@@ -35,6 +35,7 @@ export default (_: unknown, argv: WebpackArgv): Configuration => {
     context: path.resolve("./desktop"),
     entry: "./index.ts",
     target: "electron-main",
+    devtool: isDev ? "eval-cheap-module-source-map" : "nosources-source-map",
 
     output: {
       publicPath: "",

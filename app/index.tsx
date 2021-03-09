@@ -13,7 +13,7 @@ import installDevtoolsFormatters from "@foxglove-studio/app/util/installDevtools
 import overwriteFetch from "@foxglove-studio/app/util/overwriteFetch";
 import waitForFonts from "@foxglove-studio/app/util/waitForFonts";
 
-if (process.env.SENTRY_DSN) {
+if (typeof process.env.SENTRY_DSN === "string") {
   initSentry({ dsn: process.env.SENTRY_DSN });
 }
 

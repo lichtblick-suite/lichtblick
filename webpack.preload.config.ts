@@ -8,11 +8,14 @@ import { Configuration, EnvironmentPlugin } from "webpack";
 
 import { WebpackArgv } from "./WebpackArgv";
 
-export default (_: unknown, _argv: WebpackArgv): Configuration => {
+export default (_: unknown, argv: WebpackArgv): Configuration => {
+  const isDev = argv.mode === "development";
+
   return {
     context: path.resolve("./preload"),
     entry: "./index.ts",
     target: "electron-preload",
+    devtool: isDev ? "eval-cheap-module-source-map" : "nosources-source-map",
 
     output: {
       publicPath: "",
@@ -49,6 +52,9 @@ export default (_: unknown, _argv: WebpackArgv): Configuration => {
 
     resolve: {
       extensions: [".js", ".ts", ".tsx", ".json"],
+      alias: {
+        "@sentry/electron": "@sentry/electron/esm/renderer",
+      },
     },
   };
 };

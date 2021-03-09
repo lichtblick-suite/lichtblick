@@ -29,7 +29,7 @@ import { installMenuInterface } from "./menu";
 import type { OsContextWindowEvent } from "@foxglove-studio/app/OsContext";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 
-if (process.env.SENTRY_DSN !== undefined) {
+if (typeof process.env.SENTRY_DSN === "string") {
   initSentry({ dsn: process.env.SENTRY_DSN });
 }
 

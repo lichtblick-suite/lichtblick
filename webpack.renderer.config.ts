@@ -41,7 +41,7 @@ export function makeConfig(_: unknown, argv: WebpackArgv): Configuration {
     target: "web",
     context: path.resolve("./app"),
     entry: "./index.tsx",
-    devtool: isDev ? "eval-cheap-source-map" : "source-map",
+    devtool: isDev ? "eval-cheap-module-source-map" : "nosources-source-map",
 
     optimization: {
       minimize: false,
@@ -191,7 +191,6 @@ export function makeConfig(_: unknown, argv: WebpackArgv): Configuration {
       new webpack.DefinePlugin({
         // Should match webpack-defines.d.ts
         APP_NAME: JSON.stringify("Foxglove Studio"),
-        SENTRY_DSN: process.env.SENTRY_DSN,
       }),
       // https://webpack.js.org/plugins/ignore-plugin/#example-of-ignoring-moment-locales
       new webpack.IgnorePlugin({

@@ -2,14 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-// @sentry/electron isn't able to detect that the renderer should be loaded when in the preload script
-// instead if tries to load esm/main which is only applicable for the main script
-import { init as initSentry } from "@sentry/electron/esm/renderer";
+import { init as initSentry } from "@sentry/electron";
 import { contextBridge, ipcRenderer } from "electron";
 
 import { OsContext, OsContextWindowEvent } from "@foxglove-studio/app/OsContext";
 
-if (process.env.SENTRY_DSN !== undefined) {
+if (typeof process.env.SENTRY_DSN === "string") {
   initSentry({ dsn: process.env.SENTRY_DSN });
 }
 
