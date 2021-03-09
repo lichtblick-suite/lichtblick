@@ -54,7 +54,8 @@ jobs:
         env:
           REG_SUIT_GITHUB_CLIENT_ID: ${{ secrets.REG_SUIT_GITHUB_CLIENT_ID }}
           REG_SUIT_HEAD_SHA: ${{ github.sha }}
-          REG_SUIT_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          # `base.sha` works for pull request events, `before` works for pushes to main
+          REG_SUIT_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
 
   integration:
     runs-on: ${{ matrix.os }}
