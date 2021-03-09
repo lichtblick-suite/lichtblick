@@ -69,10 +69,6 @@
   "snap": {
     "confinement": "classic"
   },
-  "protocols": {
-    "name": "ssh URL",
-    "schemes": ["ssh"]
-  },
   "publish": [
     {
       "provider": "github"
