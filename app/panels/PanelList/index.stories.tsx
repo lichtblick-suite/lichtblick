@@ -22,32 +22,6 @@ import { Provider } from "react-redux";
 import PanelList from "@foxglove-studio/app/panels/PanelList";
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
-
-const ScrolledPanelList = () => {
-  return (
-    <PanelSetup
-      fixture={{ frame: {}, topics: [] }}
-      style={{ width: 350 }}
-      onMount={() =>
-        setImmediate(() => {
-          const scrollContainer = document.querySelectorAll(
-            ".PanelList__SScrollContainer-hej56s-5",
-          )[0];
-          scrollContainer.scrollTop = scrollContainer.scrollHeight;
-        })
-      }
-    >
-      <div style={{ margin: 50, height: 480 }}>
-        <PanelList
-          onPanelSelect={() => {
-            // no-op
-          }}
-        />
-      </div>
-    </PanelSetup>
-  );
-};
 
 const PanelListWithInteractions = ({
   inputValue,
@@ -88,6 +62,12 @@ const arrowDown = { key: "ArrowDown", code: "ArrowDown", keyCode: 40 };
 const arrowUp = { key: "ArrowUp", code: "ArrowUp", keyCode: 91 };
 
 storiesOf("<PanelList>", module)
+  .addParameters({
+    screenshot: {
+      // Wait for simulated key events
+      delay: 100,
+    },
+  })
   .addDecorator((childrenRenderFcn) => (
     <DndProvider backend={HTML5Backend}>
       <Provider store={configureStore(createRootReducer(createMemoryHistory()))}>
@@ -104,7 +84,6 @@ storiesOf("<PanelList>", module)
       />
     </div>
   ))
-  .add("scrolled panel list", () => <ScrolledPanelList />)
   .add("filtered panel list", () => <PanelListWithInteractions inputValue="h" />)
   .add("navigating panel list with arrow keys", () => (
     <PanelListWithInteractions events={[arrowDown, arrowDown, arrowUp]} />
@@ -113,10 +92,10 @@ storiesOf("<PanelList>", module)
     <PanelListWithInteractions events={[arrowUp]} />
   ))
   .add("filtered panel list without results in 1st category", () => (
-    <PanelListWithInteractions inputValue="ha" />
+    <PanelListWithInteractions inputValue="global" />
   ))
   .add("filtered panel list without results in last category", () => (
-    <PanelListWithInteractions inputValue="z" />
+    <PanelListWithInteractions inputValue="tab" />
   ))
   .add("filtered panel list without results in any category", () => (
     <PanelListWithInteractions inputValue="zz" />

@@ -327,7 +327,6 @@ overrides:
       - "app/store/getGlobalStore.ts"
       - "app/stories/PanelSetup.tsx"
       - "app/stories/PanelSetupWithBag.tsx"
-      - "app/stories/prepareForScreenshots.ts"
       - "app/stories/storyHelpers.tsx"
       - "app/test/MemoryStorage.ts"
       - "app/test/setup.ts"

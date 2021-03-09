@@ -1,4 +1,5 @@
 import "@foxglove-studio/app/styles/global.scss";
+import "./styles.scss";
 import { getGlobalConfig } from "@foxglove-studio/app/GlobalConfig";
 import waitForFonts from "@foxglove-studio/app/util/waitForFonts";
 import { withScreenshot } from "storycap";

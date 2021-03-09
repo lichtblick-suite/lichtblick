@@ -197,7 +197,7 @@ function DraggablePanelItem({
           highlightedItem.top + 50 <= window.innerHeight;
 
         if (!isInView && scrollRef.current) {
-          scrollRef.current.scrollIntoView({ behavior: "smooth" });
+          scrollRef.current.scrollIntoView();
         }
       }
     }
@@ -413,30 +413,27 @@ function PanelList(props: Props) {
           </SSearchInputContainer>
         </div>
       </StickyDiv>
-      {noResults ? (
-        <SEmptyState>No panels match search criteria.</SEmptyState>
-      ) : (
-        <SScrollContainer>
-          {panelCategories.map(({ label }, categoryIdx) => {
-            const prevItems = flatMap(filteredItemsByCategoryIdx.slice(0, categoryIdx));
-            if (!filteredItemsByCategoryIdx[categoryIdx].length) {
-              return null;
-            }
-            return (
-              <div key={label} style={{ paddingTop: "8px" }}>
-                {categoryIdx !== 0 && prevItems.length > 0 && <hr />}
-                <Item
-                  isHeader
-                  style={categoryIdx === 0 || !prevItems.length ? { paddingTop: 0 } : {}}
-                >
-                  {label}
-                </Item>
-                {filteredItemsByCategoryIdx[categoryIdx].map(displayPanelListItem)}
-              </div>
-            );
-          })}
-        </SScrollContainer>
-      )}
+      <SScrollContainer>
+        {noResults && <SEmptyState>No panels match search criteria.</SEmptyState>}
+        {panelCategories.map(({ label }, categoryIdx) => {
+          const prevItems = flatMap(filteredItemsByCategoryIdx.slice(0, categoryIdx));
+          if (!filteredItemsByCategoryIdx[categoryIdx].length) {
+            return null;
+          }
+          return (
+            <div key={label} style={{ paddingTop: "8px" }}>
+              {categoryIdx !== 0 && prevItems.length > 0 && <hr />}
+              <Item
+                isHeader
+                style={categoryIdx === 0 || !prevItems.length ? { paddingTop: 0 } : {}}
+              >
+                {label}
+              </Item>
+              {filteredItemsByCategoryIdx[categoryIdx].map(displayPanelListItem)}
+            </div>
+          );
+        })}
+      </SScrollContainer>
     </div>
   );
 }
