@@ -29,7 +29,7 @@
     "package:win": "yarn package --win",
     "package:darwin": "yarn package --mac",
     "package:linux": "yarn package --linux",
-    "package": "ts-node node_modules/.bin/electron-builder",
+    "package": "NODE_OPTIONS='-r ts-node/register' electron-builder",
     "storybook": "yarn workspace @foxglove-studio/app run start-storybook",
     "storybook:build": "yarn workspace @foxglove-studio/app run build-storybook",
     "storybook:storycap": "yarn workspace @foxglove-studio/app run storycap http://localhost:9001 --serverCmd \"yarn http-server storybook-static -p 9001\" --outDir \"storybook-screenshots\"",
