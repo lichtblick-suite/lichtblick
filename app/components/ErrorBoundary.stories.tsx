@@ -18,7 +18,6 @@ import HTML5Backend from "react-dnd-html5-backend";
 
 import ErrorBoundary from "./ErrorBoundary";
 
-// eslint-disable-next-line react/require-render-return
 class Broken extends React.Component {
   render() {
     throw {
@@ -28,15 +27,14 @@ class Broken extends React.Component {
   now the user sees
       `,
     };
-
-    return <></>;
+    return null;
   }
 }
 
 storiesOf("<ErrorBoundary>", module).add("examples", () => {
   return (
     <DndProvider backend={HTML5Backend}>
-      <ErrorBoundary>
+      <ErrorBoundary hideSourceLocations>
         <Broken />
       </ErrorBoundary>
     </DndProvider>

@@ -40,7 +40,10 @@ type State = {
   errorInfo: any | null | undefined;
 };
 
-export default class ErrorBoundary extends React.Component<{ children: React.ReactNode }, State> {
+export default class ErrorBoundary extends React.Component<
+  { children: React.ReactNode; hideSourceLocations?: boolean },
+  State
+> {
   state: State = {
     error: undefined,
     errorInfo: undefined,
@@ -56,7 +59,7 @@ export default class ErrorBoundary extends React.Component<{ children: React.Rea
     if (error) {
       let name = "this panel";
       if (errorInfo && typeof errorInfo.componentStack === "string") {
-        const matches = errorInfo.componentStack.match(/^\s*in ([\w()]+) \(/);
+        const matches = errorInfo.componentStack.match(/^\s*at ([\w()]+) \(/);
         if (matches && matches.length > 0) {
           name = matches[1];
         }
@@ -79,9 +82,11 @@ export default class ErrorBoundary extends React.Component<{ children: React.Rea
             <pre>{error.stack}</pre>
             <Heading>Component stack:</Heading>
             <pre>
-              {errorInfo &&
-                errorInfo.componentStack &&
-                errorInfo.componentStack.replace(/^\s*\n/g, "")}
+              {this.props.hideSourceLocations ?? false
+                ? errorInfo?.componentStack
+                    .replace(/\s+\(.+\)$/gm, "")
+                    .replace(/\s+https?:\/\/.+$/gm, "")
+                : errorInfo?.componentStack}
             </pre>
           </Flex>
         </Flex>

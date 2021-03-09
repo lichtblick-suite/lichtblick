@@ -14,9 +14,13 @@
 import React, { useEffect, useState, useCallback, ReactElement } from "react";
 
 type DimensionsParams = { height: number; width: number };
-type Props = {
-  children: (arg0: DimensionsParams) => ReactElement;
-};
+type Props =
+  | {
+      children: (arg0: DimensionsParams) => ReactElement;
+    }
+  | {
+      onChange: (arg0: DimensionsParams) => void;
+    };
 
 // Jest does not include ResizeObserver.
 class ResizeObserverMock {
@@ -41,8 +45,10 @@ const ResizeObserverImpl =
 // Works by rendering an empty div, getting the parent element, and then once we know the dimensions of the parent
 // element, rendering the children. After the initial render it just observes the parent element.
 // We expect the parent element to never change.
-export default function Dimensions({ children }: Props) {
-  const [parentElement, setParentElement] = useState<any>(undefined);
+// Pass either a children function to automatically re-render when the size changes,
+// or an onChange handler to manually handle changes.
+export default function Dimensions(props: Props): React.ReactElement | null {
+  const [parentElement, setParentElement] = useState<HTMLDivElement | null>(null);
   const [dimensions, setDimensions] = useState<DimensionsParams | null | undefined>();
   // This resizeObserver should never change.
   const [resizeObserver] = useState<ResizeObserver>(
@@ -54,9 +60,13 @@ export default function Dimensions({ children }: Props) {
 
         // We only observe a single element, so just use the first entry.
         // We have to round because these could be sub-pixel values.
-        const newWidth = Math.round(entries[0].contentRect.width);
-        const newHeight = Math.round(entries[0].contentRect.height);
-        setDimensions({ width: newWidth, height: newHeight });
+        const width = Math.round(entries[0].contentRect.width);
+        const height = Math.round(entries[0].contentRect.height);
+        if ("onChange" in props) {
+          props.onChange({ width, height });
+        } else {
+          setDimensions({ width, height });
+        }
       }),
   );
 
@@ -80,5 +90,8 @@ export default function Dimensions({ children }: Props) {
   if (dimensions == null) {
     return <div ref={setParentElementRef} />;
   }
-  return children(dimensions);
+  if ("children" in props && typeof props.children === "function") {
+    return props.children(dimensions);
+  }
+  return null;
 }

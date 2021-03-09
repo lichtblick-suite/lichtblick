@@ -15,6 +15,7 @@ import { mount } from "enzyme";
 import { createMemoryHistory } from "history";
 import { last } from "lodash";
 import React from "react";
+import { act } from "react-dom/test-utils";
 
 import MessageHistoryDEPRECATED from ".";
 import { datatypes, messages } from "./fixture";
@@ -57,7 +58,9 @@ describe("<MessageHistoryDEPRECATED />", () => {
       ),
     });
 
-    provider.unmount();
+    act(() => {
+      provider.unmount();
+    });
 
     expect(setSubscriptions.mock.calls).toEqual([
       [
@@ -94,7 +97,9 @@ describe("<MessageHistoryDEPRECATED />", () => {
     });
 
     // And unsubscribes properly, too.
-    provider.unmount();
+    act(() => {
+      provider.unmount();
+    });
     expect(setSubscriptions.mock.calls).toEqual([
       [
         expect.any(String),
@@ -521,7 +526,7 @@ describe("<MessageHistoryDEPRECATED />", () => {
         <MessageHistoryDEPRECATED paths={["/some/topic.index"]}>{childFn}</MessageHistoryDEPRECATED>
       ),
     });
-    expect(childFn.mock.calls.length).toEqual(2);
+    expect(childFn.mock.calls.length).toEqual(3);
     expect(last(childFn.mock.calls)).toEqual([
       {
         itemsByPath: {

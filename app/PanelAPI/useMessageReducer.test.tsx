@@ -13,6 +13,7 @@
 
 import { mount } from "enzyme";
 import * as React from "react";
+import { act } from "react-dom/test-utils";
 
 import * as PanelAPI from ".";
 import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
@@ -301,7 +302,9 @@ describe("useMessageReducer", () => {
     root.setProps({ children: <Test topics={["/foo", "/bar"]} /> });
 
     // And unsubscribes properly, too.
-    root.unmount();
+    act(() => {
+      root.unmount();
+    });
     expect(setSubscriptions.mock.calls).toEqual([
       [
         expect.any(String),

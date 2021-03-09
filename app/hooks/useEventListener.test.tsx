@@ -13,6 +13,7 @@
 
 import { mount } from "enzyme";
 import { DependencyList } from "react";
+import { act } from "react-dom/test-utils";
 
 import useEventListener from "./useEventListener";
 
@@ -58,7 +59,9 @@ describe("useEventListener", () => {
       ["keyup", handler],
       ["keydown", handler],
     ]);
-    el.unmount();
+    act(() => {
+      el.unmount();
+    });
     expect(target.removeEventListener.mock.calls).toEqual([
       ["keyup", handler],
       ["keydown", handler],

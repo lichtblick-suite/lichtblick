@@ -16,7 +16,7 @@ import PlayIcon from "@mdi/svg/svg/play.svg";
 import SkipNextOutlineIcon from "@mdi/svg/svg/skip-next-outline.svg";
 import SkipPreviousOutlineIcon from "@mdi/svg/svg/skip-previous-outline.svg";
 import classnames from "classnames";
-import React, { memo, useCallback, useMemo, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Time } from "rosbag";
 import styled from "styled-components";
@@ -112,7 +112,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
       [pause, play, seek],
     );
 
-    const [hoverComponentId] = useState<string>(uuidv4());
+    const [hoverComponentId] = useState<string>(() => uuidv4());
     const dispatch = useDispatch();
     const onMouseMove = useCallback(
       (e: React.MouseEvent<HTMLDivElement>) => {
@@ -157,13 +157,13 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
       [playerState, dispatch, hoverComponentId],
     );
 
-    const onMouseLeave = useCallback(
-      (_e: React.MouseEvent<HTMLDivElement>) => {
-        Tooltip.hide();
-        dispatch(clearHoverValue({ componentId: hoverComponentId }));
-      },
-      [dispatch, hoverComponentId],
-    );
+    const onMouseLeave = useCallback(() => {
+      Tooltip.hide();
+      dispatch(clearHoverValue({ componentId: hoverComponentId }));
+    }, [dispatch, hoverComponentId]);
+
+    // Clean up the tooltip when we are unmounted -- important for storybook.
+    useEffect(() => onMouseLeave, [onMouseLeave]);
 
     const { activeData, progress } = player;
     const { isPlaying, startTime, endTime, currentTime } = activeData ?? {};

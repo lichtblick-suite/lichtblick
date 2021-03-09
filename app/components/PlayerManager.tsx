@@ -103,7 +103,7 @@ async function buildPlayerFromBagURLs(urls: string[]): Promise<BuiltPlayer> {
 }
 
 const connector = connect(
-  (state: State) => ({
+  (state: State, _ownProps: OwnProps) => ({
     messageOrder: state.persistedState.panels.playbackConfig.messageOrder,
     userNodes: state.persistedState.panels.userNodes,
     globalVariables: state.persistedState.panels.globalVariables,

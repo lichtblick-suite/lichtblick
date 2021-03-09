@@ -14,9 +14,8 @@ import { Color } from "regl-worldview";
 
 import { Save3DConfig } from "../index";
 import { TopicDisplayMode as DisplayMode } from "./TopicViewModeSelector";
-import SceneBuilder from "@foxglove-studio/app/panels/ThreeDimensionalViz/SceneBuilder/index";
-import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
 import { Topic } from "@foxglove-studio/app/players/types";
+import { Namespace } from "@foxglove-studio/app/types/Messages";
 
 export type TopicDisplayMode = DisplayMode;
 export type TopicTreeConfig = {
@@ -67,9 +66,14 @@ export type TreeTopicNode = {
 export type TreeNode = TreeGroupNode | TreeTopicNode;
 
 export type UseSceneBuilderAndTransformsDataInput = {
-  sceneBuilder: SceneBuilder;
+  sceneBuilder: {
+    allNamespaces: Namespace[];
+    errorsByTopic: { [topicName: string]: string[] };
+  };
   staticallyAvailableNamespacesByTopic: NamespacesByTopic;
-  transforms: Transforms;
+  transforms: {
+    values(): { id: string }[];
+  };
 };
 
 export type SceneErrorsByKey = {

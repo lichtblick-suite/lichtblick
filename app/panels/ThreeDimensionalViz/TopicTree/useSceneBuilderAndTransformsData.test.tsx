@@ -67,11 +67,8 @@ function getMockProps({
   showTransforms?: boolean;
   showErrors?: boolean;
   mockTfIds?: string[];
-}): {
-  sceneBuilder: MockTransform;
-  transforms: MockSceneBuilder;
-} {
-  let tfIds: any = [];
+}): UseSceneBuilderAndTransformsDataInput {
+  let tfIds: string[] = [];
   if (showTransforms) {
     tfIds = ["some_tf1", "some_tf2", ""];
   } else if (mockTfIds) {
@@ -86,26 +83,28 @@ function getMockProps({
             { topic: "/foo", name: "ns2" },
           ]
         : [],
-      errors: showErrors ? DEFAULT_ERRORS : undefined,
-    } as any) as any,
-    transforms: new MockTransform({ tfs: tfIds.map((id: any) => ({ id })) }) as any,
+      errorsByTopic: showErrors ? DEFAULT_ERRORS : undefined,
+    }),
+    transforms: new MockTransform({ tfs: tfIds.map((id) => ({ id })) }),
+    staticallyAvailableNamespacesByTopic: {},
   };
 }
 
 describe("useSceneBuilderAndTransformsData", () => {
   // Create a helper component that exposes the results of the hook for mocking.
-  type Props = UseSceneBuilderAndTransformsDataInput & {
-    messagePipelineProps?: any;
-  } & any;
   function createTest() {
-    function Test(props: Props) {
+    function Test(
+      props: UseSceneBuilderAndTransformsDataInput & {
+        messagePipelineProps?: React.ComponentProps<typeof MockMessagePipelineProvider>;
+      },
+    ) {
       return (
         <MockMessagePipelineProvider {...props.messagePipelineProps}>
           <TestInner {...omit(props, "messagePipelineProps")} />
         </MockMessagePipelineProvider>
       );
     }
-    function TestInner(props: UseSceneBuilderAndTransformsDataInput & any) {
+    function TestInner(props: UseSceneBuilderAndTransformsDataInput) {
       Test.result(useSceneBuilderAndTransformsData(props));
       return null;
     }
@@ -123,46 +122,58 @@ describe("useSceneBuilderAndTransformsData", () => {
           staticallyAvailableNamespacesByTopic={staticallyAvailableNamespacesByTopic}
         />,
       );
-      expect(Test.result.mock.calls[0][0].availableNamespacesByTopic).toEqual(
+      root.setProps({
+        ...getMockProps({ showNamespaces: true, showTransforms: true }),
         staticallyAvailableNamespacesByTopic,
-      );
-      root.setProps(getMockProps({ showNamespaces: true, showTransforms: true }));
-
-      expect(Test.result.mock.calls[1][0].availableNamespacesByTopic).toEqual({
-        "/foo": ["ns1", "ns2"],
-        [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"],
-        ...staticallyAvailableNamespacesByTopic,
       });
+
+      expect(Test.result.mock.calls.map((args) => args[0].availableNamespacesByTopic)).toEqual([
+        staticallyAvailableNamespacesByTopic,
+        {
+          "/foo": ["ns1", "ns2"],
+          [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"],
+          ...staticallyAvailableNamespacesByTopic,
+        },
+        {
+          "/foo": ["ns1", "ns2"],
+          [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"],
+          ...staticallyAvailableNamespacesByTopic,
+        },
+      ]);
     });
 
     it("shows all transform namespaces collected over time", () => {
       const Test = createTest();
       const root = mount(<Test {...getMockProps({ showTransforms: true })} />);
-      expect(Test.result.mock.calls[0][0].availableNamespacesByTopic).toEqual({
-        [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"],
-      });
-
+      expect(Test.result).toHaveBeenCalledTimes(1);
       // TFs were removed, but we still report them in the available namespaces.
       root.setProps(getMockProps({}));
-      expect(Test.result.mock.calls[1][0].availableNamespacesByTopic).toEqual({
-        [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"],
-      });
+      expect(Test.result).toHaveBeenCalledTimes(3);
 
       root.setProps(getMockProps({ mockTfIds: ["some_tf3"] }));
-      expect(Test.result.mock.calls[2][0].availableNamespacesByTopic).toEqual({
-        [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2", "some_tf3"],
-      });
+      expect(Test.result).toHaveBeenCalledTimes(5);
+
+      // Technically we would only want the Test component to re-render once per props change.
+      // However, this test is set up such that the MockTransforms object is replaced on each change.
+      // In real-world use, the Transforms object is mutated and only changes when data is cleared out.
+      expect(Test.result.mock.calls.map((args) => args[0].availableNamespacesByTopic)).toEqual([
+        { [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"] },
+        { [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"] },
+        { [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"] },
+        { [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2", "some_tf3"] },
+        { [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2", "some_tf3"] },
+      ]);
     });
 
     it("resets transforms collected when the player changes", () => {
       const Test = createTest();
       const root = mount(<Test {...getMockProps({ showTransforms: true })} />);
-      expect(Test.result.mock.calls[0][0].availableNamespacesByTopic).toEqual({
-        [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"],
-      });
-
       root.setProps({ ...getMockProps({}), messagePipelineProps: { playerId: "somePlayerId" } });
-      expect(Test.result.mock.calls[1][0].availableNamespacesByTopic).toEqual({});
+      expect(Test.result.mock.calls.map((args) => args[0].availableNamespacesByTopic)).toEqual([
+        { [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"] },
+        { [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"] },
+        {},
+      ]);
     });
   });
 

@@ -38,7 +38,6 @@ import { wrapMessages } from "@foxglove-studio/app/test/datatypes";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { objectValues } from "@foxglove-studio/app/util";
 import {
-  BailoutToken,
   createSelectableContext,
   useContextSelector,
   useShallowMemo,
@@ -74,9 +73,9 @@ export type MessagePipelineContext = {
 const Context = createSelectableContext<MessagePipelineContext>();
 
 export function useMessagePipeline<T>(
-  selector: (arg0: MessagePipelineContext) => T | BailoutToken,
+  selector: (arg0: MessagePipelineContext) => T | typeof useContextSelector.BAILOUT,
 ): T {
-  return useContextSelector(Context, selector) as any;
+  return useContextSelector(Context, selector);
 }
 
 function defaultPlayerState(): PlayerState {

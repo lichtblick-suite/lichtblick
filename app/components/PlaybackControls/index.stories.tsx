@@ -111,36 +111,21 @@ storiesOf("<PlaybackControls>", module)
     const seek = action("seek");
     const player = getPlayerState();
 
-    // satisify flow
     if (player.activeData) {
       player.activeData.isPlaying = false;
       player.activeData.startTime.sec += 1;
       player.activeData.endTime.sec += 1;
     }
 
-    function mouseOver() {
+    React.useEffect(() => {
       const [element] = document.getElementsByClassName(styles.sliderContainer);
       if (element) {
         TestUtils.Simulate.mouseMove(element, { clientX: 450 });
       }
-    }
-    function mouseOut() {
-      const [element] = document.getElementsByClassName(styles.sliderContainer);
-      if (element) {
-        TestUtils.Simulate.mouseLeave(element);
-      }
-    }
-    // wrap the component so we can get a ref to it and force a mouse over and out event
-    function ControlsWithTooltip() {
-      React.useEffect(() => {
-        mouseOver();
-        return mouseOut;
-      });
-      return <UnconnectedPlaybackControls player={player} pause={pause} play={play} seek={seek} />;
-    }
+    });
     return (
       <Wrapper>
-        <ControlsWithTooltip />
+        <UnconnectedPlaybackControls player={player} pause={pause} play={play} seek={seek} />
       </Wrapper>
     );
   })

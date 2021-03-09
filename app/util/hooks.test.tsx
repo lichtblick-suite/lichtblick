@@ -359,13 +359,17 @@ describe("createSelectableContext/useContextSelector", () => {
     expect(Consumer.selectorFn.mock.calls).toEqual([[{ num: 1 }]]);
     expect(Consumer.renderFn.mock.calls).toEqual([[1]]);
 
+    root.setProps({ value: { num: 2 } });
+    expect(Consumer.selectorFn.mock.calls).toEqual([[{ num: 1 }], [{ num: 2 }]]);
+    expect(Consumer.renderFn.mock.calls).toEqual([[1], [2]]);
+
     root.setProps({ children: null, value: { num: 2 } });
     expect(Consumer.selectorFn.mock.calls).toEqual([[{ num: 1 }], [{ num: 2 }]]);
-    expect(Consumer.renderFn.mock.calls).toEqual([[1]]);
+    expect(Consumer.renderFn.mock.calls).toEqual([[1], [2]]);
 
     root.setProps({ value: { num: 3 } });
     expect(Consumer.selectorFn.mock.calls).toEqual([[{ num: 1 }], [{ num: 2 }]]);
-    expect(Consumer.renderFn.mock.calls).toEqual([[1]]);
+    expect(Consumer.renderFn.mock.calls).toEqual([[1], [2]]);
 
     root.unmount();
   });

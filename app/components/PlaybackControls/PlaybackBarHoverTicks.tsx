@@ -83,16 +83,7 @@ export default React.memo<Props>(function PlaybackBarHoverTicks({ componentId }:
 
   return (
     <>
-      <Dimensions>
-        {({ width: newWidth }) => {
-          // Just using the Dimensions for a side-effect instead of rendering children makes
-          // memoizing scaleBounds to preserve identity a bit simpler.
-          if (width !== newWidth) {
-            setWidth(newWidth);
-          }
-          return <></>;
-        }}
-      </Dimensions>
+      <Dimensions onChange={({ width: newWidth }) => setWidth(newWidth)} />
       {scaleBounds && (
         <HoverBar componentId={componentId} scaleBounds={scaleBounds} isTimestampScale>
           <TopTick />

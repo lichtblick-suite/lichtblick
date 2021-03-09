@@ -167,10 +167,11 @@ export function createSelectableContext<T>(): SelectableContext<T> {
       };
     });
 
-    const valueChanged = useChangeDetector([value], false);
-    if (valueChanged) {
-      handle.publish(value);
-    }
+    useLayoutEffect(() => {
+      if (value !== handle.currentValue()) {
+        handle.publish(value);
+      }
+    }, [handle /*never changes*/, value]);
 
     return <ctx.Provider value={handle}>{children}</ctx.Provider>;
   }
@@ -181,17 +182,7 @@ export function createSelectableContext<T>(): SelectableContext<T> {
   };
 }
 
-export type BailoutToken = symbol;
-const BAILOUT: BailoutToken = Symbol("BAILOUT");
-
-function isBailout(value: unknown): boolean {
-  // The opaque type above isn't enough to convince Flow that `=== BAILOUT` is a type check for
-  // BailoutToken, so we have to lie and say that we check for any Symbol.
-  return (
-    value === useContextSelector.BAILOUT
-    /*:: || value instanceof Symbol */
-  );
-}
+const BAILOUT: unique symbol = Symbol("BAILOUT");
 
 // `useContextSelector(context, selector)` behaves like `selector(useContext(context))`, but
 // only triggers a re-render when the selected value actually changes.
@@ -203,8 +194,8 @@ function isBailout(value: unknown): boolean {
 // no update should occur. (Returning BAILOUT from the first call to selector is not allowed.)
 export function useContextSelector<T, U>(
   context: SelectableContext<T>,
-  selector: (arg0: T) => U | BailoutToken,
-): symbol | U {
+  selector: (arg0: T) => U | typeof BAILOUT,
+): U {
   // eslint-disable-next-line no-underscore-dangle
   const handle = useContext(context._ctx);
   if (!handle) {
@@ -222,7 +213,7 @@ export function useContextSelector<T, U>(
 
   const [selectedValue, setSelectedValue] = useState(() => {
     const value = selector(handle.currentValue());
-    if (isBailout(value)) {
+    if (value === BAILOUT) {
       throw new Error("Initial selector call must not return BAILOUT");
     }
     return value;
@@ -235,9 +226,9 @@ export function useContextSelector<T, U>(
 
   // Subscribe to context updates, and setSelectedValue() only when the selected value changes.
   useLayoutEffect(() => {
-    const sub = (newValue: any) => {
+    const sub = (newValue: T) => {
       const newSelectedValue = selector(newValue);
-      if (isBailout(newSelectedValue)) {
+      if (newSelectedValue === BAILOUT) {
         return;
       }
       if (newSelectedValue !== latestSelectedValue.current) {

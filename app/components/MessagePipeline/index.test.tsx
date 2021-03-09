@@ -368,7 +368,9 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
       </MessagePipelineProvider>,
     );
 
-    el.unmount();
+    act(() => {
+      el.unmount();
+    });
     expect(player.close).toHaveBeenCalledTimes(1);
   });
 
