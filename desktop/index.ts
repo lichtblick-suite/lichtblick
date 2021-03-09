@@ -233,6 +233,7 @@ app.on("ready", async () => {
   const contentSecurtiyPolicy: Record<string, string> = {
     "default-src": "'self'",
     "script-src": `'self' 'unsafe-inline' 'unsafe-eval'`,
+    "worker-src": `'self' blob:`,
     "style-src": "'self' 'unsafe-inline'",
     "connect-src": "'self' ws: wss: http: https:", // Required for rosbridge connections
     "font-src": "'self' data:",

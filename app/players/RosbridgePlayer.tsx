@@ -339,23 +339,25 @@ export default class RosbridgePlayer implements Player {
   }
 
   setPublishers(publishers: AdvertisePayload[]): void {
-    if (!this._rosClient) {
-      throw new Error("RosbridgePlayer not connected");
-    }
-
     // Since `setPublishers` is rarely called, we can get away with just throwing away the old
     // Roslib.Topic objects and creating new ones.
     for (const publisher of objectValues(this._topicPublishers)) {
       publisher.unadvertise();
     }
     this._topicPublishers = {};
-    for (const { topic, datatype } of publishers) {
-      this._topicPublishers[topic] = new roslib.Topic({
-        ros: this._rosClient,
-        name: topic,
-        messageType: datatype,
-        queue_size: 0,
-      });
+
+    if (publishers.length > 0) {
+      if (!this._rosClient) {
+        throw new Error("RosbridgePlayer not connected");
+      }
+      for (const { topic, datatype } of publishers) {
+        this._topicPublishers[topic] = new roslib.Topic({
+          ros: this._rosClient,
+          name: topic,
+          messageType: datatype,
+          queue_size: 0,
+        });
+      }
     }
   }
 
