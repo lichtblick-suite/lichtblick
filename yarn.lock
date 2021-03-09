@@ -9794,6 +9794,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"electron-notarize@npm:1.0.0":
+  version: 1.0.0
+  resolution: "electron-notarize@npm:1.0.0"
+  dependencies:
+    debug: ^4.1.1
+    fs-extra: ^9.0.1
+  checksum: f085103e284000e45f595c6d62dba9b8502ae1f5a6463bf5e97e8b41fe082f52f52f8520c85f8edeff30df368d3ec97dfb7d0c637405b40c80d9dcbed4571221
+  languageName: node
+  linkType: hard
+
 "electron-publish@npm:22.10.5":
   version: 22.10.5
   resolution: "electron-publish@npm:22.10.5"
@@ -11565,6 +11575,7 @@ __metadata:
     electron: 12.0.0
     electron-builder: 22.10.5
     electron-devtools-installer: 3.1.1
+    electron-notarize: 1.0.0
     electron-squirrel-startup: 1.0.0
     electron-updater: 4.3.8
     eslint: 7.21.0

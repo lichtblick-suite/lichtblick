@@ -7,6 +7,7 @@
     "app": ".webpack",
     "buildResources": "resources"
   },
+  "afterSign": "resources/notarize.ts",
   "linux": {
     "target": [
       {
@@ -28,7 +29,9 @@
     },
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
     "category": "public.app-category.developer-tools",
-    "icon": "resources/icon/icon.icns"
+    "icon": "resources/icon/icon.icns",
+    "entitlements": "resources/mac/entitlements.plist",
+    "entitlementsInherit": "resources/mac/entitlements.plist"
   },
   "appx": {
     "applicationId": "FoxgloveStudio",

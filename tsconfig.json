@@ -14,6 +14,6 @@
     "noUncheckedIndexedAccess": true,
     "typeRoots": ["node_modules/@types", "./typings"]
   },
-  "include": ["*.ts", "*.js", "test/**/*.ts"],
+  "include": ["*.ts", "*.js", "test/**/*.ts", "resources/notarize.ts"],
   "exclude": ["node_modules"]
 }
