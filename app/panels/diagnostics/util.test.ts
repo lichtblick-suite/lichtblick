@@ -15,7 +15,7 @@ import {
   getDiagnosticId,
   getDisplayName,
   getDiagnosticsByLevel,
-  getSortedDiagnostics,
+  filterAndSortDiagnostics,
   computeDiagnosticInfo,
   LEVELS,
   MAX_STRING_LENGTH,
@@ -117,21 +117,25 @@ describe("diagnostics", () => {
 
   describe("getDiagnosticsByLevel", () => {
     it("removes leading slash from hardware_id if present", () => {
-      expect(getDiagnosticsByLevel(buffer as any)).toStrictEqual({
-        [LEVELS.STALE]: [],
-        [LEVELS.ERROR]: [usrrStatus],
-        [LEVELS.OK]: [watchdogStatus, mctmLogger],
-        [LEVELS.WARN]: [cameraStatus],
-      });
+      expect(getDiagnosticsByLevel(buffer)).toStrictEqual(
+        new Map([
+          [LEVELS.ERROR, [usrrStatus]],
+          [LEVELS.OK, [watchdogStatus, mctmLogger]],
+          [LEVELS.WARN, [cameraStatus]],
+        ]),
+      );
     });
   });
 
-  describe("getSortedDiagnostics", () => {
+  describe("filterAndSortDiagnostics", () => {
     it("sorts nodes that match hardware ID, if present", () => {
-      const nodes = getDiagnosticsByLevel(buffer as any)[LEVELS.OK];
-      expect(getSortedDiagnostics(nodes, "", [])).toStrictEqual([mctmLogger, watchdogStatus]);
-      expect(getSortedDiagnostics(nodes, "watchdog", [])).toStrictEqual([watchdogStatus]);
-      expect(getSortedDiagnostics(nodes, "mctm_logger", [])).toStrictEqual([mctmLogger]);
+      const nodes = getDiagnosticsByLevel(buffer).get(LEVELS.OK);
+      if (!nodes) {
+        throw new Error("Missing level OK");
+      }
+      expect(filterAndSortDiagnostics(nodes, "", [])).toStrictEqual([mctmLogger, watchdogStatus]);
+      expect(filterAndSortDiagnostics(nodes, "watchdog", [])).toStrictEqual([watchdogStatus]);
+      expect(filterAndSortDiagnostics(nodes, "mctm_logger", [])).toStrictEqual([mctmLogger]);
     });
 
     it("returns filtered nodes ordered by match quality", () => {
@@ -141,13 +145,13 @@ describe("diagnostics", () => {
       const subsequenceButPinnedDiagnostic = { ...mctmLogger, displayName: "12asdfg3456", id: "3" };
       const notSubsequenceDiagnostic = { ...mctmLogger, displayName: "12345", id: "4" };
       expect(
-        getSortedDiagnostics(
+        filterAndSortDiagnostics(
           [
             subsequenceButPinnedDiagnostic,
             notSubsequenceDiagnostic,
             subsequenceDiagnostic,
             prefixDiagnostic,
-          ] as any,
+          ],
           hardwareIdFilter,
           ["3"],
         ),

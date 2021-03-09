@@ -24,11 +24,11 @@ import { Config as DiagnosticStatusConfig } from "./DiagnosticStatusPanel";
 import helpContent from "./DiagnosticSummary.help.md";
 import styles from "./DiagnosticSummary.module.scss";
 import {
-  LEVELS,
   DiagnosticId,
   DiagnosticInfo,
   getDiagnosticsByLevel,
-  getSortedDiagnostics,
+  filterAndSortDiagnostics,
+  LEVEL_NAMES,
 } from "./util";
 import EmptyState from "@foxglove-studio/app/components/EmptyState";
 import Flex from "@foxglove-studio/app/components/Flex";
@@ -44,13 +44,6 @@ import { PanelConfig } from "@foxglove-studio/app/types/panels";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { DIAGNOSTIC_TOPIC } from "@foxglove-studio/app/util/globalConstants";
 import toggle from "@foxglove-studio/app/util/toggle";
-
-const LevelClasses = {
-  [LEVELS.OK]: styles.ok,
-  [LEVELS.WARN]: styles.warn,
-  [LEVELS.ERROR]: styles.error,
-  [LEVELS.STALE]: styles.stale,
-};
 
 type NodeRowProps = {
   info: DiagnosticInfo;
@@ -70,10 +63,11 @@ class NodeRow extends React.PureComponent<NodeRowProps> {
 
   render() {
     const { info, isPinned } = this.props;
+    const levelName = LEVEL_NAMES[info.status.level];
 
     return (
       <div
-        className={cx(LevelClasses[info.status.level], styles.nodeRow)}
+        className={cx(levelName ? styles[levelName] : null, styles.nodeRow)}
         onClick={this.onClick}
         data-test-diagnostic-row
       >
@@ -222,18 +216,19 @@ class DiagnosticSummary extends React.Component<Props> {
               });
 
               const nodesByLevel = getDiagnosticsByLevel(buffer);
+              const levels = Array.from(nodesByLevel.keys()).sort().reverse();
               const sortedNodes = sortByLevel
-                ? [].concat(
-                    ...([LEVELS.STALE, LEVELS.ERROR, LEVELS.WARN, LEVELS.OK].map((level) =>
-                      getSortedDiagnostics(nodesByLevel[level], hardwareIdFilter, pinnedIds),
-                    ) as any),
-                  )
-                : getSortedDiagnostics(
-                    [].concat(
-                      ...([LEVELS.STALE, LEVELS.ERROR, LEVELS.WARN, LEVELS.OK].map(
-                        (level) => nodesByLevel[level],
-                      ) as any),
+                ? ([] as DiagnosticInfo[]).concat(
+                    ...levels.map((level) =>
+                      filterAndSortDiagnostics(
+                        nodesByLevel.get(level) ?? [],
+                        hardwareIdFilter,
+                        pinnedIds,
+                      ),
                     ),
+                  )
+                : filterAndSortDiagnostics(
+                    ([] as DiagnosticInfo[]).concat(...nodesByLevel.values()),
                     hardwareIdFilter,
                     pinnedIds,
                   );

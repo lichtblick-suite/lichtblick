@@ -102,7 +102,6 @@ type FormattedKeyValue = {
 };
 
 const allowedTags = [
-  // this comment forces the array onto multiple lines :)
   "b",
   "br",
   "center",
@@ -328,7 +327,7 @@ class DiagnosticStatus extends React.Component<Props, any> {
       openSiblingPanel,
       topicToRender,
     } = this.props;
-    const statusClass = style[`status-${LEVEL_NAMES[status.level] || "unknown"}`];
+    const statusClass = style[`status-${LEVEL_NAMES[status.level] ?? "unknown"}`];
 
     return (
       <div>

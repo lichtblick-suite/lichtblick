@@ -12,10 +12,10 @@
 //   You may not use this file except in compliance with the License.
 
 import { addMessages, defaultDiagnosticsBuffer } from "./DiagnosticsHistory";
-import { computeDiagnosticInfo, Level, DiagnosticInfo, LEVELS } from "./util";
+import { computeDiagnosticInfo, DiagnosticInfo, LEVELS } from "./util";
 import { Message } from "@foxglove-studio/app/players/types";
 
-const messageAtLevel = (level: Level): Message => ({
+const messageAtLevel = (level: number): Message => ({
   message: {
     status: [
       {
@@ -32,7 +32,7 @@ const messageAtLevel = (level: Level): Message => ({
   receiveTime: { sec: 1547062466, nsec: 1674890 },
 });
 
-const diagnosticInfoAtLevel = (level: Level): DiagnosticInfo => {
+const diagnosticInfoAtLevel = (level: number): DiagnosticInfo => {
   const { message } = messageAtLevel(level);
   return computeDiagnosticInfo(message.status[0], message.header.stamp);
 };

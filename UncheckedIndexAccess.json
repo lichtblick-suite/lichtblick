@@ -111,7 +111,6 @@
   "app/panels/TwoDimensionalPlot/index.stories.tsx",
   "app/panels/diagnostics/DiagnosticStatus.tsx",
   "app/panels/diagnostics/DiagnosticSummary.tsx",
-  "app/panels/diagnostics/util.test.ts",
   "app/players/NodePlayer.test.ts",
   "app/players/OrderedStampPlayer.test.ts",
   "app/players/RandomAccessPlayer.test.ts",

@@ -13,7 +13,6 @@
 
 import { sortBy, truncate } from "lodash";
 import { Time } from "rosbag";
-import { $Values } from "utility-types";
 
 import { DiagnosticsBuffer } from "@foxglove-studio/app/panels/diagnostics/DiagnosticsHistory";
 import { Header } from "@foxglove-studio/app/types/Messages";
@@ -32,7 +31,7 @@ export const LEVELS: { OK: 0; WARN: 1; ERROR: 2; STALE: 3 } = {
   STALE: 3,
 };
 
-export const LEVEL_NAMES = {
+export const LEVEL_NAMES: { [key: number]: string } = {
   0: "ok",
   1: "warn",
   2: "error",
@@ -45,15 +44,13 @@ interface ToString {
 
 export type DiagnosticId = string & ToString;
 
-export type Level = $Values<typeof LEVELS>;
-
 export type KeyValue = { key: string; value: string };
 
 // diagnostic_msgs/DiagnosticStatus
 export type DiagnosticStatusMessage = {
   name: string;
   hardware_id: string;
-  level: Level;
+  level: number;
   message: string;
   values: KeyValue[];
 };
@@ -118,26 +115,22 @@ export function computeDiagnosticInfo(
   };
 }
 
-export function getDiagnosticsByLevel(
-  buffer: DiagnosticsBuffer,
-): {
-  [key: string]: DiagnosticInfo[];
-} {
-  const ret = {
-    0: [],
-    1: [],
-    2: [],
-    3: [],
-  };
+export function getDiagnosticsByLevel(buffer: DiagnosticsBuffer): Map<number, DiagnosticInfo[]> {
+  const ret = new Map<number, DiagnosticInfo[]>();
   for (const diagnosticsByName of buffer.diagnosticsByNameByTrimmedHardwareId.values()) {
     for (const diagnostic of diagnosticsByName.values()) {
-      (ret[diagnostic.status.level] as any).push(diagnostic);
+      const statuses = ret.get(diagnostic.status.level);
+      if (statuses) {
+        statuses.push(diagnostic);
+      } else {
+        ret.set(diagnostic.status.level, [diagnostic]);
+      }
     }
   }
   return ret;
 }
 
-export const getSortedDiagnostics = (
+export const filterAndSortDiagnostics = (
   nodes: DiagnosticInfo[],
   hardwareIdFilter: string,
   pinnedIds: DiagnosticId[],
