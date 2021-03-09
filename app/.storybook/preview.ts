@@ -23,4 +23,9 @@ export const decorators = [withScreenshot];
 export const parameters = {
   // Disable default padding around the page body
   layout: "fullscreen",
+
+  screenshot: {
+    // We've seen flaky screenshot sizes like 800x601.
+    viewport: { width: 800, height: 600 },
+  },
 };
