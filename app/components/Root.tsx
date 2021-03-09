@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 import cx from "classnames";
 import { CSSProperties, useEffect, useMemo, useRef } from "react";
-import { hot } from "react-hot-loader/root";
 import { connect, ConnectedProps } from "react-redux";
 import { Route } from "react-router";
 
@@ -114,4 +113,4 @@ const Root = (props: Props) => {
   return <Route path="/" render={() => <ConnectedApp {...props} />} />;
 };
 
-export default hot(Root);
+export default Root;

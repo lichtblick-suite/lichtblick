@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import React, { useCallback } from "react";
-import { hot } from "react-hot-loader/root";
 import styled from "styled-components";
 
 import helpContent from "./index.help.md";
@@ -53,4 +52,4 @@ function Note({ config, saveConfig }: Props) {
 Note.panelType = "Note";
 Note.defaultConfig = { noteText: "" };
 
-export default hot(Panel<Config>(Note as any));
+export default Panel<Config>(Note as any);

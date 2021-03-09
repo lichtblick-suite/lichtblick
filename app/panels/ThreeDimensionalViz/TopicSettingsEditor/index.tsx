@@ -13,7 +13,6 @@
 
 import { upperFirst } from "lodash";
 import React, { useCallback, ComponentType } from "react";
-import { hot } from "react-hot-loader/root";
 
 import LaserScanSettingsEditor from "./LaserScanSettingsEditor";
 import MarkerSettingsEditor from "./MarkerSettingsEditor";
@@ -192,4 +191,4 @@ const TopicSettingsEditor = React.memo<Props>(function TopicSettingsEditor({
   );
 });
 
-export default hot(TopicSettingsEditor);
+export default TopicSettingsEditor;

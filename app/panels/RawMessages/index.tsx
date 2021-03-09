@@ -20,7 +20,6 @@ import MoreIcon from "@mdi/svg/svg/unfold-more-horizontal.svg";
 // eslint-disable-next-line no-restricted-imports
 import { first, isEqual, get, last } from "lodash";
 import React, { useState, useCallback, useMemo } from "react";
-import { hot } from "react-hot-loader/root";
 import ReactHoverObserver from "react-hover-observer";
 import Tree from "react-json-tree";
 import { $Shape } from "utility-types";
@@ -593,4 +592,4 @@ RawMessages.defaultConfig = {
 };
 RawMessages.panelType = "RawMessages";
 
-export default hot(Panel<RawMessagesConfig>(RawMessages as any));
+export default Panel<RawMessagesConfig>(RawMessages as any);

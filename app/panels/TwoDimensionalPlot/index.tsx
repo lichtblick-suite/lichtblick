@@ -15,7 +15,6 @@ import { flatten, pick, round, uniq } from "lodash";
 import * as React from "react";
 import DocumentEvents from "react-document-events";
 import ReactDOM from "react-dom";
-import { hot } from "react-hot-loader/root";
 import styled from "styled-components";
 import { $Shape } from "utility-types";
 
@@ -671,4 +670,4 @@ function TwoDimensionalPlot(props: Props) {
 TwoDimensionalPlot.panelType = "TwoDimensionalPlot";
 TwoDimensionalPlot.defaultConfig = { path: { value: "" } };
 
-export default hot(Panel<Config>(TwoDimensionalPlot as any));
+export default Panel<Config>(TwoDimensionalPlot as any);

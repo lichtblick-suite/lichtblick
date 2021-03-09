@@ -18,7 +18,6 @@ import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
 import WavesIcon from "@mdi/svg/svg/waves.svg";
 import cx from "classnames";
 import { last, uniq } from "lodash";
-import { hot } from "react-hot-loader/root";
 import styled from "styled-components";
 
 import ImageCanvas from "./ImageCanvas";
@@ -661,4 +660,4 @@ function ImageView(props: Props) {
 ImageView.panelType = "ImageViewPanel";
 ImageView.defaultConfig = (getGlobalHooks() as any).perPanelHooks().ImageView.defaultConfig;
 
-export default hot(Panel<Config>(ImageView as any));
+export default Panel<Config>(ImageView as any);

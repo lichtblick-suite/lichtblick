@@ -14,7 +14,6 @@
 import hoistNonReactStatics from "hoist-non-react-statics";
 import { omit, debounce } from "lodash";
 import React, { useCallback, useMemo, useState, useRef, useEffect } from "react";
-import { hot } from "react-hot-loader/root";
 import { CameraState } from "regl-worldview";
 import { $Shape } from "utility-types";
 
@@ -242,8 +241,6 @@ export const Renderer = hoistNonReactStatics(
   BaseRenderer,
 );
 
-export default hot(
-  Panel<ThreeDimensionalVizConfig>(
-    FrameCompatibilityDEPRECATED(withTransforms(Renderer), []) as any,
-  ),
+export default Panel<ThreeDimensionalVizConfig>(
+  FrameCompatibilityDEPRECATED(withTransforms(Renderer), []) as any,
 );

@@ -16,7 +16,6 @@ import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import PlusIcon from "@mdi/svg/svg/plus.svg";
 import * as React from "react";
-import { hot } from "react-hot-loader/root";
 import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
 import { $Shape } from "utility-types";
@@ -402,4 +401,4 @@ NodePlayground.defaultConfig = {
   autoFormatOnSave: true,
 };
 
-export default hot(Panel<Config>(NodePlayground as any));
+export default Panel<Config>(NodePlayground as any);

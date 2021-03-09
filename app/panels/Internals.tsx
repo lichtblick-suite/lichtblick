@@ -13,7 +13,6 @@
 
 import { groupBy, sortBy, mapValues } from "lodash";
 import * as React from "react";
-import { hot } from "react-hot-loader/root";
 import styled from "styled-components";
 
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
@@ -256,4 +255,4 @@ function Internals(): React.ReactNode {
 Internals.panelType = "Internals";
 Internals.defaultConfig = {};
 
-export default hot(Panel(Internals as any));
+export default Panel(Internals as any);

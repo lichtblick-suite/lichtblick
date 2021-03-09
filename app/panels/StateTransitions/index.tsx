@@ -13,7 +13,6 @@
 
 import { uniq } from "lodash";
 import * as React from "react";
-import { hot } from "react-hot-loader/root";
 import stringHash from "string-hash";
 import styled, { css } from "styled-components";
 import tinycolor from "tinycolor2";
@@ -396,4 +395,4 @@ class StateTransitions extends React.PureComponent<Props> {
   }
 }
 
-export default hot(Panel<StateTransitionConfig>(StateTransitions as any));
+export default Panel<StateTransitionConfig>(StateTransitions as any);

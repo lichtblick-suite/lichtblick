@@ -13,7 +13,6 @@
 
 import { sortBy } from "lodash";
 import * as React from "react";
-import { hot } from "react-hot-loader/root";
 import { $Shape } from "utility-types";
 
 import DiagnosticStatus from "./DiagnosticStatus";
@@ -165,4 +164,4 @@ class DiagnosticStatusPanel extends React.Component<Props> {
   }
 }
 
-export default hot(Panel<Config>(DiagnosticStatusPanel as any));
+export default Panel<Config>(DiagnosticStatusPanel as any);

@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import React, { ReactNode, useCallback, useMemo } from "react";
-import { hot } from "react-hot-loader/root";
 import { $Shape } from "utility-types";
 
 import GlobalVariableSlider from "@foxglove-studio/app/components/GlobalVariableSlider";
@@ -167,4 +166,4 @@ GlobalVariableSliderPanel.defaultConfig = {
   globalVariableName: "globalVariable",
 };
 
-export default hot(Panel<GlobalVariableSliderConfig>(GlobalVariableSliderPanel as any));
+export default Panel<GlobalVariableSliderConfig>(GlobalVariableSliderPanel as any);

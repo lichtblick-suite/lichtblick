@@ -14,7 +14,6 @@
 import ClipboardOutlineIcon from "@mdi/svg/svg/clipboard-outline.svg";
 import cx from "classnames";
 import React, { PureComponent } from "react";
-import { hot } from "react-hot-loader/root";
 import { Creatable as ReactSelectCreatable } from "react-select";
 import VirtualizedSelect from "react-virtualized-select";
 import { createSelector } from "reselect";
@@ -250,4 +249,4 @@ class RosoutPanel extends PureComponent<Props> {
   }
 }
 
-export default hot(Panel<Config>(RosoutPanel as any));
+export default Panel<Config>(RosoutPanel as any);

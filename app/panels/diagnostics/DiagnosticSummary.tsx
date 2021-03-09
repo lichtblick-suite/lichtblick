@@ -17,7 +17,6 @@ import PinIcon from "@mdi/svg/svg/pin.svg";
 import cx from "classnames";
 import { compact } from "lodash";
 import * as React from "react";
-import { hot } from "react-hot-loader/root";
 import { List, AutoSizer } from "react-virtualized";
 import { $Shape } from "utility-types";
 
@@ -265,4 +264,4 @@ class DiagnosticSummary extends React.Component<Props> {
   }
 }
 
-export default hot(Panel<Config>(DiagnosticSummary as any));
+export default Panel<Config>(DiagnosticSummary as any);

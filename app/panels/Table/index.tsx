@@ -15,7 +15,6 @@ import MinusIcon from "@mdi/svg/svg/minus-box-outline.svg";
 import PlusIcon from "@mdi/svg/svg/plus-box-outline.svg";
 import _ from "lodash";
 import * as React from "react";
-import { hot } from "react-hot-loader/root";
 import { useTable, usePagination, useExpanded, useSortBy } from "react-table";
 import styled from "styled-components";
 
@@ -358,4 +357,4 @@ TablePanel.defaultConfig = {
   topicPath: "",
 };
 
-export default hot(Panel<Config>(TablePanel as any));
+export default Panel<Config>(TablePanel as any);

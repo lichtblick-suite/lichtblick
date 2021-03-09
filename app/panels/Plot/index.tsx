@@ -14,7 +14,6 @@
 import { compact, uniq } from "lodash";
 import memoizeWeak from "memoize-weak";
 import React, { useEffect, useCallback, useMemo, useRef } from "react";
-import { hot } from "react-hot-loader/root";
 import { Time, TimeUtil } from "rosbag";
 import { $Shape } from "utility-types";
 
@@ -342,4 +341,4 @@ Plot.defaultConfig = {
   xAxisVal: "timestamp",
 };
 
-export default hot(Panel<PlotConfig>(Plot as any));
+export default Panel<PlotConfig>(Plot as any);

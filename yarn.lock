@@ -1809,7 +1809,6 @@ __metadata:
     react-document-events: 1.5.1
     react-dom: 17.0.1
     react-highlight-words: 0.17.0
-    react-hot-loader: 4.13.0
     react-hover-observer: 2.1.1
     react-input-autosize: 2.2.2
     react-json-tree: 0.13.0
@@ -2306,6 +2305,43 @@ __metadata:
     mkdirp: ^1.0.4
     rimraf: ^3.0.2
   checksum: d178d86a0a96e5aa12e6d70c00d50eb3bb9a58c0cf1c36e1d7f240acb4ae3f14642c6314659c438ea409a509f08c2a62e29c9346a033e554c3f6921cdb293219
+  languageName: node
+  linkType: hard
+
+"@pmmmwh/react-refresh-webpack-plugin@npm:0.5.0-beta.1":
+  version: 0.5.0-beta.1
+  resolution: "@pmmmwh/react-refresh-webpack-plugin@npm:0.5.0-beta.1"
+  dependencies:
+    ansi-html: ^0.0.7
+    core-js-pure: ^3.8.1
+    error-stack-parser: ^2.0.6
+    html-entities: ^2.1.0
+    native-url: ^0.3.4
+    schema-utils: ^3.0.0
+    source-map: ^0.7.3
+  peerDependencies:
+    "@types/webpack": 4.x
+    react-refresh: ">=0.8.3 <0.10.0"
+    sockjs-client: ^1.4.0
+    type-fest: ">=0.13.1 <1.0.0"
+    webpack: ">=4.43.0 <6.0.0"
+    webpack-dev-server: 3.x || 4.x
+    webpack-hot-middleware: 2.x
+    webpack-plugin-serve: 0.x || 1.x
+  peerDependenciesMeta:
+    "@types/webpack":
+      optional: true
+    sockjs-client:
+      optional: true
+    type-fest:
+      optional: true
+    webpack-dev-server:
+      optional: true
+    webpack-hot-middleware:
+      optional: true
+    webpack-plugin-serve:
+      optional: true
+  checksum: 5773e41360e99c965979e81888ec5cb22e46efa5ed77879de58bd4ca0d5e59a70f34556053c053f2bca5753edaed0263670e6ba04b18e6aaaa036c60df320935
   languageName: node
   linkType: hard
 
@@ -6168,7 +6204,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-loader@npm:^8.2.2":
+"babel-loader@npm:8.2.2, babel-loader@npm:^8.2.2":
   version: 8.2.2
   resolution: "babel-loader@npm:8.2.2"
   dependencies:
@@ -8262,7 +8298,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js-pure@npm:^3.8.2":
+"core-js-pure@npm:^3.8.1, core-js-pure@npm:^3.8.2":
   version: 3.9.1
   resolution: "core-js-pure@npm:3.9.1"
   checksum: 9cbb38523f6360c068991af52bb91a55cfdc3dd3cda0964b8e232caa795b95c08523d2fb1c80b76ffd2a8446e4822a6ba960f3bd762353ad0f8470f2fd3c652e
@@ -11565,6 +11601,7 @@ __metadata:
     "@jest/types": 26.6.2
     "@mapbox/rehype-prism": 0.5.0
     "@mdx-js/loader": 1.6.22
+    "@pmmmwh/react-refresh-webpack-plugin": 0.5.0-beta.1
     "@sentry/electron": 2.4.0
     "@types/case-sensitive-paths-webpack-plugin": 2.1.4
     "@types/circular-dependency-plugin": ^5
@@ -11574,6 +11611,7 @@ __metadata:
     "@types/webpack-dev-server": 3.11.1
     "@typescript-eslint/eslint-plugin": 4.16.1
     "@typescript-eslint/parser": 4.16.1
+    babel-loader: 8.2.2
     browserify-zlib: 0.2.0
     circular-dependency-plugin: 5.2.2
     clean-webpack-plugin: 3.0.0
@@ -12150,7 +12188,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"global@npm:^4.3.0, global@npm:^4.4.0":
+"global@npm:^4.4.0":
   version: 4.4.0
   resolution: "global@npm:4.4.0"
   dependencies:
@@ -12749,6 +12787,13 @@ __metadata:
   version: 1.4.0
   resolution: "html-entities@npm:1.4.0"
   checksum: 639b7722433e5f78856f92431a302d2f113a9c2947d684975926801e507dfcf1269fdbf1f719931f478749b5a53a642b0f2c90959cd41af21a633722e9c64422
+  languageName: node
+  linkType: hard
+
+"html-entities@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "html-entities@npm:2.1.0"
+  checksum: c057cd7424be0cc8baf62f592d3692c063bf9d01e55608d695718136fd01a91f969c17d460be21e5640ce3775a9ba3b082461c785726ab99e4bdd13054d5c7d6
   languageName: node
   linkType: hard
 
@@ -15364,7 +15409,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loader-utils@npm:^1.0.0, loader-utils@npm:^1.1.0, loader-utils@npm:^1.2.3, loader-utils@npm:^1.4.0":
+"loader-utils@npm:^1.0.0, loader-utils@npm:^1.2.3, loader-utils@npm:^1.4.0":
   version: 1.4.0
   resolution: "loader-utils@npm:1.4.0"
   dependencies:
@@ -16550,6 +16595,15 @@ __metadata:
   dependencies:
     querystring: ^0.2.0
   checksum: 064e580759f06060740636184ba8dbd8cf21a1237c769625591f8a0e956714ea27d58d601fe84c4b9600dfabc88edfb3bf51fc7a579764b5d60e0d9392aec9df
+  languageName: node
+  linkType: hard
+
+"native-url@npm:^0.3.4":
+  version: 0.3.4
+  resolution: "native-url@npm:0.3.4"
+  dependencies:
+    querystring: ^0.2.0
+  checksum: 26a3716a257db5d88d2678691175144d4732cb1b12d35925f939f837b7bb9d98ce18f1d7750409fb8988f190ad075b4b72310b0e212d61fd3d832e6d073ab89b
   languageName: node
   linkType: hard
 
@@ -19244,29 +19298,6 @@ __metadata:
   peerDependencies:
     react: ^0.14.0 || ^15.0.0 || ^16.0.0-0 || ^17.0.0-0
   checksum: 2fb807c9fd6b8fcd9744728b755a004ede446025995f75f9ccdc75928f41aef085cea4480d2c8d8d8d26a3b452cf5c43d90b40f6cb4f21f9702e61d371900aba
-  languageName: node
-  linkType: hard
-
-"react-hot-loader@npm:4.13.0":
-  version: 4.13.0
-  resolution: "react-hot-loader@npm:4.13.0"
-  dependencies:
-    fast-levenshtein: ^2.0.6
-    global: ^4.3.0
-    hoist-non-react-statics: ^3.3.0
-    loader-utils: ^1.1.0
-    prop-types: ^15.6.1
-    react-lifecycles-compat: ^3.0.4
-    shallowequal: ^1.1.0
-    source-map: ^0.7.3
-  peerDependencies:
-    "@types/react": "^15.0.0 || ^16.0.0 || ^17.0.0 "
-    react: "^15.0.0 || ^16.0.0 || ^17.0.0 "
-    react-dom: "^15.0.0 || ^16.0.0 || ^17.0.0 "
-  peerDependenciesMeta:
-    "@types/react":
-      optional: true
-  checksum: f1df03e93206b379b605f3da983f700d5c8a16e3ebedf25ca1311067f4dc95cf968206af44d0b734a5505619958f2da5efe9df4bf749ed6a4989e1f6ea5d2915
   languageName: node
   linkType: hard
 

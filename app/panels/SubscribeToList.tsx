@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import * as React from "react";
-import { hot } from "react-hot-loader/root";
 
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import Flex from "@foxglove-studio/app/components/Flex";
@@ -53,4 +52,4 @@ function SubscribeToList({ config, saveConfig }: Props): React.ReactNode {
 SubscribeToList.panelType = "SubscribeToList";
 SubscribeToList.defaultConfig = { topics: "" };
 
-export default hot(Panel<Config>(SubscribeToList as any));
+export default Panel<Config>(SubscribeToList as any);

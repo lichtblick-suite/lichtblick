@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import * as React from "react";
-import { hot } from "react-hot-loader/root";
 
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import Flex from "@foxglove-studio/app/components/Flex";
@@ -99,4 +98,4 @@ function NumberOfRenders(): React.ReactNode {
 NumberOfRenders.panelType = "NumberOfRenders";
 NumberOfRenders.defaultConfig = {};
 
-export default hot(Panel(NumberOfRenders as any));
+export default Panel(NumberOfRenders as any);

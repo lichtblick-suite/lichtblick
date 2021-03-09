@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import rehypePrism from "@mapbox/rehype-prism";
+import ReactRefreshPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import CircularDependencyPlugin from "circular-dependency-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
@@ -10,7 +11,12 @@ import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
 import path from "path";
 import retext from "retext";
 import retextSmartypants from "retext-smartypants";
-import webpack, { Configuration, EnvironmentPlugin, WebpackPluginInstance } from "webpack";
+import webpack, {
+  Configuration,
+  EnvironmentPlugin,
+  RuleSetUseItem,
+  WebpackPluginInstance,
+} from "webpack";
 
 import uncheckedIndexAccessFiles from "./UncheckedIndexAccess.json";
 import { WebpackArgv } from "./WebpackArgv";
@@ -33,6 +39,17 @@ function remarkSmartypants() {
 export function makeConfig(_: unknown, argv: WebpackArgv): Configuration {
   const isDev = argv.mode === "development";
   const isServe = argv.env?.WEBPACK_SERVE ?? false;
+
+  const plugins: WebpackPluginInstance[] = [];
+  const ruleUse: RuleSetUseItem[] = [];
+
+  if (isDev) {
+    plugins.push(new ReactRefreshPlugin());
+    ruleUse.push({
+      loader: "babel-loader",
+      options: { plugins: ["react-refresh/babel"] },
+    });
+  }
 
   return {
     // force web target instead of electron-render
@@ -85,15 +102,18 @@ export function makeConfig(_: unknown, argv: WebpackArgv): Configuration {
         {
           test: /\.tsx?$/,
           exclude: /node_modules/,
-          use: {
-            loader: "ts-loader",
-            options: {
-              transpileOnly: true,
-              // https://github.com/TypeStrong/ts-loader#onlycompilebundledfiles
-              // avoid looking at files which are not part of the bundle
-              onlyCompileBundledFiles: true,
+          use: [
+            ...ruleUse,
+            {
+              loader: "ts-loader",
+              options: {
+                transpileOnly: true,
+                // https://github.com/TypeStrong/ts-loader#onlycompilebundledfiles
+                // avoid looking at files which are not part of the bundle
+                onlyCompileBundledFiles: true,
+              },
             },
-          },
+          ],
         },
         {
           test: /\.mdx$/,
@@ -168,6 +188,7 @@ export function makeConfig(_: unknown, argv: WebpackArgv): Configuration {
       ],
     },
     plugins: [
+      ...plugins,
       new CircularDependencyPlugin({
         exclude: /node_modules/,
         onDetected({ paths, compilation }) {

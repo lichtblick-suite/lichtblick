@@ -14,7 +14,6 @@
 import { last, sumBy } from "lodash";
 import * as React from "react";
 import { ReactElement } from "react";
-import { hot } from "react-hot-loader/root";
 import { $ReadOnly } from "utility-types";
 
 import helpContent from "./index.help.md";
@@ -163,4 +162,4 @@ function PlaybackPerformance(): React.ReactNode {
 PlaybackPerformance.panelType = "PlaybackPerformance";
 PlaybackPerformance.defaultConfig = {};
 
-export default hot(Panel(PlaybackPerformance as any));
+export default Panel(PlaybackPerformance as any);

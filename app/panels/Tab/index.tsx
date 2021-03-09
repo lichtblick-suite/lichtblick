@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import React, { useCallback, useMemo, useState } from "react";
-import { hot } from "react-hot-loader/root";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 
@@ -154,4 +153,4 @@ function Tab({ config, saveConfig }: Props) {
 Tab.panelType = TAB_PANEL_TYPE;
 Tab.defaultConfig = DEFAULT_TAB_PANEL_CONFIG;
 
-export default hot(Panel<Config>(Tab as any));
+export default Panel<Config>(Tab as any);

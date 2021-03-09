@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import React, { ReactElement } from "react";
-import { hot } from "react-hot-loader/root";
 import styled from "styled-components";
 
 import helpContent from "./index.help.md";
@@ -37,4 +36,4 @@ function GlobalVariables(): ReactElement {
 GlobalVariables.panelType = "Global";
 GlobalVariables.defaultConfig = {};
 
-export default hot(Panel(GlobalVariables));
+export default Panel(GlobalVariables);

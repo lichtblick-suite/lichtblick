@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import React, { ReactNode, useCallback } from "react";
-import { hot } from "react-hot-loader/root";
 import styled from "styled-components";
 
 import EmptyState from "@foxglove-studio/app/components/EmptyState";
@@ -165,4 +164,4 @@ function SourceInfo(): ReactNode {
 SourceInfo.panelType = "SourceInfo";
 SourceInfo.defaultConfig = {};
 
-export default hot(Panel(SourceInfo as any));
+export default Panel(SourceInfo as any);
