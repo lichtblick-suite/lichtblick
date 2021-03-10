@@ -43,7 +43,7 @@ export function makeConfig(_: unknown, argv: WebpackArgv): Configuration {
   const plugins: WebpackPluginInstance[] = [];
   const ruleUse: RuleSetUseItem[] = [];
 
-  if (isDev) {
+  if (isServe) {
     plugins.push(new ReactRefreshPlugin());
     ruleUse.push({
       loader: "babel-loader",
