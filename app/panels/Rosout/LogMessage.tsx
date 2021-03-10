@@ -17,7 +17,7 @@ import { Time } from "rosbag";
 
 import LevelToString from "./LevelToString";
 import style from "./LogMessage.module.scss";
-import { Header } from "@foxglove-studio/app/types/Messages";
+import { RosgraphMsgs$Log } from "@foxglove-studio/app/types/Messages";
 
 // pad the start of `val` with 0's to make the total string length `count` size
 function PadStart(val: any, count: number) {
@@ -33,11 +33,7 @@ function Stamp(props: { stamp: Time }) {
   );
 }
 
-type Props = {
-  msg: { file: string; line: string; level: number; name: string; msg: string; header: Header };
-};
-
-export default React.memo<Props>(function LogMessage({ msg }: Props) {
+export default React.memo(function LogMessage({ msg }: { msg: RosgraphMsgs$Log }) {
   const altStr = `${msg.file}:${msg.line}`;
 
   const strLevel = LevelToString(msg.level);

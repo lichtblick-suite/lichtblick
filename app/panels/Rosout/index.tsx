@@ -13,29 +13,24 @@
 
 import ClipboardOutlineIcon from "@mdi/svg/svg/clipboard-outline.svg";
 import cx from "classnames";
-import React, { PureComponent } from "react";
 import { Creatable as ReactSelectCreatable } from "react-select";
 import VirtualizedSelect from "react-virtualized-select";
 import { createSelector } from "reselect";
-import { $ReadOnly } from "utility-types";
 
 import LevelToString, { KNOWN_LOG_LEVELS } from "./LevelToString";
 import LogMessage from "./LogMessage";
 import logStyle from "./LogMessage.module.scss";
 import helpContent from "./index.help.md";
 import styles from "./index.module.scss";
+import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import Flex from "@foxglove-studio/app/components/Flex";
 import Icon from "@foxglove-studio/app/components/Icon";
 import LogList from "@foxglove-studio/app/components/LogList";
-import MessageHistoryDEPRECATED, {
-  MessageHistoryData,
-  MessageHistoryItem,
-} from "@foxglove-studio/app/components/MessageHistoryDEPRECATED";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import TopicToRenderMenu from "@foxglove-studio/app/components/TopicToRenderMenu";
-import { cast, ReflectiveMessage, Topic } from "@foxglove-studio/app/players/types";
-import { Header } from "@foxglove-studio/app/types/Messages";
+import { cast, ReflectiveMessage, Topic, TypedMessage } from "@foxglove-studio/app/players/types";
+import { RosgraphMsgs$Log } from "@foxglove-studio/app/types/Messages";
 import clipboard from "@foxglove-studio/app/util/clipboard";
 import { ROSOUT_TOPIC } from "@foxglove-studio/app/util/globalConstants";
 
@@ -51,18 +46,6 @@ type Option = {
   label: string;
 };
 
-type Config = {
-  searchTerms: string[];
-  minLogLevel: number;
-  topicToRender: string;
-};
-
-type Props = {
-  config: Config;
-  saveConfig: (arg0: Config) => void;
-  topics: Topic[];
-};
-
 // Create the log level options nodes once since they don't change per render.
 const LOG_LEVEL_OPTIONS = KNOWN_LOG_LEVELS.map((level) => ({
   label: `>= ${LevelToString(level)}`,
@@ -75,17 +58,6 @@ export const stringsToOptions = createSelector<any, any, any, unknown>(
   (strs: string[]) => strs,
   (strs: string[]): Option[] => strs.map((value) => ({ label: value, value })),
 );
-
-type RosgraphMsgs$Log = $ReadOnly<{
-  header: Header;
-  level: number;
-  name: string;
-  msg: string;
-  file: string;
-  function: string;
-  line: number;
-  topics: ReadonlyArray<string>;
-}>;
 
 export const getShouldDisplayMsg = (
   message: ReflectiveMessage,
@@ -110,38 +82,48 @@ export const getShouldDisplayMsg = (
   );
 };
 
-class RosoutPanel extends PureComponent<Props> {
-  static defaultConfig = { searchTerms: [], minLogLevel: 1, topicToRender: ROSOUT_TOPIC };
-  static panelType = "RosOut";
+type Config = {
+  searchTerms: string[];
+  minLogLevel: number;
+  topicToRender: string;
+};
 
-  _onNodeFilterChange = (selectedOptions: Option[]) => {
-    this.props.saveConfig({
-      ...this.props.config,
+type Props = {
+  config: Config;
+  saveConfig: (arg0: Config) => void;
+  topics: Topic[];
+};
+
+const RosoutPanel = React.memo(({ config, saveConfig, topics }: Props) => {
+  const onNodeFilterChange = (selectedOptions: Option[]) => {
+    saveConfig({
+      ...config,
       searchTerms: selectedOptions.map((option) => option.value),
     });
   };
 
-  _onLogLevelChange = (minLogLevel: number) => {
-    this.props.saveConfig({ ...this.props.config, minLogLevel });
+  const onLogLevelChange = (minLogLevel: number) => {
+    saveConfig({ ...config, minLogLevel });
   };
 
-  _filterFn = (item: MessageHistoryItem) =>
-    getShouldDisplayMsg(item.message, this.props.config.minLogLevel, this.props.config.searchTerms);
+  const filterFn = (item: TypedMessage<RosgraphMsgs$Log>) =>
+    getShouldDisplayMsg(item, config.minLogLevel, config.searchTerms);
 
-  _getFilteredMessages(
-    items: ReadonlyArray<MessageHistoryItem>,
-  ): ReadonlyArray<MessageHistoryItem> {
-    const { minLogLevel, searchTerms } = this.props.config;
+  function getFilteredMessages(items: readonly TypedMessage<RosgraphMsgs$Log>[]) {
+    const { minLogLevel, searchTerms } = config;
     const hasActiveFilters = minLogLevel > 1 || searchTerms.length > 0;
     if (!hasActiveFilters) {
       // This early return avoids looping over the full list with a filter that will always return true.
       return items;
     }
-    return items.filter(this._filterFn);
+    return items.filter(filterFn);
   }
 
-  _renderFiltersBar = (seenNodeNames: Set<string>, msgs: ReadonlyArray<MessageHistoryItem>) => {
-    const { minLogLevel, searchTerms } = this.props.config;
+  const renderFiltersBar = (
+    seenNodeNames: Set<string>,
+    msgs: readonly TypedMessage<RosgraphMsgs$Log>[],
+  ) => {
+    const { minLogLevel, searchTerms } = config;
     const nodeNameOptions = Array.from(seenNodeNames).map((name) => ({ label: name, value: name }));
 
     return (
@@ -164,7 +146,7 @@ class RosoutPanel extends PureComponent<Props> {
                 },
               )}
               style={styleProp}
-              onClick={() => this._onLogLevelChange(option.value)}
+              onClick={() => onLogLevelChange(option.value)}
               key={key}
             >
               {option.label}
@@ -180,7 +162,7 @@ class RosoutPanel extends PureComponent<Props> {
           multi
           closeOnSelect={false}
           value={stringsToOptions(searchTerms, undefined) as any}
-          onChange={this._onNodeFilterChange as any}
+          onChange={onNodeFilterChange as any}
           options={nodeNameOptions}
           optionHeight={parseInt(styles.optionHeight)}
           placeholder="Filter by node name or message text"
@@ -203,50 +185,47 @@ class RosoutPanel extends PureComponent<Props> {
       </div>
     );
   };
-  _renderRow({ item, style, key, index }: any) {
-    return (
-      <div key={key} style={index === 0 ? { ...style, paddingTop: 36 } : style}>
-        <LogMessage msg={item.message.message} />
+
+  const topicToRenderMenu = (
+    <TopicToRenderMenu
+      topicToRender={config.topicToRender}
+      onChange={(topicToRender) => saveConfig({ ...config, topicToRender })}
+      topics={topics}
+      singleTopicDatatype="rosgraph_msgs/Log"
+      defaultTopicToRender={ROSOUT_TOPIC}
+    />
+  );
+
+  const { [config.topicToRender]: messages = [] } = PanelAPI.useMessagesByTopic<RosgraphMsgs$Log>({
+    topics: [config.topicToRender],
+    historySize: 100000,
+  });
+
+  const seenNodeNames = new Set<string>();
+  messages.forEach((msg) => seenNodeNames.add(msg.message.name));
+
+  return (
+    <Flex col>
+      <PanelToolbar floating helpContent={helpContent} additionalIcons={topicToRenderMenu}>
+        {renderFiltersBar(seenNodeNames, messages)}
+      </PanelToolbar>
+      <div className={styles.content}>
+        <LogList
+          items={getFilteredMessages(messages)}
+          renderRow={({ item, style, key, index }) => (
+            <div key={key} style={index === 0 ? { ...style, paddingTop: 36 } : style}>
+              <LogMessage msg={item.message} />
+            </div>
+          )}
+        />
       </div>
-    );
-  }
+    </Flex>
+  );
+});
 
-  render() {
-    const { topics, config } = this.props;
-    const seenNodeNames = new Set();
-
-    const topicToRenderMenu = (
-      <TopicToRenderMenu
-        topicToRender={config.topicToRender}
-        onChange={(topicToRender) => this.props.saveConfig({ ...this.props.config, topicToRender })}
-        topics={topics}
-        singleTopicDatatype="rosgraph_msgs/Log"
-        defaultTopicToRender={ROSOUT_TOPIC}
-      />
-    );
-
-    return (
-      <MessageHistoryDEPRECATED paths={[config.topicToRender]} historySize={100000}>
-        {({ itemsByPath }: MessageHistoryData) => {
-          const msgs: ReadonlyArray<MessageHistoryItem> = itemsByPath[config.topicToRender];
-          msgs.forEach((msg) =>
-            seenNodeNames.add(cast<RosgraphMsgs$Log>(msg.message.message).name),
-          );
-
-          return (
-            <Flex col>
-              <PanelToolbar floating helpContent={helpContent} additionalIcons={topicToRenderMenu}>
-                {this._renderFiltersBar(seenNodeNames as any, msgs)}
-              </PanelToolbar>
-              <div className={styles.content}>
-                <LogList items={this._getFilteredMessages(msgs)} renderRow={this._renderRow} />
-              </div>
-            </Flex>
-          );
-        }}
-      </MessageHistoryDEPRECATED>
-    );
-  }
-}
-
-export default Panel<Config>(RosoutPanel as any);
+export default Panel<Config>(
+  Object.assign(RosoutPanel, {
+    defaultConfig: { searchTerms: [], minLogLevel: 1, topicToRender: ROSOUT_TOPIC },
+    panelType: "RosOut",
+  }) as any,
+);

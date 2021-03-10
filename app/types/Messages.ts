@@ -41,6 +41,17 @@ export type StampedMessage = Readonly<{
   header: Header;
 }>;
 
+export type RosgraphMsgs$Log = Readonly<{
+  header: Header;
+  level: number;
+  name: string;
+  msg: string;
+  file: string;
+  function: string;
+  line: number;
+  topics: ReadonlyArray<string>;
+}>;
+
 type Duration = Time;
 
 type MutableOrientation = {

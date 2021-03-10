@@ -23,5 +23,4 @@ export { useMessageReducer } from "./useMessageReducer";
 export type { RequestedTopic } from "./useMessageReducer";
 
 export { useMessagesByTopic } from "./useMessagesByTopic";
-export type { MessagesByTopic } from "./useMessagesByTopic";
 export { useBlocksByTopic } from "./useBlocksByTopic";

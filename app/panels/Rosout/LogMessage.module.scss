@@ -20,23 +20,28 @@
   line-height: 1.2;
 }
 
-.fatal {
+.fatal,
+:global(.VirtualizedSelectOption).fatal {
   color: $red;
   font-weight: bold;
 }
 
-.error {
+.error,
+:global(.VirtualizedSelectOption).error {
   color: $red;
 }
 
-.warn {
+.warn,
+:global(.VirtualizedSelectOption).warn {
   color: $orange;
 }
 
-.info {
+.info,
+:global(.VirtualizedSelectOption).info {
   color: #586e75;
 }
 
-.debug {
+.debug,
+:global(.VirtualizedSelectOption).debug {
   color: #93a1a1;
 }
