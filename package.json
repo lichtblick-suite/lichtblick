@@ -1,6 +1,6 @@
 {
   "name": "foxglove-studio",
-  "version": "0.1.1-dev",
+  "version": "0.1.2",
   "description": "Integrated robotics visualization and debugging.",
   "productName": "Foxglove Studio",
   "license": "MPL-2.0",
