@@ -10,13 +10,12 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { useCallback, useMemo, useContext } from "react";
+import { useCallback, useMemo, useContext, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { bindActionCreators } from "redux";
 
 import { redoLayoutChange, undoLayoutChange } from "@foxglove-studio/app/actions/layoutHistory";
 import { ScreenshotsContext } from "@foxglove-studio/app/components/Screenshots/ScreenshotsProvider";
-import useEventListener from "@foxglove-studio/app/hooks/useEventListener";
 import { downloadFiles } from "@foxglove-studio/app/util";
 
 const inNativeUndoRedoElement = (eventTarget: EventTarget) => {
@@ -122,7 +121,10 @@ export default function GlobalKeyListener({
 
   // Not using KeyListener because we want to preventDefault on [ctrl+z] but not on [z], and we want
   // to handle events when text areas have focus.
-  useEventListener(document, "keydown", true, keyDownHandler, [keyDownHandler]);
+  useEffect(() => {
+    document.addEventListener("keydown", keyDownHandler, { capture: true });
+    return () => document.removeEventListener("keydown", keyDownHandler, { capture: true });
+  }, [keyDownHandler]);
 
   return null;
 }

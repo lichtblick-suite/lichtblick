@@ -17,6 +17,7 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -26,7 +27,6 @@ import { createPortal } from "react-dom";
 import styles from "./index.module.scss";
 import Flex from "@foxglove-studio/app/components/Flex";
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
-import useEventListener from "@foxglove-studio/app/hooks/useEventListener";
 
 type ContainsOpenProps = {
   onChange: (containsOpen: boolean) => void;
@@ -137,11 +137,11 @@ export default function ChildToggle(props: Props): ReactElement {
 
   // add a document listener to hide the dropdown body if
   // it is expanded and the document is clicked on
-  useEventListener(
-    document,
-    "click",
-    isOpen,
-    (event: MouseEvent) => {
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+    const listener = (event: MouseEvent) => {
       if (!floatingEl.current) {
         return;
       }
@@ -155,9 +155,10 @@ export default function ChildToggle(props: Props): ReactElement {
         // the expanded toggle portion from the dom
         setImmediate(() => setIsOpen(false));
       }
-    },
-    [],
-  );
+    };
+    document.addEventListener("click", listener, { capture: true });
+    return () => document.removeEventListener("click", listener, { capture: true });
+  }, [isOpen, setIsOpen]);
 
   const [rendered, setRendered] = useState(false);
   useLayoutEffect(() => {

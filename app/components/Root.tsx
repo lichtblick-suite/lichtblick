@@ -20,6 +20,7 @@ import { redoLayoutChange, undoLayoutChange } from "@foxglove-studio/app/actions
 import { importPanelLayout } from "@foxglove-studio/app/actions/panels";
 import AddPanelMenu from "@foxglove-studio/app/components/AddPanelMenu";
 import { ExperimentalFeaturesMenu } from "@foxglove-studio/app/components/ExperimentalFeatures";
+import GlobalKeyListener from "@foxglove-studio/app/components/GlobalKeyListener";
 import GlobalVariablesMenu from "@foxglove-studio/app/components/GlobalVariablesMenu";
 import LayoutMenu from "@foxglove-studio/app/components/LayoutMenu";
 import NotificationDisplay from "@foxglove-studio/app/components/NotificationDisplay";
@@ -31,6 +32,7 @@ import Toolbar from "@foxglove-studio/app/components/Toolbar";
 import withDragDropContext from "@foxglove-studio/app/components/withDragDropContext";
 import { usePlayerSelection } from "@foxglove-studio/app/context/PlayerSelectionContext";
 import { State } from "@foxglove-studio/app/reducers";
+import history from "@foxglove-studio/app/util/history";
 import inAutomatedRunMode from "@foxglove-studio/app/util/inAutomatedRunMode";
 
 const connector = connect(
@@ -73,6 +75,7 @@ function App({
 
   return (
     <div ref={containerRef} className="app-container" tabIndex={0}>
+      <GlobalKeyListener history={history} />
       <Route path="/shortcuts" component={ShortcutsModal} />
 
       <Toolbar style={toolbarStyle} onDoubleClick={onToolbarDoubleClick}>
