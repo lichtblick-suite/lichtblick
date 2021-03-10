@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { CommentingActions } from "./commenting";
 import { HoverValueActions } from "./hoverValue";
 import { LayoutHistoryActions } from "./layoutHistory";
 import { MosaicActions } from "./mosaic";
@@ -25,5 +24,4 @@ export type ActionTypes =
   | LayoutHistoryActions
   | MosaicActions
   | PanelsActions
-  | UserNodesActions
-  | CommentingActions;
+  | UserNodesActions;

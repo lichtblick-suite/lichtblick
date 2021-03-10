@@ -14,7 +14,6 @@ import { connectRouter } from "connected-react-router";
 
 import { ActionTypes } from "@foxglove-studio/app/actions";
 import { ros_lib_dts } from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/ros";
-import commenting from "@foxglove-studio/app/reducers/commenting";
 import hoverValue from "@foxglove-studio/app/reducers/hoverValue";
 import layoutHistory, {
   LayoutHistory,
@@ -43,7 +42,6 @@ const getReducers = (history: any) => [
   userNodes,
   layoutHistory,
   recentLayouts,
-  commenting,
   ...(process.env.NODE_ENV === "test" ? [tests] : []),
 ];
 
@@ -55,15 +53,6 @@ export type PersistedState = {
 
 export type Dispatcher<T extends ActionTypes> = (dispatch: Dispatch<T>, getState: GetState) => void;
 
-export type Comment = {
-  id: string;
-  authorId: string;
-  body: string;
-  metadata: {
-    [key: string]: any;
-  };
-  attachments: { url: string }[];
-};
 export type State = {
   persistedState: PersistedState;
   mosaic: { mosaicId: string; selectedPanelIds: MosaicKey[] };
