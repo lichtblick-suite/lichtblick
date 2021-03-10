@@ -149,6 +149,13 @@ export default class Tooltip extends React.Component<Props, State> {
     this.setState({ shown: false, mousePosition: null });
   };
 
+  onMouseDown = (): void => {
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
+    this.setState({ shown: false, mousePosition: null });
+  };
+
   renderPopper() {
     const { placement, contents, offset, fixed, arrow } = this.props;
     const { shown } = this.state;
@@ -217,6 +224,8 @@ export default class Tooltip extends React.Component<Props, State> {
     } else {
       eventListeners.onMouseMove = this.onMouseMove;
     }
+
+    eventListeners.onMouseDown = this.onMouseDown;
 
     if (fixed) {
       return (
