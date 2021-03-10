@@ -13,6 +13,7 @@ import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 
 export default {
   title: "<DiagnosticSummary>",
+  excludeStories: ["makeDiagnosticMessage"],
 };
 
 export function makeDiagnosticMessage(

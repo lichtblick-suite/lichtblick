@@ -90,7 +90,7 @@ storiesOf("<StateTransitions>", module)
   .addParameters({
     screenshot: {
       // Wait for chart workers to render
-      delay: 300,
+      delay: 1000,
     },
   })
   .add("one path", () => {

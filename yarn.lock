@@ -1727,6 +1727,7 @@ __metadata:
     "@storybook/builder-webpack5": 6.2.0-beta.9
     "@storybook/react": 6.2.0-beta.9
     "@testing-library/react-hooks": 5.1.0
+    "@types/argparse": ^2
     "@types/chart.js": 2.9.31
     "@types/chartjs-plugin-annotation": 0.5.1
     "@types/classnames": 2.2.11
@@ -1763,6 +1764,7 @@ __metadata:
     "@types/uuid": 8.3.0
     "@types/ws": 7.4.0
     "@wojtekmaj/enzyme-adapter-react-17": 0.4.1
+    argparse: 2.0.1
     cbor-js: 0.1.0
     chart.js: "davidswinegar/Chart.js#0785c29a4c57b3e1b4243f8163df7950a00b2a80"
     chartjs-plugin-annotation: 0.5.7
@@ -1798,6 +1800,7 @@ __metadata:
     panzoom: 8.7.5
     prettier: 2.2.1
     promise-queue: 2.2.5
+    puppeteer-core: 8.0.0
     quickhull3d: 2.0.4
     rc-color-picker: 1.2.6
     rc-tabs: 11.7.3
@@ -3582,6 +3585,13 @@ __metadata:
   version: 1.3.1
   resolution: "@types/anymatch@npm:1.3.1"
   checksum: 1647865e528a168f66f57a077e9651c10a4c172b656cc3686fddf176555d42ca0a1647bfc626ea2fceb68fc7701426ab708224be1762b4a5216fe8368ffdba3c
+  languageName: node
+  linkType: hard
+
+"@types/argparse@npm:^2":
+  version: 2.0.5
+  resolution: "@types/argparse@npm:2.0.5"
+  checksum: aad8f449dacea75bb6c993d784e85af8152d0991270f17f7acf53871c03097d4b77f55b83ba17354ac0f50dfe6adc6a404ba3672a6cdfb4ff25e6eeab679754f
   languageName: node
   linkType: hard
 
@@ -5428,13 +5438,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"agent-base@npm:5":
-  version: 5.1.1
-  resolution: "agent-base@npm:5.1.1"
-  checksum: aff8e856932ba63bbe097ac460f2f474669c5a1ca7674d3be19d4c258b4276a6b71863fb25c8bc3d424320d0c81652044098346403e759a65a76712e697633fa
-  languageName: node
-  linkType: hard
-
 "agent-base@npm:6":
   version: 6.0.2
   resolution: "agent-base@npm:6.0.2"
@@ -5786,19 +5789,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"argparse@npm:2.0.1, argparse@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "argparse@npm:2.0.1"
+  checksum: 160b7a25d2a7097fd5fdf25eb8a99e037340078f70e6c7cfdef305837ed14d54570b2b13261bcae26c8cd44ad6e9a7136a0110d815ac65a7891c69c7bf2f4afd
+  languageName: node
+  linkType: hard
+
 "argparse@npm:^1.0.7":
   version: 1.0.10
   resolution: "argparse@npm:1.0.10"
   dependencies:
     sprintf-js: ~1.0.2
   checksum: 435adaef5f6671c3ef1478a22be6fd54bdb99fdbbce8f5561b9cbbb05068ccce87b7df3b9f3322ff52a6ebb9cab2b427cbedac47a07611690a9beaa5184093e2
-  languageName: node
-  linkType: hard
-
-"argparse@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "argparse@npm:2.0.1"
-  checksum: 160b7a25d2a7097fd5fdf25eb8a99e037340078f70e6c7cfdef305837ed14d54570b2b13261bcae26c8cd44ad6e9a7136a0110d815ac65a7891c69c7bf2f4afd
   languageName: node
   linkType: hard
 
@@ -9226,10 +9229,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"devtools-protocol@npm:0.0.818844":
-  version: 0.0.818844
-  resolution: "devtools-protocol@npm:0.0.818844"
-  checksum: 6f3e5bc2a50fc99453c75787256eb27a5707ac8e575c6783acd7cf3e13edb8974ded83f93b2e31ef2c553299b13d2970c3bf267bc32e5c0788afc933d42f39c6
+"devtools-protocol@npm:0.0.854822":
+  version: 0.0.854822
+  resolution: "devtools-protocol@npm:0.0.854822"
+  checksum: 18cad06cae75b8c05b04d7532bab25da03f70f3637cdf070dd7140eb75427e75ee81f1b93fe643e7d21434afdf99f7cbba336ea5a30f5bcf9689d2fbd4077849
   languageName: node
   linkType: hard
 
@@ -13073,16 +13076,6 @@ __metadata:
   version: 1.0.0
   resolution: "https-browserify@npm:1.0.0"
   checksum: 9746a4ef0283691774f207039efed38e31e86732ed15bcebf1878e2e7cf4b87e8a4e5fe3cce342caba9545ce0e7e2bcf44fe08edb52284b1b53bfe026e1e8f07
-  languageName: node
-  linkType: hard
-
-"https-proxy-agent@npm:^4.0.0":
-  version: 4.0.0
-  resolution: "https-proxy-agent@npm:4.0.0"
-  dependencies:
-    agent-base: 5
-    debug: 4
-  checksum: d3d20730cdcfa1b1ac492280501fa7b14ee89eb4fa2e7d300cc260463b48ea98b6cf1d4b287f40faa8c36c2f88d87819b4b419be5ec4055e9dcd2db501ce4680
   languageName: node
   linkType: hard
 
@@ -18459,7 +18452,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"proxy-from-env@npm:^1.0.0":
+"proxy-from-env@npm:^1.1.0":
   version: 1.1.0
   resolution: "proxy-from-env@npm:1.1.0"
   checksum: 6459372a57f3e8ef5211f7847ca2fffabcdd6490005892fcc0dcd62fe2b3551900c8a07fad7df9de3897547b1ab4ac7a7197964cd6fa7e76303caa4936bfaf32
@@ -18573,23 +18566,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"puppeteer-core@npm:5.5.0, puppeteer-core@npm:^5.1.0":
-  version: 5.5.0
-  resolution: "puppeteer-core@npm:5.5.0"
+"puppeteer-core@npm:8.0.0":
+  version: 8.0.0
+  resolution: "puppeteer-core@npm:8.0.0"
   dependencies:
     debug: ^4.1.0
-    devtools-protocol: 0.0.818844
+    devtools-protocol: 0.0.854822
     extract-zip: ^2.0.0
-    https-proxy-agent: ^4.0.0
+    https-proxy-agent: ^5.0.0
     node-fetch: ^2.6.1
     pkg-dir: ^4.2.0
     progress: ^2.0.1
-    proxy-from-env: ^1.0.0
+    proxy-from-env: ^1.1.0
     rimraf: ^3.0.2
     tar-fs: ^2.0.0
     unbzip2-stream: ^1.3.3
     ws: ^7.2.3
-  checksum: 2ac92cb41ad23747dcea719511ab7681ba3ed7474f54497e24eb9b2a69934f99198aa76fd96e413641c84e662ee3a29a0b677dfe5024e698429a46b9b500e981
+  checksum: 318b4d19be3b4ccfd2b3a57643b5a08dd3abefed572d1a3bec6894e694021f80dc915d1d621fea762c274ffddc8c0fd00bad7a5785ee12974dc48eabc6250fc3
   languageName: node
   linkType: hard
 

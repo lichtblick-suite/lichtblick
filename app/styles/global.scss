@@ -68,13 +68,6 @@ html {
   box-sizing: inherit;
 }
 
-#root > span,
-#root > span > span {
-  // Wrappers added by storycap.
-  display: block;
-  height: 100%;
-}
-
 #root {
   // ensure portals are able to stack on top of the main app
   z-index: 0;
