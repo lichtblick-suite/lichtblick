@@ -271,6 +271,7 @@ export default (env: unknown, argv: WebpackArgv): Configuration => {
     new HtmlWebpackPlugin({
       templateContent: `
         <html>
+          <head><meta charset="utf-8"></head>
           <script>global = globalThis;</script>
           <body>
             <div id="root"></div>
