@@ -1813,7 +1813,7 @@ __metadata:
     chart.js: "davidswinegar/Chart.js#0785c29a4c57b3e1b4243f8163df7950a00b2a80"
     chartjs-plugin-annotation: 0.5.7
     chartjs-plugin-datalabels: "davidswinegar/chartjs-plugin-datalabels#b0ade94116d4e273f0fdc17e9528c9a33c796e90"
-    chromatic: "github:amacneil/chromatic-cli#detectyarn"
+    chromatic: 5.7.0
     classnames: 2.2.6
     compressjs: 1.0.3
     connected-react-router: 6.9.1
@@ -7786,9 +7786,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@github:amacneil/chromatic-cli#detectyarn":
-  version: 5.6.2
-  resolution: "chromatic@https://github.com/amacneil/chromatic-cli.git#commit=2f084fdf836902d4cb07b4225747e2b776fd1d97"
+"chromatic@npm:5.7.0":
+  version: 5.7.0
+  resolution: "chromatic@npm:5.7.0"
   dependencies:
     "@actions/core": ^1.2.4
     "@actions/github": ^4.0.0
@@ -7826,10 +7826,10 @@ __metadata:
     uuid: ^8.3.2
     yarn-or-npm: ^3.0.1
   bin:
-    chroma: ./bin/register.js
-    chromatic: ./bin/register.js
-    chromatic-cli: ./bin/register.js
-  checksum: 58fc4514eef79505596b355517e14cce508a8413c98ab786b45997e81961cbd8c203c65d566212da2e7909fcb0f93acc4272eb126644a0b2e480ecf3691d8f4f
+    chroma: bin/register.js
+    chromatic: bin/register.js
+    chromatic-cli: bin/register.js
+  checksum: 9c0921a69603ba9e3a5bbef6694170f6f48bbe7b737f8ae8f163f56fb673e940a95b3552c0ddb5ec6f326959eac6a179906c69df5e50a91d76f8347af618b1fd
   languageName: node
   linkType: hard
 
