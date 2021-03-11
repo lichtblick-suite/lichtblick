@@ -2,6 +2,8 @@
   "name": "@foxglove-studio/app",
   "private": true,
   "scripts": {
+    "chromatic": "chromatic --project-token $CHROMATIC_PROJECT_TOKEN --build-script-name storybook:build --exit-once-uploaded",
+    "storybook:build": "build-storybook",
     "test": "NODE_OPTIONS='-r ts-node/register' jest",
     "test:watch": "NODE_OPTIONS='-r ts-node/register' jest --watch"
   },
@@ -132,6 +134,7 @@
     "@types/ws": "7.4.0",
     "@wojtekmaj/enzyme-adapter-react-17": "0.4.1",
     "argparse": "2.0.1",
+    "chromatic": "github:amacneil/chromatic-cli#detectyarn",
     "dom-to-image-more-scroll-fix": "2.9.0",
     "enzyme": "3.11.0",
     "fetch-mock": "9.11.0",

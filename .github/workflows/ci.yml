@@ -18,17 +18,20 @@ jobs:
           # Specify names so that the GitHub branch protection settings for
           # required checks don't need to change if we ever change the commands used.
           - name: lint
-            command: lint:nofix
+            command: yarn run lint:nofix
           - name: test
-            command: test --maxWorkers=100%
+            command: yarn run test --maxWorkers=100%
           - name: storybook
-            command: storybook:ci
+            command: yarn run storybook:ci
+          - name: chromatic
+            command: yarn workspace @foxglove-studio/app run chromatic
 
     name: ${{ matrix.config.name }}
 
     steps:
       - uses: actions/checkout@v2
         with:
+          fetch-depth: 0
           lfs: true
       - name: Configure Node.js
         uses: actions/setup-node@v2.1.5
@@ -50,8 +53,11 @@ jobs:
           service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
           export_default_credentials: true
       - run: yarn install --immutable
-      - run: yarn run ${{ matrix.config.command }}
+      - run: ${{ matrix.config.command }}
         env:
+          CHROMATIC_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          CHROMATIC_BRANCH: ${{ github.event.pull_request.head.ref || github.ref }}
+          CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           REG_SUIT_GITHUB_CLIENT_ID: ${{ secrets.REG_SUIT_GITHUB_CLIENT_ID }}
           REG_SUIT_HEAD_SHA: ${{ github.sha }}
           # `base.sha` works for pull request events, `before` works for pushes to main
