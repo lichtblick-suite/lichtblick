@@ -24,9 +24,11 @@ import {
   useMessagesByTopic,
 } from "@foxglove-studio/app/PanelAPI";
 import Flex from "@foxglove-studio/app/components/Flex";
-import { MessageHistoryItemsByPath } from "@foxglove-studio/app/components/MessageHistoryDEPRECATED";
 import { getTopicsFromPaths } from "@foxglove-studio/app/components/MessagePathSyntax/parseRosPath";
-import { useDecodeMessagePathsForMessagesByTopic } from "@foxglove-studio/app/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import {
+  MessageDataItemsByPath,
+  useDecodeMessagePathsForMessagesByTopic,
+} from "@foxglove-studio/app/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
@@ -101,7 +103,7 @@ type Props = {
 
 // messagePathItems contains the whole parsed message, and we don't need to cache all of that.
 // Instead, throw away everything but what we need (the timestamps).
-const getPlotDataByPath = (itemsByPath: MessageHistoryItemsByPath): PlotDataByPath => {
+const getPlotDataByPath = (itemsByPath: MessageDataItemsByPath): PlotDataByPath => {
   const ret: PlotDataByPath = {};
   Object.keys(itemsByPath).forEach((path) => {
     ret[path] = [itemsByPath[path].map(getTooltipItemForMessageHistoryItem)];

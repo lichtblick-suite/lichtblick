@@ -25,8 +25,10 @@ import TimeBasedChartTooltip from "./TimeBasedChartTooltip";
 import { clearHoverValue, setHoverValue } from "@foxglove-studio/app/actions/hoverValue";
 import Button from "@foxglove-studio/app/components/Button";
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
-import { MessageHistoryItem } from "@foxglove-studio/app/components/MessageHistoryDEPRECATED";
-import { MessagePathDataItem } from "@foxglove-studio/app/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import {
+  MessageAndData,
+  MessagePathDataItem,
+} from "@foxglove-studio/app/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import ChartComponent, {
   HoveredElement,
@@ -61,7 +63,7 @@ export type TooltipItem = {
   headerStamp: Time | null | undefined;
 };
 
-export const getTooltipItemForMessageHistoryItem = (item: MessageHistoryItem): TooltipItem => {
+export const getTooltipItemForMessageHistoryItem = (item: MessageAndData): TooltipItem => {
   const { message } = item.message;
   const headerStamp = isBobject(message)
     ? maybeGetBobjectHeaderStamp(message)

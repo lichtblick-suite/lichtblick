@@ -27,7 +27,7 @@ export type DataSourceInfo = {
   topics: ReadonlyArray<Topic>;
   datatypes: RosDatatypes;
   capabilities: string[];
-  startTime: Time | null | undefined; // Only `startTime`, since `endTime` can change rapidly when connected to a live system.
+  startTime?: Time; // Only `startTime`, since `endTime` can change rapidly when connected to a live system.
   playerId: string;
 };
 
@@ -43,8 +43,7 @@ export default function useDataSourceInfo(): DataSourceInfo {
   );
   const startTime = useMessagePipeline(
     useCallback(
-      ({ playerState: { activeData } }: MessagePipelineContext) =>
-        activeData && activeData.startTime,
+      ({ playerState: { activeData } }: MessagePipelineContext) => activeData?.startTime,
       [],
     ),
   );

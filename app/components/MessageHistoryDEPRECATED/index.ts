@@ -15,25 +15,11 @@ import React, { ReactElement, useMemo } from "react";
 import { Time } from "rosbag";
 
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import { getTopicsFromPaths } from "@foxglove-studio/app/components/MessagePathSyntax/parseRosPath";
-import {
-  MessagePathDataItem,
-  useDecodeMessagePathsForMessagesByTopic,
-} from "@foxglove-studio/app/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import { Message } from "@foxglove-studio/app/players/types";
-import { useShallowMemo } from "@foxglove-studio/app/util/hooks";
+import { MessageDataItemsByPath } from "@foxglove-studio/app/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import useMessagesByPath from "@foxglove-studio/app/components/MessagePathSyntax/useMessagesByPath";
 
-export type MessageHistoryItem = {
-  queriedData: MessagePathDataItem[];
-  message: Message;
-};
-
-export type MessageHistoryItemsByPath = Readonly<{
-  [key: string]: ReadonlyArray<MessageHistoryItem>;
-}>;
-
-export type MessageHistoryData = {
-  itemsByPath: MessageHistoryItemsByPath;
+type MessageHistoryData = {
+  itemsByPath: MessageDataItemsByPath;
   startTime: Time;
 };
 
@@ -59,23 +45,8 @@ export default React.memo<Props>(function MessageHistoryDEPRECATED({
   historySize,
 }: Props) {
   const { startTime } = PanelAPI.useDataSourceInfo();
-  const memoizedPaths: string[] = useShallowMemo<string[]>(paths);
-  const subscribeTopics = useMemo(() => getTopicsFromPaths(memoizedPaths), [memoizedPaths]);
-
-  const messagesByTopic = PanelAPI.useMessagesByTopic({
-    topics: subscribeTopics,
-    historySize: historySize || Infinity,
-  });
-
-  const decodeMessagePathsForMessagesByTopic = useDecodeMessagePathsForMessagesByTopic(
-    memoizedPaths,
-  );
-  const itemsByPath = useMemo(() => decodeMessagePathsForMessagesByTopic(messagesByTopic), [
-    decodeMessagePathsForMessagesByTopic,
-    messagesByTopic,
-  ]);
-
-  return useMemo(() => children({ itemsByPath, startTime: startTime || ZERO_TIME }), [
+  const itemsByPath = useMessagesByPath(paths, historySize);
+  return useMemo(() => children({ itemsByPath, startTime: startTime ?? ZERO_TIME }), [
     children,
     itemsByPath,
     startTime,

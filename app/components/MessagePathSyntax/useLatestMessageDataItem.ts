@@ -16,14 +16,12 @@ import { useCallback, useMemo } from "react";
 import parseRosPath from "./parseRosPath";
 import {
   useCachedGetMessagePathDataItems,
-  MessagePathDataItem,
+  MessageAndData,
 } from "./useCachedGetMessagePathDataItems";
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import { Message, MessageFormat } from "@foxglove-studio/app/players/types";
 import { useChangeDetector } from "@foxglove-studio/app/util/hooks";
-
-type MessageAndData = { message: Message; queriedData: MessagePathDataItem[] };
 
 // Get the last message for a path, but *after* applying filters. In other words, we'll keep the
 // last message that matched.
@@ -35,10 +33,7 @@ export function useLatestMessageDataItem(
   const topics = useMemo(() => (rosPath ? [rosPath.topicName] : []), [rosPath]);
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems([path]);
 
-  const addMessages: (
-    arg0: MessageAndData | null | undefined,
-    arg1: ReadonlyArray<Message>,
-  ) => MessageAndData | null | undefined = useCallback(
+  const addMessages = useCallback(
     (prevMessageAndData: MessageAndData | null | undefined, messages: ReadonlyArray<Message>) => {
       // Iterate in reverse so we can early-return and not process all messages.
       for (let i = messages.length - 1; i >= 0; --i) {

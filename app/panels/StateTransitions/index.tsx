@@ -13,18 +13,18 @@
 
 import { uniq } from "lodash";
 import * as React from "react";
+import { useMemo } from "react";
 import stringHash from "string-hash";
 import styled, { css } from "styled-components";
 import tinycolor from "tinycolor2";
 import { $Shape } from "utility-types";
 
 import helpContent from "./index.help.md";
+import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import Button from "@foxglove-studio/app/components/Button";
 import Dimensions from "@foxglove-studio/app/components/Dimensions";
-import MessageHistoryDEPRECATED, {
-  MessageHistoryData,
-} from "@foxglove-studio/app/components/MessageHistoryDEPRECATED";
 import MessagePathInput from "@foxglove-studio/app/components/MessagePathSyntax/MessagePathInput";
+import useMessagesByPath from "@foxglove-studio/app/components/MessagePathSyntax/useMessagesByPath";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import TimeBasedChart, {
@@ -127,7 +127,7 @@ const SInputDelete = styled.div`
   cursor: pointer;
 
   &:hover {
-    background ${inputColorBright};
+    background: ${inputColorBright};
   }
 
   ${SInputContainer}:hover & {
@@ -191,208 +191,203 @@ type Props = {
   isHovered: boolean;
 };
 
-class StateTransitions extends React.PureComponent<Props> {
-  static panelType = "StateTransitions";
-  static defaultConfig = { paths: [] };
+const StateTransitions = React.memo(function StateTransitions(props: Props) {
+  const { config, saveConfig, isHovered } = props;
 
-  _onInputChange = (value: string, index: number | null | undefined) => {
+  const onInputChange = (value: string, index: number | null | undefined) => {
     if (index == null) {
       throw new Error("index not set");
     }
-    const newPaths = this.props.config.paths.slice();
+    const newPaths = config.paths.slice();
     newPaths[index] = { ...newPaths[index], value: value.trim() };
-    this.props.saveConfig({ paths: newPaths });
+    saveConfig({ paths: newPaths });
   };
 
-  _onInputTimestampMethodChange = (value: TimestampMethod, index: number | null | undefined) => {
+  const onInputTimestampMethodChange = (
+    value: TimestampMethod,
+    index: number | null | undefined,
+  ) => {
     if (index == null) {
       throw new Error("index not set");
     }
-    const newPaths = this.props.config.paths.slice();
+    const newPaths = config.paths.slice();
     newPaths[index] = { ...newPaths[index], timestampMethod: value };
-    this.props.saveConfig({ paths: newPaths });
+    saveConfig({ paths: newPaths });
   };
 
-  render() {
-    const { paths } = this.props.config;
-    const onlyTopicsHeight = paths.length * 55;
-    const heightPerTopic = onlyTopicsHeight / paths.length;
-    const xAxisHeight = 30;
-    const height = Math.max(80, onlyTopicsHeight + xAxisHeight);
+  const { paths } = config;
+  const { startTime = { sec: 0, nsec: 0 } } = PanelAPI.useDataSourceInfo();
+  const itemsByPath = useMessagesByPath(useMemo(() => paths.map(({ value }) => value), [paths]));
 
-    return (
-      <SRoot>
-        <PanelToolbar floating helpContent={helpContent} />
-        <SAddButton show={this.props.isHovered}>
-          <Button
-            onClick={() =>
-              this.props.saveConfig({
-                paths: [...this.props.config.paths, { value: "", timestampMethod: "receiveTime" }],
-              })
-            }
-          >
-            add
-          </Button>
-        </SAddButton>
-        <MessageHistoryDEPRECATED paths={paths.map(({ value }) => value)}>
-          {({ itemsByPath, startTime }: MessageHistoryData) => {
-            const tooltips: any = [];
-            const data = {
-              yLabels: paths.map((_path, pathIndex) => pathIndex.toString()),
-              datasets: paths.map(({ value: path, timestampMethod }, pathIndex) => {
-                const dataItem = {
-                  borderWidth: 10,
-                  colors: [undefined], // First should be undefined to make sure we don't color in the bar before the change.
-                  data: [],
-                  fill: false,
-                  label: pathIndex.toString(),
-                  key: pathIndex.toString(),
-                  pointBackgroundColor: [],
-                  pointBorderColor: "transparent",
-                  pointHoverRadius: 3,
-                  pointRadius: 1.25,
-                  pointStyle: "circle",
-                  showLine: true,
-                  datalabels: {
-                    display: [],
-                  },
-                };
-                const baseColors = (getGlobalHooks() as any).perPanelHooks().StateTransitions
-                  .customStateTransitionColors[path] || [grey, ...lineColors];
-                let previousValue, previousTimestamp;
-                for (let index = 0; index < itemsByPath[path].length; index++) {
-                  const item = getTooltipItemForMessageHistoryItem(itemsByPath[path][index]);
-                  if (item.queriedData.length !== 1) {
-                    continue;
-                  }
+  const onlyTopicsHeight = paths.length * 55;
+  const heightPerTopic = onlyTopicsHeight / paths.length;
+  const xAxisHeight = 30;
+  const height = Math.max(80, onlyTopicsHeight + xAxisHeight);
 
-                  const timestamp =
-                    timestampMethod === "headerStamp" ? item.headerStamp : item.receiveTime;
-                  if (!timestamp) {
-                    continue;
-                  }
+  const tooltips: TimeBasedChartTooltipData[] = [];
+  const data = {
+    yLabels: paths.map((_path, pathIndex) => pathIndex.toString()),
+    datasets: paths.map(({ value: path, timestampMethod }, pathIndex) => {
+      const dataItem = {
+        borderWidth: 10,
+        colors: [undefined], // First should be undefined to make sure we don't color in the bar before the change.
+        data: [],
+        fill: false,
+        label: pathIndex.toString(),
+        key: pathIndex.toString(),
+        pointBackgroundColor: [] as string[],
+        pointBorderColor: "transparent",
+        pointHoverRadius: 3,
+        pointRadius: 1.25,
+        pointStyle: "circle",
+        showLine: true,
+        datalabels: {
+          display: [],
+        },
+      };
+      const baseColors = (getGlobalHooks() as any).perPanelHooks().StateTransitions
+        .customStateTransitionColors[path] || [grey, ...lineColors];
+      let previousValue, previousTimestamp;
+      for (let index = 0; index < itemsByPath[path].length; index++) {
+        const item = getTooltipItemForMessageHistoryItem(itemsByPath[path][index]);
+        if (item.queriedData.length !== 1) {
+          continue;
+        }
 
-                  const { constantName, value } = item.queriedData[0];
+        const timestamp = timestampMethod === "headerStamp" ? item.headerStamp : item.receiveTime;
+        if (!timestamp) {
+          continue;
+        }
 
-                  // Skip duplicates.
-                  if (
-                    previousTimestamp &&
-                    toSec(subtractTimes(previousTimestamp, timestamp)) === 0 &&
-                    previousValue === value
-                  ) {
-                    continue;
-                  }
-                  previousTimestamp = timestamp;
+        const { constantName, value } = item.queriedData[0];
 
-                  // Skip anything that cannot be cast to a number or is a string.
-                  if (Number.isNaN(value) && typeof value !== "string") {
-                    continue;
-                  }
+        // Skip duplicates.
+        if (
+          previousTimestamp &&
+          toSec(subtractTimes(previousTimestamp, timestamp)) === 0 &&
+          previousValue === value
+        ) {
+          continue;
+        }
+        previousTimestamp = timestamp;
 
-                  if (
-                    typeof value !== "number" &&
-                    typeof value !== "boolean" &&
-                    typeof value !== "string"
-                  ) {
-                    continue;
-                  }
+        // Skip anything that cannot be cast to a number or is a string.
+        if (Number.isNaN(value) && typeof value !== "string") {
+          continue;
+        }
 
-                  const valueForColor =
-                    typeof value === "string" ? stringHash(value) : Math.round(Number(value));
-                  const color =
-                    baseColors[positiveModulo(valueForColor, Object.values(baseColors).length)];
-                  // We add all points, colors, tooltips, etc to the *beginning* of the list, not the end. When
-                  // datalabels overlap we usually care about the later ones (further right). By putting those points
-                  // first in the list, we prioritize datalabels there when the library does its autoclipping.
-                  // @ts-expect-error not sure why darkColor is defined the way it is rather than memoize directly
-                  dataItem.pointBackgroundColor.unshift(darkColor(color));
-                  dataItem.colors.unshift(color);
-                  const label = constantName ? `${constantName} (${String(value)})` : String(value);
-                  const x = toSec(subtractTimes(timestamp, startTime));
-                  const y = pathIndex;
-                  const tooltip: TimeBasedChartTooltipData = {
-                    x,
-                    y,
-                    item,
-                    path,
-                    value,
-                    constantName,
-                    startTime,
-                  };
-                  tooltips.unshift(tooltip);
-                  const dataPoint: DataPoint = { x, y };
-                  const showDatalabel = previousValue === undefined || previousValue !== value;
-                  // Use "auto" here so that the datalabels library can clip datalabels if they overlap.
-                  (dataItem.datalabels.display as any).unshift(showDatalabel ? "auto" : false);
-                  if (showDatalabel) {
-                    dataPoint.label = label;
-                    dataPoint.labelColor = color;
-                  }
-                  (dataItem.data as any).unshift(dataPoint);
-                  previousValue = value;
-                }
-                return dataItem;
-              }),
-            };
+        if (typeof value !== "number" && typeof value !== "boolean" && typeof value !== "string") {
+          continue;
+        }
 
-            const marginRight = 20;
+        const valueForColor =
+          typeof value === "string" ? stringHash(value) : Math.round(Number(value));
+        const color = baseColors[positiveModulo(valueForColor, Object.values(baseColors).length)];
+        // We add all points, colors, tooltips, etc to the *beginning* of the list, not the end. When
+        // datalabels overlap we usually care about the later ones (further right). By putting those points
+        // first in the list, we prioritize datalabels there when the library does its autoclipping.
+        dataItem.pointBackgroundColor.unshift(darkColor(color));
+        dataItem.colors.unshift(color);
+        const label = constantName ? `${constantName} (${String(value)})` : String(value);
+        const x = toSec(subtractTimes(timestamp, startTime));
+        const y = pathIndex;
+        const tooltip: TimeBasedChartTooltipData = {
+          x,
+          y,
+          item,
+          path,
+          value,
+          constantName,
+          startTime,
+        };
+        tooltips.unshift(tooltip);
+        const dataPoint: DataPoint = { x, y };
+        const showDatalabel = previousValue === undefined || previousValue !== value;
+        // Use "auto" here so that the datalabels library can clip datalabels if they overlap.
+        (dataItem.datalabels.display as any).unshift(showDatalabel ? "auto" : false);
+        if (showDatalabel) {
+          dataPoint.label = label;
+          dataPoint.labelColor = color;
+        }
+        (dataItem.data as any).unshift(dataPoint);
+        previousValue = value;
+      }
+      return dataItem;
+    }),
+  };
 
-            return (
-              <SChartContainerOuter>
-                <Dimensions>
-                  {({ width }) => (
-                    <SChartContainerInner style={{ width: width - marginRight, height }}>
-                      <TimeBasedChart
-                        zoom
-                        isSynced
-                        width={width - marginRight}
-                        height={height}
-                        data={data}
-                        type="multicolorLine"
-                        xAxisIsPlaybackTime
-                        yAxes={yAxes}
-                        plugins={plugins}
-                        scaleOptions={scaleOptions as any}
-                        tooltips={tooltips}
-                      />
+  const marginRight = 20;
 
-                      {paths.map(({ value: path, timestampMethod }, index) => (
-                        <SInputContainer
-                          key={index}
-                          style={{ top: index * heightPerTopic }}
-                          shrink={index === 0 && this.props.isHovered}
-                        >
-                          <SInputDelete
-                            onClick={() => {
-                              const newPaths = this.props.config.paths.slice();
-                              newPaths.splice(index, 1);
-                              this.props.saveConfig({ paths: newPaths });
-                            }}
-                          >
-                            ✕
-                          </SInputDelete>
-                          <MessagePathInput
-                            path={path}
-                            onChange={this._onInputChange}
-                            index={index}
-                            autoSize
-                            validTypes={transitionableRosTypes}
-                            noMultiSlices
-                            timestampMethod={timestampMethod}
-                            onTimestampMethodChange={this._onInputTimestampMethodChange}
-                          />
-                        </SInputContainer>
-                      ))}
-                    </SChartContainerInner>
-                  )}
-                </Dimensions>
-              </SChartContainerOuter>
-            );
-          }}
-        </MessageHistoryDEPRECATED>
-      </SRoot>
-    );
-  }
-}
+  return (
+    <SRoot>
+      <PanelToolbar floating helpContent={helpContent} />
+      <SAddButton show={isHovered}>
+        <Button
+          onClick={() =>
+            saveConfig({
+              paths: [...config.paths, { value: "", timestampMethod: "receiveTime" }],
+            })
+          }
+        >
+          add
+        </Button>
+      </SAddButton>
+      <SChartContainerOuter>
+        <Dimensions>
+          {({ width }) => (
+            <SChartContainerInner style={{ width: width - marginRight, height }}>
+              <TimeBasedChart
+                zoom
+                isSynced
+                width={width - marginRight}
+                height={height}
+                data={data}
+                type="multicolorLine"
+                xAxisIsPlaybackTime
+                yAxes={yAxes}
+                plugins={plugins}
+                scaleOptions={scaleOptions as any}
+                tooltips={tooltips}
+              />
 
-export default Panel<StateTransitionConfig>(StateTransitions as any);
+              {paths.map(({ value: path, timestampMethod }, index) => (
+                <SInputContainer
+                  key={index}
+                  style={{ top: index * heightPerTopic }}
+                  shrink={index === 0 && isHovered}
+                >
+                  <SInputDelete
+                    onClick={() => {
+                      const newPaths = config.paths.slice();
+                      newPaths.splice(index, 1);
+                      saveConfig({ paths: newPaths });
+                    }}
+                  >
+                    ✕
+                  </SInputDelete>
+                  <MessagePathInput
+                    path={path}
+                    onChange={onInputChange}
+                    index={index}
+                    autoSize
+                    validTypes={transitionableRosTypes}
+                    noMultiSlices
+                    timestampMethod={timestampMethod}
+                    onTimestampMethodChange={onInputTimestampMethodChange}
+                  />
+                </SInputContainer>
+              ))}
+            </SChartContainerInner>
+          )}
+        </Dimensions>
+      </SChartContainerOuter>
+    </SRoot>
+  );
+});
+
+export default Panel<StateTransitionConfig>(
+  Object.assign(StateTransitions, {
+    panelType: "StateTransitions",
+    defaultConfig: { paths: [] },
+  }) as any,
+);

@@ -20,7 +20,7 @@ import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import { isTypicalFilterName } from "@foxglove-studio/app/components/MessagePathSyntax/isTypicalFilterName";
 import parseRosPath from "@foxglove-studio/app/components/MessagePathSyntax/parseRosPath";
 import useGlobalVariables, { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
-import { ReflectiveMessage, Topic } from "@foxglove-studio/app/players/types";
+import { Message, ReflectiveMessage, Topic } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { fieldNames, getField, getIndex } from "@foxglove-studio/app/util/binaryObjects";
 import { useChangeDetector, useDeepMemo, useShallowMemo } from "@foxglove-studio/app/util/hooks";
@@ -336,18 +336,24 @@ export function getMessagePathDataItems(
   return queriedData;
 }
 
-export const useDecodeMessagePathsForMessagesByTopic = (paths: string[]) => {
+export type MessageAndData = { message: Message; queriedData: MessagePathDataItem[] };
+
+export type MessageDataItemsByPath = {
+  readonly [key: string]: readonly MessageAndData[];
+};
+
+export function useDecodeMessagePathsForMessagesByTopic(
+  paths: string[],
+): (messagesByTopic: {
+  [topicName: string]: readonly ReflectiveMessage[];
+}) => MessageDataItemsByPath {
   const memoizedPaths = useShallowMemo<string[]>(paths);
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems(memoizedPaths);
   // Note: Let callers define their own memoization scheme for messagesByTopic. For regular playback
   // useMemo might be appropriate, but weakMemo will likely better for blocks.
   return useCallback(
-    (
-      messagesByTopic: Readonly<{
-        [topicName: string]: ReadonlyArray<ReflectiveMessage>;
-      }>,
-    ) => {
-      const obj: any = {};
+    (messagesByTopic) => {
+      const obj: { [path: string]: MessageAndData[] } = {};
       for (const path of memoizedPaths) {
         // Create an array for invalid paths, and valid paths with entries in messagesByTopic
         const rosPath = parseRosPath(path);
@@ -355,20 +361,23 @@ export const useDecodeMessagePathsForMessagesByTopic = (paths: string[]) => {
           obj[path] = [];
           continue;
         }
-        if (!messagesByTopic[rosPath.topicName]) {
+        const messages = messagesByTopic[rosPath.topicName];
+        if (!messages) {
           // For the playback pipeline messagesByTopic will always include an entry for every topic.
           // For the blocks, missing entries are semantically interesting, and should result in
           // missing (not empty) entries in the output so that information is communicated
           // downstream.
           continue;
         }
-        obj[path] = [];
 
-        for (const message of messagesByTopic[rosPath.topicName]) {
+        const messagesForThisPath: MessageAndData[] = [];
+        obj[path] = messagesForThisPath;
+
+        for (const message of messages) {
           // Add the item (if it exists) to the array.
           const queriedData = cachedGetMessagePathDataItems(path, message);
           if (queriedData) {
-            obj[path].push({ message, queriedData });
+            messagesForThisPath.push({ message: message as any, queriedData });
           }
         }
       }
@@ -376,4 +385,4 @@ export const useDecodeMessagePathsForMessagesByTopic = (paths: string[]) => {
     },
     [memoizedPaths, cachedGetMessagePathDataItems],
   );
-};
+}
