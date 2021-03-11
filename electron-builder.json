@@ -7,6 +7,7 @@
     "app": ".webpack",
     "buildResources": "resources"
   },
+  "artifactName": "${name}-${version}-${os}-${arch}.${ext}",
   "afterSign": "resources/notarize.ts",
   "linux": {
     "target": [
@@ -27,7 +28,6 @@
       "target": "default",
       "arch": ["x64", "arm64"]
     },
-    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
     "category": "public.app-category.developer-tools",
     "icon": "resources/icon/icon.icns",
     "entitlements": "resources/mac/entitlements.plist",
