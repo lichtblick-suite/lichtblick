@@ -24,6 +24,7 @@
     "lint": "TIMING=1 eslint --fix .",
     "lint:nofix": "TIMING=1 eslint .",
     "test": "yarn workspace @foxglove-studio/app test",
+    "test:debug": "yarn workspace @foxglove-studio/app test:debug",
     "test:watch": "yarn workspace @foxglove-studio/app test:watch",
     "test:integration": "jest --config jest.spectron.ts --rootDir test",
     "package:win": "yarn package --win",

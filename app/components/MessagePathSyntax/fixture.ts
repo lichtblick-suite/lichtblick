@@ -15,7 +15,7 @@ export const datatypes = {
   "some/datatype": { fields: [{ name: "index", type: "int32" }] },
 };
 
-export const messages = [
+export const messages = Object.freeze([
   {
     topic: "/some/topic",
     receiveTime: { sec: 100, nsec: 0 },
@@ -31,4 +31,4 @@ export const messages = [
     receiveTime: { sec: 102, nsec: 0 },
     message: { index: 2 },
   },
-];
+] as const);

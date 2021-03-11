@@ -5,6 +5,7 @@
     "chromatic": "chromatic --project-token $CHROMATIC_PROJECT_TOKEN --build-script-name storybook:build --exit-once-uploaded",
     "storybook:build": "build-storybook",
     "test": "NODE_OPTIONS='-r ts-node/register' jest",
+    "test:debug": "NODE_OPTIONS='-r ts-node/register --inspect-brk' jest",
     "test:watch": "NODE_OPTIONS='-r ts-node/register' jest --watch"
   },
   "dependencies": {
