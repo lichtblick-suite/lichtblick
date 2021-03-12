@@ -97,7 +97,6 @@
     "retext-smartypants": "4.0.0",
     "sass": "1.32.8",
     "sass-loader": "11.0.1",
-    "sharedworker-loader": "2.1.1",
     "spectron": "https://github.com/foxglove/spectron.git#commit=7f88e8fe148ee14b3efc14c3646c08c4ed0a6747",
     "stream-browserify": "3.0.0",
     "string-replace-loader": "3.0.1",

@@ -16,7 +16,7 @@ import { TimeUtil, Time } from "rosbag";
 
 // Filename of nodeTransformerWorker is recognized by the server, and given a special header to
 // ensure user-supplied code cannot make network requests.
-import NodeDataWorker from "sharedworker-loader?name=nodeTransformerWorker-[hash].[ext]!@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker"; // eslint-disable-line
+import NodeDataWorker from "worker-loader?worker=SharedWorker&filename=nodeTransformerWorker.[ext]!@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker"; // eslint-disable-line
 import {
   SetUserNodeDiagnostics,
   AddUserNodeLogs,
@@ -47,7 +47,7 @@ import {
   BobjectMessage,
 } from "@foxglove-studio/app/players/types";
 import signal from "@foxglove-studio/app/shared/signal";
-import UserNodePlayerWorker from "sharedworker-loader?name=nodeRuntimeWorker-[hash].[ext]!@foxglove-studio/app/players/UserNodePlayer/nodeRuntimeWorker"; // eslint-disable-line
+import UserNodePlayerWorker from "worker-loader?worker=SharedWorker&filename=nodeRuntimeWorker.[ext]!@foxglove-studio/app/players/UserNodePlayer/nodeRuntimeWorker"; // eslint-disable-line
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { UserNode, UserNodes } from "@foxglove-studio/app/types/panels";
 import Rpc from "@foxglove-studio/app/util/Rpc";

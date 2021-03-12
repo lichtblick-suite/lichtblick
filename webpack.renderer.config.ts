@@ -165,7 +165,7 @@ export function makeConfig(_: unknown, argv: WebpackArgv): Configuration {
               loader: "css-loader",
               options: {
                 modules: {
-                  localIdentName: "[path][name]-[sha512:hash:base32:5]--[local]",
+                  localIdentName: "[path][name]-[contenthash:base64:5]--[local]",
                 },
                 sourceMap: true,
               },
