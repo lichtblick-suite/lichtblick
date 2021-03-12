@@ -74,6 +74,7 @@
     "eslint": "7.21.0",
     "eslint-config-prettier": "8.1.0",
     "eslint-import-resolver-webpack": "0.13.0",
+    "eslint-plugin-file-progress": "1.1.1",
     "eslint-plugin-header": "github:amacneil/eslint-plugin-header#notemplate",
     "eslint-plugin-import": "2.22.1",
     "eslint-plugin-prettier": "3.3.1",

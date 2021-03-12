@@ -3,11 +3,15 @@ env:
   es6: true
   node: true
 
+ignorePatterns:
+  - storybook-static
+
 plugins:
   - react
   - react-hooks
   - "@typescript-eslint"
   - header
+  - file-progress
 
 extends:
   - eslint:recommended
@@ -34,6 +38,7 @@ settings:
   import/internal-regex: "^@foxglove-studio/"
 
 rules:
+  file-progress/activate: 1
   # https://eslint.org/docs/rules/eqeqeq
   # Use smart mode until we change "T | null | undefined" to "T | undefined"
   # For user input, we could make an isNullish function or leverage schema validation

@@ -7967,6 +7967,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cli-spinners@npm:^2.5.0":
+  version: 2.5.0
+  resolution: "cli-spinners@npm:2.5.0"
+  checksum: a275c3588179de0a07579742e1fedb508caa6840516761dac1f8544886d4aa025fc2d536323ac9c325624349203010e149ca8b0028be239fc45ed3a1c1252677
+  languageName: node
+  linkType: hard
+
 "cli-table3@npm:0.6.0":
   version: 0.6.0
   resolution: "cli-table3@npm:0.6.0"
@@ -8069,6 +8076,13 @@ __metadata:
   dependencies:
     mimic-response: ^1.0.0
   checksum: 71832f9219f2682b0915bdbc0dd187ba8e63d16b0af5342b44f97b34afe9400a1f528a253dd2f70a8dd8b23bfa4c4e106928fcc520fa5899d769af95e4cce53c
+  languageName: node
+  linkType: hard
+
+"clone@npm:^1.0.2":
+  version: 1.0.4
+  resolution: "clone@npm:1.0.4"
+  checksum: aaaa58f9906002d9c07630682536cb00581ee02d7a76cfa8573ad59784add4d5d6d4afe894c21899b974044f153f8c5c6419ffc8b1cdde61bf104ad52e3a185d
   languageName: node
   linkType: hard
 
@@ -9364,6 +9378,15 @@ __metadata:
     execa: ^1.0.0
     ip-regex: ^2.1.0
   checksum: 5d92439d573a261d850f6205fcc6541ec57378dec2032f3c7d0a18c7f9222f88f7ff4997bfff17607850b8fce6cdf3fb1c231bc43bf5e2bd6bbce3b733082add
+  languageName: node
+  linkType: hard
+
+"defaults@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "defaults@npm:1.0.3"
+  dependencies:
+    clone: ^1.0.2
+  checksum: 974f63dd0acb79d14e94ac0f2ea69a880ab2a6e4b341bb9bdc2409b4091b928abe2709a4e140528948d02f29c286efdef22851d1dc972636eed2ce8e1c5b7465
   languageName: node
   linkType: hard
 
@@ -10854,6 +10877,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"eslint-plugin-file-progress@npm:1.1.1":
+  version: 1.1.1
+  resolution: "eslint-plugin-file-progress@npm:1.1.1"
+  dependencies:
+    chalk: ^4.1.0
+    ora: ^5.1.0
+  peerDependencies:
+    eslint: ^7.0.0
+  checksum: 3fcce784956f2974c22ec69f93fdf6024ce7c6a0e9b5922ed69de85f5143558abe30a01843817f0caac4690261caef309661addbf427c9de1a4286af4e86bc53
+  languageName: node
+  linkType: hard
+
 "eslint-plugin-header@github:amacneil/eslint-plugin-header#notemplate":
   version: 3.1.1
   resolution: "eslint-plugin-header@https://github.com/amacneil/eslint-plugin-header.git#commit=073d5559b1d83e4e6d3a390d37eb6ad392b21ba0"
@@ -12006,6 +12041,7 @@ __metadata:
     eslint: 7.21.0
     eslint-config-prettier: 8.1.0
     eslint-import-resolver-webpack: 0.13.0
+    eslint-plugin-file-progress: 1.1.1
     eslint-plugin-header: "github:amacneil/eslint-plugin-header#notemplate"
     eslint-plugin-import: 2.22.1
     eslint-plugin-prettier: 3.3.1
@@ -14264,6 +14300,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"is-interactive@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "is-interactive@npm:1.0.0"
+  checksum: d79b435e5134ccd60dfe035117b1cddd5c5100e90b2d33428adfe1667e26f0114cc1bc7b3ff84a1b107de8ef27f155e3ecc3bb08c0e502a15c66300b4a45d9e5
+  languageName: node
+  linkType: hard
+
 "is-map@npm:^2.0.2":
   version: 2.0.2
   resolution: "is-map@npm:2.0.2"
@@ -16120,6 +16163,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"log-symbols@npm:^4.0.0":
+  version: 4.0.0
+  resolution: "log-symbols@npm:4.0.0"
+  dependencies:
+    chalk: ^4.0.0
+  checksum: 2cbdb0427d1853f2bd36645bff42aaca200902284f28aadacb3c0fa4c8c43fe6bfb71b5d61ab08b67063d066d7c55b8bf5fbb43b03e4a150dbcdd643e9cd1dbf
+  languageName: node
+  linkType: hard
+
 "log-update@npm:^2.3.0":
   version: 2.3.0
   resolution: "log-update@npm:2.3.0"
@@ -17809,6 +17861,22 @@ __metadata:
     type-check: ^0.4.0
     word-wrap: ^1.2.3
   checksum: bdf5683f986d00e173e6034837b7b6a9e68c7e1a37d7684b240adf1758db9076cfb04c9f64be29327881bb06c5017afb8b65012c5f02d07b180e9f6f42595ffd
+  languageName: node
+  linkType: hard
+
+"ora@npm:^5.1.0":
+  version: 5.3.0
+  resolution: "ora@npm:5.3.0"
+  dependencies:
+    bl: ^4.0.3
+    chalk: ^4.1.0
+    cli-cursor: ^3.1.0
+    cli-spinners: ^2.5.0
+    is-interactive: ^1.0.0
+    log-symbols: ^4.0.0
+    strip-ansi: ^6.0.0
+    wcwidth: ^1.0.1
+  checksum: 892cfd7a893bce2ba1203369abb8f197fc8e54c780a9a7398c021cfa202f18d15d64b1f1eca1d330eec52396ee7cdd9f7e97a7e6a004d6f943c4de646f80fd73
   languageName: node
   linkType: hard
 
@@ -24712,6 +24780,15 @@ typescript@4.2.2:
   dependencies:
     minimalistic-assert: ^1.0.0
   checksum: 5916a49cb25fc8c70e4e7eb2d01955061132687a79879292fbdee632952f368c12bc5a641d0404794dbc0e3563f8b6e74dda04467b3e96be8bcd0b919bd47a8c
+  languageName: node
+  linkType: hard
+
+"wcwidth@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "wcwidth@npm:1.0.1"
+  dependencies:
+    defaults: ^1.0.3
+  checksum: abf8ba432dd19a95af63895de6af932900a9451e175745551aeca0fd2d46604bc72ff80aa83adc3f67fb8389191329340e2864aefcf20655ffe91f0dbee5d953
   languageName: node
   linkType: hard
 
