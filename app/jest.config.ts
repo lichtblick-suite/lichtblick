@@ -25,4 +25,5 @@ export default {
     "\\.(glb|md|png)$": "<rootDir>/test/mocks/fileMock.ts",
     "\\.(css|scss)$": "<rootDir>/test/mocks/styleMock.ts",
   },
+  testRunner: "jest-circus/runner",
 };

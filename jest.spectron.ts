@@ -10,4 +10,5 @@ export default {
     },
   },
   globalSetup: "<rootDir>/globalSetup.ts",
+  testRunner: "jest-circus/runner",
 };
