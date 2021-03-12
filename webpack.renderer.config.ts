@@ -2,15 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import rehypePrism from "@mapbox/rehype-prism";
 import ReactRefreshPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import CircularDependencyPlugin from "circular-dependency-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
 import path from "path";
-import retext from "retext";
-import retextSmartypants from "retext-smartypants";
 import webpack, {
   Configuration,
   EnvironmentPlugin,
@@ -20,20 +17,6 @@ import webpack, {
 
 import uncheckedIndexAccessFiles from "./UncheckedIndexAccess.json";
 import { WebpackArgv } from "./WebpackArgv";
-
-declare const visit: any;
-
-// Enable smart quotes:
-// https://github.com/mdx-js/mdx/blob/ad58be384c07672dc415b3d9d9f45dcebbfd2eb8/docs/advanced/retext-plugins.md
-const smartypantsProcessor = retext().use(retextSmartypants);
-function remarkSmartypants() {
-  function transformer(tree: unknown) {
-    visit(tree, "text", (node: { value: string }) => {
-      node.value = String(smartypantsProcessor.processSync(node.value));
-    });
-  }
-  return transformer;
-}
 
 // Common configuration shared by Storybook and the main Webpack build
 export function makeConfig(_: unknown, argv: WebpackArgv): Configuration {
@@ -115,16 +98,6 @@ export function makeConfig(_: unknown, argv: WebpackArgv): Configuration {
               },
             },
           ],
-        },
-        {
-          test: /\.mdx$/,
-          use: {
-            loader: "@mdx-js/loader",
-            options: {
-              hastPlugins: [rehypePrism],
-              mdPlugins: [remarkSmartypants],
-            },
-          },
         },
         {
           // "?raw" imports are used to load stringified typescript in Node Playground
