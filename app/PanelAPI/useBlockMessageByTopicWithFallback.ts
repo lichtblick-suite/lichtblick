@@ -17,25 +17,6 @@ import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import { blockMessageCache } from "@foxglove-studio/app/PanelAPI/useBlocksByTopic";
 import { useChangeDetector } from "@foxglove-studio/app/util/hooks";
 
-type DiagnosticMsgs$KeyValue = {
-  key: string;
-  value: string;
-};
-
-export type CruiseMsgs$Metadata = {
-  git_hash: string;
-  map_hash: string;
-  hostname: string;
-  params: string;
-  env_vars: string;
-  city_name: string;
-  param_modules_on_disk: DiagnosticMsgs$KeyValue[];
-  semantic_db_version_live: string;
-};
-export type CruiseMsgs$DriveId = {
-  data: string;
-};
-
 function usePlaybackMessage<T>(topic: string): T | null | undefined {
   // DANGER! We circumvent PanelAPI.useMessageReducer's system of keeping state here.
   // We should rarely do that, since it's error-prone to implement your own

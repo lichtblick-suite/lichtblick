@@ -43,10 +43,10 @@ describe("isEmail", () => {
     expect(isEmail("")).toBe(false);
     expect(isEmail("@")).toBe(false);
     expect(isEmail("a@b")).toBe(false);
-    expect(isEmail("some.one@cruise.com")).toBe(true);
-    expect(isEmail("cruise.com@cruise.com")).toBe(true);
+    expect(isEmail("some.one@example.com")).toBe(true);
+    expect(isEmail("example.com@example.com")).toBe(true);
     expect(isEmail("a@b.com")).toBe(true);
-    expect(isEmail("some_one@cruise.com")).toBe(true);
+    expect(isEmail("some_one@example.com")).toBe(true);
   });
 });
 

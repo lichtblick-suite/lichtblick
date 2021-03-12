@@ -28,7 +28,6 @@ export const LAYOUT_URL_QUERY_KEY = "layout-url";
 export const PATCH_QUERY_KEY = "patch";
 export const OLD_GLOBAL_VARIABLES_QUERY_KEY = "global-data";
 export const GLOBAL_VARIABLES_QUERY_KEY = "global-variables";
-export const TITLE_QUERY_KEY = "title";
 export const TEST_EVERYTHING_LAYOUT_QUERY_VAL = "_integration-test-everything-layout";
 export const FRAMELESS = "frameless";
 

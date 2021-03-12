@@ -27,7 +27,6 @@ import zlib from "zlib";
 import Logger from "./Logger";
 import { isInIFrame } from "./iframeUtils";
 import { PanelsState } from "@foxglove-studio/app/reducers/panels";
-import { getLayoutNameAndVersion } from "@foxglove-studio/app/shared/layout";
 import { TabLocation, TabPanelConfig } from "@foxglove-studio/app/types/layouts";
 import {
   ConfigsPayload,
@@ -43,7 +42,6 @@ import {
   LAYOUT_QUERY_KEY,
   LAYOUT_URL_QUERY_KEY,
   PATCH_QUERY_KEY,
-  TITLE_QUERY_KEY,
 } from "@foxglove-studio/app/util/globalConstants";
 
 const jsondiffpatch = JsonDiffCreate({});
@@ -581,36 +579,6 @@ export function getShouldProcessPatch() {
 export function hasEditedLayout() {
   const params = new URLSearchParams(window.location.search);
   return params.has(PATCH_QUERY_KEY);
-}
-
-// There are 2 cases for updating the document title based on layout:
-// - Update when initializing redux store (can read layout name from URL or localStorage)
-// - After URL is updated.
-export function updateDocumentTitle({
-  search,
-  layoutName,
-}: {
-  search?: string;
-  layoutName?: string;
-}) {
-  if (!search && !layoutName) {
-    return;
-  }
-  const params = new URLSearchParams(search || "");
-  const title = params.get(TITLE_QUERY_KEY);
-
-  // Update directly if title is present at URL.
-  if (title) {
-    document.title = `${title} | ${APP_NAME}`;
-    return;
-  }
-  const fullLayoutName = layoutName || params.get(LAYOUT_QUERY_KEY);
-  const { name } = getLayoutNameAndVersion(fullLayoutName);
-  if (name) {
-    document.title = `${name.split("/").pop()} | ${APP_NAME}`;
-    return;
-  }
-  document.title = `${APP_NAME}`;
 }
 
 export function setDefaultFields(defaultLayout: PanelsState, layout: PanelsState): PanelsState {

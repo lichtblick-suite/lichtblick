@@ -25,8 +25,6 @@ interface TestStore extends Store {
 }
 
 let store: Store | undefined = undefined;
-// We have to wrap the actual creation of the global store in a function so that we only run it
-// after Cruise/open-source specific "hooks" have been initialized.
 function getGlobalStore(): Store {
   if (!store) {
     store = configureStore(createRootReducer(history), [

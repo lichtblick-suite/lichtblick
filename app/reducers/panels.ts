@@ -80,7 +80,6 @@ import {
   createAddUpdates,
   removePanelFromTabPanel,
   stringifyParams,
-  updateDocumentTitle,
 } from "@foxglove-studio/app/util/layout";
 
 const storage = new Storage();
@@ -136,7 +135,6 @@ export function getInitialPersistedStateAndMaybeUpdateLocalStorageAndURL(
     if (oldFetchedLayoutState) {
       newPersistedState.fetchedLayout = oldFetchedLayoutState;
     }
-    let fetchedLayoutName;
 
     // 1. Get layout from localStorage and update URL if there are no layout params and the fetchedLayout is not from layout-url param.
     if (
@@ -159,7 +157,6 @@ export function getInitialPersistedStateAndMaybeUpdateLocalStorageAndURL(
       } else {
         // Read layout name and version from fetchedLayout.
         const { name, releasedVersion, fileSuffix } = fetchedLayoutDataFromLocalStorage;
-        fetchedLayoutName = name;
         let layoutParam = name;
         if (fileSuffix) {
           layoutParam = `${name}@${fileSuffix}`;
@@ -175,10 +172,6 @@ export function getInitialPersistedStateAndMaybeUpdateLocalStorageAndURL(
       // Store the current search in localStorage. It'll get updated later when user makes layout edits.
       newPersistedState.search = newSearch;
     }
-    updateDocumentTitle({
-      layoutName: fetchedLayoutName,
-      search: newPersistedState.search || currentSearch,
-    });
 
     // 2. Set fetchedLayout state if it's available in localStorage.
     if (fetchedLayoutDataFromLocalStorage) {
