@@ -22,6 +22,7 @@ import installExtension, {
   REDUX_DEVTOOLS,
 } from "electron-devtools-installer";
 import { autoUpdater } from "electron-updater";
+import fs from "fs";
 import path from "path";
 
 import packageJson from "../package.json";
@@ -41,8 +42,17 @@ if (require("electron-squirrel-startup")) {
 }
 
 // files our app should open - either from user double-click on a supported fileAssociation
-// or command line arguments
-const filesToOpen: string[] = process.argv.slice(1);
+// or command line arguments. For now limit to .bag file arguments
+// Note: in dev we launch electron with `electron .webpack` so we need to filter out things that are not files
+const filesToOpen: string[] = process.argv.slice(1).filter((item) => {
+  // Anything that isn't a file or directory will throw, we filter those out too
+  try {
+    return fs.statSync(item).isFile();
+  } catch (err) {
+    // ignore
+  }
+  return false;
+});
 app.on("open-file", (_ev, filePath) => {
   filesToOpen.push(filePath);
 });
