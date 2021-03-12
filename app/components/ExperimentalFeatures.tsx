@@ -195,9 +195,9 @@ export function ExperimentalFeaturesModal(props: {
               browser’s{" "}
               <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage">
                 local storage
-              </a>{" "}
-              for <em>{window.location.host}</em>. They will <em>not</em> be associated with your
-              layout, user account, or persisted in any backend.
+              </a>
+              . They will <em>not</em> be associated with your layout, user account, or persisted in
+              any backend.
             </p>
             {Object.keys(list).length === 0 && (
               <p>
@@ -237,9 +237,7 @@ export function ExperimentalFeaturesModal(props: {
                     options={[
                       {
                         id: "default",
-                        label: `Default for ${window.location.host} (${
-                          feature[getDefaultKey()] ? "on" : "off"
-                        })`,
+                        label: `Default (${feature[getDefaultKey()] ? "on" : "off"})`,
                       },
                       { id: "alwaysOn", label: "Always on" },
                       { id: "alwaysOff", label: "Always off" },
