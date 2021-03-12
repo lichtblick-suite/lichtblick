@@ -9,6 +9,7 @@
   },
   "artifactName": "${name}-${version}-${os}-${arch}.${ext}",
   "afterSign": "resources/notarize.ts",
+  "icon": "resources/icon/icon.icns",
   "linux": {
     "target": [
       {
@@ -16,12 +17,25 @@
         "arch": ["x64", "arm64"]
       }
     ],
-    "icon": "resources/icon/icon.png"
+    "fileAssociations": [
+      {
+        "ext": "bag",
+        "name": "ROS Bag File",
+        "mimeType": "application/octet-stream"
+      }
+    ]
   },
   "win": {
     "target": ["nsis", "appx"],
     "rfc3161TimeStampServer": "http://timestamp.comodoca.com",
-    "icon": "resources/icon/icon.png"
+    "icon": "resources/icon/icon.png",
+    "fileAssociations": [
+      {
+        "ext": "bag",
+        "name": "ROS Bag File",
+        "icon": "resources/icon/BagIcon.ico"
+      }
+    ]
   },
   "mac": {
     "target": {
@@ -31,7 +45,30 @@
     "category": "public.app-category.developer-tools",
     "icon": "resources/icon/icon.icns",
     "entitlements": "resources/mac/entitlements.plist",
-    "entitlementsInherit": "resources/mac/entitlements.plist"
+    "entitlementsInherit": "resources/mac/entitlements.plist",
+    "extraResources": [{ "from": "resources/icon/BagIcon.png", "to": "BagIcon.png" }],
+    "extendInfo": {
+      "CFBundleDocumentTypes": [
+        {
+          "CFBundleTypeExtensions": ["bag"],
+          "CFBundleTypeIconFile": "BagIcon",
+          "CFBundleTypeName": "ROS Bag File",
+          "CFBundleTypeRole": "Viewer",
+          "LSHandlerRank": "Default",
+          "CFBundleTypeIconSystemGenerated": 1,
+          "LSItemContentTypes": ["org.ros.bag"]
+        }
+      ],
+      "UTImportedTypeDeclarations": [
+        {
+          "UTTypeConformsTo": ["public.data"],
+          "UTTypeDescription": "ROS Bag File",
+          "UTTypeIcons": { "UTTypeIconText": "bag" },
+          "UTTypeIdentifier": "org.ros.bag",
+          "UTTypeTagSpecification": { "public.filename-extension": "bag" }
+        }
+      ]
+    }
   },
   "appx": {
     "applicationId": "FoxgloveStudio",

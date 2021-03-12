@@ -14,6 +14,16 @@ if (typeof process.env.SENTRY_DSN === "string") {
 type IpcListener = (ev: unknown, ...args: unknown[]) => void;
 const menuClickListeners = new Map<string, IpcListener>();
 
+window.addEventListener("DOMContentLoaded", () => {
+  // This input element receives generated dom events from main thread to inject File objects
+  // See the comments in desktop/index.ts regarding this feature
+  const input = document.createElement("input");
+  input.setAttribute("hidden", "true");
+  input.setAttribute("type", "file");
+  input.setAttribute("id", "electron-open-file-input");
+  document.body.appendChild(input);
+});
+
 const ctx: OsContext = {
   platform: process.platform,
   handleToolbarDoubleClick() {

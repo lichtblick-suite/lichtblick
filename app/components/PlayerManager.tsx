@@ -32,6 +32,7 @@ import {
   getLocalBagDescriptor,
   getRemoteBagDescriptor,
 } from "@foxglove-studio/app/dataProviders/standardDataProviderDescriptors";
+import useElectronFilesToOpen from "@foxglove-studio/app/hooks/useElectronFilesToOpen";
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { usePrompt } from "@foxglove-studio/app/hooks/usePrompt";
 import useUserNodes from "@foxglove-studio/app/hooks/useUserNodes";
@@ -238,6 +239,18 @@ function PlayerManager({
     },
     [buildPlayer, prompt],
   );
+
+  // files the main thread told us to open
+  const filesToOpen = useElectronFilesToOpen();
+  useEffect(() => {
+    const file = filesToOpen?.[0];
+    if (!file) {
+      return;
+    }
+
+    usedFiles.current = [file];
+    buildPlayer(buildPlayerFromFiles(usedFiles.current));
+  }, [buildPlayer, filesToOpen]);
 
   const value: PlayerSelection = {
     selectSource,
