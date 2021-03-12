@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { groupBy, sortBy, mapValues } from "lodash";
+import { groupBy, sortBy } from "lodash";
 import * as React from "react";
 import styled from "styled-components";
 
@@ -20,7 +20,6 @@ import Button from "@foxglove-studio/app/components/Button";
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import Flex from "@foxglove-studio/app/components/Flex";
 import { Item } from "@foxglove-studio/app/components/Menu";
-import MessageHistoryDEPRECATED from "@foxglove-studio/app/components/MessageHistoryDEPRECATED";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
@@ -88,6 +87,30 @@ function getPublisherGroup({ advertiser }: AdvertisePayload): string {
   advertiser.type as never;
   return `<unknown: ${advertiser.type} ${advertiser.name}>`;
 }
+
+type RecordedData = {
+  readonly topics: Topic[];
+  readonly frame: {
+    [key: string]: readonly Message[];
+  };
+};
+
+const HistoryRecorder = React.memo(function HistoryRecorder({
+  topicsByName,
+  recordingTopics,
+  recordedData,
+}: {
+  topicsByName: { [topic: string]: Topic };
+  recordingTopics: string[];
+  recordedData: React.MutableRefObject<RecordedData | undefined>;
+}) {
+  const frame = PanelAPI.useMessagesByTopic({ topics: recordingTopics, historySize: 1 });
+  recordedData.current = {
+    topics: filterMap(recordingTopics, (name) => topicsByName[name]),
+    frame,
+  };
+  return null;
+});
 
 // Display webviz internal state for debugging and viewing topic dependencies.
 function Internals(): React.ReactNode {
@@ -157,16 +180,7 @@ function Internals(): React.ReactNode {
 
   const [recordGroup, setRecordGroup] = React.useState<string>(RECORD_ALL);
   const [recordingTopics, setRecordingTopics] = React.useState<string[] | null | undefined>();
-  const recordedData = React.useRef<
-    | {
-        topics: Topic[];
-        frame: {
-          [key: string]: Message[];
-        };
-      }
-    | null
-    | undefined
-  >();
+  const recordedData = React.useRef<RecordedData | undefined>();
 
   function onRecordClick() {
     if (recordingTopics) {
@@ -182,28 +196,6 @@ function Internals(): React.ReactNode {
   function downloadJSON() {
     downloadTextFile(JSON.stringify(recordedData.current) || "{}", "fixture.json");
   }
-
-  const historyRecorder = React.useMemo(() => {
-    if (!recordingTopics) {
-      return false;
-    }
-    return (
-      <MessageHistoryDEPRECATED paths={recordingTopics} historySize={1}>
-        {({ itemsByPath }) => {
-          const frame = mapValues(itemsByPath, (items) => items.map(({ message }) => message));
-          recordedData.current = {
-            topics: filterMap(Object.keys(itemsByPath), (topic) =>
-              itemsByPath[topic] && itemsByPath[topic].length
-                ? { name: topic, datatype: topicsByName[topic].datatype }
-                : null,
-            ),
-            frame,
-          };
-          return <></>;
-        }}
-      </MessageHistoryDEPRECATED>
-    );
-  }, [recordingTopics, topicsByName]);
 
   return (
     <Container>
@@ -237,7 +229,13 @@ function Internals(): React.ReactNode {
             Download JSON
           </Button>
         )}
-        {historyRecorder}
+        {recordingTopics && (
+          <HistoryRecorder
+            topicsByName={topicsByName}
+            recordingTopics={recordingTopics}
+            recordedData={recordedData}
+          />
+        )}
       </Flex>
       <Flex row>
         <section data-test="internals-subscriptions">

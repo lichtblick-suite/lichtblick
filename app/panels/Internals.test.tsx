@@ -12,17 +12,21 @@
 //   You may not use this file except in compliance with the License.
 
 import { mount } from "enzyme";
-import React from "react";
 
 import { MessagePipelineConsumer } from "../components/MessagePipeline";
 import Internals from "./Internals";
-import MessageHistoryDEPRECATED from "@foxglove-studio/app/components/MessageHistoryDEPRECATED";
+import { useMessagesByTopic } from "@foxglove-studio/app/PanelAPI";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 import { downloadTextFile, objectValues } from "@foxglove-studio/app/util";
 
 const mockDownloadTextFile: any = downloadTextFile;
 (objectValues as any).mockImplementation(Object.values); // broken by module mock
 jest.mock("@foxglove-studio/app/util");
+
+function Subscriber({ topic }: { topic: string }) {
+  useMessagesByTopic({ topics: [topic], historySize: 1 });
+  return null;
+}
 
 describe("<Internals>", () => {
   it("displays panel subscribers", () => {
@@ -43,7 +47,7 @@ describe("<Internals>", () => {
     wrapper.unmount();
 
     const anotherContextFn = jest.fn().mockReturnValue(null);
-    const wrapperWithDeprecatedMessageHistory = mount(
+    const wrapperWithSubscriber = mount(
       <PanelSetup
         fixture={{
           topics: [{ name: "/foo", datatype: "foo_msgs/Foo" }],
@@ -52,17 +56,17 @@ describe("<Internals>", () => {
       >
         <Internals />
         <MessagePipelineConsumer>{anotherContextFn}</MessagePipelineConsumer>
-        <MessageHistoryDEPRECATED paths={["/foo"]}>{() => <></>}</MessageHistoryDEPRECATED>
+        <Subscriber topic="/foo" />
       </PanelSetup>,
     );
     expect(anotherContextFn.mock.calls).toEqual([
       [expect.objectContaining({ subscriptions: [] })],
       [expect.objectContaining({ subscriptions: [expect.objectContaining({ topic: "/foo" })] })],
     ]);
-    expect(
-      wrapperWithDeprecatedMessageHistory.find("[data-test='internals-subscriptions']").text(),
-    ).toContain("/foo");
-    wrapperWithDeprecatedMessageHistory.unmount();
+    expect(wrapperWithSubscriber.find("[data-test='internals-subscriptions']").text()).toContain(
+      "/foo",
+    );
+    wrapperWithSubscriber.unmount();
   });
 
   it("records data and exports JSON fixture", async () => {
@@ -74,7 +78,7 @@ describe("<Internals>", () => {
         }}
       >
         <Internals />
-        <MessageHistoryDEPRECATED paths={["/foo"]}>{() => <></>}</MessageHistoryDEPRECATED>
+        <Subscriber topic="/foo" />
       </PanelSetup>,
     );
 
@@ -90,7 +94,13 @@ describe("<Internals>", () => {
 
     downloadButton.simulate("click");
     expect(mockDownloadTextFile.mock.calls).toEqual([
-      [JSON.stringify({ topics: [], frame: { "/foo": [] } }), "fixture.json"],
+      [
+        JSON.stringify({
+          topics: [{ name: "/foo", datatype: "foo_msgs/Foo" }],
+          frame: { "/foo": [] },
+        }),
+        "fixture.json",
+      ],
     ]);
     mockDownloadTextFile.mockClear();
 

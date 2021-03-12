@@ -285,7 +285,7 @@ export default class RosbridgePlayer implements Player {
     this._parsedTopics = new Set(parsedSubscriptions.map(({ topic }) => topic));
 
     // See what topics we actually can subscribe to.
-    const availableTopicsByTopicName = getTopicsByTopicName(this._providerTopics);
+    const availableTopicsByTopicName = getTopicsByTopicName(this._providerTopics ?? []);
     const topicNames = subscriptions
       .map(({ topic }) => topic)
       .filter((topicName) => availableTopicsByTopicName[topicName]);

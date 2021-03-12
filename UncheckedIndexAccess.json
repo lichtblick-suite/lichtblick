@@ -11,7 +11,6 @@
   "app/components/Icon.tsx",
   "app/components/KeyListener.tsx",
   "app/components/Menu/Item.tsx",
-  "app/components/MessageHistoryDEPRECATED/index.test.tsx",
   "app/components/MessagePathSyntax/MessagePathInput.tsx",
   "app/components/MessagePathSyntax/messagePathsForDatatype.test.ts",
   "app/components/MessagePathSyntax/messagePathsForDatatype.ts",

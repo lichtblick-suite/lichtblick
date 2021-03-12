@@ -46,16 +46,16 @@ export function getTopicPrefixes(topics: string[]): string[] {
     : [];
 }
 
-export const getTopicsByTopicName = createSelector<any, any, any, any>(
-  (topics: Topic[]) => topics,
+export const getTopicsByTopicName = createSelector(
+  (topics: readonly Topic[]) => topics,
   (
-    topics: Topic[],
+    topics: readonly Topic[],
   ): {
     [key: string]: Topic;
   } => {
     return keyBy(topics, ({ name }) => name);
   },
-) as FixedParametricSelector<any, any, any>;
+);
 
 // Only exported for tests
 export const constantsByDatatype = createSelector<any, any, any, any>(

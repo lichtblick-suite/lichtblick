@@ -148,7 +148,6 @@ overrides:
       - "app/components/KeyboardShortcut.tsx"
       - "app/components/Menu/ExpandableMenu.tsx"
       - "app/components/Menu/Item.tsx"
-      - "app/components/MessageHistoryDEPRECATED/index.ts"
       - "app/components/MessageOrderControls.tsx"
       - "app/components/MessagePathSyntax/MessagePathInput.tsx"
       - "app/components/MessagePathSyntax/messagePathsForDatatype.ts"
