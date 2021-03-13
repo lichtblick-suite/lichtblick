@@ -24,7 +24,7 @@ import {
 
 import CarModel from "./CarModel";
 import carOutlinePoints from "./CarModel/carOutline.json";
-import { useExperimentalFeature } from "@foxglove-studio/app/components/ExperimentalFeatures";
+import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { InteractionData } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
 import { PoseSettings } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/PoseSettingsEditor";

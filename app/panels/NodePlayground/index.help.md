@@ -30,7 +30,7 @@ Here is a basic node that echoes its input:
 ```typescript
 import { Input, Messages } from "ros";
 
-export const inputs = [ "/rosout" ];
+export const inputs = ["/rosout"];
 export const output = "/webviz_node/echo";
 
 const publisher = (message: Input<"/rosout">): Messages.rosgraph_msgs__Log => {
@@ -77,7 +77,7 @@ The `GlobalVariables` type is used to specify the types of any global variables 
 
 Strictly typing your nodes will help you debug issues at compile time rather than at runtime. It's not always obvious in Webviz how message properties are affecting the visualized output, and so the more you strictly type your nodes, the less likely you will make mistakes.
 
-With that said, you can disable Typescript checks while getting a rough draft of your node working by adding `// @ts-ignore` on the line above the one you want to ignore.
+With that said, you can disable Typescript checks while getting a rough draft of your node working by adding `// @ts-expect-error` on the line above the one you want to ignore.
 
 #### Using Multiple Input Topics
 
@@ -86,11 +86,10 @@ In some cases, you will want to define multiple input topics:
 ```typescript
 import { Input, Messages } from "ros";
 
-export const inputs = [ "/rosout", "/tf" ];
+export const inputs = ["/rosout", "/tf"];
 export const output = "/webviz_node/echo";
 
-const publisher = (message: Input<"/rosout"> | Input<"/tf">): { data: number[] }  => {
-
+const publisher = (message: Input<"/rosout"> | Input<"/tf">): { data: number[] } => {
   if (message.topic === "/rosout") {
     // type is now refined to `/rosout` -- you can use `message.message.pose` safely
   } else {
@@ -110,17 +109,17 @@ To combine messages from multiple topics, create a variable in your node's globa
 ```typescript
 import { Input, Messages, Time } from "ros";
 
-export const inputs = [ "/rosout", "/tf" ];
+export const inputs = ["/rosout", "/tf"];
 export const output = "/webviz_node/echo";
 
 let lastReceiveTime: Time = { sec: 0, nsec: 0 };
 const myScope: {
-  tf: Messages.tf2_msgs__TFMessage | null,
-  rosout: Messages.rosgraph_msgs__Log | null
-} = { 'tf': null, 'rosout': null };
+  tf: Messages.tf2_msgs__TFMessage | null;
+  rosout: Messages.rosgraph_msgs__Log | null;
+} = { tf: null, rosout: null };
 
 const publisher = (message: Input<"/rosout"> | Input<"/tf">): { data: number[] } | undefined => {
-  const { receiveTime  } = message;
+  const { receiveTime } = message;
   let inSync = true;
   if (receiveTime.sec !== lastReceiveTime.sec || receiveTime.nsec !== lastReceiveTime.nsec) {
     lastReceiveTime = receiveTime;
@@ -130,13 +129,13 @@ const publisher = (message: Input<"/rosout"> | Input<"/tf">): { data: number[] }
   if (message.topic === "/rosout") {
     myScope.rosout = message.message;
   } else {
-    myScope.tf = message.message
+    myScope.tf = message.message;
   }
 
   if (!inSync) {
     return { data: [] };
   }
-}
+};
 
 export default publisher;
 ```
@@ -170,12 +169,12 @@ For easier debugging, invoke `log(someValue)` anywhere in your Webviz node code 
 const add = (a: number, b: number): number => a + b;
 
 // NO ERRORS
-log(50, "ABC", null, undefined, 5 + 5, { "abc": 2, "def": false }, add(1, 2));
+log(50, "ABC", null, undefined, 5 + 5, { abc: 2, def: false }, add(1, 2));
 
 // ERRORS
 log(() => {});
 log(add);
-log({ "add": add, "subtract": (a: number, b: number): number => a - b })
+log({ add: add, subtract: (a: number, b: number): number => a - b });
 ```
 
 Invoking `log()` outside your publisher function will invoke it once, when your node is registered. Invoking `log()` inside your publisher function will log that value every time your publisher function is called.
@@ -198,7 +197,9 @@ const publisher = (msg: Input<"/state">): { metrics: number } | undefined => {
   if (msg.message.constant === 3) {
     return;
   }
-  return { /* YOUR DATA HERE */ };
+  return {
+    /* YOUR DATA HERE */
+  };
 };
 
 export default publisher;
@@ -219,9 +220,9 @@ export const output = "/webviz_node/json_data";
 const publisher = (msg: Input<"/state">): { data: json } => ({
   data: {
     foo: 123,
-    bar: 'string',
-    nested: { array: [1, 2, 3], working: true }
-  }
+    bar: "string",
+    nested: { array: [1, 2, 3], working: true },
+  },
 });
 export default publisher;
 ```

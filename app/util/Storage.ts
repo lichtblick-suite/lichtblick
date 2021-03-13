@@ -51,7 +51,7 @@ export default class Storage {
     return Object.keys(this._backingStore).filter((key) => !key.startsWith("_internal_"));
   }
 
-  getItem<T>(key: string): T | void {
+  getItem<T>(key: string): T | undefined {
     const val = this._backingStore.getItem(key);
 
     // if a non-json value gets into local storage we should ignore it

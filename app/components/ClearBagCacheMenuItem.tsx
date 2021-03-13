@@ -12,9 +12,9 @@
 //   You may not use this file except in compliance with the License.
 import NukeIcon from "@mdi/svg/svg/nuke.svg";
 
-import { useExperimentalFeature } from "@foxglove-studio/app/components/ExperimentalFeatures";
 import { Item } from "@foxglove-studio/app/components/Menu";
 import useConfirm from "@foxglove-studio/app/components/useConfirm";
+import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import { clearIndexedDbWithoutConfirmation } from "@foxglove-studio/app/util/indexeddb/clearIndexedDb";
 
 export default function ClearBagCacheMenuItem(): React.ReactElement | null {

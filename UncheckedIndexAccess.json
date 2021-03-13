@@ -5,7 +5,6 @@
   "app/components/AddPanelMenu/index.tsx",
   "app/components/Autocomplete.tsx",
   "app/components/ExpandingToolbar.tsx",
-  "app/components/ExperimentalFeatures.tsx",
   "app/components/Flex.tsx",
   "app/components/GlobalVariablesMenu.tsx",
   "app/components/Icon.tsx",

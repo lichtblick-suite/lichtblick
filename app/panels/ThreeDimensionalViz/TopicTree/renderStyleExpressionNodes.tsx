@@ -253,7 +253,7 @@ function StyleExpressionNode(props: any) {
                     )}
                   />
                 </SColorPickerWrapper>
-                {/* @ts-ignore-error fix comparison operator */}
+                {/* @ts-expect-error-error fix comparison operator */}
                 {editingColorForSourceIdx === 0 && (
                   <ColorPickerOverlay
                     color={(colorOverridesByColumnIdx[0] as any).color}
@@ -283,7 +283,7 @@ function StyleExpressionNode(props: any) {
                       )}
                     />
                   </SColorPickerWrapper>
-                  {/* @ts-ignore-error fix comparison operator */}
+                  {/* @ts-expect-error-error fix comparison operator */}
                   {editingColorForSourceIdx === 1 && (
                     <ColorPickerOverlay
                       color={(colorOverridesByColumnIdx[1] as any).color}

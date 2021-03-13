@@ -22,6 +22,7 @@ import {
 import DocumentDropListener from "@foxglove-studio/app/components/DocumentDropListener";
 import DropOverlay from "@foxglove-studio/app/components/DropOverlay";
 import { MessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
+import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import PlayerSelectionContext, {
   PlayerSelection,
   PlayerSourceDefinition,
@@ -39,64 +40,80 @@ import useUserNodes from "@foxglove-studio/app/hooks/useUserNodes";
 import OrderedStampPlayer from "@foxglove-studio/app/players/OrderedStampPlayer";
 import RosbridgePlayer from "@foxglove-studio/app/players/RosbridgePlayer";
 import UserNodePlayer from "@foxglove-studio/app/players/UserNodePlayer";
-import { buildPlayerFromDescriptor } from "@foxglove-studio/app/players/buildPlayer";
+import {
+  buildPlayerFromDescriptor,
+  BuildPlayerOptions,
+} from "@foxglove-studio/app/players/buildPlayer";
 import { Player } from "@foxglove-studio/app/players/types";
 import { State } from "@foxglove-studio/app/reducers";
 import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+import { useShallowMemo } from "@foxglove-studio/app/util/hooks";
 
 type BuiltPlayer = {
   player: Player;
   sources: string[];
 };
 
-function buildPlayerFromFiles(files: File[]): BuiltPlayer {
+function buildPlayerFromFiles(files: File[], options: BuildPlayerOptions): BuiltPlayer {
   if (files.length === 1) {
     return {
-      player: buildPlayerFromDescriptor(getLocalBagDescriptor(files[0]!)),
+      player: buildPlayerFromDescriptor(getLocalBagDescriptor(files[0]!), options),
       sources: files.map((file) => String(file.name)),
     };
   } else if (files.length === 2) {
     return {
-      player: buildPlayerFromDescriptor({
-        name: CoreDataProviders.CombinedDataProvider,
-        args: {},
-        children: [
-          getLocalBagDescriptor(files[0]!),
-          {
-            name: CoreDataProviders.RenameDataProvider,
-            args: { prefix: SECOND_SOURCE_PREFIX },
-            children: [getLocalBagDescriptor(files[1]!)],
-          },
-        ],
-      }),
+      player: buildPlayerFromDescriptor(
+        {
+          name: CoreDataProviders.CombinedDataProvider,
+          args: {},
+          children: [
+            getLocalBagDescriptor(files[0]!),
+            {
+              name: CoreDataProviders.RenameDataProvider,
+              args: { prefix: SECOND_SOURCE_PREFIX },
+              children: [getLocalBagDescriptor(files[1]!)],
+            },
+          ],
+        },
+        options,
+      ),
       sources: files.map((file) => String(file.name)),
     };
   }
   throw new Error(`Unsupported number of files: ${files.length}`);
 }
 
-async function buildPlayerFromBagURLs(urls: string[]): Promise<BuiltPlayer> {
+async function buildPlayerFromBagURLs(
+  urls: string[],
+  options: BuildPlayerOptions,
+): Promise<BuiltPlayer> {
   const guids = await Promise.all(urls.map(getRemoteBagGuid));
 
   if (urls.length === 1) {
     return {
-      player: buildPlayerFromDescriptor(getRemoteBagDescriptor(urls[0]!, guids[0])),
+      player: buildPlayerFromDescriptor(
+        getRemoteBagDescriptor(urls[0]!, guids[0], options),
+        options,
+      ),
       sources: urls.map((url) => url.toString()),
     };
   } else if (urls.length === 2) {
     return {
-      player: buildPlayerFromDescriptor({
-        name: CoreDataProviders.CombinedDataProvider,
-        args: {},
-        children: [
-          getRemoteBagDescriptor(urls[0]!, guids[0]),
-          {
-            name: CoreDataProviders.RenameDataProvider,
-            args: { prefix: SECOND_SOURCE_PREFIX },
-            children: [getRemoteBagDescriptor(urls[1]!, guids[1])],
-          },
-        ],
-      }),
+      player: buildPlayerFromDescriptor(
+        {
+          name: CoreDataProviders.CombinedDataProvider,
+          args: {},
+          children: [
+            getRemoteBagDescriptor(urls[0]!, guids[0], options),
+            {
+              name: CoreDataProviders.RenameDataProvider,
+              args: { prefix: SECOND_SOURCE_PREFIX },
+              children: [getRemoteBagDescriptor(urls[1]!, guids[1], options)],
+            },
+          ],
+        },
+        options,
+      ),
       sources: urls.map((url) => url.toString()),
     };
   }
@@ -160,6 +177,11 @@ function PlayerManager({
     [setDiagnostics, setLogs, setRosLib, initialMessageOrder],
   );
 
+  const buildPlayerOptions = useShallowMemo({
+    diskBagCaching: useExperimentalFeature("diskBagCaching"),
+    unlimitedMemoryCache: useExperimentalFeature("unlimitedMemoryCache"),
+  });
+
   useEffect(() => {
     if (player) {
       player.setMessageOrder(messageOrder);
@@ -179,9 +201,9 @@ function PlayerManager({
       } else {
         usedFiles.current = [...files];
       }
-      buildPlayer(buildPlayerFromFiles(usedFiles.current));
+      buildPlayer(buildPlayerFromFiles(usedFiles.current, buildPlayerOptions));
     },
-    [buildPlayer],
+    [buildPlayer, buildPlayerOptions],
   );
 
   const selectSource = useCallback(
@@ -200,7 +222,7 @@ function PlayerManager({
               const file = input?.files?.[0];
               if (file) {
                 usedFiles.current = [file];
-                buildPlayer(buildPlayerFromFiles(usedFiles.current));
+                buildPlayer(buildPlayerFromFiles(usedFiles.current, buildPlayerOptions));
               }
             },
             { once: true },
@@ -232,12 +254,12 @@ function PlayerManager({
             return;
           }
 
-          const builtPlayer = await buildPlayerFromBagURLs([result]);
+          const builtPlayer = await buildPlayerFromBagURLs([result], buildPlayerOptions);
           buildPlayer(builtPlayer);
         }
       }
     },
-    [buildPlayer, prompt],
+    [buildPlayer, prompt, buildPlayerOptions],
   );
 
   // files the main thread told us to open
@@ -249,8 +271,8 @@ function PlayerManager({
     }
 
     usedFiles.current = [file];
-    buildPlayer(buildPlayerFromFiles(usedFiles.current));
-  }, [buildPlayer, filesToOpen]);
+    buildPlayer(buildPlayerFromFiles(usedFiles.current, buildPlayerOptions));
+  }, [buildPlayer, filesToOpen, buildPlayerOptions]);
 
   const value: PlayerSelection = {
     selectSource,

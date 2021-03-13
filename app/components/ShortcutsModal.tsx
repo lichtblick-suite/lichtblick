@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import * as React from "react";
 import styled from "styled-components";
 
 import HelpModal from "@foxglove-studio/app/components/HelpModal";
@@ -22,20 +21,16 @@ const STitle = styled.h3`
   margin: 16px 0 8px 0;
 `;
 
-type Props = {
-  history: any;
-};
-
 const COMMAND = "⌘";
 const SHIFT = "⇧";
 
-export default function ShortcutsModal({ history }: Props) {
+type Props = {
+  onRequestClose: () => void;
+};
+export default function ShortcutsModal({ onRequestClose }: Props): React.ReactElement {
   return (
     <RenderToBodyComponent>
-      <HelpModal
-        rootStyle={{ maxWidth: 480, minWidth: 320 }}
-        onRequestClose={() => history.push(`/${window.location.search}`)}
-      >
+      <HelpModal rootStyle={{ maxWidth: 480, minWidth: 320 }} onRequestClose={onRequestClose}>
         <h2>Keyboard shortcuts</h2>
         <STitle>Global</STitle>
         <KeyboardShortcut description="Save layouts" keys={[COMMAND, "s"]} />

@@ -135,19 +135,19 @@ describe("GlobalKeyListener", () => {
     expect(openSaveLayoutModal).toHaveBeenCalledTimes(0);
   });
 
-  it("pushes shortcuts route to history after pressing cmd/ctrl + / keys", async () => {
+  it("opens shortcuts modal after pressing cmd/ctrl + / keys", async () => {
     const wrapper = document.createElement("div");
-    const mockHistoryPush = jest.fn();
+    const openShortcutsModal = jest.fn();
 
     mount(
       <Context store={getStore()}>
-        <GlobalKeyListener history={{ push: mockHistoryPush }} />
+        <GlobalKeyListener openShortcutsModal={openShortcutsModal} history={mockHistory} />
       </Context>,
       { attachTo: wrapper },
     );
 
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "/", ctrlKey: true }));
-    expect(mockHistoryPush).toHaveBeenNthCalledWith(1, "/shortcuts");
+    expect(openShortcutsModal).toHaveBeenCalledTimes(1);
   });
 
   it("pushes help route to history after pressing ?", async () => {

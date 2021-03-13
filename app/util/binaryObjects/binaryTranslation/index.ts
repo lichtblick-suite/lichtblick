@@ -13,9 +13,8 @@
 
 import { sumBy, maxBy } from "lodash";
 
-// @ts-expect-error
+// @ts-expect-error emscripten support library
 import ModuleFactory from "./bin/translator";
-// @ts-expect-error
 import ModuleWasm from "./bin/translator.wasm";
 import { Message } from "@foxglove-studio/app/players/types";
 import { RosDatatype, RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";

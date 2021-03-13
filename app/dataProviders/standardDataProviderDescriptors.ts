@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { getExperimentalFeature } from "@foxglove-studio/app/components/ExperimentalFeatures";
 import { CoreDataProviders } from "@foxglove-studio/app/dataProviders/constants";
 import { DataProviderDescriptor } from "@foxglove-studio/app/dataProviders/types";
 import { DISABLE_WORKERS_QUERY_KEY } from "@foxglove-studio/app/util/globalConstants";
@@ -34,21 +33,23 @@ export function getLocalBagDescriptor(file: File): DataProviderDescriptor {
   });
 }
 
-export function getRemoteBagDescriptor(url: string, guid?: string) {
-  const unlimitedCache = getExperimentalFeature("unlimitedMemoryCache");
-
+export function getRemoteBagDescriptor(
+  url: string,
+  guid: string | undefined,
+  options: { unlimitedMemoryCache: boolean; diskBagCaching: boolean },
+): DataProviderDescriptor {
   const bagDataProvider = {
     name: CoreDataProviders.BagDataProvider,
     args: {
       bagPath: { type: "remoteBagUrl", url },
-      cacheSizeInBytes: unlimitedCache ? Infinity : undefined,
+      cacheSizeInBytes: options?.unlimitedMemoryCache ?? false ? Infinity : undefined,
     },
     children: [],
   };
 
   // If we have an input identifier (which should be globally unique), then cache in indexeddb.
   // If not, then we don't have a cache key, so just read directly from the bag in memory.
-  return guid && getExperimentalFeature("diskBagCaching")
+  return guid && options?.diskBagCaching
     ? {
         name: CoreDataProviders.IdbCacheReaderDataProvider,
         args: { id: guid },

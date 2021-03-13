@@ -51,12 +51,12 @@ import {
 } from "@foxglove-studio/app/actions/panels";
 import Button from "@foxglove-studio/app/components/Button";
 import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";
-import { useExperimentalFeature } from "@foxglove-studio/app/components/ExperimentalFeatures";
 import Flex from "@foxglove-studio/app/components/Flex";
 import Icon from "@foxglove-studio/app/components/Icon";
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
 import PanelContext from "@foxglove-studio/app/components/PanelContext";
 import MosaicDragHandle from "@foxglove-studio/app/components/PanelToolbar/MosaicDragHandle";
+import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import PanelList, { getPanelsByType } from "@foxglove-studio/app/panels/PanelList";
 import { Topic } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";

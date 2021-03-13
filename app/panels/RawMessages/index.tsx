@@ -567,10 +567,7 @@ function RawMessages(props: Props) {
                   path={diffTopicPath}
                   onChange={onDiffTopicPathChange}
                   inputStyle={{ height: "100%" }}
-                  {
-                    /* @ts-ignore-error MessagePathInput is not properly passing props through? */
-                    ...{ prioritizedDatatype: topic?.datatype }
-                  }
+                  {...{ prioritizedDatatype: topic?.datatype }}
                 />
               ) : null}
             </Flex>

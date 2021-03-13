@@ -11,9 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { storiesOf } from "@storybook/react";
-import React from "react";
-
 import ShortcutsModal from "./ShortcutsModal";
 
-storiesOf("<ShortcutsModal>", module).add("standard", () => <ShortcutsModal history={{}} />);
+export default {
+  title: "<ShortcutsModal>",
+};
+export function Standard(): React.ReactElement {
+  return <ShortcutsModal onRequestClose={() => {}} />;
+}

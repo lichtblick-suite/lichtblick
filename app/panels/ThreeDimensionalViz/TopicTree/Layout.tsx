@@ -36,11 +36,11 @@ import { useDebouncedCallback } from "use-debounce";
 import useTopicTree, { TopicTreeContext } from "./useTopicTree";
 import useDataSourceInfo from "@foxglove-studio/app/PanelAPI/useDataSourceInfo";
 import Dimensions from "@foxglove-studio/app/components/Dimensions";
-import { useExperimentalFeature } from "@foxglove-studio/app/components/ExperimentalFeatures";
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
 import Modal from "@foxglove-studio/app/components/Modal";
 import PanelContext from "@foxglove-studio/app/components/PanelContext";
 import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
+import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import {

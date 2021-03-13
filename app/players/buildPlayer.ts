@@ -2,7 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { getExperimentalFeature } from "@foxglove-studio/app/components/ExperimentalFeatures";
 import { CoreDataProviders } from "@foxglove-studio/app/dataProviders/constants";
 import { rootGetDataProvider } from "@foxglove-studio/app/dataProviders/rootGetDataProvider";
 import { DataProviderDescriptor } from "@foxglove-studio/app/dataProviders/types";
@@ -17,15 +16,19 @@ import {
 } from "@foxglove-studio/app/util/inAutomatedRunMode";
 import { getSeekToTime } from "@foxglove-studio/app/util/time";
 
-export function buildPlayerFromDescriptor(childDescriptor: DataProviderDescriptor): Player {
-  const unlimitedCache = getExperimentalFeature("unlimitedMemoryCache");
+export type BuildPlayerOptions = { unlimitedMemoryCache: boolean; diskBagCaching: boolean };
+
+export function buildPlayerFromDescriptor(
+  childDescriptor: DataProviderDescriptor,
+  options: BuildPlayerOptions,
+): Player {
   const rootDescriptor = {
     name: CoreDataProviders.ParseMessagesDataProvider,
     args: {},
     children: [
       {
         name: CoreDataProviders.MemoryCacheDataProvider,
-        args: { unlimitedCache },
+        args: { unlimitedCache: options.unlimitedMemoryCache },
         children: [
           {
             name: CoreDataProviders.RewriteBinaryDataProvider,

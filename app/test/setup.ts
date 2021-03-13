@@ -47,7 +47,7 @@ if (typeof window !== "undefined") {
 // automatically gets silenced on tests.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 console.error = function (message: any) {
-  fail(`console.error: ${message}`);
+  throw new Error(`console.error in test: ${message}`);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -58,7 +58,7 @@ console.warn = function (message: any) {
     return;
   }
 
-  fail(`console.warn: ${message}`);
+  throw new Error(`console.warn in test: ${message}`);
 };
 
 // you can import fakes from fake-indexeddb and attach them to the jsdom global

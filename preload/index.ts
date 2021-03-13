@@ -5,7 +5,7 @@
 import { init as initSentry } from "@sentry/electron";
 import { contextBridge, ipcRenderer } from "electron";
 
-import { OsContext, OsContextWindowEvent } from "@foxglove-studio/app/OsContext";
+import { OsContext, OsContextForwardedEvent } from "@foxglove-studio/app/OsContext";
 
 if (typeof process.env.SENTRY_DSN === "string") {
   initSentry({ dsn: process.env.SENTRY_DSN });
@@ -29,7 +29,7 @@ const ctx: OsContext = {
   handleToolbarDoubleClick() {
     ipcRenderer.send("window.toolbar-double-clicked");
   },
-  addWindowEventListener(eventName: OsContextWindowEvent, handler: () => void) {
+  addIpcEventListener(eventName: OsContextForwardedEvent, handler: () => void) {
     ipcRenderer.on(eventName, () => handler());
   },
   async menuAddInputSource(name: string, handler: () => void) {
@@ -62,4 +62,5 @@ const ctx: OsContext = {
 // and the outside world. These restrictions impact what the api surface can expose and how.
 //
 // i.e.: returning a class instance doesn't work because prototypes do not survive the boundary
-contextBridge.exposeInMainWorld("ctxbridge", ctx);
+const { exposeInMainWorld: exposeToRenderer } = contextBridge; // poorly named
+exposeToRenderer("ctxbridge", ctx);

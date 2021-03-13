@@ -44,3 +44,8 @@ declare module "*?raw" {
   const content: string;
   export default content;
 }
+
+declare module "*.wasm" {
+  const url: string;
+  export default url;
+}

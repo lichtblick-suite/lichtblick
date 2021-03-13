@@ -27,7 +27,6 @@ import path from "path";
 
 import packageJson from "../package.json";
 import { installMenuInterface } from "./menu";
-import type { OsContextWindowEvent } from "@foxglove-studio/app/OsContext";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 
 if (typeof process.env.SENTRY_DSN === "string") {
@@ -89,14 +88,12 @@ async function createWindow(): Promise<void> {
   });
 
   // Forward full screen events to the renderer
-  const forwardWindowEvent = (name: OsContextWindowEvent) => {
-    // @ts-ignore https://github.com/microsoft/TypeScript/issues/14107
-    mainWindow.addListener(name, () => {
-      mainWindow.webContents.send(name);
-    });
-  };
-  forwardWindowEvent("enter-full-screen");
-  forwardWindowEvent("leave-full-screen");
+  mainWindow.addListener("enter-full-screen", () =>
+    mainWindow.webContents.send("enter-full-screen"),
+  );
+  mainWindow.addListener("leave-full-screen", () =>
+    mainWindow.webContents.send("leave-full-screen"),
+  );
 
   const appMenuTemplate: MenuItemConstructorOptions[] = [];
 
@@ -106,6 +103,12 @@ async function createWindow(): Promise<void> {
       label: app.name,
       submenu: [
         { role: "about" },
+        { type: "separator" },
+        {
+          label: "Preferences…",
+          accelerator: "CommandOrControl+,",
+          click: () => mainWindow.webContents.send("open-preferences"),
+        },
         { type: "separator" },
         { role: "services" },
         { type: "separator" },
@@ -169,10 +172,12 @@ async function createWindow(): Promise<void> {
     role: "help",
     submenu: [
       {
+        label: "Keyboard Shortcuts",
+        click: () => mainWindow.webContents.send("open-keyboard-shortcuts"),
+      },
+      {
         label: "Learn More",
-        click: async () => {
-          await shell.openExternal("https://electronjs.org");
-        },
+        click: async () => shell.openExternal("https://foxglove.dev"),
       },
     ],
   });

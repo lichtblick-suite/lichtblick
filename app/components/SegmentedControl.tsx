@@ -11,19 +11,20 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import * as React from "react";
+import { ReactElement } from "react";
 import styled from "styled-components";
 import tinyColor from "tinycolor2";
 
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
-export const colorToAlpha = (hex: string, alpha: number) => {
+export const colorToAlpha = (hex: string, alpha: number): string => {
   const color = tinyColor(hex);
   color.setAlpha(alpha);
   return color.toRgbString();
 };
 
 const SSegmentedControl = styled.div`
+  white-space: nowrap;
   display: inline-flex;
   padding: 4px;
   border-radius: 6px;
@@ -60,7 +61,7 @@ type Props = {
   onChange: (id: string) => void;
 };
 
-export default function SegmentedControl({ options, selectedId, onChange }: Props) {
+export default function SegmentedControl({ options, selectedId, onChange }: Props): ReactElement {
   if (options.length === 0) {
     throw new Error("<SegmentedControl> requires at least one option");
   }

@@ -10,13 +10,11 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { useCallback, useMemo, useContext, useEffect } from "react";
+import { useCallback, useMemo, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { bindActionCreators } from "redux";
 
 import { redoLayoutChange, undoLayoutChange } from "@foxglove-studio/app/actions/layoutHistory";
-import { ScreenshotsContext } from "@foxglove-studio/app/components/Screenshots/ScreenshotsProvider";
-import { downloadFiles } from "@foxglove-studio/app/util";
 
 const inNativeUndoRedoElement = (eventTarget: EventTarget) => {
   if (eventTarget instanceof HTMLTextAreaElement) {
@@ -39,14 +37,16 @@ type Props = {
   history: any;
 };
 
-export default function GlobalKeyListener({ openSaveLayoutModal, history }: Props) {
+export default function GlobalKeyListener({
+  openSaveLayoutModal,
+  openShortcutsModal,
+  history,
+}: Props): null {
   const dispatch = useDispatch();
   const actions = useMemo(
     () => bindActionCreators({ redoLayoutChange, undoLayoutChange }, dispatch),
     [dispatch],
   );
-  const { takeScreenshot } = useContext(ScreenshotsContext);
-
   const keyDownHandler: (arg0: KeyboardEvent) => void = useCallback(
     (e) => {
       const target = e.target;
@@ -87,28 +87,12 @@ export default function GlobalKeyListener({ openSaveLayoutModal, history }: Prop
       } else if (lowercaseEventKey === "s" && openSaveLayoutModal) {
         e.preventDefault();
         openSaveLayoutModal();
-      } else if (lowercaseEventKey === "/") {
+      } else if (lowercaseEventKey === "/" && openShortcutsModal) {
         e.preventDefault();
-        history.push(`/shortcuts${window.location.search}`);
-      } else if (lowercaseEventKey === "j" && process.env.NODE_ENV !== "production") {
-        // TODO (DWinegar): Remove this key listener once we get the screenshots for comments working.
-        e.preventDefault();
-        const element = document.querySelector(".PanelLayout-root");
-        if (!element) {
-          throw new Error(
-            `takeScreenshot could not find element with selector ".PanelLayout-root"`,
-          );
-        }
-        takeScreenshot(element as any)
-          .then((blob) => {
-            if (blob) {
-              downloadFiles([{ blob, fileName: "screenshot.png" }]);
-            }
-          })
-          .catch((error) => console.warn(error));
+        openShortcutsModal();
       }
     },
-    [openSaveLayoutModal, history, actions, takeScreenshot],
+    [openSaveLayoutModal, openShortcutsModal, history, actions],
   );
 
   // Not using KeyListener because we want to preventDefault on [ctrl+z] but not on [z], and we want

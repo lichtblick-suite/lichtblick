@@ -7,7 +7,7 @@ import ReactDOM from "react-dom";
 
 import "@foxglove-studio/app/styles/global.scss";
 
-import { App } from "@foxglove-studio/app/App";
+import App from "@foxglove-studio/app/App";
 import { getGlobalConfig } from "@foxglove-studio/app/GlobalConfig";
 import installDevtoolsFormatters from "@foxglove-studio/app/util/installDevtoolsFormatters";
 import overwriteFetch from "@foxglove-studio/app/util/overwriteFetch";

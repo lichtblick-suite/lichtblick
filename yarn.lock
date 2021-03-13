@@ -1817,7 +1817,6 @@ __metadata:
     classnames: 2.2.6
     compressjs: 1.0.3
     connected-react-router: 6.9.1
-    dom-to-image-more-scroll-fix: 2.9.0
     enzyme: 3.11.0
     fetch-mock: 9.11.0
     fuzzysort: 1.1.4
@@ -9875,13 +9874,6 @@ __metadata:
     domhandler: ^4.0.0
     entities: ^2.0.0
   checksum: 77e3bff86555c853af8a5f87f7433bdaf47fd377ed201b74c465c08445daf3832380acfe25276e6806ffad87ea42e57d4fb992021aef83c5dfae2d352b90860b
-  languageName: node
-  linkType: hard
-
-"dom-to-image-more-scroll-fix@npm:2.9.0":
-  version: 2.9.0
-  resolution: "dom-to-image-more-scroll-fix@npm:2.9.0"
-  checksum: e165d57c7132e81401a0f383a36dc345e27a125ca10706fc078270d3540f36140cf3efe3ba24298b361de7a99a1a40baaaae2f2e6ea4a3ae1611033da012609f
   languageName: node
   linkType: hard
 

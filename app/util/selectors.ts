@@ -161,5 +161,5 @@ export const enumValuesByDatatypeAndField = createSelector<any, any, any, any>(
   },
 ) as FixedParametricSelector<any, any, any>;
 
-// @ts-ignore createSelectorCreator does not vibe with shallowequal
+// @ts-expect-error createSelectorCreator does not vibe with shallowequal
 export const shallowEqualSelector = createSelectorCreator(defaultMemoize, shallowequal);

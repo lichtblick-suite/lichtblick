@@ -127,24 +127,6 @@ const defaultHooks = {
   getAdditionalDataProviders: () => {
     // do nothing
   },
-  experimentalFeaturesList() {
-    return {
-      diskBagCaching: {
-        name: "Disk Bag Caching (requires reload)",
-        description:
-          "When streaming bag data, persist it on disk, so that when reloading the page we don't have to download the data again. However, this might result in an overall slower experience, and is generally experimental, so we only recommend it if you're on a slow network connection. Alternatively, you can download the bag to disk manually, and drag it into Webviz.",
-        developmentDefault: false,
-        productionDefault: false,
-      },
-      unlimitedMemoryCache: {
-        name: "Unlimited in-memory cache (requires reload)",
-        description:
-          "If you have a lot of memory in your computer, and you frequently have to play all the way through large bags, you can turn this on to fully buffer the bag into memory. However, use at your own risk, as this might crash the browser.",
-        developmentDefault: false,
-        productionDefault: false,
-      },
-    };
-  },
   linkMessagePathSyntaxToHelpPage: () => true,
   getSecondSourceUrlParams() {
     return [REMOTE_BAG_URL_2_QUERY_KEY];

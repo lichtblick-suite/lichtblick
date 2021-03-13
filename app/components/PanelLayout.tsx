@@ -28,9 +28,9 @@ import {
   savePanelConfigs,
   SAVE_PANEL_CONFIGS,
 } from "@foxglove-studio/app/actions/panels";
-import { useExperimentalFeature } from "@foxglove-studio/app/components/ExperimentalFeatures";
 import Flex from "@foxglove-studio/app/components/Flex";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
+import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import PanelList from "@foxglove-studio/app/panels/PanelList";
 import { EmptyDropTarget } from "@foxglove-studio/app/panels/Tab/EmptyDropTarget";
 import { State, Dispatcher } from "@foxglove-studio/app/reducers";
@@ -100,7 +100,7 @@ export function UnconnectedPanelLayout(props: Props) {
         <PanelComponent childId={id} tabId={tabId} />
       ) : (
         // If we haven't found a panel of the given type, render the panel selector
-        // @ts-ignore typings say title is required property?
+        // @ts-expect-error typings say title is required property?
         <MosaicWindow path={path} createNode={createTile} renderPreview={() => null}>
           <Flex col center>
             <PanelToolbar floating isUnknownPanel />

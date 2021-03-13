@@ -11,27 +11,79 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { storiesOf } from "@storybook/react";
-import React from "react";
+import { action } from "@storybook/addon-actions";
+import { ReactElement } from "react";
 
-import { ExperimentalFeaturesModal } from "@foxglove-studio/app/components/ExperimentalFeatures";
-import {
-  dummyExperimentalFeaturesList,
-  dummyExperimentalFeaturesSettings,
-} from "@foxglove-studio/app/components/ExperimentalFeatures.fixture";
+import { ExperimentalFeaturesModal } from "@foxglove-studio/app/components/ExperimentalFeaturesModal";
+import ExperimentalFeaturesContext, {
+  FeatureDescriptions,
+  FeatureSettings,
+} from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 
-storiesOf("<ExperimentalFeatures>", module)
-  .addParameters({
+export default {
+  title: "<ExperimentalFeaturesModal>",
+  component: ExperimentalFeaturesModal,
+  parameters: {
     screenshot: {
       viewport: { width: 1000, height: 1300 },
     },
-  })
-  .add("empty list", () => (
-    <ExperimentalFeaturesModal listForStories={{}} settingsForStories={{}} />
-  ))
-  .add("basic fixture", () => (
-    <ExperimentalFeaturesModal
-      listForStories={dummyExperimentalFeaturesList}
-      settingsForStories={dummyExperimentalFeaturesSettings}
-    />
-  ));
+  },
+};
+
+const dummyFeatures: FeatureDescriptions = {
+  feat1: {
+    name: "Feature 1",
+    description: "Example description 1",
+    developmentDefault: true,
+    productionDefault: false,
+  },
+  feat2: {
+    name: "Feature 2",
+    description: "Example description 2",
+    developmentDefault: false,
+    productionDefault: true,
+  },
+  feat3: {
+    name: "Feature 3",
+    description: "Example description 3",
+    developmentDefault: true,
+    productionDefault: false,
+  },
+  feat4: {
+    name: "Feature 4",
+    description: "Example description 4",
+    developmentDefault: true,
+    productionDefault: false,
+  },
+};
+
+const dummySettings: FeatureSettings = {
+  feat1: { enabled: true, manuallySet: false },
+  feat2: { enabled: false, manuallySet: false },
+  feat3: { enabled: true, manuallySet: true },
+  feat4: { enabled: false, manuallySet: true },
+};
+
+export function EmptyList(): ReactElement {
+  return (
+    <ExperimentalFeaturesContext.Provider
+      value={{ features: {}, settings: {}, changeFeature: action("changeFeature") }}
+    >
+      <ExperimentalFeaturesModal onRequestClose={action("onRequestClose")} />
+    </ExperimentalFeaturesContext.Provider>
+  );
+}
+
+export function BasicFixture(): ReactElement {
+  return (
+    <ExperimentalFeaturesContext.Provider
+      value={{
+        features: dummyFeatures,
+        settings: dummySettings,
+        changeFeature: action("changeFeature"),
+      }}
+    >
+      <ExperimentalFeaturesModal onRequestClose={action("onRequestClose")} />
+    </ExperimentalFeaturesContext.Provider>
+  );
+}

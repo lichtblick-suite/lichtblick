@@ -323,7 +323,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
       }
       if (
         lastPanTime.current &&
-        // @ts-ignore while valid js we should fix this arithmatic operation on dates
+        // @ts-expect-error while valid js we should fix this arithmatic operation on dates
         new Date() - lastPanTime.current < PAN_CLICK_SUPPRESS_THRESHOLD_MS
       ) {
         // Ignore clicks that happen too soon after a pan. Sometimes clicks get fired at the end of
@@ -650,7 +650,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
         if (
           currentTime != null &&
           (lastPanTime.current == null ||
-            // @ts-ignore while valid js we should fix this arithmatic operation on dates
+            // @ts-expect-error while valid js we should fix this arithmatic operation on dates
             new Date() - lastPanTime.current > FOLLOW_PLAYBACK_PAN_THRESHOLD_MS)
         ) {
           firstXAxisTicks.min = currentTime + followPlaybackState.xOffsetMin;
