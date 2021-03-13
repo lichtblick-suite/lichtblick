@@ -28,7 +28,7 @@ import {
 // "std_msgs/Header", "geometry_msgs/Pose" etc, but not "visualization_msgs/MarkerArray".
 export const getTransitiveSubsetForDatatypes = (
   allDatatypes: RosDatatypes,
-  datatypes: ReadonlyArray<string>,
+  datatypes: readonly string[],
 ): RosDatatypes => {
   // Breadth-first search. datatypesToExplore holds datatypes which will be included in the return
   // value, but whose children have not yet been visited.

@@ -102,7 +102,7 @@ export type BinaryInstancedMarker = Readonly<{
   // Fields not provided from marker: frame_locked, text, mesh_resource, mesh_use_embedded_materials
   // Fields not present in marker:
   poses(): ArrayView<BinaryPose>;
-  metadataByIndex(): ReadonlyArray<any>;
+  metadataByIndex(): readonly any[];
   closed(): boolean;
 }>;
 

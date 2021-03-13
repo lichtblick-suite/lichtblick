@@ -23,7 +23,6 @@ import {
   cameraStateSelectors,
   DEFAULT_CAMERA_STATE,
 } from "regl-worldview";
-import { $Shape } from "utility-types";
 
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { InteractionData } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
@@ -66,7 +65,7 @@ export function useTransformedCameraState({
   followOrientation,
   transforms,
 }: {
-  configCameraState: $Shape<CameraState>;
+  configCameraState: Partial<CameraState>;
   followTf?: string | false;
   followOrientation?: boolean;
   transforms: Transforms;

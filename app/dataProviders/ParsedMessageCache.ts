@@ -69,7 +69,7 @@ export default class ParsedMessageCache {
   _cacheSizeInBytes: number = 0;
 
   parseMessages(
-    messages: ReadonlyArray<Message>,
+    messages: readonly Message[],
     readersByTopic: Readonly<{
       [topic: string]: MessageReader;
     }>,

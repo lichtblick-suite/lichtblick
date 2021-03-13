@@ -22,7 +22,6 @@ import { first, isEqual, get, last } from "lodash";
 import React, { useState, useCallback, useMemo } from "react";
 import ReactHoverObserver from "react-hover-observer";
 import Tree from "react-json-tree";
-import { $Shape } from "utility-types";
 
 import { HighlightedValue, SDiffSpan, MaybeCollapsedValue } from "./Diff";
 import Metadata from "./Metadata";
@@ -91,7 +90,7 @@ export type RawMessagesConfig = {
 
 type Props = {
   config: RawMessagesConfig;
-  saveConfig: (arg0: $Shape<RawMessagesConfig>) => void;
+  saveConfig: (arg0: Partial<RawMessagesConfig>) => void;
   openSiblingPanel: (arg0: string, cb: (arg0: PanelConfig) => PanelConfig) => void;
 };
 

@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { $Shape } from "utility-types";
-
 import {
   validateNodeDefinitions,
   makeNodeMessage,
@@ -25,7 +23,7 @@ import { deepParse, wrapJsObject } from "@foxglove-studio/app/util/binaryObjects
 import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
-const EmptyNode: $Shape<NodeDefinition<void>> = {
+const EmptyNode: Partial<NodeDefinition<void>> = {
   inputs: [],
   output: { name: "", datatype: "foo/Bar" },
   datatypes: { "foo/Bar": { fields: [] } },

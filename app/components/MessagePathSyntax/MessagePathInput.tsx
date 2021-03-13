@@ -161,7 +161,7 @@ type MessagePathInputBaseProps = {
   onTimestampMethodChange?: (arg0: TimestampMethod, index: number | null | undefined) => void;
 };
 type MessagePathInputProps = MessagePathInputBaseProps & {
-  topics: ReadonlyArray<Topic>;
+  topics: readonly Topic[];
   datatypes: RosDatatypes;
   prioritizedDatatype?: string | null | undefined;
   globalVariables: GlobalVariables;

@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { $Values } from "utility-types";
-
 import { Point, CameraInfo } from "@foxglove-studio/app/types/Messages";
 
 const DISTORTION_STATE = {
@@ -20,7 +18,7 @@ const DISTORTION_STATE = {
   CALIBRATED: "CALIBRATED",
 };
 
-type DistortionState = $Values<typeof DISTORTION_STATE>;
+type DistortionState = typeof DISTORTION_STATE[keyof typeof DISTORTION_STATE];
 
 // Essentially a copy of ROSPinholeCameraModel
 // but only the relevant methods, i.e.
@@ -28,10 +26,10 @@ type DistortionState = $Values<typeof DISTORTION_STATE>;
 // http://docs.ros.org/diamondback/api/image_geometry/html/c++/pinhole__camera__model_8cpp_source.html
 export default class PinholeCameraModel {
   _distortionState: DistortionState = DISTORTION_STATE.NONE;
-  D: ReadonlyArray<number> = [];
-  K: ReadonlyArray<number> = [];
-  P: ReadonlyArray<number> = [];
-  R: ReadonlyArray<number> = [];
+  D: readonly number[] = [];
+  K: readonly number[] = [];
+  P: readonly number[] = [];
+  R: readonly number[] = [];
 
   // Mostly copied from `fromCameraInfo`
   // http://docs.ros.org/diamondback/api/image_geometry/html/c++/pinhole__camera__model_8cpp_source.html#l00062

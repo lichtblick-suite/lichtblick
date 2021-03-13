@@ -32,7 +32,6 @@ import {
 } from "regl-worldview";
 import { Time } from "rosbag";
 import { useDebouncedCallback } from "use-debounce";
-import { $Shape } from "utility-types";
 
 import useTopicTree, { TopicTreeContext } from "./useTopicTree";
 import useDataSourceInfo from "@foxglove-studio/app/PanelAPI/useDataSourceInfo";
@@ -101,7 +100,7 @@ type EventName = "onDoubleClick" | "onMouseMove" | "onMouseDown" | "onMouseUp";
 export type ClickedPosition = { clientX: number; clientY: number };
 
 export type LayoutToolbarSharedProps = {
-  cameraState: $Shape<CameraState>;
+  cameraState: Partial<CameraState>;
   followOrientation: boolean;
   followTf?: string | false;
   onAlignXYAxis: () => void;

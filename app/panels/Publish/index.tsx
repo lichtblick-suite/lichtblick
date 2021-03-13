@@ -15,7 +15,6 @@ import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import * as React from "react";
 import styled from "styled-components";
-import { $Shape } from "utility-types";
 
 import buildSampleMessage from "./buildSampleMessage";
 import Autocomplete from "@foxglove-studio/app/components/Autocomplete";
@@ -45,7 +44,7 @@ type Config = {
 
 type Props = {
   config: Config;
-  saveConfig: (arg0: $Shape<Config>) => void;
+  saveConfig: (arg0: Partial<Config>) => void;
 
   // player state
   capabilities: string[];
@@ -54,7 +53,7 @@ type Props = {
 };
 
 type PanelState = {
-  cachedProps: $Shape<Props>;
+  cachedProps: Partial<Props>;
   datatypeNames: string[];
   parsedObject: any | null | undefined;
   error: string | null | undefined;
@@ -92,7 +91,7 @@ function getTopicName(topic: Topic): string {
   return topic.name;
 }
 
-function parseInput(value: string): $Shape<PanelState> {
+function parseInput(value: string): Partial<PanelState> {
   let parsedObject;
   let error = null;
   try {
@@ -134,7 +133,7 @@ class Publish extends React.PureComponent<Props, PanelState> {
   };
 
   static getDerivedStateFromProps(props: Props, state: PanelState) {
-    const newState: $Shape<PanelState> = parseInput(props.config.value);
+    const newState: Partial<PanelState> = parseInput(props.config.value);
     let changed = false;
 
     if (props !== state.cachedProps) {

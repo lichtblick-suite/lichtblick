@@ -85,8 +85,8 @@ export const mergedBlocks = (
 };
 
 const merge = (
-  messages1: ReadonlyArray<Message> | null | undefined,
-  messages2: ReadonlyArray<Message> | null | undefined,
+  messages1: readonly Message[] | null | undefined,
+  messages2: readonly Message[] | null | undefined,
 ) => {
   if (messages1 == null) {
     return messages2;

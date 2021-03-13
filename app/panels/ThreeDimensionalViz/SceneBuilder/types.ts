@@ -11,14 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { $ReadOnly } from "utility-types";
-
 import { Frame } from "@foxglove-studio/app/players/types";
 import { Color, Pose } from "@foxglove-studio/app/types/Messages";
 
-export type SkipTransformSpec = $ReadOnly<{ frameId: string; sourceTopic: string }>;
+export type SkipTransformSpec = { readonly frameId: string; readonly sourceTopic: string };
 
-export type ThreeDimensionalVizHooks = $ReadOnly<{
+export type ThreeDimensionalVizHooks = Readonly<{
   getSelectionState: (arg0: { [key: string]: any }) => any; // arg is globalVariables
   getTopicsToRender: (arg0: any, arg1: any) => Set<string>; // args are selection states
   skipTransformFrame: SkipTransformSpec | null | undefined;

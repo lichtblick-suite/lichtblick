@@ -15,7 +15,6 @@ import hoistNonReactStatics from "hoist-non-react-statics";
 import { omit, debounce } from "lodash";
 import React, { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import { CameraState } from "regl-worldview";
-import { $Shape } from "utility-types";
 
 import { FrameCompatibilityDEPRECATED } from "./FrameCompatibility";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
@@ -44,7 +43,7 @@ export const CAMERA_STATE_UPDATE_DEBOUNCE_DELAY_MS = 250;
 export type ThreeDimensionalVizConfig = {
   enableShortDisplayNames?: boolean;
   autoTextBackgroundColor?: boolean;
-  cameraState: $Shape<CameraState>;
+  cameraState: Partial<CameraState>;
   followTf?: string | false;
   followOrientation?: boolean;
   modifiedNamespaceTopics?: string[];

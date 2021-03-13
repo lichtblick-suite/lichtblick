@@ -486,8 +486,8 @@ describe("NodePlayer", () => {
     const subscribeAndEmitFromPlayer = async (
       subscriptions: SubscribePayload[],
     ): Promise<{
-      parsedMessages: ReadonlyArray<Message>;
-      bobjects: ReadonlyArray<BobjectMessage>;
+      parsedMessages: readonly Message[];
+      bobjects: readonly BobjectMessage[];
     }> => {
       const fakePlayer = new FakePlayer();
       const nodePlayer = new NodePlayer(fakePlayer, [node, bobjectNode]);
@@ -505,7 +505,7 @@ describe("NodePlayer", () => {
       });
       nodePlayer.setSubscriptions(subscriptions);
 
-      const emittedBobjects: ReadonlyArray<BobjectMessage> = upstreamMessages.map((msg) => ({
+      const emittedBobjects: readonly BobjectMessage[] = upstreamMessages.map((msg) => ({
         topic: msg.topic,
         receiveTime: msg.receiveTime,
         message: wrapJsObject(datatypes, "foo", msg.message),

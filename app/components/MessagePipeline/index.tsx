@@ -15,7 +15,6 @@ import { debounce, flatten, groupBy, isEqual } from "lodash";
 import * as React from "react";
 import { ReactElement } from "react";
 import { Time, TimeUtil } from "rosbag";
-import { $Shape } from "utility-types";
 
 import { pauseFrameForPromises, FramePromise } from "./pauseFrameForPromise";
 import warnOnOutOfSyncMessages from "./warnOnOutOfSyncMessages";
@@ -233,7 +232,7 @@ export function MessagePipelineProvider({ children, player, globalVariables = {}
     );
   });
 
-  const messages: ReadonlyArray<Message> | null | undefined = playerState.activeData?.messages;
+  const messages: readonly Message[] | null | undefined = playerState.activeData?.messages;
   const frame = useMemo(() => groupBy(messages || [], "topic"), [messages]);
   const sortedTopics = useMemo(() => (topics || []).sort(), [topics]);
   const datatypes: RosDatatypes = useMemo(() => unmemoizedDatatypes ?? {}, [unmemoizedDatatypes]);
@@ -358,7 +357,7 @@ export function MockMessagePipelineProvider(props: {
   setSubscriptions?: (arg0: string, arg1: SubscribePayload[]) => void;
   noActiveData?: boolean;
   showInitializing?: boolean;
-  activeData?: $Shape<PlayerStateActiveData> | null | undefined;
+  activeData?: Partial<PlayerStateActiveData> | null | undefined;
   capabilities?: string[];
   store?: any;
   startPlayback?: () => void | null | undefined;

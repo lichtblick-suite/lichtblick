@@ -70,7 +70,7 @@ export type DataSet = {
 };
 
 export type PlotDataByPath = {
-  [path: string]: ReadonlyArray<ReadonlyArray<TooltipItem>>;
+  [path: string]: readonly (readonly TooltipItem[])[];
 };
 
 type PointsAndTooltips = {
@@ -88,7 +88,7 @@ function getXForPoint(
   xAxisVal: PlotXAxisVal,
   timestamp: number,
   innerIdx: number,
-  xAxisRanges: ReadonlyArray<ReadonlyArray<TooltipItem>> | null | undefined,
+  xAxisRanges: readonly (readonly TooltipItem[])[] | null | undefined,
   xItem: TooltipItem | null | undefined,
   xAxisPath: BasePlotPath | null | undefined,
 ): number {
@@ -122,7 +122,7 @@ function getPointsAndTooltipsForMessagePathItem(
   timestampMethod: TimestampMethod,
   xAxisVal: PlotXAxisVal,
   xAxisPath?: BasePlotPath,
-  xAxisRanges?: ReadonlyArray<ReadonlyArray<TooltipItem>> | null,
+  xAxisRanges?: readonly (readonly TooltipItem[])[] | null,
   datasetKey?: string,
 ): PointsAndTooltips {
   const points: PlotChartPoint[] = [];
@@ -181,11 +181,11 @@ function getPointsAndTooltipsForMessagePathItem(
 
 function getDatasetAndTooltipsFromMessagePlotPath(
   path: PlotPath,
-  yAxisRanges: ReadonlyArray<ReadonlyArray<TooltipItem>>,
+  yAxisRanges: readonly (readonly TooltipItem[])[],
   index: number,
   startTime: Time,
   xAxisVal: PlotXAxisVal,
-  xAxisRanges: ReadonlyArray<ReadonlyArray<TooltipItem>> | null | undefined,
+  xAxisRanges: readonly (readonly TooltipItem[])[] | null | undefined,
   xAxisPath?: BasePlotPath,
 ): {
   dataset: DataSet;
@@ -204,7 +204,7 @@ function getDatasetAndTooltipsFromMessagePlotPath(
   let rangesOfTooltips: TimeBasedChartTooltipData[][] = [];
   let rangesOfPoints: PlotChartPoint[][] = [];
   for (const [rangeIdx, range] of yAxisRanges.entries()) {
-    const xRange: ReadonlyArray<TooltipItem> | null | undefined = xAxisRanges?.[rangeIdx];
+    const xRange: readonly TooltipItem[] | null | undefined = xAxisRanges?.[rangeIdx];
     const rangeTooltips = [];
     const rangePoints = [];
     for (const [outerIdx, item] of range.entries()) {

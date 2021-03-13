@@ -13,7 +13,7 @@
 import { Time, TimeUtil } from "rosbag";
 
 export function getBagChunksOverlapCount(
-  chunkInfos: ReadonlyArray<{ startTime: Time; endTime: Time }>,
+  chunkInfos: readonly { startTime: Time; endTime: Time }[],
 ) {
   if (!chunkInfos) {
     return 0;

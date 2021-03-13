@@ -12,13 +12,12 @@
 //   You may not use this file except in compliance with the License.
 
 import ts from "typescript/lib/typescript";
-import { $Values } from "utility-types";
 
 import { DiagnosticSeverity, Diagnostic } from "@foxglove-studio/app/players/UserNodePlayer/types";
 
 const mapCategoryToDiagnosticSeverity = (
   category: ts.DiagnosticCategory,
-): $Values<typeof DiagnosticSeverity> => {
+): typeof DiagnosticSeverity[keyof typeof DiagnosticSeverity] => {
   switch (category) {
     case ts.DiagnosticCategory.Error:
       return DiagnosticSeverity.Error;

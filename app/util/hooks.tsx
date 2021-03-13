@@ -13,7 +13,6 @@
 
 import { isEqual } from "lodash";
 import {
-  useCallback,
   useRef,
   useLayoutEffect,
   useState,
@@ -25,24 +24,15 @@ import {
 } from "react";
 import shallowequal from "shallowequal";
 
-export function usePreviousValue<T>(nextValue: T): T | null | undefined {
+export function usePreviousValue<T>(nextValue: T): T | undefined {
   const ref = useRef<T | undefined>(undefined);
   const previous = ref.current;
   ref.current = nextValue;
   return previous;
 }
 
-// used to force a component to update
-export function useForceUpdate() {
-  const [, setTick] = useState(0);
-  const update = useCallback(() => {
-    setTick((tick) => tick + 1);
-  }, []);
-  return update;
-}
-
 // Return initiallyTrue the first time, and again if any of the given deps have changed.
-export function useChangeDetector(deps: any[], initiallyTrue: boolean) {
+export function useChangeDetector(deps: unknown[], initiallyTrue: boolean): boolean {
   const ref = useRef(initiallyTrue ? undefined : deps);
   const changed = !shallowequal(ref.current, deps);
   ref.current = deps;
@@ -50,7 +40,7 @@ export function useChangeDetector(deps: any[], initiallyTrue: boolean) {
 }
 
 // Similar to useChangeDetector, but using deep equality check
-export function useDeepChangeDetector(deps: any[], initiallyTrue: boolean) {
+export function useDeepChangeDetector(deps: unknown[], initiallyTrue: boolean): boolean {
   const ref = useRef(initiallyTrue ? undefined : deps);
   const changed = !isEqual(ref.current, deps);
   ref.current = deps;
@@ -77,7 +67,7 @@ export function useDeepMemo<T>(value: T): T {
   return value;
 }
 
-function format(value: any): string {
+function format(value: unknown): string {
   try {
     return JSON.stringify(value);
   } catch (err) {
@@ -246,20 +236,3 @@ export function useContextSelector<T, U>(
 }
 
 useContextSelector.BAILOUT = BAILOUT;
-
-// TODO(Audrey): move the hook to npm package
-// `useReducedValue` produces a new state based on the previous state and new inputs.
-// the new state is only set when inputs have changed based on deep comparison.
-export function useReducedValue<Inputs extends any[], State>(
-  initialState: State,
-  currentInputs: Inputs,
-  reducer: (arg0: State, arg1: Inputs) => State,
-): State {
-  useMustNotChange(reducer, "reducer for useReducedValue should never change");
-  const prevStateRef = useRef(initialState);
-  const inputChanged = useDeepChangeDetector(currentInputs, false);
-  if (inputChanged) {
-    prevStateRef.current = reducer(prevStateRef.current, currentInputs);
-  }
-  return prevStateRef.current;
-}

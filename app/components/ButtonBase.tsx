@@ -12,14 +12,13 @@
 //   You may not use this file except in compliance with the License.
 
 import cx from "classnames";
-import { $Values } from "utility-types";
 
 export const PROGRESS_DIRECTION = Object.freeze({
   HORIZONTAL: "horizontal",
   PULSE: "pulse",
   VERTICAL: "vertical",
-});
-export type ProgressDirection = $Values<typeof PROGRESS_DIRECTION>;
+} as const);
+export type ProgressDirection = typeof PROGRESS_DIRECTION[keyof typeof PROGRESS_DIRECTION];
 
 let keyframesInjected = false;
 function injectKeyframes() {

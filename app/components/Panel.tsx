@@ -34,7 +34,6 @@ import {
 } from "react-mosaic-component";
 import { useSelector, useDispatch } from "react-redux";
 import { bindActionCreators } from "redux";
-import { $Shape } from "utility-types";
 
 import styles from "./Panel.module.scss";
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
@@ -115,7 +114,7 @@ export default function Panel<Config extends PanelConfig>(
   PanelComponent: (
     | ComponentType
     | ComponentType<
-        $Shape<{
+        Partial<{
           config: Config;
           saveConfig: SaveConfig<Config>;
           openSiblingPanel: (arg0: string, cb: (arg0: PanelConfig) => PanelConfig) => void;
@@ -184,7 +183,7 @@ export default function Panel<Config extends PanelConfig>(
     // Mix partial config with current config or `defaultConfig`
     const saveCompleteConfig = useCallback(
       (
-        configToSave: $Shape<Config>,
+        configToSave: Partial<Config>,
         options: { historyOptions?: EditHistoryOptions } | null | undefined,
       ) => {
         if (saveConfig) {

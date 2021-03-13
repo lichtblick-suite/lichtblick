@@ -16,7 +16,6 @@ import React, { useCallback } from "react";
 import { Color } from "regl-worldview";
 import styled from "styled-components";
 import tinyColor from "tinycolor2";
-import { $Keys } from "utility-types";
 
 import { ROW_HEIGHT } from "./TreeNodeRow";
 import Icon from "@foxglove-studio/app/components/Icon";
@@ -59,7 +58,7 @@ const SSpan = styled.span`
   }
 `;
 
-export type Size = $Keys<typeof TOGGLE_SIZE_CONFIG>;
+export type Size = keyof typeof TOGGLE_SIZE_CONFIG;
 type Props = {
   available: boolean;
   checked: boolean;

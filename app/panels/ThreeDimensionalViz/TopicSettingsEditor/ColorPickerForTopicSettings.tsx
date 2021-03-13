@@ -16,14 +16,13 @@ import React from "react";
 import { Color } from "regl-worldview";
 import styled from "styled-components";
 import tinyColor from "tinycolor2";
-import { $Keys } from "utility-types";
 
 export const PICKER_SIZE = {
   NORMAL: { name: "NORMAL", size: 24 },
   SMALL: { name: "SMALL", size: 16 },
 };
 
-export type Size = $Keys<typeof PICKER_SIZE>;
+export type Size = keyof typeof PICKER_SIZE;
 type Placement = "topLeft" | "topRight" | "bottomLeft" | "bottomRight";
 
 const SWrapper = styled.span<any>`

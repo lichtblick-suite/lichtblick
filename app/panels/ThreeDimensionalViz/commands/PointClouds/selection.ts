@@ -135,7 +135,7 @@ export function getAllPoints(maybeFullyDecodedMarker: MouseEventObject): number[
   return ret;
 }
 
-export function getAdditionalFieldNames(fields: ReadonlyArray<PointField>): string[] {
+export function getAdditionalFieldNames(fields: readonly PointField[]): string[] {
   const allFields = fields.map((field) => field.name);
   return difference(allFields, ["rgb", "x", "y", "z"]);
 }

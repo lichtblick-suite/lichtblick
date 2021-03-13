@@ -15,7 +15,6 @@ import { compact, uniq } from "lodash";
 import memoizeWeak from "memoize-weak";
 import React, { useEffect, useCallback, useMemo, useRef } from "react";
 import { Time, TimeUtil } from "rosbag";
-import { $Shape } from "utility-types";
 
 import helpContent from "./index.help.md";
 import {
@@ -98,7 +97,7 @@ export function openSiblingPlotPanel(
 
 type Props = {
   config: PlotConfig;
-  saveConfig: (arg0: $Shape<PlotConfig>) => void;
+  saveConfig: (arg0: Partial<PlotConfig>) => void;
 };
 
 // messagePathItems contains the whole parsed message, and we don't need to cache all of that.

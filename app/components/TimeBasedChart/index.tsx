@@ -157,9 +157,9 @@ type FollowPlaybackState = Readonly<{
 type Point = Readonly<{ x: number; y: number | string }>;
 
 type DataSet = Readonly<{
-  data: ReadonlyArray<Point>;
+  data: readonly Point[];
   label: string;
-  borderDash?: ReadonlyArray<number>;
+  borderDash?: readonly number[];
   color?: string;
   showLine?: boolean;
 }>;
@@ -176,7 +176,7 @@ const datumStringPixel = (
 
 // Exported for tests
 export const filterDatasets = (
-  datasets: ReadonlyArray<DataSet>,
+  datasets: readonly DataSet[],
   linesToHide: {
     [key: string]: boolean;
   },
@@ -208,7 +208,7 @@ export type Props = {
   width: number;
   height: number;
   zoom: boolean;
-  data: { datasets: ReadonlyArray<DataSet>; yLabels?: ReadonlyArray<string>; minIsZero?: boolean };
+  data: { datasets: readonly DataSet[]; yLabels?: readonly string[]; minIsZero?: boolean };
   tooltips?: TimeBasedChartTooltipData[];
   xAxes?: Chart.ChartXAxe[];
   yAxes: Chart.ChartYAxe[];
@@ -286,7 +286,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   }, [pauseFrame]);
 
   const { saveCurrentView, yAxes } = props;
-  const scaleBounds = useRef<ReadonlyArray<ScaleBounds> | null | undefined>();
+  const scaleBounds = useRef<readonly ScaleBounds[] | null | undefined>();
   const hoverBar = useRef<HTMLDivElement | null>(null);
   const onScaleBoundsUpdate = useCallback(
     (scales: ScaleBounds[]) => {

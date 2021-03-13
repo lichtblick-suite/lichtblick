@@ -140,7 +140,7 @@ export default class AutomatedRunPlayer implements Player {
   async _getMessages(
     start: Time,
     end: Time,
-  ): Promise<{ parsedMessages: ReadonlyArray<Message>; bobjects: ReadonlyArray<BobjectMessage> }> {
+  ): Promise<{ parsedMessages: readonly Message[]; bobjects: readonly BobjectMessage[] }> {
     if (!this._providerResult) {
       throw new Error("AutomatedRunPlayer not initialized");
     }
@@ -187,8 +187,8 @@ export default class AutomatedRunPlayer implements Player {
   }
 
   _emitState(
-    messages: ReadonlyArray<Message>,
-    bobjects: ReadonlyArray<BobjectMessage>,
+    messages: readonly Message[],
+    bobjects: readonly BobjectMessage[],
     currentTime: Time,
   ): Promise<void> {
     return this._emitStateQueue.add(async () => {

@@ -35,7 +35,7 @@ type Props = {
   componentId: string;
   // We don't need to (and shouldn't) rerender when the scale-bounds changes under the cursor -- the
   // bar should stay under the mouse. Only rerender when the mouse moves (using useSelector).
-  scaleBounds: { current: ReadonlyArray<ScaleBounds> | null | undefined };
+  scaleBounds: { current: readonly ScaleBounds[] | null | undefined };
   isTimestampScale: boolean;
 };
 

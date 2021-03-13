@@ -17,7 +17,6 @@ import { isEqual } from "lodash";
 import * as React from "react";
 import { CameraState, cameraStateSelectors } from "regl-worldview";
 import styled from "styled-components";
-import { $Shape } from "utility-types";
 
 import Button from "@foxglove-studio/app/components/Button";
 import ExpandingToolbar, { ToolGroup } from "@foxglove-studio/app/components/ExpandingToolbar";
@@ -60,7 +59,7 @@ const SRow = styled.div`
 `;
 
 type CameraStateInfoProps = {
-  cameraState: $Shape<CameraState>;
+  cameraState: Partial<CameraState>;
   onAlignXYAxis: () => void;
 };
 
@@ -76,7 +75,7 @@ export type CameraInfoPropsWithoutCameraState = {
 };
 
 type CameraInfoProps = {
-  cameraState: $Shape<CameraState>;
+  cameraState: Partial<CameraState>;
   targetPose: TargetPose | null | undefined;
 } & CameraInfoPropsWithoutCameraState;
 

@@ -28,7 +28,7 @@ export type MutablePoint = {
 };
 export type Point = Readonly<MutablePoint>;
 export type Vector3 = Point;
-type Points = ReadonlyArray<Point>;
+type Points = readonly Point[];
 
 export type Header = Readonly<{
   frame_id: string;
@@ -49,7 +49,7 @@ export type RosgraphMsgs$Log = Readonly<{
   file: string;
   function: string;
   line: number;
-  topics: ReadonlyArray<string>;
+  topics: readonly string[];
 }>;
 
 type Duration = Time;
@@ -101,10 +101,10 @@ export type LaserScan = Readonly<{
   angle_increment: number;
   angle_max: number;
   angle_min: number;
-  intensities: ReadonlyArray<number>;
+  intensities: readonly number[];
   range_max: number;
   range_min: number;
-  ranges: ReadonlyArray<number>;
+  ranges: readonly number[];
   scan_time?: number;
   time_increment?: number;
 }>;
@@ -115,7 +115,7 @@ export type PoseStamped = Readonly<
   }
 >;
 
-type Colors = ReadonlyArray<Color>;
+type Colors = readonly Color[];
 
 // Markers
 export type BaseMarker = Readonly<
@@ -251,7 +251,7 @@ type NavMsgs$MapMetaData = Readonly<{
 export type NavMsgs$OccupancyGrid = Readonly<{
   header: Header;
   info: NavMsgs$MapMetaData;
-  data: ReadonlyArray<number>;
+  data: readonly number[];
 }>;
 
 export type OccupancyGridMessage = Readonly<{
@@ -260,7 +260,7 @@ export type OccupancyGridMessage = Readonly<{
   map: "map" | "costmap";
   alpha: number;
   info: NavMsgs$MapMetaData;
-  data: ReadonlyArray<number>;
+  data: readonly number[];
 }>;
 
 export type TriangleListMarker = Readonly<
@@ -281,7 +281,7 @@ export type InstancedLineListMarker = Readonly<
   BaseMarker &
     MultiPointMarker & {
       type: 108;
-      metadataByIndex?: ReadonlyArray<Readonly<any>>;
+      metadataByIndex?: readonly Readonly<any>[];
     }
 >;
 
@@ -303,20 +303,20 @@ export type Marker =
   | InstancedLineListMarker;
 
 export type MarkerArray = Readonly<{
-  markers: ReadonlyArray<Marker>;
+  markers: readonly Marker[];
   // TODO(steel): Fix this. MarkerArrays have no header, except when they sometimes do.
   header?: Header;
 }>;
 
 type ChannelFloat = Readonly<{
   name: string;
-  values: ReadonlyArray<number>;
+  values: readonly number[];
 }>;
 
 type PointCloud1 = Readonly<
   StampedMessage & {
     points: Points;
-    channels: ReadonlyArray<ChannelFloat>;
+    channels: readonly ChannelFloat[];
     type: "PointCloud1";
   }
 >;
@@ -330,7 +330,7 @@ export type PointField = Readonly<{
 
 export type PointCloud2 = Readonly<
   StampedMessage & {
-    fields: ReadonlyArray<PointField>;
+    fields: readonly PointField[];
     height: number;
     width: number;
     is_bigendian: boolean;
@@ -395,10 +395,10 @@ export type CameraInfo = Readonly<{
   binning_y: number;
   roi: Roi;
   distortion_model: DistortionModel;
-  D: ReadonlyArray<number>;
-  K: ReadonlyArray<number>;
-  P: ReadonlyArray<number>;
-  R: ReadonlyArray<number>;
+  D: readonly number[];
+  K: readonly number[];
+  P: readonly number[];
+  R: readonly number[];
 }>;
 
 export type MapMetaData = Readonly<{

@@ -18,7 +18,6 @@ import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import SwapHorizontalIcon from "@mdi/svg/svg/swap-horizontal.svg";
 import SyncIcon from "@mdi/svg/svg/sync.svg";
 import React from "react";
-import { $Keys } from "utility-types";
 
 import { Item, SubMenu } from "@foxglove-studio/app/components/Menu";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
@@ -42,7 +41,7 @@ type Props = {
 };
 
 type BagSyncData = { checkedKeys: string[]; settingsByKey: TopicSettingsCollection };
-type SyncOption = $Keys<typeof SYNC_OPTIONS>;
+type SyncOption = keyof typeof SYNC_OPTIONS;
 type Keys = { bag1: string[]; bag2: [] };
 
 function bag2KeyToBag1Key(bag2Key: string) {

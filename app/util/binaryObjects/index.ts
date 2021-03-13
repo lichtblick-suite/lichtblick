@@ -81,8 +81,8 @@ export const getObjects = (
   datatype: string,
   buffer: ArrayBuffer,
   bigString: string,
-  offsets: ReadonlyArray<number>,
-): ReadonlyArray<Bobject> => {
+  offsets: readonly number[],
+): readonly Bobject[] => {
   const Class = getGetClassForView(typesByName, datatype)(
     context,
     new DataView(buffer),

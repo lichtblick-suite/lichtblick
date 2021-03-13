@@ -16,7 +16,6 @@ import * as React from "react";
 import DocumentEvents from "react-document-events";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
-import { $Shape } from "utility-types";
 
 import helpContent from "./index.help.md";
 import Button from "@foxglove-studio/app/components/Button";
@@ -95,7 +94,7 @@ type Config = {
   maxYVal?: string;
   pointRadiusOverride?: string;
 };
-type Props = { config: Config; saveConfig: (arg0: $Shape<Config>) => void };
+type Props = { config: Config; saveConfig: (arg0: Partial<Config>) => void };
 export type Line = {
   order?: number;
   label: string;
@@ -250,7 +249,7 @@ export type PlotMessage = {
 
 type MenuContentProps = {
   config: Config;
-  saveConfig: (arg0: $Shape<Config>) => void;
+  saveConfig: (arg0: Partial<Config>) => void;
 };
 function MenuContent({ config, saveConfig }: MenuContentProps) {
   const { pointRadiusOverride, minXVal, maxXVal, minYVal, maxYVal } = config;
@@ -459,7 +458,7 @@ function TwoDimensionalPlot(props: Props) {
     }
   }, []);
 
-  const scaleBounds = React.useRef<ReadonlyArray<ScaleBounds> | null | undefined>();
+  const scaleBounds = React.useRef<readonly ScaleBounds[] | null | undefined>();
   const hoverBar = React.useRef<HTMLDivElement | null>(null);
 
   const onScaleBoundsUpdate = React.useCallback(

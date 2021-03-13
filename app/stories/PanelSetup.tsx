@@ -17,7 +17,6 @@ import * as React from "react";
 import { DndProvider } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
 import { Mosaic, MosaicWindow } from "react-mosaic-component";
-import { $Shape } from "utility-types";
 
 import {
   changePanelLayout,
@@ -51,7 +50,7 @@ export type Fixture = {
   frame: Frame;
   topics: Topic[];
   capabilities?: string[];
-  activeData?: $Shape<PlayerStateActiveData>;
+  activeData?: Partial<PlayerStateActiveData>;
   progress?: Progress;
   datatypes?: RosDatatypes;
   globalVariables?: GlobalVariables;

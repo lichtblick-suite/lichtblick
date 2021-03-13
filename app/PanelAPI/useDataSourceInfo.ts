@@ -24,7 +24,7 @@ import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 // Metadata about the source of data currently being displayed in Webviz.
 // This is not expected to change often, usually when changing data sources.
 export type DataSourceInfo = {
-  topics: ReadonlyArray<Topic>;
+  topics: readonly Topic[];
   datatypes: RosDatatypes;
   capabilities: string[];
   startTime?: Time; // Only `startTime`, since `endTime` can change rapidly when connected to a live system.

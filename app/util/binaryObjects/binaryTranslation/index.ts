@@ -48,7 +48,7 @@ export interface BinaryDefinition {
 
 export type BinaryObjects = Readonly<{
   dataType: string;
-  offsets: ReadonlyArray<number>;
+  offsets: readonly number[];
   buffer: ArrayBuffer;
   bigString: string;
 }>;

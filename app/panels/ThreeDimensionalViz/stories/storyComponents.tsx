@@ -15,7 +15,6 @@ import { createMemoryHistory } from "history";
 import { uniq } from "lodash";
 import * as React from "react";
 import { Worldview } from "regl-worldview";
-import { $Shape } from "utility-types";
 
 import { selectAllPanelIds } from "@foxglove-studio/app/actions/mosaic";
 import Flex from "@foxglove-studio/app/components/Flex";
@@ -68,7 +67,7 @@ function bobjectify(fixture: FixtureExampleData): FixtureExampleData {
 }
 
 type FixtureExampleProps = {
-  initialConfig: $Shape<ThreeDimensionalVizConfig>;
+  initialConfig: Partial<ThreeDimensionalVizConfig>;
   data?: FixtureExampleData;
   loadData?: Promise<FixtureExampleData>;
   futureTime?: boolean;
@@ -77,7 +76,7 @@ type FixtureExampleProps = {
 
 type FixtureExampleState = {
   fixture: Fixture | null | undefined;
-  config: $Shape<ThreeDimensionalVizConfig>;
+  config: Partial<ThreeDimensionalVizConfig>;
 };
 
 export const WorldviewContainer = (props: { children: React.ReactNode }) => {
@@ -170,7 +169,7 @@ export const ThreeDimPanelSetupWithBag = ({
   globalVariables = {},
   bag,
 }: {
-  threeDimensionalConfig: $Shape<ThreeDimensionalVizConfig>;
+  threeDimensionalConfig: Partial<ThreeDimensionalVizConfig>;
   globalVariables: any;
   bag: string;
 }) => {

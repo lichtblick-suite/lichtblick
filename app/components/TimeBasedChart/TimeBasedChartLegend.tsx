@@ -21,11 +21,11 @@ import {
 
 // This type describes our use, but chart.js supports many more properties if we want them:
 // https://www.chartjs.org/docs/latest/charts/line.html#dataset-properties
-type Dataset = Readonly<{ label: string; color?: string; borderDash?: ReadonlyArray<number> }>;
+type Dataset = Readonly<{ label: string; color?: string; borderDash?: readonly number[] }>;
 
 type Props = {
   canToggleLines?: boolean;
-  datasets: ReadonlyArray<Dataset>;
+  datasets: readonly Dataset[];
   linesToHide: {
     [key: string]: boolean;
   };

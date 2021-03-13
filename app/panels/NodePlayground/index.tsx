@@ -18,7 +18,6 @@ import PlusIcon from "@mdi/svg/svg/plus.svg";
 import * as React from "react";
 import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
-import { $Shape } from "utility-types";
 import { v4 as uuidv4 } from "uuid";
 
 import { Script } from "./script";
@@ -68,7 +67,7 @@ type Config = {
 
 type Props = {
   config: Config;
-  saveConfig: (arg0: $Shape<Config>) => void;
+  saveConfig: (arg0: Partial<Config>) => void;
 };
 
 const UnsavedDot = styled.div`

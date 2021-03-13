@@ -27,7 +27,7 @@ export const defaultGetHeaderStamp = (
 
 function allMessageStampsNewestFirst(
   messagesByTopic: Readonly<{
-    [topic: string]: ReadonlyArray<Message>;
+    [topic: string]: readonly Message[];
   }>,
   getHeaderStamp?: (itemMessage: Message) => Time | null | undefined,
 ) {
@@ -49,12 +49,12 @@ function allMessageStampsNewestFirst(
 function messagesMatchingStamp(
   stamp: Time,
   messagesByTopic: Readonly<{
-    [topic: string]: ReadonlyArray<Message>;
+    [topic: string]: readonly Message[];
   }>,
   getHeaderStamp?: (itemMessage: Message) => Time | null | undefined,
 ):
   | Readonly<{
-      [topic: string]: ReadonlyArray<Message>;
+      [topic: string]: readonly Message[];
     }>
   | null
   | undefined {
@@ -81,12 +81,12 @@ function messagesMatchingStamp(
 // returned.
 export default function synchronizeMessages(
   messagesByTopic: Readonly<{
-    [topic: string]: ReadonlyArray<Message>;
+    [topic: string]: readonly Message[];
   }>,
   getHeaderStamp?: (itemMessage: Message) => Time | null | undefined,
 ):
   | Readonly<{
-      [topic: string]: ReadonlyArray<Message>;
+      [topic: string]: readonly Message[];
     }>
   | null
   | undefined {
@@ -105,7 +105,7 @@ export default function synchronizeMessages(
 
 function getSynchronizedMessages(
   stamp: Time,
-  topics: ReadonlyArray<string>,
+  topics: readonly string[],
   messages: {
     [topic: string]: Message[];
   },
@@ -142,7 +142,7 @@ type ReducedValue = {
 };
 
 function getSynchronizedState(
-  topics: ReadonlyArray<string>,
+  topics: readonly string[],
   { messagesByTopic, synchronizedMessages }: ReducedValue,
 ): ReducedValue {
   let newMessagesByTopic = messagesByTopic;
@@ -166,7 +166,7 @@ function getSynchronizedState(
 }
 
 // Returns reducers for use with PanelAPI.useMessageReducer
-export function getSynchronizingReducers(topics: ReadonlyArray<string>) {
+export function getSynchronizingReducers(topics: readonly string[]) {
   return {
     restore(previousValue: ReducedValue | null | undefined) {
       const messagesByTopic: Record<string, any> = {};

@@ -208,7 +208,7 @@ function renderEmptyState(
 
 function useOptionallySynchronizedMessages(
   shouldSynchronize: boolean,
-  topics: ReadonlyArray<PanelAPI.RequestedTopic>,
+  topics: readonly PanelAPI.RequestedTopic[],
 ) {
   const memoizedTopics = useDeepMemo(topics);
   const reducers = useMemo(

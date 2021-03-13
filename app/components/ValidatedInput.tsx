@@ -14,7 +14,6 @@
 import { isEqual } from "lodash";
 import * as React from "react";
 import styled from "styled-components";
-import { $Values } from "utility-types";
 
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import Flex from "@foxglove-studio/app/components/Flex";
@@ -56,7 +55,7 @@ type ParseAndStringifyFn = {
   stringify: (obj: any) => string;
   parse: (val: string) => any;
 };
-export type EditFormat = $Values<typeof EDIT_FORMAT>;
+export type EditFormat = typeof EDIT_FORMAT[keyof typeof EDIT_FORMAT];
 export type BaseProps = {
   dataValidator?: (data: any) => ValidationResult | null | undefined;
   inputStyle?: {

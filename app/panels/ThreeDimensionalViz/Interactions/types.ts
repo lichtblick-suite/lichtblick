@@ -11,15 +11,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { $ReadOnly } from "utility-types";
-
 import { RosObject } from "@foxglove-studio/app/players/types";
 import { Marker } from "@foxglove-studio/app/types/Messages";
 
-export type InteractionData = $ReadOnly<{
-  topic: string;
-  highlighted?: boolean;
-  originalMessage: $ReadOnly<RosObject>;
-}>;
+export type InteractionData = {
+  readonly topic: string;
+  readonly highlighted?: boolean;
+  readonly originalMessage: RosObject;
+};
 export type Interactive<T> = T & { interactionData: InteractionData };
 export type SelectedObject = { object: Marker; instanceIndex: number | null | undefined };

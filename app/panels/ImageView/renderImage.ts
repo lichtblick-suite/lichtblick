@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { $ReadOnly } from "utility-types";
-
 import CameraModel from "./CameraModel";
 import {
   decodeYUV,
@@ -86,7 +84,7 @@ function toRGBA(color: Color) {
 function maybeUnrectifyPoint(
   cameraModel: CameraModel | null | undefined,
   point: Point,
-): $ReadOnly<{ x: number; y: number }> {
+): Readonly<{ x: number; y: number }> {
   if (cameraModel) {
     return cameraModel.unrectifyPoint(point);
   }

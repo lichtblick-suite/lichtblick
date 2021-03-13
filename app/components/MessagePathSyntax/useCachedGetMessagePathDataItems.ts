@@ -187,7 +187,7 @@ const TIME_NEXT_BY_NAME = Object.freeze({
 export function getMessagePathDataItems(
   message: ReflectiveMessage,
   filledInPath: RosPath,
-  providerTopics: ReadonlyArray<Topic>,
+  providerTopics: readonly Topic[],
   datatypes: RosDatatypes,
 ): MessagePathDataItem[] | null | undefined {
   const structures = messagePathStructures(datatypes);

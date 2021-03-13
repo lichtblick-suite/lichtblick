@@ -27,7 +27,7 @@ type DatatypeDescription = {
 
 // Extract one big list of datatypes from the individual connections.
 export function bagConnectionsToDatatypes(
-  connections: ReadonlyArray<DatatypeDescription>,
+  connections: readonly DatatypeDescription[],
 ): RosDatatypes {
   const datatypes: Record<string, any> = {};
   connections.forEach((connection) => {
@@ -47,7 +47,7 @@ export function bagConnectionsToDatatypes(
 
 // Extract one big list of topics from the individual connections.
 export function bagConnectionsToTopics(
-  connections: ReadonlyArray<Connection>,
+  connections: readonly Connection[],
   chunkInfos: typeof Bag.prototype.chunkInfos,
 ): Topic[] {
   const numMessagesByConnectionIndex: number[] = new Array(connections.length).fill(0);

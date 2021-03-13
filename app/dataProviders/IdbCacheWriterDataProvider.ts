@@ -51,7 +51,7 @@ const BLOCK_SIZE_MILLISECONDS = 100;
 export const BLOCK_SIZE_NS = BLOCK_SIZE_MILLISECONDS * 1e6;
 const CONTINUE_DOWNLOADING_THRESHOLD = 3 * BLOCK_SIZE_NS;
 
-function getNormalizedTopics(topics: ReadonlyArray<string>): string[] {
+function getNormalizedTopics(topics: readonly string[]): string[] {
   return uniq(topics).sort();
 }
 

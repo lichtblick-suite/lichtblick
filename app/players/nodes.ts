@@ -156,11 +156,11 @@ export function applyNodesToMessages({
   datatypes,
 }: {
   nodeDefinitions: NodeDefinition<any>[];
-  originalMessages: ReadonlyArray<Message>;
-  originalBobjects: ReadonlyArray<BobjectMessage>;
+  originalMessages: readonly Message[];
+  originalBobjects: readonly BobjectMessage[];
   states: NodeStates;
   datatypes: RosDatatypes;
-}): { states: NodeStates; messages: ReadonlyArray<Message> } {
+}): { states: NodeStates; messages: readonly Message[] } {
   const messages = [...originalMessages, ...originalBobjects].sort((a, b) =>
     TimeUtil.compare(a.receiveTime, b.receiveTime),
   );
@@ -234,7 +234,7 @@ export function applyNodesToMessages({
 }
 
 export function partitionMessagesBySubscription(
-  messages: ReadonlyArray<Message>,
+  messages: readonly Message[],
   subscriptions: SubscribePayload[],
   nodeDefinitions: NodeDefinition<any>[],
   datatypes: RosDatatypes,

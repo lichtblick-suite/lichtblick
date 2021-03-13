@@ -13,7 +13,6 @@
 
 import { groupBy } from "lodash";
 import { useCallback } from "react";
-import { $ReadOnly } from "utility-types";
 
 import { useMessageReducer } from "./useMessageReducer";
 import { TypedMessage, MessageFormat } from "@foxglove-studio/app/players/types";
@@ -22,8 +21,8 @@ import { useDeepMemo } from "@foxglove-studio/app/util/hooks";
 // Exported for tests
 // Equivalent to array1.concat(array2).slice(-limit), but somewhat faster. Also works with limit=0.
 export const concatAndTruncate = <T>(
-  array1: ReadonlyArray<T>,
-  array2: ReadonlyArray<T>,
+  array1: readonly T[],
+  array2: readonly T[],
   limit: number,
 ): T[] => {
   const toTakeFromArray1 = limit - array2.length;
@@ -43,28 +42,21 @@ export function useMessagesByTopic<T = any>({
   preloadingFallback,
   format = "parsedMessages",
 }: {
-  topics: ReadonlyArray<string>;
+  topics: readonly string[];
   historySize: number;
-  preloadingFallback?: boolean | null | undefined;
+  preloadingFallback?: boolean;
   format?: MessageFormat;
 }): {
   [topic: string]: readonly TypedMessage<T>[];
 } {
   const requestedTopics = useDeepMemo(topics);
 
-  const addMessages: (
-    arg0: $ReadOnly<{
-      [key: string]: ReadonlyArray<TypedMessage<T>>;
-    }>,
-    arg1: ReadonlyArray<TypedMessage<T>>,
-  ) => $ReadOnly<{
-    [key: string]: ReadonlyArray<TypedMessage<T>>;
-  }> = useCallback(
+  const addMessages = useCallback(
     (
-      prevMessagesByTopic: $ReadOnly<{
-        [key: string]: ReadonlyArray<TypedMessage<T>>;
-      }>,
-      messages: ReadonlyArray<TypedMessage<T>>,
+      prevMessagesByTopic: {
+        readonly [key: string]: readonly TypedMessage<T>[];
+      },
+      messages: readonly TypedMessage<T>[],
     ) => {
       const newMessagesByTopic = groupBy(messages, "topic");
       const ret = { ...prevMessagesByTopic };
@@ -79,14 +71,12 @@ export function useMessagesByTopic<T = any>({
   const restore = useCallback(
     (
       prevMessagesByTopic:
-        | $ReadOnly<{
-            [key: string]: ReadonlyArray<TypedMessage<T>>;
-          }>
+        | { readonly [key: string]: readonly TypedMessage<T>[] }
         | null
         | undefined,
-    ): $ReadOnly<{
-      [key: string]: ReadonlyArray<TypedMessage<T>>;
-    }> => {
+    ): {
+      readonly [key: string]: readonly TypedMessage<T>[];
+    } => {
       const newMessagesByTopic: {
         [topic: string]: TypedMessage<T>[];
       } = {};

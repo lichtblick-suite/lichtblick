@@ -163,8 +163,8 @@ export default class UserNodePlayer implements Player {
       globalVariables: GlobalVariables,
       nodeRegistrations: NodeRegistration[],
     ): Promise<{
-      parsedMessages: ReadonlyArray<Message>;
-      bobjects: ReadonlyArray<BobjectMessage>;
+      parsedMessages: readonly Message[];
+      bobjects: readonly BobjectMessage[];
     }> => {
       const parsedMessagesPromises = [];
       const bobjectPromises = [];

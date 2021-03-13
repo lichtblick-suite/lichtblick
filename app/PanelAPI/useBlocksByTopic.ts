@@ -14,7 +14,6 @@
 import memoizeWeak from "memoize-weak";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { MessageReader } from "rosbag";
-import { $ReadOnly } from "utility-types";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -41,9 +40,9 @@ export const blockMessageCache = new ParsedMessageCache();
 // anyone who asks for binary data probably wants to parse it and cache it somehow, so give the
 // user a parser and the messages in a block-format useful for caching.
 
-type MessageBlock = $ReadOnly<{
-  [topicName: string]: ReadonlyArray<TypedMessage<ArrayBuffer>>;
-}>;
+type MessageBlock = {
+  readonly [topicName: string]: readonly TypedMessage<ArrayBuffer>[];
+};
 
 type BlocksForTopics = {
   // TODO(jp/steel): Figure out whether it's better to return message definitions here. It's
@@ -54,21 +53,21 @@ type BlocksForTopics = {
   // Semantics of blocks: Missing topics have not been cached. Adjacent elements are contiguous
   // in time. Corresponding indexes in different BlocksForTopics cover the same time-range. Blocks
   // are stored in increasing order of time.
-  blocks: ReadonlyArray<MessageBlock>;
+  blocks: readonly MessageBlock[];
 };
 
 // Memoization probably won't speed up the filtering appreciably, but preserves return identity.
 // That said, MessageBlock identity will change when the set of topics changes, so consumers should
 // prefer to use the identity of topic-block message arrays where possible.
 const filterBlockByTopics = memoizeWeak(
-  (block: MemoryCacheBlock | null | undefined, topics: ReadonlyArray<string>): MessageBlock => {
+  (block: MemoryCacheBlock | null | undefined, topics: readonly string[]): MessageBlock => {
     if (!block) {
       // For our purposes, a missing MemoryCacheBlock just means "no topics have been cached for
       // this block". This is semantically different to an empty array per topic, but not different
       // to a MemoryCacheBlock with no per-topic arrays.
       return {};
     }
-    const ret: Record<string, ReadonlyArray<BobjectMessage>> = {};
+    const ret: Record<string, readonly BobjectMessage[]> = {};
     for (const topic of topics) {
       // Don't include an empty array when the data has not been cached for this topic for this
       // block. The missing entry means "we don't know the message for this topic in this block", as
@@ -81,7 +80,7 @@ const filterBlockByTopics = memoizeWeak(
   },
 );
 
-const useSubscribeToTopicsForBlocks = (topics: ReadonlyArray<string>) => {
+const useSubscribeToTopicsForBlocks = (topics: readonly string[]) => {
   const [id] = useState(() => uuidv4());
   const { type: panelType = undefined } = useContext(PanelContext) || {};
 
@@ -104,7 +103,7 @@ function getBlocksFromPlayerState({
   playerState,
 }: {
   playerState: PlayerState;
-}): ReadonlyArray<MemoryCacheBlock | null | undefined> | null | undefined {
+}): readonly (MemoryCacheBlock | null | undefined)[] | null | undefined {
   return playerState.progress.messageCache?.blocks;
 }
 
@@ -114,7 +113,7 @@ function getBlocksFromPlayerState({
 // so all consumers need a "regular playback" pipeline fallback for now.
 // Consumers can rely on the presence of topics in messageDefinitionsByTopic to signal whether
 // a fallback is needed for a given topic, because entries will not be populated in these cases.
-export function useBlocksByTopic(topics: ReadonlyArray<string>): BlocksForTopics {
+export function useBlocksByTopic(topics: readonly string[]): BlocksForTopics {
   const requestedTopics = useShallowMemo(topics);
 
   // Subscribe to the topics
@@ -131,7 +130,7 @@ export function useBlocksByTopic(topics: ReadonlyArray<string>): BlocksForTopics
 
   // Get blocks for the topics
   const allBlocks = useMessagePipeline<
-    ReadonlyArray<MemoryCacheBlock | null | undefined> | null | undefined
+    readonly (MemoryCacheBlock | null | undefined)[] | null | undefined
   >(getBlocksFromPlayerState);
 
   const exposeBlockData = !!allBlocks; // The websocket player does not expose blocks.

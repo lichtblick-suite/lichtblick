@@ -14,7 +14,6 @@
 import { simplify } from "intervals-fn";
 import { isEqual, sum, uniq } from "lodash";
 import { TimeUtil, Time } from "rosbag";
-import { $ReadOnly } from "utility-types";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -52,14 +51,14 @@ export const MAX_BLOCK_SIZE_BYTES = 50e6; // Number of bytes in a block before w
 
 // For each memory block we store the actual messages (grouped by topic), and a total byte size of
 // the underlying ArrayBuffers.
-export type MemoryCacheBlock = $ReadOnly<{
-  messagesByTopic: $ReadOnly<{
-    [topic: string]: ReadonlyArray<BobjectMessage>;
-  }>;
-  sizeInBytes: number;
-}>;
+export type MemoryCacheBlock = {
+  readonly messagesByTopic: {
+    readonly [topic: string]: readonly BobjectMessage[];
+  };
+  readonly sizeInBytes: number;
+};
 export type BlockCache = {
-  blocks: ReadonlyArray<MemoryCacheBlock | null | undefined>;
+  blocks: readonly (MemoryCacheBlock | null | undefined)[];
   startTime: Time;
 };
 const EMPTY_BLOCK: MemoryCacheBlock = {
@@ -67,7 +66,7 @@ const EMPTY_BLOCK: MemoryCacheBlock = {
   sizeInBytes: 0,
 };
 
-function getNormalizedTopics(topics: ReadonlyArray<string>): string[] {
+function getNormalizedTopics(topics: readonly string[]): string[] {
   return uniq(topics).sort();
 }
 
@@ -234,7 +233,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
   // The actual blocks that contain the messages. Blocks have a set "width" in terms of nanoseconds
   // since the start time of the bag. If a block has some messages for a topic, then by definition
   // it has *all* messages for that topic and timespan.
-  _blocks: ReadonlyArray<MemoryCacheBlock | null | undefined> = [];
+  _blocks: readonly (MemoryCacheBlock | null | undefined)[] = [];
 
   // The start time of the bag. Used for computing from and to nanoseconds since the start.
   _startTime: Time = { sec: 0, nsec: 0 };

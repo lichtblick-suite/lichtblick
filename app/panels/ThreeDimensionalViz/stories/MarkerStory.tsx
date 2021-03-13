@@ -14,7 +14,6 @@
 import { cloneDeep } from "lodash";
 import React from "react";
 import { Color } from "regl-worldview";
-import { $Shape } from "utility-types";
 
 import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz";
 import {
@@ -55,7 +54,7 @@ Object.keys(markerProps).forEach((markerType, idx) => {
 export function MarkerStory(
   props: {
     data?: FixtureExampleData;
-    initialConfigOverride?: $Shape<ThreeDimensionalVizConfig>;
+    initialConfigOverride?: Partial<ThreeDimensionalVizConfig>;
     overrideColor?: Color | null | undefined;
     onMount?: (arg0: HTMLDivElement | null | undefined) => void;
   } = {},

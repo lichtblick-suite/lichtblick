@@ -30,7 +30,7 @@ export type TopicGroup = {
 type Props = {
   onChange: (topic: string) => void;
   topicToRender: string;
-  topics: ReadonlyArray<Topic>;
+  topics: readonly Topic[];
   // Use either one of these:
   // singleTopicDatatype only supports a single datatype (search and select based on datatype)
   // topicsGroups selects the "parent" path of a group of topics (if either of the group topics suffixes+datatypes match)

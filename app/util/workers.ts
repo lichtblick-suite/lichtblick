@@ -26,7 +26,7 @@ export const inWebWorker = (): boolean => {
 export const inSharedWorker = (): boolean =>
   typeof SharedWorkerGlobalScope !== "undefined" && self instanceof SharedWorkerGlobalScope;
 
-export const enforceFetchIsBlocked = <R, Args extends ReadonlyArray<unknown>>(
+export const enforceFetchIsBlocked = <R, Args extends readonly unknown[]>(
   fn: (...args: Args) => R,
 ): ((...args: Args) => Promise<R>) => {
   const canFetch =

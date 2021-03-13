@@ -13,7 +13,6 @@
 
 import React from "react";
 import styled from "styled-components";
-import { $Keys } from "utility-types";
 
 import { Save3DConfig } from "..";
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
@@ -44,7 +43,7 @@ const dropdownOptions = Object.keys(TOPIC_DISPLAY_MODES)
     value: (TOPIC_DISPLAY_MODES as any)[key].value,
   }));
 
-export type TopicDisplayMode = $Keys<typeof TOPIC_DISPLAY_MODES>;
+export type TopicDisplayMode = keyof typeof TOPIC_DISPLAY_MODES;
 
 const STopicViewModeSelector = styled.div`
   div {

@@ -1898,7 +1898,6 @@ __metadata:
     typescript: 4.2.2
     url-search-params: 1.1.0
     use-debounce: 3.4.3
-    utility-types: 3.10.0
     uuid: 8.3.2
     wasm-lz4: 1.0.0
     ws: 7.4.3
@@ -24723,13 +24722,6 @@ typescript@4.2.2:
   version: 0.4.0
   resolution: "utila@npm:0.4.0"
   checksum: 6799b0a5666ac26fb547068e6967e51b534e290174b10ae26e500c216197b0faed9be8a12108bc408ce475ce1002c866aac2d1d4e1453dc72b441d8900f2063a
-  languageName: node
-  linkType: hard
-
-"utility-types@npm:3.10.0":
-  version: 3.10.0
-  resolution: "utility-types@npm:3.10.0"
-  checksum: 0d2add8ad7057883548a328076dd5eaa8ccb3660df053645fec332253f047fa0882da766dfa676c6a530f6a80023f1f519e1bc3f90088c4fcede303c33de0e4a
   languageName: node
   linkType: hard
 

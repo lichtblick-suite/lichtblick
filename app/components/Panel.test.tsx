@@ -13,7 +13,6 @@
 
 import { mount } from "enzyme";
 import { createMemoryHistory } from "history";
-import { $Shape } from "utility-types";
 
 import { savePanelConfigs } from "@foxglove-studio/app/actions/panels";
 import Panel from "@foxglove-studio/app/components/Panel";
@@ -22,7 +21,7 @@ import configureStore from "@foxglove-studio/app/store/configureStore.testing";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 
 type DummyConfig = { someString: string };
-type DummyProps = { config: DummyConfig; saveConfig: (arg0: $Shape<DummyConfig>) => void };
+type DummyProps = { config: DummyConfig; saveConfig: (arg0: Partial<DummyConfig>) => void };
 
 function getDummyPanel(renderFn: any) {
   class DummyComponent extends React.Component<DummyProps> {

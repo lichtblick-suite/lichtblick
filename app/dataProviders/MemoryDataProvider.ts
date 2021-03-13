@@ -33,8 +33,8 @@ import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 function filterMessages(
   start: Time,
   end: Time,
-  topics: ReadonlyArray<string>,
-  messages: ReadonlyArray<Message> | null | undefined,
+  topics: readonly string[],
+  messages: readonly Message[] | null | undefined,
 ) {
   if (messages == null) {
     return undefined;

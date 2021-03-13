@@ -16,7 +16,6 @@ import * as React from "react";
 import Tree from "react-json-tree";
 import { MouseEventObject } from "regl-worldview";
 import styled from "styled-components";
-import { $ReadOnly } from "utility-types";
 
 import GlobalVariableLink from "./GlobalVariableLink/index";
 import { InteractionData } from "./types";
@@ -46,19 +45,11 @@ const SObjectDetails = styled.div`
   padding: 12px 0 16px 0;
 `;
 
-type CommonProps = $ReadOnly<{ interactionData: InteractionData | null | undefined }>;
+type CommonProps = { readonly interactionData: InteractionData | null | undefined };
 
-type WrapperProps = $ReadOnly<
-  CommonProps & {
-    selectedObject: MouseEventObject;
-  }
->;
+type WrapperProps = CommonProps & { readonly selectedObject: MouseEventObject };
 
-type Props = $ReadOnly<
-  CommonProps & {
-    objectToDisplay: any;
-  }
->;
+type Props = CommonProps & { readonly objectToDisplay: any };
 
 // Used for switching between views of individual and combined objects.
 // TODO(steel): Only show the combined object when the individual objects are semantically related.

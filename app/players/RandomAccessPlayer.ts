@@ -133,7 +133,7 @@ export default class RandomAccessPlayer implements Player {
   _progress: Progress = Object.freeze({});
   _id: string = uuidv4();
   _messages: Message[] = [];
-  _bobjects: ReadonlyArray<BobjectMessage> = [];
+  _bobjects: readonly BobjectMessage[] = [];
   _receivedBytes: number = 0;
   _messageOrder: TimestampMethod = "receiveTime";
   _hasError = false;
@@ -443,7 +443,7 @@ export default class RandomAccessPlayer implements Player {
   async _getMessages(
     start: Time,
     end: Time,
-  ): Promise<{ parsedMessages: Message[]; bobjects: ReadonlyArray<BobjectMessage> }> {
+  ): Promise<{ parsedMessages: Message[]; bobjects: readonly BobjectMessage[] }> {
     const parsedTopics = getSanitizedTopics(this._parsedSubscribedTopics, this._providerTopics);
     const bobjectTopics = getSanitizedTopics(this._bobjectSubscribedTopics, this._providerTopics);
     if (parsedTopics.length + bobjectTopics.length === 0) {

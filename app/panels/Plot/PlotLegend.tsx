@@ -16,7 +16,6 @@ import MenuIcon from "@mdi/svg/svg/menu.svg";
 import cx from "classnames";
 import { last } from "lodash";
 import React, { useCallback, useMemo } from "react";
-import { $Shape } from "utility-types";
 
 import styles from "./PlotLegend.module.scss";
 import { plotableRosTypes, PlotConfig, PlotXAxisVal } from "./index";
@@ -35,7 +34,7 @@ import { TimestampMethod } from "@foxglove-studio/app/util/time";
 
 type PlotLegendProps = {
   paths: PlotPath[];
-  saveConfig: (arg0: $Shape<PlotConfig>) => void;
+  saveConfig: (arg0: Partial<PlotConfig>) => void;
   showLegend: boolean;
   xAxisVal: PlotXAxisVal;
   xAxisPath?: BasePlotPath;

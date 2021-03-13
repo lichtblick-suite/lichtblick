@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { Time } from "rosbag";
-import { $Values } from "utility-types";
 
 import { PlayerState } from "@foxglove-studio/app/players/types";
 import { toMillis, fromMillis } from "@foxglove-studio/app/util/time";
@@ -26,7 +25,7 @@ export const DIRECTION = {
 };
 
 export const jumpSeek = (
-  directionSign: $Values<typeof DIRECTION>,
+  directionSign: typeof DIRECTION[keyof typeof DIRECTION],
   playerProps: { seek: (arg0: Time) => void; player: PlayerState },
   modifierKeys?: { altKey: boolean; shiftKey: boolean },
 ) => {

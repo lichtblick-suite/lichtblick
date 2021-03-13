@@ -13,7 +13,6 @@
 
 import { renderHook } from "@testing-library/react-hooks";
 import { mount } from "enzyme";
-import React from "react";
 
 import {
   useChangeDetector,
@@ -24,7 +23,6 @@ import {
   createSelectableContext,
   useContextSelector,
   SelectableContext,
-  useReducedValue,
   useDeepMemo,
 } from "./hooks";
 
@@ -131,7 +129,7 @@ describe("useShallowMemo", () => {
 
 describe("useDeepMemo", () => {
   it("returns original object when deep equal", () => {
-    let obj: any = { x: 1 };
+    let obj: unknown = { x: 1 };
     const { result, rerender } = renderHook((val) => useDeepMemo(val), { initialProps: obj });
     expect(result.current).toBe(obj);
     rerender({ x: 1 });
@@ -162,32 +160,6 @@ describe("useMustNotChange", () => {
     expect(result.current).toBe(1);
     rerender(2);
     expect(result.error).toEqual(new Error("hi\nOld: 1\nNew: 2"));
-  });
-});
-
-describe("useReducedValue", () => {
-  it("returns a new state only when the input values have changed (deep comparison)", () => {
-    const initialState = { name: "some name" };
-    const mockFn = jest.fn();
-    const input = ["foo", { name: "some other name" }];
-
-    function reducer(prevState: any, currentInput: any) {
-      const newState = currentInput.length ? { name: currentInput[0] } : prevState;
-      mockFn(newState);
-      return newState;
-    }
-
-    const { result, rerender } = renderHook((val) => useReducedValue(initialState, val, reducer), {
-      initialProps: input,
-    });
-    rerender(input);
-    expect(result.current).toEqual({ name: "some name" });
-    rerender(["foo", { name: "some other name" }]);
-    expect(result.current).toEqual({ name: "some name" });
-    expect(mockFn).toHaveBeenCalledTimes(0);
-    rerender(["bar", { name: "some other name" }]);
-    expect(result.current).toEqual({ name: "bar" });
-    expect(mockFn).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -267,8 +239,8 @@ describe("createSelectableContext/useContextSelector", () => {
   });
 
   it("re-renders when selector returns new value that isn't BAILOUT", () => {
-    const C = createSelectableContext();
-    const Consumer = createTestConsumer(C, ({ num }: any) =>
+    const C = createSelectableContext<{ num: number }>();
+    const Consumer = createTestConsumer(C, ({ num }) =>
       num === 3 ? useContextSelector.BAILOUT : num,
     );
 
@@ -313,9 +285,9 @@ describe("createSelectableContext/useContextSelector", () => {
   });
 
   it("propagates value to multiple consumers", () => {
-    const C = createSelectableContext();
-    const Consumer1 = createTestConsumer(C, ({ one }: any) => one);
-    const Consumer2 = createTestConsumer(C, ({ two }: any) => two);
+    const C = createSelectableContext<{ one: number; two: number }>();
+    const Consumer1 = createTestConsumer(C, ({ one }) => one);
+    const Consumer2 = createTestConsumer(C, ({ two }) => two);
 
     const root = mount(
       <C.Provider value={{ one: 1, two: 2 }}>
@@ -347,8 +319,8 @@ describe("createSelectableContext/useContextSelector", () => {
   });
 
   it("doesn't call selector after unmount", () => {
-    const C = createSelectableContext();
-    const Consumer = createTestConsumer(C, ({ num }: any) => num);
+    const C = createSelectableContext<{ num: number }>();
+    const Consumer = createTestConsumer(C, ({ num }) => num);
 
     const root = mount(
       <C.Provider value={{ num: 1 }}>

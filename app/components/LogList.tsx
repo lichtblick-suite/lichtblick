@@ -46,7 +46,7 @@ function LogList<Item>({
   items,
   renderRow,
 }: {
-  items: ReadonlyArray<Item>;
+  items: readonly Item[];
   renderRow: RenderRow<Item>;
 }) {
   // Automatically scrolling to the bottom by default.
@@ -63,7 +63,7 @@ function LogList<Item>({
   const lastWidth = React.useRef<number>(-1);
 
   // Keep track of the last items that we rendered to see if we need to clear the cache.
-  const lastItems = React.useRef<ReadonlyArray<Item>>([]);
+  const lastItems = React.useRef<readonly Item[]>([]);
 
   // Last time we rendered; used in `onScroll`.
   const lastRenderTime = React.useRef<number>(0);

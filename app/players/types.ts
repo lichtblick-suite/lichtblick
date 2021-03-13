@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { Time, RosMsgDefinition } from "rosbag";
-import { $Values } from "utility-types";
 
 import { BlockCache } from "@foxglove-studio/app/dataProviders/MemoryCacheDataProvider";
 import {
@@ -101,7 +100,7 @@ export type PlayerState = {
 
   // Capabilities of this particular `Player`, which are not shared across all players.
   // See `const PlayerCapabilities` for more details.
-  capabilities: $Values<typeof PlayerCapabilities>[];
+  capabilities: typeof PlayerCapabilities[keyof typeof PlayerCapabilities][];
 
   // A unique id for this player (typically a UUID generated on construction). This is used to clear
   // out any data when switching to a new player.
@@ -113,7 +112,7 @@ export type PlayerState = {
 };
 
 export type PlayerWarnings = Readonly<{
-  topicsWithoutHeaderStamps?: ReadonlyArray<string>;
+  topicsWithoutHeaderStamps?: readonly string[];
 }>;
 
 export type PlayerStateActiveData = {
@@ -121,8 +120,8 @@ export type PlayerStateActiveData = {
   // and should be immediately following the previous array of messages that was emitted as part of
   // this state. If there is a discontinuity in messages, `lastSeekTime` should be different than
   // the previous state. Panels collect these messages using the `PanelAPI`.
-  messages: ReadonlyArray<Message>;
-  bobjects: ReadonlyArray<BobjectMessage>;
+  messages: readonly Message[];
+  bobjects: readonly BobjectMessage[];
   totalBytesReceived: number; // always-increasing
 
   // The current playback position, which will be shown in the playback bar. This time should be
@@ -211,7 +210,7 @@ export type Message = TypedMessage<any>;
 type RosSingularField = number | string | boolean | RosObject; // No time -- consider it a message.
 export type RosValue =
   | RosSingularField
-  | ReadonlyArray<RosSingularField>
+  | readonly RosSingularField[]
   | Uint8Array
   | Int8Array
   | void

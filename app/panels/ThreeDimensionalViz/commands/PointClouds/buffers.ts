@@ -21,9 +21,7 @@ export type FieldOffsetsAndReaders = {
   [name: string]: { datatype: string; offset: number; reader: FieldReader | null | undefined };
 };
 
-export function getFieldOffsetsAndReaders(
-  fields: ReadonlyArray<PointField>,
-): FieldOffsetsAndReaders {
+export function getFieldOffsetsAndReaders(fields: readonly PointField[]): FieldOffsetsAndReaders {
   const result: any = {};
   for (const { name, datatype, offset = 0 } of fields) {
     result[name] = { datatype, offset, reader: getReader(datatype, offset) };

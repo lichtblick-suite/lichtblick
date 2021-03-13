@@ -14,7 +14,6 @@
 import hoistNonReactStatics from "hoist-non-react-statics";
 import PropTypes from "prop-types";
 import * as React from "react";
-import { $Shape } from "utility-types";
 
 import { getGlobalHooks } from "../../loadWebviz";
 import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
@@ -26,7 +25,7 @@ type State = { transforms: Transforms };
 
 function withTransforms<Props extends any>(ChildComponent: React.ComponentType<Props>) {
   class Component extends React.PureComponent<
-    $Shape<{ frame: Frame; cleared: boolean; forwardedRef: any }>,
+    Partial<{ frame: Frame; cleared: boolean; forwardedRef: any }>,
     State
   > {
     static displayName = `withTransforms(${
@@ -39,7 +38,7 @@ function withTransforms<Props extends any>(ChildComponent: React.ComponentType<P
     static getDerivedStateFromProps(
       nextProps: Props,
       prevState: State,
-    ): $Shape<State> | null | undefined {
+    ): Partial<State> | null | undefined {
       const { frame, cleared }: any = nextProps;
       let { transforms } = prevState;
       if (cleared) {

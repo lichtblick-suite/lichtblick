@@ -1330,7 +1330,7 @@ describe("UserNodePlayer", () => {
   describe("bobjects", () => {
     const subscribeAndEmitFromPlayer = async (
       subscriptions: SubscribePayload[],
-    ): Promise<{ messages: ReadonlyArray<Message>; bobjects: ReadonlyArray<BobjectMessage> }> => {
+    ): Promise<{ messages: readonly Message[]; bobjects: readonly BobjectMessage[] }> => {
       const fakePlayer = new FakePlayer();
       const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
 

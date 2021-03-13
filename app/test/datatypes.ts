@@ -134,7 +134,7 @@ const addRosDatatypes = (
 };
 
 export const createRosDatatypesFromFrame = (
-  topics: ReadonlyArray<Topic>,
+  topics: readonly Topic[],
   frame: Frame,
 ): RosDatatypes => {
   // Note: datatypes are duplicated when they appear in multiple places, and "common" datatypes like
@@ -161,7 +161,7 @@ export const createRosDatatypesFromFrame = (
   return ret;
 };
 
-export const wrapMessages = <T>(messages: ReadonlyArray<Message>): TypedMessage<T>[] => {
+export const wrapMessages = <T>(messages: readonly Message[]): TypedMessage<T>[] => {
   const frame = groupBy(messages, "topic");
   const topics = Object.keys(frame).map((topic) => ({ name: topic, datatype: topic }));
   const datatypes = createRosDatatypesFromFrame(topics, frame);
@@ -175,7 +175,7 @@ export const wrapMessages = <T>(messages: ReadonlyArray<Message>): TypedMessage<
 export const wrapMessage = <T>(message: Message): TypedMessage<T> => wrapMessages<T>([message])[0];
 
 // Objects are assumed to be of the same type
-export const wrapObjects = <T>(objects: ReadonlyArray<any>): T[] => {
+export const wrapObjects = <T>(objects: readonly any[]): T[] => {
   const messages = objects.map((message) => ({
     receiveTime: { sec: 0, nsec: 0 },
     topic: "dummy",

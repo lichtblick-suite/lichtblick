@@ -14,7 +14,6 @@
 import cx from "classnames";
 import React, { useMemo, useRef } from "react";
 import styled from "styled-components";
-import { $Shape } from "utility-types";
 
 import styles from "./PlotMenu.module.scss";
 import Item from "@foxglove-studio/app/components/Menu/Item";
@@ -113,9 +112,9 @@ export default function PlotMenu({
   displayWidth: string;
   minYValue: string;
   maxYValue: string;
-  saveConfig: (arg0: $Shape<PlotConfig>) => void;
-  setMinMax: (arg0: $Shape<PlotConfig>) => void;
-  setWidth: (arg0: $Shape<PlotConfig>) => void;
+  saveConfig: (arg0: Partial<PlotConfig>) => void;
+  setMinMax: (arg0: Partial<PlotConfig>) => void;
+  setWidth: (arg0: Partial<PlotConfig>) => void;
   datasets: DataSet[];
   xAxisVal: PlotXAxisVal;
   tooltips: TimeBasedChartTooltipData[];

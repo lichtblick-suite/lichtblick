@@ -17,7 +17,6 @@ import { useMemo } from "react";
 import stringHash from "string-hash";
 import styled, { css } from "styled-components";
 import tinycolor from "tinycolor2";
-import { $Shape } from "utility-types";
 
 import helpContent from "./index.help.md";
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
@@ -187,7 +186,7 @@ export function openSiblingStateTransitionsPanel(
 
 type Props = {
   config: StateTransitionConfig;
-  saveConfig: (arg0: $Shape<StateTransitionConfig>) => void;
+  saveConfig: (arg0: Partial<StateTransitionConfig>) => void;
   isHovered: boolean;
 };
 

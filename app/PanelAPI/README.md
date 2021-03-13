@@ -15,13 +15,13 @@ import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 Using this hook inside a panel will cause the panel to re-render automatically when the metadata changes, but this won't happen very often or during playback.
 
 ```js
- PanelAPI.useDataSourceInfo(): {|
-  topics: $ReadOnlyArray<Topic>,
+ PanelAPI.useDataSourceInfo(): {
+  topics: Topic[],
   datatypes: RosDatatypes,
   capabilities: string[],
-  startTime: ?Time,
+  startTime?: Time,
   playerId: string,
-|};
+};
 ```
 
 ## [`PanelAPI.useMessagesByTopic()`](useMessagesByTopic.js)
