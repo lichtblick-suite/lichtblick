@@ -15,12 +15,15 @@
       "type": "node",
       "name": "vscode-jest-tests",
       "request": "launch",
-      "args": ["run", "jest", "--runInBand"],
-      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": ["--runInBand"],
+      "cwd": "${workspaceFolder}/app",
+      "env": {
+        "NODE_OPTIONS": "--require ts-node/register"
+      },
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
-      "disableOptimisticBPs": true,
-      "program": "${workspaceFolder}/.yarn/releases/yarn-2.4.1.cjs"
+      "disableOptimisticBPs": true
     }
   ]
 }

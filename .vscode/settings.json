@@ -1,5 +1,6 @@
 {
   "debug.javascript.autoAttachFilter": "onlyWithFlag",
+  "debug.toolBarLocation": "docked",
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
