@@ -1888,7 +1888,6 @@ __metadata:
     sanitize-html: 1.20.0
     seedrandom: 3.0.5
     shallowequal: 1.1.0
-    sharedworker-loader: 2.1.1
     storycap: 3.0.3
     string-hash: 1.1.3
     styled-components: 5.2.1
@@ -16013,7 +16012,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loader-utils@npm:^1.0.0, loader-utils@npm:^1.2.3, loader-utils@npm:^1.4.0":
+"loader-utils@npm:^1.2.3, loader-utils@npm:^1.4.0":
   version: 1.4.0
   resolution: "loader-utils@npm:1.4.0"
   dependencies:
@@ -21779,16 +21778,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"schema-utils@npm:^0.4.0":
-  version: 0.4.7
-  resolution: "schema-utils@npm:0.4.7"
-  dependencies:
-    ajv: ^6.1.0
-    ajv-keywords: ^3.1.0
-  checksum: ad28f47a2cfcd9d576efab7a74447bbb4dbbaa8f8adcfeaf6dc38c8462d79cf04ecc1f6f4d5825856cff615bda3d2836c17dc0b6ed565ea454c5f15a82c2c0c0
-  languageName: node
-  linkType: hard
-
 "schema-utils@npm:^1.0.0":
   version: 1.0.0
   resolution: "schema-utils@npm:1.0.0"
@@ -22103,18 +22092,6 @@ __metadata:
   version: 1.1.0
   resolution: "shallowequal@npm:1.1.0"
   checksum: 15820dd544ce15521565c366940a46dcbe0f093c1336f6259c7b3e2490ca10135645ee262778f555d3ccc38283207f2f0a41e9a0f26888b5d5159f2904c4ac68
-  languageName: node
-  linkType: hard
-
-"sharedworker-loader@npm:2.1.1":
-  version: 2.1.1
-  resolution: "sharedworker-loader@npm:2.1.1"
-  dependencies:
-    loader-utils: ^1.0.0
-    schema-utils: ^0.4.0
-  peerDependencies:
-    webpack: ^2.0.0 || ^3.0.0 || ^4.0.0
-  checksum: 7ef9c2dff28ebc94160b8e60f44a66193499e67fc3f1c26e952a15b78d6c1c4b867065ac9fcf6d78f7a6db23e40e6bb7facecb0c7c9837e735585d6a5a5db0b7
   languageName: node
   linkType: hard
 
