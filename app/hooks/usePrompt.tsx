@@ -23,15 +23,17 @@ const ModalActions = styled.div`
 
 type PromptOptions = {
   placeholder?: string;
+  value?: string;
 };
 
 type ModalPromptProps = {
   onComplete: (value: string | undefined) => void;
   placeholder?: string;
+  value?: string;
 };
 
-function ModalPrompt({ onComplete, placeholder }: ModalPromptProps) {
-  const [value, setValue] = useState<string>("");
+function ModalPrompt({ onComplete, placeholder, value: initialValue }: ModalPromptProps) {
+  const [value, setValue] = useState<string>(initialValue ?? "");
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
@@ -64,15 +66,15 @@ export function usePrompt(): (options?: PromptOptions) => Promise<string | undef
   const [container] = useState(
     (): HTMLDivElement => {
       const element = document.createElement("div");
-      document.body.appendChild(element);
+      document.body.append(element);
       return element;
     },
   );
 
   useEffect(() => {
     return () => {
+      container.remove();
       unmountComponentAtNode(container);
-      document.body.removeChild(container);
     };
   }, [container]);
 
@@ -82,6 +84,7 @@ export function usePrompt(): (options?: PromptOptions) => Promise<string | undef
         render(
           <ModalPrompt
             placeholder={options?.placeholder}
+            value={options?.value}
             onComplete={(value) => {
               unmountComponentAtNode(container);
               resolve(value);
