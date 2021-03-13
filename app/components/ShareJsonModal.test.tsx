@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { mount } from "enzyme";
-import React from "react";
 
 import ShareJsonModal from "./ShareJsonModal";
 

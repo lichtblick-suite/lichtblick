@@ -114,7 +114,6 @@
   "app/players/OrderedStampPlayer.test.ts",
   "app/players/RandomAccessPlayer.test.ts",
   "app/players/RosbridgePlayer.test.ts",
-  "app/players/RosbridgePlayer.tsx",
   "app/players/UserNodePlayer/index.test.ts",
   "app/players/UserNodePlayer/index.ts",
   "app/players/UserNodePlayer/nodeTransformerWorker/transformer.test.ts",

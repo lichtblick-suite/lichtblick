@@ -12,10 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import cx from "classnames";
-// @ts-expect-error @types/history is outdated for v4. history v5 ships with updated declarations
-//                  When we update history to v5 we will be able to remove @types/history
-import { BrowserHistory } from "history";
-import React, { Component } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMountedState } from "react-use";
 
 import styles from "./ShareJsonModal.module.scss";
 import Button from "@foxglove-studio/app/components/Button";
@@ -23,40 +21,15 @@ import Flex from "@foxglove-studio/app/components/Flex";
 import Modal from "@foxglove-studio/app/components/Modal";
 import { downloadTextFile } from "@foxglove-studio/app/util";
 import clipboard from "@foxglove-studio/app/util/clipboard";
-import {
-  LAYOUT_QUERY_KEY,
-  LAYOUT_URL_QUERY_KEY,
-  PATCH_QUERY_KEY,
-} from "@foxglove-studio/app/util/globalConstants";
-import { stringifyParams } from "@foxglove-studio/app/util/layout";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 type Props = {
   onRequestClose: () => void;
-  onChange: (value: any) => void;
-  // the panel state from redux
-  // this will be serialized to json & displayed
-  value: any; // eslint-disable-line react/no-unused-prop-types
+  onChange?: (value: any) => void;
+  value: unknown;
   noun: string;
-  history?: BrowserHistory;
 };
 
-type State = {
-  value: string;
-  error: boolean;
-  copied: boolean;
-};
-
-function encode(value: any): string {
-  try {
-    return JSON.stringify(value, null, 2);
-  } catch (e) {
-    sendNotification("Error encoding value", e, "app", "error");
-    return "";
-  }
-}
-
-function decode(value: any): string {
+function decode(value: string) {
   try {
     return JSON.parse(value);
   } catch (err) {
@@ -64,100 +37,113 @@ function decode(value: any): string {
   }
 }
 
-function selectText(element: HTMLTextAreaElement | null | undefined): void {
+function selectText(element?: HTMLTextAreaElement | null): void {
   if (element) {
     element.focus();
     element.select();
   }
 }
 
-export default class ShareJsonModal extends Component<Props, State> {
-  state = {
-    value: encode(this.props.value),
-    error: false,
-    copied: false,
-  };
-
-  onChange = () => {
-    const { onChange, onRequestClose, history } = this.props;
-    let { value } = this.state;
-    if (value.length === 0) {
-      value = JSON.stringify({});
+export default function ShareJsonModal(props: Props) {
+  const [copied, setCopied] = useState(false);
+  const isMounted = useMountedState();
+  const [value, setValue] = useState<string>((): string => {
+    if (typeof props.value === "string") {
+      return props.value;
     }
+    return JSON.stringify(props.value, null, 2);
+  });
+  const [error, setError] = useState<Error>();
+
+  // if the prop value changes, check it for errors
+  useEffect(() => {
+    const newVal = props.value ?? "{}";
     try {
-      onChange(decode(value));
-      onRequestClose();
-      if (history) {
-        const params = new URLSearchParams(window.location.search);
-        params.delete(LAYOUT_QUERY_KEY);
-        params.delete(LAYOUT_URL_QUERY_KEY);
-        params.delete(PATCH_QUERY_KEY);
-        const query = stringifyParams(params);
-        history.push(`${location.pathname}${query}`);
+      if (typeof newVal === "string") {
+        setValue(newVal);
+        decode(newVal);
+      } else {
+        setValue(JSON.stringify(newVal, null, 2));
       }
-    } catch (e) {
-      if (process.env.NODE_ENV !== "test") {
-        console.error("Error parsing value from base64 json", e);
-      }
-      this.setState({ error: true });
+    } catch (err) {
+      setError(err);
     }
-  };
+  }, [props.value]);
 
-  onCopy = () => {
-    const { value } = this.state;
-    clipboard.copy(value).then(() => {
-      this.setState({ copied: true });
-      setTimeout(() => this.setState({ copied: false }), 1500);
+  const onApply = useCallback(() => {
+    if (value.length === 0) {
+      setError(new Error("Empty layout"));
+      return;
+    }
+
+    try {
+      const decoded = decode(value);
+      props.onChange && props.onChange(decoded);
+      props.onRequestClose();
+    } catch (err) {
+      if (process.env.NODE_ENV !== "test") {
+        console.error("Error parsing value from base64 json", err);
+      }
+
+      setError(err);
+    }
+  }, [props, value]);
+
+  const onCopy = useCallback(() => {
+    const val = value.length === 0 ? "{}" : value;
+    clipboard.copy(val).then(() => {
+      setCopied(true);
+      setTimeout(() => {
+        isMounted() && setCopied(false);
+      }, 1500);
     });
-  };
+  }, [isMounted, value]);
 
-  onDownload = () => {
-    const { value } = this.state;
-    downloadTextFile(value, "layout.json");
-  };
+  const onDownload = useCallback(() => {
+    const val = value.length === 0 ? "{}" : value;
+    downloadTextFile(val, "layout.json");
+  }, [value]);
 
-  renderError() {
-    const { error } = this.state;
+  const renderError = useMemo(() => {
     if (!error) {
       return null;
     }
     return <div className="notification is-danger">The input you provided is invalid.</div>;
-  }
+  }, [error]);
 
-  render() {
-    const { value, copied } = this.state;
-
-    return (
-      <Modal
-        onRequestClose={this.props.onRequestClose}
-        contentStyle={{
-          height: 400,
-          width: 600,
-          display: "flex",
-        }}
-      >
-        <Flex col className={styles.container}>
-          <p style={{ lineHeight: "22px" }}>
-            <em>Paste a new {this.props.noun} to use it, or copy this one to share it:</em>
-          </p>
-          <textarea
-            className={cx("textarea", styles.textarea)}
-            value={value}
-            onChange={(e) => this.setState({ value: e.target.value })}
-            data-nativeundoredo="true"
-            ref={selectText}
-          />
-          {this.renderError()}
-          <div className={styles.buttonBar}>
-            <Button primary onClick={this.onChange} className="test-apply">
-              Apply
-            </Button>
-            <Button onClick={this.onDownload}>Download</Button>
-            <Button onClick={this.onCopy}>{copied ? "Copied!" : "Copy"}</Button>
-            <Button onClick={() => this.setState({ value: "{}" })}>Clear</Button>
-          </div>
-        </Flex>
-      </Modal>
-    );
-  }
+  return (
+    <Modal
+      onRequestClose={props.onRequestClose}
+      contentStyle={{
+        height: 400,
+        width: 600,
+        display: "flex",
+      }}
+    >
+      <Flex col className={styles.container}>
+        <p style={{ lineHeight: "22px" }}>
+          <em>Paste a new {props.noun} to use it, or copy this one to share it:</em>
+        </p>
+        <textarea
+          className={cx("textarea", styles.textarea)}
+          value={value}
+          onChange={(ev) => {
+            setValue(ev.target.value);
+            setError(undefined);
+          }}
+          data-nativeundoredo="true"
+          ref={selectText}
+        />
+        {renderError}
+        <div className={styles.buttonBar}>
+          <Button primary onClick={onApply} className="test-apply">
+            Apply
+          </Button>
+          <Button onClick={onDownload}>Download</Button>
+          <Button onClick={onCopy}>{copied ? "Copied!" : "Copy"}</Button>
+          <Button onClick={() => setValue("{}")}>Clear</Button>
+        </div>
+      </Flex>
+    </Modal>
+  );
 }

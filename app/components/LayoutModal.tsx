@@ -11,42 +11,31 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-// @ts-expect-error BrowserHistory is not in @types/history v4 declarations
-import { BrowserHistory } from "history";
-import React, { useCallback } from "react";
-import { connect } from "react-redux";
+import { useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import { loadLayout } from "@foxglove-studio/app/actions/panels";
 import ShareJsonModal from "@foxglove-studio/app/components/ShareJsonModal";
-import renderToBody from "@foxglove-studio/app/components/renderToBody";
 import { State } from "@foxglove-studio/app/reducers";
 import { PanelsState } from "@foxglove-studio/app/reducers/panels";
 
-type OwnProps = {
+type Props = {
   onRequestClose: () => void;
-  history?: BrowserHistory;
 };
 
-type Props = OwnProps & {
-  panels: PanelsState;
-  loadLayout: typeof loadLayout;
-};
+function LayoutModal({ onRequestClose }: Props) {
+  const panels = useSelector((state: State) => state.persistedState.panels);
+  const dispatch = useDispatch();
 
-function UnconnectedLayoutModal({
-  onRequestClose,
-  loadLayout: loadFetchedLayout,
-  panels,
-  history,
-}: Props) {
   const onChange = useCallback(
     (layoutPayload: PanelsState) => {
-      loadFetchedLayout(layoutPayload);
+      dispatch(loadLayout(layoutPayload));
     },
-    [loadFetchedLayout],
+    [dispatch],
   );
+
   return (
     <ShareJsonModal
-      history={history}
       onRequestClose={onRequestClose}
       value={panels}
       onChange={onChange}
@@ -55,16 +44,4 @@ function UnconnectedLayoutModal({
   );
 }
 
-// TODO(JP): Use useSelector and useDispatch here, but unfortunately `loadLayout` needs
-// a `getState` function in addition to `dispatch`, so needs a bit of rework.
-// @ts-ignore look into errors for connect generic args
-const LayoutModal = connect<Props, OwnProps, _, _, _, _>(
-  (state: State) => ({ panels: state.persistedState.panels }),
-  { loadLayout },
-)(UnconnectedLayoutModal);
-
-export function openLayoutModal(history?: BrowserHistory) {
-  const modal = renderToBody(
-    <LayoutModal history={history} onRequestClose={() => modal.remove()} />,
-  );
-}
+export default LayoutModal;

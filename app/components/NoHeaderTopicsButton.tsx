@@ -12,14 +12,14 @@
 //   You may not use this file except in compliance with the License.
 import InformationIcon from "@mdi/svg/svg/information.svg";
 import { groupBy } from "lodash";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import styled from "styled-components";
 
 import Icon from "@foxglove-studio/app/components/Icon";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import Modal, { Title } from "@foxglove-studio/app/components/Modal";
+import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
 import TextContent from "@foxglove-studio/app/components/TextContent";
-import { RenderToBodyComponent } from "@foxglove-studio/app/components/renderToBody";
 
 const SRoot = styled.div`
   max-width: calc(100vw - 30px);

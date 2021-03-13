@@ -17,7 +17,7 @@ import styles from "./Confirm.module.scss";
 import Button from "@foxglove-studio/app/components/Button";
 import Flex from "@foxglove-studio/app/components/Flex";
 import Modal, { Title } from "@foxglove-studio/app/components/Modal";
-import { RenderToBodyComponent } from "@foxglove-studio/app/components/renderToBody";
+import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
 
 type ConfirmStyle = "danger" | "primary";
 

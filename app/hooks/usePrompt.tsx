@@ -2,12 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { render, unmountComponentAtNode } from "react-dom";
 import styled from "styled-components";
 
 import Button from "@foxglove-studio/app/components/Button";
 import Modal from "@foxglove-studio/app/components/Modal";
-import renderToBody from "@foxglove-studio/app/components/renderToBody";
 
 const ModalContent = styled.div`
   overflow-y: auto;
@@ -58,22 +58,41 @@ function ModalPrompt({ onComplete, placeholder }: ModalPromptProps) {
   );
 }
 
-function runPrompt(options?: PromptOptions): Promise<string | undefined> {
-  return new Promise((resolve) => {
-    const modal = renderToBody(
-      <ModalPrompt
-        placeholder={options?.placeholder}
-        onComplete={(value) => {
-          modal.remove();
-          resolve(value);
-        }}
-      />,
-    );
-  });
-}
-
 // Returns a function that can be used similarly to the DOM prompt(), but
 // backed by a React element rather than a native modal, and asynchronous.
-export function usePrompt(): typeof runPrompt {
+export function usePrompt(): (options?: PromptOptions) => Promise<string | undefined> {
+  const [container] = useState(
+    (): HTMLDivElement => {
+      const element = document.createElement("div");
+      document.body.appendChild(element);
+      return element;
+    },
+  );
+
+  useEffect(() => {
+    return () => {
+      unmountComponentAtNode(container);
+      document.body.removeChild(container);
+    };
+  }, [container]);
+
+  const runPrompt = useCallback(
+    (options?: PromptOptions) => {
+      return new Promise<string | undefined>((resolve) => {
+        render(
+          <ModalPrompt
+            placeholder={options?.placeholder}
+            onComplete={(value) => {
+              unmountComponentAtNode(container);
+              resolve(value);
+            }}
+          />,
+          container,
+        );
+      });
+    },
+    [container],
+  );
+
   return runPrompt;
 }

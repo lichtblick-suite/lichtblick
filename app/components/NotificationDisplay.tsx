@@ -25,7 +25,7 @@ import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
 import Icon from "@foxglove-studio/app/components/Icon";
 import Menu from "@foxglove-studio/app/components/Menu";
 import Modal, { Title } from "@foxglove-studio/app/components/Modal";
-import { RenderToBodyComponent } from "@foxglove-studio/app/components/renderToBody";
+import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { nbsp } from "@foxglove-studio/app/util/entities";
 import minivizAPI from "@foxglove-studio/app/util/minivizAPI";

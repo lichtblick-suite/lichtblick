@@ -12,17 +12,14 @@
 //   You may not use this file except in compliance with the License.
 
 import CloseIcon from "@mdi/svg/svg/close.svg";
-import * as React from "react";
+import { CSSProperties, PropsWithChildren } from "react";
+import { createPortal } from "react-dom";
 import styled from "styled-components";
 
 import Icon from "@foxglove-studio/app/components/Icon";
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { colors as sharedColors } from "@foxglove-studio/app/util/sharedStyleConstants";
-
-// Generic modal that renders a semi-transparent backdrop and close icon.
-// Should be opened using `renderInBody` so it sits on top of everything
-// (except in stories, where there is nothing to render on top of).
 
 export const Title = styled.h3`
   padding: 18px 24px;
@@ -44,7 +41,7 @@ const Container = styled.div`
   justify-content: center;
 `;
 
-const StyledMask = styled.div`
+const Backdrop = styled.div`
   position: absolute;
   top: 0;
   left: 0;
@@ -62,52 +59,35 @@ const StyledContent = styled.div`
 `;
 
 type Props = {
-  children: React.ReactNode;
   onRequestClose: () => void;
-  contentStyle?: {
-    [key: string]: any;
-  };
+  contentStyle?: CSSProperties;
 };
 
-export default class Modal extends React.PureComponent<Props> {
-  render() {
-    return (
-      <Container
-        ref={(el) => {
-          if (
-            el &&
-            el.parentElement &&
-            el.parentElement.dataset.modalcontainer !== "true" && // These two are for when directly rendering in storybook:
-            el.parentElement.id !== "root" &&
-            el.parentElement.parentElement?.id !== "root"
-          ) {
-            throw new Error(
-              "`<Modal>` must be rendered using `renderToBody()` or `RenderToBodyComponent`.",
-            );
-          }
+// Generic modal that renders a semi-transparent backdrop and close icon.
+export default function Modal(props: PropsWithChildren<Props>) {
+  return createPortal(
+    <Container>
+      <Backdrop onClick={props.onRequestClose} />
+      <StyledContent
+        style={{
+          borderRadius: 6,
+          backgroundColor: sharedColors.DARK2,
+          ...props.contentStyle,
         }}
       >
-        <StyledMask onClick={this.props.onRequestClose} />
-        <StyledContent
-          style={{
-            borderRadius: 6,
-            backgroundColor: sharedColors.DARK2,
-            ...this.props.contentStyle,
-          }}
+        <KeyListener global keyDownHandlers={{ Escape: props.onRequestClose }} />
+        <Icon
+          fade
+          dataTest="modal-close-icon"
+          xsmall
+          style={{ position: "absolute", right: 25, top: 25, cursor: "pointer" }}
+          onClick={props.onRequestClose}
         >
-          <KeyListener global keyDownHandlers={{ Escape: this.props.onRequestClose }} />
-          <Icon
-            fade
-            dataTest="modal-close-icon"
-            xsmall
-            style={{ position: "absolute", right: 25, top: 25, cursor: "pointer" }}
-            onClick={this.props.onRequestClose}
-          >
-            <CloseIcon />
-          </Icon>
-          {this.props.children}
-        </StyledContent>
-      </Container>
-    );
-  }
+          <CloseIcon />
+        </Icon>
+        {props.children}
+      </StyledContent>
+    </Container>,
+    document.body,
+  );
 }

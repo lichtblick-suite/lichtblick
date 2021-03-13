@@ -16,8 +16,6 @@ import { MessageReader, Time, parseMessageDefinition } from "rosbag";
 import roslib from "roslib";
 import { v4 as uuidv4 } from "uuid";
 
-import WssErrorModal from "@foxglove-studio/app/components/WssErrorModal";
-import renderToBody from "@foxglove-studio/app/components/renderToBody";
 import {
   AdvertisePayload,
   BobjectMessage,
@@ -59,9 +57,8 @@ export default class RosbridgePlayer implements Player {
     [datatype: string]: MessageReader;
   } = {};
   _start: Time | null | undefined; // The time at which we started playing.
-  _topicSubscriptions: {
-    [topicName: string]: roslib.Topic;
-  } = {}; // Active subscriptions.
+  // active subscriptions
+  _topicSubscriptions = new Map<string, roslib.Topic>();
   _requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
   _parsedMessages: Message[] = []; // Queue of messages that we'll send in next _emitState() call.
   _bobjects: BobjectMessage[] = []; // Queue of bobjects that we'll send in next _emitState() call.
@@ -86,19 +83,6 @@ export default class RosbridgePlayer implements Player {
       return;
     }
 
-    try {
-      // Create a dummy socket. This will throw if there's a SecurityError.
-      const tempSocket = new WebSocket(this._url);
-      tempSocket.binaryType = "arraybuffer";
-      tempSocket.close();
-    } catch (error) {
-      if (error && error.name === "SecurityError") {
-        const modal = renderToBody(<WssErrorModal onRequestClose={() => modal.remove()} />);
-        return;
-      }
-      console.error("Unknown WebSocket error", error);
-    }
-
     // `workersocket` will open the actual WebSocket connection in a WebWorker.
     const rosClient = new roslib.Ros({ url: this._url, transportLibrary: "workersocket" });
 
@@ -120,9 +104,9 @@ export default class RosbridgePlayer implements Player {
       if (this._requestTopicsTimeout) {
         clearTimeout(this._requestTopicsTimeout);
       }
-      for (const topicName in this._topicSubscriptions) {
-        this._topicSubscriptions[topicName].unsubscribe();
-        delete this._topicSubscriptions[topicName];
+      for (const [topicName, topic] of this._topicSubscriptions) {
+        topic.unsubscribe();
+        this._topicSubscriptions.delete(topicName);
       }
       delete this._rosClient;
       this._emitState();
@@ -292,48 +276,58 @@ export default class RosbridgePlayer implements Player {
 
     // Subscribe to all topics that we aren't subscribed to yet.
     for (const topicName of topicNames) {
-      if (!this._topicSubscriptions[topicName]) {
-        this._topicSubscriptions[topicName] = new roslib.Topic({
-          ros: this._rosClient,
-          name: topicName,
-          compression: "cbor-raw",
-        });
-        const { datatype } = availableTopicsByTopicName[topicName];
-        const messageReader = this._messageReadersByDatatype[datatype];
-        this._topicSubscriptions[topicName].subscribe((message: any) => {
-          if (!this._providerTopics) {
-            return;
-          }
-
-          const topic = topicName;
-          const receiveTime = fromMillis(Date.now());
-          const innerMessage = messageReader.readMessage(Buffer.from(message.bytes));
-          if (this._bobjectTopics.has(topicName) && this._providerDatatypes) {
-            this._bobjects.push({
-              topic,
-              receiveTime,
-              message: wrapJsObject(this._providerDatatypes, datatype, innerMessage),
-            });
-          }
-
-          if (this._parsedTopics.has(topicName)) {
-            this._parsedMessages.push({
-              topic,
-              receiveTime,
-              message: innerMessage as any,
-            });
-          }
-
-          this._emitState();
-        });
+      if (this._topicSubscriptions.has(topicName)) {
+        continue;
       }
+      const topic = new roslib.Topic({
+        ros: this._rosClient,
+        name: topicName,
+        compression: "cbor-raw",
+      });
+      const availTopic = availableTopicsByTopicName[topicName];
+      if (!availTopic) {
+        continue;
+      }
+
+      const { datatype } = availTopic;
+      const messageReader = this._messageReadersByDatatype[datatype];
+      if (!messageReader) {
+        continue;
+      }
+
+      topic.subscribe((message: any) => {
+        if (!this._providerTopics) {
+          return;
+        }
+
+        const receiveTime = fromMillis(Date.now());
+        const innerMessage = messageReader.readMessage(Buffer.from(message.bytes));
+        if (this._bobjectTopics.has(topicName) && this._providerDatatypes) {
+          this._bobjects.push({
+            topic: topicName,
+            receiveTime,
+            message: wrapJsObject(this._providerDatatypes, datatype, innerMessage),
+          });
+        }
+
+        if (this._parsedTopics.has(topicName)) {
+          this._parsedMessages.push({
+            topic: topicName,
+            receiveTime,
+            message: innerMessage as any,
+          });
+        }
+
+        this._emitState();
+      });
+      this._topicSubscriptions.set(topicName, topic);
     }
 
     // Unsubscribe from topics that we are subscribed to but shouldn't be.
-    for (const topicName in this._topicSubscriptions) {
+    for (const [topicName, topic] of this._topicSubscriptions) {
       if (!topicNames.includes(topicName)) {
-        this._topicSubscriptions[topicName].unsubscribe();
-        delete this._topicSubscriptions[topicName];
+        topic.unsubscribe();
+        this._topicSubscriptions.delete(topicName);
       }
     }
   }
@@ -362,7 +356,8 @@ export default class RosbridgePlayer implements Player {
   }
 
   publish({ topic, msg }: PublishPayload): void {
-    if (!this._topicPublishers[topic]) {
+    const subscription = this._topicSubscriptions.get(topic);
+    if (!subscription) {
       sendNotification(
         "Invalid publish call",
         `Tried to publish on a topic that is not registered as a publisher: ${topic}`,
@@ -371,7 +366,7 @@ export default class RosbridgePlayer implements Player {
       );
       return;
     }
-    this._topicPublishers[topic].publish(msg);
+    subscription.publish(msg);
   }
 
   // Bunch of unsupported stuff. Just don't do anything for these.

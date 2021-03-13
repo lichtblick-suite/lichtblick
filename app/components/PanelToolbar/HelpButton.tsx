@@ -12,32 +12,25 @@
 //   You may not use this file except in compliance with the License.
 
 import HelpCircleOutlineIcon from "@mdi/svg/svg/help-circle-outline.svg";
-import { CSSProperties, ReactNode } from "react";
+import { CSSProperties, PropsWithChildren, useState } from "react";
 
 import styles from "./index.module.scss";
 import HelpModal from "@foxglove-studio/app/components/HelpModal";
 import Icon from "@foxglove-studio/app/components/Icon";
-import renderToBody from "@foxglove-studio/app/components/renderToBody";
 
 type Props = {
-  children: ReactNode | string;
   iconStyle?: CSSProperties;
 };
 
-export default class HelpButton extends React.Component<Props> {
-  render() {
-    return (
-      <Icon
-        tooltip="Help"
-        fade
-        onClick={() => {
-          const modal = renderToBody(
-            <HelpModal onRequestClose={() => modal.remove()}>{this.props.children}</HelpModal>,
-          );
-        }}
-      >
-        <HelpCircleOutlineIcon className={styles.icon} style={this.props.iconStyle || {}} />
-      </Icon>
-    );
-  }
+export default function HelpButton(props: PropsWithChildren<Props>) {
+  const [showHelp, setShowHelp] = useState<boolean>(false);
+
+  return (
+    <Icon tooltip="Help" fade onClick={() => setShowHelp(true)}>
+      {showHelp && (
+        <HelpModal onRequestClose={() => setShowHelp(false)}>{props.children}</HelpModal>
+      )}
+      <HelpCircleOutlineIcon className={styles.icon} style={props.iconStyle} />
+    </Icon>
+  );
 }

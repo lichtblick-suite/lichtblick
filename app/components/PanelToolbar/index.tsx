@@ -41,10 +41,9 @@ import Dimensions from "@foxglove-studio/app/components/Dimensions";
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import Icon from "@foxglove-studio/app/components/Icon";
 import { Item, SubMenu } from "@foxglove-studio/app/components/Menu";
-import PanelContext from "@foxglove-studio/app/components/PanelContext";
+import PanelContext, { usePanelContext } from "@foxglove-studio/app/components/PanelContext";
 import { getPanelTypeFromMosaic } from "@foxglove-studio/app/components/PanelToolbar/utils";
 import ShareJsonModal from "@foxglove-studio/app/components/ShareJsonModal";
-import renderToBody from "@foxglove-studio/app/components/renderToBody";
 import PanelList, { PanelSelection } from "@foxglove-studio/app/panels/PanelList";
 import { State } from "@foxglove-studio/app/reducers";
 import frameless from "@foxglove-studio/app/util/frameless";
@@ -136,25 +135,28 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
     [actions, mosaicActions, mosaicWindowActions, tabId],
   );
 
-  const onImportClick = useCallback(
-    (store, id) => {
-      if (!id) {
-        return;
-      }
-      const panelConfigById = store.getState().persistedState.panels.savedProps;
-      const modal = renderToBody(
-        <ShareJsonModal
-          onRequestClose={() => modal.remove()}
-          value={panelConfigById[id] || {}}
-          onChange={(config) =>
-            actions.savePanelConfigs({ configs: [{ id, config, override: true }] })
-          }
-          noun="panel configuration"
-        />,
-      );
-    },
-    [actions],
-  );
+  const { store } = useContext(ReactReduxContext);
+  const panelContext = usePanelContext();
+  const [showShareModal, setShowShareModal] = useState<boolean>(false);
+
+  const shareModal = useMemo(() => {
+    const id = panelContext?.id;
+    if (!id || !showShareModal) {
+      return null;
+    }
+
+    const panelConfigById = store.getState().persistedState.panels.savedProps;
+    return (
+      <ShareJsonModal
+        onRequestClose={() => setShowShareModal(false)}
+        value={panelConfigById[id] ?? {}}
+        onChange={(config) =>
+          actions.savePanelConfigs({ configs: [{ id, config, override: true }] })
+        }
+        noun="panel configuration"
+      />
+    );
+  }, [panelContext?.id, showShareModal, store, actions]);
 
   const type = getPanelType();
   if (!type) {
@@ -162,72 +164,65 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
   }
 
   return (
-    <ReactReduxContext.Consumer>
-      {({ store }) => (
-        <PanelContext.Consumer>
-          {(panelContext) => (
-            <>
-              <SubMenu
-                text="Change panel"
-                icon={<CheckboxMultipleBlankOutlineIcon />}
-                dataTest="panel-settings-change"
-              >
-                <PanelList
-                  selectedPanelTitle={panelContext?.title}
-                  onPanelSelect={swap(panelContext?.id)}
-                />
-              </SubMenu>
-              {!isUnknownPanel && (
-                <>
-                  <Item
-                    icon={<FullscreenIcon />}
-                    onClick={panelContext?.enterFullscreen}
-                    dataTest="panel-settings-fullscreen"
-                    tooltip="(shortcut: ` or ~)"
-                  >
-                    Fullscreen
-                  </Item>
-                  <Item
-                    icon={<ArrowSplitHorizontalIcon />}
-                    onClick={() => split(store, panelContext?.id, "column")}
-                    dataTest="panel-settings-hsplit"
-                    tooltip="(shortcut: ` or ~)"
-                  >
-                    Split horizontal
-                  </Item>
-                  <Item
-                    icon={<ArrowSplitVerticalIcon />}
-                    onClick={() => split(store, panelContext?.id, "row")}
-                    dataTest="panel-settings-vsplit"
-                    tooltip="(shortcut: ` or ~)"
-                  >
-                    Split vertical
-                  </Item>
-                </>
-              )}
-              <Item
-                icon={<TrashCanOutlineIcon />}
-                onClick={close}
-                dataTest="panel-settings-remove"
-                tooltip="(shortcut: ` or ~)"
-              >
-                Remove panel
-              </Item>
-              {!isUnknownPanel && (
-                <Item
-                  icon={<CodeJsonIcon />}
-                  onClick={() => onImportClick(store, panelContext?.id)}
-                  disabled={type === TAB_PANEL_TYPE}
-                  dataTest="panel-settings-config"
-                >
-                  Import/export panel settings
-                </Item>
-              )}
-            </>
-          )}
-        </PanelContext.Consumer>
+    <>
+      <SubMenu
+        text="Change panel"
+        icon={<CheckboxMultipleBlankOutlineIcon />}
+        dataTest="panel-settings-change"
+      >
+        <PanelList
+          selectedPanelTitle={panelContext?.title}
+          onPanelSelect={swap(panelContext?.id)}
+        />
+      </SubMenu>
+      {!isUnknownPanel && (
+        <>
+          <Item
+            icon={<FullscreenIcon />}
+            onClick={panelContext?.enterFullscreen}
+            dataTest="panel-settings-fullscreen"
+            tooltip="(shortcut: ` or ~)"
+          >
+            Fullscreen
+          </Item>
+          <Item
+            icon={<ArrowSplitHorizontalIcon />}
+            onClick={() => split(store, panelContext?.id, "column")}
+            dataTest="panel-settings-hsplit"
+            tooltip="(shortcut: ` or ~)"
+          >
+            Split horizontal
+          </Item>
+          <Item
+            icon={<ArrowSplitVerticalIcon />}
+            onClick={() => split(store, panelContext?.id, "row")}
+            dataTest="panel-settings-vsplit"
+            tooltip="(shortcut: ` or ~)"
+          >
+            Split vertical
+          </Item>
+        </>
       )}
-    </ReactReduxContext.Consumer>
+      <Item
+        icon={<TrashCanOutlineIcon />}
+        onClick={close}
+        dataTest="panel-settings-remove"
+        tooltip="(shortcut: ` or ~)"
+      >
+        Remove panel
+      </Item>
+      {!isUnknownPanel && (
+        <Item
+          icon={<CodeJsonIcon />}
+          onClick={() => setShowShareModal(true)}
+          disabled={type === TAB_PANEL_TYPE}
+          dataTest="panel-settings-config"
+        >
+          Import/export panel settings
+        </Item>
+      )}
+      {shareModal}
+    </>
   );
 }
 

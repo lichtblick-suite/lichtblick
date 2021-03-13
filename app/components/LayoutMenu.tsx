@@ -11,38 +11,42 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import CodeJsonIcon from "@mdi/svg/svg/code-json.svg";
-import React, { useState } from "react";
+import { useState } from "react";
 
 import LayoutIcon from "@foxglove-studio/app/assets/layout.svg";
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
 import ClearBagCacheMenuItem from "@foxglove-studio/app/components/ClearBagCacheMenuItem";
 import Flex from "@foxglove-studio/app/components/Flex";
 import { WrappedIcon } from "@foxglove-studio/app/components/Icon";
-import { openLayoutModal } from "@foxglove-studio/app/components/LayoutModal";
+import LayoutModal from "@foxglove-studio/app/components/LayoutModal";
 import Menu, { Item } from "@foxglove-studio/app/components/Menu";
 
 export default function LayoutMenu() {
   const [isOpen, setIsOpen] = useState(false);
+  const [showLayoutModal, setShowLayoutModal] = useState(false);
 
   return (
-    <ChildToggle position="below" onToggle={setIsOpen} isOpen={isOpen}>
-      <Flex>
-        <WrappedIcon medium fade active={isOpen} tooltip="Config">
-          <LayoutIcon />
-        </WrappedIcon>
-      </Flex>
-      <Menu>
-        <Item
-          icon={<CodeJsonIcon />}
-          onClick={() => {
-            setIsOpen(false);
-            openLayoutModal();
-          }}
-        >
-          Import/export layout
-        </Item>
-        <ClearBagCacheMenuItem />
-      </Menu>
-    </ChildToggle>
+    <>
+      {showLayoutModal && <LayoutModal onRequestClose={() => setShowLayoutModal(false)} />}
+      <ChildToggle position="below" onToggle={setIsOpen} isOpen={isOpen}>
+        <Flex>
+          <WrappedIcon medium fade active={isOpen} tooltip="Config">
+            <LayoutIcon />
+          </WrappedIcon>
+        </Flex>
+        <Menu>
+          <Item
+            icon={<CodeJsonIcon />}
+            onClick={() => {
+              setIsOpen(false);
+              setShowLayoutModal(true);
+            }}
+          >
+            Import/export layout
+          </Item>
+          <ClearBagCacheMenuItem />
+        </Menu>
+      </ChildToggle>
+    </>
   );
 }

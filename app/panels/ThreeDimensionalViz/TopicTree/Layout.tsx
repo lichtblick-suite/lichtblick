@@ -41,7 +41,7 @@ import { useExperimentalFeature } from "@foxglove-studio/app/components/Experime
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
 import Modal from "@foxglove-studio/app/components/Modal";
 import PanelContext from "@foxglove-studio/app/components/PanelContext";
-import { RenderToBodyComponent } from "@foxglove-studio/app/components/renderToBody";
+import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
 import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import {

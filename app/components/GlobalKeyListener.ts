@@ -35,16 +35,11 @@ const inNativeUndoRedoElement = (eventTarget: EventTarget) => {
 
 type Props = {
   openSaveLayoutModal?: () => void;
-  openLayoutModal?: () => void;
   openShortcutsModal?: () => void;
   history: any;
 };
 
-export default function GlobalKeyListener({
-  openSaveLayoutModal,
-  openLayoutModal,
-  history,
-}: Props) {
+export default function GlobalKeyListener({ openSaveLayoutModal, history }: Props) {
   const dispatch = useDispatch();
   const actions = useMemo(
     () => bindActionCreators({ redoLayoutChange, undoLayoutChange }, dispatch),
@@ -92,9 +87,6 @@ export default function GlobalKeyListener({
       } else if (lowercaseEventKey === "s" && openSaveLayoutModal) {
         e.preventDefault();
         openSaveLayoutModal();
-      } else if (lowercaseEventKey === "e" && openLayoutModal) {
-        e.preventDefault();
-        openLayoutModal();
       } else if (lowercaseEventKey === "/") {
         e.preventDefault();
         history.push(`/shortcuts${window.location.search}`);
@@ -116,7 +108,7 @@ export default function GlobalKeyListener({
           .catch((error) => console.warn(error));
       }
     },
-    [openSaveLayoutModal, openLayoutModal, history, actions, takeScreenshot],
+    [openSaveLayoutModal, history, actions, takeScreenshot],
   );
 
   // Not using KeyListener because we want to preventDefault on [ctrl+z] but not on [z], and we want
