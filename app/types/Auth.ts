@@ -12,5 +12,5 @@
 //   You may not use this file except in compliance with the License.
 
 export type Auth = {
-  username: string | null | undefined;
+  username?: string;
 };

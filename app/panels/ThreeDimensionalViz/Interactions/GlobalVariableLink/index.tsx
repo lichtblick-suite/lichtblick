@@ -79,7 +79,7 @@ type Props = {
   hasNestedValue?: boolean;
   highlight?: boolean;
   label?: string;
-  linkedGlobalVariable?: LinkedGlobalVariable | null | undefined;
+  linkedGlobalVariable?: LinkedGlobalVariable;
   markerKeyPath?: string[];
   nestedValueStyle?: any;
   onlyRenderAddLink?: boolean;

@@ -38,7 +38,7 @@ describe("getDiff", () => {
     });
 
     // with showFullMessageForDiff set to true
-    expect(getDiff(firstObj, secondObj, null, true)).toEqual({
+    expect(getDiff(firstObj, secondObj, undefined, true)).toEqual({
       deletedKey: { [diffLabels.DELETED.labelText]: 1 },
       addedKey: { [diffLabels.ADDED.labelText]: 1 },
       changedKey: { [diffLabels.CHANGED.labelText]: `2 ${diffArrow} 3` },
@@ -83,7 +83,7 @@ describe("getDiff", () => {
       getDiff(
         { a: firstObj, b: secondObj, c: secondObj },
         { a: secondObj, b: firstObj, c: secondObj },
-        null,
+        undefined,
         true,
       ),
     ).toEqual({

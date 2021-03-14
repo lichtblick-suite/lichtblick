@@ -134,8 +134,8 @@ export function getPanelsByType(): {
 
 type DropDescription = {
   type: string;
-  config: PanelConfig | null | undefined;
-  relatedConfigs: SavedProps | null | undefined;
+  config?: PanelConfig;
+  relatedConfigs?: SavedProps;
   position: MosaicDropTargetPosition;
   path: MosaicPath;
   tabId?: string;
@@ -144,8 +144,8 @@ type PanelItemProps = {
   panel: {
     type: string;
     title: string;
-    config: PanelConfig | null | undefined;
-    relatedConfigs: SavedProps | null | undefined;
+    config?: PanelConfig;
+    relatedConfigs?: SavedProps;
   };
   searchQuery: string;
   checked?: boolean;

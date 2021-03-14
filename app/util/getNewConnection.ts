@@ -17,10 +17,10 @@ import { Range, isRangeCoveredByRanges, missingRanges } from "./ranges";
 // Based on a number of properties this function determines if a new connection should be opened or
 // not. It can be used for any type of ranges, be it bytes, timestamps, or something else.
 export function getNewConnection(options: {
-  currentRemainingRange: Range | null | undefined; // The remaining range that the current connection (if any) is going to download.
-  readRequestRange: Range | null | undefined; // The range of the read request that we're trying to satisfy.
+  currentRemainingRange?: Range; // The remaining range that the current connection (if any) is going to download.
+  readRequestRange?: Range; // The range of the read request that we're trying to satisfy.
   downloadedRanges: Range[]; // Array of ranges that have been downloaded already.
-  lastResolvedCallbackEnd: number | null | undefined; // The range.end of the last read request that we resolved. Useful for reading ahead a bit.
+  lastResolvedCallbackEnd?: number; // The range.end of the last read request that we resolved. Useful for reading ahead a bit.
   cacheSize: number; // The cache size. If equal to or larger than `fileSize` we will attempt to download the whole file.
   fileSize: number; // Size of the file.
   continueDownloadingThreshold: number; // Amount we're willing to wait downloading before opening a new connection.
@@ -45,10 +45,10 @@ function getNewConnectionWithExistingReadRequest({
   fileSize,
   continueDownloadingThreshold,
 }: {
-  currentRemainingRange: Range | null | undefined;
+  currentRemainingRange?: Range;
   readRequestRange: Range;
   downloadedRanges: Range[];
-  lastResolvedCallbackEnd: number | null | undefined;
+  lastResolvedCallbackEnd?: number;
   cacheSize: number;
   fileSize: number;
   continueDownloadingThreshold: number;
@@ -107,7 +107,7 @@ function getNewConnectionWithoutExistingConnection({
   fileSize,
 }: {
   downloadedRanges: Range[];
-  lastResolvedCallbackEnd: number | null | undefined;
+  lastResolvedCallbackEnd?: number;
   cacheSize: number;
   fileSize: number;
 }): Range | null | undefined {

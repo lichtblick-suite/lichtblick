@@ -107,7 +107,7 @@ const missingTransformMessage = (
   rootTransformId: string,
   error: ErrorDetails,
   transforms: Transforms,
-  skipTransform: SkipTransformSpec | null | undefined,
+  skipTransform: SkipTransformSpec | undefined,
 ): string => {
   if (skipTransform != null && error.frameIds.has(skipTransform.frameId)) {
     return `missing transform. Is ${skipTransform.sourceTopic} present?`;
@@ -123,7 +123,7 @@ const missingTransformMessage = (
 export function getSceneErrorsByTopic(
   sceneErrors: SceneErrors,
   transforms: Transforms,
-  skipTransform: SkipTransformSpec | null | undefined,
+  skipTransform: SkipTransformSpec | undefined,
 ): {
   [topicName: string]: string[];
 } {
@@ -209,13 +209,13 @@ export default class SceneBuilder implements MarkerProvider {
     topicsWithBadFrameIds: new Set(),
   };
   maps = [];
-  flattenedZHeightPose: Pose | null | undefined = null;
+  flattenedZHeightPose?: Pose;
   scene = {};
   collectors: {
     [key: string]: MessageCollector;
   } = {};
   _clock?: Time;
-  _playerId: string | null | undefined = null;
+  _playerId?: string;
   _settingsByKey: TopicSettingsCollection = {};
   _onForceUpdate?: () => void;
 
@@ -783,7 +783,7 @@ export default class SceneBuilder implements MarkerProvider {
     topic: string,
     drawData: StampedMessage,
     type: number,
-    originalMessage?: any | null,
+    originalMessage?: any,
   ): void => {
     const sourcePose = emptyPose();
     const pose = this.transforms?.apply(

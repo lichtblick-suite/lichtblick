@@ -45,7 +45,7 @@ const isArrayElement = (value: any, pathItem: any, structureItem: any): boolean 
 // a bunch of paths for that navigated down value.
 export function getValueActionForValue(
   rootValue: unknown,
-  rootStructureItem: MessagePathStructureItem | null | undefined,
+  rootStructureItem: MessagePathStructureItem | undefined,
   keyPath: (number | string)[],
 ): ValueAction | null | undefined {
   let singleSlicePath = "";
@@ -123,7 +123,7 @@ export function getValueActionForValue(
 // Using comma-joined path to allow memoization of this function
 export const getStructureItemForPath = memoizeWeak(
   (
-    rootStructureItem: MessagePathStructureItem | null | undefined,
+    rootStructureItem: MessagePathStructureItem | undefined,
     keyPathJoined: string,
   ): MessagePathStructureItem | null | undefined => {
     // split the path and parse into numbers and strings

@@ -55,8 +55,8 @@ type Props = {
 type PanelState = {
   cachedProps: Partial<Props>;
   datatypeNames: string[];
-  parsedObject: any | null | undefined;
-  error: string | null | undefined;
+  parsedObject?: any;
+  error?: string;
 };
 
 const STextArea = styled.textarea`
@@ -128,7 +128,7 @@ class Publish extends React.PureComponent<Props, PanelState> {
   state = {
     cachedProps: {},
     datatypeNames: [],
-    error: null,
+    error: undefined,
     parsedObject: undefined,
   };
 

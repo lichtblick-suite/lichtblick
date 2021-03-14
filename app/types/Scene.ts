@@ -33,7 +33,7 @@ import {
 import Bounds from "@foxglove-studio/app/util/Bounds";
 
 export type Scene = {
-  flattenedZHeightPose: Pose | null | undefined;
+  flattenedZHeightPose?: Pose;
   bounds: Bounds;
 };
 

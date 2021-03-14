@@ -23,7 +23,7 @@ export function findCanvas(): HTMLCanvasElement {
 
 export async function simulateMouseMove(
   point: number[] = [0, 0],
-  canvas: HTMLCanvasElement | null | undefined,
+  canvas: HTMLCanvasElement | undefined,
 ) {
   const [clientX, clientY] = point;
   canvas = canvas || findCanvas();

@@ -88,7 +88,7 @@ function mapTemplateIdsToNewIds(templateIds: string[]): PanelIdMap {
 function getLayoutWithNewPanelIds(
   layout: MosaicNode,
   panelIdMap: PanelIdMap,
-): MosaicNode | null | undefined {
+): MosaicNode | undefined {
   if (typeof layout === "string") {
     // return corresponding ID if it exists in panelIdMap
     // (e.g. for Tab panel presets with 1 panel in active layout)
@@ -96,7 +96,7 @@ function getLayoutWithNewPanelIds(
   }
 
   if (!layout) {
-    return null;
+    return undefined;
   }
   const newLayout: Record<string, any> = {};
   for (const key in layout) {
@@ -201,7 +201,7 @@ export const getSaveConfigsPayloadForAddedPanel = ({
 }: {
   id: string;
   config: PanelConfig;
-  relatedConfigs: SavedProps | null | undefined;
+  relatedConfigs?: SavedProps;
 }): SaveConfigsPayload => {
   if (!relatedConfigs) {
     return { configs: [{ id, config }] };
@@ -234,7 +234,10 @@ export function getPanelIdsInsideTabPanels(panelIds: string[], savedProps: Saved
   return flatMap(tabLayouts, getLeaves);
 }
 
-export const DEFAULT_TAB_PANEL_CONFIG = { activeTabIdx: 0, tabs: [{ title: "1", layout: null }] };
+export const DEFAULT_TAB_PANEL_CONFIG = {
+  activeTabIdx: 0,
+  tabs: [{ title: "1", layout: undefined }],
+};
 // Returns all panelIds for a given layout (including layouts stored in Tab panels)
 export function getAllPanelIds(layout: MosaicNode, savedProps: SavedProps): string[] {
   const layoutPanelIds = getLeaves(layout);
@@ -242,7 +245,7 @@ export function getAllPanelIds(layout: MosaicNode, savedProps: SavedProps): stri
   return [...layoutPanelIds, ...tabPanelIds];
 }
 
-export const validateTabPanelConfig = (config?: PanelConfig | null) => {
+export const validateTabPanelConfig = (config?: PanelConfig) => {
   if (!config) {
     return false;
   }
@@ -265,7 +268,7 @@ export const validateTabPanelConfig = (config?: PanelConfig | null) => {
 };
 
 export const updateTabPanelLayout = (
-  layout: MosaicNode | null,
+  layout: MosaicNode | undefined,
   tabPanelConfig: TabPanelConfig,
 ): TabPanelConfig => {
   const updatedTabs = tabPanelConfig.tabs.map((tab, i) => {
@@ -295,11 +298,11 @@ export const removePanelFromTabPanel = (
   }
 
   const currentTabLayout = config.tabs[config.activeTabIdx].layout;
-  let newTree: MosaicNode | null;
+  let newTree: MosaicNode | undefined;
   if (!path.length) {
-    newTree = null;
+    newTree = undefined;
   } else {
-    const update = createRemoveUpdate(currentTabLayout, path);
+    const update = createRemoveUpdate(currentTabLayout ?? null, path);
     newTree = updateTree<string>(currentTabLayout!, [update]);
   }
 
@@ -310,7 +313,7 @@ export const removePanelFromTabPanel = (
 };
 
 export const createAddUpdates = (
-  tree: MosaicNode | null | undefined,
+  tree: MosaicNode | undefined,
   panelId: string,
   newPath: MosaicPath,
   position: MosaicDropTargetPosition,
@@ -328,9 +331,9 @@ export const createAddUpdates = (
 
 export const addPanelToTab = (
   insertedPanelId: string,
-  destinationPath: MosaicPath | null | undefined,
-  destinationPosition: MosaicDropTargetPosition | null | undefined,
-  tabConfig: PanelConfig | null | undefined,
+  destinationPath: MosaicPath | undefined,
+  destinationPosition: MosaicDropTargetPosition | undefined,
+  tabConfig: PanelConfig | undefined,
   tabId: string,
 ): SaveConfigsPayload => {
   const safeTabConfig = validateTabPanelConfig(tabConfig)
@@ -449,13 +452,13 @@ export const moveTabBetweenTabPanels = ({
 
 export const replaceAndRemovePanels = (
   panelArgs: {
-    originalId?: string | null | undefined;
-    newId?: string | null | undefined;
+    originalId?: string;
+    newId?: string;
     idsToRemove?: string[];
   },
   layout: MosaicNode,
-): MosaicNode | null => {
-  const { originalId = null, newId = null, idsToRemove = [] } = panelArgs;
+): MosaicNode | undefined => {
+  const { originalId, newId, idsToRemove = [] } = panelArgs;
   const panelIds = getLeaves(layout);
   if (xor(panelIds, idsToRemove).length === 0) {
     return newId;
@@ -468,7 +471,7 @@ export const replaceAndRemovePanels = (
       } else if (currentLayout === originalId) {
         return newId;
       } else if (!currentLayout || currentLayout === panelIdToRemove) {
-        return null;
+        return undefined;
       }
 
       const pathToNode = getPathFromNode(panelIdToRemove, currentLayout);
@@ -483,8 +486,8 @@ export const replaceAndRemovePanels = (
 };
 
 export function getConfigsForNestedPanelsInsideTab(
-  panelIdToReplace: string | null | undefined,
-  tabPanelId: string | null | undefined,
+  panelIdToReplace: string | undefined,
+  tabPanelId: string | undefined,
   panelIdsToRemove: string[],
   savedProps: SavedProps,
 ): ConfigsPayload[] {
@@ -506,8 +509,8 @@ export function getConfigsForNestedPanelsInsideTab(
 }
 
 export function getLayoutPatch(
-  baseState: PanelsState | null | undefined,
-  newState: PanelsState | null | undefined,
+  baseState: PanelsState | undefined,
+  newState: PanelsState | undefined,
 ): string {
   const delta = jsondiffpatch.diff(baseState, newState);
   return delta ? JSON.stringify(delta) : "";

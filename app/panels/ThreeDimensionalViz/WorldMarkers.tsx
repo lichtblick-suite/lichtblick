@@ -110,7 +110,7 @@ const glTextAtlasPromise = glTextAtlasLoader();
 
 type GLTextAtlasStatus = {
   status: "LOADING" | "LOADED";
-  glTextAtlas: TextAtlas | null | undefined;
+  glTextAtlas?: TextAtlas;
 };
 
 export type WorldMarkerProps = {

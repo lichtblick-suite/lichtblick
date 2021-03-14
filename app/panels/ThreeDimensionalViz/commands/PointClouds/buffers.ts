@@ -18,7 +18,7 @@ import { ColorMode } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Topic
 import { PointField } from "@foxglove-studio/app/types/Messages";
 
 export type FieldOffsetsAndReaders = {
-  [name: string]: { datatype: string; offset: number; reader: FieldReader | null | undefined };
+  [name: string]: { datatype: string; offset: number; reader?: FieldReader };
 };
 
 export function getFieldOffsetsAndReaders(fields: readonly PointField[]): FieldOffsetsAndReaders {

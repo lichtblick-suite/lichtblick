@@ -70,7 +70,7 @@ export default function PlotLegend(props: PlotLegendProps) {
   const lastPath = last(paths);
 
   const onInputChange = useCallback(
-    (value: string, index: number | null | undefined) => {
+    (value: string, index?: number) => {
       if (index == null) {
         throw new Error("index not set");
       }
@@ -82,7 +82,7 @@ export default function PlotLegend(props: PlotLegendProps) {
   );
 
   const onInputTimestampMethodChange = useCallback(
-    (value: TimestampMethod, index: number | null | undefined) => {
+    (value: TimestampMethod, index?: number) => {
       if (index == null) {
         throw new Error("index not set");
       }

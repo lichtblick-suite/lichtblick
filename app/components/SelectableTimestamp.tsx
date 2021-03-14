@@ -73,7 +73,7 @@ type Props = {
   endTime: Time;
   pausePlayback: () => void;
   seekPlayback: (arg0: Time) => void;
-  timezone?: string | null | undefined;
+  timezone?: string;
 };
 
 function getValidTime(timeStr: string, start: Time, end: Time, isRosTime: boolean) {

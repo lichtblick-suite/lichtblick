@@ -31,7 +31,7 @@ const rootReducer = createRootReducer(createBrowserHistory());
 const fixture = { topics: [], datatypes: {}, frame: {}, layout: "Tab!a" };
 const manyTabs = new Array(25)
   .fill(1)
-  .map((elem, idx) => ({ title: `Tab #${idx + 1}`, layout: null }));
+  .map((elem, idx) => ({ title: `Tab #${idx + 1}`, layout: undefined }));
 const DEFAULT_TIMEOUT = 200;
 storiesOf("<Tab>", module)
   .addParameters({
@@ -90,7 +90,7 @@ storiesOf("<Tab>", module)
           savedProps: {
             "Tab!a": {
               activeTabIdx: 0,
-              tabs: [{ title: "First tab", layout: null }],
+              tabs: [{ title: "First tab", layout: undefined }],
             },
           },
         }}
@@ -116,7 +116,7 @@ storiesOf("<Tab>", module)
           savedProps: {
             "Tab!a": {
               activeTabIdx: 0,
-              tabs: [{ title: "First tab", layout: null }],
+              tabs: [{ title: "First tab", layout: undefined }],
             },
           },
         }}
@@ -175,7 +175,7 @@ storiesOf("<Tab>", module)
           tabs: [
             {
               title: "Tab A",
-              layout: null,
+              layout: undefined,
             },
             {
               title: "Tab B",
@@ -197,7 +197,7 @@ storiesOf("<Tab>", module)
             },
             {
               title: "Tab C",
-              layout: null,
+              layout: undefined,
             },
           ],
         }}
@@ -224,7 +224,7 @@ storiesOf("<Tab>", module)
         fixture={{
           ...fixture,
           savedProps: {
-            "Tab!a": { activeTabIdx: 0, tabs: [{ title: "Tab A", layout: null }] },
+            "Tab!a": { activeTabIdx: 0, tabs: [{ title: "Tab A", layout: undefined }] },
           },
         }}
         style={{ width: "100%" }}

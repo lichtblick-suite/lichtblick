@@ -59,10 +59,10 @@ type Props = {
   onPanZoom?: (arg0: ScaleBounds[]) => void;
   onClick?: (
     arg0: React.MouseEvent<HTMLCanvasElement>,
-    datalabel: ScaleBounds[] | null | undefined,
+    datalabel: ScaleBounds[] | undefined,
   ) => void;
-  forceDisableWorkerRendering?: boolean | null | undefined;
-  scaleOptions?: ScaleOptions | null | undefined;
+  forceDisableWorkerRendering?: boolean;
+  scaleOptions?: ScaleOptions;
   onChartUpdate?: () => OnEndChartUpdate;
 };
 
@@ -71,8 +71,8 @@ const devicePixelRatio = window.devicePixelRatio || 1;
 const webWorkerManager = new WebWorkerManager(ChartJSWorker, 4);
 
 class ChartComponent extends React.PureComponent<Props> {
-  canvas: HTMLCanvasElement | null | undefined;
-  _chartRpc: RpcLike | null | undefined;
+  canvas?: HTMLCanvasElement;
+  _chartRpc?: RpcLike;
   _node?: OffscreenCanvas;
   _id = uuidv4();
   _scaleBoundsByScaleId = {};
@@ -190,7 +190,7 @@ class ChartComponent extends React.PureComponent<Props> {
 
     if (this._chartRpc) {
       this._chartRpc.send("destroy", { id: this._id });
-      this._chartRpc = null;
+      this._chartRpc = undefined;
 
       if (this._usingWebWorker) {
         webWorkerManager.unregisterWorkerListener(this._id);
@@ -198,13 +198,13 @@ class ChartComponent extends React.PureComponent<Props> {
     }
   }
 
-  _ref = (element: HTMLCanvasElement | null | undefined): void => {
-    this.canvas = element;
+  _ref = (element?: HTMLCanvasElement | null): void => {
+    this.canvas = element ?? undefined;
   };
 
   getElementAtXAxis = async (
     event: React.MouseEvent<any> | MouseEvent,
-  ): Promise<HoveredElement | null | undefined> => {
+  ): Promise<HoveredElement | undefined> => {
     if (!this.canvas) {
       return Promise.resolve(undefined);
     }

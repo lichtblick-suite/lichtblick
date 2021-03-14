@@ -95,7 +95,7 @@ function GlobalVariablesMenu(props: Props) {
   const layout = useSelector((state: any) => state.persistedState.panels.layout);
   const addPanelToLayout = useCallback(() => {
     setIsOpen(false);
-    dispatch(addPanel({ type: GlobalVariables.panelType, layout, tabId: null } as AddPanelPayload));
+    dispatch(addPanel({ type: GlobalVariables.panelType, layout } as AddPanelPayload));
 
     logEvent({
       name: getEventNames().PANEL_ADD,

@@ -50,13 +50,13 @@ type AutocompleteProps = {
   getItemText: (arg0: unknown) => string;
   filterText?: string;
   value?: string;
-  selectedItem?: unknown | null | undefined;
+  selectedItem?: unknown;
   onChange?: (arg0: React.SyntheticEvent<HTMLInputElement>, arg1: string) => void;
   onSelect: (arg0: string, arg1: unknown, arg2: Autocomplete) => void; // eslint-disable-line no-use-before-define
   onBlur?: () => void;
-  hasError?: boolean | null;
-  autocompleteKey?: string | null;
-  placeholder?: string | undefined;
+  hasError?: boolean;
+  autocompleteKey?: string;
+  placeholder?: string;
   autoSize?: boolean;
   sortWhenFiltering: boolean;
   clearOnFocus: boolean; // only for uncontrolled use (when onChange is not set)
@@ -252,7 +252,7 @@ export default class Autocomplete extends PureComponent<AutocompleteProps, Autoc
       items,
       placeholder,
       selectedItem,
-      value = this.state.value ?? (selectedItem ? getItemText(selectedItem) : null),
+      value = this.state.value ?? (selectedItem ? getItemText(selectedItem) : undefined),
       filterText = value,
       sortWhenFiltering,
       minWidth,

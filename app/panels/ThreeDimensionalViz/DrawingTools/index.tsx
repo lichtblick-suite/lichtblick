@@ -28,7 +28,7 @@ type Props = {
   onSetPolygons: (polygons: Polygon[]) => void;
   polygonBuilder: PolygonBuilder;
   selectedPolygonEditFormat: EditFormat;
-  onSetDrawingTabType: (arg0: DrawingTabType | null | undefined) => void;
+  onSetDrawingTabType: (arg0?: DrawingTabType) => void;
   defaultSelectedTab?: DrawingTabType; // for UI testing
 };
 
@@ -40,7 +40,7 @@ function DrawingTools({
   polygonBuilder,
   selectedPolygonEditFormat,
 }: Props) {
-  const [selectedTab, setSelectedTab] = React.useState<DrawingTabType | null | undefined>(
+  const [selectedTab, setSelectedTab] = React.useState<DrawingTabType | undefined>(
     defaultSelectedTab,
   );
 

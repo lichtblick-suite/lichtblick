@@ -68,8 +68,8 @@ type Props = {
   onToggle: () => void;
   onMouseEnter?: (arg0: MouseEvent) => void;
   onMouseLeave?: (arg0: MouseEvent) => void;
-  overrideColor?: Color | null | undefined;
-  size?: Size | null | undefined;
+  overrideColor?: Color;
+  size?: Size;
   unavailableTooltip?: string;
   visibleInScene: boolean;
   diffModeEnabled: boolean;
@@ -100,8 +100,8 @@ function getStyles({
 }: {
   checked: boolean;
   visibleInScene: boolean;
-  overrideColor: Color | null | undefined;
-  size: Size | null | undefined;
+  overrideColor?: Color;
+  size?: Size;
   diffModeEnabled: boolean;
   columnIndex: number;
 }): any {

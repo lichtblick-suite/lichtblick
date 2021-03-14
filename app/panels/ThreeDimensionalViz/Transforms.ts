@@ -31,7 +31,7 @@ function stripLeadingSlash(name: string) {
 export class Transform {
   id: string;
   matrix: mat4 = mat4.create();
-  parent: Transform | null | undefined;
+  parent?: Transform;
   _hasValidMatrix: boolean = false;
 
   constructor(id: string) {

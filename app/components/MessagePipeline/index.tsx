@@ -91,14 +91,14 @@ function defaultPlayerState(): PlayerState {
 
 type ProviderProps = {
   children: React.ReactNode;
-  player?: Player | null | undefined;
+  player?: Player;
   globalVariables?: GlobalVariables;
 };
 export function MessagePipelineProvider({ children, player, globalVariables = {} }: ProviderProps) {
-  const currentPlayer = useRef<Player | null | undefined>(undefined);
+  const currentPlayer = useRef<Player | undefined>(undefined);
   const [playerState, setPlayerState] = useState<PlayerState>(defaultPlayerState);
-  const lastActiveData = useRef<PlayerStateActiveData | null | undefined>(playerState.activeData);
-  const lastTimeWhenActiveDataBecameSet = useRef<number | null | undefined>();
+  const lastActiveData = useRef<PlayerStateActiveData | undefined>(playerState.activeData);
+  const lastTimeWhenActiveDataBecameSet = useRef<number | undefined>();
   const [subscriptionsById, setAllSubscriptions] = useState<{
     [key: string]: SubscribePayload[];
   }>({});
@@ -107,7 +107,7 @@ export function MessagePipelineProvider({ children, player, globalVariables = {}
   // This state is tied to the player, and should be replaced whenever the player changes.
   const playerTickState = useRef<{
     // Call this to resolve the current tick. If this doesn't exist, there isn't a tick currently rendering.
-    resolveFn?: () => void | null | undefined;
+    resolveFn?: () => void;
     // Promises to halt the current tick for.
     promisesToWaitFor: FramePromise[];
     waitingForPromises: boolean;
@@ -349,7 +349,7 @@ const NO_DATATYPES = Object.freeze({});
 // TODO(Audrey): put messages under activeData, add ability to mock seeking
 export function MockMessagePipelineProvider(props: {
   children: React.ReactNode;
-  isPresent?: boolean | null | undefined;
+  isPresent?: boolean;
   topics?: Topic[];
   datatypes?: RosDatatypes;
   messages?: Message[];
@@ -357,7 +357,7 @@ export function MockMessagePipelineProvider(props: {
   setSubscriptions?: (arg0: string, arg1: SubscribePayload[]) => void;
   noActiveData?: boolean;
   showInitializing?: boolean;
-  activeData?: Partial<PlayerStateActiveData> | null | undefined;
+  activeData?: Partial<PlayerStateActiveData>;
   capabilities?: string[];
   store?: any;
   startPlayback?: () => void | null | undefined;
@@ -366,7 +366,7 @@ export function MockMessagePipelineProvider(props: {
   currentTime?: Time;
   startTime?: Time;
   endTime?: Time;
-  isPlaying?: boolean | null | undefined;
+  isPlaying?: boolean;
   pauseFrame?: (arg0: string) => ResumeFrame;
   playerId?: string;
   requestBackfill?: () => void;

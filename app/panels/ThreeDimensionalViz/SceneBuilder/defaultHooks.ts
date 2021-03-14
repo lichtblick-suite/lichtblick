@@ -31,7 +31,7 @@ const sceneBuilderHooks: ThreeDimensionalVizHooks = {
   getFlattenedPose: () => undefined,
   getOccupancyGridValues: (_topic) => [0.5, "map"],
   getMarkerColor: (topic, markerColor) => markerColor,
-  skipTransformFrame: null,
+  skipTransformFrame: undefined,
 };
 
 export default sceneBuilderHooks;

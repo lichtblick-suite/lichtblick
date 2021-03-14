@@ -54,7 +54,7 @@ export type MessagePathPart =
 export type RosPath = {
   topicName: string;
   messagePath: MessagePathPart[];
-  modifier: string | null | undefined;
+  modifier?: string;
 };
 
 // "Structure items" are a more useful version of `datatypes`. They can be

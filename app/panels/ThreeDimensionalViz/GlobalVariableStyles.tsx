@@ -100,7 +100,7 @@ export const TAB_TYPE_VARIABLES = "Global Variables";
 export type TabType = typeof TAB_TYPE_VARIABLES;
 
 type Props = {
-  defaultSelectedTab?: TabType | null | undefined; // for UI testing
+  defaultSelectedTab?: TabType; // for UI testing
   colorOverrideBySourceIdxByVariable: ColorOverrideBySourceIdxByVariable;
   setColorOverrideBySourceIdxByVariable: (arg0: ColorOverrideBySourceIdxByVariable) => void;
 };

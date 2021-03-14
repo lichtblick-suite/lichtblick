@@ -56,7 +56,7 @@ export function getTargetPose(followTf: string | false, transforms: Transforms) 
       };
     }
   }
-  return null;
+  return undefined;
 }
 
 export function useTransformedCameraState({
@@ -69,12 +69,12 @@ export function useTransformedCameraState({
   followTf?: string | false;
   followOrientation?: boolean;
   transforms: Transforms;
-}): { transformedCameraState: CameraState; targetPose: TargetPose | null | undefined } {
+}): { transformedCameraState: CameraState; targetPose?: TargetPose } {
   let transformedCameraState = { ...configCameraState };
   const targetPose = getTargetPose(followTf as any, transforms);
   // Store last seen target pose because the target may become available/unavailable over time as
   // the player changes, and we want to avoid moving the camera when it disappears.
-  const lastTargetPoseRef = useRef<TargetPose | null | undefined>(null);
+  const lastTargetPoseRef = useRef<TargetPose | undefined>();
   const lastTargetPose = lastTargetPoseRef.current;
   // Recompute cameraState based on the new inputs at each render
   if (targetPose) {
@@ -125,15 +125,13 @@ export const getObject = (selectedObject: MouseEventObject) => {
     selectedObject?.object;
   return isBobject(object) ? deepParse(object) : object;
 };
-export const getInteractionData = (
-  selectedObject: MouseEventObject,
-): InteractionData | null | undefined =>
+export const getInteractionData = (selectedObject: MouseEventObject): InteractionData | undefined =>
   selectedObject.object.interactionData || getObject(selectedObject)?.interactionData;
 
 export function getUpdatedGlobalVariablesBySelectedObject(
   selectedObject: MouseEventObject,
   linkedGlobalVariables: LinkedGlobalVariables,
-): GlobalVariables | null | undefined {
+): GlobalVariables | undefined {
   const object = getObject(selectedObject);
   const interactionData = getInteractionData(selectedObject);
   if (!linkedGlobalVariables.length || !interactionData?.topic) {
@@ -174,11 +172,11 @@ export function getNewCameraStateOnFollowChange({
   newFollowOrientation,
 }: {
   prevCameraState: CameraState;
-  prevTargetPose: TargetPose | null | undefined;
-  prevFollowTf: (string | false) | null | undefined;
-  prevFollowOrientation: boolean | null | undefined;
-  newFollowTf: (string | false) | null | undefined;
-  newFollowOrientation: boolean | null | undefined;
+  prevTargetPose?: TargetPose;
+  prevFollowTf?: string | false;
+  prevFollowOrientation?: boolean;
+  newFollowTf?: string | false;
+  newFollowOrientation?: boolean;
 }): CameraState {
   const newCameraState = { ...prevCameraState };
   if (newFollowTf) {

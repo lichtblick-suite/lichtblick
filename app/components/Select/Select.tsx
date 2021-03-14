@@ -29,7 +29,7 @@ const SEmpty = styled.div`
 type Props = {
   children: React.ReactNode;
   // specify text specifically if the value is not a string
-  text?: string | null | undefined;
+  text?: string;
   value: any;
   icon: React.ReactNode;
   onChange: (value: any) => void;
@@ -44,7 +44,7 @@ export default class Select extends React.Component<Props, State> {
     icon: <MenuDownIcon />,
   };
 
-  el: HTMLDivElement | null | undefined;
+  el?: HTMLDivElement;
 
   state = {
     isOpen: false,
@@ -117,7 +117,11 @@ export default class Select extends React.Component<Props, State> {
     const { isOpen } = this.state;
     const { text, value, icon } = this.props;
     return (
-      <div ref={(el) => (this.el = el)} className={styles.container} onClick={this.open}>
+      <div
+        ref={(el) => (this.el = el ?? undefined)}
+        className={styles.container}
+        onClick={this.open}
+      >
         <div className={styles.select}>
           <span className={styles.value}>{text || value}</span>
           <span className={styles.icon}>

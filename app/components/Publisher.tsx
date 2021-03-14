@@ -27,7 +27,7 @@ type Props = {
 // Component that registers a publisher with the player and provides a publish() function to publish data.
 export default class Publisher extends React.PureComponent<Props> {
   _id: string = uuidv4();
-  _context: MessagePipelineContext | null | undefined;
+  _context?: MessagePipelineContext;
 
   _getContext(): MessagePipelineContext {
     if (!this._context) {

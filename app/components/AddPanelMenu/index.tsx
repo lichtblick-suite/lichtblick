@@ -34,7 +34,7 @@ function AddPanelMenu(props: Props) {
   const layout = useSelector((state: ReduxState) => state.persistedState.panels.layout);
   const onPanelSelect = useCallback(
     ({ type, config, relatedConfigs }: PanelSelection) => {
-      dispatch(addPanel({ type, layout, config, relatedConfigs, tabId: null } as AddPanelPayload));
+      dispatch(addPanel({ type, layout, config, relatedConfigs } as AddPanelPayload));
       logEvent({ name: getEventNames().PANEL_ADD, tags: { [getEventTags().PANEL_TYPE]: type } });
     },
     [dispatch, layout],

@@ -105,7 +105,7 @@ function InteractionContextMenuItem({
   interactiveObject,
   selectObject,
 }: {
-  selectObject: (arg0: SelectedObject | null | undefined) => void;
+  selectObject: (arg0?: SelectedObject) => void;
   interactiveObject?: MouseEventObject;
 }) {
   const object = getObject(interactiveObject);

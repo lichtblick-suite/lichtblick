@@ -21,10 +21,10 @@ import Flex from "@foxglove-studio/app/components/Flex";
 import { LaserScan } from "@foxglove-studio/app/types/Messages";
 
 type LaserScanSettings = {
-  pointSize?: number | null | undefined;
-  pointShape?: string | null | undefined;
-  decayTime?: number | null | undefined;
-  overrideColor: Color | null | undefined;
+  pointSize?: number;
+  pointShape?: string;
+  decayTime?: number;
+  overrideColor?: Color;
 };
 
 export default function LaserScanSettingsEditor(

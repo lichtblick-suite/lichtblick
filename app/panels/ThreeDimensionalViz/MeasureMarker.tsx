@@ -15,7 +15,7 @@ import React from "react";
 import { Lines, Spheres, Point } from "regl-worldview";
 
 type Props = {
-  measurePoints: { start: Point | null | undefined; end: Point | null | undefined };
+  measurePoints: { start?: Point; end?: Point };
 };
 
 const sphereSize: number = 0.3;

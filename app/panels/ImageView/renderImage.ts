@@ -42,8 +42,8 @@ export async function renderImage({
   rawMarkerData,
 }: {
   canvas: (HTMLCanvasElement | OffscreenCanvas) | null | undefined;
-  imageMessage: Message | null | undefined;
-  imageMessageDatatype: string | null | undefined;
+  imageMessage?: Message;
+  imageMessageDatatype?: string;
   rawMarkerData: RawMarkerData;
 }): Promise<Dimensions | null | undefined> {
   if (!canvas) {
@@ -53,7 +53,7 @@ export async function renderImage({
     clearCanvas(canvas);
     return null;
   }
-  let markerData = null;
+  let markerData = undefined;
   try {
     markerData = buildMarkerData(rawMarkerData);
   } catch (error) {
@@ -82,7 +82,7 @@ function toRGBA(color: Color) {
 
 // Note: Return type is inexact -- may contain z.
 function maybeUnrectifyPoint(
-  cameraModel: CameraModel | null | undefined,
+  cameraModel: CameraModel | undefined,
   point: Point,
 ): Readonly<{ x: number; y: number }> {
   if (cameraModel) {
@@ -153,7 +153,7 @@ async function decodeMessageToBitmap(msg: Message, datatype: string): Promise<Im
   return self.createImageBitmap(image);
 }
 
-function clearCanvas(canvas: HTMLCanvasElement | null | undefined) {
+function clearCanvas(canvas?: HTMLCanvasElement) {
   if (canvas) {
     canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
   }
@@ -205,7 +205,7 @@ function paintBitmap(
 function paintMarkers(
   ctx: CanvasRenderingContext2D,
   messages: Message[],
-  cameraModel: CameraModel | null | undefined,
+  cameraModel: CameraModel | undefined,
 ) {
   for (const { message } of messages) {
     ctx.save();
@@ -227,7 +227,7 @@ function paintMarkers(
 function paintMarker(
   ctx: CanvasRenderingContext2D,
   marker: ImageMarker,
-  cameraModel: CameraModel | null | undefined,
+  cameraModel: CameraModel | undefined,
 ) {
   switch (marker.type) {
     case 0: {
@@ -345,7 +345,7 @@ function paintMarker(
   }
 }
 
-function resizeCanvas(canvas: HTMLCanvasElement | null | undefined, width: number, height: number) {
+function resizeCanvas(canvas: HTMLCanvasElement | undefined, width: number, height: number) {
   if (canvas && (canvas.width !== width || canvas.height !== height)) {
     canvas.width = width;
     canvas.height = height;

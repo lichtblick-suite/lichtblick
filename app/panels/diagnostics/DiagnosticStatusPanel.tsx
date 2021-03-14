@@ -29,8 +29,8 @@ import { PanelConfig } from "@foxglove-studio/app/types/panels";
 import { DIAGNOSTIC_TOPIC } from "@foxglove-studio/app/util/globalConstants";
 
 export type Config = {
-  selectedHardwareId?: string | null | undefined;
-  selectedName?: string | null | undefined;
+  selectedHardwareId?: string;
+  selectedName?: string;
   splitFraction?: number;
   topicToRender: string;
   collapsedSections: { name: string; section: string }[];

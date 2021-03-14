@@ -26,11 +26,11 @@ const STitleWrapper = styled.div`
 
 type Props = {
   title: ReactNode;
-  icon?: ReactNode | null | undefined;
+  icon?: ReactNode;
   isOpen: boolean;
   setIsOpen: (arg0: boolean) => void;
   children: ReactNode[];
-  disableOpenClose: boolean | null | undefined;
+  disableOpenClose?: boolean;
   dataTest?: string;
 };
 

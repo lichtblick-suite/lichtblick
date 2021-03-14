@@ -325,7 +325,7 @@ storiesOf("<NodePlayground>", module)
             userNodeDiagnostics={{}}
             explorer={explorer}
             updateExplorer={updateExplorer}
-            selectedNodeId={null}
+            selectedNodeId={undefined}
             userNodes={userNodes}
             deleteNode={() => {
               // no-op

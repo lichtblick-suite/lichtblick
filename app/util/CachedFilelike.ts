@@ -81,14 +81,14 @@ export default class CachedFilelike implements Filelike {
   _readRequests: { range: Range; callback: Callback<Buffer>; requestTime: number }[] = [];
 
   // The range.end of the last read request that we resolved. Useful for reading ahead a bit.
-  _lastResolvedCallbackEnd: number | null | undefined;
+  _lastResolvedCallbackEnd?: number;
 
   // The last time we've encountered an error;
-  _lastErrorTime: number | null | undefined;
+  _lastErrorTime?: number;
 
   constructor(options: {
     fileReader: FileReader;
-    cacheSizeInBytes?: number | null | undefined;
+    cacheSizeInBytes?: number;
     logFn?: (arg0: string) => void;
     keepReconnectingCallback?: (reconnecting: boolean) => void;
   }) {

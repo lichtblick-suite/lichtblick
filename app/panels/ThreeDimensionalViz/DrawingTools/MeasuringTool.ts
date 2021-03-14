@@ -22,7 +22,7 @@ export type MeasureState = "idle" | "place-start" | "place-finish";
 
 export type MeasureInfo = {
   measureState: MeasureState;
-  measurePoints: { start: Point | null | undefined; end: Point | null | undefined };
+  measurePoints: { start?: Point; end?: Point };
 };
 
 type Props = MeasureInfo & {

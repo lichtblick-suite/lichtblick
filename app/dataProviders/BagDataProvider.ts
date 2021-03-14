@@ -38,7 +38,7 @@ import { fromMillis, subtractTimes } from "@foxglove-studio/app/util/time";
 
 type BagPath = { type: "file"; file: File | string } | { type: "remoteBagUrl"; url: string };
 
-type Options = { bagPath: BagPath; cacheSizeInBytes?: number | null | undefined };
+type Options = { bagPath: BagPath; cacheSizeInBytes?: number };
 
 const log = new Logger(__filename);
 
@@ -109,8 +109,8 @@ class LogMetricsReader {
 export default class BagDataProvider implements DataProvider {
   _options: Options;
   _bag?: Bag;
-  _lastPerformanceStatsToLog: TimedDataThroughput | null | undefined;
-  _extensionPoint: ExtensionPoint | null | undefined;
+  _lastPerformanceStatsToLog?: TimedDataThroughput;
+  _extensionPoint?: ExtensionPoint;
 
   constructor(options: Options, children: DataProviderDescriptor[]) {
     if (children.length > 0) {

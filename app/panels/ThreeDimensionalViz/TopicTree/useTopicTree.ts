@@ -35,9 +35,9 @@ export function generateNodeKey({
   namespace,
   isFeatureColumn,
 }: {
-  topicName?: string | null | undefined;
-  name?: string | null | undefined;
-  namespace?: string | null | undefined;
+  topicName?: string;
+  name?: string;
+  namespace?: string;
   isFeatureColumn?: boolean;
 }): string {
   const prefixedTopicName = topicName
@@ -78,7 +78,7 @@ export function generateTreeNode(
     datatypesByTopic: {
       [topicName: string]: string;
     };
-    parentKey: string | null | undefined;
+    parentKey?: string;
     hasFeatureColumn: boolean;
   },
 ): TreeNode {
@@ -221,7 +221,7 @@ export default function useTree({
     } = {};
 
     // Check if a node is selected and fill in the isSelectedMemo cache for future access.
-    function isSelected(baseKey: string | null | undefined, isFeatureColumn: boolean): boolean {
+    function isSelected(baseKey: string | undefined, isFeatureColumn: boolean): boolean {
       // Only topic node or top level group node may not have parentKey, and if we reached this level,
       // the descendants nodes should already been selected. Specifically, if a node key is included in the checkedKeys
       // and it doesn't have any parent node, it's considered to be selected.
@@ -297,7 +297,7 @@ export default function useTree({
     // Returns whether a node/namespace is rendered in the 3d scene. Keep it inside useMemo since it needs to access the same isSelectedMemo.
     // A node is visible if it's available, itself and all ancestor nodes are selected.
     function getIsTreeNodeVisibleInScene(
-      node: TreeNode | null | undefined,
+      node: TreeNode | undefined,
       columnIndex: number,
       namespace?: string,
     ): boolean {
@@ -422,7 +422,7 @@ export default function useTree({
   }, [defaultTopicSettings, settingsByKey]);
 
   const onNamespaceOverrideColorChange = useCallback(
-    (newColor: string | null | undefined, prefixedNamespaceKey: string) => {
+    (newColor: string | undefined, prefixedNamespaceKey: string) => {
       const newSettingsByKey = newColor
         ? { ...settingsByKey, [prefixedNamespaceKey]: { overrideColor: newColor } }
         : omit(settingsByKey, prefixedNamespaceKey);
@@ -636,7 +636,7 @@ export default function useTree({
   const sceneErrorsByKey = useMemo(() => {
     const result: any = {};
 
-    function collectGroupErrors(groupKey: string | null | undefined, errors: string[]) {
+    function collectGroupErrors(groupKey: string | undefined, errors: string[]) {
       if (!groupKey) {
         return;
       }

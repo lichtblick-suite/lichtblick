@@ -30,7 +30,7 @@ const SListItem = styled.li`
 `;
 
 type Props = {
-  nodeId: string | null | undefined;
+  nodeId?: string;
   logs: UserNodeLog[];
   clearLogs: (nodeId: string) => void;
 };

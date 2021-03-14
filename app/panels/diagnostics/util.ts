@@ -77,7 +77,7 @@ export function trimHardwareId(hardwareId: string): string {
   return hardwareId.startsWith("/") ? hardwareId.slice(1) : hardwareId;
 }
 
-export function getDiagnosticId(hardwareId: string, name?: string | null): DiagnosticId {
+export function getDiagnosticId(hardwareId: string, name?: string): DiagnosticId {
   const trimmedHardwareId = trimHardwareId(hardwareId);
   return name != null ? `|${trimmedHardwareId}|${name}|` : `|${trimmedHardwareId}|`;
 }

@@ -53,7 +53,7 @@ import { subtractTimes, toSec, fromSec, formatTimeRaw } from "@foxglove-studio/a
 
 const cx = classnames.bind(styles);
 
-export const StyledFullWidthBar = styled.div<{ activeData?: PlayerStateActiveData | null }>`
+export const StyledFullWidthBar = styled.div<{ activeData?: PlayerStateActiveData }>`
   position: absolute;
   top: 12px;
   left: 0;

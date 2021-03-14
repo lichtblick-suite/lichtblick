@@ -52,18 +52,18 @@ export default class RosbridgePlayer implements Player {
   _listener?: (arg0: PlayerState) => Promise<void>; // Listener for _emitState().
   _closed: boolean = false; // Whether the player has been completely closed using close().
   _providerTopics: Topic[] | null | undefined; // Topics as published by the WebSocket.
-  _providerDatatypes: RosDatatypes | null | undefined; // Datatypes as published by the WebSocket.
+  _providerDatatypes?: RosDatatypes; // Datatypes as published by the WebSocket.
   _messageReadersByDatatype: {
     [datatype: string]: MessageReader;
   } = {};
-  _start: Time | null | undefined; // The time at which we started playing.
+  _start?: Time; // The time at which we started playing.
   // active subscriptions
   _topicSubscriptions = new Map<string, roslib.Topic>();
   _requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
   _parsedMessages: Message[] = []; // Queue of messages that we'll send in next _emitState() call.
   _bobjects: BobjectMessage[] = []; // Queue of bobjects that we'll send in next _emitState() call.
   _messageOrder: TimestampMethod = "receiveTime";
-  _requestTopicsTimeout: ReturnType<typeof setTimeout> | null | undefined; // setTimeout() handle for _requestTopics().
+  _requestTopicsTimeout?: ReturnType<typeof setTimeout>; // setTimeout() handle for _requestTopics().
   _topicPublishers: {
     [topicName: string]: roslib.Topic;
   } = {};

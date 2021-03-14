@@ -150,7 +150,7 @@ type Props = {
   hasFeatureColumn: boolean;
   saveConfig: Save3DConfig;
   sceneBuilderMessage: any;
-  setCurrentEditingTopic: (arg0: Topic | null | undefined) => void;
+  setCurrentEditingTopic: (arg0?: Topic) => void;
   settingsByKey: {
     [topic: string]: any;
   };

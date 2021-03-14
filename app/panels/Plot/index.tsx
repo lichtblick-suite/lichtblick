@@ -229,7 +229,7 @@ function Plot(props: Props) {
   // Min/max x-values and playback position indicator are only used for preloaded plots. In non-
   // preloaded plots min x-value is always the last seek time, and the max x-value is the current
   // playback time.
-  const timeToXValueForPreloading = (t: Time | null | undefined): number | null | undefined => {
+  const timeToXValueForPreloading = (t?: Time): number | undefined => {
     if (xAxisVal === "timestamp" && t && startTime) {
       return toSec(subtractTimes(t, startTime));
     }

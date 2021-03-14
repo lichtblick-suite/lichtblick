@@ -176,7 +176,7 @@ export default class Database {
   // gets a range of objects by key inclusive of start and end
   async getRange(
     objectStore: string,
-    index: string | null | undefined,
+    index: string | undefined,
     start: IDBValidKey,
     end: IDBValidKey,
   ): Promise<Record[]> {

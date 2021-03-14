@@ -89,7 +89,7 @@ export function getFirstInvalidVariableFromRosPath(
   rosPath: RosPath,
   globalVariables: GlobalVariables,
   setGlobalVariables: (arg0: GlobalVariables) => void,
-): { variableName: string; loc: number } | null | undefined {
+): { variableName: string; loc: number } | undefined {
   const { messagePath } = rosPath;
   const globalVars = Object.keys(globalVariables);
   return flatMap(messagePath, (path) => {
@@ -149,7 +149,7 @@ function getExamplePrimitive(primitiveType: RosPrimitive) {
 type MessagePathInputBaseProps = {
   path: string; // A path of the form `/topic.some_field[:]{id==42}.x`
   index?: number; // Optional index field which gets passed to `onChange` (so you don't have to create anonymous functions)
-  onChange: (value: string, index: number | null | undefined) => void;
+  onChange: (value: string, index?: number) => void;
   validTypes?: string[]; // Valid types, like "message", "array", or "primitive", or a ROS primitive like "float64"
   noMultiSlices?: boolean; // Don't suggest slices with multiple values `[:]`, only single values like `[0]`.
   autoSize?: boolean;
@@ -158,12 +158,12 @@ type MessagePathInputBaseProps = {
   disableAutocomplete?: boolean; // Treat this as a normal input, with no autocomplete.
 
   timestampMethod?: TimestampMethod;
-  onTimestampMethodChange?: (arg0: TimestampMethod, index: number | null | undefined) => void;
+  onTimestampMethodChange?: (arg0: TimestampMethod, index?: number) => void;
 };
 type MessagePathInputProps = MessagePathInputBaseProps & {
   topics: readonly Topic[];
   datatypes: RosDatatypes;
-  prioritizedDatatype?: string | null | undefined;
+  prioritizedDatatype?: string;
   globalVariables: GlobalVariables;
   setGlobalVariables: (arg0: GlobalVariables) => void;
 };
@@ -172,7 +172,7 @@ class MessagePathInputUnconnected extends React.PureComponent<
   MessagePathInputProps,
   MessagePathInputState
 > {
-  _input: HTMLInputElement | null | undefined;
+  _input?: HTMLInputElement;
 
   constructor(props: MessagePathInputProps) {
     super(props);
@@ -201,7 +201,7 @@ class MessagePathInputUnconnected extends React.PureComponent<
   _onSelect = (
     value: string,
     autocomplete: Autocomplete,
-    autocompleteType: ("topicName" | "messagePath" | "globalVariables") | null | undefined,
+    autocompleteType: ("topicName" | "messagePath" | "globalVariables") | undefined,
     autocompleteRange: { start: number; end: number },
   ) => {
     // If we're dealing with a topic name, and we cannot validly end in a message type,
@@ -249,9 +249,9 @@ class MessagePathInputUnconnected extends React.PureComponent<
     } = this.props;
 
     const rosPath = parseRosPath(path);
-    let autocompleteType: ("topicName" | "messagePath" | "globalVariables") | null | undefined;
-    let topic: Topic | null | undefined;
-    let structureTraversalResult: StructureTraversalResult | null | undefined;
+    let autocompleteType: ("topicName" | "messagePath" | "globalVariables") | undefined;
+    let topic: Topic | undefined;
+    let structureTraversalResult: StructureTraversalResult | undefined;
     if (rosPath) {
       const { topicName } = rosPath;
       topic = topics.find(({ name }) => name === topicName);

@@ -27,7 +27,7 @@ import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
 import { fromSec, TimestampMethod } from "@foxglove-studio/app/util/time";
 
 function makeMessage(
-  headerStamp: number | null | undefined,
+  headerStamp: number | undefined,
   receiveTime: number,
   topic: string = "/dummy_topic",
 ) {
@@ -43,7 +43,7 @@ function makeMessage(
 }
 
 function makeBobject(
-  headerStamp: number | null | undefined,
+  headerStamp: number | undefined,
   receiveTime: number,
   topic: string = "/dummy_topic",
 ) {

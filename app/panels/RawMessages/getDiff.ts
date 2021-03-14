@@ -39,7 +39,7 @@ export const diffLabelsByLabelText = keyBy(Object.values(diffLabels), "labelText
 export default function getDiff(
   before: any,
   after: any,
-  idLabel: string | null | undefined = null,
+  idLabel?: string,
   showFullMessageForDiff: boolean = false,
 ): any {
   if (Array.isArray(before) && Array.isArray(after)) {
@@ -126,7 +126,7 @@ export default function getDiff(
     const diff: any = {};
     const allKeys = Object.keys(before).concat(Object.keys(after));
     for (const key of uniq(allKeys)) {
-      const innerDiff = getDiff(before[key], after[key], null, showFullMessageForDiff);
+      const innerDiff = getDiff(before[key], after[key], undefined, showFullMessageForDiff);
       if (!isEmpty(innerDiff)) {
         diff[key] = innerDiff;
       } else if (showFullMessageForDiff) {

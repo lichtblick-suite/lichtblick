@@ -53,8 +53,8 @@ const playerStateWithMessages = (messages: any, messageOrder: any): PlayerState 
 });
 
 const message = (
-  headerStampSeconds: number | null | undefined,
-  receiveTimeSeconds: number | null | undefined,
+  headerStampSeconds: number | undefined,
+  receiveTimeSeconds: number | undefined,
 ): Message => ({
   topic: "/foo",
   receiveTime:

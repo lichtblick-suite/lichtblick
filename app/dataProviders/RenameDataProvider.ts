@@ -157,10 +157,7 @@ export default class RenameDataProvider implements DataProvider {
     }),
   );
 
-  _mapBlock = memoizeWeak((block: MemoryCacheBlock | null | undefined):
-    | MemoryCacheBlock
-    | null
-    | undefined => {
+  _mapBlock = memoizeWeak((block?: MemoryCacheBlock): MemoryCacheBlock | undefined => {
     if (!block) {
       return;
     }

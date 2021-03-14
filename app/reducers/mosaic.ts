@@ -46,7 +46,7 @@ export default function mosaicReducer(state: State, action: ActionTypes): State 
         ...state,
         mosaic: {
           ...state.mosaic,
-          selectedPanelIds: getLeaves(state.persistedState.panels.layout),
+          selectedPanelIds: getLeaves(state.persistedState.panels.layout ?? null),
         },
       };
     default:

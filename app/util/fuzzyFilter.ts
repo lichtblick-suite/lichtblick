@@ -15,7 +15,7 @@
 // Score by how early in the string matches appear.
 export default function fuzzyFilter<T>(
   options: T[],
-  filter: string | null | undefined,
+  filter: string | undefined,
   getText: (arg0: T) => string = (x: any) => x,
   sort: boolean = true,
 ): T[] {

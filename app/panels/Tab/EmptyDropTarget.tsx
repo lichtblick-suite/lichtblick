@@ -56,8 +56,8 @@ const SPickAPanelText = styled.div`
 `;
 
 type Props = {
-  mosaicId: string | null | undefined;
-  tabId: string | null | undefined;
+  mosaicId?: string;
+  tabId?: string;
 };
 
 export const EmptyDropTarget = ({ mosaicId, tabId }: Props) => {
@@ -77,7 +77,7 @@ export const EmptyDropTarget = ({ mosaicId, tabId }: Props) => {
 
   const onPanelSelect = useCallback(
     ({ type, config, relatedConfigs }: PanelSelection) => {
-      dispatch(addPanel({ tabId, type, layout: null, config, relatedConfigs }));
+      dispatch(addPanel({ tabId, type, layout: undefined, config, relatedConfigs }));
       logEvent({ name: getEventNames().PANEL_ADD, tags: { [getEventTags().PANEL_TYPE]: type } });
     },
     [dispatch, tabId],

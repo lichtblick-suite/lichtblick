@@ -342,7 +342,7 @@ export type PointCloud2 = Readonly<
     // this is appended by scene builder
     type: 102 | "PointCloud2";
     // this is appended by scene builder
-    pose: Pose | null | undefined;
+    pose?: Pose;
   }
 >;
 

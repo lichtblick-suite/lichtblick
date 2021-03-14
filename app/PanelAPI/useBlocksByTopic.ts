@@ -60,7 +60,7 @@ type BlocksForTopics = {
 // That said, MessageBlock identity will change when the set of topics changes, so consumers should
 // prefer to use the identity of topic-block message arrays where possible.
 const filterBlockByTopics = memoizeWeak(
-  (block: MemoryCacheBlock | null | undefined, topics: readonly string[]): MessageBlock => {
+  (block: MemoryCacheBlock | undefined, topics: readonly string[]): MessageBlock => {
     if (!block) {
       // For our purposes, a missing MemoryCacheBlock just means "no topics have been cached for
       // this block". This is semantically different to an empty array per topic, but not different
@@ -103,7 +103,7 @@ function getBlocksFromPlayerState({
   playerState,
 }: {
   playerState: PlayerState;
-}): readonly (MemoryCacheBlock | null | undefined)[] | null | undefined {
+}): readonly (MemoryCacheBlock | undefined)[] | undefined {
   return playerState.progress.messageCache?.blocks;
 }
 
@@ -129,9 +129,9 @@ export function useBlocksByTopic(topics: readonly string[]): BlocksForTopics {
   );
 
   // Get blocks for the topics
-  const allBlocks = useMessagePipeline<
-    readonly (MemoryCacheBlock | null | undefined)[] | null | undefined
-  >(getBlocksFromPlayerState);
+  const allBlocks = useMessagePipeline<readonly (MemoryCacheBlock | undefined)[] | undefined>(
+    getBlocksFromPlayerState,
+  );
 
   const exposeBlockData = !!allBlocks; // The websocket player does not expose blocks.
 

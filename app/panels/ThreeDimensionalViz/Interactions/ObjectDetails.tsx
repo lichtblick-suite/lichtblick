@@ -45,7 +45,7 @@ const SObjectDetails = styled.div`
   padding: 12px 0 16px 0;
 `;
 
-type CommonProps = { readonly interactionData: InteractionData | null | undefined };
+type CommonProps = { readonly interactionData?: InteractionData };
 
 type WrapperProps = CommonProps & { readonly selectedObject: MouseEventObject };
 

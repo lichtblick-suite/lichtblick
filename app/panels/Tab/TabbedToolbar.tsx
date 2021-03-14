@@ -60,10 +60,7 @@ type Props = {
   actions: TabActions;
   tabs: TabConfig[];
   activeTabIdx: number;
-  setDraggingTabState: (arg0: {
-    isOver: boolean;
-    item: DraggingTabItem | null | undefined;
-  }) => void;
+  setDraggingTabState: (arg0: { isOver: boolean; item?: DraggingTabItem }) => void;
 };
 
 export function TabbedToolbar(props: Props) {

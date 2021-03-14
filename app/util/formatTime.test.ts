@@ -73,10 +73,10 @@ describe("formatTime.parseTimeStr", () => {
     return `${formatTime.formatDate(timestamp)} ${formatTime.formatTime(timestamp)}`;
   }
 
-  it("returns null if the input string is formatted incorrectly", () => {
-    expect(formatTime.parseTimeStr("")).toEqual(null);
-    expect(formatTime.parseTimeStr("018-07")).toEqual(null);
-    expect(formatTime.parseTimeStr("0")).toEqual(null);
+  it("returns undefined if the input string is formatted incorrectly", () => {
+    expect(formatTime.parseTimeStr("")).toEqual(undefined);
+    expect(formatTime.parseTimeStr("018-07")).toEqual(undefined);
+    expect(formatTime.parseTimeStr("0")).toEqual(undefined);
   });
 
   it("returns the correct time", () => {

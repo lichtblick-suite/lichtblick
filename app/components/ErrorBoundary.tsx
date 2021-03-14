@@ -36,8 +36,8 @@ const ErrorBanner = styled.div`
 `;
 
 type State = {
-  error: Error | null | undefined;
-  errorInfo: any | null | undefined;
+  error?: Error;
+  errorInfo?: any;
 };
 
 export default class ErrorBoundary extends React.Component<

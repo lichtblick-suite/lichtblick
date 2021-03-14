@@ -98,7 +98,7 @@ export function messagePathStructures(
 }
 
 export function validTerminatingStructureItem(
-  structureItem?: MessagePathStructureItem | null,
+  structureItem?: MessagePathStructureItem,
   validTypes?: string[] | null,
 ): boolean {
   return (
@@ -116,7 +116,7 @@ export function messagePathsForDatatype(
   datatype: string,
   datatypes: RosDatatypes,
   validTypes?: string[] | null,
-  noMultiSlices?: boolean | null,
+  noMultiSlices?: boolean,
   messagePath: MessagePathPart[] = [],
 ): string[] {
   let clonedMessagePath = [...messagePath];
@@ -181,8 +181,8 @@ export function messagePathsForDatatype(
 
 export type StructureTraversalResult = {
   valid: boolean;
-  msgPathPart: MessagePathPart | null | undefined;
-  structureItem: MessagePathStructureItem | null | undefined;
+  msgPathPart?: MessagePathPart;
+  structureItem?: MessagePathStructureItem;
 };
 
 // Traverse down the structure given a `messagePath`. Return if the path
@@ -195,7 +195,7 @@ export type StructureTraversalResult = {
 // does not) and does not hold onto objects as strongly (it uses WeakMap).
 export const traverseStructure = memoizeWeak(
   (
-    structureItem: MessagePathStructureItem | null | undefined,
+    structureItem: MessagePathStructureItem | undefined,
     messagePath: MessagePathPart[],
   ): StructureTraversalResult => {
     if (!structureItem) {

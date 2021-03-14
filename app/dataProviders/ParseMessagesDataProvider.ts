@@ -36,7 +36,7 @@ export default class ParseMessagesDataProvider implements DataProvider {
   // Underlying DataProvider.
   _provider: DataProvider;
   // Passed into `initialize`.
-  _parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic | null | undefined;
+  _parsedMessageDefinitionsByTopic?: ParsedMessageDefinitionsByTopic;
   _messageCache = new ParsedMessageCache();
 
   // Reader per topic, as generated from the underlying DataProvider's `initialize` function.

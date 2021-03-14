@@ -41,19 +41,19 @@ const SWrapper = styled.span<any>`
 
 const DEFAULT_OVERRIDE_COLOR = "rgba(255,255,255,1)";
 
-export function getHexFromColorSettingWithDefault(color: Color | null | undefined): string {
+export function getHexFromColorSettingWithDefault(color?: Color): string {
   return color ? tinyColor.fromRatio(color).toRgbString() : DEFAULT_OVERRIDE_COLOR;
 }
 
 type Props = {
-  color: Color | null | undefined;
+  color?: Color;
   onChange: (newColor: Color) => void;
   placement?: Placement;
-  size?: Size | null | undefined;
+  size?: Size;
   useModal?: boolean;
 };
 type ColorPickerSettingsPanelProps = {
-  color: Color | null | undefined;
+  color?: Color;
   onChange: (newColor: Color) => void;
 };
 

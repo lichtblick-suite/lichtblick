@@ -43,7 +43,7 @@ export function toRgba(rgba: Color) {
 // extract clicked point's position, color and additional field values to display in the UI
 export function getClickedInfo(
   maybeFullyDecodedMarker: MouseEventObject,
-  instanceIndex: number | null | undefined,
+  instanceIndex: number | undefined,
 ): ClickedInfo | null | undefined {
   const { positionBuffer, colorBuffer, fields, settings, is_bigendian } = maybeFullyDecodedMarker;
   if (

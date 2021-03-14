@@ -76,7 +76,7 @@ export type CameraInfoPropsWithoutCameraState = {
 
 type CameraInfoProps = {
   cameraState: Partial<CameraState>;
-  targetPose: TargetPose | null | undefined;
+  targetPose?: TargetPose;
 } & CameraInfoPropsWithoutCameraState;
 
 function CameraStateInfo({ cameraState, onAlignXYAxis }: CameraStateInfoProps) {

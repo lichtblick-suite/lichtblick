@@ -18,8 +18,8 @@ import { cast, Message, RosObject } from "@foxglove-studio/app/players/types";
 import { StampedMessage } from "@foxglove-studio/app/types/Messages";
 
 export const defaultGetHeaderStamp = (
-  message: Readonly<RosObject> | null | undefined,
-): Time | null | undefined => {
+  message: Readonly<RosObject> | undefined,
+): Time | undefined => {
   if (message != null && message.header != null) {
     return cast<StampedMessage>(message).header.stamp;
   }
@@ -168,7 +168,7 @@ function getSynchronizedState(
 // Returns reducers for use with PanelAPI.useMessageReducer
 export function getSynchronizingReducers(topics: readonly string[]) {
   return {
-    restore(previousValue: ReducedValue | null | undefined) {
+    restore(previousValue?: ReducedValue) {
       const messagesByTopic: Record<string, any> = {};
       for (const topic of topics) {
         messagesByTopic[topic] = (previousValue && previousValue.messagesByTopic[topic]) || [];

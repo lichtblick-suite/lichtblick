@@ -16,14 +16,14 @@ import { VertexBuffer, MemoizedVertexBuffer } from "./types";
 
 function reglBuffer(data: Float32Array) {
   const buffer: {
-    data?: Float32Array | null | undefined;
+    data?: Float32Array;
   } = {
     data,
   };
   return {
     buffer,
     destroy: () => {
-      buffer.data = null;
+      buffer.data = undefined;
     },
   };
 }
@@ -54,7 +54,7 @@ describe("VertexBufferCache", () => {
     const vertexBuffer = makeVertexBuffer();
     const memoized = makeMemoizedVertexBuffer(vertexBuffer);
 
-    expect(cache.get(vertexBuffer)).toBeNull();
+    expect(cache.get(vertexBuffer)).toBeUndefined();
     cache.set(vertexBuffer, memoized);
     expect(cache.get(vertexBuffer)).toBe(memoized);
   });
@@ -65,13 +65,13 @@ describe("VertexBufferCache", () => {
     const vertexBuffer = makeVertexBuffer();
     const memoized = makeMemoizedVertexBuffer(vertexBuffer);
 
-    expect(cache.get(vertexBuffer)).toBeNull();
+    expect(cache.get(vertexBuffer)).toBeUndefined();
     cache.set(vertexBuffer, memoized);
     expect(cache.get(vertexBuffer)).toBe(memoized);
 
     // Set same value again
     cache.set(vertexBuffer, memoized);
-    expect(memoized.buffer.buffer.data).not.toBeNull();
+    expect(memoized.buffer.buffer.data).not.toBeUndefined();
   });
 
   it("overrides a vertex buffer and destroys data", () => {
@@ -81,14 +81,14 @@ describe("VertexBufferCache", () => {
     const memo1 = makeMemoizedVertexBuffer(vertexBuffer);
     const memo2 = makeMemoizedVertexBuffer(vertexBuffer);
 
-    expect(cache.get(vertexBuffer)).toBeNull();
+    expect(cache.get(vertexBuffer)).toBeUndefined();
     cache.set(vertexBuffer, memo1);
     expect(cache.get(vertexBuffer)).toBe(memo1);
     cache.set(vertexBuffer, memo2);
     expect(cache.get(vertexBuffer)).toBe(memo2);
 
     // Destroys memo1 data since it's no longer cached
-    expect(memo1.buffer.buffer.data).toBeNull();
+    expect(memo1.buffer.buffer.data).toBeUndefined();
   });
 
   it("persists vertex buffers in between frames", () => {
@@ -99,7 +99,7 @@ describe("VertexBufferCache", () => {
 
     // Frame 0: VB does not exist
     cache.onPreRender();
-    expect(cache.get(vertexBuffer)).toBeNull();
+    expect(cache.get(vertexBuffer)).toBeUndefined();
     cache.onPostRender();
 
     // Frame 1: VB is created
@@ -110,13 +110,13 @@ describe("VertexBufferCache", () => {
     // Frame 2: VB is read
     cache.onPreRender();
     expect(cache.get(vertexBuffer)).toBe(memoized);
-    expect(memoized.buffer.buffer.data).not.toBeNull();
+    expect(memoized.buffer.buffer.data).not.toBeUndefined();
     cache.onPostRender();
 
     // Frame 3: VB is read
     cache.onPreRender();
     expect(cache.get(vertexBuffer)).toBe(memoized);
-    expect(memoized.buffer.buffer.data).not.toBeNull();
+    expect(memoized.buffer.buffer.data).not.toBeUndefined();
     cache.onPostRender();
   });
 
@@ -128,7 +128,7 @@ describe("VertexBufferCache", () => {
 
     // Frame 0: VB does not exist
     cache.onPreRender();
-    expect(cache.get(vertexBuffer)).toBeNull();
+    expect(cache.get(vertexBuffer)).toBeUndefined();
     cache.onPostRender();
 
     // Frame 1: VB is created
@@ -139,7 +139,7 @@ describe("VertexBufferCache", () => {
     // Frame 2: VB is read
     cache.onPreRender();
     expect(cache.get(vertexBuffer)).toBe(memoized);
-    expect(memoized.buffer.data).not.toBeNull();
+    expect(memoized.buffer.buffer.data).not.toBeUndefined();
     cache.onPostRender();
 
     // Frame 3: VB is not read
@@ -148,8 +148,8 @@ describe("VertexBufferCache", () => {
 
     // Frame 4: VB is no longer cached and it's data has been erased
     cache.onPreRender();
-    expect(cache.get(vertexBuffer)).toBeNull();
-    expect(memoized.buffer.buffer.data).toBeNull();
+    expect(cache.get(vertexBuffer)).toBeUndefined();
+    expect(memoized.buffer.buffer.data).toBeUndefined();
     cache.onPostRender();
   });
 
@@ -191,10 +191,10 @@ describe("VertexBufferCache", () => {
     expect(vbMemo2).not.toBe(vbMemo1);
 
     cache.onPreRender();
-    expect(cache.get(vb)).toBeNull();
+    expect(cache.get(vb)).toBeUndefined();
     cache.set(vb, vbMemo2);
     cache.onPostRender();
 
-    expect(vbMemo1.buffer.buffer.data).toBeNull();
+    expect(vbMemo1.buffer.buffer.data).toBeUndefined();
   });
 });

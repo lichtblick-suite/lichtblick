@@ -446,7 +446,7 @@ const transform = ({
   topics: Topic[];
   rosLib: string;
   datatypes: RosDatatypes;
-}): NodeData & { sourceFile: void | null | undefined; typeChecker: void | null | undefined } => {
+}): NodeData & { sourceFile?: void; typeChecker?: void } => {
   const transformer = compose(
     getOutputTopic,
     validateOutputTopic,

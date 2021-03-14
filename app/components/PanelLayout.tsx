@@ -38,7 +38,7 @@ import { MosaicNode, SaveConfigsPayload } from "@foxglove-studio/app/types/panel
 import { getPanelIdForType, getPanelTypeFromId } from "@foxglove-studio/app/util/layout";
 
 type Props = {
-  layout: MosaicNode | null | undefined;
+  layout?: MosaicNode;
   onChange: (panels: any) => void;
   setMosaicId: (mosaicId: string) => void;
   savePanelConfigs: (arg0: SaveConfigsPayload) => Dispatcher<SAVE_PANEL_CONFIGS>;

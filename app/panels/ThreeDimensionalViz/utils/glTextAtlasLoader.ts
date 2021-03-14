@@ -33,7 +33,7 @@ export type TextAtlas = {
   };
 };
 
-async function getTextAtlas(): Promise<TextAtlas | null | undefined> {
+async function getTextAtlas(): Promise<TextAtlas | undefined> {
   // Don't try to fetch this in tests, it won't work.
   if (process.env.NODE_ENV === "test") {
     return;

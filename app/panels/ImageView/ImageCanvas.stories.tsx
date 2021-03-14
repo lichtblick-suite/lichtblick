@@ -221,7 +221,7 @@ const markers = [
 
 const noMarkersMarkerData = {
   markers: [],
-  cameraInfo: null,
+  cameraInfo: undefined,
   scale: 1,
   transformMarkers: false,
 };
@@ -379,7 +379,7 @@ storiesOf("<ImageCanvas>", module)
             image={imageMessage}
             rawMarkerData={{
               markers,
-              cameraInfo: null,
+              cameraInfo: undefined,
               scale: 1,
               transformMarkers: false,
             }}
@@ -430,7 +430,7 @@ storiesOf("<ImageCanvas>", module)
             image={imageMessage}
             rawMarkerData={{
               markers,
-              cameraInfo: null,
+              cameraInfo: undefined,
               scale: 1,
               transformMarkers: false,
             }}
@@ -501,7 +501,7 @@ storiesOf("<ImageCanvas>", module)
                 image={imageMessage}
                 rawMarkerData={{
                   markers,
-                  cameraInfo: null,
+                  cameraInfo: undefined,
                   scale: 1,
                   transformMarkers: false,
                 }}

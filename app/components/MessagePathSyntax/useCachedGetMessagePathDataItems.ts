@@ -36,7 +36,7 @@ export type MessagePathDataItem = {
   // kinds of "nice ids" for different purposes, e.g. `[10]{id==5}{other_id=123}` for tooltips (more information)
   // but `[:]{other_id==123}` for line graphs (more likely to match values).
   path: string; // The path to get to this value. Tries to use "nice ids" like `[:]{some_id==123}` wherever possible.
-  constantName?: string | null | undefined; // The name of the constant that the value matches up with, if any.
+  constantName?: string; // The name of the constant that the value matches up with, if any.
 };
 
 // Given a set of message paths, this returns a function that you can call to resolve a single path

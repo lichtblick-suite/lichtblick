@@ -44,7 +44,7 @@ export function SelectedHardwareIDOnly(): JSX.Element {
         config={{
           topicToRender: "/diagnostics",
           selectedHardwareId: "hardware_id1",
-          selectedName: null,
+          selectedName: undefined,
           collapsedSections: [],
         }}
       />
@@ -74,7 +74,7 @@ export function MovedDivider(): JSX.Element {
         config={{
           topicToRender: "/diagnostics",
           selectedHardwareId: "hardware_id1",
-          selectedName: null,
+          selectedName: undefined,
           splitFraction: 0.25,
           collapsedSections: [],
         }}

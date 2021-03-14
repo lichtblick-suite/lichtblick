@@ -57,12 +57,12 @@ type OffscreenCanvas = HTMLCanvasElement;
 // config because they can only be set using a callback function, which we can't pass across worker boundaries.
 export type ScaleOptions = {
   // Sets y-axis labels to a fixed width, so that vertically-aligned charts can be directly compared.
-  fixedYAxisWidth?: number | null | undefined;
+  fixedYAxisWidth?: number;
   // We might want to hide just the first and last because they can overlap with other labels or have long decimal
   // points.
   yAxisTicks?: "show" | "hide" | "hideFirstAndLast";
   // Display the x-axes with a seconds unit, eg "1 s"
-  xAxisTicks?: XAxisTicks | null | undefined;
+  xAxisTicks?: XAxisTicks;
 };
 
 function hideAllTicksScaleCallback() {
@@ -99,7 +99,7 @@ const datasetKeyProvider = (d: Chart.ChartDataSets) => d.label ?? "";
 export default class ChartJSManager {
   id: string;
   _node: OffscreenCanvas;
-  _chartInstance: ChartInstance | null | undefined;
+  _chartInstance?: ChartInstance;
 
   constructor({
     id,
@@ -115,7 +115,7 @@ export default class ChartJSManager {
     type?: Chart.ChartType | string;
     data?: Chart.ChartData;
     options: Chart.ChartConfiguration;
-    scaleOptions: ScaleOptions | null | undefined;
+    scaleOptions?: ScaleOptions;
     devicePixelRatio: number;
   }) {
     this.id = id;
@@ -205,7 +205,7 @@ export default class ChartJSManager {
   }: {
     data: Chart.ChartData;
     options: Chart.ChartConfiguration;
-    scaleOptions: ScaleOptions | null | undefined;
+    scaleOptions?: ScaleOptions;
   }): ScaleBounds[] | undefined {
     const chartInstance = this._chartInstance;
 
@@ -286,7 +286,7 @@ export default class ChartJSManager {
     if (chartInstance) {
       chartInstance.destroy();
     }
-    this._chartInstance = null;
+    this._chartInstance = undefined;
   }
 
   // Get the closest element at the same x-axis value as the cursor.
@@ -345,7 +345,7 @@ export default class ChartJSManager {
     }
   }
 
-  _addFunctionsToConfig(config: any, scaleOptions: ScaleOptions | null | undefined): typeof config {
+  _addFunctionsToConfig(config: any, scaleOptions?: ScaleOptions): typeof config {
     if (config && config.plugins.datalabels) {
       // This controls which datalabels are displayed. Only display labels for datapoints that include a "label"
       // property.

@@ -78,9 +78,9 @@ const DEFAULT_PANEL_HOOKS = { imageMarkerDatatypes: [] };
 export type Config = DefaultConfig & {
   panelHooks?: ImageViewPanelHooks;
   transformMarkers: boolean;
-  mode: "fit" | "fill" | "other" | null;
-  zoomPercentage: number | null | undefined;
-  offset: number[] | null | undefined;
+  mode?: "fit" | "fill" | "other";
+  zoomPercentage?: number;
+  offset?: number[];
   saveStoryConfig?: () => void;
 };
 
@@ -583,7 +583,7 @@ function ImageView(props: Props) {
     markers: markersToRender,
     scale,
     transformMarkers,
-    cameraInfo: markersToRender.length > 0 ? cameraInfo : null,
+    cameraInfo: markersToRender.length > 0 ? cameraInfo : undefined,
   };
 
   const toolbar = useMemo(() => {

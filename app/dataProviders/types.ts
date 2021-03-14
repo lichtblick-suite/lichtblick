@@ -65,9 +65,9 @@ export type GetMessagesTopics = Readonly<{
 }>;
 
 export type GetMessagesResult = Readonly<{
-  parsedMessages: readonly Message[] | null | undefined;
-  rosBinaryMessages: readonly TypedMessage<ArrayBuffer>[] | null | undefined;
-  bobjects: readonly BobjectMessage[] | null | undefined;
+  parsedMessages?: readonly Message[];
+  rosBinaryMessages?: readonly TypedMessage<ArrayBuffer>[];
+  bobjects?: readonly BobjectMessage[];
 }>;
 
 export type ParsedMessageDefinitions = Readonly<{

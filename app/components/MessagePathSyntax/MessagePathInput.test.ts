@@ -48,7 +48,7 @@ describe("getFirstInvalidVariableFromRosPath", () => {
           repr: "myId==$not_yet_set_global_var",
         },
       ],
-      modifier: null,
+      modifier: undefined,
     };
     expect(getFirstInvalidVariableFromRosPath(rosPath, {}, setGlobalVars)).toEqual({
       loc: 10,
@@ -75,7 +75,7 @@ describe("getFirstInvalidVariableFromRosPath", () => {
           repr: `myId==$${defaultKey}`,
         },
       ],
-      modifier: null,
+      modifier: undefined,
     });
     Object.keys(defaultGlobalVars).forEach((defaultKey) => {
       expect(

@@ -155,7 +155,7 @@ type SearchTextComponentProps = SearchTextProps & {
   onCameraStateChange: (arg0: CameraState) => void;
   onFollowChange: (newFollowTf?: string | false, newFollowOrientation?: boolean) => void;
   cameraState: CameraState;
-  rootTf: string | null | undefined;
+  rootTf?: string;
   transforms: Transforms;
 };
 
@@ -171,7 +171,7 @@ export const useSearchMatches = ({
   cameraState: CameraState;
   currentMatch: GLTextMarker;
   onCameraStateChange: (arg0: CameraState) => void;
-  rootTf: string | null | undefined;
+  rootTf?: string;
   searchTextOpen: boolean;
   transforms: Transforms;
 }) => {

@@ -22,13 +22,13 @@ export default class VertexBufferCache {
 
   // Call this method before rendering to initialize
   // the cache for the current frame.
-  onPreRender() {
+  onPreRender(): void {
     this._previous = this._current;
     this._current = new Map<Float32Array, MemoizedVertexBuffer>();
   }
 
   // Get a vertex buffer from the cache.
-  get(key: VertexBuffer): MemoizedVertexBuffer | null | undefined {
+  get(key: VertexBuffer): MemoizedVertexBuffer | undefined {
     const { buffer } = key;
     let existing = this._current.get(buffer);
     if (existing) {
@@ -47,11 +47,11 @@ export default class VertexBufferCache {
     }
     // The vertex buffer has not being cached neither in the current
     // nor in the previous frame.
-    return null;
+    return undefined;
   }
 
   // Set a cached value for a vertex buffer
-  set(key: VertexBuffer, value: MemoizedVertexBuffer) {
+  set(key: VertexBuffer, value: MemoizedVertexBuffer): void {
     const existing = this._current.get(key.buffer);
     if (existing) {
       if (existing === value) {
@@ -67,12 +67,12 @@ export default class VertexBufferCache {
   }
 
   // Call this function after rendering a frame to delete unused buffers
-  onPostRender() {
+  onPostRender(): void {
     this._previous.forEach(this._deleteBuffer);
     this._previous.clear();
   }
 
-  _deleteBuffer(cached: MemoizedVertexBuffer) {
+  _deleteBuffer(cached: MemoizedVertexBuffer): void {
     const { buffer } = cached;
     if (buffer) {
       // Destroy GPU buffer

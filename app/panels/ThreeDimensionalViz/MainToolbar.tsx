@@ -25,7 +25,7 @@ import styles from "@foxglove-studio/app/panels/ThreeDimensionalViz/Layout.modul
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 
 type Props = {
-  measuringTool: MeasuringTool | null | undefined;
+  measuringTool?: MeasuringTool;
   measureInfo: MeasureInfo;
   perspective: boolean;
   debug: boolean;

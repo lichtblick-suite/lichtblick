@@ -13,7 +13,7 @@
 
 type DebouncedFn<Args extends unknown[]> = ((...args: Args) => void) & {
   // the currently executing promise, if any
-  currentPromise?: Promise<void> | null | undefined;
+  currentPromise?: Promise<void>;
 };
 
 // debouncePromise returns a function which wraps calls to `fn`.

@@ -124,8 +124,8 @@ export type TableInstance<HookInstances, HookState> = HookInstances & {
   prepareRow(row: Row): void;
   flatRows: Row[];
   totalColumnsWidth: number;
-  toggleHideColumn(columnId: string, value: boolean | null | undefined): void;
+  toggleHideColumn(columnId: string, value?: boolean): void;
   setHiddenColumns(columnIds: string[]): void;
-  toggleHideAllColumns(val: boolean | null | undefined): void;
+  toggleHideAllColumns(val?: boolean): void;
   getToggleHideAllColumnsProps(userProps: any): any;
 };

@@ -56,7 +56,7 @@ function PlaybackPerformanceItem(props: PlaybackPerformanceItemProps): ReactElem
 
 export type UnconnectedPlaybackPerformanceProps = {
   readonly timestamp: number;
-  readonly activeData: PlayerStateActiveData | null | undefined;
+  readonly activeData?: PlayerStateActiveData;
 };
 
 // Exported for stories

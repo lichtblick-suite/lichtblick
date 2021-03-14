@@ -71,11 +71,11 @@ type FixtureExampleProps = {
   data?: FixtureExampleData;
   loadData?: Promise<FixtureExampleData>;
   futureTime?: boolean;
-  onMount?: (arg0: HTMLDivElement | null | undefined, store?: Store) => void;
+  onMount?: (arg0: HTMLDivElement | undefined, store?: Store) => void;
 };
 
 type FixtureExampleState = {
-  fixture: Fixture | null | undefined;
+  fixture?: Fixture;
   config: Partial<ThreeDimensionalVizConfig>;
 };
 
@@ -88,7 +88,7 @@ export const WorldviewContainer = (props: { children: React.ReactNode }) => {
 };
 
 export class FixtureExample extends React.Component<FixtureExampleProps, FixtureExampleState> {
-  state: FixtureExampleState = { fixture: null, config: this.props.initialConfig };
+  state: FixtureExampleState = { fixture: undefined, config: this.props.initialConfig };
 
   componentDidMount() {
     const { data, loadData } = this.props;

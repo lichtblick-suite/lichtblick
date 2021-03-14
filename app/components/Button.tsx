@@ -19,7 +19,7 @@ import Tooltip from "@foxglove-studio/app/components/Tooltip";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 export type Props = JSX.LibraryManagedAttributes<typeof BaseButton, BaseButton["props"]> & {
-  innerRef: LegacyRef<BaseButton> | null | undefined;
+  innerRef?: LegacyRef<BaseButton>;
   tooltipProps?: JSX.LibraryManagedAttributes<typeof Tooltip, Tooltip["props"]>;
   style: CSSProperties;
   isPrimary?: boolean;

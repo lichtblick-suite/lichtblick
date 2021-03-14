@@ -20,4 +20,4 @@ export type InteractionData = {
   readonly originalMessage: RosObject;
 };
 export type Interactive<T> = T & { interactionData: InteractionData };
-export type SelectedObject = { object: Marker; instanceIndex: number | null | undefined };
+export type SelectedObject = { object: Marker; instanceIndex?: number };

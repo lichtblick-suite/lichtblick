@@ -29,10 +29,7 @@ type Props = {
   tabCount: number;
   tabIndex: number;
   tabTitle: string;
-  setDraggingTabState: (arg0: {
-    isOver: boolean;
-    item: DraggingTabItem | null | undefined;
-  }) => void;
+  setDraggingTabState: (arg0: { isOver: boolean; item?: DraggingTabItem }) => void;
 };
 
 export function DraggableToolbarTab(props: Props) {

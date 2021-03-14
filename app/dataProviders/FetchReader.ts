@@ -21,7 +21,7 @@ export default class FetchReader extends Readable {
   _aborted: boolean = false;
   _url: string;
 
-  constructor(url: string, options: RequestInit | null | undefined) {
+  constructor(url: string, options?: RequestInit) {
     super();
     this._url = url;
     this._controller = new AbortController();

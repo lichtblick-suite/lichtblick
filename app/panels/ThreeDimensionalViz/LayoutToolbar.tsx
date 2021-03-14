@@ -37,20 +37,20 @@ type Props = LayoutToolbarSharedProps &
   SearchTextProps & {
     autoSyncCameraState: boolean;
     debug: boolean;
-    interactionsTabType: TabType | null | undefined;
+    interactionsTabType?: TabType;
     measureInfo: MeasureInfo;
     measuringElRef: { current: MeasuringTool | null };
-    onSetDrawingTabType: (arg0: DrawingTabType | null | undefined) => void;
+    onSetDrawingTabType: (arg0?: DrawingTabType) => void;
     onSetPolygons: (polygons: Polygon[]) => void;
     onToggleCameraMode: () => void;
     onToggleDebug: () => void;
     polygonBuilder: PolygonBuilder;
-    rootTf: string | null | undefined;
-    selectedObject: MouseEventObject | null | undefined;
+    rootTf?: string;
+    selectedObject?: MouseEventObject;
     selectedPolygonEditFormat: "json" | "yaml";
-    setInteractionsTabType: (arg0: TabType | null | undefined) => void;
+    setInteractionsTabType: (arg0?: TabType) => void;
     setMeasureInfo: (arg0: MeasureInfo) => void;
-    showCrosshair: boolean | null | undefined;
+    showCrosshair?: boolean;
     isHidden: boolean;
   };
 
@@ -128,7 +128,7 @@ function LayoutToolbar({
         </div>
         <MainToolbar
           measureInfo={measureInfo}
-          measuringTool={measuringElRef.current}
+          measuringTool={measuringElRef.current ?? undefined}
           perspective={cameraState.perspective}
           debug={debug}
           onToggleCameraMode={onToggleCameraMode}

@@ -57,7 +57,7 @@ export type State = {
   persistedState: PersistedState;
   mosaic: { mosaicId: string; selectedPanelIds: MosaicKey[] };
   auth: AuthState;
-  hoverValue: HoverValue | null | undefined;
+  hoverValue?: HoverValue;
   userNodes: { userNodeDiagnostics: UserNodeDiagnostics; rosLib: string };
   router: { location: { pathname: string; search: string } };
   layoutHistory: LayoutHistory;
@@ -86,7 +86,7 @@ export default function createRootReducer(history: any, args?: { testAuth?: any 
     persistedState,
     mosaic: { mosaicId: "", selectedPanelIds: [] },
     auth: Object.freeze(args?.testAuth || { username: undefined }),
-    hoverValue: null,
+    hoverValue: undefined,
     userNodes: {
       userNodeDiagnostics: {
         diagnostics: [],
@@ -101,7 +101,7 @@ export default function createRootReducer(history: any, args?: { testAuth?: any 
   return (state: State, action: ActionTypes): State => {
     const oldPersistedState: PersistedState | null | undefined = state?.persistedState;
     const reducers: Array<
-      (arg0: State, arg1: ActionTypes, arg2: PersistedState | null | undefined) => State
+      (arg0: State, arg1: ActionTypes, arg2?: PersistedState) => State
     > = getReducers(history) as any;
     return reducers.reduce(
       (builtState, reducer) => reducer(builtState, action, oldPersistedState),

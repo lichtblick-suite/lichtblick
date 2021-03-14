@@ -56,7 +56,7 @@ const publisher = (message: Input<>, globalVars: GlobalVariables): Output => {
 export default publisher;`;
 
 type Config = {
-  selectedNodeId: string | null | undefined;
+  selectedNodeId?: string;
   // Used only for storybook screenshot testing.
   editorForStorybook?: React.ReactNode;
   // Used only for storybook screenshot testing.

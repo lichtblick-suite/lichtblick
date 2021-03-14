@@ -12,9 +12,11 @@
 //   You may not use this file except in compliance with the License.
 import { debounce } from "lodash";
 
-export function arrayToPoint(v: [number, number, number] | null | undefined) {
+export function arrayToPoint(
+  v?: [number, number, number],
+): { x: number; y: number; z: number } | undefined {
   if (!v) {
-    return null;
+    return undefined;
   }
   return { x: v[0], y: v[1], z: v[2] };
 }

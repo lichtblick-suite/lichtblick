@@ -63,7 +63,7 @@ const clearBgStyle = { backgroundColor: "transparent", padding: 0 };
 type Props = {
   hidden: boolean;
   highlight: boolean;
-  innerRef: ReactRef<any> | null | undefined;
+  innerRef?: ReactRef<any>;
   isActive: boolean;
   isDragging: boolean;
   actions: TabActions;

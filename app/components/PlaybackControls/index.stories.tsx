@@ -64,7 +64,7 @@ function Wrapper({
   children,
   store,
 }: {
-  activeData?: PlayerStateActiveData | null | undefined;
+  activeData?: PlayerStateActiveData;
   children: React.ReactNode;
   store?: any;
 }) {

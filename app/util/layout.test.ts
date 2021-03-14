@@ -75,7 +75,7 @@ describe("layout", () => {
           activeTabIdx: 0,
           tabs: [
             { title: "1", layout: "DiagnosticSummary!3fktxti" },
-            { title: "2", layout: null },
+            { title: "2", layout: undefined },
           ],
         },
         relatedConfigs: {},
@@ -89,10 +89,10 @@ describe("layout", () => {
       expect(getPanelTypeFromId(inputLayout!)).toEqual(getPanelTypeFromId(outputLayout));
       expect(inputLayout).not.toEqual(outputLayout);
     });
-    it("works with null tab layouts", () => {
+    it("works with undefined tab layouts", () => {
       const originalConfig = {
         id: "Tab!abc",
-        config: { tabs: [{ title: "First tab", layout: null }] },
+        config: { tabs: [{ title: "First tab", layout: undefined }] },
       };
       const { configs } = getSaveConfigsPayloadForAddedPanel({
         ...originalConfig,
@@ -103,7 +103,7 @@ describe("layout", () => {
     it("returns config when there are no related configs", () => {
       const originalConfig = {
         id: "Tab!abc",
-        config: { tabs: [{ title: "First tab", layout: null }] },
+        config: { tabs: [{ title: "First tab", layout: undefined }] },
       };
       const { configs } = getSaveConfigsPayloadForAddedPanel({
         ...originalConfig,
@@ -143,7 +143,7 @@ describe("layout", () => {
             activeTabIdx: 0,
             tabs: [
               { title: "1", layout: "DiagnosticSummary!3v8mswd" },
-              { title: "2", layout: null },
+              { title: "2", layout: undefined },
             ],
           },
           "Tab!3u9ypnk",
@@ -155,8 +155,8 @@ describe("layout", () => {
             config: {
               activeTabIdx: 0,
               tabs: [
-                { title: "1", layout: null },
-                { title: "2", layout: null },
+                { title: "1", layout: undefined },
+                { title: "2", layout: undefined },
               ],
             },
           },
@@ -179,7 +179,7 @@ describe("layout", () => {
                   splitPercentage: 100,
                 },
               },
-              { title: "2", layout: null },
+              { title: "2", layout: undefined },
             ],
           },
           "Tab!3u9ypnk",
@@ -192,7 +192,7 @@ describe("layout", () => {
               activeTabIdx: 0,
               tabs: [
                 { title: "1", layout: "DiagnosticSummary!1x1vwgf" },
-                { title: "2", layout: null },
+                { title: "2", layout: undefined },
               ],
             },
           },
@@ -291,7 +291,7 @@ describe("layout", () => {
             activeTabIdx: 0,
             tabs: [
               { title: "1", layout: "DiagnosticSummary!3v8mswd" },
-              { title: "2", layout: null },
+              { title: "2", layout: undefined },
             ],
           },
           "Tab!3u9ypnk",
@@ -311,7 +311,7 @@ describe("layout", () => {
                     direction: "column",
                   },
                 },
-                { title: "2", layout: null },
+                { title: "2", layout: undefined },
               ],
             },
           },
@@ -324,7 +324,7 @@ describe("layout", () => {
           "DiagnosticSummary!4dpz3hc",
           undefined,
           undefined,
-          { activeTabIdx: 0, tabs: [{ title: "1", layout: null }] },
+          { activeTabIdx: 0, tabs: [{ title: "1", layout: undefined }] },
           "Tab!3u9ypnk",
         ),
       ).toEqual({
@@ -429,7 +429,7 @@ describe("layout", () => {
             },
           },
         ),
-      ).toEqual(null);
+      ).toEqual(undefined);
     });
 
     it("will just remove specified panels if no panel is specified as replacement", () => {
@@ -463,7 +463,7 @@ describe("layout", () => {
             },
           },
         ),
-      ).toEqual(null);
+      ).toEqual(undefined);
     });
     it("will not modify layouts that don't contain panelIdsToRemove", () => {
       const originalLayout: MosaicNode<string> = {
@@ -479,7 +479,7 @@ describe("layout", () => {
         replaceAndRemovePanels({ idsToRemove: ["Missing!a", "Missing!b"] }, originalLayout),
       ).toEqual(originalLayout);
     });
-    it("will return null if all panels are replaced", () => {
+    it("will return undefined if all panels are replaced", () => {
       expect(
         replaceAndRemovePanels(
           { originalId: "OldId!y", idsToRemove: ["Remove!a", "Remove!b"] },
@@ -489,7 +489,7 @@ describe("layout", () => {
             second: "Remove!b",
           },
         ),
-      ).toEqual(null);
+      ).toEqual(undefined);
     });
   });
 
@@ -497,7 +497,7 @@ describe("layout", () => {
     it("correctly updates active tab's layout with single panel", () => {
       expect(
         updateTabPanelLayout("RosOut!abc", {
-          tabs: [{ title: "A", layout: null }],
+          tabs: [{ title: "A", layout: undefined }],
           activeTabIdx: 0,
         }),
       ).toEqual({
@@ -507,7 +507,7 @@ describe("layout", () => {
       expect(
         updateTabPanelLayout("RosOut!abc", {
           tabs: [
-            { title: "A", layout: null },
+            { title: "A", layout: undefined },
             { title: "B", layout: "RosOut!def" },
           ],
           activeTabIdx: 1,
@@ -515,7 +515,7 @@ describe("layout", () => {
       ).toEqual({
         activeTabIdx: 1,
         tabs: [
-          { title: "A", layout: null },
+          { title: "A", layout: undefined },
           { layout: "RosOut!abc", title: "B" },
         ],
       });
@@ -527,7 +527,10 @@ describe("layout", () => {
         direction: "row",
       };
       expect(
-        updateTabPanelLayout(newLayout, { tabs: [{ title: "A", layout: null }], activeTabIdx: 0 }),
+        updateTabPanelLayout(newLayout, {
+          tabs: [{ title: "A", layout: undefined }],
+          activeTabIdx: 0,
+        }),
       ).toEqual({
         activeTabIdx: 0,
         tabs: [{ layout: newLayout, title: "A" }],
@@ -535,7 +538,7 @@ describe("layout", () => {
       expect(
         updateTabPanelLayout(newLayout, {
           tabs: [
-            { title: "A", layout: null },
+            { title: "A", layout: undefined },
             { title: "B", layout: "RosOut!def" },
           ],
           activeTabIdx: 1,
@@ -543,7 +546,7 @@ describe("layout", () => {
       ).toEqual({
         activeTabIdx: 1,
         tabs: [
-          { title: "A", layout: null },
+          { title: "A", layout: undefined },
           { layout: newLayout, title: "B" },
         ],
       });

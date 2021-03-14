@@ -58,7 +58,7 @@ const PlaybackTimeDisplayMethod = ({
   currentTime: Time;
   startTime: Time;
   endTime: Time;
-  timezone?: string | null | undefined;
+  timezone?: string;
   onSeek: (arg0: Time) => void;
   onPause: () => void;
   isPlaying: boolean;

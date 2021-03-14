@@ -24,7 +24,7 @@ type Props = {
 };
 
 export default class KeyListener extends React.Component<Props> {
-  el: HTMLDivElement | null | undefined;
+  el?: HTMLDivElement;
 
   static defaultProps = {
     global: false,
@@ -50,7 +50,7 @@ export default class KeyListener extends React.Component<Props> {
     }
   }
 
-  callHandlers(handlers: KeyHandlers | null | undefined, event: KeyboardEvent) {
+  callHandlers(handlers: KeyHandlers | undefined, event: KeyboardEvent) {
     if (!handlers) {
       return;
     }
@@ -87,6 +87,6 @@ export default class KeyListener extends React.Component<Props> {
   };
 
   render() {
-    return <div style={{ display: "none" }} ref={(el) => (this.el = el)} />;
+    return <div style={{ display: "none" }} ref={(el) => (this.el = el ?? undefined)} />;
   }
 }

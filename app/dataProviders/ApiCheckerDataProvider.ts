@@ -60,7 +60,7 @@ export function instrumentTreeWithApiCheckerDataProvider(
 export default class ApiCheckerDataProvider implements DataProvider {
   _name: string;
   _provider?: DataProvider;
-  _initializationResult: InitializationResult | null | undefined;
+  _initializationResult?: InitializationResult;
   _topicNames: string[] = [];
   _closed: boolean = false;
   _isRoot: boolean;

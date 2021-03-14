@@ -58,7 +58,7 @@ export type MemoryCacheBlock = {
   readonly sizeInBytes: number;
 };
 export type BlockCache = {
-  blocks: readonly (MemoryCacheBlock | null | undefined)[];
+  blocks: readonly (MemoryCacheBlock | undefined)[];
   startTime: Time;
 };
 const EMPTY_BLOCK: MemoryCacheBlock = {
@@ -89,7 +89,7 @@ export function getBlocksToKeep({
   // The maximum cache size in bytes.
   maxCacheSizeInBytes: number;
   // A block index to avoid evicting blocks from near.
-  badEvictionRange: Range | null | undefined;
+  badEvictionRange?: Range;
 }): {
   blockIndexesToKeep: Set<number>;
   newRecentRanges: Range[];
@@ -176,7 +176,7 @@ export function getBlocksToKeep({
 
 function getBlocksToKeepDirection(
   blockRange: Range,
-  badEvictionLocation: number | null | undefined,
+  badEvictionLocation: number | undefined,
 ): {
   startIndex: number;
   endIndex: number;
@@ -233,7 +233,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
   // The actual blocks that contain the messages. Blocks have a set "width" in terms of nanoseconds
   // since the start time of the bag. If a block has some messages for a topic, then by definition
   // it has *all* messages for that topic and timespan.
-  _blocks: readonly (MemoryCacheBlock | null | undefined)[] = [];
+  _blocks: readonly (MemoryCacheBlock | undefined)[] = [];
 
   // The start time of the bag. Used for computing from and to nanoseconds since the start.
   _startTime: Time = { sec: 0, nsec: 0 };
@@ -269,7 +269,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
 
   // The end time of the last callback that we've resolved. This is useful for preloading new data
   // around this time.
-  _lastResolvedCallbackEnd: number | null | undefined;
+  _lastResolvedCallbackEnd?: number;
 
   // When we log a "block too large" error, we only want to do that once, to prevent
   // spamming errors.

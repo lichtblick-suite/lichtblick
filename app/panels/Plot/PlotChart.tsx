@@ -89,8 +89,8 @@ function getXForPoint(
   timestamp: number,
   innerIdx: number,
   xAxisRanges: readonly (readonly TooltipItem[])[] | null | undefined,
-  xItem: TooltipItem | null | undefined,
-  xAxisPath: BasePlotPath | null | undefined,
+  xItem: TooltipItem | undefined,
+  xAxisPath: BasePlotPath | undefined,
 ): number {
   if (isCustomScale(xAxisVal) && xAxisPath) {
     if (isReferenceLinePlotPathType(xAxisPath)) {
@@ -117,7 +117,7 @@ const scaleOptions: ScaleOptions = {
 
 function getPointsAndTooltipsForMessagePathItem(
   yItem: TooltipItem,
-  xItem: TooltipItem | null | undefined,
+  xItem: TooltipItem | undefined,
   startTime: Time,
   timestampMethod: TimestampMethod,
   xAxisVal: PlotXAxisVal,
@@ -395,11 +395,11 @@ type PlotChartProps = {
   paths: PlotPath[];
   minYValue: number;
   maxYValue: number;
-  saveCurrentView: (minY: number, maxY: number, width: number | null | undefined) => void;
+  saveCurrentView: (minY: number, maxY: number, width?: number) => void;
   datasets: DataSet[];
   tooltips: TimeBasedChartTooltipData[];
   xAxisVal: PlotXAxisVal;
-  currentTime?: number | null | undefined;
+  currentTime?: number;
   defaultView: ChartDefaultView;
   onClick?: (
     arg0: React.MouseEvent<HTMLCanvasElement>,

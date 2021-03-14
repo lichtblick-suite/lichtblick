@@ -41,7 +41,7 @@ export type NamespaceNode = {
   hasNamespaceOverrideColorChangedByColumn: boolean[];
   key: string;
   namespace: string;
-  overrideColorByColumn: (string | null | undefined)[] | null | undefined;
+  overrideColorByColumn?: (string | undefined)[];
   visibleInSceneByColumn: boolean[];
 };
 
@@ -85,7 +85,7 @@ function NamespaceNodeRow({
   namespace: string;
   availableByColumn: boolean[];
   checkedByColumn: boolean[];
-  overrideColorByColumn: (string | null | undefined)[] | null | undefined;
+  overrideColorByColumn?: (string | undefined)[];
   visibleInSceneByColumn: boolean[];
   rowWidth: number;
   isXSWidth: boolean;

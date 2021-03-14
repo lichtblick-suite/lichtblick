@@ -5,6 +5,9 @@ env:
 
 ignorePatterns:
   - storybook-static
+  # This file triggers an eslint bug because of our {fs: false} setting in webpack config.
+  # But for some reason it only happens locally, not in CI.
+  - app/test/transformers/rawImportPreprocessor.ts
 
 plugins:
   - react

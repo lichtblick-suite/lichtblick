@@ -29,7 +29,7 @@ const SHeaderItem = styled.div`
 `;
 
 type Props = {
-  nodeId: string | null | undefined;
+  nodeId?: string;
   isSaved: boolean;
   save: () => void;
   diagnostics: Diagnostic[];

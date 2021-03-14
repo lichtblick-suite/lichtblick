@@ -34,7 +34,7 @@ import colors from "@foxglove-studio/app/styles/colors.module.scss";
 type Props = {
   node: Node;
   depth: number;
-  disableCheckbox: boolean | null | undefined;
+  disableCheckbox?: boolean;
   enableVisibilityToggle?: boolean;
   onRemoveNode: (node: Node) => void | null | undefined;
   onToggleExpand: (node: Node) => void;

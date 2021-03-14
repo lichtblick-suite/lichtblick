@@ -16,7 +16,7 @@ import OrderedStampPlayer from "@foxglove-studio/app/players/OrderedStampPlayer"
 import { UserNodes } from "@foxglove-studio/app/types/panels";
 
 type Props = {
-  nodePlayer: OrderedStampPlayer | null | undefined;
+  nodePlayer?: OrderedStampPlayer;
   userNodes: UserNodes;
 };
 

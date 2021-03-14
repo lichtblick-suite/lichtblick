@@ -57,7 +57,7 @@ function Tab({ config, saveConfig }: Props) {
 
   // Holds the state of actively dragging tabs as they relate to this Tab Panel
   const [draggingTabState, setDraggingTabState] = useState<DraggingTabPanelState>({
-    item: null,
+    item: undefined,
     isOver: false,
   });
 
@@ -88,7 +88,7 @@ function Tab({ config, saveConfig }: Props) {
     [activeTabIdx, saveConfig, tabs],
   );
   const addTab = useCallback(() => {
-    const newTab = { title: `${tabs.length + 1}`, layout: null };
+    const newTab = { title: `${tabs.length + 1}`, layout: undefined };
     saveConfig({ ...config, activeTabIdx: tabs.length, tabs: tabs.concat([newTab]) });
   }, [config, saveConfig, tabs]);
   const onChangeLayout = useCallback(

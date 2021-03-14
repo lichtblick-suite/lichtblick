@@ -25,7 +25,7 @@ function lineStrip({
 }: {
   points: Point[];
   closed?: boolean;
-  color?: Color | null | undefined;
+  color?: Color;
 }): LineStripMarker {
   return {
     id: "foo",
@@ -41,13 +41,7 @@ function lineStrip({
   };
 }
 
-function lineList({
-  points,
-  color,
-}: {
-  points: Point[];
-  color?: Color | null | undefined;
-}): LineListMarker {
+function lineList({ points, color }: { points: Point[]; color?: Color }): LineListMarker {
   return {
     id: "foo",
     ns: "bar",

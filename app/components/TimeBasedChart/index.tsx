@@ -48,7 +48,7 @@ import { useDeepChangeDetector } from "@foxglove-studio/app/util/hooks";
 import { defaultGetHeaderStamp } from "@foxglove-studio/app/util/synchronizeMessages";
 import { maybeGetBobjectHeaderStamp } from "@foxglove-studio/app/util/time";
 
-type Bounds = { minX: number | null | undefined; maxX: number | null | undefined };
+type Bounds = { minX?: number; maxX?: number };
 const SyncTimeAxis = createSyncingComponent<Bounds, Bounds>(
   "SyncTimeAxis",
   (dataItems: Bounds[]) => ({
@@ -60,7 +60,7 @@ const SyncTimeAxis = createSyncingComponent<Bounds, Bounds>(
 export type TooltipItem = {
   queriedData: MessagePathDataItem[];
   receiveTime: Time;
-  headerStamp: Time | null | undefined;
+  headerStamp?: Time;
 };
 
 export const getTooltipItemForMessageHistoryItem = (item: MessageAndData): TooltipItem => {
@@ -78,9 +78,9 @@ export type TimeBasedChartTooltipData = {
   item: TooltipItem;
   path: string;
   value: number | boolean | string;
-  constantName?: string | null | undefined;
+  constantName?: string;
   startTime: Time;
-  source?: number | null | undefined;
+  source?: number;
 };
 
 export type DataPoint = {
@@ -164,14 +164,14 @@ type DataSet = Readonly<{
   showLine?: boolean;
 }>;
 
-const scalePerPixel = (bounds: ScaleBounds | null | undefined): number | null | undefined =>
+const scalePerPixel = (bounds?: ScaleBounds): number | undefined =>
   bounds && Math.abs(bounds.max - bounds.min) / Math.abs(bounds.maxAlongAxis - bounds.minAlongAxis);
-const screenCoord = (value: number, valuePerPixel: number | null | undefined) =>
+const screenCoord = (value: number, valuePerPixel?: number) =>
   !valuePerPixel ? value : Math.trunc(value / valuePerPixel);
 const datumStringPixel = (
   { x, y }: Point,
-  xScale: number | null | undefined,
-  yScale: number | null | undefined,
+  xScale: number | undefined,
+  yScale: number | undefined,
 ): string => `${screenCoord(x, xScale)},${typeof y === "string" ? y : screenCoord(y, yScale)}`;
 
 // Exported for tests
@@ -180,8 +180,8 @@ export const filterDatasets = (
   linesToHide: {
     [key: string]: boolean;
   },
-  xScalePerPixel?: number | null,
-  yScalePerPixel?: number | null,
+  xScalePerPixel?: number,
+  yScalePerPixel?: number,
 ): DataSet[] =>
   datasets // Only draw enabled lines. Needed for correctness.
     .filter(({ label }) => !linesToHide[label]) // Remove redundant points to make drawing the chart more efficient.
@@ -228,13 +228,13 @@ export type Props = {
       [axis: string]: number;
     },
   ) => void | null | undefined;
-  saveCurrentView?: (minY: number, maxY: number, width: number | null | undefined) => void;
+  saveCurrentView?: (minY: number, maxY: number, width?: number) => void;
   // If the x axis represents playback time ("timestamp"), the hover cursor will be synced.
   // Note, this setting should not be used for other time values.
   xAxisIsPlaybackTime: boolean;
   plugins?: Chart.ChartPluginsOptions;
-  scaleOptions?: ScaleOptions | null | undefined;
-  currentTime?: number | null | undefined;
+  scaleOptions?: ScaleOptions;
+  currentTime?: number;
   defaultView?: ChartDefaultView;
 };
 
@@ -286,7 +286,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   }, [pauseFrame]);
 
   const { saveCurrentView, yAxes } = props;
-  const scaleBounds = useRef<readonly ScaleBounds[] | null | undefined>();
+  const scaleBounds = useRef<readonly ScaleBounds[] | undefined>();
   const hoverBar = useRef<HTMLDivElement | null>(null);
   const onScaleBoundsUpdate = useCallback(
     (scales: ScaleBounds[]) => {
@@ -442,7 +442,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     (
       currentChartComponent: ChartComponent,
       canvas: HTMLCanvasElement,
-      tooltipItem: HoveredElement | null | undefined,
+      tooltipItem: HoveredElement | undefined,
     ) => {
       // This is an async callback, so it can fire after this component is unmounted. Make sure that we remove the
       // tooltip if this fires after unmount.
@@ -558,7 +558,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
 
   const xScaleOptions = followPlaybackState && xBounds ? stepSize(xBounds) : undefined;
 
-  const getChartjsOptions = (minX: number | null | undefined, maxX: number | null | undefined) => {
+  const getChartjsOptions = (minX: number | undefined, maxX?: number) => {
     const { currentTime } = props;
     const plugins = props.plugins ?? {};
     const annotations = [...(props.annotations ?? [])];

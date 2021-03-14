@@ -132,10 +132,7 @@ export const clearLayoutUrlReplacedByDefault = (): Dispatcher<CLEAR_LAYOUT_URL_R
   return dispatch({ type: PANELS_ACTION_TYPES.CLEAR_LAYOUT_URL_REPLACED_BY_DEFAULT });
 };
 
-export function applyPatchToLayout(
-  patch: string | null | undefined,
-  layout: PanelsState,
-): PanelsState {
+export function applyPatchToLayout(patch: string | undefined, layout: PanelsState): PanelsState {
   if (!patch) {
     return layout;
   }
@@ -172,7 +169,7 @@ export const fetchLayout = (
 ): Dispatcher<SET_FETCHED_LAYOUT | SET_FETCH_LAYOUT_FAILED | LOAD_LAYOUT> => (dispatch) => {
   const params = new URLSearchParams(search);
   const hasLayoutUrl = params.get(LAYOUT_URL_QUERY_KEY);
-  const patch = params.get(PATCH_QUERY_KEY);
+  const patch = params.get(PATCH_QUERY_KEY) ?? undefined;
   dispatch({ type: PANELS_ACTION_TYPES.SET_FETCHED_LAYOUT, payload: { isLoading: true } });
   return getGlobalHooks()
     .getLayoutFromUrl(search)
@@ -306,8 +303,8 @@ export const moveTab = (payload: MoveTabPayload): MOVE_TAB => ({
 
 export type AddPanelPayload = {
   type: string;
-  layout: MosaicNode | null | undefined;
-  tabId: string | null | undefined;
+  layout?: MosaicNode;
+  tabId?: string;
   config?: PanelConfig;
   relatedConfigs?: SavedProps;
 };
@@ -322,8 +319,8 @@ export type DropPanelPayload = {
   destinationPath: MosaicPath;
   position: "top" | "bottom" | "left" | "right";
   tabId?: string;
-  config: PanelConfig | null | undefined;
-  relatedConfigs: SavedProps | null | undefined;
+  config?: PanelConfig;
+  relatedConfigs?: SavedProps;
 };
 type DROP_PANEL = { type: "DROP_PANEL"; payload: DropPanelPayload };
 export const dropPanel = (payload: DropPanelPayload): DROP_PANEL => ({
@@ -333,7 +330,7 @@ export const dropPanel = (payload: DropPanelPayload): DROP_PANEL => ({
 
 export type StartDragPayload = {
   path: MosaicPath;
-  sourceTabId: string | null | undefined;
+  sourceTabId?: string;
 };
 type START_DRAG = { type: "START_DRAG"; payload: StartDragPayload };
 export const startDrag = (payload: StartDragPayload): START_DRAG => ({
@@ -345,8 +342,8 @@ export type EndDragPayload = {
   originalLayout: MosaicNode;
   originalSavedProps: SavedProps;
   panelId: string;
-  sourceTabId: string | null | undefined;
-  targetTabId: string | null | undefined;
+  sourceTabId?: string;
+  targetTabId?: string;
   position: MosaicDropTargetPosition;
   destinationPath: MosaicPath;
   ownPath: MosaicPath;

@@ -23,8 +23,8 @@ import { Marker, MarkerArray } from "@foxglove-studio/app/types/Messages";
 import { LINED_CONVEX_HULL_RENDERING_SETTING } from "@foxglove-studio/app/util/globalConstants";
 
 type MarkerSettings = {
-  overrideColor?: Color | null | undefined;
-  overrideCommand?: string | null | undefined;
+  overrideColor?: Color;
+  overrideCommand?: string;
 };
 
 export default function MarkerSettingsEditor(

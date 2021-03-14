@@ -15,7 +15,7 @@ import { createContext } from "react";
 export const TAB_DRAG_TYPE = "TAB";
 export type DraggingTabItem = { type: typeof TAB_DRAG_TYPE; tabIndex: number; panelId: string };
 export type DraggingTabPanelState = {
-  item: DraggingTabItem | null | undefined;
+  item?: DraggingTabItem;
   isOver: boolean;
 };
 

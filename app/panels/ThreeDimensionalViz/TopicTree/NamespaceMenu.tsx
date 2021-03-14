@@ -66,7 +66,7 @@ type Props = {
   namespace: string;
   nodeKey: string;
   onNamespaceOverrideColorChange: OnNamespaceOverrideColorChange;
-  overrideColorByColumn: (string | null | undefined)[] | null | undefined;
+  overrideColorByColumn?: (string | undefined)[];
   providerAvailable: boolean;
   setEditingNamespace: SetEditingNamespace;
   topicName: string;

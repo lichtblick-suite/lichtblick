@@ -89,7 +89,7 @@ const undoLayoutChange = (
 };
 
 const pushLayoutChange = (
-  oldPersistedState: PersistedState | null | undefined,
+  oldPersistedState: PersistedState | undefined,
   newPersistedState: PersistedState,
   layoutHistory: LayoutHistory,
   action: any,
@@ -119,7 +119,7 @@ const pushLayoutChange = (
 export default function (
   state: State,
   action: ActionTypes,
-  oldPersistedState?: PersistedState | null | undefined,
+  oldPersistedState?: PersistedState,
 ): State {
   switch (action.type) {
     case "UNDO_LAYOUT_CHANGE": {

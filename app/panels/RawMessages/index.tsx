@@ -225,7 +225,7 @@ function RawMessages(props: Props) {
 
   const valueRenderer = useCallback(
     (
-      structureItem: MessagePathStructureItem | null | undefined,
+      structureItem: MessagePathStructureItem | undefined,
       data: unknown[],
       queriedData: MessagePathDataItem[],
       label: string,
@@ -359,7 +359,7 @@ function RawMessages(props: Props) {
       diffItem && dataWithoutWrappingArray(diffItem.queriedData.map(({ value }) => value as any));
     const diff =
       diffEnabled &&
-      getDiff(maybeDeepParse(data), maybeDeepParse(diffData), null, showFullMessageForDiff);
+      getDiff(maybeDeepParse(data), maybeDeepParse(diffData), undefined, showFullMessageForDiff);
     const diffLabelTexts = objectValues(diffLabels).map(({ labelText }) => labelText);
 
     const CheckboxComponent = showFullMessageForDiff
@@ -404,7 +404,7 @@ function RawMessages(props: Props) {
               getItemString={diffEnabled ? (getItemStringForDiff as any) : (getItemString as any)}
               valueRenderer={(...args) => {
                 if (diffEnabled) {
-                  return valueRenderer(null, diff, diff, ...args);
+                  return valueRenderer(undefined, diff, diff, ...args);
                 }
                 if (hideWrappingArray) {
                   // When the wrapping array is hidden, put it back here.

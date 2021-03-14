@@ -107,7 +107,7 @@ export type LayoutToolbarSharedProps = {
   onCameraStateChange: (arg0: CameraState) => void;
   onFollowChange: (followTf?: string | false, followOrientation?: boolean) => void;
   saveConfig: Save3DConfig;
-  targetPose: TargetPose | null | undefined;
+  targetPose?: TargetPose;
   transforms: Transforms;
   isPlaying?: boolean;
 };
@@ -203,7 +203,7 @@ export default function Layout({
   const [editingNamespace, setEditingNamespace] = useState<
     | {
         namespaceKey: string;
-        namespaceColor: string | null | undefined;
+        namespaceColor?: string;
       }
     | null
     | undefined
@@ -466,7 +466,7 @@ export default function Layout({
   ]);
 
   const handleDrawPolygons = useCallback(
-    (eventName: EventName, ev: MouseEvent, args: ReglClickInfo | null | undefined) => {
+    (eventName: EventName, ev: MouseEvent, args?: ReglClickInfo) => {
       (polygonBuilder as any)[eventName](ev, args);
       forceUpdate();
     },
@@ -508,25 +508,22 @@ export default function Layout({
     [],
   );
 
-  const handleEvent = useCallback(
-    (eventName: EventName, ev: MouseEvent, args: ReglClickInfo | null | undefined) => {
-      if (!args) {
-        return;
-      }
-      const {
-        drawingTabType: currentDrawingTabType,
-        handleDrawPolygons: currentHandleDrawPolygons,
-      } = callbackInputsRef.current;
-      const measuringHandler = measuringElRef.current && (measuringElRef.current as any)[eventName];
-      const measureActive = measuringElRef.current && measuringElRef.current.measureActive;
-      if (measuringHandler && measureActive) {
-        return measuringHandler(ev, args);
-      } else if (currentDrawingTabType === POLYGON_TAB_TYPE) {
-        currentHandleDrawPolygons(eventName, ev, args);
-      }
-    },
-    [],
-  );
+  const handleEvent = useCallback((eventName: EventName, ev: MouseEvent, args?: ReglClickInfo) => {
+    if (!args) {
+      return;
+    }
+    const {
+      drawingTabType: currentDrawingTabType,
+      handleDrawPolygons: currentHandleDrawPolygons,
+    } = callbackInputsRef.current;
+    const measuringHandler = measuringElRef.current && (measuringElRef.current as any)[eventName];
+    const measureActive = measuringElRef.current && measuringElRef.current.measureActive;
+    if (measuringHandler && measureActive) {
+      return measuringHandler(ev, args);
+    } else if (currentDrawingTabType === POLYGON_TAB_TYPE) {
+      currentHandleDrawPolygons(eventName, ev, args);
+    }
+  }, []);
 
   const updateGlobalVariablesFromSelection = useCallback(
     (newSelectedObject: MouseEventObject) => {
@@ -546,7 +543,7 @@ export default function Layout({
   // Auto open/close the tab when the selectedObject changes as long as
   // we aren't drawing or the disableAutoOpenClickedObject setting is enabled.
   const updateInteractionsTabVisibility = useCallback(
-    (newSelectedObject: MouseEventObject | null | undefined) => {
+    (newSelectedObject?: MouseEventObject) => {
       if (!isDrawing) {
         const shouldBeOpen = newSelectedObject && !disableAutoOpenClickedObject;
         setInteractionsTabType(shouldBeOpen ? (OBJECT_TAB_TYPE as any) : null);
@@ -556,7 +553,7 @@ export default function Layout({
   );
 
   const selectObject = useCallback(
-    (newSelectedObject: MouseEventObject | null | undefined) => {
+    (newSelectedObject?: MouseEventObject) => {
       setSelectionState({
         ...callbackInputsRef.current.selectionState,
         selectedObject: newSelectedObject,
@@ -580,7 +577,7 @@ export default function Layout({
     toggleDebug,
   } = useMemo(() => {
     return {
-      onClick: (ev: MouseEvent, args: ReglClickInfo | null | undefined) => {
+      onClick: (ev: MouseEvent, args?: ReglClickInfo) => {
         // Don't set any clicked objects when measuring distance or drawing polygons.
         if (callbackInputsRef.current.isDrawing) {
           return;
@@ -607,19 +604,16 @@ export default function Layout({
           setShowTopicTree(false);
         }
       },
-      onDoubleClick: (ev: MouseEvent, args: ReglClickInfo | null | undefined) =>
+      onDoubleClick: (ev: MouseEvent, args?: ReglClickInfo) =>
         handleEvent("onDoubleClick", ev, args),
       onExitTopicTreeFocus: () => {
         if (containerRef.current) {
           containerRef.current.focus();
         }
       },
-      onMouseDown: (ev: MouseEvent, args: ReglClickInfo | null | undefined) =>
-        handleEvent("onMouseDown", ev, args),
-      onMouseMove: (ev: MouseEvent, args: ReglClickInfo | null | undefined) =>
-        handleEvent("onMouseMove", ev, args),
-      onMouseUp: (ev: MouseEvent, args: ReglClickInfo | null | undefined) =>
-        handleEvent("onMouseUp", ev, args),
+      onMouseDown: (ev: MouseEvent, args?: ReglClickInfo) => handleEvent("onMouseDown", ev, args),
+      onMouseMove: (ev: MouseEvent, args?: ReglClickInfo) => handleEvent("onMouseMove", ev, args),
+      onMouseUp: (ev: MouseEvent, args?: ReglClickInfo) => handleEvent("onMouseUp", ev, args),
       onSetPolygons: (polygons: Polygon[]) => setPolygonBuilder(new PolygonBuilder(polygons)),
       toggleDebug: () => setDebug(!callbackInputsRef.current.debug),
       toggleCameraMode: () => {

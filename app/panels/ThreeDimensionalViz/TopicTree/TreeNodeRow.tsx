@@ -114,7 +114,7 @@ type Props = {
   visibleByColumn: (boolean | null | undefined)[];
   sceneErrors: string[] | null | undefined;
   setCurrentEditingTopic: SetCurrentEditingTopic;
-  derivedCustomSettings: DerivedCustomSettings | null | undefined;
+  derivedCustomSettings?: DerivedCustomSettings;
   width: number;
   filterText: string;
   tooltips?: Node[];

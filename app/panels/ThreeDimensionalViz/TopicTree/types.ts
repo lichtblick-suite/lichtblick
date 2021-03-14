@@ -34,8 +34,8 @@ export type TopicTreeConfig = {
 export type NamespacesByTopic = {
   [topicName: string]: string[];
 };
-type EditingNamespace = { namespaceKey: string; namespaceColor: string | null | undefined };
-export type SetEditingNamespace = (arg0: EditingNamespace | null | undefined) => void;
+type EditingNamespace = { namespaceKey: string; namespaceColor?: string };
+export type SetEditingNamespace = (arg0?: EditingNamespace) => void;
 
 export type TreeGroupNode = {
   type: "group";
@@ -111,7 +111,7 @@ export type GetIsTreeNodeVisibleInScene = (
   namespaceKey?: string,
 ) => boolean;
 export type GetIsTreeNodeVisibleInTree = (key: string) => boolean;
-export type SetCurrentEditingTopic = (arg0: Topic | null | undefined) => void;
+export type SetCurrentEditingTopic = (arg0?: Topic) => void;
 export type ToggleNode = (nodeKey: string, namespaceParentTopicName?: string) => void;
 export type ToggleNodeByColumn = (
   nodeKey: string,
@@ -132,7 +132,7 @@ export type DerivedCustomSettingsByKey = {
   [key: string]: DerivedCustomSettings;
 };
 export type OnNamespaceOverrideColorChange = (
-  newRbgaColor: Color | null | undefined,
+  newRbgaColor: Color | undefined,
   prefixedNamespaceKey: string,
 ) => void;
 export type VisibleTopicsCountByKey = {

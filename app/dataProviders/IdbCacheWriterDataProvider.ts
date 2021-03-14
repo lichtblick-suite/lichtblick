@@ -95,7 +95,7 @@ export default class IdbCacheWriterDataProvider implements DataProvider {
 
   // The end time of the last callback that we've resolved. This is useful for preloading new data
   // around this time.
-  _lastResolvedCallbackEnd: number | null | undefined;
+  _lastResolvedCallbackEnd?: number;
 
   _extensionPoint?: ExtensionPoint;
 

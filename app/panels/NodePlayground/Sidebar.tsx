@@ -106,7 +106,7 @@ type NodesListProps = {
   selectNode: (id: string) => void;
   deleteNode: (id: string) => void;
   collapse: () => void;
-  selectedNodeId: string | null | undefined;
+  selectedNodeId?: string;
   userNodeDiagnostics: {
     [guid: string]: UserNodeDiagnostics;
   };
@@ -138,7 +138,7 @@ type Props = {
   selectNode: (nodeId: string) => void;
   deleteNode: (nodeId: string) => void;
   userNodes: UserNodes;
-  selectedNodeId: string | null | undefined;
+  selectedNodeId?: string;
   otherMarkdownDocsForTest?: string;
   userNodeDiagnostics: {
     [guid: string]: UserNodeDiagnostics;

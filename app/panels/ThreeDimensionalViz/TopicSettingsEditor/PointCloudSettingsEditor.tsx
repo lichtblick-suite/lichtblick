@@ -48,10 +48,10 @@ export const DEFAULT_MIN_COLOR = { r: 0, g: 0, b: 1, a: 1 };
 export const DEFAULT_MAX_COLOR = { r: 1, g: 0, b: 0, a: 1 };
 
 export type PointCloudSettings = {
-  pointSize?: number | null | undefined;
-  pointShape?: string | null | undefined;
-  decayTime?: number | null | undefined;
-  colorMode: ColorMode | null | undefined;
+  pointSize?: number;
+  pointShape?: string;
+  decayTime?: number;
+  colorMode?: ColorMode;
 };
 
 const SValueRangeInput = styled(SInput).attrs({ type: "number", placeholder: "auto" })`
@@ -92,7 +92,7 @@ export default function PointCloudSettingsEditor(
     (
       newValue:
         | (ColorMode | null | undefined)
-        | ((arg0: ColorMode | null | undefined) => ColorMode | null | undefined),
+        | ((arg0?: ColorMode) => ColorMode | null | undefined),
     ) => {
       onSettingsChange((newSettings: any) => ({
         ...newSettings,

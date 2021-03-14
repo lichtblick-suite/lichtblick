@@ -89,8 +89,8 @@ export default class AutomatedRunPlayer implements Player {
   _speed: number;
   _msPerFrame: number;
   _client: AutomatedRunClient;
-  _error: Error | null | undefined;
-  _waitToReportErrorPromise: Promise<void> | null | undefined;
+  _error?: Error;
+  _waitToReportErrorPromise?: Promise<void>;
   _startCalled: boolean = false;
   _receivedBytes: number = 0;
   // Calls to this._listener must not happen concurrently, and we want them to happen

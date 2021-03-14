@@ -43,7 +43,7 @@ type Props = {
   label?: string;
   onBlur: () => void;
   onChange: (value: string) => void;
-  onError?: (error: string | null | undefined) => void;
+  onError?: (error?: string) => void;
   placeholder?: string;
   style: {
     [key: string]: string | number;
@@ -69,7 +69,7 @@ export default function TextField({
   value,
   ...rest
 }: Props) {
-  const [error, setError] = useState<string | null | undefined>();
+  const [error, setError] = useState<string | undefined>();
   const [inputStr, setInputStr] = useState<string>(value || defaultValue || "");
 
   const prevIncomingVal = useRef<string | undefined>("");
@@ -79,7 +79,7 @@ export default function TextField({
     // only compare if it's a controlled component
     if (!defaultValue && !validateOnBlur && prevIncomingVal.current !== value) {
       const validationResult = validator(value);
-      setError(validationResult || null);
+      setError(validationResult || undefined);
       setInputStr(value || "");
     }
     prevIncomingVal.current = value;
@@ -103,7 +103,7 @@ export default function TextField({
       if (validationResult) {
         setError(validationResult);
       } else {
-        setError(null);
+        setError(undefined);
         onChange(val);
       }
     },

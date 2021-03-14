@@ -36,7 +36,7 @@ describe("<PointClouds />", () => {
         POINT_CLOUD_WITH_ADDITIONAL_FIELDS as any,
       ) as any) as PointCloud2;
       const fullyDecodedMarker = decodeAdditionalFields(partiallyDecodedMarker);
-      expect(getClickedInfo(fullyDecodedMarker, null)).toEqual(undefined);
+      expect(getClickedInfo(fullyDecodedMarker, undefined)).toEqual(undefined);
       expect(getClickedInfo(fullyDecodedMarker, 1000)).toEqual(undefined);
     });
 
