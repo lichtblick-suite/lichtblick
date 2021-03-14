@@ -18,7 +18,7 @@ import { last } from "lodash";
 import React, { useCallback, useMemo } from "react";
 
 import styles from "./PlotLegend.module.scss";
-import { plotableRosTypes, PlotConfig, PlotXAxisVal } from "./index";
+import { plotableRosTypes, PlotConfig, PlotXAxisVal } from "./types";
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
 import Icon from "@foxglove-studio/app/components/Icon";
