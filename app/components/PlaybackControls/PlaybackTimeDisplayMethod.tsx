@@ -21,13 +21,13 @@ import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
 import Flex from "@foxglove-studio/app/components/Flex";
 import { ndash } from "@foxglove-studio/app/util/entities";
-import { formatDate, formatTime } from "@foxglove-studio/app/util/formatTime";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 import {
-  formatTimeRaw,
-  isTimeInRangeInclusive,
+  formatDate,
+  formatTime,
   getValidatedTimeAndMethodFromString,
-} from "@foxglove-studio/app/util/time";
+} from "@foxglove-studio/app/util/formatTime";
+import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { formatTimeRaw, isTimeInRangeInclusive } from "@foxglove-studio/app/util/time";
 
 const MAX_WIDTH = 200;
 

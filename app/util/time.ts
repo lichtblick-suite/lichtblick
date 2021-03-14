@@ -14,11 +14,9 @@
 // No time functions that require `moment` should live in this file.
 import { Time, TimeUtil } from "rosbag";
 
-import { MIN_MEM_CACHE_BLOCK_SIZE_NS } from "@foxglove-studio/app/dataProviders/MemoryCacheDataProvider";
 import { cast, Bobject, Message } from "@foxglove-studio/app/players/types";
 import { BinaryTime } from "@foxglove-studio/app/types/BinaryMessages";
 import { deepParse } from "@foxglove-studio/app/util/binaryObjects";
-import { parseTimeStr } from "@foxglove-studio/app/util/formatTime";
 import {
   SEEK_TO_FRACTION_QUERY_KEY,
   SEEK_TO_RELATIVE_MS_QUERY_KEY,
@@ -290,15 +288,7 @@ export type SeekToTimeSpec = AbsoluteSeekToTime | RelativeSeekToTime | SeekFract
 // something useful on the screen. Ideally this is less than BLOCK_SIZE_NS from
 // MemoryCacheDataProvider so we still stay within the first block when fetching
 // initial data.
-export const SEEK_ON_START_NS =
-  99 *
-  /* ms */
-  1e6;
-if (SEEK_ON_START_NS >= MIN_MEM_CACHE_BLOCK_SIZE_NS) {
-  throw new Error(
-    "SEEK_ON_START_NS should be less than MIN_MEM_CACHE_BLOCK_SIZE_NS (to keep initial backfill within one block)",
-  );
-}
+export const SEEK_ON_START_NS = 99 * 1e6; /* ms */
 
 export function getSeekToTime(): SeekToTimeSpec {
   const params = new URLSearchParams(window.location.search);
@@ -382,34 +372,4 @@ export const getRosTimeFromString = (text: string) => {
   }
   const textAsNum = Number(text);
   return { sec: Math.floor(textAsNum), nsec: textAsNum * 1e9 - Math.floor(textAsNum) * 1e9 };
-};
-
-const todTimeRegex = /^\d+:\d+:\d+.\d+\s[PpAa][Mm]\s[A-Za-z$]+/;
-export const getValidatedTimeAndMethodFromString = ({
-  text,
-  date,
-  timezone,
-}: {
-  text: string | null | undefined;
-  date: string;
-  timezone: string | null | undefined;
-}): { time: Time | null | undefined; method: "ROS" | "TOD" } | null | undefined => {
-  if (!text) {
-    return;
-  }
-  const isInvalidRosTime = isNaN(+text);
-  const isInvalidTodTime = !(
-    todTimeRegex.test(text || "") && parseTimeStr(`${date} ${text || ""}`, timezone)
-  );
-
-  if (isInvalidRosTime && isInvalidTodTime) {
-    return;
-  }
-
-  return {
-    time: !isInvalidRosTime
-      ? getRosTimeFromString(text || "")
-      : parseTimeStr(`${date} ${text || ""}`, timezone),
-    method: isInvalidRosTime ? "TOD" : "ROS",
-  };
 };
