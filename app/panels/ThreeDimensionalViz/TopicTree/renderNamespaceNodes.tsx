@@ -11,11 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import React, { useCallback, useContext, useMemo } from "react";
+import { useCallback, useContext, useMemo } from "react";
 
 import NamespaceMenu from "./NamespaceMenu";
 import NodeName from "./NodeName";
-import { TREE_SPACING } from "./TopicTree";
 import { SToggles, STreeNodeRow, SLeft, SRightActions, ICON_SIZE } from "./TreeNodeRow";
 import VisibilityToggle, { TOGGLE_WRAPPER_SIZE } from "./VisibilityToggle";
 import { TooltipRow, TooltipTable, TreeUINode } from "./renderTreeNodes";
@@ -26,6 +25,7 @@ import {
   TreeTopicNode,
 } from "./types";
 import { ThreeDimensionalVizContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
+import { TREE_SPACING } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/constants";
 import { TopicTreeContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
 import { SECOND_SOURCE_PREFIX, TRANSFORM_TOPIC } from "@foxglove-studio/app/util/globalConstants";
 import { useGuaranteedContext } from "@foxglove-studio/app/util/hooks";

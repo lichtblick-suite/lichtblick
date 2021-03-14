@@ -12,15 +12,15 @@
 //   You may not use this file except in compliance with the License.
 
 import DotsVerticalIcon from "@mdi/svg/svg/dots-vertical.svg";
-import React, { useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 
-import { ROW_HEIGHT } from "./TreeNodeRow";
 import { SetCurrentEditingTopic } from "./types";
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
 import Icon from "@foxglove-studio/app/components/Icon";
 import KeyboardShortcut from "@foxglove-studio/app/components/KeyboardShortcut";
 import Menu, { Item } from "@foxglove-studio/app/components/Menu";
+import { ROW_HEIGHT } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/constants";
 import { TopicTreeContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
 import clipboard from "@foxglove-studio/app/util/clipboard";
 import { useGuaranteedContext } from "@foxglove-studio/app/util/hooks";

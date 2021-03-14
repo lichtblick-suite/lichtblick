@@ -12,12 +12,12 @@
 //   You may not use this file except in compliance with the License.
 
 import BlockHelperIcon from "@mdi/svg/svg/block-helper.svg";
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import { Color } from "regl-worldview";
 import styled from "styled-components";
 import tinyColor from "tinycolor2";
 
-import { ROW_HEIGHT } from "./TreeNodeRow";
+import { ROW_HEIGHT } from "./constants";
 import Icon from "@foxglove-studio/app/components/Icon";
 import { getHexFromColorSettingWithDefault } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";

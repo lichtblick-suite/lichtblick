@@ -26,7 +26,7 @@ import { Save3DConfig } from "../index";
 import DiffModeSettings from "./DiffModeSettings";
 import TopicTreeSwitcher, { SWITCHER_HEIGHT } from "./TopicTreeSwitcher";
 import TopicViewModeSelector from "./TopicViewModeSelector";
-import { ROW_HEIGHT } from "./TreeNodeRow";
+import { ROW_HEIGHT, TREE_SPACING } from "./constants";
 import NoMatchesSvg from "./noMatches.svg";
 import renderTreeNodes, { SWITCHER_WIDTH } from "./renderTreeNodes";
 import {
@@ -54,7 +54,6 @@ const DEFAULT_WIDTH = 360;
 const DEFAULT_XS_WIDTH = 240;
 const SEARCH_BAR_HEIGHT = 40;
 const SWITCHER_ICON_SIZE = 20;
-export const TREE_SPACING = 8;
 const MAX_CONTAINER_WIDTH_RATIO = 0.9;
 
 const STopicTreeWrapper = styled.div`

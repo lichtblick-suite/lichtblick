@@ -15,14 +15,16 @@ import React, { useCallback } from "react";
 import { Color } from "regl-worldview";
 import styled from "styled-components";
 
-import { CommonPointSettings, CommonDecaySettings, TopicSettingsEditorProps } from ".";
 import ColorPickerForTopicSettings from "./ColorPickerForTopicSettings";
+import CommonDecaySettings from "./CommonDecaySettings";
 import { SLabel, SInput } from "./common";
 import Flex from "@foxglove-studio/app/components/Flex";
 import GradientPicker from "@foxglove-studio/app/components/GradientPicker";
 import Radio from "@foxglove-studio/app/components/Radio";
 import SegmentedControl from "@foxglove-studio/app/components/SegmentedControl";
 import { Select, Option } from "@foxglove-studio/app/components/Select";
+import CommonPointSettings from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/CommonPointSettings";
+import { TopicSettingsEditorProps } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/types";
 import { PointCloud2 } from "@foxglove-studio/app/types/Messages";
 
 export type ColorMode =

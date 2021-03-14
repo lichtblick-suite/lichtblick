@@ -13,11 +13,11 @@
 
 import LinkVariantOffIcon from "@mdi/svg/svg/link-variant-off.svg";
 import LinkVariantIcon from "@mdi/svg/svg/link-variant.svg";
-import React, { useState, ReactNode } from "react";
+import { useState, ReactNode } from "react";
 import styled from "styled-components";
 
+import GlobalVariableName from "../GlobalVariableName";
 import { LinkedGlobalVariable } from "../useLinkedGlobalVariables";
-import { GlobalVariableName } from "./index";
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
 import Icon from "@foxglove-studio/app/components/Icon";
 

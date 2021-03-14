@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { upperFirst } from "lodash";
 import React, { useCallback, ComponentType } from "react";
 
 import LaserScanSettingsEditor from "./LaserScanSettingsEditor";
@@ -19,11 +18,9 @@ import MarkerSettingsEditor from "./MarkerSettingsEditor";
 import PointCloudSettingsEditor from "./PointCloudSettingsEditor";
 import PoseSettingsEditor from "./PoseSettingsEditor";
 import styles from "./TopicSettingsEditor.module.scss";
-import { SLabel, SDescription, SInput } from "./common";
 import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";
-import Flex from "@foxglove-studio/app/components/Flex";
-import { Select, Option } from "@foxglove-studio/app/components/Select";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
+import { TopicSettingsEditorProps } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/types";
 import { Topic } from "@foxglove-studio/app/players/types";
 import {
   POINT_CLOUD_DATATYPE,
@@ -34,94 +31,7 @@ import {
 
 export const LINED_CONVEX_HULL_RENDERING_SETTING = "LinedConvexHull";
 
-export function CommonPointSettings({
-  defaultPointSize,
-  defaultPointShape = "circle",
-  settings,
-  onFieldChange,
-}: {
-  defaultPointSize: number;
-  defaultPointShape?: string;
-  settings: {
-    pointSize?: number;
-    pointShape?: string;
-  };
-  onFieldChange: (name: string, value: any) => void;
-}) {
-  const pointSizeVal = settings.pointSize === undefined ? "" : settings.pointSize;
-
-  const pointShape = settings.pointShape;
-  const pointShapeVal = pointShape ? pointShape : defaultPointShape;
-  const pointShapeOpts = ["circle", "square"].map((field) => (
-    <Option key={field} value={field}>
-      {upperFirst(field)}
-    </Option>
-  ));
-
-  return (
-    <Flex col>
-      <SLabel>Point size</SLabel>
-      <SInput
-        data-test="point-size-input"
-        type="number"
-        placeholder={defaultPointSize.toString()}
-        value={pointSizeVal as any}
-        min={1}
-        max={50}
-        step={1}
-        onChange={(e) => {
-          const isInputValid = !isNaN(parseFloat(e.target.value));
-          onFieldChange("pointSize", isInputValid ? parseFloat(e.target.value) : undefined);
-        }}
-      />
-
-      <SLabel>Point shape</SLabel>
-      <Select
-        text={upperFirst(pointShapeVal)}
-        value={pointShapeVal}
-        onChange={(value) => onFieldChange("pointShape", value)}
-      >
-        {pointShapeOpts}
-      </Select>
-    </Flex>
-  );
-}
-
-export function CommonDecaySettings({
-  settings,
-  onFieldChange,
-}: {
-  settings: { decayTime?: number };
-  onFieldChange: (name: string, value: any) => any;
-}) {
-  const decayTime = settings.decayTime;
-  const decayTimeValue = decayTime === undefined ? "" : decayTime;
-
-  return (
-    <Flex col>
-      <SLabel>Decay time (seconds)</SLabel>
-      <SDescription>When set to 0, only the latest received data will be displayed.</SDescription>
-      <SInput
-        type="number"
-        placeholder="0"
-        value={decayTimeValue as any}
-        min={0}
-        step={0.1}
-        onChange={(e) => {
-          const isInputValid = !isNaN(parseFloat(e.target.value));
-          onFieldChange("decayTime", isInputValid ? parseFloat(e.target.value) : undefined);
-        }}
-      />
-    </Flex>
-  );
-}
-
-export type TopicSettingsEditorProps<Msg, Settings> = {
-  message?: Msg;
-  settings: Settings;
-  onFieldChange: (name: string, value: any) => void;
-  onSettingsChange: (arg0: any | ((arg0: any) => any)) => void;
-};
+export type { TopicSettingsEditorProps } from "./types";
 
 export function topicSettingsEditorForDatatype(
   datatype: string,

@@ -11,12 +11,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import React from "react";
 import { Color } from "regl-worldview";
 
-import { CommonPointSettings, CommonDecaySettings, TopicSettingsEditorProps } from ".";
 import ColorPickerForTopicSettings from "./ColorPickerForTopicSettings";
+import CommonDecaySettings from "./CommonDecaySettings";
+import CommonPointSettings from "./CommonPointSettings";
 import { SLabel } from "./common";
+import { TopicSettingsEditorProps } from "./types";
 import Flex from "@foxglove-studio/app/components/Flex";
 import { LaserScan } from "@foxglove-studio/app/types/Messages";
 

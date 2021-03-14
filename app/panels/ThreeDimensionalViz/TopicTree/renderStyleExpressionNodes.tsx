@@ -17,9 +17,9 @@ import { groupBy, defaults } from "lodash";
 import { useCallback, useContext, useMemo, useState } from "react";
 import styled from "styled-components";
 
-import { TREE_SPACING } from "./TopicTree";
-import { ROW_HEIGHT, SLeft, SRightActions, SToggles, STreeNodeRow } from "./TreeNodeRow";
+import { SLeft, SRightActions, SToggles, STreeNodeRow } from "./TreeNodeRow";
 import VisibilityToggle from "./VisibilityToggle";
+import { TREE_SPACING, ROW_HEIGHT } from "./constants";
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
 import Icon from "@foxglove-studio/app/components/Icon";
 import Menu, { Item } from "@foxglove-studio/app/components/Menu";

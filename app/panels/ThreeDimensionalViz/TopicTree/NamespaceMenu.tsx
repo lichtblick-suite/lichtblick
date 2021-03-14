@@ -13,10 +13,10 @@
 
 import DotsVerticalIcon from "@mdi/svg/svg/dots-vertical.svg";
 import UndoVariantIcon from "@mdi/svg/svg/undo-variant.svg";
-import React, { useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 
-import { ROW_HEIGHT, SDotMenuPlaceholder } from "./TreeNodeRow";
+import { SDotMenuPlaceholder } from "./TreeNodeRow";
 import { OnNamespaceOverrideColorChange, SetEditingNamespace } from "./types";
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
 import Icon from "@foxglove-studio/app/components/Icon";
@@ -26,6 +26,7 @@ import {
   getHexFromColorSettingWithDefault,
   PICKER_SIZE,
 } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
+import { ROW_HEIGHT } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/constants";
 import { TopicTreeContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
 import clipboard from "@foxglove-studio/app/util/clipboard";
 import { useGuaranteedContext } from "@foxglove-studio/app/util/hooks";

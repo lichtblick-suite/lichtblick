@@ -13,11 +13,10 @@
 
 import AlertCircleIcon from "@mdi/svg/svg/alert-circle.svg";
 import LeadPencilIcon from "@mdi/svg/svg/lead-pencil.svg";
-import React, { useCallback, useContext, useMemo } from "react";
+import { useCallback, useContext, useMemo } from "react";
 import styled from "styled-components";
 
 import NodeName from "./NodeName";
-import { TREE_SPACING } from "./TopicTree";
 import TreeNodeMenu, { DOT_MENU_WIDTH } from "./TreeNodeMenu";
 import VisibilityToggle, { TOGGLE_WRAPPER_SIZE, TOPIC_ROW_PADDING } from "./VisibilityToggle";
 import { DerivedCustomSettings, SetCurrentEditingTopic, TreeNode } from "./types";
@@ -25,6 +24,10 @@ import Icon from "@foxglove-studio/app/components/Icon";
 import Tooltip from "@foxglove-studio/app/components/Tooltip";
 import { ThreeDimensionalVizContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
 import { canEditDatatype } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor";
+import {
+  ROW_HEIGHT,
+  TREE_SPACING,
+} from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/constants";
 import { TopicTreeContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
 import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import { useGuaranteedContext } from "@foxglove-studio/app/util/hooks";
@@ -32,7 +35,7 @@ import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 import { joinTopics } from "@foxglove-studio/app/util/topicUtils";
 
 export const ICON_SIZE = 22;
-export const ROW_HEIGHT = 24;
+
 const MAX_GROUP_ERROR_WIDTH = 64;
 const VISIBLE_COUNT_WIDTH = 18;
 const VISIBLE_COUNT_MARGIN = 4;
