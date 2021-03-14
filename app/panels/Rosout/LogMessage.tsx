@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import _ from "lodash";
-import React from "react";
 import { Time } from "rosbag";
 
 import LevelToString from "./LevelToString";

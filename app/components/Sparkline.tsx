@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { max } from "lodash";
-import * as React from "react";
 
 import AutoSizingCanvas from "@foxglove-studio/app/components/AutoSizingCanvas";
 

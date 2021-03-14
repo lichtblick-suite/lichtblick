@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { storiesOf } from "@storybook/react";
-import React from "react";
 
 import ContextMenu from "@foxglove-studio/app/components/ContextMenu";
 import Menu, { Item } from "@foxglove-studio/app/components/Menu";

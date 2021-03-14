@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { isEqual } from "lodash";
-import * as React from "react";
 import styled from "styled-components";
 
 import Dropdown from "@foxglove-studio/app/components/Dropdown";

@@ -16,7 +16,6 @@ import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 import { StaticServices } from "monaco-editor/esm/vs/editor/standalone/browser/standaloneServices";
 // @ts-expect-error no types for monaco-vim, probably remove vim editing mode
 import { initVimMode } from "monaco-vim";
-import * as React from "react";
 import MonacoEditor from "react-monaco-editor";
 
 import getPrettifiedCode from "@foxglove-studio/app/panels/NodePlayground/prettier";
@@ -30,7 +29,7 @@ const VS_WEBVIZ_THEME = "vs-webviz";
 const codeEditorService = StaticServices.codeEditorService.get();
 
 type Props = {
-  script: Script | null;
+  script?: Script;
   setScriptCode: (code: string) => void;
   vimMode: boolean;
   autoFormatOnSave: boolean;

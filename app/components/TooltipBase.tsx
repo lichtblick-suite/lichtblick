@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import * as PopperJS from "popper.js";
-import * as React from "react";
 import { render, createPortal, unmountComponentAtNode } from "react-dom";
 import { Manager, Reference, Popper } from "react-popper";
 
@@ -240,10 +239,10 @@ export default class Tooltip extends React.Component<Props, State> {
       );
     }
     return (
-      <React.Fragment>
+      <>
         {React.cloneElement(child, eventListeners)}
         {this.renderPopper()}
-      </React.Fragment>
+      </>
     );
   }
 }

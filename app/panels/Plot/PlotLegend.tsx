@@ -15,7 +15,7 @@ import AlertCircleIcon from "@mdi/svg/svg/alert-circle.svg";
 import MenuIcon from "@mdi/svg/svg/menu.svg";
 import cx from "classnames";
 import { last } from "lodash";
-import React, { useCallback, useMemo } from "react";
+import React, { Fragment, useCallback, useMemo } from "react";
 
 import styles from "./PlotLegend.module.scss";
 import { plotableRosTypes, PlotConfig, PlotXAxisVal } from "./types";
@@ -177,7 +177,7 @@ export default function PlotLegend(props: PlotLegendProps) {
         const hasMismatchedDataLength = pathsWithMismatchedDataLengths.includes(path.value);
 
         return (
-          <React.Fragment key={index}>
+          <Fragment key={index}>
             <div className={styles.item}>
               y:
               <div
@@ -234,7 +234,7 @@ export default function PlotLegend(props: PlotLegendProps) {
                 ✕
               </div>
             </div>
-          </React.Fragment>
+          </Fragment>
         );
       })}
       <div

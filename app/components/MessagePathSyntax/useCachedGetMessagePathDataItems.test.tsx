@@ -13,7 +13,6 @@
 import { mount } from "enzyme";
 import { createMemoryHistory } from "history";
 import { cloneDeep } from "lodash";
-import * as React from "react";
 
 import {
   fillInGlobalVariablesInPath,

@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { sortBy } from "lodash";
-import * as React from "react";
 
 import DiagnosticStatus from "./DiagnosticStatus";
 import helpContent from "./DiagnosticStatusPanel.help.md";

@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { first, last } from "lodash";
-import React from "react";
 
 import { isTypicalFilterName } from "@foxglove-studio/app/components/MessagePathSyntax/isTypicalFilterName";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";

@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import memoize from "lodash/memoize";
-import React from "react";
 import { Command } from "regl-worldview";
 
 import { ReglColor } from "@foxglove-studio/app/util/colorUtils";

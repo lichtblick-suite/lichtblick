@@ -15,7 +15,6 @@ import ArrowLeftBoldIcon from "@mdi/svg/svg/arrow-left-bold.svg";
 import DeleteIcon from "@mdi/svg/svg/delete.svg";
 import FileMultipleIcon from "@mdi/svg/svg/file-multiple.svg";
 import HelpCircleIcon from "@mdi/svg/svg/help-circle.svg";
-import React from "react";
 import styled from "styled-components";
 
 import Flex from "@foxglove-studio/app/components/Flex";
@@ -146,7 +145,7 @@ type Props = {
   explorer: Explorer;
   updateExplorer: (explorer: Explorer) => void;
   setScriptOverride: (script: Script, maxDepth?: number) => void;
-  script: Script | null;
+  script?: Script;
   addNewNode: (_: any, sourceCode?: string) => void;
 };
 

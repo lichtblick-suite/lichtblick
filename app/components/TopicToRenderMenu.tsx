@@ -13,7 +13,6 @@
 import CheckIcon from "@mdi/svg/svg/check.svg";
 import DatabaseIcon from "@mdi/svg/svg/database.svg";
 import { uniq } from "lodash";
-import React from "react";
 import styled from "styled-components";
 
 import Dropdown from "@foxglove-studio/app/components/Dropdown";

@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { noop } from "lodash";
-import React from "react";
 
 import { ColorOverrideBySourceIdxByVariable } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/Layout";
 import { Color } from "@foxglove-studio/app/types/Messages";

@@ -14,7 +14,6 @@
 import flatMap from "lodash/flatMap";
 import uniqBy from "lodash/uniqBy";
 import qh from "quickhull3d";
-import * as React from "react";
 import {
   Triangles,
   Lines,
@@ -78,7 +77,7 @@ function getTriangleChildrenForHitmap(
 
 export default function LinedConvexHulls({ children, ...rest }: Props) {
   return (
-    <React.Fragment>
+    <>
       {/* Render all the lines, even if we can't generate a convex hull from them. */}
       <Lines getChildrenForHitmap={nonInstancedGetChildrenForHitmap} {...rest}>
         {children}
@@ -90,6 +89,6 @@ export default function LinedConvexHulls({ children, ...rest }: Props) {
          */}
         {children.map((line) => ({ ...line, originalMarker: line, onlyRenderInHitmap: true }))}
       </Triangles>
-    </React.Fragment>
+    </>
   );
 }

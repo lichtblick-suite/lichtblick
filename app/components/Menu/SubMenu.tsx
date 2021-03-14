@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import * as React from "react";
-
 import Item from "./Item";
 import Menu from "./Menu";
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";

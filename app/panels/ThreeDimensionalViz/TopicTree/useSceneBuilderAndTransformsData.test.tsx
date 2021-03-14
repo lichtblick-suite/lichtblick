@@ -13,7 +13,6 @@
 
 import { mount } from "enzyme";
 import { omit } from "lodash";
-import * as React from "react";
 
 import { UseSceneBuilderAndTransformsDataInput } from "./types";
 import useSceneBuilderAndTransformsData from "./useSceneBuilderAndTransformsData";

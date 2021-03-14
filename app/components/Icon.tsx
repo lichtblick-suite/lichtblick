@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import cx from "classnames";
-import * as React from "react";
 
 import styles from "./icon.module.scss";
 import Tooltip from "@foxglove-studio/app/components/Tooltip";

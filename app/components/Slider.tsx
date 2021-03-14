@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { clamp } from "lodash";
-import * as React from "react";
 import DocumentEvents from "react-document-events";
 import styled from "styled-components";
 

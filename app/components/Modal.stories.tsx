@@ -13,7 +13,6 @@
 
 import { action } from "@storybook/addon-actions";
 import { storiesOf } from "@storybook/react";
-import React from "react";
 
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
 import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";

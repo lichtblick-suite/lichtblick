@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { groupBy, sortBy } from "lodash";
-import * as React from "react";
+import { Fragment } from "react";
 import styled from "styled-components";
 
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
@@ -136,7 +136,7 @@ function Internals(): React.ReactNode {
       .sort()
       .map((key) => {
         return (
-          <React.Fragment key={key}>
+          <Fragment key={key}>
             <div style={{ marginTop: 16 }}>{key}:</div>
             <ul>
               {sortBy(groupedSubscriptions[key], (sub) => sub.topic).map((sub, i) => (
@@ -150,7 +150,7 @@ function Internals(): React.ReactNode {
                 </li>
               ))}
             </ul>
-          </React.Fragment>
+          </Fragment>
         );
       });
   }, [groupedSubscriptions, subscriptions.length, topicsByName]);
@@ -164,7 +164,7 @@ function Internals(): React.ReactNode {
       .sort()
       .map((key) => {
         return (
-          <React.Fragment key={key}>
+          <Fragment key={key}>
             <div style={{ marginTop: 16 }}>{key}:</div>
             <ul>
               {sortBy(groupedPublishers[key], (sub) => sub.topic).map((sub, i) => (
@@ -173,7 +173,7 @@ function Internals(): React.ReactNode {
                 </li>
               ))}
             </ul>
-          </React.Fragment>
+          </Fragment>
         );
       });
   }, [publishers]);

@@ -14,7 +14,6 @@
 import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
 import cx from "classnames";
 import { flatten, flatMap, partition } from "lodash";
-import * as React from "react";
 
 import styles from "./MessagePathInput.module.scss";
 import { RosPath, RosPrimitive } from "./constants";

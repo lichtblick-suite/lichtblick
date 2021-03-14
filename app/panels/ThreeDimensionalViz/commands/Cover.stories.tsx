@@ -13,7 +13,6 @@
 
 import { storiesOf } from "@storybook/react";
 import { noop } from "lodash";
-import React from "react";
 import { Worldview } from "regl-worldview";
 import styled from "styled-components";
 

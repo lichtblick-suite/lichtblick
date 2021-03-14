@@ -15,7 +15,6 @@ import AlertIcon from "@mdi/svg/svg/alert.svg";
 import HelpCircleIcon from "@mdi/svg/svg/help-circle.svg";
 import InformationIcon from "@mdi/svg/svg/information.svg";
 import { invert } from "lodash";
-import React from "react";
 
 import Icon from "@foxglove-studio/app/components/Icon";
 import { Diagnostic, DiagnosticSeverity } from "@foxglove-studio/app/players/UserNodePlayer/types";

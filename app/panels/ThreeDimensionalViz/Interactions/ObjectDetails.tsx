@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { first, omit, sortBy } from "lodash";
-import * as React from "react";
 import Tree from "react-json-tree";
 import { MouseEventObject } from "regl-worldview";
 import styled from "styled-components";

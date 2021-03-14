@@ -12,8 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { flatten, groupBy } from "lodash";
-import * as React from "react"; // eslint-disable-line import/no-duplicates
-import { useEffect, useState } from "react"; // eslint-disable-line import/no-duplicates
+import { useEffect, useState } from "react";
 
 import NodePlayer from "@foxglove-studio/app/players/NodePlayer";
 import StoryPlayer from "@foxglove-studio/app/players/StoryPlayer";

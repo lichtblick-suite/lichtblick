@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import * as React from "react";
 import styled from "styled-components";
 
 import colors from "@foxglove-studio/app/styles/colors.module.scss";

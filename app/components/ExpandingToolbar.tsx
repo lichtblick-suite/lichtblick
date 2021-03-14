@@ -13,7 +13,6 @@
 
 import ArrowCollapseIcon from "@mdi/svg/svg/arrow-collapse.svg";
 import cx from "classnames";
-import * as React from "react";
 import styled from "styled-components";
 
 import styles from "./ExpandingToolbar.module.scss";

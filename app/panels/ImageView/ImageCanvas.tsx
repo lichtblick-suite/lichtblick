@@ -16,7 +16,6 @@ import cx from "classnames";
 import isEqual from "lodash/isEqual";
 import omit from "lodash/omit";
 import panzoom from "panzoom";
-import React from "react";
 import OutsideClickHandler from "react-outside-click-handler";
 import ReactResizeDetector from "react-resize-detector";
 import shallowequal from "shallowequal";

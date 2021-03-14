@@ -20,8 +20,7 @@ import DragIcon from "@mdi/svg/svg/drag.svg";
 import FullscreenIcon from "@mdi/svg/svg/fullscreen.svg";
 import TrashCanOutlineIcon from "@mdi/svg/svg/trash-can-outline.svg";
 import cx from "classnames";
-import * as React from "react"; // eslint-disable-line import/no-duplicates
-import { useContext, useState, useCallback, useMemo } from "react"; // eslint-disable-line import/no-duplicates
+import { useContext, useState, useCallback, useMemo } from "react";
 import { MosaicContext, MosaicWindowContext } from "react-mosaic-component";
 import { useDispatch, useSelector, ReactReduxContext } from "react-redux";
 import { bindActionCreators } from "redux";

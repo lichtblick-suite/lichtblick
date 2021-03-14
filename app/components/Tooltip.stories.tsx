@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { storiesOf } from "@storybook/react";
-import * as React from "react";
 
 import Tooltip from "@foxglove-studio/app/components/Tooltip";
 

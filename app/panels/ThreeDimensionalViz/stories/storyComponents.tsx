@@ -13,7 +13,6 @@
 
 import { createMemoryHistory } from "history";
 import { uniq } from "lodash";
-import * as React from "react";
 import { Worldview } from "regl-worldview";
 
 import { selectAllPanelIds } from "@foxglove-studio/app/actions/mosaic";

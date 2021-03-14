@@ -13,7 +13,6 @@
 import MagnifyIcon from "@mdi/svg/svg/magnify.svg";
 import fuzzySort from "fuzzysort";
 import { flatten, flatMap, isEqual } from "lodash";
-import * as React from "react";
 import { useDrag } from "react-dnd";
 import { MosaicDragType } from "react-mosaic-component";
 import { useDispatch, useSelector } from "react-redux";

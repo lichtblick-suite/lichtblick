@@ -134,11 +134,11 @@ const FOLLOW_PLAYBACK_PAN_THRESHOLD_MS = 100;
 
 const MemoizedTooltips = memo(function Tooltips() {
   return (
-    <React.Fragment>
+    <>
       <Tooltip contents={<div>Hold v to zoom vertically, or b to zoom both axes</div>} delay={0}>
         <div style={{ position: "absolute", left: 0, top: 0, width: 30, bottom: 0 }} />
       </Tooltip>
-    </React.Fragment>
+    </>
   );
 });
 

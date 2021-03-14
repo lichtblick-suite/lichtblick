@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { noop } from "lodash";
-import * as React from "react";
 import ReactDOM from "react-dom";
 
 import DocumentDropListener from "@foxglove-studio/app/components/DocumentDropListener";

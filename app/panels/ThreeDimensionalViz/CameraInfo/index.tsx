@@ -14,7 +14,6 @@
 import CameraControlIcon from "@mdi/svg/svg/camera-control.svg";
 import { vec3 } from "gl-matrix";
 import { isEqual } from "lodash";
-import * as React from "react";
 import { CameraState, cameraStateSelectors } from "regl-worldview";
 import styled from "styled-components";
 

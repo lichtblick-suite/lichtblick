@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { cloneDeep } from "lodash";
-import React from "react";
 import { Color } from "regl-worldview";
 
 import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz";

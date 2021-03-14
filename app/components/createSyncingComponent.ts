@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { throttle } from "lodash";
-import * as React from "react";
 import shallowequal from "shallowequal";
 import { v4 as uuidv4 } from "uuid";
 

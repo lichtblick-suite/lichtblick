@@ -15,7 +15,6 @@ import WarnIcon from "@mdi/svg/svg/alert.svg";
 import InfoIcon from "@mdi/svg/svg/bell.svg";
 import NotificationIcon from "@mdi/svg/svg/close-circle.svg";
 import moment from "moment";
-import * as React from "react";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import tinyColor from "tinycolor2";

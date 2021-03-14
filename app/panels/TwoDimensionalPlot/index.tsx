@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { flatten, pick, round, uniq } from "lodash";
-import * as React from "react";
 import DocumentEvents from "react-document-events";
 import ReactDOM from "react-dom";
 import styled from "styled-components";

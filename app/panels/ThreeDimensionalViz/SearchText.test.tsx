@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 import { renderHook, act } from "@testing-library/react-hooks";
 import { mount } from "enzyme";
-import * as React from "react";
 import { CameraState } from "regl-worldview";
 
 import { Interactive } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";

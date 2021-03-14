@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 import { storiesOf } from "@storybook/react";
 import { noop } from "lodash";
-import * as React from "react";
 
 import PlotMenu from "@foxglove-studio/app/panels/Plot/PlotMenu";
 

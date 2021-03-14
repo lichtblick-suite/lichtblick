@@ -13,7 +13,6 @@
 
 import CircleIcon from "@mdi/svg/svg/circle.svg";
 import { mount } from "enzyme";
-import React from "react";
 
 import Icon from "./Icon";
 

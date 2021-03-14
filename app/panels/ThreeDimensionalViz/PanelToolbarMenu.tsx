@@ -17,7 +17,6 @@ import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import SwapHorizontalIcon from "@mdi/svg/svg/swap-horizontal.svg";
 import SyncIcon from "@mdi/svg/svg/sync.svg";
-import React from "react";
 
 import { Item, SubMenu } from "@foxglove-studio/app/components/Menu";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";

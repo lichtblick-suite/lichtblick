@@ -13,7 +13,6 @@
 
 import { mount } from "enzyme";
 import { last } from "lodash";
-import * as React from "react";
 import { act } from "react-dom/test-utils";
 
 import { FrameCompatibilityDEPRECATED } from "./FrameCompatibility";

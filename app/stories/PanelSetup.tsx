@@ -13,7 +13,6 @@
 
 import { createMemoryHistory } from "history";
 import { flatten, partition } from "lodash";
-import * as React from "react";
 import { DndProvider } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
 import { Mosaic, MosaicWindow } from "react-mosaic-component";

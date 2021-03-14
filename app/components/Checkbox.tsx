@@ -13,7 +13,6 @@
 
 import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
-import * as React from "react";
 import styled from "styled-components";
 
 import Icon from "@foxglove-studio/app/components/Icon";

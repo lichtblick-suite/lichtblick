@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
-import React from "react";
 
 import {
   PLOT_DASHED_STYLE,

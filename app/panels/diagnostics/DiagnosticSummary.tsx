@@ -16,7 +16,6 @@ import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import PinIcon from "@mdi/svg/svg/pin.svg";
 import cx from "classnames";
 import { compact } from "lodash";
-import * as React from "react";
 import { List, AutoSizer } from "react-virtualized";
 
 import { Config as DiagnosticStatusConfig } from "./DiagnosticStatusPanel";

@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { last, sumBy } from "lodash";
-import * as React from "react";
 import { ReactElement } from "react";
 
 import helpContent from "./index.help.md";

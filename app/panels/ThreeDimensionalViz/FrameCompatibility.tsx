@@ -13,7 +13,6 @@
 
 import hoistNonReactStatics from "hoist-non-react-statics";
 import { uniq } from "lodash";
-import * as React from "react";
 
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import { Message, Topic } from "@foxglove-studio/app/players/types";

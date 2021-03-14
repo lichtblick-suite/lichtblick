@@ -13,7 +13,6 @@
 
 import { mount } from "enzyme";
 import { cloneDeep } from "lodash";
-import * as React from "react";
 import { MessageReader, parseMessageDefinition } from "rosbag";
 
 import * as PanelAPI from ".";

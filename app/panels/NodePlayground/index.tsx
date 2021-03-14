@@ -15,7 +15,7 @@ import ArrowLeftIcon from "@mdi/svg/svg/arrow-left.svg";
 import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import PlusIcon from "@mdi/svg/svg/plus.svg";
-import * as React from "react";
+import { Suspense } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
@@ -172,7 +172,7 @@ function NodePlayground(props: Props) {
   const [scriptBackStack, setScriptBackStack] = React.useState<Script[]>([]);
   // Holds the currently active script
   const currentScript =
-    scriptBackStack.length > 0 ? scriptBackStack[scriptBackStack.length - 1] : null;
+    scriptBackStack.length > 0 ? scriptBackStack[scriptBackStack.length - 1] : undefined;
   const isCurrentScriptSelectedNode =
     !!selectedNode && !!currentScript && currentScript.filePath === selectedNode.name;
   const isNodeSaved =
@@ -352,7 +352,7 @@ function NodePlayground(props: Props) {
                     /* Ensures the monaco-editor starts loading before the user opens it */
                   }}
                 >
-                  <React.Suspense
+                  <Suspense
                     fallback={
                       <Flex center style={{ width: "100%", height: "100%" }}>
                         <Icon large>
@@ -375,7 +375,7 @@ function NodePlayground(props: Props) {
                         save={saveNode}
                       />
                     )}
-                  </React.Suspense>
+                  </Suspense>
                 </div>
                 <BottomBar
                   nodeId={selectedNodeId}

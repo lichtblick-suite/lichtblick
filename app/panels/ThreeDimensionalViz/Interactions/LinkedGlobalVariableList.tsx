@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import LinkPlusIcon from "@mdi/svg/svg/link-plus.svg";
-import * as React from "react";
 import styled from "styled-components";
 
 import GlobalVariableLink, { SPath, GlobalVariableName } from "./GlobalVariableLink/index";

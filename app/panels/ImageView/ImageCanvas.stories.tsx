@@ -13,7 +13,6 @@
 
 import { storiesOf } from "@storybook/react";
 import { range, noop } from "lodash";
-import * as React from "react";
 
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import ImageCanvas from "@foxglove-studio/app/panels/ImageView/ImageCanvas";

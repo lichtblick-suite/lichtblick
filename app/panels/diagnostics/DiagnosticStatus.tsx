@@ -17,7 +17,6 @@ import ChevronDownIcon from "@mdi/svg/svg/unfold-less-horizontal.svg";
 import ChevronUpIcon from "@mdi/svg/svg/unfold-more-horizontal.svg";
 import cx from "classnames";
 import { clamp } from "lodash";
-import * as React from "react";
 import { createSelector } from "reselect";
 import sanitizeHtml from "sanitize-html";
 import styled from "styled-components";

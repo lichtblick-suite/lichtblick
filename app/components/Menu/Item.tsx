@@ -17,7 +17,6 @@ import ChevronLeftIcon from "@mdi/svg/svg/chevron-left.svg";
 import ChevronRightIcon from "@mdi/svg/svg/chevron-right.svg";
 import cx from "classnames";
 import { noop } from "lodash";
-import * as React from "react";
 import styled from "styled-components";
 
 import styles from "./index.module.scss";

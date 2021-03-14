@@ -14,7 +14,6 @@
 import DatabaseIcon from "@mdi/svg/svg/database.svg";
 import { storiesOf } from "@storybook/react";
 import { createMemoryHistory } from "history";
-import * as React from "react";
 import { Mosaic, MosaicWindow } from "react-mosaic-component";
 import { Provider } from "react-redux";
 

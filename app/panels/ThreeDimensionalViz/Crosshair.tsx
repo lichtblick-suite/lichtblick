@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { vec3, quat } from "gl-matrix";
-import React from "react";
 import { cameraStateSelectors, Lines, CameraState } from "regl-worldview";
 
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";

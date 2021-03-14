@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { storiesOf } from "@storybook/react";
-import React from "react";
 
 import Publish from "@foxglove-studio/app/panels/Publish";
 import { PlayerCapabilities } from "@foxglove-studio/app/players/types";

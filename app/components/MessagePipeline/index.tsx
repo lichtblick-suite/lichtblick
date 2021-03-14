@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { debounce, flatten, groupBy, isEqual } from "lodash";
-import * as React from "react";
 import { ReactElement } from "react";
 import { Time, TimeUtil } from "rosbag";
 

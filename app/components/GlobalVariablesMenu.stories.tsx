@@ -13,7 +13,6 @@
 
 import { storiesOf } from "@storybook/react";
 import { createMemoryHistory } from "history";
-import React from "react";
 import { DndProvider } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
 import { Provider } from "react-redux";

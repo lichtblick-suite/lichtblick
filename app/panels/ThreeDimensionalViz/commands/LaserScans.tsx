@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { range } from "lodash";
-import * as React from "react";
 import {
   Command,
   withPose,

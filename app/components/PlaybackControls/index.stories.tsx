@@ -14,7 +14,6 @@
 import { action } from "@storybook/addon-actions";
 import { storiesOf } from "@storybook/react";
 import { createMemoryHistory } from "history";
-import * as React from "react";
 import TestUtils from "react-dom/test-utils";
 
 import { UnconnectedPlaybackControls } from ".";

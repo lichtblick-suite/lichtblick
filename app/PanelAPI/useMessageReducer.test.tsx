@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { mount } from "enzyme";
-import * as React from "react";
 import { act } from "react-dom/test-utils";
 
 import * as PanelAPI from ".";

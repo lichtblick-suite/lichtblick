@@ -13,7 +13,6 @@
 
 import { mount } from "enzyme";
 import { createMemoryHistory } from "history";
-import React from "react";
 
 import * as layoutHistoryActions from "@foxglove-studio/app/actions/layoutHistory";
 import GlobalKeyListener from "@foxglove-studio/app/components/GlobalKeyListener";

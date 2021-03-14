@@ -22,7 +22,6 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import Hammer from "hammerjs";
-import React from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { ScaleOptions as ManagerScaleOptions } from "./ChartJSManager";

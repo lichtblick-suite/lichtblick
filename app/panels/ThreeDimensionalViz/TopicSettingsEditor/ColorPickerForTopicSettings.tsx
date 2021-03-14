@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import ColorPicker, { Panel as ColorPickerPanel } from "rc-color-picker";
-import React from "react";
 import { Color } from "regl-worldview";
 import styled from "styled-components";
 import tinyColor from "tinycolor2";

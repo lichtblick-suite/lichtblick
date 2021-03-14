@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import * as React from "react";
-
 // Since flow-types do not exist for react-table, this is a rough approximation
 // of what the types react-table gives us, which is pulled from
 // https://react-table.tanstack.com/docs/api/overview.

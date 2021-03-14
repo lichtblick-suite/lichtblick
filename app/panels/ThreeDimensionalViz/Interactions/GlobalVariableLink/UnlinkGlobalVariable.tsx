@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { isEqual } from "lodash";
-import * as React from "react";
 
 import { getPath } from "../interactionUtils";
 import useLinkedGlobalVariables, { LinkedGlobalVariable } from "../useLinkedGlobalVariables";

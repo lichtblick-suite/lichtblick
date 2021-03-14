@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { isEqual } from "lodash";
-import * as React from "react";
 import { ReglClickInfo } from "regl-worldview";
 
 import { Point } from "@foxglove-studio/app/types/Messages";

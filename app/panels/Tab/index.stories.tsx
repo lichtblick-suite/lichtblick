@@ -13,7 +13,6 @@
 
 import { storiesOf } from "@storybook/react";
 import { createBrowserHistory } from "history";
-import React from "react";
 import TestUtils from "react-dom/test-utils";
 
 import Tab from "./index";

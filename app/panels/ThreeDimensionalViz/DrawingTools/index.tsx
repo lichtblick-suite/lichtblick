@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import PencilIcon from "@mdi/svg/svg/pencil.svg";
-import * as React from "react";
 import { PolygonBuilder, Polygon } from "regl-worldview";
 
 import Polygons from "./Polygons";

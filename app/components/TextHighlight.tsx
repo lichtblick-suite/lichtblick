@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import fuzzySort from "fuzzysort";
-import React from "react";
 import styled from "styled-components";
 
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";

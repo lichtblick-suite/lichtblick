@@ -13,7 +13,6 @@
 
 import { storiesOf } from "@storybook/react";
 import { noop } from "lodash";
-import React from "react";
 
 import { SliderWithTicks } from "@foxglove-studio/app/components/SliderWithTicks";
 

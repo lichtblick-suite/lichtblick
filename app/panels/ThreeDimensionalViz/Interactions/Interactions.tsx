@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import CursorDefault from "@mdi/svg/svg/cursor-default.svg";
-import * as React from "react";
 import { MouseEventObject } from "regl-worldview";
 
 import LinkedGlobalVariableList from "./LinkedGlobalVariableList";

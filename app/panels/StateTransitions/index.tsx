@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { uniq } from "lodash";
-import * as React from "react";
 import { useMemo } from "react";
 import stringHash from "string-hash";
 import styled, { css } from "styled-components";

@@ -13,7 +13,6 @@
 
 import hoistNonReactStatics from "hoist-non-react-statics";
 import PropTypes from "prop-types";
-import * as React from "react";
 
 import { getGlobalHooks } from "../../loadWebviz";
 import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";

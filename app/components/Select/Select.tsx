@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
-import * as React from "react";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
 
