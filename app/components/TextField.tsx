@@ -49,7 +49,7 @@ type Props = {
     [key: string]: string | number;
   };
   validateOnBlur?: boolean;
-  validator: (value: any) => string | null | undefined;
+  validator: (value: any) => string | undefined;
   value?: string;
 };
 

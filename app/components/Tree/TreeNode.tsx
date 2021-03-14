@@ -36,7 +36,7 @@ type Props = {
   depth: number;
   disableCheckbox?: boolean;
   enableVisibilityToggle?: boolean;
-  onRemoveNode: (node: Node) => void | null | undefined;
+  onRemoveNode: (node: Node) => void;
   onToggleExpand: (node: Node) => void;
   onToggleVisibility?: (node: Node) => void;
   onToggleCheck: (node: Node) => void;

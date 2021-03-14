@@ -155,7 +155,7 @@ export const processMessage = ({
     // TODO: Be able to map line numbers from errors.
     const error = e.toString();
     return {
-      message: null,
+      message: undefined,
       error: error.length ? error : "Unknown error encountered running this node.",
       userNodeLogs,
       userNodeDiagnostics,

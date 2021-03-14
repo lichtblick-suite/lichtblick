@@ -321,7 +321,7 @@ function TablePanel({ config, saveConfig }: Props) {
     [saveConfig],
   );
 
-  const topicRosPath: RosPath | null | undefined = React.useMemo(() => parseRosPath(topicPath), [
+  const topicRosPath: RosPath | undefined = React.useMemo(() => parseRosPath(topicPath), [
     topicPath,
   ]);
   const topicName = topicRosPath?.topicName || "";

@@ -188,7 +188,7 @@ export default class ApiCheckerDataProvider implements DataProvider {
         continue;
       }
       const topics = (subscriptions as any)[messageType] ?? [];
-      let lastTime: Time | null | undefined;
+      let lastTime: Time | undefined;
       for (const message of messages) {
         if (!topics.includes(message.topic)) {
           this._warn(

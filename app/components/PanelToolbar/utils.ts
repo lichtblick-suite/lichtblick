@@ -15,9 +15,12 @@ import { getNodeAtPath } from "react-mosaic-component";
 
 import { getPanelTypeFromId } from "@foxglove-studio/app/util/layout";
 
-export function getPanelTypeFromMosaic(mosaicWindowActions: any, mosaicActions: any) {
+export function getPanelTypeFromMosaic(
+  mosaicWindowActions: any,
+  mosaicActions: any,
+): string | undefined {
   if (!mosaicWindowActions || !mosaicActions) {
-    return null;
+    return undefined;
   }
   const node = getNodeAtPath(mosaicActions.getRoot(), mosaicWindowActions.getPath());
   const type = getPanelTypeFromId(node);

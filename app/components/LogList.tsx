@@ -24,10 +24,10 @@ type RowRendererParams = {
   columns: any[];
   index: number;
   isScrolling: boolean;
-  onRowClick: () => void | null | undefined;
-  onRowDoubleClick: () => void | null | undefined;
-  onRowMouseOver: () => void | null | undefined;
-  onRowMouseOut: () => void | null | undefined;
+  onRowClick: () => void;
+  onRowDoubleClick: () => void;
+  onRowMouseOver: () => void;
+  onRowMouseOut: () => void;
   rowData: any;
   style: React.CSSProperties;
   parent?: any;

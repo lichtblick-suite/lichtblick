@@ -133,14 +133,12 @@ function RawMessages(props: Props) {
   const { topicPath, diffMethod, diffTopicPath, diffEnabled, showFullMessageForDiff } = config;
   const { topics, datatypes } = useDataSourceInfo();
 
-  const topicRosPath: RosPath | null | undefined = useMemo(() => parseRosPath(topicPath), [
-    topicPath,
-  ]);
-  const topic: Topic | null | undefined = useMemo(
+  const topicRosPath: RosPath | undefined = useMemo(() => parseRosPath(topicPath), [topicPath]);
+  const topic: Topic | undefined = useMemo(
     () => topicRosPath && topics.find(({ name }) => name === topicRosPath.topicName),
     [topicRosPath, topics],
   );
-  const rootStructureItem: MessagePathStructureItem | null | undefined = useMemo(() => {
+  const rootStructureItem: MessagePathStructureItem | undefined = useMemo(() => {
     if (!topic || !topicRosPath) {
       return;
     }
@@ -235,7 +233,7 @@ function RawMessages(props: Props) {
       <ReactHoverObserver className={styles.iconWrapper}>
         {({ isHovering }: any) => {
           const lastKeyPath: number = last(keyPath) as any;
-          let valueAction: ValueAction | null | undefined;
+          let valueAction: ValueAction | undefined;
           if (isHovering && structureItem) {
             valueAction = getValueActionForValue(
               data[lastKeyPath],
@@ -244,7 +242,7 @@ function RawMessages(props: Props) {
             );
           }
 
-          let constantName: string | null | undefined;
+          let constantName: string | undefined;
           if (structureItem) {
             const childStructureItem = getStructureItemForPath(
               structureItem,

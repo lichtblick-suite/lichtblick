@@ -104,7 +104,7 @@ export default function GlobalVariableLink({
   variableValue = null,
 }: Props) {
   const { linkedGlobalVariables } = useLinkedGlobalVariables();
-  let linkedGlobalVariableLocal: LinkedGlobalVariable | null | undefined = linkedGlobalVariable;
+  let linkedGlobalVariableLocal: LinkedGlobalVariable | undefined = linkedGlobalVariable;
   if (!linkedGlobalVariableLocal && topic && markerKeyPath) {
     linkedGlobalVariableLocal = getLinkedGlobalVariable({
       topic,

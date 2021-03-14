@@ -95,7 +95,7 @@ const pushLayoutChange = (
   action: any,
 ): LayoutHistory => {
   const time = Date.now();
-  const historyOptions: EditHistoryOptions | null | undefined = action.payload?.historyOptions;
+  const historyOptions: EditHistoryOptions | undefined = action.payload?.historyOptions;
   if (
     historyOptions === "SUPPRESS_HISTORY_ENTRY" ||
     isEqual(oldPersistedState, newPersistedState)

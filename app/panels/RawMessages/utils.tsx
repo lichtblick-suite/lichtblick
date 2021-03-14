@@ -162,7 +162,7 @@ export const getItemStringForDiff = (type: string, data: any, itemType: string) 
   );
 };
 
-export function getMessageDocumentationLink(datatype: string): string | null | undefined {
+export function getMessageDocumentationLink(datatype: string): string | undefined {
   const parts = datatype.split("/");
   const pkg = first(parts);
   const filename = last(parts);

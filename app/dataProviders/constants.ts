@@ -24,4 +24,4 @@ export const CoreDataProviders = {
   RpcDataProvider: "RpcDataProvider",
   WorkerDataProvider: "WorkerDataProvider",
 };
-export const MESSAGE_FORMATS = ["bobjects", "rosBinaryMessages", "parsedMessages"];
+export const MESSAGE_FORMATS = ["bobjects", "rosBinaryMessages", "parsedMessages"] as const;

@@ -264,9 +264,7 @@ function GlobalVariablesTable(): ReactElement {
   }, []);
 
   const previousGlobalVariables = usePreviousValue(globalVariables);
-  const previousGlobalVariablesRef = useRef<GlobalVariables | null | undefined>(
-    previousGlobalVariables,
-  );
+  const previousGlobalVariablesRef = useRef<GlobalVariables | undefined>(previousGlobalVariables);
   previousGlobalVariablesRef.current = previousGlobalVariables;
 
   const [changedVariables, setChangedVariables] = useState<string[]>([]);

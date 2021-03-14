@@ -59,7 +59,7 @@ type Props = {
 
 export default React.memo<Props>(function PlaybackBarHoverTicks({ componentId }: Props) {
   const { startTime, endTime } = useMessagePipeline(getStartAndEndTime);
-  const [width, setWidth] = useState<number | null | undefined>();
+  const [width, setWidth] = useState<number | undefined>();
 
   const scaleBounds = useMemo<{ current: readonly ScaleBounds[] | undefined }>(() => {
     if (width == null || startTime == null || endTime == null) {

@@ -27,10 +27,10 @@ const logger = new Logger("videoRecordingClient");
 // - "screenshot" (take a screenshot and acknowledge when done, so we can continue).
 //
 
-let screenshotResolve: (() => void) | null | undefined;
-let finishedMsPerFrame: number | null | undefined;
-let error: Error | null | undefined;
-let errorSignal: Signal<void> | null | undefined;
+let screenshotResolve: (() => void) | undefined;
+let finishedMsPerFrame: number | undefined;
+let error: Error | undefined;
+let errorSignal: Signal<void> | undefined;
 
 export type VideoRecordingAction = {
   action: "error" | "finish" | "screenshot";
@@ -39,7 +39,7 @@ export type VideoRecordingAction = {
 };
 
 (window as any).videoRecording = {
-  nextAction(): VideoRecordingAction | null | undefined {
+  nextAction(): VideoRecordingAction | undefined {
     if (error) {
       // This object is serialized and deserialized to pass it to Puppeteer, so passing the error object itself will
       // just result in { "action": "error", "error": {} }. Instead pass a string - the stack itself.
@@ -49,10 +49,10 @@ export type VideoRecordingAction = {
           error.stack || error.message || (error.toString && error.toString()) || (error as any),
       };
       // Clear error, since if it is whitelisted we will ignore and try to keep running
-      error = null;
+      error = undefined;
       if (errorSignal) {
         errorSignal.resolve();
-        errorSignal = null;
+        errorSignal = undefined;
       }
       return payload;
     }
@@ -62,7 +62,7 @@ export type VideoRecordingAction = {
     if (screenshotResolve) {
       return { action: "screenshot" };
     }
-    return null;
+    return undefined;
   },
 
   hasTakenScreenshot() {

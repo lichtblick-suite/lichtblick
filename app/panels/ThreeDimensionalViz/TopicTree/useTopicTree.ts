@@ -512,7 +512,7 @@ export default function useTree({
         isFeatureColumn ? item.featureKey : item.key,
       );
       const topicNames = filterMap(nodeAndChildren, (item) =>
-        item.type === "topic" ? item.topicName : null,
+        item.type === "topic" ? item.topicName : undefined,
       );
 
       const namespaceChildrenKeys = flatten(
@@ -640,7 +640,7 @@ export default function useTree({
       if (!groupKey) {
         return;
       }
-      let nodeKey: string | null | undefined = groupKey;
+      let nodeKey: string | undefined = groupKey;
       while (nodeKey && nodesByKey[nodeKey]) {
         if (!result[nodeKey]) {
           result[nodeKey] = [];

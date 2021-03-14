@@ -14,8 +14,8 @@
 import tick from "@foxglove-studio/app/shared/tick";
 
 export async function dragAndDrop(
-  source: (Element | null | undefined) | (() => Element | null | undefined),
-  target: (Element | null | undefined) | (() => Element | null | undefined),
+  source: (Element | undefined) | (() => Element | undefined),
+  target: (Element | undefined) | (() => Element | undefined),
 ) {
   const sourceEl = typeof source === "function" ? source() : source;
   if (!sourceEl) {

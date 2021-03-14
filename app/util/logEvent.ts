@@ -16,7 +16,7 @@
 // javascript from the hooks in each worker.
 
 export type Tags = {
-  readonly [key: string]: (string | boolean | number | string[] | number[]) | null | undefined;
+  readonly [key: string]: (string | boolean | number | string[] | number[]) | undefined;
 };
 
 let eventNames:

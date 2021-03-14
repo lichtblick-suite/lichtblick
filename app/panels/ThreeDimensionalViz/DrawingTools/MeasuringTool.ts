@@ -97,25 +97,25 @@ export default class MeasuringTool extends React.Component<Props> {
     }
   };
 
-  get onMouseMove(): ((arg0: MouseEvent, arg1: ReglClickInfo) => void) | null | undefined {
+  get onMouseMove(): ((arg0: MouseEvent, arg1: ReglClickInfo) => void) | undefined {
     if (!this.measureActive) {
-      return null;
+      return undefined;
     }
 
     return this._canvasMouseMoveHandler;
   }
 
-  get onMouseUp(): ((arg0: MouseEvent, arg1: ReglClickInfo) => void) | null | undefined {
+  get onMouseUp(): ((arg0: MouseEvent, arg1: ReglClickInfo) => void) | undefined {
     if (!this.measureActive) {
-      return null;
+      return undefined;
     }
 
     return this._canvasMouseUpHandler;
   }
 
-  get onMouseDown(): ((arg0: MouseEvent, arg1: ReglClickInfo) => void) | null | undefined {
+  get onMouseDown(): ((arg0: MouseEvent, arg1: ReglClickInfo) => void) | undefined {
     if (!this.measureActive) {
-      return null;
+      return undefined;
     }
 
     return this._canvasMouseDownHandler;

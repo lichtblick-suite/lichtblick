@@ -28,7 +28,7 @@ export default function debouncePromise<Args extends unknown[]>(
   // Whether we are currently waiting for a promise returned by `fn` to resolve.
   let calling = false;
   // Whether another call to the debounced function was made while a call was in progress.
-  let callPending: Args | null | undefined;
+  let callPending: Args | undefined;
 
   const debouncedFn: DebouncedFn<Args> = (...args: Args) => {
     if (calling) {

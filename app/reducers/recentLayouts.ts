@@ -23,7 +23,7 @@ const LAYOUT_COUNT_STORED = 10;
 // We ONLY save the name, and not the version here, because if the user selects a layout, we just want the most recent
 // version of that layout.
 type RecentLayoutId = string;
-function recentLayoutFromPersistedState(state: PersistedState): RecentLayoutId | null | undefined {
+function recentLayoutFromPersistedState(state: PersistedState): RecentLayoutId | undefined {
   return state.fetchedLayout?.data?.name;
 }
 

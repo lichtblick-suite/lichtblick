@@ -403,7 +403,7 @@ function ImageView(props: Props) {
   }, [cameraTopic, imageTopicsByNamespace, onChangeCameraTopic]);
 
   const cameraInfoTopic = getCameraInfoTopic(cameraTopic);
-  const cameraInfo: CameraInfo | null | undefined = PanelAPI.useMessageReducer({
+  const cameraInfo: CameraInfo | undefined = PanelAPI.useMessageReducer({
     topics: cameraInfoTopic ? [cameraInfoTopic] : [],
     restore: useCallback((value: any) => value, []) as any,
     addMessage: useCallback((value, { message }: TypedMessage<CameraInfo>) => message, []),

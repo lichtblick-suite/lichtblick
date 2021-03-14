@@ -411,11 +411,15 @@ storiesOf("<Tab>", module)
               '[data-test~="Tab!Left"] [data-test="add-tab"]',
             )[0] as any).click();
 
-            const dragHandle = document.querySelector(
-              '[data-test~="Tab!RightInner"] [data-test="mosaic-drag-handle"]',
-            );
-            dragAndDrop(dragHandle, () =>
-              document.querySelector('[data-test~="Tab!Left"] [data-test="empty-drop-target"]'),
+            const dragHandle =
+              document.querySelector(
+                '[data-test~="Tab!RightInner"] [data-test="mosaic-drag-handle"]',
+              ) ?? undefined;
+            dragAndDrop(
+              dragHandle,
+              () =>
+                document.querySelector('[data-test~="Tab!Left"] [data-test="empty-drop-target"]') ??
+                undefined,
             );
           }, DEFAULT_TIMEOUT);
         }}

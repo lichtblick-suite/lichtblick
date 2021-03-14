@@ -34,12 +34,12 @@ const log = new Logger(__filename);
 //
 // This is to ensure that other mechanisms that we have in place for either discarding old messages
 // or forcing an update of `player.lastSeekTime` are working properly.
-let lastMessages: readonly Message[] | null | undefined;
-let lastCurrentTime: Time | null | undefined;
-let lastMessageTime: Time | null | undefined;
-let lastMessageTopic: string | null | undefined;
-let lastLastSeekTime: number | null | undefined;
-let warningTimeout: ReturnType<typeof setTimeout> | null | undefined;
+let lastMessages: readonly Message[] | undefined;
+let lastCurrentTime: Time | undefined;
+let lastMessageTime: Time | undefined;
+let lastMessageTopic: string | undefined;
+let lastLastSeekTime: number | undefined;
+let warningTimeout: ReturnType<typeof setTimeout> | undefined;
 let incorrectMessages: Message[] = [];
 
 export default function warnOnOutOfSyncMessages(playerState: PlayerState) {

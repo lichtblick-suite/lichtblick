@@ -66,10 +66,10 @@ export class Transform {
     return this.parent.rootTransform();
   }
 
-  apply(output: MutablePose, input: Pose, rootId: string): MutablePose | null | undefined {
+  apply(output: MutablePose, input: Pose, rootId: string): MutablePose | undefined {
     rootId = stripLeadingSlash(rootId);
     if (!this.isValid(rootId)) {
-      return null;
+      return undefined;
     }
 
     if (this.id === rootId) {
@@ -85,7 +85,7 @@ export class Transform {
 
     // Can't apply if this transform doesn't map to the root transform.
     if (!this.isChildOfTransform(rootId)) {
-      return null;
+      return undefined;
     }
 
     const { position, orientation } = input;
@@ -176,7 +176,7 @@ export default class Transforms {
     original: Pose,
     frameId: string,
     rootId: string,
-  ): MutablePose | null | undefined {
+  ): MutablePose | undefined {
     const tf = this.storage.get(frameId);
     return tf.apply(output, original, rootId);
   }

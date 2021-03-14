@@ -57,7 +57,7 @@ type ParseAndStringifyFn = {
 };
 export type EditFormat = typeof EDIT_FORMAT[keyof typeof EDIT_FORMAT];
 export type BaseProps = {
-  dataValidator?: (data: any) => ValidationResult | null | undefined;
+  dataValidator?: (data: any) => ValidationResult | undefined;
   inputStyle?: {
     [attr: string]: string | number;
   };

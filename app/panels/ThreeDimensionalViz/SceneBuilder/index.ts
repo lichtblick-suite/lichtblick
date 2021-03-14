@@ -478,13 +478,13 @@ export default class SceneBuilder implements MarkerProvider {
   _transformMarkerPose = (
     topic: string,
     marker: BinaryMarker | BinaryInstancedMarker,
-  ): MutablePose | null | undefined => {
+  ): MutablePose | undefined => {
     const frame_id = marker.header().frame_id();
 
     if (!frame_id) {
       const error = this._addError(this.errors.topicsMissingFrameIds, topic);
       error.namespaces.add(marker.ns());
-      return null;
+      return undefined;
     }
 
     if (frame_id === this.rootTransformID) {

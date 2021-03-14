@@ -118,7 +118,7 @@ class ParseMessageDefinitionCache {
     return parsedDefinition;
   }
 
-  getStoredDefinition(md5Sum: string): RosMsgDefinition[] | null | undefined {
+  getStoredDefinition(md5Sum: string): RosMsgDefinition[] | undefined {
     this._usedMd5Sums.add(md5Sum);
 
     if (this._hashesToParsedDefinitions[md5Sum]) {

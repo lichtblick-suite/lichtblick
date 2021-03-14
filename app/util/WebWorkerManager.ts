@@ -35,7 +35,7 @@ export default class WebWorkerManager {
     this._allListeners = new Set();
   }
 
-  testing_getWorkerState(id: string): WorkerListenerState | null | undefined {
+  testing_getWorkerState(id: string): WorkerListenerState | undefined {
     return this._workerStates.find(
       (workerState) => workerState && workerState.listenerIds.includes(id),
     );

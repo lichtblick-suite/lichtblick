@@ -489,9 +489,7 @@ export default class RandomAccessPlayer implements Player {
           );
           return undefined;
         }
-        const topic: Topic | null | undefined = this._providerTopics.find(
-          (t) => t.name === message.topic,
-        );
+        const topic: Topic | undefined = this._providerTopics.find((t) => t.name === message.topic);
         if (!topic) {
           sendNotification(
             `Could not find topic for message ${message.topic}; skipped message`,

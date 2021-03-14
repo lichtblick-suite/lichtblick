@@ -47,11 +47,11 @@ const NO_WARNINGS = Object.freeze({});
 // unmarshalls into plain JS objects.
 export default class RosbridgePlayer implements Player {
   _url: string; // WebSocket URL.
-  _rosClient: roslib.Ros | null | undefined; // The roslibjs client when we're connected.
+  _rosClient?: roslib.Ros; // The roslibjs client when we're connected.
   _id: string = uuidv4(); // Unique ID for this player.
   _listener?: (arg0: PlayerState) => Promise<void>; // Listener for _emitState().
   _closed: boolean = false; // Whether the player has been completely closed using close().
-  _providerTopics: Topic[] | null | undefined; // Topics as published by the WebSocket.
+  _providerTopics?: Topic[]; // Topics as published by the WebSocket.
   _providerDatatypes?: RosDatatypes; // Datatypes as published by the WebSocket.
   _messageReadersByDatatype: {
     [datatype: string]: MessageReader;

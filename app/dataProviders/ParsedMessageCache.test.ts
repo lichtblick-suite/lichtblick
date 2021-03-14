@@ -33,7 +33,7 @@ describe("parsedMessageCache", () => {
       reportMetadataCallback: () => {
         // no-op
       },
-      notifyPlayerManager: async (): Promise<NotifyPlayerManagerReplyData | null | undefined> => {
+      notifyPlayerManager: async (): Promise<NotifyPlayerManagerReplyData | undefined> => {
         // no-op
         return;
       },

@@ -43,7 +43,7 @@ type ItemProps = {
   iconSize?: "xxsmall" | "xsmall" | "small" | "medium" | "large" | "xlarge";
   isDropdown?: boolean;
   disabled?: boolean;
-  onClick?: () => void | null | undefined;
+  onClick?: () => void;
   hasSubMenu?: boolean;
   direction?: "left" | "right";
   dataTest?: string;

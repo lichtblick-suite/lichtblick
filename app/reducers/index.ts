@@ -99,7 +99,7 @@ export default function createRootReducer(history: any, args?: { testAuth?: any 
     commenting: { fetchedCommentsBase: [], fetchedCommentsFeature: [], sourceToShow: "Both" },
   };
   return (state: State, action: ActionTypes): State => {
-    const oldPersistedState: PersistedState | null | undefined = state?.persistedState;
+    const oldPersistedState: PersistedState | undefined = state?.persistedState;
     const reducers: Array<
       (arg0: State, arg1: ActionTypes, arg2?: PersistedState) => State
     > = getReducers(history) as any;

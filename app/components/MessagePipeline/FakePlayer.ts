@@ -24,7 +24,7 @@ export default class FakePlayer implements Player {
   listener?: (arg0: PlayerState) => Promise<void>;
   playerId: string = "test";
   subscriptions: SubscribePayload[] = [];
-  publishers: AdvertisePayload[] | null | undefined;
+  publishers: AdvertisePayload[] | undefined;
   _capabilities: typeof PlayerCapabilities[keyof typeof PlayerCapabilities][] = [];
 
   setListener(listener: (arg0: PlayerState) => Promise<void>): void {

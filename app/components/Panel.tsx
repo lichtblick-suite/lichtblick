@@ -184,7 +184,7 @@ export default function Panel<Config extends PanelConfig>(
     const saveCompleteConfig = useCallback(
       (
         configToSave: Partial<Config>,
-        options: { historyOptions?: EditHistoryOptions } | null | undefined,
+        options: { historyOptions?: EditHistoryOptions } | undefined,
       ) => {
         if (saveConfig) {
           saveConfig(configToSave as any);

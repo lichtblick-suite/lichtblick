@@ -38,7 +38,7 @@ import { fromNanoSec, getSeekToTime, SEEK_ON_START_NS } from "@foxglove-studio/a
 const playerOptions: RandomAccessPlayerOptions = {
   metricsCollector: undefined,
   seekToTime: { type: "absolute", time: { sec: 10, nsec: 0 } },
-  notifyPlayerManager: async (): Promise<NotifyPlayerManagerReplyData | null | undefined> => {
+  notifyPlayerManager: async (): Promise<NotifyPlayerManagerReplyData | undefined> => {
     // no-op
     return;
   },

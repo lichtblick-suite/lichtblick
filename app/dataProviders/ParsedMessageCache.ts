@@ -29,7 +29,7 @@ function readMessage(
   readersByTopic: Readonly<{
     [topic: string]: MessageReader;
   }>,
-): Message | null | undefined {
+): Message | undefined {
   if (isBobject(message.message)) {
     return { ...message, message: deepParse(message.message) };
   }
@@ -90,7 +90,7 @@ export default class ParsedMessageCache {
       // Update the access time.
       cache.lastAccessIndex = this._cacheAccessIndex++;
 
-      let outputMessage: Message | null | undefined = cache.map.get(message);
+      let outputMessage: Message | undefined = cache.map.get(message);
       if (!outputMessage) {
         outputMessage = readMessage(message, readersByTopic);
         if (outputMessage) {

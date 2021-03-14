@@ -376,7 +376,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
       const canvasRenderer = this._canvasRenderer;
       if (canvasRenderer.type === "rpc") {
         const worker = this._getRpcWorker();
-        dimensions = await worker.send<Dimensions | null | undefined>("renderImage", {
+        dimensions = await worker.send<Dimensions | undefined>("renderImage", {
           id: this._id,
           imageMessage: image,
           imageMessageDatatype: topic.datatype,
@@ -384,7 +384,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
         });
       } else {
         dimensions = await renderImage({
-          canvas: this._canvasRef.current,
+          canvas: this._canvasRef.current ?? undefined,
           imageMessage: image,
           imageMessageDatatype: topic.datatype,
           rawMarkerData,

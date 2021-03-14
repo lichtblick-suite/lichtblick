@@ -75,7 +75,7 @@ export default class CachedFilelike implements Filelike {
 
   // The current active connection, if there is one. `remainingRange.start` gets updated whenever
   // we receive new data, so it truly is the remaining range that it is going to download.
-  _currentConnection: { stream: FileStream; remainingRange: Range } | null | undefined;
+  _currentConnection: { stream: FileStream; remainingRange: Range } | undefined;
 
   // A list of read requests and associated ranges for all read requests, in order.
   _readRequests: { range: Range; callback: Callback<Buffer>; requestTime: number }[] = [];

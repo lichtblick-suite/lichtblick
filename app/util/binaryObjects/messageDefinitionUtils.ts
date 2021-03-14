@@ -91,7 +91,7 @@ export const classDatatypes = new WeakMap<any, [RosDatatypes, string]>();
 export const associateDatatypes = (cls: any, datatypes: [RosDatatypes, string]): void => {
   classDatatypes.set(cls, datatypes);
 };
-export const getDatatypes = (cls: any): [RosDatatypes, string] | null | undefined =>
+export const getDatatypes = (cls: any): [RosDatatypes, string] | undefined =>
   classDatatypes.get(cls);
 
 // Note: returns false for "time" and "duration". Might be more useful not doing that.

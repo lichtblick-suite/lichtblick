@@ -30,7 +30,7 @@ export type NotifyPlayerManagerData = RequireAuthAsk;
 export type NotifyPlayerManagerReplyData = RequireAuthReply;
 export type NotifyPlayerManager = (
   arg0: NotifyPlayerManagerData,
-) => Promise<NotifyPlayerManagerReplyData | null | undefined>;
+) => Promise<NotifyPlayerManagerReplyData | undefined>;
 
 export type MessageDefinitionsByTopic = {
   [topic: string]: string;

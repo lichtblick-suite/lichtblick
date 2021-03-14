@@ -88,7 +88,7 @@ function getXForPoint(
   xAxisVal: PlotXAxisVal,
   timestamp: number,
   innerIdx: number,
-  xAxisRanges: readonly (readonly TooltipItem[])[] | null | undefined,
+  xAxisRanges: readonly (readonly TooltipItem[])[] | undefined,
   xItem: TooltipItem | undefined,
   xAxisPath: BasePlotPath | undefined,
 ): number {
@@ -122,7 +122,7 @@ function getPointsAndTooltipsForMessagePathItem(
   timestampMethod: TimestampMethod,
   xAxisVal: PlotXAxisVal,
   xAxisPath?: BasePlotPath,
-  xAxisRanges?: readonly (readonly TooltipItem[])[] | null,
+  xAxisRanges?: readonly (readonly TooltipItem[])[],
   datasetKey?: string,
 ): PointsAndTooltips {
   const points: PlotChartPoint[] = [];
@@ -185,7 +185,7 @@ function getDatasetAndTooltipsFromMessagePlotPath(
   index: number,
   startTime: Time,
   xAxisVal: PlotXAxisVal,
-  xAxisRanges: readonly (readonly TooltipItem[])[] | null | undefined,
+  xAxisRanges: readonly (readonly TooltipItem[])[] | undefined,
   xAxisPath?: BasePlotPath,
 ): {
   dataset: DataSet;
@@ -204,11 +204,11 @@ function getDatasetAndTooltipsFromMessagePlotPath(
   let rangesOfTooltips: TimeBasedChartTooltipData[][] = [];
   let rangesOfPoints: PlotChartPoint[][] = [];
   for (const [rangeIdx, range] of yAxisRanges.entries()) {
-    const xRange: readonly TooltipItem[] | null | undefined = xAxisRanges?.[rangeIdx];
+    const xRange: readonly TooltipItem[] | undefined = xAxisRanges?.[rangeIdx];
     const rangeTooltips = [];
     const rangePoints = [];
     for (const [outerIdx, item] of range.entries()) {
-      const xItem: TooltipItem | null | undefined = xRange?.[outerIdx];
+      const xItem: TooltipItem | undefined = xRange?.[outerIdx];
       const {
         points: itemPoints,
         tooltips: itemTooltips,
@@ -331,7 +331,7 @@ export function getDatasetsAndTooltips(
     const yRanges = itemsByPath[path.value] ?? [];
     const xRanges = xAxisPath && itemsByPath[xAxisPath.value];
     if (!path.enabled) {
-      return null;
+      return undefined;
     } else if (!isReferenceLinePlotPathType(path)) {
       return getDatasetAndTooltipsFromMessagePlotPath(
         path,
@@ -343,7 +343,7 @@ export function getDatasetsAndTooltips(
         xAxisPath,
       );
     }
-    return null;
+    return undefined;
   });
 
   return {
@@ -358,11 +358,11 @@ export function getDatasetsAndTooltips(
 function getAnnotations(paths: PlotPath[]) {
   return filterMap(paths, (path: PlotPath, index: number) => {
     if (!path.enabled) {
-      return null;
+      return undefined;
     } else if (isReferenceLinePlotPathType(path)) {
       return getAnnotationFromReferenceLine(path, index);
     }
-    return null;
+    return undefined;
   });
 }
 
@@ -407,7 +407,7 @@ type PlotChartProps = {
     arg2: {
       [scaleId: string]: number;
     },
-  ) => void | null | undefined;
+  ) => void;
 };
 export default memo<PlotChartProps>(function PlotChart(props: PlotChartProps) {
   const {

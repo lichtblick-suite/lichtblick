@@ -49,7 +49,7 @@ const ResizeObserverImpl =
 // or an onChange handler to manually handle changes.
 export default function Dimensions(props: Props): React.ReactElement | null {
   const [parentElement, setParentElement] = useState<HTMLDivElement | null>(null);
-  const [dimensions, setDimensions] = useState<DimensionsParams | null | undefined>();
+  const [dimensions, setDimensions] = useState<DimensionsParams | undefined>();
   // This resizeObserver should never change.
   const [resizeObserver] = useState<ResizeObserver>(
     () =>

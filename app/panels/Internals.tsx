@@ -179,7 +179,7 @@ function Internals(): React.ReactNode {
   }, [publishers]);
 
   const [recordGroup, setRecordGroup] = React.useState<string>(RECORD_ALL);
-  const [recordingTopics, setRecordingTopics] = React.useState<string[] | null | undefined>();
+  const [recordingTopics, setRecordingTopics] = React.useState<string[] | undefined>();
   const recordedData = React.useRef<RecordedData | undefined>();
 
   function onRecordClick() {

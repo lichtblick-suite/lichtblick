@@ -92,7 +92,7 @@ type ColumnInstance = {
 };
 
 export type ColumnOptions = {
-  Header?: string | (() => React.ReactElement<any> | null | undefined);
+  Header?: string | (() => React.ReactElement<any> | undefined);
   accessor?: string;
   columns?: ColumnOptions[];
   Cell?: (props: CellProps<ColumnInstance, Row>) => any;

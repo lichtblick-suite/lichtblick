@@ -50,6 +50,6 @@ export function updateMarkerCache(
 export function memoizedMarker(
   cache: Map<Uint8Array, MemoizedMarker>,
   marker: PointCloudMarker,
-): PointCloudMarker | null | undefined {
+): PointCloudMarker | undefined {
   return cache.get(marker.data)?.marker;
 }

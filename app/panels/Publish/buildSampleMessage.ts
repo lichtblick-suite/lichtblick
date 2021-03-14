@@ -33,7 +33,7 @@ export const builtinSampleValues = {
 export default function buildSampleMessage(
   datatypes: RosDatatypes,
   datatype: string,
-): any | null | undefined {
+): any | undefined {
   const builtin = (builtinSampleValues as any)[datatype];
   if (builtin != null) {
     return builtin;

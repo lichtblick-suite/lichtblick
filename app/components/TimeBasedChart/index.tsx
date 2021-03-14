@@ -223,11 +223,11 @@ export type Props = {
   datasetId?: string;
   onClick?: (
     arg0: React.MouseEvent<HTMLCanvasElement>,
-    datalabel: ScaleBounds[] | null | undefined,
+    datalabel: ScaleBounds[] | undefined,
     values: {
       [axis: string]: number;
     },
-  ) => void | null | undefined;
+  ) => void;
   saveCurrentView?: (minY: number, maxY: number, width?: number) => void;
   // If the x axis represents playback time ("timestamp"), the hover cursor will be synced.
   // Note, this setting should not be used for other time values.
@@ -248,9 +248,9 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   const hasUnmounted = useRef<boolean>(false);
 
   const [hasUserPannedOrZoomed, setHasUserPannedOrZoomed] = useState<boolean>(false);
-  const [followPlaybackState, setFollowPlaybackState] = useState<
-    FollowPlaybackState | null | undefined
-  >(null);
+  const [followPlaybackState, setFollowPlaybackState] = useState<FollowPlaybackState | undefined>(
+    undefined,
+  );
   const [, forceUpdate] = useState(0);
 
   const onVisibilityChange = useCallback(() => {
@@ -314,10 +314,10 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   );
 
   const { onClick } = props;
-  const lastPanTime = useRef<Date | null | undefined>();
+  const lastPanTime = useRef<Date | undefined>();
 
   const onClickAddingValues = useCallback(
-    (ev: React.MouseEvent<HTMLCanvasElement>, datalabel: ScaleBounds[] | null | undefined) => {
+    (ev: React.MouseEvent<HTMLCanvasElement>, datalabel: ScaleBounds[] | undefined) => {
       if (!onClick) {
         return;
       }
@@ -348,7 +348,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   );
 
   // Keep a ref to props.currentTime so onPanZoom can have stable identity
-  const currentTimeRef = useRef<number | null | undefined>();
+  const currentTimeRef = useRef<number | undefined>();
   currentTimeRef.current = props.currentTime;
   const onPanZoom = useCallback(
     (newScaleBounds: ScaleBounds[]) => {
@@ -380,7 +380,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
       chartComponent.current.resetZoom();
       setHasUserPannedOrZoomed(false);
     }
-    setFollowPlaybackState(null);
+    setFollowPlaybackState(undefined);
   }, [setHasUserPannedOrZoomed, setFollowPlaybackState]);
 
   if (useDeepChangeDetector([props.defaultView], false)) {
@@ -389,7 +389,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
       setHasUserPannedOrZoomed(false);
     }
     if (followPlaybackState != null) {
-      setFollowPlaybackState(null);
+      setFollowPlaybackState(undefined);
     }
   }
 

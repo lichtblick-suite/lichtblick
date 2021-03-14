@@ -14,7 +14,7 @@
 // More efficient version of [...values].map(mapFn).filter(Boolean)
 export default function filterMap<T, U>(
   values: Iterable<T>,
-  mapFn: (arg0: T, arg1: number) => U | null | undefined,
+  mapFn: (arg0: T, arg1: number) => U | undefined,
 ): U[] {
   const results: Array<U> = [];
   let index = 0;

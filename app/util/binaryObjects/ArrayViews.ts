@@ -25,9 +25,7 @@ export interface ArrayView<T> extends Iterable<T> {
   readonly get: (index: number) => T;
   readonly length: () => number;
   readonly toArray: () => T[];
-  readonly find: (
-    predicate: (item: T, index: number, collection: T[]) => boolean,
-  ) => T | null | undefined;
+  readonly find: (predicate: (item: T, index: number, collection: T[]) => boolean) => T | undefined;
 }
 
 // Class is inside a closure to make instance construction cheaper (only two fields to set). The
@@ -84,7 +82,7 @@ export const getArrayView = <T>(getElement: GetArrayElement<T>, elementSize: num
       return ret;
     }
 
-    find(predicate: (item: T, index: number, collection: T[]) => boolean): T | null | undefined {
+    find(predicate: (item: T, index: number, collection: T[]) => boolean): T | undefined {
       // @ts-expect-error Note(roman): running into weird generic miss-match issues
       // I suspect related to declaring a class inside the function, this feels very anti-pattern
       return find(this.toArray(), predicate);
@@ -116,7 +114,7 @@ export class PrimitiveArrayView<T> implements ArrayView<T> {
     return this.value;
   }
 
-  find(predicate: (item: T, index: number, collection: T[]) => boolean): T | null | undefined {
+  find(predicate: (item: T, index: number, collection: T[]) => boolean): T | undefined {
     // @ts-expect-error Note(roman): running into weird generic miss-match issues
     // I suspect related to declaring a class inside the function, this feels very anti-pattern
     return find(this.toArray(), predicate);
@@ -155,7 +153,7 @@ export const getReverseWrapperArrayView = <T>(Class: any) =>
       return ret;
     }
 
-    find(predicate: (item: T, index: number, collection: T[]) => boolean): T | null | undefined {
+    find(predicate: (item: T, index: number, collection: T[]) => boolean): T | undefined {
       // @ts-expect-error Note(roman): running into weird generic miss-match issues
       // I suspect related to declaring a class inside the function, this feels very anti-pattern
       return find(this.toArray(), predicate);

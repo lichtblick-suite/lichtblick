@@ -17,14 +17,14 @@ import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import { blockMessageCache } from "@foxglove-studio/app/PanelAPI/useBlocksByTopic";
 import { useChangeDetector } from "@foxglove-studio/app/util/hooks";
 
-function usePlaybackMessage<T>(topic: string): T | null | undefined {
+function usePlaybackMessage<T>(topic: string): T | undefined {
   // DANGER! We circumvent PanelAPI.useMessageReducer's system of keeping state here.
   // We should rarely do that, since it's error-prone to implement your own
   // state management in panels. However, in this case it's really annoying that
   // the message gets reset to the default whenever a seek happens. (This is a more general
   // problem with static/latched topics that we should fix, possibly orthogonally to the
   // use of block message storage.)
-  const lastMessage = useRef<T | null | undefined>();
+  const lastMessage = useRef<T | undefined>();
 
   const { playerId } = PanelAPI.useDataSourceInfo();
   const hasChangedPlayerId = useChangeDetector([playerId], false);
@@ -32,7 +32,7 @@ function usePlaybackMessage<T>(topic: string): T | null | undefined {
     lastMessage.current = undefined;
   }
 
-  const newMessage = PanelAPI.useMessageReducer<T | null | undefined>({
+  const newMessage = PanelAPI.useMessageReducer<T | undefined>({
     topics: [topic],
     restore: useCallback((prevState) => prevState || lastMessage.current, [lastMessage]),
     addMessage: useCallback((prevState, { message }) => prevState || message, []),
@@ -42,7 +42,7 @@ function usePlaybackMessage<T>(topic: string): T | null | undefined {
   return lastMessage.current;
 }
 
-export default function useBlockMessageByTopicWithFallback<T>(topic: string): T | null | undefined {
+export default function useBlockMessageByTopicWithFallback<T>(topic: string): T | undefined {
   const { blocks, messageReadersByTopic } = PanelAPI.useBlocksByTopic([topic]);
 
   const binaryBlocksMessage = useMemo(() => {

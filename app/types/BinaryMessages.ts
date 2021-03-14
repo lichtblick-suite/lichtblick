@@ -77,7 +77,7 @@ export type BinaryMarker = Readonly<{
   scale(): BinaryPoint;
   color(): BinaryColorRgba;
   // Reverse-wrapped "markers" created in the 3D panel sometimes have no lifetimes :(((
-  lifetime(): BinaryTime | null | undefined;
+  lifetime(): BinaryTime | undefined;
   frame_locked(): boolean;
   points(): ArrayView<BinaryPoint>;
   colors(): ArrayView<BinaryColorRgba>;
@@ -98,7 +98,7 @@ export type BinaryInstancedMarker = Readonly<{
   colors(): ArrayView<BinaryColorRgba>;
   points(): ArrayView<BinaryPoint>;
   // Reverse-wrapped "markers" created in the 3D panel sometimes have no lifetimes :(((
-  lifetime(): BinaryTime | null | undefined;
+  lifetime(): BinaryTime | undefined;
   // Fields not provided from marker: frame_locked, text, mesh_resource, mesh_use_embedded_materials
   // Fields not present in marker:
   poses(): ArrayView<BinaryPose>;

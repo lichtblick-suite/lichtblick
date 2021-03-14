@@ -43,7 +43,7 @@ export default function getDiff(
   showFullMessageForDiff: boolean = false,
 ): any {
   if (Array.isArray(before) && Array.isArray(after)) {
-    let idToCompareWith: string | null | undefined;
+    let idToCompareWith: string | undefined;
     const allItems = before.concat(after);
     if (allItems[0] && typeof allItems[0] === "object") {
       let candidateIdsToCompareWith: any = {};

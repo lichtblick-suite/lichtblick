@@ -201,13 +201,13 @@ export function getNextFrame(
   currentTime: Time,
   timestamps: string[] = [],
   goLeft?: boolean,
-): Time | null | undefined {
+): Time | undefined {
   if (!timestamps.length) {
-    return null;
+    return undefined;
   }
   const effectiveIdx = findClosestTimestampIndex(currentTime, timestamps);
   if (effectiveIdx === -1) {
-    return null;
+    return undefined;
   }
   let nextIdx = 0;
   const maxIdx = timestamps.length - 1;
@@ -250,18 +250,18 @@ export const isTimeInRangeInclusive = (time: Time, start: Time, end: Time) => {
   return true;
 };
 
-export function parseRosTimeStr(str: string): Time | null | undefined {
+export function parseRosTimeStr(str: string): Time | undefined {
   if (/^\d+\.?$/.test(str)) {
     // Whole number with optional "." at the end.
     return { sec: parseInt(str, 10) || 0, nsec: 0 };
   }
   if (!/^\d+\.\d+$/.test(str)) {
     // Not digits.digits -- invalid.
-    return null;
+    return undefined;
   }
   const partials = str.split(".");
   if (partials.length === 0) {
-    return null;
+    return undefined;
   }
   // There can be 9 digits of nanoseconds. If the fractional part is "1", we need to add eight
   // zeros. Also, make sure we round to an integer if we need to _remove_ digits.

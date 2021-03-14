@@ -15,7 +15,7 @@ export type Node = {
   id: string;
   legacyIds: string[];
   text: string;
-  tooltip: React.ReactNode[] | null | undefined;
+  tooltip: React.ReactNode[] | undefined;
   icon: React.ReactNode;
   checked: boolean;
   disabled: boolean;

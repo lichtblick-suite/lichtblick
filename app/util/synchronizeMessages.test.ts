@@ -41,7 +41,7 @@ describe("synchronizeMessages", () => {
         {
           "/foo": [message("/foo", { sec: 1, nsec: 2 })],
         },
-        () => null,
+        () => undefined,
       ),
     ).toEqual(null);
   });

@@ -31,10 +31,10 @@ export type Props = {
 };
 
 let portal: any;
-function getPortal(): Element | null | undefined {
+function getPortal(): Element | undefined {
   const { body } = document;
   if (!body) {
-    return null;
+    return undefined;
   }
   if (!portal) {
     portal = document.createElement("div");
@@ -45,7 +45,7 @@ function getPortal(): Element | null | undefined {
 
 type State = {
   shown: boolean;
-  mousePosition: { x: number; y: number } | null | undefined;
+  mousePosition: { x: number; y: number } | undefined;
 };
 
 // Wrapper component to add tooltip listeners to your elements
@@ -59,7 +59,7 @@ export default class Tooltip extends React.Component<Props, State> {
   };
 
   timeout?: ReturnType<typeof setTimeout>;
-  scheduleUpdate?: () => void | null | undefined;
+  scheduleUpdate?: () => void;
 
   // fake element used for positioning the tooltip next to the mouse
   fakeReferenceElement = {
@@ -146,14 +146,14 @@ export default class Tooltip extends React.Component<Props, State> {
     if (this.timeout) {
       clearTimeout(this.timeout);
     }
-    this.setState({ shown: false, mousePosition: null });
+    this.setState({ shown: false, mousePosition: undefined });
   };
 
   onMouseDown = (): void => {
     if (this.timeout) {
       clearTimeout(this.timeout);
     }
-    this.setState({ shown: false, mousePosition: null });
+    this.setState({ shown: false, mousePosition: undefined });
   };
 
   renderPopper() {

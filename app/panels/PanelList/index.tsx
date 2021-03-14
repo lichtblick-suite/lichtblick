@@ -264,9 +264,7 @@ function verifyPanels() {
 
 function PanelList(props: Props) {
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [highlightedPanelIdx, setHighlightedPanelIdx] = React.useState<number | null | undefined>(
-    null,
-  );
+  const [highlightedPanelIdx, setHighlightedPanelIdx] = React.useState<number | undefined>();
   const { onPanelSelect, selectedPanelTitle } = props;
 
   const dispatch = useDispatch();
@@ -402,12 +400,8 @@ function PanelList(props: Props) {
               value={searchQuery}
               onChange={handleSearchChange}
               onKeyDown={onKeyDown}
-              onBlur={() => {
-                setHighlightedPanelIdx(null);
-              }}
-              onFocus={() => {
-                setHighlightedPanelIdx(0);
-              }}
+              onBlur={() => setHighlightedPanelIdx(undefined)}
+              onFocus={() => setHighlightedPanelIdx(0)}
               autoFocus
             />
           </SSearchInputContainer>

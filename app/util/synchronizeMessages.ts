@@ -29,7 +29,7 @@ function allMessageStampsNewestFirst(
   messagesByTopic: Readonly<{
     [topic: string]: readonly Message[];
   }>,
-  getHeaderStamp?: (itemMessage: Message) => Time | null | undefined,
+  getHeaderStamp?: (itemMessage: Message) => Time | undefined,
 ) {
   const stamps = [];
   for (const topic in messagesByTopic) {
@@ -51,7 +51,7 @@ function messagesMatchingStamp(
   messagesByTopic: Readonly<{
     [topic: string]: readonly Message[];
   }>,
-  getHeaderStamp?: (itemMessage: Message) => Time | null | undefined,
+  getHeaderStamp?: (itemMessage: Message) => Time | undefined,
 ):
   | Readonly<{
       [topic: string]: readonly Message[];
@@ -83,7 +83,7 @@ export default function synchronizeMessages(
   messagesByTopic: Readonly<{
     [topic: string]: readonly Message[];
   }>,
-  getHeaderStamp?: (itemMessage: Message) => Time | null | undefined,
+  getHeaderStamp?: (itemMessage: Message) => Time | undefined,
 ):
   | Readonly<{
       [topic: string]: readonly Message[];

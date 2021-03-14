@@ -44,7 +44,7 @@ export type MessagePathDataItem = {
 // reference, as long as topics/datatypes/global variables haven't changed in the meantime.
 export function useCachedGetMessagePathDataItems(
   paths: string[],
-): (path: string, message: ReflectiveMessage) => MessagePathDataItem[] | null | undefined {
+): (path: string, message: ReflectiveMessage) => MessagePathDataItem[] | undefined {
   const { topics: providerTopics, datatypes } = PanelAPI.useDataSourceInfo();
   const { globalVariables } = useGlobalVariables();
   const memoizedPaths: string[] = useShallowMemo<string[]>(paths);
@@ -73,7 +73,7 @@ export function useCachedGetMessagePathDataItems(
   const cachesByPath = useRef<{
     [key: string]: {
       filledInPath: RosPath;
-      weakMap: WeakMap<ReflectiveMessage, MessagePathDataItem[] | null | undefined>;
+      weakMap: WeakMap<ReflectiveMessage, MessagePathDataItem[] | undefined>;
     };
   }>({});
   if (useChangeDetector([providerTopics, datatypes], true)) {
@@ -92,7 +92,7 @@ export function useCachedGetMessagePathDataItems(
   }
 
   return useCallback(
-    (path: string, message: ReflectiveMessage): MessagePathDataItem[] | null | undefined => {
+    (path: string, message: ReflectiveMessage): MessagePathDataItem[] | undefined => {
       if (!memoizedPaths.includes(path)) {
         throw new Error(`path (${path}) was not in the list of cached paths`);
       }
@@ -189,7 +189,7 @@ export function getMessagePathDataItems(
   filledInPath: RosPath,
   providerTopics: readonly Topic[],
   datatypes: RosDatatypes,
-): MessagePathDataItem[] | null | undefined {
+): MessagePathDataItem[] | undefined {
   const structures = messagePathStructures(datatypes);
   const topic = getTopicsByTopicName(providerTopics)[filledInPath.topicName];
 
@@ -228,7 +228,7 @@ export function getMessagePathDataItems(
       structureItem.structureType === "primitive" && structureItem.primitiveType === "json";
     if (!pathItem) {
       // If we're at the end of the `messagePath`, we're done! Just store the point.
-      let constantName: string | null | undefined;
+      let constantName: string | undefined;
       const prevPathItem = filledInPath.messagePath[pathIndex - 1];
       if (prevPathItem && prevPathItem.type === "name") {
         const fieldName = prevPathItem.name;

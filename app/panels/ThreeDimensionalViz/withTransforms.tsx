@@ -38,7 +38,7 @@ function withTransforms<Props extends any>(ChildComponent: React.ComponentType<P
     static getDerivedStateFromProps(
       nextProps: Props,
       prevState: State,
-    ): Partial<State> | null | undefined {
+    ): Partial<State> | undefined {
       const { frame, cleared }: any = nextProps;
       let { transforms } = prevState;
       if (cleared) {

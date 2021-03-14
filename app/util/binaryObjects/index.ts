@@ -51,7 +51,7 @@ type BinaryBobjectData = Readonly<{
   approximateSize: number;
 }>;
 const binaryData = new WeakMap<any, BinaryBobjectData>();
-export const getBinaryData = (bobject: any): BinaryBobjectData | null | undefined =>
+export const getBinaryData = (bobject: any): BinaryBobjectData | undefined =>
   binaryData.get(bobject);
 const reverseWrappedBobjects = new WeakSet<any>();
 
@@ -194,7 +194,7 @@ export const getField = (obj: any | undefined, field: string): any => {
   return obj[field];
 };
 
-export const getIndex = (obj: any, i: number): any | null | undefined => {
+export const getIndex = (obj: any, i: number): any | undefined => {
   if (!obj) {
     return;
   }

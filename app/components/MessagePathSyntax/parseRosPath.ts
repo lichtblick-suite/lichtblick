@@ -21,10 +21,7 @@ import filterMap from "@foxglove-studio/app/util/filterMap";
 
 const grammarObj = Grammar.fromCompiled(grammar);
 
-const parseRosPath: (path: string) => RosPath | null | undefined = memoize((path: string):
-  | RosPath
-  | null
-  | undefined => {
+const parseRosPath = memoize((path: string): RosPath | undefined => {
   // Need to create a new Parser object for every new string to parse (should be cheap).
   const parser = new Parser(grammarObj);
   try {

@@ -31,7 +31,7 @@ function Box({ children, title }: any) {
 }
 
 function ErrorExample() {
-  const [error, setError] = React.useState<string | null | undefined>();
+  const [error, setError] = React.useState<string | undefined>();
   return (
     <>
       <TextField value="foo" validator={validator} onError={setError} hideInlineError />

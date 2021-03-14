@@ -329,7 +329,7 @@ function TwoDimensionalPlot(props: Props) {
 
   const maybeBobject: unknown = useLatestMessageDataItem(path.value, "bobjects")?.queriedData[0]
     ?.value;
-  const message: PlotMessage | null | undefined = isBobject(maybeBobject)
+  const message: PlotMessage | undefined = isBobject(maybeBobject)
     ? deepParse(maybeBobject)
     : cast<PlotMessage>(maybeBobject);
   const { title, yAxisLabel, xAxisLabel, gridColor, lines = [], points = [], polygons = [] } =
@@ -456,7 +456,7 @@ function TwoDimensionalPlot(props: Props) {
     }
   }, []);
 
-  const scaleBounds = React.useRef<readonly ScaleBounds[] | null | undefined>();
+  const scaleBounds = React.useRef<readonly ScaleBounds[] | undefined>();
   const hoverBar = React.useRef<HTMLDivElement | null>(null);
 
   const onScaleBoundsUpdate = React.useCallback(

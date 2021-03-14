@@ -85,9 +85,7 @@ export default class StoryPlayer implements Player {
           reportMetadataCallback: () => {
             // no-op
           },
-          notifyPlayerManager: async (): Promise<
-            NotifyPlayerManagerReplyData | null | undefined
-          > => {
+          notifyPlayerManager: async (): Promise<NotifyPlayerManagerReplyData | undefined> => {
             // no-op
             return;
           },

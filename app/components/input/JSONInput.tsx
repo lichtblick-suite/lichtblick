@@ -53,7 +53,7 @@ export function JSONInput(props: {
   );
 }
 
-function parseJson(val: string): unknown | null | undefined {
+function parseJson(val: string): unknown | undefined {
   try {
     return JSON.parse(val);
   } catch (e) {

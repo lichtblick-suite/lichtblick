@@ -326,16 +326,16 @@ function instancedGetChildrenForHitmap<
     // in pointcloud object is expensive
     const isInExcludedObjects = excludedObjects.find(({ object }) => object === prop);
     if (isInExcludedObjects) {
-      return null;
+      return undefined;
     }
     const hitmapProp = { ...prop };
     const { width, height } = prop;
     if (!width || !height) {
-      return null;
+      return undefined;
     }
     const instanceCount = Math.ceil(width * height);
     if (instanceCount < 1) {
-      return null;
+      return undefined;
     }
     const idColors = assignNextColors(prop, instanceCount);
     const allColors: any = [];

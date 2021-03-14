@@ -167,7 +167,7 @@ export default class AutomatedRunPlayer implements Player {
 
     const filterMessages = (msgs: any) =>
       msgs.map((message: any) => {
-        const topic: Topic | null | undefined = providerResult.topics.find(
+        const topic: Topic | undefined = providerResult.topics.find(
           (t) => t.name === message.topic,
         );
         if (!topic) {
@@ -285,7 +285,7 @@ export default class AutomatedRunPlayer implements Player {
             break;
         }
       },
-      notifyPlayerManager: async (): Promise<NotifyPlayerManagerReplyData | null | undefined> => {
+      notifyPlayerManager: async (): Promise<NotifyPlayerManagerReplyData | undefined> => {
         // no-op
         return;
       },

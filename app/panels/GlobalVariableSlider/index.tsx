@@ -38,7 +38,8 @@ type MenuProps = {
 };
 
 // Validation helper functions for the SliderSettingsMenu
-const minMaxValidatorFn = (str: string) => (isNaN(parseFloat(str)) ? "Must be valid number" : null);
+const minMaxValidatorFn = (str: string) =>
+  isNaN(parseFloat(str)) ? "Must be valid number" : undefined;
 const stepValidatorFn = (str: string) => {
   const result = minMaxValidatorFn(str);
   if (result) {
@@ -48,7 +49,7 @@ const stepValidatorFn = (str: string) => {
   if (number <= 0) {
     return "Must be >= 0";
   }
-  return null;
+  return undefined;
 };
 
 function SliderSettingsMenu(props: MenuProps) {

@@ -125,7 +125,7 @@ export type ToggleNamespaceChecked = (arg0: {
 }) => void;
 export type GetIsNamespaceCheckedByDefault = (topicName: string, columnIndex: number) => boolean;
 export type DerivedCustomSettings = {
-  overrideColorByColumn?: (string | null | undefined)[];
+  overrideColorByColumn?: (string | undefined)[];
   isDefaultSettings: boolean;
 };
 export type DerivedCustomSettingsByKey = {

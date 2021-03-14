@@ -94,7 +94,7 @@ function extractValues({
   stride,
 }: {
   data: Uint8Array;
-  readers: (FieldReader | null | undefined)[];
+  readers: (FieldReader | undefined)[];
   pointCount: number;
   stride: number;
 }): VertexBuffer {
@@ -182,11 +182,11 @@ export function createColorBuffer({
   colorMode: ColorMode;
   pointCount: number;
   stride: number;
-}): VertexBuffer | null | undefined {
+}): VertexBuffer | undefined {
   if (colorMode.mode === "flat") {
     // If color mode is "flat", we don't need a color buffer since
     // we'll be using a constant value
-    return null;
+    return undefined;
   }
 
   if (colorMode.mode === "rgb") {

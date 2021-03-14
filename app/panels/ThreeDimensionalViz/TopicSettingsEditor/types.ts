@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export type TopicSettingsEditorProps<Msg, Settings> = {
-  message: Msg | null | undefined;
+  message?: Msg;
   settings: Settings;
   onFieldChange: (name: string, value: any) => void;
   onSettingsChange: (arg0: any | ((arg0: any) => any)) => void;

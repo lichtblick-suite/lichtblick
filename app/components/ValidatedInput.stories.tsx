@@ -30,7 +30,7 @@ const INPUT_OBJ1 = { id: 2, name: "bar" };
 const json = EDIT_FORMAT.JSON;
 const yaml = EDIT_FORMAT.YAML;
 
-function myValidator(data: any = {}): ValidationResult | null | undefined {
+function myValidator(data: any = {}): ValidationResult | undefined {
   const rules = { id: [isNumber] };
   const validator = createValidator(rules);
   const result = validator(data);

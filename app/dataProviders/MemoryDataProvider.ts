@@ -34,7 +34,7 @@ function filterMessages(
   start: Time,
   end: Time,
   topics: readonly string[],
-  messages: readonly Message[] | null | undefined,
+  messages: readonly Message[] | undefined,
 ) {
   if (messages == null) {
     return undefined;
@@ -58,7 +58,7 @@ function filterMessages(
 // In-memory data provider, for in tests.
 export default class MemoryDataProvider implements DataProvider {
   messages: GetMessagesResult;
-  topics: Topic[] | null | undefined;
+  topics?: Topic[];
   datatypes?: RosDatatypes;
   messageDefinitionsByTopic: MessageDefinitionsByTopic;
   parsedMessageDefinitionsByTopic?: ParsedMessageDefinitionsByTopic;

@@ -139,7 +139,7 @@ export type UserSelectionState = {
   // The x,y position used to position the context menu
   clickedPosition: ClickedPosition;
   // The object shown in the Interactions menu; also used to update global variables
-  selectedObject: MouseEventObject | null;
+  selectedObject?: MouseEventObject;
 };
 
 export type EditTopicState = { tooltipPosX: number; topic: Topic };
@@ -197,15 +197,12 @@ export default function Layout({
     measureState: "idle",
     measurePoints: { start: undefined, end: undefined },
   });
-  const [currentEditingTopic, setCurrentEditingTopic] = useState<Topic | null | undefined>(
-    undefined,
-  );
+  const [currentEditingTopic, setCurrentEditingTopic] = useState<Topic | undefined>(undefined);
   const [editingNamespace, setEditingNamespace] = useState<
     | {
         namespaceKey: string;
         namespaceColor?: string;
       }
-    | null
     | undefined
   >();
 
@@ -220,17 +217,15 @@ export default function Layout({
   // used for updating DrawPolygon during mouse move and scenebuilder namespace change.
   const [_, forceUpdate] = useReducer((x) => x + 1, 0);
   const measuringElRef = useRef<MeasuringTool>(null);
-  const [drawingTabType, setDrawingTabType] = useState<DrawingTabType | null | undefined>(
-    undefined,
-  );
-  const [interactionsTabType, setInteractionsTabType] = useState<DrawingTabType | null | undefined>(
+  const [drawingTabType, setDrawingTabType] = useState<DrawingTabType | undefined>(undefined);
+  const [interactionsTabType, setInteractionsTabType] = useState<DrawingTabType | undefined>(
     undefined,
   );
 
   const [selectionState, setSelectionState] = useState<UserSelectionState>({
     clickedObjects: [],
     clickedPosition: { clientX: 0, clientY: 0 },
-    selectedObject: null,
+    selectedObject: undefined,
   });
   const { selectedObject, clickedObjects, clickedPosition } = selectionState;
 
@@ -546,7 +541,7 @@ export default function Layout({
     (newSelectedObject?: MouseEventObject) => {
       if (!isDrawing) {
         const shouldBeOpen = newSelectedObject && !disableAutoOpenClickedObject;
-        setInteractionsTabType(shouldBeOpen ? (OBJECT_TAB_TYPE as any) : null);
+        setInteractionsTabType(shouldBeOpen ? (OBJECT_TAB_TYPE as any) : undefined);
       }
     },
     [disableAutoOpenClickedObject, isDrawing],
@@ -632,7 +627,7 @@ export default function Layout({
   }, [handleEvent, selectObject]);
 
   // When the TopicTree is hidden, focus the <World> again so keyboard controls continue to work
-  const worldRef = useRef<typeof Worldview | null | undefined>(null);
+  const worldRef = useRef<typeof Worldview | undefined>(null);
   useEffect(() => {
     if (!showTopicTree && worldRef.current) {
       worldRef.current.focus();
@@ -649,7 +644,7 @@ export default function Layout({
       Escape: (e) => {
         e.preventDefault();
         setShowTopicTree(false);
-        setDrawingTabType(null);
+        setDrawingTabType(undefined);
         searchTextProps.toggleSearchTextOpen(false);
         if (document.activeElement && document.activeElement === containerRef.current) {
           (document.activeElement as any).blur();

@@ -18,7 +18,7 @@ export default function CommonDecaySettings({
   settings,
   onFieldChange,
 }: {
-  settings: { decayTime?: number | null | undefined };
+  settings: { decayTime?: number };
   onFieldChange: (name: string, value: any) => any;
 }) {
   const decayTime = settings.decayTime;

@@ -189,8 +189,8 @@ describe("time.findClosestTimestampIndex", () => {
 
 describe("time.getNextFrame", () => {
   const timestamps = ["4.049839000", "4.249933000", "4.449961000", "5.650058000"];
-  it("returns null for empty timestamps", async () => {
-    expect(time.getNextFrame({ sec: 3, nsec: 0 }, [])).toEqual(null);
+  it("returns undefined for empty timestamps", async () => {
+    expect(time.getNextFrame({ sec: 3, nsec: 0 }, [])).toEqual(undefined);
   });
 
   it("returns the next frame ", async () => {
@@ -250,10 +250,10 @@ describe("time.isTimeInRangeInclusive", () => {
 });
 
 describe("time.parseRosTimeStr", () => {
-  it("returns null if the input string is formatted incorrectly", () => {
-    expect(time.parseRosTimeStr("")).toEqual(null);
-    expect(time.parseRosTimeStr(".12121")).toEqual(null);
-    expect(time.parseRosTimeStr(".")).toEqual(null);
+  it("returns undefined if the input string is formatted incorrectly", () => {
+    expect(time.parseRosTimeStr("")).toEqual(undefined);
+    expect(time.parseRosTimeStr(".12121")).toEqual(undefined);
+    expect(time.parseRosTimeStr(".")).toEqual(undefined);
   });
 
   it("returns the correct time", () => {

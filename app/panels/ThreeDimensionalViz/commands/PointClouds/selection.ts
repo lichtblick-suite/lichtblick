@@ -32,7 +32,7 @@ export type ClickedInfo = {
   clickedPoint: number[];
   clickedPointColor?: number[];
   additionalFieldValues?: {
-    [name: string]: number | null | undefined;
+    [name: string]: number | undefined;
   };
 };
 
@@ -44,7 +44,7 @@ export function toRgba(rgba: Color) {
 export function getClickedInfo(
   maybeFullyDecodedMarker: MouseEventObject,
   instanceIndex: number | undefined,
-): ClickedInfo | null | undefined {
+): ClickedInfo | undefined {
   const { positionBuffer, colorBuffer, fields, settings, is_bigendian } = maybeFullyDecodedMarker;
   if (
     isEmpty(positionBuffer) ||
@@ -103,7 +103,7 @@ export function getClickedInfo(
     }
   }
 
-  let additionalFieldValues: { [name: string]: number | null | undefined } | undefined;
+  let additionalFieldValues: { [name: string]: number | undefined } | undefined;
   const additionalField = getAdditionalFieldNames(fields);
   if (additionalField.length) {
     additionalFieldValues = additionalField.reduce((memo: any, fieldName) => {

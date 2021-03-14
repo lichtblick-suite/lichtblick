@@ -212,7 +212,7 @@ export function MessagePipelineProvider({ children, player, globalVariables = {}
     };
   }, [player]);
 
-  const topics: Topic[] | null | undefined = playerState.activeData?.topics;
+  const topics: Topic[] | undefined = playerState.activeData?.topics;
   useShouldNotChangeOften(topics, () => {
     sendNotification(
       "Provider topics should not change often",
@@ -222,7 +222,7 @@ export function MessagePipelineProvider({ children, player, globalVariables = {}
     );
   });
 
-  const unmemoizedDatatypes: RosDatatypes | null | undefined = playerState.activeData?.datatypes;
+  const unmemoizedDatatypes: RosDatatypes | undefined = playerState.activeData?.datatypes;
   useShouldNotChangeOften(unmemoizedDatatypes, () => {
     sendNotification(
       "Provider datatypes should not change often",
@@ -232,7 +232,7 @@ export function MessagePipelineProvider({ children, player, globalVariables = {}
     );
   });
 
-  const messages: readonly Message[] | null | undefined = playerState.activeData?.messages;
+  const messages: readonly Message[] | undefined = playerState.activeData?.messages;
   const frame = useMemo(() => groupBy(messages || [], "topic"), [messages]);
   const sortedTopics = useMemo(() => (topics || []).sort(), [topics]);
   const datatypes: RosDatatypes = useMemo(() => unmemoizedDatatypes ?? {}, [unmemoizedDatatypes]);
@@ -360,9 +360,9 @@ export function MockMessagePipelineProvider(props: {
   activeData?: Partial<PlayerStateActiveData>;
   capabilities?: string[];
   store?: any;
-  startPlayback?: () => void | null | undefined;
-  pausePlayback?: () => void | null | undefined;
-  seekPlayback?: (arg0: Time) => void | null | undefined;
+  startPlayback?: () => void;
+  pausePlayback?: () => void;
+  seekPlayback?: (arg0: Time) => void;
   currentTime?: Time;
   startTime?: Time;
   endTime?: Time;

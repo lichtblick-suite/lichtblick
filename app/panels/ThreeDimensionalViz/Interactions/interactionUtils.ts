@@ -55,7 +55,7 @@ export function getLinkedGlobalVariable({
   topic: string;
   markerKeyPath: string[];
   linkedGlobalVariables: LinkedGlobalVariables;
-}): LinkedGlobalVariable | null | undefined {
+}): LinkedGlobalVariable | undefined {
   const linkedGlobalVariablesKeyByTopicWithPath = memoizedGetLinkedVariablesKeyByTopicWithPath(
     linkedGlobalVariables,
   );

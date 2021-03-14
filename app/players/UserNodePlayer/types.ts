@@ -87,7 +87,7 @@ export type NodeData = {
   name: string;
   sourceCode: string;
   transpiledCode: string;
-  projectCode: Map<string, string> | null | undefined;
+  projectCode: Map<string, string> | undefined;
   diagnostics: readonly Diagnostic[];
   inputTopics: readonly string[];
   outputTopic: string;
@@ -132,7 +132,7 @@ export type RegistrationOutput = {
 };
 
 export type ProcessMessageOutput = {
-  message: Record<string, unknown> | null | undefined;
+  message: Record<string, unknown> | undefined;
   error: null | string;
   userNodeLogs: UserNodeLog[];
   userNodeDiagnostics: Diagnostic[];

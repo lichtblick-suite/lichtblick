@@ -57,11 +57,9 @@ import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 // MeasureDataProvider.
 
 export type GetMessagesTopics = Readonly<{
-  parsedMessages?: readonly string[] | null | undefined;
-  rosBinaryMessages?: readonly string[] | null | undefined;
-  bobjects?: readonly string[] | null | undefined;
-
-  [key: string]: readonly string[] | null | undefined;
+  parsedMessages?: readonly string[];
+  rosBinaryMessages?: readonly string[];
+  bobjects?: readonly string[];
 }>;
 
 export type GetMessagesResult = Readonly<{

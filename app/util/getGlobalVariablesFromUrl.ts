@@ -18,7 +18,7 @@ import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 export function getGlobalVariablesFromUrl(
   params: URLSearchParams,
-): Record<string, string> | null | undefined {
+): Record<string, string> | undefined {
   const globalVariables =
     params.get(GLOBAL_VARIABLES_QUERY_KEY) || params.get(OLD_GLOBAL_VARIABLES_QUERY_KEY);
   if (globalVariables) {

@@ -84,7 +84,7 @@ export default class IdbCacheWriterDataProvider implements DataProvider {
   } = {};
 
   // The current "connection", which represents the range that we're downloading.
-  _currentConnection: { id: string; topics: string[]; remainingRange: Range } | null | undefined;
+  _currentConnection: { id: string; topics: string[]; remainingRange: Range } | undefined;
 
   // The read requests we've received via `getMessages`.
   _readRequests: {

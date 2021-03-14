@@ -41,17 +41,17 @@ export async function renderImage({
   imageMessageDatatype,
   rawMarkerData,
 }: {
-  canvas: (HTMLCanvasElement | OffscreenCanvas) | null | undefined;
+  canvas?: HTMLCanvasElement | OffscreenCanvas;
   imageMessage?: Message;
   imageMessageDatatype?: string;
   rawMarkerData: RawMarkerData;
-}): Promise<Dimensions | null | undefined> {
+}): Promise<Dimensions | undefined> {
   if (!canvas) {
-    return null;
+    return undefined;
   }
   if (!imageMessage || !imageMessageDatatype) {
     clearCanvas(canvas);
-    return null;
+    return undefined;
   }
   let markerData = undefined;
   try {
@@ -163,7 +163,7 @@ function paintBitmap(
   canvas: HTMLCanvasElement,
   bitmap: ImageBitmap,
   markerData: MarkerData,
-): Dimensions | null | undefined {
+): Dimensions | undefined {
   let bitmapDimensions = { width: bitmap.width, height: bitmap.height };
   const ctx = canvas.getContext("2d");
   if (!ctx) {

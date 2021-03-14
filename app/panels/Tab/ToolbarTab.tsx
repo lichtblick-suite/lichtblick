@@ -85,7 +85,7 @@ export function ToolbarTab(props: Props) {
     hidden,
   } = props;
 
-  const inputRef = useRef<HTMLInputElement | null | undefined>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const [title, setTitle] = useState<string>(tabTitle || "");
   const [editingTitle, setEditingTitle] = useState<boolean>(false);
   const onChangeTitleInput = useCallback((ev) => setTitle(ev.target.value), []);
@@ -183,7 +183,7 @@ export function ToolbarTab(props: Props) {
             onChange={onChangeTitleInput}
             onBlur={setTabTitle}
             onKeyDown={onKeyDown}
-            ref={(el) => (inputRef.current = el)}
+            ref={inputRef}
           />
         </div>
       </Tooltip>

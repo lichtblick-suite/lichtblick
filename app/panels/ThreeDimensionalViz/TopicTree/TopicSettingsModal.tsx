@@ -72,7 +72,7 @@ const STabWrapper = styled.div`
 function getSettingsByColumnWithDefaults(
   topicName: string,
   settingsByColumn?: any[] | null,
-): { settingsByColumn: any[] } | null | undefined {
+): { settingsByColumn: any[] } | undefined {
   const defaultTopicSettingsByColumn = getGlobalHooks()
     .startupPerPanelHooks()
     .ThreeDimensionalViz.getDefaultTopicSettingsByColumn();

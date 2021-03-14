@@ -125,10 +125,11 @@ export default class RenameDataProvider implements DataProvider {
   });
 
   async getMessages(start: Time, end: Time, topics: GetMessagesTopics): Promise<GetMessagesResult> {
-    const childTopics: any = {};
+    const childTopics: { -readonly [K in keyof GetMessagesTopics]: GetMessagesTopics[K] } = {};
     for (const type of MESSAGE_FORMATS) {
-      if (topics[type]) {
-        childTopics[type] = (topics[type] as any).map((topic: any) => {
+      const originalTopics = topics[type];
+      if (originalTopics) {
+        childTopics[type] = originalTopics.map((topic) => {
           if (!topic.startsWith(this._prefix)) {
             throw new Error(
               "RenameDataProvider#getMessages called with topic that doesn't match prefix",

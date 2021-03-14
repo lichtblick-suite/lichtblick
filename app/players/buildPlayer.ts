@@ -54,7 +54,7 @@ export function buildPlayerFromDescriptor(
   return new RandomAccessPlayer(rootDescriptor, {
     metricsCollector: undefined,
     seekToTime: getSeekToTime(),
-    notifyPlayerManager: async (): Promise<NotifyPlayerManagerReplyData | null | undefined> => {
+    notifyPlayerManager: async (): Promise<NotifyPlayerManagerReplyData | undefined> => {
       // no-op
       return;
     },

@@ -83,7 +83,7 @@ describe("<PointClouds />", () => {
         settings: { colorMode: { mode: "flat", flatColor: { r: 1, g: 0, b: 0, a: 1 } } },
       } as any);
       const { colorBuffer } = result;
-      expect(colorBuffer).toBeNull();
+      expect(colorBuffer).toBeUndefined();
     });
   });
 

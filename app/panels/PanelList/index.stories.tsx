@@ -34,7 +34,7 @@ const PanelListWithInteractions = ({
     style={{ margin: 50, height: 480 }}
     ref={(el) => {
       if (el) {
-        const input: HTMLInputElement | null | undefined = el.querySelector("input") as any;
+        const input: HTMLInputElement | undefined = el.querySelector("input") as any;
         if (input) {
           input.focus();
           if (inputValue) {

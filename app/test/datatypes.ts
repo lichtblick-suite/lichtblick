@@ -31,7 +31,7 @@ export type FieldType =
   | { type: "message"; isArray: boolean; object: InferredObject }
   | { type: "unknown"; isArray: boolean };
 
-const maybeInferJsonFieldType = (value: any, fieldName: string): FieldType | null | undefined => {
+const maybeInferJsonFieldType = (value: any, fieldName: string): FieldType | undefined => {
   // Current heuristic: "Looks like metadata in a marker".
   // This heuristic doesn't cover every case of JSON data we might want to support, so we might want
   // to make this pluggable in the future.
