@@ -22,6 +22,7 @@ import {
   associateDatatypes,
   deepParseSymbol,
   getDatatypes,
+  isBobject,
   primitiveList,
 } from "@foxglove-studio/app/util/binaryObjects/messageDefinitionUtils";
 
@@ -101,23 +102,10 @@ export const getObjects = (
   return ret;
 };
 
-// True for "object bobjects" and array views.
-export const isBobject = (object?: any): boolean => object?.[deepParseSymbol] != null;
-export const isArrayView = (object: any): boolean =>
-  isBobject(object) && object[Symbol.iterator] != null;
+export { deepParse, isBobject } from "./messageDefinitionUtils";
 
-export const deepParse = (object?: any): any => {
-  if (object == null) {
-    // Missing submessage fields are unfortunately common for constructed markers. This is not
-    // principled, but it is pragmatic.
-    return object;
-  }
-  if (!isBobject(object)) {
-    // This is typically a typing mistake -- the user thinks they have a bobject but have a
-    // primitive or a parsed message.
-    throw new Error("Argument to deepParse is not a bobject");
-  }
-  return object[deepParseSymbol]();
+export const isArrayView = (object: any): boolean => {
+  return isBobject(object) && object[Symbol.iterator] != null;
 };
 
 export const wrapJsObject = <T>(typesByName: RosDatatypes, typeName: string, object: any): T => {

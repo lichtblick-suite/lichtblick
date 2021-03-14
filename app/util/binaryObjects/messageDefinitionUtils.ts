@@ -99,3 +99,22 @@ export const getDatatypes = (cls: any): [RosDatatypes, string] | null | undefine
 // player, and has gone missing in test fixture before as well. Best to just assume it doesn't
 // exist, because it's an annoying denormalization anyway.
 export const isComplex = (typeName: string) => !primitiveList.has(typeName);
+
+// True for "object bobjects" and array views.
+export const isBobject = (object?: any): boolean => {
+  return object?.[deepParseSymbol] != null;
+};
+
+export const deepParse = (object?: any): any => {
+  if (object == null) {
+    // Missing submessage fields are unfortunately common for constructed markers. This is not
+    // principled, but it is pragmatic.
+    return object;
+  }
+  if (!isBobject(object)) {
+    // This is typically a typing mistake -- the user thinks they have a bobject but have a
+    // primitive or a parsed message.
+    throw new Error("Argument to deepParse is not a bobject");
+  }
+  return object[deepParseSymbol]();
+};

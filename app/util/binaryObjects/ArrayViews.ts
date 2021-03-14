@@ -13,8 +13,11 @@
 
 import { find } from "lodash";
 
-import { deepParse, isBobject } from "@foxglove-studio/app/util/binaryObjects";
-import { deepParseSymbol } from "@foxglove-studio/app/util/binaryObjects/messageDefinitionUtils";
+import {
+  deepParse,
+  isBobject,
+  deepParseSymbol,
+} from "@foxglove-studio/app/util/binaryObjects/messageDefinitionUtils";
 
 type GetArrayElement<T> = (offset: number) => T;
 
