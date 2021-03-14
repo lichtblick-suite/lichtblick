@@ -24,14 +24,11 @@ const storage = new Storage();
 
 const getStore = () => {
   const store = getGlobalStoreForTest();
-  const checkState = (
-    fn: (arg: Pick<State, "persistedState" | "router" | "layoutHistory">) => void,
-  ) => {
-    const { persistedState, router, layoutHistory } = store.getState();
+  const checkState = (fn: (arg: Pick<State, "persistedState" | "layoutHistory">) => void) => {
+    const { persistedState, layoutHistory } = store.getState();
     fn({
-      persistedState: { ...persistedState, search: router.location.search },
+      persistedState: { ...persistedState },
       layoutHistory,
-      router,
     });
   };
   return { store, checkState };

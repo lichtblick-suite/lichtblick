@@ -11,12 +11,10 @@
 //   You may not use this file except in compliance with the License.
 
 import CogIcon from "@mdi/svg/svg/cog.svg";
-import { ConnectedRouter } from "connected-react-router";
 import { ReactElement, useState, CSSProperties, useEffect, useMemo, useRef } from "react";
 import { DndProvider } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
 import { Provider, useDispatch } from "react-redux";
-import { Route } from "react-router";
 import styled from "styled-components";
 
 import { OsContextSingleton } from "@foxglove-studio/app/OsContext";
@@ -164,18 +162,14 @@ export default function App(): ReactElement {
   return (
     <Provider store={getGlobalStore()}>
       <ExperimentalFeaturesLocalStorageProvider features={experimentalFeatures}>
-        <ConnectedRouter history={browserHistory}>
-          <ErrorBoundary>
-            <PlayerManager playerSources={playerSources}>
-              <NativeFileMenuPlayerSelection />
-              <Route path="/">
-                <DndProvider backend={HTML5Backend}>
-                  <Root />
-                </DndProvider>
-              </Route>
-            </PlayerManager>
-          </ErrorBoundary>
-        </ConnectedRouter>
+        <ErrorBoundary>
+          <PlayerManager playerSources={playerSources}>
+            <NativeFileMenuPlayerSelection />
+            <DndProvider backend={HTML5Backend}>
+              <Root />
+            </DndProvider>
+          </PlayerManager>
+        </ErrorBoundary>
       </ExperimentalFeaturesLocalStorageProvider>
     </Provider>
   );

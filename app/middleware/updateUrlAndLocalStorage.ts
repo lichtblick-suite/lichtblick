@@ -28,8 +28,6 @@ function maybeSetPersistedStateInLocalStorage(store: Store, skipSettingLocalStor
   const state = store.getState();
   const persistedState = {
     ...state.persistedState,
-    // Persist search so we can restore the current layout when loading Webviz without layout params.
-    search: state.router.location.search,
   };
   setPersistedStateInLocalStorage(persistedState);
 }

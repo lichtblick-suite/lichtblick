@@ -11,44 +11,38 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import * as React from "react";
+import { PropsWithChildren, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
-import { Link } from "react-router-dom";
+import { CSSProperties } from "styled-components";
 
 import styles from "./TextContent.module.scss";
 
 type Props = {
-  children: React.ReactNode | string;
   linkTarget?: string;
-  style?: {
-    [key: string]: number | string;
-  };
+  style?: CSSProperties;
 };
 
-export default class TextContent extends React.Component<Props> {
-  render() {
-    const { children, linkTarget = undefined, style = {} } = this.props;
+export default function TextContent(props: PropsWithChildren<Props>) {
+  const { children, style } = props;
+  const linkTarget = props.linkTarget;
 
-    // Make links in Markdown work with react-router.
-    // Per https://github.com/rexxars/react-markdown/issues/29#issuecomment-275437798
-    function renderLink(props: any) {
-      return props.href.match(/^\//) ? (
-        <Link to={props.href}>{props.children}</Link>
-      ) : (
-        <a href={props.href} target={linkTarget}>
-          {props.children}
+  const linkRenderer = useMemo(() => {
+    return function RenderLink(renderLinkProps: any) {
+      return (
+        <a href={renderLinkProps.href} target={linkTarget}>
+          {renderLinkProps.children}
         </a>
       );
-    }
+    };
+  }, [linkTarget]);
 
-    return (
-      <div className={styles.root} style={style}>
-        {typeof children === "string" ? (
-          <ReactMarkdown source={children} renderers={{ link: renderLink }} />
-        ) : (
-          children
-        )}
-      </div>
-    );
-  }
+  return (
+    <div className={styles.root} style={style}>
+      {typeof children === "string" ? (
+        <ReactMarkdown source={children} renderers={{ link: linkRenderer }} />
+      ) : (
+        children
+      )}
+    </div>
+  );
 }

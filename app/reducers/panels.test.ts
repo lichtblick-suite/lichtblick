@@ -15,7 +15,6 @@ import fetchMock from "fetch-mock";
 import { getLeaves, MosaicParent } from "react-mosaic-component";
 import { MosaicDropTargetPosition } from "react-mosaic-component/lib/internalTypes";
 
-import { ActionTypes } from "@foxglove-studio/app/actions";
 import {
   changePanelLayout,
   savePanelConfigs,
@@ -33,7 +32,7 @@ import {
   fetchLayout,
 } from "@foxglove-studio/app/actions/panels";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
-import { Dispatcher, State, PersistedState } from "@foxglove-studio/app/reducers";
+import { State, PersistedState } from "@foxglove-studio/app/reducers";
 import {
   PanelsState,
   GLOBAL_STATE_STORAGE_KEY,
@@ -56,9 +55,9 @@ function GetGlobalState() {
 
 const getStore = () => {
   const store = getGlobalStoreForTest();
-  const checkState = (fn: (arg: Pick<State, "persistedState" | "router">) => void) => {
-    const { persistedState, router } = store.getState();
-    fn({ persistedState: { ...persistedState, search: router.location.search }, router });
+  const checkState = (fn: (arg: Pick<State, "persistedState">) => void) => {
+    const { persistedState } = store.getState();
+    fn({ persistedState });
   };
   return { store, checkState };
 };
@@ -93,8 +92,7 @@ describe("state.persistedState", () => {
       savedProps: { "foo!bar": { test: true } },
     };
 
-    checkState(({ persistedState: { panels }, router }) => {
-      expect(router.location.pathname).toEqual("/");
+    checkState(({ persistedState: { panels } }) => {
       expect(panels.layout).not.toEqual("foo!bar");
       expect(panels.savedProps).toEqual({});
     });
@@ -232,44 +230,6 @@ describe("state.persistedState", () => {
       const globalState = GetGlobalState();
       expect(globalState.panels.restrictedTopics).toEqual(payload.restrictedTopics);
     });
-  });
-
-  const testLayoutKeptInUrl = (desc: string, actionCreator: () => Dispatcher<ActionTypes>) => {
-    it(desc, () => {
-      const { store, checkState } = getStore();
-      store.push?.("/?layout=foo");
-      checkState(({ router }) => {
-        expect(router.location.search).toEqual("?layout=foo");
-      });
-      store.dispatch(actionCreator());
-      checkState(({ router }) => {
-        expect(router.location.search).toEqual("?layout=foo");
-      });
-
-      store.push?.("/?layout=foo&name=bar");
-      store.dispatch(actionCreator());
-      checkState(({ router }) => {
-        expect(router.location.search).toEqual("?layout=foo&name=bar");
-      });
-
-      store.push?.("/?laYOut=zug&layout=foo&name=bar");
-      store.dispatch(actionCreator());
-      checkState(({ router }) => {
-        expect(router.location.search).toEqual("?laYOut=zug&layout=foo&name=bar");
-      });
-    });
-  };
-
-  testLayoutKeptInUrl("keeps layout in URL when config changes", () => {
-    return savePanelConfigs({ configs: [{ id: "bar", config: { baz: true } }] });
-  });
-
-  testLayoutKeptInUrl("keeps layout in URL when layout changes", () => {
-    return changePanelLayout({ layout: "foo!bar" });
-  });
-
-  testLayoutKeptInUrl("keeps layout in URL when layout is imported", () => {
-    return importPanelLayout({ layout: "foo!bar", savedProps: {} });
   });
 
   describe("adds panel to a layout", () => {
@@ -574,18 +534,6 @@ describe("state.persistedState", () => {
     });
   });
 
-  it("does not remove layout if layout is imported from url", () => {
-    const { store, checkState } = getStore();
-    store.push?.("/?layout=foo&name=bar");
-    checkState(({ router }) => {
-      expect(router.location.search).toEqual("?layout=foo&name=bar");
-    });
-    store.dispatch(importPanelLayout({ layout: undefined, savedProps: {} }, {}));
-    checkState(({ router }) => {
-      expect(router.location.search).toEqual("?layout=foo&name=bar");
-    });
-  });
-
   it("closes a panel in single-panel layout", () => {
     const { store, checkState } = getStore();
     store.dispatch(
@@ -886,23 +834,6 @@ describe("state.persistedState", () => {
           });
         },
       );
-    });
-  });
-
-  it("does not remove layout if config are saved silently", () => {
-    const { store, checkState } = getStore();
-    store.dispatch(changePanelLayout({ layout: "foo" }));
-    store.push?.("/?layout=foo&name=bar");
-    checkState(({ router }) => {
-      expect(router.location.search).toEqual("?layout=foo&name=bar");
-    });
-    store.dispatch(
-      savePanelConfigs({
-        configs: [{ id: "foo", config: { bar: true }, defaultConfig: { bar: false } }],
-      }),
-    );
-    checkState(({ router }) => {
-      expect(router.location.search).toEqual("?layout=foo&name=bar");
     });
   });
 

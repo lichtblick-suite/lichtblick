@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import * as React from "react";
-import styled from "styled-components";
+import { PropsWithChildren } from "react";
+import styled, { CSSProperties } from "styled-components";
 
 import Modal from "@foxglove-studio/app/components/Modal";
 import TextContent from "@foxglove-studio/app/components/TextContent";
@@ -34,12 +34,8 @@ const SFootnote = styled.div`
 `;
 
 type Props = {
-  children: React.ReactNode | string;
-  linkTarget?: string;
   onRequestClose: () => void;
-  rootStyle?: {
-    [attr: string]: string | number;
-  };
+  rootStyle?: CSSProperties;
 };
 
 function Footnote() {
@@ -50,11 +46,15 @@ function Footnote() {
   return <SFootnote>{footnote}</SFootnote>;
 }
 
-export default function HelpModal({ onRequestClose, linkTarget, rootStyle, children }: Props) {
+export default function HelpModal({
+  onRequestClose,
+  children,
+  rootStyle,
+}: PropsWithChildren<Props>) {
   return (
     <Modal onRequestClose={onRequestClose}>
       <SRoot {...(rootStyle ? { style: rootStyle } : undefined)}>
-        <TextContent linkTarget={linkTarget}>{children}</TextContent>
+        <TextContent>{children}</TextContent>
         <Footnote />
       </SRoot>
     </Modal>

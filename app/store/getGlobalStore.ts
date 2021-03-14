@@ -10,7 +10,6 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { routerMiddleware, replace } from "connected-react-router";
 import { createMemoryHistory } from "history";
 
 import updateUrlAndLocalStorageMiddleware from "@foxglove-studio/app/middleware/updateUrlAndLocalStorage";
@@ -27,10 +26,7 @@ interface TestStore extends Store {
 let store: Store | undefined = undefined;
 function getGlobalStore(): Store {
   if (!store) {
-    store = configureStore(createRootReducer(history), [
-      routerMiddleware(history),
-      updateUrlAndLocalStorageMiddleware,
-    ]);
+    store = configureStore(createRootReducer(history), [updateUrlAndLocalStorageMiddleware]);
   }
   return store;
 }
@@ -39,17 +35,12 @@ export function getGlobalStoreForTest(args?: { search?: string; testAuth?: unkno
   const memoryHistory = createMemoryHistory();
   const testStore = configureTestingStore(
     createRootReducer(memoryHistory, { testAuth: args?.testAuth }),
-    [routerMiddleware(memoryHistory), updateUrlAndLocalStorageMiddleware],
+    [updateUrlAndLocalStorageMiddleware],
     memoryHistory,
   );
 
   // Attach a helper method to the test store.
   (testStore as TestStore).push = (path: string) => memoryHistory.push(path);
-
-  const search = args?.search;
-  if (search) {
-    testStore.dispatch(replace(`/${search}`));
-  }
 
   return testStore;
 }
