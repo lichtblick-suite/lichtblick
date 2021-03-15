@@ -48,6 +48,7 @@ export const isNumberArray = (expectArrLen = 0) => (value: unknown): string | un
       }
     }
   }
+  return undefined;
 };
 
 export const isOrientation = (value: unknown): string | undefined => {
@@ -62,6 +63,7 @@ export const isOrientation = (value: unknown): string | undefined => {
       return "must be valid quaternion";
     }
   }
+  return undefined;
 };
 
 export const isString = (value: any): string | undefined =>
@@ -77,6 +79,7 @@ export const minLen = (minLength = 0) => (value: any): string | undefined => {
       ? `must contain at least ${minLength} ${minLength === 1 ? "character" : "characters"}`
       : undefined;
   }
+  return undefined;
 };
 
 export const maxLen = (maxLength = 0) => (value: any): string | undefined => {
@@ -85,6 +88,7 @@ export const maxLen = (maxLength = 0) => (value: any): string | undefined => {
   } else if (typeof value === "string") {
     return value.length > maxLength ? `must contain at most ${maxLength} characters` : undefined;
   }
+  return undefined;
 };
 
 export const hasLen = (len = 0) => (value: string | any[]): string | undefined => {
@@ -97,6 +101,7 @@ export const hasLen = (len = 0) => (value: string | any[]): string | undefined =
       ? `must contain ${len} characters (current count: ${value.length})`
       : undefined;
   }
+  return undefined;
 };
 
 export const isNotPrivate = (value: any): string | undefined =>
@@ -114,6 +119,7 @@ export const isWebsocketUrl = (value: string): string | undefined => {
   if (!pattern.test(value)) {
     return getWebsocketUrlError(value);
   }
+  return undefined;
 };
 
 export const createValidator = (rules: Rules) => {
@@ -143,6 +149,7 @@ export const createPrimitiveValidator = (rules: Rule[]) => {
         return error;
       }
     }
+    return undefined;
   };
 };
 
@@ -186,6 +193,7 @@ const isXYPointArray = (value: any): string | undefined => {
         return `x and y points must be numbers`;
       }
     }
+    return undefined;
   } else {
     return "must be an array of x and y points";
   }
@@ -199,6 +207,7 @@ const isPolygons = (value: any): string | undefined => {
         return error;
       }
     }
+    return undefined;
   } else {
     return "must be an array of nested x and y points";
   }
@@ -231,6 +240,7 @@ const isLayoutName = (value: string): string | undefined => {
   if (pattern.test(value)) {
     return getLayoutNameError(value);
   }
+  return undefined;
 };
 
 export const layoutNameValidator = createPrimitiveValidator([minLen(1), maxLen(120), isLayoutName]);

@@ -330,6 +330,7 @@ export default class ChartJSManager {
         return mapChartElementToEventElement(chartInstance, firstXAxisElement);
       }
     }
+    return undefined;
   }
 
   getDatalabelAtEvent({ event }: { event: Event }): unknown {
@@ -343,6 +344,7 @@ export default class ChartJSManager {
         return context.dataset.data[context.dataIndex];
       }
     }
+    return undefined;
   }
 
   _addFunctionsToConfig(config: any, scaleOptions?: ScaleOptions): typeof config {

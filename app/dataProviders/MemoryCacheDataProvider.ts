@@ -461,7 +461,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
     this._maybeRunNewConnections();
   }
 
-  _getNewConnection() {
+  _getNewConnection(): Range | undefined {
     const connectionForReadRange = getNewConnection({
       currentRemainingRange: this._currentConnection
         ? this._currentConnection.remainingBlockRange
@@ -487,9 +487,10 @@ export default class MemoryCacheDataProvider implements DataProvider {
     }
     // Either a good connection is already in progress, or we've served all connections and have
     // nothing useful to prefetch.
+    return undefined;
   }
 
-  _getPrefetchRange() {
+  _getPrefetchRange(): Range | undefined {
     const bounds = {
       start: 0,
       end: this._blocks.length,
@@ -497,7 +498,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
     const uncachedRanges = missingRanges(bounds, this._getDownloadedBlockRanges());
 
     if (!uncachedRanges.length) {
-      return; // We have loaded the whole file.
+      return undefined; // We have loaded the whole file.
     }
 
     const prefetchStart = getPrefetchStartPoint(uncachedRanges, this._lastResolvedCallbackEnd || 0);
@@ -510,7 +511,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
     };
   }
 
-  async _maybeRunNewConnections() {
+  async _maybeRunNewConnections(): Promise<void> {
     for (;;) {
       const newConnection = this._getNewConnection();
 

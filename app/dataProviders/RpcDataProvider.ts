@@ -60,6 +60,7 @@ export default class RpcDataProvider implements DataProvider {
           default:
             throw new Error(`Unsupported extension point type in RpcDataProvider: ${type}`);
         }
+        return undefined;
       });
     }
     return this._rpc.send("initialize", { childDescriptor: this._childDescriptor });

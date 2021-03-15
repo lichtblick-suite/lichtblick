@@ -60,6 +60,7 @@ export function useLatestMessageDataItem(
           return { message: prevMessageAndData.message, queriedData };
         }
       }
+      return undefined;
     },
     [cachedGetMessagePathDataItems, path],
   );

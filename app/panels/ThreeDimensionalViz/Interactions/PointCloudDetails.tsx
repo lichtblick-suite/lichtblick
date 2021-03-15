@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import ExportVariantIcon from "@mdi/svg/svg/export-variant.svg";
-import React, { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { MouseEventObject } from "regl-worldview";
 import styled from "styled-components";
 

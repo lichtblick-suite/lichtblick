@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { clamp } from "lodash";
-import React, { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Arrows,
   Cubes,

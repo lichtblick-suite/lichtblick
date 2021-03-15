@@ -39,7 +39,7 @@ const maybeInferJsonFieldType = (value: any, fieldName: string): FieldType | und
     (field) => value[field] != undefined,
   );
   if (!hasMarkerFields) {
-    return;
+    return undefined;
   }
   if (fieldName === "metadata" || fieldName === "metadataByIndex") {
     return { type: "json", isArray: false };
@@ -47,6 +47,7 @@ const maybeInferJsonFieldType = (value: any, fieldName: string): FieldType | und
   if (fieldName.toLowerCase().includes("json")) {
     return { type: "json", isArray: false };
   }
+  return undefined;
 };
 
 export const inferDatatypes = (fieldType: FieldType, value: any): FieldType => {

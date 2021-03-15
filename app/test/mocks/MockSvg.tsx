@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import React, { Component } from "react";
+import { Component } from "react";
 
 export default class MockSvg extends Component<any> {
   render() {

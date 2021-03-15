@@ -14,7 +14,7 @@
 import GridIcon from "@mdi/svg/svg/grid.svg";
 import MapMarkerIcon from "@mdi/svg/svg/map-marker.svg";
 import { storiesOf } from "@storybook/react";
-import React, { useState } from "react";
+import { useState } from "react";
 
 import Menu from "@foxglove-studio/app/components/Menu";
 import Tree, { Node } from "@foxglove-studio/app/components/Tree";

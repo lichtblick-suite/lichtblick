@@ -13,7 +13,7 @@
 
 import CogIcon from "@mdi/svg/svg/cog.svg";
 import { storiesOf } from "@storybook/react";
-import React, { useState } from "react";
+import { useState } from "react";
 
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";

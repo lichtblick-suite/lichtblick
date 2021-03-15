@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { storiesOf } from "@storybook/react";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 import AutoSizingCanvas from ".";
 

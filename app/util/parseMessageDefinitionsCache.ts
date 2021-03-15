@@ -129,6 +129,7 @@ class ParseMessageDefinitionCache {
       this._hashesToParsedDefinitions[md5Sum] = parsedDefinition;
       return parsedDefinition;
     }
+    return undefined;
   }
 
   getMd5sForStoredDefinitions(): string[] {

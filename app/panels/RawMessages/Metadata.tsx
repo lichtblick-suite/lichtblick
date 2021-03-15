@@ -58,6 +58,7 @@ export default function Metadata({ data, diffData, diff, datatype, message, diff
         if (typeof value === "object" && value.buffer) {
           return "<buffer>";
         }
+        return undefined;
       });
       clipboard.copy(JSON.stringify(dataWithoutLargeArrays, undefined, 2) || "");
     },

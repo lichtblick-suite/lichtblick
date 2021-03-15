@@ -96,6 +96,7 @@ function Root() {
     if (insetWindowControls) {
       return { marginLeft: "78px", borderLeft: "2px groove #29292f" };
     }
+    return undefined;
   }, [isFullScreen]);
 
   return (

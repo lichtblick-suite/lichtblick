@@ -13,7 +13,7 @@
 import CloseIcon from "@mdi/svg/svg/close.svg";
 import DotsVerticalIcon from "@mdi/svg/svg/dots-vertical.svg";
 import { partition, pick, union, without } from "lodash";
-import React, { useEffect, useMemo, useCallback, useRef, useState, ReactElement } from "react";
+import { useEffect, useMemo, useCallback, useRef, useState, ReactElement } from "react";
 import styled, { css, keyframes } from "styled-components";
 
 import { usePreviousValue } from "../util/hooks";

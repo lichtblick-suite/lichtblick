@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import React, { forwardRef } from "react";
+import { forwardRef } from "react";
 import { Worldview, CameraState, MouseHandler, DEFAULT_CAMERA_STATE } from "regl-worldview";
 
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";

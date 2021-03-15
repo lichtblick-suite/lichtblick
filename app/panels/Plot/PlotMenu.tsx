@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import cx from "classnames";
-import React, { useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import styled from "styled-components";
 
 import styles from "./PlotMenu.module.scss";

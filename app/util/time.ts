@@ -355,7 +355,7 @@ type MaybeStampedBobject = Readonly<{
 
 export const maybeGetBobjectHeaderStamp = (message: Bobject | undefined): Time | undefined => {
   if (message == undefined) {
-    return;
+    return undefined;
   }
   const maybeStamped = cast<MaybeStampedBobject>(message);
   const header = maybeStamped.header && maybeStamped.header();
@@ -363,6 +363,7 @@ export const maybeGetBobjectHeaderStamp = (message: Bobject | undefined): Time |
   if (isTime(stamp)) {
     return stamp;
   }
+  return undefined;
 };
 
 export const getRosTimeFromString = (text: string) => {

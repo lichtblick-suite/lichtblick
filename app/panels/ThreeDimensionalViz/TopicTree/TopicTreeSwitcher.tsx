@@ -13,7 +13,7 @@
 
 import LayersIcon from "@mdi/svg/svg/layers.svg";
 import PinIcon from "@mdi/svg/svg/pin.svg";
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import styled from "styled-components";
 
 import { Save3DConfig } from "../index";

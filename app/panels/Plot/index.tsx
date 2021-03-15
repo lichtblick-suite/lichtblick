@@ -233,6 +233,7 @@ function Plot(props: Props) {
     if (xAxisVal === "timestamp" && t && startTime) {
       return toSec(subtractTimes(t, startTime));
     }
+    return undefined;
   };
   const preloadingDisplayTime = timeToXValueForPreloading(currentTime);
   const preloadingStartTime = timeToXValueForPreloading(startTime); // zero or undefined

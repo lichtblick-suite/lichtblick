@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { storiesOf } from "@storybook/react";
-import React, { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Color } from "regl-worldview";
 
 import VisibilityToggle, { Size, TOGGLE_SIZE_CONFIG } from "./VisibilityToggle";

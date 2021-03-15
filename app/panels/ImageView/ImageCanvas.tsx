@@ -273,9 +273,9 @@ export default class ImageCanvas extends React.Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props) {
-    const imageChanged = !shallowequal(prevProps, this.props, (a, b, key) => {
+    const imageChanged = !shallowequal(prevProps, this.props, (a, b, key): boolean | void => {
       if (key === "rawMarkerData") {
-        return shallowequal(a, b, (innerA, innerB, innerKey) => {
+        return shallowequal(a, b, (innerA, innerB, innerKey): boolean | void => {
           if (innerKey === "markers") {
             return shallowequal(innerA, innerB);
           } else if (innerKey === "cameraInfo") {

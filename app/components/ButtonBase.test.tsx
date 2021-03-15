@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { mount } from "enzyme";
-import React, { SyntheticEvent } from "react";
+import { SyntheticEvent } from "react";
 
 import Button from "./ButtonBase";
 

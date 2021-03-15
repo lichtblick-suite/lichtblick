@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { storiesOf } from "@storybook/react";
-import React, { useState } from "react";
+import { useState } from "react";
 
 import TwoDimensionalPlot from "./index";
 import PanelSetup, { triggerWheel } from "@foxglove-studio/app/stories/PanelSetup";

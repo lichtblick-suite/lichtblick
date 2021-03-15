@@ -33,4 +33,5 @@ export function getGlobalVariablesFromUrl(
       );
     }
   }
+  return undefined;
 }

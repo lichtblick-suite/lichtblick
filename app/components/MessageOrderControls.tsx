@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import { setPlaybackConfig } from "@foxglove-studio/app/actions/panels";

@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import LoadingIcon from "@mdi/svg/svg/loading.svg";
-import React, { PureComponent } from "react";
+import { PureComponent } from "react";
 
 import styles from "./SpinningLoadingIcon.module.scss";
 

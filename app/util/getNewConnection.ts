@@ -35,6 +35,7 @@ export function getNewConnection(options: {
   } else if (!currentRemainingRange) {
     return getNewConnectionWithoutExistingConnection(otherOptions);
   }
+  return undefined;
 }
 
 function getNewConnectionWithExistingReadRequest({
@@ -136,4 +137,5 @@ function getNewConnectionWithoutExistingConnection({
     // within it that has not already been downloaded.
     return missingRanges(readAheadRange, downloadedRanges)[0];
   }
+  return undefined;
 }

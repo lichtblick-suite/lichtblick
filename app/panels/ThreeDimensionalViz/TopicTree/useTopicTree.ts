@@ -437,6 +437,7 @@ export default function useTree({
         const [_, topicName, namespace] = item.split(":");
         return { topicName, namespace };
       }
+      return undefined;
     });
     return keyBy(checkedNamespaces, "topicName");
   }, [checkedKeys]);

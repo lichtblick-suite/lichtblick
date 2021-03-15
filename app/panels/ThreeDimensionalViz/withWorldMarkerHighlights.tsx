@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { partition } from "lodash";
-import React, { ComponentType } from "react";
+import { ComponentType } from "react";
 
 import { WorldMarkerProps } from "@foxglove-studio/app/panels/ThreeDimensionalViz/WorldMarkers";
 import Cover from "@foxglove-studio/app/panels/ThreeDimensionalViz/commands/Cover";

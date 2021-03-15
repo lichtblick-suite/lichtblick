@@ -11,12 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { rosPrimitiveTypes } from "rosbag";
+import { rosPrimitiveTypes, Time } from "rosbag";
 
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { isComplex } from "@foxglove-studio/app/util/binaryObjects/messageDefinitionUtils";
 
-function getPrimitiveDefault(type: string) {
+function getPrimitiveDefault(
+  type: string,
+): string | boolean | number | Time | Record<string, unknown> | undefined {
   if (type === "string") {
     return "";
   } else if (type === "bool") {
@@ -39,6 +41,7 @@ function getPrimitiveDefault(type: string) {
   } else if (type === "json") {
     return {};
   }
+  return undefined;
 }
 
 // Provides (nested, recursive) defaults for a message of a given datatype. Modifies messages in-place for performance.
@@ -46,7 +49,7 @@ export default function addMessageDefaults(
   datatypes: RosDatatypes,
   datatypeName: string,
   object: any,
-) {
+): void {
   if (!datatypes[datatypeName]) {
     throw new Error(`addMessageDefaults: datatype "${datatypeName}" missing from datatypes`);
   }

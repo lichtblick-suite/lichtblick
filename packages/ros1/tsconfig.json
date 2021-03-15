@@ -5,13 +5,8 @@
     "target": "es2020",
     "module": "es2020",
     "lib": ["es2020"],
-    "importHelpers": true,
-    "downlevelIteration": true,
     "declaration": true,
     "rootDir": "./src",
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noEmit": true
   }

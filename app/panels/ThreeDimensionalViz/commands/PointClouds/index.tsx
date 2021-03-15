@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   Command,
   withPose,

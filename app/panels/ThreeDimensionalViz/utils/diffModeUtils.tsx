@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { partition } from "lodash";
-import React, { ComponentType } from "react";
+import { ComponentType } from "react";
 import { vec4ToRGBA } from "regl-worldview";
 
 import {

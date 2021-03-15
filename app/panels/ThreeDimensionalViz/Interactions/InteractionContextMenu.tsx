@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import React, { useCallback, useContext, useEffect } from "react";
+import { useCallback, useContext, useEffect } from "react";
 import { MouseEventObject } from "regl-worldview";
 import styled from "styled-components";
 

@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import styled from "styled-components";
 
 import Tooltip from "@foxglove-studio/app/components/Tooltip";

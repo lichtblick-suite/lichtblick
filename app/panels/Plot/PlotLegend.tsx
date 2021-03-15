@@ -15,7 +15,7 @@ import AlertCircleIcon from "@mdi/svg/svg/alert-circle.svg";
 import MenuIcon from "@mdi/svg/svg/menu.svg";
 import cx from "classnames";
 import { last } from "lodash";
-import React, { Fragment, useCallback, useMemo } from "react";
+import { Fragment, useCallback, useMemo } from "react";
 
 import styles from "./PlotLegend.module.scss";
 import { plotableRosTypes, PlotConfig, PlotXAxisVal } from "./types";

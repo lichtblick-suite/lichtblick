@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { createMemoryHistory } from "history";
-import React, { useRef, ReactNode } from "react";
+import { useRef, ReactNode } from "react";
 import { Provider } from "react-redux";
 
 import createRootReducer from "@foxglove-studio/app/reducers";

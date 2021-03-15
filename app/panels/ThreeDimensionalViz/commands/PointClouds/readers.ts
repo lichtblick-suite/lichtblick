@@ -104,4 +104,5 @@ export function getReader(datatype: number, offset: number) {
     default:
       log.error("Unsupported datatype", datatype);
   }
+  return undefined;
 }

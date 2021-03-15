@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 import { useDrop } from "react-dnd";
 import { MosaicDragType } from "react-mosaic-component";
 import { useDispatch } from "react-redux";
@@ -69,6 +69,7 @@ export const EmptyDropTarget = ({ mosaicId, tabId }: Props) => {
       if (monitor.getItem().mosaicId === mosaicId) {
         return { tabId };
       }
+      return undefined;
     },
     collect: (monitor) => ({
       isOver: monitor.isOver(),

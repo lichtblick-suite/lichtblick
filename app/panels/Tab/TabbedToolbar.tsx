@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import PlusIcon from "@mdi/svg/svg/plus.svg";
-import React, { useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";

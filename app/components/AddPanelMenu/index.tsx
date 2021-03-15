@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import PlusCircleOutlineIcon from "@mdi/svg/svg/plus-circle-outline.svg";
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { addPanel, AddPanelPayload } from "@foxglove-studio/app/actions/panels";

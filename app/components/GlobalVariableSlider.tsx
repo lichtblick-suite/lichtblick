@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import React, { ReactElement, useCallback } from "react";
+import { ReactElement, useCallback } from "react";
 
 import { SliderWithTicks, SliderProps } from "@foxglove-studio/app/components/SliderWithTicks";
 import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";

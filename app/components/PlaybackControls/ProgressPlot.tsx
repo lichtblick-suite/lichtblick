@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { complement } from "intervals-fn";
-import React, { Component } from "react";
+import { Component } from "react";
 
 import AutoSizingCanvas from "@foxglove-studio/app/components/AutoSizingCanvas";
 import { Progress } from "@foxglove-studio/app/players/types";

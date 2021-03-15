@@ -23,6 +23,7 @@ export const defaultGetHeaderStamp = (
   if (message != undefined && message.header != undefined) {
     return cast<StampedMessage>(message).header.stamp;
   }
+  return undefined;
 };
 
 function allMessageStampsNewestFirst(
@@ -98,6 +99,7 @@ export default function synchronizeMessages(
       return synchronizedMessagesByTopic;
     }
   }
+  return undefined;
 }
 
 function getSynchronizedMessages(

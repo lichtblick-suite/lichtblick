@@ -103,7 +103,7 @@ export function getValueActionForValue(
     } else if (structureItem.structureType === "primitive") {
       // ROS has primitives with nested data (time, duration).
       // We currently don't support looking inside them.
-      return;
+      return undefined;
     } else {
       throw new Error(`Invalid structureType: ${structureItem.structureType} for value/pathItem.`);
     }
@@ -120,6 +120,7 @@ export function getValueActionForValue(
       primitiveType: structureItem.primitiveType,
     };
   }
+  return undefined;
 }
 
 // Given root structureItem (e.g. a message definition),
