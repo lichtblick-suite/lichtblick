@@ -37,9 +37,8 @@ export function createLinkedChannels(): { local: Channel; remote: Channel } {
 
     postMessage(data: any, _transfer?: Array<ArrayBuffer>) {
       const ev = new MessageEvent("message", { data });
-      // eslint-disable-next-line no-use-before-define
       if (remote.onmessage) {
-        remote.onmessage(ev); // eslint-disable-line no-use-before-define
+        remote.onmessage(ev);
       }
     },
     terminate: () => {

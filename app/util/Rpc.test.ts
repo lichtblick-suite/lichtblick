@@ -99,9 +99,8 @@ describe("Rpc", () => {
       onmessage: undefined,
       postMessage(data: any, _transfer?: ArrayBuffer[]) {
         const ev = new MessageEvent("message", { data });
-        // eslint-disable-next-line no-use-before-define
         if (workerChannel.onmessage) {
-          workerChannel.onmessage(ev); // eslint-disable-line no-use-before-define
+          workerChannel.onmessage(ev);
         }
       },
       terminate: () => {

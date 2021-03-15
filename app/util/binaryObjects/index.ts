@@ -159,7 +159,6 @@ export const fieldNames = (o: any): string[] => {
   return bobjectFieldNames(o);
 };
 
-// eslint-disable-next-line @typescript-eslint/ban-types
 export const merge = <T extends any>(
   bobject: T,
   overrides: Readonly<{

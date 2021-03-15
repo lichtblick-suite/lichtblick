@@ -23,7 +23,6 @@ import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
 import styles from "./ImageCanvas.module.scss";
-// eslint-disable-next-line import/no-unresolved
 import { ImageViewPanelHooks, Config, SaveImagePanelConfig } from "./index";
 import { renderImage } from "./renderImage";
 import { checkOutOfBounds, Dimensions } from "./util";

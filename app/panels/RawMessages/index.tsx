@@ -565,7 +565,7 @@ function RawMessages(props: Props) {
                   path={diffTopicPath}
                   onChange={onDiffTopicPathChange}
                   inputStyle={{ height: "100%" }}
-                  {...{ prioritizedDatatype: topic?.datatype }}
+                  prioritizedDatatype={topic?.datatype}
                 />
               ) : undefined}
             </Flex>

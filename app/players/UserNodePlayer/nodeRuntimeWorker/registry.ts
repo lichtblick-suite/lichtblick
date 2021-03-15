@@ -73,8 +73,8 @@ export const requireImplementation = (id: string, projectCode: Map<string, strin
     if (requestedFile.endsWith(file)) {
       const sourceExports = {};
       const require = (reqId: string) => requireImplementation(reqId, projectCode);
+      // eslint-disable-next-line no-new-func
       new Function("exports", "require", source)(sourceExports, require);
-      /* eslint-disable-line no-new-func */
       return sourceExports;
     }
   }
@@ -109,8 +109,8 @@ export const registerNode = ({
     const require = (id: string) => requireImplementation(id, projectCode);
 
     // Using new Function in order to execute user-input text in Node Playground as code
+    // eslint-disable-next-line no-new-func
     new Function("exports", "require", nodeCode)(nodeExports, require);
-    /* eslint-disable-line no-new-func */
     nodeCallback = nodeExports.default;
     return {
       error: undefined,

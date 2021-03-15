@@ -25,13 +25,11 @@ import Hammer from "hammerjs";
 import { v4 as uuidv4 } from "uuid";
 
 import { ScaleOptions as ManagerScaleOptions } from "./ChartJSManager";
-// eslint-disable-next-line import/no-unresolved
 import { ScaleBounds, ZoomOptions, PanOptions, wheelZoomHandler } from "./zoomAndPanHelpers";
 import { objectValues } from "@foxglove-studio/app/util";
 import { getFakeRpcs, RpcLike } from "@foxglove-studio/app/util/FakeRpc";
 import WebWorkerManager from "@foxglove-studio/app/util/WebWorkerManager";
 import supportsOffscreenCanvas from "@foxglove-studio/app/util/supportsOffscreenCanvas";
-// eslint-disable-next-line import/default
 import ChartJSWorker from "worker-loader!./ChartJSWorker.worker.ts";
 
 const getMainThreadChartJSWorker = () =>

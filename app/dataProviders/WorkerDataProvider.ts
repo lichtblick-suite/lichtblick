@@ -24,7 +24,6 @@ import {
 import RpcDataProvider from "@foxglove-studio/app/dataProviders/RpcDataProvider";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import Rpc from "@foxglove-studio/app/util/Rpc";
-// eslint-disable-next-line import/default
 import WorkerDataProviderWorker from "worker-loader!@foxglove-studio/app/dataProviders/WorkerDataProvider.worker";
 
 const params = new URLSearchParams(window.location.search);

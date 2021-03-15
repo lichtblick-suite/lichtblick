@@ -46,7 +46,7 @@ describe("errors", () => {
       expect(message.includes("[ Either cyclic object or object with BigInt(s) ]")).toBeTruthy();
     });
     it("catches BigInt values in extraInfo", () => {
-      const { message } = new AppError("internal error", { val: BigInt(10) }); // eslint-disable-line no-undef
+      const { message } = new AppError("internal error", { val: BigInt(10) });
       expect(message.includes("[ Either cyclic object or object with BigInt(s) ]")).toBeTruthy();
     });
   });

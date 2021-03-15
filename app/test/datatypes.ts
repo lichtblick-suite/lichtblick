@@ -18,7 +18,6 @@ import { Frame, Message, Topic, TypedMessage } from "@foxglove-studio/app/player
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 
-// eslint-disable-next-line no-use-before-define
 type InferredObject = {
   [field: string]: FieldType;
 };

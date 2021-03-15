@@ -57,8 +57,10 @@ rules:
   react/jsx-uses-react: off
   react/react-in-jsx-scope: off
   react/prop-types: warn
+  react/no-unused-prop-types: warn
   react-hooks/rules-of-hooks: error
   react-hooks/exhaustive-deps: error
+  no-new-func: error
   header/header:
     - error
     - line
@@ -102,6 +104,14 @@ rules:
     - error
     - allowNamedFunctions: true
   "@typescript-eslint/no-shadow": error
+  no-restricted-imports:
+    - error
+    - paths:
+        - name: lodash
+          importNames: [get]
+          message: "Use optional chaining instead of lodash.get."
+        - name: lodash/get
+          message: "Use optional chaining instead of lodash.get."
   no-restricted-syntax:
     - error
     - selector: "MethodDefinition[kind='get'], Property[kind='get']"

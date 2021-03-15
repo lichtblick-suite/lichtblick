@@ -102,6 +102,7 @@ function MessagePathInputStory(props: { path: string; prioritizedDatatype?: stri
           <MessagePathInput
             autoSize
             path={path}
+            prioritizedDatatype={props.prioritizedDatatype}
             onChange={(newPath) => setPath(newPath)}
             timestampMethod="receiveTime"
           />

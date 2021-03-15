@@ -79,7 +79,7 @@ const updateUrlActions = [
 const updateUrlAndLocalStorageMiddlewareDebounced = (store: Store) => (
   next: (arg0: Action) => any,
 ) => (action: Action) => {
-  const result = next(action); // eslint-disable-line callback-return
+  const result = next(action);
   // Any action that changes panels state should potentially trigger a URL update.
   const skipSettingLocalStorage = !!action.payload?.skipSettingLocalStorage;
 

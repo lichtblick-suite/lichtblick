@@ -153,8 +153,8 @@ type PanelItemProps = {
   // the props here are actually used in the dragSource
   // beginDrag and endDrag callbacks - the props are passed via react-dnd
   // so keep the flow defs here so those functions can have access to some type info
-  mosaicId: string; //eslint-disable-line react/no-unused-prop-types
-  onDrop: (arg0: DropDescription) => void; //eslint-disable-line react/no-unused-prop-types
+  mosaicId: string;
+  onDrop: (arg0: DropDescription) => void;
 };
 
 function DraggablePanelItem({

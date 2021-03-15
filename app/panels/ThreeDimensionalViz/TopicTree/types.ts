@@ -47,7 +47,6 @@ export type TreeGroupNode = {
   // Whether the data providers are available. If it is and the current node is not available, we'll show
   // the node name being striked through in the UI.
   providerAvailable: boolean;
-  // eslint-disable-next-line
   children: TreeNode[];
 };
 export type TreeTopicNode = {

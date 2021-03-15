@@ -43,9 +43,6 @@ export type ParsedMessageDefinitionsByTopic = {
 // current time, which topics and datatypes are available, and so on.
 // For more details, see the types below.
 
-// We disable no-use-before-define so we can have the most important types at the top.
-
-/* eslint-disable no-use-before-define */
 export interface Player {
   // The main way to get information out the player is to set a listener. This listener will be
   // called whenever the PlayerState changes, so that we can render the new state to the UI. Users

@@ -68,7 +68,6 @@ function getDependentNodeDefinitions(
   rootNode: NodeDefinition<any>,
 ): NodeDefinition<any>[] {
   const dependentNodeDefs: NodeDefinition<any>[] = [];
-  // eslint-disable-next-line no-inner-declarations
   function traverse(def: NodeDefinition<any>) {
     if (dependentNodeDefs.includes(def)) {
       throw new Error(`Webviz Node ${rootNode.output.name} has a circular dependency!`);

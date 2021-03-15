@@ -52,7 +52,7 @@ type AutocompleteProps = {
   value?: string;
   selectedItem?: unknown;
   onChange?: (arg0: React.SyntheticEvent<HTMLInputElement>, arg1: string) => void;
-  onSelect: (arg0: string, arg1: unknown, arg2: Autocomplete) => void; // eslint-disable-line no-use-before-define
+  onSelect: (arg0: string, arg1: unknown, arg2: Autocomplete) => void;
   onBlur?: () => void;
   hasError?: boolean;
   autocompleteKey?: string;

@@ -155,6 +155,7 @@ type MessagePathInputBaseProps = {
   placeholder?: string;
   inputStyle?: any;
   disableAutocomplete?: boolean; // Treat this as a normal input, with no autocomplete.
+  prioritizedDatatype?: string;
 
   timestampMethod?: TimestampMethod;
   onTimestampMethodChange?: (arg0: TimestampMethod, index?: number) => void;
@@ -162,7 +163,6 @@ type MessagePathInputBaseProps = {
 type MessagePathInputProps = MessagePathInputBaseProps & {
   topics: readonly Topic[];
   datatypes: RosDatatypes;
-  prioritizedDatatype?: string;
   globalVariables: GlobalVariables;
   setGlobalVariables: (arg0: GlobalVariables) => void;
 };

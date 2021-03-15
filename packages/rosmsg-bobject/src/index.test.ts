@@ -28,7 +28,7 @@ export const disableConsoleWarnings = () => {
     if (expected.findIndex((msg) => message.startsWith(msg)) >= 0) {
       return;
     }
-    fail(message); // eslint-disable-line
+    fail(message);
   };
 };
 
