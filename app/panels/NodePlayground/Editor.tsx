@@ -14,8 +14,6 @@
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 // @ts-expect-error why doesn't this import the base monaco?
 import { StaticServices } from "monaco-editor/esm/vs/editor/standalone/browser/standaloneServices";
-// @ts-expect-error no types for monaco-vim, probably remove vim editing mode
-import { initVimMode } from "monaco-vim";
 import MonacoEditor from "react-monaco-editor";
 
 import getPrettifiedCode from "@foxglove-studio/app/panels/NodePlayground/prettier";
@@ -31,7 +29,6 @@ const codeEditorService = StaticServices.codeEditorService.get();
 type Props = {
   script?: Script;
   setScriptCode: (code: string) => void;
-  vimMode: boolean;
   autoFormatOnSave: boolean;
   rosLib: string;
 
@@ -74,27 +71,14 @@ const Editor = ({
   autoFormatOnSave,
   script,
   setScriptCode,
-  vimMode,
   resizeKey,
   save,
   setScriptOverride,
   rosLib,
 }: Props) => {
   const editorRef = React.useRef<any>(null);
-  const vimModeRef = React.useRef(null);
   const autoFormatOnSaveRef = React.useRef(autoFormatOnSave);
   autoFormatOnSaveRef.current = autoFormatOnSave;
-
-  React.useEffect(() => {
-    if (editorRef.current) {
-      if (vimMode) {
-        vimModeRef.current = initVimMode(editorRef.current);
-      } else if (vimModeRef.current) {
-        // Turn off VimMode.
-        (vimModeRef.current as any).dispose();
-      }
-    }
-  }, [vimMode]);
 
   React.useEffect(() => {
     monacoApi.languages.typescript.typescriptDefaults.addExtraLib(
@@ -249,9 +233,6 @@ const Editor = ({
   const didMount = React.useCallback(
     (editor) => {
       editorRef.current = editor;
-      if (vimMode) {
-        vimModeRef.current = initVimMode(editorRef.current);
-      }
       editor.addAction({
         id: "ctrl-s",
         label: "Save current node",
@@ -259,7 +240,7 @@ const Editor = ({
         run: saveCode,
       });
     },
-    [vimMode, saveCode],
+    [saveCode],
   );
 
   const onChange = React.useCallback((srcCode: string) => setScriptCode(srcCode), [setScriptCode]);

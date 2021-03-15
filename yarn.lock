@@ -1847,7 +1847,6 @@ __metadata:
     moment-duration-format: 2.3.2
     moment-timezone: 0.5.33
     monaco-editor: 0.22.3
-    monaco-vim: 0.1.12
     natsort: 2.0.2
     panzoom: 8.7.5
     prettier: 2.2.1
@@ -17165,15 +17164,6 @@ __metadata:
   version: 0.22.3
   resolution: "monaco-editor@npm:0.22.3"
   checksum: 1f5a65aee9cb2edb3aa8b82448e36d78e26a9aff2b76561b34f2dcd5d0077ff719d187bc6f439557c4059df8631eb73b7ba33ed90f0d6e1e606bc7cd04023909
-  languageName: node
-  linkType: hard
-
-"monaco-vim@npm:0.1.12":
-  version: 0.1.12
-  resolution: "monaco-vim@npm:0.1.12"
-  peerDependencies:
-    monaco-editor: ^0.14.0 || ^0.15.0 || ^0.16.0 || ^0.17.0 || ^0.18.0 || ^0.19.0 || ^0.20.0 || ^0.21.0 || ^0.22.0
-  checksum: 0cc80f92f05609a68b714c1132659883bd99594b5b559bb1acc648c944b5673566a07b30fc3b9579f8557b45e90d447a337a2f4de9d5005b7c8bac2a7c3c84a5
   languageName: node
   linkType: hard
 

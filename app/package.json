@@ -35,7 +35,6 @@
     "moment-duration-format": "2.3.2",
     "moment-timezone": "0.5.33",
     "monaco-editor": "0.22.3",
-    "monaco-vim": "0.1.12",
     "natsort": "2.0.2",
     "panzoom": "8.7.5",
     "prettier": "2.2.1",

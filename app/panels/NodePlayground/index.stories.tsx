@@ -145,7 +145,7 @@ storiesOf("<NodePlayground>", module)
         userNodeLogs: { nodeId1: { logs: [] } },
       }}
     >
-      <NodePlayground config={{ selectedNodeId: "nodeId1", vimMode: false }} />
+      <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
   ))
   .add("Editor shows new code when userNodes change", () => (
@@ -176,7 +176,7 @@ storiesOf("<NodePlayground>", module)
         }, 500);
       }}
     >
-      <NodePlayground config={{ selectedNodeId: "nodeId1", vimMode: false }} />
+      <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
       <SExpectedResult style={{ left: "375px", top: "150px" }}>
         Should show function norm() code
       </SExpectedResult>
@@ -199,7 +199,6 @@ storiesOf("<NodePlayground>", module)
       <NodePlayground
         config={{
           selectedNodeId: "nodeId1",
-          vimMode: false,
           additionalBackStackItems: [
             {
               filePath: "/webviz_node/pointClouds",
@@ -233,7 +232,6 @@ storiesOf("<NodePlayground>", module)
       <NodePlayground
         config={{
           selectedNodeId: "nodeId1",
-          vimMode: false,
           additionalBackStackItems: [
             {
               filePath: "/webviz_node/pointClouds",
@@ -269,7 +267,7 @@ storiesOf("<NodePlayground>", module)
           }, SIDEBAR_OPEN_CLICK_TIMEOUT);
         }}
       >
-        <NodePlayground config={{ selectedNodeId: "nodeId1", vimMode: false }} />
+        <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
       </PanelSetup>
     );
   })
@@ -283,7 +281,7 @@ storiesOf("<NodePlayground>", module)
           }, SIDEBAR_OPEN_CLICK_TIMEOUT);
         }}
       >
-        <NodePlayground config={{ selectedNodeId: "nodeId1", vimMode: false }} />
+        <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
       </PanelSetup>
     );
   })
@@ -297,7 +295,7 @@ storiesOf("<NodePlayground>", module)
           }, SIDEBAR_OPEN_CLICK_TIMEOUT);
         }}
       >
-        <NodePlayground config={{ selectedNodeId: "nodeId1", vimMode: false }} />
+        <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
       </PanelSetup>
     );
   })
@@ -353,9 +351,7 @@ storiesOf("<NodePlayground>", module)
     };
     return (
       <PanelSetup fixture={{ ...fixture, userNodes }}>
-        <NodePlayground
-          config={{ selectedNodeId: "nodeId1", editorForStorybook: <NeverLoad />, vimMode: false }}
-        />
+        <NodePlayground config={{ selectedNodeId: "nodeId1", editorForStorybook: <NeverLoad /> }} />
       </PanelSetup>
     );
   });
@@ -376,7 +372,7 @@ storiesOf("NodePlayground - <BottomBar>", module)
         userNodeDiagnostics: { nodeId1: { diagnostics: [] } },
       }}
     >
-      <NodePlayground config={{ selectedNodeId: "nodeId1", vimMode: false }} />
+      <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
   ))
   .add("no errors - open", () => (
@@ -395,7 +391,7 @@ storiesOf("NodePlayground - <BottomBar>", module)
         }, OPEN_BOTTOM_BAR_TIMEOUT);
       }}
     >
-      <NodePlayground config={{ selectedNodeId: "nodeId1", vimMode: false }} />
+      <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
   ))
   .add("no logs - open", () => (
@@ -414,7 +410,7 @@ storiesOf("NodePlayground - <BottomBar>", module)
         }, OPEN_BOTTOM_BAR_TIMEOUT);
       }}
     >
-      <NodePlayground config={{ selectedNodeId: "nodeId1", vimMode: false }} />
+      <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
   ))
   .add("errors - closed", () => (
@@ -460,7 +456,7 @@ storiesOf("NodePlayground - <BottomBar>", module)
         },
       }}
     >
-      <NodePlayground config={{ selectedNodeId: "nodeId1", vimMode: false }} />
+      <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
   ))
   .add("errors - open", () => (
@@ -514,7 +510,7 @@ storiesOf("NodePlayground - <BottomBar>", module)
         }, OPEN_BOTTOM_BAR_TIMEOUT);
       }}
     >
-      <NodePlayground config={{ selectedNodeId: "nodeId1", vimMode: false }} />
+      <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
   ))
   .add("logs - closed", () => (
@@ -531,7 +527,7 @@ storiesOf("NodePlayground - <BottomBar>", module)
         userNodeLogs: { nodeId1: { logs } },
       }}
     >
-      <NodePlayground config={{ selectedNodeId: "nodeId1", vimMode: false }} />
+      <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
   ))
   .add("logs - open", () => (
@@ -556,7 +552,7 @@ storiesOf("NodePlayground - <BottomBar>", module)
         }, OPEN_BOTTOM_BAR_TIMEOUT);
       }}
     >
-      <NodePlayground config={{ selectedNodeId: "nodeId1", vimMode: false }} />
+      <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
   ))
   .add("cleared logs", () => (
@@ -580,7 +576,7 @@ storiesOf("NodePlayground - <BottomBar>", module)
         }, OPEN_BOTTOM_BAR_TIMEOUT);
       }}
     >
-      <NodePlayground config={{ selectedNodeId: "nodeId1", vimMode: false }} />
+      <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
   ));
 
@@ -592,15 +588,7 @@ storiesOf("<NodePlaygroundSettings>", module)
   })
   .add("enabled auto format on save", () => (
     <NodePlaygroundSettings
-      config={{ selectedNodeId: undefined, autoFormatOnSave: true, vimMode: false }}
-      saveConfig={() => {
-        // no-op
-      }}
-    />
-  ))
-  .add("enabled vim mode", () => (
-    <NodePlaygroundSettings
-      config={{ selectedNodeId: undefined, autoFormatOnSave: false, vimMode: true }}
+      config={{ selectedNodeId: undefined, autoFormatOnSave: true }}
       saveConfig={() => {
         // no-op
       }}
@@ -608,15 +596,7 @@ storiesOf("<NodePlaygroundSettings>", module)
   ))
   .add("both modes disabled", () => (
     <NodePlaygroundSettings
-      config={{ selectedNodeId: undefined, autoFormatOnSave: false, vimMode: false }}
-      saveConfig={() => {
-        // no-op
-      }}
-    />
-  ))
-  .add("both modes enabled", () => (
-    <NodePlaygroundSettings
-      config={{ selectedNodeId: undefined, autoFormatOnSave: true, vimMode: true }}
+      config={{ selectedNodeId: undefined, autoFormatOnSave: false }}
       saveConfig={() => {
         // no-op
       }}
