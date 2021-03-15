@@ -110,7 +110,7 @@ const buildTypeMapFromParams = (
     const currentParam = typeParameters[i];
     newTypeParamMap[currentParam.name.escapedText] = {
       current: currentParam,
-      parent: typeMap[i] || { parent: null, current: currentParam.default },
+      parent: typeMap[i] || { parent: undefined, current: currentParam.default },
     };
   }
   return newTypeParamMap;
@@ -181,7 +181,7 @@ export const findReturnType = (
     throw new Error("Node is undefined.");
   }
 
-  const visitNext = findReturnType.bind(null, checker, depth + 1);
+  const visitNext = findReturnType.bind(undefined, checker, depth + 1);
 
   switch (node.kind) {
     case ts.SyntaxKind.TypeLiteral:

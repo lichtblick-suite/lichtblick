@@ -62,7 +62,7 @@ export function decodeMarker(marker: PointCloudMarker) {
   // This check will also avoid computing min/max values on CPU
   // since they're not needed for hitmap.
   const colorBuffer = isHitmap
-    ? null
+    ? undefined
     : createColorBuffer({
         data,
         fields: offsetsAndReaders,

@@ -56,7 +56,6 @@ function messagesMatchingStamp(
   | Readonly<{
       [topic: string]: readonly Message[];
     }>
-  | null
   | undefined {
   const synchronizedMessagesByTopic: Record<string, any> = {};
   for (const topic in messagesByTopic) {
@@ -69,7 +68,7 @@ function messagesMatchingStamp(
     if (synchronizedMessage != null) {
       synchronizedMessagesByTopic[topic] = [synchronizedMessage];
     } else {
-      return null;
+      return undefined;
     }
   }
   return synchronizedMessagesByTopic;
@@ -88,7 +87,6 @@ export default function synchronizeMessages(
   | Readonly<{
       [topic: string]: readonly Message[];
     }>
-  | null
   | undefined {
   for (const stamp of allMessageStampsNewestFirst(messagesByTopic, getHeaderStamp)) {
     const synchronizedMessagesByTopic = messagesMatchingStamp(
@@ -100,7 +98,6 @@ export default function synchronizeMessages(
       return synchronizedMessagesByTopic;
     }
   }
-  return null;
 }
 
 function getSynchronizedMessages(
@@ -113,7 +110,6 @@ function getSynchronizedMessages(
   | {
       [topic: string]: Message;
     }
-  | null
   | undefined {
   const synchronizedMessages: Record<string, any> = {};
   for (const topic of topics) {
@@ -122,7 +118,7 @@ function getSynchronizedMessages(
       return thisStamp && TimeUtil.areSame(stamp, thisStamp);
     });
     if (!matchingMessage) {
-      return null;
+      return undefined;
     }
     synchronizedMessages[topic] = matchingMessage;
   }
@@ -133,12 +129,7 @@ type ReducedValue = {
   messagesByTopic: {
     [topic: string]: Message[];
   };
-  synchronizedMessages:
-    | {
-        [topic: string]: Message;
-      }
-    | null
-    | undefined;
+  synchronizedMessages?: { [topic: string]: Message };
 };
 
 function getSynchronizedState(
@@ -173,7 +164,7 @@ export function getSynchronizingReducers(topics: readonly string[]) {
       for (const topic of topics) {
         messagesByTopic[topic] = (previousValue && previousValue.messagesByTopic[topic]) || [];
       }
-      return getSynchronizedState(topics, { messagesByTopic, synchronizedMessages: null });
+      return getSynchronizedState(topics, { messagesByTopic });
     },
     addMessage({ messagesByTopic, synchronizedMessages }: ReducedValue, newMessage: Message) {
       return getSynchronizedState(topics, {

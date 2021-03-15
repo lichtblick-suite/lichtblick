@@ -51,7 +51,7 @@ export default function ShareJsonModal(props: Props) {
     if (typeof props.value === "string") {
       return props.value;
     }
-    return JSON.stringify(props.value, null, 2);
+    return JSON.stringify(props.value, undefined, 2);
   });
   const [error, setError] = useState<Error>();
 
@@ -63,7 +63,7 @@ export default function ShareJsonModal(props: Props) {
         setValue(newVal);
         decode(newVal);
       } else {
-        setValue(JSON.stringify(newVal, null, 2));
+        setValue(JSON.stringify(newVal, undefined, 2));
       }
     } catch (err) {
       setError(err);

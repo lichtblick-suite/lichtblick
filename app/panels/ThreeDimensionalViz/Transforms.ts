@@ -169,7 +169,7 @@ export default class Transforms {
   // This allows the caller to decide if they want to update the pose by reference
   // (by reference by supplying it as both the first and second arguments)
   // or return a new one by calling with apply({ position: { }, orientation: {} }, original).
-  // Returns the output pose, or the input pose if no transform was needed, or null if the transform
+  // Returns the output pose, or the input pose if no transform was needed, or undefined if the transform
   // is not available -- the return value must not be ignored.
   apply(
     output: MutablePose,

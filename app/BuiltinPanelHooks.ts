@@ -76,14 +76,14 @@ export function perPanelHooks() {
       canTransformMarkersByTopic: (topic: string) => !topic.includes("rect"),
     },
     GlobalVariableSlider: {
-      getVariableSpecificOutput: () => null,
+      getVariableSpecificOutput: () => undefined,
     },
     StateTransitions: { defaultConfig: { paths: [] }, customStateTransitionColors: {} },
     ThreeDimensionalViz: {
       defaultConfig: {
         checkedKeys: ["name:Topics"],
         expandedKeys: ["name:Topics"],
-        followTf: null,
+        followTf: undefined,
         cameraState: {},
         modifiedNamespaceTopics: [],
         pinTopics: false,
@@ -91,7 +91,7 @@ export function perPanelHooks() {
         autoSyncCameraState: false,
         autoTextBackgroundColor: true,
       },
-      MapComponent: null,
+      MapComponent: undefined,
       topicSettingsEditors: {},
       copy: {},
       SUPPORTED_MARKER_DATATYPES,
@@ -139,9 +139,9 @@ export function perPanelHooks() {
       },
       ungroupedNodesCategory: "Topics",
       rootTransformFrame: "map",
-      defaultFollowTransformFrame: null,
+      defaultFollowTransformFrame: undefined,
       useWorldspacePointSize: () => true,
-      createPointCloudPositionBuffer: () => null,
+      createPointCloudPositionBuffer: () => undefined,
     },
     RawMessages: {
       docLinkFunction: (filename: string) => `https://www.google.com/search?q=${filename}`,

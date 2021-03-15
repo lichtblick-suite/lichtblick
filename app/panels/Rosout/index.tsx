@@ -175,7 +175,7 @@ const RosoutPanel = React.memo(({ config, saveConfig, topics }: Props) => {
           <Icon
             style={{ padding: "1px 0px 0px 6px" }}
             onClick={() => {
-              clipboard.copy(JSON.stringify(msgs, null, 2));
+              clipboard.copy(JSON.stringify(msgs, undefined, 2));
             }}
             tooltip="Copy rosout to clipboard"
           >

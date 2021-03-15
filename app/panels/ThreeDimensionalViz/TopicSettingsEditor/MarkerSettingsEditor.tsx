@@ -53,7 +53,10 @@ export default function MarkerSettingsEditor(
         checked={settings.overrideCommand === LINED_CONVEX_HULL_RENDERING_SETTING}
         label="Allow clicking inside line markers that form polygons"
         onChange={(checked) =>
-          onFieldChange("overrideCommand", checked ? LINED_CONVEX_HULL_RENDERING_SETTING : null)
+          onFieldChange(
+            "overrideCommand",
+            checked ? LINED_CONVEX_HULL_RENDERING_SETTING : undefined,
+          )
         }
         style={{ marginBottom: 12 }}
         labelStyle={{ lineHeight: 1.2 }}

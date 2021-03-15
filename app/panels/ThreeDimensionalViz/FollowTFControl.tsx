@@ -256,7 +256,7 @@ const FollowTFControl = memo<Props>((props: Props) => {
         >
           <MenuLeftIcon />
         </Icon>
-      ) : null}
+      ) : undefined}
       <Button
         tooltipProps={{ placement: "top" } as any}
         onClick={onClickFollowButton}

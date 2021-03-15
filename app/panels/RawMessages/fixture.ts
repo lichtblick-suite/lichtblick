@@ -290,7 +290,7 @@ export const withMissingData = {
         topic: "/baz/missing_data",
         receiveTime: { sec: 123, nsec: 456789012 },
         message: {
-          value: null,
+          value: undefined,
         },
       },
     ],

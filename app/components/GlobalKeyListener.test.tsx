@@ -75,7 +75,7 @@ describe("GlobalKeyListener", () => {
   it("does not fire undo/redo events from editable fields", () => {
     const shareTextarea = document.getElementById("some-text-area");
     if (shareTextarea == null) {
-      throw new Error("Satisfy flow: shareTextArea is not null.");
+      throw new Error("could not find shareTextArea.");
     }
     shareTextarea.dispatchEvent(
       new KeyboardEvent("keydown", { key: "z", ctrlKey: true, bubbles: true }),
@@ -86,7 +86,7 @@ describe("GlobalKeyListener", () => {
     // Check that it does fire in a different text area.
     const otherTextarea = document.getElementById("other-text-area");
     if (!otherTextarea) {
-      throw new Error("Satisfy flow: otherTextArea is not null.");
+      throw new Error("could not find otherTextArea.");
     }
     otherTextarea.dispatchEvent(
       new KeyboardEvent("keydown", { key: "z", ctrlKey: true, bubbles: true }),
@@ -128,7 +128,7 @@ describe("GlobalKeyListener", () => {
 
     const textarea = document.getElementById("some-text-area");
     if (!textarea) {
-      throw new Error("Satisfy flow: textarea is not null.");
+      throw new Error("could not find textarea.");
     }
     textarea.dispatchEvent(new KeyboardEvent("keydown", { key: "s", ctrlKey: true }));
     expect(openSaveLayoutModal).toHaveBeenCalledTimes(0);
@@ -178,7 +178,7 @@ describe("GlobalKeyListener", () => {
 
     const textarea = document.getElementById("some-text-area");
     if (!textarea) {
-      throw new Error("Satisfy flow: textarea is not null.");
+      throw new Error("could not find textarea.");
     }
     textarea.dispatchEvent(new KeyboardEvent("keydown", { key: "?" }));
     expect(mockHistoryPush).not.toHaveBeenCalled();

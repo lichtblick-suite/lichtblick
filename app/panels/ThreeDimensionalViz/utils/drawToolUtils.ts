@@ -40,7 +40,7 @@ function pointsToYaml(polygonPoints: Point2D[][]): string {
 }
 
 function pointsToJson(polygonPoints: Point2D[][]): string {
-  return JSON.stringify(polygonPoints, null, 2);
+  return JSON.stringify(polygonPoints, undefined, 2);
 }
 
 export function getFormattedString(

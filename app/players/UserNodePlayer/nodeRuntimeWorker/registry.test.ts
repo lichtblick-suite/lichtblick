@@ -60,11 +60,11 @@ describe("stringifyFuncsInObject", () => {
     expect(
       stringifyFuncsInObject({
         someKey: true,
-        anotherKey: { nestedKey: null, anotherNestedKey: undefined },
+        anotherKey: { nestedKey: undefined, anotherNestedKey: undefined },
       }),
     ).toEqual({
       someKey: true,
-      anotherKey: { nestedKey: null, anotherNestedKey: undefined },
+      anotherKey: { nestedKey: undefined, anotherNestedKey: undefined },
     });
   });
 });

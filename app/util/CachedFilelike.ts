@@ -133,7 +133,7 @@ export default class CachedFilelike implements Filelike {
   // Read a certain byte range, and get back a `Buffer` in `callback`.
   read(offset: number, length: number, callback: Callback<Buffer>) {
     if (length === 0) {
-      callback(null, Buffer.allocUnsafe(0));
+      callback(undefined, Buffer.allocUnsafe(0));
       return;
     }
 
@@ -184,7 +184,7 @@ export default class CachedFilelike implements Filelike {
       if (process.env.READ_DELAY && process.env.NODE_ENV !== "production") {
         delay = parseInt(process.env.READ_DELAY) || 1000;
       }
-      setTimeout(() => callback(null, buffer), delay);
+      setTimeout(() => callback(undefined, buffer), delay);
 
       return false;
     });

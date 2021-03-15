@@ -19,18 +19,8 @@ export type Tags = {
   readonly [key: string]: (string | boolean | number | string[] | number[]) | undefined;
 };
 
-let eventNames:
-  | {
-      readonly [key: string]: string;
-    }
-  | null
-  | undefined;
-let eventTags:
-  | {
-      readonly [key: string]: string;
-    }
-  | null
-  | undefined;
+let eventNames: { readonly [key: string]: string } | undefined;
+let eventTags: { readonly [key: string]: string } | undefined;
 
 // We can't set the event names/tags in a web worker because that would require creating a different worker for every
 // proprietary / open source worker. Just throw an error in a worker.

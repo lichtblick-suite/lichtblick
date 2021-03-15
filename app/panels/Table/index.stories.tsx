@@ -23,6 +23,7 @@ const makeArrayData = (length = 50, nestArray = true): any => {
       bool: true,
       str: `${i}-abcd-edfg`,
       n: null,
+      u: undefined,
       obj: {
         date: new Date(`2020-01-${i}`),
       },

@@ -230,7 +230,7 @@ type ProcessedInitializationResult = Readonly<{
 // or removing certain topics.
 export default class CombinedDataProvider implements DataProvider {
   _providers: DataProvider[];
-  // Initialization result will be null for providers that don't successfully initialize.
+  // Initialization result will be undefined for providers that don't successfully initialize.
   _initializationResultsPerProvider: (ProcessedInitializationResult | undefined)[] = [];
   _progressPerProvider: (Progress | undefined)[];
   _extensionPoint?: ExtensionPoint;

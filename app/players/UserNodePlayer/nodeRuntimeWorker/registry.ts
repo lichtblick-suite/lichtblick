@@ -113,7 +113,7 @@ export const registerNode = ({
     /* eslint-disable-line no-new-func */
     nodeCallback = nodeExports.default;
     return {
-      error: null,
+      error: undefined,
       userNodeLogs,
       userNodeDiagnostics,
     };
@@ -150,7 +150,7 @@ export const processMessage = ({
   };
   try {
     const newMessage = nodeCallback(message, globalVariables);
-    return { message: newMessage, error: null, userNodeLogs, userNodeDiagnostics };
+    return { message: newMessage, error: undefined, userNodeLogs, userNodeDiagnostics };
   } catch (e) {
     // TODO: Be able to map line numbers from errors.
     const error = e.toString();

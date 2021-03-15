@@ -96,7 +96,7 @@ describe("Rpc", () => {
   it("can send and receive transferrables", async () => {
     const expectedTransfer = new ArrayBuffer(1);
     const mainChannel: ChannelImpl = {
-      onmessage: null,
+      onmessage: undefined,
       postMessage(data: any, _transfer?: ArrayBuffer[]) {
         const ev = new MessageEvent("message", { data });
         // eslint-disable-next-line no-use-before-define
@@ -110,7 +110,7 @@ describe("Rpc", () => {
     };
 
     const workerChannel: ChannelImpl = {
-      onmessage: null,
+      onmessage: undefined,
       postMessage(data: any, transfer?: ArrayBuffer[]) {
         const ev = new MessageEvent("message", { data });
         expect(transfer).toHaveLength(1);

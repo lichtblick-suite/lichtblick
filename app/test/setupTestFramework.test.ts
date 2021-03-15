@@ -31,4 +31,16 @@ describe("custom expectations", () => {
       expect([1, 2]).not.toContainOnly([1, 1]);
     });
   });
+
+  describe("toBeNullOrUndefined", () => {
+    it("passes only when given null or undefined", () => {
+      expect(null).not.toEqual(undefined);
+      expect(null).toBeNullOrUndefined();
+      expect(undefined).toBeNullOrUndefined();
+      expect(0).not.toBeNullOrUndefined();
+      expect("").not.toBeNullOrUndefined();
+      expect([]).not.toBeNullOrUndefined();
+      expect({}).not.toBeNullOrUndefined();
+    });
+  });
 });

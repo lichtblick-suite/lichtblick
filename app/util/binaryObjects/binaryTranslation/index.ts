@@ -61,8 +61,8 @@ export const DefinitionCommand = {
 };
 
 export default class BinaryMessageWriter {
-  _bridgeInstance: any = null;
-  _definitionRegistry: any = null;
+  _bridgeInstance?: any;
+  _definitionRegistry?: any;
 
   async initialize() {
     this._bridgeInstance = await getModuleFactory();

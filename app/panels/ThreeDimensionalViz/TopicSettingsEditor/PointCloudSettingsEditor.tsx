@@ -194,7 +194,7 @@ export default function PointCloudSettingsEditor(
                 onChange={({ target: { value } }) =>
                   onColorModeChange((newColorMode: any) => ({
                     ...newColorMode,
-                    minValue: value === "" ? null : +value,
+                    minValue: value === "" ? undefined : +value,
                   }))
                 }
               />
@@ -206,7 +206,7 @@ export default function PointCloudSettingsEditor(
                 onChange={({ target: { value } }) =>
                   onColorModeChange((newColorMode: any) => ({
                     ...newColorMode,
-                    maxValue: value === "" ? null : +value,
+                    maxValue: value === "" ? undefined : +value,
                   }))
                 }
               />

@@ -21,7 +21,7 @@ import tick from "@foxglove-studio/app/shared/tick";
 const baseProps = {
   hidden: false,
   highlight: false,
-  innerRef: null,
+  innerRef: undefined,
   isActive: false,
   isDragging: false,
   actions: {

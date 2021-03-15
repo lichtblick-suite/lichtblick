@@ -59,7 +59,7 @@ export default function Metadata({ data, diffData, diff, datatype, message, diff
           return "<buffer>";
         }
       });
-      clipboard.copy(JSON.stringify(dataWithoutLargeArrays, null, 2) || "");
+      clipboard.copy(JSON.stringify(dataWithoutLargeArrays, undefined, 2) || "");
     },
     [],
   );

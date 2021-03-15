@@ -268,7 +268,7 @@ export default class Autocomplete extends PureComponent<AutocompleteProps, Autoc
       this._ignoreBlur = false;
     }
 
-    const selectedItemValue = selectedItem != null ? getItemValue(selectedItem) : null;
+    const selectedItemValue = selectedItem != null ? getItemValue(selectedItem) : undefined;
     return (
       <ReactAutocomplete
         open={open}

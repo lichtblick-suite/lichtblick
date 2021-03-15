@@ -38,7 +38,7 @@ describe("<PointClouds />", () => {
       expect(memoized1).toBe(memoized2);
     });
 
-    it("returns null object when marker has been removed from cache", () => {
+    it("returns undefined when marker has been removed from cache", () => {
       let cache = new Map<Uint8Array, MemoizedMarker>();
       const marker: any = { ...POINT_CLOUD_MESSAGE };
       cache = updateMarkerCache(cache, [marker]);

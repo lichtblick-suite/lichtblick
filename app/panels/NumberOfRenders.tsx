@@ -43,8 +43,8 @@ function UseMessagesByPathComponent() {
 function UseMessageReducerComponent() {
   PanelAPI.useMessageReducer({
     topics: [],
-    restore: useCallback(() => null, []),
-    addMessage: useCallback(() => null, []),
+    restore: useCallback(() => undefined, []),
+    addMessage: useCallback(() => undefined, []),
   });
   return <>useMessageReducer: {getRenderCountMessage(useMessageReducerRenderCount++)}</>;
 }

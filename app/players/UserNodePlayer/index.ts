@@ -226,7 +226,7 @@ export default class UserNodePlayer implements Player {
     // TODO: Only reset workers once
     return this._resetWorkers().then(() => {
       this.setSubscriptions(this._subscriptions);
-      const { currentTime = null, isPlaying = false } = this._lastPlayerStateActiveData || {};
+      const { currentTime, isPlaying = false } = this._lastPlayerStateActiveData || {};
       if (currentTime && !isPlaying) {
         this._player.seekPlayback(currentTime);
       }
@@ -247,8 +247,8 @@ export default class UserNodePlayer implements Player {
     const nodeData = await transformWorker.send<NodeData>("transform", transformMessage);
     const { inputTopics, outputTopic, transpiledCode, projectCode, outputDatatype } = nodeData;
 
-    let bobjectSender: any;
-    let rpc: any;
+    let bobjectSender: BobjectRpcSender | undefined;
+    let rpc: Rpc | undefined;
     let terminateSignal = signal<void>();
     return {
       nodeId,
@@ -265,7 +265,6 @@ export default class UserNodePlayer implements Player {
             this._unusedNodeRuntimeWorkers.pop() ||
             rpcFromNewSharedWorker(new UserNodePlayerWorker());
           bobjectSender = new BobjectRpcSender(rpc);
-          // @ts-expect-error we don't know the type of rpc, once we fix that the send will accept a generic
           const { error, userNodeDiagnostics, userNodeLogs } = await rpc.send<RegistrationOutput>(
             "registerNode",
             {
@@ -289,7 +288,6 @@ export default class UserNodePlayer implements Player {
         }
 
         const result = await Promise.race([
-          // @ts-expect-error we don't know the type of rpc, once we fix that the send will accept a generic
           bobjectSender.send<ProcessMessageOutput>(
             "processMessage",
             message,
@@ -330,7 +328,7 @@ export default class UserNodePlayer implements Player {
         terminateSignal.resolve();
         if (rpc) {
           this._unusedNodeRuntimeWorkers.push(rpc);
-          rpc = null;
+          rpc = undefined;
         }
       },
     };

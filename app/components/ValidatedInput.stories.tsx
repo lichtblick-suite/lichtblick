@@ -153,7 +153,7 @@ storiesOf("<ValidatedInput>", module)
             setImmediate(() => {
               // scroll to the top and start editing
               input.scrollTop = 0;
-              triggerInputChange(input, JSON.stringify(changedObj, null, 2));
+              triggerInputChange(input, JSON.stringify(changedObj, undefined, 2));
             });
           }}
         />

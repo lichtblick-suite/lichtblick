@@ -197,7 +197,7 @@ export function ValidatedInputBase({
 
 function JsonInput(props: BaseProps) {
   function stringify(val: any) {
-    return JSON.stringify(val, null, 2);
+    return JSON.stringify(val, undefined, 2);
   }
   return <ValidatedInputBase parse={JSON.parse} stringify={stringify} {...props} />;
 }

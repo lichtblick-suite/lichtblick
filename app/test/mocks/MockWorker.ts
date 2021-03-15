@@ -13,5 +13,5 @@
 
 // imported by worker-loader! in jest
 export default class MockWorker {
-  port = { start: () => null };
+  port = { start: (): void => undefined };
 }

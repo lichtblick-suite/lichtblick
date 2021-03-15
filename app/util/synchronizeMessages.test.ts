@@ -25,8 +25,8 @@ function message(topic: string, stamp?: Time) {
 
 describe("synchronizeMessages", () => {
   it("returns nothing for empty frame", () => {
-    expect(synchronizeMessages({})).toEqual(null);
-    expect(synchronizeMessages({ "/foo": [] })).toEqual(null);
+    expect(synchronizeMessages({})).toEqual(undefined);
+    expect(synchronizeMessages({ "/foo": [] })).toEqual(undefined);
   });
 
   it("returns nothing for missing header", () => {
@@ -34,7 +34,7 @@ describe("synchronizeMessages", () => {
       synchronizeMessages({
         "/foo": [message("/foo", undefined)],
       }),
-    ).toEqual(null);
+    ).toEqual(undefined);
 
     expect(
       synchronizeMessages(
@@ -43,7 +43,7 @@ describe("synchronizeMessages", () => {
         },
         () => undefined,
       ),
-    ).toEqual(null);
+    ).toEqual(undefined);
   });
 
   it("works with single message", () => {
@@ -68,7 +68,7 @@ describe("synchronizeMessages", () => {
         "/foo": [message("/foo", { sec: 1, nsec: 0 })],
         "/bar": [message("/bar", { sec: 2, nsec: 0 })],
       }),
-    ).toBeNull();
+    ).toBeNullOrUndefined();
 
     expect(
       synchronizeMessages({
@@ -76,7 +76,7 @@ describe("synchronizeMessages", () => {
         "/bar": [message("/bar", { sec: 1, nsec: 0 })],
         "/baz": [],
       }),
-    ).toBeNull();
+    ).toBeNullOrUndefined();
   });
 
   it("returns latest of multiple matches regardless of order", () => {
@@ -105,7 +105,7 @@ describe("getSynchronizingReducers", () => {
         "/a": [],
         "/b": [],
       },
-      synchronizedMessages: null,
+      synchronizedMessages: undefined,
     });
 
     expect(
@@ -114,14 +114,14 @@ describe("getSynchronizingReducers", () => {
           "/a": [message("/a", { sec: 1, nsec: 0 }), message("/a", { sec: 2, nsec: 0 })],
           "/c": [message("/c", { sec: 1, nsec: 0 })],
         },
-        synchronizedMessages: null,
+        synchronizedMessages: undefined,
       }),
     ).toEqual({
       messagesByTopic: {
         "/a": [message("/a", { sec: 1, nsec: 0 }), message("/a", { sec: 2, nsec: 0 })],
         "/b": [],
       },
-      synchronizedMessages: null,
+      synchronizedMessages: undefined,
     });
   });
 
@@ -134,7 +134,7 @@ describe("getSynchronizingReducers", () => {
           "/b": [message("/b", { sec: 2, nsec: 0 })],
           "/c": [message("/c", { sec: 1, nsec: 0 })],
         },
-        synchronizedMessages: null,
+        synchronizedMessages: undefined,
       }),
     ).toEqual({
       messagesByTopic: {
@@ -157,7 +157,7 @@ describe("getSynchronizingReducers", () => {
             "/a": [message("/a", { sec: 1, nsec: 0 })],
             "/b": [message("/b", { sec: 2, nsec: 0 })],
           },
-          synchronizedMessages: null,
+          synchronizedMessages: undefined,
         },
         message("/a", { sec: 3, nsec: 0 }),
       ),
@@ -166,7 +166,7 @@ describe("getSynchronizingReducers", () => {
         "/a": [message("/a", { sec: 1, nsec: 0 }), message("/a", { sec: 3, nsec: 0 })],
         "/b": [message("/b", { sec: 2, nsec: 0 })],
       },
-      synchronizedMessages: null,
+      synchronizedMessages: undefined,
     });
   });
 
@@ -179,7 +179,7 @@ describe("getSynchronizingReducers", () => {
             "/a": [message("/a", { sec: 1, nsec: 0 })],
             "/b": [message("/b", { sec: 2, nsec: 0 })],
           },
-          synchronizedMessages: null,
+          synchronizedMessages: undefined,
         },
         message("/a", { sec: 2, nsec: 0 }),
       ),

@@ -113,7 +113,7 @@ const SWelcomeScreen = styled.div`
   }
 `;
 
-export type Explorer = null | "docs" | "nodes" | "utils" | "templates";
+export type Explorer = undefined | "docs" | "nodes" | "utils" | "templates";
 
 const WelcomeScreen = ({
   addNewNode,
@@ -152,7 +152,7 @@ function NodePlayground(props: Props) {
   const { config, saveConfig } = props;
   const { autoFormatOnSave, selectedNodeId, editorForStorybook, vimMode } = config;
 
-  const [explorer, updateExplorer] = React.useState<Explorer>(null);
+  const [explorer, updateExplorer] = React.useState<Explorer>(undefined);
 
   const userNodes = useSelector((state: any) => state.persistedState.panels.userNodes);
   const userNodeDiagnostics = useSelector((state: any) => state.userNodes.userNodeDiagnostics);

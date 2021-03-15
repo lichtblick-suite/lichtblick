@@ -149,7 +149,7 @@ function RawMessages(props: Props) {
   }, [datatypes, topic, topicRosPath]);
 
   // When expandAll is unset, we'll use expandedFields to get expanded info
-  const [expandAll, setExpandAll] = useState(false);
+  const [expandAll, setExpandAll] = useState<boolean | undefined>(false);
   const [expandedFields, setExpandedFields] = useState(() => new Set());
 
   const topicName = topicRosPath?.topicName || "";
@@ -216,7 +216,7 @@ function RawMessages(props: Props) {
         expandedFieldsCopy.add(key);
         setExpandedFields(expandedFieldsCopy);
       }
-      setExpandAll(null as any);
+      setExpandAll(undefined);
     },
     [expandedFields],
   );
@@ -318,7 +318,7 @@ function RawMessages(props: Props) {
 
   const renderSingleTopicOrDiffOutput = useCallback(() => {
     let shouldExpandNode;
-    if (expandAll !== null) {
+    if (expandAll != null) {
       shouldExpandNode = () => expandAll;
     } else {
       shouldExpandNode = (keypath: any) => {
@@ -567,7 +567,7 @@ function RawMessages(props: Props) {
                   inputStyle={{ height: "100%" }}
                   {...{ prioritizedDatatype: topic?.datatype }}
                 />
-              ) : null}
+              ) : undefined}
             </Flex>
           )}
         </div>

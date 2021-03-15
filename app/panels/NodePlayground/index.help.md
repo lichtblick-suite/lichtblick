@@ -114,9 +114,9 @@ export const output = "/webviz_node/echo";
 
 let lastReceiveTime: Time = { sec: 0, nsec: 0 };
 const myScope: {
-  tf: Messages.tf2_msgs__TFMessage | null;
-  rosout: Messages.rosgraph_msgs__Log | null;
-} = { tf: null, rosout: null };
+  tf?: Messages.tf2_msgs__TFMessage;
+  rosout?: Messages.rosgraph_msgs__Log;
+} = {};
 
 const publisher = (message: Input<"/rosout"> | Input<"/tf">): { data: number[] } | undefined => {
   const { receiveTime } = message;

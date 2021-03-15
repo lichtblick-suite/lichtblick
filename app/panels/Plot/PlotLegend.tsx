@@ -209,7 +209,7 @@ export default function PlotLegend(props: PlotLegendProps) {
                   index={index}
                   autoSize
                   disableAutocomplete={isReferenceLinePlotPath}
-                  {...(xAxisVal === "timestamp" ? { timestampMethod } : null)}
+                  {...(xAxisVal === "timestamp" ? { timestampMethod } : undefined)}
                 />
                 {hasMismatchedDataLength && (
                   <Icon

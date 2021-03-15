@@ -120,7 +120,7 @@ const bobjectFormatter: DevtoolFormatter = {
     return [
       "div",
       { style: "margin-left: 20px; color: darkblue;" },
-      `\n${JSON.stringify(parsedBody, null, 2)}`,
+      `\n${JSON.stringify(parsedBody, undefined, 2)}`,
     ];
   },
 };

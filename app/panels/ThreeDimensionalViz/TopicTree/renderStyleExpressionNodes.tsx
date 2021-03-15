@@ -34,6 +34,7 @@ import {
   PICKER_SIZE,
   getHexFromColorSettingWithDefault,
 } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
+import { ColorOverride } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/Layout";
 import {
   TreeUINode,
   TooltipRow,
@@ -119,7 +120,7 @@ function StyleExpressionNode(props: any) {
   const { markerKeyPath, name } = linkedGlobalVariables[0];
 
   const value = globalVariables[name];
-  const colorOverridesByColumnIdx = defaults(
+  const colorOverridesByColumnIdx: (ColorOverride | undefined)[] = defaults(
     [],
     colorOverrideBySourceIdxByVariable[name],
     getDefaultColorOverrideBySourceIdx(rowIndex),
@@ -200,7 +201,7 @@ function StyleExpressionNode(props: any) {
               if (!hasFeatureColumn && sourceIdx === 1) {
                 return null;
               }
-              const { active, color } = override || { active: false, color: null };
+              const { active, color } = override ?? { active: false };
               return (
                 <VisibilityToggle
                   available={true}
@@ -208,10 +209,18 @@ function StyleExpressionNode(props: any) {
                   dataTest={`visibility-toggle T:${topic} ${name} ${sourceIdx}`}
                   key={sourceIdx}
                   onAltToggle={() =>
-                    updateSettingsForGlobalVariable(name, { active: !active, color }, sourceIdx)
+                    updateSettingsForGlobalVariable(
+                      name,
+                      { active: !active, color } as any,
+                      sourceIdx,
+                    )
                   }
                   onToggle={() =>
-                    updateSettingsForGlobalVariable(name, { active: !active, color }, sourceIdx)
+                    updateSettingsForGlobalVariable(
+                      name,
+                      { active: !active, color } as any,
+                      sourceIdx,
+                    )
                   }
                   overrideColor={color}
                   size="SMALL"

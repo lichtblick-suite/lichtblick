@@ -107,7 +107,7 @@ export type LayoutUrl = {
 };
 export type InitialLayoutFetchResult = {
   layoutUrlReplacedByDefault?: LayoutUrl;
-  // The layoutFetchResult will be null if there is no layout to load in the URL.
+  // The layoutFetchResult will be undefined if there is no layout to load in the URL.
   layoutFetchResult?: LayoutFetchResult;
 };
 export type SetFetchedLayoutPayload = {

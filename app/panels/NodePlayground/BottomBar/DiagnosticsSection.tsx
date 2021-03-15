@@ -41,31 +41,29 @@ type Props = {
 const DiagnosticsSection = ({ diagnostics }: Props) => {
   return diagnostics.length ? (
     <ul>
-      {diagnostics.map(
-        ({ severity, message, source, startColumn = null, startLineNumber = null }, i) => {
-          const severityLabel = invert(DiagnosticSeverity)[severity];
-          const errorLoc =
-            startLineNumber != null && startColumn != null
-              ? `[${startLineNumber + 1},${startColumn + 1}]`
-              : null;
-          return (
-            <li key={`${message}_${i}`}>
-              <Icon
-                tooltip="Severity"
-                small
-                style={{ color: (severityColors as any)[severityLabel] }}
-                active
-              >
-                {(severityIcons as any)[severityLabel]}
-              </Icon>
-              <span style={{ padding: "5px" }}>{message}</span>
-              <span style={{ color: colors.GRAY }}>
-                {source} {errorLoc}
-              </span>
-            </li>
-          );
-        },
-      )}
+      {diagnostics.map(({ severity, message, source, startColumn, startLineNumber }, i) => {
+        const severityLabel = invert(DiagnosticSeverity)[severity];
+        const errorLoc =
+          startLineNumber != null && startColumn != null
+            ? `[${startLineNumber + 1},${startColumn + 1}]`
+            : undefined;
+        return (
+          <li key={`${message}_${i}`}>
+            <Icon
+              tooltip="Severity"
+              small
+              style={{ color: (severityColors as any)[severityLabel] }}
+              active
+            >
+              {(severityIcons as any)[severityLabel]}
+            </Icon>
+            <span style={{ padding: "5px" }}>{message}</span>
+            <span style={{ color: colors.GRAY }}>
+              {source} {errorLoc}
+            </span>
+          </li>
+        );
+      })}
     </ul>
   ) : (
     <p>No problems to display.</p>

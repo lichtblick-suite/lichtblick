@@ -33,13 +33,13 @@ class MosaicWrapper extends React.Component<{
     const { width = 300 } = this.props;
     return (
       <Mosaic
-        onChange={() => null}
+        onChange={() => undefined}
         renderTile={(id, path) => (
           <MosaicWindow
             title="test"
             path={path}
             toolbarControls={<div />}
-            renderPreview={() => null as any}
+            renderPreview={() => undefined as any}
           >
             <div style={{ width, height: 300, padding: 30, position: "relative" }}>
               {id === "Sibling" ? "Sibling Panel" : this.props.children}

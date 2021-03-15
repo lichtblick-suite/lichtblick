@@ -141,7 +141,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
     }
   };
 
-  panZoomCanvas: any = null;
+  panZoomCanvas: any = undefined;
   bitmapDimensions: Dimensions = { width: 0, height: 0 };
 
   keepInBounds = (div: HTMLElement) => {

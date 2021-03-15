@@ -93,11 +93,11 @@ describe("addMessageDefaults", () => {
     expect(message.child).toEqual([]);
   });
 
-  it("sets null fields in array types", () => {
+  it("sets undefined fields in array types", () => {
     const datatypes = {
       root: { fields: [{ type: "string", name: "child", isArray: true }] },
     };
-    const message = { child: [null] };
+    const message = { child: [undefined] };
     addMessageDefaults(datatypes, "root", message);
     expect(message.child).toEqual([""]);
   });

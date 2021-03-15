@@ -203,7 +203,7 @@ describe("definitions", () => {
         "fake_msgs/HasByteArray",
         definitions["fake_msgs/HasByteArray"],
       );
-      expect(definition).not.toBeNull();
+      expect(definition).not.toBeNullOrUndefined();
       expect(definition.getSize()).toBe(8);
     });
 
@@ -224,7 +224,7 @@ describe("definitions", () => {
         "std_msgs/Header",
         definitions["std_msgs/Header"],
       );
-      expect(definition).not.toBeNull();
+      expect(definition).not.toBeNullOrUndefined();
       expect(definition.getSize()).toBe(20);
     });
 
@@ -234,7 +234,7 @@ describe("definitions", () => {
         "fake_msgs/HasComplexAndArray",
         definitions["fake_msgs/HasComplexAndArray"],
       );
-      expect(definition).not.toBeNull();
+      expect(definition).not.toBeNullOrUndefined();
       expect(definition.getSize()).toBe(28);
     });
 
@@ -243,7 +243,7 @@ describe("definitions", () => {
         "fake_msgs/HasByteArray",
         definitions["fake_msgs/HasByteArray"],
       );
-      expect(definition).not.toBeNull();
+      expect(definition).not.toBeNullOrUndefined();
       expect(definition.getSize()).toBe(8);
     });
 
@@ -257,7 +257,7 @@ describe("definitions", () => {
         "fake_msgs/HasComplexArray",
         definitions["fake_msgs/HasComplexArray"],
       );
-      expect(definition).not.toBeNull();
+      expect(definition).not.toBeNullOrUndefined();
       expect(definition.getSize()).toBe(8);
     });
 

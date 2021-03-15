@@ -188,10 +188,11 @@ describe("createSelectableContext/useContextSelector", () => {
   function createTestConsumer<T, U>(ctx: SelectableContext<T>, selector: (arg0: T) => U) {
     function Consumer() {
       const value = useContextSelector(ctx, Consumer.selectorFn);
-      return Consumer.renderFn(value);
+      Consumer.renderFn(value);
+      return null;
     }
     Consumer.selectorFn = jest.fn().mockImplementation(selector);
-    Consumer.renderFn = jest.fn().mockImplementation(() => null);
+    Consumer.renderFn = jest.fn();
     return Consumer;
   }
 
@@ -353,7 +354,7 @@ describe("createSelectableContext/useContextSelector", () => {
     const selector2 = jest.fn().mockImplementation(({ y }) => y);
     const selector3 = jest.fn().mockImplementation(({ z }) => z);
 
-    const renderFn = jest.fn().mockImplementation(() => null);
+    const renderFn = jest.fn();
 
     function clearMocks() {
       selector1.mockClear();
@@ -366,7 +367,8 @@ describe("createSelectableContext/useContextSelector", () => {
       const x = useContextSelector(C, selector1);
       const y = useContextSelector(C, selector2);
       const z = useContextSelector(C, selector3);
-      return renderFn([x, y, z]);
+      renderFn([x, y, z]);
+      return null;
     }
 
     const root = mount(

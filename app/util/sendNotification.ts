@@ -92,7 +92,7 @@ export default function sendNotification(
   // We only want to send non-user errors and warnings to Sentry
   if (type === "app") {
     const sentrySeverity =
-      severity === "error" ? Severity.Error : severity === "warn" ? Severity.Warning : null;
+      severity === "error" ? Severity.Error : severity === "warn" ? Severity.Warning : undefined;
     if (sentrySeverity) {
       captureException(new AppError(details, message), { level: sentrySeverity });
     }

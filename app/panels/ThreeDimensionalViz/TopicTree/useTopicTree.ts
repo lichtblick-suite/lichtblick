@@ -796,4 +796,4 @@ export default function useTree({
   };
 }
 
-export const TopicTreeContext = createContext<UseTreeOutput | null>(null);
+export const TopicTreeContext = createContext<UseTreeOutput | undefined>(undefined);

@@ -240,7 +240,7 @@ storiesOf("<NotificationDisplay>", module)
         notification={{
           id: "1",
           message: "Error 1",
-          details: null,
+          details: undefined,
           read: false,
           created: new Date(),
           severity: "error",

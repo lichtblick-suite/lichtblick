@@ -69,17 +69,10 @@ export function useMessagesByTopic<T = any>({
   );
 
   const restore = useCallback(
-    (
-      prevMessagesByTopic:
-        | { readonly [key: string]: readonly TypedMessage<T>[] }
-        | null
-        | undefined,
-    ): {
+    (prevMessagesByTopic?: {
       readonly [key: string]: readonly TypedMessage<T>[];
-    } => {
-      const newMessagesByTopic: {
-        [topic: string]: TypedMessage<T>[];
-      } = {};
+    }): { readonly [key: string]: readonly TypedMessage<T>[] } => {
+      const newMessagesByTopic: { [topic: string]: TypedMessage<T>[] } = {};
       // When changing topics, we try to keep as many messages around from the previous set of
       // topics as possible.
       for (const topic of requestedTopics) {

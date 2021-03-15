@@ -222,11 +222,11 @@ function useOptionallySynchronizedMessages(
         : {
             restore: (previousValue) => ({
               messagesByTopic: previousValue ? previousValue.messagesByTopic : {},
-              synchronizedMessages: null,
+              synchronizedMessages: undefined,
             }),
             addMessage: ({ messagesByTopic }, newMessage) => ({
               messagesByTopic: { ...messagesByTopic, [newMessage.topic]: [newMessage] },
-              synchronizedMessages: null,
+              synchronizedMessages: undefined,
             }),
           },
     [shouldSynchronize, memoizedTopics],

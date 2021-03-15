@@ -579,7 +579,7 @@ export default function Layout({
         }
         const newClickedObjects = (args && (args as any).objects) || [];
         const newClickedPosition = { clientX: ev.clientX, clientY: ev.clientY };
-        const newSelectedObject = newClickedObjects.length === 1 ? newClickedObjects[0] : null;
+        const newSelectedObject = newClickedObjects.length === 1 ? newClickedObjects[0] : undefined;
 
         // Select the object directly if there is only one or open up context menu if there are many.
         setSelectionState({

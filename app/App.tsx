@@ -61,7 +61,7 @@ const SToolbarItem = styled.div`
   -webkit-app-region: no-drag;
 `;
 function Root() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
   useEffect(() => {
     // Focus on page load to enable keyboard interaction.

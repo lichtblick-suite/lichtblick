@@ -90,7 +90,7 @@ export default class Slider extends React.Component<Props> {
   getValueAtMouse(e: React.MouseEvent<HTMLDivElement>): number {
     const { min, max, step } = this.props;
     // this should never happen since you can't interact with an unmounted component
-    // but to appease flow we need to check if the ref is null
+    // but to appease TypeScript we need to check if the ref is defined
     if (!this.el) {
       console.warn("No dom ref available for click handler");
       return 0;

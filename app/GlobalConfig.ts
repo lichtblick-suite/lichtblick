@@ -89,7 +89,7 @@ const defaultHooks = {
     }
     return importedPanelsByCategory;
   },
-  helpPageFootnote: () => null,
+  helpPageFootnote: () => undefined,
   perPanelHooks: () => {
     return importedPerPanelHooks;
   },

@@ -1655,7 +1655,7 @@ describe("state.persistedState", () => {
           panelId: "Audio!a",
           sourceTabId: undefined,
           targetTabId: undefined,
-          position: (<unknown>null) as MosaicDropTargetPosition,
+          position: (<unknown>undefined) as MosaicDropTargetPosition,
           destinationPath: ["second"],
           ownPath: ["first"],
         }),

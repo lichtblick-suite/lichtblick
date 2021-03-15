@@ -85,7 +85,9 @@ class DiagnosticStatusPanel extends React.Component<Props> {
     } = config;
 
     const selectedDisplayName =
-      selectedHardwareId != null ? getDisplayName(selectedHardwareId, selectedName || "") : null;
+      selectedHardwareId != null
+        ? getDisplayName(selectedHardwareId, selectedName || "")
+        : undefined;
     return (
       <Flex scroll scrollX col>
         <DiagnosticsHistory topic={topicToRender}>

@@ -12,21 +12,21 @@
 //   You may not use this file except in compliance with the License.
 
 const RosPrimitives = {
-  bool: null,
-  int8: null,
-  uint8: null,
-  int16: null,
-  uint16: null,
-  int32: null,
-  uint32: null,
-  int64: null,
-  uint64: null,
-  float32: null,
-  float64: null,
-  string: null,
-  time: null,
-  duration: null,
-  json: null,
+  bool: undefined,
+  int8: undefined,
+  uint8: undefined,
+  int16: undefined,
+  uint16: undefined,
+  int32: undefined,
+  uint32: undefined,
+  int64: undefined,
+  uint64: undefined,
+  float32: undefined,
+  float64: undefined,
+  string: undefined,
+  time: undefined,
+  duration: undefined,
+  json: undefined,
 };
 
 export type RosPrimitive = keyof typeof RosPrimitives;
@@ -35,7 +35,7 @@ export const rosPrimitives: string[] = Object.keys(RosPrimitives);
 export type MessagePathFilter = {
   type: "filter";
   path: string[];
-  value: void | number | string | { variableName: string; startLoc: number };
+  value?: number | string | { variableName: string; startLoc: number };
   nameLoc: number;
   valueLoc: number;
   repr: string; // the original string representation of the filter

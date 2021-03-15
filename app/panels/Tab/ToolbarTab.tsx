@@ -202,7 +202,7 @@ export function ToolbarTab(props: Props) {
             <CloseIcon onMouseDown={(e) => e.preventDefault()} />
           )}
         </Icon>
-      ) : null}
+      ) : undefined}
     </STab>
   );
 }

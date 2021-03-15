@@ -230,12 +230,7 @@ export default class SceneBuilder implements MarkerProvider {
   allNamespaces: Namespace[] = [];
   // TODO(Audrey): remove enabledNamespaces once we release topic groups
   enabledNamespaces: Namespace[] = [];
-  selectedNamespacesByTopic:
-    | {
-        [topicName: string]: Set<string>;
-      }
-    | null
-    | undefined;
+  selectedNamespacesByTopic?: { [topicName: string]: Set<string> };
   flatten: boolean = false;
   bounds: Bounds = new Bounds();
 

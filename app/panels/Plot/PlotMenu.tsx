@@ -150,7 +150,7 @@ export default function PlotMenu({
             <SButton onClick={setWidth as any}>Set to current view</SButton>
           </Item>
         </>
-      ) : null;
+      ) : undefined;
     return (
       <>
         <Item

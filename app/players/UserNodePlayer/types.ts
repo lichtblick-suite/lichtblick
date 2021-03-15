@@ -126,14 +126,14 @@ export type UserNodeLogs = {
 };
 
 export type RegistrationOutput = {
-  error: null | string;
+  error?: string;
   userNodeLogs: UserNodeLog[];
   userNodeDiagnostics: Diagnostic[];
 };
 
 export type ProcessMessageOutput = {
   message: Record<string, unknown> | undefined;
-  error: null | string;
+  error?: string;
   userNodeLogs: UserNodeLog[];
   userNodeDiagnostics: Diagnostic[];
 };

@@ -23,7 +23,7 @@ describe("<PointClouds />", () => {
         hitmapColors: [255, 255, 255, 255, 255, 255, 255, 255, 255],
       } as any);
       const { colorBuffer } = result;
-      expect(colorBuffer).toBeNull();
+      expect(colorBuffer).toBeNullOrUndefined();
     });
   });
 });

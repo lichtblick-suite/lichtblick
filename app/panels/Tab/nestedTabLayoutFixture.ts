@@ -34,7 +34,7 @@ const nestedTabLayoutFixture: Fixture = {
       tabs: [
         {
           title: "Inactive Plots",
-          layout: null,
+          layout: undefined,
         },
         {
           title: "Child Plots",

@@ -94,7 +94,7 @@ describe("<PointClouds />", () => {
         settings: { colorMode: { mode: "rgb" } },
       } as any);
       const { colorBuffer, data } = result;
-      expect(colorBuffer).not.toBeNull();
+      expect(colorBuffer).not.toBeNullOrUndefined();
       const { buffer, offset, stride } = colorBuffer || {};
       if (!buffer) {
         throw new Error("Buffer is undefined");
@@ -114,7 +114,7 @@ describe("<PointClouds />", () => {
         is_bigendian: true,
       } as any);
       const { colorBuffer, data } = result;
-      expect(colorBuffer).not.toBeNull();
+      expect(colorBuffer).not.toBeNullOrUndefined();
       const { buffer, offset, stride } = colorBuffer || {};
       if (!buffer) {
         throw new Error("Buffer is undefined");
@@ -139,7 +139,7 @@ describe("<PointClouds />", () => {
       expect(positionBuffer.buffer.length).toBe(6 * FLOAT_SIZE);
       expect(positionBuffer.offset).toBe(0);
       expect(positionBuffer.stride).toBe(32 / FLOAT_SIZE);
-      expect(colorBuffer).not.toBeNull();
+      expect(colorBuffer).not.toBeNullOrUndefined();
       expect(colorBuffer?.buffer.length).toBe(6 * FLOAT_SIZE);
       expect(colorBuffer?.offset).toBe(1);
       expect(colorBuffer?.stride).toBe(32 / FLOAT_SIZE);
@@ -163,7 +163,7 @@ describe("<PointClouds />", () => {
       expect(positionBuffer.offset).toBe(0);
       expect(positionBuffer.stride).toBe(3);
       // Colors are extracted because color field type is not float
-      expect(colorBuffer).not.toBeNull();
+      expect(colorBuffer).not.toBeNullOrUndefined();
       expect(colorBuffer?.buffer.length).toBe(6);
       expect(colorBuffer?.offset).toBe(0);
       expect(colorBuffer?.stride).toBe(3);
@@ -190,7 +190,7 @@ describe("<PointClouds />", () => {
       expect(positionBuffer.buffer.length).toBe(6 * FLOAT_SIZE);
       expect(positionBuffer.offset).toBe(0);
       expect(positionBuffer.stride).toBe(32 / FLOAT_SIZE);
-      expect(colorBuffer).not.toBeNull();
+      expect(colorBuffer).not.toBeNullOrUndefined();
       expect(colorBuffer?.buffer.length).toBe(6 * FLOAT_SIZE);
       expect(colorBuffer?.offset).toBe(1);
       expect(colorBuffer?.stride).toBe(32 / FLOAT_SIZE);
@@ -221,7 +221,7 @@ describe("<PointClouds />", () => {
       expect(positionBuffer.offset).toBe(0);
       expect(positionBuffer.stride).toBe(3);
       // Colors are extracted because color field type is not float
-      expect(colorBuffer).not.toBeNull();
+      expect(colorBuffer).not.toBeNullOrUndefined();
       expect(colorBuffer?.buffer.length).toBe(6);
       expect(colorBuffer?.offset).toBe(0);
       expect(colorBuffer?.stride).toBe(3);
@@ -246,7 +246,7 @@ describe("<PointClouds />", () => {
     };
     it("float", () => {
       const colorBuffer = extractMarkerColors("x");
-      expect(colorBuffer).not.toBeNull();
+      expect(colorBuffer).not.toBeNullOrUndefined();
       expect(colorBuffer?.buffer.length).toBe(6);
       expect(colorBuffer?.offset).toBe(0);
       expect(colorBuffer?.stride).toBe(3);
@@ -259,7 +259,7 @@ describe("<PointClouds />", () => {
     });
     it("uint8", () => {
       const colorBuffer = extractMarkerColors("foo");
-      expect(colorBuffer).not.toBeNull();
+      expect(colorBuffer).not.toBeNullOrUndefined();
       expect(colorBuffer?.buffer.length).toBe(6);
       expect(colorBuffer?.offset).toBe(0);
       expect(colorBuffer?.stride).toBe(3);
@@ -272,7 +272,7 @@ describe("<PointClouds />", () => {
     });
     it("uint16", () => {
       const colorBuffer = extractMarkerColors("bar");
-      expect(colorBuffer).not.toBeNull();
+      expect(colorBuffer).not.toBeNullOrUndefined();
       expect(colorBuffer?.buffer.length).toBe(6);
       expect(colorBuffer?.offset).toBe(0);
       expect(colorBuffer?.stride).toBe(3);
@@ -285,7 +285,7 @@ describe("<PointClouds />", () => {
     });
     it("int16", () => {
       const colorBuffer = extractMarkerColors("foo16_some_really_really_long_name");
-      expect(colorBuffer).not.toBeNull();
+      expect(colorBuffer).not.toBeNullOrUndefined();
       expect(colorBuffer?.buffer.length).toBe(6);
       expect(colorBuffer?.offset).toBe(0);
       expect(colorBuffer?.stride).toBe(3);
@@ -298,7 +298,7 @@ describe("<PointClouds />", () => {
     });
     it("int32", () => {
       const colorBuffer = extractMarkerColors("baz");
-      expect(colorBuffer).not.toBeNull();
+      expect(colorBuffer).not.toBeNullOrUndefined();
       expect(colorBuffer?.buffer.length).toBe(6);
       expect(colorBuffer?.offset).toBe(0);
       expect(colorBuffer?.stride).toBe(3);

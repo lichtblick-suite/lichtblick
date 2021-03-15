@@ -96,7 +96,7 @@ export default class MessageCollector {
   }
 
   flush() {
-    // clear out all null lifetime markers
+    // clear out all undefined lifetime markers
     this.markers.forEach((marker, key) => {
       if (marker.lifetime == null) {
         this.markers.delete(key);

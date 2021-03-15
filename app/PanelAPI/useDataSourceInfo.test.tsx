@@ -37,9 +37,10 @@ describe("useDataSourceInfo", () => {
   // Create a helper component that exposes the results of the hook in a Jest mock function
   function createTest() {
     function Test() {
-      return Test.renderFn(PanelAPI.useDataSourceInfo());
+      Test.renderFn(PanelAPI.useDataSourceInfo());
+      return null;
     }
-    Test.renderFn = jest.fn().mockImplementation(() => null);
+    Test.renderFn = jest.fn();
     return Test;
   }
 
