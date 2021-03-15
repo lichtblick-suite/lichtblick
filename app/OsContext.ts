@@ -9,6 +9,22 @@ export type OsContextForwardedEvent =
   | "open-preferences"
   | "open-keyboard-shortcuts";
 
+export type StorageContent = string | Uint8Array;
+
+export interface Storage {
+  // list items in the datastore
+  list(datastore: string): Promise<string[]>;
+  // get all the items in the datastore
+  all(datastore: string): Promise<StorageContent[]>;
+  // get a single item from the datastore
+  get(datastore: string, key: string): Promise<StorageContent | undefined>;
+  // put a single item into the datastore
+  // This will replace any existing item with the same key
+  put(datastore: string, key: string, value: StorageContent): Promise<void>;
+  // remove an item from the datastore
+  delete(datastore: string, key: string): Promise<void>;
+}
+
 /** OsContext is exposed over the electron Context Bridge */
 export interface OsContext {
   // See Node.js process.platform
@@ -22,11 +38,7 @@ export interface OsContext {
   // Manage file menu input source menu items
   menuAddInputSource(name: string, handler: () => void): Promise<void>;
   menuRemoveInputSource(name: string): Promise<void>;
+
+  // file backed key/value storage
+  storage: Storage;
 }
-
-type GlobalWithCtx = typeof global & {
-  ctxbridge?: OsContext;
-};
-
-/** Global singleton of the OsContext provided by the bridge */
-export const OsContextSingleton = (global as GlobalWithCtx).ctxbridge;

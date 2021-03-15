@@ -5,7 +5,8 @@
 import { init as initSentry } from "@sentry/electron";
 import { contextBridge, ipcRenderer } from "electron";
 
-import { OsContext, OsContextForwardedEvent } from "@foxglove-studio/app/OsContext";
+import LocalFileStorage from "./LocalFileStorage";
+import type { OsContext, OsContextForwardedEvent } from "@foxglove-studio/app/OsContext";
 
 if (typeof process.env.SENTRY_DSN === "string") {
   initSentry({ dsn: process.env.SENTRY_DSN });
@@ -23,6 +24,8 @@ window.addEventListener("DOMContentLoaded", () => {
   input.setAttribute("id", "electron-open-file-input");
   document.body.appendChild(input);
 });
+
+const localFileStorage = new LocalFileStorage();
 
 const ctx: OsContext = {
   platform: process.platform,
@@ -55,6 +58,16 @@ const ctx: OsContext = {
     menuClickListeners.delete(name);
     ipcRenderer.off("menu.click-input-source", listener);
     ipcRenderer.invoke("menu.remove-input-source", name);
+  },
+
+  // Context bridge cannot expose "classes" only exposes functions
+  // We use .bind to attach the localFileStorage instance as _this_ to the function
+  storage: {
+    list: localFileStorage.list.bind(localFileStorage),
+    all: localFileStorage.all.bind(localFileStorage),
+    get: localFileStorage.get.bind(localFileStorage),
+    put: localFileStorage.put.bind(localFileStorage),
+    delete: localFileStorage.delete.bind(localFileStorage),
   },
 };
 

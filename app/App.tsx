@@ -17,7 +17,7 @@ import HTML5Backend from "react-dnd-html5-backend";
 import { Provider, useDispatch } from "react-redux";
 import styled from "styled-components";
 
-import { OsContextSingleton } from "@foxglove-studio/app/OsContext";
+import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import { importPanelLayout } from "@foxglove-studio/app/actions/panels";
 import AddPanelMenu from "@foxglove-studio/app/components/AddPanelMenu";
 import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";

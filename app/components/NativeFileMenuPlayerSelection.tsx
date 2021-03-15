@@ -4,7 +4,7 @@
 
 import { ReactElement, useEffect } from "react";
 
-import { OsContextSingleton } from "@foxglove-studio/app/OsContext";
+import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import { usePlayerSelection } from "@foxglove-studio/app/context/PlayerSelectionContext";
 
 // NativeFileMenuPlayerSelection adds available player selection items to the apps native OS menubar

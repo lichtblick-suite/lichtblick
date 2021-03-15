@@ -11,6 +11,7 @@ import {
   app,
   BrowserWindow,
   BrowserWindowConstructorOptions,
+  ipcMain,
   Menu,
   MenuItemConstructorOptions,
   session,
@@ -29,15 +30,18 @@ import packageJson from "../package.json";
 import { installMenuInterface } from "./menu";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 
-if (typeof process.env.SENTRY_DSN === "string") {
-  initSentry({ dsn: process.env.SENTRY_DSN });
-}
-
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
+
+const isMac = process.platform === "darwin";
+const isProduction = process.env.NODE_ENV === "production";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
   app.quit();
+}
+
+if (typeof process.env.SENTRY_DSN === "string") {
+  initSentry({ dsn: process.env.SENTRY_DSN });
 }
 
 // files our app should open - either from user double-click on a supported fileAssociation
@@ -56,8 +60,10 @@ app.on("open-file", (_ev, filePath) => {
   filesToOpen.push(filePath);
 });
 
-const isMac = process.platform === "darwin";
-const isProduction = process.env.NODE_ENV === "production";
+// support preload lookups for the user data path
+ipcMain.handle("getUserDataPath", () => {
+  return app.getPath("userData");
+});
 
 async function createWindow(): Promise<void> {
   const preloadPath = path.join(app.getAppPath(), "main", "preload.js");
@@ -70,6 +76,7 @@ async function createWindow(): Promise<void> {
     webPreferences: {
       contextIsolation: true,
       preload: preloadPath,
+      nodeIntegration: false,
     },
     backgroundColor: colors.background,
   };
