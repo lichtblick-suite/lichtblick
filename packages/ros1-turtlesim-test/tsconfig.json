@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": ["src/**/*.ts"],
+  "compilerOptions": {
+    "outDir": "dist",
+    "target": "es2020",
+    "module": "commonjs",
+    "lib": ["es2020"],
+    "importHelpers": true,
+    "downlevelIteration": true,
+    "declaration": true,
+    "rootDir": "./src",
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noEmit": true
+  }
+}

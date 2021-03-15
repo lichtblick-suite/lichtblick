@@ -1,0 +1,30 @@
+{
+  "name": "@foxglove/ros1-turtlesim-test",
+  "version": "0.0.1",
+  "description": "Example @foxglove/ros1 client that interacts with turtlesim",
+  "license": "MPL-2.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/foxglove/studio.git"
+  },
+  "author": {
+    "name": "Foxglove Technologies",
+    "email": "support@foxglove.dev"
+  },
+  "homepage": "https://foxglove.dev/",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "start": "ts-node src/index.ts"
+  },
+  "devDependencies": {
+    "tslib": "2.1.0",
+    "typescript": "4.2.2"
+  },
+  "dependencies": {
+    "@foxglove/ros1-nodejs": "workspace:packages/ros1-nodejs"
+  }
+}
