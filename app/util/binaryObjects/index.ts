@@ -105,7 +105,7 @@ export const getObjects = (
 export { deepParse, isBobject } from "./messageDefinitionUtils";
 
 export const isArrayView = (object: any): boolean => {
-  return isBobject(object) && object[Symbol.iterator] != null;
+  return isBobject(object) && object[Symbol.iterator] != undefined;
 };
 
 export const wrapJsObject = <T>(typesByName: RosDatatypes, typeName: string, object: any): T => {
@@ -125,7 +125,7 @@ export const wrapJsObject = <T>(typesByName: RosDatatypes, typeName: string, obj
 // so the shared storage is clear.
 export const inaccurateByteSize = (obj: any): number => {
   const data = getBinaryData(obj);
-  if (data != null) {
+  if (data != undefined) {
     return data.approximateSize;
   }
   if (reverseWrappedBobjects.has(obj)) {
@@ -143,7 +143,7 @@ export function bobjectFieldNames(bobject: any): string[] {
     throw new Error("Unknown constructor in bobjectFieldNames");
   }
   const datatype = typeInfo[0][typeInfo[1]];
-  if (datatype == null) {
+  if (datatype == undefined) {
     if (typeInfo[1] === "time" || typeInfo[1] === "duration") {
       return ["sec", "nsec"];
     }
@@ -177,7 +177,7 @@ export const merge = <T extends any>(
     shallow[field] = bobject[field]();
   });
   const datatypes = getDatatypes(Object.getPrototypeOf(bobject).constructor);
-  if (datatypes == null) {
+  if (datatypes == undefined) {
     throw new Error("Unknown type in merge");
   }
   return cast<T>(wrapJsObject(datatypes[0], datatypes[1], { ...shallow, ...overrides }));

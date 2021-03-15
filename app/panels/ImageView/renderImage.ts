@@ -178,10 +178,10 @@ function paintBitmap(
 
   const { markers, cameraModel } = markerData;
   let { originalWidth, originalHeight } = markerData;
-  if (originalWidth == null) {
+  if (originalWidth == undefined) {
     originalWidth = bitmap.width;
   }
-  if (originalHeight == null) {
+  if (originalHeight == undefined) {
     originalHeight = bitmap.height;
   }
 

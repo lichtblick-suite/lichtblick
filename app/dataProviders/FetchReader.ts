@@ -102,7 +102,7 @@ export default class FetchReader extends Readable {
             return this.push(null);
           }
           // Flow doesn't know that value is only undefined when value done is true.
-          if (value != null) {
+          if (value != undefined) {
             this.push(Buffer.from(value.buffer));
           }
         })

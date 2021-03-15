@@ -79,7 +79,7 @@ export function trimHardwareId(hardwareId: string): string {
 
 export function getDiagnosticId(hardwareId: string, name?: string): DiagnosticId {
   const trimmedHardwareId = trimHardwareId(hardwareId);
-  return name != null ? `|${trimmedHardwareId}|${name}|` : `|${trimmedHardwareId}|`;
+  return name != undefined ? `|${trimmedHardwareId}|${name}|` : `|${trimmedHardwareId}|`;
 }
 
 export function getDisplayName(hardwareId: string, name: string) {

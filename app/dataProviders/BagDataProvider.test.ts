@@ -145,7 +145,7 @@ describe("BagDataProvider", () => {
     });
     expect(bobjects).toBe(undefined);
     expect(parsedMessages).toBe(undefined);
-    if (rosBinaryMessages == null) {
+    if (rosBinaryMessages == undefined) {
       throw new Error("Satisfy flow");
     }
     const timestamps = rosBinaryMessages.map(({ receiveTime }) => receiveTime);

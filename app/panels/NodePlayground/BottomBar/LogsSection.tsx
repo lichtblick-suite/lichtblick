@@ -69,7 +69,7 @@ const LogsSection = ({ nodeId, logs, clearLogs }: Props) => {
       </button>
       <ul>
         {logs.map(({ source, value }, idx) => {
-          const renderTreeObj = value != null && typeof value === "object";
+          const renderTreeObj = value != undefined && typeof value === "object";
           return (
             <SListItem
               key={`${idx}${source}`}
@@ -79,7 +79,7 @@ const LogsSection = ({ nodeId, logs, clearLogs }: Props) => {
                 <Tree hideRoot data={value} invertTheme={false} theme={jsonTreeTheme} />
               ) : (
                 <span style={{ color: (valueColorMap as any)[typeof value] || colors.LIGHT }}>
-                  {value == null || value === false ? String(value) : value}
+                  {value == undefined || value === false ? String(value) : value}
                 </span>
               )}
               <div style={{ color: colors.DARK9, textDecoration: "underline" }}>{source}</div>

@@ -35,7 +35,7 @@ function makeMessage(
     topic,
     message: {
       header: {
-        stamp: headerStamp == null ? undefined : fromSec(headerStamp),
+        stamp: headerStamp == undefined ? undefined : fromSec(headerStamp),
       },
     },
     receiveTime: fromSec(receiveTime),
@@ -52,7 +52,7 @@ function makeBobject(
     receiveTime: fromSec(receiveTime),
     message: wrapJsObject(basicDatatypes, "geometry_msgs/PoseStamped", {
       header: {
-        stamp: headerStamp == null ? undefined : fromSec(headerStamp),
+        stamp: headerStamp == undefined ? undefined : fromSec(headerStamp),
       },
       pose: { position: { x: 0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 0 } },
     }),
@@ -171,7 +171,7 @@ describe("OrderedStampPlayer", () => {
     const bobjects = states[0].activeData?.bobjects;
     const topics = states[0].activeData?.topics;
 
-    if (bobjects == null) {
+    if (bobjects == undefined) {
       throw new Error("Satisfy flow.");
     }
     expect(

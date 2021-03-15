@@ -39,7 +39,7 @@ export function useLatestMessageDataItem(
       for (let i = messages.length - 1; i >= 0; --i) {
         const message = messages[i];
         const queriedData = cachedGetMessagePathDataItems(path, message);
-        if (queriedData == null) {
+        if (queriedData == undefined) {
           // Invalid path.
           return;
         }

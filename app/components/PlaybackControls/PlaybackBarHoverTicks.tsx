@@ -47,7 +47,7 @@ const BottomTick = styled.div`
 `;
 
 function getStartAndEndTime({ playerState: { activeData } }: MessagePipelineContext) {
-  if (activeData == null) {
+  if (activeData == undefined) {
     return { startTime: undefined, endTime: undefined };
   }
   return { startTime: activeData.startTime, endTime: activeData.endTime };
@@ -62,7 +62,7 @@ export default React.memo<Props>(function PlaybackBarHoverTicks({ componentId }:
   const [width, setWidth] = useState<number | undefined>();
 
   const scaleBounds = useMemo<{ current: readonly ScaleBounds[] | undefined }>(() => {
-    if (width == null || startTime == null || endTime == null) {
+    if (width == undefined || startTime == undefined || endTime == undefined) {
       return { current: undefined };
     }
     return {

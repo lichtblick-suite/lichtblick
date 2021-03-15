@@ -363,7 +363,7 @@ export default class RandomAccessPlayer implements Player {
     // is very slow. Also, smooth over the range that we request, so that a single slow frame won't
     // cause the next frame to also be unnecessarily slow by increasing the frame size.
     let rangeMillis = Math.min(durationMillis * this._speed, 300);
-    if (this._lastRangeMillis != null) {
+    if (this._lastRangeMillis != undefined) {
       rangeMillis = this._lastRangeMillis * 0.9 + rangeMillis * 0.1;
     }
     this._lastRangeMillis = rangeMillis;
@@ -457,9 +457,9 @@ export default class RandomAccessPlayer implements Player {
       parsedMessages: parsedTopics,
     });
     const { parsedMessages, bobjects } = messages;
-    if (parsedMessages == null || bobjects == null) {
+    if (parsedMessages == undefined || bobjects == undefined) {
       const messageTypes = Object.keys(messages)
-        .filter((type) => (messages as any)[type] != null)
+        .filter((type) => (messages as any)[type] != undefined)
         .join("\n");
       sendNotification(
         "Bad set of message types in RandomAccessPlayer",

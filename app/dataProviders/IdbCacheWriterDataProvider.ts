@@ -302,7 +302,7 @@ export default class IdbCacheWriterDataProvider implements DataProvider {
           rosBinaryMessages: topics,
         },
       );
-      if (bobjects != null || parsedMessages != null || rosBinaryMessages == null) {
+      if (bobjects != undefined || parsedMessages != undefined || rosBinaryMessages == undefined) {
         sendNotification("IdbCacheWriter should only have ROS binary messages", "", "app", "error");
         return;
       }

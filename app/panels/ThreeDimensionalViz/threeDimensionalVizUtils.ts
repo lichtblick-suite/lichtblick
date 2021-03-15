@@ -92,7 +92,7 @@ export function useTransformedCameraState({
     }
   }
   // Read the distance from URL when World is first loaded with empty cameraState distance in savedProps
-  if (configCameraState?.distance == null) {
+  if (configCameraState?.distance == undefined) {
     transformedCameraState.distance = getZoomDistanceFromURLParam();
   }
 

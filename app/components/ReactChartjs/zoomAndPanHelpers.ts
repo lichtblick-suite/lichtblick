@@ -417,7 +417,7 @@ export function getChartValue(
   bounds: ScaleBounds | undefined,
   canvasPx: number,
 ): number | undefined {
-  if (bounds == null) {
+  if (bounds == undefined) {
     return;
   }
   const { min, max, minAlongAxis, maxAlongAxis } = bounds;
@@ -426,7 +426,7 @@ export function getChartValue(
 }
 
 export function getChartPx(bounds: ScaleBounds | undefined, value: number): number | undefined {
-  if (bounds == null) {
+  if (bounds == undefined) {
     return;
   }
   const { min, max, minAlongAxis, maxAlongAxis } = bounds;
@@ -437,7 +437,7 @@ export function getChartPx(bounds: ScaleBounds | undefined, value: number): numb
 }
 
 export function inBounds(position: number, bounds?: ScaleBounds): boolean {
-  if (bounds == null) {
+  if (bounds == undefined) {
     return false;
   }
   // The position of the minimum value may not be the minimum coordinate if the axis is reversed.

@@ -44,7 +44,7 @@ const DiagnosticsSection = ({ diagnostics }: Props) => {
       {diagnostics.map(({ severity, message, source, startColumn, startLineNumber }, i) => {
         const severityLabel = invert(DiagnosticSeverity)[severity];
         const errorLoc =
-          startLineNumber != null && startColumn != null
+          startLineNumber != undefined && startColumn != undefined
             ? `[${startLineNumber + 1},${startColumn + 1}]`
             : undefined;
         return (

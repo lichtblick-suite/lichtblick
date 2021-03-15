@@ -106,7 +106,7 @@ export function getFirstInvalidVariableFromRosPath(
         messagePathParts.push({ variableName, loc });
       }
       if (
-        path.end != null &&
+        path.end != undefined &&
         typeof path.end === "object" &&
         !globalVars.includes(path.end.variableName)
       ) {

@@ -58,7 +58,7 @@ const Icon = (props: Props) => {
   } = props;
   const classNames = cx("icon", styles.icon, className, {
     [styles.fade]: fade,
-    [styles.clickable]: !!onClick || clickable == null || clickable,
+    [styles.clickable]: !!onClick || clickable == undefined || clickable,
     [styles.active]: active,
     [styles.xlarge]: xlarge,
     [styles.large]: large,

@@ -158,7 +158,7 @@ export default class AutomatedRunPlayer implements Player {
       bobjects: bobjectTopics,
     });
     const { parsedMessages, rosBinaryMessages, bobjects } = messages;
-    if (rosBinaryMessages?.length || bobjects == null || parsedMessages == null) {
+    if (rosBinaryMessages?.length || bobjects == undefined || parsedMessages == undefined) {
       const messageTypes = Object.keys(messages)
         .filter((kind) => (messages as any)[kind]?.length)
         .join(",");
@@ -314,7 +314,7 @@ export default class AutomatedRunPlayer implements Player {
   }
 
   async _onUpdateProgress() {
-    if (this._client.shouldLoadDataBeforePlaying && this._providerResult != null) {
+    if (this._client.shouldLoadDataBeforePlaying && this._providerResult != undefined) {
       // Update the view and do preloading calculations. Not necessary if we're already playing.
       this._emitState([], [], this._providerResult.start);
     }
@@ -328,7 +328,7 @@ export default class AutomatedRunPlayer implements Player {
   }
 
   _readyToPlay() {
-    if (!this._startCalled || this._providerResult == null) {
+    if (!this._startCalled || this._providerResult == undefined) {
       return false;
     }
     if (!this._client.shouldLoadDataBeforePlaying) {

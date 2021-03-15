@@ -29,10 +29,10 @@ const getMaybeLogStall = (
   const startOfRequest = Date.now();
   return (buffer: Buffer) => {
     const now = Date.now();
-    if (firstDataReceivedTime == null) {
+    if (firstDataReceivedTime == undefined) {
       firstDataReceivedTime = now;
     }
-    if (lastDataReceivedTime != null && now - lastDataReceivedTime > stallThresholdMs) {
+    if (lastDataReceivedTime != undefined && now - lastDataReceivedTime > stallThresholdMs) {
       const stallDuration = fromMillis(now - lastDataReceivedTime);
       const requestTimeUntilStall = fromMillis(lastDataReceivedTime - startOfRequest);
       const transferTimeUntilStall = fromMillis(lastDataReceivedTime - firstDataReceivedTime);

@@ -111,7 +111,7 @@ export default class ParseMessagesDataProvider implements DataProvider {
     const getMessagesPromise = this._provider.getMessages(start, end, childTopics);
     const readersByTopic = this._getReadersByTopic(readerTopics);
     const { bobjects } = await getMessagesPromise;
-    if (bobjects == null) {
+    if (bobjects == undefined) {
       throw new Error("Child of ParseMessagesProvider must provide binary messages");
     }
     const messagesToParse = bobjects.filter(({ topic }) => requestedParsedTopics.has(topic));

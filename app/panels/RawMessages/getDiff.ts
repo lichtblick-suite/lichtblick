@@ -47,7 +47,7 @@ export default function getDiff(
     const allItems = before.concat(after);
     if (allItems[0] && typeof allItems[0] === "object") {
       let candidateIdsToCompareWith: any = {};
-      if (allItems[0].id != null) {
+      if (allItems[0].id != undefined) {
         candidateIdsToCompareWith.id = { before: [], after: [] };
       }
       for (const key in allItems[0]) {
@@ -60,14 +60,14 @@ export default function getDiff(
       }
       for (const idKey in candidateIdsToCompareWith) {
         for (const beforeItem of before) {
-          if (beforeItem[idKey] != null) {
+          if (beforeItem[idKey] != undefined) {
             candidateIdsToCompareWith[idKey].before.push(beforeItem[idKey]);
           }
         }
       }
       for (const idKey in candidateIdsToCompareWith) {
         for (const afterItem of after) {
-          if (afterItem[idKey] != null) {
+          if (afterItem[idKey] != undefined) {
             candidateIdsToCompareWith[idKey].after.push(afterItem[idKey]);
           }
         }

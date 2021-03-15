@@ -99,7 +99,7 @@ const isSingleElemArray = (obj: any) => {
     return false;
   }
   const arr = isArrayView(obj) ? cast<ArrayView<any>>(obj).toArray() : cast<any[]>(obj);
-  return arr.filter((a) => a != null).length === 1;
+  return arr.filter((a) => a != undefined).length === 1;
 };
 const dataWithoutWrappingArray = (data: any) => {
   return isSingleElemArray(data) && typeof getIndex(data, 0) === "object"
@@ -318,7 +318,7 @@ function RawMessages(props: Props) {
 
   const renderSingleTopicOrDiffOutput = useCallback(() => {
     let shouldExpandNode;
-    if (expandAll != null) {
+    if (expandAll != undefined) {
       shouldExpandNode = () => expandAll;
     } else {
       shouldExpandNode = (keypath: any) => {
@@ -349,7 +349,7 @@ function RawMessages(props: Props) {
     const shouldDisplaySingleVal =
       (data !== undefined && typeof data !== "object") ||
       (isSingleElemArray(data) &&
-        getIndex(data, 0) != null &&
+        getIndex(data, 0) != undefined &&
         typeof getIndex(data, 0) !== "object");
     const singleVal = isSingleElemArray(data) ? getIndex(data, 0) : data;
 
@@ -413,7 +413,7 @@ function RawMessages(props: Props) {
               postprocessValue={(rawVal: unknown) => {
                 const val = maybeShallowParse(rawVal);
                 if (
-                  val != null &&
+                  val != undefined &&
                   typeof val === "object" &&
                   Object.keys(val as any).length === 1 &&
                   diffLabelTexts.includes(Object.keys(val as any)[0])

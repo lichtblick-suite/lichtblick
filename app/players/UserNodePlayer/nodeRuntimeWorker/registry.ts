@@ -36,7 +36,7 @@ export const containsFuncDeclaration = (args: any[]) => {
   for (const arg of args) {
     if (typeof arg === "function") {
       return true;
-    } else if (arg != null && typeof arg === "object") {
+    } else if (arg != undefined && typeof arg === "object") {
       for (const value of Object.values(arg)) {
         if (containsFuncDeclaration([value])) {
           return true;
@@ -50,7 +50,7 @@ export const containsFuncDeclaration = (args: any[]) => {
 export const stringifyFuncsInObject = (arg: any) => {
   if (typeof arg === "function") {
     return `${arg}`;
-  } else if (arg != null && typeof arg === "object") {
+  } else if (arg != undefined && typeof arg === "object") {
     const newArg = { ...arg };
     for (const [key, value] of Object.entries(arg)) {
       newArg[key] = stringifyFuncsInObject(value);

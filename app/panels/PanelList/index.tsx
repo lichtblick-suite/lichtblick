@@ -322,15 +322,15 @@ function PanelList(props: Props) {
   ]);
 
   const highlightedPanel = React.useMemo(
-    () => (highlightedPanelIdx != null ? filteredItems[highlightedPanelIdx] : null),
+    () => (highlightedPanelIdx != undefined ? filteredItems[highlightedPanelIdx] : null),
     [filteredItems, highlightedPanelIdx],
   );
 
   const onKeyDown = React.useCallback(
     (e) => {
-      if (e.key === "ArrowDown" && highlightedPanelIdx != null) {
+      if (e.key === "ArrowDown" && highlightedPanelIdx != undefined) {
         setHighlightedPanelIdx((highlightedPanelIdx + 1) % filteredItems.length);
-      } else if (e.key === "ArrowUp" && highlightedPanelIdx != null) {
+      } else if (e.key === "ArrowUp" && highlightedPanelIdx != undefined) {
         const newIdx = (highlightedPanelIdx - 1) % (filteredItems.length - 1);
         setHighlightedPanelIdx(newIdx >= 0 ? newIdx : filteredItems.length + newIdx);
       } else if (e.key === "Enter" && highlightedPanel) {

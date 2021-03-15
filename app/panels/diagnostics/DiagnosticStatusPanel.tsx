@@ -85,7 +85,7 @@ class DiagnosticStatusPanel extends React.Component<Props> {
     } = config;
 
     const selectedDisplayName =
-      selectedHardwareId != null
+      selectedHardwareId != undefined
         ? getDisplayName(selectedHardwareId, selectedName || "")
         : undefined;
     return (
@@ -94,16 +94,16 @@ class DiagnosticStatusPanel extends React.Component<Props> {
           {(buffer) => {
             let selectedItem; // selected by name+hardware_id
             let selectedItems; // [selectedItem], or all diagnostics with selectedHardwareId if no name is selected
-            if (selectedHardwareId != null) {
+            if (selectedHardwareId != undefined) {
               const items = [];
               const diagnosticsByName = buffer.diagnosticsByNameByTrimmedHardwareId.get(
                 trimHardwareId(selectedHardwareId),
               );
-              if (diagnosticsByName != null) {
+              if (diagnosticsByName != undefined) {
                 for (const diagnostic of diagnosticsByName.values()) {
-                  if (selectedName == null || selectedName === diagnostic.status.name) {
+                  if (selectedName == undefined || selectedName === diagnostic.status.name) {
                     items.push(diagnostic);
-                    if (selectedName != null) {
+                    if (selectedName != undefined) {
                       selectedItem = diagnostic;
                     }
                   }

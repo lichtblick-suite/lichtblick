@@ -52,8 +52,8 @@ type Bounds = { minX?: number; maxX?: number };
 const SyncTimeAxis = createSyncingComponent<Bounds, Bounds>(
   "SyncTimeAxis",
   (dataItems: Bounds[]) => ({
-    minX: min(dataItems.map(({ minX }) => (minX == null ? undefined : minX))),
-    maxX: max(dataItems.map(({ maxX }) => (maxX == null ? undefined : maxX))),
+    minX: min(dataItems.map(({ minX }) => (minX == undefined ? undefined : minX))),
+    maxX: max(dataItems.map(({ maxX }) => (maxX == undefined ? undefined : maxX))),
   }),
 );
 
@@ -302,7 +302,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
       ) {
         saveCurrentView(firstYScale.min, firstYScale.max, width);
       }
-      if (firstYScale != null && hoverBar.current != null) {
+      if (firstYScale != undefined && hoverBar.current != undefined) {
         const { current } = hoverBar;
         const topPx = Math.min(firstYScale.minAlongAxis, firstYScale.maxAlongAxis);
         const bottomPx = Math.max(firstYScale.minAlongAxis, firstYScale.maxAlongAxis);
@@ -337,7 +337,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
             ? ev.clientX - (ev.target as Element).getBoundingClientRect().x
             : ev.clientY - (ev.target as Element).getBoundingClientRect().y;
         const value = getChartValue(bounds, chartPx);
-        if (value == null) {
+        if (value == undefined) {
           return;
         }
         values[bounds.id] = value;
@@ -359,10 +359,10 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
       // initial "zoom to fit" state. Subsequent zooms/pans adjust the offsets.
       const bounds = newScaleBounds.find(({ axes }) => axes === "xAxes");
       if (
-        bounds != null &&
-        bounds.min != null &&
-        bounds.max != null &&
-        currentTimeRef.current != null
+        bounds != undefined &&
+        bounds.min != undefined &&
+        bounds.max != undefined &&
+        currentTimeRef.current != undefined
       ) {
         const currentTime = currentTimeRef.current;
         setFollowPlaybackState({
@@ -388,7 +388,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     if (hasUserPannedOrZoomed) {
       setHasUserPannedOrZoomed(false);
     }
-    if (followPlaybackState != null) {
+    if (followPlaybackState != undefined) {
       setFollowPlaybackState(undefined);
     }
   }
@@ -534,7 +534,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
       }
 
       const value = getChartValue(xBounds, xMousePosition);
-      if (value != null) {
+      if (value != undefined) {
         setGlobalHoverTime(value);
       } else {
         clearGlobalHoverTime();
@@ -592,7 +592,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
           },
         }))
       : [defaultXAxis];
-    if (currentTime != null) {
+    if (currentTime != undefined) {
       annotations.push({
         type: "line",
         drawTime: "beforeDatasetsDraw",
@@ -644,12 +644,12 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     };
     const firstXAxisTicks = options.scales?.xAxes?.[0]?.ticks;
     if (firstXAxisTicks) {
-      if (followPlaybackState != null) {
+      if (followPlaybackState != undefined) {
         // Follow playback, but don't force it if the user has recently panned or zoomed -- playback
         // will fight with the user's action.
         if (
-          currentTime != null &&
-          (lastPanTime.current == null ||
+          currentTime != undefined &&
+          (lastPanTime.current == undefined ||
             // @ts-expect-error while valid js we should fix this arithmatic operation on dates
             new Date() - lastPanTime.current > FOLLOW_PLAYBACK_PAN_THRESHOLD_MS)
         ) {
@@ -683,7 +683,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   );
   let minX: number;
   let maxX: number;
-  if (defaultView == null || (defaultView.type === "following" && currentTime == null)) {
+  if (defaultView == undefined || (defaultView.type === "following" && currentTime == undefined)) {
     // Zoom to fit if the view is "following" but there's no playback cursor. Unlikely.
     minX = min(xVals) ?? 0;
     maxX = max(xVals) ?? 0;
@@ -692,15 +692,17 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     maxX = defaultView.maxXValue;
   } else {
     // Following with non-null currentTime.
-    if (currentTime == null) {
-      throw new Error("Flow doesn't know that currentTime != null");
+    if (currentTime == undefined) {
+      throw new Error("Flow doesn't know that currentTime != undefined");
     }
     minX = currentTime - defaultView.width / 2;
     maxX = currentTime + defaultView.width / 2;
   }
 
   const scaleOptions =
-    xScaleOptions != null ? { ...props.scaleOptions, xAxisTicks: "follow" } : props.scaleOptions;
+    xScaleOptions != undefined
+      ? { ...props.scaleOptions, xAxisTicks: "follow" }
+      : props.scaleOptions;
 
   const chartProps = {
     type,
@@ -744,13 +746,13 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
           </HoverBar>
 
           {/* only sync when using x-axis timestamp and actually plotting data. */}
-          {isSynced && currentTime == null && xAxisIsPlaybackTime && hasData ? (
+          {isSynced && currentTime == undefined && xAxisIsPlaybackTime && hasData ? (
             <SyncTimeAxis data={{ minX, maxX }}>
               {(syncedMinMax) => {
                 const syncedMinX =
-                  syncedMinMax.minX != null ? min([minX, syncedMinMax.minX]) : minX;
+                  syncedMinMax.minX != undefined ? min([minX, syncedMinMax.minX]) : minX;
                 const syncedMaxX =
-                  syncedMinMax.maxX != null ? max([maxX, syncedMinMax.maxX]) : maxX;
+                  syncedMinMax.maxX != undefined ? max([maxX, syncedMinMax.maxX]) : maxX;
                 return (
                   // @ts-expect-error fix properties
                   <ChartComponent

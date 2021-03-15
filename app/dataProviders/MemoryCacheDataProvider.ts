@@ -102,7 +102,7 @@ export function getBlocksToKeep({
     for (let blockIndex = badEvictionRange.start; blockIndex < badEvictionRange.end; ++blockIndex) {
       const sizeInBytes = blockSizesInBytes[blockIndex];
 
-      if (sizeInBytes != null && !blockIndexesToKeep.has(blockIndex)) {
+      if (sizeInBytes != undefined && !blockIndexesToKeep.has(blockIndex)) {
         blockIndexesToKeep.add(blockIndex);
         cacheSizeInBytes += sizeInBytes;
       }
@@ -148,7 +148,7 @@ export function getBlocksToKeep({
               },
         ];
         const newRecentRanges =
-          badEvictionRange == null
+          badEvictionRange == undefined
             ? newRecentRangesExcludingBadEvictionRange
             : mergeNewRangeIntoUnsortedNonOverlappingList(
                 badEvictionRange,
@@ -183,7 +183,7 @@ function getBlocksToKeepDirection(
   increment: number;
 } {
   if (
-    badEvictionLocation != null &&
+    badEvictionLocation != undefined &&
     Math.abs(badEvictionLocation - blockRange.start) <
       Math.abs(badEvictionLocation - blockRange.end)
   ) {
@@ -600,9 +600,9 @@ export default class MemoryCacheDataProvider implements DataProvider {
           };
       const { bobjects, rosBinaryMessages, parsedMessages } = messages;
 
-      if (rosBinaryMessages != null || parsedMessages != null) {
+      if (rosBinaryMessages != undefined || parsedMessages != undefined) {
         const types = (Object.keys(messages) as (keyof typeof messages)[])
-          .filter((type) => messages[type] != null)
+          .filter((type) => messages[type] != undefined)
           .join("\n");
         sendNotification("MemoryCacheDataProvider got bad message types", types, "app", "error");
         // Do not retry.
@@ -739,7 +739,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
     // playback cursor) because we'll automatically try to refetch that data immediately after.
     let badEvictionRange = this._readRequests[0]?.blockRange;
 
-    if (!badEvictionRange && this._lastResolvedCallbackEnd != null) {
+    if (!badEvictionRange && this._lastResolvedCallbackEnd != undefined) {
       badEvictionRange = {
         start: this._lastResolvedCallbackEnd,
         end: this._lastResolvedCallbackEnd + this._readAheadBlocks,

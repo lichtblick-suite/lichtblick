@@ -207,7 +207,7 @@ class DiagnosticSummary extends React.Component<Props> {
                 const diagnosticsByName = buffer.diagnosticsByNameByTrimmedHardwareId.get(
                   trimmedHardwareId,
                 );
-                if (diagnosticsByName == null) {
+                if (diagnosticsByName == undefined) {
                   return;
                 }
                 return diagnosticsByName.get(name);

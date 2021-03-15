@@ -55,7 +55,7 @@ export function getValueActionForValue(
   let structureItem: MessagePathStructureItem | undefined = rootStructureItem;
   // Walk down the keyPath, while updating `value` and `structureItem`
   for (const pathItem of keyPath) {
-    if (structureItem == null || value == null) {
+    if (structureItem == undefined || value == undefined) {
       break;
     } else if (isObjectElement(value, pathItem, structureItem)) {
       structureItem =
@@ -89,7 +89,11 @@ export function getValueActionForValue(
           isTypicalFilterName(key),
         );
       }
-      if (typeof value === "object" && value != null && typeof typicalFilterName === "string") {
+      if (
+        typeof value === "object" &&
+        value != undefined &&
+        typeof typicalFilterName === "string"
+      ) {
         singleSlicePath += `[:]{${typicalFilterName}==${
           JSON.stringify(getField(value, typicalFilterName)) || ""
         }}`;
@@ -105,7 +109,7 @@ export function getValueActionForValue(
     }
   }
   // At this point we should be looking at a primitive. If not, just return nothing.
-  if (structureItem && structureItem.structureType === "primitive" && value != null) {
+  if (structureItem && structureItem.structureType === "primitive" && value != undefined) {
     if (pivotPath && isTypicalFilterName((last(keyPath) as any).toString())) {
       return { type: "pivot", pivotPath };
     }
@@ -138,7 +142,7 @@ export const getStructureItemForPath = memoizeWeak(
     let structureItem: MessagePathStructureItem | undefined = rootStructureItem;
     // Walk down the keyPath, while updating `value` and `structureItem`
     for (const pathItem of keyPath) {
-      if (structureItem == null) {
+      if (structureItem == undefined) {
         break;
       } else if (structureItem.structureType === "message" && typeof pathItem === "string") {
         structureItem = structureItem.nextByName[pathItem];

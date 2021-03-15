@@ -121,7 +121,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
           return;
         }
         const { startTime, endTime } = activeData || {};
-        if (!startTime || !endTime || el.current == null || slider.current == null) {
+        if (!startTime || !endTime || el.current == undefined || slider.current == undefined) {
           return;
         }
         const currentEl = el.current;
@@ -170,7 +170,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
 
     const min = (startTime && toSec(startTime)) ?? 0;
     const max = (endTime && toSec(endTime)) ?? 0;
-    const value = currentTime == null ? undefined : toSec(currentTime);
+    const value = currentTime == undefined ? undefined : toSec(currentTime);
     const step = (max - min) / 500;
 
     const seekControls = useMemo(
@@ -224,12 +224,12 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
               ref={slider}
               min={min || 0}
               max={max || 100}
-              disabled={min == null || max == null}
+              disabled={min == undefined || max == undefined}
               step={step}
               value={value}
               draggable
               onChange={onChange}
-              renderSlider={(val) => (val == null ? null : <StyledMarker width={val} />)}
+              renderSlider={(val) => (val == undefined ? null : <StyledMarker width={val} />)}
             />
           </div>
           <PlaybackBarHoverTicks componentId={hoverComponentId} />

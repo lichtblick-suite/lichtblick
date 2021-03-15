@@ -295,19 +295,19 @@ export function getSeekToTime(): SeekToTimeSpec {
     type: "relative",
     startOffset: fromNanoSec(SEEK_ON_START_NS),
   };
-  if (absoluteSeek != null) {
+  if (absoluteSeek != undefined) {
     return isNaN(+absoluteSeek)
       ? defaultResult
       : { type: "absolute", time: fromMillis(parseInt(absoluteSeek)) };
   }
   const relativeSeek = params.get(SEEK_TO_RELATIVE_MS_QUERY_KEY);
-  if (relativeSeek != null) {
+  if (relativeSeek != undefined) {
     return isNaN(+relativeSeek)
       ? defaultResult
       : { type: "relative", startOffset: fromMillis(parseInt(relativeSeek)) };
   }
   const seekFraction = params.get(SEEK_TO_FRACTION_QUERY_KEY);
-  if (seekFraction != null) {
+  if (seekFraction != undefined) {
     return isNaN(+seekFraction)
       ? defaultResult
       : { type: "fraction", fraction: parseFloat(seekFraction) };
@@ -333,7 +333,10 @@ export function getTimestampForMessage(
   timestampMethod?: TimestampMethod,
 ): Time | undefined {
   if (timestampMethod === "headerStamp") {
-    if (message.message.header?.stamp?.sec != null && message.message.header?.stamp?.nsec != null) {
+    if (
+      message.message.header?.stamp?.sec != undefined &&
+      message.message.header?.stamp?.nsec != undefined
+    ) {
       return message.message.header.stamp;
     }
     return undefined;
@@ -351,7 +354,7 @@ type MaybeStampedBobject = Readonly<{
 }>;
 
 export const maybeGetBobjectHeaderStamp = (message: Bobject | undefined): Time | undefined => {
-  if (message == null) {
+  if (message == undefined) {
     return;
   }
   const maybeStamped = cast<MaybeStampedBobject>(message);

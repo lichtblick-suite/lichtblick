@@ -41,7 +41,7 @@ function getStore() {
 }
 
 function Context(props: { children: React.ReactNode; store?: any }) {
-  const extraProps = props.store == null ? undefined : { store: props.store };
+  const extraProps = props.store == undefined ? undefined : { store: props.store };
   return (
     <PanelSetup
       fixture={{

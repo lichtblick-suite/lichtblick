@@ -69,7 +69,7 @@ const Flex = (props: Props) => {
     onMouseMove,
     dataTest,
   } = props;
-  if (col != null && col === row) {
+  if (col != undefined && col === row) {
     throw new Error("Flex col and row are mutually exclusive");
   }
 

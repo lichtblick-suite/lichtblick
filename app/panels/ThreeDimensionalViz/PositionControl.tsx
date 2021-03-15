@@ -37,7 +37,7 @@ export function parsePosition(input: string): Vec3 | undefined {
   if (parts.length === 2 || parts.length === 3) {
     const x = parseMatch(parts[0]);
     const y = parseMatch(parts[1]);
-    if (x != null && y != null) {
+    if (x != undefined && y != undefined) {
       return [x, y, 0];
     }
   }

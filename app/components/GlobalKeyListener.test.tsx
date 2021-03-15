@@ -74,7 +74,7 @@ describe("GlobalKeyListener", () => {
 
   it("does not fire undo/redo events from editable fields", () => {
     const shareTextarea = document.getElementById("some-text-area");
-    if (shareTextarea == null) {
+    if (shareTextarea == undefined) {
       throw new Error("could not find shareTextArea.");
     }
     shareTextarea.dispatchEvent(

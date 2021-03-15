@@ -208,7 +208,8 @@ const FollowTFControl = memo<Props>((props: Props) => {
   }, [onMouseLeaveDebounced, setHovering]);
 
   const followingCustomFrame = tfToFollow && tfToFollow !== getDefaultFollowTransformFrame();
-  const showFrameList = lastSelectedFrame != null || forceShowFrameList || followingCustomFrame;
+  const showFrameList =
+    lastSelectedFrame != undefined || forceShowFrameList || followingCustomFrame;
   const selectedFrameId = tfToFollow || lastSelectedFrame;
   const selectedItem = selectedFrameId ? { tf: { id: selectedFrameId }, depth: 0 } : undefined;
 

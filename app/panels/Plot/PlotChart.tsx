@@ -198,7 +198,7 @@ function getDatasetAndTooltipsFromMessagePlotPath(
 
   let hasMismatchedData =
     isCustomScale(xAxisVal) &&
-    xAxisRanges != null &&
+    xAxisRanges != undefined &&
     (yAxisRanges.length !== xAxisRanges.length ||
       xAxisRanges.every((range, rangeIndex) => range.length !== yAxisRanges[rangeIndex]?.length));
   let rangesOfTooltips: TimeBasedChartTooltipData[][] = [];

@@ -71,7 +71,7 @@ export default function PlotLegend(props: PlotLegendProps) {
 
   const onInputChange = useCallback(
     (value: string, index?: number) => {
-      if (index == null) {
+      if (index == undefined) {
         throw new Error("index not set");
       }
       const newPaths = paths.slice();
@@ -83,7 +83,7 @@ export default function PlotLegend(props: PlotLegendProps) {
 
   const onInputTimestampMethodChange = useCallback(
     (value: TimestampMethod, index?: number) => {
-      if (index == null) {
+      if (index == undefined) {
         throw new Error("index not set");
       }
       const newPaths = paths.slice();

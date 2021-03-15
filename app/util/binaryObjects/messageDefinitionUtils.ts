@@ -38,11 +38,11 @@ const primitiveSizes: Record<string, number> = {
 export const primitiveList: Set<string> = new Set(Object.keys(primitiveSizes));
 
 export const typeSize = memoize((typesByName: RosDatatypes, typeName: string): number => {
-  if (primitiveSizes[typeName] != null) {
+  if (primitiveSizes[typeName] != undefined) {
     return primitiveSizes[typeName];
   }
   const messageType = typesByName[typeName];
-  if (messageType == null) {
+  if (messageType == undefined) {
     throw new Error(`Unknown type: ${typeName}`);
   }
   // We add field sizes here, not type sizes. If the type has a field that's an array of strings,
@@ -102,11 +102,11 @@ export const isComplex = (typeName: string) => !primitiveList.has(typeName);
 
 // True for "object bobjects" and array views.
 export const isBobject = (object?: any): boolean => {
-  return object?.[deepParseSymbol] != null;
+  return object?.[deepParseSymbol] != undefined;
 };
 
 export const deepParse = (object?: any): any => {
-  if (object == null) {
+  if (object == undefined) {
     // Missing submessage fields are unfortunately common for constructed markers. This is not
     // principled, but it is pragmatic.
     return object;

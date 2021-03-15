@@ -36,7 +36,7 @@ function filterMessages(
   topics: readonly string[],
   messages: readonly Message[] | undefined,
 ) {
-  if (messages == null) {
+  if (messages == undefined) {
     return undefined;
   }
   const ret = [];
@@ -89,7 +89,7 @@ export default class MemoryDataProvider implements DataProvider {
     this.messageDefinitionsByTopic = messageDefinitionsByTopic || {};
     this.parsedMessageDefinitionsByTopic = parsedMessageDefinitionsByTopic;
     this.initiallyLoaded = !!initiallyLoaded;
-    this.providesParsedMessages = providesParsedMessages ?? messages.parsedMessages != null;
+    this.providesParsedMessages = providesParsedMessages ?? messages.parsedMessages != undefined;
   }
 
   async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {

@@ -146,7 +146,7 @@ function SourceInfo(): ReactNode {
               >
                 {t.datatype}
               </SCell>
-              {t.numMessages != null ? (
+              {t.numMessages != undefined ? (
                 <SCell>
                   {t.numMessages} msgs ({(t.numMessages / toSec(duration)).toFixed(2)} Hz)
                 </SCell>

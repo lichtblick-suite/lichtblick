@@ -268,7 +268,7 @@ export default class Autocomplete extends PureComponent<AutocompleteProps, Autoc
       this._ignoreBlur = false;
     }
 
-    const selectedItemValue = selectedItem != null ? getItemValue(selectedItem) : undefined;
+    const selectedItemValue = selectedItem != undefined ? getItemValue(selectedItem) : undefined;
     return (
       <ReactAutocomplete
         open={open}
@@ -283,7 +283,8 @@ export default class Autocomplete extends PureComponent<AutocompleteProps, Autoc
               data-test-auto-item
               className={cx(styles.autocompleteItem, {
                 [styles.highlighted]: isHighlighted,
-                [styles.selected]: selectedItemValue != null && itemValue === selectedItemValue,
+                [styles.selected]:
+                  selectedItemValue != undefined && itemValue === selectedItemValue,
               })}
             >
               {getItemText(item)}

@@ -36,7 +36,7 @@ export function getRecentLayouts(): RecentLayoutId[] {
 export function maybeStoreNewRecentLayout(newPersistedState: PersistedState) {
   const oldRecentLayouts = getRecentLayouts();
   const newestRecentLayout = recentLayoutFromPersistedState(newPersistedState);
-  if (newestRecentLayout == null || oldRecentLayouts[0] === newestRecentLayout) {
+  if (newestRecentLayout == undefined || oldRecentLayouts[0] === newestRecentLayout) {
     return;
   }
 

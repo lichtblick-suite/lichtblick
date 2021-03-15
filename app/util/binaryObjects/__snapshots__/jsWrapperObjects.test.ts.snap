@@ -14,7 +14,7 @@ class std_msgs_Header {
   }
   stamp() {
     const $fieldValue = this[$value].stamp;
-    if ($fieldValue == null || $fieldValue[$deepParse] != null) {
+    if ($fieldValue == undefined || $fieldValue[$deepParse] != undefined) {
       return $fieldValue;
     }
     return new time($fieldValue);
@@ -38,14 +38,14 @@ class fake_msgs_HasComplexAndArray {
   }
   header() {
     const $fieldValue = this[$value].header;
-    if ($fieldValue == null || $fieldValue[$deepParse] != null) {
+    if ($fieldValue == undefined || $fieldValue[$deepParse] != undefined) {
       return $fieldValue;
     }
     return new std_msgs_Header($fieldValue);
   }
   stringArray() {
     const $fieldValue = this[$value].stringArray;
-    if ($fieldValue == null || $fieldValue[$deepParse] != null) {
+    if ($fieldValue == undefined || $fieldValue[$deepParse] != undefined) {
       return $fieldValue;
     }
     return new $PrimitiveArrayView($fieldValue);
@@ -65,7 +65,7 @@ class fake_msgs_HasComplexArray {
   }
   complexArray() {
     const $fieldValue = this[$value].complexArray;
-    if ($fieldValue == null || $fieldValue[$deepParse] != null) {
+    if ($fieldValue == undefined || $fieldValue[$deepParse] != undefined) {
       return $fieldValue;
     }
     return new fake_msgs_HasComplexAndArray$Array($fieldValue);
@@ -148,7 +148,7 @@ class fake_msgs_HasArrayOfEmpties {
   }
   arr() {
     const $fieldValue = this[$value].arr;
-    if ($fieldValue == null || $fieldValue[$deepParse] != null) {
+    if ($fieldValue == undefined || $fieldValue[$deepParse] != undefined) {
       return $fieldValue;
     }
     return new fake_msgs_HasConstant$Array($fieldValue);
@@ -167,56 +167,56 @@ class fake_msgs_ContainsEverything {
   }
   first() {
     const $fieldValue = this[$value].first;
-    if ($fieldValue == null || $fieldValue[$deepParse] != null) {
+    if ($fieldValue == undefined || $fieldValue[$deepParse] != undefined) {
       return $fieldValue;
     }
     return new std_msgs_Header($fieldValue);
   }
   second() {
     const $fieldValue = this[$value].second;
-    if ($fieldValue == null || $fieldValue[$deepParse] != null) {
+    if ($fieldValue == undefined || $fieldValue[$deepParse] != undefined) {
       return $fieldValue;
     }
     return new fake_msgs_HasComplexAndArray($fieldValue);
   }
   third() {
     const $fieldValue = this[$value].third;
-    if ($fieldValue == null || $fieldValue[$deepParse] != null) {
+    if ($fieldValue == undefined || $fieldValue[$deepParse] != undefined) {
       return $fieldValue;
     }
     return new fake_msgs_HasComplexArray($fieldValue);
   }
   fourth() {
     const $fieldValue = this[$value].fourth;
-    if ($fieldValue == null || $fieldValue[$deepParse] != null) {
+    if ($fieldValue == undefined || $fieldValue[$deepParse] != undefined) {
       return $fieldValue;
     }
     return new fake_msgs_HasConstant($fieldValue);
   }
   fifth() {
     const $fieldValue = this[$value].fifth;
-    if ($fieldValue == null || $fieldValue[$deepParse] != null) {
+    if ($fieldValue == undefined || $fieldValue[$deepParse] != undefined) {
       return $fieldValue;
     }
     return new fake_msgs_HasByteArray($fieldValue);
   }
   sixth() {
     const $fieldValue = this[$value].sixth;
-    if ($fieldValue == null || $fieldValue[$deepParse] != null) {
+    if ($fieldValue == undefined || $fieldValue[$deepParse] != undefined) {
       return $fieldValue;
     }
     return new fake_msgs_HasJson($fieldValue);
   }
   seventh() {
     const $fieldValue = this[$value].seventh;
-    if ($fieldValue == null || $fieldValue[$deepParse] != null) {
+    if ($fieldValue == undefined || $fieldValue[$deepParse] != undefined) {
       return $fieldValue;
     }
     return new fake_msgs_HasInt64s($fieldValue);
   }
   eighth() {
     const $fieldValue = this[$value].eighth;
-    if ($fieldValue == null || $fieldValue[$deepParse] != null) {
+    if ($fieldValue == undefined || $fieldValue[$deepParse] != undefined) {
       return $fieldValue;
     }
     return new fake_msgs_HasArrayOfEmpties($fieldValue);

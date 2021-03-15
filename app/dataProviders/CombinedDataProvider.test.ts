@@ -146,7 +146,7 @@ function getCombinedDataProvider(data: any[]) {
     const { provider, prefix } = item;
     providerInfos.push({});
     const childProvider =
-      prefix == null
+      prefix == undefined
         ? provider
         : new RenameDataProvider({ prefix }, [provider], (child: any) => child);
     children.push({ name: "TestProvider", args: { provider: childProvider }, children: [] });
@@ -937,7 +937,7 @@ describe("mergedBlocks", () => {
       { startTime: { sec: 0, nsec: 0 }, blocks: [lhs] },
       { startTime: { sec: 0, nsec: 0 }, blocks: [rhs] },
     );
-    if (mergedValue == null) {
+    if (mergedValue == undefined) {
       throw new Error("satisfy flow");
     }
     const combinedBlocks = mergedValue.blocks;
@@ -953,7 +953,7 @@ describe("mergedBlocks", () => {
       { startTime: { sec: 0, nsec: 0 }, blocks: [lhs] },
       { startTime: { sec: 0, nsec: 0 }, blocks: [rhs] },
     );
-    if (newMergedValue == null) {
+    if (newMergedValue == undefined) {
       throw new Error("satisfy flow");
     }
     const newCombinedBlocks = newMergedValue.blocks;

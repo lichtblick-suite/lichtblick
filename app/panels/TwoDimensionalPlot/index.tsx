@@ -81,7 +81,7 @@ const keysToPick = [
 const messagePathInputStyle = { height: "100%" };
 
 const isValidMinMaxVal = (val?: string) => {
-  return val == null || val === "" || !isNaN(parseFloat(val));
+  return val == undefined || val === "" || !isNaN(parseFloat(val));
 };
 
 type Path = { value: string };
@@ -171,9 +171,9 @@ const HoverBar = React.memo<HoverBarProps>(function HoverBar({
   // We avoid putting the visibility and transforms into react state to try to keep updates snappy.
   // Mouse interactions are frequent, and adding/removing the bar from the DOM would slow things
   // down a lot more than mutating the style props does.
-  if (wrapper.current != null) {
+  if (wrapper.current != undefined) {
     const { current } = wrapper;
-    if (mousePosition != null) {
+    if (mousePosition != undefined) {
       showBar(current, mousePosition.x);
     } else {
       hideBar(current);
@@ -462,7 +462,7 @@ function TwoDimensionalPlot(props: Props) {
     (scales) => {
       scaleBounds.current = scales;
       const firstYScale = scales.find(({ axes }: any) => axes === "yAxes");
-      if (firstYScale != null && hoverBar.current != null) {
+      if (firstYScale != undefined && hoverBar.current != undefined) {
         const { current } = hoverBar;
         const topPx = Math.min(firstYScale.minAlongAxis, firstYScale.maxAlongAxis);
         const bottomPx = Math.max(firstYScale.minAlongAxis, firstYScale.maxAlongAxis);

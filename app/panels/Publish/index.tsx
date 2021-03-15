@@ -150,9 +150,9 @@ class Publish extends React.PureComponent<Props, PanelState> {
     // the user's message just because state.cachedProps.config hasn't been initialized.
     if (
       props.config.datatype &&
-      state.cachedProps?.config?.datatype != null &&
+      state.cachedProps?.config?.datatype != undefined &&
       props.config.datatype !== state.cachedProps?.config?.datatype &&
-      props.datatypes[props.config.datatype] != null
+      props.datatypes[props.config.datatype] != undefined
     ) {
       const sampleMessage = buildSampleMessage(props.datatypes, props.config.datatype);
       if (sampleMessage) {

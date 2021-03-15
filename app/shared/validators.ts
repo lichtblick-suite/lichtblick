@@ -20,7 +20,7 @@ type Rules = {
 const layoutNameRegex = /[@%]/; // Don't allow these characters in layoutName.
 
 function isEmpty(value: any) {
-  return value == null;
+  return value == undefined;
 }
 
 export const isEmail = (value?: unknown): boolean => {
@@ -29,7 +29,7 @@ export const isEmail = (value?: unknown): boolean => {
 };
 
 export const isRequired = (value: any): string | undefined =>
-  value == null ? "is required" : undefined;
+  value == undefined ? "is required" : undefined;
 
 export const isNumber = (value: any): string | undefined =>
   !isEmpty(value) && typeof value !== "number" ? "must be a number" : undefined;
@@ -179,7 +179,7 @@ export const cameraStateValidator = (jsonData: any): ValidationResult | undefine
 const isXYPointArray = (value: any): string | undefined => {
   if (Array.isArray(value)) {
     for (const item of value) {
-      if (!item || item.x == null || item.y == null) {
+      if (!item || item.x == undefined || item.y == undefined) {
         return `must contain x and y points`;
       }
       if (typeof item.x !== "number" || typeof item.y !== "number") {

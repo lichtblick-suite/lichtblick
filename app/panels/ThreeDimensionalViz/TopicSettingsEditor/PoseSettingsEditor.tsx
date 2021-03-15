@@ -44,7 +44,7 @@ export default function PoseSettingsEditor(
   const settingsByCarType = React.useMemo(() => {
     switch (settings.modelType) {
       case "car-model": {
-        const alpha = settings.alpha != null ? settings.alpha : 1;
+        const alpha = settings.alpha != undefined ? settings.alpha : 1;
         return (
           <Flex col>
             <SLabel>Alpha</SLabel>

@@ -33,13 +33,13 @@ const arrayTypeName = (typeName: string): string => `${friendlyTypeName(typeName
 const printFieldDefinitionBody = (field: RosMsgField): string => {
   if (field.isConstant) {
     const value = JSON.stringify(field.value);
-    if (value == null) {
+    if (value == undefined) {
       throw new Error(`Could not serialize constant value for field ${field.name}`);
     }
     return `return ${value};`;
   }
   const complexExpression = (type: string) => `const $fieldValue = this[$value].${field.name};
-if ($fieldValue == null || $fieldValue[$deepParse] != null) {
+if ($fieldValue == undefined || $fieldValue[$deepParse] != undefined) {
   return $fieldValue;
 }
 return new ${type}($fieldValue);`;
@@ -82,7 +82,7 @@ const deepParseFieldExpression = ({
 
 const printClassDefinition = (typesByName: RosDatatypes, typeName: string): string => {
   const type = typesByName[typeName];
-  if (type == null) {
+  if (type == undefined) {
     throw new Error(`Unknown type "${typeName}"`);
   }
   const fieldDefinitions = type.fields.map((field) => indent(printFieldDefinition(field), 2));

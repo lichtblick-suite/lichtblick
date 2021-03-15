@@ -176,7 +176,7 @@ export function useMessageReducer<T>(props: Props<T>): T {
     () => new Set(requestedTopics.map((req) => (typeof req === "object" ? req.topic : req))),
     [requestedTopics],
   );
-  const format = props.addBobjects != null ? "bobjects" : "parsedMessages";
+  const format = props.addBobjects != undefined ? "bobjects" : "parsedMessages";
   const subscriptions = useSubscriptions({
     requestedTopics,
     panelType,

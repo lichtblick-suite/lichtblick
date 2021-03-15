@@ -100,7 +100,7 @@ const printFieldDefinitionBody = (
 ): string => {
   if (field.isConstant) {
     const value = JSON.stringify(field.value);
-    if (value == null) {
+    if (value == undefined) {
       throw new Error(`Could not serialize constant value for field ${field.name}`);
     }
     return `return ${value};`;
@@ -170,7 +170,7 @@ const printDeepParseField = (
 
 const printDeepParseFunction = (typesByName: RosDatatypes, typeName: string): string => {
   const type = typesByName[typeName];
-  if (type == null) {
+  if (type == undefined) {
     throw new Error(`Unknown type "${typeName}"`);
   }
 
@@ -196,7 +196,7 @@ const printDeepParseMethod = (typeName: string): string => {
 const printClassDefinition = (typesByName: RosDatatypes, typeName: string): string => {
   let pointer = new PointerExpression("this[$offset]");
   const type = typesByName[typeName];
-  if (type == null) {
+  if (type == undefined) {
     throw new Error(`Unknown type "${typeName}"`);
   }
   const fieldDefinitions = type.fields.map((field) => {
@@ -230,7 +230,7 @@ const getTypesUsed = (typesByName: RosDatatypes, typeName: string): TypesUsed =>
     const nextFrontier: string[] = [];
     for (const nextTypeName of frontier) {
       const nextType = typesByName[nextTypeName];
-      if (nextType == null) {
+      if (nextType == undefined) {
         throw new Error(`Unknown type ${nextTypeName}`);
       }
       nextType.fields.forEach((field) => {

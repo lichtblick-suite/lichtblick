@@ -193,7 +193,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   const { config, saveConfig, isHovered } = props;
 
   const onInputChange = (value: string, index?: number) => {
-    if (index == null) {
+    if (index == undefined) {
       throw new Error("index not set");
     }
     const newPaths = config.paths.slice();
@@ -202,7 +202,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   };
 
   const onInputTimestampMethodChange = (value: TimestampMethod, index: number | undefined) => {
-    if (index == null) {
+    if (index == undefined) {
       throw new Error("index not set");
     }
     const newPaths = config.paths.slice();

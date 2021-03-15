@@ -89,7 +89,7 @@ function validateDatatypes({ output, datatypes }: NodeDefinition<any>) {
       }
     }
   }
-  if (datatypes[output.datatype] == null) {
+  if (datatypes[output.datatype] == undefined) {
     throw new Error(`The datatype "${output.datatype}" is not defined for node "${output.name}"`);
   }
 }

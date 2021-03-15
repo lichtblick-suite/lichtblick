@@ -43,7 +43,7 @@ export type IframeEvent =
 
 function createMessageHandler(handleMessage: (eventData: IframeEvent) => void) {
   return (event: any) => {
-    if (!isInIFrame() || event.data == null || typeof event.data !== "object") {
+    if (!isInIFrame() || event.data == undefined || typeof event.data !== "object") {
       return;
     }
     handleMessage(event.data);

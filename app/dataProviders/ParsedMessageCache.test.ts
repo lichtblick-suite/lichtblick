@@ -51,7 +51,7 @@ describe("parsedMessageCache", () => {
     const { rosBinaryMessages } = await provider.getMessages(start, end, {
       rosBinaryMessages: ["/tf"],
     });
-    if (rosBinaryMessages == null) {
+    if (rosBinaryMessages == undefined) {
       throw new Error("Satisfy flow");
     }
 

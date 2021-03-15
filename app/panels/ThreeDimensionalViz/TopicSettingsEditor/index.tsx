@@ -49,7 +49,7 @@ export function topicSettingsEditorForDatatype(
 }
 
 export function canEditDatatype(datatype: string): boolean {
-  return topicSettingsEditorForDatatype(datatype) != null;
+  return topicSettingsEditorForDatatype(datatype) != undefined;
 }
 
 export function canEditNamespaceOverrideColorDatatype(datatype: string): boolean {

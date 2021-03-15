@@ -224,7 +224,7 @@ export default class BagDataProvider implements DataProvider {
   }
 
   _logStats() {
-    if (this._extensionPoint == null || this._lastPerformanceStatsToLog == null) {
+    if (this._extensionPoint == undefined || this._lastPerformanceStatsToLog == undefined) {
       return;
     }
     this._extensionPoint.reportMetadataCallback(this._lastPerformanceStatsToLog.data);
@@ -236,7 +236,7 @@ export default class BagDataProvider implements DataProvider {
 
   _queueStats(stats: TimedDataThroughput) {
     if (
-      this._lastPerformanceStatsToLog != null &&
+      this._lastPerformanceStatsToLog != undefined &&
       statsAreAdjacent(this._lastPerformanceStatsToLog, stats)
     ) {
       // The common case: The next bit of data will be next to the last one. For remote bags we'll

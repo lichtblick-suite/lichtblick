@@ -412,7 +412,7 @@ export function MockMessagePipelineProvider(props: {
 
   const playerState = useMemo(
     () => ({
-      isPresent: props.isPresent == null ? true : props.isPresent,
+      isPresent: props.isPresent == undefined ? true : props.isPresent,
       playerId: props.playerId || "1",
       progress: props.progress || {},
       showInitializing: !!props.showInitializing,

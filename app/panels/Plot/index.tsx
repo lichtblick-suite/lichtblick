@@ -142,7 +142,7 @@ function Plot(props: Props) {
     () =>
       saveConfig({
         followingViewWidth:
-          currentViewWidth.current != null ? currentViewWidth.current.toString() : "",
+          currentViewWidth.current != undefined ? currentViewWidth.current.toString() : "",
       }),
     [saveConfig],
   );
@@ -150,8 +150,8 @@ function Plot(props: Props) {
   const setMinMax = useCallback(
     () =>
       saveConfig({
-        minYValue: currentMinY.current != null ? currentMinY.current.toString() : "",
-        maxYValue: currentMaxY.current != null ? currentMaxY.current.toString() : "",
+        minYValue: currentMinY.current != undefined ? currentMinY.current.toString() : "",
+        maxYValue: currentMaxY.current != undefined ? currentMaxY.current.toString() : "",
       }),
     [currentMaxY, currentMinY, saveConfig],
   );
@@ -200,7 +200,7 @@ function Plot(props: Props) {
   // If every streaming key is in the blocks, just use the blocks object for a stable identity.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const mergedItems = Object.keys(streamedItemsByPath).every(
-    (path) => (blockItemsByPath as any)[path] != null,
+    (path) => (blockItemsByPath as any)[path] != undefined,
   )
     ? blockItemsByPath
     : { ...streamedItemsByPath, ...blockItemsByPath };
@@ -238,18 +238,18 @@ function Plot(props: Props) {
   const preloadingStartTime = timeToXValueForPreloading(startTime); // zero or undefined
   const preloadingEndTime = timeToXValueForPreloading(endTime);
   let defaultView;
-  if (preloadingDisplayTime != null) {
-    if (followingViewWidth != null && parseFloat(followingViewWidth) > 0) {
+  if (preloadingDisplayTime != undefined) {
+    if (followingViewWidth != undefined && parseFloat(followingViewWidth) > 0) {
       // Will be ignored in TimeBasedChart for non-preloading plots and non-timestamp plots.
       defaultView = { type: "following", width: parseFloat(followingViewWidth) };
-    } else if (preloadingStartTime != null && preloadingEndTime != null) {
+    } else if (preloadingStartTime != undefined && preloadingEndTime != undefined) {
       defaultView = { type: "fixed", minXValue: preloadingStartTime, maxXValue: preloadingEndTime };
     }
   }
 
   const onClick = useCallback(
     (_, __, { X_AXIS_ID: seekSeconds }) => {
-      if (!startTime || seekSeconds == null || !seek || xAxisVal !== "timestamp") {
+      if (!startTime || seekSeconds == undefined || !seek || xAxisVal !== "timestamp") {
         return;
       }
       // The player validates and clamps the time.

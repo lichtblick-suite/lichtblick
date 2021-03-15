@@ -20,7 +20,7 @@ import { StampedMessage } from "@foxglove-studio/app/types/Messages";
 export const defaultGetHeaderStamp = (
   message: Readonly<RosObject> | undefined,
 ): Time | undefined => {
-  if (message != null && message.header != null) {
+  if (message != undefined && message.header != undefined) {
     return cast<StampedMessage>(message).header.stamp;
   }
 };
@@ -65,7 +65,7 @@ function messagesMatchingStamp(
         : defaultGetHeaderStamp(message.message);
       return thisStamp && TimeUtil.areSame(stamp, thisStamp);
     });
-    if (synchronizedMessage != null) {
+    if (synchronizedMessage != undefined) {
       synchronizedMessagesByTopic[topic] = [synchronizedMessage];
     } else {
       return undefined;
@@ -94,7 +94,7 @@ export default function synchronizeMessages(
       messagesByTopic,
       getHeaderStamp,
     );
-    if (synchronizedMessagesByTopic != null) {
+    if (synchronizedMessagesByTopic != undefined) {
       return synchronizedMessagesByTopic;
     }
   }

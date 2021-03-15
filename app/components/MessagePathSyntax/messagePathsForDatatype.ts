@@ -233,7 +233,7 @@ export const traverseStructure = memoizeWeak(
         if (
           structureItem.structureType !== "message" ||
           msgPathPart.path.length === 0 ||
-          msgPathPart.value == null
+          msgPathPart.value == undefined
         ) {
           return { valid: false, msgPathPart, structureItem };
         }
@@ -243,7 +243,7 @@ export const traverseStructure = memoizeWeak(
             return { valid: false, msgPathPart, structureItem };
           }
           currentItem = currentItem.nextByName[name];
-          if (currentItem == null) {
+          if (currentItem == undefined) {
             return { valid: false, msgPathPart, structureItem };
           }
         }

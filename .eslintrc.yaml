@@ -42,12 +42,6 @@ settings:
 
 rules:
   file-progress/activate: 1
-  # https://eslint.org/docs/rules/eqeqeq
-  # Use smart mode until we change "T | null | undefined" to "T | undefined"
-  # For user input, we could make an isNullish function or leverage schema validation
-  eqeqeq:
-    - error
-    - smart
   no-console: off # configured in no-restricted-syntax
   "@typescript-eslint/ban-ts-comment":
     - error
@@ -117,6 +111,17 @@ rules:
     # We disable console methods here rather than using no-console so that it doesn't prohibit overrides such as "console.info = ..."
     - selector: "CallExpression[callee.object.name='console'][callee.property.name!=/^(warn|error|debug|assert)$/]"
       message: "Unexpected property on console object was called"
+
+    # Ban `null [!=]= x` and `x [!=]= null`
+    - selector: "BinaryExpression:matches([operator='=='], [operator='!=']):matches([left.type=Literal][left.raw=null], [right.type=Literal][right.raw=null])"
+      message: 'Prefer "x == undefined" or "x != undefined" to check for both null and undefined.'
+    # Ban `undefined [!=]= x`
+    - selector: "BinaryExpression:matches([operator='=='], [operator='!='])[left.type=Identifier][left.name=undefined]"
+      message: 'Prefer "x == undefined" or "x != undefined" to check for both null and undefined.'
+    # Ban `==` and `!=` unless RHS is undefined
+    - selector: "BinaryExpression:matches([operator='=='], [operator='!=']):not([right.type=Identifier][right.name=undefined]):not([right.type=Literal][right.raw=null])"
+      message: 'Use strict equality operators "===" and "!==", except when checking for null or undefined.'
+
   "@typescript-eslint/strict-boolean-expressions":
     - error
       # Force explicit checks that strings are empty

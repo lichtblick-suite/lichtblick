@@ -352,7 +352,7 @@ function GlobalVariablesTable(): ReactElement {
       </table>
       <Flex style={{ margin: "20px 16px 16px", justifyContent: "flex-end" }}>
         <button
-          disabled={globalVariables[""] != null}
+          disabled={globalVariables[""] != undefined}
           onClick={() => setGlobalVariables({ "": "" })}
           data-test="add-variable-btn"
         >

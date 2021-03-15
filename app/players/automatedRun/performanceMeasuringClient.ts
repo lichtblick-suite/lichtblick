@@ -122,7 +122,7 @@ class PerformanceMeasuringClient {
 
   markFrameRenderEnd() {
     const frameRenderStart = this.frameRenderStart;
-    if (frameRenderStart == null) {
+    if (frameRenderStart == undefined) {
       throw new Error("Called markFrameRenderEnd without calling markFrameRenderStart");
     }
     if (this.enablePerformanceMarks) {
@@ -144,7 +144,7 @@ class PerformanceMeasuringClient {
 
   markPreloadEnd() {
     const { preloadStart } = this;
-    if (preloadStart == null) {
+    if (preloadStart == undefined) {
       throw new Error("Called markPreloadEnd without calling markPreloadStart");
     }
     if (this.enablePerformanceMarks) {
@@ -163,7 +163,7 @@ class PerformanceMeasuringClient {
 
   markTotalFrameEnd() {
     const totalFrameMs = this.totalFrameMs;
-    if (totalFrameMs == null) {
+    if (totalFrameMs == undefined) {
       throw new Error("Called markTotalFrameEnd without calling markTotalFrameStart");
     }
     this.totalFrameTimes.push(round(performance.now() - totalFrameMs));
@@ -211,7 +211,7 @@ class PerformanceMeasuringClient {
     const bagLengthMs = this.bagLengthMs;
     const preloadTimeMs = this.preloadTimeMs;
 
-    if (startTime == null || bagLengthMs == null) {
+    if (startTime == undefined || bagLengthMs == undefined) {
       throw new Error("Cannot call finish() without calling start()");
     }
 

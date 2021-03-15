@@ -123,7 +123,7 @@ function getNewConnectionWithoutExistingConnection({
     } else {
       readAheadRange = { start: 0, end: fileSize };
     }
-  } else if (lastResolvedCallbackEnd != null) {
+  } else if (lastResolvedCallbackEnd != undefined) {
     // Otherwise, if we have a limited cache, we want to read the data right after the last
     // read request, because usually read requests are sequential without gaps.
     readAheadRange = {

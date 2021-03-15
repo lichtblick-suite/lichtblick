@@ -73,19 +73,19 @@ export class BobjectRpcSender {
     additionalTransferables?: any,
   ): Promise<T> {
     const messageDatatypeInfo = getDatatypes(Object.getPrototypeOf(message).constructor);
-    if (messageDatatypeInfo == null) {
+    if (messageDatatypeInfo == undefined) {
       throw new Error("Missing datatypes for message. Likely not a bobject.");
     }
     const [datatypes, datatype] = messageDatatypeInfo;
     let datatypesIndex = this._datatypesIndices.get(datatypes);
-    if (datatypesIndex == null) {
+    if (datatypesIndex == undefined) {
       datatypesIndex = this._numberOfDatatypesSent;
       this._datatypesIndices.set(datatypes, datatypesIndex);
       this._numberOfDatatypesSent += 1;
       await this._rpc.send("$$transferDatatypes", datatypes);
     }
     const binaryData = getBinaryData(message);
-    if (binaryData == null) {
+    if (binaryData == undefined) {
       // Reverse-wrapped bobject. Deep parse to transfer.
       const data = {
         action,
@@ -141,7 +141,7 @@ export class BobjectRpcReceiver {
     });
     rpc.receive("$$transferBobject", async (transferData: TransferData) => {
       const receiveFunction = this._receiveFunctions[transferData.action];
-      if (receiveFunction == null) {
+      if (receiveFunction == undefined) {
         throw new Error(`action ${transferData.action} not registered`);
       }
       return receiveFunction(transferData);

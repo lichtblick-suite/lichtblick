@@ -52,7 +52,7 @@ export default function addMessageDefaults(
   }
   for (const { name, type, isConstant, isArray } of datatypes[datatypeName].fields) {
     // Don't set any constant fields - they are not written anyways.
-    if (!isConstant && object[name] == null) {
+    if (!isConstant && object[name] == undefined) {
       if (isArray) {
         object[name] = [];
       } else if (rosPrimitiveTypes.has(type)) {
@@ -75,7 +75,7 @@ export default function addMessageDefaults(
       }
     } else if (!isConstant && isArray) {
       for (const index in object[name]) {
-        if (object[name][index] == null) {
+        if (object[name][index] == undefined) {
           object[name][index] = getPrimitiveDefault(type);
         }
       }

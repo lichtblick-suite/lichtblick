@@ -184,7 +184,7 @@ export default class ApiCheckerDataProvider implements DataProvider {
 
     for (const messageType of MESSAGE_FORMATS) {
       const messages = providerResult[messageType];
-      if (messages == null) {
+      if (messages == undefined) {
         continue;
       }
       const topics = (subscriptions as any)[messageType] ?? [];

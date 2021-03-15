@@ -353,7 +353,7 @@ export default class ChartJSManager {
         const label = value?.label;
         // We have to return "null" if we don't want this label to be displayed. Returning "undefined" falls back to the
         // default formatting.
-        return label != null ? label : null;
+        return label != undefined ? label : null;
       };
       // Override color so that it can be set per-dataset.
       const staticColor = config.plugins.datalabels.color || "white";
@@ -365,7 +365,7 @@ export default class ChartJSManager {
 
     if (scaleOptions) {
       for (const scale of config.scales.yAxes) {
-        if (scaleOptions.fixedYAxisWidth != null) {
+        if (scaleOptions.fixedYAxisWidth != undefined) {
           scale.afterFit = (scaleInstance: any) => {
             scaleInstance.width = scaleOptions.fixedYAxisWidth;
           };

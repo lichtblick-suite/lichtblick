@@ -46,10 +46,10 @@ const emptyGetMessagesResult = {
 };
 
 const memoizedMergedBlock = memoizeWeak((block1?: MemoryCacheBlock, block2?: MemoryCacheBlock) => {
-  if (block1 == null) {
+  if (block1 == undefined) {
     return block2;
   }
-  if (block2 == null) {
+  if (block2 == undefined) {
     return block1;
   }
   return {
@@ -63,10 +63,10 @@ export const mergedBlocks = (
   cache1: BlockCache | undefined,
   cache2: BlockCache | undefined,
 ): BlockCache | undefined => {
-  if (cache1 == null) {
+  if (cache1 == undefined) {
     return cache2;
   }
-  if (cache2 == null) {
+  if (cache2 == undefined) {
     return cache1;
   }
   if (!TimeUtil.areSame(cache1.startTime, cache2.startTime)) {
@@ -86,10 +86,10 @@ const merge = (
   messages1: readonly Message[] | undefined,
   messages2: readonly Message[] | undefined,
 ) => {
-  if (messages1 == null) {
+  if (messages1 == undefined) {
     return messages2;
   }
-  if (messages2 == null) {
+  if (messages2 == undefined) {
     return messages1;
   }
   const messages = [];
@@ -210,7 +210,7 @@ function intersectProgress(progresses: Progress[]): Progress {
     fullyLoadedFractionRanges: deepIntersect(
       filterMap(progresses, (p) => p.fullyLoadedFractionRanges),
     ),
-    ...(messageCache != null ? { messageCache } : undefined),
+    ...(messageCache != undefined ? { messageCache } : undefined),
   };
 }
 function emptyProgress() {
@@ -314,7 +314,7 @@ export default class CombinedDataProvider implements DataProvider {
     const messagesPerProvider = await Promise.all(
       this._providers.map(async (provider, index) => {
         const initializationResult = this._initializationResultsPerProvider[index];
-        if (initializationResult == null) {
+        if (initializationResult == undefined) {
           return { bobjects: undefined, parsedMessages: undefined, rosBinaryMessages: undefined };
         }
         const availableTopics = initializationResult.topicSet;
@@ -350,7 +350,7 @@ export default class CombinedDataProvider implements DataProvider {
           filteredTopicsByFormat,
         );
         for (const messages of objectValues(providerResult)) {
-          if (messages == null) {
+          if (messages == undefined) {
             continue;
           }
           for (const message of messages) {

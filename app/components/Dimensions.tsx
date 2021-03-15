@@ -87,7 +87,7 @@ export default function Dimensions(props: Props): React.ReactElement | null {
   }, [parentElement, resizeObserver]);
 
   // This only happens during the first render - we use it to grab the parentElement of this div.
-  if (dimensions == null) {
+  if (dimensions == undefined) {
     return <div ref={setParentElementRef} />;
   }
   if ("children" in props && typeof props.children === "function") {

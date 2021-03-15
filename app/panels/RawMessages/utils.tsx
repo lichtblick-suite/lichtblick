@@ -46,7 +46,7 @@ export function getItemString(type: string, data: any, itemType: string, itemStr
   const keys = Object.keys(data);
   if (keys.length === 2) {
     const { sec, nsec } = data;
-    if (sec != null && nsec != null) {
+    if (sec != undefined && nsec != undefined) {
       // Values "too small" to be absolute epoch-based times are probably relative durations.
       return sec < DURATION_20_YEARS_SEC ? formatDuration(data) : <span>{format(data)}</span>;
     }
@@ -55,7 +55,7 @@ export function getItemString(type: string, data: any, itemType: string, itemStr
   // for vectors/points display length
   if (keys.length === 2) {
     const { x, y } = data;
-    if (x != null && y != null) {
+    if (x != undefined && y != undefined) {
       const length = Math.sqrt(x * x + y * y);
       return (
         <span>
@@ -67,7 +67,7 @@ export function getItemString(type: string, data: any, itemType: string, itemStr
 
   if (keys.length === 3) {
     const { x, y, z } = data;
-    if (x != null && y != null && z != null) {
+    if (x != undefined && y != undefined && z != undefined) {
       const length = Math.sqrt(x * x + y * y + z * z);
       return (
         <span>

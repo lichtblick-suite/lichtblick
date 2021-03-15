@@ -50,7 +50,7 @@ class MessageWithLifetime {
     if (!currentTime) {
       return false;
     }
-    if (this.lifetime == null) {
+    if (this.lifetime == undefined) {
       // Do not expire markers if we can't tell what their lifetime is.
       // They'll be flushed later if needed (see flush below)
       return false;
@@ -98,7 +98,7 @@ export default class MessageCollector {
   flush() {
     // clear out all undefined lifetime markers
     this.markers.forEach((marker, key) => {
-      if (marker.lifetime == null) {
+      if (marker.lifetime == undefined) {
         this.markers.delete(key);
       }
     });
@@ -138,7 +138,7 @@ export default class MessageCollector {
     // Topics are expected to have data in one of these two "modes" at a time.
     // Non-marker messages are not expected to have names, as they have no "delete" operation.
 
-    if (lifetime != null) {
+    if (lifetime != undefined) {
       // Assuming that all future messages will have a decay time set,
       // we need to immediately expire any pre-existing message that didn't have a decay time.
       this.markers.delete(topic);

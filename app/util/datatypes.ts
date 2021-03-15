@@ -38,12 +38,12 @@ export const getTransitiveSubsetForDatatypes = (
     const nextDatatypesToExplore = new Set<string>();
     for (const datatype of datatypesToExplore) {
       const definition = allDatatypes[datatype];
-      if (definition == null) {
+      if (definition == undefined) {
         throw new Error(`Definition missing for type ${datatype}`);
       }
       ret[datatype] = definition;
       for (const field of definition.fields) {
-        if (isComplex(field.type) && ret[field.type] == null) {
+        if (isComplex(field.type) && ret[field.type] == undefined) {
           nextDatatypesToExplore.add(field.type);
         }
       }
@@ -218,7 +218,7 @@ function getGetDatatypeName() {
   let count = 0;
   const names: Record<string, unknown> = {};
   return (key: string) => {
-    if (names[key] == null) {
+    if (names[key] == undefined) {
       names[key] = `${prefix}_${count++}`;
     }
     return names[key];
@@ -285,7 +285,8 @@ export const getContentBasedDatatypes = (
     const definition = messageDefinitionsByTopic[topic];
     const parsedDefinition = parsedMessageDefinitionsByTopic[topic];
     // This "key" is just used to group topics with identical sets of datatypes.
-    const stringDefinitionKey = definition != null ? definition : JSON.stringify(parsedDefinition);
+    const stringDefinitionKey =
+      definition != undefined ? definition : JSON.stringify(parsedDefinition);
     if (topicsByStringDefinition[stringDefinitionKey]) {
       // Already generated datatypes for these message types.
       topicsByStringDefinition[stringDefinitionKey].push(topic);

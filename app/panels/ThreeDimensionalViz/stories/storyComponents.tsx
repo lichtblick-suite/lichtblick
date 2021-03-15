@@ -147,7 +147,7 @@ export class FixtureExample extends React.Component<FixtureExampleProps, Fixture
             config={this.state.config as any}
             saveConfig={(config) => this.setState({ config: { ...this.state.config, ...config } })}
           />
-          {this.props.futureTime != null && (
+          {this.props.futureTime != undefined && (
             <div style={{ height: "100px" }}>
               <GlobalVariableSliderPanel
                 config={{

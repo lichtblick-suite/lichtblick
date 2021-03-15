@@ -684,12 +684,12 @@ export default function useTree({
         return false;
       } else if (node.type === "group") {
         // Group node
-        return node.name != null && node.name.toLowerCase().includes(searchText);
+        return node.name != undefined && node.name.toLowerCase().includes(searchText);
       }
       // Topic node, without namespace
       return (
         node.topicName.toLowerCase().includes(searchText) ||
-        (node.name != null && node.name.toLowerCase().includes(searchText)) ||
+        (node.name != undefined && node.name.toLowerCase().includes(searchText)) ||
         (hasFeatureColumn &&
           `${SECOND_SOURCE_PREFIX}${node.topicName}`.toLowerCase().includes(searchText))
       );

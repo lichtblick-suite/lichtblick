@@ -58,7 +58,7 @@ export const StyledRange = styled.div.attrs<{ width: number }>(({ width }) => ({
 `;
 
 function defaultRenderSlider(value: number | undefined): React.ReactNode {
-  if (value == null || isNaN(value)) {
+  if (value == undefined || isNaN(value)) {
     return null;
   }
   return <StyledRange width={value} />;
@@ -182,7 +182,7 @@ export default class Slider extends React.Component<Props> {
           enabled={mouseDown && draggable}
           onMouseUp={this._onMouseUp}
         />
-        {renderSlider(value != null && min !== max ? (value - min) / (max - min) : undefined)}
+        {renderSlider(value != undefined && min !== max ? (value - min) / (max - min) : undefined)}
       </StyledSlider>
     );
   }

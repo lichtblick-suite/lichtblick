@@ -45,7 +45,7 @@ export function decodeMarker(marker: PointCloudMarker) {
 
   const colorMode: ColorMode = settings.colorMode
     ? settings.colorMode
-    : rgbOffset != null
+    : rgbOffset != undefined
     ? { mode: "rgb" }
     : { mode: "flat", flatColor: DEFAULT_FLAT_COLOR };
 
@@ -80,12 +80,12 @@ export function decodeMarker(marker: PointCloudMarker) {
   // These calculations can be ignored if we're rendering to the hitmap
   if (colorBuffer && !isHitmap && (colorMode.mode === "gradient" || colorMode.mode === "rainbow")) {
     let hasMinValue = false;
-    if (colorMode.minValue != null) {
+    if (colorMode.minValue != undefined) {
       hasMinValue = true;
       minColorValue = colorMode.minValue;
     }
     let hasMaxValue = false;
-    if (colorMode.maxValue != null) {
+    if (colorMode.maxValue != undefined) {
       hasMaxValue = true;
       maxColorValue = colorMode.maxValue;
     }

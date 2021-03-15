@@ -105,7 +105,7 @@ function extractValues({
     for (let j = 0; j < readers.length; j++) {
       const reader = readers[j];
       let value = Number.NaN;
-      if (reader != null) {
+      if (reader != undefined) {
         value = reader.read(data, pointStart);
       }
       buffer[i * COMPONENT_COUNT + j] = value;

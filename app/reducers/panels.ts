@@ -117,7 +117,7 @@ let initialPersistedState: PersistedState | undefined = undefined;
 export function getInitialPersistedStateAndMaybeUpdateLocalStorageAndURL(
   history: any,
 ): PersistedState {
-  if (initialPersistedState == null) {
+  if (initialPersistedState == undefined) {
     const defaultPersistedState = Object.freeze(getGlobalHooks().getDefaultPersistedState());
     const oldPersistedState: any = storage.getItem(GLOBAL_STATE_STORAGE_KEY);
 
@@ -600,7 +600,7 @@ const dragWithinSameTab = (
         ...sourceTabChildConfigs,
       ],
     });
-  } else if (currentTabLayout != null) {
+  } else if (currentTabLayout != undefined) {
     const updates = createDragToUpdates(currentTabLayout, ownPath, destinationPath, position);
     const newTree = updateTree(currentTabLayout, updates);
 
@@ -874,7 +874,7 @@ const endDrag = (panelsState: PanelsState, dragPayload: EndDragPayload): PanelsS
     return changePanelLayout(panelsState, { layout: originalLayout, trimSavedProps: false });
   }
 
-  if (position != null && destinationPath != null && !isEqual(destinationPath, ownPath)) {
+  if (position != undefined && destinationPath != undefined && !isEqual(destinationPath, ownPath)) {
     const updates = createDragToUpdates(originalLayout, ownPath, destinationPath, position);
     const newLayout = updateTree(originalLayout, updates);
     return changePanelLayout(panelsState, { layout: newLayout, trimSavedProps: false });
