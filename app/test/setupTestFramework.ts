@@ -16,7 +16,7 @@ import { isEqual } from "lodash";
 
 import {
   mockSendNotification,
-  setNotificationHandler,
+  mockSetNotificationHandler,
 } from "@foxglove-studio/app/test/MockSendNotification";
 
 // Mock out sendNotification for all tests
@@ -24,7 +24,7 @@ jest.mock("@foxglove-studio/app/util/sendNotification", () => {
   return {
     __esModule: true,
     default: mockSendNotification,
-    setNotificationHandler,
+    setNotificationHandler: mockSetNotificationHandler,
   };
 });
 
@@ -35,7 +35,7 @@ afterEach(async () => {
     const calls = mockSendNotification.mock.calls;
     mockSendNotification.mockClear();
     // Reset the error handler to the default (no error handler).
-    setNotificationHandler();
+    mockSetNotificationHandler();
     fail(
       `sendNotification has been called during this test (call sendNotification.expectCalledDuringTest(); at the end of your test if you expect this): ${JSON.stringify(
         calls,

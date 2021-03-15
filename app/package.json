@@ -3,10 +3,7 @@
   "private": true,
   "scripts": {
     "chromatic": "chromatic --project-token $CHROMATIC_PROJECT_TOKEN --build-script-name storybook:build --exit-once-uploaded",
-    "storybook:build": "build-storybook",
-    "test": "NODE_OPTIONS='-r ts-node/register' jest",
-    "test:debug": "NODE_OPTIONS='-r ts-node/register --inspect-brk' jest",
-    "test:watch": "NODE_OPTIONS='-r ts-node/register' jest --watch"
+    "storybook:build": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' build-storybook"
   },
   "dependencies": {
     "@mdi/svg": "5.9.55",

@@ -134,8 +134,6 @@
   "app/util/bags.test.ts",
   "app/util/binaryObjects/ArrayViews.ts",
   "app/util/binaryObjects/BobjectRpc.ts",
-  "app/util/binaryObjects/binaryTranslation/index.test.ts",
-  "app/util/binaryObjects/binaryTranslation/index.ts",
   "app/util/binaryObjects/binaryWrapperObjects.test.ts",
   "app/util/binaryObjects/index.test.ts",
   "app/util/binaryObjects/index.ts",

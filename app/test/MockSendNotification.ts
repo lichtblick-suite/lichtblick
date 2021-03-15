@@ -32,7 +32,7 @@ const mockSendNotification = jest.fn<
   }
 });
 
-const setNotificationHandler = (handler?: NotificationHandler): void => {
+const mockSetNotificationHandler = (handler?: NotificationHandler): void => {
   currentHandler = handler;
 };
 
@@ -45,7 +45,7 @@ const setNotificationHandler = (handler?: NotificationHandler): void => {
   }
   mockSendNotification.mockClear();
   // Reset the error handler to the default (no error handler).
-  setNotificationHandler();
+  mockSetNotificationHandler();
 };
 
-export { mockSendNotification, setNotificationHandler };
+export { mockSendNotification, mockSetNotificationHandler };

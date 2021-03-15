@@ -41,6 +41,6 @@ docker run \
     -s WASM=1 \
     -s DISABLE_EXCEPTION_CATCHING=1 \
     -o $WORK_DIR/bin/translator.js \
-    --extern-pre-js $WORK_DIR/extern-pre.js \
+    --extern-pre-js $WORK_DIR/extern-pre.txt \
     -I$WORK_DIR/cpp/include \
     `find $WORK_DIR/cpp -name "*.cpp"`

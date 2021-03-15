@@ -13,59 +13,25 @@
 
 import { sumBy, maxBy } from "lodash";
 
-// @ts-expect-error emscripten support library
-import ModuleFactory from "./bin/translator";
-import ModuleWasm from "./bin/translator.wasm";
-import { Message } from "@foxglove-studio/app/players/types";
-import { RosDatatype, RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
+import ModuleFactory from "../bin/translator";
+import { BinaryDefinition, BinaryObjects, Message, RosDatatype, RosDatatypes } from "./types";
 
-// TODO: move this to a utils file?
-function isNodeModule() {
-  return typeof process === "undefined" || !("browser" in process);
-}
+const wasmUrl = new URL("../bin/translator.wasm", import.meta.url);
 
-// TODO: move this to a utils file?
-async function getModuleFactory(): Promise<unknown> {
-  // When running outside a browser (i.e. tests), we can let Emscripten to
-  // resolve the WASM file automatically. That does fail when running in the browser because
-  // of Webpack, so we need to indicate the Wasm location manually
-  if (isNodeModule()) {
-    return ModuleFactory();
-  }
-  return ModuleFactory({
-    locateFile: () => {
-      // get the path to the wasm file
-      // Webpack puts this file in the `dist` directory
-      return ModuleWasm;
-    },
-  });
-}
-
-export interface BinaryDefinition {
-  getSize(): number;
-}
-
-export type BinaryObjects = Readonly<{
-  dataType: string;
-  offsets: readonly number[];
-  buffer: ArrayBuffer;
-  bigString: string;
-}>;
-
-export const DefinitionCommand = {
-  READ_FIXED_SIZE_DATA: 0,
-  READ_STRING: 1,
-  READ_DYNAMIC_SIZE_DATA: 2,
-  CONSTANT_ARRAY: 3,
-  DYNAMIC_ARRAY: 4,
-};
+// in node, the ModuleFactory wants a path without a protocol
+const isBrowser = "browser" in process;
+const wasmPath = isBrowser ? wasmUrl.toString() : wasmUrl.pathname;
 
 export default class BinaryMessageWriter {
   _bridgeInstance?: any;
   _definitionRegistry?: any;
 
   async initialize() {
-    this._bridgeInstance = await getModuleFactory();
+    this._bridgeInstance = await ModuleFactory({
+      locateFile: () => {
+        return wasmPath;
+      },
+    });
     if (this._bridgeInstance) {
       this._definitionRegistry = new this._bridgeInstance.DefinitionRegistry();
     }
@@ -90,7 +56,7 @@ export default class BinaryMessageWriter {
   _createDefinition(name: string, dataType: RosDatatype): BinaryDefinition {
     const definition = this._getDefinitions().create(name);
     for (const field of dataType.fields) {
-      if (field.isConstant) {
+      if (field.isConstant ?? false) {
         // ignore constant fields since they have no values in the message's data.
         continue;
       }
@@ -111,8 +77,8 @@ export default class BinaryMessageWriter {
   }
 
   registerDefinitions(dataTypes: RosDatatypes): BinaryDefinition[] {
-    const definitions = Object.keys(dataTypes).map((type) => {
-      return this._createDefinition(type, dataTypes[type]);
+    const definitions = Object.entries(dataTypes).map(([type, dataType]) => {
+      return this._createDefinition(type, dataType);
     });
     if (!this._getDefinitions().finalize()) {
       throw new Error(`Failed to validate definitions`);
@@ -192,12 +158,7 @@ export default class BinaryMessageWriter {
     //    characters returned by bigString.split(). Decoding as utf-8 is possible, and we could
     //    store _codepoint_ indices in the buffer, but we would need our codepoint counting to agree
     //    with the browser's for invalid data, which is difficult.
-    let stringBuffer = writer.getBigString();
-    if (process.env.NODE_ENV === "test") {
-      // Something weird/terrible happening in node environments here... Causes the TextDecoder
-      // polyfill we use in tests to malfunction. Doesn't happen on the web.
-      stringBuffer = stringBuffer.slice();
-    }
+    const stringBuffer = writer.getBigString();
     const bigString = new TextDecoder("ascii").decode(stringBuffer);
     writer.delete();
 

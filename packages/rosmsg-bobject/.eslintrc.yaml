@@ -1,0 +1,2 @@
+parserOptions:
+  project: packages/rosmsg-bobject/tsconfig.json

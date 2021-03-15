@@ -13,7 +13,6 @@
 import { groupBy } from "lodash";
 import { Time, TimeUtil } from "rosbag";
 
-import BinaryMessageWriter from "../util/binaryObjects/binaryTranslation";
 import rawMessageDefinitionsToParsed from "./rawMessageDefinitionsToParsed";
 import {
   DataProviderDescriptor,
@@ -29,6 +28,7 @@ import { getObjects } from "@foxglove-studio/app/util/binaryObjects";
 import { getContentBasedDatatypes } from "@foxglove-studio/app/util/datatypes";
 import naturalSort from "@foxglove-studio/app/util/naturalSort";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
+import { BinaryMessageWriter } from "@foxglove/rosmsg-bobject";
 
 export default class RewriteBinaryDataProvider implements DataProvider {
   _provider: DataProvider;
