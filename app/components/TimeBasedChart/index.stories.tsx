@@ -276,7 +276,9 @@ storiesOf("<TimeBasedChart>", module)
       </div>
     );
   })
-  .add("can zoom and then update with new data without resetting the zoom", () => <ZoomExample />)
+  .add("can zoom and then update with new data without resetting the zoom", () => <ZoomExample />, {
+    screenshot: { delay: 3000 },
+  })
   .add("cleans up the tooltip when removing the panel", () => <CleansUpTooltipExample />)
   .add("should call pauseFrame twice", () => <PauseFrameExample {...commonProps} />)
   .add(
