@@ -12,7 +12,8 @@
 //   You may not use this file except in compliance with the License.
 import NukeIcon from "@mdi/svg/svg/nuke.svg";
 
-import { Item } from "@foxglove-studio/app/components/Menu";
+import Button from "@foxglove-studio/app/components/Button";
+import Icon from "@foxglove-studio/app/components/Icon";
 import useConfirm from "@foxglove-studio/app/components/useConfirm";
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import { clearIndexedDbWithoutConfirmation } from "@foxglove-studio/app/util/indexeddb/clearIndexedDb";
@@ -31,13 +32,18 @@ export default function ClearBagCacheMenuItem(): React.ReactElement | ReactNull 
       }
     },
   });
+
   if (!useExperimentalFeature("diskBagCaching")) {
     return ReactNull;
   }
+
   return (
-    <Item icon={<NukeIcon />} onClick={open}>
+    <Button onClick={open}>
       {modal}
+      <Icon medium>
+        <NukeIcon />
+      </Icon>{" "}
       Clear bag cache
-    </Item>
+    </Button>
   );
 }

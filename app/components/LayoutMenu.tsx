@@ -15,7 +15,6 @@ import { useState } from "react";
 
 import LayoutIcon from "@foxglove-studio/app/assets/layout.svg";
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
-import ClearBagCacheMenuItem from "@foxglove-studio/app/components/ClearBagCacheMenuItem";
 import Flex from "@foxglove-studio/app/components/Flex";
 import { WrappedIcon } from "@foxglove-studio/app/components/Icon";
 import LayoutModal from "@foxglove-studio/app/components/LayoutModal";
@@ -44,7 +43,6 @@ export default function LayoutMenu() {
           >
             Import/export layout
           </Item>
-          <ClearBagCacheMenuItem />
         </Menu>
       </ChildToggle>
     </>

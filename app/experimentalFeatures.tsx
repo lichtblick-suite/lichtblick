@@ -2,13 +2,22 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import ClearBagCacheButton from "@foxglove-studio/app/components/ClearBagCacheButton";
 import { FeatureDescriptions } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 
 export default {
   diskBagCaching: {
     name: "Disk Bag Caching (requires reload)",
-    description:
-      "When streaming bag data, persist it on disk, so that when reloading the page we don't have to download the data again. However, this might result in an overall slower experience, and is generally experimental, so we only recommend it if you're on a slow network connection. Alternatively, you can download the bag to disk manually, and drag it into Webviz.",
+    description: (
+      <>
+        When streaming bag data, persist it on disk, so that when reloading the page we don’t have
+        to download the data again. However, this might result in an overall slower experience, and
+        is generally experimental, so we only recommend it if you’re on a slow network connection.
+        Alternatively, you can download the bag to disk manually, and drag it into Webviz.
+        <br />
+        <ClearBagCacheButton />
+      </>
+    ),
     developmentDefault: false,
     productionDefault: false,
   },
