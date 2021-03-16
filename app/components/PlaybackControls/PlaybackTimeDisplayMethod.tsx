@@ -73,7 +73,7 @@ const PlaybackTimeDisplayMethod = ({
     [dispatch],
   );
 
-  const timestampInputRef = useRef<HTMLInputElement | null>(null);
+  const timestampInputRef = useRef<HTMLInputElement>(ReactNull);
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   const currentTimeString = useMemo(() => {

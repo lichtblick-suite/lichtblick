@@ -91,6 +91,7 @@ describe("RandomAccessPlayer", () => {
   beforeEach(() => {
     mockDateNow = jest.spyOn(Date, "now").mockReturnValue(0);
     // Remove any seek-to param in the URL
+    // eslint-disable-next-line no-restricted-syntax
     history.replaceState(null, (window as any).title, location.pathname);
   });
   afterEach(async () => {

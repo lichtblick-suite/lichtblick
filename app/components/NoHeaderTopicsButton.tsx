@@ -57,7 +57,7 @@ export default function NoHeaderTopicsButton() {
   const [showingModal, setShowingModal] = useState(false);
   return useMemo(() => {
     if (!topicsWithoutHeaders.length) {
-      return null;
+      return ReactNull;
     }
     const rows = topicsWithoutHeaders.sort().map(({ topic, datatype }: any) => (
       <tr key={topic}>

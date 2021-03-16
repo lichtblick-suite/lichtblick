@@ -37,6 +37,9 @@ declare global {
   }
 }
 
+// eslint-disable-next-line no-restricted-syntax
+const USE_DEFAULT_FORMATTER = null;
+
 const timeFormatter: DevtoolFormatter = (() => {
   function groupDigits(str: string) {
     const result = ["span", {}];
@@ -68,7 +71,7 @@ const timeFormatter: DevtoolFormatter = (() => {
         !Number.isInteger(maybeTime.sec) ||
         !Number.isInteger(maybeTime.nsec)
       ) {
-        return null;
+        return USE_DEFAULT_FORMATTER;
       }
       const nsec = maybeTime.nsec.toFixed().padStart(9, "0");
       const rng = seedrandom(`${maybeTime.sec}.${nsec}`);
@@ -96,7 +99,7 @@ const bobjectFormatter: DevtoolFormatter = {
     }
     // If it's not a bobject, use the default formatter.
     if (!isBobject(obj)) {
-      return null;
+      return USE_DEFAULT_FORMATTER;
     }
     if (isArrayView(obj)) {
       return [

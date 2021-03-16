@@ -137,6 +137,6 @@ export default class MeasuringTool extends React.Component<Props> {
   }
 
   render() {
-    return null;
+    return ReactNull;
   }
 }

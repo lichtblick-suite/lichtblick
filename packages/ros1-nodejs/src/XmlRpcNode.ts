@@ -93,7 +93,7 @@ export function XmlRpcCreateServer(options: {
   return new Promise((resolve, reject) => {
     const server = xmlrpc.createServer(options, () => {
       const address = server.httpServer.address();
-      if (address !== null && typeof address !== "string") {
+      if (address != undefined && typeof address !== "string") {
         resolve(
           new XmlRpcServerNode(server, {
             hostname: options.hostname,

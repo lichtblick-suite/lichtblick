@@ -18,13 +18,8 @@ exports.default = async function (context: AfterPackContext) {
   const appleId = process.env.APPLE_ID;
   const applePassword = process.env.APPLE_PASSWORD;
 
-  if (appId === undefined || appId === null) {
-    log.warn(
-      {
-        reason: "'appId' missing from builder config",
-      },
-      "skipped notarizing",
-    );
+  if (appId == undefined) {
+    log.warn({ reason: "'appId' missing from builder config" }, "skipped notarizing");
     return;
   }
 
@@ -38,13 +33,7 @@ exports.default = async function (context: AfterPackContext) {
     return;
   }
 
-  log.info(
-    {
-      appPath: appPath,
-      appleId: appleId,
-    },
-    "notarizing",
-  );
+  log.info({ appPath: appPath, appleId: appleId }, "notarizing");
 
   return notarize({
     appBundleId: appId,

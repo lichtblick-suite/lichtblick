@@ -46,7 +46,7 @@ describe("useMessageReducer", () => {
       } catch (e) {
         Test.error(e);
       }
-      return null;
+      return ReactNull;
     }
     Test.result = jest.fn();
     Test.error = jest.fn();

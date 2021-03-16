@@ -222,161 +222,159 @@ export default function renderTreeNodes({
   const titleWidth = width - SWITCHER_WIDTH;
 
   // @ts-expect-error this needs to be untangled
-  return children
-    .filter(({ key }) => getIsTreeNodeVisibleInTree(key))
-    .map((item) => {
-      const { key, providerAvailable } = item;
-      const visibleByColumn = hasFeatureColumn
-        ? [getIsTreeNodeVisibleInScene(item, 0), getIsTreeNodeVisibleInScene(item, 1)]
-        : [getIsTreeNodeVisibleInScene(item, 0)];
+  return filterMap(children, (item) => {
+    const { key, providerAvailable } = item;
+    if (!getIsTreeNodeVisibleInTree(key)) {
+      return undefined;
+    }
+    const visibleByColumn = hasFeatureColumn
+      ? [getIsTreeNodeVisibleInScene(item, 0), getIsTreeNodeVisibleInScene(item, 1)]
+      : [getIsTreeNodeVisibleInScene(item, 0)];
 
-      const nodeVisibleInScene = !!(visibleByColumn[0] || visibleByColumn[1]);
-      const nodeAvailable = item.availableByColumn[0] || item.availableByColumn[1];
+    const nodeVisibleInScene = !!(visibleByColumn[0] || visibleByColumn[1]);
+    const nodeAvailable = item.availableByColumn[0] || item.availableByColumn[1];
 
-      const showVisible = topicDisplayMode === TOPIC_DISPLAY_MODES.SHOW_SELECTED.value;
-      const showAvailable = topicDisplayMode === TOPIC_DISPLAY_MODES.SHOW_AVAILABLE.value;
+    const showVisible = topicDisplayMode === TOPIC_DISPLAY_MODES.SHOW_SELECTED.value;
+    const showAvailable = topicDisplayMode === TOPIC_DISPLAY_MODES.SHOW_AVAILABLE.value;
 
-      // Render all nodes regardless of the displayMode when datasources are unavailable.
-      if (
-        providerAvailable &&
-        ((showVisible && !nodeVisibleInScene) || (showAvailable && !nodeAvailable))
-      ) {
-        return null;
-      }
+    // Render all nodes regardless of the displayMode when datasources are unavailable.
+    if (
+      providerAvailable &&
+      ((showVisible && !nodeVisibleInScene) || (showAvailable && !nodeAvailable))
+    ) {
+      return undefined;
+    }
 
-      const itemChildren = item.type === "group" ? item.children : [];
-      const topicName = item.type === "topic" ? item.topicName : "";
-      const datatype = item.type === "topic" ? item.datatype : undefined;
+    const itemChildren = item.type === "group" ? item.children : [];
+    const topicName = item.type === "topic" ? item.topicName : "";
+    const datatype = item.type === "topic" ? item.datatype : undefined;
 
-      const namespaceNodes =
-        item.type === "topic"
-          ? getNamespaceNodes({
-              availableNamespacesByTopic,
-              canEditNamespaceOverrideColor: !!(
-                datatype && canEditNamespaceOverrideColorDatatype(datatype)
-              ),
-              checkedKeysSet,
-              derivedCustomSettingsByKey,
-              getIsNamespaceCheckedByDefault,
-              getIsTreeNodeVisibleInScene,
-              hasFeatureColumn,
-              node: item,
-              showVisible,
-            })
-          : [];
+    const namespaceNodes =
+      item.type === "topic"
+        ? getNamespaceNodes({
+            availableNamespacesByTopic,
+            canEditNamespaceOverrideColor: !!(
+              datatype && canEditNamespaceOverrideColorDatatype(datatype)
+            ),
+            checkedKeysSet,
+            derivedCustomSettingsByKey,
+            getIsNamespaceCheckedByDefault,
+            getIsTreeNodeVisibleInScene,
+            hasFeatureColumn,
+            node: item,
+            showVisible,
+          })
+        : [];
 
-      const tooltips = [];
-      if (topicName) {
-        tooltips.push(
-          <TooltipRow key={tooltips.length}>
-            <TooltipTable>
-              <tbody>
+    const tooltips = [];
+    if (topicName) {
+      tooltips.push(
+        <TooltipRow key={tooltips.length}>
+          <TooltipTable>
+            <tbody>
+              <tr>
+                <th>Topic:</th>
+                <td>
+                  <code>{topicName}</code>
+                </td>
+              </tr>
+              {item.type === "topic" && item.datatype && (
                 <tr>
-                  <th>Topic:</th>
+                  <th>Type:</th>
                   <td>
-                    <code>{topicName}</code>
+                    <code>{item.datatype}</code>
                   </td>
                 </tr>
-                {item.type === "topic" && item.datatype && (
-                  <tr>
-                    <th>Type:</th>
-                    <td>
-                      <code>{item.datatype}</code>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </TooltipTable>
-          </TooltipRow>,
-        );
-      }
-      if ((item as any).description) {
-        tooltips.push(
-          <TooltipDescription key={tooltips.length}>
-            {(item as any).description}
-          </TooltipDescription>,
-        );
-      }
+              )}
+            </tbody>
+          </TooltipTable>
+        </TooltipRow>,
+      );
+    }
+    if ((item as any).description) {
+      tooltips.push(
+        <TooltipDescription key={tooltips.length}>{(item as any).description}</TooltipDescription>,
+      );
+    }
 
-      const title = (
-        <TreeNodeRow
-          checkedKeysSet={checkedKeysSet}
-          derivedCustomSettings={derivedCustomSettingsByKey[key]}
-          filterText={filterText}
-          hasChildren={itemChildren.length > 0 || namespaceNodes.length > 0}
-          hasFeatureColumn={hasFeatureColumn}
-          isXSWidth={isXSWidth}
-          node={item}
-          nodeVisibleInScene={nodeVisibleInScene}
-          sceneErrors={sceneErrorsByKey[item.key]}
-          setCurrentEditingTopic={setCurrentEditingTopic}
-          visibleByColumn={visibleByColumn}
-          width={titleWidth}
-          visibleTopicsCount={visibleTopicsCountByKey[item.key] || 0}
-          {...(tooltips.length ? ({ tooltips } as any) : undefined)}
-          diffModeEnabled={diffModeEnabled}
-        />
+    const title = (
+      <TreeNodeRow
+        checkedKeysSet={checkedKeysSet}
+        derivedCustomSettings={derivedCustomSettingsByKey[key]}
+        filterText={filterText}
+        hasChildren={itemChildren.length > 0 || namespaceNodes.length > 0}
+        hasFeatureColumn={hasFeatureColumn}
+        isXSWidth={isXSWidth}
+        node={item}
+        nodeVisibleInScene={nodeVisibleInScene}
+        sceneErrors={sceneErrorsByKey[item.key]}
+        setCurrentEditingTopic={setCurrentEditingTopic}
+        visibleByColumn={visibleByColumn}
+        width={titleWidth}
+        visibleTopicsCount={visibleTopicsCountByKey[item.key] || 0}
+        {...(tooltips.length ? ({ tooltips } as any) : undefined)}
+        diffModeEnabled={diffModeEnabled}
+      />
+    );
+
+    const childrenNodes = [];
+    if (item.type === "topic") {
+      childrenNodes.push(
+        ...renderStyleExpressionNodes({
+          isXSWidth,
+          topicName,
+          hasFeatureColumn,
+          linkedGlobalVariablesByTopic,
+          width: titleWidth,
+        }),
       );
 
-      const childrenNodes = [];
-      if (item.type === "topic") {
-        childrenNodes.push(
-          ...renderStyleExpressionNodes({
-            isXSWidth,
-            topicName,
-            hasFeatureColumn,
-            linkedGlobalVariablesByTopic,
-            width: titleWidth,
-          }),
-        );
-
-        childrenNodes.push(
-          ...renderNamespaceNodes({
-            children: namespaceNodes.sort(naturalSort("namespace")),
-            getIsTreeNodeVisibleInTree,
-            hasFeatureColumn,
-            isXSWidth,
-            onNamespaceOverrideColorChange,
-            setEditingNamespace,
-            topicNode: item,
-            width: titleWidth,
-            filterText,
-            diffModeEnabled,
-          }),
-        );
-      }
-      if (itemChildren) {
-        childrenNodes.push(
-          ...renderTreeNodes({
-            availableNamespacesByTopic,
-            checkedKeysSet,
-            children: itemChildren,
-            getIsTreeNodeVisibleInScene,
-            getIsTreeNodeVisibleInTree,
-            getIsNamespaceCheckedByDefault,
-            hasFeatureColumn,
-            isXSWidth,
-            onNamespaceOverrideColorChange,
-            setEditingNamespace,
-            topicDisplayMode,
-            sceneErrorsByKey,
-            setCurrentEditingTopic,
-            derivedCustomSettingsByKey,
-            visibleTopicsCountByKey,
-            width: titleWidth,
-            filterText,
-            linkedGlobalVariablesByTopic,
-            diffModeEnabled,
-          }),
-        );
-      }
-      return {
-        key,
-        title,
-        ...(childrenNodes.length ? { children: childrenNodes } : undefined),
-        // Add `disabled` so that the switcher has the correct color.
-        disabled: !nodeVisibleInScene,
-      };
-    })
-    .filter(Boolean);
+      childrenNodes.push(
+        ...renderNamespaceNodes({
+          children: namespaceNodes.sort(naturalSort("namespace")),
+          getIsTreeNodeVisibleInTree,
+          hasFeatureColumn,
+          isXSWidth,
+          onNamespaceOverrideColorChange,
+          setEditingNamespace,
+          topicNode: item,
+          width: titleWidth,
+          filterText,
+          diffModeEnabled,
+        }),
+      );
+    }
+    if (itemChildren) {
+      childrenNodes.push(
+        ...renderTreeNodes({
+          availableNamespacesByTopic,
+          checkedKeysSet,
+          children: itemChildren,
+          getIsTreeNodeVisibleInScene,
+          getIsTreeNodeVisibleInTree,
+          getIsNamespaceCheckedByDefault,
+          hasFeatureColumn,
+          isXSWidth,
+          onNamespaceOverrideColorChange,
+          setEditingNamespace,
+          topicDisplayMode,
+          sceneErrorsByKey,
+          setCurrentEditingTopic,
+          derivedCustomSettingsByKey,
+          visibleTopicsCountByKey,
+          width: titleWidth,
+          filterText,
+          linkedGlobalVariablesByTopic,
+          diffModeEnabled,
+        }),
+      );
+    }
+    return {
+      key,
+      title,
+      ...(childrenNodes.length ? { children: childrenNodes } : undefined),
+      // Add `disabled` so that the switcher has the correct color.
+      disabled: !nodeVisibleInScene,
+    };
+  });
 }

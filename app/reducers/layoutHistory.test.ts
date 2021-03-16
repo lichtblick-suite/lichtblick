@@ -50,6 +50,7 @@ describe("state.layoutHistory", () => {
     const baseUrl = "http://localhost/";
     const { store, checkState } = getStore();
     store.dispatch(changePanelLayout({ layout: "foo!1234" }));
+    // eslint-disable-next-line no-restricted-syntax
     history.replaceState(null, document.title, `${baseUrl}?layout=foo!1234`);
     checkState(({ layoutHistory, persistedState }) => {
       expect(layoutHistory.undoStates.length).toEqual(1); // original state
@@ -59,6 +60,7 @@ describe("state.layoutHistory", () => {
 
     await delay(NEVER_PUSH_LAYOUT_THRESHOLD_MS + 100);
     store.dispatch(changePanelLayout({ layout: "bar!5678" }));
+    // eslint-disable-next-line no-restricted-syntax
     history.replaceState(null, document.title, `${baseUrl}?layout=bar!5678`);
     checkState(({ layoutHistory, persistedState }) => {
       expect(layoutHistory.undoStates.length).toEqual(2); // original and foo!1234

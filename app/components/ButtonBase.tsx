@@ -204,7 +204,7 @@ export default class Button extends React.Component<Props, State> {
     const { mouseDown, progressPercentage } = this.state;
     // don't render a bar if we aren't a delay button
     if (!delay || !mouseDown) {
-      return null;
+      return ReactNull;
     }
 
     if (progressDirection === PROGRESS_DIRECTION.PULSE) {

@@ -17,6 +17,7 @@ import ts from "typescript/lib/typescript";
 
 import { Topic } from "@foxglove-studio/app/players/types";
 import { RosDatatypes, RosDatatype } from "@foxglove-studio/app/types/RosDatatypes";
+import filterMap from "@foxglove-studio/app/util/filterMap";
 
 export type InterfaceDeclarations = {
   [datatype: string]: ts.InterfaceDeclaration;
@@ -116,28 +117,26 @@ export const generateTypeDefs = (datatypes: RosDatatypes): InterfaceDeclarations
       continue;
     }
 
-    const typeMembers = definition.fields
-      .map(({ name, type, isArray, isConstant }) => {
-        let node;
-        if (isConstant) {
-          // TODO: Support ROS constants at some point.
-          return null;
-        } else if (isArray && typedArrayMap[type]) {
-          node = ts.createTypeReferenceNode(typedArrayMap[type]);
-        } else if (rosPrimitivesToTypeScriptMap[type]) {
-          node = ts.createKeywordTypeNode(rosPrimitivesToTypeScriptMap[type]);
-        } else if (rosSpecialTypesToTypescriptMap[type]) {
-          node = ts.createTypeReferenceNode(rosSpecialTypesToTypescriptMap[type].name);
-        } else {
-          node = ts.createTypeReferenceNode(formatInterfaceName(type));
-        }
-        if (isArray && !typedArrayMap[type]) {
-          node = ts.createArrayTypeNode(node);
-        }
+    const typeMembers = filterMap(definition.fields, ({ name, type, isArray, isConstant }) => {
+      let node;
+      if (isConstant) {
+        // TODO: Support ROS constants at some point.
+        return undefined;
+      } else if (isArray && typedArrayMap[type]) {
+        node = ts.createTypeReferenceNode(typedArrayMap[type]);
+      } else if (rosPrimitivesToTypeScriptMap[type]) {
+        node = ts.createKeywordTypeNode(rosPrimitivesToTypeScriptMap[type]);
+      } else if (rosSpecialTypesToTypescriptMap[type]) {
+        node = ts.createTypeReferenceNode(rosSpecialTypesToTypescriptMap[type].name);
+      } else {
+        node = ts.createTypeReferenceNode(formatInterfaceName(type));
+      }
+      if (isArray && !typedArrayMap[type]) {
+        node = ts.createArrayTypeNode(node);
+      }
 
-        return createProperty(name, node);
-      })
-      .filter((val) => !!val);
+      return createProperty(name, node);
+    });
 
     interfaceDeclarations[datatype] = ts.createInterfaceDeclaration(
       undefined,

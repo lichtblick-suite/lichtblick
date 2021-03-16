@@ -17,7 +17,7 @@ import useConfirm from "@foxglove-studio/app/components/useConfirm";
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import { clearIndexedDbWithoutConfirmation } from "@foxglove-studio/app/util/indexeddb/clearIndexedDb";
 
-export default function ClearBagCacheMenuItem(): React.ReactElement | null {
+export default function ClearBagCacheMenuItem(): React.ReactElement | ReactNull {
   const { modal, open } = useConfirm({
     prompt:
       "This will clear out all locally cached bag data from IndexedDB.\n\nUse this if you're having consistency or performance issues (but then please still report them to us!).\n\nThis will only work if you've closed all Webviz windows, since we cannot delete active databases.",
@@ -32,7 +32,7 @@ export default function ClearBagCacheMenuItem(): React.ReactElement | null {
     },
   });
   if (!useExperimentalFeature("diskBagCaching")) {
-    return null;
+    return ReactNull;
   }
   return (
     <Item icon={<NukeIcon />} onClick={open}>

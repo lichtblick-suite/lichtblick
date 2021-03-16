@@ -337,7 +337,7 @@ export function MessagePipelineProvider({ children, player, globalVariables = {}
   );
 }
 
-type ConsumerProps = { children: (arg0: MessagePipelineContext) => ReactElement | null };
+type ConsumerProps = { children: (arg0: MessagePipelineContext) => ReactElement | ReactNull };
 export function MessagePipelineConsumer({ children }: ConsumerProps) {
   const value = useMessagePipeline(useCallback((ctx) => ctx, []));
   return children(value);

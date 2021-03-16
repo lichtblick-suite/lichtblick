@@ -211,7 +211,7 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
     return (
       <div
         style={{ width: "100%", height: "100%", display: "flex", ...this.props.style }}
-        ref={(el?: HTMLDivElement | null) => {
+        ref={(el) => {
           const { onFirstMount, onMount } = this.props;
           if (el && onFirstMount && !this._hasMounted) {
             this._hasMounted = true;

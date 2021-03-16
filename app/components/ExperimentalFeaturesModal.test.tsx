@@ -62,7 +62,7 @@ describe("ExperimentalFeatures", () => {
       renderedSettings.feat2 = useExperimentalFeature("feat2");
       renderedSettings.feat3 = useExperimentalFeature("feat3");
       renderedSettings.feat4 = useExperimentalFeature("feat4");
-      return null;
+      return ReactNull;
     }
 
     const container = mount(

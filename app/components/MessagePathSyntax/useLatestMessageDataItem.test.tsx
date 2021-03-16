@@ -44,7 +44,7 @@ describe("useLatestMessageDataItem", () => {
   function createTest(format: MessageFormat = "parsedMessages") {
     function Test({ path }: { path: string }) {
       Test.result(useLatestMessageDataItem(path, format));
-      return null;
+      return ReactNull;
     }
     Test.result = jest.fn();
     return Test;

@@ -76,7 +76,7 @@ export function getNonOverlappingLabels(
   return stepLabels;
 }
 
-function drawTicks(futureTime: number | null, sliderConfig: SliderProps) {
+function drawTicks(futureTime: number | undefined, sliderConfig: SliderProps) {
   const { min, max, step } = sliderConfig;
 
   // First, measure all the step labels' text widths.

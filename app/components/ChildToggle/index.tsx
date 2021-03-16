@@ -113,8 +113,8 @@ export default function ChildToggle(props: Props): ReactElement {
     latestProps.current.onToggle?.(value);
   }, []);
 
-  const el = useRef<HTMLDivElement>(null);
-  const floatingEl = useRef<HTMLDivElement>(null);
+  const el = useRef<HTMLDivElement>(ReactNull);
+  const floatingEl = useRef<HTMLDivElement>(ReactNull);
 
   // Inform the ancestor when we open/close. This enables ChildToggle.ContainsOpen to work.
   const previousIsOpen = useRef(false);

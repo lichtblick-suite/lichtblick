@@ -83,7 +83,7 @@ const runUseGLTextTest = async (
       setSearchTextMatches,
       searchTextMatches,
     } as any);
-    return null;
+    return ReactNull;
   };
   const root = await mount(<Wrapper />);
   root.update();

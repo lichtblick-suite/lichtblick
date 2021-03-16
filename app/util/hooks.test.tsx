@@ -189,7 +189,7 @@ describe("createSelectableContext/useContextSelector", () => {
     function Consumer() {
       const value = useContextSelector(ctx, Consumer.selectorFn);
       Consumer.renderFn(value);
-      return null;
+      return ReactNull;
     }
     Consumer.selectorFn = jest.fn().mockImplementation(selector);
     Consumer.renderFn = jest.fn();
@@ -336,6 +336,7 @@ describe("createSelectableContext/useContextSelector", () => {
     expect(Consumer.selectorFn.mock.calls).toEqual([[{ num: 1 }], [{ num: 2 }]]);
     expect(Consumer.renderFn.mock.calls).toEqual([[1], [2]]);
 
+    // eslint-disable-next-line no-restricted-syntax
     root.setProps({ children: null, value: { num: 2 } });
     expect(Consumer.selectorFn.mock.calls).toEqual([[{ num: 1 }], [{ num: 2 }]]);
     expect(Consumer.renderFn.mock.calls).toEqual([[1], [2]]);
@@ -368,7 +369,7 @@ describe("createSelectableContext/useContextSelector", () => {
       const y = useContextSelector(C, selector2);
       const z = useContextSelector(C, selector3);
       renderFn([x, y, z]);
-      return null;
+      return ReactNull;
     }
 
     const root = mount(

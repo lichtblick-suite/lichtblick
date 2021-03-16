@@ -105,7 +105,7 @@ describe("useSceneBuilderAndTransformsData", () => {
     }
     function TestInner(props: UseSceneBuilderAndTransformsDataInput) {
       Test.result(useSceneBuilderAndTransformsData(props));
-      return null;
+      return ReactNull;
     }
     Test.result = jest.fn();
     return Test;

@@ -102,7 +102,7 @@ function NamespaceNodeRow({
   const nodeVisibleInScene = !!(visibleInSceneByColumn[0] || visibleInSceneByColumn[1]);
 
   const { setHoveredMarkerMatchers } = useContext(ThreeDimensionalVizContext);
-  const { toggleCheckAllAncestors, toggleNamespaceChecked }: any = useGuaranteedContext(
+  const { toggleCheckAllAncestors, toggleNamespaceChecked } = useGuaranteedContext(
     TopicTreeContext,
     "TopicTreeContext",
   );

@@ -166,7 +166,7 @@ function DraggablePanelItem({
   highlighted,
   mosaicId,
 }: PanelItemProps) {
-  const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  const scrollRef = React.useRef<HTMLDivElement>(ReactNull);
   const [__, drag] = useDrag({
     item: { type: MosaicDragType.WINDOW },
     begin: (_monitor) => ({ mosaicId } as any),
@@ -322,7 +322,7 @@ function PanelList(props: Props) {
   ]);
 
   const highlightedPanel = React.useMemo(
-    () => (highlightedPanelIdx != undefined ? filteredItems[highlightedPanelIdx] : null),
+    () => (highlightedPanelIdx != undefined ? filteredItems[highlightedPanelIdx] : undefined),
     [filteredItems, highlightedPanelIdx],
   );
 
@@ -411,7 +411,7 @@ function PanelList(props: Props) {
         {panelCategories.map(({ label }, categoryIdx) => {
           const prevItems = flatMap(filteredItemsByCategoryIdx.slice(0, categoryIdx));
           if (!filteredItemsByCategoryIdx[categoryIdx].length) {
-            return null;
+            return ReactNull;
           }
           return (
             <div key={label} style={{ paddingTop: "8px" }}>

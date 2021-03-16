@@ -232,7 +232,9 @@ class DiagnosticSummary extends React.Component<Props> {
                   );
 
               const nodes: DiagnosticInfo[] = [...compact(pinnedNodes), ...sortedNodes];
-              return !nodes.length ? null : (
+              return !nodes.length ? (
+                ReactNull
+              ) : (
                 <AutoSizer>
                   {({ height, width }) => (
                     <List

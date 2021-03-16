@@ -73,7 +73,7 @@ export default function PointCloudDetails({ selectedObject: { object, instanceIn
   }, [additionalFieldNames, hasAdditionalFieldNames, object]);
 
   if (!clickedPoint) {
-    return null;
+    return ReactNull;
   }
 
   const colorStyle = clickedPointColor ? { color: `rgba(${clickedPointColor.join(",")})` } : {};

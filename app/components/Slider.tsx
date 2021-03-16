@@ -59,7 +59,7 @@ export const StyledRange = styled.div.attrs<{ width: number }>(({ width }) => ({
 
 function defaultRenderSlider(value: number | undefined): React.ReactNode {
   if (value == undefined || isNaN(value)) {
-    return null;
+    return ReactNull;
   }
   return <StyledRange width={value} />;
 }

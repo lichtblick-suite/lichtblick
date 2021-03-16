@@ -105,10 +105,7 @@ export default function NamespaceMenu({
     ? { width: COLOR_PICKER_AND_ICON_WIDTH }
     : {};
 
-  const { toggleCheckAllAncestors }: any = useGuaranteedContext(
-    TopicTreeContext,
-    "TopicTreeContext",
-  );
+  const { toggleCheckAllAncestors } = useGuaranteedContext(TopicTreeContext, "TopicTreeContext");
   // Don't render the dot menu if the datasources are unavailable.
   if (!providerAvailable) {
     return <SDotMenuPlaceholder />;

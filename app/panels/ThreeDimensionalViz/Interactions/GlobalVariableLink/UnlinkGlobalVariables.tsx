@@ -69,7 +69,7 @@ export default function UnlinkGlobalVariables({ name, showList }: Props) {
   const links: LinkedGlobalVariable[] = linkedGlobalVariablesKeyByName[name] || [];
 
   if (links.length === 0) {
-    return null;
+    return ReactNull;
   }
 
   const listStyle = showList ? { marginLeft: 0, marginRight: 0 } : {};

@@ -28,7 +28,7 @@ storiesOf("<Menu>", module)
     );
   })
   .add("nested", () => {
-    function openSubMenu(component: SubMenu | null) {
+    function openSubMenu(component: SubMenu | ReactNull) {
       if (component) {
         // @ts-expect-error figure out what to actually do here
         // eslint-disable-next-line react/no-find-dom-node

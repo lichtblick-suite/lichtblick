@@ -120,7 +120,7 @@ const buildTypeMapFromArgs = (typeArguments: ts.TypeNode[] = [], typeMap: TypeMa
   const newTypeParamMap = {};
   typeArguments.forEach((typeArg, i) => {
     const text = typeArg.getText();
-    const parent = typeMap[text] || typeMap[i] || null;
+    const parent = typeMap[text] ?? typeMap[i];
     const current = typeArg;
     newTypeParamMap[i] = { current, parent };
   });

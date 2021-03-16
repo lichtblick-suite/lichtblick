@@ -61,7 +61,7 @@ describe("useCachedGetMessagePathDataItems", () => {
     function Test({ paths }: { paths: string[] }) {
       const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems(paths);
       Test.cachedGetMessage = cachedGetMessagePathDataItems;
-      return null;
+      return ReactNull;
     }
     Test.cachedGetMessage = (_path: string, _message: Message) => {
       // no-op
@@ -789,7 +789,7 @@ describe("useDecodeMessagePathsForMessagesByTopic", () => {
   function createTest() {
     function Test({ paths }: { paths: string[] }) {
       (Test as any).hook = useDecodeMessagePathsForMessagesByTopic(paths);
-      return null;
+      return ReactNull;
     }
     return Test;
   }

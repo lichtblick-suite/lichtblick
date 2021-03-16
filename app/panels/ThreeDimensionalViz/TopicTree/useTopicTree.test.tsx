@@ -57,7 +57,7 @@ describe("useTopicTree", () => {
   function createTest() {
     function Test(props: UseTreeInput) {
       Test.result(useTopicTree(props));
-      return null;
+      return ReactNull;
     }
     Test.result = jest.fn();
     return Test;

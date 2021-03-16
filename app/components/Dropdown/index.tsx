@@ -86,8 +86,8 @@ export default class Dropdown extends React.Component<Props, State> {
   renderChildren() {
     const { children } = this.props;
     return React.Children.map(children, (child, i) => {
-      if (child === null) {
-        return null;
+      if (child == undefined) {
+        return ReactNull;
       }
       const inner = (child as any).props.value != undefined ? this.renderItem(child as any) : child;
       return <span key={i}>{inner}</span>;

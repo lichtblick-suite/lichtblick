@@ -36,7 +36,7 @@ function Canvas({
   height,
   overrideDevicePixelRatioForTest: ratio = window.devicePixelRatio || 1,
 }: CanvasProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(ReactNull);
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) {

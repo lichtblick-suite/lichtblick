@@ -109,7 +109,7 @@ const HistoryRecorder = React.memo(function HistoryRecorder({
     topics: filterMap(recordingTopics, (name) => topicsByName[name]),
     frame,
   };
-  return null;
+  return ReactNull;
 });
 
 // Display webviz internal state for debugging and viewing topic dependencies.

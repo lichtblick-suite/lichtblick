@@ -60,6 +60,7 @@ describe("inferDatatypes", () => {
   });
 
   it("is robust against nulls", () => {
+    // eslint-disable-next-line no-restricted-syntax
     const value = { arr: [null, 1], val: null };
     expect(inferDatatypes(unknown, value)).toEqual({
       isArray: false,

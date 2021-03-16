@@ -26,7 +26,7 @@ class Broken extends React.Component {
   now the user sees
       `,
     };
-    return null;
+    return ReactNull;
   }
 }
 

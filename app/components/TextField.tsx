@@ -72,7 +72,7 @@ export default function TextField({
   const [inputStr, setInputStr] = useState<string>(value || defaultValue || "");
 
   const prevIncomingVal = useRef<string | undefined>("");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(ReactNull);
 
   useLayoutEffect(() => {
     // only compare if it's a controlled component

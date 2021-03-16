@@ -199,7 +199,7 @@ function StyleExpressionNode(props: any) {
           <SToggles>
             {filterMap(colorOverridesByColumnIdx, (override, sourceIdx) => {
               if (!hasFeatureColumn && sourceIdx === 1) {
-                return null;
+                return ReactNull;
               }
               const { active, color } = override ?? { active: false };
               return (

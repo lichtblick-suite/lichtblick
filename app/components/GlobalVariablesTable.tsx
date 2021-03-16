@@ -215,7 +215,7 @@ function LinkedGlobalVariableRow({ name }: { name: string }): ReactElement {
                       </div>
                     ))}
                   </>
-                ) : null
+                ) : undefined
               }
             >
               <SLinkedTopicsSpan>

@@ -99,7 +99,7 @@ export function messagePathStructures(
 
 export function validTerminatingStructureItem(
   structureItem?: MessagePathStructureItem,
-  validTypes?: string[] | null,
+  validTypes?: string[],
 ): boolean {
   return (
     !!structureItem &&
@@ -115,7 +115,7 @@ export function validTerminatingStructureItem(
 export function messagePathsForDatatype(
   datatype: string,
   datatypes: RosDatatypes,
-  validTypes?: string[] | null,
+  validTypes?: string[],
   noMultiSlices?: boolean,
   messagePath: MessagePathPart[] = [],
 ): string[] {

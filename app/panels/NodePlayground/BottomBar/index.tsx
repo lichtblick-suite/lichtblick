@@ -62,12 +62,12 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props) => {
   const clearLogs = React.useCallback((payload: string) => dispatch(clearUserNodeLogs(payload)), [
     dispatch,
   ]);
-  const scrollContainer = useRef(null);
+  const scrollContainer = useRef<HTMLDivElement>(ReactNull);
 
   useEffect(() => {
     if (autoScroll) {
       if (scrollContainer.current) {
-        (scrollContainer as any).current.scrollTop = (scrollContainer as any).current.scrollHeight;
+        scrollContainer.current.scrollTop = scrollContainer.current.scrollHeight;
       }
     }
   }, [autoScroll, logs]);

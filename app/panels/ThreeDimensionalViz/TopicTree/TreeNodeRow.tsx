@@ -206,7 +206,7 @@ export default function TreeNodeRow({
     toggleNodeChecked,
     toggleNodeExpanded,
     toggleCheckAllDescendants,
-  }: any = useGuaranteedContext(TopicTreeContext, "TopicTreeContext");
+  } = useGuaranteedContext(TopicTreeContext, "TopicTreeContext");
 
   return (
     <STreeNodeRow visibleInScene={nodeVisibleInScene} style={{ width: rowWidth }}>

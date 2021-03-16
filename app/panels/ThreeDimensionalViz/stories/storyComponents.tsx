@@ -138,7 +138,7 @@ export class FixtureExample extends React.Component<FixtureExampleProps, Fixture
   render() {
     const { fixture } = this.state;
     if (!fixture) {
-      return null;
+      return ReactNull;
     }
     return (
       <PanelSetup fixture={fixture} onMount={this.props.onMount}>

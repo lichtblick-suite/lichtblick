@@ -167,7 +167,7 @@ const HoverBar = React.memo<HoverBarProps>(function HoverBar({
   children,
   mousePosition,
 }: HoverBarProps) {
-  const wrapper = React.useRef<HTMLDivElement | null>(null);
+  const wrapper = React.useRef<HTMLDivElement>(ReactNull);
   // We avoid putting the visibility and transforms into react state to try to keep updates snappy.
   // Mouse interactions are frequent, and adding/removing the bar from the DOM would slow things
   // down a lot more than mutating the style props does.
@@ -191,7 +191,7 @@ type TooltipProps = {
 
 const TwoDimensionalTooltip = ({ datapoints, xAxisLabel, tooltipElement }: TooltipProps) => {
   if (!tooltipElement) {
-    return null;
+    return ReactNull;
   }
 
   const contents = (
@@ -321,8 +321,8 @@ function TwoDimensionalPlot(props: Props) {
   const [hasUserPannedOrZoomed, setHasUserPannedOrZoomed] = React.useState<boolean>(false);
   const [hasVerticalExclusiveZoom, setHasVerticalExclusiveZoom] = React.useState<boolean>(false);
   const [hasBothAxesZoom, setHasBothAxesZoom] = React.useState<boolean>(false);
-  const tooltip = React.useRef<HTMLDivElement | null>(null);
-  const chartComponent = React.useRef<ChartComponent | null>(null);
+  const tooltip = React.useRef<HTMLDivElement>(ReactNull);
+  const chartComponent = React.useRef<ChartComponent>(ReactNull);
 
   const [mousePosition, setMousePosition] = React.useState<{ x: number; y: number } | undefined>();
 
@@ -451,12 +451,12 @@ function TwoDimensionalPlot(props: Props) {
     if (tooltip.current && tooltip.current.parentNode) {
       // Satisfy flow.
       tooltip.current.parentNode.removeChild(tooltip.current);
-      tooltip.current = null;
+      tooltip.current = ReactNull;
     }
   }, []);
 
   const scaleBounds = React.useRef<readonly ScaleBounds[] | undefined>();
-  const hoverBar = React.useRef<HTMLDivElement | null>(null);
+  const hoverBar = React.useRef<HTMLDivElement>(ReactNull);
 
   const onScaleBoundsUpdate = React.useCallback(
     (scales) => {

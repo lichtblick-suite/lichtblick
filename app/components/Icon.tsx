@@ -80,7 +80,7 @@ const Icon = (props: Props) => {
   };
 
   return (
-    <Tooltip contents={tooltip || null} {...tooltipProps}>
+    <Tooltip contents={tooltip} {...tooltipProps}>
       <span className={classNames} onClick={clickHandler} style={style} data-test={dataTest}>
         {children}
       </span>

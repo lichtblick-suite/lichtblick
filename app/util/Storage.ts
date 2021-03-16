@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 export interface BackingStore {
+  // eslint-disable-next-line no-restricted-syntax
   getItem(key: string): string | null | undefined;
   setItem(key: string, value: string): void;
   clear(): void;

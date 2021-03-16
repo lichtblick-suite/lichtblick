@@ -30,7 +30,7 @@ describe("createSyncingComponent", () => {
   });
 
   it("returns data that was passed in to just the component itself", async () => {
-    const childFn = jest.fn().mockReturnValue(null);
+    const childFn = jest.fn().mockReturnValue(ReactNull);
     const wrapper = mount(
       <IdentitySyncingComponent data={{ some: "data" }}>{childFn}</IdentitySyncingComponent>,
     );
@@ -41,13 +41,15 @@ describe("createSyncingComponent", () => {
 
   it("cleans up data after unmounting", async () => {
     const wrapper1 = mount(
-      <IdentitySyncingComponent data={{ component: 1 }}>{() => null}</IdentitySyncingComponent>,
+      <IdentitySyncingComponent data={{ component: 1 }}>
+        {() => ReactNull}
+      </IdentitySyncingComponent>,
     );
     await tick();
     wrapper1.unmount();
     await tick();
 
-    const childFn = jest.fn().mockReturnValue(null);
+    const childFn = jest.fn().mockReturnValue(ReactNull);
     const wrapper2 = mount(
       <IdentitySyncingComponent data={{ component: 2 }}>{childFn}</IdentitySyncingComponent>,
     );
@@ -58,11 +60,13 @@ describe("createSyncingComponent", () => {
 
   it("returns data passed to other components as well", async () => {
     const wrapper1 = mount(
-      <IdentitySyncingComponent data={{ component: 1 }}>{() => null}</IdentitySyncingComponent>,
+      <IdentitySyncingComponent data={{ component: 1 }}>
+        {() => ReactNull}
+      </IdentitySyncingComponent>,
     );
     await tick();
 
-    const childFn = jest.fn().mockReturnValue(null);
+    const childFn = jest.fn().mockReturnValue(ReactNull);
     const wrapper2 = mount(
       <IdentitySyncingComponent data={{ component: 2 }}>{childFn}</IdentitySyncingComponent>,
     );
@@ -74,13 +78,13 @@ describe("createSyncingComponent", () => {
   });
 
   it("rerenders other components when changing data", async () => {
-    const childFn1 = jest.fn().mockReturnValue(null);
+    const childFn1 = jest.fn().mockReturnValue(ReactNull);
     const wrapper1 = mount(
       <IdentitySyncingComponent data={{ component: 1 }}>{childFn1}</IdentitySyncingComponent>,
     );
     await tick();
 
-    const childFn2 = jest.fn().mockReturnValue(null);
+    const childFn2 = jest.fn().mockReturnValue(ReactNull);
     const wrapper2 = mount(
       <IdentitySyncingComponent data={{ component: 2 }}>{childFn2}</IdentitySyncingComponent>,
     );

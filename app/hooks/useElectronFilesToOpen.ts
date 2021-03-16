@@ -29,6 +29,7 @@ export default function useElectronFilesToOpen(): FileList | undefined {
 
     update();
     return () => {
+      // eslint-disable-next-line no-restricted-syntax
       input.onchange = null;
     };
   }, []);

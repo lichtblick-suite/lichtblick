@@ -41,7 +41,7 @@ type Props = {
 function Footnote() {
   const footnote = getGlobalHooks().helpPageFootnote();
   if (!footnote) {
-    return null;
+    return ReactNull;
   }
   return <SFootnote>{footnote}</SFootnote>;
 }

@@ -76,7 +76,7 @@ const Editor = ({
   setScriptOverride,
   rosLib,
 }: Props) => {
-  const editorRef = React.useRef<any>(null);
+  const editorRef = React.useRef<any>(ReactNull);
   const autoFormatOnSaveRef = React.useRef(autoFormatOnSave);
   autoFormatOnSaveRef.current = autoFormatOnSave;
 
@@ -247,7 +247,7 @@ const Editor = ({
 
   if (!script) {
     // No script to load
-    return null;
+    return ReactNull;
   }
 
   return (

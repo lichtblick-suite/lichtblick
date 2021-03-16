@@ -182,11 +182,12 @@ export function makeConfig(_: unknown, argv: WebpackArgv): Configuration {
         setImmediate: ["@foxglove-studio/app/shared/setImmediate", "default"],
       }),
       new EnvironmentPlugin({
-        SENTRY_DSN: process.env.SENTRY_DSN ?? null,
+        SENTRY_DSN: process.env.SENTRY_DSN ?? null, // eslint-disable-line no-restricted-syntax
       }),
       new webpack.DefinePlugin({
         // Should match webpack-defines.d.ts
         APP_NAME: JSON.stringify("Foxglove Studio"),
+        ReactNull: null, // eslint-disable-line no-restricted-syntax
       }),
       // https://webpack.js.org/plugins/ignore-plugin/#example-of-ignoring-moment-locales
       new webpack.IgnorePlugin({

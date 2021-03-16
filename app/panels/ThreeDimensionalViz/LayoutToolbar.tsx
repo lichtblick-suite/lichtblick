@@ -39,7 +39,7 @@ type Props = LayoutToolbarSharedProps &
     debug: boolean;
     interactionsTabType?: TabType;
     measureInfo: MeasureInfo;
-    measuringElRef: { current: MeasuringTool | null };
+    measuringElRef: { current: MeasuringTool | ReactNull };
     onSetDrawingTabType: (arg0?: DrawingTabType) => void;
     onSetPolygons: (polygons: Polygon[]) => void;
     onToggleCameraMode: () => void;
@@ -91,7 +91,9 @@ function LayoutToolbar({
   toggleSearchTextOpen,
   transforms,
 }: Props) {
-  return isHidden ? null : (
+  return isHidden ? (
+    ReactNull
+  ) : (
     <>
       <MeasuringTool
         ref={measuringElRef}

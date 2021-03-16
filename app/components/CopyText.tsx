@@ -38,7 +38,7 @@ type Props = {
 
 function CopyText({ copyText, tooltip, children }: Props) {
   if (!copyText || !children) {
-    return null;
+    return ReactNull;
   }
   return (
     <SCopyTextWrapper onClick={() => clipboard.copy(copyText)}>

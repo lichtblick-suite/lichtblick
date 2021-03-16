@@ -128,6 +128,7 @@ export default function (
         state.layoutHistory,
       );
       const { persistedState, url } = undoRedoState;
+      // eslint-disable-next-line no-restricted-syntax
       history.replaceState(null, document.title, url);
       return { ...state, persistedState, layoutHistory };
     }
@@ -137,6 +138,7 @@ export default function (
         state.layoutHistory,
       );
       const { persistedState, url } = undoRedoState;
+      // eslint-disable-next-line no-restricted-syntax
       history.replaceState(null, document.title, url);
       return { ...state, persistedState, layoutHistory };
     }

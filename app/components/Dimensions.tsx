@@ -47,8 +47,8 @@ const ResizeObserverImpl =
 // We expect the parent element to never change.
 // Pass either a children function to automatically re-render when the size changes,
 // or an onChange handler to manually handle changes.
-export default function Dimensions(props: Props): React.ReactElement | null {
-  const [parentElement, setParentElement] = useState<HTMLDivElement | null>(null);
+export default function Dimensions(props: Props): React.ReactElement | ReactNull {
+  const [parentElement, setParentElement] = useState<HTMLDivElement | undefined>(undefined);
   const [dimensions, setDimensions] = useState<DimensionsParams | undefined>();
   // This resizeObserver should never change.
   const [resizeObserver] = useState<ResizeObserver>(
@@ -93,5 +93,5 @@ export default function Dimensions(props: Props): React.ReactElement | null {
   if ("children" in props && typeof props.children === "function") {
     return props.children(dimensions);
   }
-  return null;
+  return ReactNull;
 }

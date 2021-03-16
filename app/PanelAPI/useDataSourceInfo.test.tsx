@@ -38,7 +38,7 @@ describe("useDataSourceInfo", () => {
   function createTest() {
     function Test() {
       Test.renderFn(PanelAPI.useDataSourceInfo());
-      return null;
+      return ReactNull;
     }
     Test.renderFn = jest.fn();
     return Test;

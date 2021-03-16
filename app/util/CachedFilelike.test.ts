@@ -153,6 +153,7 @@ describe("CachedFilelike", () => {
       });
 
       const readerPromise = new Promise<Buffer>((resolve, reject) => {
+        // eslint-disable-next-line no-restricted-syntax
         cachedFileReader.read(1, 2, (error: any, data?: Buffer | null) => {
           if (data) {
             resolve(data);
@@ -184,6 +185,7 @@ describe("CachedFilelike", () => {
           // no-op
         },
       });
+      // eslint-disable-next-line no-restricted-syntax
       cachedFileReader.read(1, 0, (error: any, data?: Buffer | null) => {
         if (!data) {
           throw new Error("Missing `data`");

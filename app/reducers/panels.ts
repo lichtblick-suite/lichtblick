@@ -219,6 +219,7 @@ function changePanelLayout(
   state: PanelsState,
   { layout, trimSavedProps = true }: ChangePanelLayoutPayload,
 ): PanelsState {
+  // eslint-disable-next-line no-restricted-syntax
   const panelIds = getLeaves(layout ?? null).filter((panelId) => !isEmpty(panelId));
   const panelIdsInsideTabPanels = getPanelIdsInsideTabPanels(panelIds, state.savedProps);
   // Filter savedProps in case a panel was removed from the layout
@@ -258,6 +259,7 @@ function savePanelConfigs(state: PanelsState, payload: SaveConfigsPayload): Pane
   );
   const tabPanelConfigSaved = configs.find(({ id }) => getPanelTypeFromId(id) === TAB_PANEL_TYPE);
   if (tabPanelConfigSaved) {
+    // eslint-disable-next-line no-restricted-syntax
     const panelIds = getLeaves(state.layout ?? null);
     const panelIdsInsideTabPanels = getPanelIdsInsideTabPanels(panelIds, newSavedProps);
     // Filter savedProps in case a panel was removed from a Tab layout

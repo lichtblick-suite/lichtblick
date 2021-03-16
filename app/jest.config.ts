@@ -10,6 +10,7 @@ export default {
     "\\.(bin|template|wasm)$": "<rootDir>/test/transformers/rawTransformer.js",
   },
   globals: {
+    ReactNull: null, // eslint-disable-line no-restricted-syntax
     "ts-jest": {
       tsconfig: "<rootDir>/tsconfig.jest.json",
       babelConfig: {

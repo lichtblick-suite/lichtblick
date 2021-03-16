@@ -23,12 +23,13 @@
   console.log = () => 0;
   console.log(str); // eslint-disable-line no-restricted-syntax
 
+  // All nulls are banned
   wut == null; // eslint-disable-line no-restricted-syntax
   wut != null; // eslint-disable-line no-restricted-syntax
   null == wut; // eslint-disable-line no-restricted-syntax
   null != wut; // eslint-disable-line no-restricted-syntax
-  null === wut;
-  wut === null;
+  null === wut; // eslint-disable-line no-restricted-syntax
+  wut === null; // eslint-disable-line no-restricted-syntax
 
   wut == undefined;
   wut != undefined;

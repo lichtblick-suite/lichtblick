@@ -99,6 +99,8 @@ export default class FetchReader extends Readable {
         .then(({ done, value }) => {
           // no more to read, signal stream is finished
           if (done) {
+            // Null has a special meaning for streams
+            // eslint-disable-next-line no-restricted-syntax
             this.push(null);
             return;
           }
@@ -110,6 +112,8 @@ export default class FetchReader extends Readable {
         .catch((err) => {
           // canceling the xhr request causes the promise to reject
           if (this._aborted) {
+            // Null has a special meaning for streams
+            // eslint-disable-next-line no-restricted-syntax
             this.push(null);
             return;
           }

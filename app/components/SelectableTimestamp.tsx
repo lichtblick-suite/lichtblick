@@ -78,7 +78,7 @@ type Props = {
 
 function getValidTime(timeStr: string, start: Time, end: Time, isRosTime: boolean) {
   const validTime = isRosTime ? parseRosTimeStr(timeStr) : parseTimeStr(timeStr);
-  return (validTime && clampTime(validTime, start, end)) || null;
+  return (validTime && clampTime(validTime, start, end)) || undefined;
 }
 
 export default React.memo<Props>(function SelectableTimestamp({

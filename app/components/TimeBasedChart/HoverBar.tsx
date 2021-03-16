@@ -67,7 +67,7 @@ export default React.memo<Props>(function HoverBar({
   isTimestampScale,
   scaleBounds,
 }: Props) {
-  const wrapper = React.useRef<HTMLDivElement | null>(null);
+  const wrapper = React.useRef<HTMLDivElement>(ReactNull);
   const hoverValue = useSelector((state: any) => state.hoverValue);
 
   const xBounds = scaleBounds.current && scaleBounds.current.find(({ axes }) => axes === "xAxes");

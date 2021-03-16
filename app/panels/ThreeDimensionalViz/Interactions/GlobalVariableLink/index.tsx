@@ -118,7 +118,7 @@ export default function GlobalVariableLink({
     topic && markerKeyPath ? { topic, markerKeyPath, variableValue } : undefined;
   const renderAddLink = !renderUnlink && !isArrayBuffer && addToLinkedGlobalVariable;
   if (!(renderUnlink || renderAddLink)) {
-    return null;
+    return ReactNull;
   }
 
   const arrayBufferStyle = isArrayBuffer ? style : { cursor: "pointer" };

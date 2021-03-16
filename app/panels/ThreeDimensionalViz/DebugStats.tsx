@@ -68,5 +68,5 @@ export default function DebugStats() {
       </div>
     );
   }
-  return null;
+  return ReactNull;
 }

@@ -23,7 +23,7 @@ describe("filterMap", () => {
     expect(filterMap([0, 1, 2], () => 0)).toEqual([]);
     expect(filterMap([0, 1, 2], () => undefined)).toEqual([]);
     expect(filterMap([0, 1, 2], () => NaN)).toEqual([]);
-    expect(filterMap([0, 1, 2], () => null)).toEqual([]);
+    expect(filterMap([0, 1, 2], () => null)).toEqual([]); // eslint-disable-line no-restricted-syntax
     expect(filterMap([0, 1, 2], () => "")).toEqual([]);
     expect(filterMap([0, 1, 2], () => false)).toEqual([]);
   });

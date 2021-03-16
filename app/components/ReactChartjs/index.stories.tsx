@@ -122,7 +122,7 @@ function DatalabelUpdateExample({
 }
 
 function DatalabelClickExample() {
-  const [clickedDatalabel, setClickedDatalabel] = useState<any>(null);
+  const [clickedDatalabel, setClickedDatalabel] = useState<any>(undefined);
   const refFn = useCallback(() => {
     setTimeout(() => {
       if (!clickedDatalabel) {
@@ -142,7 +142,7 @@ function DatalabelClickExample() {
       <ChartComponent
         {...propsWithDatalabels}
         onClick={(_, datalabel) => {
-          setClickedDatalabel(datalabel);
+          setClickedDatalabel(datalabel ?? undefined);
         }}
       />
     </div>

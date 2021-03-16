@@ -1095,7 +1095,7 @@ describe("UserNodePlayer", () => {
           [
             { source: "registerNode", value: 50 },
             { source: "registerNode", value: "ABC" },
-            { source: "registerNode", value: null },
+            { source: "registerNode", value: null }, // eslint-disable-line no-restricted-syntax
             { source: "registerNode", value: undefined },
             { source: "registerNode", value: 10 },
             { source: "registerNode", value: { abc: 2, def: false } },

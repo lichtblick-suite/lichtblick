@@ -116,7 +116,7 @@ const TopicTimestamp = ({
   style?: {
     [key: string]: string;
   };
-}) => (text === "" ? null : <TopicTimestampSpan style={styleObj}>{text}</TopicTimestampSpan>);
+}) => (text === "" ? ReactNull : <TopicTimestampSpan style={styleObj}>{text}</TopicTimestampSpan>);
 
 const BottomBar = ({ children }: { children?: React.ReactNode }) => (
   <div
@@ -365,7 +365,7 @@ function ImageView(props: Props) {
     const items = [...imageTopicsByNamespace.keys()].sort().map((group) => {
       const imageTopics = imageTopicsByNamespace.get(group);
       if (!imageTopics) {
-        return null;
+        return ReactNull;
       } // satisfy flow
       imageTopics.sort(naturalSort("name"));
 

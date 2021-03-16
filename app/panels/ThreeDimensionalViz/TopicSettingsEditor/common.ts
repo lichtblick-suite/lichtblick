@@ -16,7 +16,7 @@ export const SLabel = styled.label<{ strikethrough?: boolean }>`
   display: block;
   font-size: 14px;
   margin: 6px 2px;
-  text-decoration: ${(props) => (props.strikethrough ? "line-through" : null)};
+  text-decoration: ${(props) => (props.strikethrough ? "line-through" : "none")};
 `;
 export const SDescription = styled.label`
   display: block;

@@ -475,6 +475,7 @@ const transform = ({
     },
     topics,
   );
+  // eslint-disable-next-line no-restricted-syntax
   return { ...result, sourceFile: null, typeChecker: null };
 };
 

@@ -492,7 +492,7 @@ export default function Panel<Config extends PanelConfig>(
           dataTest={`panel-mouseenter-container ${childId || ""}`}
           clip
         >
-          {fullScreen ? <div className={styles.notClickable} /> : null}
+          {fullScreen && <div className={styles.notClickable} />}
           {isSelected && !fullScreen && selectedPanelIds.length > 1 && (
             <div data-tab-options className={styles.tabActionsOverlay}>
               <Button style={{ backgroundColor: colors.BLUE }} onClick={groupPanels}>
@@ -532,7 +532,7 @@ export default function Panel<Config extends PanelConfig>(
               </MosaicDragHandle>
             </div>
           )}
-          {fullScreen ? (
+          {fullScreen && (
             <button
               className={styles.exitFullScreen}
               onClick={exitFullScreen}
@@ -540,7 +540,7 @@ export default function Panel<Config extends PanelConfig>(
             >
               <CloseIcon /> <span>Exit fullscreen</span>
             </button>
-          ) : null}
+          )}
           <ErrorBoundary>{child}</ErrorBoundary>
         </Flex>
       </PanelContext.Provider>

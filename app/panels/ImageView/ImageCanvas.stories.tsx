@@ -71,7 +71,7 @@ function LoadImageMessage({ children }: any) {
   if (imageData) {
     return children(imageMessage);
   }
-  return null;
+  return ReactNull;
 }
 
 function marker(type: number, props: any = {}) {

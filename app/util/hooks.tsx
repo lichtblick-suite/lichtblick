@@ -84,9 +84,12 @@ export function useMustNotChange<T>(value: T, message: string): T {
   return value;
 }
 
-export function useGuaranteedContext<T>(contextType: Context<T>, debugContextName?: string): T {
+export function useGuaranteedContext<T>(
+  contextType: Context<T | undefined>,
+  debugContextName?: string,
+): T {
   const context = useContext(contextType);
-  if (context === null) {
+  if (context == undefined) {
     throw new Error(
       `useGuaranteedContext got null for contextType${
         debugContextName ? `: '${debugContextName}'` : ""

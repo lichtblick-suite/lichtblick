@@ -65,7 +65,7 @@ export default class Publisher extends React.PureComponent<Props> {
       <MessagePipelineConsumer>
         {(context: MessagePipelineContext) => {
           this._context = context;
-          return null;
+          return ReactNull;
         }}
       </MessagePipelineConsumer>
     );

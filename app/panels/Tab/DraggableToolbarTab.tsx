@@ -35,7 +35,7 @@ type Props = {
 export function DraggableToolbarTab(props: Props) {
   const { isActive, tabCount, actions, panelId, tabTitle, tabIndex } = props;
 
-  const ref = useRef(null);
+  const ref = useRef(ReactNull);
   const dispatch = useDispatch();
   const [{ isDragging }, dragRef] = useDrag({
     item: { type: TAB_DRAG_TYPE, panelId, tabIndex },

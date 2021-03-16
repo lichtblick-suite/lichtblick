@@ -16,14 +16,14 @@
 // 'global' within them.
 export interface Channel {
   postMessage(data: any, transfer?: any[]): void;
-  onmessage?: ((ev: MessageEvent) => unknown) | null;
+  onmessage?: ((ev: MessageEvent) => unknown) | null; // eslint-disable-line no-restricted-syntax
 }
 
 // Flow complains when some variables are declared with the above interface type, but
 // not when given this non-interface type...
 export type ChannelImpl = {
   postMessage(data: any, transfer?: any[]): void;
-  onmessage?: ((ev: MessageEvent) => unknown) | null;
+  onmessage?: ((ev: MessageEvent) => unknown) | null; // eslint-disable-line no-restricted-syntax
   terminate: () => void;
 };
 

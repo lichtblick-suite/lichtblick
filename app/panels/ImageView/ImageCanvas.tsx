@@ -124,7 +124,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
     throw new Error("_getRpcWorker can only be called with canvasRenderer type rpc");
   };
 
-  _setCanvasRef = (canvas?: HTMLCanvasElement | null): void => {
+  _setCanvasRef = (canvas?: HTMLCanvasElement | ReactNull): void => {
     if (canvas) {
       this.loadZoomFromConfig();
       if (this._canvasRenderer.type === "rpc") {
@@ -406,7 +406,10 @@ export default class ImageCanvas extends React.Component<Props, State> {
   });
 
   renderZoomChart = () => {
-    return this.state.openZoomChart ? (
+    if (!this.state.openZoomChart) {
+      return ReactNull;
+    }
+    return (
       <div className={styles.zoomChart} data-zoom-menu>
         <div className={cx(styles.menuItem, styles.notInteractive)}>
           Use mousewheel or buttons to zoom
@@ -434,7 +437,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
           Zoom to fill
         </Item>
       </div>
-    ) : null;
+    );
   };
 
   applyPanZoom = () => {
@@ -563,9 +566,9 @@ export default class ImageCanvas extends React.Component<Props, State> {
             {this.renderZoomChart()}
             <button className={styles.magnify} onClick={this.clickMagnify} data-magnify-icon>
               <MagnifyIcon />{" "}
-              {mode === "other" ? (
+              {mode === "other" && (
                 <span>{zoomPercentage ? `${zoomPercentage.toFixed(1)}%` : "null"}</span>
-              ) : null}
+              )}
             </button>
           </OutsideClickHandler>
         </div>

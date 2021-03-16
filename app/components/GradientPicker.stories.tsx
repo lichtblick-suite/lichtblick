@@ -29,7 +29,7 @@ function Story({
   initialMinColor?: Color;
   initialMaxColor?: Color;
 }) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(ReactNull);
   const [minColor, setMinColor] = useState(initialMinColor ?? { r: 0, g: 0, b: 0, a: 0 });
   const [maxColor, setMaxColor] = useState(initialMaxColor ?? { r: 0, g: 0, b: 0, a: 0 });
 

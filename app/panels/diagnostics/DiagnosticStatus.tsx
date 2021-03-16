@@ -245,7 +245,7 @@ class DiagnosticStatus extends React.Component<Props, any> {
         );
       } else if (inCollapsedSection) {
         if (ellipsisShown) {
-          return null;
+          return ReactNull;
         }
         ellipsisShown = true;
         return (
@@ -259,7 +259,7 @@ class DiagnosticStatus extends React.Component<Props, any> {
       // We need both `hardware_id` and `name`; one of them is not enough. That's also how we identify
       // what to show in this very panel; see `selectedHardwareId` AND `selectedName` in the config.
       const valuePath = `${topicToRender}.status[:]{hardware_id=="${info.status.hardware_id}"}{name=="${info.status.name}"}.values[:]{key=="${key}"}.value`;
-      let openPlotPanelIconElem = null;
+      let openPlotPanelIconElem = undefined;
       if (value && value.length > 0) {
         openPlotPanelIconElem = !isNaN(Number(value)) ? (
           <Icon
@@ -376,7 +376,7 @@ class DiagnosticStatus extends React.Component<Props, any> {
                       <DotsHorizontalIcon />
                     </Icon>
                   </div>
-                  {this._getSectionsThatCanBeCollapsed().length ? (
+                  {this._getSectionsThatCanBeCollapsed().length > 0 && (
                     <div
                       style={{ color: "white", cursor: "pointer" }}
                       onClick={this._toggleSections}
@@ -398,7 +398,7 @@ class DiagnosticStatus extends React.Component<Props, any> {
                         )}
                       </Icon>
                     </div>
-                  ) : null}
+                  )}
                 </Flex>
               </td>
             </tr>

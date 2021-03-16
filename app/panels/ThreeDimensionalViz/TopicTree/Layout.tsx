@@ -187,7 +187,7 @@ export default function Layout({
   },
 }: Props) {
   const [filterText, setFilterText] = useState(""); // Topic tree text for filtering to see certain topics.
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(ReactNull);
   const { linkedGlobalVariables } = useLinkedGlobalVariables();
   const { globalVariables, setGlobalVariables } = useGlobalVariables();
   const [debug, setDebug] = useState(false);
@@ -216,7 +216,7 @@ export default function Layout({
   } = searchTextProps;
   // used for updating DrawPolygon during mouse move and scenebuilder namespace change.
   const [_, forceUpdate] = useReducer((x) => x + 1, 0);
-  const measuringElRef = useRef<MeasuringTool>(null);
+  const measuringElRef = useRef<MeasuringTool>(ReactNull);
   const [drawingTabType, setDrawingTabType] = useState<DrawingTabType | undefined>(undefined);
   const [interactionsTabType, setInteractionsTabType] = useState<DrawingTabType | undefined>(
     undefined,
@@ -627,7 +627,7 @@ export default function Layout({
   }, [handleEvent, selectObject]);
 
   // When the TopicTree is hidden, focus the <World> again so keyboard controls continue to work
-  const worldRef = useRef<typeof Worldview | undefined>(null);
+  const worldRef = useRef<typeof Worldview | undefined>(ReactNull);
   useEffect(() => {
     if (!showTopicTree && worldRef.current) {
       worldRef.current.focus();

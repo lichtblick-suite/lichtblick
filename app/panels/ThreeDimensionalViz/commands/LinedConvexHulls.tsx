@@ -27,6 +27,8 @@ import {
   vec4ToRGBA,
 } from "regl-worldview";
 
+import filterMap from "@foxglove-studio/app/util/filterMap";
+
 type Props = CommonCommandProps & {
   children: Line[];
 };
@@ -37,40 +39,38 @@ function getTriangleChildrenForHitmap(
   excludedObjects: any,
 ): TriangleList[] {
   // This getChildrenForHitmap function takes lines and returns triangles.
-  const triangles = props
-    .map((line) => {
-      // Make sure all points are in vec3 format and unique.
-      const points = uniqBy(
-        line.points.map((point: any) => (shouldConvert(point) ? pointToVec3(point) : point)),
-        ([x, y, z]) => `${x}:${y}:${z}`,
-      );
-      // We need a minimum of 4 points to do the convex hull algorithm.
-      if (points.length < 4) {
-        return null;
-      }
-      // Try to run hulling on the face indices. If there is an error, discard the result.
-      let faceIndices;
-      try {
-        faceIndices = qh(points);
-      } catch (error) {
-        console.error(error);
-        return null;
-      }
+  const triangles = filterMap(props, (line) => {
+    // Make sure all points are in vec3 format and unique.
+    const points = uniqBy(
+      line.points.map((point: any) => (shouldConvert(point) ? pointToVec3(point) : point)),
+      ([x, y, z]) => `${x}:${y}:${z}`,
+    );
+    // We need a minimum of 4 points to do the convex hull algorithm.
+    if (points.length < 4) {
+      return undefined;
+    }
+    // Try to run hulling on the face indices. If there is an error, discard the result.
+    let faceIndices;
+    try {
+      faceIndices = qh(points);
+    } catch (error) {
+      console.error(error);
+      return undefined;
+    }
 
-      // From the point indices of each face, find the points and flatmap to get the points of the triangles.
-      const trianglePoints = flatMap(faceIndices, ([index1, index2, index3]) => {
-        return [points[index1], points[index2], points[index3]];
-      });
-      const convertedColor = typeof line.color.r === "number" ? line.color : vec4ToRGBA(line.color);
-      return {
-        pose: line.pose,
-        scale: line.scale,
-        color: convertedColor,
-        points: trianglePoints,
-        originalMarker: line.originalMarker,
-      };
-    })
-    .filter(Boolean);
+    // From the point indices of each face, find the points and flatmap to get the points of the triangles.
+    const trianglePoints = flatMap(faceIndices, ([index1, index2, index3]) => {
+      return [points[index1], points[index2], points[index3]];
+    });
+    const convertedColor = typeof line.color.r === "number" ? line.color : vec4ToRGBA(line.color);
+    return {
+      pose: line.pose,
+      scale: line.scale,
+      color: convertedColor,
+      points: trianglePoints,
+      originalMarker: line.originalMarker,
+    };
+  });
 
   return getChildrenForHitmapWithOriginalMarker(triangles, assignNextColors, excludedObjects);
 }

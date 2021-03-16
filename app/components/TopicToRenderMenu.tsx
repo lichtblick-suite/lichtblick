@@ -130,11 +130,11 @@ export default function TopicToRenderMenu({
           }}
         >
           <SSpan>{parentTopicSpan(topic, availableTopics.includes(topic))}</SSpan>
-          {topicToRender === topic ? (
+          {topicToRender === topic && (
             <SIconSpan>
               <CheckIcon />
             </SIconSpan>
-          ) : null}
+          )}
         </SDiv>
       ))}
     </Dropdown>

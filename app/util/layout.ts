@@ -302,6 +302,7 @@ export const removePanelFromTabPanel = (
   if (!path.length) {
     newTree = undefined;
   } else {
+    // eslint-disable-next-line no-restricted-syntax
     const update = createRemoveUpdate(currentTabLayout ?? null, path);
     newTree = updateTree<string>(currentTabLayout!, [update]);
   }

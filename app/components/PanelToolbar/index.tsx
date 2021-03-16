@@ -141,7 +141,7 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
   const shareModal = useMemo(() => {
     const id = panelContext?.id;
     if (!id || !showShareModal) {
-      return null;
+      return ReactNull;
     }
 
     const panelConfigById = store.getState().persistedState.panels.savedProps;
@@ -159,7 +159,7 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
 
   const type = getPanelType();
   if (!type) {
-    return null;
+    return ReactNull;
   }
 
   return (
@@ -303,7 +303,7 @@ export default React.memo<Props>(function PanelToolbar(props: Props) {
   const [containsOpen, setContainsOpen] = useState(false);
 
   if (frameless() || hideToolbars) {
-    return null;
+    return ReactNull;
   }
 
   const isRendered = isHovered || containsOpen || isDragging || !!isUnknownPanel;

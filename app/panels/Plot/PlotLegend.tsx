@@ -150,7 +150,7 @@ export default function PlotLegend(props: PlotLegendProps) {
             [styles.itemInputDisabled]: !xAxisPath?.enabled,
           })}
         >
-          {xAxisVal === "custom" || xAxisVal === "currentCustom" ? (
+          {(xAxisVal === "custom" || xAxisVal === "currentCustom") && (
             <MessagePathInput
               path={xAxisPath?.value || "/"}
               onChange={(newXAxisPath) =>
@@ -163,7 +163,7 @@ export default function PlotLegend(props: PlotLegendProps) {
               disableAutocomplete={xAxisPath && isReferenceLinePlotPathType(xAxisPath)}
               autoSize
             />
-          ) : null}
+          )}
         </div>
       </div>
       {paths.map((path: PlotPath, index: number) => {

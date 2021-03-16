@@ -30,7 +30,7 @@ function getDummyPanel(renderFn: any) {
 
     render() {
       renderFn(this.props);
-      return null;
+      return ReactNull;
     }
   }
   return Panel<DummyConfig>(DummyComponent as any);

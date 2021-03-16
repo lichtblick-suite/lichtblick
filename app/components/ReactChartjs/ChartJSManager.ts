@@ -237,6 +237,7 @@ export default class ChartJSManager {
           if (next.data) {
             const currentData = current.data;
             next.data.forEach(
+              // eslint-disable-next-line no-restricted-syntax
               (value: number | number[] | Chart.ChartPoint | null | undefined, pid: number) => {
                 currentData[pid] = value;
               },
@@ -355,6 +356,7 @@ export default class ChartJSManager {
         const label = value?.label;
         // We have to return "null" if we don't want this label to be displayed. Returning "undefined" falls back to the
         // default formatting.
+        // eslint-disable-next-line no-restricted-syntax
         return label != undefined ? label : null;
       };
       // Override color so that it can be set per-dataset.

@@ -35,7 +35,7 @@ export default class Tooltip extends React.Component<Props> {
     } = this.props;
 
     if (!contents) {
-      return children || null;
+      return children ?? ReactNull;
     }
 
     return (

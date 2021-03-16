@@ -34,7 +34,7 @@ type ModalPromptProps = {
 
 function ModalPrompt({ onComplete, placeholder, value: initialValue }: ModalPromptProps) {
   const [value, setValue] = useState<string>(initialValue ?? "");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(ReactNull);
 
   return (
     <Modal onRequestClose={() => onComplete(undefined)}>

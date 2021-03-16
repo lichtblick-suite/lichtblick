@@ -46,6 +46,7 @@ export default function mosaicReducer(state: State, action: ActionTypes): State 
         ...state,
         mosaic: {
           ...state.mosaic,
+          // eslint-disable-next-line no-restricted-syntax
           selectedPanelIds: getLeaves(state.persistedState.panels.layout ?? null),
         },
       };

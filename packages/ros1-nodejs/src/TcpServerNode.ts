@@ -22,7 +22,7 @@ export class TcpServerNode extends EventEmitter implements TcpServer {
 
   address(): TcpAddress | undefined {
     const addr = this.#server.address();
-    if (addr === null || typeof addr === "string") {
+    if (addr == undefined || typeof addr === "string") {
       // Address will only be a string for an IPC (named pipe) server, which
       // should never happen in TcpServerNode
       return undefined;

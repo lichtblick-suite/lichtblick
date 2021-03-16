@@ -85,7 +85,7 @@ const logs: UserNodeLog[] = [
   { source: "registerNode", value: 100 },
   { source: "registerNode", value: false },
   { source: "registerNode", value: "abc" },
-  { source: "registerNode", value: null },
+  { source: "registerNode", value: null }, // eslint-disable-line no-restricted-syntax
   { source: "registerNode", value: undefined },
   {
     source: "processMessage",

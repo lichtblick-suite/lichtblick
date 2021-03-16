@@ -27,7 +27,7 @@ const useUserNodes = ({ nodePlayer, userNodes }: Props) => {
     }
   }, [userNodes, nodePlayer]);
 
-  return null;
+  return ReactNull;
 };
 
 export default useUserNodes;

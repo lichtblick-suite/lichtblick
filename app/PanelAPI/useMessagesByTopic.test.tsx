@@ -32,7 +32,7 @@ describe("useMessagesByTopic", () => {
       format?: MessageFormat;
     }) {
       Test.result(PanelAPI.useMessagesByTopic({ topics, historySize, format }));
-      return null;
+      return ReactNull;
     }
     Test.result = jest.fn();
     return Test;

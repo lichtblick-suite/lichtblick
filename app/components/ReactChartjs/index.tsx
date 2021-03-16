@@ -195,7 +195,7 @@ class ChartComponent extends React.PureComponent<Props> {
     }
   }
 
-  _ref = (element?: HTMLCanvasElement | null): void => {
+  _ref = (element?: HTMLCanvasElement | ReactNull): void => {
     this.canvas = element ?? undefined;
   };
 

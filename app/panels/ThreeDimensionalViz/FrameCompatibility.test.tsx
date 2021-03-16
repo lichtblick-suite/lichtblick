@@ -43,7 +43,7 @@ describe("FrameCompatibilityDEPRECATED", () => {
     class MyComponent extends React.Component<any> {
       render() {
         childFn(this.props);
-        return null;
+        return ReactNull;
       }
 
       setSubscriptions(topics: string[]) {

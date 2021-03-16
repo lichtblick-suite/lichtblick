@@ -132,6 +132,13 @@ rules:
     - selector: "BinaryExpression:matches([operator='=='], [operator='!=']):not([right.type=Identifier][right.name=undefined]):not([right.type=Literal][right.raw=null])"
       message: 'Use strict equality operators "===" and "!==", except when checking for null or undefined.'
 
+    - selector: "TSNullKeyword, Literal[raw=null]"
+      message: >
+        Prefer undefined instead of null. When required for React refs/components, use
+        the `ReactNull` alias. Otherwise, if strictly necessary, disable this error with
+        `// eslint-disable-next-line no-restricted-syntax`. For rationale, see:
+        https://github.com/sindresorhus/meta/discussions/7"
+
   "@typescript-eslint/strict-boolean-expressions":
     - error
       # Force explicit checks that strings are empty

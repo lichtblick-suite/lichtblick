@@ -40,7 +40,7 @@ function Box({
   children: React.ReactNode;
   onMount?: (arg0: HTMLDivElement) => void;
 }) {
-  const ref = React.useRef<HTMLDivElement>(null);
+  const ref = React.useRef<HTMLDivElement>(ReactNull);
   React.useLayoutEffect(() => {
     if (ref.current && onMount) {
       onMount(ref.current);

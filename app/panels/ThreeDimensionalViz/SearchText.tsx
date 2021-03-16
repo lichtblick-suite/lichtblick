@@ -48,7 +48,7 @@ export type SearchTextProps = WorldSearchTextProps & {
   toggleSearchTextOpen: (bool: boolean) => void;
   setSearchText: (searchText: string) => void;
   setSelectedMatchIndex: (index: number) => void;
-  searchInputRef: { current: HTMLInputElement | null };
+  searchInputRef: { current: HTMLInputElement | ReactNull };
 };
 
 export const getHighlightedIndices = (text: string, searchText: string): number[] => {
@@ -137,7 +137,7 @@ export const useSearchText = (): SearchTextProps => {
   const [searchText, setSearchText] = useState<string>("");
   const [searchTextMatches, setSearchTextMatches] = useState<GLTextMarker[]>([]);
   const [selectedMatchIndex, setSelectedMatchIndex] = useState(0);
-  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(ReactNull);
 
   return {
     searchTextOpen,

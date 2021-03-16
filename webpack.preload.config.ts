@@ -45,7 +45,7 @@ export default (_: unknown, argv: WebpackArgv): Configuration => {
 
     plugins: [
       new EnvironmentPlugin({
-        SENTRY_DSN: process.env.SENTRY_DSN ?? null,
+        SENTRY_DSN: process.env.SENTRY_DSN ?? null, // eslint-disable-line no-restricted-syntax
       }),
       new ForkTsCheckerWebpackPlugin(),
     ],

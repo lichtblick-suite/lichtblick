@@ -59,14 +59,14 @@ export default function TreeNodeMenu({
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { toggleCheckAllAncestors, toggleCheckAllDescendants }: any = useGuaranteedContext(
+  const { toggleCheckAllAncestors, toggleCheckAllDescendants } = useGuaranteedContext(
     TopicTreeContext,
     "TopicTreeContext",
   );
 
   // Don't render the dot menu if the datasources are unavailable and the node is group node (topic node has option to copy topicName).
   if (!providerAvailable && !topicName) {
-    return null;
+    return ReactNull;
   }
   return (
     <ChildToggle

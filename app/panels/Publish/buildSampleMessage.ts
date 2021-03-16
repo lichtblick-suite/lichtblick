@@ -40,7 +40,7 @@ export default function buildSampleMessage(
   }
   const fields = datatypes[datatype].fields;
   if (!fields) {
-    return null;
+    return ReactNull;
   }
   const obj: any = {};
   for (const field of fields) {

@@ -55,7 +55,7 @@ export default function PanelSetupWithBag({
   store,
   frameHistoryCompatibility,
 }: Props) {
-  const [fixture, setFixture] = useState<Fixture | null>(null);
+  const [fixture, setFixture] = useState<Fixture | undefined>(undefined);
   const hasResetFixture = React.useRef(false);
 
   // 3D Panel hack that resets fixture in order to get around MessageHistory
@@ -102,5 +102,7 @@ export default function PanelSetupWithBag({
     <PanelSetup fixture={fixture} onMount={onMount} onFirstMount={onFirstMount} store={store}>
       {children}
     </PanelSetup>
-  ) : null;
+  ) : (
+    ReactNull
+  );
 }

@@ -90,8 +90,8 @@ export const TooltipItem = ({ title, value }: { title: string; value: any }) => 
 
 export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
   (props: PlaybackControlProps) => {
-    const el = useRef<HTMLDivElement | null>(null);
-    const slider = useRef<Slider | null>(null);
+    const el = useRef<HTMLDivElement>(ReactNull);
+    const slider = useRef<Slider>(ReactNull);
     const { seek, pause, play, player } = props;
 
     // playerState is unstable, and will cause callbacks to change identity every frame. They can take
@@ -229,7 +229,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
               value={value}
               draggable
               onChange={onChange}
-              renderSlider={(val) => (val == undefined ? null : <StyledMarker width={val} />)}
+              renderSlider={(val) => (val == undefined ? undefined : <StyledMarker width={val} />)}
             />
           </div>
           <PlaybackBarHoverTicks componentId={hoverComponentId} />

@@ -89,7 +89,7 @@ export default class Tooltip extends React.Component<Props, State> {
     // satisfy flow
     if (!container) {
       console.warn("Could not get tooltip portal");
-      return null;
+      return ReactNull;
     }
     return render(
       <Tooltip defaultShown defaultMousePosition={{ x, y }} contents={contents} {...rest} />,
@@ -159,7 +159,7 @@ export default class Tooltip extends React.Component<Props, State> {
     const { placement, contents, offset, fixed, arrow } = this.props;
     const { shown } = this.state;
     if (!shown) {
-      return null;
+      return ReactNull;
     }
 
     // if we are positioning based on the mouse, hook up the fake reference element
@@ -180,7 +180,7 @@ export default class Tooltip extends React.Component<Props, State> {
         {({ ref, style, scheduleUpdate, placement: renderedPlacement, arrowProps }) => {
           const { body } = document;
           if (!body) {
-            return null;
+            return ReactNull;
           }
           // hold onto the scheduleUpdate function so we can call it when the mouse moves
           this.scheduleUpdate = scheduleUpdate;

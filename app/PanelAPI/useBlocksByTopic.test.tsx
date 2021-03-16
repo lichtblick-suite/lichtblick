@@ -23,7 +23,7 @@ describe("useBlocksByTopic", () => {
   function createTest() {
     function Test({ topics }: { topics: string[] }) {
       Test.result(PanelAPI.useBlocksByTopic(topics));
-      return null;
+      return ReactNull;
     }
     Test.result = jest.fn();
     return Test;

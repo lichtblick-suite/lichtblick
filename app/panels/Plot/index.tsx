@@ -128,9 +128,9 @@ function Plot(props: Props) {
     xAxisPath,
   } = config;
   // Note that the below values are refs since they are only used in callbacks and are not rendered anywhere.
-  const currentMinY = useRef<number | null>(null);
-  const currentMaxY = useRef<number | null>(null);
-  const currentViewWidth = useRef<number | null>(null);
+  const currentMinY = useRef<number>(ReactNull);
+  const currentMaxY = useRef<number>(ReactNull);
+  const currentViewWidth = useRef<number>(ReactNull);
 
   const saveCurrentView = useCallback((minY: number, maxY: number, width: number) => {
     currentMinY.current = minY;

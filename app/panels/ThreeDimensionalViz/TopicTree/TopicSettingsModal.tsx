@@ -71,7 +71,7 @@ const STabWrapper = styled.div`
 
 function getSettingsByColumnWithDefaults(
   topicName: string,
-  settingsByColumn?: any[] | null,
+  settingsByColumn?: any[],
 ): { settingsByColumn: any[] } | undefined {
   const defaultTopicSettingsByColumn = getGlobalHooks()
     .startupPerPanelHooks()

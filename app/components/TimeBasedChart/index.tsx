@@ -243,8 +243,8 @@ export type Props = {
 // component. Uses chart.js internally, with a zoom/pan plugin, and with our
 // standard tooltips.
 export default memo<Props>(function TimeBasedChart(props: Props) {
-  const chartComponent = useRef<ChartComponent | null>(null);
-  const tooltip = useRef<HTMLDivElement | null>(null);
+  const chartComponent = useRef<ChartComponent>(ReactNull);
+  const tooltip = useRef<HTMLDivElement>(ReactNull);
   const hasUnmounted = useRef<boolean>(false);
 
   const [hasUserPannedOrZoomed, setHasUserPannedOrZoomed] = useState<boolean>(false);
@@ -287,7 +287,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
 
   const { saveCurrentView, yAxes } = props;
   const scaleBounds = useRef<readonly ScaleBounds[] | undefined>();
-  const hoverBar = useRef<HTMLDivElement | null>(null);
+  const hoverBar = useRef<HTMLDivElement>(ReactNull);
   const onScaleBoundsUpdate = useCallback(
     (scales: ScaleBounds[]) => {
       scaleBounds.current = scales;
@@ -421,9 +421,8 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
       ReactDOM.unmountComponentAtNode(tooltip.current);
     }
     if (tooltip.current && tooltip.current.parentNode) {
-      // Satisfy flow.
       tooltip.current.parentNode.removeChild(tooltip.current);
-      tooltip.current = null;
+      tooltip.current = ReactNull;
     }
   }, []);
   // Always clean up tooltips when unmounting.
