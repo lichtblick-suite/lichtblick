@@ -18,7 +18,7 @@ jobs:
           # Specify names so that the GitHub branch protection settings for
           # required checks don't need to change if we ever change the commands used.
           - name: lint
-            command: yarn run lint:nofix
+            command: yarn run lint:ci
           - name: test
             command: yarn run test --maxWorkers=100%
           - name: storybook

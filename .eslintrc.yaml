@@ -24,7 +24,6 @@ extends:
   - plugin:import/errors
   - plugin:import/warnings
   - plugin:import/typescript
-  - plugin:prettier/recommended
 
 parser: "@typescript-eslint/parser"
 parserOptions:
@@ -56,7 +55,7 @@ rules:
   "@typescript-eslint/prefer-nullish-coalescing": warn
   react/jsx-uses-react: off
   react/react-in-jsx-scope: off
-  react/prop-types: warn
+  react/prop-types: off # Unnecessary with typescript validation
   react/no-unused-prop-types: warn
   react-hooks/rules-of-hooks: error
   react-hooks/exhaustive-deps: error
@@ -81,11 +80,9 @@ rules:
       location: anywhere
   # Some good ones that people really should be adding to import/recommended:
   import/first: error
-  import/no-self-import: error
   import/no-useless-path-segments: error
   import/no-mutable-exports: error
   import/newline-after-import: error
-  import/no-duplicates: error # https://github.com/benmosher/eslint-plugin-import/issues/242#issuecomment-230118951
   # Group imports into three groups [external, @foxglove, relative] and sort alphabetically within each group
   import/order:
     - error
