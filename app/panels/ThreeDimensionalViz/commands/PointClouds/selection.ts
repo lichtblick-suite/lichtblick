@@ -15,18 +15,19 @@ import { omit, difference, isEmpty, isNil } from "lodash";
 import { MouseEventObject, toRGBA, Color } from "regl-worldview";
 
 import {
-  getVertexValues,
-  getVertexValue,
-  getFieldOffsetsAndReaders,
-  getVertexCount,
-} from "./buffers";
-import {
   DEFAULT_FLAT_COLOR,
   DEFAULT_MIN_COLOR,
   DEFAULT_MAX_COLOR,
 } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
 import { PointCloud2, PointField } from "@foxglove-studio/app/types/Messages";
 import { lerp } from "@foxglove-studio/app/util";
+
+import {
+  getVertexValues,
+  getVertexValue,
+  getFieldOffsetsAndReaders,
+  getVertexCount,
+} from "./buffers";
 
 export type ClickedInfo = {
   clickedPoint: number[];

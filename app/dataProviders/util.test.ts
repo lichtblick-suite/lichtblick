@@ -11,10 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mockExtensionPoint } from "./mockExtensionPoint";
-import { getReportMetadataForChunk } from "./util";
 import delay from "@foxglove-studio/app/shared/delay";
 import { toSec } from "@foxglove-studio/app/util/time";
+
+import { mockExtensionPoint } from "./mockExtensionPoint";
+import { getReportMetadataForChunk } from "./util";
 
 describe("getReportMetadataForChunk", () => {
   it("logs a stall", async () => {

@@ -15,7 +15,6 @@ import hoistNonReactStatics from "hoist-non-react-statics";
 import { omit, debounce } from "lodash";
 import React, { useCallback, useMemo, useState, useRef, useEffect } from "react";
 
-import { FrameCompatibilityDEPRECATED } from "./FrameCompatibility";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelContext from "@foxglove-studio/app/components/PanelContext";
@@ -32,6 +31,8 @@ import withTransforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/with
 import { Frame, Topic } from "@foxglove-studio/app/players/types";
 import { SaveConfig } from "@foxglove-studio/app/types/panels";
 import { TRANSFORM_TOPIC, TRANSFORM_STATIC_TOPIC } from "@foxglove-studio/app/util/globalConstants";
+
+import { FrameCompatibilityDEPRECATED } from "./FrameCompatibility";
 
 // The amount of time to wait before dispatching the saveConfig action to save the cameraState into the layout
 export const CAMERA_STATE_UPDATE_DEBOUNCE_DELAY_MS = 250;

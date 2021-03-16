@@ -19,9 +19,10 @@ import cx from "classnames";
 import { noop } from "lodash";
 import styled from "styled-components";
 
-import styles from "./index.module.scss";
 import Icon from "@foxglove-studio/app/components/Icon";
 import Tooltip from "@foxglove-studio/app/components/Tooltip";
+
+import styles from "./index.module.scss";
 
 const SContentWrapper = styled.div`
   flex: 1 1 auto;

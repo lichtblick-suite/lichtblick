@@ -18,8 +18,9 @@ import ReactAutocomplete from "react-autocomplete";
 import { createPortal } from "react-dom";
 import textWidth from "text-width";
 
-import styles from "./Autocomplete.module.scss";
 import fuzzyFilter from "@foxglove-studio/app/util/fuzzyFilter";
+
+import styles from "./Autocomplete.module.scss";
 
 const fontFamily = "'Inter UI', -apple-system, BlinkMacSystemFont, sans-serif";
 const fontSize = 12;

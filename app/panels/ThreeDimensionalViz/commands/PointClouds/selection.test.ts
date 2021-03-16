@@ -11,10 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { PointCloud2 } from "@foxglove-studio/app/types/Messages";
+
 import { decodeMarker } from "./decodeMarker";
 import { POINT_CLOUD_MESSAGE, POINT_CLOUD_WITH_ADDITIONAL_FIELDS } from "./fixture/pointCloudData";
 import { getClickedInfo, getAllPoints, decodeAdditionalFields } from "./selection";
-import { PointCloud2 } from "@foxglove-studio/app/types/Messages";
 
 describe("<PointClouds />", () => {
   console.info = () => {

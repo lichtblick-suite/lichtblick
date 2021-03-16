@@ -13,9 +13,10 @@
 
 import clamp from "lodash/clamp";
 
-import CameraModel from "./CameraModel";
 import { Topic, Message } from "@foxglove-studio/app/players/types";
 import { CameraInfo } from "@foxglove-studio/app/types/Messages";
+
+import CameraModel from "./CameraModel";
 
 // The OffscreenCanvas type is not yet in Flow. It's similar to, but more restrictive than HTMLCanvasElement.
 // TODO: change this to the Flow definition once it's been added.

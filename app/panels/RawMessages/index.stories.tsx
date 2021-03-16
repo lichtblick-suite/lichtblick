@@ -13,6 +13,13 @@
 
 import { storiesOf } from "@storybook/react";
 
+import RawMessages, {
+  PREV_MSG_METHOD,
+  OTHER_SOURCE_METHOD,
+} from "@foxglove-studio/app/panels/RawMessages";
+import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+
 import {
   fixture,
   enumFixture,
@@ -22,12 +29,6 @@ import {
   topicsWithIdsToDiffFixture,
   multipleNumberMessagesFixture,
 } from "./fixture";
-import RawMessages, {
-  PREV_MSG_METHOD,
-  OTHER_SOURCE_METHOD,
-} from "@foxglove-studio/app/panels/RawMessages";
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
-import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 
 const noDiffConfig = {
   diffMethod: "custom",

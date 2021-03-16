@@ -13,10 +13,11 @@
 import { round } from "lodash";
 import { Callback, Filelike } from "rosbag";
 
+import Logger from "@foxglove-studio/app/util/Logger";
+
 import VirtualLRUBuffer from "./VirtualLRUBuffer";
 import { getNewConnection } from "./getNewConnection";
 import { Range } from "./ranges";
-import Logger from "@foxglove-studio/app/util/Logger";
 
 // CachedFilelike is a `Filelike` that attempts to do as much caching of the file in memory as
 // possible. It takes in 3 named arguments to its constructor:

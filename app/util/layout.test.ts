@@ -14,6 +14,8 @@ import CBOR from "cbor-js";
 import { MosaicNode, MosaicParent, updateTree } from "react-mosaic-component";
 import zlib from "zlib";
 
+import { defaultPlaybackConfig } from "@foxglove-studio/app/reducers/panels";
+
 import {
   getPanelTypeFromId,
   getSaveConfigsPayloadForAddedPanel,
@@ -32,7 +34,6 @@ import {
   stringifyParams,
   dictForPatchCompression,
 } from "./layout";
-import { defaultPlaybackConfig } from "@foxglove-studio/app/reducers/panels";
 
 const tabConfig = {
   title: "First tab",

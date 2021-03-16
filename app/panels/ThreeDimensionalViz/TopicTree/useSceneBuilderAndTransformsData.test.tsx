@@ -14,11 +14,12 @@
 import { mount } from "enzyme";
 import { omit } from "lodash";
 
-import { UseSceneBuilderAndTransformsDataInput } from "./types";
-import useSceneBuilderAndTransformsData from "./useSceneBuilderAndTransformsData";
 import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
 import { Namespace } from "@foxglove-studio/app/types/Messages";
 import { TRANSFORM_TOPIC } from "@foxglove-studio/app/util/globalConstants";
+
+import { UseSceneBuilderAndTransformsDataInput } from "./types";
+import useSceneBuilderAndTransformsData from "./useSceneBuilderAndTransformsData";
 
 type ErrorsByTopic = {
   [topicName: string]: string[];

@@ -13,7 +13,6 @@
 
 // @ts-nocheck
 
-import { lib_filename, lib_es6_dts } from "./lib";
 import {
   DEPRECATED__ros_lib_dts,
   DEPRECATED__ros_lib_filename,
@@ -24,6 +23,8 @@ import {
   ros_lib_dts,
 } from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/ros";
 import { DEFAULT_WEBVIZ_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+
+import { lib_filename, lib_es6_dts } from "./lib";
 
 export type NodeProjectFile = {
   fileName: string;

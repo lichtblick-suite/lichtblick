@@ -33,7 +33,6 @@ import {
 import { Time } from "rosbag";
 import { useDebouncedCallback } from "use-debounce";
 
-import useTopicTree, { TopicTreeContext } from "./useTopicTree";
 import useDataSourceInfo from "@foxglove-studio/app/PanelAPI/useDataSourceInfo";
 import Dimensions from "@foxglove-studio/app/components/Dimensions";
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
@@ -91,6 +90,8 @@ import { useShallowMemo } from "@foxglove-studio/app/util/hooks";
 import { inVideoRecordingMode } from "@foxglove-studio/app/util/inAutomatedRunMode";
 import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
 import { joinTopics } from "@foxglove-studio/app/util/topicUtils";
+
+import useTopicTree, { TopicTreeContext } from "./useTopicTree";
 
 const { sceneBuilderHooks } = (getGlobalHooks() as any).perPanelHooks().ThreeDimensionalViz;
 

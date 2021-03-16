@@ -11,11 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import styles from "./TimeBasedChartTooltip.module.scss";
-import { TimeBasedChartTooltipData } from "./index";
 import Tooltip from "@foxglove-studio/app/components/Tooltip";
 import { formatTime } from "@foxglove-studio/app/util/formatTime";
 import { subtractTimes, toSec, formatTimeRaw } from "@foxglove-studio/app/util/time";
+
+import styles from "./TimeBasedChartTooltip.module.scss";
+import { TimeBasedChartTooltipData } from "./index";
 
 type Props = {
   children: React.ReactElement<any>;

@@ -13,8 +13,9 @@
 
 import { mount } from "enzyme";
 
-import * as PanelAPI from ".";
 import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
+
+import * as PanelAPI from ".";
 
 describe("useDataSourceInfo", () => {
   const topics = [{ name: "/foo", datatype: "Foo" }];

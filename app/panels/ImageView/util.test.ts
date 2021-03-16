@@ -11,6 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Topic } from "@foxglove-studio/app/players/types";
+
 import {
   getCameraInfoTopic,
   getMarkerOptions,
@@ -19,7 +21,6 @@ import {
   buildMarkerData,
   getCameraNamespace,
 } from "./util";
-import { Topic } from "@foxglove-studio/app/players/types";
 
 describe("ImageView", () => {
   describe("getCameraInfoTopic", () => {

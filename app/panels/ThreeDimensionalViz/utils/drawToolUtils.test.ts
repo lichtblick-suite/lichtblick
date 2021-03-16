@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { polygonsToPoints, pointsToPolygons, getFormattedString } from "./drawToolUtils";
 import { EDIT_FORMAT } from "@foxglove-studio/app/components/ValidatedInput";
+
+import { polygonsToPoints, pointsToPolygons, getFormattedString } from "./drawToolUtils";
 
 const points = [
   [

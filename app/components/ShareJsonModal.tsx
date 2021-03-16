@@ -15,12 +15,13 @@ import cx from "classnames";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMountedState } from "react-use";
 
-import styles from "./ShareJsonModal.module.scss";
 import Button from "@foxglove-studio/app/components/Button";
 import Flex from "@foxglove-studio/app/components/Flex";
 import Modal from "@foxglove-studio/app/components/Modal";
 import { downloadTextFile } from "@foxglove-studio/app/util";
 import clipboard from "@foxglove-studio/app/util/clipboard";
+
+import styles from "./ShareJsonModal.module.scss";
 
 type Props = {
   onRequestClose: () => void;

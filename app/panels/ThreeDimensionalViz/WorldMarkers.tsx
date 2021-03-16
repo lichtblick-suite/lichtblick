@@ -28,8 +28,6 @@ import {
 } from "regl-worldview";
 import styled from "styled-components";
 
-import glTextAtlasLoader, { TextAtlas } from "./utils/glTextAtlasLoader";
-import { groupLinesIntoInstancedLineLists } from "./utils/groupingUtils";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { Interactive } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
 import { GLTextMarker } from "@foxglove-studio/app/panels/ThreeDimensionalViz/SearchText";
@@ -59,6 +57,9 @@ import {
 } from "@foxglove-studio/app/types/Messages";
 import { deepParse, isBobject } from "@foxglove-studio/app/util/binaryObjects";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+
+import glTextAtlasLoader, { TextAtlas } from "./utils/glTextAtlasLoader";
+import { groupLinesIntoInstancedLineLists } from "./utils/groupingUtils";
 
 const ICON_WRAPPER_SIZE = 24;
 const ICON_SIZE = 14;

@@ -15,9 +15,6 @@ import React, { useCallback } from "react";
 import { Color } from "regl-worldview";
 import styled from "styled-components";
 
-import ColorPickerForTopicSettings from "./ColorPickerForTopicSettings";
-import CommonDecaySettings from "./CommonDecaySettings";
-import { SLabel, SInput } from "./common";
 import Flex from "@foxglove-studio/app/components/Flex";
 import GradientPicker from "@foxglove-studio/app/components/GradientPicker";
 import Radio from "@foxglove-studio/app/components/Radio";
@@ -26,6 +23,10 @@ import { Select, Option } from "@foxglove-studio/app/components/Select";
 import CommonPointSettings from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/CommonPointSettings";
 import { TopicSettingsEditorProps } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/types";
 import { PointCloud2 } from "@foxglove-studio/app/types/Messages";
+
+import ColorPickerForTopicSettings from "./ColorPickerForTopicSettings";
+import CommonDecaySettings from "./CommonDecaySettings";
+import { SLabel, SInput } from "./common";
 
 export type ColorMode =
   | { mode: "rgb" }

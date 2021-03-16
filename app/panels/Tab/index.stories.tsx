@@ -15,7 +15,6 @@ import { storiesOf } from "@storybook/react";
 import { createBrowserHistory } from "history";
 import TestUtils from "react-dom/test-utils";
 
-import Tab from "./index";
 import PanelLayout from "@foxglove-studio/app/components/PanelLayout";
 import nestedTabLayoutFixture from "@foxglove-studio/app/panels/Tab/nestedTabLayoutFixture";
 import createRootReducer from "@foxglove-studio/app/reducers";
@@ -24,6 +23,8 @@ import configureStore from "@foxglove-studio/app/store/configureStore.testing";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 import { SExpectedResult } from "@foxglove-studio/app/stories/storyHelpers";
 import { dragAndDrop } from "@foxglove-studio/app/test/dragAndDropHelper";
+
+import Tab from "./index";
 
 const rootReducer = createRootReducer(createBrowserHistory());
 

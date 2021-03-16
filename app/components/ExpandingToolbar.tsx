@@ -15,10 +15,11 @@ import ArrowCollapseIcon from "@mdi/svg/svg/arrow-collapse.svg";
 import cx from "classnames";
 import styled from "styled-components";
 
-import styles from "./ExpandingToolbar.module.scss";
 import Button from "@foxglove-studio/app/components/Button";
 import Flex from "@foxglove-studio/app/components/Flex";
 import Icon from "@foxglove-studio/app/components/Icon";
+
+import styles from "./ExpandingToolbar.module.scss";
 
 const PANE_WIDTH = 268;
 const PANE_HEIGHT = 240;

@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import styles from "./Tooltip.module.scss";
 import BaseTooltip from "@foxglove-studio/app/components/TooltipBase";
+
+import styles from "./Tooltip.module.scss";
 
 type BaseProps = React.ComponentProps<typeof BaseTooltip>;
 type Props = Omit<BaseProps, "offset" | "fixed" | "contents"> & {

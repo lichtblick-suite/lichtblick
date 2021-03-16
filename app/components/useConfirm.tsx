@@ -13,11 +13,12 @@
 
 import React, { useState, useCallback } from "react";
 
-import styles from "./Confirm.module.scss";
 import Button from "@foxglove-studio/app/components/Button";
 import Flex from "@foxglove-studio/app/components/Flex";
 import Modal, { Title } from "@foxglove-studio/app/components/Modal";
 import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
+
+import styles from "./Confirm.module.scss";
 
 type ConfirmStyle = "danger" | "primary";
 

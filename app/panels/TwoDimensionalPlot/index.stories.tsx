@@ -13,8 +13,9 @@
 import { storiesOf } from "@storybook/react";
 import { useState } from "react";
 
-import TwoDimensionalPlot from "./index";
 import PanelSetup, { triggerWheel } from "@foxglove-studio/app/stories/PanelSetup";
+
+import TwoDimensionalPlot from "./index";
 
 const example0 = {
   title: "This is Plot A",

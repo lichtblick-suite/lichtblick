@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { getValueActionForValue, getStructureItemForPath } from "./getValueActionForValue";
 import { wrapMessage } from "@foxglove-studio/app/test/datatypes";
+
+import { getValueActionForValue, getStructureItemForPath } from "./getValueActionForValue";
 
 describe.each(["parsedMessages", "bobjects"])("getValueActionForValue %s", (format) => {
   const getAction = (data: any, structureItem: any, keyPath: any) => {

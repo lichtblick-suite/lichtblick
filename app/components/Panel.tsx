@@ -35,7 +35,6 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { bindActionCreators } from "redux";
 
-import styles from "./Panel.module.scss";
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import {
   addSelectedPanelId,
@@ -80,6 +79,8 @@ import {
 } from "@foxglove-studio/app/util/layout";
 import logEvent, { getEventTags, getEventNames } from "@foxglove-studio/app/util/logEvent";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+
+import styles from "./Panel.module.scss";
 
 type Props<Config> = {
   childId?: string;

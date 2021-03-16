@@ -12,10 +12,11 @@
 //   You may not use this file except in compliance with the License.
 import { Color } from "regl-worldview";
 
-import { Save3DConfig } from "../index";
-import { TopicDisplayMode as DisplayMode } from "./TopicViewModeSelector";
 import { Topic } from "@foxglove-studio/app/players/types";
 import { Namespace } from "@foxglove-studio/app/types/Messages";
+
+import { Save3DConfig } from "../index";
+import { TopicDisplayMode as DisplayMode } from "./TopicViewModeSelector";
 
 export type TopicDisplayMode = DisplayMode;
 export type TopicTreeConfig = {

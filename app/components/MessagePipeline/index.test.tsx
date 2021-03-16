@@ -15,6 +15,12 @@ import { mount } from "enzyme";
 import { last } from "lodash";
 import { act } from "react-dom/test-utils";
 
+import { PlayerStateActiveData } from "@foxglove-studio/app/players/types";
+import delay from "@foxglove-studio/app/shared/delay";
+import signal from "@foxglove-studio/app/shared/signal";
+import tick from "@foxglove-studio/app/shared/tick";
+import { initializeLogEvent, resetLogEventForTests } from "@foxglove-studio/app/util/logEvent";
+
 import {
   MessagePipelineProvider,
   MessagePipelineConsumer,
@@ -22,11 +28,6 @@ import {
 } from ".";
 import FakePlayer from "./FakePlayer";
 import { MAX_PROMISE_TIMEOUT_TIME_MS } from "./pauseFrameForPromise";
-import { PlayerStateActiveData } from "@foxglove-studio/app/players/types";
-import delay from "@foxglove-studio/app/shared/delay";
-import signal from "@foxglove-studio/app/shared/signal";
-import tick from "@foxglove-studio/app/shared/tick";
-import { initializeLogEvent, resetLogEventForTests } from "@foxglove-studio/app/util/logEvent";
 
 jest.setTimeout(MAX_PROMISE_TIMEOUT_TIME_MS * 3);
 

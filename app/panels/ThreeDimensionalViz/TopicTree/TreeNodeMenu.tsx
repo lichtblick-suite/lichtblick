@@ -15,7 +15,6 @@ import DotsVerticalIcon from "@mdi/svg/svg/dots-vertical.svg";
 import { useState } from "react";
 import styled from "styled-components";
 
-import { SetCurrentEditingTopic } from "./types";
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
 import Icon from "@foxglove-studio/app/components/Icon";
 import KeyboardShortcut from "@foxglove-studio/app/components/KeyboardShortcut";
@@ -25,6 +24,8 @@ import { TopicTreeContext } from "@foxglove-studio/app/panels/ThreeDimensionalVi
 import clipboard from "@foxglove-studio/app/util/clipboard";
 import { useGuaranteedContext } from "@foxglove-studio/app/util/hooks";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+
+import { SetCurrentEditingTopic } from "./types";
 
 const DISABLED_STYLE = { cursor: "not-allowed", color: colors.TEXT_MUTED };
 

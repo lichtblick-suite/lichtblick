@@ -11,14 +11,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import Storage, { clearBustStorageFnsMap } from "@foxglove-studio/app/util/Storage";
+import sendNotification from "@foxglove-studio/app/util/sendNotification";
+
 import {
   CacheForTesting as ParseMessageDefinitionsCache,
   setStorageForTest,
   getStorageForTest,
   restoreStorageForTest,
 } from "./parseMessageDefinitionsCache";
-import Storage, { clearBustStorageFnsMap } from "@foxglove-studio/app/util/Storage";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 const storage = new Storage();
 

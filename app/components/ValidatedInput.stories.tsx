@@ -14,7 +14,6 @@
 import { storiesOf } from "@storybook/react";
 import { DEFAULT_CAMERA_STATE } from "regl-worldview";
 
-import ValidatedInput, { EDIT_FORMAT, EditFormat } from "./ValidatedInput";
 import Flex from "@foxglove-studio/app/components/Flex";
 import {
   createValidator,
@@ -22,6 +21,8 @@ import {
   ValidationResult,
 } from "@foxglove-studio/app/shared/validators";
 import { triggerInputChange, triggerInputBlur } from "@foxglove-studio/app/stories/PanelSetup";
+
+import ValidatedInput, { EDIT_FORMAT, EditFormat } from "./ValidatedInput";
 
 const INPUT_OBJ = { id: 1, name: "foo" };
 const INPUT_OBJ1 = { id: 2, name: "bar" };

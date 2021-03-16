@@ -14,11 +14,12 @@
 import hoistNonReactStatics from "hoist-non-react-statics";
 import PropTypes from "prop-types";
 
-import { getGlobalHooks } from "../../loadWebviz";
 import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
 import { Frame } from "@foxglove-studio/app/players/types";
 import { isBobject, deepParse } from "@foxglove-studio/app/util/binaryObjects";
 import { TRANSFORM_STATIC_TOPIC, TRANSFORM_TOPIC } from "@foxglove-studio/app/util/globalConstants";
+
+import { getGlobalHooks } from "../../loadWebviz";
 
 type State = { transforms: Transforms };
 

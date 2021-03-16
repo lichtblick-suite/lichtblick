@@ -13,10 +13,11 @@
 
 import { fromPairs, uniq } from "lodash";
 
-import { MessageDefinitions, ParsedMessageDefinitions } from "./types";
 import { Topic, ParsedMessageDefinitionsByTopic } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import parseMessageDefinitionsCache from "@foxglove-studio/app/util/parseMessageDefinitionsCache";
+
+import { MessageDefinitions, ParsedMessageDefinitions } from "./types";
 
 // Extract one big list of datatypes from the individual connections.
 function parsedMessageDefinitionsToDatatypes(

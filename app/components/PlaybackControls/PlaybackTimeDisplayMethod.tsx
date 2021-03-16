@@ -15,7 +15,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { Time } from "rosbag";
 import styled from "styled-components";
 
-import styles from "./index.module.scss";
 import { setPlaybackConfig } from "@foxglove-studio/app/actions/panels";
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
@@ -28,6 +27,8 @@ import {
 } from "@foxglove-studio/app/util/formatTime";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 import { formatTimeRaw, isTimeInRangeInclusive } from "@foxglove-studio/app/util/time";
+
+import styles from "./index.module.scss";
 
 const MAX_WIDTH = 200;
 

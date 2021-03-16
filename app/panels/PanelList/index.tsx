@@ -18,7 +18,6 @@ import { MosaicDragType } from "react-mosaic-component";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 
-import styles from "./index.module.scss";
 import { dropPanel } from "@foxglove-studio/app/actions/panels";
 import Flex from "@foxglove-studio/app/components/Flex";
 import Icon from "@foxglove-studio/app/components/Icon";
@@ -34,6 +33,8 @@ import {
 } from "@foxglove-studio/app/types/panels";
 import { objectValues } from "@foxglove-studio/app/util";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+
+import styles from "./index.module.scss";
 
 const StickyDiv = styled.div`
   color: ${colors.LIGHT};

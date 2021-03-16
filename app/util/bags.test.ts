@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { getBagChunksOverlapCount } from "./bags";
 import { fromSec } from "@foxglove-studio/app/util/time";
+
+import { getBagChunksOverlapCount } from "./bags";
 
 function* getPermutations<T>(values: T[]): Iterable<T[]> {
   if (values.length < 2) {

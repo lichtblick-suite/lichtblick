@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import debouncePromise from "./debouncePromise";
 import signal from "@foxglove-studio/app/shared/signal";
+
+import debouncePromise from "./debouncePromise";
 
 describe("debouncePromise", () => {
   it("debounces with resolved and rejected signals", async () => {

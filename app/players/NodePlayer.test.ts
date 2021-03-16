@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import NodePlayer from "./NodePlayer";
-import { NodeDefinition } from "./nodes";
 import FakePlayer from "@foxglove-studio/app/components/MessagePipeline/FakePlayer";
 import {
   SubscribePayload,
@@ -22,6 +20,9 @@ import {
 } from "@foxglove-studio/app/players/types";
 import signal from "@foxglove-studio/app/shared/signal";
 import { deepParse, wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
+
+import NodePlayer from "./NodePlayer";
+import { NodeDefinition } from "./nodes";
 
 const testMessageDefinition = {
   fields: [

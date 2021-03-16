@@ -14,6 +14,10 @@
 import { memoize } from "lodash";
 import memoizeWeak from "memoize-weak";
 
+import { isTypicalFilterName } from "@foxglove-studio/app/components/MessagePathSyntax/isTypicalFilterName";
+import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
+import naturalSort from "@foxglove-studio/app/util/naturalSort";
+
 import {
   MessagePathPart,
   rosPrimitives,
@@ -21,9 +25,6 @@ import {
   MessagePathStructureItem,
   MessagePathStructureItemMessage,
 } from "./constants";
-import { isTypicalFilterName } from "@foxglove-studio/app/components/MessagePathSyntax/isTypicalFilterName";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import naturalSort from "@foxglove-studio/app/util/naturalSort";
 
 // Generate an easily navigable flat structure given some `datatypes`. We cache
 // this loosely as `datatypes` don't change after the player has connected.

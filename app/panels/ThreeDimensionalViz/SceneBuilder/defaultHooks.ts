@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ThreeDimensionalVizHooks } from "./types";
 import { TF_DATATYPE } from "@foxglove-studio/app/util/globalConstants";
+
+import { ThreeDimensionalVizHooks } from "./types";
 
 const sceneBuilderHooks: ThreeDimensionalVizHooks = {
   getSelectionState: () => {

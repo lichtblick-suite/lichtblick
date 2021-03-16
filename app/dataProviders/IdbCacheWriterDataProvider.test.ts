@@ -14,17 +14,18 @@
 import { flatten } from "lodash";
 import { TimeUtil } from "rosbag";
 
+import MemoryDataProvider from "@foxglove-studio/app/dataProviders/MemoryDataProvider";
+import { mockExtensionPoint } from "@foxglove-studio/app/dataProviders/mockExtensionPoint";
+import { Message, TypedMessage } from "@foxglove-studio/app/players/types";
+import { getDatabasesInTests } from "@foxglove-studio/app/util/indexeddb/getDatabasesInTests";
+import naturalSort from "@foxglove-studio/app/util/naturalSort";
+
 import {
   getIdbCacheDataProviderDatabase,
   MESSAGES_STORE_NAME,
   TIMESTAMP_INDEX,
 } from "./IdbCacheDataProviderDatabase";
 import IdbCacheWriterDataProvider, { BLOCK_SIZE_NS } from "./IdbCacheWriterDataProvider";
-import MemoryDataProvider from "@foxglove-studio/app/dataProviders/MemoryDataProvider";
-import { mockExtensionPoint } from "@foxglove-studio/app/dataProviders/mockExtensionPoint";
-import { Message, TypedMessage } from "@foxglove-studio/app/players/types";
-import { getDatabasesInTests } from "@foxglove-studio/app/util/indexeddb/getDatabasesInTests";
-import naturalSort from "@foxglove-studio/app/util/naturalSort";
 
 function sortMessages(messages: Message[]) {
   return messages.sort(

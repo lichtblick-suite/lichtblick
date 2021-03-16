@@ -11,6 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Interactive } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
+import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+
 import {
   getDiffBySource,
   BASE_COLOR,
@@ -20,8 +23,6 @@ import {
   SOURCE_1_COLOR_RGBA,
   SOURCE_2_COLOR_RGBA,
 } from "./diffModeUtils";
-import { Interactive } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
-import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 
 const marker = (topic: string): Interactive<any> => {
   return {

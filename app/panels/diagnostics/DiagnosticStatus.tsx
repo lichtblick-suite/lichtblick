@@ -21,8 +21,6 @@ import { createSelector } from "reselect";
 import sanitizeHtml from "sanitize-html";
 import styled from "styled-components";
 
-import style from "./DiagnosticStatus.module.scss";
-import { LEVEL_NAMES, DiagnosticInfo, KeyValue, DiagnosticStatusMessage } from "./util";
 import Flex from "@foxglove-studio/app/components/Flex";
 import Icon from "@foxglove-studio/app/components/Icon";
 import Tooltip from "@foxglove-studio/app/components/Tooltip";
@@ -31,6 +29,9 @@ import { openSiblingStateTransitionsPanel } from "@foxglove-studio/app/panels/St
 import { Config } from "@foxglove-studio/app/panels/diagnostics/DiagnosticStatusPanel";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { PanelConfig } from "@foxglove-studio/app/types/panels";
+
+import style from "./DiagnosticStatus.module.scss";
+import { LEVEL_NAMES, DiagnosticInfo, KeyValue, DiagnosticStatusMessage } from "./util";
 
 const MIN_SPLIT_FRACTION = 0.1;
 

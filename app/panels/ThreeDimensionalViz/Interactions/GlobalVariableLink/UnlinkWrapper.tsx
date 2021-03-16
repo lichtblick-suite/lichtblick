@@ -16,10 +16,11 @@ import LinkVariantIcon from "@mdi/svg/svg/link-variant.svg";
 import { useState, ReactNode } from "react";
 import styled from "styled-components";
 
-import GlobalVariableName from "../GlobalVariableName";
-import { LinkedGlobalVariable } from "../useLinkedGlobalVariables";
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
 import Icon from "@foxglove-studio/app/components/Icon";
+
+import GlobalVariableName from "../GlobalVariableName";
+import { LinkedGlobalVariable } from "../useLinkedGlobalVariables";
 
 const SIconWrapper = styled.span`
   .icon {

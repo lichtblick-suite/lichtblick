@@ -15,13 +15,14 @@ import { storiesOf } from "@storybook/react";
 import moment from "moment";
 import { useRef } from "react";
 
-import { setHooks } from "../loadWebviz";
 import NotificationDisplay, {
   NotificationList,
   NotificationModal,
   NotificationMessage,
 } from "@foxglove-studio/app/components/NotificationDisplay";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
+
+import { setHooks } from "../loadWebviz";
 
 const randomNum = () => Math.floor(Math.random() * 1000);
 const addError = () =>

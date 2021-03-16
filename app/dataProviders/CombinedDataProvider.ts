@@ -15,7 +15,6 @@ import { assign, flatten, isEqual } from "lodash";
 import memoizeWeak from "memoize-weak";
 import { TimeUtil, Time, RosMsgField } from "rosbag";
 
-import rawMessageDefinitionsToParsed from "./rawMessageDefinitionsToParsed";
 import {
   BlockCache,
   MemoryCacheBlock,
@@ -37,6 +36,8 @@ import filterMap from "@foxglove-studio/app/util/filterMap";
 import { deepIntersect } from "@foxglove-studio/app/util/ranges";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import { clampTime } from "@foxglove-studio/app/util/time";
+
+import rawMessageDefinitionsToParsed from "./rawMessageDefinitionsToParsed";
 
 const sortTimes = (times: Time[]) => times.sort(TimeUtil.compare);
 const emptyGetMessagesResult = {

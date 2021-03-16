@@ -11,9 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import ChartJSWorker from "./ChartJSWorker";
 import Rpc from "@foxglove-studio/app/util/Rpc";
 import { inWebWorker } from "@foxglove-studio/app/util/workers";
+
+import ChartJSWorker from "./ChartJSWorker";
 
 if (inWebWorker()) {
   // @ts-expect-error not yet using TS Worker lib: FG-64

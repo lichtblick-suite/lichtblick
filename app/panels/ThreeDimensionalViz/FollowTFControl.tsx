@@ -20,13 +20,14 @@ import React, { memo, createRef, useCallback, useState } from "react";
 import shallowequal from "shallowequal";
 import styled from "styled-components";
 
-import { Transform } from "./Transforms";
 import Autocomplete from "@foxglove-studio/app/components/Autocomplete";
 import Button from "@foxglove-studio/app/components/Button";
 import Icon from "@foxglove-studio/app/components/Icon";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { objectValues } from "@foxglove-studio/app/util";
+
+import { Transform } from "./Transforms";
 
 type TfTreeNode = {
   tf: Transform;

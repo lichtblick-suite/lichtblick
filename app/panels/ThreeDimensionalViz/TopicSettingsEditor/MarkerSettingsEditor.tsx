@@ -13,13 +13,14 @@
 
 import { Color } from "regl-worldview";
 
-import { TopicSettingsEditorProps } from ".";
-import ColorPickerForTopicSettings from "./ColorPickerForTopicSettings";
-import { SLabel, SDescription } from "./common";
 import Checkbox from "@foxglove-studio/app/components/Checkbox";
 import Flex from "@foxglove-studio/app/components/Flex";
 import { Marker, MarkerArray } from "@foxglove-studio/app/types/Messages";
 import { LINED_CONVEX_HULL_RENDERING_SETTING } from "@foxglove-studio/app/util/globalConstants";
+
+import { TopicSettingsEditorProps } from ".";
+import ColorPickerForTopicSettings from "./ColorPickerForTopicSettings";
+import { SLabel, SDescription } from "./common";
 
 type MarkerSettings = {
   overrideColor?: Color;

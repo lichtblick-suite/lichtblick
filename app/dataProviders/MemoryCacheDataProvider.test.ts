@@ -14,12 +14,6 @@
 import { first, flatten, last } from "lodash";
 import { TimeUtil } from "rosbag";
 
-import MemoryCacheDataProvider, {
-  getBlocksToKeep,
-  getPrefetchStartPoint,
-  MAX_BLOCK_SIZE_BYTES,
-  MAX_BLOCKS,
-} from "./MemoryCacheDataProvider";
 import MemoryDataProvider from "@foxglove-studio/app/dataProviders/MemoryDataProvider";
 import { CoreDataProviders } from "@foxglove-studio/app/dataProviders/constants";
 import { mockExtensionPoint } from "@foxglove-studio/app/dataProviders/mockExtensionPoint";
@@ -28,6 +22,13 @@ import delay from "@foxglove-studio/app/shared/delay";
 import { getObject } from "@foxglove-studio/app/util/binaryObjects";
 import naturalSort from "@foxglove-studio/app/util/naturalSort";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
+
+import MemoryCacheDataProvider, {
+  getBlocksToKeep,
+  getPrefetchStartPoint,
+  MAX_BLOCK_SIZE_BYTES,
+  MAX_BLOCKS,
+} from "./MemoryCacheDataProvider";
 
 function sortMessages(messages: Message[]) {
   return messages.sort(

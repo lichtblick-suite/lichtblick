@@ -11,9 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import Rpc, { createLinkedChannels } from "./Rpc";
-import { setupReceiveReportErrorHandler, setupReceiveLogEventHandler } from "./RpcMainThreadUtils";
-import { setupSendReportNotificationHandler, setupLogEventHandler } from "./RpcWorkerUtils";
 import delay from "@foxglove-studio/app/shared/delay";
 import logEvent, {
   initializeLogEvent,
@@ -22,6 +19,10 @@ import logEvent, {
 import sendNotification, {
   setNotificationHandler,
 } from "@foxglove-studio/app/util/sendNotification";
+
+import Rpc, { createLinkedChannels } from "./Rpc";
+import { setupReceiveReportErrorHandler, setupReceiveLogEventHandler } from "./RpcMainThreadUtils";
+import { setupSendReportNotificationHandler, setupLogEventHandler } from "./RpcWorkerUtils";
 
 describe("RpcWorkerUtils and RpcMainThreadUtils", () => {
   describe("sendNotification", () => {

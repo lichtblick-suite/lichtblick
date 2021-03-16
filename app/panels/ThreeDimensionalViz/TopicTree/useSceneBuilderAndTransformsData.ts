@@ -14,14 +14,15 @@
 import { mapKeys, difference } from "lodash";
 import { useMemo, useRef } from "react";
 
+import useDataSourceInfo from "@foxglove-studio/app/PanelAPI/useDataSourceInfo";
+import { TRANSFORM_TOPIC } from "@foxglove-studio/app/util/globalConstants";
+import { useChangeDetector, useDeepMemo } from "@foxglove-studio/app/util/hooks";
+
 import {
   UseSceneBuilderAndTransformsDataInput,
   UseSceneBuilderAndTransformsDataOutput,
 } from "./types";
 import { generateNodeKey } from "./useTopicTree";
-import useDataSourceInfo from "@foxglove-studio/app/PanelAPI/useDataSourceInfo";
-import { TRANSFORM_TOPIC } from "@foxglove-studio/app/util/globalConstants";
-import { useChangeDetector, useDeepMemo } from "@foxglove-studio/app/util/hooks";
 
 // Derived namespace and error information for TopicTree from sceneBuilder and transforms.
 export default function useSceneBuilderAndTransformsData({

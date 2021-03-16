@@ -11,9 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import MessageCollector from "./MessageCollector";
 import { Interactive } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
 import { BaseMarker } from "@foxglove-studio/app/types/Messages";
+
+import MessageCollector from "./MessageCollector";
 
 const makeMarker = (namespace: string, id: string): Interactive<BaseMarker> => {
   const originalMessage = {

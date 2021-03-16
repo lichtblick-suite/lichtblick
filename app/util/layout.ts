@@ -24,8 +24,6 @@ import {
 } from "react-mosaic-component";
 import zlib from "zlib";
 
-import Logger from "./Logger";
-import { isInIFrame } from "./iframeUtils";
 import { PanelsState } from "@foxglove-studio/app/reducers/panels";
 import { TabLocation, TabPanelConfig } from "@foxglove-studio/app/types/layouts";
 import {
@@ -43,6 +41,9 @@ import {
   LAYOUT_URL_QUERY_KEY,
   PATCH_QUERY_KEY,
 } from "@foxglove-studio/app/util/globalConstants";
+
+import Logger from "./Logger";
+import { isInIFrame } from "./iframeUtils";
 
 const jsondiffpatch = JsonDiffCreate({});
 

@@ -17,9 +17,6 @@ import { groupBy, defaults } from "lodash";
 import { useCallback, useContext, useMemo, useState } from "react";
 import styled from "styled-components";
 
-import { SLeft, SRightActions, SToggles, STreeNodeRow } from "./TreeNodeRow";
-import VisibilityToggle from "./VisibilityToggle";
-import { TREE_SPACING, ROW_HEIGHT } from "./constants";
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
 import Icon from "@foxglove-studio/app/components/Icon";
 import Menu, { Item } from "@foxglove-studio/app/components/Menu";
@@ -42,6 +39,10 @@ import { Color } from "@foxglove-studio/app/types/Messages";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import { joinTopics } from "@foxglove-studio/app/util/topicUtils";
+
+import { SLeft, SRightActions, SToggles, STreeNodeRow } from "./TreeNodeRow";
+import VisibilityToggle from "./VisibilityToggle";
+import { TREE_SPACING, ROW_HEIGHT } from "./constants";
 
 // TODO: Dedupe from renderNamespaceNodes
 const OUTER_LEFT_MARGIN = 12;

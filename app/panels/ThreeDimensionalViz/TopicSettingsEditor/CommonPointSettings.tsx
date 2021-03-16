@@ -13,9 +13,10 @@
 
 import { upperFirst } from "lodash";
 
-import { SLabel, SInput } from "./common";
 import Flex from "@foxglove-studio/app/components/Flex";
 import { Select, Option } from "@foxglove-studio/app/components/Select";
+
+import { SLabel, SInput } from "./common";
 
 export default function CommonPointSettings({
   defaultPointSize,

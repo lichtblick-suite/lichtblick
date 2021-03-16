@@ -13,10 +13,6 @@
 
 import { sortBy } from "lodash";
 
-import DiagnosticStatus from "./DiagnosticStatus";
-import helpContent from "./DiagnosticStatusPanel.help.md";
-import DiagnosticsHistory, { DiagnosticAutocompleteEntry } from "./DiagnosticsHistory";
-import { getDisplayName, trimHardwareId } from "./util";
 import Autocomplete from "@foxglove-studio/app/components/Autocomplete";
 import EmptyState from "@foxglove-studio/app/components/EmptyState";
 import Flex from "@foxglove-studio/app/components/Flex";
@@ -26,6 +22,11 @@ import TopicToRenderMenu from "@foxglove-studio/app/components/TopicToRenderMenu
 import { Topic } from "@foxglove-studio/app/players/types";
 import { PanelConfig } from "@foxglove-studio/app/types/panels";
 import { DIAGNOSTIC_TOPIC } from "@foxglove-studio/app/util/globalConstants";
+
+import DiagnosticStatus from "./DiagnosticStatus";
+import helpContent from "./DiagnosticStatusPanel.help.md";
+import DiagnosticsHistory, { DiagnosticAutocompleteEntry } from "./DiagnosticsHistory";
+import { getDisplayName, trimHardwareId } from "./util";
 
 export type Config = {
   selectedHardwareId?: string;

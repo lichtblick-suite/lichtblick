@@ -26,9 +26,10 @@ import { autoUpdater } from "electron-updater";
 import fs from "fs";
 import path from "path";
 
+import colors from "@foxglove-studio/app/styles/colors.module.scss";
+
 import packageJson from "../package.json";
 import { installMenuInterface } from "./menu";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 

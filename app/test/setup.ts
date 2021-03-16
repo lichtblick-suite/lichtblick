@@ -15,8 +15,9 @@ import UrlSearchParams from "url-search-params";
 import util from "util";
 import ws from "ws";
 
-import MemoryStorage from "./MemoryStorage";
 import { resetLogEventForTests } from "@foxglove-studio/app/util/logEvent";
+
+import MemoryStorage from "./MemoryStorage";
 
 process.env.WASM_LZ4_ENVIRONMENT = "NODE";
 

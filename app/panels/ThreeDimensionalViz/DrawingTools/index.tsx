@@ -13,12 +13,13 @@
 import PencilIcon from "@mdi/svg/svg/pencil.svg";
 import { PolygonBuilder, Polygon } from "regl-worldview";
 
-import Polygons from "./Polygons";
 import ExpandingToolbar, { ToolGroup } from "@foxglove-studio/app/components/ExpandingToolbar";
 import Icon from "@foxglove-studio/app/components/Icon";
 import { EDIT_FORMAT, EditFormat } from "@foxglove-studio/app/components/ValidatedInput";
 import styles from "@foxglove-studio/app/panels/ThreeDimensionalViz/Layout.module.scss";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
+
+import Polygons from "./Polygons";
 
 export const POLYGON_TAB_TYPE = "Polygons";
 export type DrawingTabType = typeof POLYGON_TAB_TYPE;

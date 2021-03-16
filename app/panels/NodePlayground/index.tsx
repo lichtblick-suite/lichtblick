@@ -20,7 +20,6 @@ import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
-import { Script } from "./script";
 import { setUserNodes as setUserNodesAction } from "@foxglove-studio/app/actions/panels";
 import Button from "@foxglove-studio/app/components/Button";
 import Dimensions from "@foxglove-studio/app/components/Dimensions";
@@ -37,6 +36,8 @@ import Playground from "@foxglove-studio/app/panels/NodePlayground/playground-ic
 import { UserNodes } from "@foxglove-studio/app/types/panels";
 import { DEFAULT_WEBVIZ_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+
+import { Script } from "./script";
 
 const Editor = React.lazy(() => import("@foxglove-studio/app/panels/NodePlayground/Editor"));
 

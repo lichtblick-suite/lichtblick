@@ -15,6 +15,11 @@ import { difference, keyBy, uniq, mapValues, xor, isEqual, flatten, omit } from 
 import { useMemo, useCallback, useRef, createContext } from "react";
 import { useDebounce } from "use-debounce";
 
+import { TOPIC_DISPLAY_MODES } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
+import filterMap from "@foxglove-studio/app/util/filterMap";
+import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+import { useShallowMemo } from "@foxglove-studio/app/util/hooks";
+
 import {
   TreeNode,
   TopicTreeConfig,
@@ -22,10 +27,6 @@ import {
   UseTreeOutput,
   DerivedCustomSettingsByKey,
 } from "./types";
-import { TOPIC_DISPLAY_MODES } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
-import filterMap from "@foxglove-studio/app/util/filterMap";
-import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
-import { useShallowMemo } from "@foxglove-studio/app/util/hooks";
 
 const DEFAULT_TOPICS_COUNT_BY_KEY = {};
 // TODO(Audrey): opaque type for node keys: https://flow.org/en/docs/types/opaque-types/

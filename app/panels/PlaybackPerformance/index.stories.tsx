@@ -13,8 +13,9 @@
 
 import { storiesOf } from "@storybook/react";
 
-import { UnconnectedPlaybackPerformance, UnconnectedPlaybackPerformanceProps } from ".";
 import { PlayerStateActiveData } from "@foxglove-studio/app/players/types";
+
+import { UnconnectedPlaybackPerformance, UnconnectedPlaybackPerformanceProps } from ".";
 
 const defaultActiveData: PlayerStateActiveData = {
   messages: [],

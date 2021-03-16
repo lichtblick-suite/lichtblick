@@ -14,10 +14,11 @@
 import { ReactElement } from "react";
 import styled from "styled-components";
 
-import helpContent from "./index.help.md";
 import GlobalVariablesTable from "@foxglove-studio/app/components/GlobalVariablesTable";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
+
+import helpContent from "./index.help.md";
 
 const SGlobalVariablesPanel = styled.div`
   display: flex;

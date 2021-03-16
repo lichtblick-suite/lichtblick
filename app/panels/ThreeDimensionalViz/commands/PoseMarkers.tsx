@@ -22,13 +22,14 @@ import {
   Pose,
 } from "regl-worldview";
 
-import CarModel from "./CarModel";
-import carOutlinePoints from "./CarModel/carOutline.json";
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { InteractionData } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
 import { PoseSettings } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/PoseSettingsEditor";
 import { Color, Header, Scale } from "@foxglove-studio/app/types/Messages";
+
+import CarModel from "./CarModel";
+import carOutlinePoints from "./CarModel/carOutline.json";
 
 const { originalScaling, updatedScaling } = getGlobalHooks().getPoseErrorScaling();
 

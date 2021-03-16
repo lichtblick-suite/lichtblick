@@ -14,9 +14,10 @@
 import _ from "lodash";
 import { Time } from "rosbag";
 
+import { RosgraphMsgs$Log } from "@foxglove-studio/app/types/Messages";
+
 import LevelToString from "./LevelToString";
 import style from "./LogMessage.module.scss";
-import { RosgraphMsgs$Log } from "@foxglove-studio/app/types/Messages";
 
 // pad the start of `val` with 0's to make the total string length `count` size
 function PadStart(val: any, count: number) {

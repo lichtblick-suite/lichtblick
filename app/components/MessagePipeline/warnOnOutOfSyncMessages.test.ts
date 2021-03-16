@@ -11,9 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import warnOnOutOfSyncMessages from "./warnOnOutOfSyncMessages";
 import { Message, PlayerState } from "@foxglove-studio/app/players/types";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
+
+import warnOnOutOfSyncMessages from "./warnOnOutOfSyncMessages";
 
 let lastSeekTimeCounter = 1;
 const lastSeekTime = () => {

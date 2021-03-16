@@ -14,11 +14,12 @@
 import { isEqual } from "lodash";
 import styled from "styled-components";
 
+import Button from "@foxglove-studio/app/components/Button";
+import GlobalVariableName from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/GlobalVariableName";
+
 import { getPath } from "../interactionUtils";
 import useLinkedGlobalVariables, { LinkedGlobalVariable } from "../useLinkedGlobalVariables";
 import SGlobalVariableForm from "./SGlobalVariableForm";
-import Button from "@foxglove-studio/app/components/Button";
-import GlobalVariableName from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/GlobalVariableName";
 
 const SPath = styled.span`
   opacity: 0.8;

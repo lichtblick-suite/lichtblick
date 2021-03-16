@@ -14,9 +14,10 @@
 import { groupBy } from "lodash";
 import { useCallback } from "react";
 
-import { useMessageReducer } from "./useMessageReducer";
 import { TypedMessage, MessageFormat } from "@foxglove-studio/app/players/types";
 import { useDeepMemo } from "@foxglove-studio/app/util/hooks";
+
+import { useMessageReducer } from "./useMessageReducer";
 
 // Exported for tests
 // Equivalent to array1.concat(array2).slice(-limit), but somewhat faster. Also works with limit=0.

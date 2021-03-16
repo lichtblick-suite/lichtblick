@@ -14,9 +14,10 @@
 import { mount } from "enzyme";
 import { act } from "react-dom/test-utils";
 
-import * as PanelAPI from ".";
 import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
 import { wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
+
+import * as PanelAPI from ".";
 
 describe("useMessageReducer", () => {
   // Create a helper component that exposes restore, addMessage, and the results of the hook for mocking

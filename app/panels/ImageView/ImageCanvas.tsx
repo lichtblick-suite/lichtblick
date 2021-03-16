@@ -22,10 +22,6 @@ import shallowequal from "shallowequal";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
-import styles from "./ImageCanvas.module.scss";
-import { ImageViewPanelHooks, Config, SaveImagePanelConfig } from "./index";
-import { renderImage } from "./renderImage";
-import { checkOutOfBounds, Dimensions } from "./util";
 import ContextMenu from "@foxglove-studio/app/components/ContextMenu";
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
 import Menu, { Item } from "@foxglove-studio/app/components/Menu";
@@ -39,6 +35,11 @@ import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import supportsOffscreenCanvas from "@foxglove-studio/app/util/supportsOffscreenCanvas";
 import ImageCanvasWorker from "worker-loader!./ImageCanvas.worker";
+
+import styles from "./ImageCanvas.module.scss";
+import { ImageViewPanelHooks, Config, SaveImagePanelConfig } from "./index";
+import { renderImage } from "./renderImage";
+import { checkOutOfBounds, Dimensions } from "./util";
 
 type OnFinishRenderImage = () => void;
 type Props = {

@@ -16,7 +16,6 @@ import { partition, pick, union, without } from "lodash";
 import { useEffect, useMemo, useCallback, useRef, useState, ReactElement } from "react";
 import styled, { css, keyframes } from "styled-components";
 
-import { usePreviousValue } from "../util/hooks";
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
 import Flex from "@foxglove-studio/app/components/Flex";
 import Icon from "@foxglove-studio/app/components/Icon";
@@ -28,6 +27,8 @@ import useGlobalVariables, { GlobalVariables } from "@foxglove-studio/app/hooks/
 import { memoizedGetLinkedGlobalVariablesKeyByName } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/interactionUtils";
 import useLinkedGlobalVariables from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { colors as sharedColors } from "@foxglove-studio/app/util/sharedStyleConstants";
+
+import { usePreviousValue } from "../util/hooks";
 
 // The minimum amount of time to wait between showing the global variable update animation again
 export const ANIMATION_RESET_DELAY_MS = 3000;

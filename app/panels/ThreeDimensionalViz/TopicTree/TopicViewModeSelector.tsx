@@ -13,8 +13,9 @@
 
 import styled from "styled-components";
 
-import { Save3DConfig } from "..";
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
+
+import { Save3DConfig } from "..";
 
 export const TOPIC_DISPLAY_MODES = {
   SHOW_ALL: {

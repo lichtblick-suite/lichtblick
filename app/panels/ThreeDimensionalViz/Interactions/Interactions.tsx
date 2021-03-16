@@ -14,10 +14,6 @@
 import CursorDefault from "@mdi/svg/svg/cursor-default.svg";
 import { MouseEventObject } from "regl-worldview";
 
-import LinkedGlobalVariableList from "./LinkedGlobalVariableList";
-import PointCloudDetails from "./PointCloudDetails";
-import { SEmptyState, SRow, SValue } from "./styling";
-import useLinkedGlobalVariables from "./useLinkedGlobalVariables";
 import Checkbox from "@foxglove-studio/app/components/Checkbox";
 import ExpandingToolbar, {
   ToolGroup,
@@ -31,6 +27,11 @@ import styles from "@foxglove-studio/app/panels/ThreeDimensionalViz/Layout.modul
 import { decodeAdditionalFields } from "@foxglove-studio/app/panels/ThreeDimensionalViz/commands/PointClouds/selection";
 import { getInteractionData } from "@foxglove-studio/app/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
 import { SaveConfig, PanelConfig } from "@foxglove-studio/app/types/panels";
+
+import LinkedGlobalVariableList from "./LinkedGlobalVariableList";
+import PointCloudDetails from "./PointCloudDetails";
+import { SEmptyState, SRow, SValue } from "./styling";
+import useLinkedGlobalVariables from "./useLinkedGlobalVariables";
 
 export const OBJECT_TAB_TYPE = "Selected object";
 export const LINKED_VARIABLES_TAB_TYPE = "Linked variables";

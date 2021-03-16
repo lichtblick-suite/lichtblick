@@ -11,13 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { TimeBasedChartTooltipData } from "@foxglove-studio/app/components/TimeBasedChart";
+
 import {
   derivative,
   applyToDataOrTooltips,
   mathFunctions,
   MathFunction,
 } from "./transformPlotRange";
-import { TimeBasedChartTooltipData } from "@foxglove-studio/app/components/TimeBasedChart";
 
 describe("transformPlotRange", () => {
   describe("derivative", () => {

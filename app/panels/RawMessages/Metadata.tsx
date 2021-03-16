@@ -15,12 +15,13 @@ import { cloneDeepWith } from "lodash";
 import React, { useCallback } from "react";
 import styled from "styled-components";
 
-import { getMessageDocumentationLink } from "./utils";
 import Icon from "@foxglove-studio/app/components/Icon";
 import { Message } from "@foxglove-studio/app/players/types";
 import { deepParse, isBobject } from "@foxglove-studio/app/util/binaryObjects";
 import clipboard from "@foxglove-studio/app/util/clipboard";
 import { formatTimeRaw } from "@foxglove-studio/app/util/time";
+
+import { getMessageDocumentationLink } from "./utils";
 
 const SMetadata = styled.div`
   margin-top: 4px;

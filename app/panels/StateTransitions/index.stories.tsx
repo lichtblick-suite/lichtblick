@@ -14,8 +14,9 @@
 import { storiesOf } from "@storybook/react";
 import TestUtils from "react-dom/test-utils";
 
-import StateTransitions from "./index";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+
+import StateTransitions from "./index";
 
 const systemStateMessages = [
   { header: { stamp: { sec: 1526191539, nsec: 574635076 } }, state: 0 },

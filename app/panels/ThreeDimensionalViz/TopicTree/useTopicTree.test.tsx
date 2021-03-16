@@ -13,9 +13,10 @@
 
 import { mount } from "enzyme";
 
+import { Topic } from "@foxglove-studio/app/players/types";
+
 import { UseTreeInput } from "./types";
 import useTopicTree, { generateNodeKey, getBaseKey } from "./useTopicTree";
-import { Topic } from "@foxglove-studio/app/players/types";
 
 const TREE_CONFIG = {
   name: "root",

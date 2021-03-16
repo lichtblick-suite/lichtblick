@@ -17,7 +17,6 @@ import stringHash from "string-hash";
 import styled, { css } from "styled-components";
 import tinycolor from "tinycolor2";
 
-import helpContent from "./index.help.md";
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import Button from "@foxglove-studio/app/components/Button";
 import Dimensions from "@foxglove-studio/app/components/Dimensions";
@@ -38,6 +37,8 @@ import { darkColor, lineColors } from "@foxglove-studio/app/util/plotColors";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 import { TimestampMethod, subtractTimes, toSec } from "@foxglove-studio/app/util/time";
 import { grey } from "@foxglove-studio/app/util/toolsColorScheme";
+
+import helpContent from "./index.help.md";
 
 export const transitionableRosTypes = [
   "bool",

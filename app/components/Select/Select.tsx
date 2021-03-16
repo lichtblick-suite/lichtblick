@@ -15,9 +15,10 @@ import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
 
-import styles from "./Select.module.scss";
 import Icon from "@foxglove-studio/app/components/Icon";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
+
+import styles from "./Select.module.scss";
 
 const SEmpty = styled.div`
   padding: 8px 12px;

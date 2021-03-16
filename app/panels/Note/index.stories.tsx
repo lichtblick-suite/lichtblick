@@ -13,8 +13,9 @@
 
 import { storiesOf } from "@storybook/react";
 
-import Note from "./index";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+
+import Note from "./index";
 
 storiesOf("<Note>", module)
   .add("empty", () => {

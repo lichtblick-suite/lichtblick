@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { DATATYPE } from "./types";
 import log from "@foxglove-studio/app/panels/ThreeDimensionalViz/logger";
+
+import { DATATYPE } from "./types";
 
 export interface FieldReader {
   read(data: number[] | Uint8Array, index: number): number;

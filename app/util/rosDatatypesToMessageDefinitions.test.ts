@@ -13,12 +13,13 @@
 
 import { uniqBy } from "lodash";
 
-import { basicDatatypes } from "./datatypes";
-import rosDatatypesToMessageDefinition from "./rosDatatypesToMessageDefinition";
 import {
   WEBVIZ_MARKER_ARRAY_DATATYPE,
   WEBVIZ_MARKER_DATATYPE,
 } from "@foxglove-studio/app/util/globalConstants";
+
+import { basicDatatypes } from "./datatypes";
+import rosDatatypesToMessageDefinition from "./rosDatatypesToMessageDefinition";
 
 describe("rosDatatypesToMessageDefinition", () => {
   it(`Includes all of the definitions for "visualization_msgs/WebvizMarkerArray"`, () => {

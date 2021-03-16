@@ -14,9 +14,10 @@
 import HelpCircleOutlineIcon from "@mdi/svg/svg/help-circle-outline.svg";
 import { CSSProperties, PropsWithChildren, useState } from "react";
 
-import styles from "./index.module.scss";
 import HelpModal from "@foxglove-studio/app/components/HelpModal";
 import Icon from "@foxglove-studio/app/components/Icon";
+
+import styles from "./index.module.scss";
 
 type Props = {
   iconStyle?: CSSProperties;

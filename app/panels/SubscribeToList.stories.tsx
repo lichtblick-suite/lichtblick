@@ -12,8 +12,9 @@
 //   You may not use this file except in compliance with the License.
 import { storiesOf } from "@storybook/react";
 
-import SubscribeToList from "./SubscribeToList";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+
+import SubscribeToList from "./SubscribeToList";
 
 storiesOf("<SubscribeToList>", module).add("shows a topic list", () => {
   return (

@@ -13,11 +13,12 @@
 
 import { mount } from "enzyme";
 
-import { MessagePipelineConsumer } from "../components/MessagePipeline";
-import Internals from "./Internals";
 import { useMessagesByTopic } from "@foxglove-studio/app/PanelAPI";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 import { downloadTextFile, objectValues } from "@foxglove-studio/app/util";
+
+import { MessagePipelineConsumer } from "../components/MessagePipeline";
+import Internals from "./Internals";
 
 const mockDownloadTextFile: any = downloadTextFile;
 (objectValues as any).mockImplementation(Object.values); // broken by module mock

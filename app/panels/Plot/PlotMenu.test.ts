@@ -13,8 +13,9 @@
 
 import { flatten } from "lodash";
 
-import { getCSVData } from "./PlotMenu";
 import { getDatasetsAndTooltips } from "@foxglove-studio/app/panels/Plot/PlotChart";
+
+import { getCSVData } from "./PlotMenu";
 
 const {
   tooltips: trackedObjectsTooltips,

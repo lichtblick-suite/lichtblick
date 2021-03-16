@@ -15,10 +15,11 @@ import { mount } from "enzyme";
 import { last } from "lodash";
 import { act } from "react-dom/test-utils";
 
-import { FrameCompatibilityDEPRECATED } from "./FrameCompatibility";
-import { datatypes, messages } from "./FrameCompatibilityFixture";
 import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
 import { deepParse } from "@foxglove-studio/app/util/binaryObjects";
+
+import { FrameCompatibilityDEPRECATED } from "./FrameCompatibility";
+import { datatypes, messages } from "./FrameCompatibilityFixture";
 
 const unBobjectifyMessage = ({ message, receiveTime, topic }: any) => ({
   message: deepParse(message),

@@ -14,8 +14,6 @@
 import { isEqual } from "lodash";
 import { useCallback, useMemo, useRef } from "react";
 
-import { MessagePathFilter, MessagePathStructureItem, RosPath } from "./constants";
-import { messagePathStructures } from "./messagePathsForDatatype";
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import { isTypicalFilterName } from "@foxglove-studio/app/components/MessagePathSyntax/isTypicalFilterName";
 import parseRosPath from "@foxglove-studio/app/components/MessagePathSyntax/parseRosPath";
@@ -28,6 +26,9 @@ import {
   enumValuesByDatatypeAndField,
   getTopicsByTopicName,
 } from "@foxglove-studio/app/util/selectors";
+
+import { MessagePathFilter, MessagePathStructureItem, RosPath } from "./constants";
+import { messagePathStructures } from "./messagePathsForDatatype";
 
 export type MessagePathDataItem = {
   value: unknown; // The actual value.

@@ -14,12 +14,6 @@
 import { omit } from "lodash";
 import { TimeUtil, Time } from "rosbag";
 
-import RandomAccessPlayer, {
-  RandomAccessPlayerOptions,
-  SEEK_BACK_NANOSECONDS,
-  SEEK_START_DELAY_MS,
-} from "./RandomAccessPlayer";
-import TestProvider from "./TestProvider";
 import { GetMessagesResult, GetMessagesTopics } from "@foxglove-studio/app/dataProviders/types";
 import {
   BobjectMessage,
@@ -33,6 +27,13 @@ import delay from "@foxglove-studio/app/shared/delay";
 import signal from "@foxglove-studio/app/shared/signal";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import { fromNanoSec, getSeekToTime, SEEK_ON_START_NS } from "@foxglove-studio/app/util/time";
+
+import RandomAccessPlayer, {
+  RandomAccessPlayerOptions,
+  SEEK_BACK_NANOSECONDS,
+  SEEK_START_DELAY_MS,
+} from "./RandomAccessPlayer";
+import TestProvider from "./TestProvider";
 
 // By default seek to the start of the bag, since that makes things a bit simpler to reason about.
 const playerOptions: RandomAccessPlayerOptions = {

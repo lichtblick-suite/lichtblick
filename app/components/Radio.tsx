@@ -15,9 +15,10 @@ import RadioButtonCheckedIcon from "@mdi/svg/svg/radiobox-marked.svg";
 import { ReactElement } from "react";
 import styled from "styled-components";
 
+import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+
 import Icon from "./Icon";
 import { colorToAlpha } from "./SegmentedControl";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 export type RadioOption = {
   id: string;

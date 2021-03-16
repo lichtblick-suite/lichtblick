@@ -11,10 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { groupLinesIntoInstancedLineLists } from "./groupingUtils";
 import { Color, Point, LineStripMarker, LineListMarker } from "@foxglove-studio/app/types/Messages";
 import { emptyPose } from "@foxglove-studio/app/util/Pose";
 import { COLORS, MARKER_MSG_TYPES } from "@foxglove-studio/app/util/globalConstants";
+
+import { groupLinesIntoInstancedLineLists } from "./groupingUtils";
 
 const DUMMY_POINT_COLOR = { r: 0, g: 0, b: 0, a: 0 };
 

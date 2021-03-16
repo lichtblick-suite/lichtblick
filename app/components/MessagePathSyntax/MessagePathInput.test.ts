@@ -11,9 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
+
 import { tryToSetDefaultGlobalVar, getFirstInvalidVariableFromRosPath } from "./MessagePathInput";
 import { RosPath } from "./constants";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 
 const defaultGlobalVars = getGlobalHooks().getDefaultPersistedState().panels.globalVariables;
 

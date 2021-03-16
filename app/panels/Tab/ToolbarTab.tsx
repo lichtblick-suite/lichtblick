@@ -18,11 +18,12 @@ import React, { Ref as ReactRef, useCallback, useEffect, useMemo, useRef, useSta
 import styled from "styled-components";
 import textWidth from "text-width";
 
-import styles from "./Tab.module.scss";
 import Icon from "@foxglove-studio/app/components/Icon";
 import Tooltip from "@foxglove-studio/app/components/Tooltip";
 import { TabActions } from "@foxglove-studio/app/panels/Tab/TabDndContext";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+
+import styles from "./Tab.module.scss";
 
 const FONT_SIZE = 12;
 const FONT_FAMILY = "'Inter UI', -apple-system, BlinkMacSystemFont, sans-serif";

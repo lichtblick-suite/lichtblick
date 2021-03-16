@@ -11,6 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { deepParse, wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
+import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
+import sendNotification from "@foxglove-studio/app/util/sendNotification";
+
 import {
   validateNodeDefinitions,
   makeNodeMessage,
@@ -19,9 +23,6 @@ import {
   getNodeSubscriptions,
   NodeDefinition,
 } from "./nodes";
-import { deepParse, wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
-import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 const EmptyNode: Partial<NodeDefinition<void>> = {
   inputs: [],

@@ -13,10 +13,11 @@
 
 import { storiesOf } from "@storybook/react";
 
-import MessagePathInput from "./MessagePathInput";
 import Flex from "@foxglove-studio/app/components/Flex";
 import MockPanelContextProvider from "@foxglove-studio/app/components/MockPanelContextProvider";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+
+import MessagePathInput from "./MessagePathInput";
 
 const fixture = {
   datatypes: {

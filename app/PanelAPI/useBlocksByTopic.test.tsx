@@ -15,8 +15,9 @@ import { mount } from "enzyme";
 import { cloneDeep } from "lodash";
 import { MessageReader, parseMessageDefinition } from "rosbag";
 
-import * as PanelAPI from ".";
 import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
+
+import * as PanelAPI from ".";
 
 describe("useBlocksByTopic", () => {
   // Create a helper component that exposes the results of the hook for mocking.

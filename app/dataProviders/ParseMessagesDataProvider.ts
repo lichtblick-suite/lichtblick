@@ -14,6 +14,11 @@
 import { uniq } from "lodash";
 import { Time, MessageReader } from "rosbag";
 
+import ParsedMessageCache from "@foxglove-studio/app/dataProviders/ParsedMessageCache";
+import { ParsedMessageDefinitionsByTopic } from "@foxglove-studio/app/players/types";
+import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
+import { FREEZE_MESSAGES } from "@foxglove-studio/app/util/globalConstants";
+
 import {
   DataProvider,
   InitializationResult,
@@ -23,10 +28,6 @@ import {
   GetMessagesResult,
   GetMessagesTopics,
 } from "./types";
-import ParsedMessageCache from "@foxglove-studio/app/dataProviders/ParsedMessageCache";
-import { ParsedMessageDefinitionsByTopic } from "@foxglove-studio/app/players/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { FREEZE_MESSAGES } from "@foxglove-studio/app/util/globalConstants";
 
 // Parses raw messages as returned by `BagDataProvider`. To make it fast to seek back and forth, we keep
 // a small cache here, which maps messages from the underlying DataProvider to parsed messages. This assumes

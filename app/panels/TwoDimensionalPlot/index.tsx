@@ -16,7 +16,6 @@ import DocumentEvents from "react-document-events";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 
-import helpContent from "./index.help.md";
 import Button from "@foxglove-studio/app/components/Button";
 import Dimensions from "@foxglove-studio/app/components/Dimensions";
 import EmptyState from "@foxglove-studio/app/components/EmptyState";
@@ -38,6 +37,8 @@ import {
 import { deepParse, isBobject } from "@foxglove-studio/app/util/binaryObjects";
 import { useDeepChangeDetector } from "@foxglove-studio/app/util/hooks";
 import { colors, ROBOTO_MONO } from "@foxglove-studio/app/util/sharedStyleConstants";
+
+import helpContent from "./index.help.md";
 
 const SResetZoom = styled.div`
   position: absolute;

@@ -15,16 +15,6 @@ import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
 import cx from "classnames";
 import { flatten, flatMap, partition } from "lodash";
 
-import styles from "./MessagePathInput.module.scss";
-import { RosPath, RosPrimitive } from "./constants";
-import {
-  StructureTraversalResult,
-  traverseStructure,
-  messagePathStructures,
-  messagePathsForDatatype,
-  validTerminatingStructureItem,
-} from "./messagePathsForDatatype";
-import parseRosPath from "./parseRosPath";
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import Autocomplete from "@foxglove-studio/app/components/Autocomplete";
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
@@ -36,6 +26,17 @@ import { Topic } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { getTopicNames, getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
 import { TimestampMethod } from "@foxglove-studio/app/util/time";
+
+import styles from "./MessagePathInput.module.scss";
+import { RosPath, RosPrimitive } from "./constants";
+import {
+  StructureTraversalResult,
+  traverseStructure,
+  messagePathStructures,
+  messagePathsForDatatype,
+  validTerminatingStructureItem,
+} from "./messagePathsForDatatype";
+import parseRosPath from "./parseRosPath";
 
 // To show an input field with an autocomplete so the user can enter message paths, use:
 //

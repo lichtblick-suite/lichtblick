@@ -17,8 +17,6 @@ import cx from "classnames";
 import { last } from "lodash";
 import { Fragment, useCallback, useMemo } from "react";
 
-import styles from "./PlotLegend.module.scss";
-import { plotableRosTypes, PlotConfig, PlotXAxisVal } from "./types";
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
 import Icon from "@foxglove-studio/app/components/Icon";
@@ -31,6 +29,9 @@ import {
 import { lineColors } from "@foxglove-studio/app/util/plotColors";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 import { TimestampMethod } from "@foxglove-studio/app/util/time";
+
+import styles from "./PlotLegend.module.scss";
+import { plotableRosTypes, PlotConfig, PlotXAxisVal } from "./types";
 
 type PlotLegendProps = {
   paths: PlotPath[];

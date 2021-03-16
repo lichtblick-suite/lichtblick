@@ -16,8 +16,6 @@ import { storiesOf } from "@storybook/react";
 import { createMemoryHistory } from "history";
 import TestUtils from "react-dom/test-utils";
 
-import { UnconnectedPlaybackControls } from ".";
-import styles from "./index.module.scss";
 import { setPlaybackConfig } from "@foxglove-studio/app/actions/panels";
 import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
 import {
@@ -27,6 +25,9 @@ import {
 } from "@foxglove-studio/app/players/types";
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
+
+import { UnconnectedPlaybackControls } from ".";
+import styles from "./index.module.scss";
 
 const START_TIME = 1531761690;
 

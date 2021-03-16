@@ -14,7 +14,6 @@ import _, { flatten, groupBy, isEqual, keyBy, mapValues, some, xor } from "lodas
 import { Time } from "rosbag";
 import shallowequal from "shallowequal";
 
-import { SkipTransformSpec, ThreeDimensionalVizHooks } from "./types";
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import MessageCollector from "@foxglove-studio/app/panels/ThreeDimensionalViz/SceneBuilder/MessageCollector";
 import { MarkerMatcher } from "@foxglove-studio/app/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
@@ -59,6 +58,8 @@ import {
 import naturalSort from "@foxglove-studio/app/util/naturalSort";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import { fromSec } from "@foxglove-studio/app/util/time";
+
+import { SkipTransformSpec, ThreeDimensionalVizHooks } from "./types";
 
 export type TopicSettingsCollection = {
   [topicOrNamespaceKey: string]: any;

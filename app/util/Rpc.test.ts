@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import Rpc, { ChannelImpl, createLinkedChannels } from "./Rpc";
 import delay from "@foxglove-studio/app/shared/delay";
+
+import Rpc, { ChannelImpl, createLinkedChannels } from "./Rpc";
 
 describe("Rpc", () => {
   it("only allows setting Rpc once per channel", () => {

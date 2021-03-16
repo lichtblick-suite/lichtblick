@@ -15,7 +15,6 @@ import cx from "classnames";
 import { useMemo, useRef } from "react";
 import styled from "styled-components";
 
-import styles from "./PlotMenu.module.scss";
 import Item from "@foxglove-studio/app/components/Menu/Item";
 import { TimeBasedChartTooltipData } from "@foxglove-studio/app/components/TimeBasedChart";
 import { PlotConfig, PlotXAxisVal } from "@foxglove-studio/app/panels/Plot";
@@ -23,6 +22,8 @@ import { DataSet, PlotChartPoint } from "@foxglove-studio/app/panels/Plot/PlotCh
 import { PanelToolbarInput } from "@foxglove-studio/app/shared/panelToolbarStyles";
 import { downloadFiles } from "@foxglove-studio/app/util";
 import { formatTimeRaw } from "@foxglove-studio/app/util/time";
+
+import styles from "./PlotMenu.module.scss";
 
 const SLabel = styled.div`
   flex-grow: 1;

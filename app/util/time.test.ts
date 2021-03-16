@@ -11,10 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import * as time from "./time";
 import { cast } from "@foxglove-studio/app/players/types";
 import { BinaryTime } from "@foxglove-studio/app/types/BinaryMessages";
 import { deepParse, wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
+
+import * as time from "./time";
 
 const { fromSecondStamp } = time;
 describe("time.toDate & time.fromDate", () => {

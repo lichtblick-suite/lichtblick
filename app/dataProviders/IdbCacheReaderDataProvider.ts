@@ -14,6 +14,11 @@
 import microMemoize from "micro-memoize";
 import { Time } from "rosbag";
 
+import { Progress } from "@foxglove-studio/app/players/types";
+import Database from "@foxglove-studio/app/util/indexeddb/Database";
+import { Range, deepIntersect, isRangeCoveredByRanges } from "@foxglove-studio/app/util/ranges";
+import { subtractTimes, toNanoSec } from "@foxglove-studio/app/util/time";
+
 import {
   MESSAGES_STORE_NAME,
   getIdbCacheDataProviderDatabase,
@@ -28,10 +33,6 @@ import {
   GetMessagesResult,
   GetMessagesTopics,
 } from "./types";
-import { Progress } from "@foxglove-studio/app/players/types";
-import Database from "@foxglove-studio/app/util/indexeddb/Database";
-import { Range, deepIntersect, isRangeCoveredByRanges } from "@foxglove-studio/app/util/ranges";
-import { subtractTimes, toNanoSec } from "@foxglove-studio/app/util/time";
 
 // Can take a few ms, so worth memoizing.
 const deeplyIntersectedTopics = microMemoize(

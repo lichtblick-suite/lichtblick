@@ -13,10 +13,11 @@
 
 import styled from "styled-components";
 
-import { Save3DConfig } from "../index";
 import Switch from "@foxglove-studio/app/components/Switch";
 import logEvent, { getEventNames } from "@foxglove-studio/app/util/logEvent";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+
+import { Save3DConfig } from "../index";
 
 type Props = {
   enabled: boolean;

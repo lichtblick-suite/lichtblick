@@ -11,11 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { renderImage } from "./renderImage";
-import { Dimensions, RawMarkerData, OffscreenCanvas } from "./util";
 import { Message } from "@foxglove-studio/app/players/types";
 import Rpc from "@foxglove-studio/app/util/Rpc";
 import { setupWorker } from "@foxglove-studio/app/util/RpcWorkerUtils";
+
+import { renderImage } from "./renderImage";
+import { Dimensions, RawMarkerData, OffscreenCanvas } from "./util";
 
 export default class ImageCanvasWorker {
   _idToCanvas: {

@@ -20,8 +20,6 @@ import { Time } from "rosbag";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
-import HoverBar from "./HoverBar";
-import TimeBasedChartTooltip from "./TimeBasedChartTooltip";
 import { clearHoverValue, setHoverValue } from "@foxglove-studio/app/actions/hoverValue";
 import Button from "@foxglove-studio/app/components/Button";
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
@@ -47,6 +45,9 @@ import { isBobject } from "@foxglove-studio/app/util/binaryObjects";
 import { useDeepChangeDetector } from "@foxglove-studio/app/util/hooks";
 import { defaultGetHeaderStamp } from "@foxglove-studio/app/util/synchronizeMessages";
 import { maybeGetBobjectHeaderStamp } from "@foxglove-studio/app/util/time";
+
+import HoverBar from "./HoverBar";
+import TimeBasedChartTooltip from "./TimeBasedChartTooltip";
 
 type Bounds = { minX?: number; maxX?: number };
 const SyncTimeAxis = createSyncingComponent<Bounds, Bounds>(

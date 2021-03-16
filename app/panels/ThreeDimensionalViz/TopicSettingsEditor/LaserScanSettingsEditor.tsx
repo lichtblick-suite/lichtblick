@@ -13,13 +13,14 @@
 
 import { Color } from "regl-worldview";
 
+import Flex from "@foxglove-studio/app/components/Flex";
+import { LaserScan } from "@foxglove-studio/app/types/Messages";
+
 import ColorPickerForTopicSettings from "./ColorPickerForTopicSettings";
 import CommonDecaySettings from "./CommonDecaySettings";
 import CommonPointSettings from "./CommonPointSettings";
 import { SLabel } from "./common";
 import { TopicSettingsEditorProps } from "./types";
-import Flex from "@foxglove-studio/app/components/Flex";
-import { LaserScan } from "@foxglove-studio/app/types/Messages";
 
 type LaserScanSettings = {
   pointSize?: number;

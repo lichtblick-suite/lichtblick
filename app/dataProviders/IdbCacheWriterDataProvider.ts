@@ -17,14 +17,6 @@ import { TimeUtil, Time } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
 import {
-  MESSAGES_STORE_NAME,
-  TIMESTAMP_KEY,
-  TOPIC_RANGES_KEY,
-  TOPIC_RANGES_STORE_NAME,
-  getIdbCacheDataProviderDatabase,
-  PRIMARY_KEY,
-} from "./IdbCacheDataProviderDatabase";
-import {
   DataProvider,
   DataProviderDescriptor,
   ExtensionPoint,
@@ -44,6 +36,15 @@ import {
 } from "@foxglove-studio/app/util/ranges";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import { fromNanoSec, subtractTimes, toNanoSec } from "@foxglove-studio/app/util/time";
+
+import {
+  MESSAGES_STORE_NAME,
+  TIMESTAMP_KEY,
+  TOPIC_RANGES_KEY,
+  TOPIC_RANGES_STORE_NAME,
+  getIdbCacheDataProviderDatabase,
+  PRIMARY_KEY,
+} from "./IdbCacheDataProviderDatabase";
 
 const log = new Logger(__filename);
 

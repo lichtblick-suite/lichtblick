@@ -22,11 +22,6 @@ import {
   vec4ToRGBA,
 } from "regl-worldview";
 
-import VertexBufferCache from "./VertexBufferCache";
-import { FLOAT_SIZE } from "./buffers";
-import { decodeMarker } from "./decodeMarker";
-import { updateMarkerCache } from "./memoization";
-import { MemoizedMarker, MemoizedVertexBuffer, VertexBuffer } from "./types";
 import {
   DEFAULT_FLAT_COLOR,
   DEFAULT_MIN_COLOR,
@@ -35,6 +30,12 @@ import {
 import { toRgba } from "@foxglove-studio/app/panels/ThreeDimensionalViz/commands/PointClouds/selection";
 import { PointCloud } from "@foxglove-studio/app/types/Messages";
 import filterMap from "@foxglove-studio/app/util/filterMap";
+
+import VertexBufferCache from "./VertexBufferCache";
+import { FLOAT_SIZE } from "./buffers";
+import { decodeMarker } from "./decodeMarker";
+import { updateMarkerCache } from "./memoization";
+import { MemoizedMarker, MemoizedVertexBuffer, VertexBuffer } from "./types";
 
 const COLOR_MODE_FLAT = 0;
 const COLOR_MODE_RGB = 1;

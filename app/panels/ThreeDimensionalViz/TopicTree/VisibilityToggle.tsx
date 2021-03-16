@@ -17,10 +17,11 @@ import { Color } from "regl-worldview";
 import styled from "styled-components";
 import tinyColor from "tinycolor2";
 
-import { ROW_HEIGHT } from "./constants";
 import Icon from "@foxglove-studio/app/components/Icon";
 import { getHexFromColorSettingWithDefault } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+
+import { ROW_HEIGHT } from "./constants";
 
 export const TOPIC_ROW_PADDING = 3;
 

@@ -13,13 +13,14 @@
 
 import { cloneDeep } from "lodash";
 
+import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
+
 import {
   traverseStructure,
   messagePathsForDatatype,
   messagePathStructures,
   validTerminatingStructureItem,
 } from "./messagePathsForDatatype";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 
 const datatypes: RosDatatypes = {
   "pose_msgs/PoseDebug": {

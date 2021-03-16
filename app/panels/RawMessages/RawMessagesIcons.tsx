@@ -16,8 +16,6 @@ import DotsHorizontalIcon from "@mdi/svg/svg/dots-horizontal.svg";
 import TargetIcon from "@mdi/svg/svg/target.svg";
 import { ReactElement, useCallback } from "react";
 
-import { ValueAction } from "./getValueActionForValue";
-import styles from "./index.module.scss";
 import Icon from "@foxglove-studio/app/components/Icon";
 import { openSiblingPlotPanel, plotableRosTypes } from "@foxglove-studio/app/panels/Plot";
 import {
@@ -25,6 +23,9 @@ import {
   transitionableRosTypes,
 } from "@foxglove-studio/app/panels/StateTransitions";
 import { PanelConfig } from "@foxglove-studio/app/types/panels";
+
+import { ValueAction } from "./getValueActionForValue";
+import styles from "./index.module.scss";
 
 type Props = {
   valueAction: ValueAction;

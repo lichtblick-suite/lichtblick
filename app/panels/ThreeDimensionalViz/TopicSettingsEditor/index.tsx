@@ -13,11 +13,6 @@
 
 import React, { useCallback, ComponentType } from "react";
 
-import LaserScanSettingsEditor from "./LaserScanSettingsEditor";
-import MarkerSettingsEditor from "./MarkerSettingsEditor";
-import PointCloudSettingsEditor from "./PointCloudSettingsEditor";
-import PoseSettingsEditor from "./PoseSettingsEditor";
-import styles from "./TopicSettingsEditor.module.scss";
 import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { TopicSettingsEditorProps } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/types";
@@ -28,6 +23,12 @@ import {
   SENSOR_MSGS_LASER_SCAN_DATATYPE,
   WEBVIZ_MARKER_DATATYPE,
 } from "@foxglove-studio/app/util/globalConstants";
+
+import LaserScanSettingsEditor from "./LaserScanSettingsEditor";
+import MarkerSettingsEditor from "./MarkerSettingsEditor";
+import PointCloudSettingsEditor from "./PointCloudSettingsEditor";
+import PoseSettingsEditor from "./PoseSettingsEditor";
+import styles from "./TopicSettingsEditor.module.scss";
 
 export const LINED_CONVEX_HULL_RENDERING_SETTING = "LinedConvexHull";
 

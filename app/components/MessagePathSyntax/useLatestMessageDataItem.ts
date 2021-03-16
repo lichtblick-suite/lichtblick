@@ -13,15 +13,16 @@
 
 import { useCallback, useMemo } from "react";
 
+import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
+import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
+import { Message, MessageFormat } from "@foxglove-studio/app/players/types";
+import { useChangeDetector } from "@foxglove-studio/app/util/hooks";
+
 import parseRosPath from "./parseRosPath";
 import {
   useCachedGetMessagePathDataItems,
   MessageAndData,
 } from "./useCachedGetMessagePathDataItems";
-import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
-import { Message, MessageFormat } from "@foxglove-studio/app/players/types";
-import { useChangeDetector } from "@foxglove-studio/app/util/hooks";
 
 // Get the last message for a path, but *after* applying filters. In other words, we'll keep the
 // last message that matched.

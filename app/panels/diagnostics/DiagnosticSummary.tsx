@@ -18,16 +18,6 @@ import cx from "classnames";
 import { compact } from "lodash";
 import { List, AutoSizer } from "react-virtualized";
 
-import { Config as DiagnosticStatusConfig } from "./DiagnosticStatusPanel";
-import helpContent from "./DiagnosticSummary.help.md";
-import styles from "./DiagnosticSummary.module.scss";
-import {
-  DiagnosticId,
-  DiagnosticInfo,
-  getDiagnosticsByLevel,
-  filterAndSortDiagnostics,
-  LEVEL_NAMES,
-} from "./util";
 import EmptyState from "@foxglove-studio/app/components/EmptyState";
 import Flex from "@foxglove-studio/app/components/Flex";
 import Icon from "@foxglove-studio/app/components/Icon";
@@ -42,6 +32,17 @@ import { PanelConfig } from "@foxglove-studio/app/types/panels";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { DIAGNOSTIC_TOPIC } from "@foxglove-studio/app/util/globalConstants";
 import toggle from "@foxglove-studio/app/util/toggle";
+
+import { Config as DiagnosticStatusConfig } from "./DiagnosticStatusPanel";
+import helpContent from "./DiagnosticSummary.help.md";
+import styles from "./DiagnosticSummary.module.scss";
+import {
+  DiagnosticId,
+  DiagnosticInfo,
+  getDiagnosticsByLevel,
+  filterAndSortDiagnostics,
+  LEVEL_NAMES,
+} from "./util";
 
 type NodeRowProps = {
   info: DiagnosticInfo;

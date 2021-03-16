@@ -11,6 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Message } from "@foxglove-studio/app/players/types";
+import { ImageMarker, Color, Point } from "@foxglove-studio/app/types/Messages";
+import sendNotification from "@foxglove-studio/app/util/sendNotification";
+
 import CameraModel from "./CameraModel";
 import {
   decodeYUV,
@@ -25,9 +29,6 @@ import {
   decodeMono16,
 } from "./decodings";
 import { buildMarkerData, Dimensions, RawMarkerData, MarkerData, OffscreenCanvas } from "./util";
-import { Message } from "@foxglove-studio/app/players/types";
-import { ImageMarker, Color, Point } from "@foxglove-studio/app/types/Messages";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 // Just globally keep track of if we've shown an error in rendering, since typically when you get
 // one error, you'd then get a whole bunch more, which is spammy.

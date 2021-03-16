@@ -22,6 +22,12 @@ import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useSpring, animated } from "react-spring";
 import styled from "styled-components";
 
+import Dimensions from "@foxglove-studio/app/components/Dimensions";
+import Icon from "@foxglove-studio/app/components/Icon";
+import useLinkedGlobalVariables from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
+import { useChangeDetector } from "@foxglove-studio/app/util/hooks";
+import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+
 import { Save3DConfig } from "../index";
 import DiffModeSettings from "./DiffModeSettings";
 import TopicTreeSwitcher, { SWITCHER_HEIGHT } from "./TopicTreeSwitcher";
@@ -43,11 +49,6 @@ import {
   TreeNode,
   VisibleTopicsCountByKey,
 } from "./types";
-import Dimensions from "@foxglove-studio/app/components/Dimensions";
-import Icon from "@foxglove-studio/app/components/Icon";
-import useLinkedGlobalVariables from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
-import { useChangeDetector } from "@foxglove-studio/app/util/hooks";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 const CONTAINER_SPACING = 15;
 const DEFAULT_WIDTH = 360;

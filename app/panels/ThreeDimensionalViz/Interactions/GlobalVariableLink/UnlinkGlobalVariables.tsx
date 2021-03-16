@@ -14,13 +14,14 @@
 import { isEqual } from "lodash";
 import styled from "styled-components";
 
+import Button from "@foxglove-studio/app/components/Button";
+import GlobalVariableName from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/GlobalVariableName";
+import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+
 import { getPath, memoizedGetLinkedGlobalVariablesKeyByName } from "../interactionUtils";
 import useLinkedGlobalVariables, { LinkedGlobalVariable } from "../useLinkedGlobalVariables";
 import SGlobalVariableLink from "./SGlobalVariableLink";
 import UnlinkWrapper from "./UnlinkWrapper";
-import Button from "@foxglove-studio/app/components/Button";
-import GlobalVariableName from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/GlobalVariableName";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 const SPath = styled.span`
   opacity: 0.8;

@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { definitions } from "./messageDefinitionTestTypes";
 import { printClasses } from "@foxglove-studio/app/util/binaryObjects/jsWrapperObjects";
+
+import { definitions } from "./messageDefinitionTestTypes";
 
 describe("printClasses", () => {
   it("prints the expected function definition", () => {

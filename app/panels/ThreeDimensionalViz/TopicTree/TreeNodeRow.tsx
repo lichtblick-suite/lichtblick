@@ -16,10 +16,6 @@ import LeadPencilIcon from "@mdi/svg/svg/lead-pencil.svg";
 import { useCallback, useContext, useMemo } from "react";
 import styled from "styled-components";
 
-import NodeName from "./NodeName";
-import TreeNodeMenu, { DOT_MENU_WIDTH } from "./TreeNodeMenu";
-import VisibilityToggle, { TOGGLE_WRAPPER_SIZE, TOPIC_ROW_PADDING } from "./VisibilityToggle";
-import { DerivedCustomSettings, SetCurrentEditingTopic, TreeNode } from "./types";
 import Icon from "@foxglove-studio/app/components/Icon";
 import Tooltip from "@foxglove-studio/app/components/Tooltip";
 import { ThreeDimensionalVizContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
@@ -33,6 +29,11 @@ import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants"
 import { useGuaranteedContext } from "@foxglove-studio/app/util/hooks";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 import { joinTopics } from "@foxglove-studio/app/util/topicUtils";
+
+import NodeName from "./NodeName";
+import TreeNodeMenu, { DOT_MENU_WIDTH } from "./TreeNodeMenu";
+import VisibilityToggle, { TOGGLE_WRAPPER_SIZE, TOPIC_ROW_PADDING } from "./VisibilityToggle";
+import { DerivedCustomSettings, SetCurrentEditingTopic, TreeNode } from "./types";
 
 export const ICON_SIZE = 22;
 

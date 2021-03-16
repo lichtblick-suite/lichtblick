@@ -11,14 +11,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Progress } from "@foxglove-studio/app/players/types";
+import delay from "@foxglove-studio/app/shared/delay";
+import signal from "@foxglove-studio/app/shared/signal";
+
 import TestProvider from "../TestProvider";
 import AutomatedRunPlayer, {
   AutomatedRunClient,
   AUTOMATED_RUN_START_DELAY,
 } from "./AutomatedRunPlayer";
-import { Progress } from "@foxglove-studio/app/players/types";
-import delay from "@foxglove-studio/app/shared/delay";
-import signal from "@foxglove-studio/app/shared/signal";
 
 class TestRunClient implements AutomatedRunClient {
   speed = 1;

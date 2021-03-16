@@ -14,9 +14,10 @@
 import { storiesOf } from "@storybook/react";
 import styled from "styled-components";
 
-import SourceInfo from "./index";
 import PanelSetupWithBag from "@foxglove-studio/app/stories/PanelSetupWithBag";
 import bagFile from "@foxglove-studio/app/test/fixtures/example.bag";
+
+import SourceInfo from "./index";
 
 const SNarrow = styled.div`
   width: 200px;

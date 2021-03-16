@@ -23,17 +23,6 @@ import { useState, useCallback, useMemo } from "react";
 import ReactHoverObserver from "react-hover-observer";
 import Tree from "react-json-tree";
 
-import { HighlightedValue, SDiffSpan, MaybeCollapsedValue } from "./Diff";
-import Metadata from "./Metadata";
-import RawMessagesIcons from "./RawMessagesIcons";
-import {
-  ValueAction,
-  getValueActionForValue,
-  getStructureItemForPath,
-} from "./getValueActionForValue";
-import helpContent from "./index.help.md";
-import styles from "./index.module.scss";
-import { DATA_ARRAY_PREVIEW_LIMIT, getItemString, getItemStringForDiff } from "./utils";
 import { useDataSourceInfo, useMessagesByTopic } from "@foxglove-studio/app/PanelAPI";
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
@@ -76,6 +65,18 @@ import {
 } from "@foxglove-studio/app/util/binaryObjects";
 import { jsonTreeTheme, SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import { enumValuesByDatatypeAndField } from "@foxglove-studio/app/util/selectors";
+
+import { HighlightedValue, SDiffSpan, MaybeCollapsedValue } from "./Diff";
+import Metadata from "./Metadata";
+import RawMessagesIcons from "./RawMessagesIcons";
+import {
+  ValueAction,
+  getValueActionForValue,
+  getStructureItemForPath,
+} from "./getValueActionForValue";
+import helpContent from "./index.help.md";
+import styles from "./index.module.scss";
+import { DATA_ARRAY_PREVIEW_LIMIT, getItemString, getItemStringForDiff } from "./utils";
 
 export const CUSTOM_METHOD = "custom";
 export const PREV_MSG_METHOD = "previous message";

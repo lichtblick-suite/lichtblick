@@ -15,7 +15,6 @@ import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import styled from "styled-components";
 
-import buildSampleMessage from "./buildSampleMessage";
 import Autocomplete from "@foxglove-studio/app/components/Autocomplete";
 import Button from "@foxglove-studio/app/components/Button";
 import Flex from "@foxglove-studio/app/components/Flex";
@@ -30,6 +29,8 @@ import {
 } from "@foxglove-studio/app/shared/panelToolbarStyles";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
+
+import buildSampleMessage from "./buildSampleMessage";
 
 type Config = {
   topicName: string;

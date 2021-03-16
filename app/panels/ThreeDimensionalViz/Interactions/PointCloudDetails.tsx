@@ -16,7 +16,6 @@ import { useMemo, useState, useCallback } from "react";
 import { MouseEventObject } from "regl-worldview";
 import styled from "styled-components";
 
-import { SValue, SLabel } from "./styling";
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
 import Icon from "@foxglove-studio/app/components/Icon";
 import Menu from "@foxglove-studio/app/components/Menu";
@@ -27,6 +26,8 @@ import {
 } from "@foxglove-studio/app/panels/ThreeDimensionalViz/commands/PointClouds/selection";
 import { downloadFiles } from "@foxglove-studio/app/util";
 import clipboard from "@foxglove-studio/app/util/clipboard";
+
+import { SValue, SLabel } from "./styling";
 
 const SRow = styled.div`
   display: flex;

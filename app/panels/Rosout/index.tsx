@@ -17,11 +17,6 @@ import { Creatable as ReactSelectCreatable } from "react-select";
 import VirtualizedSelect from "react-virtualized-select";
 import { createSelector } from "reselect";
 
-import LevelToString, { KNOWN_LOG_LEVELS } from "./LevelToString";
-import LogMessage from "./LogMessage";
-import logStyle from "./LogMessage.module.scss";
-import helpContent from "./index.help.md";
-import styles from "./index.module.scss";
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import Flex from "@foxglove-studio/app/components/Flex";
 import Icon from "@foxglove-studio/app/components/Icon";
@@ -33,6 +28,12 @@ import { cast, ReflectiveMessage, Topic, TypedMessage } from "@foxglove-studio/a
 import { RosgraphMsgs$Log } from "@foxglove-studio/app/types/Messages";
 import clipboard from "@foxglove-studio/app/util/clipboard";
 import { ROSOUT_TOPIC } from "@foxglove-studio/app/util/globalConstants";
+
+import LevelToString, { KNOWN_LOG_LEVELS } from "./LevelToString";
+import LogMessage from "./LogMessage";
+import logStyle from "./LogMessage.module.scss";
+import helpContent from "./index.help.md";
+import styles from "./index.module.scss";
 
 // Remove creatable warning https://github.com/JedWatson/react-select/issues/2181
 class Creatable extends React.Component {

@@ -13,11 +13,12 @@
 
 import { mount } from "enzyme";
 
-import * as PanelAPI from ".";
-import { concatAndTruncate } from "./useMessagesByTopic";
 import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
 import { MessageFormat } from "@foxglove-studio/app/players/types";
 import { wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
+
+import * as PanelAPI from ".";
+import { concatAndTruncate } from "./useMessagesByTopic";
 
 describe("useMessagesByTopic", () => {
   // Create a helper component that exposes the results of the hook for mocking.

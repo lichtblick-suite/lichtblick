@@ -14,8 +14,6 @@
 import { storiesOf } from "@storybook/react";
 import styled from "styled-components";
 
-import Interactions, { OBJECT_TAB_TYPE, LINKED_VARIABLES_TAB_TYPE } from "./index";
-import useLinkedGlobalVariables from "./useLinkedGlobalVariables";
 import Flex from "@foxglove-studio/app/components/Flex";
 import MockPanelContextProvider from "@foxglove-studio/app/components/MockPanelContextProvider";
 import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
@@ -31,6 +29,9 @@ import PanelSetup, { triggerInputChange } from "@foxglove-studio/app/stories/Pan
 import { ScreenshotSizedContainer } from "@foxglove-studio/app/stories/storyHelpers";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { simulateDragClick } from "@foxglove-studio/app/test/mouseEventsHelper";
+
+import Interactions, { OBJECT_TAB_TYPE, LINKED_VARIABLES_TAB_TYPE } from "./index";
+import useLinkedGlobalVariables from "./useLinkedGlobalVariables";
 
 const SWrapper = styled.div`
   background: #2d2c33;

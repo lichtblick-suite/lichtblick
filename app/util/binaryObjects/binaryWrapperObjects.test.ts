@@ -11,13 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { definitions } from "./messageDefinitionTestTypes";
 import {
   printFieldDefinition,
   printGetClassForView,
   printSingularExpression,
   PointerExpression,
 } from "@foxglove-studio/app/util/binaryObjects/binaryWrapperObjects";
+
+import { definitions } from "./messageDefinitionTestTypes";
 
 describe("PointerExpression", () => {
   it("prints a constructed expression nicely", () => {

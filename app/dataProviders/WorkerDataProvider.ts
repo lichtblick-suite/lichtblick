@@ -13,6 +13,11 @@
 
 import { Time } from "rosbag";
 
+import RpcDataProvider from "@foxglove-studio/app/dataProviders/RpcDataProvider";
+import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
+import Rpc from "@foxglove-studio/app/util/Rpc";
+import WorkerDataProviderWorker from "worker-loader!@foxglove-studio/app/dataProviders/WorkerDataProvider.worker";
+
 import {
   DataProvider,
   InitializationResult,
@@ -21,10 +26,6 @@ import {
   GetMessagesResult,
   GetMessagesTopics,
 } from "./types";
-import RpcDataProvider from "@foxglove-studio/app/dataProviders/RpcDataProvider";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
-import Rpc from "@foxglove-studio/app/util/Rpc";
-import WorkerDataProviderWorker from "worker-loader!@foxglove-studio/app/dataProviders/WorkerDataProvider.worker";
 
 const params = new URLSearchParams(window.location.search);
 const secondSourceUrlParams = getGlobalHooks().getSecondSourceUrlParams();

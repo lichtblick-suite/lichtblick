@@ -11,9 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Message } from "@foxglove-studio/app/players/types";
+
 import { addMessages, defaultDiagnosticsBuffer } from "./DiagnosticsHistory";
 import { computeDiagnosticInfo, DiagnosticInfo, LEVELS } from "./util";
-import { Message } from "@foxglove-studio/app/players/types";
 
 const messageAtLevel = (level: number): Message => ({
   message: {

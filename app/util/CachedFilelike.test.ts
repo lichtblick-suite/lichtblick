@@ -13,8 +13,9 @@
 
 import buffer from "buffer";
 
-import CachedFilelike, { FileReader, FileStream } from "./CachedFilelike";
 import delay from "@foxglove-studio/app/shared/delay";
+
+import CachedFilelike, { FileReader, FileStream } from "./CachedFilelike";
 
 class InMemoryFileReader implements FileReader {
   _buffer: Buffer;

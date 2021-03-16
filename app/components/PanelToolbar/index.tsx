@@ -25,9 +25,6 @@ import { MosaicContext, MosaicWindowContext } from "react-mosaic-component";
 import { useDispatch, useSelector, ReactReduxContext } from "react-redux";
 import { bindActionCreators } from "redux";
 
-import HelpButton from "./HelpButton";
-import MosaicDragHandle from "./MosaicDragHandle";
-import styles from "./index.module.scss";
 import {
   savePanelConfigs,
   changePanelLayout,
@@ -48,6 +45,10 @@ import { State } from "@foxglove-studio/app/reducers";
 import frameless from "@foxglove-studio/app/util/frameless";
 import { TAB_PANEL_TYPE } from "@foxglove-studio/app/util/globalConstants";
 import logEvent, { getEventNames, getEventTags } from "@foxglove-studio/app/util/logEvent";
+
+import HelpButton from "./HelpButton";
+import MosaicDragHandle from "./MosaicDragHandle";
+import styles from "./index.module.scss";
 
 type Props = {
   children?: React.ReactNode;

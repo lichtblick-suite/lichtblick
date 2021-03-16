@@ -13,6 +13,9 @@
 
 import { sortedIndexBy } from "lodash";
 
+import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
+import { Message } from "@foxglove-studio/app/players/types";
+
 import {
   DiagnosticStatusArrayMsg,
   DiagnosticsById,
@@ -21,8 +24,6 @@ import {
   getDiagnosticId,
   trimHardwareId,
 } from "./util";
-import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import { Message } from "@foxglove-studio/app/players/types";
 
 export type DiagnosticAutocompleteEntry = {
   name?: string; // undefined for "combined hardware_id" entries for showing diagnostics with any name.

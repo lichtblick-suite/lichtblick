@@ -14,11 +14,12 @@
 import React, { useCallback } from "react";
 import styled from "styled-components";
 
-import helpContent from "./index.help.md";
 import Flex from "@foxglove-studio/app/components/Flex";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import { SaveConfig } from "@foxglove-studio/app/types/panels";
+
+import helpContent from "./index.help.md";
 
 const STextArea = styled.textarea`
   width: 100%;

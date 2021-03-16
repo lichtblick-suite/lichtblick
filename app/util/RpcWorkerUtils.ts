@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import Rpc from "./Rpc";
-import overwriteFetch from "./overwriteFetch";
 import { initializeLogEvent } from "@foxglove-studio/app/util/logEvent";
 import {
   setNotificationHandler,
@@ -20,6 +18,9 @@ import {
   NotificationType,
   NotificationSeverity,
 } from "@foxglove-studio/app/util/sendNotification";
+
+import Rpc from "./Rpc";
+import overwriteFetch from "./overwriteFetch";
 
 export function setupSendReportNotificationHandler(rpc: Rpc) {
   setNotificationHandler(

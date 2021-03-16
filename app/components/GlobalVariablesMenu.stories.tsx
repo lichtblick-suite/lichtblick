@@ -17,9 +17,10 @@ import { DndProvider } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
 import { Provider } from "react-redux";
 
-import GlobalVariablesMenu from "./GlobalVariablesMenu";
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
+
+import GlobalVariablesMenu from "./GlobalVariablesMenu";
 
 storiesOf("<GlobalVariablesMenu>", module)
   .add("closed", () => {

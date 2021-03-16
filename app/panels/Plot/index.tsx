@@ -16,8 +16,6 @@ import memoizeWeak from "memoize-weak";
 import { useEffect, useCallback, useMemo, useRef } from "react";
 import { Time, TimeUtil } from "rosbag";
 
-import helpContent from "./index.help.md";
-import { PlotConfig } from "./types";
 import {
   useBlocksByTopic,
   useDataSourceInfo,
@@ -45,6 +43,9 @@ import PlotMenu from "@foxglove-studio/app/panels/Plot/PlotMenu";
 import { PanelConfig } from "@foxglove-studio/app/types/panels";
 import { useShallowMemo } from "@foxglove-studio/app/util/hooks";
 import { fromSec, subtractTimes, toSec } from "@foxglove-studio/app/util/time";
+
+import helpContent from "./index.help.md";
+import { PlotConfig } from "./types";
 
 export { plotableRosTypes } from "./types";
 export type { PlotConfig, PlotXAxisVal } from "./types";

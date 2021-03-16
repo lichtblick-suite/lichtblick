@@ -15,8 +15,6 @@ import { debounce, flatten, groupBy, isEqual } from "lodash";
 import { ReactElement } from "react";
 import { Time, TimeUtil } from "rosbag";
 
-import { pauseFrameForPromises, FramePromise } from "./pauseFrameForPromise";
-import warnOnOutOfSyncMessages from "./warnOnOutOfSyncMessages";
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import {
   AdvertisePayload,
@@ -43,6 +41,9 @@ import {
 } from "@foxglove-studio/app/util/hooks";
 import naturalSort from "@foxglove-studio/app/util/naturalSort";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
+
+import { pauseFrameForPromises, FramePromise } from "./pauseFrameForPromise";
+import warnOnOutOfSyncMessages from "./warnOnOutOfSyncMessages";
 
 export const WARN_ON_SUBSCRIPTIONS_WITHIN_TIME_MS = 1000;
 

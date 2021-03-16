@@ -15,11 +15,12 @@ import ChevronDownIcon from "@mdi/svg/svg/chevron-down.svg";
 import cx from "classnames";
 import { ReactNode, CSSProperties, ReactElement } from "react";
 
+import Tooltip from "@foxglove-studio/app/components/Tooltip";
+
 import ChildToggle from "../ChildToggle";
 import Icon from "../Icon";
 import Menu, { Item } from "../Menu";
 import styles from "./index.module.scss";
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
 
 type Props = {
   children?: ReactNode;

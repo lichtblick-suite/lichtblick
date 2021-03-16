@@ -13,6 +13,9 @@
 
 import { cloneDeep } from "lodash";
 
+import { cast } from "@foxglove-studio/app/players/types";
+import { BinaryHeader, BinaryTime } from "@foxglove-studio/app/types/BinaryMessages";
+
 import {
   deepParse,
   getField,
@@ -36,8 +39,6 @@ import {
   HasInt64s,
 } from "./messageDefinitionTestTypes";
 import { typeSize } from "./messageDefinitionUtils";
-import { cast } from "@foxglove-studio/app/players/types";
-import { BinaryHeader, BinaryTime } from "@foxglove-studio/app/types/BinaryMessages";
 
 describe("getObjects", () => {
   it("can compile everything", () => {

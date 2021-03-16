@@ -11,11 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { FieldReader, Uint8Reader, getReader } from "./readers";
-import { DATATYPE, VertexBuffer } from "./types";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { ColorMode } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
 import { PointField } from "@foxglove-studio/app/types/Messages";
+
+import { FieldReader, Uint8Reader, getReader } from "./readers";
+import { DATATYPE, VertexBuffer } from "./types";
 
 export type FieldOffsetsAndReaders = {
   [name: string]: { datatype: string; offset: number; reader?: FieldReader };

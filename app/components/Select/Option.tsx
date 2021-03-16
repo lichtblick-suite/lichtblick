@@ -13,8 +13,9 @@
 
 import cx from "classnames";
 
-import styles from "./Option.module.scss";
 import Icon from "@foxglove-studio/app/components/Icon";
+
+import styles from "./Option.module.scss";
 
 type Props = {
   // value is used by the Select component

@@ -17,7 +17,6 @@ import _ from "lodash";
 import { useTable, usePagination, useExpanded, useSortBy } from "react-table";
 import styled from "styled-components";
 
-import helpContent from "./index.help.md";
 import { useMessagesByTopic } from "@foxglove-studio/app/PanelAPI";
 import EmptyState from "@foxglove-studio/app/components/EmptyState";
 import Flex from "@foxglove-studio/app/components/Flex";
@@ -38,6 +37,8 @@ import { RosObject } from "@foxglove-studio/app/players/types";
 import { SaveConfig } from "@foxglove-studio/app/types/panels";
 import { ROBOTO_MONO } from "@foxglove-studio/app/util/sharedStyleConstants";
 import { toolsColorScheme } from "@foxglove-studio/app/util/toolsColorScheme";
+
+import helpContent from "./index.help.md";
 
 const STable = styled.table`
   border: none;

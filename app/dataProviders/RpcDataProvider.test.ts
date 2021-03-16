@@ -11,12 +11,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import RpcDataProvider from "./RpcDataProvider";
-import RpcDataProviderRemote from "./RpcDataProviderRemote";
 import MemoryDataProvider from "@foxglove-studio/app/dataProviders/MemoryDataProvider";
 import { mockExtensionPoint } from "@foxglove-studio/app/dataProviders/mockExtensionPoint";
 import { DataProviderMetadata } from "@foxglove-studio/app/dataProviders/types";
 import Rpc, { createLinkedChannels } from "@foxglove-studio/app/util/Rpc";
+
+import RpcDataProvider from "./RpcDataProvider";
+import RpcDataProviderRemote from "./RpcDataProviderRemote";
 
 const data = {
   messages: {

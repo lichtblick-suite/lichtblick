@@ -38,7 +38,7 @@ parserOptions:
 settings:
   react:
     version: detect
-  import/internal-regex: "^@foxglove-studio/"
+  import/internal-regex: "^@foxglove"
 
 rules:
   file-progress/activate: 1
@@ -86,13 +86,12 @@ rules:
   import/no-mutable-exports: error
   import/newline-after-import: error
   import/no-duplicates: error # https://github.com/benmosher/eslint-plugin-import/issues/242#issuecomment-230118951
-  # Group imports into two groups: packages and files. Sort alphabetically
-  # within those groups.
+  # Group imports into three groups [external, @foxglove, relative] and sort alphabetically within each group
   import/order:
     - error
     - alphabetize: { order: asc }
       newlines-between: always
-      groups: [[builtin, external], [internal, parent, sibling, index]]
+      groups: [[builtin, external], [internal], [parent, sibling, index]]
 
   # we let typescript and webpack handle whether imports exist or not
   import/namespace: off

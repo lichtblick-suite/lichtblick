@@ -20,7 +20,6 @@ import { useSelector, useDispatch } from "react-redux";
 import "react-mosaic-component/react-mosaic-component.css";
 import { bindActionCreators } from "redux";
 
-import ErrorBoundary from "./ErrorBoundary";
 import "./PanelLayout.scss";
 import { setMosaicId } from "@foxglove-studio/app/actions/mosaic";
 import {
@@ -36,6 +35,8 @@ import { EmptyDropTarget } from "@foxglove-studio/app/panels/Tab/EmptyDropTarget
 import { State, Dispatcher } from "@foxglove-studio/app/reducers";
 import { MosaicNode, SaveConfigsPayload } from "@foxglove-studio/app/types/panels";
 import { getPanelIdForType, getPanelTypeFromId } from "@foxglove-studio/app/util/layout";
+
+import ErrorBoundary from "./ErrorBoundary";
 
 type Props = {
   layout?: MosaicNode;

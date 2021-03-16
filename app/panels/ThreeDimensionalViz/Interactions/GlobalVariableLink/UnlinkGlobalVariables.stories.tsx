@@ -13,8 +13,9 @@
 
 import { storiesOf } from "@storybook/react";
 
-import UnlinkGlobalVariables from "./UnlinkGlobalVariables";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+
+import UnlinkGlobalVariables from "./UnlinkGlobalVariables";
 
 const linkedGlobalVariables = [
   {

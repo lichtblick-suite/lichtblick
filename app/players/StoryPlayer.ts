@@ -13,7 +13,6 @@
 
 import { partition } from "lodash";
 
-import { SECOND_SOURCE_PREFIX } from "../util/globalConstants";
 import BagDataProvider from "@foxglove-studio/app/dataProviders/BagDataProvider";
 import CombinedDataProvider from "@foxglove-studio/app/dataProviders/CombinedDataProvider";
 import ParseMessagesDataProvider from "@foxglove-studio/app/dataProviders/ParseMessagesDataProvider";
@@ -25,6 +24,8 @@ import {
   Player,
   NotifyPlayerManagerReplyData,
 } from "@foxglove-studio/app/players/types";
+
+import { SECOND_SOURCE_PREFIX } from "../util/globalConstants";
 
 const noop = () => {
   // no-op

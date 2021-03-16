@@ -14,7 +14,6 @@
 import { last, sumBy } from "lodash";
 import { ReactElement } from "react";
 
-import helpContent from "./index.help.md";
 import Flex from "@foxglove-studio/app/components/Flex";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import Panel from "@foxglove-studio/app/components/Panel";
@@ -22,6 +21,8 @@ import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import { Sparkline, SparklinePoint } from "@foxglove-studio/app/components/Sparkline";
 import { PlayerStateActiveData } from "@foxglove-studio/app/players/types";
 import { subtractTimes, toSec } from "@foxglove-studio/app/util/time";
+
+import helpContent from "./index.help.md";
 
 const TIME_RANGE = 5000;
 

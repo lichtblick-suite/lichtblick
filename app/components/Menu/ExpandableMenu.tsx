@@ -16,8 +16,9 @@ import ChevronUpIcon from "@mdi/svg/svg/chevron-up.svg";
 import { ReactNode } from "react";
 import styled from "styled-components";
 
-import Item from "./Item";
 import Icon from "@foxglove-studio/app/components/Icon";
+
+import Item from "./Item";
 
 const STitleWrapper = styled.div`
   line-height: 15px;

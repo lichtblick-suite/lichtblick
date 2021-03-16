@@ -14,12 +14,6 @@ import { mount } from "enzyme";
 import { createMemoryHistory } from "history";
 import { cloneDeep } from "lodash";
 
-import {
-  fillInGlobalVariablesInPath,
-  getMessagePathDataItems,
-  useCachedGetMessagePathDataItems,
-  useDecodeMessagePathsForMessagesByTopic,
-} from "./useCachedGetMessagePathDataItems";
 import { setGlobalVariables } from "@foxglove-studio/app/actions/panels";
 import parseRosPath from "@foxglove-studio/app/components/MessagePathSyntax/parseRosPath";
 import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
@@ -29,6 +23,13 @@ import configureStore from "@foxglove-studio/app/store/configureStore.testing";
 import { wrapMessages } from "@foxglove-studio/app/test/datatypes";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { deepParse, isBobject } from "@foxglove-studio/app/util/binaryObjects";
+
+import {
+  fillInGlobalVariablesInPath,
+  getMessagePathDataItems,
+  useCachedGetMessagePathDataItems,
+  useDecodeMessagePathsForMessagesByTopic,
+} from "./useCachedGetMessagePathDataItems";
 
 function addValuesWithPathsToItems(
   messages: any,

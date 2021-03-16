@@ -15,12 +15,13 @@ import { act, renderHook } from "@testing-library/react-hooks";
 import { createMemoryHistory } from "history";
 import React, { PropsWithChildren } from "react";
 
-import * as fixture from "./fixture";
 import { setGlobalVariables } from "@foxglove-studio/app/actions/panels";
 import useMessagesByPath from "@foxglove-studio/app/components/MessagePathSyntax/useMessagesByPath";
 import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
+
+import * as fixture from "./fixture";
 
 const singleTopic = [{ name: "/some/topic", datatype: "some/datatype" }];
 

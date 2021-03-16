@@ -16,7 +16,6 @@ import Tabs, { TabPane } from "rc-tabs";
 import React, { useCallback } from "react";
 import styled from "styled-components";
 
-import { Save3DConfig } from "../index";
 import Button from "@foxglove-studio/app/components/Button";
 import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";
 import Modal from "@foxglove-studio/app/components/Modal";
@@ -26,6 +25,8 @@ import { topicSettingsEditorForDatatype } from "@foxglove-studio/app/panels/Thre
 import { Topic } from "@foxglove-studio/app/players/types";
 import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+
+import { Save3DConfig } from "../index";
 
 const STopicSettingsEditor = styled.div`
   background: ${colors.DARK2};

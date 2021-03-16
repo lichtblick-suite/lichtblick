@@ -5,8 +5,9 @@
 import { init as initSentry } from "@sentry/electron";
 import { contextBridge, ipcRenderer } from "electron";
 
-import LocalFileStorage from "./LocalFileStorage";
 import type { OsContext, OsContextForwardedEvent } from "@foxglove-studio/app/OsContext";
+
+import LocalFileStorage from "./LocalFileStorage";
 
 if (typeof process.env.SENTRY_DSN === "string") {
   initSentry({ dsn: process.env.SENTRY_DSN });

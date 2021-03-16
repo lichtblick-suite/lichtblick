@@ -13,7 +13,6 @@
 
 import { TimeUtil } from "rosbag";
 
-import OrderedStampPlayer, { BUFFER_DURATION_SECS } from "./OrderedStampPlayer";
 import FakePlayer from "@foxglove-studio/app/components/MessagePipeline/FakePlayer";
 import UserNodePlayer from "@foxglove-studio/app/players/UserNodePlayer";
 import {
@@ -25,6 +24,8 @@ import signal from "@foxglove-studio/app/shared/signal";
 import { deepParse, wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
 import { fromSec, TimestampMethod } from "@foxglove-studio/app/util/time";
+
+import OrderedStampPlayer, { BUFFER_DURATION_SECS } from "./OrderedStampPlayer";
 
 function makeMessage(
   headerStamp: number | undefined,

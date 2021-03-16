@@ -13,10 +13,11 @@
 
 import { storiesOf } from "@storybook/react";
 
-import GlobalVariables from "./index";
 import { LinkedGlobalVariable } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import delay from "@foxglove-studio/app/shared/delay";
 import PanelSetup, { triggerInputChange } from "@foxglove-studio/app/stories/PanelSetup";
+
+import GlobalVariables from "./index";
 
 const exampleVariables = {
   someNum: 0,

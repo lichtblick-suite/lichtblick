@@ -2,9 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { TcpAddress, TcpSocket } from "@foxglove/ros1";
 import EventEmitter from "eventemitter3";
 import net from "net";
+
+import { TcpAddress, TcpSocket } from "@foxglove/ros1";
 
 import { TcpMessageStream } from "./TcpMessageStream";
 

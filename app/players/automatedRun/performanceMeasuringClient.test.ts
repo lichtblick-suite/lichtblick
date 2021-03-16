@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import PerformanceMeasuringClient from "./performanceMeasuringClient";
 import Database from "@foxglove-studio/app/util/indexeddb/Database";
+
+import PerformanceMeasuringClient from "./performanceMeasuringClient";
 
 describe("performanceMeasuringClient", () => {
   let onPlaybackFinished: any;

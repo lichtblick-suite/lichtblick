@@ -22,9 +22,6 @@ import { Time } from "rosbag";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
-import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";
-import { ProgressPlot } from "./ProgressPlot";
-import styles from "./index.module.scss";
 import { clearHoverValue, setHoverValue } from "@foxglove-studio/app/actions/hoverValue";
 import Button from "@foxglove-studio/app/components/Button";
 import Flex from "@foxglove-studio/app/components/Flex";
@@ -50,6 +47,10 @@ import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { formatTime } from "@foxglove-studio/app/util/formatTime";
 import { colors as sharedColors } from "@foxglove-studio/app/util/sharedStyleConstants";
 import { subtractTimes, toSec, fromSec, formatTimeRaw } from "@foxglove-studio/app/util/time";
+
+import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";
+import { ProgressPlot } from "./ProgressPlot";
+import styles from "./index.module.scss";
 
 const cx = classnames.bind(styles);
 

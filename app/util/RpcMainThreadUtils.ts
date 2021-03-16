@@ -11,9 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import Rpc from "./Rpc";
 import logEvent from "@foxglove-studio/app/util/logEvent";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
+
+import Rpc from "./Rpc";
 
 // This function should be called inside the parent thread; it sets up receiving a message from the worker thread and
 // calling sendNotification.

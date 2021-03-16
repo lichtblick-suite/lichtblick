@@ -16,12 +16,13 @@ import { createMemoryHistory } from "history";
 import { DndProvider } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
 
-import PanelLayout from "./PanelLayout";
 import { changePanelLayout } from "@foxglove-studio/app/actions/panels";
 import MockPanelContextProvider from "@foxglove-studio/app/components/MockPanelContextProvider";
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+
+import PanelLayout from "./PanelLayout";
 
 const DEFAULT_CLICK_DELAY = 100;
 storiesOf("<PanelLayout>", module)

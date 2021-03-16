@@ -12,10 +12,11 @@
 //   You may not use this file except in compliance with the License.
 import { mount } from "enzyme";
 
-import { useLatestMessageDataItem } from "./useLatestMessageDataItem";
 import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
 import { Message, MessageFormat } from "@foxglove-studio/app/players/types";
 import { deepParse } from "@foxglove-studio/app/util/binaryObjects";
+
+import { useLatestMessageDataItem } from "./useLatestMessageDataItem";
 
 const topics = [{ name: "/topic", datatype: "datatype" }];
 const datatypes = {

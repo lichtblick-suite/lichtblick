@@ -24,9 +24,10 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
-import styles from "./index.module.scss";
 import Flex from "@foxglove-studio/app/components/Flex";
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
+
+import styles from "./index.module.scss";
 
 type ContainsOpenProps = {
   onChange: (containsOpen: boolean) => void;

@@ -12,6 +12,11 @@
 //   You may not use this file except in compliance with the License.
 
 import {
+  DEFAULT_FLAT_COLOR,
+  ColorMode,
+} from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
+
+import {
   getFieldOffsetsAndReaders,
   createPositionBuffer,
   createColorBuffer,
@@ -19,10 +24,6 @@ import {
   getVertexValue,
 } from "./buffers";
 import { PointCloudMarker } from "./types";
-import {
-  DEFAULT_FLAT_COLOR,
-  ColorMode,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
 
 // Decode a marker and generate position and color buffers for rendering
 // The resulting marker should be memoized for better performance

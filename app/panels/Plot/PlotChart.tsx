@@ -18,8 +18,6 @@ import { createSelector } from "reselect";
 import { Time } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
-import styles from "./PlotChart.module.scss";
-import { PlotXAxisVal } from "./index";
 import Dimensions from "@foxglove-studio/app/components/Dimensions";
 import { ScaleOptions } from "@foxglove-studio/app/components/ReactChartjs";
 import TimeBasedChart, {
@@ -49,6 +47,9 @@ import {
   formatTimeRaw,
   TimestampMethod,
 } from "@foxglove-studio/app/util/time";
+
+import styles from "./PlotChart.module.scss";
+import { PlotXAxisVal } from "./index";
 
 export type PlotChartPoint = {
   x: number;
