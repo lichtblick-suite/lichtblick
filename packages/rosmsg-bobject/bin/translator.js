@@ -1,5 +1,4 @@
 /* eslint-disable */
-// @ts-nocheck
 
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
@@ -4709,4 +4708,4 @@ var Module = (function () {
     return Module.ready;
   };
 })();
-export default Module;
+module.exports = Module;
