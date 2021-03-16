@@ -3,25 +3,26 @@
 set -euo pipefail
 
 WORK_DIR=`pwd`/`dirname $0`
+IMAGE=rosmsg-bobject
 
-docker build $WORK_DIR -t webviz:ros_binary_translation
+docker build $WORK_DIR -t $IMAGE
 
 docker run \
   --rm \
   -v $WORK_DIR:$WORK_DIR \
-  webviz:ros_binary_translation \
+  $IMAGE \
   clang-format -i $WORK_DIR/cpp/**/*.cpp $WORK_DIR/cpp/**/*.hpp
 
 docker run \
   --rm \
   -v $WORK_DIR:$WORK_DIR \
-  webviz:ros_binary_translation \
+  $IMAGE \
   clang-tidy $WORK_DIR/cpp/**/*.cpp $WORK_DIR/cpp/**/*.hpp -- -I$WORK_DIR/cpp/include
 
 docker run \
   --rm \
   -v $WORK_DIR:$WORK_DIR \
-  webviz:ros_binary_translation \
+  $IMAGE \
   emcc \
     -fno-rtti \
     -fno-exceptions \
