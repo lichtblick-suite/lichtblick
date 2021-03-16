@@ -26,8 +26,7 @@
     ]
   },
   "win": {
-    "target": ["nsis", "appx"],
-    "rfc3161TimeStampServer": "http://timestamp.comodoca.com",
+    "target": ["nsis"],
     "icon": "resources/icon/icon.png",
     "fileAssociations": [
       {
