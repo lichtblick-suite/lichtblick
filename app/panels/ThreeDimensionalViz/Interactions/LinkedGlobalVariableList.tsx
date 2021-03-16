@@ -14,11 +14,16 @@
 import LinkPlusIcon from "@mdi/svg/svg/link-plus.svg";
 import styled from "styled-components";
 
-import GlobalVariableLink, { SPath, GlobalVariableName } from "./GlobalVariableLink/index";
+import GlobalVariableLink from "./GlobalVariableLink/index";
+import GlobalVariableName from "./GlobalVariableName";
 import { getPath } from "./interactionUtils";
 import { SEmptyState } from "./styling";
 import { LinkedGlobalVariables } from "./useLinkedGlobalVariables";
 import Icon from "@foxglove-studio/app/components/Icon";
+
+const SPath = styled.span`
+  opacity: 0.8;
+`;
 
 const STable = styled.table`
   td {

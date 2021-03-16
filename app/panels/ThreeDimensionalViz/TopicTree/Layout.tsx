@@ -43,10 +43,7 @@ import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToB
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
-import {
-  Save3DConfig,
-  ThreeDimensionalVizConfig,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz";
+import { Save3DConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz";
 import DebugStats from "@foxglove-studio/app/panels/ThreeDimensionalViz/DebugStats";
 import {
   POLYGON_TAB_TYPE,
@@ -83,6 +80,7 @@ import {
   getObject,
   getUpdatedGlobalVariablesBySelectedObject,
 } from "@foxglove-studio/app/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
+import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz/types";
 import { Frame, Topic } from "@foxglove-studio/app/players/types";
 import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
 import { Color } from "@foxglove-studio/app/types/Messages";

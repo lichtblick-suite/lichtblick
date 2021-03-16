@@ -13,60 +13,21 @@
 
 import styled from "styled-components";
 
-import GlobalVariableName from "../GlobalVariableName";
 import { getLinkedGlobalVariable } from "../interactionUtils";
 import useLinkedGlobalVariables, { LinkedGlobalVariable } from "../useLinkedGlobalVariables";
 import LinkToGlobalVariable from "./LinkToGlobalVariable";
+import SGlobalVariableLink from "./SGlobalVariableLink";
 import UnlinkGlobalVariable from "./UnlinkGlobalVariable";
-import UnlinkGlobalVariables from "./UnlinkGlobalVariables";
 import UnlinkWrapper from "./UnlinkWrapper";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 const SWrapper = styled.span`
   display: inline-flex;
   align-items: center;
 `;
-export const SPath = styled.span`
-  opacity: 0.8;
-`;
+
 export const SP = styled.p`
   line-height: 1.4;
   margin-bottom: 12px;
-`;
-export const SGlobalVariableLink = styled.span`
-  height: 15px;
-  flex-direction: row;
-  display: inline-flex;
-  align-items: center;
-  word-break: normal;
-  .icon {
-    color: ${colors.BLUE};
-  }
-  .link-icon {
-    opacity: 0.2;
-    display: none;
-  }
-  .highlight {
-    opacity: 1;
-    display: inline;
-  }
-  &:hover {
-    .link-icon {
-      opacity: 1;
-    }
-  }
-`;
-
-export const SGlobalVariableForm = styled.form`
-  background-color: ${colors.DARK3};
-  margin-left: -16px;
-  padding: 12px;
-  width: 240px;
-  box-shadow: 0 6px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.25);
-  pointer-events: auto;
-  flex: 0 0 auto;
-  border-radius: 8px;
-  overflow-wrap: break-word;
 `;
 
 const SValue = styled.span`
@@ -147,5 +108,3 @@ export default function GlobalVariableLink({
     </SWrapper>
   );
 }
-
-export { GlobalVariableName, UnlinkGlobalVariables };

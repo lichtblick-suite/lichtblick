@@ -31,6 +31,8 @@ export type TopicTreeConfig = {
   legacyIds?: string[];
 };
 
+export type TreeUINode = { title: Node; key: string; children?: TreeUINode[]; disabled?: boolean };
+
 export type NamespacesByTopic = {
   [topicName: string]: string[];
 };

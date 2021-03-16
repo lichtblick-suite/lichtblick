@@ -168,9 +168,10 @@ export function makeConfig(_: unknown, argv: WebpackArgv): Configuration {
         failOnError: true,
         onDetected({ paths, compilation }) {
           if (paths.some((filePath) => filePath.match(/(^|[\\/])GlobalConfig.ts/))) {
+            // compilation.warnings.push(new Error(paths.join(" -> ")));
             return;
           }
-          compilation.warnings.push(new Error(paths.join(" -> ")));
+          compilation.errors.push(new Error(paths.join(" -> ")));
         },
       }) as WebpackPluginInstance,
       new webpack.ProvidePlugin({

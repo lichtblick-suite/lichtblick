@@ -12,16 +12,23 @@
 //   You may not use this file except in compliance with the License.
 
 import { isEqual } from "lodash";
+import styled from "styled-components";
 
 import { getPath } from "../interactionUtils";
 import useLinkedGlobalVariables, { LinkedGlobalVariable } from "../useLinkedGlobalVariables";
-import { SPath, SGlobalVariableForm, GlobalVariableName } from "./index";
+import SGlobalVariableForm from "./SGlobalVariableForm";
 import Button from "@foxglove-studio/app/components/Button";
+import GlobalVariableName from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/GlobalVariableName";
+
+const SPath = styled.span`
+  opacity: 0.8;
+`;
 
 type Props = {
   linkedGlobalVariable: LinkedGlobalVariable;
   setIsOpen: (arg0: boolean) => void;
 };
+
 export default function UnlinkGlobalVariable({
   linkedGlobalVariable: { topic, markerKeyPath, name },
   setIsOpen,

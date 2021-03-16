@@ -14,24 +14,20 @@
 import hoistNonReactStatics from "hoist-non-react-statics";
 import { omit, debounce } from "lodash";
 import React, { useCallback, useMemo, useState, useRef, useEffect } from "react";
-import { CameraState } from "regl-worldview";
 
 import { FrameCompatibilityDEPRECATED } from "./FrameCompatibility";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelContext from "@foxglove-studio/app/components/PanelContext";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
-import { TopicSettingsCollection } from "@foxglove-studio/app/panels/ThreeDimensionalViz/SceneBuilder";
-import Layout, {
-  ColorOverrideBySourceIdxByVariable,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/Layout";
-import { TopicDisplayMode } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
+import Layout from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/Layout";
 import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
 import helpContent from "@foxglove-studio/app/panels/ThreeDimensionalViz/index.help.md";
 import {
   useTransformedCameraState,
   getNewCameraStateOnFollowChange,
 } from "@foxglove-studio/app/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
+import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz/types";
 import withTransforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/withTransforms";
 import { Frame, Topic } from "@foxglove-studio/app/players/types";
 import { SaveConfig } from "@foxglove-studio/app/types/panels";
@@ -40,27 +36,6 @@ import { TRANSFORM_TOPIC, TRANSFORM_STATIC_TOPIC } from "@foxglove-studio/app/ut
 // The amount of time to wait before dispatching the saveConfig action to save the cameraState into the layout
 export const CAMERA_STATE_UPDATE_DEBOUNCE_DELAY_MS = 250;
 
-export type ThreeDimensionalVizConfig = {
-  enableShortDisplayNames?: boolean;
-  autoTextBackgroundColor?: boolean;
-  cameraState: Partial<CameraState>;
-  followTf?: string | false;
-  followOrientation?: boolean;
-  modifiedNamespaceTopics?: string[];
-  pinTopics: boolean;
-  diffModeEnabled: boolean;
-  topicDisplayMode?: TopicDisplayMode;
-  flattenMarkers?: boolean;
-  selectedPolygonEditFormat?: "json" | "yaml";
-  showCrosshair?: boolean;
-
-  expandedKeys: string[];
-  checkedKeys: string[];
-  settingsByKey: TopicSettingsCollection;
-  autoSyncCameraState?: boolean;
-  colorOverrideBySourceIdxByVariable?: ColorOverrideBySourceIdxByVariable;
-  disableAutoOpenClickedObject?: boolean;
-};
 export type Save3DConfig = SaveConfig<ThreeDimensionalVizConfig>;
 
 export type Props = {

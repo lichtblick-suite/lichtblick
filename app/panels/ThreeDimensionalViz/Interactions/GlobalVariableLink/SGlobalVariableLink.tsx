@@ -11,11 +11,30 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import Interactions from "./Interactions";
+import styled from "styled-components";
 
-export * from "./Interactions";
-export { default as InteractionContextMenu } from "./InteractionContextMenu";
-export { default as GlobalVariableLink } from "./GlobalVariableLink";
-export * from "./types";
+import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
-export default Interactions;
+export default styled.span`
+  height: 15px;
+  flex-direction: row;
+  display: inline-flex;
+  align-items: center;
+  word-break: normal;
+  .icon {
+    color: ${colors.BLUE};
+  }
+  .link-icon {
+    opacity: 0.2;
+    display: none;
+  }
+  .highlight {
+    opacity: 1;
+    display: inline;
+  }
+  &:hover {
+    .link-icon {
+      opacity: 1;
+    }
+  }
+`;

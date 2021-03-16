@@ -20,9 +20,8 @@ import Flex from "@foxglove-studio/app/components/Flex";
 import PanelLayout from "@foxglove-studio/app/components/PanelLayout";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import GlobalVariableSliderPanel from "@foxglove-studio/app/panels/GlobalVariableSlider";
-import ThreeDimensionalViz, {
-  ThreeDimensionalVizConfig,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz";
+import ThreeDimensionalViz from "@foxglove-studio/app/panels/ThreeDimensionalViz";
+import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz/types";
 import { Frame, Topic } from "@foxglove-studio/app/players/types";
 import createRootReducer from "@foxglove-studio/app/reducers";
 import delay from "@foxglove-studio/app/shared/delay";

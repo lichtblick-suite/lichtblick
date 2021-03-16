@@ -14,6 +14,8 @@
 import { uniq } from "lodash";
 import styled from "styled-components";
 
+import TooltipRow from "./TooltipRow";
+import TooltipTable from "./TooltipTable";
 import TreeNodeRow from "./TreeNodeRow";
 import renderNamespaceNodes, { NamespaceNode } from "./renderNamespaceNodes";
 import { renderStyleExpressionNodes } from "./renderStyleExpressionNodes";
@@ -30,6 +32,7 @@ import {
   TopicDisplayMode,
   TreeNode,
   TreeTopicNode,
+  TreeUINode,
   VisibleTopicsCountByKey,
 } from "./types";
 import { generateNodeKey } from "./useTopicTree";
@@ -39,7 +42,6 @@ import { TOPIC_DISPLAY_MODES } from "@foxglove-studio/app/panels/ThreeDimensiona
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import naturalSort from "@foxglove-studio/app/util/naturalSort";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 export const SWITCHER_WIDTH = 24;
 
@@ -52,34 +54,9 @@ export const SToggle = styled.div`
   height: 24px;
 `;
 
-export const TooltipRow = styled.div`
-  margin: 4px 0;
-  &:first-child {
-    margin-top: 0;
-  }
-  &:last-child {
-    margin-bottom: 0;
-  }
-`;
 const TooltipDescription = styled(TooltipRow)`
   line-height: 1.3;
   max-width: 300px;
-`;
-
-export const TooltipTable = styled.table`
-  th,
-  td {
-    border: none;
-    padding: 0;
-  }
-  td {
-    word-break: break-word;
-  }
-  max-width: 100%;
-  th {
-    color: ${colors.TEXT_MUTED};
-    padding-right: 4px;
-  }
 `;
 
 type Props = {
@@ -105,8 +82,6 @@ type Props = {
   };
   diffModeEnabled: boolean;
 };
-
-export type TreeUINode = { title: Node; key: string; children?: TreeUINode[]; disabled?: boolean };
 
 export function getNamespaceNodes({
   availableNamespacesByTopic,

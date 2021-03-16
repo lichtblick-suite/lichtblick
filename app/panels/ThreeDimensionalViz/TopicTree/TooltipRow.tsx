@@ -11,11 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import Interactions from "./Interactions";
+import styled from "styled-components";
 
-export * from "./Interactions";
-export { default as InteractionContextMenu } from "./InteractionContextMenu";
-export { default as GlobalVariableLink } from "./GlobalVariableLink";
-export * from "./types";
-
-export default Interactions;
+export default styled.div`
+  margin: 4px 0;
+  &:first-child {
+    margin-top: 0;
+  }
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;

@@ -14,7 +14,6 @@
 import { cloneDeep } from "lodash";
 import { Color } from "regl-worldview";
 
-import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz";
 import {
   markerProps,
   generateMarkers,
@@ -23,6 +22,7 @@ import {
   FixtureExampleData,
   FixtureExample,
 } from "@foxglove-studio/app/panels/ThreeDimensionalViz/stories/storyComponents";
+import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz/types";
 
 const fixtureData = {
   topics: {
