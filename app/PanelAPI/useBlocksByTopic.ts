@@ -72,8 +72,9 @@ const filterBlockByTopics = memoizeWeak(
       // Don't include an empty array when the data has not been cached for this topic for this
       // block. The missing entry means "we don't know the message for this topic in this block", as
       // opposed to "we know there are no messages for this topic in this block".
-      if (block.messagesByTopic[topic]) {
-        ret[topic] = block.messagesByTopic[topic];
+      const maybeBobjectMessage = block.messagesByTopic[topic];
+      if (maybeBobjectMessage) {
+        ret[topic] = maybeBobjectMessage;
       }
     }
     return ret;
@@ -145,7 +146,9 @@ export function useBlocksByTopic(topics: readonly string[]): BlocksForTopics {
     for (const topic of requestedTopics) {
       if (parsedMessageDefinitionsByTopic && parsedMessageDefinitionsByTopic[topic]) {
         const parsedDefinition = parsedMessageDefinitionsByTopic[topic];
-        result[topic] = new MessageReader(parsedDefinition);
+        if (parsedDefinition) {
+          result[topic] = new MessageReader(parsedDefinition);
+        }
       }
     }
     return result;

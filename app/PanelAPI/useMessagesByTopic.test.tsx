@@ -18,7 +18,6 @@ import { MessageFormat } from "@foxglove-studio/app/players/types";
 import { wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 
 import * as PanelAPI from ".";
-import { concatAndTruncate } from "./useMessagesByTopic";
 
 describe("useMessagesByTopic", () => {
   // Create a helper component that exposes the results of the hook for mocking.
@@ -137,43 +136,5 @@ describe("useMessagesByTopic", () => {
     expect(Test.result.mock.calls).toEqual([[{ "/foo": [message] }]]);
 
     root.unmount();
-  });
-});
-
-describe("concatAndTruncate", () => {
-  it("can truncate down to zero", () => {
-    expect(concatAndTruncate([1, 2, 3], [4, 5, 6], 0)).toEqual([]);
-    expect(concatAndTruncate([], [1, 2, 3], 0)).toEqual([]);
-    expect(concatAndTruncate([1, 2, 3], [], 0)).toEqual([]);
-    expect(concatAndTruncate([], [], 0)).toEqual([]);
-  });
-
-  it("works when no truncation is necessary", () => {
-    expect(concatAndTruncate([1, 2, 3], [4, 5, 6], Infinity)).toEqual([1, 2, 3, 4, 5, 6]);
-    expect(concatAndTruncate([1, 2, 3], [4, 5, 6], 100)).toEqual([1, 2, 3, 4, 5, 6]);
-    expect(concatAndTruncate([1, 2, 3], [4, 5, 6], 6)).toEqual([1, 2, 3, 4, 5, 6]);
-
-    expect(concatAndTruncate([], [1, 2, 3], Infinity)).toEqual([1, 2, 3]);
-    expect(concatAndTruncate([], [1, 2, 3], 100)).toEqual([1, 2, 3]);
-    expect(concatAndTruncate([], [1, 2, 3], 3)).toEqual([1, 2, 3]);
-
-    expect(concatAndTruncate([1, 2, 3], [], Infinity)).toEqual([1, 2, 3]);
-    expect(concatAndTruncate([1, 2, 3], [], 100)).toEqual([1, 2, 3]);
-    expect(concatAndTruncate([1, 2, 3], [], 3)).toEqual([1, 2, 3]);
-  });
-
-  it("can truncate into the middle of the first array", () => {
-    expect(concatAndTruncate([1, 2, 3], [], 2)).toEqual([2, 3]);
-    expect(concatAndTruncate([1, 2, 3], [4, 5], 3)).toEqual([3, 4, 5]);
-  });
-
-  it("can truncate into the middle of the second array", () => {
-    expect(concatAndTruncate([], [1, 2, 3], 2)).toEqual([2, 3]);
-    expect(concatAndTruncate([0], [1, 2, 3], 2)).toEqual([2, 3]);
-  });
-
-  it("can return just the second array", () => {
-    expect(concatAndTruncate([], [1, 2, 3], 3)).toEqual([1, 2, 3]);
-    expect(concatAndTruncate([0], [1, 2, 3], 3)).toEqual([1, 2, 3]);
   });
 });

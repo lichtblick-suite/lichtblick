@@ -52,7 +52,7 @@ describe("useDataSourceInfo", () => {
         topics={topics}
         datatypes={datatypes}
         capabilities={["hello"]}
-        messages={[messages[0]]}
+        messages={messages.slice(0, 1)}
         startTime={{ sec: 0, nsec: 1 }}
       >
         <Test />
@@ -79,7 +79,7 @@ describe("useDataSourceInfo", () => {
         topics={topics}
         datatypes={datatypes}
         capabilities={["hello"]}
-        messages={[messages[0]]}
+        messages={messages.slice(0, 1)}
         startTime={{ sec: 0, nsec: 1 }}
       >
         <Test />

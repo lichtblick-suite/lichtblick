@@ -15,25 +15,10 @@ import { groupBy } from "lodash";
 import { useCallback } from "react";
 
 import { TypedMessage, MessageFormat } from "@foxglove-studio/app/players/types";
+import concatAndTruncate from "@foxglove-studio/app/util/concatAndTruncate";
 import { useDeepMemo } from "@foxglove-studio/app/util/hooks";
 
 import { useMessageReducer } from "./useMessageReducer";
-
-// Exported for tests
-// Equivalent to array1.concat(array2).slice(-limit), but somewhat faster. Also works with limit=0.
-export const concatAndTruncate = <T>(
-  array1: readonly T[],
-  array2: readonly T[],
-  limit: number,
-): T[] => {
-  const toTakeFromArray1 = limit - array2.length;
-  const ret = toTakeFromArray1 <= 0 ? [] : array1.slice(-toTakeFromArray1);
-  const toTakeFromArray2 = limit - ret.length;
-  for (let i = Math.max(0, array2.length - toTakeFromArray2); i < array2.length; ++i) {
-    ret.push(array2[i]);
-  }
-  return ret;
-};
 
 // Convenience wrapper around `useMessageReducer`, for if you just want some
 // recent messages for a few topics.
@@ -61,8 +46,11 @@ export function useMessagesByTopic<T = any>({
     ) => {
       const newMessagesByTopic = groupBy(messages, "topic");
       const ret = { ...prevMessagesByTopic };
-      Object.keys(newMessagesByTopic).forEach((topic) => {
-        ret[topic] = concatAndTruncate(ret[topic], newMessagesByTopic[topic], historySize);
+      Object.entries(newMessagesByTopic).forEach(([topic, newMessages]) => {
+        const retTopic = ret[topic];
+        if (retTopic) {
+          ret[topic] = concatAndTruncate(retTopic, newMessages, historySize);
+        }
       });
       return ret;
     },
@@ -77,10 +65,8 @@ export function useMessagesByTopic<T = any>({
       // When changing topics, we try to keep as many messages around from the previous set of
       // topics as possible.
       for (const topic of requestedTopics) {
-        newMessagesByTopic[topic] =
-          prevMessagesByTopic && prevMessagesByTopic[topic]
-            ? prevMessagesByTopic[topic].slice(-historySize)
-            : [];
+        const prevMessages = prevMessagesByTopic?.[topic];
+        newMessagesByTopic[topic] = prevMessages?.slice(-historySize) ?? [];
       }
       return newMessagesByTopic;
     },
