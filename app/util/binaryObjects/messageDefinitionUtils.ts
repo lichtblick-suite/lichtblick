@@ -38,8 +38,9 @@ const primitiveSizes: Record<string, number> = {
 export const primitiveList: Set<string> = new Set(Object.keys(primitiveSizes));
 
 export const typeSize = memoize((typesByName: RosDatatypes, typeName: string): number => {
-  if (primitiveSizes[typeName] != undefined) {
-    return primitiveSizes[typeName];
+  const primitiveSize = primitiveSizes[typeName];
+  if (primitiveSize != undefined) {
+    return primitiveSize;
   }
   const messageType = typesByName[typeName];
   if (messageType == undefined) {
@@ -47,7 +48,7 @@ export const typeSize = memoize((typesByName: RosDatatypes, typeName: string): n
   }
   // We add field sizes here, not type sizes. If the type has a field that's an array of strings,
   // it only adds eight bytes to the object's inline size.
-  return sum(typesByName[typeName].fields.map((field) => fieldSize(typesByName, field)));
+  return sum(typesByName[typeName]?.fields.map((field) => fieldSize(typesByName, field)));
 });
 
 // No point in memoizing this -- it can only do O(1) work before hitting `typeSize`, which is
@@ -59,7 +60,7 @@ export function fieldSize(typesByName: RosDatatypes, field: RosMsgField): number
   }
   if (field.isArray) {
     // NOTE: Fixed-size arrays are not inlined.
-    return 2 * primitiveSizes.int32;
+    return 2 * 4 /* int32 */;
   }
   return typeSize(typesByName, field.type);
 }

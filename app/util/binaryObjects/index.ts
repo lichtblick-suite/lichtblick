@@ -97,7 +97,7 @@ export const getObjects = (
   // error).
   const approximateSize = (buffer.byteLength + bigString.length) / offsets.length;
   ret.forEach((bobject, i) => {
-    binaryData.set(bobject, { buffer, bigString, offset: offsets[i], approximateSize });
+    binaryData.set(bobject, { buffer, bigString, offset: offsets[i]!, approximateSize });
   });
   return ret;
 };

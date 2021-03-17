@@ -83,17 +83,17 @@ describe("getObjects", () => {
     ]).map((o) => cast<BinaryHeader>(o));
     expect(inaccurateByteSize(first)).toBe(22);
     expect(inaccurateByteSize(second)).toBe(22);
-    expect(() => inaccurateByteSize(first.stamp())).toThrow("Size of object not available");
-    expect(first.stamp().sec()).toBe(56);
-    expect(first.stamp().nsec()).toBe(78);
-    expect(first.seq()).toBe(1234);
-    expect(first.frame_id()).toBe("as");
+    expect(() => inaccurateByteSize(first?.stamp())).toThrow("Size of object not available");
+    expect(first?.stamp().sec()).toBe(56);
+    expect(first?.stamp().nsec()).toBe(78);
+    expect(first?.seq()).toBe(1234);
+    expect(first?.frame_id()).toBe("as");
     expect(deepParse(first)).toEqual({ stamp: { sec: 56, nsec: 78 }, seq: 1234, frame_id: "as" });
 
-    expect(second.stamp().sec()).toBe(43);
-    expect(second.stamp().nsec()).toBe(21);
-    expect(second.seq()).toBe(5678);
-    expect(second.frame_id()).toBe("df");
+    expect(second?.stamp().sec()).toBe(43);
+    expect(second?.stamp().nsec()).toBe(21);
+    expect(second?.seq()).toBe(5678);
+    expect(second?.frame_id()).toBe("df");
     expect(deepParse(second)).toEqual({ stamp: { sec: 43, nsec: 21 }, seq: 5678, frame_id: "df" });
   });
 

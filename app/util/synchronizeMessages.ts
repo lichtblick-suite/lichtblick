@@ -33,8 +33,8 @@ function allMessageStampsNewestFirst(
   getHeaderStamp?: (itemMessage: Message) => Time | undefined,
 ) {
   const stamps = [];
-  for (const topic in messagesByTopic) {
-    for (const message of messagesByTopic[topic]) {
+  for (const messages of Object.values(messagesByTopic)) {
+    for (const message of messages) {
       const stamp = getHeaderStamp
         ? getHeaderStamp(message)
         : defaultGetHeaderStamp(message.message);
@@ -59,8 +59,8 @@ function messagesMatchingStamp(
     }>
   | undefined {
   const synchronizedMessagesByTopic: Record<string, any> = {};
-  for (const topic in messagesByTopic) {
-    const synchronizedMessage = messagesByTopic[topic].find((message) => {
+  for (const [topic, messages] of Object.entries(messagesByTopic)) {
+    const synchronizedMessage = messages.find((message) => {
       const thisStamp = getHeaderStamp
         ? getHeaderStamp(message)
         : defaultGetHeaderStamp(message.message);
@@ -115,7 +115,7 @@ function getSynchronizedMessages(
   | undefined {
   const synchronizedMessages: Record<string, any> = {};
   for (const topic of topics) {
-    const matchingMessage = messages[topic].find(({ message }) => {
+    const matchingMessage = messages[topic]?.find(({ message }) => {
       const thisStamp = message?.header?.stamp;
       return thisStamp && TimeUtil.areSame(stamp, thisStamp);
     });
@@ -169,12 +169,11 @@ export function getSynchronizingReducers(topics: readonly string[]) {
       return getSynchronizedState(topics, { messagesByTopic });
     },
     addMessage({ messagesByTopic, synchronizedMessages }: ReducedValue, newMessage: Message) {
+      const messages = messagesByTopic[newMessage.topic];
       return getSynchronizedState(topics, {
         messagesByTopic: {
           ...messagesByTopic,
-          [newMessage.topic]: messagesByTopic[newMessage.topic]
-            ? messagesByTopic[newMessage.topic].concat(newMessage)
-            : [newMessage],
+          [newMessage.topic]: messages ? messages.concat(newMessage) : [newMessage],
         },
         synchronizedMessages,
       });

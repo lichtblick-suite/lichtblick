@@ -80,7 +80,7 @@ describe("getContentBasedDatatypes", () => {
     );
     expect(Object.keys(fakeDatatypes)).toHaveLength(1);
     expect(fakeDatatypesByTopic.topic1).toBe(fakeDatatypesByTopic.topic2);
-    expect(fakeDatatypes[fakeDatatypesByTopic.topic1]).toEqual({
+    expect(fakeDatatypes[fakeDatatypesByTopic.topic1!]).toEqual({
       fields: [{ isArray: false, isComplex: false, name: "value", type: "string" }],
     });
   });

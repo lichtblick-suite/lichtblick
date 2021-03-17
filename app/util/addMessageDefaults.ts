@@ -50,10 +50,11 @@ export default function addMessageDefaults(
   datatypeName: string,
   object: any,
 ): void {
-  if (!datatypes[datatypeName]) {
+  const datatype = datatypes[datatypeName];
+  if (!datatype) {
     throw new Error(`addMessageDefaults: datatype "${datatypeName}" missing from datatypes`);
   }
-  for (const { name, type, isConstant, isArray } of datatypes[datatypeName].fields) {
+  for (const { name, type, isConstant, isArray } of datatype.fields) {
     // Don't set any constant fields - they are not written anyways.
     if (!isConstant && object[name] == undefined) {
       if (isArray) {

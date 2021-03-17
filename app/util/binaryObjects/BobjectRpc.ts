@@ -172,16 +172,24 @@ export class BobjectRpcReceiver {
     }
     // Need to make a bobject.
     const { datatypesIndex, datatype, topic } = transferData;
-    const bobject =
-      transferData.type === "parsed"
-        ? wrapJsObject(this._datatypes[datatypesIndex], datatype, transferData.message)
-        : getObjects(
-            this._datatypes[datatypesIndex],
-            datatype,
-            this._buffersByTopic[topic].buffer,
-            this._buffersByTopic[topic].bigString,
-            [transferData.offset],
-          )[0];
+    const datatypes = this._datatypes[datatypesIndex];
+    if (!datatypes) {
+      throw new Error(`BobjectRpc: invariant violation - no datatype for index ${datatypesIndex}`);
+    }
+
+    let bobject: unknown;
+    if (transferData.type === "parsed") {
+      bobject = wrapJsObject(datatypes, datatype, transferData.message);
+    } else {
+      const buffer = this._buffersByTopic[topic];
+      if (!buffer) {
+        throw new Error(`BobjectRpc: invariant violation - no buffer for topic ${topic}`);
+      }
+      bobject = getObjects(datatypes, datatype, buffer.buffer, buffer.bigString, [
+        transferData.offset,
+      ])[0];
+    }
+
     return format === "parsed" ? deepParse(bobject) : bobject;
   }
 }

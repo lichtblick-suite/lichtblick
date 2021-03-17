@@ -20,7 +20,7 @@ class FakeRpc {
   } = {};
 
   async send<TResult>(topic: string, data?: any, _transfer?: any[]): Promise<TResult> {
-    return this.proxiedWorker?.handlers[topic](data);
+    return this.proxiedWorker?.handlers[topic]?.(data);
   }
 
   async receive<T, TOut>(topic: string, handler: (arg0: T) => TOut) {

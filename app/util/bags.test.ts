@@ -21,7 +21,7 @@ function* getPermutations<T>(values: T[]): Iterable<T[]> {
     return;
   }
   for (let i = 0; i < values.length; ++i) {
-    const element = values[i];
+    const element = values[i]!;
     const rest = [...values.slice(0, i), ...values.slice(i + 1)];
     for (const restPermutation of getPermutations(rest)) {
       yield [element, ...restPermutation];

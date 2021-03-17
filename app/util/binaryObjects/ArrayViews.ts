@@ -95,7 +95,11 @@ export class PrimitiveArrayView<T> implements ArrayView<T> {
     this.value = value;
   }
   get(index: number): T {
-    return this.value[index];
+    const value = this.value[index];
+    if (value === undefined) {
+      throw new Error("PrimitiveArrayView: get(index) returned undefined value");
+    }
+    return value;
   }
   length() {
     return this.value.length;

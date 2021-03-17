@@ -67,15 +67,16 @@ export const constantsByDatatype = createSelector<any, any, any, any>(
       [key: string]: string;
     };
   } => {
-    const results: Record<string, Record<string, string>> = {};
-    for (const datatype of Object.keys(datatypes)) {
-      results[datatype] = {};
-      for (const field of datatypes[datatype].fields) {
+    type Result = Record<string | number, string>;
+    const results: Record<string, Result> = {};
+    for (const [datatype, value] of Object.entries(datatypes)) {
+      const result: Result = (results[datatype] = {});
+      for (const field of value.fields) {
         if (field.isConstant && field.value !== undefined && typeof field.value !== "boolean") {
-          if (results[datatype][field.value]) {
-            results[datatype][field.value] = "<multiple constants match>";
+          if (result[field.value]) {
+            result[field.value] = "<multiple constants match>";
           } else {
-            results[datatype][field.value] = field.name;
+            result[field.value] = field.name;
           }
         }
       }
@@ -107,7 +108,7 @@ export const enumValuesByDatatypeAndField = createSelector<any, any, any, any>(
     };
   } => {
     const results: Record<string, any> = {};
-    for (const datatype of Object.keys(datatypes)) {
+    for (const [datatype, value] of Object.entries(datatypes)) {
       const currentResult: Record<string, any> = {};
       // keep track of parsed constants
       let constants: {
@@ -115,7 +116,7 @@ export const enumValuesByDatatypeAndField = createSelector<any, any, any, any>(
       } = {};
       // constants' types
       let lastType;
-      for (const field of datatypes[datatype].fields) {
+      for (const field of value.fields) {
         if (lastType && field.type !== lastType) {
           // encountering new type resets the accumulated constants
           constants = {};

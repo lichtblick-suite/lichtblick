@@ -126,7 +126,9 @@ class ParseMessageDefinitionCache {
     }
     if (this._md5SumsToParsedDefinitions[md5Sum]) {
       const parsedDefinition = this._md5SumsToParsedDefinitions[md5Sum];
-      this._hashesToParsedDefinitions[md5Sum] = parsedDefinition;
+      if (parsedDefinition) {
+        this._hashesToParsedDefinitions[md5Sum] = parsedDefinition;
+      }
       return parsedDefinition;
     }
     return undefined;

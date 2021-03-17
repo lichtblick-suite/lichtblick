@@ -35,6 +35,7 @@ import {
   MosaicDropTargetPosition,
   SavedProps,
 } from "@foxglove-studio/app/types/panels";
+import filterMap from "@foxglove-studio/app/util/filterMap";
 import {
   TAB_PANEL_TYPE,
   LAYOUT_QUERY_KEY,
@@ -64,7 +65,7 @@ export function getPanelIdForType(type: string): string {
 }
 
 export function getPanelTypeFromId(id: string): string {
-  return id.split("!")[0];
+  return id.split("!")[0] ?? "";
 }
 
 export function getPanelIdWithNewType(id: string, newPanelType: string): string {
@@ -120,13 +121,22 @@ function compactLayout(layout: MosaicNode): MosaicNode {
   }
 
   const prunedChildren = [layout.first, layout.second].filter(Boolean).map(compactLayout);
-  return prunedChildren.length < 2
-    ? prunedChildren[0]
-    : {
-        ...layout,
-        first: prunedChildren[0],
-        second: prunedChildren[1],
-      };
+  const [first, second] = prunedChildren;
+  if (first == undefined && second == undefined) {
+    return "";
+  } else if (first != undefined && second != undefined) {
+    return {
+      ...layout,
+      first,
+      second,
+    };
+  }
+
+  return {
+    ...layout,
+    first: first ?? second ?? "",
+    second: "",
+  };
 }
 
 // Recursively replaces all leaves of the current layout
@@ -209,14 +219,22 @@ export const getSaveConfigsPayloadForAddedPanel = ({
   }
   const templateIds = getPanelIdsInsideTabPanels([id], { [id]: config });
   const panelIdMap = mapTemplateIdsToNewIds(templateIds);
-  let newConfigs = templateIds.map((tempId) => ({
-    id: panelIdMap[tempId],
-    config: relatedConfigs[tempId],
-  }));
-  newConfigs = [...newConfigs, { id, config }]
+  const newConfigs = filterMap(templateIds, (templateId) => {
+    const panelId = panelIdMap[templateId];
+    const relatedConfig = relatedConfigs[templateId];
+    if (!panelId || !relatedConfigs) {
+      return;
+    }
+
+    return {
+      id: panelId,
+      config: relatedConfig,
+    };
+  });
+  const allConfigs = [...newConfigs, { id, config }]
     .filter((configObj) => configObj.config)
     .map(replaceMaybeTabLayoutWithNewPanelIds(panelIdMap));
-  return { configs: newConfigs };
+  return { configs: allConfigs };
 };
 
 export function getPanelIdsInsideTabPanels(panelIds: string[], savedProps: SavedProps): string[] {
@@ -224,7 +242,7 @@ export function getPanelIdsInsideTabPanels(panelIds: string[], savedProps: Saved
   const tabLayouts: any = [];
   tabPanelIds.forEach((panelId) => {
     if (savedProps[panelId]?.tabs) {
-      savedProps[panelId].tabs.forEach((tab: any) => {
+      savedProps[panelId]?.tabs.forEach((tab: any) => {
         tabLayouts.push(
           tab.layout,
           ...getPanelIdsInsideTabPanels(getLeaves(tab.layout), savedProps),
@@ -298,7 +316,7 @@ export const removePanelFromTabPanel = (
     return { configs: [] };
   }
 
-  const currentTabLayout = config.tabs[config.activeTabIdx].layout;
+  const currentTabLayout = config.tabs[config.activeTabIdx]?.layout;
   let newTree: MosaicNode | undefined;
   if (!path.length) {
     newTree = undefined;
@@ -364,6 +382,9 @@ export const addPanelToTab = (
 
 function getValidTabPanelConfig(panelId: string, savedProps: SavedProps): PanelConfig {
   const config = savedProps[panelId];
+  if (!config) {
+    return DEFAULT_TAB_PANEL_CONFIG;
+  }
   return validateTabPanelConfig(config) ? config : DEFAULT_TAB_PANEL_CONFIG;
 }
 

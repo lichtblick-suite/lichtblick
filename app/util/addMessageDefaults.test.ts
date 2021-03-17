@@ -81,7 +81,7 @@ describe("addMessageDefaults", () => {
     };
     const message: { child: { string?: string }[] } = { child: [{}] };
     addMessageDefaults(datatypes, "root", message);
-    expect(message.child[0].string).toEqual("");
+    expect(message.child[0]?.string).toEqual("");
   });
 
   it("sets missing empty arrays", () => {

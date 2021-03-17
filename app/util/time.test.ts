@@ -196,34 +196,34 @@ describe("time.getNextFrame", () => {
 
   it("returns the next frame ", async () => {
     expect(time.getNextFrame({ sec: 3, nsec: 0 }, timestamps)).toEqual(
-      fromSecondStamp(timestamps[1]),
+      fromSecondStamp(timestamps[1]!),
     );
     expect(time.getNextFrame({ sec: 4, nsec: 240000000 }, timestamps)).toEqual(
-      fromSecondStamp(timestamps[1]),
+      fromSecondStamp(timestamps[1]!),
     );
     expect(time.getNextFrame({ sec: 4, nsec: 249933000 }, timestamps)).toEqual(
-      fromSecondStamp(timestamps[2]),
+      fromSecondStamp(timestamps[2]!),
     );
     expect(time.getNextFrame({ sec: 5, nsec: 650058000 }, timestamps)).toEqual(
-      fromSecondStamp(timestamps[0]),
+      fromSecondStamp(timestamps[0]!),
     );
     expect(time.getNextFrame({ sec: 6, nsec: 0 }, timestamps)).toEqual(
-      fromSecondStamp(timestamps[0]),
+      fromSecondStamp(timestamps[0]!),
     );
   });
 
   it("returns the previous frame ", async () => {
     expect(time.getNextFrame({ sec: 3, nsec: 0 }, timestamps, true)).toEqual(
-      fromSecondStamp(timestamps[timestamps.length - 1]),
+      fromSecondStamp(timestamps[timestamps.length - 1]!),
     );
     expect(time.getNextFrame({ sec: 6, nsec: 0 }, timestamps, true)).toEqual(
-      fromSecondStamp(timestamps[timestamps.length - 2]),
+      fromSecondStamp(timestamps[timestamps.length - 2]!),
     );
     expect(time.getNextFrame({ sec: 5, nsec: 650058000 }, timestamps, true)).toEqual(
-      fromSecondStamp(timestamps[timestamps.length - 2]),
+      fromSecondStamp(timestamps[timestamps.length - 2]!),
     );
     expect(time.getNextFrame({ sec: 5, nsec: 640058000 }, timestamps, true)).toEqual(
-      fromSecondStamp(timestamps[timestamps.length - 3]),
+      fromSecondStamp(timestamps[timestamps.length - 3]!),
     );
   });
 });

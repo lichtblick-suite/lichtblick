@@ -244,9 +244,13 @@ const renameDatatypes = (datatypes: RosDatatypes, typeName: string, getNewName: 
 
   // Generate mapped datatype definitions.
   const idMappedDatatypes: Record<string, unknown> = {};
-  Object.keys(datatypes).forEach((datatype) => {
-    idMappedDatatypes[nameMapping[datatype]] = {
-      fields: datatypes[datatype].fields.map((field) => ({
+  Object.entries(datatypes).forEach(([datatype, value]) => {
+    const mapping = nameMapping[datatype];
+    if (!mapping) {
+      return;
+    }
+    idMappedDatatypes[mapping] = {
+      fields: value.fields.map((field) => ({
         ...field,
         type: nameMapping[field.type] ?? field.type,
       })),
@@ -283,13 +287,14 @@ export const getContentBasedDatatypes = (
   // The string message definitions by topic could be incomplete, so use the parsed ones to turn into datatypes.
   Object.keys(parsedMessageDefinitionsByTopic).forEach((topic) => {
     const definition = messageDefinitionsByTopic[topic];
-    const parsedDefinition = parsedMessageDefinitionsByTopic[topic];
+    const parsedDefinition = parsedMessageDefinitionsByTopic[topic] ?? [];
     // This "key" is just used to group topics with identical sets of datatypes.
     const stringDefinitionKey =
       definition != undefined ? definition : JSON.stringify(parsedDefinition);
-    if (topicsByStringDefinition[stringDefinitionKey]) {
+    const topics = topicsByStringDefinition[stringDefinitionKey];
+    if (topics) {
       // Already generated datatypes for these message types.
-      topicsByStringDefinition[stringDefinitionKey].push(topic);
+      topics.push(topic);
     } else {
       // First time seeing this definition. Generate new datatypes for it.
       topicsByStringDefinition[stringDefinitionKey] = [topic];
@@ -301,23 +306,32 @@ export const getContentBasedDatatypes = (
         datatypes[typeName] = { fields: datatype.definitions };
       });
 
-      // Rename datatypes for this set of message definitions (reusing types we've seen before.)
-      const { idMappedDatatypes, topicDatatypeId } = renameDatatypes(
-        datatypes,
-        datatypesByTopic[topic],
-        getDatatypeName,
-      );
-      Object.assign(allFakeDatatypes, idMappedDatatypes);
-      fakeDatatypesByStringDefinition[stringDefinitionKey] = topicDatatypeId;
+      const datatypesTopic = datatypesByTopic[topic];
+      if (datatypesTopic !== undefined) {
+        // Rename datatypes for this set of message definitions (reusing types we've seen before.)
+        const { idMappedDatatypes, topicDatatypeId } = renameDatatypes(
+          datatypes,
+          datatypesTopic,
+          getDatatypeName,
+        );
+        if (topicDatatypeId !== undefined) {
+          Object.assign(allFakeDatatypes, idMappedDatatypes);
+          fakeDatatypesByStringDefinition[stringDefinitionKey] = topicDatatypeId;
+        }
+      }
     }
   });
 
   // Transform "per stringified set of message definitions" output to "per topic".
   const fakeDatatypesByTopic: Record<string, string> = {};
   Object.keys(topicsByStringDefinition).forEach((stringDefinition) => {
-    topicsByStringDefinition[stringDefinition].forEach((topic) => {
-      fakeDatatypesByTopic[topic] = fakeDatatypesByStringDefinition[stringDefinition];
-    });
+    const topics = topicsByStringDefinition[stringDefinition] ?? [];
+    const fakeDatatypes = fakeDatatypesByStringDefinition[stringDefinition];
+    if (fakeDatatypes) {
+      topics.forEach((topic) => {
+        fakeDatatypesByTopic[topic] = fakeDatatypes;
+      });
+    }
   });
 
   return { fakeDatatypesByTopic, fakeDatatypes: allFakeDatatypes };

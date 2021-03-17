@@ -49,17 +49,17 @@ describe("layout", () => {
         config: { tabs: [tabConfig] },
         relatedConfigs: { "Plot!1": firstPlotConfig, "Plot!2": secondPlotConfig },
       }).configs;
-      const newIdForFirstPlot = configsSaved[0].id;
-      expect(configsSaved[0].config).toEqual(firstPlotConfig);
-      expect(getPanelTypeFromId(newIdForFirstPlot)).not.toEqual("Plot!1");
-      expect(getPanelTypeFromId(newIdForFirstPlot)).toEqual("Plot");
+      const newIdForFirstPlot = configsSaved[0]?.id;
+      expect(configsSaved[0]?.config).toEqual(firstPlotConfig);
+      expect(getPanelTypeFromId(newIdForFirstPlot!)).not.toEqual("Plot!1");
+      expect(getPanelTypeFromId(newIdForFirstPlot!)).toEqual("Plot");
 
-      const newIdForSecondPlot = configsSaved[1].id;
-      expect(configsSaved[1].config).toEqual(secondPlotConfig);
-      expect(getPanelTypeFromId(newIdForFirstPlot)).not.toEqual("Plot!2");
-      expect(getPanelTypeFromId(newIdForSecondPlot)).toEqual("Plot");
+      const newIdForSecondPlot = configsSaved[1]?.id;
+      expect(configsSaved[1]?.config).toEqual(secondPlotConfig);
+      expect(getPanelTypeFromId(newIdForFirstPlot!)).not.toEqual("Plot!2");
+      expect(getPanelTypeFromId(newIdForSecondPlot!)).toEqual("Plot");
 
-      expect(configsSaved[2].config).toEqual({
+      expect(configsSaved[2]?.config).toEqual({
         tabs: [
           {
             ...tabConfig,
@@ -67,7 +67,7 @@ describe("layout", () => {
           },
         ],
       });
-      expect(configsSaved[2].id).toEqual("Tab!abc");
+      expect(configsSaved[2]?.id).toEqual("Tab!abc");
     });
     it("works with single panel tab layouts", () => {
       const inputConfig = {
@@ -82,10 +82,10 @@ describe("layout", () => {
         relatedConfigs: {},
       };
       const { configs } = getSaveConfigsPayloadForAddedPanel(inputConfig);
-      expect(inputConfig.config.tabs.length).toEqual(configs[0].config.tabs.length);
+      expect(inputConfig.config.tabs.length).toEqual(configs[0]?.config.tabs.length);
 
-      const inputLayout = inputConfig.config.tabs[0].layout;
-      const outputLayout = configs[0].config.tabs[0].layout;
+      const inputLayout = inputConfig.config.tabs[0]?.layout;
+      const outputLayout = configs[0]?.config.tabs[0].layout;
 
       expect(getPanelTypeFromId(inputLayout!)).toEqual(getPanelTypeFromId(outputLayout));
       expect(inputLayout).not.toEqual(outputLayout);
@@ -121,13 +121,13 @@ describe("layout", () => {
         relatedConfigs: { "Plot!1": firstPlotConfig },
       }).configs;
       expect(configsSaved.length).toEqual(2);
-      const newIdForFirstPlot = configsSaved[0].id;
-      expect(configsSaved[0].config).toEqual(firstPlotConfig);
+      const newIdForFirstPlot = configsSaved[0]?.id;
+      expect(configsSaved[0]?.config).toEqual(firstPlotConfig);
       expect(newIdForFirstPlot).not.toEqual("Plot!1");
-      expect(getPanelTypeFromId(newIdForFirstPlot)).toEqual("Plot");
+      expect(getPanelTypeFromId(newIdForFirstPlot!)).toEqual("Plot");
 
-      expect(configsSaved[1].id).toEqual("Tab!abc");
-      const updatedTabConfig = configsSaved[1].config.tabs[0];
+      expect(configsSaved[1]?.id).toEqual("Tab!abc");
+      const updatedTabConfig = configsSaved[1]?.config.tabs[0];
       expect(updatedTabConfig.layout.first).toEqual(newIdForFirstPlot);
       expect(updatedTabConfig.layout.second).not.toEqual("Plot!2");
       expect(getPanelTypeFromId(updatedTabConfig.layout.second)).toEqual("Plot");

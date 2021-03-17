@@ -175,16 +175,16 @@ export function findClosestTimestampIndex(
     return -1;
   }
   let [l, r] = [0, maxIdx];
-  if (currT <= timestamps[0]) {
+  if (currT <= timestamps[0]!) {
     return 0;
-  } else if (currT >= timestamps[maxIdx]) {
+  } else if (currT >= timestamps[maxIdx]!) {
     return maxIdx;
   }
 
   while (l <= r) {
     const m = l + Math.floor((r - l) / 2);
-    const prevT = timestamps[m];
-    const nextT = timestamps[m + 1];
+    const prevT = timestamps[m]!;
+    const nextT = timestamps[m + 1]!;
 
     if (prevT <= currT && currT < nextT) {
       return m;
@@ -222,6 +222,9 @@ export function getNextFrame(
     }
   }
   const nextFrame = timestamps[nextIdx];
+  if (nextFrame == undefined) {
+    return undefined;
+  }
   return fromSecondStamp(nextFrame);
 }
 
@@ -263,12 +266,18 @@ export function parseRosTimeStr(str: string): Time | undefined {
   if (partials.length === 0) {
     return undefined;
   }
+
+  const [first, second] = partials;
+  if (first === undefined || second === undefined) {
+    return undefined;
+  }
+
   // There can be 9 digits of nanoseconds. If the fractional part is "1", we need to add eight
   // zeros. Also, make sure we round to an integer if we need to _remove_ digits.
-  const digitsShort = 9 - partials[1].length;
-  const nsec = Math.round(parseInt(partials[1], 10) * 10 ** digitsShort);
+  const digitsShort = 9 - second.length;
+  const nsec = Math.round(parseInt(second, 10) * 10 ** digitsShort);
   // It's possible we rounded to { sec: 1, nsec: 1e9 }, which is invalid, so fixTime.
-  return fixTime({ sec: parseInt(partials[0], 10) || 0, nsec });
+  return fixTime({ sec: parseInt(first, 10) || 0, nsec });
 }
 
 // Functions and types for specifying and applying player initial seek time intentions.

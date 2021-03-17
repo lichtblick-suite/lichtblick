@@ -82,8 +82,8 @@ describe("printSingularExpression", () => {
 describe("printFieldDefinition", () => {
   it("handles complex arrays", () => {
     const pointer = new PointerExpression("this.offset");
-    const field = definitions["fake_msgs/HasComplexArray"].fields[0];
-    expect(printFieldDefinition(definitions, field, pointer)).toBe(
+    const field = definitions["fake_msgs/HasComplexArray"]?.fields[0];
+    expect(printFieldDefinition(definitions, field!, pointer)).toBe(
       `
 complexArray() {
   const from = $view.getInt32((this.offset + 4), true);
@@ -95,8 +95,8 @@ complexArray() {
 
   it("special-cases byte arrays", () => {
     const pointer = new PointerExpression("this.offset");
-    const field = definitions["fake_msgs/HasByteArray"].fields[0];
-    expect(printFieldDefinition(definitions, field, pointer)).toBe(
+    const field = definitions["fake_msgs/HasByteArray"]?.fields[0];
+    expect(printFieldDefinition(definitions, field!, pointer)).toBe(
       `
 byte_array() {
   const from = $view.getInt32((this.offset + 4), true);
@@ -108,8 +108,8 @@ byte_array() {
 
   it("handles singular fields", () => {
     const pointer = new PointerExpression("this.offset");
-    const field = definitions["std_msgs/Header"].fields[0];
-    expect(printFieldDefinition(definitions, field, pointer)).toBe(
+    const field = definitions["std_msgs/Header"]?.fields[0];
+    expect(printFieldDefinition(definitions, field!, pointer)).toBe(
       `
 seq() {
   return $view.getUint32(this.offset, true);
@@ -119,8 +119,8 @@ seq() {
 
   it("makes a method for constants", () => {
     const pointer = new PointerExpression("this.offset");
-    const field = definitions["fake_msgs/HasConstant"].fields[0];
-    expect(printFieldDefinition(definitions, field, pointer)).toBe(
+    const field = definitions["fake_msgs/HasConstant"]?.fields[0];
+    expect(printFieldDefinition(definitions, field!, pointer)).toBe(
       `
 const() {
   return 1;

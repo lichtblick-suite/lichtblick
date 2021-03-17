@@ -24,9 +24,12 @@ describe("debouncePromise", () => {
 
     let numCallsStarted = 0;
     const debouncedFn = debouncePromise(() => {
-      callsStarted[numCallsStarted].resolve();
+      callsStarted[numCallsStarted]?.resolve();
       const promise = callReturns[numCallsStarted];
       ++numCallsStarted;
+      if (!promise) {
+        throw new Error("no remaining promises");
+      }
       return promise;
     });
 
@@ -38,8 +41,8 @@ describe("debouncePromise", () => {
       if (expectedNum !== prevExpectedCallsStarted) {
         const finishedSignal = callsFinished[prevExpectedCallsStarted];
         debouncedFn.currentPromise?.then(
-          () => finishedSignal.resolve(),
-          (err) => finishedSignal.reject(err),
+          () => finishedSignal?.resolve(),
+          (err) => finishedSignal?.reject(err),
         );
       }
       prevExpectedCallsStarted = expectedNum;
@@ -55,11 +58,11 @@ describe("debouncePromise", () => {
     debouncedFn();
     debouncedFn();
     expectCallsStarted(1);
-    callReturns[0].resolve();
+    callReturns[0]?.resolve();
     await callsStarted[0];
     await callsStarted[1];
     expectCallsStarted(2);
-    callReturns[1].reject(new Error("1"));
+    callReturns[1]?.reject(new Error("1"));
     expect(debouncedFn.currentPromise).toBeDefined();
     await callsFinished[0];
     await expect(callsFinished[1]).rejects.toThrow("1");
@@ -75,13 +78,13 @@ describe("debouncePromise", () => {
     // The previous call is still running, so we don't start a new call yet.
     debouncedFn();
     expectCallsStarted(3);
-    callReturns[2].reject(new Error("2"));
+    callReturns[2]?.reject(new Error("2"));
     await expect(callsFinished[2]).rejects.toThrow("2");
     // After the 3rd call finishes, the 4th can begin.
     await callsStarted[3];
     expectCallsStarted(4);
     expect(debouncedFn.currentPromise).toBeDefined();
-    callReturns[3].resolve();
+    callReturns[3]?.resolve();
     await callsFinished[3];
     expect(debouncedFn.currentPromise).toBeUndefined();
     expectCallsStarted(4);

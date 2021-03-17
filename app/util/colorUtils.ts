@@ -47,8 +47,9 @@ export const interpolateColor = (colorA: ReglColor, colorB: ReglColor, t: number
 };
 
 // Converts a string like "rgb(r,g,b)" to a regl number array [r,g,b,a]
+// Any component that fails to convert is replaced with a 1
 export const rgbStrToReglRGB = (numberStr: string, alpha?: number): ReglColor => {
-  const [_, r, g, b, a = "1"] =
+  const [_, r = "1", g = "1", b = "1", a = "1"] =
     numberStr.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,?\s*(\d+\.?\d+)?\s*\)/) ?? [];
   return [
     parseFloat(r) / 255,
