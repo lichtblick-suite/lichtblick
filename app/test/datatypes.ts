@@ -108,9 +108,9 @@ const addRosDatatypes = (
   datatype: string,
   getTypeName: () => string,
 ): void => {
-  const fields = Object.keys(object).map(
-    (fieldName): RosMsgField => {
-      const inferredField = object[fieldName];
+  const fields = Object.entries(object).map(
+    ([fieldName, inferredField]): RosMsgField => {
+      const inferredType = inferredField.type;
       switch (inferredField.type) {
         case "bool":
         case "float64":
@@ -126,7 +126,7 @@ const addRosDatatypes = (
           return { name: fieldName, isComplex: true, isArray: inferredField.isArray, type };
         }
         default:
-          throw new Error(`Bad type ${(inferredField as any).type}`);
+          throw new Error(`Bad type ${inferredType}`);
       }
     },
   );
@@ -172,7 +172,7 @@ export const wrapMessages = <T>(messages: readonly Message[]): TypedMessage<T>[]
   }));
 };
 
-export const wrapMessage = <T>(message: Message): TypedMessage<T> => wrapMessages<T>([message])[0];
+export const wrapMessage = <T>(message: Message): TypedMessage<T> => wrapMessages<T>([message])[0]!;
 
 // Objects are assumed to be of the same type
 export const wrapObjects = <T>(objects: readonly any[]): T[] => {

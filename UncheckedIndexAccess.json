@@ -121,7 +121,6 @@
   "app/players/nodes.ts",
   "app/reducers/panels.test.ts",
   "app/reducers/panels.ts",
-  "app/test/datatypes.ts",
   "app/util/FakeRpc.ts",
   "app/util/Rpc.ts",
   "app/util/VirtualLRUBuffer.ts",
