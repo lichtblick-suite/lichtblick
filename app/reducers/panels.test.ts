@@ -280,10 +280,10 @@ describe("state.persistedState", () => {
             panels: { layout, savedProps },
           },
         }) => {
-          const tabs = savedProps["Tab!a"].tabs;
+          const tabs = savedProps["Tab!a"]?.tabs;
           const newAudioId = tabs[0].layout;
           expect(layout).toEqual("Tab!a");
-          expect(savedProps["Tab!a"].activeTabIdx).toEqual(0);
+          expect(savedProps["Tab!a"]?.activeTabIdx).toEqual(0);
           expect(tabs[0].title).toEqual("A");
           expect(getPanelTypeFromId(newAudioId)).toEqual("Audio");
           expect(tabs.length).toEqual(3);
@@ -355,7 +355,7 @@ describe("state.persistedState", () => {
           expect(getPanelTypeFromId(layout.second as string)).toEqual("Tab");
 
           expect(savedProps["Audio!a"]).toEqual({ foo: "bar" });
-          const { activeTabIdx, tabs } = savedProps[layout.second as string];
+          const { activeTabIdx, tabs } = savedProps[layout.second as string]!;
           expect(activeTabIdx).toEqual(0);
           expect(tabs.length).toEqual(1);
           expect(tabs[0].title).toEqual("A");
@@ -392,7 +392,7 @@ describe("state.persistedState", () => {
           },
         }) => {
           expect(layout).toEqual("Tab!a");
-          const tabs = savedProps["Tab!a"].tabs;
+          const tabs = savedProps["Tab!a"]?.tabs;
           expect(tabs[0].title).toEqual("A");
           expect(getPanelTypeFromId(tabs[0].layout)).toEqual("Audio");
           expect(tabs.length).toEqual(3);
@@ -427,7 +427,7 @@ describe("state.persistedState", () => {
         }) => {
           expect(layout).toEqual("Tab!a");
           expect(savedProps["Tab!a"]).toEqual(panelLayout.savedProps["Tab!a"]);
-          const tabBTabs = savedProps["Tab!b"].tabs;
+          const tabBTabs = savedProps["Tab!b"]?.tabs;
           expect(tabBTabs.length).toEqual(1);
           expect(tabBTabs[0].layout.first).toEqual("Plot!a");
           expect(getPanelTypeFromId(tabBTabs[0].layout.second)).toEqual("Audio");
@@ -461,16 +461,16 @@ describe("state.persistedState", () => {
           expect(getPanelTypeFromId(layout.second as string)).toEqual("Tab");
 
           const parentTabConfig = savedProps[layout.second as string];
-          expect(parentTabConfig.tabs.length).toEqual(1);
-          expect(parentTabConfig.tabs[0].title).toEqual("A");
+          expect(parentTabConfig?.tabs.length).toEqual(1);
+          expect(parentTabConfig?.tabs[0].title).toEqual("A");
 
-          const childTabId = parentTabConfig.tabs[0].layout;
+          const childTabId = parentTabConfig?.tabs[0].layout;
           expect(getPanelTypeFromId(childTabId)).toEqual("Tab");
           const childTabProps = savedProps[childTabId];
-          expect(childTabProps.activeTabIdx).toEqual(0);
-          expect(childTabProps.tabs.length).toEqual(1);
-          expect(childTabProps.tabs[0].title).toEqual("B");
-          expect(getPanelTypeFromId(childTabProps.tabs[0].layout)).toEqual("Plot");
+          expect(childTabProps?.activeTabIdx).toEqual(0);
+          expect(childTabProps?.tabs.length).toEqual(1);
+          expect(childTabProps?.tabs[0].title).toEqual("B");
+          expect(getPanelTypeFromId(childTabProps?.tabs[0].layout)).toEqual("Plot");
         },
       );
     });
@@ -915,7 +915,7 @@ describe("state.persistedState", () => {
           expect(getPanelTypeFromId(layout.second as string)).toEqual("Tab");
           expect(layout.direction).toEqual("row");
           expect(savedProps["Tab!a"]).toEqual(tabConfig);
-          expect(getPanelTypeFromId(savedProps[layout.second as string].tabs[0].layout)).toEqual(
+          expect(getPanelTypeFromId(savedProps[layout.second as string]?.tabs[0].layout)).toEqual(
             "Audio",
           );
           expect(savedProps["Audio!a"]).toEqual(audioConfig);
@@ -955,7 +955,7 @@ describe("state.persistedState", () => {
           },
         }) => {
           expect(layout).toEqual("Tab!a");
-          const tabLayout = savedProps["Tab!a"].tabs[0].layout;
+          const tabLayout = savedProps["Tab!a"]?.tabs[0].layout;
           expect(tabLayout.first).toEqual("Audio!a");
           expect(getPanelTypeFromId(tabLayout.second)).toEqual("Audio");
           expect(tabLayout.direction).toEqual("row");
@@ -1023,7 +1023,7 @@ describe("state.persistedState", () => {
         }) => {
           const layout = maybeLayout as string;
           expect(getPanelTypeFromId(layout)).toEqual("Tab");
-          const tabLayout = savedProps[layout].tabs[0].layout;
+          const tabLayout = savedProps[layout]?.tabs[0].layout;
           expect(getPanelTypeFromId(tabLayout)).toEqual("RawMessages");
           expect(savedProps[tabLayout]).toEqual(rawMessagesConfig);
         },
@@ -1059,7 +1059,7 @@ describe("state.persistedState", () => {
           },
         }) => {
           expect(layout).toEqual("Tab!a");
-          const tabLayout = savedProps["Tab!a"].tabs[0].layout;
+          const tabLayout = savedProps["Tab!a"]?.tabs[0].layout;
           expect(getPanelTypeFromId(tabLayout)).toEqual("RawMessages");
           expect(savedProps[tabLayout]).toEqual(rawMessagesConfig);
         },

@@ -56,6 +56,7 @@ import {
   MosaicDropTargetPosition,
 } from "@foxglove-studio/app/types/panels";
 import Storage from "@foxglove-studio/app/util/Storage";
+import filterMap from "@foxglove-studio/app/util/filterMap";
 import {
   TAB_PANEL_TYPE,
   LAYOUT_QUERY_KEY,
@@ -313,7 +314,7 @@ const splitPanel = (
   let newPanelsState = { ...state.persistedState.panels };
   const { savedProps } = newPanelsState;
   if (tabId) {
-    const activeTabLayout = savedProps[tabId].tabs[savedProps[tabId].activeTabIdx].layout;
+    const activeTabLayout = savedProps[tabId]?.tabs[savedProps[tabId]?.activeTabIdx].layout;
     const newTabLayout = updateTree(activeTabLayout, [
       {
         path: getPathFromNode(id, activeTabLayout),
@@ -360,15 +361,17 @@ const swapPanel = (
   let newPanelsState = { ...state.persistedState.panels };
   // For a panel inside a Tab panel, update the Tab panel's tab layouts via savedProps
   if (tabId && originalId) {
-    const tabSavedProps = newPanelsState.savedProps[tabId] as TabPanelConfig;
-    const activeTabLayout = tabSavedProps.tabs[tabSavedProps.activeTabIdx]
-      .layout as MosaicParent<string>;
-    const newTabLayout = replaceAndRemovePanels({ originalId, newId }, activeTabLayout);
+    const tabSavedProps = newPanelsState.savedProps[tabId];
+    if (tabSavedProps) {
+      const activeTabLayout = tabSavedProps.tabs[tabSavedProps.activeTabIdx]
+        .layout as MosaicParent<string>;
+      const newTabLayout = replaceAndRemovePanels({ originalId, newId }, activeTabLayout);
 
-    const newTabConfig = updateTabPanelLayout(newTabLayout, tabSavedProps);
-    newPanelsState = savePanelConfigs(newPanelsState, {
-      configs: [{ id: tabId, config: newTabConfig }],
-    });
+      const newTabConfig = updateTabPanelLayout(newTabLayout, tabSavedProps as TabPanelConfig);
+      newPanelsState = savePanelConfigs(newPanelsState, {
+        configs: [{ id: tabId, config: newTabConfig }],
+      });
+    }
   } else {
     newPanelsState = changePanelLayout(newPanelsState, {
       layout: updateTree(root, [{ path, spec: { $set: newId } }]),
@@ -588,7 +591,7 @@ const dragWithinSameTab = (
     sourceTabChildConfigs: ConfigsPayload[];
   },
 ): PanelsState => {
-  const currentTabLayout = sourceTabConfig.tabs[sourceTabConfig.activeTabIdx].layout;
+  const currentTabLayout = sourceTabConfig.tabs[sourceTabConfig.activeTabIdx]?.layout;
   let newPanelsState = { ...panelsState };
   if (typeof currentTabLayout === "string") {
     newPanelsState = changePanelLayout(panelsState, {
@@ -768,7 +771,7 @@ const startDrag = (
   if (path.length) {
     if (sourceTabId) {
       const tabConfig = panelsState.savedProps[sourceTabId] as TabPanelConfig;
-      const activeLayout = tabConfig.tabs[tabConfig.activeTabIdx].layout;
+      const activeLayout = tabConfig.tabs[tabConfig.activeTabIdx]?.layout;
       if (!activeLayout) {
         return panelsState;
       }
@@ -815,10 +818,13 @@ const endDrag = (panelsState: PanelsState, dragPayload: EndDragPayload): PanelsS
     ? (originalSavedProps[targetTabId] as TabPanelConfig)
     : undefined;
   const panelIdsInsideTabPanels =
-    (sourceTabId && getPanelIdsInsideTabPanels([sourceTabId], originalSavedProps)) ?? [];
-  const sourceTabChildConfigs = (panelIdsInsideTabPanels as Array<string>)
-    .filter((id) => !!originalSavedProps[id])
-    .map((id) => ({ id, config: originalSavedProps[id] }));
+    (sourceTabId !== undefined && getPanelIdsInsideTabPanels([sourceTabId], originalSavedProps)) ||
+    [];
+
+  const sourceTabChildConfigs = filterMap(panelIdsInsideTabPanels, (id) => {
+    const config = originalSavedProps[id];
+    return config ? { id, config } : undefined;
+  });
 
   if (withinSameTab && sourceTabConfig && sourceTabId) {
     return dragWithinSameTab(panelsState, {

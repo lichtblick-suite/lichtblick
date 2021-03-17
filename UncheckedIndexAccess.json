@@ -119,8 +119,6 @@
   "app/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/vectors.ts",
   "app/players/automatedRun/performanceMeasuringClient.ts",
   "app/players/nodes.ts",
-  "app/reducers/panels.test.ts",
-  "app/reducers/panels.ts",
   "app/util/FakeRpc.ts",
   "app/util/Rpc.ts",
   "app/util/VirtualLRUBuffer.ts",
