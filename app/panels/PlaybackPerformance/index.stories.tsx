@@ -14,6 +14,7 @@
 import { storiesOf } from "@storybook/react";
 
 import { PlayerStateActiveData } from "@foxglove-studio/app/players/types";
+import StoreSetup from "@foxglove-studio/app/stories/StoreSetup";
 
 import { UnconnectedPlaybackPerformance, UnconnectedPlaybackPerformanceProps } from ".";
 
@@ -41,7 +42,11 @@ function Example({ states }: { states: UnconnectedPlaybackPerformanceProps[] }) 
       setState(state.slice(1));
     }
   }, [state]);
-  return <UnconnectedPlaybackPerformance {...state[0]} />;
+  return (
+    <StoreSetup>
+      <UnconnectedPlaybackPerformance {...state[0]} />
+    </StoreSetup>
+  );
 }
 
 storiesOf("<PlaybackPerformance>", module).add("simple example", () => {
