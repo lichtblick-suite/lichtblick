@@ -129,10 +129,10 @@ export const createValidator = (rules: Rules) => {
     [field: string]: string;
   } => {
     const errors: Record<string, string> = {};
-    Object.keys(rules).forEach((key) => {
+    Object.entries(rules).forEach(([key, rule]) => {
       // concat enables both functions and arrays of functions
-      const rule = join(rules[key]);
-      const error = rule(data[key]);
+      const joinedRules = join(rule);
+      const error = joinedRules(data[key]);
       if (error) {
         errors[key] = error;
       }
@@ -143,8 +143,8 @@ export const createValidator = (rules: Rules) => {
 
 export const createPrimitiveValidator = (rules: Rule[]) => {
   return (data: any): string | undefined => {
-    for (let i = 0; i < rules.length; i++) {
-      const error = rules[i](data);
+    for (const rule of rules) {
+      const error = rule(data);
       if (error) {
         return error;
       }
