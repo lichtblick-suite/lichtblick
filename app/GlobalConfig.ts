@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { perPanelHooks } from "@foxglove-studio/app/BuiltinPanelHooks";
-import { PersistedState, Store } from "@foxglove-studio/app/reducers";
+import { PersistedState } from "@foxglove-studio/app/reducers";
 import {
   LAYOUT_URL_QUERY_KEY,
   REMOTE_BAG_URL_2_QUERY_KEY,
@@ -130,10 +130,6 @@ const defaultHooks = {
   linkMessagePathSyntaxToHelpPage: () => true,
   getSecondSourceUrlParams() {
     return [REMOTE_BAG_URL_2_QUERY_KEY];
-  },
-  updateUrlToTrackLayoutChanges: async (_opt: { store: Store; skipPatch: boolean }) => {
-    // Persist the layout state in URL or remote storage if needed.
-    await Promise.resolve();
   },
   getPoseErrorScaling() {
     const scaling = {

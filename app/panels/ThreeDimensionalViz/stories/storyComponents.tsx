@@ -31,9 +31,10 @@ import PanelSetupWithBag from "@foxglove-studio/app/stories/PanelSetupWithBag";
 import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
 import { ScreenshotSizedContainer } from "@foxglove-studio/app/stories/storyHelpers";
 import { createRosDatatypesFromFrame } from "@foxglove-studio/app/test/datatypes";
-import { Store } from "@foxglove-studio/app/types/Store";
 import { objectValues } from "@foxglove-studio/app/util";
 import { isBobject, wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
+
+type Store = ReturnType<typeof configureStore>;
 
 export type FixtureExampleData = {
   topics: {

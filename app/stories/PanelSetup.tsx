@@ -40,10 +40,11 @@ import { Frame, Topic, PlayerStateActiveData, Progress } from "@foxglove-studio/
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { Store } from "@foxglove-studio/app/types/Store";
 import { MosaicNode, SavedProps, UserNodes } from "@foxglove-studio/app/types/panels";
 import { objectValues } from "@foxglove-studio/app/util";
 import { isBobject } from "@foxglove-studio/app/util/binaryObjects";
+
+type Store = ReturnType<typeof configureStore>;
 
 export type Fixture = {
   frame: Frame;
@@ -185,7 +186,7 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      store: props.store || configureStore(createRootReducer(createMemoryHistory())),
+      store: props.store ?? configureStore(createRootReducer(createMemoryHistory())),
     };
   }
 

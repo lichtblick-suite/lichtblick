@@ -11,6 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Reducer } from "redux";
+import { ThunkAction } from "redux-thunk";
+
 import { ActionTypes } from "@foxglove-studio/app/actions";
 import { ros_lib_dts } from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/ros";
 import hoverValue from "@foxglove-studio/app/reducers/hoverValue";
@@ -29,7 +32,6 @@ import recentLayouts, {
 import tests from "@foxglove-studio/app/reducers/tests";
 import userNodes, { UserNodeDiagnostics } from "@foxglove-studio/app/reducers/userNodes";
 import { Auth as AuthState } from "@foxglove-studio/app/types/Auth";
-import { Dispatch, GetState } from "@foxglove-studio/app/types/Store";
 import { HoverValue } from "@foxglove-studio/app/types/hoverValue";
 import { MosaicKey, SetFetchedLayoutPayload } from "@foxglove-studio/app/types/panels";
 
@@ -49,7 +51,7 @@ export type PersistedState = {
   search?: string;
 };
 
-export type Dispatcher<T extends ActionTypes> = (dispatch: Dispatch<T>, getState: GetState) => void;
+export type Dispatcher<A extends ActionTypes> = ThunkAction<void, State, undefined, A>;
 
 export type State = {
   persistedState: PersistedState;
@@ -65,9 +67,10 @@ export type State = {
   };
 };
 
-export type Store = { dispatch: Dispatch<unknown>; getState: () => State };
-
-export default function createRootReducer(history: any, args?: { testAuth?: any }) {
+export default function createRootReducer(
+  history: any,
+  args?: { testAuth?: any },
+): Reducer<State, ActionTypes> {
   const persistedState = getInitialPersistedStateAndMaybeUpdateLocalStorageAndURL(history);
   maybeStoreNewRecentLayout(persistedState);
   const initialState: State = {
@@ -85,7 +88,7 @@ export default function createRootReducer(history: any, args?: { testAuth?: any 
     layoutHistory: initialLayoutHistoryState,
     commenting: { fetchedCommentsBase: [], fetchedCommentsFeature: [], sourceToShow: "Both" },
   };
-  return (state: State, action: ActionTypes): State => {
+  return (state: State | undefined, action: ActionTypes): State => {
     const oldPersistedState: PersistedState | undefined = state?.persistedState;
     const reducers: Array<
       (arg0: State, arg1: ActionTypes, arg2?: PersistedState) => State

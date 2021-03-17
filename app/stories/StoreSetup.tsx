@@ -17,7 +17,8 @@ import { Provider } from "react-redux";
 
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore";
-import { Store } from "@foxglove-studio/app/types/Store";
+
+type Store = ReturnType<typeof configureStore>;
 
 type Props = {
   children: ReactNode;
@@ -25,7 +26,7 @@ type Props = {
 };
 
 export default function StoreSetup(props: Props) {
-  const storeRef = useRef(props.store || configureStore(createRootReducer(createMemoryHistory())));
+  const storeRef = useRef(props.store ?? configureStore(createRootReducer(createMemoryHistory())));
 
   return <Provider store={storeRef.current}>{props.children}</Provider>;
 }

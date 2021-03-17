@@ -125,7 +125,10 @@ export const loadLayout = (layout: PanelsState): Dispatcher<LOAD_LAYOUT> => (dis
   return dispatch({ type: PANELS_ACTION_TYPES.LOAD_LAYOUT, payload: layout });
 };
 
-type CLEAR_LAYOUT_URL_REPLACED_BY_DEFAULT = { type: "CLEAR_LAYOUT_URL_REPLACED_BY_DEFAULT" };
+type CLEAR_LAYOUT_URL_REPLACED_BY_DEFAULT = {
+  type: "CLEAR_LAYOUT_URL_REPLACED_BY_DEFAULT";
+  payload?: never;
+};
 export const clearLayoutUrlReplacedByDefault = (): Dispatcher<CLEAR_LAYOUT_URL_REPLACED_BY_DEFAULT> => (
   dispatch,
 ) => {

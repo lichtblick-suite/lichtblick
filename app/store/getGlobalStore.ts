@@ -16,8 +16,9 @@ import updateUrlAndLocalStorageMiddleware from "@foxglove-studio/app/middleware/
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store";
 import configureTestingStore from "@foxglove-studio/app/store/configureStore.testing";
-import { Store } from "@foxglove-studio/app/types/Store";
 import history from "@foxglove-studio/app/util/history";
+
+type Store = ReturnType<typeof configureStore>;
 
 interface TestStore extends Store {
   push?: (path: string) => void;

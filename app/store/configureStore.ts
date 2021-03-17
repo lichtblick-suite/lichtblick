@@ -12,14 +12,16 @@
 //   You may not use this file except in compliance with the License.
 
 import { createStore, applyMiddleware, Reducer } from "redux";
-import thunk from "redux-thunk";
-import type { ThunkMiddleware } from "redux-thunk";
+import thunk, { ThunkDispatch } from "redux-thunk";
 
 import { ActionTypes } from "@foxglove-studio/app/actions";
-import { Store } from "@foxglove-studio/app/types/Store";
+import { State } from "@foxglove-studio/app/reducers";
 
-const configureStore = (reducer: Reducer<any, ActionTypes>, middleware: Array<any> = []) => {
-  let enhancer = applyMiddleware(thunk as ThunkMiddleware<Store, ActionTypes>, ...middleware);
+const configureStore = (reducer: Reducer<State, ActionTypes>, middleware: Array<any> = []) => {
+  let enhancer = applyMiddleware<ThunkDispatch<State, undefined, ActionTypes>>(
+    thunk,
+    ...middleware,
+  );
   if (process.env.NODE_ENV !== "production") {
     // Unclear whether this require can be safely moved to an import
     // eslint-disable-next-line @typescript-eslint/no-var-requires

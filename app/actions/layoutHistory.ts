@@ -11,13 +11,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-export type REDO_LAYOUT_CHANGE = { type: "REDO_LAYOUT_CHANGE" };
+export type REDO_LAYOUT_CHANGE = { type: "REDO_LAYOUT_CHANGE"; payload?: never };
 
 export const redoLayoutChange = (): REDO_LAYOUT_CHANGE => ({
   type: "REDO_LAYOUT_CHANGE",
 });
 
-export type UNDO_LAYOUT_CHANGE = { type: "UNDO_LAYOUT_CHANGE" };
+export type UNDO_LAYOUT_CHANGE = { type: "UNDO_LAYOUT_CHANGE"; payload?: never };
 
 export const undoLayoutChange = (): UNDO_LAYOUT_CHANGE => ({
   type: "UNDO_LAYOUT_CHANGE",
