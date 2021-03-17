@@ -153,7 +153,6 @@ export const useSearchText = (): SearchTextProps => {
 };
 type SearchTextComponentProps = SearchTextProps & {
   onCameraStateChange: (arg0: CameraState) => void;
-  onFollowChange: (newFollowTf?: string | false, newFollowOrientation?: boolean) => void;
   cameraState: CameraState;
   rootTf?: string;
   transforms: Transforms;
@@ -174,7 +173,7 @@ export const useSearchMatches = ({
   rootTf?: string;
   searchTextOpen: boolean;
   transforms: Transforms;
-}) => {
+}): void => {
   const hasCurrentMatchChanged = useDeepChangeDetector([currentMatch], true);
   React.useEffect(() => {
     if (!currentMatch || !searchTextOpen || !rootTf || !hasCurrentMatchChanged) {

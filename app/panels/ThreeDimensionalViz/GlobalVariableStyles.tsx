@@ -149,7 +149,6 @@ export default function GlobalVariableStyles(props: Props) {
             <GlobalVariableStylesRow
               key={name}
               name={name}
-              rowIndex={i}
               overrides={defaults(
                 [],
                 colorOverrideBySourceIdxByVariable[name],
@@ -172,7 +171,6 @@ function GlobalVariableStylesRow({
   updateSettingsForGlobalVariable,
 }: {
   name: string;
-  rowIndex: number;
   overrides: ColorOverride[];
   linkedGlobalVariablesForRow: any;
   updateSettingsForGlobalVariable: (arg0: string, settings: ColorOverride, arg2: number) => void;

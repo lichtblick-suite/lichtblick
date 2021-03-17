@@ -88,7 +88,7 @@ const RainbowText = React.memo(function RainbowText({ children }) {
 
 export default function PointCloudSettingsEditor(
   props: TopicSettingsEditorProps<PointCloud2, PointCloudSettings>,
-) {
+): React.ReactElement {
   const { message, settings = {}, onFieldChange, onSettingsChange } = props;
 
   const onColorModeChange = useCallback(

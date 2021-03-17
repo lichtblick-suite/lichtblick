@@ -15,6 +15,7 @@ import AlertIcon from "@mdi/svg/svg/alert.svg";
 import HelpCircleIcon from "@mdi/svg/svg/help-circle.svg";
 import InformationIcon from "@mdi/svg/svg/information.svg";
 import { invert } from "lodash";
+import { ReactElement } from "react";
 
 import Icon from "@foxglove-studio/app/components/Icon";
 import { Diagnostic, DiagnosticSeverity } from "@foxglove-studio/app/players/UserNodePlayer/types";
@@ -38,7 +39,7 @@ type Props = {
   diagnostics: Diagnostic[];
 };
 
-const DiagnosticsSection = ({ diagnostics }: Props) => {
+const DiagnosticsSection = ({ diagnostics }: Props): ReactElement => {
   return diagnostics.length ? (
     <ul>
       {diagnostics.map(({ severity, message, source, startColumn, startLineNumber }, i) => {

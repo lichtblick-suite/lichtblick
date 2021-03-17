@@ -51,7 +51,6 @@ const SIconWrapper = styled.span`
 
 type Props = {
   linkedGlobalVariable: LinkedGlobalVariable;
-  style?: any;
   children: (arg0: {
     setIsOpen: (arg0: boolean) => void;
     linkedGlobalVariable: LinkedGlobalVariable;

@@ -206,8 +206,6 @@ type SharedProps = {
   getIsTreeNodeVisibleInScene: GetIsTreeNodeVisibleInScene;
   getIsTreeNodeVisibleInTree: GetIsTreeNodeVisibleInTree;
   hasFeatureColumn: boolean;
-  isPlaying?: boolean;
-  onExitTopicTreeFocus: () => void;
   onNamespaceOverrideColorChange: OnNamespaceOverrideColorChange;
   pinTopics: boolean;
   diffModeEnabled: boolean;
@@ -227,6 +225,8 @@ type SharedProps = {
 type Props = SharedProps & {
   containerHeight: number;
   containerWidth: number;
+  isPlaying?: boolean;
+  onExitTopicTreeFocus: () => void;
 };
 
 type BaseProps = SharedProps & {
@@ -427,11 +427,14 @@ function TopicTreeWrapper({
   containerHeight,
   pinTopics,
   showTopicTree,
+  sceneErrorsByKey,
+  saveConfig,
+  setShowTopicTree,
+  isPlaying,
   ...rest
 }: Props) {
   const defaultTreeWidth = clamp(containerWidth, DEFAULT_XS_WIDTH, DEFAULT_WIDTH);
   const renderTopicTree = pinTopics || showTopicTree;
-  const { sceneErrorsByKey, saveConfig, setShowTopicTree, isPlaying } = rest;
   const springProps = useSpring({
     native: true,
     unique: true,
@@ -479,6 +482,9 @@ function TopicTreeWrapper({
               {renderTopicTree && (
                 <TopicTree
                   {...rest}
+                  sceneErrorsByKey={sceneErrorsByKey}
+                  saveConfig={saveConfig}
+                  setShowTopicTree={setShowTopicTree}
                   pinTopics={pinTopics}
                   showTopicTree={showTopicTree}
                   treeWidth={width}

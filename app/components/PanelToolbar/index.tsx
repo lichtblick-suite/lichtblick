@@ -51,12 +51,13 @@ import MosaicDragHandle from "./MosaicDragHandle";
 import styles from "./index.module.scss";
 
 type Props = {
+  // eslint-disable-next-line react/no-unused-prop-types
   children?: React.ReactNode;
   floating?: boolean;
   helpContent?: React.ReactNode;
   menuContent?: React.ReactNode;
-  showPanelName?: boolean;
   additionalIcons?: React.ReactNode;
+  // eslint-disable-next-line react/no-unused-prop-types
   hideToolbars?: boolean;
   showHiddenControlsOnHover?: boolean;
   isUnknownPanel?: boolean;
@@ -230,24 +231,25 @@ type PanelToolbarControlsProps = Props & {
   isRendered: boolean;
   onDragStart: () => void;
   onDragEnd: () => void;
+  showPanelName?: boolean;
   isUnknownPanel: boolean;
 };
 
 // Keep controls, which don't change often, in a pure component in order to avoid re-rendering the
 // whole PanelToolbar when only children change.
-const PanelToolbarControls = React.memo(function PanelToolbarControls(
-  props: PanelToolbarControlsProps,
-) {
+const PanelToolbarControls = React.memo(function PanelToolbarControls({
+  additionalIcons,
+  floating,
+  helpContent,
+  isRendered,
+  isUnknownPanel,
+  menuContent,
+  onDragEnd,
+  onDragStart,
+  showHiddenControlsOnHover,
+  showPanelName,
+}: PanelToolbarControlsProps) {
   const panelData = useContext(PanelContext);
-  const {
-    floating,
-    helpContent,
-    menuContent,
-    showPanelName,
-    additionalIcons,
-    showHiddenControlsOnHover,
-  } = props;
-  const { isRendered, onDragStart, onDragEnd, isUnknownPanel } = props;
 
   return (
     <div
@@ -286,17 +288,16 @@ const PanelToolbarControls = React.memo(function PanelToolbarControls(
 // Panel toolbar should be added to any panel that's part of the
 // react-mosaic layout.  It adds a drag handle, remove/replace controls
 // and has a place to add custom controls via it's children property
-export default React.memo<Props>(function PanelToolbar(props: Props) {
-  const {
-    children,
-    floating,
-    helpContent,
-    menuContent,
-    additionalIcons,
-    hideToolbars,
-    showHiddenControlsOnHover,
-    isUnknownPanel,
-  } = props;
+export default React.memo<Props>(function PanelToolbar({
+  additionalIcons,
+  children,
+  floating,
+  helpContent,
+  hideToolbars,
+  isUnknownPanel,
+  menuContent,
+  showHiddenControlsOnHover,
+}: Props) {
   const { isHovered = false } = useContext(PanelContext) || {};
   const [isDragging, setIsDragging] = useState(false);
   const onDragStart = useCallback(() => setIsDragging(true), []);

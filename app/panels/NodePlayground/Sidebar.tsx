@@ -28,7 +28,6 @@ import { Script } from "@foxglove-studio/app/panels/NodePlayground/script";
 import { getNodeProjectConfig } from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
 import templates from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/templates";
 import userUtilsReadMe from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/README.md";
-import { UserNodeDiagnostics } from "@foxglove-studio/app/reducers/userNodes";
 import { UserNodes } from "@foxglove-studio/app/types/panels";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
@@ -106,9 +105,6 @@ type NodesListProps = {
   deleteNode: (id: string) => void;
   collapse: () => void;
   selectedNodeId?: string;
-  userNodeDiagnostics: {
-    [guid: string]: UserNodeDiagnostics;
-  };
 };
 
 const NodesList = ({ nodes, selectNode, deleteNode, collapse, selectedNodeId }: NodesListProps) => {
@@ -122,7 +118,7 @@ const NodesList = ({ nodes, selectNode, deleteNode, collapse, selectedNodeId }: 
             selected={selectedNodeId === nodeId}
             onClick={() => selectNode(nodeId)}
           >
-            {nodes[nodeId].name}
+            {nodes[nodeId]?.name}
             <Icon onClick={() => deleteNode(nodeId)} medium>
               <DeleteIcon />
             </Icon>
@@ -139,9 +135,6 @@ type Props = {
   userNodes: UserNodes;
   selectedNodeId?: string;
   otherMarkdownDocsForTest?: string;
-  userNodeDiagnostics: {
-    [guid: string]: UserNodeDiagnostics;
-  };
   explorer: Explorer;
   updateExplorer: (explorer: Explorer) => void;
   setScriptOverride: (script: Script, maxDepth?: number) => void;
@@ -181,13 +174,12 @@ const Sidebar = ({
   deleteNode,
   selectedNodeId,
   otherMarkdownDocsForTest,
-  userNodeDiagnostics,
   explorer,
   updateExplorer,
   setScriptOverride,
   script,
   addNewNode,
-}: Props) => {
+}: Props): React.ReactElement => {
   const nodesSelected = explorer === "nodes";
   const docsSelected = explorer === "docs";
   const utilsSelected = explorer === "utils";
@@ -227,14 +219,13 @@ const Sidebar = ({
           deleteNode={deleteNode}
           collapse={() => updateExplorer(undefined)}
           selectedNodeId={selectedNodeId}
-          userNodeDiagnostics={userNodeDiagnostics}
         />
       ),
       docs: (
         <SFlex>
           <SidebarTitle title={"docs"} collapse={() => updateExplorer(undefined)} />
           <TextContent style={{ backgroundColor: "transparent" }} linkTarget="_blank">
-            {otherMarkdownDocsForTest || nodePlaygroundDocs}
+            {otherMarkdownDocsForTest ?? nodePlaygroundDocs}
           </TextContent>
           <br />
           <br />
@@ -290,7 +281,6 @@ const Sidebar = ({
       selectNode,
       selectedNodeId,
       updateExplorer,
-      userNodeDiagnostics,
       userNodes,
     ],
   );

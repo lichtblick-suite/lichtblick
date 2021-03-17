@@ -117,7 +117,6 @@ function LayoutToolbar({
             cameraState={cameraState}
             transforms={transforms}
             rootTf={rootTf}
-            onFollowChange={onFollowChange}
           />
         </div>
         <div className={styles.buttons}>

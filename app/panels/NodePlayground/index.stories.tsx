@@ -319,7 +319,6 @@ storiesOf("<NodePlayground>", module)
       return (
         <PanelSetup fixture={{ ...fixture, userNodes }}>
           <Sidebar
-            userNodeDiagnostics={{}}
             explorer={explorer}
             updateExplorer={updateExplorer}
             selectedNodeId={undefined}

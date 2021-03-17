@@ -15,7 +15,7 @@ import ArrowLeftIcon from "@mdi/svg/svg/arrow-left.svg";
 import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import PlusIcon from "@mdi/svg/svg/plus.svg";
-import { Suspense } from "react";
+import { ReactElement, Suspense } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
@@ -83,7 +83,7 @@ const UnsavedDot = styled.div`
 `;
 
 // Exported for screenshot testing.
-export const NodePlaygroundSettings = ({ config, saveConfig }: Props) => (
+export const NodePlaygroundSettings = ({ config, saveConfig }: Props): ReactElement => (
   <>
     <Item
       icon={config.autoFormatOnSave ? <CheckboxMarkedIcon /> : <CheckboxBlankOutlineIcon />}
@@ -189,7 +189,7 @@ function NodePlayground(props: Props) {
 
   React.useLayoutEffect(() => {
     if (selectedNode) {
-      const testItems = props.config.additionalBackStackItems || [];
+      const testItems = props.config.additionalBackStackItems ?? [];
       setScriptBackStack([
         { filePath: selectedNode.name, code: selectedNode.sourceCode, readOnly: false },
         ...testItems,
@@ -200,7 +200,7 @@ function NodePlayground(props: Props) {
   const addNewNode = React.useCallback(
     (_, code?: string) => {
       const newNodeId = uuidv4();
-      const sourceCode = code || skeletonBody;
+      const sourceCode = code ?? skeletonBody;
       // TODO: Add integration test for this flow.
       setUserNodes({
         [newNodeId]: {
@@ -276,7 +276,6 @@ function NodePlayground(props: Props) {
               }}
               selectedNodeId={selectedNodeId}
               userNodes={userNodes}
-              userNodeDiagnostics={userNodeDiagnostics}
               script={currentScript}
               setScriptOverride={setScriptOverride}
               addNewNode={addNewNode}
@@ -355,15 +354,15 @@ function NodePlayground(props: Props) {
                       </Flex>
                     }
                   >
-                    {editorForStorybook || (
+                    {editorForStorybook ?? (
                       <Editor
                         autoFormatOnSave={!!autoFormatOnSave}
                         script={currentScript}
                         setScriptCode={setScriptCode}
                         setScriptOverride={setScriptOverride}
                         rosLib={rosLib}
-                        resizeKey={`${width}-${height}-${explorer || "none"}-${
-                          selectedNodeId || "none"
+                        resizeKey={`${width}-${height}-${explorer ?? "none"}-${
+                          selectedNodeId ?? "none"
                         }`}
                         save={saveNode}
                       />

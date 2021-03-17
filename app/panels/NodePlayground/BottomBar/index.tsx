@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, ReactElement } from "react";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
 
@@ -54,7 +54,7 @@ const HeaderItem = ({ isOpen, numItems, text }: HeaderItemProps) => (
   </SHeaderItem>
 );
 
-const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props) => {
+const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactElement => {
   const [bottomBarDisplay, setBottomBarDisplay] = useState("closed");
   const [autoScroll, setAutoScroll] = useState(true);
 

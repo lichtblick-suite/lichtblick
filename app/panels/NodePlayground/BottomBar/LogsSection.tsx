@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { ReactElement } from "react";
 import Tree from "react-json-tree";
 import styled from "styled-components";
 
@@ -43,7 +44,7 @@ const valueColorMap = {
   undefined: jsonTreeTheme.base08,
 };
 
-const LogsSection = ({ nodeId, logs, clearLogs }: Props) => {
+const LogsSection = ({ nodeId, logs, clearLogs }: Props): ReactElement => {
   if (logs.length === 0) {
     return (
       <>

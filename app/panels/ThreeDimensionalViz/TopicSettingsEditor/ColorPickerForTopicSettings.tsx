@@ -49,7 +49,6 @@ type Props = {
   onChange: (newColor: Color) => void;
   placement?: Placement;
   size?: Size;
-  useModal?: boolean;
 };
 type ColorPickerSettingsPanelProps = {
   color?: Color;

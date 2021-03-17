@@ -14,6 +14,7 @@
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 // @ts-expect-error why doesn't this import the base monaco?
 import { StaticServices } from "monaco-editor/esm/vs/editor/standalone/browser/standaloneServices";
+import { ReactElement } from "react";
 import MonacoEditor from "react-monaco-editor";
 
 import getPrettifiedCode from "@foxglove-studio/app/panels/NodePlayground/prettier";
@@ -75,7 +76,7 @@ const Editor = ({
   save,
   setScriptOverride,
   rosLib,
-}: Props) => {
+}: Props): ReactElement | ReactNull => {
   const editorRef = React.useRef<any>(ReactNull);
   const autoFormatOnSaveRef = React.useRef(autoFormatOnSave);
   autoFormatOnSaveRef.current = autoFormatOnSave;
@@ -127,7 +128,7 @@ const Editor = ({
     }
     const filePath = monacoApi.Uri.parse(`file://${script.filePath}`);
     const model =
-      monacoApi.editor.getModel(filePath) ||
+      monacoApi.editor.getModel(filePath) ??
       monacoApi.editor.createModel(script.code, "typescript", filePath);
 
     // Update the model's code if it was updated outside the Editor.
