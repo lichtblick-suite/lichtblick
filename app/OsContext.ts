@@ -17,7 +17,12 @@ export interface Storage {
   // get all the items in the datastore
   all(datastore: string): Promise<StorageContent[]>;
   // get a single item from the datastore
-  get(datastore: string, key: string): Promise<StorageContent | undefined>;
+  get(
+    datastore: string,
+    key: string,
+    options?: { encoding: undefined },
+  ): Promise<Uint8Array | undefined>;
+  get(datastore: string, key: string, options: { encoding: "utf8" }): Promise<string | undefined>;
   // put a single item into the datastore
   // This will replace any existing item with the same key
   put(datastore: string, key: string, value: StorageContent): Promise<void>;

@@ -38,6 +38,7 @@ import ShortcutsModal from "@foxglove-studio/app/components/ShortcutsModal";
 import TinyConnectionPicker from "@foxglove-studio/app/components/TinyConnectionPicker";
 import Toolbar from "@foxglove-studio/app/components/Toolbar";
 import ExperimentalFeaturesLocalStorageProvider from "@foxglove-studio/app/context/ExperimentalFeaturesLocalStorageProvider";
+import OsContextAppConfigurationProvider from "@foxglove-studio/app/context/OsContextAppConfigurationProvider";
 import OsContextLayoutStorageProvider from "@foxglove-studio/app/context/OsContextLayoutStorageProvider";
 import {
   PlayerSourceDefinition,
@@ -165,20 +166,22 @@ export default function App(): ReactElement {
   ];
 
   return (
-    <Provider store={globalStore}>
-      <ExperimentalFeaturesLocalStorageProvider features={experimentalFeatures}>
-        <ErrorBoundary>
-          <PlayerManager playerSources={playerSources}>
-            <NativeFileMenuPlayerSelection />
-            <DndProvider backend={HTML5Backend}>
-              <OsContextLayoutStorageProvider>
-                <Root />
-                <LayoutStorageReduxAdapter />
-              </OsContextLayoutStorageProvider>
-            </DndProvider>
-          </PlayerManager>
-        </ErrorBoundary>
-      </ExperimentalFeaturesLocalStorageProvider>
-    </Provider>
+    <OsContextAppConfigurationProvider>
+      <Provider store={globalStore}>
+        <ExperimentalFeaturesLocalStorageProvider features={experimentalFeatures}>
+          <ErrorBoundary>
+            <PlayerManager playerSources={playerSources}>
+              <NativeFileMenuPlayerSelection />
+              <DndProvider backend={HTML5Backend}>
+                <OsContextLayoutStorageProvider>
+                  <Root />
+                  <LayoutStorageReduxAdapter />
+                </OsContextLayoutStorageProvider>
+              </DndProvider>
+            </PlayerManager>
+          </ErrorBoundary>
+        </ExperimentalFeaturesLocalStorageProvider>
+      </Provider>
+    </OsContextAppConfigurationProvider>
   );
 }

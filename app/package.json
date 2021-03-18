@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "@mdi/svg": "5.9.55",
+    "async-mutex": "0.3.1",
     "cbor-js": "0.1.0",
     "chart.js": "davidswinegar/Chart.js#0785c29a4c57b3e1b4243f8163df7950a00b2a80",
     "chartjs-plugin-annotation": "0.5.7",

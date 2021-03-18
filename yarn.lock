@@ -1810,6 +1810,7 @@ __metadata:
     "@types/ws": 7.4.0
     "@wojtekmaj/enzyme-adapter-react-17": 0.4.1
     argparse: 2.0.1
+    async-mutex: 0.3.1
     cbor-js: 0.1.0
     chart.js: "davidswinegar/Chart.js#0785c29a4c57b3e1b4243f8163df7950a00b2a80"
     chartjs-plugin-annotation: 0.5.7
@@ -6362,6 +6363,15 @@ __metadata:
   version: 1.0.1
   resolution: "async-limiter@npm:1.0.1"
   checksum: d123312ace75c07399ddc58e06cc028dacce35f71cdf59cf9b22f6c31dde221c22285e6185ede823ecb67f3b3065e26205eb9f74fcbba3f12ce7a2c2b09d7763
+  languageName: node
+  linkType: hard
+
+"async-mutex@npm:0.3.1":
+  version: 0.3.1
+  resolution: "async-mutex@npm:0.3.1"
+  dependencies:
+    tslib: ^2.1.0
+  checksum: 39468028c2d4f09157ca28a8037d0deae21999fa0fce6dfe893e7344789891211fc9363efe0889283f69a35730ed0ec604d552d041adeb8fab1262131d3e4431
   languageName: node
   linkType: hard
 

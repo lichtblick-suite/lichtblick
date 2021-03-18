@@ -24,7 +24,7 @@
     "lint": "TIMING=1 eslint --report-unused-disable-directives --fix .",
     "lint:ci": "TIMING=1 NODE_OPTIONS='--max-old-space-size=4096' eslint --report-unused-disable-directives --config .eslintrc.ci.yaml .",
     "test": "NODE_OPTIONS='-r ts-node/register' jest",
-    "test:debug": "NODE_OPTIONS='-r ts-node/register' --inspect-brk jest",
+    "test:debug": "NODE_OPTIONS='-r ts-node/register --inspect-brk' jest",
     "test:watch": "NODE_OPTIONS='-r ts-node/register' jest --watch",
     "test:integration": "jest --projects test",
     "package:win": "yarn package --win",
