@@ -298,8 +298,10 @@ app.on("ready", async () => {
 
     // In development, we run with the pre-packaged Electron binary, so we need to manually set the Dock icon.
     try {
-      // This fails when opening the app from a packaged DMG.
-      app.dock.setIcon("resources/icon/icon.png");
+      if (app.dock != undefined) {
+        // This fails when opening the app from a packaged DMG.
+        app.dock.setIcon("resources/icon/icon.png");
+      }
     } catch (error) {
       console.error("Unable to set icon", error);
     }
