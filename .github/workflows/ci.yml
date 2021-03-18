@@ -45,6 +45,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - run: yarn install --immutable
+      - run: yarn dedupe --check
+        if: matrix.config.name == 'lint'
       - run: ${{ matrix.config.command }}
         env:
           CHROMATIC_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
