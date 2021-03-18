@@ -53,11 +53,11 @@ export function panelsByCategory() {
     { title: "Global Variable Slider", component: GlobalVariableSlider },
     { title: "Node Playground", component: NodePlayground },
     { title: "Tab", component: Tab },
-    { title: "Webviz Internals", component: Internals },
     { title: "Data Source Info", component: SourceInfo },
   ];
 
   const debugging = [
+    { title: "Studio Internals", component: Internals },
     { title: "Number of Renders", component: NumberOfRenders },
     { title: "Playback Performance", component: PlaybackPerformance },
     { title: "Subscribe to List", component: SubscribeToList },

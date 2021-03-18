@@ -70,10 +70,6 @@ function getSubscriptionGroup({ requester }: SubscribePayload): string {
     case "other":
       return requester.name;
   }
-  requester.type as never; // enforce that all cases are handled in switch above
-  // this shouldn't be necessary, but Flow doesn't let us fall off the end without returning a string
-  // https://github.com/facebook/flow/issues/451
-  return `<unknown: ${requester.type} ${requester.name}>`;
 }
 
 function getPublisherGroup({ advertiser }: AdvertisePayload): string {
@@ -84,8 +80,6 @@ function getPublisherGroup({ advertiser }: AdvertisePayload): string {
     case "panel":
       return `Panel “${advertiser.name}”`;
   }
-  advertiser.type as never;
-  return `<unknown: ${advertiser.type} ${advertiser.name}>`;
 }
 
 type RecordedData = {
@@ -112,7 +106,7 @@ const HistoryRecorder = React.memo(function HistoryRecorder({
   return ReactNull;
 });
 
-// Display webviz internal state for debugging and viewing topic dependencies.
+// Display internal state for debugging and viewing topic dependencies.
 function Internals(): React.ReactNode {
   const { topics } = PanelAPI.useDataSourceInfo();
   const topicsByName = React.useMemo(() => getTopicsByTopicName(topics), [topics]);
