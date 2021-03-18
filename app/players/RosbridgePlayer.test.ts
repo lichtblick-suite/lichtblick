@@ -194,8 +194,8 @@ describe("RosbridgePlayer", () => {
         expect(messages.length).toBe(0);
 
         expect(bobjects.length).toBe(1);
-        expect(isBobject(bobjects[0].message)).toBe(true);
-        expect(deepParse(bobjects[0].message)).toStrictEqual({
+        expect(isBobject(bobjects[0]?.message)).toBe(true);
+        expect(deepParse(bobjects[0]?.message)).toStrictEqual({
           header: {
             seq: 7643,
             stamp: { sec: 1234, nsec: 5678 },
@@ -220,8 +220,8 @@ describe("RosbridgePlayer", () => {
         expect(messages.length).toBe(0);
 
         expect(bobjects.length).toBe(1);
-        expect(isBobject(bobjects[0].message)).toBe(true);
-        expect(deepParse(bobjects[0].message)).toStrictEqual({
+        expect(isBobject(bobjects[0]?.message)).toBe(true);
+        expect(deepParse(bobjects[0]?.message)).toStrictEqual({
           text: "some text",
         });
 
@@ -240,8 +240,8 @@ describe("RosbridgePlayer", () => {
         }
 
         expect(messages.length).toBe(1);
-        expect(isBobject(messages[0].message)).toBe(false);
-        expect(messages[0].message).toEqual({
+        expect(isBobject(messages[0]?.message)).toBe(false);
+        expect(messages[0]?.message).toEqual({
           header: {
             seq: 7643,
             stamp: { sec: 1234, nsec: 5678 },
@@ -266,8 +266,8 @@ describe("RosbridgePlayer", () => {
         }
 
         expect(messages.length).toBe(1);
-        expect(isBobject(messages[0].message)).toBe(false);
-        expect(messages[0].message).toEqual({
+        expect(isBobject(messages[0]?.message)).toBe(false);
+        expect(messages[0]?.message).toEqual({
           text: "some text",
         });
 
@@ -291,8 +291,8 @@ describe("RosbridgePlayer", () => {
         }
 
         expect(messages.length).toBe(1);
-        expect(isBobject(messages[0].message)).toBe(false);
-        expect(messages[0].message).toEqual({
+        expect(isBobject(messages[0]?.message)).toBe(false);
+        expect(messages[0]?.message).toEqual({
           header: {
             seq: 7643,
             stamp: { sec: 1234, nsec: 5678 },
@@ -301,8 +301,8 @@ describe("RosbridgePlayer", () => {
         });
 
         expect(bobjects.length).toBe(1);
-        expect(isBobject(bobjects[0].message)).toBe(true);
-        expect(deepParse(bobjects[0].message)).toStrictEqual({
+        expect(isBobject(bobjects[0]?.message)).toBe(true);
+        expect(deepParse(bobjects[0]?.message)).toStrictEqual({
           text: "some text",
         });
 
@@ -324,8 +324,8 @@ describe("RosbridgePlayer", () => {
         }
 
         expect(messages.length).toBe(1);
-        expect(isBobject(messages[0].message)).toBe(false);
-        expect(messages[0].message).toEqual({
+        expect(isBobject(messages[0]?.message)).toBe(false);
+        expect(messages[0]?.message).toEqual({
           header: {
             seq: 7643,
             stamp: { sec: 1234, nsec: 5678 },
@@ -334,8 +334,8 @@ describe("RosbridgePlayer", () => {
         });
 
         expect(bobjects.length).toBe(1);
-        expect(isBobject(bobjects[0].message)).toBe(true);
-        expect(deepParse(bobjects[0].message)).toStrictEqual({
+        expect(isBobject(bobjects[0]?.message)).toBe(true);
+        expect(deepParse(bobjects[0]?.message)).toStrictEqual({
           header: {
             seq: 7643,
             stamp: { sec: 1234, nsec: 5678 },

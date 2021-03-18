@@ -183,7 +183,7 @@ export function applyNodesToMessages({
   // Have to do this the old-school way since we are appending to
   // `messages` in the process.
   for (let i = 0; i < messages.length; i++) {
-    const message = messages[i];
+    const message = messages[i]!;
     nodeDefinitions.forEach((nodeDefinition) => {
       const definitionIsBobjects = nodeDefinition.format === "bobjects";
       const formatMatches = definitionIsBobjects === isBobject(message.message);
@@ -198,7 +198,7 @@ export function applyNodesToMessages({
           nodeResult = applyNodeToMessage(nodeDefinition, message, previousState);
         } catch (error) {
           sendNotification(
-            `Error running Webviz node: ${nodeDefinition.output.name}`,
+            `Error running playground node: ${nodeDefinition.output.name}`,
             `${error} ${error.stack}`,
             "app",
             "error",
@@ -260,7 +260,8 @@ export function partitionMessagesBySubscription(
         if (isBobject(message.message)) {
           bobjects.push(message);
         } else {
-          const nodeDef = definitionsByTopic[message.topic] && definitionsByTopic[message.topic][0];
+          const nodeDef =
+            definitionsByTopic[message.topic] && definitionsByTopic[message.topic]?.[0];
           if (!nodeDef) {
             throw new Error("Message produced from unsubscribed node. This should never happen.");
           }

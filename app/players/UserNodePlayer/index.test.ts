@@ -29,7 +29,7 @@ import {
   PlayerStateActiveData,
 } from "@foxglove-studio/app/players/types";
 import signal from "@foxglove-studio/app/shared/signal";
-import { wrapMessages } from "@foxglove-studio/app/test/datatypes";
+import { wrapMessage, wrapMessages } from "@foxglove-studio/app/test/datatypes";
 import Storage from "@foxglove-studio/app/util/Storage";
 import { deepParse } from "@foxglove-studio/app/util/binaryObjects";
 import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
@@ -121,23 +121,26 @@ const basicPlayerState: PlayerStateActiveData = {
   topics: [],
   datatypes: {},
 };
-const parsedUpstreamMessages = [
-  {
-    topic: "/np_input",
-    receiveTime: { sec: 0, nsec: 1 },
-    message: {
-      payload: "bar",
-    },
+
+const parsedFirst = {
+  topic: "/np_input",
+  receiveTime: { sec: 0, nsec: 1 },
+  message: {
+    payload: "bar",
   },
-  {
-    topic: "/np_input",
-    receiveTime: { sec: 0, nsec: 100 },
-    message: {
-      payload: "baz",
-    },
+};
+
+const parsedSecond = {
+  topic: "/np_input",
+  receiveTime: { sec: 0, nsec: 100 },
+  message: {
+    payload: "baz",
   },
-];
-const upstreamMessages = wrapMessages(parsedUpstreamMessages);
+};
+
+const upstreamFirst = wrapMessage(parsedFirst);
+const upstreamSecond = wrapMessage(parsedSecond);
+
 const parseBobjectMessage = (msg: any) => ({ ...msg, message: deepParse(msg.message) });
 
 const setListenerHelper = (player: UserNodePlayer, numPromises: number = 1) => {
@@ -150,7 +153,7 @@ const setListenerHelper = (player: UserNodePlayer, numPromises: number = 1) => {
     }
     const messages = (playerState.activeData || {}).messages || [];
     const bobjects = (playerState.activeData || {}).bobjects || [];
-    signals[numEmits].resolve({
+    signals[numEmits]?.resolve({
       topicNames,
       messages,
       bobjects,
@@ -415,7 +418,7 @@ describe("UserNodePlayer", () => {
         },
       });
 
-      const messagesArray = [upstreamMessages[0]];
+      const messagesArray = [upstreamFirst];
 
       const [done, nextDone] = setListenerHelper(userNodePlayer, 2);
 
@@ -480,9 +483,9 @@ describe("UserNodePlayer", () => {
 
       fakePlayer.emit({
         ...basicPlayerState,
-        bobjects: [upstreamMessages[0]],
+        bobjects: [upstreamFirst],
         messageOrder: "receiveTime",
-        currentTime: upstreamMessages[0].receiveTime,
+        currentTime: upstreamFirst.receiveTime,
         topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
         datatypes: { foo: { fields: [] } },
       });
@@ -507,9 +510,9 @@ describe("UserNodePlayer", () => {
 
       fakePlayer.emit({
         ...basicPlayerState,
-        bobjects: [upstreamMessages[0]],
+        bobjects: [upstreamFirst],
         messageOrder: "receiveTime",
-        currentTime: upstreamMessages[0].receiveTime,
+        currentTime: upstreamFirst.receiveTime,
         topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
         datatypes: { foo: { fields: [] } },
       });
@@ -519,7 +522,7 @@ describe("UserNodePlayer", () => {
       expect(messages).toEqual([
         {
           topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
-          receiveTime: upstreamMessages[0].receiveTime,
+          receiveTime: upstreamFirst.receiveTime,
           message: { custom_np_field: "abc", value: "bar" },
         },
       ]);
@@ -545,9 +548,9 @@ describe("UserNodePlayer", () => {
 
       fakePlayer.emit({
         ...basicPlayerState,
-        bobjects: [upstreamMessages[0]],
+        bobjects: [upstreamFirst],
         messageOrder: "receiveTime",
-        currentTime: upstreamMessages[0].receiveTime,
+        currentTime: upstreamFirst.receiveTime,
         topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
         datatypes: { foo: { fields: [] } },
       });
@@ -580,9 +583,9 @@ describe("UserNodePlayer", () => {
 
       fakePlayer.emit({
         ...basicPlayerState,
-        bobjects: [upstreamMessages[0]],
+        bobjects: [upstreamFirst],
         messageOrder: "receiveTime",
-        currentTime: upstreamMessages[0].receiveTime,
+        currentTime: upstreamFirst.receiveTime,
         topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
         datatypes,
       });
@@ -590,9 +593,9 @@ describe("UserNodePlayer", () => {
 
       fakePlayer.emit({
         ...basicPlayerState,
-        bobjects: [upstreamMessages[1]],
+        bobjects: [upstreamSecond],
         messageOrder: "receiveTime",
-        currentTime: upstreamMessages[1].receiveTime,
+        currentTime: upstreamSecond.receiveTime,
         topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
         datatypes,
       });
@@ -636,9 +639,9 @@ describe("UserNodePlayer", () => {
 
       fakePlayer.emit({
         ...basicPlayerState,
-        bobjects: [upstreamMessages[0]],
+        bobjects: [upstreamFirst],
         messageOrder: "receiveTime",
-        currentTime: upstreamMessages[0].receiveTime,
+        currentTime: upstreamFirst.receiveTime,
         topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
         datatypes: { foo: { fields: [] } },
       });
@@ -648,7 +651,7 @@ describe("UserNodePlayer", () => {
       expect(messages).toEqual([
         {
           topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
-          receiveTime: upstreamMessages[0].receiveTime,
+          receiveTime: upstreamFirst.receiveTime,
           message: { a: 1, b: 0.7483314773547883, g: 0.7483314773547883, r: 1 },
         },
       ]);
@@ -682,9 +685,9 @@ describe("UserNodePlayer", () => {
 
       fakePlayer.emit({
         ...basicPlayerState,
-        bobjects: [upstreamMessages[0]],
+        bobjects: [upstreamFirst],
         messageOrder: "receiveTime",
-        currentTime: upstreamMessages[0].receiveTime,
+        currentTime: upstreamFirst.receiveTime,
         topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
         datatypes: { foo: { fields: [] } },
       });
@@ -694,9 +697,9 @@ describe("UserNodePlayer", () => {
 
       fakePlayer.emit({
         ...basicPlayerState,
-        bobjects: [upstreamMessages[1]],
+        bobjects: [upstreamSecond],
         messageOrder: "receiveTime",
-        currentTime: upstreamMessages[1].receiveTime,
+        currentTime: upstreamSecond.receiveTime,
         topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
         datatypes: { foo: { fields: [] } },
       });
@@ -705,7 +708,7 @@ describe("UserNodePlayer", () => {
       expect(nextResult.messages).toEqual([
         {
           topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
-          receiveTime: upstreamMessages[1].receiveTime,
+          receiveTime: upstreamSecond.receiveTime,
           message: { custom_np_field: "abc", value: "baz" },
         },
       ]);
@@ -736,9 +739,9 @@ describe("UserNodePlayer", () => {
 
       fakePlayer.emit({
         ...basicPlayerState,
-        bobjects: [upstreamMessages[0]],
+        bobjects: [upstreamFirst],
         messageOrder: "receiveTime",
-        currentTime: upstreamMessages[0].receiveTime,
+        currentTime: upstreamFirst.receiveTime,
         topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
         datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
       });
@@ -799,9 +802,9 @@ describe("UserNodePlayer", () => {
 
       fakePlayer.emit({
         ...basicPlayerState,
-        bobjects: [upstreamMessages[0]],
+        bobjects: [upstreamFirst],
         messageOrder: "receiveTime",
-        currentTime: upstreamMessages[0].receiveTime,
+        currentTime: upstreamFirst.receiveTime,
         topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
         datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
       });
@@ -812,12 +815,12 @@ describe("UserNodePlayer", () => {
       expect(messages).toEqual([
         {
           topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
-          receiveTime: upstreamMessages[0].receiveTime,
+          receiveTime: upstreamFirst.receiveTime,
           message: { custom_np_field: "abc", value: "bar" },
         },
         {
           topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}2`,
-          receiveTime: upstreamMessages[0].receiveTime,
+          receiveTime: upstreamFirst.receiveTime,
           message: { custom_np_field: "abc", value: "bar" },
         },
       ]);
@@ -849,9 +852,9 @@ describe("UserNodePlayer", () => {
 
       fakePlayer.emit({
         ...basicPlayerState,
-        bobjects: [upstreamMessages[0]],
+        bobjects: [upstreamFirst],
         messageOrder: "receiveTime",
-        currentTime: upstreamMessages[0].receiveTime,
+        currentTime: upstreamFirst.receiveTime,
         topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
         datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
       });
@@ -860,9 +863,9 @@ describe("UserNodePlayer", () => {
 
       fakePlayer.emit({
         ...basicPlayerState,
-        bobjects: [upstreamMessages[1]],
+        bobjects: [upstreamSecond],
         messageOrder: "receiveTime",
-        currentTime: upstreamMessages[1].receiveTime,
+        currentTime: upstreamSecond.receiveTime,
         lastSeekTime: 1,
         topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
         datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
@@ -973,9 +976,9 @@ describe("UserNodePlayer", () => {
 
       fakePlayer.emit({
         ...basicPlayerState,
-        bobjects: [upstreamMessages[0]],
+        bobjects: [upstreamFirst],
         messageOrder: "receiveTime",
-        currentTime: upstreamMessages[0].receiveTime,
+        currentTime: upstreamFirst.receiveTime,
         topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
         datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
       });
@@ -1012,9 +1015,9 @@ describe("UserNodePlayer", () => {
 
       fakePlayer.emit({
         ...basicPlayerState,
-        bobjects: [upstreamMessages[0]],
+        bobjects: [upstreamFirst],
         messageOrder: "receiveTime",
-        currentTime: upstreamMessages[0].receiveTime,
+        currentTime: upstreamFirst.receiveTime,
         topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
         datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
       });
@@ -1025,9 +1028,9 @@ describe("UserNodePlayer", () => {
       userNodePlayer.setUserNodes({});
       fakePlayer.emit({
         ...basicPlayerState,
-        bobjects: [upstreamMessages[0]],
+        bobjects: [upstreamFirst],
         messageOrder: "receiveTime",
-        currentTime: upstreamMessages[0].receiveTime,
+        currentTime: upstreamFirst.receiveTime,
         topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
         datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
       });
@@ -1124,9 +1127,9 @@ describe("UserNodePlayer", () => {
 
         fakePlayer.emit({
           ...basicPlayerState,
-          bobjects: [upstreamMessages[0]],
+          bobjects: [upstreamFirst],
           messageOrder: "receiveTime",
-          currentTime: upstreamMessages[0].receiveTime,
+          currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
           datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
         });
@@ -1166,9 +1169,9 @@ describe("UserNodePlayer", () => {
 
         fakePlayer.emit({
           ...basicPlayerState,
-          bobjects: [upstreamMessages[0]],
+          bobjects: [upstreamFirst],
           messageOrder: "receiveTime",
-          currentTime: upstreamMessages[0].receiveTime,
+          currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
           datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
         });
@@ -1221,9 +1224,9 @@ describe("UserNodePlayer", () => {
 
         fakePlayer.emit({
           ...basicPlayerState,
-          bobjects: [upstreamMessages[0]],
+          bobjects: [upstreamFirst],
           messageOrder: "receiveTime",
-          currentTime: upstreamMessages[0].receiveTime,
+          currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
           datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
         });
@@ -1261,9 +1264,9 @@ describe("UserNodePlayer", () => {
 
         fakePlayer.emit({
           ...basicPlayerState,
-          bobjects: [upstreamMessages[0]],
+          bobjects: [upstreamFirst],
           messageOrder: "receiveTime",
-          currentTime: upstreamMessages[0].receiveTime,
+          currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
           datatypes: exampleDatatypes,
         });
@@ -1295,9 +1298,9 @@ describe("UserNodePlayer", () => {
 
         const playerState: PlayerStateActiveData = {
           ...basicPlayerState,
-          bobjects: [upstreamMessages[0]],
+          bobjects: [upstreamFirst],
           messageOrder: "receiveTime",
-          currentTime: upstreamMessages[0].receiveTime,
+          currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
           datatypes: { foo: { fields: [] } },
         };
@@ -1307,7 +1310,7 @@ describe("UserNodePlayer", () => {
         expect(messages).toEqual([
           {
             topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
-            receiveTime: upstreamMessages[0].receiveTime,
+            receiveTime: upstreamFirst.receiveTime,
             message: { custom_np_field: "aaa", value: "aaa" },
           },
         ]);
@@ -1319,7 +1322,7 @@ describe("UserNodePlayer", () => {
         expect(messages2).toEqual([
           {
             topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
-            receiveTime: upstreamMessages[0].receiveTime,
+            receiveTime: upstreamFirst.receiveTime,
             message: { custom_np_field: "bbb", value: "bbb" },
           },
         ]);
@@ -1345,10 +1348,10 @@ describe("UserNodePlayer", () => {
 
       fakePlayer.emit({
         ...basicPlayerState,
-        messages: [parsedUpstreamMessages[0]],
-        bobjects: [upstreamMessages[0]],
+        messages: [parsedFirst],
+        bobjects: [upstreamFirst],
         messageOrder: "receiveTime",
-        currentTime: upstreamMessages[0].receiveTime,
+        currentTime: upstreamFirst.receiveTime,
         topics: [{ name: "/np_input", datatype: "foo" }],
         datatypes,
       });
@@ -1362,14 +1365,14 @@ describe("UserNodePlayer", () => {
       const { messages, bobjects } = await subscribeAndEmitFromPlayer([
         { topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`, format: "bobjects" },
       ]);
-      expect(messages).toEqual([parsedUpstreamMessages[0]]);
+      expect(messages).toEqual([parsedFirst]);
 
       expect(bobjects).toHaveLength(2);
       expect(bobjects.map(parseBobjectMessage)).toEqual([
-        parsedUpstreamMessages[0],
+        parsedFirst,
         {
           topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
-          receiveTime: upstreamMessages[0].receiveTime,
+          receiveTime: upstreamFirst.receiveTime,
           message: { custom_np_field: "abc", value: "bar" },
         },
       ]);
@@ -1380,12 +1383,12 @@ describe("UserNodePlayer", () => {
         { topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`, format: "bobjects" },
       ]);
       expect(messages.length).toEqual(1);
-      expect(messages).toEqual([parsedUpstreamMessages[0]]);
+      expect(messages).toEqual([parsedFirst]);
 
       expect(bobjects.length).toEqual(2);
       expect(
         bobjects.map(parseBobjectMessage).filter(({ topic }) => topic !== "/webviz_node/1"),
-      ).toEqual([parsedUpstreamMessages[0]]);
+      ).toEqual([parsedFirst]);
     });
 
     it("emits bobjects and parsedMessages when subscribed to", async () => {
@@ -1396,10 +1399,10 @@ describe("UserNodePlayer", () => {
 
       expect(messages.length).toEqual(2);
       expect(messages).toEqual([
-        parsedUpstreamMessages[0],
+        parsedFirst,
         {
           topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
-          receiveTime: upstreamMessages[0].receiveTime,
+          receiveTime: upstreamFirst.receiveTime,
           message: { custom_np_field: "abc", value: "bar" },
         },
       ]);
@@ -1410,7 +1413,7 @@ describe("UserNodePlayer", () => {
       ).toEqual([
         {
           topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
-          receiveTime: upstreamMessages[0].receiveTime,
+          receiveTime: upstreamFirst.receiveTime,
           message: { custom_np_field: "abc", value: "bar" },
         },
       ]);
@@ -1467,14 +1470,14 @@ describe("UserNodePlayer", () => {
         { topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`, format: "bobjects" },
         { topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`, format: "bobjects" },
       ]);
-      expect(messages).toEqual([parsedUpstreamMessages[0]]);
+      expect(messages).toEqual([parsedFirst]);
 
       expect(
         bobjects.map(parseBobjectMessage).filter(({ topic }) => topic === "/webviz_node/1"),
       ).toEqual([
         {
           topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
-          receiveTime: upstreamMessages[0].receiveTime,
+          receiveTime: upstreamFirst.receiveTime,
           message: { custom_np_field: "abc", value: "bar" },
         },
       ]);
@@ -1500,9 +1503,9 @@ describe("UserNodePlayer", () => {
       emit = () => {
         fakePlayer.emit({
           ...basicPlayerState,
-          bobjects: [upstreamMessages[0]],
+          bobjects: [upstreamFirst],
           messageOrder: "receiveTime",
-          currentTime: upstreamMessages[0].receiveTime,
+          currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
           datatypes: { foo: { fields: [] } },
         });
@@ -1512,7 +1515,7 @@ describe("UserNodePlayer", () => {
         expect(messages).toEqual([
           {
             topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}0`,
-            receiveTime: upstreamMessages[0].receiveTime,
+            receiveTime: upstreamFirst.receiveTime,
             message: { key: sourceIndex },
           },
         ]);

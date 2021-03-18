@@ -77,13 +77,13 @@ export function convertToRangeView(points: Point[], range: number, makeColors: b
   // transforms for free
   let maxRange = Number.MIN_VALUE;
   if (makeColors) {
-    for (let i = 0; i < points.length; ++i) {
-      maxRange = Math.max(maxRange, norm(points[i]));
+    for (const point of points) {
+      maxRange = Math.max(maxRange, norm(point));
     }
   }
   // actually move the points and generate colors if specified
   for (let i = 0; i < points.length; ++i) {
-    const pt = points[i];
+    const pt = points[i]!;
     if (makeColors) {
       const dist = norm(pt);
       if (dist <= range) {

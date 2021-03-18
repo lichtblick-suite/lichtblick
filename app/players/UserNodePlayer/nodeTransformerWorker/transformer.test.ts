@@ -133,8 +133,8 @@ describe("pipeline", () => {
     ])("returns errors for badly formatted inputs", (sourceCode, errorCategory) => {
       const { diagnostics } = compose(compile, getInputTopics)({ ...baseNodeData, sourceCode }, []);
       expect(diagnostics.length).toEqual(1);
-      expect(diagnostics[0].severity).toEqual(DiagnosticSeverity.Error);
-      expect(diagnostics[0].code).toEqual(errorCategory);
+      expect(diagnostics[0]?.severity).toEqual(DiagnosticSeverity.Error);
+      expect(diagnostics[0]?.code).toEqual(errorCategory);
     });
   });
   describe("getOutputTopics", () => {
@@ -152,16 +152,16 @@ describe("pipeline", () => {
     ])("returns errors for badly formatted output topics", (sourceCode) => {
       const { diagnostics } = getOutputTopic({ ...baseNodeData, sourceCode });
       expect(diagnostics.length).toEqual(1);
-      expect(diagnostics[0].severity).toEqual(DiagnosticSeverity.Error);
-      expect(diagnostics[0].code).toEqual(ErrorCodes.OutputTopicChecker.NO_OUTPUTS);
+      expect(diagnostics[0]?.severity).toEqual(DiagnosticSeverity.Error);
+      expect(diagnostics[0]?.code).toEqual(ErrorCodes.OutputTopicChecker.NO_OUTPUTS);
     });
   });
   describe("validateOutputTopic", () => {
     it.each(["/bad_prefix"])("errs on bad topic prefixes", (outputTopic) => {
       const { diagnostics } = validateOutputTopic({ ...baseNodeData, outputTopic });
       expect(diagnostics.length).toEqual(1);
-      expect(diagnostics[0].severity).toEqual(DiagnosticSeverity.Error);
-      expect(diagnostics[0].code).toEqual(ErrorCodes.OutputTopicChecker.BAD_PREFIX);
+      expect(diagnostics[0]?.severity).toEqual(DiagnosticSeverity.Error);
+      expect(diagnostics[0]?.code).toEqual(ErrorCodes.OutputTopicChecker.BAD_PREFIX);
     });
   });
   describe("validateInputTopics", () => {
@@ -174,8 +174,8 @@ describe("pipeline", () => {
         topics.map((name) => ({ name, datatype: "" })),
       );
       expect(diagnostics.length).toEqual(1);
-      expect(diagnostics[0].severity).toEqual(DiagnosticSeverity.Error);
-      expect(diagnostics[0].code).toEqual(ErrorCodes.InputTopicsChecker.NO_TOPIC_AVAIL);
+      expect(diagnostics[0]?.severity).toEqual(DiagnosticSeverity.Error);
+      expect(diagnostics[0]?.code).toEqual(ErrorCodes.InputTopicsChecker.NO_TOPIC_AVAIL);
     });
     it("errs when a node tries to input another user node", () => {
       const { diagnostics } = validateInputTopics(
@@ -183,8 +183,8 @@ describe("pipeline", () => {
         [],
       );
       expect(diagnostics.length).toEqual(1);
-      expect(diagnostics[0].severity).toEqual(DiagnosticSeverity.Error);
-      expect(diagnostics[0].code).toEqual(ErrorCodes.InputTopicsChecker.CIRCULAR_IMPORT);
+      expect(diagnostics[0]?.severity).toEqual(DiagnosticSeverity.Error);
+      expect(diagnostics[0]?.code).toEqual(ErrorCodes.InputTopicsChecker.CIRCULAR_IMPORT);
     });
   });
 
@@ -194,7 +194,7 @@ describe("pipeline", () => {
         { ...baseNodeData, name: "/bad_name" },
         [],
       );
-      expect(diagnostics[0].code).toEqual(ErrorCodes.Other.FILENAME);
+      expect(diagnostics[0]?.code).toEqual(ErrorCodes.Other.FILENAME);
     });
     it.each(["const x: string = 'hello webviz'", "const num: number = 1222"])(
       "can compile",
@@ -254,7 +254,7 @@ describe("pipeline", () => {
       ])("throws errors when user uses incorrect arguments with log function", (sourceCode) => {
         const { diagnostics } = compile({ ...baseNodeData, sourceCode });
         expect(diagnostics.length).toEqual(1);
-        const { source, severity } = diagnostics[0];
+        const { source, severity } = diagnostics[0]!;
         expect(source).toEqual(Sources.Typescript);
         expect(severity).toEqual(DiagnosticSeverity.Error);
       });
@@ -265,7 +265,7 @@ describe("pipeline", () => {
       ({ sourceCode, errorCode }) => {
         const { diagnostics } = compile({ ...baseNodeData, sourceCode });
         expect(diagnostics.length).toEqual(1);
-        const { source, message, severity, code } = diagnostics[0];
+        const { source, message, severity, code } = diagnostics[0]!;
         expect(code).toEqual(errorCode);
         expect(source).toEqual("Typescript");
         expect(typeof message).toEqual("string");
@@ -291,7 +291,7 @@ describe("pipeline", () => {
     ])("catches semantic errors", ({ sourceCode, errorCode }) => {
       const { diagnostics } = compile({ ...baseNodeData, sourceCode });
       expect(diagnostics.length).toEqual(1);
-      const { source, message, severity, code } = diagnostics[0];
+      const { source, message, severity, code } = diagnostics[0]!;
       expect(code).toEqual(errorCode);
       expect(source).toEqual("Typescript");
       expect(typeof message).toEqual("string");
@@ -303,7 +303,7 @@ describe("pipeline", () => {
     ])("catches syntactic errors", ({ sourceCode, errorCode }) => {
       const { diagnostics } = compile({ ...baseNodeData, sourceCode });
       expect(diagnostics.length).toEqual(1);
-      const { source, message, severity, code } = diagnostics[0];
+      const { source, message, severity, code } = diagnostics[0]!;
       expect(code).toEqual(errorCode);
       expect(source).toEqual("Typescript");
       expect(typeof message).toEqual("string");

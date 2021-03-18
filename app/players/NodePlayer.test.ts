@@ -106,16 +106,13 @@ describe("NodePlayer", () => {
       totalBytesReceived: 1234,
     });
     expect(messages).toHaveLength(1);
-    const { activeData } = messages[0];
+    const { activeData } = messages[0]!;
     expect(activeData).not.toBeUndefined();
-    if (!activeData) {
-      throw new Error("satisfy flow");
-    }
-    expect(activeData.datatypes).toEqual({
+    expect(activeData?.datatypes).toEqual({
       test: testMessageDefinition,
       foo: { fields: [] },
     });
-    expect(activeData.topics).toEqual([
+    expect(activeData?.topics).toEqual([
       { name: "/input/foo", datatype: "foo" },
       { name: "/input/bar", datatype: "bar" },
       { name: "/webviz/test", datatype: "test" },
@@ -158,13 +155,10 @@ describe("NodePlayer", () => {
       playerWarnings: {},
       totalBytesReceived: 1234,
     });
-    const { activeData } = messages[0];
+    const { activeData } = messages[0]!;
     expect(activeData).not.toBeUndefined();
-    if (!activeData) {
-      throw new Error("satisfy flow");
-    }
-    expect(activeData.datatypes).toEqual({ foo: { fields: [] } });
-    expect(activeData.topics).toEqual([
+    expect(activeData?.datatypes).toEqual({ foo: { fields: [] } });
+    expect(activeData?.topics).toEqual([
       { name: "/input/foo", datatype: "foo" },
       { name: "/input/bar", datatype: "bar" },
     ]);
@@ -198,16 +192,13 @@ describe("NodePlayer", () => {
       playerWarnings: {},
       totalBytesReceived: 1234,
     });
-    const { activeData } = messages[0];
+    const { activeData } = messages[0]!;
     expect(activeData).not.toBeUndefined();
-    if (!activeData) {
-      throw new Error("satisfy flow");
-    }
-    expect(activeData.datatypes).toEqual({
+    expect(activeData?.datatypes).toEqual({
       test: testMessageDefinition,
       foo: { fields: [] },
     });
-    expect(activeData.topics).toEqual([
+    expect(activeData?.topics).toEqual([
       { name: "/input/foo", datatype: "foo" },
       { name: "/input/bar", datatype: "bar" },
       { name: "/webviz/test", datatype: "test" },
@@ -341,7 +332,7 @@ describe("NodePlayer", () => {
       messages: upstreamMessages,
       bobjects: [],
       messageOrder: "receiveTime",
-      currentTime: upstreamMessages[0].receiveTime,
+      currentTime: upstreamMessages[0]!.receiveTime,
       startTime: { sec: 0, nsec: 0 },
       endTime: { sec: 1, nsec: 0 },
       isPlaying: true,
@@ -395,7 +386,7 @@ describe("NodePlayer", () => {
       messages: upstreamMessages,
       bobjects: [],
       messageOrder: "receiveTime",
-      currentTime: upstreamMessages[0].receiveTime,
+      currentTime: upstreamMessages[0]!.receiveTime,
       startTime: { sec: 0, nsec: 0 },
       endTime: { sec: 1, nsec: 0 },
       isPlaying: true,
@@ -427,10 +418,10 @@ describe("NodePlayer", () => {
     });
     nodePlayer.setSubscriptions([{ topic: "/webviz/test", format: "parsedMessages" }]);
     fakePlayer.emit({
-      messages: [upstreamMessages[0]],
+      messages: [upstreamMessages[0]!],
       bobjects: [],
       messageOrder: "receiveTime",
-      currentTime: upstreamMessages[0].receiveTime,
+      currentTime: upstreamMessages[0]!.receiveTime,
       startTime: { sec: 0, nsec: 0 },
       endTime: { sec: 1, nsec: 0 },
       isPlaying: true,
@@ -444,10 +435,10 @@ describe("NodePlayer", () => {
     });
 
     fakePlayer.emit({
-      messages: [upstreamMessages[1]],
+      messages: [upstreamMessages[1]!],
       bobjects: [],
       messageOrder: "receiveTime",
-      currentTime: upstreamMessages[1].receiveTime,
+      currentTime: upstreamMessages[1]!.receiveTime,
       startTime: { sec: 0, nsec: 0 },
       endTime: { sec: 1, nsec: 0 },
       isPlaying: true,
@@ -516,7 +507,7 @@ describe("NodePlayer", () => {
         messages: upstreamMessages,
         bobjects: emittedBobjects,
         messageOrder: "receiveTime",
-        currentTime: upstreamMessages[0].receiveTime,
+        currentTime: upstreamMessages[0]!.receiveTime,
         startTime: { sec: 0, nsec: 0 },
         endTime: { sec: 1, nsec: 0 },
         isPlaying: true,
@@ -540,12 +531,12 @@ describe("NodePlayer", () => {
       ]);
       expect(parsedMessages).toHaveLength(2);
       expect(bobjects).toHaveLength(4);
-      expect(deepParse(bobjects[0].message)).toEqual({
+      expect(deepParse(bobjects[0]?.message)).toEqual({
         payload: "bar",
         callCount: 1,
       });
 
-      expect(deepParse(bobjects[2].message)).toEqual({
+      expect(deepParse(bobjects[2]?.message)).toEqual({
         payload: "baz",
         callCount: 2,
       });
@@ -594,13 +585,13 @@ describe("NodePlayer", () => {
       expect(parsedMessages).toHaveLength(4);
       expect(bobjects).toHaveLength(4);
 
-      [parsedMessages[1].message, deepParse(bobjects[0].message)].forEach((message) => {
+      [parsedMessages[1]?.message, deepParse(bobjects[0]?.message)].forEach((message) => {
         expect(message).toEqual({
           payload: "bar",
           callCount: 1,
         });
       });
-      [parsedMessages[3].message, deepParse(bobjects[2].message)].forEach((message) => {
+      [parsedMessages[3]?.message, deepParse(bobjects[2]?.message)].forEach((message) => {
         expect(message).toEqual({
           payload: "baz",
           callCount: 2,

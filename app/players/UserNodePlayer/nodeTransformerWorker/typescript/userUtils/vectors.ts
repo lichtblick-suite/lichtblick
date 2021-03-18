@@ -6,10 +6,9 @@ type vec3 = [number, number, number];
  * Dot-product of two vectors.
  */
 export function dot(vec1: number[], vec2: number[]) {
-  let i;
   let ret = 0.0;
-  for (i = 0; i < vec1.length; ++i) {
-    ret += vec1[i] * vec2[i];
+  for (let i = 0; i < vec1.length && i < vec2.length; ++i) {
+    ret += vec1[i]! * vec2[i]!;
   }
   return ret;
 }
@@ -63,14 +62,18 @@ export function scalarMultiply(vector: number[], scalar: number) {
 
 /*
  * Sums an array of vectors.
+ * NOTE: all the vector arrays must be at least the length of the first vector
  */
 export function vectorAddition(vectors: number[][]): number[] {
-  let i;
-  const ret = vectors[0].slice();
-  for (i = 1; i < vectors.length; ++i) {
-    let j;
-    for (j = 0; j < ret.length; ++j) {
-      ret[j] += vectors[i][j];
+  const first = vectors[0];
+  if (!first) {
+    throw new Error("vectorAddition requires vectors");
+  }
+
+  const ret = first.slice();
+  for (let i = 1; i < vectors.length; ++i) {
+    for (let j = 0; j < ret.length; ++j) {
+      ret[j] += vectors[i]![j]!;
     }
   }
   return ret;

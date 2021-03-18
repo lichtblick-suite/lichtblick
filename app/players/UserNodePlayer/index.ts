@@ -395,7 +395,7 @@ export default class UserNodePlayer implements Player {
     const nodesByOutputTopic = groupBy(nodeRegistrations, ({ output }) => output.name);
     const [validNodeRegistrations, duplicateNodeRegistrations] = partition(
       nodeRegistrations,
-      (nodeReg) => nodeReg === nodesByOutputTopic[nodeReg.output.name][0],
+      (nodeReg) => nodeReg === nodesByOutputTopic[nodeReg.output.name]?.[0],
     );
     duplicateNodeRegistrations.forEach(({ nodeId, nodeData }) => {
       this._setUserNodeDiagnostics(nodeId, [

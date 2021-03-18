@@ -150,7 +150,7 @@ describe("RandomAccessPlayer", () => {
       },
     ]);
     // make sure capabilities don't change from one message to another
-    expect(messages[0].capabilities).toBe(messages[1].capabilities);
+    expect(messages[0]?.capabilities).toBe(messages[1]?.capabilities);
 
     source.close();
   });

@@ -105,18 +105,5 @@
   "app/panels/ThreeDimensionalViz/utils/groupingUtils.ts",
   "app/panels/TwoDimensionalPlot/index.stories.tsx",
   "app/panels/diagnostics/DiagnosticStatus.tsx",
-  "app/panels/diagnostics/DiagnosticSummary.tsx",
-  "app/players/NodePlayer.test.ts",
-  "app/players/OrderedStampPlayer.test.ts",
-  "app/players/RandomAccessPlayer.test.ts",
-  "app/players/RosbridgePlayer.test.ts",
-  "app/players/UserNodePlayer/index.test.ts",
-  "app/players/UserNodePlayer/index.ts",
-  "app/players/UserNodePlayer/nodeTransformerWorker/transformer.test.ts",
-  "app/players/UserNodePlayer/nodeTransformerWorker/typegen.test.ts",
-  "app/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/pointClouds.ts",
-  "app/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/readers.ts",
-  "app/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/vectors.ts",
-  "app/players/automatedRun/performanceMeasuringClient.ts",
-  "app/players/nodes.ts"
+  "app/panels/diagnostics/DiagnosticSummary.tsx"
 ]

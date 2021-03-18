@@ -213,7 +213,7 @@ describe("typegen", () => {
 
           const { diagnostics } = compile({
             ...baseNodeData,
-            sourceCode: formattedTypes["std_msgs/Data"],
+            sourceCode: formattedTypes["std_msgs/Data"] ?? "",
           });
           expect(diagnostics).toEqual([]);
         });

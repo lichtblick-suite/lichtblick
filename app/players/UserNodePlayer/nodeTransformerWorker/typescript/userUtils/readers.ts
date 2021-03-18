@@ -20,10 +20,15 @@ export class Float32Reader implements FieldReader {
   }
 
   read(data: Uint8Array, index: number): number {
-    this.view.setUint8(0, data[index + this.offset]);
-    this.view.setUint8(1, data[index + this.offset + 1]);
-    this.view.setUint8(2, data[index + this.offset + 2]);
-    this.view.setUint8(3, data[index + this.offset + 3]);
+    const base = index + this.offset;
+    const size = 4;
+    if (data.length < base + size) {
+      throw new Error("cannot read Float32 from data - not enough data");
+    }
+    this.view.setUint8(0, data[base]!);
+    this.view.setUint8(1, data[base + 1]!);
+    this.view.setUint8(2, data[base + 2]!);
+    this.view.setUint8(3, data[base + 3]!);
     return this.view.getFloat32(0, true);
   }
 }
@@ -38,10 +43,15 @@ export class Int32Reader implements FieldReader {
   }
 
   read(data: Uint8Array, index: number): number {
-    this.view.setUint8(0, data[index + this.offset]);
-    this.view.setUint8(1, data[index + this.offset + 1]);
-    this.view.setUint8(2, data[index + this.offset + 2]);
-    this.view.setUint8(3, data[index + this.offset + 3]);
+    const base = index + this.offset;
+    const size = 4;
+    if (data.length < base + size) {
+      throw new Error("cannot read Int32 from data - not enough data");
+    }
+    this.view.setUint8(0, data[base]!);
+    this.view.setUint8(1, data[base + 1]!);
+    this.view.setUint8(2, data[base + 2]!);
+    this.view.setUint8(3, data[base + 3]!);
     return this.view.getInt32(0, true);
   }
 }
@@ -56,8 +66,13 @@ export class Uint16Reader implements FieldReader {
   }
 
   read(data: Uint8Array, index: number): number {
-    this.view.setUint8(0, data[index + this.offset]);
-    this.view.setUint8(1, data[index + this.offset + 1]);
+    const base = index + this.offset;
+    const size = 2;
+    if (data.length < base + size) {
+      throw new Error("cannot read Uint16 from data - not enough data");
+    }
+    this.view.setUint8(0, data[base]!);
+    this.view.setUint8(1, data[base + 1]!);
     return this.view.getUint16(0, true);
   }
 }
@@ -69,7 +84,12 @@ export class Uint8Reader implements FieldReader {
   }
 
   read(data: Uint8Array, index: number): number {
-    return data[index + this.offset];
+    const base = index + this.offset;
+    const size = 1;
+    if (data.length < base + size) {
+      throw new Error("cannot read Uint8 from data - not enough data");
+    }
+    return data[base]!;
   }
 }
 
@@ -83,8 +103,13 @@ export class Int16Reader implements FieldReader {
   }
 
   read(data: Uint8Array, index: number): number {
-    this.view.setUint8(0, data[index + this.offset]);
-    this.view.setUint8(1, data[index + this.offset + 1]);
+    const base = index + this.offset;
+    const size = 2;
+    if (data.length < base + size) {
+      throw new Error("cannot read Int16 from data - not enough data");
+    }
+    this.view.setUint8(0, data[base]!);
+    this.view.setUint8(1, data[base + 1]!);
     return this.view.getInt16(0, true);
   }
 }

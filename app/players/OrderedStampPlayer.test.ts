@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import assert from "assert";
 import { TimeUtil } from "rosbag";
 
 import FakePlayer from "@foxglove-studio/app/components/MessagePipeline/FakePlayer";
@@ -169,12 +170,9 @@ describe("OrderedStampPlayer", () => {
       currentTime: fromSec(10),
       bobjects: upstreamBobjects,
     });
-    const bobjects = states[0].activeData?.bobjects;
-    const topics = states[0].activeData?.topics;
-
-    if (bobjects == undefined) {
-      throw new Error("Satisfy flow.");
-    }
+    const bobjects = states[0]?.activeData?.bobjects;
+    const topics = states[0]?.activeData?.topics;
+    assert(bobjects);
     expect(
       bobjects.map(({ receiveTime, message, topic }) => ({
         topic,

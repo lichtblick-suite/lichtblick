@@ -227,7 +227,7 @@ class PerformanceMeasuringClient {
       }
       // The 100th percentile (i.e. max) frame time is at index (length - 1).
       const index = Math.round((percentile / 100) * (sortedFrameLengths.length - 1));
-      return sortedFrameLengths[index];
+      return sortedFrameLengths[index] ?? 0;
     };
     const frameTimePercentiles = [50, 90, 95, 99, 100].map((percentile) => ({
       percentile,
