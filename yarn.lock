@@ -1815,6 +1815,7 @@ __metadata:
     "@types/tinycolor2": 1.4.2
     "@types/url-search-params": 1.1.0
     "@types/uuid": 8.3.0
+    "@types/wicg-file-system-access": 2020.9.1
     "@types/ws": 7.4.0
     "@wojtekmaj/enzyme-adapter-react-17": 0.4.1
     argparse: 2.0.1
@@ -4991,6 +4992,13 @@ __metadata:
   version: 1.3.2
   resolution: "@types/which@npm:1.3.2"
   checksum: ffb779f93f76c0f79c0c1d7f9f36f5c396a8b04b5214cd905a0c22a16555f41d689940aa642fb23fd040e648a5ae7e15e5dcc2fd7d6c44608f5c3dabec9e02e7
+  languageName: node
+  linkType: hard
+
+"@types/wicg-file-system-access@npm:2020.9.1":
+  version: 2020.9.1
+  resolution: "@types/wicg-file-system-access@npm:2020.9.1"
+  checksum: 9703bed51ac2c9755bb89cedbc2efe9bb275c9de8e9d94a2e254d14bc03227385afe59a3e0c55c62f5a40a42e2012602c96a7f3409e977bd585f850a5708b752
   languageName: node
   linkType: hard
 

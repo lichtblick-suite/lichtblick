@@ -28,4 +28,10 @@ export default {
     developmentDefault: false,
     productionDefault: false,
   },
+  layoutManagement: {
+    name: "Manage Layouts",
+    description: `Manage layouts via the layout menu. Add/Remove/Copy layouts. Import/Export layouts to files.`,
+    developmentDefault: false,
+    productionDefault: false,
+  },
 } as FeatureDescriptions;

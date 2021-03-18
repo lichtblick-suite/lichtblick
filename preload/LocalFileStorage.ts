@@ -82,9 +82,18 @@ export default class LocalFileStorage implements Storage {
       throw new Error(`datastore (${datastore}) contains invalid characters`);
     }
 
+    const datastoresDir = path.join(basePath, "studio-datastores");
+    try {
+      await fs.mkdir(datastoresDir);
+    } catch (err) {
+      if (err.code !== "EEXIST") {
+        throw err;
+      }
+    }
+
     // There are other files and folders in the userDataPath. To avoid conflict we
     // store our datastores under a studio specific directory
-    const datastoreDir = path.join(basePath, "studio-datastores", datastore);
+    const datastoreDir = path.join(datastoresDir, datastore);
     try {
       await fs.mkdir(datastoreDir);
     } catch (err) {

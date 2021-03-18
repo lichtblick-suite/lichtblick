@@ -27,6 +27,7 @@ import GlobalKeyListener from "@foxglove-studio/app/components/GlobalKeyListener
 import GlobalVariablesMenu from "@foxglove-studio/app/components/GlobalVariablesMenu";
 import { WrappedIcon } from "@foxglove-studio/app/components/Icon";
 import LayoutMenu from "@foxglove-studio/app/components/LayoutMenu";
+import LayoutStorageReduxAdapter from "@foxglove-studio/app/components/LayoutStorageReduxAdapter";
 import { NativeFileMenuPlayerSelection } from "@foxglove-studio/app/components/NativeFileMenuPlayerSelection";
 import NotificationDisplay from "@foxglove-studio/app/components/NotificationDisplay";
 import PanelLayout from "@foxglove-studio/app/components/PanelLayout";
@@ -37,6 +38,7 @@ import ShortcutsModal from "@foxglove-studio/app/components/ShortcutsModal";
 import TinyConnectionPicker from "@foxglove-studio/app/components/TinyConnectionPicker";
 import Toolbar from "@foxglove-studio/app/components/Toolbar";
 import ExperimentalFeaturesLocalStorageProvider from "@foxglove-studio/app/context/ExperimentalFeaturesLocalStorageProvider";
+import OsContextLayoutStorageProvider from "@foxglove-studio/app/context/OsContextLayoutStorageProvider";
 import {
   PlayerSourceDefinition,
   usePlayerSelection,
@@ -145,6 +147,8 @@ function Root() {
 }
 
 export default function App(): ReactElement {
+  const globalStore = getGlobalStore();
+
   const playerSources: PlayerSourceDefinition[] = [
     {
       name: "Bag File",
@@ -161,13 +165,16 @@ export default function App(): ReactElement {
   ];
 
   return (
-    <Provider store={getGlobalStore()}>
+    <Provider store={globalStore}>
       <ExperimentalFeaturesLocalStorageProvider features={experimentalFeatures}>
         <ErrorBoundary>
           <PlayerManager playerSources={playerSources}>
             <NativeFileMenuPlayerSelection />
             <DndProvider backend={HTML5Backend}>
-              <Root />
+              <OsContextLayoutStorageProvider>
+                <Root />
+                <LayoutStorageReduxAdapter />
+              </OsContextLayoutStorageProvider>
             </DndProvider>
           </PlayerManager>
         </ErrorBoundary>

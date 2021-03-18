@@ -15,12 +15,15 @@ import { useState } from "react";
 
 import LayoutIcon from "@foxglove-studio/app/assets/layout.svg";
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
+import ExperimentalLayoutMenu from "@foxglove-studio/app/components/ExperimentalLayoutMenu";
 import Flex from "@foxglove-studio/app/components/Flex";
 import { WrappedIcon } from "@foxglove-studio/app/components/Icon";
 import LayoutModal from "@foxglove-studio/app/components/LayoutModal";
 import Menu, { Item } from "@foxglove-studio/app/components/Menu";
+import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 
-export default function LayoutMenu() {
+// default import/export menu with no layout management
+function ImportExportMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [showLayoutModal, setShowLayoutModal] = useState(false);
 
@@ -47,4 +50,15 @@ export default function LayoutMenu() {
       </ChildToggle>
     </>
   );
+}
+
+export default function LayoutMenu() {
+  const enableLayoutManagement = useExperimentalFeature("layoutManagement");
+
+  // show existing import/export menu
+  if (!enableLayoutManagement) {
+    return <ImportExportMenu />;
+  }
+
+  return <ExperimentalLayoutMenu />;
 }

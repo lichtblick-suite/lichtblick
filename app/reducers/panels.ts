@@ -93,6 +93,8 @@ export const defaultPlaybackConfig: PlaybackConfig = {
 };
 
 export type PanelsState = {
+  id?: string;
+  name?: string;
   layout?: MosaicNode;
   // We store config for each panel in a hash keyed by the panel id.
   // This should at some point be renamed to `config` or `configById` or so,
