@@ -91,7 +91,6 @@ export default class Select extends React.Component<Props, State> {
     });
     const { body } = document;
     const { el } = this;
-    // satisfy flow
     if (!body || !el) {
       return;
     }

@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import assert from "assert";
 import { MessageReader, parseMessageDefinition } from "rosbag";
 
 import BagDataProvider from "@foxglove-studio/app/dataProviders/BagDataProvider";
@@ -51,10 +52,7 @@ describe("parsedMessageCache", () => {
     const { rosBinaryMessages } = await provider.getMessages(start, end, {
       rosBinaryMessages: ["/tf"],
     });
-    if (rosBinaryMessages == undefined) {
-      throw new Error("Satisfy flow");
-    }
-
+    assert(rosBinaryMessages);
     const cache = new ParsedMessageCache();
     const parsedMessages1 = cache.parseMessages(rosBinaryMessages, messageReadersByTopic);
     const parsedMessages2 = cache.parseMessages(rosBinaryMessages, messageReadersByTopic);

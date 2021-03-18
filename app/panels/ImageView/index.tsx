@@ -367,7 +367,7 @@ function ImageView(props: Props) {
       const imageTopics = imageTopicsByNamespace.get(group);
       if (!imageTopics) {
         return ReactNull;
-      } // satisfy flow
+      }
       imageTopics.sort(naturalSort("name"));
 
       // place rectified topic above other imageTopics

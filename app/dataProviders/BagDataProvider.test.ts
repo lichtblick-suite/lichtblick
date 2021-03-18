@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import assert from "assert";
 import { TimeUtil } from "rosbag";
 
 import BagDataProvider, {
@@ -145,9 +146,8 @@ describe("BagDataProvider", () => {
     });
     expect(bobjects).toBe(undefined);
     expect(parsedMessages).toBe(undefined);
-    if (rosBinaryMessages == undefined) {
-      throw new Error("Satisfy flow");
-    }
+    expect(rosBinaryMessages).toBeTruthy();
+    assert(rosBinaryMessages);
     const timestamps = rosBinaryMessages.map(({ receiveTime }) => receiveTime);
     const sortedTimestamps = [...timestamps];
     sortedTimestamps.sort(TimeUtil.compare);

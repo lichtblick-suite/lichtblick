@@ -86,7 +86,7 @@ export default class Tooltip extends React.Component<Props, State> {
     // extract defaultShown and defaultMousePosition from props since we specify those explicitly
     const { defaultShown: _, defaultMousePosition: __, ...rest } = props ?? {};
     const container = getPortal();
-    // satisfy flow
+    // Don't throw since its just a tooltip
     if (!container) {
       console.warn("Could not get tooltip portal");
       return ReactNull;

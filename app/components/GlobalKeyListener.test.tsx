@@ -42,9 +42,6 @@ describe("GlobalKeyListener", () => {
     redoActionCreator = jest.spyOn(layoutHistoryActions, "redoLayoutChange");
     undoActionCreator = jest.spyOn(layoutHistoryActions, "undoLayoutChange");
     const wrapper = document.createElement("div");
-    if (!document.body) {
-      throw new Error("Satisfy flow: Need a document for this test.");
-    }
     document.body.appendChild(wrapper);
     mount(
       <Context store={getStore()}>

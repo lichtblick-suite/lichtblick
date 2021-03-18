@@ -95,7 +95,6 @@ function getState(hasHeaderStamp?: any): PlayerStateActiveData {
 function makePlayers(
   initialOrder: TimestampMethod,
 ): { player: OrderedStampPlayer; fakePlayer: FakePlayer } {
-  // Need to put a UserNodePlayer in between to satisfy flow.
   const fakePlayer = new FakePlayer();
   fakePlayer.setCapabilities([PlayerCapabilities.setSpeed]);
   return {
@@ -375,7 +374,6 @@ describe("OrderedStampPlayer", () => {
         this.emit({ ...getState(), currentTime, messages: upstreamMessages });
       }
     }
-    // Need to put a UserNodePlayer in between to satisfy flow.
     const fakePlayer = new ModifiedFakePlayer();
     fakePlayer.setCapabilities([PlayerCapabilities.setSpeed]);
     const player = new OrderedStampPlayer(

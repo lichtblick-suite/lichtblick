@@ -294,7 +294,6 @@ export default class ImageCanvas extends React.Component<Props, State> {
     const { topic, image } = this.props;
     const canvas = this._canvasRef.current;
 
-    // satisfy flow
     if (!canvas || !image || !topic) {
       return;
     }

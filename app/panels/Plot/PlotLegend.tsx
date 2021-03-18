@@ -54,8 +54,7 @@ const shortXAxisLabel = (path: PlotXAxisVal): string => {
       return "timestamp";
     default:
       path as never; // Assert the switch is exhaustive
-
-      throw new Error("Satisfy flow");
+      throw new Error(`unknown path: ${path}`);
   }
 };
 

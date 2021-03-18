@@ -24,6 +24,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import assert from "assert";
 import { parseMessageDefinition } from "rosbag";
 
 import BagDataProvider from "@foxglove-studio/app/dataProviders/BagDataProvider";
@@ -937,9 +938,7 @@ describe("mergedBlocks", () => {
       { startTime: { sec: 0, nsec: 0 }, blocks: [lhs] },
       { startTime: { sec: 0, nsec: 0 }, blocks: [rhs] },
     );
-    if (mergedValue == undefined) {
-      throw new Error("satisfy flow");
-    }
+    assert(mergedValue);
     const combinedBlocks = mergedValue.blocks;
     expect(mergedValue).toEqual({
       startTime: { sec: 0, nsec: 0 },
@@ -953,9 +952,7 @@ describe("mergedBlocks", () => {
       { startTime: { sec: 0, nsec: 0 }, blocks: [lhs] },
       { startTime: { sec: 0, nsec: 0 }, blocks: [rhs] },
     );
-    if (newMergedValue == undefined) {
-      throw new Error("satisfy flow");
-    }
+    assert(newMergedValue);
     const newCombinedBlocks = newMergedValue.blocks;
     expect(newMergedValue).toEqual(mergedValue);
     expect(newCombinedBlocks[0]).toBe(combinedBlocks[0]);
