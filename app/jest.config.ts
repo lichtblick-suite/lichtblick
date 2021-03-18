@@ -22,8 +22,6 @@ export default {
   setupFilesAfterEnv: ["<rootDir>/test/setupTestFramework.ts"],
   restoreMocks: true,
   moduleNameMapper: {
-    "worker-loader.*!.*/UserNodePlayer/.+Worker": "<rootDir>/players/UserNodePlayer/worker.mock.ts",
-    "worker-loader.*!.*": "<rootDir>/test/mocks/MockWorker.ts",
     "\\.svg$": "<rootDir>/test/mocks/MockSvg.tsx",
     "react-monaco-editor": "<rootDir>/test/stubs/MonacoEditor.tsx",
     "\\.(glb|md|png)$": "<rootDir>/test/mocks/fileMock.ts",

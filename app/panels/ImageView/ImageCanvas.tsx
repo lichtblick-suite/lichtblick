@@ -34,12 +34,18 @@ import WebWorkerManager from "@foxglove-studio/app/util/WebWorkerManager";
 import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import supportsOffscreenCanvas from "@foxglove-studio/app/util/supportsOffscreenCanvas";
-import ImageCanvasWorker from "worker-loader!./ImageCanvas.worker";
 
 import styles from "./ImageCanvas.module.scss";
 import { ImageViewPanelHooks, Config, SaveImagePanelConfig } from "./index";
 import { renderImage } from "./renderImage";
 import { checkOutOfBounds, Dimensions } from "./util";
+
+// WebworkerManager wants to build workers as classes so we provide this wrapper
+class ImageCanvasWorker {
+  constructor() {
+    return new Worker(new URL("ImageCanvas.worker", import.meta.url));
+  }
+}
 
 type OnFinishRenderImage = () => void;
 type Props = {

@@ -166,6 +166,16 @@ const setListenerHelper = (player: UserNodePlayer, numPromises: number = 1) => {
   return signals;
 };
 
+// @ts-expect-error MockUserNodePlayerWorker is not a fully valid SharedWorker but is enough for our needs
+UserNodePlayer.CreateNodeRuntimeWorker = () => {
+  return new MockUserNodePlayerWorker();
+};
+
+// @ts-expect-error MockUserNodePlayerWorker is not a fully valid SharedWorker but is enough for our needs
+UserNodePlayer.CreateNodeTransformWorker = () => {
+  return new MockUserNodePlayerWorker();
+};
+
 describe("UserNodePlayer", () => {
   afterAll(() => {
     storage.clear();

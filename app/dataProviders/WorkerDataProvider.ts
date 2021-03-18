@@ -16,7 +16,6 @@ import { Time } from "rosbag";
 import RpcDataProvider from "@foxglove-studio/app/dataProviders/RpcDataProvider";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import Rpc from "@foxglove-studio/app/util/Rpc";
-import WorkerDataProviderWorker from "worker-loader!@foxglove-studio/app/dataProviders/WorkerDataProvider.worker";
 
 import {
   DataProvider,
@@ -26,6 +25,10 @@ import {
   GetMessagesResult,
   GetMessagesTopics,
 } from "./types";
+
+const WorkerDataProviderWorker = () => {
+  return new Worker(new URL("./WorkerDataProvider.worker", import.meta.url));
+};
 
 const params = new URLSearchParams(window.location.search);
 const secondSourceUrlParams = getGlobalHooks().getSecondSourceUrlParams();
@@ -37,12 +40,12 @@ let preinitializedWorkers: any[] = [];
 if (process.env.NODE_ENV !== "test") {
   preinitializedWorkers = hasSecondSource
     ? [
-        new WorkerDataProviderWorker(),
-        new WorkerDataProviderWorker(),
-        new WorkerDataProviderWorker(),
-        new WorkerDataProviderWorker(),
+        WorkerDataProviderWorker(),
+        WorkerDataProviderWorker(),
+        WorkerDataProviderWorker(),
+        WorkerDataProviderWorker(),
       ]
-    : [new WorkerDataProviderWorker(), new WorkerDataProviderWorker()];
+    : [WorkerDataProviderWorker(), WorkerDataProviderWorker()];
 }
 
 // Wraps the underlying DataProviderDescriptor tree in a Web Worker, therefore allowing
@@ -50,23 +53,26 @@ if (process.env.NODE_ENV !== "test") {
 export default class WorkerDataProvider implements DataProvider {
   _worker?: Worker;
   _provider?: RpcDataProvider;
-  _child: DataProviderDescriptor;
+  _child?: DataProviderDescriptor;
 
   constructor(args: any, children: DataProviderDescriptor[]) {
     if (children.length !== 1) {
       throw new Error(`Incorrect number of children to WorkerDataProvider: ${children.length}`);
     }
-    this._child = children[0];
+    const child = children[0];
+    if (child) {
+      this._child = child;
+    }
   }
 
   initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
     if (preinitializedWorkers.length > 0) {
       this._worker = preinitializedWorkers.pop();
     } else {
-      this._worker = new WorkerDataProviderWorker();
+      this._worker = WorkerDataProviderWorker();
     }
 
-    if (!this._worker) {
+    if (!this._worker || !this._child) {
       throw new Error("WorderDataProvider failed to initialize");
     }
 

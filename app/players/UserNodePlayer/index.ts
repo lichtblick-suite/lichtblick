@@ -14,9 +14,6 @@ import { isEqual, groupBy, partition } from "lodash";
 import microMemoize from "micro-memoize";
 import { TimeUtil, Time } from "rosbag";
 
-// Filename of nodeTransformerWorker is recognized by the server, and given a special header to
-// ensure user-supplied code cannot make network requests.
-import NodeDataWorker from "worker-loader?worker=SharedWorker&filename=nodeTransformerWorker.[ext]!@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker"; // eslint-disable-line
 import {
   SetUserNodeDiagnostics,
   AddUserNodeLogs,
@@ -47,7 +44,6 @@ import {
   BobjectMessage,
 } from "@foxglove-studio/app/players/types";
 import signal from "@foxglove-studio/app/shared/signal";
-import UserNodePlayerWorker from "worker-loader?worker=SharedWorker&filename=nodeRuntimeWorker.[ext]!@foxglove-studio/app/players/UserNodePlayer/nodeRuntimeWorker"; // eslint-disable-line
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { UserNode, UserNodes } from "@foxglove-studio/app/types/panels";
 import Rpc from "@foxglove-studio/app/util/Rpc";
@@ -110,6 +106,16 @@ export default class UserNodePlayer implements Player {
   _rosLib?: string;
   _globalVariables: GlobalVariables = {};
   _pendingResetWorkers?: Promise<void>;
+
+  // exposed as a static to allow testing to mock/replace
+  static CreateNodeTransformWorker = () => {
+    return new SharedWorker(new URL("./nodeTransformerWorker/index", import.meta.url).toString());
+  };
+
+  // exposed as a static to allow testing to mock/replace
+  static CreateNodeRuntimeWorker = () => {
+    return new SharedWorker(new URL("./nodeRuntimeWorker/index", import.meta.url).toString());
+  };
 
   constructor(player: Player, userNodeActions: UserNodeActions) {
     this._player = player;
@@ -263,7 +269,7 @@ export default class UserNodePlayer implements Player {
         if (!bobjectSender || !rpc) {
           rpc =
             this._unusedNodeRuntimeWorkers.pop() ||
-            rpcFromNewSharedWorker(new UserNodePlayerWorker());
+            rpcFromNewSharedWorker(UserNodePlayer.CreateNodeRuntimeWorker());
           bobjectSender = new BobjectRpcSender(rpc);
           const { error, userNodeDiagnostics, userNodeLogs } = await rpc.send<RegistrationOutput>(
             "registerNode",
@@ -336,7 +342,7 @@ export default class UserNodePlayer implements Player {
 
   _getTransformWorker(): Rpc {
     if (!this._nodeTransformRpc) {
-      this._nodeTransformRpc = rpcFromNewSharedWorker(new NodeDataWorker());
+      this._nodeTransformRpc = rpcFromNewSharedWorker(UserNodePlayer.CreateNodeTransformWorker());
     }
     return this._nodeTransformRpc;
   }

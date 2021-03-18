@@ -108,7 +108,6 @@
     "webpack": "5.26.3",
     "webpack-cli": "4.5.0",
     "webpack-dev-server": "3.11.2",
-    "webpack-hot-middleware": "2.25.0",
-    "worker-loader": "3.0.8"
+    "webpack-hot-middleware": "2.25.0"
   }
 }

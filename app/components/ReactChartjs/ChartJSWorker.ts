@@ -44,7 +44,7 @@ export default class ChartJSWorker {
     rpc.receive("initialize", (args: any) => {
       const manager = new ChartJSManager(args);
       this._managersById[args.id] = manager;
-      return this._managersById[args.id].getScaleBounds();
+      return this._managersById[args.id]?.getScaleBounds();
     });
     rpc.receive("doZoom", (args: any) => this._managersById[args.id]?.doZoom(args));
     rpc.receive("resetZoomDelta", (args: any) => this._managersById[args.id]?.resetZoomDelta());

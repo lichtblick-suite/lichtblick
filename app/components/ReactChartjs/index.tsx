@@ -28,10 +28,16 @@ import { objectValues } from "@foxglove-studio/app/util";
 import { getFakeRpcs, RpcLike } from "@foxglove-studio/app/util/FakeRpc";
 import WebWorkerManager from "@foxglove-studio/app/util/WebWorkerManager";
 import supportsOffscreenCanvas from "@foxglove-studio/app/util/supportsOffscreenCanvas";
-import ChartJSWorker from "worker-loader!./ChartJSWorker.worker.ts";
 
 import { ScaleOptions as ManagerScaleOptions } from "./ChartJSManager";
 import { ScaleBounds, ZoomOptions, PanOptions, wheelZoomHandler } from "./zoomAndPanHelpers";
+
+// Webworker Manager wants a constructor so we need to have a "class" wrapper
+class ChartJSWorker {
+  constructor() {
+    return new Worker(new URL("./ChartJSWorker.worker", import.meta.url));
+  }
+}
 
 const getMainThreadChartJSWorker = () =>
   import(
