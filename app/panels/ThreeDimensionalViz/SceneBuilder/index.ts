@@ -118,7 +118,7 @@ const missingTransformMessage = (
   }
   const frameIds = [...error.frameIds].sort().join(",");
   const s = error.frameIds.size === 1 ? "" : "s"; // for plural
-  return `missing transforms to root frame ${rootTransformId} from frame${s} ${frameIds}.`;
+  return `missing transforms from frame${s} (${frameIds}) to root frame (${rootTransformId})`;
 };
 
 export function getSceneErrorsByTopic(
@@ -422,9 +422,13 @@ export default class SceneBuilder implements MarkerProvider {
 
   // Update the field anytime the errors change in order to generate a new object to trigger TopicTree to rerender.
   _updateErrorsByTopic() {
+    if (!this.transforms) {
+      return;
+    }
+
     const errorsByTopic = getSceneErrorsByTopic(
       this.errors,
-      this.transforms as any,
+      this.transforms,
       this._hooks.skipTransformFrame,
     );
     if (!isEqual(this.errorsByTopic, errorsByTopic)) {

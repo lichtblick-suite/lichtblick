@@ -403,14 +403,35 @@ export default function Layout({
     );
   }, [colorOverrideBySourceIdxByVariable, globalVariables, linkedGlobalVariables]);
 
-  const rootTf = useMemo(
-    () =>
-      frame &&
-      transforms.rootOfTransform(
-        followTf || getGlobalHooks().perPanelHooks().ThreeDimensionalViz.rootTransformFrame,
-      ).id,
-    [frame, transforms, followTf],
-  );
+  const rootTf = useMemo(() => {
+    // REP 105 specifies a set of conventional root frame transform ids
+    // We try these in order
+    // https://www.ros.org/reps/rep-0105.html
+    const possibleRootFrames = ["base_link", "odom", "map", "earth"];
+
+    // If the user specified a followTf, we give priority to the root frame from their followTf
+    if (followTf) {
+      possibleRootFrames.unshift(followTf);
+    }
+
+    for (const possibleRoot of possibleRootFrames) {
+      if (transforms.has(possibleRoot)) {
+        return transforms.rootOfTransform(possibleRoot).id;
+      }
+    }
+    return undefined;
+  }, [transforms, followTf]);
+
+  useEffect(() => {
+    sceneBuilder.setPlayerId(playerId);
+  }, [playerId, sceneBuilder]);
+
+  useEffect(() => {
+    if (!rootTf) {
+      return;
+    }
+    sceneBuilder.setTransforms(transforms, rootTf);
+  }, [rootTf, sceneBuilder, transforms]);
 
   useMemo(() => {
     // TODO(Audrey): add tests for the clearing behavior
@@ -424,8 +445,6 @@ export default function Layout({
     const topicsByTopicName = getTopicsByTopicName(topics);
     const selectedTopics = filterMap(selectedTopicNames, (name) => topicsByTopicName[name]);
 
-    sceneBuilder.setPlayerId(playerId);
-    sceneBuilder.setTransforms(transforms, rootTf);
     sceneBuilder.setFlattenMarkers(!!flattenMarkers);
     sceneBuilder.setSelectedNamespacesByTopic(selectedNamespacesByTopic);
     sceneBuilder.setSettingsByKey(settingsByKey);
@@ -446,7 +465,6 @@ export default function Layout({
     topics,
     selectedTopicNames,
     sceneBuilder,
-    playerId,
     transforms,
     rootTf,
     flattenMarkers,
