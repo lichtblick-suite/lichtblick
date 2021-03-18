@@ -16,6 +16,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.DEPENDABOT_FIX_GITHUB_TOKEN }}
 
       - name: git lfs pull
         run: git lfs pull --include .yarn/
