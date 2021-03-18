@@ -1,0 +1,41 @@
+# Automatically commit updated `yarn.lock` file for dependabot PRs.
+# This is necessary because dependabot doesn't support Yarn v2 yet:
+# https://github.com/dependabot/dependabot-core/issues/1297
+
+name: Dependabot
+
+on:
+  push:
+    branches: [dependabot/npm_and_yarn/**]
+
+jobs:
+  build:
+    name: fix
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: git lfs pull
+        run: git lfs pull --include .yarn/
+
+      - name: Configure Node.js
+        uses: actions/setup-node@v2.1.5
+        with:
+          node-version: 15.x
+
+      - name: Fix yarn.lock
+        env:
+          YARN_ENABLE_SCRIPTS: false # disable post-install scripts
+        run: |
+          yarn install --skip-builds
+          yarn dedupe
+
+      - name: Commit changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "contact@foxglove.dev"
+          git add yarn.lock
+          git commit -m 'Fix yarn.lock'
+          git push

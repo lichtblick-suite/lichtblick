@@ -1458,16 +1458,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.1, @babel/runtime@npm:^7.10.2, @babel/runtime@npm:^7.11.1, @babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.12.1, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.3.1, @babel/runtime@npm:^7.5.0, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7":
-  version: 7.13.9
-  resolution: "@babel/runtime@npm:7.13.9"
-  dependencies:
-    regenerator-runtime: ^0.13.4
-  checksum: e6f79d20e10c2921520c499f3cf295a9ee5c137e73f77f77eedde9f9073bc3541c1fc7fa6c97b0613f4140303ac00d08506e9f090068d219c58781d2b62c662d
-  languageName: node
-  linkType: hard
-
-"@babel/runtime@npm:^7.12.13":
+"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.1.2, @babel/runtime@npm:^7.10.1, @babel/runtime@npm:^7.10.2, @babel/runtime@npm:^7.11.1, @babel/runtime@npm:^7.11.2, @babel/runtime@npm:^7.12.1, @babel/runtime@npm:^7.12.13, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.3.1, @babel/runtime@npm:^7.5.0, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.7.2, @babel/runtime@npm:^7.7.6, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7":
   version: 7.13.10
   resolution: "@babel/runtime@npm:7.13.10"
   dependencies:
@@ -4601,21 +4592,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:17.0.2":
+"@types/react-dom@npm:17.0.2, @types/react-dom@npm:>=16.9.0":
   version: 17.0.2
   resolution: "@types/react-dom@npm:17.0.2"
   dependencies:
     "@types/react": "*"
   checksum: abaadaa2629640870f4b982e3f32cf8f719773cfa97f02931baebef1993c0e2d70fd17f94b29bcf00d45ea099d5f04a042cf55ecb5e2bf8804c4e4cabdb4adc0
-  languageName: node
-  linkType: hard
-
-"@types/react-dom@npm:>=16.9.0":
-  version: 17.0.1
-  resolution: "@types/react-dom@npm:17.0.1"
-  dependencies:
-    "@types/react": "*"
-  checksum: 695dd4bbef4fabdc726359e4031b2887b913d65fb2ff59e5a9e81f9ae20ca4dd8f2b6fe1f39fa5c1197babdb86f6b81b385f5d4438536f2ceeb5ff136102f45b
   languageName: node
   linkType: hard
 
@@ -4724,17 +4706,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:>=16.9.0":
-  version: 17.0.2
-  resolution: "@types/react@npm:17.0.2"
-  dependencies:
-    "@types/prop-types": "*"
-    csstype: ^3.0.2
-  checksum: de1cd27ce57a961379978f83676d60d88bf729337683d1d4cb22dd8f285ed4200db19f7243052dc67c80133fe6798da1497456fe6f67a5bba5f5e30ce2544bfa
-  languageName: node
-  linkType: hard
-
-"@types/react@npm:17.0.3":
+"@types/react@npm:*, @types/react@npm:17.0.3, @types/react@npm:>=16.9.0":
   version: 17.0.3
   resolution: "@types/react@npm:17.0.3"
   dependencies:
@@ -25727,10 +25699,10 @@ typescript@4.2.2:
   languageName: node
   linkType: hard
 
-"yargs-parser@npm:20.x, yargs-parser@npm:^20.2.2":
-  version: 20.2.6
-  resolution: "yargs-parser@npm:20.2.6"
-  checksum: ed21fc0f35290dc9ce1714e6a3e656ca1901ff59432f3dd43668244879b2cca6acff0bff66df9cfbcd934d4db6e98e57cae6def2700ca823e85449f2fb664660
+"yargs-parser@npm:20.x, yargs-parser@npm:^20.2.2, yargs-parser@npm:^20.2.3":
+  version: 20.2.7
+  resolution: "yargs-parser@npm:20.2.7"
+  checksum: 124e7f1c24c9609d5d1c343f14b83289634e19bb43770708ebb6a19852647aaa0f89edcbf0e5b18a21bee77f54513ab5051518b2950cda69eb607a7c6251aa4f
   languageName: node
   linkType: hard
 
@@ -25751,13 +25723,6 @@ typescript@4.2.2:
     camelcase: ^5.0.0
     decamelize: ^1.2.0
   checksum: 33871721679053cc38165afc6356c06c3e820459589b5db78f315886105070eb90cbb583cd6515fa4231937d60c80262ca2b7c486d5942576802446318a39597
-  languageName: node
-  linkType: hard
-
-"yargs-parser@npm:^20.2.3":
-  version: 20.2.7
-  resolution: "yargs-parser@npm:20.2.7"
-  checksum: 124e7f1c24c9609d5d1c343f14b83289634e19bb43770708ebb6a19852647aaa0f89edcbf0e5b18a21bee77f54513ab5051518b2950cda69eb607a7c6251aa4f
   languageName: node
   linkType: hard
 

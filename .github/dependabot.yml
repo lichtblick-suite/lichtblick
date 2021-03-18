@@ -1,13 +1,11 @@
 version: 2
 
 updates:
-  # dependabot doesn't support yarn v2 yet
-  # https://github.com/dependabot/dependabot-core/issues/1297
-  # - package-ecosystem: npm
-  #   directory: "/"
-  #   schedule:
-  #     interval: weekly
-  #   open-pull-requests-limit: 10
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 10
 
   - package-ecosystem: github-actions
     directory: "/"
