@@ -16,7 +16,6 @@ import GlobalVariables from "@foxglove-studio/app/panels/GlobalVariables";
 import ImageViewPanel from "@foxglove-studio/app/panels/ImageView";
 import Internals from "@foxglove-studio/app/panels/Internals";
 import NodePlayground from "@foxglove-studio/app/panels/NodePlayground";
-import Note from "@foxglove-studio/app/panels/Note";
 import NumberOfRenders from "@foxglove-studio/app/panels/NumberOfRenders";
 import PlaybackPerformance from "@foxglove-studio/app/panels/PlaybackPerformance";
 import Plot from "@foxglove-studio/app/panels/Plot";
@@ -53,7 +52,6 @@ export function panelsByCategory() {
     { title: "Global Variables", component: GlobalVariables },
     { title: "Global Variable Slider", component: GlobalVariableSlider },
     { title: "Node Playground", component: NodePlayground },
-    { title: "Notes", component: Note },
     { title: "Tab", component: Tab },
     { title: "Webviz Internals", component: Internals },
     { title: "Data Source Info", component: SourceInfo },
