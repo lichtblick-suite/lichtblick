@@ -1813,7 +1813,7 @@ __metadata:
     idb: 2.1.3
     indent-string: 4.0.0
     int53: 1.0.0
-    inter-ui: 3.15.0
+    inter-ui: 3.15.1
     intervals-fn: 3.0.3
     js-yaml: 4.0.0
     jsondiffpatch: 0.4.1
@@ -13417,10 +13417,10 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"inter-ui@npm:3.15.0":
-  version: 3.15.0
-  resolution: "inter-ui@npm:3.15.0"
-  checksum: eb32dc515e100dad0c605026bd431b6c71f5ea531beca4ae5755a1b9614d3606f54c01db9c77b789a8c18527b0ac11a0bb0d5fd6659b24ed11b85dc8e8a91447
+"inter-ui@npm:3.15.1":
+  version: 3.15.1
+  resolution: "inter-ui@npm:3.15.1"
+  checksum: 30b771fbf028832875d86f701f6c0741704b1eb238ce696fe4dea4abb9acc6f7112f0729a5f56fa43d074b39e179eccb76762c300dddda201462df22b0e6115a
   languageName: node
   linkType: hard
 
