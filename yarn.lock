@@ -1842,7 +1842,7 @@ __metadata:
     react-highlight-words: 0.17.0
     react-hover-observer: 2.1.1
     react-input-autosize: 2.2.2
-    react-json-tree: 0.13.0
+    react-json-tree: 0.15.0
     react-markdown: 5.0.3
     react-monaco-editor: 0.42.0
     react-mosaic-component: "troygibb/react-mosaic#860c8d70ba3c723be07bc6208f0d05e2c3f2915f"
@@ -19292,17 +19292,17 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"react-json-tree@npm:0.13.0":
-  version: 0.13.0
-  resolution: "react-json-tree@npm:0.13.0"
+"react-json-tree@npm:0.15.0":
+  version: 0.15.0
+  resolution: "react-json-tree@npm:0.15.0"
   dependencies:
     "@types/prop-types": ^15.7.3
     prop-types: ^15.7.2
     react-base16-styling: ^0.8.0
   peerDependencies:
-    "@types/react": ^16.3.18
-    react: ^16.3.0
-  checksum: 7706cf56c5e4fe367ca1739f993e6ba59414734fce68600dfd4007e81a9240b6b19d8e3076e88634ad6e374aa65f627944c92cca29b2c0ff4a8241838031390d
+    "@types/react": ^16.3.0 || ^17.0.0
+    react: ^16.3.0 || ^17.0.0
+  checksum: 0e509ee22408e64e69aad364d94548193ce7348c38c9a120244bc1172d787cbc2f39ff83f5154723002718fd22a66d9ae63dab778d79bab6630ebc3a5653de1f
   languageName: node
   linkType: hard
 
