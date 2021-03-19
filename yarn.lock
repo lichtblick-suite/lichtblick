@@ -1832,7 +1832,7 @@ __metadata:
     quickhull3d: 2.0.4
     rc-color-picker: 1.2.6
     rc-tabs: 11.7.3
-    rc-tree: 3.11.0
+    rc-tree: 4.1.5
     react: 17.0.1
     react-autocomplete: "janpaul123/react-autocomplete#bc8737070b5744069719c8fcd4e0a197192b0d48"
     react-dnd: 10.0.2
@@ -18861,9 +18861,9 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"rc-tree@npm:3.11.0":
-  version: 3.11.0
-  resolution: "rc-tree@npm:3.11.0"
+"rc-tree@npm:4.1.5":
+  version: 4.1.5
+  resolution: "rc-tree@npm:4.1.5"
   dependencies:
     "@babel/runtime": ^7.10.1
     classnames: 2.x
@@ -18873,7 +18873,7 @@ fsevents@^1.2.7:
   peerDependencies:
     react: "*"
     react-dom: "*"
-  checksum: b4f15777f466ecf94725f96bbaff9bddd2c5277b1e3343a18fcd6a00528e65a9bbbc23e282444c9fd6914ceec8d6fc782069ec5dd575bdf55b7584b21e70a5d1
+  checksum: 87ca9170009e01b7077712b019c40f095ed40e1e32d762bd8bba18fe2167fa11344f27f0f922719d6bcd53e48177a29c05bc1d93829514cf83f2d23e0a15d277
   languageName: node
   linkType: hard
 
