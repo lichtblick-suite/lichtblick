@@ -1,0 +1,52 @@
+# Automatically save updated `yarn.lock` file for dependabot PRs.
+# This is necessary because dependabot doesn't support Yarn v2 yet:
+# https://github.com/dependabot/dependabot-core/issues/1297
+#
+# Note: We use the `pull_request_target` event due to GitHub security measures.
+#       It is important to ensure we don't execute any untrusted PR code in this context.
+# See: https://github.blog/changelog/2021-02-19-github-actions-workflows-triggered-by-dependabot-prs-will-run-with-read-only-permissions/
+#      https://securitylab.github.com/research/github-actions-preventing-pwn-requests
+
+name: Dependabot
+
+on:
+  pull_request_target:
+    branches: [dependabot/npm_and_yarn/**]
+
+jobs:
+  build:
+    name: fix
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: git lfs pull
+        run: git lfs pull --include .yarn/
+
+      - name: Configure Node.js
+        uses: actions/setup-node@v2.1.5
+        with:
+          node-version: 15.x
+
+      - name: Update yarn.lock
+        # IMPORTANT: setting YARN_ENABLE_SCRIPTS=false is critical to ensure that untrusted
+        # PRs can't add an npm package and then use that to execute untrusted code in
+        # a trusted context. See links at the top of this workflow for further details.
+        # See also: https://github.com/yarnpkg/berry/issues/1679#issuecomment-669937860
+        env:
+          YARN_ENABLE_SCRIPTS: false
+        run: |
+          yarn install --skip-builds
+          yarn dedupe
+
+      - name: Commit yarn.lock
+        run: |
+          git config user.name "adrianbot"
+          git config user.email "contact@foxglove.dev"
+          git add yarn.lock
+          git commit -m 'Fix yarn.lock'
+          git push
