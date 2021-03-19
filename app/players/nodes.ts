@@ -260,8 +260,7 @@ export function partitionMessagesBySubscription(
         if (isBobject(message.message)) {
           bobjects.push(message);
         } else {
-          const nodeDef =
-            definitionsByTopic[message.topic] && definitionsByTopic[message.topic]?.[0];
+          const nodeDef = definitionsByTopic[message.topic]?.[0];
           if (!nodeDef) {
             throw new Error("Message produced from unsubscribed node. This should never happen.");
           }
