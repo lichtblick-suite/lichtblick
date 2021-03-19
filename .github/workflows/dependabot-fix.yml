@@ -10,14 +10,15 @@
 name: Dependabot
 
 on:
-  pull_request_target:
-    branches: [dependabot/npm_and_yarn/**]
+  - pull_request_target
 
 jobs:
   build:
     name: fix
     runs-on: ubuntu-latest
-    if: github.actor == 'dependabot[bot]'
+    if: |
+      github.actor == 'dependabot[bot]' &&
+      contains(github.event.pull_request.head.ref, 'dependabot/npm_and_yarn/')
 
     steps:
       - uses: actions/checkout@v2
