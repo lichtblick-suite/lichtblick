@@ -117,7 +117,7 @@
     "@types/react-virtualized": "9.21.11",
     "@types/react-virtualized-select": "3.0.8",
     "@types/sanitize-html": "1.27.1",
-    "@types/seedrandom": "2.4.28",
+    "@types/seedrandom": "3.0.0",
     "@types/shallowequal": "1.1.1",
     "@types/string-hash": "1.1.1",
     "@types/styled-components": "5.1.7",
