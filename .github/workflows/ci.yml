@@ -42,8 +42,7 @@ jobs:
             .yarn/cache
             **/node_modules
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+          restore-keys: ${{ runner.os }}-yarn-
       - run: yarn install --immutable
       - run: yarn dedupe --check
         if: matrix.config.name == 'lint'
@@ -77,8 +76,7 @@ jobs:
             .yarn/cache
             **/node_modules
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+          restore-keys: ${{ runner.os }}-yarn-
       - run: yarn install --immutable
       - name: test:integration
         if: matrix.os == 'ubuntu-20.04'
