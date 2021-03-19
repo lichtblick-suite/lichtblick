@@ -127,8 +127,8 @@ export function messagePathsForDatatype(
       messagePaths.push(builtString);
     }
     if (structureItem.structureType === "message") {
-      for (const name of Object.keys(structureItem.nextByName)) {
-        traverse(structureItem.nextByName[name], `${builtString}.${name}`);
+      for (const [name, item] of Object.entries(structureItem.nextByName)) {
+        traverse(item, `${builtString}.${name}`);
       }
     } else if (structureItem.structureType === "array") {
       if (structureItem.next.structureType === "message") {

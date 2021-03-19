@@ -100,7 +100,7 @@ function CleansUpTooltipExample() {
   const refFn = useCallback(() => {
     setTimeout(() => {
       const [canvas] = document.getElementsByTagName("canvas");
-      const { top, left } = canvas.getBoundingClientRect();
+      const { top, left } = canvas!.getBoundingClientRect();
       document.dispatchEvent(
         new MouseEvent("mousemove", { clientX: 363 + left, clientY: 650 + top }),
       );
@@ -242,7 +242,7 @@ storiesOf("<TimeBasedChart>", module)
         ref={() => {
           setTimeout(() => {
             const [canvas] = document.getElementsByTagName("canvas");
-            const { top, left } = canvas.getBoundingClientRect();
+            const { top, left } = canvas!.getBoundingClientRect();
             // This will show the vertical bar but not the tooltip because the mouse is on top of a different element
             // (in this case the document), not the canvas itself.
             document.dispatchEvent(
@@ -264,8 +264,8 @@ storiesOf("<TimeBasedChart>", module)
         ref={() => {
           setTimeout(() => {
             const [canvas] = document.getElementsByTagName("canvas");
-            const { top, left } = canvas.getBoundingClientRect();
-            canvas.dispatchEvent(
+            const { top, left } = canvas!.getBoundingClientRect();
+            canvas!.dispatchEvent(
               new MouseEvent("mousemove", { clientX: 363 + left, clientY: 400 + top }),
             );
           }, DEFAULT_DELAY);

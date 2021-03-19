@@ -300,7 +300,7 @@ class MessagePathInputUnconnected extends React.PureComponent<
         // TODO: add support for nested paths to primitives, such as "/some_topic{foo.bar==3}".
         for (const name of Object.keys(structureTraversalResult.structureItem.nextByName)) {
           const item = structureTraversalResult.structureItem.nextByName[name];
-          if (item.structureType === "primitive") {
+          if (item?.structureType === "primitive") {
             autocompleteItems.push(`${name}==${getExamplePrimitive(item.primitiveType)}`);
           }
         }
@@ -402,8 +402,8 @@ class MessagePathInputUnconnected extends React.PureComponent<
                 <Tooltip contents="Timestamp used for x-axis" placement="top">
                   <div
                     className={cx({
-                      [styles.timestampMethodDropdown]: true,
-                      [styles.timestampMethodDropdownError]:
+                      [styles.timestampMethodDropdown!]: true,
+                      [styles.timestampMethodDropdownError!]:
                         timestampMethod === "headerStamp" && noHeaderStamp,
                     })}
                   >
@@ -451,7 +451,7 @@ class MessagePathInputUnconnected extends React.PureComponent<
               >
                 <span
                   className={cx({
-                    [styles.timestampItemError]: noHeaderStamp,
+                    [styles.timestampItemError!]: noHeaderStamp,
                   })}
                 >
                   header.stamp

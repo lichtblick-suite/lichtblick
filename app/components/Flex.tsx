@@ -75,15 +75,15 @@ const Flex = (props: Props) => {
 
   // toggle conditional classes based on props
   const conditionalClasses = {
-    [styles.col]: col,
-    [styles.reverse]: reverse,
-    [styles.center]: center,
-    [styles.start]: start,
-    [styles.end]: end,
-    [styles.wrap]: wrap,
-    [styles.clip]: clip,
-    [styles.scroll]: scroll,
-    [styles.scrollX]: scrollX,
+    [styles.col!]: col,
+    [styles.reverse!]: reverse,
+    [styles.center!]: center,
+    [styles.start!]: start,
+    [styles.end!]: end,
+    [styles.wrap!]: wrap,
+    [styles.clip!]: clip,
+    [styles.scroll!]: scroll,
+    [styles.scrollX!]: scrollX,
   };
   const combinedClasses = cx(styles.flex, conditionalClasses, className);
 

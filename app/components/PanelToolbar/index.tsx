@@ -93,10 +93,14 @@ function StandardMenuItems({
   );
 
   const close = useCallback(() => {
-    logEvent({
-      name: getEventNames().PANEL_REMOVE,
-      tags: { [getEventTags().PANEL_TYPE]: getPanelType() },
-    });
+    const name = getEventNames().PANEL_REMOVE;
+    const type = getEventTags().PANEL_TYPE;
+    if (name != undefined && type != undefined) {
+      logEvent({
+        name: name,
+        tags: { [type]: getPanelType() },
+      });
+    }
     actions.closePanel({
       tabId,
       root: mosaicActions.getRoot() as any,
@@ -110,12 +114,20 @@ function StandardMenuItems({
       if (!id || !type) {
         throw new Error("Trying to split unknown panel!");
       }
-      logEvent({
-        name: getEventNames().PANEL_SPLIT,
-        tags: { [getEventTags().PANEL_TYPE]: getPanelType() },
-      });
+      const name = getEventNames().PANEL_SPLIT;
+      const eventType = getEventTags().PANEL_TYPE;
+      if (name != undefined && eventType != undefined) {
+        logEvent({
+          name: name,
+          tags: { [eventType]: type },
+        });
+      }
 
       const config = savedProps[id];
+      if (!config) {
+        return;
+      }
+
       actions.splitPanel({
         id,
         tabId,
@@ -139,7 +151,14 @@ function StandardMenuItems({
         config: config as any,
         relatedConfigs,
       });
-      logEvent({ name: getEventNames().PANEL_SWAP, tags: { [getEventTags().PANEL_TYPE]: type } });
+      const name = getEventNames().PANEL_SWAP;
+      const eventType = getEventTags().PANEL_TYPE;
+      if (name != undefined && eventType != undefined) {
+        logEvent({
+          name: name,
+          tags: { [eventType]: type },
+        });
+      }
     },
     [actions, mosaicActions, mosaicWindowActions, tabId],
   );
@@ -329,9 +348,9 @@ export default React.memo<Props>(function PanelToolbar({
           {shareModal}
           <div
             className={cx(styles.panelToolbarContainer, {
-              [styles.floating]: floating,
-              [styles.floatingShow]: floating && isRendered,
-              [styles.hasChildren]: !!children,
+              [styles.floating!]: floating,
+              [styles.floatingShow!]: floating && isRendered,
+              [styles.hasChildren!]: !!children,
             })}
           >
             {(isRendered || !floating) && children}

@@ -63,7 +63,7 @@ class PanelToolbarWithOpenMenu extends React.PureComponent<{ hideToolbars?: bool
             // wait for Dimensions
             setTimeout(() => {
               const gearIcon = el.querySelectorAll("svg")[1];
-              gearIcon.parentElement?.click();
+              gearIcon?.parentElement?.click();
             }, 100);
           }
         }}

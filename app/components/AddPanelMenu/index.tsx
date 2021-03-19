@@ -35,7 +35,12 @@ function AddPanelMenu(props: Props) {
   const onPanelSelect = useCallback(
     ({ type, config, relatedConfigs }: PanelSelection) => {
       dispatch(addPanel({ type, layout, config, relatedConfigs } as AddPanelPayload));
-      logEvent({ name: getEventNames().PANEL_ADD, tags: { [getEventTags().PANEL_TYPE]: type } });
+
+      const name = getEventNames().PANEL_ADD;
+      const panelType = getEventTags().PANEL_TYPE;
+      if (name != undefined && panelType != undefined) {
+        logEvent({ name: name, tags: { [panelType]: type } });
+      }
     },
     [dispatch, layout],
   );

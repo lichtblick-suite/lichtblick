@@ -65,7 +65,7 @@ describe("useLatestMessageDataItem", () => {
   it("uses the latest message", async () => {
     const Test = createTest();
     const root = mount(
-      <MockMessagePipelineProvider messages={[messages[0]]} topics={topics} datatypes={datatypes}>
+      <MockMessagePipelineProvider messages={[messages[0]!]} topics={topics} datatypes={datatypes}>
         <Test path="/topic.value" />
       </MockMessagePipelineProvider>,
     );
@@ -109,7 +109,7 @@ describe("useLatestMessageDataItem", () => {
       [
         {
           message: messages[1],
-          queriedData: [{ path: "/topic{value==1}", value: messages[1].message }],
+          queriedData: [{ path: "/topic{value==1}", value: messages[1]?.message }],
         },
       ],
     ]);
@@ -120,7 +120,7 @@ describe("useLatestMessageDataItem", () => {
   it("returns bobjects when told to", async () => {
     const Test = createTest("bobjects");
     const root = mount(
-      <MockMessagePipelineProvider messages={[messages[0]]} topics={topics} datatypes={datatypes}>
+      <MockMessagePipelineProvider messages={[messages[0]!]} topics={topics} datatypes={datatypes}>
         <Test path="/topic" />
       </MockMessagePipelineProvider>,
     );
@@ -129,8 +129,8 @@ describe("useLatestMessageDataItem", () => {
       message,
       queriedData: [data],
     } = Test.result.mock.calls[0][0] ?? {};
-    expect(deepParse(message.message)).toEqual(messages[0].message);
-    expect(deepParse(data.value)).toEqual(messages[0].message);
+    expect(deepParse(message.message)).toEqual(messages[0]?.message);
+    expect(deepParse(data.value)).toEqual(messages[0]?.message);
 
     root.unmount();
   });

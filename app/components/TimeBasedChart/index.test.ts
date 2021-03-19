@@ -37,7 +37,7 @@ describe("filterDatasets", () => {
       },
     ];
     const linesToHide = {};
-    expect(filterDatasets(datasets, linesToHide, 100, 100)[0].data.map(({ y }) => y)).toEqual([
+    expect(filterDatasets(datasets, linesToHide, 100, 100)[0]?.data.map(({ y }) => y)).toEqual([
       "1",
       "2",
       "3",
@@ -51,7 +51,7 @@ describe("filterDatasets", () => {
 
     const datasets = [{ data, label: "1" }];
     const linesToHide = {};
-    expect(filterDatasets(datasets, linesToHide, 10, 10)[0].data.map(({ x }) => x)).toEqual([
+    expect(filterDatasets(datasets, linesToHide, 10, 10)[0]?.data.map(({ x }) => x)).toEqual([
       0,
       10,
       20,
@@ -75,7 +75,7 @@ describe("filterDatasets", () => {
       },
     ];
     const linesToHide = {};
-    expect(filterDatasets(datasets, linesToHide)[0].data.map(({ x }) => x)).toEqual([
+    expect(filterDatasets(datasets, linesToHide)[0]?.data.map(({ x }) => x)).toEqual([
       NaN,
       1,
       NaN,
@@ -93,6 +93,6 @@ describe("filterDatasets", () => {
       },
     ];
     const linesToHide = {};
-    expect(filterDatasets(datasets, linesToHide)[0].data.map(({ x }) => x)).toEqual([NaN, 1, 2]);
+    expect(filterDatasets(datasets, linesToHide)[0]?.data.map(({ x }) => x)).toEqual([NaN, 1, 2]);
   });
 });

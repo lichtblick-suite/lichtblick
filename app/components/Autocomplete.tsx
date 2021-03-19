@@ -28,7 +28,7 @@ function measureText(text: string): number {
   return textWidth(text, { family: fontFamily, size: fontSize }) + 3;
 }
 
-const rowHeight = parseInt(styles.rowHeight);
+const rowHeight = parseInt(styles.rowHeight ?? "24");
 
 // <Autocomplete> is a Webviz-specific autocomplete with support for things like multiple
 // autocompletes that seamlessly transition into each other, e.g. when building more complex
@@ -283,8 +283,8 @@ export default class Autocomplete extends PureComponent<AutocompleteProps, Autoc
               data-highlighted={isHighlighted}
               data-test-auto-item
               className={cx(styles.autocompleteItem, {
-                [styles.highlighted]: isHighlighted,
-                [styles.selected]:
+                [styles.highlighted!]: isHighlighted,
+                [styles.selected!]:
                   selectedItemValue != undefined && itemValue === selectedItemValue,
               })}
             >
@@ -297,8 +297,8 @@ export default class Autocomplete extends PureComponent<AutocompleteProps, Autoc
         value={value || ""}
         inputProps={{
           className: cx(styles.input, {
-            [styles.inputError]: hasError,
-            [styles.placeholder]: !value,
+            [styles.inputError!]: hasError,
+            [styles.placeholder!]: !value,
           }),
           autoCorrect: "off",
           autoCapitalize: "off",

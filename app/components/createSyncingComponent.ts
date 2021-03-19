@@ -108,9 +108,9 @@ export default function createSyncingComponent<ComponentData, ReducerOutput>(
         // Throttle updates because it's not imporant that components update immediately and calling `forceUpdate` often
         // lead to suboptimal performance. Most of the time, synced plots will update within THROTTLE_TIME_MS anyways,
         // making a forceUpdate unncessary.
-        Object.keys(componentsById).forEach((id) => {
+        Object.entries(componentsById).forEach(([id, component]) => {
           if (id !== this._id && !hasRenderedIds.has(id)) {
-            componentsById[id].forceUpdate();
+            component.forceUpdate();
           }
         });
       },

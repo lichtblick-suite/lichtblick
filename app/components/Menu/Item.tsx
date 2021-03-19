@@ -73,11 +73,11 @@ const Item = (props: ItemProps) => {
     hoverForScreenshots,
   } = props;
   const classes = cx(styles.item, className, {
-    [styles.active]: highlighted && !disabled,
-    [styles.disabled]: disabled,
+    [styles.active!]: highlighted && !disabled,
+    [styles.disabled!]: disabled,
     disabled,
-    [styles.header]: isHeader,
-    [styles.hoverForScreenshot]: hoverForScreenshots,
+    [styles.header!]: isHeader,
+    [styles.hoverForScreenshot!]: hoverForScreenshots,
   });
 
   const item = (

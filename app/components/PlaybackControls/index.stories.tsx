@@ -118,7 +118,7 @@ storiesOf("<PlaybackControls>", module)
     }
 
     React.useEffect(() => {
-      const [element] = document.getElementsByClassName(styles.sliderContainer);
+      const [element] = document.getElementsByClassName(styles.sliderContainer!);
       if (element) {
         TestUtils.Simulate.mouseMove(element, { clientX: 450 });
       }

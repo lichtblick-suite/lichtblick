@@ -32,7 +32,7 @@ export function JSONInput(props: {
   return (
     <input
       style={{ color: isValid ? "white" : colors.RED }}
-      data-test={props.dataTest || "json-input"}
+      data-test={props.dataTest ?? "json-input"}
       type="text"
       value={internalValue}
       onChange={(e) => {
@@ -43,8 +43,9 @@ export function JSONInput(props: {
         }
       }}
       onKeyDown={(e) => {
-        if (typeof parsedValue === "number" && keyValMap[e.key]) {
-          const newParsedValue = parsedValue + keyValMap[e.key];
+        const val = keyValMap[e.key];
+        if (typeof parsedValue === "number" && val) {
+          const newParsedValue = parsedValue + val;
           setInternalValue(`${newParsedValue}`);
           props.onChange(newParsedValue);
         }

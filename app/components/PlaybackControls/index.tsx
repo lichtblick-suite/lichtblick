@@ -180,7 +180,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
           <Button
             onClick={() => jumpSeek(DIRECTION.BACKWARD, { seek, player: playerState.current })}
             style={{ borderRadius: "4px 0px 0px 4px", marginLeft: "16px", marginRight: "1px" }}
-            className={cx([styles.seekBtn, { [styles.inactive]: !activeData }])}
+            className={cx([styles.seekBtn, { [styles.inactive!]: !activeData }])}
           >
             <Icon medium tooltip="Seek backward">
               <SkipPreviousOutlineIcon />
@@ -189,7 +189,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
           <Button
             onClick={() => jumpSeek(DIRECTION.FORWARD, { seek, player: playerState.current })}
             style={{ borderRadius: "0px 4px 4px 0px" }}
-            className={cx([styles.seekBtn, { [styles.inactive]: !activeData }])}
+            className={cx([styles.seekBtn, { [styles.inactive!]: !activeData }])}
           >
             <Icon medium tooltip="Seek forward">
               <SkipNextOutlineIcon />

@@ -55,7 +55,7 @@ export default class KeyListener extends React.Component<Props> {
     }
     if (typeof handlers[event.key] === "function") {
       event.preventDefault();
-      handlers[event.key](event);
+      handlers[event.key]?.(event);
     }
   }
 

@@ -84,9 +84,9 @@ export function useCachedGetMessagePathDataItems(
   // relevant global variable changed. Delete the caches for where the `filledInPath` doesn't match
   // any more.
   if (useChangeDetector([memoizedFilledInPaths], false)) {
-    for (const path of Object.keys(cachesByPath.current)) {
+    for (const [path, current] of Object.entries(cachesByPath.current)) {
       const filledInPath = memoizedFilledInPaths[path];
-      if (!filledInPath || !isEqual(cachesByPath.current[path].filledInPath, filledInPath)) {
+      if (!filledInPath || !isEqual(current.filledInPath, filledInPath)) {
         delete cachesByPath.current[path];
       }
     }
@@ -101,10 +101,11 @@ export function useCachedGetMessagePathDataItems(
       if (!filledInPath) {
         return;
       }
-      if (!cachesByPath.current[path]) {
-        cachesByPath.current[path] = { filledInPath, weakMap: new WeakMap() };
-      }
-      const { weakMap } = cachesByPath.current[path];
+      const currentPath = (cachesByPath.current[path] = cachesByPath.current[path] ?? {
+        filledInPath,
+        weakMap: new WeakMap(),
+      });
+      const { weakMap } = currentPath;
       if (!weakMap.has(message)) {
         const messagePathDataItems = getMessagePathDataItems(
           message,
@@ -243,14 +244,17 @@ export function getMessagePathDataItems(
       // If the `pathItem` is a name, we're traversing down using that name.
       const next = structureItem.nextByName[pathItem.name];
       const nextStructIsJson =
-        next && next.structureType === "primitive" && next?.primitiveType === "json";
+        next?.structureType === "primitive" && next?.primitiveType === "json";
+
+      const actualNext =
+        !nextStructIsJson && next
+          ? next
+          : { structureType: "primitive", primitiveType: "json", datatype: "" };
       traverse(
         getField(value, pathItem.name),
         pathIndex + 1,
         `${path}.${pathItem.name}`,
-        !nextStructIsJson
-          ? next
-          : { structureType: "primitive", primitiveType: "json", datatype: "" },
+        actualNext as any,
       );
     } else if (
       pathItem.type === "name" &&
@@ -333,7 +337,10 @@ export function getMessagePathDataItems(
       );
     }
   }
-  traverse(message.message, 0, filledInPath.topicName, structures[topic.datatype]);
+  const structure = structures[topic.datatype];
+  if (structure) {
+    traverse(message.message, 0, filledInPath.topicName, structure);
+  }
   return queriedData;
 }
 

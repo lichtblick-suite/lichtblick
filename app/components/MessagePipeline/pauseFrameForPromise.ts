@@ -39,9 +39,13 @@ export async function pauseFrameForPromises(promises: FramePromise[]) {
 
     // Log the panelTypes so we can track which panels timeout regularly.
     const sortedUniquePanelTypes = sortedUniq(sortBy(promises.map(({ name }) => name)));
-    logEvent({
-      name: getEventNames().PAUSE_FRAME_TIMEOUT,
-      tags: { [getEventTags().PANEL_TYPES]: sortedUniquePanelTypes },
-    });
+    const name = getEventNames().PAUSE_FRAME_TIMEOUT;
+    const type = getEventTags().PANEL_TYPES;
+    if (name != undefined && type != undefined) {
+      logEvent({
+        name,
+        tags: { [type]: sortedUniquePanelTypes },
+      });
+    }
   }
 }

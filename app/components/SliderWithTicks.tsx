@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import { sumBy } from "lodash";
 import styled from "styled-components";
-import textWidth from "text-width";
+import textWidth, { Options } from "text-width";
 
 import AutoSizingCanvas from "@foxglove-studio/app/components/AutoSizingCanvas";
 import Slider from "@foxglove-studio/app/components/Slider";
@@ -23,7 +23,7 @@ import mixins from "@foxglove-studio/app/styles/mixins.module.scss";
 // we will remove every other label until the ratio is back above this value.
 const MINIMUM_LABEL_FREESPACE_RATIO = 2;
 
-const TICK_FONT = { family: mixins.monospaceFont, size: 10 };
+const TICK_FONT: Options = { family: mixins.monospaceFont ?? "monospace", size: 10 };
 
 const SSliderContainer = styled.div`
   height: 30px;

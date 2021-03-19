@@ -97,10 +97,14 @@ function GlobalVariablesMenu(props: Props) {
     setIsOpen(false);
     dispatch(addPanel({ type: GlobalVariables.panelType, layout } as AddPanelPayload));
 
-    logEvent({
-      name: getEventNames().PANEL_ADD,
-      tags: { [getEventTags().PANEL_TYPE]: GlobalVariables.panelType },
-    });
+    const name = getEventNames().PANEL_ADD;
+    const type = getEventTags().PANEL_TYPE;
+    if (name != undefined && type != undefined) {
+      logEvent({
+        name,
+        tags: { [type]: GlobalVariables.panelType },
+      });
+    }
   }, [dispatch, layout]);
 
   const { globalVariables } = useGlobalVariables();

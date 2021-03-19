@@ -285,7 +285,7 @@ describe("traverseStructure", () => {
     ).toEqual({
       valid: true,
       msgPathPart: undefined,
-      structureItem: (structure.nextByName.some_pose as any).nextByName.x,
+      structureItem: (structure?.nextByName.some_pose as any).nextByName.x,
     });
     expect(
       traverseStructure(structure, [
@@ -296,7 +296,7 @@ describe("traverseStructure", () => {
     ).toEqual({
       valid: true,
       msgPathPart: undefined,
-      structureItem: (structure.nextByName.some_pose as any).nextByName.dummy_array.next,
+      structureItem: (structure?.nextByName.some_pose as any).nextByName.dummy_array.next,
     });
     expect(
       traverseStructure(structure, [
@@ -308,7 +308,7 @@ describe("traverseStructure", () => {
     ).toEqual({
       valid: true,
       msgPathPart: undefined,
-      structureItem: (structure.nextByName.some_pose as any).nextByName.dummy_array.next,
+      structureItem: (structure?.nextByName.some_pose as any).nextByName.dummy_array.next,
     });
     expect(
       traverseStructure(structure, [
@@ -318,12 +318,12 @@ describe("traverseStructure", () => {
     ).toEqual({
       valid: true,
       msgPathPart: undefined,
-      structureItem: structure.nextByName.some_pose,
+      structureItem: structure?.nextByName.some_pose,
     });
     expect(traverseStructure(structure, [{ type: "name", name: "some_pose" }])).toEqual({
       valid: true,
       msgPathPart: undefined,
-      structureItem: structure.nextByName.some_pose,
+      structureItem: structure?.nextByName.some_pose,
     });
     expect(traverseStructure(structureJson, [{ type: "name", name: "myJson" }])).toEqual({
       msgPathPart: undefined,

@@ -58,15 +58,15 @@ const Icon = (props: Props) => {
     dataTest,
   } = props;
   const classNames = cx("icon", styles.icon, className, {
-    [styles.fade]: fade,
-    [styles.clickable]: !!onClick || clickable == undefined || clickable,
-    [styles.active]: active,
-    [styles.xlarge]: xlarge,
-    [styles.large]: large,
-    [styles.medium]: medium,
-    [styles.small]: small,
-    [styles.xsmall]: xsmall,
-    [styles.xxsmall]: xxsmall,
+    [styles.fade!]: fade,
+    [styles.clickable!]: !!onClick || clickable == undefined || clickable,
+    [styles.active!]: active,
+    [styles.xlarge!]: xlarge,
+    [styles.large!]: large,
+    [styles.medium!]: medium,
+    [styles.small!]: small,
+    [styles.xsmall!]: xsmall,
+    [styles.xxsmall!]: xxsmall,
   });
 
   // if we have a click handler

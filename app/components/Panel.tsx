@@ -176,7 +176,7 @@ export default function Panel<Config extends PanelConfig>(
 
     const panelsByType = useMemo(() => getPanelsByType(), []);
     const type = PanelComponent.panelType;
-    const title = useMemo(() => panelsByType[type]?.title, [panelsByType, type]);
+    const title = useMemo(() => panelsByType[type]?.title ?? "", [panelsByType, type]);
     const panelComponentConfig = useMemo(() => ({ ...PanelComponent.defaultConfig, ...config }), [
       config,
     ]);
@@ -340,10 +340,14 @@ export default function Panel<Config extends PanelConfig>(
     const { closePanel, splitPanel } = useMemo(
       () => ({
         closePanel: () => {
-          logEvent({
-            name: getEventNames().PANEL_REMOVE,
-            tags: { [getEventTags().PANEL_TYPE]: type },
-          });
+          const name = getEventNames().PANEL_REMOVE;
+          const eventType = getEventTags().PANEL_TYPE;
+          if (name != undefined && eventType !== undefined) {
+            logEvent({
+              name,
+              tags: { [eventType]: type },
+            });
+          }
           mosaicActions.remove(mosaicWindowActions.getPath());
         },
         splitPanel: () => {
@@ -367,10 +371,14 @@ export default function Panel<Config extends PanelConfig>(
           } else {
             mosaicWindowActions.split({ type: PanelComponent.panelType });
           }
-          logEvent({
-            name: getEventNames().PANEL_SPLIT,
-            tags: { [getEventTags().PANEL_TYPE]: type },
-          });
+          const name = getEventNames().PANEL_SPLIT;
+          const eventType = getEventTags().PANEL_TYPE;
+          if (name != undefined && eventType !== undefined) {
+            logEvent({
+              name,
+              tags: { [eventType]: type },
+            });
+          }
         },
       }),
       [actions, childId, config, mosaicActions, mosaicWindowActions, savedProps, tabId, type],
@@ -485,9 +493,9 @@ export default function Panel<Config extends PanelConfig>(
           onMouseLeave={onMouseLeave}
           onMouseMove={onMouseMove}
           className={cx({
-            [styles.root]: true,
-            [styles.rootFullScreen]: fullScreen,
-            [styles.selected]: isSelected && !isDemoMode,
+            [styles.root!]: true,
+            [styles.rootFullScreen!]: fullScreen,
+            [styles.selected!]: isSelected && !isDemoMode,
           })}
           col
           dataTest={`panel-mouseenter-container ${childId || ""}`}
