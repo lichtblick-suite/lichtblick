@@ -1825,7 +1825,7 @@ __metadata:
     moment-timezone: 0.5.33
     monaco-editor: 0.22.3
     natsort: 2.0.2
-    panzoom: 8.7.5
+    panzoom: 9.4.1
     prettier: 2.2.1
     promise-queue: 2.2.5
     puppeteer-core: 8.0.0
@@ -16685,7 +16685,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"ngraph.events@npm:^1.0.0":
+"ngraph.events@npm:^1.2.1":
   version: 1.2.1
   resolution: "ngraph.events@npm:1.2.1"
   checksum: f275549b3f61c377357b9368ab661299e854fe2835843a32b7ee0e01e00d7df89946cdf4365cf703c5e0073205e78db170e130a83355076caa0541a61d6cb947
@@ -17508,14 +17508,14 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"panzoom@npm:8.7.5":
-  version: 8.7.5
-  resolution: "panzoom@npm:8.7.5"
+"panzoom@npm:9.4.1":
+  version: 9.4.1
+  resolution: "panzoom@npm:9.4.1"
   dependencies:
     amator: ^1.1.0
-    ngraph.events: ^1.0.0
+    ngraph.events: ^1.2.1
     wheel: ^1.0.0
-  checksum: 65a9e092c0518bac4f95081e64dd9c926bc7ab6eb15c942b0d91a6275e063150b2f14ad38d59c17725e6bf981b8ed673f1d2b100d295e8eb077fc2e38b484495
+  checksum: 92100a32fd51d676a40e603b69e925e02aa3c8f483ef6c49277a88ba9c9cf8472496d3a2c8497c8efac71ab532f30c45cc0daa0683f4abff6dd9a21bfb3efb50
   languageName: node
   linkType: hard
 

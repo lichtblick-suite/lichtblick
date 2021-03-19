@@ -34,7 +34,7 @@
     "moment-timezone": "0.5.33",
     "monaco-editor": "0.22.3",
     "natsort": "2.0.2",
-    "panzoom": "8.7.5",
+    "panzoom": "9.4.1",
     "prettier": "2.2.1",
     "promise-queue": "2.2.5",
     "puppeteer-core": "8.0.0",
