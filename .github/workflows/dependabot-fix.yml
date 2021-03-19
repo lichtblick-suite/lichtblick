@@ -30,6 +30,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
+          # Using a Personal Access Token here is required to trigger workflows on our new commit.
+          # The default GitHub token doesn't trigger any workflows.
+          # See: https://github.community/t/push-from-action-does-not-trigger-subsequent-action/16854/2
+          token: ${{ secrets.DEPENDABOT_FIX_GITHUB_TOKEN }}
           ref: ${{ github.event.pull_request.head.ref }}
 
       - run: git lfs pull --include .yarn/
