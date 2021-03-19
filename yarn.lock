@@ -1938,6 +1938,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@foxglove/xmlrpc@workspace:packages/xmlrpc":
+  version: 0.0.0-use.local
+  resolution: "@foxglove/xmlrpc@workspace:packages/xmlrpc"
+  dependencies:
+    "@types/sax": ^1
+    byte-base64: 1.1.0
+    cross-fetch: 3.1.1
+    sax: 1.2.4
+    web-encoding: 1.1.0
+    xmlbuilder2: 2.4.0
+  languageName: unknown
+  linkType: soft
+
 "@hapi/hoek@npm:^9.0.0":
   version: 9.1.1
   resolution: "@hapi/hoek@npm:9.1.1"
@@ -2418,6 +2431,43 @@ __metadata:
   dependencies:
     "@octokit/openapi-types": ^5.3.2
   checksum: d96bb9fae7f71c849f952432ffbcecc5ce2d00c18044bfb8d993625b9c9852ad6a672f2c144ab198f4e6a3618c744bdc833158b7c02e810659b006736ab73ed5
+  languageName: node
+  linkType: hard
+
+"@oozcitak/dom@npm:1.15.8":
+  version: 1.15.8
+  resolution: "@oozcitak/dom@npm:1.15.8"
+  dependencies:
+    "@oozcitak/infra": 1.0.8
+    "@oozcitak/url": 1.0.4
+    "@oozcitak/util": 8.3.8
+  checksum: 935d8b52ed955e7e949f3cd6a9eeeee6e644bbda42b8d324280e62155a8f945670a93d0e0878ac728877ec65736a747b7ed9d2b22c2e1183d67060ff1b358955
+  languageName: node
+  linkType: hard
+
+"@oozcitak/infra@npm:1.0.8":
+  version: 1.0.8
+  resolution: "@oozcitak/infra@npm:1.0.8"
+  dependencies:
+    "@oozcitak/util": 8.3.8
+  checksum: 49858baadd1bd2a5a2bf283b1ce773ee88bc32cf3a3ac6737b2f2e8a62952a9771617f9e6665ce43625dfe226f79f03796920164d21819b16515250cb6ea7fe0
+  languageName: node
+  linkType: hard
+
+"@oozcitak/url@npm:1.0.4":
+  version: 1.0.4
+  resolution: "@oozcitak/url@npm:1.0.4"
+  dependencies:
+    "@oozcitak/infra": 1.0.8
+    "@oozcitak/util": 8.3.8
+  checksum: 639fb2159b02a518bb1cdd70ac92ceb5ca7097b2c7f1588d083efafa74fc57e43ee3afd2ef9c9a53f565788c52cbe5961a0f568de03ce8248129432b2087d0cd
+  languageName: node
+  linkType: hard
+
+"@oozcitak/util@npm:8.3.8":
+  version: 8.3.8
+  resolution: "@oozcitak/util@npm:8.3.8"
+  checksum: 459a7fb55a7a342e63e2fab7e24198af144ddcf6550229140379afc9086ab3dec2e2822eeb5e2add3abb498d85b7718a73ef82e9ac6ceabe50441dec276e1656
   languageName: node
   linkType: hard
 
@@ -4293,6 +4343,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:14.6.2":
+  version: 14.6.2
+  resolution: "@types/node@npm:14.6.2"
+  checksum: e88f4749fd95d7358a719dee27bb3c02aa7d93a69d95887b4baaeae3fcc21c65d8675e6a9633e499de22fa77651fc12188fd3657a6729dbce9e44a4fe5c0691b
+  languageName: node
+  linkType: hard
+
 "@types/node@npm:^12.6.8":
   version: 12.20.6
   resolution: "@types/node@npm:12.20.6"
@@ -4640,6 +4697,15 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: e95d14da2d05dea49e913db55922857234b01f2b1b513dd8cc556b64ffa6d89fb81ce4c1f21a6b4cd20f39d61455975e623ed681502b3d06b2d24a2ddd03a21e
+  languageName: node
+  linkType: hard
+
+"@types/sax@npm:^1":
+  version: 1.2.1
+  resolution: "@types/sax@npm:1.2.1"
+  dependencies:
+    "@types/node": "*"
+  checksum: 99f2c89dd69b53136d6ffdd4bc431ef2e1cdf29ac2b5c67bb3ec09c12814b5440e85fe3d31562774ad093d3631cf0660b6e5443c70f8654dd7d4ef3a797a0964
   languageName: node
   linkType: hard
 
@@ -7157,6 +7223,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"byte-base64@npm:1.1.0":
+  version: 1.1.0
+  resolution: "byte-base64@npm:1.1.0"
+  checksum: 53efa8f90121349e62de6568aba92d88dafdd352f65bd4e864b718b32c6d9cc3d31c861dc4fe9e49bd86ab2b256044538834ef6c085f47b6312476f0f8c27eb1
+  languageName: node
+  linkType: hard
+
 "bytes@npm:3.0.0":
   version: 3.0.0
   resolution: "bytes@npm:3.0.0"
@@ -8637,6 +8710,15 @@ __metadata:
   version: 1.1.1
   resolution: "create-require@npm:1.1.1"
   checksum: babd307893abfb26d77ae11cb9d6b6cfa6d18c9cee435cf70b5a3fb44aa8d90c9ec26ea89cbb16e0a94b8d34f5fcaee164b90ed526cdd3158955673ab9652d01
+  languageName: node
+  linkType: hard
+
+"cross-fetch@npm:3.1.1":
+  version: 3.1.1
+  resolution: "cross-fetch@npm:3.1.1"
+  dependencies:
+    node-fetch: 2.6.1
+  checksum: 635d8e6688b57719a1edc0e0aaaa9e77a16203823d4a8025324f5ad3f97c2f41837765cfa28609ede61214a4f1e806a6bba8296e8ef2693875255552def66eef
   languageName: node
   linkType: hard
 
@@ -14718,6 +14800,18 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"js-yaml@npm:3.14.0":
+  version: 3.14.0
+  resolution: "js-yaml@npm:3.14.0"
+  dependencies:
+    argparse: ^1.0.7
+    esprima: ^4.0.0
+  bin:
+    js-yaml: bin/js-yaml.js
+  checksum: 2eb95464e5263aedc20ae2d9280f0e29b00adab15ece080ec42473d7055efaab24b904108644d115f687efe05a5bde02972b883aafa93607c4c108f667a56fa7
+  languageName: node
+  linkType: hard
+
 "js-yaml@npm:4.0.0, js-yaml@npm:^4.0.0":
   version: 4.0.0
   resolution: "js-yaml@npm:4.0.0"
@@ -16640,6 +16734,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"node-fetch@npm:2.6.1, node-fetch@npm:^2.6.0, node-fetch@npm:^2.6.1":
+  version: 2.6.1
+  resolution: "node-fetch@npm:2.6.1"
+  checksum: cbb171635e538162b977eac5dfe7a1e07a9a02e991924377a6435502291e2f823d306b95aabc455caebf4a118ccf836868462bc70ccc3095af02bb9da61fda37
+  languageName: node
+  linkType: hard
+
 "node-fetch@npm:^1.0.1":
   version: 1.7.3
   resolution: "node-fetch@npm:1.7.3"
@@ -16647,13 +16748,6 @@ fsevents@^1.2.7:
     encoding: ^0.1.11
     is-stream: ^1.0.1
   checksum: d04afb2e328ffb974a5ac4800fe5714d7419243d72f089a6a2383d3b93368c61ae88954a4866c476c0d7f95d7af414c1b9a885e051971061efe4054d526e23ed
-  languageName: node
-  linkType: hard
-
-"node-fetch@npm:^2.6.0, node-fetch@npm:^2.6.1":
-  version: 2.6.1
-  resolution: "node-fetch@npm:2.6.1"
-  checksum: cbb171635e538162b977eac5dfe7a1e07a9a02e991924377a6435502291e2f823d306b95aabc455caebf4a118ccf836868462bc70ccc3095af02bb9da61fda37
   languageName: node
   linkType: hard
 
@@ -20574,7 +20668,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"sax@npm:1.2.x, sax@npm:^1.2.4, sax@npm:~1.2.4":
+"sax@npm:1.2.4, sax@npm:1.2.x, sax@npm:^1.2.4, sax@npm:~1.2.4":
   version: 1.2.4
   resolution: "sax@npm:1.2.4"
   checksum: 9d7668d69105e89e2c1a4b2fdc12c72e1a2f78b825f7b4a8a2ea5cdfebf70920bd17715bed55264c3b3959616a0695f8ad2d098bf6944fbd0953ee9c695dceef
@@ -24239,6 +24333,19 @@ typescript@4.2.2:
   version: 3.0.0
   resolution: "xml-name-validator@npm:3.0.0"
   checksum: b96679a42e6be36d2433987fe3cc45e972d20d7c2c2a787a2d6b2da94392bd9f23f671cdba29a91211289a2fa8e6965e466dbc1105d0e5730fc3a43e4f1a0688
+  languageName: node
+  linkType: hard
+
+"xmlbuilder2@npm:2.4.0":
+  version: 2.4.0
+  resolution: "xmlbuilder2@npm:2.4.0"
+  dependencies:
+    "@oozcitak/dom": 1.15.8
+    "@oozcitak/infra": 1.0.8
+    "@oozcitak/util": 8.3.8
+    "@types/node": 14.6.2
+    js-yaml: 3.14.0
+  checksum: 98980702552d8e6eb7af3f077ec5d52ad15c56567a2dd47bd7a3a4a7296917b1fc8bbf9a56bb5f1fb797b958831524c793f73eb0a78c89f771f5bd340f12f536
   languageName: node
   linkType: hard
 
