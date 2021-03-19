@@ -78,7 +78,6 @@ async function createWindow(): Promise<void> {
       contextIsolation: true,
       preload: preloadPath,
       nodeIntegration: false,
-      webSecurity: false,
     },
     backgroundColor: colors.background,
   };
