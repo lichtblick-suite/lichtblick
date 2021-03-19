@@ -32,8 +32,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: git lfs pull
-        run: git lfs pull --include .yarn/
+      - run: git lfs pull --include .yarn/
 
       - name: Configure Node.js
         uses: actions/setup-node@v2.1.5
@@ -49,5 +48,5 @@ jobs:
           git config user.name "adrianbot"
           git config user.email "contact@foxglove.dev"
           git add yarn.lock
-          git commit -m 'Fix yarn.lock'
+          git commit -m '[dependabot skip] Fix yarn.lock'
           git push
