@@ -15,7 +15,7 @@
     "classnames": "2.2.6",
     "compressjs": "1.0.3",
     "fuzzysort": "1.1.4",
-    "gl-matrix": "2.8.1",
+    "gl-matrix": "3.3.0",
     "hammerjs": "2.0.8",
     "history": "5.0.0",
     "hoist-non-react-statics": "3.3.2",

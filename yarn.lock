@@ -1805,7 +1805,7 @@ __metadata:
     enzyme: 3.11.0
     fetch-mock: 9.11.0
     fuzzysort: 1.1.4
-    gl-matrix: 2.8.1
+    gl-matrix: 3.3.0
     hammerjs: 2.0.8
     history: 5.0.0
     hoist-non-react-statics: 3.3.2
@@ -12099,17 +12099,10 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"gl-matrix@npm:*, gl-matrix@npm:>=2.6.1":
+"gl-matrix@npm:*, gl-matrix@npm:3.3.0, gl-matrix@npm:>=2.6.1":
   version: 3.3.0
   resolution: "gl-matrix@npm:3.3.0"
   checksum: d75bac9b6b40d6a97c8fd507e76129dae91d84685d5eaf622600ddc811f31fe89d917bb5ddbf8575ce19cf7a993a10bcd5db138ba9bdf2630cf53ec43dc7afa0
-  languageName: node
-  linkType: hard
-
-"gl-matrix@npm:2.8.1":
-  version: 2.8.1
-  resolution: "gl-matrix@npm:2.8.1"
-  checksum: 9fe971c396d54991a74bec0d4cf63da85485dfd24d1e98c149a57c949f3eb26bd32d64fca956857fe484cc73a24589d5ecb41a092026f72158d16a86cfe8ecab
   languageName: node
   linkType: hard
 
