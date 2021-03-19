@@ -1857,7 +1857,7 @@ __metadata:
     react-virtualized: 9.22.3
     react-virtualized-select: 3.1.3
     redux: 4.0.5
-    redux-devtools-extension: 2.13.8
+    redux-devtools-extension: 2.13.9
     redux-thunk: 2.3.0
     regl-worldview: 0.16.0
     reselect: 4.0.0
@@ -19850,12 +19850,12 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"redux-devtools-extension@npm:2.13.8":
-  version: 2.13.8
-  resolution: "redux-devtools-extension@npm:2.13.8"
+"redux-devtools-extension@npm:2.13.9":
+  version: 2.13.9
+  resolution: "redux-devtools-extension@npm:2.13.9"
   peerDependencies:
     redux: ^3.1.0 || ^4.0.0
-  checksum: 4375a0698238f658ca93e35209e488e2c493e1cbb449c52bbd4a6a0d118547bc38e0a0af594801cb3abe7d460508792f095614b54006bb7373e14515cd110a4f
+  checksum: ed3d28384887b38f4ed7471bd1f47fffe9d6798eca87d0db7cff115a90a6618780ab9a3a14ce6b9a27633abda6b48fb386a1d63bd182e6658648475399ff7af9
   languageName: node
   linkType: hard
 
