@@ -4,11 +4,20 @@
 
 import { Socket } from "net";
 
+import { HttpServerElectron } from "./HttpServerElectron";
 import { TcpServerElectron } from "./TcpServerElectron";
 import { TcpSocketElectron } from "./TcpSocketElectron";
 import { getTransform, nextId, registerEntity } from "./registry";
 
 export { registerTransform } from "./registry";
+
+export function createHttpServer(): MessagePort {
+  const channel = new MessageChannel();
+  const id = nextId();
+  const server = new HttpServerElectron(id, channel.port2);
+  registerEntity(id, server);
+  return channel.port1;
+}
 
 export function createSocket(transformName?: string): MessagePort {
   const channel = new MessageChannel();

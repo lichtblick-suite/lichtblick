@@ -2,7 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { HttpHandler } from "../shared/HttpTypes";
 import { Cloneable, RpcCall, RpcResponse } from "../shared/Rpc";
+import { HttpServerRenderer } from "./HttpServerRenderer";
 import { TcpServerRenderer } from "./TcpServerRenderer";
 import { TcpSocketRenderer } from "./TcpSocketRenderer";
 
@@ -32,6 +34,23 @@ export class Sockets {
         callback(args, ev.ports);
       }
     };
+  }
+
+  createHttpServer(requestHandler: HttpHandler): Promise<HttpServerRenderer> {
+    return new Promise((resolve, reject) => {
+      const callId = this.#nextCallId++;
+      this.#callbacks.set(callId, (_, ports) => {
+        const port = ports?.[0];
+        if (!port) {
+          return reject(new Error("no port returned"));
+        }
+
+        resolve(new HttpServerRenderer(port, requestHandler));
+      });
+
+      const msg: RpcCall = ["createHttpServer", callId];
+      this.#messagePort.postMessage(msg);
+    });
   }
 
   createSocket(transformName?: string): Promise<TcpSocketRenderer> {

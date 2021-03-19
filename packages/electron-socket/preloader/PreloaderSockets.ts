@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Cloneable, RpcCall } from "../shared/Rpc";
-import { createServer, createSocket } from "./api";
+import { createHttpServer, createServer, createSocket } from "./api";
 
 export class PreloaderSockets {
   // The preloader ("isolated world") side of the original message channel
@@ -13,6 +13,13 @@ export class PreloaderSockets {
   #messagePort: MessagePort;
   // The API exposed to the renderer
   #functionHandlers = new Map<string, (callId: number, args: Cloneable[]) => void>([
+    [
+      "createHttpServer",
+      (callId, _) => {
+        const port = createHttpServer();
+        this.#messagePort.postMessage([callId], [port]);
+      },
+    ],
     [
       "createSocket",
       (callId, args) => {
