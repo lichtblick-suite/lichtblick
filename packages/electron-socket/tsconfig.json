@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.json",
+  "include": ["preloader/*.ts", "renderer/*.ts", "shared/*.ts"],
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "es2020",
+    "lib": ["es2020", "dom"],
+    "declaration": true,
+    "rootDir": ".",
+    "noUnusedParameters": true,
+    "noEmit": true
+  }
+}

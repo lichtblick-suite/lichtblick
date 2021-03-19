@@ -1900,6 +1900,19 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@foxglove/electron-socket@workspace:packages/electron-socket":
+  version: 0.0.0-use.local
+  resolution: "@foxglove/electron-socket@workspace:packages/electron-socket"
+  dependencies:
+    "@jest/types": 26.6.2
+    electron: 12.0.0
+    eventemitter3: 4.0.7
+    jest: 26.6.3
+    tslib: 2.1.0
+    typescript: 4.2.2
+  languageName: unknown
+  linkType: soft
+
 "@foxglove/ros1-nodejs@workspace:packages/ros1-nodejs":
   version: 0.0.0-use.local
   resolution: "@foxglove/ros1-nodejs@workspace:packages/ros1-nodejs"
@@ -12120,6 +12133,7 @@ __metadata:
   dependencies:
     "@actions/core": 1.2.6
     "@actions/exec": 1.0.4
+    "@foxglove/electron-socket": "workspace:packages/electron-socket"
     "@jest/types": 26.6.2
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.0-beta.1
     "@sentry/electron": 2.4.0
