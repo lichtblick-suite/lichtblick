@@ -2,64 +2,59 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { URL } from "whatwg-url";
+import { XmlRpcValue } from "@foxglove/xmlrpc";
 
-import { XmlRpcClient, XmlRpcResponse, XmlRpcValue } from "./XmlRpcTypes";
+import { RosXmlRpcClient } from "./RosXmlRpcClient";
+import { RosXmlRpcResponse } from "./XmlRpcTypes";
 
 export type ProtocolParams = [string, ...XmlRpcValue[]];
 
-export class RosFollowerClient {
-  #client: XmlRpcClient;
-
-  constructor(options: { xmlRpcClient: XmlRpcClient }) {
-    this.#client = options.xmlRpcClient;
+export class RosFollowerClient extends RosXmlRpcClient {
+  getBusStats(callerId: string): Promise<RosXmlRpcResponse> {
+    return this._methodCall("getBusStats", [callerId]);
   }
 
-  url(): URL {
-    return this.#client.serverUrl;
+  getBusInfo(callerId: string): Promise<RosXmlRpcResponse> {
+    return this._methodCall("getBusInfo", [callerId]);
   }
 
-  getBusStats(callerId: string): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("getBusStats", [callerId]);
+  shutdown(callerId: string, msg = ""): Promise<RosXmlRpcResponse> {
+    return this._methodCall("shutdown", [callerId, msg]);
   }
 
-  getBusInfo(callerId: string): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("getBusInfo", [callerId]);
+  async getPid(callerId: string): Promise<RosXmlRpcResponse> {
+    return this._methodCall("getPid", [callerId]);
   }
 
-  shutdown(callerId: string, msg = ""): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("shutdown", [callerId, msg]);
+  getSubscriptions(callerId: string): Promise<RosXmlRpcResponse> {
+    return this._methodCall("getSubscriptions", [callerId]);
   }
 
-  async getPid(callerId: string): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("getPid", [callerId]);
-  }
-
-  getSubscriptions(callerId: string): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("getSubscriptions", [callerId]);
-  }
-
-  getPublications(callerId: string): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("getPublications", [callerId]);
+  getPublications(callerId: string): Promise<RosXmlRpcResponse> {
+    return this._methodCall("getPublications", [callerId]);
   }
 
   paramUpdate(
     callerId: string,
     parameterKey: string,
     parameterValue: XmlRpcValue,
-  ): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("paramUpdate", [callerId, parameterKey, parameterValue]);
+  ): Promise<RosXmlRpcResponse> {
+    return this._methodCall("paramUpdate", [callerId, parameterKey, parameterValue]);
   }
 
-  publisherUpdate(callerId: string, topic: string, publishers: string[]): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("publisherUpdate", [callerId, topic, publishers]);
+  publisherUpdate(
+    callerId: string,
+    topic: string,
+    publishers: string[],
+  ): Promise<RosXmlRpcResponse> {
+    return this._methodCall("publisherUpdate", [callerId, topic, publishers]);
   }
 
   requestTopic(
     callerId: string,
     topic: string,
     protocols: ProtocolParams[],
-  ): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("requestTopic", [callerId, topic, protocols]);
+  ): Promise<RosXmlRpcResponse> {
+    return this._methodCall("requestTopic", [callerId, topic, protocols]);
   }
 }

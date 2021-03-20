@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["src/**/*.ts", "typings/*.d.ts"],
+  "include": ["src/**/*.ts"],
   "compilerOptions": {
     "target": "es2020",
     "module": "es2020",

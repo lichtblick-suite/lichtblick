@@ -26,7 +26,6 @@
     "typescript": "4.2.2"
   },
   "dependencies": {
-    "@foxglove/ros1": "workspace:packages/ros1",
-    "xmlrpc-rosnodejs": "1.4.1"
+    "@foxglove/ros1": "workspace:packages/ros1"
   }
 }

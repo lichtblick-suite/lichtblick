@@ -3,31 +3,46 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { RosNode } from "@foxglove/ros1";
-import { PlatformNode, TcpSocketNode, XmlRpcNode } from "@foxglove/ros1-nodejs";
+import {
+  getDefaultRosMasterUri,
+  getHostname,
+  getPid,
+  HttpServerNode,
+  TcpSocketNode,
+} from "@foxglove/ros1-nodejs";
 
 async function main() {
   const name = "/testclient";
   let rosNode: RosNode | undefined;
 
   try {
-    const url = await PlatformNode.GetDefaultRosMasterUri();
-    const xmlRpcClient = await XmlRpcNode.XmlRpcCreateClient({ url });
     rosNode = new RosNode({
       name,
-      xmlRpcClient,
-      xmlRpcCreateClient: XmlRpcNode.XmlRpcCreateClient,
-      xmlRpcCreateServer: XmlRpcNode.XmlRpcCreateServer,
-      tcpConnect: TcpSocketNode.Connect,
-      getPid: PlatformNode.GetPid,
-      getHostname: PlatformNode.GetHostname,
+      rosMasterUri: getDefaultRosMasterUri(),
+      hostname: getHostname(),
+      pid: getPid(),
+      httpServer: new HttpServerNode(),
+      tcpSocketCreate: TcpSocketNode.Create,
     });
 
     await rosNode.start();
 
-    const sub = await rosNode.subscribe({
+    const sub = rosNode.subscribe({
       topic: "/turtle1/color_sensor",
       type: "turtlesim/Color",
     });
+
+    sub.on("message", (msg, data, pub) => {
+      // eslint-disable-next-line no-restricted-syntax
+      console.log(
+        `[MSG] ${JSON.stringify(msg)} (${
+          data.byteLength
+        } bytes from ${pub.connection.getTransportInfo()})`,
+      );
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // eslint-disable-next-line no-restricted-syntax
     console.dir(sub.getStats());
   } catch (err) {

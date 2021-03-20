@@ -4,7 +4,7 @@
 
 export type TcpAddress = {
   port: number;
-  family: string;
+  family?: string;
   address: string;
 };
 
@@ -13,9 +13,12 @@ export interface TcpSocket {
   localAddress(): TcpAddress | undefined;
   fd(): number | undefined;
   connected(): boolean;
+
+  connect(): Promise<void>;
   close(): void;
   write(data: Uint8Array): Promise<void>;
 
+  on(eventName: "connect", listener: () => void): this;
   on(eventName: "close", listener: () => void): this;
   on(eventName: "message", listener: (message: Uint8Array) => void): this;
   on(eventName: "end", listener: () => void): this;
@@ -36,6 +39,6 @@ export interface TcpListen {
   (options: { host?: string; port?: number; backlog?: number }): Promise<TcpServer>;
 }
 
-export interface TcpConnect {
+export interface TcpSocketCreate {
   (options: { host: string; port: number }): Promise<TcpSocket>;
 }

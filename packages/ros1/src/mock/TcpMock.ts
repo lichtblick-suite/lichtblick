@@ -14,7 +14,7 @@ export class TcpSocketMock extends EventEmitter implements TcpSocket {
   }
 
   remoteAddress(): TcpAddress | undefined {
-    return this.#connected ? { address: "192.168.1.2", port: 40000, family: "IPv4" } : undefined;
+    return { address: "192.168.1.2", port: 40000, family: this.#connected ? "IPv4" : undefined };
   }
 
   localAddress(): TcpAddress | undefined {
@@ -27,6 +27,10 @@ export class TcpSocketMock extends EventEmitter implements TcpSocket {
 
   connected(): boolean {
     return this.#connected;
+  }
+
+  connect(): Promise<void> {
+    return Promise.resolve();
   }
 
   close(): void {
@@ -62,6 +66,6 @@ export function TcpListen(_options: {
   return Promise.resolve(new TcpServerMock());
 }
 
-export function TcpConnect(_options: { host: string; port: number }): Promise<TcpSocket> {
+export function TcpSocketConnect(_options: { host: string; port: number }): Promise<TcpSocket> {
   return Promise.resolve(new TcpSocketMock());
 }

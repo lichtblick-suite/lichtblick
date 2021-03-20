@@ -1902,7 +1902,6 @@ __metadata:
     jest: 26.6.3
     tslib: 2.1.0
     typescript: 4.2.2
-    xmlrpc-rosnodejs: 1.4.1
   languageName: unknown
   linkType: soft
 
@@ -1920,6 +1919,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/ros1@workspace:packages/ros1"
   dependencies:
+    "@foxglove/xmlrpc": "workspace:packages/xmlrpc"
     "@jest/types": 26.6.2
     "@types/whatwg-url": 8
     eventemitter3: 4.0.7
@@ -20661,7 +20661,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"sax@npm:1.2.4, sax@npm:1.2.x, sax@npm:^1.2.4, sax@npm:~1.2.4":
+"sax@npm:1.2.4, sax@npm:^1.2.4, sax@npm:~1.2.4":
   version: 1.2.4
   resolution: "sax@npm:1.2.4"
   checksum: 9d7668d69105e89e2c1a4b2fdc12c72e1a2f78b825f7b4a8a2ea5cdfebf70920bd17715bed55264c3b3959616a0695f8ad2d098bf6944fbd0953ee9c695dceef
@@ -24342,13 +24342,6 @@ typescript@4.2.2:
   languageName: node
   linkType: hard
 
-"xmlbuilder@npm:8.2.x":
-  version: 8.2.2
-  resolution: "xmlbuilder@npm:8.2.2"
-  checksum: 80ccece600442d66dd87e8580971d2ce32474b5e56e56a912a2440e84aaa1bbde02eee0bcf610b91e90e77ecf56fc5bd4ab61da3579853171f3b69c4bde6847b
-  languageName: node
-  linkType: hard
-
 "xmlbuilder@npm:>=11.0.1":
   version: 15.1.1
   resolution: "xmlbuilder@npm:15.1.1"
@@ -24388,16 +24381,6 @@ typescript@4.2.2:
   version: 1.5.5
   resolution: "xmlhttprequest-ssl@npm:1.5.5"
   checksum: 8bb71857be6fa5536a12998b5a65c73f6f86d38404a08e373d16cbb96f334148b0afe0041bc91a9cff817552a6a1f855806145a7bf0ac0c4a7beaf40d9f5f282
-  languageName: node
-  linkType: hard
-
-"xmlrpc-rosnodejs@npm:1.4.1":
-  version: 1.4.1
-  resolution: "xmlrpc-rosnodejs@npm:1.4.1"
-  dependencies:
-    sax: 1.2.x
-    xmlbuilder: 8.2.x
-  checksum: 55a0ec23901a8aacb5c05d771bc4482406b4e6f693e544cc17fea05aa6845d09a5608ebab68f4c8cc7d87de8228bfcdd76fc4b37dae97d87c21ffc738cfdbe90
   languageName: node
   linkType: hard
 

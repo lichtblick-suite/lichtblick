@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 // Node.js backend
-export * as PlatformNode from "./PlatformNode";
-export { TcpServerNode } from "./TcpServerNode";
-export { TcpSocketNode } from "./TcpSocketNode";
-export * as XmlRpcNode from "./XmlRpcNode";
+export * from "./HttpServerNode";
+export * from "./platform";
+export * from "./TcpServerNode";
+export * from "./TcpSocketNode";

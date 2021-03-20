@@ -2,17 +2,19 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { EventEmitter } from "eventemitter3";
 import { MessageReader, parseMessageDefinition, RosMsgDefinition } from "rosbag";
 import { TextDecoder, TextEncoder } from "web-encoding";
 
 import { Connection, ConnectionStats } from "./Connection";
 import { TcpAddress, TcpSocket } from "./TcpTypes";
 
-type Header = [string, string][];
+export class TcpConnection extends EventEmitter implements Connection {
+  retries = 0;
 
-export class TcpConnection implements Connection {
   #socket: TcpSocket;
   #readingHeader = true;
+  #requestHeader: Map<string, string>;
   #header = new Map<string, string>();
   #stats = {
     bytesSent: 0,
@@ -24,10 +26,14 @@ export class TcpConnection implements Connection {
   #msgDefinition: RosMsgDefinition[] = [];
   #msgReader: MessageReader | undefined;
 
-  constructor(socket: TcpSocket) {
+  constructor(socket: TcpSocket, requestHeader: Map<string, string>) {
+    super();
     this.#socket = socket;
+    this.#requestHeader = requestHeader;
 
+    socket.on("connect", this.#handleConnect);
     socket.on("close", this.#handleClose);
+    socket.on("error", this.#handleError);
     socket.on("message", this.#handleMessage);
   }
 
@@ -44,7 +50,7 @@ export class TcpConnection implements Connection {
   }
 
   header(): Map<string, string> {
-    return this.#header;
+    return new Map<string, string>(this.#header);
   }
 
   stats(): ConnectionStats {
@@ -52,11 +58,12 @@ export class TcpConnection implements Connection {
   }
 
   close(): void {
+    this.removeAllListeners();
     this.#socket.close();
   }
 
-  async writeHeader(header: Header): Promise<void> {
-    const data = TcpConnection.SerializeHeader(header);
+  async writeHeader(): Promise<void> {
+    const data = TcpConnection.SerializeHeader(this.#requestHeader);
     this.#stats.bytesSent += data.byteLength;
     return this.#socket.write(data);
   }
@@ -73,8 +80,19 @@ export class TcpConnection implements Connection {
     return `TCPROS not connected [socket ${fd}]`;
   }
 
+  #handleConnect = (): void => {
+    this.retries = 0;
+    // Write the initial request header. This prompts the publisher to respond
+    // with its own header then start streaming messages
+    this.writeHeader();
+  };
+
   #handleClose = (): void => {
     // TODO: Enter a reconnect loop
+  };
+
+  #handleError = (): void => {
+    // TOOD: Enter a reconnect loop
   };
 
   #handleMessage = (data: Uint8Array): void => {
@@ -93,15 +111,16 @@ export class TcpConnection implements Connection {
         const msg = this.#msgReader.readMessage(
           Buffer.from(data.buffer, data.byteOffset, data.length),
         );
-        // eslint-disable-next-line no-restricted-syntax
-        console.log(`[MSG] ${JSON.stringify(msg)}`);
+        this.emit("message", msg, data);
       }
     }
   };
 
-  static SerializeHeader(header: Header): Uint8Array {
+  static SerializeHeader(header: Map<string, string>): Uint8Array {
     const encoder = new TextEncoder();
-    const encoded = header.map(([key, value]) => encoder.encode(`${key}=${value}`)) as Uint8Array[];
+    const encoded = Array.from(header).map(([key, value]) =>
+      encoder.encode(`${key}=${value}`),
+    ) as Uint8Array[];
     const payloadLen = encoded.reduce((sum, str) => sum + str.length + 4, 0);
     const buffer = new ArrayBuffer(payloadLen + 4);
     const array = new Uint8Array(buffer);

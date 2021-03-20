@@ -4,8 +4,10 @@
 
 import { URL } from "whatwg-url";
 
+import { HttpServer, XmlRpcServer, XmlRpcValue } from "@foxglove/xmlrpc";
+
 import { RosNode } from "./RosNode";
-import { XmlRpcResponse, XmlRpcServer, XmlRpcValue } from "./XmlRpcTypes";
+import { RosXmlRpcResponse } from "./XmlRpcTypes";
 
 function CheckArguments(args: XmlRpcValue[], expected: string[]): Error | undefined {
   if (args.length !== expected.length) {
@@ -33,42 +35,38 @@ function TcpRequested(protocols: XmlRpcValue[]): boolean {
 }
 
 export class RosFollower {
-  #server?: XmlRpcServer;
   #rosNode: RosNode;
+  #server: XmlRpcServer;
 
-  constructor(rosNode: RosNode) {
+  constructor(rosNode: RosNode, httpServer: HttpServer) {
     this.#rosNode = rosNode;
+    this.#server = new XmlRpcServer(httpServer);
   }
 
-  async start(port?: number): Promise<void> {
-    const hostname = await this.#rosNode.hostname();
-    this.#server = await this.#rosNode.xmlRpcCreateServer({ hostname, port });
+  async start(hostname: string, port?: number): Promise<void> {
+    await this.#server.listen(port, hostname, 10);
 
-    this.#server.addMethod("getBusStats", this.getBusStats);
-    this.#server.addMethod("getBusInfo", this.getBusInfo);
-    this.#server.addMethod("shutdown", this.shutdown);
-    this.#server.addMethod("getPid", this.getPid);
-    this.#server.addMethod("getSubscriptions", this.getSubscriptions);
-    this.#server.addMethod("getPublications", this.getPublications);
-    this.#server.addMethod("paramUpdate", this.paramUpdate);
-    this.#server.addMethod("publisherUpdate", this.publisherUpdate);
-    this.#server.addMethod("requestTopic", this.requestTopic);
+    this.#server.setHandler("getBusStats", this.getBusStats);
+    this.#server.setHandler("getBusInfo", this.getBusInfo);
+    this.#server.setHandler("shutdown", this.shutdown);
+    this.#server.setHandler("getPid", this.getPid);
+    this.#server.setHandler("getSubscriptions", this.getSubscriptions);
+    this.#server.setHandler("getPublications", this.getPublications);
+    this.#server.setHandler("paramUpdate", this.paramUpdate);
+    this.#server.setHandler("publisherUpdate", this.publisherUpdate);
+    this.#server.setHandler("requestTopic", this.requestTopic);
   }
 
   close(): void {
-    this.#server?.close();
-    this.#server = undefined;
+    this.#server.close();
   }
 
   url(): URL | undefined {
-    const addr = this.#server?.address();
-    if (addr === undefined) {
-      return undefined;
-    }
-    return new URL(`${addr.secure ? "https:" : "http:"}//${addr.hostname}:${addr.port}/`);
+    const urlStr = this.#server.url();
+    return urlStr != undefined ? new URL(urlStr) : undefined;
   }
 
-  getBusStats = (args: XmlRpcValue[]): Promise<XmlRpcResponse> => {
+  getBusStats = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     const err = CheckArguments(args, ["string"]);
     if (err) {
       return Promise.reject(err);
@@ -77,14 +75,14 @@ export class RosFollower {
     const publications = this.#rosNode.publications.values();
     const subscriptions = this.#rosNode.subscriptions.values();
 
-    const publishStats: XmlRpcValue[] = Array.from(publications, (pub, _) => pub.getStats());
-    const subscribeStats: XmlRpcValue[] = Array.from(subscriptions, (sub, _) => sub.getStats());
+    const publishStats: XmlRpcValue[] = Array.from(publications, (pub, __) => pub.getStats());
+    const subscribeStats: XmlRpcValue[] = Array.from(subscriptions, (sub, __) => sub.getStats());
     const serviceStats: XmlRpcValue[] = [];
 
     return Promise.resolve([1, "", [publishStats, subscribeStats, serviceStats]]);
   };
 
-  getBusInfo = (args: XmlRpcValue[]): Promise<XmlRpcResponse> => {
+  getBusInfo = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     const err = CheckArguments(args, ["string"]);
     if (err) {
       return Promise.reject(err);
@@ -93,7 +91,7 @@ export class RosFollower {
     return Promise.resolve([1, "", ""]);
   };
 
-  shutdown = (args: XmlRpcValue[]): Promise<XmlRpcResponse> => {
+  shutdown = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     if (args.length !== 1 && args.length !== 2) {
       return Promise.reject(new Error(`Expected 1-2 arguments, got ${args.length}`));
     }
@@ -110,17 +108,17 @@ export class RosFollower {
     return Promise.resolve([1, "", 0]);
   };
 
-  getPid = async (args: XmlRpcValue[]): Promise<XmlRpcResponse> => {
+  getPid = async (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     const err = CheckArguments(args, ["string"]);
     if (err) {
       return Promise.reject(err);
     }
 
-    const pid = await this.#rosNode.pid();
+    const pid = await this.#rosNode.pid;
     return [1, "", pid];
   };
 
-  getSubscriptions = (args: XmlRpcValue[]): Promise<XmlRpcResponse> => {
+  getSubscriptions = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     const err = CheckArguments(args, ["string"]);
     if (err) {
       return Promise.reject(err);
@@ -131,7 +129,7 @@ export class RosFollower {
     return Promise.resolve([1, "subscriptions", subs]);
   };
 
-  getPublications = (args: XmlRpcValue[]): Promise<XmlRpcResponse> => {
+  getPublications = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     const err = CheckArguments(args, ["string"]);
     if (err) {
       return Promise.reject(err);
@@ -142,7 +140,7 @@ export class RosFollower {
     return Promise.resolve([1, "publications", pubs]);
   };
 
-  paramUpdate = (args: XmlRpcValue[]): Promise<XmlRpcResponse> => {
+  paramUpdate = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     const err = CheckArguments(args, ["string", "string", "*"]);
     if (err) {
       return Promise.reject(err);
@@ -152,7 +150,7 @@ export class RosFollower {
     return Promise.reject(new Error("Not implemented"));
   };
 
-  publisherUpdate = (args: XmlRpcValue[]): Promise<XmlRpcResponse> => {
+  publisherUpdate = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     const err = CheckArguments(args, ["string", "string", "*"]);
     if (err) {
       return Promise.reject(err);
@@ -162,7 +160,7 @@ export class RosFollower {
     return Promise.reject(new Error("Not implemented"));
   };
 
-  requestTopic = (args: XmlRpcValue[]): Promise<XmlRpcResponse> => {
+  requestTopic = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     const err = CheckArguments(args, ["string", "string", "*"]);
     if (err) {
       return Promise.reject(err);
@@ -174,7 +172,7 @@ export class RosFollower {
       return Promise.resolve([0, "unsupported protocol", []]);
     }
 
-    const addr = this.#rosNode.connectionManager.tcpServerAddress();
+    const addr = this.#rosNode.tcpServerAddress();
     if (!addr) {
       return Promise.resolve([0, "cannot receive incoming connections", []]);
     }

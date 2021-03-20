@@ -3,8 +3,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export * from "./Connection";
-export * from "./ConnectionManager";
-export * from "./PlatformTypes";
 export * from "./Publication";
 export * from "./PublisherLink";
 export * from "./RosMasterClient";

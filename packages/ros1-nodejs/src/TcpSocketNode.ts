@@ -16,14 +16,19 @@ type MaybeHasFd = {
 };
 
 export class TcpSocketNode extends EventEmitter implements TcpSocket {
+  #host: string;
+  #port: number;
   #socket: net.Socket;
   #transformer = new TcpMessageStream();
 
-  constructor(socket: net.Socket) {
+  constructor(host: string, port: number, socket: net.Socket) {
     super();
+    this.#host = host;
+    this.#port = port;
     this.#socket = socket;
     this.#socket.pipe(this.#transformer);
 
+    socket.on("connect", () => this.emit("connect"));
     socket.on("close", () => this.emit("close"));
     socket.on("end", () => this.emit("end"));
     socket.on("timeout", () => this.emit("timeout"));
@@ -33,16 +38,11 @@ export class TcpSocketNode extends EventEmitter implements TcpSocket {
   }
 
   remoteAddress(): TcpAddress | undefined {
-    if (this.#socket.destroyed) {
-      return undefined;
-    }
-
-    const port = this.#socket.remotePort;
-    const family = this.#socket.remoteFamily;
-    const address = this.#socket.remoteAddress;
-    return port !== undefined && family !== undefined && address !== undefined
-      ? { port, family, address }
-      : undefined;
+    return {
+      port: this.#port,
+      family: this.#socket.remoteFamily,
+      address: this.#host,
+    };
   }
 
   localAddress(): TcpAddress | undefined {
@@ -67,7 +67,19 @@ export class TcpSocketNode extends EventEmitter implements TcpSocket {
   }
 
   connected(): boolean {
-    return !this.#socket.destroyed && this.#socket.remoteAddress !== undefined;
+    return !this.#socket.destroyed && this.#socket.localAddress !== undefined;
+  }
+
+  connect(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const KEEPALIVE_MS = 60 * 1000;
+
+      this.#socket.on("error", reject).connect(this.#port, this.#host, () => {
+        this.#socket.removeListener("error", reject);
+        this.#socket.setKeepAlive(true, KEEPALIVE_MS);
+        resolve();
+      });
+    });
   }
 
   close(): void {
@@ -86,25 +98,7 @@ export class TcpSocketNode extends EventEmitter implements TcpSocket {
     });
   }
 
-  static Connect(options: { host: string; port: number }): Promise<TcpSocket> {
-    return new Promise((resolve, reject) => {
-      const TIMEOUT_MS = 5000;
-      const KEEPALIVE_MS = 60 * 1000;
-
-      const socket: net.Socket = net
-        .createConnection(
-          {
-            timeout: TIMEOUT_MS,
-            port: options.port,
-            host: options.host,
-          },
-          () => {
-            socket.removeListener("error", reject);
-            socket.setKeepAlive(true, KEEPALIVE_MS);
-            resolve(new TcpSocketNode(socket));
-          },
-        )
-        .on("error", reject);
-    });
+  static Create({ host, port }: { host: string; port: number }): Promise<TcpSocket> {
+    return Promise.resolve(new TcpSocketNode(host, port, new net.Socket()));
   }
 }

@@ -21,6 +21,8 @@ export type HttpHandler = (req: HttpRequest) => Promise<HttpResponse>;
 export interface HttpServer {
   handler: HttpHandler;
 
+  url(): string | undefined;
+
   listen(port?: number, hostname?: string, backlog?: number): Promise<void>;
 
   close(): void;

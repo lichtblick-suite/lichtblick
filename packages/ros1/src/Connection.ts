@@ -11,6 +11,8 @@ export interface ConnectionStats {
 }
 
 export interface Connection {
+  on(eventName: "message", listener: (msg: unknown, data: Uint8Array) => void): this;
+
   transportType(): string;
 
   connected(): boolean;

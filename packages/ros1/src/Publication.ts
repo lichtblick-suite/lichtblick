@@ -15,7 +15,7 @@ export class Publication {
   readonly name: string;
   readonly md5sum: string;
   readonly dataType: string;
-  subscribers: SubscriberLink[] = [];
+  #subscribers = new Map<number, SubscriberLink>();
 
   constructor(name: string, md5sum: string, dataType: string) {
     this.name = name;
@@ -23,8 +23,15 @@ export class Publication {
     this.dataType = dataType;
   }
 
+  close(): void {
+    for (const sub of this.#subscribers.values()) {
+      sub.connection.close();
+    }
+    this.#subscribers.clear();
+  }
+
   getInfo(): SubscriberInfo[] {
-    return this.subscribers.map(
+    return Array.from(this.#subscribers.values()).map(
       (sub): SubscriberInfo => {
         return [
           sub.connectionId,
@@ -40,7 +47,7 @@ export class Publication {
   }
 
   getStats(): [string, SubscriberStats[]] {
-    const subStats = this.subscribers.map(
+    const subStats = Array.from(this.#subscribers.values()).map(
       (sub): SubscriberStats => {
         const stats = sub.connection.stats();
         return [sub.connectionId, stats.bytesSent, stats.bytesSent, stats.messagesSent, 0];

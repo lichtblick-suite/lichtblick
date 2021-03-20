@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { TextEncoder } from "web-encoding";
+
 import { Deserializer } from "./Deserializer";
 import { HttpRequest, HttpResponse, HttpServer } from "./HttpTypes";
 import { serializeFault, serializeMethodResponse } from "./Serializer";
@@ -16,6 +18,10 @@ export class XmlRpcServer {
   constructor(server: HttpServer) {
     this.server = server;
     server.handler = this.#requestHandler; // Our HTTP handler
+  }
+
+  url(): string | undefined {
+    return this.server.url();
   }
 
   listen(port?: number, hostname?: string, backlog?: number): Promise<void> {
@@ -43,7 +49,11 @@ export class XmlRpcServer {
           err instanceof XmlRpcFault ? err : new XmlRpcFault(String(err.stack ?? err)),
         );
       }
-      return { statusCode: 200, headers: { "Content-Type": "text/xml", body } };
+      const contentLength = String(new TextEncoder().encode(body).length);
+      return {
+        statusCode: 200,
+        headers: { "Content-Type": "text/xml", "Content-Length": contentLength, body },
+      };
     } else {
       return { statusCode: 404 };
     }

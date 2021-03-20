@@ -3,44 +3,30 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import os from "os";
-import { URL } from "whatwg-url";
 
-function isPrivateIP(ip: string): boolean {
-  // Logic based on isPrivateIP() in ros_comm network.cpp
-  return ip.startsWith("192.168") || ip.startsWith("10.") || ip.startsWith("169.254");
+export function getPid(): number {
+  return process.pid;
 }
 
-export function GetPid(): Promise<number> {
-  return Promise.resolve(process.pid);
-}
-
-export function GetDefaultRosMasterUri(): Promise<URL> {
-  const urlStr = process.env["ROS_MASTER_URI"];
-  if (urlStr !== undefined && urlStr.length > 0) {
-    try {
-      const url = new URL(urlStr);
-      if (url.protocol === "http:" || url.protocol === "https:") {
-        return Promise.resolve(url);
-      }
-    } finally {
-      // Ignore malformed ROS_MASTER_URI env var
-    }
+export function getDefaultRosMasterUri(): string {
+  const url = process.env["ROS_MASTER_URI"];
+  if (url !== undefined && url.length > 0) {
+    return url;
   }
-
-  return Promise.resolve(new URL("http://localhost:11311"));
+  return "http://localhost:11311/";
 }
 
-export function GetHostname(): Promise<string> {
+export function getHostname(): string {
   // Prefer ROS_HOSTNAME, then ROS_IP env vars
   let hostname = process.env["ROS_HOSTNAME"] ?? process.env["ROS_IP"];
   if (hostname !== undefined && hostname.length > 0) {
-    return Promise.resolve(hostname);
+    return hostname;
   }
 
   // Try to get the operating system hostname
   hostname = os.hostname();
   if (hostname !== undefined && hostname.length > 0) {
-    return Promise.resolve(hostname);
+    return hostname;
   }
 
   // Fall back to iterating network interfaces looking for an IP address
@@ -72,9 +58,14 @@ export function GetHostname(): Promise<string> {
     }
   }
   if (bestAddr !== undefined) {
-    return Promise.resolve(bestAddr.address);
+    return bestAddr.address;
   }
 
   // Last resort, return IPv4 loopback
-  return Promise.resolve("127.0.0.1");
+  return "127.0.0.1";
+}
+
+function isPrivateIP(ip: string): boolean {
+  // Logic based on isPrivateIP() in ros_comm network.cpp
+  return ip.startsWith("192.168") || ip.startsWith("10.") || ip.startsWith("169.254");
 }

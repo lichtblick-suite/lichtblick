@@ -2,36 +2,25 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { URL } from "whatwg-url";
+import { RosXmlRpcClient } from "./RosXmlRpcClient";
+import { RosXmlRpcResponse } from "./XmlRpcTypes";
 
-import { XmlRpcClient, XmlRpcResponse } from "./XmlRpcTypes";
-
-export class RosMasterClient {
-  #client: XmlRpcClient;
-
-  constructor(options: { xmlRpcClient: XmlRpcClient }) {
-    this.#client = options.xmlRpcClient;
-  }
-
-  url(): URL {
-    return this.#client.serverUrl;
-  }
-
+export class RosMasterClient extends RosXmlRpcClient {
   registerService(
     callerId: string,
     service: string,
     serviceApi: string,
     callerApi: string,
-  ): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("registerService", [callerId, service, serviceApi, callerApi]);
+  ): Promise<RosXmlRpcResponse> {
+    return this._methodCall("registerService", [callerId, service, serviceApi, callerApi]);
   }
 
   unregisterService(
     callerId: string,
     service: string,
     serviceApi: string,
-  ): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("unregisterService", [callerId, service, serviceApi]);
+  ): Promise<RosXmlRpcResponse> {
+    return this._methodCall("unregisterService", [callerId, service, serviceApi]);
   }
 
   registerSubscriber(
@@ -39,16 +28,16 @@ export class RosMasterClient {
     topic: string,
     topicType: string,
     callerApi: string,
-  ): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("registerSubscriber", [callerId, topic, topicType, callerApi]);
+  ): Promise<RosXmlRpcResponse> {
+    return this._methodCall("registerSubscriber", [callerId, topic, topicType, callerApi]);
   }
 
   unregisterSubscriber(
     callerId: string,
     topic: string,
     callerApi: string,
-  ): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("unregisterSubscriber", [callerId, topic, callerApi]);
+  ): Promise<RosXmlRpcResponse> {
+    return this._methodCall("unregisterSubscriber", [callerId, topic, callerApi]);
   }
 
   registerPublisher(
@@ -56,35 +45,39 @@ export class RosMasterClient {
     topic: string,
     topicType: string,
     callerApi: string,
-  ): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("registerPublisher", [callerId, topic, topicType, callerApi]);
+  ): Promise<RosXmlRpcResponse> {
+    return this._methodCall("registerPublisher", [callerId, topic, topicType, callerApi]);
   }
 
-  unregisterPublisher(callerId: string, topic: string, callerApi: string): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("unregisterPublisher", [callerId, topic, callerApi]);
+  unregisterPublisher(
+    callerId: string,
+    topic: string,
+    callerApi: string,
+  ): Promise<RosXmlRpcResponse> {
+    return this._methodCall("unregisterPublisher", [callerId, topic, callerApi]);
   }
 
-  lookupNode(callerId: string, nodeName: string): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("lookupNode", [callerId, nodeName]);
+  lookupNode(callerId: string, nodeName: string): Promise<RosXmlRpcResponse> {
+    return this._methodCall("lookupNode", [callerId, nodeName]);
   }
 
-  getPublishedTopics(callerId: string, subgraph: string = ""): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("getPublishedTopics", [callerId, subgraph]);
+  getPublishedTopics(callerId: string, subgraph: string = ""): Promise<RosXmlRpcResponse> {
+    return this._methodCall("getPublishedTopics", [callerId, subgraph]);
   }
 
-  getTopicTypes(callerId: string): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("getTopicTypes", [callerId]);
+  getTopicTypes(callerId: string): Promise<RosXmlRpcResponse> {
+    return this._methodCall("getTopicTypes", [callerId]);
   }
 
-  getSystemState(callerId: string): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("getSystemState", [callerId]);
+  getSystemState(callerId: string): Promise<RosXmlRpcResponse> {
+    return this._methodCall("getSystemState", [callerId]);
   }
 
-  getUri(callerId: string): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("getUri", [callerId]);
+  getUri(callerId: string): Promise<RosXmlRpcResponse> {
+    return this._methodCall("getUri", [callerId]);
   }
 
-  lookupService(callerId: string, service: string): Promise<XmlRpcResponse> {
-    return this.#client.methodCall("lookupService", [callerId, service]);
+  lookupService(callerId: string, service: string): Promise<RosXmlRpcResponse> {
+    return this._methodCall("lookupService", [callerId, service]);
   }
 }
