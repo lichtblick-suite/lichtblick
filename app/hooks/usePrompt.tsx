@@ -36,6 +36,11 @@ function ModalPrompt({ onComplete, placeholder, value: initialValue }: ModalProm
   const [value, setValue] = useState<string>(initialValue ?? "");
   const inputRef = useRef<HTMLInputElement>(ReactNull);
 
+  // select any existing input text on first display
+  useEffect(() => {
+    inputRef.current?.select();
+  }, []);
+
   return (
     <Modal onRequestClose={() => onComplete(undefined)}>
       <ModalContent>
