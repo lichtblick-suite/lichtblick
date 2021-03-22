@@ -25,9 +25,8 @@ import Hammer from "hammerjs";
 import { v4 as uuidv4 } from "uuid";
 
 import { objectValues } from "@foxglove-studio/app/util";
-import { getFakeRpcs, RpcLike } from "@foxglove-studio/app/util/FakeRpc";
+import { RpcLike } from "@foxglove-studio/app/util/FakeRpc";
 import WebWorkerManager from "@foxglove-studio/app/util/WebWorkerManager";
-import supportsOffscreenCanvas from "@foxglove-studio/app/util/supportsOffscreenCanvas";
 
 import { ScaleOptions as ManagerScaleOptions } from "./ChartJSManager";
 import { ScaleBounds, ZoomOptions, PanOptions, wheelZoomHandler } from "./zoomAndPanHelpers";
@@ -38,12 +37,6 @@ class ChartJSWorker {
     return new Worker(new URL("./ChartJSWorker.worker", import.meta.url));
   }
 }
-
-const getMainThreadChartJSWorker = () =>
-  import(
-    /* webpackChunkName: "main-thread-chartjs" */
-    "./ChartJSWorker"
-  );
 
 export type HoveredElement = any;
 export type ScaleOptions = ManagerScaleOptions;
@@ -65,7 +58,6 @@ type Props = {
     arg0: React.MouseEvent<HTMLCanvasElement>,
     datalabel: ScaleBounds[] | undefined,
   ) => void;
-  forceDisableWorkerRendering?: boolean;
   scaleOptions?: ScaleOptions;
   onChartUpdate?: () => OnEndChartUpdate;
 };
@@ -106,18 +98,9 @@ class ChartComponent extends React.PureComponent<Props> {
       return this._chartRpc;
     }
 
-    if (!this.props.forceDisableWorkerRendering && supportsOffscreenCanvas()) {
-      // Only use a real chart worker if we support offscreenCanvas.
-      this._chartRpc = webWorkerManager.registerWorkerListener(this._id);
-      this._usingWebWorker = true;
-    } else {
-      // Otherwise use a fake RPC so that we don't have to maintain two separate APIs.
-      const { mainThreadRpc, workerRpc } = getFakeRpcs();
-      const { default: MainThreadChartJSWorker } = await getMainThreadChartJSWorker();
-      new MainThreadChartJSWorker(workerRpc);
-      this._chartRpc = mainThreadRpc;
-      this._usingWebWorker = false;
-    }
+    this._chartRpc = webWorkerManager.registerWorkerListener(this._id);
+    this._usingWebWorker = true;
+
     return this._chartRpc;
   };
 

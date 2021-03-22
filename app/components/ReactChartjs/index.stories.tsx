@@ -100,11 +100,7 @@ propsWithDatalabels.data.datasets[0]!.datalabels.display = true;
 
 const divStyle = { width: 600, height: 800, background: "black" };
 
-function DatalabelUpdateExample({
-  forceDisableWorkerRendering,
-}: {
-  forceDisableWorkerRendering: boolean;
-}) {
+function DatalabelUpdateExample() {
   const [hasRenderedOnce, setHasRenderedOnce] = useState<boolean>(false);
   const refFn = useCallback(() => {
     setTimeout(() => setHasRenderedOnce(true), 200);
@@ -116,7 +112,7 @@ function DatalabelUpdateExample({
   }
   return (
     <div style={divStyle} ref={refFn}>
-      <ChartComponent {...chartProps} forceDisableWorkerRendering={forceDisableWorkerRendering} />
+      <ChartComponent {...chartProps} />
     </div>
   );
 }
@@ -160,10 +156,7 @@ storiesOf("<ChartComponent>", module)
       <ChartComponent {...props} />
     </div>
   ))
-  .add("can update", () => <DatalabelUpdateExample forceDisableWorkerRendering={false} />)
-  .add("[web worker disabled] can update", () => (
-    <DatalabelUpdateExample forceDisableWorkerRendering />
-  ))
+  .add("can update", () => <DatalabelUpdateExample />)
   .add("with datalabels", () => (
     <div style={divStyle}>
       <ChartComponent {...propsWithDatalabels} />
