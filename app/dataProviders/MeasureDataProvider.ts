@@ -60,11 +60,12 @@ export default class MeasureDataProvider implements DataProvider {
     children: DataProviderDescriptor[],
     getDataProvider: GetDataProvider,
   ) {
-    if (children.length !== 1) {
+    const child = children[0];
+    if (children.length !== 1 || !child) {
       throw new Error(`Incorrect number of children to MeasureDataProvider: ${children.length}`);
     }
     this._name = name;
-    this._provider = getDataProvider(children[0]);
+    this._provider = getDataProvider(child);
   }
 
   async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {

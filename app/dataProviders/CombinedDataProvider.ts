@@ -30,7 +30,7 @@ import {
   MessageDefinitions,
   ParsedMessageDefinitions,
 } from "@foxglove-studio/app/dataProviders/types";
-import { Message, Progress, Topic } from "@foxglove-studio/app/players/types";
+import { Message, Progress } from "@foxglove-studio/app/players/types";
 import { objectValues } from "@foxglove-studio/app/util";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { deepIntersect } from "@foxglove-studio/app/util/ranges";
@@ -93,21 +93,30 @@ const merge = (
   if (messages2 == undefined) {
     return messages1;
   }
-  const messages = [];
+  const messages = new Array(messages1.length + messages2.length);
+  let idx = 0;
   let index1 = 0;
   let index2 = 0;
   while (index1 < messages1.length && index2 < messages2.length) {
-    if (TimeUtil.isGreaterThan(messages1[index1].receiveTime, messages2[index2].receiveTime)) {
-      messages.push(messages2[index2++]);
+    const m1 = messages1[index1]!;
+    const m2 = messages2[index2]!;
+    if (TimeUtil.isGreaterThan(m1.receiveTime, m2.receiveTime)) {
+      messages[idx] = m2;
+      ++index2;
     } else {
-      messages.push(messages1[index1++]);
+      messages[idx] = m1;
+      ++index1;
     }
+
+    ++idx;
   }
+  // we've consumed either messages1 or messages2 fully
+  // the remaining entries in the peer array are all older than those we've consumed
   while (index1 < messages1.length) {
-    messages.push(messages1[index1++]);
+    messages[idx++] = messages1[index1++];
   }
   while (index2 < messages2.length) {
-    messages.push(messages2[index2++]);
+    messages[idx++] = messages2[index2++];
   }
   return messages;
 };
@@ -131,29 +140,22 @@ const throwOnDuplicateTopics = (topics: string[]) => {
 
 const throwOnUnequalDatatypes = (datatypes: [string, RosMsgField[]][]) => {
   datatypes
-    .sort((a, b) => (a[0] && b[0] ? +(a[0][0] > b[0][0]) || -1 : 0))
+    .sort((a, b) => (a[0] && b[0] ? +(a[0][0]! > b[0][0]!) || -1 : 0))
     .forEach(([datatype, definition], i, sortedDataTypes) => {
-      if (
-        sortedDataTypes[i + 1] &&
-        datatype === sortedDataTypes[i + 1][0] &&
-        !isEqual(definition, sortedDataTypes[i + 1][1])
-      ) {
+      const next = sortedDataTypes[i + 1];
+      if (next && datatype === next[0] && !isEqual(definition, next[1])) {
         throw new Error(
           `Conflicting datatype definitions found for ${datatype}: ${JSON.stringify(
             definition,
-          )} !== ${JSON.stringify(sortedDataTypes[i + 1][1])}`,
+          )} !== ${JSON.stringify(next[1])}`,
         );
       }
     });
 };
 // We parse all message definitions here and then merge them.
-function mergeMessageDefinitions(
-  messageDefinitionArr: MessageDefinitions[],
-  topicsArr: Topic[][],
-): MessageDefinitions {
-  const parsedMessageDefinitionArr: ParsedMessageDefinitions[] = messageDefinitionArr.map(
-    (messageDefinitions, index) =>
-      rawMessageDefinitionsToParsed(messageDefinitions, topicsArr[index]),
+function mergeMessageDefinitions(initResult: InitializationResult[]): MessageDefinitions {
+  const parsedMessageDefinitionArr: ParsedMessageDefinitions[] = initResult.map((result) =>
+    rawMessageDefinitionsToParsed(result.messageDefinitions, result.topics),
   );
   throwOnUnequalDatatypes(
     flatten(parsedMessageDefinitionArr.map(({ datatypes }) => Object.entries(datatypes)) as any),
@@ -258,9 +260,9 @@ export default class CombinedDataProvider implements DataProvider {
       });
     });
     const initializeOutcomes = await Promise.allSettled(providerInitializePromises);
-    const results = initializeOutcomes
-      .filter(({ status }) => status === "fulfilled")
-      .map(({ value }: any) => value);
+    const results = filterMap(initializeOutcomes, (result) => {
+      return result.status === "fulfilled" ? result.value : undefined;
+    });
     this._initializationResultsPerProvider = initializeOutcomes.map((outcome: any) => {
       if (outcome.status === "fulfilled") {
         const { start, end, topics } = outcome.value;
@@ -293,16 +295,13 @@ export default class CombinedDataProvider implements DataProvider {
     const mergedTopics = flatten(results.map(({ topics }) => topics));
     throwOnDuplicateTopics(mergedTopics.map(({ name }) => name));
     throwOnMixedParsedMessages(results.map(({ providesParsedMessages }) => providesParsedMessages));
-    const combinedMessageDefinitions = mergeMessageDefinitions(
-      results.map(({ messageDefinitions }) => messageDefinitions),
-      results.map(({ topics }) => topics),
-    );
+    const combinedMessageDefinitions = mergeMessageDefinitions(results);
 
     return {
       start,
       end,
       topics: mergedTopics,
-      providesParsedMessages: results.length ? results[0].providesParsedMessages : false,
+      providesParsedMessages: results[0]?.providesParsedMessages ?? false,
       messageDefinitions: combinedMessageDefinitions,
     };
   }

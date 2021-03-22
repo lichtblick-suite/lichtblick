@@ -32,7 +32,13 @@ function parsedMessageDefinitionsToDatatypes(
   const datatypes: RosDatatypes = {};
   topLevelDatatypeNames.forEach((datatypeName) => {
     const topicName = topicNameByDatatypeName[datatypeName];
+    if (topicName == undefined) {
+      return;
+    }
     const parsedMessageDefinition = parsedMessageDefinitionsByTopic[topicName];
+    if (!parsedMessageDefinition) {
+      return;
+    }
     parsedMessageDefinition.forEach(({ name, definitions }, index) => {
       // The first definition usually doesn't have an explicit name,
       // so we get the name from the datatype.
@@ -54,8 +60,10 @@ export default function rawMessageDefinitionsToParsed(
     return messageDefinitions;
   }
   const parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic = {};
-  for (const topic of Object.keys(messageDefinitions.messageDefinitionsByTopic)) {
-    const messageDefinition = messageDefinitions.messageDefinitionsByTopic[topic];
+  for (const [topic, topicDefinitions] of Object.entries(
+    messageDefinitions.messageDefinitionsByTopic,
+  )) {
+    const messageDefinition = topicDefinitions;
     const md5 = messageDefinitions.messageDefinitionMd5SumByTopic?.[topic];
     parsedMessageDefinitionsByTopic[topic] = parseMessageDefinitionsCache.parseMessageDefinition(
       messageDefinition,

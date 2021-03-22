@@ -52,12 +52,13 @@ export default class ParseMessagesDataProvider implements DataProvider {
   } = {};
 
   constructor(_args: any, children: DataProviderDescriptor[], getDataProvider: GetDataProvider) {
-    if (children.length !== 1) {
+    const child = children[0];
+    if (children.length !== 1 || !child) {
       throw new Error(
         `Incorrect number of children to ParseMessagesDataProvider: ${children.length}`,
       );
     }
-    this._provider = getDataProvider(children[0]);
+    this._provider = getDataProvider(child);
   }
 
   async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
@@ -90,14 +91,17 @@ export default class ParseMessagesDataProvider implements DataProvider {
     if (!parsedMessageDefinitionsByTopic) {
       throw new Error("ParseMessagesDataProvider: getMessages called before initialize");
     }
-    topics.forEach((topic) => {
+    for (const topic of topics) {
       if (!this._readersByTopic[topic]) {
         const parsedDefinition = parsedMessageDefinitionsByTopic[topic];
+        if (!parsedDefinition) {
+          continue;
+        }
         this._readersByTopic[topic] = new MessageReader(parsedDefinition, {
           freeze: FREEZE_MESSAGES,
         });
       }
-    });
+    }
     return this._readersByTopic;
   }
 

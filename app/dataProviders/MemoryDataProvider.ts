@@ -103,9 +103,9 @@ export default class MemoryDataProvider implements DataProvider {
     }
     const { parsedMessages, rosBinaryMessages, bobjects } = this.messages;
     const sortedMessages = [
-      ...(parsedMessages || []),
-      ...(rosBinaryMessages || []),
-      ...(bobjects || []),
+      ...(parsedMessages ?? []),
+      ...(rosBinaryMessages ?? []),
+      ...(bobjects ?? []),
     ].sort((m1, m2) => TimeUtil.compare(m1.receiveTime, m2.receiveTime));
 
     let messageDefinitions: MessageDefinitions;
@@ -123,15 +123,16 @@ export default class MemoryDataProvider implements DataProvider {
       };
     }
 
+    const firstSortedMessage = sortedMessages[0];
     const lastReceiveTime = last(sortedMessages)?.receiveTime;
-    if (!lastReceiveTime) {
+    if (!lastReceiveTime || !firstSortedMessage) {
       throw new Error("MemoryDataProvider invariant: no sorted messages");
     }
 
     return {
-      start: sortedMessages[0].receiveTime,
+      start: firstSortedMessage.receiveTime,
       end: lastReceiveTime,
-      topics: this.topics || [],
+      topics: this.topics ?? [],
       messageDefinitions,
       providesParsedMessages: this.providesParsedMessages,
     };

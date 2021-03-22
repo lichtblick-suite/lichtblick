@@ -72,11 +72,12 @@ export default class ApiCheckerDataProvider implements DataProvider {
   ) {
     this._name = args.name;
     this._isRoot = args.isRoot;
-    if (children.length !== 1) {
+    const child = children[0];
+    if (children.length !== 1 || !child) {
       this._warn(`Required exactly 1 child, but received ${children.length}`);
       return;
     }
-    this._provider = getDataProvider(children[0]);
+    this._provider = getDataProvider(child);
   }
 
   async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {

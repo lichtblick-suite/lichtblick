@@ -36,10 +36,11 @@ export default class RpcDataProvider implements DataProvider {
   constructor(rpc: Rpc, children: DataProviderDescriptor[]) {
     this._rpc = rpc;
     setupMainThreadRpc(this._rpc);
-    if (children.length !== 1) {
+    const child = children[0];
+    if (children.length !== 1 || !child) {
       throw new Error(`RpcDataProvider requires exactly 1 child, but received ${children.length}`);
     }
-    this._childDescriptor = children[0];
+    this._childDescriptor = child;
   }
 
   initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {

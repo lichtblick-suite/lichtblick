@@ -29,6 +29,7 @@ import {
   DataProvider,
   MessageDefinitions,
 } from "@foxglove-studio/app/dataProviders/types";
+import type { BobjectMessage } from "@foxglove-studio/app/players/types";
 import { Message, Progress, Topic } from "@foxglove-studio/app/players/types";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 
@@ -41,14 +42,15 @@ export default class RenameDataProvider implements DataProvider {
     children: DataProviderDescriptor[],
     getDataProvider: GetDataProvider,
   ) {
-    if (children.length !== 1) {
+    const child = children[0];
+    if (children.length !== 1 || !child) {
       throw new Error(`Incorrect number of children to RenameDataProvider: ${children.length}`);
     }
     if (args.prefix && !args.prefix.startsWith("/")) {
       throw new Error(`Prefix must have a leading forward slash: ${JSON.stringify(args.prefix)}`);
     }
-    this._provider = getDataProvider(children[0]);
-    this._prefix = args.prefix || "";
+    this._provider = getDataProvider(child);
+    this._prefix = args.prefix ?? "";
   }
 
   async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
@@ -163,11 +165,12 @@ export default class RenameDataProvider implements DataProvider {
       return;
     }
 
-    const messagesByTopic: any = {};
-    for (const topicName of Object.keys(block.messagesByTopic)) {
-      messagesByTopic[`${this._prefix}${topicName}`] = block.messagesByTopic[topicName].map(
-        this._mapMessage,
-      );
+    const messagesByTopic: {
+      [topic: string]: readonly BobjectMessage[];
+    } = {};
+
+    for (const [topicName, topicMessages] of Object.entries(block.messagesByTopic)) {
+      messagesByTopic[`${this._prefix}${topicName}`] = topicMessages.map(this._mapMessage);
     }
     return { messagesByTopic, sizeInBytes: block.sizeInBytes };
   });

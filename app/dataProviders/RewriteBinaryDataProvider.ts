@@ -41,7 +41,11 @@ export default class RewriteBinaryDataProvider implements DataProvider {
   _datatypes: RosDatatypes = {};
 
   constructor(_: any, children: DataProviderDescriptor[], getDataProvider: GetDataProvider) {
-    this._provider = getDataProvider(children[0]);
+    const child = children[0];
+    if (!child) {
+      throw new Error("RewriteBinaryDataProvider requires one child");
+    }
+    this._provider = getDataProvider(child);
   }
 
   async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
@@ -107,13 +111,16 @@ export default class RewriteBinaryDataProvider implements DataProvider {
     try {
       if (rosBinaryMessages) {
         const messagesByTopic = groupBy(rosBinaryMessages, "topic");
-        Object.keys(messagesByTopic).forEach((topic) => {
+        for (const [topic, topicMessages] of Object.entries(messagesByTopic)) {
           const definitionName = this._datatypeByTopic[topic];
-          const messages = messagesByTopic[topic];
+          if (definitionName == undefined) {
+            continue;
+          }
+          const messages = topicMessages;
           const binary = writer.rewriteMessages(definitionName, messages);
           const binaryObjects = getObjects(
             this._datatypes,
-            this._datatypeByTopic[topic],
+            definitionName,
             binary.buffer,
             binary.bigString,
             binary.offsets,
@@ -122,10 +129,11 @@ export default class RewriteBinaryDataProvider implements DataProvider {
             ...binaryObjects.map((b, i) => ({
               message: b,
               topic,
-              receiveTime: messages[i].receiveTime,
+              // how do we know that messages[i] is valid?
+              receiveTime: messages[i]!.receiveTime,
             })),
           );
-        });
+        }
       }
     } catch (err) {
       sendNotification(

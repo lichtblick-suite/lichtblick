@@ -106,12 +106,13 @@ export default class IdbCacheWriterDataProvider implements DataProvider {
     getDataProvider: GetDataProvider,
   ) {
     this._id = id;
-    if (children.length !== 1) {
+    const child = children[0];
+    if (children.length !== 1 || !child) {
       throw new Error(
         `Incorrect number of children to IdbCacheReaderDataProvider: ${children.length}`,
       );
     }
-    this._provider = getDataProvider(children[0]);
+    this._provider = getDataProvider(child);
   }
 
   async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
@@ -324,7 +325,7 @@ export default class IdbCacheWriterDataProvider implements DataProvider {
       const tx = this._db.transaction([MESSAGES_STORE_NAME, TOPIC_RANGES_STORE_NAME], "readwrite");
       const messagesStore = tx.objectStore(MESSAGES_STORE_NAME);
       for (let index = 0; index < rosBinaryMessages.length; index++) {
-        const message = rosBinaryMessages[index];
+        const message = rosBinaryMessages[index]!;
         if (message.message.byteLength > 10000000) {
           log.warn(
             `Message on ${message.topic} is suspiciously large (${message.message.byteLength} bytes)`,

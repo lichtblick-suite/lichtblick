@@ -111,7 +111,7 @@ export function getBlocksToKeep({
 
   // Go through all the ranges, from most to least recent.
   for (let blockRangeIndex = 0; blockRangeIndex < recentBlockRanges.length; blockRangeIndex++) {
-    const blockRange = recentBlockRanges[blockRangeIndex];
+    const blockRange = recentBlockRanges[blockRangeIndex]!;
     // Work through blocks from highest priority to lowest. Break and discard low-priority blocks if
     // we exceed our memory budget.
     const { startIndex, endIndex, increment } = getBlocksToKeepDirection(
@@ -219,7 +219,7 @@ export function getPrefetchStartPoint(uncachedRanges: Range[], cursorPosition: n
 
     return a.start - b.start;
   });
-  return uncachedRanges[0].start;
+  return uncachedRanges[0]?.start ?? 0;
 }
 
 // This fills up the memory with messages from an underlying DataProvider. The messages have to be
@@ -294,14 +294,14 @@ export default class MemoryCacheDataProvider implements DataProvider {
   ) {
     this._id = id;
     this._cacheSizeBytes = unlimitedCache ? Infinity : DEFAULT_CACHE_SIZE_BYTES;
-
-    if (children.length !== 1) {
+    const child = children[0];
+    if (children.length !== 1 || !child) {
       throw new Error(
         `Incorrect number of children to MemoryCacheDataProvider: ${children.length}`,
       );
     }
 
-    this._provider = getDataProvider(children[0]);
+    this._provider = getDataProvider(child);
   }
 
   async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
@@ -634,10 +634,10 @@ export default class MemoryCacheDataProvider implements DataProvider {
         this._loggedTooLargeError = true;
         const sizes = [];
 
-        for (const topic of Object.keys(messagesByTopic)) {
+        for (const [topic, topicMessages] of Object.entries(messagesByTopic)) {
           let size = 0;
 
-          for (const bobjectMessage of messagesByTopic[topic]) {
+          for (const bobjectMessage of topicMessages) {
             const { message } = bobjectMessage;
             size +=
               message instanceof ArrayBuffer ? message.byteLength : inaccurateByteSize(message);

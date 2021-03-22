@@ -43,6 +43,7 @@ describe("parsedMessageCache", () => {
       throw new Error("BagDataProvider should have raw message definitions");
     }
     const tfDefinition = messageDefinitions.messageDefinitionsByTopic["/tf"];
+    assert(tfDefinition);
     const parsedTfDefinition = parseMessageDefinition(tfDefinition);
     const messageReadersByTopic = {
       "/tf": new MessageReader(parsedTfDefinition),

@@ -747,7 +747,7 @@ describe("CombinedDataProvider", () => {
           },
         });
         const calls = mockProgressCallback.mock.calls;
-        expect(calls[calls.length - 1][0].messageCache).toEqual({
+        expect(calls[calls.length - 1]![0].messageCache).toEqual({
           startTime: { sec: 100, nsec: 0 },
           blocks: [
             {
@@ -787,7 +787,7 @@ describe("CombinedDataProvider", () => {
           },
         });
         const calls = mockProgressCallback.mock.calls;
-        expect(calls[calls.length - 1][0].messageCache).toEqual({
+        expect(calls[calls.length - 1]![0].messageCache).toEqual({
           startTime: { sec: 100, nsec: 0 },
           blocks: [
             {

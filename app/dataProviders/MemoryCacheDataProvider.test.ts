@@ -170,7 +170,7 @@ describe("MemoryCacheDataProvider", () => {
     ]);
     expect(getMessagesSpy.mock.calls).toHaveLength(MAX_BLOCKS);
     // Start of the first call is the start of the bag
-    expect(getMessagesSpy.mock.calls[0][0]).toEqual({ sec: 0, nsec: 0 });
+    expect(getMessagesSpy.mock.calls[0]![0]).toEqual({ sec: 0, nsec: 0 });
     // End of the last call is the end of the bag
     expect(last(getMessagesSpy.mock.calls)![1]).toEqual({ sec: 3600, nsec: 0 });
   });
@@ -277,10 +277,10 @@ describe("MemoryCacheDataProvider", () => {
     const progress = last(mockProgressCallback.mock.calls)?.[0] ?? {};
     const loadedRanges = progress.fullyLoadedFractionRanges ?? [];
     expect(loadedRanges).toHaveLength(2);
-    expect(loadedRanges[0].start).toBe(0);
-    expect(loadedRanges[0].end).toBeGreaterThanOrEqual(10 / 201);
-    expect(loadedRanges[1].start).toBe(100 / 201);
-    expect(loadedRanges[1].end).toBeGreaterThanOrEqual(161 / 201);
+    expect(loadedRanges[0]?.start).toBe(0);
+    expect(loadedRanges[0]?.end).toBeGreaterThanOrEqual(10 / 201);
+    expect(loadedRanges[1]?.start).toBe(100 / 201);
+    expect(loadedRanges[1]?.end).toBeGreaterThanOrEqual(161 / 201);
     expect(progress.messageCache).toEqual({
       startTime: { sec: 0, nsec: 0 },
       blocks: expect.arrayContaining([]),
