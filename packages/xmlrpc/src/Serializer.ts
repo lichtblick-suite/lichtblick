@@ -22,8 +22,8 @@ export function serializeMethodCall(
   params: XmlRpcValue[] = [],
   encoding?: Encoding,
 ): string {
-  const xml = createXml()
-    .ele("methodCall", { version: "1.0", encoding })
+  const xml = createXml({ version: "1.0", encoding })
+    .ele("methodCall")
     .ele("methodName")
     .txt(method)
     .up()

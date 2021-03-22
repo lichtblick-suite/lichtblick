@@ -52,7 +52,8 @@ export class XmlRpcServer {
       const contentLength = String(new TextEncoder().encode(body).length);
       return {
         statusCode: 200,
-        headers: { "Content-Type": "text/xml", "Content-Length": contentLength, body },
+        headers: { "Content-Type": "text/xml", "Content-Length": contentLength },
+        body,
       };
     } else {
       return { statusCode: 404 };

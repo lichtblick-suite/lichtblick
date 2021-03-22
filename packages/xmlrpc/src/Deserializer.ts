@@ -40,7 +40,7 @@ export class Deserializer {
     this.#parser.on("error", this.#onError);
   }
 
-  deserializeMethodResponse(data: string): Promise<XmlRpcValue> {
+  deserializeMethodResponse(data: string | ArrayBuffer): Promise<XmlRpcValue> {
     return new Promise((resolve, reject) => {
       this.#callback = (error, result) => {
         if (error) {
@@ -254,7 +254,7 @@ export class Deserializer {
   };
 
   #endBase64 = (data: string): void => {
-    const buffer = new Buffer(data, "base64");
+    const buffer = Buffer.from(data, "base64");
     this.#push(buffer);
     this.#value = false;
   };

@@ -5,32 +5,22 @@
 export type DateFormatterOptions = {
   colons?: boolean;
   hyphens?: boolean;
-  local?: boolean;
   ms?: boolean;
-  offset?: boolean;
 };
 
 export class DateFormatter {
   #colons = true;
-  #hyphens = false;
-  #local = true;
-  #ms = false;
-  #offset = false;
+  #hyphens = true;
+  #ms = true;
 
   // Regular Expression that dissects an ISO 8601 formatted string into an array of parts
-  static ISO8601 = new RegExp(
-    "([0-9]{4})([-]?([0-9]{2}))([-]?([0-9]{2}))" +
-      "(T([0-9]{2})(((:?([0-9]{2}))?((:?([0-9]{2}))?(.([0-9]+))?))?)" +
-      "(Z|([+-]([0-9]{2}(:?([0-9]{2}))?)))?)?",
-  );
+  static ISO8601 = /([0-9]{4})([-]?([0-9]{2}))([-]?([0-9]{2}))(T-?([0-9]{2})(((:?([0-9]{2}))?((:?([0-9]{2}))?(\.([0-9]+))?))?)(Z|([+-]([0-9]{2}(:?([0-9]{2}))?)))?)?/;
 
   constructor(options?: DateFormatterOptions) {
     if (options) {
       this.#colons = options.colons ?? this.#colons;
       this.#hyphens = options.hyphens ?? this.#hyphens;
-      this.#local = options.local ?? this.#local;
       this.#ms = options.ms ?? this.#ms;
-      this.#offset = options.offset ?? this.#offset;
     }
   }
 
@@ -58,7 +48,7 @@ export class DateFormatter {
     date +=
       dateParts[17] !== undefined
         ? dateParts[17] + (dateParts[19] != undefined && dateParts[20] == undefined ? "00" : "")
-        : DateFormatter.formatCurrentOffset(new Date(date));
+        : ["Z"];
 
     return new Date(date);
   }
@@ -70,16 +60,14 @@ export class DateFormatter {
    * @return {string}   - String representation of timestamp.
    */
   encodeIso8601(date: Date): string {
-    const parts = this.#local
-      ? DateFormatter.getLocalDateParts(date)
-      : DateFormatter.getUTCDateParts(date);
+    const parts = DateFormatter.getUTCDateParts(date);
 
     return [
       [parts[0], parts[1], parts[2]].join(this.#hyphens ? "-" : ""),
       "T",
       [parts[3], parts[4], parts[5]].join(this.#colons ? ":" : ""),
       this.#ms ? "." + parts[6] : "",
-      this.#local ? (this.#offset ? DateFormatter.formatCurrentOffset(date) : "") : "Z",
+      "Z",
     ].join("");
   }
 
@@ -134,25 +122,6 @@ export class DateFormatter {
       DateFormatter.zeroPad(date.getUTCMinutes(), 2),
       DateFormatter.zeroPad(date.getUTCSeconds(), 2),
       DateFormatter.zeroPad(date.getUTCMilliseconds(), 3),
-    ];
-  }
-
-  /**
-   * Helper function to get an array of zero-padded date parts,
-   * in the local time zone
-   *
-   * @param {Date} date - Date Object
-   * @return {string[]}
-   */
-  static getLocalDateParts(date: Date): string[] {
-    return [
-      date.getFullYear().toString(),
-      DateFormatter.zeroPad(date.getMonth() + 1, 2),
-      DateFormatter.zeroPad(date.getDate(), 2),
-      DateFormatter.zeroPad(date.getHours(), 2),
-      DateFormatter.zeroPad(date.getMinutes(), 2),
-      DateFormatter.zeroPad(date.getSeconds(), 2),
-      DateFormatter.zeroPad(date.getMilliseconds(), 3),
     ];
   }
 }
