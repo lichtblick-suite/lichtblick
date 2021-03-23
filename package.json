@@ -17,6 +17,7 @@
     "email": "support@foxglove.dev"
   },
   "scripts": {
+    "clean": "rimraf .webpack dist app/storybook-static",
     "start": "electron .webpack",
     "build:prod": "webpack --mode production --progress",
     "build:dev": "webpack --mode development --progress",
@@ -51,6 +52,7 @@
     "@types/circular-dependency-plugin": "^5",
     "@types/electron-devtools-installer": "2.2.0",
     "@types/nearley": "2.11.1",
+    "@types/rimraf": "^3",
     "@types/sass": "^1",
     "@types/webpack-dev-server": "3.11.1",
     "@typescript-eslint/eslint-plugin": "4.16.1",
@@ -90,6 +92,7 @@
     "path-browserify": "1.0.1",
     "prettier": "2.2.1",
     "react-svg-loader": "3.0.3",
+    "rimraf": "3.0.2",
     "sass": "1.32.8",
     "sass-loader": "11.0.1",
     "spectron": "https://github.com/foxglove/spectron.git#commit=7f88e8fe148ee14b3efc14c3646c08c4ed0a6747",

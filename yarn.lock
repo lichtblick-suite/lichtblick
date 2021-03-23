@@ -4672,7 +4672,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/rimraf@npm:^3.0.0":
+"@types/rimraf@npm:^3, @types/rimraf@npm:^3.0.0":
   version: 3.0.0
   resolution: "@types/rimraf@npm:3.0.0"
   dependencies:
@@ -11730,6 +11730,7 @@ __metadata:
     "@types/circular-dependency-plugin": ^5
     "@types/electron-devtools-installer": 2.2.0
     "@types/nearley": 2.11.1
+    "@types/rimraf": ^3
     "@types/sass": ^1
     "@types/webpack-dev-server": 3.11.1
     "@typescript-eslint/eslint-plugin": 4.16.1
@@ -11769,6 +11770,7 @@ __metadata:
     path-browserify: 1.0.1
     prettier: 2.2.1
     react-svg-loader: 3.0.3
+    rimraf: 3.0.2
     sass: 1.32.8
     sass-loader: 11.0.1
     spectron: "https://github.com/foxglove/spectron.git#commit=7f88e8fe148ee14b3efc14c3646c08c4ed0a6747"
@@ -20419,6 +20421,17 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"rimraf@npm:3.0.2, rimraf@npm:^3.0.0, rimraf@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "rimraf@npm:3.0.2"
+  dependencies:
+    glob: ^7.1.3
+  bin:
+    rimraf: bin.js
+  checksum: f0de3e445581e64a8a077af476cc30708e659f5779ec2ca2a161556d0792aa318a685923798ae22055b4ecd02b9aff444ef619578f7af53cf8e0e248031e3dee
+  languageName: node
+  linkType: hard
+
 "rimraf@npm:^2.2.8, rimraf@npm:^2.5.4, rimraf@npm:^2.6.3":
   version: 2.7.1
   resolution: "rimraf@npm:2.7.1"
@@ -20427,17 +20440,6 @@ fsevents@^1.2.7:
   bin:
     rimraf: ./bin.js
   checksum: 059efac2838ef917d4d1da1d80e724ad28c120cdf14ca6ed27ca72db2dc70be3e25421cba5947c6ec3d804c1d2bb9a247254653816ee0722bf943ffdd1ae19ef
-  languageName: node
-  linkType: hard
-
-"rimraf@npm:^3.0.0, rimraf@npm:^3.0.2":
-  version: 3.0.2
-  resolution: "rimraf@npm:3.0.2"
-  dependencies:
-    glob: ^7.1.3
-  bin:
-    rimraf: bin.js
-  checksum: f0de3e445581e64a8a077af476cc30708e659f5779ec2ca2a161556d0792aa318a685923798ae22055b4ecd02b9aff444ef619578f7af53cf8e0e248031e3dee
   languageName: node
   linkType: hard
 
