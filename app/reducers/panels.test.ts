@@ -217,21 +217,6 @@ describe("state.persistedState", () => {
     });
   });
 
-  it("sets restrictedTopics in local storage if present", () => {
-    const { store, checkState } = getStore();
-    const payload = {
-      layout: "foo!baz",
-      savedProps: { foo: { test: true } },
-      restrictedTopics: ["1", "2", "3"],
-    };
-
-    store.dispatch(importPanelLayout(payload));
-    checkState(() => {
-      const globalState = GetGlobalState();
-      expect(globalState.panels.restrictedTopics).toEqual(payload.restrictedTopics);
-    });
-  });
-
   describe("adds panel to a layout", () => {
     it("adds panel to main app layout", () => {
       const { store, checkState } = getStore();

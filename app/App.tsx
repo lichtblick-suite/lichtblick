@@ -11,14 +11,23 @@
 //   You may not use this file except in compliance with the License.
 
 import CogIcon from "@mdi/svg/svg/cog.svg";
-import { ReactElement, useState, CSSProperties, useEffect, useMemo, useRef } from "react";
+import {
+  ReactElement,
+  useState,
+  CSSProperties,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from "react";
 import { DndProvider } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
 import { Provider, useDispatch } from "react-redux";
+import { useMountedState } from "react-use";
 import styled from "styled-components";
 
 import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
-import { importPanelLayout } from "@foxglove-studio/app/actions/panels";
+import { importPanelLayout, loadLayout } from "@foxglove-studio/app/actions/panels";
 import AddPanelMenu from "@foxglove-studio/app/components/AddPanelMenu";
 import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";
 import { ExperimentalFeaturesModal } from "@foxglove-studio/app/components/ExperimentalFeaturesModal";
@@ -37,6 +46,7 @@ import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToB
 import ShortcutsModal from "@foxglove-studio/app/components/ShortcutsModal";
 import TinyConnectionPicker from "@foxglove-studio/app/components/TinyConnectionPicker";
 import Toolbar from "@foxglove-studio/app/components/Toolbar";
+import { useAppConfiguration } from "@foxglove-studio/app/context/AppConfigurationContext";
 import ExperimentalFeaturesLocalStorageProvider from "@foxglove-studio/app/context/ExperimentalFeaturesLocalStorageProvider";
 import OsContextAppConfigurationProvider from "@foxglove-studio/app/context/OsContextAppConfigurationProvider";
 import OsContextLayoutStorageProvider from "@foxglove-studio/app/context/OsContextLayoutStorageProvider";
@@ -45,6 +55,7 @@ import {
   usePlayerSelection,
 } from "@foxglove-studio/app/context/PlayerSelectionContext";
 import experimentalFeatures from "@foxglove-studio/app/experimentalFeatures";
+import welcomeLayout from "@foxglove-studio/app/layouts/welcomeLayout";
 import getGlobalStore from "@foxglove-studio/app/store/getGlobalStore";
 import browserHistory from "@foxglove-studio/app/util/history";
 import inAutomatedRunMode from "@foxglove-studio/app/util/inAutomatedRunMode";
@@ -75,10 +86,19 @@ function Root() {
     (window as any).setPanelLayout = (payload: any) => dispatch(importPanelLayout(payload));
   }, [dispatch]);
 
-  const { currentSourceName } = usePlayerSelection();
+  const { currentSourceName, setPlayerFromDemoBag } = usePlayerSelection();
 
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
+
+  const isMounted = useMountedState();
+
+  const openWelcomeLayout = useCallback(async () => {
+    if (isMounted()) {
+      dispatch(loadLayout(welcomeLayout));
+      await setPlayerFromDemoBag();
+    }
+  }, [dispatch, setPlayerFromDemoBag, isMounted]);
 
   // On MacOS we use inset window controls, when the window is full-screen these controls are not present
   // We detect the full screen state and adjust our rendering accordingly
@@ -92,7 +112,8 @@ function Root() {
     OsContextSingleton?.addIpcEventListener("open-keyboard-shortcuts", () =>
       setShortcutsModalOpen(true),
     );
-  }, []);
+    OsContextSingleton?.addIpcEventListener("open-welcome-layout", () => openWelcomeLayout());
+  }, [openWelcomeLayout]);
 
   const toolbarStyle = useMemo<CSSProperties | undefined>(() => {
     const insetWindowControls = OsContextSingleton?.platform === "darwin" && !isFullScreen;
@@ -101,6 +122,19 @@ function Root() {
     }
     return undefined;
   }, [isFullScreen]);
+
+  const appConfiguration = useAppConfiguration();
+
+  // Show welcome layout on first run
+  useEffect(() => {
+    (async () => {
+      const welcomeLayoutShown = await appConfiguration.get("onboarding.welcome-layout.shown");
+      if (!welcomeLayoutShown) {
+        await openWelcomeLayout();
+        await appConfiguration.set("onboarding.welcome-layout.shown", true);
+      }
+    })();
+  }, [appConfiguration, openWelcomeLayout]);
 
   return (
     <div ref={containerRef} className="app-container" tabIndex={0}>

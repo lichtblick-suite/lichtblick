@@ -126,8 +126,7 @@ export default function Panel<Config extends PanelConfig>(
         }>
       >
   ) &
-    PanelStatics<Config>, // TODO(JP): Add `& PanelStatics<Config>` to the return type when we have figured out
-  // https://stackoverflow.com/questions/52508434/adding-static-variable-to-union-of-class-types
+    PanelStatics<Config>,
 ): ComponentType<Props<Config>> & PanelStatics<Config> {
   function ConnectedPanel(props: Props<Config>) {
     const { childId, config: originalConfig, saveConfig, tabId } = props;

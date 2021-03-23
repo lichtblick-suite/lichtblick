@@ -69,14 +69,10 @@ const SegmentedControlWrapper = styled.div`
   align-items: center;
 `;
 
-const RainbowText = React.memo(function RainbowText({ children }) {
-  if (!(children instanceof Array)) {
-    return <></>;
-  }
-  const length = children.length;
+const RainbowText = React.memo(function RainbowText({ children }: { children: string }) {
   return (
     <>
-      {children.map((child, idx) => (
+      {Array.from(children, (child, idx) => (
         // Rainbow gradient goes from magenta (300) to red (0)
         <span key={idx} style={{ color: `hsl(${300 - 300 * (idx / (length - 1))}, 100%, 60%)` }}>
           {child}

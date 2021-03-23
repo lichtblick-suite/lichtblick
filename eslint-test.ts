@@ -41,3 +41,5 @@
   wut == str; // eslint-disable-line no-restricted-syntax
   str == wut; // eslint-disable-line no-restricted-syntax
 };
+
+function useEffectOnce() {} // eslint-disable-line id-denylist, @typescript-eslint/no-unused-vars

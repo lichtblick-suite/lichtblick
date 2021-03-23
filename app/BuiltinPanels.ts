@@ -29,6 +29,7 @@ import Tab from "@foxglove-studio/app/panels/Tab";
 import Table from "@foxglove-studio/app/panels/Table";
 import ThreeDimensionalViz from "@foxglove-studio/app/panels/ThreeDimensionalViz";
 import TwoDimensionalPlot from "@foxglove-studio/app/panels/TwoDimensionalPlot";
+import WelcomePanel from "@foxglove-studio/app/panels/WelcomePanel";
 import DiagnosticStatusPanel from "@foxglove-studio/app/panels/diagnostics/DiagnosticStatusPanel";
 import DiagnosticSummary from "@foxglove-studio/app/panels/diagnostics/DiagnosticSummary";
 import { ndash } from "@foxglove-studio/app/util/entities";
@@ -63,5 +64,8 @@ export function panelsByCategory() {
     { title: "Subscribe to List", component: SubscribeToList },
   ];
 
-  return { ros, utilities, debugging };
+  // These panels are hidden from the menu because getGlobalHooks().panelCategories() doesn't include "hidden".
+  const hidden = [{ title: "Welcome", component: WelcomePanel }];
+
+  return { ros, utilities, debugging, hidden };
 }

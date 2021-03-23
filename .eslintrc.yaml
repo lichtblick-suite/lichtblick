@@ -41,6 +41,9 @@ settings:
 
 rules:
   file-progress/activate: 1
+  id-denylist:
+    - error
+    - useEffectOnce
   no-console: off # configured in no-restricted-syntax
   "@typescript-eslint/ban-ts-comment":
     - error

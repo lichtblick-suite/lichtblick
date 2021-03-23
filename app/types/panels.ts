@@ -17,8 +17,6 @@ import type {
   MosaicDirection,
 } from "react-mosaic-component";
 
-import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
-import { LinkedGlobalVariables } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { PanelsState } from "@foxglove-studio/app/reducers/panels";
 import { TimestampMethod } from "@foxglove-studio/app/util/time";
 
@@ -83,13 +81,7 @@ export type CreateTabPanelPayload = {
   singleTab: boolean;
 };
 
-export type ImportPanelLayoutPayload = {
-  // layout is the object passed to react-mosaic
-  layout?: MosaicNode;
-  savedProps?: SavedProps;
-  globalVariables?: GlobalVariables;
-  userNodes?: UserNodes;
-  linkedGlobalVariables?: LinkedGlobalVariables;
+export type ImportPanelLayoutPayload = Partial<Omit<PanelsState, "id" | "name">> & {
   skipSettingLocalStorage?: boolean;
 };
 

@@ -66,7 +66,7 @@ export type Fixture = {
 
 type Props = {
   children: React.ReactNode;
-  fixture: Fixture;
+  fixture?: Fixture;
   omitDragAndDrop?: boolean;
   onMount?: (arg0: HTMLDivElement, store: Store) => void;
   onFirstMount?: (arg0: HTMLDivElement) => void;
@@ -146,7 +146,7 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
       userNodeLogs,
       userNodeRosLib,
       savedProps,
-    } = props.fixture;
+    } = props.fixture ?? {};
     if (globalVariables) {
       store.dispatch(overwriteGlobalVariables(globalVariables));
     }
@@ -191,14 +191,8 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
   }
 
   renderInner() {
-    const {
-      frame = {},
-      topics,
-      datatypes,
-      capabilities,
-      activeData,
-      progress,
-    } = this.props.fixture;
+    const { frame = {}, topics = [], datatypes, capabilities, activeData, progress } =
+      this.props.fixture ?? {};
     let dTypes = datatypes;
     if (!dTypes) {
       const dummyDatatypes: RosDatatypes = {};

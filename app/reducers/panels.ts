@@ -104,7 +104,6 @@ export type PanelsState = {
   userNodes: UserNodes;
   linkedGlobalVariables: LinkedGlobalVariables;
   playbackConfig: PlaybackConfig;
-  restrictedTopics?: string[];
   version?: number;
 };
 
@@ -475,7 +474,7 @@ function importPanelLayout(state: PanelsState, payload: ImportPanelLayoutPayload
       globalVariables: payload.globalVariables ?? {},
       userNodes: payload.userNodes ?? {},
       linkedGlobalVariables: payload.linkedGlobalVariables ?? [],
-      playbackConfig: defaultPlaybackConfig,
+      playbackConfig: payload.playbackConfig ?? defaultPlaybackConfig,
     };
 
     return newPanelsState;
