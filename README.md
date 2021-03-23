@@ -1,17 +1,20 @@
 # Foxglove Studio
 
-Foxglove Studio is an integrated visualization and diagnosis tool for robotics.
+Foxglove Studio ([foxglove.dev](https://foxglove.dev)) is an integrated visualization and diagnosis tool for robotics.
 
 ## Installation
 
-Check [Releases](https://github.com/foxglove/studio/releases) for the latest version.
+Visit [foxglove.dev/download](https://foxglove.dev/download) or [GitHub Releases](https://github.com/foxglove/studio/releases) to download the latest version.
 
 ## Support
 
 - [GitHub Discussions](https://github.com/foxglove/studio/discussions)
 - [Slack Community](https://foxglove.dev/join-slack)
+- [@foxglovedev on Twitter](https://twitter.com/foxglovedev)
 
-## Development
+## Contributing
+
+Contributions are welcome! Foxglove Studio is primarily written in TypeScript, the instructions below should help you get started:
 
 **Supported development environments:** Linux, Windows, macOS
 
