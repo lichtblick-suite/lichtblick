@@ -18,6 +18,7 @@ import CodeJsonIcon from "@mdi/svg/svg/code-json.svg";
 import CogIcon from "@mdi/svg/svg/cog.svg";
 import DragIcon from "@mdi/svg/svg/drag.svg";
 import FullscreenIcon from "@mdi/svg/svg/fullscreen.svg";
+import HelpCircleOutlineIcon from "@mdi/svg/svg/help-circle-outline.svg";
 import TrashCanOutlineIcon from "@mdi/svg/svg/trash-can-outline.svg";
 import cx from "classnames";
 import { useContext, useState, useCallback, useMemo } from "react";
@@ -35,6 +36,7 @@ import {
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
 import Dimensions from "@foxglove-studio/app/components/Dimensions";
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
+import HelpModal from "@foxglove-studio/app/components/HelpModal";
 import Icon from "@foxglove-studio/app/components/Icon";
 import { Item, SubMenu } from "@foxglove-studio/app/components/Menu";
 import PanelContext, { usePanelContext } from "@foxglove-studio/app/components/PanelContext";
@@ -46,18 +48,15 @@ import frameless from "@foxglove-studio/app/util/frameless";
 import { TAB_PANEL_TYPE } from "@foxglove-studio/app/util/globalConstants";
 import logEvent, { getEventNames, getEventTags } from "@foxglove-studio/app/util/logEvent";
 
-import HelpButton from "./HelpButton";
 import MosaicDragHandle from "./MosaicDragHandle";
 import styles from "./index.module.scss";
 
 type Props = {
-  // eslint-disable-next-line react/no-unused-prop-types
   children?: React.ReactNode;
   floating?: boolean;
   helpContent?: React.ReactNode;
   menuContent?: React.ReactNode;
   additionalIcons?: React.ReactNode;
-  // eslint-disable-next-line react/no-unused-prop-types
   hideToolbars?: boolean;
   showHiddenControlsOnHover?: boolean;
   isUnknownPanel?: boolean;
@@ -233,7 +232,10 @@ function StandardMenuItems({
   );
 }
 
-type PanelToolbarControlsProps = Props & {
+type PanelToolbarControlsProps = Pick<
+  Props,
+  "additionalIcons" | "floating" | "menuContent" | "showHiddenControlsOnHover"
+> & {
   isRendered: boolean;
   onDragStart: () => void;
   onDragEnd: () => void;
@@ -247,7 +249,6 @@ type PanelToolbarControlsProps = Props & {
 const PanelToolbarControls = React.memo(function PanelToolbarControls({
   additionalIcons,
   floating,
-  helpContent,
   isRendered,
   isUnknownPanel,
   menuContent,
@@ -266,7 +267,6 @@ const PanelToolbarControls = React.memo(function PanelToolbarControls({
     >
       {showPanelName && panelData && <div className={styles.panelName}>{panelData.title}</div>}
       {additionalIcons}
-      {helpContent && <HelpButton>{helpContent}</HelpButton>}
       <Dropdown
         flatEdges={!floating}
         toggleComponent={
@@ -316,6 +316,7 @@ export default React.memo<Props>(function PanelToolbar({
   const onDragEnd = useCallback(() => setIsDragging(false), []);
   const [containsOpen, setContainsOpen] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const dispatch = useDispatch();
 
   const { store } = useContext(ReactReduxContext);
@@ -336,6 +337,21 @@ export default React.memo<Props>(function PanelToolbar({
     );
   }, [id, showShareModal, store, dispatch]);
 
+  // Help-shown state must be hoisted outside the controls container so the modal can remain visible
+  // when the panel is no longer hovered.
+  const additionalIconsWithHelp = useMemo(() => {
+    return helpContent ? (
+      <>
+        {additionalIcons}
+        <Icon tooltip="Help" fade onClick={() => setShowHelp(true)}>
+          <HelpCircleOutlineIcon className={styles.icon} />
+        </Icon>
+      </>
+    ) : (
+      additionalIcons
+    );
+  }, [additionalIcons, helpContent]);
+
   if (frameless() || hideToolbars) {
     return ReactNull;
   }
@@ -346,6 +362,9 @@ export default React.memo<Props>(function PanelToolbar({
       {({ width }) => (
         <ChildToggle.ContainsOpen onChange={setContainsOpen}>
           {shareModal}
+          {showHelp && (
+            <HelpModal onRequestClose={() => setShowHelp(false)}>{helpContent}</HelpModal>
+          )}
           <div
             className={cx(styles.panelToolbarContainer, {
               [styles.floating!]: floating,
@@ -359,10 +378,9 @@ export default React.memo<Props>(function PanelToolbar({
                 isRendered={isRendered}
                 showHiddenControlsOnHover={showHiddenControlsOnHover}
                 floating={floating}
-                helpContent={helpContent}
                 menuContent={menuContent}
                 showPanelName={width > 360}
-                additionalIcons={additionalIcons}
+                additionalIcons={additionalIconsWithHelp}
                 onDragStart={onDragStart}
                 onDragEnd={onDragEnd}
                 isUnknownPanel={!!isUnknownPanel}

@@ -11,30 +11,38 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { PropsWithChildren, useMemo } from "react";
+import { PropsWithChildren, useCallback, useContext } from "react";
 import ReactMarkdown from "react-markdown";
 import { CSSProperties } from "styled-components";
+
+import LinkHandlerContext from "@foxglove-studio/app/context/LinkHandlerContext";
 
 import styles from "./TextContent.module.scss";
 
 type Props = {
-  linkTarget?: string;
   style?: CSSProperties;
 };
 
-export default function TextContent(props: PropsWithChildren<Props>) {
+export default function TextContent(props: PropsWithChildren<Props>): React.ReactElement {
   const { children, style } = props;
-  const linkTarget = props.linkTarget;
 
-  const linkRenderer = useMemo(() => {
-    return function RenderLink(renderLinkProps: any) {
+  const handleLink = useContext(LinkHandlerContext);
+
+  const linkRenderer = useCallback(
+    (linkProps: { href: string; children: React.ReactNode }) => {
       return (
-        <a href={renderLinkProps.href} target={linkTarget}>
-          {renderLinkProps.children}
+        <a
+          href={linkProps.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(event) => handleLink(event, linkProps.href)}
+        >
+          {linkProps.children}
         </a>
       );
-    };
-  }, [linkTarget]);
+    },
+    [handleLink],
+  );
 
   return (
     <div className={styles.root} style={style}>

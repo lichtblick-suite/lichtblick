@@ -10,7 +10,6 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import type { History } from "history";
 import { useCallback, useMemo, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { bindActionCreators } from "redux";
@@ -33,19 +32,7 @@ const inNativeUndoRedoElement = (eventTarget: EventTarget) => {
   return false;
 };
 
-type HistoryPush = Pick<History, "push">;
-
-type Props = {
-  openSaveLayoutModal?: () => void;
-  openShortcutsModal?: () => void;
-  history: HistoryPush;
-};
-
-export default function GlobalKeyListener({
-  openSaveLayoutModal,
-  openShortcutsModal,
-  history,
-}: Props): ReactNull {
+export default function GlobalKeyListener(): ReactNull {
   const dispatch = useDispatch();
   const actions = useMemo(
     () => bindActionCreators({ redoLayoutChange, undoLayoutChange }, dispatch),
@@ -65,14 +52,14 @@ export default function GlobalKeyListener({
       }
 
       const lowercaseEventKey = e.key.toLowerCase();
-      if (e.key === "?") {
-        history.push(`/help${window.location.search}`);
-      }
 
       if (!(e.ctrlKey || e.metaKey)) {
         return;
       }
       if (lowercaseEventKey === "z") {
+        // Shortcuts for undo/redo. Note that undo/redo actions are also handled in App.tsx where
+        // they can be connected to the Edit menu items.
+
         // Don't use ctrl-Z for layout history actions inside the Monaco Editor. It isn't
         // controlled, and changes inside it don't result in updates to the Redux state. We could
         // consider making the editor controlled, with a separate "unsaved state".
@@ -88,22 +75,16 @@ export default function GlobalKeyListener({
         } else {
           actions.undoLayoutChange();
         }
-      } else if (lowercaseEventKey === "s" && openSaveLayoutModal) {
-        e.preventDefault();
-        openSaveLayoutModal();
-      } else if (lowercaseEventKey === "/" && openShortcutsModal) {
-        e.preventDefault();
-        openShortcutsModal();
       }
     },
-    [openSaveLayoutModal, openShortcutsModal, history, actions],
+    [actions],
   );
 
   // Not using KeyListener because we want to preventDefault on [ctrl+z] but not on [z], and we want
   // to handle events when text areas have focus.
   useEffect(() => {
-    document.addEventListener("keydown", keyDownHandler, { capture: true });
-    return () => document.removeEventListener("keydown", keyDownHandler, { capture: true });
+    document.addEventListener("keydown", keyDownHandler);
+    return () => document.removeEventListener("keydown", keyDownHandler);
   }, [keyDownHandler]);
 
   return ReactNull;

@@ -8,7 +8,10 @@ export type OsContextForwardedEvent =
   | "leave-full-screen"
   | "open-preferences"
   | "open-keyboard-shortcuts"
-  | "open-welcome-layout";
+  | "open-message-path-syntax-help"
+  | "open-welcome-layout"
+  | "undo"
+  | "redo";
 
 export type StorageContent = string | Uint8Array;
 

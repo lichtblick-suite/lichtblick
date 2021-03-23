@@ -145,8 +145,16 @@ async function createWindow(): Promise<void> {
     role: "editMenu",
     label: "Edit",
     submenu: [
-      { role: "undo" },
-      { role: "redo" },
+      {
+        label: "Undo",
+        accelerator: "CommandOrControl+Z",
+        click: () => mainWindow.webContents.send("undo"),
+      },
+      {
+        label: "Redo",
+        accelerator: "CommandOrControl+Shift+Z",
+        click: () => mainWindow.webContents.send("redo"),
+      },
       { type: "separator" },
       { role: "cut" },
       { role: "copy" },
@@ -187,6 +195,10 @@ async function createWindow(): Promise<void> {
       {
         label: "Welcome",
         click: () => mainWindow.webContents.send("open-welcome-layout"),
+      },
+      {
+        label: "Message Path Syntax",
+        click: () => mainWindow.webContents.send("open-message-path-syntax-help"),
       },
       {
         label: "Keyboard Shortcuts",

@@ -224,14 +224,12 @@ const Sidebar = ({
       docs: (
         <SFlex>
           <SidebarTitle title={"docs"} collapse={() => updateExplorer(undefined)} />
-          <TextContent style={{ backgroundColor: "transparent" }} linkTarget="_blank">
+          <TextContent style={{ backgroundColor: "transparent" }}>
             {otherMarkdownDocsForTest ?? nodePlaygroundDocs}
           </TextContent>
           <br />
           <br />
-          <TextContent style={{ backgroundColor: "transparent" }} linkTarget="_blank">
-            {userUtilsReadMe}
-          </TextContent>
+          <TextContent style={{ backgroundColor: "transparent" }}>{userUtilsReadMe}</TextContent>
         </SFlex>
       ),
       utils: (
