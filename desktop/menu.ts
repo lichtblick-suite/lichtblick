@@ -9,6 +9,7 @@ import { simulateUserClick } from "./simulateUserClick";
 // Install handlers for ipc menu add and remove events
 // These handlers allow for the preload/renderer to manage the list of "File Open ..." items.
 export function installMenuInterface(): void {
+  ipcMain.removeHandler("menu.add-input-source");
   ipcMain.handle("menu.add-input-source", (_ev: unknown, ...args) => {
     const name = args[0];
     if (typeof name !== "string") {
@@ -56,6 +57,7 @@ export function installMenuInterface(): void {
     Menu.setApplicationMenu(appMenu);
   });
 
+  ipcMain.removeHandler("menu.remove-input-source");
   ipcMain.handle("menu.remove-input-source", (_ev: unknown, ...args) => {
     const name = args[0];
     if (typeof name !== "string") {
