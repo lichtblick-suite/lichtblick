@@ -3,7 +3,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { fetch } from "cross-fetch";
-import { TextEncoder } from "web-encoding";
 
 import { Deserializer } from "./Deserializer";
 import { serializeMethodCall } from "./Serializer";
@@ -14,12 +13,8 @@ export class XmlRpcClient {
   url: string;
   encoding?: Encoding;
   headers = {
-    "User-Agent": "Foxglove XML-RPC",
     "Content-Type": "text/xml",
-    "Content-Length": "0",
     Accept: "text/xml",
-    "Accept-Charset": "UTF8",
-    Connection: "Keep-Alive",
   };
 
   constructor(url: string, options?: { encoding?: Encoding; headers?: Record<string, string> }) {
@@ -33,8 +28,7 @@ export class XmlRpcClient {
   // Make an XML-RPC call to the server and return the response
   async methodCall(method: string, params?: XmlRpcValue[]): Promise<XmlRpcValue> {
     const body = serializeMethodCall(method, params, this.encoding);
-    const headers = { ...this.headers };
-    headers["Content-Length"] = String(new TextEncoder().encode(body).length);
+    const headers = this.headers;
 
     const res = await fetch(this.url, {
       method: "POST",

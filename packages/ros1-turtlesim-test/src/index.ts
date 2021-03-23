@@ -4,12 +4,13 @@
 
 import { RosNode } from "@foxglove/ros1";
 import {
-  getDefaultRosMasterUri,
+  getEnvVar,
   getHostname,
+  getNetworkInterfaces,
   getPid,
-  HttpServerNode,
   TcpSocketNode,
-} from "@foxglove/ros1-nodejs";
+} from "@foxglove/ros1/src/nodejs";
+import { HttpServerNodejs } from "@foxglove/xmlrpc/src/HttpServerNodejs";
 
 async function main() {
   const name = "/testclient";
@@ -18,10 +19,10 @@ async function main() {
   try {
     rosNode = new RosNode({
       name,
-      rosMasterUri: getDefaultRosMasterUri(),
-      hostname: getHostname(),
+      rosMasterUri: getEnvVar("ROS_MASTER_URI") ?? "http://localhost:11311/",
+      hostname: RosNode.GetRosHostname(getEnvVar, getHostname, getNetworkInterfaces),
       pid: getPid(),
-      httpServer: new HttpServerNode(),
+      httpServer: new HttpServerNodejs(),
       tcpSocketCreate: TcpSocketNode.Create,
     });
 

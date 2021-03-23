@@ -3,7 +3,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import net from "net";
-import { Transform } from "stream";
 
 import { Cloneable, RpcCall, RpcHandler, RpcResponse } from "../shared/Rpc";
 import { TcpAddress } from "../shared/TcpTypes";
@@ -16,9 +15,10 @@ type MaybeHasFd = {
 
 export class TcpSocketElectron {
   readonly id: number;
+  readonly host: string;
+  readonly port: number;
   #socket: net.Socket;
   #messagePort: MessagePort;
-  #transform?: Transform;
   #api = new Map<string, RpcHandler>([
     ["remoteAddress", (callId) => this.#apiResponse(callId, this.remoteAddress())],
     ["localAddress", (callId) => this.#apiResponse(callId, this.localAddress())],
@@ -51,9 +51,8 @@ export class TcpSocketElectron {
     ["connected", (callId) => this.#apiResponse(callId, this.connected())],
     [
       "connect",
-      (callId, args) => {
-        const options = args[0] as { port: number; host?: string };
-        this.connect(options)
+      (callId, _) => {
+        this.connect()
           .then(() => this.#apiResponse(callId, undefined))
           .catch((err) => this.#apiResponse(callId, String(err.stack ?? err)));
       },
@@ -71,23 +70,24 @@ export class TcpSocketElectron {
     ],
   ]);
 
-  constructor(id: number, messagePort: MessagePort, socket: net.Socket, transform?: Transform) {
+  constructor(
+    id: number,
+    messagePort: MessagePort,
+    host: string,
+    port: number,
+    socket: net.Socket,
+  ) {
     this.id = id;
+    this.host = host;
+    this.port = port;
     this.#socket = socket;
     this.#messagePort = messagePort;
-    this.#transform = transform;
 
     this.#socket.on("close", () => this.#emit("close"));
     this.#socket.on("end", () => this.#emit("end"));
+    this.#socket.on("data", this.#handleData);
     this.#socket.on("timeout", () => this.#emit("timeout"));
     this.#socket.on("error", (err) => this.#emit("error", String(err.stack ?? err)));
-
-    if (transform) {
-      this.#socket.pipe(transform);
-      transform.on("data", this.#handleData);
-    } else {
-      this.#socket.on("data", this.#handleData);
-    }
 
     messagePort.onmessage = (ev: MessageEvent<RpcCall>) => {
       const [methodName, callId] = ev.data;
@@ -140,12 +140,13 @@ export class TcpSocketElectron {
     return !this.#socket.destroyed && this.#socket.localAddress !== undefined;
   }
 
-  connect(options: { port: number; host?: string }): Promise<void> {
+  connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.#socket
-        .connect(options, () => {
+        .connect({ host: this.host, port: this.port }, () => {
           this.#socket.removeListener("error", reject);
           resolve();
+          this.#emit("connect");
         })
         .on("error", reject);
     });
@@ -159,8 +160,6 @@ export class TcpSocketElectron {
     this.#socket.removeAllListeners();
     this.close();
     this.#messagePort.close();
-    this.#transform?.removeListener("data", this.#handleData);
-    this.#transform = undefined;
   }
 
   write(data: Uint8Array): Promise<void> {

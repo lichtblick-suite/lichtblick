@@ -3,7 +3,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import net from "net";
-import { Transform } from "stream";
 
 import { Cloneable, RpcCall, RpcHandler, RpcResponse } from "../shared/Rpc";
 import { TcpAddress } from "../shared/TcpTypes";
@@ -14,7 +13,6 @@ export class TcpServerElectron {
   readonly id: number;
   #server: net.Server;
   #messagePort: MessagePort;
-  #transform?: Transform;
   #api = new Map<string, RpcHandler>([
     ["address", (callId) => this.#apiResponse([callId, this.address()])],
     [
@@ -32,11 +30,10 @@ export class TcpServerElectron {
     ["dispose", (callId) => this.#apiResponse([callId, this.dispose()])],
   ]);
 
-  constructor(id: number, messagePort: MessagePort, transform?: Transform) {
+  constructor(id: number, messagePort: MessagePort) {
     this.id = id;
     this.#server = net.createServer();
     this.#messagePort = messagePort;
-    this.#transform = transform;
 
     this.#server.on("close", () => this.#emit("close"));
     this.#server.on("connection", (socket) => this.#emitConnection(socket));
@@ -94,9 +91,11 @@ export class TcpServerElectron {
   };
 
   #emitConnection = (socket: net.Socket): void => {
-    const channel = new MessageChannel();
     const id = nextId();
-    const electronSocket = new TcpSocketElectron(id, channel.port2, socket, this.#transform);
+    const channel = new MessageChannel();
+    const host = socket.remoteAddress as string;
+    const port = socket.remotePort as number;
+    const electronSocket = new TcpSocketElectron(id, channel.port2, host, port, socket);
     registerEntity(id, electronSocket);
     this.#messagePort.postMessage(["connection"], [channel.port1]);
   };

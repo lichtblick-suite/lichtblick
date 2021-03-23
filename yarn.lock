@@ -1893,23 +1893,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/ros1-nodejs@workspace:packages/ros1-nodejs":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/ros1-nodejs@workspace:packages/ros1-nodejs"
-  dependencies:
-    "@foxglove/ros1": "workspace:packages/ros1"
-    "@jest/types": 26.6.2
-    jest: 26.6.3
-    tslib: 2.1.0
-    typescript: 4.2.2
-  languageName: unknown
-  linkType: soft
-
 "@foxglove/ros1-turtlesim-test@workspace:packages/ros1-turtlesim-test":
   version: 0.0.0-use.local
   resolution: "@foxglove/ros1-turtlesim-test@workspace:packages/ros1-turtlesim-test"
   dependencies:
-    "@foxglove/ros1-nodejs": "workspace:packages/ros1-nodejs"
+    "@foxglove/ros1": "workspace:packages/ros1"
     tslib: 2.1.0
     typescript: 4.2.2
   languageName: unknown
@@ -1921,14 +1909,12 @@ __metadata:
   dependencies:
     "@foxglove/xmlrpc": "workspace:packages/xmlrpc"
     "@jest/types": 26.6.2
-    "@types/whatwg-url": 8
     eventemitter3: 4.0.7
     jest: 26.6.3
     rosbag: "github:foxglove/rosbag.js#fc61125fbc01ff55698c5ed48987b2d9e7599572"
     tslib: 2.1.0
     typescript: 4.2.2
     web-encoding: 1.1.0
-    whatwg-url: 8.4.0
   languageName: unknown
   linkType: soft
 
@@ -4809,6 +4795,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/url-parse@npm:^1":
+  version: 1.4.3
+  resolution: "@types/url-parse@npm:1.4.3"
+  checksum: dc778cf3e0cc325ac43aedeadfe83e8723fb10b2561a4f916be3efab6aaa128250c42b0e7e31bec2c5ea1fc1cda7a77db7c8c15bac8af86dfc4cebbd28dbbdec
+  languageName: node
+  linkType: hard
+
 "@types/url-search-params@npm:1.1.0":
   version: 1.1.0
   resolution: "@types/url-search-params@npm:1.1.0"
@@ -4834,13 +4827,6 @@ __metadata:
   version: 5.2.0
   resolution: "@types/wait-on@npm:5.2.0"
   checksum: bab44ec5fc49b639eaaa9c7da7f4f1c2c0ac986add300435a8d75e2c3ffad841dada0fb8227e4eb7d8e7e0b9cff92e05ba3d2459f718c4fddbcfc20161de0bc9
-  languageName: node
-  linkType: hard
-
-"@types/webidl-conversions@npm:*":
-  version: 6.1.0
-  resolution: "@types/webidl-conversions@npm:6.1.0"
-  checksum: 5a939bfc40f097b3a0a9390178b294ca901f35d3fc9fcf042658bc5da4ac85fa50c60f23dbba57b8e594d9e8c1b5fca738174a395527ecc1bbe094ee900c7502
   languageName: node
   linkType: hard
 
@@ -4886,16 +4872,6 @@ __metadata:
     "@types/webpack-sources": "*"
     source-map: ^0.6.0
   checksum: c84012af1d0159e6c17b065139d8c15ffe18042445db4f9c61e2fe3aff1d4ebeb8a65af6824e991eb161334c2842c6d2b55f9d700bd7e64bf492f3dcbf1a92d1
-  languageName: node
-  linkType: hard
-
-"@types/whatwg-url@npm:8":
-  version: 8.0.0
-  resolution: "@types/whatwg-url@npm:8.0.0"
-  dependencies:
-    "@types/node": "*"
-    "@types/webidl-conversions": "*"
-  checksum: 3c73a8c092e7769dcbbfa9b9275f8f06b07b7816d35b5dbf3c90ae3844484d3586ba07211857bbac23e122a5ea1f0cf066a8f337a9f16e44bfcd7447d6fc0143
   languageName: node
   linkType: hard
 
@@ -11732,6 +11708,7 @@ __metadata:
     "@types/nearley": 2.11.1
     "@types/rimraf": ^3
     "@types/sass": ^1
+    "@types/url-parse": ^1
     "@types/webpack-dev-server": 3.11.1
     "@typescript-eslint/eslint-plugin": 4.16.1
     "@typescript-eslint/parser": 4.16.1
@@ -11782,6 +11759,7 @@ __metadata:
     ts-node: 9.1.1
     typescript: 4.2.2
     typescript-plugin-css-modules: 3.2.0
+    url-parse: 1.5.1
     webpack: 5.26.3
     webpack-cli: 4.5.0
     webpack-dev-server: 3.11.2
@@ -23309,7 +23287,7 @@ typescript@4.2.2:
   languageName: node
   linkType: hard
 
-"url-parse@npm:^1.4.3, url-parse@npm:^1.4.7":
+"url-parse@npm:1.5.1, url-parse@npm:^1.4.3, url-parse@npm:^1.4.7":
   version: 1.5.1
   resolution: "url-parse@npm:1.5.1"
   dependencies:
@@ -24101,17 +24079,6 @@ typescript@4.2.2:
   languageName: node
   linkType: hard
 
-"whatwg-url@npm:8.4.0, whatwg-url@npm:^8.0.0, whatwg-url@npm:^8.4.0":
-  version: 8.4.0
-  resolution: "whatwg-url@npm:8.4.0"
-  dependencies:
-    lodash.sortby: ^4.7.0
-    tr46: ^2.0.2
-    webidl-conversions: ^6.1.0
-  checksum: c85dfbedd2554e76d05eba467509db3a0ed5740e3bf1069a10ca302da531d64399693e4952c61be67d119a6b7f634f3ff65fbe59555b30474f849a7e0ce2a4c6
-  languageName: node
-  linkType: hard
-
 "whatwg-url@npm:^6.5.0":
   version: 6.5.0
   resolution: "whatwg-url@npm:6.5.0"
@@ -24120,6 +24087,17 @@ typescript@4.2.2:
     tr46: ^1.0.1
     webidl-conversions: ^4.0.2
   checksum: 454a06402d3ccec0057b8b2d00231153a38bb985749268903111166175e599254175461515b351cd3e6c7e1a9674c35adbcf708304cd38e6aae5b81c6ac9e095
+  languageName: node
+  linkType: hard
+
+"whatwg-url@npm:^8.0.0, whatwg-url@npm:^8.4.0":
+  version: 8.4.0
+  resolution: "whatwg-url@npm:8.4.0"
+  dependencies:
+    lodash.sortby: ^4.7.0
+    tr46: ^2.0.2
+    webidl-conversions: ^6.1.0
+  checksum: c85dfbedd2554e76d05eba467509db3a0ed5740e3bf1069a10ca302da531d64399693e4952c61be67d119a6b7f634f3ff65fbe59555b30474f849a7e0ce2a4c6
   languageName: node
   linkType: hard
 

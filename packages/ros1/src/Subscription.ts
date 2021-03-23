@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { EventEmitter } from "eventemitter3";
+import { MessageReader, RosMsgDefinition } from "rosbag";
 
 import { Connection } from "./Connection";
 import { PublisherLink } from "./PublisherLink";
@@ -27,25 +28,44 @@ type PublisherInfo = [
   connectionInfo: string,
 ];
 
-export class Subscription {
+export declare interface Subscription {
+  on(
+    event: "header",
+    listener: (
+      header: Map<string, string>,
+      msgDef: RosMsgDefinition[],
+      msgReader: MessageReader,
+    ) => void,
+  ): this;
+  on(
+    event: "message",
+    listener: (msg: unknown, data: Uint8Array, publisher: PublisherLink) => void,
+  ): this;
+}
+
+export class Subscription extends EventEmitter {
   readonly name: string;
   readonly md5sum: string;
   readonly dataType: string;
   #publishers = new Map<number, PublisherLink>();
-  #emitter = new EventEmitter();
 
   constructor(name: string, md5sum: string, dataType: string) {
+    super();
     this.name = name;
     this.md5sum = md5sum;
     this.dataType = dataType;
   }
 
   close(): void {
-    this.#emitter.removeAllListeners();
+    this.removeAllListeners();
     for (const pub of this.#publishers.values()) {
       pub.connection.close();
     }
     this.#publishers.clear();
+  }
+
+  publishers(): Readonly<Map<number, PublisherLink>> {
+    return this.#publishers;
   }
 
   addPublisher(
@@ -53,23 +73,16 @@ export class Subscription {
     rosFollowerClient: RosFollowerClient,
     connection: Connection,
   ): void {
-    const publisher = new PublisherLink(connectionId, rosFollowerClient, connection);
+    const publisher = new PublisherLink(connectionId, this, rosFollowerClient, connection);
     this.#publishers.set(connectionId, publisher);
 
-    connection.on("message", (msg, data) => this.#emitter.emit("message", msg, data, publisher));
+    connection.on("header", (header, def, reader) => this.emit("header", header, def, reader));
+    connection.on("message", (msg, data) => this.emit("message", msg, data, publisher));
   }
 
   removePublisher(connectionId: number): boolean {
     this.#publishers.get(connectionId)?.connection.close();
     return this.#publishers.delete(connectionId);
-  }
-
-  on(
-    eventName: "message",
-    listener: (msg: unknown, data: Uint8Array, publisher: PublisherLink) => void,
-  ): this {
-    this.#emitter.on(eventName, listener);
-    return this;
   }
 
   getInfo(): PublisherInfo[] {

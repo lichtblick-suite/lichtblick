@@ -14,6 +14,7 @@
 import { PropsWithChildren, useCallback, useEffect, useRef, useState } from "react";
 import { connect, ConnectedProps } from "react-redux";
 
+import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import {
   setUserNodeDiagnostics,
   addUserNodeLogs,
@@ -38,6 +39,7 @@ import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { usePrompt } from "@foxglove-studio/app/hooks/usePrompt";
 import useUserNodes from "@foxglove-studio/app/hooks/useUserNodes";
 import OrderedStampPlayer from "@foxglove-studio/app/players/OrderedStampPlayer";
+import Ros1Player from "@foxglove-studio/app/players/Ros1Player";
 import RosbridgePlayer from "@foxglove-studio/app/players/RosbridgePlayer";
 import UserNodePlayer from "@foxglove-studio/app/players/UserNodePlayer";
 import {
@@ -48,6 +50,7 @@ import { Player } from "@foxglove-studio/app/players/types";
 import { State } from "@foxglove-studio/app/reducers";
 import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import { useShallowMemo } from "@foxglove-studio/app/util/hooks";
+import { parseInputUrl } from "@foxglove-studio/app/util/url";
 
 const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo.bag";
 
@@ -59,7 +62,7 @@ type BuiltPlayer = {
 function buildPlayerFromFiles(files: File[], options: BuildPlayerOptions): BuiltPlayer {
   if (files.length === 1) {
     return {
-      player: buildPlayerFromDescriptor(getLocalBagDescriptor(files[0]!), options),
+      player: buildPlayerFromDescriptor(getLocalBagDescriptor(files[0] as File), options),
       sources: files.map((file) => String(file.name)),
     };
   } else if (files.length === 2) {
@@ -69,11 +72,11 @@ function buildPlayerFromFiles(files: File[], options: BuildPlayerOptions): Built
           name: CoreDataProviders.CombinedDataProvider,
           args: {},
           children: [
-            getLocalBagDescriptor(files[0]!),
+            getLocalBagDescriptor(files[0] as File),
             {
               name: CoreDataProviders.RenameDataProvider,
               args: { prefix: SECOND_SOURCE_PREFIX },
-              children: [getLocalBagDescriptor(files[1]!)],
+              children: [getLocalBagDescriptor(files[1] as File)],
             },
           ],
         },
@@ -94,7 +97,7 @@ async function buildPlayerFromBagURLs(
   if (urls.length === 1) {
     return {
       player: buildPlayerFromDescriptor(
-        getRemoteBagDescriptor(urls[0]!, guids[0], options),
+        getRemoteBagDescriptor(urls[0] as string, guids[0], options),
         options,
       ),
       sources: urls.map((url) => url.toString()),
@@ -106,11 +109,11 @@ async function buildPlayerFromBagURLs(
           name: CoreDataProviders.CombinedDataProvider,
           args: {},
           children: [
-            getRemoteBagDescriptor(urls[0]!, guids[0], options),
+            getRemoteBagDescriptor(urls[0] as string, guids[0], options),
             {
               name: CoreDataProviders.RenameDataProvider,
               args: { prefix: SECOND_SOURCE_PREFIX },
-              children: [getRemoteBagDescriptor(urls[1]!, guids[1], options)],
+              children: [getRemoteBagDescriptor(urls[1] as string, guids[1], options)],
             },
           ],
         },
@@ -234,11 +237,25 @@ function PlayerManager({
 
           break;
         }
+        case "ros1-core": {
+          const result = await prompt({
+            value: OsContextSingleton?.getEnvVar("ROS_MASTER_URI") ?? "http://localhost:11311/",
+          });
+          const url = parseInputUrl(result, "http:");
+          if (url == undefined) {
+            return;
+          }
+          buildPlayer({
+            player: new Ros1Player(url),
+            sources: [url],
+          });
+          break;
+        }
         case "ws": {
           const result = await prompt({
             placeholder: "ws://localhost:9090",
           });
-          if (result === undefined || result.length === 0) {
+          if (result == undefined || result.length === 0) {
             return;
           }
 
@@ -252,12 +269,13 @@ function PlayerManager({
           const result = await prompt({
             placeholder: "http://example.com/file.bag",
           });
-          if (result === undefined || result.length === 0) {
+          if (result == undefined || result.length === 0) {
             return;
           }
 
           const builtPlayer = await buildPlayerFromBagURLs([result], buildPlayerOptions);
           buildPlayer(builtPlayer);
+          break;
         }
       }
     },
@@ -276,6 +294,11 @@ function PlayerManager({
     buildPlayer(buildPlayerFromFiles(usedFiles.current, buildPlayerOptions));
   }, [buildPlayer, filesToOpen, buildPlayerOptions]);
 
+  let availableSources = playerSources;
+  if (!useExperimentalFeature("ros1Native")) {
+    availableSources = availableSources.filter((src) => src.type !== "ros1-core");
+  }
+
   const value: PlayerSelection = {
     selectSource,
     // Expose a simple way to load a demo bag for first launch onboarding.
@@ -284,7 +307,7 @@ function PlayerManager({
     // the prompt() responsibilities could be moved out of the PlayerManager.
     setPlayerFromDemoBag: async () =>
       buildPlayer(await buildPlayerFromBagURLs([DEMO_BAG_URL], buildPlayerOptions)),
-    availableSources: playerSources,
+    availableSources,
     currentSourceName,
     currentPlayer: player,
   };

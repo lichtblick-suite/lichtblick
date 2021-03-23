@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { URL } from "whatwg-url";
+import { EventEmitter } from "eventemitter3";
 
 import { HttpServer } from "@foxglove/xmlrpc";
 
@@ -12,7 +12,7 @@ import { RosFollowerClient } from "./RosFollowerClient";
 import { RosMasterClient } from "./RosMasterClient";
 import { Subscription } from "./Subscription";
 import { TcpConnection } from "./TcpConnection";
-import { TcpSocketCreate, TcpServer, TcpAddress } from "./TcpTypes";
+import { TcpSocketCreate, TcpServer, TcpAddress, NetworkInterface } from "./TcpTypes";
 
 export type SubscribeOpts = {
   topic: string;
@@ -22,15 +22,7 @@ export type SubscribeOpts = {
   tcpNoDelay?: boolean;
 };
 
-function ToUrl(url: string): URL | undefined {
-  try {
-    return new URL(url);
-  } catch {
-    return undefined;
-  }
-}
-
-export class RosNode {
+export class RosNode extends EventEmitter {
   readonly name: string;
   readonly hostname: string;
   readonly pid: number;
@@ -54,6 +46,7 @@ export class RosNode {
     tcpSocketCreate: TcpSocketCreate;
     tcpServer?: TcpServer;
   }) {
+    super();
     this.name = options.name;
     this.hostname = options.hostname;
     this.pid = options.pid;
@@ -165,7 +158,7 @@ export class RosNode {
       this.name,
       subscription.name,
       subscription.dataType,
-      localApiUrl.toString(),
+      localApiUrl,
     );
 
     if (status !== 1) {
@@ -201,18 +194,13 @@ export class RosNode {
 
     // Register with each publisher
     await Promise.all(
-      publishers.map(async (pubUrlStr) => {
-        const url = ToUrl(pubUrlStr as string);
-        if (url === undefined) {
-          return;
-        }
-
+      publishers.map(async (pubUrl) => {
         if (!this.#running) {
           return;
         }
 
         // Create an XMLRPC client to talk to this publisher
-        const rosFollowerClient = new RosFollowerClient(String(url));
+        const rosFollowerClient = new RosFollowerClient(pubUrl);
 
         if (!this.#running) {
           return;
@@ -253,4 +241,61 @@ export class RosNode {
       }),
     );
   };
+
+  static GetRosHostname(
+    getEnvVar: (envVar: string) => string | undefined,
+    getHostname: () => string | undefined,
+    getNetworkInterfaces: () => NetworkInterface[],
+  ): string {
+    // Prefer ROS_HOSTNAME, then ROS_IP env vars
+    let hostname = getEnvVar("ROS_HOSTNAME") ?? getEnvVar("ROS_IP");
+    if (hostname !== undefined && hostname.length > 0) {
+      return hostname;
+    }
+
+    // Try to get the operating system hostname
+    hostname = getHostname();
+    if (hostname !== undefined && hostname.length > 0) {
+      return hostname;
+    }
+
+    // Fall back to iterating network interfaces looking for an IP address
+    let bestAddr: NetworkInterface | undefined;
+    const ifaces = getNetworkInterfaces();
+    for (const name in ifaces) {
+      const iface = ifaces[name];
+      if (iface == undefined) {
+        continue;
+      }
+      if (
+        (iface.family !== "IPv4" && iface.family !== "IPv6") ||
+        iface.internal ||
+        iface.address.length === 0
+      ) {
+        continue;
+      }
+
+      if (bestAddr === undefined) {
+        // Use the first non-internal interface we find
+        bestAddr = iface;
+      } else if (RosNode.IsPrivateIP(bestAddr.address) && !RosNode.IsPrivateIP(iface.address)) {
+        // Prefer public IPs over private
+        bestAddr = iface;
+      } else if (bestAddr.family !== "IPv6" && iface.family === "IPv6") {
+        // Prefer IPv6
+        bestAddr = iface;
+      }
+    }
+    if (bestAddr !== undefined) {
+      return bestAddr.address;
+    }
+
+    // Last resort, return IPv4 loopback
+    return "127.0.0.1";
+  }
+
+  static IsPrivateIP(ip: string): boolean {
+    // Logic based on isPrivateIP() in ros_comm network.cpp
+    return ip.startsWith("192.168") || ip.startsWith("10.") || ip.startsWith("169.254");
+  }
 }

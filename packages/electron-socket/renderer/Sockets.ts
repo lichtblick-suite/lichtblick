@@ -36,7 +36,7 @@ export class Sockets {
     };
   }
 
-  createHttpServer(requestHandler: HttpHandler): Promise<HttpServerRenderer> {
+  createHttpServer(requestHandler?: HttpHandler): Promise<HttpServerRenderer> {
     return new Promise((resolve, reject) => {
       const callId = this.#nextCallId++;
       this.#callbacks.set(callId, (_, ports) => {
@@ -53,36 +53,38 @@ export class Sockets {
     });
   }
 
-  createSocket(transformName?: string): Promise<TcpSocketRenderer> {
+  createSocket(host: string, port: number): Promise<TcpSocketRenderer> {
     return new Promise((resolve, reject) => {
       const callId = this.#nextCallId++;
-      this.#callbacks.set(callId, (_, ports) => {
-        const port = ports?.[0];
-        if (!port) {
-          return reject(new Error("no port returned"));
+      this.#callbacks.set(callId, (args, ports) => {
+        const msgPort = ports?.[0];
+        if (!msgPort) {
+          const err = args[0] as string | undefined;
+          return reject(new Error(err ?? "no port returned"));
         }
 
-        resolve(new TcpSocketRenderer(port));
+        resolve(new TcpSocketRenderer(msgPort));
       });
 
-      const msg: RpcCall = ["createSocket", callId, transformName];
+      const msg: RpcCall = ["createSocket", callId, host, port];
       this.#messagePort.postMessage(msg);
     });
   }
 
-  createServer(transformName?: string): Promise<TcpServerRenderer> {
+  createServer(): Promise<TcpServerRenderer> {
     return new Promise((resolve, reject) => {
       const callId = this.#nextCallId++;
-      this.#callbacks.set(callId, (_, ports) => {
+      this.#callbacks.set(callId, (args, ports) => {
         const port = ports?.[0];
         if (!port) {
-          return reject(new Error("no port returned"));
+          const err = args[0] as string | undefined;
+          return reject(new Error(err ?? "no port returned"));
         }
 
         resolve(new TcpServerRenderer(port));
       });
 
-      const msg: RpcCall = ["createServer", callId, transformName];
+      const msg: RpcCall = ["createServer", callId];
       this.#messagePort.postMessage(msg);
     });
   }

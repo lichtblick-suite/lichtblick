@@ -7,12 +7,21 @@ import { MessageReader, parseMessageDefinition, RosMsgDefinition } from "rosbag"
 import { TextDecoder, TextEncoder } from "web-encoding";
 
 import { Connection, ConnectionStats } from "./Connection";
+import { RosTcpMessageStream } from "./RosTcpMessageStream";
 import { TcpAddress, TcpSocket } from "./TcpTypes";
 
+// Implements a subscriber for the TCPROS transport. The actual TCP transport is
+// implemented in the passed in `socket` (TcpSocket). A transform stream is used
+// internally for parsing the TCPROS message format (4 byte length followed by
+// message payload) so "message" events represent one full message each without
+// the length prefix. A transform class that meets this requirements is
+// implemented in `RosTcpMessageStream`.
 export class TcpConnection extends EventEmitter implements Connection {
   retries = 0;
 
   #socket: TcpSocket;
+  #connected = false;
+  #transportInfo = "TCPROS not connected [socket -1]";
   #readingHeader = true;
   #requestHeader: Map<string, string>;
   #header = new Map<string, string>();
@@ -23,6 +32,7 @@ export class TcpConnection extends EventEmitter implements Connection {
     messagesReceived: 0,
     dropEstimate: -1,
   };
+  #transformer = new RosTcpMessageStream();
   #msgDefinition: RosMsgDefinition[] = [];
   #msgReader: MessageReader | undefined;
 
@@ -34,19 +44,21 @@ export class TcpConnection extends EventEmitter implements Connection {
     socket.on("connect", this.#handleConnect);
     socket.on("close", this.#handleClose);
     socket.on("error", this.#handleError);
-    socket.on("message", this.#handleMessage);
+    socket.on("data", (chunk) => this.#transformer.addData(chunk));
+
+    this.#transformer.on("message", this.#handleMessage);
   }
 
   transportType(): string {
     return "TCPROS";
   }
 
-  remoteAddress(): TcpAddress | undefined {
+  remoteAddress(): Promise<TcpAddress | undefined> {
     return this.#socket.remoteAddress();
   }
 
   connected(): boolean {
-    return this.#socket.connected();
+    return this.#connected;
   }
 
   header(): Map<string, string> {
@@ -57,6 +69,14 @@ export class TcpConnection extends EventEmitter implements Connection {
     return this.#stats;
   }
 
+  messageDefinition(): RosMsgDefinition[] {
+    return this.#msgDefinition;
+  }
+
+  messageReader(): MessageReader | undefined {
+    return this.#msgReader;
+  }
+
   close(): void {
     this.removeAllListeners();
     this.#socket.close();
@@ -64,54 +84,72 @@ export class TcpConnection extends EventEmitter implements Connection {
 
   async writeHeader(): Promise<void> {
     const data = TcpConnection.SerializeHeader(this.#requestHeader);
-    this.#stats.bytesSent += data.byteLength;
+    this.#stats.bytesSent += 4 + data.byteLength;
+
+    // Write the 4-byte length
+    const lenBuffer = new ArrayBuffer(4);
+    const view = new DataView(lenBuffer);
+    view.setUint32(0, data.byteLength, true);
+    this.#socket.write(new Uint8Array(lenBuffer));
+
+    // Write the serialized header payload
     return this.#socket.write(data);
   }
 
   // e.g. "TCPROS connection on port 59746 to [host:34318 on socket 11]"
   getTransportInfo(): string {
-    const localPort = this.#socket.localAddress()?.port ?? -1;
-    const addr = this.#socket.remoteAddress();
-    const fd = this.#socket.fd() ?? -1;
+    return this.#transportInfo;
+  }
+
+  #getTransportInfo = async (): Promise<string> => {
+    const localPort = (await this.#socket.localAddress())?.port ?? -1;
+    const addr = await this.#socket.remoteAddress();
+    const fd = (await this.#socket.fd()) ?? -1;
     if (addr) {
       const { address, port } = addr;
       return `TCPROS connection on port ${localPort} to [${address}:${port} on socket ${fd}]`;
     }
     return `TCPROS not connected [socket ${fd}]`;
-  }
+  };
 
-  #handleConnect = (): void => {
+  #handleConnect = async (): Promise<void> => {
+    this.#connected = true;
     this.retries = 0;
+    this.#transportInfo = await this.#getTransportInfo();
     // Write the initial request header. This prompts the publisher to respond
     // with its own header then start streaming messages
     this.writeHeader();
   };
 
   #handleClose = (): void => {
+    this.#connected = false;
     // TODO: Enter a reconnect loop
   };
 
   #handleError = (): void => {
-    // TOOD: Enter a reconnect loop
+    this.#connected = false;
+    // TODO: Enter a reconnect loop
   };
 
-  #handleMessage = (data: Uint8Array): void => {
-    this.#stats.bytesReceived += data.byteLength;
+  #handleMessage = (msgData: Uint8Array): void => {
+    this.#connected = true;
+    this.#stats.bytesReceived += msgData.byteLength;
 
     if (this.#readingHeader) {
       this.#readingHeader = false;
 
-      this.#header = TcpConnection.ParseHeader(data);
+      this.#header = TcpConnection.ParseHeader(msgData);
       this.#msgDefinition = parseMessageDefinition(this.#header.get("message_definition") ?? "");
       this.#msgReader = new MessageReader(this.#msgDefinition);
+      this.emit("header", this.#header, this.#msgDefinition, this.#msgReader);
     } else {
       this.#stats.messagesReceived++;
 
       if (this.#msgReader) {
         const msg = this.#msgReader.readMessage(
-          Buffer.from(data.buffer, data.byteOffset, data.length),
+          Buffer.from(msgData.buffer, msgData.byteOffset, msgData.length),
         );
-        this.emit("message", msg, data);
+        this.emit("message", msg, msgData);
       }
     }
   };
@@ -122,14 +160,11 @@ export class TcpConnection extends EventEmitter implements Connection {
       encoder.encode(`${key}=${value}`),
     ) as Uint8Array[];
     const payloadLen = encoded.reduce((sum, str) => sum + str.length + 4, 0);
-    const buffer = new ArrayBuffer(payloadLen + 4);
+    const buffer = new ArrayBuffer(payloadLen);
     const array = new Uint8Array(buffer);
     const view = new DataView(buffer);
 
     let idx = 0;
-    view.setUint32(idx, payloadLen, true);
-    idx += 4;
-
     encoded.forEach((strData) => {
       view.setUint32(idx, strData.length, true);
       idx += 4;

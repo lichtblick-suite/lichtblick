@@ -78,6 +78,11 @@ async function createWindow(): Promise<void> {
       contextIsolation: true,
       preload: preloadPath,
       nodeIntegration: false,
+      // Disable webSecurity in development so we can make XML-RPC calls, load
+      // remote data, etc. In production, the app is served from file:// URLs so
+      // the Origin header is not sent, disabling the CORS
+      // Access-Control-Allow-Origin check
+      webSecurity: process.env.NODE_ENV === "production",
     },
     backgroundColor: colors.background,
   };

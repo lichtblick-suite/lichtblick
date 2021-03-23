@@ -2,8 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { URL } from "whatwg-url";
-
 import { XmlRpcClient, XmlRpcValue } from "@foxglove/xmlrpc";
 
 import { RosXmlRpcResponse } from "./XmlRpcTypes";
@@ -15,8 +13,8 @@ export class RosXmlRpcClient {
     this.#client = new XmlRpcClient(url, { encoding: "utf8" });
   }
 
-  url(): URL {
-    return new URL(this.#client.url);
+  url(): string {
+    return this.#client.url;
   }
 
   protected _methodCall = async (

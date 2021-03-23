@@ -31,10 +31,23 @@ export interface Storage {
   delete(datastore: string, key: string): Promise<void>;
 }
 
+export interface NetworkInterface {
+  name: string;
+  family: "IPv4" | "IPv6";
+  internal: boolean;
+  address: string;
+  cidr?: string;
+  mac: string;
+  netmask: string;
+}
+
 /** OsContext is exposed over the electron Context Bridge */
 export interface OsContext {
   // See Node.js process.platform
   platform: string;
+
+  // The process id of this application
+  pid: number;
 
   handleToolbarDoubleClick(): void;
 
@@ -44,6 +57,13 @@ export interface OsContext {
   // Manage file menu input source menu items
   menuAddInputSource(name: string, handler: () => void): Promise<void>;
   menuRemoveInputSource(name: string): Promise<void>;
+
+  // Retrieve an environment variable
+  getEnvVar(envVar: string): string | undefined;
+  // Get the operating system hostname
+  getHostname(): string;
+  // Get a listing for every network interface discovered on the system
+  getNetworkInterfaces(): NetworkInterface[];
 
   // file backed key/value storage
   storage: Storage;

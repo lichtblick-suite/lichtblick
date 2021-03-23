@@ -9,8 +9,10 @@ import { Cloneable, RpcCall, RpcEvent, RpcResponse } from "../shared/Rpc";
 import { TcpAddress } from "../shared/TcpTypes";
 
 export class HttpServerRenderer extends EventEmitter {
+  handler: HttpHandler;
+
+  #url: string | undefined;
   #messagePort: MessagePort;
-  #handler: HttpHandler;
   #callbacks = new Map<number, (result: Cloneable[]) => void>();
   #nextCallId = 0;
   #events = new Map<string, (args: Cloneable[], ports?: readonly MessagePort[]) => void>([
@@ -22,7 +24,7 @@ export class HttpServerRenderer extends EventEmitter {
         const req = args[1] as HttpRequest;
         let res: HttpResponse | undefined;
         try {
-          res = await this.#handler(req);
+          res = await this.handler(req);
         } catch (err) {
           res = { statusCode: 500, statusMessage: String(err) };
         }
@@ -32,10 +34,10 @@ export class HttpServerRenderer extends EventEmitter {
     ["error", (args) => this.emit("error", new Error(args[0] as string))],
   ]);
 
-  constructor(messagePort: MessagePort, requestHandler: HttpHandler) {
+  constructor(messagePort: MessagePort, requestHandler?: HttpHandler) {
     super();
     this.#messagePort = messagePort;
-    this.#handler = requestHandler;
+    this.handler = requestHandler ?? (() => Promise.resolve({ statusCode: 404 }));
 
     messagePort.onmessage = (ev: MessageEvent<RpcResponse | RpcEvent>) => {
       const args = ev.data.slice(1);
@@ -57,6 +59,10 @@ export class HttpServerRenderer extends EventEmitter {
     messagePort.start();
   }
 
+  url(): string | undefined {
+    return this.#url;
+  }
+
   async address(): Promise<TcpAddress | undefined> {
     const res = await this.#apiCall("address");
     return res[0] as TcpAddress | undefined;
@@ -64,8 +70,17 @@ export class HttpServerRenderer extends EventEmitter {
 
   async listen(port?: number, hostname?: string, backlog?: number): Promise<void> {
     const res = await this.#apiCall("listen", port, hostname, backlog);
-    if (res[0] != undefined) {
-      return Promise.reject(new Error(res[0] as string));
+    const err = res[0] as string | undefined;
+    if (err != undefined) {
+      return Promise.reject(new Error(err));
+    }
+
+    // Store the URL we are listening at
+    const addr = await this.address();
+    if (addr == undefined || typeof addr === "string") {
+      this.#url = addr;
+    } else {
+      this.#url = `http://${hostname ?? addr.address}:${addr.port}/`;
     }
   }
 

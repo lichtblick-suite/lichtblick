@@ -6,35 +6,42 @@ import { EventEmitter } from "eventemitter3";
 
 import { TcpAddress, TcpServer, TcpSocket } from "../TcpTypes";
 
-export class TcpSocketMock extends EventEmitter implements TcpSocket {
+export class MockTcpSocket extends EventEmitter implements TcpSocket {
   #connected = true;
 
   constructor() {
     super();
   }
 
-  remoteAddress(): TcpAddress | undefined {
-    return { address: "192.168.1.2", port: 40000, family: this.#connected ? "IPv4" : undefined };
+  remoteAddress(): Promise<TcpAddress | undefined> {
+    return Promise.resolve({
+      address: "192.168.1.2",
+      port: 40000,
+      family: this.#connected ? "IPv4" : undefined,
+    });
   }
 
-  localAddress(): TcpAddress | undefined {
-    return this.#connected ? { address: "127.0.0.1", port: 30000, family: "IPv4" } : undefined;
+  localAddress(): Promise<TcpAddress | undefined> {
+    return Promise.resolve(
+      this.#connected ? { address: "127.0.0.1", port: 30000, family: "IPv4" } : undefined,
+    );
   }
 
-  fd(): number | undefined {
-    return 1;
+  fd(): Promise<number | undefined> {
+    return Promise.resolve(1);
   }
 
-  connected(): boolean {
-    return this.#connected;
+  connected(): Promise<boolean> {
+    return Promise.resolve(this.#connected);
   }
 
   connect(): Promise<void> {
     return Promise.resolve();
   }
 
-  close(): void {
+  close(): Promise<void> {
     this.#connected = false;
+    return Promise.resolve();
   }
 
   write(_data: Uint8Array): Promise<void> {
@@ -42,7 +49,7 @@ export class TcpSocketMock extends EventEmitter implements TcpSocket {
   }
 }
 
-export class TcpServerMock extends EventEmitter implements TcpServer {
+export class MockTcpServer extends EventEmitter implements TcpServer {
   listening = true;
 
   constructor() {
@@ -62,10 +69,10 @@ export function TcpListen(_options: {
   host?: string;
   port?: number;
   backlog?: number;
-}): Promise<TcpServerMock> {
-  return Promise.resolve(new TcpServerMock());
+}): Promise<MockTcpServer> {
+  return Promise.resolve(new MockTcpServer());
 }
 
 export function TcpSocketConnect(_options: { host: string; port: number }): Promise<TcpSocket> {
-  return Promise.resolve(new TcpSocketMock());
+  return Promise.resolve(new MockTcpSocket());
 }

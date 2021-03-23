@@ -4,8 +4,10 @@
 
 import { init as initSentry } from "@sentry/electron";
 import { contextBridge, ipcRenderer } from "electron";
+import os from "os";
 
 import type { OsContext, OsContextForwardedEvent } from "@foxglove-studio/app/OsContext";
+import { NetworkInterface } from "@foxglove-studio/app/OsContext";
 import { PreloaderSockets } from "@foxglove/electron-socket/preloader";
 
 import LocalFileStorage from "./LocalFileStorage";
@@ -34,6 +36,7 @@ const localFileStorage = new LocalFileStorage();
 
 const ctx: OsContext = {
   platform: process.platform,
+  pid: process.pid,
   handleToolbarDoubleClick() {
     ipcRenderer.send("window.toolbar-double-clicked");
   },
@@ -63,6 +66,24 @@ const ctx: OsContext = {
     menuClickListeners.delete(name);
     ipcRenderer.off("menu.click-input-source", listener);
     ipcRenderer.invoke("menu.remove-input-source", name);
+  },
+
+  // Environment queries
+  getEnvVar: (envVar: string) => process.env[envVar],
+  getHostname: os.hostname,
+  getNetworkInterfaces: (): NetworkInterface[] => {
+    const output: NetworkInterface[] = [];
+    const ifaces = os.networkInterfaces();
+    for (const name in ifaces) {
+      const iface = ifaces[name];
+      if (iface == undefined) {
+        continue;
+      }
+      for (const info of iface) {
+        output.push({ name, ...info, cidr: info.cidr ?? undefined });
+      }
+    }
+    return output;
   },
 
   // Context bridge cannot expose "classes" only exposes functions

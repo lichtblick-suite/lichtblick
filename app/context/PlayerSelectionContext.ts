@@ -8,7 +8,7 @@ import type OrderedStampPlayer from "@foxglove-studio/app/players/OrderedStampPl
 
 export type PlayerSourceDefinition = {
   name: string;
-  type: "file" | "ws" | "http";
+  type: "file" | "ros1-core" | "ws" | "http";
 };
 
 // PlayerSelection provides the user with a select function and the items to select

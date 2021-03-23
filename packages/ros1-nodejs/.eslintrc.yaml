@@ -1,2 +1,0 @@
-parserOptions:
-  project: packages/ros1-nodejs/tsconfig.json

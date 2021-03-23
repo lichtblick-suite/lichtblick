@@ -7,9 +7,7 @@ import { Socket } from "net";
 import { HttpServerElectron } from "./HttpServerElectron";
 import { TcpServerElectron } from "./TcpServerElectron";
 import { TcpSocketElectron } from "./TcpSocketElectron";
-import { getTransform, nextId, registerEntity } from "./registry";
-
-export { registerTransform } from "./registry";
+import { nextId, registerEntity } from "./registry";
 
 export function createHttpServer(): MessagePort {
   const channel = new MessageChannel();
@@ -19,20 +17,18 @@ export function createHttpServer(): MessagePort {
   return channel.port1;
 }
 
-export function createSocket(transformName?: string): MessagePort {
+export function createSocket(host: string, port: number): MessagePort | undefined {
   const channel = new MessageChannel();
-  const transform = transformName != undefined ? getTransform(transformName) : undefined;
   const id = nextId();
-  const socket = new TcpSocketElectron(id, channel.port2, new Socket(), transform);
+  const socket = new TcpSocketElectron(id, channel.port2, host, port, new Socket());
   registerEntity(id, socket);
   return channel.port1;
 }
 
-export function createServer(transformName?: string): MessagePort {
+export function createServer(): MessagePort | undefined {
   const channel = new MessageChannel();
-  const transform = transformName != undefined ? getTransform(transformName) : undefined;
   const id = nextId();
-  const server = new TcpServerElectron(id, channel.port2, transform);
+  const server = new TcpServerElectron(id, channel.port2);
   registerEntity(id, server);
   return channel.port1;
 }

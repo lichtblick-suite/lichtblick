@@ -173,10 +173,9 @@ export function messagePathsForDatatype(
     }
   }
   const structureItem = messagePathStructures(datatypes)[datatype];
-  if (!structureItem) {
-    throw new Error(`datatype not found "${datatype}"`);
+  if (structureItem != undefined) {
+    traverse(structureItem, "");
   }
-  traverse(structureItem, "");
   return messagePaths.sort(naturalSort());
 }
 

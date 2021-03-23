@@ -2,8 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { URL } from "whatwg-url";
-
 import { HttpServer, XmlRpcServer, XmlRpcValue } from "@foxglove/xmlrpc";
 
 import { RosNode } from "./RosNode";
@@ -61,9 +59,8 @@ export class RosFollower {
     this.#server.close();
   }
 
-  url(): URL | undefined {
-    const urlStr = this.#server.url();
-    return urlStr != undefined ? new URL(urlStr) : undefined;
+  url(): string | undefined {
+    return this.#server.url();
   }
 
   getBusStats = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {

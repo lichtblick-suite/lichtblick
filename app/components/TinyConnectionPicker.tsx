@@ -18,6 +18,7 @@ import TransitConnectionIcon from "@mdi/svg/svg/transit-connection-variant.svg";
 import WanIcon from "@mdi/svg/svg/wan.svg";
 import { ReactElement, useCallback, useState } from "react";
 
+import RosSvg from "@foxglove-studio/app/assets/ros.svg";
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
 import { WrappedIcon } from "@foxglove-studio/app/components/Icon";
 import Menu, { Item } from "@foxglove-studio/app/components/Menu";
@@ -61,6 +62,9 @@ export default function TinyConnectionPicker({
           switch (item.type) {
             case "file":
               icon = <FileIcon />;
+              break;
+            case "ros1-core":
+              icon = <RosSvg />;
               break;
             case "ws":
               icon = <TransitConnectionIcon />;

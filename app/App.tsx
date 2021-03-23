@@ -190,6 +190,10 @@ export default function App(): ReactElement {
       type: "file",
     },
     {
+      name: "ROS",
+      type: "ros1-core",
+    },
+    {
       name: "WebSocket",
       type: "ws",
     },

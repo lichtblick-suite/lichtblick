@@ -12,6 +12,7 @@ export class TcpSocketRenderer extends EventEmitter {
   #callbacks = new Map<number, (result: Cloneable[]) => void>();
   #nextCallId = 0;
   #events = new Map<string, (args: Cloneable[], ports?: readonly MessagePort[]) => void>([
+    ["connect", () => this.emit("connect")],
     ["close", () => this.emit("close")],
     ["end", () => this.emit("end")],
     ["timeout", () => this.emit("timeout")],
@@ -75,8 +76,8 @@ export class TcpSocketRenderer extends EventEmitter {
     return res[0] as boolean;
   }
 
-  async connect(options: { port: number; host?: string }): Promise<void> {
-    const res = await this.#apiCall("connect", options);
+  async connect(): Promise<void> {
+    const res = await this.#apiCall("connect");
     if (res[0] != undefined) {
       return Promise.reject(new Error(res[0] as string));
     }

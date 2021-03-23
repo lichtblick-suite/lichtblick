@@ -2,16 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import EventEmitter from "eventemitter3";
-import { URL } from "whatwg-url";
+import type { XmlRpcValue } from "@foxglove/xmlrpc";
 
-import type {
-  XmlRpcClient,
-  XmlRpcValue,
-  XmlRpcResponse,
-  XmlRpcServer,
-  HttpAddress,
-} from "../XmlRpcTypes";
+import type { RosXmlRpcResponse } from "../XmlRpcTypes";
 
 const TURTLESIM_SERVICES = new Set([
   "/turtlesim/get_loggers",
@@ -27,14 +20,14 @@ const TURTLESIM_SERVICES = new Set([
   "/rosout/set_logger_level",
 ]);
 
-export class XmlRpcClientMock implements XmlRpcClient {
-  readonly serverUrl: URL;
+export class XmlRpcClientMock {
+  readonly serverUrl: string;
 
-  constructor(serverUrl: URL) {
+  constructor(serverUrl: string) {
     this.serverUrl = serverUrl;
   }
 
-  methodCall(method: string, args: XmlRpcValue[]): Promise<XmlRpcResponse> {
+  methodCall(method: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> {
     switch (method) {
       case "getPublishedTopics":
         return Promise.resolve([
@@ -122,46 +115,4 @@ export class XmlRpcClientMock implements XmlRpcClient {
         return Promise.resolve([-1, `unknown method [${method}]`, ""]);
     }
   }
-}
-
-export class XmlRpcServerMock extends EventEmitter implements XmlRpcServer {
-  #address?: HttpAddress;
-
-  constructor() {
-    super();
-    this.#address = { hostname: "localhost", port: 39211, secure: false };
-  }
-
-  address(): HttpAddress | undefined {
-    return this.#address;
-  }
-
-  close(): void {
-    this.#address = undefined;
-  }
-
-  addMethod(method: string, handler: (args: XmlRpcValue[]) => Promise<XmlRpcResponse>): this {
-    this.on(method, (params) => {
-      if (!Array.isArray(params)) {
-        params = [params];
-      }
-
-      handler(params).catch((err) => {
-        this.emit("error", err);
-      });
-    });
-
-    return this;
-  }
-}
-
-export function XmlRpcCreateClient(options: { url: URL }): Promise<XmlRpcClient> {
-  return Promise.resolve(new XmlRpcClientMock(options.url));
-}
-
-export function XmlRpcCreateServer(_options: {
-  host: string;
-  port: number;
-}): Promise<XmlRpcServer> {
-  return Promise.resolve(new XmlRpcServerMock());
 }
