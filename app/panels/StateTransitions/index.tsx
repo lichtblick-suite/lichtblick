@@ -381,9 +381,9 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   );
 });
 
-export default Panel<StateTransitionConfig>(
+export default Panel(
   Object.assign(StateTransitions, {
     panelType: "StateTransitions",
     defaultConfig: { paths: [] },
-  }) as any,
+  }),
 );

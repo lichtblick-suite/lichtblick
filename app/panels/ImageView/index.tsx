@@ -661,4 +661,4 @@ function ImageView(props: Props) {
 ImageView.panelType = "ImageViewPanel";
 ImageView.defaultConfig = (getGlobalHooks() as any).perPanelHooks().ImageView.defaultConfig;
 
-export default Panel<Config>(ImageView as any);
+export default Panel(ImageView);

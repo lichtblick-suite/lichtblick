@@ -224,9 +224,9 @@ const RosoutPanel = React.memo(({ config, saveConfig, topics }: Props) => {
   );
 });
 
-export default Panel<Config>(
+export default Panel(
   Object.assign(RosoutPanel, {
-    defaultConfig: { searchTerms: [], minLogLevel: 1, topicToRender: ROSOUT_TOPIC },
+    defaultConfig: { searchTerms: [] as string[], minLogLevel: 1, topicToRender: ROSOUT_TOPIC },
     panelType: "RosOut",
-  }) as any,
+  }),
 );

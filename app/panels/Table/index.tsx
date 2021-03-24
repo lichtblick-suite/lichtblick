@@ -361,4 +361,4 @@ TablePanel.defaultConfig = {
   topicPath: "",
 };
 
-export default Panel<Config>(TablePanel as any);
+export default Panel(TablePanel);

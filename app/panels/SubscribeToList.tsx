@@ -23,7 +23,7 @@ import { SaveConfig } from "@foxglove-studio/app/types/panels";
 type Config = { topics: string };
 type Props = { config: Config; saveConfig: SaveConfig<Config> };
 
-function SubscribeToList({ config, saveConfig }: Props): React.ReactNode {
+function SubscribeToList({ config, saveConfig }: Props): React.ReactElement {
   const topics = config.topics.split(/\s*(?:\n|,|\s)\s*/);
   const messagesSeen = PanelAPI.useMessageReducer<number>({
     topics,
@@ -51,4 +51,4 @@ function SubscribeToList({ config, saveConfig }: Props): React.ReactNode {
 SubscribeToList.panelType = "SubscribeToList";
 SubscribeToList.defaultConfig = { topics: "" };
 
-export default Panel<Config>(SubscribeToList as any);
+export default Panel(SubscribeToList);

@@ -150,7 +150,7 @@ export function UnconnectedPlaybackPerformance({
   );
 }
 
-function PlaybackPerformance(): React.ReactNode {
+function PlaybackPerformance() {
   const timestamp = Date.now();
   const activeData = useMessagePipeline(
     React.useCallback(({ playerState }) => playerState.activeData, []),
@@ -161,4 +161,4 @@ function PlaybackPerformance(): React.ReactNode {
 PlaybackPerformance.panelType = "PlaybackPerformance";
 PlaybackPerformance.defaultConfig = {};
 
-export default Panel(PlaybackPerformance as any);
+export default Panel(PlaybackPerformance);

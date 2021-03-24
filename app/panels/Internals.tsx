@@ -107,7 +107,7 @@ const HistoryRecorder = React.memo(function HistoryRecorder({
 });
 
 // Display internal state for debugging and viewing topic dependencies.
-function Internals(): React.ReactNode {
+function Internals() {
   const { topics } = PanelAPI.useDataSourceInfo();
   const topicsByName = React.useMemo(() => getTopicsByTopicName(topics), [topics]);
   const subscriptions = useMessagePipeline(
@@ -247,4 +247,4 @@ function Internals(): React.ReactNode {
 Internals.panelType = "Internals";
 Internals.defaultConfig = {};
 
-export default Panel(Internals as any);
+export default Panel(Internals);

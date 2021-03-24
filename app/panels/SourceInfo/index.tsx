@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ReactNode, useCallback } from "react";
+import { useCallback } from "react";
 import styled from "styled-components";
 
 import EmptyState from "@foxglove-studio/app/components/EmptyState";
@@ -66,7 +66,7 @@ const SHeaderItem = styled.div`
   white-space: nowrap;
 `;
 
-function SourceInfo(): ReactNode {
+function SourceInfo() {
   const { topics, startTime, endTime } = useMessagePipeline(
     useCallback(
       ({ playerState: { activeData } }) =>
@@ -164,4 +164,4 @@ function SourceInfo(): ReactNode {
 SourceInfo.panelType = "SourceInfo";
 SourceInfo.defaultConfig = {};
 
-export default Panel(SourceInfo as any);
+export default Panel(SourceInfo);

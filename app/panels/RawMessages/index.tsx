@@ -581,10 +581,10 @@ function RawMessages(props: Props) {
 RawMessages.defaultConfig = {
   topicPath: "",
   diffTopicPath: "",
-  diffMethod: CUSTOM_METHOD,
+  diffMethod: CUSTOM_METHOD as typeof CUSTOM_METHOD,
   diffEnabled: false,
   showFullMessageForDiff: false,
 };
 RawMessages.panelType = "RawMessages";
 
-export default Panel<RawMessagesConfig>(RawMessages as any);
+export default Panel(RawMessages);

@@ -105,6 +105,12 @@ interface PanelStatics<Config> {
 
 const EMPTY_CONFIG = Object.freeze({});
 
+// Like React.ComponentType<P>, but without restrictions on the constructor return type.
+type ComponentConstructorType<P> = { displayName?: string } & (
+  | { new (props: P): React.Component<unknown, unknown> }
+  | { (props: P): React.ReactElement<unknown> | ReactNull }
+);
+
 // HOC that wraps panel in an error boundary and flex box.
 // Gives panel a `config` and `saveConfig`.
 //   export default Panel(MyPanelComponent)
@@ -112,20 +118,15 @@ const EMPTY_CONFIG = Object.freeze({});
 // `config` comes from Redux, but in stories / tests you can pass in your own:
 //   `<MyPanel config={…} />`
 export default function Panel<Config extends PanelConfig>(
-  PanelComponent: (
-    | ComponentType
-    | ComponentType<
-        Partial<{
-          config: Config;
-          saveConfig: SaveConfig<Config>;
-          openSiblingPanel: (arg0: string, cb: (arg0: PanelConfig) => PanelConfig) => void;
-          topics: Topic[];
-          capabilities: string[];
-          datatypes: RosDatatypes;
-          isHovered: boolean;
-        }>
-      >
-  ) &
+  PanelComponent: ComponentConstructorType<{
+    config: Config;
+    saveConfig: SaveConfig<Config>;
+    openSiblingPanel: (arg0: string, cb: (arg0: PanelConfig) => PanelConfig) => void;
+    topics: Topic[];
+    capabilities: string[];
+    datatypes: RosDatatypes;
+    isHovered: boolean;
+  }> &
     PanelStatics<Config>,
 ): ComponentType<Props<Config>> & PanelStatics<Config> {
   function ConnectedPanel(props: Props<Config>) {

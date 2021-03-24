@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ReactNode, useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import GlobalVariableSlider from "@foxglove-studio/app/components/GlobalVariableSlider";
 import Item from "@foxglove-studio/app/components/Menu/Item";
@@ -125,7 +125,7 @@ function SliderSettingsMenu(props: MenuProps) {
   );
 }
 
-function GlobalVariableSliderPanel(props: Props): ReactNode {
+function GlobalVariableSliderPanel(props: Props): React.ReactElement {
   const { config, saveConfig } = props;
   const { sliderProps, globalVariableName } = config;
   const { globalVariables, setGlobalVariables } = useGlobalVariables();
@@ -166,4 +166,4 @@ GlobalVariableSliderPanel.defaultConfig = {
   globalVariableName: "globalVariable",
 };
 
-export default Panel<GlobalVariableSliderConfig>(GlobalVariableSliderPanel as any);
+export default Panel(GlobalVariableSliderPanel);

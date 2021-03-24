@@ -316,4 +316,4 @@ class Publish extends React.PureComponent<Props, PanelState> {
   }
 }
 
-export default Panel<Config>(Publish as any);
+export default Panel(Publish);

@@ -391,4 +391,4 @@ NodePlayground.defaultConfig = {
   autoFormatOnSave: true,
 };
 
-export default Panel<Config>(NodePlayground as any);
+export default Panel(NodePlayground);

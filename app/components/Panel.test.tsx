@@ -33,7 +33,7 @@ function getDummyPanel(renderFn: any) {
       return ReactNull;
     }
   }
-  return Panel<DummyConfig>(DummyComponent as any);
+  return Panel(DummyComponent);
 }
 
 function getStore() {

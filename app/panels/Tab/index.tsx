@@ -153,4 +153,4 @@ function Tab({ config, saveConfig }: Props) {
 Tab.panelType = TAB_PANEL_TYPE;
 Tab.defaultConfig = DEFAULT_TAB_PANEL_CONFIG;
 
-export default Panel<Config>(Tab as any);
+export default Panel(Tab);

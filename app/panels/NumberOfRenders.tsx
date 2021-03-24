@@ -58,7 +58,7 @@ function MessagePipelineRendersComponent() {
   return <>messagePipelineRenderCount: {++messagePipelineRenderCount}</>;
 }
 
-function NumberOfRenders(): React.ReactNode {
+function NumberOfRenders() {
   panelRenderCount++;
   return (
     <Flex col>
@@ -82,4 +82,4 @@ function NumberOfRenders(): React.ReactNode {
 NumberOfRenders.panelType = "NumberOfRenders";
 NumberOfRenders.defaultConfig = {};
 
-export default Panel(NumberOfRenders as any);
+export default Panel(NumberOfRenders);

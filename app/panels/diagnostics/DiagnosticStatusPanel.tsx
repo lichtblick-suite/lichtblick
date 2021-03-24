@@ -165,4 +165,4 @@ class DiagnosticStatusPanel extends React.Component<Props> {
   }
 }
 
-export default Panel<Config>(DiagnosticStatusPanel as any);
+export default Panel(DiagnosticStatusPanel);

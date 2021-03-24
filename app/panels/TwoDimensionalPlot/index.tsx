@@ -666,4 +666,4 @@ function TwoDimensionalPlot(props: Props) {
 TwoDimensionalPlot.panelType = "TwoDimensionalPlot";
 TwoDimensionalPlot.defaultConfig = { path: { value: "" } };
 
-export default Panel<Config>(TwoDimensionalPlot as any);
+export default Panel(TwoDimensionalPlot);

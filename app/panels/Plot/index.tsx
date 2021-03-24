@@ -305,11 +305,11 @@ function Plot(props: Props) {
 }
 Plot.panelType = "Plot";
 Plot.defaultConfig = {
-  paths: [{ value: "", enabled: true, timestampMethod: "receiveTime" }],
+  paths: [{ value: "", enabled: true, timestampMethod: "receiveTime" as const }],
   minYValue: "",
   maxYValue: "",
   showLegend: true,
-  xAxisVal: "timestamp",
+  xAxisVal: "timestamp" as const,
 };
 
-export default Panel<PlotConfig>(Plot as any);
+export default Panel(Plot);
