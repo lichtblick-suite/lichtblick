@@ -1,0 +1,22 @@
+{
+  "name": "@foxglove/wasm-bz2",
+  "version": "0.0.1",
+  "description": "Bzip2 decompression compiled to WebAssembly",
+  "license": "MPL-2.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/foxglove/studio.git"
+  },
+  "author": {
+    "name": "Foxglove Technologies",
+    "email": "support@foxglove.dev"
+  },
+  "homepage": "https://foxglove.dev/",
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "devDependencies": {
+    "@types/emscripten": "1.39.4",
+    "jest": "26.6.3"
+  }
+}

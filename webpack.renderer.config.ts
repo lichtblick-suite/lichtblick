@@ -149,16 +149,6 @@ export function makeConfig(_: unknown, argv: WebpackArgv): Configuration {
         { test: /\.scss$/, loader: "sass-loader", options: { sourceMap: true } },
         { test: /\.woff2?$/, type: "asset/inline" },
         { test: /\.(glb|bag|ttf|bin)$/, type: "asset/resource" },
-        {
-          test: /node_modules[\\/]compressjs[\\/].*\.js/,
-          loader: "string-replace-loader",
-          options: {
-            search:
-              "if (typeof define !== 'function') { var define = require('amdefine')(module); }",
-            replace:
-              "/* webviz: removed broken amdefine shim (https://github.com/webpack/webpack/issues/5316) */",
-          },
-        },
       ],
     },
     plugins: [

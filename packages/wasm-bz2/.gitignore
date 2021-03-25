@@ -1,0 +1,4 @@
+.emscripten_cache
+build
+!dist
+vendor

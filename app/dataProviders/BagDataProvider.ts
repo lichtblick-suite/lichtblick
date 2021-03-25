@@ -11,10 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import Bzip2 from "compressjs/lib/Bzip2";
 import { debounce, isEqual } from "lodash";
 import Bag, { open, Time, BagReader, TimeUtil } from "rosbag";
-import decompress from "wasm-lz4";
+import decompressLZ4 from "wasm-lz4";
 
 import BrowserHttpReader from "@foxglove-studio/app/dataProviders/BrowserHttpReader";
 import {
@@ -35,6 +34,7 @@ import { bagConnectionsToTopics } from "@foxglove-studio/app/util/bagConnections
 import { getBagChunksOverlapCount } from "@foxglove-studio/app/util/bags";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import { fromMillis, subtractTimes } from "@foxglove-studio/app/util/time";
+import Bzip2 from "@foxglove/wasm-bz2";
 
 type BagPath = { type: "file"; file: File | string } | { type: "remoteBagUrl"; url: string };
 
@@ -122,7 +122,8 @@ export default class BagDataProvider implements DataProvider {
   async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
     this._extensionPoint = extensionPoint;
     const { bagPath, cacheSizeInBytes } = this._options;
-    await decompress.isLoaded;
+    await decompressLZ4.isLoaded;
+    await Bzip2.isLoaded;
 
     if (bagPath.type === "remoteBagUrl") {
       const fileReader = new LogMetricsReader(new BrowserHttpReader(bagPath.url), extensionPoint);
@@ -278,9 +279,9 @@ export default class BagDataProvider implements DataProvider {
       endTime: end,
       noParse: true,
       decompress: {
-        bz2: (buffer: Buffer, _size: number) => {
+        bz2: (buffer: Buffer, size: number) => {
           try {
-            return Buffer.from(Bzip2.decompressFile(buffer));
+            return Buffer.from(Bzip2.decompress(buffer, size, { small: false }));
           } catch (error) {
             reportMalformedError("bz2 decompression", error);
             throw error;
@@ -288,7 +289,7 @@ export default class BagDataProvider implements DataProvider {
         },
         lz4: (...args: unknown[]) => {
           try {
-            return decompress(...args);
+            return decompressLZ4(...args);
           } catch (error) {
             reportMalformedError("lz4 decompression", error);
             throw error;

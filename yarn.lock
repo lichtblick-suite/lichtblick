@@ -1801,7 +1801,6 @@ __metadata:
     chartjs-plugin-datalabels: "davidswinegar/chartjs-plugin-datalabels#b0ade94116d4e273f0fdc17e9528c9a33c796e90"
     chromatic: 5.7.0
     classnames: 2.2.6
-    compressjs: 1.0.3
     enzyme: 3.11.0
     fetch-mock: 9.11.0
     fuzzysort: 1.1.4
@@ -1921,6 +1920,15 @@ __metadata:
 "@foxglove/rosmsg-bobject@workspace:packages/rosmsg-bobject":
   version: 0.0.0-use.local
   resolution: "@foxglove/rosmsg-bobject@workspace:packages/rosmsg-bobject"
+  languageName: unknown
+  linkType: soft
+
+"@foxglove/wasm-bz2@workspace:packages/wasm-bz2":
+  version: 0.0.0-use.local
+  resolution: "@foxglove/wasm-bz2@workspace:packages/wasm-bz2"
+  dependencies:
+    "@types/emscripten": 1.39.4
+    jest: 26.6.3
   languageName: unknown
   linkType: soft
 
@@ -3962,6 +3970,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/emscripten@npm:1.39.4":
+  version: 1.39.4
+  resolution: "@types/emscripten@npm:1.39.4"
+  checksum: b848421e2597a0ce56b74c6427f843cfd8f26dec8eaaa1929317e9417bc06eaa934057c317cbb561ade2f5462b6906e37868608211e09f9f507dca62066795a8
+  languageName: node
+  linkType: hard
+
 "@types/enzyme-adapter-react-16@npm:1.0.6":
   version: 1.0.6
   resolution: "@types/enzyme-adapter-react-16@npm:1.0.6"
@@ -5696,13 +5711,6 @@ __metadata:
   dependencies:
     bezier-easing: ^2.0.3
   checksum: 5954da4a29b833755abf8c000ac65004cf82041db1fdb1f9a2c28408e2a6048445121161991b261c9f17bfc4f22242092ebc47b9a6396aa9447415ab9c7ae414
-  languageName: node
-  linkType: hard
-
-"amdefine@npm:~1.0.0":
-  version: 1.0.1
-  resolution: "amdefine@npm:1.0.1"
-  checksum: 8b163d7cd3224b8648a6f9be045f1e111847d53acb21b3f9fca3b7ef20da63de4b256c6dfc175a340d9a2bb13fcab9f633089e2d4ac230ea9721db038962d256
   languageName: node
   linkType: hard
 
@@ -8167,15 +8175,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:~2.8.1":
-  version: 2.8.1
-  resolution: "commander@npm:2.8.1"
-  dependencies:
-    graceful-readlink: ">= 1.0.0"
-  checksum: aee28c886bcda957c96e94fe5eb6d33066ac9c1c8443995fe3f1933a7c83986c76cd617a88f82872eb4d0a362c71a2416b4770ccb3d3e2f554a5232a2408bc37
-  languageName: node
-  linkType: hard
-
 "commondir@npm:^1.0.1":
   version: 1.0.1
   resolution: "commondir@npm:1.0.1"
@@ -8260,18 +8259,6 @@ __metadata:
     safe-buffer: 5.1.2
     vary: ~1.1.2
   checksum: 8f5356777088492755e40a506acb35af7de9e99b3efcaba9d60dbdf4b61cb2f817a1100015da06f6ca8dea8f4cd015b91c27f02b562e2f66750329b9104dfeb1
-  languageName: node
-  linkType: hard
-
-"compressjs@npm:1.0.3":
-  version: 1.0.3
-  resolution: "compressjs@npm:1.0.3"
-  dependencies:
-    amdefine: ~1.0.0
-    commander: ~2.8.1
-  bin:
-    compressjs: ./bin/compressjs
-  checksum: 38a08ed1b4dd28431385c3734c0481e8fa0482bdfbf382c321a18c580553be95feba25fec1515166815d50cd240441dc95c60bfd6206f2c8b2f2e4dcb9449d63
   languageName: node
   linkType: hard
 
