@@ -29,10 +29,19 @@ import HelpButton from "@foxglove-studio/app/components/PanelToolbar/HelpButton"
 import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
 import GlobalVariables from "@foxglove-studio/app/panels/GlobalVariables";
 import helpContent from "@foxglove-studio/app/panels/GlobalVariables/index.help.md";
-import { SLinkUnderline } from "@foxglove-studio/app/shared/styledComponents";
 import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
 import logEvent, { getEventTags, getEventNames } from "@foxglove-studio/app/util/logEvent";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+
+export const SLinkUnderline = styled.span`
+  color: ${colors.BLUE};
+  cursor: pointer;
+
+  &:hover {
+    color: ${colors.BLUE};
+    text-decoration: underline;
+  }
+`;
 
 const STitleBar = styled.div`
   display: flex;

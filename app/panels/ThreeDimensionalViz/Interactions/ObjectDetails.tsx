@@ -18,6 +18,7 @@ import styled from "styled-components";
 
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
+import { getItemString } from "@foxglove-studio/app/components/JsonTree/getItemString";
 import { getInstanceObj } from "@foxglove-studio/app/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
 import { deepParse, isBobject } from "@foxglove-studio/app/util/binaryObjects";
 import { jsonTreeTheme } from "@foxglove-studio/app/util/globalConstants";
@@ -132,7 +133,7 @@ function ObjectDetails({ interactionData, objectToDisplay }: Props) {
         invertTheme={false}
         theme={{ ...jsonTreeTheme, tree: { margin: 0 } }}
         hideRoot
-        getItemString={(type, data, itemType, itemString) => <span>{itemString}</span>}
+        getItemString={getItemString}
         labelRenderer={(markerKeyPath, p1, p2, hasChildren) => {
           const label = first(markerKeyPath);
           if (!hasChildren) {

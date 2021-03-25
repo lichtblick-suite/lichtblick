@@ -49,7 +49,7 @@ export default function LinkedGlobalVariableList({ linkedGlobalVariables }: Prop
         >
           <LinkPlusIcon />
         </Icon>{" "}
-        icon in the “Clicked object” tab to link values with global variables.
+        icon in the “Selected object” tab to link values with global variables.
       </SEmptyState>
     );
   }

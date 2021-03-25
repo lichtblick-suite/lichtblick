@@ -11,14 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { first, last } from "lodash";
+import { ReactNode } from "react";
 
-import { isTypicalFilterName } from "@foxglove-studio/app/components/MessagePathSyntax/isTypicalFilterName";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { diffLabels } from "@foxglove-studio/app/panels/RawMessages/getDiff";
-import { format, formatDuration } from "@foxglove-studio/app/util/formatTime";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
-const DURATION_20_YEARS_SEC = 20 * 365 * 24 * 60 * 60;
 export const DATA_ARRAY_PREVIEW_LIMIT = 20;
 export const ROS_COMMON_MSGS: Set<string> = new Set([
   "actionlib_msgs",
@@ -32,63 +30,6 @@ export const ROS_COMMON_MSGS: Set<string> = new Set([
   "trajectory_msgs",
   "visualization_msgs",
 ]);
-
-function getArrow(x: number, y: number) {
-  if (x === 0 && y === 0) {
-    return;
-  }
-  return (
-    <span style={{ transform: `rotate(${Math.atan2(-y, x)}rad)`, display: "inline-block" }}>→</span>
-  );
-}
-
-export function getItemString(type: string, data: any, itemType: string, itemString: string) {
-  const keys = Object.keys(data);
-  if (keys.length === 2) {
-    const { sec, nsec } = data;
-    if (sec != undefined && nsec != undefined) {
-      // Values "too small" to be absolute epoch-based times are probably relative durations.
-      return sec < DURATION_20_YEARS_SEC ? formatDuration(data) : <span>{format(data)}</span>;
-    }
-  }
-
-  // for vectors/points display length
-  if (keys.length === 2) {
-    const { x, y } = data;
-    if (x != undefined && y != undefined) {
-      const length = Math.sqrt(x * x + y * y);
-      return (
-        <span>
-          norm = {length.toFixed(2)} {getArrow(x, y)}
-        </span>
-      );
-    }
-  }
-
-  if (keys.length === 3) {
-    const { x, y, z } = data;
-    if (x != undefined && y != undefined && z != undefined) {
-      const length = Math.sqrt(x * x + y * y + z * z);
-      return (
-        <span>
-          norm = {length.toFixed(2)} {z === 0 ? getArrow(x, y) : undefined}
-        </span>
-      );
-    }
-  }
-
-  // Surface typically-used keys directly in the object summary so the user doesn't have to expand it.
-  const filterKeys = keys
-    .filter(isTypicalFilterName)
-    .map((key) => `${key}: ${data[key]}`)
-    .join(", ");
-  return (
-    <span>
-      {itemType} {filterKeys || itemString}
-    </span>
-  );
-}
-
 function getChangeCounts(data: any, startingCounts: any) {
   const possibleLabelTexts = Object.keys(startingCounts);
   for (const key in data) {
@@ -101,7 +42,7 @@ function getChangeCounts(data: any, startingCounts: any) {
   return startingCounts;
 }
 
-export const getItemStringForDiff = (type: string, data: any, itemType: string) => {
+export const getItemStringForDiff = (type: string, data: any, itemType: ReactNode): ReactNode => {
   const { ADDED, DELETED, CHANGED, ID } = diffLabels;
   const id = data[ID.labelText];
   const idLabel = id

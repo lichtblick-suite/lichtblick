@@ -30,7 +30,7 @@ Clicking on a point in a point cloud offers additional information, such as the 
 
 ### Linking selected markers to global variables
 
-It's possible to link fields from a selected marker to global variables. In the "Clicked object" tab of the "Interactions" panel, hover over a key in the JSON view of the marker. A button should appear that, when clicked, opens a dialog box that allows linking the field to a global variable.
+It's possible to link fields from a selected marker to global variables. In the "Selected object" tab of the "Interactions" panel, hover over a key in the JSON view of the marker. A button should appear that, when clicked, opens a dialog box that allows linking the field to a global variable.
 
 When a global variable is linked, selecting another marker that contains the same key will update the global variable. For example, with the tracked object "id" field linked to the global variable "$trackedObjectId", clicking another tracked object will update the "$trackedObjectId" field. This makes it easy to use the information about selected markers in other panels.
 
