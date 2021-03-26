@@ -86,12 +86,12 @@ export default class PinholeCameraModel {
     }
 
     const { P, R, D, K } = this;
-    const fx = P[0];
-    const fy = P[5];
-    const cx = P[2];
-    const cy = P[6];
-    const tx = P[3];
-    const ty = P[7];
+    const fx = P[0]!;
+    const fy = P[5]!;
+    const cx = P[2]!;
+    const cy = P[6]!;
+    const tx = P[3]!;
+    const ty = P[7]!;
 
     // Formulae from docs for cv::initUndistortRectifyMap,
     // http://opencv.willowgarage.com/documentation/cpp/camera_calibration_and_3d_reconstruction.html
@@ -102,9 +102,9 @@ export default class PinholeCameraModel {
     const x1 = (rectX - cx - tx) / fx;
     const y1 = (rectY - cy - ty) / fy;
     // [X Y W]^T <- R^-1 * [x y 1]^T
-    const X = R[0] * x1 + R[1] * y1 + R[2];
-    const Y = R[3] * x1 + R[4] * y1 + R[5];
-    const W = R[6] * x1 + R[7] * y1 + R[8];
+    const X = R[0]! * x1 + R[1]! * y1 + R[2]!;
+    const Y = R[3]! * x1 + R[4]! * y1 + R[5]!;
+    const W = R[6]! * x1 + R[7]! * y1 + R[8]!;
     const xp = X / W;
     const yp = Y / W;
 
@@ -115,14 +115,14 @@ export default class PinholeCameraModel {
     const r4 = r2 * r2;
     const r6 = r4 * r2;
     const a1 = 2 * xp * yp;
-    const k1 = D[0];
-    const k2 = D[1];
-    const p1 = D[2];
-    const p2 = D[3];
-    const k3 = D[4];
+    const k1 = D[0]!;
+    const k2 = D[1]!;
+    const p1 = D[2]!;
+    const p2 = D[3]!;
+    const k3 = D[4]!;
     let barrel_correction = 1 + k1 * r2 + k2 * r4 + k3 * r6;
     if (D.length === 8) {
-      barrel_correction /= 1.0 + D[5] * r2 + D[6] * r4 + D[7] * r6;
+      barrel_correction /= 1.0 + D[5]! * r2 + D[6]! * r4 + D[7]! * r6;
     }
     const xpp = xp * barrel_correction + p1 * a1 + p2 * (r2 + 2 * (xp * xp));
     const ypp = yp * barrel_correction + p1 * (r2 + 2 * (yp * yp)) + p2 * a1;
@@ -130,6 +130,6 @@ export default class PinholeCameraModel {
     // map_x(u,v) <- x''fx + cx
     // map_y(u,v) <- y''fy + cy
     // cx, fx, etc. come from original camera matrix K.
-    return { x: xpp * K[0] + K[2], y: ypp * K[4] + K[5] };
+    return { x: xpp * K[0]! + K[2]!, y: ypp * K[4]! + K[5]! };
   }
 }

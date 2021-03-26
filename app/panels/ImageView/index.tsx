@@ -122,7 +122,7 @@ const TopicTimestamp = ({
 const BottomBar = ({ children }: { children?: React.ReactNode }) => (
   <div
     className={cx(imageCanvasStyles["bottom-bar"], {
-      [imageCanvasStyles.inScreenshotTests]: inScreenshotTests(),
+      [imageCanvasStyles.inScreenshotTests!]: inScreenshotTests(),
     })}
   >
     {children}
@@ -183,11 +183,11 @@ function renderEmptyState(
               exactly.
             </p>
             <ul>
-              {Object.keys(messagesByTopic).map((topic) => (
+              {Object.entries(messagesByTopic).map(([topic, topicMessages]) => (
                 <li key={topic}>
                   <code>{topic}</code>:{" "}
-                  {messagesByTopic[topic] && messagesByTopic[topic].length
-                    ? messagesByTopic[topic]
+                  {topicMessages.length > 0
+                    ? topicMessages
                         .map((
                           { message }, // In some cases, a user may have subscribed to a topic that does not include a header stamp.
                         ) =>
@@ -424,7 +424,7 @@ function ImageView(props: Props) {
     () =>
       shouldSynchronize
         ? synchronizedMessages
-          ? enabledMarkerTopics.map((topic) => synchronizedMessages[topic])
+          ? filterMap(enabledMarkerTopics, (topic) => synchronizedMessages[topic])
           : []
         : filterMap(enabledMarkerTopics, (topic) => last(messagesByTopic[topic])),
     [enabledMarkerTopics, messagesByTopic, shouldSynchronize, synchronizedMessages],

@@ -135,7 +135,7 @@ export default function PlotMenu({
               <SLabel>X range</SLabel>
               <PanelToolbarInput
                 type="number"
-                className={cx(styles.input, { [styles.inputError]: !isValidWidth(displayWidth) })}
+                className={cx(styles.input, { [styles.inputError!]: !isValidWidth(displayWidth) })}
                 value={displayWidth}
                 onChange={({ target: { value } }) => {
                   const isZero = parseFloat(value) === 0;
@@ -169,7 +169,7 @@ export default function PlotMenu({
             <SLabel>Y max</SLabel>
             <PanelToolbarInput
               type="number"
-              className={cx(styles.input, { [styles.inputError]: !isValidInput(maxYValue) })}
+              className={cx(styles.input, { [styles.inputError!]: !isValidInput(maxYValue) })}
               value={maxYValue}
               onChange={(event) => {
                 saveConfig({ maxYValue: event.target.value });
@@ -187,7 +187,7 @@ export default function PlotMenu({
             <SLabel>Y min</SLabel>
             <PanelToolbarInput
               type="number"
-              className={cx(styles.input, { [styles.inputError]: !isValidInput(minYValue) })}
+              className={cx(styles.input, { [styles.inputError!]: !isValidInput(minYValue) })}
               value={minYValue}
               onChange={(event) => {
                 saveConfig({ minYValue: event.target.value });

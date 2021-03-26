@@ -210,7 +210,7 @@ storiesOf("<Tab>", module)
       onMount={() => {
         const mouseEnterContainer = document.querySelectorAll(
           "[data-test~=panel-mouseenter-container",
-        )[0];
+        )[0]!;
         TestUtils.Simulate.mouseEnter(mouseEnterContainer);
       }}
     >
@@ -381,11 +381,11 @@ storiesOf("<Tab>", module)
             const toolbar = document.querySelectorAll('[data-test="toolbar-droppable"]')[0];
 
             // Drag the first tab in the parent tab panel over the second tab in the child tab panel
-            tabs[0].dispatchEvent(new MouseEvent("dragstart", { bubbles: true }));
-            tabs[0].dispatchEvent(new MouseEvent("dragenter", { bubbles: true }));
-            toolbar.dispatchEvent(new MouseEvent("dragout", { bubbles: true }));
+            tabs[0]?.dispatchEvent(new MouseEvent("dragstart", { bubbles: true }));
+            tabs[0]?.dispatchEvent(new MouseEvent("dragenter", { bubbles: true }));
+            toolbar?.dispatchEvent(new MouseEvent("dragout", { bubbles: true }));
             await tick();
-            tabs[2].dispatchEvent(new MouseEvent("dragover", { bubbles: true }));
+            tabs[2]?.dispatchEvent(new MouseEvent("dragover", { bubbles: true }));
           }, DEFAULT_TIMEOUT);
         }}
       >

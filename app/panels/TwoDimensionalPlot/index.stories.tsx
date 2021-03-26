@@ -169,7 +169,7 @@ storiesOf("<TwoDimensionalPlot>", module)
             const [canvas] = document.getElementsByTagName("canvas");
             const x = 105;
             const y = 190;
-            canvas.dispatchEvent(
+            canvas?.dispatchEvent(
               new MouseEvent("mousemove", { pageX: x, pageY: y, clientX: x, clientY: y } as any),
             );
           }, 100);

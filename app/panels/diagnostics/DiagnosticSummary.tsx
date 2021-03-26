@@ -73,7 +73,7 @@ class NodeRow extends React.PureComponent<NodeRowProps> {
         <Icon
           fade={!isPinned}
           onClick={this.onClickPin}
-          className={cx(styles.pinIcon, { [styles.pinned]: isPinned })}
+          className={cx(styles.pinIcon, { [styles.pinned!]: isPinned })}
         >
           <PinIcon />
         </Icon>
@@ -205,13 +205,13 @@ class DiagnosticSummary extends React.Component<Props> {
               const { pinnedIds, hardwareIdFilter, sortByLevel = true } = this.props.config;
               const pinnedNodes = filterMap(pinnedIds, (id) => {
                 const [_, trimmedHardwareId, name] = id.split("|");
+                if (name == undefined || trimmedHardwareId == undefined) {
+                  return;
+                }
                 const diagnosticsByName = buffer.diagnosticsByNameByTrimmedHardwareId.get(
                   trimmedHardwareId,
                 );
-                if (diagnosticsByName == undefined) {
-                  return;
-                }
-                return diagnosticsByName.get(name);
+                return diagnosticsByName?.get(name);
               });
 
               const nodesByLevel = getDiagnosticsByLevel(buffer);
@@ -233,9 +233,10 @@ class DiagnosticSummary extends React.Component<Props> {
                   );
 
               const nodes: DiagnosticInfo[] = [...compact(pinnedNodes), ...sortedNodes];
-              return !nodes.length ? (
-                ReactNull
-              ) : (
+              if (nodes.length === 0) {
+                return ReactNull;
+              }
+              return (
                 <AutoSizer>
                   {({ height, width }) => (
                     <List

@@ -198,7 +198,10 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
       throw new Error("index not set");
     }
     const newPaths = config.paths.slice();
-    newPaths[index] = { ...newPaths[index], value: value.trim() };
+    const newPath = newPaths[index];
+    if (newPath) {
+      newPaths[index] = { ...newPath, value: value.trim() };
+    }
     saveConfig({ paths: newPaths });
   };
 
@@ -207,7 +210,10 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
       throw new Error("index not set");
     }
     const newPaths = config.paths.slice();
-    newPaths[index] = { ...newPaths[index], timestampMethod: value };
+    const newPath = newPaths[index];
+    if (newPath) {
+      newPaths[index] = { ...newPath, timestampMethod: value };
+    }
     saveConfig({ paths: newPaths });
   };
 
@@ -244,8 +250,8 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
       const baseColors = (getGlobalHooks() as any).perPanelHooks().StateTransitions
         .customStateTransitionColors[path] || [grey, ...lineColors];
       let previousValue, previousTimestamp;
-      for (let index = 0; index < itemsByPath[path].length; index++) {
-        const item = getTooltipItemForMessageHistoryItem(itemsByPath[path][index]);
+      for (const pathItems of itemsByPath[path] ?? []) {
+        const item = getTooltipItemForMessageHistoryItem(pathItems);
         if (item.queriedData.length !== 1) {
           continue;
         }
@@ -255,7 +261,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
           continue;
         }
 
-        const { constantName, value } = item.queriedData[0];
+        const { constantName, value } = item.queriedData[0]!;
 
         // Skip duplicates.
         if (

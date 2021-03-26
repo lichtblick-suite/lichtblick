@@ -111,10 +111,10 @@ storiesOf("<RosoutPanel>", module)
         }}
         onMount={() => {
           TestUtils.Simulate.mouseEnter(
-            document.querySelectorAll("[data-test~=panel-mouseenter-container]")[0],
+            document.querySelectorAll("[data-test~=panel-mouseenter-container]")[0]!,
           );
           setTimeout(() => {
-            TestUtils.Simulate.click(document.querySelectorAll("[data-test=topic-set]")[0]);
+            TestUtils.Simulate.click(document.querySelectorAll("[data-test=topic-set]")[0]!);
           });
         }}
       >
@@ -128,10 +128,10 @@ storiesOf("<RosoutPanel>", module)
         fixture={fixture}
         onMount={() => {
           TestUtils.Simulate.mouseEnter(
-            document.querySelectorAll("[data-test~=panel-mouseenter-container]")[0],
+            document.querySelectorAll("[data-test~=panel-mouseenter-container]")[0]!,
           );
           setTimeout(() => {
-            TestUtils.Simulate.click(document.querySelectorAll("[data-test=panel-settings]")[0]);
+            TestUtils.Simulate.click(document.querySelectorAll("[data-test=panel-settings]")[0]!);
           });
         }}
       >

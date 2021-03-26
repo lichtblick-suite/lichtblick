@@ -75,7 +75,10 @@ export default function PlotLegend(props: PlotLegendProps) {
         throw new Error("index not set");
       }
       const newPaths = paths.slice();
-      newPaths[index] = { ...newPaths[index], value: value.trim() };
+      const newPath = newPaths[index];
+      if (newPath) {
+        newPaths[index] = { ...newPath, value: value.trim() };
+      }
       saveConfig({ paths: newPaths });
     },
     [paths, saveConfig],
@@ -87,7 +90,10 @@ export default function PlotLegend(props: PlotLegendProps) {
         throw new Error("index not set");
       }
       const newPaths = paths.slice();
-      newPaths[index] = { ...newPaths[index], timestampMethod: value };
+      const newPath = newPaths[index];
+      if (newPath) {
+        newPaths[index] = { ...newPath, timestampMethod: value };
+      }
       saveConfig({ paths: newPaths });
     },
     [paths, saveConfig],
@@ -146,8 +152,8 @@ export default function PlotLegend(props: PlotLegendProps) {
         </div>
         <div
           className={cx({
-            [styles.itemInput]: true,
-            [styles.itemInputDisabled]: !xAxisPath?.enabled,
+            [styles.itemInput!]: true,
+            [styles.itemInputDisabled!]: !xAxisPath?.enabled,
           })}
         >
           {(xAxisVal === "custom" || xAxisVal === "currentCustom") && (
@@ -185,7 +191,10 @@ export default function PlotLegend(props: PlotLegendProps) {
                 style={{ zIndex: 1 }}
                 onClick={() => {
                   const newPaths = paths.slice();
-                  newPaths[index] = { ...newPaths[index], enabled: !newPaths[index].enabled };
+                  const newPath = newPaths[index];
+                  if (newPath) {
+                    newPaths[index] = { ...newPath, enabled: !newPath.enabled };
+                  }
                   saveConfig({ paths: newPaths });
                 }}
               >
@@ -196,8 +205,8 @@ export default function PlotLegend(props: PlotLegendProps) {
               </div>
               <div
                 className={cx({
-                  [styles.itemInput]: true,
-                  [styles.itemInputDisabled]: !path.enabled,
+                  [styles.itemInput!]: true,
+                  [styles.itemInputDisabled!]: !path.enabled,
                 })}
               >
                 <MessagePathInput

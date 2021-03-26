@@ -49,7 +49,7 @@ const expandAll = () => {
   }
 };
 const scrollToBottom = () => {
-  const scrollContainer = document.querySelectorAll(".Flex-module__scroll___3l7to")[0];
+  const scrollContainer = document.querySelectorAll(".Flex-module__scroll___3l7to")[0]!;
   scrollContainer.scrollTop = scrollContainer.scrollHeight;
 };
 

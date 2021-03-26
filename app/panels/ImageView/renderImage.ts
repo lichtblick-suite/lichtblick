@@ -257,8 +257,8 @@ function paintMarker(
       ctx.lineWidth = marker.thickness;
 
       for (let i = 0; i < marker.points.length; i += 2) {
-        const { x: x1, y: y1 } = maybeUnrectifyPoint(cameraModel, marker.points[i]);
-        const { x: x2, y: y2 } = maybeUnrectifyPoint(cameraModel, marker.points[i + 1]);
+        const { x: x1, y: y1 } = maybeUnrectifyPoint(cameraModel, marker.points[i]!);
+        const { x: x2, y: y2 } = maybeUnrectifyPoint(cameraModel, marker.points[i + 1]!);
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
@@ -274,10 +274,10 @@ function paintMarker(
         break;
       }
       ctx.beginPath();
-      const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[0]);
+      const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[0]!);
       ctx.moveTo(x, y);
       for (let i = 1; i < marker.points.length; i++) {
-        const maybeUnrectifiedPoint = maybeUnrectifyPoint(cameraModel, marker.points[i]);
+        const maybeUnrectifiedPoint = maybeUnrectifyPoint(cameraModel, marker.points[i]!);
         ctx.lineTo(maybeUnrectifiedPoint.x, maybeUnrectifiedPoint.y);
       }
       if (marker.type === 3) {
@@ -303,8 +303,8 @@ function paintMarker(
       const size = marker.scale || 4;
       if (marker.outline_colors && marker.outline_colors.length === marker.points.length) {
         for (let i = 0; i < marker.points.length; i++) {
-          const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[i]);
-          ctx.fillStyle = toRGBA(marker.outline_colors[i]);
+          const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[i]!);
+          ctx.fillStyle = toRGBA(marker.outline_colors[i]!);
           ctx.beginPath();
           ctx.arc(x, y, size, 0, 2 * Math.PI);
           ctx.fill();
@@ -312,7 +312,7 @@ function paintMarker(
       } else {
         ctx.beginPath();
         for (let i = 0; i < marker.points.length; i++) {
-          const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[i]);
+          const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[i]!);
           ctx.arc(x, y, size, 0, 2 * Math.PI);
           ctx.closePath();
         }

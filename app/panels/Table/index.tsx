@@ -331,7 +331,9 @@ function TablePanel({ config, saveConfig }: Props) {
   const topicName = topicRosPath?.topicName || "";
   const msgs = useMessagesByTopic({ topics: [topicName], historySize: 1 })[topicName];
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems([topicPath]);
-  const cachedMessages = msgs.length ? cachedGetMessagePathDataItems(topicPath, msgs[0]) : [];
+  const msg = msgs?.[0];
+  const cachedMessages = msg ? cachedGetMessagePathDataItems(topicPath, msg) : [];
+  const firstCachedMessage = cachedMessages?.[0];
 
   return (
     <Flex col clip style={{ position: "relative" }}>
@@ -347,9 +349,9 @@ function TablePanel({ config, saveConfig }: Props) {
       </PanelToolbar>
       {!topicPath && <EmptyState>No topic selected</EmptyState>}
       {topicPath && !cachedMessages?.length && <EmptyState>Waiting for next message</EmptyState>}
-      {topicPath && cachedMessages && cachedMessages?.length && (
+      {topicPath && firstCachedMessage && (
         <STableContainer>
-          <Table value={cachedMessages[0].value} accessorPath={""} />
+          <Table value={firstCachedMessage.value} accessorPath={""} />
         </STableContainer>
       )}
     </Flex>

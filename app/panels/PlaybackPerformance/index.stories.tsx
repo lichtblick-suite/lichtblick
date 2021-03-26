@@ -44,7 +44,7 @@ function Example({ states }: { states: UnconnectedPlaybackPerformanceProps[] }) 
   }, [state]);
   return (
     <StoreSetup>
-      <UnconnectedPlaybackPerformance {...state[0]} />
+      <UnconnectedPlaybackPerformance {...state[0]!} />
     </StoreSetup>
   );
 }

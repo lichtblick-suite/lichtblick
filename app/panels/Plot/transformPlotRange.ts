@@ -23,10 +23,16 @@ export function derivative(
   const points = [];
   const newTooltips = [];
   for (let i = 1; i < data.length; i++) {
-    const secondsDifference = data[i].x - data[i - 1].x;
-    const value = (data[i].y - data[i - 1].y) / secondsDifference;
+    const item = data[i]!;
+    const prevItem = data[i - 1]!;
+    const secondsDifference = item.x - prevItem.x;
+    const value = (item.y - prevItem.y) / secondsDifference;
     const previousTooltip = tooltips[i];
-    const point: PlotChartPoint = { x: data[i].x, y: value };
+    const point: PlotChartPoint = { x: item.x, y: value };
+    if (!previousTooltip) {
+      continue;
+    }
+
     const tooltip = {
       x: point.x,
       y: point.y,

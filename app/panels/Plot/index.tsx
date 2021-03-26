@@ -73,8 +73,8 @@ type Props = {
 // Instead, throw away everything but what we need (the timestamps).
 const getPlotDataByPath = (itemsByPath: MessageDataItemsByPath): PlotDataByPath => {
   const ret: PlotDataByPath = {};
-  Object.keys(itemsByPath).forEach((path) => {
-    ret[path] = [itemsByPath[path].map(getTooltipItemForMessageHistoryItem)];
+  Object.entries(itemsByPath).forEach(([path, items]) => {
+    ret[path] = [items.map(getTooltipItemForMessageHistoryItem)];
   });
   return ret;
 };
@@ -95,20 +95,24 @@ function getBlockItemsByPath(decodeMessagePathsForMessagesByTopic: any, blocks: 
       decodeMessagePathsForMessagesByTopic,
       block,
     );
-    Object.keys(messagePathItemsForBlock).forEach((path) => {
+    Object.entries(messagePathItemsForBlock).forEach(([path, messagePathItems]) => {
       const existingItems: TooltipItem[][] = (ret as any)[path] || [];
       // getMessagePathItemsForBlock returns an array of exactly one range of items.
-      const [pathItems] = messagePathItemsForBlock[path];
+      const [pathItems] = messagePathItems;
       if (lastBlockIndexForPath[path] === i - 1) {
         // If we are continuing directly from the previous block index (i - 1) then add to the
         // existing range, otherwise start a new range
         const currentRange = existingItems[existingItems.length - 1];
-        for (const item of pathItems) {
-          currentRange.push(item);
+        if (currentRange && pathItems) {
+          for (const item of pathItems) {
+            currentRange.push(item);
+          }
         }
       } else {
-        // Start a new contiguous range. Make a copy so we can extend it.
-        existingItems.push(pathItems.slice());
+        if (pathItems) {
+          // Start a new contiguous range. Make a copy so we can extend it.
+          existingItems.push(pathItems.slice());
+        }
       }
       (ret as any)[path] = existingItems;
       lastBlockIndexForPath[path] = i;

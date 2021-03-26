@@ -285,8 +285,8 @@ class DiagnosticStatus extends React.Component<Props, any> {
       }
       return (
         <tr key={idx} className={style.row}>
-          {this._renderKeyValueCell(style.keyCell, keyHtml, key)}
-          {this._renderKeyValueCell(style.valueCell, valueHtml, value, openPlotPanelIconElem)}
+          {this._renderKeyValueCell(style.keyCell!, keyHtml, key)}
+          {this._renderKeyValueCell(style.valueCell!, valueHtml, value, openPlotPanelIconElem)}
         </tr>
       );
     });

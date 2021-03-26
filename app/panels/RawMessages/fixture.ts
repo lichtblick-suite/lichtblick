@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Fixture } from "@foxglove-studio/app/stories/PanelSetup";
 import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 
 export const fixture = {
@@ -297,7 +298,7 @@ export const withMissingData = {
   },
 };
 
-export const topicsToDiffFixture = {
+export const topicsToDiffFixture: Fixture = {
   datatypes: enumAdvancedFixture.datatypes,
   topics: [
     { name: "/baz/enum_advanced", datatype: "baz/enum_advanced" },
@@ -317,7 +318,7 @@ export const topicsToDiffFixture = {
     ],
     "/another/baz/enum_advanced": [
       {
-        ...enumAdvancedFixture.frame["/baz/enum_advanced"][0],
+        ...enumAdvancedFixture.frame["/baz/enum_advanced"][0]!,
         topic: "/another/baz/enum_advanced",
         message: {
           ...exampleMessage,
@@ -340,7 +341,7 @@ export const topicsWithIdsToDiffFixture = {
   frame: {
     "/baz/enum_advanced_array": [
       {
-        receiveTime: enumAdvancedFixture.frame["/baz/enum_advanced"][0].receiveTime,
+        receiveTime: enumAdvancedFixture.frame["/baz/enum_advanced"][0]!.receiveTime,
         topic: "/baz/enum_advanced_array",
         message: {
           value: [
@@ -357,7 +358,7 @@ export const topicsWithIdsToDiffFixture = {
     ],
     "/another/baz/enum_advanced_array": [
       {
-        receiveTime: enumAdvancedFixture.frame["/baz/enum_advanced"][0].receiveTime,
+        receiveTime: enumAdvancedFixture.frame["/baz/enum_advanced"][0]!.receiveTime,
         topic: "/another/baz/enum_advanced_array",
         message: {
           value: [

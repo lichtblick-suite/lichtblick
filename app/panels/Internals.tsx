@@ -137,9 +137,8 @@ function Internals() {
                 <li key={i}>
                   <code>
                     {sub.topic}
-                    {topicsByName[sub.topic] &&
-                      topicsByName[sub.topic].originalTopic &&
-                      ` (original topic: ${topicsByName[sub.topic].originalTopic})`}
+                    {topicsByName[sub.topic]?.originalTopic &&
+                      ` (original topic: ${topicsByName[sub.topic]?.originalTopic})`}
                   </code>
                 </li>
               ))}
@@ -183,7 +182,7 @@ function Internals() {
       return;
     }
     const recordSubs =
-      recordGroup === RECORD_ALL ? subscriptions : groupedSubscriptions[recordGroup];
+      recordGroup === RECORD_ALL ? subscriptions : groupedSubscriptions[recordGroup] ?? [];
     setRecordingTopics(recordSubs.map((sub) => sub.topic));
   }
 

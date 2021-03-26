@@ -43,7 +43,7 @@ const DiagnosticsSection = ({ diagnostics }: Props): ReactElement => {
   return diagnostics.length ? (
     <ul>
       {diagnostics.map(({ severity, message, source, startColumn, startLineNumber }, i) => {
-        const severityLabel = invert(DiagnosticSeverity)[severity];
+        const severityLabel = invert(DiagnosticSeverity)[severity] ?? "Error";
         const errorLoc =
           startLineNumber != undefined && startColumn != undefined
             ? `[${startLineNumber + 1},${startColumn + 1}]`

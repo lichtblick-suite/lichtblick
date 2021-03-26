@@ -82,7 +82,7 @@ storiesOf("<ToolbarTab>", module)
       ref={async (el) => {
         await tick();
         if (el) {
-          el.querySelectorAll("input")[0].click();
+          el.querySelectorAll("input")[0]?.click();
         }
       }}
     >

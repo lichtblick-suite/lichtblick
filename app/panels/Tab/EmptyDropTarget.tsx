@@ -79,7 +79,11 @@ export const EmptyDropTarget = ({ mosaicId, tabId }: Props) => {
   const onPanelSelect = useCallback(
     ({ type, config, relatedConfigs }: PanelSelection) => {
       dispatch(addPanel({ tabId, type, layout: undefined, config, relatedConfigs }));
-      logEvent({ name: getEventNames().PANEL_ADD, tags: { [getEventTags().PANEL_TYPE]: type } });
+      const name = getEventNames().PANEL_ADD;
+      const eventType = getEventTags().PANEL_TYPE;
+      if (name != undefined && eventType != undefined) {
+        logEvent({ name, tags: { [eventType]: type } });
+      }
     },
     [dispatch, tabId],
   );

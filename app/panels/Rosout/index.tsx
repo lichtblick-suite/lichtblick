@@ -95,6 +95,8 @@ type Props = {
   topics: Topic[];
 };
 
+const optionHeight = parseInt(styles.optionHeight!);
+
 const RosoutPanel = React.memo(({ config, saveConfig, topics }: Props) => {
   const onNodeFilterChange = (selectedOptions: Option[]) => {
     saveConfig({
@@ -134,8 +136,8 @@ const RosoutPanel = React.memo(({ config, saveConfig, topics }: Props) => {
           clearable={false}
           searchable={false}
           value={minLogLevel}
-          optionHeight={parseInt(styles.optionHeight)}
-          maxHeight={parseInt(styles.optionHeight) * KNOWN_LOG_LEVELS.length}
+          optionHeight={optionHeight}
+          maxHeight={optionHeight * KNOWN_LOG_LEVELS.length}
           options={LOG_LEVEL_OPTIONS}
           optionRenderer={({ key, style: styleProp, option, focusedOption }: any) => (
             <div
@@ -165,7 +167,7 @@ const RosoutPanel = React.memo(({ config, saveConfig, topics }: Props) => {
           value={stringsToOptions(searchTerms, undefined) as any}
           onChange={onNodeFilterChange as any}
           options={nodeNameOptions}
-          optionHeight={parseInt(styles.optionHeight)}
+          optionHeight={optionHeight}
           placeholder="Filter by node name or message text"
           searchable
           selectComponent={Creatable}

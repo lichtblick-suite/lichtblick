@@ -118,10 +118,8 @@ export function getPanelsByType(): {
   if (!gPanelsByType) {
     gPanelsByType = {};
     const panelsByCategory = getPanelsByCategory();
-    for (const category in panelsByCategory) {
-      const nonPresetPanels = panelsByCategory[category].filter(
-        (panel) => panel && !panel.presetSettings,
-      );
+    for (const panels of Object.values(panelsByCategory)) {
+      const nonPresetPanels = panels.filter((panel) => panel && !panel.presetSettings);
       for (const item of nonPresetPanels) {
         const panelType = (item.component as any).panelType;
         console.assert(panelType && !(panelType in gPanelsByType));
@@ -239,8 +237,8 @@ function verifyPanels() {
     { component: React.ComponentType<any>; presetSettings?: PresetSettings }
   > = new Map();
   const panelsByCategory = getPanelsByCategory();
-  for (const category in panelsByCategory) {
-    for (const { component, presetSettings } of panelsByCategory[category]) {
+  for (const panels of Object.values(panelsByCategory)) {
+    for (const { component, presetSettings } of panels) {
       const { name, displayName, panelType } = component as any;
       if (!panelType) {
         throw new Error(
@@ -303,7 +301,7 @@ function PanelList(props: Props) {
     (key: string) =>
       searchQuery
         ? fuzzySort
-            .go(searchQuery, panelsByCategory[key], { key: "title" })
+            .go(searchQuery, panelsByCategory[key] ?? [], { key: "title" })
             .map((searchResult) => searchResult.obj)
         : panelsByCategory[key],
     [panelsByCategory, searchQuery],
@@ -314,7 +312,7 @@ function PanelList(props: Props) {
   );
 
   const noResults = React.useMemo(
-    () => filteredItemsByCategoryIdx.every((items) => !items.length),
+    () => filteredItemsByCategoryIdx.every((items) => !items || items.length === 0),
     [filteredItemsByCategoryIdx],
   );
 
@@ -411,7 +409,8 @@ function PanelList(props: Props) {
         {noResults && <SEmptyState>No panels match search criteria.</SEmptyState>}
         {panelCategories.map(({ label }, categoryIdx) => {
           const prevItems = flatMap(filteredItemsByCategoryIdx.slice(0, categoryIdx));
-          if (!filteredItemsByCategoryIdx[categoryIdx].length) {
+          const localFilteredItems = filteredItemsByCategoryIdx[categoryIdx];
+          if (!localFilteredItems || localFilteredItems.length === 0) {
             return ReactNull;
           }
           return (
@@ -423,7 +422,7 @@ function PanelList(props: Props) {
               >
                 {label}
               </Item>
-              {filteredItemsByCategoryIdx[categoryIdx].map(displayPanelListItem)}
+              {localFilteredItems.map(displayPanelListItem)}
             </div>
           );
         })}

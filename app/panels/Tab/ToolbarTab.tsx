@@ -170,7 +170,7 @@ export function ToolbarTab(props: Props) {
       value={tabTitle || ""}
       onClick={onClickTab}
       ref={innerRef}
-      className={cx(styles.tab, { [styles.active]: isActive })}
+      className={cx(styles.tab, { [styles.active!]: isActive })}
     >
       <Tooltip contents={editingTitle ? "" : tabTitle || "Enter tab name"} placement="top">
         {/* This div has to be here because the <ToolTip> overwrites the ref of its child*/}

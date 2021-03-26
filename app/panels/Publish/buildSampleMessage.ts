@@ -38,7 +38,7 @@ export default function buildSampleMessage(
   if (builtin != undefined) {
     return builtin;
   }
-  const fields = datatypes[datatype].fields;
+  const fields = datatypes[datatype]?.fields;
   if (!fields) {
     return ReactNull;
   }

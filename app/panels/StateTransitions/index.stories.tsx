@@ -125,7 +125,7 @@ storiesOf("<StateTransitions>", module)
         onMount={() => {
           const mouseEnterContainer = document.querySelectorAll(
             "[data-test~=panel-mouseenter-container",
-          )[0];
+          )[0]!;
           TestUtils.Simulate.mouseEnter(mouseEnterContainer);
         }}
         style={{ width: 370 }}
@@ -172,7 +172,7 @@ storiesOf("<StateTransitions>", module)
             const [canvas] = document.getElementsByTagName("canvas");
             const x = 163;
             const y = 266;
-            canvas.dispatchEvent(
+            canvas?.dispatchEvent(
               new MouseEvent("mousemove", { screenX: x, clientX: x, screenY: y, clientY: y }),
             );
           }, 100);

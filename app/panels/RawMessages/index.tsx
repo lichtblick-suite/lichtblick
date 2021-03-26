@@ -154,18 +154,18 @@ function RawMessages(props: Props) {
   const [expandAll, setExpandAll] = useState<boolean | undefined>(false);
   const [expandedFields, setExpandedFields] = useState(() => new Set());
 
-  const topicName = topicRosPath?.topicName || "";
+  const topicName = topicRosPath?.topicName ?? "";
   const consecutiveMsgs = useMessagesByTopic({
     topics: [topicName],
     historySize: 2,
     format: "bobjects",
   })[topicName];
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems([topicPath]);
-  const prevTickMsg = consecutiveMsgs[consecutiveMsgs.length - 2];
+  const prevTickMsg = consecutiveMsgs?.[consecutiveMsgs.length - 2];
   const [prevTickObj, currTickObj] = [
     prevTickMsg && {
       message: prevTickMsg,
-      queriedData: cachedGetMessagePathDataItems(topicPath, prevTickMsg) || [],
+      queriedData: cachedGetMessagePathDataItems(topicPath, prevTickMsg) ?? [],
     },
     useLatestMessageDataItem(topicPath, "bobjects"),
   ];
@@ -265,7 +265,7 @@ function RawMessages(props: Props) {
               }
             }
           }
-          const basePath: string = queriedData[lastKeyPath] && queriedData[lastKeyPath].path;
+          const basePath = queriedData[lastKeyPath]?.path ?? "";
           let itemLabel = label;
           // output preview for the first x items if the data is in binary format
           // sample output: Int8Array(331776) [-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, ...]
@@ -347,7 +347,7 @@ function RawMessages(props: Props) {
 
     const data = dataWithoutWrappingArray(baseItem.queriedData.map(({ value }) => value as any));
     const hideWrappingArray =
-      baseItem.queriedData.length === 1 && typeof baseItem.queriedData[0].value === "object";
+      baseItem.queriedData.length === 1 && typeof baseItem.queriedData[0]?.value === "object";
     const shouldDisplaySingleVal =
       (data !== undefined && typeof data !== "object") ||
       (isSingleElemArray(data) &&
@@ -418,7 +418,7 @@ function RawMessages(props: Props) {
                   val != undefined &&
                   typeof val === "object" &&
                   Object.keys(val as any).length === 1 &&
-                  diffLabelTexts.includes(Object.keys(val as any)[0])
+                  diffLabelTexts.includes(Object.keys(val as any)[0]!)
                 ) {
                   if (Object.keys(val as any)[0] !== diffLabels.ID.labelText) {
                     return objectValues(val as any)[0];
@@ -449,7 +449,7 @@ function RawMessages(props: Props) {
                   }
                   const nestedObj = get(diff, keyPath.slice().reverse(), {});
                   const nestedObjKey = Object.keys(nestedObj)[0];
-                  if (diffLabelsByLabelText[nestedObjKey]) {
+                  if (nestedObjKey && diffLabelsByLabelText[nestedObjKey]) {
                     // @ts-expect-error backgroundColor is not a property?
                     backgroundColor = diffLabelsByLabelText[nestedObjKey].backgroundColor;
                     textDecoration =
@@ -459,7 +459,7 @@ function RawMessages(props: Props) {
                     style: {
                       ...baseStyle,
                       backgroundColor,
-                      textDecoration: textDecoration || "inherit",
+                      textDecoration: textDecoration ?? "inherit",
                     },
                   };
                 },
@@ -478,7 +478,7 @@ function RawMessages(props: Props) {
                   let textDecoration;
                   const nestedObj = get(diff, keyPath.slice().reverse(), {});
                   const nestedObjKey = Object.keys(nestedObj)[0];
-                  if (diffLabelsByLabelText[nestedObjKey]) {
+                  if (nestedObjKey && diffLabelsByLabelText[nestedObjKey]) {
                     // @ts-expect-error backgroundColor is not a property?
                     backgroundColor = diffLabelsByLabelText[nestedObjKey].backgroundColor;
                     textDecoration =

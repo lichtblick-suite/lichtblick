@@ -23,9 +23,9 @@ export function decodeYUV(
   // populate 2 pixels at a time
   const max = height * width;
   for (let r = 0; r <= max; r += 2) {
-    const u = yuv[off] - 128;
-    const y1 = yuv[off + 1];
-    const v = yuv[off + 2] - 128;
+    const u = yuv[off]! - 128;
+    const y1 = yuv[off + 1]!;
+    const v = yuv[off + 2]! - 128;
     const y2 = yuv[off + 3];
 
     // rgba
@@ -35,9 +35,9 @@ export function decodeYUV(
     output[c + 3] = 255;
 
     // rgba
-    output[c + 4] = y2 + 1.402 * v;
-    output[c + 5] = y2 - 0.34414 * u - 0.71414 * v;
-    output[c + 6] = y2 + 1.772 * u;
+    output[c + 4] = y2! + 1.402 * v;
+    output[c + 5] = y2! - 0.34414 * u - 0.71414 * v;
+    output[c + 6] = y2! + 1.772 * u;
     output[c + 7] = 255;
 
     c += 8;
@@ -55,9 +55,9 @@ export function decodeRGB8(
   let outIdx = 0;
 
   for (let i = 0; i < width * height; i++) {
-    const r = rgb[inIdx++];
-    const g = rgb[inIdx++];
-    const b = rgb[inIdx++];
+    const r = rgb[inIdx++]!;
+    const g = rgb[inIdx++]!;
+    const b = rgb[inIdx++]!;
 
     output[outIdx++] = r;
     output[outIdx++] = g;
@@ -76,9 +76,9 @@ export function decodeBGR8(
   let outIdx = 0;
 
   for (let i = 0; i < width * height; i++) {
-    const b = bgr[inIdx++];
-    const g = bgr[inIdx++];
-    const r = bgr[inIdx++];
+    const b = bgr[inIdx++]!;
+    const g = bgr[inIdx++]!;
+    const r = bgr[inIdx++]!;
 
     output[outIdx++] = r;
     output[outIdx++] = g;
@@ -116,7 +116,7 @@ export function decodeMono8(
   let outIdx = 0;
 
   for (let i = 0; i < width * height; i++) {
-    const ch = mono8[inIdx++];
+    const ch = mono8[inIdx++]!;
     output[outIdx++] = ch;
     output[outIdx++] = ch;
     output[outIdx++] = ch;
