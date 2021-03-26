@@ -231,7 +231,7 @@ export default function Layout({
   // Since the highlightedMarkerMatchers are updated by mouse events, we wait
   // a short amount of time to prevent excessive re-rendering of the 3D panel
   const [hoveredMarkerMatchers, setHoveredMarkerMatchers] = useState<MarkerMatcher[]>([]);
-  const [setHoveredMarkerMatchersDebounced] = useDebouncedCallback(setHoveredMarkerMatchers, 100);
+  const setHoveredMarkerMatchersDebounced = useDebouncedCallback(setHoveredMarkerMatchers, 100);
 
   const isDrawing = useMemo(
     () => measureInfo.measureState !== "idle" || drawingTabType === POLYGON_TAB_TYPE,
