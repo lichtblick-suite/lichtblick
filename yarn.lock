@@ -1923,6 +1923,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@foxglove/velodyne-cloud@workspace:packages/velodyne-cloud":
+  version: 0.0.0-use.local
+  resolution: "@foxglove/velodyne-cloud@workspace:packages/velodyne-cloud"
+  dependencies:
+    "@jest/types": 26.6.2
+    jest: 26.6.3
+    jest-circus: 26.6.3
+    kelonio: 0.6.0
+    rosbag: "github:foxglove/rosbag.js#fc61125fbc01ff55698c5ed48987b2d9e7599572"
+    tslib: 2.1.0
+    typescript: 4.2.2
+  languageName: unknown
+  linkType: soft
+
 "@foxglove/wasm-bz2@workspace:packages/wasm-bz2":
   version: 0.0.0-use.local
   resolution: "@foxglove/wasm-bz2@workspace:packages/wasm-bz2"
@@ -8182,6 +8196,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"complex.js@npm:^2.0.11":
+  version: 2.0.12
+  resolution: "complex.js@npm:2.0.12"
+  checksum: 4386e1ccd3496e12882ac0955e926d7dd342a9d97d55b155bbd3a367cc1e190c7bd91584b7152208b05708f0f6eb173f8e886f89aa0f2012cc012a5c42b222b3
+  languageName: node
+  linkType: hard
+
 "component-bind@npm:1.0.0":
   version: 1.0.0
   resolution: "component-bind@npm:1.0.0"
@@ -10541,6 +10562,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"escape-latex@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "escape-latex@npm:1.2.0"
+  checksum: d8012eb447a373f61270138f9acd749566f24b42f6727c2cc80254f0e678e83a7cf20c14ec45887f80173be2aad15a80d396ca2f4a53edd857a769faebc409fb
+  languageName: node
+  linkType: hard
+
 "escape-string-regexp@npm:2.0.0, escape-string-regexp@npm:^2.0.0":
   version: 2.0.0
   resolution: "escape-string-regexp@npm:2.0.0"
@@ -11753,6 +11781,13 @@ __metadata:
     webpack-hot-middleware: 2.25.0
   languageName: unknown
   linkType: soft
+
+"fraction.js@npm:^4.0.12":
+  version: 4.0.13
+  resolution: "fraction.js@npm:4.0.13"
+  checksum: 1e9ec132b09f17f3e41aa53508197901277f11896f6adc0b51a4b38511e6236813a471488c319221f4fadf7c854be9566a4924215623b460364591d80e1791c3
+  languageName: node
+  linkType: hard
 
 "fragment-cache@npm:^0.2.1":
   version: 0.2.1
@@ -14240,6 +14275,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"javascript-natural-sort@npm:^0.7.1":
+  version: 0.7.1
+  resolution: "javascript-natural-sort@npm:0.7.1"
+  checksum: f097317419cf0be44aa491a3a7b7c8dfa3590852e994641afb6ea4a7e57e5dae58d9198dd5fa0b98585f296f91f534100825e734f9b69cef65728819f50d701b
+  languageName: node
+  linkType: hard
+
 "jest-canvas-mock@npm:2.3.1":
   version: 2.3.1
   resolution: "jest-canvas-mock@npm:2.3.1"
@@ -15062,6 +15104,16 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"kelonio@npm:0.6.0":
+  version: 0.6.0
+  resolution: "kelonio@npm:0.6.0"
+  dependencies:
+    browser-process-hrtime: ^1.0.0
+    mathjs: ^6.2.3
+  checksum: b38e84d1843e7ada5ca8673135f7adbf0635660383dbd425d79d16a6dcd5d1bba265fbb8766647d2f1f6deae1a49138e0f161c1f1955791910d3d1472e5b077b
+  languageName: node
+  linkType: hard
+
 "keyv@npm:^3.0.0":
   version: 3.1.0
   resolution: "keyv@npm:3.1.0"
@@ -15842,6 +15894,24 @@ fsevents@^1.2.7:
   version: 1.2.6
   resolution: "material-colors@npm:1.2.6"
   checksum: 15883150a32abdb79638175b320712621a2962200ca3c09dfa0d5e3b614c081a0d459058ae367714f133801b8d9779f4137ddda4f2fbcaf8038a4624ab32c037
+  languageName: node
+  linkType: hard
+
+"mathjs@npm:^6.2.3":
+  version: 6.6.5
+  resolution: "mathjs@npm:6.6.5"
+  dependencies:
+    complex.js: ^2.0.11
+    decimal.js: ^10.2.0
+    escape-latex: ^1.2.0
+    fraction.js: ^4.0.12
+    javascript-natural-sort: ^0.7.1
+    seed-random: ^2.2.0
+    tiny-emitter: ^2.1.0
+    typed-function: ^1.1.1
+  bin:
+    mathjs: bin/cli.js
+  checksum: 707f52ae99f0498f89716b60698689ffe2102e48ef8997ac905b70ee8bfc6b47dcd6de0322dab0feec8e55b376fd48ffaa34007d106859e3ccf82fcfdb7253a3
   languageName: node
   linkType: hard
 
@@ -20712,6 +20782,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"seed-random@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "seed-random@npm:2.2.0"
+  checksum: 61cb57e7d8c5fa8d0597ab2f3a696f4517fc05f0aecac6a60895724704f90bfa4afc257e938bf7d83d5421b5d9e3f97c8b39a3b706318999102473d74aa436e9
+  languageName: node
+  linkType: hard
+
 "seedrandom@npm:3.0.5":
   version: 3.0.5
   resolution: "seedrandom@npm:3.0.5"
@@ -22354,7 +22431,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"tiny-emitter@npm:^2.0.0":
+"tiny-emitter@npm:^2.0.0, tiny-emitter@npm:^2.1.0":
   version: 2.1.0
   resolution: "tiny-emitter@npm:2.1.0"
   checksum: 0055509c72e5fe35d6ab66fa6339342e0f29129e77ed2086e475fdf80be43a8651f2517be76513b46a042c8356396f4da5a35e2e23457252176808d5a892036a
@@ -22800,6 +22877,13 @@ fsevents@^1.2.7:
     media-typer: 0.3.0
     mime-types: ~2.1.24
   checksum: 20a3514f1d835c979237995129d1f8c564325301e3a8f1c732bcbe1d7fa0ca1f65994e41a79e9030d79f31e5459bb9be5c377848fcb477cb3049a661b3713d74
+  languageName: node
+  linkType: hard
+
+"typed-function@npm:^1.1.1":
+  version: 1.1.1
+  resolution: "typed-function@npm:1.1.1"
+  checksum: 8d4d4467219fa95b75b17c73c9e5c1cb9f3558b0e744f429ac2699634bc252381f9fbf63641450d67c24b98b871d77af9e095633839e77763cf499fa3abc7788
   languageName: node
   linkType: hard
 

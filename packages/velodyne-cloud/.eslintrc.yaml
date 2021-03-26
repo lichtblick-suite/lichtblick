@@ -1,0 +1,6 @@
+parserOptions:
+  project: packages/velodyne-cloud/tsconfig.json
+
+ignorePatterns:
+  - dist/
+  - perf/
