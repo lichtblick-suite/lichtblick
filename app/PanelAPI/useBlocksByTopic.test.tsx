@@ -15,7 +15,7 @@ import { mount } from "enzyme";
 import { cloneDeep } from "lodash";
 import { MessageReader, parseMessageDefinition } from "rosbag";
 
-import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
+import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
 
 import * as PanelAPI from ".";
 

@@ -13,7 +13,7 @@
 
 import { storiesOf } from "@storybook/react";
 
-import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
+import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
 import TinyConnectionPicker from "@foxglove-studio/app/components/TinyConnectionPicker";
 import PlayerSelectionContext, {
   PlayerSelection,

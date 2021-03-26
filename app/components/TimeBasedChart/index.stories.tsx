@@ -14,7 +14,7 @@ import { storiesOf } from "@storybook/react";
 import cloneDeep from "lodash/cloneDeep";
 import { useState, useCallback } from "react";
 
-import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
+import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
 import { triggerWheel } from "@foxglove-studio/app/stories/PanelSetup";
 
 import TimeBasedChart from "./index";

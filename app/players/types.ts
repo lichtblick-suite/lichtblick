@@ -80,15 +80,18 @@ export interface Player {
   setGlobalVariables(globalVariables: GlobalVariables): void;
 }
 
+export const enum PlayerPresence {
+  NOT_PRESENT = "NOT_PRESENT",
+  CONSTRUCTING = "CONSTRUCTING",
+  INITIALIZING = "INITIALIZING",
+  RECONNECTING = "RECONNECTING",
+  PRESENT = "PRESENT",
+  ERROR = "ERROR",
+}
+
 export type PlayerState = {
-  // Is there a real Player set at all. Should be set to `false` when initializing a PlayerState outside of an actual player.
-  isPresent: boolean;
-
-  // Show a spinner in the UI (indicating making some sort of connection).
-  showSpinner: boolean;
-
-  // Show "initializing" instead of a playback bar at the bottom of the screen.
-  showInitializing: boolean;
+  // Information about the player's presence or connection status, for the UI to show a loading indicator.
+  presence: PlayerPresence;
 
   // Show some sort of progress indication in the playback bar; see `type Progress` for more details.
   // TODO(JP): Maybe we should unify some progress and the other initialization fields above into

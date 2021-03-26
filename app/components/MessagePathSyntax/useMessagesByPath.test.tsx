@@ -17,7 +17,7 @@ import React, { PropsWithChildren } from "react";
 
 import { setGlobalVariables } from "@foxglove-studio/app/actions/panels";
 import useMessagesByPath from "@foxglove-studio/app/components/MessagePathSyntax/useMessagesByPath";
-import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
+import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
 

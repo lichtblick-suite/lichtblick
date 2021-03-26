@@ -36,7 +36,7 @@ afterEach(async () => {
     mockSendNotification.mockClear();
     // Reset the error handler to the default (no error handler).
     mockSetNotificationHandler();
-    fail(
+    throw new Error(
       `sendNotification has been called during this test (call sendNotification.expectCalledDuringTest(); at the end of your test if you expect this): ${JSON.stringify(
         calls,
       )}`,

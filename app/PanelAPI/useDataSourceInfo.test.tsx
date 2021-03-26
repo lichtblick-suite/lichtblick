@@ -13,7 +13,7 @@
 
 import { mount } from "enzyme";
 
-import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
+import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
 
 import * as PanelAPI from ".";
 

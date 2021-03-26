@@ -15,7 +15,7 @@ import { mount } from "enzyme";
 import { last } from "lodash";
 import { act } from "react-dom/test-utils";
 
-import { PlayerStateActiveData } from "@foxglove-studio/app/players/types";
+import { PlayerPresence, PlayerStateActiveData } from "@foxglove-studio/app/players/types";
 import delay from "@foxglove-studio/app/shared/delay";
 import signal from "@foxglove-studio/app/shared/signal";
 import tick from "@foxglove-studio/app/shared/tick";
@@ -45,11 +45,9 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
           playerState: {
             activeData: undefined,
             capabilities: [],
-            isPresent: false,
+            presence: PlayerPresence.NOT_PRESENT,
             playerId: "",
             progress: {},
-            showInitializing: true,
-            showSpinner: true,
           },
           subscriptions: [],
           publishers: [],
@@ -74,7 +72,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     const player = new FakePlayer();
     const callback = jest.fn().mockReturnValue(ReactNull);
     mount(
-      <MessagePipelineProvider player={player}>
+      <MessagePipelineProvider maybePlayer={{ player }}>
         <MessagePipelineConsumer>{callback}</MessagePipelineConsumer>
       </MessagePipelineProvider>,
     );
@@ -87,11 +85,9 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
           playerState: {
             activeData: undefined,
             capabilities: [],
-            isPresent: false,
+            presence: PlayerPresence.INITIALIZING,
             playerId: "",
             progress: {},
-            showInitializing: true,
-            showSpinner: true,
           },
         }),
       ],
@@ -100,14 +96,36 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
           playerState: {
             activeData: undefined,
             capabilities: [],
-            isPresent: true,
+            presence: PlayerPresence.PRESENT,
             playerId: "test",
             progress: {},
-            showInitializing: false,
-            showSpinner: false,
           },
         }),
       ],
+    ]);
+  });
+
+  it("merges player presence info with construction status from maybePlayer", async () => {
+    const player = new FakePlayer();
+    const callback = jest.fn().mockReturnValue(ReactNull);
+    const pipeline = mount(
+      <MessagePipelineProvider maybePlayer={{}}>
+        <MessagePipelineConsumer>{callback}</MessagePipelineConsumer>
+      </MessagePipelineProvider>,
+    );
+
+    pipeline.setProps({ maybePlayer: { loading: true } });
+    pipeline.setProps({ maybePlayer: { error: "failed to load player" } });
+    pipeline.setProps({ maybePlayer: { player } });
+    await act(() => player.emit());
+    await act(() => player.emit({ presence: PlayerPresence.RECONNECTING }));
+    expect(callback.mock.calls.map(([{ playerState }]) => playerState.presence)).toEqual([
+      PlayerPresence.NOT_PRESENT,
+      PlayerPresence.CONSTRUCTING,
+      PlayerPresence.ERROR,
+      PlayerPresence.INITIALIZING,
+      PlayerPresence.PRESENT,
+      PlayerPresence.RECONNECTING,
     ]);
   });
 
@@ -115,7 +133,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     const player = new FakePlayer();
     const callback = jest.fn().mockReturnValue(ReactNull);
     mount(
-      <MessagePipelineProvider player={player}>
+      <MessagePipelineProvider maybePlayer={{ player }}>
         <MessagePipelineConsumer>{callback}</MessagePipelineConsumer>
       </MessagePipelineProvider>,
     );
@@ -134,7 +152,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
 
     const promise = signal();
     const pipeline = mount(
-      <MessagePipelineProvider player={player} globalVariables={{}}>
+      <MessagePipelineProvider maybePlayer={{ player }} globalVariables={{}}>
         <MessagePipelineConsumer>
           {(context) => {
             pauseFrame = context.pauseFrame;
@@ -154,7 +172,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     const onFrameRendered = pauseFrame("Wait");
 
     // Pass in new globalVariables and make sure they aren't used until the frame is done
-    pipeline.setProps({ player, globalVariables: { futureTime: 1 } });
+    pipeline.setProps({ maybePlayer: { player }, globalVariables: { futureTime: 1 } });
     await tick();
     expect(player.setGlobalVariables).toHaveBeenCalledTimes(1);
 
@@ -169,7 +187,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     let callCount = 0;
     let lastSubscriptions = [];
     mount(
-      <MessagePipelineProvider player={player}>
+      <MessagePipelineProvider maybePlayer={{ player }}>
         <MessagePipelineConsumer>
           {(context) => {
             callCount++;
@@ -224,7 +242,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     let callCount = 0;
     let lastPublishers = [];
     mount(
-      <MessagePipelineProvider player={player}>
+      <MessagePipelineProvider maybePlayer={{ player }}>
         <MessagePipelineConsumer>
           {(context) => {
             callCount++;
@@ -274,7 +292,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     let lastContext;
     let lastPromise = Promise.resolve();
     mount(
-      <MessagePipelineProvider player={player}>
+      <MessagePipelineProvider maybePlayer={{ player }}>
         <MessagePipelineConsumer>
           {(context: any) => {
             callCount++;
@@ -312,7 +330,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     const player = new FakePlayer();
     const callback = jest.fn().mockReturnValue(ReactNull);
     mount(
-      <MessagePipelineProvider player={player}>
+      <MessagePipelineProvider maybePlayer={{ player }}>
         <MessagePipelineConsumer>{callback}</MessagePipelineConsumer>
       </MessagePipelineProvider>,
     );
@@ -334,7 +352,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     jest.spyOn(player, "seekPlayback");
     let callCount = 0;
     mount(
-      <MessagePipelineProvider player={player}>
+      <MessagePipelineProvider maybePlayer={{ player }}>
         <MessagePipelineConsumer>
           {(context) => {
             callCount++;
@@ -363,7 +381,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     const player = new FakePlayer();
     jest.spyOn(player, "close");
     const el = mount(
-      <MessagePipelineProvider player={player}>
+      <MessagePipelineProvider maybePlayer={{ player }}>
         <MessagePipelineConsumer>{() => ReactNull}</MessagePipelineConsumer>
       </MessagePipelineProvider>,
     );
@@ -384,7 +402,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
       jest.spyOn(player, "close");
       fn = jest.fn().mockReturnValue(ReactNull);
       const el = mount(
-        <MessagePipelineProvider player={player}>
+        <MessagePipelineProvider maybePlayer={{ player }}>
           <MessagePipelineConsumer>{fn}</MessagePipelineConsumer>
         </MessagePipelineProvider>,
       );
@@ -393,7 +411,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
 
       player2 = new FakePlayer();
       player2.playerId = "fake player 2";
-      act(() => el.setProps({ player: player2 }) && undefined);
+      act(() => el.setProps({ maybePlayer: { player: player2 } }) && undefined);
       expect(player.close).toHaveBeenCalledTimes(1);
       expect(fn).toHaveBeenCalledTimes(4);
     });
@@ -449,7 +467,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     let callCount = 0;
     const wait = signal();
     const el = mount(
-      <MessagePipelineProvider player={player}>
+      <MessagePipelineProvider maybePlayer={{ player }}>
         <MessagePipelineConsumer>
           {(context) => {
             callCount++;
@@ -480,7 +498,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     );
     await wait;
     const player2 = new FakePlayer();
-    act(() => el.setProps({ player: player2 }) && undefined);
+    act(() => el.setProps({ maybePlayer: { player: player2 } }) && undefined);
     expect(player2.subscriptions).toEqual([
       { topic: "/webviz/test", format: "parsedMessages" },
       { topic: "/webviz/test2", format: "parsedMessages" },
@@ -492,7 +510,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     const player = new FakePlayer();
     const fn = jest.fn().mockReturnValue(ReactNull);
     const el = mount(
-      <MessagePipelineProvider player={player}>
+      <MessagePipelineProvider maybePlayer={{ player }}>
         <MessagePipelineConsumer>{fn}</MessagePipelineConsumer>
       </MessagePipelineProvider>,
     );
@@ -512,19 +530,17 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
       playerWarnings: {},
       totalBytesReceived: 1234,
     };
-    await act(() => player.emit(activeData));
+    await act(() => player.emit({ activeData }));
     expect(fn).toHaveBeenCalledTimes(2);
 
-    el.setProps({ player: undefined });
+    el.setProps({ maybePlayer: { player: undefined } });
     expect(fn).toHaveBeenCalledTimes(4);
     expect(last(fn.mock.calls)[0].playerState).toEqual({
       activeData,
       capabilities: [],
-      isPresent: false,
+      presence: PlayerPresence.NOT_PRESENT,
       playerId: "",
       progress: {},
-      showInitializing: true,
-      showSpinner: true,
     });
   });
 
@@ -533,7 +549,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     const player = new FakePlayer();
     const fn = jest.fn().mockReturnValue(ReactNull);
     mount(
-      <MessagePipelineProvider player={player}>
+      <MessagePipelineProvider maybePlayer={{ player }}>
         <MessagePipelineConsumer>{fn}</MessagePipelineConsumer>
       </MessagePipelineProvider>,
     );
@@ -561,7 +577,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
       playerWarnings: {},
       totalBytesReceived: 1234,
     };
-    await act(() => player.emit(activeData));
+    await act(() => player.emit({ activeData }));
     expect(fn).toHaveBeenCalledTimes(3);
 
     // Calling setSubscriptions right after activeData is ok if the set of topics doesn't change
@@ -601,7 +617,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
 
       player = new FakePlayer();
       el = mount(
-        <MessagePipelineProvider player={player}>
+        <MessagePipelineProvider maybePlayer={{ player }}>
           <MessagePipelineConsumer>
             {(context) => {
               pauseFrame = context.pauseFrame;
@@ -758,7 +774,7 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
 
       // Replace the player.
       const newPlayer = new FakePlayer();
-      el.setProps({ player: newPlayer });
+      el.setProps({ maybePlayer: { player: newPlayer } });
       await delay(20);
 
       const secondPlayerResumeFn = pauseFrame("");

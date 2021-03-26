@@ -87,23 +87,25 @@ describe("NodePlayer", () => {
       messages.push(playerState);
     });
     fakePlayer.emit({
-      messages: [],
-      bobjects: [],
-      messageOrder: "receiveTime",
-      currentTime: { sec: 0, nsec: 0 },
-      startTime: { sec: 0, nsec: 0 },
-      endTime: { sec: 1, nsec: 0 },
-      isPlaying: true,
-      speed: 0.2,
-      lastSeekTime: 0,
-      topics: [
-        { name: "/input/foo", datatype: "foo" },
-        { name: "/input/bar", datatype: "bar" },
-      ],
-      datatypes: { foo: { fields: [] } },
-      parsedMessageDefinitionsByTopic: {},
-      playerWarnings: {},
-      totalBytesReceived: 1234,
+      activeData: {
+        messages: [],
+        bobjects: [],
+        messageOrder: "receiveTime",
+        currentTime: { sec: 0, nsec: 0 },
+        startTime: { sec: 0, nsec: 0 },
+        endTime: { sec: 1, nsec: 0 },
+        isPlaying: true,
+        speed: 0.2,
+        lastSeekTime: 0,
+        topics: [
+          { name: "/input/foo", datatype: "foo" },
+          { name: "/input/bar", datatype: "bar" },
+        ],
+        datatypes: { foo: { fields: [] } },
+        parsedMessageDefinitionsByTopic: {},
+        playerWarnings: {},
+        totalBytesReceived: 1234,
+      },
     });
     expect(messages).toHaveLength(1);
     const { activeData } = messages[0]!;
@@ -137,23 +139,25 @@ describe("NodePlayer", () => {
       messages.push(playerState);
     });
     fakePlayer.emit({
-      messages: [],
-      bobjects: [],
-      messageOrder: "receiveTime",
-      currentTime: { sec: 0, nsec: 0 },
-      startTime: { sec: 0, nsec: 0 },
-      endTime: { sec: 1, nsec: 0 },
-      isPlaying: true,
-      speed: 0.2,
-      lastSeekTime: 0,
-      topics: [
-        { name: "/input/foo", datatype: "foo" },
-        { name: "/input/bar", datatype: "bar" },
-      ],
-      datatypes: { foo: { fields: [] } },
-      parsedMessageDefinitionsByTopic: {},
-      playerWarnings: {},
-      totalBytesReceived: 1234,
+      activeData: {
+        messages: [],
+        bobjects: [],
+        messageOrder: "receiveTime",
+        currentTime: { sec: 0, nsec: 0 },
+        startTime: { sec: 0, nsec: 0 },
+        endTime: { sec: 1, nsec: 0 },
+        isPlaying: true,
+        speed: 0.2,
+        lastSeekTime: 0,
+        topics: [
+          { name: "/input/foo", datatype: "foo" },
+          { name: "/input/bar", datatype: "bar" },
+        ],
+        datatypes: { foo: { fields: [] } },
+        parsedMessageDefinitionsByTopic: {},
+        playerWarnings: {},
+        totalBytesReceived: 1234,
+      },
     });
     const { activeData } = messages[0]!;
     expect(activeData).not.toBeUndefined();
@@ -174,23 +178,25 @@ describe("NodePlayer", () => {
       messages.push(playerState);
     });
     fakePlayer.emit({
-      messages: [],
-      bobjects: [],
-      messageOrder: "receiveTime",
-      currentTime: { sec: 0, nsec: 0 },
-      startTime: { sec: 0, nsec: 0 },
-      endTime: { sec: 1, nsec: 0 },
-      isPlaying: true,
-      speed: 0.2,
-      lastSeekTime: 0,
-      topics: [
-        { name: "/input/foo", datatype: "foo" },
-        { name: "/input/bar", datatype: "bar" },
-      ],
-      datatypes: { foo: { fields: [] } },
-      parsedMessageDefinitionsByTopic: {},
-      playerWarnings: {},
-      totalBytesReceived: 1234,
+      activeData: {
+        messages: [],
+        bobjects: [],
+        messageOrder: "receiveTime",
+        currentTime: { sec: 0, nsec: 0 },
+        startTime: { sec: 0, nsec: 0 },
+        endTime: { sec: 1, nsec: 0 },
+        isPlaying: true,
+        speed: 0.2,
+        lastSeekTime: 0,
+        topics: [
+          { name: "/input/foo", datatype: "foo" },
+          { name: "/input/bar", datatype: "bar" },
+        ],
+        datatypes: { foo: { fields: [] } },
+        parsedMessageDefinitionsByTopic: {},
+        playerWarnings: {},
+        totalBytesReceived: 1234,
+      },
     });
     const { activeData } = messages[0]!;
     expect(activeData).not.toBeUndefined();
@@ -329,20 +335,22 @@ describe("NodePlayer", () => {
     nodePlayer.setSubscriptions([{ topic: "/webviz/test", format: "parsedMessages" }]);
 
     fakePlayer.emit({
-      messages: upstreamMessages,
-      bobjects: [],
-      messageOrder: "receiveTime",
-      currentTime: upstreamMessages[0]!.receiveTime,
-      startTime: { sec: 0, nsec: 0 },
-      endTime: { sec: 1, nsec: 0 },
-      isPlaying: true,
-      speed: 0.2,
-      lastSeekTime: 0,
-      topics: [{ name: "/input/foo", datatype: "foo" }],
-      datatypes: { foo: { fields: [] } },
-      parsedMessageDefinitionsByTopic: {},
-      playerWarnings: {},
-      totalBytesReceived: 1234,
+      activeData: {
+        messages: upstreamMessages,
+        bobjects: [],
+        messageOrder: "receiveTime",
+        currentTime: upstreamMessages[0]!.receiveTime,
+        startTime: { sec: 0, nsec: 0 },
+        endTime: { sec: 1, nsec: 0 },
+        isPlaying: true,
+        speed: 0.2,
+        lastSeekTime: 0,
+        topics: [{ name: "/input/foo", datatype: "foo" }],
+        datatypes: { foo: { fields: [] } },
+        parsedMessageDefinitionsByTopic: {},
+        playerWarnings: {},
+        totalBytesReceived: 1234,
+      },
     });
 
     await done;
@@ -383,20 +391,22 @@ describe("NodePlayer", () => {
     });
 
     fakePlayer.emit({
-      messages: upstreamMessages,
-      bobjects: [],
-      messageOrder: "receiveTime",
-      currentTime: upstreamMessages[0]!.receiveTime,
-      startTime: { sec: 0, nsec: 0 },
-      endTime: { sec: 1, nsec: 0 },
-      isPlaying: true,
-      speed: 0.2,
-      lastSeekTime: 0,
-      topics: [{ name: "/input/foo", datatype: "foo" }],
-      datatypes: { foo: { fields: [] } },
-      parsedMessageDefinitionsByTopic: {},
-      playerWarnings: {},
-      totalBytesReceived: 1234,
+      activeData: {
+        messages: upstreamMessages,
+        bobjects: [],
+        messageOrder: "receiveTime",
+        currentTime: upstreamMessages[0]!.receiveTime,
+        startTime: { sec: 0, nsec: 0 },
+        endTime: { sec: 1, nsec: 0 },
+        isPlaying: true,
+        speed: 0.2,
+        lastSeekTime: 0,
+        topics: [{ name: "/input/foo", datatype: "foo" }],
+        datatypes: { foo: { fields: [] } },
+        parsedMessageDefinitionsByTopic: {},
+        playerWarnings: {},
+        totalBytesReceived: 1234,
+      },
     });
 
     await done;
@@ -418,38 +428,42 @@ describe("NodePlayer", () => {
     });
     nodePlayer.setSubscriptions([{ topic: "/webviz/test", format: "parsedMessages" }]);
     fakePlayer.emit({
-      messages: [upstreamMessages[0]!],
-      bobjects: [],
-      messageOrder: "receiveTime",
-      currentTime: upstreamMessages[0]!.receiveTime,
-      startTime: { sec: 0, nsec: 0 },
-      endTime: { sec: 1, nsec: 0 },
-      isPlaying: true,
-      speed: 0.2,
-      lastSeekTime: 0,
-      topics: [{ name: "/input/foo", datatype: "foo" }],
-      datatypes: { foo: { fields: [] } },
-      parsedMessageDefinitionsByTopic: {},
-      playerWarnings: {},
-      totalBytesReceived: 1234,
+      activeData: {
+        messages: [upstreamMessages[0]!],
+        bobjects: [],
+        messageOrder: "receiveTime",
+        currentTime: upstreamMessages[0]!.receiveTime,
+        startTime: { sec: 0, nsec: 0 },
+        endTime: { sec: 1, nsec: 0 },
+        isPlaying: true,
+        speed: 0.2,
+        lastSeekTime: 0,
+        topics: [{ name: "/input/foo", datatype: "foo" }],
+        datatypes: { foo: { fields: [] } },
+        parsedMessageDefinitionsByTopic: {},
+        playerWarnings: {},
+        totalBytesReceived: 1234,
+      },
     });
 
     fakePlayer.emit({
-      messages: [upstreamMessages[1]!],
-      bobjects: [],
-      messageOrder: "receiveTime",
-      currentTime: upstreamMessages[1]!.receiveTime,
-      startTime: { sec: 0, nsec: 0 },
-      endTime: { sec: 1, nsec: 0 },
-      isPlaying: true,
-      speed: 0.2,
-      // set the last seek time to a new value
-      lastSeekTime: 1,
-      topics: [{ name: "/input/foo", datatype: "foo" }],
-      datatypes: { foo: { fields: [] } },
-      parsedMessageDefinitionsByTopic: {},
-      playerWarnings: {},
-      totalBytesReceived: 1234,
+      activeData: {
+        messages: [upstreamMessages[1]!],
+        bobjects: [],
+        messageOrder: "receiveTime",
+        currentTime: upstreamMessages[1]!.receiveTime,
+        startTime: { sec: 0, nsec: 0 },
+        endTime: { sec: 1, nsec: 0 },
+        isPlaying: true,
+        speed: 0.2,
+        // set the last seek time to a new value
+        lastSeekTime: 1,
+        topics: [{ name: "/input/foo", datatype: "foo" }],
+        datatypes: { foo: { fields: [] } },
+        parsedMessageDefinitionsByTopic: {},
+        playerWarnings: {},
+        totalBytesReceived: 1234,
+      },
     });
     await done;
     expect(messages).toHaveLength(4);
@@ -504,20 +518,22 @@ describe("NodePlayer", () => {
       }));
 
       fakePlayer.emit({
-        messages: upstreamMessages,
-        bobjects: emittedBobjects,
-        messageOrder: "receiveTime",
-        currentTime: upstreamMessages[0]!.receiveTime,
-        startTime: { sec: 0, nsec: 0 },
-        endTime: { sec: 1, nsec: 0 },
-        isPlaying: true,
-        speed: 0.2,
-        lastSeekTime: 0,
-        topics: [{ name: "/input/foo", datatype: "foo" }],
-        datatypes,
-        parsedMessageDefinitionsByTopic: {},
-        playerWarnings: {},
-        totalBytesReceived: 1234,
+        activeData: {
+          messages: upstreamMessages,
+          bobjects: emittedBobjects,
+          messageOrder: "receiveTime",
+          currentTime: upstreamMessages[0]!.receiveTime,
+          startTime: { sec: 0, nsec: 0 },
+          endTime: { sec: 1, nsec: 0 },
+          isPlaying: true,
+          speed: 0.2,
+          lastSeekTime: 0,
+          topics: [{ name: "/input/foo", datatype: "foo" }],
+          datatypes,
+          parsedMessageDefinitionsByTopic: {},
+          playerWarnings: {},
+          totalBytesReceived: 1234,
+        },
       });
 
       await done;

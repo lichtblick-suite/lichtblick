@@ -35,6 +35,7 @@ import {
   Topic,
   ParsedMessageDefinitionsByTopic,
   NotifyPlayerManager,
+  PlayerPresence,
 } from "@foxglove-studio/app/players/types";
 import delay from "@foxglove-studio/app/shared/delay";
 import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
@@ -274,9 +275,7 @@ export default class RandomAccessPlayer implements Player {
 
     if (this._hasError) {
       return this._listener({
-        isPresent: false,
-        showSpinner: false,
-        showInitializing: false,
+        presence: PlayerPresence.NOT_PRESENT,
         progress: {},
         capabilities: [],
         playerId: this._id,
@@ -319,9 +318,11 @@ export default class RandomAccessPlayer implements Player {
     }
 
     const data = {
-      isPresent: true,
-      showSpinner: this._initializing || this._reconnecting,
-      showInitializing: this._initializing,
+      presence: this._reconnecting
+        ? PlayerPresence.RECONNECTING
+        : this._initializing
+        ? PlayerPresence.INITIALIZING
+        : PlayerPresence.PRESENT,
       progress: this._progress,
       capabilities,
       playerId: this._id,

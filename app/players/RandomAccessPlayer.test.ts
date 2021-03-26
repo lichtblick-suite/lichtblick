@@ -21,6 +21,7 @@ import {
   NotifyPlayerManagerReplyData,
   PlayerCapabilities,
   PlayerMetricsCollectorInterface,
+  PlayerPresence,
   PlayerState,
 } from "@foxglove-studio/app/players/types";
 import delay from "@foxglove-studio/app/shared/delay";
@@ -114,10 +115,8 @@ describe("RandomAccessPlayer", () => {
       {
         activeData: undefined,
         capabilities: [PlayerCapabilities.setSpeed],
-        isPresent: true,
+        presence: PlayerPresence.INITIALIZING,
         progress: {},
-        showInitializing: true,
-        showSpinner: true,
       },
       {
         activeData: {
@@ -143,10 +142,8 @@ describe("RandomAccessPlayer", () => {
           playerWarnings: {},
         },
         capabilities: [PlayerCapabilities.setSpeed],
-        isPresent: true,
+        presence: PlayerPresence.PRESENT,
         progress: {},
-        showInitializing: false,
-        showSpinner: false,
       },
     ]);
     // make sure capabilities don't change from one message to another
@@ -1272,8 +1269,8 @@ describe("RandomAccessPlayer", () => {
     expect(provider.closed).toBe(false);
 
     expect(messages).toEqual([
-      expect.objectContaining({ showInitializing: true, activeData: undefined }),
-      expect.objectContaining({ showInitializing: false, activeData: undefined }),
+      expect.objectContaining({ presence: PlayerPresence.INITIALIZING, activeData: undefined }),
+      expect.objectContaining({ presence: PlayerPresence.NOT_PRESENT, activeData: undefined }),
     ]);
     expect(sendNotification).toHaveBeenCalledWith(
       "Error initializing player",
@@ -1284,26 +1281,23 @@ describe("RandomAccessPlayer", () => {
     (sendNotification as any).mockClear();
   });
 
-  it("shows a spinner when a provider is reconnecting", (done) => {
+  it("reports when a provider is reconnecting", (done) => {
     const provider = new TestProvider();
     const source = new RandomAccessPlayer(
       { name: "TestProvider", args: { provider }, children: [] },
       playerOptions,
     );
-    source.setListener((state) => {
-      if (!state.showInitializing) {
-        if (!state.showSpinner) {
-          setImmediate(() =>
-            provider.extensionPoint?.reportMetadataCallback({
-              type: "updateReconnecting",
-              reconnecting: true,
-            }),
-          );
-        } else {
-          done();
-        }
+    source.setListener(async (state) => {
+      if (state.presence === PlayerPresence.PRESENT) {
+        setImmediate(() =>
+          provider.extensionPoint?.reportMetadataCallback({
+            type: "updateReconnecting",
+            reconnecting: true,
+          }),
+        );
+      } else if (state.presence === PlayerPresence.RECONNECTING) {
+        done();
       }
-      return Promise.resolve();
     });
   });
 

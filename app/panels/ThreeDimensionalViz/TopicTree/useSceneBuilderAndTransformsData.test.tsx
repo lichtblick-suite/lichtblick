@@ -14,7 +14,7 @@
 import { mount } from "enzyme";
 import { omit } from "lodash";
 
-import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
+import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
 import { Namespace } from "@foxglove-studio/app/types/Messages";
 import { TRANSFORM_TOPIC } from "@foxglove-studio/app/util/globalConstants";
 

@@ -19,6 +19,9 @@ const compiler = webpack(
 
 // global jest test setup builds the webpack build before running any integration tests
 export default async (): Promise<void> => {
+  if ((process.env.INTEGRATION_SKIP_BUILD ?? "") !== "") {
+    return;
+  }
   return new Promise<void>((resolve, reject) => {
     // eslint-disable-next-line no-restricted-syntax
     console.info("Building Webpack");

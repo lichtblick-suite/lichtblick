@@ -29,7 +29,7 @@ import {
   addUserNodeLogs,
   setUserNodeRosLib,
 } from "@foxglove-studio/app/actions/userNodes";
-import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
+import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { LinkedGlobalVariables } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import {

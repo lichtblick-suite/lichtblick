@@ -17,9 +17,10 @@ import { createMemoryHistory } from "history";
 import TestUtils from "react-dom/test-utils";
 
 import { setPlaybackConfig } from "@foxglove-studio/app/actions/panels";
-import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
+import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
 import {
   PlayerCapabilities,
+  PlayerPresence,
   PlayerState,
   PlayerStateActiveData,
 } from "@foxglove-studio/app/players/types";
@@ -33,9 +34,7 @@ const START_TIME = 1531761690;
 
 function getPlayerState(): PlayerState {
   const player: PlayerState = {
-    isPresent: true,
-    showSpinner: false,
-    showInitializing: false,
+    presence: PlayerPresence.PRESENT,
     progress: {},
     capabilities: [PlayerCapabilities.setSpeed],
     playerId: "1",

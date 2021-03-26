@@ -18,6 +18,7 @@ import {
   Player,
   SubscribePayload,
   AdvertisePayload,
+  PlayerPresence,
 } from "@foxglove-studio/app/players/types";
 
 export default class FakePlayer implements Player {
@@ -31,16 +32,20 @@ export default class FakePlayer implements Player {
     this.listener = listener;
   }
 
-  emit(activeData?: PlayerStateActiveData): Promise<void> {
+  emit({
+    activeData,
+    presence,
+  }: {
+    activeData?: PlayerStateActiveData;
+    presence?: PlayerPresence;
+  } = {}): Promise<void> {
     if (!this.listener) {
       return Promise.resolve();
     }
 
     return this.listener({
       playerId: this.playerId,
-      isPresent: true,
-      showSpinner: false,
-      showInitializing: false,
+      presence: presence ?? PlayerPresence.PRESENT,
       capabilities: this._capabilities,
       progress: {},
       activeData,

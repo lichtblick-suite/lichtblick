@@ -14,7 +14,7 @@
 import { mount } from "enzyme";
 import { act } from "react-dom/test-utils";
 
-import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
+import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
 import { wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 
 import * as PanelAPI from ".";

@@ -4,8 +4,6 @@
 
 import { createContext, useContext } from "react";
 
-import type OrderedStampPlayer from "@foxglove-studio/app/players/OrderedStampPlayer";
-
 export type PlayerSourceDefinition = {
   name: string;
   type: "file" | "ros1-core" | "ws" | "http";
@@ -14,10 +12,9 @@ export type PlayerSourceDefinition = {
 // PlayerSelection provides the user with a select function and the items to select
 export interface PlayerSelection {
   selectSource: (definition: PlayerSourceDefinition) => void;
-  setPlayerFromDemoBag: () => Promise<void>;
+  setPlayerFromDemoBag: () => void;
   availableSources: PlayerSourceDefinition[];
   currentSourceName?: string;
-  currentPlayer?: OrderedStampPlayer;
 }
 
 const PlayerSelectionContext = createContext<PlayerSelection>({

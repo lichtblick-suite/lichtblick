@@ -10,6 +10,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import AlertIcon from "@mdi/svg/svg/alert.svg";
 import CogIcon from "@mdi/svg/svg/cog.svg";
 import {
   ReactElement,
@@ -36,10 +37,11 @@ import Flex from "@foxglove-studio/app/components/Flex";
 import GlobalKeyListener from "@foxglove-studio/app/components/GlobalKeyListener";
 import GlobalVariablesMenu from "@foxglove-studio/app/components/GlobalVariablesMenu";
 import HelpModal from "@foxglove-studio/app/components/HelpModal";
-import { WrappedIcon } from "@foxglove-studio/app/components/Icon";
+import Icon, { WrappedIcon } from "@foxglove-studio/app/components/Icon";
 import LayoutMenu from "@foxglove-studio/app/components/LayoutMenu";
 import LayoutStorageReduxAdapter from "@foxglove-studio/app/components/LayoutStorageReduxAdapter";
 import messagePathHelp from "@foxglove-studio/app/components/MessagePathSyntax/index.help.md";
+import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import { NativeFileMenuPlayerSelection } from "@foxglove-studio/app/components/NativeFileMenuPlayerSelection";
 import NotificationDisplay from "@foxglove-studio/app/components/NotificationDisplay";
 import PanelLayout from "@foxglove-studio/app/components/PanelLayout";
@@ -47,6 +49,7 @@ import PlaybackControls from "@foxglove-studio/app/components/PlaybackControls";
 import PlayerManager from "@foxglove-studio/app/components/PlayerManager";
 import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
 import ShortcutsModal from "@foxglove-studio/app/components/ShortcutsModal";
+import SpinningLoadingIcon from "@foxglove-studio/app/components/SpinningLoadingIcon";
 import TinyConnectionPicker from "@foxglove-studio/app/components/TinyConnectionPicker";
 import Toolbar from "@foxglove-studio/app/components/Toolbar";
 import { useAppConfiguration } from "@foxglove-studio/app/context/AppConfigurationContext";
@@ -60,6 +63,7 @@ import {
 } from "@foxglove-studio/app/context/PlayerSelectionContext";
 import experimentalFeatures from "@foxglove-studio/app/experimentalFeatures";
 import welcomeLayout from "@foxglove-studio/app/layouts/welcomeLayout";
+import { PlayerPresence } from "@foxglove-studio/app/players/types";
 import getGlobalStore from "@foxglove-studio/app/store/getGlobalStore";
 import inAutomatedRunMode from "@foxglove-studio/app/util/inAutomatedRunMode";
 
@@ -81,6 +85,9 @@ function Root() {
   const containerRef = useRef<HTMLDivElement>(ReactNull);
   const dispatch = useDispatch();
   const { currentSourceName, setPlayerFromDemoBag } = usePlayerSelection();
+  const playerPresence = useMessagePipeline(
+    useCallback(({ playerState }) => playerState.presence, []),
+  );
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
   const [messagePathSyntaxModalOpen, setMessagePathSyntaxModalOpen] = useState(false);
@@ -158,11 +165,35 @@ function Root() {
     (async () => {
       const welcomeLayoutShown = await appConfiguration.get("onboarding.welcome-layout.shown");
       if (!welcomeLayoutShown) {
-        await openWelcomeLayout();
+        // Set configuration *before* opening the layout to avoid infinite recursion when the player
+        // loading state causes us to re-render.
         await appConfiguration.set("onboarding.welcome-layout.shown", true);
+        await openWelcomeLayout();
       }
     })();
   }, [appConfiguration, openWelcomeLayout]);
+
+  const presenceIcon = (() => {
+    switch (playerPresence) {
+      case PlayerPresence.NOT_PRESENT:
+      case PlayerPresence.PRESENT:
+        return undefined;
+      case PlayerPresence.CONSTRUCTING:
+      case PlayerPresence.INITIALIZING:
+      case PlayerPresence.RECONNECTING:
+        return (
+          <Icon small style={{ paddingLeft: 10 }}>
+            <SpinningLoadingIcon />
+          </Icon>
+        );
+      case PlayerPresence.ERROR:
+        return (
+          <Icon small style={{ paddingLeft: 10 }}>
+            <AlertIcon />
+          </Icon>
+        );
+    }
+  })();
 
   return (
     <LinkHandlerContext.Provider value={handleInternalLink}>
@@ -183,7 +214,9 @@ function Root() {
           <SToolbarItem>
             <TinyConnectionPicker />
           </SToolbarItem>
-          <SToolbarItem>{currentSourceName ?? "Select a data source"}</SToolbarItem>
+          <SToolbarItem>
+            {currentSourceName ?? "Select a data source"} {presenceIcon}
+          </SToolbarItem>
           <div style={{ flexGrow: 1 }}></div>
           <SToolbarItem style={{ marginRight: 5 }}>
             {!inAutomatedRunMode() && <NotificationDisplay />}
@@ -222,10 +255,6 @@ export default function App(): ReactElement {
 
   const playerSources: PlayerSourceDefinition[] = [
     {
-      name: "Bag File",
-      type: "file",
-    },
-    {
       name: "ROS",
       type: "ros1-core",
     },
@@ -234,7 +263,11 @@ export default function App(): ReactElement {
       type: "ws",
     },
     {
-      name: "HTTP",
+      name: "Bag File (local)",
+      type: "file",
+    },
+    {
+      name: "Bag File (HTTP)",
       type: "http",
     },
   ];

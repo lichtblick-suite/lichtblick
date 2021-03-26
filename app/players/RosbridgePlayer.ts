@@ -27,6 +27,7 @@ import {
   SubscribePayload,
   Topic,
   ParsedMessageDefinitionsByTopic,
+  PlayerPresence,
 } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { objectValues } from "@foxglove-studio/app/util";
@@ -195,9 +196,7 @@ export default class RosbridgePlayer implements Player {
     const { _providerTopics, _providerDatatypes, _start } = this;
     if (!_providerTopics || !_providerDatatypes || !_start) {
       return this._listener({
-        isPresent: true,
-        showSpinner: true,
-        showInitializing: !!this._rosClient,
+        presence: PlayerPresence.INITIALIZING,
         progress: {},
         capabilities,
         playerId: this._id,
@@ -214,9 +213,7 @@ export default class RosbridgePlayer implements Player {
     const bobjects = this._bobjects;
     this._bobjects = [];
     return this._listener({
-      isPresent: true,
-      showSpinner: !this._rosClient,
-      showInitializing: false,
+      presence: PlayerPresence.PRESENT,
       progress: {},
       capabilities,
       playerId: this._id,

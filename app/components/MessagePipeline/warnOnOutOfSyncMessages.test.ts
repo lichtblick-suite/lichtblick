@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Message, PlayerState } from "@foxglove-studio/app/players/types";
+import { Message, PlayerPresence, PlayerState } from "@foxglove-studio/app/players/types";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 import warnOnOutOfSyncMessages from "./warnOnOutOfSyncMessages";
@@ -23,9 +23,7 @@ const lastSeekTime = () => {
 };
 
 const playerStateWithMessages = (messages: any, messageOrder: any): PlayerState => ({
-  isPresent: true,
-  showSpinner: false,
-  showInitializing: false,
+  presence: PlayerPresence.PRESENT,
   progress: {},
   capabilities: [],
   playerId: "test",

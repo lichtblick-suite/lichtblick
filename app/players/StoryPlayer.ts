@@ -23,6 +23,7 @@ import {
   SubscribePayload,
   Player,
   NotifyPlayerManagerReplyData,
+  PlayerPresence,
 } from "@foxglove-studio/app/players/types";
 
 import { SECOND_SOURCE_PREFIX } from "../util/globalConstants";
@@ -107,11 +108,9 @@ export default class StoryPlayer implements Player {
 
           listener({
             capabilities: [],
-            isPresent: false,
+            presence: PlayerPresence.PRESENT,
             playerId: "",
             progress: {},
-            showInitializing: true,
-            showSpinner: true,
             activeData: {
               topics,
               datatypes: messageDefinitions.datatypes,

@@ -341,12 +341,14 @@ describe("UserNodePlayer", () => {
       const [done] = setListenerHelper(userNodePlayer);
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        messages: [],
-        messageOrder: "receiveTime",
-        currentTime: { sec: 0, nsec: 0 },
-        topics: [{ name: "/np_input", datatype: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }],
-        datatypes: { foo: { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          messages: [],
+          messageOrder: "receiveTime",
+          currentTime: { sec: 0, nsec: 0 },
+          topics: [{ name: "/np_input", datatype: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }],
+          datatypes: { foo: { fields: [] } },
+        },
       });
 
       const { topicNames, messages }: any = await done;
@@ -370,7 +372,7 @@ describe("UserNodePlayer", () => {
 
       const [done1, done2, done3] = setListenerHelper(userNodePlayer, 3);
 
-      const playerState: PlayerStateActiveData = {
+      const activeData: PlayerStateActiveData = {
         ...basicPlayerState,
         messages: [],
         messageOrder: "receiveTime",
@@ -379,7 +381,7 @@ describe("UserNodePlayer", () => {
         datatypes: { foo: { fields: [] } },
       };
 
-      fakePlayer.emit(playerState);
+      fakePlayer.emit({ activeData });
       const { topics: firstTopics, datatypes: firstDatatypes }: any = await done1;
       expect(firstTopics).toEqual([
         { name: "/np_input", datatype: "/np_input_datatype" },
@@ -397,13 +399,13 @@ describe("UserNodePlayer", () => {
       });
 
       // Seek should keep topics memoized.
-      fakePlayer.emit({ ...playerState, lastSeekTime: 123 });
+      fakePlayer.emit({ activeData: { ...activeData, lastSeekTime: 123 } });
       const { topics: secondTopics, datatypes: secondDatatypes }: any = await done2;
       expect(secondTopics).toBe(firstTopics);
       expect(secondDatatypes).toBe(firstDatatypes);
 
       // Changing topics/datatypes should not memoize.
-      fakePlayer.emit({ ...playerState, topics: [], datatypes: {} });
+      fakePlayer.emit({ activeData: { ...activeData, topics: [], datatypes: {} } });
       const { topics: thirdTopics, datatypes: thirdDatatypes }: any = await done3;
       expect(thirdTopics).not.toBe(firstTopics);
       expect(thirdDatatypes).not.toBe(firstDatatypes);
@@ -433,23 +435,27 @@ describe("UserNodePlayer", () => {
       const [done, nextDone] = setListenerHelper(userNodePlayer, 2);
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: messagesArray,
-        messageOrder: "receiveTime",
-        currentTime: { sec: 0, nsec: 0 },
-        topics: [{ name: "/np_input", datatype: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }],
-        datatypes: { foo: { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          bobjects: messagesArray,
+          messageOrder: "receiveTime",
+          currentTime: { sec: 0, nsec: 0 },
+          topics: [{ name: "/np_input", datatype: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }],
+          datatypes: { foo: { fields: [] } },
+        },
       });
 
       const { messages }: any = await done;
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: messagesArray,
-        messageOrder: "receiveTime",
-        currentTime: { sec: 0, nsec: 0 },
-        topics: [{ name: "/np_input", datatype: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }],
-        datatypes: { foo: { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          bobjects: messagesArray,
+          messageOrder: "receiveTime",
+          currentTime: { sec: 0, nsec: 0 },
+          topics: [{ name: "/np_input", datatype: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }],
+          datatypes: { foo: { fields: [] } },
+        },
       });
 
       const { messages: newMessages }: any = await nextDone;
@@ -465,12 +471,14 @@ describe("UserNodePlayer", () => {
       const [done] = setListenerHelper(userNodePlayer);
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        messages: [],
-        messageOrder: "receiveTime",
-        currentTime: { sec: 0, nsec: 0 },
-        topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-        datatypes: { foo: { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          messages: [],
+          messageOrder: "receiveTime",
+          currentTime: { sec: 0, nsec: 0 },
+          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          datatypes: { foo: { fields: [] } },
+        },
       });
 
       const { topicNames }: any = await done;
@@ -492,12 +500,14 @@ describe("UserNodePlayer", () => {
       });
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: [upstreamFirst],
-        messageOrder: "receiveTime",
-        currentTime: upstreamFirst.receiveTime,
-        topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-        datatypes: { foo: { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          bobjects: [upstreamFirst],
+          messageOrder: "receiveTime",
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          datatypes: { foo: { fields: [] } },
+        },
       });
 
       const { messages, topicNames }: any = await done;
@@ -519,12 +529,14 @@ describe("UserNodePlayer", () => {
       });
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: [upstreamFirst],
-        messageOrder: "receiveTime",
-        currentTime: upstreamFirst.receiveTime,
-        topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-        datatypes: { foo: { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          bobjects: [upstreamFirst],
+          messageOrder: "receiveTime",
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          datatypes: { foo: { fields: [] } },
+        },
       });
 
       const { messages }: any = await done;
@@ -557,12 +569,14 @@ describe("UserNodePlayer", () => {
       });
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: [upstreamFirst],
-        messageOrder: "receiveTime",
-        currentTime: upstreamFirst.receiveTime,
-        topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-        datatypes: { foo: { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          bobjects: [upstreamFirst],
+          messageOrder: "receiveTime",
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          datatypes: { foo: { fields: [] } },
+        },
       });
 
       await done;
@@ -592,22 +606,26 @@ describe("UserNodePlayer", () => {
       });
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: [upstreamFirst],
-        messageOrder: "receiveTime",
-        currentTime: upstreamFirst.receiveTime,
-        topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-        datatypes,
+        activeData: {
+          ...basicPlayerState,
+          bobjects: [upstreamFirst],
+          messageOrder: "receiveTime",
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          datatypes,
+        },
       });
       await done1;
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: [upstreamSecond],
-        messageOrder: "receiveTime",
-        currentTime: upstreamSecond.receiveTime,
-        topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-        datatypes,
+        activeData: {
+          ...basicPlayerState,
+          bobjects: [upstreamSecond],
+          messageOrder: "receiveTime",
+          currentTime: upstreamSecond.receiveTime,
+          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          datatypes,
+        },
       });
       await done2;
 
@@ -648,12 +666,14 @@ describe("UserNodePlayer", () => {
       });
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: [upstreamFirst],
-        messageOrder: "receiveTime",
-        currentTime: upstreamFirst.receiveTime,
-        topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-        datatypes: { foo: { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          bobjects: [upstreamFirst],
+          messageOrder: "receiveTime",
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          datatypes: { foo: { fields: [] } },
+        },
       });
 
       const { messages }: any = await done;
@@ -694,24 +714,28 @@ describe("UserNodePlayer", () => {
       });
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: [upstreamFirst],
-        messageOrder: "receiveTime",
-        currentTime: upstreamFirst.receiveTime,
-        topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-        datatypes: { foo: { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          bobjects: [upstreamFirst],
+          messageOrder: "receiveTime",
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          datatypes: { foo: { fields: [] } },
+        },
       });
 
       const result: any = await done;
       expect(result.messages).toEqual([]);
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: [upstreamSecond],
-        messageOrder: "receiveTime",
-        currentTime: upstreamSecond.receiveTime,
-        topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-        datatypes: { foo: { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          bobjects: [upstreamSecond],
+          messageOrder: "receiveTime",
+          currentTime: upstreamSecond.receiveTime,
+          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          datatypes: { foo: { fields: [] } },
+        },
       });
 
       const nextResult: any = await nextDone;
@@ -748,12 +772,14 @@ describe("UserNodePlayer", () => {
       ]);
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: [upstreamFirst],
-        messageOrder: "receiveTime",
-        currentTime: upstreamFirst.receiveTime,
-        topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-        datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          bobjects: [upstreamFirst],
+          messageOrder: "receiveTime",
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+        },
       });
 
       const { messages, topics }: any = await done;
@@ -811,12 +837,14 @@ describe("UserNodePlayer", () => {
       ]);
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: [upstreamFirst],
-        messageOrder: "receiveTime",
-        currentTime: upstreamFirst.receiveTime,
-        topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-        datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          bobjects: [upstreamFirst],
+          messageOrder: "receiveTime",
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+        },
       });
 
       const { messages }: any = await done;
@@ -861,24 +889,28 @@ describe("UserNodePlayer", () => {
       const [firstDone, secondDone] = setListenerHelper(userNodePlayer, 2);
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: [upstreamFirst],
-        messageOrder: "receiveTime",
-        currentTime: upstreamFirst.receiveTime,
-        topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-        datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          bobjects: [upstreamFirst],
+          messageOrder: "receiveTime",
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+        },
       });
 
       await firstDone;
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: [upstreamSecond],
-        messageOrder: "receiveTime",
-        currentTime: upstreamSecond.receiveTime,
-        lastSeekTime: 1,
-        topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-        datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          bobjects: [upstreamSecond],
+          messageOrder: "receiveTime",
+          currentTime: upstreamSecond.receiveTime,
+          lastSeekTime: 1,
+          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+        },
       });
 
       const { messages }: any = await secondDone;
@@ -985,12 +1017,14 @@ describe("UserNodePlayer", () => {
       const [done] = setListenerHelper(userNodePlayer);
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: [upstreamFirst],
-        messageOrder: "receiveTime",
-        currentTime: upstreamFirst.receiveTime,
-        topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-        datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          bobjects: [upstreamFirst],
+          messageOrder: "receiveTime",
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+        },
       });
 
       const { topicNames, messages }: any = await done;
@@ -1024,12 +1058,14 @@ describe("UserNodePlayer", () => {
       const [firstDone, secondDone] = setListenerHelper(userNodePlayer, 2);
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: [upstreamFirst],
-        messageOrder: "receiveTime",
-        currentTime: upstreamFirst.receiveTime,
-        topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-        datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          bobjects: [upstreamFirst],
+          messageOrder: "receiveTime",
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+        },
       });
 
       const { topicNames: firstTopicNames }: any = await firstDone;
@@ -1037,12 +1073,14 @@ describe("UserNodePlayer", () => {
 
       userNodePlayer.setUserNodes({});
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: [upstreamFirst],
-        messageOrder: "receiveTime",
-        currentTime: upstreamFirst.receiveTime,
-        topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-        datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          bobjects: [upstreamFirst],
+          messageOrder: "receiveTime",
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+          datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+        },
       });
       const { topicNames: secondTopicNames }: any = await secondDone;
       expect(secondTopicNames).toEqual(["/np_input"]);
@@ -1065,7 +1103,7 @@ describe("UserNodePlayer", () => {
       });
 
       const [done] = setListenerHelper(userNodePlayer);
-      fakePlayer.emit(basicPlayerState);
+      fakePlayer.emit({ activeData: basicPlayerState });
       await done;
       expect(mockSetNodeDiagnostics).toHaveBeenLastCalledWith({
         nodeId: {
@@ -1136,12 +1174,14 @@ describe("UserNodePlayer", () => {
         });
 
         fakePlayer.emit({
-          ...basicPlayerState,
-          bobjects: [upstreamFirst],
-          messageOrder: "receiveTime",
-          currentTime: upstreamFirst.receiveTime,
-          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+          activeData: {
+            ...basicPlayerState,
+            bobjects: [upstreamFirst],
+            messageOrder: "receiveTime",
+            currentTime: upstreamFirst.receiveTime,
+            topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+            datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+          },
         });
 
         const { topicNames }: any = await done;
@@ -1178,12 +1218,14 @@ describe("UserNodePlayer", () => {
         const [done] = setListenerHelper(userNodePlayer);
 
         fakePlayer.emit({
-          ...basicPlayerState,
-          bobjects: [upstreamFirst],
-          messageOrder: "receiveTime",
-          currentTime: upstreamFirst.receiveTime,
-          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+          activeData: {
+            ...basicPlayerState,
+            bobjects: [upstreamFirst],
+            messageOrder: "receiveTime",
+            currentTime: upstreamFirst.receiveTime,
+            topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+            datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+          },
         });
 
         userNodePlayer.setSubscriptions([
@@ -1233,12 +1275,14 @@ describe("UserNodePlayer", () => {
         const [done] = setListenerHelper(userNodePlayer);
 
         fakePlayer.emit({
-          ...basicPlayerState,
-          bobjects: [upstreamFirst],
-          messageOrder: "receiveTime",
-          currentTime: upstreamFirst.receiveTime,
-          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+          activeData: {
+            ...basicPlayerState,
+            bobjects: [upstreamFirst],
+            messageOrder: "receiveTime",
+            currentTime: upstreamFirst.receiveTime,
+            topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+            datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+          },
         });
 
         const { topics }: any = await done;
@@ -1273,12 +1317,14 @@ describe("UserNodePlayer", () => {
         const [done] = setListenerHelper(userNodePlayer);
 
         fakePlayer.emit({
-          ...basicPlayerState,
-          bobjects: [upstreamFirst],
-          messageOrder: "receiveTime",
-          currentTime: upstreamFirst.receiveTime,
-          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: exampleDatatypes,
+          activeData: {
+            ...basicPlayerState,
+            bobjects: [upstreamFirst],
+            messageOrder: "receiveTime",
+            currentTime: upstreamFirst.receiveTime,
+            topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+            datatypes: exampleDatatypes,
+          },
         });
 
         const { topics }: any = await done;
@@ -1306,7 +1352,7 @@ describe("UserNodePlayer", () => {
           },
         });
 
-        const playerState: PlayerStateActiveData = {
+        const activeData: PlayerStateActiveData = {
           ...basicPlayerState,
           bobjects: [upstreamFirst],
           messageOrder: "receiveTime",
@@ -1314,7 +1360,7 @@ describe("UserNodePlayer", () => {
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
           datatypes: { foo: { fields: [] } },
         };
-        fakePlayer.emit(playerState);
+        fakePlayer.emit({ activeData });
 
         const { messages }: any = await done;
         expect(messages).toEqual([
@@ -1326,7 +1372,7 @@ describe("UserNodePlayer", () => {
         ]);
 
         userNodePlayer.setGlobalVariables({ globalValue: "bbb" });
-        fakePlayer.emit(playerState);
+        fakePlayer.emit({ activeData });
 
         const { messages: messages2 }: any = await done2;
         expect(messages2).toEqual([
@@ -1357,13 +1403,15 @@ describe("UserNodePlayer", () => {
       const datatypes = { foo: { fields: [{ name: "payload", type: "string" }] } };
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        messages: [parsedFirst],
-        bobjects: [upstreamFirst],
-        messageOrder: "receiveTime",
-        currentTime: upstreamFirst.receiveTime,
-        topics: [{ name: "/np_input", datatype: "foo" }],
-        datatypes,
+        activeData: {
+          ...basicPlayerState,
+          messages: [parsedFirst],
+          bobjects: [upstreamFirst],
+          messageOrder: "receiveTime",
+          currentTime: upstreamFirst.receiveTime,
+          topics: [{ name: "/np_input", datatype: "foo" }],
+          datatypes,
+        },
       });
 
       const { messages, bobjects }: any = await done;
@@ -1455,18 +1503,20 @@ describe("UserNodePlayer", () => {
       const [done] = setListenerHelper(userNodePlayer);
 
       fakePlayer.emit({
-        ...basicPlayerState,
-        bobjects: wrapMessages([
-          {
-            message: { payload: "" },
-            topic: "/np_input",
-            receiveTime: { sec: 0, nsec: 0 },
-          },
-        ]),
-        messageOrder: "receiveTime",
-        currentTime: { sec: 0, nsec: 0 },
-        topics: [{ name: "/np_input", datatype: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }],
-        datatypes: { foo: { fields: [] } },
+        activeData: {
+          ...basicPlayerState,
+          bobjects: wrapMessages([
+            {
+              message: { payload: "" },
+              topic: "/np_input",
+              receiveTime: { sec: 0, nsec: 0 },
+            },
+          ]),
+          messageOrder: "receiveTime",
+          currentTime: { sec: 0, nsec: 0 },
+          topics: [{ name: "/np_input", datatype: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }],
+          datatypes: { foo: { fields: [] } },
+        },
       });
 
       const { bobjects }: any = await done;
@@ -1512,12 +1562,14 @@ describe("UserNodePlayer", () => {
 
       emit = () => {
         fakePlayer.emit({
-          ...basicPlayerState,
-          bobjects: [upstreamFirst],
-          messageOrder: "receiveTime",
-          currentTime: upstreamFirst.receiveTime,
-          topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] } },
+          activeData: {
+            ...basicPlayerState,
+            bobjects: [upstreamFirst],
+            messageOrder: "receiveTime",
+            currentTime: upstreamFirst.receiveTime,
+            topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
+            datatypes: { foo: { fields: [] } },
+          },
         });
       };
 

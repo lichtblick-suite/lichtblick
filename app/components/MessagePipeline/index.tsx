@@ -13,7 +13,7 @@
 
 import { debounce, flatten, groupBy, isEqual } from "lodash";
 import { ReactElement } from "react";
-import { Time, TimeUtil } from "rosbag";
+import { Time } from "rosbag";
 
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import {
@@ -21,16 +21,14 @@ import {
   Frame,
   Message,
   Player,
+  PlayerPresence,
   PlayerState,
   PlayerStateActiveData,
-  Progress,
   PublishPayload,
   SubscribePayload,
   Topic,
 } from "@foxglove-studio/app/players/types";
 import signal from "@foxglove-studio/app/shared/signal";
-import StoreSetup from "@foxglove-studio/app/stories/StoreSetup";
-import { wrapMessages } from "@foxglove-studio/app/test/datatypes";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { objectValues } from "@foxglove-studio/app/util";
 import {
@@ -39,7 +37,6 @@ import {
   useShallowMemo,
   useShouldNotChangeOften,
 } from "@foxglove-studio/app/util/hooks";
-import naturalSort from "@foxglove-studio/app/util/naturalSort";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 import { pauseFrameForPromises, FramePromise } from "./pauseFrameForPromise";
@@ -69,19 +66,18 @@ export type MessagePipelineContext = {
   requestBackfill(): void;
 };
 
-const Context = createSelectableContext<MessagePipelineContext>();
+// exported only for MockMessagePipelineProvider
+export const ContextInternal = createSelectableContext<MessagePipelineContext>();
 
 export function useMessagePipeline<T>(
   selector: (arg0: MessagePipelineContext) => T | typeof useContextSelector.BAILOUT,
 ): T {
-  return useContextSelector(Context, selector);
+  return useContextSelector(ContextInternal, selector);
 }
 
 function defaultPlayerState(): PlayerState {
   return {
-    isPresent: false,
-    showSpinner: true,
-    showInitializing: true,
+    presence: PlayerPresence.NOT_PRESENT,
     progress: {},
     capabilities: [],
     playerId: "",
@@ -89,14 +85,45 @@ function defaultPlayerState(): PlayerState {
   };
 }
 
+export type MaybePlayer<P extends Player = Player> =
+  | { loading: true; error?: undefined; player?: undefined }
+  | { loading?: false; error: string; player?: undefined }
+  | { loading?: false; error?: undefined; player?: P };
+
 type ProviderProps = {
   children: React.ReactNode;
-  player?: Player;
+
+  // Represents either the lack of a player, a player that is currently being constructed, or a
+  // valid player. MessagePipelineProvider is not responsible for building players, but it is
+  // responsible for providing player state information downstream in a context -- so this
+  // information is passed in and merged with other player state.
+  maybePlayer?: MaybePlayer;
+
   globalVariables?: GlobalVariables;
 };
-export function MessagePipelineProvider({ children, player, globalVariables = {} }: ProviderProps) {
+export function MessagePipelineProvider({
+  children,
+  maybePlayer = {},
+  globalVariables = {},
+}: ProviderProps): React.ReactElement {
   const currentPlayer = useRef<Player | undefined>(undefined);
-  const [playerState, setPlayerState] = useState<PlayerState>(defaultPlayerState);
+  const [rawPlayerState, setRawPlayerState] = useState<PlayerState>(defaultPlayerState);
+  const playerState = useMemo(() => {
+    // Use the MaybePlayer's status if we do not yet have a player to report presence.
+    if (rawPlayerState.presence === PlayerPresence.NOT_PRESENT) {
+      return {
+        ...rawPlayerState,
+        presence: maybePlayer.loading
+          ? PlayerPresence.CONSTRUCTING
+          : maybePlayer.error
+          ? PlayerPresence.ERROR
+          : maybePlayer.player
+          ? PlayerPresence.INITIALIZING
+          : PlayerPresence.NOT_PRESENT,
+      };
+    }
+    return rawPlayerState;
+  }, [maybePlayer, rawPlayerState]);
   const lastActiveData = useRef<PlayerStateActiveData | undefined>(playerState.activeData);
   const lastTimeWhenActiveDataBecameSet = useRef<number | undefined>();
   const [subscriptionsById, setAllSubscriptions] = useState<{
@@ -120,11 +147,9 @@ export function MessagePipelineProvider({ children, player, globalVariables = {}
   const publishers: AdvertisePayload[] = useMemo(() => flatten(objectValues(publishersById)), [
     publishersById,
   ]);
-  useEffect(() => (player ? player.setSubscriptions(subscriptions) : undefined), [
-    player,
-    subscriptions,
-  ]);
-  useEffect(() => (player ? player.setPublishers(publishers) : undefined), [player, publishers]);
+  const player = maybePlayer?.player;
+  useEffect(() => player?.setSubscriptions(subscriptions), [player, subscriptions]);
+  useEffect(() => player?.setPublishers(publishers), [player, publishers]);
 
   // Delay the player listener promise until rendering has finished for the latest data.
   useLayoutEffect(() => {
@@ -183,10 +208,10 @@ export function MessagePipelineProvider({ children, player, globalVariables = {}
       const promise = new Promise((resolve) => {
         playerTickState.current.resolveFn = resolve as any;
       });
-      setPlayerState((currentPlayerState) => {
+      setRawPlayerState((currentPlayerState) => {
         if (currentPlayer.current !== player) {
           // It's unclear how we can ever get here, but it looks like React
-          // doesn't properly order the `setPlayerState` call below. So we
+          // doesn't properly order the `setRawPlayerState` call below. So we
           // need this additional check. Unfortunately this is hard to test,
           // so please make sure to manually test having an active player and
           // disconnecting from it when changing this code. Without this line
@@ -205,7 +230,7 @@ export function MessagePipelineProvider({ children, player, globalVariables = {}
     return () => {
       currentPlayer.current = playerTickState.current.resolveFn = undefined;
       player.close();
-      setPlayerState({
+      setRawPlayerState({
         ...defaultPlayerState(),
         activeData: lastActiveData.current,
       });
@@ -312,9 +337,8 @@ export function MessagePipelineProvider({ children, player, globalVariables = {}
       skipUpdate = true;
     };
   }, [globalVariables]);
-
   return (
-    <Context.Provider
+    <ContextInternal.Provider
       value={useShallowMemo({
         playerState,
         subscriptions,
@@ -334,171 +358,12 @@ export function MessagePipelineProvider({ children, player, globalVariables = {}
       })}
     >
       {children}
-    </Context.Provider>
+    </ContextInternal.Provider>
   );
 }
 
 type ConsumerProps = { children: (arg0: MessagePipelineContext) => ReactElement | ReactNull };
-export function MessagePipelineConsumer({ children }: ConsumerProps) {
+export function MessagePipelineConsumer({ children }: ConsumerProps): ReactElement | ReactNull {
   const value = useMessagePipeline(useCallback((ctx) => ctx, []));
   return children(value);
-}
-
-const NO_DATATYPES = Object.freeze({});
-
-// TODO(Audrey): put messages under activeData, add ability to mock seeking
-export function MockMessagePipelineProvider(props: {
-  children: React.ReactNode;
-  isPresent?: boolean;
-  topics?: Topic[];
-  datatypes?: RosDatatypes;
-  messages?: Message[];
-  bobjects?: Message[];
-  setSubscriptions?: (arg0: string, arg1: SubscribePayload[]) => void;
-  noActiveData?: boolean;
-  showInitializing?: boolean;
-  activeData?: Partial<PlayerStateActiveData>;
-  capabilities?: string[];
-  store?: any;
-  startPlayback?: () => void;
-  pausePlayback?: () => void;
-  seekPlayback?: (arg0: Time) => void;
-  currentTime?: Time;
-  startTime?: Time;
-  endTime?: Time;
-  isPlaying?: boolean;
-  pauseFrame?: (arg0: string) => ResumeFrame;
-  playerId?: string;
-  requestBackfill?: () => void;
-  progress?: Progress;
-}) {
-  const startTime = useRef();
-  let currentTime = props.currentTime;
-  if (!currentTime) {
-    for (const message of props.messages || []) {
-      if (
-        !startTime.current ||
-        TimeUtil.isLessThan(message.receiveTime, startTime.current as any)
-      ) {
-        startTime.current = message.receiveTime as any;
-      }
-      if (!currentTime || TimeUtil.isLessThan(currentTime, message.receiveTime)) {
-        currentTime = message.receiveTime;
-      }
-    }
-  }
-
-  const [allSubscriptions, setAllSubscriptions] = useState<{
-    [key: string]: SubscribePayload[];
-  }>({});
-  const flattenedSubscriptions: SubscribePayload[] = useMemo(
-    () => flatten(objectValues(allSubscriptions)),
-    [allSubscriptions],
-  );
-  const setSubscriptions = useCallback(
-    (id, subs) => setAllSubscriptions((s) => ({ ...s, [id]: subs })),
-    [setAllSubscriptions],
-  );
-
-  const requestBackfill = useMemo(
-    () =>
-      props.requestBackfill ||
-      (() => {
-        // no-op
-      }),
-    [props.requestBackfill],
-  );
-
-  const capabilities = useShallowMemo(props.capabilities || []);
-
-  const playerState = useMemo(
-    () => ({
-      isPresent: props.isPresent == undefined ? true : props.isPresent,
-      playerId: props.playerId || "1",
-      progress: props.progress || {},
-      showInitializing: !!props.showInitializing,
-      showSpinner: false,
-      capabilities,
-      activeData: props.noActiveData
-        ? undefined
-        : {
-            messages: props.messages || [],
-            bobjects: props.bobjects || wrapMessages(props.messages || []),
-            topics: props.topics || [],
-            datatypes: props.datatypes || NO_DATATYPES,
-            startTime: props.startTime || startTime.current || { sec: 100, nsec: 0 },
-            currentTime: currentTime || { sec: 100, nsec: 0 },
-            endTime: props.endTime || currentTime || { sec: 100, nsec: 0 },
-            isPlaying: !!props.isPlaying,
-            speed: 0.2,
-            lastSeekTime: 0,
-            ...props.activeData,
-          },
-    }),
-    [
-      props.isPresent,
-      props.playerId,
-      props.progress,
-      props.showInitializing,
-      props.noActiveData,
-      props.messages,
-      props.bobjects,
-      props.topics,
-      props.datatypes,
-      props.startTime,
-      props.endTime,
-      props.isPlaying,
-      props.activeData,
-      capabilities,
-      currentTime,
-    ],
-  );
-
-  return (
-    <StoreSetup store={props.store}>
-      <Context.Provider
-        value={{
-          playerState: playerState as any,
-          frame: groupBy(props.messages || [], "topic"),
-          sortedTopics: (props.topics || []).sort(naturalSort("name")),
-          datatypes: props.datatypes || NO_DATATYPES,
-          subscriptions: flattenedSubscriptions,
-          publishers: [],
-          setSubscriptions: props.setSubscriptions || setSubscriptions,
-          setPublishers: (_, __) => {
-            // no-op
-          },
-          publish: (_) => {
-            // no-op
-          },
-          startPlayback:
-            props.startPlayback ||
-            (() => {
-              // no-op
-            }),
-          pausePlayback:
-            props.pausePlayback ||
-            (() => {
-              // no-op
-            }),
-          setPlaybackSpeed: (_) => {
-            // no-op
-          },
-          seekPlayback:
-            props.seekPlayback ||
-            ((_) => {
-              // no-op
-            }),
-          pauseFrame:
-            props.pauseFrame ||
-            (() => () => {
-              // no-op
-            }),
-          requestBackfill,
-        }}
-      >
-        {props.children}
-      </Context.Provider>
-    </StoreSetup>
-  );
 }

@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import { mount } from "enzyme";
 
-import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
+import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
 import { Message, MessageFormat } from "@foxglove-studio/app/players/types";
 import { deepParse } from "@foxglove-studio/app/util/binaryObjects";
 

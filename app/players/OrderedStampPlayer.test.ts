@@ -124,9 +124,11 @@ describe("OrderedStampPlayer", () => {
     const upstreamMessages = [makeMessage(8.9, 9.5), makeMessage(8, 10), makeMessage(9.5, 10)];
 
     await fakePlayer.emit({
-      ...getState(),
-      currentTime: fromSec(10),
-      messages: upstreamMessages,
+      activeData: {
+        ...getState(),
+        currentTime: fromSec(10),
+        messages: upstreamMessages,
+      },
     });
     expect(states).toEqual([
       expect.objectContaining({
@@ -162,12 +164,14 @@ describe("OrderedStampPlayer", () => {
 
     expect(BUFFER_DURATION_SECS).toEqual(1);
     await fakePlayer.emit({
-      ...getState(true),
-      topics: oldTopics,
+      activeData: {
+        ...getState(true),
+        topics: oldTopics,
 
-      // Reordering buffer is one second long, so data before header-stamp=9 will be emitted.
-      currentTime: fromSec(10),
-      bobjects: upstreamBobjects,
+        // Reordering buffer is one second long, so data before header-stamp=9 will be emitted.
+        currentTime: fromSec(10),
+        bobjects: upstreamBobjects,
+      },
     });
     const bobjects = states[0]?.activeData?.bobjects;
     const topics = states[0]?.activeData?.topics;
@@ -217,10 +221,12 @@ describe("OrderedStampPlayer", () => {
     const msg = makeMessage(0.5, 9.5);
     const upstreamMessages = [makeMessage(undefined, 9.5, "/dummy_no_header_topic"), msg];
     await fakePlayer.emit({
-      ...getState(true),
-      topics: oldTopics,
-      currentTime: fromSec(10),
-      messages: upstreamMessages,
+      activeData: {
+        ...getState(true),
+        topics: oldTopics,
+        currentTime: fromSec(10),
+        messages: upstreamMessages,
+      },
     });
     expect(states).toEqual([
       expect.objectContaining({
@@ -248,9 +254,7 @@ describe("OrderedStampPlayer", () => {
       states.push(playerState);
     });
 
-    await fakePlayer.emit({
-      ...getState(),
-    });
+    await fakePlayer.emit({ activeData: { ...getState() } });
     expect(setPlaybakcSpeedSpy.mock.calls).toEqual([]);
 
     // Set playback speed during backfill. Passed straight through.
@@ -258,8 +262,10 @@ describe("OrderedStampPlayer", () => {
     expect(setPlaybakcSpeedSpy.mock.calls).toEqual([[12345]]);
 
     await fakePlayer.emit({
-      ...getState(),
-      currentTime: TimeUtil.add(getState().currentTime, fromSec(BUFFER_DURATION_SECS + 0.1)),
+      activeData: {
+        ...getState(),
+        currentTime: TimeUtil.add(getState().currentTime, fromSec(BUFFER_DURATION_SECS + 0.1)),
+      },
     });
     // No additional setSpeed calls.
     expect(setPlaybakcSpeedSpy.mock.calls).toEqual([[12345]]);
@@ -273,9 +279,7 @@ describe("OrderedStampPlayer", () => {
       states.push(playerState);
     });
 
-    await fakePlayer.emit({
-      ...getState(),
-    });
+    await fakePlayer.emit({ activeData: { ...getState() } });
     // No backfilling, no setPlayback calls.
     expect(setPlaybackSpeedSpy.mock.calls).toEqual([]);
 
@@ -298,9 +302,11 @@ describe("OrderedStampPlayer", () => {
 
     // Emit something in receiveTime, see it passed through.
     await fakePlayer.emit({
-      ...getState(),
-      currentTime: fromSec(10),
-      messages: [makeMessage(10, 10)],
+      activeData: {
+        ...getState(),
+        currentTime: fromSec(10),
+        messages: [makeMessage(10, 10)],
+      },
     });
     expect(fakePlayer.seekPlayback).not.toHaveBeenCalled();
     expect(state?.activeData?.messages).toEqual([makeMessage(10, 10)]);
@@ -312,17 +318,21 @@ describe("OrderedStampPlayer", () => {
     expect(fakePlayer.seekPlayback).toHaveBeenNthCalledWith(1, fromSec(11), { sec: 1, nsec: 0 });
 
     await fakePlayer.emit({
-      ...getState(),
-      currentTime: fromSec(10.5),
-      messages: [makeMessage(10.5, 10.5)],
+      activeData: {
+        ...getState(),
+        currentTime: fromSec(10.5),
+        messages: [makeMessage(10.5, 10.5)],
+      },
     });
     // No new messages to emit.
     expect(state?.activeData?.messages).toEqual([]);
 
     await fakePlayer.emit({
-      ...getState(),
-      currentTime: fromSec(12),
-      messages: [makeMessage(12, 12)],
+      activeData: {
+        ...getState(),
+        currentTime: fromSec(12),
+        messages: [makeMessage(12, 12)],
+      },
     });
     expect(state?.activeData?.messages).toEqual([makeMessage(10.5, 10.5)]);
     // No more seeks yet.
@@ -336,9 +346,11 @@ describe("OrderedStampPlayer", () => {
 
     // See pass-through behavior again.
     await fakePlayer.emit({
-      ...getState(),
-      currentTime: fromSec(13),
-      messages: [makeMessage(12, 12), makeMessage(13, 13)],
+      activeData: {
+        ...getState(),
+        currentTime: fromSec(13),
+        messages: [makeMessage(12, 12), makeMessage(13, 13)],
+      },
     });
     expect(state?.activeData?.messages).toEqual([makeMessage(12, 12), makeMessage(13, 13)]);
   });
@@ -352,9 +364,11 @@ describe("OrderedStampPlayer", () => {
       // no-op
     });
     await fakePlayer.emit({
-      ...getState(),
-      currentTime,
-      messages: [],
+      activeData: {
+        ...getState(),
+        currentTime,
+        messages: [],
+      },
     });
 
     // The backfill request should seek the currentTime using BUFFER_DURATION_SECS as a backfillDuration
@@ -371,7 +385,7 @@ describe("OrderedStampPlayer", () => {
     const upstreamMessages = [makeMessage(8.9, 9.5)];
     class ModifiedFakePlayer extends FakePlayer {
       seekPlayback() {
-        this.emit({ ...getState(), currentTime, messages: upstreamMessages });
+        this.emit({ activeData: { ...getState(), currentTime, messages: upstreamMessages } });
       }
     }
     const fakePlayer = new ModifiedFakePlayer();

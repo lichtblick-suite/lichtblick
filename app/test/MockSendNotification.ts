@@ -41,7 +41,9 @@ const mockSetNotificationHandler = (handler?: NotificationHandler): void => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (mockSendNotification as any).expectCalledDuringTest = () => {
   if (mockSendNotification.mock.calls.length === 0) {
-    fail("Expected sendNotification to have been called during the test, but it was never called!");
+    throw new Error(
+      "Expected sendNotification to have been called during the test, but it was never called!",
+    );
   }
   mockSendNotification.mockClear();
   // Reset the error handler to the default (no error handler).

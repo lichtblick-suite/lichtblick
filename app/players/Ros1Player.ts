@@ -13,6 +13,7 @@ import {
   Message,
   Player,
   PlayerCapabilities,
+  PlayerPresence,
   PlayerState,
   PublishPayload,
   SubscribePayload,
@@ -123,9 +124,7 @@ export default class Ros1Player implements Player {
     const start = this.#start;
     if (!providerTopics || !start) {
       return this.#listener({
-        isPresent: true,
-        showSpinner: true,
-        showInitializing: !!this.#rosNode,
+        presence: PlayerPresence.INITIALIZING,
         progress: {},
         capabilities,
         playerId: this.#id,
@@ -142,9 +141,7 @@ export default class Ros1Player implements Player {
     const bobjects = this.#bobjects;
     this.#bobjects = [];
     return this.#listener({
-      isPresent: true,
-      showSpinner: !this.#rosNode,
-      showInitializing: false,
+      presence: PlayerPresence.PRESENT,
       progress: {},
       capabilities,
       playerId: this.#id,

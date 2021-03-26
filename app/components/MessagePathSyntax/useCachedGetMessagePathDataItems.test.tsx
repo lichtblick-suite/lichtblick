@@ -16,7 +16,7 @@ import { cloneDeep } from "lodash";
 
 import { setGlobalVariables } from "@foxglove-studio/app/actions/panels";
 import parseRosPath from "@foxglove-studio/app/components/MessagePathSyntax/parseRosPath";
-import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
+import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
 import { Message, Topic } from "@foxglove-studio/app/players/types";
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";

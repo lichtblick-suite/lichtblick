@@ -13,7 +13,7 @@
 
 import { mount } from "enzyme";
 
-import { MockMessagePipelineProvider } from "@foxglove-studio/app/components/MessagePipeline";
+import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
 import { MessageFormat } from "@foxglove-studio/app/players/types";
 import { wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 

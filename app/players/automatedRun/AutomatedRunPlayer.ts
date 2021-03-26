@@ -27,6 +27,7 @@ import {
   Message,
   NotifyPlayerManagerReplyData,
   Player,
+  PlayerPresence,
   PlayerState,
   Progress,
   PublishPayload,
@@ -204,9 +205,7 @@ export default class AutomatedRunPlayer implements Player {
         throw new Error("AutomatedRunPlayer requires parsed message definitions");
       }
       return this._listener({
-        isPresent: true,
-        showSpinner: false,
-        showInitializing: false,
+        presence: PlayerPresence.PRESENT,
         progress: this._progress,
         capabilities: [],
         playerId: this._id,
