@@ -59,7 +59,9 @@ describe("Transformer", () => {
     }
   });
 
-  it("has expected performance", async () => {
+  // CI performance is non-deterministic, a better approach will be to have dedicated machines
+  // and log performance over time to correlate regressions rather than gate
+  it.skip("has expected performance", async () => {
     const calibration = new Calibration(Model.HDL32E);
     const transform = new Transformer(calibration);
     const maxPoints = RawPacket.MAX_POINTS_PER_PACKET * 100;
