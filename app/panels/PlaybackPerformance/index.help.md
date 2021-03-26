@@ -14,7 +14,7 @@ The number of frames played per second. Though the player can play back at up to
 
 ## Bag frame time
 
-The duration in bag-time for the rendered frames in milliseconds. To "keep up" with playback, Webviz will often emit "larger" frames.
+The duration in bag-time for the rendered frames in milliseconds. To "keep up" with playback, Studio will often emit "larger" frames.
 
 ## Data throughput
 

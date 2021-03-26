@@ -2,7 +2,7 @@
 
 Plots arbitrary values from topics, similar to [rqt_plot](http://wiki.ros.org/rqt_plot).
 
-The values plotted are specified through Webviz's [message path syntax](#help:message-path-syntax).
+The values plotted are specified through the [message path syntax](#help:message-path-syntax).
 
 In the options menu, you can set a minimum and maximum Y-value. By default, the plot will use those bounds unless the data you're looking at extends above the max Y-value or below the min Y-value; in those cases it will automatically expand. If you want to disable this behavior and force the plot to use the exact minimum and maximum Y-values entered, you can "lock" the y-axis in the options menu as well.
 

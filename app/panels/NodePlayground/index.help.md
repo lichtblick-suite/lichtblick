@@ -1,6 +1,6 @@
 # Node Playground
 
-Node Playground is a code editor sandbox in which you can write pseudo-ROS topics that get published within Webviz. Node Playground allows you to manipulate, reduce, and filter existing ROS messages and output them in a way that is useful to you.
+Node Playground is a code editor sandbox in which you can write pseudo-ROS topics that get published internally. Node Playground allows you to manipulate, reduce, and filter existing ROS messages and output them in a way that is useful to you.
 
 ## Getting Started
 
@@ -17,9 +17,9 @@ Here are some resources to get yourself ramped up:
 
 Post in #typescript for TypeScript questions.
 
-### Writing Your First Webviz Node
+### Writing Your First Node
 
-Every Webviz node must declare 3 exports that determine how it should execute:
+Every node must declare 3 exports that determine how it should execute:
 
 - An inputs array of topic names.
 - An output topic with an enforced prefix: `/webviz_node/`.
@@ -75,7 +75,7 @@ As for the `Output` type, you can either manually type out your output with the 
 
 The `GlobalVariables` type is used to specify the types of any global variables you'd like to access in your node. It is not required.
 
-Strictly typing your nodes will help you debug issues at compile time rather than at runtime. It's not always obvious in Webviz how message properties are affecting the visualized output, and so the more you strictly type your nodes, the less likely you will make mistakes.
+Strictly typing your nodes will help you debug issues at compile time rather than at runtime. It's not always obvious how message properties are affecting the visualized output, and so the more you strictly type your nodes, the less likely you will make mistakes.
 
 With that said, you can disable Typescript checks while getting a rough draft of your node working by adding `// @ts-expect-error` on the line above the one you want to ignore.
 
@@ -142,7 +142,7 @@ export default publisher;
 
 #### Using Global Variables
 
-The publisher function will receive all of the Webviz global variables as an object every time it is called. If the global variables change, the publisher function will automatically re-run with the new values:
+The publisher function will receive all of the global variables as an object every time it is called. If the global variables change, the publisher function will automatically re-run with the new values:
 
 ```typescript
 import { Input, Messages } from "ros";
@@ -163,7 +163,7 @@ const publisher = (message: Input<"/foo_marker">, globalVars: GlobalVariables): 
 
 ## Debugging
 
-For easier debugging, invoke `log(someValue)` anywhere in your Webviz node code to print values to the `Logs` section at the bottom of the panel. The only value you cannot `log()` is one that is, or contains, a function definition.
+For easier debugging, invoke `log(someValue)` anywhere in your node code to print values to the `Logs` section at the bottom of the panel. The only value you cannot `log()` is one that is, or contains, a function definition.
 
 ```typescript
 const add = (a: number, b: number): number => a + b;
