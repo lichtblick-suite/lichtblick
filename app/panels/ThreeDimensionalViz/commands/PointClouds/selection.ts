@@ -74,8 +74,8 @@ export function getClickedInfo(
       if (!is_bigendian) {
         // When data uses little endianess, colors are in BGR format
         // and we must swap R and B channels to display them correclty.
-        const temp = clickedPointColor[2];
-        clickedPointColor[2] = clickedPointColor[0];
+        const temp = clickedPointColor[2]!;
+        clickedPointColor[2] = clickedPointColor[0]!;
         clickedPointColor[0] = temp;
       }
     } else if (colorMode.mode === "gradient" && !isEmpty(colorBuffer)) {
@@ -163,7 +163,7 @@ export function decodeAdditionalFields(
     for (let col = 0; col < width; col++) {
       const dataStart = col * point_step + dataOffset;
       for (const fieldName of additionalField) {
-        const reader = offsets[fieldName].reader;
+        const reader = offsets[fieldName]?.reader;
         if (reader) {
           const fieldValue = reader.read(data, dataStart);
           otherFieldsValues[fieldName][pointCount] = fieldValue;

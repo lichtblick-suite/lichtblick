@@ -86,7 +86,7 @@ const originAxes: Array<Axis> = [
   },
 ];
 
-const tempOrientation = [0, 0, 0, 0];
+const tempOrientation = [0, 0, 0, 0] as [number, number, number, number];
 
 const getTransformedAxisArrowMarker = (
   id: string,

@@ -90,6 +90,7 @@ export default function DiffModeSettings({ enabled, saveConfig }: Props) {
   const updateDiffModeFlag = () => {
     saveConfig({ diffModeEnabled: !enabled });
     logEvent({
+      // @ts-expect-error Event logging is not currently well typed
       name: getEventNames()["3D_PANEL.DIFF_MODE_TOGGLED"],
       tags: {
         enabled: !enabled,

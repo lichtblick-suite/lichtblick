@@ -33,7 +33,7 @@ export function pointsToPolygons(polygonPoints: Point2D[][]): Polygon[] {
 }
 
 function pointsToYaml(polygonPoints: Point2D[][]): string {
-  if (!polygonPoints.length || !polygonPoints[0].length) {
+  if (!polygonPoints[0]?.length) {
     return "";
   }
   return YAML.stringify(polygonPoints);
@@ -58,8 +58,8 @@ export function getPolygonLineDistances(polygonPoints: Point2D[][]): number {
     if (polyPoints.length > 1) {
       for (let i = 0; i < polyPoints.length - 1; i++) {
         memo += Math.hypot(
-          polyPoints[i + 1].x - polyPoints[i].x,
-          polyPoints[i + 1].y - polyPoints[i].y,
+          polyPoints[i + 1]!.x - polyPoints[i]!.x,
+          polyPoints[i + 1]!.y - polyPoints[i]!.y,
         );
       }
     }

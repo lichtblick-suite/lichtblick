@@ -145,8 +145,8 @@ export type EditTopicState = { tooltipPosX: number; topic: Topic };
 
 type GlobalVariableName = string;
 export type ColorOverride = {
-  color: Color;
-  active: boolean;
+  color?: Color;
+  active?: boolean;
 };
 export type ColorOverrideBySourceIdxByVariable = Record<GlobalVariableName, ColorOverride[]>;
 
@@ -794,8 +794,7 @@ export default function Layout({
                   hasFeatureColumn={hasFeatureColumn}
                   setCurrentEditingTopic={setCurrentEditingTopic}
                   sceneBuilderMessage={
-                    sceneBuilder.collectors[currentEditingTopic.name] &&
-                    sceneBuilder.collectors[currentEditingTopic.name].getMessages()[0]
+                    sceneBuilder.collectors[currentEditingTopic.name]?.getMessages()[0]
                   }
                   saveConfig={saveConfig}
                   settingsByKey={settingsByKey}

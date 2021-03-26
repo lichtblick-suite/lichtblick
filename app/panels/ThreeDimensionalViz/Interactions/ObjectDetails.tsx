@@ -67,7 +67,9 @@ function ObjectDetailsWrapper({
   const updateShowInstance = (shouldShowInstance: any) => {
     setShowInstance(shouldShowInstance);
     logEvent({
+      // @ts-expect-error Event logging is not currently well typed
       name: getEventNames()["3D_PANEL.OBJECT_DETAILS_SHOW_INSTANCE"],
+      // @ts-expect-error Event logging is not currently well typed
       tags: { [getEventTags().PANEL_TYPE]: "3D Panel" },
     });
   };
@@ -142,7 +144,7 @@ function ObjectDetails({ interactionData, objectToDisplay }: Props) {
 
           let objectForPath = sortedDataObject;
           for (let i = markerKeyPath.length - 1; i >= 0; i--) {
-            objectForPath = objectForPath[markerKeyPath[i]];
+            objectForPath = objectForPath[markerKeyPath[i]!];
             if (!objectForPath) {
               break;
             }

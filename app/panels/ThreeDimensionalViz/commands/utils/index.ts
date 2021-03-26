@@ -85,7 +85,7 @@ function toTypedArray(data: readonly number[] | Int8Array): Uint8Array {
   }
   const result = new Uint8Array(data.length);
   for (let i = 0; i < data.length; i++) {
-    result[i] = data[i];
+    result[i] = data[i]!; // raw for loop is faster than .set() or .from(): https://jsben.ch/JkgZs
   }
   return result;
 }

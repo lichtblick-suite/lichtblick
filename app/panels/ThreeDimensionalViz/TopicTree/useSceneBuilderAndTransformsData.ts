@@ -57,8 +57,7 @@ export default function useSceneBuilderAndTransformsData({
   const availableNamespacesByTopic = useMemo(() => {
     const result = { ...staticallyAvailableNamespacesByTopic };
     for (const { name, topic } of sceneBuilder.allNamespaces) {
-      result[topic] = result[topic] || [];
-      result[topic].push(name);
+      (result[topic] ??= []).push(name);
     }
     if (availableTfs.length) {
       result[TRANSFORM_TOPIC] = availableTfs;

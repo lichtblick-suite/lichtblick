@@ -189,6 +189,9 @@ export default function TreeNodeRow({
     (columnIndex, visible) => {
       if (visible) {
         const topic = [topicName, joinTopics(SECOND_SOURCE_PREFIX, topicName)][columnIndex];
+        if (!topic) {
+          return;
+        }
         setHoveredMarkerMatchers([{ topic }]);
       }
     },
@@ -320,7 +323,7 @@ export default function TreeNodeRow({
           datatype={showTopicSettings ? datatype : undefined}
           disableBaseColumn={diffModeEnabled || !availableByColumn[0]}
           disableFeatureColumn={diffModeEnabled || !availableByColumn[1]}
-          hasFeatureColumn={hasFeatureColumn && availableByColumn[1]}
+          hasFeatureColumn={hasFeatureColumn && (availableByColumn[1] ?? false)}
           nodeKey={key}
           providerAvailable={providerAvailable}
           setCurrentEditingTopic={setCurrentEditingTopic}

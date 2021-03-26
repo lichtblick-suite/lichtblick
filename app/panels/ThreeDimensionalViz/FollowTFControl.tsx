@@ -63,11 +63,11 @@ const buildTfTree = (transforms: Transform[]): TfTree => {
 
   // Now add children to their parents treenode.
   for (const tf of transforms) {
+    const node = tree.nodes[tf.id] as TfTreeNode;
     if (tf.parent) {
-      const parentTreeNode = tree.nodes[tf.parent.id];
-      parentTreeNode.children.push(tree.nodes[tf.id]);
+      tree.nodes[tf.parent.id]?.children.push(node);
     } else {
-      tree.roots.push(tree.nodes[tf.id]);
+      tree.roots.push(node);
     }
   }
 

@@ -30,4 +30,4 @@ export const messages = [
     receiveTime: { sec: 102, nsec: 0 },
     message: { index: 2 },
   },
-];
+] as const;

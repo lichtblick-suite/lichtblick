@@ -73,8 +73,9 @@ export default function UnlinkGlobalVariables({ name, showList }: Props) {
     linkedGlobalVariables,
   );
   const links: LinkedGlobalVariable[] = linkedGlobalVariablesKeyByName[name] || [];
+  const firstLink = links[0];
 
-  if (links.length === 0) {
+  if (!firstLink) {
     return ReactNull;
   }
 
@@ -132,7 +133,7 @@ export default function UnlinkGlobalVariables({ name, showList }: Props) {
             Unlink <GlobalVariableName name={name} />
           </span>
         }
-        linkedGlobalVariable={links[0]}
+        linkedGlobalVariable={firstLink}
       >
         {() => <SForm data-test="unlink-form">{listHtml}</SForm>}
       </UnlinkWrapper>

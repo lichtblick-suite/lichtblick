@@ -12,7 +12,6 @@ export default {
   globals: {
     ReactNull: null, // eslint-disable-line no-restricted-syntax
     "ts-jest": {
-      tsconfig: "<rootDir>/tsconfig.jest.json",
       babelConfig: {
         plugins: ["babel-plugin-transform-import-meta", "@babel/plugin-transform-modules-commonjs"],
       },

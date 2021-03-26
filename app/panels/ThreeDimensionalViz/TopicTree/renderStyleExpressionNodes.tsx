@@ -200,7 +200,7 @@ function StyleExpressionNode(props: any) {
               if (!hasFeatureColumn && sourceIdx === 1) {
                 return ReactNull;
               }
-              const { active, color } = override ?? { active: false };
+              const { active = false, color } = override ?? {};
               return (
                 <VisibilityToggle
                   available={true}

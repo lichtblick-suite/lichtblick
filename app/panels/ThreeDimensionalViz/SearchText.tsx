@@ -168,7 +168,7 @@ export const useSearchMatches = ({
   transforms,
 }: {
   cameraState: CameraState;
-  currentMatch: GLTextMarker;
+  currentMatch?: GLTextMarker;
   onCameraStateChange: (arg0: CameraState) => void;
   rootTf?: string;
   searchTextOpen: boolean;

@@ -217,9 +217,7 @@ export default function useTree({
   const selections = useMemo(() => {
     const checkedKeysSet = new Set(checkedKeys);
     // Memoize node selections for extracting topic/namespace selections and checking node's visibility state.
-    const isSelectedMemo: {
-      [key: string]: boolean;
-    } = {};
+    const isSelectedMemo: { [key: string]: boolean } = {};
 
     // Check if a node is selected and fill in the isSelectedMemo cache for future access.
     function isSelected(baseKey: string | undefined, isFeatureColumn: boolean): boolean {
@@ -232,20 +230,21 @@ export default function useTree({
 
       const node = nodesByKey[baseKey];
       const featureKey = node?.featureKey || baseKey;
-      if (!isFeatureColumn && isSelectedMemo[baseKey] === undefined) {
-        isSelectedMemo[baseKey] =
+      let result: boolean;
+      if (!isFeatureColumn) {
+        result = isSelectedMemo[baseKey] ??=
           checkedKeysSet.has(baseKey) &&
           (node
             ? isSelected(node.parentKey, isFeatureColumn)
             : checkedKeysSet.has(`name:${uncategorizedGroupName}`));
-      } else if (isFeatureColumn && isSelectedMemo[featureKey] === undefined) {
-        isSelectedMemo[featureKey] =
+      } else {
+        result = isSelectedMemo[featureKey] ??=
           checkedKeysSet.has(featureKey) &&
           (node
             ? isSelected(node.parentKey, isFeatureColumn)
             : checkedKeysSet.has(`name_2:${uncategorizedGroupName}`));
       }
-      return isSelectedMemo[isFeatureColumn ? featureKey : baseKey];
+      return result;
     }
 
     const selectedTopicNamesSet = new Set(
@@ -497,7 +496,10 @@ export default function useTree({
 
   const toggleNodeChecked = useCallback(
     (nodeKey: string, columnIndex: number) => {
-      const key = columnIndex === 1 ? nodesByKey[nodeKey].featureKey : nodeKey;
+      const key = columnIndex === 1 ? nodesByKey[nodeKey]?.featureKey : nodeKey;
+      if (!key) {
+        return;
+      }
       saveConfig({ checkedKeys: xor(checkedKeys, [key]) });
     },
     [checkedKeys, nodesByKey, saveConfig],
@@ -506,6 +508,9 @@ export default function useTree({
   const toggleCheckAllDescendants = useCallback(
     (nodeKey: string, columnIndex: number) => {
       const node = nodesByKey[nodeKey];
+      if (!node) {
+        return;
+      }
       const isFeatureColumn = columnIndex === 1;
       const keyWithPrefix = isFeatureColumn ? node.featureKey : nodeKey;
       const isNowChecked = !checkedKeys.includes(keyWithPrefix);
@@ -648,7 +653,7 @@ export default function useTree({
           result[nodeKey] = [];
         }
         result[nodeKey].push(...errors);
-        nodeKey = nodesByKey[nodeKey].parentKey;
+        nodeKey = nodesByKey[nodeKey]?.parentKey;
       }
     }
 

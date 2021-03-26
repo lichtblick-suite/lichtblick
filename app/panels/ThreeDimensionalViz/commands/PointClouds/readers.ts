@@ -31,10 +31,10 @@ export class Float32Reader implements FieldReader {
   }
 
   read(data: number[] | Uint8Array, index: number): number {
-    view.setUint8(0, data[index + this.offset]);
-    view.setUint8(1, data[index + this.offset + 1]);
-    view.setUint8(2, data[index + this.offset + 2]);
-    view.setUint8(3, data[index + this.offset + 3]);
+    view.setUint8(0, data[index + this.offset]!);
+    view.setUint8(1, data[index + this.offset + 1]!);
+    view.setUint8(2, data[index + this.offset + 2]!);
+    view.setUint8(3, data[index + this.offset + 3]!);
     return view.getFloat32(0, true);
   }
 }
@@ -46,10 +46,10 @@ export class Int32Reader implements FieldReader {
   }
 
   read(data: number[] | Uint8Array, index: number): number {
-    view.setUint8(0, data[index + this.offset]);
-    view.setUint8(1, data[index + this.offset + 1]);
-    view.setUint8(2, data[index + this.offset + 2]);
-    view.setUint8(3, data[index + this.offset + 3]);
+    view.setUint8(0, data[index + this.offset]!);
+    view.setUint8(1, data[index + this.offset + 1]!);
+    view.setUint8(2, data[index + this.offset + 2]!);
+    view.setUint8(3, data[index + this.offset + 3]!);
     return view.getInt32(0, true);
   }
 }
@@ -61,8 +61,8 @@ export class Uint16Reader implements FieldReader {
   }
 
   read(data: number[] | Uint8Array, index: number): number {
-    view.setUint8(0, data[index + this.offset]);
-    view.setUint8(1, data[index + this.offset + 1]);
+    view.setUint8(0, data[index + this.offset]!);
+    view.setUint8(1, data[index + this.offset + 1]!);
     return view.getUint16(0, true);
   }
 }
@@ -73,8 +73,8 @@ export class Int16Reader implements FieldReader {
   }
 
   read(data: number[] | Uint8Array, index: number): number {
-    view.setUint8(0, data[index + this.offset]);
-    view.setUint8(1, data[index + this.offset + 1]);
+    view.setUint8(0, data[index + this.offset]!);
+    view.setUint8(1, data[index + this.offset + 1]!);
     return view.getInt16(0, true);
   }
 }
@@ -86,7 +86,7 @@ export class Uint8Reader implements FieldReader {
   }
 
   read(data: number[] | Uint8Array, index: number): number {
-    return data[index + this.offset];
+    return data[index + this.offset]!;
   }
 }
 

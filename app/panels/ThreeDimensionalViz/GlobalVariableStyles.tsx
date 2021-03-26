@@ -35,7 +35,6 @@ import {
   ColorOverride,
   ColorOverrideBySourceIdxByVariable,
 } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/Layout";
-import { Color } from "@foxglove-studio/app/types/Messages";
 import { hexToColorObj } from "@foxglove-studio/app/util/colorUtils";
 import { lineColors } from "@foxglove-studio/app/util/plotColors";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
@@ -82,7 +81,7 @@ export function getDefaultColorOverrideBySourceIdx(defaultColorIndex: number): C
   return [
     {
       active: false,
-      color: hexToColorObj(lineColors[defaultColorIndex % lineColors.length], 1),
+      color: hexToColorObj(lineColors[defaultColorIndex % lineColors.length]!, 1),
     },
     {
       active: false,
@@ -117,7 +116,7 @@ export default function GlobalVariableStyles(props: Props) {
   const linkedGlobalVariablesByName = groupBy(linkedGlobalVariables, ({ name }) => name);
 
   const updateSettingsForGlobalVariable = useCallback(
-    (globalVariableName, settings: { active: boolean; color: Color }, sourceIdx = 0) => {
+    (globalVariableName, settings: ColorOverride, sourceIdx = 0) => {
       const updatedSettings = new Array(2)
         .fill(0)
         .map((_, i) => colorOverrideBySourceIdxByVariable[globalVariableName]?.[i]);
@@ -190,7 +189,7 @@ function GlobalVariableStylesRow({
       <SRow>
         <Checkbox
           label={""}
-          checked={overrides[0]?.active}
+          checked={overrides[0]?.active ?? false}
           dataTest={`GlobalVariableStylesRow ${name}`}
           onChange={(_active) =>
             updateSettingsForGlobalVariable(
@@ -202,7 +201,7 @@ function GlobalVariableStylesRow({
         />
         <Checkbox
           label={""}
-          checked={overrides[1]?.active}
+          checked={overrides[1]?.active ?? false}
           dataTest={`GlobalVariableStylesRow ${name}`}
           onChange={(_active) =>
             updateSettingsForGlobalVariable(

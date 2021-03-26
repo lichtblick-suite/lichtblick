@@ -44,7 +44,7 @@ export function groupLinesIntoInstancedLineLists(
   const INFINITE_METADATA = {};
 
   for (const [id, messageList] of toPairs(groups)) {
-    const baseMessage = messageList[0];
+    const baseMessage = messageList[0] as LineListMarker | LineStripMarker; // groupBy doesn't produce empty groups
     const isLineStrip = baseMessage.type === MARKER_MSG_TYPES.LINE_STRIP;
     const allColors = []; // accumulated colors
     const allPoints = []; // accumulated positions

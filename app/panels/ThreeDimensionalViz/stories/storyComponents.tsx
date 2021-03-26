@@ -54,8 +54,9 @@ function bobjectify(fixture: FixtureExampleData): FixtureExampleData {
 
   const datatypes = createRosDatatypesFromFrame(topicsArray, frame);
   topicsArray.forEach(({ name: topicName, datatype }) => {
-    if (frame[topicName]) {
-      (newFrame as any)[topicName] = frame[topicName].map(({ topic, receiveTime, message }) => ({
+    const messages = frame[topicName];
+    if (messages) {
+      (newFrame as any)[topicName] = messages.map(({ topic, receiveTime, message }) => ({
         topic,
         receiveTime,
         message: !isBobject(message) ? wrapJsObject(datatypes, datatype, message) : message,

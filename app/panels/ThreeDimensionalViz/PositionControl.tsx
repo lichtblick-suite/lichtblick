@@ -31,12 +31,12 @@ export function parsePosition(input: string): Vec3 | undefined {
   const parts = input.split(/\s*[,\n{}[\]]+\s*/).filter((part) => part !== "");
   const parseMatch = (val: string) => {
     const match = val.match(/-?\d+(\.\d+)?/);
-    return match ? Number.parseFloat(match[0]) : undefined;
+    return match && match[0] ? Number.parseFloat(match[0]) : undefined;
   };
   // allow length 3 to ignore z value
   if (parts.length === 2 || parts.length === 3) {
-    const x = parseMatch(parts[0]);
-    const y = parseMatch(parts[1]);
+    const x = parseMatch(parts[0]!);
+    const y = parseMatch(parts[1]!);
     if (x != undefined && y != undefined) {
       return [x, y, 0];
     }

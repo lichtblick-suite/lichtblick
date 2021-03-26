@@ -454,11 +454,7 @@ export default class SceneBuilder implements MarkerProvider {
   namespaceIsEnabled(topic: string, name: string) {
     if (this.selectedNamespacesByTopic) {
       // enable all namespaces under a topic if it's not already set
-      return (
-        (this.selectedNamespacesByTopic[topic] &&
-          this.selectedNamespacesByTopic[topic].has(name)) ||
-        this.selectedNamespacesByTopic[topic] == undefined
-      );
+      return this.selectedNamespacesByTopic[topic]?.has(name) ?? true;
     }
     return some(this.enabledNamespaces, (ns) => ns.topic === topic && ns.name === name);
   }
@@ -585,7 +581,7 @@ export default class SceneBuilder implements MarkerProvider {
       colors: overrideColor ? [] : message.colors,
     };
 
-    this.collectors[topic].addMarker(marker as any, name);
+    this.collectors[topic]!.addMarker(marker as any, name);
   }
 
   _consumeMarker(topic: string, message: BinaryMarker | BinaryInstancedMarker): void {
@@ -616,10 +612,10 @@ export default class SceneBuilder implements MarkerProvider {
         return;
       case 2:
         // delete
-        this.collectors[topic].deleteMarker(name);
+        this.collectors[topic]!.deleteMarker(name);
         return;
       case 3:
-        this.collectors[topic].deleteAll();
+        this.collectors[topic]!.deleteAll();
         return;
       default:
         this._setTopicError(topic, `Unsupported action type: ${message.action()}`);
@@ -722,7 +718,7 @@ export default class SceneBuilder implements MarkerProvider {
       marker.metadataByIndex = message.metadataByIndex();
       marker.closed = message.closed && message.closed();
     }
-    this.collectors[topic].addMarker(marker, name);
+    this.collectors[topic]!.addMarker(marker, name);
   }
 
   _consumeOccupancyGrid = (topic: string, message: NavMsgs$OccupancyGrid): void => {
@@ -810,7 +806,7 @@ export default class SceneBuilder implements MarkerProvider {
     // to an infinite lifetime. But do allow for 0 values based on user preferences.
     const decayTimeInSec = this._settingsByKey[`t:${topic}`]?.decayTime;
     const lifetime = decayTimeInSec ? fromSec(decayTimeInSec) : undefined;
-    this.collectors[topic].addNonMarker(topic, mappedMessage, lifetime);
+    this.collectors[topic]!.addNonMarker(topic, mappedMessage, lifetime);
   };
 
   setCurrentTime = (currentTime: { sec: number; nsec: number }) => {
@@ -820,8 +816,7 @@ export default class SceneBuilder implements MarkerProvider {
     // set the new clock value in all existing collectors
     // including those for topics not included in this frame,
     // so each can expire markers if they need to
-    for (const key in this.collectors) {
-      const collector = this.collectors[key];
+    for (const collector of Object.values(this.collectors)) {
       collector.setClock(this._clock);
     }
   };
@@ -931,11 +926,11 @@ export default class SceneBuilder implements MarkerProvider {
     this.errors.topicsMissingTransforms.delete(topic);
     this.errors.topicsWithBadFrameIds.delete(topic);
     this.errors.topicsWithError.delete(topic);
-    this.collectors[topic] = this.collectors[topic] || new MessageCollector();
-    this.collectors[topic].setClock(this._clock as any);
-    this.collectors[topic].flush();
+    this.collectors[topic] ??= new MessageCollector();
+    this.collectors[topic]!.setClock(this._clock as any);
+    this.collectors[topic]!.flush();
 
-    const datatype = this.topicsByName[topic].datatype;
+    const datatype = this.topicsByName[topic]!.datatype;
     // If topic has a decayTime set, markers with no lifetime will get one
     // later on, so we don't need to filter them. Note: A decayTime of zero is
     // defined as an infinite lifetime

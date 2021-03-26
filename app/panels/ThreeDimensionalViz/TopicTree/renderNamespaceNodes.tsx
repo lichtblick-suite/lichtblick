@@ -114,6 +114,9 @@ function NamespaceNodeRow({
     (columnIndex, visible) => {
       if (visible) {
         const topic = [topicName, joinTopics(SECOND_SOURCE_PREFIX, topicName)][columnIndex];
+        if (!topic) {
+          return;
+        }
         setHoveredMarkerMatchers([
           { topic, checks: [{ markerKeyPath: ["ns"], value: namespace }] },
         ]);
@@ -194,7 +197,7 @@ function NamespaceNodeRow({
             <VisibilityToggle // Some namespaces are statically available. But we want to make sure the parent topic is also available
               // before showing it as available.
               available={topicNodeAvailable && available}
-              checked={checkedByColumn[columnIndex]}
+              checked={checkedByColumn[columnIndex] ?? false}
               dataTest={`visibility-toggle~${nodeKey}~column${columnIndex}`}
               key={columnIndex}
               onAltToggle={() => onAltToggle(columnIndex)}
@@ -213,7 +216,7 @@ function NamespaceNodeRow({
           disableBaseColumn={!availableByColumn[0]}
           disableFeatureColumn={!availableByColumn[1]}
           featureKey={featureKey}
-          hasFeatureColumn={hasFeatureColumn && availableByColumn[1]}
+          hasFeatureColumn={hasFeatureColumn && (availableByColumn[1] ?? false)}
           hasNamespaceOverrideColorChangedByColumn={hasNamespaceOverrideColorChangedByColumn}
           namespace={namespace}
           nodeKey={nodeKey}
@@ -242,7 +245,7 @@ export default function renderNamespaceNodes({
   diffModeEnabled,
 }: Props): TreeUINode[] {
   const rowWidth = width - (isXSWidth ? 0 : TREE_SPACING * 2) - OUTER_LEFT_MARGIN;
-  const topicNodeAvailable = topicNode.availableByColumn[0] || topicNode.availableByColumn[1];
+  const topicNodeAvailable = topicNode.availableByColumn.some((value) => value);
   const togglesWidth = hasFeatureColumn ? TOGGLE_WRAPPER_SIZE * 2 : TOGGLE_WRAPPER_SIZE;
   const rightActionWidth = topicNodeAvailable ? togglesWidth + ICON_SIZE : ICON_SIZE;
   const maxNodeNameLen = rowWidth - rightActionWidth - INNER_LEFT_MARGIN * 2;

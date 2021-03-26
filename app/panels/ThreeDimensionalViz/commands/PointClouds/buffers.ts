@@ -53,7 +53,7 @@ export function getVertexValue(buffer: VertexBuffer, index: number): number {
   const data = buffer.buffer;
   const offset = buffer.offset;
   const stride = buffer.stride;
-  return data[index * stride + offset];
+  return data[index * stride + offset]!;
 }
 
 // Utility function to get multiple consecutive values from vertex buffers.
@@ -63,7 +63,7 @@ export function getVertexValues(buffer: VertexBuffer, index: number, count: numb
   const offset = buffer.offset;
   const stride = buffer.stride;
   for (let i = 0; i < count; i++) {
-    ret.push(data[index * stride + offset + i]);
+    ret.push(data[index * stride + offset + i]!);
   }
   return ret;
 }
@@ -140,10 +140,14 @@ export function createPositionBuffer({
     return positions;
   }
 
+  const { x: xField, y: yField, z: zField } = fields;
+  if (!xField || !yField || !zField) {
+    throw new Error("Cannot create a position buffer without x, y, and z fields");
+  }
+
   // Check if all position components are stored next to each other
   const positionIsValid =
-    fields.y.offset - fields.x.offset === FLOAT_SIZE &&
-    fields.z.offset - fields.y.offset === FLOAT_SIZE;
+    yField.offset - xField.offset === FLOAT_SIZE && zField.offset - yField.offset === FLOAT_SIZE;
   if (positionIsValid && hasValidStride(stride)) {
     // Create a VBO for positions by recasting the data array into a float array
     // This will give us the correct values for (x,y,z) tuples.
@@ -153,7 +157,7 @@ export function createPositionBuffer({
       buffer: reinterpretBufferToFloat(data),
       // Divide by sizeof(float) since offset and stride are defined based on number of
       // float values, not bytes
-      offset: fields.x.offset / FLOAT_SIZE,
+      offset: xField.offset / FLOAT_SIZE,
       stride: stride / FLOAT_SIZE,
     };
   }
@@ -165,7 +169,7 @@ export function createPositionBuffer({
   );
   return extractValues({
     data,
-    readers: [fields.x.reader, fields.y.reader, fields.z.reader],
+    readers: [xField.reader, yField.reader, zField.reader],
     pointCount,
     stride,
   });
@@ -191,7 +195,11 @@ export function createColorBuffer({
   }
 
   if (colorMode.mode === "rgb") {
-    const rgbOffset = fields.rgb.offset || 0;
+    const rgbField = fields.rgb;
+    if (!rgbField) {
+      throw new Error("Cannot create color buffer in rgb mode without an rgb field");
+    }
+    const rgbOffset = rgbField.offset || 0;
     if (hasValidStride(FLOAT_SIZE * stride)) {
       return {
         // RGB colors are encoded in a single 4-byte tuple and unfortunately we cannot extract
@@ -227,6 +235,9 @@ export function createColorBuffer({
   }
 
   const colorField = fields[colorMode.colorField || "rgb"];
+  if (!colorField) {
+    throw new Error(`Cannot create color buffer without ${colorMode.colorField || "rgb"} field`);
+  }
 
   // If the color is computed from any of the other float fields (i.e. x positions)
   // we can do the same trick as for positions, with just a different offset

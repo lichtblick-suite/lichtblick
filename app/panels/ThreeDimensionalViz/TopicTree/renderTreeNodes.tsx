@@ -128,13 +128,9 @@ export function getNamespaceNodes({
     if (canEditNamespaceOverrideColor) {
       // Use namespace overrideColor by default, and fall back to topic overrideColor.
       const namespaceOverrideColorByColumn =
-        (derivedCustomSettingsByKey[namespaceKey] &&
-          derivedCustomSettingsByKey[namespaceKey].overrideColorByColumn) ||
-        [];
+        derivedCustomSettingsByKey[namespaceKey]?.overrideColorByColumn ?? [];
       const topicOverrideColorByColumn =
-        (derivedCustomSettingsByKey[topicNodeKey] &&
-          derivedCustomSettingsByKey[topicNodeKey].overrideColorByColumn) ||
-        [];
+        derivedCustomSettingsByKey[topicNodeKey]?.overrideColorByColumn ?? [];
       columns.forEach((columnIdx) => {
         overrideColorByColumn.push(
           namespaceOverrideColorByColumn[columnIdx] || topicOverrideColorByColumn[columnIdx],

@@ -24,12 +24,12 @@ describe("<PointClouds />", () => {
       expect(buffer.length).toBe(6 * FLOAT_SIZE);
       expect(offset).toBe(0);
       expect(stride).toBe(32 / FLOAT_SIZE);
-      expect(Math.floor(buffer[0])).toBe(-2239);
-      expect(Math.floor(buffer[1])).toBe(-706);
-      expect(Math.floor(buffer[2])).toBe(-3);
-      expect(Math.floor(buffer[8])).toBe(-2239);
-      expect(Math.floor(buffer[9])).toBe(-706);
-      expect(Math.floor(buffer[10])).toBe(-3);
+      expect(Math.floor(buffer[0]!)).toBe(-2239);
+      expect(Math.floor(buffer[1]!)).toBe(-706);
+      expect(Math.floor(buffer[2]!)).toBe(-3);
+      expect(Math.floor(buffer[8]!)).toBe(-2239);
+      expect(Math.floor(buffer[9]!)).toBe(-706);
+      expect(Math.floor(buffer[10]!)).toBe(-3);
     });
 
     it("builds a point cloud with height 3", () => {
@@ -44,12 +44,12 @@ describe("<PointClouds />", () => {
       expect(buffer.length).toBe(6 * FLOAT_SIZE);
       expect(offset).toBe(0);
       expect(stride).toBe(32 / FLOAT_SIZE);
-      expect(Math.floor(buffer[0])).toBe(-2239);
-      expect(Math.floor(buffer[1])).toBe(-706);
-      expect(Math.floor(buffer[2])).toBe(-3);
-      expect(Math.floor(buffer[8])).toBe(-2239);
-      expect(Math.floor(buffer[9])).toBe(-706);
-      expect(Math.floor(buffer[10])).toBe(-3);
+      expect(Math.floor(buffer[0]!)).toBe(-2239);
+      expect(Math.floor(buffer[1]!)).toBe(-706);
+      expect(Math.floor(buffer[2]!)).toBe(-3);
+      expect(Math.floor(buffer[8]!)).toBe(-2239);
+      expect(Math.floor(buffer[9]!)).toBe(-706);
+      expect(Math.floor(buffer[10]!)).toBe(-3);
     });
 
     it("extracts both positions from data since stride is not multiple of sizeof(float)", () => {
@@ -102,9 +102,9 @@ describe("<PointClouds />", () => {
       expect(buffer.length).toBe(data.length);
       expect(offset).toBe(16);
       expect(stride).toBe(32);
-      expect(Math.floor(buffer[16])).toBe(255);
-      expect(Math.floor(buffer[17])).toBe(225);
-      expect(Math.floor(buffer[18])).toBe(127);
+      expect(Math.floor(buffer[16]!)).toBe(255);
+      expect(Math.floor(buffer[17]!)).toBe(225);
+      expect(Math.floor(buffer[18]!)).toBe(127);
     });
 
     it("builds color buffer by expanding RGB, ignoring endianness since that'll be handled by shaders", () => {
@@ -122,9 +122,9 @@ describe("<PointClouds />", () => {
       expect(buffer.length).toBe(data.length);
       expect(offset).toBe(16);
       expect(stride).toBe(32);
-      expect(Math.floor(buffer[16])).toBe(255);
-      expect(Math.floor(buffer[17])).toBe(225);
-      expect(Math.floor(buffer[18])).toBe(127);
+      expect(Math.floor(buffer[16]!)).toBe(255);
+      expect(Math.floor(buffer[17]!)).toBe(225);
+      expect(Math.floor(buffer[18]!)).toBe(127);
     });
   });
 
