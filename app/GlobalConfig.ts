@@ -41,7 +41,6 @@ const defaultHooks = {
       });
   },
   async importHooksAsync() {},
-  nodes: () => [],
   getDefaultPersistedState() {
     // All panel fields have to be present.
     const state: PersistedState = {

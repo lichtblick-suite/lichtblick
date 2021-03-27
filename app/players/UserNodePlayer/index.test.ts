@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import FakePlayer from "@foxglove-studio/app/components/MessagePipeline/FakePlayer";
-import NodePlayer from "@foxglove-studio/app/players/NodePlayer";
 import UserNodePlayer from "@foxglove-studio/app/players/UserNodePlayer";
 import exampleDatatypes from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes.json";
 import {
@@ -21,7 +20,6 @@ import {
   ErrorCodes,
 } from "@foxglove-studio/app/players/UserNodePlayer/types";
 import MockUserNodePlayerWorker from "@foxglove-studio/app/players/UserNodePlayer/worker.mock";
-import { NodeDefinition } from "@foxglove-studio/app/players/nodes";
 import {
   SubscribePayload,
   Message,
@@ -37,24 +35,6 @@ import { DEFAULT_WEBVIZ_NODE_PREFIX } from "@foxglove-studio/app/util/globalCons
 
 const storage = new Storage();
 const nodeId = "nodeId";
-
-const hardcodedNode: NodeDefinition<any> = {
-  inputs: ["/input/foo", "/input/bar"],
-  output: { name: "/webviz/test", datatype: "test" },
-  datatypes: { test: { fields: [{ type: "string", name: "foo" }] } },
-  format: "parsedMessages",
-  defaultState: {},
-  callback: ({ message, state }: any) => ({
-    messages: [
-      {
-        topic: "/webviz/test",
-        receiveTime: message.receiveTime,
-        message: message.message,
-      },
-    ],
-    state,
-  }),
-};
 
 const nodeUserCode = `
   export const inputs = ["/np_input"];
@@ -257,71 +237,6 @@ describe("UserNodePlayer", () => {
       const publishPayload = { topic: "/foo", msg: {} };
       userNodePlayer.publish(publishPayload);
       expect(fakePlayer.publish).toHaveBeenCalledWith(publishPayload);
-    });
-  });
-
-  describe("behavior with NodePlayer as player", () => {
-    it("subscribes to general topics when subscribed to, without any Webviz nodes", () => {
-      const fakePlayer = new FakePlayer();
-      const nodePlayer = new NodePlayer(fakePlayer);
-      const userNodePlayer = new UserNodePlayer(nodePlayer, defaultUserNodeActions);
-      userNodePlayer.setListener(async () => {
-        // no-op
-      });
-      userNodePlayer.setSubscriptions([
-        { topic: "/input/foo", format: "parsedMessages" },
-        { topic: "/input/baz", format: "parsedMessages" },
-      ]);
-      expect(fakePlayer.subscriptions).toEqual([
-        { topic: "/input/foo", format: "parsedMessages" },
-        { topic: "/input/baz", format: "parsedMessages" },
-      ]);
-    });
-
-    it("subscribes to Webviz node topic when subscribed to, if it exists as an active Webviz node topic", () => {
-      const fakePlayer = new FakePlayer();
-      const setSubscriptionMock = jest.spyOn(fakePlayer, "setSubscriptions");
-      const nodePlayer = new NodePlayer(fakePlayer, [hardcodedNode]);
-      const userNodePlayer = new UserNodePlayer(nodePlayer, defaultUserNodeActions);
-      const messages = [];
-      userNodePlayer.setListener(async (playerState) => {
-        messages.push(playerState);
-      });
-      userNodePlayer.setSubscriptions([
-        { topic: "/webviz/test", format: "parsedMessages" },
-        { topic: "/input/baz", format: "parsedMessages" },
-      ]);
-      expect(setSubscriptionMock.mock.calls).toEqual([
-        [
-          [
-            { topic: "/input/baz", format: "parsedMessages" },
-            {
-              requester: { name: "/webviz/test", type: "node" },
-              topic: "/input/foo",
-              format: "parsedMessages",
-            },
-            {
-              requester: { name: "/webviz/test", type: "node" },
-              topic: "/input/bar",
-              format: "parsedMessages",
-            },
-          ],
-        ],
-      ]);
-    });
-
-    it("does not subscribe to Webviz node topic when subscribed to, if it doesn't exist as an active Webviz node", () => {
-      const fakePlayer = new FakePlayer();
-      const nodePlayer = new NodePlayer(fakePlayer);
-      const userNodePlayer = new UserNodePlayer(nodePlayer, defaultUserNodeActions);
-      userNodePlayer.setListener(async () => {
-        // no-op
-      });
-      userNodePlayer.setSubscriptions([
-        { topic: "/webviz/foo", format: "parsedMessages" },
-        { topic: "/input/baz", format: "parsedMessages" },
-      ]);
-      expect(fakePlayer.subscriptions).toEqual([{ topic: "/input/baz", format: "parsedMessages" }]);
     });
   });
 

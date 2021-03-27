@@ -14,7 +14,6 @@
 import { flatten, groupBy } from "lodash";
 import { useEffect, useState } from "react";
 
-import NodePlayer from "@foxglove-studio/app/players/NodePlayer";
 import StoryPlayer from "@foxglove-studio/app/players/StoryPlayer";
 import { PlayerState, SubscribePayload } from "@foxglove-studio/app/players/types";
 import PanelSetup, { Fixture } from "@foxglove-studio/app/stories/PanelSetup";
@@ -72,7 +71,7 @@ export default function PanelSetupWithBag({
 
   useEffect(() => {
     (async () => {
-      const player = new NodePlayer(new StoryPlayer([bag, bag2].filter(Boolean) as string[]));
+      const player = new StoryPlayer([bag, bag2].filter(Boolean) as string[]);
       const formattedSubscriptions: SubscribePayload[] = flatten(
         (subscriptions || []).map((topic) => [
           { topic, format: "parsedMessages" },
