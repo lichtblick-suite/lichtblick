@@ -16,7 +16,6 @@ import {
   DataProviderDescriptor,
   DataProviderMetadata,
 } from "@foxglove-studio/app/dataProviders/types";
-import { NotifyPlayerManagerData } from "@foxglove-studio/app/players/types";
 import Rpc from "@foxglove-studio/app/util/Rpc";
 import { setupWorker } from "@foxglove-studio/app/util/RpcWorkerUtils";
 
@@ -36,8 +35,6 @@ export default class RpcDataProviderRemote {
         reportMetadataCallback: (data: DataProviderMetadata) => {
           rpc.send("extensionPointCallback", { type: "reportMetadataCallback", data });
         },
-        notifyPlayerManager: (data: NotifyPlayerManagerData) =>
-          rpc.send("extensionPointCallback", { type: "notifyPlayerManager", data }),
       });
     });
     rpc.receive("getMessages", async ({ start, end, topics }: any) => {

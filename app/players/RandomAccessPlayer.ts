@@ -34,7 +34,6 @@ import {
   SubscribePayload,
   Topic,
   ParsedMessageDefinitionsByTopic,
-  NotifyPlayerManager,
   PlayerPresence,
 } from "@foxglove-studio/app/players/types";
 import delay from "@foxglove-studio/app/shared/delay";
@@ -98,7 +97,6 @@ const capabilities = [PlayerCapabilities.setSpeed];
 export type RandomAccessPlayerOptions = {
   metricsCollector?: PlayerMetricsCollectorInterface;
   seekToTime: SeekToTimeSpec;
-  notifyPlayerManager: NotifyPlayerManager;
 };
 
 // A `Player` that wraps around a tree of `DataProviders`.
@@ -140,13 +138,12 @@ export default class RandomAccessPlayer implements Player {
   _hasError = false;
   _closed = false;
   _seekToTime: SeekToTimeSpec;
-  _notifyPlayerManager: NotifyPlayerManager;
   _lastRangeMillis?: number;
   _parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic = {};
 
   constructor(
     providerDescriptor: DataProviderDescriptor,
-    { metricsCollector, seekToTime, notifyPlayerManager }: RandomAccessPlayerOptions,
+    { metricsCollector, seekToTime }: RandomAccessPlayerOptions,
   ) {
     if (process.env.NODE_ENV === "test" && providerDescriptor.name === "TestProvider") {
       this._provider = providerDescriptor.args.provider;
@@ -156,7 +153,6 @@ export default class RandomAccessPlayer implements Player {
     this._metricsCollector = metricsCollector || new NoopMetricsCollector();
     this._seekToTime = seekToTime;
     this._metricsCollector.playerConstructed();
-    this._notifyPlayerManager = notifyPlayerManager;
 
     document.addEventListener("visibilitychange", this._handleDocumentVisibilityChange, false);
   }
@@ -226,7 +222,6 @@ export default class RandomAccessPlayer implements Player {
               break;
           }
         },
-        notifyPlayerManager: this._notifyPlayerManager,
       })
       .then(({ start, end, topics, messageDefinitions, providesParsedMessages }) => {
         if (!providesParsedMessages) {

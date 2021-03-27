@@ -18,7 +18,7 @@ import BagDataProvider from "@foxglove-studio/app/dataProviders/BagDataProvider"
 import ParsedMessageCache, {
   CACHE_SIZE_BYTES,
 } from "@foxglove-studio/app/dataProviders/ParsedMessageCache";
-import { cast, NotifyPlayerManagerReplyData } from "@foxglove-studio/app/players/types";
+import { cast } from "@foxglove-studio/app/players/types";
 import { BinaryHeader } from "@foxglove-studio/app/types/BinaryMessages";
 import { getObject, wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 import { definitions } from "@foxglove-studio/app/util/binaryObjects/messageDefinitionTestTypes";
@@ -33,10 +33,6 @@ describe("parsedMessageCache", () => {
       },
       reportMetadataCallback: () => {
         // no-op
-      },
-      notifyPlayerManager: async (): Promise<NotifyPlayerManagerReplyData | undefined> => {
-        // no-op
-        return;
       },
     });
     if (messageDefinitions.type !== "raw") {

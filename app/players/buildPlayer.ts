@@ -9,7 +9,7 @@ import RandomAccessPlayer from "@foxglove-studio/app/players/RandomAccessPlayer"
 import AutomatedRunPlayer from "@foxglove-studio/app/players/automatedRun/AutomatedRunPlayer";
 import PerformanceMeasuringClient from "@foxglove-studio/app/players/automatedRun/performanceMeasuringClient";
 import videoRecordingClient from "@foxglove-studio/app/players/automatedRun/videoRecordingClient";
-import { NotifyPlayerManagerReplyData, Player } from "@foxglove-studio/app/players/types";
+import { Player } from "@foxglove-studio/app/players/types";
 import {
   inVideoRecordingMode,
   inPlaybackPerformanceMeasuringMode,
@@ -54,9 +54,5 @@ export function buildPlayerFromDescriptor(
   return new RandomAccessPlayer(rootDescriptor, {
     metricsCollector: undefined,
     seekToTime: getSeekToTime(),
-    notifyPlayerManager: async (): Promise<NotifyPlayerManagerReplyData | undefined> => {
-      // no-op
-      return;
-    },
   });
 }

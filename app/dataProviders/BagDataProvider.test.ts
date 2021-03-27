@@ -18,7 +18,6 @@ import BagDataProvider, {
   statsAreAdjacent,
   TimedDataThroughput,
 } from "@foxglove-studio/app/dataProviders/BagDataProvider";
-import { NotifyPlayerManagerReplyData } from "@foxglove-studio/app/players/types";
 import delay from "@foxglove-studio/app/shared/delay";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
@@ -28,10 +27,6 @@ const dummyExtensionPoint = {
   },
   reportMetadataCallback() {
     // no-op
-  },
-  notifyPlayerManager: async (): Promise<NotifyPlayerManagerReplyData | undefined> => {
-    // no-op
-    return;
   },
 };
 

@@ -22,7 +22,6 @@ import {
   PlayerState,
   SubscribePayload,
   Player,
-  NotifyPlayerManagerReplyData,
   PlayerPresence,
 } from "@foxglove-studio/app/players/types";
 
@@ -86,10 +85,6 @@ export default class StoryPlayer implements Player {
           },
           reportMetadataCallback: () => {
             // no-op
-          },
-          notifyPlayerManager: async (): Promise<NotifyPlayerManagerReplyData | undefined> => {
-            // no-op
-            return;
           },
         })
         .then(async ({ topics, start, end, messageDefinitions }) => {

@@ -21,7 +21,6 @@ import {
   MessageDefinitionsByTopic,
   ParsedMessageDefinitionsByTopic,
   TypedMessage,
-  NotifyPlayerManager,
 } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 
@@ -143,7 +142,6 @@ export type ExtensionPoint = {
   // TODO(JP): this is a bit of an odd one out. Maybe we should unify this with the
   // `progressCallback` and have one type of "status" object?
   reportMetadataCallback: (arg0: DataProviderMetadata) => void;
-  notifyPlayerManager: NotifyPlayerManager;
 };
 
 export type InitializationPerformanceMetadata = Readonly<{

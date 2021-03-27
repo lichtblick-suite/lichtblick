@@ -18,7 +18,6 @@ import { GetMessagesResult, GetMessagesTopics } from "@foxglove-studio/app/dataP
 import {
   BobjectMessage,
   Message,
-  NotifyPlayerManagerReplyData,
   PlayerCapabilities,
   PlayerMetricsCollectorInterface,
   PlayerPresence,
@@ -40,10 +39,6 @@ import TestProvider from "./TestProvider";
 const playerOptions: RandomAccessPlayerOptions = {
   metricsCollector: undefined,
   seekToTime: { type: "absolute", time: { sec: 10, nsec: 0 } },
-  notifyPlayerManager: async (): Promise<NotifyPlayerManagerReplyData | undefined> => {
-    // no-op
-    return;
-  },
 };
 
 type PlayerStateWithoutPlayerId = Omit<PlayerState, "playerId">;

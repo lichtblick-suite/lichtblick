@@ -24,14 +24,6 @@ import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { Range } from "@foxglove-studio/app/util/ranges";
 import { TimestampMethod } from "@foxglove-studio/app/util/time";
 
-export type RequireAuthAsk = { type: "requireAuthAsk" };
-export type RequireAuthReply = { type: "requireAuthReply"; data: string };
-export type NotifyPlayerManagerData = RequireAuthAsk;
-export type NotifyPlayerManagerReplyData = RequireAuthReply;
-export type NotifyPlayerManager = (
-  arg0: NotifyPlayerManagerData,
-) => Promise<NotifyPlayerManagerReplyData | undefined>;
-
 export type MessageDefinitionsByTopic = {
   [topic: string]: string;
 };

@@ -25,7 +25,6 @@ import {
   AdvertisePayload,
   BobjectMessage,
   Message,
-  NotifyPlayerManagerReplyData,
   Player,
   PlayerPresence,
   PlayerState,
@@ -283,10 +282,6 @@ export default class AutomatedRunPlayer implements Player {
           default:
             break;
         }
-      },
-      notifyPlayerManager: async (): Promise<NotifyPlayerManagerReplyData | undefined> => {
-        // no-op
-        return;
       },
     });
 
