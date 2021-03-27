@@ -36,7 +36,14 @@ import {
   UserNodeDiagnostics,
   UserNodeLogs,
 } from "@foxglove-studio/app/players/UserNodePlayer/types";
-import { Frame, Topic, PlayerStateActiveData, Progress } from "@foxglove-studio/app/players/types";
+import {
+  Frame,
+  Topic,
+  PlayerStateActiveData,
+  Progress,
+  PublishPayload,
+  AdvertisePayload,
+} from "@foxglove-studio/app/players/types";
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
@@ -62,6 +69,8 @@ export type Fixture = {
   userNodeLogs?: UserNodeLogs;
   userNodeRosLib?: string;
   savedProps?: SavedProps;
+  publish?: (request: PublishPayload) => void;
+  setPublishers?: (arg0: string, arg1: AdvertisePayload[]) => void;
 };
 
 type Props = {
@@ -191,8 +200,16 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
   }
 
   renderInner() {
-    const { frame = {}, topics = [], datatypes, capabilities, activeData, progress } =
-      this.props.fixture ?? {};
+    const {
+      frame = {},
+      topics = [],
+      datatypes,
+      capabilities,
+      activeData,
+      progress,
+      publish,
+      setPublishers,
+    } = this.props.fixture ?? {};
     let dTypes = datatypes;
     if (!dTypes) {
       const dummyDatatypes: RosDatatypes = {};
@@ -226,6 +243,8 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
           activeData={activeData}
           progress={progress}
           store={this.state.store}
+          publish={publish}
+          setPublishers={setPublishers}
         >
           {this.props.children}
         </MockMessagePipelineProvider>

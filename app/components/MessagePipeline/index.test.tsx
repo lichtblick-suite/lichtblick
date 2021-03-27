@@ -11,117 +11,133 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mount } from "enzyme";
+import { renderHook, RenderResult } from "@testing-library/react-hooks/dom";
 import { last } from "lodash";
+import { PropsWithChildren, useCallback } from "react";
 import { act } from "react-dom/test-utils";
 
+import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { PlayerPresence, PlayerStateActiveData } from "@foxglove-studio/app/players/types";
 import delay from "@foxglove-studio/app/shared/delay";
-import signal from "@foxglove-studio/app/shared/signal";
 import tick from "@foxglove-studio/app/shared/tick";
 import { initializeLogEvent, resetLogEventForTests } from "@foxglove-studio/app/util/logEvent";
 
 import {
   MessagePipelineProvider,
-  MessagePipelineConsumer,
   WARN_ON_SUBSCRIPTIONS_WITHIN_TIME_MS,
+  useMessagePipeline,
+  MaybePlayer,
+  MessagePipelineContext,
 } from ".";
 import FakePlayer from "./FakePlayer";
 import { MAX_PROMISE_TIMEOUT_TIME_MS } from "./pauseFrameForPromise";
 
 jest.setTimeout(MAX_PROMISE_TIMEOUT_TIME_MS * 3);
 
-describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
+type WrapperProps = {
+  maybePlayer: MaybePlayer;
+  globalVariables?: GlobalVariables;
+};
+function Hook(_props: WrapperProps) {
+  return useMessagePipeline(useCallback((value) => value, []));
+}
+function Wrapper({ children, maybePlayer, globalVariables }: PropsWithChildren<WrapperProps>) {
+  return (
+    <MessagePipelineProvider maybePlayer={maybePlayer} globalVariables={globalVariables}>
+      {children}
+    </MessagePipelineProvider>
+  );
+}
+
+describe("MessagePipelineProvider/useMessagePipeline", () => {
   it("returns empty data when no player is given", () => {
-    const callback = jest.fn().mockReturnValue(ReactNull);
-    mount(
-      <MessagePipelineProvider>
-        <MessagePipelineConsumer>{callback}</MessagePipelineConsumer>
-      </MessagePipelineProvider>,
-    );
-    expect(callback.mock.calls).toEqual([
-      [
-        {
-          playerState: {
-            activeData: undefined,
-            capabilities: [],
-            presence: PlayerPresence.NOT_PRESENT,
-            playerId: "",
-            progress: {},
-          },
-          subscriptions: [],
-          publishers: [],
-          frame: {},
-          sortedTopics: [],
-          datatypes: {},
-          setSubscriptions: expect.any(Function),
-          setPublishers: expect.any(Function),
-          publish: expect.any(Function),
-          startPlayback: expect.any(Function),
-          pausePlayback: expect.any(Function),
-          setPlaybackSpeed: expect.any(Function),
-          seekPlayback: expect.any(Function),
-          pauseFrame: expect.any(Function),
-          requestBackfill: expect.any(Function),
+    const { result } = renderHook(Hook, { wrapper: Wrapper });
+    expect(result.all).toEqual([
+      {
+        playerState: {
+          activeData: undefined,
+          capabilities: [],
+          presence: PlayerPresence.NOT_PRESENT,
+          playerId: "",
+          progress: {},
         },
-      ],
+        subscriptions: [],
+        publishers: [],
+        frame: {},
+        sortedTopics: [],
+        datatypes: {},
+        setSubscriptions: expect.any(Function),
+        setPublishers: expect.any(Function),
+        publish: expect.any(Function),
+        startPlayback: expect.any(Function),
+        pausePlayback: expect.any(Function),
+        setPlaybackSpeed: expect.any(Function),
+        seekPlayback: expect.any(Function),
+        pauseFrame: expect.any(Function),
+        requestBackfill: expect.any(Function),
+      },
     ]);
   });
 
   it("updates when the player emits a new state", async () => {
     const player = new FakePlayer();
-    const callback = jest.fn().mockReturnValue(ReactNull);
-    mount(
-      <MessagePipelineProvider maybePlayer={{ player }}>
-        <MessagePipelineConsumer>{callback}</MessagePipelineConsumer>
-      </MessagePipelineProvider>,
-    );
+    const { result } = renderHook(Hook, {
+      wrapper: Wrapper,
+      initialProps: { maybePlayer: { player } },
+    });
+
     act(() => {
       player.emit();
     });
-    expect(callback.mock.calls).toEqual([
-      [
-        expect.objectContaining({
-          playerState: {
-            activeData: undefined,
-            capabilities: [],
-            presence: PlayerPresence.INITIALIZING,
-            playerId: "",
-            progress: {},
-          },
-        }),
-      ],
-      [
-        expect.objectContaining({
-          playerState: {
-            activeData: undefined,
-            capabilities: [],
-            presence: PlayerPresence.PRESENT,
-            playerId: "test",
-            progress: {},
-          },
-        }),
-      ],
+    expect(result.all).toEqual([
+      expect.objectContaining({
+        playerState: {
+          activeData: undefined,
+          capabilities: [],
+          presence: PlayerPresence.INITIALIZING,
+          playerId: "",
+          progress: {},
+        },
+      }),
+      expect.objectContaining({
+        playerState: {
+          activeData: undefined,
+          capabilities: [],
+          presence: PlayerPresence.PRESENT,
+          playerId: "test",
+          progress: {},
+        },
+      }),
     ]);
   });
 
   it("merges player presence info with construction status from maybePlayer", async () => {
     const player = new FakePlayer();
-    const callback = jest.fn().mockReturnValue(ReactNull);
-    const pipeline = mount(
-      <MessagePipelineProvider maybePlayer={{}}>
-        <MessagePipelineConsumer>{callback}</MessagePipelineConsumer>
-      </MessagePipelineProvider>,
-    );
+    const { result, rerender } = renderHook(Hook, {
+      wrapper: Wrapper,
+      initialProps: { maybePlayer: {} },
+    });
 
-    pipeline.setProps({ maybePlayer: { loading: true } });
-    pipeline.setProps({ maybePlayer: { error: "failed to load player" } });
-    pipeline.setProps({ maybePlayer: { player } });
+    rerender({ maybePlayer: { loading: true } });
+    rerender({ maybePlayer: { error: "failed to load player" } });
+    rerender({ maybePlayer: { player } });
     await act(() => player.emit());
     await act(() => player.emit({ presence: PlayerPresence.RECONNECTING }));
-    expect(callback.mock.calls.map(([{ playerState }]) => playerState.presence)).toEqual([
+    expect(
+      result.all.map((ctx) => {
+        if (ctx instanceof Error) {
+          throw ctx;
+        }
+        return ctx.playerState.presence;
+      }),
+    ).toEqual([
+      // Some unsightly duplication here - either an artifact of renderHook or a potential
+      // improvement by modifying useContextSelector.
+      PlayerPresence.NOT_PRESENT,
       PlayerPresence.NOT_PRESENT,
       PlayerPresence.CONSTRUCTING,
+      PlayerPresence.CONSTRUCTING,
+      PlayerPresence.ERROR,
       PlayerPresence.ERROR,
       PlayerPresence.INITIALIZING,
       PlayerPresence.PRESENT,
@@ -131,12 +147,10 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
 
   it("throws an error when the player emits before the previous emit has been resolved", () => {
     const player = new FakePlayer();
-    const callback = jest.fn().mockReturnValue(ReactNull);
-    mount(
-      <MessagePipelineProvider maybePlayer={{ player }}>
-        <MessagePipelineConsumer>{callback}</MessagePipelineConsumer>
-      </MessagePipelineProvider>,
-    );
+    renderHook(Hook, {
+      wrapper: Wrapper,
+      initialProps: { maybePlayer: { player } },
+    });
     act(() => {
       player.emit();
     });
@@ -146,33 +160,20 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
   });
 
   it("waits for the previous frame to finish before calling setGlobalVariables again", async () => {
-    let pauseFrame: any;
     const player = new FakePlayer();
     jest.spyOn(player, "setGlobalVariables");
-
-    const promise = signal();
-    const pipeline = mount(
-      <MessagePipelineProvider maybePlayer={{ player }} globalVariables={{}}>
-        <MessagePipelineConsumer>
-          {(context) => {
-            pauseFrame = context.pauseFrame;
-            promise.resolve();
-            return ReactNull;
-          }}
-        </MessagePipelineConsumer>
-      </MessagePipelineProvider>,
-    );
-    await Promise.all([promise, tick()]);
-    if (!pauseFrame) {
-      return;
-    }
+    const { result, rerender } = renderHook(Hook, {
+      wrapper: Wrapper,
+      initialProps: { maybePlayer: { player }, globalVariables: {} },
+    });
+    await tick();
 
     expect(player.setGlobalVariables).toHaveBeenCalledWith({});
     expect(player.setGlobalVariables).toHaveBeenCalledTimes(1);
-    const onFrameRendered = pauseFrame("Wait");
+    const onFrameRendered = result.current.pauseFrame("Wait");
 
     // Pass in new globalVariables and make sure they aren't used until the frame is done
-    pipeline.setProps({ maybePlayer: { player }, globalVariables: { futureTime: 1 } });
+    rerender({ maybePlayer: { player }, globalVariables: { futureTime: 1 } });
     await tick();
     expect(player.setGlobalVariables).toHaveBeenCalledTimes(1);
 
@@ -182,166 +183,96 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     expect(player.setGlobalVariables).toHaveBeenCalledWith({ futureTime: 1 });
   });
 
-  it("sets subscriptions", (done) => {
+  it("sets subscriptions", () => {
     const player = new FakePlayer();
-    let callCount = 0;
-    let lastSubscriptions = [];
-    mount(
-      <MessagePipelineProvider maybePlayer={{ player }}>
-        <MessagePipelineConsumer>
-          {(context) => {
-            callCount++;
-            lastSubscriptions = context.subscriptions;
-            if (callCount === 1) {
-              // update the subscriptions immediately after render, not during
-              // calling this on the same tick as render causes an error because we're setting state during render loop
-              setImmediate(() => {
-                act(() =>
-                  context.setSubscriptions("test", [
-                    { topic: "/webviz/test", format: "parsedMessages" },
-                  ]),
-                );
-                act(() =>
-                  context.setSubscriptions("bar", [
-                    { topic: "/webviz/test2", format: "parsedMessages" },
-                  ]),
-                );
-              });
-            }
-            if (callCount === 2) {
-              expect(context.subscriptions).toEqual([
-                { topic: "/webviz/test", format: "parsedMessages" },
-              ]);
-            }
-            if (callCount === 3) {
-              expect(context.subscriptions).toEqual([
-                { topic: "/webviz/test", format: "parsedMessages" },
-                { topic: "/webviz/test2", format: "parsedMessages" },
-              ]);
-              // cause the player to emit a frame outside the render loop to trigger another render
-              setImmediate(() => {
-                act(() => {
-                  player.emit();
-                });
-              });
-            }
-            if (callCount === 4) {
-              // make sure subscriptions are reference equal when they don't change
-              expect(context.subscriptions).toBe(lastSubscriptions);
-              done();
-            }
-            return ReactNull;
-          }}
-        </MessagePipelineConsumer>
-      </MessagePipelineProvider>,
-    );
+    const { result } = renderHook(Hook, {
+      wrapper: Wrapper,
+      initialProps: { maybePlayer: { player } },
+    });
+
+    act(() => {
+      result.current.setSubscriptions("test", [
+        { topic: "/webviz/test", format: "parsedMessages" },
+      ]);
+    });
+    expect(result.current.subscriptions).toEqual([
+      { topic: "/webviz/test", format: "parsedMessages" },
+    ]);
+
+    act(() => {
+      result.current.setSubscriptions("bar", [
+        { topic: "/webviz/test2", format: "parsedMessages" },
+      ]);
+    });
+    expect(result.current.subscriptions).toEqual([
+      { topic: "/webviz/test", format: "parsedMessages" },
+      { topic: "/webviz/test2", format: "parsedMessages" },
+    ]);
+    const lastSubscriptions = result.current.subscriptions;
+    // cause the player to emit a frame outside the render loop to trigger another render
+    act(() => {
+      player.emit();
+    });
+    // make sure subscriptions are reference equal when they don't change
+    expect(result.current.subscriptions).toBe(lastSubscriptions);
   });
 
-  it("sets publishers", (done) => {
+  it("sets publishers", () => {
     const player = new FakePlayer();
-    let callCount = 0;
-    let lastPublishers = [];
-    mount(
-      <MessagePipelineProvider maybePlayer={{ player }}>
-        <MessagePipelineConsumer>
-          {(context) => {
-            callCount++;
-            lastPublishers = context.publishers;
-            if (callCount === 1) {
-              // update the publishers immediately after render, not during
-              // calling this on the same tick as render causes an error because we're setting state during render loop
-              setImmediate(() => {
-                act(() =>
-                  context.setPublishers("test", [{ topic: "/webviz/test", datatype: "test" }]),
-                );
-                act(() =>
-                  context.setPublishers("bar", [{ topic: "/webviz/test2", datatype: "test2" }]),
-                );
-              });
-            }
-            if (callCount === 2) {
-              expect(context.publishers).toEqual([{ topic: "/webviz/test", datatype: "test" }]);
-            }
-            if (callCount === 3) {
-              expect(context.publishers).toEqual([
-                { topic: "/webviz/test", datatype: "test" },
-                { topic: "/webviz/test2", datatype: "test2" },
-              ]);
-              // cause the player to emit a frame outside the render loop to trigger another render
-              setImmediate(() => {
-                act(() => {
-                  player.emit();
-                });
-              });
-            }
-            if (callCount === 4) {
-              // make sure publishers are reference equal when they don't change
-              expect(context.publishers).toBe(lastPublishers);
-              done();
-            }
-            return ReactNull;
-          }}
-        </MessagePipelineConsumer>
-      </MessagePipelineProvider>,
-    );
+    const { result } = renderHook(Hook, {
+      wrapper: Wrapper,
+      initialProps: { maybePlayer: { player } },
+    });
+
+    act(() => result.current.setPublishers("test", [{ topic: "/webviz/test", datatype: "test" }]));
+    expect(result.current.publishers).toEqual([{ topic: "/webviz/test", datatype: "test" }]);
+
+    act(() => result.current.setPublishers("bar", [{ topic: "/webviz/test2", datatype: "test2" }]));
+    expect(result.current.publishers).toEqual([
+      { topic: "/webviz/test", datatype: "test" },
+      { topic: "/webviz/test2", datatype: "test2" },
+    ]);
+
+    const lastPublishers = result.current.publishers;
+    // cause the player to emit a frame outside the render loop to trigger another render
+    act(() => {
+      player.emit();
+    });
+    // make sure publishers are reference equal when they don't change
+    expect(result.current.publishers).toBe(lastPublishers);
   });
 
-  it("renders with the same callback functions every time", (done) => {
+  it("renders with the same callback functions every time", async () => {
     const player = new FakePlayer();
-    let callCount = 0;
-    let lastContext;
-    let lastPromise = Promise.resolve();
-    mount(
-      <MessagePipelineProvider maybePlayer={{ player }}>
-        <MessagePipelineConsumer>
-          {(context: any) => {
-            callCount++;
-            if (callCount > 3) {
-              done();
-              return ReactNull;
-            }
-            // cause the player to emit a frame outside the render loop to trigger another render
-            setImmediate(() => {
-              lastPromise.then(() => {
-                act(() => {
-                  lastPromise = player.emit();
-                });
-              });
-            });
-            // we don't have a last context yet
-            if (callCount === 1) {
-              return ReactNull;
-            }
-            lastContext = context;
-            for (const key in context) {
-              const value = context[key];
-              if (typeof value === "function") {
-                expect(lastContext[key]).toBe(context[key]);
-              }
-            }
-            return ReactNull;
-          }}
-        </MessagePipelineConsumer>
-      </MessagePipelineProvider>,
-    );
+    const { result } = renderHook(Hook, {
+      wrapper: Wrapper,
+      initialProps: { maybePlayer: { player } },
+    });
+
+    const lastContext = result.current;
+    await act(() => player.emit());
+    for (const [key, value] of Object.entries(result.current)) {
+      if (typeof value === "function") {
+        expect((lastContext as any)[key]).toBe(value);
+      }
+    }
   });
 
   it("resolves listener promise after each render", async () => {
     const player = new FakePlayer();
-    const callback = jest.fn().mockReturnValue(ReactNull);
-    mount(
-      <MessagePipelineProvider maybePlayer={{ player }}>
-        <MessagePipelineConsumer>{callback}</MessagePipelineConsumer>
-      </MessagePipelineProvider>,
-    );
+    const { result } = renderHook(Hook, {
+      wrapper: Wrapper,
+      initialProps: { maybePlayer: { player } },
+    });
+
     // once for the initialization message
-    expect(callback).toHaveBeenCalledTimes(1);
+    expect(result.all.length).toBe(1);
     // Now wait for the player state emit cycle to complete.
     // This promise should resolve when the render loop finishes.
     await act(() => player.emit());
-    expect(callback).toHaveBeenCalledTimes(2);
+    expect(result.all.length).toBe(2);
     await act(() => player.emit());
-    expect(callback).toHaveBeenCalledTimes(3);
+    expect(result.all.length).toBe(3);
   });
 
   it("proxies player methods to player", () => {
@@ -350,155 +281,121 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     jest.spyOn(player, "pausePlayback");
     jest.spyOn(player, "setPlaybackSpeed");
     jest.spyOn(player, "seekPlayback");
-    let callCount = 0;
-    mount(
-      <MessagePipelineProvider maybePlayer={{ player }}>
-        <MessagePipelineConsumer>
-          {(context) => {
-            callCount++;
-            if (callCount === 1) {
-              expect(player.startPlayback).toHaveBeenCalledTimes(0);
-              expect(player.pausePlayback).toHaveBeenCalledTimes(0);
-              expect(player.setPlaybackSpeed).toHaveBeenCalledTimes(0);
-              expect(player.seekPlayback).toHaveBeenCalledTimes(0);
-              context.startPlayback();
-              context.pausePlayback();
-              context.setPlaybackSpeed(0.5);
-              context.seekPlayback({ sec: 1, nsec: 0 });
-              expect(player.startPlayback).toHaveBeenCalledTimes(1);
-              expect(player.pausePlayback).toHaveBeenCalledTimes(1);
-              expect(player.setPlaybackSpeed).toHaveBeenCalledWith(0.5);
-              expect(player.seekPlayback).toHaveBeenCalledWith({ sec: 1, nsec: 0 });
-            }
-            return ReactNull;
-          }}
-        </MessagePipelineConsumer>
-      </MessagePipelineProvider>,
-    );
+    const { result } = renderHook(Hook, {
+      wrapper: Wrapper,
+      initialProps: { maybePlayer: { player } },
+    });
+
+    expect(player.startPlayback).toHaveBeenCalledTimes(0);
+    expect(player.pausePlayback).toHaveBeenCalledTimes(0);
+    expect(player.setPlaybackSpeed).toHaveBeenCalledTimes(0);
+    expect(player.seekPlayback).toHaveBeenCalledTimes(0);
+    result.current.startPlayback();
+    result.current.pausePlayback();
+    result.current.setPlaybackSpeed(0.5);
+    result.current.seekPlayback({ sec: 1, nsec: 0 });
+    expect(player.startPlayback).toHaveBeenCalledTimes(1);
+    expect(player.pausePlayback).toHaveBeenCalledTimes(1);
+    expect(player.setPlaybackSpeed).toHaveBeenCalledWith(0.5);
+    expect(player.seekPlayback).toHaveBeenCalledWith({ sec: 1, nsec: 0 });
   });
 
   it("closes player on unmount", () => {
     const player = new FakePlayer();
     jest.spyOn(player, "close");
-    const el = mount(
-      <MessagePipelineProvider maybePlayer={{ player }}>
-        <MessagePipelineConsumer>{() => ReactNull}</MessagePipelineConsumer>
-      </MessagePipelineProvider>,
-    );
-
-    act(() => {
-      el.unmount();
+    const { unmount } = renderHook(Hook, {
+      wrapper: Wrapper,
+      initialProps: { maybePlayer: { player } },
     });
+
+    unmount();
     expect(player.close).toHaveBeenCalledTimes(1);
   });
 
   describe("when changing the player", () => {
     let player: any;
     let player2: any;
-    let fn: any;
+    let result: RenderResult<MessagePipelineContext>;
     beforeEach(async () => {
       player = new FakePlayer();
       player.playerId = "fake player 1";
       jest.spyOn(player, "close");
-      fn = jest.fn().mockReturnValue(ReactNull);
-      const el = mount(
-        <MessagePipelineProvider maybePlayer={{ player }}>
-          <MessagePipelineConsumer>{fn}</MessagePipelineConsumer>
-        </MessagePipelineProvider>,
-      );
+      let rerender;
+      ({ result, rerender } = renderHook(Hook, {
+        wrapper: Wrapper,
+        initialProps: { maybePlayer: { player } },
+      }));
+
       await act(() => player.emit());
-      expect(fn).toHaveBeenCalledTimes(2);
+      expect(result.all.length).toBe(2);
 
       player2 = new FakePlayer();
       player2.playerId = "fake player 2";
-      act(() => el.setProps({ maybePlayer: { player: player2 } }) && undefined);
+      rerender({ maybePlayer: { player: player2 } });
       expect(player.close).toHaveBeenCalledTimes(1);
-      expect(fn).toHaveBeenCalledTimes(4);
+      expect(result.all.length).toBe(5);
     });
 
     it("closes old player when new player is supplied and stops old player message flow", async () => {
       await act(() => player2.emit());
-      expect(fn).toHaveBeenCalledTimes(5);
+      expect(result.all.length).toBe(6);
       await act(() => player.emit());
-      expect(fn).toHaveBeenCalledTimes(5);
-      expect(fn.mock.calls.map((args: any) => args[0].playerState.playerId)).toEqual([
-        "",
-        "fake player 1",
-        "fake player 1",
-        "",
-        "fake player 2",
-      ]);
+      expect(result.all.length).toBe(6);
+      expect(
+        result.all.map((ctx) => {
+          if (ctx instanceof Error) {
+            throw ctx;
+          }
+          return ctx.playerState.playerId;
+        }),
+      ).toEqual(["", "fake player 1", "fake player 1", "fake player 1", "", "fake player 2"]);
     });
 
     it("does not think the old player is the new player if it emits first", async () => {
       await act(() => player.emit());
-      expect(fn).toHaveBeenCalledTimes(4);
+      expect(result.all.length).toBe(5);
       await act(() => player2.emit());
-      expect(fn).toHaveBeenCalledTimes(5);
-      expect(fn.mock.calls.map((args: any) => args[0].playerState.playerId)).toEqual([
-        "",
-        "fake player 1",
-        "fake player 1",
-        "",
-        "fake player 2",
-      ]);
+      expect(result.all.length).toBe(6);
+      expect(
+        result.all.map((ctx) => {
+          if (ctx instanceof Error) {
+            throw ctx;
+          }
+          return ctx.playerState.playerId;
+        }),
+      ).toEqual(["", "fake player 1", "fake player 1", "fake player 1", "", "fake player 2"]);
     });
   });
 
   it("does not throw when interacting w/ context and player is missing", () => {
-    mount(
-      <MessagePipelineProvider>
-        <MessagePipelineConsumer>
-          {(context) => {
-            context.startPlayback();
-            context.pausePlayback();
-            context.setPlaybackSpeed(1);
-            context.seekPlayback({ sec: 1, nsec: 0 });
-            context.publish({ topic: "/foo", msg: {} });
-            return ReactNull;
-          }}
-        </MessagePipelineConsumer>
-      </MessagePipelineProvider>,
-    );
+    const { result } = renderHook(Hook, { wrapper: Wrapper });
+    result.current.startPlayback();
+    result.current.pausePlayback();
+    result.current.setPlaybackSpeed(1);
+    result.current.seekPlayback({ sec: 1, nsec: 0 });
+    result.current.publish({ topic: "/foo", msg: {} });
   });
 
   it("transfers subscriptions and publishers between players", async () => {
     const player = new FakePlayer();
-    let callCount = 0;
-    const wait = signal();
-    const el = mount(
-      <MessagePipelineProvider maybePlayer={{ player }}>
-        <MessagePipelineConsumer>
-          {(context) => {
-            callCount++;
-            if (callCount === 1) {
-              // update the subscriptions immediately after render, not during
-              // calling this on the same tick as render causes an error because we're setting state during render loop
-              setImmediate(() => {
-                act(() =>
-                  context.setSubscriptions("test", [
-                    { topic: "/webviz/test", format: "parsedMessages" },
-                  ]),
-                );
-                act(() =>
-                  context.setSubscriptions("bar", [
-                    { topic: "/webviz/test2", format: "parsedMessages" },
-                  ]),
-                );
-                act(() =>
-                  context.setPublishers("test", [{ topic: "/webviz/test", datatype: "test" }]),
-                );
-                wait.resolve();
-              });
-            }
-            return ReactNull;
-          }}
-        </MessagePipelineConsumer>
-      </MessagePipelineProvider>,
+    const { result, rerender } = renderHook(Hook, {
+      wrapper: Wrapper,
+      initialProps: { maybePlayer: { player } },
+    });
+    act(() =>
+      result.current.setSubscriptions("test", [
+        { topic: "/webviz/test", format: "parsedMessages" },
+      ]),
     );
-    await wait;
+    act(() =>
+      result.current.setSubscriptions("bar", [
+        { topic: "/webviz/test2", format: "parsedMessages" },
+      ]),
+    );
+    act(() => result.current.setPublishers("test", [{ topic: "/webviz/test", datatype: "test" }]));
+
     const player2 = new FakePlayer();
-    act(() => el.setProps({ maybePlayer: { player: player2 } }) && undefined);
+    rerender({ maybePlayer: { player: player2 } });
     expect(player2.subscriptions).toEqual([
       { topic: "/webviz/test", format: "parsedMessages" },
       { topic: "/webviz/test2", format: "parsedMessages" },
@@ -508,12 +405,10 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
 
   it("keeps activeData when closing a player", async () => {
     const player = new FakePlayer();
-    const fn = jest.fn().mockReturnValue(ReactNull);
-    const el = mount(
-      <MessagePipelineProvider maybePlayer={{ player }}>
-        <MessagePipelineConsumer>{fn}</MessagePipelineConsumer>
-      </MessagePipelineProvider>,
-    );
+    const { result, rerender } = renderHook(Hook, {
+      wrapper: Wrapper,
+      initialProps: { maybePlayer: { player } },
+    });
     const activeData: PlayerStateActiveData = {
       messages: [],
       bobjects: [],
@@ -531,11 +426,11 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
       totalBytesReceived: 1234,
     };
     await act(() => player.emit({ activeData }));
-    expect(fn).toHaveBeenCalledTimes(2);
+    expect(result.all.length).toBe(2);
 
-    el.setProps({ maybePlayer: { player: undefined } });
-    expect(fn).toHaveBeenCalledTimes(4);
-    expect(last(fn.mock.calls)[0].playerState).toEqual({
+    rerender({ maybePlayer: { player: undefined } });
+    expect(result.all.length).toBe(5);
+    expect((last(result.all) as MessagePipelineContext).playerState).toEqual({
       activeData,
       capabilities: [],
       presence: PlayerPresence.NOT_PRESENT,
@@ -547,17 +442,18 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
   it("logs a warning if a panel subscribes just after activeData becomes available", async () => {
     jest.spyOn(console, "warn").mockReturnValue();
     const player = new FakePlayer();
-    const fn = jest.fn().mockReturnValue(ReactNull);
-    mount(
-      <MessagePipelineProvider maybePlayer={{ player }}>
-        <MessagePipelineConsumer>{fn}</MessagePipelineConsumer>
-      </MessagePipelineProvider>,
-    );
-    expect(fn).toHaveBeenCalledTimes(1);
+    const { result } = renderHook(Hook, {
+      wrapper: Wrapper,
+      initialProps: { maybePlayer: { player } },
+    });
+
+    expect(result.all.length).toBe(1);
     act(() =>
-      fn.mock.calls[0][0].setSubscriptions("id", [{ topic: "/test", format: "parsedMessages" }]),
+      (result.all[0] as MessagePipelineContext).setSubscriptions("id", [
+        { topic: "/test", format: "parsedMessages" },
+      ]),
     );
-    expect(fn).toHaveBeenCalledTimes(2);
+    expect(result.all.length).toBe(2);
     expect(console.warn).toHaveBeenCalledTimes(0);
 
     // Emit activeData.
@@ -578,14 +474,20 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
       totalBytesReceived: 1234,
     };
     await act(() => player.emit({ activeData }));
-    expect(fn).toHaveBeenCalledTimes(3);
+    expect(result.all.length).toBe(3);
 
     // Calling setSubscriptions right after activeData is ok if the set of topics doesn't change
-    act(() => fn.mock.calls[0][0].setSubscriptions("id", [{ topic: "/test", format: "bobjects" }]));
+    act(() =>
+      (result.all[0] as MessagePipelineContext).setSubscriptions("id", [
+        { topic: "/test", format: "bobjects" },
+      ]),
+    );
     expect((console.warn as any).mock.calls).toEqual([]);
     // But changing the set of topics results in a warning
     act(() =>
-      fn.mock.calls[0][0].setSubscriptions("id", [{ topic: "/test2", format: "parsedMessages" }]),
+      (result.all[0] as MessagePipelineContext).setSubscriptions("id", [
+        { topic: "/test2", format: "parsedMessages" },
+      ]),
     );
     expect((console.warn as any).mock.calls).toEqual([
       [
@@ -596,15 +498,14 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     // If we wait a little bit, we shouldn't get any additional warnings.
     await delay(WARN_ON_SUBSCRIPTIONS_WITHIN_TIME_MS + 200);
     act(() =>
-      fn.mock.calls[0][0].setSubscriptions("id", [{ topic: "/test", format: "parsedMessages" }]),
+      (result.all[0] as MessagePipelineContext).setSubscriptions("id", [
+        { topic: "/test", format: "parsedMessages" },
+      ]),
     );
     expect((console.warn as any).mock.calls.length).toEqual(1);
   });
 
   describe("pauseFrame", () => {
-    let pauseFrame: any;
-    let player: any;
-    let el: any;
     let logger: any;
 
     beforeEach(async () => {
@@ -614,20 +515,6 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
         { PAUSE_FRAME_TIMEOUT: "pause_frame_timeout" },
         { PANEL_TYPES: "panel_types" },
       );
-
-      player = new FakePlayer();
-      el = mount(
-        <MessagePipelineProvider maybePlayer={{ player }}>
-          <MessagePipelineConsumer>
-            {(context) => {
-              pauseFrame = context.pauseFrame;
-              return ReactNull;
-            }}
-          </MessagePipelineConsumer>
-        </MessagePipelineProvider>,
-      );
-
-      await delay(20);
     });
 
     afterEach(() => {
@@ -636,6 +523,12 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
 
     it("frames automatically resolve without calling pauseFrame", async () => {
       let hasFinishedFrame = false;
+      const player = new FakePlayer();
+      renderHook(Hook, {
+        wrapper: Wrapper,
+        initialProps: { maybePlayer: { player } },
+      });
+
       await act(async () => {
         player.emit().then(() => {
           hasFinishedFrame = true;
@@ -647,7 +540,15 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
 
     it("when pausing for multiple promises, waits for all of them to resolve", async () => {
       // Start by pausing twice.
-      const resumeFunctions = [pauseFrame(""), pauseFrame("")];
+      const player = new FakePlayer();
+      const { result } = renderHook(Hook, {
+        wrapper: Wrapper,
+        initialProps: { maybePlayer: { player } },
+      });
+      const resumeFunctions = [
+        result.current.pauseFrame(""),
+        result.current.pauseFrame(""),
+      ] as const;
 
       // Trigger the next emit.
       let hasFinishedFrame = false;
@@ -673,10 +574,15 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
 
     it("can wait for promises multiple frames in a row", async () => {
       expect.assertions(8);
+      const player = new FakePlayer();
+      const { result } = renderHook(Hook, {
+        wrapper: Wrapper,
+        initialProps: { maybePlayer: { player } },
+      });
       async function runSingleFrame(shouldPause: boolean) {
         let resumeFn;
         if (shouldPause) {
-          resumeFn = pauseFrame("");
+          resumeFn = result.current.pauseFrame("");
         }
 
         let hasFinishedFrame = false;
@@ -705,8 +611,14 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     });
 
     it("Adding a promise that is previously resolved just plays through", async () => {
+      const player = new FakePlayer();
+      const { result } = renderHook(Hook, {
+        wrapper: Wrapper,
+        initialProps: { maybePlayer: { player } },
+      });
+
       // Pause the current frame, but immediately resume it before we actually emit.
-      const resumeFn = pauseFrame("");
+      const resumeFn = result.current.pauseFrame("");
       resumeFn();
 
       // Then trigger the next emit.
@@ -724,8 +636,13 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     });
 
     it("Adding a promise that does not resolve eventually results in an error, and then continues playing", async () => {
+      const player = new FakePlayer();
+      const { result } = renderHook(Hook, {
+        wrapper: Wrapper,
+        initialProps: { maybePlayer: { player } },
+      });
       // Pause the current frame.
-      pauseFrame("");
+      result.current.pauseFrame("");
 
       // Then trigger the next emit.
       let hasFinishedFrame = false;
@@ -743,9 +660,15 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     });
 
     it("Adding multiple promises that do not resolve eventually results in an error, and then continues playing", async () => {
+      const player = new FakePlayer();
+      const { result } = renderHook(Hook, {
+        wrapper: Wrapper,
+        initialProps: { maybePlayer: { player } },
+      });
+
       // Pause the current frame twice.
-      pauseFrame("");
-      pauseFrame("");
+      result.current.pauseFrame("");
+      result.current.pauseFrame("");
 
       // Then trigger the next emit.
       let hasFinishedFrame = false;
@@ -763,8 +686,13 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
     });
 
     it("does not accidentally resolve the second player's promise when replacing the player", async () => {
+      const player = new FakePlayer();
+      const { result, rerender } = renderHook(Hook, {
+        wrapper: Wrapper,
+        initialProps: { maybePlayer: { player } },
+      });
       // Pause the current frame.
-      const firstPlayerResumeFn = pauseFrame("");
+      const firstPlayerResumeFn = result.current.pauseFrame("");
 
       // Then trigger the next emit.
       await act(async () => {
@@ -774,10 +702,10 @@ describe("MessagePipelineProvider/MessagePipelineConsumer", () => {
 
       // Replace the player.
       const newPlayer = new FakePlayer();
-      el.setProps({ maybePlayer: { player: newPlayer } });
+      rerender({ maybePlayer: { player: newPlayer } });
       await delay(20);
 
-      const secondPlayerResumeFn = pauseFrame("");
+      const secondPlayerResumeFn = result.current.pauseFrame("");
       let secondPlayerHasFinishedFrame = false;
       await act(async () => {
         newPlayer.emit().then(() => {

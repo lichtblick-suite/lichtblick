@@ -12,12 +12,13 @@
 //   You may not use this file except in compliance with the License.
 
 import { mount } from "enzyme";
+import { useCallback } from "react";
 
 import { useMessagesByTopic } from "@foxglove-studio/app/PanelAPI";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 import { downloadTextFile, objectValues } from "@foxglove-studio/app/util";
 
-import { MessagePipelineConsumer } from "../components/MessagePipeline";
+import { MessagePipelineContext, useMessagePipeline } from "../components/MessagePipeline";
 import Internals from "./Internals";
 
 const mockDownloadTextFile: any = downloadTextFile;
@@ -31,6 +32,10 @@ function Subscriber({ topic }: { topic: string }) {
 
 describe("<Internals>", () => {
   it("displays panel subscribers", () => {
+    function Consumer({ fn }: { fn: (ctx: MessagePipelineContext) => void }) {
+      fn(useMessagePipeline(useCallback((ctx) => ctx, [])));
+      return ReactNull;
+    }
     const contextFn = jest.fn().mockReturnValue(ReactNull);
     const wrapper = mount(
       <PanelSetup
@@ -40,7 +45,7 @@ describe("<Internals>", () => {
         }}
       >
         <Internals />
-        <MessagePipelineConsumer>{contextFn}</MessagePipelineConsumer>
+        <Consumer fn={contextFn} />
       </PanelSetup>,
     );
     expect(wrapper.find("[data-test='internals-subscriptions']").text()).not.toContain("/foo");
@@ -56,7 +61,7 @@ describe("<Internals>", () => {
         }}
       >
         <Internals />
-        <MessagePipelineConsumer>{anotherContextFn}</MessagePipelineConsumer>
+        <Consumer fn={anotherContextFn} />
         <Subscriber topic="/foo" />
       </PanelSetup>,
     );

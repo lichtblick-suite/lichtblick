@@ -10,6 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import { action } from "@storybook/addon-actions";
 import { storiesOf } from "@storybook/react";
 
 import Publish from "@foxglove-studio/app/panels/Publish";
@@ -24,6 +25,8 @@ const getFixture = (allowPublish: any) => {
     },
     frame: {},
     capabilities: allowPublish ? [PlayerCapabilities.advertise] : [],
+    publish: action("publish"),
+    setPublishers: action("setPublishers"),
   };
 };
 
@@ -78,6 +81,8 @@ storiesOf("<Publish>", module)
       },
       frame: {},
       capabilities: [PlayerCapabilities.advertise],
+      setPublishers: action("setPublishers"),
+      publish: action("publish"),
     };
 
     const validJSON = `{\n  "a": 1,\n  "b": 2,\n  "c": 3\n}`;
@@ -96,6 +101,8 @@ storiesOf("<Publish>", module)
       },
       frame: {},
       capabilities: [PlayerCapabilities.advertise],
+      setPublishers: action("setPublishers"),
+      publish: action("publish"),
     };
 
     const invalid = `{\n  "a": 1,\n  'b: 2,\n  "c": 3\n}`;

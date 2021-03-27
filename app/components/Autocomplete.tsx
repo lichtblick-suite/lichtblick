@@ -45,15 +45,15 @@ const rowHeight = parseInt(styles.rowHeight ?? "24");
 // event has to be ignored, and the subsequent `focus` event also has to be ignored since it's kind
 // of a "false" focus event. (In our case we just don't bother with ignoring the `focus` event since
 // it doesn't cause any problems.)
-type AutocompleteProps = {
-  items: unknown[];
-  getItemValue: (arg0: unknown) => string;
-  getItemText: (arg0: unknown) => string;
+type AutocompleteProps<T = unknown> = {
+  items: T[];
+  getItemValue: (arg0: T) => string;
+  getItemText: (arg0: T) => string;
   filterText?: string;
   value?: string;
-  selectedItem?: unknown;
+  selectedItem?: T;
   onChange?: (arg0: React.SyntheticEvent<HTMLInputElement>, arg1: string) => void;
-  onSelect: (arg0: string, arg1: unknown, arg2: Autocomplete) => void;
+  onSelect: (arg0: string, arg1: T, arg2: Autocomplete<T>) => void;
   onBlur?: () => void;
   hasError?: boolean;
   autocompleteKey?: string;
@@ -84,7 +84,10 @@ function defaultGetText(name: string) {
   };
 }
 
-export default class Autocomplete extends PureComponent<AutocompleteProps, AutocompleteState> {
+export default class Autocomplete<T = unknown> extends PureComponent<
+  AutocompleteProps<T>,
+  AutocompleteState
+> {
   _autocomplete: RefObject<ReactAutocomplete>;
   _ignoreFocus: boolean = false;
   _ignoreBlur: boolean = false;
@@ -97,7 +100,7 @@ export default class Autocomplete extends PureComponent<AutocompleteProps, Autoc
     minWidth: 100,
   };
 
-  constructor(props: AutocompleteProps) {
+  constructor(props: AutocompleteProps<T>) {
     super(props);
     this._autocomplete = React.createRef<ReactAutocomplete>();
     this.state = { focused: false, showAllItems: false };
@@ -327,9 +330,8 @@ export default class Autocomplete extends PureComponent<AutocompleteProps, Autoc
 
           // The longest string might not be the widest (e.g. "|||" vs "www"), but this is
           // quite a bit faster, so we throw in a nice padding and call it good enough! :-)
-          const width =
-            measureText(getItemText(maxBy(autocompleteItems, (item) => getItemText(item).length))) +
-            50;
+          const longestItem = maxBy(autocompleteItems, (item) => getItemText(item).length);
+          const width = 50 + (longestItem != undefined ? measureText(getItemText(longestItem)) : 0);
           const maxHeight = `calc(100vh - 10px - ${style.top}px)`;
 
           return (

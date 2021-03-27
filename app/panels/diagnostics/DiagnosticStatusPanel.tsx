@@ -126,7 +126,7 @@ class DiagnosticStatusPanel extends React.Component<Props> {
                     getItemText={(entry) => (entry as any).displayName}
                     getItemValue={(entry) => (entry as any).id}
                     onSelect={this._onSelect as any}
-                    selectedItem={selectedItem}
+                    selectedItem={selectedItem as any}
                     inputStyle={{ height: "100%" }}
                   />
                 </PanelToolbar>

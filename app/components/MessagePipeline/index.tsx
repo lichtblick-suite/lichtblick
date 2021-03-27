@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { debounce, flatten, groupBy, isEqual } from "lodash";
-import { ReactElement } from "react";
 import { Time } from "rosbag";
 
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
@@ -360,10 +359,4 @@ export function MessagePipelineProvider({
       {children}
     </ContextInternal.Provider>
   );
-}
-
-type ConsumerProps = { children: (arg0: MessagePipelineContext) => ReactElement | ReactNull };
-export function MessagePipelineConsumer({ children }: ConsumerProps): ReactElement | ReactNull {
-  const value = useMessagePipeline(useCallback((ctx) => ctx, []));
-  return children(value);
 }

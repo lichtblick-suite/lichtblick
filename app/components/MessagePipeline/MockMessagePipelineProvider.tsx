@@ -16,10 +16,12 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { Time, TimeUtil } from "rosbag";
 
 import {
+  AdvertisePayload,
   Message,
   PlayerPresence,
   PlayerStateActiveData,
   Progress,
+  PublishPayload,
   SubscribePayload,
   Topic,
 } from "@foxglove-studio/app/players/types";
@@ -44,6 +46,8 @@ export default function MockMessagePipelineProvider(props: {
   datatypes?: RosDatatypes;
   messages?: Message[];
   bobjects?: Message[];
+  publish?: (request: PublishPayload) => void;
+  setPublishers?: (arg0: string, arg1: AdvertisePayload[]) => void;
   setSubscriptions?: (arg0: string, arg1: SubscribePayload[]) => void;
   noActiveData?: boolean;
   activeData?: Partial<PlayerStateActiveData>;
@@ -147,8 +151,8 @@ export default function MockMessagePipelineProvider(props: {
           subscriptions: flattenedSubscriptions,
           publishers: [],
           setSubscriptions: props.setSubscriptions ?? setSubscriptions,
-          setPublishers: noop,
-          publish: noop,
+          setPublishers: props.setPublishers ?? noop,
+          publish: props.publish ?? noop,
           startPlayback: props.startPlayback ?? noop,
           pausePlayback: props.pausePlayback ?? noop,
           setPlaybackSpeed: noop,

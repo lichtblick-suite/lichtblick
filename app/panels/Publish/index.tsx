@@ -13,6 +13,7 @@
 
 import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import styled from "styled-components";
 
 import Autocomplete from "@foxglove-studio/app/components/Autocomplete";
@@ -21,7 +22,7 @@ import Flex from "@foxglove-studio/app/components/Flex";
 import Item from "@foxglove-studio/app/components/Menu/Item";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import Publisher from "@foxglove-studio/app/components/Publisher";
+import usePublisher from "@foxglove-studio/app/hooks/usePublisher";
 import { PlayerCapabilities, Topic } from "@foxglove-studio/app/players/types";
 import {
   PanelToolbarInput,
@@ -50,13 +51,6 @@ type Props = {
   capabilities: string[];
   topics: Topic[];
   datatypes: RosDatatypes;
-};
-
-type PanelState = {
-  cachedProps: Partial<Props>;
-  datatypeNames: string[];
-  parsedObject?: any;
-  error?: string;
 };
 
 const STextArea = styled.textarea`
@@ -91,11 +85,11 @@ function getTopicName(topic: Topic): string {
   return topic.name;
 }
 
-function parseInput(value: string): Partial<PanelState> {
+function parseInput(value: string): { error?: string; parsedObject?: unknown } {
   let parsedObject;
   let error = undefined;
   try {
-    const parsedAny = JSON.parse(value);
+    const parsedAny: unknown = JSON.parse(value);
     if (Array.isArray(parsedAny)) {
       error = "Message content must be an object, not an array";
     } else if (parsedAny === null /* eslint-disable-line no-restricted-syntax */) {
@@ -111,209 +105,195 @@ function parseInput(value: string): Partial<PanelState> {
   return { error, parsedObject };
 }
 
-class Publish extends React.PureComponent<Props, PanelState> {
-  static panelType = "Publish";
-  static defaultConfig = {
-    topicName: "",
-    datatype: "",
-    buttonText: "Publish",
-    buttonTooltip: "",
-    buttonColor: "#00A871",
-    advancedView: true,
-    value: "",
-  };
+function Publish(props: Props) {
+  const {
+    capabilities,
+    topics,
+    datatypes,
+    config: { topicName, datatype, buttonText, buttonTooltip, buttonColor, advancedView, value },
+    saveConfig,
+  } = props;
 
-  _publisher = React.createRef<Publisher>();
+  const publish = usePublisher({ name: "Publish", topic: topicName, datatype });
 
-  state = {
-    cachedProps: {},
-    datatypeNames: [],
-    error: undefined,
-    parsedObject: undefined,
-  };
+  const datatypeNames = useMemo(() => Object.keys(datatypes).sort(), [datatypes]);
+  const { error, parsedObject } = useMemo(() => parseInput(value), [value]);
 
-  static getDerivedStateFromProps(props: Props, state: PanelState) {
-    const newState: Partial<PanelState> = parseInput(props.config.value);
-    let changed = false;
-
-    if (props !== state.cachedProps) {
-      newState.cachedProps = props;
-      changed = true;
-    }
-
-    if (props.datatypes !== state.cachedProps.datatypes) {
-      newState.datatypeNames = Object.keys(props.datatypes).sort();
-      changed = true;
-    }
-
-    // when the selected datatype changes, replace the textarea contents with a sample message of the correct shape
-    // Make sure not to build a sample message on first load, though -- we don't want to overwrite
-    // the user's message just because state.cachedProps.config hasn't been initialized.
+  // when the selected datatype changes, replace the textarea contents with a sample message of the correct shape
+  // Make sure not to build a sample message on first load, though -- we don't want to overwrite
+  // the user's message just because prevDatatype hasn't been initialized.
+  const prevDatatype = useRef<string | undefined>();
+  useEffect(() => {
     if (
-      props.config.datatype &&
-      state.cachedProps?.config?.datatype != undefined &&
-      props.config.datatype !== state.cachedProps?.config?.datatype &&
-      props.datatypes[props.config.datatype] != undefined
+      datatype.length > 0 &&
+      prevDatatype.current != undefined &&
+      datatype !== prevDatatype.current &&
+      datatypes[datatype] != undefined
     ) {
-      const sampleMessage = buildSampleMessage(props.datatypes, props.config.datatype);
+      const sampleMessage = buildSampleMessage(datatypes, datatype);
       if (sampleMessage) {
         const stringifiedSampleMessage = JSON.stringify(sampleMessage, undefined, 2);
-        props.saveConfig({ value: stringifiedSampleMessage });
-        changed = true;
+        saveConfig({ value: stringifiedSampleMessage });
       }
     }
+    prevDatatype.current = datatype;
+  }, [saveConfig, datatype, datatypes]);
 
-    return changed ? newState : undefined;
-  }
-
-  _onChangeTopic = (event: any, topicName: string) => {
-    this.props.saveConfig({ topicName });
-  };
+  const onChangeTopic = useCallback(
+    (event: unknown, name: string) => {
+      saveConfig({ topicName: name });
+    },
+    [saveConfig],
+  );
 
   // when a known topic is selected, also fill in its datatype
-  _onSelectTopic = (topicName: string, topic: Topic, autocomplete: Autocomplete) => {
-    this.props.saveConfig({ topicName, datatype: topic.datatype });
-    autocomplete.blur();
-  };
+  const onSelectTopic = useCallback(
+    (name: string, topic: Topic, autocomplete: Autocomplete<Topic>) => {
+      saveConfig({ topicName: name, datatype: topic.datatype });
+      autocomplete.blur();
+    },
+    [saveConfig],
+  );
 
-  _onSelectDatatype = (datatype: string, value: any, autocomplete: Autocomplete) => {
-    this.props.saveConfig({ datatype });
-    autocomplete.blur();
-  };
+  const onSelectDatatype = useCallback(
+    (newDatatype: string, _value: unknown, autocomplete: Autocomplete<string>) => {
+      saveConfig({ datatype: newDatatype });
+      autocomplete.blur();
+    },
+    [saveConfig],
+  );
 
-  _publish = () => {
-    const { topicName } = this.props.config;
-    const { parsedObject } = this.state;
-    if (topicName && parsedObject && this._publisher.current) {
-      this._publisher.current.publish(parsedObject);
+  const onPublishClicked = useCallback(() => {
+    if (topicName && parsedObject) {
+      publish(parsedObject);
     } else {
       throw new Error(`called _publish() when input was invalid`);
     }
-  };
+  }, [publish, parsedObject, topicName]);
 
-  _onChange = (event: React.SyntheticEvent<HTMLTextAreaElement>) => {
-    this.props.saveConfig({ value: (event.target as any).value });
-  };
+  const onChange = useCallback(
+    (event: React.SyntheticEvent<HTMLTextAreaElement>) => {
+      saveConfig({ value: (event.target as any).value });
+    },
+    [saveConfig],
+  );
 
-  _renderMenuContent() {
-    const { config, saveConfig } = this.props;
-
-    return (
-      <>
-        <Item
-          icon={config.advancedView ? <CheckboxMarkedIcon /> : <CheckboxBlankOutlineIcon />}
-          onClick={() => {
-            saveConfig({ advancedView: !config.advancedView });
+  const menuContent = (
+    <>
+      <Item
+        icon={advancedView ? <CheckboxMarkedIcon /> : <CheckboxBlankOutlineIcon />}
+        onClick={() => {
+          saveConfig({ advancedView: !advancedView });
+        }}
+      >
+        <span>Advanced mode</span>
+      </Item>
+      <Item>
+        <PanelToolbarLabel>Button text</PanelToolbarLabel>
+        <PanelToolbarInput
+          type="text"
+          value={buttonText}
+          onChange={(event) => {
+            saveConfig({ buttonText: event.target.value });
           }}
+          placeholder="Publish"
+        />
+      </Item>
+      <Item>
+        <PanelToolbarLabel>Button tooltip</PanelToolbarLabel>
+        <PanelToolbarInput
+          type="text"
+          value={buttonTooltip}
+          onChange={(event) => {
+            saveConfig({ buttonTooltip: event.target.value });
+          }}
+        />
+      </Item>
+      <Item>
+        <PanelToolbarLabel>Button color (rgba or hex)</PanelToolbarLabel>
+        <PanelToolbarInput
+          type="text"
+          value={buttonColor}
+          onChange={(event) => {
+            saveConfig({ buttonColor: event.target.value });
+          }}
+          placeholder="rgba(1,1,1,1) or #FFFFFF"
+        />
+      </Item>
+    </>
+  );
+
+  const canPublish = capabilities.includes(PlayerCapabilities.advertise);
+  const buttonRowStyle = advancedView
+    ? { flex: "0 0 auto" }
+    : { flex: "0 0 auto", justifyContent: "center" };
+
+  return (
+    <Flex col style={{ height: "100%", padding: "12px" }}>
+      <PanelToolbar floating menuContent={menuContent} />
+      {advancedView && (
+        <SRow>
+          <SSpan>Topic:</SSpan>
+          <Autocomplete
+            placeholder="Choose a topic"
+            items={topics}
+            hasError={false}
+            onChange={onChangeTopic}
+            onSelect={onSelectTopic}
+            selectedItem={{ name: topicName, datatype: "" }}
+            getItemText={getTopicName}
+            getItemValue={getTopicName}
+          />
+        </SRow>
+      )}
+      {advancedView && (
+        <SRow>
+          <PanelToolbarLabel>Datatype:</PanelToolbarLabel>
+          <Autocomplete
+            clearOnFocus
+            placeholder="Choose a datatype"
+            items={datatypeNames}
+            onSelect={onSelectDatatype}
+            selectedItem={datatype}
+          />
+        </SRow>
+      )}
+      {advancedView && (
+        <STextAreaContainer>
+          <STextArea
+            placeholder="Enter message content as JSON"
+            value={value || ""}
+            onChange={onChange}
+          />
+        </STextAreaContainer>
+      )}
+      <Flex row style={buttonRowStyle}>
+        {error && <SErrorText>{error}</SErrorText>}
+        <Button
+          style={canPublish ? { backgroundColor: buttonColor } : {}}
+          tooltip={canPublish ? buttonTooltip : "Connect to ROS to publish data"}
+          disabled={!canPublish || !parsedObject}
+          primary={canPublish && !!parsedObject}
+          onClick={onPublishClicked}
         >
-          <span>Advanced mode</span>
-        </Item>
-        <Item>
-          <PanelToolbarLabel>Button text</PanelToolbarLabel>
-          <PanelToolbarInput
-            type="text"
-            value={config.buttonText}
-            onChange={(event) => {
-              saveConfig({ buttonText: event.target.value });
-            }}
-            placeholder="Publish"
-          />
-        </Item>
-        <Item>
-          <PanelToolbarLabel>Button tooltip</PanelToolbarLabel>
-          <PanelToolbarInput
-            type="text"
-            value={config.buttonTooltip}
-            onChange={(event) => {
-              saveConfig({ buttonTooltip: event.target.value });
-            }}
-          />
-        </Item>
-        <Item>
-          <PanelToolbarLabel>Button color (rgba or hex)</PanelToolbarLabel>
-          <PanelToolbarInput
-            type="text"
-            value={config.buttonColor}
-            onChange={(event) => {
-              saveConfig({ buttonColor: event.target.value });
-            }}
-            placeholder="rgba(1,1,1,1) or #FFFFFF"
-          />
-        </Item>
-      </>
-    );
-  }
-
-  render() {
-    const {
-      capabilities,
-      topics,
-      config: { topicName, datatype, buttonText, buttonTooltip, buttonColor, advancedView, value },
-    } = this.props;
-
-    const { datatypeNames, parsedObject, error } = this.state;
-    const canPublish = capabilities.includes(PlayerCapabilities.advertise);
-    const buttonRowStyle = advancedView
-      ? { flex: "0 0 auto" }
-      : { flex: "0 0 auto", justifyContent: "center" };
-
-    return (
-      <Flex col style={{ height: "100%", padding: "12px" }}>
-        {topicName && datatype && (
-          <Publisher ref={this._publisher} name="Publish" topic={topicName} datatype={datatype} />
-        )}
-        <PanelToolbar floating menuContent={this._renderMenuContent()} />
-        {advancedView && (
-          <SRow>
-            <SSpan>Topic:</SSpan>
-            <Autocomplete
-              placeholder="Choose a topic"
-              items={topics}
-              hasError={false}
-              onChange={this._onChangeTopic}
-              onSelect={this._onSelectTopic as any}
-              selectedItem={{ name: topicName }}
-              getItemText={getTopicName as any}
-              getItemValue={getTopicName as any}
-            />
-          </SRow>
-        )}
-        {advancedView && (
-          <SRow>
-            <PanelToolbarLabel>Datatype:</PanelToolbarLabel>
-            <Autocomplete
-              clearOnFocus
-              placeholder="Choose a datatype"
-              items={datatypeNames}
-              onSelect={this._onSelectDatatype}
-              selectedItem={datatype}
-            />
-          </SRow>
-        )}
-        {advancedView && (
-          <STextAreaContainer>
-            <STextArea
-              placeholder="Enter message content as JSON"
-              value={value || ""}
-              onChange={this._onChange}
-            />
-          </STextAreaContainer>
-        )}
-        <Flex row style={buttonRowStyle}>
-          {error && <SErrorText>{error}</SErrorText>}
-          <Button
-            style={canPublish ? { backgroundColor: buttonColor } : {}}
-            tooltip={canPublish ? buttonTooltip : "Connect to ROS to publish data"}
-            disabled={!canPublish || !parsedObject}
-            primary={canPublish && !!parsedObject}
-            onClick={this._publish}
-          >
-            {buttonText}
-          </Button>
-        </Flex>
+          {buttonText}
+        </Button>
       </Flex>
-    );
-  }
+    </Flex>
+  );
 }
 
-export default Panel(Publish);
+export default Panel(
+  Object.assign(React.memo(Publish), {
+    panelType: "Publish",
+    defaultConfig: {
+      topicName: "",
+      datatype: "",
+      buttonText: "Publish",
+      buttonTooltip: "",
+      buttonColor: "#00A871",
+      advancedView: true,
+      value: "",
+    },
+  }),
+);
