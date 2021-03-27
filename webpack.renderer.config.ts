@@ -59,7 +59,7 @@ export function makeConfig(_: unknown, argv: WebpackArgv): Configuration {
       },
       fallback: {
         path: require.resolve("path-browserify"),
-        stream: require.resolve("stream-browserify"),
+        stream: require.resolve("readable-stream"),
         zlib: require.resolve("browserify-zlib"),
         crypto: require.resolve("crypto-browserify"),
         fs: false,
