@@ -332,7 +332,6 @@ overrides:
       - "app/panels/ThreeDimensionalViz/threeDimensionalVizUtils.ts"
       - "app/panels/ThreeDimensionalViz/utils/drawToolUtils.ts"
       - "app/panels/ThreeDimensionalViz/withTransforms.tsx"
-      - "app/panels/TwoDimensionalPlot/index.tsx"
       - "app/panels/diagnostics/DiagnosticStatus.tsx"
       - "app/panels/diagnostics/DiagnosticStatusPanel.tsx"
       - "app/panels/diagnostics/DiagnosticSummary.tsx"

@@ -28,7 +28,6 @@ import SubscribeToList from "@foxglove-studio/app/panels/SubscribeToList";
 import Tab from "@foxglove-studio/app/panels/Tab";
 import Table from "@foxglove-studio/app/panels/Table";
 import ThreeDimensionalViz from "@foxglove-studio/app/panels/ThreeDimensionalViz";
-import TwoDimensionalPlot from "@foxglove-studio/app/panels/TwoDimensionalPlot";
 import WelcomePanel from "@foxglove-studio/app/panels/WelcomePanel";
 import DiagnosticStatusPanel from "@foxglove-studio/app/panels/diagnostics/DiagnosticStatusPanel";
 import DiagnosticSummary from "@foxglove-studio/app/panels/diagnostics/DiagnosticSummary";
@@ -36,7 +35,6 @@ import { ndash } from "@foxglove-studio/app/util/entities";
 
 export function panelsByCategory() {
   const ros = [
-    { title: "2D Plot", component: TwoDimensionalPlot },
     { title: "3D", component: ThreeDimensionalViz },
     { title: `Diagnostics ${ndash} Summary`, component: DiagnosticSummary },
     { title: `Diagnostics ${ndash} Detail`, component: DiagnosticStatusPanel },

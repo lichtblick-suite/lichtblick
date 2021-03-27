@@ -11,10 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import markerArray from "./markerArray.ts.template";
-import twoDimensionalPlot from "./twoDimensionalPlot.ts.template";
 
 export default [
-  { name: "2D Plot", description: "Quickly create 2D Plot topics", template: twoDimensionalPlot },
   {
     name: "MarkerArray",
     description: "Basic template for a node that publishes one or more markers",
