@@ -34,7 +34,7 @@ jobs:
       - name: Configure Node.js
         uses: actions/setup-node@v2.1.5
         with:
-          node-version: 15.x
+          node-version: 14.x
       - name: Restore cache
         uses: actions/cache@v2.1.4
         with:
@@ -68,7 +68,7 @@ jobs:
       - name: Configure Node.js
         uses: actions/setup-node@v2.1.5
         with:
-          node-version: 15.x
+          node-version: 14.x
       - name: Restore cache
         uses: actions/cache@v2.1.4
         with:
