@@ -4824,13 +4824,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/url-parse@npm:^1":
-  version: 1.4.3
-  resolution: "@types/url-parse@npm:1.4.3"
-  checksum: dc778cf3e0cc325ac43aedeadfe83e8723fb10b2561a4f916be3efab6aaa128250c42b0e7e31bec2c5ea1fc1cda7a77db7c8c15bac8af86dfc4cebbd28dbbdec
-  languageName: node
-  linkType: hard
-
 "@types/url-search-params@npm:1.1.0":
   version: 1.1.0
   resolution: "@types/url-search-params@npm:1.1.0"
@@ -11723,7 +11716,6 @@ __metadata:
     "@types/nearley": 2.11.1
     "@types/rimraf": ^3
     "@types/sass": ^1
-    "@types/url-parse": ^1
     "@types/webpack-dev-server": 3.11.1
     "@typescript-eslint/eslint-plugin": 4.16.1
     "@typescript-eslint/parser": 4.16.1
@@ -11774,7 +11766,7 @@ __metadata:
     ts-node: 9.1.1
     typescript: 4.2.2
     typescript-plugin-css-modules: 3.2.0
-    url-parse: 1.5.1
+    universal-url: 2.0.0
     webpack: 5.26.3
     webpack-cli: 4.5.0
     webpack-dev-server: 3.11.2
@@ -12692,6 +12684,13 @@ fsevents@^1.2.7:
     property-information: ^5.0.0
     space-separated-tokens: ^1.0.0
   checksum: c801a859137b7b0092235e50b5c9927c8e0ddbfc4739f4da5bf20170821be6bd883744a11ed2a3909d00d24964632892118913b3b13b02601018035da8b00b52
+  languageName: node
+  linkType: hard
+
+"hasurl@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "hasurl@npm:1.0.0"
+  checksum: 523cb8fc4d586c9b7de2be51c3f9b5130c2192c4724b209d71aaeed860e84591059a400a5095d375861fd63f5bdcf90a6e80e1efcc1c6f860cf6165bb27632e0
   languageName: node
   linkType: hard
 
@@ -23214,6 +23213,16 @@ typescript@4.2.2:
   languageName: node
   linkType: hard
 
+"universal-url@npm:2.0.0":
+  version: 2.0.0
+  resolution: "universal-url@npm:2.0.0"
+  dependencies:
+    hasurl: ^1.0.0
+    whatwg-url: ^7.0.0
+  checksum: 403800e8b104e6cd131d802723ca75dc868b98d6acdd438dcd558dc66b83dcc25e20fe0508cb2cd68b22720cde8961f1638da3a0bc20ca93f911a8e073daa3b6
+  languageName: node
+  linkType: hard
+
 "universal-user-agent@npm:^6.0.0":
   version: 6.0.0
   resolution: "universal-user-agent@npm:6.0.0"
@@ -23348,7 +23357,7 @@ typescript@4.2.2:
   languageName: node
   linkType: hard
 
-"url-parse@npm:1.5.1, url-parse@npm:^1.4.3, url-parse@npm:^1.4.7":
+"url-parse@npm:^1.4.3, url-parse@npm:^1.4.7":
   version: 1.5.1
   resolution: "url-parse@npm:1.5.1"
   dependencies:
@@ -24148,6 +24157,17 @@ typescript@4.2.2:
     tr46: ^1.0.1
     webidl-conversions: ^4.0.2
   checksum: 454a06402d3ccec0057b8b2d00231153a38bb985749268903111166175e599254175461515b351cd3e6c7e1a9674c35adbcf708304cd38e6aae5b81c6ac9e095
+  languageName: node
+  linkType: hard
+
+"whatwg-url@npm:^7.0.0":
+  version: 7.1.0
+  resolution: "whatwg-url@npm:7.1.0"
+  dependencies:
+    lodash.sortby: ^4.7.0
+    tr46: ^1.0.1
+    webidl-conversions: ^4.0.2
+  checksum: ccbf75d3dfa6d97a7705acc250a43041dfcfa0c9695a5148cac844c39a29657d7c07b3c4533ebabb2401fedcd5eb98626256add2760403b0889c9983ea1a76aa
   languageName: node
   linkType: hard
 

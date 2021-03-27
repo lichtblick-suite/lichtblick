@@ -386,7 +386,7 @@ export const extractDatatypes = (nodeData: NodeData): NodeData => {
 
     // If we've hit this case, then we should fix it.
     sendNotification(
-      "Unknown error encountered in Node Playground. Please report to the webviz team",
+      "Unknown error encountered in Node Playground. Please report to the Foxglove team",
       error,
       "app",
       "error",

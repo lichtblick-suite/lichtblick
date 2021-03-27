@@ -491,7 +491,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     );
     expect((console.warn as any).mock.calls).toEqual([
       [
-        "Panel subscribed right after Player loaded, which causes unnecessary requests. Please let the Webviz team know about this. Topics: /test2",
+        "Panel subscribed right after Player loaded, which causes unnecessary requests. Please let the Foxglove team know about this. Topics: /test2",
       ],
     ]);
 

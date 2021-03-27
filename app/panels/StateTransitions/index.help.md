@@ -6,4 +6,4 @@ The values plotted are specified through the [message path syntax](#help:message
 
 You can zoom by scrolling, and pan by dragging. Double-click to reset.
 
-Colors are hard-coded for the default paths. If you use a different path, you get some default colors. Please contact the Webviz team if you want more custom colors.
+Colors are hard-coded for the default paths. If you use a different path, you get some default colors. Please contact the Foxglove team if you want more custom colors.

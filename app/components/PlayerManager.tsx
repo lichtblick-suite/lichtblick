@@ -51,6 +51,7 @@ import {
 } from "@foxglove-studio/app/players/buildPlayer";
 import { Player } from "@foxglove-studio/app/players/types";
 import { State } from "@foxglove-studio/app/reducers";
+import { AppError } from "@foxglove-studio/app/util/errors";
 import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import { useShallowMemo } from "@foxglove-studio/app/util/hooks";
 import { parseInputUrl } from "@foxglove-studio/app/util/url";
@@ -164,11 +165,17 @@ async function getPlayerBuilderFromUserSelection(
     }
     case "ros1-core": {
       const result = await prompt({
-        value: OsContextSingleton?.getEnvVar("ROS_MASTER_URI") ?? "http://localhost:11311/",
+        value: OsContextSingleton?.getEnvVar("ROS_MASTER_URI") ?? "localhost:11311",
       });
-      const url = parseInputUrl(result, "http:");
+      const url = parseInputUrl(result, "ros:", {
+        "http:": { port: 80 },
+        "https:": { port: 443 },
+        "ros:": { protocol: "http:", port: 11311 },
+      });
       if (url == undefined) {
-        return;
+        throw new AppError(
+          "Invalid ROS URL. See the ROS_MASTER_URI at http://wiki.ros.org/ROS/EnvironmentVariables for more info.",
+        );
       }
       return async () => ({
         player: new Ros1Player(url),
@@ -179,24 +186,38 @@ async function getPlayerBuilderFromUserSelection(
       const result = await prompt({
         placeholder: "ws://localhost:9090",
       });
-      if (result == undefined || result.length === 0) {
-        return;
+      const url = parseInputUrl(result, "http:", {
+        "http:": { protocol: "ws:", port: 80 },
+        "https:": { protocol: "wss:", port: 443 },
+        "ws:": { port: 9090 },
+        "wss:": { port: 9090 },
+        "ros:": { protocol: "ws:", port: 9090 },
+      });
+      if (url == undefined) {
+        throw new AppError("Invalid rosbridge WebSocket URL. Use the ws:// or wss:// protocol.");
       }
 
       return async () => ({
-        player: new RosbridgePlayer(result),
-        sources: [result],
+        player: new RosbridgePlayer(url),
+        sources: [url],
       });
     }
     case "http": {
       const result = await prompt({
-        placeholder: "http://example.com/file.bag",
+        placeholder: "https://example.com/file.bag",
       });
-      if (result == undefined || result.length === 0) {
-        return;
+      const url = parseInputUrl(result, "https:", {
+        "http:": { port: 80 },
+        "https:": { port: 443 },
+        "ftp:": { port: 21 },
+      });
+      if (url == undefined) {
+        throw new AppError(
+          "Invalid rosbag URL. Use a http:// or https:// URL of a web hosted bag file.",
+        );
       }
 
-      return () => buildPlayerFromBagURLs([result], options);
+      return () => buildPlayerFromBagURLs([url], options);
     }
   }
 }

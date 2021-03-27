@@ -240,25 +240,16 @@ export function MessagePipelineProvider({
   useShouldNotChangeOften(topics, () => {
     sendNotification(
       "Provider topics should not change often",
-      "If they do they are probably not memoized properly. Please let the Webviz team know if you see this warning.",
+      "If they do they are probably not memoized properly. Please let the Foxglove team know if you see this warning.",
       "app",
       "warn",
     );
   });
 
   const unmemoizedDatatypes: RosDatatypes | undefined = playerState.activeData?.datatypes;
-  useShouldNotChangeOften(unmemoizedDatatypes, () => {
-    sendNotification(
-      "Provider datatypes should not change often",
-      "If they do they are probably not memoized properly. Please let the Webviz team know if you see this warning.",
-      "app",
-      "warn",
-    );
-  });
-
   const messages: readonly Message[] | undefined = playerState.activeData?.messages;
-  const frame = useMemo(() => groupBy(messages || [], "topic"), [messages]);
-  const sortedTopics = useMemo(() => (topics || []).sort(), [topics]);
+  const frame = useMemo(() => groupBy(messages ?? [], "topic"), [messages]);
+  const sortedTopics = useMemo(() => (topics ?? []).sort(), [topics]);
   const datatypes: RosDatatypes = useMemo(() => unmemoizedDatatypes ?? {}, [unmemoizedDatatypes]);
   const setSubscriptions = useCallback(
     (id: string, subscriptionsForId: SubscribePayload[]) => {
@@ -269,7 +260,7 @@ export function MessagePipelineProvider({
             lastTimeWhenActiveDataBecameSet.current + WARN_ON_SUBSCRIPTIONS_WITHIN_TIME_MS &&
           !isEqual(
             new Set(subscriptionsForId.map(({ topic }) => topic)),
-            new Set((s[id] || []).map(({ topic }) => topic)),
+            new Set((s[id] ?? []).map(({ topic }) => topic)),
           )
         ) {
           // TODO(JP): Might be nice to use `sendNotification` here at some point, so users can let us know about this.
@@ -278,7 +269,7 @@ export function MessagePipelineProvider({
           // layout changes, since a panel might decide to save its config when data becomes available, and that is
           // bad behaviour by itself too.
           console.warn(
-            `Panel subscribed right after Player loaded, which causes unnecessary requests. Please let the Webviz team know about this. Topics: ${subscriptionsForId
+            `Panel subscribed right after Player loaded, which causes unnecessary requests. Please let the Foxglove team know about this. Topics: ${subscriptionsForId
               .map(({ topic }) => topic)
               .join(", ")}`,
           );
