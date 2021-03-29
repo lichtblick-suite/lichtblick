@@ -277,15 +277,15 @@ export default function App(): ReactElement {
       <Provider store={globalStore}>
         <ExperimentalFeaturesLocalStorageProvider features={experimentalFeatures}>
           <ErrorBoundary>
-            <PlayerManager playerSources={playerSources}>
-              <NativeFileMenuPlayerSelection />
-              <DndProvider backend={HTML5Backend}>
-                <OsContextLayoutStorageProvider>
+            <OsContextLayoutStorageProvider>
+              <LayoutStorageReduxAdapter />
+              <PlayerManager playerSources={playerSources}>
+                <NativeFileMenuPlayerSelection />
+                <DndProvider backend={HTML5Backend}>
                   <Root />
-                  <LayoutStorageReduxAdapter />
-                </OsContextLayoutStorageProvider>
-              </DndProvider>
-            </PlayerManager>
+                </DndProvider>
+              </PlayerManager>
+            </OsContextLayoutStorageProvider>
           </ErrorBoundary>
         </ExperimentalFeaturesLocalStorageProvider>
       </Provider>

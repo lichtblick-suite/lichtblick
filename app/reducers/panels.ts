@@ -897,6 +897,7 @@ const endDrag = (panelsState: PanelsState, dragPayload: EndDragPayload): PanelsS
 
 const panelsReducer = function (state: State, action: ActionTypes): State {
   // Make a copy of the persistedState before mutation.
+  // Only return the copy if we mutated persistedState, otherwise we return the old state
   let newState = {
     ...state,
     persistedState: { ...state.persistedState, panels: { ...state.persistedState.panels } },
@@ -1034,7 +1035,8 @@ const panelsReducer = function (state: State, action: ActionTypes): State {
       break;
 
     default:
-      break;
+      // avoid returning a copy of the state if we did not handle the action
+      return state;
   }
 
   return newState;

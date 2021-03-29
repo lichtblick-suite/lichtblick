@@ -4,9 +4,9 @@
 
 import DeleteSvg from "@mdi/svg/svg/delete-forever.svg";
 import PencilSvg from "@mdi/svg/svg/pencil.svg";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { useAsync } from "react-use";
+import { useAsyncRetry } from "react-use";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
@@ -19,12 +19,12 @@ import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 type LayoutsContextMenuProps = {
   onClose?: () => void;
-  onSelectAction?: (layout: Layout) => void;
-  onNewAction?: (layout: Layout) => void;
-  onDeleteAction?: (layout: Layout) => void;
-  onExportAction?: (layout: Layout) => void;
-  onImportAction?: () => void;
-  onRenameAction?: (layout: Layout) => void;
+  onSelectAction?: (layout: Layout) => Promise<void> | void;
+  onNewAction?: (layout: Layout) => Promise<void> | void;
+  onDeleteAction?: (layout: Layout) => Promise<void>;
+  onExportAction?: (layout: Layout) => Promise<void> | void;
+  onImportAction?: () => Promise<void> | void;
+  onRenameAction?: (layout: Layout) => Promise<void> | void;
 };
 
 // Wrap Item with styled so we can reference it in ShowHoverParent
@@ -47,8 +47,22 @@ const ShowHoverParent = styled.div`
 export default function LayoutsContextMenu(props: LayoutsContextMenuProps) {
   const layoutStorage = useLayoutStorage();
   const currentPanelsState = useSelector((state: State) => state.persistedState.panels);
+  const [layouts, setLayouts] = useState<Layout[] | undefined>(undefined);
 
-  const { value: layouts, error, loading } = useAsync(() => layoutStorage.list(), [layoutStorage]);
+  const { value: asyncLayouts, error, loading, retry: reload } = useAsyncRetry(async () => {
+    const list = await layoutStorage.list();
+    list.sort((a, b) => a.name.localeCompare(b.name));
+    return list;
+  }, [layoutStorage]);
+
+  // a basic stale-while-revalidate pattern to avoid flicker of layout menu when we reload the layout list
+  // When we re-visit local/remote layouts we will want to look at something like swr (https://swr.vercel.app/)
+  // that will handle this and other nice things for us.
+  useEffect(() => {
+    if (asyncLayouts) {
+      setLayouts(asyncLayouts);
+    }
+  }, [asyncLayouts]);
 
   const exportToFile = useCallback(() => {
     props.onClose?.();
@@ -90,10 +104,14 @@ export default function LayoutsContextMenu(props: LayoutsContextMenuProps) {
         return;
       }
 
-      props.onDeleteAction?.(layout);
-      props.onClose?.();
+      await props.onDeleteAction?.(layout);
+
+      // Leave the menu open on delete but reload the menu items.
+      // This gives visual feedback to the user that their action worked.
+      // Also allows them to delete another item, to delete multiple, without re-opening the menu.
+      reload();
     },
-    [currentPanelsState, props],
+    [currentPanelsState, props, reload],
   );
 
   const layoutItems = useMemo(() => {
