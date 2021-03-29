@@ -1,64 +1,157 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-//
-// This file incorporates work covered by the following copyright and
-// permission notice:
-//
-//   Copyright 2018-2021 Cruise LLC
-//
-//   This source code is licensed under the Apache License, Version 2.0,
-//   found at http://www.apache.org/licenses/LICENSE-2.0
-//   You may not use this file except in compliance with the License.
-import CodeJsonIcon from "@mdi/svg/svg/code-json.svg";
-import { useState } from "react";
 
+import path from "path";
+import { useCallback, useState } from "react";
+import { useDispatch } from "react-redux";
+import { useMountedState } from "react-use";
+import { v4 as uuidv4 } from "uuid";
+
+import { loadLayout } from "@foxglove-studio/app/actions/panels";
 import LayoutIcon from "@foxglove-studio/app/assets/layout.svg";
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
-import ExperimentalLayoutMenu from "@foxglove-studio/app/components/ExperimentalLayoutMenu";
 import Flex from "@foxglove-studio/app/components/Flex";
 import { WrappedIcon } from "@foxglove-studio/app/components/Icon";
-import LayoutModal from "@foxglove-studio/app/components/LayoutModal";
-import Menu, { Item } from "@foxglove-studio/app/components/Menu";
-import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
+import { Layout, useLayoutStorage } from "@foxglove-studio/app/context/LayoutStorageContext";
+import { usePrompt } from "@foxglove-studio/app/hooks/usePrompt";
+import { PanelsState } from "@foxglove-studio/app/reducers/panels";
+import { downloadTextFile } from "@foxglove-studio/app/util";
+import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
-// default import/export menu with no layout management
-function ImportExportMenu() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [showLayoutModal, setShowLayoutModal] = useState(false);
+import LayoutsContextMenu from "./LayoutsContextMenu";
 
-  return (
-    <>
-      {showLayoutModal && <LayoutModal onRequestClose={() => setShowLayoutModal(false)} />}
-      <ChildToggle position="below" onToggle={setIsOpen} isOpen={isOpen}>
-        <Flex>
-          <WrappedIcon medium fade active={isOpen} tooltip="Config">
-            <LayoutIcon />
-          </WrappedIcon>
-        </Flex>
-        <Menu>
-          <Item
-            icon={<CodeJsonIcon />}
-            onClick={() => {
-              setIsOpen(false);
-              setShowLayoutModal(true);
-            }}
-          >
-            Import/export layout
-          </Item>
-        </Menu>
-      </ChildToggle>
-    </>
-  );
-}
+// A Wrapper around window.showOpenFilePicker that handles the error thrown on "cancel"
+// Why the api is designed this was is beyond me
+async function showOpenFilePicker(): Promise<FileSystemFileHandle | undefined> {
+  const result = await window
+    .showOpenFilePicker({
+      multiple: false,
+      excludeAcceptAllOption: false,
+      types: [
+        {
+          description: "JSON Files",
+          accept: {
+            "application/json": [".json"],
+          },
+        },
+      ],
+    })
+    .catch((err) => {
+      if (err.message !== "The user aborted a request.") {
+        throw err;
+      }
+    });
 
-export default function LayoutMenu() {
-  const enableLayoutManagement = useExperimentalFeature("layoutManagement");
-
-  // show existing import/export menu
-  if (!enableLayoutManagement) {
-    return <ImportExportMenu />;
+  if (!result) {
+    return;
   }
 
-  return <ExperimentalLayoutMenu />;
+  return result[0];
+}
+
+// Show the list of available layouts for user selection
+// The context menu is implemented as a separate component to avoid fetching the layout list
+// and re-rendering when panel layouts change if the menu is not open
+export default function LayoutMenu(props: { isOpen?: boolean }) {
+  const [isOpen, setIsOpen] = useState(props.isOpen ?? false);
+  const prompt = usePrompt();
+  const dispatch = useDispatch();
+  const isMounted = useMountedState();
+
+  const layoutStorage = useLayoutStorage();
+
+  const renameAction = useCallback(
+    async (layout: Layout) => {
+      const value = await prompt({
+        value: layout.name,
+      });
+      if (!isMounted()) {
+        return;
+      }
+      if (value !== undefined && value.length > 0 && layout.state) {
+        layout.name = value;
+        layout.state.name = value;
+        dispatch(loadLayout(layout.state));
+      }
+    },
+    [dispatch, isMounted, prompt],
+  );
+
+  const exportAction = useCallback((layout: Layout) => {
+    const name = layout.name ?? "unnamed";
+    const content = JSON.stringify(layout.state, undefined, 2);
+    downloadTextFile(content, `${name}.json`);
+  }, []);
+
+  const importAction = useCallback(async () => {
+    const fileHandle = await showOpenFilePicker();
+    if (!fileHandle) {
+      return;
+    }
+
+    const file = await fileHandle.getFile();
+    const layoutName = path.basename(file.name, path.extname(file.name));
+    const content = await file.text();
+    const parsedState: unknown = JSON.parse(content);
+
+    if (!isMounted()) {
+      return;
+    }
+
+    if (typeof parsedState !== "object") {
+      sendNotification(`${file} is not a valid layout`, Error, "user", "error");
+      return;
+    }
+
+    const state = parsedState as PanelsState;
+    state.id = uuidv4();
+    state.name = layoutName;
+
+    dispatch(loadLayout(state));
+  }, [dispatch, isMounted]);
+
+  const newAction = useCallback(
+    (layout: Layout) => {
+      if (layout.state) {
+        dispatch(loadLayout(layout.state));
+      }
+    },
+    [dispatch],
+  );
+
+  const selectAction = useCallback(
+    (layout: Layout) => {
+      if (layout.state) {
+        dispatch(loadLayout(layout.state));
+      }
+    },
+    [dispatch],
+  );
+
+  const deleteLayout = useCallback(
+    async (layout: Layout) => {
+      await layoutStorage.delete(layout.id);
+    },
+    [layoutStorage],
+  );
+
+  return (
+    <ChildToggle position="below" onToggle={setIsOpen} isOpen={isOpen}>
+      <Flex>
+        <WrappedIcon medium fade active={isOpen} tooltip="Layouts">
+          <LayoutIcon />
+        </WrappedIcon>
+      </Flex>
+      <LayoutsContextMenu
+        onSelectAction={selectAction}
+        onRenameAction={renameAction}
+        onNewAction={newAction}
+        onExportAction={exportAction}
+        onImportAction={importAction}
+        onDeleteAction={deleteLayout}
+        onClose={() => setIsOpen(false)}
+      />
+    </ChildToggle>
+  );
 }
