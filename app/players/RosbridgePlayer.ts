@@ -127,9 +127,11 @@ export default class RosbridgePlayer implements Player {
     }
 
     try {
-      const result = await new Promise<any>((resolve, reject) =>
-        rosClient.getTopicsAndRawTypes(resolve, reject),
-      );
+      const result = await new Promise<{
+        topics: string[];
+        types: string[];
+        typedefs_full_text: string[];
+      }>((resolve, reject) => rosClient.getTopicsAndRawTypes(resolve, reject));
 
       const topicsMissingDatatypes: string[] = [];
       const topics = [];
@@ -137,11 +139,11 @@ export default class RosbridgePlayer implements Player {
       const messageReaders: Record<string, MessageReader> = {};
 
       for (let i = 0; i < result.topics.length; i++) {
-        const topicName = result.topics[i];
+        const topicName = result.topics[i] as string;
         const type = result.types[i];
         const messageDefinition = result.typedefs_full_text[i];
 
-        if (!type || !messageDefinition) {
+        if (type == undefined || messageDefinition == undefined) {
           topicsMissingDatatypes.push(topicName);
           continue;
         }
@@ -181,7 +183,7 @@ export default class RosbridgePlayer implements Player {
       this.setSubscriptions(this._requestedSubscriptions);
       this._emitState();
     } catch (error) {
-      sendNotification("Error in fetching topics and datatypes", error, "app", "error");
+      sendNotification("Error connecting to rosbridge", error, "app", "error");
     } finally {
       // Regardless of what happens, request topics again in a little bit.
       this._requestTopicsTimeout = setTimeout(this._requestTopics, 3000);

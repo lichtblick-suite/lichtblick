@@ -348,11 +348,6 @@ function PlayerManager({
     setPlayer(async () => buildPlayerFromFiles(usedFiles.current, buildPlayerOptions));
   }, [setPlayer, filesToOpen, buildPlayerOptions]);
 
-  let availableSources = playerSources;
-  if (!useExperimentalFeature("ros1Native")) {
-    availableSources = availableSources.filter((src) => src.type !== "ros1-core");
-  }
-
   const value: PlayerSelection = {
     selectSource,
     // Expose a simple way to load a demo bag for first launch onboarding.
@@ -363,7 +358,7 @@ function PlayerManager({
       () => setPlayer(() => buildPlayerFromBagURLs([DEMO_BAG_URL], buildPlayerOptions)),
       [setPlayer, buildPlayerOptions],
     ),
-    availableSources,
+    availableSources: playerSources,
     currentSourceName,
   };
 
