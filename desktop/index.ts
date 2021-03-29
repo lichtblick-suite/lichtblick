@@ -178,15 +178,16 @@ async function createWindow(): Promise<void> {
     role: "viewMenu",
     label: "View",
     submenu: [
-      { role: "reload" },
-      { role: "forceReload" },
-      { role: "toggleDevTools" },
-      { type: "separator" },
       { role: "resetZoom" },
       { role: "zoomIn" },
       { role: "zoomOut" },
       { type: "separator" },
       { role: "togglefullscreen" },
+      { type: "separator" },
+      {
+        label: "Advanced",
+        submenu: [{ role: "reload" }, { role: "forceReload" }, { role: "toggleDevTools" }],
+      },
     ],
   });
 
