@@ -20,6 +20,7 @@ import { MarkerMatcher } from "@foxglove-studio/app/panels/ThreeDimensionalViz/T
 import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
 import { cast, BobjectMessage, Topic, Frame, Message } from "@foxglove-studio/app/players/types";
 import {
+  BinaryPath,
   BinaryMarker,
   BinaryPolygonStamped,
   BinaryPoseStamped,
@@ -51,6 +52,7 @@ import {
   VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE,
   POSE_STAMPED_DATATYPE,
   NAV_MSGS_OCCUPANCY_GRID_DATATYPE,
+  NAV_MSGS_PATH_DATATYPE,
   POINT_CLOUD_DATATYPE,
   SENSOR_MSGS_LASER_SCAN_DATATYPE,
   GEOMETRY_MSGS_POLYGON_STAMPED_DATATYPE,
@@ -866,6 +868,27 @@ export default class SceneBuilder implements MarkerProvider {
         this._consumeOccupancyGrid(topic, deepParse(message));
 
         break;
+      case NAV_MSGS_PATH_DATATYPE: {
+        const topicSettings = this._settingsByKey[`t:${topic}`];
+
+        const pathStamped = cast<BinaryPath>(message);
+        if (pathStamped.poses().length() === 0) {
+          break;
+        }
+        const newMessage = {
+          header: deepParse(pathStamped.header()),
+          // Future: display orientation of the poses in the path
+          points: pathStamped
+            .poses()
+            .toArray()
+            .map((pose) => deepParse(pose.pose().position())),
+          closed: false,
+          scale: { x: 0.2 },
+          color: topicSettings?.overrideColor ?? { r: 0.5, g: 0.5, b: 1, a: 1 },
+        };
+        this._consumeNonMarkerMessage(topic, newMessage, 4 /* line strip */, message);
+        break;
+      }
       case POINT_CLOUD_DATATYPE:
         this._consumeNonMarkerMessage(topic, deepParse(message), 102);
 

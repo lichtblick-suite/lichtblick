@@ -20,7 +20,6 @@ import Button from "@foxglove-studio/app/components/Button";
 import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";
 import Modal from "@foxglove-studio/app/components/Modal";
 import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { topicSettingsEditorForDatatype } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor";
 import { Topic } from "@foxglove-studio/app/players/types";
 import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
@@ -70,35 +69,14 @@ const STabWrapper = styled.div`
   }
 `;
 
-function getSettingsByColumnWithDefaults(
-  topicName: string,
-  settingsByColumn?: any[],
-): { settingsByColumn: any[] } | undefined {
-  const defaultTopicSettingsByColumn = getGlobalHooks()
-    .startupPerPanelHooks()
-    .ThreeDimensionalViz.getDefaultTopicSettingsByColumn();
-
-  if (defaultTopicSettingsByColumn) {
-    const newSettingsByColumn = settingsByColumn || [undefined, undefined];
-    newSettingsByColumn.forEach((settings, columnIndex) => {
-      if (settings === undefined) {
-        // Only apply default settings if there are no settings present.
-        newSettingsByColumn[columnIndex] = (defaultTopicSettingsByColumn as any)[columnIndex];
-      }
-    });
-    return { settingsByColumn: newSettingsByColumn };
-  }
-  return settingsByColumn ? { settingsByColumn } : undefined;
-}
-
 function MainEditor({
   datatype,
   collectorMessage,
-  columnIndex,
+  columnIndex: _columnIndex,
   onFieldChange,
   onSettingsChange,
   settings,
-  topicName,
+  topicName: _topicName,
 }: {
   datatype: string;
   collectorMessage: any;
@@ -134,9 +112,7 @@ function MainEditor({
           className="test-reset-settings-btn"
           style={{ marginTop: 8 }}
           onClick={() => {
-            const defaultSettingsByColumn =
-              (getSettingsByColumnWithDefaults(topicName) as any).settingsByColumn || [];
-            onSettingsChange(defaultSettingsByColumn[columnIndex]);
+            onSettingsChange({});
           }}
         >
           Reset to defaults

@@ -93,7 +93,7 @@ import { joinTopics } from "@foxglove-studio/app/util/topicUtils";
 
 import useTopicTree, { TopicTreeContext } from "./useTopicTree";
 
-const { sceneBuilderHooks } = (getGlobalHooks() as any).perPanelHooks().ThreeDimensionalViz;
+const { sceneBuilderHooks } = getGlobalHooks().perPanelHooks().ThreeDimensionalViz;
 
 type EventName = "onDoubleClick" | "onMouseMove" | "onMouseDown" | "onMouseUp";
 export type ClickedPosition = { clientX: number; clientY: number };

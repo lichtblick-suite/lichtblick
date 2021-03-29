@@ -18,6 +18,7 @@ import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { TopicSettingsEditorProps } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/types";
 import { Topic } from "@foxglove-studio/app/players/types";
 import {
+  NAV_MSGS_PATH_DATATYPE,
   POINT_CLOUD_DATATYPE,
   POSE_STAMPED_DATATYPE,
   SENSOR_MSGS_LASER_SCAN_DATATYPE,
@@ -44,6 +45,7 @@ export function topicSettingsEditorForDatatype(
     [WEBVIZ_MARKER_DATATYPE]: MarkerSettingsEditor,
     "visualization_msgs/Marker": MarkerSettingsEditor,
     "visualization_msgs/MarkerArray": MarkerSettingsEditor,
+    [NAV_MSGS_PATH_DATATYPE]: MarkerSettingsEditor,
     ...(getGlobalHooks() as any).perPanelHooks().ThreeDimensionalViz.topicSettingsEditors,
   };
   return editors[datatype];

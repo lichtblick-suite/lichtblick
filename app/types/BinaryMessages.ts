@@ -57,6 +57,8 @@ export type BinaryPose2D = Readonly<{
 
 export type BinaryPoseStamped = Readonly<BinaryStampedMessage & { pose(): BinaryPose }>;
 
+export type BinaryPath = Readonly<BinaryStampedMessage & { poses(): ArrayView<BinaryPoseStamped> }>;
+
 export type BinaryPolygon = Readonly<{ points(): ArrayView<BinaryPoint> }>;
 export type BinaryPolygonStamped = Readonly<BinaryStampedMessage & { polygon(): BinaryPolygon }>;
 

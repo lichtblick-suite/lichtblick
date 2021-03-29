@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import ArrowDecisionIcon from "@mdi/svg/svg/arrow-decision.svg";
 import BlurIcon from "@mdi/svg/svg/blur.svg";
 import CubeOutline from "@mdi/svg/svg/cube-outline.svg";
 import GridIcon from "@mdi/svg/svg/grid.svg";
@@ -26,6 +27,7 @@ import { defaultMapPalette } from "@foxglove-studio/app/panels/ThreeDimensionalV
 import {
   GEOMETRY_MSGS_POLYGON_STAMPED_DATATYPE,
   NAV_MSGS_OCCUPANCY_GRID_DATATYPE,
+  NAV_MSGS_PATH_DATATYPE,
   POINT_CLOUD_DATATYPE,
   POSE_STAMPED_DATATYPE,
   SENSOR_MSGS_LASER_SCAN_DATATYPE,
@@ -48,6 +50,7 @@ export function perPanelHooks() {
     POINT_CLOUD_DATATYPE,
     SENSOR_MSGS_LASER_SCAN_DATATYPE,
     NAV_MSGS_OCCUPANCY_GRID_DATATYPE,
+    NAV_MSGS_PATH_DATATYPE,
     GEOMETRY_MSGS_POLYGON_STAMPED_DATATYPE,
     TF_DATATYPE,
   };
@@ -123,6 +126,7 @@ export function perPanelHooks() {
         [VISUALIZATION_MSGS_MARKER_DATATYPE]: HexagonIcon,
         [VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE]: HexagonMultipleIcon,
         [NAV_MSGS_OCCUPANCY_GRID_DATATYPE]: GridIcon,
+        [NAV_MSGS_PATH_DATATYPE]: ArrowDecisionIcon,
         [SENSOR_MSGS_LASER_SCAN_DATATYPE]: RadarIcon,
         [GEOMETRY_MSGS_POLYGON_STAMPED_DATATYPE]: PentagonOutlineIcon,
         [POINT_CLOUD_DATATYPE]: BlurIcon,
