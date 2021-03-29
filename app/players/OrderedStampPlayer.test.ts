@@ -96,7 +96,7 @@ function makePlayers(
   initialOrder: TimestampMethod,
 ): { player: OrderedStampPlayer; fakePlayer: FakePlayer } {
   const fakePlayer = new FakePlayer();
-  fakePlayer.setCapabilities([PlayerCapabilities.setSpeed]);
+  fakePlayer.setCapabilities([PlayerCapabilities.setSpeed, PlayerCapabilities.playbackControl]);
   return {
     fakePlayer,
     player: new OrderedStampPlayer(
@@ -389,7 +389,7 @@ describe("OrderedStampPlayer", () => {
       }
     }
     const fakePlayer = new ModifiedFakePlayer();
-    fakePlayer.setCapabilities([PlayerCapabilities.setSpeed]);
+    fakePlayer.setCapabilities([PlayerCapabilities.setSpeed, PlayerCapabilities.playbackControl]);
     const player = new OrderedStampPlayer(
       new UserNodePlayer(fakePlayer as any, {
         setUserNodeDiagnostics: jest.fn(),

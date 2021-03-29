@@ -15,6 +15,8 @@ import { storiesOf } from "@storybook/react";
 import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
 import PlaybackSpeedControls from "@foxglove-studio/app/components/PlaybackSpeedControls";
 
+const CAPABILITIES = ["setSpeed", "playbackControl"];
+
 function ControlsStory() {
   return (
     <div
@@ -42,21 +44,21 @@ storiesOf("<PlaybackSpeedControls>", module)
   })
   .add("without a speed from the player", () => {
     return (
-      <MockMessagePipelineProvider capabilities={["setSpeed"]} activeData={{ speed: undefined }}>
+      <MockMessagePipelineProvider capabilities={CAPABILITIES} activeData={{ speed: undefined }}>
         <ControlsStory />
       </MockMessagePipelineProvider>
     );
   })
   .add("with a speed", () => {
     return (
-      <MockMessagePipelineProvider capabilities={["setSpeed"]}>
+      <MockMessagePipelineProvider capabilities={CAPABILITIES}>
         <ControlsStory />
       </MockMessagePipelineProvider>
     );
   })
   .add("with a very small speed", () => {
     return (
-      <MockMessagePipelineProvider capabilities={["setSpeed"]} activeData={{ speed: 0.01 }}>
+      <MockMessagePipelineProvider capabilities={CAPABILITIES} activeData={{ speed: 0.01 }}>
         <ControlsStory />
       </MockMessagePipelineProvider>
     );

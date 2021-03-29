@@ -12,7 +12,6 @@ import {
   BobjectMessage,
   Message,
   Player,
-  PlayerCapabilities,
   PlayerPresence,
   PlayerState,
   PublishPayload,
@@ -29,7 +28,7 @@ import { Sockets } from "@foxglove/electron-socket/renderer";
 import { RosNode, TcpSocket } from "@foxglove/ros1";
 import { HttpServer } from "@foxglove/xmlrpc/src";
 
-const capabilities = [PlayerCapabilities.advertise];
+const capabilities: string[] = [];
 const NO_WARNINGS = Object.freeze({});
 
 // Connects to `rosmaster` instance using `@foxglove/ros1`. Currently doesn't support seeking or

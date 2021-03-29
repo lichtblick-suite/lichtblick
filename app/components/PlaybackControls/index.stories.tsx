@@ -36,7 +36,7 @@ function getPlayerState(): PlayerState {
   const player: PlayerState = {
     presence: PlayerPresence.PRESENT,
     progress: {},
-    capabilities: [PlayerCapabilities.setSpeed],
+    capabilities: [PlayerCapabilities.setSpeed, PlayerCapabilities.playbackControl],
     playerId: "1",
     activeData: {
       messages: [],
@@ -68,7 +68,11 @@ function Wrapper({
   store?: any;
 }) {
   return (
-    <MockMessagePipelineProvider capabilities={["setSpeed"]} store={store} activeData={activeData}>
+    <MockMessagePipelineProvider
+      capabilities={["setSpeed", "playbackControl"]}
+      store={store}
+      activeData={activeData}
+    >
       <div style={{ padding: 20, margin: 100 }}>{children}</div>
     </MockMessagePipelineProvider>
   );

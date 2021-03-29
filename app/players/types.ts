@@ -303,6 +303,9 @@ export const PlayerCapabilities = {
 
   // Setting speed to something that is not real time.
   setSpeed: "setSpeed",
+
+  // Ability to play, pause, and seek in time.
+  playbackControl: "playbackControl",
 };
 
 // A metrics collector is an interface passed into a `Player`, which will get called when certain

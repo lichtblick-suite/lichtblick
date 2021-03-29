@@ -88,6 +88,9 @@ function Root() {
   const playerPresence = useMessagePipeline(
     useCallback(({ playerState }) => playerState.presence, []),
   );
+  const playerCapabilities = useMessagePipeline(
+    useCallback(({ playerState }) => playerState.capabilities, []),
+  );
   const [preferencesOpen, setPreferencesOpen] = useState(false);
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
   const [messagePathSyntaxModalOpen, setMessagePathSyntaxModalOpen] = useState(false);
@@ -195,6 +198,10 @@ function Root() {
     }
   })();
 
+  const showPlaybackControls =
+    playerPresence === PlayerPresence.NOT_PRESENT ||
+    playerCapabilities.indexOf("playbackControl") !== -1;
+
   return (
     <LinkHandlerContext.Provider value={handleInternalLink}>
       <div ref={containerRef} className="app-container" tabIndex={0}>
@@ -244,7 +251,7 @@ function Root() {
           </SToolbarItem>
         </Toolbar>
         <PanelLayout />
-        <PlaybackControls />
+        {showPlaybackControls && <PlaybackControls />}
       </div>
     </LinkHandlerContext.Provider>
   );

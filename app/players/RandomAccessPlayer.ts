@@ -92,7 +92,7 @@ if (SEEK_ON_START_NS >= SEEK_BACK_NANOSECONDS) {
 
 export const SEEK_START_DELAY_MS = 100;
 
-const capabilities = [PlayerCapabilities.setSpeed];
+const capabilities = [PlayerCapabilities.setSpeed, PlayerCapabilities.playbackControl];
 
 export type RandomAccessPlayerOptions = {
   metricsCollector?: PlayerMetricsCollectorInterface;
