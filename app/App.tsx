@@ -259,7 +259,7 @@ export default function App(): ReactElement {
       type: "ros1-core",
     },
     {
-      name: "WebSocket",
+      name: "Rosbridge (WebSocket)",
       type: "ws",
     },
     {
