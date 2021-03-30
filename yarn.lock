@@ -1867,7 +1867,7 @@ __metadata:
     react-input-autosize: 3.0.0
     react-json-tree: 0.15.0
     react-markdown: 5.0.3
-    react-monaco-editor: 0.42.0
+    react-monaco-editor: 0.43.0
     react-mosaic-component: "troygibb/react-mosaic#860c8d70ba3c723be07bc6208f0d05e2c3f2915f"
     react-outside-click-handler: 1.3.0
     react-popper: 1.0.0
@@ -19428,16 +19428,16 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"react-monaco-editor@npm:0.42.0":
-  version: 0.42.0
-  resolution: "react-monaco-editor@npm:0.42.0"
+"react-monaco-editor@npm:0.43.0":
+  version: 0.43.0
+  resolution: "react-monaco-editor@npm:0.43.0"
   dependencies:
     monaco-editor: "*"
     prop-types: ^15.7.2
   peerDependencies:
     "@types/react": ^17.x
     react: ^17.x
-  checksum: e409bd5fdce759b6a4e6005c927d49dc170d6f25b25330e2f5261f3286627141ee9de8075adfa82a062da6fe02759fce09d89e394c1fdee8bb600b0c349dcca2
+  checksum: 3d18242d505d2321828218abd491ff317514f354a9a1fa5fcb6ac92e01d58f4e09d7d3408141eab18b975c9d91386aea76a4c19e28196a6bf7523b7c0743803d
   languageName: node
   linkType: hard
 
