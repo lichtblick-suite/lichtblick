@@ -197,8 +197,8 @@ async function getPlayerBuilderFromUserSelection(
         value: "ws://localhost:9090",
         transformer: (str) => {
           const result = parseInputUrl(str, "http:", {
-            "http:": { protocol: "ws:", port: 80 },
-            "https:": { protocol: "wss:", port: 443 },
+            "http:": { protocol: "ws:", port: 9090 },
+            "https:": { protocol: "wss:", port: 9090 },
             "ws:": { port: 9090 },
             "wss:": { port: 9090 },
             "ros:": { protocol: "ws:", port: 9090 },
