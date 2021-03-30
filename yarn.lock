@@ -1793,7 +1793,7 @@ __metadata:
     "@types/http-server": ^0
     "@types/js-yaml": 4.0.0
     "@types/moment-duration-format": 2.2.2
-    "@types/prettier": 2.2.1
+    "@types/prettier": 2.2.3
     "@types/promise-queue": 2.2.0
     "@types/react": 17.0.3
     "@types/react-autocomplete": 1.8.5
@@ -4448,17 +4448,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/prettier@npm:2.2.1":
-  version: 2.2.1
-  resolution: "@types/prettier@npm:2.2.1"
-  checksum: 9dc257dfc51eab6bc1e9ce58df94b309a206b2cdc6768709de3d20f70ae545c616bbc46add6d66f66cfa6cfbb0613dd09e6b6028ff6ff8ba9d3625f38d85cc66
-  languageName: node
-  linkType: hard
-
-"@types/prettier@npm:^2.0.0":
-  version: 2.2.2
-  resolution: "@types/prettier@npm:2.2.2"
-  checksum: 907c2dac93899961706017ecf17d0038b500f499f61d6f1d31e439dae88f7cb90ee944760b1348856baa7befa42761fc53f9bde5add08feccfc810280347d681
+"@types/prettier@npm:2.2.3, @types/prettier@npm:^2.0.0":
+  version: 2.2.3
+  resolution: "@types/prettier@npm:2.2.3"
+  checksum: b7e80288f9f776caca84391a7a217b8baac6b4fce00bb9701af69299d465cb8faf17466f0af0803970c74d2c191767ca729a6d21a2f7e2ce552d1ef6cc0d653a
   languageName: node
   linkType: hard
 
