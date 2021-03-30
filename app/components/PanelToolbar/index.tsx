@@ -39,7 +39,7 @@ import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import HelpModal from "@foxglove-studio/app/components/HelpModal";
 import Icon from "@foxglove-studio/app/components/Icon";
 import { Item, SubMenu } from "@foxglove-studio/app/components/Menu";
-import PanelContext, { usePanelContext } from "@foxglove-studio/app/components/PanelContext";
+import PanelContext from "@foxglove-studio/app/components/PanelContext";
 import { getPanelTypeFromMosaic } from "@foxglove-studio/app/components/PanelToolbar/utils";
 import ShareJsonModal from "@foxglove-studio/app/components/ShareJsonModal";
 import PanelList, { PanelSelection } from "@foxglove-studio/app/panels/PanelList";
@@ -163,7 +163,7 @@ function StandardMenuItems({
   );
 
   const { store } = useContext(ReactReduxContext);
-  const panelContext = usePanelContext();
+  const panelContext = useContext(PanelContext);
 
   const type = getPanelType();
   if (!type) {

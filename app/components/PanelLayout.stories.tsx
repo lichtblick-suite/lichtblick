@@ -41,9 +41,7 @@ storiesOf("<PanelLayout>", module)
           store={store}
           omitDragAndDrop
         >
-          <MockPanelContextProvider>
-            <PanelLayout />
-          </MockPanelContextProvider>
+          <PanelLayout />
         </PanelSetup>
       </DndProvider>
     );
