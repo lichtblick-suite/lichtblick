@@ -311,6 +311,7 @@ export const PlayerCapabilities = {
 // A metrics collector is an interface passed into a `Player`, which will get called when certain
 // events happen, so we can track those events in some metrics system.
 export interface PlayerMetricsCollectorInterface {
+  setProperty(key: string, value: string | number | boolean): void;
   playerConstructed(): void;
   initialized(): void;
   play(speed: number): void;

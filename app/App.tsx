@@ -52,6 +52,7 @@ import ShortcutsModal from "@foxglove-studio/app/components/ShortcutsModal";
 import SpinningLoadingIcon from "@foxglove-studio/app/components/SpinningLoadingIcon";
 import TinyConnectionPicker from "@foxglove-studio/app/components/TinyConnectionPicker";
 import Toolbar from "@foxglove-studio/app/components/Toolbar";
+import AnalyticsProvider from "@foxglove-studio/app/context/AnalyticsProvider";
 import { useAppConfiguration } from "@foxglove-studio/app/context/AppConfigurationContext";
 import ExperimentalFeaturesLocalStorageProvider from "@foxglove-studio/app/context/ExperimentalFeaturesLocalStorageProvider";
 import LinkHandlerContext from "@foxglove-studio/app/context/LinkHandlerContext";
@@ -65,7 +66,10 @@ import experimentalFeatures from "@foxglove-studio/app/experimentalFeatures";
 import welcomeLayout from "@foxglove-studio/app/layouts/welcomeLayout";
 import { PlayerPresence } from "@foxglove-studio/app/players/types";
 import getGlobalStore from "@foxglove-studio/app/store/getGlobalStore";
+import { ImportPanelLayoutPayload } from "@foxglove-studio/app/types/panels";
 import inAutomatedRunMode from "@foxglove-studio/app/util/inAutomatedRunMode";
+
+type TestableWindow = Window & { setPanelLayout?: (payload: ImportPanelLayoutPayload) => void };
 
 const SToolbarItem = styled.div`
   flex: 0 0 auto;
@@ -122,7 +126,8 @@ function Root() {
       containerRef.current.focus();
     }
     // Add a hook for integration tests.
-    (window as any).setPanelLayout = (payload: any) => dispatch(importPanelLayout(payload));
+    (window as TestableWindow).setPanelLayout = (payload: ImportPanelLayoutPayload) =>
+      dispatch(importPanelLayout(payload));
 
     OsContextSingleton?.addIpcEventListener("enter-full-screen", () => setFullScreen(true));
     OsContextSingleton?.addIpcEventListener("leave-full-screen", () => setFullScreen(false));
@@ -282,19 +287,21 @@ export default function App(): ReactElement {
   return (
     <OsContextAppConfigurationProvider>
       <Provider store={globalStore}>
-        <ExperimentalFeaturesLocalStorageProvider features={experimentalFeatures}>
-          <ErrorBoundary>
-            <OsContextLayoutStorageProvider>
-              <LayoutStorageReduxAdapter />
-              <PlayerManager playerSources={playerSources}>
-                <NativeFileMenuPlayerSelection />
-                <DndProvider backend={HTML5Backend}>
-                  <Root />
-                </DndProvider>
-              </PlayerManager>
-            </OsContextLayoutStorageProvider>
-          </ErrorBoundary>
-        </ExperimentalFeaturesLocalStorageProvider>
+        <AnalyticsProvider>
+          <ExperimentalFeaturesLocalStorageProvider features={experimentalFeatures}>
+            <ErrorBoundary>
+              <OsContextLayoutStorageProvider>
+                <LayoutStorageReduxAdapter />
+                <PlayerManager playerSources={playerSources}>
+                  <NativeFileMenuPlayerSelection />
+                  <DndProvider backend={HTML5Backend}>
+                    <Root />
+                  </DndProvider>
+                </PlayerManager>
+              </OsContextLayoutStorageProvider>
+            </ErrorBoundary>
+          </ExperimentalFeaturesLocalStorageProvider>
+        </AnalyticsProvider>
       </Provider>
     </OsContextAppConfigurationProvider>
   );

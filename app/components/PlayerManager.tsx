@@ -27,6 +27,7 @@ import {
   MaybePlayer,
   MessagePipelineProvider,
 } from "@foxglove-studio/app/components/MessagePipeline";
+import { useAnalytics } from "@foxglove-studio/app/context/AnalyticsContext";
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import PlayerSelectionContext, {
   PlayerSelection,
@@ -41,6 +42,7 @@ import {
 import useElectronFilesToOpen from "@foxglove-studio/app/hooks/useElectronFilesToOpen";
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { usePrompt } from "@foxglove-studio/app/hooks/usePrompt";
+import AnalyticsMetricsCollector from "@foxglove-studio/app/players/AnalyticsMetricsCollector";
 import OrderedStampPlayer from "@foxglove-studio/app/players/OrderedStampPlayer";
 import Ros1Player from "@foxglove-studio/app/players/Ros1Player";
 import RosbridgePlayer from "@foxglove-studio/app/players/RosbridgePlayer";
@@ -144,6 +146,8 @@ async function getPlayerBuilderFromUserSelection(
   prompt: ReturnType<typeof usePrompt>,
   options: BuildPlayerOptions,
 ): Promise<(() => Promise<BuiltPlayer>) | undefined> {
+  options.metricsCollector.setProperty("player", definition.type);
+
   switch (definition.type) {
     case "file": {
       let file: File;
@@ -186,7 +190,7 @@ async function getPlayerBuilderFromUserSelection(
         return undefined;
       }
       return async () => ({
-        player: new Ros1Player(url),
+        player: new Ros1Player(url, options.metricsCollector),
         sources: [url],
       });
     }
@@ -216,7 +220,7 @@ async function getPlayerBuilderFromUserSelection(
       }
 
       return async () => ({
-        player: new RosbridgePlayer(url),
+        player: new RosbridgePlayer(url, options.metricsCollector),
         sources: [url],
       });
     }
@@ -318,9 +322,10 @@ function PlayerManager({
     [setDiagnostics, setLogs, setRosLib, initialMessageOrder],
   );
 
-  const buildPlayerOptions = useShallowMemo({
+  const buildPlayerOptions: BuildPlayerOptions = useShallowMemo({
     diskBagCaching: useExperimentalFeature("diskBagCaching"),
     unlimitedMemoryCache: useExperimentalFeature("unlimitedMemoryCache"),
+    metricsCollector: new AnalyticsMetricsCollector(useAnalytics()),
   });
 
   useEffect(() => {

@@ -67,6 +67,10 @@ export interface OsContext {
   getHostname(): string;
   // Get a listing for every network interface discovered on the system
   getNetworkInterfaces(): NetworkInterface[];
+  // Get a unique identifier for the system from the operating system
+  getMachineId(): string;
+  // Get the version string from package.json
+  getAppVersion(): string;
 
   // file backed key/value storage
   storage: Storage;

@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import NoopMetricsCollector from "@foxglove-studio/app/players/NoopMetricsCollector";
 import RosbridgePlayer from "@foxglove-studio/app/players/RosbridgePlayer";
 import { isBobject, deepParse } from "@foxglove-studio/app/util/binaryObjects";
 
@@ -113,7 +114,7 @@ describe("RosbridgePlayer", () => {
   let player: RosbridgePlayer;
 
   beforeEach(() => {
-    player = new RosbridgePlayer("ws://some-url");
+    player = new RosbridgePlayer("ws://some-url", new NoopMetricsCollector());
   });
 
   afterEach(() => {

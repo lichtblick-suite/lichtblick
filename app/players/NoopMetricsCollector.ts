@@ -18,6 +18,9 @@ import {
 } from "@foxglove-studio/app/players/types";
 
 export default class NoopMetricsCollector implements PlayerMetricsCollectorInterface {
+  setProperty(_key: string, _value: string | number | boolean): void {
+    // no-op
+  }
   playerConstructed(): void {
     // no-op
   }

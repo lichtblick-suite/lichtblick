@@ -12,6 +12,7 @@ import {
   BobjectMessage,
   Message,
   Player,
+  PlayerMetricsCollectorInterface,
   PlayerPresence,
   PlayerState,
   PublishPayload,
@@ -49,11 +50,15 @@ export default class Ros1Player implements Player {
   private _requestTopicsTimeout?: ReturnType<typeof setTimeout>; // setTimeout() handle for _requestTopics().
   private _bobjectTopics: Set<string> = new Set();
   private _parsedTopics: Set<string> = new Set();
+  private _hasReceivedMessage = false;
+  private _metricsCollector: PlayerMetricsCollectorInterface;
   private _sentTopicsErrorNotification = false;
 
-  constructor(url: string) {
+  constructor(url: string, metricsCollector: PlayerMetricsCollectorInterface) {
+    this._metricsCollector = metricsCollector;
     this._url = url;
     this._start = fromMillis(Date.now());
+    this._metricsCollector.playerConstructed();
     this._open();
   }
 
@@ -100,6 +105,10 @@ export default class Ros1Player implements Player {
       const sortedTopics: Topic[] = sortBy(topics, "name");
       if (isEqual(sortedTopics, this._providerTopics)) {
         return;
+      }
+
+      if (this._providerTopics == undefined) {
+        this._metricsCollector.initialized();
       }
 
       this._providerTopics = sortedTopics;
@@ -180,6 +189,8 @@ export default class Ros1Player implements Player {
     if (this._rosNode) {
       this._rosNode.shutdown();
     }
+    this._metricsCollector.close();
+    this._hasReceivedMessage = false;
   }
 
   setSubscriptions(subscriptions: SubscribePayload[]): void {
@@ -225,6 +236,12 @@ export default class Ros1Player implements Player {
         }
 
         const receiveTime = fromMillis(Date.now());
+
+        if (!this._hasReceivedMessage) {
+          this._hasReceivedMessage = true;
+          this._metricsCollector.recordTimeToFirstMsgs();
+        }
+
         if (this._bobjectTopics.has(topicName)) {
           this._bobjects.push({
             topic: topicName,

@@ -40,6 +40,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@amplitude/types@npm:^1.5.3":
+  version: 1.5.3
+  resolution: "@amplitude/types@npm:1.5.3"
+  checksum: 7c2db9c5f6089af64f4ce1fdc3a347dd60861423893f5c55dc1494ff24dec2325f390d6737a239240ac02cab94e1693e3b50de99d0188d7dcdded22d54a2a480
+  languageName: node
+  linkType: hard
+
+"@amplitude/ua-parser-js@npm:0.7.24":
+  version: 0.7.24
+  resolution: "@amplitude/ua-parser-js@npm:0.7.24"
+  checksum: c91c6e08960c737b54b1d727b9b7be70fa39d6c6d896eb40040213e0785708cd032481458c97a435e28bf21f1a06527dc45aab22765cb536d757a848d1dade41
+  languageName: node
+  linkType: hard
+
+"@amplitude/utils@npm:^1.0.5":
+  version: 1.5.3
+  resolution: "@amplitude/utils@npm:1.5.3"
+  dependencies:
+    "@amplitude/types": ^1.5.3
+    tslib: ^1.9.3
+  checksum: 5e5b082513fc3d03afd0c92c3fa2d20ee30ad7e1f91539f8497238167ada1b07d7bca444b95e09d004eca43e791cad1a7c8622371559fbee77ec12cf49c15368
+  languageName: node
+  linkType: hard
+
 "@babel/code-frame@npm:7.10.4":
   version: 7.10.4
   resolution: "@babel/code-frame@npm:7.10.4"
@@ -3784,6 +3808,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/amplitude-js@npm:7.0.1":
+  version: 7.0.1
+  resolution: "@types/amplitude-js@npm:7.0.1"
+  checksum: c613d3d828c444cc7cb93f6870b403d25ae6148cc97136f717be5a156d2e57f7d7d1c5c180edd0c2d3ef795f40972e9e950f04ef7702c64a4c7037320fb9a6a8
+  languageName: node
+  linkType: hard
+
 "@types/anymatch@npm:*":
   version: 1.3.1
   resolution: "@types/anymatch@npm:1.3.1"
@@ -5721,6 +5752,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"amplitude-js@npm:8.1.0":
+  version: 8.1.0
+  resolution: "amplitude-js@npm:8.1.0"
+  dependencies:
+    "@amplitude/ua-parser-js": 0.7.24
+    "@amplitude/utils": ^1.0.5
+    blueimp-md5: ^2.10.0
+    query-string: 5
+  checksum: 68bded962e582b217d635b95ae1d0b7aa0fb18f60021dee3d7586c734ba2e9e553f59ef94911833ed85c1b8ddfbd464d8112a751aa472cd2243ac831f3adaee7
+  languageName: node
+  linkType: hard
+
 "ansi-align@npm:^3.0.0":
   version: 3.0.0
   resolution: "ansi-align@npm:3.0.0"
@@ -6843,6 +6886,13 @@ __metadata:
   version: 3.7.2
   resolution: "bluebird@npm:3.7.2"
   checksum: 4f2288662f3d4eadbb82d4daa4a7d7976a28fa3c7eb4102c9b4033b03e5be4574ba123ac52a7c103cde4cb7b2d2afc1dbe41817ca15a29ff21ecd258d0286047
+  languageName: node
+  linkType: hard
+
+"blueimp-md5@npm:^2.10.0":
+  version: 2.18.0
+  resolution: "blueimp-md5@npm:2.18.0"
+  checksum: cc115b7e0f5573a26a3a6af699f98f7d29477bd529ffaee06ba8dcb2b470f88b0e762d09df771bc356fcdcfdb0d1d02cd8529889f32b03c7d3baf42817c46d67
   languageName: node
   linkType: hard
 
@@ -11710,6 +11760,7 @@ __metadata:
     "@jest/types": 26.6.2
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.0-beta.1
     "@sentry/electron": 2.4.0
+    "@types/amplitude-js": 7.0.1
     "@types/case-sensitive-paths-webpack-plugin": 2.1.4
     "@types/circular-dependency-plugin": ^5
     "@types/electron-devtools-installer": 2.2.0
@@ -11719,6 +11770,7 @@ __metadata:
     "@types/webpack-dev-server": 3.11.1
     "@typescript-eslint/eslint-plugin": 4.16.1
     "@typescript-eslint/parser": 4.16.1
+    amplitude-js: 8.1.0
     babel-loader: 8.2.2
     babel-plugin-transform-import-meta: 1.0.1
     browserify-zlib: 0.2.0
@@ -11751,6 +11803,7 @@ __metadata:
     monaco-editor-webpack-plugin: 3.0.0
     nearley: 2.20.1
     nearley-loader: 2.0.0
+    node-machine-id: 1.1.12
     path-browserify: 1.0.1
     prettier: 2.2.1
     react-svg-loader: 3.0.3
@@ -16856,6 +16909,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"node-machine-id@npm:1.1.12":
+  version: 1.1.12
+  resolution: "node-machine-id@npm:1.1.12"
+  checksum: 893cf7e3693fd693c3564a2dc1e32c5e43bb09e819365a3fbcbcc9fe1b694a2dd647da842483992653bd4afb7f797ef67c9e654665de5443143eed1db520b495
+  languageName: node
+  linkType: hard
+
 "node-modules-regexp@npm:^1.0.0":
   version: 1.0.0
   resolution: "node-modules-regexp@npm:1.0.0"
@@ -18591,6 +18651,17 @@ fsevents@^1.2.7:
   version: 6.5.2
   resolution: "qs@npm:6.5.2"
   checksum: fa0410eff2c05ce3328e11f82db4015e7819c986ee056d6b62b06ae112f4929af09ea3b879ca168ff9f0338f50972bba487ad0e46c879e42bfaf63c3c2ea7f09
+  languageName: node
+  linkType: hard
+
+"query-string@npm:5":
+  version: 5.1.1
+  resolution: "query-string@npm:5.1.1"
+  dependencies:
+    decode-uri-component: ^0.2.0
+    object-assign: ^4.1.0
+    strict-uri-encode: ^1.0.0
+  checksum: 68d4ad519a9fc288bc9ade3e515ce89a6806b88fd92e1459277570dca753665bb1b43e4cc7747012fc3b19b3d4283a724d519b568859943f57aaa3668c4d5b4b
   languageName: node
   linkType: hard
 
@@ -21714,6 +21785,13 @@ fsevents@^1.2.7:
   version: 1.0.1
   resolution: "stream-shift@npm:1.0.1"
   checksum: 5d777b222e460dc660ee29acad4f99649eb8d0051d3cb648fc92f3f77557b33d0a8ad656291c2cfa87703204191534a6003c2b035606a699674d0bb600353ad3
+  languageName: node
+  linkType: hard
+
+"strict-uri-encode@npm:^1.0.0":
+  version: 1.1.0
+  resolution: "strict-uri-encode@npm:1.1.0"
+  checksum: 6c80f6998a45414d7c124772383cc10ce7bd22586af80762407cded1569666564fb8c0a4c9c997ac39a1116d46dfffc5d57135e759a0acb66a4da1191f5a3a4a
   languageName: node
   linkType: hard
 

@@ -1421,6 +1421,9 @@ describe("RandomAccessPlayer", () => {
       _seeked: number = 0;
       _speed: number[] = [];
 
+      setProperty(_key: string, _value: string | number | boolean): void {
+        // no-op
+      }
       playerConstructed(): void {
         // no-op
       }

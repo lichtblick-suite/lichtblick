@@ -9,14 +9,18 @@ import RandomAccessPlayer from "@foxglove-studio/app/players/RandomAccessPlayer"
 import AutomatedRunPlayer from "@foxglove-studio/app/players/automatedRun/AutomatedRunPlayer";
 import PerformanceMeasuringClient from "@foxglove-studio/app/players/automatedRun/performanceMeasuringClient";
 import videoRecordingClient from "@foxglove-studio/app/players/automatedRun/videoRecordingClient";
-import { Player } from "@foxglove-studio/app/players/types";
+import { Player, PlayerMetricsCollectorInterface } from "@foxglove-studio/app/players/types";
 import {
   inVideoRecordingMode,
   inPlaybackPerformanceMeasuringMode,
 } from "@foxglove-studio/app/util/inAutomatedRunMode";
 import { getSeekToTime } from "@foxglove-studio/app/util/time";
 
-export type BuildPlayerOptions = { unlimitedMemoryCache: boolean; diskBagCaching: boolean };
+export type BuildPlayerOptions = {
+  unlimitedMemoryCache: boolean;
+  diskBagCaching: boolean;
+  metricsCollector: PlayerMetricsCollectorInterface;
+};
 
 export function buildPlayerFromDescriptor(
   childDescriptor: DataProviderDescriptor,
@@ -52,7 +56,7 @@ export function buildPlayerFromDescriptor(
   }
 
   return new RandomAccessPlayer(rootDescriptor, {
-    metricsCollector: undefined,
+    metricsCollector: options.metricsCollector,
     seekToTime: getSeekToTime(),
   });
 }
