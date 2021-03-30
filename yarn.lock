@@ -1886,7 +1886,7 @@ __metadata:
     reselect: 4.0.0
     rosbag: "github:foxglove/rosbag.js#fc61125fbc01ff55698c5ed48987b2d9e7599572"
     roslib: "github:foxglove/roslibjs#364a19d5f3ada7543fac9194a50b96087c7556ba"
-    sanitize-html: 1.20.0
+    sanitize-html: 2.3.3
     seedrandom: 3.0.5
     shallowequal: 1.1.0
     storycap: 3.0.3
@@ -6091,7 +6091,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"array-uniq@npm:^1.0.1, array-uniq@npm:^1.0.2":
+"array-uniq@npm:^1.0.1":
   version: 1.0.3
   resolution: "array-uniq@npm:1.0.3"
   checksum: ae11b7fc1e624f7ed45f7a269b521f3f9f73dbff277be9c61fe0240c497bd3fba86367753e0ebdf49bcfd3fee14f4ebab80f573545878525eb48429514a02124
@@ -8133,7 +8133,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"colorette@npm:^1.2.1":
+"colorette@npm:^1.2.1, colorette@npm:^1.2.2":
   version: 1.2.2
   resolution: "colorette@npm:1.2.2"
   checksum: e240f0c94b8d9f34b52bd17b50fc13a3b74f9e662edeaa2b0c65e06ec6b1fc6367fb42b834ec5a1d819d68b74a3d850f3bd3e284f9e614d6c4ffa122f83c6ec5
@@ -12935,7 +12935,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"htmlparser2@npm:^3.10.0, htmlparser2@npm:^3.10.1":
+"htmlparser2@npm:^3.10.1":
   version: 3.10.1
   resolution: "htmlparser2@npm:3.10.1"
   dependencies:
@@ -15224,7 +15224,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"klona@npm:^2.0.4":
+"klona@npm:^2.0.3, klona@npm:^2.0.4":
   version: 2.0.4
   resolution: "klona@npm:2.0.4"
   checksum: be4a0c784135b6a75ac2c5ac9564894807aa050de041ac775a20d3ee46969ac5c3d37503d12c215c7decb592196e59e22852fd0cf28ac0cc29fe3a6df9168624
@@ -15557,13 +15557,6 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"lodash.escaperegexp@npm:^4.1.2":
-  version: 4.1.2
-  resolution: "lodash.escaperegexp@npm:4.1.2"
-  checksum: 475d069cdacfe279e0e2c72109821f38fc59ba44c88ddc2d96cdf5364e8ada2cd1dd73195df05893ab185fe4f503e9657f1e50e31dff624594c91ba1316f40e1
-  languageName: node
-  linkType: hard
-
 "lodash.flatten@npm:^4.4.0":
   version: 4.4.0
   resolution: "lodash.flatten@npm:4.4.0"
@@ -15599,24 +15592,10 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"lodash.isstring@npm:^4.0.1":
-  version: 4.0.1
-  resolution: "lodash.isstring@npm:4.0.1"
-  checksum: 20c46960b74fd63c27b534f1725cd4141ac19b35c7250affee37c8b7899b1a4c5e9820becfafe571a4d48cd4c86206ee03c2e93fe943dbeab82ddd5cab710540
-  languageName: node
-  linkType: hard
-
 "lodash.merge@npm:^4.6.1":
   version: 4.6.2
   resolution: "lodash.merge@npm:4.6.2"
   checksum: 4e2bb42a87a148991458d7c384bc197e96f7115e9536fc8e2c86ae9e99ce1c1f693ff15eb85761952535f48d72253aed8e673d9f32dde3e671cd91e3fde220a7
-  languageName: node
-  linkType: hard
-
-"lodash.mergewith@npm:^4.6.1":
-  version: 4.6.2
-  resolution: "lodash.mergewith@npm:4.6.2"
-  checksum: 3561b63cebc629721ab4c016627fc54929ee33cdef1854b4a15ade71dd8eb5f2fc602830efe5395aed41c607d65e2cce356667116aa7156b82468594b42ab95f
   languageName: node
   linkType: hard
 
@@ -17664,6 +17643,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"parse-srcset@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "parse-srcset@npm:1.0.2"
+  checksum: f79a26845a6ec70c5b97713798cc8492854ac246e5979cd081db68fa811a96a90399bfea7691edf516491c79e8450ed2cfacdcd2c75ff18250c4847dd552dbc4
+  languageName: node
+  linkType: hard
+
 "parse5-htmlparser2-tree-adapter@npm:^6.0.0":
   version: 6.0.1
   resolution: "parse5-htmlparser2-tree-adapter@npm:6.0.1"
@@ -18241,14 +18227,14 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.2.6":
-  version: 8.2.6
-  resolution: "postcss@npm:8.2.6"
+"postcss@npm:^8.0.2, postcss@npm:^8.2.6":
+  version: 8.2.8
+  resolution: "postcss@npm:8.2.8"
   dependencies:
-    colorette: ^1.2.1
+    colorette: ^1.2.2
     nanoid: ^3.1.20
     source-map: ^0.6.1
-  checksum: 31dcc6632589e5b0d06ae3854122073a38952f3a25280511fa4bd8c2bc254c05d1d1db0913848ed3171c84d41b233ec3fe5d7349de4700f624a16fa93553ccac
+  checksum: 6e17d28833cf918a5ab306bfc7ec66b236dc51ed0f3de959491d40f6a171f5bd5f26de12f74e6bfeebaad44b0ac92b9f477a669d5f1fc07a27d67d8147a4bf6f
   languageName: node
   linkType: hard
 
@@ -20683,21 +20669,18 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"sanitize-html@npm:1.20.0":
-  version: 1.20.0
-  resolution: "sanitize-html@npm:1.20.0"
+"sanitize-html@npm:2.3.3":
+  version: 2.3.3
+  resolution: "sanitize-html@npm:2.3.3"
   dependencies:
-    chalk: ^2.4.1
-    htmlparser2: ^3.10.0
-    lodash.clonedeep: ^4.5.0
-    lodash.escaperegexp: ^4.1.2
-    lodash.isplainobject: ^4.0.6
-    lodash.isstring: ^4.0.1
-    lodash.mergewith: ^4.6.1
-    postcss: ^7.0.5
-    srcset: ^1.0.0
-    xtend: ^4.0.1
-  checksum: 38beea5baafaa11a1a38c0c185dc0013aa62f6a23ed21411579180e337fa185b275968239323c2a716404e9050610888e162cd58e5c376101ea7d765c903fe93
+    deepmerge: ^4.2.2
+    escape-string-regexp: ^4.0.0
+    htmlparser2: ^6.0.0
+    is-plain-object: ^5.0.0
+    klona: ^2.0.3
+    parse-srcset: ^1.0.2
+    postcss: ^8.0.2
+  checksum: 68cef1cf949bd58afb4c6fcfd55ba6ac9f342dcf5c8cf5aacd5fd532bca3c77d15c29c753eef7089923583a75e4877dede2fd72581ef535028651f8f144971e2
   languageName: node
   linkType: hard
 
@@ -21524,16 +21507,6 @@ fsevents@^1.2.7:
   version: 1.0.3
   resolution: "sprintf-js@npm:1.0.3"
   checksum: 51df1bce9e577287f56822d79ac5bd94f6c634fccf193895f2a1d2db2e975b6aa7bc97afae9cf11d49b7c37fe4afc188ff5c4878be91f2c86eabd11c5df8b62c
-  languageName: node
-  linkType: hard
-
-"srcset@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "srcset@npm:1.0.0"
-  dependencies:
-    array-uniq: ^1.0.2
-    number-is-nan: ^1.0.0
-  checksum: d0a091e4235fe9f564cba96e9adb20977571b5beda37251daa7d08f383d3ff18831c30de530d2dbc8cc28f2faba453d63c7914d744bc2956aa4f05a0a93f9268
   languageName: node
   linkType: hard
 
