@@ -23,7 +23,7 @@
     "byte-base64": "1.1.0",
     "cross-fetch": "3.1.1",
     "sax": "1.2.4",
-    "web-encoding": "1.1.0",
+    "web-encoding": "1.1.2",
     "xmlbuilder2": "2.4.0"
   },
   "devDependencies": {
