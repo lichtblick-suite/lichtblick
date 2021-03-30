@@ -215,6 +215,7 @@ export default (env: unknown, argv: WebpackArgv): Configuration => {
   config.plugins?.push(
     new HtmlWebpackPlugin({
       templateContent: `
+        <!doctype html>
         <html>
           <head><meta charset="utf-8"></head>
           <script>global = globalThis;</script>
