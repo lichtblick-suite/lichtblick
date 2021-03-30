@@ -1,0 +1,2 @@
+parserOptions:
+  project: packages/just-fetch/browser/tsconfig.json

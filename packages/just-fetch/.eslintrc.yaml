@@ -1,0 +1,5 @@
+parserOptions:
+  project: packages/just-fetch/tsconfig.json
+
+ignorePatterns:
+  - dist/

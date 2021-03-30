@@ -1,0 +1,12 @@
+{
+  "extends": "../../../tsconfig.json",
+  "include": ["index.ts"],
+  "compilerOptions": {
+    "outDir": "../dist/browser",
+    "target": "es2020",
+    "module": "commonjs",
+    "lib": ["es2020", "dom"],
+    "declaration": true,
+    "rootDir": "."
+  }
+}
