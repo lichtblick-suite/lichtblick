@@ -311,7 +311,7 @@ app.on("ready", async () => {
     await Promise.race([
       Promise.allSettled([
         installExtension(REACT_DEVELOPER_TOOLS),
-        installExtension(REDUX_DEVTOOLS),
+        (process.env.REDUX_DEVTOOLS ?? "") !== "" ? installExtension(REDUX_DEVTOOLS) : null,
       ]).then((results) => {
         finished = true;
         console.log("Finished:", results);
