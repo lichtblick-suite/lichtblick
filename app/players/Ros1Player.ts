@@ -119,7 +119,7 @@ export default class Ros1Player implements Player {
     } catch (error) {
       if (!this._sentTopicsErrorNotification) {
         this._sentTopicsErrorNotification = true;
-        sendNotification("Error connecting to ROS", error, "app", "error");
+        sendNotification("Error connecting to ROS", error, "user", "error");
       }
     } finally {
       // Regardless of what happens, request topics again in a little bit.

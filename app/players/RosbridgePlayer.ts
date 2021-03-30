@@ -206,7 +206,7 @@ export default class RosbridgePlayer implements Player {
     } catch (error) {
       if (!this._sentTopicsErrorNotification) {
         this._sentTopicsErrorNotification = true;
-        sendNotification("Error in fetching topics and datatypes", error, "app", "error");
+        sendNotification("Failed to fetch topics from rosbridge", error, "user", "error");
       }
     } finally {
       // Regardless of what happens, request topics again in a little bit.
