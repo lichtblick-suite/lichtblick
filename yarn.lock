@@ -1864,7 +1864,7 @@ __metadata:
     react-dom: 17.0.1
     react-highlight-words: 0.17.0
     react-hover-observer: 2.1.1
-    react-input-autosize: 2.2.2
+    react-input-autosize: 3.0.0
     react-json-tree: 0.15.0
     react-markdown: 5.0.3
     react-monaco-editor: 0.42.0
@@ -19347,7 +19347,18 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"react-input-autosize@npm:2.2.2, react-input-autosize@npm:^2.1.2":
+"react-input-autosize@npm:3.0.0":
+  version: 3.0.0
+  resolution: "react-input-autosize@npm:3.0.0"
+  dependencies:
+    prop-types: ^15.5.8
+  peerDependencies:
+    react: ^16.3.0 || ^17.0.0
+  checksum: 1e2923da6ead593f1efae1951271d95a5807d3f4eef392dfa20092bb218e811da913213ab0b4367199d2643d8c765ff03cab01aea4905fb7ae42f25c0608ca08
+  languageName: node
+  linkType: hard
+
+"react-input-autosize@npm:^2.1.2":
   version: 2.2.2
   resolution: "react-input-autosize@npm:2.2.2"
   dependencies:
