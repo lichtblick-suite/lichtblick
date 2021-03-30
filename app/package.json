@@ -119,7 +119,7 @@
     "@types/seedrandom": "3.0.0",
     "@types/shallowequal": "1.1.1",
     "@types/string-hash": "1.1.1",
-    "@types/styled-components": "5.1.7",
+    "@types/styled-components": "5.1.9",
     "@types/tinycolor2": "1.4.2",
     "@types/url-search-params": "1.1.0",
     "@types/uuid": "8.3.0",
