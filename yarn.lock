@@ -1899,7 +1899,7 @@ __metadata:
     use-debounce: 6.0.0
     uuid: 8.3.2
     wasm-lz4: 1.0.0
-    ws: 7.4.3
+    ws: 7.4.4
   languageName: unknown
   linkType: soft
 
@@ -24394,9 +24394,9 @@ typescript@4.2.2:
   languageName: node
   linkType: hard
 
-"ws@npm:7.4.3, ws@npm:^7.2.1, ws@npm:^7.2.3":
-  version: 7.4.3
-  resolution: "ws@npm:7.4.3"
+"ws@npm:7.4.4, ws@npm:^7.2.1, ws@npm:^7.2.3":
+  version: 7.4.4
+  resolution: "ws@npm:7.4.4"
   peerDependencies:
     bufferutil: ^4.0.1
     utf-8-validate: ^5.0.2
@@ -24405,7 +24405,7 @@ typescript@4.2.2:
       optional: true
     utf-8-validate:
       optional: true
-  checksum: 493655b7c4589d09ff3c2b6e8870b9ad7f7aea0aff34034e2dbb9a2e13f6868a47b06b423bc2365aec6143500b04ad24fdaecfbd9a6752f8eab2d339182c9884
+  checksum: ad08761ed753cdd3f7172e9a9efc7d74e7e196623cace2380e5f74ff0abd16196e03223bd4148a34278dcbc653ee3841994635419281cbf303b3f22c589e2ec4
   languageName: node
   linkType: hard
 
