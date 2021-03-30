@@ -72,6 +72,8 @@ export default class RosbridgePlayer implements Player {
   _bobjectTopics: Set<string> = new Set();
   _parsedTopics: Set<string> = new Set();
   _receivedBytes: number = 0;
+  _sentConnectionClosedNotification = false;
+  _sentTopicsErrorNotification = false;
 
   constructor(url: string) {
     this._url = url;
@@ -98,6 +100,7 @@ export default class RosbridgePlayer implements Player {
     rosClient.on("error", (error) => {
       // TODO(JP): Figure out which kinds of errors we can get here, and which ones we should
       // actually show to the user.
+      // The "workersocket" transport just sends `null` as the error data: https://github.com/RobotWebTools/roslibjs/blob/6c17327cae14ca0c76ca5f71de5661279207219c/src/util/workerSocket.js#L27
       console.warn("WebSocket error", error);
     });
 
@@ -112,8 +115,17 @@ export default class RosbridgePlayer implements Player {
       delete this._rosClient;
       this._emitState();
 
+      if (!this._sentConnectionClosedNotification) {
+        this._sentConnectionClosedNotification = true;
+        sendNotification(
+          "Rosbridge connection failed",
+          `Check that the rosbridge WebSocket server at ${this._url} is reachable.`,
+          "user",
+          "error",
+        );
+      }
       // Try connecting again.
-      setTimeout(this._open, 1000);
+      setTimeout(this._open, 3000);
     });
   };
 
@@ -183,7 +195,10 @@ export default class RosbridgePlayer implements Player {
       this.setSubscriptions(this._requestedSubscriptions);
       this._emitState();
     } catch (error) {
-      sendNotification("Error connecting to rosbridge", error, "app", "error");
+      if (!this._sentTopicsErrorNotification) {
+        this._sentTopicsErrorNotification = true;
+        sendNotification("Error in fetching topics and datatypes", error, "app", "error");
+      }
     } finally {
       // Regardless of what happens, request topics again in a little bit.
       this._requestTopicsTimeout = setTimeout(this._requestTopics, 3000);

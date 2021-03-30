@@ -109,8 +109,8 @@ storiesOf("<TextField>", module).add("default", () => {
       <Box title="uncontrolled">
         <UncontrolledExample />
       </Box>
-      <Box title="focusOnMount">
-        <TextField defaultValue="foo" focusOnMount />
+      <Box title="selectOnMount">
+        <TextField defaultValue="foo" selectOnMount />
       </Box>
       <Box title="use hideInlineError to show custom error UI">
         <ErrorExample />

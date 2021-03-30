@@ -15,9 +15,7 @@ const DEFAULT_PROTOS = {
 
 describe("util/url", () => {
   describe("parseInputUrl", () => {
-    it("accepts undefined, empty, and malformed input", () => {
-      expect(parseInputUrl(undefined)).toBeUndefined();
-      expect(parseInputUrl(undefined, "test:", DEFAULT_PROTOS)).toBeUndefined();
+    it("accepts empty, and malformed input", () => {
       expect(parseInputUrl("")).toBeUndefined();
       expect(parseInputUrl("localhost", "test:", DEFAULT_PROTOS)).toEqual(undefined);
     });

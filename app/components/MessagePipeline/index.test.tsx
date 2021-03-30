@@ -21,6 +21,7 @@ import { PlayerPresence, PlayerStateActiveData } from "@foxglove-studio/app/play
 import delay from "@foxglove-studio/app/shared/delay";
 import tick from "@foxglove-studio/app/shared/tick";
 import { initializeLogEvent, resetLogEventForTests } from "@foxglove-studio/app/util/logEvent";
+import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 import {
   MessagePipelineProvider,
@@ -119,7 +120,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     });
 
     rerender({ maybePlayer: { loading: true } });
-    rerender({ maybePlayer: { error: "failed to load player" } });
+    rerender({ maybePlayer: { error: new Error("failed to load player") } });
     rerender({ maybePlayer: { player } });
     await act(() => player.emit());
     await act(() => player.emit({ presence: PlayerPresence.RECONNECTING }));
@@ -143,6 +144,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       PlayerPresence.PRESENT,
       PlayerPresence.RECONNECTING,
     ]);
+    sendNotification.expectCalledDuringTest();
   });
 
   it("throws an error when the player emits before the previous emit has been resolved", () => {

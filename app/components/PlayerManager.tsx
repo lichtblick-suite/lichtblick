@@ -164,18 +164,26 @@ async function getPlayerBuilderFromUserSelection(
       };
     }
     case "ros1-core": {
-      const result = await prompt({
+      const url = await prompt({
+        title: "ROS 1 TCP connection",
+        placeholder: "localhost:11311",
         value: OsContextSingleton?.getEnvVar("ROS_MASTER_URI") ?? "localhost:11311",
-      });
-      const url = parseInputUrl(result, "ros:", {
-        "http:": { port: 80 },
-        "https:": { port: 443 },
-        "ros:": { protocol: "http:", port: 11311 },
+        transformer: (str) => {
+          const result = parseInputUrl(str, "ros:", {
+            "http:": { port: 80 },
+            "https:": { port: 443 },
+            "ros:": { protocol: "http:", port: 11311 },
+          });
+          if (result == undefined) {
+            throw new AppError(
+              "Invalid ROS URL. See the ROS_MASTER_URI at http://wiki.ros.org/ROS/EnvironmentVariables for more info.",
+            );
+          }
+          return result;
+        },
       });
       if (url == undefined) {
-        throw new AppError(
-          "Invalid ROS URL. See the ROS_MASTER_URI at http://wiki.ros.org/ROS/EnvironmentVariables for more info.",
-        );
+        return undefined;
       }
       return async () => ({
         player: new Ros1Player(url),
@@ -183,18 +191,28 @@ async function getPlayerBuilderFromUserSelection(
       });
     }
     case "ws": {
-      const result = await prompt({
+      const url = await prompt({
+        title: "WebSocket connection",
         placeholder: "ws://localhost:9090",
-      });
-      const url = parseInputUrl(result, "http:", {
-        "http:": { protocol: "ws:", port: 80 },
-        "https:": { protocol: "wss:", port: 443 },
-        "ws:": { port: 9090 },
-        "wss:": { port: 9090 },
-        "ros:": { protocol: "ws:", port: 9090 },
+        value: "ws://localhost:9090",
+        transformer: (str) => {
+          const result = parseInputUrl(str, "http:", {
+            "http:": { protocol: "ws:", port: 80 },
+            "https:": { protocol: "wss:", port: 443 },
+            "ws:": { port: 9090 },
+            "wss:": { port: 9090 },
+            "ros:": { protocol: "ws:", port: 9090 },
+          });
+          if (result == undefined) {
+            throw new AppError(
+              "Invalid rosbridge WebSocket URL. Use the ws:// or wss:// protocol.",
+            );
+          }
+          return result;
+        },
       });
       if (url == undefined) {
-        throw new AppError("Invalid rosbridge WebSocket URL. Use the ws:// or wss:// protocol.");
+        return undefined;
       }
 
       return async () => ({
@@ -203,18 +221,25 @@ async function getPlayerBuilderFromUserSelection(
       });
     }
     case "http": {
-      const result = await prompt({
+      const url = await prompt({
+        title: "Remote bag file",
         placeholder: "https://example.com/file.bag",
-      });
-      const url = parseInputUrl(result, "https:", {
-        "http:": { port: 80 },
-        "https:": { port: 443 },
-        "ftp:": { port: 21 },
+        transformer: (str) => {
+          const result = parseInputUrl(str, "https:", {
+            "http:": { port: 80 },
+            "https:": { port: 443 },
+            "ftp:": { port: 21 },
+          });
+          if (result == undefined) {
+            throw new AppError(
+              "Invalid bag URL. Use a http:// or https:// URL of a web hosted bag file.",
+            );
+          }
+          return result;
+        },
       });
       if (url == undefined) {
-        throw new AppError(
-          "Invalid rosbag URL. Use a http:// or https:// URL of a web hosted bag file.",
-        );
+        return undefined;
       }
 
       return () => buildPlayerFromBagURLs([url], options);
@@ -287,7 +312,7 @@ function PlayerManager({
         headerStampPlayer.setGlobalVariables(globalVariablesRef.current);
         setMaybePlayer({ player: headerStampPlayer });
       } catch (error) {
-        setMaybePlayer({ error: error.toString() });
+        setMaybePlayer({ error });
       }
     },
     [setDiagnostics, setLogs, setRosLib, initialMessageOrder],
@@ -323,14 +348,18 @@ function PlayerManager({
 
   const selectSource = useCallback(
     async (definition: PlayerSourceDefinition) => {
-      const builder = await getPlayerBuilderFromUserSelection(
-        definition,
-        usedFiles,
-        prompt,
-        buildPlayerOptions,
-      );
-      if (builder && isMounted()) {
-        setPlayer(builder);
+      try {
+        const builder = await getPlayerBuilderFromUserSelection(
+          definition,
+          usedFiles,
+          prompt,
+          buildPlayerOptions,
+        );
+        if (builder && isMounted()) {
+          setPlayer(builder);
+        }
+      } catch (error) {
+        setMaybePlayer({ error });
       }
     },
     [setPlayer, prompt, buildPlayerOptions, isMounted],

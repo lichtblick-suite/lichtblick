@@ -101,6 +101,6 @@ export default function sendNotification(
   addNotification(message, details, type, severity);
 }
 
-sendNotification.expectCalledDuringTest = () => {
+sendNotification.expectCalledDuringTest = (): void => {
   throw new Error("Should be overriden in setupTestFramework.ts");
 };

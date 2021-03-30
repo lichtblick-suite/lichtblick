@@ -86,7 +86,7 @@ function defaultPlayerState(): PlayerState {
 
 export type MaybePlayer<P extends Player = Player> =
   | { loading: true; error?: undefined; player?: undefined }
-  | { loading?: false; error: string; player?: undefined }
+  | { loading?: false; error: Error; player?: undefined }
   | { loading?: false; error?: undefined; player?: P };
 
 type ProviderProps = {
@@ -149,6 +149,13 @@ export function MessagePipelineProvider({
   const player = maybePlayer?.player;
   useEffect(() => player?.setSubscriptions(subscriptions), [player, subscriptions]);
   useEffect(() => player?.setPublishers(publishers), [player, publishers]);
+
+  useEffect(() => {
+    const error = maybePlayer.error;
+    if (error) {
+      sendNotification("Connection error", error, "user", "error");
+    }
+  }, [maybePlayer.error]);
 
   // Delay the player listener promise until rendering has finished for the latest data.
   useLayoutEffect(() => {

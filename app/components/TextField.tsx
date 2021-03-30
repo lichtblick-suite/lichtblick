@@ -34,7 +34,7 @@ export const SError = styled.div`
 
 type Props = {
   defaultValue?: string;
-  focusOnMount?: boolean;
+  selectOnMount?: boolean;
   inputStyle: {
     [key: string]: string | number;
   };
@@ -54,7 +54,7 @@ type Props = {
 
 export default function TextField({
   defaultValue,
-  focusOnMount,
+  selectOnMount,
   inputStyle,
   hideInlineError,
   label,
@@ -67,7 +67,7 @@ export default function TextField({
   validator,
   value,
   ...rest
-}: Props) {
+}: Props): React.ReactElement {
   const [error, setError] = useState<string | undefined>();
   const [inputStr, setInputStr] = useState<string>(value || defaultValue || "");
 
@@ -85,10 +85,10 @@ export default function TextField({
   }, [defaultValue, validateOnBlur, validator, value]);
 
   useLayoutEffect(() => {
-    if (inputRef.current && focusOnMount) {
-      inputRef.current.focus();
+    if (inputRef.current && selectOnMount) {
+      inputRef.current.select();
     }
-  }, [focusOnMount]);
+  }, [selectOnMount]);
 
   useLayoutEffect(() => {
     if (onError) {

@@ -16,11 +16,11 @@ const DEFAULT_PROTOS = {
 // and a map of protocols to default port numbers and a separate (optional)
 // protocol name to rewrite to
 export function parseInputUrl(
-  str: string | undefined,
+  str: string,
   defaultProtocol = "https:",
   protocols: { [proto: string]: { protocol?: string; port: number } } = DEFAULT_PROTOS,
 ): string | undefined {
-  if (str == undefined || str.length === 0) {
+  if (str.length === 0) {
     return undefined;
   }
 
