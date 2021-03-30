@@ -99,7 +99,7 @@ export default class UserNodePlayer implements Player {
   // Not sure if there is perf issue with unused workers (may just go idle) - requires more research
   _unusedNodeRuntimeWorkers: Rpc[] = [];
   _lastPlayerStateActiveData?: PlayerStateActiveData;
-  _setUserNodeDiagnostics: (nodeId: string, diagnostics: Diagnostic[]) => void;
+  _setUserNodeDiagnostics: (nodeId: string, diagnostics: readonly Diagnostic[]) => void;
   _addUserNodeLogs: (nodeId: string, logs: UserNodeLog[]) => void;
   _setRosLib: (rosLib: string) => void;
   _nodeTransformRpc?: Rpc;
@@ -124,7 +124,7 @@ export default class UserNodePlayer implements Player {
     // TODO(troy): can we make the below action flow better? Might be better to
     // just add an id, and the thing you want to update? Instead of passing in
     // objects?
-    this._setUserNodeDiagnostics = (nodeId: string, diagnostics: Diagnostic[]) => {
+    this._setUserNodeDiagnostics = (nodeId: string, diagnostics: readonly Diagnostic[]) => {
       setUserNodeDiagnostics({ [nodeId]: { diagnostics } });
     };
     this._addUserNodeLogs = (nodeId: string, logs: UserNodeLog[]) => {
@@ -140,11 +140,14 @@ export default class UserNodePlayer implements Player {
     };
   }
 
-  _getTopics = microMemoize((topics: Topic[], nodeTopics: Topic[]) => [...topics, ...nodeTopics], {
-    isEqual,
-  });
+  _getTopics = microMemoize(
+    (topics: Topic[], nodeTopics: Topic[]): Topic[] => [...topics, ...nodeTopics],
+    {
+      isEqual,
+    },
+  );
   _getDatatypes = microMemoize(
-    (datatypes: any, nodeRegistrations: NodeRegistration[]) => {
+    (datatypes: RosDatatypes, nodeRegistrations: NodeRegistration[]): RosDatatypes => {
       const userNodeDatatypes = nodeRegistrations.reduce(
         (allDatatypes, { nodeData }) => ({ ...allDatatypes, ...nodeData.datatypes }),
         { ...basicDatatypes },
@@ -163,11 +166,11 @@ export default class UserNodePlayer implements Player {
   // (i.e. invoke _getMessages with an empty array) to refresh messages
   _getMessages = microMemoize(
     async (
-      parsedMessages: Message[],
-      bobjects: BobjectMessage[],
+      parsedMessages: readonly Message[],
+      bobjects: readonly BobjectMessage[],
       datatypes: RosDatatypes,
       globalVariables: GlobalVariables,
-      nodeRegistrations: NodeRegistration[],
+      nodeRegistrations: readonly NodeRegistration[],
     ): Promise<{
       parsedMessages: readonly Message[];
       bobjects: readonly BobjectMessage[];
@@ -381,8 +384,8 @@ export default class UserNodePlayer implements Player {
     }
 
     const allNodeRegistrations = await Promise.all(
-      Object.keys(this._userNodes).map(async (nodeId) =>
-        this._getNodeRegistration(nodeId, this._userNodes[nodeId]),
+      Object.entries(this._userNodes).map(async ([nodeId, userNode]) =>
+        this._getNodeRegistration(nodeId, userNode),
       ),
     );
 

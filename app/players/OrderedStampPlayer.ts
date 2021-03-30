@@ -45,7 +45,7 @@ import {
 // than their receive times.
 export const BUFFER_DURATION_SECS = 1.0;
 
-const getTopicsWithHeaer = microMemoize((topics: Topic[], datatypes: RosDatatypes) => {
+const getTopicsWithHeader = microMemoize((topics: Topic[], datatypes: RosDatatypes) => {
   return topics.filter(({ datatype }) => {
     const fields = datatypes[datatype]?.fields;
     return fields && fields.find((field) => field.type === "std_msgs/Header");
@@ -144,7 +144,7 @@ export default class OrderedStampPlayer implements Player {
       });
       const currentTime = clampTime(thresholdTime, activeData.startTime, activeData.endTime);
       this._currentTime = currentTime;
-      const topicsWithHeader = getTopicsWithHeaer(activeData.topics, activeData.datatypes);
+      const topicsWithHeader = getTopicsWithHeader(activeData.topics, activeData.datatypes);
       return listener({
         ...state,
         activeData: {

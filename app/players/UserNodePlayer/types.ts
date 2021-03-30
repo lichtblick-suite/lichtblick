@@ -119,7 +119,7 @@ export type UserNodeLog = {
 };
 
 export type UserNodeDiagnostics = {
-  [nodeId: string]: { diagnostics: Diagnostic[] };
+  [nodeId: string]: { diagnostics: readonly Diagnostic[] };
 };
 export type UserNodeLogs = {
   [nodeId: string]: { logs: UserNodeLog[] };

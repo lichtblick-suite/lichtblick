@@ -1842,7 +1842,7 @@ __metadata:
     jsondiffpatch: 0.4.1
     lodash: 4.17.21
     memoize-weak: 1.0.2
-    micro-memoize: 3.0.1
+    micro-memoize: 4.0.9
     moment: 2.29.1
     moment-duration-format: 2.3.2
     moment-timezone: 0.5.33
@@ -16199,10 +16199,10 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"micro-memoize@npm:3.0.1":
-  version: 3.0.1
-  resolution: "micro-memoize@npm:3.0.1"
-  checksum: 6be10c82fb9f3f55a5a7d11390e48db154d4b1c9cb75eaf4e83e3a4f0f9738e1a5b46c8fa14fb6bcd68e7d65b058ad4c71bdab09a3b8d3c21444825b33b0986b
+"micro-memoize@npm:4.0.9":
+  version: 4.0.9
+  resolution: "micro-memoize@npm:4.0.9"
+  checksum: 67e7a8d1da9f3030be9f898b407ad0135b897bb541be3b995cb6bf70051fefd3e4bf38e17ed5085663266a3b945a469b2df27ffd06cf6362d77ba03280de0958
   languageName: node
   linkType: hard
 

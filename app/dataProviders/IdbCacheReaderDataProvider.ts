@@ -36,7 +36,7 @@ import {
 
 // Can take a few ms, so worth memoizing.
 const deeplyIntersectedTopics = microMemoize(
-  (topics: string[], rangesByTopic: Record<string, Range[]>) => {
+  (topics: readonly string[], rangesByTopic: Record<string, Range[]>) => {
     return deepIntersect(topics.map((topic) => rangesByTopic[topic] || []));
   },
 );

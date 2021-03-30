@@ -6,6 +6,7 @@
     "jsx": "react-jsx",
     "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "paths": {
+      "micro-memoize": ["../typings/micro-memoize"],
       "@foxglove-studio/app/*": ["*"]
     }
   },
