@@ -89,7 +89,7 @@
     "@storybook/builder-webpack5": "6.2.0",
     "@storybook/react": "6.2.0",
     "@testing-library/react": "11.2.5",
-    "@testing-library/react-hooks": "5.1.0",
+    "@testing-library/react-hooks": "5.1.1",
     "@types/argparse": "^2",
     "@types/chart.js": "2.9.31",
     "@types/chartjs-plugin-annotation": "0.5.1",

@@ -1780,7 +1780,7 @@ __metadata:
     "@storybook/builder-webpack5": 6.2.0
     "@storybook/react": 6.2.0
     "@testing-library/react": 11.2.5
-    "@testing-library/react-hooks": 5.1.0
+    "@testing-library/react-hooks": 5.1.1
     "@types/argparse": ^2
     "@types/chart.js": 2.9.31
     "@types/chartjs-plugin-annotation": 0.5.1
@@ -3764,9 +3764,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/react-hooks@npm:5.1.0":
-  version: 5.1.0
-  resolution: "@testing-library/react-hooks@npm:5.1.0"
+"@testing-library/react-hooks@npm:5.1.1":
+  version: 5.1.1
+  resolution: "@testing-library/react-hooks@npm:5.1.1"
   dependencies:
     "@babel/runtime": ^7.12.5
     "@types/react": ">=16.9.0"
@@ -3783,7 +3783,7 @@ __metadata:
       optional: true
     react-test-renderer:
       optional: true
-  checksum: 9c03fa569c52597f833fc7a8e63774fec54ac0b8ce62bf5b02c1178add36189f7ada0c923c6cd696a04184468b71a62a0b217c42498fc19764e10cc0e49df57d
+  checksum: cae917a90b8cbb8d4e738b1df0d404a0af344dc8debf1afd5b7d6b6919287373994ace87d0d82544adc86927d783a6785a6d414b2818cb69545d6f6ce5672486
   languageName: node
   linkType: hard
 
