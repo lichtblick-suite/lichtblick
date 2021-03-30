@@ -56,7 +56,7 @@
     "react-mosaic-component": "troygibb/react-mosaic#860c8d70ba3c723be07bc6208f0d05e2c3f2915f",
     "react-outside-click-handler": "1.3.0",
     "react-popper": "1.0.0",
-    "react-redux": "7.2.2",
+    "react-redux": "7.2.3",
     "react-resize-detector": "6.5.0",
     "react-select": "1.2.1",
     "react-spring": "8.0.27",
