@@ -988,16 +988,16 @@ export default class SceneBuilder implements MarkerProvider {
         }
 
         // Highlight if marker matches any of this topic's highlightMarkerMatchers; dim other markers
-        if (Object.keys(this._highlightMarkerMatchersByTopic).length > 0) {
-          const markerMatches = (this._highlightMarkerMatchersByTopic[topic.name] || []).some(
-            ({ checks = [] }) =>
-              checks.every(({ markerKeyPath, value }) => {
-                const markerValue = _.get(message, markerKeyPath as any);
-                return value === markerValue;
-              }),
-          );
-          marker.interactionData.highlighted = markerMatches;
-        }
+        // Markers that are not re-processed on this frame (i.e. older markers whose lifetime has
+        // not expired) do not get a new copy of interactionData, so they always need to be reset.
+        const markerMatches = (this._highlightMarkerMatchersByTopic[topic.name] || []).some(
+          ({ checks = [] }) =>
+            checks.every(({ markerKeyPath, value }) => {
+              const markerValue = _.get(message, markerKeyPath as any);
+              return value === markerValue;
+            }),
+        );
+        marker.interactionData.highlighted = markerMatches;
 
         // TODO(bmc): once we support more topic settings
         // flesh this out to be more marker type agnostic
