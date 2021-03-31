@@ -1889,7 +1889,7 @@ __metadata:
     shallowequal: 1.1.0
     storycap: 3.0.3
     string-hash: 1.1.3
-    styled-components: 5.2.1
+    styled-components: 5.2.2
     text-width: 1.2.0
     tinycolor2: 1.4.2
     typescript: 4.2.2
@@ -6612,7 +6612,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-plugin-styled-components@npm:>= 1":
+"babel-plugin-styled-components@npm:>= 1.12.0":
   version: 1.12.0
   resolution: "babel-plugin-styled-components@npm:1.12.0"
   dependencies:
@@ -22042,16 +22042,16 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"styled-components@npm:5.2.1":
-  version: 5.2.1
-  resolution: "styled-components@npm:5.2.1"
+"styled-components@npm:5.2.2":
+  version: 5.2.2
+  resolution: "styled-components@npm:5.2.2"
   dependencies:
     "@babel/helper-module-imports": ^7.0.0
     "@babel/traverse": ^7.4.5
     "@emotion/is-prop-valid": ^0.8.8
     "@emotion/stylis": ^0.8.4
     "@emotion/unitless": ^0.7.4
-    babel-plugin-styled-components: ">= 1"
+    babel-plugin-styled-components: ">= 1.12.0"
     css-to-react-native: ^3.0.0
     hoist-non-react-statics: ^3.0.0
     shallowequal: ^1.1.0
@@ -22060,7 +22060,7 @@ fsevents@^1.2.7:
     react: ">= 16.8.0"
     react-dom: ">= 16.8.0"
     react-is: ">= 16.8.0"
-  checksum: c27911be08f2c6212d1f381d154cab5204c63b34d1b9ba56388b19654497a523ff466884fbf8914637c046ae8862387b0fc63f9ead67e1a8ab3a8af70b0d8089
+  checksum: e22ff50b0e6d53916ee393dc81a4ea415e573eba8a65f8eedeb4daea080d8bede3027c5ec3d9782cd3f08cf2e87babb50977bfac4f6de6ca26a9d68ea3bcef19
   languageName: node
   linkType: hard
 
