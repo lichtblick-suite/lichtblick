@@ -56,9 +56,9 @@ const ctx: OsContext = {
       }
     };
 
-    await ipcRenderer.invoke("menu.add-input-source", name);
     menuClickListeners.set(name, listener);
     ipcRenderer.on("menu.click-input-source", listener);
+    await ipcRenderer.invoke("menu.add-input-source", name);
   },
   async menuRemoveInputSource(name: string) {
     const listener = menuClickListeners.get(name);
@@ -67,7 +67,7 @@ const ctx: OsContext = {
     }
     menuClickListeners.delete(name);
     ipcRenderer.off("menu.click-input-source", listener);
-    ipcRenderer.invoke("menu.remove-input-source", name);
+    await ipcRenderer.invoke("menu.remove-input-source", name);
   },
 
   // Environment queries
