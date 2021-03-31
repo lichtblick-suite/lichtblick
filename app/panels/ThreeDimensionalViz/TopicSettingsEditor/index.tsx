@@ -22,6 +22,7 @@ import {
   POINT_CLOUD_DATATYPE,
   POSE_STAMPED_DATATYPE,
   SENSOR_MSGS_LASER_SCAN_DATATYPE,
+  VELODYNE_SCAN_DATATYPE,
   WEBVIZ_MARKER_DATATYPE,
 } from "@foxglove-studio/app/util/globalConstants";
 
@@ -40,6 +41,7 @@ export function topicSettingsEditorForDatatype(
 ): ComponentType<TopicSettingsEditorProps<any, any>> | undefined {
   const editors = {
     [POINT_CLOUD_DATATYPE]: PointCloudSettingsEditor,
+    [VELODYNE_SCAN_DATATYPE]: PointCloudSettingsEditor,
     [POSE_STAMPED_DATATYPE]: PoseSettingsEditor,
     [SENSOR_MSGS_LASER_SCAN_DATATYPE]: LaserScanSettingsEditor,
     [WEBVIZ_MARKER_DATATYPE]: MarkerSettingsEditor,

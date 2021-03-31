@@ -18,6 +18,7 @@ import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import MessageCollector from "@foxglove-studio/app/panels/ThreeDimensionalViz/SceneBuilder/MessageCollector";
 import { MarkerMatcher } from "@foxglove-studio/app/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
 import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
+import VelodyneCloudConverter from "@foxglove-studio/app/panels/ThreeDimensionalViz/VelodyneCloudConverter";
 import { cast, BobjectMessage, Topic, Frame, Message } from "@foxglove-studio/app/players/types";
 import {
   BinaryPath,
@@ -54,6 +55,7 @@ import {
   NAV_MSGS_OCCUPANCY_GRID_DATATYPE,
   NAV_MSGS_PATH_DATATYPE,
   POINT_CLOUD_DATATYPE,
+  VELODYNE_SCAN_DATATYPE,
   SENSOR_MSGS_LASER_SCAN_DATATYPE,
   GEOMETRY_MSGS_POLYGON_STAMPED_DATATYPE,
 } from "@foxglove-studio/app/util/globalConstants";
@@ -229,6 +231,11 @@ export default class SceneBuilder implements MarkerProvider {
   _colorOverrideMarkerMatchersByTopic: MarkerMatchersByTopic = {};
 
   _hooks: ThreeDimensionalVizHooks;
+
+  // Decodes `velodyne_msgs/VelodyneScan` ROS messages into
+  // `VelodyneScanDecoded` objects that mimic `PointCloud2` and can be rendered
+  // as point clouds
+  _velodyneCloudConverter = new VelodyneCloudConverter();
 
   allNamespaces: Namespace[] = [];
   // TODO(Audrey): remove enabledNamespaces once we release topic groups
@@ -808,10 +815,10 @@ export default class SceneBuilder implements MarkerProvider {
     // to an infinite lifetime. But do allow for 0 values based on user preferences.
     const decayTimeInSec = this._settingsByKey[`t:${topic}`]?.decayTime;
     const lifetime = decayTimeInSec ? fromSec(decayTimeInSec) : undefined;
-    this.collectors[topic]!.addNonMarker(topic, mappedMessage, lifetime);
+    (<MessageCollector>this.collectors[topic]).addNonMarker(topic, mappedMessage, lifetime);
   };
 
-  setCurrentTime = (currentTime: { sec: number; nsec: number }) => {
+  setCurrentTime = (currentTime: { sec: number; nsec: number }): void => {
     this.bounds.reset();
 
     this._clock = currentTime;
@@ -824,7 +831,7 @@ export default class SceneBuilder implements MarkerProvider {
   };
 
   // extracts renderable markers from the ros frame
-  render() {
+  render(): void {
     this.flattenedZHeightPose =
       this._hooks.getFlattenedPose(this.frame as any) || this.flattenedZHeightPose;
 
@@ -893,6 +900,13 @@ export default class SceneBuilder implements MarkerProvider {
         this._consumeNonMarkerMessage(topic, deepParse(message), 102);
 
         break;
+      case VELODYNE_SCAN_DATATYPE: {
+        const converted = this._velodyneCloudConverter.decode(deepParse(message));
+        if (converted) {
+          this._consumeNonMarkerMessage(topic, converted, 102);
+        }
+        break;
+      }
       case SENSOR_MSGS_LASER_SCAN_DATATYPE:
         this._consumeNonMarkerMessage(topic, deepParse(message), 104);
 

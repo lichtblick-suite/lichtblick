@@ -340,13 +340,30 @@ export type PointCloud2 = Readonly<
     data: Uint8Array;
     is_dense: number;
     // this is appended by scene builder
-    type: 102 | "PointCloud2";
+    type: 102;
     // this is appended by scene builder
     pose?: Pose;
   }
 >;
 
-export type PointCloud = PointCloud1 | PointCloud2;
+export type VelodynePacket = Readonly<{
+  stamp: Time;
+  data: Uint8Array; // 1206 bytes
+}>;
+
+export type VelodyneScan = Readonly<
+  StampedMessage & {
+    packets: VelodynePacket[];
+  }
+>;
+
+export type VelodyneScanDecoded = Readonly<
+  PointCloud2 & {
+    packets: VelodynePacket[];
+  }
+>;
+
+export type PointCloud = PointCloud1 | PointCloud2 | VelodyneScanDecoded;
 
 type Transform = Readonly<{
   rotation: Orientation;

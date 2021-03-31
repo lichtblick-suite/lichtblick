@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { RawBlock } from "./RawBlock";
-import { FactoryId, ReturnMode } from "./VelodyneTypes";
+import { FactoryId, Model, ReturnMode } from "./VelodyneTypes";
 
 export class RawPacket {
   static RAW_SCAN_SIZE = 3;
@@ -39,5 +39,36 @@ export class RawPacket {
     this.factoryField2 = data[1205] as number;
     this.returnMode = this.factoryField1 in ReturnMode ? this.factoryField1 : undefined;
     this.factoryId = this.factoryField2 in FactoryId ? this.factoryField2 : undefined;
+  }
+
+  inferModel(): Model | undefined {
+    return RawPacket.InferModel(this.data);
+  }
+
+  static InferModel(packet: Uint8Array): Model | undefined {
+    const factoryId = packet[1205];
+
+    switch (factoryId) {
+      case FactoryId.HDL32E:
+        return Model.HDL32E;
+      case FactoryId.VLP16:
+        return Model.VLP16;
+      case FactoryId.VLP32AB:
+        return undefined;
+      case FactoryId.VLP16HiRes:
+        return Model.VLP16HiRes;
+      case FactoryId.VLP32C:
+        return Model.VLP32C;
+      case FactoryId.Velarray:
+        return undefined;
+      case FactoryId.HDL64:
+        // Is it possible to distinguish HDL64E / HDL64E_S21 / HDL64E_S3?
+        return Model.HDL64E;
+      case FactoryId.VLS128Old:
+      case FactoryId.VLS128:
+        return Model.VLS128;
+      default:
+        return undefined;
+    }
   }
 }

@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "@foxglove/electron-socket": "workspace:packages/electron-socket",
+    "@foxglove/velodyne-cloud": "workspace:packages/velodyne-cloud",
     "@jest/types": "26.6.2",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.0-beta.1",
     "@sentry/electron": "2.4.0",
