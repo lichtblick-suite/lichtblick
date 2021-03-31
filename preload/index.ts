@@ -24,15 +24,22 @@ const menuClickListeners = new Map<string, IpcListener>();
 // Initialize the RPC channel for electron-socket
 PreloaderSockets.Create();
 
-window.addEventListener("DOMContentLoaded", () => {
-  // This input element receives generated dom events from main thread to inject File objects
-  // See the comments in desktop/index.ts regarding this feature
-  const input = document.createElement("input");
-  input.setAttribute("hidden", "true");
-  input.setAttribute("type", "file");
-  input.setAttribute("id", "electron-open-file-input");
-  document.body.appendChild(input);
-});
+window.addEventListener(
+  "DOMContentLoaded",
+  async () => {
+    // This input element receives generated dom events from main thread to inject File objects
+    // See the comments in desktop/index.ts regarding this feature
+    const input = document.createElement("input");
+    input.setAttribute("hidden", "true");
+    input.setAttribute("type", "file");
+    input.setAttribute("id", "electron-open-file-input");
+    document.body.appendChild(input);
+
+    // let main know we are ready to accept open-file requests
+    await ipcRenderer.invoke("load-pending-files");
+  },
+  { once: true },
+);
 
 const localFileStorage = new LocalFileStorage();
 

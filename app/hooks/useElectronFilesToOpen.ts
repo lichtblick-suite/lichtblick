@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 // Hook to get any files the main thread has told us to open
 // See the comments in main thread implementation on how the files are injected into this input
 export default function useElectronFilesToOpen(): FileList | undefined {
-  const [files, setFiles] = useState<FileList>();
+  const [fileList, setFileList] = useState<FileList>();
 
   useEffect(() => {
     const input = document.querySelector<HTMLInputElement>("#electron-open-file-input");
@@ -20,19 +20,20 @@ export default function useElectronFilesToOpen(): FileList | undefined {
 
     const update = () => {
       if (input.files) {
-        setFiles(input.files);
+        setFileList(input.files);
       }
     };
 
     // handle any new file open requests
-    input.onchange = update;
+    input.addEventListener("change", update);
 
+    // trigger initial set list
     update();
+
     return () => {
-      // eslint-disable-next-line no-restricted-syntax
-      input.onchange = null;
+      input.removeEventListener("change", update);
     };
   }, []);
 
-  return files;
+  return fileList;
 }

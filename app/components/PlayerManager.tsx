@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { PropsWithChildren, useCallback, useEffect, useRef, useState } from "react";
+import { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { useMountedState } from "react-use";
 
@@ -322,10 +322,15 @@ function PlayerManager({
     [setDiagnostics, setLogs, setRosLib, initialMessageOrder],
   );
 
+  const analytics = useAnalytics();
+  const metricsCollector = useMemo(() => {
+    return new AnalyticsMetricsCollector(analytics);
+  }, [analytics]);
+
   const buildPlayerOptions: BuildPlayerOptions = useShallowMemo({
     diskBagCaching: useExperimentalFeature("diskBagCaching"),
     unlimitedMemoryCache: useExperimentalFeature("unlimitedMemoryCache"),
-    metricsCollector: new AnalyticsMetricsCollector(useAnalytics()),
+    metricsCollector: metricsCollector,
   });
 
   useEffect(() => {

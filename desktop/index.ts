@@ -221,12 +221,6 @@ async function createWindow(): Promise<void> {
   Menu.setApplicationMenu(Menu.buildFromTemplate(appMenuTemplate));
   installMenuInterface();
 
-  mainWindow.loadURL(rendererPath);
-
-  if (!isProduction) {
-    mainWindow.webContents.openDevTools();
-  }
-
   // Open all new windows in an external browser
   // Note: this API is supposed to be superseded by webContents.setWindowOpenHandler,
   // but using that causes the app to freeze when a new window is opened.
@@ -283,18 +277,30 @@ async function createWindow(): Promise<void> {
     }
   }
 
+  // indicates the preloader has setup the file input used to inject which files to open
+  let preloaderFileInputIsReady = false;
+
   // This handles user dropping files on the doc icon or double clicking a file when the app
   // is already open.
   //
   // The open-file handler registered earlier will handle adding the file to filesToOpen
   app.on("open-file", async (_ev) => {
-    await loadFilesToOpen();
+    if (preloaderFileInputIsReady) {
+      await loadFilesToOpen();
+    }
   });
 
-  // When the window content has loaded, the input is available, we can open our files now
-  mainWindow.webContents.on("did-finish-load", () => {
-    loadFilesToOpen();
+  // preload will tell us when it is ready to process the pending open file requests
+  ipcMain.handle("load-pending-files", async () => {
+    await loadFilesToOpen();
+    preloaderFileInputIsReady = true;
   });
+
+  mainWindow.loadURL(rendererPath);
+
+  if (!isProduction) {
+    mainWindow.webContents.openDevTools();
+  }
 }
 
 // This method will be called when Electron has finished
