@@ -1803,7 +1803,7 @@ __metadata:
     "@types/react-outside-click-handler": 1.3.0
     "@types/react-redux": 7.1.16
     "@types/react-select": 1.2.0
-    "@types/react-table": 7.0.28
+    "@types/react-table": 7.0.29
     "@types/react-virtualized": 9.21.11
     "@types/react-virtualized-select": 3.0.8
     "@types/sanitize-html": 1.27.1
@@ -4649,12 +4649,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-table@npm:7.0.28":
-  version: 7.0.28
-  resolution: "@types/react-table@npm:7.0.28"
+"@types/react-table@npm:7.0.29":
+  version: 7.0.29
+  resolution: "@types/react-table@npm:7.0.29"
   dependencies:
     "@types/react": "*"
-  checksum: 4319b4fce98149a02488d16a4ae7cf1e86cda9a5142a2c19b2e64d004e838d13e3dd9cddb1908e9c5c4bbb5300216a044bf48f1a31fc15f28ff635e0768cddc2
+  checksum: 3a0a29b2520b3561c9f9418d87c4988f73973a7a637b27ca4ec2f3090c8a842dd715913c23fa108e48242d86d895075b9b1bb5a23608ded494bc1cebb36c2261
   languageName: node
   linkType: hard
 
