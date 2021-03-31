@@ -1798,7 +1798,7 @@ __metadata:
     "@types/react": 17.0.3
     "@types/react-autocomplete": 1.8.5
     "@types/react-dom": 17.0.3
-    "@types/react-highlight-words": 0.16.1
+    "@types/react-highlight-words": 0.16.2
     "@types/react-input-autosize": 2.2.0
     "@types/react-outside-click-handler": 1.3.0
     "@types/react-redux": 7.1.16
@@ -4583,12 +4583,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-highlight-words@npm:0.16.1":
-  version: 0.16.1
-  resolution: "@types/react-highlight-words@npm:0.16.1"
+"@types/react-highlight-words@npm:0.16.2":
+  version: 0.16.2
+  resolution: "@types/react-highlight-words@npm:0.16.2"
   dependencies:
     "@types/react": "*"
-  checksum: 50c3cdebc73c193afccac88bfbbc326d1cb13a796f51987b570e9b832d1a32cd499fd0c583daba1895f53fefba5e31816e71bcb0d43815ed570e667bf679a112
+  checksum: 9f1d809a4e4da0c06c62898a781450833992ef9b5555f4774034d68cad9c371395a4f4341de156773df3f19e72a5f2071a674a6d4314832ae77a868ecd6e0268
   languageName: node
   linkType: hard
 
