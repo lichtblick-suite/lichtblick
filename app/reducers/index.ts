@@ -13,6 +13,7 @@
 
 import { Reducer } from "redux";
 import { ThunkAction } from "redux-thunk";
+import { v4 as uuidv4 } from "uuid";
 
 import { ActionTypes } from "@foxglove-studio/app/actions";
 import { ros_lib_dts } from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/ros";
@@ -33,7 +34,7 @@ import tests from "@foxglove-studio/app/reducers/tests";
 import userNodes, { UserNodeDiagnostics } from "@foxglove-studio/app/reducers/userNodes";
 import { Auth as AuthState } from "@foxglove-studio/app/types/Auth";
 import { HoverValue } from "@foxglove-studio/app/types/hoverValue";
-import { MosaicKey, SetFetchedLayoutPayload } from "@foxglove-studio/app/types/panels";
+import { SetFetchedLayoutPayload } from "@foxglove-studio/app/types/panels";
 
 const getReducers = () => [
   panels,
@@ -55,7 +56,7 @@ export type Dispatcher<A extends ActionTypes> = ThunkAction<void, State, undefin
 
 export type State = {
   persistedState: PersistedState;
-  mosaic: { mosaicId: string; selectedPanelIds: MosaicKey[] };
+  mosaic: { mosaicId: string; selectedPanelIds: string[] };
   auth: AuthState;
   hoverValue?: HoverValue;
   userNodes: { userNodeDiagnostics: UserNodeDiagnostics; rosLib: string };
@@ -75,7 +76,11 @@ export default function createRootReducer(
   maybeStoreNewRecentLayout(persistedState);
   const initialState: State = {
     persistedState,
-    mosaic: { mosaicId: "", selectedPanelIds: [] },
+    mosaic: {
+      // We use the same mosaicId for all mosaics to support dragging and dropping between them
+      mosaicId: uuidv4(),
+      selectedPanelIds: [],
+    },
     auth: Object.freeze(args?.testAuth || { username: undefined }),
     hoverValue: undefined,
     userNodes: {

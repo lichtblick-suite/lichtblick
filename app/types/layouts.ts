@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { MosaicNode } from "react-mosaic-component";
+
 import { PanelsState } from "@foxglove-studio/app/reducers/panels";
-import { MosaicNode } from "@foxglove-studio/app/types/panels";
 
 export type LayoutDescription = {
   id: string;
@@ -28,7 +29,7 @@ export type SaveLayoutPayload = {
   isAutosaved?: boolean;
 };
 
-export type TabConfig = { title: string; layout?: MosaicNode };
+export type TabConfig = { title: string; layout?: MosaicNode<string> };
 
 export type TabPanelConfig = {
   activeTabIdx: number;

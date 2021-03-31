@@ -18,17 +18,12 @@ import { State } from "@foxglove-studio/app/reducers";
 
 export default function mosaicReducer(state: State, action: ActionTypes): State {
   switch (action.type) {
-    case "SET_MOSAIC_ID":
-      return { ...state, mosaic: { ...state.mosaic, mosaicId: action.payload } };
     case "ADD_SELECTED_PANEL_ID":
       return {
         ...state,
         mosaic: {
           ...state.mosaic,
-          selectedPanelIds: uniq<string | number>([
-            ...state.mosaic.selectedPanelIds,
-            action.payload,
-          ]),
+          selectedPanelIds: uniq([...state.mosaic.selectedPanelIds, action.payload]),
         },
       };
     case "REMOVE_SELECTED_PANEL_ID":

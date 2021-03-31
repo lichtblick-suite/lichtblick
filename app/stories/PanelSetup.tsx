@@ -15,7 +15,7 @@ import { createMemoryHistory } from "history";
 import { flatten, partition } from "lodash";
 import { DndProvider } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
-import { Mosaic, MosaicWindow } from "react-mosaic-component";
+import { Mosaic, MosaicNode, MosaicWindow } from "react-mosaic-component";
 
 import {
   changePanelLayout,
@@ -47,7 +47,7 @@ import {
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { MosaicNode, SavedProps, UserNodes } from "@foxglove-studio/app/types/panels";
+import { SavedProps, UserNodes } from "@foxglove-studio/app/types/panels";
 import { objectValues } from "@foxglove-studio/app/util";
 import { isBobject } from "@foxglove-studio/app/util/binaryObjects";
 
@@ -61,7 +61,7 @@ export type Fixture = {
   progress?: Progress;
   datatypes?: RosDatatypes;
   globalVariables?: GlobalVariables;
-  layout?: MosaicNode;
+  layout?: MosaicNode<string>;
   linkedGlobalVariables?: LinkedGlobalVariables;
   userNodes?: UserNodes;
   userNodeDiagnostics?: UserNodeDiagnostics;

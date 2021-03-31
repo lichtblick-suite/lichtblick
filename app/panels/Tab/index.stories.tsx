@@ -16,7 +16,10 @@ import { createBrowserHistory } from "history";
 import TestUtils from "react-dom/test-utils";
 
 import PanelLayout from "@foxglove-studio/app/components/PanelLayout";
-import nestedTabLayoutFixture from "@foxglove-studio/app/panels/Tab/nestedTabLayoutFixture";
+import {
+  nestedTabLayoutFixture,
+  nestedTabLayoutFixture2,
+} from "@foxglove-studio/app/panels/Tab/nestedTabLayoutFixture";
 import createRootReducer from "@foxglove-studio/app/reducers";
 import tick from "@foxglove-studio/app/shared/tick";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
@@ -421,6 +424,42 @@ storiesOf("<Tab>", module)
                 document.querySelector('[data-test~="Tab!Left"] [data-test="empty-drop-target"]') ??
                 undefined,
             );
+          }, DEFAULT_TIMEOUT);
+        }}
+      >
+        <PanelLayout />
+      </PanelSetup>
+    );
+  })
+  .add("supports dragging between tabs anywhere in the layout", () => {
+    const store = configureStore(rootReducer);
+    return (
+      <PanelSetup
+        fixture={nestedTabLayoutFixture2}
+        style={{ width: "100%" }}
+        store={store}
+        onMount={() => {
+          setTimeout(async () => {
+            const mouseEnterContainer = document.querySelectorAll('[data-test~="Plot!1"]')[0];
+            if (!mouseEnterContainer) {
+              throw new Error("missing plot panel");
+            }
+            TestUtils.Simulate.mouseEnter(mouseEnterContainer);
+            const dragHandle = document.querySelector(
+              '[data-test~="Plot!1"] [data-test="mosaic-drag-handle"]',
+            );
+            if (!dragHandle) {
+              throw new Error("missing drag handle");
+            }
+            dragAndDrop(dragHandle, () => {
+              const dropTarget = document
+                .querySelector('[data-test~="unknown!inner4"]')
+                ?.parentElement?.parentElement?.querySelector(".drop-target.left");
+              if (!dropTarget) {
+                throw new Error("missing drop target");
+              }
+              return dropTarget;
+            });
           }, DEFAULT_TIMEOUT);
         }}
       >

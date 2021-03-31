@@ -13,7 +13,7 @@
 import CBOR from "cbor-js";
 import { create as JsonDiffCreate } from "jsondiffpatch";
 import { cloneDeep } from "lodash";
-import { MosaicPath } from "react-mosaic-component";
+import { MosaicNode, MosaicPath } from "react-mosaic-component";
 import zlib from "zlib";
 
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
@@ -29,18 +29,16 @@ import {
   SaveFullConfigPayload,
   UserNodes,
   PlaybackConfig,
-  MosaicNode,
   SavedProps,
   PanelConfig,
   SetFetchedLayoutPayload,
+  MosaicDropTargetPosition,
 } from "@foxglove-studio/app/types/panels";
 import { LAYOUT_URL_QUERY_KEY, PATCH_QUERY_KEY } from "@foxglove-studio/app/util/globalConstants";
 import { dictForPatchCompression } from "@foxglove-studio/app/util/layout";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 const jsondiffpatch = JsonDiffCreate({});
-
-type MosaicDropTargetPosition = "top" | "bottom" | "left" | "right";
 
 export enum PANELS_ACTION_TYPES {
   CHANGE_PANEL_LAYOUT = "CHANGE_PANEL_LAYOUT",
@@ -259,7 +257,7 @@ export const setPlaybackConfig = (payload: Partial<PlaybackConfig>): SET_PLAYBAC
 
 export type ClosePanelPayload = {
   tabId?: string;
-  root: MosaicNode;
+  root: MosaicNode<string>;
   path: MosaicPath;
 };
 type CLOSE_PANEL = { type: "CLOSE_PANEL"; payload: ClosePanelPayload };
@@ -272,7 +270,7 @@ export type SplitPanelPayload = {
   tabId?: string;
   id: string;
   direction: "row" | "column";
-  root: MosaicNode;
+  root: MosaicNode<string>;
   path: MosaicPath;
   config: PanelConfig;
 };
@@ -286,7 +284,7 @@ export type SwapPanelPayload = {
   tabId?: string;
   originalId: string;
   type: string;
-  root: MosaicNode;
+  root: MosaicNode<string>;
   path: MosaicPath;
   config: PanelConfig;
   relatedConfigs?: SavedProps;
@@ -306,7 +304,7 @@ export const moveTab = (payload: MoveTabPayload): MOVE_TAB => ({
 
 export type AddPanelPayload = {
   type: string;
-  layout?: MosaicNode;
+  layout?: MosaicNode<string>;
   tabId?: string;
   config?: PanelConfig;
   relatedConfigs?: SavedProps;
@@ -342,7 +340,7 @@ export const startDrag = (payload: StartDragPayload): START_DRAG => ({
 });
 
 export type EndDragPayload = {
-  originalLayout: MosaicNode;
+  originalLayout: MosaicNode<string>;
   originalSavedProps: SavedProps;
   panelId: string;
   sourceTabId?: string;

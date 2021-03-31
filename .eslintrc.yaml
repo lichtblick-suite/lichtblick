@@ -44,6 +44,7 @@ rules:
   id-denylist:
     - error
     - useEffectOnce
+    - window # don't allow redefining window
   no-console: off # configured in no-restricted-syntax
   "@typescript-eslint/ban-ts-comment":
     - error

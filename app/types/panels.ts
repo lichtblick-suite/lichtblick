@@ -10,21 +10,13 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import type {
-  MosaicNode as OrigMosaicNode,
-  MosaicPath,
-  MosaicBranch,
-  MosaicDirection,
-} from "react-mosaic-component";
+import type { MosaicNode } from "react-mosaic-component";
 
 import { PanelsState } from "@foxglove-studio/app/reducers/panels";
 import { TimestampMethod } from "@foxglove-studio/app/util/time";
 
 // Mosaic Types
-export type MosaicKey = string | number;
 export type MosaicDropTargetPosition = "top" | "bottom" | "left" | "right";
-export type { MosaicPath, MosaicBranch, MosaicDirection };
-export type MosaicNode = OrigMosaicNode<string>;
 
 export type PanelConfig = {
   [key: string]: any;
@@ -54,7 +46,7 @@ export type ConfigsPayload = {
   defaultConfig?: PanelConfig;
 };
 export type ChangePanelLayoutPayload = {
-  layout?: MosaicNode;
+  layout?: MosaicNode<string>;
   trimSavedProps?: boolean;
   historyOptions?: EditHistoryOptions;
 };
@@ -76,7 +68,7 @@ export type SavedProps = {
 
 export type CreateTabPanelPayload = {
   idToReplace?: string;
-  layout: MosaicNode;
+  layout: MosaicNode<string>;
   idsToRemove: string[];
   singleTab: boolean;
 };

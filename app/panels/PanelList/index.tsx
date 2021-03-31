@@ -14,7 +14,7 @@ import MagnifyIcon from "@mdi/svg/svg/magnify.svg";
 import fuzzySort from "fuzzysort";
 import { flatten, flatMap, isEqual } from "lodash";
 import { useDrag } from "react-dnd";
-import { MosaicDragType } from "react-mosaic-component";
+import { MosaicDragType, MosaicPath } from "react-mosaic-component";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 
@@ -27,7 +27,6 @@ import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { TabPanelConfig } from "@foxglove-studio/app/types/layouts";
 import {
   PanelConfig,
-  MosaicPath,
   MosaicDropTargetPosition,
   SavedProps,
 } from "@foxglove-studio/app/types/panels";

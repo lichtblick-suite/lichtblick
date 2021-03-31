@@ -13,7 +13,6 @@
 
 import fetchMock from "fetch-mock";
 import { getLeaves, MosaicParent } from "react-mosaic-component";
-import { MosaicDropTargetPosition } from "react-mosaic-component/lib/internalTypes";
 
 import {
   changePanelLayout,
@@ -41,7 +40,11 @@ import {
 } from "@foxglove-studio/app/reducers/panels";
 import delay from "@foxglove-studio/app/shared/delay";
 import { getGlobalStoreForTest } from "@foxglove-studio/app/store/getGlobalStore";
-import { CreateTabPanelPayload, ImportPanelLayoutPayload } from "@foxglove-studio/app/types/panels";
+import {
+  CreateTabPanelPayload,
+  ImportPanelLayoutPayload,
+  MosaicDropTargetPosition,
+} from "@foxglove-studio/app/types/panels";
 import Storage from "@foxglove-studio/app/util/Storage";
 import { TAB_PANEL_TYPE } from "@foxglove-studio/app/util/globalConstants";
 import { getPanelTypeFromId } from "@foxglove-studio/app/util/layout";

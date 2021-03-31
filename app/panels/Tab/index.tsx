@@ -133,12 +133,8 @@ function Tab({ config, saveConfig }: Props) {
               layout={activeLayout}
               savePanelConfigs={savePanelConfigsFn}
               onChange={onChangeLayout}
-              setMosaicId={() => {
-                // no-op
-              }}
               mosaicId={mosaicId}
               tabId={panelId}
-              removeRootDropTarget
             />
           </TabDndContext.Provider>
         ) : (

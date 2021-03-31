@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import CBOR from "cbor-js";
-import { MosaicNode, MosaicParent, updateTree } from "react-mosaic-component";
+import { getNodeAtPath, MosaicNode, MosaicParent, updateTree } from "react-mosaic-component";
 import zlib from "zlib";
 
 import { defaultPlaybackConfig } from "@foxglove-studio/app/reducers/panels";
@@ -33,6 +33,7 @@ import {
   getUpdatedURLWithNewVersion,
   stringifyParams,
   dictForPatchCompression,
+  getPathFromNode,
 } from "./layout";
 
 const tabConfig = {
@@ -687,5 +688,27 @@ describe("layout", () => {
         getUpdatedURLWithNewVersion("?layout=foo&patch=somePatch", "bar", timestampAndPatchHash),
       ).toMatch(`?layout=bar%40${timestampAndPatchHash}`);
     });
+  });
+});
+
+describe("getPathFromNode", () => {
+  it("should get a node based on id", () => {
+    const tree: MosaicNode<number> = {
+      direction: "row",
+      first: 1,
+      second: {
+        direction: "column",
+        first: {
+          direction: "column",
+          first: 2,
+          second: 3,
+        },
+        second: 4,
+      },
+    };
+    expect(getNodeAtPath(tree, getPathFromNode(1, tree))).toEqual(1);
+    expect(getNodeAtPath(tree, getPathFromNode(2, tree))).toEqual(2);
+    expect(getNodeAtPath(tree, getPathFromNode(3, tree))).toEqual(3);
+    expect(getNodeAtPath(tree, getPathFromNode(4, tree))).toEqual(4);
   });
 });

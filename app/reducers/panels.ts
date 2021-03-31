@@ -14,7 +14,6 @@
 import { isEmpty, isEqual, dropRight, pick, cloneDeep } from "lodash";
 import {
   updateTree,
-  getPathFromNode,
   createDragToUpdates,
   createRemoveUpdate,
   createHideUpdate,
@@ -22,6 +21,7 @@ import {
   MosaicPath,
   getLeaves,
   MosaicParent,
+  MosaicNode,
 } from "react-mosaic-component";
 
 import { ActionTypes } from "@foxglove-studio/app/actions";
@@ -44,7 +44,6 @@ import {
   PanelConfig,
   ConfigsPayload,
   CreateTabPanelPayload,
-  MosaicNode,
   ChangePanelLayoutPayload,
   SaveConfigsPayload,
   SaveFullConfigPayload,
@@ -52,7 +51,6 @@ import {
   SavedProps,
   UserNodes,
   PlaybackConfig,
-  MosaicKey,
   MosaicDropTargetPosition,
 } from "@foxglove-studio/app/types/panels";
 import Storage from "@foxglove-studio/app/util/Storage";
@@ -81,6 +79,7 @@ import {
   createAddUpdates,
   removePanelFromTabPanel,
   stringifyParams,
+  getPathFromNode,
 } from "@foxglove-studio/app/util/layout";
 
 const storage = new Storage();
@@ -95,7 +94,7 @@ export const defaultPlaybackConfig: PlaybackConfig = {
 export type PanelsState = {
   id?: string;
   name?: string;
-  layout?: MosaicNode;
+  layout?: MosaicNode<string>;
   // We store config for each panel in a hash keyed by the panel id.
   // This should at some point be renamed to `config` or `configById` or so,
   // but it's inconvenient to have this diverge from `PANEL_PROPS_KEY`.
@@ -339,7 +338,7 @@ const splitPanel = (
     const relatedConfigs =
       type === TAB_PANEL_TYPE
         ? (getPanelIdsInsideTabPanels([id], savedProps).reduce(
-            (res: Record<string, unknown>, panelId: MosaicKey) => ({
+            (res: Record<string, unknown>, panelId: string) => ({
               ...res,
               [panelId]: savedProps[panelId],
             }),
@@ -583,7 +582,7 @@ const dragWithinSameTab = (
     sourceTabConfig,
     sourceTabChildConfigs,
   }: {
-    originalLayout: MosaicNode;
+    originalLayout: MosaicNode<string>;
     sourceTabId: string;
     position: MosaicDropTargetPosition;
     destinationPath: MosaicPath;
@@ -641,7 +640,7 @@ const dragToMainFromTab = (
     sourceTabConfig,
     sourceTabChildConfigs,
   }: {
-    originalLayout: MosaicNode;
+    originalLayout: MosaicNode<string>;
     sourceTabId: string;
     position: MosaicDropTargetPosition;
     destinationPath: MosaicPath;
@@ -686,7 +685,7 @@ const dragToTabFromMain = (
     targetTabConfig,
     sourceTabChildConfigs,
   }: {
-    originalLayout: MosaicNode;
+    originalLayout: MosaicNode<string>;
     panelId: string;
     targetTabId: string;
     position?: MosaicDropTargetPosition;
@@ -728,7 +727,7 @@ const dragToTabFromTab = (
     sourceTabConfig,
     sourceTabChildConfigs,
   }: {
-    originalLayout: MosaicNode;
+    originalLayout: MosaicNode<string>;
     panelId: string;
     sourceTabId: string;
     targetTabId: string;

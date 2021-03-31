@@ -28,7 +28,6 @@ import {
   MosaicWindowContext,
   getNodeAtPath,
   getOtherBranch,
-  getPathFromNode,
   isParent,
   updateTree,
 } from "react-mosaic-component";
@@ -74,6 +73,7 @@ import {
   getPanelIdForType,
   getPanelTypeFromId,
   getParentTabPanelByPanelId,
+  getPathFromNode,
   isTabPanel,
   updateTabPanelLayout,
 } from "@foxglove-studio/app/util/layout";

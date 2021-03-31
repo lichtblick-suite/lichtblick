@@ -18,10 +18,13 @@ import {
   createRemoveUpdate,
   getLeaves,
   getNodeAtPath,
-  getPathFromNode,
   updateTree,
   MosaicUpdate,
+  isParent,
+  MosaicNode,
+  MosaicPath,
 } from "react-mosaic-component";
+import { MosaicKey } from "react-mosaic-component/lib/types";
 import zlib from "zlib";
 
 import { PanelsState } from "@foxglove-studio/app/reducers/panels";
@@ -30,8 +33,6 @@ import {
   ConfigsPayload,
   PanelConfig,
   SaveConfigsPayload,
-  MosaicNode,
-  MosaicPath,
   MosaicDropTargetPosition,
   SavedProps,
 } from "@foxglove-studio/app/types/panels";
@@ -76,6 +77,28 @@ export function isTabPanel(panelId: string) {
   return getPanelTypeFromId(panelId) === TAB_PANEL_TYPE;
 }
 
+// Traverses `tree` to find the path to the specified `node`
+export function getPathFromNode<T extends MosaicKey>(
+  node: T | undefined,
+  tree: MosaicNode<T> | null, // eslint-disable-line no-restricted-syntax
+  path: MosaicPath = [],
+): MosaicPath {
+  if (tree === node) {
+    return path;
+  }
+  if (tree && isParent(tree)) {
+    const first = getPathFromNode(node, tree.first, [...path, "first"]);
+    if (first.length) {
+      return first;
+    }
+    const second = getPathFromNode(node, tree.second, [...path, "second"]);
+    if (second.length) {
+      return second;
+    }
+  }
+  return [];
+}
+
 type PanelIdMap = {
   [panelId: string]: string;
 };
@@ -88,9 +111,9 @@ function mapTemplateIdsToNewIds(templateIds: string[]): PanelIdMap {
 }
 
 function getLayoutWithNewPanelIds(
-  layout: MosaicNode,
+  layout: MosaicNode<string>,
   panelIdMap: PanelIdMap,
-): MosaicNode | undefined {
+): MosaicNode<string> | undefined {
   if (typeof layout === "string") {
     // return corresponding ID if it exists in panelIdMap
     // (e.g. for Tab panel presets with 1 panel in active layout)
@@ -111,11 +134,11 @@ function getLayoutWithNewPanelIds(
     }
   }
   // TODO: Refactor above to allow for better typing here.
-  return (newLayout as any) as MosaicNode;
+  return (newLayout as any) as MosaicNode<string>;
 }
 
 // Recursively removes all empty nodes from a layout
-function compactLayout(layout: MosaicNode): MosaicNode {
+function compactLayout(layout: MosaicNode<string>): MosaicNode<string> {
   if (typeof layout === "string") {
     return layout;
   }
@@ -141,9 +164,9 @@ function compactLayout(layout: MosaicNode): MosaicNode {
 
 // Recursively replaces all leaves of the current layout
 function replaceLeafLayouts(
-  layout: MosaicNode,
-  replacerFn: (layout: MosaicNode) => MosaicNode,
-): MosaicNode {
+  layout: MosaicNode<string>,
+  replacerFn: (layout: MosaicNode<string>) => MosaicNode<string>,
+): MosaicNode<string> {
   if (typeof layout === "string") {
     return replacerFn(layout);
   }
@@ -156,10 +179,10 @@ function replaceLeafLayouts(
 
 // Replaces Tab panels with their active tab's layout
 export function inlineTabPanelLayouts(
-  layout: MosaicNode,
+  layout: MosaicNode<string>,
   savedProps: SavedProps,
   preserveTabPanelIds: string[],
-) {
+): MosaicNode<string> {
   const tabFreeLayout = replaceLeafLayouts(layout, (id) => {
     if (typeof id === "string" && isTabPanel(id) && !preserveTabPanelIds.includes(id)) {
       const panelProps = getValidTabPanelConfig(id, savedProps);
@@ -258,7 +281,7 @@ export const DEFAULT_TAB_PANEL_CONFIG = {
   tabs: [{ title: "1", layout: undefined }],
 };
 // Returns all panelIds for a given layout (including layouts stored in Tab panels)
-export function getAllPanelIds(layout: MosaicNode, savedProps: SavedProps): string[] {
+export function getAllPanelIds(layout: MosaicNode<string>, savedProps: SavedProps): string[] {
   const layoutPanelIds = getLeaves(layout);
   const tabPanelIds = getPanelIdsInsideTabPanels(layoutPanelIds, savedProps);
   return [...layoutPanelIds, ...tabPanelIds];
@@ -287,7 +310,7 @@ export const validateTabPanelConfig = (config?: PanelConfig) => {
 };
 
 export const updateTabPanelLayout = (
-  layout: MosaicNode | undefined,
+  layout: MosaicNode<string> | undefined,
   tabPanelConfig: TabPanelConfig,
 ): TabPanelConfig => {
   const updatedTabs = tabPanelConfig.tabs.map((tab, i) => {
@@ -317,7 +340,7 @@ export const removePanelFromTabPanel = (
   }
 
   const currentTabLayout = config.tabs[config.activeTabIdx]?.layout;
-  let newTree: MosaicNode | undefined;
+  let newTree: MosaicNode<string> | undefined;
   if (!path.length) {
     newTree = undefined;
   } else {
@@ -333,7 +356,7 @@ export const removePanelFromTabPanel = (
 };
 
 export const createAddUpdates = (
-  tree: MosaicNode | undefined,
+  tree: MosaicNode<string> | undefined,
   panelId: string,
   newPath: MosaicPath,
   position: MosaicDropTargetPosition,
@@ -479,8 +502,8 @@ export const replaceAndRemovePanels = (
     newId?: string;
     idsToRemove?: string[];
   },
-  layout: MosaicNode,
-): MosaicNode | undefined => {
+  layout: MosaicNode<string>,
+): MosaicNode<string> | undefined => {
   const { originalId, newId, idsToRemove = [] } = panelArgs;
   const panelIds = getLeaves(layout);
   if (xor(panelIds, idsToRemove).length === 0) {

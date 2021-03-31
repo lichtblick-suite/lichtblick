@@ -99,4 +99,66 @@ const nestedTabLayoutFixture: Fixture = {
   },
 };
 
-export default nestedTabLayoutFixture;
+const nestedTabLayoutFixture2: Fixture = {
+  topics: [],
+  datatypes: {},
+  frame: {},
+  layout: {
+    direction: "row",
+    splitPercentage: 20,
+    first: "Plot!1",
+    second: {
+      direction: "row",
+      splitPercentage: 20,
+      first: "unknown!2",
+      second: {
+        direction: "column",
+        splitPercentage: 20,
+        first: "unknown!3",
+        second: "Tab!a",
+      },
+    },
+  },
+  savedProps: {
+    "Tab!a": {
+      activeTabIdx: 0,
+      tabs: [
+        {
+          title: "First",
+          layout: {
+            direction: "column",
+            splitPercentage: 20,
+            first: "unknown!inner1",
+            second: {
+              direction: "column",
+              splitPercentage: 20,
+              first: "unknown!inner2",
+              second: {
+                direction: "row",
+                splitPercentage: 20,
+                first: "unknown!inner3",
+                second: "Tab!b",
+              },
+            },
+          },
+        },
+      ],
+    },
+    "Tab!b": {
+      activeTabIdx: 0,
+      tabs: [
+        {
+          title: "First inner",
+          layout: {
+            direction: "column",
+            splitPercentage: 50,
+            first: "unknown!inner4",
+            second: "unknown!inner5",
+          },
+        },
+      ],
+    },
+  },
+};
+
+export { nestedTabLayoutFixture, nestedTabLayoutFixture2 };

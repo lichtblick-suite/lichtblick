@@ -10,18 +10,21 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import React, { useCallback, useMemo, forwardRef, ElementRef } from "react";
+import React, { useCallback, useMemo, forwardRef, ElementRef, PropsWithChildren } from "react";
+import { useDrop } from "react-dnd";
 import {
   MosaicWithoutDragDropContext,
   MosaicWindow,
-  MosaicDumbWindow,
+  MosaicDragType,
+  MosaicNode,
 } from "react-mosaic-component";
 import { useSelector, useDispatch } from "react-redux";
 import "react-mosaic-component/react-mosaic-component.css";
 import { bindActionCreators } from "redux";
+import styled from "styled-components";
 
 import "./PanelLayout.scss";
-import { setMosaicId } from "@foxglove-studio/app/actions/mosaic";
+
 import {
   changePanelLayout,
   savePanelConfigs,
@@ -33,48 +36,57 @@ import { useExperimentalFeature } from "@foxglove-studio/app/context/Experimenta
 import PanelList from "@foxglove-studio/app/panels/PanelList";
 import { EmptyDropTarget } from "@foxglove-studio/app/panels/Tab/EmptyDropTarget";
 import { State, Dispatcher } from "@foxglove-studio/app/reducers";
-import { MosaicNode, SaveConfigsPayload } from "@foxglove-studio/app/types/panels";
+import { SaveConfigsPayload } from "@foxglove-studio/app/types/panels";
 import { getPanelIdForType, getPanelTypeFromId } from "@foxglove-studio/app/util/layout";
 
 import ErrorBoundary from "./ErrorBoundary";
 
 type Props = {
-  layout?: MosaicNode;
+  layout?: MosaicNode<string>;
   onChange: (panels: any) => void;
-  setMosaicId: (mosaicId: string) => void;
   savePanelConfigs: (arg0: SaveConfigsPayload) => Dispatcher<SAVE_PANEL_CONFIGS>;
   forwardedRef?: ElementRef<any>;
   mosaicId?: string;
   tabId?: string;
-
-  /*
-   * React mosaic adds a DropTarget wrapper around the mosaic root; remove for
-   * Tab panels so that users can correctly drag panels in from the outer
-   * layout.
-   */
-  removeRootDropTarget?: boolean;
 };
 
-// we subclass the mosaic layout without dragdropcontext
-// dragdropcontext is initialized in the App container
-// so components outside the mosaic component can participate
-class MosaicRoot extends MosaicWithoutDragDropContext {
-  componentDidMount() {
-    // set the mosaic id in redux so elements outside the container
-    // can use the id to register their drag intents with mosaic drop targets
-    (this.props as any).setMosaicId(this.state.mosaicId);
+// CSS hack to disable the first level of drop targets inside a Tab's own mosaic window (that would
+// place the dropped item as a sibling of the Tab), as well as the "root drop targets" inside the
+// nested mosaic (that would place the dropped item as a direct child of the Tab). Makes it easier
+// to drop panels into a tab layout.
+const HideTopLevelDropTargets = styled.div.attrs({ style: { margin: 0 } })`
+  .mosaic-root + .drop-target-container {
+    display: none !important;
   }
+  & > .mosaic-window > .drop-target-container {
+    display: none !important;
+  }
+`;
+
+// This wrapper makes the tabId available in the drop result when something is dropped into a nested
+// drop target. This allows a panel to know which mosaic it was dropped in regardless of nesting
+// level.
+function TabMosaicWrapper({ tabId, children }: PropsWithChildren<{ tabId?: string }>) {
+  const [, drop] = useDrop({
+    accept: MosaicDragType.WINDOW,
+    drop: (item, monitor) => {
+      const nestedDropResult = monitor.getDropResult();
+      if (nestedDropResult) {
+        // The drop result may already have a tabId if it was dropped in a more deeply-nested Tab
+        // mosaic. Provide our tabId only if there wasn't one already.
+        return { tabId, ...nestedDropResult };
+      }
+    },
+  });
+  return (
+    <HideTopLevelDropTargets className="mosaic-tile" ref={drop}>
+      {children}
+    </HideTopLevelDropTargets>
+  );
 }
 
-export function UnconnectedPanelLayout(props: Props) {
-  const {
-    layout,
-    onChange,
-    savePanelConfigs: saveConfigs,
-    tabId,
-    removeRootDropTarget,
-    mosaicId,
-  } = props;
+export function UnconnectedPanelLayout(props: Props): React.ReactElement {
+  const { layout, onChange, savePanelConfigs: saveConfigs, tabId, mosaicId } = props;
   const createTile = useCallback(
     (config: any) => {
       const defaultPanelType = "RosOut";
@@ -101,27 +113,27 @@ export function UnconnectedPanelLayout(props: Props) {
         <PanelComponent childId={id} tabId={tabId} />
       ) : (
         // If we haven't found a panel of the given type, render the panel selector
-        // @ts-expect-error typings say title is required property?
-        <MosaicWindow path={path} createNode={createTile} renderPreview={() => undefined}>
-          <Flex col center>
-            <PanelToolbar floating isUnknownPanel />
-            Unknown panel type: {type}.
-          </Flex>
-        </MosaicWindow>
+        <Flex col center dataTest={id}>
+          <PanelToolbar floating isUnknownPanel />
+          Unknown panel type: {type}.
+        </Flex>
       );
 
-      const MosaicWindowComponent: any = type === "Tab" ? MosaicDumbWindow : MosaicWindow;
-      return (
-        <MosaicWindowComponent
+      const mosaicWindow = (
+        <MosaicWindow
+          title=""
           key={path}
           path={path}
           createNode={createTile}
-          renderPreview={() => undefined}
-          tabId={tabId}
+          renderPreview={() => undefined as any}
         >
           {panel}
-        </MosaicWindowComponent>
+        </MosaicWindow>
       );
+      if (type === "Tab") {
+        return <TabMosaicWrapper tabId={id}>{mosaicWindow}</TabMosaicWrapper>;
+      }
+      return mosaicWindow;
     },
     [createTile, tabId],
   );
@@ -129,30 +141,18 @@ export function UnconnectedPanelLayout(props: Props) {
   const bodyToRender = useMemo(
     () =>
       layout ? (
-        <MosaicRoot
+        <MosaicWithoutDragDropContext
           renderTile={renderTile as any}
           className={isDemoMode ? "borderless" : "none"}
           resize={{ minimumPaneSizePercentage: 2 }}
           value={layout}
           onChange={onChange}
-          // @ts-expect-error setMosaicId property does not exist?
-          setMosaicId={props.setMosaicId}
           mosaicId={mosaicId}
-          removeRootDropTarget={removeRootDropTarget}
         />
       ) : (
         <EmptyDropTarget tabId={tabId} mosaicId={mosaicId} />
       ),
-    [
-      isDemoMode,
-      layout,
-      mosaicId,
-      onChange,
-      props.setMosaicId,
-      removeRootDropTarget,
-      renderTile,
-      tabId,
-    ],
+    [isDemoMode, layout, mosaicId, onChange, renderTile, tabId],
   );
 
   return <ErrorBoundary ref={props.forwardedRef as any}>{bodyToRender}</ErrorBoundary>;
@@ -162,22 +162,23 @@ const ConnectedPanelLayout = (_: any, ref: any) => {
   const layout = useSelector((state: State) => state.persistedState.panels.layout);
   const dispatch = useDispatch();
   const actions = React.useMemo(
-    () => bindActionCreators({ changePanelLayout, savePanelConfigs, setMosaicId }, dispatch),
+    () => bindActionCreators({ changePanelLayout, savePanelConfigs }, dispatch),
     [dispatch],
   );
   const onChange = useCallback(
-    (newLayout: MosaicNode) => {
+    (newLayout: MosaicNode<string>) => {
       actions.changePanelLayout({ layout: newLayout });
     },
     [actions],
   );
+  const mosaicId = useSelector(({ mosaic }: State) => mosaic.mosaicId);
   return (
     <UnconnectedPanelLayout
       forwardedRef={ref}
       layout={layout}
       onChange={onChange}
       savePanelConfigs={actions.savePanelConfigs}
-      setMosaicId={actions.setMosaicId}
+      mosaicId={mosaicId}
     />
   );
 };
