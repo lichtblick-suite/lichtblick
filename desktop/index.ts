@@ -37,6 +37,10 @@ declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 const isMac = process.platform === "darwin";
 const isProduction = process.env.NODE_ENV === "production";
 
+// Suppress Electron Security Warning in development
+// See the comment for the webSecurity setting on browser window
+process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = isProduction ? "false" : "true";
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
   app.quit();
@@ -83,7 +87,7 @@ async function createWindow(): Promise<void> {
       // remote data, etc. In production, the app is served from file:// URLs so
       // the Origin header is not sent, disabling the CORS
       // Access-Control-Allow-Origin check
-      webSecurity: process.env.NODE_ENV === "production",
+      webSecurity: isProduction,
     },
     backgroundColor: colors.background,
   };
