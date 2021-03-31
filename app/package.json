@@ -113,7 +113,7 @@
     "@types/react-table": "7.0.29",
     "@types/react-virtualized": "9.21.11",
     "@types/react-virtualized-select": "3.0.8",
-    "@types/sanitize-html": "1.27.1",
+    "@types/sanitize-html": "1.27.2",
     "@types/seedrandom": "3.0.0",
     "@types/shallowequal": "1.1.1",
     "@types/string-hash": "1.1.1",
