@@ -142,10 +142,6 @@ export function applyPatchToLayout(patch: string | undefined, layout: PanelsStat
     const dictionaryBuffer = Buffer.from(CBOR.encode(dictForPatchCompression));
     const uint8Arr = zlib.inflateSync(patchBuffer, { dictionary: dictionaryBuffer });
 
-    if (!uint8Arr) {
-      return layout;
-    }
-
     const buffer = uint8Arr.buffer.slice(
       uint8Arr.byteOffset,
       uint8Arr.byteLength + uint8Arr.byteOffset,

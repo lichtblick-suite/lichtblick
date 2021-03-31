@@ -262,11 +262,7 @@ export class RosNode extends EventEmitter {
     // Fall back to iterating network interfaces looking for an IP address
     let bestAddr: NetworkInterface | undefined;
     const ifaces = getNetworkInterfaces();
-    for (const name in ifaces) {
-      const iface = ifaces[name];
-      if (iface == undefined) {
-        continue;
-      }
+    for (const iface of ifaces) {
       if (
         (iface.family !== "IPv4" && iface.family !== "IPv6") ||
         iface.internal ||

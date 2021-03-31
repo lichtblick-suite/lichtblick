@@ -85,7 +85,7 @@ export const getInputTopics = (nodeData: NodeData): NodeData => {
     };
   }
 
-  const inputTopicElements = inputsExport?.declarations[0]?.initializer?.elements;
+  const inputTopicElements = inputsExport.declarations[0]?.initializer?.elements;
   if (
     !inputTopicElements ||
     inputTopicElements.some(({ kind }) => kind !== ts.SyntaxKind.StringLiteral)

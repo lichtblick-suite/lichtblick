@@ -26,7 +26,7 @@ import { DIAGNOSTIC_TOPIC } from "@foxglove-studio/app/util/globalConstants";
 import DiagnosticStatus from "./DiagnosticStatus";
 import helpContent from "./DiagnosticStatusPanel.help.md";
 import DiagnosticsHistory, { DiagnosticAutocompleteEntry } from "./DiagnosticsHistory";
-import { getDisplayName, trimHardwareId } from "./util";
+import { DiagnosticInfo, getDisplayName, trimHardwareId } from "./util";
 
 export type Config = {
   selectedHardwareId?: string;
@@ -94,7 +94,7 @@ class DiagnosticStatusPanel extends React.Component<Props> {
         <DiagnosticsHistory topic={topicToRender}>
           {(buffer) => {
             let selectedItem; // selected by name+hardware_id
-            let selectedItems; // [selectedItem], or all diagnostics with selectedHardwareId if no name is selected
+            let selectedItems: DiagnosticInfo[] | undefined; // [selectedItem], or all diagnostics with selectedHardwareId if no name is selected
             if (selectedHardwareId != undefined) {
               const items = [];
               const diagnosticsByName = buffer.diagnosticsByNameByTrimmedHardwareId.get(
@@ -123,14 +123,14 @@ class DiagnosticStatusPanel extends React.Component<Props> {
                   <Autocomplete
                     placeholder={selectedDisplayName ?? "Select a diagnostic"}
                     items={buffer.sortedAutocompleteEntries}
-                    getItemText={(entry) => (entry as any).displayName}
-                    getItemValue={(entry) => (entry as any).id}
+                    getItemText={(entry) => entry.displayName}
+                    getItemValue={(entry) => entry.id}
                     onSelect={this._onSelect as any}
                     selectedItem={selectedItem as any}
                     inputStyle={{ height: "100%" }}
                   />
                 </PanelToolbar>
-                {selectedItems && selectedItems.length ? (
+                {selectedItems?.length ? (
                   <Flex col scroll>
                     {sortBy(selectedItems, ({ status }) => status.name.toLowerCase()).map(
                       (item) => (

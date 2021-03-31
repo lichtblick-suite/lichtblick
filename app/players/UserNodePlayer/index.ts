@@ -156,11 +156,6 @@ export default class UserNodePlayer implements Player {
     },
     { isEqual },
   );
-  _getNodeRegistration = microMemoize(this._createNodeRegistration, {
-    isEqual,
-    isPromise: true,
-    maxSize: Infinity, // We prune the cache anytime the userNodes change, so it's not *actually* Infinite
-  });
 
   // When updating Webviz nodes while paused, we seek to the current time
   // (i.e. invoke _getMessages with an empty array) to refresh messages
@@ -228,8 +223,8 @@ export default class UserNodePlayer implements Player {
     // Prune the nodeDefinition cache so it doesn't grow forever.
     // We add one to the count so we don't have to recompile nodes if users undo/redo node changes.
     const maxNodeRegistrationCacheCount = Object.keys(userNodes).length + 1;
-    this._getNodeRegistration.cache?.keys.splice(maxNodeRegistrationCacheCount, Infinity);
-    this._getNodeRegistration.cache?.values.splice(maxNodeRegistrationCacheCount, Infinity);
+    this._getNodeRegistration.cache.keys.splice(maxNodeRegistrationCacheCount, Infinity);
+    this._getNodeRegistration.cache.values.splice(maxNodeRegistrationCacheCount, Infinity);
 
     // This code causes us to reset workers twice because the forceSeek resets the workers too
     // TODO: Only reset workers once
@@ -243,7 +238,10 @@ export default class UserNodePlayer implements Player {
   }
 
   // Defines the inputs/outputs and worker interface of a user node.
-  async _createNodeRegistration(nodeId: string, userNode: UserNode): Promise<NodeRegistration> {
+  _createNodeRegistration = async (
+    nodeId: string,
+    userNode: UserNode,
+  ): Promise<NodeRegistration> => {
     // Pass all the nodes a set of basic datatypes that we know how to render.
     // These could be overwritten later by bag datatypes, but these datatype definitions should be very stable.
     const { topics = [], datatypes = {} } = this._lastPlayerStateActiveData || {};
@@ -341,7 +339,12 @@ export default class UserNodePlayer implements Player {
         }
       },
     };
-  }
+  };
+  _getNodeRegistration = microMemoize(this._createNodeRegistration, {
+    isEqual,
+    isPromise: true,
+    maxSize: Infinity, // We prune the cache anytime the userNodes change, so it's not *actually* Infinite
+  });
 
   _getTransformWorker(): Rpc {
     if (!this._nodeTransformRpc) {

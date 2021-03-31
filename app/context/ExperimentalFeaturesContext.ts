@@ -21,7 +21,7 @@ export type FeatureSettings = {
 export type ExperimentalFeaturesBackend = {
   features: FeatureDescriptions;
   settings: FeatureSettings;
-  changeFeature(id: string, value: FeatureValue): void;
+  changeFeature: (id: string, value: FeatureValue) => void;
 };
 const ExperimentalFeaturesContext = createContext<ExperimentalFeaturesBackend>({
   features: {},

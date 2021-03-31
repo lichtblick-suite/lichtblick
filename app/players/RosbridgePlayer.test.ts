@@ -11,11 +11,21 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Time } from "rosbag";
+
 import NoopMetricsCollector from "@foxglove-studio/app/players/NoopMetricsCollector";
 import RosbridgePlayer from "@foxglove-studio/app/players/RosbridgePlayer";
 import { isBobject, deepParse } from "@foxglove-studio/app/util/binaryObjects";
 
-const headerMessage = ({ seq, stamp: { sec, nsec }, frame_id }: any) => {
+const headerMessage = ({
+  seq,
+  stamp: { sec, nsec },
+  frame_id,
+}: {
+  seq: number;
+  stamp: Time;
+  frame_id: string;
+}) => {
   const bytes = Buffer.alloc(16 + frame_id.length);
   bytes.writeUInt32LE(seq, 0);
   bytes.writeUInt32LE(sec, 4);
@@ -25,7 +35,7 @@ const headerMessage = ({ seq, stamp: { sec, nsec }, frame_id }: any) => {
   return { bytes };
 };
 
-const textMessage = ({ text }: any) => {
+const textMessage = ({ text }: { text: string }) => {
   const bytes = Buffer.alloc(4 + text.length);
   bytes.writeUInt32LE(text.length, 0);
   bytes.write(text, 4);

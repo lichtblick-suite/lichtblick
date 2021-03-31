@@ -360,8 +360,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
       // initial "zoom to fit" state. Subsequent zooms/pans adjust the offsets.
       const bounds = newScaleBounds.find(({ axes }) => axes === "xAxes");
       if (
-        bounds != undefined &&
-        bounds.min != undefined &&
+        bounds?.min != undefined &&
         bounds.max != undefined &&
         currentTimeRef.current != undefined
       ) {
@@ -421,7 +420,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     if (tooltip.current) {
       ReactDOM.unmountComponentAtNode(tooltip.current);
     }
-    if (tooltip.current && tooltip.current.parentNode) {
+    if (tooltip.current?.parentNode) {
       tooltip.current.parentNode.removeChild(tooltip.current);
       tooltip.current = ReactNull;
     }
@@ -516,10 +515,8 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
       }
       const { canvas } = currentChartComponent;
       const canvasRect = canvas.getBoundingClientRect();
-      const xBounds =
-        scaleBounds.current && scaleBounds.current.find(({ axes }) => axes === "xAxes");
-      const yBounds =
-        scaleBounds.current && scaleBounds.current.find(({ axes }) => axes === "yAxes");
+      const xBounds = scaleBounds.current?.find(({ axes }) => axes === "xAxes");
+      const yBounds = scaleBounds.current?.find(({ axes }) => axes === "yAxes");
       const xMousePosition = event.pageX - canvasRect.left;
       const yMousePosition = event.pageY - canvasRect.top;
       const isTargetingCanvas = event.target === canvas;
@@ -540,7 +537,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
         clearGlobalHoverTime();
       }
 
-      if (tooltips && tooltips.length) {
+      if (tooltips?.length) {
         const tooltipElement = await currentChartComponent.getElementAtXAxis(event);
         updateTooltip(currentChartComponent, canvas, tooltipElement);
       } else {
@@ -553,8 +550,8 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   // Normally we set the x axis step-size and display automatically, but we need consistency when
   // scrolling with playback because the vertical lines can flicker, and x axis labels can have an
   // inconsistent number of digits.
-  const xBounds = scaleBounds.current && scaleBounds.current.find(({ axes }) => axes === "xAxes");
-  const yBounds = scaleBounds.current && scaleBounds.current.find(({ axes }) => axes === "yAxes");
+  const xBounds = scaleBounds.current?.find(({ axes }) => axes === "xAxes");
+  const yBounds = scaleBounds.current?.find(({ axes }) => axes === "yAxes");
 
   const xScaleOptions = followPlaybackState && xBounds ? stepSize(xBounds) : undefined;
 

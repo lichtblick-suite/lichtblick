@@ -44,7 +44,7 @@ const laserScan = (regl: Regl) =>
   `,
 
     uniforms: {
-      pointSize: (context: never, props: any) => (props.settings && props.settings.pointSize) || 4,
+      pointSize: (context: never, props: any) => props.settings?.pointSize || 4,
       isCircle: (context: never, props: any) =>
         (props.settings && props.settings.pointShape === "circle") || false,
       // Color is not included in the LaserScan message - it's only included if the color is added by

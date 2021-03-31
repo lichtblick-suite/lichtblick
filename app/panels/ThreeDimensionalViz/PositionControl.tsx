@@ -31,7 +31,7 @@ export function parsePosition(input: string): Vec3 | undefined {
   const parts = input.split(/\s*[,\n{}[\]]+\s*/).filter((part) => part !== "");
   const parseMatch = (val: string) => {
     const match = val.match(/-?\d+(\.\d+)?/);
-    return match && match[0] ? Number.parseFloat(match[0]) : undefined;
+    return match?.[0] ? Number.parseFloat(match[0]) : undefined;
   };
   // allow length 3 to ignore z value
   if (parts.length === 2 || parts.length === 3) {

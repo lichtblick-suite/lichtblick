@@ -343,7 +343,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
               }
               style={
                 // If the autocomplete would fall off the screen, pin it to the right.
-                (style.left as any) + width <= window.innerWidth
+                (style.left as number) + width <= window.innerWidth
                   ? { ...menuStyle, ...style, width, maxWidth: "100%", maxHeight }
                   : {
                       ...menuStyle,

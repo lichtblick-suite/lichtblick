@@ -26,7 +26,7 @@ const SPEEDS = ["0.01", "0.02", "0.05", "0.1", "0.2", "0.5", "0.8", "1", "2", "3
 export default function PlaybackSpeedControls() {
   const configSpeed = useSelector((state: any) => state.persistedState.panels.playbackConfig.speed);
   const speed = useMessagePipeline(
-    useCallback(({ playerState }) => playerState.activeData && playerState.activeData.speed, []),
+    useCallback(({ playerState }) => playerState.activeData?.speed, []),
   );
   const { capabilities } = useDataSourceInfo();
   const canSetSpeed = capabilities.includes(PlayerCapabilities.setSpeed);

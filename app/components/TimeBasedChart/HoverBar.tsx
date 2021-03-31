@@ -70,7 +70,7 @@ export default React.memo<Props>(function HoverBar({
   const wrapper = React.useRef<HTMLDivElement>(ReactNull);
   const hoverValue = useSelector((state: any) => state.hoverValue);
 
-  const xBounds = scaleBounds.current && scaleBounds.current.find(({ axes }) => axes === "xAxes");
+  const xBounds = scaleBounds.current?.find(({ axes }) => axes === "xAxes");
 
   // We avoid putting the visibility and transforms into react state to try to keep updates snappy.
   // Mouse interactions are frequent, and adding/removing the bar from the DOM would slow things

@@ -157,7 +157,7 @@ export function buildMarkerData(rawMarkerData: RawMarkerData): MarkerData | unde
   // Markers can only be rendered if we know the original size of the image.
   let originalWidth;
   let originalHeight;
-  if (cameraInfo && cameraInfo.width && cameraInfo.height) {
+  if (cameraInfo?.width && cameraInfo.height) {
     // Prefer using CameraInfo can be used to determine the image size.
     originalWidth = cameraInfo.width;
     originalHeight = cameraInfo.height;

@@ -107,7 +107,7 @@ function PoseMarkers({ markers, layerIndex }: PoseMarkerProps): ReactElement {
           pose,
           interactionData,
           points: carOutlinePoints,
-          color: settings?.overrideColor ?? { r: 0.3313, g: 0.3313, b: 0.3375, a: 1 },
+          color: settings.overrideColor ?? { r: 0.3313, g: 0.3313, b: 0.3375, a: 1 },
         });
         break;
       }

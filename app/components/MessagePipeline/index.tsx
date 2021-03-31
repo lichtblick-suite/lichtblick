@@ -53,16 +53,16 @@ export type MessagePipelineContext = {
   datatypes: RosDatatypes;
   subscriptions: SubscribePayload[];
   publishers: AdvertisePayload[];
-  setSubscriptions(id: string, subscriptionsForId: SubscribePayload[]): void;
-  setPublishers(id: string, publishersForId: AdvertisePayload[]): void;
-  publish(request: PublishPayload): void;
-  startPlayback(): void;
-  pausePlayback(): void;
-  setPlaybackSpeed(speed: number): void;
-  seekPlayback(time: Time): void;
+  setSubscriptions: (id: string, subscriptionsForId: SubscribePayload[]) => void;
+  setPublishers: (id: string, publishersForId: AdvertisePayload[]) => void;
+  publish: (request: PublishPayload) => void;
+  startPlayback: () => void;
+  pausePlayback: () => void;
+  setPlaybackSpeed: (speed: number) => void;
+  seekPlayback: (time: Time) => void;
   // Don't render the next frame until the returned function has been called.
-  pauseFrame(name: string): ResumeFrame;
-  requestBackfill(): void;
+  pauseFrame: (name: string) => ResumeFrame;
+  requestBackfill: () => void;
 };
 
 // exported only for MockMessagePipelineProvider
@@ -146,7 +146,7 @@ export function MessagePipelineProvider({
   const publishers: AdvertisePayload[] = useMemo(() => flatten(objectValues(publishersById)), [
     publishersById,
   ]);
-  const player = maybePlayer?.player;
+  const player = maybePlayer.player;
   useEffect(() => player?.setSubscriptions(subscriptions), [player, subscriptions]);
   useEffect(() => player?.setPublishers(publishers), [player, publishers]);
 
@@ -322,7 +322,7 @@ export function MessagePipelineProvider({
     let skipUpdate = false;
     (async () => {
       // Wait for the current frame to finish rendering if needed
-      await pauseFrameForPromises(playerTickState.current?.promisesToWaitFor ?? []);
+      await pauseFrameForPromises(playerTickState.current.promisesToWaitFor ?? []);
 
       // If the globalVariables have already changed again while
       // we waited for the frame to render, skip the update.

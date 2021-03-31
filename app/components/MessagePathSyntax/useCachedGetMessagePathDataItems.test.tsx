@@ -44,15 +44,12 @@ function addValuesWithPathsToItems(
     if (!rosPath) {
       return undefined;
     }
-    const items = getMessagePathDataItems(message as any, rosPath, providerTopics, datatypes);
-    return (
-      items &&
-      items.map(({ value, path, constantName }) => ({
-        value: isBobject(value) ? deepParse(value) : value,
-        path,
-        constantName,
-      }))
-    );
+    const items = getMessagePathDataItems(message, rosPath, providerTopics, datatypes);
+    return items?.map(({ value, path, constantName }) => ({
+      value: isBobject(value) ? deepParse(value) : value,
+      path,
+      constantName,
+    }));
   });
 }
 

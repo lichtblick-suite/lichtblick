@@ -20,7 +20,7 @@ import { StampedMessage } from "@foxglove-studio/app/types/Messages";
 export const defaultGetHeaderStamp = (
   message: Readonly<RosObject> | undefined,
 ): Time | undefined => {
-  if (message != undefined && message.header != undefined) {
+  if (message?.header) {
     return cast<StampedMessage>(message).header.stamp;
   }
   return undefined;
@@ -116,7 +116,7 @@ function getSynchronizedMessages(
   const synchronizedMessages: Record<string, any> = {};
   for (const topic of topics) {
     const matchingMessage = messages[topic]?.find(({ message }) => {
-      const thisStamp = message?.header?.stamp;
+      const thisStamp = message.header?.stamp;
       return thisStamp && TimeUtil.areSame(stamp, thisStamp);
     });
     if (!matchingMessage) {
@@ -148,7 +148,7 @@ function getSynchronizedState(
       newSynchronizedMessages = syncedMsgs;
       newMessagesByTopic = mapValues(newMessagesByTopic, (msgsByTopic) =>
         msgsByTopic.filter(({ message }) => {
-          const thisStamp = message?.header?.stamp;
+          const thisStamp = message.header?.stamp;
           return !TimeUtil.isLessThan(thisStamp, stamp);
         }),
       );
@@ -161,14 +161,14 @@ function getSynchronizedState(
 // Returns reducers for use with PanelAPI.useMessageReducer
 export function getSynchronizingReducers(topics: readonly string[]) {
   return {
-    restore(previousValue?: ReducedValue) {
+    restore: (previousValue?: ReducedValue) => {
       const messagesByTopic: Record<string, any> = {};
       for (const topic of topics) {
-        messagesByTopic[topic] = (previousValue && previousValue.messagesByTopic[topic]) || [];
+        messagesByTopic[topic] = previousValue?.messagesByTopic[topic] ?? [];
       }
       return getSynchronizedState(topics, { messagesByTopic });
     },
-    addMessage({ messagesByTopic, synchronizedMessages }: ReducedValue, newMessage: Message) {
+    addMessage: ({ messagesByTopic, synchronizedMessages }: ReducedValue, newMessage: Message) => {
       const messages = messagesByTopic[newMessage.topic];
       return getSynchronizedState(topics, {
         messagesByTopic: {

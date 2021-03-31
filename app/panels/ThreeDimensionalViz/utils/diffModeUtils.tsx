@@ -114,7 +114,7 @@ export const withDiffMode = (BaseWorldMarkers: ComponentType<WorldMarkerProps>) 
               {...{
                 ...props,
                 clearCachedMarkers: true,
-                layerIndex: (props.layerIndex as any) + i * LAYER_INDEX_DIFF_MODE_BASE_PER_PASS,
+                layerIndex: (props.layerIndex as number) + i * LAYER_INDEX_DIFF_MODE_BASE_PER_PASS,
                 markersByType: markersByRenderPass,
               }}
             />

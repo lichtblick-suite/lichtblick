@@ -144,11 +144,9 @@ export function useBlocksByTopic(topics: readonly string[]): BlocksForTopics {
     }
     const result: Record<string, MessageReader> = {};
     for (const topic of requestedTopics) {
-      if (parsedMessageDefinitionsByTopic && parsedMessageDefinitionsByTopic[topic]) {
-        const parsedDefinition = parsedMessageDefinitionsByTopic[topic];
-        if (parsedDefinition) {
-          result[topic] = new MessageReader(parsedDefinition);
-        }
+      const parsedDefinition = parsedMessageDefinitionsByTopic?.[topic];
+      if (parsedDefinition) {
+        result[topic] = new MessageReader(parsedDefinition);
       }
     }
     return result;

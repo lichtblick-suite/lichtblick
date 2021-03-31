@@ -188,7 +188,7 @@ export const getField = (obj: any | undefined, field: string): any => {
     return;
   }
   if (isBobject(obj)) {
-    return obj[field] && obj[field]();
+    return obj[field]?.();
   }
   return obj[field];
 };

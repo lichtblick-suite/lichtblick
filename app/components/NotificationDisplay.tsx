@@ -63,7 +63,7 @@ const Container = styled.div<{ flash: boolean; unread: boolean; color: string }>
 const Fader = styled.span<{ visible: boolean }>`
   text-align: center;
   font-size: 12px;
-  padding-right: 2px
+  padding-right: 2px;
   opacity: ${(props) => (props.visible ? 1 : 0)};
   transition: opacity 200ms linear;
   display: inline-block;
@@ -130,7 +130,7 @@ const displayPropsBySeverity = {
   },
 };
 const getColorForSeverity = (severity: NotificationSeverity): string =>
-  displayPropsBySeverity[severity]?.color ?? colors.BLUEL1;
+  displayPropsBySeverity[severity].color ?? colors.BLUEL1;
 
 function NotificationItem(props: NotificationItemProps) {
   const { notification, onClick } = props;

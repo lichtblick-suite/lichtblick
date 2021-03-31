@@ -29,7 +29,7 @@ export default {
   async copy(text: string): Promise<void> {
     // attempt to use the new async clipboard methods. If those are not available or fail, fallback to the old
     // `execCommand` method.
-    if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+    if (navigator?.clipboard?.writeText) {
       try {
         return navigator.clipboard.writeText(text);
       } catch (error) {

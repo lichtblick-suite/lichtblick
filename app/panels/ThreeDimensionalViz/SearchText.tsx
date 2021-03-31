@@ -119,9 +119,7 @@ export const useGLText = ({
     if (!searchTextOpen && !searchTextMatches.length) {
       return;
     }
-    const matches = glText.filter(
-      (marker) => marker.highlightedIndices && marker.highlightedIndices.length,
-    );
+    const matches = glText.filter((marker) => marker.highlightedIndices?.length);
     if (matches.length) {
       throttledSetSearchTextMatches(matches);
     } else if (!matches.length && searchTextMatches.length) {

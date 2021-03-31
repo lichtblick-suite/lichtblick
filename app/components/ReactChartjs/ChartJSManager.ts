@@ -221,7 +221,7 @@ export default class ChartJSManager {
     // Pipe datasets to chart instance datasets enabling
     // seamless transitions
     const currentDatasets = this._getCurrentDatasets();
-    const nextDatasets = (data && data.datasets) || [];
+    const nextDatasets = data?.datasets ?? [];
     this._checkDatasets(currentDatasets);
 
     const currentDatasetsIndexed = keyBy(currentDatasets, datasetKeyProvider);
@@ -349,7 +349,7 @@ export default class ChartJSManager {
   }
 
   _addFunctionsToConfig(config: any, scaleOptions?: ScaleOptions): typeof config {
-    if (config && config.plugins.datalabels) {
+    if (config?.plugins.datalabels) {
       // This controls which datalabels are displayed. Only display labels for datapoints that include a "label"
       // property.
       config.plugins.datalabels.formatter = (value: any, _context: any) => {
@@ -418,11 +418,6 @@ export default class ChartJSManager {
   }
 
   _getCurrentDatasets(): Chart.ChartDataSets[] {
-    return (
-      (this._chartInstance &&
-        this._chartInstance.config.data &&
-        this._chartInstance.config.data.datasets) ||
-      []
-    );
+    return this._chartInstance?.config.data?.datasets ?? [];
   }
 }

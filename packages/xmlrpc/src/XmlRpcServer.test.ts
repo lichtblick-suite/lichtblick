@@ -45,7 +45,7 @@ describe("XmlRpcServer", () => {
         expect(handledMethod).toEqual(true);
         let resData = "";
         expect(res.statusCode).toEqual(200);
-        res.on("data", (chunk) => (resData += chunk));
+        res.on("data", (chunk: string) => (resData += chunk));
         res.on("end", () => {
           expect(resData).toEqual(
             '<?xml version="1.0"?><methodResponse version="1.0"><params><param><value><array><data><value><int>1</int></value><value><string>test</string></value><value/></data></array></value></param></params></methodResponse>',

@@ -28,7 +28,7 @@ function SubscribeToList({ config, saveConfig }: Props): React.ReactElement {
   const messagesSeen = PanelAPI.useMessageReducer<number>({
     topics,
     restore: React.useCallback(() => 0, []),
-    addMessage: React.useCallback((seenBefore) => seenBefore + 1, []),
+    addMessage: React.useCallback((seenBefore: number) => seenBefore + 1, []),
   });
   return (
     <Flex col>

@@ -187,19 +187,18 @@ export default function NamespaceMenu({
                           overrideColorByColumn[0] as any,
                         )}
                       />
-                      {hasNamespaceOverrideColorChangedByColumn &&
-                        hasNamespaceOverrideColorChangedByColumn[0] && (
-                          <Icon
-                            dataTest="reset-override-color-icon"
-                            small
-                            fade
-                            tooltipProps={{ placement: "top", contents: "Reset to default" }}
-                            onClick={() => onNamespaceOverrideColorChange(undefined, nodeKey)}
-                            style={overrideColorChangedIconStyle}
-                          >
-                            <UndoVariantIcon />
-                          </Icon>
-                        )}
+                      {hasNamespaceOverrideColorChangedByColumn?.[0] && (
+                        <Icon
+                          dataTest="reset-override-color-icon"
+                          small
+                          fade
+                          tooltipProps={{ placement: "top", contents: "Reset to default" }}
+                          onClick={() => onNamespaceOverrideColorChange(undefined, nodeKey)}
+                          style={overrideColorChangedIconStyle}
+                        >
+                          <UndoVariantIcon />
+                        </Icon>
+                      )}
                     </SColorPickerWrapper>
                   </SItemContent>
                 </Item>
@@ -225,22 +224,21 @@ export default function NamespaceMenu({
                             overrideColorByColumn[1] as any,
                           )}
                         />
-                        {hasNamespaceOverrideColorChangedByColumn &&
-                          hasNamespaceOverrideColorChangedByColumn[1] && (
-                            <Icon
-                              dataTest="reset-override-color-icon"
-                              small
-                              fade
-                              tooltipProps={{
-                                placement: "top",
-                                contents: "Reset color to default.",
-                              }}
-                              onClick={() => onNamespaceOverrideColorChange(undefined, featureKey)}
-                              style={overrideColorChangedIconStyle}
-                            >
-                              <UndoVariantIcon />
-                            </Icon>
-                          )}
+                        {hasNamespaceOverrideColorChangedByColumn?.[1] && (
+                          <Icon
+                            dataTest="reset-override-color-icon"
+                            small
+                            fade
+                            tooltipProps={{
+                              placement: "top",
+                              contents: "Reset color to default.",
+                            }}
+                            onClick={() => onNamespaceOverrideColorChange(undefined, featureKey)}
+                            style={overrideColorChangedIconStyle}
+                          >
+                            <UndoVariantIcon />
+                          </Icon>
+                        )}
                       </SColorPickerWrapper>
                     </SItemContent>
                   </Item>

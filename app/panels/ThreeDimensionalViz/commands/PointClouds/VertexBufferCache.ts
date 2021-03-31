@@ -72,7 +72,7 @@ export default class VertexBufferCache {
     this._previous.clear();
   }
 
-  _deleteBuffer(cached: MemoizedVertexBuffer): void {
+  _deleteBuffer = (cached: MemoizedVertexBuffer): void => {
     const { buffer } = cached;
     if (buffer) {
       // Destroy GPU buffer
@@ -80,5 +80,5 @@ export default class VertexBufferCache {
     } else {
       console.warn("Cannot destroy buffer", cached);
     }
-  }
+  };
 }

@@ -52,7 +52,7 @@ export interface OsContext {
   // The process id of this application
   pid: number;
 
-  handleToolbarDoubleClick(): void;
+  handleToolbarDoubleClick: () => void;
 
   // Events from the native window are available in the main process but not the renderer, so we forward them through the bridge.
   addIpcEventListener(eventName: OsContextForwardedEvent, handler: () => void): void;
@@ -62,15 +62,15 @@ export interface OsContext {
   menuRemoveInputSource(name: string): Promise<void>;
 
   // Retrieve an environment variable
-  getEnvVar(envVar: string): string | undefined;
+  getEnvVar: (envVar: string) => string | undefined;
   // Get the operating system hostname
-  getHostname(): string;
+  getHostname: () => string;
   // Get a listing for every network interface discovered on the system
-  getNetworkInterfaces(): NetworkInterface[];
+  getNetworkInterfaces: () => NetworkInterface[];
   // Get a unique identifier for the system from the operating system
-  getMachineId(): string;
+  getMachineId: () => string;
   // Get the version string from package.json
-  getAppVersion(): string;
+  getAppVersion: () => string;
 
   // file backed key/value storage
   storage: Storage;

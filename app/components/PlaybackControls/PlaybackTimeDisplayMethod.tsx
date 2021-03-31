@@ -111,8 +111,7 @@ const PlaybackTimeDisplayMethod = ({
       setHasError(false);
       setIsEditing(false);
       if (
-        validTimeAndMethod &&
-        validTimeAndMethod.time &&
+        validTimeAndMethod?.time &&
         isTimeInRangeInclusive(validTimeAndMethod.time, startTime, endTime)
       ) {
         onSeek(validTimeAndMethod.time);

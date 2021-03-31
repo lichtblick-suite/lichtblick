@@ -21,6 +21,9 @@ export default function hoverValueReducer(state: State, action: ActionTypes): St
       if (state.hoverValue?.componentId === action.payload.componentId) {
         return { ...state, hoverValue: undefined };
       }
+      break;
+    default:
+      break;
   }
   return state;
 }

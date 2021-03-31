@@ -45,8 +45,7 @@ export type VideoRecordingAction = {
       // just result in { "action": "error", "error": {} }. Instead pass a string - the stack itself.
       const payload: VideoRecordingAction = {
         action: "error",
-        error:
-          error.stack || error.message || (error.toString && error.toString()) || (error as any),
+        error: error.stack || error.message || error.toString?.() || (error as any),
       };
       // Clear error, since if it is whitelisted we will ignore and try to keep running
       error = undefined;
@@ -145,9 +144,9 @@ class VideoRecordingClient {
     if (screenshotResolve) {
       throw new Error("Already have a screenshot queued!");
     }
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       screenshotResolve = resolve;
-    }) as Promise<void>;
+    });
   }
 
   finish() {

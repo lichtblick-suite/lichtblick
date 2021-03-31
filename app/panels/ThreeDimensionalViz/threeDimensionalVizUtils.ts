@@ -36,7 +36,7 @@ export type TargetPose = { target: Vec3; targetOrientation: Vec4 };
 const ZOOM_LEVEL_URL_PARAM = "zoom";
 
 function getZoomDistanceFromURLParam(): number | void {
-  const params = new URLSearchParams(location && location.search);
+  const params = new URLSearchParams(location?.search);
   if (params.has(ZOOM_LEVEL_URL_PARAM)) {
     return parseFloat(params.get(ZOOM_LEVEL_URL_PARAM) as any);
   }
@@ -92,7 +92,7 @@ export function useTransformedCameraState({
     }
   }
   // Read the distance from URL when World is first loaded with empty cameraState distance in savedProps
-  if (configCameraState?.distance == undefined) {
+  if (configCameraState.distance == undefined) {
     transformedCameraState.distance = getZoomDistanceFromURLParam();
   }
 
@@ -139,7 +139,7 @@ export function getUpdatedGlobalVariablesBySelectedObject(
   }
   const newGlobalVariables: any = {};
   linkedGlobalVariables.forEach(({ topic, markerKeyPath, name }) => {
-    if (interactionData?.topic === topic) {
+    if (interactionData.topic === topic) {
       const objectForPath = get(object, [...markerKeyPath].reverse());
       newGlobalVariables[name] = objectForPath;
     }
@@ -155,7 +155,9 @@ function getEquivalentOffsetsWithoutTarget(
   followOrientation?: boolean,
 ): { targetOffset: Vec3; thetaOffset: number } {
   const heading = followOrientation
-    ? cameraStateSelectors.targetHeading({ targetOrientation: targetPose.targetOrientation })
+    ? (cameraStateSelectors.targetHeading({
+        targetOrientation: targetPose.targetOrientation,
+      }) as number)
     : 0;
   const targetOffset = vec3.rotateZ([0, 0, 0], offsets.targetOffset, [0, 0, 0], -heading);
   vec3.add(targetOffset, targetOffset, targetPose.target);

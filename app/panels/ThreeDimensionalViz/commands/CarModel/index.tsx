@@ -25,7 +25,7 @@ async function loadCarModel() {
   const nodes = [...model.json.nodes];
 
   // overwrite the translation component of the root node so the car's center is its rear axle
-  const translation: any = [0, 0, 0];
+  const translation: vec3 = [0, 0, 0];
   vec3.lerp(translation, model.json.accessors[1].min, model.json.accessors[1].max, 0.5);
   vec3.scale(translation, translation, -nodes[0].scale[0]);
   translation[1] += 56.075834;

@@ -61,7 +61,7 @@ export class PreloaderSockets {
         return;
       }
 
-      const args = ev.data.slice(2) as Cloneable[];
+      const args = ev.data.slice(2);
       handler(callId, args);
     };
     messagePort.start();

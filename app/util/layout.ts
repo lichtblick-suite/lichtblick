@@ -292,7 +292,7 @@ export const validateTabPanelConfig = (config?: PanelConfig) => {
     return false;
   }
 
-  if (!Array.isArray(config?.tabs) || typeof config?.activeTabIdx !== "number") {
+  if (!Array.isArray(config.tabs) || typeof config.activeTabIdx !== "number") {
     const error = new Error(
       "A non-Tab panel config is being operated on as if it were a Tab panel.",
     );
@@ -461,8 +461,8 @@ export const moveTabBetweenTabPanels = ({
   const sourceConfig = getValidTabPanelConfig(source.panelId, savedProps);
   const targetConfig = getValidTabPanelConfig(target.panelId, savedProps);
 
-  const sourceIndex = source.tabIndex ?? sourceConfig.tabs.length;
-  const targetIndex = target.tabIndex ?? targetConfig.tabs.length;
+  const sourceIndex = source.tabIndex ?? (sourceConfig.tabs.length as number);
+  const targetIndex = target.tabIndex ?? (targetConfig.tabs.length as number);
   const nextTabsSource = [
     ...sourceConfig.tabs.slice(0, sourceIndex),
     ...sourceConfig.tabs.slice(sourceIndex + 1),
@@ -479,7 +479,7 @@ export const moveTabBetweenTabPanels = ({
 
   const movedToBeforeActiveTabTarget = targetIndex <= targetConfig.activeTabIdx;
   const nextActiveTabIdxTarget = movedToBeforeActiveTabTarget
-    ? targetConfig.activeTabIdx + 1
+    ? (targetConfig.activeTabIdx as number) + 1
     : targetConfig.activeTabIdx;
 
   return {

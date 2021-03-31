@@ -177,7 +177,7 @@ export function decodeAdditionalFields(
   return {
     ...omit(marker, "data"), // no need to include data since all fields have been decoded
     ...otherFieldsValues,
-  } as any;
+  };
 }
 
 // taken from http://docs.ros.org/jade/api/rviz/html/c++/point__cloud__transformers_8cpp_source.html

@@ -26,7 +26,7 @@ PreloaderSockets.Create();
 
 window.addEventListener(
   "DOMContentLoaded",
-  async () => {
+  () => {
     // This input element receives generated dom events from main thread to inject File objects
     // See the comments in desktop/index.ts regarding this feature
     const input = document.createElement("input");
@@ -36,7 +36,7 @@ window.addEventListener(
     document.body.appendChild(input);
 
     // let main know we are ready to accept open-file requests
-    await ipcRenderer.invoke("load-pending-files");
+    ipcRenderer.invoke("load-pending-files");
   },
   { once: true },
 );
@@ -116,5 +116,4 @@ const ctx: OsContext = {
 // and the outside world. These restrictions impact what the api surface can expose and how.
 //
 // i.e.: returning a class instance doesn't work because prototypes do not survive the boundary
-const { exposeInMainWorld: exposeToRenderer } = contextBridge; // poorly named
-exposeToRenderer("ctxbridge", ctx);
+contextBridge.exposeInMainWorld("ctxbridge", ctx); // poorly named - expose to renderer

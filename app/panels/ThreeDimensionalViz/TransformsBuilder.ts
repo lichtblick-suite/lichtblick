@@ -177,7 +177,7 @@ export const getArrowToParentMarkers = (
   childPose = transform.apply(childPose, childPose, rootTransformID);
 
   let parentPose: any = { position: { ...originPosition }, orientation: throwawayQuat };
-  parentPose = parent && parent.apply(parentPose, parentPose, rootTransformID);
+  parentPose = parent?.apply(parentPose, parentPose, rootTransformID);
 
   if (!childPose || !parentPose) {
     return [];

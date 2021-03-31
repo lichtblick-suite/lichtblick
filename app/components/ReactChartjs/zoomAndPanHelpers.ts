@@ -52,24 +52,21 @@ type ChartInstance = any;
 
 // ZOOM FUNCTIONS
 
-const zoomCumulativeDeltaByChartId = {};
+const zoomCumulativeDeltaByChartId: Record<string, number> = {};
 
 function zoomCategoryScale(scale, zoom, center, zoomOptions, chartId) {
   const labels = scale.chart.data.labels;
-  let minIndex = scale.minIndex;
+  let minIndex = scale.minIndex as number;
   const lastLabelIndex = labels.length - 1;
-  let maxIndex = scale.maxIndex;
+  let maxIndex = scale.maxIndex as number;
   const sensitivity = zoomOptions.sensitivity;
   const chartCenter = scale.isHorizontal()
-    ? scale.left + scale.width / 2
-    : scale.top + scale.height / 2;
+    ? (scale.left as number) + scale.width / 2
+    : (scale.topleft as number) + scale.height / 2;
   const centerPointer = scale.isHorizontal() ? center.x : center.y;
 
-  zoomCumulativeDeltaByChartId[chartId] = zoomCumulativeDeltaByChartId[chartId] || 0;
   zoomCumulativeDeltaByChartId[chartId] =
-    zoom > 1
-      ? zoomCumulativeDeltaByChartId[chartId] + 1
-      : zoomCumulativeDeltaByChartId[chartId] - 1;
+    (zoomCumulativeDeltaByChartId[chartId] ?? 0) + (zoom > 1 ? 1 : -1);
 
   if (Math.abs(zoomCumulativeDeltaByChartId[chartId]) > sensitivity) {
     if (zoomCumulativeDeltaByChartId[chartId] < 0) {
@@ -111,8 +108,8 @@ function zoomNumericalScale(scale, zoom, center) {
   const minDelta = newDiff * minPercent;
   const maxDelta = newDiff * maxPercent;
 
-  scale.options.ticks.min = scale.min + minDelta;
-  scale.options.ticks.max = scale.max - maxDelta;
+  scale.options.ticks.min = (scale.min as number) + minDelta;
+  scale.options.ticks.max = (scale.max as number) - maxDelta;
 }
 
 function zoomTimeScale(scale, zoom, center) {
@@ -163,7 +160,7 @@ function directionEnabled(mode, dir) {
   if (mode === undefined) {
     return true;
   } else if (typeof mode === "string") {
-    return mode.indexOf(dir) !== -1;
+    return mode.includes(dir);
   }
 
   return false;
@@ -178,7 +175,12 @@ export function doZoom(
   focalPoint?: { x: number; y: number },
   whichAxesParam?: string,
 ) {
-  const ca = chartInstance.chartArea;
+  const ca = chartInstance.chartArea as {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+  };
 
   if (!focalPoint) {
     focalPoint = {
@@ -229,18 +231,17 @@ export function resetZoomDelta(chartId: string) {
 
 // PAN OPTIONS
 
-const panCumulativeDeltaByChartId = {};
+const panCumulativeDeltaByChartId: Record<string, number> = {};
 
-function panCategoryScale(scale, delta, panOptions, chartId) {
+function panCategoryScale(scale, delta: number, panOptions, chartId) {
   const labels = scale.chart.data.labels;
   const lastLabelIndex = labels.length - 1;
   const offsetAmt = Math.max(scale.ticks.length, 1);
   const panSpeed = panOptions.speed;
-  let minIndex = scale.minIndex;
+  let minIndex = scale.minIndex as number;
   const step = Math.round(scale.width / (offsetAmt * panSpeed));
 
-  panCumulativeDeltaByChartId[chartId] = panCumulativeDeltaByChartId[chartId] || 0;
-  panCumulativeDeltaByChartId[chartId] += delta;
+  panCumulativeDeltaByChartId[chartId] = (panCumulativeDeltaByChartId[chartId] ?? 0) + delta;
 
   minIndex =
     panCumulativeDeltaByChartId[chartId] > step

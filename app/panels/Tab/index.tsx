@@ -44,7 +44,7 @@ const SPanelCover = styled.div`
 type Props = { config: Config; saveConfig: SaveConfig<Config> };
 
 function Tab({ config, saveConfig }: Props) {
-  const panelId = usePanelContext()?.id;
+  const panelId = usePanelContext().id;
   const dispatch = useDispatch();
   const mosaicId = useSelector(({ mosaic }: any) => mosaic.mosaicId);
   // something sinister is going on here and needs to be fixed - FG-70
@@ -77,7 +77,7 @@ function Tab({ config, saveConfig }: Props) {
     [saveConfig, tabs],
   );
   const removeTab = useCallback(
-    (idx) => {
+    (idx: number) => {
       const newTabs = tabs.slice(0, idx).concat(tabs.slice(idx + 1));
       const lastIdx = tabs.length - 1;
       saveConfig({

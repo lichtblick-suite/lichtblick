@@ -43,7 +43,7 @@ describe("OsContextAppConfiguration", () => {
     result.resolve(JSON.stringify({ abc: 123 }));
     await expect(config.get("abc")).resolves.toEqual(123);
     await expect(config.get("abc")).resolves.toEqual(123);
-    expect(ctx.storage.get).toHaveBeenCalledTimes(1);
+    expect((ctx.storage as MockStorage).get).toHaveBeenCalledTimes(1);
   });
 
   it("serializes reads and writes", async () => {

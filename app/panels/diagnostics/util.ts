@@ -95,7 +95,7 @@ export function computeDiagnosticInfo(
   stamp: Time,
 ): DiagnosticInfo {
   const displayName = getDisplayName(status.hardware_id, status.name);
-  if (status.values && status.values.some(({ value }) => value.length > MAX_STRING_LENGTH)) {
+  if (status.values?.some(({ value }) => value.length > MAX_STRING_LENGTH)) {
     status = {
       ...status,
       values: status.values

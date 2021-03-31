@@ -24,7 +24,7 @@ export function parseInputUrl(
     return undefined;
   }
 
-  if (str.indexOf("://") === -1) {
+  if (!str.includes("://")) {
     str = `${defaultProtocol}//${str}`;
   }
 

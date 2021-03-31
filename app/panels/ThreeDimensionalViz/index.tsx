@@ -65,13 +65,12 @@ const BaseRenderer = (props: Props, ref: any) => {
 
   const currentTime = useMessagePipeline(
     useCallback(
-      ({ playerState: { activeData } }) =>
-        (activeData && activeData.currentTime) || { sec: 0, nsec: 0 },
+      ({ playerState: { activeData } }) => activeData?.currentTime ?? { sec: 0, nsec: 0 },
       [],
     ),
   );
   const isPlaying = useMessagePipeline(
-    useCallback(({ playerState: { activeData } }) => !!(activeData && activeData.isPlaying), []),
+    useCallback(({ playerState: { activeData } }) => !!activeData?.isPlaying, []),
   );
 
   // We use useState to store the cameraState instead of using config directly in order to

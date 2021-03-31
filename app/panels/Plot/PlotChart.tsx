@@ -105,7 +105,7 @@ function getXForPoint(
       const maybeBobject = xItem.queriedData[innerIdx]?.value;
       const value =
         maybeBobject && isBobject(maybeBobject) ? deepParse(maybeBobject) : maybeBobject;
-      return isTime(value) ? toSec(value as Time) : Number(value);
+      return isTime(value) ? toSec(value) : Number(value);
     }
   }
   return xAxisVal === "timestamp" ? timestamp : innerIdx;
@@ -158,16 +158,15 @@ function getPointsAndTooltipsForMessagePathItem(
         tooltips.push(tooltip);
       }
     } else if (isTime(value)) {
-      const timeValue = value as Time;
       const x = getXForPoint(xAxisVal, elapsedTime, innerIdx, xAxisRanges, xItem, xAxisPath);
-      const y = toSec(timeValue);
+      const y = toSec(value);
       const tooltip = {
         x,
         y,
         datasetKey,
         item: yItem,
         path: queriedPath,
-        value: `${format(timeValue)} (${formatTimeRaw(timeValue)})`,
+        value: `${format(value)} (${formatTimeRaw(value)})`,
         constantName,
         startTime,
       };

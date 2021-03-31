@@ -319,7 +319,7 @@ export default class CombinedDataProvider implements DataProvider {
         }
         const availableTopics = initializationResult.topicSet;
         const filterTopics = (maybeTopics: any) =>
-          maybeTopics && maybeTopics.filter((topic: any) => availableTopics.has(topic));
+          maybeTopics?.filter((topic: any) => availableTopics.has(topic));
         const filteredTopicsByFormat = {
           bobjects: filterTopics(topics.bobjects),
           parsedMessages: filterTopics(topics.parsedMessages),

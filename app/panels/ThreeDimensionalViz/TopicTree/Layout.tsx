@@ -214,7 +214,7 @@ export default function Layout({
     selectedMatchIndex,
   } = searchTextProps;
   // used for updating DrawPolygon during mouse move and scenebuilder namespace change.
-  const [_, forceUpdate] = useReducer((x) => x + 1, 0);
+  const [_, forceUpdate] = useReducer((x: number) => x + 1, 0);
   const measuringElRef = useRef<MeasuringTool>(ReactNull);
   const [drawingTabType, setDrawingTabType] = useState<DrawingTabType | undefined>(undefined);
   const [interactionsTabType, setInteractionsTabType] = useState<DrawingTabType | undefined>(
@@ -529,7 +529,7 @@ export default function Layout({
       handleDrawPolygons: currentHandleDrawPolygons,
     } = callbackInputsRef.current;
     const measuringHandler = measuringElRef.current && (measuringElRef.current as any)[eventName];
-    const measureActive = measuringElRef.current && measuringElRef.current.measureActive;
+    const measureActive = measuringElRef.current?.measureActive;
     if (measuringHandler && measureActive) {
       return measuringHandler(ev, args);
     } else if (currentDrawingTabType === POLYGON_TAB_TYPE) {

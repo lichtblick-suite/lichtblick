@@ -70,7 +70,7 @@ export default class TreeNode extends Component<Props> {
   onExpandClick = (_e: React.SyntheticEvent<HTMLElement>) => {
     const { onToggleExpand, node } = this.props;
     // if the node has no children, have the entire container be a hitbox for toggling checked
-    if (node.children && node.children.length) {
+    if (node.children?.length) {
       onToggleExpand(node);
     } else {
       this.onCheckboxClick();
@@ -113,7 +113,7 @@ export default class TreeNode extends Component<Props> {
   getCheckboxIcon() {
     const { checked, disabled, missing, hasCheckbox, children } = this.props.node;
     if (!hasCheckbox) {
-      return children && children.length && <FolderIcon />;
+      return children?.length && <FolderIcon />;
     }
     if (missing) {
       return <BlockHelperIcon className={styles.blockHelperIcon} />;
@@ -148,7 +148,7 @@ export default class TreeNode extends Component<Props> {
       namespace,
     } = node;
     const headerClasses = cx(styles.header, {
-      [styles.hasChildren!]: children && children.length,
+      [styles.hasChildren!]: children?.length,
       [styles.disabled!]: disabled,
       [styles.canEdit!]: canEdit,
     });

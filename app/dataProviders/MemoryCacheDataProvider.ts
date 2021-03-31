@@ -478,7 +478,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
       return connectionForReadRange;
     }
 
-    const cacheBytesUsed = sum(filterMap(this._blocks, (block) => block && block.sizeInBytes));
+    const cacheBytesUsed = sum(filterMap(this._blocks, (block) => block?.sizeInBytes));
 
     if (!this._currentConnection && cacheBytesUsed < this._cacheSizeBytes) {
       // All read requests have been served, but we have free cache space available. Cache something

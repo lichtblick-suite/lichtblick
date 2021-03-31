@@ -36,9 +36,7 @@ export default class WebWorkerManager {
   }
 
   testing_getWorkerState(id: string): WorkerListenerState | undefined {
-    return this._workerStates.find(
-      (workerState) => workerState && workerState.listenerIds.includes(id),
-    );
+    return this._workerStates.find((workerState) => workerState?.listenerIds.includes(id));
   }
 
   registerWorkerListener(id: string): Rpc {
@@ -59,7 +57,7 @@ export default class WebWorkerManager {
     }
     const workerStateByListenerCount = sortBy(
       this._workerStates.filter(Boolean),
-      (workerState) => workerState && workerState.listenerIds.length,
+      (workerState) => workerState?.listenerIds.length,
     );
     const workerState = workerStateByListenerCount[0];
     if (!workerState) {

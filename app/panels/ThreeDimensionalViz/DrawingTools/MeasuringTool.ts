@@ -93,6 +93,8 @@ export default class MeasuringTool extends React.Component<Props> {
           },
         });
         break;
+      default:
+        break;
     }
   };
 

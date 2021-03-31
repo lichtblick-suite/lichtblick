@@ -140,9 +140,6 @@ function getExamplePrimitive(primitiveType: RosPrimitive) {
     case "time":
     case "json":
       return "";
-    default:
-      primitiveType as never;
-      return "";
   }
 }
 

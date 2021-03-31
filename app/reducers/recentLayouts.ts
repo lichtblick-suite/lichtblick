@@ -24,7 +24,7 @@ const LAYOUT_COUNT_STORED = 10;
 // version of that layout.
 type RecentLayoutId = string;
 function recentLayoutFromPersistedState(state: PersistedState): RecentLayoutId | undefined {
-  return state.fetchedLayout?.data?.name;
+  return state.fetchedLayout.data?.name;
 }
 
 // We ALWAYS read from localStorage here, because multiple tabs could be writing to recent layouts.

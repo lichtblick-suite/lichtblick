@@ -125,7 +125,7 @@ class DiagnosticSummary extends React.Component<Props> {
       <div key={key} style={style}>
         <NodeRow
           info={item}
-          isPinned={this.props.config.pinnedIds.indexOf(item.id) !== -1}
+          isPinned={this.props.config.pinnedIds.includes(item.id)}
           onClick={this.showDetails}
           onClickPin={this.togglePinned}
         />

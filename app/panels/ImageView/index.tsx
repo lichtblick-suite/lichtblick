@@ -191,7 +191,7 @@ function renderEmptyState(
                         .map((
                           { message }, // In some cases, a user may have subscribed to a topic that does not include a header stamp.
                         ) =>
-                          message?.header?.stamp
+                          message.header?.stamp
                             ? formatTimeRaw(message.header.stamp)
                             : "[ unknown ]",
                         )
@@ -435,7 +435,7 @@ function ImageView(props: Props) {
     const stamps = {};
     for (const { topic, message } of markersToRender) {
       // In some cases, a user may have subscribed to a topic that does not include a header stamp.
-      (stamps as any)[topic] = message?.header?.stamp
+      (stamps as any)[topic] = message.header?.stamp
         ? formatTimeRaw(message.header.stamp)
         : "[ not available ]";
     }
@@ -560,7 +560,7 @@ function ImageView(props: Props) {
     [scale, onChangeScale, synchronize, onToggleSynchronize],
   );
 
-  const imageMessage = messagesByTopic?.[cameraTopic]?.[0];
+  const imageMessage = messagesByTopic[cameraTopic]?.[0];
   const lastImageMessageRef = React.useRef(imageMessage);
   if (imageMessage) {
     lastImageMessageRef.current = imageMessage;

@@ -80,7 +80,7 @@ function getMarkers(markerProviders: MarkerProvider[]): InteractiveMarkersByType
 
   markerProviders.forEach((provider) => {
     if (provider) {
-      provider.renderMarkers((collector as any) as MarkerCollector);
+      provider.renderMarkers(collector as MarkerCollector);
     }
   });
 

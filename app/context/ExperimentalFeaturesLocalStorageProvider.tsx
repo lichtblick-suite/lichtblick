@@ -45,7 +45,7 @@ export default function ExperimentalFeaturesLocalStorageProvider({
 
       logEvent({
         // @ts-expect-error Event logging is not currently well typed
-        name: getEventNames().CHANGE_EXPERIMENTAL_FEATURE as string | undefined,
+        name: getEventNames().CHANGE_EXPERIMENTAL_FEATURE,
         tags: { feature: id, value },
       });
 

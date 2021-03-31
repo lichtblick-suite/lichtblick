@@ -119,7 +119,7 @@ const arePropsEqual = (prevProps: any, nextProps: any) => {
   if (!nextProps.tfToFollow) {
     const tfTree = buildTfTree(nextProps.transforms.values());
     const allNodes = Array.from(getDescendants(tfTree.roots));
-    const nodesWithoutDefaultFollowTfFrame = allNodes && allNodes.length && !defaultFollowTfFrame;
+    const nodesWithoutDefaultFollowTfFrame = allNodes?.length && !defaultFollowTfFrame;
     if (nodesWithoutDefaultFollowTfFrame) {
       return false;
     }
@@ -135,8 +135,8 @@ const FollowTFControl = memo<Props>((props: Props) => {
 
   const tfTree = buildTfTree(transforms.values());
   const allNodes: any = Array.from(getDescendants(tfTree.roots));
-  const nodesWithoutDefaultFollowTfFrame = allNodes && allNodes.length && !defaultFollowTfFrame;
-  const newFollowTfFrame = allNodes && allNodes[0] && allNodes[0].tf && allNodes[0].tf.id;
+  const nodesWithoutDefaultFollowTfFrame = allNodes?.length && !defaultFollowTfFrame;
+  const newFollowTfFrame = allNodes?.[0]?.tf?.id;
 
   const autocomplete = createRef<Autocomplete>();
 

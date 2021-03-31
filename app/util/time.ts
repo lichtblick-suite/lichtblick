@@ -367,8 +367,8 @@ export const maybeGetBobjectHeaderStamp = (message: Bobject | undefined): Time |
     return undefined;
   }
   const maybeStamped = cast<MaybeStampedBobject>(message);
-  const header = maybeStamped.header && maybeStamped.header();
-  const stamp = header && header.stamp && deepParse(header.stamp());
+  const header = maybeStamped.header?.();
+  const stamp = header?.stamp && deepParse(header.stamp());
   if (isTime(stamp)) {
     return stamp;
   }

@@ -173,7 +173,7 @@ export function fillInGlobalVariablesInPath(
         return { ...messagePathPart, value };
       }
 
-      messagePathPart.type as "name" | "filter";
+      messagePathPart.type;
       return messagePathPart;
     }),
   };
@@ -235,7 +235,7 @@ export function getMessagePathDataItems(
       if (prevPathItem && prevPathItem.type === "name") {
         const fieldName = prevPathItem.name;
         const enumMap = enumValuesByDatatypeAndField(datatypes)[structureItem.datatype];
-        if (enumMap && enumMap[fieldName]) {
+        if (enumMap?.[fieldName]) {
           constantName = enumMap[fieldName][value];
         }
       }
@@ -243,8 +243,7 @@ export function getMessagePathDataItems(
     } else if (pathItem.type === "name" && structureItem.structureType === "message") {
       // If the `pathItem` is a name, we're traversing down using that name.
       const next = structureItem.nextByName[pathItem.name];
-      const nextStructIsJson =
-        next?.structureType === "primitive" && next?.primitiveType === "json";
+      const nextStructIsJson = next?.structureType === "primitive" && next.primitiveType === "json";
 
       const actualNext =
         !nextStructIsJson && next
@@ -284,7 +283,7 @@ export function getMessagePathDataItems(
       }
 
       // If the `pathItem` is a slice, iterate over all the relevant elements in the array.
-      const arrayLength = getField(value, "length");
+      const arrayLength = getField(value, "length") as number;
       for (let i = startIdx; i <= Math.min(endIdx, arrayLength - 1); i++) {
         const index = i >= 0 ? i : arrayLength + i;
         const arrayElement = getIndex(value, index);

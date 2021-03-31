@@ -556,7 +556,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
           <KeyListener keyDownHandlers={this.keyDownHandlers} />
           <div>
             {this.state.error && (
-              <SErrorMessage>Error: {(this.state?.error as any).message}</SErrorMessage>
+              <SErrorMessage>Error: {(this.state.error as any).message}</SErrorMessage>
             )}
             <canvas
               onContextMenu={this.onCanvasRightClick}

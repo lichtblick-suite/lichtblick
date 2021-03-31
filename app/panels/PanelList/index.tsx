@@ -184,7 +184,7 @@ function DraggablePanelItem({
   React.useEffect(() => {
     if (highlighted && scrollRef.current) {
       const highlightedItem = scrollRef.current.getBoundingClientRect();
-      const scrollContainer = scrollRef.current?.parentElement?.parentElement?.parentElement;
+      const scrollContainer = scrollRef.current.parentElement?.parentElement?.parentElement;
       if (scrollContainer) {
         const scrollContainerToTop = scrollContainer.getBoundingClientRect().top;
 

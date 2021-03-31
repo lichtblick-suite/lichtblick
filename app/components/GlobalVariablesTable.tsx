@@ -142,10 +142,10 @@ export function isActiveElementEditable() {
 }
 
 const changeGlobalKey = (
-  newKey: any,
-  oldKey: any,
+  newKey: string,
+  oldKey: string,
   globalVariables: any,
-  idx: any,
+  idx: number,
   overwriteGlobalVariables: any,
 ) => {
   const keys = Object.keys(globalVariables);

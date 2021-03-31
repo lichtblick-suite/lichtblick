@@ -14,7 +14,7 @@
   set x(newX) {},
 });
 
-(async () => {
+void (async () => {
   await 1; // eslint-disable-line @typescript-eslint/await-thenable
   await (function () {})(); // eslint-disable-line @typescript-eslint/await-thenable
   await (async function () {})();

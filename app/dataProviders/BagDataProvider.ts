@@ -224,13 +224,13 @@ export default class BagDataProvider implements DataProvider {
     };
   }
 
-  _logStats() {
+  _logStats = (): void => {
     if (this._extensionPoint == undefined || this._lastPerformanceStatsToLog == undefined) {
       return;
     }
     this._extensionPoint.reportMetadataCallback(this._lastPerformanceStatsToLog.data);
     this._lastPerformanceStatsToLog = undefined;
-  }
+  };
 
   // Logs some stats if it has been more than a second since the last call.
   _debouncedLogStats = debounce(this._logStats, 1000, { leading: false, trailing: true });
@@ -268,9 +268,12 @@ export default class BagDataProvider implements DataProvider {
       messages.push({
         topic,
         receiveTime: timestamp,
-        message: data.buffer.slice(data.byteOffset, data.byteOffset + data.length),
+        message: data.buffer.slice(
+          data.byteOffset,
+          (data.byteOffset as number) + (data.length as number),
+        ),
       });
-      totalSizeOfMessages += data.length;
+      totalSizeOfMessages += data.length as number;
       numberOfMessages += 1;
     };
     const options = {

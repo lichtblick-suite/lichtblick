@@ -35,6 +35,8 @@ import {
   MutablePose,
   Pose,
   StampedMessage,
+  Point,
+  MutablePoint,
 } from "@foxglove-studio/app/types/Messages";
 import { MarkerProvider, MarkerCollector, Scene } from "@foxglove-studio/app/types/Scene";
 import { objectValues } from "@foxglove-studio/app/util";
@@ -157,7 +159,10 @@ export function getSceneErrorsByTopic(
 }
 
 // Only display one non-lifetime message at a time, so we filter to the last one.
-export function filterOutSupersededMessages(messages: any, datatype: string) {
+export function filterOutSupersededMessages<T extends Pick<Message, "message">>(
+  messages: T[],
+  datatype: string,
+): T[] {
   // Later messages take precedence over earlier messages, so iterate from latest to earliest to
   // find the last one that matters.
   const reversedMessages = messages.slice().reverse();
@@ -530,11 +535,11 @@ export default class SceneBuilder implements MarkerProvider {
     let minZ = Number.MAX_SAFE_INTEGER;
 
     const { points, pose } = message as any;
-    const { position } = pose;
+    const { position } = pose as Pose;
 
     // if the marker has points, adjust bounds by the points
-    if (points && points.length) {
-      points.forEach((point: any) => {
+    if (points?.length) {
+      points.forEach((point: Point) => {
         const x = point.x + position.x;
         const y = point.y + position.y;
         const z = point.z + position.z;
@@ -550,7 +555,7 @@ export default class SceneBuilder implements MarkerProvider {
     // if the minimum z value of any point (or the pose) is exactly 0
     // then assume this marker can be flattened
     if (minZ === 0 && this.flatten && this.flattenedZHeightPose) {
-      position.z = this.flattenedZHeightPose.position.z;
+      (position as MutablePoint).z = this.flattenedZHeightPose.position.z;
     }
 
     // HACK(jacob): rather than hard-coding this, we should
@@ -645,7 +650,7 @@ export default class SceneBuilder implements MarkerProvider {
     const parsedPoints = [];
     // if the marker has points, adjust bounds by the points. (Constructed markers sometimes don't
     // have points.)
-    if (points && points.length()) {
+    if (points?.length()) {
       for (const point of points) {
         const x = point.x();
         const y = point.y();
@@ -723,9 +728,9 @@ export default class SceneBuilder implements MarkerProvider {
     }
     // InstancedLineList fields. Check some fields, some fixtures do not include them all.
     if ("metadataByIndex" in message) {
-      marker.poses = message.poses && message.poses();
+      marker.poses = message.poses?.();
       marker.metadataByIndex = message.metadataByIndex();
-      marker.closed = message.closed && message.closed();
+      marker.closed = message.closed?.();
     }
     this.collectors[topic]!.addMarker(marker, name);
   }
@@ -835,7 +840,7 @@ export default class SceneBuilder implements MarkerProvider {
     this.flattenedZHeightPose =
       this._hooks.getFlattenedPose(this.frame as any) || this.flattenedZHeightPose;
 
-    if (this.flattenedZHeightPose && this.flattenedZHeightPose.position) {
+    if (this.flattenedZHeightPose?.position) {
       this.bounds.update(this.flattenedZHeightPose.position);
     }
     for (const topic of this.topicsToRender) {

@@ -48,7 +48,7 @@ export const BUFFER_DURATION_SECS = 1.0;
 const getTopicsWithHeader = microMemoize((topics: Topic[], datatypes: RosDatatypes) => {
   return topics.filter(({ datatype }) => {
     const fields = datatypes[datatype]?.fields;
-    return fields && fields.find((field) => field.type === "std_msgs/Header");
+    return fields?.find((field) => field.type === "std_msgs/Header");
   });
 });
 

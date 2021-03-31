@@ -145,9 +145,9 @@ export default class RenameDataProvider implements DataProvider {
     const { parsedMessages, rosBinaryMessages, bobjects } = messages;
 
     return {
-      parsedMessages: parsedMessages && parsedMessages.map(this._mapMessage),
-      rosBinaryMessages: rosBinaryMessages && rosBinaryMessages.map(this._mapMessage),
-      bobjects: bobjects && bobjects.map(this._mapMessage),
+      parsedMessages: parsedMessages?.map(this._mapMessage),
+      rosBinaryMessages: rosBinaryMessages?.map(this._mapMessage),
+      bobjects: bobjects?.map(this._mapMessage),
     };
   }
 

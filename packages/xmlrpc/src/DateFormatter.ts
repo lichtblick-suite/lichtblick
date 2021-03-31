@@ -48,7 +48,7 @@ export class DateFormatter {
     date +=
       dateParts[17] !== undefined
         ? dateParts[17] + (dateParts[19] != undefined && dateParts[20] == undefined ? "00" : "")
-        : ["Z"];
+        : "Z";
 
     return new Date(date);
   }
@@ -99,11 +99,7 @@ export class DateFormatter {
    * @return {string}       - String with the padded digit
    */
   static zeroPad(digit: number, length: number): string {
-    let padded = "" + digit;
-    while (padded.length < length) {
-      padded = "0" + padded;
-    }
-    return padded;
+    return digit.toString().padStart(length, "0");
   }
 
   /**
@@ -111,9 +107,9 @@ export class DateFormatter {
    * in UTC
    *
    * @param {Date} date - Date Object
-   * @return {string[]}
+   * @return {[string, string, string, string, string, string, string]}
    */
-  static getUTCDateParts(date: Date): string[] {
+  static getUTCDateParts(date: Date): [string, string, string, string, string, string, string] {
     return [
       date.getUTCFullYear().toString(),
       DateFormatter.zeroPad(date.getUTCMonth() + 1, 2),

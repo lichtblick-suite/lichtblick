@@ -8,7 +8,7 @@ import type { AddressInfo } from "net";
 import { RosMasterClient } from "./RosMasterClient";
 
 describe("RosMasterClient", () => {
-  it("getPublishedTopics", async () => {
+  it("getPublishedTopics", (done) => {
     const server = http
       .createServer((_, res) => {
         res.writeHead(200, { "Content-Type": "text/xml" });
@@ -101,6 +101,7 @@ describe("RosMasterClient", () => {
           ["/rosout_agg", "rosgraph_msgs/Log"],
         ]);
         server.close();
+        done();
       });
   });
 });

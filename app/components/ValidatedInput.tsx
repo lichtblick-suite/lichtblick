@@ -152,7 +152,7 @@ export function ValidatedInputBase({
 
   const handleChange = useCallback(
     (e) => {
-      const val = e.currentTarget && e.currentTarget.value;
+      const val = e.currentTarget?.value;
       if (!isEditing) {
         setIsEditing(true);
       }

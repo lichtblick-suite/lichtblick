@@ -94,7 +94,7 @@ const timeFormatter: DevtoolFormatter = (() => {
 const bobjectFormatter: DevtoolFormatter = {
   header(obj, config) {
     // If it's a nested object, use the object key as the header.
-    if (config && config.bobjectFormatter) {
+    if (config?.bobjectFormatter) {
       return ["div", {}, config.key];
     }
     // If it's not a bobject, use the default formatter.

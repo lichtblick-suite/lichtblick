@@ -42,14 +42,14 @@ export function getRemoteBagDescriptor(
     name: CoreDataProviders.BagDataProvider,
     args: {
       bagPath: { type: "remoteBagUrl", url },
-      cacheSizeInBytes: options?.unlimitedMemoryCache ?? false ? Infinity : undefined,
+      cacheSizeInBytes: options.unlimitedMemoryCache ?? false ? Infinity : undefined,
     },
     children: [],
   };
 
   // If we have an input identifier (which should be globally unique), then cache in indexeddb.
   // If not, then we don't have a cache key, so just read directly from the bag in memory.
-  return guid && options?.diskBagCaching
+  return guid && options.diskBagCaching
     ? {
         name: CoreDataProviders.IdbCacheReaderDataProvider,
         args: { id: guid },

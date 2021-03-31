@@ -81,7 +81,7 @@ export default function Metadata({ data, diffData, diff, datatype, message, diff
         `${diffMessage ? " base" : ""} @ ${formatTimeRaw(message.receiveTime)} ROS `}
       <CopyMessageButton onClick={onClickCopy(data)} text="Copy msg" />
 
-      {diffMessage && diffMessage.receiveTime && (
+      {diffMessage?.receiveTime && (
         <>
           <div>
             {`diff @ ${formatTimeRaw(diffMessage.receiveTime)} ROS `}

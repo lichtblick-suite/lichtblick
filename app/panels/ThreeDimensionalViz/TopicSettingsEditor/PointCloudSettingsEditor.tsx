@@ -97,9 +97,8 @@ export default function PointCloudSettingsEditor(
     [onSettingsChange],
   );
 
-  const hasRGB = message && message.fields && message.fields.some(({ name }) => name === "rgb");
-  const defaultColorField =
-    message && message.fields && message.fields.find(({ name }) => name !== "rgb")?.name;
+  const hasRGB = message?.fields?.some(({ name }) => name === "rgb");
+  const defaultColorField = message?.fields?.find(({ name }) => name !== "rgb")?.name;
   const colorMode: ColorMode = (settings as any).colorMode
     ? (settings as any).colorMode
     : hasRGB

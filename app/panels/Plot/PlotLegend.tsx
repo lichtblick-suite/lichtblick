@@ -52,10 +52,8 @@ const shortXAxisLabel = (path: PlotXAxisVal): string => {
       return "path (current)";
     case "timestamp":
       return "timestamp";
-    default:
-      path as never; // Assert the switch is exhaustive
-      throw new Error(`unknown path: ${path}`);
   }
+  throw new Error(`unknown path: ${path}`);
 };
 
 export default function PlotLegend(props: PlotLegendProps) {

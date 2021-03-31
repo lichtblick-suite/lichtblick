@@ -52,37 +52,39 @@ export default class FakePlayer implements Player {
     });
   }
 
-  close() {
+  close = (): void => {
     // no-op
-  }
-  setPlaybackSpeed() {
+  };
+  setPlaybackSpeed = (): void => {
     // no-op
-  }
-  pausePlayback() {
+  };
+  pausePlayback = (): void => {
     // no-op
-  }
-  publish() {
+  };
+  publish = (): void => {
     // no-op
-  }
-  setPublishers(pubs: AdvertisePayload[]) {
+  };
+  setPublishers = (pubs: AdvertisePayload[]): void => {
     this.publishers = pubs;
-  }
-  setSubscriptions(subs: SubscribePayload[]) {
+  };
+  setSubscriptions = (subs: SubscribePayload[]): void => {
     this.subscriptions = subs;
-  }
-  setCapabilities(capabilities: typeof PlayerCapabilities[keyof typeof PlayerCapabilities][]) {
+  };
+  setCapabilities = (
+    capabilities: typeof PlayerCapabilities[keyof typeof PlayerCapabilities][],
+  ): void => {
     this._capabilities = capabilities;
-  }
-  startPlayback() {
+  };
+  startPlayback = (): void => {
     // no-op
-  }
-  seekPlayback() {
+  };
+  seekPlayback = (): void => {
     // no-op
-  }
-  requestBackfill() {
+  };
+  requestBackfill = (): void => {
     // no-op
-  }
-  setGlobalVariables() {
+  };
+  setGlobalVariables = (): void => {
     // no-op
-  }
+  };
 }

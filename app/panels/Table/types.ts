@@ -53,10 +53,10 @@ export type PaginationProps = {
   pageOptions: number[];
   canPreviousPage: boolean;
   canNextPage: boolean;
-  gotoPage(index: number): void;
-  previousPage(): void;
-  nextPage(): void;
-  setPageSize(size: number): void;
+  gotoPage: (index: number) => void;
+  previousPage: () => void;
+  nextPage: () => void;
+  setPageSize: (size: number) => void;
 };
 
 export type PaginationState = {
@@ -116,14 +116,14 @@ export type TableInstance<HookInstances, HookState> = HookInstances & {
   headers: ColumnInstance[];
   flatHeaders: ColumnInstance[];
   rows: Row[];
-  getTableProps(): any;
-  getTableBodyProps(): any;
+  getTableProps: () => any;
+  getTableBodyProps: () => any;
   // Responsible for lazily preparing a row for rendering.
-  prepareRow(row: Row): void;
+  prepareRow: (row: Row) => void;
   flatRows: Row[];
   totalColumnsWidth: number;
-  toggleHideColumn(columnId: string, value?: boolean): void;
-  setHiddenColumns(columnIds: string[]): void;
-  toggleHideAllColumns(val?: boolean): void;
-  getToggleHideAllColumnsProps(userProps: any): any;
+  toggleHideColumn: (columnId: string, value?: boolean) => void;
+  setHiddenColumns: (columnIds: string[]) => void;
+  toggleHideAllColumns: (val?: boolean) => void;
+  getToggleHideAllColumnsProps: (userProps: any) => any;
 };

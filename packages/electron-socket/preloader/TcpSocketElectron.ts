@@ -184,8 +184,8 @@ export class TcpSocketElectron {
     this._messagePort.postMessage(msg);
   }
 
-  private _handleData(data: Uint8Array): void {
+  private _handleData = (data: Uint8Array): void => {
     const msg: Cloneable[] = ["data", data];
     this._messagePort.postMessage(msg, [data.buffer]);
-  }
+  };
 }

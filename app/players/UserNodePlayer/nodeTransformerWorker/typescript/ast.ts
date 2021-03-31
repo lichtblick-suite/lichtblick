@@ -244,9 +244,9 @@ export const findReturnType = (
 
     case ts.SyntaxKind.IndexedAccessType: {
       const declaration = visitNext(node.objectType);
-      const indexedProperty = node?.indexType?.literal?.text;
+      const indexedProperty = node.indexType?.literal?.text;
 
-      const next = declaration.members.find((member) => member?.name?.text === indexedProperty);
+      const next = declaration.members.find((member) => member.name?.text === indexedProperty);
 
       return visitNext(next.type);
     }
@@ -296,7 +296,7 @@ export const constructDatatypes = (
   // definition, we can check whether it exists in the 'ros' module and just
   // return the ros-specific definition, e.g. 'std_msgs/ColorRGBA', instead of
   // our own definition. This allows user nodes to operate much more freely.
-  const interfaceName = node?.name?.text;
+  const interfaceName = node.name?.text;
   if (isNodeFromRosModule(node) && messageDefinitionMap[interfaceName]) {
     return {
       outputDatatype: messageDefinitionMap[interfaceName],

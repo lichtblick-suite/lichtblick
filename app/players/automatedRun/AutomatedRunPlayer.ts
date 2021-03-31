@@ -245,7 +245,7 @@ export default class AutomatedRunPlayer implements Player {
     if (this._initializeTimeout) {
       clearTimeout(this._initializeTimeout);
     }
-    this._initializeTimeout = setTimeout(() => this._initialize(), AUTOMATED_RUN_START_DELAY);
+    this._initializeTimeout = setTimeout(() => void this._initialize(), AUTOMATED_RUN_START_DELAY);
   }
 
   async _initialize() {
@@ -330,8 +330,7 @@ export default class AutomatedRunPlayer implements Player {
     }
     // If the client has shouldLoadDataBeforePlaying set to true, only start playback once all data has loaded.
     return (
-      this._progress.fullyLoadedFractionRanges &&
-      this._progress.fullyLoadedFractionRanges.length &&
+      this._progress.fullyLoadedFractionRanges?.length &&
       this._progress.fullyLoadedFractionRanges.every(({ start, end }) => start === 0 && end === 1)
     );
   }

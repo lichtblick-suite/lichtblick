@@ -53,7 +53,7 @@ function Example({
           return;
         }
         if (showToggled || showFocused) {
-          const toggleEl = (el.querySelector(`[data-test="myToggle"]`) as any) as HTMLInputElement;
+          const toggleEl = el.querySelector(`[data-test="myToggle"]`) as HTMLInputElement;
           if (showToggled) {
             toggleEl.click();
           } else if (showFocused) {

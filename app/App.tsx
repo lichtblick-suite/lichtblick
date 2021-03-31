@@ -204,8 +204,7 @@ function Root() {
   })();
 
   const showPlaybackControls =
-    playerPresence === PlayerPresence.NOT_PRESENT ||
-    playerCapabilities.indexOf("playbackControl") !== -1;
+    playerPresence === PlayerPresence.NOT_PRESENT || playerCapabilities.includes("playbackControl");
 
   return (
     <LinkHandlerContext.Provider value={handleInternalLink}>

@@ -223,7 +223,7 @@ export default function WorldMarkers({
 
   return (
     <>
-      <OccupancyGrids layerIndex={(layerIndex as any) + LAYER_INDEX_OCCUPANCY_GRIDS}>
+      <OccupancyGrids layerIndex={(layerIndex as number) + LAYER_INDEX_OCCUPANCY_GRIDS}>
         {grid as any}
       </OccupancyGrids>
       {/* Render PointClouds first so other markers with the same zIndex can show on top of PointClouds. */}
@@ -242,7 +242,7 @@ export default function WorldMarkers({
       <LaserScans layerIndex={layerIndex}>{laserScan as any}</LaserScans>
       {glTextAtlasInfo.status === "LOADED" && (
         <GLText
-          layerIndex={(layerIndex as any) + LAYER_INDEX_TEXT}
+          layerIndex={(layerIndex as number) + LAYER_INDEX_TEXT}
           alphabet={ALPHABET}
           scaleInvariantFontSize={14}
           autoBackgroundColor={autoTextBackgroundColor}
@@ -257,7 +257,17 @@ export default function WorldMarkers({
       </Lines>
       <LinedConvexHulls layerIndex={layerIndex}>{linedConvexHull}</LinedConvexHulls>
       <Overlay
-        renderItem={({ item, coordinates, index, dimension: { width, height } }: any) => {
+        renderItem={({
+          item,
+          coordinates,
+          index,
+          dimension: { width, height },
+        }: {
+          item: any; // eslint-disable-line react/no-unused-prop-types
+          coordinates?: [number, number]; // eslint-disable-line react/no-unused-prop-types
+          index: any; // eslint-disable-line react/no-unused-prop-types
+          dimension: { width: number; height: number }; // eslint-disable-line react/no-unused-prop-types
+        }) => {
           if (!coordinates) {
             return ReactNull;
           }
@@ -272,7 +282,10 @@ export default function WorldMarkers({
           if (!metadata) {
             return;
           }
-          const { markerStyle = {}, iconOffset: { x = 0, y = 0 } = {} } = metadata;
+          const { markerStyle = {}, iconOffset: { x = 0, y = 0 } = {} } = metadata as {
+            markerStyle?: any;
+            iconOffset?: { x: number; y: number };
+          };
           const iconsByClassification = getGlobalHooks().perPanelHooks().ThreeDimensionalViz
             .iconsByClassification;
           const SvgIcon = iconsByClassification.DEFAULT;

@@ -102,11 +102,7 @@ export default class Select extends React.Component<Props, State> {
     };
     return createPortal(
       <div style={style} className={styles.menu}>
-        {mappedChildren && mappedChildren.length ? (
-          mappedChildren
-        ) : (
-          <SEmpty>No options available</SEmpty>
-        )}
+        {mappedChildren?.length ? mappedChildren : <SEmpty>No options available</SEmpty>}
       </div>,
       body,
     );

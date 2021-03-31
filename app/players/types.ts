@@ -224,8 +224,7 @@ export type OpaqueMessage<T> = Readonly<{
 }>;
 export type BobjectMessage = OpaqueMessage<Bobject>;
 export type ReflectiveMessage = OpaqueMessage<unknown>;
-export const cast = <T>(message: Readonly<RosObject> | Bobject | unknown): T =>
-  (message as any) as T;
+export const cast = <T>(message: Readonly<RosObject> | Bobject | unknown): T => message as T;
 
 // Contains different kinds of progress indications, mostly used in the playback bar.
 export type Progress = Readonly<{

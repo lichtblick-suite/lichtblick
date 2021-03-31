@@ -135,7 +135,7 @@ function LayoutToolbar({
           onToggleCameraMode={onToggleCameraMode}
           onToggleDebug={onToggleDebug}
         />
-        {measuringElRef.current && measuringElRef.current.measureDistance}
+        {measuringElRef.current?.measureDistance}
         <Interactions
           selectedObject={selectedObject}
           interactionsTabType={interactionsTabType}

@@ -384,9 +384,9 @@ describe("OrderedStampPlayer", () => {
     const done2 = signal();
     const upstreamMessages = [makeMessage(8.9, 9.5)];
     class ModifiedFakePlayer extends FakePlayer {
-      seekPlayback() {
+      seekPlayback = () => {
         this.emit({ activeData: { ...getState(), currentTime, messages: upstreamMessages } });
-      }
+      };
     }
     const fakePlayer = new ModifiedFakePlayer();
     fakePlayer.setCapabilities([PlayerCapabilities.setSpeed, PlayerCapabilities.playbackControl]);

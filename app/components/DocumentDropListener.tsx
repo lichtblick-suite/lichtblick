@@ -39,7 +39,7 @@ export default class DocumentDropListener extends React.PureComponent<Props, Sta
     document.removeEventListener("dragleave", this._onDragLeave);
   }
 
-  _onDrop = async (ev: DragEvent) => {
+  _onDrop = (ev: DragEvent) => {
     const { filesSelected } = this.props;
     if (!ev.dataTransfer) {
       return;

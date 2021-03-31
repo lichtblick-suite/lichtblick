@@ -22,7 +22,7 @@ type Props = {
 
 export default function Crosshair({ cameraState }: Props) {
   const { target, targetOffset, distance, thetaOffset } = cameraState;
-  const targetHeading = cameraStateSelectors.targetHeading(cameraState);
+  const targetHeading = cameraStateSelectors.targetHeading(cameraState) as number;
   // move the crosshair to the center of the camera's viewport: the target + targetOffset rotated by heading
   const crosshairPoint: vec3 = [0, 0, 0];
   vec3.add(
@@ -34,7 +34,7 @@ export default function Crosshair({ cameraState }: Props) {
   // orient and size the crosshair so it remains visually fixed in the center
   const length = 0.02 * distance;
   const orientation: quat = [0, 0, 0, 1];
-  const theta = targetHeading + thetaOffset;
+  const theta = targetHeading + (thetaOffset as number);
 
   quat.rotateZ(orientation, orientation, -theta);
 

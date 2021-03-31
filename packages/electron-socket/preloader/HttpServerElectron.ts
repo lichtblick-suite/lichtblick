@@ -106,7 +106,7 @@ export class HttpServerElectron {
     this._messagePort.postMessage(msg);
   }
 
-  private _handleRequest(req: http.IncomingMessage, res: http.ServerResponse): void {
+  private _handleRequest = (req: http.IncomingMessage, res: http.ServerResponse): void => {
     const chunks: Uint8Array[] = [];
     req.on("data", (chunk: Uint8Array) => chunks.push(chunk));
     req.on("end", () => {
@@ -143,5 +143,5 @@ export class HttpServerElectron {
       };
       this._emit("request", requestId, request);
     });
-  }
+  };
 }

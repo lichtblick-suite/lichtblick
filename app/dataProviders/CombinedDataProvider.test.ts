@@ -489,8 +489,12 @@ describe("CombinedDataProvider", () => {
       const neverResolvedPromise = new Promise<InitializationResult>(() => {
         // no-op
       });
-      jest.spyOn(p1, "initialize").mockImplementation(() => neverResolvedPromise);
-      jest.spyOn(p2, "initialize").mockImplementation(() => neverResolvedPromise);
+      const initialize1 = jest
+        .spyOn(p1, "initialize")
+        .mockImplementation(() => neverResolvedPromise);
+      const initialize2 = jest
+        .spyOn(p2, "initialize")
+        .mockImplementation(() => neverResolvedPromise);
 
       const combinedProvider = getCombinedDataProvider([
         { provider: p1 },
@@ -500,8 +504,8 @@ describe("CombinedDataProvider", () => {
       combinedProvider.initialize(mockExtensionPoint().extensionPoint);
       await delay(1);
 
-      expect(p1.initialize).toHaveBeenCalled();
-      expect(p2.initialize).toHaveBeenCalled();
+      expect(initialize1).toHaveBeenCalled();
+      expect(initialize2).toHaveBeenCalled();
     });
 
     it("combines messages", async () => {

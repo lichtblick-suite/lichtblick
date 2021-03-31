@@ -24,7 +24,6 @@ import ThreeDimensionalViz from "@foxglove-studio/app/panels/ThreeDimensionalViz
 import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz/types";
 import { Frame, Topic } from "@foxglove-studio/app/players/types";
 import createRootReducer from "@foxglove-studio/app/reducers";
-import delay from "@foxglove-studio/app/shared/delay";
 import configureStore from "@foxglove-studio/app/store/configureStore";
 import PanelSetup, { Fixture } from "@foxglove-studio/app/stories/PanelSetup";
 import PanelSetupWithBag from "@foxglove-studio/app/stories/PanelSetupWithBag";
@@ -189,11 +188,11 @@ export const ThreeDimPanelSetupWithBag = ({
         subscriptions={topics}
         store={store}
         onMount={() => {
-          setImmediate(async () => {
-            await delay(500); // Wait for the panel to finish resizing
+          // Wait for the panel to finish resizing
+          setTimeout(() => {
             // Select the panel so we can control with the keyboard
             store.dispatch(selectAllPanelIds() as any);
-          });
+          }, 500);
         }}
         getMergedFixture={(bagFixture: any) => ({
           ...bagFixture,

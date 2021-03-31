@@ -254,7 +254,7 @@ const makePointCloudCommand = () => {
           return is_bigendian ? COLOR_MODE_RGB : COLOR_MODE_BGR;
         },
         flatColor: (context: never, props: any) => {
-          if (props.blend && props.blend.color) {
+          if (props.blend?.color) {
             // Use constant color for blending.
             return toRgba(vec4ToRGBA(props.blend.color));
           }

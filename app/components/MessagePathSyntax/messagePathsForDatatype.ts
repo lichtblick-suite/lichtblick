@@ -216,7 +216,7 @@ export const traverseStructure = memoizeWeak(
         const next: MessagePathStructureItem | undefined =
           structureItem.nextByName[msgPathPart.name];
         const nextStructureIsJson: any =
-          next && next.structureType === "primitive" && next?.primitiveType === "json";
+          next && next.structureType === "primitive" && next.primitiveType === "json";
         structureItem = !nextStructureIsJson
           ? next
           : {

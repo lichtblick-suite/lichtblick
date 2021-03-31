@@ -344,7 +344,7 @@ export default function useTree({
     if (!providerTopics.length) {
       return DEFAULT_TOPICS_COUNT_BY_KEY;
     }
-    const ret: any = {};
+    const ret: Record<string, number> = {};
 
     selectedTopicNames.forEach((topicName) => {
       const isFeatureColumn = topicName.startsWith(SECOND_SOURCE_PREFIX);
@@ -361,7 +361,7 @@ export default function useTree({
       const parentKey = nodesByKey[topicKey]?.parentKey;
       let parentNode = parentKey ? nodesByKey[parentKey] : undefined;
       while (parentNode) {
-        ret[parentNode.key] = (ret[parentNode.key] || 0) + 1;
+        ret[parentNode.key] = (ret[parentNode.key] ?? 0) + 1;
         parentNode = parentNode.parentKey ? nodesByKey[parentNode.parentKey] : undefined;
       }
     });
@@ -691,12 +691,12 @@ export default function useTree({
         return false;
       } else if (node.type === "group") {
         // Group node
-        return node.name != undefined && node.name.toLowerCase().includes(searchText);
+        return node.name?.toLowerCase().includes(searchText);
       }
       // Topic node, without namespace
       return (
         node.topicName.toLowerCase().includes(searchText) ||
-        (node.name != undefined && node.name.toLowerCase().includes(searchText)) ||
+        node.name?.toLowerCase().includes(searchText) ||
         (hasFeatureColumn &&
           `${SECOND_SOURCE_PREFIX}${node.topicName}`.toLowerCase().includes(searchText))
       );

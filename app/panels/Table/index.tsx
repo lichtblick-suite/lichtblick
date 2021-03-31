@@ -13,7 +13,7 @@
 
 import MinusIcon from "@mdi/svg/svg/minus-box-outline.svg";
 import PlusIcon from "@mdi/svg/svg/plus-box-outline.svg";
-import _ from "lodash";
+import { noop } from "lodash";
 import { useTable, usePagination, useExpanded, useSortBy } from "react-table";
 import styled from "styled-components";
 
@@ -63,7 +63,7 @@ const STableHeader = styled.th<STableHeaderProps>`
   border-bottom: ${({ isSortedAsc }: STableHeaderProps) =>
     isSortedAsc ? `solid 3px ${toolsColorScheme.blue.medium}` : "none"};
   border-top: ${({ isSortedDesc }: STableHeaderProps) =>
-    isSortedDesc ? `solid 3px ${toolsColorScheme.blue.medium}` : "none"}
+    isSortedDesc ? `solid 3px ${toolsColorScheme.blue.medium}` : "none"};
   border-left: none;
   border-right: none;
   font-weight: bold;
@@ -140,7 +140,7 @@ const Table = ({ value, accessorPath }: { value: unknown; accessorPath: string }
       return [];
     }
 
-    const rosObject: RosObject = (Array.isArray(value) ? value[0] || {} : value) as any;
+    const rosObject: RosObject = Array.isArray(value) ? value[0] || {} : value;
 
     // Strong assumption about structure of data.
     return getColumnsFromObject(rosObject, accessorPath);
@@ -156,7 +156,7 @@ const Table = ({ value, accessorPath }: { value: unknown; accessorPath: string }
     } as any,
     useSortBy,
     useExpanded,
-    !isNested ? usePagination : _.noop,
+    !isNested ? usePagination : noop,
   ) as any;
 
   if (

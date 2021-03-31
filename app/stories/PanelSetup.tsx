@@ -90,9 +90,9 @@ type State = {
 };
 
 function setNativeValue(element: unknown, value: unknown) {
-  const valueSetter = Object.getOwnPropertyDescriptor(element, "value")?.set;
+  const valueSetter = Object.getOwnPropertyDescriptor(element, "value")?.set; // eslint-disable-line @typescript-eslint/unbound-method
   const prototype = Object.getPrototypeOf(element);
-  const prototypeValueSetter = Object.getOwnPropertyDescriptor(prototype, "value")?.set;
+  const prototypeValueSetter = Object.getOwnPropertyDescriptor(prototype, "value")?.set; // eslint-disable-line @typescript-eslint/unbound-method
   if (valueSetter && valueSetter !== prototypeValueSetter) {
     prototypeValueSetter?.call(element, value);
   } else {

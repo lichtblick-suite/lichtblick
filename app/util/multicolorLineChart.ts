@@ -28,7 +28,7 @@ export default function installMulticolorLineChart(Chart: any) {
           if (!data._view.originalY) {
             data._view.originalY = data._view.y;
           }
-          data._view.y = data._view.originalY + multicolorLineYOffset;
+          data._view.y = (data._view.originalY as number) + (multicolorLineYOffset as number);
         });
       }
       const originalDatasets = meta.dataset._children.filter((data: any) => {

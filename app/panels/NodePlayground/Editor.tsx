@@ -221,7 +221,7 @@ const Editor = ({
   );
 
   const saveCode = React.useCallback(async () => {
-    const model = editorRef.current && editorRef.current.getModel();
+    const model = editorRef.current?.getModel();
     if (model && script && !script.readOnly) {
       // We have to use a ref for autoFormatOnSaveRef because of how monaco scopes the action callbacks
       if (autoFormatOnSaveRef.current) {

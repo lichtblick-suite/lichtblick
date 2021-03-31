@@ -97,7 +97,7 @@ export default class ParsedMessageCache {
           cache.map.set(message, outputMessage);
           const messageSize = isBobject(message.message)
             ? inaccurateByteSize(message.message)
-            : message.message.byteLength;
+            : (message.message.byteLength as number);
           cache.sizeInBytes += messageSize;
           this._cacheSizeInBytes += messageSize;
         }

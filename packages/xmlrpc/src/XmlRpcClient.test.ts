@@ -8,7 +8,7 @@ import type { AddressInfo } from "net";
 import { XmlRpcClient } from "./XmlRpcClient";
 
 describe("XmlRpcClient", () => {
-  it("Can call a method on a live server", () => {
+  it("Can call a method on a live server", (done) => {
     const server = http
       .createServer((_, res) => {
         res.writeHead(200, { "Content-Type": "text/xml" });
@@ -28,10 +28,11 @@ describe("XmlRpcClient", () => {
         const res = await client.methodCall("listMethods");
         expect(res).toEqual("more.listMethods");
         server.close();
+        done();
       });
   });
 
-  it("Can call a method with a chunked response", () => {
+  it("Can call a method with a chunked response", (done) => {
     const server = http
       .createServer((_, res) => {
         res.writeHead(200, { "Content-Type": "text/xml" });
@@ -57,10 +58,11 @@ describe("XmlRpcClient", () => {
         const res = await client.methodCall("listMethods");
         expect(res).toEqual(["system.listMethods", "system.methodSignature", "xmlrpc_dialect"]);
         server.close();
+        done();
       });
   });
 
-  it("Can call a method with UTF8 encoding", () => {
+  it("Can call a method with UTF8 encoding", (done) => {
     const server = http
       .createServer((_, res) => {
         res.writeHead(200, { "Content-Type": "text/xml" });
@@ -80,6 +82,7 @@ describe("XmlRpcClient", () => {
         const res = await client.methodCall("listMethods");
         expect(res).toEqual("here is mr. Snowman: ☃");
         server.close();
+        done();
       });
   });
 
@@ -88,7 +91,7 @@ describe("XmlRpcClient", () => {
     const server = http
       .createServer((req, res) => {
         req.setEncoding("utf8");
-        req.on("data", (chunk) => {
+        req.on("data", (chunk: string) => {
           requestBody += chunk;
         });
         res.writeHead(200, { "Content-Type": "text/xml" });

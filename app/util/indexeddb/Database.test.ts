@@ -126,14 +126,17 @@ describe("Database", () => {
       writer.end();
     });
 
-    writer.on("finish", async () => {
-      const tx = db.transaction("bar");
-      const store = tx.objectStore("bar");
-      expect(await store.get(1)).toEqual({ one: 1 });
-      expect(await store.get(2)).toEqual({ two: 2 });
-      expect(await store.get(3)).toEqual({ three: 3 });
-      expect(await store.get(4)).toEqual(undefined);
-      expect(writer.total).toEqual(3);
+    await new Promise<void>((resolve) => {
+      writer.on("finish", async () => {
+        const tx = db.transaction("bar");
+        const store = tx.objectStore("bar");
+        expect(await store.get(1)).toEqual({ one: 1 });
+        expect(await store.get(2)).toEqual({ two: 2 });
+        expect(await store.get(3)).toEqual({ three: 3 });
+        expect(await store.get(4)).toEqual(undefined);
+        expect(writer.total).toEqual(3);
+        resolve();
+      });
     });
   });
 
@@ -150,14 +153,17 @@ describe("Database", () => {
       writer.end();
     });
 
-    writer.on("finish", async () => {
-      const tx = db.transaction("bar");
-      const store = tx.objectStore("bar");
-      expect(await store.get(1)).toEqual({ one: 1, topic: "/foo" });
-      expect(await store.get(2)).toEqual({ two: 2, topic: "/foo" });
-      expect(await store.get(3)).toEqual({ three: 3, topic: "/foo" });
-      expect(await store.get(4)).toEqual(undefined);
-      expect(writer.total).toEqual(3);
+    await new Promise<void>((resolve) => {
+      writer.on("finish", async () => {
+        const tx = db.transaction("bar");
+        const store = tx.objectStore("bar");
+        expect(await store.get(1)).toEqual({ one: 1, topic: "/foo" });
+        expect(await store.get(2)).toEqual({ two: 2, topic: "/foo" });
+        expect(await store.get(3)).toEqual({ three: 3, topic: "/foo" });
+        expect(await store.get(4)).toEqual(undefined);
+        expect(writer.total).toEqual(3);
+        resolve();
+      });
     });
   });
 
