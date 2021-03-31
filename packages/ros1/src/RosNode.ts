@@ -32,10 +32,10 @@ export class RosNode extends EventEmitter {
   subscriptions = new Map<string, Subscription>();
   publications = new Map<string, Publication>();
 
-  #running = true;
-  #tcpSocketCreate: TcpSocketCreate;
-  #connectionIdCounter = 0;
-  #tcpServer?: TcpServer;
+  private _running = true;
+  private _tcpSocketCreate: TcpSocketCreate;
+  private _connectionIdCounter = 0;
+  private _tcpServer?: TcpServer;
 
   constructor(options: {
     name: string;
@@ -52,8 +52,8 @@ export class RosNode extends EventEmitter {
     this.pid = options.pid;
     this.rosMasterClient = new RosMasterClient(options.rosMasterUri);
     this.rosFollower = new RosFollower(this, options.httpServer);
-    this.#tcpSocketCreate = options.tcpSocketCreate;
-    this.#tcpServer = options.tcpServer;
+    this._tcpSocketCreate = options.tcpSocketCreate;
+    this._tcpServer = options.tcpServer;
   }
 
   async start(port?: number): Promise<void> {
@@ -61,8 +61,8 @@ export class RosNode extends EventEmitter {
   }
 
   shutdown(_msg?: string): void {
-    this.#running = false;
-    this.#tcpServer?.close();
+    this._running = false;
+    this._tcpServer?.close();
     this.rosFollower.close();
     for (const sub of this.subscriptions.values()) {
       sub.close();
@@ -83,7 +83,7 @@ export class RosNode extends EventEmitter {
 
     // Asynchronously register this subscription with rosmaster and connect to
     // each publisher
-    this.#registerSubscriberAndConnect(subscription, options);
+    this._registerSubscriberAndConnect(subscription, options);
 
     return subscription;
   }
@@ -111,7 +111,7 @@ export class RosNode extends EventEmitter {
   }
 
   tcpServerAddress(): TcpAddress | undefined {
-    return this.#tcpServer?.address();
+    return this._tcpServer?.address();
   }
 
   receivedBytes(): number {
@@ -139,12 +139,12 @@ export class RosNode extends EventEmitter {
     return { port: protocol[2] as number, address: protocol[1] as string };
   }
 
-  #newConnectionId = (): number => {
-    return this.#connectionIdCounter++;
-  };
+  private _newConnectionId(): number {
+    return this._connectionIdCounter++;
+  }
 
-  #registerSubscriber = async (subscription: Subscription): Promise<string[]> => {
-    if (!this.#running) {
+  private async _registerSubscriber(subscription: Subscription): Promise<string[]> {
+    if (!this._running) {
       return Promise.resolve([]);
     }
 
@@ -171,38 +171,38 @@ export class RosNode extends EventEmitter {
     }
 
     return publishers as string[];
-  };
+  }
 
-  #registerSubscriberAndConnect = async (
+  private async _registerSubscriberAndConnect(
     subscription: Subscription,
     options: SubscribeOpts,
-  ): Promise<void> => {
+  ): Promise<void> {
     const { topic, type } = options;
     const md5sum = options.md5sum ?? "*";
     const tcpNoDelay = options.tcpNoDelay ?? false;
 
-    if (!this.#running) {
+    if (!this._running) {
       return;
     }
 
     // TODO: Handle this registration failing
-    const publishers = await this.#registerSubscriber(subscription);
+    const publishers = await this._registerSubscriber(subscription);
 
-    if (!this.#running) {
+    if (!this._running) {
       return;
     }
 
     // Register with each publisher
     await Promise.all(
       publishers.map(async (pubUrl) => {
-        if (!this.#running) {
+        if (!this._running) {
           return;
         }
 
         // Create an XMLRPC client to talk to this publisher
         const rosFollowerClient = new RosFollowerClient(pubUrl);
 
-        if (!this.#running) {
+        if (!this._running) {
           return;
         }
 
@@ -210,12 +210,12 @@ export class RosNode extends EventEmitter {
         // TODO: Handle this requestTopic() call failing
         const { address, port } = await RosNode.RequestTopic(this.name, topic, rosFollowerClient);
 
-        if (!this.#running) {
+        if (!this._running) {
           return;
         }
 
         // Create a TCP socket connecting to this publisher
-        const socket = await this.#tcpSocketCreate({ host: address, port });
+        const socket = await this._tcpSocketCreate({ host: address, port });
         const connection = new TcpConnection(
           socket,
           new Map<string, string>([
@@ -227,20 +227,20 @@ export class RosNode extends EventEmitter {
           ]),
         );
 
-        if (!this.#running) {
+        if (!this._running) {
           socket.close();
           return;
         }
 
         // Hold a reference to this publisher
-        const connectionId = this.#newConnectionId();
+        const connectionId = this._newConnectionId();
         subscription.addPublisher(connectionId, rosFollowerClient, connection);
 
         // Asynchronously initiate the socket connection
         socket.connect();
       }),
     );
-  };
+  }
 
   static GetRosHostname(
     getEnvVar: (envVar: string) => string | undefined,

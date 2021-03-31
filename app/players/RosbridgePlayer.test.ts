@@ -89,14 +89,14 @@ class MockRosClient {
 }
 
 class MockRosTopic {
-  #name: string = "";
+  private _name: string = "";
 
   constructor({ name }: { name: string }) {
-    this.#name = name;
+    this._name = name;
   }
 
   subscribe(callback: (arg: unknown) => void) {
-    workerInstance.getMessagesByTopicName(this.#name).forEach(({ message }) => callback(message));
+    workerInstance.getMessagesByTopicName(this._name).forEach(({ message }) => callback(message));
   }
 }
 

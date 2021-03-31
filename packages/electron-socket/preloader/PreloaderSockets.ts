@@ -10,14 +10,14 @@ export class PreloaderSockets {
   // connecting to the renderer ("main world"). Function calls such as
   // createSocket() and createServer() come in on this channel, and function
   // call return values are sent back over it
-  #messagePort: MessagePort;
+  private _messagePort: MessagePort;
   // The API exposed to the renderer
-  #functionHandlers = new Map<string, (callId: number, args: Cloneable[]) => void>([
+  private _functionHandlers = new Map<string, (callId: number, args: Cloneable[]) => void>([
     [
       "createHttpServer",
       (callId, _) => {
         const port = createHttpServer();
-        this.#messagePort.postMessage([callId], [port]);
+        this._messagePort.postMessage([callId], [port]);
       },
     ],
     [
@@ -27,9 +27,9 @@ export class PreloaderSockets {
         const port = args[1] as number;
         const msgPort = createSocket(host, port);
         if (msgPort == undefined) {
-          this.#messagePort.postMessage([callId, `createSocket(${host}, ${port}) failed`]);
+          this._messagePort.postMessage([callId, `createSocket(${host}, ${port}) failed`]);
         } else {
-          this.#messagePort.postMessage([callId], [msgPort]);
+          this._messagePort.postMessage([callId], [msgPort]);
         }
       },
     ],
@@ -38,9 +38,9 @@ export class PreloaderSockets {
       (callId, _args) => {
         const msgPort = createServer();
         if (msgPort == undefined) {
-          this.#messagePort.postMessage([callId, `createServer() failed`]);
+          this._messagePort.postMessage([callId, `createServer() failed`]);
         } else {
-          this.#messagePort.postMessage([callId], [msgPort]);
+          this._messagePort.postMessage([callId], [msgPort]);
         }
       },
     ],
@@ -50,14 +50,14 @@ export class PreloaderSockets {
   static registeredSockets = new Map<string, PreloaderSockets>();
 
   constructor(messagePort: MessagePort) {
-    this.#messagePort = messagePort;
+    this._messagePort = messagePort;
 
     messagePort.onmessage = (ev: MessageEvent<RpcCall>) => {
       const methodName = ev.data[0];
       const callId = ev.data[1];
-      const handler = this.#functionHandlers.get(methodName);
+      const handler = this._functionHandlers.get(methodName);
       if (handler == undefined) {
-        this.#messagePort.postMessage([callId, `unhandled method "${methodName}"`]);
+        this._messagePort.postMessage([callId, `unhandled method "${methodName}"`]);
         return;
       }
 

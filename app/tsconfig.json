@@ -4,7 +4,7 @@
     "baseUrl": ".",
     "module": "es2020",
     "jsx": "react-jsx",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "lib": ["DOM", "DOM.Iterable", "es2020"],
     "paths": {
       "micro-memoize": ["../typings/micro-memoize"],
       "@foxglove-studio/app/*": ["*"]

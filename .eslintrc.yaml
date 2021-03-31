@@ -142,6 +142,9 @@ rules:
         `// eslint-disable-next-line no-restricted-syntax`. For rationale, see:
         https://github.com/sindresorhus/meta/discussions/7"
 
+    - selector: "TSPrivateIdentifier"
+      message: "Use private instead of #"
+
   "@typescript-eslint/strict-boolean-expressions":
     - error
       # Force explicit checks that strings are empty

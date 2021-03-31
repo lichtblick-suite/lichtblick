@@ -10,33 +10,33 @@ export default class OsContextAppConfiguration implements AppConfiguration {
   static STORE_NAME = "settings";
   static STORE_KEY = "settings.json";
 
-  readonly #ctx: Pick<OsContext, "storage">;
+  private readonly _ctx: Pick<OsContext, "storage">;
 
   // Protect access to currentValue to avoid read-modify-write races between multiple set() calls.
-  #mutex = new Mutex();
-  #currentValue: unknown;
+  private _mutex = new Mutex();
+  private _currentValue: unknown;
 
   constructor(ctx: Pick<OsContext, "storage">) {
-    this.#ctx = ctx;
-    this.#mutex.runExclusive(async () => {
-      const value = await this.#ctx.storage.get(
+    this._ctx = ctx;
+    this._mutex.runExclusive(async () => {
+      const value = await this._ctx.storage.get(
         OsContextAppConfiguration.STORE_NAME,
         OsContextAppConfiguration.STORE_KEY,
         { encoding: "utf8" },
       );
-      this.#currentValue = JSON.parse(value ?? "{}");
+      this._currentValue = JSON.parse(value ?? "{}");
     });
   }
 
   async get(key: string): Promise<unknown> {
-    return await this.#mutex.runExclusive(
-      () => (this.#currentValue as Record<string, unknown>)[key],
+    return await this._mutex.runExclusive(
+      () => (this._currentValue as Record<string, unknown>)[key],
     );
   }
 
   async set(key: string, value: unknown): Promise<void> {
-    await this.#mutex.runExclusive(async () => {
-      const currentConfig = await this.#ctx.storage.get(
+    await this._mutex.runExclusive(async () => {
+      const currentConfig = await this._ctx.storage.get(
         OsContextAppConfiguration.STORE_NAME,
         OsContextAppConfiguration.STORE_KEY,
         { encoding: "utf8" },
@@ -44,12 +44,12 @@ export default class OsContextAppConfiguration implements AppConfiguration {
 
       const newConfig: unknown = { ...JSON.parse(currentConfig ?? "{}"), [key]: value };
 
-      await this.#ctx.storage.put(
+      await this._ctx.storage.put(
         OsContextAppConfiguration.STORE_NAME,
         OsContextAppConfiguration.STORE_KEY,
         JSON.stringify(newConfig),
       );
-      this.#currentValue = newConfig;
+      this._currentValue = newConfig;
     });
   }
 }

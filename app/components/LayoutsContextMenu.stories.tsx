@@ -16,13 +16,13 @@ import configureStore from "@foxglove-studio/app/store/configureStore.testing";
 import LayoutsContextMenu from "./LayoutsContextMenu";
 
 class FakeLayoutStorage implements LayoutStorage {
-  #layouts: Layout[];
+  private _layouts: Layout[];
 
   constructor(layouts: Layout[] = []) {
-    this.#layouts = layouts;
+    this._layouts = layouts;
   }
   list(): Promise<Layout[]> {
-    return Promise.resolve(this.#layouts);
+    return Promise.resolve(this._layouts);
   }
   get(_id: string): Promise<Layout | undefined> {
     throw new Error("Method not implemented.");

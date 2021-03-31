@@ -7,21 +7,21 @@ import { XmlRpcClient, XmlRpcValue } from "@foxglove/xmlrpc";
 import { RosXmlRpcResponse } from "./XmlRpcTypes";
 
 export class RosXmlRpcClient {
-  #client: XmlRpcClient;
+  private _client: XmlRpcClient;
 
   constructor(url: string) {
-    this.#client = new XmlRpcClient(url, { encoding: "utf8" });
+    this._client = new XmlRpcClient(url, { encoding: "utf8" });
   }
 
   url(): string {
-    return this.#client.url;
+    return this._client.url;
   }
 
   protected _methodCall = async (
     methodName: string,
     args: XmlRpcValue[],
   ): Promise<RosXmlRpcResponse> => {
-    const res = await this.#client.methodCall(methodName, args);
+    const res = await this._client.methodCall(methodName, args);
     if (!Array.isArray(res) || res.length !== 3) {
       throw new Error(`malformed XML-RPC response`);
     }

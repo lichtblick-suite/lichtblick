@@ -8,10 +8,10 @@ import { Cloneable, RpcCall, RpcEvent, RpcResponse } from "../shared/Rpc";
 import { TcpAddress } from "../shared/TcpTypes";
 
 export class TcpSocketRenderer extends EventEmitter {
-  #messagePort: MessagePort;
-  #callbacks = new Map<number, (result: Cloneable[]) => void>();
-  #nextCallId = 0;
-  #events = new Map<string, (args: Cloneable[], ports?: readonly MessagePort[]) => void>([
+  private _messagePort: MessagePort;
+  private _callbacks = new Map<number, (result: Cloneable[]) => void>();
+  private _nextCallId = 0;
+  private _events = new Map<string, (args: Cloneable[], ports?: readonly MessagePort[]) => void>([
     ["connect", () => this.emit("connect")],
     ["close", () => this.emit("close")],
     ["end", () => this.emit("end")],
@@ -22,22 +22,22 @@ export class TcpSocketRenderer extends EventEmitter {
 
   constructor(messagePort: MessagePort) {
     super();
-    this.#messagePort = messagePort;
+    this._messagePort = messagePort;
 
     messagePort.onmessage = (ev: MessageEvent<RpcResponse | RpcEvent>) => {
       const args = ev.data.slice(1);
       if (typeof ev.data[0] === "number") {
         // RpcResponse
         const callId = ev.data[0];
-        const callback = this.#callbacks.get(callId);
+        const callback = this._callbacks.get(callId);
         if (callback !== undefined) {
-          this.#callbacks.delete(callId);
+          this._callbacks.delete(callId);
           callback(args);
         }
       } else {
         // RpcEvent
         const eventName = ev.data[0];
-        const handler = this.#events.get(eventName);
+        const handler = this._events.get(eventName);
         handler?.(args, ev.ports);
       }
     };
@@ -45,81 +45,81 @@ export class TcpSocketRenderer extends EventEmitter {
   }
 
   async remoteAddress(): Promise<TcpAddress | undefined> {
-    const res = await this.#apiCall("remoteAddress");
+    const res = await this._apiCall("remoteAddress");
     return res[0] as TcpAddress | undefined;
   }
 
   async localAddress(): Promise<TcpAddress | undefined> {
-    const res = await this.#apiCall("localAddress");
+    const res = await this._apiCall("localAddress");
     return res[0] as TcpAddress | undefined;
   }
 
   async fd(): Promise<number | undefined> {
-    const res = await this.#apiCall("fd");
+    const res = await this._apiCall("fd");
     return res[0] as number | undefined;
   }
 
   async setKeepAlive(enable?: boolean, initialDelay?: number): Promise<void> {
-    await this.#apiCall("setKeepAlive", enable, initialDelay);
+    await this._apiCall("setKeepAlive", enable, initialDelay);
   }
 
   async setTimeout(timeout: number): Promise<void> {
-    await this.#apiCall("setTimeout", timeout);
+    await this._apiCall("setTimeout", timeout);
   }
 
   async setNoDelay(noDelay?: boolean): Promise<void> {
-    await this.#apiCall("setNoDelay", noDelay);
+    await this._apiCall("setNoDelay", noDelay);
   }
 
   async connected(): Promise<boolean> {
-    const res = await this.#apiCall("connected");
+    const res = await this._apiCall("connected");
     return res[0] as boolean;
   }
 
   async connect(): Promise<void> {
-    const res = await this.#apiCall("connect");
+    const res = await this._apiCall("connect");
     if (res[0] != undefined) {
       return Promise.reject(new Error(res[0] as string));
     }
   }
 
   async close(): Promise<void> {
-    await this.#apiCall("close");
+    await this._apiCall("close");
   }
 
   async dispose(): Promise<void> {
-    await this.#apiCall("dispose");
+    await this._apiCall("dispose");
     // eslint-disable-next-line no-restricted-syntax
-    this.#messagePort.onmessage = null;
-    this.#messagePort.close();
-    this.#callbacks.clear();
+    this._messagePort.onmessage = null;
+    this._messagePort.close();
+    this._callbacks.clear();
   }
 
   async write(data: Uint8Array, transfer = true): Promise<void> {
     return new Promise((resolve) => {
-      const callId = this.#nextCallId++;
-      this.#callbacks.set(callId, () => {
-        this.#callbacks.delete(callId);
+      const callId = this._nextCallId++;
+      this._callbacks.set(callId, () => {
+        this._callbacks.delete(callId);
         resolve();
       });
       const msg: RpcCall = ["write", callId, data];
       if (transfer) {
-        this.#messagePort.postMessage(msg, [data.buffer]);
+        this._messagePort.postMessage(msg, [data.buffer]);
       } else {
-        this.#messagePort.postMessage(msg);
+        this._messagePort.postMessage(msg);
       }
     });
   }
 
-  #apiCall = (methodName: string, ...args: Cloneable[]): Promise<Cloneable[]> => {
+  private _apiCall(methodName: string, ...args: Cloneable[]): Promise<Cloneable[]> {
     return new Promise((resolve) => {
-      const callId = this.#nextCallId++;
-      this.#callbacks.set(callId, (result) => {
-        this.#callbacks.delete(callId);
+      const callId = this._nextCallId++;
+      this._callbacks.set(callId, (result) => {
+        this._callbacks.delete(callId);
         resolve(result);
       });
       const msg: RpcCall = [methodName, callId, ...args];
-      this.#messagePort.postMessage(msg);
+      this._messagePort.postMessage(msg);
     });
-  };
+  }
 }

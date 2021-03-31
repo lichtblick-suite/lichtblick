@@ -19,34 +19,34 @@ import { TcpAddress, TcpSocket } from "./TcpTypes";
 export class TcpConnection extends EventEmitter implements Connection {
   retries = 0;
 
-  #socket: TcpSocket;
-  #connected = false;
-  #transportInfo = "TCPROS not connected [socket -1]";
-  #readingHeader = true;
-  #requestHeader: Map<string, string>;
-  #header = new Map<string, string>();
-  #stats = {
+  private _socket: TcpSocket;
+  private _connected = false;
+  private _transportInfo = "TCPROS not connected [socket -1]";
+  private _readingHeader = true;
+  private _requestHeader: Map<string, string>;
+  private _header = new Map<string, string>();
+  private _stats = {
     bytesSent: 0,
     bytesReceived: 0,
     messagesSent: 0,
     messagesReceived: 0,
     dropEstimate: -1,
   };
-  #transformer = new RosTcpMessageStream();
-  #msgDefinition: RosMsgDefinition[] = [];
-  #msgReader: MessageReader | undefined;
+  private _transformer = new RosTcpMessageStream();
+  private _msgDefinition: RosMsgDefinition[] = [];
+  private _msgReader: MessageReader | undefined;
 
   constructor(socket: TcpSocket, requestHeader: Map<string, string>) {
     super();
-    this.#socket = socket;
-    this.#requestHeader = requestHeader;
+    this._socket = socket;
+    this._requestHeader = requestHeader;
 
-    socket.on("connect", this.#handleConnect);
-    socket.on("close", this.#handleClose);
-    socket.on("error", this.#handleError);
-    socket.on("data", (chunk) => this.#transformer.addData(chunk));
+    socket.on("connect", this._handleConnect);
+    socket.on("close", this._handleClose);
+    socket.on("error", this._handleError);
+    socket.on("data", (chunk) => this._transformer.addData(chunk));
 
-    this.#transformer.on("message", this.#handleMessage);
+    this._transformer.on("message", this._handleMessage);
   }
 
   transportType(): string {
@@ -54,57 +54,57 @@ export class TcpConnection extends EventEmitter implements Connection {
   }
 
   remoteAddress(): Promise<TcpAddress | undefined> {
-    return this.#socket.remoteAddress();
+    return this._socket.remoteAddress();
   }
 
   connected(): boolean {
-    return this.#connected;
+    return this._connected;
   }
 
   header(): Map<string, string> {
-    return new Map<string, string>(this.#header);
+    return new Map<string, string>(this._header);
   }
 
   stats(): ConnectionStats {
-    return this.#stats;
+    return this._stats;
   }
 
   messageDefinition(): RosMsgDefinition[] {
-    return this.#msgDefinition;
+    return this._msgDefinition;
   }
 
   messageReader(): MessageReader | undefined {
-    return this.#msgReader;
+    return this._msgReader;
   }
 
   close(): void {
     this.removeAllListeners();
-    this.#socket.close();
+    this._socket.close();
   }
 
   async writeHeader(): Promise<void> {
-    const data = TcpConnection.SerializeHeader(this.#requestHeader);
-    this.#stats.bytesSent += 4 + data.byteLength;
+    const data = TcpConnection.SerializeHeader(this._requestHeader);
+    this._stats.bytesSent += 4 + data.byteLength;
 
     // Write the 4-byte length
     const lenBuffer = new ArrayBuffer(4);
     const view = new DataView(lenBuffer);
     view.setUint32(0, data.byteLength, true);
-    this.#socket.write(new Uint8Array(lenBuffer));
+    this._socket.write(new Uint8Array(lenBuffer));
 
     // Write the serialized header payload
-    return this.#socket.write(data);
+    return this._socket.write(data);
   }
 
   // e.g. "TCPROS connection on port 59746 to [host:34318 on socket 11]"
   getTransportInfo(): string {
-    return this.#transportInfo;
+    return this._transportInfo;
   }
 
-  #getTransportInfo = async (): Promise<string> => {
-    const localPort = (await this.#socket.localAddress())?.port ?? -1;
-    const addr = await this.#socket.remoteAddress();
-    const fd = (await this.#socket.fd()) ?? -1;
+  private _getTransportInfo = async (): Promise<string> => {
+    const localPort = (await this._socket.localAddress())?.port ?? -1;
+    const addr = await this._socket.remoteAddress();
+    const fd = (await this._socket.fd()) ?? -1;
     if (addr) {
       const { address, port } = addr;
       return `TCPROS connection on port ${localPort} to [${address}:${port} on socket ${fd}]`;
@@ -112,41 +112,41 @@ export class TcpConnection extends EventEmitter implements Connection {
     return `TCPROS not connected [socket ${fd}]`;
   };
 
-  #handleConnect = async (): Promise<void> => {
-    this.#connected = true;
+  private _handleConnect = async (): Promise<void> => {
+    this._connected = true;
     this.retries = 0;
-    this.#transportInfo = await this.#getTransportInfo();
+    this._transportInfo = await this._getTransportInfo();
     // Write the initial request header. This prompts the publisher to respond
     // with its own header then start streaming messages
     this.writeHeader();
   };
 
-  #handleClose = (): void => {
-    this.#connected = false;
+  private _handleClose = (): void => {
+    this._connected = false;
     // TODO: Enter a reconnect loop
   };
 
-  #handleError = (): void => {
-    this.#connected = false;
+  private _handleError = (): void => {
+    this._connected = false;
     // TODO: Enter a reconnect loop
   };
 
-  #handleMessage = (msgData: Uint8Array): void => {
-    this.#connected = true;
-    this.#stats.bytesReceived += msgData.byteLength;
+  private _handleMessage = (msgData: Uint8Array): void => {
+    this._connected = true;
+    this._stats.bytesReceived += msgData.byteLength;
 
-    if (this.#readingHeader) {
-      this.#readingHeader = false;
+    if (this._readingHeader) {
+      this._readingHeader = false;
 
-      this.#header = TcpConnection.ParseHeader(msgData);
-      this.#msgDefinition = parseMessageDefinition(this.#header.get("message_definition") ?? "");
-      this.#msgReader = new MessageReader(this.#msgDefinition);
-      this.emit("header", this.#header, this.#msgDefinition, this.#msgReader);
+      this._header = TcpConnection.ParseHeader(msgData);
+      this._msgDefinition = parseMessageDefinition(this._header.get("message_definition") ?? "");
+      this._msgReader = new MessageReader(this._msgDefinition);
+      this.emit("header", this._header, this._msgDefinition, this._msgReader);
     } else {
-      this.#stats.messagesReceived++;
+      this._stats.messagesReceived++;
 
-      if (this.#msgReader) {
-        const msg = this.#msgReader.readMessage(
+      if (this._msgReader) {
+        const msg = this._msgReader.readMessage(
           Buffer.from(msgData.buffer, msgData.byteOffset, msgData.length),
         );
         this.emit("message", msg, msgData);

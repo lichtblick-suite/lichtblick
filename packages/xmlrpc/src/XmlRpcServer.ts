@@ -17,7 +17,7 @@ export class XmlRpcServer {
 
   constructor(server: HttpServer) {
     this.server = server;
-    server.handler = this.#requestHandler; // Our HTTP handler
+    server.handler = this._requestHandler; // Our HTTP handler
   }
 
   url(): string | undefined {
@@ -36,7 +36,7 @@ export class XmlRpcServer {
     this.xmlRpcHandlers.set(methodName, handler);
   }
 
-  #requestHandler = async (req: HttpRequest): Promise<HttpResponse> => {
+  private _requestHandler = async (req: HttpRequest): Promise<HttpResponse> => {
     const deserializer = new Deserializer();
     const [methodName, args] = await deserializer.deserializeMethodCall(req.body);
     const handler = this.xmlRpcHandlers.get(methodName);

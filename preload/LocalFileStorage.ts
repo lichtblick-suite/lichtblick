@@ -9,7 +9,7 @@ import path from "path";
 import type { Storage, StorageContent } from "@foxglove-studio/app/OsContext";
 
 export default class LocalFileStorage implements Storage {
-  #userDataPath = ipcRenderer.invoke("getUserDataPath");
+  private _userDataPath = ipcRenderer.invoke("getUserDataPath");
 
   async list(datastore: string): Promise<string[]> {
     const datastoreDir = await this.ensureDatastorePath(datastore);
@@ -89,7 +89,7 @@ export default class LocalFileStorage implements Storage {
   }
 
   private async ensureDatastorePath(datastore: string): Promise<string> {
-    const basePath = await this.#userDataPath;
+    const basePath = await this._userDataPath;
     // check that datastore matches regex [a-z]*
     // since datastore becomes a path under our userDataPath, we use this to sanitize
     if (!/[a-z-]/.test(datastore)) {

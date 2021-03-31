@@ -7,7 +7,7 @@ import { EventEmitter } from "eventemitter3";
 import { TcpAddress, TcpServer, TcpSocket } from "../TcpTypes";
 
 export class MockTcpSocket extends EventEmitter implements TcpSocket {
-  #connected = true;
+  private _connected = true;
 
   constructor() {
     super();
@@ -17,13 +17,13 @@ export class MockTcpSocket extends EventEmitter implements TcpSocket {
     return Promise.resolve({
       address: "192.168.1.2",
       port: 40000,
-      family: this.#connected ? "IPv4" : undefined,
+      family: this._connected ? "IPv4" : undefined,
     });
   }
 
   localAddress(): Promise<TcpAddress | undefined> {
     return Promise.resolve(
-      this.#connected ? { address: "127.0.0.1", port: 30000, family: "IPv4" } : undefined,
+      this._connected ? { address: "127.0.0.1", port: 30000, family: "IPv4" } : undefined,
     );
   }
 
@@ -32,7 +32,7 @@ export class MockTcpSocket extends EventEmitter implements TcpSocket {
   }
 
   connected(): Promise<boolean> {
-    return Promise.resolve(this.#connected);
+    return Promise.resolve(this._connected);
   }
 
   connect(): Promise<void> {
@@ -40,7 +40,7 @@ export class MockTcpSocket extends EventEmitter implements TcpSocket {
   }
 
   close(): Promise<void> {
-    this.#connected = false;
+    this._connected = false;
     return Promise.resolve();
   }
 

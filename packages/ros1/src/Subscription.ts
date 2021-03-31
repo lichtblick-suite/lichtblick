@@ -47,7 +47,7 @@ export class Subscription extends EventEmitter {
   readonly name: string;
   readonly md5sum: string;
   readonly dataType: string;
-  #publishers = new Map<number, PublisherLink>();
+  private _publishers = new Map<number, PublisherLink>();
 
   constructor(name: string, md5sum: string, dataType: string) {
     super();
@@ -58,14 +58,14 @@ export class Subscription extends EventEmitter {
 
   close(): void {
     this.removeAllListeners();
-    for (const pub of this.#publishers.values()) {
+    for (const pub of this._publishers.values()) {
       pub.connection.close();
     }
-    this.#publishers.clear();
+    this._publishers.clear();
   }
 
   publishers(): Readonly<Map<number, PublisherLink>> {
-    return this.#publishers;
+    return this._publishers;
   }
 
   addPublisher(
@@ -74,19 +74,19 @@ export class Subscription extends EventEmitter {
     connection: Connection,
   ): void {
     const publisher = new PublisherLink(connectionId, this, rosFollowerClient, connection);
-    this.#publishers.set(connectionId, publisher);
+    this._publishers.set(connectionId, publisher);
 
     connection.on("header", (header, def, reader) => this.emit("header", header, def, reader));
     connection.on("message", (msg, data) => this.emit("message", msg, data, publisher));
   }
 
   removePublisher(connectionId: number): boolean {
-    this.#publishers.get(connectionId)?.connection.close();
-    return this.#publishers.delete(connectionId);
+    this._publishers.get(connectionId)?.connection.close();
+    return this._publishers.delete(connectionId);
   }
 
   getInfo(): PublisherInfo[] {
-    return Array.from(this.#publishers.values()).map(
+    return Array.from(this._publishers.values()).map(
       (pub): PublisherInfo => {
         return [
           pub.connectionId,
@@ -102,7 +102,7 @@ export class Subscription extends EventEmitter {
   }
 
   getStats(): [string, PublisherStats[]] {
-    const pubStats = Array.from(this.#publishers.values()).map(
+    const pubStats = Array.from(this._publishers.values()).map(
       (pub): PublisherStats => {
         const stats = pub.connection.stats();
         return [
@@ -119,7 +119,7 @@ export class Subscription extends EventEmitter {
 
   receivedBytes(): number {
     let bytes = 0;
-    for (const pub of this.#publishers.values()) {
+    for (const pub of this._publishers.values()) {
       bytes += pub.connection.stats().bytesReceived;
     }
     return bytes;

@@ -13,24 +13,27 @@ export class Sockets {
   // the renderer to the preloader ("isolated world"). Function calls such as
   // createSocket() and createServer() are sent over this port, and function
   // call return values are received back over it
-  #messagePort: MessagePort;
+  private _messagePort: MessagePort;
   // Completion callbacks for any in-flight RPC calls
-  #callbacks = new Map<number, (args: Cloneable[], ports?: readonly MessagePort[]) => void>();
+  private _callbacks = new Map<
+    number,
+    (args: Cloneable[], ports?: readonly MessagePort[]) => void
+  >();
   // Asynchronous RPC calls are tracked using a callId integer
-  #nextCallId = 0;
+  private _nextCallId = 0;
 
   // A map of created `Sockets` instances, or a promise if creation is in progress
   static registeredSockets = new Map<string, Sockets | Promise<Sockets>>();
 
   constructor(messagePort: MessagePort) {
-    this.#messagePort = messagePort;
+    this._messagePort = messagePort;
 
     messagePort.onmessage = (ev: MessageEvent<RpcResponse>) => {
       const callId = ev.data[0];
       const args = ev.data.slice(1);
-      const callback = this.#callbacks.get(callId);
+      const callback = this._callbacks.get(callId);
       if (callback) {
-        this.#callbacks.delete(callId);
+        this._callbacks.delete(callId);
         callback(args, ev.ports);
       }
     };
@@ -38,8 +41,8 @@ export class Sockets {
 
   createHttpServer(requestHandler?: HttpHandler): Promise<HttpServerRenderer> {
     return new Promise((resolve, reject) => {
-      const callId = this.#nextCallId++;
-      this.#callbacks.set(callId, (_, ports) => {
+      const callId = this._nextCallId++;
+      this._callbacks.set(callId, (_, ports) => {
         const port = ports?.[0];
         if (!port) {
           return reject(new Error("no port returned"));
@@ -49,14 +52,14 @@ export class Sockets {
       });
 
       const msg: RpcCall = ["createHttpServer", callId];
-      this.#messagePort.postMessage(msg);
+      this._messagePort.postMessage(msg);
     });
   }
 
   createSocket(host: string, port: number): Promise<TcpSocketRenderer> {
     return new Promise((resolve, reject) => {
-      const callId = this.#nextCallId++;
-      this.#callbacks.set(callId, (args, ports) => {
+      const callId = this._nextCallId++;
+      this._callbacks.set(callId, (args, ports) => {
         const msgPort = ports?.[0];
         if (!msgPort) {
           const err = args[0] as string | undefined;
@@ -67,14 +70,14 @@ export class Sockets {
       });
 
       const msg: RpcCall = ["createSocket", callId, host, port];
-      this.#messagePort.postMessage(msg);
+      this._messagePort.postMessage(msg);
     });
   }
 
   createServer(): Promise<TcpServerRenderer> {
     return new Promise((resolve, reject) => {
-      const callId = this.#nextCallId++;
-      this.#callbacks.set(callId, (args, ports) => {
+      const callId = this._nextCallId++;
+      this._callbacks.set(callId, (args, ports) => {
         const port = ports?.[0];
         if (!port) {
           const err = args[0] as string | undefined;
@@ -85,7 +88,7 @@ export class Sockets {
       });
 
       const msg: RpcCall = ["createServer", callId];
-      this.#messagePort.postMessage(msg);
+      this._messagePort.postMessage(msg);
     });
   }
 

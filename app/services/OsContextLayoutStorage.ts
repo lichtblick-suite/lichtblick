@@ -19,14 +19,14 @@ function assertLayout(value: unknown): asserts value is Layout {
 export default class OsContextLayoutStorage implements LayoutStorage {
   private static STORE_NAME = "layouts";
 
-  #ctx: OsContext;
+  private _ctx: OsContext;
 
   constructor(osContext: OsContext) {
-    this.#ctx = osContext;
+    this._ctx = osContext;
   }
 
   async list(): Promise<Layout[]> {
-    const items = await this.#ctx.storage.all(OsContextLayoutStorage.STORE_NAME);
+    const items = await this._ctx.storage.all(OsContextLayoutStorage.STORE_NAME);
 
     const layouts: Layout[] = [];
     for (const item of items) {
@@ -44,7 +44,7 @@ export default class OsContextLayoutStorage implements LayoutStorage {
   }
 
   async get(id: string): Promise<Layout | undefined> {
-    const item = await this.#ctx.storage.get(OsContextLayoutStorage.STORE_NAME, id);
+    const item = await this._ctx.storage.get(OsContextLayoutStorage.STORE_NAME, id);
     if (!(item instanceof Uint8Array)) {
       throw new Error("Invariant violation - layout item is not a buffer");
     }
@@ -58,10 +58,10 @@ export default class OsContextLayoutStorage implements LayoutStorage {
 
   async put(layout: Layout): Promise<void> {
     const content = JSON.stringify(layout);
-    return this.#ctx.storage.put(OsContextLayoutStorage.STORE_NAME, layout.id, content);
+    return this._ctx.storage.put(OsContextLayoutStorage.STORE_NAME, layout.id, content);
   }
 
   async delete(id: string): Promise<void> {
-    return this.#ctx.storage.delete(OsContextLayoutStorage.STORE_NAME, id);
+    return this._ctx.storage.delete(OsContextLayoutStorage.STORE_NAME, id);
   }
 }

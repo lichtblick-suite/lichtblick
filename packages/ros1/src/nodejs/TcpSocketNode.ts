@@ -14,15 +14,15 @@ type MaybeHasFd = {
 };
 
 export class TcpSocketNode extends EventEmitter implements TcpSocket {
-  #host: string;
-  #port: number;
-  #socket: net.Socket;
+  private _host: string;
+  private _port: number;
+  private _socket: net.Socket;
 
   constructor(host: string, port: number, socket: net.Socket) {
     super();
-    this.#host = host;
-    this.#port = port;
-    this.#socket = socket;
+    this._host = host;
+    this._port = port;
+    this._socket = socket;
 
     socket.on("connect", () => this.emit("connect"));
     socket.on("close", () => this.emit("close"));
@@ -34,19 +34,19 @@ export class TcpSocketNode extends EventEmitter implements TcpSocket {
 
   remoteAddress(): Promise<TcpAddress | undefined> {
     return Promise.resolve({
-      port: this.#port,
-      family: this.#socket.remoteFamily,
-      address: this.#host,
+      port: this._port,
+      family: this._socket.remoteFamily,
+      address: this._host,
     });
   }
 
   localAddress(): Promise<TcpAddress | undefined> {
-    if (this.#socket.destroyed) {
+    if (this._socket.destroyed) {
       return Promise.resolve(undefined);
     }
-    const port = this.#socket.localPort;
-    const family = this.#socket.remoteFamily; // There is no localFamily
-    const address = this.#socket.localAddress;
+    const port = this._socket.localPort;
+    const family = this._socket.remoteFamily; // There is no localFamily
+    const address = this._socket.localAddress;
     return Promise.resolve(
       port !== undefined && family !== undefined && address !== undefined
         ? { port, family, address }
@@ -60,33 +60,33 @@ export class TcpSocketNode extends EventEmitter implements TcpSocket {
     // where sockets have file descriptors. See
     // <https://github.com/nodejs/help/issues/1312>
     // eslint-disable-next-line no-underscore-dangle
-    return Promise.resolve(((this.#socket as unknown) as MaybeHasFd)._handle?.fd);
+    return Promise.resolve(((this._socket as unknown) as MaybeHasFd)._handle?.fd);
   }
 
   connected(): Promise<boolean> {
-    return Promise.resolve(!this.#socket.destroyed && this.#socket.localAddress !== undefined);
+    return Promise.resolve(!this._socket.destroyed && this._socket.localAddress !== undefined);
   }
 
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       const KEEPALIVE_MS = 60 * 1000;
 
-      this.#socket.on("error", reject).connect(this.#port, this.#host, () => {
-        this.#socket.removeListener("error", reject);
-        this.#socket.setKeepAlive(true, KEEPALIVE_MS);
+      this._socket.on("error", reject).connect(this._port, this._host, () => {
+        this._socket.removeListener("error", reject);
+        this._socket.setKeepAlive(true, KEEPALIVE_MS);
         resolve();
       });
     });
   }
 
   close(): Promise<void> {
-    this.#socket.destroy();
+    this._socket.destroy();
     return Promise.resolve();
   }
 
   write(data: Uint8Array): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.#socket.write(data, (err) => {
+      this._socket.write(data, (err) => {
         if (err) {
           reject(err);
           return;

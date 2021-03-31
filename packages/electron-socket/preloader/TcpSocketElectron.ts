@@ -17,19 +17,19 @@ export class TcpSocketElectron {
   readonly id: number;
   readonly host: string;
   readonly port: number;
-  #socket: net.Socket;
-  #messagePort: MessagePort;
-  #api = new Map<string, RpcHandler>([
-    ["remoteAddress", (callId) => this.#apiResponse(callId, this.remoteAddress())],
-    ["localAddress", (callId) => this.#apiResponse(callId, this.localAddress())],
-    ["fd", (callId) => this.#apiResponse(callId, this.fd())],
+  private _socket: net.Socket;
+  private _messagePort: MessagePort;
+  private _api = new Map<string, RpcHandler>([
+    ["remoteAddress", (callId) => this._apiResponse(callId, this.remoteAddress())],
+    ["localAddress", (callId) => this._apiResponse(callId, this.localAddress())],
+    ["fd", (callId) => this._apiResponse(callId, this.fd())],
     [
       "setKeepAlive",
       (callId, args) => {
         const enable = args[0] as boolean | undefined;
         const initialDelay = args[1] as number | undefined;
         this.setKeepAlive(enable, initialDelay);
-        this.#apiResponse(callId);
+        this._apiResponse(callId);
       },
     ],
     [
@@ -37,7 +37,7 @@ export class TcpSocketElectron {
       (callId, args) => {
         const timeout = args[0] as number;
         this.setTimeout(timeout);
-        this.#apiResponse(callId);
+        this._apiResponse(callId);
       },
     ],
     [
@@ -45,27 +45,27 @@ export class TcpSocketElectron {
       (callId, args) => {
         const noDelay = args[0] as boolean | undefined;
         this.setNoDelay(noDelay);
-        this.#apiResponse(callId);
+        this._apiResponse(callId);
       },
     ],
-    ["connected", (callId) => this.#apiResponse(callId, this.connected())],
+    ["connected", (callId) => this._apiResponse(callId, this.connected())],
     [
       "connect",
       (callId, _) => {
         this.connect()
-          .then(() => this.#apiResponse(callId, undefined))
-          .catch((err) => this.#apiResponse(callId, String(err.stack ?? err)));
+          .then(() => this._apiResponse(callId, undefined))
+          .catch((err) => this._apiResponse(callId, String(err.stack ?? err)));
       },
     ],
-    ["close", (callId) => this.#apiResponse(callId, this.close())],
-    ["dispose", (callId) => this.#apiResponse(callId, this.dispose())],
+    ["close", (callId) => this._apiResponse(callId, this.close())],
+    ["dispose", (callId) => this._apiResponse(callId, this.dispose())],
     [
       "write",
       (callId, args) => {
         const data = args[0] as Uint8Array;
         this.write(data)
-          .then(() => this.#apiResponse(callId, undefined))
-          .catch((err) => this.#apiResponse(callId, String(err.stack ?? err)));
+          .then(() => this._apiResponse(callId, undefined))
+          .catch((err) => this._apiResponse(callId, String(err.stack ?? err)));
       },
     ],
   ]);
@@ -80,35 +80,35 @@ export class TcpSocketElectron {
     this.id = id;
     this.host = host;
     this.port = port;
-    this.#socket = socket;
-    this.#messagePort = messagePort;
+    this._socket = socket;
+    this._messagePort = messagePort;
 
-    this.#socket.on("close", () => this.#emit("close"));
-    this.#socket.on("end", () => this.#emit("end"));
-    this.#socket.on("data", this.#handleData);
-    this.#socket.on("timeout", () => this.#emit("timeout"));
-    this.#socket.on("error", (err) => this.#emit("error", String(err.stack ?? err)));
+    this._socket.on("close", () => this._emit("close"));
+    this._socket.on("end", () => this._emit("end"));
+    this._socket.on("data", this._handleData);
+    this._socket.on("timeout", () => this._emit("timeout"));
+    this._socket.on("error", (err) => this._emit("error", String(err.stack ?? err)));
 
     messagePort.onmessage = (ev: MessageEvent<RpcCall>) => {
       const [methodName, callId] = ev.data;
       const args = ev.data.slice(2);
-      const handler = this.#api.get(methodName);
+      const handler = this._api.get(methodName);
       handler?.(callId, args);
     };
     messagePort.start();
   }
 
   remoteAddress(): TcpAddress | undefined {
-    const port = this.#socket.remotePort;
-    const family = this.#socket.remoteFamily;
-    const address = this.#socket.remoteAddress;
+    const port = this._socket.remotePort;
+    const family = this._socket.remoteFamily;
+    const address = this._socket.remoteAddress;
     return port !== undefined && address !== undefined ? { port, family, address } : undefined;
   }
 
   localAddress(): TcpAddress | undefined {
-    const port = this.#socket.localPort;
-    const family = this.#socket.remoteFamily; // There is no localFamily
-    const address = this.#socket.localAddress;
+    const port = this._socket.localPort;
+    const family = this._socket.remoteFamily; // There is no localFamily
+    const address = this._socket.localAddress;
     return port !== undefined && address !== undefined ? { port, family, address } : undefined;
   }
 
@@ -118,53 +118,53 @@ export class TcpSocketElectron {
     // where sockets have file descriptors. See
     // <https://github.com/nodejs/help/issues/1312>
     // eslint-disable-next-line no-underscore-dangle
-    return ((this.#socket as unknown) as MaybeHasFd)._handle?.fd;
+    return ((this._socket as unknown) as MaybeHasFd)._handle?.fd;
   }
 
   setKeepAlive(enable?: boolean, initialDelay?: number): this {
-    this.#socket.setKeepAlive(enable, initialDelay);
+    this._socket.setKeepAlive(enable, initialDelay);
     return this;
   }
 
   setTimeout(timeout: number): this {
-    this.#socket.setTimeout(timeout);
+    this._socket.setTimeout(timeout);
     return this;
   }
 
   setNoDelay(noDelay?: boolean): this {
-    this.#socket.setNoDelay(noDelay);
+    this._socket.setNoDelay(noDelay);
     return this;
   }
 
   connected(): boolean {
-    return !this.#socket.destroyed && this.#socket.localAddress !== undefined;
+    return !this._socket.destroyed && this._socket.localAddress !== undefined;
   }
 
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.#socket
+      this._socket
         .connect({ host: this.host, port: this.port }, () => {
-          this.#socket.removeListener("error", reject);
+          this._socket.removeListener("error", reject);
           resolve();
-          this.#emit("connect");
+          this._emit("connect");
         })
         .on("error", reject);
     });
   }
 
   close(): void {
-    this.#socket.destroy();
+    this._socket.destroy();
   }
 
   dispose(): void {
-    this.#socket.removeAllListeners();
+    this._socket.removeAllListeners();
     this.close();
-    this.#messagePort.close();
+    this._messagePort.close();
   }
 
   write(data: Uint8Array): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.#socket.write(data, (err) => {
+      this._socket.write(data, (err) => {
         if (err) {
           reject(err);
           return;
@@ -174,18 +174,18 @@ export class TcpSocketElectron {
     });
   }
 
-  #apiResponse = (callId: number, ...args: Cloneable[]): void => {
+  private _apiResponse(callId: number, ...args: Cloneable[]): void {
     const msg: RpcResponse = [callId, ...args];
-    this.#messagePort.postMessage(msg);
-  };
+    this._messagePort.postMessage(msg);
+  }
 
-  #emit = (eventName: string, ...args: Cloneable[]): void => {
+  private _emit(eventName: string, ...args: Cloneable[]): void {
     const msg: Cloneable[] = [eventName, ...args];
-    this.#messagePort.postMessage(msg);
-  };
+    this._messagePort.postMessage(msg);
+  }
 
-  #handleData = (data: Uint8Array): void => {
+  private _handleData(data: Uint8Array): void {
     const msg: Cloneable[] = ["data", data];
-    this.#messagePort.postMessage(msg, [data.buffer]);
-  };
+    this._messagePort.postMessage(msg, [data.buffer]);
+  }
 }

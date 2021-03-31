@@ -10,12 +10,12 @@ import { TcpAddress } from "../shared/TcpTypes";
 
 export class HttpServerElectron {
   readonly id: number;
-  #server: http.Server;
-  #messagePort: MessagePort;
-  #nextRequestId = 0;
-  #requests = new Map<number, (response: HttpResponse) => Promise<void>>();
-  #api = new Map<string, RpcHandler>([
-    ["address", (callId) => this.#apiResponse([callId, this.address()])],
+  private _server: http.Server;
+  private _messagePort: MessagePort;
+  private _nextRequestId = 0;
+  private _requests = new Map<number, (response: HttpResponse) => Promise<void>>();
+  private _api = new Map<string, RpcHandler>([
+    ["address", (callId) => this._apiResponse([callId, this.address()])],
     [
       "listen",
       (callId, args) => {
@@ -23,8 +23,8 @@ export class HttpServerElectron {
         const hostname = args[1] as string | undefined;
         const backlog = args[2] as number | undefined;
         this.listen(port, hostname, backlog)
-          .then(() => this.#apiResponse([callId, undefined]))
-          .catch((err) => this.#apiResponse([callId, String(err.stack ?? err)]));
+          .then(() => this._apiResponse([callId, undefined]))
+          .catch((err) => this._apiResponse([callId, String(err.stack ?? err)]));
       },
     ],
     [
@@ -32,40 +32,40 @@ export class HttpServerElectron {
       (callId, args) => {
         const requestId = args[0] as number;
         const response = args[1] as HttpResponse;
-        const handler = this.#requests.get(requestId);
+        const handler = this._requests.get(requestId);
         if (handler == undefined) {
-          this.#apiResponse([callId, `unknown requestId ${requestId}`]);
+          this._apiResponse([callId, `unknown requestId ${requestId}`]);
           return;
         }
-        this.#requests.delete(requestId);
+        this._requests.delete(requestId);
         handler(response)
-          .then(() => this.#apiResponse([callId, undefined]))
-          .catch((err) => this.#apiResponse([callId, String(err.stack ?? err)]));
+          .then(() => this._apiResponse([callId, undefined]))
+          .catch((err) => this._apiResponse([callId, String(err.stack ?? err)]));
       },
     ],
-    ["close", (callId) => this.#apiResponse([callId, this.close()])],
-    ["dispose", (callId) => this.#apiResponse([callId, this.dispose()])],
+    ["close", (callId) => this._apiResponse([callId, this.close()])],
+    ["dispose", (callId) => this._apiResponse([callId, this.dispose()])],
   ]);
 
   constructor(id: number, messagePort: MessagePort) {
     this.id = id;
-    this.#server = http.createServer(this.#handleRequest);
-    this.#messagePort = messagePort;
+    this._server = http.createServer(this._handleRequest);
+    this._messagePort = messagePort;
 
-    this.#server.on("close", () => this.#emit("close"));
-    this.#server.on("error", (err) => this.#emit("error", String(err.stack ?? err)));
+    this._server.on("close", () => this._emit("close"));
+    this._server.on("error", (err) => this._emit("error", String(err.stack ?? err)));
 
     messagePort.onmessage = (ev: MessageEvent<RpcCall>) => {
       const [methodName, callId] = ev.data;
       const args = ev.data.slice(2);
-      const handler = this.#api.get(methodName);
+      const handler = this._api.get(methodName);
       handler?.(callId, args);
     };
     messagePort.start();
   }
 
   address(): TcpAddress | undefined {
-    const addr = this.#server.address();
+    const addr = this._server.address();
     if (addr == undefined || typeof addr === "string") {
       // Address will only be a string for an IPC (named pipe) server, which
       // should never happen here
@@ -76,44 +76,44 @@ export class HttpServerElectron {
 
   listen(port?: number, hostname?: string, backlog?: number): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.#server.listen(port, hostname, backlog, () => {
-        this.#server.removeListener("error", reject);
+      this._server.listen(port, hostname, backlog, () => {
+        this._server.removeListener("error", reject);
         resolve();
       });
     });
   }
 
   close(): void {
-    this.#server.close();
+    this._server.close();
   }
 
   dispose(): void {
-    this.#server.removeAllListeners();
+    this._server.removeAllListeners();
     this.close();
-    this.#messagePort.close();
+    this._messagePort.close();
   }
 
-  #apiResponse = (message: RpcResponse, transfer?: Transferable[]): void => {
+  private _apiResponse(message: RpcResponse, transfer?: Transferable[]): void {
     if (transfer != undefined) {
-      this.#messagePort.postMessage(message, transfer);
+      this._messagePort.postMessage(message, transfer);
     } else {
-      this.#messagePort.postMessage(message);
+      this._messagePort.postMessage(message);
     }
-  };
+  }
 
-  #emit = (eventName: string, ...args: Cloneable[]): void => {
+  private _emit(eventName: string, ...args: Cloneable[]): void {
     const msg = [eventName, ...args];
-    this.#messagePort.postMessage(msg);
-  };
+    this._messagePort.postMessage(msg);
+  }
 
-  #handleRequest = (req: http.IncomingMessage, res: http.ServerResponse): void => {
+  private _handleRequest(req: http.IncomingMessage, res: http.ServerResponse): void {
     const chunks: Uint8Array[] = [];
     req.on("data", (chunk: Uint8Array) => chunks.push(chunk));
     req.on("end", () => {
       const body = Buffer.concat(chunks).toString();
 
-      const requestId = this.#nextRequestId++;
-      this.#requests.set(
+      const requestId = this._nextRequestId++;
+      this._requests.set(
         requestId,
         (incomingRes): Promise<void> => {
           res.chunkedEncoding = incomingRes.chunkedEncoding ?? res.chunkedEncoding;
@@ -141,7 +141,7 @@ export class HttpServerElectron {
         method: req.method,
         url: req.url,
       };
-      this.#emit("request", requestId, request);
+      this._emit("request", requestId, request);
     });
-  };
+  }
 }

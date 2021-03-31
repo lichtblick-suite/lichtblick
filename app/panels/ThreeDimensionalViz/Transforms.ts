@@ -132,25 +132,25 @@ export class Transform {
 }
 
 class TfStore {
-  #storage = new Map<string, Transform>();
+  private _storage = new Map<string, Transform>();
 
   get(key: string): Transform {
     key = stripLeadingSlash(key);
-    let result = this.#storage.get(key);
+    let result = this._storage.get(key);
     if (result) {
       return result;
     }
     result = new Transform(key);
-    this.#storage.set(key, result);
+    this._storage.set(key, result);
     return result;
   }
 
   has(key: string): boolean {
-    return this.#storage.has(key);
+    return this._storage.has(key);
   }
 
   values(): Array<Transform> {
-    return Array.from(this.#storage.values());
+    return Array.from(this._storage.values());
   }
 }
 
