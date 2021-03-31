@@ -29,7 +29,7 @@ import { Sockets } from "@foxglove/electron-socket/renderer";
 import { RosNode, TcpSocket } from "@foxglove/ros1";
 import { HttpServer } from "@foxglove/xmlrpc/src";
 
-const capabilities: string[] = [];
+const CAPABILITIES: string[] = [];
 const NO_WARNINGS = Object.freeze({});
 
 // Connects to `rosmaster` instance using `@foxglove/ros1`. Currently doesn't support seeking or
@@ -138,7 +138,7 @@ export default class Ros1Player implements Player {
       return this._listener({
         presence: PlayerPresence.INITIALIZING,
         progress: {},
-        capabilities,
+        capabilities: CAPABILITIES,
         playerId: this._id,
         activeData: undefined,
       });
@@ -155,7 +155,7 @@ export default class Ros1Player implements Player {
     return this._listener({
       presence: PlayerPresence.PRESENT,
       progress: {},
-      capabilities,
+      capabilities: CAPABILITIES,
       playerId: this._id,
 
       activeData: {
@@ -274,12 +274,13 @@ export default class Ros1Player implements Player {
 
   setPublishers(publishers: AdvertisePayload[]): void {
     // TODO: Publishing
+    publishers = publishers.filter((p) => p.topic.length > 0);
     if (publishers.length > 0) {
       const topics = publishers.map((p) => p.topic).join(", ");
       sendNotification(
         "Publishing not supported",
         `Cannot publish to "${topics}", ROS publishing is not supported yet`,
-        "app",
+        "user",
         "error",
       );
     }
