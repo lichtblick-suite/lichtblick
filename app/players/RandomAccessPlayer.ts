@@ -593,7 +593,7 @@ export default class RandomAccessPlayer implements Player {
         this._messages = messages;
         this._bobjects = bobjects;
         this._lastSeekEmitTime = seekTime;
-        await this._emitState();
+        this._emitState();
       }
     } else {
       // If we are playing, make sure we set this emit time so that consumers will know that we seeked.

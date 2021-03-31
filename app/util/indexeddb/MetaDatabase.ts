@@ -158,7 +158,7 @@ export async function updateMetaDatabases(
     });
     await Promise.all(promises);
   } finally {
-    await metadataDatabase.close();
+    metadataDatabase.close();
   }
 }
 
@@ -168,7 +168,7 @@ export async function doesDatabaseExist(
 ): Promise<boolean> {
   const metadataDatabase = await Database.get(getConfig(metadataDatabaseName));
   const entry = await metadataDatabase.get(metadataObjectStoreName, databaseName);
-  await metadataDatabase.close();
+  metadataDatabase.close();
   log.info(`Checking if database exists returned ${!!entry} with...`, { databaseName });
   return !!entry;
 }

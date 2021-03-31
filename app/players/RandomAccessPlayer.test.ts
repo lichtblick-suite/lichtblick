@@ -104,7 +104,7 @@ describe("RandomAccessPlayer", () => {
       playerOptions,
     );
     const store = new MessageStore(2);
-    await source.setListener(store.add);
+    source.setListener(store.add);
     const messages = await store.done;
     expect(messages).toEqual([
       {
@@ -154,7 +154,7 @@ describe("RandomAccessPlayer", () => {
       { ...playerOptions, seekToTime: getSeekToTime() },
     );
     const store = new MessageStore(2);
-    await source.setListener(store.add);
+    source.setListener(store.add);
     const messages: any = await store.done;
     expect(messages[1].activeData.currentTime).toEqual(
       TimeUtil.add({ sec: 10, nsec: 0 }, fromNanoSec(SEEK_ON_START_NS)),
@@ -170,7 +170,7 @@ describe("RandomAccessPlayer", () => {
       playerOptions,
     );
     const store = new MessageStore(2);
-    await source.setListener(store.add);
+    source.setListener(store.add);
     // make getMessages do nothing since we're going to start reading
     provider.getMessages = () =>
       new Promise(() => {
@@ -228,7 +228,7 @@ describe("RandomAccessPlayer", () => {
       playerOptions,
     );
     const store = new MessageStore(2);
-    await source.setListener(store.add);
+    source.setListener(store.add);
     // allow initialization messages to come in
     await store.done;
     // wait for each playback speed change
@@ -321,7 +321,8 @@ describe("RandomAccessPlayer", () => {
       playerOptions,
     );
     const store = new MessageStore(5);
-    await source.setListener(store.add);
+    source.setListener(store.add);
+    await Promise.resolve();
 
     source.setSubscriptions([{ topic: "/foo/bar", format: "parsedMessages" }]);
     source.requestBackfill(); // We always get a `requestBackfill` after each `setSubscriptions`.
@@ -366,7 +367,7 @@ describe("RandomAccessPlayer", () => {
       playerOptions,
     );
     const store = new MessageStore(5);
-    await source.setListener(store.add);
+    source.setListener(store.add);
 
     source.setSubscriptions([]);
     source.requestBackfill(); // We always get a `requestBackfill` after each `setSubscriptions`.
@@ -426,7 +427,8 @@ describe("RandomAccessPlayer", () => {
     };
 
     const store = new MessageStore(4);
-    await source.setListener(store.add);
+    source.setListener(store.add);
+    await Promise.resolve();
     source.setSubscriptions([{ topic: "/foo/bar", format: "parsedMessages" }]);
     source.requestBackfill(); // We always get a `requestBackfill` after each `setSubscriptions`.
     source.startPlayback();
@@ -503,7 +505,8 @@ describe("RandomAccessPlayer", () => {
     };
 
     const store = new MessageStore(5);
-    await source.setListener(store.add);
+    source.setListener(store.add);
+    await Promise.resolve();
     source.setSubscriptions([{ topic: "/foo/bar", format: "parsedMessages" }]);
     source.requestBackfill(); // We always get a `requestBackfill` after each `setSubscriptions`.
 
@@ -591,7 +594,8 @@ describe("RandomAccessPlayer", () => {
     };
 
     const store = new MessageStore(4);
-    await source.setListener(store.add);
+    source.setListener(store.add);
+    await Promise.resolve();
     source.setSubscriptions([{ topic: "/foo/bar", format: "parsedMessages" }]);
     source.requestBackfill(); // We always get a `requestBackfill` after each `setSubscriptions`.
     source.startPlayback();
@@ -1014,9 +1018,8 @@ describe("RandomAccessPlayer", () => {
     };
     provider.getMessages = getMessages;
 
-    await source.setListener(async () => {
-      // no-op
-    });
+    source.setListener(async () => {});
+    await Promise.resolve();
     source.setSubscriptions([{ topic: "/foo/bar", format: "parsedMessages" }]);
     source.requestBackfill(); // We always get a `requestBackfill` after each `setSubscriptions`.
 
@@ -1097,7 +1100,7 @@ describe("RandomAccessPlayer", () => {
     };
 
     const store = new MessageStore(9);
-    await source.setListener(store.add);
+    source.setListener(store.add);
     await delay(1);
     source.setSubscriptions([
       { topic: "/foo/bar", format: "parsedMessages" },
@@ -1176,7 +1179,7 @@ describe("RandomAccessPlayer", () => {
     );
     const messagesReceived: Message[] = [];
     const bobjectsReceived: BobjectMessage[] = [];
-    await source.setListener((msg) => {
+    source.setListener((msg) => {
       messagesReceived.push(
         ...((
           msg.activeData ?? {
@@ -1236,10 +1239,9 @@ describe("RandomAccessPlayer", () => {
       { name: "TestProvider", args: { provider }, children: [] },
       playerOptions,
     );
-    await source.setListener(async () => {
-      // no-op
-    });
-    await source.close();
+    source.setListener(async () => {});
+    await Promise.resolve();
+    source.close();
     expect(provider.closed).toBe(true);
   });
 
@@ -1256,7 +1258,7 @@ describe("RandomAccessPlayer", () => {
     );
 
     const store = new MessageStore(2);
-    await source.setListener(store.add);
+    source.setListener(store.add);
     expect(provider.closed).toBe(false);
 
     source.close();
@@ -1332,7 +1334,8 @@ describe("RandomAccessPlayer", () => {
     });
 
     const store = new MessageStore(2);
-    await player.setListener(store.add);
+    player.setListener(store.add);
+    await Promise.resolve();
     player.startPlayback();
 
     await firstGetMessagesCall;
@@ -1598,7 +1601,8 @@ describe("RandomAccessPlayer", () => {
     });
 
     const store = new MessageStore(3);
-    await player.setListener(store.add);
+    player.setListener(store.add);
+    await Promise.resolve();
     player.startPlayback();
 
     await firstGetMessagesCall;
@@ -1652,7 +1656,7 @@ describe("RandomAccessPlayer", () => {
     const store = new MessageStore(2);
     player.setSubscriptions([{ topic: "/foo/bar", format: "parsedMessages" }]);
     player.requestBackfill(); // We always get a `requestBackfill` after each `setSubscriptions`.
-    await player.setListener(store.add);
+    player.setListener(store.add);
     const firstMessages = await store.done;
     expect(firstMessages).toEqual([
       expect.objectContaining({ activeData: undefined }), // isPlaying is set to false to begin
@@ -1679,7 +1683,8 @@ describe("RandomAccessPlayer", () => {
     player.seekPlayback({ sec: 10, nsec: 0 });
     expect(provider.getMessages).not.toHaveBeenCalled();
 
-    await player.setListener(store.add);
+    player.setListener(store.add);
+    await Promise.resolve();
     player.seekPlayback({ sec: 10, nsec: 0 });
     expect(provider.getMessages).toHaveBeenCalled();
 
@@ -1696,7 +1701,7 @@ describe("RandomAccessPlayer", () => {
     const store = new MessageStore(2);
     player.setSubscriptions([{ topic: "/foo/bar", format: "parsedMessages" }]);
     player.requestBackfill(); // We always get a `requestBackfill` after each `setSubscriptions`.
-    await player.setListener(store.add);
+    player.setListener(store.add);
     await store.done;
 
     // Seek to just before the end.
@@ -1762,7 +1767,7 @@ describe("RandomAccessPlayer", () => {
     };
 
     const store = new MessageStore(2);
-    await source.setListener(store.add);
+    source.setListener(store.add);
     source.setSubscriptions([
       { topic: "/unknown_topic", format: "parsedMessages" }, // Shouldn't appear in getMessages at all!
       { topic: "/parsed_topic", format: "parsedMessages" },
@@ -1803,7 +1808,7 @@ describe("RandomAccessPlayer", () => {
     };
 
     const store = new MessageStore(2);
-    await source.setListener(store.add);
+    source.setListener(store.add);
     source.setSubscriptions([
       { topic: "/unknown_topic", format: "parsedMessages" }, // Shouldn't appear in getMessages at all!
       { topic: "/streaming_parsed", format: "parsedMessages" },
@@ -1831,7 +1836,7 @@ describe("RandomAccessPlayer", () => {
         { name: "TestProvider", args: { provider }, children: [] },
         playerOptions,
       );
-      await player.setListener(async () => {
+      player.setListener(async () => {
         // no-op
       });
       provider.extensionPoint?.progressCallback({});
@@ -1847,9 +1852,8 @@ describe("RandomAccessPlayer", () => {
         { name: "TestProvider", args: { provider }, children: [] },
         playerOptions,
       );
-      await player.setListener(async () => {
-        // no-op
-      });
+      player.setListener(async () => {});
+      await Promise.resolve();
 
       // Provider start/end is 10s/100s. Load from 55s to 100s.
       provider.extensionPoint?.progressCallback({

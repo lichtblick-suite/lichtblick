@@ -36,7 +36,7 @@ describe("Database", () => {
     expect(await tx2.objectStore("bar").get(2)).toEqual("two");
     expect(await tx2.objectStore("bar").get(3)).toEqual(undefined);
     await tx2.complete;
-    await db.close();
+    db.close();
   });
 
   it("can do crud operations", async () => {

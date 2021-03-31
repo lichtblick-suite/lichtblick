@@ -111,8 +111,7 @@ export class RosFollower {
       return Promise.reject(err);
     }
 
-    const pid = await this.#rosNode.pid;
-    return [1, "", pid];
+    return [1, "", this.#rosNode.pid];
   };
 
   getSubscriptions = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {

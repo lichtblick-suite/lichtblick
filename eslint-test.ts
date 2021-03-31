@@ -14,6 +14,12 @@
   set x(newX) {},
 });
 
+(async () => {
+  await 1; // eslint-disable-line @typescript-eslint/await-thenable
+  await (function () {})(); // eslint-disable-line @typescript-eslint/await-thenable
+  await (async function () {})();
+})();
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (str: string, num: number, wut: any) => {
   str ? 0 : 1; // eslint-disable-line @typescript-eslint/strict-boolean-expressions

@@ -12,7 +12,7 @@ export type PlayerSourceDefinition = {
 // PlayerSelection provides the user with a select function and the items to select
 export interface PlayerSelection {
   selectSource: (definition: PlayerSourceDefinition) => void;
-  setPlayerFromDemoBag: () => void;
+  setPlayerFromDemoBag: () => Promise<void>;
   availableSources: PlayerSourceDefinition[];
   currentSourceName?: string;
 }

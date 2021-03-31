@@ -57,6 +57,7 @@ rules:
   "@typescript-eslint/no-inferrable-types": off
   "@typescript-eslint/no-empty-function": off
   "@typescript-eslint/prefer-nullish-coalescing": warn
+  "@typescript-eslint/await-thenable": error
   react/jsx-uses-react: off
   react/react-in-jsx-scope: off
   react/prop-types: off # Unnecessary with typescript validation

@@ -83,7 +83,7 @@ export default class Database {
     this.db = db;
   }
 
-  close() {
+  close(): void {
     return this.db.close();
   }
 
