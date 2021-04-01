@@ -1873,7 +1873,6 @@ __metadata:
     react-redux: 7.2.3
     react-resize-detector: 6.6.4
     react-select: 1.2.1
-    react-spring: 8.0.27
     react-table: 7.6.3
     react-transition-group: 4.4.1
     react-use: 17.2.1
@@ -19709,19 +19708,6 @@ fsevents@^1.2.7:
     react: ^0.14.0 || ^15.0.0-0 || ^16.0.0 || ^17.0.0
     react-dom: ^0.14.0 || ^15.0.0-0 || ^16.0.0 || ^17.0.0
   checksum: 72777a6ce5153d3c73405c23210a4d2e18eb2c432016ea461736edbbd8cac8c5f653d22bab3a21cefc80d6e17e4dfb42f209ec51bf447f53c5d5e8936e863053
-  languageName: node
-  linkType: hard
-
-"react-spring@npm:8.0.27":
-  version: 8.0.27
-  resolution: "react-spring@npm:8.0.27"
-  dependencies:
-    "@babel/runtime": ^7.3.1
-    prop-types: ^15.5.8
-  peerDependencies:
-    react: ">= 16.8.0"
-    react-dom: ">= 16.8.0"
-  checksum: 8f041fd3037df9b610deeb5eb12d035ed9188ee0be4d2882b017db6074e7ab66ec9a990506e687274576516557d427a9199497b5559d3409ec38986dba987587
   languageName: node
   linkType: hard
 
