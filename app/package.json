@@ -12,7 +12,7 @@
     "chart.js": "davidswinegar/Chart.js#0785c29a4c57b3e1b4243f8163df7950a00b2a80",
     "chartjs-plugin-annotation": "0.5.7",
     "chartjs-plugin-datalabels": "davidswinegar/chartjs-plugin-datalabels#b0ade94116d4e273f0fdc17e9528c9a33c796e90",
-    "classnames": "2.2.6",
+    "classnames": "2.3.0",
     "fuzzysort": "1.1.4",
     "gl-matrix": "3.3.0",
     "hammerjs": "2.0.8",
