@@ -19,7 +19,7 @@ import MoreIcon from "@mdi/svg/svg/unfold-more-horizontal.svg";
 import { clamp, groupBy } from "lodash";
 import Tree from "rc-tree";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
-import { useSpring, animated } from "react-spring";
+import { CSSTransition } from "react-transition-group";
 import styled from "styled-components";
 
 import Dimensions from "@foxglove-studio/app/components/Dimensions";
@@ -35,6 +35,7 @@ import TopicViewModeSelector from "./TopicViewModeSelector";
 import { ROW_HEIGHT, TREE_SPACING } from "./constants";
 import NoMatchesSvg from "./noMatches.svg";
 import renderTreeNodes, { SWITCHER_WIDTH } from "./renderTreeNodes";
+import topicTreeTransition from "./topicTreeTransition.module.scss";
 import {
   DerivedCustomSettingsByKey,
   GetIsNamespaceCheckedByDefault,
@@ -68,7 +69,7 @@ const STopicTreeWrapper = styled.div`
   pointer-events: none;
 `;
 
-const STopicTree = styled(animated.div)`
+const STopicTree = styled.div`
   position: relative;
   color: ${colors.TEXT};
   border-radius: 6px;
@@ -77,6 +78,7 @@ const STopicTree = styled(animated.div)`
   max-width: 100%;
   overflow: auto;
   pointer-events: auto;
+  transition: opacity 0.15s linear, transform 0.15s linear;
 `;
 
 const STopicTreeInner = styled.div<any>`
@@ -225,7 +227,6 @@ type SharedProps = {
 type Props = SharedProps & {
   containerHeight: number;
   containerWidth: number;
-  isPlaying?: boolean;
   onExitTopicTreeFocus: () => void;
 };
 
@@ -430,20 +431,10 @@ function TopicTreeWrapper({
   sceneErrorsByKey,
   saveConfig,
   setShowTopicTree,
-  isPlaying,
   ...rest
 }: Props) {
   const defaultTreeWidth = clamp(containerWidth, DEFAULT_XS_WIDTH, DEFAULT_WIDTH);
   const renderTopicTree = pinTopics || showTopicTree;
-  const springProps = useSpring({
-    native: true,
-    unique: true,
-    precision: 0.1,
-    // Skip the animation if we are playing because it looks nicer than having the animation lag
-    immediate: isPlaying,
-    to: { opacity: renderTopicTree ? 1 : 0, transformX: renderTopicTree ? 0 : -20 },
-    config: { tension: 340, friction: 26, clamp: true },
-  } as any);
 
   return (
     <STopicTreeWrapper
@@ -469,17 +460,14 @@ function TopicTreeWrapper({
               saveConfig={saveConfig}
               setShowTopicTree={setShowTopicTree}
             />
-            <STopicTree
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                pointerEvents: renderTopicTree ? "auto" : "none",
-                opacity: (springProps as any).opacity,
-                transform: (springProps as any).transformX.interpolate((x: any) =>
-                  x === 0 ? "none" : `translate3d(${x}px, 0px, 0px)`,
-                ),
-              }}
+            <CSSTransition
+              timeout={150}
+              in={renderTopicTree}
+              classNames={{ ...topicTreeTransition }}
+              mountOnEnter
+              unmountOnExit
             >
-              {renderTopicTree && (
+              <STopicTree onClick={(e) => e.stopPropagation()}>
                 <TopicTree
                   {...rest}
                   sceneErrorsByKey={sceneErrorsByKey}
@@ -492,8 +480,8 @@ function TopicTreeWrapper({
                     containerHeight - SEARCH_BAR_HEIGHT - SWITCHER_HEIGHT - CONTAINER_SPACING * 2
                   }
                 />
-              )}
-            </STopicTree>
+              </STopicTree>
+            </CSSTransition>
           </div>
         )}
       </Dimensions>

@@ -768,7 +768,6 @@ export default function Layout({
                       getIsTreeNodeVisibleInScene={getIsTreeNodeVisibleInScene}
                       getIsTreeNodeVisibleInTree={getIsTreeNodeVisibleInTree}
                       hasFeatureColumn={hasFeatureColumn}
-                      isPlaying={isPlaying}
                       onExitTopicTreeFocus={onExitTopicTreeFocus}
                       onNamespaceOverrideColorChange={onNamespaceOverrideColorChange}
                       pinTopics={pinTopics}
