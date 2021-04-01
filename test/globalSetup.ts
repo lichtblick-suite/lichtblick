@@ -27,6 +27,7 @@ export default async (): Promise<void> => {
     // eslint-disable-next-line no-restricted-syntax
     console.info("Building Webpack");
     compiler.run((err, result) => {
+      compiler.close(() => {});
       if (err) {
         reject(err);
         return;
