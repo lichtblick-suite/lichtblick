@@ -41,16 +41,12 @@ import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
 import filterMap from "@foxglove-studio/app/util/filterMap";
-import { SEEK_TO_UNIX_MS_QUERY_KEY } from "@foxglove-studio/app/util/globalConstants";
-import { stringifyParams } from "@foxglove-studio/app/util/layout";
 import { isRangeCoveredByRanges } from "@foxglove-studio/app/util/ranges";
 import { getSanitizedTopics } from "@foxglove-studio/app/util/selectors";
 import sendNotification, { NotificationType } from "@foxglove-studio/app/util/sendNotification";
 import {
-  toMillis,
   clampTime,
   fromMillis,
-  fromNanoSec,
   getSeekTimeFromSpec,
   percentOf,
   SEEK_ON_START_NS,
@@ -59,9 +55,6 @@ import {
   SeekToTimeSpec,
   TimestampMethod,
 } from "@foxglove-studio/app/util/time";
-
-export const MISSING_CORS_ERROR_TITLE =
-  "Often this is due to missing CORS headers on the requested URL";
 
 const LOOP_MIN_BAG_TIME_IN_SEC = 1;
 const NO_WARNINGS = Object.freeze({});
@@ -257,9 +250,7 @@ export default class RandomAccessPlayer implements Player {
         }, SEEK_START_DELAY_MS);
       })
       .catch((error: Error) => {
-        // When CORS is misconfigured then that is really a user error, so we shouldn't be logging it.
-        const errorType = error.message.includes(MISSING_CORS_ERROR_TITLE) ? "user" : "app";
-        this._setError("Error initializing player", error, errorType);
+        this._setError("Error initializing player", error, "app");
       });
   }
 
@@ -286,30 +277,6 @@ export default class RandomAccessPlayer implements Player {
       // If we're outputting any messages, we need to cancel any in-progress backfills. Otherwise
       // we'd be "traveling back in time".
       this._cancelSeekBackfill = true;
-    }
-
-    // If we are paused at a certain time, update seek-to query param
-    if (this._initialized && !this._isPlaying) {
-      const dataStart = clampTime(
-        TimeUtil.add(this._start, fromNanoSec(SEEK_ON_START_NS)),
-        this._start,
-        this._end,
-      );
-      const atDataStart = TimeUtil.areSame(this._currentTime, dataStart);
-      const params = new URLSearchParams(location.search);
-
-      // If paused at the start of a datasource, remove seek-to param
-      if (atDataStart) {
-        params.delete(SEEK_TO_UNIX_MS_QUERY_KEY);
-      } else {
-        // Otherwise, update the seek-to param
-        params.set(SEEK_TO_UNIX_MS_QUERY_KEY, `${toMillis(this._currentTime)}`);
-      }
-      history.replaceState(
-        {},
-        (window as any).title,
-        `${location.pathname}${stringifyParams(params)}`,
-      );
     }
 
     const data = {
