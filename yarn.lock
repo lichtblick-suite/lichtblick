@@ -1949,7 +1949,7 @@ __metadata:
     rosbag: "github:foxglove/rosbag.js#fc61125fbc01ff55698c5ed48987b2d9e7599572"
     tslib: 2.1.0
     typescript: 4.2.2
-    web-encoding: 1.1.2
+    web-encoding: 1.1.3
   languageName: unknown
   linkType: soft
 
@@ -1995,7 +1995,7 @@ __metadata:
     sax: 1.2.4
     tslib: 2.1.0
     typescript: 4.2.2
-    web-encoding: 1.1.2
+    web-encoding: 1.1.3
     xmlbuilder2: 2.4.0
   languageName: unknown
   linkType: soft
@@ -23999,15 +23999,15 @@ typescript@4.2.2:
   languageName: node
   linkType: hard
 
-"web-encoding@npm:1.1.2":
-  version: 1.1.2
-  resolution: "web-encoding@npm:1.1.2"
+"web-encoding@npm:1.1.3":
+  version: 1.1.3
+  resolution: "web-encoding@npm:1.1.3"
   dependencies:
     "@zxing/text-encoding": 0.9.0
   dependenciesMeta:
     "@zxing/text-encoding":
       optional: true
-  checksum: c03fdf5de8d6e164d36d7e10b54197039bd0d9fd8bb5500e3637f7b1c4c69d5410ab6c88ccc23fcdab2df170395a3c108fd284c01b4d39815123bb79a95de473
+  checksum: 9e81fd9fa5d19380ef1a36e415b508035f0be78f58f50b4e68731d2cf4bd1eed82ac44bb8a2a0225342f6edbed1acde3f57b9747bfd11e1c9840b2f80ce5f553
   languageName: node
   linkType: hard
 
