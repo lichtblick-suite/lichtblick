@@ -18,6 +18,7 @@ import {
   shell,
   systemPreferences,
   nativeTheme,
+  MenuItem,
 } from "electron";
 import installExtension, {
   REACT_DEVELOPER_TOOLS,
@@ -178,6 +179,27 @@ async function createWindow(): Promise<void> {
     ],
   });
 
+  const showSharedWorkersMenu = () => {
+    // Electron doesn't let us update dynamic menus when they are being opened, so just open a popup
+    // context menu. This is ugly, but only for development anyway.
+    // https://github.com/electron/electron/issues/528
+    const workers = mainWindow.webContents.getAllSharedWorkers();
+    Menu.buildFromTemplate(
+      workers.length === 0
+        ? [{ label: "No Shared Workers", enabled: false }]
+        : workers.map(
+            (worker) =>
+              new MenuItem({
+                label: worker.url,
+                click() {
+                  mainWindow.webContents.closeDevTools();
+                  mainWindow.webContents.inspectSharedWorkerById(worker.id);
+                },
+              }),
+          ),
+    ).popup();
+  };
+
   appMenuTemplate.push({
     role: "viewMenu",
     label: "View",
@@ -190,7 +212,17 @@ async function createWindow(): Promise<void> {
       { type: "separator" },
       {
         label: "Advanced",
-        submenu: [{ role: "reload" }, { role: "forceReload" }, { role: "toggleDevTools" }],
+        submenu: [
+          { role: "reload" },
+          { role: "forceReload" },
+          { role: "toggleDevTools" },
+          {
+            label: "Inspect Shared Worker…",
+            click() {
+              showSharedWorkersMenu();
+            },
+          },
+        ],
       },
     ],
   });

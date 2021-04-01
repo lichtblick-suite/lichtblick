@@ -52,6 +52,15 @@ import { wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 import { BobjectRpcSender } from "@foxglove-studio/app/util/binaryObjects/BobjectRpc";
 import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
 import { DEFAULT_WEBVIZ_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+import sendNotification from "@foxglove-studio/app/util/sendNotification";
+
+// TypeScript's built-in lib only accepts strings for the scriptURL. However, webpack only
+// understands `new URL()` to properly build the worker entry point:
+// https://github.com/webpack/webpack/issues/13043
+declare let SharedWorker: {
+  prototype: SharedWorker;
+  new (scriptURL: URL, options?: string | WorkerOptions): SharedWorker;
+};
 
 type UserNodeActions = {
   setUserNodeDiagnostics: SetUserNodeDiagnostics;
@@ -59,7 +68,11 @@ type UserNodeActions = {
   setUserNodeRosLib: SetUserNodeRosLib;
 };
 
-const rpcFromNewSharedWorker = (worker: any) => {
+const rpcFromNewSharedWorker = (worker: SharedWorker) => {
+  worker.onerror = (event) => {
+    console.error("SharedWorker error:", event);
+    sendNotification("An error occurred in Node Playground.", event.message, "app", "error");
+  };
   const port: MessagePort = worker.port;
   port.start();
   const rpc = new Rpc(port);
@@ -108,13 +121,13 @@ export default class UserNodePlayer implements Player {
   _pendingResetWorkers?: Promise<void>;
 
   // exposed as a static to allow testing to mock/replace
-  static CreateNodeTransformWorker = () => {
-    return new SharedWorker(new URL("./nodeTransformerWorker/index", import.meta.url).toString());
+  static CreateNodeTransformWorker = (): SharedWorker => {
+    return new SharedWorker(new URL("./nodeTransformerWorker/index", import.meta.url));
   };
 
   // exposed as a static to allow testing to mock/replace
-  static CreateNodeRuntimeWorker = () => {
-    return new SharedWorker(new URL("./nodeRuntimeWorker/index", import.meta.url).toString());
+  static CreateNodeRuntimeWorker = (): SharedWorker => {
+    return new SharedWorker(new URL("./nodeRuntimeWorker/index", import.meta.url));
   };
 
   constructor(player: Player, userNodeActions: UserNodeActions) {

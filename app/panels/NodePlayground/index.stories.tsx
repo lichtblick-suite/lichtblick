@@ -20,6 +20,7 @@ import NodePlayground, {
 } from "@foxglove-studio/app/panels/NodePlayground";
 import Sidebar from "@foxglove-studio/app/panels/NodePlayground/Sidebar";
 import testDocs from "@foxglove-studio/app/panels/NodePlayground/index.test.md";
+import rawUserUtils from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/rawUserUtils";
 import { UserNodeLog } from "@foxglove-studio/app/players/UserNodePlayer/types";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 import { SExpectedResult } from "@foxglove-studio/app/stories/storyHelpers";
@@ -129,6 +130,17 @@ storiesOf("<NodePlayground>", module)
       <PanelSetup fixture={fixture}>
         <NodePlayground />
       </PanelSetup>
+    );
+  })
+  .add("rawUserUtils", () => {
+    return (
+      <div style={{ margin: 12 }}>
+        <p style={{ color: "lightgreen" }}>
+          This should be original TypeScript source code. This is a story rather than a unit test
+          because it’s effectively a test of our webpack config.
+        </p>
+        <pre>{rawUserUtils[0]?.sourceCode}</pre>;
+      </div>
     );
   })
   .add("utils usage in node", () => (

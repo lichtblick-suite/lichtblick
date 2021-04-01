@@ -27,7 +27,6 @@ import Modal, { Title } from "@foxglove-studio/app/components/Modal";
 import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
 import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { nbsp } from "@foxglove-studio/app/util/entities";
-import minivizAPI from "@foxglove-studio/app/util/minivizAPI";
 import {
   DetailsType,
   NotificationType,
@@ -60,11 +59,10 @@ const Container = styled.div<{ flash: boolean; unread: boolean; color: string }>
     props.flash ? "black" : props.unread ? props.color : "rgba(255, 255, 255, 0.5)"};
 `;
 
-const Fader = styled.span<{ visible: boolean }>`
+const Fader = styled.span`
   text-align: center;
   font-size: 12px;
   padding-right: 2px;
-  opacity: ${(props) => (props.visible ? 1 : 0)};
   transition: opacity 200ms linear;
   display: inline-block;
   max-width: 500px;
@@ -242,10 +240,6 @@ export default function NotificationDisplay(): React.ReactElement {
         hideTimeout.current = setTimeout(() => {
           setShowMostRecent(false);
         }, FLASH_DURATION_MILLIS);
-
-        // Notify the iFrame from here, since we should always have a `window` here since we're not
-        // in a React component (and not in a worker).
-        minivizAPI.postNotificationMessage({ message, details, type, severity });
       },
     );
 
@@ -292,9 +286,7 @@ export default function NotificationDisplay(): React.ReactElement {
                 <IconSvg />
               </Icon>
             </div>
-            <Fader visible={showMostRecent} style={{ paddingLeft: 5, cursor: "pointer" }}>
-              {firstNotification.message}
-            </Fader>
+            <Fader style={{ paddingLeft: 5, cursor: "pointer" }}>{firstNotification.message}</Fader>
             <div style={{ fontSize: 12 }}>{unreadCount > 1 && `${nbsp}(1 of ${unreadCount})`}</div>
           </div>
           <NotificationList notifications={notifications} onClick={setClickedNotification} />

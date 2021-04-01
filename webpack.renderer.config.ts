@@ -47,7 +47,7 @@ export function makeConfig(_: unknown, argv: WebpackArgv): Configuration {
     },
 
     output: {
-      publicPath: isServe ? "/renderer" : "",
+      publicPath: isServe ? "/renderer/" : "",
       path: path.resolve(__dirname, ".webpack", "renderer"),
     },
 
@@ -84,6 +84,7 @@ export function makeConfig(_: unknown, argv: WebpackArgv): Configuration {
         {
           test: /\.tsx?$/,
           exclude: /node_modules/,
+          resourceQuery: { not: [/raw/] },
           use: [
             ...ruleUse,
             {

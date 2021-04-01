@@ -78,10 +78,6 @@ const SToolbarItem = styled.div`
   height: 100%;
   min-width: 40px;
 
-  .icon {
-    color: white;
-  }
-
   // Allow interacting with buttons in the title bar without dragging the window
   -webkit-app-region: no-drag;
 `;
