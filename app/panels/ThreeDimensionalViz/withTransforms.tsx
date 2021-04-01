@@ -15,13 +15,16 @@ import hoistNonReactStatics from "hoist-non-react-statics";
 import PropTypes from "prop-types";
 
 import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
-import { Frame } from "@foxglove-studio/app/players/types";
+import { Frame, Message } from "@foxglove-studio/app/players/types";
+import { TF } from "@foxglove-studio/app/types/Messages";
 import { isBobject, deepParse } from "@foxglove-studio/app/util/binaryObjects";
 import { TRANSFORM_STATIC_TOPIC, TRANSFORM_TOPIC } from "@foxglove-studio/app/util/globalConstants";
 
 import { getGlobalHooks } from "../../loadWebviz";
 
 type State = { transforms: Transforms };
+type TfMessage = { transforms: TF[] };
+type BaseProps = { frame: Frame; cleared: boolean };
 
 function withTransforms<Props extends any>(ChildComponent: React.ComponentType<Props>) {
   class Component extends React.PureComponent<
@@ -29,7 +32,7 @@ function withTransforms<Props extends any>(ChildComponent: React.ComponentType<P
     State
   > {
     static displayName = `withTransforms(${
-      ChildComponent.displayName || ChildComponent.name || ""
+      ChildComponent.displayName ?? ChildComponent.name ?? ""
     })`;
     static contextTypes = { store: PropTypes.any };
 
@@ -39,18 +42,31 @@ function withTransforms<Props extends any>(ChildComponent: React.ComponentType<P
       nextProps: Props,
       prevState: State,
     ): Partial<State> | undefined {
-      const { frame, cleared }: any = nextProps;
+      const { frame, cleared } = nextProps as BaseProps;
       let { transforms } = prevState;
       if (cleared) {
         transforms = new Transforms();
       }
 
+      // Find any references to previously unseen frames in the set of incoming messages
+      // Note the naming confusion between `frame` (a map of topic names to messages received on
+      // that topic) and transform frames (coordinate frames)
+      for (const topic in frame) {
+        for (const msg of frame[topic] as Message[]) {
+          const frameId = msg.message.header?.frame_id as string | undefined;
+          if (frameId != undefined) {
+            transforms.register(frameId);
+          }
+        }
+      }
+
+      // Process all new /tf messages
       const tfs = frame[TRANSFORM_TOPIC];
       if (tfs) {
         const skipFrameId = getGlobalHooks().perPanelHooks().ThreeDimensionalViz.sceneBuilderHooks
           .skipTransformFrame?.frameId;
         for (const { message } of tfs) {
-          const parsedMessage = isBobject(message) ? deepParse(message) : message;
+          const parsedMessage = (isBobject(message) ? deepParse(message) : message) as TfMessage;
           for (const tf of parsedMessage.transforms) {
             if (tf.child_frame_id !== skipFrameId) {
               transforms.consume(tf);
@@ -58,10 +74,12 @@ function withTransforms<Props extends any>(ChildComponent: React.ComponentType<P
           }
         }
       }
+
+      // Process all new /tf_static messages
       const tfs_static = frame[TRANSFORM_STATIC_TOPIC];
       if (tfs_static) {
         for (const { message } of tfs_static) {
-          const parsedMessage = isBobject(message) ? deepParse(message) : message;
+          const parsedMessage = (isBobject(message) ? deepParse(message) : message) as TfMessage;
           for (const tf of parsedMessage.transforms) {
             transforms.consume(tf);
           }

@@ -72,7 +72,9 @@ import TopicTree from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree
 import { TOPIC_DISPLAY_MODES } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
 import { TopicDisplayMode } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/types";
 import useSceneBuilderAndTransformsData from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/useSceneBuilderAndTransformsData";
-import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
+import Transforms, {
+  DEFAULT_ROOT_FRAME_IDS,
+} from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
 import TransformsBuilder from "@foxglove-studio/app/panels/ThreeDimensionalViz/TransformsBuilder";
 import World from "@foxglove-studio/app/panels/ThreeDimensionalViz/World";
 import {
@@ -405,22 +407,27 @@ export default function Layout({
   }, [colorOverrideBySourceIdxByVariable, globalVariables, linkedGlobalVariables]);
 
   const rootTf = useMemo(() => {
-    // REP 105 specifies a set of conventional root frame transform ids
-    // We try these in order
-    // https://www.ros.org/reps/rep-0105.html
-    const possibleRootFrames = ["base_link", "odom", "map", "earth"];
-
-    // If the user specified a followTf, we give priority to the root frame from their followTf
+    // If the user specified a followTf we will only return the root frame from their followTf
     if (followTf) {
-      possibleRootFrames.unshift(followTf);
+      if (transforms.has(followTf)) {
+        return transforms.rootOfTransform(followTf).id;
+      }
+      return undefined;
     }
 
-    for (const possibleRoot of possibleRootFrames) {
-      if (transforms.has(possibleRoot)) {
-        return transforms.rootOfTransform(possibleRoot).id;
+    const tfStore = transforms.storage.entries();
+
+    // Try the conventional list of root frame transform ids
+    for (const frameId of DEFAULT_ROOT_FRAME_IDS) {
+      const tf = tfStore.get(frameId);
+      if (tf != undefined) {
+        return tf.id;
       }
     }
-    return undefined;
+
+    // Fall back to the root of the first transform (lexicographically), if any
+    const firstFrameId = Array.from(tfStore.keys()).sort()[0];
+    return firstFrameId != undefined ? tfStore.get(firstFrameId)?.rootTransform().id : undefined;
   }, [transforms, followTf]);
 
   useEffect(() => {
