@@ -1824,7 +1824,7 @@ __metadata:
     chart.js: "davidswinegar/Chart.js#0785c29a4c57b3e1b4243f8163df7950a00b2a80"
     chartjs-plugin-annotation: 0.5.7
     chartjs-plugin-datalabels: "davidswinegar/chartjs-plugin-datalabels#b0ade94116d4e273f0fdc17e9528c9a33c796e90"
-    chromatic: 5.7.0
+    chromatic: 5.7.1
     classnames: 2.3.0
     enzyme: 3.11.0
     fetch-mock: 9.11.0
@@ -7775,9 +7775,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:5.7.0":
-  version: 5.7.0
-  resolution: "chromatic@npm:5.7.0"
+"chromatic@npm:5.7.1":
+  version: 5.7.1
+  resolution: "chromatic@npm:5.7.1"
   dependencies:
     "@actions/core": ^1.2.4
     "@actions/github": ^4.0.0
@@ -7818,7 +7818,7 @@ __metadata:
     chroma: bin/register.js
     chromatic: bin/register.js
     chromatic-cli: bin/register.js
-  checksum: 9c0921a69603ba9e3a5bbef6694170f6f48bbe7b737f8ae8f163f56fb673e940a95b3552c0ddb5ec6f326959eac6a179906c69df5e50a91d76f8347af618b1fd
+  checksum: 58f16e493967c0b77e18b0715d6b0d6d3806f6f3e2729f063f359f71fb9356f4da56a31a6ed1370bcead5b545120bf9ad21b399c859408cc42f07b255659d568
   languageName: node
   linkType: hard
 
