@@ -40,7 +40,7 @@ export function makeConfig(_: unknown, argv: WebpackArgv): Configuration {
     target: "web",
     context: path.resolve("./app"),
     entry: "./index.tsx",
-    devtool: isDev ? "eval-cheap-module-source-map" : "nosources-source-map",
+    devtool: isDev ? "eval-cheap-module-source-map" : "source-map",
 
     optimization: {
       minimize: false,

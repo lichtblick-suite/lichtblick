@@ -15,7 +15,7 @@ export default (_: unknown, argv: WebpackArgv): Configuration => {
     context: path.resolve("./preload"),
     entry: "./index.ts",
     target: "electron-preload",
-    devtool: isDev ? "eval-cheap-module-source-map" : "nosources-source-map",
+    devtool: isDev ? "eval-cheap-module-source-map" : "source-map",
 
     output: {
       publicPath: "",
