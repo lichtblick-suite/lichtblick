@@ -82,10 +82,10 @@
     "wasm-lz4": "1.0.0"
   },
   "devDependencies": {
-    "@storybook/addon-actions": "6.2.1",
-    "@storybook/addon-essentials": "6.2.1",
-    "@storybook/builder-webpack5": "6.2.1",
-    "@storybook/react": "6.2.1",
+    "@storybook/addon-actions": "6.2.2",
+    "@storybook/addon-essentials": "6.2.2",
+    "@storybook/builder-webpack5": "6.2.2",
+    "@storybook/react": "6.2.2",
     "@testing-library/react": "11.2.6",
     "@testing-library/react-hooks": "5.1.1",
     "@types/argparse": "^2",
