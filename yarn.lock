@@ -1927,6 +1927,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@foxglove/log@workspace:packages/log":
+  version: 0.0.0-use.local
+  resolution: "@foxglove/log@workspace:packages/log"
+  languageName: unknown
+  linkType: soft
+
 "@foxglove/ros1-turtlesim-test@workspace:packages/ros1-turtlesim-test":
   version: 0.0.0-use.local
   resolution: "@foxglove/ros1-turtlesim-test@workspace:packages/ros1-turtlesim-test"

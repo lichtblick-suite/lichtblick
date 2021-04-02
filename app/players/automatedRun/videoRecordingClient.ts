@@ -13,9 +13,9 @@
 
 import delay from "@foxglove-studio/app/shared/delay";
 import signal, { Signal } from "@foxglove-studio/app/shared/signal";
-import Logger from "@foxglove-studio/app/util/Logger";
+import Logger from "@foxglove/log";
 
-const logger = new Logger("videoRecordingClient");
+const logger = Logger.getLogger("videoRecordingClient");
 
 // This is the interface between the video recording server (recordVideo.js) and
 // the client (whomever uses `videoRecordingClient`). The idea is that the server opens a webpage

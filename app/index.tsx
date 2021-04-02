@@ -13,6 +13,9 @@ import installDevtoolsFormatters from "@foxglove-studio/app/util/installDevtools
 import overwriteFetch from "@foxglove-studio/app/util/overwriteFetch";
 import waitForFonts from "@foxglove-studio/app/util/waitForFonts";
 import { Sockets } from "@foxglove/electron-socket/renderer";
+import log from "@foxglove/log";
+
+log.debug("initializing renderer");
 
 if (typeof process.env.SENTRY_DSN === "string") {
   initSentry({ dsn: process.env.SENTRY_DSN });
@@ -40,8 +43,7 @@ async function main() {
 
   ReactDOM.render(<App />, rootEl, () => {
     // Integration tests look for this console log to indicate the app has rendered once
-    // eslint-disable-next-line no-restricted-syntax
-    console.log("App rendered");
+    log.debug("App rendered");
   });
 }
 

@@ -22,6 +22,7 @@ import {
   SEEK_TO_RELATIVE_MS_QUERY_KEY,
   SEEK_TO_UNIX_MS_QUERY_KEY,
 } from "@foxglove-studio/app/util/globalConstants";
+import log from "@foxglove/log";
 
 type BatchTimestamp = {
   seconds: number;
@@ -42,7 +43,7 @@ export function isTime(obj?: unknown): obj is Time {
 
 export function formatTimeRaw(stamp: Time) {
   if (stamp.sec < 0 || stamp.nsec < 0) {
-    console.error("Times are not allowed to be negative");
+    log.error("Times are not allowed to be negative");
     return "(invalid negative time)";
   }
   return `${stamp.sec}.${stamp.nsec.toFixed().padStart(9, "0")}`;

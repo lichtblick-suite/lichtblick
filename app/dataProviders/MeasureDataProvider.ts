@@ -24,9 +24,9 @@ import {
   GetMessagesTopics,
   InitializationResult,
 } from "@foxglove-studio/app/dataProviders/types";
-import Logger from "@foxglove-studio/app/util/Logger";
+import Logger from "@foxglove/log";
 
-const log = new Logger(__filename);
+const log = Logger.getLogger(__filename);
 
 // Wrap each DataProvider in the tree with a MeasureDataProvider.
 export function instrumentTreeWithMeasureDataProvider(

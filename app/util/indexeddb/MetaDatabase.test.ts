@@ -84,6 +84,9 @@ describe("MetaDatabase", () => {
       await updateMetaDatabases("foo", 1, METADATABASE_NAME);
       await updateMetaDatabases("bar", 1, METADATABASE_NAME);
       spy.mockRestore();
+
+      // we expect to log an error from the failed deletion
+      (console.error as jest.Mock).mockClear();
     });
 
     it("does not delete databases which never fire onblocked calls", async () => {

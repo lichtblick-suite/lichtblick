@@ -43,25 +43,6 @@ if (typeof window !== "undefined") {
   window.URLSearchParams = UrlSearchParams;
 }
 
-// Disallow console.error and console.warn in tests. This should only be called
-// from libraries anyway, since for user-code we should be using `Logger`, which
-// automatically gets silenced on tests.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-console.error = function (message: any) {
-  throw new Error(`console.error in test: ${message}`);
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-console.warn = function (message: any) {
-  // We'll have to update these methods, but for now we just ignore their
-  // warning messages.
-  if (message.includes("https://fb.me/react-unsafe-component-lifecycles")) {
-    return;
-  }
-
-  throw new Error(`console.warn in test: ${message}`);
-};
-
 // you can import fakes from fake-indexeddb and attach them to the jsdom global
 // https://github.com/dumbmatter/fakeIndexedDB#use
 global.indexedDB = require("fake-indexeddb");

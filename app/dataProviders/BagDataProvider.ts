@@ -29,18 +29,18 @@ import {
 import { getReportMetadataForChunk } from "@foxglove-studio/app/dataProviders/util";
 import { Message } from "@foxglove-studio/app/players/types";
 import CachedFilelike, { FileReader } from "@foxglove-studio/app/util/CachedFilelike";
-import Logger from "@foxglove-studio/app/util/Logger";
 import { bagConnectionsToTopics } from "@foxglove-studio/app/util/bagConnectionsHelper";
 import { getBagChunksOverlapCount } from "@foxglove-studio/app/util/bags";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import { fromMillis, subtractTimes } from "@foxglove-studio/app/util/time";
+import Logger from "@foxglove/log";
 import Bzip2 from "@foxglove/wasm-bz2";
 
 type BagPath = { type: "file"; file: File | string } | { type: "remoteBagUrl"; url: string };
 
 type Options = { bagPath: BagPath; cacheSizeInBytes?: number };
 
-const log = new Logger(__filename);
+const log = Logger.getLogger(__filename);
 
 function reportMalformedError(operation: string, error: Error): void {
   sendNotification(

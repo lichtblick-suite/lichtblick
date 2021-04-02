@@ -442,7 +442,6 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
   });
 
   it("logs a warning if a panel subscribes just after activeData becomes available", async () => {
-    jest.spyOn(console, "warn").mockReturnValue();
     const player = new FakePlayer();
     const { result } = renderHook(Hook, {
       wrapper: Wrapper,
@@ -484,14 +483,14 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         { topic: "/test", format: "bobjects" },
       ]),
     );
-    expect((console.warn as any).mock.calls).toEqual([]);
+    expect((console.warn as jest.Mock).mock.calls).toEqual([]);
     // But changing the set of topics results in a warning
     act(() =>
       (result.all[0] as MessagePipelineContext).setSubscriptions("id", [
         { topic: "/test2", format: "parsedMessages" },
       ]),
     );
-    expect((console.warn as any).mock.calls).toEqual([
+    expect((console.warn as jest.Mock).mock.calls).toEqual([
       [
         "Panel subscribed right after Player loaded, which causes unnecessary requests. Please let the Foxglove team know about this. Topics: /test2",
       ],
@@ -504,7 +503,8 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         { topic: "/test", format: "parsedMessages" },
       ]),
     );
-    expect((console.warn as any).mock.calls.length).toEqual(1);
+    expect((console.warn as jest.Mock).mock.calls.length).toEqual(1);
+    (console.warn as jest.Mock).mockClear();
   });
 
   describe("pauseFrame", () => {

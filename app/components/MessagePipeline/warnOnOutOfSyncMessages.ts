@@ -14,7 +14,6 @@
 import { Time, TimeUtil } from "rosbag";
 
 import { Message, PlayerState } from "@foxglove-studio/app/players/types";
-import Logger from "@foxglove-studio/app/util/Logger";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import {
   subtractTimes,
@@ -22,11 +21,12 @@ import {
   formatFrame,
   getTimestampForMessage,
 } from "@foxglove-studio/app/util/time";
+import Logger from "@foxglove/log";
 
 const DRIFT_THRESHOLD_SEC = 1; // Maximum amount of drift allowed.
 const WAIT_FOR_SEEK_SEC = 1; // How long we wait for a change in `lastSeekTime` before warning.
 
-const log = new Logger(__filename);
+const log = Logger.getLogger(__filename);
 
 // Logs a warning when there is a significant difference (more than `DRIFT_THRESHOLD_SEC`) between
 // a message's timestamp and `player.currentTime` OR when messages went back in time,

@@ -25,7 +25,6 @@ import {
   GetMessagesTopics,
   InitializationResult,
 } from "@foxglove-studio/app/dataProviders/types";
-import Logger from "@foxglove-studio/app/util/Logger";
 import { getNewConnection } from "@foxglove-studio/app/util/getNewConnection";
 import Database from "@foxglove-studio/app/util/indexeddb/Database";
 import {
@@ -36,6 +35,7 @@ import {
 } from "@foxglove-studio/app/util/ranges";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import { fromNanoSec, subtractTimes, toNanoSec } from "@foxglove-studio/app/util/time";
+import Logger from "@foxglove/log";
 
 import {
   MESSAGES_STORE_NAME,
@@ -46,7 +46,7 @@ import {
   PRIMARY_KEY,
 } from "./IdbCacheDataProviderDatabase";
 
-const log = new Logger(__filename);
+const log = Logger.getLogger(__filename);
 
 const BLOCK_SIZE_MILLISECONDS = 100;
 export const BLOCK_SIZE_NS = BLOCK_SIZE_MILLISECONDS * 1e6;

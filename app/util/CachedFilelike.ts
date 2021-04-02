@@ -13,7 +13,7 @@
 import { round } from "lodash";
 import { Callback, Filelike } from "rosbag";
 
-import Logger from "@foxglove-studio/app/util/Logger";
+import Logger from "@foxglove/log";
 
 import VirtualLRUBuffer from "./VirtualLRUBuffer";
 import { getNewConnection } from "./getNewConnection";
@@ -63,14 +63,14 @@ const CACHE_BLOCK_SIZE = 1024 * 1024 * 10; // 10MiB blocks.
 // account actual download speed.
 const CLOSE_ENOUGH_BYTES_TO_NOT_START_NEW_CONNECTION = 1024 * 1024 * 5;
 
-const logger = new Logger("CachedFilelike");
+const log = Logger.getLogger(__filename);
 
 export default class CachedFilelike implements Filelike {
   _fileReader: FileReader;
   _cacheSizeInBytes: number = Infinity;
   _fileSize?: number;
   _virtualBuffer: VirtualLRUBuffer;
-  _logFn: (arg0: string) => void = (msg) => logger.info(msg);
+  _logFn: (arg0: string) => void = (msg) => log.info(msg);
   _closed: boolean = false;
   _keepReconnectingCallback?: (reconnecting: boolean) => void;
 

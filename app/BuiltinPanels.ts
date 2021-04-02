@@ -14,6 +14,7 @@
 import GlobalVariableSlider from "@foxglove-studio/app/panels/GlobalVariableSlider";
 import GlobalVariables from "@foxglove-studio/app/panels/GlobalVariables";
 import ImageViewPanel from "@foxglove-studio/app/panels/ImageView";
+import InternalLogs from "@foxglove-studio/app/panels/InternalLogs";
 import Internals from "@foxglove-studio/app/panels/Internals";
 import NodePlayground from "@foxglove-studio/app/panels/NodePlayground";
 import NumberOfRenders from "@foxglove-studio/app/panels/NumberOfRenders";
@@ -57,6 +58,7 @@ export function panelsByCategory() {
 
   const debugging = [
     { title: "Studio Internals", component: Internals },
+    { title: "Studio Logs", component: InternalLogs },
     { title: "Number of Renders", component: NumberOfRenders },
     { title: "Playback Performance", component: PlaybackPerformance },
     { title: "Subscribe to List", component: SubscribeToList },

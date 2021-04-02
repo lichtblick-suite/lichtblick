@@ -6,13 +6,13 @@ import amplitude from "amplitude-js";
 import { v4 as uuidv4 } from "uuid";
 
 import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
-import Logger from "@foxglove-studio/app/util/Logger";
 import Storage from "@foxglove-studio/app/util/Storage";
+import Logger from "@foxglove/log";
 
 const UUID_ZERO = "00000000-0000-0000-0000-000000000000";
 const USER_ID_KEY = "analytics_user_id";
 
-const log = new Logger(__filename);
+const log = Logger.getLogger(__filename);
 
 export enum AppEvent {
   APP_INIT = "APP_INIT",

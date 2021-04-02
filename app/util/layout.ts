@@ -43,9 +43,11 @@ import {
   LAYOUT_URL_QUERY_KEY,
   PATCH_QUERY_KEY,
 } from "@foxglove-studio/app/util/globalConstants";
+import Logger from "@foxglove/log";
 
-import Logger from "./Logger";
 import { isInIFrame } from "./iframeUtils";
+
+const log = Logger.getLogger(__filename);
 
 const jsondiffpatch = JsonDiffCreate({});
 
@@ -296,13 +298,13 @@ export const validateTabPanelConfig = (config?: PanelConfig) => {
     const error = new Error(
       "A non-Tab panel config is being operated on as if it were a Tab panel.",
     );
-    new Logger("layout").info(`Invalid Tab panel config: ${error.message}`, config);
+    log.info(`Invalid Tab panel config: ${error.message}`, config);
     captureException(error);
     return false;
   }
   if (config && config.activeTabIdx >= config.tabs.length) {
     const error = new Error("A Tab panel has an activeTabIdx for a nonexistent tab.");
-    new Logger("layout").info(`Invalid Tab panel config: ${error.message}`, config);
+    log.info(`Invalid Tab panel config: ${error.message}`, config);
     captureException(error);
     return false;
   }

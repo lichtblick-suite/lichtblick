@@ -33,7 +33,6 @@ import {
   SubscribePayload,
   Topic,
 } from "@foxglove-studio/app/players/types";
-import Logger from "@foxglove-studio/app/util/Logger";
 import { USER_ERROR_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import { getSanitizedTopics } from "@foxglove-studio/app/util/selectors";
 import sendNotification, {
@@ -44,8 +43,9 @@ import sendNotification, {
   setNotificationHandler,
 } from "@foxglove-studio/app/util/sendNotification";
 import { clampTime, subtractTimes, toMillis } from "@foxglove-studio/app/util/time";
+import Logger from "@foxglove/log";
 
-const logger = new Logger("AutomatedRunPlayer");
+const logger = Logger.getLogger(__filename);
 
 export interface AutomatedRunClient {
   speed: number;
