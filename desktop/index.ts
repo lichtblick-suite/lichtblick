@@ -79,6 +79,7 @@ async function createWindow(): Promise<void> {
   const windowOptions: BrowserWindowConstructorOptions = {
     height: 800,
     width: 1200,
+    autoHideMenuBar: true,
     title: APP_NAME,
     webPreferences: {
       contextIsolation: true,

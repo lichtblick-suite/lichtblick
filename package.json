@@ -27,7 +27,7 @@
     "test": "NODE_OPTIONS='-r ts-node/register' jest",
     "test:debug": "NODE_OPTIONS='-r ts-node/register --inspect-brk' jest",
     "test:watch": "NODE_OPTIONS='-r ts-node/register' jest --watch",
-    "test:integration": "jest --projects test",
+    "test:integration": "jest --forceExit --projects test",
     "package:win": "yarn package --win",
     "package:darwin": "yarn package --mac",
     "package:linux": "yarn package --linux",
