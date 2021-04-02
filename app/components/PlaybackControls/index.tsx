@@ -13,12 +13,13 @@
 
 import PauseIcon from "@mdi/svg/svg/pause.svg";
 import PlayIcon from "@mdi/svg/svg/play.svg";
+import RepeatIcon from "@mdi/svg/svg/repeat.svg";
 import SkipNextOutlineIcon from "@mdi/svg/svg/skip-next-outline.svg";
 import SkipPreviousOutlineIcon from "@mdi/svg/svg/skip-previous-outline.svg";
 import classnames from "classnames";
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { Time } from "rosbag";
+import { Time, TimeUtil } from "rosbag";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
@@ -93,6 +94,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
   (props: PlaybackControlProps) => {
     const el = useRef<HTMLDivElement>(ReactNull);
     const slider = useRef<Slider>(ReactNull);
+    const [repeat, setRepeat] = useState(false);
     const { seek, pause, play, player } = props;
 
     // playerState is unstable, and will cause callbacks to change identity every frame. They can take
@@ -174,6 +176,37 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
     const value = currentTime == undefined ? undefined : toSec(currentTime);
     const step = (max - min) / 500;
 
+    // repeat logic could also live in messagePipeline but since it is only triggered
+    // from playback controls we've implemented it here for now - if there is demand
+    // to toggle repeat from elsewhere this logic can move
+    if (currentTime && endTime && TimeUtil.compare(currentTime, endTime) >= 0) {
+      // repeat
+      if (startTime && repeat) {
+        seek(startTime);
+        // if the user turns on repeat and we are at the end, we assume they want to play from start
+        // even if paused
+        play();
+      } else {
+        // no-repeat
+        // pause playback to toggle pause button state
+        // if the user clicks play while we are at the end, we go back to begginning
+        pause();
+      }
+    }
+
+    // non-memo'd because it changes each time currentTime updates
+    const resumePlay = () => {
+      // if we are at the end, we need to go back to start
+      if (currentTime && endTime && startTime && TimeUtil.compare(currentTime, endTime) >= 0) {
+        seek(startTime);
+      }
+      play();
+    };
+
+    const toggleRepeat = useCallback(() => {
+      setRepeat((old) => !old);
+    }, []);
+
     const seekControls = useMemo(
       () => (
         <>
@@ -205,7 +238,12 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
         <KeyListener global keyDownHandlers={keyDownHandlers} />
         <MessageOrderControls />
         <PlaybackSpeedControls />
-        <div className={styles.playIconWrapper} onClick={isPlaying ? pause : play}>
+        <div>
+          <Icon style={repeat ? {} : { opacity: 0.4 }} large onClick={toggleRepeat}>
+            <RepeatIcon />
+          </Icon>
+        </div>
+        <div className={styles.playIconWrapper} onClick={isPlaying ? pause : resumePlay}>
           <Icon style={activeData ? {} : { opacity: 0.4 }} xlarge>
             {isPlaying ? <PauseIcon /> : <PlayIcon />}
           </Icon>

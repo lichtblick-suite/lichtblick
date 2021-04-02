@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { isEqual, partition } from "lodash";
+import { partition } from "lodash";
 import { TimeUtil, Time } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
@@ -37,7 +37,6 @@ import {
   PlayerPresence,
 } from "@foxglove-studio/app/players/types";
 import delay from "@foxglove-studio/app/shared/delay";
-import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
 import filterMap from "@foxglove-studio/app/util/filterMap";
@@ -51,12 +50,10 @@ import {
   percentOf,
   SEEK_ON_START_NS,
   subtractTimes,
-  toSec,
   SeekToTimeSpec,
   TimestampMethod,
 } from "@foxglove-studio/app/util/time";
 
-const LOOP_MIN_BAG_TIME_IN_SEC = 1;
 const NO_WARNINGS = Object.freeze({});
 
 // The number of nanoseconds to seek backwards to build context during a seek
@@ -101,9 +98,9 @@ export default class RandomAccessPlayer implements Player {
   _speed: number = 0.2;
   _start: Time = { sec: 0, nsec: 0 };
   _end: Time = { sec: 0, nsec: 0 };
-  // _currentTime is defined as the end of the last range that we emitted messages for.
-  // In other words, we may emit messages that <= currentTime, but not after currentTime.
-  _currentTime: Time = { sec: 0, nsec: 0 };
+  // next read start time indicates where to start reading for the next tick
+  // after a tick read, it is set to 1nsec past the end of the read operation (preparing for the next tick)
+  _nextReadStartTime: Time = { sec: 0, nsec: 0 };
   _lastTickMillis?: number;
   // The last time a "seek" was started. This is used to cancel async operations, such as seeks or ticks, when a seek
   // happens while they are ocurring.
@@ -228,7 +225,7 @@ export default class RandomAccessPlayer implements Player {
         const initialTime = getSeekTimeFromSpec(this._seekToTime, start, end);
 
         this._start = start;
-        this._currentTime = initialTime;
+        this._nextReadStartTime = initialTime;
         this._end = end;
         this._providerTopics = topics;
         this._providerDatatypes = parsedMessageDefinitions.datatypes;
@@ -244,7 +241,7 @@ export default class RandomAccessPlayer implements Player {
             return;
           }
           // Only do the initial seek if we haven't started playing already.
-          if (!this._isPlaying && TimeUtil.areSame(this._currentTime, initialTime)) {
+          if (!this._isPlaying && TimeUtil.areSame(this._nextReadStartTime, initialTime)) {
             this.seekPlayback(initialTime);
           }
         }, SEEK_START_DELAY_MS);
@@ -279,6 +276,14 @@ export default class RandomAccessPlayer implements Player {
       this._cancelSeekBackfill = true;
     }
 
+    // _nextReadStartTime points to the start of the _next_ range we want to read
+    // for our player state, we want to have currentTime represent the last time of the range we read
+    // It would be weird to provide a currentTime outside the bounds of what we read
+    let lastEnd = this._nextReadStartTime;
+    if (lastEnd.sec > 0 || lastEnd.nsec > 0) {
+      lastEnd = TimeUtil.add(lastEnd, { sec: 0, nsec: -1 });
+    }
+
     const data = {
       presence: this._reconnecting
         ? PlayerPresence.RECONNECTING
@@ -295,7 +300,7 @@ export default class RandomAccessPlayer implements Player {
             bobjects,
             totalBytesReceived: this._receivedBytes,
             messageOrder: this._messageOrder,
-            currentTime: clampTime(this._currentTime, this._start, this._end),
+            currentTime: clampTime(lastEnd, this._start, this._end),
             startTime: this._start,
             endTime: this._end,
             isPlaying: this._isPlaying,
@@ -331,38 +336,19 @@ export default class RandomAccessPlayer implements Player {
     }
     this._lastRangeMillis = rangeMillis;
 
-    // loop to the beginning if we pass the end of the playback range
-    if (isEqual(this._currentTime, this._end)) {
-      if (inScreenshotTests()) {
-        // Just don't loop at all in screenshot / integration tests.
-        this.pausePlayback();
-        return;
-      }
-      if (toSec(subtractTimes(this._end, this._start)) < LOOP_MIN_BAG_TIME_IN_SEC) {
-        // Don't loop for short bags.
-        this.pausePlayback();
-        return;
-      }
-      // Wait a little bit before we loop back. This helps with extremely small bags; otherwise
-      // it looks like it's stuck at the beginning of the bag.
-      await delay(500);
-      if (this._isPlaying) {
-        this._playFromStart();
-      }
+    // read is past end of bag, no more to read
+    if (TimeUtil.compare(this._nextReadStartTime, this._end) > 0) {
       return;
     }
 
     const seekTime = this._lastSeekStartTime;
-    const start: Time = clampTime(
-      TimeUtil.add(this._currentTime, { sec: 0, nsec: 1 }),
-      this._start,
-      this._end,
-    );
+    const start: Time = clampTime(this._nextReadStartTime, this._start, this._end);
     const end: Time = clampTime(
-      TimeUtil.add(this._currentTime, fromMillis(rangeMillis)),
+      TimeUtil.add(this._nextReadStartTime, fromMillis(rangeMillis)),
       this._start,
       this._end,
     );
+
     const { parsedMessages: messages, bobjects } = await this._getMessages(start, end);
     await this._emitState.currentPromise;
 
@@ -372,8 +358,9 @@ export default class RandomAccessPlayer implements Player {
       return;
     }
 
-    // Update the currentTime when we know a seek didn't happen.
-    this._setCurrentTime(end);
+    // our read finished and we didn't seed during the read, prepare for the next tick
+    // we need to do this after checking for seek changes since seek time may have changed
+    this._nextReadStartTime = TimeUtil.add(end, { sec: 0, nsec: 1 });
 
     // if we paused while reading then do not emit messages
     // and exit the read loop
@@ -520,9 +507,9 @@ export default class RandomAccessPlayer implements Player {
     this._initialized = true;
   }
 
-  _setCurrentTime(time: Time): void {
+  _setNextReadStartTime(time: Time): void {
     this._metricsCollector.recordPlaybackTime(time, !this.hasCachedRange(this._start, this._end));
-    this._currentTime = clampTime(time, this._start, this._end);
+    this._nextReadStartTime = clampTime(time, this._start, this._end);
   }
 
   _seekPlaybackInternal = debouncePromise(async (backfillDuration?: Time) => {
@@ -533,30 +520,39 @@ export default class RandomAccessPlayer implements Player {
     this._messages = [];
     this._bobjects = [];
 
+    // backfill includes the current time we've seek'd to
+    // playback after backfill will load messages after the seek time
+    const backfillEnd = clampTime(this._nextReadStartTime, this._start, this._end);
+
     // Backfill a few hundred milliseconds of data if we're paused so panels have something to show.
     // If we're playing, we'll give the panels some data soon anyway.
     const internalBackfillDuration = { sec: 0, nsec: this._isPlaying ? 0 : SEEK_BACK_NANOSECONDS };
     // Add on any extra time needed by the OrderedStampPlayer.
     const totalBackfillDuration = TimeUtil.add(
       internalBackfillDuration,
-      backfillDuration || { sec: 0, nsec: 0 },
+      backfillDuration ?? { sec: 0, nsec: 0 },
     );
     const backfillStart = clampTime(
-      subtractTimes(this._currentTime, totalBackfillDuration),
+      subtractTimes(this._nextReadStartTime, totalBackfillDuration),
       this._start,
       this._end,
     );
+
     // Only getMessages if we have some messages to get.
     if (backfillDuration || !this._isPlaying) {
       const { parsedMessages: messages, bobjects } = await this._getMessages(
         backfillStart,
-        this._currentTime,
+        backfillEnd,
       );
       // Only emit the messages if we haven't seeked again / emitted messages since we
       // started loading them. Note that for the latter part just checking for `isPlaying`
       // is not enough because the user might have started playback and then paused again!
       // Therefore we really need something like `this._cancelSeekBackfill`.
       if (this._lastSeekStartTime === seekTime && !this._cancelSeekBackfill) {
+        // similar to _tick(), we set the next start time past where we have read
+        // this happens after reading and confirming that playback or other seeking hasn't happened
+        this._nextReadStartTime = TimeUtil.add(backfillEnd, { sec: 0, nsec: 1 });
+
         this._messages = messages;
         this._bobjects = bobjects;
         this._lastSeekEmitTime = seekTime;
@@ -574,16 +570,8 @@ export default class RandomAccessPlayer implements Player {
       return;
     }
     this._metricsCollector.seek(time);
-    this._setCurrentTime(time);
+    this._setNextReadStartTime(time);
     this._seekPlaybackInternal(backfillDuration);
-  }
-
-  _playFromStart(): void {
-    if (!this._isPlaying) {
-      throw new Error("Can only play from the very start when we're already playing.");
-    }
-    // Start a nanosecond before start time to get messages exactly at start time.
-    this.seekPlayback(TimeUtil.add(this._start, { sec: 0, nsec: -1 }));
   }
 
   setSubscriptions(newSubscriptions: SubscribePayload[]): void {
@@ -604,7 +592,7 @@ export default class RandomAccessPlayer implements Player {
     if (this._isPlaying || this._initializing) {
       return;
     }
-    this.seekPlayback(this._currentTime);
+    this.seekPlayback(this._nextReadStartTime);
   }
 
   setPublishers(_publishers: AdvertisePayload[]) {
