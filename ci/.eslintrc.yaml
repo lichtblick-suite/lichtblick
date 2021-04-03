@@ -1,0 +1,2 @@
+parserOptions:
+  project: ci/tsconfig.json

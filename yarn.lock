@@ -19,6 +19,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@actions/exec@npm:1.0.4":
+  version: 1.0.4
+  resolution: "@actions/exec@npm:1.0.4"
+  dependencies:
+    "@actions/io": ^1.0.1
+  checksum: 99e3a90a24ae157bc77f5e933d82caba5b8deee979e8489e534db75ffab08a2758f625e83f020736b031eca054ac3710b9f18cea5c9123f69457bb0582094c3e
+  languageName: node
+  linkType: hard
+
 "@actions/github@npm:^4.0.0":
   version: 4.0.0
   resolution: "@actions/github@npm:4.0.0"
@@ -37,6 +46,13 @@ __metadata:
   dependencies:
     tunnel: 0.0.6
   checksum: f6d3947c09b9adbc9798ccecdf19fda025be132c70bc0bb5791df87547870594773fabe5c89ee29306cf08f8ca9378f5d615d991b31d64e521bb22e3a31c355f
+  languageName: node
+  linkType: hard
+
+"@actions/io@npm:^1.0.1":
+  version: 1.1.0
+  resolution: "@actions/io@npm:1.1.0"
+  checksum: 82f5d2ff0bb635cfb479bce21ed7132e610c7df7b7aea567e511f60f96a8e92e85fcdea3955262b7148fed615308f4bc49892097c97c69398dfbb3955e78552b
   languageName: node
   linkType: hard
 
@@ -11795,6 +11811,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "foxglove-studio@workspace:."
   dependencies:
+    "@actions/exec": 1.0.4
     "@foxglove/electron-socket": "workspace:packages/electron-socket"
     "@foxglove/velodyne-cloud": "workspace:packages/velodyne-cloud"
     "@jest/types": 26.6.2
