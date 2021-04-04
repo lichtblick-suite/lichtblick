@@ -18,10 +18,6 @@ import { POINT_CLOUD_MESSAGE, POINT_CLOUD_WITH_ADDITIONAL_FIELDS } from "./fixtu
 import { getClickedInfo, getAllPoints, decodeAdditionalFields } from "./selection";
 
 describe("<PointClouds />", () => {
-  console.info = () => {
-    // decodeMarker() will log warnings in console whenever a buffer cannot be sent to GPU
-  };
-
   describe("getClickedInfo", () => {
     it("returns undefined when points field is empty", () => {
       const partiallyDecodedMarker = (decodeMarker(

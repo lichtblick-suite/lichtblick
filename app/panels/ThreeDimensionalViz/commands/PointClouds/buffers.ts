@@ -19,13 +19,20 @@ import { FieldReader, Uint8Reader, getReader } from "./readers";
 import { DATATYPE, VertexBuffer } from "./types";
 
 export type FieldOffsetsAndReaders = {
-  [name: string]: { datatype: string; offset: number; reader?: FieldReader };
+  [name: string]: { datatype: number; offset: number; reader?: FieldReader };
 };
 
-export function getFieldOffsetsAndReaders(fields: readonly PointField[]): FieldOffsetsAndReaders {
-  const result: any = {};
+export function getFieldOffsetsAndReaders(
+  data: Uint8Array,
+  fields: readonly PointField[],
+): FieldOffsetsAndReaders {
+  const result: FieldOffsetsAndReaders = {};
   for (const { name, datatype, offset = 0 } of fields) {
-    result[name] = { datatype, offset, reader: getReader(datatype, offset) };
+    result[name] = {
+      datatype,
+      offset,
+      reader: getReader(data, datatype, offset),
+    };
   }
   return result;
 }
@@ -35,8 +42,8 @@ export const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT;
 // Reinterpret a buffer of bytes as a buffer of float values
 export function reinterpretBufferToFloat(buffer: Uint8Array): Float32Array {
   return new Float32Array(
-    new Uint8Array(buffer).buffer,
-    0,
+    buffer.buffer,
+    buffer.byteOffset,
     buffer.length / Float32Array.BYTES_PER_ELEMENT,
   );
 }
@@ -89,7 +96,6 @@ function hasValidStride(stride: number): boolean {
 // This function always returns a Float32Array with three values for each point
 // in the cloud since it might be used for both colors and/or positions.
 function extractValues({
-  data,
   readers,
   pointCount,
   stride,
@@ -107,7 +113,7 @@ function extractValues({
       const reader = readers[j];
       let value = Number.NaN;
       if (reader != undefined) {
-        value = reader.read(data, pointStart);
+        value = reader.read(pointStart);
       }
       buffer[i * COMPONENT_COUNT + j] = value;
     }
@@ -163,10 +169,6 @@ export function createPositionBuffer({
   }
 
   // We cannot use positions as is from data buffer. Extract them.
-  // eslint-disable-next-line no-restricted-syntax
-  console.info(
-    `Vertex buffer stride will be too big (${stride}). Extracting positions from data in CPU`,
-  );
   return extractValues({
     data,
     readers: [xField.reader, yField.reader, zField.reader],
@@ -199,7 +201,7 @@ export function createColorBuffer({
     if (!rgbField) {
       throw new Error("Cannot create color buffer in rgb mode without an rgb field");
     }
-    const rgbOffset = rgbField.offset || 0;
+    const rgbOffset = rgbField.offset ?? 0;
     if (hasValidStride(FLOAT_SIZE * stride)) {
       return {
         // RGB colors are encoded in a single 4-byte tuple and unfortunately we cannot extract
@@ -216,27 +218,21 @@ export function createColorBuffer({
       };
     }
     // stride is too big. Extract colors from data
-    // eslint-disable-next-line no-restricted-syntax
-    console.info(
-      `Vertex buffer stride will be too big (${
-        4 * stride
-      }). Extracting RGB colors from data in CPU`,
-    );
     return extractValues({
       data,
       readers: [
-        new Uint8Reader(rgbOffset + 0),
-        new Uint8Reader(rgbOffset + 1),
-        new Uint8Reader(rgbOffset + 2),
+        new Uint8Reader(data, rgbOffset + 0),
+        new Uint8Reader(data, rgbOffset + 1),
+        new Uint8Reader(data, rgbOffset + 2),
       ],
       stride,
       pointCount,
     });
   }
 
-  const colorField = fields[colorMode.colorField || "rgb"];
+  const colorField = fields[colorMode.colorField ?? "rgb"];
   if (!colorField) {
-    throw new Error(`Cannot create color buffer without ${colorMode.colorField || "rgb"} field`);
+    throw new Error(`Cannot create color buffer without ${colorMode.colorField ?? "rgb"} field`);
   }
 
   // If the color is computed from any of the other float fields (i.e. x positions)
@@ -245,8 +241,7 @@ export function createColorBuffer({
   // memory alignment is correct (that is, it's divisible by sizeof(float)). There
   // might be other values previous to this one that have different memory alignments.
   if (
-    // @ts-expect-error typescript says this will always be false cause of the types involved
-    colorField.datatype === DATATYPE.float32 &&
+    colorField.datatype === DATATYPE.FLOAT32 &&
     colorField.offset % FLOAT_SIZE === 0 &&
     hasValidStride(stride)
   ) {
@@ -261,8 +256,6 @@ export function createColorBuffer({
 
   // Color datatype is not float or stride is too big
   // Just extract color data from buffer using CPU
-  // eslint-disable-next-line no-restricted-syntax
-  console.info("Cannot reinterpret data. Extracting color buffer using CPU");
   return extractValues({
     data,
     readers: [colorField.reader],

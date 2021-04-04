@@ -29,6 +29,15 @@ import {
   getVertexCount,
 } from "./buffers";
 
+type MinMaxColors = { minColorValue: number; maxColorValue: number };
+
+type DecodedFields = { [fieldName: string]: number[] };
+
+function getRange(min: number, max: number): number {
+  const delta = max - min;
+  return delta !== 0 ? delta : Infinity;
+}
+
 export type ClickedInfo = {
   clickedPoint: number[];
   clickedPointColor?: number[];
@@ -37,7 +46,7 @@ export type ClickedInfo = {
   };
 };
 
-export function toRgba(rgba: Color) {
+export function toRgba(rgba: Color): [number, number, number, number] {
   return toRGBA({ r: rgba.r * 255, g: rgba.g * 255, b: rgba.b * 255, a: rgba.a });
 }
 
@@ -55,7 +64,7 @@ export function getClickedInfo(
     return undefined;
   }
 
-  const pointIndex = instanceIndex || 0;
+  const pointIndex = instanceIndex ?? 0;
 
   // Extract [x, y, z] from position buffer;
   const clickedPoint = getVertexValues(positionBuffer, pointIndex, 3);
@@ -74,14 +83,14 @@ export function getClickedInfo(
       if (!is_bigendian) {
         // When data uses little endianess, colors are in BGR format
         // and we must swap R and B channels to display them correclty.
-        const temp = clickedPointColor[2]!;
-        clickedPointColor[2] = clickedPointColor[0]!;
+        const temp = clickedPointColor[2] as number;
+        clickedPointColor[2] = clickedPointColor[0] as number;
         clickedPointColor[0] = temp;
       }
     } else if (colorMode.mode === "gradient" && !isEmpty(colorBuffer)) {
-      const { minColorValue, maxColorValue } = maybeFullyDecodedMarker;
+      const { minColorValue, maxColorValue } = maybeFullyDecodedMarker as MinMaxColors;
       const colorFieldValue = getVertexValue(colorBuffer, pointIndex);
-      const colorFieldRange = maxColorValue - minColorValue || Infinity;
+      const colorFieldRange = getRange(minColorValue, maxColorValue);
       const pct = Math.max(0, Math.min((colorFieldValue - minColorValue) / colorFieldRange, 1));
       const { minColor, maxColor } = colorMode;
       const parsedMinColor = toRgba(minColor || DEFAULT_MIN_COLOR);
@@ -93,9 +102,9 @@ export function getClickedInfo(
         1.0,
       ];
     } else if (colorMode.mode === "rainbow" && !isEmpty(colorBuffer)) {
-      const { minColorValue, maxColorValue } = maybeFullyDecodedMarker;
+      const { minColorValue, maxColorValue } = maybeFullyDecodedMarker as MinMaxColors;
       const colorFieldValue = getVertexValue(colorBuffer, pointIndex);
-      const colorFieldRange = maxColorValue - minColorValue || Infinity;
+      const colorFieldRange = getRange(minColorValue, maxColorValue);
       const pct = Math.max(0, Math.min((colorFieldValue - minColorValue) / colorFieldRange, 1));
       clickedPointColor = [0, 0, 0, 1];
       setRainbowColor(clickedPointColor, 0, pct);
@@ -106,14 +115,14 @@ export function getClickedInfo(
 
   let additionalFieldValues: { [name: string]: number | undefined } | undefined;
   const additionalField = getAdditionalFieldNames(fields);
-  if (additionalField.length) {
-    additionalFieldValues = additionalField.reduce((memo: any, fieldName) => {
+  if (additionalField.length > 0) {
+    additionalFieldValues = additionalField.reduce((memo, fieldName) => {
       const values = maybeFullyDecodedMarker[fieldName];
       if (values) {
         memo[fieldName] = values[pointIndex];
       }
       return memo;
-    }, {});
+    }, {} as { [name: string]: number | undefined });
   }
 
   return {
@@ -141,23 +150,16 @@ export function getAdditionalFieldNames(fields: readonly PointField[]): string[]
   return difference(allFields, ["rgb", "x", "y", "z"]);
 }
 
-export function decodeAdditionalFields(
-  marker: PointCloud2,
-): {
-  [fieldName: string]: number[];
-} {
+export function decodeAdditionalFields(marker: PointCloud2): any {
   const { fields, data, width, row_step, height, point_step } = marker;
-  const offsets = getFieldOffsetsAndReaders(fields);
-  if (!offsets) {
-    return {};
-  }
+  const offsets = getFieldOffsetsAndReaders(data, fields);
 
   let pointCount = 0;
   const additionalField = getAdditionalFieldNames(fields);
-  const otherFieldsValues: any = additionalField.reduce((memo: any, name) => {
+  const otherFieldsValues = additionalField.reduce((memo, name) => {
     memo[name] = new Array(width * height);
     return memo;
-  }, {});
+  }, {} as DecodedFields);
   for (let row = 0; row < height; row++) {
     const dataOffset = row * row_step;
     for (let col = 0; col < width; col++) {
@@ -165,8 +167,8 @@ export function decodeAdditionalFields(
       for (const fieldName of additionalField) {
         const reader = offsets[fieldName]?.reader;
         if (reader) {
-          const fieldValue = reader.read(data, dataStart);
-          otherFieldsValues[fieldName][pointCount] = fieldValue;
+          const fieldValue = reader.read(dataStart);
+          otherFieldsValues[fieldName]![pointCount] = fieldValue;
         }
       }
       // increase point count by 1

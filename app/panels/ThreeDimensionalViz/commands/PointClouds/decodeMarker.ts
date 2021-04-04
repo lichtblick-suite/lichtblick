@@ -37,7 +37,7 @@ export function decodeMarker(marker: PointCloudMarker) {
     hitmapColors,
     data,
   } = marker;
-  const offsetsAndReaders = getFieldOffsetsAndReaders(fields);
+  const offsetsAndReaders = getFieldOffsetsAndReaders(data, fields);
   const { rgb: { offset: rgbOffset } = {} as any } = offsetsAndReaders;
 
   // Calculate the number of points in the cloud.

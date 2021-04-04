@@ -330,7 +330,7 @@ function instancedGetChildrenForHitmap<
     }
     const hitmapProp = { ...prop };
     const { width, height } = prop;
-    if (!width || !height) {
+    if (width == undefined || width === 0 || height == undefined || height === 0) {
       return undefined;
     }
     const instanceCount = Math.ceil(width * height);
@@ -347,7 +347,7 @@ function instancedGetChildrenForHitmap<
     hitmapProp.hitmapColors = allColors;
     // expand the interaction area
     hitmapProp.settings = hitmapProp.settings ? { ...hitmapProp.settings } : {};
-    hitmapProp.settings.pointSize = (hitmapProp.settings.pointSize || 2) * 5;
+    hitmapProp.settings.pointSize = (hitmapProp.settings.pointSize ?? 2) * 5;
     return hitmapProp;
   });
 }
@@ -365,7 +365,7 @@ export default function PointClouds({
   const [command] = useState(() => makePointCloudCommand());
   const markerCache = useRef(new Map<Uint8Array, MemoizedMarker>());
   markerCache.current = updateMarkerCache(markerCache.current, children);
-  const decodedMarkers = !clearCachedMarkers
+  const decodedMarkers = !(clearCachedMarkers ?? false)
     ? [...markerCache.current.values()].map((decoded) => decoded.marker)
     : children.map((m) => decodeMarker(m));
   return (

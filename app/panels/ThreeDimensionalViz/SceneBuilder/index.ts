@@ -116,15 +116,19 @@ const missingTransformMessage = (
   transforms: Transforms,
   skipTransform: SkipTransformSpec | undefined,
 ): string => {
-  if (skipTransform != undefined && error.frameIds.has(skipTransform.frameId)) {
-    return `missing transform. Is ${skipTransform.sourceTopic} present?`;
-  }
-  if (transforms.empty) {
-    return `missing transform. Is ${TRANSFORM_TOPIC} or ${TRANSFORM_STATIC_TOPIC} present?`;
-  }
   const frameIds = [...error.frameIds].sort().join(",");
   const s = error.frameIds.size === 1 ? "" : "s"; // for plural
-  return `missing transforms from frame${s} (${frameIds}) to root frame (${rootTransformId})`;
+  const msg =
+    frameIds.length > 0
+      ? `missing transforms from frame${s} <${frameIds}> to root frame <${rootTransformId}>`
+      : `missing transform <${rootTransformId}>`;
+  if (skipTransform != undefined && error.frameIds.has(skipTransform.frameId)) {
+    return msg + `. Is ${skipTransform.sourceTopic} present?`;
+  }
+  if (transforms.empty) {
+    return msg + `. Is ${TRANSFORM_TOPIC} or ${TRANSFORM_STATIC_TOPIC} present?`;
+  }
+  return msg;
 };
 
 export function getSceneErrorsByTopic(

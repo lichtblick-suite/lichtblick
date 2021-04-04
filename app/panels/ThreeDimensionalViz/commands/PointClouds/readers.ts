@@ -16,94 +16,129 @@ import log from "@foxglove-studio/app/panels/ThreeDimensionalViz/logger";
 import { DATATYPE } from "./types";
 
 export interface FieldReader {
-  read(data: number[] | Uint8Array, index: number): number;
+  read(byteOffset: number): number;
 }
 
-// Shared between all readers. The JS main thread doesn't get preempted. Instantiating the buffer is
-// weirdly expensive. The buffer needs to be big enough for the largest reader type.
-const buffer = new ArrayBuffer(4);
-const view = new DataView(buffer);
+export class Int8Reader implements FieldReader {
+  view: DataView;
 
-export class Float32Reader implements FieldReader {
-  offset: number;
-  constructor(offset: number) {
-    this.offset = offset;
+  constructor(data: Uint8Array, offset: number) {
+    this.view = new DataView(data.buffer, data.byteOffset + offset, data.byteLength - offset);
   }
 
-  read(data: number[] | Uint8Array, index: number): number {
-    view.setUint8(0, data[index + this.offset]!);
-    view.setUint8(1, data[index + this.offset + 1]!);
-    view.setUint8(2, data[index + this.offset + 2]!);
-    view.setUint8(3, data[index + this.offset + 3]!);
-    return view.getFloat32(0, true);
-  }
-}
-
-export class Int32Reader implements FieldReader {
-  offset: number;
-  constructor(offset: number) {
-    this.offset = offset;
-  }
-
-  read(data: number[] | Uint8Array, index: number): number {
-    view.setUint8(0, data[index + this.offset]!);
-    view.setUint8(1, data[index + this.offset + 1]!);
-    view.setUint8(2, data[index + this.offset + 2]!);
-    view.setUint8(3, data[index + this.offset + 3]!);
-    return view.getInt32(0, true);
-  }
-}
-
-export class Uint16Reader implements FieldReader {
-  offset: number;
-  constructor(offset: number) {
-    this.offset = offset;
-  }
-
-  read(data: number[] | Uint8Array, index: number): number {
-    view.setUint8(0, data[index + this.offset]!);
-    view.setUint8(1, data[index + this.offset + 1]!);
-    return view.getUint16(0, true);
-  }
-}
-export class Int16Reader implements FieldReader {
-  offset: number;
-  constructor(offset: number) {
-    this.offset = offset;
-  }
-
-  read(data: number[] | Uint8Array, index: number): number {
-    view.setUint8(0, data[index + this.offset]!);
-    view.setUint8(1, data[index + this.offset + 1]!);
-    return view.getInt16(0, true);
+  read(byteOffset: number): number {
+    return this.view.getInt8(byteOffset);
   }
 }
 
 export class Uint8Reader implements FieldReader {
-  offset: number;
-  constructor(offset: number) {
-    this.offset = offset;
+  view: DataView;
+
+  constructor(data: Uint8Array, offset: number) {
+    this.view = new DataView(data.buffer, data.byteOffset + offset, data.byteLength - offset);
   }
 
-  read(data: number[] | Uint8Array, index: number): number {
-    return data[index + this.offset]!;
+  read(byteOffset: number): number {
+    return this.view.getUint8(byteOffset);
   }
 }
 
-export function getReader(datatype: number, offset: number) {
-  switch (datatype) {
-    case DATATYPE.float32:
-      return new Float32Reader(offset);
-    case DATATYPE.uint8:
-      return new Uint8Reader(offset);
-    case DATATYPE.uint16:
-      return new Uint16Reader(offset);
-    case DATATYPE.int16:
-      return new Int16Reader(offset);
-    case DATATYPE.int32:
-      return new Int32Reader(offset);
-    default:
-      log.error("Unsupported datatype", datatype);
+export class Int16Reader implements FieldReader {
+  view: DataView;
+
+  constructor(data: Uint8Array, offset: number) {
+    this.view = new DataView(data.buffer, data.byteOffset + offset, data.byteLength - offset);
   }
-  return undefined;
+
+  read(byteOffset: number): number {
+    return this.view.getInt16(byteOffset, true);
+  }
+}
+
+export class Uint16Reader implements FieldReader {
+  view: DataView;
+
+  constructor(data: Uint8Array, offset: number) {
+    this.view = new DataView(data.buffer, data.byteOffset + offset, data.byteLength - offset);
+  }
+
+  read(byteOffset: number): number {
+    return this.view.getUint16(byteOffset, true);
+  }
+}
+
+export class Int32Reader implements FieldReader {
+  view: DataView;
+
+  constructor(data: Uint8Array, offset: number) {
+    this.view = new DataView(data.buffer, data.byteOffset + offset, data.byteLength - offset);
+  }
+
+  read(byteOffset: number): number {
+    return this.view.getInt32(byteOffset, true);
+  }
+}
+
+export class Uint32Reader implements FieldReader {
+  view: DataView;
+
+  constructor(data: Uint8Array, offset: number) {
+    this.view = new DataView(data.buffer, data.byteOffset + offset, data.byteLength - offset);
+  }
+
+  read(byteOffset: number): number {
+    return this.view.getUint32(byteOffset, true);
+  }
+}
+
+export class Float32Reader implements FieldReader {
+  view: DataView;
+
+  constructor(data: Uint8Array, offset: number) {
+    this.view = new DataView(data.buffer, data.byteOffset + offset, data.byteLength - offset);
+  }
+
+  read(byteOffset: number): number {
+    return this.view.getFloat32(byteOffset, true);
+  }
+}
+
+export class Float64Reader implements FieldReader {
+  view: DataView;
+
+  constructor(data: Uint8Array, offset: number) {
+    this.view = new DataView(data.buffer, data.byteOffset + offset, data.byteLength - offset);
+  }
+
+  read(byteOffset: number): number {
+    return this.view.getFloat64(byteOffset, true);
+  }
+}
+
+export function getReader(
+  data: Uint8Array,
+  datatype: number,
+  offset: number,
+): FieldReader | undefined {
+  switch (datatype) {
+    case DATATYPE.INT8:
+      return new Int8Reader(data, offset);
+    case DATATYPE.UINT8:
+      return new Uint8Reader(data, offset);
+    case DATATYPE.INT16:
+      return new Int16Reader(data, offset);
+    case DATATYPE.UINT16:
+      return new Uint16Reader(data, offset);
+    case DATATYPE.INT32:
+      return new Int32Reader(data, offset);
+    case DATATYPE.UINT32:
+      return new Uint32Reader(data, offset);
+    case DATATYPE.FLOAT32:
+      return new Float32Reader(data, offset);
+    case DATATYPE.FLOAT64:
+      return new Float64Reader(data, offset);
+    default:
+      log.error("Unrecognized PointCloud2 field datatype", datatype);
+      return undefined;
+  }
 }

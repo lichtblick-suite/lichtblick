@@ -14,13 +14,16 @@
 import { PointCloudSettings } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
 import { PointCloud2 } from "@foxglove-studio/app/types/Messages";
 
-export const DATATYPE = {
-  uint8: 2,
-  uint16: 4,
-  int16: 3,
-  int32: 5,
-  float32: 7,
-};
+export enum DATATYPE {
+  INT8 = 1,
+  UINT8 = 2,
+  INT16 = 3,
+  UINT16 = 4,
+  INT32 = 5,
+  UINT32 = 6,
+  FLOAT32 = 7,
+  FLOAT64 = 8,
+}
 
 export type PointCloudMarker = PointCloud2 & {
   settings?: PointCloudSettings;
