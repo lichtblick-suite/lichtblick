@@ -29,11 +29,16 @@ import fs from "fs";
 import path from "path";
 
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
+import Logger from "@foxglove/log";
 
 import packageJson from "../package.json";
 import { installMenuInterface } from "./menu";
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
+
+const log = Logger.getLogger(__filename);
+
+log.info("Foxglove Studio starting");
 
 const isMac = process.platform === "darwin";
 const isProduction = process.env.NODE_ENV === "production";
@@ -47,7 +52,10 @@ if (require("electron-squirrel-startup")) {
   app.quit();
 }
 
-if (typeof process.env.SENTRY_DSN === "string") {
+// Load opt-out settings for crash reporting and telemetry
+const [allowCrashReporting, allowTelemetry] = getTelemetrySettings();
+if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
+  log.info("initializing Sentry in renderer");
   initSentry({ dsn: process.env.SENTRY_DSN });
 }
 
@@ -85,6 +93,10 @@ async function createWindow(): Promise<void> {
       contextIsolation: true,
       preload: preloadPath,
       nodeIntegration: false,
+      additionalArguments: [
+        `--allowCrashReporting=${allowCrashReporting ? "1" : "0"}`,
+        `--allowTelemetry=${allowTelemetry ? "1" : "0"}`,
+      ],
       // Disable webSecurity in development so we can make XML-RPC calls, load
       // remote data, etc. In production, the app is served from file:// URLs so
       // the Origin header is not sent, disabling the CORS
@@ -254,6 +266,12 @@ async function createWindow(): Promise<void> {
   Menu.setApplicationMenu(Menu.buildFromTemplate(appMenuTemplate));
   installMenuInterface();
 
+  mainWindow.webContents.once("dom-ready", () => {
+    if (!isProduction) {
+      mainWindow.webContents.openDevTools();
+    }
+  });
+
   // Open all new windows in an external browser
   // Note: this API is supposed to be superseded by webContents.setWindowOpenHandler,
   // but using that causes the app to freeze when a new window is opened.
@@ -329,11 +347,8 @@ async function createWindow(): Promise<void> {
     preloaderFileInputIsReady = true;
   });
 
-  mainWindow.loadURL(rendererPath);
-
-  if (!isProduction) {
-    mainWindow.webContents.openDevTools();
-  }
+  log.info(`mainWindow.loadURL(${rendererPath})`);
+  mainWindow.loadURL(rendererPath).then(() => log.info("mainWindow URL loaded"));
 }
 
 // This method will be called when Electron has finished
@@ -435,3 +450,27 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
+
+// Load telemetry opt-out settings from settings.json
+function getTelemetrySettings(): [crashReportingEnabled: boolean, telemetryEnabled: boolean] {
+  const datastoreDir = path.join(app.getPath("userData"), "studio-datastores");
+  const settingsPath = path.join(datastoreDir, "settings.json");
+  let crashReportingEnabled = true;
+  let telemetryEnabled = true;
+
+  try {
+    fs.mkdirSync(datastoreDir, { recursive: true });
+  } catch {
+    // Ignore directory creation errors, including dir already exists
+  }
+
+  try {
+    const settings = JSON.parse(fs.readFileSync(settingsPath, { encoding: "utf8" }));
+    crashReportingEnabled = settings["telemetry.crashReportingEnabled"] ?? true;
+    telemetryEnabled = settings["telemetry.telemetryEnabled"] ?? true;
+  } catch {
+    // Ignore file load or parsing errors, including settings.json not existing
+  }
+
+  return [crashReportingEnabled, telemetryEnabled];
+}

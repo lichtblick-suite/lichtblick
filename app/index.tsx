@@ -9,15 +9,19 @@ import "@foxglove-studio/app/styles/global.scss";
 
 import App from "@foxglove-studio/app/App";
 import { getGlobalConfig } from "@foxglove-studio/app/GlobalConfig";
+import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import installDevtoolsFormatters from "@foxglove-studio/app/util/installDevtoolsFormatters";
 import overwriteFetch from "@foxglove-studio/app/util/overwriteFetch";
 import waitForFonts from "@foxglove-studio/app/util/waitForFonts";
 import { Sockets } from "@foxglove/electron-socket/renderer";
-import log from "@foxglove/log";
+import Logger from "@foxglove/log";
+
+const log = Logger.getLogger(__filename);
 
 log.debug("initializing renderer");
 
-if (typeof process.env.SENTRY_DSN === "string") {
+if (OsContextSingleton?.isCrashReportingEnabled() && typeof process.env.SENTRY_DSN === "string") {
+  log.info("initializing Sentry in renderer");
   initSentry({ dsn: process.env.SENTRY_DSN });
 }
 

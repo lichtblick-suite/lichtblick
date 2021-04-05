@@ -10,11 +10,19 @@ import os from "os";
 import type { OsContext, OsContextForwardedEvent } from "@foxglove-studio/app/OsContext";
 import { NetworkInterface } from "@foxglove-studio/app/OsContext";
 import { PreloaderSockets } from "@foxglove/electron-socket/preloader";
+import Logger from "@foxglove/log";
 
 import appPackage from "../package.json";
 import LocalFileStorage from "./LocalFileStorage";
 
-if (typeof process.env.SENTRY_DSN === "string") {
+const log = Logger.getLogger(__filename);
+
+log.info(`initializing preloader, argv="${window.process.argv.join(" ")}"`);
+
+// Load opt-out settings for crash reporting and telemetry
+const [allowCrashReporting, allowTelemetry] = getTelemetrySettings();
+if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
+  log.info("initializing Sentry in preload");
   initSentry({ dsn: process.env.SENTRY_DSN });
 }
 
@@ -77,6 +85,9 @@ const ctx: OsContext = {
     await ipcRenderer.invoke("menu.remove-input-source", name);
   },
 
+  isCrashReportingEnabled: (): boolean => allowCrashReporting,
+  isTelemetryEnabled: (): boolean => allowTelemetry,
+
   // Environment queries
   getEnvVar: (envVar: string) => process.env[envVar],
   getHostname: os.hostname,
@@ -117,3 +128,15 @@ const ctx: OsContext = {
 //
 // i.e.: returning a class instance doesn't work because prototypes do not survive the boundary
 contextBridge.exposeInMainWorld("ctxbridge", ctx); // poorly named - expose to renderer
+
+// Load telemetry opt-out settings from window.process.argv
+function getTelemetrySettings(): [crashReportingEnabled: boolean, telemetryEnabled: boolean] {
+  const argv = window.process.argv;
+  const crashReportingEnabled = Boolean(
+    parseInt(argv.find((arg) => arg.indexOf("--allowCrashReporting=") === 0)?.split("=")[1] ?? "0"),
+  );
+  const telemetryEnabled = Boolean(
+    parseInt(argv.find((arg) => arg.indexOf("--allowTelemetry=") === 0)?.split("=")[1] ?? "0"),
+  );
+  return [crashReportingEnabled, telemetryEnabled];
+}
