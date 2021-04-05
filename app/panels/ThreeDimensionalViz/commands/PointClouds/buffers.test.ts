@@ -36,5 +36,19 @@ describe("<PointClouds />", () => {
       expect(Math.floor(buffer[17]!)).toBe(225);
       expect(Math.floor(buffer[18]!)).toBe(127);
     });
+
+    it("handles odd sizes", () => {
+      const srcBuffer = new ArrayBuffer(11);
+      const data = new Uint8Array(srcBuffer);
+      const buffer = reinterpretBufferToFloat(data);
+      expect(buffer).toHaveLength(2);
+    });
+
+    it("handles odd offsets", () => {
+      const srcBuffer = new ArrayBuffer(15);
+      const data = new Uint8Array(srcBuffer, 5, 8);
+      const buffer = reinterpretBufferToFloat(data);
+      expect(buffer).toHaveLength(2);
+    });
   });
 });

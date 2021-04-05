@@ -41,11 +41,14 @@ export const FLOAT_SIZE = Float32Array.BYTES_PER_ELEMENT;
 
 // Reinterpret a buffer of bytes as a buffer of float values
 export function reinterpretBufferToFloat(buffer: Uint8Array): Float32Array {
-  return new Float32Array(
-    buffer.buffer,
-    buffer.byteOffset,
-    buffer.length / Float32Array.BYTES_PER_ELEMENT,
-  );
+  if (buffer.byteOffset % FLOAT_SIZE === 0) {
+    // Fast path when byteOffset is aligned with FLOAT_SIZE
+    return new Float32Array(buffer.buffer, buffer.byteOffset, buffer.length / FLOAT_SIZE);
+  } else {
+    // Bad alignment, we have to copy a section of the ArrayBuffer
+    const end = buffer.byteOffset + buffer.length;
+    return new Float32Array(buffer.buffer.slice(buffer.byteOffset, end));
+  }
 }
 
 // Expand a buffer of byte values, transforming each value into a float
