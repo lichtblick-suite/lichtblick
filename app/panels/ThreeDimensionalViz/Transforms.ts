@@ -171,6 +171,7 @@ export default class Transforms {
     // child_frame_id is the id of the tf
     const id = tfMessage.child_frame_id;
     const parentId = tfMessage.header.frame_id;
+    this.register(parentId);
     const tf = this.storage.get(id);
     const { rotation, translation } = tfMessage.transform;
     tf.set(translation, rotation);
