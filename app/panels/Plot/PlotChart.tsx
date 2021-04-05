@@ -11,15 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
 import flatten from "lodash/flatten";
-import React, { memo } from "react";
-import { createSelector } from "reselect";
+import { ComponentProps, memo, useMemo } from "react";
+import { useResizeDetector } from "react-resize-detector";
 import { Time } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
-import Dimensions from "@foxglove-studio/app/components/Dimensions";
-import { ScaleOptions } from "@foxglove-studio/app/components/ReactChartjs";
 import TimeBasedChart, {
   ChartDefaultView,
   TimeBasedChartTooltipData,
@@ -80,8 +79,6 @@ type PointsAndTooltips = {
   hasMismatchedData: boolean;
 };
 
-const Y_AXIS_ID = "Y_AXIS_ID";
-
 const isCustomScale = (xAxisVal: PlotXAxisVal): boolean =>
   xAxisVal === "custom" || xAxisVal === "currentCustom";
 
@@ -110,11 +107,6 @@ function getXForPoint(
   }
   return xAxisVal === "timestamp" ? timestamp : innerIdx;
 }
-
-const scaleOptions: ScaleOptions = {
-  fixedYAxisWidth: 48,
-  yAxisTicks: "hideFirstAndLast",
-};
 
 function getPointsAndTooltipsForMessagePathItem(
   yItem: TooltipItem,
@@ -305,13 +297,13 @@ function getAnnotationFromReferenceLine(path: PlotPath, index: number): Annotati
   const borderColor = lineColors[index % lineColors.length] ?? "#DDDDDD";
   return {
     type: "line",
+    display: true,
     drawTime: "beforeDatasetsDraw",
-    scaleID: Y_AXIS_ID,
-    label: { content: path.value },
+    scaleID: "y",
+    label: { content: path.value, width: "100%", height: "100%" },
     borderColor,
     borderDash: [5, 5],
     borderWidth: 1,
-    mode: "horizontal",
     value: Number.parseFloat(path.value),
   };
 }
@@ -366,45 +358,20 @@ function getAnnotations(paths: PlotPath[]) {
   });
 }
 
-type YAxesInterface = { minY: number; maxY: number; scaleId: string };
-// min/maxYValue is NaN when it's unset, and an actual number otherwise.
-const yAxes = createSelector<YAxesInterface, unknown, Chart.ChartYAxe[], unknown>(
-  // @ts-expect-error investigate correct argument here
-  (params) => params,
-  ({ minY, maxY, scaleId }: YAxesInterface) => {
-    const min = isNaN(minY) ? undefined : minY;
-    const max = isNaN(maxY) ? undefined : maxY;
-    return [
-      {
-        id: scaleId,
-        ticks: {
-          min,
-          max,
-          precision: 3,
-        },
-        gridLines: {
-          color: "rgba(255, 255, 255, 0.2)",
-          zeroLineColor: "rgba(255, 255, 255, 0.2)",
-        },
-      },
-    ];
-  },
-);
-
 type PlotChartProps = {
   paths: PlotPath[];
   minYValue: number;
   maxYValue: number;
   saveCurrentView: (minY: number, maxY: number, width?: number) => void;
-  datasets: DataSet[];
+  datasets: ComponentProps<typeof TimeBasedChart>["data"]["datasets"];
   tooltips: TimeBasedChartTooltipData[];
   xAxisVal: PlotXAxisVal;
   currentTime?: number;
   defaultView: ChartDefaultView;
   onClick?: (
-    arg0: React.MouseEvent<HTMLCanvasElement>,
-    arg1: unknown,
-    arg2: {
+    ev: React.MouseEvent<HTMLCanvasElement>,
+    datalabel: unknown,
+    values: {
       [scaleId: string]: number;
     },
   ) => void;
@@ -422,32 +389,49 @@ export default memo<PlotChartProps>(function PlotChart(props: PlotChartProps) {
     tooltips,
     xAxisVal,
   } = props;
-  const annotations = getAnnotations(paths);
+
+  const annotations = useMemo(() => getAnnotations(paths), [paths]);
+
+  const yAxes = useMemo((): ScaleOptions => {
+    const min = isNaN(minYValue) ? undefined : minYValue;
+    const max = isNaN(maxYValue) ? undefined : maxYValue;
+    return {
+      min,
+      max,
+      ticks: {
+        precision: 3,
+      },
+      grid: {
+        color: "rgba(255, 255, 255, 0.2)",
+      },
+    };
+  }, [maxYValue, minYValue]);
+
+  const { width, height, ref: sizeRef } = useResizeDetector();
+
+  const data = useMemo(() => {
+    return { datasets };
+  }, [datasets]);
 
   return (
-    <div className={styles.root}>
-      <Dimensions>
-        {({ width, height }) => (
-          <TimeBasedChart // Force a redraw every time the x-axis value changes.
-            key={xAxisVal}
-            isSynced
-            zoom
-            width={width}
-            height={height}
-            data={{ datasets }}
-            tooltips={tooltips}
-            annotations={annotations}
-            type="scatter"
-            yAxes={yAxes({ minY: minYValue, maxY: maxYValue, scaleId: Y_AXIS_ID })}
-            saveCurrentView={saveCurrentView}
-            xAxisIsPlaybackTime={xAxisVal === "timestamp"}
-            scaleOptions={scaleOptions}
-            currentTime={currentTime}
-            defaultView={defaultView}
-            onClick={onClick}
-          />
-        )}
-      </Dimensions>
+    <div className={styles.root} ref={sizeRef}>
+      <TimeBasedChart
+        key={xAxisVal}
+        isSynced
+        zoom
+        width={width ?? 0}
+        height={height ?? 0}
+        data={data}
+        tooltips={tooltips}
+        annotations={annotations}
+        type="scatter"
+        yAxes={yAxes}
+        saveCurrentView={saveCurrentView}
+        xAxisIsPlaybackTime={xAxisVal === "timestamp"}
+        currentTime={currentTime}
+        defaultView={defaultView}
+        onClick={onClick}
+      />
     </div>
   );
 });

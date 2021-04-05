@@ -10,10 +10,19 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import { ChartOptions, ChartData, ScaleOptions, ScatterDataPoint } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
-import { max, min, flatten, sortedUniqBy, uniqBy } from "lodash";
-import React, { memo, useEffect, useCallback, useState, useRef } from "react";
-import DocumentEvents from "react-document-events";
+import { ZoomOptions } from "chartjs-plugin-zoom/types/options";
+import React, {
+  memo,
+  useEffect,
+  useCallback,
+  useState,
+  useRef,
+  ComponentProps,
+  useMemo,
+  MouseEvent,
+} from "react";
 import ReactDOM from "react-dom";
 import { useDispatch } from "react-redux";
 import { Time } from "rosbag";
@@ -22,41 +31,25 @@ import { v4 as uuidv4 } from "uuid";
 
 import { clearHoverValue, setHoverValue } from "@foxglove-studio/app/actions/hoverValue";
 import Button from "@foxglove-studio/app/components/Button";
+import ChartComponent from "@foxglove-studio/app/components/Chart/index";
+import { RpcElement, RpcScales } from "@foxglove-studio/app/components/Chart/types";
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
 import {
   MessageAndData,
   MessagePathDataItem,
 } from "@foxglove-studio/app/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
-import ChartComponent, {
-  HoveredElement,
-  ScaleOptions,
-} from "@foxglove-studio/app/components/ReactChartjs";
-import {
-  getChartValue,
-  inBounds,
-  ScaleBounds,
-} from "@foxglove-studio/app/components/ReactChartjs/zoomAndPanHelpers";
 import TimeBasedChartLegend from "@foxglove-studio/app/components/TimeBasedChart/TimeBasedChartLegend";
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
-import createSyncingComponent from "@foxglove-studio/app/components/createSyncingComponent";
+import makeGlobalState from "@foxglove-studio/app/components/TimeBasedChart/makeGlobalState";
 import mixins from "@foxglove-studio/app/styles/mixins.module.scss";
 import { isBobject } from "@foxglove-studio/app/util/binaryObjects";
+import filterMap from "@foxglove-studio/app/util/filterMap";
 import { useDeepChangeDetector } from "@foxglove-studio/app/util/hooks";
 import { defaultGetHeaderStamp } from "@foxglove-studio/app/util/synchronizeMessages";
 import { maybeGetBobjectHeaderStamp } from "@foxglove-studio/app/util/time";
 
 import HoverBar from "./HoverBar";
 import TimeBasedChartTooltip from "./TimeBasedChartTooltip";
-
-type Bounds = { minX?: number; maxX?: number };
-const SyncTimeAxis = createSyncingComponent<Bounds, Bounds>(
-  "SyncTimeAxis",
-  (dataItems: Bounds[]) => ({
-    minX: min(dataItems.map(({ minX }) => (minX == undefined ? undefined : minX))),
-    maxX: max(dataItems.map(({ maxX }) => (maxX == undefined ? undefined : maxX))),
-  }),
-);
 
 export type TooltipItem = {
   queriedData: MessagePathDataItem[];
@@ -82,13 +75,6 @@ export type TimeBasedChartTooltipData = {
   constantName?: string;
   startTime: Time;
   source?: number;
-};
-
-export type DataPoint = {
-  x: number;
-  y: number | string;
-  label?: string;
-  labelColor?: string;
 };
 
 const SRoot = styled.div`
@@ -126,77 +112,91 @@ const SBar = styled.div<{ xAxisIsPlaybackTime: boolean }>`
   border-width: ${(props) => (props.xAxisIsPlaybackTime ? "4px" : "0px 4px")};
 `;
 
-// Sometimes a click gets fired at the end of a pan. Probably subtle touchpad stuff. Ignore "clicks"
-// that happen too soon after a pan.
-const PAN_CLICK_SUPPRESS_THRESHOLD_MS = 100;
-// Drag-pans and playback following sometimes fight. We suppress automatic following moves during
-// drag pans to avoid it.
-const FOLLOW_PLAYBACK_PAN_THRESHOLD_MS = 100;
-
-const MemoizedTooltips = memo(function Tooltips() {
-  return (
-    <>
-      <Tooltip contents={<div>Hold v to zoom vertically, or b to zoom both axes</div>} delay={0}>
-        <div style={{ position: "absolute", left: 0, top: 0, width: 30, bottom: 0 }} />
-      </Tooltip>
-    </>
-  );
-});
-
-const STEP_SIZES = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 15, 30, 60];
-const stepSize = ({ min: minValue, max: maxValue, minAlongAxis, maxAlongAxis }: ScaleBounds) => {
-  // Pick the smallest step size that gives lines greater than 50px apart
-  const secondsPer50Pixels = 50 * ((maxValue - minValue) / (maxAlongAxis - minAlongAxis));
-  return STEP_SIZES.find((step) => step > secondsPer50Pixels) ?? 60;
-};
-
 type FollowPlaybackState = Readonly<{
   xOffsetMin: number; // -1 means the left edge of the plot is one second before the current time.
   xOffsetMax: number; // 1 means the right edge of the plot is one second after the current time.
 }>;
 
-type Point = Readonly<{ x: number; y: number | string }>;
-
-type DataSet = Readonly<{
-  data: readonly Point[];
-  label: string;
-  borderDash?: readonly number[];
-  color?: string;
-  showLine?: boolean;
-}>;
-
-const scalePerPixel = (bounds?: ScaleBounds): number | undefined =>
-  bounds && Math.abs(bounds.max - bounds.min) / Math.abs(bounds.maxAlongAxis - bounds.minAlongAxis);
-const screenCoord = (value: number, valuePerPixel?: number) =>
-  !valuePerPixel ? value : Math.trunc(value / valuePerPixel);
-const datumStringPixel = (
-  { x, y }: Point,
-  xScale: number | undefined,
-  yScale: number | undefined,
-): string => `${screenCoord(x, xScale)},${typeof y === "string" ? y : screenCoord(y, yScale)}`;
+// Chartjs typings use _null_ to indicate _gaps_ in the dataset
+// eslint-disable-next-line no-restricted-syntax
+type Data = ChartData<"scatter", (ScatterDataPoint | null)[]>;
+type DataSet = Data["datasets"][0];
 
 // Exported for tests
-export const filterDatasets = (
+export function filterDatasets(
   datasets: readonly DataSet[],
   linesToHide: {
     [key: string]: boolean;
   },
-  xScalePerPixel?: number,
-  yScalePerPixel?: number,
-): DataSet[] =>
-  datasets // Only draw enabled lines. Needed for correctness.
-    .filter(({ label }) => !linesToHide[label]) // Remove redundant points to make drawing the chart more efficient.
-    .map((dataset) => {
-      const data = dataset.showLine // For line charts, just remove adjacent points on top of each other so we can draw self-
-        ? // intersecting (loopy) lines.
-          sortedUniqBy(dataset.data.slice(), (datum) =>
-            datumStringPixel(datum, xScalePerPixel, yScalePerPixel),
-          ) // For scatter charts there's no point in drawing any overlapping points.
-        : uniqBy(dataset.data.slice(), (datum) =>
-            datumStringPixel(datum, xScalePerPixel, yScalePerPixel),
-          );
-      return { ...dataset, data };
+  width: number,
+  height: number,
+  bounds?: { x: { min: number; max: number }; y: { min: number; max: number } },
+): DataSet[] {
+  return filterMap(datasets, (dataset) => {
+    const { label } = dataset;
+    if ((label === undefined || linesToHide[label]) ?? false) {
+      return;
+    }
+
+    // we don't have any bounds to filter the dataset on, it goes unfiltered
+    if (!bounds) {
+      // NaN item values are now allowed, instead we convert these to undefined entries
+      // which will create _gaps_ in the line
+      const nanToNulldata = dataset.data.map((item) => {
+        if (item == undefined || isNaN(item.x) || isNaN(item.y)) {
+          // Chartjs typings use _null_
+          // eslint-disable-next-line no-restricted-syntax
+          return null;
+        }
+        return item;
+      });
+
+      return { ...dataset, data: nanToNulldata };
+    }
+
+    const pixelPerXValue = width / (bounds.x.max - bounds.x.min);
+    const pixelPerYValue = height / (bounds.y.max - bounds.y.min);
+
+    let prev: ScatterDataPoint | undefined;
+    const data = filterMap(dataset.data, (datum) => {
+      if (!datum || isNaN(datum.x) || isNaN(datum.y)) {
+        return datum;
+      }
+
+      if (!prev) {
+        prev = datum;
+        return datum;
+      }
+
+      const pixelXDistance = (datum.x - prev.x) * pixelPerXValue;
+      const pixelYDistance = (datum.y - prev.y) * pixelPerYValue;
+
+      if (pixelXDistance < 4 && pixelYDistance < 4) {
+        return;
+      }
+
+      prev = datum;
+      return datum;
     });
+
+    // NaN item values are now allowed, instead we convert these to undefined entries
+    // which will create _gaps_ in the line
+    const nanToNulldata = data.map((item) => {
+      if (item == undefined || isNaN(item.x) || isNaN(item.y)) {
+        // Chartjs typings use _null_
+        // eslint-disable-next-line no-restricted-syntax
+        return null;
+      }
+      return item;
+    });
+
+    return { ...dataset, data: nanToNulldata };
+  });
+}
+
+// only sync the x axis and allow y-axis scales to auto-calculate
+type SyncBounds = { min: number; max: number; userInteraction: boolean };
+const useGlobalXBounds = makeGlobalState<SyncBounds>();
 
 // Calculation mode for the "reset view" view.
 export type ChartDefaultView =
@@ -205,14 +205,14 @@ export type ChartDefaultView =
   | { type: "following"; width: number };
 
 export type Props = {
-  type: "scatter" | "multicolorLine";
+  type: "scatter";
   width: number;
   height: number;
   zoom: boolean;
-  data: { datasets: readonly DataSet[]; yLabels?: readonly string[]; minIsZero?: boolean };
+  data: Data;
   tooltips?: TimeBasedChartTooltipData[];
-  xAxes?: Chart.ChartXAxe[];
-  yAxes: Chart.ChartYAxe[];
+  xAxes?: ScaleOptions;
+  yAxes: ScaleOptions;
   annotations?: AnnotationOptions[];
   drawLegend?: boolean;
   isSynced?: boolean;
@@ -223,8 +223,8 @@ export type Props = {
   };
   datasetId?: string;
   onClick?: (
-    arg0: React.MouseEvent<HTMLCanvasElement>,
-    datalabel: ScaleBounds[] | undefined,
+    ev: React.MouseEvent<HTMLCanvasElement>,
+    datalabel: unknown,
     values: {
       [axis: string]: number;
     },
@@ -233,8 +233,7 @@ export type Props = {
   // If the x axis represents playback time ("timestamp"), the hover cursor will be synced.
   // Note, this setting should not be used for other time values.
   xAxisIsPlaybackTime: boolean;
-  plugins?: Chart.ChartPluginsOptions;
-  scaleOptions?: ScaleOptions;
+  plugins?: ChartOptions["plugins"];
   currentTime?: number;
   defaultView?: ChartDefaultView;
 };
@@ -244,146 +243,176 @@ export type Props = {
 // component. Uses chart.js internally, with a zoom/pan plugin, and with our
 // standard tooltips.
 export default memo<Props>(function TimeBasedChart(props: Props) {
-  const chartComponent = useRef<ChartComponent>(ReactNull);
-  const tooltip = useRef<HTMLDivElement>(ReactNull);
+  const {
+    datasetId,
+    type,
+    width,
+    height,
+    drawLegend,
+    canToggleLines,
+    toggleLine,
+    data,
+    isSynced = false,
+    tooltips,
+    yAxes,
+    xAxes,
+    defaultView,
+    currentTime,
+    xAxisIsPlaybackTime,
+  } = props;
+
+  const tooltipRef = useRef<HTMLDivElement>(ReactNull);
   const hasUnmounted = useRef<boolean>(false);
+  const canvasContainer = useRef<HTMLDivElement>(ReactNull);
 
   const [hasUserPannedOrZoomed, setHasUserPannedOrZoomed] = useState<boolean>(false);
-  const [followPlaybackState, setFollowPlaybackState] = useState<FollowPlaybackState | undefined>(
-    undefined,
-  );
-  const [, forceUpdate] = useState(0);
-
-  const onVisibilityChange = useCallback(() => {
-    if (document.visibilityState === "visible") {
-      // HACK: There is a Chrome bug that causes 2d canvas elements to get cleared when the page
-      // becomes hidden on certain hardware:
-      // https://bugs.chromium.org/p/chromium/issues/detail?id=588434
-      // https://bugs.chromium.org/p/chromium/issues/detail?id=591374
-      // We can hack around this by forcing a re-render when the page becomes visible again.
-      // There may be other canvases that this affects, but these seemed like the most important.
-      // Ideally we can find a global workaround but we're not sure there is one — can't just
-      // twiddle the width/height attribute of the canvas as suggested in one of the comments on
-      // a chrome bug; it seems like you really have to redraw the frame from scratch.
-      forceUpdate((old) => ++old);
-    }
-  }, [forceUpdate]);
-  useEffect(() => {
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-    };
-  }, [onVisibilityChange]);
+  const [followPlaybackState, setFollowPlaybackState] = useState<FollowPlaybackState | undefined>();
 
   const pauseFrame = useMessagePipeline(
     useCallback((messagePipeline) => messagePipeline.pauseFrame, []),
   );
 
+  // when data changes, we pause and wait for onChartUpdate to resume
+  const resumeFrame = useRef<() => void | undefined>();
+
+  // resumes any paused frames
+  // since we render in a web-worker we need to pause/resume the message pipeline to keep
+  // our plot rendeirng in-sync with data rendered elsewhere in the app
   const onChartUpdate = useCallback(() => {
-    const resumeFrame = pauseFrame("TimeBasedChart");
-    return () => {
-      resumeFrame();
-    };
-  }, [pauseFrame]);
+    resumeFrame.current?.();
+    resumeFrame.current = undefined;
+  }, []);
 
-  const { saveCurrentView, yAxes } = props;
-  const scaleBounds = useRef<readonly ScaleBounds[] | undefined>();
   const hoverBar = useRef<HTMLDivElement>(ReactNull);
-  const onScaleBoundsUpdate = useCallback(
-    (scales: ScaleBounds[]) => {
-      scaleBounds.current = scales;
-      const firstYScale = scales.find(({ axes }) => axes === "yAxes");
-      const firstXScale = scales.find(({ axes }) => axes === "xAxes");
-      const width = firstXScale && firstXScale.max - firstXScale.min;
-      if (
-        firstYScale &&
-        saveCurrentView &&
-        typeof firstYScale.min === "number" &&
-        typeof firstYScale.max === "number"
-      ) {
-        saveCurrentView(firstYScale.min, firstYScale.max, width);
-      }
-      if (firstYScale != undefined && hoverBar.current != undefined) {
-        const { current } = hoverBar;
-        const topPx = Math.min(firstYScale.minAlongAxis, firstYScale.maxAlongAxis);
-        const bottomPx = Math.max(firstYScale.minAlongAxis, firstYScale.maxAlongAxis);
-        current.style.top = `${topPx}px`;
-        current.style.height = `${bottomPx - topPx}px`;
-      }
-    },
-    [saveCurrentView, scaleBounds],
-  );
+  const isUserInteraction = useRef(false);
 
-  const { onClick } = props;
-  const lastPanTime = useRef<Date | undefined>();
+  const [currentScales, setCurrentScales] = useState<RpcScales | undefined>();
+  const [globalBounds, setGlobalBounds] = useGlobalXBounds({ enabled: isSynced });
 
-  const onClickAddingValues = useCallback(
-    (ev: React.MouseEvent<HTMLCanvasElement>, datalabel: ScaleBounds[] | undefined) => {
-      if (!onClick) {
-        return;
-      }
-      if (
-        lastPanTime.current &&
-        // @ts-expect-error while valid js we should fix this arithmatic operation on dates
-        new Date() - lastPanTime.current < PAN_CLICK_SUPPRESS_THRESHOLD_MS
-      ) {
-        // Ignore clicks that happen too soon after a pan. Sometimes clicks get fired at the end of
-        // drags on touchpads.
-        return;
-      }
-      const values: { [id: string]: number } = {};
-      (scaleBounds.current ?? []).forEach((bounds) => {
-        const chartPx =
-          bounds.axes === "xAxes"
-            ? ev.clientX - (ev.target as Element).getBoundingClientRect().x
-            : ev.clientY - (ev.target as Element).getBoundingClientRect().y;
-        const value = getChartValue(bounds, chartPx);
-        if (value == undefined) {
-          return;
+  const { labels, datasets } = data;
+
+  const linesToHide = useMemo(() => props.linesToHide ?? {}, [props.linesToHide]);
+
+  useEffect(() => {
+    // see notes for onChartUpdate
+    resumeFrame.current = pauseFrame("TimeBasedChart");
+
+    // cleanup pased frames on unmount or dataset changes
+    return () => {
+      resumeFrame.current?.();
+      resumeFrame.current = undefined;
+    };
+  }, [pauseFrame, datasets]);
+
+  // some callbacks don't need to re-create when the current scales change, so we keep a ref
+  const currentScalesRef = useRef<RpcScales | undefined>(currentScales);
+  useEffect(() => {
+    currentScalesRef.current = currentScales;
+  }, [currentScales]);
+
+  // calculates the minX/maxX for all our datasets
+  // we do this on the unfiltered datasets because we need the bounds to properly filter adjacent points
+  const datasetXBounds = useMemo(() => {
+    let min;
+    let max;
+
+    for (const dataset of datasets) {
+      for (const item of dataset.data) {
+        if (item == undefined || isNaN(item.x) || isNaN(item.y)) {
+          continue;
         }
-        values[bounds.id] = value;
-      });
-      return onClick(ev, datalabel, values);
-    },
-    [onClick, scaleBounds, lastPanTime],
-  );
+        min = Math.min(min ?? item.x, item.x);
+        max = Math.max(max ?? item.x, item.x);
+      }
+    }
 
-  // Keep a ref to props.currentTime so onPanZoom can have stable identity
-  const currentTimeRef = useRef<number | undefined>();
-  currentTimeRef.current = props.currentTime;
-  const onPanZoom = useCallback(
-    (newScaleBounds: ScaleBounds[]) => {
-      if (!hasUserPannedOrZoomed) {
-        setHasUserPannedOrZoomed(true);
+    // if the min/max are the same, let chart component decide the bounds
+    // otherwise we end up with no x-axis
+    if (min === max) {
+      return;
+    }
+
+    if (min == undefined || max == undefined) {
+      return;
+    }
+
+    return { min, max };
+  }, [datasets]);
+
+  // handle setting the sync value on updates to our scales
+  useEffect(() => {
+    // no need to update sync values if we are not syncing
+    if (!isSynced || !currentScales?.x) {
+      return;
+    }
+
+    // the change is a result of user interaction on our chart
+    // we definitely set the sync scale value so other charts follow our zoom/pan behavior
+    if (isUserInteraction.current) {
+      setGlobalBounds({
+        min: currentScales.x.min,
+        max: currentScales.x.max,
+        userInteraction: isUserInteraction.current,
+      });
+      return;
+    }
+
+    // the scales changed due to new data or another non-user initiated event
+    // the sync value is conditionally set depending on the state of the existing sync value
+    setGlobalBounds((old) => {
+      // no scale from our plot, always use old value
+      const xScale = currentScales?.x;
+      if (!xScale) {
+        return old;
       }
-      // Preloaded plots follow playback at a fixed zoom and x-offset unless the user is in the
-      // initial "zoom to fit" state. Subsequent zooms/pans adjust the offsets.
-      const bounds = newScaleBounds.find(({ axes }) => axes === "xAxes");
-      if (
-        bounds?.min != undefined &&
-        bounds.max != undefined &&
-        currentTimeRef.current != undefined
-      ) {
-        const currentTime = currentTimeRef.current;
-        setFollowPlaybackState({
-          xOffsetMin: bounds.min - currentTime,
-          xOffsetMax: bounds.max - currentTime,
-        });
+
+      // no old value for sync, initialize with our value
+      if (!old) {
+        return {
+          min: xScale.min,
+          max: xScale.max,
+          userInteraction: false,
+        };
       }
-      lastPanTime.current = new Date();
-    },
-    [hasUserPannedOrZoomed],
-  );
+
+      // give preference to an old value set via user interaction
+      // note that updates due to _our_ user interaction are set earlier
+      if (old.userInteraction) {
+        return old;
+      }
+
+      // calculate min/max based on old value and our new scale
+      const newMin = Math.min(xScale.min, old.min);
+      const newMax = Math.max(xScale.max, old.max);
+
+      // avoid making a new sync object if the existing one matches our range
+      // avoids infinite set states
+      if (old.max === newMax && old.min === newMin) {
+        return old;
+      }
+
+      // existing value does not match our new range, update the global sync value
+      return {
+        min: newMin,
+        max: newMax,
+        userInteraction: false,
+      };
+    });
+  }, [isSynced, currentScales, setGlobalBounds]);
 
   const onResetZoom = useCallback(() => {
-    if (chartComponent.current) {
-      chartComponent.current.resetZoom();
-      setHasUserPannedOrZoomed(false);
-    }
     setFollowPlaybackState(undefined);
-  }, [setHasUserPannedOrZoomed, setFollowPlaybackState]);
+    setHasUserPannedOrZoomed(false);
 
-  if (useDeepChangeDetector([props.defaultView], false)) {
+    // clearing the global bounds will make all panels reset to their data sets
+    // which will cause all to re-sync to the min/max ranges for any panels without user interaction
+    if (isSynced) {
+      isUserInteraction.current = false;
+      setGlobalBounds(undefined);
+    }
+  }, [isSynced, setGlobalBounds]);
+
+  if (useDeepChangeDetector([defaultView], false)) {
     // Reset the view to the default when the default changes.
     if (hasUserPannedOrZoomed) {
       setHasUserPannedOrZoomed(false);
@@ -395,12 +424,16 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
 
   const [hasVerticalExclusiveZoom, setHasVerticalExclusiveZoom] = useState<boolean>(false);
   const [hasBothAxesZoom, setHasBothAxesZoom] = useState<boolean>(false);
-  let zoomMode = "x";
-  if (hasVerticalExclusiveZoom) {
-    zoomMode = "y";
-  } else if (hasBothAxesZoom) {
-    zoomMode = "xy";
-  }
+
+  const zoomMode = useMemo<ZoomOptions["mode"]>(() => {
+    if (hasVerticalExclusiveZoom) {
+      return "y";
+    } else if (hasBothAxesZoom) {
+      return "xy";
+    }
+    return "x";
+  }, [hasBothAxesZoom, hasVerticalExclusiveZoom]);
+
   const keyDownHandlers = React.useMemo(
     () => ({
       v: () => setHasVerticalExclusiveZoom(true),
@@ -417,14 +450,15 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   );
 
   const removeTooltip = useCallback(() => {
-    if (tooltip.current) {
-      ReactDOM.unmountComponentAtNode(tooltip.current);
+    if (tooltipRef.current) {
+      ReactDOM.unmountComponentAtNode(tooltipRef.current);
     }
-    if (tooltip.current?.parentNode) {
-      tooltip.current.parentNode.removeChild(tooltip.current);
-      tooltip.current = ReactNull;
+    if (tooltipRef.current?.parentNode) {
+      tooltipRef.current.parentNode.removeChild(tooltipRef.current);
+      tooltipRef.current = ReactNull;
     }
   }, []);
+
   // Always clean up tooltips when unmounting.
   useEffect(() => {
     return () => {
@@ -433,61 +467,49 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     };
   }, [removeTooltip]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const tooltips = props.tooltips ?? [];
   // We use a custom tooltip so we can style it more nicely, and so that it can break
   // out of the bounds of the canvas, in case the panel is small.
   const updateTooltip = useCallback(
-    (
-      currentChartComponent: ChartComponent,
-      canvas: HTMLCanvasElement,
-      tooltipItem: HoveredElement | undefined,
-    ) => {
+    (element?: RpcElement) => {
       // This is an async callback, so it can fire after this component is unmounted. Make sure that we remove the
       // tooltip if this fires after unmount.
-      if (!tooltipItem || hasUnmounted.current) {
+      if (!element || hasUnmounted.current) {
         return removeTooltip();
       }
 
-      // We have to iterate through all of the tooltips every time the user hovers over a point. However, the cost of
-      // running this search is small (< 10ms even with many tooltips) compared to the cost of indexing tooltips by
-      // coordinates and we care more about render time than tooltip responsiveness.
-      const tooltipData = tooltips.find(
-        (_tooltip) =>
-          _tooltip.x === tooltipItem.data.x && String(_tooltip.y) === String(tooltipItem.data.y),
+      // Locate the tooltip for our data
+      // We do a lazy linear find for now - a perf on this vs map lookups might be useful
+      // Note then you need to make keys from x/y points
+      const tooltipData = tooltips?.find(
+        (item) => item.x === element.data?.x && item.y === element.data?.y,
       );
       if (!tooltipData) {
         return removeTooltip();
       }
 
-      if (!tooltip.current) {
-        tooltip.current = document.createElement("div");
-        if (canvas.parentNode) {
-          canvas.parentNode.appendChild(tooltip.current);
-        }
+      if (!tooltipRef.current) {
+        tooltipRef.current = document.createElement("div");
+        canvasContainer.current?.parentNode?.appendChild(tooltipRef.current);
       }
 
-      if (tooltip.current) {
-        ReactDOM.render(
-          <TimeBasedChartTooltip tooltip={tooltipData}>
-            <div
-              style={{
-                position: "absolute",
-                left: 0,
-                top: 0,
-                transform: `translate(${tooltipItem.view.x}px, ${tooltipItem.view.y}px)`,
-              }}
-            />
-          </TimeBasedChartTooltip>,
-          tooltip.current,
-        );
-      }
+      ReactDOM.render(
+        <TimeBasedChartTooltip tooltip={tooltipData}>
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              transform: `translate(${element.view.x}px, ${element.view.y}px)`,
+            }}
+          />
+        </TimeBasedChartTooltip>,
+        tooltipRef.current,
+      );
     },
     [removeTooltip, tooltips],
   );
 
   const [hoverComponentId] = useState(() => uuidv4());
-  const { xAxisIsPlaybackTime } = props;
   const dispatch = useDispatch();
   const clearGlobalHoverTime = useCallback(
     () => dispatch(clearHoverValue({ componentId: hoverComponentId })),
@@ -505,230 +527,243 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     [dispatch, hoverComponentId, xAxisIsPlaybackTime],
   );
 
+  const onMouseOut = useCallback(() => {
+    removeTooltip();
+    clearGlobalHoverTime();
+  }, [clearGlobalHoverTime, removeTooltip]);
+
+  // currentScalesRef is used because we don't need to change this callback content when the scales change
+  // this does mean that scale changes don't remove tooltips - which is a future enhancement
   const onMouseMove = useCallback(
-    async (event: MouseEvent) => {
-      const currentChartComponent = chartComponent.current;
-      if (!currentChartComponent || !currentChartComponent.canvas) {
-        removeTooltip();
-        clearGlobalHoverTime();
-        return;
-      }
-      const { canvas } = currentChartComponent;
-      const canvasRect = canvas.getBoundingClientRect();
-      const xBounds = scaleBounds.current?.find(({ axes }) => axes === "xAxes");
-      const yBounds = scaleBounds.current?.find(({ axes }) => axes === "yAxes");
-      const xMousePosition = event.pageX - canvasRect.left;
-      const yMousePosition = event.pageY - canvasRect.top;
-      const isTargetingCanvas = event.target === canvas;
-      if (
-        !inBounds(xMousePosition, xBounds) ||
-        !inBounds(yMousePosition, yBounds) ||
-        !isTargetingCanvas
-      ) {
+    (event: MouseEvent<HTMLDivElement>) => {
+      const xScale = currentScalesRef.current?.x;
+      if (!xScale || !canvasContainer.current) {
         removeTooltip();
         clearGlobalHoverTime();
         return;
       }
 
-      const value = getChartValue(xBounds, xMousePosition);
-      if (value != undefined) {
-        setGlobalHoverTime(value);
-      } else {
+      const canvasContainerRect = canvasContainer.current.getBoundingClientRect();
+      const mouseX = event.pageX - canvasContainerRect.left;
+      const pixels = xScale.right - xScale.left;
+      const range = xScale.max - xScale.min;
+      const xVal = (range / pixels) * (mouseX - xScale.left) + xScale.min;
+
+      const xInBounds = xVal >= xScale.min && xVal <= xScale.max;
+      if (!xInBounds || isNaN(xVal)) {
+        removeTooltip();
         clearGlobalHoverTime();
+        return;
       }
 
-      if (tooltips?.length) {
-        const tooltipElement = await currentChartComponent.getElementAtXAxis(event);
-        updateTooltip(currentChartComponent, canvas, tooltipElement);
-      } else {
-        removeTooltip();
-      }
+      setGlobalHoverTime(xVal);
     },
-    [updateTooltip, removeTooltip, tooltips, clearGlobalHoverTime, setGlobalHoverTime, scaleBounds],
+    [setGlobalHoverTime, removeTooltip, clearGlobalHoverTime],
   );
 
-  // Normally we set the x axis step-size and display automatically, but we need consistency when
-  // scrolling with playback because the vertical lines can flicker, and x axis labels can have an
-  // inconsistent number of digits.
-  const xBounds = scaleBounds.current?.find(({ axes }) => axes === "xAxes");
-  const yBounds = scaleBounds.current?.find(({ axes }) => axes === "yAxes");
+  const plugins = useMemo<ChartOptions["plugins"]>(() => {
+    const annotations: AnnotationOptions[] = [...(props.annotations ?? [])];
 
-  const xScaleOptions = followPlaybackState && xBounds ? stepSize(xBounds) : undefined;
-
-  const getChartjsOptions = (minX: number | undefined, maxX?: number) => {
-    const { currentTime } = props;
-    const plugins = props.plugins ?? {};
-    const annotations = [...(props.annotations ?? [])];
-
-    // We create these objects every time so that they can be modified.
-    const defaultXTicksSettings = {
-      fontFamily: mixins.monospaceFont,
-      fontSize: 10,
-      fontColor: "#eee",
-      maxRotation: 0,
-      stepSize: xScaleOptions,
-    };
-    const defaultYTicksSettings = {
-      fontFamily: mixins.monospaceFont,
-      fontSize: 10,
-      fontColor: "#eee",
-      padding: 0,
-    };
-    const defaultXAxis = {
-      id: "X_AXIS_ID",
-      ticks: defaultXTicksSettings,
-      gridLines: { color: "rgba(255, 255, 255, 0.2)", zeroLineColor: "rgba(255, 255, 255, 0.2)" },
-    };
-    const xAxes: Chart.ChartXAxe[] = props.xAxes
-      ? props.xAxes.map((xAxis) => ({
-          ...defaultXAxis,
-          ...xAxis,
-          ticks: {
-            ...defaultXTicksSettings,
-            ...xAxis.ticks,
-          },
-        }))
-      : [defaultXAxis];
     if (currentTime != undefined) {
       annotations.push({
         type: "line",
         drawTime: "beforeDatasetsDraw",
-        scaleID: "X_AXIS_ID",
+        scaleID: "x",
         borderColor: "#aaa",
         borderWidth: 1,
-        mode: "vertical",
         value: currentTime,
       });
     }
 
-    const options: Chart.ChartOptions = {
+    return {
+      decimation: {
+        enabled: true,
+      },
+      legend: {
+        display: false,
+      },
+      datalabels: {
+        display: false,
+      },
+      tooltip: {
+        intersect: false,
+        mode: "x",
+        enabled: false, // Disable native tooltips since we use custom ones.
+      },
+      zoom: {
+        zoom: {
+          enabled: props.zoom,
+          mode: zoomMode,
+          sensitivity: 3,
+          speed: 0.1,
+        },
+        pan: {
+          mode: "xy",
+          enabled: true,
+          speed: 20,
+          threshold: 10,
+        },
+      },
+      ...props.plugins,
+      annotation: { annotations },
+    };
+  }, [currentTime, props.annotations, props.plugins, props.zoom, zoomMode]);
+
+  const xScale = useMemo<ScaleOptions>(() => {
+    const defaultXTicksSettings: ScaleOptions["ticks"] = {
+      font: {
+        family: mixins.monospaceFont,
+        size: 10,
+      },
+      color: "#eee",
+      maxRotation: 0,
+    };
+
+    let min: number | undefined;
+    let max: number | undefined;
+
+    // if the user has interacted with our chart locally, we ignore any global sync or local data ranges
+    if (!hasUserPannedOrZoomed) {
+      // default to dataset bounds
+      if (datasetXBounds) {
+        min = datasetXBounds.min;
+        max = datasetXBounds.max;
+      }
+
+      // if we are syncing and have global bounds there are two possibilities
+      // 1. the global bounds are from user interaction, we use that unconditionally
+      // 2. the global bounds are min/max with our dataset bounds
+      if (isSynced && globalBounds) {
+        if (globalBounds.userInteraction) {
+          min = globalBounds.min;
+          max = globalBounds.max;
+        } else {
+          min = Math.min(min ?? globalBounds.min, globalBounds.min);
+          max = Math.max(max ?? globalBounds.max, globalBounds.max);
+        }
+      }
+    }
+
+    return {
+      grid: { color: "rgba(255, 255, 255, 0.2)" },
+      ...xAxes,
+      ...{ min, max },
+      ticks: {
+        ...defaultXTicksSettings,
+        ...xAxes?.ticks,
+      },
+    };
+  }, [datasetXBounds, globalBounds, hasUserPannedOrZoomed, isSynced, xAxes]);
+
+  // we don't sync the y-axis bounds
+  const yScale = useMemo<ScaleOptions>(() => {
+    const defaultYTicksSettings: ScaleOptions["ticks"] = {
+      font: {
+        family: mixins.monospaceFont,
+        size: 10,
+      },
+      color: "#eee",
+      padding: 0,
+    };
+
+    return {
+      type: "linear",
+      ...yAxes,
+      ticks: {
+        ...defaultYTicksSettings,
+        ...yAxes.ticks,
+      },
+    } as ScaleOptions;
+  }, [yAxes]);
+
+  // changing the dataset bounds can change the current scales which then cache busts the
+  // dataMemo which could then change the scales. This creates a state update cycle and slows down rendering.
+  // Instead we
+  const [bustDataMemo, setBustDataMemo] = useState(0);
+  useEffect(() => {
+    if (isUserInteraction.current) {
+      setBustDataMemo((old) => ++old);
+    }
+  }, [currentScales]);
+
+  // Filter the dataset down to what can be shows to the user
+  // this ignores out of bounds points and points that are too close together
+  // we use either automatically calculated bounds (xScale) or the currentScale
+  // if the user is manually controlling the component
+  const dataMemo = useMemo(() => {
+    bustDataMemo; // to appease exchaustive lint hooks
+    const currentScalesLocal = currentScalesRef.current;
+
+    let bounds:
+      | { x: { min: number; max: number }; y: { min: number; max: number } }
+      | undefined = undefined;
+    if (currentScalesLocal?.x && currentScalesLocal?.y) {
+      bounds = {
+        x: {
+          min: currentScalesLocal.x.min,
+          max: currentScalesLocal.x.max,
+        },
+        y: {
+          min: currentScalesLocal.y.min,
+          max: currentScalesLocal.y.max,
+        },
+      };
+    }
+
+    const filtered = filterDatasets(datasets, linesToHide, width, height, bounds);
+
+    return {
+      labels,
+      datasets: filtered,
+    };
+  }, [bustDataMemo, datasets, linesToHide, width, height, labels]);
+
+  const options = useMemo<ChartOptions>(() => {
+    return {
       maintainAspectRatio: false,
       animation: { duration: 0 },
-      responsiveAnimationDuration: 0,
-      legend: { display: false },
       // Disable splines, they seem to cause weird rendering artifacts:
       elements: { line: { tension: 0 } },
       hover: {
         intersect: false,
         mode: "x",
       },
-      tooltips: {
-        intersect: false,
-        mode: "x",
-        enabled: false, // Disable native tooltips since we use custom ones.
-      },
       scales: {
-        xAxes,
-        yAxes: yAxes.map((yAxis) => {
-          const ticks = {
-            ...defaultYTicksSettings,
-            ...yAxis.ticks,
-          };
-          // If the user is manually panning or zooming, don't constrain the y-axis
-          if (hasUserPannedOrZoomed) {
-            delete ticks.min;
-            delete ticks.max;
-          }
-
-          return {
-            ...yAxis,
-            ticks,
-          };
-        }),
+        x: xScale,
+        y: yScale,
       },
       plugins,
-      annotation: { annotations },
     };
-    const firstXAxisTicks = options.scales?.xAxes?.[0]?.ticks;
-    if (firstXAxisTicks) {
-      if (followPlaybackState != undefined) {
-        // Follow playback, but don't force it if the user has recently panned or zoomed -- playback
-        // will fight with the user's action.
-        if (
-          currentTime != undefined &&
-          (lastPanTime.current == undefined ||
-            // @ts-expect-error while valid js we should fix this arithmatic operation on dates
-            new Date() - lastPanTime.current > FOLLOW_PLAYBACK_PAN_THRESHOLD_MS)
-        ) {
-          firstXAxisTicks.min = currentTime + followPlaybackState.xOffsetMin;
-          firstXAxisTicks.max = currentTime + followPlaybackState.xOffsetMax;
-        }
-      } else if (!hasUserPannedOrZoomed) {
-        firstXAxisTicks.min = minX;
-        firstXAxisTicks.max = maxX;
-      }
-    }
-    return options;
-  };
+  }, [plugins, xScale, yScale]);
 
-  const {
-    currentTime,
-    datasetId,
-    type,
-    width,
-    height,
-    drawLegend,
-    canToggleLines,
-    toggleLine,
-    data,
-    isSynced,
-    linesToHide = {},
-    defaultView,
-  } = props;
-  const xVals = flatten(
-    data.datasets.map(({ data: pts }) => (pts.length > 1 ? pts.map(({ x }) => x) : undefined)),
+  const onHover = useCallback(
+    (elements: RpcElement[]) => {
+      updateTooltip(elements[0]);
+    },
+    [updateTooltip],
   );
-  let minX: number;
-  let maxX: number;
-  if (defaultView == undefined || (defaultView.type === "following" && currentTime == undefined)) {
-    // Zoom to fit if the view is "following" but there's no playback cursor. Unlikely.
-    minX = min(xVals) ?? 0;
-    maxX = max(xVals) ?? 0;
-  } else if (defaultView.type === "fixed") {
-    minX = defaultView.minXValue;
-    maxX = defaultView.maxXValue;
-  } else {
-    // Following with non-null currentTime.
-    if (currentTime == undefined) {
-      throw new Error("Flow doesn't know that currentTime != undefined");
+
+  const onScalesUpdate = useCallback((scales: RpcScales, { userInteraction }) => {
+    isUserInteraction.current = userInteraction;
+    if (userInteraction) {
+      setHasUserPannedOrZoomed(true);
     }
-    minX = currentTime - defaultView.width / 2;
-    maxX = currentTime + defaultView.width / 2;
-  }
 
-  const scaleOptions =
-    xScaleOptions != undefined
-      ? { ...props.scaleOptions, xAxisTicks: "follow" }
-      : props.scaleOptions;
+    setCurrentScales(scales);
+  }, []);
 
-  const chartProps = {
+  // we don't memo this because either options or data is likely to change with each render
+  // maybe one day someone perfs this and decides to memo?
+  const chartProps: ComponentProps<typeof ChartComponent> = {
     type,
     width,
     height,
-    key: `${width}x${height}`,
-    ref: chartComponent,
-    data: {
-      ...data,
-      datasets: filterDatasets(
-        data.datasets,
-        linesToHide,
-        scalePerPixel(xBounds),
-        scalePerPixel(yBounds),
-      ),
-    },
-    onScaleBoundsUpdate,
-    onPanZoom,
-    onClick: onClickAddingValues,
-    zoomOptions: {
-      ...ChartComponent.defaultProps.zoomOptions,
-      enabled: props.zoom,
-      mode: zoomMode,
-    },
-    scaleOptions,
+    options,
+    data: dataMemo,
+    onScalesUpdate: onScalesUpdate,
     onChartUpdate,
+    onHover,
   };
-
-  const hasData = chartProps.data.datasets.some((dataset) => dataset.data.length);
 
   return (
     <div style={{ display: "flex", width: "100%" }}>
@@ -737,32 +772,14 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
           <HoverBar
             componentId={hoverComponentId}
             isTimestampScale={xAxisIsPlaybackTime}
-            scaleBounds={scaleBounds}
+            scales={currentScales}
           >
             <SBar xAxisIsPlaybackTime={xAxisIsPlaybackTime} ref={hoverBar} />
           </HoverBar>
 
-          {/* only sync when using x-axis timestamp and actually plotting data. */}
-          {isSynced && currentTime == undefined && xAxisIsPlaybackTime && hasData ? (
-            <SyncTimeAxis data={{ minX, maxX }}>
-              {(syncedMinMax) => {
-                const syncedMinX =
-                  syncedMinMax.minX != undefined ? min([minX, syncedMinMax.minX]) : minX;
-                const syncedMaxX =
-                  syncedMinMax.maxX != undefined ? max([maxX, syncedMinMax.maxX]) : maxX;
-                return (
-                  // @ts-expect-error fix properties
-                  <ChartComponent
-                    {...chartProps}
-                    options={getChartjsOptions(syncedMinX, syncedMaxX)}
-                  />
-                );
-              }}
-            </SyncTimeAxis>
-          ) : (
-            // @ts-expect-error fix properties
-            <ChartComponent {...chartProps} options={getChartjsOptions(minX, maxX)} />
-          )}
+          <div ref={canvasContainer} onMouseMove={onMouseMove} onMouseOut={onMouseOut}>
+            <ChartComponent {...chartProps} />
+          </div>
 
           {hasUserPannedOrZoomed && (
             <SResetZoom>
@@ -771,32 +788,17 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
               </Button>
             </SResetZoom>
           )}
-
-          {/* Handle tooltips while dragging by checking all document events. */}
-          <DocumentEvents
-            capture
-            onMouseDown={onMouseMove}
-            onMouseUp={onMouseMove}
-            onMouseMove={onMouseMove}
-            onMouseLeave={onMouseMove}
-          />
           <KeyListener global keyDownHandlers={keyDownHandlers} keyUpHandlers={keyUphandlers} />
         </SRoot>
       </div>
-      {props.zoom && <MemoizedTooltips />}
-      {drawLegend && (
+      {drawLegend === true && (
         <SLegend>
           <TimeBasedChartLegend
             datasetId={datasetId}
             canToggleLines={canToggleLines}
             datasets={data.datasets}
             linesToHide={linesToHide}
-            toggleLine={
-              toggleLine ??
-              (() => {
-                // no-op
-              })
-            }
+            toggleLine={toggleLine}
           />
         </SLegend>
       )}

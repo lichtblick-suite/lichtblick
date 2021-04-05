@@ -203,12 +203,13 @@ function Plot(props: Props) {
   const { startTime } = useDataSourceInfo();
 
   // If every streaming key is in the blocks, just use the blocks object for a stable identity.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const mergedItems = Object.keys(streamedItemsByPath).every(
-    (path) => (blockItemsByPath as any)[path] != undefined,
-  )
-    ? blockItemsByPath
-    : { ...streamedItemsByPath, ...blockItemsByPath };
+  const mergedItems = useMemo(() => {
+    return Object.keys(streamedItemsByPath).every(
+      (path) => (blockItemsByPath as any)[path] != undefined,
+    )
+      ? blockItemsByPath
+      : { ...streamedItemsByPath, ...blockItemsByPath };
+  }, [blockItemsByPath, streamedItemsByPath]);
 
   // Don't filter out disabled paths when passing into getDatasetsAndTooltips, because we still want
   // easy access to the history when turning the disabled paths back on.
@@ -217,7 +218,7 @@ function Plot(props: Props) {
     // with lots of preloaded data, and when we preload a new block we re-generate the datasets for
     // the whole timeline. We should try to use block memoization here.
     () =>
-      getDatasetsAndTooltips(yAxisPaths, mergedItems, startTime || ZERO_TIME, xAxisVal, xAxisPath),
+      getDatasetsAndTooltips(yAxisPaths, mergedItems, startTime ?? ZERO_TIME, xAxisVal, xAxisPath),
     [yAxisPaths, mergedItems, startTime, xAxisVal, xAxisPath],
   );
 
@@ -254,7 +255,7 @@ function Plot(props: Props) {
   }
 
   const onClick = useCallback(
-    (_, __, { X_AXIS_ID: seekSeconds }) => {
+    (_event, _datalabel, { x: seekSeconds }) => {
       if (!startTime || seekSeconds == undefined || !seek || xAxisVal !== "timestamp") {
         return;
       }
@@ -265,6 +266,7 @@ function Plot(props: Props) {
     [seek, startTime, xAxisVal],
   );
 
+  // console.log(preloadingEndTime);
   return (
     <Flex col clip center style={{ position: "relative" }}>
       <PanelToolbar
@@ -272,7 +274,7 @@ function Plot(props: Props) {
         floating
         menuContent={
           <PlotMenu
-            displayWidth={followingViewWidth || ""}
+            displayWidth={followingViewWidth ?? ""}
             minYValue={minYValue}
             maxYValue={maxYValue}
             saveConfig={saveConfig}

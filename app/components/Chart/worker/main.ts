@@ -11,12 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+// Entrypoint for chartjs worker
+
 import Rpc from "@foxglove-studio/app/util/Rpc";
 import { inWebWorker } from "@foxglove-studio/app/util/workers";
 
-import ChartJSWorker from "./ChartJSWorker";
+import ChartJsMux from "./ChartJsMux";
 
 if (inWebWorker()) {
   // @ts-expect-error not yet using TS Worker lib: FG-64
-  new ChartJSWorker(new Rpc(global));
+  new ChartJsMux(new Rpc(global));
 }

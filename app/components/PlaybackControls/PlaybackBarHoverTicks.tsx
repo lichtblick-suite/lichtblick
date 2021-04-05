@@ -10,18 +10,17 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import React, { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useResizeDetector } from "react-resize-detector";
 import styled, { css } from "styled-components";
 
-import Dimensions from "@foxglove-studio/app/components/Dimensions";
+import { RpcScales } from "@foxglove-studio/app/components/Chart/types";
 import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove-studio/app/components/MessagePipeline";
 import HoverBar from "@foxglove-studio/app/components/TimeBasedChart/HoverBar";
 import { toSec } from "@foxglove-studio/app/util/time";
-
-import { ScaleBounds } from "../ReactChartjs/zoomAndPanHelpers";
 
 const sharedTickStyles = css`
   position: absolute;
@@ -60,37 +59,35 @@ type Props = {
 
 export default React.memo<Props>(function PlaybackBarHoverTicks({ componentId }: Props) {
   const { startTime, endTime } = useMessagePipeline(getStartAndEndTime);
-  const [width, setWidth] = useState<number | undefined>();
+  const { width, ref } = useResizeDetector({
+    handleHeight: false,
+  });
 
-  const scaleBounds = useMemo<{ current: readonly ScaleBounds[] | undefined }>(() => {
-    if (width == undefined || startTime == undefined || endTime == undefined) {
-      return { current: undefined };
+  const scaleBounds = useMemo<RpcScales | undefined>(() => {
+    if (startTime == undefined || endTime == undefined) {
+      return;
     }
+
     return {
-      // HoverBar takes a ref to avoid rerendering (and avoid needing to rerender) when the bounds
-      // change in charts that scroll at playback speed.
-      current: [
-        {
-          id: componentId,
-          min: 0,
-          max: toSec(endTime) - toSec(startTime),
-          axes: "xAxes",
-          minAlongAxis: 0,
-          maxAlongAxis: width,
-        },
-      ],
+      x: {
+        min: 0,
+        max: toSec(endTime) - toSec(startTime),
+        left: 0,
+        right: width ?? 0,
+      },
     };
-  }, [width, startTime, endTime, componentId]);
+  }, [width, startTime, endTime]);
+
+  if (!scaleBounds) {
+    return ReactNull;
+  }
 
   return (
-    <>
-      <Dimensions onChange={({ width: newWidth }) => setWidth(newWidth)} />
-      {scaleBounds && (
-        <HoverBar componentId={componentId} scaleBounds={scaleBounds} isTimestampScale>
-          <TopTick />
-          <BottomTick />
-        </HoverBar>
-      )}
-    </>
+    <div ref={ref} style={{ width: "100%" }}>
+      <HoverBar componentId={componentId} scales={scaleBounds} isTimestampScale>
+        <TopTick />
+        <BottomTick />
+      </HoverBar>
+    </div>
   );
 });

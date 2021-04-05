@@ -11,13 +11,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { CSSProperties, useMemo } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 
-import {
-  getChartPx,
-  ScaleBounds,
-} from "@foxglove-studio/app/components/ReactChartjs/zoomAndPanHelpers";
+import { RpcScales } from "@foxglove-studio/app/components/Chart/types";
+import { State } from "@foxglove-studio/app/reducers";
+import { HoverValue } from "@foxglove-studio/app/types/hoverValue";
 
 const SWrapper = styled.div`
   top: 0;
@@ -25,31 +25,17 @@ const SWrapper = styled.div`
   position: absolute;
   pointer-events: none;
   will-change: transform;
-  // "visibility" and "transform" are set by JS, but outside of React.
   visibility: hidden;
 `;
 
 type Props = {
   children?: React.ReactNode;
   componentId: string;
-  // We don't need to (and shouldn't) rerender when the scale-bounds changes under the cursor -- the
-  // bar should stay under the mouse. Only rerender when the mouse moves (using useSelector).
-  scaleBounds: { current?: readonly ScaleBounds[] };
+  scales?: RpcScales;
   isTimestampScale: boolean;
 };
 
-function hideBar(wrapper: any) {
-  if (wrapper.style.visibility !== "hidden") {
-    wrapper.style.visibility = "hidden";
-  }
-}
-
-function showBar(wrapper: any, position: any) {
-  wrapper.style.visibility = "visible";
-  wrapper.style.transform = `translateX(${position}px)`;
-}
-
-function shouldShowBar(hoverValue: any, componentId: any, isTimestampScale: boolean) {
+function shouldShowBar(hoverValue: HoverValue, componentId: string, isTimestampScale: boolean) {
   if (hoverValue == undefined) {
     return false;
   }
@@ -65,30 +51,33 @@ export default React.memo<Props>(function HoverBar({
   children,
   componentId,
   isTimestampScale,
-  scaleBounds,
+  scales,
 }: Props) {
-  const wrapper = React.useRef<HTMLDivElement>(ReactNull);
-  const hoverValue = useSelector((state: any) => state.hoverValue);
+  const hoverValue = useSelector((state: State) => state.hoverValue);
 
-  const xBounds = scaleBounds.current?.find(({ axes }) => axes === "xAxes");
-
-  // We avoid putting the visibility and transforms into react state to try to keep updates snappy.
-  // Mouse interactions are frequent, and adding/removing the bar from the DOM would slow things
-  // down a lot more than mutating the style props does.
-  if (wrapper.current != undefined) {
-    const { current } = wrapper;
-    if (xBounds == undefined || hoverValue == undefined) {
-      hideBar(current);
+  const positionX = useMemo(() => {
+    const xScale = scales?.x;
+    if (!xScale || !hoverValue || !shouldShowBar(hoverValue, componentId, isTimestampScale)) {
+      return;
     }
-    if (shouldShowBar(hoverValue, componentId, isTimestampScale)) {
-      const position = getChartPx(xBounds, hoverValue.value);
-      if (position == undefined) {
-        hideBar(current);
-      } else {
-        showBar(current, position);
-      }
-    }
-  }
 
-  return <SWrapper ref={wrapper}>{children}</SWrapper>;
+    const pixels = xScale.right - xScale.left;
+    const range = xScale.max - xScale.min;
+
+    const pos = (hoverValue.value - xScale.min) / (range / pixels) + xScale.left;
+    // don't show hoverbar if it falls outsize our boundary
+    if (pos < xScale.left || pos > xScale.right) {
+      return;
+    }
+    return pos;
+  }, [scales?.x, hoverValue, componentId, isTimestampScale]);
+
+  const { visibility, transform } = useMemo((): CSSProperties => {
+    if (positionX == undefined || isNaN(positionX)) {
+      return { visibility: "hidden", transform: undefined };
+    }
+    return { visibility: "visible", transform: `translateX(${positionX}px)` };
+  }, [positionX]);
+
+  return <SWrapper style={{ visibility, transform }}>{children}</SWrapper>;
 });

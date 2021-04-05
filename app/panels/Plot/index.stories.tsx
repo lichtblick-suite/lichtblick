@@ -14,7 +14,7 @@
 import { storiesOf } from "@storybook/react";
 import { parseMessageDefinition } from "rosbag";
 
-import Plot from "@foxglove-studio/app/panels/Plot";
+import Plot, { PlotConfig } from "@foxglove-studio/app/panels/Plot";
 import PanelSetup, { triggerWheel } from "@foxglove-studio/app/stories/PanelSetup";
 import { wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 import { fromSec } from "@foxglove-studio/app/util/time";
@@ -291,7 +291,7 @@ const fixture = {
   progress: { messageCache },
 };
 
-const paths = [
+const paths: PlotConfig["paths"] = [
   { value: "/some_topic/location.pose.velocity", enabled: true, timestampMethod: "receiveTime" },
   {
     value: "/some_topic/location.pose.acceleration",
@@ -308,13 +308,14 @@ const paths = [
   { value: "/some_topic/location.header.stamp", enabled: true, timestampMethod: "receiveTime" },
 ];
 
-const exampleConfig = {
+const exampleConfig: PlotConfig = {
   paths,
   minYValue: "",
   maxYValue: "",
   showLegend: true,
   xAxisVal: "timestamp",
 };
+
 storiesOf("<Plot>", module)
   .addParameters({
     screenshot: {
@@ -324,14 +325,14 @@ storiesOf("<Plot>", module)
   .add("line graph", () => {
     return (
       <PanelSetup fixture={fixture}>
-        <Plot config={exampleConfig as any} />
+        <Plot config={exampleConfig} />
       </PanelSetup>
     );
   })
   .add("line graph with legends hidden", () => {
     return (
       <PanelSetup fixture={fixture}>
-        <Plot config={{ ...exampleConfig, showLegend: false } as any} />
+        <Plot config={{ ...exampleConfig, showLegend: false }} />
       </PanelSetup>
     );
   })
@@ -339,32 +340,28 @@ storiesOf("<Plot>", module)
     return (
       <PanelSetup fixture={fixture} style={{ flexDirection: "column" }}>
         <Plot
-          config={
-            {
-              ...exampleConfig,
-              paths: [
-                {
-                  value: "/some_topic/location.pose.acceleration",
-                  enabled: true,
-                  timestampMethod: "receiveTime",
-                },
-              ],
-            } as any
-          }
+          config={{
+            ...exampleConfig,
+            paths: [
+              {
+                value: "/some_topic/location.pose.acceleration",
+                enabled: true,
+                timestampMethod: "receiveTime",
+              },
+            ],
+          }}
         />
         <Plot
-          config={
-            {
-              ...exampleConfig,
-              paths: [
-                {
-                  value: "/some_topic/location_subset.pose.velocity",
-                  enabled: true,
-                  timestampMethod: "receiveTime",
-                },
-              ],
-            } as any
-          }
+          config={{
+            ...exampleConfig,
+            paths: [
+              {
+                value: "/some_topic/location_subset.pose.velocity",
+                enabled: true,
+                timestampMethod: "receiveTime",
+              },
+            ],
+          }}
         />
       </PanelSetup>
     );
@@ -385,7 +382,7 @@ storiesOf("<Plot>", module)
           }, 100);
         }}
       >
-        <Plot config={exampleConfig as any} />
+        <Plot config={exampleConfig} />
       </PanelSetup>
     );
   })
@@ -393,19 +390,17 @@ storiesOf("<Plot>", module)
     return (
       <PanelSetup fixture={fixture}>
         <Plot
-          config={
-            {
-              ...exampleConfig,
-              paths: [
-                {
-                  value: "/some_topic/location.pose.velocity",
-                  enabled: true,
-                  timestampMethod: "headerStamp",
-                },
-                { value: "/boolean_topic.data", enabled: true, timestampMethod: "headerStamp" },
-              ],
-            } as any
-          }
+          config={{
+            ...exampleConfig,
+            paths: [
+              {
+                value: "/some_topic/location.pose.velocity",
+                enabled: true,
+                timestampMethod: "headerStamp",
+              },
+              { value: "/boolean_topic.data", enabled: true, timestampMethod: "headerStamp" },
+            ],
+          }}
         />
       </PanelSetup>
     );
@@ -414,18 +409,16 @@ storiesOf("<Plot>", module)
     return (
       <PanelSetup fixture={fixture} style={{ maxWidth: 250 }}>
         <Plot
-          config={
-            {
-              ...exampleConfig,
-              paths: [
-                {
-                  value: "/some_topic/location.pose.velocity",
-                  enabled: true,
-                  timestampMethod: "receiveTime",
-                },
-              ],
-            } as any
-          }
+          config={{
+            ...exampleConfig,
+            paths: [
+              {
+                value: "/some_topic/location.pose.velocity",
+                enabled: true,
+                timestampMethod: "receiveTime",
+              },
+            ],
+          }}
         />
       </PanelSetup>
     );
@@ -434,23 +427,21 @@ storiesOf("<Plot>", module)
     return (
       <PanelSetup fixture={fixture}>
         <Plot
-          config={
-            {
-              ...exampleConfig,
-              paths: [
-                {
-                  value: "/some_topic/location.pose.velocity",
-                  enabled: false,
-                  timestampMethod: "receiveTime",
-                },
-                {
-                  value: "/some_topic/location.pose.acceleration",
-                  enabled: true,
-                  timestampMethod: "receiveTime",
-                },
-              ],
-            } as any
-          }
+          config={{
+            ...exampleConfig,
+            paths: [
+              {
+                value: "/some_topic/location.pose.velocity",
+                enabled: false,
+                timestampMethod: "receiveTime",
+              },
+              {
+                value: "/some_topic/location.pose.acceleration",
+                enabled: true,
+                timestampMethod: "receiveTime",
+              },
+            ],
+          }}
         />
       </PanelSetup>
     );
@@ -584,24 +575,22 @@ storiesOf("<Plot>", module)
     return (
       <PanelSetup fixture={fixture}>
         <Plot
-          config={
-            {
-              ...exampleConfig,
-              paths: [
-                {
-                  value: "/some_topic/state.items[:].speed",
-                  enabled: true,
-                  timestampMethod: "receiveTime",
-                },
-                {
-                  value: "/some_topic/location.pose.velocity",
-                  enabled: true,
-                  timestampMethod: "receiveTime",
-                },
-                { value: "3", enabled: true, timestampMethod: "receiveTime" },
-              ],
-            } as any
-          }
+          config={{
+            ...exampleConfig,
+            paths: [
+              {
+                value: "/some_topic/state.items[:].speed",
+                enabled: true,
+                timestampMethod: "receiveTime",
+              },
+              {
+                value: "/some_topic/location.pose.velocity",
+                enabled: true,
+                timestampMethod: "receiveTime",
+              },
+              { value: "3", enabled: true, timestampMethod: "receiveTime" },
+            ],
+          }}
         />
       </PanelSetup>
     );
@@ -615,7 +604,7 @@ storiesOf("<Plot>", module)
           (xAxisDropdown as any).click();
         }}
       >
-        <Plot config={exampleConfig as any} />
+        <Plot config={exampleConfig} />
       </PanelSetup>
     );
   })
@@ -742,14 +731,10 @@ storiesOf("<Plot>", module)
         }}
       >
         <Plot
-          config={
-            {
-              ...exampleConfig,
-              paths: [
-                { value: "/some_number.data", enabled: true, timestampMethod: "receiveTime" },
-              ],
-            } as any
-          }
+          config={{
+            ...exampleConfig,
+            paths: [{ value: "/some_number.data", enabled: true, timestampMethod: "receiveTime" }],
+          }}
         />
       </PanelSetup>
     );
@@ -778,15 +763,13 @@ storiesOf("<Plot>", module)
     return (
       <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
         <Plot
-          config={
-            {
-              ...exampleConfig,
-              paths: [
-                { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-                { value: "/preloaded_topic.data", enabled: true, timestampMethod: "headerStamp" },
-              ],
-            } as any
-          }
+          config={{
+            ...exampleConfig,
+            paths: [
+              { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+              { value: "/preloaded_topic.data", enabled: true, timestampMethod: "headerStamp" },
+            ],
+          }}
         />
       </PanelSetup>
     );
@@ -795,19 +778,17 @@ storiesOf("<Plot>", module)
     return (
       <PanelSetup fixture={withEndTime(fixture, { sec: 3, nsec: 0 })}>
         <Plot
-          config={
-            {
-              ...exampleConfig,
-              paths: [
-                {
-                  value: "/some_topic/state.items[0].speed",
-                  enabled: true,
-                  timestampMethod: "receiveTime",
-                },
-                { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-              ],
-            } as any
-          }
+          config={{
+            ...exampleConfig,
+            paths: [
+              {
+                value: "/some_topic/state.items[0].speed",
+                enabled: true,
+                timestampMethod: "receiveTime",
+              },
+              { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+            ],
+          }}
         />
       </PanelSetup>
     );
@@ -816,19 +797,17 @@ storiesOf("<Plot>", module)
     return (
       <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
         <Plot
-          config={
-            {
-              ...exampleConfig,
-              paths: [
-                { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-                {
-                  value: "/preloaded_topic.data.@derivative",
-                  enabled: true,
-                  timestampMethod: "receiveTime",
-                },
-              ],
-            } as any
-          }
+          config={{
+            ...exampleConfig,
+            paths: [
+              { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+              {
+                value: "/preloaded_topic.data.@derivative",
+                enabled: true,
+                timestampMethod: "receiveTime",
+              },
+            ],
+          }}
         />
       </PanelSetup>
     );
@@ -837,19 +816,17 @@ storiesOf("<Plot>", module)
     return (
       <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
         <Plot
-          config={
-            {
-              ...exampleConfig,
-              paths: [
-                { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-                {
-                  value: "/preloaded_topic.data.@negative",
-                  enabled: true,
-                  timestampMethod: "receiveTime",
-                },
-              ],
-            } as any
-          }
+          config={{
+            ...exampleConfig,
+            paths: [
+              { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+              {
+                value: "/preloaded_topic.data.@negative",
+                enabled: true,
+                timestampMethod: "receiveTime",
+              },
+            ],
+          }}
         />
       </PanelSetup>
     );
@@ -858,19 +835,17 @@ storiesOf("<Plot>", module)
     return (
       <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
         <Plot
-          config={
-            {
-              ...exampleConfig,
-              paths: [
-                { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-                {
-                  value: "/preloaded_topic.data.@abs",
-                  enabled: true,
-                  timestampMethod: "receiveTime",
-                },
-              ],
-            } as any
-          }
+          config={{
+            ...exampleConfig,
+            paths: [
+              { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+              {
+                value: "/preloaded_topic.data.@abs",
+                enabled: true,
+                timestampMethod: "receiveTime",
+              },
+            ],
+          }}
         />
       </PanelSetup>
     );

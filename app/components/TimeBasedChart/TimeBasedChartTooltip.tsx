@@ -11,6 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { PropsWithChildren } from "react";
+
 import Tooltip from "@foxglove-studio/app/components/Tooltip";
 import { formatTime } from "@foxglove-studio/app/util/formatTime";
 import { subtractTimes, toSec, formatTimeRaw } from "@foxglove-studio/app/util/time";
@@ -19,67 +21,66 @@ import styles from "./TimeBasedChartTooltip.module.scss";
 import { TimeBasedChartTooltipData } from "./index";
 
 type Props = {
-  children: React.ReactElement<any>;
   tooltip: TimeBasedChartTooltipData;
 };
-export default class TimeBasedChartTooltip extends React.PureComponent<Props> {
-  render() {
-    const { tooltip } = this.props;
-    const value = typeof tooltip.value === "string" ? tooltip.value : JSON.stringify(tooltip.value);
-    const { receiveTime, headerStamp } = tooltip.item;
-    const content = (
-      <div className={styles.root}>
-        <div>
-          <span className={styles.title}>Value:&nbsp;</span>
-          {tooltip.constantName ? `${tooltip.constantName} (${value})` : value}
-        </div>
-        <div>
-          <span className={styles.title}>Path:&nbsp;</span>
-          {tooltip.path}
-        </div>
-        {tooltip.source != undefined && (
-          <div>
-            <span className={styles.title}>Source:&nbsp;</span>
-            {tooltip.source}
-          </div>
-        )}
-        {receiveTime && headerStamp && (
-          <table>
-            <tbody>
-              <tr>
-                <th />
-                {receiveTime && <th>receive time</th>}
-                {headerStamp && <th>header.stamp</th>}
-              </tr>
-              <tr>
-                <th>ROS</th>
-                {receiveTime && <td>{formatTimeRaw(receiveTime)}</td>}
-                {headerStamp && <td>{formatTimeRaw(headerStamp)}</td>}
-              </tr>
-              <tr>
-                <th>Time</th>
-                {receiveTime && <td>{formatTime(receiveTime)}</td>}
-                {headerStamp && <td>{formatTime(headerStamp)}</td>}
-              </tr>
-              <tr>
-                <th>Elapsed</th>
-                {receiveTime && (
-                  <td>{toSec(subtractTimes(receiveTime, tooltip.startTime)).toFixed(9)} sec</td>
-                )}
-                {headerStamp && (
-                  <td>{toSec(subtractTimes(headerStamp, tooltip.startTime)).toFixed(9)} sec</td>
-                )}
-              </tr>
-            </tbody>
-          </table>
-        )}
-      </div>
-    );
 
-    return (
-      <Tooltip defaultShown placement="top" contents={content}>
-        {this.props.children}
-      </Tooltip>
-    );
-  }
+export default function TimeBasedChartTooltip(props: PropsWithChildren<Props>) {
+  const { tooltip } = props;
+  const value = typeof tooltip.value === "string" ? tooltip.value : JSON.stringify(tooltip.value);
+  const { receiveTime, headerStamp } = tooltip.item;
+
+  const content = (
+    <div className={styles.root}>
+      <div>
+        <span className={styles.title}>Value:&nbsp;</span>
+        {tooltip.constantName ? `${tooltip.constantName} (${value})` : value}
+      </div>
+      <div>
+        <span className={styles.title}>Path:&nbsp;</span>
+        {tooltip.path}
+      </div>
+      {tooltip.source != undefined && (
+        <div>
+          <span className={styles.title}>Source:&nbsp;</span>
+          {tooltip.source}
+        </div>
+      )}
+      {receiveTime && headerStamp && (
+        <table>
+          <tbody>
+            <tr>
+              <th />
+              {receiveTime && <th>receive time</th>}
+              {headerStamp && <th>header.stamp</th>}
+            </tr>
+            <tr>
+              <th>ROS</th>
+              {receiveTime && <td>{formatTimeRaw(receiveTime)}</td>}
+              {headerStamp && <td>{formatTimeRaw(headerStamp)}</td>}
+            </tr>
+            <tr>
+              <th>Time</th>
+              {receiveTime && <td>{formatTime(receiveTime)}</td>}
+              {headerStamp && <td>{formatTime(headerStamp)}</td>}
+            </tr>
+            <tr>
+              <th>Elapsed</th>
+              {receiveTime && (
+                <td>{toSec(subtractTimes(receiveTime, tooltip.startTime)).toFixed(9)} sec</td>
+              )}
+              {headerStamp && (
+                <td>{toSec(subtractTimes(headerStamp, tooltip.startTime)).toFixed(9)} sec</td>
+              )}
+            </tr>
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+
+  return (
+    <Tooltip defaultShown placement="top" contents={content}>
+      {props.children as any}
+    </Tooltip>
+  );
 }

@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import { storiesOf } from "@storybook/react";
 import cloneDeep from "lodash/cloneDeep";
-import { useState, useCallback } from "react";
+import { useState, useCallback, ComponentProps } from "react";
 import TestUtils from "react-dom/test-utils";
 
 import ChartComponent from ".";
@@ -24,7 +24,7 @@ const dataPoint = {
   label: "datalabel with selection id 1",
 };
 
-const props = {
+const props: ComponentProps<typeof ChartComponent> = {
   width: 500,
   height: 700,
   data: {
@@ -32,7 +32,6 @@ const props = {
       {
         borderColor: "#4e98e2",
         label: "/turtle1/pose.x",
-        key: "0",
         showLine: true,
         fill: false,
         borderWidth: 1,
@@ -47,56 +46,66 @@ const props = {
   },
   options: {
     animation: { duration: 0 },
-    responsiveAnimationDuration: 0,
-    legend: { display: false },
     elements: { line: { tension: 0 } },
-    annotations: { annotations: [] },
     plugins: {
+      legend: { display: false },
+      annotation: { annotations: [] },
       datalabels: {
         anchor: "start",
         align: 0,
         offset: 5,
         color: "white",
       },
-    } as Chart.ChartPluginsOptions,
+      zoom: {
+        zoom: {
+          enabled: true,
+          mode: "xy",
+          sensitivity: 3,
+          speed: 0.1,
+        },
+        pan: {
+          enabled: true,
+        },
+      },
+    },
     scales: {
-      yAxes: [
-        {
-          id: "Y_AXIS_ID",
-          ticks: {
-            fontFamily: `"Roboto Mono", Menlo, Inconsolata, "Courier New", Courier, monospace`,
-            fontSize: 10,
-            fontColor: "#eee",
-            padding: 0,
-            precision: 3,
+      y: {
+        ticks: {
+          font: {
+            family: `"Roboto Mono", Menlo, Inconsolata, "Courier New", Courier, monospace`,
+            size: 10,
           },
-          gridLines: {
-            color: "rgba(255, 255, 255, 0.2)",
-            zeroLineColor: "rgba(255, 255, 255, 0.2)",
-          },
+          color: "#eee",
+          padding: 0,
+          precision: 3,
         },
-      ],
-      xAxes: [
-        {
-          ticks: {
-            fontFamily: `"Roboto Mono", Menlo, Inconsolata, "Courier New", Courier, monospace`,
-            fontSize: 10,
-            fontColor: "#eee",
-            maxRotation: 0,
-          },
-          gridLines: {
-            color: "rgba(255, 255, 255, 0.2)",
-            zeroLineColor: "rgba(255, 255, 255, 0.2)",
-          },
+        grid: {
+          color: "rgba(255, 255, 255, 0.2)",
         },
-      ],
+      },
+
+      x: {
+        ticks: {
+          font: {
+            family: `"Roboto Mono", Menlo, Inconsolata, "Courier New", Courier, monospace`,
+            size: 10,
+          },
+          color: "#eee",
+          maxRotation: 0,
+        },
+        grid: {
+          color: "rgba(255, 255, 255, 0.2)",
+        },
+      },
     },
   },
   type: "scatter",
 };
 
 const propsWithDatalabels = cloneDeep(props);
-propsWithDatalabels.data.datasets[0]!.datalabels.display = true;
+if (propsWithDatalabels.data.datasets[0]?.datalabels) {
+  propsWithDatalabels.data.datasets[0].datalabels.display = true;
+}
 
 const divStyle = { width: 600, height: 800, background: "black" };
 
@@ -108,7 +117,12 @@ function DatalabelUpdateExample() {
 
   const chartProps = cloneDeep(props);
   if (hasRenderedOnce) {
-    chartProps.data.datasets[0]!.data[0]!.x++;
+    if (
+      chartProps.data.datasets[0]?.data[0] != undefined &&
+      typeof chartProps.data.datasets[0]?.data[0] !== "number"
+    ) {
+      chartProps.data.datasets[0].data[0].x++;
+    }
   }
   return (
     <div style={divStyle} ref={refFn}>
@@ -137,7 +151,7 @@ function DatalabelClickExample() {
       </div>
       <ChartComponent
         {...propsWithDatalabels}
-        onClick={(_, datalabel) => {
+        onClick={(datalabel) => {
           setClickedDatalabel(datalabel ?? undefined);
         }}
       />

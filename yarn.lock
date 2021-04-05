@@ -1798,8 +1798,6 @@ __metadata:
     "@testing-library/react": 11.2.6
     "@testing-library/react-hooks": 5.1.1
     "@types/argparse": ^2
-    "@types/chart.js": 2.9.31
-    "@types/chartjs-plugin-annotation": 0.5.1
     "@types/classnames": 2.2.11
     "@types/css-font-loading-module": 0.0.4
     "@types/enzyme": ^3
@@ -1837,9 +1835,10 @@ __metadata:
     argparse: 2.0.1
     async-mutex: 0.3.1
     cbor-js: 0.1.0
-    chart.js: "davidswinegar/Chart.js#0785c29a4c57b3e1b4243f8163df7950a00b2a80"
-    chartjs-plugin-annotation: 0.5.7
-    chartjs-plugin-datalabels: "davidswinegar/chartjs-plugin-datalabels#b0ade94116d4e273f0fdc17e9528c9a33c796e90"
+    chart.js: 3.0.2
+    chartjs-plugin-annotation: 1.0.0-rc
+    chartjs-plugin-datalabels: 2.0.0-beta.1
+    chartjs-plugin-zoom: "github:foxglove/chartjs-plugin-zoom#656541279943f00dce600288435f83c436293146"
     chromatic: 5.7.1
     classnames: 2.3.1
     enzyme: 3.11.0
@@ -3958,25 +3957,6 @@ __metadata:
   dependencies:
     chalk: "*"
   checksum: 9cded9031f180268be59010fc1e13c7b4384e51f0ca8b75bc7a40bdd46f5f3c4859953525fb53663287e5bb25ca5df59396c276ce5c09e1a83aa7a2aec6a9f59
-  languageName: node
-  linkType: hard
-
-"@types/chart.js@npm:*, @types/chart.js@npm:2.9.31":
-  version: 2.9.31
-  resolution: "@types/chart.js@npm:2.9.31"
-  dependencies:
-    moment: ^2.10.2
-  checksum: 3cb82bd8209d337161899f0dd4fcd6896e44992bd648cd54390805feb67e322c04722dc9c377f1a828029a23e753391073359d271ede52ca6d7be0fed72025be
-  languageName: node
-  linkType: hard
-
-"@types/chartjs-plugin-annotation@npm:0.5.1":
-  version: 0.5.1
-  resolution: "@types/chartjs-plugin-annotation@npm:0.5.1"
-  dependencies:
-    "@types/chart.js": "*"
-    moment: ^2.10.2
-  checksum: 63dcaff8dec6cc0141638628f47fb203b0b462760fec9d863bb2246f20050643fb32e9f1a0b6a0c88b586ac55ce2339c353068dfbe775b34f7ddcf5019859794
   languageName: node
   linkType: hard
 
@@ -7656,60 +7636,39 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@davidswinegar/Chart.js#0785c29a4c57b3e1b4243f8163df7950a00b2a80":
-  version: 2.9.3
-  resolution: "chart.js@https://github.com/davidswinegar/Chart.js.git#commit=0785c29a4c57b3e1b4243f8163df7950a00b2a80"
-  dependencies:
-    chartjs-color: ^2.1.0
-    moment: ^2.10.2
-  checksum: a3e6b47b33a47bb28fa90473f6068cf5cf935306a05e48a6c59216c19d64617e9d14cde48671b8ec040dccc79a717eb79877977bf4fdb3a967ce55bd687b3130
+"chart.js@npm:3.0.2":
+  version: 3.0.2
+  resolution: "chart.js@npm:3.0.2"
+  checksum: daf656a52230ef75a03c13195f28ce379253ad42d585d7f9db8c006e3235c7f34f5b6d097f9060607870f2b5d39be7866f7fa056c615e70fc0ae3dd6f796785b
   languageName: node
   linkType: hard
 
-"chart.js@npm:^2.4.0":
-  version: 2.9.4
-  resolution: "chart.js@npm:2.9.4"
-  dependencies:
-    chartjs-color: ^2.1.0
-    moment: ^2.10.2
-  checksum: 4551932943bc5e42d25ae5632d91878fb89e22937095a2742e23c4d0d0bde405bed6be2cb8480694ba599d6dbb9882c8bce6bac1e4667c820eb24c38416380aa
-  languageName: node
-  linkType: hard
-
-"chartjs-color-string@npm:^0.6.0":
-  version: 0.6.0
-  resolution: "chartjs-color-string@npm:0.6.0"
-  dependencies:
-    color-name: ^1.0.0
-  checksum: 29f7ef3ebf5af1a76034da3148e1f230eee0c0f6df497ab7072ce5fb9c11ff37f5f030d2a2a5f1fd9230895d9aa294b455c5dd0f0e04f38688c69d0ccbdca7dd
-  languageName: node
-  linkType: hard
-
-"chartjs-color@npm:^2.1.0":
-  version: 2.4.1
-  resolution: "chartjs-color@npm:2.4.1"
-  dependencies:
-    chartjs-color-string: ^0.6.0
-    color-convert: ^1.9.3
-  checksum: 850408dfcda057ef0115018d5c83b88f5539cf93bbae8389bd3c5caa405a18e1f1d89b22a26107e1559248206a4ad6243294a820d50f042c6782a1d9d09fb3de
-  languageName: node
-  linkType: hard
-
-"chartjs-plugin-annotation@npm:0.5.7":
-  version: 0.5.7
-  resolution: "chartjs-plugin-annotation@npm:0.5.7"
-  dependencies:
-    chart.js: ^2.4.0
-  checksum: 1e8f40716c5b6034382adb97377f56679371767f25d88eaa8dfa01040889d7d63f74c2e48d2fb5605d02d1a4635808278b212b3ee0dd1d4a43f5bca1ec0f6b2c
-  languageName: node
-  linkType: hard
-
-"chartjs-plugin-datalabels@davidswinegar/chartjs-plugin-datalabels#b0ade94116d4e273f0fdc17e9528c9a33c796e90":
-  version: 0.7.0
-  resolution: "chartjs-plugin-datalabels@https://github.com/davidswinegar/chartjs-plugin-datalabels.git#commit=b0ade94116d4e273f0fdc17e9528c9a33c796e90"
+"chartjs-plugin-annotation@npm:1.0.0-rc":
+  version: 1.0.0-rc
+  resolution: "chartjs-plugin-annotation@npm:1.0.0-rc"
   peerDependencies:
-    chart.js: ">= 2.7.0 < 3"
-  checksum: b3c6a5031f50d11bc7c7bb3c3721435a750e94985f38f69878b75a040214a3b4d434b02da85e82861cc64da89f3bf7bac8f87b4be53e7ba8201f82950ecea8f2
+    chart.js: ^3.0.0-rc.3
+  checksum: 1ae977eadf28e41016b23772291f031964e6664723f99acfdb7642b8007ee4d64970423bcd1b1cd0ac08a09c436b8695a3d496a19475bd81e8fd7ef7f45f5d0a
+  languageName: node
+  linkType: hard
+
+"chartjs-plugin-datalabels@npm:2.0.0-beta.1":
+  version: 2.0.0-beta.1
+  resolution: "chartjs-plugin-datalabels@npm:2.0.0-beta.1"
+  peerDependencies:
+    chart.js: ^3.0.0-beta.13
+  checksum: a7d0d7798e7d1ecc3d8a3ae37c55f281c7e56a155db9560ef7dc84b2e2cc59fab3a67d303ffb2490c6dd40873d062e811a472644d8ed2128c4067619e4722687
+  languageName: node
+  linkType: hard
+
+"chartjs-plugin-zoom@github:foxglove/chartjs-plugin-zoom#656541279943f00dce600288435f83c436293146":
+  version: 1.0.0-beta.1
+  resolution: "chartjs-plugin-zoom@https://github.com/foxglove/chartjs-plugin-zoom.git#commit=656541279943f00dce600288435f83c436293146"
+  dependencies:
+    hammerjs: ^2.0.8
+  peerDependencies:
+    chart.js: ^3.0.0-beta.13
+  checksum: b038b0cb2cc4bd2137767dc0b10b8cf22c038be1efd1a587d22d174fff63a9a25581b2b5d5931987ca7c393e1bb7205da5a8d318ad1881096f226971b20ec49d
   languageName: node
   linkType: hard
 
@@ -8147,7 +8106,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"color-convert@npm:^1.9.0, color-convert@npm:^1.9.1, color-convert@npm:^1.9.3":
+"color-convert@npm:^1.9.0, color-convert@npm:^1.9.1":
   version: 1.9.3
   resolution: "color-convert@npm:1.9.3"
   dependencies:
@@ -12536,7 +12495,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"hammerjs@npm:2.0.8":
+"hammerjs@npm:2.0.8, hammerjs@npm:^2.0.8":
   version: 2.0.8
   resolution: "hammerjs@npm:2.0.8"
   checksum: 68178494e20c711ca4beefd644a57d09452436697e511c6777836ed184d5c96d9a92c001a7bb51eb2fa98220f814a7d79606dbd44ed569adad7d0c9d32d4ba77
@@ -16566,7 +16525,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"moment@npm:2.29.1, moment@npm:>= 2.9.0, moment@npm:>=2.14.0, moment@npm:^2.10.2, moment@npm:^2.18.1":
+"moment@npm:2.29.1, moment@npm:>= 2.9.0, moment@npm:>=2.14.0, moment@npm:^2.18.1":
   version: 2.29.1
   resolution: "moment@npm:2.29.1"
   checksum: 86729013febf7160de5b93da69273dd304d674b0224f9544b3abd09a87671ddd2cdd57598261ce57588910d63747ffd5590965e83c790d8bf327083c0e0a06e0

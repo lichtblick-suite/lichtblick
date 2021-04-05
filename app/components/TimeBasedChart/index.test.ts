@@ -21,78 +21,9 @@ describe("filterDatasets", () => {
       { data: [], label: "c" },
     ];
     const linesToHide = { a: false, b: true };
-    expect(filterDatasets(datasets, linesToHide).map(({ label }) => label)).toEqual(["a", "c"]);
-  });
-
-  it("leaves string values alone", () => {
-    const datasets = [
-      {
-        data: [
-          { x: 0, y: "1" },
-          { x: 0, y: "1" },
-          { x: 0, y: "2" },
-          { x: 0, y: "3" },
-        ],
-        label: "1",
-      },
-    ];
-    const linesToHide = {};
-    expect(filterDatasets(datasets, linesToHide, 100, 100)[0]?.data.map(({ y }) => y)).toEqual([
-      "1",
-      "2",
-      "3",
+    expect(filterDatasets(datasets, linesToHide, 0, 0).map(({ label }) => label)).toEqual([
+      "a",
+      "c",
     ]);
-  });
-
-  it("filters out points that are too close to each other", () => {
-    const data = new Array(101).fill(0).map((_, x) => ({ y: 0, x }));
-    expect(data[0]).toEqual({ y: 0, x: 0 });
-    expect(data[100]).toEqual({ y: 0, x: 100 });
-
-    const datasets = [{ data, label: "1" }];
-    const linesToHide = {};
-    expect(filterDatasets(datasets, linesToHide, 10, 10)[0]?.data.map(({ x }) => x)).toEqual([
-      0,
-      10,
-      20,
-      30,
-      40,
-      50,
-      60,
-      70,
-      80,
-      90,
-      100,
-    ]);
-  });
-
-  it("preserves non-adjacent NaNs in line charts", () => {
-    const datasets = [
-      {
-        data: [NaN, NaN, 1, NaN, NaN, 2, NaN, NaN].map((val) => ({ x: val, y: val })),
-        label: "1",
-        showLine: true,
-      },
-    ];
-    const linesToHide = {};
-    expect(filterDatasets(datasets, linesToHide)[0]?.data.map(({ x }) => x)).toEqual([
-      NaN,
-      1,
-      NaN,
-      2,
-      NaN,
-    ]);
-  });
-
-  it("preserves one NaN in scatter plots", () => {
-    // Any behavior would be fine here, but this is what we currently do.
-    const datasets = [
-      {
-        data: [NaN, NaN, 1, NaN, NaN, 2, NaN, NaN].map((val) => ({ x: val, y: val })),
-        label: "1",
-      },
-    ];
-    const linesToHide = {};
-    expect(filterDatasets(datasets, linesToHide)[0]?.data.map(({ x }) => x)).toEqual([NaN, 1, 2]);
   });
 });
