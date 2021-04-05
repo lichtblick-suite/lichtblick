@@ -1841,7 +1841,7 @@ __metadata:
     chartjs-plugin-annotation: 0.5.7
     chartjs-plugin-datalabels: "davidswinegar/chartjs-plugin-datalabels#b0ade94116d4e273f0fdc17e9528c9a33c796e90"
     chromatic: 5.7.1
-    classnames: 2.3.0
+    classnames: 2.3.1
     enzyme: 3.11.0
     fetch-mock: 9.11.0
     fuzzysort: 1.1.4
@@ -7919,10 +7919,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"classnames@npm:2.3.0, classnames@npm:2.x, classnames@npm:^2.2.1, classnames@npm:^2.2.4, classnames@npm:^2.2.5, classnames@npm:^2.2.6":
-  version: 2.3.0
-  resolution: "classnames@npm:2.3.0"
-  checksum: 8ca9dad97dd63db49ecd4d4b7bb5f05bef6628794b0ca3154bd7ec7ed7f16bdb9947515eca86dad0e7223b0391aa96f6b15dc2a7d31c795a19669b70799ec7f3
+"classnames@npm:2.3.1, classnames@npm:2.x, classnames@npm:^2.2.1, classnames@npm:^2.2.4, classnames@npm:^2.2.5, classnames@npm:^2.2.6":
+  version: 2.3.1
+  resolution: "classnames@npm:2.3.1"
+  checksum: 57d536edede609f81425d24b062d8d720a466565faf1e38d32c881e883920baa71519ac70c7b565e9cd39201fb1c1ff9bdf8aabf8e26544bac481e7924867c83
   languageName: node
   linkType: hard
 
