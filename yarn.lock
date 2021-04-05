@@ -1911,7 +1911,7 @@ __metadata:
     tinycolor2: 1.4.2
     typescript: 4.2.2
     url-search-params: 1.1.0
-    use-debounce: 6.0.0
+    use-debounce: 6.0.1
     uuid: 8.3.2
     wasm-lz4: 1.0.0
     ws: 7.4.4
@@ -23647,12 +23647,12 @@ typescript@4.2.2:
   languageName: node
   linkType: hard
 
-"use-debounce@npm:6.0.0":
-  version: 6.0.0
-  resolution: "use-debounce@npm:6.0.0"
+"use-debounce@npm:6.0.1":
+  version: 6.0.1
+  resolution: "use-debounce@npm:6.0.1"
   peerDependencies:
     react: ">=16.8.0"
-  checksum: e05f35a38ef3b1d370eb2d51417aed2881946fc5dea4c2b2fb39c96fb9890c3a7b0d64565fc29981e3abcb744caf4018b5d5acc7d28d09dd016279936d20ecfd
+  checksum: 4e28868f1b87d6911b89486eb9537abc3ef11962e631682b21da71678532230a084aced98d39fe266b1294fed02cdbbcdc179a7e39ef166977f44c2203a3e7d9
   languageName: node
   linkType: hard
 
