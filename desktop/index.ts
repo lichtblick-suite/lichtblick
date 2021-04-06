@@ -357,9 +357,16 @@ async function createWindow(): Promise<void> {
 app.on("ready", async () => {
   nativeTheme.themeSource = "dark";
 
-  autoUpdater.checkForUpdatesAndNotify().catch((err) => {
-    captureException(err);
-  });
+  // Only stable builds check for automatic updates
+  if (process.env.NODE_ENV !== "production") {
+    log.info("Automatic updates disabled (development environment)");
+  } else if (/-(dev|nightly)/.test(packageJson.version)) {
+    log.info("Automatic updates disabled (development build)");
+  } else {
+    autoUpdater.checkForUpdatesAndNotify().catch((err) => {
+      captureException(err);
+    });
+  }
 
   if (!isProduction) {
     console.group("Installing Chrome extensions for development...");
