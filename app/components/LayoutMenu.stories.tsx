@@ -6,14 +6,13 @@ import { createMemoryHistory } from "history";
 import { useMemo } from "react";
 import { Provider } from "react-redux";
 
+import LayoutMenu from "@foxglove-studio/app/components/LayoutMenu";
 import LayoutStorageContext, {
   Layout,
   LayoutStorage,
 } from "@foxglove-studio/app/context/LayoutStorageContext";
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
-
-import LayoutsContextMenu from "./LayoutsContextMenu";
 
 class FakeLayoutStorage implements LayoutStorage {
   private _layouts: Layout[];
@@ -36,8 +35,8 @@ class FakeLayoutStorage implements LayoutStorage {
 }
 
 export default {
-  title: "LayoutsContextMenu",
-  component: LayoutsContextMenu,
+  title: "LayoutMenu",
+  component: LayoutMenu,
 };
 
 export function Empty(): JSX.Element {
@@ -45,10 +44,10 @@ export function Empty(): JSX.Element {
   const store = useMemo(() => configureStore(createRootReducer(createMemoryHistory())), []);
 
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ display: "flex", height: 400 }}>
       <Provider store={store}>
         <LayoutStorageContext.Provider value={storage}>
-          <LayoutsContextMenu />
+          <LayoutMenu defaultIsOpen />
         </LayoutStorageContext.Provider>
       </Provider>
     </div>
@@ -88,10 +87,10 @@ export function LayoutList(): JSX.Element {
   }, []);
 
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ display: "flex", height: 400 }}>
       <Provider store={store}>
         <LayoutStorageContext.Provider value={storage}>
-          <LayoutsContextMenu />
+          <LayoutMenu defaultIsOpen />
         </LayoutStorageContext.Provider>
       </Provider>
     </div>

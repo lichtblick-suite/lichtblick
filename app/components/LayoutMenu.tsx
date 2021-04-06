@@ -2,30 +2,32 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import {
+  ActionButton,
+  ContextualMenuItemType,
+  IButton,
+  IContextualMenuItem,
+} from "@fluentui/react";
 import path from "path";
-import { useCallback, useState } from "react";
-import { useDispatch } from "react-redux";
-import { useMountedState } from "react-use";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useDispatch, useSelector, useStore } from "react-redux";
+import { useAsyncFn, useMountedState } from "react-use";
 import { v4 as uuidv4 } from "uuid";
 
 import { loadLayout } from "@foxglove-studio/app/actions/panels";
-import LayoutIcon from "@foxglove-studio/app/assets/layout.svg";
-import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
-import Flex from "@foxglove-studio/app/components/Flex";
-import { WrappedIcon } from "@foxglove-studio/app/components/Icon";
 import { Layout, useLayoutStorage } from "@foxglove-studio/app/context/LayoutStorageContext";
+import useLatestNonNull from "@foxglove-studio/app/hooks/useLatestNonNull";
 import { usePrompt } from "@foxglove-studio/app/hooks/usePrompt";
+import { State } from "@foxglove-studio/app/reducers";
 import { PanelsState } from "@foxglove-studio/app/reducers/panels";
 import { downloadTextFile } from "@foxglove-studio/app/util";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
-import LayoutsContextMenu from "./LayoutsContextMenu";
-
 // A Wrapper around window.showOpenFilePicker that handles the error thrown on "cancel"
 // Why the api is designed this was is beyond me
 async function showOpenFilePicker(): Promise<FileSystemFileHandle | undefined> {
-  const result = await window
-    .showOpenFilePicker({
+  try {
+    const result = await window.showOpenFilePicker({
       multiple: false,
       excludeAcceptAllOption: false,
       types: [
@@ -36,34 +38,60 @@ async function showOpenFilePicker(): Promise<FileSystemFileHandle | undefined> {
           },
         },
       ],
-    })
-    .catch((err) => {
-      if (err.message !== "The user aborted a request.") {
-        throw err;
-      }
     });
-
-  if (!result) {
-    return;
+    return result?.[0];
+  } catch (err) {
+    if (err.name === "AbortError") {
+      return;
+    }
+    throw err;
   }
-
-  return result[0];
 }
 
 // Show the list of available layouts for user selection
-// The context menu is implemented as a separate component to avoid fetching the layout list
-// and re-rendering when panel layouts change if the menu is not open
-export default function LayoutMenu(props: { isOpen?: boolean }) {
-  const [isOpen, setIsOpen] = useState(props.isOpen ?? false);
+export default function LayoutMenu({
+  defaultIsOpen = false,
+}: {
+  defaultIsOpen?: boolean;
+}): React.ReactElement {
   const prompt = usePrompt();
   const dispatch = useDispatch();
   const isMounted = useMountedState();
+  const buttonRef = useRef<IButton>(ReactNull);
+  useLayoutEffect(() => {
+    if (defaultIsOpen) {
+      buttonRef.current?.openMenu();
+    }
+  }, [defaultIsOpen]);
 
   const layoutStorage = useLayoutStorage();
+
+  const currentLayoutId = useSelector((state: State) => state.persistedState.panels.id);
+  // Access the store directly so we can lazily read store.persistedState.panels rather than
+  // subscribing to updates.
+  const store = useStore<State>();
+
+  // a basic stale-while-revalidate pattern to avoid flicker of layout menu when we reload the layout list
+  // When we re-visit local/remote layouts we will want to look at something like swr (https://swr.vercel.app/)
+  // that will handle this and other nice things for us.
+  const [{ value: asyncLayouts, error, loading }, fetchLayouts] = useAsyncFn(async () => {
+    const list = await layoutStorage.list();
+    list.sort((a, b) => a.name.localeCompare(b.name));
+    return list;
+  }, [layoutStorage]);
+
+  const layouts = useLatestNonNull(asyncLayouts);
+
+  useEffect(() => {
+    if (error) {
+      sendNotification(error.message, error, "app", "error");
+    }
+  }, [error]);
 
   const renameAction = useCallback(
     async (layout: Layout) => {
       const value = await prompt({
+        title: "Rename layout",
         value: layout.name,
       });
       if (!isMounted()) {
@@ -78,11 +106,12 @@ export default function LayoutMenu(props: { isOpen?: boolean }) {
     [dispatch, isMounted, prompt],
   );
 
-  const exportAction = useCallback((layout: Layout) => {
-    const name = layout.name ?? "unnamed";
-    const content = JSON.stringify(layout.state, undefined, 2);
+  const exportAction = useCallback(() => {
+    const currentPanelsState = store.getState().persistedState.panels;
+    const name = currentPanelsState.name ?? "unnamed";
+    const content = JSON.stringify(currentPanelsState, undefined, 2);
     downloadTextFile(content, `${name}.json`);
-  }, []);
+  }, [store]);
 
   const importAction = useCallback(async () => {
     const fileHandle = await showOpenFilePicker();
@@ -111,15 +140,6 @@ export default function LayoutMenu(props: { isOpen?: boolean }) {
     dispatch(loadLayout(state));
   }, [dispatch, isMounted]);
 
-  const newAction = useCallback(
-    (layout: Layout) => {
-      if (layout.state) {
-        dispatch(loadLayout(layout.state));
-      }
-    },
-    [dispatch],
-  );
-
   const selectAction = useCallback(
     (layout: Layout) => {
       if (layout.state) {
@@ -132,26 +152,102 @@ export default function LayoutMenu(props: { isOpen?: boolean }) {
   const deleteLayout = useCallback(
     async (layout: Layout) => {
       await layoutStorage.delete(layout.id);
+      fetchLayouts();
     },
-    [layoutStorage],
+    [layoutStorage, fetchLayouts],
   );
 
+  const duplicateLayout = useCallback(() => {
+    const currentPanelsState = store.getState().persistedState.panels;
+    const name = `${currentPanelsState.name ?? "unnamed"} copy`;
+    const id = uuidv4();
+
+    const newState: PanelsState = {
+      ...currentPanelsState,
+      id: id,
+      name: name,
+    };
+
+    dispatch(loadLayout(newState));
+  }, [dispatch, store]);
+
+  const layoutItems: IContextualMenuItem[] = useMemo(() => {
+    if (loading || layouts === undefined) {
+      return [];
+    }
+
+    // Panel state may not have an ID yet. To make highlighting current layout work we need the ID.
+    // Here we set one locally until the currentPanelState has one
+    // const currentId = currentPanelsState.id ?? uuidv4();
+    // currentPanelsState.id = currentId;
+
+    // current panel state is not in our storage layouts list - this happens after creating a new
+    // layout since useLayoutStorage does not subscribe to updates when layouts are added.
+    if (currentLayoutId != undefined && !layouts.some((layout) => layout.id === currentLayoutId)) {
+      const currentPanelsState = store.getState().persistedState.panels;
+      layouts.push({
+        id: currentLayoutId,
+        name: currentPanelsState.name ?? "unnamed",
+        state: currentPanelsState,
+      });
+    }
+
+    return layouts.map(
+      (layout, idx): IContextualMenuItem => ({
+        key: `layout${idx}`,
+        text: layout.name,
+        split: true,
+        onClick: () => {
+          if (layout.id !== currentLayoutId) {
+            selectAction(layout);
+          }
+        },
+        iconProps: layout.id === currentLayoutId ? { iconName: "Checkmark" } : undefined,
+        subMenuProps: {
+          items: [
+            {
+              key: "rename",
+              text: "Rename",
+              iconProps: { iconName: "Edit" },
+              onClick: () => void renameAction(layout),
+            },
+            {
+              key: "delete",
+              text: "Delete",
+              iconProps: { iconName: "Delete" },
+              // delete only available for non-current layouts to avoid "what happens when I delete last layout"
+              disabled: layout.id === currentLayoutId,
+              onClick: (event) => {
+                // Leave the menu open on delete but reload the menu items.
+                // This gives visual feedback to the user that their action worked.
+                // Also allows them to delete another item, to delete multiple, without re-opening the menu.
+                event?.preventDefault();
+                deleteLayout(layout);
+              },
+            },
+          ],
+        },
+      }),
+    );
+  }, [loading, layouts, store, currentLayoutId, renameAction, selectAction, deleteLayout]);
+
+  const items: IContextualMenuItem[] = [
+    ...layoutItems,
+    { key: "divider_1", itemType: ContextualMenuItemType.Divider },
+    { key: "new", text: "New", onClick: duplicateLayout, iconProps: { iconName: "Add" } },
+    { key: "export", text: "Export", onClick: exportAction, iconProps: { iconName: "Share" } },
+    { key: "import", text: "Import", onClick: importAction, iconProps: { iconName: "OpenFile" } },
+  ];
+
   return (
-    <ChildToggle position="below" onToggle={setIsOpen} isOpen={isOpen}>
-      <Flex>
-        <WrappedIcon medium fade active={isOpen} tooltip="Layouts">
-          <LayoutIcon />
-        </WrappedIcon>
-      </Flex>
-      <LayoutsContextMenu
-        onSelectAction={selectAction}
-        onRenameAction={renameAction}
-        onNewAction={newAction}
-        onExportAction={exportAction}
-        onImportAction={importAction}
-        onDeleteAction={deleteLayout}
-        onClose={() => setIsOpen(false)}
-      />
-    </ChildToggle>
+    <ActionButton
+      componentRef={buttonRef}
+      iconProps={{
+        iconName: "FiveTileGrid",
+        styles: { root: { "& span": { verticalAlign: "baseline" } } },
+      }}
+      menuProps={{ items, onMenuOpened: () => fetchLayouts() }}
+      onRenderMenuIcon={() => ReactNull}
+    />
   );
 }

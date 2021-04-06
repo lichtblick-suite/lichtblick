@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { storiesOf } from "@storybook/react";
+import { useEffect } from "react";
 import TestUtils from "react-dom/test-utils";
 
 import { importPanelLayout } from "@foxglove-studio/app/actions/panels";
@@ -35,27 +36,27 @@ storiesOf("<ShareJsonModal>", module)
       noun="layout"
     />
   ))
-  .add("submitting invalid layout", () => (
-    <div
-      data-modalcontainer="true"
-      ref={(el) => {
-        if (el) {
-          const textarea: any = document.querySelector("textarea");
-          textarea.value = "{";
-          TestUtils.Simulate.change(textarea);
-          setTimeout(() => {
-            document.querySelector<HTMLElement>(".test-apply")?.click();
-          }, 10);
-        }
-      }}
-    >
-      <ShareJsonModal
-        onRequestClose={() => {
-          // no-op
-        }}
-        value={""}
-        onChange={onLayoutChange}
-        noun="layout"
-      />
-    </div>
-  ));
+  .add("submitting invalid layout", () => {
+    useEffect(() => {
+      setTimeout(() => {
+        const textarea: any = document.querySelector("textarea");
+        textarea.value = "{";
+        TestUtils.Simulate.change(textarea);
+        setTimeout(() => {
+          document.querySelector<HTMLElement>(".test-apply")?.click();
+        }, 10);
+      }, 10);
+    }, []);
+    return (
+      <div data-modalcontainer="true">
+        <ShareJsonModal
+          onRequestClose={() => {
+            // no-op
+          }}
+          value={""}
+          onChange={onLayoutChange}
+          noun="layout"
+        />
+      </div>
+    );
+  });

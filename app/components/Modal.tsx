@@ -11,9 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Layer } from "@fluentui/react";
 import CloseIcon from "@mdi/svg/svg/close.svg";
 import { CSSProperties, PropsWithChildren } from "react";
-import { createPortal } from "react-dom";
 import styled from "styled-components";
 
 import Icon from "@foxglove-studio/app/components/Icon";
@@ -47,8 +47,7 @@ const Backdrop = styled.div`
   left: 0;
   bottom: 0;
   right: 0;
-  opacity: 0.75;
-  background-color: black;
+  background-color: ${({ theme }) => theme.palette.blackTranslucent40};
   width: 100%;
   height: 100%;
 `;
@@ -64,30 +63,31 @@ type Props = {
 };
 
 // Generic modal that renders a semi-transparent backdrop and close icon.
-export default function Modal(props: PropsWithChildren<Props>) {
-  return createPortal(
-    <Container>
-      <Backdrop onClick={props.onRequestClose} />
-      <StyledContent
-        style={{
-          borderRadius: 6,
-          backgroundColor: sharedColors.DARK2,
-          ...props.contentStyle,
-        }}
-      >
-        <KeyListener global keyDownHandlers={{ Escape: props.onRequestClose }} />
-        <Icon
-          fade
-          dataTest="modal-close-icon"
-          xsmall
-          style={{ position: "absolute", right: 25, top: 25, cursor: "pointer" }}
-          onClick={props.onRequestClose}
+export default function Modal(props: PropsWithChildren<Props>): React.ReactElement {
+  return (
+    <Layer>
+      <Container>
+        <Backdrop onClick={props.onRequestClose} />
+        <StyledContent
+          style={{
+            borderRadius: 6,
+            backgroundColor: sharedColors.DARK2,
+            ...props.contentStyle,
+          }}
         >
-          <CloseIcon />
-        </Icon>
-        {props.children}
-      </StyledContent>
-    </Container>,
-    document.body,
+          <KeyListener global keyDownHandlers={{ Escape: props.onRequestClose }} />
+          <Icon
+            fade
+            dataTest="modal-close-icon"
+            xsmall
+            style={{ position: "absolute", right: 25, top: 25, cursor: "pointer" }}
+            onClick={props.onRequestClose}
+          >
+            <CloseIcon />
+          </Icon>
+          {props.children}
+        </StyledContent>
+      </Container>
+    </Layer>
   );
 }

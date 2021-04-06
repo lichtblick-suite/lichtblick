@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { storiesOf } from "@storybook/react";
-
 import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
 import TinyConnectionPicker from "@foxglove-studio/app/components/TinyConnectionPicker";
 import PlayerSelectionContext, {
@@ -20,7 +18,12 @@ import PlayerSelectionContext, {
   PlayerSourceDefinition,
 } from "@foxglove-studio/app/context/PlayerSelectionContext";
 
-storiesOf("<TinyConnectionPicker>", module).add("default", () => {
+export default {
+  title: "<TinyConnectionPicker>",
+  component: TinyConnectionPicker,
+};
+
+export function Default(): React.ReactElement {
   const playerSources: PlayerSourceDefinition[] = [
     {
       name: "Bag File",
@@ -49,10 +52,10 @@ storiesOf("<TinyConnectionPicker>", module).add("default", () => {
   return (
     <PlayerSelectionContext.Provider value={value}>
       <MockMessagePipelineProvider>
-        <div style={{ padding: 8, textAlign: "right", width: "100%" }}>
+        <div style={{ padding: 8, width: "100%", height: 400 }}>
           <TinyConnectionPicker defaultIsOpen />
         </div>
       </MockMessagePipelineProvider>
     </PlayerSelectionContext.Provider>
   );
-});
+}

@@ -10,13 +10,12 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import { Callout, IconButton } from "@fluentui/react";
 import CloseIcon from "@mdi/svg/svg/close.svg";
-import DotsVerticalIcon from "@mdi/svg/svg/dots-vertical.svg";
 import { partition, pick, union, without } from "lodash";
 import { useEffect, useMemo, useCallback, useRef, useState, ReactElement } from "react";
 import styled, { css, keyframes } from "styled-components";
 
-import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
 import Flex from "@foxglove-studio/app/components/Flex";
 import Icon from "@foxglove-studio/app/components/Icon";
 import Menu, { Item } from "@foxglove-studio/app/components/Menu";
@@ -189,6 +188,8 @@ function LinkedGlobalVariableRow({ name }: { name: string }): ReactElement {
     setGlobalVariables({ [name]: undefined });
   }, [linkedGlobalVariables, name, setGlobalVariables, setLinkedGlobalVariables]);
 
+  const moreButton = useRef<HTMLElement>(ReactNull);
+
   return (
     <>
       <td>${name}</td>
@@ -224,21 +225,27 @@ function LinkedGlobalVariableRow({ name }: { name: string }): ReactElement {
               </SLinkedTopicsSpan>
             </Tooltip>
           </Flex>
-          <ChildToggle position="below" isOpen={isOpen} onToggle={setIsOpen}>
-            <SIconWrapper isOpen={isOpen}>
-              <Icon small dataTest={`unlink-${name}`}>
-                <DotsVerticalIcon />
-              </Icon>
-            </SIconWrapper>
-            <Menu style={{ padding: "4px 0px" }}>
-              {linkedTopicPaths.map((path: any) => (
-                <Item dataTest="unlink-path" key={path} onClick={() => unlink(path)}>
-                  Remove <span style={{ color: sharedColors.LIGHT, opacity: 1 }}>{path}</span>
-                </Item>
-              ))}
-              <Item onClick={unlinkAndDelete}>Delete global variable</Item>
-            </Menu>
-          </ChildToggle>
+          <IconButton
+            elementRef={moreButton}
+            iconProps={{ iconName: "MoreVertical" }}
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {isOpen && (
+              // use Callout instead of a menu on the button for now so that we can style the menu text
+              <Callout target={moreButton} isBeakVisible={false} onDismiss={() => setIsOpen(false)}>
+                <Menu style={{ padding: "4px 0px" }}>
+                  {linkedTopicPaths.map((path: any) => (
+                    <Item dataTest="unlink-path" key={path} onClick={() => unlink(path)}>
+                      <span>
+                        Remove <span style={{ color: sharedColors.LIGHT, opacity: 1 }}>{path}</span>
+                      </span>
+                    </Item>
+                  ))}
+                  <Item onClick={unlinkAndDelete}>Delete global variable</Item>
+                </Menu>
+              </Callout>
+            )}
+          </IconButton>
         </Flex>
       </td>
     </>

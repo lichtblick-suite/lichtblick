@@ -2,64 +2,85 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { screen, fireEvent } from "@testing-library/react";
+import { screen, fireEvent, act } from "@testing-library/react";
 import { renderHook } from "@testing-library/react-hooks/dom";
+
+import ModalHost from "@foxglove-studio/app/context/ModalHost";
 
 import { usePrompt } from "./usePrompt";
 
 describe("usePrompt", () => {
-  it("should cleanup any extra nodes added", () => {
+  it("cleans up extra nodes added", async () => {
     const start = document.body.childNodes.length;
-    const { unmount } = renderHook(() => usePrompt());
+    const { result, unmount } = renderHook(() => usePrompt(), { wrapper: ModalHost });
+    expect(document.body.childNodes.length).toEqual(start);
+    let promise: Promise<string | undefined> | undefined;
+    act(() => {
+      promise = result.current({ title: "Hello" });
+    });
+    expect(promise).toBeDefined();
     expect(document.body.childNodes.length).toEqual(start + 1);
     unmount();
     expect(document.body.childNodes.length).toEqual(start);
+    await expect(promise).resolves.toBeUndefined();
   });
 
-  it("should support a placeholder", async () => {
-    const { result, unmount } = renderHook(() => usePrompt());
+  it("should support a title and placeholder", async () => {
+    const { result, unmount } = renderHook(() => usePrompt(), { wrapper: ModalHost });
 
-    result.current({
-      placeholder: "test-placeholder",
+    act(() => {
+      result.current({
+        title: "test-title",
+        placeholder: "test-placeholder",
+      });
     });
 
-    const input = screen.getByPlaceholderText("test-placeholder") as HTMLInputElement;
+    await expect(screen.findByText("test-title")).resolves.not.toBeNullOrUndefined();
+    const input = (await screen.findByPlaceholderText("test-placeholder")) as HTMLInputElement;
     expect(input.value).toEqual("");
     unmount();
   });
 
   it("should return entered value", async () => {
-    const { result, unmount } = renderHook(() => usePrompt());
-    const valPromise = result.current({
-      placeholder: "test-placeholder",
+    const { result, unmount } = renderHook(() => usePrompt(), { wrapper: ModalHost });
+    let valPromise: Promise<string | undefined> | undefined;
+    act(() => {
+      valPromise = result.current({
+        title: "test-title",
+        placeholder: "test-placeholder",
+      });
     });
+    expect(valPromise).toBeDefined();
 
-    const input = screen.getByPlaceholderText("test-placeholder");
+    const input = await screen.findByPlaceholderText("test-placeholder");
     fireEvent.change(input, { target: { value: "something" } });
 
     const submitButton = screen.getByText("OK");
     submitButton.click();
 
-    const val = await valPromise;
-    expect(val).toEqual("something");
+    await expect(valPromise).resolves.toEqual("something");
     unmount();
   });
 
   it("should use an initial value", async () => {
-    const { result, unmount } = renderHook(() => usePrompt());
-    const valPromise = result.current({
-      value: "initial-value",
-      placeholder: "some-placeholder",
+    const { result, unmount } = renderHook(() => usePrompt(), { wrapper: ModalHost });
+    let valPromise: Promise<string | undefined> | undefined;
+    act(() => {
+      valPromise = result.current({
+        title: "test-title",
+        value: "initial-value",
+        placeholder: "some-placeholder",
+      });
     });
+    expect(valPromise).toBeDefined();
 
-    const input = screen.getByPlaceholderText("some-placeholder") as HTMLInputElement;
+    const input = (await screen.findByPlaceholderText("some-placeholder")) as HTMLInputElement;
     expect(input.value).toEqual("initial-value");
 
     const submitButton = screen.getByText("OK");
     submitButton.click();
 
-    const val = await valPromise;
-    expect(val).toEqual("initial-value");
+    await expect(valPromise).resolves.toEqual("initial-value");
     unmount();
   });
 });

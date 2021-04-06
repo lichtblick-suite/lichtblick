@@ -10,20 +10,23 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import EarthIcon from "@mdi/svg/svg/earth.svg";
-import { useState, useCallback, useEffect } from "react";
+import {
+  ActionButton,
+  Callout,
+  IButton,
+  IContextualMenuProps,
+  keyframes,
+  useTheme,
+} from "@fluentui/react";
+import { useState, useCallback, useEffect, useRef, useLayoutEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 
 import { AddPanelPayload, addPanel } from "@foxglove-studio/app/actions/panels";
-import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
-import Flex from "@foxglove-studio/app/components/Flex";
 import GlobalVariablesTable, {
   ANIMATION_RESET_DELAY_MS,
   isActiveElementEditable,
-  makeFlashAnimation,
 } from "@foxglove-studio/app/components/GlobalVariablesTable";
-import { WrappedIcon } from "@foxglove-studio/app/components/Icon";
 import Menu from "@foxglove-studio/app/components/Menu";
 import HelpButton from "@foxglove-studio/app/components/PanelToolbar/HelpButton";
 import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
@@ -65,45 +68,16 @@ const SActions = styled.div`
 `;
 
 const AnimationDuration = 3;
-const IconFlashKeyframes = makeFlashAnimation(
-  css`
-    opacity: 0.5;
-    color: ${colors.LIGHT};
-  `,
-  css`
-    opacity: 1;
-    color: ${colors.BLUE};
-  `,
-);
-const IconFlashAnimation = css`
-  animation: ${IconFlashKeyframes} ${AnimationDuration}s ease-out;
-  animation-fill-mode: forwards;
-`;
-
-const SAnimatedIcon = styled(WrappedIcon)`
-  color: ${colors.LIGHT};
-  transition: all ${AnimationDuration}s;
-  ${({ animate, skipAnimation }: any) => (animate && !skipAnimation ? IconFlashAnimation : "none")};
-`;
 
 type Props = {
   defaultIsOpen?: boolean; // Only for testing
   skipAnimation?: boolean; // Only for testing
 };
 
-function GlobalVariablesMenu(props: Props) {
-  const { defaultIsOpen, skipAnimation = inScreenshotTests() } = props;
-  const [hasChangedVariable, setHasChangedVariable] = useState<boolean>(false);
-  const [isOpen, setIsOpen] = useState<boolean>(defaultIsOpen || false);
-  const onToggle = useCallback((newValue: boolean) => {
-    setHasChangedVariable(false);
-    setIsOpen(newValue);
-  }, []);
-
+function MenuContent(menuProps: IContextualMenuProps) {
   const dispatch = useDispatch();
   const layout = useSelector((state: any) => state.persistedState.panels.layout);
   const addPanelToLayout = useCallback(() => {
-    setIsOpen(false);
     dispatch(addPanel({ type: GlobalVariables.panelType, layout } as AddPanelPayload));
 
     const name = getEventNames().PANEL_ADD;
@@ -115,35 +89,8 @@ function GlobalVariablesMenu(props: Props) {
       });
     }
   }, [dispatch, layout]);
-
-  const { globalVariables } = useGlobalVariables();
-  useEffect(() => {
-    setHasChangedVariable(!skipAnimation && !isActiveElementEditable());
-    const timerId = setTimeout(() => setHasChangedVariable(false), ANIMATION_RESET_DELAY_MS);
-    return () => clearTimeout(timerId);
-  }, [globalVariables, skipAnimation]);
-
   return (
-    <ChildToggle
-      position="below"
-      isOpen={isOpen}
-      onToggle={onToggle}
-      dataTest="open-global-variables"
-    >
-      <Flex center>
-        <SAnimatedIcon
-          medium
-          fade
-          active={isOpen}
-          // @ts-expect-error resolve once type for SAnimatedIcon props is specified
-          animate={hasChangedVariable}
-          skipAnimation={skipAnimation || isOpen}
-          style={{ transition: "all 1s ease-out" }}
-          tooltip="Global variables"
-        >
-          <EarthIcon />
-        </SAnimatedIcon>
-      </Flex>
+    <Callout {...menuProps}>
       <Menu>
         <STitleBar>
           <STitle>Global variables</STitle>
@@ -155,7 +102,60 @@ function GlobalVariablesMenu(props: Props) {
         <hr />
         <GlobalVariablesTable />
       </Menu>
-    </ChildToggle>
+    </Callout>
+  );
+}
+
+function GlobalVariablesMenu(props: Props): React.ReactElement {
+  const { defaultIsOpen, skipAnimation = inScreenshotTests() } = props;
+  const [hasChangedVariable, setHasChangedVariable] = useState<boolean>(false);
+
+  const {
+    palette: { themePrimary },
+  } = useTheme();
+  const flashKeyframes = useMemo(
+    () =>
+      keyframes({
+        "0%, 20%, 100%": { color: themePrimary },
+        "10%, 30%, 80%": { color: colors.BLUE },
+      }),
+    [themePrimary],
+  );
+
+  const { globalVariables } = useGlobalVariables();
+  useEffect(() => {
+    setHasChangedVariable(!skipAnimation && !isActiveElementEditable());
+    const timerId = setTimeout(() => setHasChangedVariable(false), ANIMATION_RESET_DELAY_MS);
+    return () => clearTimeout(timerId);
+  }, [globalVariables, skipAnimation]);
+
+  const buttonElementRef = useRef<HTMLElement>(ReactNull);
+  const buttonRef = useRef<IButton>(ReactNull);
+  useLayoutEffect(() => {
+    if (defaultIsOpen) {
+      buttonRef.current?.openMenu();
+    }
+  }, [defaultIsOpen]);
+
+  return (
+    <ActionButton
+      componentRef={buttonRef}
+      elementRef={buttonElementRef}
+      iconProps={{
+        iconName: "Variable2",
+        styles: {
+          root: {
+            "& span": { verticalAlign: "baseline" },
+            animation: hasChangedVariable
+              ? `${flashKeyframes} ${AnimationDuration}s ease-out forwards`
+              : undefined,
+          },
+        },
+      }}
+      menuProps={{ items: [] }}
+      onRenderMenuIcon={() => ReactNull}
+      menuAs={MenuContent}
+    />
   );
 }
 

@@ -4,8 +4,14 @@ import { getGlobalConfig } from "@foxglove-studio/app/GlobalConfig";
 import waitForFonts from "@foxglove-studio/app/util/waitForFonts";
 import { withScreenshot } from "storycap";
 import { withMockSubscribeToNewsletter } from "./__mocks__/subscribeToNewsletter";
+import { StoryContext } from "@storybook/react";
+import ThemeProvider from "@foxglove-studio/app/theme/ThemeProvider";
 
 let loaded = false;
+
+function withTheme(story: Function, { parameters }: StoryContext) {
+  return <ThemeProvider>{story()}</ThemeProvider>;
+}
 
 export const loaders = [
   async () => {
@@ -19,7 +25,7 @@ export const loaders = [
   },
 ];
 
-export const decorators = [withScreenshot, withMockSubscribeToNewsletter];
+export const decorators = [withTheme, withScreenshot, withMockSubscribeToNewsletter];
 
 export const parameters = {
   // Disable default padding around the page body

@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Layer } from "@fluentui/react";
 import cx from "classnames";
 import {
   ReactElement,
@@ -22,7 +23,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { createPortal } from "react-dom";
 
 import Flex from "@foxglove-studio/app/components/Flex";
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
@@ -225,7 +225,7 @@ export default function ChildToggle(props: Props): ReactElement {
       </div>
     );
 
-    return noPortal ? tree : createPortal(tree, document.body);
+    return noPortal ? tree : <Layer eventBubblingEnabled>{tree}</Layer>;
   }
 
   const keyDownHandlers = {

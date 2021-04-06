@@ -25,7 +25,7 @@ import GlobalVariablesMenu from "./GlobalVariablesMenu";
 storiesOf("<GlobalVariablesMenu>", module)
   .add("closed", () => {
     return (
-      <div style={{ margin: 30, paddingLeft: 300 }}>
+      <div style={{ margin: 30, paddingLeft: 300, height: 400 }}>
         <DndProvider backend={HTML5Backend}>
           <Provider store={configureStore(createRootReducer(createMemoryHistory()))}>
             <GlobalVariablesMenu />
@@ -36,7 +36,7 @@ storiesOf("<GlobalVariablesMenu>", module)
   })
   .add("open", () => {
     return (
-      <div style={{ margin: 30, paddingLeft: 300 }}>
+      <div style={{ margin: 30, paddingLeft: 300, height: 400 }}>
         <DndProvider backend={HTML5Backend}>
           <Provider store={configureStore(createRootReducer(createMemoryHistory()))}>
             <GlobalVariablesMenu defaultIsOpen />

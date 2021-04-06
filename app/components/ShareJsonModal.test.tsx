@@ -13,6 +13,8 @@
 
 import { mount } from "enzyme";
 
+import ThemeProvider from "@foxglove-studio/app/theme/ThemeProvider";
+
 import ShareJsonModal from "./ShareJsonModal";
 
 describe("<ShareJsonModal />", () => {
@@ -22,16 +24,18 @@ describe("<ShareJsonModal />", () => {
       done();
     };
     const wrapper = mount(
-      <div data-modalcontainer="true">
-        <ShareJsonModal
-          onRequestClose={() => {
-            // no-op
-          }}
-          value={{}}
-          onChange={pass}
-          noun="layout"
-        />
-      </div>,
+      <ThemeProvider>
+        <div data-modalcontainer="true">
+          <ShareJsonModal
+            onRequestClose={() => {
+              // no-op
+            }}
+            value={{}}
+            onChange={pass}
+            noun="layout"
+          />
+        </div>
+      </ThemeProvider>,
     );
     const newValue = btoa(JSON.stringify({ id: "foo" }));
     wrapper.find(".textarea").simulate("change", { target: { value: newValue } });
@@ -44,16 +48,18 @@ describe("<ShareJsonModal />", () => {
       done("Change callback was fired unexpectedly");
     };
     const wrapper = mount(
-      <div data-modalcontainer="true">
-        <ShareJsonModal
-          onRequestClose={() => {
-            // no-op
-          }}
-          value={{}}
-          onChange={fail}
-          noun="layout"
-        />
-      </div>,
+      <ThemeProvider>
+        <div data-modalcontainer="true">
+          <ShareJsonModal
+            onRequestClose={() => {
+              // no-op
+            }}
+            value={{}}
+            onChange={fail}
+            noun="layout"
+          />
+        </div>
+      </ThemeProvider>,
     );
     const newValue = "asdlkfjasdf";
     wrapper.find(".textarea").simulate("change", { target: { value: newValue } });
@@ -68,16 +74,18 @@ describe("<ShareJsonModal />", () => {
       done();
     };
     const wrapper = mount(
-      <div data-modalcontainer="true">
-        <ShareJsonModal
-          onRequestClose={() => {
-            // no-op
-          }}
-          value={{}}
-          onChange={pass}
-          noun="layout"
-        />
-      </div>,
+      <ThemeProvider>
+        <div data-modalcontainer="true">
+          <ShareJsonModal
+            onRequestClose={() => {
+              // no-op
+            }}
+            value={{}}
+            onChange={pass}
+            noun="layout"
+          />
+        </div>
+      </ThemeProvider>,
     );
     const newValue = btoa(
       JSON.stringify({

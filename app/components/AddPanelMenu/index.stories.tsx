@@ -29,7 +29,7 @@ storiesOf("<AddPanelMenu>", module)
   })
   .add("standard", () => {
     return (
-      <div style={{ margin: 30, paddingLeft: 300 }}>
+      <div style={{ margin: 30, paddingLeft: 300, height: 400 }}>
         <DndProvider backend={HTML5Backend}>
           <Provider store={configureStore(createRootReducer(createMemoryHistory()))}>
             <AddPanelMenu defaultIsOpen />

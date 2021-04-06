@@ -10,8 +10,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { ActionButton } from "@fluentui/react";
 import AlertIcon from "@mdi/svg/svg/alert.svg";
-import CogIcon from "@mdi/svg/svg/cog.svg";
 import {
   ReactElement,
   useState,
@@ -33,11 +33,10 @@ import { importPanelLayout, loadLayout } from "@foxglove-studio/app/actions/pane
 import AddPanelMenu from "@foxglove-studio/app/components/AddPanelMenu";
 import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";
 import { ExperimentalFeaturesModal } from "@foxglove-studio/app/components/ExperimentalFeaturesModal";
-import Flex from "@foxglove-studio/app/components/Flex";
 import GlobalKeyListener from "@foxglove-studio/app/components/GlobalKeyListener";
 import GlobalVariablesMenu from "@foxglove-studio/app/components/GlobalVariablesMenu";
 import HelpModal from "@foxglove-studio/app/components/HelpModal";
-import Icon, { WrappedIcon } from "@foxglove-studio/app/components/Icon";
+import Icon from "@foxglove-studio/app/components/Icon";
 import LayoutMenu from "@foxglove-studio/app/components/LayoutMenu";
 import LayoutStorageReduxAdapter from "@foxglove-studio/app/components/LayoutStorageReduxAdapter";
 import messagePathHelp from "@foxglove-studio/app/components/MessagePathSyntax/index.help.md";
@@ -56,6 +55,7 @@ import AnalyticsProvider from "@foxglove-studio/app/context/AnalyticsProvider";
 import { useAppConfiguration } from "@foxglove-studio/app/context/AppConfigurationContext";
 import ExperimentalFeaturesLocalStorageProvider from "@foxglove-studio/app/context/ExperimentalFeaturesLocalStorageProvider";
 import LinkHandlerContext from "@foxglove-studio/app/context/LinkHandlerContext";
+import ModalHost from "@foxglove-studio/app/context/ModalHost";
 import OsContextAppConfigurationProvider from "@foxglove-studio/app/context/OsContextAppConfigurationProvider";
 import OsContextLayoutStorageProvider from "@foxglove-studio/app/context/OsContextLayoutStorageProvider";
 import {
@@ -66,6 +66,7 @@ import experimentalFeatures from "@foxglove-studio/app/experimentalFeatures";
 import welcomeLayout from "@foxglove-studio/app/layouts/welcomeLayout";
 import { PlayerPresence } from "@foxglove-studio/app/players/types";
 import getGlobalStore from "@foxglove-studio/app/store/getGlobalStore";
+import ThemeProvider from "@foxglove-studio/app/theme/ThemeProvider";
 import { ImportPanelLayoutPayload } from "@foxglove-studio/app/types/panels";
 import inAutomatedRunMode from "@foxglove-studio/app/util/inAutomatedRunMode";
 
@@ -238,16 +239,16 @@ function Root() {
             <GlobalVariablesMenu />
           </SToolbarItem>
           <SToolbarItem>
-            <Flex center>
-              <WrappedIcon medium fade onClick={() => setPreferencesOpen(true)}>
-                <CogIcon />
-              </WrappedIcon>
-              {preferencesOpen && (
-                <RenderToBodyComponent>
-                  <ExperimentalFeaturesModal onRequestClose={() => setPreferencesOpen(false)} />
-                </RenderToBodyComponent>
-              )}
-            </Flex>
+            <ActionButton
+              iconProps={{
+                iconName: "Settings",
+                styles: { root: { "& span": { verticalAlign: "baseline" } } },
+              }}
+              onClick={() => setPreferencesOpen(true)}
+            />
+            {preferencesOpen && (
+              <ExperimentalFeaturesModal onRequestClose={() => setPreferencesOpen(false)} />
+            )}
           </SToolbarItem>
         </Toolbar>
         <PanelLayout />
@@ -279,25 +280,35 @@ export default function App(): ReactElement {
     },
   ];
 
+  const providers = [
+    /* eslint-disable react/jsx-key */
+    <OsContextAppConfigurationProvider />,
+    <OsContextLayoutStorageProvider />,
+    <Provider store={globalStore} />,
+    <AnalyticsProvider />,
+    <ExperimentalFeaturesLocalStorageProvider features={experimentalFeatures} />,
+    <ThemeProvider />,
+    <ModalHost />, // render modal elements inside the ThemeProvider
+    /* eslint-enable react/jsx-key */
+  ];
+  function AllProviders({ children }: { children: React.ReactElement }) {
+    return providers.reduceRight(
+      (wrappedChildren, provider) => React.cloneElement(provider, undefined, wrappedChildren),
+      children,
+    );
+  }
+
   return (
-    <OsContextAppConfigurationProvider>
-      <Provider store={globalStore}>
-        <AnalyticsProvider>
-          <ExperimentalFeaturesLocalStorageProvider features={experimentalFeatures}>
-            <ErrorBoundary>
-              <OsContextLayoutStorageProvider>
-                <LayoutStorageReduxAdapter />
-                <PlayerManager playerSources={playerSources}>
-                  <NativeFileMenuPlayerSelection />
-                  <DndProvider backend={HTML5Backend}>
-                    <Root />
-                  </DndProvider>
-                </PlayerManager>
-              </OsContextLayoutStorageProvider>
-            </ErrorBoundary>
-          </ExperimentalFeaturesLocalStorageProvider>
-        </AnalyticsProvider>
-      </Provider>
-    </OsContextAppConfigurationProvider>
+    <AllProviders>
+      <ErrorBoundary>
+        <LayoutStorageReduxAdapter />
+        <PlayerManager playerSources={playerSources}>
+          <NativeFileMenuPlayerSelection />
+          <DndProvider backend={HTML5Backend}>
+            <Root />
+          </DndProvider>
+        </PlayerManager>
+      </ErrorBoundary>
+    </AllProviders>
   );
 }

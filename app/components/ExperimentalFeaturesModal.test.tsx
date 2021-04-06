@@ -17,6 +17,7 @@ import { useExperimentalFeature } from "@foxglove-studio/app/context/Experimenta
 import ExperimentalFeaturesLocalStorageProvider, {
   EXPERIMENTAL_FEATURES_STORAGE_KEY,
 } from "@foxglove-studio/app/context/ExperimentalFeaturesLocalStorageProvider";
+import ThemeProvider from "@foxglove-studio/app/theme/ThemeProvider";
 import Storage from "@foxglove-studio/app/util/Storage";
 
 const features = {
@@ -66,12 +67,14 @@ describe("ExperimentalFeatures", () => {
     }
 
     const container = mount(
-      <ExperimentalFeaturesLocalStorageProvider features={features}>
-        <RenderExperimentalFeatures />
-        <div data-modalcontainer>
-          <ExperimentalFeaturesModal />
-        </div>
-      </ExperimentalFeaturesLocalStorageProvider>,
+      <ThemeProvider>
+        <ExperimentalFeaturesLocalStorageProvider features={features}>
+          <RenderExperimentalFeatures />
+          <div data-modalcontainer>
+            <ExperimentalFeaturesModal />
+          </div>
+        </ExperimentalFeaturesLocalStorageProvider>
+      </ThemeProvider>,
     );
     expect(renderCount).toEqual(1);
     expect(renderedSettings).toEqual({
