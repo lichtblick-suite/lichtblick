@@ -43,7 +43,7 @@ export default function TinyConnectionPicker({
       onRenderMenuIcon={() => ReactNull}
       menuProps={{
         items: availableSources.map((source) => {
-          let iconName: string;
+          let iconName: RegisteredIconNames;
           switch (source.type) {
             case "file":
               iconName = "OpenFile";

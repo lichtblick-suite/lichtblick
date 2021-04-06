@@ -113,7 +113,7 @@ export default function LayoutMenu({
     downloadTextFile(content, `${name}.json`);
   }, [store]);
 
-  const importAction = useCallback(async () => {
+  const importAction = useCallback<() => void>(async () => {
     const fileHandle = await showOpenFilePicker();
     if (!fileHandle) {
       return;
@@ -202,7 +202,7 @@ export default function LayoutMenu({
             selectAction(layout);
           }
         },
-        iconProps: layout.id === currentLayoutId ? { iconName: "Checkmark" } : undefined,
+        iconProps: layout.id === currentLayoutId ? { iconName: "CheckMark" } : undefined,
         subMenuProps: {
           items: [
             {
