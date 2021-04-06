@@ -14,12 +14,9 @@
 import { Frame } from "@foxglove-studio/app/players/types";
 import { Color, Pose } from "@foxglove-studio/app/types/Messages";
 
-export type SkipTransformSpec = { readonly frameId: string; readonly sourceTopic: string };
-
 export type ThreeDimensionalVizHooks = Readonly<{
   getSelectionState: (arg0: { [key: string]: any }) => any; // arg is globalVariables
   getTopicsToRender: (arg0: any, arg1: any) => Set<string>; // args are selection states
-  skipTransformFrame?: SkipTransformSpec;
   getMarkerColor: (arg0: string, arg1: Color) => Color;
   getOccupancyGridValues: (arg0: string) => [number, string]; // arg is topic, return value is [alpha, map].
   getFlattenedPose: (arg0: Frame) => Pose | undefined;

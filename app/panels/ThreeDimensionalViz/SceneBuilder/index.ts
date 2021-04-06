@@ -65,7 +65,7 @@ import naturalSort from "@foxglove-studio/app/util/naturalSort";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import { fromSec } from "@foxglove-studio/app/util/time";
 
-import { SkipTransformSpec, ThreeDimensionalVizHooks } from "./types";
+import { ThreeDimensionalVizHooks } from "./types";
 
 export type TopicSettingsCollection = {
   [topicOrNamespaceKey: string]: any;
@@ -114,7 +114,6 @@ const missingTransformMessage = (
   rootTransformId: string,
   error: ErrorDetails,
   transforms: Transforms,
-  skipTransform: SkipTransformSpec | undefined,
 ): string => {
   const frameIds = [...error.frameIds].sort().join(",");
   const s = error.frameIds.size === 1 ? "" : "s"; // for plural
@@ -122,9 +121,6 @@ const missingTransformMessage = (
     frameIds.length > 0
       ? `missing transforms from frame${s} <${frameIds}> to root frame <${rootTransformId}>`
       : `missing transform <${rootTransformId}>`;
-  if (skipTransform != undefined && error.frameIds.has(skipTransform.frameId)) {
-    return msg + `. Is ${skipTransform.sourceTopic} present?`;
-  }
   if (transforms.empty) {
     return msg + `. Is ${TRANSFORM_TOPIC} or ${TRANSFORM_STATIC_TOPIC} present?`;
   }
@@ -134,7 +130,6 @@ const missingTransformMessage = (
 export function getSceneErrorsByTopic(
   sceneErrors: SceneErrors,
   transforms: Transforms,
-  skipTransform: SkipTransformSpec | undefined,
 ): {
   [topicName: string]: string[];
 } {
@@ -151,10 +146,7 @@ export function getSceneErrorsByTopic(
   }
   // errors related to missing frame ids and transform ids
   sceneErrors.topicsMissingTransforms.forEach((err, topic) => {
-    addError(
-      topic,
-      missingTransformMessage(sceneErrors.rootTransformID, err, transforms, skipTransform),
-    );
+    addError(topic, missingTransformMessage(sceneErrors.rootTransformID, err, transforms));
   });
   sceneErrors.topicsMissingFrameIds.forEach((_err, topic) => {
     addError(topic, "missing frame id");
@@ -444,11 +436,7 @@ export default class SceneBuilder implements MarkerProvider {
       return;
     }
 
-    const errorsByTopic = getSceneErrorsByTopic(
-      this.errors,
-      this.transforms,
-      this._hooks.skipTransformFrame,
-    );
+    const errorsByTopic = getSceneErrorsByTopic(this.errors, this.transforms);
     if (!isEqual(this.errorsByTopic, errorsByTopic)) {
       this.errorsByTopic = errorsByTopic;
       if (this._onForceUpdate) {

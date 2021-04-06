@@ -20,11 +20,20 @@ import { TF } from "@foxglove-studio/app/types/Messages";
 import { isBobject, deepParse } from "@foxglove-studio/app/util/binaryObjects";
 import { TRANSFORM_STATIC_TOPIC, TRANSFORM_TOPIC } from "@foxglove-studio/app/util/globalConstants";
 
-import { getGlobalHooks } from "../../loadWebviz";
-
 type State = { transforms: Transforms };
 type TfMessage = { transforms: TF[] };
 type BaseProps = { frame: Frame; cleared: boolean };
+
+function consumeTfs(tfs: Message[] | undefined, transforms: Transforms): void {
+  if (tfs != undefined) {
+    for (const { message } of tfs) {
+      const parsedMessage = (isBobject(message) ? deepParse(message) : message) as TfMessage;
+      for (const tf of parsedMessage.transforms) {
+        transforms.consume(tf);
+      }
+    }
+  }
+}
 
 function withTransforms<Props extends any>(ChildComponent: React.ComponentType<Props>) {
   class Component extends React.PureComponent<
@@ -60,31 +69,9 @@ function withTransforms<Props extends any>(ChildComponent: React.ComponentType<P
         }
       }
 
-      // Process all new /tf messages
-      const tfs = frame[TRANSFORM_TOPIC];
-      if (tfs) {
-        const skipFrameId = getGlobalHooks().perPanelHooks().ThreeDimensionalViz.sceneBuilderHooks
-          .skipTransformFrame?.frameId;
-        for (const { message } of tfs) {
-          const parsedMessage = (isBobject(message) ? deepParse(message) : message) as TfMessage;
-          for (const tf of parsedMessage.transforms) {
-            if (tf.child_frame_id !== skipFrameId) {
-              transforms.consume(tf);
-            }
-          }
-        }
-      }
-
-      // Process all new /tf_static messages
-      const tfs_static = frame[TRANSFORM_STATIC_TOPIC];
-      if (tfs_static) {
-        for (const { message } of tfs_static) {
-          const parsedMessage = (isBobject(message) ? deepParse(message) : message) as TfMessage;
-          for (const tf of parsedMessage.transforms) {
-            transforms.consume(tf);
-          }
-        }
-      }
+      // Process all new /tf and /tf_static messages
+      consumeTfs(frame[TRANSFORM_TOPIC], transforms);
+      consumeTfs(frame[TRANSFORM_STATIC_TOPIC], transforms);
 
       return { transforms };
     }
