@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { ZIndexes } from "@fluentui/react";
 import ColorPicker, { Panel as ColorPickerPanel } from "rc-color-picker";
 import { Color } from "regl-worldview";
 import styled from "styled-components";
@@ -88,6 +89,7 @@ export default function ColorPickerForTopicSettings({ color, placement, onChange
   return (
     <SWrapper isSmallSize={isSmallSize}>
       <ColorPicker
+        style={{ zIndex: ZIndexes.Layer + 1 }}
         animation="slide-up"
         color={hexColor}
         placement={placement}
