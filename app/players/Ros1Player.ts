@@ -26,8 +26,11 @@ import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import { fromMillis, TimestampMethod } from "@foxglove-studio/app/util/time";
 import { Sockets } from "@foxglove/electron-socket/renderer";
+import Logger from "@foxglove/log";
 import { RosNode, TcpSocket } from "@foxglove/ros1";
 import { HttpServer } from "@foxglove/xmlrpc/src";
+
+const log = Logger.getLogger(__filename);
 
 const CAPABILITIES: string[] = [];
 const NO_WARNINGS = Object.freeze({});
@@ -55,6 +58,7 @@ export default class Ros1Player implements Player {
   private _sentTopicsErrorNotification = false;
 
   constructor(url: string, metricsCollector: PlayerMetricsCollectorInterface) {
+    log.info(`url: ${url}`);
     this._metricsCollector = metricsCollector;
     this._url = url;
     this._start = fromMillis(Date.now());

@@ -13,7 +13,7 @@
 
 import { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { connect, ConnectedProps } from "react-redux";
-import { useMountedState } from "react-use";
+import { useAsync, useLocalStorage, useMountedState } from "react-use";
 
 import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import {
@@ -53,10 +53,14 @@ import {
 } from "@foxglove-studio/app/players/buildPlayer";
 import { Player } from "@foxglove-studio/app/players/types";
 import { State } from "@foxglove-studio/app/reducers";
+import Storage from "@foxglove-studio/app/util/Storage";
 import { AppError } from "@foxglove-studio/app/util/errors";
 import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import { useShallowMemo } from "@foxglove-studio/app/util/hooks";
 import { parseInputUrl } from "@foxglove-studio/app/util/url";
+import Logger from "@foxglove/log";
+
+const log = Logger.getLogger(__filename);
 
 const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo.bag";
 
@@ -131,124 +135,158 @@ async function buildPlayerFromBagURLs(
   throw new Error(`Unsupported number of urls: ${urls.length}`);
 }
 
-// Based on a source type, prompt the user for additional input and return a function to build the
-// requested player. The user input and actual building of the player are in separate async
-// operations so the player manager can delay clearing out the old player and entering the
-// "constructing" state until the user selection has completed. Returns undefined if the user
-// cancels the operation.
-//
-// TODO(jacob): can we reduce the indirection here by making it so we can always immediately
-// construct a player, remove maybePlayer and remove CONSTRUCTING from the enum? This would require
-// changes to the GUID fetching in buildPlayerFromBagURLs.
-async function getPlayerBuilderFromUserSelection(
-  definition: PlayerSourceDefinition,
-  usedFiles: { current: File[] },
-  prompt: ReturnType<typeof usePrompt>,
-  options: BuildPlayerOptions,
-): Promise<(() => Promise<BuiltPlayer>) | undefined> {
-  options.metricsCollector.setProperty("player", definition.type);
+type FactoryOptions = {
+  source: PlayerSourceDefinition;
+  skipRestore: boolean;
+  prompt: ReturnType<typeof usePrompt>;
+  storage: Storage;
+};
 
-  switch (definition.type) {
-    case "file": {
-      let file: File;
-      try {
-        const [fileHandle] = await showOpenFilePicker({
-          types: [{ accept: { "application/octet-stream": [".bag"] } }],
-        });
-        file = await fileHandle.getFile();
-      } catch (error) {
-        if (error.name === "AbortError") {
-          return undefined;
-        }
-        throw error;
-      }
-      return async () => {
-        usedFiles.current = [file];
-        return buildPlayerFromFiles(usedFiles.current, options);
-      };
-    }
-    case "ros1-core": {
-      const url = await prompt({
-        title: "ROS 1 TCP connection",
-        placeholder: "localhost:11311",
-        value: OsContextSingleton?.getEnvVar("ROS_MASTER_URI") ?? "localhost:11311",
-        transformer: (str) => {
-          const result = parseInputUrl(str, "ros:", {
-            "http:": { port: 80 },
-            "https:": { port: 443 },
-            "ros:": { protocol: "http:", port: 11311 },
-          });
-          if (result == undefined) {
-            throw new AppError(
-              "Invalid ROS URL. See the ROS_MASTER_URI at http://wiki.ros.org/ROS/EnvironmentVariables for more info.",
-            );
-          }
-          return result;
-        },
-      });
-      if (url == undefined) {
-        return undefined;
-      }
-      return async () => ({
-        player: new Ros1Player(url, options.metricsCollector),
-        sources: [url],
-      });
-    }
-    case "ws": {
-      const url = await prompt({
-        title: "WebSocket connection",
-        placeholder: "ws://localhost:9090",
-        value: "ws://localhost:9090",
-        transformer: (str) => {
-          const result = parseInputUrl(str, "http:", {
-            "http:": { protocol: "ws:", port: 9090 },
-            "https:": { protocol: "wss:", port: 9090 },
-            "ws:": { port: 9090 },
-            "wss:": { port: 9090 },
-            "ros:": { protocol: "ws:", port: 9090 },
-          });
-          if (result == undefined) {
-            throw new AppError(
-              "Invalid rosbridge WebSocket URL. Use the ws:// or wss:// protocol.",
-            );
-          }
-          return result;
-        },
-      });
-      if (url == undefined) {
-        return undefined;
-      }
+async function localBagFileSource(options: FactoryOptions) {
+  let file: File;
 
-      return async () => ({
-        player: new RosbridgePlayer(url, options.metricsCollector),
-        sources: [url],
-      });
-    }
-    case "http": {
-      const url = await prompt({
-        title: "Remote bag file",
-        placeholder: "https://example.com/file.bag",
-        transformer: (str) => {
-          const result = parseInputUrl(str, "https:", {
-            "http:": { port: 80 },
-            "https:": { port: 443 },
-            "ftp:": { port: 21 },
-          });
-          if (result == undefined) {
-            throw new AppError(
-              "Invalid bag URL. Use a http:// or https:// URL of a web hosted bag file.",
-            );
-          }
-          return result;
-        },
-      });
-      if (url == undefined) {
-        return undefined;
-      }
-
-      return () => buildPlayerFromBagURLs([url], options);
-    }
+  // future enhancement woudl be to store the fileHandle in indexeddb and try to restore
+  // fileHandles can be stored in indexeddb but not localstorage
+  if (!options.skipRestore) {
+    return;
   }
+
+  try {
+    const [fileHandle] = await showOpenFilePicker({
+      types: [{ accept: { "application/octet-stream": [".bag"] } }],
+    });
+    file = await fileHandle.getFile();
+  } catch (error) {
+    if (error.name === "AbortError") {
+      return undefined;
+    }
+    throw error;
+  }
+  return async (playerOptions: BuildPlayerOptions) => {
+    return buildPlayerFromFiles([file], playerOptions);
+  };
+}
+
+async function remoteBagFileSource(options: FactoryOptions) {
+  const storageCacheKey = `studio.source.${options.source.name}`;
+
+  // undefined url indicates the user canceled the prompt
+  let maybeUrl;
+
+  if (options.skipRestore ?? false) {
+    maybeUrl = await options.prompt({
+      title: "Remote bag file",
+      placeholder: "https://example.com/file.bag",
+      transformer: (str) => {
+        const result = parseInputUrl(str, "https:", {
+          "http:": { port: 80 },
+          "https:": { port: 443 },
+          "ftp:": { port: 21 },
+        });
+        if (result == undefined) {
+          throw new AppError(
+            "Invalid bag URL. Use a http:// or https:// URL of a web hosted bag file.",
+          );
+        }
+        return result;
+      },
+    });
+  } else {
+    maybeUrl = options.storage.getItem<string>(storageCacheKey);
+  }
+
+  if (maybeUrl == undefined) {
+    return undefined;
+  }
+
+  const url = maybeUrl;
+  options.storage.setItem(storageCacheKey, url);
+  return (playerOptions: BuildPlayerOptions) => buildPlayerFromBagURLs([url], playerOptions);
+}
+
+async function rosbridgeSource(options: FactoryOptions) {
+  const storageCacheKey = `studio.source.${options.source.name}`;
+
+  // undefined url indicates the user canceled the prompt
+  let maybeUrl;
+
+  if (options.skipRestore ?? false) {
+    const value = options.storage.getItem<string>(storageCacheKey) ?? "ws://localhost:9090";
+    maybeUrl = await options.prompt({
+      title: "WebSocket connection",
+      placeholder: "ws://localhost:9090",
+      value,
+      transformer: (str) => {
+        const result = parseInputUrl(str, "http:", {
+          "http:": { protocol: "ws:", port: 9090 },
+          "https:": { protocol: "wss:", port: 9090 },
+          "ws:": { port: 9090 },
+          "wss:": { port: 9090 },
+          "ros:": { protocol: "ws:", port: 9090 },
+        });
+        if (result == undefined) {
+          throw new AppError("Invalid rosbridge WebSocket URL. Use the ws:// or wss:// protocol.");
+        }
+        return result;
+      },
+    });
+  } else {
+    maybeUrl = options.storage.getItem<string>(storageCacheKey);
+  }
+
+  if (maybeUrl == undefined) {
+    return undefined;
+  }
+
+  const url = maybeUrl;
+  options.storage.setItem(storageCacheKey, url);
+  return async (playerOptions: BuildPlayerOptions) => ({
+    player: new RosbridgePlayer(url, playerOptions.metricsCollector),
+    sources: [url],
+  });
+}
+
+async function roscoreSource(options: FactoryOptions) {
+  const storageCacheKey = `studio.source.${options.source.name}`;
+
+  // undefined url indicates the user canceled the prompt
+  let maybeUrl;
+
+  if (options.skipRestore ?? false) {
+    const value = options.storage.getItem<string>(storageCacheKey);
+
+    maybeUrl = await options.prompt({
+      title: "ROS 1 TCP connection",
+      placeholder: "localhost:11311",
+      value: value ?? OsContextSingleton?.getEnvVar("ROS_MASTER_URI") ?? "localhost:11311",
+      transformer: (str) => {
+        const result = parseInputUrl(str, "ros:", {
+          "http:": { port: 80 },
+          "https:": { port: 443 },
+          "ros:": { protocol: "http:", port: 11311 },
+        });
+        if (result == undefined) {
+          throw new AppError(
+            "Invalid ROS URL. See the ROS_MASTER_URI at http://wiki.ros.org/ROS/EnvironmentVariables for more info.",
+          );
+        }
+        return result;
+      },
+    });
+  } else {
+    maybeUrl = options.storage.getItem<string>(storageCacheKey);
+  }
+
+  if (maybeUrl == undefined) {
+    return undefined;
+  }
+
+  const url = maybeUrl;
+  options.storage.setItem(storageCacheKey, url);
+  return async (playerOptions: BuildPlayerOptions) => ({
+    player: new Ros1Player(url, playerOptions.metricsCollector),
+    sources: [url],
+  });
 }
 
 const connector = connect(
@@ -286,7 +324,6 @@ function PlayerManager({
   const globalVariablesRef = useRef<GlobalVariables>(globalVariables);
   const [maybePlayer, setMaybePlayer] = useState<MaybePlayer<OrderedStampPlayer>>({});
   const [currentSourceName, setCurrentSourceName] = useState<string | undefined>(undefined);
-  const prompt = usePrompt();
   const isMounted = useMountedState();
 
   // We don't want to recreate the player when the message order changes, but we do want to
@@ -294,13 +331,24 @@ function PlayerManager({
   // dependency array below to defeat the linter.
   const [initialMessageOrder] = useState(messageOrder);
 
+  const analytics = useAnalytics();
+  const metricsCollector = useMemo(() => {
+    return new AnalyticsMetricsCollector(analytics);
+  }, [analytics]);
+
+  const buildPlayerOptions: BuildPlayerOptions = useShallowMemo({
+    diskBagCaching: useExperimentalFeature("diskBagCaching"),
+    unlimitedMemoryCache: useExperimentalFeature("unlimitedMemoryCache"),
+    metricsCollector: metricsCollector,
+  });
+
   // Load a new player using the given definition -- passed as a function so that the asynchronous
   // operation can be included as part of the "loading" state we pass in to MessagePipelineProvider.
   const setPlayer = useCallback(
-    async (buildPlayer: () => Promise<BuiltPlayer | undefined>) => {
+    async (buildPlayer: (options: BuildPlayerOptions) => Promise<BuiltPlayer | undefined>) => {
       setMaybePlayer({ loading: true });
       try {
-        const builtPlayer = await buildPlayer();
+        const builtPlayer = await buildPlayer(buildPlayerOptions);
         if (!builtPlayer) {
           setMaybePlayer({ player: undefined });
           return;
@@ -319,19 +367,8 @@ function PlayerManager({
         setMaybePlayer({ error });
       }
     },
-    [setDiagnostics, setLogs, setRosLib, initialMessageOrder],
+    [buildPlayerOptions, setDiagnostics, setLogs, setRosLib, initialMessageOrder],
   );
-
-  const analytics = useAnalytics();
-  const metricsCollector = useMemo(() => {
-    return new AnalyticsMetricsCollector(analytics);
-  }, [analytics]);
-
-  const buildPlayerOptions: BuildPlayerOptions = useShallowMemo({
-    diskBagCaching: useExperimentalFeature("diskBagCaching"),
-    unlimitedMemoryCache: useExperimentalFeature("unlimitedMemoryCache"),
-    metricsCollector: metricsCollector,
-  });
 
   useEffect(() => {
     maybePlayer.player?.setMessageOrder(messageOrder);
@@ -351,29 +388,88 @@ function PlayerManager({
       } else {
         usedFiles.current = [...files];
       }
-      setPlayer(async () => buildPlayerFromFiles(usedFiles.current, buildPlayerOptions));
+      setPlayer(async (options: BuildPlayerOptions) =>
+        buildPlayerFromFiles(usedFiles.current, options),
+      );
     },
-    [setPlayer, buildPlayerOptions],
+    [setPlayer],
   );
 
-  const selectSource = useCallback(
-    async (definition: PlayerSourceDefinition) => {
-      try {
-        const builder = await getPlayerBuilderFromUserSelection(
-          definition,
-          usedFiles,
-          prompt,
-          buildPlayerOptions,
-        );
-        if (builder && isMounted()) {
-          setPlayer(builder);
-        }
-      } catch (error) {
-        setMaybePlayer({ error });
-      }
-    },
-    [setPlayer, prompt, buildPlayerOptions, isMounted],
+  const [selectedSource, setSelectedSource] = useLocalStorage<PlayerSourceDefinition>(
+    "studio.playermanager.selected-source",
   );
+
+  // Based on a source type, prompt the user for additional input and return a function to build the
+  // requested player. The user input and actual building of the player are in separate async
+  // operations so the player manager can delay clearing out the old player and entering the
+  // "constructing" state until the user selection has completed. Returns undefined if the user
+  // cancels the operation.
+  //
+  // TODO(jacob): can we reduce the indirection here by making it so we can always immediately
+  // construct a player, remove maybePlayer and remove CONSTRUCTING from the enum? This would require
+  // changes to the GUID fetching in buildPlayerFromBagURLs.
+  const lookupPlayerBuilderFactory = useCallback((definition: PlayerSourceDefinition) => {
+    switch (definition.type) {
+      case "file":
+        return localBagFileSource;
+      case "ros1-core":
+        return roscoreSource;
+      case "ws":
+        return rosbridgeSource;
+      case "http":
+        return remoteBagFileSource;
+      default:
+        return;
+    }
+  }, []);
+
+  // The first time we load a source, we restore the previous source state (i.e. url)
+  // and try to automatically load the source.
+  // Subsequent source changes do not restore the state which typically results in a user prompt
+  const skipRestoreRef = useRef<boolean>(false);
+
+  const prompt = usePrompt();
+  const storage = useMemo(() => new Storage(), []);
+
+  useAsync(async () => {
+    if (!selectedSource) {
+      return;
+    }
+
+    log.debug(`Select Source: ${selectedSource.name} ${selectedSource.type}`);
+    try {
+      metricsCollector.setProperty("player", selectedSource.type);
+
+      // see comment for skipRestoreRef
+      const skipRestore = skipRestoreRef.current;
+      skipRestoreRef.current = true;
+
+      const createPlayerBuilder = lookupPlayerBuilderFactory(selectedSource);
+      if (!createPlayerBuilder) {
+        throw new Error(`Could not create a player for ${selectedSource.name}`);
+      }
+
+      const playerBuilder = await createPlayerBuilder({
+        source: selectedSource,
+        skipRestore,
+        prompt,
+        storage,
+      });
+      if (playerBuilder && isMounted()) {
+        setPlayer(playerBuilder);
+      }
+    } catch (error) {
+      setMaybePlayer({ error });
+    }
+  }, [
+    isMounted,
+    lookupPlayerBuilderFactory,
+    metricsCollector,
+    prompt,
+    selectedSource,
+    setPlayer,
+    storage,
+  ]);
 
   // files the main thread told us to open
   const filesToOpen = useElectronFilesToOpen();
@@ -384,18 +480,21 @@ function PlayerManager({
     }
 
     usedFiles.current = [file];
-    setPlayer(async () => buildPlayerFromFiles(usedFiles.current, buildPlayerOptions));
-  }, [setPlayer, filesToOpen, buildPlayerOptions]);
+    setPlayer(async (options: BuildPlayerOptions) =>
+      buildPlayerFromFiles(usedFiles.current, options),
+    );
+  }, [setPlayer, filesToOpen]);
 
   const value: PlayerSelection = {
-    selectSource,
+    selectSource: setSelectedSource,
     // Expose a simple way to load a demo bag for first launch onboarding.
     // In the future we may want to replace this limited API with something more cohesive
     // that exposes the different buildPlayerFromX methods above. At the same time,
     // the prompt() responsibilities could be moved out of the PlayerManager.
     setPlayerFromDemoBag: useCallback(
-      () => setPlayer(() => buildPlayerFromBagURLs([DEMO_BAG_URL], buildPlayerOptions)),
-      [setPlayer, buildPlayerOptions],
+      () =>
+        setPlayer((options: BuildPlayerOptions) => buildPlayerFromBagURLs([DEMO_BAG_URL], options)),
+      [setPlayer],
     ),
     availableSources: playerSources,
     currentSourceName,
