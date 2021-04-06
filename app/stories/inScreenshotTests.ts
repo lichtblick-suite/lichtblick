@@ -11,8 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import isChromatic from "chromatic/isChromatic";
+
 export default function inScreenshotTests(): boolean {
   // Integration tests and screenshot tests are not always in a headless Chrome, so need to check for a custom user
   // agent.
-  return navigator.userAgent.includes("PuppeteerTestingChrome");
+  return navigator.userAgent.includes("PuppeteerTestingChrome") || isChromatic();
 }
