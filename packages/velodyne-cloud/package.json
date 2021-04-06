@@ -29,7 +29,7 @@
     "jest-circus": "26.6.3",
     "kelonio": "0.6.0",
     "rosbag": "github:foxglove/rosbag.js#fc61125fbc01ff55698c5ed48987b2d9e7599572",
-    "tslib": "2.1.0",
+    "tslib": "2.2.0",
     "typescript": "4.2.2"
   }
 }

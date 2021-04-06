@@ -1925,7 +1925,7 @@ __metadata:
     electron: 12.0.0
     eventemitter3: 4.0.7
     jest: 26.6.3
-    tslib: 2.1.0
+    tslib: 2.2.0
     typescript: 4.2.2
   languageName: unknown
   linkType: soft
@@ -1935,7 +1935,7 @@ __metadata:
   resolution: "@foxglove/just-fetch@workspace:packages/just-fetch"
   dependencies:
     node-fetch: ^3.0.0-beta.9
-    tslib: 2.1.0
+    tslib: 2.2.0
     typescript: 4.2.2
   peerDependencies:
     node-fetch: ">=3.0.0-beta.9"
@@ -1953,7 +1953,7 @@ __metadata:
   resolution: "@foxglove/ros1-turtlesim-test@workspace:packages/ros1-turtlesim-test"
   dependencies:
     "@foxglove/ros1": "workspace:packages/ros1"
-    tslib: 2.1.0
+    tslib: 2.2.0
     typescript: 4.2.2
   languageName: unknown
   linkType: soft
@@ -1967,7 +1967,7 @@ __metadata:
     eventemitter3: 4.0.7
     jest: 26.6.3
     rosbag: "github:foxglove/rosbag.js#fc61125fbc01ff55698c5ed48987b2d9e7599572"
-    tslib: 2.1.0
+    tslib: 2.2.0
     typescript: 4.2.2
     web-encoding: 1.1.3
   languageName: unknown
@@ -1988,7 +1988,7 @@ __metadata:
     jest-circus: 26.6.3
     kelonio: 0.6.0
     rosbag: "github:foxglove/rosbag.js#fc61125fbc01ff55698c5ed48987b2d9e7599572"
-    tslib: 2.1.0
+    tslib: 2.2.0
     typescript: 4.2.2
   languageName: unknown
   linkType: soft
@@ -2013,7 +2013,7 @@ __metadata:
     jest: 26.6.3
     jest-circus: 26.6.3
     sax: 1.2.4
-    tslib: 2.1.0
+    tslib: 2.2.0
     typescript: 4.2.2
     web-encoding: 1.1.3
     xmlbuilder2: 2.4.0
@@ -22948,10 +22948,10 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"tslib@npm:2.1.0, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0":
-  version: 2.1.0
-  resolution: "tslib@npm:2.1.0"
-  checksum: d8f5bdd067611651c6b846c2388f4dc8ba1f5af124e66105f5263d1ad56da17f4b8c6566887ca2f205c5a9758451871ceca87d5d06087af2dca1699c5e33db69
+"tslib@npm:2.2.0, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0":
+  version: 2.2.0
+  resolution: "tslib@npm:2.2.0"
+  checksum: 2d35468c470410871c5246e43f12dcb6d0fc363b617c176f26443b9530e5c5ee8448966892a42956168d8f495da7865bda33dfe82c26c91991e28999974a618f
   languageName: node
   linkType: hard
 

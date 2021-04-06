@@ -21,7 +21,7 @@
     "start": "ts-node src/index.ts"
   },
   "devDependencies": {
-    "tslib": "2.1.0",
+    "tslib": "2.2.0",
     "typescript": "4.2.2"
   },
   "dependencies": {
