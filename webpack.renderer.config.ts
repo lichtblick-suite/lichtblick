@@ -16,6 +16,7 @@ import webpack, {
 } from "webpack";
 
 import { WebpackArgv } from "./WebpackArgv";
+import packageJson from "./package.json";
 
 type Options = {
   // During hot reloading and development it is useful to comment out code while iterating.
@@ -189,7 +190,7 @@ export function makeConfig(_: unknown, argv: WebpackArgv, options?: Options): Co
       }),
       new webpack.DefinePlugin({
         // Should match webpack-defines.d.ts
-        APP_NAME: JSON.stringify("Foxglove Studio"),
+        APP_NAME: JSON.stringify(packageJson.productName),
         ReactNull: null, // eslint-disable-line no-restricted-syntax
       }),
       // https://webpack.js.org/plugins/ignore-plugin/#example-of-ignoring-moment-locales

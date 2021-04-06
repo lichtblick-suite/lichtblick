@@ -38,7 +38,7 @@ declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 
 const log = Logger.getLogger(__filename);
 
-log.info("Foxglove Studio starting");
+log.info(`${packageJson.productName} ${packageJson.version}`);
 
 const isMac = process.platform === "darwin";
 const isProduction = process.env.NODE_ENV === "production";

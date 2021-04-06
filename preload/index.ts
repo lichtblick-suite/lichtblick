@@ -12,11 +12,12 @@ import { NetworkInterface } from "@foxglove-studio/app/OsContext";
 import { PreloaderSockets } from "@foxglove/electron-socket/preloader";
 import Logger from "@foxglove/log";
 
-import appPackage from "../package.json";
+import packageJson from "../package.json";
 import LocalFileStorage from "./LocalFileStorage";
 
 const log = Logger.getLogger(__filename);
 
+log.info(`${packageJson.productName} ${packageJson.version}`);
 log.info(`initializing preloader, argv="${window.process.argv.join(" ")}"`);
 
 // Load opt-out settings for crash reporting and telemetry
@@ -109,7 +110,7 @@ const ctx: OsContext = {
     return machineIdSync();
   },
   getAppVersion: (): string => {
-    return appPackage.version;
+    return packageJson.version;
   },
 
   // Context bridge cannot expose "classes" only exposes functions
