@@ -13,6 +13,7 @@
 
 import { debounce, isEqual } from "lodash";
 import Bag, { open, Time, BagReader, TimeUtil } from "rosbag";
+import ReadResult from "rosbag/dist/ReadResult";
 import decompressLZ4 from "wasm-lz4";
 
 import BrowserHttpReader from "@foxglove-studio/app/dataProviders/BrowserHttpReader";
@@ -263,17 +264,14 @@ export default class BagDataProvider implements DataProvider {
     let totalSizeOfMessages = 0;
     let numberOfMessages = 0;
     const messages: Message[] = [];
-    const onMessage = (msg: Message) => {
-      const { data, topic, timestamp } = msg as any;
+    const onMessage = (msg: ReadResult<unknown>) => {
+      const { data, topic, timestamp } = msg;
       messages.push({
         topic,
         receiveTime: timestamp,
-        message: data.buffer.slice(
-          data.byteOffset,
-          (data.byteOffset as number) + (data.length as number),
-        ),
+        message: data.buffer.slice(data.byteOffset, data.byteOffset + data.length),
       });
-      totalSizeOfMessages += data.length as number;
+      totalSizeOfMessages += data.length;
       numberOfMessages += 1;
     };
     const options = {
@@ -301,7 +299,7 @@ export default class BagDataProvider implements DataProvider {
       },
     };
     try {
-      await this._bag?.readMessages(options, onMessage as any);
+      await this._bag?.readMessages(options, onMessage);
     } catch (error) {
       reportMalformedError("bag parsing", error);
       throw error;
