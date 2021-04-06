@@ -230,7 +230,7 @@ function Root() {
           <SToolbarItem>
             <TinyConnectionPicker />
           </SToolbarItem>
-          <SToolbarItem style={{ flex: "1 1 auto" }}>
+          <SToolbarItem style={{ flex: "0 1 auto" }}>
             <TruncatedText>{currentSourceName ?? "Select a data source"}</TruncatedText>{" "}
             {presenceIcon}
           </SToolbarItem>
