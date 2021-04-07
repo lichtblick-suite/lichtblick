@@ -1,10 +1,12 @@
-import "@foxglove-studio/app/styles/global.scss";
-import "./styles.scss";
 import waitForFonts from "@foxglove-studio/app/util/waitForFonts";
 import { withScreenshot } from "storycap";
 import { withMockSubscribeToNewsletter } from "./__mocks__/subscribeToNewsletter";
 import { Story, StoryContext } from "@storybook/react";
 import ThemeProvider from "@foxglove-studio/app/theme/ThemeProvider";
+
+import "@foxglove-studio/app/styles/global.scss";
+import "./styles.scss";
+import withScreenshotSignal from "@foxglove-studio/app/.storybook/withScreenshotSignal";
 
 let loaded = false;
 
@@ -27,7 +29,12 @@ export const loaders = [
   },
 ];
 
-export const decorators = [withTheme, withScreenshot, withMockSubscribeToNewsletter];
+export const decorators = [
+  withTheme,
+  withScreenshot,
+  withScreenshotSignal,
+  withMockSubscribeToNewsletter,
+];
 
 export const parameters = {
   // Disable default padding around the page body

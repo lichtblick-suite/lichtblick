@@ -13,6 +13,7 @@
 
 import { createMemoryHistory } from "history";
 import { flatten, partition } from "lodash";
+import { ComponentProps } from "react";
 import { DndProvider } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
 import { Mosaic, MosaicNode, MosaicWindow } from "react-mosaic-component";
@@ -83,6 +84,7 @@ type Props = {
   fixture?: Fixture;
   panelCatalog?: PanelCatalog;
   omitDragAndDrop?: boolean;
+  pauseFrame?: ComponentProps<typeof MockMessagePipelineProvider>["pauseFrame"];
   onMount?: (arg0: HTMLDivElement, store: Store) => void;
   onFirstMount?: (arg0: HTMLDivElement) => void;
   store?: Store;
@@ -263,6 +265,7 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
           topics={topics}
           datatypes={dTypes}
           messages={messages}
+          pauseFrame={this.props.pauseFrame}
           bobjects={bobjects.length > 0 ? bobjects : undefined}
           activeData={activeData}
           progress={progress}

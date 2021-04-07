@@ -11,10 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { storiesOf } from "@storybook/react";
+import { useCallback } from "react";
 import TestUtils from "react-dom/test-utils";
 
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+import { useScreenshotReady } from "@foxglove-studio/app/stories/ScreenshotReadyContext";
 
 import StateTransitions from "./index";
 
@@ -86,107 +87,154 @@ const fixture = {
   },
 };
 
-storiesOf("<StateTransitions>", module)
-  .addParameters({
-    screenshot: {
-      // Wait for chart workers to render
-      delay: 1000,
-    },
-  })
-  .add("one path", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <StateTransitions
-          config={{
-            paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("multiple paths", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <StateTransitions
-          config={{
-            paths: new Array(5).fill({
-              value: "/some/topic/with/state.state",
-              timestampMethod: "receiveTime",
-            }),
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("multiple paths with hover", () => {
-    return (
-      <PanelSetup
-        fixture={fixture}
-        onMount={() => {
-          const mouseEnterContainer = document.querySelectorAll(
-            "[data-test~=panel-mouseenter-container",
-          )[0]!;
-          TestUtils.Simulate.mouseEnter(mouseEnterContainer);
+export default {
+  title: "<StateTransitions>",
+  component: StateTransitions,
+};
+
+export const OnePath = () => {
+  const sceneReady = useScreenshotReady();
+  const pauseFrame = useCallback(() => {
+    return () => {
+      sceneReady();
+    };
+  }, [sceneReady]);
+
+  return (
+    <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
+      <StateTransitions
+        config={{
+          paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
         }}
-        style={{ width: 370 }}
-      >
-        <StateTransitions
-          config={{
-            paths: new Array(5).fill({
-              value: "/some/topic/with/state.state",
-              timestampMethod: "receiveTime",
-            }),
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("long path", () => {
-    return (
-      <PanelSetup fixture={fixture} style={{ maxWidth: 100 }}>
-        <StateTransitions
-          config={{
-            paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("json path", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <StateTransitions
-          config={{
-            paths: [{ value: "/some/topic/with/state.data.value", timestampMethod: "receiveTime" }],
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("With a hovered tooltip", () => {
-    return (
-      <PanelSetup
-        fixture={fixture}
-        onMount={() => {
-          setTimeout(() => {
-            const [canvas] = document.getElementsByTagName("canvas");
-            const x = 163;
-            const y = 266;
-            canvas?.dispatchEvent(
-              new MouseEvent("mousemove", { screenX: x, clientX: x, screenY: y, clientY: y }),
-            );
-          }, 100);
+      />
+    </PanelSetup>
+  );
+};
+
+export const MultiplePaths = () => {
+  const sceneReady = useScreenshotReady();
+  const pauseFrame = useCallback(() => {
+    return () => {
+      sceneReady();
+    };
+  }, [sceneReady]);
+
+  return (
+    <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
+      <StateTransitions
+        config={{
+          paths: new Array(5).fill({
+            value: "/some/topic/with/state.state",
+            timestampMethod: "receiveTime",
+          }),
         }}
-        style={{ width: 370 }}
-      >
-        <StateTransitions
-          config={{
-            paths: new Array(5).fill({
-              value: "/some/topic/with/state.state",
-              timestampMethod: "receiveTime",
-            }),
-          }}
-        />
-      </PanelSetup>
-    );
-  });
+      />
+    </PanelSetup>
+  );
+};
+
+export const MultiplePathsWithHover = () => {
+  const sceneReady = useScreenshotReady();
+  const pauseFrame = useCallback(() => {
+    return () => {
+      sceneReady();
+    };
+  }, [sceneReady]);
+
+  return (
+    <PanelSetup
+      pauseFrame={pauseFrame}
+      fixture={fixture}
+      onMount={() => {
+        const mouseEnterContainer = document.querySelectorAll(
+          "[data-test~=panel-mouseenter-container",
+        )[0]!;
+        TestUtils.Simulate.mouseEnter(mouseEnterContainer);
+      }}
+      style={{ width: 370 }}
+    >
+      <StateTransitions
+        config={{
+          paths: new Array(5).fill({
+            value: "/some/topic/with/state.state",
+            timestampMethod: "receiveTime",
+          }),
+        }}
+      />
+    </PanelSetup>
+  );
+};
+
+export const LongPath = () => {
+  const sceneReady = useScreenshotReady();
+  const pauseFrame = useCallback(() => {
+    return () => {
+      sceneReady();
+    };
+  }, [sceneReady]);
+
+  return (
+    <PanelSetup pauseFrame={pauseFrame} fixture={fixture} style={{ maxWidth: 100 }}>
+      <StateTransitions
+        config={{
+          paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
+        }}
+      />
+    </PanelSetup>
+  );
+};
+
+export const JsonPath = () => {
+  const sceneReady = useScreenshotReady();
+  const pauseFrame = useCallback(() => {
+    return () => {
+      sceneReady();
+    };
+  }, [sceneReady]);
+
+  return (
+    <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
+      <StateTransitions
+        config={{
+          paths: [{ value: "/some/topic/with/state.data.value", timestampMethod: "receiveTime" }],
+        }}
+      />
+    </PanelSetup>
+  );
+};
+
+export const WithAHoveredTooltip = () => {
+  const sceneReady = useScreenshotReady();
+  const pauseFrame = useCallback(() => {
+    return () => {
+      sceneReady();
+    };
+  }, [sceneReady]);
+
+  return (
+    <PanelSetup
+      pauseFrame={pauseFrame}
+      fixture={fixture}
+      onMount={() => {
+        setTimeout(() => {
+          const [canvas] = document.getElementsByTagName("canvas");
+          const x = 163;
+          const y = 266;
+          canvas?.dispatchEvent(
+            new MouseEvent("mousemove", { screenX: x, clientX: x, screenY: y, clientY: y }),
+          );
+        }, 100);
+      }}
+      style={{ width: 370 }}
+    >
+      <StateTransitions
+        config={{
+          paths: new Array(5).fill({
+            value: "/some/topic/with/state.state",
+            timestampMethod: "receiveTime",
+          }),
+        }}
+      />
+    </PanelSetup>
+  );
+};

@@ -279,8 +279,13 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   // since we render in a web-worker we need to pause/resume the message pipeline to keep
   // our plot rendeirng in-sync with data rendered elsewhere in the app
   const onChartUpdate = useCallback(() => {
-    resumeFrame.current?.();
+    const current = resumeFrame.current;
     resumeFrame.current = undefined;
+
+    if (current) {
+      // allow the chart offscreen canvas to render to screen
+      requestAnimationFrame(current);
+    }
   }, []);
 
   const hoverBar = useRef<HTMLDivElement>(ReactNull);
@@ -299,10 +304,9 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
 
     // cleanup pased frames on unmount or dataset changes
     return () => {
-      resumeFrame.current?.();
-      resumeFrame.current = undefined;
+      onChartUpdate();
     };
-  }, [pauseFrame, datasets]);
+  }, [pauseFrame, datasets, onChartUpdate]);
 
   // some callbacks don't need to re-create when the current scales change, so we keep a ref
   const currentScalesRef = useRef<RpcScales | undefined>(currentScales);
@@ -764,6 +768,12 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     onChartUpdate,
     onHover,
   };
+
+  // avoid rendering if width/height are 0 - usually on initial mount
+  // so we don't trigger onChartUpdate if we know we will immediately resize
+  if (width === 0 || height === 0) {
+    return ReactNull;
+  }
 
   return (
     <div style={{ display: "flex", width: "100%" }}>

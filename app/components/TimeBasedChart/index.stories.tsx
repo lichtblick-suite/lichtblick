@@ -14,8 +14,8 @@ import cloneDeep from "lodash/cloneDeep";
 import { useState, useCallback, useRef } from "react";
 
 import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
-import signal from "@foxglove-studio/app/shared/signal";
 import { triggerWheel } from "@foxglove-studio/app/stories/PanelSetup";
+import { useScreenshotReady } from "@foxglove-studio/app/stories/ScreenshotReadyContext";
 
 import TimeBasedChart, { TimeBasedChartTooltipData } from "./index";
 import type { Props } from "./index";
@@ -96,13 +96,13 @@ export default {
   },
 };
 
-const simpleSignal = signal();
 export const Simple = () => {
+  const sceneReady = useScreenshotReady();
   const pauseFrame = useCallback(() => {
     return () => {
-      simpleSignal.resolve();
+      sceneReady();
     };
-  }, []);
+  }, [sceneReady]);
 
   return (
     <div style={{ width: "100%", height: "100%", background: "black" }}>
@@ -113,90 +113,102 @@ export const Simple = () => {
   );
 };
 
-Simple.parameters = {
-  screenshot: {
-    waitFor: simpleSignal,
-  },
-};
-
 // zoom and update without resetting zoom
-const zoomAndUpdateSignal = signal();
 export const CanZoomAndUpdate = () => {
+  const sceneReady = useScreenshotReady();
+  const [chartProps, setChartProps] = useState(cloneDeep(commonProps));
+  const callCountRef = useRef(0);
+
   const okTrigger = useRef(false);
+
+  const doScroll = useCallback(async () => {
+    const canvasEl = document.querySelector("canvas");
+    if (!canvasEl) {
+      return;
+    }
+
+    // Zoom is a continuous event, so we need to simulate wheel multiple times
+    for (let i = 0; i < 5; i++) {
+      triggerWheel(canvasEl, 2);
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    setChartProps((oldProps) => {
+      const newProps = cloneDeep(oldProps);
+      const newDataPoint = cloneDeep(newProps.data.datasets[0]!.data[0]!);
+      newDataPoint.x = 20;
+      newProps.data.datasets[0]!.data[1] = newDataPoint;
+
+      // the next chart render will trigger our screenshot signal
+      okTrigger.current = true;
+      return newProps;
+    });
+  }, []);
+
   const pauseFrame = useCallback(() => {
     return () => {
+      // first render of the chart triggers scrolling
+      if (callCountRef.current === 0) {
+        doScroll();
+      }
+
       if (okTrigger.current) {
-        zoomAndUpdateSignal.resolve();
+        sceneReady();
       }
+
+      ++callCountRef.current;
     };
-  }, []);
-
-  const [chartProps, setChartProps] = useState(cloneDeep(commonProps));
-
-  const refFn = useCallback(() => {
-    setTimeout(() => {
-      const canvasEl = document.querySelector("canvas");
-      // Zoom is a continuous event, so we need to simulate wheel multiple times
-      if (canvasEl) {
-        for (let i = 0; i < 5; i++) {
-          triggerWheel(canvasEl, 1);
-        }
-        setTimeout(() => {
-          setChartProps((oldProps) => {
-            // the next chart render will trigger our screenshot signal
-            okTrigger.current = true;
-
-            const newProps = cloneDeep(oldProps);
-            const newDataPoint = cloneDeep(newProps.data.datasets[0]!.data[0]!);
-            newDataPoint.x = 20;
-            newProps.data.datasets[0]!.data[1] = newDataPoint;
-            return newProps;
-          });
-        }, 50);
-      }
-    }, 200);
-  }, []);
+  }, [doScroll, sceneReady]);
 
   return (
-    <div style={{ width: 800, height: 800, background: "black" }} ref={refFn}>
+    <div style={{ width: 800, height: 800, background: "black" }}>
       <MockMessagePipelineProvider pauseFrame={pauseFrame}>
         <TimeBasedChart {...chartProps} width={800} height={800} />
       </MockMessagePipelineProvider>
     </div>
   );
 };
-CanZoomAndUpdate.parameters = { screenshot: { waitFor: zoomAndUpdateSignal } };
 
 export const CleansUpTooltipOnUnmount = () => {
+  const sceneReady = useScreenshotReady();
+
   const [hasRenderedOnce, setHasRenderedOnce] = useState<boolean>(false);
-  const refFn = useCallback(() => {
-    setTimeout(() => {
-      const [canvas] = document.getElementsByTagName("canvas");
-      const { top, left } = canvas!.getBoundingClientRect();
-      document.dispatchEvent(
-        new MouseEvent("mousemove", { clientX: 363 + left, clientY: 650 + top }),
-      );
-      setTimeout(() => {
-        setHasRenderedOnce(true);
-      }, 100);
-    }, 200);
-  }, []);
+  const refFn = useCallback(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    const [canvas] = document.getElementsByTagName("canvas");
+    const { top, left } = canvas!.getBoundingClientRect();
+    document.dispatchEvent(
+      new MouseEvent("mousemove", { clientX: 363 + left, clientY: 650 + top }),
+    );
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    setHasRenderedOnce(true);
+    sceneReady();
+  }, [sceneReady]);
+
+  if (hasRenderedOnce) {
+    return ReactNull;
+  }
+
   return (
     <div style={{ width: "100%", height: "100%", background: "black" }} ref={refFn}>
       <MockMessagePipelineProvider>
-        {!hasRenderedOnce && <TimeBasedChart {...commonProps} />}
+        <TimeBasedChart {...commonProps} />
       </MockMessagePipelineProvider>
     </div>
   );
 };
 
 export const CallPauseOnInitialMount = () => {
+  const sceneReady = useScreenshotReady();
   const [unpauseFrameCount, setUnpauseFrameCount] = useState(0);
   const pauseFrame = useCallback(() => {
     return () => {
       setUnpauseFrameCount((old) => old + 1);
+      sceneReady();
     };
-  }, [setUnpauseFrameCount]);
+  }, [sceneReady]);
 
   return (
     <div style={{ width: "100%", height: "100%", background: "black" }}>
