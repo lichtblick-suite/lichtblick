@@ -1928,9 +1928,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluentui/react@npm:8.9.0":
-  version: 8.9.0
-  resolution: "@fluentui/react@npm:8.9.0"
+"@fluentui/react@npm:8.9.1":
+  version: 8.9.1
+  resolution: "@fluentui/react@npm:8.9.1"
   dependencies:
     "@fluentui/date-time-utilities": ^8.0.2
     "@fluentui/font-icons-mdl2": ^8.0.3
@@ -1950,7 +1950,7 @@ __metadata:
     "@types/react-dom": ">=16.8.0 <18.0.0"
     react: ">=16.8.0 <18.0.0"
     react-dom: ">=16.8.0 <18.0.0"
-  checksum: 5c30307ff388dc068f6d2ee7c739fe163f676757dbcb3a540002341ee82009c618c55e4fd8396dc066fe976e65450810e933ea50157a6e99b093ddbb02364a1f
+  checksum: 5a3c7abcdc2a0faecf9cc7c382adf6e234c8e9760cc512afa177d81239a268a875f61f6ac576c9fb6d71a3541e967cd2f0c1c8d8c3e9d2ad5a35ada700ad12ea
   languageName: node
   linkType: hard
 
@@ -2011,7 +2011,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove-studio/app@workspace:app"
   dependencies:
-    "@fluentui/react": 8.9.0
+    "@fluentui/react": 8.9.1
     "@fluentui/react-icons-mdl2": 1.0.3
     "@mdi/svg": 5.9.55
     "@storybook/addon-actions": 6.2.3
