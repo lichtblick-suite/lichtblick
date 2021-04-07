@@ -89,7 +89,7 @@ The list of icons can be found at: https://developer.microsoft.com/en-us/fluentu
 
 ### Using a new icon
 
-Since we only import the SVG icons we need, icons must be registered before they are used. This is done in [useIcons.tsx](../app/theme/useIcons.tsx), and there is a corresponding type definition tracking the `RegisteredIconNames` at [fluentui.d.ts](../typings/fluentui.d.ts). the TypeScript compiler will prompt you to update both of these places before you can use a new icon.
+Since we only import the SVG icons we need, icons must be registered before they are used. This is done in the [ThemeProvider](../app/theme/ThemeProvider.tsx), and there is a corresponding type definition tracking the `RegisteredIconNames` at [fluentui.d.ts](../typings/fluentui.d.ts). The TypeScript compiler will prompt you to update both of these places before you can use a new icon.
 
 ### Custom SVG icons
 
