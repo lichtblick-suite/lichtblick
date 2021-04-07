@@ -30,9 +30,8 @@ storiesOf("<Menu>", module)
   .add("nested", () => {
     function openSubMenu(component: SubMenu | ReactNull) {
       if (component) {
-        // @ts-expect-error figure out what to actually do here
         // eslint-disable-next-line react/no-find-dom-node
-        ReactDOM.findDOMNode(component).querySelector("svg").parentElement.click();
+        (ReactDOM.findDOMNode(component) as Element).querySelector("svg")?.parentElement?.click();
       }
     }
     return (

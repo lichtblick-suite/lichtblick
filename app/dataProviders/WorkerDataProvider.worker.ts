@@ -17,7 +17,7 @@ import IdbCacheWriterDataProvider from "@foxglove-studio/app/dataProviders/IdbCa
 import MeasureDataProvider from "@foxglove-studio/app/dataProviders/MeasureDataProvider";
 import RpcDataProviderRemote from "@foxglove-studio/app/dataProviders/RpcDataProviderRemote";
 import createGetDataProvider from "@foxglove-studio/app/dataProviders/createGetDataProvider";
-import Rpc from "@foxglove-studio/app/util/Rpc";
+import Rpc, { Channel } from "@foxglove-studio/app/util/Rpc";
 import { inWebWorker } from "@foxglove-studio/app/util/workers";
 
 const getDataProvider = createGetDataProvider({
@@ -28,6 +28,6 @@ const getDataProvider = createGetDataProvider({
 });
 
 if (inWebWorker()) {
-  // @ts-expect-error not yet using TS Worker lib: FG-64
-  new RpcDataProviderRemote(new Rpc(global), getDataProvider);
+  // not yet using TS Worker lib: FG-64
+  new RpcDataProviderRemote(new Rpc((global as unknown) as Channel), getDataProvider);
 }

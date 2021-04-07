@@ -49,3 +49,10 @@ declare module "*.wasm" {
   const url: string;
   export default url;
 }
+
+declare module "*.ne" {
+  import type { CompiledRules } from "nearley";
+
+  const compiledRules: CompiledRules;
+  export default compiledRules;
+}

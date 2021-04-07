@@ -17,7 +17,6 @@ import { Parser, Grammar } from "nearley";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 
 import { RosPath } from "./constants";
-// @ts-expect-error grammar.ne files currently imported with any type
 import grammar from "./grammar.ne";
 
 const grammarObj = Grammar.fromCompiled(grammar);

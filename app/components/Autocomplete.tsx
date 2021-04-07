@@ -368,7 +368,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
             </div>
           );
         }}
-        // @ts-expect-error renderMenuWrapper is not an attribute?
+        // @ts-expect-error renderMenuWrapper added in the fork but we don't have typings for it
         renderMenuWrapper={(menu: any) => document.body && createPortal(menu, document.body)}
         ref={this._autocomplete}
         wrapperStyle={{ flex: "1 1 auto", overflow: "hidden", marginLeft: 6 }}

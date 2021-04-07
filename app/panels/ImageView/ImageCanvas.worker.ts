@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Message } from "@foxglove-studio/app/players/types";
-import Rpc from "@foxglove-studio/app/util/Rpc";
+import Rpc, { Channel } from "@foxglove-studio/app/util/Rpc";
 import { setupWorker } from "@foxglove-studio/app/util/RpcWorkerUtils";
 
 import { renderImage } from "./renderImage";
@@ -53,6 +53,6 @@ export default class ImageCanvasWorker {
 }
 
 if ((global as any).postMessage && !global.onmessage) {
-  // @ts-expect-error not yet using TS Worker lib: FG-64
-  new ImageCanvasWorker(new Rpc(global));
+  // not yet using TS Worker lib: FG-64
+  new ImageCanvasWorker(new Rpc((global as unknown) as Channel));
 }

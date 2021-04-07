@@ -18,6 +18,7 @@ import styled from "styled-components";
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import Button from "@foxglove-studio/app/components/Button";
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
+import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
 import Flex from "@foxglove-studio/app/components/Flex";
 import { Item } from "@foxglove-studio/app/components/Menu";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
@@ -208,13 +209,13 @@ function Internals() {
           value={recordGroup}
           onChange={(value) => setRecordGroup(value)}
         >
-          {/* @ts-expect-error value is required for Dropdown */}
-          <Item value={RECORD_ALL}>All panels</Item>
+          <DropdownItem value={RECORD_ALL}>
+            <Item>All panels</Item>
+          </DropdownItem>
           {subscriptionGroups.map((group) => (
-            /* @ts-expect-error value is required for Dropdown */
-            <Item key={group} value={group}>
-              {group}
-            </Item>
+            <DropdownItem key={group} value={group}>
+              <Item>{group}</Item>
+            </DropdownItem>
           ))}
         </Dropdown>
         {recordingTopics && (
