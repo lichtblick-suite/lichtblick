@@ -47,7 +47,7 @@ export default function MarkerSettingsEditor(
         Optionally allow treating line markers as polygons, so that clicking inside the lines in the line marker selects
         the marker. The default behavior for line markers requires the user to click exactly on the line to select the
         line marker. This option can reduce performance and will not work on instanced line markers (those with "type":
-        105).
+        108).
         `}
       </SDescription>
       <Checkbox

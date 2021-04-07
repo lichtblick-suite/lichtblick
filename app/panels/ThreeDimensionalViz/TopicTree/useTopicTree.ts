@@ -17,7 +17,11 @@ import { useDebounce } from "use-debounce";
 
 import { TOPIC_DISPLAY_MODES } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
 import filterMap from "@foxglove-studio/app/util/filterMap";
-import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+import {
+  FOXGLOVE_GRID_DATATYPE,
+  FOXGLOVE_GRID_TOPIC,
+  SECOND_SOURCE_PREFIX,
+} from "@foxglove-studio/app/util/globalConstants";
 import { useShallowMemo } from "@foxglove-studio/app/util/hooks";
 
 import {
@@ -87,9 +91,20 @@ export function generateTreeNode(
   const featureKey = generateNodeKey({ name, topicName, isFeatureColumn: true });
   const providerAvailable = availableTopicsNamesSet.size > 0;
 
-  if (topicName) {
+  if (key === `t:${FOXGLOVE_GRID_TOPIC}`) {
+    return {
+      type: "topic",
+      topicName: FOXGLOVE_GRID_TOPIC,
+      datatype: FOXGLOVE_GRID_DATATYPE,
+      key,
+      featureKey,
+      name,
+      availableByColumn: [true],
+      providerAvailable: true,
+    };
+  } else if (topicName) {
     const datatype =
-      datatypesByTopic[topicName] || datatypesByTopic[`${SECOND_SOURCE_PREFIX}${topicName}`];
+      datatypesByTopic[topicName] ?? datatypesByTopic[`${SECOND_SOURCE_PREFIX}${topicName}`];
     return {
       type: "topic",
       key,
@@ -192,7 +207,7 @@ export default function useTree({
     const uncategorizedTopicNames = difference(nonPrefixedTopicNames, topicTreeTopics);
     const datatypesByTopic = mapValues(keyBy(providerTopics, "name"), (item) => item.datatype);
 
-    const newChildren = [...(topicTreeConfig.children || [])];
+    const newChildren = [...(topicTreeConfig.children ?? [])];
     if (uncategorizedTopicNames.length) {
       // Add uncategorized group node to root config.
       newChildren.push({

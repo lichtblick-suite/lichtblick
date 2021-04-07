@@ -78,11 +78,9 @@ function getMarkers(markerProviders: MarkerProvider[]): InteractiveMarkersByType
       collector[field] = (o: any) => (markers as any)[field].push(o);
     });
 
-  markerProviders.forEach((provider) => {
-    if (provider) {
-      provider.renderMarkers(collector as MarkerCollector);
-    }
-  });
+  for (const provider of markerProviders) {
+    provider.renderMarkers(collector as MarkerCollector);
+  }
 
   return markers;
 }

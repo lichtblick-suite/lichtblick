@@ -55,6 +55,9 @@ export const VELODYNE_SCAN_DATATYPE = "velodyne_msgs/VelodyneScan";
 export const VISUALIZATION_MSGS_MARKER_DATATYPE = "visualization_msgs/Marker";
 export const VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE = "visualization_msgs/MarkerArray";
 
+export const FOXGLOVE_GRID_TOPIC = "/foxglove/grid";
+export const FOXGLOVE_GRID_DATATYPE = "foxglove/Grid";
+
 export const MARKER_ARRAY_DATATYPES = [
   "visualization_msgs/MarkerArray",
   FUTURE_VIZ_MSGS_DATATYPE,

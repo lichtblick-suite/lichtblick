@@ -14,6 +14,7 @@
 import { perPanelHooks } from "@foxglove-studio/app/BuiltinPanelHooks";
 import { PersistedState } from "@foxglove-studio/app/reducers";
 import {
+  FOXGLOVE_GRID_TOPIC,
   LAYOUT_URL_QUERY_KEY,
   REMOTE_BAG_URL_2_QUERY_KEY,
 } from "@foxglove-studio/app/util/globalConstants";
@@ -102,6 +103,12 @@ const defaultHooks = {
         getDefaultTopicTree: () => ({
           name: "root",
           children: [
+            {
+              name: "Grid",
+              topicName: FOXGLOVE_GRID_TOPIC,
+              children: [],
+              description: "Draws a reference grid.",
+            },
             {
               name: "TF",
               topicName: "/tf",

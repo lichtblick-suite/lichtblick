@@ -983,7 +983,7 @@ export default class SceneBuilder implements MarkerProvider {
     };
   }
 
-  renderMarkers(add: MarkerCollector) {
+  renderMarkers(add: MarkerCollector): void {
     for (const topic of objectValues(this.topicsByName)) {
       const collector = this.collectors[topic.name];
       if (!collector) {
