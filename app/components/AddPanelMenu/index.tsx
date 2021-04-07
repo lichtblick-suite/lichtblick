@@ -41,7 +41,14 @@ function MenuContent(menuProps: IContextualMenuProps) {
     [dispatch, layout],
   );
   return (
-    <Callout {...menuProps}>
+    <Callout
+      {...menuProps}
+      directionalHintFixed
+      layerProps={{
+        // Allow dragging panels from the menu into the layout
+        eventBubblingEnabled: true,
+      }}
+    >
       <Menu>
         <PanelList onPanelSelect={onPanelSelect} />
       </Menu>
