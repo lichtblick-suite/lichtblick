@@ -16,6 +16,14 @@ import Rpc from "@foxglove-studio/app/util/Rpc";
 import { setupSendReportNotificationHandler } from "@foxglove-studio/app/util/RpcWorkerUtils";
 import { enforceFetchIsBlocked, inSharedWorker } from "@foxglove-studio/app/util/workers";
 
+let unsentErrors: string[] = [];
+(global as any).onerror = (event: ErrorEvent) => {
+  unsentErrors.push(event.error.toString());
+};
+(global as any).onunhandledrejection = (event: PromiseRejectionEvent) => {
+  unsentErrors.push(String(event.reason instanceof Error ? event.reason.message : event.reason));
+};
+
 if (!inSharedWorker()) {
   // In Chrome, web workers currently (as of March 2020) inherit their Content Security Policy from
   // their associated page, ignoring any policy in the headers of their source file. SharedWorkers
@@ -26,9 +34,19 @@ if (!inSharedWorker()) {
   throw new Error("Not in a SharedWorker.");
 }
 
-(global as any).onconnect = (e: any) => {
-  const port = e.ports[0];
+(global as any).onconnect = (connectEvent: MessageEvent) => {
+  const port = connectEvent.ports[0] as MessagePort;
   const rpc = new Rpc(port);
+
+  // If any errors occurred while nobody was connected, send them now
+  unsentErrors.forEach((message) => rpc.send("error", message));
+  unsentErrors = [];
+  (global as any).onerror = (event: ErrorEvent) => {
+    rpc.send("error", event.error.toString());
+  };
+  (global as any).onunhandledrejection = (event: PromiseRejectionEvent) => {
+    rpc.send("error", String(event.reason instanceof Error ? event.reason.message : event.reason));
+  };
 
   setupSendReportNotificationHandler(rpc);
   // Shared workers need to be closed "from the inside" -- they have no terminate() method.

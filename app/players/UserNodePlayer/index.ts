@@ -68,14 +68,36 @@ type UserNodeActions = {
   setUserNodeRosLib: SetUserNodeRosLib;
 };
 
-const rpcFromNewSharedWorker = (worker: SharedWorker) => {
+const rpcFromNewSharedWorker = (worker: SharedWorker, name: string) => {
   worker.onerror = (event) => {
     console.error("SharedWorker error:", event);
-    sendNotification("An error occurred in Node Playground.", event.message, "app", "error");
+    sendNotification(
+      "An error occurred in Node Playground.",
+      `${name} worker error: ${event.message || "no details available"}`,
+      "app",
+      "error",
+    );
   };
   const port: MessagePort = worker.port;
+  port.onmessageerror = (event) => {
+    console.error("SharedWorker messageerror:", event);
+    sendNotification(
+      "An error occurred in Node Playground.",
+      `${name} message error: ${String(event.data) || "no details available"}`,
+      "app",
+      "error",
+    );
+  };
   port.start();
   const rpc = new Rpc(port);
+  rpc.receive("error", (msg) => {
+    sendNotification(
+      "An error occurred in Node Playground.",
+      `${name} error: ${msg || "no details available"}`,
+      "app",
+      "error",
+    );
+  });
   setupReceiveReportErrorHandler(rpc);
   return rpc;
 };
@@ -283,7 +305,7 @@ export default class UserNodePlayer implements Player {
         if (!bobjectSender || !rpc) {
           rpc =
             this._unusedNodeRuntimeWorkers.pop() ||
-            rpcFromNewSharedWorker(UserNodePlayer.CreateNodeRuntimeWorker());
+            rpcFromNewSharedWorker(UserNodePlayer.CreateNodeRuntimeWorker(), "Node runtime");
           bobjectSender = new BobjectRpcSender(rpc);
           const { error, userNodeDiagnostics, userNodeLogs } = await rpc.send<RegistrationOutput>(
             "registerNode",
@@ -361,7 +383,10 @@ export default class UserNodePlayer implements Player {
 
   _getTransformWorker(): Rpc {
     if (!this._nodeTransformRpc) {
-      this._nodeTransformRpc = rpcFromNewSharedWorker(UserNodePlayer.CreateNodeTransformWorker());
+      this._nodeTransformRpc = rpcFromNewSharedWorker(
+        UserNodePlayer.CreateNodeTransformWorker(),
+        "Node transformer",
+      );
     }
     return this._nodeTransformRpc;
   }

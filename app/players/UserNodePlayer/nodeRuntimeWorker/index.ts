@@ -18,6 +18,14 @@ import Rpc from "@foxglove-studio/app/util/Rpc";
 import { BobjectRpcReceiver } from "@foxglove-studio/app/util/binaryObjects/BobjectRpc";
 import { enforceFetchIsBlocked, inSharedWorker } from "@foxglove-studio/app/util/workers";
 
+let unsentErrors: string[] = [];
+(global as any).onerror = (event: ErrorEvent) => {
+  unsentErrors.push(event.error.toString());
+};
+(global as any).onunhandledrejection = (event: PromiseRejectionEvent) => {
+  unsentErrors.push(String(event.reason instanceof Error ? event.reason.message : event.reason));
+};
+
 if (!inSharedWorker()) {
   // In Chrome, web workers currently (as of March 2020) inherit their Content Security Policy from
   // their associated page, ignoring any policy in the headers of their source file. SharedWorkers
@@ -31,6 +39,17 @@ if (!inSharedWorker()) {
 (global as any).onconnect = (e: any) => {
   const port = e.ports[0];
   const rpc = new Rpc(port);
+
+  // If any errors occurred while nobody was connected, send them now
+  unsentErrors.forEach((message) => rpc.send("error", message));
+  unsentErrors = [];
+  (global as any).onerror = (event: ErrorEvent) => {
+    rpc.send("error", event.error.toString());
+  };
+  (global as any).onunhandledrejection = (event: PromiseRejectionEvent) => {
+    rpc.send("error", String(event.reason instanceof Error ? event.reason.message : event.reason));
+  };
+
   // Just check fetch is blocked on registration, don't slow down message processing.
   rpc.receive("registerNode", enforceFetchIsBlocked(registerNode));
   new BobjectRpcReceiver(rpc).receive(
