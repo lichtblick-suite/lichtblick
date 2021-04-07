@@ -33,7 +33,6 @@ import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipel
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { Message, TypedMessage } from "@foxglove-studio/app/players/types";
 import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
@@ -74,7 +73,6 @@ export type ImageViewPanelHooks = {
   defaultConfig: DefaultConfig;
   imageMarkerDatatypes: string[];
 };
-const DEFAULT_PANEL_HOOKS = { imageMarkerDatatypes: [] };
 
 export type Config = DefaultConfig & {
   panelHooks?: ImageViewPanelHooks;
@@ -151,6 +149,8 @@ const ToggleComponent = ({
     </button>
   );
 };
+
+const canTransformMarkersByTopic = (topic: string) => !topic.includes("rect");
 
 // Group image topics by the first component of their name
 
@@ -290,8 +290,10 @@ function ImageView(props: Props) {
     };
   }, [topics]);
 
-  const { imageMarkerDatatypes } =
-    panelHooks || (getGlobalHooks() as any).perPanelHooks().ImageView || DEFAULT_PANEL_HOOKS;
+  const imageMarkerDatatypes = useMemo(
+    () => ["visualization_msgs/ImageMarker", "webviz_msgs/ImageMarkerArray"],
+    [],
+  );
   const defaultAvailableMarkerTopics = useMemo(
     () => getMarkerOptions(cameraTopic, topics, allCameraNamespaces, imageMarkerDatatypes),
     [cameraTopic, topics, allCameraNamespaces, imageMarkerDatatypes],
@@ -323,12 +325,10 @@ function ImageView(props: Props) {
         enabledMarkerTopics,
         newAvailableMarkerTopics,
       );
+
       saveConfig({
         cameraTopic: newCameraTopic,
-        transformMarkers: (getGlobalHooks() as any)
-          .perPanelHooks()
-          .ImageView.canTransformMarkersByTopic(newCameraTopic),
-
+        transformMarkers: canTransformMarkersByTopic(newCameraTopic),
         enabledMarkerTopics: newEnabledMarkerTopics,
       });
     },
@@ -599,9 +599,7 @@ function ImageView(props: Props) {
   }, [imageTopicDropdown, markerDropdown, menuContent]);
 
   const renderBottomBar = () => {
-    const canTransformMarkers = (getGlobalHooks() as any)
-      .perPanelHooks()
-      .ImageView.canTransformMarkersByTopic(cameraTopic);
+    const canTransformMarkers = canTransformMarkersByTopic(cameraTopic);
 
     const topicTimestamp = (
       <TopicTimestamp
@@ -659,6 +657,16 @@ function ImageView(props: Props) {
 }
 
 ImageView.panelType = "ImageViewPanel";
-ImageView.defaultConfig = (getGlobalHooks() as any).perPanelHooks().ImageView.defaultConfig;
+ImageView.defaultConfig = {
+  cameraTopic: "",
+  enabledMarkerTopics: [],
+  customMarkerTopicOptions: [],
+  scale: 0.2,
+  transformMarkers: false,
+  synchronize: false,
+  mode: "fit",
+  zoomPercentage: 100,
+  offset: [0, 0],
+} as Config;
 
 export default Panel(ImageView);

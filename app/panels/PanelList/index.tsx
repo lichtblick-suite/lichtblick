@@ -12,7 +12,8 @@
 //   You may not use this file except in compliance with the License.
 import MagnifyIcon from "@mdi/svg/svg/magnify.svg";
 import fuzzySort from "fuzzysort";
-import { flatten, flatMap, isEqual } from "lodash";
+import { flatMap } from "lodash";
+import { useCallback, useEffect, useMemo } from "react";
 import { useDrag } from "react-dnd";
 import { MosaicDragType, MosaicPath } from "react-mosaic-component";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,14 +24,13 @@ import Flex from "@foxglove-studio/app/components/Flex";
 import Icon from "@foxglove-studio/app/components/Icon";
 import { Item } from "@foxglove-studio/app/components/Menu";
 import TextHighlight from "@foxglove-studio/app/components/TextHighlight";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
+import { PanelInfo, usePanelCatalog } from "@foxglove-studio/app/context/PanelCatalogContext";
 import { TabPanelConfig } from "@foxglove-studio/app/types/layouts";
 import {
   PanelConfig,
   MosaicDropTargetPosition,
   SavedProps,
 } from "@foxglove-studio/app/types/panels";
-import { objectValues } from "@foxglove-studio/app/util";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 import styles from "./index.module.scss";
@@ -87,47 +87,12 @@ const SEmptyState = styled.div`
 type PresetSettings =
   | { config: TabPanelConfig; relatedConfigs: SavedProps }
   | { config: PanelConfig; relatedConfigs: typeof undefined };
+
 export type PanelListItem = {
   title: string;
   component: React.ComponentType<any>;
   presetSettings?: PresetSettings;
 };
-
-// getPanelsByCategory() and getPanelsByType() are functions rather than top-level constants
-// in order to avoid issues with circular imports, such as
-// FooPanel -> PanelToolbar -> PanelList -> getGlobalHooks().panelsByCategory() -> FooPanel.
-let gPanelsByCategory: any;
-function getPanelsByCategory(): {
-  [category: string]: PanelListItem[];
-} {
-  if (!gPanelsByCategory) {
-    gPanelsByCategory = getGlobalHooks().panelsByCategory();
-
-    for (const category in gPanelsByCategory) {
-      gPanelsByCategory[category] = gPanelsByCategory[category].filter(Boolean);
-    }
-  }
-  return gPanelsByCategory;
-}
-
-let gPanelsByType: any;
-export function getPanelsByType(): {
-  [type: string]: PanelListItem;
-} {
-  if (!gPanelsByType) {
-    gPanelsByType = {};
-    const panelsByCategory = getPanelsByCategory();
-    for (const panels of Object.values(panelsByCategory)) {
-      const nonPresetPanels = panels.filter((panel) => panel && !panel.presetSettings);
-      for (const item of nonPresetPanels) {
-        const panelType = (item.component as any).panelType;
-        console.assert(panelType && !(panelType in gPanelsByType));
-        gPanelsByType[panelType] = item;
-      }
-    }
-  }
-  return gPanelsByType;
-}
 
 type DropDescription = {
   type: string;
@@ -230,31 +195,27 @@ type Props = {
 };
 
 // sanity checks to help panel authors debug issues
-function verifyPanels() {
+function verifyPanels(panelsByCategory: Map<string, PanelInfo[]>) {
   const panelTypes: Map<
     string,
     { component: React.ComponentType<any>; presetSettings?: PresetSettings }
   > = new Map();
-  const panelsByCategory = getPanelsByCategory();
-  for (const panels of Object.values(panelsByCategory)) {
-    for (const { component, presetSettings } of panels) {
-      const { name, displayName, panelType } = component as any;
+  for (const panels of panelsByCategory.values()) {
+    for (const { component } of panels) {
+      const { name, displayName, panelType } = component;
+      const dispName = displayName ?? name ?? "<unnamed>";
       if (!panelType) {
-        throw new Error(
-          `Panel component ${
-            displayName || name || "<unnamed>"
-          } must declare a unique \`static panelType\``,
-        );
+        throw new Error(`Panel component ${dispName} must declare a unique \`static panelType\``);
       }
       const existingPanel = panelTypes.get(panelType);
-      if (existingPanel && isEqual(existingPanel.presetSettings, presetSettings)) {
+      if (existingPanel) {
+        const otherDisplayName =
+          existingPanel.component.displayName || existingPanel.component.name || "<unnamed>";
         throw new Error(
-          `Two components have the same panelType ('${panelType}') and same presetSettings: ${
-            existingPanel.component.displayName || existingPanel.component.name || "<unnamed>"
-          } and ${displayName || name || "<unnamed>"}`,
+          `Two components have the same panelType ('${panelType}'): ${otherDisplayName} and ${dispName}`,
         );
       }
-      panelTypes.set(panelType, { component, presetSettings });
+      panelTypes.set(panelType, { component });
     }
   }
 }
@@ -293,16 +254,22 @@ function PanelList(props: Props) {
     setHighlightedPanelIdx(0);
   }, []);
 
-  verifyPanels();
-  const panelCategories = React.useMemo(() => getGlobalHooks().panelCategories(), []);
-  const panelsByCategory = React.useMemo(() => getPanelsByCategory(), []);
-  const getFilteredItemsForCategory = React.useCallback(
-    (key: string) =>
-      searchQuery
+  const panelCatalog = usePanelCatalog();
+  const panelCategories = useMemo(() => panelCatalog.getPanelCategories(), [panelCatalog]);
+  const panelsByCategory = useMemo(() => panelCatalog.getPanelsByCategory(), [panelCatalog]);
+
+  useEffect(() => {
+    verifyPanels(panelsByCategory);
+  }, [panelsByCategory]);
+
+  const getFilteredItemsForCategory = useCallback(
+    (key: string) => {
+      return searchQuery
         ? fuzzySort
-            .go(searchQuery, panelsByCategory[key] ?? [], { key: "title" })
+            .go(searchQuery, panelsByCategory.get(key) ?? [], { key: "title" })
             .map((searchResult) => searchResult.obj)
-        : panelsByCategory[key],
+        : panelsByCategory.get(key);
+    },
     [panelsByCategory, searchQuery],
   );
   const filteredItemsByCategoryIdx = React.useMemo(
@@ -332,11 +299,9 @@ function PanelList(props: Props) {
         const newIdx = (highlightedPanelIdx - 1) % (filteredItems.length - 1);
         setHighlightedPanelIdx(newIdx >= 0 ? newIdx : filteredItems.length + newIdx);
       } else if (e.key === "Enter" && highlightedPanel) {
-        const { component, presetSettings } = highlightedPanel;
+        const { component } = highlightedPanel;
         onPanelSelect({
-          type: (component as any).panelType,
-          config: presetSettings?.config,
-          relatedConfigs: presetSettings?.relatedConfigs,
+          type: component.panelType,
         });
       }
     },
@@ -429,12 +394,5 @@ function PanelList(props: Props) {
     </div>
   );
 }
-
-PanelList.getComponentForType = (type: string): any | void => {
-  const panelsByCategory = getPanelsByCategory();
-  const allPanels = flatten(objectValues(panelsByCategory));
-  const panel = allPanels.find((item) => (item.component as any).panelType === type);
-  return panel?.component;
-};
 
 export default PanelList;

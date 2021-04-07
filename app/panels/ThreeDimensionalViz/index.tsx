@@ -18,7 +18,6 @@ import React, { useCallback, useMemo, useState, useRef, useEffect } from "react"
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelContext from "@foxglove-studio/app/components/PanelContext";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import Layout from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/Layout";
 import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
 import helpContent from "@foxglove-studio/app/panels/ThreeDimensionalViz/index.help.md";
@@ -88,12 +87,7 @@ const BaseRenderer = (props: Props, ref: any) => {
 
   const onSetSubscriptions = useCallback(
     (subscriptions: string[]) => {
-      setSubscriptions([
-        ...getGlobalHooks().perPanelHooks().ThreeDimensionalViz.topics,
-        TRANSFORM_TOPIC,
-        TRANSFORM_STATIC_TOPIC,
-        ...subscriptions,
-      ]);
+      setSubscriptions([TRANSFORM_TOPIC, TRANSFORM_STATIC_TOPIC, ...subscriptions]);
     },
     [setSubscriptions],
   );
@@ -208,7 +202,17 @@ const BaseRenderer = (props: Props, ref: any) => {
 
 BaseRenderer.displayName = "ThreeDimensionalViz";
 BaseRenderer.panelType = "3D Panel";
-BaseRenderer.defaultConfig = getGlobalHooks().perPanelHooks().ThreeDimensionalViz.defaultConfig;
+BaseRenderer.defaultConfig = {
+  checkedKeys: ["name:Topics"],
+  expandedKeys: ["name:Topics"],
+  followTf: undefined,
+  cameraState: {},
+  modifiedNamespaceTopics: [],
+  pinTopics: false,
+  settingsByKey: {},
+  autoSyncCameraState: false,
+  autoTextBackgroundColor: true,
+};
 
 export const Renderer = hoistNonReactStatics(
   React.forwardRef<Props, typeof BaseRenderer>(BaseRenderer as any),

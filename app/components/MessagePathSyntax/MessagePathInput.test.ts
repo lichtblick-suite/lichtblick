@@ -11,24 +11,22 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
-
 import { tryToSetDefaultGlobalVar, getFirstInvalidVariableFromRosPath } from "./MessagePathInput";
 import { RosPath } from "./constants";
 
-const defaultGlobalVars = getGlobalHooks().getDefaultPersistedState().panels.globalVariables;
+const defaultGlobalVars = new Map<string, unknown>();
 
 describe("tryToSetDefaultGlobalVar", () => {
   it("correctly returns true/false depending on whether a global variable has a default", () => {
     const setGlobalVars = jest.fn();
     expect(tryToSetDefaultGlobalVar("some_var_without_default", setGlobalVars)).toEqual(false);
     expect(setGlobalVars).not.toHaveBeenCalled();
-    Object.keys(defaultGlobalVars).forEach((defaultKey) => {
+    for (const [defaultKey, defaultValue] of defaultGlobalVars) {
       expect(tryToSetDefaultGlobalVar(defaultKey, setGlobalVars)).toEqual(true);
       expect(setGlobalVars).toHaveBeenCalledWith({
-        [defaultKey]: defaultGlobalVars[defaultKey],
+        [defaultKey]: defaultValue,
       });
-    });
+    }
   });
 });
 

@@ -18,7 +18,6 @@ import { Worldview } from "regl-worldview";
 import { selectAllPanelIds } from "@foxglove-studio/app/actions/mosaic";
 import Flex from "@foxglove-studio/app/components/Flex";
 import PanelLayout from "@foxglove-studio/app/components/PanelLayout";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import GlobalVariableSliderPanel from "@foxglove-studio/app/panels/GlobalVariableSlider";
 import ThreeDimensionalViz from "@foxglove-studio/app/panels/ThreeDimensionalViz";
 import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz/types";
@@ -176,8 +175,7 @@ export const ThreeDimPanelSetupWithBag = ({
   const topics = uniq(
     threeDimensionalConfig.checkedKeys
       ?.filter((key) => key.startsWith("t:"))
-      .map((topic) => topic.substring(2))
-      .concat((getGlobalHooks() as any).perPanelHooks().ThreeDimensionalViz.topics),
+      .map((topic) => topic.substring(2)),
   );
 
   return (

@@ -18,9 +18,51 @@ import HTML5Backend from "react-dnd-html5-backend";
 import TestUtils from "react-dom/test-utils";
 import { Provider } from "react-redux";
 
+import Panel from "@foxglove-studio/app/components/Panel";
+import PanelCatalogContext, {
+  PanelCatalog,
+  PanelCategory,
+  PanelInfo,
+} from "@foxglove-studio/app/context/PanelCatalogContext";
 import PanelList from "@foxglove-studio/app/panels/PanelList";
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
+
+const SamplePanel1 = function () {
+  return <div></div>;
+};
+SamplePanel1.panelType = "sample";
+SamplePanel1.defaultConfig = {};
+
+const SamplePanel2 = function () {
+  return <div></div>;
+};
+SamplePanel2.panelType = "sample2";
+SamplePanel2.defaultConfig = {};
+
+const MockPanel1 = Panel(SamplePanel1);
+const MockPanel2 = Panel(SamplePanel2);
+
+class MockPanelCatalog implements PanelCatalog {
+  getPanelCategories(): PanelCategory[] {
+    return [
+      { label: "ROS", key: "ros" },
+      { label: "DEBUG", key: "debug" },
+    ];
+  }
+  getPanelsByCategory(): Map<string, PanelInfo[]> {
+    return new Map([
+      ["ros", [{ title: "Some Panel", component: MockPanel1 }]],
+      ["debug", [{ title: "Happy Panel", component: MockPanel2 }]],
+    ]);
+  }
+  getPanelsByType(): Map<string, PanelInfo> {
+    return new Map();
+  }
+  getComponentForType(_type: string): PanelInfo["component"] | undefined {
+    return undefined;
+  }
+}
 
 const PanelListWithInteractions = ({
   inputValue,
@@ -70,7 +112,9 @@ storiesOf("<PanelList>", module)
   .addDecorator((childrenRenderFcn) => (
     <DndProvider backend={HTML5Backend}>
       <Provider store={configureStore(createRootReducer(createMemoryHistory()))}>
-        {childrenRenderFcn()}
+        <PanelCatalogContext.Provider value={new MockPanelCatalog()}>
+          {childrenRenderFcn()}
+        </PanelCatalogContext.Provider>
       </Provider>
     </DndProvider>
   ))
@@ -91,14 +135,14 @@ storiesOf("<PanelList>", module)
     <PanelListWithInteractions events={[arrowUp]} />
   ))
   .add("filtered panel list without results in 1st category", () => (
-    <PanelListWithInteractions inputValue="global" />
+    <PanelListWithInteractions inputValue="Happy" />
   ))
   .add("filtered panel list without results in last category", () => (
-    <PanelListWithInteractions inputValue="tab" />
+    <PanelListWithInteractions inputValue="Some" />
   ))
   .add("filtered panel list without results in any category", () => (
     <PanelListWithInteractions inputValue="zz" />
   ))
   .add("case-insensitive filtering and highlight submenu", () => (
-    <PanelListWithInteractions inputValue="dp" />
+    <PanelListWithInteractions inputValue="hn" />
   ));

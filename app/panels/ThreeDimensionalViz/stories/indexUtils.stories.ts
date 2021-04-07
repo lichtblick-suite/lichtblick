@@ -13,7 +13,6 @@
 
 import { Color } from "regl-worldview";
 
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { MARKER_MSG_TYPES } from "@foxglove-studio/app/util/globalConstants";
 
 const GAP = 11;
@@ -76,7 +75,7 @@ type Props = {
 };
 
 export function generateMarkers(props: Props, idx: number, markerName: string) {
-  const rootTfID = (getGlobalHooks() as any).perPanelHooks().ThreeDimensionalViz.rootTransformFrame;
+  const rootTfID = "map";
   const header = { seq: 257399, stamp: { sec: 1534827954, nsec: 262587964 }, frame_id: rootTfID };
   const pose = {
     position: { x: idx * GAP - (TOTAL * GAP) / 2 - 20, y: 0, z: 0 },

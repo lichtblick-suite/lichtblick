@@ -15,7 +15,13 @@ import { storiesOf } from "@storybook/react";
 import { createBrowserHistory } from "history";
 import TestUtils from "react-dom/test-utils";
 
+import Panel from "@foxglove-studio/app/components/Panel";
 import PanelLayout from "@foxglove-studio/app/components/PanelLayout";
+import {
+  PanelCatalog,
+  PanelCategory,
+  PanelInfo,
+} from "@foxglove-studio/app/context/PanelCatalogContext";
 import {
   nestedTabLayoutFixture,
   nestedTabLayoutFixture2,
@@ -30,6 +36,52 @@ import { dragAndDrop } from "@foxglove-studio/app/test/dragAndDropHelper";
 import Tab from "./index";
 
 const rootReducer = createRootReducer(createBrowserHistory());
+
+const SamplePanel1 = function () {
+  return <div>Sample Panel 1</div>;
+};
+SamplePanel1.panelType = "Sample1";
+SamplePanel1.defaultConfig = {};
+
+const SamplePanel2 = function () {
+  return <div>Sample Panel 2</div>;
+};
+SamplePanel2.panelType = "Sample2";
+SamplePanel2.defaultConfig = {};
+
+const MockPanel1 = Panel(SamplePanel1);
+const MockPanel2 = Panel(SamplePanel2);
+
+class MockPanelCatalog implements PanelCatalog {
+  getPanelCategories(): PanelCategory[] {
+    return [
+      { label: "ROS", key: "ros" },
+      { label: "MISC", key: "misc" },
+    ];
+  }
+  getPanelsByCategory(): Map<string, PanelInfo[]> {
+    return new Map([
+      [
+        "ros",
+        [
+          { title: "Some Panel", component: MockPanel1 },
+          { title: "Happy Panel", component: MockPanel2 },
+        ],
+      ],
+      ["misc", [{ title: "Tab", component: Tab }]],
+    ]);
+  }
+  getPanelsByType(): Map<string, PanelInfo> {
+    return new Map([
+      [MockPanel1.panelType, { title: "Some Panel", component: SamplePanel1 }],
+      [MockPanel2.panelType, { title: "Happy Panel", component: SamplePanel2 }],
+      [Tab.panelType, { title: "Tab", component: Tab }],
+    ]);
+  }
+  getComponentForType(type: string): PanelInfo["component"] | undefined {
+    return this.getPanelsByType().get(type)?.component;
+  }
+}
 
 const fixture = { topics: [], datatypes: {}, frame: {}, layout: "Tab!a" };
 const manyTabs = new Array(25)
@@ -50,6 +102,7 @@ storiesOf("<Tab>", module)
   .add("showing panel list", () => (
     <PanelSetup
       fixture={fixture}
+      panelCatalog={new MockPanelCatalog()}
       onMount={() => {
         setTimeout(async () => {
           await tick();
@@ -63,6 +116,7 @@ storiesOf("<Tab>", module)
   .add("picking a panel from the panel list creates a new tab if there are none", () => {
     return (
       <PanelSetup
+        panelCatalog={new MockPanelCatalog()}
         fixture={{
           ...fixture,
           savedProps: {
@@ -77,7 +131,9 @@ storiesOf("<Tab>", module)
             await tick();
             (document.querySelectorAll('[data-test="pick-a-panel"]')[0] as any).click();
             await tick();
-            (document.querySelectorAll('[data-test="panel-menu-item Image"]')[0] as any).click();
+            (document.querySelectorAll(
+              '[data-test="panel-menu-item Some Panel"]',
+            )[0] as any).click();
           }, DEFAULT_TIMEOUT);
         }}
       >
@@ -88,6 +144,7 @@ storiesOf("<Tab>", module)
   .add("picking a panel from the panel list updates the tab's layout", () => {
     return (
       <PanelSetup
+        panelCatalog={new MockPanelCatalog()}
         fixture={{
           ...fixture,
           savedProps: {
@@ -102,7 +159,9 @@ storiesOf("<Tab>", module)
             await tick();
             (document.querySelectorAll('[data-test="pick-a-panel"]')[0] as any).click();
             await tick();
-            (document.querySelectorAll('[data-test="panel-menu-item Image"]')[0] as any).click();
+            (document.querySelectorAll(
+              '[data-test="panel-menu-item Some Panel"]',
+            )[0] as any).click();
           }, DEFAULT_TIMEOUT);
         }}
       >
@@ -114,6 +173,7 @@ storiesOf("<Tab>", module)
     const store = configureStore(rootReducer);
     return (
       <PanelSetup
+        panelCatalog={new MockPanelCatalog()}
         fixture={{
           ...fixture,
           savedProps: {
@@ -130,7 +190,9 @@ storiesOf("<Tab>", module)
             (document.querySelectorAll('[data-test="pick-a-panel"]')[0] as any).click();
             await tick();
 
-            const imageItem = document.querySelectorAll('[data-test="panel-menu-item Image"]')[0];
+            const imageItem = document.querySelectorAll(
+              '[data-test="panel-menu-item Some Panel"]',
+            )[0];
             const panel = document.querySelectorAll('[data-test="empty-drop-target"]')[0];
             dragAndDrop(imageItem, panel);
           }, DEFAULT_TIMEOUT);
@@ -144,6 +206,7 @@ storiesOf("<Tab>", module)
     const store = configureStore(rootReducer);
     return (
       <PanelSetup
+        panelCatalog={new MockPanelCatalog()}
         fixture={{
           ...fixture,
           savedProps: {
@@ -160,7 +223,9 @@ storiesOf("<Tab>", module)
             (document.querySelectorAll('[data-test="pick-a-panel"]')[0] as any).click();
             await tick();
 
-            const imageItem = document.querySelectorAll('[data-test="panel-menu-item Image"]')[0];
+            const imageItem = document.querySelectorAll(
+              '[data-test="panel-menu-item Some Panel"]',
+            )[0];
             const panel = document.querySelectorAll('[data-test="empty-drop-target"]')[0];
             dragAndDrop(imageItem, panel);
           }, DEFAULT_TIMEOUT);
@@ -171,7 +236,7 @@ storiesOf("<Tab>", module)
     );
   })
   .add("with chosen active tab", () => (
-    <PanelSetup fixture={fixture}>
+    <PanelSetup panelCatalog={new MockPanelCatalog()} fixture={fixture}>
       <Tab
         config={{
           activeTabIdx: 1,
@@ -186,14 +251,14 @@ storiesOf("<Tab>", module)
                 direction: "row",
                 first: {
                   direction: "column",
-                  first: "3D Panel!2xqjjqw",
-                  second: "Publish!81fx2n",
+                  first: "Sample1!2xqjjqw",
+                  second: "Sample2!81fx2n",
                   splitPercentage: 60,
                 },
                 second: {
                   direction: "column",
-                  first: "ImageViewPanel!3dor2gy",
-                  second: "Publish!3wrafzj",
+                  first: "Sample2!3dor2gy",
+                  second: "Sample1!3wrafzj",
                   splitPercentage: 40,
                 },
               },
@@ -209,6 +274,7 @@ storiesOf("<Tab>", module)
   ))
   .add("many tabs do not cover panel toolbar", () => (
     <PanelSetup
+      panelCatalog={new MockPanelCatalog()}
       fixture={fixture}
       onMount={() => {
         const mouseEnterContainer = document.querySelectorAll(
@@ -224,6 +290,7 @@ storiesOf("<Tab>", module)
     const store = configureStore(rootReducer);
     return (
       <PanelSetup
+        panelCatalog={new MockPanelCatalog()}
         fixture={{
           ...fixture,
           savedProps: {
@@ -249,6 +316,7 @@ storiesOf("<Tab>", module)
     const store = configureStore(rootReducer);
     return (
       <PanelSetup
+        panelCatalog={new MockPanelCatalog()}
         fixture={{
           ...fixture,
           savedProps: {
@@ -274,6 +342,7 @@ storiesOf("<Tab>", module)
     const store = configureStore(rootReducer);
     return (
       <PanelSetup
+        panelCatalog={new MockPanelCatalog()}
         fixture={{
           ...fixture,
           savedProps: {
@@ -301,6 +370,7 @@ storiesOf("<Tab>", module)
     const store = configureStore(rootReducer);
     return (
       <PanelSetup
+        panelCatalog={new MockPanelCatalog()}
         fixture={{
           ...fixture,
           savedProps: {
@@ -329,6 +399,7 @@ storiesOf("<Tab>", module)
     const store = configureStore(rootReducer);
     return (
       <PanelSetup
+        panelCatalog={new MockPanelCatalog()}
         fixture={{
           ...fixture,
           layout: {
@@ -365,6 +436,7 @@ storiesOf("<Tab>", module)
     const store = configureStore(rootReducer);
     return (
       <PanelSetup
+        panelCatalog={new MockPanelCatalog()}
         fixture={{
           ...fixture,
           savedProps: {
@@ -404,6 +476,7 @@ storiesOf("<Tab>", module)
     const store = configureStore(rootReducer);
     return (
       <PanelSetup
+        panelCatalog={new MockPanelCatalog()}
         fixture={nestedTabLayoutFixture}
         style={{ width: "100%" }}
         store={store}
@@ -435,6 +508,7 @@ storiesOf("<Tab>", module)
     const store = configureStore(rootReducer);
     return (
       <PanelSetup
+        panelCatalog={new MockPanelCatalog()}
         fixture={nestedTabLayoutFixture2}
         style={{ width: "100%" }}
         store={store}

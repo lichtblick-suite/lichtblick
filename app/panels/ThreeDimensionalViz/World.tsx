@@ -14,7 +14,6 @@
 import { forwardRef } from "react";
 import { Worldview, CameraState, MouseHandler, DEFAULT_CAMERA_STATE } from "regl-worldview";
 
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import {
   WorldSearchTextProps,
   useGLText,
@@ -69,14 +68,32 @@ function getMarkers(markerProviders: MarkerProvider[]): InteractiveMarkersByType
   };
 
   const collector: any = {};
-  getGlobalHooks()
-    .perPanelHooks()
-    .ThreeDimensionalViz.allSupportedMarkers.forEach((field: any) => {
-      if (!(markers as any)[field]) {
-        (markers as any)[field] = [];
-      }
-      collector[field] = (o: any) => (markers as any)[field].push(o);
-    });
+  [
+    "arrow",
+    "cube",
+    "cubeList",
+    "cylinder",
+    "filledPolygon",
+    "grid",
+    "instancedLineList",
+    "laserScan",
+    "linedConvexHull",
+    "lineList",
+    "lineStrip",
+    "overlayIcon",
+    "pointcloud",
+    "points",
+    "poseMarker",
+    "sphere",
+    "sphereList",
+    "text",
+    "triangleList",
+  ].forEach((field: any) => {
+    if (!(markers as any)[field]) {
+      (markers as any)[field] = [];
+    }
+    collector[field] = (o: any) => (markers as any)[field].push(o);
+  });
 
   for (const provider of markerProviders) {
     provider.renderMarkers(collector as MarkerCollector);

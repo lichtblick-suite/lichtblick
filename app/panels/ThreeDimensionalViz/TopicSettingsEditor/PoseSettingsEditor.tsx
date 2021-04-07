@@ -13,11 +13,9 @@
 
 import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
-import InformationIcon from "@mdi/svg/svg/information.svg";
+import { ComponentProps } from "react";
 
 import Flex from "@foxglove-studio/app/components/Flex";
-import Icon from "@foxglove-studio/app/components/Icon";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { Color, PoseStamped } from "@foxglove-studio/app/types/Messages";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
@@ -142,7 +140,7 @@ export default function PoseSettingsEditor(
     ? CheckboxMarkedIcon
     : CheckboxBlankOutlineIcon;
 
-  const iconProps = {
+  const iconProps: ComponentProps<typeof CheckboxComponent> = {
     width: 16,
     height: 16,
     style: {
@@ -150,10 +148,8 @@ export default function PoseSettingsEditor(
       position: "relative",
       top: "5px",
     },
-  } as any;
+  };
 
-  const copy = (getGlobalHooks() as any).perPanelHooks().ThreeDimensionalViz.copy
-    .poseSettingsEditor;
   return (
     <Flex col>
       <SLabel>Rendered Car</SLabel>
@@ -187,11 +183,6 @@ export default function PoseSettingsEditor(
           }
         />
         <SLabel>Show error buffer</SLabel>
-        {copy?.errorBuffer && (
-          <Icon tooltip={copy.errorBuffer}>
-            <InformationIcon />
-          </Icon>
-        )}
       </Flex>
       {settingsByCarType}
     </Flex>

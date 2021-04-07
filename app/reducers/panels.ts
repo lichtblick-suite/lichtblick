@@ -36,7 +36,6 @@ import {
   MoveTabPayload,
 } from "@foxglove-studio/app/actions/panels";
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { LinkedGlobalVariables } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { State, PersistedState } from "@foxglove-studio/app/reducers";
 import { TabPanelConfig } from "@foxglove-studio/app/types/layouts";
@@ -110,6 +109,34 @@ export const setPersistedStateInLocalStorage = (persistedState: PersistedState):
   storage.setItem(GLOBAL_STATE_STORAGE_KEY, persistedState);
 };
 
+// All panel fields have to be present.
+export const defaultPersistedState = Object.freeze<PersistedState>({
+  fetchedLayout: { isLoading: false, data: undefined },
+  search: "",
+  panels: {
+    layout: {
+      direction: "row",
+      first: "DiagnosticSummary!3edblo1",
+      second: {
+        direction: "row",
+        first: "RosOut!1f38b3d",
+        second: "3D Panel!1my2ydk",
+        splitPercentage: 50,
+      },
+      splitPercentage: 33.3333333333,
+    },
+    savedProps: {},
+    globalVariables: {},
+    userNodes: {},
+    linkedGlobalVariables: [],
+    playbackConfig: {
+      speed: 0.2,
+      messageOrder: "receiveTime",
+      timeDisplayMethod: "ROS",
+    },
+  },
+});
+
 // initialPersistedState will be initialized once when the store initializes this reducer. It is
 // initialized lazily so we can manipulate localStorage in test setup and when we create new stores
 // new stores they will use the new values in localStorage. Re-initializing it for every action is
@@ -119,11 +146,10 @@ export function getInitialPersistedStateAndMaybeUpdateLocalStorageAndURL(
   history: any,
 ): PersistedState {
   if (initialPersistedState == undefined) {
-    const defaultPersistedState = Object.freeze(getGlobalHooks().getDefaultPersistedState());
     const oldPersistedState: any = storage.getItem(GLOBAL_STATE_STORAGE_KEY);
 
     // cast to PersistedState to remove the Readonly created by the Object.freeze above
-    const newPersistedState = cloneDeep(defaultPersistedState as PersistedState);
+    const newPersistedState = cloneDeep(defaultPersistedState) as PersistedState;
 
     const { search: currentSearch, pathname } = history.location;
     const currentSearchParams = new URLSearchParams(currentSearch);

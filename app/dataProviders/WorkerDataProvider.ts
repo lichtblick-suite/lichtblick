@@ -14,7 +14,6 @@
 import { Time } from "rosbag";
 
 import RpcDataProvider from "@foxglove-studio/app/dataProviders/RpcDataProvider";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import Rpc from "@foxglove-studio/app/util/Rpc";
 
 import {
@@ -30,22 +29,11 @@ const WorkerDataProviderWorker = () => {
   return new Worker(new URL("./WorkerDataProvider.worker", import.meta.url));
 };
 
-const params = new URLSearchParams(window.location.search);
-const secondSourceUrlParams = getGlobalHooks().getSecondSourceUrlParams();
-const hasSecondSource = secondSourceUrlParams.some((param) => params.has(param));
-
 // We almost always use a WorkerDataProvider in Webviz. By initializing the first worker before we actually construct
 // the WorkerDataProvider we can potentially improve performance by loading while waiting for async requests.
 let preinitializedWorkers: any[] = [];
 if (process.env.NODE_ENV !== "test") {
-  preinitializedWorkers = hasSecondSource
-    ? [
-        WorkerDataProviderWorker(),
-        WorkerDataProviderWorker(),
-        WorkerDataProviderWorker(),
-        WorkerDataProviderWorker(),
-      ]
-    : [WorkerDataProviderWorker(), WorkerDataProviderWorker()];
+  preinitializedWorkers = [WorkerDataProviderWorker(), WorkerDataProviderWorker()];
 }
 
 // Wraps the underlying DataProviderDescriptor tree in a Web Worker, therefore allowing

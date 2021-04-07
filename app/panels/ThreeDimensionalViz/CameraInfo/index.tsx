@@ -27,7 +27,6 @@ import {
   UncontrolledValidatedInput,
   YamlInput,
 } from "@foxglove-studio/app/components/ValidatedInput";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import {
   SValue,
   SLabel,
@@ -267,11 +266,7 @@ export default function CameraInfo({
                   </SValue>
                 </SRow>
               ) : (
-                <p>
-                  Locked to map (
-                  {(getGlobalHooks() as any).perPanelHooks().ThreeDimensionalViz.rootTransformFrame}
-                  )
-                </p>
+                <p>Locked to map</p>
               )}
             </Flex>
           )}

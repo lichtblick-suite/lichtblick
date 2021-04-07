@@ -16,7 +16,6 @@ import { cloneDeep } from "lodash";
 import { MosaicNode, MosaicPath } from "react-mosaic-component";
 import zlib from "zlib";
 
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { LinkedGlobalVariables } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { Dispatcher } from "@foxglove-studio/app/reducers";
 import { PanelsState } from "@foxglove-studio/app/reducers/panels";
@@ -34,7 +33,6 @@ import {
   SetFetchedLayoutPayload,
   MosaicDropTargetPosition,
 } from "@foxglove-studio/app/types/panels";
-import { LAYOUT_URL_QUERY_KEY, PATCH_QUERY_KEY } from "@foxglove-studio/app/util/globalConstants";
 import { dictForPatchCompression } from "@foxglove-studio/app/util/layout";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
@@ -160,49 +158,6 @@ export function applyPatchToLayout(patch: string | undefined, layout: PanelsStat
     return layout;
   }
 }
-
-export const fetchLayout = (
-  search: string,
-): Dispatcher<SET_FETCHED_LAYOUT | SET_FETCH_LAYOUT_FAILED | LOAD_LAYOUT> => (dispatch) => {
-  const params = new URLSearchParams(search);
-  const hasLayoutUrl = params.get(LAYOUT_URL_QUERY_KEY);
-  const patch = params.get(PATCH_QUERY_KEY) ?? undefined;
-  dispatch({ type: PANELS_ACTION_TYPES.SET_FETCHED_LAYOUT, payload: { isLoading: true } });
-  return getGlobalHooks()
-    .getLayoutFromUrl(search)
-    .then((layoutFetchResult) => {
-      dispatch({
-        type: PANELS_ACTION_TYPES.SET_FETCHED_LAYOUT,
-        // Omitting `isInitializedFromLocalStorage` whenever we get a new fetched layout.
-        payload: {
-          isLoading: false,
-          data: {
-            ...layoutFetchResult,
-            content: layoutFetchResult.content || layoutFetchResult,
-          },
-          isFromLayoutUrlParam: !!hasLayoutUrl,
-        },
-      });
-      if (layoutFetchResult) {
-        if (hasLayoutUrl) {
-          const patchedLayout = applyPatchToLayout(
-            patch,
-            layoutFetchResult.content || layoutFetchResult,
-          );
-          dispatch({ type: PANELS_ACTION_TYPES.LOAD_LAYOUT, payload: patchedLayout });
-        } else if (layoutFetchResult.content) {
-          const patchedLayout = applyPatchToLayout(patch, layoutFetchResult.content);
-          dispatch({
-            type: PANELS_ACTION_TYPES.LOAD_LAYOUT,
-            payload: patchedLayout,
-          });
-        }
-      }
-    })
-    .catch((e) => {
-      dispatch({ type: PANELS_ACTION_TYPES.SET_FETCH_LAYOUT_FAILED, payload: e });
-    });
-};
 
 type OVERWRITE_GLOBAL_DATA = {
   type: "OVERWRITE_GLOBAL_DATA";

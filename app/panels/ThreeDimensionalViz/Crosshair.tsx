@@ -14,8 +14,6 @@
 import { vec3, quat } from "gl-matrix";
 import { cameraStateSelectors, Lines, CameraState } from "regl-worldview";
 
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
-
 type Props = {
   cameraState: CameraState;
 };
@@ -42,7 +40,7 @@ export default function Crosshair({ cameraState }: Props) {
     const thickness = 0.004 * distance * (1 + extraThickness);
     return {
       header: {
-        frame_id: (getGlobalHooks() as any).rootTransformFrame,
+        frame_id: "map",
         stamp: { sec: 0, nsec: 0 },
       },
       type: 5,

@@ -23,7 +23,6 @@ import {
 } from "regl-worldview";
 
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { InteractionData } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
 import { PoseSettings } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/PoseSettingsEditor";
 import { Color, Header, Scale } from "@foxglove-studio/app/types/Messages";
@@ -31,7 +30,11 @@ import { Color, Header, Scale } from "@foxglove-studio/app/types/Messages";
 import CarModel from "./CarModel";
 import carOutlinePoints from "./CarModel/carOutline.json";
 
-const { originalScaling, updatedScaling } = getGlobalHooks().getPoseErrorScaling();
+const originalScaling = {
+  x: 1,
+  y: 1,
+};
+const updatedScaling = originalScaling;
 
 const getScaledCarOutlineBufferPoints = (scaling: { x: number; y: number }) => {
   const vectorSum = carOutlinePoints.reduce(

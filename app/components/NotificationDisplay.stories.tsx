@@ -22,8 +22,6 @@ import NotificationDisplay, {
 } from "@foxglove-studio/app/components/NotificationDisplay";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
-import { setHooks } from "../loadWebviz";
-
 const randomNum = () => Math.floor(Math.random() * 1000);
 const addError = () =>
   sendNotification(`Another error #${randomNum()}`, "some details", "app", "error");
@@ -242,26 +240,6 @@ storiesOf("<NotificationDisplay>", module)
           id: "1",
           message: "Error 1",
           details: undefined,
-          read: false,
-          created: new Date(),
-          severity: "error",
-        }}
-      />
-    );
-  })
-  .add("Error Modal with custom details renderer", () => {
-    setHooks({
-      renderErrorDetails(details: any) {
-        return <span style={{ fontStyle: "italic" }}>Modified details [{details}]</span>;
-      },
-    });
-    return (
-      <NotificationModal
-        onRequestClose={() => {}}
-        notification={{
-          id: "1",
-          message: "Error Modal without details",
-          details: "original",
           read: false,
           created: new Date(),
           severity: "error",

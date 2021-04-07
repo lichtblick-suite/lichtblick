@@ -8,9 +8,9 @@ import ReactDOM from "react-dom";
 import "@foxglove-studio/app/styles/global.scss";
 
 import App from "@foxglove-studio/app/App";
-import { getGlobalConfig } from "@foxglove-studio/app/GlobalConfig";
 import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import installDevtoolsFormatters from "@foxglove-studio/app/util/installDevtoolsFormatters";
+import { initializeLogEvent } from "@foxglove-studio/app/util/logEvent";
 import overwriteFetch from "@foxglove-studio/app/util/overwriteFetch";
 import waitForFonts from "@foxglove-studio/app/util/waitForFonts";
 import { Sockets } from "@foxglove/electron-socket/renderer";
@@ -42,8 +42,7 @@ async function main() {
   // consider moving waitForFonts into App to display an app loading screen
   await waitForFonts();
 
-  // This should live within App and become part of startup
-  await getGlobalConfig().load();
+  initializeLogEvent(() => undefined, {}, {});
 
   ReactDOM.render(<App />, rootEl, () => {
     // Integration tests look for this console log to indicate the app has rendered once

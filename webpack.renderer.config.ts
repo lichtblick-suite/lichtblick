@@ -166,13 +166,6 @@ export function makeConfig(_: unknown, argv: WebpackArgv, options?: Options): Co
       new CircularDependencyPlugin({
         exclude: /node_modules/,
         failOnError: true,
-        onDetected({ paths, compilation }) {
-          if (paths.some((filePath) => filePath.match(/(^|[\\/])GlobalConfig.ts/))) {
-            // compilation.warnings.push(new Error(paths.join(" -> ")));
-            return;
-          }
-          compilation.errors.push(new Error(paths.join(" -> ")));
-        },
       }) as WebpackPluginInstance,
       new webpack.ProvidePlugin({
         // since we avoid "import React from 'react'" we shim here when used globally

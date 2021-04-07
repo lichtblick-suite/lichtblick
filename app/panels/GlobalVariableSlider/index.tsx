@@ -20,7 +20,6 @@ import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import { SliderProps } from "@foxglove-studio/app/components/SliderWithTicks";
 import TextField from "@foxglove-studio/app/components/TextField";
 import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 
 export type GlobalVariableSliderConfig = {
   sliderProps: SliderProps;
@@ -142,11 +141,7 @@ function GlobalVariableSliderPanel(props: Props): React.ReactElement {
     },
     [config.globalVariableName, globalVariableValue, saveConfig, setGlobalVariables],
   );
-  const additionalOutput = useMemo(() => {
-    return (getGlobalHooks() as any)
-      .perPanelHooks()
-      .GlobalVariableSlider.getVariableSpecificOutput(globalVariableName, globalVariables);
-  }, [globalVariableName, globalVariables]);
+
   const menuContent = useMemo(
     () => <SliderSettingsMenu config={config} updateConfig={saveSliderProps} />,
     [config, saveSliderProps],
@@ -155,7 +150,6 @@ function GlobalVariableSliderPanel(props: Props): React.ReactElement {
     <div style={{ padding: "25px 4px 4px" }}>
       <PanelToolbar floating menuContent={menuContent} />
       <GlobalVariableSlider sliderProps={sliderProps} globalVariableName={globalVariableName} />
-      {additionalOutput}
     </div>
   );
 }

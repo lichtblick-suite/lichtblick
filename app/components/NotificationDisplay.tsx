@@ -25,7 +25,6 @@ import Icon from "@foxglove-studio/app/components/Icon";
 import Menu from "@foxglove-studio/app/components/Menu";
 import Modal, { Title } from "@foxglove-studio/app/components/Modal";
 import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { nbsp } from "@foxglove-studio/app/util/entities";
 import {
   DetailsType,
@@ -187,10 +186,7 @@ export function NotificationModal({
   notification: NotificationMessage;
   onRequestClose: () => void;
 }): React.ReactElement {
-  const { renderNotificationDetails } = getGlobalHooks() as any;
-  let details = renderNotificationDetails
-    ? renderNotificationDetails(notification.details)
-    : notification.details;
+  let details = notification.details;
   if (details instanceof Error) {
     details = details.stack;
   }

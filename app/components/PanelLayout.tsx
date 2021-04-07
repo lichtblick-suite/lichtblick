@@ -33,7 +33,7 @@ import {
 import Flex from "@foxglove-studio/app/components/Flex";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
-import PanelList from "@foxglove-studio/app/panels/PanelList";
+import { usePanelCatalog } from "@foxglove-studio/app/context/PanelCatalogContext";
 import { EmptyDropTarget } from "@foxglove-studio/app/panels/Tab/EmptyDropTarget";
 import { State, Dispatcher } from "@foxglove-studio/app/reducers";
 import { SaveConfigsPayload } from "@foxglove-studio/app/types/panels";
@@ -100,6 +100,8 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
     [saveConfigs],
   );
 
+  const panelCatalog = usePanelCatalog();
+
   const renderTile = useCallback(
     (id: string, path: any) => {
       // `id` is usually a string. But when `layout` is empty, `id` will be an empty object, in which case we don't need to render Tile
@@ -108,7 +110,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
       }
       const type = getPanelTypeFromId(id);
 
-      const PanelComponent = PanelList.getComponentForType(type);
+      const PanelComponent = panelCatalog.getComponentForType(type);
       const panel = PanelComponent ? (
         <PanelComponent childId={id} tabId={tabId} />
       ) : (
@@ -135,7 +137,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
       }
       return mosaicWindow;
     },
-    [createTile, tabId],
+    [createTile, tabId, panelCatalog],
   );
   const isDemoMode = useExperimentalFeature("demoMode");
   const bodyToRender = useMemo(

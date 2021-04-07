@@ -25,7 +25,6 @@ import { Item } from "@foxglove-studio/app/components/Menu";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import TopicToRenderMenu from "@foxglove-studio/app/components/TopicToRenderMenu";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import DiagnosticsHistory from "@foxglove-studio/app/panels/diagnostics/DiagnosticsHistory";
 import { Topic } from "@foxglove-studio/app/players/types";
 import { PanelConfig } from "@foxglove-studio/app/types/panels";
@@ -100,7 +99,9 @@ type Props = {
 class DiagnosticSummary extends React.Component<Props> {
   static panelType = "DiagnosticSummary";
   static defaultConfig = {
-    ...(getGlobalHooks() as any).perPanelHooks().DiagnosticSummary.defaultConfig,
+    pinnedIds: [],
+    hardwareIdFilter: "",
+    topicToRender: DIAGNOSTIC_TOPIC,
   };
 
   togglePinned = (info: DiagnosticInfo) => {

@@ -13,7 +13,6 @@
 import { first, last } from "lodash";
 import { ReactNode } from "react";
 
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { diffLabels } from "@foxglove-studio/app/panels/RawMessages/getDiff";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
@@ -108,5 +107,5 @@ export function getMessageDocumentationLink(datatype: string): string | undefine
   const filename = last(parts);
   return ROS_COMMON_MSGS.has(pkg as any)
     ? `http://docs.ros.org/api/${pkg}/html/msg/${filename}.html`
-    : (getGlobalHooks() as any).perPanelHooks().RawMessages.docLinkFunction(filename);
+    : `https://www.google.com/search?q=${filename}`;
 }

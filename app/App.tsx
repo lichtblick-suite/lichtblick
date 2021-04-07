@@ -53,6 +53,7 @@ import TinyConnectionPicker from "@foxglove-studio/app/components/TinyConnection
 import Toolbar from "@foxglove-studio/app/components/Toolbar";
 import AnalyticsProvider from "@foxglove-studio/app/context/AnalyticsProvider";
 import { useAppConfiguration } from "@foxglove-studio/app/context/AppConfigurationContext";
+import BuiltinPanelCatalogProvider from "@foxglove-studio/app/context/BuiltinPanelCatalogProvider";
 import ExperimentalFeaturesLocalStorageProvider from "@foxglove-studio/app/context/ExperimentalFeaturesLocalStorageProvider";
 import LinkHandlerContext from "@foxglove-studio/app/context/LinkHandlerContext";
 import ModalHost from "@foxglove-studio/app/context/ModalHost";
@@ -314,7 +315,9 @@ export default function App(): ReactElement {
         <PlayerManager playerSources={playerSources}>
           <NativeFileMenuPlayerSelection />
           <DndProvider backend={HTML5Backend}>
-            <Root />
+            <BuiltinPanelCatalogProvider>
+              <Root />
+            </BuiltinPanelCatalogProvider>
           </DndProvider>
         </PlayerManager>
       </ErrorBoundary>

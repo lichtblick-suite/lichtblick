@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { ColorMode } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
 import { PointField } from "@foxglove-studio/app/types/Messages";
 
@@ -128,9 +127,6 @@ function extractValues({
   };
 }
 
-export const SPHERICAL_RANGE_SCALE = (getGlobalHooks() as any).perPanelHooks().ThreeDimensionalViz
-  .pointCloudSphericalRangeScale;
-
 export function createPositionBuffer({
   data,
   fields,
@@ -142,13 +138,6 @@ export function createPositionBuffer({
   pointCount: number;
   stride: number;
 }): VertexBuffer {
-  const positions = (getGlobalHooks() as any)
-    .perPanelHooks()
-    .ThreeDimensionalViz.createPointCloudPositionBuffer({ data, fields, pointCount, stride });
-  if (positions) {
-    return positions;
-  }
-
   const { x: xField, y: yField, z: zField } = fields;
   if (!xField || !yField || !zField) {
     throw new Error("Cannot create a position buffer without x, y, and z fields");

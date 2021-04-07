@@ -30,6 +30,11 @@ import {
   setUserNodeRosLib,
 } from "@foxglove-studio/app/actions/userNodes";
 import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
+import PanelCatalogContext, {
+  PanelCatalog,
+  PanelCategory,
+  PanelInfo,
+} from "@foxglove-studio/app/context/PanelCatalogContext";
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { LinkedGlobalVariables } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import {
@@ -76,6 +81,7 @@ export type Fixture = {
 type Props = {
   children: React.ReactNode;
   fixture?: Fixture;
+  panelCatalog?: PanelCatalog;
   omitDragAndDrop?: boolean;
   onMount?: (arg0: HTMLDivElement, store: Store) => void;
   onFirstMount?: (arg0: HTMLDivElement) => void;
@@ -87,6 +93,7 @@ type Props = {
 
 type State = {
   store: any;
+  mockPanelCatalog: PanelCatalog;
 };
 
 function setNativeValue(element: unknown, value: unknown) {
@@ -143,6 +150,22 @@ export const MosaicWrapper = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
+// empty catalog if one is not provided via props
+class MockPanelCatalog implements PanelCatalog {
+  getPanelCategories(): PanelCategory[] {
+    return [];
+  }
+  getPanelsByCategory(): Map<string, PanelInfo[]> {
+    return new Map();
+  }
+  getPanelsByType(): Map<string, PanelInfo> {
+    return new Map();
+  }
+  getComponentForType(_type: string): PanelInfo["component"] | undefined {
+    return undefined;
+  }
+}
+
 export default class PanelSetup extends React.PureComponent<Props, State> {
   static getDerivedStateFromProps(props: Props, prevState: State) {
     const { store } = prevState;
@@ -196,6 +219,7 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
     super(props);
     this.state = {
       store: props.store ?? configureStore(createRootReducer(createMemoryHistory())),
+      mockPanelCatalog: props.panelCatalog ?? new MockPanelCatalog(),
     };
   }
 
@@ -246,7 +270,9 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
           publish={publish}
           setPublishers={setPublishers}
         >
-          {this.props.children}
+          <PanelCatalogContext.Provider value={this.state.mockPanelCatalog}>
+            {this.props.children}
+          </PanelCatalogContext.Provider>
         </MockMessagePipelineProvider>
       </div>
     );

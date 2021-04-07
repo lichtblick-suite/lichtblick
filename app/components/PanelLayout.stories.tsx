@@ -68,29 +68,4 @@ storiesOf("<PanelLayout>", module)
         </PanelSetup>
       </DndProvider>
     );
-  })
-  .add("tab panel", () => {
-    const store = configureStore(createRootReducer(createMemoryHistory));
-    store.dispatch(
-      changePanelLayout({
-        layout: {
-          first: "Tab!1r7jeml",
-          second: "Global!45ehbhx",
-          direction: "row",
-        },
-      }),
-    );
-    return (
-      <DndProvider backend={HTML5Backend}>
-        <PanelSetup
-          fixture={{ topics: [], datatypes: {}, frame: {} }}
-          store={store}
-          omitDragAndDrop
-        >
-          <MockPanelContextProvider>
-            <PanelLayout />
-          </MockPanelContextProvider>
-        </PanelSetup>
-      </DndProvider>
-    );
   });

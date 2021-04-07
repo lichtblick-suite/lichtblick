@@ -21,7 +21,6 @@ import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import Icon from "@foxglove-studio/app/components/Icon";
 import Tooltip from "@foxglove-studio/app/components/Tooltip";
 import useGlobalVariables, { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { Topic } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { getTopicNames, getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
@@ -77,9 +76,10 @@ export function tryToSetDefaultGlobalVar(
   variableName: string,
   setGlobalVariables: (arg0: GlobalVariables) => void,
 ): boolean {
-  const defaultGlobalVars = getGlobalHooks().getDefaultPersistedState().panels.globalVariables;
-  if (Object.keys(defaultGlobalVars).includes(variableName)) {
-    setGlobalVariables({ [variableName]: defaultGlobalVars[variableName] });
+  const defaultGlobalVars = new Map<string, GlobalVariables>();
+  const defaultVar = defaultGlobalVars.get(variableName);
+  if (defaultVar) {
+    setGlobalVariables({ [variableName]: defaultVar });
     return true;
   }
   return false;

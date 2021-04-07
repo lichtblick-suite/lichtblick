@@ -13,8 +13,10 @@
 
 import { Command, withPose, pointToVec3, defaultBlend, CommonCommandProps } from "regl-worldview";
 
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
-import { TextureCache } from "@foxglove-studio/app/panels/ThreeDimensionalViz/commands/utils";
+import {
+  defaultMapPalette,
+  TextureCache,
+} from "@foxglove-studio/app/panels/ThreeDimensionalViz/commands/utils";
 import { OccupancyGridMessage } from "@foxglove-studio/app/types/Messages";
 
 const occupancyGrids = (regl: any) => {
@@ -23,7 +25,7 @@ const occupancyGrids = (regl: any) => {
   const positionBuffer = regl.buffer([0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0]);
 
   const cache = new TextureCache(regl);
-  const paletteTextures: any = {};
+  const paletteTextures = new Map<Uint8Array, any>();
 
   return withPose({
     primitive: "triangle strip",
@@ -104,16 +106,15 @@ const occupancyGrids = (regl: any) => {
         const { x, y, z, w } = props.info.origin.orientation;
         return [x, y, z, w];
       },
-      palette: (context: any, props: OccupancyGridMessage) => {
-        const palette = (getGlobalHooks() as any)
-          .perPanelHooks()
-          .ThreeDimensionalViz.getMapPalette(props.map);
+      palette: (_context: any, _props: OccupancyGridMessage) => {
+        const palette = defaultMapPalette;
         // track which palettes we've uploaded as textures
-        if (paletteTextures[palette]) {
-          return paletteTextures[palette];
+        let texture = paletteTextures.get(palette);
+        if (texture) {
+          return texture;
         }
         // if we haven't already uploaded this palette, upload it to the GPU
-        paletteTextures[palette] = regl.texture({
+        texture = regl.texture({
           format: "rgba",
           type: "uint8",
           mipmap: false,
@@ -121,7 +122,8 @@ const occupancyGrids = (regl: any) => {
           width: 256,
           height: 1,
         });
-        return paletteTextures[palette];
+        paletteTextures.set(palette, texture);
+        return texture;
       },
       data: (context: any, props: any) => {
         return cache.get(props);

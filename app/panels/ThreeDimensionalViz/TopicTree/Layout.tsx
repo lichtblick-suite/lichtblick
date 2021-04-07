@@ -41,7 +41,6 @@ import PanelContext from "@foxglove-studio/app/components/PanelContext";
 import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { Save3DConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz";
 import DebugStats from "@foxglove-studio/app/panels/ThreeDimensionalViz/DebugStats";
 import {
@@ -62,6 +61,7 @@ import styles from "@foxglove-studio/app/panels/ThreeDimensionalViz/Layout.modul
 import LayoutToolbar from "@foxglove-studio/app/panels/ThreeDimensionalViz/LayoutToolbar";
 import PanelToolbarMenu from "@foxglove-studio/app/panels/ThreeDimensionalViz/PanelToolbarMenu";
 import SceneBuilder from "@foxglove-studio/app/panels/ThreeDimensionalViz/SceneBuilder";
+import sceneBuilderHooks from "@foxglove-studio/app/panels/ThreeDimensionalViz/SceneBuilder/defaultHooks";
 import { useSearchText } from "@foxglove-studio/app/panels/ThreeDimensionalViz/SearchText";
 import {
   MarkerMatcher,
@@ -91,6 +91,19 @@ import { Color } from "@foxglove-studio/app/types/Messages";
 import { getField } from "@foxglove-studio/app/util/binaryObjects";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import {
+  GEOMETRY_MSGS_POLYGON_STAMPED_DATATYPE,
+  NAV_MSGS_OCCUPANCY_GRID_DATATYPE,
+  NAV_MSGS_PATH_DATATYPE,
+  POINT_CLOUD_DATATYPE,
+  POSE_STAMPED_DATATYPE,
+  SENSOR_MSGS_LASER_SCAN_DATATYPE,
+  TF_DATATYPE,
+  TF2_DATATYPE,
+  VELODYNE_SCAN_DATATYPE,
+  VISUALIZATION_MSGS_MARKER_DATATYPE,
+  VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE,
+  WEBVIZ_MARKER_DATATYPE,
+  WEBVIZ_MARKER_ARRAY_DATATYPE,
   FOXGLOVE_GRID_TOPIC,
   SECOND_SOURCE_PREFIX,
   TRANSFORM_TOPIC,
@@ -101,8 +114,6 @@ import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
 import { joinTopics } from "@foxglove-studio/app/util/topicUtils";
 
 import useTopicTree, { TopicTreeContext } from "./useTopicTree";
-
-const { sceneBuilderHooks } = getGlobalHooks().perPanelHooks().ThreeDimensionalViz;
 
 type EventName = "onDoubleClick" | "onMouseMove" | "onMouseDown" | "onMouseUp";
 export type ClickedPosition = { clientX: number; clientY: number };
@@ -271,25 +282,36 @@ export default function Layout({
     uncategorizedGroupName,
   } = useMemo(
     () => ({
-      blacklistTopicsSet: new Set(
-        getGlobalHooks().perPanelHooks().ThreeDimensionalViz.BLACKLIST_TOPICS,
-      ),
-      supportedMarkerDatatypesSet: new Set(
-        Object.values(
-          getGlobalHooks().perPanelHooks().ThreeDimensionalViz.SUPPORTED_MARKER_DATATYPES,
-        ),
-      ),
-      topicTreeConfig: getGlobalHooks()
-        .startupPerPanelHooks()
-        .ThreeDimensionalViz.getDefaultTopicTree(),
-      staticallyAvailableNamespacesByTopic: getGlobalHooks()
-        .startupPerPanelHooks()
-        .ThreeDimensionalViz.getStaticallyAvailableNamespacesByTopic(),
-      defaultTopicSettings: getGlobalHooks()
-        .startupPerPanelHooks()
-        .ThreeDimensionalViz.getDefaultSettings(),
-      uncategorizedGroupName: getGlobalHooks().perPanelHooks().ThreeDimensionalViz
-        .ungroupedNodesCategory,
+      blacklistTopicsSet: new Set(),
+      supportedMarkerDatatypesSet: new Set([
+        VISUALIZATION_MSGS_MARKER_DATATYPE,
+        VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE,
+        WEBVIZ_MARKER_DATATYPE,
+        WEBVIZ_MARKER_ARRAY_DATATYPE,
+        POSE_STAMPED_DATATYPE,
+        POINT_CLOUD_DATATYPE,
+        VELODYNE_SCAN_DATATYPE,
+        SENSOR_MSGS_LASER_SCAN_DATATYPE,
+        NAV_MSGS_OCCUPANCY_GRID_DATATYPE,
+        NAV_MSGS_PATH_DATATYPE,
+        GEOMETRY_MSGS_POLYGON_STAMPED_DATATYPE,
+        TF_DATATYPE,
+        TF2_DATATYPE,
+      ]),
+      topicTreeConfig: {
+        name: "root",
+        children: [
+          {
+            name: "TF",
+            topicName: "/tf",
+            children: [],
+            description: "Visualize relationships between /tf frames.",
+          },
+        ],
+      },
+      staticallyAvailableNamespacesByTopic: {},
+      defaultTopicSettings: {},
+      uncategorizedGroupName: "Topics",
     }),
     [],
   );

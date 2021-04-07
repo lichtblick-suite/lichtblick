@@ -16,7 +16,6 @@ import styled, { CSSProperties } from "styled-components";
 
 import Modal from "@foxglove-studio/app/components/Modal";
 import TextContent from "@foxglove-studio/app/components/TextContent";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 
 const SRoot = styled.div`
   max-width: 700px; // Px value because beyond a certain absolute width the lines become harder to read.
@@ -26,25 +25,10 @@ const SRoot = styled.div`
   padding: 2.5em;
 `;
 
-const SFootnote = styled.div`
-  opacity: 0.8;
-  margin: 1em 0 0;
-  font-size: 1.1rem;
-  line-height: 1.4;
-`;
-
 type Props = {
   onRequestClose: () => void;
   rootStyle?: CSSProperties;
 };
-
-function Footnote() {
-  const footnote = getGlobalHooks().helpPageFootnote();
-  if (!footnote) {
-    return ReactNull;
-  }
-  return <SFootnote>{footnote}</SFootnote>;
-}
 
 export default function HelpModal({
   onRequestClose,
@@ -55,7 +39,6 @@ export default function HelpModal({
     <Modal onRequestClose={onRequestClose}>
       <SRoot {...(rootStyle ? { style: rootStyle } : undefined)}>
         <TextContent>{children}</TextContent>
-        <Footnote />
       </SRoot>
     </Modal>
   );

@@ -23,7 +23,6 @@ import styled from "styled-components";
 import Autocomplete from "@foxglove-studio/app/components/Autocomplete";
 import Button from "@foxglove-studio/app/components/Button";
 import Icon from "@foxglove-studio/app/components/Icon";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { objectValues } from "@foxglove-studio/app/util";
 
@@ -112,14 +111,11 @@ const Container = styled.div`
   position: relative;
 `;
 
-const defaultFollowTfFrame = getGlobalHooks().perPanelHooks().ThreeDimensionalViz
-  .defaultFollowTransformFrame;
-
 const arePropsEqual = (prevProps: any, nextProps: any) => {
   if (!nextProps.tfToFollow) {
     const tfTree = buildTfTree(nextProps.transforms.values());
     const allNodes = Array.from(getDescendants(tfTree.roots));
-    const nodesWithoutDefaultFollowTfFrame = allNodes?.length && !defaultFollowTfFrame;
+    const nodesWithoutDefaultFollowTfFrame = allNodes?.length;
     if (nodesWithoutDefaultFollowTfFrame) {
       return false;
     }
@@ -135,13 +131,13 @@ const FollowTFControl = memo<Props>((props: Props) => {
 
   const tfTree = buildTfTree(transforms.values());
   const allNodes: any = Array.from(getDescendants(tfTree.roots));
-  const nodesWithoutDefaultFollowTfFrame = allNodes?.length && !defaultFollowTfFrame;
+  const nodesWithoutDefaultFollowTfFrame = allNodes?.length;
   const newFollowTfFrame = allNodes?.[0]?.tf?.id;
 
   const autocomplete = createRef<Autocomplete>();
 
   const getDefaultFollowTransformFrame = useCallback(() => {
-    return nodesWithoutDefaultFollowTfFrame ? newFollowTfFrame : defaultFollowTfFrame;
+    return nodesWithoutDefaultFollowTfFrame ? newFollowTfFrame : undefined;
   }, [nodesWithoutDefaultFollowTfFrame, newFollowTfFrame]);
 
   const getFollowButtonTooltip = useCallback(() => {

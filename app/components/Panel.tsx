@@ -55,7 +55,7 @@ import KeyListener from "@foxglove-studio/app/components/KeyListener";
 import PanelContext from "@foxglove-studio/app/components/PanelContext";
 import MosaicDragHandle from "@foxglove-studio/app/components/PanelToolbar/MosaicDragHandle";
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
-import PanelList, { getPanelsByType } from "@foxglove-studio/app/panels/PanelList";
+import { usePanelCatalog } from "@foxglove-studio/app/context/PanelCatalogContext";
 import { Topic } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { TabPanelConfig } from "@foxglove-studio/app/types/layouts";
@@ -98,7 +98,8 @@ type ActionProps = {
   selectAllPanelIds: () => void;
   createTabPanel: (arg0: CreateTabPanelPayload) => void;
 };
-interface PanelStatics<Config> {
+
+export interface PanelStatics<Config> {
   panelType: string;
   defaultConfig: Config;
 }
@@ -173,10 +174,11 @@ export default function Panel<Config extends PanelConfig>(
     const [fullScreen, setFullScreen] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
     const [fullScreenLocked, setFullScreenLocked] = useState(false);
+    const panelCatalog = usePanelCatalog();
 
-    const panelsByType = useMemo(() => getPanelsByType(), []);
+    const panelsByType = useMemo(() => panelCatalog.getPanelsByType(), [panelCatalog]);
     const type = PanelComponent.panelType;
-    const title = useMemo(() => panelsByType[type]?.title ?? "", [panelsByType, type]);
+    const title = useMemo(() => panelsByType.get(type)?.title ?? "", [panelsByType, type]);
     const panelComponentConfig = useMemo(() => ({ ...PanelComponent.defaultConfig, ...config }), [
       config,
     ]);
@@ -217,7 +219,7 @@ export default function Panel<Config extends PanelConfig>(
     // If such a panel already exists, we update it with the new props.
     const openSiblingPanel = useCallback(
       (panelType: string, siblingConfigCreator: (arg0: PanelConfig) => PanelConfig) => {
-        const siblingComponent = PanelList.getComponentForType(panelType);
+        const siblingComponent = panelCatalog.getComponentForType(panelType);
         if (!siblingComponent) {
           return;
         }
@@ -260,7 +262,7 @@ export default function Panel<Config extends PanelConfig>(
           });
         });
       },
-      [actions, mosaicActions, mosaicWindowActions],
+      [actions, mosaicActions, mosaicWindowActions, panelCatalog],
     );
 
     const selectPanel = useCallback(

@@ -14,7 +14,7 @@
 import { storiesOf } from "@storybook/react";
 import { range, noop } from "lodash";
 
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
+import ImageView from "@foxglove-studio/app/panels/ImageView";
 import ImageCanvas from "@foxglove-studio/app/panels/ImageView/ImageCanvas";
 
 const cameraInfo = {
@@ -229,7 +229,7 @@ const topics = [
   { name: "/storybook_image", datatype: "sensor_msgs/Image" },
   { name: "/storybook_compressed_image", datatype: "sensor_msgs/CompressedImage" },
 ];
-const config = (getGlobalHooks() as any).perPanelHooks().ImageView.defaultConfig;
+const config = ImageView.defaultConfig;
 
 function RGBStory({ encoding }: { encoding: string }) {
   const width = 2560;

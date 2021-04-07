@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import fetchMock from "fetch-mock";
 import { getLeaves, MosaicParent } from "react-mosaic-component";
 
 import {
@@ -28,17 +27,15 @@ import {
   moveTab,
   startDrag,
   endDrag,
-  fetchLayout,
 } from "@foxglove-studio/app/actions/panels";
-import { getGlobalHooks } from "@foxglove-studio/app/loadWebviz";
 import { State, PersistedState } from "@foxglove-studio/app/reducers";
 import {
   PanelsState,
   GLOBAL_STATE_STORAGE_KEY,
   resetInitialPersistedState,
   defaultPlaybackConfig,
+  defaultPersistedState,
 } from "@foxglove-studio/app/reducers/panels";
-import delay from "@foxglove-studio/app/shared/delay";
 import { getGlobalStoreForTest } from "@foxglove-studio/app/store/getGlobalStore";
 import {
   CreateTabPanelPayload,
@@ -49,7 +46,6 @@ import Storage from "@foxglove-studio/app/util/Storage";
 import { TAB_PANEL_TYPE } from "@foxglove-studio/app/util/globalConstants";
 import { getPanelTypeFromId } from "@foxglove-studio/app/util/layout";
 
-const defaultPersistedState = Object.freeze(getGlobalHooks().getDefaultPersistedState());
 const storage = new Storage();
 
 function GetGlobalState() {
@@ -571,49 +567,6 @@ describe("state.persistedState", () => {
       expect(panels.savedProps).toEqual({
         "Tab!a": { activeTabIdx: 0, tabs: [{ title: "A", layout: undefined }] },
       });
-    });
-  });
-
-  it("updates fetchedLayout data and loading state, when fetching from layout-url param", async () => {
-    const { store, checkState } = getStore();
-    fetchMock.get("https://www.foo.com", { status: 200, body: { layout: { foo: "bar" } } });
-    store.dispatch(fetchLayout("?layout-url=https://www.foo.com"));
-    // Before fetch returns, fetchedLayout should be loading, but not yet have data.
-    checkState(({ persistedState: { fetchedLayout } }) => {
-      expect(fetchedLayout).toEqual({ isLoading: true });
-    });
-    await delay(500);
-    checkState(({ persistedState: { panels, fetchedLayout } }) => {
-      expect(panels.layout).toEqual({ foo: "bar" });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      expect((fetchedLayout.data as any).layout).toEqual({ foo: "bar" });
-      expect(fetchedLayout.isLoading).toEqual(false);
-    });
-    store.dispatch(fetchLayout("?layout-url=https://www.foo.com"));
-    // Before fetch returns, fetchedLayout should again be loading, but have cleared previously fetched data.
-    checkState(({ persistedState: { fetchedLayout } }) => {
-      expect(fetchedLayout).toEqual({ isLoading: true });
-    });
-  });
-
-  it("updates fetchedLayout data and loading state, when fetching from layout-url param is unsuccessful", async () => {
-    const { store, checkState } = getStore();
-    fetchMock.get("https://www.bar.com", { status: 400 });
-    checkState(({ persistedState: { fetchedLayout } }) => {
-      expect(fetchedLayout).toEqual({ isLoading: false });
-    });
-    store.dispatch(fetchLayout("?layout-url=https://www.bar.com"));
-    // Before fetch returns, fetchedLayout should be loading, but not yet have data.
-    checkState(({ persistedState: { fetchedLayout } }) => {
-      expect(fetchedLayout).toEqual({ isLoading: true });
-    });
-    await delay(500);
-    checkState(({ persistedState: { panels, fetchedLayout } }) => {
-      // Panels state should not have changed.
-      expect(panels.layout).toEqual(defaultPersistedState.panels.layout);
-      // fetchedLayout should be down loading, but have no data.
-      expect(fetchedLayout.isLoading).toBe(false);
-      expect(fetchedLayout.error?.message).toMatch("Failed to fetch layout from URL");
     });
   });
 
