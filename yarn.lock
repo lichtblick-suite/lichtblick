@@ -2238,7 +2238,7 @@ __metadata:
     tslib: 2.2.0
     typescript: 4.2.2
     web-encoding: 1.1.4
-    xmlbuilder2: 2.4.0
+    xmlbuilder2: 2.4.1
   languageName: unknown
   linkType: soft
 
@@ -4580,13 +4580,6 @@ __metadata:
   version: 14.14.31
   resolution: "@types/node@npm:14.14.31"
   checksum: 635dc8a0898a923621e02ca179e17baa39fdfa44f0096fcc1b7046c9b32317e74a99956a7b45ca0e8069874f51f4e7873a418239a318a4b6e7936f6510ac5992
-  languageName: node
-  linkType: hard
-
-"@types/node@npm:14.6.2":
-  version: 14.6.2
-  resolution: "@types/node@npm:14.6.2"
-  checksum: e88f4749fd95d7358a719dee27bb3c02aa7d93a69d95887b4baaeae3fcc21c65d8675e6a9633e499de22fa77651fc12188fd3657a6729dbce9e44a4fe5c0691b
   languageName: node
   linkType: hard
 
@@ -24797,16 +24790,16 @@ typescript@4.2.2:
   languageName: node
   linkType: hard
 
-"xmlbuilder2@npm:2.4.0":
-  version: 2.4.0
-  resolution: "xmlbuilder2@npm:2.4.0"
+"xmlbuilder2@npm:2.4.1":
+  version: 2.4.1
+  resolution: "xmlbuilder2@npm:2.4.1"
   dependencies:
     "@oozcitak/dom": 1.15.8
     "@oozcitak/infra": 1.0.8
     "@oozcitak/util": 8.3.8
-    "@types/node": 14.6.2
+    "@types/node": "*"
     js-yaml: 3.14.0
-  checksum: 98980702552d8e6eb7af3f077ec5d52ad15c56567a2dd47bd7a3a4a7296917b1fc8bbf9a56bb5f1fb797b958831524c793f73eb0a78c89f771f5bd340f12f536
+  checksum: 6081e28c920184423e6e3c254e3e84246fbaab3593e9bf39686cba07db053103ffe4ef33832d6105480cc4ead2566c5dcb649ff877c6889bad2f42da88d8ed82
   languageName: node
   linkType: hard
 

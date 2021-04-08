@@ -28,7 +28,7 @@
     "byte-base64": "1.1.0",
     "sax": "1.2.4",
     "web-encoding": "1.1.4",
-    "xmlbuilder2": "2.4.0"
+    "xmlbuilder2": "2.4.1"
   },
   "devDependencies": {
     "@jest/types": "26.6.2",
