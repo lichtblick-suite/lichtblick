@@ -2119,7 +2119,7 @@ __metadata:
     redux: 4.0.5
     redux-devtools-extension: 2.13.9
     redux-thunk: 2.3.0
-    regl-worldview: 0.16.0
+    regl-worldview: "github:foxglove/webviz#workspace=regl-worldview&commit=65cc3fc2e154199714c4c8752639ef6179be311d"
     reselect: 4.0.0
     rosbag: "github:foxglove/rosbag.js#fc61125fbc01ff55698c5ed48987b2d9e7599572"
     roslib: "github:foxglove/roslibjs#364a19d5f3ada7543fac9194a50b96087c7556ba"
@@ -20402,9 +20402,9 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"regl-worldview@npm:0.16.0":
-  version: 0.16.0
-  resolution: "regl-worldview@npm:0.16.0"
+"regl-worldview@github:foxglove/webviz#workspace=regl-worldview&commit=65cc3fc2e154199714c4c8752639ef6179be311d":
+  version: 0.16.1
+  resolution: "regl-worldview@https://github.com/foxglove/webviz.git#workspace=regl-worldview&commit=65cc3fc2e154199714c4c8752639ef6179be311d"
   dependencies:
     "@babel/runtime": ^7.3.1
     "@mapbox/tiny-sdf": ^1.1.1
@@ -20421,7 +20421,7 @@ fsevents@^1.2.7:
   peerDependencies:
     react: 16.x
     react-dom: 16.x
-  checksum: 36782515a989a7c206fbf7149671363592eb6bbd4f84d49a5eab702ee0574d0767ab9373176351e20254b0008585fb0d16df2dea81701f98b4e59fb58fbecd02
+  checksum: ac8acee14342253ff46f0b415119d2f46bf75c14f78c9f5c59c14f07b737f25c414eb35b705870cd56bfeefb2a3c6377f5aed0b79a9abcb7ca8bbd1fb9cff144
   languageName: node
   linkType: hard
 
