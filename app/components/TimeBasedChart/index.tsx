@@ -27,6 +27,7 @@ import ReactDOM from "react-dom";
 import { useDispatch } from "react-redux";
 import { Time } from "rosbag";
 import styled from "styled-components";
+import { useDebounce } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
 
 import { clearHoverValue, setHoverValue } from "@foxglove-studio/app/actions/hoverValue";
@@ -117,6 +118,8 @@ type FollowPlaybackState = Readonly<{
   xOffsetMax: number; // 1 means the right edge of the plot is one second after the current time.
 }>;
 
+type ChartComponentProps = ComponentProps<typeof ChartComponent>;
+
 // Chartjs typings use _null_ to indicate _gaps_ in the dataset
 // eslint-disable-next-line no-restricted-syntax
 type Data = ChartData<"scatter", (ScatterDataPoint | null)[]>;
@@ -168,10 +171,9 @@ export function filterDatasets(
         return datum;
       }
 
-      const pixelXDistance = (datum.x - prev.x) * pixelPerXValue;
-      const pixelYDistance = (datum.y - prev.y) * pixelPerYValue;
-
-      if (pixelXDistance < 4 && pixelYDistance < 4) {
+      const pixelXDistance = Math.abs((datum.x - prev.x) * pixelPerXValue);
+      const pixelYDistance = Math.abs((datum.y - prev.y) * pixelPerYValue);
+      if (pixelXDistance < 3 && pixelYDistance < 3) {
         return;
       }
 
@@ -222,13 +224,7 @@ export type Props = {
     [key: string]: boolean;
   };
   datasetId?: string;
-  onClick?: (
-    ev: React.MouseEvent<HTMLCanvasElement>,
-    datalabel: unknown,
-    values: {
-      [axis: string]: number;
-    },
-  ) => void;
+  onClick?: ChartComponentProps["onClick"];
   saveCurrentView?: (minY: number, maxY: number, width?: number) => void;
   // If the x axis represents playback time ("timestamp"), the hover cursor will be synced.
   // Note, this setting should not be used for other time values.
@@ -549,9 +545,9 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
 
       const canvasContainerRect = canvasContainer.current.getBoundingClientRect();
       const mouseX = event.pageX - canvasContainerRect.left;
-      const pixels = xScale.right - xScale.left;
+      const pixels = xScale.pixelMax - xScale.pixelMin;
       const range = xScale.max - xScale.min;
-      const xVal = (range / pixels) * (mouseX - xScale.left) + xScale.min;
+      const xVal = (range / pixels) * (mouseX - xScale.pixelMin) + xScale.min;
 
       const xInBounds = xVal >= xScale.min && xVal <= xScale.max;
       if (!xInBounds || isNaN(xVal)) {
@@ -680,47 +676,45 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     } as ScaleOptions;
   }, [yAxes]);
 
-  // changing the dataset bounds can change the current scales which then cache busts the
-  // dataMemo which could then change the scales. This creates a state update cycle and slows down rendering.
-  // Instead we
-  const [bustDataMemo, setBustDataMemo] = useState(0);
-  useEffect(() => {
-    if (isUserInteraction.current) {
-      setBustDataMemo((old) => ++old);
-    }
-  }, [currentScales]);
+  const filterDatasetsCached = useCallback(
+    (unfilteredDatasets: typeof datasets) => {
+      let bounds:
+        | { x: { min: number; max: number }; y: { min: number; max: number } }
+        | undefined = undefined;
+      if (currentScales?.x && currentScales?.y) {
+        bounds = {
+          x: {
+            min: currentScales.x.min,
+            max: currentScales.x.max,
+          },
+          y: {
+            min: currentScales.y.min,
+            max: currentScales.y.max,
+          },
+        };
+      }
+
+      return filterDatasets(unfilteredDatasets, linesToHide, width, height, bounds);
+    },
+    [currentScales, height, linesToHide, width],
+  );
+
+  // avoid re-filtering datasets on every change to scales, etc
+  // it is ok to filter the datasets once the view has changed/stabilized
+  // without filtering you can end up in a cascading update cycle from scales changing
+  // causing dataFiltered to change, which causes scales to change
+  const [filterDatasetsDebounced] = useDebounce(filterDatasetsCached, 250);
 
   // Filter the dataset down to what can be shows to the user
   // this ignores out of bounds points and points that are too close together
   // we use either automatically calculated bounds (xScale) or the currentScale
   // if the user is manually controlling the component
-  const dataMemo = useMemo(() => {
-    bustDataMemo; // to appease exchaustive lint hooks
-    const currentScalesLocal = currentScalesRef.current;
-
-    let bounds:
-      | { x: { min: number; max: number }; y: { min: number; max: number } }
-      | undefined = undefined;
-    if (currentScalesLocal?.x && currentScalesLocal?.y) {
-      bounds = {
-        x: {
-          min: currentScalesLocal.x.min,
-          max: currentScalesLocal.x.max,
-        },
-        y: {
-          min: currentScalesLocal.y.min,
-          max: currentScalesLocal.y.max,
-        },
-      };
-    }
-
-    const filtered = filterDatasets(datasets, linesToHide, width, height, bounds);
-
+  const dataFiltered = useMemo(() => {
     return {
       labels,
-      datasets: filtered,
+      datasets: filterDatasetsDebounced(datasets),
     };
-  }, [bustDataMemo, datasets, linesToHide, width, height, labels]);
+  }, [datasets, filterDatasetsDebounced, labels]);
 
   const options = useMemo<ChartOptions>(() => {
     return {
@@ -758,12 +752,13 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
 
   // we don't memo this because either options or data is likely to change with each render
   // maybe one day someone perfs this and decides to memo?
-  const chartProps: ComponentProps<typeof ChartComponent> = {
+  const chartProps: ChartComponentProps = {
     type,
     width,
     height,
     options,
-    data: dataMemo,
+    data: dataFiltered,
+    onClick: props.onClick,
     onScalesUpdate: onScalesUpdate,
     onChartUpdate,
     onHover,

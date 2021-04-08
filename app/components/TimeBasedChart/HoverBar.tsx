@@ -61,12 +61,12 @@ export default React.memo<Props>(function HoverBar({
       return;
     }
 
-    const pixels = xScale.right - xScale.left;
+    const pixels = xScale.pixelMax - xScale.pixelMin;
     const range = xScale.max - xScale.min;
 
-    const pos = (hoverValue.value - xScale.min) / (range / pixels) + xScale.left;
+    const pos = (hoverValue.value - xScale.min) / (range / pixels) + xScale.pixelMin;
     // don't show hoverbar if it falls outsize our boundary
-    if (pos < xScale.left || pos > xScale.right) {
+    if (pos < xScale.pixelMin || pos > xScale.pixelMax) {
       return;
     }
     return pos;

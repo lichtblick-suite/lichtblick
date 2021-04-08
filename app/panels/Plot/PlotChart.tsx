@@ -20,6 +20,7 @@ import { Time } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
 import TimeBasedChart, {
+  Props as TimeBasedChartProps,
   ChartDefaultView,
   TimeBasedChartTooltipData,
   TooltipItem,
@@ -368,13 +369,7 @@ type PlotChartProps = {
   xAxisVal: PlotXAxisVal;
   currentTime?: number;
   defaultView: ChartDefaultView;
-  onClick?: (
-    ev: React.MouseEvent<HTMLCanvasElement>,
-    datalabel: unknown,
-    values: {
-      [scaleId: string]: number;
-    },
-  ) => void;
+  onClick?: TimeBasedChartProps["onClick"];
 };
 export default memo<PlotChartProps>(function PlotChart(props: PlotChartProps) {
   const {

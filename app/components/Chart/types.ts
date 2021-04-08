@@ -4,9 +4,21 @@
 
 import { ScatterDataPoint } from "chart.js";
 
-export type RpcScale = { min: number; max: number; left: number; right: number };
+export type RpcScale = {
+  // min scale value
+  min: number;
+  // max scale value
+  max: number;
+  // pixel coordinate within the component that corresponds to min
+  pixelMin: number;
+  // pixel coordinate within the component that corresponds to max
+  pixelMax: number;
+};
 
-export type RpcScales = Record<string, { min: number; max: number; left: number; right: number }>;
+export type RpcScales = {
+  x?: RpcScale;
+  y?: RpcScale;
+};
 
 export type RpcElement = {
   data?: ScatterDataPoint;

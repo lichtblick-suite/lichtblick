@@ -150,8 +150,8 @@ function DatalabelClickExample() {
       </div>
       <ChartComponent
         {...propsWithDatalabels}
-        onClick={(datalabel) => {
-          setClickedDatalabel(datalabel ?? undefined);
+        onClick={(ev) => {
+          setClickedDatalabel(ev.datalabel);
         }}
       />
     </div>

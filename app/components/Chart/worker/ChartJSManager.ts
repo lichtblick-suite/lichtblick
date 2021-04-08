@@ -225,14 +225,28 @@ export default class ChartJSManager {
   // all rpc methods return the current chart scale since that is the main thing that could change automatically
   getScales(): RpcScales {
     const scales: RpcScales = {};
-    for (const [id, scale] of Object.entries(this._chartInstance.scales)) {
-      scales[id] = {
-        left: scale.left,
-        right: scale.right,
-        min: scale.min,
-        max: scale.max,
+
+    // fill our rpc scales - we only support x and y scales for now
+    const xScale = this._chartInstance.scales.x;
+    if (xScale) {
+      scales.x = {
+        pixelMin: xScale.left,
+        pixelMax: xScale.right,
+        min: xScale.min,
+        max: xScale.max,
       };
     }
+
+    const yScale = this._chartInstance.scales.y;
+    if (yScale) {
+      scales.y = {
+        pixelMin: yScale.bottom,
+        pixelMax: yScale.top,
+        min: yScale.min,
+        max: yScale.max,
+      };
+    }
+
     return scales;
   }
 

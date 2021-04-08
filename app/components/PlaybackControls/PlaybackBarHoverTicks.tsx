@@ -72,8 +72,8 @@ export default React.memo<Props>(function PlaybackBarHoverTicks({ componentId }:
       x: {
         min: 0,
         max: toSec(endTime) - toSec(startTime),
-        left: 0,
-        right: width ?? 0,
+        pixelMin: 0,
+        pixelMax: width ?? 0,
       },
     };
   }, [width, startTime, endTime]);

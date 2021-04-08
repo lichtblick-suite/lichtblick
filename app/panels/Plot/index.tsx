@@ -13,7 +13,7 @@
 
 import { compact, uniq } from "lodash";
 import memoizeWeak from "memoize-weak";
-import { useEffect, useCallback, useMemo, useRef } from "react";
+import { useEffect, useCallback, useMemo, useRef, ComponentProps } from "react";
 import { Time, TimeUtil } from "rosbag";
 
 import {
@@ -254,8 +254,9 @@ function Plot(props: Props) {
     }
   }
 
-  const onClick = useCallback(
-    (_event, _datalabel, { x: seekSeconds }) => {
+  const onClick = useCallback<NonNullable<ComponentProps<typeof PlotChart>["onClick"]>>(
+    (params) => {
+      const seekSeconds = params.x;
       if (!startTime || seekSeconds == undefined || !seek || xAxisVal !== "timestamp") {
         return;
       }

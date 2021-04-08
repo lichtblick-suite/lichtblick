@@ -17,13 +17,21 @@ class ChartJSWorker {
   }
 }
 
+type OnClickArg = {
+  datalabel?: unknown;
+  // x-value in scale
+  x: number | undefined;
+  // y-value in scale
+  y: number | undefined;
+};
+
 type Props = {
   data: ChartData;
   options: ChartOptions;
   type: string;
   height: number;
   width: number;
-  onClick?: (datalabel: unknown) => void;
+  onClick?: (params: OnClickArg) => void;
 
   // called when the chart scales have updated (happens for zoom/pan/reset)
   onScalesUpdate?: (scales: RpcScales, opt: { userInteraction: boolean }) => void;
@@ -61,6 +69,10 @@ function Chart(props: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(ReactNull);
   const [currentScales, setScales] = useState<RpcScales | undefined>(undefined);
   const userInteraction = useRef(false);
+
+  // to avoid changing useCallback deps for callbacks which access the scale value
+  // at the time they are invoked
+  const currentScalesRef = useRef<RpcScales | undefined>();
 
   const zoomEnabled = props.options.plugins?.zoom?.zoom?.enabled ?? false;
   const panEnabled = props.options.plugins?.zoom?.pan?.enabled ?? false;
@@ -101,6 +113,8 @@ function Chart(props: Props) {
 
   // trigger when scales update
   useEffect(() => {
+    currentScalesRef.current = currentScales;
+
     if (currentScales) {
       onScalesUpdate?.(currentScales, { userInteraction: userInteraction.current });
       userInteraction.current = false;
@@ -290,15 +304,37 @@ function Chart(props: Props) {
       }
 
       const rect = event.currentTarget.getBoundingClientRect();
-      const x = event.clientX - rect.left;
-      const y = event.clientY - rect.top;
+      const mouseX = event.clientX - rect.left;
+      const mouseY = event.clientY - rect.top;
 
       // maybe we should forward the click event and add support for datalabel listeners
       // the rpc channel doesn't have a way to send rpc back...
       const datalabel = await rpcSend("getDatalabelAtEvent", {
-        event: { x, y, type: "click" },
+        event: { x: mouseX, y: mouseY, type: "click" },
       });
-      props.onClick?.(datalabel);
+
+      let xVal: number | undefined;
+      let yVal: number | undefined;
+
+      const xScale = currentScalesRef.current?.x;
+      if (xScale) {
+        const pixels = xScale.pixelMax - xScale.pixelMin;
+        const range = xScale.max - xScale.min;
+        xVal = (range / pixels) * (mouseX - xScale.pixelMin) + xScale.min;
+      }
+
+      const yScale = currentScalesRef.current?.y;
+      if (yScale) {
+        const pixels = yScale.pixelMax - yScale.pixelMin;
+        const range = yScale.max - yScale.min;
+        yVal = (range / pixels) * (mouseY - yScale.pixelMin) + yScale.min;
+      }
+
+      props.onClick?.({
+        datalabel: datalabel,
+        x: xVal,
+        y: yVal,
+      });
     },
     [props, rpcSend],
   );
