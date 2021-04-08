@@ -2145,7 +2145,7 @@ __metadata:
   resolution: "@foxglove/electron-socket@workspace:packages/electron-socket"
   dependencies:
     "@jest/types": 26.6.2
-    electron: 12.0.0
+    electron: 12.0.2
     eventemitter3: 4.0.7
     jest: 26.6.3
     tslib: 2.2.0
@@ -10366,16 +10366,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:12.0.0":
-  version: 12.0.0
-  resolution: "electron@npm:12.0.0"
+"electron@npm:12.0.2":
+  version: 12.0.2
+  resolution: "electron@npm:12.0.2"
   dependencies:
     "@electron/get": ^1.0.1
     "@types/node": ^14.6.2
     extract-zip: ^1.0.3
   bin:
     electron: cli.js
-  checksum: 10963f7ac118e5446f75fbfbc35c45e60ad1db1e1922432d2c3b7f0b0b25a0f4d728509b34f833e22521f4ab94bcb3c06607e735eedf3519ccb57c85aeb182e9
+  checksum: 77f69f651309151748913fe3b57bcfc82f814142d7ccc8f9157c2ba7647b08ab9ae7d38b3231075ecce348422f0ce4351879e5f0e76095a8c8c304d08c2983d0
   languageName: node
   linkType: hard
 
@@ -12031,7 +12031,7 @@ __metadata:
     colors: 1.4.0
     crypto-browserify: 3.12.0
     css-loader: 5.2.0
-    electron: 12.0.0
+    electron: 12.0.2
     electron-builder: 22.10.5
     electron-devtools-installer: 3.1.1
     electron-notarize: 1.0.0
