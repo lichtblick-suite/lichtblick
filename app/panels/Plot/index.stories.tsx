@@ -12,10 +12,12 @@
 //   You may not use this file except in compliance with the License.
 
 import { storiesOf } from "@storybook/react";
+import { useCallback, useRef } from "react";
 import { parseMessageDefinition } from "rosbag";
 
 import Plot, { PlotConfig } from "@foxglove-studio/app/panels/Plot";
 import PanelSetup, { triggerWheel } from "@foxglove-studio/app/stories/PanelSetup";
+import { useScreenshotReady } from "@foxglove-studio/app/stories/ScreenshotReadyContext";
 import { wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 import { fromSec } from "@foxglove-studio/app/util/time";
 
@@ -317,28 +319,46 @@ const exampleConfig: PlotConfig = {
 };
 
 storiesOf("<Plot>", module)
-  .addParameters({
-    screenshot: {
-      delay: 4000,
-    },
-  })
   .add("line graph", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot config={exampleConfig} />
       </PanelSetup>
     );
   })
   .add("line graph with legends hidden", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot config={{ ...exampleConfig, showLegend: false }} />
       </PanelSetup>
     );
   })
   .add("in a line graph with multiple plots, x-axes are synced", () => {
+    const callCountRef = useRef(0);
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return () => {
+        ++callCountRef.current;
+
+        // since we have two plots and are syncing them, we expect two calls to resume frame
+        if (callCountRef.current >= 2) {
+          sceneReady();
+        }
+      };
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={fixture} style={{ flexDirection: "column" }}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture} style={{ flexDirection: "column" }}>
         <Plot
           config={{
             ...exampleConfig,
@@ -367,28 +387,49 @@ storiesOf("<Plot>", module)
     );
   })
   .add("line graph after zoom", () => {
+    const pauseState = useRef<"zoom" | "ready">("zoom");
+    const sceneReady = useScreenshotReady();
+
+    const doZoom = useCallback(() => {
+      const canvasEl = document.querySelector("canvas");
+      // Zoom is a continuous event, so we need to simulate wheel multiple times
+      if (canvasEl) {
+        for (let i = 0; i < 5; i++) {
+          triggerWheel(canvasEl, 1);
+        }
+      }
+
+      // indicate our next render completion should mark the scene ready
+      pauseState.current = "ready";
+    }, []);
+
+    const pauseFrame = useCallback(() => {
+      return () => {
+        switch (pauseState.current) {
+          case "zoom":
+            doZoom();
+            break;
+          case "ready":
+            sceneReady();
+            break;
+        }
+      };
+    }, [doZoom, sceneReady]);
+
     return (
-      <PanelSetup
-        fixture={fixture}
-        onMount={(el: any) => {
-          setTimeout(() => {
-            const canvasEl = el.querySelector("canvas");
-            // Zoom is a continuous event, so we need to simulate wheel multiple times
-            if (canvasEl) {
-              for (let i = 0; i < 5; i++) {
-                triggerWheel(canvasEl, 1);
-              }
-            }
-          }, 100);
-        }}
-      >
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot config={exampleConfig} />
       </PanelSetup>
     );
   })
   .add("timestampMethod: headerStamp", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot
           config={{
             ...exampleConfig,
@@ -406,8 +447,13 @@ storiesOf("<Plot>", module)
     );
   })
   .add("long path", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={fixture} style={{ maxWidth: 250 }}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture} style={{ maxWidth: 250 }}>
         <Plot
           config={{
             ...exampleConfig,
@@ -424,8 +470,13 @@ storiesOf("<Plot>", module)
     );
   })
   .add("disabled path", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot
           config={{
             ...exampleConfig,
@@ -447,8 +498,13 @@ storiesOf("<Plot>", module)
     );
   })
   .add("reference line", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot
           config={{
             xAxisVal: "timestamp",
@@ -467,8 +523,13 @@ storiesOf("<Plot>", module)
     );
   })
   .add("with min and max Y values", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot
           config={{
             xAxisVal: "timestamp",
@@ -488,8 +549,13 @@ storiesOf("<Plot>", module)
     );
   })
   .add("with just min Y value less than minimum value", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot
           config={{
             xAxisVal: "timestamp",
@@ -509,8 +575,13 @@ storiesOf("<Plot>", module)
     );
   })
   .add("with just min Y value more than minimum value", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot
           config={{
             xAxisVal: "timestamp",
@@ -530,8 +601,13 @@ storiesOf("<Plot>", module)
     );
   })
   .add("with just max Y value less than maximum value", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot
           config={{
             xAxisVal: "timestamp",
@@ -551,8 +627,13 @@ storiesOf("<Plot>", module)
     );
   })
   .add("with just max Y value more than maximum value", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot
           config={{
             xAxisVal: "timestamp",
@@ -572,8 +653,13 @@ storiesOf("<Plot>", module)
     );
   })
   .add("scatter plot plus line graph plus reference line", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot
           config={{
             ...exampleConfig,
@@ -596,21 +682,29 @@ storiesOf("<Plot>", module)
     );
   })
   .add("open x-axis dropdown menu", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return () => {
+        const xAxisDropdown = document.querySelectorAll("[data-test=plot-legend-x-axis-menu]")[0];
+        (xAxisDropdown as any).click();
+        sceneReady();
+      };
+    }, [sceneReady]);
+
     return (
-      <PanelSetup
-        fixture={fixture}
-        onMount={() => {
-          const xAxisDropdown = document.querySelectorAll("[data-test=plot-legend-x-axis-menu]")[0];
-          (xAxisDropdown as any).click();
-        }}
-      >
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot config={exampleConfig} />
       </PanelSetup>
     );
   })
   .add("index-based x-axis for array", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot
           config={{
             ...exampleConfig,
@@ -629,8 +723,13 @@ storiesOf("<Plot>", module)
     );
   })
   .add("custom x-axis topic", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot
           config={{
             ...exampleConfig,
@@ -649,9 +748,14 @@ storiesOf("<Plot>", module)
     );
   })
   .add("current custom x-axis topic", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     // As above, but just shows a single point instead of the whole line.
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot
           config={{
             ...exampleConfig,
@@ -670,8 +774,13 @@ storiesOf("<Plot>", module)
     );
   })
   .add("custom x-axis topic with mismatched data lengths", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot
           config={{
             ...exampleConfig,
@@ -701,8 +810,14 @@ storiesOf("<Plot>", module)
     );
   })
   .add("super close values", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
       <PanelSetup
+        pauseFrame={pauseFrame}
         fixture={{
           datatypes: {
             "std_msgs/Float32": { fields: [{ name: "data", type: "float32", isArray: false }] },
@@ -740,8 +855,13 @@ storiesOf("<Plot>", module)
     );
   })
   .add("time values", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={fixture}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
         <Plot
           config={{
             ...exampleConfig,
@@ -760,8 +880,13 @@ storiesOf("<Plot>", module)
     );
   })
   .add("preloaded data in binary blocks", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
         <Plot
           config={{
             ...exampleConfig,
@@ -775,8 +900,13 @@ storiesOf("<Plot>", module)
     );
   })
   .add("mixed streamed and preloaded data", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={withEndTime(fixture, { sec: 3, nsec: 0 })}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={withEndTime(fixture, { sec: 3, nsec: 0 })}>
         <Plot
           config={{
             ...exampleConfig,
@@ -794,8 +924,13 @@ storiesOf("<Plot>", module)
     );
   })
   .add("preloaded data and its derivative", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
         <Plot
           config={{
             ...exampleConfig,
@@ -813,8 +948,13 @@ storiesOf("<Plot>", module)
     );
   })
   .add("preloaded data and its negative", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
         <Plot
           config={{
             ...exampleConfig,
@@ -832,8 +972,13 @@ storiesOf("<Plot>", module)
     );
   })
   .add("preloaded data and its absolute value", () => {
+    const sceneReady = useScreenshotReady();
+    const pauseFrame = useCallback(() => {
+      return sceneReady;
+    }, [sceneReady]);
+
     return (
-      <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
+      <PanelSetup pauseFrame={pauseFrame} fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
         <Plot
           config={{
             ...exampleConfig,
