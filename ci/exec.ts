@@ -5,13 +5,13 @@
 import { group } from "@actions/core";
 import { exec as execAction } from "@actions/exec";
 
-export default async function exec(program: string, args?: string[]): Promise<void> {
+export async function exec(program: string, ...args: string[]): Promise<void> {
   await group(`$ ${program} ${args?.join(" ")}`, async () => {
     await execAction(program, args);
   });
 }
 
-export async function execOutput(program: string, args?: string[]): Promise<string> {
+export async function execOutput(program: string, ...args: string[]): Promise<string> {
   let output = "";
   await execAction(program, args, {
     silent: true,

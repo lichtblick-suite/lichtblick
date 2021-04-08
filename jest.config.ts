@@ -6,5 +6,9 @@
 export default {
   // We exclude the integration test since it involves performing a webpack build and
   // doesn't support "watch" or "debug" in the same way
-  projects: ["<rootDir>/app/jest.config.ts", "<rootDir>/packages/*/jest.config.ts"],
+  projects: [
+    "<rootDir>/app/jest.config.ts",
+    "<rootDir>/ci/jest.config.ts",
+    "<rootDir>/packages/*/jest.config.ts",
+  ],
 };
