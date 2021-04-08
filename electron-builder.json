@@ -2,7 +2,6 @@
   "$schema": "http://json.schemastore.org/electron-builder",
   "appId": "dev.foxglove.studio",
   "npmRebuild": false,
-  "//": "Packing app sources in an ASAR file breaks SharedWorker loading: https://github.com/electron/electron/issues/28572",
   "asar": false,
   "directories": {
     "app": ".webpack",
