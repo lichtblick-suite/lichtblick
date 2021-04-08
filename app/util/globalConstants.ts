@@ -40,6 +40,7 @@ export const ROSOUT_TOPIC = "/rosout";
 export const SOCKET_KEY = "dataSource.websocket";
 export const SECOND_SOURCE_PREFIX = "/webviz_source_2";
 
+export const COLOR_RGBA_DATATYPE = "std_msgs/ColorRGBA";
 export const GEOMETRY_MSGS_POLYGON_STAMPED_DATATYPE = "geometry_msgs/PolygonStamped";
 export const NAV_MSGS_OCCUPANCY_GRID_DATATYPE = "nav_msgs/OccupancyGrid";
 export const NAV_MSGS_PATH_DATATYPE = "nav_msgs/Path";

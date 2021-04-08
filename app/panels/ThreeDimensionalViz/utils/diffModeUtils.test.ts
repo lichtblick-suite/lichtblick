@@ -37,6 +37,7 @@ const marker = (topic: string): Interactive<any> => {
 
 const markers = {
   arrow: [marker("arrows")],
+  color: [],
   cube: [],
   cubeList: [],
   cylinder: [],
@@ -60,6 +61,7 @@ const markers = {
 
 const sharedExpected = {
   arrow: [],
+  color: [],
   cube: [],
   cubeList: [],
   cylinder: [],

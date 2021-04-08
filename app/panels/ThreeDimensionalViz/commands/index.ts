@@ -10,6 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+export { default as Cover } from "./Cover";
 export { default as PoseMarkers } from "./PoseMarkers";
 export { default as LaserScans } from "./LaserScans";
 export { default as OccupancyGrids } from "./OccupancyGrids";

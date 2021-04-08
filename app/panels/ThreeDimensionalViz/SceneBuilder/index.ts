@@ -58,6 +58,7 @@ import {
   NAV_MSGS_PATH_DATATYPE,
   POINT_CLOUD_DATATYPE,
   VELODYNE_SCAN_DATATYPE,
+  COLOR_RGBA_DATATYPE,
   SENSOR_MSGS_LASER_SCAN_DATATYPE,
   GEOMETRY_MSGS_POLYGON_STAMPED_DATATYPE,
 } from "@foxglove-studio/app/util/globalConstants";
@@ -781,6 +782,18 @@ export default class SceneBuilder implements MarkerProvider {
     (this.collectors[topic] as any).addNonMarker(topic, mappedMessage);
   };
 
+  _consumeColor = (msg: BobjectMessage): void => {
+    const color = deepParse(msg.message);
+    if (color.r == undefined || color.g == undefined || color.b == undefined) {
+      return;
+    }
+    const newMessage = {
+      header: { frame_id: "", stamp: msg.receiveTime },
+      color: { r: color.r / 255, g: color.g / 255, b: color.b / 255, a: color.a ?? 1 },
+    };
+    this._consumeNonMarkerMessage(msg.topic, newMessage, 110);
+  };
+
   _consumeNonMarkerMessage = (
     topic: string,
     drawData: StampedMessage,
@@ -788,16 +801,20 @@ export default class SceneBuilder implements MarkerProvider {
     originalMessage?: any,
   ): void => {
     const sourcePose = emptyPose();
-    const pose = this.transforms?.apply(
+    let pose = this.transforms?.apply(
       sourcePose,
       sourcePose,
       drawData.header.frame_id,
       this.rootTransformID as any,
     );
     if (!pose) {
-      const error = this._addError(this.errors.topicsMissingTransforms, topic);
-      error.frameIds.add(drawData.header.frame_id);
-      return;
+      // Don't error on frame_id="", interpret it as an identity transform
+      if (drawData.header.frame_id.length > 0) {
+        const error = this._addError(this.errors.topicsMissingTransforms, topic);
+        error.frameIds.add(drawData.header.frame_id);
+        return;
+      }
+      pose = sourcePose;
     }
 
     const mappedMessage = {
@@ -895,7 +912,6 @@ export default class SceneBuilder implements MarkerProvider {
       }
       case POINT_CLOUD_DATATYPE:
         this._consumeNonMarkerMessage(topic, deepParse(message), 102);
-
         break;
       case VELODYNE_SCAN_DATATYPE: {
         const converted = this._velodyneCloudConverter.decode(deepParse(message));
@@ -906,7 +922,9 @@ export default class SceneBuilder implements MarkerProvider {
       }
       case SENSOR_MSGS_LASER_SCAN_DATATYPE:
         this._consumeNonMarkerMessage(topic, deepParse(message), 104);
-
+        break;
+      case COLOR_RGBA_DATATYPE:
+        this._consumeColor(msg);
         break;
       case GEOMETRY_MSGS_POLYGON_STAMPED_DATATYPE: {
         // convert Polygon to a line strip
@@ -932,6 +950,11 @@ export default class SceneBuilder implements MarkerProvider {
         break;
       }
       default: {
+        if (datatype.endsWith("/Color") || datatype.endsWith("/ColorRGBA")) {
+          this._consumeColor(msg);
+          break;
+        }
+
         const { flattenedZHeightPose, collectors, errors, lastSeenMessages, selectionState } = this;
         this._hooks.consumeBobject(
           topic,
@@ -1087,6 +1110,8 @@ export default class SceneBuilder implements MarkerProvider {
         return add.instancedLineList(marker);
       case 109:
         return add.overlayIcon(marker);
+      case 110:
+        return add.color(marker);
       default:
         {
           if (!this._hooks.addMarkerToCollector(add, marker)) {

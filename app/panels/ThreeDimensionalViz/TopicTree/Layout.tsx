@@ -91,22 +91,23 @@ import { Color } from "@foxglove-studio/app/types/Messages";
 import { getField } from "@foxglove-studio/app/util/binaryObjects";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import {
+  COLOR_RGBA_DATATYPE,
+  FOXGLOVE_GRID_TOPIC,
   GEOMETRY_MSGS_POLYGON_STAMPED_DATATYPE,
   NAV_MSGS_OCCUPANCY_GRID_DATATYPE,
   NAV_MSGS_PATH_DATATYPE,
   POINT_CLOUD_DATATYPE,
   POSE_STAMPED_DATATYPE,
+  SECOND_SOURCE_PREFIX,
   SENSOR_MSGS_LASER_SCAN_DATATYPE,
   TF_DATATYPE,
   TF2_DATATYPE,
-  VELODYNE_SCAN_DATATYPE,
-  VISUALIZATION_MSGS_MARKER_DATATYPE,
-  VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE,
-  WEBVIZ_MARKER_DATATYPE,
-  WEBVIZ_MARKER_ARRAY_DATATYPE,
-  FOXGLOVE_GRID_TOPIC,
-  SECOND_SOURCE_PREFIX,
   TRANSFORM_TOPIC,
+  VELODYNE_SCAN_DATATYPE,
+  VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE,
+  VISUALIZATION_MSGS_MARKER_DATATYPE,
+  WEBVIZ_MARKER_ARRAY_DATATYPE,
+  WEBVIZ_MARKER_DATATYPE,
 } from "@foxglove-studio/app/util/globalConstants";
 import { useShallowMemo } from "@foxglove-studio/app/util/hooks";
 import { inVideoRecordingMode } from "@foxglove-studio/app/util/inAutomatedRunMode";
@@ -169,6 +170,34 @@ export type ColorOverride = {
   active?: boolean;
 };
 export type ColorOverrideBySourceIdxByVariable = Record<GlobalVariableName, ColorOverride[]>;
+
+const SUPPORTED_MARKER_DATATYPES = {
+  // generally supported datatypes
+  VISUALIZATION_MSGS_MARKER_DATATYPE,
+  VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE,
+  WEBVIZ_MARKER_DATATYPE,
+  WEBVIZ_MARKER_ARRAY_DATATYPE,
+  POSE_STAMPED_DATATYPE,
+  POINT_CLOUD_DATATYPE,
+  VELODYNE_SCAN_DATATYPE,
+  SENSOR_MSGS_LASER_SCAN_DATATYPE,
+  COLOR_RGBA_DATATYPE,
+  NAV_MSGS_OCCUPANCY_GRID_DATATYPE,
+  NAV_MSGS_PATH_DATATYPE,
+  GEOMETRY_MSGS_POLYGON_STAMPED_DATATYPE,
+  TF_DATATYPE,
+  TF2_DATATYPE,
+};
+const SUPPORTED_MARKER_DATATYPES_SET = new Set(Object.values(SUPPORTED_MARKER_DATATYPES));
+
+function isTopicRenderable(topic: Topic): boolean {
+  const datatype = topic.datatype;
+  return (
+    SUPPORTED_MARKER_DATATYPES_SET.has(datatype) ||
+    datatype.endsWith("/Color") ||
+    datatype.endsWith("/ColorRGBA")
+  );
+}
 
 export default function Layout({
   cameraState,
@@ -277,7 +306,6 @@ export default function Layout({
     blacklistTopicsSet,
     topicTreeConfig,
     staticallyAvailableNamespacesByTopic,
-    supportedMarkerDatatypesSet,
     defaultTopicSettings,
     uncategorizedGroupName,
   } = useMemo(
@@ -331,10 +359,9 @@ export default function Layout({
   const topicTreeTopics = useMemo(
     () =>
       memoizedTopics.filter(
-        (topic) =>
-          supportedMarkerDatatypesSet.has(topic.datatype) && !blacklistTopicsSet.has(topic.name),
+        (topic) => isTopicRenderable(topic) && !blacklistTopicsSet.has(topic.name),
       ),
-    [blacklistTopicsSet, memoizedTopics, supportedMarkerDatatypesSet],
+    [blacklistTopicsSet, memoizedTopics],
   );
 
   const topicTreeData = useTopicTree({
@@ -477,7 +504,7 @@ export default function Layout({
     if (cleared) {
       sceneBuilder.clear();
     }
-    if (!frame || !rootTf) {
+    if (!frame) {
       return;
     }
     // Toggle scene builder topics based on visible topic nodes in the tree
@@ -496,7 +523,9 @@ export default function Layout({
     sceneBuilder.render();
 
     // update the transforms and set the selected ones to render
-    transformsBuilder.setTransforms(transforms, rootTf);
+    if (rootTf) {
+      transformsBuilder.setTransforms(transforms, rootTf);
+    }
     transformsBuilder.setSelectedTransforms(selectedNamespacesByTopic[TRANSFORM_TOPIC] ?? []);
   }, [
     cleared,

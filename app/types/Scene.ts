@@ -29,6 +29,7 @@ import {
   LaserScan,
   InstancedLineListMarker,
   OverlayIconMarker,
+  ColorMarker,
 } from "@foxglove-studio/app/types/Messages";
 import Bounds from "@foxglove-studio/app/util/Bounds";
 
@@ -39,6 +40,7 @@ export type Scene = {
 
 export interface MarkerCollector {
   arrow(arg0: ArrowMarker): any;
+  color(arg0: ColorMarker): any;
   cube(arg0: CubeMarker): any;
   cubeList(arg0: CubeListMarker): any;
   sphere(arg0: SphereMarker): any;

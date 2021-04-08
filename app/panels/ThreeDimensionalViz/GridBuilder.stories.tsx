@@ -20,6 +20,7 @@ import { TopicSettingsCollection } from "@foxglove-studio/app/panels/ThreeDimens
 import { GridSettings } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/GridSettingsEditor";
 import {
   ArrowMarker,
+  ColorMarker,
   CubeListMarker,
   CubeMarker,
   CylinderMarker,
@@ -57,6 +58,7 @@ class MockMarkerCollector implements MarkerCollector {
   };
 
   arrow(_arg0: ArrowMarker): any {}
+  color(_arg0: ColorMarker): any {}
   cube(_arg0: CubeMarker): any {}
   cubeList(_arg0: CubeListMarker): any {}
   sphere(_arg0: SphereMarker): any {}

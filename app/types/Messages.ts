@@ -285,6 +285,12 @@ export type InstancedLineListMarker = Readonly<
     }
 >;
 
+export type ColorMarker = Readonly<
+  BaseMarker & {
+    type: 110;
+  }
+>;
+
 export type Marker =
   | ArrowMarker
   | CubeMarker
@@ -300,7 +306,8 @@ export type Marker =
   | TriangleListMarker
   | MeshMarker
   | FilledPolygonMarker
-  | InstancedLineListMarker;
+  | InstancedLineListMarker
+  | ColorMarker;
 
 export type MarkerArray = Readonly<{
   markers: readonly Marker[];
