@@ -2020,14 +2020,14 @@ __metadata:
     "@storybook/react": 6.2.5
     "@testing-library/react": 11.2.6
     "@testing-library/react-hooks": 5.1.1
-    "@types/argparse": ^2
+    "@types/argparse": ^2.0.5
     "@types/classnames": 2.2.11
     "@types/css-font-loading-module": 0.0.4
-    "@types/enzyme": ^3
+    "@types/enzyme": ^3.10.8
     "@types/enzyme-adapter-react-16": 1.0.6
     "@types/gl-matrix": 3.2.0
     "@types/hammerjs": 2.0.39
-    "@types/http-server": ^0
+    "@types/http-server": ^0.10.1
     "@types/js-yaml": 4.0.0
     "@types/moment-duration-format": 2.2.2
     "@types/prettier": 2.2.3
@@ -2041,7 +2041,7 @@ __metadata:
     "@types/react-redux": 7.1.16
     "@types/react-select": 1.2.0
     "@types/react-table": 7.0.29
-    "@types/react-transition-group": ^4
+    "@types/react-transition-group": ^4.4.1
     "@types/react-virtualized": 9.21.11
     "@types/react-virtualized-select": 3.0.8
     "@types/sanitize-html": 1.27.2
@@ -2231,7 +2231,7 @@ __metadata:
   dependencies:
     "@foxglove/just-fetch": "workspace:packages/just-fetch"
     "@jest/types": 26.6.2
-    "@types/sax": ^1
+    "@types/sax": ^1.2.1
     byte-base64: 1.1.0
     jest: 26.6.3
     jest-circus: 26.6.3
@@ -4081,7 +4081,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/argparse@npm:^2":
+"@types/argparse@npm:^2.0.5":
   version: 2.0.5
   resolution: "@types/argparse@npm:2.0.5"
   checksum: aad8f449dacea75bb6c993d784e85af8152d0991270f17f7acf53871c03097d4b77f55b83ba17354ac0f50dfe6adc6a404ba3672a6cdfb4ff25e6eeab679754f
@@ -4172,12 +4172,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/case-sensitive-paths-webpack-plugin@npm:2.1.4":
-  version: 2.1.4
-  resolution: "@types/case-sensitive-paths-webpack-plugin@npm:2.1.4"
+"@types/case-sensitive-paths-webpack-plugin@npm:2.1.5":
+  version: 2.1.5
+  resolution: "@types/case-sensitive-paths-webpack-plugin@npm:2.1.5"
   dependencies:
-    "@types/webpack": "*"
-  checksum: 37f26b40f660c9a014ded31e07af14b464ad971b865984c7f99756263f4bd82ab3bd60ce15b00a6637c9775d8222c6e3aa134bc112beebc9d10a55720d517a89
+    "@types/webpack": ^4
+  checksum: 5e6fc459ba482d4078c9bcb9e75ed4438a56094619df946e519be19930136d29a5b64fe527eaa9faea3ac0c695cc799cb121d80e3203ae67bf7b384d9c612f93
   languageName: node
   linkType: hard
 
@@ -4199,12 +4199,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/circular-dependency-plugin@npm:^5":
-  version: 5.0.1
-  resolution: "@types/circular-dependency-plugin@npm:5.0.1"
+"@types/circular-dependency-plugin@npm:^5.0.2":
+  version: 5.0.2
+  resolution: "@types/circular-dependency-plugin@npm:5.0.2"
   dependencies:
-    "@types/webpack": "*"
-  checksum: cccbdffa9d1f8ca879c08338c777c9aaf51652c4e1ca5a3a422cf1ad90139d15cdac36ee960f6d7416dcaa312ff81898f5255230b88147efe900d2fb39c7e8e6
+    "@types/webpack": ^4
+  checksum: dbe2449542b566bb1a7d304126d044faf972f7dca8e34bf75b1e2d046e05aa4545c3c3363cea23a96a58300e9f407b302000395bf7559913fe79c7af5b368d60
   languageName: node
   linkType: hard
 
@@ -4287,7 +4287,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/enzyme@npm:*, @types/enzyme@npm:^3":
+"@types/enzyme@npm:*, @types/enzyme@npm:^3.10.8":
   version: 3.10.8
   resolution: "@types/enzyme@npm:3.10.8"
   dependencies:
@@ -4431,18 +4431,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/http-proxy-middleware@npm:*":
-  version: 0.19.3
-  resolution: "@types/http-proxy-middleware@npm:0.19.3"
-  dependencies:
-    "@types/connect": "*"
-    "@types/http-proxy": "*"
-    "@types/node": "*"
-  checksum: 9f850ef5e933972c40316c11ab8ce33b7d51aca92dc4d761d92854ca07a442065c9ba5adca20733705f4fb12d46b1a97eadfb2c20eea3c3a7c58a8f8e459b952
-  languageName: node
-  linkType: hard
-
-"@types/http-proxy@npm:*":
+"@types/http-proxy@npm:^1.17.5":
   version: 1.17.5
   resolution: "@types/http-proxy@npm:1.17.5"
   dependencies:
@@ -4451,7 +4440,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/http-server@npm:^0":
+"@types/http-server@npm:^0.10.1":
   version: 0.10.1
   resolution: "@types/http-server@npm:0.10.1"
   dependencies:
@@ -4539,7 +4528,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/license-checker@npm:^25":
+"@types/license-checker@npm:^25.0.1":
   version: 25.0.1
   resolution: "@types/license-checker@npm:25.0.1"
   checksum: 426d11703e59bb715c9fab7195e9924304b4c6f999629fec8b9f876a9badfa46ee90a079755ca104db872dbf874ad1c286c2fd15516b18e18bc5d85a2d7dbc5f
@@ -4889,7 +4878,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-transition-group@npm:^4":
+"@types/react-transition-group@npm:^4.4.1":
   version: 4.4.1
   resolution: "@types/react-transition-group@npm:4.4.1"
   dependencies:
@@ -4946,7 +4935,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/rimraf@npm:^3, @types/rimraf@npm:^3.0.0":
+"@types/rimraf@npm:^3.0.0":
   version: 3.0.0
   resolution: "@types/rimraf@npm:3.0.0"
   dependencies:
@@ -4965,7 +4954,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/sass@npm:^1":
+"@types/sass@npm:^1.16.0":
   version: 1.16.0
   resolution: "@types/sass@npm:1.16.0"
   dependencies:
@@ -4974,7 +4963,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/sax@npm:^1":
+"@types/sax@npm:^1.2.1":
   version: 1.2.1
   resolution: "@types/sax@npm:1.2.1"
   dependencies:
@@ -5053,10 +5042,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/tapable@npm:*, @types/tapable@npm:^1.0.5":
-  version: 1.0.6
-  resolution: "@types/tapable@npm:1.0.6"
-  checksum: 01709a2f8dbea665a39c008ba6995c76210fabb52434815e7632c7fff22ecad1dd49a1d75b8f5b2e9b365c6d7a6407127bed834587df4777b800110c2a74fc36
+"@types/tapable@npm:^1, @types/tapable@npm:^1.0.5":
+  version: 1.0.7
+  resolution: "@types/tapable@npm:1.0.7"
+  checksum: af30bb7429d590c7df1f3f5b8ef55fcf2c5498cd2d972c40b0ee543a2e7c3df988b5ac29e231b22b09b712ea1df3dbf3eb145dcbbd43544534cbfb0f1cebdfac
   languageName: node
   linkType: hard
 
@@ -5111,16 +5100,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/webpack-dev-server@npm:3.11.1":
-  version: 3.11.1
-  resolution: "@types/webpack-dev-server@npm:3.11.1"
+"@types/webpack-dev-server@npm:3.11.3":
+  version: 3.11.3
+  resolution: "@types/webpack-dev-server@npm:3.11.3"
   dependencies:
     "@types/connect-history-api-fallback": "*"
     "@types/express": "*"
-    "@types/http-proxy-middleware": "*"
     "@types/serve-static": "*"
-    "@types/webpack": "*"
-  checksum: b5811f664ff4575c29423688047c7741b0b73db0942702f542a93ac1347bf3360f28ff171c9a49f27689657b371d991427cff6e8fcae6b86b9a154c51e2f2f14
+    "@types/webpack": ^4
+    http-proxy-middleware: ^1.0.0
+  checksum: 5f6ac6b6c28703004ccd324d23e1cb2441f8fb91755b289e4fb83c8c5f82a4a23834d95a22ea8b63f318f62b03004312bd01ae9a38a320e71f09efb772b0aed2
   languageName: node
   linkType: hard
 
@@ -5142,17 +5131,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/webpack@npm:*, @types/webpack@npm:^4.4.31, @types/webpack@npm:^4.41.26, @types/webpack@npm:^4.41.8":
-  version: 4.41.26
-  resolution: "@types/webpack@npm:4.41.26"
+"@types/webpack@npm:^4, @types/webpack@npm:^4.4.31, @types/webpack@npm:^4.41.26, @types/webpack@npm:^4.41.8":
+  version: 4.41.27
+  resolution: "@types/webpack@npm:4.41.27"
   dependencies:
     "@types/anymatch": "*"
     "@types/node": "*"
-    "@types/tapable": "*"
+    "@types/tapable": ^1
     "@types/uglify-js": "*"
     "@types/webpack-sources": "*"
     source-map: ^0.6.0
-  checksum: c84012af1d0159e6c17b065139d8c15ffe18042445db4f9c61e2fe3aff1d4ebeb8a65af6824e991eb161334c2842c6d2b55f9d700bd7e64bf492f3dcbf1a92d1
+  checksum: 5e10ad206accc6a9ec3dbea1b79625d441dc2d93cad61daa8ba77eea0a7b659f7ca605078ec06189e9b7eb48fa244b6cfc617771e8fc579cdd9b26546e8c3120
   languageName: node
   linkType: hard
 
@@ -12023,14 +12012,14 @@ __metadata:
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.0-beta.1
     "@sentry/electron": 2.4.0
     "@types/amplitude-js": 7.0.1
-    "@types/case-sensitive-paths-webpack-plugin": 2.1.4
-    "@types/circular-dependency-plugin": ^5
+    "@types/case-sensitive-paths-webpack-plugin": 2.1.5
+    "@types/circular-dependency-plugin": ^5.0.2
     "@types/electron-devtools-installer": 2.2.0
-    "@types/license-checker": ^25
+    "@types/license-checker": ^25.0.1
     "@types/nearley": 2.11.1
-    "@types/rimraf": ^3
-    "@types/sass": ^1
-    "@types/webpack-dev-server": 3.11.1
+    "@types/rimraf": ^3.0.0
+    "@types/sass": ^1.16.0
+    "@types/webpack-dev-server": 3.11.3
     "@typescript-eslint/eslint-plugin": 4.16.1
     "@typescript-eslint/parser": 4.16.1
     amplitude-js: 8.1.0
@@ -13338,7 +13327,21 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"http-proxy@npm:^1.17.0, http-proxy@npm:^1.18.0":
+"http-proxy-middleware@npm:^1.0.0":
+  version: 1.1.0
+  resolution: "http-proxy-middleware@npm:1.1.0"
+  dependencies:
+    "@types/http-proxy": ^1.17.5
+    camelcase: ^6.2.0
+    http-proxy: ^1.18.1
+    is-glob: ^4.0.1
+    is-plain-obj: ^3.0.0
+    micromatch: ^4.0.2
+  checksum: 231bf80920f775c6df376816aac0842a50af183d7743ed2f46884c307435f030a1b3a83b2931bb07120a4e69f05ed74ec1f4bf90f465fcdbf74645069edd4066
+  languageName: node
+  linkType: hard
+
+"http-proxy@npm:^1.17.0, http-proxy@npm:^1.18.0, http-proxy@npm:^1.18.1":
   version: 1.18.1
   resolution: "http-proxy@npm:1.18.1"
   dependencies:
@@ -14264,6 +14267,13 @@ fsevents@^1.2.7:
   version: 2.1.0
   resolution: "is-plain-obj@npm:2.1.0"
   checksum: 2314302f9140d1e9607731d523f207d8000281aebbabe0083210342c0758976f75f0f5db405e55910bd4dc9a04baddbeab9d476290642b5a0d31431cc9bda4b3
+  languageName: node
+  linkType: hard
+
+"is-plain-obj@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "is-plain-obj@npm:3.0.0"
+  checksum: 70a50b220133b82adf1302aa7efde74d6a2b734a6687b199c733491a4f724b69d1196a6c440238adcc767cc419e7dc02309af159ab21412f685893d36154eb2e
   languageName: node
   linkType: hard
 
