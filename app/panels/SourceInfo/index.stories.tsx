@@ -37,7 +37,7 @@ function PanelWithData() {
 
 storiesOf("<SourceInfo>", module)
   .addParameters({
-    screenshot: {
+    chromatic: {
       delay: 1750,
     },
   })

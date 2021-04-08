@@ -11,11 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useCallback } from "react";
 import TestUtils from "react-dom/test-utils";
 
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
-import { useScreenshotReady } from "@foxglove-studio/app/stories/ScreenshotReadyContext";
 
 import StateTransitions from "./index";
 
@@ -90,18 +88,16 @@ const fixture = {
 export default {
   title: "<StateTransitions>",
   component: StateTransitions,
+  parameters: {
+    chromatic: {
+      delay: 50,
+    },
+  },
 };
 
 export const OnePath = () => {
-  const sceneReady = useScreenshotReady();
-  const pauseFrame = useCallback(() => {
-    return () => {
-      sceneReady();
-    };
-  }, [sceneReady]);
-
   return (
-    <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
+    <PanelSetup fixture={fixture}>
       <StateTransitions
         config={{
           paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
@@ -112,15 +108,8 @@ export const OnePath = () => {
 };
 
 export const MultiplePaths = () => {
-  const sceneReady = useScreenshotReady();
-  const pauseFrame = useCallback(() => {
-    return () => {
-      sceneReady();
-    };
-  }, [sceneReady]);
-
   return (
-    <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
+    <PanelSetup fixture={fixture}>
       <StateTransitions
         config={{
           paths: new Array(5).fill({
@@ -134,16 +123,8 @@ export const MultiplePaths = () => {
 };
 
 export const MultiplePathsWithHover = () => {
-  const sceneReady = useScreenshotReady();
-  const pauseFrame = useCallback(() => {
-    return () => {
-      sceneReady();
-    };
-  }, [sceneReady]);
-
   return (
     <PanelSetup
-      pauseFrame={pauseFrame}
       fixture={fixture}
       onMount={() => {
         const mouseEnterContainer = document.querySelectorAll(
@@ -166,15 +147,8 @@ export const MultiplePathsWithHover = () => {
 };
 
 export const LongPath = () => {
-  const sceneReady = useScreenshotReady();
-  const pauseFrame = useCallback(() => {
-    return () => {
-      sceneReady();
-    };
-  }, [sceneReady]);
-
   return (
-    <PanelSetup pauseFrame={pauseFrame} fixture={fixture} style={{ maxWidth: 100 }}>
+    <PanelSetup fixture={fixture} style={{ maxWidth: 100 }}>
       <StateTransitions
         config={{
           paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
@@ -185,15 +159,8 @@ export const LongPath = () => {
 };
 
 export const JsonPath = () => {
-  const sceneReady = useScreenshotReady();
-  const pauseFrame = useCallback(() => {
-    return () => {
-      sceneReady();
-    };
-  }, [sceneReady]);
-
   return (
-    <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
+    <PanelSetup fixture={fixture}>
       <StateTransitions
         config={{
           paths: [{ value: "/some/topic/with/state.data.value", timestampMethod: "receiveTime" }],
@@ -204,16 +171,8 @@ export const JsonPath = () => {
 };
 
 export const WithAHoveredTooltip = () => {
-  const sceneReady = useScreenshotReady();
-  const pauseFrame = useCallback(() => {
-    return () => {
-      sceneReady();
-    };
-  }, [sceneReady]);
-
   return (
     <PanelSetup
-      pauseFrame={pauseFrame}
       fixture={fixture}
       onMount={() => {
         setTimeout(() => {
@@ -237,4 +196,10 @@ export const WithAHoveredTooltip = () => {
       />
     </PanelSetup>
   );
+};
+
+WithAHoveredTooltip.parameters = {
+  chromatic: {
+    delay: 200,
+  },
 };

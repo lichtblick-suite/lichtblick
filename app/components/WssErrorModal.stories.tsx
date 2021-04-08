@@ -17,7 +17,7 @@ import WssErrorModal from "@foxglove-studio/app/components/WssErrorModal";
 
 storiesOf("<WssErrorModal>", module)
   .addParameters({
-    screenshot: {
+    chromatic: {
       delay: 1000,
     },
   })

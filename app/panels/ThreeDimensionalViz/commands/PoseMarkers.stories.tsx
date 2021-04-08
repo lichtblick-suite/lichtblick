@@ -94,7 +94,7 @@ function Example({
 
 storiesOf("<3DViz> / PoseMarkers", module)
   .addParameters({
-    screenshot: {
+    chromatic: {
       // the car-model marker loads the car models asyncronously
       // we delay screenshot until some time with the hope it has loaded
       delay: 3000,

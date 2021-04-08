@@ -15,7 +15,6 @@ import { useState, useCallback, useRef } from "react";
 
 import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
 import { triggerWheel } from "@foxglove-studio/app/stories/PanelSetup";
-import { useScreenshotReady } from "@foxglove-studio/app/stories/ScreenshotReadyContext";
 
 import TimeBasedChart, { TimeBasedChartTooltipData } from "./index";
 import type { Props } from "./index";
@@ -90,23 +89,16 @@ export default {
   title: "<TimeBasedChart>",
   component: TimeBasedChart,
   parameters: {
-    screenshot: {
-      delay: 1500,
+    chromatic: {
+      delay: 50,
     },
   },
 };
 
 export const Simple = () => {
-  const sceneReady = useScreenshotReady();
-  const pauseFrame = useCallback(() => {
-    return () => {
-      sceneReady();
-    };
-  }, [sceneReady]);
-
   return (
     <div style={{ width: "100%", height: "100%", background: "black" }}>
-      <MockMessagePipelineProvider pauseFrame={pauseFrame}>
+      <MockMessagePipelineProvider>
         <TimeBasedChart {...commonProps} />
       </MockMessagePipelineProvider>
     </div>
@@ -115,11 +107,8 @@ export const Simple = () => {
 
 // zoom and update without resetting zoom
 export const CanZoomAndUpdate = () => {
-  const sceneReady = useScreenshotReady();
   const [chartProps, setChartProps] = useState(cloneDeep(commonProps));
   const callCountRef = useRef(0);
-
-  const okTrigger = useRef(false);
 
   const doScroll = useCallback(async () => {
     const canvasEl = document.querySelector("canvas");
@@ -139,9 +128,6 @@ export const CanZoomAndUpdate = () => {
       const newDataPoint = cloneDeep(newProps.data.datasets[0]!.data[0]!);
       newDataPoint.x = 20;
       newProps.data.datasets[0]!.data[1] = newDataPoint;
-
-      // the next chart render will trigger our screenshot signal
-      okTrigger.current = true;
       return newProps;
     });
   }, []);
@@ -153,13 +139,9 @@ export const CanZoomAndUpdate = () => {
         doScroll();
       }
 
-      if (okTrigger.current) {
-        sceneReady();
-      }
-
       ++callCountRef.current;
     };
-  }, [doScroll, sceneReady]);
+  }, [doScroll]);
 
   return (
     <div style={{ width: 800, height: 800, background: "black" }}>
@@ -170,9 +152,13 @@ export const CanZoomAndUpdate = () => {
   );
 };
 
-export const CleansUpTooltipOnUnmount = () => {
-  const sceneReady = useScreenshotReady();
+CanZoomAndUpdate.parameters = {
+  chromatic: {
+    delay: 500,
+  },
+};
 
+export const CleansUpTooltipOnUnmount = () => {
   const [hasRenderedOnce, setHasRenderedOnce] = useState<boolean>(false);
   const refFn = useCallback(async () => {
     await new Promise((resolve) => setTimeout(resolve, 200));
@@ -184,8 +170,7 @@ export const CleansUpTooltipOnUnmount = () => {
     );
     await new Promise((resolve) => setTimeout(resolve, 100));
     setHasRenderedOnce(true);
-    sceneReady();
-  }, [sceneReady]);
+  }, []);
 
   if (hasRenderedOnce) {
     return ReactNull;
@@ -200,15 +185,19 @@ export const CleansUpTooltipOnUnmount = () => {
   );
 };
 
+CleansUpTooltipOnUnmount.parameters = {
+  chromatic: {
+    delay: 500,
+  },
+};
+
 export const CallPauseOnInitialMount = () => {
-  const sceneReady = useScreenshotReady();
   const [unpauseFrameCount, setUnpauseFrameCount] = useState(0);
   const pauseFrame = useCallback(() => {
     return () => {
       setUnpauseFrameCount((old) => old + 1);
-      sceneReady();
     };
-  }, [sceneReady]);
+  }, []);
 
   return (
     <div style={{ width: "100%", height: "100%", background: "black" }}>

@@ -90,7 +90,7 @@ storiesOf("<GlobalVariables>", module)
     return <PanelWithData linkedGlobalVariables={linkedGlobalVariables} />;
   })
   .addParameters({
-    screenshot: {
+    chromatic: {
       delay: 1000,
     },
   })

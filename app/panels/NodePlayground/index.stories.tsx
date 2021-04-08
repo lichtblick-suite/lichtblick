@@ -121,7 +121,7 @@ const SIDEBAR_OPEN_CLICK_TIMEOUT = 500;
 
 storiesOf("<NodePlayground>", module)
   .addParameters({
-    screenshot: {
+    chromatic: {
       delay: 2500,
     },
   })
@@ -371,7 +371,7 @@ const OPEN_BOTTOM_BAR_TIMEOUT = 500;
 
 storiesOf("NodePlayground - <BottomBar>", module)
   .addParameters({
-    screenshot: {
+    chromatic: {
       delay: 2500,
     },
   })
@@ -593,7 +593,7 @@ storiesOf("NodePlayground - <BottomBar>", module)
 
 storiesOf("<NodePlaygroundSettings>", module)
   .addParameters({
-    screenshot: {
+    chromatic: {
       delay: 1000,
     },
   })

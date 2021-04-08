@@ -364,7 +364,7 @@ function ShouldCallOnRenderImage({
 
 storiesOf("<ImageCanvas>", module)
   .addParameters({
-    screenshot: {
+    chromatic: {
       delay: 2500,
     },
   })

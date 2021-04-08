@@ -10,7 +10,6 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { storiesOf } from "@storybook/react";
 import cloneDeep from "lodash/cloneDeep";
 import { useState, useCallback, ComponentProps } from "react";
 import TestUtils from "react-dom/test-utils";
@@ -159,21 +158,48 @@ function DatalabelClickExample() {
   );
 }
 
-storiesOf("<ChartComponent>", module)
-  .addParameters({
-    screenshot: {
-      delay: 1500,
+export default {
+  title: "<ChartComponent>",
+  component: ChartComponent,
+  parameters: {
+    chromatic: {
+      delay: 100,
     },
-  })
-  .add("default", () => (
+  },
+};
+
+export const Basic = () => {
+  return (
     <div style={divStyle}>
       <ChartComponent {...props} />
     </div>
-  ))
-  .add("can update", () => <DatalabelUpdateExample />)
-  .add("with datalabels", () => (
+  );
+};
+
+export const CanUpdate = () => {
+  return <DatalabelUpdateExample />;
+};
+
+CanUpdate.parameters = {
+  chromatic: {
+    delay: 500,
+  },
+};
+
+export const WithDatalabels = () => {
+  return (
     <div style={divStyle}>
       <ChartComponent {...propsWithDatalabels} />
     </div>
-  ))
-  .add("allows clicking on datalabels", () => <DatalabelClickExample />);
+  );
+};
+
+export const AllowsClickingOnDatalabels = () => {
+  return <DatalabelClickExample />;
+};
+
+AllowsClickingOnDatalabels.parameters = {
+  chromatic: {
+    delay: 500,
+  },
+};

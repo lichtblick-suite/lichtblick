@@ -193,10 +193,10 @@ function PanelSetupWithData({
   );
 }
 
-const storyParams = { screenshot: { viewport: { width: 1001, height: 1101 } } };
-
 storiesOf("<Interaction>", module)
-  .addParameters(storyParams)
+  .addParameters({
+    chromatic: { viewport: { width: 1001, height: 1101 } },
+  })
   .add("default", () => {
     return (
       <SWrapper>
@@ -432,7 +432,7 @@ const selectObject = () => simulateDragClick([468, 340]);
 const deselectObject = () => simulateDragClick([515, 630]);
 
 storiesOf("<Interaction> / open-close behavior", module)
-  .addParameters({ screenshot: { delay: 2500, ...storyParams.screenshot } })
+  .addParameters({ chromatic: { delay: 2500 } })
   .add("auto opens the object details after selectedObject is set", () => {
     return (
       <ScreenshotSizedContainer>

@@ -24,7 +24,7 @@ export default {
   title: "<ExperimentalFeaturesModal>",
   component: ExperimentalFeaturesModal,
   parameters: {
-    screenshot: {
+    chromatic: {
       viewport: { width: 1000, height: 1300 },
     },
   },

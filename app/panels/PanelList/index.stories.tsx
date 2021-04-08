@@ -104,7 +104,7 @@ const arrowUp = { key: "ArrowUp", code: "ArrowUp", keyCode: 91 };
 
 storiesOf("<PanelList>", module)
   .addParameters({
-    screenshot: {
+    chromatic: {
       // Wait for simulated key events
       delay: 100,
     },
