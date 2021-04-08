@@ -2087,7 +2087,7 @@ __metadata:
     moment-timezone: 0.5.33
     monaco-editor: 0.23.0
     natsort: 2.0.2
-    panzoom: 9.4.1
+    panzoom: 9.4.2
     prettier: 2.2.1
     promise-queue: 2.2.5
     puppeteer-core: 8.0.0
@@ -17939,14 +17939,14 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"panzoom@npm:9.4.1":
-  version: 9.4.1
-  resolution: "panzoom@npm:9.4.1"
+"panzoom@npm:9.4.2":
+  version: 9.4.2
+  resolution: "panzoom@npm:9.4.2"
   dependencies:
     amator: ^1.1.0
     ngraph.events: ^1.2.1
     wheel: ^1.0.0
-  checksum: 92100a32fd51d676a40e603b69e925e02aa3c8f483ef6c49277a88ba9c9cf8472496d3a2c8497c8efac71ab532f30c45cc0daa0683f4abff6dd9a21bfb3efb50
+  checksum: b5d1f6dcfeac396b057a0e2d17719ecf53e5cbf851d2b236f4db047adaf266eef95c05a637a888bed9c4fce0a1c705e7ecd5662f2752eb46dfe47c603aa5648b
   languageName: node
   linkType: hard
 
