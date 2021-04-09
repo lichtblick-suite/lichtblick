@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import delay from "@foxglove-studio/app/shared/delay";
+import delay from "@foxglove-studio/app/util/delay";
 
 import { encodeURLQueryParamValue, positiveModulo, debounceReduce } from "./index";
 

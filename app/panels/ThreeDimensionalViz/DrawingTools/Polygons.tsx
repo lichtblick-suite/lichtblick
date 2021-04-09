@@ -27,8 +27,8 @@ import {
   pointsToPolygons,
   getPolygonLineDistances,
 } from "@foxglove-studio/app/panels/ThreeDimensionalViz/utils/drawToolUtils";
-import { polygonPointsValidator } from "@foxglove-studio/app/shared/validators";
 import clipboard from "@foxglove-studio/app/util/clipboard";
+import { polygonPointsValidator } from "@foxglove-studio/app/util/validators";
 
 export type Point2D = { x: number; y: number };
 

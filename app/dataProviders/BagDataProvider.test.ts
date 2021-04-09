@@ -18,7 +18,7 @@ import BagDataProvider, {
   statsAreAdjacent,
   TimedDataThroughput,
 } from "@foxglove-studio/app/dataProviders/BagDataProvider";
-import delay from "@foxglove-studio/app/shared/delay";
+import delay from "@foxglove-studio/app/util/delay";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 const dummyExtensionPoint = {

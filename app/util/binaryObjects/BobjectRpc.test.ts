@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { cast } from "@foxglove-studio/app/players/types";
-import signal from "@foxglove-studio/app/shared/signal";
 import Rpc, { createLinkedChannels } from "@foxglove-studio/app/util/Rpc";
 import { deepParse, getObject, wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 import {
@@ -23,6 +22,7 @@ import {
   definitions,
   HasComplexAndArray,
 } from "@foxglove-studio/app/util/binaryObjects/messageDefinitionTestTypes";
+import signal from "@foxglove-studio/app/util/signal";
 
 const datatype = "fake_msgs/HasComplexAndArray";
 

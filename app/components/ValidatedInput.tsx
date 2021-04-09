@@ -16,8 +16,8 @@ import styled from "styled-components";
 
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import Flex from "@foxglove-studio/app/components/Flex";
-import { validationErrorToString, ValidationResult } from "@foxglove-studio/app/shared/validators";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
+import { validationErrorToString, ValidationResult } from "@foxglove-studio/app/util/validators";
 import YAML from "@foxglove-studio/app/util/yaml";
 
 const { useState, useCallback, useRef, useLayoutEffect, useEffect } = React;

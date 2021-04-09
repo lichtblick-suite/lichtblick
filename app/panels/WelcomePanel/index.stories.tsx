@@ -9,8 +9,8 @@ import AppConfigurationContext, {
   AppConfiguration,
 } from "@foxglove-studio/app/context/AppConfigurationContext";
 import WelcomePanel from "@foxglove-studio/app/panels/WelcomePanel";
-import signal from "@foxglove-studio/app/shared/signal";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+import signal from "@foxglove-studio/app/util/signal";
 
 export default {
   title: "<WelcomePanel>",

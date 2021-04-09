@@ -21,9 +21,9 @@ import {
   PlayerState,
   PlayerStateActiveData,
 } from "@foxglove-studio/app/players/types";
-import signal from "@foxglove-studio/app/shared/signal";
 import { deepParse, wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
+import signal from "@foxglove-studio/app/util/signal";
 import { fromSec, TimestampMethod } from "@foxglove-studio/app/util/time";
 
 import OrderedStampPlayer, { BUFFER_DURATION_SECS } from "./OrderedStampPlayer";

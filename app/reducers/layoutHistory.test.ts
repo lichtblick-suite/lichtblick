@@ -16,9 +16,9 @@ import { changePanelLayout, savePanelConfigs } from "@foxglove-studio/app/action
 import { State } from "@foxglove-studio/app/reducers";
 import { NEVER_PUSH_LAYOUT_THRESHOLD_MS } from "@foxglove-studio/app/reducers/layoutHistory";
 import { GLOBAL_STATE_STORAGE_KEY } from "@foxglove-studio/app/reducers/panels";
-import delay from "@foxglove-studio/app/shared/delay";
 import { getGlobalStoreForTest } from "@foxglove-studio/app/store/getGlobalStore";
 import Storage from "@foxglove-studio/app/util/Storage";
+import delay from "@foxglove-studio/app/util/delay";
 
 const storage = new Storage();
 

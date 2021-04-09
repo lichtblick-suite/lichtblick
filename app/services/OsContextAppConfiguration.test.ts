@@ -4,7 +4,7 @@
 
 import { OsContext } from "@foxglove-studio/app/OsContext";
 import OsContextAppConfiguration from "@foxglove-studio/app/services/OsContextAppConfiguration";
-import signal from "@foxglove-studio/app/shared/signal";
+import signal from "@foxglove-studio/app/util/signal";
 
 type MockStorage = {
   [K in keyof OsContext["storage"]]: jest.Mock<

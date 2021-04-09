@@ -13,9 +13,9 @@
 
 import { sortBy, sortedUniq } from "lodash";
 
-import promiseTimeout from "@foxglove-studio/app/shared/promiseTimeout";
 import inAutomatedRunMode from "@foxglove-studio/app/util/inAutomatedRunMode";
 import logEvent, { getEventNames, getEventTags } from "@foxglove-studio/app/util/logEvent";
+import promiseTimeout from "@foxglove-studio/app/util/promiseTimeout";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 export type FramePromise = { name: string; promise: Promise<void> };

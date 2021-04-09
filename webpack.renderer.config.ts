@@ -173,7 +173,7 @@ export function makeConfig(_: unknown, argv: WebpackArgv, options?: Options): Co
         // the buffer module exposes the Buffer class as a property
         Buffer: ["buffer", "Buffer"],
         process: "process/browser",
-        setImmediate: ["@foxglove-studio/app/shared/setImmediate", "default"],
+        setImmediate: ["@foxglove-studio/app/util/setImmediate", "default"],
       }),
       new EnvironmentPlugin({
         SENTRY_DSN: process.env.SENTRY_DSN ?? null, // eslint-disable-line no-restricted-syntax

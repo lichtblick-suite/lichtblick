@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import signal from "@foxglove-studio/app/shared/signal";
+import signal from "@foxglove-studio/app/util/signal";
 
 import debouncePromise from "./debouncePromise";
 

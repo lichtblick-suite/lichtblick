@@ -44,7 +44,6 @@ import {
   Topic,
   BobjectMessage,
 } from "@foxglove-studio/app/players/types";
-import signal from "@foxglove-studio/app/shared/signal";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { UserNode, UserNodes } from "@foxglove-studio/app/types/panels";
 import Rpc from "@foxglove-studio/app/util/Rpc";
@@ -54,6 +53,7 @@ import { BobjectRpcSender } from "@foxglove-studio/app/util/binaryObjects/Bobjec
 import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
 import { DEFAULT_WEBVIZ_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
+import signal from "@foxglove-studio/app/util/signal";
 
 // TypeScript's built-in lib only accepts strings for the scriptURL. However, webpack only
 // understands `new URL()` to properly build the worker entry point:

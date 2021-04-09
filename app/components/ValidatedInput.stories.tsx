@@ -15,12 +15,8 @@ import { storiesOf } from "@storybook/react";
 import { DEFAULT_CAMERA_STATE } from "regl-worldview";
 
 import Flex from "@foxglove-studio/app/components/Flex";
-import {
-  createValidator,
-  isNumber,
-  ValidationResult,
-} from "@foxglove-studio/app/shared/validators";
 import { triggerInputChange, triggerInputBlur } from "@foxglove-studio/app/stories/PanelSetup";
+import { createValidator, isNumber, ValidationResult } from "@foxglove-studio/app/util/validators";
 
 import ValidatedInput, { EDIT_FORMAT, EditFormat } from "./ValidatedInput";
 

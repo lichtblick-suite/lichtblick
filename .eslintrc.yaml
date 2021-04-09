@@ -372,8 +372,6 @@ overrides:
       - "app/players/automatedRun/performanceMeasuringClient.ts"
       - "app/players/automatedRun/videoRecordingClient.ts"
       - "app/reducers/panels.ts"
-      - "app/shared/layout.ts"
-      - "app/shared/validators.ts"
       - "app/store/getGlobalStore.ts"
       - "app/stories/PanelSetup.tsx"
       - "app/stories/PanelSetupWithBag.tsx"

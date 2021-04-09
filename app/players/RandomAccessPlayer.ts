@@ -36,9 +36,9 @@ import {
   ParsedMessageDefinitionsByTopic,
   PlayerPresence,
 } from "@foxglove-studio/app/players/types";
-import delay from "@foxglove-studio/app/shared/delay";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
+import delay from "@foxglove-studio/app/util/delay";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { isRangeCoveredByRanges } from "@foxglove-studio/app/util/ranges";
 import { getSanitizedTopics } from "@foxglove-studio/app/util/selectors";

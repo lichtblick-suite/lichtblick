@@ -26,12 +26,12 @@ import {
   BobjectMessage,
   PlayerStateActiveData,
 } from "@foxglove-studio/app/players/types";
-import signal from "@foxglove-studio/app/shared/signal";
 import { wrapMessage, wrapMessages } from "@foxglove-studio/app/test/datatypes";
 import Storage from "@foxglove-studio/app/util/Storage";
 import { deepParse } from "@foxglove-studio/app/util/binaryObjects";
 import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
 import { DEFAULT_WEBVIZ_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+import signal from "@foxglove-studio/app/util/signal";
 
 const storage = new Storage();
 const nodeId = "nodeId";

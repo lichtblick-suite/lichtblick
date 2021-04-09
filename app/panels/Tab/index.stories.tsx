@@ -27,11 +27,11 @@ import {
   nestedTabLayoutFixture2,
 } from "@foxglove-studio/app/panels/Tab/nestedTabLayoutFixture";
 import createRootReducer from "@foxglove-studio/app/reducers";
-import tick from "@foxglove-studio/app/shared/tick";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 import { SExpectedResult } from "@foxglove-studio/app/stories/storyHelpers";
 import { dragAndDrop } from "@foxglove-studio/app/test/dragAndDropHelper";
+import tick from "@foxglove-studio/app/util/tick";
 
 import Tab from "./index";
 

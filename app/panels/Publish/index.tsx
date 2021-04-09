@@ -22,12 +22,10 @@ import Flex from "@foxglove-studio/app/components/Flex";
 import Item from "@foxglove-studio/app/components/Menu/Item";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
+import PanelToolbarInput from "@foxglove-studio/app/components/PanelToolbarInput";
+import PanelToolbarLabel from "@foxglove-studio/app/components/PanelToolbarLabel";
 import usePublisher from "@foxglove-studio/app/hooks/usePublisher";
 import { PlayerCapabilities, Topic } from "@foxglove-studio/app/players/types";
-import {
-  PanelToolbarInput,
-  PanelToolbarLabel,
-} from "@foxglove-studio/app/shared/panelToolbarStyles";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 

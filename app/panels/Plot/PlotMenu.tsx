@@ -16,10 +16,10 @@ import { useMemo, useRef } from "react";
 import styled from "styled-components";
 
 import Item from "@foxglove-studio/app/components/Menu/Item";
+import PanelToolbarInput from "@foxglove-studio/app/components/PanelToolbarInput";
 import { TimeBasedChartTooltipData } from "@foxglove-studio/app/components/TimeBasedChart";
 import { PlotConfig, PlotXAxisVal } from "@foxglove-studio/app/panels/Plot";
 import { DataSet, PlotChartPoint } from "@foxglove-studio/app/panels/Plot/PlotChart";
-import { PanelToolbarInput } from "@foxglove-studio/app/shared/panelToolbarStyles";
 import { downloadFiles } from "@foxglove-studio/app/util";
 import { formatTimeRaw } from "@foxglove-studio/app/util/time";
 

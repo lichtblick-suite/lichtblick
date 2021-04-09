@@ -53,7 +53,7 @@ export const isNumberArray = (expectArrLen = 0) => (value: unknown): string | un
 
 export const isOrientation = (value: unknown): string | undefined => {
   const isNumberArrayErr = isNumberArray(4)(value);
-  if (isNumberArrayErr) {
+  if (isNumberArrayErr != undefined) {
     return isNumberArrayErr;
   }
   if (value) {
@@ -109,7 +109,7 @@ export const isNotPrivate = (value: any): string | undefined =>
 
 // return the first error
 const join = (rules: Array<Rule>) => (value: unknown) =>
-  rules.map((rule) => rule(value)).filter((error) => !!error)[0];
+  rules.map((rule) => rule(value)).filter((error) => error != undefined)[0];
 
 export const getWebsocketUrlError = (websocketUrl: string) => {
   return `"${websocketUrl}" is an invalid WebSocket URL`;
@@ -133,7 +133,7 @@ export const createValidator = (rules: Rules) => {
       // concat enables both functions and arrays of functions
       const joinedRules = join(rule);
       const error = joinedRules(data[key]);
-      if (error) {
+      if (error != undefined) {
         errors[key] = error;
       }
     });
@@ -145,7 +145,7 @@ export const createPrimitiveValidator = (rules: Rule[]) => {
   return (data: any): string | undefined => {
     for (const rule of rules) {
       const error = rule(data);
-      if (error) {
+      if (error != undefined) {
         return error;
       }
     }
@@ -203,7 +203,7 @@ const isPolygons = (value: any): string | undefined => {
   if (Array.isArray(value)) {
     for (const item of value) {
       const error = isXYPointArray(item);
-      if (error) {
+      if (error != undefined) {
         return error;
       }
     }

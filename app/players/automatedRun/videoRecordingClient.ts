@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import delay from "@foxglove-studio/app/shared/delay";
-import signal, { Signal } from "@foxglove-studio/app/shared/signal";
+import delay from "@foxglove-studio/app/util/delay";
+import signal, { Signal } from "@foxglove-studio/app/util/signal";
 import Logger from "@foxglove/log";
 
 const logger = Logger.getLogger("videoRecordingClient");

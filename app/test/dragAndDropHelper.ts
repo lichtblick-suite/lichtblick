@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import tick from "@foxglove-studio/app/shared/tick";
+import tick from "@foxglove-studio/app/util/tick";
 
 export async function dragAndDrop(
   source: (Element | undefined) | (() => Element | undefined),

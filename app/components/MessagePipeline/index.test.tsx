@@ -18,10 +18,10 @@ import { act } from "react-dom/test-utils";
 
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { PlayerPresence, PlayerStateActiveData } from "@foxglove-studio/app/players/types";
-import delay from "@foxglove-studio/app/shared/delay";
-import tick from "@foxglove-studio/app/shared/tick";
+import delay from "@foxglove-studio/app/util/delay";
 import { initializeLogEvent, resetLogEventForTests } from "@foxglove-studio/app/util/logEvent";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
+import tick from "@foxglove-studio/app/util/tick";
 
 import {
   MessagePipelineProvider,

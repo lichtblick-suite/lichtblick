@@ -16,7 +16,7 @@ import { noop } from "lodash";
 import React, { ReactNode } from "react";
 
 import { ToolbarTab } from "@foxglove-studio/app/panels/Tab/ToolbarTab";
-import tick from "@foxglove-studio/app/shared/tick";
+import tick from "@foxglove-studio/app/util/tick";
 
 const baseProps = {
   hidden: false,

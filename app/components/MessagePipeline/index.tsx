@@ -27,7 +27,6 @@ import {
   SubscribePayload,
   Topic,
 } from "@foxglove-studio/app/players/types";
-import signal from "@foxglove-studio/app/shared/signal";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { objectValues } from "@foxglove-studio/app/util";
 import {
@@ -37,6 +36,7 @@ import {
   useShouldNotChangeOften,
 } from "@foxglove-studio/app/util/hooks";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
+import signal from "@foxglove-studio/app/util/signal";
 
 import { pauseFrameForPromises, FramePromise } from "./pauseFrameForPromise";
 import warnOnOutOfSyncMessages from "./warnOnOutOfSyncMessages";

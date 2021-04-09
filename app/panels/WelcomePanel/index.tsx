@@ -21,8 +21,8 @@ import TextField from "@foxglove-studio/app/components/TextField";
 import { usePlayerSelection } from "@foxglove-studio/app/context/PlayerSelectionContext";
 import { useAsyncAppConfigurationValue } from "@foxglove-studio/app/hooks/useAsyncAppConfigurationValue";
 import subscribeToNewsletter from "@foxglove-studio/app/panels/WelcomePanel/subscribeToNewsletter";
-import { isEmail } from "@foxglove-studio/app/shared/validators";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
+import { isEmail } from "@foxglove-studio/app/util/validators";
 
 const Term = styled.span`
   font-weight: bold;
