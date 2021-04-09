@@ -36,6 +36,7 @@ export class RosNode extends EventEmitter {
   private _tcpSocketCreate: TcpSocketCreate;
   private _connectionIdCounter = 0;
   private _tcpServer?: TcpServer;
+  private _localApiUrl?: string;
 
   constructor(options: {
     name: string;
@@ -94,6 +95,8 @@ export class RosNode extends EventEmitter {
       return false;
     }
 
+    this._unregisterSubscriber(topic);
+
     subscription.close();
     this.subscriptions.delete(topic);
     return true;
@@ -143,22 +146,32 @@ export class RosNode extends EventEmitter {
     return this._connectionIdCounter++;
   }
 
+  private _callerApi(): string {
+    if (this._localApiUrl != undefined) {
+      return this._localApiUrl;
+    }
+
+    this._localApiUrl = this.rosFollower.url();
+    if (this._localApiUrl == undefined) {
+      throw new Error("Local XMLRPC server was not started");
+    }
+
+    return this._localApiUrl;
+  }
+
   private async _registerSubscriber(subscription: Subscription): Promise<string[]> {
     if (!this._running) {
       return Promise.resolve([]);
     }
 
-    const localApiUrl = this.rosFollower.url();
-    if (localApiUrl === undefined) {
-      throw new Error("Local XMLRPC server is not running");
-    }
+    const callerApi = this._callerApi();
 
     // Register with rosmaster as a subscriber to this topic
     const [status, msg, publishers] = await this.rosMasterClient.registerSubscriber(
       this.name,
       subscription.name,
       subscription.dataType,
-      localApiUrl,
+      callerApi,
     );
 
     if (status !== 1) {
@@ -171,6 +184,25 @@ export class RosNode extends EventEmitter {
     }
 
     return publishers as string[];
+  }
+
+  private async _unregisterSubscriber(topic: string): Promise<void> {
+    try {
+      const callerApi = this._callerApi();
+
+      // Unregister with rosmaster as a subscriber to this topic
+      const [status, msg] = await this.rosMasterClient.unregisterSubscriber(
+        this.name,
+        topic,
+        callerApi,
+      );
+
+      if (status !== 1) {
+        throw new Error(`unregisterSubscriber() failed. status=${status}, msg="${msg}"`);
+      }
+    } catch (_err) {
+      // TODO: Log this warning
+    }
   }
 
   private async _registerSubscriberAndConnect(
