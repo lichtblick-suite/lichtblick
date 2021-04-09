@@ -41,9 +41,9 @@ value -> integer  {% (d) => d[0] %}
        | "false" {% (d) => ({ value: false, repr: "false" }) %}
 	   | variable {% (d) => d[0] %}
 
-## Topic part. Basically an id but with slashes.
-topicName -> slashID:+
-  {% (d) => d[0].join("") %}
+## Topic part. Basically an id but with (optional) slashes.
+topicName -> slashID:+     {% (d) => d[0].join("") %}
+           | id slashID:*  {% (d) => d[0] + d[1].join("") %}
 slashID -> "/" id:?
   {% (d) => d.join("") %}
 

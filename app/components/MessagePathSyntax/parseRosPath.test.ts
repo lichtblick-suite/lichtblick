@@ -39,6 +39,21 @@ describe("parseRosPath", () => {
       ],
       modifier: "derivative",
     });
+    expect(parseRosPath("some0/nice_topic.with[99].stuff[0]")).toEqual({
+      topicName: "some0/nice_topic",
+      messagePath: [
+        { type: "name", name: "with" },
+        { type: "slice", start: 99, end: 99 },
+        { type: "name", name: "stuff" },
+        { type: "slice", start: 0, end: 0 },
+      ],
+      modifier: MISSING,
+    });
+    expect(parseRosPath("some_nice_topic")).toEqual({
+      topicName: "some_nice_topic",
+      messagePath: [],
+      modifier: MISSING,
+    });
   });
 
   it("parses slices", () => {
@@ -370,13 +385,16 @@ describe("parseRosPath", () => {
     });
   });
 
+  it("parses simple valid strings", () => {
+    expect(parseRosPath("blah")).toBeDefined();
+    expect(parseRosPath("100")).toBeDefined();
+    expect(parseRosPath("blah.blah")).toBeDefined();
+  });
+
   it("returns undefined for invalid strings", () => {
-    expect(parseRosPath("blah")).toBeUndefined();
-    expect(parseRosPath("100")).toBeUndefined();
     expect(parseRosPath("-100")).toBeUndefined();
     expect(parseRosPath("[100]")).toBeUndefined();
     expect(parseRosPath("[-100]")).toBeUndefined();
-    expect(parseRosPath("blah.blah")).toBeUndefined();
     expect(parseRosPath("/topic.no.2d.arrays[0][1]")).toBeUndefined();
     expect(parseRosPath("/topic.foo[].bar")).toBeUndefined();
     expect(parseRosPath("/topic.foo[bar]")).toBeUndefined();
