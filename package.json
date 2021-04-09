@@ -42,8 +42,7 @@
     ]
   },
   "resolutions": {
-    "puppeteer-core": "8.0.0",
-    "@electron/universal": "https://github.com/foxglove/universal.git#commit=3e22e99bc0fbd18fd98815b1fb4a800b71ec30b4"
+    "puppeteer-core": "8.0.0"
   },
   "devDependencies": {
     "@actions/exec": "1.0.4",

@@ -10,11 +10,14 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import { initializeNotActuallySharedWorker } from "@foxglove-studio/app/players/UserNodePlayer/NotActuallySharedWorker";
 import transform from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/transformer";
 import generateRosLib from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typegen";
 import Rpc from "@foxglove-studio/app/util/Rpc";
 import { setupSendReportNotificationHandler } from "@foxglove-studio/app/util/RpcWorkerUtils";
 import { enforceFetchIsBlocked, inSharedWorker } from "@foxglove-studio/app/util/workers";
+
+initializeNotActuallySharedWorker();
 
 let unsentErrors: string[] = [];
 (global as any).onerror = (event: ErrorEvent) => {

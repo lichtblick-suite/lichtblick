@@ -20,6 +20,7 @@ import {
   SetUserNodeRosLib,
 } from "@foxglove-studio/app/actions/userNodes";
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
+import NotActuallySharedWorker from "@foxglove-studio/app/players/UserNodePlayer/NotActuallySharedWorker";
 import {
   Diagnostic,
   DiagnosticSeverity,
@@ -57,10 +58,11 @@ import sendNotification from "@foxglove-studio/app/util/sendNotification";
 // TypeScript's built-in lib only accepts strings for the scriptURL. However, webpack only
 // understands `new URL()` to properly build the worker entry point:
 // https://github.com/webpack/webpack/issues/13043
-declare let SharedWorker: {
-  prototype: SharedWorker;
-  new (scriptURL: URL, options?: string | WorkerOptions): SharedWorker;
-};
+// Temporarily unused while we are using NotActuallySharedWorker
+// declare let SharedWorker: {
+//   prototype: SharedWorker;
+//   new (scriptURL: URL, options?: string | WorkerOptions): SharedWorker;
+// };
 
 type UserNodeActions = {
   setUserNodeDiagnostics: SetUserNodeDiagnostics;
@@ -68,7 +70,7 @@ type UserNodeActions = {
   setUserNodeRosLib: SetUserNodeRosLib;
 };
 
-const rpcFromNewSharedWorker = (worker: SharedWorker, name: string) => {
+const rpcFromNewSharedWorker = (worker: SharedWorker | NotActuallySharedWorker, name: string) => {
   worker.onerror = (event) => {
     console.error("SharedWorker error:", event);
     sendNotification(
@@ -143,13 +145,17 @@ export default class UserNodePlayer implements Player {
   _pendingResetWorkers?: Promise<void>;
 
   // exposed as a static to allow testing to mock/replace
-  static CreateNodeTransformWorker = (): SharedWorker => {
-    return new SharedWorker(new URL("./nodeTransformerWorker/index", import.meta.url));
+  static CreateNodeTransformWorker = (): SharedWorker | NotActuallySharedWorker => {
+    return new NotActuallySharedWorker(
+      new Worker(new URL("./nodeTransformerWorker/index", import.meta.url)),
+    );
   };
 
   // exposed as a static to allow testing to mock/replace
-  static CreateNodeRuntimeWorker = (): SharedWorker => {
-    return new SharedWorker(new URL("./nodeRuntimeWorker/index", import.meta.url));
+  static CreateNodeRuntimeWorker = (): SharedWorker | NotActuallySharedWorker => {
+    return new NotActuallySharedWorker(
+      new Worker(new URL("./nodeRuntimeWorker/index", import.meta.url)),
+    );
   };
 
   constructor(player: Player, userNodeActions: UserNodeActions) {

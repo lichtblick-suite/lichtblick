@@ -1618,16 +1618,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron/universal@https://github.com/foxglove/universal.git#commit=3e22e99bc0fbd18fd98815b1fb4a800b71ec30b4":
-  version: 0.0.0-development
-  resolution: "@electron/universal@https://github.com/foxglove/universal.git#commit=3e22e99bc0fbd18fd98815b1fb4a800b71ec30b4"
+"@electron/universal@npm:1.0.4":
+  version: 1.0.4
+  resolution: "@electron/universal@npm:1.0.4"
   dependencies:
     "@malept/cross-spawn-promise": ^1.1.0
     asar: ^3.0.3
     debug: ^4.3.1
     dir-compare: ^2.4.0
     fs-extra: ^9.0.1
-  checksum: ae7b62557fa30022b2e4e739af1b8f508c910bb580f2a7d4d1412758743f110f2cce93f9029be5ad2637f4feb01cfd3af8d1f6169c140efbea504095c8a1142d
+  checksum: 2da9a467bab6e2f130fffbbba544cb0f08eb8c0067891ae12c73ca19f58145328ccecd50785a2bd2dde4d40f586ba982a3d7d711f0db8caa796cc425267ad25f
   languageName: node
   linkType: hard
 
