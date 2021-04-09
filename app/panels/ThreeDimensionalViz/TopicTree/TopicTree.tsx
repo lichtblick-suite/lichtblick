@@ -24,8 +24,8 @@ import styled from "styled-components";
 
 import Dimensions from "@foxglove-studio/app/components/Dimensions";
 import Icon from "@foxglove-studio/app/components/Icon";
+import useChangeDetector from "@foxglove-studio/app/hooks/useChangeDetector";
 import useLinkedGlobalVariables from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
-import { useChangeDetector } from "@foxglove-studio/app/util/hooks";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 import { Save3DConfig } from "../index";

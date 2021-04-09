@@ -13,11 +13,11 @@
 
 import { useCallback, useContext, useMemo } from "react";
 
+import useGuaranteedContext from "@foxglove-studio/app/hooks/useGuaranteedContext";
 import { ThreeDimensionalVizContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
 import { TREE_SPACING } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/constants";
 import { TopicTreeContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
 import { SECOND_SOURCE_PREFIX, TRANSFORM_TOPIC } from "@foxglove-studio/app/util/globalConstants";
-import { useGuaranteedContext } from "@foxglove-studio/app/util/hooks";
 import { joinTopics } from "@foxglove-studio/app/util/topicUtils";
 
 import NamespaceMenu from "./NamespaceMenu";

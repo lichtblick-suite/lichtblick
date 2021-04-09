@@ -18,6 +18,7 @@ import styled from "styled-components";
 
 import Icon from "@foxglove-studio/app/components/Icon";
 import Tooltip from "@foxglove-studio/app/components/Tooltip";
+import useGuaranteedContext from "@foxglove-studio/app/hooks/useGuaranteedContext";
 import { ThreeDimensionalVizContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
 import { canEditDatatype } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor";
 import {
@@ -26,7 +27,6 @@ import {
 } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/constants";
 import { TopicTreeContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
 import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
-import { useGuaranteedContext } from "@foxglove-studio/app/util/hooks";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 import { joinTopics } from "@foxglove-studio/app/util/topicUtils";
 

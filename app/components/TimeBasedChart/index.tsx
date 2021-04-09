@@ -42,10 +42,10 @@ import {
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import TimeBasedChartLegend from "@foxglove-studio/app/components/TimeBasedChart/TimeBasedChartLegend";
 import makeGlobalState from "@foxglove-studio/app/components/TimeBasedChart/makeGlobalState";
+import useDeepChangeDetector from "@foxglove-studio/app/hooks/useDeepChangeDetector";
 import mixins from "@foxglove-studio/app/styles/mixins.module.scss";
 import { isBobject } from "@foxglove-studio/app/util/binaryObjects";
 import filterMap from "@foxglove-studio/app/util/filterMap";
-import { useDeepChangeDetector } from "@foxglove-studio/app/util/hooks";
 import { defaultGetHeaderStamp } from "@foxglove-studio/app/util/synchronizeMessages";
 import { maybeGetBobjectHeaderStamp } from "@foxglove-studio/app/util/time";
 

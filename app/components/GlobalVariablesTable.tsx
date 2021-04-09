@@ -23,11 +23,10 @@ import Tooltip from "@foxglove-studio/app/components/Tooltip";
 import { JSONInput } from "@foxglove-studio/app/components/input/JSONInput";
 import { ValidatedResizingInput } from "@foxglove-studio/app/components/input/ValidatedResizingInput";
 import useGlobalVariables, { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
+import { usePreviousValue } from "@foxglove-studio/app/hooks/usePreviousValue";
 import { memoizedGetLinkedGlobalVariablesKeyByName } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/interactionUtils";
 import useLinkedGlobalVariables from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { colors as sharedColors } from "@foxglove-studio/app/util/sharedStyleConstants";
-
-import { usePreviousValue } from "../util/hooks";
 
 // The minimum amount of time to wait between showing the global variable update animation again
 export const ANIMATION_RESET_DELAY_MS = 3000;

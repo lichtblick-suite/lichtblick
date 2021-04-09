@@ -24,13 +24,13 @@ import PanelContext from "@foxglove-studio/app/components/PanelContext";
 import { MemoryCacheBlock } from "@foxglove-studio/app/dataProviders/MemoryCacheDataProvider";
 import ParsedMessageCache from "@foxglove-studio/app/dataProviders/ParsedMessageCache";
 import useCleanup from "@foxglove-studio/app/hooks/useCleanup";
+import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
 import {
   BobjectMessage,
   SubscribePayload,
   TypedMessage,
   PlayerState,
 } from "@foxglove-studio/app/players/types";
-import { useShallowMemo } from "@foxglove-studio/app/util/hooks";
 
 // Preloading users can (optionally) share this cache of recently parsed messages if they think
 // other panels might use data on the same topic.

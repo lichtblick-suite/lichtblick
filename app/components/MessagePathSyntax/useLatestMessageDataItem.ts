@@ -15,8 +15,8 @@ import { useCallback, useMemo } from "react";
 
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
+import useChangeDetector from "@foxglove-studio/app/hooks/useChangeDetector";
 import { Message, MessageFormat } from "@foxglove-studio/app/players/types";
-import { useChangeDetector } from "@foxglove-studio/app/util/hooks";
 
 import parseRosPath from "./parseRosPath";
 import {

@@ -19,14 +19,12 @@ import {
   MessagePipelineContext,
 } from "@foxglove-studio/app/components/MessagePipeline";
 import PanelContext from "@foxglove-studio/app/components/PanelContext";
+import useChangeDetector from "@foxglove-studio/app/hooks/useChangeDetector";
 import useCleanup from "@foxglove-studio/app/hooks/useCleanup";
+import useContextSelector from "@foxglove-studio/app/hooks/useContextSelector";
+import useDeepMemo from "@foxglove-studio/app/hooks/useDeepMemo";
+import useShouldNotChangeOften from "@foxglove-studio/app/hooks/useShouldNotChangeOften";
 import { Message, MessageFormat, SubscribePayload } from "@foxglove-studio/app/players/types";
-import {
-  useChangeDetector,
-  useShouldNotChangeOften,
-  useContextSelector,
-  useDeepMemo,
-} from "@foxglove-studio/app/util/hooks";
 
 type MessageReducer<T> = (arg0: T, message: Message) => T;
 type MessagesReducer<T> = (arg0: T, messages: readonly Message[]) => T;

@@ -33,13 +33,14 @@ import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipel
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
+import useDeepMemo from "@foxglove-studio/app/hooks/useDeepMemo";
+import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
 import { Message, TypedMessage } from "@foxglove-studio/app/players/types";
 import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { CameraInfo } from "@foxglove-studio/app/types/Messages";
 import { SaveConfig } from "@foxglove-studio/app/types/panels";
 import filterMap from "@foxglove-studio/app/util/filterMap";
-import { useShallowMemo, useDeepMemo } from "@foxglove-studio/app/util/hooks";
 import naturalSort from "@foxglove-studio/app/util/naturalSort";
 import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
 import { colors as sharedColors } from "@foxglove-studio/app/util/sharedStyleConstants";

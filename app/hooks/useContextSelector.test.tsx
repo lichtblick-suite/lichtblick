@@ -11,178 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { renderHook } from "@testing-library/react-hooks";
 import { mount } from "enzyme";
 
-import {
-  useChangeDetector,
-  useDeepChangeDetector,
-  useShallowMemo,
-  useMustNotChange,
-  useShouldNotChangeOften,
-  createSelectableContext,
-  useContextSelector,
+import useContextSelector from "@foxglove-studio/app/hooks/useContextSelector";
+import createSelectableContext, {
   SelectableContext,
-  useDeepMemo,
-} from "./hooks";
-
-describe("useChangeDetector", () => {
-  it("returns true only when value changes", () => {
-    for (const initialValue of [true, false]) {
-      const { result, rerender } = renderHook((deps) => useChangeDetector(deps, initialValue), {
-        initialProps: [1, 1],
-      });
-      expect(result.current).toBe(initialValue);
-      rerender([1, 1]);
-      expect(result.current).toBe(false);
-      rerender([2, 1]);
-      expect(result.current).toBe(true);
-      rerender([2, 1]);
-      expect(result.current).toBe(false);
-      rerender([2, 2]);
-      expect(result.current).toBe(true);
-      rerender([2, 2]);
-      expect(result.current).toBe(false);
-    }
-  });
-
-  it("uses reference equality", () => {
-    const obj = {};
-    const { result, rerender } = renderHook((deps) => useChangeDetector(deps, false), {
-      initialProps: [1, "a", obj],
-    });
-    expect(result.current).toBe(false);
-    rerender([1, "a", obj]);
-    expect(result.current).toBe(false);
-    rerender([1, "a", {}]);
-    expect(result.current).toBe(true);
-    rerender([1, "a", obj]);
-    expect(result.current).toBe(true);
-    rerender([1, "a", obj]);
-    expect(result.current).toBe(false);
-  });
-});
-
-describe("useDeepChangeDetector", () => {
-  it("returns true only when value changes", () => {
-    for (const initialValue of [true, false]) {
-      const { result, rerender } = renderHook((deps) => useDeepChangeDetector(deps, initialValue), {
-        initialProps: [1, 1],
-      });
-      expect(result.current).toBe(initialValue);
-      rerender([1, 1]);
-      expect(result.current).toBe(false);
-      rerender([2, 1]);
-      expect(result.current).toBe(true);
-      rerender([2, 1]);
-      expect(result.current).toBe(false);
-      rerender([2, 2]);
-      expect(result.current).toBe(true);
-      rerender([2, 2]);
-      expect(result.current).toBe(false);
-    }
-  });
-
-  it("uses deep comparison (lodash isEqual) for equality check", () => {
-    const obj = { name: "foo" };
-    const objInArr = { name: "bar" };
-    const { result, rerender } = renderHook((deps) => useDeepChangeDetector(deps, false), {
-      initialProps: [[1, objInArr], "a", obj],
-    });
-    expect(result.current).toBe(false);
-    rerender([[1, objInArr], "a", obj]);
-    expect(result.current).toBe(false);
-    rerender([[1, { name: "bar" }], "a", { name: "foo" }]);
-    expect(result.current).toBe(false);
-  });
-});
-
-describe("useShallowMemo", () => {
-  it("returns original object when shallowly equal", () => {
-    {
-      const obj = { x: 1 };
-      const { result, rerender } = renderHook((val) => useShallowMemo(val), { initialProps: obj });
-      expect(result.current).toBe(obj);
-      rerender({ x: 1 });
-      expect(result.current).toBe(obj);
-    }
-
-    {
-      const obj = ["abc", 123];
-      const { result, rerender } = renderHook((val) => useShallowMemo(val), { initialProps: obj });
-      rerender(obj);
-      expect(result.current).toBe(obj);
-      rerender(["abc", 123]);
-      expect(result.current).toBe(obj);
-    }
-
-    {
-      const obj = ["abc", { x: 1 }];
-      const { result, rerender } = renderHook((val) => useShallowMemo(val), { initialProps: obj });
-      rerender(obj);
-      expect(result.current).toBe(obj);
-      rerender(["abc", { x: 1 }]);
-      expect(result.current).not.toBe(obj);
-    }
-  });
-});
-
-describe("useDeepMemo", () => {
-  it("returns original object when deep equal", () => {
-    let obj: unknown = { x: 1 };
-    const { result, rerender } = renderHook((val) => useDeepMemo(val), { initialProps: obj });
-    expect(result.current).toBe(obj);
-    rerender({ x: 1 });
-    expect(result.current).toBe(obj);
-
-    obj = ["abc", 123];
-    rerender(obj);
-    expect(result.current).toBe(obj);
-    rerender(["abc", 123]);
-    expect(result.current).toBe(obj);
-
-    obj = ["abc", { x: 1 }];
-    rerender(obj);
-    expect(result.current).toBe(obj);
-    rerender(["abc", { x: 1 }]);
-    expect(result.current).toBe(obj);
-    rerender(["abc", { x: 2 }]);
-    expect(result.current).not.toBe(obj);
-  });
-});
-
-describe("useMustNotChange", () => {
-  it("throws when value changes", () => {
-    const { result, rerender } = renderHook((val) => useMustNotChange(val, "hi"), {
-      initialProps: 1,
-    });
-    rerender(1);
-    expect(result.current).toBe(1);
-    rerender(2);
-    expect(result.error).toEqual(new Error("hi\nOld: 1\nNew: 2"));
-  });
-});
-
-describe("useShouldNotChangeOften", () => {
-  it("logs when value changes twice in a row", () => {
-    const warn = jest.fn();
-    const { result, rerender } = renderHook((val) => useShouldNotChangeOften(val, warn), {
-      initialProps: "a",
-    });
-    function update(val: string) {
-      rerender(val);
-      expect(result.current).toBe(val);
-    }
-    update("a");
-    update("a");
-    update("b");
-    update("b");
-    update("c");
-    expect(warn).not.toHaveBeenCalled();
-    update("d");
-    expect(warn).toHaveBeenCalled();
-  });
-});
+} from "@foxglove-studio/app/util/createSelectableContext";
 
 describe("createSelectableContext/useContextSelector", () => {
   function createTestConsumer<T, U>(ctx: SelectableContext<T>, selector: (arg0: T) => U) {
@@ -204,6 +38,8 @@ describe("createSelectableContext/useContextSelector", () => {
     expect(() => mount(<Consumer />)).toThrow(
       "useContextSelector was used outside a corresponding <Provider />.",
     );
+
+    (console.error as any).mockClear();
   });
 
   it("throws when first selector call returns BAILOUT", () => {
@@ -218,6 +54,8 @@ describe("createSelectableContext/useContextSelector", () => {
         </C.Provider>,
       ),
     ).toThrow("Initial selector call must not return BAILOUT");
+
+    (console.error as any).mockClear();
   });
 
   it("calls selector and render once with initial value", () => {

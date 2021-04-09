@@ -15,8 +15,9 @@ import { mapKeys, difference } from "lodash";
 import { useMemo, useRef } from "react";
 
 import useDataSourceInfo from "@foxglove-studio/app/PanelAPI/useDataSourceInfo";
+import useChangeDetector from "@foxglove-studio/app/hooks/useChangeDetector";
+import useDeepMemo from "@foxglove-studio/app/hooks/useDeepMemo";
 import { TRANSFORM_TOPIC } from "@foxglove-studio/app/util/globalConstants";
-import { useChangeDetector, useDeepMemo } from "@foxglove-studio/app/util/hooks";
 
 import {
   UseSceneBuilderAndTransformsDataInput,

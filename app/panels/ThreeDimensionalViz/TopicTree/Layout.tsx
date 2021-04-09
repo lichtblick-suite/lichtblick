@@ -41,6 +41,7 @@ import PanelContext from "@foxglove-studio/app/components/PanelContext";
 import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
+import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
 import { Save3DConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz";
 import DebugStats from "@foxglove-studio/app/panels/ThreeDimensionalViz/DebugStats";
 import {
@@ -109,7 +110,6 @@ import {
   WEBVIZ_MARKER_ARRAY_DATATYPE,
   WEBVIZ_MARKER_DATATYPE,
 } from "@foxglove-studio/app/util/globalConstants";
-import { useShallowMemo } from "@foxglove-studio/app/util/hooks";
 import { inVideoRecordingMode } from "@foxglove-studio/app/util/inAutomatedRunMode";
 import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
 import { joinTopics } from "@foxglove-studio/app/util/topicUtils";

@@ -42,6 +42,7 @@ import {
 import useElectronFilesToOpen from "@foxglove-studio/app/hooks/useElectronFilesToOpen";
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { usePrompt } from "@foxglove-studio/app/hooks/usePrompt";
+import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
 import AnalyticsMetricsCollector from "@foxglove-studio/app/players/AnalyticsMetricsCollector";
 import OrderedStampPlayer from "@foxglove-studio/app/players/OrderedStampPlayer";
 import Ros1Player from "@foxglove-studio/app/players/Ros1Player";
@@ -56,7 +57,6 @@ import { State } from "@foxglove-studio/app/reducers";
 import Storage from "@foxglove-studio/app/util/Storage";
 import { AppError } from "@foxglove-studio/app/util/errors";
 import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
-import { useShallowMemo } from "@foxglove-studio/app/util/hooks";
 import { parseInputUrl } from "@foxglove-studio/app/util/url";
 import Logger from "@foxglove/log";
 

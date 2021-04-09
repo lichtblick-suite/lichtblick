@@ -14,7 +14,10 @@
 import { debounce, flatten, groupBy, isEqual } from "lodash";
 import { Time } from "rosbag";
 
+import useContextSelector from "@foxglove-studio/app/hooks/useContextSelector";
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
+import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
+import useShouldNotChangeOften from "@foxglove-studio/app/hooks/useShouldNotChangeOften";
 import {
   AdvertisePayload,
   Frame,
@@ -29,12 +32,7 @@ import {
 } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { objectValues } from "@foxglove-studio/app/util";
-import {
-  createSelectableContext,
-  useContextSelector,
-  useShallowMemo,
-  useShouldNotChangeOften,
-} from "@foxglove-studio/app/util/hooks";
+import createSelectableContext from "@foxglove-studio/app/util/createSelectableContext";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import signal from "@foxglove-studio/app/util/signal";
 

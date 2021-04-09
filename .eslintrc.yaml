@@ -400,7 +400,6 @@ overrides:
       - "app/util/fuzzyFilter.ts"
       - "app/util/getGlobalVariablesFromUrl.ts"
       - "app/util/getNewConnection.ts"
-      - "app/util/hooks.tsx"
       - "app/util/inAutomatedRunMode.ts"
       - "app/util/index.ts"
       - "app/util/indexeddb/Database.ts"

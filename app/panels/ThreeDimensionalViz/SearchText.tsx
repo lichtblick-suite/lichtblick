@@ -22,10 +22,10 @@ import { CameraState, cameraStateSelectors } from "regl-worldview";
 
 import Button from "@foxglove-studio/app/components/Button";
 import Icon from "@foxglove-studio/app/components/Icon";
+import useDeepChangeDetector from "@foxglove-studio/app/hooks/useDeepChangeDetector";
 import { Interactive } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
 import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
 import { TextMarker, Color } from "@foxglove-studio/app/types/Messages";
-import { useDeepChangeDetector } from "@foxglove-studio/app/util/hooks";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 export const YELLOW = { r: 1, b: 0, g: 1, a: 1 };

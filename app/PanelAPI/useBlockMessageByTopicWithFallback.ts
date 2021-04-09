@@ -15,7 +15,7 @@ import { useCallback, useMemo, useRef } from "react";
 
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import { blockMessageCache } from "@foxglove-studio/app/PanelAPI/useBlocksByTopic";
-import { useChangeDetector } from "@foxglove-studio/app/util/hooks";
+import useChangeDetector from "@foxglove-studio/app/hooks/useChangeDetector";
 
 function usePlaybackMessage<T>(topic: string): T | undefined {
   // DANGER! We circumvent PanelAPI.useMessageReducer's system of keeping state here.

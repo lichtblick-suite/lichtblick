@@ -20,6 +20,7 @@ import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
 import Icon from "@foxglove-studio/app/components/Icon";
 import KeyboardShortcut from "@foxglove-studio/app/components/KeyboardShortcut";
 import Menu, { Item } from "@foxglove-studio/app/components/Menu";
+import useGuaranteedContext from "@foxglove-studio/app/hooks/useGuaranteedContext";
 import {
   getHexFromColorSettingWithDefault,
   PICKER_SIZE,
@@ -27,7 +28,6 @@ import {
 import { ROW_HEIGHT } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/constants";
 import { TopicTreeContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
 import clipboard from "@foxglove-studio/app/util/clipboard";
-import { useGuaranteedContext } from "@foxglove-studio/app/util/hooks";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 import { SDotMenuPlaceholder } from "./TreeNodeRow";
