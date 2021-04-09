@@ -2054,7 +2054,7 @@ __metadata:
     "@types/uuid": 8.3.0
     "@types/wicg-file-system-access": 2020.9.1
     "@types/ws": 7.4.1
-    "@wojtekmaj/enzyme-adapter-react-17": 0.6.0
+    "@wojtekmaj/enzyme-adapter-react-17": 0.6.1
     argparse: 2.0.1
     async-mutex: 0.3.1
     cbor-js: 0.1.0
@@ -5627,9 +5627,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wojtekmaj/enzyme-adapter-react-17@npm:0.6.0":
-  version: 0.6.0
-  resolution: "@wojtekmaj/enzyme-adapter-react-17@npm:0.6.0"
+"@wojtekmaj/enzyme-adapter-react-17@npm:0.6.1":
+  version: 0.6.1
+  resolution: "@wojtekmaj/enzyme-adapter-react-17@npm:0.6.1"
   dependencies:
     "@wojtekmaj/enzyme-adapter-utils": ^0.1.0
     enzyme-shallow-equal: ^1.0.0
@@ -5643,7 +5643,7 @@ __metadata:
     enzyme: ^3.0.0
     react: ^17.0.0-0
     react-dom: ^17.0.0-0
-  checksum: 5aa055cd9d29dc39537ce05120d5dc7362a4318034486533cb7fc430ca9e2c91dad57764d403b1d1fa20aff9abb41743b2e87e0622590b792712b199c476ae17
+  checksum: 5ffce75cd5ecdf7074060a374cefb586f8dc07808768cf0163b67462d20e9f784b3a65b0e27ea93953ced3af37182779c7847608e6d3933726d53e7fd7d34fa5
   languageName: node
   linkType: hard
 
