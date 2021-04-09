@@ -10291,6 +10291,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"electron@npm:13.0.0-beta.12":
+  version: 13.0.0-beta.12
+  resolution: "electron@npm:13.0.0-beta.12"
+  dependencies:
+    "@electron/get": ^1.0.1
+    "@types/node": ^14.6.2
+    extract-zip: ^1.0.3
+  bin:
+    electron: cli.js
+  checksum: 5623789c9cd5e5b1e0d4e240a81eb03e45afbf955a8aefe2aa4d8e2b7709bc7a0836964c44ff618b25952bfba0778a797984fb8d9e7903e8830440b755f3dad8
+  languageName: node
+  linkType: hard
+
 "elegant-spinner@npm:^1.0.1":
   version: 1.0.1
   resolution: "elegant-spinner@npm:1.0.1"
@@ -11945,7 +11958,7 @@ __metadata:
     colors: 1.4.0
     crypto-browserify: 3.12.0
     css-loader: 5.2.0
-    electron: 12.0.2
+    electron: 13.0.0-beta.12
     electron-builder: 22.10.5
     electron-devtools-installer: 3.1.1
     electron-notarize: 1.0.0

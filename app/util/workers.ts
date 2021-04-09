@@ -24,19 +24,16 @@ export const inWebWorker = (): boolean => {
 
 // To debug shared workers, enter 'chrome://inspect/#workers' into the url bar.
 export const inSharedWorker = (): boolean =>
-  true || // Temporarily disabled while we are using NotActuallySharedWorker.
-  (typeof SharedWorkerGlobalScope !== "undefined" && self instanceof SharedWorkerGlobalScope);
+  typeof SharedWorkerGlobalScope !== "undefined" && self instanceof SharedWorkerGlobalScope;
 
 export const enforceFetchIsBlocked = <R, Args extends readonly unknown[]>(
   fn: (...args: Args) => R,
 ): ((...args: Args) => Promise<R>) => {
-  const canFetch = Promise.resolve(false);
-  // Temporarily disabled while we are using NotActuallySharedWorker.
-  // const canFetch =
-  //   typeof fetch !== "undefined" &&
-  //   fetch("data:test")
-  //     .then(() => true)
-  //     .catch(() => false);
+  const canFetch =
+    typeof fetch !== "undefined" &&
+    fetch("data:test")
+      .then(() => true)
+      .catch(() => false);
   return async (...args) => {
     if (await canFetch) {
       throw new Error("Content security policy too loose.");

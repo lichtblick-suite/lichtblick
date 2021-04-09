@@ -13,8 +13,6 @@
 
 import fetchMock from "fetch-mock";
 
-import NotActuallySharedWorker from "@foxglove-studio/app/players/UserNodePlayer/NotActuallySharedWorker";
-
 import { enforceFetchIsBlocked, inWebWorker, inSharedWorker } from "./workers";
 
 describe("inWebWorker", () => {
@@ -24,16 +22,14 @@ describe("inWebWorker", () => {
   });
 });
 
-NotActuallySharedWorker;
-describe.skip("inSharedWorker", () => {
+describe("inSharedWorker", () => {
   it("returns false in unit tests", () => {
     // Difficult to get positive cases in Jest, but covered by integration tests.
     expect(inSharedWorker()).toBe(false);
   });
 });
 
-NotActuallySharedWorker;
-describe.skip("enforceFetchIsBlocked", () => {
+describe("enforceFetchIsBlocked", () => {
   afterEach(() => {
     fetchMock.restore();
   });
