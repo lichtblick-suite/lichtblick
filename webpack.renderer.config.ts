@@ -74,6 +74,7 @@ export function makeConfig(_: unknown, argv: WebpackArgv, options?: Options): Co
         crypto: require.resolve("crypto-browserify"),
         fs: false,
         pnpapi: false,
+        perf_hooks: false, // TypeScript tries to use this when running in node
         // These are optional for react-mosaic-component
         "@blueprintjs/core": false,
         "@blueprintjs/icons": false,
@@ -159,6 +160,27 @@ export function makeConfig(_: unknown, argv: WebpackArgv, options?: Options): Co
         { test: /\.scss$/, loader: "sass-loader", options: { sourceMap: true } },
         { test: /\.woff2?$/, type: "asset/inline" },
         { test: /\.(glb|bag|ttf|bin)$/, type: "asset/resource" },
+        {
+          // TypeScript uses dynamic requires()s when running in node. We can disable these when we
+          // bundle it for the renderer.
+          test: /[\\/]node_modules[\\/]typescript[\\/]lib[\\/]typescript\.js$/,
+          loader: "string-replace-loader",
+          options: {
+            multiple: [
+              {
+                search: "etwModule = require(etwModulePath);",
+                replace:
+                  "throw new Error('[Foxglove] This module is not supported in the browser.');",
+              },
+              {
+                search:
+                  "return { module: require(modulePath), modulePath: modulePath, error: undefined };",
+                replace:
+                  "throw new Error('[Foxglove] This module is not supported in the browser.');",
+              },
+            ],
+          },
+        },
       ],
     },
     plugins: [
