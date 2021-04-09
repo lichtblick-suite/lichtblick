@@ -25,5 +25,6 @@ if ! grep -q '/opt/ros' ~/.bashrc; then
     echo >> ~/.bashrc
     echo "source /opt/ros/noetic/setup.bash  # ros1" >> ~/.bashrc
     echo "# source /opt/ros/foxy/setup.bash  # ros2" >> ~/.bashrc
+    echo "export ROS_HOSTNAME=192.168.33.10" >> ~/.bashrc
 fi
 EOF
