@@ -11,9 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ReactNode } from "react";
+import { ReactNode, useCallback } from "react";
 
 import { isTypicalFilterName } from "@foxglove-studio/app/components/MessagePathSyntax/isTypicalFilterName";
+import useTimezone from "@foxglove-studio/app/hooks/useTimezone";
 import { format, formatDuration } from "@foxglove-studio/app/util/formatTime";
 
 const DURATION_20_YEARS_SEC = 20 * 365 * 24 * 60 * 60;
@@ -27,18 +28,37 @@ function getArrow(x: number, y: number) {
   );
 }
 
-export function getItemString(
+export default function useGetItemStringWithTimezone(): (
   type: string,
   data: any,
   itemType: ReactNode,
   itemString: string,
+) => ReactNode {
+  const timezone = useTimezone();
+  return useCallback(
+    (type: string, data: any, itemType: ReactNode, itemString: string) =>
+      getItemString(type, data, itemType, itemString, timezone),
+    [timezone],
+  );
+}
+
+function getItemString(
+  type: string,
+  data: any,
+  itemType: ReactNode,
+  itemString: string,
+  timezone?: string,
 ): ReactNode {
   const keys = Object.keys(data);
   if (keys.length === 2) {
     const { sec, nsec } = data;
     if (sec != undefined && nsec != undefined) {
       // Values "too small" to be absolute epoch-based times are probably relative durations.
-      return sec < DURATION_20_YEARS_SEC ? formatDuration(data) : <span>{format(data)}</span>;
+      return sec < DURATION_20_YEARS_SEC ? (
+        formatDuration(data)
+      ) : (
+        <span>{format(data, timezone)}</span>
+      );
     }
   }
 

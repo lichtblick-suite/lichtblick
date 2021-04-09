@@ -24,9 +24,16 @@ declare global {
     | "OpenFile"
     | "Settings"
     | "Share"
+    | "TestBeakerSolid"
     | "Variable2";
 }
 
+declare module "@fluentui/react/lib/components/Icon" {
+  export interface IIconProps {
+    iconName?: RegisteredIconNames;
+    styles?: IStyleFunctionOrObject<IIconStyleProps, IIconStyles>;
+  }
+}
 declare module "@fluentui/react/lib/Icon" {
   export interface IIconProps {
     iconName?: RegisteredIconNames;

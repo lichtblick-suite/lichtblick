@@ -23,8 +23,8 @@ import { toDate, fromDate, getRosTimeFromString } from "./time";
 // There is some miss-match between the moment we import and the one the type declarations expect
 momentDurationFormatSetup(moment);
 
-export function format(stamp: Time) {
-  return `${formatDate(stamp)} ${formatTime(stamp)}`;
+export function format(stamp: Time, timezone?: string) {
+  return `${formatDate(stamp, timezone)} ${formatTime(stamp, timezone)}`;
 }
 
 export function formatDate(stamp: Time, timezone?: string) {

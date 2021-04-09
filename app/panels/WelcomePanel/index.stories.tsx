@@ -19,42 +19,53 @@ export default {
 
 function makeConfiguration(entries?: [string, unknown][]): AppConfiguration {
   const map = new Map<string, unknown>(entries);
+  const listeners = new Set<() => void>();
   return {
     get: async (key: string) => map.get(key),
-    set: async (key: string, value: unknown) => void map.set(key, value),
+    set: async (key: string, value: unknown) => {
+      map.set(key, value);
+      [...listeners].forEach((listener) => listener());
+    },
+    addChangeListener: (key, cb) => listeners.add(cb),
+    removeChangeListener: (key, cb) => listeners.delete(cb),
   };
 }
 
 export function Default(): React.ReactElement {
   const [config] = useState(() => makeConfiguration());
   return (
-    <AppConfigurationContext.Provider value={config}>
-      <PanelSetup>
+    <PanelSetup>
+      <AppConfigurationContext.Provider value={config}>
         <WelcomePanel />
-      </PanelSetup>
-    </AppConfigurationContext.Provider>
+      </AppConfigurationContext.Provider>
+    </PanelSetup>
   );
 }
 
 export function AlreadySignedUp(): React.ReactElement {
   const [config] = useState(() => makeConfiguration([["onboarding.subscribed", true]]));
   return (
-    <AppConfigurationContext.Provider value={config}>
-      <PanelSetup>
+    <PanelSetup>
+      <AppConfigurationContext.Provider value={config}>
         <WelcomePanel />
-      </PanelSetup>
-    </AppConfigurationContext.Provider>
+      </AppConfigurationContext.Provider>
+    </PanelSetup>
   );
 }
 
 export function LoadingGet(): React.ReactElement {
-  const [config] = useState(() => ({ get: () => signal(), set: () => signal() }));
+  const [config] = useState(() => ({
+    get: () => signal(),
+    set: () => signal(),
+    addChangeListener() {},
+    removeChangeListener() {},
+  }));
   return (
-    <AppConfigurationContext.Provider value={config}>
-      <PanelSetup>
+    <PanelSetup>
+      <AppConfigurationContext.Provider value={config}>
         <WelcomePanel />
-      </PanelSetup>
-    </AppConfigurationContext.Provider>
+      </AppConfigurationContext.Provider>
+    </PanelSetup>
   );
 }
 
@@ -86,11 +97,11 @@ function Example({ mockSetConfig }: { mockSetConfig?: () => Promise<void> }): Re
   }, []);
   return (
     <div style={{ flex: "1 1 auto" }} ref={wrapper}>
-      <AppConfigurationContext.Provider value={config}>
-        <PanelSetup>
+      <PanelSetup>
+        <AppConfigurationContext.Provider value={config}>
           <WelcomePanel />
-        </PanelSetup>
-      </AppConfigurationContext.Provider>
+        </AppConfigurationContext.Provider>
+      </PanelSetup>
     </div>
   );
 }

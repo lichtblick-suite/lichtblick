@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import { mount } from "enzyme";
 
-import { ExperimentalFeaturesModal } from "@foxglove-studio/app/components/ExperimentalFeaturesModal";
+import { ExperimentalFeatureSettings } from "@foxglove-studio/app/components/ExperimentalFeatureSettings";
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import ExperimentalFeaturesLocalStorageProvider, {
   EXPERIMENTAL_FEATURES_STORAGE_KEY,
@@ -71,7 +71,7 @@ describe("ExperimentalFeatures", () => {
         <ExperimentalFeaturesLocalStorageProvider features={features}>
           <RenderExperimentalFeatures />
           <div data-modalcontainer>
-            <ExperimentalFeaturesModal />
+            <ExperimentalFeatureSettings />
           </div>
         </ExperimentalFeaturesLocalStorageProvider>
       </ThemeProvider>,

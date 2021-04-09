@@ -31,6 +31,9 @@ import {
   setUserNodeRosLib,
 } from "@foxglove-studio/app/actions/userNodes";
 import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
+import AppConfigurationContext, {
+  AppConfiguration,
+} from "@foxglove-studio/app/context/AppConfigurationContext";
 import PanelCatalogContext, {
   PanelCatalog,
   PanelCategory,
@@ -96,6 +99,7 @@ type Props = {
 type State = {
   store: any;
   mockPanelCatalog: PanelCatalog;
+  mockAppConfiguration: AppConfiguration;
 };
 
 function setNativeValue(element: unknown, value: unknown) {
@@ -222,6 +226,12 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
     this.state = {
       store: props.store ?? configureStore(createRootReducer(createMemoryHistory())),
       mockPanelCatalog: props.panelCatalog ?? new MockPanelCatalog(),
+      mockAppConfiguration: {
+        async set() {},
+        async get() {},
+        addChangeListener() {},
+        removeChangeListener() {},
+      },
     };
   }
 
@@ -274,7 +284,9 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
           setPublishers={setPublishers}
         >
           <PanelCatalogContext.Provider value={this.state.mockPanelCatalog}>
-            {this.props.children}
+            <AppConfigurationContext.Provider value={this.state.mockAppConfiguration}>
+              {this.props.children}
+            </AppConfigurationContext.Provider>
           </PanelCatalogContext.Provider>
         </MockMessagePipelineProvider>
       </div>

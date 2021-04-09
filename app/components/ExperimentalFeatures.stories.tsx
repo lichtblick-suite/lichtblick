@@ -14,7 +14,7 @@
 import { action } from "@storybook/addon-actions";
 import { ReactElement } from "react";
 
-import { ExperimentalFeaturesModal } from "@foxglove-studio/app/components/ExperimentalFeaturesModal";
+import { ExperimentalFeatureSettings } from "@foxglove-studio/app/components/ExperimentalFeatureSettings";
 import ExperimentalFeaturesContext, {
   FeatureDescriptions,
   FeatureSettings,
@@ -22,7 +22,7 @@ import ExperimentalFeaturesContext, {
 
 export default {
   title: "<ExperimentalFeaturesModal>",
-  component: ExperimentalFeaturesModal,
+  component: ExperimentalFeatureSettings,
   parameters: {
     chromatic: {
       viewport: { width: 1000, height: 1300 },
@@ -69,7 +69,7 @@ export function EmptyList(): ReactElement {
     <ExperimentalFeaturesContext.Provider
       value={{ features: {}, settings: {}, changeFeature: action("changeFeature") }}
     >
-      <ExperimentalFeaturesModal onRequestClose={action("onRequestClose")} />
+      <ExperimentalFeatureSettings />
     </ExperimentalFeaturesContext.Provider>
   );
 }
@@ -83,7 +83,7 @@ export function BasicFixture(): ReactElement {
         changeFeature: action("changeFeature"),
       }}
     >
-      <ExperimentalFeaturesModal onRequestClose={action("onRequestClose")} />
+      <ExperimentalFeatureSettings />
     </ExperimentalFeaturesContext.Provider>
   );
 }

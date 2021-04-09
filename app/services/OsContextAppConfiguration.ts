@@ -11,6 +11,7 @@ export default class OsContextAppConfiguration implements AppConfiguration {
   static STORE_KEY = "settings.json";
 
   private readonly _ctx: Pick<OsContext, "storage">;
+  private _listeners = new Map<string, Set<() => void>>();
 
   // Protect access to currentValue to avoid read-modify-write races between multiple set() calls.
   private _mutex = new Mutex();
@@ -28,7 +29,7 @@ export default class OsContextAppConfiguration implements AppConfiguration {
     });
   }
 
-  async get(key: string): Promise<unknown> {
+  async get(key: string): Promise<unknown | undefined> {
     return await this._mutex.runExclusive(
       () => (this._currentValue as Record<string, unknown>)[key],
     );
@@ -51,5 +52,26 @@ export default class OsContextAppConfiguration implements AppConfiguration {
       );
       this._currentValue = newConfig;
     });
+    const listeners = this._listeners.get(key);
+    if (listeners) {
+      // Copy the list of listeners to protect against mutation during iteration
+      [...listeners].forEach((listener) => listener());
+    }
+  }
+
+  addChangeListener(key: string, cb: () => void): void {
+    let listeners = this._listeners.get(key);
+    if (!listeners) {
+      listeners = new Set();
+      this._listeners.set(key, listeners);
+    }
+    listeners.add(cb);
+  }
+
+  removeChangeListener(key: string, cb: () => void): void {
+    const listeners = this._listeners.get(key);
+    if (listeners) {
+      listeners.delete(cb);
+    }
   }
 }

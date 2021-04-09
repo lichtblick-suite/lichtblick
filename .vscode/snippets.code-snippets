@@ -10,5 +10,10 @@
     "scope": "typescriptreact",
     "prefix": "useState",
     "body": "const [${1:thing}, set${1/(.*)/${1:/capitalize}/}] = useState($3);"
+  },
+  "Insert useCallback": {
+    "scope": "typescriptreact",
+    "prefix": "useCallback",
+    "body": "const ${1:func} = useCallback(($2) => {$3}, [$4]);"
   }
 }

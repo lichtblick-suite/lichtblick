@@ -29,6 +29,7 @@ const icons: {
   OpenFile: <Icons.OpenFileIcon />,
   Settings: <Icons.SettingsIcon />,
   Share: <Icons.ShareIcon />,
+  TestBeakerSolid: <Icons.TestBeakerSolidIcon />,
   Variable2: <Icons.Variable2Icon />,
   "studio.ROS": <RosIcon />,
 };

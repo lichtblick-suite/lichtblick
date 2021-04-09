@@ -10,7 +10,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ActionButton } from "@fluentui/react";
+import { ActionButton, Modal } from "@fluentui/react";
 import AlertIcon from "@mdi/svg/svg/alert.svg";
 import {
   ReactElement,
@@ -32,7 +32,6 @@ import { redoLayoutChange, undoLayoutChange } from "@foxglove-studio/app/actions
 import { importPanelLayout, loadLayout } from "@foxglove-studio/app/actions/panels";
 import AddPanelMenu from "@foxglove-studio/app/components/AddPanelMenu";
 import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";
-import { ExperimentalFeaturesModal } from "@foxglove-studio/app/components/ExperimentalFeaturesModal";
 import GlobalKeyListener from "@foxglove-studio/app/components/GlobalKeyListener";
 import GlobalVariablesMenu from "@foxglove-studio/app/components/GlobalVariablesMenu";
 import HelpModal from "@foxglove-studio/app/components/HelpModal";
@@ -46,6 +45,7 @@ import NotificationDisplay from "@foxglove-studio/app/components/NotificationDis
 import PanelLayout from "@foxglove-studio/app/components/PanelLayout";
 import PlaybackControls from "@foxglove-studio/app/components/PlaybackControls";
 import PlayerManager from "@foxglove-studio/app/components/PlayerManager";
+import Preferences from "@foxglove-studio/app/components/Preferences";
 import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
 import ShortcutsModal from "@foxglove-studio/app/components/ShortcutsModal";
 import SpinningLoadingIcon from "@foxglove-studio/app/components/SpinningLoadingIcon";
@@ -256,9 +256,13 @@ function Root() {
               }}
               onClick={() => setPreferencesOpen(true)}
             />
-            {preferencesOpen && (
-              <ExperimentalFeaturesModal onRequestClose={() => setPreferencesOpen(false)} />
-            )}
+            <Modal
+              styles={{ main: { width: "80vw", maxWidth: 850, height: "80vh", maxHeight: 600 } }}
+              isOpen={preferencesOpen}
+              onDismiss={() => setPreferencesOpen(false)}
+            >
+              <Preferences />
+            </Modal>
           </SToolbarItem>
         </Toolbar>
         <PanelLayout />

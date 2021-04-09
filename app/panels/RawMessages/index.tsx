@@ -29,7 +29,7 @@ import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem"
 import EmptyState from "@foxglove-studio/app/components/EmptyState";
 import Flex from "@foxglove-studio/app/components/Flex";
 import Icon from "@foxglove-studio/app/components/Icon";
-import { getItemString } from "@foxglove-studio/app/components/JsonTree/getItemString";
+import useGetItemStringWithTimezone from "@foxglove-studio/app/components/JsonTree/useGetItemStringWithTimezone";
 import MessagePathInput from "@foxglove-studio/app/components/MessagePathSyntax/MessagePathInput";
 import {
   RosPath,
@@ -134,6 +134,8 @@ function RawMessages(props: Props) {
   const { config, saveConfig, openSiblingPanel } = props;
   const { topicPath, diffMethod, diffTopicPath, diffEnabled, showFullMessageForDiff } = config;
   const { topics, datatypes } = useDataSourceInfo();
+
+  const getItemString = useGetItemStringWithTimezone();
 
   const topicRosPath: RosPath | undefined = useMemo(() => parseRosPath(topicPath), [topicPath]);
   const topic: Topic | undefined = useMemo(
@@ -361,6 +363,7 @@ function RawMessages(props: Props) {
     const CheckboxComponent = showFullMessageForDiff
       ? CheckboxMarkedIcon
       : CheckboxBlankOutlineIcon;
+
     return (
       <Flex col clip scroll className={styles.container}>
         <Metadata
@@ -512,6 +515,7 @@ function RawMessages(props: Props) {
     topic,
     topicPath,
     valueRenderer,
+    getItemString,
   ]);
 
   return (

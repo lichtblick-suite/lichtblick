@@ -6,8 +6,10 @@ import { createContext, useContext } from "react";
 
 // Exposes an interface for reading and writing user-configurable options and other persistent application state.
 export interface AppConfiguration {
-  get(key: string): Promise<unknown>;
+  get(key: string): Promise<unknown | undefined>;
   set(key: string, value: unknown): Promise<void>;
+  addChangeListener(key: string, cb: () => void): void;
+  removeChangeListener(key: string, cb: () => void): void;
 }
 
 const AppConfigurationContext = createContext<AppConfiguration | undefined>(undefined);

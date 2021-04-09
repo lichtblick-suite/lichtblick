@@ -18,7 +18,7 @@ import styled from "styled-components";
 
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
-import { getItemString } from "@foxglove-studio/app/components/JsonTree/getItemString";
+import useGetItemStringWithTimezone from "@foxglove-studio/app/components/JsonTree/useGetItemStringWithTimezone";
 import { getInstanceObj } from "@foxglove-studio/app/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
 import { deepParse, isBobject } from "@foxglove-studio/app/util/binaryObjects";
 import { jsonTreeTheme } from "@foxglove-studio/app/util/globalConstants";
@@ -104,6 +104,8 @@ function ObjectDetailsWrapper({
 function ObjectDetails({ interactionData, objectToDisplay }: Props) {
   const topic = interactionData?.topic ?? "";
   const originalObject = omit(objectToDisplay, "interactionData");
+
+  const getItemString = useGetItemStringWithTimezone();
 
   if (!topic) {
     // show the original object directly if there is no interaction data. e.g. DrawPolygons
