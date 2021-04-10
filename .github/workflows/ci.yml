@@ -16,7 +16,6 @@ jobs:
       matrix:
         os:
           - ubuntu-20.04
-          - windows-2019
         config:
           # Specify names so that the GitHub branch protection settings for
           # required checks don't need to change if we ever change the commands used.
@@ -26,9 +25,12 @@ jobs:
             command: yarn run test --maxWorkers=100%
           - name: storybook
             command: yarn workspace @foxglove-studio/app run chromatic
-        exclude:
+        include:
           - os: windows-2019
-            config: { name: test }
+            config:
+              name: lint
+              command: echo complete
+        exclude:
           - os: windows-2019
             config: { name: storybook }
 
