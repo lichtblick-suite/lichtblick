@@ -2029,6 +2029,7 @@ __metadata:
     "@types/hammerjs": 2.0.39
     "@types/http-server": ^0.10.1
     "@types/js-yaml": 4.0.0
+    "@types/leaflet": 1.7.0
     "@types/moment-duration-format": 2.2.2
     "@types/prettier": 2.2.3
     "@types/promise-queue": 2.2.0
@@ -2079,6 +2080,7 @@ __metadata:
     intervals-fn: 3.0.3
     js-yaml: 4.0.0
     jsondiffpatch: 0.4.1
+    leaflet: 1.7.1
     lodash: 4.17.21
     memoize-weak: 1.0.2
     micro-memoize: 4.0.9
@@ -2103,6 +2105,7 @@ __metadata:
     react-hover-observer: 2.1.1
     react-input-autosize: 3.0.0
     react-json-tree: 0.15.0
+    react-leaflet: 3.1.0
     react-markdown: 5.0.3
     react-monaco-editor: 0.43.0
     react-mosaic-component: 4.1.1
@@ -2857,6 +2860,17 @@ __metadata:
   version: 2.0.0
   resolution: "@react-dnd/shallowequal@npm:2.0.0"
   checksum: cbac47721d35114ee2c12a4001dfea5b953a9f88a860b9db7bca2c03f5fe99ae36258c8cb873a605ef787d2f68c4bf0014ba91533eab5691acee4893b308a00c
+  languageName: node
+  linkType: hard
+
+"@react-leaflet/core@npm:^1.0.2":
+  version: 1.0.2
+  resolution: "@react-leaflet/core@npm:1.0.2"
+  peerDependencies:
+    leaflet: ^1.7.1
+    react: ^17.0.1
+    react-dom: ^17.0.1
+  checksum: d0819720426ae84df87eb156e6477d0bc9060f1715eeadebc774ee630124d5b94155ce007becfe62f2bee854f8bc982b5b2b862b3b77d0654ed88265f572cb30
   languageName: node
   linkType: hard
 
@@ -4307,6 +4321,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/geojson@npm:*":
+  version: 7946.0.7
+  resolution: "@types/geojson@npm:7946.0.7"
+  checksum: b0a614f58a169069d9978af24c4b816bc7140a722829d8786ad1ff22d8362b429c56170326c836ce661a0307f8e35820a055966c2eedc21b62671a56c472263e
+  languageName: node
+  linkType: hard
+
 "@types/gl-matrix@npm:3.2.0":
   version: 3.2.0
   resolution: "@types/gl-matrix@npm:3.2.0"
@@ -4476,6 +4497,15 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: 3aaf557d5b82e733d5a17b7f55af5d6be953363c3a594f006d64265790fe87c301c6e1400c0b6b1cf72add50a0ceddc25afb8231ab8302a2e5b6ebfbfac30e5d
+  languageName: node
+  linkType: hard
+
+"@types/leaflet@npm:1.7.0":
+  version: 1.7.0
+  resolution: "@types/leaflet@npm:1.7.0"
+  dependencies:
+    "@types/geojson": "*"
+  checksum: 83142a248a527fe787b3bb36d36335053cdaeb98e518f1b57f70b833d3a64642008872445964bf5d447d7c09f1375332e5851bbb15c1486242162b6d5e599161
   languageName: node
   linkType: hard
 
@@ -15505,6 +15535,13 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"leaflet@npm:1.7.1":
+  version: 1.7.1
+  resolution: "leaflet@npm:1.7.1"
+  checksum: 7a841174dc3c8e135a2ba9a81cdd8145ef4c00e516eb558281ea47b20499f94ddab58a76a72ee15104e0dce88a07ae91fe933cfab75b569c5ed0770497aa7d99
+  languageName: node
+  linkType: hard
+
 "less@npm:^3.11.1":
   version: 3.13.1
   resolution: "less@npm:3.13.1"
@@ -19672,6 +19709,19 @@ fsevents@^1.2.7:
     "@types/react": ^16.3.0 || ^17.0.0
     react: ^16.3.0 || ^17.0.0
   checksum: 0e509ee22408e64e69aad364d94548193ce7348c38c9a120244bc1172d787cbc2f39ff83f5154723002718fd22a66d9ae63dab778d79bab6630ebc3a5653de1f
+  languageName: node
+  linkType: hard
+
+"react-leaflet@npm:3.1.0":
+  version: 3.1.0
+  resolution: "react-leaflet@npm:3.1.0"
+  dependencies:
+    "@react-leaflet/core": ^1.0.2
+  peerDependencies:
+    leaflet: ^1.7.1
+    react: ^17.0.1
+    react-dom: ^17.0.1
+  checksum: 983744e95dd29891f97cd5977feb9c6eafe97c2abf9f8ca63cbc93e17311b80beac211d9f6dc860aab3fffae62ce17382eca37f61b3a36229b3c23f86365d948
   languageName: node
   linkType: hard
 

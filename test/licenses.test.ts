@@ -9,6 +9,7 @@ const ALLOWED_LICENSES = [
   "MPL-2.0",
   "MIT",
   "BSD",
+  "BSD-2-clause",
   "Apache-2.0",
   "ISC",
   "Python-2.0",
@@ -19,6 +20,7 @@ const ALLOWED_LICENSES = [
   "WTFPL",
   "Unlicense",
   "OFL-1.1",
+  "Hippocratic-2.1",
 ];
 const EXCLUDED_PACKAGES = ["gl-vec3@1.1.3", "pngparse@2.0.1"];
 

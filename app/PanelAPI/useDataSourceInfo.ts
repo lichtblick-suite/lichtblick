@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { Time } from "rosbag";
 
 import {
@@ -21,7 +21,7 @@ import {
 import { Topic } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 
-// Metadata about the source of data currently being displayed in Webviz.
+// Metadata about the source of data currently being displayed.
 // This is not expected to change often, usually when changing data sources.
 export type DataSourceInfo = {
   topics: readonly Topic[];
@@ -62,11 +62,14 @@ export default function useDataSourceInfo(): DataSourceInfo {
     ),
   );
 
-  return {
-    topics,
-    datatypes,
-    capabilities,
-    startTime,
-    playerId,
-  };
+  // we want the returned object to have a stable identity
+  return useMemo<DataSourceInfo>(() => {
+    return {
+      topics,
+      datatypes,
+      capabilities,
+      startTime,
+      playerId,
+    };
+  }, [capabilities, datatypes, playerId, startTime, topics]);
 }
