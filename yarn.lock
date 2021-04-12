@@ -2058,7 +2058,7 @@ __metadata:
     argparse: 2.0.1
     async-mutex: 0.3.1
     cbor-js: 0.1.0
-    chart.js: 3.0.2
+    chart.js: 3.1.0
     chartjs-plugin-annotation: 1.0.0-rc
     chartjs-plugin-datalabels: 2.0.0-beta.1
     chartjs-plugin-zoom: "github:foxglove/chartjs-plugin-zoom#656541279943f00dce600288435f83c436293146"
@@ -7776,10 +7776,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:3.0.2":
-  version: 3.0.2
-  resolution: "chart.js@npm:3.0.2"
-  checksum: daf656a52230ef75a03c13195f28ce379253ad42d585d7f9db8c006e3235c7f34f5b6d097f9060607870f2b5d39be7866f7fa056c615e70fc0ae3dd6f796785b
+"chart.js@npm:3.1.0":
+  version: 3.1.0
+  resolution: "chart.js@npm:3.1.0"
+  checksum: 19614f270918b6c865b155604749b6a69ce05477d557fd356a1853f2d742f71db392f0842b63ffaae687d8f02ee70cec58e7326cb78fd701abc621f4f47d61f6
   languageName: node
   linkType: hard
 
