@@ -283,7 +283,7 @@ async function createWindow(): Promise<void> {
   mainWindow.webContents.on("ipc-message", (_event: unknown, channel: string) => {
     if (channel === "window.toolbar-double-clicked") {
       const action: string =
-        systemPreferences.getUserDefault("AppleActionOnDoubleClick", "string") || "Maximize";
+        systemPreferences.getUserDefault?.("AppleActionOnDoubleClick", "string") || "Maximize";
       if (action === "Minimize") {
         mainWindow.minimize();
       } else if (action === "Maximize") {
