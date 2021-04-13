@@ -330,6 +330,12 @@ export default function Layout({
         name: "root",
         children: [
           {
+            name: "Grid",
+            topicName: FOXGLOVE_GRID_TOPIC,
+            children: [],
+            description: "Draws a reference grid.",
+          },
+          {
             name: "TF",
             topicName: "/tf",
             children: [],
