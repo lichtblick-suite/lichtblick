@@ -46,7 +46,7 @@ jobs:
         with:
           node-version: 14.x
       - name: Restore cache
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v2.1.5
         with:
           path: |
             .yarn/cache
@@ -80,7 +80,7 @@ jobs:
         with:
           node-version: 14.x
       - name: Restore cache
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v2.1.5
         with:
           path: |
             .yarn/cache
