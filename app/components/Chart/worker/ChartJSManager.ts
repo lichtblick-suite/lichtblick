@@ -19,6 +19,9 @@ import EventEmitter from "eventemitter3";
 import merge from "lodash/merge";
 
 import { RpcElement, RpcScales } from "@foxglove-studio/app/components/Chart/types";
+import Logger from "@foxglove/log";
+
+const log = Logger.getLogger(__filename);
 
 // allows us to override the chart.ctx instance field which zoom plugin uses for adding event listeners
 type MutableContext = Omit<Chart, "ctx"> & { ctx: any };
@@ -40,26 +43,39 @@ function removeEventListener(emitter: EventEmitter) {
   };
 }
 
+type InitOpts = {
+  id: string;
+  node: OffscreenCanvas;
+  type: ChartType;
+  data: ChartData;
+  options: ChartOptions;
+  devicePixelRatio: number;
+  fontLoaded: Promise<FontFace>;
+};
+
 export default class ChartJSManager {
-  private _chartInstance: Chart;
+  private _chartInstance?: Chart;
   private _fakeNodeEvents = new EventEmitter();
   private _fakeDocumentEvents = new EventEmitter();
-  private _lastDatalabelClickContext?: DatalabelContext = undefined;
+  private _lastDatalabelClickContext?: DatalabelContext;
 
-  constructor({
+  constructor(initOpts: InitOpts) {
+    log.info(`new ChartJSManager(id=${initOpts.id})`);
+    this.init(initOpts);
+  }
+
+  async init({
+    id,
     node,
     type,
     data,
     options,
     devicePixelRatio,
-  }: {
-    id: string;
-    node: OffscreenCanvas;
-    type: ChartType;
-    data: ChartData;
-    options: ChartOptions;
-    devicePixelRatio: number;
-  }) {
+    fontLoaded,
+  }: InitOpts): Promise<void> {
+    const font = await fontLoaded;
+    log.debug(`ChartJSManager(${id}) init, default font "${font.family}" status=${font.status}`);
+
     const fakeNode = {
       addEventListener: addEventListener(this._fakeNodeEvents),
       removeEventListener: removeEventListener(this._fakeNodeEvents),
@@ -81,9 +97,10 @@ export default class ChartJSManager {
       return res;
     };
 
-    const fullOptions = {
+    const fullOptions: ChartOptions = {
       ...this.addFunctionsToConfig(options),
       devicePixelRatio,
+      font: { family: "'Roboto Mono'" },
     };
 
     const chartInstance = new Chart(node, {
@@ -123,19 +140,19 @@ export default class ChartJSManager {
 
   panstart(event: any) {
     event.target.getBoundingClientRect = () => event.target.boundingClientRect;
-    (this._chartInstance as any).$zoom.panStartHandler(event);
+    (this._chartInstance as any)?.$zoom.panStartHandler(event);
     return this.getScales();
   }
 
   panmove(event: any) {
     event.target.getBoundingClientRect = () => event.target.boundingClientRect;
-    (this._chartInstance as any).$zoom.panHandler(event);
+    (this._chartInstance as any)?.$zoom.panHandler(event);
     return this.getScales();
   }
 
   panend(event: any) {
     event.target.getBoundingClientRect = () => event.target.boundingClientRect;
-    (this._chartInstance as any).$zoom.panEndHandler(event);
+    (this._chartInstance as any)?.$zoom.panEndHandler(event);
     return this.getScales();
   }
 
@@ -149,8 +166,11 @@ export default class ChartJSManager {
     options: ChartOptions;
     width: number;
     height: number;
-  }) {
+  }): RpcScales {
     const instance = this._chartInstance;
+    if (instance == undefined) {
+      return {};
+    }
 
     instance.options.plugins = this.addFunctionsToConfig(options).plugins;
 
@@ -182,17 +202,18 @@ export default class ChartJSManager {
 
     // ev is cast to any because the typings for getElementsAtEventForMode are wrong
     // ev is specified as a dom Event - but the implementation does not require it for the basic platform
-    const elements = this._chartInstance.getElementsAtEventForMode(
-      ev as any,
-      this._chartInstance.options.hover?.mode ?? "intersect",
-      this._chartInstance.options.hover ?? {},
-      false,
-    );
+    const elements =
+      this._chartInstance?.getElementsAtEventForMode(
+        ev as any,
+        this._chartInstance.options.hover?.mode ?? "intersect",
+        this._chartInstance.options.hover ?? {},
+        false,
+      ) ?? [];
 
     const out = new Array<RpcElement>();
 
     for (const element of elements) {
-      const data = this._chartInstance.data.datasets[element.datasetIndex]?.data[element.index];
+      const data = this._chartInstance?.data.datasets[element.datasetIndex]?.data[element.index];
       if (data == undefined || typeof data === "number") {
         continue;
       }
@@ -211,8 +232,7 @@ export default class ChartJSManager {
   }
 
   getDatalabelAtEvent({ event }: { event: Event }): unknown {
-    const chartInstance = this._chartInstance;
-    chartInstance.notifyPlugins("beforeEvent", { event });
+    this._chartInstance?.notifyPlugins("beforeEvent", { event });
 
     // clear the stored click context - we have consumed it
     const context = this._lastDatalabelClickContext;
@@ -227,7 +247,7 @@ export default class ChartJSManager {
     const scales: RpcScales = {};
 
     // fill our rpc scales - we only support x and y scales for now
-    const xScale = this._chartInstance.scales.x;
+    const xScale = this._chartInstance?.scales.x;
     if (xScale) {
       scales.x = {
         pixelMin: xScale.left,
@@ -237,7 +257,7 @@ export default class ChartJSManager {
       };
     }
 
-    const yScale = this._chartInstance.scales.y;
+    const yScale = this._chartInstance?.scales.y;
     if (yScale) {
       scales.y = {
         pixelMin: yScale.bottom,

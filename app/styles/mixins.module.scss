@@ -77,14 +77,14 @@ $control-margin: 0 0.2em;
   background-color: $dark5;
 }
 
-$sans-serif-font: "Inter UI", -apple-system, BlinkMacSystemFont, sans-serif;
+$sans-serif-font: "Inter UI";
 
 @mixin sans-serif {
   font-family: $sans-serif-font;
   font-feature-settings: "tnum";
 }
 
-$monospace-font: "Roboto Mono", Menlo, Inconsolata, "Courier New", Courier, monospace;
+$monospace-font: "Roboto Mono";
 @mixin monospace {
   font-family: $monospace-font;
 }

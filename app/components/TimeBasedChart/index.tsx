@@ -48,9 +48,12 @@ import { isBobject } from "@foxglove-studio/app/util/binaryObjects";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { defaultGetHeaderStamp } from "@foxglove-studio/app/util/synchronizeMessages";
 import { maybeGetBobjectHeaderStamp } from "@foxglove-studio/app/util/time";
+import Logger from "@foxglove/log";
 
 import HoverBar from "./HoverBar";
 import TimeBasedChartTooltipContent from "./TimeBasedChartTooltipContent";
+
+const log = Logger.getLogger(__filename);
 
 export type TooltipItem = {
   queriedData: MessagePathDataItem[];
@@ -753,6 +756,8 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     onChartUpdate,
     onHover,
   };
+
+  useEffect(() => log.debug(`<TimeBasedChart> (datasetId=${datasetId})`), [datasetId]);
 
   // avoid rendering if width/height are 0 - usually on initial mount
   // so we don't trigger onChartUpdate if we know we will immediately resize
