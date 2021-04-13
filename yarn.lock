@@ -1884,34 +1884,34 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluentui/react-icon-provider@npm:^1.0.3":
-  version: 1.0.3
-  resolution: "@fluentui/react-icon-provider@npm:1.0.3"
+"@fluentui/react-icon-provider@npm:^1.0.4":
+  version: 1.0.4
+  resolution: "@fluentui/react-icon-provider@npm:1.0.4"
   dependencies:
     "@fluentui/set-version": ^8.0.2
-    "@fluentui/style-utilities": ^8.0.3
+    "@fluentui/style-utilities": ^8.0.4
     tslib: ^1.10.0
   peerDependencies:
     "@types/react": ">=16.8.0 <18.0.0"
     "@types/react-dom": ">=16.8.0 <18.0.0"
     react: ">=16.8.0 <18.0.0"
     react-dom: ">=16.8.0 <18.0.0"
-  checksum: 4f56b49bc5b310dc9bb99dfc8c5876c03147c9446f4b279eb029abe3f11d9dd68955b01eb253a9b7925ba94991ea06c654a2684fa0d5bbafe3c27b2c7516c4d9
+  checksum: 121435978379e7e67f3464f64e22ceb8a3a896a3894c48049cf3fa88180f3c67f62c12fcf4c98733d88d01a061aa4ac903f9c022ac8b3c444a599c7eda28ed04
   languageName: node
   linkType: hard
 
-"@fluentui/react-icons-mdl2@npm:1.0.3":
-  version: 1.0.3
-  resolution: "@fluentui/react-icons-mdl2@npm:1.0.3"
+"@fluentui/react-icons-mdl2@npm:1.0.4":
+  version: 1.0.4
+  resolution: "@fluentui/react-icons-mdl2@npm:1.0.4"
   dependencies:
-    "@fluentui/react-icon-provider": ^1.0.3
+    "@fluentui/react-icon-provider": ^1.0.4
     "@fluentui/set-version": ^8.0.2
-    "@fluentui/utilities": ^8.0.3
+    "@fluentui/utilities": ^8.0.4
     "@microsoft/load-themed-styles": ^1.10.26
     tslib: ^1.10.0
   peerDependencies:
     react: ">=16.8.0 <18.0.0"
-  checksum: b726e8fbd51cd0b5037987a2073a1945ac9921b6bceb5b231f6177ac33a396fe3c31115579639bd77cf95100113e4f732961064cd372fbcfcb33ed2efa3f6b37
+  checksum: b0e3c860264dcd46dc9d1898246fe51254b7eced520e40401d0854b7ff3982044ed8b9290e88dc4fd2724773258b07df9d69a103d5420f7ae699663b50a0c18a
   languageName: node
   linkType: hard
 
@@ -1963,7 +1963,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluentui/style-utilities@npm:^8.0.3, @fluentui/style-utilities@npm:^8.0.4":
+"@fluentui/style-utilities@npm:^8.0.4":
   version: 8.0.4
   resolution: "@fluentui/style-utilities@npm:8.0.4"
   dependencies:
@@ -1992,7 +1992,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluentui/utilities@npm:^8.0.3, @fluentui/utilities@npm:^8.0.4":
+"@fluentui/utilities@npm:^8.0.4":
   version: 8.0.4
   resolution: "@fluentui/utilities@npm:8.0.4"
   dependencies:
@@ -2012,7 +2012,7 @@ __metadata:
   resolution: "@foxglove-studio/app@workspace:app"
   dependencies:
     "@fluentui/react": 8.10.0
-    "@fluentui/react-icons-mdl2": 1.0.3
+    "@fluentui/react-icons-mdl2": 1.0.4
     "@mdi/svg": 5.9.55
     "@storybook/addon-actions": 6.2.5
     "@storybook/addon-essentials": 6.2.5
