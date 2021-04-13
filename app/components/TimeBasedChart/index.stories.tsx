@@ -191,7 +191,7 @@ export const CleansUpTooltipOnUnmount = () => {
 
 CleansUpTooltipOnUnmount.parameters = {
   chromatic: {
-    delay: 500,
+    delay: 2000,
   },
 };
 
