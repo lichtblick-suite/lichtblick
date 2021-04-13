@@ -24,6 +24,7 @@ async function main() {
       pid: getPid(),
       httpServer: new HttpServerNodejs(),
       tcpSocketCreate: TcpSocketNode.Create,
+      log: console,
     });
 
     await rosNode.start();

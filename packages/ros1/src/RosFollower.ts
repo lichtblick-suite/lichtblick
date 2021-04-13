@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { EventEmitter, ListenerFn } from "eventemitter3";
+
 import { HttpServer, XmlRpcServer, XmlRpcValue } from "@foxglove/xmlrpc";
 
 import { RosNode } from "./RosNode";
@@ -32,11 +34,24 @@ function TcpRequested(protocols: XmlRpcValue[]): boolean {
   return false;
 }
 
-export class RosFollower {
+export declare interface RosFollower {
+  on(
+    event: "paramUpdate",
+    listener: (paramKey: string, paramValue: XmlRpcValue, callerId: string) => void,
+  ): this;
+  on(
+    event: "publisherUpdate",
+    listener: (topic: string, publishers: string[], callerId: string) => void,
+  ): this;
+  on(event: string, listener: ListenerFn): this;
+}
+
+export class RosFollower extends EventEmitter {
   private _rosNode: RosNode;
   private _server: XmlRpcServer;
 
   constructor(rosNode: RosNode, httpServer: HttpServer) {
+    super();
     this._rosNode = rosNode;
     this._server = new XmlRpcServer(httpServer);
   }
@@ -142,8 +157,10 @@ export class RosFollower {
       return Promise.reject(err);
     }
 
-    // TODO
-    return Promise.reject(new Error("Not implemented"));
+    const [callerId, paramKey, paramValue] = args as [string, string, XmlRpcValue];
+    this.emit("paramUpdate", paramKey, paramValue, callerId);
+
+    return Promise.resolve([1, "", 0]);
   };
 
   publisherUpdate = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
@@ -152,8 +169,13 @@ export class RosFollower {
       return Promise.reject(err);
     }
 
-    // TODO
-    return Promise.reject(new Error("Not implemented"));
+    const [callerId, topic, publishers] = args as [string, string, string[]];
+    if (!Array.isArray(publishers)) {
+      return Promise.reject(new Error(`invalid publishers list`));
+    }
+    this.emit("publisherUpdate", topic, publishers, callerId);
+
+    return Promise.resolve([1, "", 0]);
   };
 
   requestTopic = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {

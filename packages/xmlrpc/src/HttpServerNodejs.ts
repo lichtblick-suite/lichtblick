@@ -36,7 +36,7 @@ export class HttpServerNodejs implements HttpServer {
     if (addr == undefined || typeof addr === "string") {
       return addr ?? undefined;
     }
-    const hostname = addr.address === "::" ? "[::]" : addr;
+    const hostname = addr.address === "::" ? "[::]" : addr.address;
     return `http://${hostname}${addr.port != undefined ? ":" + String(addr.port) : ""}/`;
   }
 

@@ -195,8 +195,6 @@ export class TcpConnection extends EventEmitter implements Connection {
       idx += len;
     }
 
-    // TODO: Warn if there are leftover bytes
-
     return result;
   }
 }

@@ -6,6 +6,7 @@ import { EventEmitter } from "eventemitter3";
 
 import { HttpServer } from "@foxglove/xmlrpc";
 
+import { LoggerService } from "./LoggerService";
 import { Publication } from "./Publication";
 import { RosFollower } from "./RosFollower";
 import { RosFollowerClient } from "./RosFollowerClient";
@@ -37,6 +38,7 @@ export class RosNode extends EventEmitter {
   private _connectionIdCounter = 0;
   private _tcpServer?: TcpServer;
   private _localApiUrl?: string;
+  private _log?: LoggerService;
 
   constructor(options: {
     name: string;
@@ -46,6 +48,7 @@ export class RosNode extends EventEmitter {
     httpServer: HttpServer;
     tcpSocketCreate: TcpSocketCreate;
     tcpServer?: TcpServer;
+    log?: LoggerService;
   }) {
     super();
     this.name = options.name;
@@ -55,23 +58,29 @@ export class RosNode extends EventEmitter {
     this.rosFollower = new RosFollower(this, options.httpServer);
     this._tcpSocketCreate = options.tcpSocketCreate;
     this._tcpServer = options.tcpServer;
+    this._log = options.log;
   }
 
   async start(port?: number): Promise<void> {
-    return this.rosFollower.start(this.hostname, port);
+    return this.rosFollower
+      .start(this.hostname, port)
+      .then(() => this._log?.debug?.(`rosfollower listening at ${this.rosFollower.url()}`));
   }
 
   shutdown(_msg?: string): void {
+    this._log?.debug?.("shutting down");
     this._running = false;
     this._tcpServer?.close();
     this.rosFollower.close();
-    for (const sub of this.subscriptions.values()) {
-      sub.close();
+
+    for (const subTopic of Array.from(this.subscriptions.keys())) {
+      this.unsubscribe(subTopic);
     }
-    for (const pub of this.publications.values()) {
-      // TODO: Unregister publisher with rosmaster
-      pub.close();
+
+    for (const pubTopic of Array.from(this.publications.keys())) {
+      this.unpublish(pubTopic);
     }
+
     this.subscriptions.clear();
     this.publications.clear();
   }
@@ -81,6 +90,8 @@ export class RosNode extends EventEmitter {
     const md5sum = options.md5sum ?? "*";
     const subscription = new Subscription(topic, md5sum, type);
     this.subscriptions.set(topic, subscription);
+
+    this._log?.debug?.(`subscribing to ${topic} (${type})`);
 
     // Asynchronously register this subscription with rosmaster and connect to
     // each publisher
@@ -99,6 +110,19 @@ export class RosNode extends EventEmitter {
 
     subscription.close();
     this.subscriptions.delete(topic);
+    return true;
+  }
+
+  unpublish(topic: string): boolean {
+    const publication = this.publications.get(topic);
+    if (!publication) {
+      return false;
+    }
+
+    this._unregisterPublisher(topic);
+
+    publication.close();
+    this.publications.delete(topic);
     return true;
   }
 
@@ -177,6 +201,8 @@ export class RosNode extends EventEmitter {
     if (status !== 1) {
       throw new Error(`registerSubscriber() failed. status=${status}, msg="${msg}"`);
     }
+
+    this._log?.debug?.(`registered subscriber to ${subscription.name} (${subscription.dataType})`);
     if (!Array.isArray(publishers)) {
       throw new Error(
         `registerSubscriber() did not receive a list of publishers. value=${publishers}`,
@@ -200,8 +226,35 @@ export class RosNode extends EventEmitter {
       if (status !== 1) {
         throw new Error(`unregisterSubscriber() failed. status=${status}, msg="${msg}"`);
       }
-    } catch (_err) {
-      // TODO: Log this warning
+
+      this._log?.debug?.(`unregistered subscriber to ${topic}`);
+    } catch (err) {
+      // Warn and carry on, the rosmaster graph will be out of sync but there's
+      // not much we can do (it may already be offline)
+      this._log?.warn?.(err, "unregisterSubscriber");
+    }
+  }
+
+  private async _unregisterPublisher(topic: string): Promise<void> {
+    try {
+      const callerApi = this._callerApi();
+
+      // Unregister with rosmaster as a publisher of this topic
+      const [status, msg] = await this.rosMasterClient.unregisterPublisher(
+        this.name,
+        topic,
+        callerApi,
+      );
+
+      if (status !== 1) {
+        throw new Error(`unregisterPublisher() failed. status=${status}, msg="${msg}"`);
+      }
+
+      this._log?.debug?.(`unregistered publisher for ${topic}`);
+    } catch (err) {
+      // Warn and carry on, the rosmaster graph will be out of sync but there's
+      // not much we can do (it may already be offline)
+      this._log?.warn?.(err, "unregisterPublisher");
     }
   }
 
@@ -241,6 +294,9 @@ export class RosNode extends EventEmitter {
         // Call requestTopic on this publisher to register ourselves as a subscriber
         // TODO: Handle this requestTopic() call failing
         const { address, port } = await RosNode.RequestTopic(this.name, topic, rosFollowerClient);
+        this._log?.debug?.(
+          `reigstered with ${pubUrl} as a subscriber to ${topic}, connecting to tcpros://${address}:${port}`,
+        );
 
         if (!this._running) {
           return;
@@ -269,7 +325,7 @@ export class RosNode extends EventEmitter {
         subscription.addPublisher(connectionId, rosFollowerClient, connection);
 
         // Asynchronously initiate the socket connection
-        socket.connect();
+        socket.connect().then(() => this._log?.debug?.(`connected to tcpros://${address}:${port}`));
       }),
     );
   }

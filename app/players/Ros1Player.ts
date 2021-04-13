@@ -31,6 +31,7 @@ import { RosNode, TcpSocket } from "@foxglove/ros1";
 import { HttpServer } from "@foxglove/xmlrpc/src";
 
 const log = Logger.getLogger(__filename);
+const rosLog = Logger.getLogger("ROS1");
 
 const CAPABILITIES: string[] = [];
 const NO_WARNINGS = Object.freeze({});
@@ -86,6 +87,7 @@ export default class Ros1Player implements Player {
         rosMasterUri: this._url,
         httpServer: (httpServer as unknown) as HttpServer,
         tcpSocketCreate,
+        log: rosLog,
       });
     }
 
