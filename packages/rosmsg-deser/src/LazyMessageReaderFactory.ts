@@ -233,12 +233,10 @@ function getterFunction(field: RosMsgField): string {
 // The size functions calculate the size of fields within arrays.
 // The offset methods calculate the start byte of the field within the entire message buffer.
 // The getter de-serializes the field from the message buffer.
-export default function buildReader(types: RosMsgDefinition[]): SerializedMessageReader {
+export default function buildReader(types: readonly RosMsgDefinition[]): SerializedMessageReader {
   const classes = new Array<string>();
 
-  // Build the types in reverse order so the root message appears last
-  // Since the root message depends on custom types we want those to be defined
-  for (const type of types.reverse()) {
+  for (const type of types) {
     const name = sanitizeName(type.name ?? "__RootMsg");
 
     const offsetFns = new Array<string>();
@@ -323,7 +321,9 @@ export default function buildReader(types: RosMsgDefinition[]): SerializedMessag
     classes.push(messageSrc);
   }
 
-  const src = classes.join("\n\n");
+  // Output the types in reverse order so the root message appears last
+  // Since the root message depends on custom types we want those to be defined
+  const src = classes.reverse().join("\n\n");
 
   // close over our builtin deserializers and builtin size functions
   // eslint-disable-next-line no-new-func
