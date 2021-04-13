@@ -710,6 +710,75 @@ return __RootMsg;
 }"
 `;
 
+exports[`LazyReader should deserialize int8 STATUS_ONE = 1
+       int8 STATUS_TWO = 2
+       int8 status: int8 STATUS_ONE = 1
+       int8 STATUS_TWO = 2
+       int8 status 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+
+
+      static status_size(view /* dataview */, offset) {
+          return 1;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+
+
+        // int8 status
+        totalSize += 1;
+        offset += 1;
+      
+            
+            return totalSize;
+        }
+
+        
+          status_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            status: this.status
+          };
+        }
+
+        
+
+get status() {
+        const offset = this.status_offset(this.#view, this.#offset);
+        return readers.int8(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
 exports[`LazyReader should deserialize int8 first
 int8 second: int8 first
 int8 second 1`] = `

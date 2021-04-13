@@ -203,6 +203,14 @@ describe("LazyReader", () => {
         custom: [{ first: 0x02 }, { first: 0x03 }, { first: 0x04 }],
       },
     ],
+    // ignore constants
+    [
+      `int8 STATUS_ONE = 1
+       int8 STATUS_TWO = 2
+       int8 status`,
+      [0x02],
+      { status: 2 },
+    ],
   ])("should deserialize %s", (msgDef: string, arr: Iterable<number>, expected: any) => {
     const buffer = Uint8Array.from(arr);
     const reader = new LazyMessageReader(parseMessageDefinition(msgDef));

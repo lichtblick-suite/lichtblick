@@ -71,6 +71,10 @@ interface SerializedMessageReader {
 
 // Return a static size function for our @param field
 function sizeFunction(field: RosMsgField): string {
+  if (field.isConstant === true) {
+    return "";
+  }
+
   const fieldSize = fixedSizeTypes.get(field.type);
 
   // if the field size is not known, size will be calculated on-demand
@@ -122,6 +126,10 @@ function sizeFunction(field: RosMsgField): string {
 
 // Return the part of the static size() function for our message class for @param field
 function sizePartForDefinition(field: RosMsgField): string {
+  if (field.isConstant === true) {
+    return "";
+  }
+
   const fieldSize = fixedSizeTypes.get(field.type);
   const isFixedArray = field.isArray === true && field.arrayLength != undefined;
 
@@ -154,6 +162,10 @@ function sizePartForDefinition(field: RosMsgField): string {
 
 // Create a getter function for the field
 function getterFunction(field: RosMsgField): string {
+  if (field.isConstant === true) {
+    return "";
+  }
+
   const isBuiltinReader = field.type in deserializers;
   const isBuiltinSize = field.type in builtinSizes;
 
