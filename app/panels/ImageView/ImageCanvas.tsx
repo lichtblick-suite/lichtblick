@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { ContextualMenu } from "@fluentui/react";
 import MagnifyIcon from "@mdi/svg/svg/magnify.svg";
 import cx from "classnames";
 import isEqual from "lodash/isEqual";
@@ -22,9 +23,8 @@ import shallowequal from "shallowequal";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
-import ContextMenu from "@foxglove-studio/app/components/ContextMenu";
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
-import Menu, { Item } from "@foxglove-studio/app/components/Menu";
+import { Item } from "@foxglove-studio/app/components/Menu";
 import { Message, Topic } from "@foxglove-studio/app/players/types";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { CameraInfo } from "@foxglove-studio/app/types/Messages";
@@ -67,6 +67,7 @@ type Props = {
 type State = {
   error?: Error;
   openZoomChart: boolean;
+  contextMenuEvent?: MouseEvent;
 };
 
 const SErrorMessage = styled.div`
@@ -101,7 +102,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
   _divRef = React.createRef<HTMLDivElement>();
   _id: string;
   _canvasRenderer: CanvasRenderer;
-  state = {
+  state: State = {
     error: undefined,
     openZoomChart: false,
   };
@@ -321,13 +322,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
   onCanvasRightClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     e.stopPropagation();
     e.preventDefault();
-    return ContextMenu.show(
-      e.clientX,
-      e.clientY,
-      <Menu>
-        <Item onClick={this.downloadImage}>Download Image</Item>
-      </Menu>,
-    );
+    this.setState({ contextMenuEvent: e.nativeEvent });
   };
 
   clickMagnify = () => {
@@ -563,6 +558,13 @@ export default class ImageCanvas extends React.Component<Props, State> {
               ref={this._setCanvasRef}
               className={styles.canvas}
             />
+            {this.state.contextMenuEvent && (
+              <ContextualMenu
+                target={this.state.contextMenuEvent}
+                onDismiss={() => this.setState({ contextMenuEvent: undefined })}
+                items={[{ key: "download", text: "Download Image", onClick: this.downloadImage }]}
+              />
+            )}
           </div>
           <OutsideClickHandler
             onOutsideClick={() => {

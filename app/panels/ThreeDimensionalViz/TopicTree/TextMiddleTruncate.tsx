@@ -58,7 +58,7 @@ export default function TextMiddleTruncate({
   endTextLength,
   style,
   testShowTooltip,
-}: Props) {
+}: Props): React.ReactElement {
   const startTextLen = Math.max(0, text.length - (endTextLength || DEFAULT_END_TEXT_LENGTH));
   const startText = text.substr(0, startTextLen);
   const endText = text.substr(startTextLen);
@@ -69,11 +69,9 @@ export default function TextMiddleTruncate({
       <SEnd>{endText}</SEnd>
     </STextMiddleTruncate>
   );
-  return tooltips ? (
-    <Tooltip contents={tooltips} placement="top" defaultShown={testShowTooltip}>
+  return (
+    <Tooltip contents={tooltips} placement="top" shown={testShowTooltip}>
       {elem}
     </Tooltip>
-  ) : (
-    elem
   );
 }

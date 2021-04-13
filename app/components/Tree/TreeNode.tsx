@@ -222,8 +222,8 @@ export default class TreeNode extends Component<Props> {
             </Icon>
           )}
           {extraIcon}
-          <span className={cx("node-text", styles.text)}>
-            <Tooltip contents={tooltipContents} offset={{ x: 0, y: 8 }}>
+          <span className={styles.text}>
+            <Tooltip contents={tooltipContents}>
               <span>{node.text}</span>
             </Tooltip>
           </span>

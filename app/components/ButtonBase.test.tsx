@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { mount } from "enzyme";
-import { SyntheticEvent } from "react";
 
 import Button from "./ButtonBase";
 
@@ -66,70 +65,5 @@ describe("<Button />", () => {
     expect(classes).toContain("is-warning");
     expect(classes).toContain("is-danger");
     el.unmount();
-  });
-
-  it("delayed button click event does not fire on click", (done: any) => {
-    const fail = () => done("Should not have called click callback");
-    const el = mount(
-      <Button delay={1000} onClick={fail}>
-        hello
-      </Button>,
-    );
-    el.simulate("click");
-    setImmediate(() => {
-      el.unmount();
-      done();
-    });
-  });
-
-  it("delays click callback when mouse is down", (done) => {
-    let clicked = false;
-    const onClick = (e: SyntheticEvent<HTMLButtonElement>) => {
-      clicked = true;
-      expect(e).toBeTruthy();
-      done();
-      el.unmount();
-    };
-    const el = mount(
-      <Button delay={10} onClick={onClick} progressClassName="foo">
-        hello
-      </Button>,
-    );
-    el.simulate("mouseDown");
-    expect(clicked).toBe(false);
-  });
-
-  it("can control mousedown via external calls", (done: any) => {
-    const onClick = () => {
-      el.unmount();
-      done();
-    };
-    const el = mount<Button>(
-      <Button delay={10} onClick={onClick}>
-        testing
-      </Button>,
-    );
-    el.instance().onMouseDown({
-      persist: () => {
-        // do nothing
-      },
-    } as any);
-  });
-
-  it("unmounting cancels done callback", (done: any) => {
-    const el = mount<Button>(
-      <Button delay={1} onClick={() => done("Should not call done callback")}>
-        testing
-      </Button>,
-    );
-    el.instance().onMouseDown({
-      persist: () => {
-        // do nothing
-      },
-    } as any);
-    setImmediate(() => {
-      el.unmount();
-      done();
-    });
   });
 });

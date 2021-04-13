@@ -41,8 +41,7 @@ import {
 } from "@foxglove-studio/app/components/PlaybackControls/sharedHelpers";
 import PlaybackSpeedControls from "@foxglove-studio/app/components/PlaybackSpeedControls";
 import Slider from "@foxglove-studio/app/components/Slider";
-import tooltipStyles from "@foxglove-studio/app/components/Tooltip.module.scss";
-import Tooltip from "@foxglove-studio/app/components/TooltipBase";
+import { useTooltip } from "@foxglove-studio/app/components/Tooltip";
 import { PlayerState, PlayerStateActiveData } from "@foxglove-studio/app/players/types";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { formatTime } from "@foxglove-studio/app/util/formatTime";
@@ -95,6 +94,15 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
     const el = useRef<HTMLDivElement>(ReactNull);
     const slider = useRef<Slider>(ReactNull);
     const [repeat, setRepeat] = useState(false);
+    const [tooltipState, setTooltipState] = useState<
+      { x: number; y: number; tip: JSX.Element } | undefined
+    >();
+    const { tooltip } = useTooltip({
+      shown: tooltipState != undefined,
+      noPointerEvents: true,
+      targetPosition: { x: tooltipState?.x ?? 0, y: tooltipState?.y ?? 0 },
+      contents: tooltipState?.tip,
+    });
     const { seek, pause, play, player } = props;
 
     // playerState is unstable, and will cause callbacks to change identity every frame. They can take
@@ -138,17 +146,13 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
         const timeFromStart = subtractTimes(stamp, startTime);
 
         const tip = (
-          <div className={classnames(tooltipStyles.tooltip, styles.tip)}>
+          <div className={styles.tip}>
             <TooltipItem title="ROS" value={formatTimeRaw(stamp)} />
             <TooltipItem title="Time" value={formatTime(stamp)} />
             <TooltipItem title="Elapsed" value={`${toSec(timeFromStart).toFixed(9)} sec`} />
           </div>
         );
-        Tooltip.show(x, y, tip, {
-          placement: "top",
-          offset: { x: 0, y: 0 },
-          arrow: <div className={tooltipStyles.arrow} />,
-        });
+        setTooltipState({ x, y, tip });
         dispatch(
           setHoverValue({
             componentId: hoverComponentId,
@@ -161,11 +165,11 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
     );
 
     const onMouseLeave = useCallback(() => {
-      Tooltip.hide();
+      setTooltipState(undefined);
       dispatch(clearHoverValue({ componentId: hoverComponentId }));
     }, [dispatch, hoverComponentId]);
 
-    // Clean up the tooltip when we are unmounted -- important for storybook.
+    // Clean up the hover value when we are unmounted -- important for storybook.
     useEffect(() => onMouseLeave, [onMouseLeave]);
 
     const { activeData, progress } = player;
@@ -214,8 +218,9 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
             onClick={() => jumpSeek(DIRECTION.BACKWARD, { seek, player: playerState.current })}
             style={{ borderRadius: "4px 0px 0px 4px", marginLeft: "16px", marginRight: "1px" }}
             className={cx([styles.seekBtn, { [styles.inactive!]: !activeData }])}
+            tooltip="Seek backward"
           >
-            <Icon medium tooltip="Seek backward">
+            <Icon medium>
               <SkipPreviousOutlineIcon />
             </Icon>
           </Button>
@@ -223,8 +228,9 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
             onClick={() => jumpSeek(DIRECTION.FORWARD, { seek, player: playerState.current })}
             style={{ borderRadius: "0px 4px 4px 0px" }}
             className={cx([styles.seekBtn, { [styles.inactive!]: !activeData }])}
+            tooltip="Seek forward"
           >
-            <Icon medium tooltip="Seek forward">
+            <Icon medium>
               <SkipNextOutlineIcon />
             </Icon>
           </Button>
@@ -235,6 +241,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
 
     return (
       <Flex row className={styles.container}>
+        {tooltip}
         <KeyListener global keyDownHandlers={keyDownHandlers} />
         <MessageOrderControls />
         <PlaybackSpeedControls />

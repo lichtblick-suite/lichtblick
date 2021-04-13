@@ -8,6 +8,8 @@ import {
   IOverlayStyles,
   IModalStyles,
   IComboBoxStyles,
+  ITooltipStyles,
+  ITooltipStyleProps,
 } from "@fluentui/react";
 import { createTheme } from "@fluentui/theme";
 
@@ -58,6 +60,18 @@ export default createTheme({
           },
         },
       } as Partial<IComboBoxStyles>,
+    },
+    Tooltip: {
+      styles: ({ theme }: ITooltipStyleProps): Partial<ITooltipStyles> => ({
+        root: {
+          padding: 6,
+          background: theme.palette.neutralDark,
+        },
+        content: {
+          background: theme.palette.neutralDark,
+          color: theme.palette.neutralLight,
+        },
+      }),
     },
     // Prevent Layer from overriding root styles - similar to `applyTo="none"` on ThemeProvider.
     // https://github.com/microsoft/fluentui/issues/17701

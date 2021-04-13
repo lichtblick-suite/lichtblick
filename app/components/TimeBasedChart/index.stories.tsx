@@ -12,6 +12,8 @@
 //   You may not use this file except in compliance with the License.
 import cloneDeep from "lodash/cloneDeep";
 import { useState, useCallback, useRef } from "react";
+import TestUtils from "react-dom/test-utils";
+import { useMount } from "react-use";
 
 import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
 import { triggerWheel } from "@foxglove-studio/app/stories/PanelSetup";
@@ -160,24 +162,26 @@ CanZoomAndUpdate.parameters = {
 
 export const CleansUpTooltipOnUnmount = () => {
   const [hasRenderedOnce, setHasRenderedOnce] = useState<boolean>(false);
-  const refFn = useCallback(async () => {
+  useMount(async () => {
     await new Promise((resolve) => setTimeout(resolve, 200));
 
     const [canvas] = document.getElementsByTagName("canvas");
     const { top, left } = canvas!.getBoundingClientRect();
-    document.dispatchEvent(
-      new MouseEvent("mousemove", { clientX: 363 + left, clientY: 650 + top }),
-    );
+    TestUtils.Simulate.mouseMove(canvas!, { clientX: 333 + left, clientY: 650 + top });
     await new Promise((resolve) => setTimeout(resolve, 100));
+    const tooltip = document.querySelector("[data-test~=TimeBasedChartTooltipContent]");
+    if (tooltip == undefined) {
+      throw new Error("could not find tooltip");
+    }
     setHasRenderedOnce(true);
-  }, []);
+  });
 
   if (hasRenderedOnce) {
     return ReactNull;
   }
 
   return (
-    <div style={{ width: "100%", height: "100%", background: "black" }} ref={refFn}>
+    <div style={{ width: "100%", height: "100%", background: "black" }}>
       <MockMessagePipelineProvider>
         <TimeBasedChart {...commonProps} />
       </MockMessagePipelineProvider>

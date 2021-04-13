@@ -13,62 +13,7 @@
 
 import cx from "classnames";
 
-export const PROGRESS_DIRECTION = Object.freeze({
-  HORIZONTAL: "horizontal",
-  PULSE: "pulse",
-  VERTICAL: "vertical",
-} as const);
-export type ProgressDirection = typeof PROGRESS_DIRECTION[keyof typeof PROGRESS_DIRECTION];
-
-let keyframesInjected = false;
-function injectKeyframes() {
-  if (keyframesInjected) {
-    return;
-  }
-  const style = document.createElement("style");
-  style.innerHTML = `
-    @keyframes cruise-automation-button-pulse {
-      0%,
-      100%  {
-        opacity: 0.9;
-      }
-      50% {
-        opacity: 0.2;
-      }
-    }
-  `;
-  if (!document.body) {
-    throw new Error("no document.body");
-  }
-  document.body.appendChild(style);
-  keyframesInjected = true;
-}
-
-type ProgressProps = {
-  customStyle?: {
-    [key: string]: any;
-  };
-  direction?: ProgressDirection;
-  percentage: number;
-};
-
-function getProgressStyle(props: ProgressProps) {
-  const { direction, percentage, customStyle } = props;
-  if (direction === PROGRESS_DIRECTION.PULSE) {
-    return {
-      ...customStyle,
-      width: "100%",
-      height: "100%",
-    };
-  }
-  return {
-    ...customStyle,
-    width: direction === PROGRESS_DIRECTION.HORIZONTAL ? `${percentage}%` : "100%",
-    height: direction !== PROGRESS_DIRECTION.HORIZONTAL ? `${percentage}%` : "100%",
-  };
-}
-
-type Props = {
+export type Props = {
   id?: string;
   small?: boolean;
   large?: boolean;
@@ -82,35 +27,16 @@ type Props = {
   onMouseLeave?: (event: React.SyntheticEvent<HTMLButtonElement>) => void;
   children: React.ReactNode;
   className?: string;
-  delay?: number;
-  progressClassName?: string;
-  progressDirection?: ProgressDirection;
-  progressStyle?: {
-    [key: string]: any;
-  };
   style?: {
     [key: string]: any;
   };
   tooltip?: string;
+  innerRef?: React.Ref<HTMLButtonElement>;
 };
 
-type State = {
-  mouseDown: boolean;
-  progressPercentage: number;
-};
-
-export default class Button extends React.Component<Props, State> {
+class ButtonBaseImpl extends React.Component<Props> {
   animationId?: ReturnType<typeof requestAnimationFrame>;
   cancelTimeoutId?: ReturnType<typeof setTimeout>;
-
-  static defaultProps = {
-    progressDirection: PROGRESS_DIRECTION.VERTICAL,
-  };
-
-  state = {
-    mouseDown: false,
-    progressPercentage: 0,
-  };
 
   componentWillUnmount() {
     if (this.animationId) {
@@ -120,18 +46,6 @@ export default class Button extends React.Component<Props, State> {
       clearTimeout(this.cancelTimeoutId);
     }
   }
-
-  onDelayFinished = (e: React.SyntheticEvent<HTMLButtonElement>) => {
-    const { onClick } = this.props;
-    // slightly delay reseting to a non-progress state
-    // this allows the consumer to apply some kind of 'toggled on' class to the button
-    // and also makes the interaction slightly less jarring
-    this.cancelTimeoutId = setTimeout(this.cancelDown, 100);
-    if (!onClick) {
-      return;
-    }
-    onClick(e);
-  };
 
   onMouseUp = (e: React.SyntheticEvent<HTMLButtonElement>) => {
     const { onMouseUp } = this.props;
@@ -149,92 +63,18 @@ export default class Button extends React.Component<Props, State> {
     }
   };
 
-  onMouseDown = (e: React.SyntheticEvent<HTMLButtonElement>) => {
-    const { delay } = this.props;
-    if (!delay) {
-      return;
-    }
-    // we need to remove the event from the pool to use it after a delay
-    e.persist();
-    // call animate after state change because this.setState is async
-    const onComplete = () => this.onDelayFinished(e);
-    const start = Date.now();
-    this.setState({ mouseDown: true }, () => this.animate(start, onComplete));
-  };
-
-  animate(startStamp: number, doneCallback: () => void) {
-    const { mouseDown } = this.state;
-    const { delay } = this.props;
-    if (!mouseDown || !delay) {
-      return;
-    }
-    // if just finshed a previous click there might be a pending cancel operation
-    // so clear it out
-    if (this.cancelTimeoutId) {
-      clearTimeout(this.cancelTimeoutId);
-    }
-
-    this.animationId = requestAnimationFrame(() => {
-      const tickStamp = Date.now();
-      const progressPercentage = Math.min(((tickStamp - startStamp) / delay) * 100, 100);
-      this.setState({ progressPercentage });
-      if (progressPercentage < 100) {
-        this.animate(startStamp, doneCallback);
-        return;
-      }
-      doneCallback();
-    });
-  }
-
   onClick = (e: React.SyntheticEvent<HTMLButtonElement>) => {
-    const { onClick, delay } = this.props;
+    const { onClick } = this.props;
     e.stopPropagation();
     e.preventDefault();
-    if (onClick && !delay) {
+    if (onClick) {
       onClick(e);
     }
   };
 
   cancelDown = () => {
-    this.setState({ mouseDown: false, progressPercentage: 0 });
+    this.setState({ mouseDown: false });
   };
-
-  renderProgressBar() {
-    const { delay, progressClassName, progressStyle, progressDirection } = this.props;
-    const { mouseDown, progressPercentage } = this.state;
-    // don't render a bar if we aren't a delay button
-    if (!delay || !mouseDown) {
-      return ReactNull;
-    }
-
-    if (progressDirection === PROGRESS_DIRECTION.PULSE) {
-      injectKeyframes();
-    }
-
-    // allow user supplied classname to supercede built in class
-    return (
-      <span
-        style={{
-          content: "",
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          zIndex: 1,
-          backgroundColor: "rgba(0, 0, 0, 0.5)",
-          animation:
-            progressDirection === PROGRESS_DIRECTION.PULSE
-              ? "cruise-automation-button-pulse 1s linear infinite"
-              : undefined,
-          ...getProgressStyle({
-            direction: progressDirection,
-            percentage: progressPercentage,
-            customStyle: progressStyle,
-          }),
-        }}
-        className={progressClassName}
-      />
-    );
-  }
 
   render() {
     const {
@@ -250,6 +90,7 @@ export default class Button extends React.Component<Props, State> {
       style,
       tooltip,
       onFocus,
+      innerRef,
     } = this.props;
     const classes = cx("button", className || "", {
       // support some bulma classes to be supplied in consumer either through bulma or custom classes
@@ -268,16 +109,18 @@ export default class Button extends React.Component<Props, State> {
         id={id}
         onClick={this.onClick}
         onFocus={onFocus}
-        onMouseDown={this.onMouseDown}
         onMouseLeave={this.onMouseLeave}
         onMouseUp={this.onMouseUp}
         style={{ position: "relative", zIndex: 0, overflow: "hidden", ...style }}
         title={tooltip}
         disabled={disabled}
+        ref={innerRef}
       >
         {children}
-        {this.renderProgressBar()}
       </button>
     );
   }
 }
+export default React.forwardRef<HTMLButtonElement, Props>(function ButtonBase(props, ref) {
+  return <ButtonBaseImpl {...props} innerRef={ref} />;
+});

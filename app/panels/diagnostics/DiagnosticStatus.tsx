@@ -343,20 +343,20 @@ class DiagnosticStatus extends React.Component<Props, any> {
               <td style={{ padding: 0, borderLeft: "none" }} />
             </tr>
             <tr className={cx(style.section, statusClass)}>
-              <Tooltip
-                placement="bottom"
-                contents={
-                  <div>
-                    Hardware ID: <code>{status.hardware_id}</code>
-                    <br />
-                    Name: <code>{status.name}</code>
-                  </div>
-                }
-              >
-                <th data-test="DiagnosticStatus-display-name" colSpan={2}>
-                  {displayName}
-                </th>
-              </Tooltip>
+              <th data-test="DiagnosticStatus-display-name" colSpan={2}>
+                <Tooltip
+                  placement="bottom"
+                  contents={
+                    <div>
+                      Hardware ID: <code>{status.hardware_id}</code>
+                      <br />
+                      Name: <code>{status.name}</code>
+                    </div>
+                  }
+                >
+                  <span>{displayName}</span>
+                </Tooltip>
+              </th>
             </tr>
             <tr className={cx(style.row, statusClass)}>
               <td colSpan={2}>

@@ -34,7 +34,7 @@ type Props = {
     [key: string]: any;
   };
   tooltip?: React.ReactNode;
-  tooltipProps?: React.ComponentProps<typeof Tooltip>;
+  tooltipProps?: Partial<React.ComponentProps<typeof Tooltip> & { alwaysShown?: false }>;
   dataTest?: string;
 };
 
