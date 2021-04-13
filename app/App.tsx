@@ -12,15 +12,7 @@
 
 import { ActionButton, Modal } from "@fluentui/react";
 import AlertIcon from "@mdi/svg/svg/alert.svg";
-import {
-  ReactElement,
-  useState,
-  CSSProperties,
-  useEffect,
-  useMemo,
-  useRef,
-  useCallback,
-} from "react";
+import { ReactElement, useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { DndProvider } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
 import { Provider, useDispatch } from "react-redux";
@@ -63,6 +55,7 @@ import {
   PlayerSourceDefinition,
   usePlayerSelection,
 } from "@foxglove-studio/app/context/PlayerSelectionContext";
+import WindowGeometryContext from "@foxglove-studio/app/context/WindowGeometryContext";
 import experimentalFeatures from "@foxglove-studio/app/experimentalFeatures";
 import welcomeLayout from "@foxglove-studio/app/layouts/welcomeLayout";
 import { PlayerPresence } from "@foxglove-studio/app/players/types";
@@ -114,11 +107,6 @@ function Root() {
     }
   }, [dispatch, setPlayerFromDemoBag, isMounted]);
 
-  // On MacOS we use inset window controls, when the window is full-screen these controls are not present
-  // We detect the full screen state and adjust our rendering accordingly
-  // Note: this does not removed the handlers so should be done at the highest component level
-  const [isFullScreen, setFullScreen] = useState(false);
-
   const handleInternalLink = useCallback((event: React.MouseEvent, href: string) => {
     if (href === "#help:message-path-syntax") {
       event.preventDefault();
@@ -134,9 +122,6 @@ function Root() {
     // Add a hook for integration tests.
     (window as TestableWindow).setPanelLayout = (payload: ImportPanelLayoutPayload) =>
       dispatch(importPanelLayout(payload));
-
-    OsContextSingleton?.addIpcEventListener("enter-full-screen", () => setFullScreen(true));
-    OsContextSingleton?.addIpcEventListener("leave-full-screen", () => setFullScreen(false));
 
     // For undo/redo events, first try the browser's native undo/redo, and if that is disabled, then
     // undo/redo the layout history. Note that in GlobalKeyListener we also handle the keyboard
@@ -163,14 +148,6 @@ function Root() {
     );
     OsContextSingleton?.addIpcEventListener("open-welcome-layout", () => openWelcomeLayout());
   }, [dispatch, openWelcomeLayout]);
-
-  const toolbarStyle = useMemo<CSSProperties | undefined>(() => {
-    const insetWindowControls = OsContextSingleton?.platform === "darwin" && !isFullScreen;
-    if (insetWindowControls) {
-      return { marginLeft: "78px", borderLeft: "2px groove #29292f" };
-    }
-    return undefined;
-  }, [isFullScreen]);
 
   const appConfiguration = useAppConfiguration();
 
@@ -227,7 +204,7 @@ function Root() {
           </RenderToBodyComponent>
         )}
 
-        <Toolbar style={toolbarStyle} onDoubleClick={OsContextSingleton?.handleToolbarDoubleClick}>
+        <Toolbar onDoubleClick={OsContextSingleton?.handleToolbarDoubleClick}>
           <SToolbarItem>
             <TinyConnectionPicker />
           </SToolbarItem>
@@ -294,10 +271,23 @@ export default function App(): ReactElement {
     },
   ];
 
+  // On MacOS we use inset window controls, when the window is full-screen these controls are not present
+  // We detect the full screen state and adjust our rendering accordingly
+  // Note: this does not removed the handlers so should be done at the highest component level
+  const [isFullScreen, setFullScreen] = useState(false);
+  useEffect(() => {
+    OsContextSingleton?.addIpcEventListener("enter-full-screen", () => setFullScreen(true));
+    OsContextSingleton?.addIpcEventListener("leave-full-screen", () => setFullScreen(false));
+  }, []);
+
+  const insetToolbar = OsContextSingleton?.platform === "darwin" && !isFullScreen;
+  const windowGeometry = useMemo(() => ({ insetToolbar }), [insetToolbar]);
+
   const providers = [
     /* eslint-disable react/jsx-key */
     <OsContextAppConfigurationProvider />,
     <OsContextLayoutStorageProvider />,
+    <WindowGeometryContext.Provider value={windowGeometry} />,
     <Provider store={globalStore} />,
     <AnalyticsProvider />,
     <ExperimentalFeaturesLocalStorageProvider features={experimentalFeatures} />,

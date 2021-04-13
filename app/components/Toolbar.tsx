@@ -11,19 +11,24 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import cx from "classnames";
 import { ReactNode, useCallback } from "react";
+
+import { useWindowGeometry } from "@foxglove-studio/app/context/WindowGeometryContext";
 
 import styles from "./Toolbar.module.scss";
 
 type Props = {
   children: ReactNode;
-  style?: React.CSSProperties;
   className?: string;
   onDoubleClick?: () => void;
 };
 
 function Toolbar(props: Props): React.ReactElement {
-  const { style, className = "", onDoubleClick } = props;
+  const { className = "", onDoubleClick } = props;
+
+  const { insetToolbar } = useWindowGeometry();
+
   const clickHandler = useCallback(
     (event: React.MouseEvent) => {
       // Only process the click event if the toolbar itself was clicked, not e.g. a button
@@ -34,7 +39,12 @@ function Toolbar(props: Props): React.ReactElement {
     [onDoubleClick],
   );
   return (
-    <div className={`${styles.toolbar} ${className}`} style={style} onDoubleClick={clickHandler}>
+    <div
+      className={cx(styles.toolbar, className, {
+        [styles.insetToolbar as string]: insetToolbar,
+      })}
+      onDoubleClick={clickHandler}
+    >
       {props.children}
     </div>
   );

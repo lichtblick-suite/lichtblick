@@ -1,2 +1,5 @@
 $topBarHeight: 40px;
 $playbackControlHeight: 60px;
+:export {
+  topBarHeight: $topBarHeight;
+}
