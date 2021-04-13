@@ -11,9 +11,10 @@ export default function mockSubscribeToNewsletter(email: string): Promise<void> 
 
 // Decorator for all stories to allow passing a mock function implementation in `parameters.mockSubscribeToNewsletter`
 // Example: https://storybook.js.org/docs/react/workflows/build-pages-with-storybook#mocking-imports
-export function withMockSubscribeToNewsletter(Story: Story, { parameters }: StoryContext) {
-  if (parameters && parameters.mockSubscribeToNewsletter) {
-    nextFn = parameters.mockSubscribeToNewsletter;
-  }
-  return <Story />;
+export function withMockSubscribeToNewsletter(
+  Child: Story,
+  { parameters }: StoryContext,
+): JSX.Element {
+  nextFn = parameters?.mockSubscribeToNewsletter;
+  return <Child />;
 }

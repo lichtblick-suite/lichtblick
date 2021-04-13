@@ -4,6 +4,7 @@ env:
   node: true
 
 ignorePatterns:
+  - "!.storybook"
   - storybook-static
   # This file triggers an eslint bug because of our {fs: false} setting in webpack config.
   # But for some reason it only happens locally, not in CI.
