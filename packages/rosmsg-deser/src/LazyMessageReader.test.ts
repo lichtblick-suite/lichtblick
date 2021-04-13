@@ -211,6 +211,30 @@ describe("LazyReader", () => {
       [0x02],
       { status: 2 },
     ],
+    // An array of custom types which themselves have a custom type
+    // This tests an array's ability to properly size custom types
+    [
+      `CustomType[] custom
+    ============
+    MSG: custom_type/CustomType
+    MoreCustom another
+    ============
+    MSG: custom_type/MoreCustom
+    uint8 field`,
+      [
+        ...[0x03, 0x00, 0x00, 0x00], // length
+        0x02,
+        0x03,
+        0x04,
+      ],
+      {
+        custom: [
+          { another: { field: 0x02 } },
+          { another: { field: 0x03 } },
+          { another: { field: 0x04 } },
+        ],
+      },
+    ],
   ])("should deserialize %s", (msgDef: string, arr: Iterable<number>, expected: any) => {
     const buffer = Uint8Array.from(arr);
     const reader = new LazyMessageReader(parseMessageDefinition(msgDef));

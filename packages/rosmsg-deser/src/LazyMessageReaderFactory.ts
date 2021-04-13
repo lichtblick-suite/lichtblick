@@ -125,7 +125,7 @@ function sizeFunction(field: RosMsgField): string {
 }
 
 // Return the part of the static size() function for our message class for @param field
-function sizePartForDefinition(field: RosMsgField): string {
+function sizePartForDefinition(className: string, field: RosMsgField): string {
   if (field.isConstant === true) {
     return "";
   }
@@ -153,7 +153,7 @@ function sizePartForDefinition(field: RosMsgField): string {
   return `
     // ${field.type} ${field.name}
     {
-        const size = this.${field.name}_size(view, offset);
+        const size = ${className}.${field.name}_size(view, offset);
         totalSize += size;
         offset += size;
     }
@@ -286,7 +286,7 @@ export default function buildReader(types: readonly RosMsgDefinition[]): Seriali
             let totalSize = 0;
             let offset = initOffset;
 
-            ${type.definitions.map(sizePartForDefinition).join("\n")}
+            ${type.definitions.map(sizePartForDefinition.bind(undefined, name)).join("\n")}
             
             return totalSize;
         }

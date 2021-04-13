@@ -76,7 +76,7 @@ class __RootMsg {
             
     // custom_type/CustomType custom
     {
-        const size = this.custom_size(view, offset);
+        const size = __RootMsg.custom_size(view, offset);
         totalSize += size;
         offset += size;
     }
@@ -116,6 +116,191 @@ class __RootMsg {
         const offset = this.custom_offset(this.#view, this.#offset);
         return custom_type_CustomType.build(this.#view, offset);
       }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize CustomType[] custom
+    ============
+    MSG: custom_type/CustomType
+    MoreCustom another
+    ============
+    MSG: custom_type/MoreCustom
+    uint8 field: CustomType[] custom
+    ============
+    MSG: custom_type/CustomType
+    MoreCustom another
+    ============
+    MSG: custom_type/MoreCustom
+    uint8 field 1`] = `
+"function anonymous(readers,sizes
+) {
+class custom_type_MoreCustom {
+        
+      static field_size(view /* dataview */, offset) {
+          return 1;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // uint8 field
+        totalSize += 1;
+        offset += 1;
+      
+            
+            return totalSize;
+        }
+
+        
+          field_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of custom_type_MoreCustom from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new custom_type_MoreCustom(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            field: this.field
+          };
+        }
+
+        get field() {
+        const offset = this.field_offset(this.#view, this.#offset);
+        return readers.uint8(this.#view, offset);
+      }
+    }
+
+class custom_type_CustomType {
+        
+      static another_size(view /* dataview */, offset) {
+          return custom_type_MoreCustom.size(view, offset);
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+    // custom_type/MoreCustom another
+    {
+        const size = custom_type_CustomType.another_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+            
+            return totalSize;
+        }
+
+        
+          another_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of custom_type_CustomType from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new custom_type_CustomType(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            another: this.another
+          };
+        }
+
+        get another() {
+        const offset = this.another_offset(this.#view, this.#offset);
+        return custom_type_MoreCustom.build(this.#view, offset);
+      }
+    }
+
+class __RootMsg {
+        
+          static custom_size(view /* dataview */, offset) {
+              return sizes.array(view, offset, custom_type_CustomType.size);
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+    // custom_type/CustomType custom
+    {
+        const size = __RootMsg.custom_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+            
+            return totalSize;
+        }
+
+        
+          custom_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            custom: this.custom
+          };
+        }
+
+        
+          // custom_type/CustomType[] custom
+          get custom() {
+            const offset = this.custom_offset(this.#view, this.#offset);
+            return readers.dynamicArray(this.#view, offset, custom_type_CustomType.build, custom_type_CustomType.size);
+          }
     }
 return __RootMsg;
 }"
@@ -197,7 +382,7 @@ class __RootMsg {
             
     // custom_type/CustomType custom
     {
-        const size = this.custom_size(view, offset);
+        const size = __RootMsg.custom_size(view, offset);
         totalSize += size;
         offset += size;
     }
@@ -320,7 +505,7 @@ class __RootMsg {
             
     // custom_type/CustomType custom
     {
-        const size = this.custom_size(view, offset);
+        const size = __RootMsg.custom_size(view, offset);
         totalSize += size;
         offset += size;
     }
@@ -444,7 +629,7 @@ class __RootMsg {
             
     // float32 arr
     {
-        const size = this.arr_size(view, offset);
+        const size = __RootMsg.arr_size(view, offset);
         totalSize += size;
         offset += size;
     }
@@ -517,7 +702,7 @@ class __RootMsg {
             
     // float32 first
     {
-        const size = this.first_size(view, offset);
+        const size = __RootMsg.first_size(view, offset);
         totalSize += size;
         offset += size;
     }
@@ -525,7 +710,7 @@ class __RootMsg {
 
     // float32 second
     {
-        const size = this.second_size(view, offset);
+        const size = __RootMsg.second_size(view, offset);
         totalSize += size;
         offset += size;
     }
@@ -999,7 +1184,7 @@ class __RootMsg {
             
     // int8 first
     {
-        const size = this.first_size(view, offset);
+        const size = __RootMsg.first_size(view, offset);
         totalSize += size;
         offset += size;
     }
@@ -1362,7 +1547,7 @@ class __RootMsg {
             
     // int32 arr
     {
-        const size = this.arr_size(view, offset);
+        const size = __RootMsg.arr_size(view, offset);
         totalSize += size;
         offset += size;
     }
@@ -1551,7 +1736,7 @@ class __RootMsg {
             
     // string first
     {
-        const size = this.first_size(view, offset);
+        const size = __RootMsg.first_size(view, offset);
         totalSize += size;
         offset += size;
     }
@@ -1632,7 +1817,7 @@ class __RootMsg {
             
     // string sample
     {
-        const size = this.sample_size(view, offset);
+        const size = __RootMsg.sample_size(view, offset);
         totalSize += size;
         offset += size;
     }
@@ -1694,7 +1879,7 @@ class __RootMsg {
             
     // string sample
     {
-        const size = this.sample_size(view, offset);
+        const size = __RootMsg.sample_size(view, offset);
         totalSize += size;
         offset += size;
     }
@@ -1756,7 +1941,7 @@ class __RootMsg {
             
     // string first
     {
-        const size = this.first_size(view, offset);
+        const size = __RootMsg.first_size(view, offset);
         totalSize += size;
         offset += size;
     }
@@ -1820,7 +2005,7 @@ class __RootMsg {
             
     // string first
     {
-        const size = this.first_size(view, offset);
+        const size = __RootMsg.first_size(view, offset);
         totalSize += size;
         offset += size;
     }
@@ -1944,7 +2129,7 @@ class __RootMsg {
             
     // time arr
     {
-        const size = this.arr_size(view, offset);
+        const size = __RootMsg.arr_size(view, offset);
         totalSize += size;
         offset += size;
     }
@@ -2082,7 +2267,7 @@ class __RootMsg {
 
     // float32 arr
     {
-        const size = this.arr_size(view, offset);
+        const size = __RootMsg.arr_size(view, offset);
         totalSize += size;
         offset += size;
     }
@@ -2259,7 +2444,7 @@ class __RootMsg {
 
     // int32 arr
     {
-        const size = this.arr_size(view, offset);
+        const size = __RootMsg.arr_size(view, offset);
         totalSize += size;
         offset += size;
     }
@@ -2350,7 +2535,7 @@ class __RootMsg {
 
     // time arr
     {
-        const size = this.arr_size(view, offset);
+        const size = __RootMsg.arr_size(view, offset);
         totalSize += size;
         offset += size;
     }
