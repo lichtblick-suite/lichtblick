@@ -12,12 +12,12 @@
 //   You may not use this file except in compliance with the License.
 
 import { uniq } from "lodash";
-import { Time, MessageReader } from "rosbag";
+import { Time } from "rosbag";
 
 import ParsedMessageCache from "@foxglove-studio/app/dataProviders/ParsedMessageCache";
 import { ParsedMessageDefinitionsByTopic } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { FREEZE_MESSAGES } from "@foxglove-studio/app/util/globalConstants";
+import { LazyMessageReader } from "@foxglove/rosmsg-deser";
 
 import {
   DataProvider,
@@ -27,6 +27,7 @@ import {
   GetDataProvider,
   GetMessagesResult,
   GetMessagesTopics,
+  MessageReader,
 } from "./types";
 
 // Parses raw messages as returned by `BagDataProvider`. To make it fast to seek back and forth, we keep
@@ -82,11 +83,7 @@ export default class ParseMessagesDataProvider implements DataProvider {
   }
 
   // Make sure that we have a reader for each requested topic, but only create them on-demand.
-  _getReadersByTopic(
-    topics: string[],
-  ): {
-    [key: string]: MessageReader;
-  } {
+  _getReadersByTopic(topics: string[]): ParseMessagesDataProvider["_readersByTopic"] {
     const parsedMessageDefinitionsByTopic = this._parsedMessageDefinitionsByTopic;
     if (!parsedMessageDefinitionsByTopic) {
       throw new Error("ParseMessagesDataProvider: getMessages called before initialize");
@@ -97,9 +94,7 @@ export default class ParseMessagesDataProvider implements DataProvider {
         if (!parsedDefinition) {
           continue;
         }
-        this._readersByTopic[topic] = new MessageReader(parsedDefinition, {
-          freeze: FREEZE_MESSAGES,
-        });
+        this._readersByTopic[topic] = new LazyMessageReader(parsedDefinition);
       }
     }
     return this._readersByTopic;

@@ -1,0 +1,2877 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LazyReader should deserialize CustomType custom
+    ============
+    MSG: custom_type/CustomType
+    uint8 first: CustomType custom
+    ============
+    MSG: custom_type/CustomType
+    uint8 first 1`] = `
+"function anonymous(readers,sizes
+) {
+class custom_type_CustomType {
+        
+      static first_size(view /* dataview */, offset) {
+          return 1;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // uint8 first
+        totalSize += 1;
+        offset += 1;
+      
+            
+            return totalSize;
+        }
+
+        
+          first_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of custom_type_CustomType from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new custom_type_CustomType(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            first: this.first
+          };
+        }
+
+        get first() {
+        const offset = this.first_offset(this.#view, this.#offset);
+        return readers.uint8(this.#view, offset);
+      }
+    }
+
+class __RootMsg {
+        
+      static custom_size(view /* dataview */, offset) {
+          return custom_type_CustomType.size(view, offset);
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+    // custom_type/CustomType custom
+    {
+        const size = this.custom_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+            
+            return totalSize;
+        }
+
+        
+          custom_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            custom: this.custom
+          };
+        }
+
+        get custom() {
+        const offset = this.custom_offset(this.#view, this.#offset);
+        return custom_type_CustomType.build(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize CustomType[] custom
+    ============
+    MSG: custom_type/CustomType
+    uint8 first: CustomType[] custom
+    ============
+    MSG: custom_type/CustomType
+    uint8 first 1`] = `
+"function anonymous(readers,sizes
+) {
+class custom_type_CustomType {
+        
+      static first_size(view /* dataview */, offset) {
+          return 1;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // uint8 first
+        totalSize += 1;
+        offset += 1;
+      
+            
+            return totalSize;
+        }
+
+        
+          first_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of custom_type_CustomType from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new custom_type_CustomType(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            first: this.first
+          };
+        }
+
+        get first() {
+        const offset = this.first_offset(this.#view, this.#offset);
+        return readers.uint8(this.#view, offset);
+      }
+    }
+
+class __RootMsg {
+        
+          static custom_size(view /* dataview */, offset) {
+              return sizes.array(view, offset, custom_type_CustomType.size);
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+    // custom_type/CustomType custom
+    {
+        const size = this.custom_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+            
+            return totalSize;
+        }
+
+        
+          custom_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            custom: this.custom
+          };
+        }
+
+        
+          // custom_type/CustomType[] custom
+          get custom() {
+            const offset = this.custom_offset(this.#view, this.#offset);
+            return readers.dynamicArray(this.#view, offset, custom_type_CustomType.build, custom_type_CustomType.size);
+          }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize CustomType[3] custom
+    ============
+    MSG: custom_type/CustomType
+    uint8 first: CustomType[3] custom
+    ============
+    MSG: custom_type/CustomType
+    uint8 first 1`] = `
+"function anonymous(readers,sizes
+) {
+class custom_type_CustomType {
+        
+      static first_size(view /* dataview */, offset) {
+          return 1;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // uint8 first
+        totalSize += 1;
+        offset += 1;
+      
+            
+            return totalSize;
+        }
+
+        
+          first_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of custom_type_CustomType from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new custom_type_CustomType(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            first: this.first
+          };
+        }
+
+        get first() {
+        const offset = this.first_offset(this.#view, this.#offset);
+        return readers.uint8(this.#view, offset);
+      }
+    }
+
+class __RootMsg {
+        
+          static custom_size(view /* dataview */, offset) {
+              return sizes.fixedArray(view, offset, 3, custom_type_CustomType.size);
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+    // custom_type/CustomType custom
+    {
+        const size = this.custom_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+            
+            return totalSize;
+        }
+
+        
+          custom_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            custom: this.custom
+          };
+        }
+
+        
+        // custom_type/CustomType[3] custom
+          get custom() {
+            const offset = this.custom_offset(this.#view, this.#offset);
+            return readers.fixedArray(this.#view, offset, 3, custom_type_CustomType.build, custom_type_CustomType.size);
+          }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize float32 sample: float32 sample 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 4;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // float32 sample
+        totalSize += 4;
+        offset += 4;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.float32(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize float32[] arr: float32[] arr 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+          static arr_size(view /* dataview */, offset) {
+            const len = view.getUint32(offset, true);
+            return 4 + len * 4;
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+    // float32 arr
+    {
+        const size = this.arr_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+            
+            return totalSize;
+        }
+
+        
+          arr_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            arr: this.arr
+          };
+        }
+
+        
+          // float32[] arr
+          get arr() {
+            const offset = this.arr_offset(this.#view, this.#offset);
+            const len = this.#view.getUint32(offset, true);
+            return readers.float32Array(this.#view, offset + 4, len);
+          }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize float32[] first
+float32[] second: float32[] first
+float32[] second 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+          static first_size(view /* dataview */, offset) {
+            const len = view.getUint32(offset, true);
+            return 4 + len * 4;
+          }
+
+          static second_size(view /* dataview */, offset) {
+            const len = view.getUint32(offset, true);
+            return 4 + len * 4;
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+    // float32 first
+    {
+        const size = this.first_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+
+    // float32 second
+    {
+        const size = this.second_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+            
+            return totalSize;
+        }
+
+        
+          first_offset(view, initOffset) {
+            return initOffset;
+          }
+
+          second_offset(view, initOffset) {
+            const prevOffset = this.first_offset(view, initOffset);
+            const totalOffset = prevOffset + __RootMsg.first_size(view, prevOffset);
+  
+            // future calls will avoid re-calculating the offset
+            this.second_offset = () => totalOffset;
+            return totalOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            first: this.first,
+second: this.second
+          };
+        }
+
+        
+          // float32[] first
+          get first() {
+            const offset = this.first_offset(this.#view, this.#offset);
+            const len = this.#view.getUint32(offset, true);
+            return readers.float32Array(this.#view, offset + 4, len);
+          }
+
+          // float32[] second
+          get second() {
+            const offset = this.second_offset(this.#view, this.#offset);
+            const len = this.#view.getUint32(offset, true);
+            return readers.float32Array(this.#view, offset + 4, len);
+          }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize float32[2] arr: float32[2] arr 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+          static arr_size(view /* dataview */, offset) {
+            return 4 * 2;
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // float32[2] arr
+        totalSize += 8;
+        offset += 8;
+      
+            
+            return totalSize;
+        }
+
+        
+          arr_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            arr: this.arr
+          };
+        }
+
+        
+          // float32[2] arr
+          get arr() {
+            const offset = this.arr_offset(this.#view, this.#offset);
+            return readers.float32Array(this.#view, offset, 2);
+          }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize float64 sample: float64 sample 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 8;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // float64 sample
+        totalSize += 8;
+        offset += 8;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.float64(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize int8 first
+int8 second: int8 first
+int8 second 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static first_size(view /* dataview */, offset) {
+          return 1;
+      }
+
+      static second_size(view /* dataview */, offset) {
+          return 1;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // int8 first
+        totalSize += 1;
+        offset += 1;
+      
+
+        // int8 second
+        totalSize += 1;
+        offset += 1;
+      
+            
+            return totalSize;
+        }
+
+        
+          first_offset(view, initOffset) {
+            return initOffset;
+          }
+
+          second_offset(view, initOffset) {
+            const prevOffset = this.first_offset(view, initOffset);
+            const totalOffset = prevOffset + __RootMsg.first_size(view, prevOffset);
+  
+            // future calls will avoid re-calculating the offset
+            this.second_offset = () => totalOffset;
+            return totalOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            first: this.first,
+second: this.second
+          };
+        }
+
+        get first() {
+        const offset = this.first_offset(this.#view, this.#offset);
+        return readers.int8(this.#view, offset);
+      }
+get second() {
+        const offset = this.second_offset(this.#view, this.#offset);
+        return readers.int8(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize int8 sample # highest: int8 sample # highest 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 1;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // int8 sample
+        totalSize += 1;
+        offset += 1;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.int8(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize int8 sample # lowest: int8 sample # lowest 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 1;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // int8 sample
+        totalSize += 1;
+        offset += 1;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.int8(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize int8[] first: int8[] first 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+          static first_size(view /* dataview */, offset) {
+            const len = view.getUint32(offset, true);
+            return 4 + len * 1;
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+    // int8 first
+    {
+        const size = this.first_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+            
+            return totalSize;
+        }
+
+        
+          first_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            first: this.first
+          };
+        }
+
+        
+          // int8[] first
+          get first() {
+            const offset = this.first_offset(this.#view, this.#offset);
+            const len = this.#view.getUint32(offset, true);
+            return readers.int8Array(this.#view, offset + 4, len);
+          }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize int8[4] first: int8[4] first 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+          static first_size(view /* dataview */, offset) {
+            return 1 * 4;
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // int8[4] first
+        totalSize += 4;
+        offset += 4;
+      
+            
+            return totalSize;
+        }
+
+        
+          first_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            first: this.first
+          };
+        }
+
+        
+          // int8[4] first
+          get first() {
+            const offset = this.first_offset(this.#view, this.#offset);
+            return readers.int8Array(this.#view, offset, 4);
+          }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize int16 sample # highest: int16 sample # highest 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 2;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // int16 sample
+        totalSize += 2;
+        offset += 2;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.int16(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize int16 sample # lowest: int16 sample # lowest 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 2;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // int16 sample
+        totalSize += 2;
+        offset += 2;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.int16(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize int32 sample # highest: int32 sample # highest 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 4;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // int32 sample
+        totalSize += 4;
+        offset += 4;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.int32(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize int32 sample # lowest: int32 sample # lowest 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 4;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // int32 sample
+        totalSize += 4;
+        offset += 4;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.int32(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize int32[] arr: int32[] arr 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+          static arr_size(view /* dataview */, offset) {
+            const len = view.getUint32(offset, true);
+            return 4 + len * 4;
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+    // int32 arr
+    {
+        const size = this.arr_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+            
+            return totalSize;
+        }
+
+        
+          arr_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            arr: this.arr
+          };
+        }
+
+        
+          // int32[] arr
+          get arr() {
+            const offset = this.arr_offset(this.#view, this.#offset);
+            const len = this.#view.getUint32(offset, true);
+            return readers.int32Array(this.#view, offset + 4, len);
+          }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize int64 sample # highest: int64 sample # highest 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 8;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // int64 sample
+        totalSize += 8;
+        offset += 8;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.int64(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize int64 sample # lowest: int64 sample # lowest 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 8;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // int64 sample
+        totalSize += 8;
+        offset += 8;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.int64(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize string first
+int8 second: string first
+int8 second 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static first_size(view /* dataview */, offset) {
+          return sizes.string(view, offset);
+      }
+
+      static second_size(view /* dataview */, offset) {
+          return 1;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+    // string first
+    {
+        const size = this.first_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+
+        // int8 second
+        totalSize += 1;
+        offset += 1;
+      
+            
+            return totalSize;
+        }
+
+        
+          first_offset(view, initOffset) {
+            return initOffset;
+          }
+
+          second_offset(view, initOffset) {
+            const prevOffset = this.first_offset(view, initOffset);
+            const totalOffset = prevOffset + __RootMsg.first_size(view, prevOffset);
+  
+            // future calls will avoid re-calculating the offset
+            this.second_offset = () => totalOffset;
+            return totalOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            first: this.first,
+second: this.second
+          };
+        }
+
+        get first() {
+        const offset = this.first_offset(this.#view, this.#offset);
+        return readers.string(this.#view, offset);
+      }
+get second() {
+        const offset = this.second_offset(this.#view, this.#offset);
+        return readers.int8(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize string sample # empty string: string sample # empty string 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return sizes.string(view, offset);
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+    // string sample
+    {
+        const size = this.sample_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.string(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize string sample # some string: string sample # some string 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return sizes.string(view, offset);
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+    // string sample
+    {
+        const size = this.sample_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.string(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize string[] first: string[] first 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+          static first_size(view /* dataview */, offset) {
+              return sizes.array(view, offset, sizes.string);
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+    // string first
+    {
+        const size = this.first_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+            
+            return totalSize;
+        }
+
+        
+          first_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            first: this.first
+          };
+        }
+
+        
+          // string[] first
+          get first() {
+            const offset = this.first_offset(this.#view, this.#offset);
+            return readers.dynamicArray(this.#view, offset, readers.string, sizes.string);
+          }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize string[2] first: string[2] first 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+          static first_size(view /* dataview */, offset) {
+              return sizes.fixedArray(view, offset, 2, sizes.string);
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+    // string first
+    {
+        const size = this.first_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+            
+            return totalSize;
+        }
+
+        
+          first_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            first: this.first
+          };
+        }
+
+        
+        // string[2] first
+          get first() {
+            const offset = this.first_offset(this.#view, this.#offset);
+            return readers.fixedArray(this.#view, offset, 2, readers.string, sizes.string);
+          }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize time stamp: time stamp 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static stamp_size(view /* dataview */, offset) {
+          return 8;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // time stamp
+        totalSize += 8;
+        offset += 8;
+      
+            
+            return totalSize;
+        }
+
+        
+          stamp_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            stamp: this.stamp
+          };
+        }
+
+        get stamp() {
+        const offset = this.stamp_offset(this.#view, this.#offset);
+        return readers.time(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize time[] arr: time[] arr 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+          static arr_size(view /* dataview */, offset) {
+            const len = view.getUint32(offset, true);
+            return 4 + len * 8;
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+    // time arr
+    {
+        const size = this.arr_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+            
+            return totalSize;
+        }
+
+        
+          arr_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            arr: this.arr
+          };
+        }
+
+        
+          // time[] arr
+          get arr() {
+            const offset = this.arr_offset(this.#view, this.#offset);
+            const len = this.#view.getUint32(offset, true);
+            return readers.timeArray(this.#view, offset + 4, len);
+          }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize time[1] arr: time[1] arr 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+          static arr_size(view /* dataview */, offset) {
+            return 8 * 1;
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // time[1] arr
+        totalSize += 8;
+        offset += 8;
+      
+            
+            return totalSize;
+        }
+
+        
+          arr_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            arr: this.arr
+          };
+        }
+
+        
+          // time[1] arr
+          get arr() {
+            const offset = this.arr_offset(this.#view, this.#offset);
+            return readers.timeArray(this.#view, offset, 1);
+          }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize uint8 blank
+float32[] arr: uint8 blank
+float32[] arr 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static blank_size(view /* dataview */, offset) {
+          return 1;
+      }
+
+          static arr_size(view /* dataview */, offset) {
+            const len = view.getUint32(offset, true);
+            return 4 + len * 4;
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // uint8 blank
+        totalSize += 1;
+        offset += 1;
+      
+
+    // float32 arr
+    {
+        const size = this.arr_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+            
+            return totalSize;
+        }
+
+        
+          blank_offset(view, initOffset) {
+            return initOffset;
+          }
+
+          arr_offset(view, initOffset) {
+            const prevOffset = this.blank_offset(view, initOffset);
+            const totalOffset = prevOffset + __RootMsg.blank_size(view, prevOffset);
+  
+            // future calls will avoid re-calculating the offset
+            this.arr_offset = () => totalOffset;
+            return totalOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            blank: this.blank,
+arr: this.arr
+          };
+        }
+
+        get blank() {
+        const offset = this.blank_offset(this.#view, this.#offset);
+        return readers.uint8(this.#view, offset);
+      }
+
+          // float32[] arr
+          get arr() {
+            const offset = this.arr_offset(this.#view, this.#offset);
+            const len = this.#view.getUint32(offset, true);
+            return readers.float32Array(this.#view, offset + 4, len);
+          }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize uint8 blank
+float32[2] arr: uint8 blank
+float32[2] arr 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static blank_size(view /* dataview */, offset) {
+          return 1;
+      }
+
+          static arr_size(view /* dataview */, offset) {
+            return 4 * 2;
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // uint8 blank
+        totalSize += 1;
+        offset += 1;
+      
+
+        // float32[2] arr
+        totalSize += 8;
+        offset += 8;
+      
+            
+            return totalSize;
+        }
+
+        
+          blank_offset(view, initOffset) {
+            return initOffset;
+          }
+
+          arr_offset(view, initOffset) {
+            const prevOffset = this.blank_offset(view, initOffset);
+            const totalOffset = prevOffset + __RootMsg.blank_size(view, prevOffset);
+  
+            // future calls will avoid re-calculating the offset
+            this.arr_offset = () => totalOffset;
+            return totalOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            blank: this.blank,
+arr: this.arr
+          };
+        }
+
+        get blank() {
+        const offset = this.blank_offset(this.#view, this.#offset);
+        return readers.uint8(this.#view, offset);
+      }
+
+          // float32[2] arr
+          get arr() {
+            const offset = this.arr_offset(this.#view, this.#offset);
+            return readers.float32Array(this.#view, offset, 2);
+          }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize uint8 blank
+int32[] arr: uint8 blank
+int32[] arr 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static blank_size(view /* dataview */, offset) {
+          return 1;
+      }
+
+          static arr_size(view /* dataview */, offset) {
+            const len = view.getUint32(offset, true);
+            return 4 + len * 4;
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // uint8 blank
+        totalSize += 1;
+        offset += 1;
+      
+
+    // int32 arr
+    {
+        const size = this.arr_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+            
+            return totalSize;
+        }
+
+        
+          blank_offset(view, initOffset) {
+            return initOffset;
+          }
+
+          arr_offset(view, initOffset) {
+            const prevOffset = this.blank_offset(view, initOffset);
+            const totalOffset = prevOffset + __RootMsg.blank_size(view, prevOffset);
+  
+            // future calls will avoid re-calculating the offset
+            this.arr_offset = () => totalOffset;
+            return totalOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            blank: this.blank,
+arr: this.arr
+          };
+        }
+
+        get blank() {
+        const offset = this.blank_offset(this.#view, this.#offset);
+        return readers.uint8(this.#view, offset);
+      }
+
+          // int32[] arr
+          get arr() {
+            const offset = this.arr_offset(this.#view, this.#offset);
+            const len = this.#view.getUint32(offset, true);
+            return readers.int32Array(this.#view, offset + 4, len);
+          }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize uint8 blank
+time[] arr: uint8 blank
+time[] arr 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static blank_size(view /* dataview */, offset) {
+          return 1;
+      }
+
+          static arr_size(view /* dataview */, offset) {
+            const len = view.getUint32(offset, true);
+            return 4 + len * 8;
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // uint8 blank
+        totalSize += 1;
+        offset += 1;
+      
+
+    // time arr
+    {
+        const size = this.arr_size(view, offset);
+        totalSize += size;
+        offset += size;
+    }
+    
+            
+            return totalSize;
+        }
+
+        
+          blank_offset(view, initOffset) {
+            return initOffset;
+          }
+
+          arr_offset(view, initOffset) {
+            const prevOffset = this.blank_offset(view, initOffset);
+            const totalOffset = prevOffset + __RootMsg.blank_size(view, prevOffset);
+  
+            // future calls will avoid re-calculating the offset
+            this.arr_offset = () => totalOffset;
+            return totalOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            blank: this.blank,
+arr: this.arr
+          };
+        }
+
+        get blank() {
+        const offset = this.blank_offset(this.#view, this.#offset);
+        return readers.uint8(this.#view, offset);
+      }
+
+          // time[] arr
+          get arr() {
+            const offset = this.arr_offset(this.#view, this.#offset);
+            const len = this.#view.getUint32(offset, true);
+            return readers.timeArray(this.#view, offset + 4, len);
+          }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize uint8 sample # highest: uint8 sample # highest 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 1;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // uint8 sample
+        totalSize += 1;
+        offset += 1;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.uint8(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize uint8 sample # lowest: uint8 sample # lowest 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 1;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // uint8 sample
+        totalSize += 1;
+        offset += 1;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.uint8(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize uint8[4] first: uint8[4] first 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+          static first_size(view /* dataview */, offset) {
+            return 1 * 4;
+          }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // uint8[4] first
+        totalSize += 4;
+        offset += 4;
+      
+            
+            return totalSize;
+        }
+
+        
+          first_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            first: this.first
+          };
+        }
+
+        
+          // uint8[4] first
+          get first() {
+            const offset = this.first_offset(this.#view, this.#offset);
+            return readers.uint8Array(this.#view, offset, 4);
+          }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize uint16 sample # highest: uint16 sample # highest 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 2;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // uint16 sample
+        totalSize += 2;
+        offset += 2;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.uint16(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize uint16 sample # lowest: uint16 sample # lowest 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 2;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // uint16 sample
+        totalSize += 2;
+        offset += 2;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.uint16(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize uint32 sample # highest: uint32 sample # highest 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 4;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // uint32 sample
+        totalSize += 4;
+        offset += 4;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.uint32(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize uint32 sample # lowest: uint32 sample # lowest 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 4;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // uint32 sample
+        totalSize += 4;
+        offset += 4;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.uint32(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize uint64 sample # highest: uint64 sample # highest 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 8;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // uint64 sample
+        totalSize += 8;
+        offset += 8;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.uint64(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;
+
+exports[`LazyReader should deserialize uint64 sample # lowest: uint64 sample # lowest 1`] = `
+"function anonymous(readers,sizes
+) {
+class __RootMsg {
+        
+      static sample_size(view /* dataview */, offset) {
+          return 8;
+      }
+
+        // return the total serialized size of the message in the view
+        static size(view /* DataView */, initOffset = 0) {
+            let totalSize = 0;
+            let offset = initOffset;
+
+            
+        // uint64 sample
+        totalSize += 8;
+        offset += 8;
+      
+            
+            return totalSize;
+        }
+
+        
+          sample_offset(view, initOffset) {
+            return initOffset;
+          }
+
+        // return an instance of __RootMsg from the view at initOffset bytes into the view
+        // NOTE: the underlying view data lifetime must be at least the lifetime of the instance
+        static build(view /* DataView */, offset = 0) {
+            return new __RootMsg(view, offset);
+        }
+
+        #view = undefined;
+        #offset;
+  
+        constructor(view, offset = 0) {
+          this.#view = view;
+          this.#offset = offset;
+        }
+
+        // return a json object of the fields
+        // this fully parses the message
+        toJSON() {
+          return {
+            sample: this.sample
+          };
+        }
+
+        get sample() {
+        const offset = this.sample_offset(this.#view, this.#offset);
+        return readers.uint64(this.#view, offset);
+      }
+    }
+return __RootMsg;
+}"
+`;

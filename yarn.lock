@@ -2204,6 +2204,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@foxglove/rosmsg-deser@workspace:packages/rosmsg-deser":
+  version: 0.0.0-use.local
+  resolution: "@foxglove/rosmsg-deser@workspace:packages/rosmsg-deser"
+  languageName: unknown
+  linkType: soft
+
 "@foxglove/velodyne-cloud@workspace:packages/velodyne-cloud":
   version: 0.0.0-use.local
   resolution: "@foxglove/velodyne-cloud@workspace:packages/velodyne-cloud"

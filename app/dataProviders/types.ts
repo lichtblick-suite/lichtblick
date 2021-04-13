@@ -108,6 +108,10 @@ export interface DataProvider {
   close(): Promise<void>;
 }
 
+export interface MessageReader {
+  readMessage<T>(buffer: Uint8Array): T;
+}
+
 export interface DataProviderConstructor {
   new (
     // The arguments to this particular DataProvider; typically an object.

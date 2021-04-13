@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { sortBy } from "lodash";
-import { MessageReader } from "rosbag";
 
+import { MessageReader } from "@foxglove-studio/app/dataProviders/types";
 import { Message } from "@foxglove-studio/app/players/types";
 import { deepParse, inaccurateByteSize, isBobject } from "@foxglove-studio/app/util/binaryObjects";
 import filterMap from "@foxglove-studio/app/util/filterMap";
