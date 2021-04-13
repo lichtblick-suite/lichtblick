@@ -93,7 +93,7 @@ type Props = {
   onFollowChange: (tfId?: string | false, followOrientation?: boolean) => void;
 };
 
-function* getDescendants(nodes: TfTreeNode[]): any {
+function* getDescendants(nodes: TfTreeNode[]): Iterable<TfTreeNode> {
   for (const node of nodes) {
     yield node;
     yield* getDescendants(node.children);
@@ -130,7 +130,7 @@ const FollowTFControl = memo<Props>((props: Props) => {
   const [lastSelectedFrame, setLastSelectedFrame] = useState(undefined);
 
   const tfTree = buildTfTree(transforms.values());
-  const allNodes: any = Array.from(getDescendants(tfTree.roots));
+  const allNodes = Array.from(getDescendants(tfTree.roots));
   const nodesWithoutDefaultFollowTfFrame = allNodes?.length;
   const newFollowTfFrame = allNodes?.[0]?.tf?.id;
 

@@ -62,7 +62,9 @@ function withTransforms<Props extends any>(ChildComponent: React.ComponentType<P
       // that topic) and transform frames (coordinate frames)
       for (const topic in frame) {
         for (const msg of frame[topic] as Message[]) {
-          const frameId = msg.message.header?.frame_id as string | undefined;
+          const frameId: string | undefined = isBobject(msg.message)
+            ? msg.message.header?.().frame_id?.()
+            : msg.message.header?.frame_id;
           if (frameId != undefined) {
             transforms.register(frameId);
           }
