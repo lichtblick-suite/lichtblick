@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Map as LeafMap } from "leaflet";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 
 import {
@@ -18,7 +18,7 @@ import Logger from "@foxglove/log";
 
 import FilteredPointMarkers from "./FilteredPointMarkers";
 import helpContent from "./index.help.md";
-import { BinaryNavSatFixMsg, NavSatFixMsg, Point, PointCache } from "./types";
+import { BinaryNavSatFixMsg, NavSatFixMsg, Point } from "./types";
 
 import "leaflet/dist/leaflet.css";
 
@@ -36,15 +36,12 @@ type Props = {
 
 function MapPanel(props: Props) {
   const { saveConfig, config } = props;
-  const topicCaches = useRef(new Map<string, PointCache>());
   const [center, setCenter] = useState<Point | undefined>();
-
   const { topics, playerId } = useDataSourceInfo();
 
   // clear cached points when the player changes
   useEffect(() => {
     setCenter(undefined);
-    topicCaches.current = new Map();
   }, [playerId]);
 
   // eligible topics are those that match the message datatypes we support
@@ -67,55 +64,53 @@ function MapPanel(props: Props) {
     historySize: 1,
   });
 
-  // add blocks (preloaded chunks from bag files)
+  // calculate center point from blocks if we don't have a center point
   useEffect(() => {
-    for (const messageBlock of blocks) {
-      for (const [topic, payloads] of Object.entries(messageBlock)) {
-        let topicCache = topicCaches.current.get(topic);
-        if (!topicCache) {
-          topicCache = new Map();
-          topicCaches.current.set(topic, topicCache);
-        }
+    setCenter((old) => {
+      // set center only once
+      if (old) {
+        return old;
+      }
 
-        for (const payload of payloads) {
-          const stamp = payload.receiveTime.sec * 1e9 + payload.receiveTime.nsec;
-          const lat = ((payload.message as unknown) as BinaryNavSatFixMsg).latitude();
-          const lon = ((payload.message as unknown) as BinaryNavSatFixMsg).longitude();
-          const point: Point = {
-            lat,
-            lon,
-          };
+      for (const messageBlock of blocks) {
+        for (const payloads of Object.values(messageBlock)) {
+          for (const payload of payloads) {
+            const lat = ((payload.message as unknown) as BinaryNavSatFixMsg).latitude();
+            const lon = ((payload.message as unknown) as BinaryNavSatFixMsg).longitude();
+            const point: Point = {
+              lat,
+              lon,
+            };
 
-          topicCache.set(stamp, point);
-
-          // center is set only once
-          setCenter((old) => (old ? old : point));
+            return point;
+          }
         }
       }
-    }
+
+      return;
+    });
   }, [blocks]);
 
-  // add streaming messages
+  // calculate center point from streaming messages if we don't have a center point
   useEffect(() => {
-    for (const [topic, payloads] of Object.entries(navMessages)) {
-      let topicCache = topicCaches.current.get(topic);
-      if (!topicCache) {
-        topicCache = new Map();
-        topicCaches.current.set(topic, topicCache);
+    setCenter((old) => {
+      // set center only once
+      if (old) {
+        return old;
       }
 
-      for (const payload of payloads) {
-        const stamp = payload.receiveTime.sec * 1e9 + payload.receiveTime.nsec;
-        const point: Point = {
-          lat: payload.message.latitude,
-          lon: payload.message.longitude,
-        };
-        topicCache.set(stamp, point);
+      for (const payloads of Object.values(navMessages)) {
+        for (const payload of payloads) {
+          const point: Point = {
+            lat: payload.message.latitude,
+            lon: payload.message.longitude,
+          };
 
-        // center is set only once
-        setCenter((old) => (old ? old : point));
+          return point;
+        }
       }
-    }
+      return;
+    });
   }, [navMessages]);
 
   const [currentMap, setCurrentMap] = useState<LeafMap | undefined>(undefined);
@@ -162,7 +157,7 @@ function MapPanel(props: Props) {
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <FilteredPointMarkers pointsByTopic={topicCaches} />
+        <FilteredPointMarkers messages={navMessages} blocks={blocks} />
       </MapContainer>
     </>
   );
