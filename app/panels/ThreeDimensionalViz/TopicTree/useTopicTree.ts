@@ -402,7 +402,7 @@ export default function useTree({
         if (!result[key]) {
           result[key] = {};
         }
-      } else if (topicKeyOrNamespaceKey.startsWith("t:/")) {
+      } else if (topicKeyOrNamespaceKey.startsWith("t:")) {
         // Settings for topic.
         const topicName = topicKeyOrNamespaceKey.substr("t:".length);
         const baseTopicName = isFeatureTopicOrNamespace
