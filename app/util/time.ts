@@ -41,7 +41,7 @@ export function isTime(obj?: unknown): obj is Time {
   );
 }
 
-export function formatTimeRaw(stamp: Time) {
+export function formatTimeRaw(stamp: Time): string {
   if (stamp.sec < 0 || stamp.nsec < 0) {
     log.error("Times are not allowed to be negative");
     return "(invalid negative time)";
@@ -78,7 +78,7 @@ export function fromDate(date: Date): Time {
 
 // returns the percentage of target in the range between start & end
 // e.g. start = { sec: 0 }, end = { sec: 10 }, target = { sec: 5 } = 50
-export function percentOf(start: Time, end: Time, target: Time) {
+export function percentOf(start: Time, end: Time, target: Time): number {
   const totalDuration = subtractTimes(end, start);
   const targetDuration = subtractTimes(target, start);
   return (toSec(targetDuration) / toSec(totalDuration)) * 100;
@@ -104,6 +104,10 @@ function fixTime(t: Time): Time {
   return { sec, nsec };
 }
 
+export function addTimes({ sec: sec1, nsec: nsec1 }: Time, { sec: sec2, nsec: nsec2 }: Time): Time {
+  return fixTime({ sec: sec1 + sec2, nsec: nsec1 + nsec2 });
+}
+
 export function subtractTimes(
   { sec: sec1, nsec: nsec1 }: Time,
   { sec: sec2, nsec: nsec2 }: Time,
@@ -114,12 +118,12 @@ export function subtractTimes(
 // WARNING! This will not be a precise integer for large time values due to JS only supporting
 // 53-bit integers. Best to only use this when the time represents a relatively small duration
 // (at max a few weeks).
-export function toNanoSec({ sec, nsec }: Time) {
+export function toNanoSec({ sec, nsec }: Time): number {
   return sec * 1e9 + nsec;
 }
 
 // WARNING! Imprecise float; see above.
-export function toMicroSec({ sec, nsec }: Time) {
+export function toMicroSec({ sec, nsec }: Time): number {
   return (sec * 1e9 + nsec) / 1000;
 }
 
@@ -176,16 +180,16 @@ export function findClosestTimestampIndex(
     return -1;
   }
   let [l, r] = [0, maxIdx];
-  if (currT <= timestamps[0]!) {
+  if (currT <= <number>timestamps[0]) {
     return 0;
-  } else if (currT >= timestamps[maxIdx]!) {
+  } else if (currT >= <number>timestamps[maxIdx]) {
     return maxIdx;
   }
 
   while (l <= r) {
     const m = l + Math.floor((r - l) / 2);
-    const prevT = timestamps[m]!;
-    const nextT = timestamps[m + 1]!;
+    const prevT = <number>timestamps[m];
+    const nextT = <number>timestamps[m + 1];
 
     if (prevT <= currT && currT < nextT) {
       return m;
@@ -247,7 +251,7 @@ export function clampTime(time: Time, start: Time, end: Time): Time {
   return time;
 }
 
-export const isTimeInRangeInclusive = (time: Time, start: Time, end: Time) => {
+export const isTimeInRangeInclusive = (time: Time, start: Time, end: Time): boolean => {
   if (TimeUtil.compare(start, time) > 0 || TimeUtil.compare(end, time) < 0) {
     return false;
   }
@@ -354,7 +358,7 @@ export function getTimestampForMessage(
   return message.receiveTime;
 }
 
-export const compareBinaryTimes = (a: BinaryTime, b: BinaryTime) => {
+export const compareBinaryTimes = (a: BinaryTime, b: BinaryTime): number => {
   return a.sec() - b.sec() || a.nsec() - b.nsec();
 };
 
@@ -376,9 +380,9 @@ export const maybeGetBobjectHeaderStamp = (message: Bobject | undefined): Time |
   return undefined;
 };
 
-export const getRosTimeFromString = (text: string) => {
+export const getRosTimeFromString = (text: string): Time | undefined => {
   if (!text.length || isNaN(+text)) {
-    return;
+    return undefined;
   }
   const textAsNum = Number(text);
   return { sec: Math.floor(textAsNum), nsec: textAsNum * 1e9 - Math.floor(textAsNum) * 1e9 };

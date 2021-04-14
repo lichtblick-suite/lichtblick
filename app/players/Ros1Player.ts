@@ -24,7 +24,13 @@ import { wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
 import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
-import { fromMillis, TimestampMethod } from "@foxglove-studio/app/util/time";
+import {
+  addTimes,
+  fromMillis,
+  subtractTimes,
+  TimestampMethod,
+  toSec,
+} from "@foxglove-studio/app/util/time";
 import { Sockets } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
 import { RosNode, TcpSocket } from "@foxglove/ros1";
@@ -50,6 +56,8 @@ export default class Ros1Player implements Player {
   private _subscribedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of subscriber IDs subscribed to each topic.
   private _services = new Map<string, Set<string>>(); // A map of service names to service provider IDs that provide each service.
   private _start?: Time; // The time at which we started playing.
+  private _clockTime?: Time; // The most recent published `/clock` time, if available
+  private _clockReceived: Time = { sec: 0, nsec: 0 }; // The local time when `_clockTime` was last received
   private _requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
   private _parsedMessages: Message[] = []; // Queue of messages that we'll send in next _emitState() call.
   private _bobjects: BobjectMessage[] = []; // Queue of bobjects that we'll send in next _emitState() call.
@@ -163,7 +171,7 @@ export default class Ros1Player implements Player {
     // Time is always moving forward even if we don't get messages from the server.
     setTimeout(this._emitState, 100);
 
-    const currentTime = fromMillis(Date.now());
+    const currentTime = this._getCurrentTime();
     const messages = this._parsedMessages;
     this._parsedMessages = [];
     const bobjects = this._bobjects;
@@ -219,6 +227,9 @@ export default class Ros1Player implements Player {
       return;
     }
 
+    // Subscribe to additional topics used by Ros1Player itself
+    this._addInternalSubscriptions(subscriptions);
+
     const [bobjectSubscriptions, parsedSubscriptions] = partition(
       subscriptions,
       ({ format }) => format === "bobjects",
@@ -270,11 +281,13 @@ export default class Ros1Player implements Player {
         }
 
         if (this._parsedTopics.has(topicName)) {
-          this._parsedMessages.push({
+          const msg: Message = {
             topic: topicName,
             receiveTime,
             message: message as never,
-          });
+          };
+          this._parsedMessages.push(msg);
+          this._handleInternalMessage(msg);
         }
 
         this._emitState();
@@ -357,4 +370,42 @@ export default class Ros1Player implements Player {
     });
     return typesByName;
   };
+
+  private _addInternalSubscriptions(subscriptions: SubscribePayload[]): void {
+    // Always subscribe to /clock if available
+    if (subscriptions.find((sub) => sub.topic === "/clock") === undefined) {
+      subscriptions.unshift({
+        topic: "/clock",
+        requester: { type: "other", name: "Ros1Player" },
+        format: "parsedMessages",
+      });
+    }
+  }
+
+  private _handleInternalMessage(msg: BobjectMessage | Message): void {
+    if (msg.topic === "/clock" && !isNaN(msg.message.clock?.sec)) {
+      const time = msg.message.clock as Time;
+      const seconds = toSec(msg.message.clock);
+      if (isNaN(seconds)) {
+        return;
+      }
+
+      if (this._clockTime == undefined) {
+        this._start = time;
+      }
+
+      this._clockTime = time;
+      this._clockReceived = msg.receiveTime;
+    }
+  }
+
+  private _getCurrentTime(): Time {
+    const now = fromMillis(Date.now());
+    if (this._clockTime == undefined) {
+      return now;
+    }
+
+    const delta = subtractTimes(now, this._clockReceived);
+    return addTimes(this._clockTime, delta);
+  }
 }

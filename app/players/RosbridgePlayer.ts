@@ -38,7 +38,13 @@ import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
 import { FREEZE_MESSAGES } from "@foxglove-studio/app/util/globalConstants";
 import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
-import { fromMillis, TimestampMethod } from "@foxglove-studio/app/util/time";
+import {
+  addTimes,
+  fromMillis,
+  subtractTimes,
+  TimestampMethod,
+  toSec,
+} from "@foxglove-studio/app/util/time";
 import type { RosGraph } from "@foxglove/ros1";
 
 const capabilities = [PlayerCapabilities.advertise];
@@ -63,6 +69,8 @@ export default class RosbridgePlayer implements Player {
     [datatype: string]: MessageReader;
   } = {};
   _start?: Time; // The time at which we started playing.
+  _clockTime?: Time; // The most recent published `/clock` time, if available
+  _clockReceived: Time = { sec: 0, nsec: 0 }; // The local time when `_clockTime` was last received
   // active subscriptions
   _topicSubscriptions = new Map<string, roslib.Topic>();
   _requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
@@ -255,7 +263,7 @@ export default class RosbridgePlayer implements Player {
     // Time is always moving forward even if we don't get messages from the server.
     setTimeout(this._emitState, 100);
 
-    const currentTime = fromMillis(Date.now());
+    const currentTime = this._getCurrentTime();
     const messages = this._parsedMessages;
     this._parsedMessages = [];
     const bobjects = this._bobjects;
@@ -310,6 +318,9 @@ export default class RosbridgePlayer implements Player {
     if (!this._rosClient || this._closed) {
       return;
     }
+
+    // Subscribe to additional topics used by Ros1Player itself
+    this._addInternalSubscriptions(subscriptions);
 
     const [bobjectSubscriptions, parsedSubscriptions] = partition(
       subscriptions,
@@ -367,11 +378,13 @@ export default class RosbridgePlayer implements Player {
         }
 
         if (this._parsedTopics.has(topicName)) {
-          this._parsedMessages.push({
+          const msg: Message = {
             topic: topicName,
             receiveTime,
-            message: innerMessage as any,
-          });
+            message: innerMessage as never,
+          };
+          this._parsedMessages.push(msg);
+          this._handleInternalMessage(msg);
         }
 
         this._emitState();
@@ -443,6 +456,44 @@ export default class RosbridgePlayer implements Player {
   }
   setGlobalVariables(): void {
     // no-op
+  }
+
+  private _addInternalSubscriptions(subscriptions: SubscribePayload[]): void {
+    // Always subscribe to /clock if available
+    if (subscriptions.find((sub) => sub.topic === "/clock") === undefined) {
+      subscriptions.unshift({
+        topic: "/clock",
+        requester: { type: "other", name: "Ros1Player" },
+        format: "parsedMessages",
+      });
+    }
+  }
+
+  private _handleInternalMessage(msg: BobjectMessage | Message): void {
+    if (msg.topic === "/clock" && !isNaN(msg.message.clock?.sec)) {
+      const time = msg.message.clock as Time;
+      const seconds = toSec(msg.message.clock);
+      if (isNaN(seconds)) {
+        return;
+      }
+
+      if (this._clockTime == undefined) {
+        this._start = time;
+      }
+
+      this._clockTime = time;
+      this._clockReceived = msg.receiveTime;
+    }
+  }
+
+  private _getCurrentTime(): Time {
+    const now = fromMillis(Date.now());
+    if (this._clockTime == undefined) {
+      return now;
+    }
+
+    const delta = subtractTimes(now, this._clockReceived);
+    return addTimes(this._clockTime, delta);
   }
 
   private async _getSystemState(): Promise<RosGraph> {
