@@ -24,6 +24,7 @@ import cx from "classnames";
 import { useContext, useState, useCallback, useMemo } from "react";
 import { MosaicContext, MosaicWindowContext } from "react-mosaic-component";
 import { useDispatch, useSelector, ReactReduxContext } from "react-redux";
+import { useResizeDetector } from "react-resize-detector";
 import { bindActionCreators } from "redux";
 
 import {
@@ -34,7 +35,6 @@ import {
   swapPanel,
 } from "@foxglove-studio/app/actions/panels";
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
-import Dimensions from "@foxglove-studio/app/components/Dimensions";
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import HelpModal from "@foxglove-studio/app/components/HelpModal";
 import Icon from "@foxglove-studio/app/components/Icon";
@@ -352,44 +352,45 @@ export default React.memo<Props>(function PanelToolbar({
     );
   }, [additionalIcons, helpContent]);
 
+  const { width, ref: sizeRef } = useResizeDetector({
+    handleHeight: false,
+  });
+
   if (frameless() || hideToolbars) {
     return ReactNull;
   }
 
   const isRendered = isHovered || containsOpen || isDragging || !!isUnknownPanel;
+
   return (
-    <Dimensions>
-      {({ width }) => (
-        <ChildToggle.ContainsOpen onChange={setContainsOpen}>
-          {shareModal}
-          {showHelp && (
-            <HelpModal onRequestClose={() => setShowHelp(false)}>{helpContent}</HelpModal>
+    <div ref={sizeRef}>
+      <ChildToggle.ContainsOpen onChange={setContainsOpen}>
+        {shareModal}
+        {showHelp && <HelpModal onRequestClose={() => setShowHelp(false)}>{helpContent}</HelpModal>}
+        <div
+          className={cx(styles.panelToolbarContainer, {
+            [styles.floating!]: floating,
+            [styles.floatingShow!]: floating && isRendered,
+            [styles.hasChildren!]: !!children,
+          })}
+        >
+          {(isRendered || !floating) && children}
+          {(isRendered || showHiddenControlsOnHover) && (
+            <PanelToolbarControls
+              isRendered={isRendered}
+              showHiddenControlsOnHover={showHiddenControlsOnHover}
+              floating={floating}
+              menuContent={menuContent}
+              showPanelName={(width ?? 0) > 360}
+              additionalIcons={additionalIconsWithHelp}
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+              isUnknownPanel={!!isUnknownPanel}
+              onEditPanelConfig={() => setShowShareModal(true)}
+            />
           )}
-          <div
-            className={cx(styles.panelToolbarContainer, {
-              [styles.floating!]: floating,
-              [styles.floatingShow!]: floating && isRendered,
-              [styles.hasChildren!]: !!children,
-            })}
-          >
-            {(isRendered || !floating) && children}
-            {(isRendered || showHiddenControlsOnHover) && (
-              <PanelToolbarControls
-                isRendered={isRendered}
-                showHiddenControlsOnHover={showHiddenControlsOnHover}
-                floating={floating}
-                menuContent={menuContent}
-                showPanelName={width > 360}
-                additionalIcons={additionalIconsWithHelp}
-                onDragStart={onDragStart}
-                onDragEnd={onDragEnd}
-                isUnknownPanel={!!isUnknownPanel}
-                onEditPanelConfig={() => setShowShareModal(true)}
-              />
-            )}
-          </div>
-        </ChildToggle.ContainsOpen>
-      )}
-    </Dimensions>
+        </div>
+      </ChildToggle.ContainsOpen>
+    </div>
   );
 });

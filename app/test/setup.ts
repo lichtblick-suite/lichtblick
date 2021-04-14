@@ -61,5 +61,27 @@ global.TextEncoder = util.TextEncoder;
 // React available everywhere (matches webpack config)
 global.React = require("react");
 
+// Jest does not include ResizeObserver.
+class ResizeObserverMock {
+  private _callback: ResizeObserverCallback;
+
+  constructor(callback: ResizeObserverCallback) {
+    this._callback = callback;
+  }
+
+  disconnect() {}
+
+  observe() {
+    const entry: any = {
+      contentRect: { width: 150, height: 150 },
+    };
+    this._callback([entry], this);
+  }
+
+  unobserve() {}
+}
+
+global.ResizeObserver = ResizeObserverMock;
+
 // Set logEvent up with a default implementation
 resetLogEventForTests();

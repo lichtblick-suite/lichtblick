@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { complement } from "intervals-fn";
-import { Component } from "react";
+import { useCallback } from "react";
 
 import AutoSizingCanvas from "@foxglove-studio/app/components/AutoSizingCanvas";
 import { Progress } from "@foxglove-studio/app/players/types";
@@ -25,32 +25,27 @@ type ProgressProps = {
   progress: Progress;
 };
 
-export class ProgressPlot extends Component<ProgressProps> {
-  shouldComponentUpdate(nextProps: ProgressProps) {
-    return nextProps.progress !== this.props.progress;
-  }
-
-  _draw = (context: CanvasRenderingContext2D, width: number, height: number) => {
-    const { progress } = this.props;
-
-    context.clearRect(0, 0, width, height);
-
-    if (progress.fullyLoadedFractionRanges) {
-      context.fillStyle = colors.DARK5;
-      const invertedRanges = complement({ start: 0, end: 1 }, progress.fullyLoadedFractionRanges);
-      for (const range of invertedRanges) {
-        const start = width * range.start;
-        const end = width * range.end;
-        context.fillRect(start, LINE_START, end - start, LINE_HEIGHT);
+export function ProgressPlot(props: ProgressProps) {
+  const { fullyLoadedFractionRanges } = props.progress;
+  const draw = useCallback(
+    (context: CanvasRenderingContext2D, width: number, height: number) => {
+      context.clearRect(0, 0, width, height);
+      if (fullyLoadedFractionRanges) {
+        context.fillStyle = colors.DARK5;
+        const invertedRanges = complement({ start: 0, end: 1 }, fullyLoadedFractionRanges);
+        for (const range of invertedRanges) {
+          const start = width * range.start;
+          const end = width * range.end;
+          context.fillRect(start, LINE_START, end - start, LINE_HEIGHT);
+        }
       }
-    }
-  };
+    },
+    [fullyLoadedFractionRanges],
+  );
 
-  render() {
-    return (
-      <div style={{ height: BAR_HEIGHT }}>
-        <AutoSizingCanvas draw={this._draw} />
-      </div>
-    );
-  }
+  return (
+    <div style={{ height: BAR_HEIGHT }}>
+      <AutoSizingCanvas draw={draw} />
+    </div>
+  );
 }

@@ -12,34 +12,30 @@
 //   You may not use this file except in compliance with the License.
 
 import { useRef, useLayoutEffect } from "react";
-
-import Dimensions from "@foxglove-studio/app/components/Dimensions";
+import { useResizeDetector } from "react-resize-detector";
 
 type Draw = (context: CanvasRenderingContext2D, width: number, height: number) => void;
-
-type CanvasProps = {
-  draw: Draw;
-  width: number;
-  height: number;
-  overrideDevicePixelRatioForTest?: number;
-};
 
 type AutoSizingCanvasProps = {
   draw: Draw;
   overrideDevicePixelRatioForTest?: number;
 };
 
-// Nested within `AutoSizingCanvas` so that componentDidUpdate fires on width/height changes.
-function Canvas({
-  draw,
-  width,
-  height,
-  overrideDevicePixelRatioForTest: ratio = window.devicePixelRatio || 1,
-}: CanvasProps) {
+const AutoSizingCanvas = ({ draw, overrideDevicePixelRatioForTest }: AutoSizingCanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(ReactNull);
+
+  const { width, height } = useResizeDetector({
+    targetRef: canvasRef,
+  });
+
+  const ratio = overrideDevicePixelRatioForTest ?? 1;
+
+  const actualWidth = ratio * (width ?? 0);
+  const actualHeight = ratio * (height ?? 0);
+
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) {
+    if (!canvas || width === undefined || height === undefined) {
       return;
     }
     const ctx = canvas.getContext("2d");
@@ -53,24 +49,11 @@ function Canvas({
   return (
     <canvas
       ref={canvasRef}
-      width={width * ratio}
-      height={height * ratio}
-      style={{ width, height }}
+      width={actualWidth}
+      height={actualHeight}
+      style={{ width: "100%", height: "100%" }}
     />
   );
-}
-
-const AutoSizingCanvas = ({ draw, overrideDevicePixelRatioForTest }: AutoSizingCanvasProps) => (
-  <Dimensions>
-    {({ width, height }) => (
-      <Canvas
-        width={width}
-        height={height}
-        draw={draw}
-        overrideDevicePixelRatioForTest={overrideDevicePixelRatioForTest}
-      />
-    )}
-  </Dimensions>
-);
+};
 
 export default AutoSizingCanvas;

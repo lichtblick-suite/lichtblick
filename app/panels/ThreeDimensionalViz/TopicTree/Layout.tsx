@@ -21,6 +21,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { useResizeDetector } from "react-resize-detector";
 import {
   Worldview,
   PolygonBuilder,
@@ -34,7 +35,6 @@ import { Time } from "rosbag";
 import { useDebouncedCallback } from "use-debounce";
 
 import useDataSourceInfo from "@foxglove-studio/app/PanelAPI/useDataSourceInfo";
-import Dimensions from "@foxglove-studio/app/components/Dimensions";
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
 import Modal from "@foxglove-studio/app/components/Modal";
 import PanelContext from "@foxglove-studio/app/components/PanelContext";
@@ -797,6 +797,12 @@ export default function Layout({
     ],
   );
 
+  const {
+    width: containerWidth,
+    height: containerHeight,
+    ref: topicTreeSizeRef,
+  } = useResizeDetector();
+
   return (
     <ThreeDimensionalVizContext.Provider value={threeDimensionalVizContextValue}>
       <TopicTreeContext.Provider value={topicTreeData}>
@@ -827,41 +833,38 @@ export default function Layout({
                   height: "100%",
                 } as React.CSSProperties
               }
+              ref={topicTreeSizeRef}
             >
               {(!isDemoMode || (isDemoMode && isHovered)) && (
-                <Dimensions>
-                  {({ width: containerWidth, height: containerHeight }) => (
-                    <TopicTree
-                      allKeys={allKeys}
-                      availableNamespacesByTopic={availableNamespacesByTopic}
-                      checkedKeys={checkedKeys}
-                      containerHeight={containerHeight}
-                      containerWidth={containerWidth}
-                      derivedCustomSettingsByKey={derivedCustomSettingsByKey}
-                      expandedKeys={expandedKeys}
-                      filterText={filterText}
-                      getIsNamespaceCheckedByDefault={getIsNamespaceCheckedByDefault}
-                      getIsTreeNodeVisibleInScene={getIsTreeNodeVisibleInScene}
-                      getIsTreeNodeVisibleInTree={getIsTreeNodeVisibleInTree}
-                      hasFeatureColumn={hasFeatureColumn}
-                      onExitTopicTreeFocus={onExitTopicTreeFocus}
-                      onNamespaceOverrideColorChange={onNamespaceOverrideColorChange}
-                      pinTopics={pinTopics}
-                      diffModeEnabled={diffModeEnabled}
-                      rootTreeNode={rootTreeNode}
-                      saveConfig={saveConfig}
-                      sceneErrorsByKey={sceneErrorsByKey}
-                      setCurrentEditingTopic={setCurrentEditingTopic}
-                      setEditingNamespace={setEditingNamespace}
-                      setFilterText={setFilterText}
-                      setShowTopicTree={setShowTopicTree}
-                      shouldExpandAllKeys={shouldExpandAllKeys}
-                      showTopicTree={showTopicTree}
-                      topicDisplayMode={topicDisplayMode}
-                      visibleTopicsCountByKey={visibleTopicsCountByKey}
-                    />
-                  )}
-                </Dimensions>
+                <TopicTree
+                  allKeys={allKeys}
+                  availableNamespacesByTopic={availableNamespacesByTopic}
+                  checkedKeys={checkedKeys}
+                  containerHeight={containerHeight ?? 0}
+                  containerWidth={containerWidth ?? 0}
+                  derivedCustomSettingsByKey={derivedCustomSettingsByKey}
+                  expandedKeys={expandedKeys}
+                  filterText={filterText}
+                  getIsNamespaceCheckedByDefault={getIsNamespaceCheckedByDefault}
+                  getIsTreeNodeVisibleInScene={getIsTreeNodeVisibleInScene}
+                  getIsTreeNodeVisibleInTree={getIsTreeNodeVisibleInTree}
+                  hasFeatureColumn={hasFeatureColumn}
+                  onExitTopicTreeFocus={onExitTopicTreeFocus}
+                  onNamespaceOverrideColorChange={onNamespaceOverrideColorChange}
+                  pinTopics={pinTopics}
+                  diffModeEnabled={diffModeEnabled}
+                  rootTreeNode={rootTreeNode}
+                  saveConfig={saveConfig}
+                  sceneErrorsByKey={sceneErrorsByKey}
+                  setCurrentEditingTopic={setCurrentEditingTopic}
+                  setEditingNamespace={setEditingNamespace}
+                  setFilterText={setFilterText}
+                  setShowTopicTree={setShowTopicTree}
+                  shouldExpandAllKeys={shouldExpandAllKeys}
+                  showTopicTree={showTopicTree}
+                  topicDisplayMode={topicDisplayMode}
+                  visibleTopicsCountByKey={visibleTopicsCountByKey}
+                />
               )}
               {currentEditingTopic && (
                 <TopicSettingsModal

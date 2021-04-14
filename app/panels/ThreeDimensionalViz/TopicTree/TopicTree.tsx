@@ -19,10 +19,10 @@ import MoreIcon from "@mdi/svg/svg/unfold-more-horizontal.svg";
 import { clamp, groupBy } from "lodash";
 import Tree from "rc-tree";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { useResizeDetector } from "react-resize-detector";
 import { CSSTransition } from "react-transition-group";
 import styled from "styled-components";
 
-import Dimensions from "@foxglove-studio/app/components/Dimensions";
 import Icon from "@foxglove-studio/app/components/Icon";
 import useChangeDetector from "@foxglove-studio/app/hooks/useChangeDetector";
 import useLinkedGlobalVariables from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
@@ -436,55 +436,56 @@ function TopicTreeWrapper({
   const defaultTreeWidth = clamp(containerWidth, DEFAULT_XS_WIDTH, DEFAULT_WIDTH);
   const renderTopicTree = pinTopics || showTopicTree;
 
+  const { width, ref: sizeRef } = useResizeDetector({
+    handleHeight: false,
+  });
+
   return (
     <STopicTreeWrapper
       style={{ height: containerHeight - CONTAINER_SPACING * 3 }}
       className="ant-component"
     >
-      <Dimensions>
-        {({ width }) => (
-          <div
-            style={{
-              width: defaultTreeWidth,
-              resize: renderTopicTree ? "horizontal" : "none",
-              overflow: renderTopicTree ? "hidden auto" : "visible",
-              minWidth: DEFAULT_XS_WIDTH,
-              maxWidth: containerWidth - 100,
-            }}
-            onClick={(ev) => ev.stopPropagation()}
-          >
-            <TopicTreeSwitcher
-              showErrorBadge={!renderTopicTree && Object.keys(sceneErrorsByKey).length > 0}
-              pinTopics={pinTopics}
-              renderTopicTree={renderTopicTree}
+      <div
+        ref={sizeRef}
+        style={{
+          width: defaultTreeWidth,
+          resize: renderTopicTree ? "horizontal" : "none",
+          overflow: renderTopicTree ? "hidden auto" : "visible",
+          minWidth: DEFAULT_XS_WIDTH,
+          maxWidth: containerWidth - 100,
+        }}
+        onClick={(ev) => ev.stopPropagation()}
+      >
+        <TopicTreeSwitcher
+          showErrorBadge={!renderTopicTree && Object.keys(sceneErrorsByKey).length > 0}
+          pinTopics={pinTopics}
+          renderTopicTree={renderTopicTree}
+          saveConfig={saveConfig}
+          setShowTopicTree={setShowTopicTree}
+        />
+        <CSSTransition
+          timeout={150}
+          in={renderTopicTree}
+          classNames={{ ...topicTreeTransition }}
+          mountOnEnter
+          unmountOnExit
+        >
+          <STopicTree onClick={(e) => e.stopPropagation()}>
+            <TopicTree
+              {...rest}
+              sceneErrorsByKey={sceneErrorsByKey}
               saveConfig={saveConfig}
               setShowTopicTree={setShowTopicTree}
+              pinTopics={pinTopics}
+              showTopicTree={showTopicTree}
+              treeWidth={width ?? 0}
+              treeHeight={
+                containerHeight - SEARCH_BAR_HEIGHT - SWITCHER_HEIGHT - CONTAINER_SPACING * 2
+              }
             />
-            <CSSTransition
-              timeout={150}
-              in={renderTopicTree}
-              classNames={{ ...topicTreeTransition }}
-              mountOnEnter
-              unmountOnExit
-            >
-              <STopicTree onClick={(e) => e.stopPropagation()}>
-                <TopicTree
-                  {...rest}
-                  sceneErrorsByKey={sceneErrorsByKey}
-                  saveConfig={saveConfig}
-                  setShowTopicTree={setShowTopicTree}
-                  pinTopics={pinTopics}
-                  showTopicTree={showTopicTree}
-                  treeWidth={width}
-                  treeHeight={
-                    containerHeight - SEARCH_BAR_HEIGHT - SWITCHER_HEIGHT - CONTAINER_SPACING * 2
-                  }
-                />
-              </STopicTree>
-            </CSSTransition>
-          </div>
-        )}
-      </Dimensions>
+          </STopicTree>
+        </CSSTransition>
+      </div>
     </STopicTreeWrapper>
   );
 }

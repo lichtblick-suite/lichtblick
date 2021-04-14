@@ -90,7 +90,7 @@ export default {
   component: StateTransitions,
   parameters: {
     chromatic: {
-      delay: 50,
+      delay: 100,
     },
   },
 };

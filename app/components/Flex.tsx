@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import cx from "classnames";
+import { LegacyRef } from "react";
 
 import styles from "./Flex.module.scss";
 
@@ -45,6 +46,8 @@ type Props = {
   onMouseMove?: (arg0: MouseEvent) => void;
   // for storybook screenshots tests
   dataTest?: string;
+
+  ref?: LegacyRef<HTMLDivElement>;
 };
 
 const Flex = (props: Props) => {
@@ -68,6 +71,7 @@ const Flex = (props: Props) => {
     onMouseLeave,
     onMouseMove,
     dataTest,
+    ref,
   } = props;
   if (col != undefined && col === row) {
     throw new Error("Flex col and row are mutually exclusive");
@@ -94,6 +98,7 @@ const Flex = (props: Props) => {
   const fullStyle = style ? { ...flexStyle, ...style } : flexStyle;
   return (
     <div
+      ref={ref}
       data-test={dataTest}
       className={combinedClasses}
       style={fullStyle}
