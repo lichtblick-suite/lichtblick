@@ -21,10 +21,11 @@ import styles from "./TextContent.module.scss";
 
 type Props = {
   style?: CSSProperties;
+  allowDangerousHtml?: boolean;
 };
 
 export default function TextContent(props: PropsWithChildren<Props>): React.ReactElement {
-  const { children, style } = props;
+  const { children, style, allowDangerousHtml } = props;
 
   const handleLink = useContext(LinkHandlerContext);
 
@@ -50,7 +51,7 @@ export default function TextContent(props: PropsWithChildren<Props>): React.Reac
         <ReactMarkdown
           source={children}
           renderers={{ link: linkRenderer }}
-          allowDangerousHtml={true}
+          allowDangerousHtml={allowDangerousHtml}
         />
       ) : (
         children

@@ -38,7 +38,7 @@ export default function HelpModal({
   return (
     <Modal onRequestClose={onRequestClose}>
       <SRoot {...(rootStyle ? { style: rootStyle } : undefined)}>
-        <TextContent>{children}</TextContent>
+        <TextContent allowDangerousHtml={true}>{children}</TextContent>
       </SRoot>
     </Modal>
   );

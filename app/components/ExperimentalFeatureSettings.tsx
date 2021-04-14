@@ -38,7 +38,7 @@ export function ExperimentalFeatureSettings(): React.ReactElement {
             return (
               <tr key={id}>
                 <td style={{ width: "100%", padding: 4 }}>
-                  <TextContent>
+                  <TextContent allowDangerousHtml={true}>
                     <h2>
                       {feature.name} <code style={{ fontSize: 12 }}>{id}</code>
                     </h2>
