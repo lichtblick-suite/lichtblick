@@ -2,12 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import {
+  Checkbox,
   DirectionalHint,
   IComboBoxOption,
   Pivot,
   PivotItem,
   SelectableOptionMenuItemType,
   Stack,
+  Text,
   useTheme,
   VirtualizedComboBox,
 } from "@fluentui/react";
@@ -121,6 +123,14 @@ function TimezoneSettings(): React.ReactElement {
 
 export default function Preferences(): React.ReactElement {
   const theme = useTheme();
+
+  const [crashReportingEnabled, setCrashReportingEnabled] = useAsyncAppConfigurationValue<boolean>(
+    "telemetry.crashReportingEnabled",
+  );
+  const [telemetryEnabled, setTelemetryEnabled] = useAsyncAppConfigurationValue<boolean>(
+    "telemetry.telemetryEnabled",
+  );
+
   return (
     <Pivot>
       <PivotItem headerText="Settings" style={{ padding: theme.spacing.m }}>
@@ -128,26 +138,25 @@ export default function Preferences(): React.ReactElement {
           <TimezoneSettings />
         </Stack.Item>
       </PivotItem>
-      {/*
-      TODO(john): hook these up to actual app settings
-      <PivotItem headerText="Privacy" style={{ padding: theme.spacing.m }}>
-        <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
-          <Text style={{ color: theme.palette.neutralSecondary }}>
-            Changes will take effect the next time {APP_NAME} is launched.
-          </Text>
-          <Checkbox
-            checked={telemetryEnabled}
-            onChange={(event, checked) => setTelemetryEnabled(checked)}
-            label={`Send anonymized usage data to help us improve ${APP_NAME}`}
-          />
-          <Checkbox
-            checked={crashReportingEnabled}
-            onChange={(event, checked) => setCrashReportingEnabled(checked)}
-            label="Send anonymized crash reports"
-          />
-        </Stack>
-      </PivotItem>
-      */}
+      {
+        <PivotItem headerText="Privacy" style={{ padding: theme.spacing.m }}>
+          <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
+            <Text style={{ color: theme.palette.neutralSecondary }}>
+              Changes will take effect the next time {APP_NAME} is launched.
+            </Text>
+            <Checkbox
+              checked={telemetryEnabled.value ?? true}
+              onChange={(event, checked) => setTelemetryEnabled(checked)}
+              label={`Send anonymized usage data to help us improve ${APP_NAME}`}
+            />
+            <Checkbox
+              checked={crashReportingEnabled.value ?? true}
+              onChange={(event, checked) => setCrashReportingEnabled(checked)}
+              label="Send anonymized crash reports"
+            />
+          </Stack>
+        </PivotItem>
+      }
       <PivotItem headerText="Experimental Features">
         <ExperimentalFeatureSettings />
       </PivotItem>

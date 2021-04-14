@@ -460,7 +460,7 @@ app.on("window-all-closed", () => {
 
 // Load telemetry opt-out settings from settings.json
 function getTelemetrySettings(): [crashReportingEnabled: boolean, telemetryEnabled: boolean] {
-  const datastoreDir = path.join(app.getPath("userData"), "studio-datastores");
+  const datastoreDir = path.join(app.getPath("userData"), "studio-datastores", "settings");
   const settingsPath = path.join(datastoreDir, "settings.json");
   let crashReportingEnabled = true;
   let telemetryEnabled = true;
