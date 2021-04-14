@@ -122,11 +122,7 @@ function StandardMenuItems({
         });
       }
 
-      const config = savedProps[id];
-      if (!config) {
-        return;
-      }
-
+      const config = savedProps[id] ?? {};
       actions.splitPanel({
         id,
         tabId,
