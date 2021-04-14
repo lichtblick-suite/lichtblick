@@ -58,6 +58,7 @@ describe("ApiCheckerDataProvider", () => {
           parsedMessageDefinitionsByTopic: { "/some_topic": [], "/some_other_topic": [] },
           datatypes: { some_datatype: { fields: [] } },
         },
+        connections: [],
         end: { nsec: 0, sec: 105 },
         start: { nsec: 0, sec: 100 },
         topics: [
@@ -82,6 +83,7 @@ describe("ApiCheckerDataProvider", () => {
           type: "raw",
           messageDefinitionsByTopic: { "/some_topic": "dummy", "/some_other_topic": "dummy" },
         },
+        connections: [],
         end: { nsec: 0, sec: 105 },
         start: { nsec: 0, sec: 100 },
         topics: [

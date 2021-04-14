@@ -77,6 +77,7 @@ export default class TestProvider implements DataProvider {
       start: this._start,
       end: this._end,
       topics: this._topics,
+      connections: [],
       providesParsedMessages: true,
       messageDefinitions: {
         type: "parsed",

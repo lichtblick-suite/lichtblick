@@ -129,6 +129,7 @@ export type InitializationResult = {
   start: Time; // Inclusive (time of first message).
   end: Time; // Inclusive (time of last message).
   topics: Topic[];
+  connections: Connection[];
 
   // Signals whether the messages returned from calls to getMessages are parsed into Javascript
   // objects or are returned in ROS binary format.
@@ -195,6 +196,7 @@ export type Connection = {
   md5sum: string;
   topic: string;
   type: string;
+  callerid: string;
 };
 
 // DataProviders can be instantiated using a DataProviderDescriptor and a GetDataProvider function.

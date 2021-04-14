@@ -135,6 +135,7 @@ describe("RandomAccessPlayer", () => {
           ],
           parsedMessageDefinitionsByTopic: {},
           playerWarnings: {},
+          publishedTopics: new Map<string, Set<string>>(),
         },
         capabilities: [PlayerCapabilities.setSpeed, PlayerCapabilities.playbackControl],
         presence: PlayerPresence.PRESENT,

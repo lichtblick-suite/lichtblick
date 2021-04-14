@@ -16,6 +16,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { rootGetDataProvider } from "@foxglove-studio/app/dataProviders/rootGetDataProvider";
 import {
+  Connection,
   DataProvider,
   DataProviderDescriptor,
   DataProviderMetadata,
@@ -114,6 +115,7 @@ export default class RandomAccessPlayer implements Player {
   _parsedSubscribedTopics: Set<string> = new Set();
   _bobjectSubscribedTopics: Set<string> = new Set();
   _providerTopics: Topic[] = [];
+  _providerConnections: Connection[] = [];
   _providerDatatypes: RosDatatypes = {};
   _metricsCollector: PlayerMetricsCollectorInterface;
   _initializing: boolean = true;
@@ -213,7 +215,7 @@ export default class RandomAccessPlayer implements Player {
           }
         },
       })
-      .then(({ start, end, topics, messageDefinitions, providesParsedMessages }) => {
+      .then(({ start, end, topics, connections, messageDefinitions, providesParsedMessages }) => {
         if (!providesParsedMessages) {
           throw new Error("Use ParseMessagesDataProvider to parse raw messages");
         }
@@ -228,6 +230,7 @@ export default class RandomAccessPlayer implements Player {
         this._nextReadStartTime = initialTime;
         this._end = end;
         this._providerTopics = topics;
+        this._providerConnections = connections;
         this._providerDatatypes = parsedMessageDefinitions.datatypes;
         this._parsedMessageDefinitionsByTopic =
           parsedMessageDefinitions.parsedMessageDefinitionsByTopic;
@@ -284,7 +287,17 @@ export default class RandomAccessPlayer implements Player {
       lastEnd = TimeUtil.add(lastEnd, { sec: 0, nsec: -1 });
     }
 
-    const data = {
+    const publishedTopics = new Map<string, Set<string>>();
+    for (const conn of this._providerConnections) {
+      let publishers = publishedTopics.get(conn.topic);
+      if (publishers == undefined) {
+        publishers = new Set<string>();
+        publishedTopics.set(conn.topic, publishers);
+      }
+      publishers.add(conn.callerid);
+    }
+
+    const data: PlayerState = {
       presence: this._reconnecting
         ? PlayerPresence.RECONNECTING
         : this._initializing
@@ -308,6 +321,7 @@ export default class RandomAccessPlayer implements Player {
             lastSeekTime: this._lastSeekEmitTime,
             topics: this._providerTopics,
             datatypes: this._providerDatatypes,
+            publishedTopics,
             parsedMessageDefinitionsByTopic: this._parsedMessageDefinitionsByTopic,
             playerWarnings: NO_WARNINGS,
           },

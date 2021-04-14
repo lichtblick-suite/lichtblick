@@ -46,6 +46,9 @@ export default class Ros1Player implements Player {
   private _closed: boolean = false; // Whether the player has been completely closed using close().
   private _providerTopics?: Topic[]; // Topics as advertised by rosmaster.
   private _providerDatatypes: RosDatatypes = {}; // All ROS message definitions received from subscriptions.
+  private _publishedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of publisher IDs publishing each topic.
+  private _subscribedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of subscriber IDs subscribed to each topic.
+  private _services = new Map<string, Set<string>>(); // A map of service names to service provider IDs that provide each service.
   private _start?: Time; // The time at which we started playing.
   private _requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
   private _parsedMessages: Message[] = []; // Queue of messages that we'll send in next _emitState() call.
@@ -121,6 +124,13 @@ export default class Ros1Player implements Player {
 
       // Try subscribing again, since we might now be able to subscribe to some new topics.
       this.setSubscriptions(this._requestedSubscriptions);
+
+      // Fetch the full graph topology
+      const graph = await rosNode.getSystemState();
+      this._publishedTopics = graph.publishers;
+      this._subscribedTopics = graph.subscribers;
+      this._services = graph.services;
+
       this._emitState();
     } catch (error) {
       if (!this._sentTopicsErrorNotification) {
@@ -179,6 +189,9 @@ export default class Ros1Player implements Player {
         lastSeekTime: 1,
         topics: providerTopics,
         datatypes: this._providerDatatypes,
+        publishedTopics: this._publishedTopics,
+        subscribedTopics: this._subscribedTopics,
+        services: this._services,
         parsedMessageDefinitionsByTopic: {},
         playerWarnings: NO_WARNINGS,
       },

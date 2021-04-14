@@ -376,6 +376,7 @@ describe("CombinedDataProvider", () => {
       expect(await combinedProvider.initialize(mockExtensionPoint().extensionPoint)).toEqual({
         start: { nsec: 0, sec: 100 },
         end: { nsec: 0, sec: 104 },
+        connections: [],
         topics: [
           { datatype: "some_datatype", name: "/some_topic1", numMessages: undefined },
           {
@@ -456,6 +457,7 @@ describe("CombinedDataProvider", () => {
       expect(await combinedProvider.initialize(mockExtensionPoint().extensionPoint)).toEqual({
         start: { nsec: 0, sec: 101 },
         end: { nsec: 0, sec: 101 },
+        connections: [],
         topics: [
           { name: "/some_topic", datatype: "some_datatype" },
           { name: "/some_topic_2", datatype: "some_datatype_2" },

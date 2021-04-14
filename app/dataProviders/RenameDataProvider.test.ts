@@ -65,6 +65,7 @@ describe("RenameDataProvider", () => {
       expect(await provider.initialize(mockExtensionPoint().extensionPoint)).toEqual({
         start: { nsec: 0, sec: 101 },
         end: { nsec: 0, sec: 103 },
+        connections: [],
         topics: [
           {
             datatype: "some_datatype",
@@ -88,6 +89,7 @@ describe("RenameDataProvider", () => {
       expect(await provider.initialize(mockExtensionPoint().extensionPoint)).toEqual({
         start: { nsec: 0, sec: 101 },
         end: { nsec: 0, sec: 103 },
+        connections: [],
         topics: [
           {
             datatype: "some_datatype",

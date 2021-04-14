@@ -163,10 +163,16 @@ export default class BagDataProvider implements DataProvider {
     const { startTime, endTime, chunkInfos } = this._bag;
     const connections: Connection[] = [];
     const emptyConnections: any[] = [];
-    for (const [_, connection] of this._bag.connections) {
-      const { messageDefinition, md5sum, topic, type } = connection;
+    for (const [connId, connection] of this._bag.connections) {
+      const { messageDefinition, md5sum, topic, type, callerid } = connection;
       if (messageDefinition && md5sum && topic && type) {
-        connections.push({ messageDefinition, md5sum, topic, type });
+        connections.push({
+          messageDefinition,
+          md5sum,
+          topic,
+          type,
+          callerid: callerid ?? String(connId),
+        });
       } else {
         emptyConnections.push(connection);
       }
@@ -216,6 +222,7 @@ export default class BagDataProvider implements DataProvider {
       start: startTime,
       end: endTime,
       topics: bagConnectionsToTopics(connections, chunkInfos),
+      connections,
       messageDefinitions: {
         type: "raw",
         messageDefinitionsByTopic,

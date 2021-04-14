@@ -133,6 +133,7 @@ export default class MemoryDataProvider implements DataProvider {
       start: firstSortedMessage.receiveTime,
       end: lastReceiveTime,
       topics: this.topics ?? [],
+      connections: [],
       messageDefinitions,
       providesParsedMessages: this.providesParsedMessages,
     };

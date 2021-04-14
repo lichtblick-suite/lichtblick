@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { PropsWithChildren, useCallback, useContext } from "react";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown from "react-markdown/with-html";
 import { CSSProperties } from "styled-components";
 
 import LinkHandlerContext from "@foxglove-studio/app/context/LinkHandlerContext";
@@ -47,7 +47,11 @@ export default function TextContent(props: PropsWithChildren<Props>): React.Reac
   return (
     <div className={styles.root} style={style}>
       {typeof children === "string" ? (
-        <ReactMarkdown source={children} renderers={{ link: linkRenderer }} />
+        <ReactMarkdown
+          source={children}
+          renderers={{ link: linkRenderer }}
+          allowDangerousHtml={true}
+        />
       ) : (
         children
       )}

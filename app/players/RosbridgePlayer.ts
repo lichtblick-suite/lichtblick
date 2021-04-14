@@ -39,6 +39,7 @@ import { FREEZE_MESSAGES } from "@foxglove-studio/app/util/globalConstants";
 import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import { fromMillis, TimestampMethod } from "@foxglove-studio/app/util/time";
+import type { RosGraph } from "@foxglove/ros1";
 
 const capabilities = [PlayerCapabilities.advertise];
 const NO_WARNINGS = Object.freeze({});
@@ -55,6 +56,9 @@ export default class RosbridgePlayer implements Player {
   _closed: boolean = false; // Whether the player has been completely closed using close().
   _providerTopics?: Topic[]; // Topics as published by the WebSocket.
   _providerDatatypes?: RosDatatypes; // Datatypes as published by the WebSocket.
+  _publishedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of publisher IDs publishing each topic.
+  _subscribedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of subscriber IDs subscribed to each topic.
+  _services = new Map<string, Set<string>>(); // A map of service names to service provider IDs that provide each service.
   _messageReadersByDatatype: {
     [datatype: string]: MessageReader;
   } = {};
@@ -77,6 +81,7 @@ export default class RosbridgePlayer implements Player {
   _hasReceivedMessage = false;
   _sentConnectionClosedNotification = false;
   _sentTopicsErrorNotification = false;
+  _sentNodesErrorNotification = false;
 
   constructor(url: string, metricsCollector: PlayerMetricsCollectorInterface) {
     this._metricsCollector = metricsCollector;
@@ -202,6 +207,23 @@ export default class RosbridgePlayer implements Player {
 
       // Try subscribing again, since we might now be able to subscribe to some new topics.
       this.setSubscriptions(this._requestedSubscriptions);
+
+      // Fetch the full graph topology
+      try {
+        const graph = await this._getSystemState();
+        this._publishedTopics = graph.publishers;
+        this._subscribedTopics = graph.subscribers;
+        this._services = graph.services;
+      } catch (error) {
+        if (!this._sentNodesErrorNotification) {
+          this._sentNodesErrorNotification = true;
+          sendNotification("Failed to fetch node details from rosbridge", error, "user", "warn");
+        }
+        this._publishedTopics = new Map();
+        this._subscribedTopics = new Map();
+        this._services = new Map();
+      }
+
       this._emitState();
     } catch (error) {
       if (!this._sentTopicsErrorNotification) {
@@ -259,6 +281,9 @@ export default class RosbridgePlayer implements Player {
         lastSeekTime: 1,
         topics: _providerTopics,
         datatypes: _providerDatatypes,
+        publishedTopics: this._publishedTopics,
+        subscribedTopics: this._subscribedTopics,
+        services: this._services,
         parsedMessageDefinitionsByTopic: this._parsedMessageDefinitionsByTopic,
         playerWarnings: NO_WARNINGS,
       },
@@ -418,5 +443,42 @@ export default class RosbridgePlayer implements Player {
   }
   setGlobalVariables(): void {
     // no-op
+  }
+
+  private async _getSystemState(): Promise<RosGraph> {
+    const output: RosGraph = {
+      publishers: new Map<string, Set<string>>(),
+      subscribers: new Map<string, Set<string>>(),
+      services: new Map<string, Set<string>>(),
+    };
+
+    const addEntry = (map: Map<string, Set<string>>, key: string, value: string) => {
+      let entries = map.get(key);
+      if (entries == undefined) {
+        entries = new Set<string>();
+        map.set(key, entries);
+      }
+      entries.add(value);
+    };
+
+    return new Promise((resolve, reject) => {
+      this._rosClient?.getNodes(async (nodes) => {
+        await Promise.all(
+          nodes.map((node) => {
+            this._rosClient?.getNodeDetails(
+              node,
+              (subscriptions, publications, services) => {
+                publications.forEach((pub) => addEntry(output.publishers, pub, node));
+                subscriptions.forEach((sub) => addEntry(output.subscribers, sub, node));
+                services.forEach((srv) => addEntry(output.services, srv, node));
+              },
+              reject,
+            );
+          }),
+        );
+
+        resolve(output);
+      }, reject);
+    });
   }
 }

@@ -72,6 +72,7 @@ describe("IdbCacheWriterDataProvider", () => {
     expect(await provider.initialize(extensionPoint)).toEqual({
       start: { nsec: 0, sec: 100 },
       end: { nsec: 0, sec: 102 },
+      connections: [],
       topics: [],
       messageDefinitions: {
         type: "raw",

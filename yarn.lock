@@ -2035,6 +2035,7 @@ __metadata:
     "@types/promise-queue": 2.2.0
     "@types/react": 17.0.3
     "@types/react-autocomplete": 1.8.5
+    "@types/react-cytoscapejs": ^1
     "@types/react-dom": 17.0.3
     "@types/react-highlight-words": 0.16.2
     "@types/react-input-autosize": 2.2.0
@@ -2065,6 +2066,8 @@ __metadata:
     chartjs-plugin-zoom: "github:foxglove/chartjs-plugin-zoom#656541279943f00dce600288435f83c436293146"
     chromatic: 5.7.1
     classnames: 2.3.1
+    cytoscape-cola: 2.4.0
+    cytoscape-dagre: 2.3.2
     enzyme: 3.11.0
     fetch-mock: 9.11.0
     fuzzysort: 1.1.4
@@ -2099,6 +2102,7 @@ __metadata:
     rc-tree: 4.1.5
     react: 17.0.2
     react-autocomplete: "janpaul123/react-autocomplete#bc8737070b5744069719c8fcd4e0a197192b0d48"
+    react-cytoscapejs: 1.2.1
     react-document-events: 1.5.1
     react-dom: 17.0.2
     react-highlight-words: 0.17.0
@@ -4229,6 +4233,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/cytoscape@npm:*":
+  version: 3.14.12
+  resolution: "@types/cytoscape@npm:3.14.12"
+  checksum: 306d4d72a8833e88b50a7f3abdd225bd7922dade28f331cbbc25c2dc88f5a83066d6ffe724fe18db8eca6a774a55259301fcedb9deaef1f2859ac3e278d3a59b
+  languageName: node
+  linkType: hard
+
 "@types/debug@npm:^4.1.5":
   version: 4.1.5
   resolution: "@types/debug@npm:4.1.5"
@@ -4747,6 +4758,16 @@ __metadata:
   dependencies:
     "@types/react": "*"
   checksum: 3325f37f87a0a2aff18c17205fe43b4c993ed9d5a4b1c34dcaaa8a2edf7c126da68809ad26e3908cbd7de53b6dc3d0f9d5e9fa0363c8c9dc0f475619f164a4b1
+  languageName: node
+  linkType: hard
+
+"@types/react-cytoscapejs@npm:^1":
+  version: 1.2.1
+  resolution: "@types/react-cytoscapejs@npm:1.2.1"
+  dependencies:
+    "@types/cytoscape": "*"
+    "@types/react": "*"
+  checksum: 5f6a630290e1d9dc85df7d36eb11a23e0dcdb788c925de1f997c37dd37419cb53199cb7334e700a0d58302ddbe042b753de5fe16d327842a532e970741e5095f
   languageName: node
   linkType: hard
 
@@ -9217,6 +9238,95 @@ __metadata:
   languageName: node
   linkType: hard
 
+"cytoscape-cola@npm:2.4.0":
+  version: 2.4.0
+  resolution: "cytoscape-cola@npm:2.4.0"
+  dependencies:
+    webcola: ^3.4.0
+  peerDependencies:
+    cytoscape: ^3.2.0
+  checksum: 1c069662c2061999b199b065993afb21492deb1da54488a51d385296ffaa8e4d0f8838b6370e37b62f5b3ca6d4cca1663c06dddb41b2c43b3cbd46ab43e59e0a
+  languageName: node
+  linkType: hard
+
+"cytoscape-dagre@npm:2.3.2":
+  version: 2.3.2
+  resolution: "cytoscape-dagre@npm:2.3.2"
+  dependencies:
+    dagre: ^0.8.5
+  peerDependencies:
+    cytoscape: ^3.2.22
+  checksum: 99fe2b8f9fabddf4a8e122f2ca3d6971640ed1afe7463503b421f83aaaabdad6bcc7f1562519fcd516e6df11e1cd95f11e4056808f0d8033692a4967fd1b565e
+  languageName: node
+  linkType: hard
+
+"cytoscape@npm:^3.2.19":
+  version: 3.18.2
+  resolution: "cytoscape@npm:3.18.2"
+  dependencies:
+    heap: ^0.2.6
+    lodash.debounce: ^4.0.8
+  checksum: c9b93ac623d67b874a864694744e7c39c95d83953a3de9ffd3ff12fe2f189e22d896c799acfd7277cd852da75040d3438ca5808de68d8285e97287efbd511148
+  languageName: node
+  linkType: hard
+
+"d3-dispatch@npm:1, d3-dispatch@npm:^1.0.3":
+  version: 1.0.6
+  resolution: "d3-dispatch@npm:1.0.6"
+  checksum: 2bec4b1395b167974d8fc6b2d5b2a843efd90c377e1749202cf2241557a0bfc7e5eaa465de0f39b5d977d2ae60c5ac982d2f043482bbfb49df53028b53769c98
+  languageName: node
+  linkType: hard
+
+"d3-drag@npm:^1.0.4":
+  version: 1.2.5
+  resolution: "d3-drag@npm:1.2.5"
+  dependencies:
+    d3-dispatch: 1
+    d3-selection: 1
+  checksum: a924f590fc5cea7bb0358fee70719d8c58db12e5a3cab4cd3c3848c60ad337ef89ff4248846d75b33422d47a9f122718ce54c5bdc504d5c141b689412dcf05a7
+  languageName: node
+  linkType: hard
+
+"d3-path@npm:1":
+  version: 1.0.9
+  resolution: "d3-path@npm:1.0.9"
+  checksum: 48492b1a4218bdfee93bed5bcb59f5e3ff6d3c66bffba82ddbb8e4007515ca517fc59b8ec7023c2387506ec25502ff7797f9a59274b6efec8b7652bc839a0be3
+  languageName: node
+  linkType: hard
+
+"d3-selection@npm:1":
+  version: 1.4.2
+  resolution: "d3-selection@npm:1.4.2"
+  checksum: 5b0df1824a0aab04eb9a31ee48f64ce88a6fcf3052c103da4cd7da3171e6464573017c1c7ac20eaf2c2fe7caedf4ad280d61f32e5edcd6a22b6c5a241eeb5b77
+  languageName: node
+  linkType: hard
+
+"d3-shape@npm:^1.3.5":
+  version: 1.3.7
+  resolution: "d3-shape@npm:1.3.7"
+  dependencies:
+    d3-path: 1
+  checksum: 90c1e7d773b3586da88f90bd5592d57eb5dade5b26088cddbb9828dd9f86c63f84c609b41051d695626c8acce21f041c61e189071939d45a2511585a87dd7151
+  languageName: node
+  linkType: hard
+
+"d3-timer@npm:^1.0.5":
+  version: 1.0.10
+  resolution: "d3-timer@npm:1.0.10"
+  checksum: e302132e1fc8989a5693fc7d265a034d7634ec87a1a8ed85e5959715d9da413971d9289f0ef304c67397d2acb4ebebd99f5adf0c8819929b8f6c588a1fd01d36
+  languageName: node
+  linkType: hard
+
+"dagre@npm:^0.8.5":
+  version: 0.8.5
+  resolution: "dagre@npm:0.8.5"
+  dependencies:
+    graphlib: ^2.1.8
+    lodash: ^4.17.15
+  checksum: 174cf2dcb4e6fdaab37ef5357f4a0063b2d008f2aeeffb5354089560b29382707acbd55c9c534d4313f63ae6fb594b80171fb6402497042fa2c85196c419d610
+  languageName: node
+  linkType: hard
+
 "dashdash@npm:^1.12.0":
   version: 1.14.1
   resolution: "dashdash@npm:1.14.1"
@@ -12623,6 +12733,15 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"graphlib@npm:^2.1.8":
+  version: 2.1.8
+  resolution: "graphlib@npm:2.1.8"
+  dependencies:
+    lodash: ^4.17.15
+  checksum: 86e4433af9cf450c414d8cc58481ac8b96321fc25ecbbf08d27f0694a5e3a72a5c7a973795683b5ed5bbced75af1b0706c2b6e964f44f27b9078b229b652abee
+  languageName: node
+  linkType: hard
+
 "growly@npm:^1.3.0":
   version: 1.3.0
   resolution: "growly@npm:1.3.0"
@@ -12926,7 +13045,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"heap@npm:0.2.6":
+"heap@npm:0.2.6, heap@npm:^0.2.6":
   version: 0.2.6
   resolution: "heap@npm:0.2.6"
   checksum: 7bb8c80753b64cfbb4685bd0aa4ba52101d63c4a90d450b151931e23d0e30552a60be5db4dd109d1a18e73d1af27ceca9884b1cc451a1b7757f3dd89bcdc21a4
@@ -19315,6 +19434,19 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
+"react-cytoscapejs@npm:1.2.1":
+  version: 1.2.1
+  resolution: "react-cytoscapejs@npm:1.2.1"
+  dependencies:
+    cytoscape: ^3.2.19
+    prop-types: ^15.6.2
+  peerDependencies:
+    react: ">=15.0.0"
+    react-dom: ">=15.0.0"
+  checksum: 6de241c4f7caa08e4b3791996a63bdb37632a2f736b386c17c11f0231f15d7150c7410deca681e28765f6ddb38807e753b7a2e353c4a39146e615a7c067f9f9f
+  languageName: node
+  linkType: hard
+
 "react-dev-utils@npm:^11.0.3":
   version: 11.0.3
   resolution: "react-dev-utils@npm:11.0.3"
@@ -24097,6 +24229,18 @@ typescript@4.2.2:
   version: 1.1.4
   resolution: "web-namespaces@npm:1.1.4"
   checksum: 0899d2a4a088b15761b6234ff6610f9598112d58f27adad86f7881ad51631317b47033bfa84cdeb62a37c8b6c3ece618f4ff720fd42c99f4907a1d9390c9dae0
+  languageName: node
+  linkType: hard
+
+"webcola@npm:^3.4.0":
+  version: 3.4.0
+  resolution: "webcola@npm:3.4.0"
+  dependencies:
+    d3-dispatch: ^1.0.3
+    d3-drag: ^1.0.4
+    d3-shape: ^1.3.5
+    d3-timer: ^1.0.5
+  checksum: 9940125a75ab2a56f80790215424e5f4a609b6156e357c53f531844a0c44f6b1367d1ffc2731a1827d7efad000785e337295b2fff9932beb6bf9dac7af8168bd
   languageName: node
   linkType: hard
 

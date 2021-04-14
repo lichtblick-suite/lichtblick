@@ -69,6 +69,7 @@ describe("RewriteBinaryDataProvider", () => {
     expect(await provider.initialize(mockExtensionPoint().extensionPoint)).toEqual({
       start: { nsec: 0, sec: 100 },
       end: { nsec: 0, sec: 102 },
+      connections: [],
       topics: [
         { name: "/foo", datatype: "empty" },
         { name: "/bar", datatype: "empty" },

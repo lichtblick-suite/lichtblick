@@ -15,6 +15,14 @@ declare module "roslib" {
     on(eventName: "close", cb: () => void): void;
     on(eventName: "error", cb: (err: Error) => void): void;
 
+    getNodes(cb: (nodes: string[]) => void, errorCallback: (error: Error) => void): void;
+
+    getNodeDetails(
+      node: string,
+      cb: (subscriptions: string[], publications: string[], services: string[]) => void,
+      errorCallback: (error: Error) => void,
+    ): void;
+
     getTopicsAndRawTypes(
       cb: (result: { topics: string[]; types: string[]; typedefs_full_text: string[] }) => void,
       errorCallback: (error: Error) => void,

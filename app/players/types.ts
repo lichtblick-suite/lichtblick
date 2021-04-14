@@ -163,6 +163,15 @@ export type PlayerStateActiveData = {
   // another datatype must refer to a datatype that is present in this list).
   datatypes: RosDatatypes;
 
+  // A map of topic names to the set of publisher IDs publishing each topic.
+  publishedTopics?: Map<string, Set<string>>;
+
+  // A map of topic names to the set of subscriber IDs subscribed to each topic.
+  subscribedTopics?: Map<string, Set<string>>;
+
+  // A map of service names to service provider IDs that provide each service.
+  services?: Map<string, Set<string>>;
+
   // Used for late-parsing of binary messages. Required to cover any topic for which binary data is
   // given to panels. (May be empty for players that only provide messages parsed into objects.)
   parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic;

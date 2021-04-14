@@ -6,6 +6,17 @@ import ClearBagCacheButton from "@foxglove-studio/app/components/ClearBagCacheBu
 import { FeatureDescriptions } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 
 export default {
+  topicGraphPanel: {
+    name: "Topic Graph panel",
+    description: (
+      <>
+        Enable an in-progress panel for visualizing the connectivity graph of a ROS system, similar
+        to rqt_graph.
+      </>
+    ),
+    developmentDefault: true,
+    productionDefault: false,
+  },
   diskBagCaching: {
     name: "Disk Bag Caching (requires reload)",
     description: (

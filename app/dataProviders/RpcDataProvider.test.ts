@@ -43,6 +43,7 @@ describe("RpcDataProvider", () => {
     new RpcDataProviderRemote(new Rpc(workerChannel), () => memoryDataProvider);
 
     expect(await provider.initialize(mockExtensionPoint().extensionPoint)).toEqual({
+      connections: [],
       start: { nsec: 0, sec: 100 },
       end: { nsec: 0, sec: 102 },
       topics: [{ datatype: "some_datatype", name: "/some_topic" }],

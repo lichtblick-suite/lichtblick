@@ -96,6 +96,18 @@ class MockRosClient {
   getMessagesByTopicName(topicName: string): { message: unknown }[] {
     return this._messages.filter(({ topic }) => topic === topicName);
   }
+
+  getNodes(callback: (nodes: string[]) => void, _errCb: (error: Error) => void) {
+    callback([]);
+  }
+
+  getNodeDetails(
+    _node: string,
+    callback: (subscriptions: string[], publications: string[], services: string[]) => void,
+    _errCb: (error: Error) => void,
+  ) {
+    callback([], [], []);
+  }
 }
 
 class MockRosTopic {
