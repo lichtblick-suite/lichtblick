@@ -284,7 +284,7 @@ export default function renderTreeNodes({
         visibleByColumn={visibleByColumn}
         width={titleWidth}
         visibleTopicsCount={visibleTopicsCountByKey[item.key] || 0}
-        {...(tooltips.length ? ({ tooltips } as any) : undefined)}
+        {...(tooltips.length > 0 ? ({ tooltips } as any) : undefined)}
         diffModeEnabled={diffModeEnabled}
       />
     );
@@ -344,7 +344,7 @@ export default function renderTreeNodes({
     return {
       key,
       title,
-      ...(childrenNodes.length ? { children: childrenNodes } : undefined),
+      ...(childrenNodes.length > 0 ? { children: childrenNodes } : undefined),
       // Add `disabled` so that the switcher has the correct color.
       disabled: !nodeVisibleInScene,
     };

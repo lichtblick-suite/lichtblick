@@ -207,7 +207,7 @@ export function getNextFrame(
   timestamps: string[] = [],
   goLeft?: boolean,
 ): Time | undefined {
-  if (!timestamps.length) {
+  if (timestamps.length === 0) {
     return undefined;
   }
   const effectiveIdx = findClosestTimestampIndex(currentTime, timestamps);

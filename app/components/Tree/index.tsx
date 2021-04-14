@@ -67,7 +67,7 @@ export default class Tree extends PureComponent<Props> {
   render() {
     const { root, hideRoot } = this.props;
     const children = root.children || [];
-    if (hideRoot && !children.filter((treeNode: Node) => treeNode.visible).length) {
+    if (hideRoot && !children.some((treeNode: Node) => treeNode.visible)) {
       return <div style={{ padding: "8px 12px", color: "#666" }}>None</div>;
     }
     return hideRoot ? children.map(this.renderNode) : this.renderNode(root);

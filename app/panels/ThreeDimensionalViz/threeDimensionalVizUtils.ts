@@ -134,7 +134,7 @@ export function getUpdatedGlobalVariablesBySelectedObject(
 ): GlobalVariables | undefined {
   const object = getObject(selectedObject);
   const interactionData = getInteractionData(selectedObject);
-  if (!linkedGlobalVariables.length || !interactionData?.topic) {
+  if (linkedGlobalVariables.length === 0 || !interactionData?.topic) {
     return;
   }
   const newGlobalVariables: any = {};

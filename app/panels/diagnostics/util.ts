@@ -82,11 +82,11 @@ export function getDiagnosticId(hardwareId: string, name?: string): DiagnosticId
   return name != undefined ? `|${trimmedHardwareId}|${name}|` : `|${trimmedHardwareId}|`;
 }
 
-export function getDisplayName(hardwareId: string, name: string) {
+export function getDisplayName(hardwareId: string, name: string): string {
   if (name.indexOf(hardwareId) === 0) {
     return name;
   }
-  return name ? `${hardwareId}: ${name}` : hardwareId;
+  return name.length > 0 ? `${hardwareId}: ${name}` : hardwareId;
 }
 
 // ensures the diagnostic status message's name consists of both the hardware id and the name
@@ -98,13 +98,11 @@ export function computeDiagnosticInfo(
   if (status.values?.some(({ value }) => value.length > MAX_STRING_LENGTH)) {
     status = {
       ...status,
-      values: status.values
-        ? status.values.map((kv) =>
-            kv.value.length > MAX_STRING_LENGTH
-              ? { key: kv.key, value: truncate(kv.value, { length: MAX_STRING_LENGTH }) }
-              : kv,
-          )
-        : (undefined as any),
+      values: status.values?.map((kv) =>
+        kv.value.length > MAX_STRING_LENGTH
+          ? { key: kv.key, value: truncate(kv.value, { length: MAX_STRING_LENGTH }) }
+          : kv,
+      ),
     };
   }
   return {
@@ -136,7 +134,7 @@ export const filterAndSortDiagnostics = (
   pinnedIds: DiagnosticId[],
 ): DiagnosticInfo[] => {
   const unpinnedNodes = nodes.filter(({ id }) => !pinnedIds.includes(id));
-  if (!hardwareIdFilter) {
+  if (hardwareIdFilter.length === 0) {
     return sortBy(unpinnedNodes, (info) => info.displayName.replace(/^\//, ""));
   }
   // fuzzyFilter sorts by match accuracy.

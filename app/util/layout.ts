@@ -75,7 +75,7 @@ export function getPanelIdWithNewType(id: string, newPanelType: string): string 
   return id.replace(getPanelTypeFromId(id), newPanelType);
 }
 
-export function isTabPanel(panelId: string) {
+export function isTabPanel(panelId: string): boolean {
   return getPanelTypeFromId(panelId) === TAB_PANEL_TYPE;
 }
 
@@ -88,13 +88,13 @@ export function getPathFromNode<T extends MosaicKey>(
   if (tree === node) {
     return path;
   }
-  if (tree && isParent(tree)) {
+  if (tree != undefined && isParent(tree)) {
     const first = getPathFromNode(node, tree.first, [...path, "first"]);
-    if (first.length) {
+    if (first.length > 0) {
       return first;
     }
     const second = getPathFromNode(node, tree.second, [...path, "second"]);
-    if (second.length) {
+    if (second.length > 0) {
       return second;
     }
   }
@@ -119,17 +119,20 @@ function getLayoutWithNewPanelIds(
   if (typeof layout === "string") {
     // return corresponding ID if it exists in panelIdMap
     // (e.g. for Tab panel presets with 1 panel in active layout)
-    return panelIdMap[layout] || getPanelIdForType(getPanelTypeFromId(layout));
+    return panelIdMap[layout] ?? getPanelIdForType(getPanelTypeFromId(layout));
   }
 
-  if (!layout) {
+  if (layout == undefined) {
     return undefined;
   }
   const newLayout: Record<string, any> = {};
   for (const key in layout) {
     if (typeof (layout as any)[key] === "object" && !Array.isArray((layout as any)[key])) {
       newLayout[key] = getLayoutWithNewPanelIds((layout as any)[key], panelIdMap);
-    } else if (typeof (layout as any)[key] === "string" && panelIdMap[(layout as any)[key]]) {
+    } else if (
+      typeof (layout as any)[key] === "string" &&
+      panelIdMap[(layout as any)[key]] != undefined
+    ) {
       newLayout[key] = panelIdMap[(layout as any)[key]];
     } else {
       newLayout[key] = (layout as any)[key];
@@ -205,7 +208,7 @@ export const getParentTabPanelByPanelId = (
   [key: string]: string;
 } =>
   Object.entries(savedProps).reduce((memo: any, [savedPanelId, savedConfig]) => {
-    if (isTabPanel(savedPanelId) && savedConfig) {
+    if (isTabPanel(savedPanelId) && savedConfig != undefined) {
       const tabPanelConfig: TabPanelConfig = savedConfig as any;
       tabPanelConfig.tabs.forEach((tab: any) => {
         const panelIdsInTab = getLeaves(tab.layout);
@@ -247,7 +250,7 @@ export const getSaveConfigsPayloadForAddedPanel = ({
   const newConfigs = filterMap(templateIds, (templateId) => {
     const panelId = panelIdMap[templateId];
     const relatedConfig = relatedConfigs[templateId];
-    if (!panelId || !relatedConfigs) {
+    if (panelId === undefined || relatedConfig === undefined) {
       return;
     }
 
@@ -289,7 +292,7 @@ export function getAllPanelIds(layout: MosaicNode<string>, savedProps: SavedProp
   return [...layoutPanelIds, ...tabPanelIds];
 }
 
-export const validateTabPanelConfig = (config?: PanelConfig) => {
+export const validateTabPanelConfig = (config?: PanelConfig): boolean => {
   if (!config) {
     return false;
   }
@@ -302,7 +305,7 @@ export const validateTabPanelConfig = (config?: PanelConfig) => {
     captureException(error);
     return false;
   }
-  if (config && config.activeTabIdx >= config.tabs.length) {
+  if (config.activeTabIdx >= config.tabs.length) {
     const error = new Error("A Tab panel has an activeTabIdx for a nonexistent tab.");
     log.info(`Invalid Tab panel config: ${error.message}`, config);
     captureException(error);
@@ -343,7 +346,7 @@ export const removePanelFromTabPanel = (
 
   const currentTabLayout = config.tabs[config.activeTabIdx]?.layout;
   let newTree: MosaicNode<string> | undefined;
-  if (!path.length) {
+  if (path.length === 0) {
     newTree = undefined;
   } else {
     // eslint-disable-next-line no-restricted-syntax
@@ -363,7 +366,7 @@ export const createAddUpdates = (
   newPath: MosaicPath,
   position: MosaicDropTargetPosition,
 ): MosaicUpdate<string>[] => {
-  if (!tree) {
+  if (tree == undefined) {
     return [];
   }
   const node = getNodeAtPath(tree, newPath);
@@ -387,7 +390,7 @@ export const addPanelToTab = (
 
   const currentTabLayout = safeTabConfig.tabs[safeTabConfig.activeTabIdx]?.layout;
   const newTree =
-    currentTabLayout && destinationPath && destinationPosition
+    currentTabLayout != undefined && destinationPath && destinationPosition != undefined
       ? updateTree<string>(
           currentTabLayout,
           createAddUpdates(currentTabLayout, insertedPanelId, destinationPath, destinationPosition),
@@ -573,7 +576,7 @@ export function stringifyParams(params: URLSearchParams): string {
       stringifiedParams.push(`${key}=${encodeURIComponent(value)}`);
     }
   }
-  return stringifiedParams.length ? `?${stringifiedParams.join("&")}` : "";
+  return stringifiedParams.length > 0 ? `?${stringifiedParams.join("&")}` : "";
 }
 
 const stateKeyMap = {
@@ -597,7 +600,7 @@ export const dictForPatchCompression = { ...layoutKeyMap, ...stateKeyMap };
 
 export function getUpdatedURLWithPatch(search: string, diff: string): string {
   // Return the original search directly if the diff is empty.
-  if (!diff) {
+  if (diff.length === 0) {
     return search;
   }
   const params = new URLSearchParams(search);
@@ -618,16 +621,16 @@ export function getUpdatedURLWithNewVersion(
   version?: string,
 ): string {
   const params = new URLSearchParams(search);
-  params.set(LAYOUT_QUERY_KEY, `${name}${version ? `@${version}` : ""}`);
+  params.set(LAYOUT_QUERY_KEY, `${name}${version != undefined ? `@${version}` : ""}`);
   params.delete(PATCH_QUERY_KEY);
   return stringifyParams(params);
 }
-export function getShouldProcessPatch() {
+export function getShouldProcessPatch(): boolean {
   // Skip processing patch in iframe (currently used for MiniViz) since we can't update the URL anyway.
   return !IS_IN_IFRAME;
 }
 // If we have a URL patch, the user has edited the layout.
-export function hasEditedLayout() {
+export function hasEditedLayout(): boolean {
   const params = new URLSearchParams(window.location.search);
   return params.has(PATCH_QUERY_KEY);
 }

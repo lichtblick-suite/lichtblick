@@ -73,7 +73,7 @@ const rpcFromNewSharedWorker = (worker: SharedWorker, name: string) => {
     console.error("SharedWorker error:", event);
     sendNotification(
       "An error occurred in Node Playground.",
-      `${name} worker error: ${event.message || "no details available"}`,
+      `${name} worker error: ${event.message ?? "no details available"}`,
       "app",
       "error",
     );
@@ -83,7 +83,7 @@ const rpcFromNewSharedWorker = (worker: SharedWorker, name: string) => {
     console.error("SharedWorker messageerror:", event);
     sendNotification(
       "An error occurred in Node Playground.",
-      `${name} message error: ${String(event.data) || "no details available"}`,
+      `${name} message error: ${String(event.data) ?? "no details available"}`,
       "app",
       "error",
     );
@@ -163,7 +163,7 @@ export default class UserNodePlayer implements Player {
       setUserNodeDiagnostics({ [nodeId]: { diagnostics } });
     };
     this._addUserNodeLogs = (nodeId: string, logs: UserNodeLog[]) => {
-      if (logs.length) {
+      if (logs.length > 0) {
         addUserNodeLogs({ [nodeId]: { logs } });
       }
     };
@@ -247,7 +247,7 @@ export default class UserNodePlayer implements Player {
     },
   );
 
-  setGlobalVariables(globalVariables: GlobalVariables) {
+  setGlobalVariables(globalVariables: GlobalVariables): void {
     this._globalVariables = globalVariables;
   }
 
@@ -265,7 +265,7 @@ export default class UserNodePlayer implements Player {
     // TODO: Only reset workers once
     return this._resetWorkers().then(() => {
       this.setSubscriptions(this._subscriptions);
-      const { currentTime, isPlaying = false } = this._lastPlayerStateActiveData || {};
+      const { currentTime, isPlaying = false } = this._lastPlayerStateActiveData ?? {};
       if (currentTime && !isPlaying) {
         this._player.seekPlayback(currentTime);
       }
@@ -279,7 +279,7 @@ export default class UserNodePlayer implements Player {
   ): Promise<NodeRegistration> => {
     // Pass all the nodes a set of basic datatypes that we know how to render.
     // These could be overwritten later by bag datatypes, but these datatype definitions should be very stable.
-    const { topics = [], datatypes = {} } = this._lastPlayerStateActiveData || {};
+    const { topics = [], datatypes = {} } = this._lastPlayerStateActiveData ?? {};
     const nodeDatatypes = { ...basicDatatypes, ...datatypes };
 
     const rosLib = await this._getRosLib();
@@ -304,7 +304,7 @@ export default class UserNodePlayer implements Player {
         // Register the node within a web worker to be executed.
         if (!bobjectSender || !rpc) {
           rpc =
-            this._unusedNodeRuntimeWorkers.pop() ||
+            this._unusedNodeRuntimeWorkers.pop() ??
             rpcFromNewSharedWorker(UserNodePlayer.CreateNodeRuntimeWorker(), "Node runtime");
           bobjectSender = new BobjectRpcSender(rpc);
           const { error, userNodeDiagnostics, userNodeLogs } = await rpc.send<RegistrationOutput>(
@@ -314,7 +314,7 @@ export default class UserNodePlayer implements Player {
               nodeCode: transpiledCode,
             },
           );
-          if (error) {
+          if (error != undefined) {
             this._setUserNodeDiagnostics(nodeId, [
               ...userNodeDiagnostics,
               {
@@ -341,16 +341,17 @@ export default class UserNodePlayer implements Player {
           return;
         }
 
-        const diagnostics = result.error
-          ? [
-              {
-                source: Sources.Runtime,
-                severity: DiagnosticSeverity.Error,
-                message: result.error,
-                code: ErrorCodes.RUNTIME,
-              },
-            ]
-          : [];
+        const diagnostics =
+          result.error != undefined
+            ? [
+                {
+                  source: Sources.Runtime,
+                  severity: DiagnosticSeverity.Error,
+                  message: result.error,
+                  code: ErrorCodes.RUNTIME,
+                },
+              ]
+            : [];
         if (diagnostics.length > 0) {
           this._setUserNodeDiagnostics(nodeId, diagnostics);
         }
@@ -398,7 +399,7 @@ export default class UserNodePlayer implements Player {
   //
   // For the time being, resetWorkers is a catchall for these circumstances. As
   // performance bottlenecks are identified, it will be subject to change.
-  async _resetWorkers() {
+  async _resetWorkers(): Promise<void> {
     if (!this._lastPlayerStateActiveData) {
       return;
     }
@@ -414,7 +415,7 @@ export default class UserNodePlayer implements Player {
     // This early return is an optimization measure so that the
     // `nodeRegistrations` array is not re-defined, which will invalidate
     // downstream caches. (i.e. `this._getTopics`)
-    if (!this._nodeRegistrations.length && !Object.entries(this._userNodes).length) {
+    if (this._nodeRegistrations.length === 0 && Object.entries(this._userNodes).length === 0) {
       pending.resolve();
       this._pendingResetWorkers = undefined;
       return;
@@ -469,7 +470,7 @@ export default class UserNodePlayer implements Player {
   async _getRosLib(): Promise<string> {
     // We only generate the roslib once, because available topics and datatypes should never change. If they do, for
     // a source or player change, we destroy this player and create a new one.
-    if (this._rosLib) {
+    if (this._rosLib != undefined) {
       return this._rosLib;
     }
 
@@ -488,7 +489,7 @@ export default class UserNodePlayer implements Player {
     return rosLib as string;
   }
 
-  setListener(listener: (arg0: PlayerState) => Promise<void>) {
+  setListener(listener: (arg0: PlayerState) => Promise<void>): void {
     this._player.setListener(async (playerState: PlayerState) => {
       const { activeData } = playerState;
       if (!activeData) {
@@ -538,7 +539,7 @@ export default class UserNodePlayer implements Player {
     });
   }
 
-  setSubscriptions(subscriptions: SubscribePayload[]) {
+  setSubscriptions(subscriptions: SubscribePayload[]): void {
     this._subscriptions = subscriptions;
 
     const mappedTopics: string[] = [];
@@ -585,7 +586,7 @@ export default class UserNodePlayer implements Player {
     this._player.setSubscriptions(realTopicSubscriptions);
   }
 
-  close = () => {
+  close = (): void => {
     for (const nodeRegistration of this._nodeRegistrations) {
       nodeRegistration.terminate();
     }
@@ -595,12 +596,12 @@ export default class UserNodePlayer implements Player {
     }
   };
 
-  setPublishers = (publishers: AdvertisePayload[]) => this._player.setPublishers(publishers);
-  publish = (request: PublishPayload) => this._player.publish(request);
-  startPlayback = () => this._player.startPlayback();
-  pausePlayback = () => this._player.pausePlayback();
-  setPlaybackSpeed = (speed: number) => this._player.setPlaybackSpeed(speed);
-  seekPlayback = (time: Time, backfillDuration?: Time) =>
+  setPublishers = (publishers: AdvertisePayload[]): void => this._player.setPublishers(publishers);
+  publish = (request: PublishPayload): void => this._player.publish(request);
+  startPlayback = (): void => this._player.startPlayback();
+  pausePlayback = (): void => this._player.pausePlayback();
+  setPlaybackSpeed = (speed: number): void => this._player.setPlaybackSpeed(speed);
+  seekPlayback = (time: Time, backfillDuration?: Time): void =>
     this._player.seekPlayback(time, backfillDuration);
-  requestBackfill = () => this._player.requestBackfill();
+  requestBackfill = (): void => this._player.requestBackfill();
 }

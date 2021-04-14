@@ -52,8 +52,8 @@ export default function PanelSetupWithBag({
   onMount,
   onFirstMount,
   store,
-  frameHistoryCompatibility,
-}: Props) {
+  frameHistoryCompatibility = false,
+}: Props): JSX.Element | ReactNull {
   const [fixture, setFixture] = useState<Fixture | undefined>(undefined);
   const hasResetFixture = React.useRef(false);
 
@@ -73,7 +73,7 @@ export default function PanelSetupWithBag({
     (async () => {
       const player = new StoryPlayer([bag, bag2].filter(Boolean) as string[]);
       const formattedSubscriptions: SubscribePayload[] = flatten(
-        (subscriptions || []).map((topic) => [
+        (subscriptions ?? []).map((topic) => [
           { topic, format: "parsedMessages" },
           { topic, format: "bobjects" },
         ]),

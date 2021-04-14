@@ -63,9 +63,8 @@ function PanelWithData({
   linkedGlobalVariables?: LinkedGlobalVariable[];
   onMount?: any;
 }) {
-  const globalVariables = linkedGlobalVars.length
-    ? exampleDataWithLinkedVariables
-    : exampleVariables;
+  const globalVariables =
+    linkedGlobalVars.length > 0 ? exampleDataWithLinkedVariables : exampleVariables;
   const fixture = {
     topics: [],
     frame: {},

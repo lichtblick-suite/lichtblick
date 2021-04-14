@@ -382,7 +382,7 @@ function PanelList(props: Props) {
               {categoryIdx !== 0 && prevItems.length > 0 && <hr />}
               <Item
                 isHeader
-                style={categoryIdx === 0 || !prevItems.length ? { paddingTop: 0 } : {}}
+                style={categoryIdx === 0 || prevItems.length === 0 ? { paddingTop: 0 } : {}}
               >
                 {label}
               </Item>

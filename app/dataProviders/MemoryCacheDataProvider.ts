@@ -497,7 +497,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
     };
     const uncachedRanges = missingRanges(bounds, this._getDownloadedBlockRanges());
 
-    if (!uncachedRanges.length) {
+    if (uncachedRanges.length === 0) {
       return undefined; // We have loaded the whole file.
     }
 
@@ -543,7 +543,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
   // Replace the current connection with a new one, spanning a certain range of blocks. Return whether we
   // completed successfully, or whether we were interrupted by another connection.
   async _setConnection(blockRange: Range): Promise<boolean> {
-    if (!this._getCurrentTopics().length) {
+    if (this._getCurrentTopics().length === 0) {
       delete this._currentConnection;
       return true;
     }
@@ -590,15 +590,16 @@ export default class MemoryCacheDataProvider implements DataProvider {
           Math.min(this._totalNs, (currentBlockIndex + 1) * this._memCacheBlockSizeNs) - 1,
         ), // endTime is inclusive.
       );
-      const messages = topics.length
-        ? await this._provider.getMessages(startTime, endTime, {
-            bobjects: topics,
-          })
-        : {
-            rosBinaryMessages: undefined,
-            bobjects: [],
-            parsedMessages: undefined,
-          };
+      const messages =
+        topics.length > 0
+          ? await this._provider.getMessages(startTime, endTime, {
+              bobjects: topics,
+            })
+          : {
+              rosBinaryMessages: undefined,
+              bobjects: [],
+              parsedMessages: undefined,
+            };
       const { bobjects, rosBinaryMessages, parsedMessages } = messages;
 
       if (rosBinaryMessages != undefined || parsedMessages != undefined) {

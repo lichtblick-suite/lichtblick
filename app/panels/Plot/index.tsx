@@ -162,7 +162,7 @@ function Plot(props: Props) {
   );
 
   useEffect(() => {
-    if (!yAxisPaths.length) {
+    if (yAxisPaths.length === 0) {
       saveConfig({ paths: [{ value: "", enabled: true, timestampMethod: "receiveTime" }] });
     }
   });

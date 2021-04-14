@@ -439,7 +439,7 @@ export default class RandomAccessPlayer implements Player {
     // invoked unless a user's browser is focused on the current session's tab.
     // Moreover, there is a disproportionally small amount of time between when we procure
     // messages here and when they are set to playerState.
-    if (parsedMessages.length || bobjects.length) {
+    if (parsedMessages.length > 0 || bobjects.length > 0) {
       this._metricsCollector.recordTimeToFirstMsgs();
     }
     const filterMessages = (msgs: Message[], topics: string[]) =>

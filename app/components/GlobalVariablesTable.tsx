@@ -205,7 +205,7 @@ function LinkedGlobalVariableRow({ name }: { name: string }): ReactElement {
 
             <Tooltip
               contents={
-                linkedTopicPaths.length ? (
+                linkedTopicPaths.length > 0 ? (
                   <>
                     <div style={{ fontWeight: "bold", opacity: 0.4 }}>
                       {linkedTopicPaths.length} LINKED TOPIC{linkedTopicPaths.length > 1 ? "S" : ""}
@@ -220,7 +220,7 @@ function LinkedGlobalVariableRow({ name }: { name: string }): ReactElement {
               }
             >
               <SLinkedTopicsSpan>
-                {linkedTopicPaths.length ? <bdi>{linkedTopicPaths.join(", ")}</bdi> : "--"}
+                {linkedTopicPaths.length > 0 ? <bdi>{linkedTopicPaths.join(", ")}</bdi> : "--"}
               </SLinkedTopicsSpan>
             </Tooltip>
           </Flex>

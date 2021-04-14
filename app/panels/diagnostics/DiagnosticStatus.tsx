@@ -309,12 +309,13 @@ class DiagnosticStatus extends React.Component<Props, any> {
 
   _toggleSections = () => {
     const { saveConfig, collapsedSections, info } = this.props;
-    const newSectionsForCurrentName = this._getSectionsCollapsedForCurrentName().length
-      ? []
-      : this._getSectionsThatCanBeCollapsed().map(({ key, value }) => ({
-          name: info.status.name,
-          section: `${key}${value}`,
-        }));
+    const newSectionsForCurrentName =
+      this._getSectionsCollapsedForCurrentName().length > 0
+        ? []
+        : this._getSectionsThatCanBeCollapsed().map(({ key, value }) => ({
+            name: info.status.name,
+            section: `${key}${value}`,
+          }));
     const otherSections = collapsedSections.filter(({ name }) => name !== info.status.name);
     saveConfig({ collapsedSections: newSectionsForCurrentName.concat(otherSections) });
   };
@@ -387,12 +388,12 @@ class DiagnosticStatus extends React.Component<Props, any> {
                         fade
                         style={{ padding: 4 }}
                         tooltip={
-                          this._getSectionsCollapsedForCurrentName().length
+                          this._getSectionsCollapsedForCurrentName().length > 0
                             ? "Expand all"
                             : "Collapse all"
                         }
                       >
-                        {this._getSectionsCollapsedForCurrentName().length ? (
+                        {this._getSectionsCollapsedForCurrentName().length > 0 ? (
                           <ChevronUpIcon />
                         ) : (
                           <ChevronDownIcon />

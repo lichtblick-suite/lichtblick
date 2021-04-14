@@ -49,7 +49,7 @@ export default function useSceneBuilderAndTransformsData({
     // NOTE: changing this to instead show the exact TFs available at this point in time is NOT advisable. There is a
     // subtle bug that will lead to the topic tree "jumping" in position as TFs are quickly removed and then re-added
     // whenever a topic is added.
-    if (tfsNotYetAdded.length) {
+    if (tfsNotYetAdded.length > 0) {
       availableTfsRef.current = [...availableTfsRef.current, ...tfsNotYetAdded];
     }
   }
@@ -60,7 +60,7 @@ export default function useSceneBuilderAndTransformsData({
     for (const { name, topic } of sceneBuilder.allNamespaces) {
       (result[topic] ??= []).push(name);
     }
-    if (availableTfs.length) {
+    if (availableTfs.length > 0) {
       result[TRANSFORM_TOPIC] = availableTfs;
     }
     return result;

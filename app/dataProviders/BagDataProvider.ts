@@ -191,7 +191,7 @@ export default class BagDataProvider implements DataProvider {
       );
     }
 
-    if (!startTime || !endTime || !connections.length) {
+    if (!startTime || !endTime || connections.length === 0) {
       // This will abort video generation:
       sendNotification("Cannot play invalid bag", "Bag is empty or corrupt.", "user", "error");
       return new Promise(() => {

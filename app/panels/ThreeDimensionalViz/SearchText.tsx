@@ -94,7 +94,7 @@ export const useGLText = ({
 
       const highlightedIndices = getHighlightedIndices(marker.text, searchText);
 
-      if (highlightedIndices.length) {
+      if (highlightedIndices.length > 0) {
         numMatches += 1;
         const highlightedMarker = {
           ...marker,
@@ -116,13 +116,13 @@ export const useGLText = ({
   );
 
   useEffect(() => {
-    if (!searchTextOpen && !searchTextMatches.length) {
+    if (!searchTextOpen && searchTextMatches.length === 0) {
       return;
     }
     const matches = glText.filter((marker) => marker.highlightedIndices?.length);
-    if (matches.length) {
+    if (matches.length > 0) {
       throttledSetSearchTextMatches(matches);
-    } else if (!matches.length && searchTextMatches.length) {
+    } else if (searchTextMatches.length > 0) {
       throttledSetSearchTextMatches([]);
     }
   }, [throttledSetSearchTextMatches, glText, searchText, searchTextMatches.length, searchTextOpen]);
@@ -243,7 +243,7 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
   );
 
   React.useEffect(() => {
-    if (!searchTextMatches.length) {
+    if (searchTextMatches.length === 0) {
       setSelectedMatchIndex(0);
     }
   }, [searchTextMatches.length, setSelectedMatchIndex]);

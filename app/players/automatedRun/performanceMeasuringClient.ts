@@ -74,7 +74,7 @@ if (isNaN(msPerFrame)) {
 }
 
 // Define average([]) as 0.
-const average = (numbers: number[]) => sum(numbers) / (numbers.length || 1);
+const average = (numbers: number[]) => sum(numbers) / (numbers.length === 0 ? 1 : numbers.length);
 
 // Marks are expensive: only enable marking performance when we can plausibly see and use the markings, IE in local
 // development builds when we aren't doing benchmarking.
@@ -97,7 +97,7 @@ class PerformanceMeasuringClient {
   totalFrameMs?: number;
   totalFrameTimes: number[] = [];
 
-  start({ bagLengthMs }: { bagLengthMs: number }) {
+  start({ bagLengthMs }: { bagLengthMs: number }): void {
     if (process.env.NODE_ENV !== "production" && process.env.NODE_ENV !== "test") {
       sendNotification(
         "In performance measuring mode, but NODE_ENV is not production!",
@@ -113,14 +113,14 @@ class PerformanceMeasuringClient {
     this.startedMeasuringPerformance = true;
   }
 
-  markFrameRenderStart() {
+  markFrameRenderStart(): void {
     this.frameRenderStart = performance.now();
     if (this.enablePerformanceMarks) {
       performance.mark("FRAME_RENDER_START");
     }
   }
 
-  markFrameRenderEnd() {
+  markFrameRenderEnd(): number {
     const frameRenderStart = this.frameRenderStart;
     if (frameRenderStart == undefined) {
       throw new Error("Called markFrameRenderEnd without calling markFrameRenderStart");
@@ -135,14 +135,14 @@ class PerformanceMeasuringClient {
     return frameTimeMs;
   }
 
-  markPreloadStart() {
+  markPreloadStart(): void {
     this.preloadStart = performance.now();
     if (this.enablePerformanceMarks) {
       performance.mark("PRELOAD_START");
     }
   }
 
-  markPreloadEnd() {
+  markPreloadEnd(): number {
     const { preloadStart } = this;
     if (preloadStart == undefined) {
       throw new Error("Called markPreloadEnd without calling markPreloadStart");
@@ -157,11 +157,11 @@ class PerformanceMeasuringClient {
     return preloadTimeMs;
   }
 
-  markTotalFrameStart() {
+  markTotalFrameStart(): void {
     this.totalFrameMs = performance.now();
   }
 
-  markTotalFrameEnd() {
+  markTotalFrameEnd(): void {
     const totalFrameMs = this.totalFrameMs;
     if (totalFrameMs == undefined) {
       throw new Error("Called markTotalFrameEnd without calling markTotalFrameStart");
@@ -170,7 +170,7 @@ class PerformanceMeasuringClient {
     this.totalFrameMs = undefined;
   }
 
-  onError(e: Error) {
+  onError(e: Error): Promise<void> {
     const event = new CustomEvent("playbackError", { detail: e.toString() });
     window.dispatchEvent(event);
     // Never bother to resolve this promise since we should stop perf playback whenever any error occurs.
@@ -179,7 +179,7 @@ class PerformanceMeasuringClient {
     });
   }
 
-  async onFrameFinished() {
+  async onFrameFinished(): Promise<void> {
     // no-op
   }
 
@@ -206,7 +206,7 @@ class PerformanceMeasuringClient {
     };
   }
 
-  async finish() {
+  async finish(): Promise<void> {
     const startTime = this.startTime;
     const bagLengthMs = this.bagLengthMs;
     const preloadTimeMs = this.preloadTimeMs;

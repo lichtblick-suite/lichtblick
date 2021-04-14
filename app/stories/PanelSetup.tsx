@@ -86,7 +86,7 @@ type Props = {
   children: React.ReactNode;
   fixture?: Fixture;
   panelCatalog?: PanelCatalog;
-  omitDragAndDrop?: boolean;
+  omitDragAndDrop: boolean;
   pauseFrame?: ComponentProps<typeof MockMessagePipelineProvider>["pauseFrame"];
   onMount?: (arg0: HTMLDivElement, store: Store) => void;
   onFirstMount?: (arg0: HTMLDivElement) => void;
@@ -116,7 +116,7 @@ function setNativeValue(element: unknown, value: unknown) {
 export function triggerInputChange(
   node: HTMLInputElement | HTMLTextAreaElement,
   value: string = "",
-) {
+): void {
   // force trigger textarea to change
   node.value = `${value} `;
   // trigger input change: https://stackoverflow.com/questions/23892547/what-is-the-best-way-to-trigger-onchange-event-in-react-js
@@ -126,19 +126,19 @@ export function triggerInputChange(
   node.dispatchEvent(ev);
 }
 
-export function triggerInputBlur(node: HTMLInputElement | HTMLTextAreaElement) {
+export function triggerInputBlur(node: HTMLInputElement | HTMLTextAreaElement): void {
   const ev = new Event("blur", { bubbles: true });
   node.dispatchEvent(ev);
 }
 
-export function triggerWheel(target: HTMLElement, deltaX: number) {
+export function triggerWheel(target: HTMLElement, deltaX: number): void {
   const event = document.createEvent("MouseEvents");
   event.initEvent("wheel", true, true);
   (event as any).deltaX = deltaX;
   target.dispatchEvent(event);
 }
 
-export const MosaicWrapper = ({ children }: { children: React.ReactNode }) => {
+export const MosaicWrapper = ({ children }: { children: React.ReactNode }): JSX.Element => {
   return (
     <DndProvider backend={HTML5Backend}>
       <Mosaic
@@ -173,7 +173,10 @@ class MockPanelCatalog implements PanelCatalog {
 }
 
 export default class PanelSetup extends React.PureComponent<Props, State> {
-  static getDerivedStateFromProps(props: Props, prevState: State) {
+  static defaultProps = {
+    omitDragAndDrop: false,
+  };
+  static getDerivedStateFromProps(props: Props, prevState: State): Partial<State> {
     const { store } = prevState;
     const {
       globalVariables,
@@ -203,7 +206,7 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
     if (userNodeLogs) {
       store.dispatch(addUserNodeLogs(userNodeLogs));
     }
-    if (userNodeRosLib) {
+    if (userNodeRosLib != undefined) {
       store.dispatch(setUserNodeRosLib(userNodeRosLib));
     }
     if (savedProps) {
@@ -235,7 +238,7 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
     };
   }
 
-  renderInner() {
+  renderInner(): JSX.Element {
     const {
       frame = {},
       topics = [],
@@ -293,7 +296,7 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
     );
   }
 
-  render() {
+  render(): JSX.Element {
     return this.props.omitDragAndDrop ? (
       this.renderInner()
     ) : (

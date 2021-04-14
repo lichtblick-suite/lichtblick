@@ -232,7 +232,7 @@ export default class IdbCacheWriterDataProvider implements DataProvider {
 
   // Replace the current connection with a new one, spanning a certain range.
   async _setConnection(range: Range) {
-    if (!this._getCurrentTopics().length) {
+    if (this._getCurrentTopics().length === 0) {
       delete this._currentConnection;
       return;
     }

@@ -27,19 +27,13 @@ import {
 
 import { SECOND_SOURCE_PREFIX } from "../util/globalConstants";
 
-const noop = () => {
-  // no-op
-};
+const noop = (): void => {};
 
 const getBagDescriptor = async (url?: string) => {
-  if (!url) {
+  if (url == undefined) {
     throw new Error("No bag url provided.");
   }
   const response = await fetch(url);
-  if (!response) {
-    throw new Error(`Failed to fetch the bag: ${url || "undefined"}`);
-  }
-
   const blobs = await response.blob();
   return { type: "file", file: new File([blobs], "test.bag") };
 };
@@ -53,7 +47,7 @@ export default class StoryPlayer implements Player {
   constructor(bags: string[]) {
     this._bags = bags;
   }
-  setListener(listener: (arg0: PlayerState) => Promise<void>) {
+  setListener(listener: (arg0: PlayerState) => Promise<void>): void {
     (async () => {
       const bagDescriptors = await Promise.all(
         this._bags.map(async (file, i) => {
@@ -93,10 +87,6 @@ export default class StoryPlayer implements Player {
             parsedMessages: this._parsedSubscribedTopics,
           });
 
-          if (!parsedMessages || !bobjects) {
-            throw new Error("No messages provided.");
-          }
-
           if (messageDefinitions.type === "raw") {
             throw new Error("StoryPlayer requires parsed message definitions");
           }
@@ -127,7 +117,7 @@ export default class StoryPlayer implements Player {
     })();
   }
 
-  setSubscriptions(subscriptions: SubscribePayload[]) {
+  setSubscriptions(subscriptions: SubscribePayload[]): void {
     const [bobjectSubscriptions, parsedSubscriptions] = partition(
       subscriptions,
       ({ format }) => format === "bobjects",

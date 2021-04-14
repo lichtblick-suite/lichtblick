@@ -40,7 +40,7 @@ type Props = {
 };
 
 const DiagnosticsSection = ({ diagnostics }: Props): ReactElement => {
-  return diagnostics.length ? (
+  return diagnostics.length > 0 ? (
     <ul>
       {diagnostics.map(({ severity, message, source, startColumn, startLineNumber }, i) => {
         const severityLabel = invert(DiagnosticSeverity)[severity] ?? "Error";

@@ -164,7 +164,7 @@ export function MessagePipelineProvider({
       const currentPlayerTickState = playerTickState.current;
       requestAnimationFrame(async () => {
         if (currentPlayerTickState.resolveFn && !currentPlayerTickState.waitingForPromises) {
-          if (currentPlayerTickState.promisesToWaitFor.length) {
+          if (currentPlayerTickState.promisesToWaitFor.length > 0) {
             // If we have finished rendering but we still have to wait for some promises wait for them here.
 
             const promises = currentPlayerTickState.promisesToWaitFor;

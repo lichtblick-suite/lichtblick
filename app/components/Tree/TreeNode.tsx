@@ -232,7 +232,7 @@ export default class TreeNode extends Component<Props> {
           {removeIcon}
           <Icon
             className={cx(styles["expand-icon"], {
-              [styles.invisible!]: !children || !children.length,
+              [styles.invisible!]: !children || children.length === 0,
             })}
             style={{ left: paddingLeft + depth * indentWidth - 16 }}
           >

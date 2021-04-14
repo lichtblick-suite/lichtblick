@@ -208,7 +208,7 @@ export default function useTree({
     const datatypesByTopic = mapValues(keyBy(providerTopics, "name"), (item) => item.datatype);
 
     const newChildren = [...(topicTreeConfig.children ?? [])];
-    if (uncategorizedTopicNames.length) {
+    if (uncategorizedTopicNames.length > 0) {
       // Add uncategorized group node to root config.
       newChildren.push({
         name: uncategorizedGroupName,
@@ -356,7 +356,7 @@ export default function useTree({
 
   const visibleTopicsCountByKey = useMemo(() => {
     // No need to update if topics are unavailable.
-    if (!providerTopics.length) {
+    if (providerTopics.length === 0) {
       return DEFAULT_TOPICS_COUNT_BY_KEY;
     }
     const ret: Record<string, number> = {};

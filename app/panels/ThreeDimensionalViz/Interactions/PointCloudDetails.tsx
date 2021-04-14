@@ -53,7 +53,7 @@ export default function PointCloudDetails({ selectedObject: { object, instanceIn
     [additionalFieldValues],
   );
 
-  const hasAdditionalFieldNames = !!additionalFieldNames.length;
+  const hasAdditionalFieldNames = additionalFieldNames.length > 0;
   const onCopy = useCallback(() => {
     // GPU point clouds need to extract positions using getAllPoints()
     const allPoints: number[] = object.points || getAllPoints(object);
