@@ -8,6 +8,7 @@ import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
 import path from "path";
+import createStyledComponentsTransformer from "typescript-plugin-styled-components";
 import webpack, {
   Configuration,
   EnvironmentPlugin,
@@ -17,6 +18,13 @@ import webpack, {
 
 import { WebpackArgv } from "./WebpackArgv";
 import packageJson from "./package.json";
+
+const styledComponentsTransformer = createStyledComponentsTransformer({
+  getDisplayName: (filename, bindingName) => {
+    const sanitizedFilename = path.relative(__dirname, filename).replace(/[^a-zA-Z0-9_-]/g, "_");
+    return bindingName != undefined ? `${bindingName}__${sanitizedFilename}` : sanitizedFilename;
+  },
+});
 
 type Options = {
   // During hot reloading and development it is useful to comment out code while iterating.
@@ -106,6 +114,7 @@ export function makeConfig(_: unknown, argv: WebpackArgv, options?: Options): Co
                 // avoid looking at files which are not part of the bundle
                 onlyCompileBundledFiles: true,
                 configFile: isDev ? "tsconfig.dev.json" : "tsconfig.json",
+                getCustomTransformers: () => ({ before: [styledComponentsTransformer] }),
               },
             },
           ],

@@ -12090,6 +12090,7 @@ __metadata:
     ts-node: 9.1.1
     typescript: 4.2.2
     typescript-plugin-css-modules: 3.2.0
+    typescript-plugin-styled-components: 1.5.0
     universal-url: 2.0.0
     webpack: 5.31.0
     webpack-cli: 4.6.0
@@ -23385,6 +23386,15 @@ resolve@^2.0.0-next.3:
   peerDependencies:
     typescript: ">=3.0.0"
   checksum: a3dabdd5c97bd2f2fc392263c54193b6838981de72f63d7d5586f4aca3225322ae5ccab150b842f3d9827c96a19ab368e314554fcd2574663ca9092f0509d601
+  languageName: node
+  linkType: hard
+
+"typescript-plugin-styled-components@npm:1.5.0":
+  version: 1.5.0
+  resolution: "typescript-plugin-styled-components@npm:1.5.0"
+  peerDependencies:
+    typescript: ^2.5.2 || ^3.0 || ^4.0
+  checksum: d4a44cbfe200c7f7a10d7277454f3847f066c44018751581492bca13d3c7b595f3c223d90ff0cb7be55002e39d925c0a5ab2f3b8ac2f78f5c6b5a8a48c67e8d3
   languageName: node
   linkType: hard
 
