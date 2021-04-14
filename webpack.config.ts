@@ -37,6 +37,12 @@ const devServerConfig: WebpackConfiguration = {
       return /\.webpack[\\/](main[\\/](?!.*hot-update)|package\.json)/.test(filePath);
     },
     hot: true,
+    // The problem and solution are described at <https://github.com/webpack/webpack-dev-server/issues/1604>.
+    // When running in dev mode two errors are logged to the dev console:
+    //  "Invalid Host/Origin header"
+    //  "[WDS] Disconnected!"
+    // Since we are only connecting to localhost, DNS rebinding attacks are not a concern during dev
+    disableHostCheck: true,
   },
   plugins: [
     new CleanWebpackPlugin(),
