@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { addBreadcrumb, setUser, Severity } from "@sentry/electron";
 import amplitude from "amplitude-js";
 import { v4 as uuidv4 } from "uuid";
 
@@ -29,11 +30,17 @@ export enum AppEvent {
 
 export class Analytics {
   private _amplitude?: amplitude.AmplitudeClient;
+  private _crashReporting: boolean;
   private _storage = new Storage();
 
-  constructor(options: { optOut?: boolean; amplitudeApiKey: string | undefined }) {
+  constructor(options: {
+    optOut?: boolean;
+    crashReportingOptOut: boolean;
+    amplitudeApiKey: string | undefined;
+  }) {
     const amplitudeApiKey = options.amplitudeApiKey;
     const optOut = options.optOut ?? false;
+    this._crashReporting = !(options.crashReportingOptOut ?? false);
     if (!optOut && amplitudeApiKey != undefined && amplitudeApiKey.length > 0) {
       const userId = this.getUserId();
       const deviceId = this.getDeviceId();
@@ -49,6 +56,14 @@ export class Analytics {
       this._amplitude.logEvent(AppEvent.APP_INIT);
     } else {
       log.info("Telemetry is disabled");
+    }
+
+    if (this._crashReporting) {
+      const id = this.getUserId();
+      const deviceId = this.getDeviceId();
+      setUser({ id, deviceId });
+    } else {
+      log.info("Crash reporting is disabled");
     }
   }
 
@@ -69,7 +84,17 @@ export class Analytics {
     return OsContextSingleton?.getMachineId() ?? UUID_ZERO;
   }
 
-  async logEvent(event: AppEvent, data?: unknown): Promise<void> {
+  async logEvent(event: AppEvent, data?: { [key: string]: unknown }): Promise<void> {
+    if (this._crashReporting) {
+      addBreadcrumb({
+        type: "user",
+        category: event,
+        level: Severity.Info,
+        data,
+        timestamp: Date.now() / 1000,
+      });
+    }
+
     return new Promise((resolve) => {
       if (this._amplitude == undefined) {
         return resolve();

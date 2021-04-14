@@ -6,7 +6,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import "colors";
-import { captureException, init as initSentry } from "@sentry/electron";
+import { addBreadcrumb, captureException, init as initSentry } from "@sentry/electron";
 import {
   app,
   BrowserWindow,
@@ -408,7 +408,7 @@ app.on("ready", async () => {
 
   // Content Security Policy
   // See: https://www.electronjs.org/docs/tutorial/security
-  const contentSecurtiyPolicy: Record<string, string> = {
+  const contentSecurityPolicy: Record<string, string> = {
     "default-src": "'self'",
     "script-src": `'self' 'unsafe-inline' 'unsafe-eval'`,
     "worker-src": `'self' blob:`,
@@ -418,15 +418,43 @@ app.on("ready", async () => {
     "img-src": "'self' data: https:",
   };
 
+  if (allowCrashReporting) {
+    session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
+      // Log web requests as crash reporting breadcrumbs
+      addBreadcrumb({
+        type: "http",
+        category: "request",
+        timestamp: details.timestamp / 1000.0,
+        data: { url: details.url, method: details.method },
+      });
+      callback({});
+    });
+  }
+
   // Set default http headers
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const url = new URL(details.url);
     const responseHeaders = { ...details.responseHeaders };
 
+    // Log web responses as crash reporting breadcrumbs
+    if (allowCrashReporting) {
+      addBreadcrumb({
+        type: "http",
+        category: "response",
+        timestamp: details.timestamp / 1000.0,
+        data: {
+          url: details.url,
+          method: details.method,
+          status_code: details.statusCode,
+          reason: details.statusLine,
+        },
+      });
+    }
+
     // don't set CSP for internal URLs
     if (!["chrome-extension:", "devtools:"].includes(url.protocol)) {
       responseHeaders["Content-Security-Policy"] = [
-        Object.entries(contentSecurtiyPolicy)
+        Object.entries(contentSecurityPolicy)
           .map(([key, val]) => `${key} ${val}`)
           .join("; "),
       ];
