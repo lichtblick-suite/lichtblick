@@ -28,6 +28,7 @@ export const ROS_COMMON_MSGS: Set<string> = new Set([
   "stereo_msgs",
   "trajectory_msgs",
   "visualization_msgs",
+  "turtlesim",
 ]);
 function getChangeCounts(data: any, startingCounts: any) {
   const possibleLabelTexts = Object.keys(startingCounts);
@@ -107,5 +108,5 @@ export function getMessageDocumentationLink(datatype: string): string | undefine
   const filename = last(parts);
   return ROS_COMMON_MSGS.has(pkg as any)
     ? `http://docs.ros.org/api/${pkg}/html/msg/${filename}.html`
-    : `https://www.google.com/search?q=${filename}`;
+    : `https://www.google.com/search?q=${pkg}/${filename}`;
 }

@@ -136,9 +136,10 @@ export default class UserNodePlayer implements Player {
   _lastPlayerStateActiveData?: PlayerStateActiveData;
   _setUserNodeDiagnostics: (nodeId: string, diagnostics: readonly Diagnostic[]) => void;
   _addUserNodeLogs: (nodeId: string, logs: UserNodeLog[]) => void;
-  _setRosLib: (rosLib: string) => void;
+  _setRosLib: (rosLib: string, datatypes: RosDatatypes) => void;
   _nodeTransformRpc?: Rpc;
   _rosLib?: string;
+  _rosLibDatatypes?: RosDatatypes; // the datatypes we last used to generate rosLib -- regenerate if they change
   _globalVariables: GlobalVariables = {};
   _pendingResetWorkers?: Promise<void>;
 
@@ -168,8 +169,9 @@ export default class UserNodePlayer implements Player {
       }
     };
 
-    this._setRosLib = (rosLib: string) => {
+    this._setRosLib = (rosLib: string, datatypes: RosDatatypes) => {
       this._rosLib = rosLib;
+      this._rosLibDatatypes = datatypes;
       // We set this in Redux as the monaco editor needs to refer to it.
       setUserNodeRosLib(rosLib);
     };
@@ -468,25 +470,24 @@ export default class UserNodePlayer implements Player {
   }
 
   async _getRosLib(): Promise<string> {
-    // We only generate the roslib once, because available topics and datatypes should never change. If they do, for
-    // a source or player change, we destroy this player and create a new one.
-    if (this._rosLib != undefined) {
-      return this._rosLib;
-    }
-
     if (!this._lastPlayerStateActiveData) {
       throw new Error("_getRosLib was called before `_lastPlayerStateActiveData` set");
     }
-
     const { topics, datatypes } = this._lastPlayerStateActiveData;
+
+    // If datatypes have not changed, we can reuse the existing rosLib
+    if (this._rosLib != undefined && this._rosLibDatatypes === datatypes) {
+      return this._rosLib;
+    }
+
     const transformWorker = this._getTransformWorker();
-    const rosLib = await transformWorker.send("generateRosLib", {
+    const rosLib: string = await transformWorker.send("generateRosLib", {
       topics,
       datatypes,
     });
-    this._setRosLib(rosLib as any);
+    this._setRosLib(rosLib, datatypes);
 
-    return rosLib as string;
+    return rosLib;
   }
 
   setListener(listener: (arg0: PlayerState) => Promise<void>): void {
