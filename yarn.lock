@@ -5110,7 +5110,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/webpack@npm:^4, @types/webpack@npm:^4.4.31, @types/webpack@npm:^4.41.26, @types/webpack@npm:^4.41.8":
+"@types/webpack@npm:^4, @types/webpack@npm:^4.41.26, @types/webpack@npm:^4.41.8":
   version: 4.41.27
   resolution: "@types/webpack@npm:4.41.27"
   dependencies:
@@ -8099,15 +8099,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"clean-webpack-plugin@npm:3.0.0":
-  version: 3.0.0
-  resolution: "clean-webpack-plugin@npm:3.0.0"
+"clean-webpack-plugin@npm:4.0.0-alpha.0":
+  version: 4.0.0-alpha.0
+  resolution: "clean-webpack-plugin@npm:4.0.0-alpha.0"
   dependencies:
-    "@types/webpack": ^4.4.31
     del: ^4.1.1
   peerDependencies:
-    webpack: "*"
-  checksum: fc0fbd1c8e163b784209d51a5df4336ad359737f8b324697d33d1c484ee5c7efee9a1f9f18786860216019764f4a6e02e329e0410e3ab4d52e5e5b52a1038dfe
+    webpack: ">=4.0.0 <6.0.0"
+  checksum: 24a671e2df6d831b8badcb1491b6e38e1f92a303a88d645084839ef8cdd577474f5da5ca18f1a5cf1382dfb7ba07b25bc721440bbe42bf1433313ce9885c6c1a
   languageName: node
   linkType: hard
 
@@ -9002,9 +9001,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"css-loader@npm:5.2.0, css-loader@npm:^5.0.1":
-  version: 5.2.0
-  resolution: "css-loader@npm:5.2.0"
+"css-loader@npm:5.2.1, css-loader@npm:^5.0.1":
+  version: 5.2.1
+  resolution: "css-loader@npm:5.2.1"
   dependencies:
     camelcase: ^6.2.0
     cssesc: ^3.0.0
@@ -9020,7 +9019,7 @@ __metadata:
     semver: ^7.3.4
   peerDependencies:
     webpack: ^4.27.0 || ^5.0.0
-  checksum: c3b2bb78531a56f6f6d5fa5dd6e2f992a89f136db3f4c150c3536daaa315b453d252c80f493099ead4edf0143b23357ff2d772148b61725c3dbca45b13446e67
+  checksum: ea4174eea8e0a6227584a0114496d5e8468be985e9aca89cca723e4c2afa757267652dff307e7901f2e6fb10571151c8bee71468550933772fe5ff70a520d9d7
   languageName: node
   linkType: hard
 
@@ -11961,9 +11960,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fork-ts-checker-webpack-plugin@npm:6.2.0, fork-ts-checker-webpack-plugin@npm:^6.0.4":
-  version: 6.2.0
-  resolution: "fork-ts-checker-webpack-plugin@npm:6.2.0"
+"fork-ts-checker-webpack-plugin@npm:6.2.1, fork-ts-checker-webpack-plugin@npm:^6.0.4":
+  version: 6.2.1
+  resolution: "fork-ts-checker-webpack-plugin@npm:6.2.1"
   dependencies:
     "@babel/code-frame": ^7.8.3
     "@types/json-schema": ^7.0.5
@@ -11977,7 +11976,7 @@ __metadata:
     schema-utils: 2.7.0
     semver: ^7.3.2
     tapable: ^1.0.0
-  checksum: 0600c928014a1a0a24728aca863a998028b2f3cbbd53722ecb1555cfc0723a31662d1b3970e58d1dad646bf16c6da12415ca779e84ea0446dcf74122f0c3d41c
+  checksum: 35ecf3b65a115a7b6dabd00739fdd96ef34d04dc595e0232fb0510a0342b135f6a1f54c2c6d80af282c38f2bd468e3baf412180e10fd9292b3d8f4ab8894542c
   languageName: node
   linkType: hard
 
@@ -12044,10 +12043,10 @@ __metadata:
     babel-plugin-transform-import-meta: 1.0.1
     browserify-zlib: 0.2.0
     circular-dependency-plugin: 5.2.2
-    clean-webpack-plugin: 3.0.0
+    clean-webpack-plugin: 4.0.0-alpha.0
     colors: 1.4.0
     crypto-browserify: 3.12.0
-    css-loader: 5.2.0
+    css-loader: 5.2.1
     electron: 13.0.0-beta.13
     electron-builder: 22.10.5
     electron-devtools-installer: 3.1.1
@@ -12064,7 +12063,7 @@ __metadata:
     eslint-plugin-react: 7.23.1
     eslint-plugin-react-hooks: 4.2.0
     fake-indexeddb: 3.1.2
-    fork-ts-checker-webpack-plugin: 6.2.0
+    fork-ts-checker-webpack-plugin: 6.2.1
     html-webpack-plugin: 5.3.1
     jest: 26.6.3
     jest-canvas-mock: 2.3.1
@@ -12092,7 +12091,7 @@ __metadata:
     typescript-plugin-css-modules: 3.2.0
     typescript-plugin-styled-components: 1.5.0
     universal-url: 2.0.0
-    webpack: 5.31.0
+    webpack: 5.33.2
     webpack-cli: 4.6.0
     webpack-dev-server: 3.11.2
     webpack-hot-middleware: 2.25.0
@@ -24549,9 +24548,9 @@ typescript@4.2.2:
   languageName: node
   linkType: hard
 
-"webpack@npm:5.31.0, webpack@npm:^5.9.0":
-  version: 5.31.0
-  resolution: "webpack@npm:5.31.0"
+"webpack@npm:5.33.2, webpack@npm:^5.9.0":
+  version: 5.33.2
+  resolution: "webpack@npm:5.33.2"
   dependencies:
     "@types/eslint-scope": ^3.7.0
     "@types/estree": ^0.0.46
@@ -24581,7 +24580,7 @@ typescript@4.2.2:
       optional: true
   bin:
     webpack: bin/webpack.js
-  checksum: a419dff80c83969a28f0c130f003487a570870b3bde44a3bcca543f5d052b8c6dd5edd0e330251a632c1eb3bc85944fa42fc7159d18abf210c47189f9da56fd9
+  checksum: 2132ec24db3b94c4bbafe821de2e3bc05f60b8eadfd8bbc1bb441d5b49309ac20c5230d592c7bebf7a6650d317ae00f69d8b577126b4c301956f3048eb439886
   languageName: node
   linkType: hard
 
