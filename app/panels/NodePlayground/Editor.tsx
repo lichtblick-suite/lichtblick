@@ -15,7 +15,8 @@ import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 // @ts-expect-error why doesn't this import the base monaco?
 import { StaticServices } from "monaco-editor/esm/vs/editor/standalone/browser/standaloneServices";
 import { ReactElement } from "react";
-import MonacoEditor from "react-monaco-editor";
+import MonacoEditor, { EditorDidMount, EditorWillMount } from "react-monaco-editor";
+import { useResizeDetector } from "react-resize-detector";
 
 import getPrettifiedCode from "@foxglove-studio/app/panels/NodePlayground/prettier";
 import { Script, EditorSelection } from "@foxglove-studio/app/panels/NodePlayground/script";
@@ -27,14 +28,14 @@ const VS_WEBVIZ_THEME = "vs-webviz";
 
 const codeEditorService = StaticServices.codeEditorService.get();
 
+type CodeEditor = monacoApi.editor.IStandaloneCodeEditor;
+
 type Props = {
   script?: Script;
   setScriptCode: (code: string) => void;
   autoFormatOnSave: boolean;
   rosLib: string;
 
-  /* A minor hack to tell the monaco editor to resize when dimensions change. */
-  resizeKey: string;
   save: (code: string) => void;
   setScriptOverride: (script: Script) => void;
 };
@@ -72,12 +73,11 @@ const Editor = ({
   autoFormatOnSave,
   script,
   setScriptCode,
-  resizeKey,
   save,
   setScriptOverride,
   rosLib,
 }: Props): ReactElement | ReactNull => {
-  const editorRef = React.useRef<any>(ReactNull);
+  const editorRef = React.useRef<CodeEditor>(ReactNull);
   const autoFormatOnSaveRef = React.useRef(autoFormatOnSave);
   autoFormatOnSaveRef.current = autoFormatOnSave;
 
@@ -123,7 +123,7 @@ const Editor = ({
 
   React.useEffect(() => {
     const editor = editorRef.current;
-    if (!editorRef || !script) {
+    if (!editor || !script) {
       return;
     }
     const filePath = monacoApi.Uri.parse(`file://${script.filePath}`);
@@ -141,7 +141,7 @@ const Editor = ({
     gotoSelection(editor, script.selection);
   }, [script]);
 
-  const options = React.useMemo(() => {
+  const options = React.useMemo<monacoApi.editor.IStandaloneEditorConstructionOptions>(() => {
     return {
       wordWrap: "on",
       minimap: {
@@ -151,12 +151,15 @@ const Editor = ({
     };
   }, [script]);
 
-  const willMount = React.useCallback(
+  const willMount = React.useCallback<EditorWillMount>(
     (monaco) => {
       if (!script) {
         return;
       }
-      monaco.editor.defineTheme(VS_WEBVIZ_THEME, vsWebvizTheme);
+      monaco.editor.defineTheme(
+        VS_WEBVIZ_THEME,
+        vsWebvizTheme as monacoApi.editor.IStandaloneThemeData,
+      );
 
       // Set eager model sync to enable intellisense between the user code and utility files
       monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
@@ -225,13 +228,13 @@ const Editor = ({
     if (model && script && !script.readOnly) {
       // We have to use a ref for autoFormatOnSaveRef because of how monaco scopes the action callbacks
       if (autoFormatOnSaveRef.current) {
-        await editorRef.current.getAction("editor.action.formatDocument").run();
+        await editorRef.current?.getAction("editor.action.formatDocument").run();
       }
       save(model.getValue());
     }
   }, [save, script]);
 
-  const didMount = React.useCallback(
+  const didMount = React.useCallback<EditorDidMount>(
     (editor) => {
       editorRef.current = editor;
       editor.addAction({
@@ -246,21 +249,32 @@ const Editor = ({
 
   const onChange = React.useCallback((srcCode: string) => setScriptCode(srcCode), [setScriptCode]);
 
+  // monaco editor builtin auto layout uses an interval to adjust size to the parent component
+  // instead we use a resize observer and tell the editor to update the layout
+  const { ref: sizeRef } = useResizeDetector({
+    onResize: (width, height) => {
+      if (width != undefined && height != undefined) {
+        editorRef.current?.layout({ width, height });
+      }
+    },
+  });
+
   if (!script) {
     // No script to load
     return ReactNull;
   }
 
   return (
-    <MonacoEditor
-      key={resizeKey}
-      language="typescript"
-      theme={VS_WEBVIZ_THEME}
-      editorWillMount={willMount}
-      editorDidMount={didMount}
-      options={options as any}
-      onChange={onChange}
-    />
+    <div ref={sizeRef} style={{ width: "100%", height: "100%" }}>
+      <MonacoEditor
+        language="typescript"
+        theme={VS_WEBVIZ_THEME}
+        editorWillMount={willMount}
+        editorDidMount={didMount}
+        options={options}
+        onChange={onChange}
+      />
+    </div>
   );
 };
 

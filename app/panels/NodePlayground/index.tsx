@@ -11,13 +11,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Stack } from "@fluentui/react";
 import ArrowLeftIcon from "@mdi/svg/svg/arrow-left.svg";
 import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import PlusIcon from "@mdi/svg/svg/plus.svg";
 import { ReactElement, Suspense } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { useResizeDetector } from "react-resize-detector";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
@@ -252,12 +252,12 @@ function NodePlayground(props: Props) {
     [scriptBackStack],
   );
 
-  const { width, height, ref: sizeRef } = useResizeDetector();
+  //const { width, height, ref: sizeRef } = useResizeDetector();
 
   return (
-    <Flex ref={sizeRef} col style={{ height: "100%", position: "relative" }}>
+    <Stack verticalFill>
       <PanelToolbar floating menuContent={<NodePlaygroundSettings {...props} />} />
-      <Flex style={{ height, width }}>
+      <Stack horizontal verticalFill>
         <Sidebar
           explorer={explorer}
           updateExplorer={updateExplorer}
@@ -280,7 +280,7 @@ function NodePlayground(props: Props) {
           setScriptOverride={setScriptOverride}
           addNewNode={addNewNode}
         />
-        <Flex col>
+        <Stack grow verticalFill style={{ overflow: "hidden" }}>
           <Flex
             start
             style={{
@@ -331,16 +331,16 @@ function NodePlayground(props: Props) {
             </Icon>
           </Flex>
 
-          <Flex col style={{ flexGrow: 1, position: "relative" }}>
+          <Stack grow style={{ overflow: "hidden " }}>
             {!selectedNodeId && (
               <WelcomeScreen addNewNode={addNewNode as any} updateExplorer={updateExplorer} />
             )}
             <div
-              key={`${width}x${height}`}
               data-nativeundoredo="true"
               style={{
-                height: "100%",
+                flexGrow: 1,
                 width: "100%",
+                overflow: "hidden",
                 display: selectedNodeId ? "initial" : "none",
                 /* Ensures the monaco-editor starts loading before the user opens it */
               }}
@@ -361,25 +361,24 @@ function NodePlayground(props: Props) {
                     setScriptCode={setScriptCode}
                     setScriptOverride={setScriptOverride}
                     rosLib={rosLib}
-                    resizeKey={`${width}-${height}-${explorer ?? "none"}-${
-                      selectedNodeId ?? "none"
-                    }`}
                     save={saveNode}
                   />
                 )}
               </Suspense>
             </div>
-            <BottomBar
-              nodeId={selectedNodeId}
-              isSaved={isNodeSaved}
-              save={() => saveNode(currentScript?.code)}
-              diagnostics={selectedNodeDiagnostics}
-              logs={selectedNodeLogs}
-            />
-          </Flex>
-        </Flex>
-      </Flex>
-    </Flex>
+            <Stack>
+              <BottomBar
+                nodeId={selectedNodeId}
+                isSaved={isNodeSaved}
+                save={() => saveNode(currentScript?.code)}
+                diagnostics={selectedNodeDiagnostics}
+                logs={selectedNodeLogs}
+              />
+            </Stack>
+          </Stack>
+        </Stack>
+      </Stack>
+    </Stack>
   );
 }
 
