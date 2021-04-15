@@ -13,7 +13,6 @@
 
 import FetchReader from "@foxglove-studio/app/dataProviders/FetchReader";
 import { FileReader, FileStream } from "@foxglove-studio/app/util/CachedFilelike";
-import { corsError } from "@foxglove-studio/app/util/corsError";
 
 // A file reader that reads from a remote HTTP URL, for usage in the browser (not for node.js).
 export default class BrowserHttpReader implements FileReader {
@@ -23,7 +22,7 @@ export default class BrowserHttpReader implements FileReader {
     this._url = url;
   }
 
-  async open() {
+  async open(): Promise<{ size: number; identifier?: string }> {
     let response;
     try {
       // Make a GET request and then immediately cancel it. This is more robust than a HEAD request,
@@ -36,23 +35,24 @@ export default class BrowserHttpReader implements FileReader {
       response = await fetch(this._url, { signal: controller.signal });
       controller.abort();
     } catch (error) {
-      throw new Error(`Fetching remote file failed. ${corsError(this._url)} ${error}`);
+      throw new Error(`Fetching remote file failed. <${this._url}> ${error}`);
     }
     if (!response || !response.ok) {
       throw new Error(
-        `Fetching remote file failed. ${corsError(this._url)} Status code: ${response.status}.`,
+        `Fetching remote file failed. <${this._url}> Status code: ${response.status}.`,
       );
     }
     if (response.headers.get("accept-ranges") !== "bytes") {
-      throw new Error(`Remote file does not support HTTP Range Requests. ${corsError(this._url)}`);
+      throw new Error(`Remote file does not support HTTP Range Requests. <${this._url}>`);
     }
     const size = response.headers.get("content-length");
     if (!size) {
-      throw new Error(`Remote file is missing file size. ${corsError(this._url)}`);
+      throw new Error(`Remote file is missing file size. <${this._url}>`);
     }
     return {
       size: parseInt(size),
-      identifier: response.headers.get("etag") || response.headers.get("last-modified"),
+      identifier:
+        response.headers.get("etag") ?? response.headers.get("last-modified") ?? undefined,
     };
   }
 
