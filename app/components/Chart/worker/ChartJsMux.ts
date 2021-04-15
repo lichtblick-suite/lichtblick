@@ -98,6 +98,7 @@ export default class ChartJsMux {
     rpc.receive("panmove", (args: any) => this._getChart(args.id).panmove(args.event));
 
     rpc.receive("update", (args: any) => this._getChart(args.id).update(args));
+    rpc.receive("update-data", (args: any) => this._getChart(args.id).updateData(args));
     rpc.receive("destroy", (args: any) => {
       const manager = this._managers.get(args.id);
       if (manager) {

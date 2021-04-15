@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ChartOptions, ChartData } from "chart.js";
+import { ChartOptions, ChartData, ScatterDataPoint } from "chart.js";
 import Hammer from "hammerjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -25,8 +25,13 @@ type OnClickArg = {
   y: number | undefined;
 };
 
+// Chartjs typings use _null_ to indicate _gaps_ in the dataset
+// eslint-disable-next-line no-restricted-syntax
+const ChartNull = null;
+type Data = ChartData<"scatter", (ScatterDataPoint | typeof ChartNull)[]>;
+
 type Props = {
-  data: ChartData;
+  data: Data;
   options: ChartOptions;
   type: string;
   height: number;
@@ -67,8 +72,6 @@ function Chart(props: Props) {
   const [id] = useState(uuidv4());
   const initialized = useRef(false);
   const canvasRef = useRef<HTMLCanvasElement>(ReactNull);
-  const [currentScales, setScales] = useState<RpcScales | undefined>(undefined);
-  const userInteraction = useRef(false);
 
   // to avoid changing useCallback deps for callbacks which access the scale value
   // at the time they are invoked
@@ -99,27 +102,24 @@ function Chart(props: Props) {
   }, [id, rpcSend]);
 
   // trigger when scales update
-  const onScalesUpdate = props.onScalesUpdate;
+  const onScalesUpdateRef = useRef(props.onScalesUpdate);
+  onScalesUpdateRef.current = props.onScalesUpdate;
 
-  const maybeUpdateScales = useCallback((newScales: RpcScales) => {
-    setScales((oldScales) => {
+  const maybeUpdateScales = useCallback(
+    (newScales: RpcScales, opt?: { userInteraction: boolean }) => {
+      const oldScales = currentScalesRef.current;
+      currentScalesRef.current = newScales;
+
       // cheap hack to only update the scales when the values change
       // avoids triggering handlers that depend on scales
       const oldStr = JSON.stringify(oldScales);
       const newStr = JSON.stringify(newScales);
-      return oldStr === newStr ? oldScales : newScales;
-    });
-  }, []);
-
-  // trigger when scales update
-  useEffect(() => {
-    currentScalesRef.current = currentScales;
-
-    if (currentScales) {
-      onScalesUpdate?.(currentScales, { userInteraction: userInteraction.current });
-      userInteraction.current = false;
-    }
-  }, [onScalesUpdate, currentScales]);
+      if (oldStr !== newStr) {
+        onScalesUpdateRef.current?.(newScales, opt ?? { userInteraction: false });
+      }
+    },
+    [],
+  );
 
   // first time initialization
   useEffect(() => {
@@ -158,21 +158,29 @@ function Chart(props: Props) {
     })();
   }, [type, data, options, width, height, rpcSend, maybeUpdateScales]);
 
-  // update chart on new changes
+  // call this when chart finishes rendering new data
   const { onChartUpdate } = props;
+
+  useEffect(() => {
+    (async function () {
+      const scales = await rpcSend<RpcScales>("update-data", {
+        data,
+      });
+      maybeUpdateScales(scales);
+      onChartUpdate?.();
+    })();
+  }, [data, maybeUpdateScales, onChartUpdate, rpcSend]);
+
   useEffect(() => {
     (async function () {
       const scales = await rpcSend<RpcScales>("update", {
-        data,
         options,
         width,
         height,
       });
       maybeUpdateScales(scales);
-
-      onChartUpdate?.();
     })();
-  }, [data, height, maybeUpdateScales, onChartUpdate, options, rpcSend, width]);
+  }, [height, maybeUpdateScales, onChartUpdate, options, rpcSend, width]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -214,8 +222,7 @@ function Chart(props: Props) {
           },
         },
       });
-      userInteraction.current = true;
-      maybeUpdateScales(scales);
+      maybeUpdateScales(scales, { userInteraction: true });
     });
 
     hammerManager.on("panend", async (event) => {
@@ -230,8 +237,7 @@ function Chart(props: Props) {
           },
         },
       });
-      userInteraction.current = true;
-      maybeUpdateScales(scales);
+      maybeUpdateScales(scales, { userInteraction: true });
     });
 
     return () => {
@@ -258,8 +264,7 @@ function Chart(props: Props) {
           },
         },
       });
-      userInteraction.current = true;
-      maybeUpdateScales(scales);
+      maybeUpdateScales(scales, { userInteraction: true });
     },
     [zoomEnabled, rpcSend, maybeUpdateScales],
   );

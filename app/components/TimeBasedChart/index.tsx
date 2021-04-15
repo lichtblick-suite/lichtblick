@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { ChartOptions, ChartData, ScaleOptions, ScatterDataPoint } from "chart.js";
+import { ChartOptions, ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
 import { ZoomOptions } from "chartjs-plugin-zoom/types/options";
 import React, {
@@ -26,7 +26,7 @@ import React, {
 import { useDispatch } from "react-redux";
 import { Time } from "rosbag";
 import styled from "styled-components";
-import { useDebounce } from "use-debounce";
+import { useDebouncedCallback } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
 
 import { clearHoverValue, setHoverValue } from "@foxglove-studio/app/actions/hoverValue";
@@ -42,7 +42,6 @@ import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipel
 import TimeBasedChartLegend from "@foxglove-studio/app/components/TimeBasedChart/TimeBasedChartLegend";
 import makeGlobalState from "@foxglove-studio/app/components/TimeBasedChart/makeGlobalState";
 import { useTooltip } from "@foxglove-studio/app/components/Tooltip";
-import useDeepChangeDetector from "@foxglove-studio/app/hooks/useDeepChangeDetector";
 import mixins from "@foxglove-studio/app/styles/mixins.module.scss";
 import { isBobject } from "@foxglove-studio/app/util/binaryObjects";
 import filterMap from "@foxglove-studio/app/util/filterMap";
@@ -52,6 +51,7 @@ import Logger from "@foxglove/log";
 
 import HoverBar from "./HoverBar";
 import TimeBasedChartTooltipContent from "./TimeBasedChartTooltipContent";
+import downsample from "./downsample";
 
 const log = Logger.getLogger(__filename);
 
@@ -116,88 +116,11 @@ const SBar = styled.div<{ xAxisIsPlaybackTime: boolean }>`
   border-width: ${(props) => (props.xAxisIsPlaybackTime ? "4px" : "0px 4px")};
 `;
 
-type FollowPlaybackState = Readonly<{
-  xOffsetMin: number; // -1 means the left edge of the plot is one second before the current time.
-  xOffsetMax: number; // 1 means the right edge of the plot is one second after the current time.
-}>;
-
 type ChartComponentProps = ComponentProps<typeof ChartComponent>;
 
 // Chartjs typings use _null_ to indicate _gaps_ in the dataset
 // eslint-disable-next-line no-restricted-syntax
-type Data = ChartData<"scatter", (ScatterDataPoint | null)[]>;
-type DataSet = Data["datasets"][0];
-
-// Exported for tests
-export function filterDatasets(
-  datasets: readonly DataSet[],
-  linesToHide: {
-    [key: string]: boolean;
-  },
-  width: number,
-  height: number,
-  bounds?: { x: { min: number; max: number }; y: { min: number; max: number } },
-): DataSet[] {
-  return filterMap(datasets, (dataset) => {
-    const { label } = dataset;
-    if ((label === undefined || linesToHide[label]) ?? false) {
-      return;
-    }
-
-    // we don't have any bounds to filter the dataset on, it goes unfiltered
-    if (!bounds) {
-      // NaN item values are now allowed, instead we convert these to undefined entries
-      // which will create _gaps_ in the line
-      const nanToNulldata = dataset.data.map((item) => {
-        if (item == undefined || isNaN(item.x) || isNaN(item.y)) {
-          // Chartjs typings use _null_
-          // eslint-disable-next-line no-restricted-syntax
-          return null;
-        }
-        return item;
-      });
-
-      return { ...dataset, data: nanToNulldata };
-    }
-
-    const pixelPerXValue = width / (bounds.x.max - bounds.x.min);
-    const pixelPerYValue = height / (bounds.y.max - bounds.y.min);
-
-    let prev: ScatterDataPoint | undefined;
-    const data = filterMap(dataset.data, (datum) => {
-      if (!datum || isNaN(datum.x) || isNaN(datum.y)) {
-        return datum;
-      }
-
-      if (!prev) {
-        prev = datum;
-        return datum;
-      }
-
-      const pixelXDistance = Math.abs((datum.x - prev.x) * pixelPerXValue);
-      const pixelYDistance = Math.abs((datum.y - prev.y) * pixelPerYValue);
-      if (pixelXDistance < 3 && pixelYDistance < 3) {
-        return;
-      }
-
-      prev = datum;
-      return datum;
-    });
-
-    // NaN item values are now allowed, instead we convert these to undefined entries
-    // which will create _gaps_ in the line
-    const nanToNulldata = data.map((item) => {
-      if (item == undefined || isNaN(item.x) || isNaN(item.y)) {
-        // Chartjs typings use _null_
-        // eslint-disable-next-line no-restricted-syntax
-        return null;
-      }
-      return item;
-    });
-
-    return { ...dataset, data: nanToNulldata };
-  });
-}
+const ChartNull = null;
 
 // only sync the x axis and allow y-axis scales to auto-calculate
 type SyncBounds = { min: number; max: number; userInteraction: boolean };
@@ -205,7 +128,6 @@ const useGlobalXBounds = makeGlobalState<SyncBounds>();
 
 // Calculation mode for the "reset view" view.
 export type ChartDefaultView =
-  | void // Zoom to fit
   | { type: "fixed"; minXValue: number; maxXValue: number }
   | { type: "following"; width: number };
 
@@ -214,7 +136,7 @@ export type Props = {
   width: number;
   height: number;
   zoom: boolean;
-  data: Data;
+  data: ChartComponentProps["data"];
   tooltips?: TimeBasedChartTooltipData[];
   xAxes?: ScaleOptions;
   yAxes: ScaleOptions;
@@ -260,11 +182,12 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     xAxisIsPlaybackTime,
   } = props;
 
+  const { labels, datasets } = data;
+
   const hasUnmounted = useRef<boolean>(false);
   const canvasContainer = useRef<HTMLDivElement>(ReactNull);
 
   const [hasUserPannedOrZoomed, setHasUserPannedOrZoomed] = useState<boolean>(false);
-  const [followPlaybackState, setFollowPlaybackState] = useState<FollowPlaybackState | undefined>();
 
   const pauseFrame = useMessagePipeline(
     useCallback((messagePipeline) => messagePipeline.pauseFrame, []),
@@ -287,142 +210,144 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   }, []);
 
   const hoverBar = useRef<HTMLDivElement>(ReactNull);
-  const isUserInteraction = useRef(false);
 
-  const [currentScales, setCurrentScales] = useState<RpcScales | undefined>();
   const [globalBounds, setGlobalBounds] = useGlobalXBounds({ enabled: isSynced });
-
-  const { labels, datasets } = data;
 
   const linesToHide = useMemo(() => props.linesToHide ?? {}, [props.linesToHide]);
 
   useEffect(() => {
-    // see notes for onChartUpdate
-    resumeFrame.current = pauseFrame("TimeBasedChart");
-
     // cleanup pased frames on unmount or dataset changes
     return () => {
       onChartUpdate();
     };
-  }, [pauseFrame, datasets, onChartUpdate]);
+  }, [pauseFrame, onChartUpdate]);
 
   // some callbacks don't need to re-create when the current scales change, so we keep a ref
-  const currentScalesRef = useRef<RpcScales | undefined>(currentScales);
-  useEffect(() => {
-    currentScalesRef.current = currentScales;
-  }, [currentScales]);
+  const currentScalesRef = useRef<RpcScales | undefined>(undefined);
 
   // calculates the minX/maxX for all our datasets
   // we do this on the unfiltered datasets because we need the bounds to properly filter adjacent points
-  const datasetXBounds = useMemo(() => {
-    let min;
-    let max;
+  const datasetBounds = useMemo(() => {
+    let xMin;
+    let xMax;
+    let yMin;
+    let yMax;
 
     for (const dataset of datasets) {
       for (const item of dataset.data) {
-        if (item == undefined || isNaN(item.x) || isNaN(item.y)) {
+        if (item == undefined) {
           continue;
         }
-        min = Math.min(min ?? item.x, item.x);
-        max = Math.max(max ?? item.x, item.x);
+        if (!isNaN(item.x)) {
+          xMin = Math.min(xMin ?? item.x, item.x);
+          xMax = Math.max(xMax ?? item.x, item.x);
+        }
+
+        if (!isNaN(item.x)) {
+          yMin = Math.min(yMin ?? item.y, item.y);
+          yMax = Math.max(yMax ?? item.y, item.y);
+        }
       }
     }
 
-    // if the min/max are the same, let chart component decide the bounds
-    // otherwise we end up with no x-axis
-    if (min === max) {
-      return;
-    }
-
-    if (min == undefined || max == undefined) {
-      return;
-    }
-
-    return { min, max };
+    return { x: { min: xMin, max: xMax }, y: { min: yMin, max: yMax } };
   }, [datasets]);
 
-  // handle setting the sync value on updates to our scales
-  useEffect(() => {
-    // no need to update sync values if we are not syncing
-    if (!isSynced || !currentScales?.x) {
-      return;
-    }
+  // avoid re-doing a downsample on every scale change, instead mark the downsample as dirty
+  // with a debounce and if downsampling hasn't happened after some time, trigger a downsample
+  const [invalidateDownsample, setDownsampleFlush] = useState(1);
+  const queueDownsampleInvalidate = useDebouncedCallback(
+    () => {
+      setDownsampleFlush((old) => old + 1);
+    },
+    100,
+    { leading: false },
+  );
 
-    // the change is a result of user interaction on our chart
-    // we definitely set the sync scale value so other charts follow our zoom/pan behavior
-    if (isUserInteraction.current) {
-      setGlobalBounds({
-        min: currentScales.x.min,
-        max: currentScales.x.max,
-        userInteraction: isUserInteraction.current,
-      });
-      return;
-    }
+  const updateScales = useCallback(
+    (scales: RpcScales) => {
+      currentScalesRef.current = scales;
 
-    // the scales changed due to new data or another non-user initiated event
-    // the sync value is conditionally set depending on the state of the existing sync value
-    setGlobalBounds((old) => {
-      // no scale from our plot, always use old value
-      const xScale = currentScales?.x;
-      if (!xScale) {
-        return old;
+      queueDownsampleInvalidate();
+
+      // chart indicated we got a scales update, we may need to update global bounds
+      if (!isSynced || !scales?.x) {
+        return;
       }
 
-      // no old value for sync, initialize with our value
-      if (!old) {
+      // the change is a result of user interaction on our chart
+      // we definitely set the sync scale value so other charts follow our zoom/pan behavior
+      if (hasUserPannedOrZoomed) {
+        setGlobalBounds({
+          min: scales.x.min,
+          max: scales.x.max,
+          userInteraction: true,
+        });
+        return;
+      }
+
+      // the scales changed due to new data or another non-user initiated event
+      // the sync value is conditionally set depending on the state of the existing sync value
+      setGlobalBounds((old) => {
+        // no scale from our plot, always use old value
+        const xScale = scales?.x;
+        if (!xScale) {
+          return old;
+        }
+
+        // no old value for sync, initialize with our value
+        if (!old) {
+          return {
+            min: xScale.min,
+            max: xScale.max,
+            userInteraction: false,
+          };
+        }
+
+        // give preference to an old value set via user interaction
+        // note that updates due to _our_ user interaction are set earlier
+        if (old.userInteraction) {
+          return old;
+        }
+
+        // calculate min/max based on old value and our new scale
+        const newMin = Math.min(xScale.min, old.min);
+        const newMax = Math.max(xScale.max, old.max);
+
+        // avoid making a new sync object if the existing one matches our range
+        // avoids infinite set states
+        if (old.max === newMax && old.min === newMin) {
+          return old;
+        }
+
+        // existing value does not match our new range, update the global sync value
         return {
-          min: xScale.min,
-          max: xScale.max,
+          min: newMin,
+          max: newMax,
           userInteraction: false,
         };
-      }
+      });
+    },
+    [hasUserPannedOrZoomed, isSynced, queueDownsampleInvalidate, setGlobalBounds],
+  );
 
-      // give preference to an old value set via user interaction
-      // note that updates due to _our_ user interaction are set earlier
-      if (old.userInteraction) {
-        return old;
-      }
-
-      // calculate min/max based on old value and our new scale
-      const newMin = Math.min(xScale.min, old.min);
-      const newMax = Math.max(xScale.max, old.max);
-
-      // avoid making a new sync object if the existing one matches our range
-      // avoids infinite set states
-      if (old.max === newMax && old.min === newMin) {
-        return old;
-      }
-
-      // existing value does not match our new range, update the global sync value
-      return {
-        min: newMin,
-        max: newMax,
-        userInteraction: false,
-      };
-    });
-  }, [isSynced, currentScales, setGlobalBounds]);
-
-  const onResetZoom = useCallback(() => {
-    setFollowPlaybackState(undefined);
+  const onResetZoom = () => {
     setHasUserPannedOrZoomed(false);
 
     // clearing the global bounds will make all panels reset to their data sets
     // which will cause all to re-sync to the min/max ranges for any panels without user interaction
     if (isSynced) {
-      isUserInteraction.current = false;
-      setGlobalBounds(undefined);
+      if (defaultView?.type === "fixed") {
+        setGlobalBounds({
+          min: defaultView.minXValue,
+          max: defaultView.maxXValue,
+          userInteraction: false,
+        });
+      } else {
+        setGlobalBounds(undefined);
+      }
     }
-  }, [isSynced, setGlobalBounds]);
-
-  if (useDeepChangeDetector([defaultView], false)) {
-    // Reset the view to the default when the default changes.
-    if (hasUserPannedOrZoomed) {
-      setHasUserPannedOrZoomed(false);
-    }
-    if (followPlaybackState != undefined) {
-      setFollowPlaybackState(undefined);
-    }
-  }
+  };
 
   const [hasVerticalExclusiveZoom, setHasVerticalExclusiveZoom] = useState<boolean>(false);
   const [hasBothAxesZoom, setHasBothAxesZoom] = useState<boolean>(false);
@@ -502,7 +427,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     [tooltips],
   );
 
-  const [hoverComponentId] = useState(() => uuidv4());
+  const hoverComponentId = useMemo(() => uuidv4(), []);
   const dispatch = useDispatch();
   const clearGlobalHoverTime = useCallback(
     () => dispatch(clearHoverValue({ componentId: hoverComponentId })),
@@ -571,6 +496,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     return {
       decimation: {
         enabled: true,
+        algorithm: "lttb",
       },
       legend: {
         display: false,
@@ -599,8 +525,58 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
       },
       ...props.plugins,
       annotation: { annotations },
-    };
+    } as ChartOptions["plugins"];
   }, [currentTime, props.annotations, props.plugins, props.zoom, zoomMode]);
+
+  // To avoid making a new xScale identity on all updates that might change the min/max
+  // we memo the min/max X values so only when the values change is the scales object re-made
+  const { min: minX, max: maxX } = useMemo(() => {
+    // if the user has manual override of the display, we remove the min/max settings and allow the chart
+    // to handle the bounds
+    if (hasUserPannedOrZoomed) {
+      return { min: undefined, max: undefined };
+    }
+
+    let min: number | undefined;
+    let max: number | undefined;
+
+    // default view possibly gives us some initial bounds
+    if (defaultView?.type === "fixed") {
+      min = defaultView.minXValue;
+      max = defaultView.maxXValue;
+    } else {
+      min = datasetBounds.x.min;
+      max = datasetBounds.x.max;
+    }
+
+    // if we are syncing and have global bounds there are two possibilities
+    // 1. the global bounds are from user interaction, we use that unconditionally
+    // 2. the global bounds are min/max with our dataset bounds
+    if (isSynced && globalBounds) {
+      if (globalBounds.userInteraction) {
+        min = globalBounds.min;
+        max = globalBounds.max;
+      } else {
+        min = Math.min(min ?? globalBounds.min, globalBounds.min);
+        max = Math.max(max ?? globalBounds.max, globalBounds.max);
+      }
+    }
+
+    // if the min/max are the same, use undefined to fall-back to chart component auto-scales
+    // without this the chart axis does not appear since it has as 0 size
+    if (min === max) {
+      return { min: undefined, max: undefined };
+    }
+
+    return { min, max };
+  }, [
+    datasetBounds.x.max,
+    datasetBounds.x.min,
+    defaultView,
+    globalBounds,
+    hasUserPannedOrZoomed,
+    isSynced,
+  ]);
 
   const xScale = useMemo<ScaleOptions>(() => {
     const defaultXTicksSettings: ScaleOptions["ticks"] = {
@@ -612,43 +588,20 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
       maxRotation: 0,
     };
 
-    let min: number | undefined;
-    let max: number | undefined;
-
-    // if the user has interacted with our chart locally, we ignore any global sync or local data ranges
-    if (!hasUserPannedOrZoomed) {
-      // default to dataset bounds
-      if (datasetXBounds) {
-        min = datasetXBounds.min;
-        max = datasetXBounds.max;
-      }
-
-      // if we are syncing and have global bounds there are two possibilities
-      // 1. the global bounds are from user interaction, we use that unconditionally
-      // 2. the global bounds are min/max with our dataset bounds
-      if (isSynced && globalBounds) {
-        if (globalBounds.userInteraction) {
-          min = globalBounds.min;
-          max = globalBounds.max;
-        } else {
-          min = Math.min(min ?? globalBounds.min, globalBounds.min);
-          max = Math.max(max ?? globalBounds.max, globalBounds.max);
-        }
-      }
-    }
-
-    return {
+    const scale = {
       grid: { color: "rgba(255, 255, 255, 0.2)" },
       ...xAxes,
-      ...{ min, max },
+      min: minX,
+      max: maxX,
       ticks: {
         ...defaultXTicksSettings,
         ...xAxes?.ticks,
       },
     };
-  }, [datasetXBounds, globalBounds, hasUserPannedOrZoomed, isSynced, xAxes]);
 
-  // we don't sync the y-axis bounds
+    return scale;
+  }, [maxX, minX, xAxes]);
+
   const yScale = useMemo<ScaleOptions>(() => {
     const defaultYTicksSettings: ScaleOptions["ticks"] = {
       font: {
@@ -669,13 +622,21 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     } as ScaleOptions;
   }, [yAxes]);
 
-  const filterDatasetsCached = useCallback(
-    (unfilteredDatasets: typeof datasets) => {
+  const downsampleDatasets = useCallback(
+    (fullDatasets: typeof datasets) => {
+      const currentScales = currentScalesRef.current;
       let bounds:
-        | { x: { min: number; max: number }; y: { min: number; max: number } }
+        | {
+            width: number;
+            height: number;
+            x: { min: number; max: number };
+            y: { min: number; max: number };
+          }
         | undefined = undefined;
       if (currentScales?.x && currentScales?.y) {
         bounds = {
+          width,
+          height,
           x: {
             min: currentScales.x.min,
             max: currentScales.x.max,
@@ -687,27 +648,59 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
         };
       }
 
-      return filterDatasets(unfilteredDatasets, linesToHide, width, height, bounds);
+      if (!bounds) {
+        return fullDatasets;
+      }
+
+      return fullDatasets.map((dataset) => {
+        if (!bounds) {
+          return dataset;
+        }
+
+        const downsampled = downsample(dataset, bounds);
+        // NaN item values are now allowed, instead we convert these to undefined entries
+        // which will create _gaps_ in the line
+        const nanToNulldata = downsampled.data.map((item) => {
+          if (item == undefined || isNaN(item.x) || isNaN(item.y)) {
+            // Chartjs typings use _null_ to indicate a gap
+            return ChartNull;
+          }
+          return item;
+        });
+
+        return { ...downsampled, data: nanToNulldata };
+      });
     },
-    [currentScales, height, linesToHide, width],
+    [height, width],
   );
 
-  // avoid re-filtering datasets on every change to scales, etc
-  // it is ok to filter the datasets once the view has changed/stabilized
-  // without filtering you can end up in a cascading update cycle from scales changing
-  // causing dataFiltered to change, which causes scales to change
-  const [filterDatasetsDebounced] = useDebounce(filterDatasetsCached, 250);
+  // remove datasets that should be hidden
+  const visibleDatasets = useMemo(() => {
+    return filterMap(datasets, (dataset) => {
+      const { label } = dataset;
+      if ((label === undefined || linesToHide[label]) ?? false) {
+        return;
+      }
+      return dataset;
+    });
+  }, [datasets, linesToHide]);
 
-  // Filter the dataset down to what can be shows to the user
-  // this ignores out of bounds points and points that are too close together
-  // we use either automatically calculated bounds (xScale) or the currentScale
-  // if the user is manually controlling the component
-  const dataFiltered = useMemo(() => {
+  const downsampledData = useMemo(() => {
+    invalidateDownsample;
+
+    if (resumeFrame.current) {
+      log.warn("force resumed paused frame");
+      resumeFrame.current();
+    }
+    // during streaming the message pipeline should not give us any more data until we finish
+    // rendering this update
+    resumeFrame.current = pauseFrame("TimeBasedChart");
+
     return {
       labels,
-      datasets: filterDatasetsDebounced(datasets),
+      datasets: downsampleDatasets(visibleDatasets),
     };
-  }, [datasets, filterDatasetsDebounced, labels]);
+  }, [visibleDatasets, downsampleDatasets, labels, pauseFrame, invalidateDownsample]);
 
   const options = useMemo<ChartOptions>(() => {
     return {
@@ -734,14 +727,16 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     [updateTooltip],
   );
 
-  const onScalesUpdate = useCallback((scales: RpcScales, { userInteraction }) => {
-    isUserInteraction.current = userInteraction;
-    if (userInteraction) {
-      setHasUserPannedOrZoomed(true);
-    }
+  const onScalesUpdate = useCallback(
+    (scales: RpcScales, { userInteraction }) => {
+      if (userInteraction) {
+        setHasUserPannedOrZoomed(true);
+      }
 
-    setCurrentScales(scales);
-  }, []);
+      updateScales(scales);
+    },
+    [updateScales],
+  );
 
   // we don't memo this because either options or data is likely to change with each render
   // maybe one day someone perfs this and decides to memo?
@@ -750,7 +745,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     width,
     height,
     options,
-    data: dataFiltered,
+    data: downsampledData,
     onClick: props.onClick,
     onScalesUpdate: onScalesUpdate,
     onChartUpdate,
@@ -773,7 +768,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
           <HoverBar
             componentId={hoverComponentId}
             isTimestampScale={xAxisIsPlaybackTime}
-            scales={currentScales}
+            scales={currentScalesRef.current}
           >
             <SBar xAxisIsPlaybackTime={xAxisIsPlaybackTime} ref={hoverBar} />
           </HoverBar>

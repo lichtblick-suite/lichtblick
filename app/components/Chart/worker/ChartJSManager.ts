@@ -156,13 +156,23 @@ export default class ChartJSManager {
     return this.getScales();
   }
 
+  updateData({ data }: { data: ChartData }): RpcScales {
+    const instance = this._chartInstance;
+    if (instance == undefined) {
+      return {};
+    }
+
+    instance.data = data;
+    instance.update();
+
+    return this.getScales();
+  }
+
   update({
-    data,
     options,
     width,
     height,
   }: {
-    data: ChartData;
     options: ChartOptions;
     width: number;
     height: number;
@@ -177,7 +187,6 @@ export default class ChartJSManager {
     // scales are special because we can mutate them interally via the zoom plugin
     instance.options.scales = merge(instance.options.scales, options.scales);
 
-    instance.data = data;
     instance.update();
 
     if (instance.width !== width || instance.height !== height) {

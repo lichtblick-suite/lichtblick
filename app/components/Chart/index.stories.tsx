@@ -32,7 +32,6 @@ const props: ComponentProps<typeof ChartComponent> = {
         borderColor: "#4e98e2",
         label: "/turtle1/pose.x",
         showLine: true,
-        fill: false,
         borderWidth: 1,
         pointRadius: 1.5,
         pointHoverRadius: 3,
