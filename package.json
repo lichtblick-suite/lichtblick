@@ -17,7 +17,7 @@
   },
   "scripts": {
     "clean": "rimraf .webpack dist app/storybook-static",
-    "clean:package": "yarn clean && yarn build:prod && yarn package",
+    "clean:package": "yarn && yarn clean && yarn build:prod && yarn package",
     "start": "electron .webpack",
     "build:prod": "webpack --mode production --progress",
     "build:dev": "webpack --mode development --progress",
