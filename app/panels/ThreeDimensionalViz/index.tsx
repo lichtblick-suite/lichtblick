@@ -29,7 +29,6 @@ import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDime
 import withTransforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/withTransforms";
 import { Frame, Topic } from "@foxglove-studio/app/players/types";
 import { SaveConfig } from "@foxglove-studio/app/types/panels";
-import { TRANSFORM_TOPIC, TRANSFORM_STATIC_TOPIC } from "@foxglove-studio/app/util/globalConstants";
 
 import { FrameCompatibilityDEPRECATED } from "./FrameCompatibility";
 
@@ -86,9 +85,7 @@ const BaseRenderer = (props: Props, ref: any) => {
   });
 
   const onSetSubscriptions = useCallback(
-    (subscriptions: string[]) => {
-      setSubscriptions([TRANSFORM_TOPIC, TRANSFORM_STATIC_TOPIC, ...subscriptions]);
-    },
+    (subscriptions: string[]) => setSubscriptions(subscriptions),
     [setSubscriptions],
   );
 

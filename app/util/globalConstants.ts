@@ -34,7 +34,6 @@ export const FRAMELESS = "frameless";
 export const DEFAULT_WEBVIZ_NODE_PREFIX = "/webviz_node/";
 
 export const TRANSFORM_TOPIC = "/tf";
-export const TRANSFORM_STATIC_TOPIC = "/tf_static";
 export const DIAGNOSTIC_TOPIC = "/diagnostics";
 export const ROSOUT_TOPIC = "/rosout";
 export const SOCKET_KEY = "dataSource.websocket";
@@ -50,6 +49,7 @@ export const SENSOR_MSGS_LASER_SCAN_DATATYPE = "sensor_msgs/LaserScan";
 export const WEBVIZ_MARKER_DATATYPE = "visualization_msgs/WebvizMarker";
 export const WEBVIZ_MARKER_ARRAY_DATATYPE = "visualization_msgs/WebvizMarkerArray";
 export const FUTURE_VIZ_MSGS_DATATYPE = "future_visualization_msgs/WebvizMarkerArray";
+export const TRANSFORM_STAMPED_DATATYPE = "geometry_msgs/TransformStamped";
 export const TF_DATATYPE = "tf/tfMessage";
 export const TF2_DATATYPE = "tf2_msgs/TFMessage";
 export const VELODYNE_SCAN_DATATYPE = "velodyne_msgs/VelodyneScan";

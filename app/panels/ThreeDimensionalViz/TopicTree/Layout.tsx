@@ -109,6 +109,7 @@ import {
   VISUALIZATION_MSGS_MARKER_DATATYPE,
   WEBVIZ_MARKER_ARRAY_DATATYPE,
   WEBVIZ_MARKER_DATATYPE,
+  TRANSFORM_STAMPED_DATATYPE,
 } from "@foxglove-studio/app/util/globalConstants";
 import { inVideoRecordingMode } from "@foxglove-studio/app/util/inAutomatedRunMode";
 import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
@@ -401,7 +402,24 @@ export default function Layout({
     visibleTopicsCountByKey,
   } = topicTreeData;
 
-  useEffect(() => setSubscriptions(selectedTopicNames), [selectedTopicNames, setSubscriptions]);
+  const subscribedTopics = useMemo(() => {
+    const allTopics = new Set<string>(selectedTopicNames);
+
+    // Subscribe to all TF topics
+    for (const topic of memoizedTopics) {
+      if (
+        topic.datatype === TF_DATATYPE ||
+        topic.datatype === TF2_DATATYPE ||
+        topic.datatype === TRANSFORM_STAMPED_DATATYPE
+      ) {
+        allTopics.add(topic.name);
+      }
+    }
+
+    return Array.from(allTopics.values());
+  }, [memoizedTopics, selectedTopicNames]);
+
+  useEffect(() => setSubscriptions(subscribedTopics), [subscribedTopics, setSubscriptions]);
   const { playerId } = useDataSourceInfo();
 
   // If a user selects a marker or hovers over a TopicPicker row, highlight relevant markers

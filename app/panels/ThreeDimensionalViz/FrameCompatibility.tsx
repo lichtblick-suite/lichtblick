@@ -16,15 +16,13 @@ import { uniq } from "lodash";
 
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import useChangeDetector from "@foxglove-studio/app/hooks/useChangeDetector";
-import { Message, Topic } from "@foxglove-studio/app/players/types";
+import { Frame, Message, Topic } from "@foxglove-studio/app/players/types";
 
 const useFrame = (
   topics: string[],
 ): {
-  cleared: boolean;
-  frame: {
-    [topic: string]: readonly Message[];
-  };
+  cleared?: boolean;
+  frame: Frame;
 } => {
   // NOTE(JP): This is a huge abuse of the `useMessageReducer` API. Never use `useMessageReducer`
   // in this way yourself!! `restore` and `addMessage` should be pure functions and not have

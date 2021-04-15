@@ -47,8 +47,6 @@ import {
   POSE_MARKER_SCALE,
   LINED_CONVEX_HULL_RENDERING_SETTING,
   MARKER_ARRAY_DATATYPES,
-  TRANSFORM_STATIC_TOPIC,
-  TRANSFORM_TOPIC,
   WEBVIZ_MARKER_DATATYPE,
   WEBVIZ_MARKER_ARRAY_DATATYPE,
   VISUALIZATION_MSGS_MARKER_DATATYPE,
@@ -123,7 +121,7 @@ const missingTransformMessage = (
       ? `missing transforms from frame${s} <${frameIds}> to root frame <${rootTransformId}>`
       : `missing transform <${rootTransformId}>`;
   if (transforms.empty) {
-    return msg + `. Is ${TRANSFORM_TOPIC} or ${TRANSFORM_STATIC_TOPIC} present?`;
+    return msg + ". No transforms found";
   }
   return msg;
 };
@@ -504,11 +502,11 @@ export default class SceneBuilder implements MarkerProvider {
     badFrameError.namespaces.add(namespace);
     badFrameError.frameIds.add(frame_id);
 
-    const pose = (this.transforms as any).apply(
+    const pose = (this.transforms as Transforms).apply(
       emptyPose(),
       deepParse(marker.pose()),
       frame_id,
-      this.rootTransformID as any,
+      this.rootTransformID as string,
     );
     if (!pose) {
       const topicMissingError = this._addError(this.errors.topicsMissingTransforms, topic);
