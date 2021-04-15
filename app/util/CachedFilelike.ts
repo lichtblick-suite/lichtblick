@@ -94,13 +94,13 @@ export default class CachedFilelike implements Filelike {
     keepReconnectingCallback?: (reconnecting: boolean) => void;
   }) {
     this._fileReader = options.fileReader;
-    this._cacheSizeInBytes = options.cacheSizeInBytes || this._cacheSizeInBytes;
-    this._logFn = options.logFn || this._logFn;
+    this._cacheSizeInBytes = options.cacheSizeInBytes ?? this._cacheSizeInBytes;
+    this._logFn = options.logFn ?? this._logFn;
     this._keepReconnectingCallback = options.keepReconnectingCallback;
     this._virtualBuffer = new VirtualLRUBuffer({ size: 0 });
   }
 
-  async open() {
+  async open(): Promise<void> {
     if (this._fileSize !== undefined) {
       return;
     }
@@ -124,7 +124,7 @@ export default class CachedFilelike implements Filelike {
   }
 
   // Get the file size. Requires a call to `open()` or `read()` first.
-  size() {
+  size(): number {
     if (this._fileSize === undefined) {
       throw new Error("CachedFilelike has not been opened");
     }
@@ -132,7 +132,7 @@ export default class CachedFilelike implements Filelike {
   }
 
   // Read a certain byte range, and get back a `Buffer` in `callback`.
-  read(offset: number, length: number, callback: Callback<Buffer>) {
+  read(offset: number, length: number, callback: Callback<Buffer>): void {
     if (length === 0) {
       callback(undefined, Buffer.allocUnsafe(0));
       return;
@@ -161,7 +161,7 @@ export default class CachedFilelike implements Filelike {
   }
 
   // Gets called any time our connection or read requests change.
-  _updateState() {
+  _updateState(): void {
     if (this._closed) {
       return;
     }
@@ -210,7 +210,7 @@ export default class CachedFilelike implements Filelike {
   }
 
   // Replace the current connection with a new one, spanning a certain range.
-  _setConnection(range: Range) {
+  _setConnection(range: Range): void {
     this._logFn(`Setting new connection @ ${rangeToString(range)}`);
 
     if (this._currentConnection) {

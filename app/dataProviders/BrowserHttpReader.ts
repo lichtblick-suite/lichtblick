@@ -58,6 +58,6 @@ export default class BrowserHttpReader implements FileReader {
 
   fetch(offset: number, length: number): FileStream {
     const headers = new Headers({ range: `bytes=${offset}-${offset + (length - 1)}` });
-    return new FetchReader(this._url, { headers });
+    return new FetchReader(this._url, { headers }) as FileStream;
   }
 }
