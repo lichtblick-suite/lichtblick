@@ -28,6 +28,7 @@ import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { InteractionData } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
 import { LinkedGlobalVariables } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
+import { MutablePose } from "@foxglove-studio/app/types/Messages";
 import { emptyPose } from "@foxglove-studio/app/util/Pose";
 import { isBobject, deepParse } from "@foxglove-studio/app/util/binaryObjects";
 
@@ -38,14 +39,17 @@ const ZOOM_LEVEL_URL_PARAM = "zoom";
 function getZoomDistanceFromURLParam(): number | void {
   const params = new URLSearchParams(location?.search);
   if (params.has(ZOOM_LEVEL_URL_PARAM)) {
-    return parseFloat(params.get(ZOOM_LEVEL_URL_PARAM) as any);
+    return parseFloat(params.get(ZOOM_LEVEL_URL_PARAM) as string);
   }
 }
 
 // Get the camera target position and orientation
-export function getTargetPose(followTf: string | false, transforms: Transforms) {
-  if (followTf) {
-    let pose: any = emptyPose();
+export function getTargetPose(
+  followTf: string | false | undefined,
+  transforms: Transforms,
+): TargetPose | undefined {
+  if (followTf && transforms.has(followTf)) {
+    let pose: MutablePose | undefined = emptyPose();
     pose = transforms.apply(pose, pose, followTf, transforms.rootOfTransform(followTf).id);
     if (pose) {
       const { x: px, y: py, z: pz } = pose.position;
@@ -71,7 +75,7 @@ export function useTransformedCameraState({
   transforms: Transforms;
 }): { transformedCameraState: CameraState; targetPose?: TargetPose } {
   let transformedCameraState = { ...configCameraState };
-  const targetPose = getTargetPose(followTf as any, transforms);
+  const targetPose = getTargetPose(followTf, transforms);
   // Store last seen target pose because the target may become available/unavailable over time as
   // the player changes, and we want to avoid moving the camera when it disappears.
   const lastTargetPoseRef = useRef<TargetPose | undefined>();
@@ -117,7 +121,8 @@ export const getInstanceObj = (marker: any, idx: number): any => {
   }
   return marker.metadataByIndex()?.[idx];
 };
-export const getObject = (selectedObject: MouseEventObject) => {
+
+export const getObject = (selectedObject: MouseEventObject): any => {
   const object =
     (selectedObject.instanceIndex !== undefined &&
       selectedObject.object.metadataByIndex !== undefined &&
@@ -125,6 +130,7 @@ export const getObject = (selectedObject: MouseEventObject) => {
     selectedObject?.object;
   return isBobject(object) ? deepParse(object) : object;
 };
+
 export const getInteractionData = (selectedObject: MouseEventObject): InteractionData | undefined =>
   selectedObject.object.interactionData || getObject(selectedObject)?.interactionData;
 
@@ -137,7 +143,7 @@ export function getUpdatedGlobalVariablesBySelectedObject(
   if (linkedGlobalVariables.length === 0 || !interactionData?.topic) {
     return;
   }
-  const newGlobalVariables: any = {};
+  const newGlobalVariables: { [key: string]: any } = {};
   linkedGlobalVariables.forEach(({ topic, markerKeyPath, name }) => {
     if (interactionData.topic === topic) {
       const objectForPath = get(object, [...markerKeyPath].reverse());

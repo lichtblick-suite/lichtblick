@@ -982,10 +982,10 @@ export default class SceneBuilder implements MarkerProvider {
     this.errors.topicsWithBadFrameIds.delete(topic);
     this.errors.topicsWithError.delete(topic);
     this.collectors[topic] ??= new MessageCollector();
-    this.collectors[topic]!.setClock(this._clock as any);
-    this.collectors[topic]!.flush();
+    (<MessageCollector>this.collectors[topic]).setClock(this._clock ?? { sec: 0, nsec: 0 });
+    (<MessageCollector>this.collectors[topic]).flush();
 
-    const datatype = this.topicsByName[topic]!.datatype;
+    const datatype = (<Topic>this.topicsByName[topic]).datatype;
     // If topic has a decayTime set, markers with no lifetime will get one
     // later on, so we don't need to filter them. Note: A decayTime of zero is
     // defined as an infinite lifetime

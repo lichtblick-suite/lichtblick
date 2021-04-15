@@ -219,6 +219,10 @@ export default class Transforms {
     return this.storage.get(key);
   }
 
+  getMaybe(key: string): Transform | undefined {
+    return this.storage.getMaybe(key);
+  }
+
   values(): Array<Transform> {
     return this.storage.values();
   }

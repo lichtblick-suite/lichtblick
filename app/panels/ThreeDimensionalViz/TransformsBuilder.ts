@@ -50,7 +50,7 @@ type Axis = ArrowMarker & {
   unitVector: vec3;
 };
 
-const originAxes: Array<Axis> = [
+const originAxes: Axis[] = [
   {
     ...defaultArrowMarker,
     scale: { ...defaultArrowScale },
@@ -61,7 +61,7 @@ const originAxes: Array<Axis> = [
     id: "X",
     color: { r: 1, g: 0, b: 0, a: 1 },
     unitVector: vec3.fromValues(1, 0, 0),
-  } as any,
+  } as Axis,
   {
     ...defaultArrowMarker,
     scale: { ...defaultArrowScale },
@@ -72,7 +72,7 @@ const originAxes: Array<Axis> = [
     id: "Y",
     color: { r: 0, g: 1, b: 0, a: 1 },
     unitVector: vec3.fromValues(0, 1, 0),
-  },
+  } as Axis,
   {
     ...defaultArrowMarker,
     scale: { ...defaultArrowScale },
@@ -83,7 +83,7 @@ const originAxes: Array<Axis> = [
     id: "Z",
     color: { r: 0, g: 0, b: 1, a: 1 },
     unitVector: vec3.fromValues(0, 0, 1),
-  },
+  } as Axis,
 ];
 
 const tempOrientation = [0, 0, 0, 0] as [number, number, number, number];
@@ -173,10 +173,16 @@ export const getArrowToParentMarkers = (
     return [];
   }
 
-  let childPose: any = { position: { ...originPosition }, orientation: throwawayQuat };
+  let childPose: MutablePose | undefined = {
+    position: { ...originPosition },
+    orientation: throwawayQuat,
+  };
   childPose = transform.apply(childPose, childPose, rootTransformID);
 
-  let parentPose: any = { position: { ...originPosition }, orientation: throwawayQuat };
+  let parentPose: MutablePose | undefined = {
+    position: { ...originPosition },
+    orientation: throwawayQuat,
+  };
   parentPose = parent?.apply(parentPose, parentPose, rootTransformID);
 
   if (!childPose || !parentPose) {
@@ -199,7 +205,7 @@ export const getArrowToParentMarkers = (
         y: 0.01,
         z: 0.05,
       },
-    } as any,
+    } as ArrowMarker,
   ];
 };
 
@@ -208,7 +214,7 @@ export default class TransformsBuilder implements MarkerProvider {
   rootTransformID?: string;
   selections: string[] = [];
 
-  setTransforms = (transforms: Transforms, rootTransformID: string) => {
+  setTransforms = (transforms: Transforms, rootTransformID: string): void => {
     this.transforms = transforms;
     this.rootTransformID = rootTransformID;
   };
@@ -218,7 +224,7 @@ export default class TransformsBuilder implements MarkerProvider {
     id: string,
     transform: Transform,
     rootTransformID: string,
-  ) {
+  ): void {
     if (!transform.isChildOfTransform(rootTransformID)) {
       return;
     }
@@ -241,23 +247,22 @@ export default class TransformsBuilder implements MarkerProvider {
     }
   }
 
-  setSelectedTransforms(selections: string[]) {
+  setSelectedTransforms(selections: string[]): void {
     this.selections = selections;
   }
 
-  renderMarkers = (add: MarkerCollector) => {
+  renderMarkers = (add: MarkerCollector): void => {
     const { selections, transforms } = this;
-    if (!transforms) {
+    if (transforms == undefined || this.rootTransformID == undefined) {
       return;
     }
     for (const key of selections) {
-      const transform = transforms.get(key);
-      if (!transform.isValid(this.rootTransformID as any)) {
-        // If a marker doesn't exist yet, skip rendering for now, we might get the
-        // transform in a later message, so we still want to keep it in selections.
-        continue;
+      const transform = transforms.getMaybe(key);
+      // If a marker doesn't exist yet, skip rendering for now, we might get the
+      // transform in a later message, so we still want to keep it in selections.
+      if (transform?.isValid(this.rootTransformID) === true) {
+        this.addMarkersForTransform(add, key, transform, this.rootTransformID);
       }
-      this.addMarkersForTransform(add, key, transform, this.rootTransformID as any);
     }
   };
 }

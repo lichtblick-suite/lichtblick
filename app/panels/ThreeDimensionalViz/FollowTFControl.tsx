@@ -26,7 +26,7 @@ import Icon from "@foxglove-studio/app/components/Icon";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { objectValues } from "@foxglove-studio/app/util";
 
-import { Transform } from "./Transforms";
+import Transforms, { Transform } from "./Transforms";
 
 type TfTreeNode = {
   tf: Transform;
@@ -41,7 +41,7 @@ type TfTree = {
   };
 };
 
-const treeNodeToTfId = (node: any) => node.tf.id;
+const treeNodeToTfId = (node: TfTreeNode) => node.tf.id;
 
 const buildTfTree = (transforms: Transform[]): TfTree => {
   const tree: TfTree = {
@@ -87,7 +87,7 @@ const buildTfTree = (transforms: Transform[]): TfTree => {
 };
 
 type Props = {
-  transforms: any;
+  transforms: Transforms;
   tfToFollow?: string;
   followOrientation?: boolean;
   onFollowChange: (tfId?: string | false, followOrientation?: boolean) => void;
@@ -111,7 +111,7 @@ const Container = styled.div`
   position: relative;
 `;
 
-const arePropsEqual = (prevProps: any, nextProps: any) => {
+const arePropsEqual = (prevProps: Props, nextProps: Props) => {
   if (!nextProps.tfToFollow) {
     const tfTree = buildTfTree(nextProps.transforms.values());
     const allNodes = Array.from(getDescendants(tfTree.roots));
@@ -127,14 +127,14 @@ const FollowTFControl = memo<Props>((props: Props) => {
   const { transforms, tfToFollow, followOrientation, onFollowChange } = props;
   const [forceShowFrameList, setForceShowFrameList] = useState(false);
   const [hovering, setHovering] = useState(false);
-  const [lastSelectedFrame, setLastSelectedFrame] = useState(undefined);
+  const [lastSelectedFrame, setLastSelectedFrame] = useState<string | undefined>(undefined);
 
   const tfTree = buildTfTree(transforms.values());
   const allNodes = Array.from(getDescendants(tfTree.roots));
   const nodesWithoutDefaultFollowTfFrame = allNodes?.length;
   const newFollowTfFrame = allNodes?.[0]?.tf?.id;
 
-  const autocomplete = createRef<Autocomplete>();
+  const autocomplete = createRef<Autocomplete<TfTreeNode>>();
 
   const getDefaultFollowTransformFrame = useCallback(() => {
     return nodesWithoutDefaultFollowTfFrame ? newFollowTfFrame : undefined;
@@ -171,8 +171,8 @@ const FollowTFControl = memo<Props>((props: Props) => {
   ]);
 
   const onSelectFrame = useCallback(
-    (id: string, item: unknown, autocompleteNode: Autocomplete) => {
-      setLastSelectedFrame(id === getDefaultFollowTransformFrame() ? undefined : (id as any));
+    (id: string, item: unknown, autocompleteNode: Autocomplete<TfTreeNode>) => {
+      setLastSelectedFrame(id === getDefaultFollowTransformFrame() ? undefined : id);
       onFollowChange(id, followOrientation);
       autocompleteNode.blur();
     },
@@ -207,8 +207,10 @@ const FollowTFControl = memo<Props>((props: Props) => {
   const followingCustomFrame = tfToFollow && tfToFollow !== getDefaultFollowTransformFrame();
   const showFrameList =
     lastSelectedFrame != undefined || forceShowFrameList || followingCustomFrame;
-  const selectedFrameId = tfToFollow || lastSelectedFrame;
-  const selectedItem = selectedFrameId ? { tf: { id: selectedFrameId }, depth: 0 } : undefined;
+  const selectedFrameId = tfToFollow ?? lastSelectedFrame;
+  const selectedItem: TfTreeNode | undefined = selectedFrameId
+    ? { tf: new Transform(selectedFrameId), children: [], depth: 0 }
+    : undefined;
 
   return (
     <Container
@@ -249,14 +251,14 @@ const FollowTFControl = memo<Props>((props: Props) => {
         <Icon
           tooltip={"Select Another Frame\u2026"}
           onClick={openFrameList}
-          tooltipProps={{ placement: "top" } as any}
+          tooltipProps={{ placement: "top" }}
           style={{ color: "white" }}
         >
           <MenuLeftIcon />
         </Icon>
       ) : undefined}
       <Button
-        tooltipProps={{ placement: "top" } as any}
+        tooltipProps={{ placement: "top" }}
         onClick={onClickFollowButton}
         tooltip={getFollowButtonTooltip()}
       >
