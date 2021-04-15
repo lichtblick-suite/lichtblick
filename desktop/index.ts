@@ -56,7 +56,11 @@ if (require("electron-squirrel-startup")) {
 const [allowCrashReporting, allowTelemetry] = getTelemetrySettings();
 if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
   log.info("initializing Sentry in renderer");
-  initSentry({ dsn: process.env.SENTRY_DSN });
+  initSentry({
+    dsn: process.env.SENTRY_DSN,
+    autoSessionTracking: true,
+    release: "studio@" + APP_VERSION,
+  });
 }
 
 // files our app should open - either from user double-click on a supported fileAssociation
@@ -112,7 +116,7 @@ async function createWindow(): Promise<void> {
 
   app.setAboutPanelOptions({
     applicationName: packageJson.productName,
-    applicationVersion: packageJson.version,
+    applicationVersion: APP_VERSION,
     version: process.platform,
     copyright: undefined,
     website: packageJson.homepage,

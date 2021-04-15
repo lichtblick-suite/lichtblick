@@ -4,4 +4,5 @@
 
 // Should match DefinePlugin in webpack configuration
 declare const APP_NAME: string;
+declare const APP_VERSION: string;
 declare const ReactNull: ReactNull;

@@ -22,7 +22,11 @@ log.debug("initializing renderer");
 
 if (OsContextSingleton?.isCrashReportingEnabled() && typeof process.env.SENTRY_DSN === "string") {
   log.info("initializing Sentry in renderer");
-  initSentry({ dsn: process.env.SENTRY_DSN });
+  initSentry({
+    dsn: process.env.SENTRY_DSN,
+    autoSessionTracking: true,
+    release: "studio@" + APP_VERSION,
+  });
 }
 
 installDevtoolsFormatters();

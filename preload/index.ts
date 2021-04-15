@@ -23,8 +23,12 @@ log.info(`initializing preloader, argv="${window.process.argv.join(" ")}"`);
 // Load opt-out settings for crash reporting and telemetry
 const [allowCrashReporting, allowTelemetry] = getTelemetrySettings();
 if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
-  log.info("initializing Sentry in preload");
-  initSentry({ dsn: process.env.SENTRY_DSN });
+  log.debug("initializing Sentry in preload");
+  initSentry({
+    dsn: process.env.SENTRY_DSN,
+    autoSessionTracking: true,
+    release: "studio@" + APP_VERSION,
+  });
 }
 
 type IpcListener = (ev: unknown, ...args: unknown[]) => void;

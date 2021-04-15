@@ -75,6 +75,7 @@ export default (_: unknown, argv: WebpackArgv): Configuration => {
         MAIN_WINDOW_WEBPACK_ENTRY: rendererEntry,
         // Should match webpack-defines.d.ts
         APP_NAME: JSON.stringify(packageJson.productName),
+        APP_VERSION: JSON.stringify(packageJson.version),
       }),
       new EnvironmentPlugin({
         SENTRY_DSN: process.env.SENTRY_DSN ?? null, // eslint-disable-line no-restricted-syntax
