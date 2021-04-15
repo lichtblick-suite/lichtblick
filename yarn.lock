@@ -2046,7 +2046,7 @@ __metadata:
     "@types/react-transition-group": ^4.4.1
     "@types/react-virtualized": 9.21.11
     "@types/react-virtualized-select": 3.0.8
-    "@types/sanitize-html": 1.27.2
+    "@types/sanitize-html": 2.3.0
     "@types/seedrandom": 3.0.0
     "@types/shallowequal": 1.1.1
     "@types/string-hash": 1.1.1
@@ -4931,12 +4931,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/sanitize-html@npm:1.27.2":
-  version: 1.27.2
-  resolution: "@types/sanitize-html@npm:1.27.2"
+"@types/sanitize-html@npm:2.3.0":
+  version: 2.3.0
+  resolution: "@types/sanitize-html@npm:2.3.0"
   dependencies:
-    htmlparser2: ^4.1.0
-  checksum: 4f5782b108116e3197f0f351b06d056c34edde78f11bce83459de8a0842bc58670150a0107bf097d8f3aac0902742e4581042e311964573c6c8ac8f022a03283
+    htmlparser2: ^6.0.0
+  checksum: 49ee43b9ba7505fd5fce9264e13b966bba8b720de090a13adcf2f52e159e256b7c25bf6a7f25099a07cea4cde4eb24f59d00684b0742c300be5920d55755780a
   languageName: node
   linkType: hard
 
@@ -10071,7 +10071,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"domhandler@npm:^3.0.0, domhandler@npm:^3.3.0":
+"domhandler@npm:^3.3.0":
   version: 3.3.0
   resolution: "domhandler@npm:3.3.0"
   dependencies:
@@ -10099,7 +10099,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"domutils@npm:^2.0.0, domutils@npm:^2.4.2, domutils@npm:^2.4.3, domutils@npm:^2.4.4":
+"domutils@npm:^2.4.2, domutils@npm:^2.4.3, domutils@npm:^2.4.4":
   version: 2.4.4
   resolution: "domutils@npm:2.4.4"
   dependencies:
@@ -13253,18 +13253,6 @@ fsevents@^1.2.7:
     inherits: ^2.0.1
     readable-stream: ^3.1.1
   checksum: 94fa6312e6c378b1c0f1626d3f468f0b25c5dcf6689bfa61fa0002c044c4c77842b5122feb84b501b02539165917febba0ffe754046996c9e8ed77c1bb65e66c
-  languageName: node
-  linkType: hard
-
-"htmlparser2@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "htmlparser2@npm:4.1.0"
-  dependencies:
-    domelementtype: ^2.0.1
-    domhandler: ^3.0.0
-    domutils: ^2.0.0
-    entities: ^2.0.0
-  checksum: 4a5d9ecbe339a500c23187740836c94a3b9edba6348995c5359bc832addcc8027633cb98bd5f715b96eb48caefeb5a38a1d6187522f45c1dc2b2be45a2f807ed
   languageName: node
   linkType: hard
 
