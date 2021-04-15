@@ -4,16 +4,13 @@
 
 import { PropsWithChildren, useMemo } from "react";
 
-import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import PanelCatalogContext from "@foxglove-studio/app/context/PanelCatalogContext";
 import BuiltinPanelCatalog from "@foxglove-studio/app/services/BuiltinPanelCatalog";
 
 export default function BuiltinPanelCatalogProvider(
   props: PropsWithChildren<unknown>,
 ): React.ReactElement {
-  const topicGraphPanel = useExperimentalFeature("topicGraphPanel");
-
-  const panelCatalog = useMemo(() => new BuiltinPanelCatalog(topicGraphPanel), [topicGraphPanel]);
+  const panelCatalog = useMemo(() => new BuiltinPanelCatalog(), []);
   return (
     <PanelCatalogContext.Provider value={panelCatalog}>
       {props.children}

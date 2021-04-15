@@ -72,10 +72,9 @@ class BuiltinPanelCatalog implements PanelCatalog {
   private _panelsByCategory: Map<string, PanelInfo[]>;
   private _panelsByType: Map<string, PanelInfo>;
 
-  constructor(enableTopicGraphPanel: boolean) {
-    const rosPanels = ros.filter((p) => enableTopicGraphPanel || p.title !== "Topic Graph");
+  constructor() {
     this._panelsByCategory = new Map<string, PanelInfo[]>([
-      ["ros", rosPanels],
+      ["ros", ros],
       ["utilities", utilities],
       ["debugging", debugging],
       ["hidden", hidden],
