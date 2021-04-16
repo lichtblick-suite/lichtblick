@@ -28,17 +28,17 @@ import { autoUpdater } from "electron-updater";
 import fs from "fs";
 import path from "path";
 
+import { APP_NAME, APP_VERSION, APP_HOMEPAGE } from "@foxglove-studio/app/constants";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import Logger from "@foxglove/log";
 
-import packageJson from "../package.json";
 import { installMenuInterface } from "./menu";
 
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 
 const log = Logger.getLogger(__filename);
 
-log.info(`${packageJson.productName} ${packageJson.version}`);
+log.info(`${APP_NAME} ${APP_VERSION}`);
 
 const isMac = process.platform === "darwin";
 const isProduction = process.env.NODE_ENV === "production";
@@ -115,11 +115,11 @@ async function createWindow(): Promise<void> {
   const mainWindow = new BrowserWindow(windowOptions);
 
   app.setAboutPanelOptions({
-    applicationName: packageJson.productName,
+    applicationName: APP_NAME,
     applicationVersion: APP_VERSION,
     version: process.platform,
     copyright: undefined,
-    website: packageJson.homepage,
+    website: APP_HOMEPAGE,
     iconPath: undefined,
   });
 
@@ -364,7 +364,7 @@ app.on("ready", async () => {
   // Only stable builds check for automatic updates
   if (process.env.NODE_ENV !== "production") {
     log.info("Automatic updates disabled (development environment)");
-  } else if (/-(dev|nightly)/.test(packageJson.version)) {
+  } else if (/-(dev|nightly)/.test(APP_VERSION)) {
     log.info("Automatic updates disabled (development build)");
   } else {
     autoUpdater.checkForUpdatesAndNotify().catch((err) => {

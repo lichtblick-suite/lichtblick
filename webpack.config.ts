@@ -8,7 +8,7 @@ import path from "path";
 import type { Configuration } from "webpack";
 import type { Configuration as WebpackDevServerConfiguration } from "webpack-dev-server";
 
-import packageInfo from "./package.json";
+import packageJson from "./package.json";
 import main from "./webpack.main.config";
 import preload from "./webpack.preload.config";
 import renderer from "./webpack.renderer.config";
@@ -52,13 +52,13 @@ const devServerConfig: WebpackConfiguration = {
       filename: "package.json",
       templateContent: JSON.stringify({
         main: "main/main.js",
-        name: packageInfo.name,
-        productName: packageInfo.productName,
-        version: packageInfo.version,
-        description: packageInfo.description,
-        productDescription: packageInfo.productDescription,
-        license: packageInfo.license,
-        author: packageInfo.author,
+        name: packageJson.name,
+        productName: packageJson.productName,
+        version: packageJson.version,
+        description: packageJson.description,
+        productDescription: packageJson.productDescription,
+        license: packageJson.license,
+        author: packageJson.author,
       }),
     }),
   ],

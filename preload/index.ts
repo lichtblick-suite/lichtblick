@@ -9,15 +9,15 @@ import os from "os";
 
 import type { OsContext, OsContextForwardedEvent } from "@foxglove-studio/app/OsContext";
 import { NetworkInterface } from "@foxglove-studio/app/OsContext";
+import { APP_NAME, APP_VERSION } from "@foxglove-studio/app/constants";
 import { PreloaderSockets } from "@foxglove/electron-socket/preloader";
 import Logger from "@foxglove/log";
 
-import packageJson from "../package.json";
 import LocalFileStorage from "./LocalFileStorage";
 
 const log = Logger.getLogger(__filename);
 
-log.info(`${packageJson.productName} ${packageJson.version}`);
+log.info(`${APP_NAME} ${APP_VERSION}`);
 log.info(`initializing preloader, argv="${window.process.argv.join(" ")}"`);
 
 // Load opt-out settings for crash reporting and telemetry
@@ -114,7 +114,7 @@ const ctx: OsContext = {
     return machineIdSync();
   },
   getAppVersion: (): string => {
-    return packageJson.version;
+    return APP_VERSION;
   },
 
   // Context bridge cannot expose "classes" only exposes functions

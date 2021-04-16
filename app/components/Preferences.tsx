@@ -17,6 +17,7 @@ import moment from "moment-timezone";
 import { useCallback, useMemo, useState } from "react";
 
 import { ExperimentalFeatureSettings } from "@foxglove-studio/app/components/ExperimentalFeatureSettings";
+import { APP_NAME } from "@foxglove-studio/app/constants";
 import { useAsyncAppConfigurationValue } from "@foxglove-studio/app/hooks/useAsyncAppConfigurationValue";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import fuzzyFilter from "@foxglove-studio/app/util/fuzzyFilter";

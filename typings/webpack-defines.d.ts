@@ -3,6 +3,4 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 // Should match DefinePlugin in webpack configuration
-declare const APP_NAME: string;
-declare const APP_VERSION: string;
 declare const ReactNull: ReactNull;

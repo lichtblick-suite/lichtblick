@@ -17,7 +17,6 @@ import webpack, {
 } from "webpack";
 
 import { WebpackArgv } from "./WebpackArgv";
-import packageJson from "./package.json";
 
 const styledComponentsTransformer = createStyledComponentsTransformer({
   getDisplayName: (filename, bindingName) => {
@@ -214,8 +213,6 @@ export function makeConfig(_: unknown, argv: WebpackArgv, options?: Options): Co
       }),
       new webpack.DefinePlugin({
         // Should match webpack-defines.d.ts
-        APP_NAME: JSON.stringify(packageJson.productName),
-        APP_VERSION: JSON.stringify(packageJson.version),
         ReactNull: null, // eslint-disable-line no-restricted-syntax
       }),
       // https://webpack.js.org/plugins/ignore-plugin/#example-of-ignoring-moment-locales

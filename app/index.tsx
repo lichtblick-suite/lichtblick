@@ -9,6 +9,7 @@ import "@foxglove-studio/app/styles/global.scss";
 
 import App from "@foxglove-studio/app/App";
 import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
+import { APP_VERSION } from "@foxglove-studio/app/constants";
 import installDevtoolsFormatters from "@foxglove-studio/app/util/installDevtoolsFormatters";
 import { initializeLogEvent } from "@foxglove-studio/app/util/logEvent";
 import overwriteFetch from "@foxglove-studio/app/util/overwriteFetch";
