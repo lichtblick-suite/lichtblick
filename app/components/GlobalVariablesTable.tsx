@@ -254,7 +254,7 @@ function LinkedGlobalVariableRow({ name }: { name: string }): ReactElement {
 function GlobalVariablesTable(): ReactElement {
   const { globalVariables, setGlobalVariables, overwriteGlobalVariables } = useGlobalVariables();
   const { linkedGlobalVariables } = useLinkedGlobalVariables();
-  const globalVariableNames = Object.keys(globalVariables);
+  const globalVariableNames = useMemo(() => Object.keys(globalVariables), [globalVariables]);
   const linkedGlobalVariablesKeyByName = memoizedGetLinkedGlobalVariablesKeyByName(
     linkedGlobalVariables,
   );
