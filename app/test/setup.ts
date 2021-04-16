@@ -13,11 +13,8 @@
 
 import UrlSearchParams from "url-search-params";
 import util from "util";
-import ws from "ws";
 
 import { resetLogEventForTests } from "@foxglove-studio/app/util/logEvent";
-
-import MemoryStorage from "./MemoryStorage";
 
 process.env.WASM_LZ4_ENVIRONMENT = "NODE";
 
@@ -30,14 +27,6 @@ if (typeof window.URL.createObjectURL === "undefined") {
 }
 
 if (typeof window !== "undefined") {
-  // make sure window.localStorage exists
-  (window as any).localStorage = window.localStorage || new MemoryStorage();
-
-  global.requestAnimationFrame = window.requestAnimationFrame =
-    global.requestAnimationFrame || ((cb) => setTimeout(cb, 0));
-
-  global.cancelAnimationFrame = window.cancelAnimationFrame =
-    global.cancelAnimationFrame || ((id) => clearTimeout(id));
   global.TextDecoder = util.TextDecoder as typeof TextDecoder;
   // polyfill URLSearchParams in jsdom
   window.URLSearchParams = UrlSearchParams;
@@ -52,9 +41,6 @@ global.IDBObjectStore = require("fake-indexeddb/lib/FDBObjectStore");
 global.IDBTransaction = require("fake-indexeddb/lib/FDBTransaction");
 global.IDBDatabase = require("fake-indexeddb/lib/FDBDatabase");
 global.IDBKeyRange = require("fake-indexeddb/lib/FDBKeyRange");
-
-// monkey-patch global websocket
-global.WebSocket = global.WebSocket || ws;
 
 global.TextEncoder = util.TextEncoder;
 

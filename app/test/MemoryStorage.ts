@@ -21,24 +21,24 @@ export default class MemoryStorage {
   _internal_quota: number;
 
   constructor(quota?: number) {
-    this._internal_quota = quota || DEFAULT_LOCAL_STORAGE__QUOTA;
+    this._internal_quota = quota ?? DEFAULT_LOCAL_STORAGE__QUOTA;
   }
 
-  clear() {
+  clear(): void {
     this._internal_items = {};
   }
 
-  getItem(key: string) {
+  getItem(key: string): any {
     return this._internal_items[key];
   }
 
-  _getUsedSize() {
+  _getUsedSize(): number {
     return Object.keys(this._internal_items).reduce((memo, key) => {
       return memo + new Blob([this.getItem(key)]).size;
     }, 0);
   }
 
-  setItem(key: string, value: string) {
+  setItem(key: string, value: string): void {
     const valueByteSize = new Blob([value]).size;
     const newSize = this._getUsedSize() + valueByteSize;
     if (newSize > this._internal_quota) {
@@ -48,7 +48,7 @@ export default class MemoryStorage {
     (this as any)[key] = value;
   }
 
-  removeItem(key: string) {
+  removeItem(key: string): void {
     delete this._internal_items[key];
     delete (this as any)[key];
   }

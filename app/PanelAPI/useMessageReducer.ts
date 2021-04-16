@@ -89,9 +89,8 @@ function useSubscriptions({
   format: MessageFormat;
 }): SubscribePayload[] {
   return useMemo(() => {
-    const requester: SubscribePayload["requester"] = panelType
-      ? { type: "panel", name: panelType }
-      : undefined;
+    const requester: SubscribePayload["requester"] =
+      panelType != undefined ? { type: "panel", name: panelType } : undefined;
 
     return requestedTopics.map((request) => {
       if (typeof request === "object") {
@@ -178,7 +177,7 @@ export function useMessageReducer<T>(props: Props<T>): T {
   const subscriptions = useSubscriptions({
     requestedTopics,
     panelType,
-    preloadingFallback: !!props.preloadingFallback,
+    preloadingFallback: props.preloadingFallback ?? false,
     format,
   });
   const setSubscriptions = useMessagePipeline(
@@ -222,7 +221,8 @@ export function useMessageReducer<T>(props: Props<T>): T {
           latestRequestedTopicsRef.current.has(topic),
         );
         // Bail out if we didn't want any of these messages, but not if this is our first render
-        const shouldBail = lastProcessedMessagesRef.current && filteredMessages.length === 0;
+        const shouldBail =
+          lastProcessedMessagesRef.current != undefined && filteredMessages.length === 0;
         lastProcessedMessagesRef.current = messageData;
         return shouldBail ? useContextSelector.BAILOUT : filteredMessages;
       },

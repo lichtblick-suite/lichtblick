@@ -25,7 +25,7 @@ export type BustStorageFn = (backingStore: BackingStore, keys: string[]) => void
 const bustStorageFnsMap = new Map();
 
 // Exported for testing.
-export function clearBustStorageFnsMap() {
+export function clearBustStorageFnsMap(): void {
   bustStorageFnsMap.clear();
 }
 
@@ -38,12 +38,12 @@ export default class Storage {
   }
 
   // The registered bustStorageFn will be called when the storage quota is reached.
-  registerBustStorageFn(bustStorageFn: BustStorageFn) {
+  registerBustStorageFn(bustStorageFn: BustStorageFn): void {
     const bustStorageFns = bustStorageFnsMap.get(this._backingStore) || [];
     bustStorageFnsMap.set(this._backingStore, [...bustStorageFns, bustStorageFn]);
   }
 
-  clear() {
+  clear(): void {
     this._backingStore.clear();
   }
 
@@ -57,7 +57,7 @@ export default class Storage {
 
     // if a non-json value gets into local storage we should ignore it
     try {
-      return val ? (JSON.parse(val) as T) : undefined;
+      return val != undefined && val.length > 0 ? (JSON.parse(val) as T) : undefined;
     } catch (e) {
       // suppress logging during tests - otherwise it prints out a stack trace
       // which makes it look like a test is failing
@@ -68,14 +68,14 @@ export default class Storage {
     }
   }
 
-  _bustStorage() {
+  _bustStorage(): void {
     const bustStorageFns = bustStorageFnsMap.get(this._backingStore) || [];
     for (const bustStorageFn of bustStorageFns) {
       bustStorageFn(this._backingStore, this.keys());
     }
   }
 
-  setItem(key: string, value: any, bustStorageFn?: BustStorageFn) {
+  setItem(key: string, value: unknown, bustStorageFn?: BustStorageFn): void {
     const strValue = JSON.stringify(value);
     try {
       this._backingStore.setItem(key, strValue);
@@ -108,7 +108,7 @@ export default class Storage {
     }
   }
 
-  removeItem(key: string) {
+  removeItem(key: string): void {
     this._backingStore.removeItem(key);
   }
 }

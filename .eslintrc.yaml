@@ -178,9 +178,6 @@ rules:
 
 overrides:
   - files:
-      - "app/PanelAPI/useBlocksByTopic.ts"
-      - "app/PanelAPI/useMessageReducer.ts"
-      - "app/actions/panels.ts"
       - "app/components/AutoSizingCanvas/index.stories.tsx"
       - "app/components/Autocomplete.tsx"
       - "app/components/Button.tsx"
@@ -251,7 +248,6 @@ overrides:
       - "app/dataProviders/getRemoteBagGuid.ts"
       - "app/dataProviders/rawMessageDefinitionsToParsed.ts"
       - "app/dataProviders/standardDataProviderDescriptors.ts"
-      - "app/index.tsx"
       - "app/panels/GlobalVariableSlider/index.tsx"
       - "app/panels/GlobalVariables/index.stories.tsx"
       - "app/panels/ImageView/CameraModel.ts"
@@ -337,11 +333,8 @@ overrides:
       - "app/players/automatedRun/AutomatedRunPlayer.test.ts"
       - "app/players/automatedRun/AutomatedRunPlayer.ts"
       - "app/players/automatedRun/videoRecordingClient.ts"
-      - "app/test/MemoryStorage.ts"
-      - "app/test/setup.ts"
       - "app/util/CachedFilelike.ts"
       - "app/util/RpcWorkerUtils.ts"
-      - "app/util/Storage.ts"
       - "app/util/addMessageDefaults.ts"
       - "app/util/bagConnectionsHelper.ts"
       - "app/util/bags.ts"
@@ -349,15 +342,9 @@ overrides:
       - "app/util/binaryObjects/index.ts"
       - "app/util/binaryObjects/jsWrapperObjects.ts"
       - "app/util/binaryObjects/messageDefinitionUtils.ts"
-      - "app/util/clipboard.ts"
-      - "app/util/datatypes.ts"
-      - "app/util/errors.ts"
-      - "app/util/formatTime.ts"
-      - "app/util/fuzzyFilter.ts"
       - "app/util/getGlobalVariablesFromUrl.ts"
       - "app/util/getNewConnection.ts"
       - "app/util/inAutomatedRunMode.ts"
-      - "app/util/index.ts"
       - "app/util/indexeddb/Database.ts"
       - "app/util/indexeddb/DbWriter.ts"
       - "app/util/indexeddb/MetaDatabase.ts"
@@ -370,7 +357,5 @@ overrides:
       - "app/util/rosDatatypesToMessageDefinitions.test.ts"
       - "app/util/selectors.ts"
       - "app/util/sendNotification.ts"
-      - "app/util/synchronizeMessages.ts"
-      - "app/util/time.ts"
     rules:
       "@typescript-eslint/strict-boolean-expressions": off

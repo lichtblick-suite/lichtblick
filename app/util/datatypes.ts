@@ -213,23 +213,27 @@ export const basicDatatypes: RosDatatypes = {
 };
 
 let datatypeSetsGenerated = 0;
-function getGetDatatypeName() {
+function getGetDatatypeName(): (key: string) => string {
   const prefix = `f_${datatypeSetsGenerated++}`;
   let count = 0;
-  const names: Record<string, unknown> = {};
+  const names: Record<string, string> = {};
   return (key: string) => {
     if (names[key] == undefined) {
       names[key] = `${prefix}_${count++}`;
     }
-    return names[key];
+    return names[key] as string;
   };
 }
 
-export const resetDatatypePrefixForTest = () => {
+export const resetDatatypePrefixForTest = (): void => {
   datatypeSetsGenerated = 0;
 };
 
-const renameDatatypes = (datatypes: RosDatatypes, typeName: string, getNewName: any) => {
+const renameDatatypes = (
+  datatypes: RosDatatypes,
+  typeName: string,
+  getNewName: (key: string) => string,
+) => {
   // Generate name/id mappings.
   const nameMapping: Record<string, string> = {};
   Object.keys(datatypes).forEach((datatype) => {
@@ -246,7 +250,7 @@ const renameDatatypes = (datatypes: RosDatatypes, typeName: string, getNewName: 
   const idMappedDatatypes: Record<string, unknown> = {};
   Object.entries(datatypes).forEach(([datatype, value]) => {
     const mapping = nameMapping[datatype];
-    if (!mapping) {
+    if (mapping == undefined) {
       return;
     }
     idMappedDatatypes[mapping] = {
@@ -301,10 +305,12 @@ export const getContentBasedDatatypes = (
 
       // Convert parsedDefinition:RosMsgField[] to datatypes:RosDatatypes
       const datatypes: RosDatatypes = {};
-      parsedDefinition.forEach((datatype: any) => {
+      for (const datatype of parsedDefinition) {
         const typeName = datatype.name ?? datatypesByTopic[topic];
-        datatypes[typeName] = { fields: datatype.definitions };
-      });
+        if (typeName != undefined) {
+          datatypes[typeName] = { fields: datatype.definitions };
+        }
+      }
 
       const datatypesTopic = datatypesByTopic[topic];
       if (datatypesTopic !== undefined) {
@@ -327,10 +333,10 @@ export const getContentBasedDatatypes = (
   Object.keys(topicsByStringDefinition).forEach((stringDefinition) => {
     const topics = topicsByStringDefinition[stringDefinition] ?? [];
     const fakeDatatypes = fakeDatatypesByStringDefinition[stringDefinition];
-    if (fakeDatatypes) {
-      topics.forEach((topic) => {
+    if (fakeDatatypes != undefined) {
+      for (const topic of topics) {
         fakeDatatypesByTopic[topic] = fakeDatatypes;
-      });
+      }
     }
   });
 

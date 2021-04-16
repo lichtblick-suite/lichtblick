@@ -45,7 +45,7 @@ export class AppError extends Error {
       }
     }
 
-    if (!this.message) {
+    if (this.message === "") {
       this.message = "Unknown Error";
     }
   }

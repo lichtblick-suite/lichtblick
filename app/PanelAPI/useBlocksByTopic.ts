@@ -83,7 +83,7 @@ const filterBlockByTopics = memoizeWeak(
 
 const useSubscribeToTopicsForBlocks = (topics: readonly string[]) => {
   const [id] = useState(() => uuidv4());
-  const { type: panelType = undefined } = useContext(PanelContext) || {};
+  const { type: panelType = undefined } = useContext(PanelContext) ?? {};
 
   const setSubscriptions = useMessagePipeline(
     useCallback(
@@ -93,7 +93,7 @@ const useSubscribeToTopicsForBlocks = (topics: readonly string[]) => {
     ),
   );
   const subscriptions: SubscribePayload[] = useMemo(() => {
-    const requester = panelType ? { type: "panel", name: panelType } : undefined;
+    const requester = panelType != undefined ? { type: "panel", name: panelType } : undefined;
     return topics.map((topic) => <SubscribePayload>{ topic, requester, format: "bobjects" });
   }, [panelType, topics]);
   useEffect(() => setSubscriptions(id, subscriptions), [id, setSubscriptions, subscriptions]);

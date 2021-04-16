@@ -86,7 +86,7 @@ const updateUrlAndLocalStorageMiddlewareDebounced = (store: Store) => (
     typeof action.payload === "object" &&
     "skipSettingLocalStorage" in action.payload
   ) {
-    skipSettingLocalStorage = action.payload.skipSettingLocalStorage;
+    skipSettingLocalStorage = Boolean(action.payload.skipSettingLocalStorage);
   }
 
   if (updateUrlActions.includes(action.type)) {

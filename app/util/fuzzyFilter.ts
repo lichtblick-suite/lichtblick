@@ -19,7 +19,7 @@ export default function fuzzyFilter<T>(
   getText: (arg0: T) => string = (x: any) => x,
   sort: boolean = true,
 ): T[] {
-  if (!filter) {
+  if (filter == undefined || filter === "") {
     return options;
   }
   const needle = filter.toLowerCase().replace(/[^a-z0-9]/g, "");

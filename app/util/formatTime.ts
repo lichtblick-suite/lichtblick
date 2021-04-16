@@ -23,27 +23,31 @@ import { toDate, fromDate, getRosTimeFromString } from "./time";
 // There is some miss-match between the moment we import and the one the type declarations expect
 momentDurationFormatSetup(moment);
 
-export function format(stamp: Time, timezone?: string) {
+export function format(stamp: Time, timezone?: string): string {
   return `${formatDate(stamp, timezone)} ${formatTime(stamp, timezone)}`;
 }
 
-export function formatDate(stamp: Time, timezone?: string) {
+export function formatDate(stamp: Time, timezone?: string): string {
   if (stamp.sec < 0 || stamp.nsec < 0) {
     console.error("Times are not allowed to be negative");
     return "(invalid negative time)";
   }
-  return moment.tz(toDate(stamp), timezone || moment.tz.guess()).format("YYYY-MM-DD");
+  return moment
+    .tz(toDate(stamp), timezone != undefined ? timezone : moment.tz.guess())
+    .format("YYYY-MM-DD");
 }
 
-export function formatTime(stamp: Time, timezone?: string) {
+export function formatTime(stamp: Time, timezone?: string): string {
   if (stamp.sec < 0 || stamp.nsec < 0) {
     console.error("Times are not allowed to be negative");
     return "(invalid negative time)";
   }
-  return moment.tz(toDate(stamp), timezone || moment.tz.guess()).format("h:mm:ss.SSS A z");
+  return moment
+    .tz(toDate(stamp), timezone != undefined ? timezone : moment.tz.guess())
+    .format("h:mm:ss.SSS A z");
 }
 
-export function formatTimeRaw(stamp: Time) {
+export function formatTimeRaw(stamp: Time): string {
   if (stamp.sec < 0 || stamp.nsec < 0) {
     console.error("Times are not allowed to be negative");
     return "(invalid negative time)";
@@ -51,16 +55,17 @@ export function formatTimeRaw(stamp: Time) {
   return `${stamp.sec}.${stamp.nsec.toFixed().padStart(9, "0")}`;
 }
 
-export function formatDuration(stamp: Time) {
+export function formatDuration(stamp: Time): string {
   return moment
     .duration(Math.round(stamp.sec * 1000 + stamp.nsec / 1e6))
     .format("h:mm:ss.SSS", { trim: false });
 }
 
 export function parseTimeStr(str: string, timezone?: string): Time | undefined {
-  const newMomentTimeObj = timezone
-    ? moment.tz(str, "YYYY-MM-DD h:mm:ss.SSS A z", timezone)
-    : moment(str, "YYYY-MM-DD h:mm:ss.SSS A z");
+  const newMomentTimeObj =
+    timezone != undefined
+      ? moment.tz(str, "YYYY-MM-DD h:mm:ss.SSS A z", timezone)
+      : moment(str, "YYYY-MM-DD h:mm:ss.SSS A z");
   const date = newMomentTimeObj.toDate();
   const result = (newMomentTimeObj.isValid() && fromDate(date)) || undefined;
 
@@ -80,13 +85,11 @@ export const getValidatedTimeAndMethodFromString = ({
   date: string;
   timezone?: string;
 }): { time?: Time; method: "ROS" | "TOD" } | undefined => {
-  if (!text) {
+  if (text == undefined || text === "") {
     return;
   }
   const isInvalidRosTime = isNaN(+text);
-  const isInvalidTodTime = !(
-    todTimeRegex.test(text || "") && parseTimeStr(`${date} ${text || ""}`, timezone)
-  );
+  const isInvalidTodTime = !(todTimeRegex.test(text) && parseTimeStr(`${date} ${text}`, timezone));
 
   if (isInvalidRosTime && isInvalidTodTime) {
     return;
@@ -94,8 +97,8 @@ export const getValidatedTimeAndMethodFromString = ({
 
   return {
     time: !isInvalidRosTime
-      ? getRosTimeFromString(text || "")
-      : parseTimeStr(`${date} ${text || ""}`, timezone),
+      ? getRosTimeFromString(text)
+      : parseTimeStr(`${date} ${text}`, timezone),
     method: isInvalidRosTime ? "TOD" : "ROS",
   };
 };

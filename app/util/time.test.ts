@@ -17,7 +17,6 @@ import { deepParse, wrapJsObject } from "@foxglove-studio/app/util/binaryObjects
 
 import * as time from "./time";
 
-const { fromSecondStamp } = time;
 describe("time.toDate & time.fromDate", () => {
   it("converts to date and from date", () => {
     const totalSeconds = Math.round(Date.now() / 1000);
@@ -185,46 +184,6 @@ describe("time.findClosestTimestampIndex", () => {
     expect(time.findClosestTimestampIndex({ sec: 1, nsec: 0 }, ["1", "2"])).toEqual(0);
     expect(time.findClosestTimestampIndex({ sec: 1, nsec: 999999999 }, ["1", "2"])).toEqual(0);
     expect(time.findClosestTimestampIndex({ sec: 2, nsec: 999999999 }, ["1", "2", "3"])).toEqual(1);
-  });
-});
-
-describe("time.getNextFrame", () => {
-  const timestamps = ["4.049839000", "4.249933000", "4.449961000", "5.650058000"];
-  it("returns undefined for empty timestamps", async () => {
-    expect(time.getNextFrame({ sec: 3, nsec: 0 }, [])).toEqual(undefined);
-  });
-
-  it("returns the next frame ", async () => {
-    expect(time.getNextFrame({ sec: 3, nsec: 0 }, timestamps)).toEqual(
-      fromSecondStamp(timestamps[1]!),
-    );
-    expect(time.getNextFrame({ sec: 4, nsec: 240000000 }, timestamps)).toEqual(
-      fromSecondStamp(timestamps[1]!),
-    );
-    expect(time.getNextFrame({ sec: 4, nsec: 249933000 }, timestamps)).toEqual(
-      fromSecondStamp(timestamps[2]!),
-    );
-    expect(time.getNextFrame({ sec: 5, nsec: 650058000 }, timestamps)).toEqual(
-      fromSecondStamp(timestamps[0]!),
-    );
-    expect(time.getNextFrame({ sec: 6, nsec: 0 }, timestamps)).toEqual(
-      fromSecondStamp(timestamps[0]!),
-    );
-  });
-
-  it("returns the previous frame ", async () => {
-    expect(time.getNextFrame({ sec: 3, nsec: 0 }, timestamps, true)).toEqual(
-      fromSecondStamp(timestamps[timestamps.length - 1]!),
-    );
-    expect(time.getNextFrame({ sec: 6, nsec: 0 }, timestamps, true)).toEqual(
-      fromSecondStamp(timestamps[timestamps.length - 2]!),
-    );
-    expect(time.getNextFrame({ sec: 5, nsec: 650058000 }, timestamps, true)).toEqual(
-      fromSecondStamp(timestamps[timestamps.length - 2]!),
-    );
-    expect(time.getNextFrame({ sec: 5, nsec: 640058000 }, timestamps, true)).toEqual(
-      fromSecondStamp(timestamps[timestamps.length - 3]!),
-    );
   });
 });
 

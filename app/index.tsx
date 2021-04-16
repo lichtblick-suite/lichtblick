@@ -21,7 +21,10 @@ const log = Logger.getLogger(__filename);
 
 log.debug("initializing renderer");
 
-if (OsContextSingleton?.isCrashReportingEnabled() && typeof process.env.SENTRY_DSN === "string") {
+if (
+  (OsContextSingleton?.isCrashReportingEnabled() ?? false) &&
+  typeof process.env.SENTRY_DSN === "string"
+) {
   log.info("initializing Sentry in renderer");
   initSentry({
     dsn: process.env.SENTRY_DSN,

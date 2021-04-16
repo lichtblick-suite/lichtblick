@@ -13,7 +13,7 @@
 
 function fallbackCopy(text: string) {
   const { body } = document;
-  if (!body) {
+  if (body == undefined) {
     throw new Error("Could not find body, failed to copy.");
   }
   const el = document.createElement("textarea");
@@ -29,7 +29,7 @@ export default {
   async copy(text: string): Promise<void> {
     // attempt to use the new async clipboard methods. If those are not available or fail, fallback to the old
     // `execCommand` method.
-    if (navigator?.clipboard?.writeText) {
+    if (navigator?.clipboard?.writeText != undefined) {
       try {
         return navigator.clipboard.writeText(text);
       } catch (error) {

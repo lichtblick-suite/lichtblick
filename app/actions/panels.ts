@@ -132,7 +132,7 @@ export const clearLayoutUrlReplacedByDefault = (): Dispatcher<CLEAR_LAYOUT_URL_R
 };
 
 export function applyPatchToLayout(patch: string | undefined, layout: PanelsState): PanelsState {
-  if (!patch) {
+  if (patch == undefined || patch.length === 0) {
     return layout;
   }
   try {
@@ -162,11 +162,11 @@ export function applyPatchToLayout(patch: string | undefined, layout: PanelsStat
 type OVERWRITE_GLOBAL_DATA = {
   type: "OVERWRITE_GLOBAL_DATA";
   payload: {
-    [key: string]: any;
+    [key: string]: unknown;
   };
 };
 export const overwriteGlobalVariables = (payload: {
-  [key: string]: any;
+  [key: string]: unknown;
 }): OVERWRITE_GLOBAL_DATA => ({
   type: PANELS_ACTION_TYPES.OVERWRITE_GLOBAL_DATA,
   payload,
@@ -175,10 +175,10 @@ export const overwriteGlobalVariables = (payload: {
 type SET_GLOBAL_DATA = {
   type: "SET_GLOBAL_DATA";
   payload: {
-    [key: string]: any;
+    [key: string]: unknown;
   };
 };
-export const setGlobalVariables = (payload: { [key: string]: any }): SET_GLOBAL_DATA => ({
+export const setGlobalVariables = (payload: { [key: string]: unknown }): SET_GLOBAL_DATA => ({
   type: PANELS_ACTION_TYPES.SET_GLOBAL_DATA,
   payload,
 });

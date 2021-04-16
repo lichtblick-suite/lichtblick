@@ -20,7 +20,7 @@ import { StampedMessage } from "@foxglove-studio/app/types/Messages";
 export const defaultGetHeaderStamp = (
   message: Readonly<RosObject> | undefined,
 ): Time | undefined => {
-  if (message?.header) {
+  if (message?.header != undefined) {
     return cast<StampedMessage>(message).header.stamp;
   }
   return undefined;

@@ -202,37 +202,6 @@ export function findClosestTimestampIndex(
   return -1;
 }
 
-export function getNextFrame(
-  currentTime: Time,
-  timestamps: string[] = [],
-  goLeft?: boolean,
-): Time | undefined {
-  if (timestamps.length === 0) {
-    return undefined;
-  }
-  const effectiveIdx = findClosestTimestampIndex(currentTime, timestamps);
-  if (effectiveIdx === -1) {
-    return undefined;
-  }
-  let nextIdx = 0;
-  const maxIdx = timestamps.length - 1;
-  if (effectiveIdx === -1) {
-    nextIdx = goLeft ? maxIdx : 0;
-  } else {
-    nextIdx = effectiveIdx + (goLeft ? -1 : 1);
-    if (nextIdx < 0) {
-      nextIdx = maxIdx;
-    } else if (nextIdx > maxIdx) {
-      nextIdx = 0;
-    }
-  }
-  const nextFrame = timestamps[nextIdx];
-  if (nextFrame == undefined) {
-    return undefined;
-  }
-  return fromSecondStamp(nextFrame);
-}
-
 export function formatFrame({ sec, nsec }: Time): string {
   return `${sec}.${String.prototype.padStart.call(nsec, 9, "0")}`;
 }
@@ -261,7 +230,8 @@ export const isTimeInRangeInclusive = (time: Time, start: Time, end: Time): bool
 export function parseRosTimeStr(str: string): Time | undefined {
   if (/^\d+\.?$/.test(str)) {
     // Whole number with optional "." at the end.
-    return { sec: parseInt(str, 10) || 0, nsec: 0 };
+    const sec = parseInt(str, 10);
+    return { sec: isNaN(sec) ? 0 : sec, nsec: 0 };
   }
   if (!/^\d+\.\d+$/.test(str)) {
     // Not digits.digits -- invalid.
@@ -282,7 +252,8 @@ export function parseRosTimeStr(str: string): Time | undefined {
   const digitsShort = 9 - second.length;
   const nsec = Math.round(parseInt(second, 10) * 10 ** digitsShort);
   // It's possible we rounded to { sec: 1, nsec: 1e9 }, which is invalid, so fixTime.
-  return fixTime({ sec: parseInt(first, 10) || 0, nsec });
+  const sec = parseInt(first, 10);
+  return fixTime({ sec: isNaN(sec) ? 0 : sec, nsec });
 }
 
 // Functions and types for specifying and applying player initial seek time intentions.
@@ -359,7 +330,8 @@ export function getTimestampForMessage(
 }
 
 export const compareBinaryTimes = (a: BinaryTime, b: BinaryTime): number => {
-  return a.sec() - b.sec() || a.nsec() - b.nsec();
+  const secDiff = a.sec() - b.sec();
+  return secDiff !== 0 ? secDiff : a.nsec() - b.nsec();
 };
 
 // Descriptive -- not a real type
@@ -381,7 +353,7 @@ export const maybeGetBobjectHeaderStamp = (message: Bobject | undefined): Time |
 };
 
 export const getRosTimeFromString = (text: string): Time | undefined => {
-  if (!text.length || isNaN(+text)) {
+  if (text.length === 0 || isNaN(+text)) {
     return undefined;
   }
   const textAsNum = Number(text);
