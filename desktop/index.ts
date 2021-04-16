@@ -7,40 +7,25 @@
 
 import "colors";
 import { addBreadcrumb, captureException, init as initSentry } from "@sentry/electron";
-import {
-  app,
-  BrowserWindow,
-  BrowserWindowConstructorOptions,
-  ipcMain,
-  Menu,
-  MenuItemConstructorOptions,
-  session,
-  shell,
-  systemPreferences,
-  nativeTheme,
-  MenuItem,
-} from "electron";
+import { app, BrowserWindow, ipcMain, Menu, session, nativeTheme } from "electron";
 import installExtension, {
   REACT_DEVELOPER_TOOLS,
   REDUX_DEVTOOLS,
 } from "electron-devtools-installer";
 import { autoUpdater } from "electron-updater";
 import fs from "fs";
-import path from "path";
 
 import { APP_NAME, APP_VERSION, APP_HOMEPAGE } from "@foxglove-studio/app/constants";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import Logger from "@foxglove/log";
 
+import StudioWindow from "./StudioWindow";
 import { installMenuInterface } from "./menu";
-
-declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
+import { getTelemetrySettings } from "./telemetry";
 
 const log = Logger.getLogger(__filename);
 
 log.info(`${APP_NAME} ${APP_VERSION}`);
 
-const isMac = process.platform === "darwin";
 const isProduction = process.env.NODE_ENV === "production";
 
 // Suppress Electron Security Warning in development
@@ -53,7 +38,7 @@ if (require("electron-squirrel-startup")) {
 }
 
 // Load opt-out settings for crash reporting and telemetry
-const [allowCrashReporting, allowTelemetry] = getTelemetrySettings();
+const [allowCrashReporting] = getTelemetrySettings();
 if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
   log.info("initializing Sentry in renderer");
   initSentry({
@@ -61,6 +46,12 @@ if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
     autoSessionTracking: true,
     release: "studio@" + APP_VERSION,
   });
+}
+
+if (!app.isDefaultProtocolClient("foxglove")) {
+  if (!app.setAsDefaultProtocolClient("foxglove")) {
+    log.warn("Could not set app as handler for foxglove://");
+  }
 }
 
 // files our app should open - either from user double-click on a supported fileAssociation
@@ -79,281 +70,29 @@ app.on("open-file", (_ev, filePath) => {
   filesToOpen.push(filePath);
 });
 
+// works on osx - even when app is closed
+// tho it is a bit strange since it isn't clear when this runs...
+const openUrls: string[] = [];
+app.on("open-url", (ev, url) => {
+  if (!url.startsWith("foxglove://")) {
+    return;
+  }
+
+  ev.preventDefault();
+
+  if (app.isReady()) {
+    if (url.startsWith("foxglove://")) {
+      new StudioWindow([url]);
+    }
+  } else {
+    openUrls.push(url);
+  }
+});
+
 // support preload lookups for the user data path
 ipcMain.handle("getUserDataPath", () => {
   return app.getPath("userData");
 });
-
-async function createWindow(): Promise<void> {
-  const preloadPath = path.join(app.getAppPath(), "main", "preload.js");
-  const rendererPath = MAIN_WINDOW_WEBPACK_ENTRY;
-
-  const windowOptions: BrowserWindowConstructorOptions = {
-    height: 800,
-    width: 1200,
-    autoHideMenuBar: true,
-    title: APP_NAME,
-    webPreferences: {
-      contextIsolation: true,
-      preload: preloadPath,
-      nodeIntegration: false,
-      additionalArguments: [
-        `--allowCrashReporting=${allowCrashReporting ? "1" : "0"}`,
-        `--allowTelemetry=${allowTelemetry ? "1" : "0"}`,
-      ],
-      // Disable webSecurity in development so we can make XML-RPC calls, load
-      // remote data, etc. In production, the app is served from file:// URLs so
-      // the Origin header is not sent, disabling the CORS
-      // Access-Control-Allow-Origin check
-      webSecurity: isProduction,
-    },
-    backgroundColor: colors.background,
-  };
-  if (isMac) {
-    windowOptions.titleBarStyle = "hiddenInset";
-  }
-  const mainWindow = new BrowserWindow(windowOptions);
-
-  app.setAboutPanelOptions({
-    applicationName: APP_NAME,
-    applicationVersion: APP_VERSION,
-    version: process.platform,
-    copyright: undefined,
-    website: APP_HOMEPAGE,
-    iconPath: undefined,
-  });
-
-  // Forward full screen events to the renderer
-  mainWindow.addListener("enter-full-screen", () =>
-    mainWindow.webContents.send("enter-full-screen"),
-  );
-  mainWindow.addListener("leave-full-screen", () =>
-    mainWindow.webContents.send("leave-full-screen"),
-  );
-
-  const appMenuTemplate: MenuItemConstructorOptions[] = [];
-
-  if (isMac) {
-    appMenuTemplate.push({
-      role: "appMenu",
-      label: app.name,
-      submenu: [
-        { role: "about" },
-        { type: "separator" },
-        {
-          label: "Preferences…",
-          accelerator: "CommandOrControl+,",
-          click: () => mainWindow.webContents.send("open-preferences"),
-        },
-        { type: "separator" },
-        { role: "services" },
-        { type: "separator" },
-        { role: "hide" },
-        { role: "hideOthers" },
-        { role: "unhide" },
-        { type: "separator" },
-        { role: "quit" },
-      ],
-    });
-  }
-
-  appMenuTemplate.push({
-    role: "fileMenu",
-    label: "File",
-    id: "fileMenu",
-    submenu: [isMac ? { role: "close" } : { role: "quit" }],
-  });
-
-  appMenuTemplate.push({
-    role: "editMenu",
-    label: "Edit",
-    submenu: [
-      {
-        label: "Undo",
-        accelerator: "CommandOrControl+Z",
-        click: () => mainWindow.webContents.send("undo"),
-      },
-      {
-        label: "Redo",
-        accelerator: "CommandOrControl+Shift+Z",
-        click: () => mainWindow.webContents.send("redo"),
-      },
-      { type: "separator" },
-      { role: "cut" },
-      { role: "copy" },
-      { role: "paste" },
-      ...(isMac
-        ? [
-            { role: "pasteAndMatchStyle" } as const,
-            { role: "delete" } as const,
-            { role: "selectAll" } as const,
-          ]
-        : [
-            { role: "delete" } as const,
-            { type: "separator" } as const,
-            { role: "selectAll" } as const,
-          ]),
-    ],
-  });
-
-  const showSharedWorkersMenu = () => {
-    // Electron doesn't let us update dynamic menus when they are being opened, so just open a popup
-    // context menu. This is ugly, but only for development anyway.
-    // https://github.com/electron/electron/issues/528
-    const workers = mainWindow.webContents.getAllSharedWorkers();
-    Menu.buildFromTemplate(
-      workers.length === 0
-        ? [{ label: "No Shared Workers", enabled: false }]
-        : workers.map(
-            (worker) =>
-              new MenuItem({
-                label: worker.url,
-                click() {
-                  mainWindow.webContents.closeDevTools();
-                  mainWindow.webContents.inspectSharedWorkerById(worker.id);
-                },
-              }),
-          ),
-    ).popup();
-  };
-
-  appMenuTemplate.push({
-    role: "viewMenu",
-    label: "View",
-    submenu: [
-      { role: "resetZoom" },
-      { role: "zoomIn" },
-      { role: "zoomOut" },
-      { type: "separator" },
-      { role: "togglefullscreen" },
-      { type: "separator" },
-      {
-        label: "Advanced",
-        submenu: [
-          { role: "reload" },
-          { role: "forceReload" },
-          { role: "toggleDevTools" },
-          {
-            label: "Inspect Shared Worker…",
-            click() {
-              showSharedWorkersMenu();
-            },
-          },
-        ],
-      },
-    ],
-  });
-
-  appMenuTemplate.push({
-    role: "help",
-    submenu: [
-      {
-        label: "Welcome",
-        click: () => mainWindow.webContents.send("open-welcome-layout"),
-      },
-      {
-        label: "Message Path Syntax",
-        click: () => mainWindow.webContents.send("open-message-path-syntax-help"),
-      },
-      {
-        label: "Keyboard Shortcuts",
-        accelerator: "CommandOrControl+/",
-        click: () => mainWindow.webContents.send("open-keyboard-shortcuts"),
-      },
-      {
-        label: "Learn More",
-        click: async () => shell.openExternal("https://foxglove.dev"),
-      },
-    ],
-  });
-
-  Menu.setApplicationMenu(Menu.buildFromTemplate(appMenuTemplate));
-  installMenuInterface();
-
-  mainWindow.webContents.once("dom-ready", () => {
-    if (!isProduction) {
-      mainWindow.webContents.openDevTools();
-    }
-  });
-
-  // Open all new windows in an external browser
-  // Note: this API is supposed to be superseded by webContents.setWindowOpenHandler,
-  // but using that causes the app to freeze when a new window is opened.
-  mainWindow.webContents.on("new-window", (event, url) => {
-    event.preventDefault();
-    shell.openExternal(url);
-  });
-
-  mainWindow.webContents.on("ipc-message", (_event: unknown, channel: string) => {
-    if (channel === "window.toolbar-double-clicked") {
-      const action: string =
-        systemPreferences.getUserDefault?.("AppleActionOnDoubleClick", "string") || "Maximize";
-      if (action === "Minimize") {
-        mainWindow.minimize();
-      } else if (action === "Maximize") {
-        mainWindow.isMaximized() ? mainWindow.unmaximize() : mainWindow.maximize();
-      } else {
-        // "None"
-      }
-    }
-  });
-
-  // Our app has support for working with _File_ instances in the renderer. This avoids extra copies
-  // while reading files and lets the renderer seek/read as necessary using all the browser
-  // primavites for _File_ instances.
-  //
-  // Unfortunately Electron does not provide a way to create or send _File_ instances to the renderer.
-  // To avoid sending the data over our context bridge, we use a _hack_.
-  // Via the debugger we _inject_ a DOM event to set the files of an <input> element.
-  const inputElementId = "electron-open-file-input";
-  async function loadFilesToOpen() {
-    const debug = mainWindow.webContents.debugger;
-    try {
-      debug.attach("1.1");
-    } catch (err) {
-      // debugger may already be attached
-    }
-
-    try {
-      const documentRes = await debug.sendCommand("DOM.getDocument");
-      const queryRes = await debug.sendCommand("DOM.querySelector", {
-        nodeId: documentRes.root.nodeId,
-        selector: `#${inputElementId}`,
-      });
-      await debug.sendCommand("DOM.setFileInputFiles", {
-        nodeId: queryRes.nodeId,
-        files: filesToOpen,
-      });
-
-      // clear the files once we've opened them
-      filesToOpen.splice(0, filesToOpen.length);
-    } finally {
-      debug.detach();
-    }
-  }
-
-  // indicates the preloader has setup the file input used to inject which files to open
-  let preloaderFileInputIsReady = false;
-
-  // This handles user dropping files on the doc icon or double clicking a file when the app
-  // is already open.
-  //
-  // The open-file handler registered earlier will handle adding the file to filesToOpen
-  app.on("open-file", async (_ev) => {
-    if (preloaderFileInputIsReady) {
-      await loadFilesToOpen();
-    }
-  });
-
-  // preload will tell us when it is ready to process the pending open file requests
-  ipcMain.handle("load-pending-files", async () => {
-    await loadFilesToOpen();
-    preloaderFileInputIsReady = true;
-  });
-
-  log.info(`mainWindow.loadURL(${rendererPath})`);
-  mainWindow.loadURL(rendererPath).then(() => log.info("mainWindow URL loaded"));
-}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -371,6 +110,15 @@ app.on("ready", async () => {
       captureException(err);
     });
   }
+
+  app.setAboutPanelOptions({
+    applicationName: APP_NAME,
+    applicationVersion: APP_VERSION,
+    version: process.platform,
+    copyright: undefined,
+    website: APP_HOMEPAGE,
+    iconPath: undefined,
+  });
 
   if (!isProduction) {
     console.group("Installing Chrome extensions for development...");
@@ -467,8 +215,72 @@ app.on("ready", async () => {
     callback({ responseHeaders });
   });
 
-  // Create the main window
-  createWindow();
+  // When we change the focused window we switc the app menu so actions go to the correct window
+  app.on("browser-window-focus", (_ev, browserWindow) => {
+    const studioWindow = StudioWindow.fromWebContentsId(browserWindow.webContents.id);
+    if (studioWindow) {
+      Menu.setApplicationMenu(studioWindow.getMenu());
+    }
+  });
+
+  // Our app has support for working with _File_ instances in the renderer. This avoids extra copies
+  // while reading files and lets the renderer seek/read as necessary using all the browser
+  // primitives for _File_ instances.
+  //
+  // Unfortunately Electron does not provide a way to create or send _File_ instances to the renderer.
+  // To avoid sending the data over our context bridge, we use a _hack_.
+  // Via the debugger we _inject_ a DOM event to set the files of an <input> element.
+  const inputElementId = "electron-open-file-input";
+  async function loadFilesToOpen(browserWindow: BrowserWindow) {
+    const debug = browserWindow.webContents.debugger;
+    try {
+      debug.attach("1.1");
+    } catch (err) {
+      // debugger may already be attached
+    }
+
+    try {
+      const documentRes = await debug.sendCommand("DOM.getDocument");
+      const queryRes = await debug.sendCommand("DOM.querySelector", {
+        nodeId: documentRes.root.nodeId,
+        selector: `#${inputElementId}`,
+      });
+      await debug.sendCommand("DOM.setFileInputFiles", {
+        nodeId: queryRes.nodeId,
+        files: filesToOpen,
+      });
+
+      // clear the files once we've opened them
+      filesToOpen.splice(0, filesToOpen.length);
+    } finally {
+      debug.detach();
+    }
+  }
+
+  // indicates the preloader has setup the file input used to inject which files to open
+  let preloaderFileInputIsReady = false;
+
+  // This handles user dropping files on the doc icon or double clicking a file when the app
+  // is already open.
+  //
+  // The open-file handler registered earlier will handle adding the file to filesToOpen
+  app.on("open-file", async (_ev) => {
+    if (preloaderFileInputIsReady) {
+      const focusedWindow = BrowserWindow.getFocusedWindow();
+      if (focusedWindow) {
+        await loadFilesToOpen(focusedWindow);
+      }
+    }
+  });
+
+  // preload will tell us when it is ready to process the pending open file requests
+  ipcMain.handle("load-pending-files", async (ev) => {
+    const browserWindow = BrowserWindow.fromId(ev.sender.id);
+    if (browserWindow) {
+      await loadFilesToOpen(browserWindow);
+    }
+    preloaderFileInputIsReady = true;
+  });
 
   // This event handler must be added after the "ready" event fires
   // (see https://github.com/electron/electron-quick-start/pull/382)
@@ -476,9 +288,15 @@ app.on("ready", async () => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
+      new StudioWindow();
     }
   });
+
+  installMenuInterface();
+
+  const argv = process.argv;
+  const deepLinks = argv.filter((arg) => arg.startsWith("foxglove://"));
+  new StudioWindow([...deepLinks, ...openUrls]);
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -489,27 +307,3 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
-
-// Load telemetry opt-out settings from settings.json
-function getTelemetrySettings(): [crashReportingEnabled: boolean, telemetryEnabled: boolean] {
-  const datastoreDir = path.join(app.getPath("userData"), "studio-datastores", "settings");
-  const settingsPath = path.join(datastoreDir, "settings.json");
-  let crashReportingEnabled = true;
-  let telemetryEnabled = true;
-
-  try {
-    fs.mkdirSync(datastoreDir, { recursive: true });
-  } catch {
-    // Ignore directory creation errors, including dir already exists
-  }
-
-  try {
-    const settings = JSON.parse(fs.readFileSync(settingsPath, { encoding: "utf8" }));
-    crashReportingEnabled = settings["telemetry.crashReportingEnabled"] ?? true;
-    telemetryEnabled = settings["telemetry.telemetryEnabled"] ?? true;
-  } catch {
-    // Ignore file load or parsing errors, including settings.json not existing
-  }
-
-  return [crashReportingEnabled, telemetryEnabled];
-}

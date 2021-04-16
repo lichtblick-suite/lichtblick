@@ -117,6 +117,10 @@ const ctx: OsContext = {
     return APP_VERSION;
   },
 
+  getDeepLinks: (): string[] => {
+    return window.process.argv.filter((arg) => arg.startsWith("foxglove://"));
+  },
+
   // Context bridge cannot expose "classes" only exposes functions
   // We use .bind to attach the localFileStorage instance as _this_ to the function
   storage: {

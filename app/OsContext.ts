@@ -77,6 +77,9 @@ export interface OsContext {
   // Get the version string from package.json
   getAppVersion: () => string;
 
+  // Get an array of deep links provided on app launch
+  getDeepLinks: () => string[];
+
   // file backed key/value storage
   storage: Storage;
 }

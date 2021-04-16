@@ -10,6 +10,12 @@
   "artifactName": "${name}-${version}-${os}-${arch}.${ext}",
   "afterSign": "resources/notarize.ts",
   "icon": "resources/icon/icon.icns",
+  "protocols": [
+    {
+      "name": "foxglove",
+      "schemes": ["foxglove"]
+    }
+  ],
   "linux": {
     "target": [
       {
@@ -56,6 +62,12 @@
           "LSHandlerRank": "Default",
           "CFBundleTypeIconSystemGenerated": 1,
           "LSItemContentTypes": ["org.ros.bag"]
+        }
+      ],
+      "CFBundleURLTypes": [
+        {
+          "CFBundleURLSchemes": ["foxglove"],
+          "CFBundleTypeRole": "Viewer"
         }
       ],
       "UTImportedTypeDeclarations": [
