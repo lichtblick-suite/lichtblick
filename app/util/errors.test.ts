@@ -11,10 +11,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { AppError } from "@foxglove-studio/app/util/errors";
+import { AppError, UserError } from "@foxglove-studio/app/util/errors";
 
 describe("errors", () => {
   describe("AppError", () => {
+    it("is an instanceof itself", () => {
+      const err = new AppError("example");
+      expect(err.name).toBe("AppError");
+      expect(err).toBeInstanceOf(AppError);
+    });
     it("copies the original error", () => {
       const err = new Error("simple error");
       const { message } = new AppError(err);
@@ -48,6 +53,14 @@ describe("errors", () => {
     it("catches BigInt values in extraInfo", () => {
       const { message } = new AppError("internal error", { val: BigInt(10) });
       expect(message.includes("[ Either cyclic object or object with BigInt(s) ]")).toBeTruthy();
+    });
+  });
+
+  describe("UserError", () => {
+    it("is an instanceof itself", () => {
+      const err = new UserError("example");
+      expect(err.name).toBe("UserError");
+      expect(err).toBeInstanceOf(UserError);
     });
   });
 });

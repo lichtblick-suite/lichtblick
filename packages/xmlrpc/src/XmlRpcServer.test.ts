@@ -6,6 +6,7 @@ import http from "http";
 import { URL } from "url";
 
 import { HttpServerNodejs } from "./HttpServerNodejs";
+import { XmlRpcFault } from "./XmlRpcFault";
 import { XmlRpcServer } from "./XmlRpcServer";
 import { XmlRpcValue } from "./XmlRpcTypes";
 
@@ -59,5 +60,93 @@ describe("XmlRpcServer", () => {
       req.write(chunk2);
       req.end();
     });
+  });
+
+  it("serializes faults", async () => {
+    const server = new XmlRpcServer(new HttpServerNodejs());
+    server.setHandler(
+      "testMethod1",
+      (methodName, _args): Promise<XmlRpcValue> => {
+        expect(methodName).toEqual("testMethod1");
+        throw new Error("Example error");
+      },
+    );
+    server.setHandler(
+      "testMethod2",
+      (methodName, _args): Promise<XmlRpcValue> => {
+        expect(methodName).toEqual("testMethod2");
+        throw new XmlRpcFault("Example error", 123);
+      },
+    );
+
+    await server.listen();
+    const port = parseInt(new URL(server.server.url() as string).port);
+    expect(port).not.toBeNaN();
+
+    const options = { host: "localhost", port, path: "/", method: "POST" };
+
+    try {
+      // Generic error produces generic fault code
+      await new Promise<void>((resolve, reject) => {
+        const req = http.request(options);
+        req.on("error", (err) => reject(err));
+        req.on("response", (res) => {
+          let resData = "";
+          expect(res.statusCode).toEqual(200);
+          res.on("data", (chunk: string) => (resData += chunk));
+          res.on("end", () => {
+            resolve(
+              (async () => {
+                expect(resData).toContain(
+                  `<?xml version="1.0"?><methodResponse version="1.0"><fault><value><struct><member>` +
+                    `<name>faultCode</name><value><int>-32500</int></value></member>` +
+                    `<member><name>faultString</name><value><string>Error: Example error`,
+                );
+              })(),
+            );
+          });
+        });
+
+        req.write(`
+          <?xml version="1.0" encoding="UTF-8"?>
+          <methodCall>
+            <methodName>testMethod1</methodName>
+          </methodCall>
+        `);
+        req.end();
+      });
+
+      // Custom XmlRpcFault code is passed through
+      await new Promise<void>((resolve, reject) => {
+        const req = http.request(options);
+        req.on("error", (err) => reject(err));
+        req.on("response", (res) => {
+          let resData = "";
+          expect(res.statusCode).toEqual(200);
+          res.on("data", (chunk: string) => (resData += chunk));
+          res.on("end", () => {
+            resolve(
+              (async () => {
+                expect(resData).toContain(
+                  `<?xml version="1.0"?><methodResponse version="1.0"><fault><value><struct>` +
+                    `<member><name>faultCode</name><value><int>123</int></value></member>` +
+                    `<member><name>faultString</name><value><string>Example error`,
+                );
+              })(),
+            );
+          });
+        });
+
+        req.write(`
+          <?xml version="1.0" encoding="UTF-8"?>
+          <methodCall>
+            <methodName>testMethod2</methodName>
+          </methodCall>
+        `);
+        req.end();
+      });
+    } finally {
+      server.close();
+    }
   });
 });

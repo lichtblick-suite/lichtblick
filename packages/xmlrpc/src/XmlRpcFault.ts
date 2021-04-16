@@ -13,8 +13,5 @@ export class XmlRpcFault extends Error {
 
     this.code = this.faultCode = faultCode;
     this.faultString = faultString;
-
-    // Set the prototype explicitly
-    Object.setPrototypeOf(this, XmlRpcFault.prototype);
   }
 }

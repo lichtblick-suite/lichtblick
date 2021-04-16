@@ -250,7 +250,12 @@ export default class RandomAccessPlayer implements Player {
         }, SEEK_START_DELAY_MS);
       })
       .catch((error: Error) => {
-        this._setError("Error initializing player", error, "app");
+        this._setError(
+          "Error initializing player",
+          error,
+          // instanceof doesn't work here because errors may be sent across Rpc.
+          error.name === "UserError" ? "user" : "app",
+        );
       });
   }
 
