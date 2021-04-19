@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import indent from "indent-string";
 import memoize from "memoize-weak";
 import { RosMsgField } from "rosbag";
 
@@ -26,6 +25,7 @@ import {
   deepParseSymbol,
   friendlyTypeName,
   isComplex,
+  indent,
 } from "@foxglove-studio/app/util/binaryObjects/messageDefinitionUtils";
 
 const arrayTypeName = (typeName: string): string => `${friendlyTypeName(typeName)}$Array`;

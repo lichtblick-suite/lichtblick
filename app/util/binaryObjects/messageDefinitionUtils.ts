@@ -119,3 +119,7 @@ export const deepParse = (object?: any): any => {
   }
   return object[deepParseSymbol]();
 };
+
+export function indent(text: string, count: number): string {
+  return text.replace(/^(?!\s*$)/gm, " ".repeat(count));
+}
