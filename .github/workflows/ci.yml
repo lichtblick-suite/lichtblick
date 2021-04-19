@@ -90,7 +90,7 @@ jobs:
       - run: yarn install --immutable
       - name: test:integration
         if: matrix.os == 'ubuntu-20.04'
-        uses: GabrielBB/xvfb-action@v1.4
+        uses: GabrielBB/xvfb-action@v1.5
         with:
           working-directory: ./
           run: yarn run test:integration
