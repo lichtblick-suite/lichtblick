@@ -14,6 +14,7 @@ import installExtension, {
 } from "electron-devtools-installer";
 import { autoUpdater } from "electron-updater";
 import fs from "fs";
+import { URL } from "universal-url";
 
 import { APP_NAME, APP_VERSION, APP_HOMEPAGE } from "@foxglove-studio/app/constants";
 import Logger from "@foxglove/log";
@@ -170,15 +171,32 @@ app.on("ready", async () => {
     "img-src": "'self' data: https:",
   };
 
+  const ignoredDomainSuffixes = ["api.amplitude.com", "ingest.sentry.io"];
+  const ignoreRequest = (urlStr: string): boolean => {
+    try {
+      const url = new URL(urlStr);
+      for (const suffix of ignoredDomainSuffixes) {
+        if (url.hostname.endsWith(suffix)) {
+          return true;
+        }
+      }
+    } catch {
+      // Don't ignore requests to unparseable URLs
+    }
+    return false;
+  };
+
   if (allowCrashReporting) {
     session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
       // Log web requests as crash reporting breadcrumbs
-      addBreadcrumb({
-        type: "http",
-        category: "request",
-        timestamp: details.timestamp / 1000.0,
-        data: { url: details.url, method: details.method },
-      });
+      if (!ignoreRequest(details.url)) {
+        addBreadcrumb({
+          type: "http",
+          category: "request",
+          timestamp: details.timestamp / 1000.0,
+          data: { url: details.url, method: details.method },
+        });
+      }
       callback({});
     });
   }
@@ -189,7 +207,7 @@ app.on("ready", async () => {
     const responseHeaders = { ...details.responseHeaders };
 
     // Log web responses as crash reporting breadcrumbs
-    if (allowCrashReporting) {
+    if (allowCrashReporting && !ignoreRequest(details.url)) {
       addBreadcrumb({
         type: "http",
         category: "response",
