@@ -129,11 +129,11 @@ const SAnimatedRow = styled.tr<{ animate: boolean; skipAnimation: any }>`
   border-bottom: 1px solid ${sharedColors.BORDER_LIGHT};
 `;
 
-export function isActiveElementEditable() {
+export function isActiveElementEditable(): boolean {
   const activeEl = document.activeElement;
   return (
-    activeEl &&
-    ((activeEl as any).isContentEditable ||
+    activeEl != undefined &&
+    ((activeEl as HTMLElement).isContentEditable ||
       activeEl.tagName === "INPUT" ||
       activeEl.tagName === "TEXTAREA")
   );

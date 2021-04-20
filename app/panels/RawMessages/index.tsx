@@ -269,10 +269,9 @@ function RawMessages(props: Props) {
           // sample output: Int8Array(331776) [-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, ...]
           let smallNumberArrayStr = "";
           if (ArrayBuffer.isView(itemValue)) {
-            // @ts-expect-error whatever log is here is not correct for ArrayBufferView
-            const itemPart = itemValue.slice(0, DATA_ARRAY_PREVIEW_LIMIT).join(", ");
-            // @ts-expect-error whatever log is here is not correct for ArrayBufferView
-            const length = itemValue.length;
+            const array = itemValue as Uint8Array;
+            const itemPart = array.slice(0, DATA_ARRAY_PREVIEW_LIMIT).join(", ");
+            const length = array.length;
             smallNumberArrayStr = `(${length}) [${itemPart}${
               length >= DATA_ARRAY_PREVIEW_LIMIT ? ", ..." : ""
             }] `;

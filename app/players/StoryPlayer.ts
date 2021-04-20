@@ -128,6 +128,7 @@ export default class StoryPlayer implements Player {
 
   close = noop;
   setPublishers = noop;
+  setParameter = noop;
   publish = noop;
   startPlayback = noop;
   pausePlayback = noop;

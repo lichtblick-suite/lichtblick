@@ -2,6 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+/* eslint-disable no-restricted-syntax */
+
 import { RosNode } from "@foxglove/ros1";
 import {
   getEnvVar,
@@ -29,13 +31,15 @@ async function main() {
 
     await rosNode.start();
 
+    const params = await rosNode.subscribeAllParams();
+    console.dir(params);
+
     const sub = rosNode.subscribe({
       topic: "/turtle1/color_sensor",
       type: "turtlesim/Color",
     });
 
     sub.on("message", (msg, data, pub) => {
-      // eslint-disable-next-line no-restricted-syntax
       console.log(
         `[MSG] ${JSON.stringify(msg)} (${
           data.byteLength
@@ -45,7 +49,6 @@ async function main() {
 
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // eslint-disable-next-line no-restricted-syntax
     console.dir(sub.getStats());
   } catch (err) {
     const msg = (err as Error).stack ?? `${err}`;

@@ -19,6 +19,7 @@ import {
   SubscribePayload,
   AdvertisePayload,
   PlayerPresence,
+  ParameterValue,
 } from "@foxglove-studio/app/players/types";
 
 export default class FakePlayer implements Player {
@@ -67,6 +68,9 @@ export default class FakePlayer implements Player {
   setPublishers = (pubs: AdvertisePayload[]): void => {
     this.publishers = pubs;
   };
+  setParameter(_key: string, _value: ParameterValue): void {
+    // no-op
+  }
   setSubscriptions = (subs: SubscribePayload[]): void => {
     this.subscriptions = subs;
   };

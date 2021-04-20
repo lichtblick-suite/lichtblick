@@ -22,6 +22,7 @@ import {
   AdvertisePayload,
   Frame,
   Message,
+  ParameterValue,
   Player,
   PlayerPresence,
   PlayerState,
@@ -53,6 +54,7 @@ export type MessagePipelineContext = {
   publishers: AdvertisePayload[];
   setSubscriptions: (id: string, subscriptionsForId: SubscribePayload[]) => void;
   setPublishers: (id: string, publishersForId: AdvertisePayload[]) => void;
+  setParameter: (key: string, value: ParameterValue) => void;
   publish: (request: PublishPayload) => void;
   startPlayback: () => void;
   pausePlayback: () => void;
@@ -290,6 +292,10 @@ export function MessagePipelineProvider({
     },
     [setAllPublishers],
   );
+  const setParameter = useCallback(
+    (key: string, value: ParameterValue) => (player ? player.setParameter(key, value) : undefined),
+    [player],
+  );
   const publish = useCallback(
     (request: PublishPayload) => (player ? player.publish(request) : undefined),
     [player],
@@ -343,6 +349,7 @@ export function MessagePipelineProvider({
         datatypes,
         setSubscriptions,
         setPublishers,
+        setParameter,
         publish,
         startPlayback,
         pausePlayback,

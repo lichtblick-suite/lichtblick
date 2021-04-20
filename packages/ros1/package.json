@@ -18,10 +18,15 @@
   "files": [
     "src"
   ],
-  "scripts": {},
+  "scripts": {
+    "test": "NODE_OPTIONS='-r ts-node/register' jest",
+    "test:debug": "NODE_OPTIONS='-r ts-node/register --inspect-brk' jest",
+    "test:watch": "NODE_OPTIONS='-r ts-node/register' jest --watch"
+  },
   "devDependencies": {
     "@jest/types": "26.6.2",
     "jest": "26.6.3",
+    "jest-circus": "26.6.3",
     "tslib": "2.2.0",
     "typescript": "4.2.2"
   },

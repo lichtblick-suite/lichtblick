@@ -19,6 +19,7 @@ import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
 import {
   AdvertisePayload,
   Message,
+  ParameterValue,
   PlayerPresence,
   PlayerStateActiveData,
   Progress,
@@ -49,6 +50,7 @@ export default function MockMessagePipelineProvider(props: {
   publish?: (request: PublishPayload) => void;
   setPublishers?: (arg0: string, arg1: AdvertisePayload[]) => void;
   setSubscriptions?: (arg0: string, arg1: SubscribePayload[]) => void;
+  setParameter?: (key: string, value: ParameterValue) => void;
   noActiveData?: boolean;
   activeData?: Partial<PlayerStateActiveData>;
   capabilities?: string[];
@@ -152,6 +154,7 @@ export default function MockMessagePipelineProvider(props: {
           publishers: [],
           setSubscriptions: props.setSubscriptions ?? setSubscriptions,
           setPublishers: props.setPublishers ?? noop,
+          setParameter: props.setParameter ?? noop,
           publish: props.publish ?? noop,
           startPlayback: props.startPlayback ?? noop,
           pausePlayback: props.pausePlayback ?? noop,

@@ -74,6 +74,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         pausePlayback: expect.any(Function),
         setPlaybackSpeed: expect.any(Function),
         seekPlayback: expect.any(Function),
+        setParameter: expect.any(Function),
         pauseFrame: expect.any(Function),
         requestBackfill: expect.any(Function),
       },

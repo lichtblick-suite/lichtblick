@@ -42,6 +42,7 @@ import {
   SubscribePayload,
   Topic,
   BobjectMessage,
+  ParameterValue,
 } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { UserNode, UserNodes } from "@foxglove-studio/app/types/panels";
@@ -598,6 +599,8 @@ export default class UserNodePlayer implements Player {
   };
 
   setPublishers = (publishers: AdvertisePayload[]): void => this._player.setPublishers(publishers);
+  setParameter = (key: string, value: ParameterValue): void =>
+    this._player.setParameter(key, value);
   publish = (request: PublishPayload): void => this._player.publish(request);
   startPlayback = (): void => this._player.startPlayback();
   pausePlayback = (): void => this._player.pausePlayback();

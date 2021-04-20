@@ -24,6 +24,10 @@ export class XmlRpcServer {
     return this.server.url();
   }
 
+  port(): number | undefined {
+    return this.server.port();
+  }
+
   listen(port?: number, hostname?: string, backlog?: number): Promise<void> {
     return this.server.listen(port, hostname, backlog);
   }

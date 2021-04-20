@@ -25,6 +25,7 @@ import {
   AdvertisePayload,
   BobjectMessage,
   Message,
+  ParameterValue,
   Player,
   PlayerPresence,
   PlayerState,
@@ -419,6 +420,10 @@ export default class AutomatedRunPlayer implements Player {
 
   setPublishers(_publishers: AdvertisePayload[]) {
     // no-op
+  }
+
+  setParameter(_key: string, _value: ParameterValue): void {
+    throw new Error(`Unsupported in AutomatedRunPlayer`);
   }
 
   publish(_payload: PublishPayload) {

@@ -36,6 +36,7 @@ import {
   Topic,
   ParsedMessageDefinitionsByTopic,
   PlayerPresence,
+  ParameterValue,
 } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
@@ -616,6 +617,15 @@ export default class RandomAccessPlayer implements Player {
 
   setPublishers(_publishers: AdvertisePayload[]) {
     // no-op
+  }
+
+  setParameter(key: string, _value: ParameterValue): void {
+    sendNotification(
+      "Parameter editing unsupported",
+      `Cannot set parameter "${key}" with RandomAccessPlayer, parameter editing is not supported`,
+      "app",
+      "error",
+    );
   }
 
   publish(_payload: PublishPayload) {

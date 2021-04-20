@@ -40,6 +40,14 @@ export class HttpServerNodejs implements HttpServer {
     return `http://${hostname}${addr.port != undefined ? ":" + String(addr.port) : ""}/`;
   }
 
+  port(): number | undefined {
+    const addr = this._server.address();
+    if (addr == undefined || typeof addr === "string") {
+      return undefined;
+    }
+    return addr.port;
+  }
+
   listen(port?: number, hostname?: string, backlog?: number): Promise<void> {
     return new Promise((resolve, reject) => {
       this._server.on("error", reject);

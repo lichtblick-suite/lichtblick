@@ -11,7 +11,8 @@ import { TcpAddress } from "../shared/TcpTypes";
 export class HttpServerRenderer extends EventEmitter {
   handler: HttpHandler;
 
-  private _url: string | undefined;
+  private _url?: string;
+  private _port?: number;
   private _messagePort: MessagePort;
   private _callbacks = new Map<number, (result: Cloneable[]) => void>();
   private _nextCallId = 0;
@@ -63,6 +64,10 @@ export class HttpServerRenderer extends EventEmitter {
     return this._url;
   }
 
+  port(): number | undefined {
+    return this._port;
+  }
+
   async address(): Promise<TcpAddress | undefined> {
     const res = await this._apiCall("address");
     return res[0] as TcpAddress | undefined;
@@ -75,12 +80,14 @@ export class HttpServerRenderer extends EventEmitter {
       return Promise.reject(new Error(err));
     }
 
-    // Store the URL we are listening at
+    // Store the URL and port we are listening at
     const addr = await this.address();
     if (addr == undefined || typeof addr === "string") {
       this._url = addr;
+      this._port = undefined;
     } else {
       this._url = `http://${hostname ?? addr.address}:${addr.port}/`;
+      this._port = addr.port;
     }
   }
 

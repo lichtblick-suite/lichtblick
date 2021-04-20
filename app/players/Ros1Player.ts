@@ -11,7 +11,9 @@ import {
   AdvertisePayload,
   BobjectMessage,
   Message,
+  ParameterValue,
   Player,
+  PlayerCapabilities,
   PlayerMetricsCollectorInterface,
   PlayerPresence,
   PlayerState,
@@ -39,7 +41,7 @@ import { HttpServer } from "@foxglove/xmlrpc/src";
 const log = Logger.getLogger(__filename);
 const rosLog = Logger.getLogger("ROS1");
 
-const CAPABILITIES: string[] = [];
+const CAPABILITIES = [PlayerCapabilities.getParameters, PlayerCapabilities.setParameters];
 const NO_WARNINGS = Object.freeze({});
 
 // Connects to `rosmaster` instance using `@foxglove/ros1`. Currently doesn't support seeking or
@@ -55,6 +57,7 @@ export default class Ros1Player implements Player {
   private _publishedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of publisher IDs publishing each topic.
   private _subscribedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of subscriber IDs subscribed to each topic.
   private _services = new Map<string, Set<string>>(); // A map of service names to service provider IDs that provide each service.
+  private _parameters = new Map<string, ParameterValue>(); // rosparams
   private _start?: Time; // The time at which we started playing.
   private _clockTime?: Time; // The most recent published `/clock` time, if available
   private _clockReceived: Time = { sec: 0, nsec: 0 }; // The local time when `_clockTime` was last received
@@ -68,6 +71,7 @@ export default class Ros1Player implements Player {
   private _hasReceivedMessage = false;
   private _metricsCollector: PlayerMetricsCollectorInterface;
   private _sentTopicsErrorNotification = false;
+  private _sentNodesErrorNotification = false;
 
   constructor(url: string, metricsCollector: PlayerMetricsCollectorInterface) {
     log.info(`url: ${url}`);
@@ -91,7 +95,7 @@ export default class Ros1Player implements Player {
     };
 
     if (this._rosNode == undefined) {
-      this._rosNode = new RosNode({
+      const rosNode = new RosNode({
         name: "/foxglovestudio",
         hostname: RosNode.GetRosHostname(os.getEnvVar, os.getHostname, os.getNetworkInterfaces),
         pid: os.pid,
@@ -99,6 +103,12 @@ export default class Ros1Player implements Player {
         httpServer: (httpServer as unknown) as HttpServer,
         tcpSocketCreate,
         log: rosLog,
+      });
+      this._rosNode = rosNode;
+
+      rosNode.on("paramUpdate", ({ key, value, prevValue, callerId }) => {
+        log.debug("paramUpdate", key, value, prevValue, callerId);
+        this._parameters = new Map(rosNode.parameters);
       });
     }
 
@@ -133,11 +143,26 @@ export default class Ros1Player implements Player {
       // Try subscribing again, since we might now be able to subscribe to some new topics.
       this.setSubscriptions(this._requestedSubscriptions);
 
+      // Subscribe to all parameters
+      const params = await rosNode.subscribeAllParams();
+      this._parameters = new Map();
+      params.forEach((value, key) => this._parameters.set(key, value));
+
       // Fetch the full graph topology
-      const graph = await rosNode.getSystemState();
-      this._publishedTopics = graph.publishers;
-      this._subscribedTopics = graph.subscribers;
-      this._services = graph.services;
+      try {
+        const graph = await rosNode.getSystemState();
+        this._publishedTopics = graph.publishers;
+        this._subscribedTopics = graph.subscribers;
+        this._services = graph.services;
+      } catch (error) {
+        if (!this._sentNodesErrorNotification) {
+          this._sentNodesErrorNotification = true;
+          sendNotification("Failed to fetch system state from ROS", error, "user", "warn");
+        }
+        this._publishedTopics = new Map();
+        this._subscribedTopics = new Map();
+        this._services = new Map();
+      }
 
       this._emitState();
     } catch (error) {
@@ -200,6 +225,7 @@ export default class Ros1Player implements Player {
         publishedTopics: this._publishedTopics,
         subscribedTopics: this._subscribedTopics,
         services: this._services,
+        parameters: this._parameters,
         parsedMessageDefinitionsByTopic: {},
         playerWarnings: NO_WARNINGS,
       },
@@ -316,6 +342,11 @@ export default class Ros1Player implements Player {
         "error",
       );
     }
+  }
+
+  setParameter(key: string, value: ParameterValue): void {
+    log.debug(`Ros1Player.setParameter(key=${key}, value=${value})`);
+    this._rosNode?.setParameter(key, value);
   }
 
   publish({ topic, msg }: PublishPayload): void {

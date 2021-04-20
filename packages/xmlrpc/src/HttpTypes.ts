@@ -23,6 +23,8 @@ export interface HttpServer {
 
   url(): string | undefined;
 
+  port(): number | undefined;
+
   listen(port?: number, hostname?: string, backlog?: number): Promise<void>;
 
   close(): void;

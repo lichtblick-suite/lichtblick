@@ -1,0 +1,140 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/
+//
+// This file incorporates work covered by the following copyright and
+// permission notice:
+//
+//   Copyright 2018-2021 Cruise LLC
+//
+//   This source code is licensed under the Apache License, Version 2.0,
+//   found at http://www.apache.org/licenses/LICENSE-2.0
+//   You may not use this file except in compliance with the License.
+
+import { union } from "lodash";
+import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import EmptyState from "@foxglove-studio/app/components/EmptyState";
+import { isActiveElementEditable } from "@foxglove-studio/app/components/GlobalVariablesTable";
+import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
+import Panel from "@foxglove-studio/app/components/Panel";
+import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
+import { JSONInput } from "@foxglove-studio/app/components/input/JSONInput";
+import { usePreviousValue } from "@foxglove-studio/app/hooks/usePreviousValue";
+import { ParameterValue, PlayerCapabilities } from "@foxglove-studio/app/players/types";
+
+import AnimatedRow from "./AnimatedRow";
+import ParametersPanel from "./ParametersPanel";
+import ParametersTable from "./ParametersTable";
+import Scrollable from "./Scrollable";
+import helpContent from "./index.help.md";
+
+// The minimum amount of time to wait between showing the parameter update animation again
+export const ANIMATION_RESET_DELAY_MS = 3000;
+
+function Parameters(): ReactElement {
+  const { capabilities, parameters, setParameter } = useMessagePipeline(
+    useCallback(
+      ({ setParameter: setParam, playerState: { activeData, capabilities: caps } }) =>
+        activeData
+          ? {
+              capabilities: caps,
+              parameters: activeData.parameters ?? new Map(),
+              setParameter: setParam,
+            }
+          : { capabilities: [] as string[], parameters: new Map(), setParameter: undefined },
+      [],
+    ),
+  );
+
+  const canGetParams = capabilities.includes(PlayerCapabilities.getParameters);
+  const canSetParams = capabilities.includes(PlayerCapabilities.setParameters);
+
+  const parameterNames = useMemo(() => Array.from(parameters.keys()), [parameters]);
+
+  // Don't run the animation when the Table first renders
+  const skipAnimation = useRef<boolean>(true);
+  useEffect(() => {
+    const timeoutId = setTimeout(() => (skipAnimation.current = false), ANIMATION_RESET_DELAY_MS);
+    return () => clearTimeout(timeoutId);
+  }, []);
+
+  const previousParameters = usePreviousValue(parameters);
+  const previousParametersRef = useRef<Map<string, unknown> | undefined>(previousParameters);
+  previousParametersRef.current = previousParameters;
+
+  const [changedParameters, setChangedParameters] = useState<string[]>([]);
+  useEffect(() => {
+    if (skipAnimation.current || isActiveElementEditable()) {
+      return;
+    }
+    const newChangedParameters = union(
+      Array.from(parameters.keys()),
+      Array.from(previousParametersRef.current?.keys() ?? []),
+    ).filter((name) => {
+      const previousValue = previousParametersRef.current?.get(name);
+      return previousValue !== parameters.get(name);
+    });
+
+    setChangedParameters(newChangedParameters);
+    const timerId = setTimeout(() => setChangedParameters([]), ANIMATION_RESET_DELAY_MS);
+    return () => clearTimeout(timerId);
+  }, [parameters, skipAnimation]);
+
+  if (!canGetParams) {
+    return (
+      <>
+        <PanelToolbar floating helpContent={helpContent} />
+        <EmptyState>Connect to a ROS source to view parameters</EmptyState>
+      </>
+    );
+  }
+
+  return (
+    <ParametersPanel>
+      <PanelToolbar helpContent={helpContent} floating />
+      <Scrollable>
+        <ParametersTable>
+          <table>
+            <thead>
+              <tr>
+                <th>Parameter</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              {parameterNames.map((name) => {
+                const value = JSON.stringify(parameters.get(name) ?? "");
+                return (
+                  <AnimatedRow
+                    key={`parameter-${name}`}
+                    skipAnimation={skipAnimation.current}
+                    animate={changedParameters.includes(name)}
+                  >
+                    <td>{name}</td>
+                    <td width="100%">
+                      {canSetParams ? (
+                        <JSONInput
+                          dataTest={`parameter-value-input-${value}`}
+                          value={value}
+                          onChange={(newVal) => setParameter?.(name, newVal as ParameterValue)}
+                        />
+                      ) : (
+                        value
+                      )}
+                    </td>
+                  </AnimatedRow>
+                );
+              })}
+            </tbody>
+          </table>
+        </ParametersTable>
+      </Scrollable>
+    </ParametersPanel>
+  );
+}
+
+Parameters.panelType = "Parameters";
+Parameters.defaultConfig = {};
+
+export default Panel(Parameters);

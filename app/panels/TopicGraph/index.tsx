@@ -200,7 +200,7 @@ function TopicGraph() {
     return (
       <>
         <PanelToolbar floating helpContent={helpContent} />
-        <EmptyState>Waiting for player data...</EmptyState>
+        <EmptyState>Waiting for data...</EmptyState>
       </>
     );
   }

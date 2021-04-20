@@ -84,7 +84,7 @@ function SourceInfo() {
     return (
       <>
         <PanelToolbar floating />
-        <EmptyState>Waiting for player data...</EmptyState>
+        <EmptyState>Waiting for data...</EmptyState>
       </>
     );
   }

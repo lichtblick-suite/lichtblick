@@ -20,7 +20,7 @@ export function JSONInput(props: {
   value: string;
   dataTest?: string;
   onChange: (arg0: unknown) => void;
-}) {
+}): React.ReactElement {
   const [internalValue, setInternalValue] = useState<string>(props.value);
   const lastPropsValue = useRef<string>(props.value);
   if (lastPropsValue.current !== props.value) {

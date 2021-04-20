@@ -2,18 +2,21 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { EventEmitter } from "eventemitter3";
+import { EventEmitter, ListenerFn } from "eventemitter3";
 
-import { HttpServer } from "@foxglove/xmlrpc";
+import { HttpServer, XmlRpcFault, XmlRpcValue } from "@foxglove/xmlrpc";
 
 import { LoggerService } from "./LoggerService";
 import { Publication } from "./Publication";
 import { RosFollower } from "./RosFollower";
 import { RosFollowerClient } from "./RosFollowerClient";
 import { RosMasterClient } from "./RosMasterClient";
+import { RosParamClient } from "./RosParamClient";
 import { Subscription } from "./Subscription";
 import { TcpConnection } from "./TcpConnection";
 import { TcpSocketCreate, TcpServer, TcpAddress, NetworkInterface } from "./TcpTypes";
+import { RosXmlRpcResponse, RosXmlRpcResponseOrFault } from "./XmlRpcTypes";
+import { isEmptyPlainObject } from "./objectTests";
 
 export type RosGraph = {
   publishers: Map<string, Set<string>>; // Maps topic names to arrays of nodes publishing each topic
@@ -29,15 +32,33 @@ export type SubscribeOpts = {
   tcpNoDelay?: boolean;
 };
 
+export type ParamUpdateArgs = {
+  key: string;
+  value: XmlRpcValue;
+  prevValue: XmlRpcValue;
+  callerId: string;
+};
+
+export declare interface RosNode {
+  on(event: "paramUpdate", listener: (args: ParamUpdateArgs) => void): this;
+  on(
+    event: "publisherUpdate",
+    listener: (topic: string, publishers: string[], callerId: string) => void,
+  ): this;
+  on(event: string, listener: ListenerFn): this;
+}
+
 export class RosNode extends EventEmitter {
   readonly name: string;
   readonly hostname: string;
   readonly pid: number;
 
   rosMasterClient: RosMasterClient;
+  rosParamClient: RosParamClient;
   rosFollower: RosFollower;
   subscriptions = new Map<string, Subscription>();
   publications = new Map<string, Publication>();
+  parameters = new Map<string, XmlRpcValue>();
 
   private _running = true;
   private _tcpSocketCreate: TcpSocketCreate;
@@ -61,10 +82,24 @@ export class RosNode extends EventEmitter {
     this.hostname = options.hostname;
     this.pid = options.pid;
     this.rosMasterClient = new RosMasterClient(options.rosMasterUri);
+    this.rosParamClient = new RosParamClient(options.rosMasterUri);
     this.rosFollower = new RosFollower(this, options.httpServer);
     this._tcpSocketCreate = options.tcpSocketCreate;
     this._tcpServer = options.tcpServer;
     this._log = options.log;
+
+    this.rosFollower.on("paramUpdate", (key, value, callerId) => {
+      const prevValue = this.parameters.get(key);
+      this.parameters.set(key, value);
+      this.emit("paramUpdate", { key, value, prevValue, callerId });
+    });
+    this.rosFollower.on("publisherUpdate", (topic, publishers, callerId) => {
+      this.emit("publisherUpdate", topic, publishers, callerId);
+
+      // FG-216: Subscribe/unsubscribe as necessary
+      // const sub = this.subscriptions.get(topic);
+      // if (sub != undefined) {}
+    });
   }
 
   async start(port?: number): Promise<void> {
@@ -79,6 +114,10 @@ export class RosNode extends EventEmitter {
     this._tcpServer?.close();
     this.rosFollower.close();
 
+    if (this.parameters.size > 0) {
+      this.unsubscribeAllParams();
+    }
+
     for (const subTopic of Array.from(this.subscriptions.keys())) {
       this.unsubscribe(subTopic);
     }
@@ -89,6 +128,7 @@ export class RosNode extends EventEmitter {
 
     this.subscriptions.clear();
     this.publications.clear();
+    this.parameters.clear();
   }
 
   subscribe(options: SubscribeOpts): Subscription {
@@ -130,6 +170,114 @@ export class RosNode extends EventEmitter {
     publication.close();
     this.publications.delete(topic);
     return true;
+  }
+
+  async getParamNames(): Promise<string[]> {
+    const [status, msg, names] = await this.rosParamClient.getParamNames(this.name);
+    if (status !== 1) {
+      throw new Error(`getParamNames returned failure (status=${status}): ${msg}`);
+    }
+    if (!Array.isArray(names)) {
+      throw new Error(`getParamNames returned unrecognized data (${msg})`);
+    }
+    return names as string[];
+  }
+
+  async setParameter(key: string, value: XmlRpcValue): Promise<void> {
+    const [status, msg] = await this.rosParamClient.setParam(this.name, key, value);
+    if (status !== 1) {
+      throw new Error(`setParam returned failure (status=${status}): ${msg}`);
+    }
+  }
+
+  async subscribeParam(key: string): Promise<XmlRpcValue> {
+    const callerApi = this._callerApi();
+    const [status, msg, value] = await this.rosParamClient.subscribeParam(
+      this.name,
+      callerApi,
+      key,
+    );
+    if (status !== 1) {
+      throw new Error(`subscribeParam returned failure (status=${status}): ${msg}`);
+    }
+    // rosparam server returns an empty object ({}) if the parameter has not been set yet
+    const adjustedValue = isEmptyPlainObject(value) ? undefined : value;
+    this.parameters.set(key, adjustedValue);
+
+    this._log?.debug?.(`subscribed ${callerApi} to param "${key}" (${adjustedValue})`);
+    return adjustedValue;
+  }
+
+  async unsubscribeParam(key: string): Promise<boolean> {
+    const callerApi = this._callerApi();
+    const [status, msg, value] = await this.rosParamClient.unsubscribeParam(
+      this.name,
+      callerApi,
+      key,
+    );
+    if (status !== 1) {
+      throw new Error(`unsubscribeParam returned failure (status=${status}): ${msg}`);
+    }
+    this.parameters.delete(key);
+    const didUnsubscribe = (value as number) === 1;
+
+    this._log?.debug?.(
+      `unsubscribed ${callerApi} from param "${key}" (didUnsubscribe=${didUnsubscribe})`,
+    );
+    return didUnsubscribe;
+  }
+
+  async subscribeAllParams(): Promise<Readonly<Map<string, XmlRpcValue>>> {
+    const keys = await this.getParamNames();
+    const callerApi = this._callerApi();
+    const res = await this.rosParamClient.subscribeParams(this.name, callerApi, keys);
+    if (res.length !== keys.length) {
+      throw new Error(`subscribeAllParams returned unrecognized data: ${JSON.stringify(res)}`);
+    }
+
+    // Rebuild local map of all subscribed parameters
+    this.parameters.clear();
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i] as string;
+      const entry = res[i] as RosXmlRpcResponseOrFault;
+      if (entry instanceof XmlRpcFault) {
+        this._log?.warn?.(`subscribeAllParams errored on "${key}" (${entry})`);
+        continue;
+      }
+      const [status, msg, value] = entry as RosXmlRpcResponse;
+      if (status !== 1) {
+        this._log?.warn?.(`subscribeAllParams failed for "${key}" (status=${status}): ${msg}`);
+        continue;
+      }
+      // rosparam server returns an empty object ({}) if the parameter has not been set yet
+      const adjustedValue = isEmptyPlainObject(value) ? undefined : value;
+      this.parameters.set(key, adjustedValue);
+    }
+
+    this._log?.debug?.(
+      `subscribed ${callerApi} to all parameters (${Array.from(this.parameters.keys())})`,
+    );
+    return this.parameters;
+  }
+
+  async unsubscribeAllParams(): Promise<void> {
+    const keys = Array.from(this.parameters.keys());
+    const callerApi = this._callerApi();
+    const res = await this.rosParamClient.unsubscribeParams(this.name, callerApi, keys);
+    if (res.length !== keys.length) {
+      throw new Error(`subscribeAllParams returned unrecognized data: ${JSON.stringify(res)}`);
+    }
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i] as string;
+      const [status, msg] = res[i] as RosXmlRpcResponse;
+      if (status !== 1) {
+        this._log?.warn?.(`unsubscribeAllParams failed for "${key}" (status=${status}): ${msg}`);
+        continue;
+      }
+    }
+
+    this._log?.debug?.(`unsubscribed ${callerApi} from all parameters (${keys})`);
+    this.parameters.clear();
   }
 
   async getPublishedTopics(subgraph?: string): Promise<[topic: string, dataType: string][]> {
@@ -325,7 +473,7 @@ export class RosNode extends EventEmitter {
         // TODO: Handle this requestTopic() call failing
         const { address, port } = await RosNode.RequestTopic(this.name, topic, rosFollowerClient);
         this._log?.debug?.(
-          `reigstered with ${pubUrl} as a subscriber to ${topic}, connecting to tcpros://${address}:${port}`,
+          `registered with ${pubUrl} as a subscriber to ${topic}, connecting to tcpros://${address}:${port}`,
         );
 
         if (!this._running) {

@@ -27,6 +27,7 @@ import {
   PlayerState,
   PlayerWarnings,
   Topic,
+  ParameterValue,
 } from "@foxglove-studio/app/players/types";
 import { BinaryStampedMessage } from "@foxglove-studio/app/types/BinaryMessages";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
@@ -169,6 +170,7 @@ export default class OrderedStampPlayer implements Player {
     this._player.setSubscriptions(subscriptions);
   close = () => this._player.close();
   setPublishers = (publishers: AdvertisePayload[]) => this._player.setPublishers(publishers);
+  setParameter = (key: string, value: ParameterValue) => this._player.setParameter(key, value);
   publish = (request: PublishPayload) => this._player.publish(request);
   startPlayback = () => this._player.startPlayback();
   pausePlayback = () => this._player.pausePlayback();
