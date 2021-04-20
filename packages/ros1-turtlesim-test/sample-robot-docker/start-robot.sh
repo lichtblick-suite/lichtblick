@@ -20,6 +20,7 @@ docker run \
   -it \
   --rm \
   --sysctl net.ipv4.ip_local_port_range="${MIN_PORT} ${MAX_PORT}" \
+  --hostname ${HOSTNAME} \
   -e ROS_MASTER_URI="http://${HOSTNAME}:${ROSCORE_PORT}/" \
   -e ROS_HOSTNAME="${HOSTNAME}" \
   -p ${ROSCORE_PORT}-${MAX_PORT}:${ROSCORE_PORT}-${MAX_PORT} \
