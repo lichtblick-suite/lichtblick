@@ -12,6 +12,7 @@ Visit [foxglove.dev/download](https://foxglove.dev/download) or [GitHub Releases
 
 ## Support
 
+- [Documentation](https://foxglove.dev/docs)
 - [GitHub Discussions](https://github.com/foxglove/studio/discussions)
 - [Slack Community](https://foxglove.dev/join-slack)
 - [@foxglovedev on Twitter](https://twitter.com/foxglovedev)
@@ -48,3 +49,9 @@ $ yarn lint         # lint all files
 $ yarn test         # run all tests
 $ yarn test:watch   # run tests on changed files
 ```
+
+## About
+
+Foxglove Studio began as a fork and evolution of [Webviz](https://github.com/cruise-automation/webviz), an open source project developed by [Cruise](https://getcruise.com/).
+
+To learn more about Foxglove, visit [foxglove.dev/about](https://foxglove.dev/about) or view our [documentation](https://foxglove.dev/docs) and [release notes](https://github.com/foxglove/studio/releases).
