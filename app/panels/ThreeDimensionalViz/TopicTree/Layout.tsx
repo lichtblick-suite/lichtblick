@@ -121,7 +121,7 @@ type EventName = "onDoubleClick" | "onMouseMove" | "onMouseDown" | "onMouseUp";
 export type ClickedPosition = { clientX: number; clientY: number };
 
 export type LayoutToolbarSharedProps = {
-  cameraState: Partial<CameraState>;
+  cameraState: CameraState;
   followOrientation: boolean;
   followTf?: string | false;
   onAlignXYAxis: () => void;

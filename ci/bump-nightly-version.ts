@@ -6,7 +6,7 @@
 // Any existing version string extras like "-dev" are removed.
 
 import assert from "assert";
-import { readFile, writeFile } from "fs/promises";
+import { promises as fs } from "fs";
 import path from "path";
 
 import { execOutput } from "./exec";
@@ -15,7 +15,7 @@ const PACKAGE_JSON_PATH = path.join(__dirname, "..", "package.json");
 
 export default async function main(): Promise<void> {
   // Parse package.json
-  const pkg = JSON.parse(await readFile(PACKAGE_JSON_PATH, "utf8"));
+  const pkg = JSON.parse(await fs.readFile(PACKAGE_JSON_PATH, "utf8"));
 
   // Generate new package version
   const ver = (pkg.version as string).replace(/-.*$/, "");
@@ -28,7 +28,7 @@ export default async function main(): Promise<void> {
   pkg.version = `${ver}-nightly.${date}.${sha}`;
 
   // Write package.json
-  await writeFile(PACKAGE_JSON_PATH, JSON.stringify(pkg, undefined, 2) + "\n", "utf8");
+  await fs.writeFile(PACKAGE_JSON_PATH, JSON.stringify(pkg, undefined, 2) + "\n", "utf8");
 }
 
 if (require.main === module) {

@@ -63,7 +63,20 @@ declare module "regl-worldview" {
   }
 
   type MouseEventObject = any;
-  type CameraState = any;
+  type Vec3 = readonly [number, number, number];
+  type Vec4 = readonly [number, number, number, number];
+  type CameraState = {
+    distance: number;
+    perspective: boolean;
+    phi: number;
+    target: Vec3;
+    targetOffset: Vec3;
+    targetOrientation: Vec4;
+    thetaOffset: number;
+    fovy: number;
+    near: number;
+    far: number;
+  };
   type CameraStateSelectors = any;
   type Scale = any;
   type Pose = any;
@@ -74,9 +87,23 @@ declare module "regl-worldview" {
   type MouseHandler = any;
 
   // vars
-  const DEFAULT_CAMERA_STATE: any;
+  const DEFAULT_CAMERA_STATE: CameraState;
   const defaultBlend: any;
   const cameraStateSelectors: CameraStateSelectors;
+
+  type CameraKeyMap = any;
+  class CameraStore {
+    constructor(handler: (state: CameraState) => void, initialCameraState: Partial<CameraState>);
+    setCameraState(state: Partial<CameraState>): void;
+  }
+
+  const CameraListener: React.ComponentClass<
+    React.PropsWithChildren<{
+      cameraStore: CameraStore;
+      keyMap?: CameraKeyMap;
+      shiftKeys: boolean;
+    }>
+  >;
 
   export {
     DEFAULT_CAMERA_STATE,
@@ -100,6 +127,8 @@ declare module "regl-worldview" {
     cameraStateSelectors,
     CameraStateSelectors,
     CameraState,
+    CameraStore,
+    CameraListener,
     MouseEventObject,
     GLTFScene,
     vec4ToRGBA,

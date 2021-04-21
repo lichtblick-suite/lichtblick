@@ -57,10 +57,13 @@
     "@types/electron-devtools-installer": "2.2.0",
     "@types/license-checker": "^25.0.1",
     "@types/nearley": "2.11.1",
+    "@types/pngjs": "^6",
     "@types/rimraf": "^3.0.0",
     "@types/sass": "^1.16.0",
     "@types/semver": "^7",
+    "@types/utif": "^3",
     "@types/webpack-dev-server": "3.11.3",
+    "@types/xmldom": "^0",
     "@typescript-eslint/eslint-plugin": "4.21.0",
     "@typescript-eslint/parser": "4.21.0",
     "amplitude-js": "8.1.0",
@@ -99,6 +102,7 @@
     "nearley-loader": "2.0.0",
     "node-machine-id": "1.1.12",
     "path-browserify": "1.0.1",
+    "pngjs": "6.0.0",
     "prettier": "2.2.1",
     "react-svg-loader": "3.0.3",
     "readable-stream": "3.6.0",
@@ -116,9 +120,11 @@
     "typescript-plugin-css-modules": "3.2.0",
     "typescript-plugin-styled-components": "1.5.0",
     "universal-url": "2.0.0",
+    "utif": "3.1.0",
     "webpack": "5.33.2",
     "webpack-cli": "4.6.0",
     "webpack-dev-server": "3.11.2",
-    "webpack-hot-middleware": "2.25.0"
+    "webpack-hot-middleware": "2.25.0",
+    "xmldom": "0.6.0"
   }
 }

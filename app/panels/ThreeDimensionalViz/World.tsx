@@ -171,7 +171,7 @@ function World(
           layerIndex: LAYER_INDEX_DEFAULT_BASE,
           clearCachedMarkers: false,
           isDemoMode,
-          cameraDistance: cameraState.distance || DEFAULT_CAMERA_STATE.distance,
+          cameraDistance: cameraState.distance ?? DEFAULT_CAMERA_STATE.distance,
           diffModeEnabled,
         }}
       />

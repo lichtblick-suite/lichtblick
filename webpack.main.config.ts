@@ -28,7 +28,7 @@ export default (_: unknown, argv: WebpackArgv): Configuration => {
   // When making static builds (for packaging), the renderer entry is a file on disk.
   // This switches between the two and is injected below via DefinePlugin as MAIN_WINDOW_WEBPACK_ENTRY
   const rendererEntry = isServe
-    ? "'http://localhost:8080/renderer/index.html'"
+    ? `"http://${argv.host ?? "localhost"}:8080/renderer/index.html"`
     : "`file://${require('path').join(__dirname, '..', 'renderer', 'index.html')}`";
 
   return {

@@ -22,8 +22,6 @@ import {
   addUserNodeLogs,
   setUserNodeRosLib,
 } from "@foxglove-studio/app/actions/userNodes";
-import DocumentDropListener from "@foxglove-studio/app/components/DocumentDropListener";
-import DropOverlay from "@foxglove-studio/app/components/DropOverlay";
 import {
   MaybePlayer,
   MessagePipelineProvider,
@@ -40,7 +38,6 @@ import {
   getLocalBagDescriptor,
   getRemoteBagDescriptor,
 } from "@foxglove-studio/app/dataProviders/standardDataProviderDescriptors";
-import useElectronFilesToOpen from "@foxglove-studio/app/hooks/useElectronFilesToOpen";
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { usePrompt } from "@foxglove-studio/app/hooks/usePrompt";
 import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
@@ -378,24 +375,6 @@ function PlayerManager({
     maybePlayer.player?.setUserNodes(userNodes);
   }, [userNodes, maybePlayer]);
 
-  const dropHandler = useCallback(
-    ({ files, shiftPressed }: { files: FileList | File[]; shiftPressed: boolean }) => {
-      if (files.length === 0) {
-        return;
-      }
-
-      if (shiftPressed) {
-        usedFiles.current = [...usedFiles.current, ...files];
-      } else {
-        usedFiles.current = [...files];
-      }
-      setPlayer(async (options: BuildPlayerOptions) =>
-        buildPlayerFromFiles(usedFiles.current, options),
-      );
-    },
-    [setPlayer],
-  );
-
   const [selectedSource, setSelectedSource] = useLocalStorage<PlayerSourceDefinition>(
     "studio.playermanager.selected-source",
   );
@@ -500,22 +479,25 @@ function PlayerManager({
     storage,
   ]);
 
-  // files the main thread told us to open
-  const filesToOpen = useElectronFilesToOpen();
-  useEffect(() => {
-    const file = filesToOpen?.[0];
-    if (!file) {
-      return;
-    }
-
-    usedFiles.current = [file];
-    setPlayer(async (options: BuildPlayerOptions) =>
-      buildPlayerFromFiles(usedFiles.current, options),
-    );
-  }, [setPlayer, filesToOpen]);
-
   const value: PlayerSelection = {
     selectSource: setSelectedSource,
+    setPlayerFromFiles: useCallback(
+      (files: File[], { append = false }: { append?: boolean } = {}) => {
+        if (files.length === 0) {
+          return;
+        }
+
+        if (append) {
+          usedFiles.current = [...usedFiles.current, ...files];
+        } else {
+          usedFiles.current = [...files];
+        }
+        setPlayer(async (options: BuildPlayerOptions) =>
+          buildPlayerFromFiles(usedFiles.current, options),
+        );
+      },
+      [setPlayer],
+    ),
     // Expose a simple way to load a demo bag for first launch onboarding.
     // In the future we may want to replace this limited API with something more cohesive
     // that exposes the different buildPlayerFromX methods above. At the same time,
@@ -531,16 +513,6 @@ function PlayerManager({
 
   return (
     <>
-      <DocumentDropListener filesSelected={dropHandler}>
-        <DropOverlay>
-          <div style={{ fontSize: "4em", marginBottom: "1em" }}>Drop a bag file to load it!</div>
-          <div style={{ fontSize: "2em" }}>
-            (hold SHIFT while dropping a second bag file to add it
-            <br />
-            with all topics prefixed with {SECOND_SOURCE_PREFIX})
-          </div>
-        </DropOverlay>
-      </DocumentDropListener>
       <PlayerSelectionContext.Provider value={value}>
         <MessagePipelineProvider maybePlayer={maybePlayer} globalVariables={globalVariables}>
           {children}

@@ -23,6 +23,8 @@ import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import { redoLayoutChange, undoLayoutChange } from "@foxglove-studio/app/actions/layoutHistory";
 import { importPanelLayout, loadLayout } from "@foxglove-studio/app/actions/panels";
 import AddPanelMenu from "@foxglove-studio/app/components/AddPanelMenu";
+import DocumentDropListener from "@foxglove-studio/app/components/DocumentDropListener";
+import DropOverlay from "@foxglove-studio/app/components/DropOverlay";
 import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";
 import GlobalKeyListener from "@foxglove-studio/app/components/GlobalKeyListener";
 import GlobalVariablesMenu from "@foxglove-studio/app/components/GlobalVariablesMenu";
@@ -35,6 +37,7 @@ import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipel
 import { NativeFileMenuPlayerSelection } from "@foxglove-studio/app/components/NativeFileMenuPlayerSelection";
 import NotificationDisplay from "@foxglove-studio/app/components/NotificationDisplay";
 import PanelLayout from "@foxglove-studio/app/components/PanelLayout";
+import ParamAssetAdapter from "@foxglove-studio/app/components/ParamAssetAdapter";
 import PlaybackControls from "@foxglove-studio/app/components/PlaybackControls";
 import PlayerManager from "@foxglove-studio/app/components/PlayerManager";
 import Preferences from "@foxglove-studio/app/components/Preferences";
@@ -45,6 +48,7 @@ import TinyConnectionPicker from "@foxglove-studio/app/components/TinyConnection
 import Toolbar from "@foxglove-studio/app/components/Toolbar";
 import AnalyticsProvider from "@foxglove-studio/app/context/AnalyticsProvider";
 import { useAppConfiguration } from "@foxglove-studio/app/context/AppConfigurationContext";
+import { AssetsProvider, useAssets } from "@foxglove-studio/app/context/AssetContext";
 import BuiltinPanelCatalogProvider from "@foxglove-studio/app/context/BuiltinPanelCatalogProvider";
 import ExperimentalFeaturesLocalStorageProvider from "@foxglove-studio/app/context/ExperimentalFeaturesLocalStorageProvider";
 import LinkHandlerContext from "@foxglove-studio/app/context/LinkHandlerContext";
@@ -57,11 +61,14 @@ import {
 } from "@foxglove-studio/app/context/PlayerSelectionContext";
 import WindowGeometryContext from "@foxglove-studio/app/context/WindowGeometryContext";
 import experimentalFeatures from "@foxglove-studio/app/experimentalFeatures";
+import useElectronFilesToOpen from "@foxglove-studio/app/hooks/useElectronFilesToOpen";
 import welcomeLayout from "@foxglove-studio/app/layouts/welcomeLayout";
 import { PlayerPresence } from "@foxglove-studio/app/players/types";
+import URDFAssetLoader from "@foxglove-studio/app/services/URDFAssetLoader";
 import getGlobalStore from "@foxglove-studio/app/store/getGlobalStore";
 import ThemeProvider from "@foxglove-studio/app/theme/ThemeProvider";
 import { ImportPanelLayoutPayload } from "@foxglove-studio/app/types/panels";
+import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import inAutomatedRunMode from "@foxglove-studio/app/util/inAutomatedRunMode";
 
 type TestableWindow = Window & { setPanelLayout?: (payload: ImportPanelLayoutPayload) => void };
@@ -87,7 +94,7 @@ const TruncatedText = styled.span`
 function Root() {
   const containerRef = useRef<HTMLDivElement>(ReactNull);
   const dispatch = useDispatch();
-  const { currentSourceName, setPlayerFromDemoBag } = usePlayerSelection();
+  const { currentSourceName, setPlayerFromFiles, setPlayerFromDemoBag } = usePlayerSelection();
   const playerPresence = useMessagePipeline(
     useCallback(({ playerState }) => playerState.presence, []),
   );
@@ -164,6 +171,39 @@ function Root() {
     })();
   }, [appConfiguration, openWelcomeLayout]);
 
+  const { loadFromFile } = useAssets();
+
+  const openFiles = useCallback(
+    async (files: FileList, { shiftPressed }: { shiftPressed: boolean }) => {
+      const otherFiles: File[] = [];
+      for (const file of files) {
+        if (!(await loadFromFile(file, file.path))) {
+          otherFiles.push(file);
+        }
+      }
+
+      if (otherFiles.length > 0) {
+        setPlayerFromFiles(otherFiles, { append: shiftPressed });
+      }
+    },
+    [loadFromFile, setPlayerFromFiles],
+  );
+
+  // files the main thread told us to open
+  const filesToOpen = useElectronFilesToOpen();
+  useEffect(() => {
+    if (filesToOpen) {
+      openFiles(filesToOpen, { shiftPressed: false });
+    }
+  }, [filesToOpen, openFiles]);
+
+  const dropHandler = useCallback(
+    ({ files, shiftPressed }: { files: FileList; shiftPressed: boolean }) => {
+      openFiles(files, { shiftPressed });
+    },
+    [openFiles],
+  );
+
   const presenceIcon = (() => {
     switch (playerPresence) {
       case PlayerPresence.NOT_PRESENT:
@@ -191,6 +231,16 @@ function Root() {
 
   return (
     <LinkHandlerContext.Provider value={handleInternalLink}>
+      <DocumentDropListener filesSelected={dropHandler}>
+        <DropOverlay>
+          <div style={{ fontSize: "4em", marginBottom: "1em" }}>Drop a bag file to load it!</div>
+          <div style={{ fontSize: "2em" }}>
+            (hold SHIFT while dropping a second bag file to add it
+            <br />
+            with all topics prefixed with {SECOND_SOURCE_PREFIX})
+          </div>
+        </DropOverlay>
+      </DocumentDropListener>
       <div ref={containerRef} className="app-container" tabIndex={0}>
         <GlobalKeyListener />
         {shortcutsModalOpen && (
@@ -283,16 +333,20 @@ export default function App(): ReactElement {
   const insetToolbar = OsContextSingleton?.platform === "darwin" && !isFullScreen;
   const windowGeometry = useMemo(() => ({ insetToolbar }), [insetToolbar]);
 
+  const [assetLoaders] = useState(() => [new URDFAssetLoader()]);
+
   const providers = [
     /* eslint-disable react/jsx-key */
     <OsContextAppConfigurationProvider />,
     <OsContextLayoutStorageProvider />,
+    <ThemeProvider />,
+    <ModalHost />, // render modal elements inside the ThemeProvider
     <WindowGeometryContext.Provider value={windowGeometry} />,
     <Provider store={globalStore} />,
     <AnalyticsProvider />,
     <ExperimentalFeaturesLocalStorageProvider features={experimentalFeatures} />,
-    <ThemeProvider />,
-    <ModalHost />, // render modal elements inside the ThemeProvider
+    <PlayerManager playerSources={playerSources} />,
+    <AssetsProvider loaders={assetLoaders} />,
     /* eslint-enable react/jsx-key */
   ];
   function AllProviders({ children }: { children: React.ReactElement }) {
@@ -306,14 +360,13 @@ export default function App(): ReactElement {
     <AllProviders>
       <ErrorBoundary>
         <LayoutStorageReduxAdapter />
-        <PlayerManager playerSources={playerSources}>
-          <NativeFileMenuPlayerSelection />
-          <DndProvider backend={HTML5Backend}>
-            <BuiltinPanelCatalogProvider>
-              <Root />
-            </BuiltinPanelCatalogProvider>
-          </DndProvider>
-        </PlayerManager>
+        <ParamAssetAdapter />
+        <NativeFileMenuPlayerSelection />
+        <DndProvider backend={HTML5Backend}>
+          <BuiltinPanelCatalogProvider>
+            <Root />
+          </BuiltinPanelCatalogProvider>
+        </DndProvider>
       </ErrorBoundary>
     </AllProviders>
   );

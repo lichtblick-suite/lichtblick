@@ -156,9 +156,7 @@ export class TcpConnection extends EventEmitter implements Connection {
 
   static SerializeHeader(header: Map<string, string>): Uint8Array {
     const encoder = new TextEncoder();
-    const encoded = Array.from(header).map(([key, value]) =>
-      encoder.encode(`${key}=${value}`),
-    ) as Uint8Array[];
+    const encoded = Array.from(header).map(([key, value]) => encoder.encode(`${key}=${value}`));
     const payloadLen = encoded.reduce((sum, str) => sum + str.length + 4, 0);
     const buffer = new ArrayBuffer(payloadLen);
     const array = new Uint8Array(buffer);
@@ -184,7 +182,7 @@ export class TcpConnection extends EventEmitter implements Connection {
     while (idx + 4 < data.length) {
       const len = Math.min(view.getUint32(idx, true), data.length - idx - 4);
       idx += 4;
-      const str = decoder.decode(new Uint8Array(data.buffer, data.byteOffset + idx, len)) as string;
+      const str = decoder.decode(new Uint8Array(data.buffer, data.byteOffset + idx, len));
       let equalIdx = str.indexOf("=");
       if (equalIdx < 0) {
         equalIdx = str.length;

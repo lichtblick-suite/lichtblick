@@ -45,6 +45,7 @@ export function Default(): React.ReactElement {
 
   const value: PlayerSelection = {
     selectSource: () => {},
+    setPlayerFromFiles: () => {},
     setPlayerFromDemoBag: async () => {},
     availableSources: playerSources,
   };

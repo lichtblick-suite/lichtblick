@@ -125,6 +125,7 @@
     "@types/shallowequal": "1.1.1",
     "@types/string-hash": "1.1.1",
     "@types/styled-components": "5.1.9",
+    "@types/three": "^0",
     "@types/tinycolor2": "1.4.2",
     "@types/url-search-params": "1.1.0",
     "@types/uuid": "8.3.0",
@@ -136,6 +137,9 @@
     "enzyme": "3.11.0",
     "fetch-mock": "9.11.0",
     "http-server": "0.12.3",
-    "url-search-params": "1.1.0"
+    "three": "0.127.0",
+    "urdf-loader": "0.10.1",
+    "url-search-params": "1.1.0",
+    "xacro-parser": "0.2.3"
   }
 }

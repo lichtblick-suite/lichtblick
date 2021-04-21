@@ -36,11 +36,12 @@ export type TargetPose = { target: Vec3; targetOrientation: Vec4 };
 
 const ZOOM_LEVEL_URL_PARAM = "zoom";
 
-function getZoomDistanceFromURLParam(): number | void {
+function getZoomDistanceFromURLParam(): number | undefined {
   const params = new URLSearchParams(location?.search);
   if (params.has(ZOOM_LEVEL_URL_PARAM)) {
     return parseFloat(params.get(ZOOM_LEVEL_URL_PARAM) as string);
   }
+  return undefined;
 }
 
 // Get the camera target position and orientation
@@ -74,7 +75,7 @@ export function useTransformedCameraState({
   followOrientation?: boolean;
   transforms: Transforms;
 }): { transformedCameraState: CameraState; targetPose?: TargetPose } {
-  let transformedCameraState = { ...configCameraState };
+  const transformedCameraState = { ...configCameraState };
   const targetPose = getTargetPose(followTf, transforms);
   // Store last seen target pose because the target may become available/unavailable over time as
   // the player changes, and we want to avoid moving the camera when it disappears.
@@ -100,13 +101,13 @@ export function useTransformedCameraState({
     transformedCameraState.distance = getZoomDistanceFromURLParam();
   }
 
-  transformedCameraState = mergeWith(
+  const mergedCameraState = mergeWith(
     transformedCameraState,
     DEFAULT_CAMERA_STATE,
     (objVal, srcVal) => objVal ?? srcVal,
   );
 
-  return { transformedCameraState, targetPose: targetPose || lastTargetPose };
+  return { transformedCameraState: mergedCameraState, targetPose: targetPose || lastTargetPose };
 }
 
 export const getInstanceObj = (marker: any, idx: number): any => {
@@ -165,7 +166,11 @@ function getEquivalentOffsetsWithoutTarget(
         targetOrientation: targetPose.targetOrientation,
       }) as number)
     : 0;
-  const targetOffset = vec3.rotateZ([0, 0, 0], offsets.targetOffset, [0, 0, 0], -heading);
+  const targetOffset = vec3.rotateZ([0, 0, 0], offsets.targetOffset, [0, 0, 0], -heading) as [
+    number,
+    number,
+    number,
+  ];
   vec3.add(targetOffset, targetOffset, targetPose.target);
   const thetaOffset = offsets.thetaOffset + heading;
   return { targetOffset, thetaOffset };
@@ -179,13 +184,13 @@ export function getNewCameraStateOnFollowChange({
   newFollowTf,
   newFollowOrientation,
 }: {
-  prevCameraState: CameraState;
+  prevCameraState: Partial<CameraState>;
   prevTargetPose?: TargetPose;
   prevFollowTf?: string | false;
   prevFollowOrientation?: boolean;
   newFollowTf?: string | false;
   newFollowOrientation?: boolean;
-}): CameraState {
+}): Partial<CameraState> {
   const newCameraState = { ...prevCameraState };
   if (newFollowTf) {
     // When switching to follow orientation, adjust thetaOffset to preserve camera rotation.
@@ -198,8 +203,9 @@ export function getNewCameraStateOnFollowChange({
         newCameraState.targetOffset || DEFAULT_CAMERA_STATE.targetOffset,
         [0, 0, 0],
         heading,
-      );
-      newCameraState.thetaOffset -= heading;
+      ) as Vec3;
+      newCameraState.thetaOffset =
+        (newCameraState.thetaOffset ?? DEFAULT_CAMERA_STATE.thetaOffset) - heading;
     }
     // When following a frame for the first time, snap to the origin.
     if (!prevFollowTf) {

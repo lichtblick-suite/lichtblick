@@ -2,6 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+// Make Electron type definitions available globally, such as extensions to File and other built-ins
+/// <reference types="electron" />
+
 import { init as initSentry } from "@sentry/electron";
 import ReactDOM from "react-dom";
 

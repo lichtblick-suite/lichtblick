@@ -24,3 +24,5 @@ export type { RequestedTopic } from "./useMessageReducer";
 
 export { useMessagesByTopic } from "./useMessagesByTopic";
 export { useBlocksByTopic } from "./useBlocksByTopic";
+
+export { default as useParameter } from "./useParameter";

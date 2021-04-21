@@ -14,7 +14,7 @@
 import CameraControlIcon from "@mdi/svg/svg/camera-control.svg";
 import { vec3 } from "gl-matrix";
 import { isEqual } from "lodash";
-import { CameraState, cameraStateSelectors } from "regl-worldview";
+import { CameraState, cameraStateSelectors, Vec3 } from "regl-worldview";
 import styled from "styled-components";
 
 import Button from "@foxglove-studio/app/components/Button";
@@ -70,25 +70,25 @@ export type CameraInfoPropsWithoutCameraState = {
 };
 
 type CameraInfoProps = {
-  cameraState: Partial<CameraState>;
+  cameraState: CameraState;
   targetPose?: TargetPose;
 } & CameraInfoPropsWithoutCameraState;
 
 function CameraStateInfo({ cameraState, onAlignXYAxis }: CameraStateInfoProps) {
   return (
     <>
-      {Object.keys(cameraState)
+      {(Object.keys(cameraState) as (keyof CameraState)[])
         .sort()
         .map((key) => {
-          let val = cameraState[key];
+          let val: unknown = cameraState[key];
           if (key === "perspective") {
-            val = cameraState[key] ? "true" : "false";
-          } else if (Array.isArray(cameraState[key])) {
-            val = cameraState[key].map((x: any) => x.toFixed(1)).join(", ");
-          } else if (typeof cameraState[key] === "number") {
-            val = cameraState[key].toFixed(2);
+            val = val ? "true" : "false";
+          } else if (Array.isArray(val)) {
+            val = val.map((x: any) => x.toFixed(1)).join(", ");
+          } else if (typeof val === "number") {
+            val = val.toFixed(2);
           }
-          return [key, val];
+          return [key, val as string];
         })
         .map(([key, val]) => (
           <SRow key={key}>
@@ -246,7 +246,7 @@ export default function CameraInfo({
                             vec3.sub(TEMP_VEC3 as any, newPos as any, cameraState.target),
                             ZERO_VEC3 as any,
                             cameraStateSelectors.targetHeading(cameraState),
-                          );
+                          ) as Vec3;
                           if (!isEqual(cameraState.targetOffset, newTargetOffset)) {
                             onCameraStateChange({ ...cameraState, targetOffset: newTargetOffset });
                           }

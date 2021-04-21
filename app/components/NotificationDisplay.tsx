@@ -174,7 +174,7 @@ const ModalBody = styled.div`
   padding: 32px;
   max-width: 600px;
   min-width: 300px;
-  max-height: 600px;
+  max-height: 80vh;
   overflow: auto;
 `;
 

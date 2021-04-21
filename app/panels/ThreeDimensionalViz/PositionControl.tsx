@@ -94,7 +94,7 @@ export default class PositionControl extends Component<Props> {
         vec3.sub(TEMP_VEC3, newPos, target),
         ZERO_VEC3,
         targetHeading,
-      );
+      ) as Vec3;
       if (!isEqual(targetOffset, newTargetOffset)) {
         this.props.onCameraStateChange({ ...cameraState, targetOffset: newTargetOffset });
         return;

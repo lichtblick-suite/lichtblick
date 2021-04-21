@@ -32,7 +32,7 @@ export default function Crosshair({ cameraState }: Props) {
   // orient and size the crosshair so it remains visually fixed in the center
   const length = 0.02 * distance;
   const orientation: quat = [0, 0, 0, 1];
-  const theta = targetHeading + (thetaOffset as number);
+  const theta = targetHeading + thetaOffset;
 
   quat.rotateZ(orientation, orientation, -theta);
 

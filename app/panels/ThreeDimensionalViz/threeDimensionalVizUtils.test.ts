@@ -11,9 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { CameraState } from "regl-worldview";
+
 import {
   getNewCameraStateOnFollowChange,
   getUpdatedGlobalVariablesBySelectedObject,
+  TargetPose,
 } from "./threeDimensionalVizUtils";
 
 describe("threeDimensionalVizUtils", () => {
@@ -21,7 +24,7 @@ describe("threeDimensionalVizUtils", () => {
     it("converts the camera state to use targetOffset instead of target when no longer following", () => {
       const prevFollowTf = "root";
       const prevFollowOrientation = undefined;
-      const prevTargetPose = {
+      const prevTargetPose: TargetPose = {
         target: [1322.127197265625, -1484.3931884765625, -20.19326400756836],
         targetOrientation: [
           -0.004656290448945672,
@@ -30,7 +33,7 @@ describe("threeDimensionalVizUtils", () => {
           0.9989893841257927,
         ],
       };
-      const prevCameraState = {
+      const prevCameraState: CameraState = {
         perspective: false,
         target: [1322.127197265625, -1484.3931884765625, -20.19326400756836],
         distance: 75,
@@ -38,6 +41,9 @@ describe("threeDimensionalVizUtils", () => {
         targetOffset: [0, 0, 0],
         targetOrientation: [0, 0, 0, 1],
         thetaOffset: 0,
+        fovy: 1,
+        near: 0,
+        far: 1,
       };
 
       const newCameraState = getNewCameraStateOnFollowChange({

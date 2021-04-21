@@ -28,6 +28,7 @@ import Tab from "@foxglove-studio/app/panels/Tab";
 import Table from "@foxglove-studio/app/panels/Table";
 import ThreeDimensionalViz from "@foxglove-studio/app/panels/ThreeDimensionalViz";
 import TopicGraph from "@foxglove-studio/app/panels/TopicGraph";
+import URDFViewer from "@foxglove-studio/app/panels/URDFViewer";
 import WelcomePanel from "@foxglove-studio/app/panels/WelcomePanel";
 import DiagnosticStatusPanel from "@foxglove-studio/app/panels/diagnostics/DiagnosticStatusPanel";
 import DiagnosticSummary from "@foxglove-studio/app/panels/diagnostics/DiagnosticSummary";
@@ -46,6 +47,7 @@ const ros: PanelInfo[] = [
   { title: "rosout", component: Rosout },
   { title: "State Transitions", component: StateTransitions },
   { title: "Table", component: Table },
+  { title: "URDF Viewer", component: URDFViewer },
   { title: "Topic Graph", component: TopicGraph },
 ];
 

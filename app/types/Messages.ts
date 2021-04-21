@@ -432,3 +432,11 @@ export type MapMetaData = Readonly<{
   height: number;
   origin: Pose;
 }>;
+
+export type JointState = Readonly<{
+  header: Header;
+  name: string[];
+  position: number[];
+  velocity: number[];
+  effort: number[];
+}>;

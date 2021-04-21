@@ -21,6 +21,10 @@ import Logger from "@foxglove/log";
 
 import StudioWindow from "./StudioWindow";
 import { installMenuInterface } from "./menu";
+import {
+  registerRosPackageProtocolHandlers,
+  registerRosPackageProtocolSchemes,
+} from "./rosPackageResources";
 import { getTelemetrySettings } from "./telemetry";
 
 const log = Logger.getLogger(__filename);
@@ -95,11 +99,16 @@ ipcMain.handle("getUserDataPath", () => {
   return app.getPath("userData");
 });
 
+// Must be called before app.ready event
+registerRosPackageProtocolSchemes();
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", async () => {
   nativeTheme.themeSource = "dark";
+
+  registerRosPackageProtocolHandlers();
 
   // Only stable builds check for automatic updates
   if (process.env.NODE_ENV !== "production") {
@@ -166,9 +175,9 @@ app.on("ready", async () => {
     "script-src": `'self' 'unsafe-inline' 'unsafe-eval'`,
     "worker-src": `'self' blob:`,
     "style-src": "'self' 'unsafe-inline'",
-    "connect-src": "'self' ws: wss: http: https:", // Required for rosbridge connections
+    "connect-src": "'self' ws: wss: http: https: x-foxglove-ros-package:",
     "font-src": "'self' data:",
-    "img-src": "'self' data: https:",
+    "img-src": "'self' data: https: x-foxglove-ros-package-converted-tiff:",
   };
 
   const ignoredDomainSuffixes = ["api.amplitude.com", "ingest.sentry.io"];

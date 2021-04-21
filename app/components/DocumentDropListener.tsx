@@ -13,11 +13,7 @@
 
 type Props = {
   children: React.ReactNode; // Shown when dragging in a file.
-  filesSelected: (arg0: {
-    files: FileList | File[];
-    shiftPressed: boolean;
-    onConfirmLocalFilesModalClose?: () => void;
-  }) => any;
+  filesSelected: (arg0: { files: FileList; shiftPressed: boolean }) => any;
 };
 
 type State = {

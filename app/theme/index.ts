@@ -10,6 +10,7 @@ import {
   IComboBoxStyles,
   ITooltipStyles,
   ITooltipStyleProps,
+  IToggleStyles,
 } from "@fluentui/react";
 import { createTheme } from "@fluentui/theme";
 
@@ -92,6 +93,13 @@ export default createTheme({
           color: "",
         },
       } as ILayerStyles,
+    },
+    Toggle: {
+      styles: {
+        container: {
+          alignItems: "baseline",
+        },
+      } as IToggleStyles,
     },
   },
   isInverted: true,

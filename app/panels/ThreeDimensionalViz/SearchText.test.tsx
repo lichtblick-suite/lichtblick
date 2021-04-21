@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import { renderHook, act } from "@testing-library/react-hooks";
 import { mount } from "enzyme";
-import { CameraState } from "regl-worldview";
+import { CameraState, DEFAULT_CAMERA_STATE } from "regl-worldview";
 
 import { Interactive } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
 import {
@@ -198,14 +198,15 @@ describe("<SearchText />", () => {
       return tf;
     };
 
-    const baseCameraState = {
+    const baseCameraState: CameraState = {
+      ...DEFAULT_CAMERA_STATE,
       target: [0, 0, 0],
       targetOffset: [0, 0, 0],
       targetOrientation: [0, 0, 0, 1],
     };
 
     const useWrapper = (
-      initialCameraState: CameraState = baseCameraState,
+      initialCameraState = baseCameraState,
       initialMatch: GLTextMarker = createMarker("text"),
     ) => {
       const transforms = getTf();
@@ -233,7 +234,7 @@ describe("<SearchText />", () => {
       });
     });
     it("should take into account target heading in target offset", () => {
-      const initialCameraState = {
+      const initialCameraState: CameraState = {
         ...baseCameraState,
         targetOrientation: [0.0, 0.0, -0.8, 0.6],
       };
@@ -277,6 +278,7 @@ describe("<SearchText />", () => {
       expect(result.current.onCameraStateChange).toHaveBeenCalledTimes(1);
       act(() => {
         result.current.onCameraStateChange({
+          ...DEFAULT_CAMERA_STATE,
           targetOffset: [5, 5, 5],
         });
       });
