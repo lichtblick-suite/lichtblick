@@ -19,7 +19,15 @@ import GridLargeIcon from "@mdi/svg/svg/grid-large.svg";
 import TrashCanOutlineIcon from "@mdi/svg/svg/trash-can-outline.svg";
 import cx from "classnames";
 import { last, without, xor } from "lodash";
-import React, { useState, useCallback, useContext, useMemo, useRef, ComponentType } from "react";
+import React, {
+  useState,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  ComponentType,
+  Profiler,
+} from "react";
 import DocumentEvents from "react-document-events";
 import {
   MosaicContext,
@@ -31,8 +39,9 @@ import {
   isParent,
   updateTree,
 } from "react-mosaic-component";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector, useDispatch, useStore } from "react-redux";
 import { bindActionCreators } from "redux";
+import styled from "styled-components";
 
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import {
@@ -57,6 +66,7 @@ import MosaicDragHandle from "@foxglove-studio/app/components/PanelToolbar/Mosai
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import { usePanelCatalog } from "@foxglove-studio/app/context/PanelCatalogContext";
 import { Topic } from "@foxglove-studio/app/players/types";
+import { State } from "@foxglove-studio/app/reducers";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { TabPanelConfig } from "@foxglove-studio/app/types/layouts";
 import {
@@ -81,6 +91,16 @@ import logEvent, { getEventTags, getEventNames } from "@foxglove-studio/app/util
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 import styles from "./Panel.module.scss";
+
+const PerfInfo = styled.div`
+  position: absolute;
+  white-space: pre-line;
+  bottom: 2px;
+  left: 2px;
+  font-size: 9px;
+  opacity: 0.5;
+  user-select: none;
+`;
 
 type Props<Config> = {
   childId?: string;
@@ -137,16 +157,35 @@ export default function Panel<Config extends PanelConfig>(
       MosaicWindowContext,
     );
 
-    const layout = useSelector((state: any) => state.persistedState.panels.layout);
-    const savedProps = useSelector((state: any) => state.persistedState.panels.savedProps);
-    const stableSavedProps = useRef(savedProps);
-    stableSavedProps.current = savedProps;
-    const selectedPanelIds = useSelector((state: any) => state.mosaic.selectedPanelIds);
-    const isSelected = selectedPanelIds.includes(childId);
-    const isFocused = selectedPanelIds.length === 1 && selectedPanelIds[0] === childId; // the current panel is the only selected panel
+    // Used by actions that need to operate on the current state without causing the panel to
+    // re-render by subscribing to various unnecessary parts of the state.
+    const store = useStore<State>();
 
-    const isOnlyPanel = useMemo(() => (tabId ? false : !isParent(layout)), [layout, tabId]);
-    const config = savedProps[childId as any] || originalConfig || EMPTY_CONFIG;
+    const isSelected = useSelector(
+      (state: State) => childId != undefined && state.mosaic.selectedPanelIds.includes(childId),
+    );
+    const numSelectedPanelsIfSelected = useSelector((state: State) =>
+      isSelected ? state.mosaic.selectedPanelIds.length : 0,
+    );
+    const isFocused = useSelector(
+      // the current panel is the only selected panel
+      (state: State) =>
+        childId != undefined &&
+        state.mosaic.selectedPanelIds.length === 1 &&
+        state.mosaic.selectedPanelIds[0] === childId,
+    );
+
+    const isOnlyPanel = useSelector((state: State) =>
+      tabId != undefined || !state.persistedState.panels.layout
+        ? false
+        : !isParent(state.persistedState.panels.layout),
+    );
+    const config = useSelector(
+      (state: State) =>
+        (childId == undefined ? undefined : state.persistedState.panels.savedProps[childId]) ??
+        originalConfig ??
+        EMPTY_CONFIG,
+    );
 
     const { topics, datatypes, capabilities } = PanelAPI.useDataSourceInfo();
     const dispatch = useDispatch();
@@ -233,7 +272,7 @@ export default function Panel<Config extends PanelConfig>(
         if (typeof siblingId === "string" && getPanelTypeFromId(siblingId) === panelType) {
           const siblingConfig: PanelConfig = {
             ...siblingDefaultConfig,
-            ...stableSavedProps.current[siblingId],
+            ...store.getState().persistedState.panels.savedProps[siblingId],
           };
           actions.savePanelConfigs({
             configs: [
@@ -262,12 +301,14 @@ export default function Panel<Config extends PanelConfig>(
           });
         });
       },
-      [actions, mosaicActions, mosaicWindowActions, panelCatalog],
+      [store, actions, mosaicActions, mosaicWindowActions, panelCatalog],
     );
 
     const selectPanel = useCallback(
       (panelId: string, toggleSelection: boolean) => {
         const panelIdsToDeselect = [];
+        const savedProps = store.getState().persistedState.panels.savedProps;
+        const selectedPanelIds = store.getState().mosaic.selectedPanelIds;
 
         // If we selected a Tab panel, deselect its children
         const savedConfig = savedProps[panelId];
@@ -299,7 +340,7 @@ export default function Panel<Config extends PanelConfig>(
           (window.getSelection() as any).removeAllRanges();
         }
       },
-      [actions, savedProps, selectedPanelIds, tabId],
+      [store, actions, tabId],
     );
 
     const onOverlayClick = useCallback(
@@ -322,69 +363,80 @@ export default function Panel<Config extends PanelConfig>(
     );
 
     const groupPanels = useCallback(() => {
+      const layout = store.getState().persistedState.panels.layout;
+      const selectedPanelIds = store.getState().mosaic.selectedPanelIds;
+      if (layout == undefined) {
+        return;
+      }
       actions.createTabPanel({
         idToReplace: childId,
         layout,
         idsToRemove: selectedPanelIds,
         singleTab: true,
       });
-    }, [actions, childId, layout, selectedPanelIds]);
+    }, [store, actions, childId]);
 
     const createTabs = useCallback(() => {
+      const layout = store.getState().persistedState.panels.layout;
+      const selectedPanelIds = store.getState().mosaic.selectedPanelIds;
+      if (layout == undefined) {
+        return;
+      }
       actions.createTabPanel({
         idToReplace: childId,
         layout,
         idsToRemove: selectedPanelIds,
         singleTab: false,
       });
-    }, [actions, childId, layout, selectedPanelIds]);
+    }, [store, actions, childId]);
 
-    const { closePanel, splitPanel } = useMemo(
-      () => ({
-        closePanel: () => {
-          const name = getEventNames().PANEL_REMOVE;
-          const eventType = getEventTags().PANEL_TYPE;
-          if (name != undefined && eventType !== undefined) {
-            logEvent({
-              name,
-              tags: { [eventType]: type },
-            });
-          }
-          mosaicActions.remove(mosaicWindowActions.getPath());
-        },
-        splitPanel: () => {
-          if (tabId) {
-            const newId = getPanelIdForType(PanelComponent.panelType);
-            const activeTabLayout = savedProps[tabId].tabs[savedProps[tabId].activeTabIdx].layout;
-            const pathToPanelInTab = getPathFromNode(childId, activeTabLayout);
-            const newTabLayout = updateTree(activeTabLayout, [
-              {
-                path: pathToPanelInTab,
-                spec: { $set: { first: childId, second: newId, direction: "row" } },
-              },
-            ]);
-            const newTabConfig = updateTabPanelLayout(newTabLayout, savedProps[tabId]);
-            actions.savePanelConfigs({
-              configs: [
-                { id: tabId, config: newTabConfig },
-                { id: newId, config },
-              ],
-            });
-          } else {
-            mosaicWindowActions.split({ type: PanelComponent.panelType });
-          }
-          const name = getEventNames().PANEL_SPLIT;
-          const eventType = getEventTags().PANEL_TYPE;
-          if (name != undefined && eventType !== undefined) {
-            logEvent({
-              name,
-              tags: { [eventType]: type },
-            });
-          }
-        },
-      }),
-      [actions, childId, config, mosaicActions, mosaicWindowActions, savedProps, tabId, type],
-    );
+    const closePanel = useCallback(() => {
+      const name = getEventNames().PANEL_REMOVE;
+      const eventType = getEventTags().PANEL_TYPE;
+      if (name != undefined && eventType !== undefined) {
+        logEvent({
+          name,
+          tags: { [eventType]: type },
+        });
+      }
+      mosaicActions.remove(mosaicWindowActions.getPath());
+    }, [mosaicActions, mosaicWindowActions, type]);
+
+    const splitPanel = useCallback(() => {
+      const savedProps = store.getState().persistedState.panels.savedProps;
+      const tabSavedProps = tabId != undefined ? (savedProps[tabId] as TabPanelConfig) : undefined;
+      if (tabId != undefined && tabSavedProps != undefined && childId != undefined) {
+        const newId = getPanelIdForType(PanelComponent.panelType);
+        const activeTabLayout = tabSavedProps.tabs[tabSavedProps.activeTabIdx]?.layout;
+        if (activeTabLayout == undefined) {
+          return;
+        }
+        const pathToPanelInTab = getPathFromNode(childId, activeTabLayout);
+        const newTabLayout = updateTree(activeTabLayout, [
+          {
+            path: pathToPanelInTab,
+            spec: { $set: { first: childId, second: newId, direction: "row" } },
+          },
+        ]);
+        const newTabConfig = updateTabPanelLayout(newTabLayout, tabSavedProps);
+        actions.savePanelConfigs({
+          configs: [
+            { id: tabId, config: newTabConfig },
+            { id: newId, config },
+          ],
+        });
+      } else {
+        mosaicWindowActions.split({ type: PanelComponent.panelType });
+      }
+      const name = getEventNames().PANEL_SPLIT;
+      const eventType = getEventTags().PANEL_TYPE;
+      if (name != undefined && eventType !== undefined) {
+        logEvent({
+          name,
+          tags: { [eventType]: type },
+        });
+      }
+    }, [actions, childId, config, mosaicWindowActions, store, tabId, type]);
 
     const { onMouseEnter, onMouseLeave, onMouseMove, enterFullscreen, exitFullScreen } = useMemo(
       () => ({
@@ -470,91 +522,111 @@ export default function Panel<Config extends PanelConfig>(
     );
 
     const isDemoMode = useExperimentalFeature("demoMode");
+    const renderCount = useRef(0);
+    const perfInfo = useRef<HTMLDivElement>(ReactNull);
     return (
-      <PanelContext.Provider
-        value={{
-          type,
-          id: childId as any,
-          title,
-          config,
-          saveConfig: saveCompleteConfig as any,
-          updatePanelConfig,
-          openSiblingPanel,
-          enterFullscreen,
-          isHovered,
-          isFocused,
-          tabId,
+      <Profiler
+        id={childId ?? "$unknown_id"}
+        onRender={(
+          id,
+          phase,
+          actualDuration,
+          _baseDuration,
+          _startTime,
+          _commitTime,
+          _interactions,
+        ) => {
+          if (perfInfo.current) {
+            perfInfo.current.innerText = `${++renderCount.current}\n${actualDuration.toFixed(1)}ms`;
+          }
         }}
       >
-        {/* Ensure user exits full-screen mode when leaving window, even if key is still pressed down */}
-        <DocumentEvents target={window} enabled onBlur={onBlurDocument} />
-        <KeyListener global keyUpHandlers={keyUpHandlers} keyDownHandlers={keyDownHandlers} />
-        <Flex
-          onClick={onOverlayClick}
-          onMouseEnter={onMouseEnter}
-          onMouseLeave={onMouseLeave}
-          onMouseMove={onMouseMove}
-          className={cx({
-            [styles.root!]: true,
-            [styles.rootFullScreen!]: fullScreen,
-            [styles.selected!]: isSelected && !isDemoMode,
-          })}
-          col
-          dataTest={`panel-mouseenter-container ${childId || ""}`}
-          clip
+        <PanelContext.Provider
+          value={{
+            type,
+            id: childId as any,
+            title,
+            config,
+            saveConfig: saveCompleteConfig as any,
+            updatePanelConfig,
+            openSiblingPanel,
+            enterFullscreen,
+            isHovered,
+            isFocused,
+            tabId,
+          }}
         >
-          {fullScreen && <div className={styles.notClickable} />}
-          {isSelected && !fullScreen && selectedPanelIds.length > 1 && (
-            <div data-tab-options className={styles.tabActionsOverlay}>
-              <Button style={{ backgroundColor: colors.BLUE }} onClick={groupPanels}>
-                <Icon small style={{ marginBottom: 5 }}>
-                  <BorderAllIcon />
-                </Icon>
-                Group in tab
-              </Button>
-              <Button style={{ backgroundColor: colors.BLUE }} onClick={createTabs}>
-                <Icon small style={{ marginBottom: 5 }}>
-                  <ExpandAllOutlineIcon />
-                </Icon>
-                Create {selectedPanelIds.length} tabs
-              </Button>
-            </div>
-          )}
-          {type !== TAB_PANEL_TYPE && quickActionsKeyPressed && !fullScreen && (
-            <div className={styles.quickActionsOverlay} data-panel-overlay>
-              <MosaicDragHandle tabId={tabId}>
-                <>
-                  <div>
-                    <FullscreenIcon />
-                    {shiftKeyPressed ? "Lock fullscreen" : "Fullscreen (Shift+click to lock)"}
-                  </div>
-                  <div>
-                    <Button onClick={closePanel} disabled={isOnlyPanel}>
-                      <TrashCanOutlineIcon />
-                      Remove
-                    </Button>
-                    <Button onClick={splitPanel}>
-                      <GridLargeIcon />
-                      Split
-                    </Button>
-                  </div>
-                  {!isOnlyPanel && <p>Drag to move</p>}
-                </>
-              </MosaicDragHandle>
-            </div>
-          )}
-          {fullScreen && (
-            <button
-              className={styles.exitFullScreen}
-              onClick={exitFullScreen}
-              data-panel-overlay-exit
-            >
-              <CloseIcon /> <span>Exit fullscreen</span>
-            </button>
-          )}
-          <ErrorBoundary>{child}</ErrorBoundary>
-        </Flex>
-      </PanelContext.Provider>
+          {/* Ensure user exits full-screen mode when leaving window, even if key is still pressed down */}
+          <DocumentEvents target={window} enabled onBlur={onBlurDocument} />
+          <KeyListener global keyUpHandlers={keyUpHandlers} keyDownHandlers={keyDownHandlers} />
+          <Flex
+            onClick={onOverlayClick}
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            onMouseMove={onMouseMove}
+            className={cx({
+              [styles.root!]: true,
+              [styles.rootFullScreen!]: fullScreen,
+              [styles.selected!]: isSelected && !isDemoMode,
+            })}
+            col
+            dataTest={`panel-mouseenter-container ${childId || ""}`}
+            clip
+          >
+            {fullScreen && <div className={styles.notClickable} />}
+            {isSelected && !fullScreen && numSelectedPanelsIfSelected > 1 && (
+              <div data-tab-options className={styles.tabActionsOverlay}>
+                <Button style={{ backgroundColor: colors.BLUE }} onClick={groupPanels}>
+                  <Icon small style={{ marginBottom: 5 }}>
+                    <BorderAllIcon />
+                  </Icon>
+                  Group in tab
+                </Button>
+                <Button style={{ backgroundColor: colors.BLUE }} onClick={createTabs}>
+                  <Icon small style={{ marginBottom: 5 }}>
+                    <ExpandAllOutlineIcon />
+                  </Icon>
+                  Create {numSelectedPanelsIfSelected} tabs
+                </Button>
+              </div>
+            )}
+            {type !== TAB_PANEL_TYPE && quickActionsKeyPressed && !fullScreen && (
+              <div className={styles.quickActionsOverlay} data-panel-overlay>
+                <MosaicDragHandle tabId={tabId}>
+                  <>
+                    <div>
+                      <FullscreenIcon />
+                      {shiftKeyPressed ? "Lock fullscreen" : "Fullscreen (Shift+click to lock)"}
+                    </div>
+                    <div>
+                      <Button onClick={closePanel} disabled={isOnlyPanel}>
+                        <TrashCanOutlineIcon />
+                        Remove
+                      </Button>
+                      <Button onClick={splitPanel}>
+                        <GridLargeIcon />
+                        Split
+                      </Button>
+                    </div>
+                    {!isOnlyPanel && <p>Drag to move</p>}
+                  </>
+                </MosaicDragHandle>
+              </div>
+            )}
+            {fullScreen && (
+              <button
+                className={styles.exitFullScreen}
+                onClick={exitFullScreen}
+                data-panel-overlay-exit
+              >
+                <CloseIcon /> <span>Exit fullscreen</span>
+              </button>
+            )}
+            <ErrorBoundary>{child}</ErrorBoundary>
+            {process.env.NODE_ENV !== "production" && <PerfInfo ref={perfInfo} />}
+          </Flex>
+        </PanelContext.Provider>
+      </Profiler>
     );
   }
   ConnectedPanel.displayName = `Panel(${PanelComponent.displayName || PanelComponent.name || ""})`;
