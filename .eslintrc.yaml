@@ -4,6 +4,8 @@ env:
   node: true
 
 ignorePatterns:
+  - dist
+  - "packages/**/wasm/*.js"
   - "!.storybook"
   - storybook-static
   # This file triggers an eslint bug because of our {fs: false} setting in webpack config.

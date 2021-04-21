@@ -110,7 +110,10 @@ export class Sockets {
           return;
         }
 
-        const messagePort = windowEv.ports[0] as MessagePort;
+        const messagePort = windowEv.ports[0];
+        if (messagePort == undefined) {
+          return;
+        }
         const sockets = new Sockets(messagePort);
         Sockets.registeredSockets.set(channel, sockets);
 

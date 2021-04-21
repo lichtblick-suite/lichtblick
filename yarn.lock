@@ -4977,16 +4977,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/rimraf@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "@types/rimraf@npm:3.0.0"
-  dependencies:
-    "@types/glob": "*"
-    "@types/node": "*"
-  checksum: 00a00a430f838ddafdbc17386f08d928b1ae7aeada84d112f4369a7a89b4d47c1bb6849688f1d6ee404a08338ab52a80c742f0c3040d63ccc2aaec04bd1009f5
-  languageName: node
-  linkType: hard
-
 "@types/sanitize-html@npm:2.3.0":
   version: 2.3.0
   resolution: "@types/sanitize-html@npm:2.3.0"
@@ -12133,7 +12123,6 @@ __metadata:
     "@types/license-checker": ^25.0.1
     "@types/nearley": 2.11.1
     "@types/pngjs": ^6
-    "@types/rimraf": ^3.0.0
     "@types/sass": ^1.16.0
     "@types/semver": ^7
     "@types/utif": ^3

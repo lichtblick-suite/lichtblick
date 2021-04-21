@@ -5,7 +5,7 @@
 import EventEmitter from "eventemitter3";
 import net from "net";
 
-import { TcpAddress, TcpSocket } from "@foxglove/ros1";
+import { TcpAddress, TcpSocket } from "../TcpTypes";
 
 type MaybeHasFd = {
   _handle?: {

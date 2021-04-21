@@ -2,10 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { HDL32E_PACKET1 } from "../fixtures/packets";
 import { RawBlock } from "./RawBlock";
 import { RawPacket } from "./RawPacket";
 import { BlockId, FactoryId, ReturnMode } from "./VelodyneTypes";
+import { HDL32E_PACKET1 } from "./fixtures/packets";
 
 describe("RawPacket", () => {
   it("can decode a packet from an HDL-32E", () => {

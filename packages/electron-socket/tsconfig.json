@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.json",
-  "include": ["preloader/*.ts", "renderer/*.ts", "shared/*.ts"],
+  "include": ["**/*.ts"],
   "compilerOptions": {
     "module": "es2020",
     "lib": ["es2020", "dom"],

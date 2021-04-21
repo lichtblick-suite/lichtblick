@@ -21,6 +21,8 @@ jobs:
           # required checks don't need to change if we ever change the commands used.
           - name: lint
             command: yarn run lint:ci
+          - name: packages
+            command: yarn build:packages
           - name: test
             command: yarn run test --maxWorkers=100%
           - name: storybook

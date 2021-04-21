@@ -36,7 +36,7 @@ import {
 import { Sockets } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
 import { RosNode, TcpSocket } from "@foxglove/ros1";
-import { HttpServer } from "@foxglove/xmlrpc/src";
+import { HttpServer } from "@foxglove/xmlrpc";
 
 const log = Logger.getLogger(__filename);
 const rosLog = Logger.getLogger("ROS1");

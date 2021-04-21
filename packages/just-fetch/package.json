@@ -13,11 +13,10 @@
     "email": "support@foxglove.dev"
   },
   "homepage": "https://foxglove.dev/",
-  "main": "index.ts",
-  "browser": "browser/index.ts",
+  "main": "src/node.ts",
+  "browser": "src/browser.ts",
   "files": [
-    "browser/index.ts",
-    "index.ts"
+    "src"
   ],
   "scripts": {
     "build": "tsc && tsc -p browser/tsconfig.json"

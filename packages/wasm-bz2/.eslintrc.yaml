@@ -1,5 +1,2 @@
 parserOptions:
   project: packages/wasm-bz2/tsconfig.json
-
-ignorePatterns:
-  - "dist/*.js"

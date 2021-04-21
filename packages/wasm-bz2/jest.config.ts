@@ -6,11 +6,11 @@ export default {
   preset: "ts-jest",
   globals: {
     "ts-jest": {
-      tsconfig: "<rootDir>/tsconfig.json",
       babelConfig: {
         plugins: ["babel-plugin-transform-import-meta", "@babel/plugin-transform-modules-commonjs"],
       },
     },
   },
   testRunner: "jest-circus/runner",
+  testMatch: ["<rootDir>/src/**/*.test.ts"],
 };

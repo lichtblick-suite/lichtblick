@@ -34,7 +34,7 @@ if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
 type IpcListener = (ev: unknown, ...args: unknown[]) => void;
 const menuClickListeners = new Map<string, IpcListener>();
 
-// Initialize the RPC channel for electron-socket
+// Initialize the RPC channel for electron-socket asynchronously
 PreloaderSockets.Create();
 
 window.addEventListener(

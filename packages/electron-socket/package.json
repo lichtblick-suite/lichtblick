@@ -14,8 +14,8 @@
   },
   "homepage": "https://foxglove.dev/",
   "exports": {
-    "./preloader": "./preloader/index.ts",
-    "./renderer": "./renderer/index.ts"
+    "./preloader": "./src/preloader/index.ts",
+    "./renderer": "./src/renderer/index.ts"
   },
   "files": [
     "src"

@@ -5,9 +5,9 @@
 // eslint-disable-next-line @typescript-eslint/triple-slash-reference
 /// <reference path="../typings/module.d.ts" />
 
-import ModuleFactory, { BZ2Module } from "@foxglove/wasm-bz2/dist/module";
+import ModuleFactory, { BZ2Module } from "@foxglove/wasm-bz2/wasm/module";
 
-const wasmUrl = new URL("../dist/module.wasm", import.meta.url);
+const wasmUrl = new URL("../wasm/module.wasm", import.meta.url);
 
 let loaded = false;
 let Module: BZ2Module;
@@ -16,7 +16,7 @@ function urlToPath(url: URL): string {
   if (url.protocol !== "file:") {
     return url.pathname;
   }
-  // On Windows, new URL("file:///C:/wasm-bz2/dist/module.wasm").pathname -> "/C:/wasm-bz2/dist/module.wasm"
+  // On Windows, new URL("file:///C:/wasm-bz2/wasm/module.wasm").pathname -> "/C:/wasm-bz2/wasm/module.wasm"
   // In this case, strip the leading `/` off to transform it into a regular filesystem path
   return url.pathname.replace(/^\/([A-Z]):\//, "$1:/");
 }

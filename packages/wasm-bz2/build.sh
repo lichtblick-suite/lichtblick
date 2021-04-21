@@ -54,4 +54,4 @@ run_emcc \
     -std=c++17 \
     "$WORK_DIR/cpp/module.cpp" \
     "$WORK_DIR"/build/{bzlib,decompress,huffman,randtable,crctable}.o \
-    -o "$WORK_DIR"/dist/module.js
+    -o "$WORK_DIR"/wasm/module.js

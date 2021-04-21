@@ -1,5 +1,2 @@
 parserOptions:
   project: packages/xmlrpc/tsconfig.json
-
-ignorePatterns:
-  - dist/

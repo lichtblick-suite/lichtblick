@@ -2,6 +2,7 @@
   "extends": "../../tsconfig.json",
   "include": ["src/**/*.ts", "test/**/*.ts", "jest.config.ts"],
   "compilerOptions": {
-    "module": "es2020"
+    "module": "es2020",
+    "noEmit": true
   }
 }

@@ -16,9 +16,10 @@
     "email": "support@foxglove.dev"
   },
   "scripts": {
-    "clean": "rimraf .webpack dist app/storybook-static",
+    "clean": "tsc --build --clean packages/*/tsconfig.json && rimraf .webpack dist app/storybook-static",
     "clean:package": "yarn && yarn clean && yarn build:prod && yarn package",
     "start": "electron .webpack",
+    "build:packages": "tsc --build packages/*/tsconfig.json",
     "build:prod": "webpack --mode production --progress",
     "build:dev": "webpack --mode development --progress",
     "serve": "webpack serve --mode development --progress",
@@ -58,7 +59,6 @@
     "@types/license-checker": "^25.0.1",
     "@types/nearley": "2.11.1",
     "@types/pngjs": "^6",
-    "@types/rimraf": "^3.0.0",
     "@types/sass": "^1.16.0",
     "@types/semver": "^7",
     "@types/utif": "^3",

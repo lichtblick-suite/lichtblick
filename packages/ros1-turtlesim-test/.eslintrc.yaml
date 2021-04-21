@@ -1,5 +1,2 @@
 parserOptions:
   project: packages/ros1-turtlesim-test/tsconfig.json
-
-ignorePatterns:
-  - dist/

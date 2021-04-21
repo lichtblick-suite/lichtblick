@@ -4,12 +4,12 @@
 
 import { benchmark } from "kelonio";
 
-import { HDL32E_PACKET1 } from "../fixtures/packets";
 import { Calibration } from "./Calibration";
 import { PointCloud } from "./PointCloud";
 import { RawPacket } from "./RawPacket";
 import { Transformer } from "./Transformer";
 import { Model } from "./VelodyneTypes";
+import { HDL32E_PACKET1 } from "./fixtures/packets";
 
 function norm(x: number, y: number, z: number): number {
   return Math.hypot(x, y, z);

@@ -2,8 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-export default {
-  preset: "ts-jest",
-  testRunner: "jest-circus/runner",
-  testMatch: ["<rootDir>/src/**/*.test.ts"],
-};
+// Import helper since TypeScript doesn't support package exports yet:
+// https://github.com/microsoft/TypeScript/issues/33079
+export * from "./src/renderer";
