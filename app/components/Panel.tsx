@@ -304,8 +304,8 @@ export default function Panel<Config extends PanelConfig>(
       [store, actions, mosaicActions, mosaicWindowActions, panelCatalog],
     );
 
-    const selectPanel = useCallback(
-      (panelId: string, toggleSelection: boolean) => {
+    const togglePanelSelected = useCallback(
+      (panelId: string) => {
         const panelIdsToDeselect = [];
         const savedProps = store.getState().persistedState.panels.savedProps;
         const selectedPanelIds = store.getState().mosaic.selectedPanelIds;
@@ -331,7 +331,7 @@ export default function Panel<Config extends PanelConfig>(
         }
         panelIdsToDeselect.push(...parentTabPanelIds);
 
-        const nextSelectedPanelIds = toggleSelection ? xor(selectedPanelIds, [panelId]) : [panelId];
+        const nextSelectedPanelIds = xor(selectedPanelIds, [panelId]);
         const nextValidSelectedPanelIds = without(nextSelectedPanelIds, ...panelIdsToDeselect);
         actions.setSelectedPanelIds(nextValidSelectedPanelIds);
 
@@ -344,7 +344,7 @@ export default function Panel<Config extends PanelConfig>(
     );
 
     const onOverlayClick = useCallback(
-      (e) => {
+      (e: MouseEvent) => {
         if (!fullScreen && quickActionsKeyPressed) {
           setFullScreen(true);
           if (shiftKeyPressed) {
@@ -353,13 +353,19 @@ export default function Panel<Config extends PanelConfig>(
           return;
         }
 
-        if (childId) {
+        if (childId != undefined && (e.metaKey || shiftKeyPressed || isSelected)) {
           e.stopPropagation();
-          const toggleSelection = e.metaKey || shiftKeyPressed;
-          selectPanel(childId, toggleSelection);
+          togglePanelSelected(childId);
         }
       },
-      [childId, fullScreen, quickActionsKeyPressed, selectPanel, shiftKeyPressed],
+      [
+        childId,
+        fullScreen,
+        quickActionsKeyPressed,
+        togglePanelSelected,
+        shiftKeyPressed,
+        isSelected,
+      ],
     );
 
     const groupPanels = useCallback(() => {
