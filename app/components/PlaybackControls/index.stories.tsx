@@ -18,6 +18,9 @@ import TestUtils from "react-dom/test-utils";
 
 import { setPlaybackConfig } from "@foxglove-studio/app/actions/panels";
 import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
+import AppConfigurationContext, {
+  AppConfiguration,
+} from "@foxglove-studio/app/context/AppConfigurationContext";
 import {
   PlayerCapabilities,
   PlayerPresence,
@@ -58,6 +61,13 @@ function getPlayerState(): PlayerState {
   return player;
 }
 
+const mockAppConfiguration: AppConfiguration = {
+  get: async () => undefined,
+  set: async () => {},
+  addChangeListener: () => {},
+  removeChangeListener: () => {},
+};
+
 function Wrapper({
   activeData,
   children,
@@ -68,13 +78,15 @@ function Wrapper({
   store?: any;
 }) {
   return (
-    <MockMessagePipelineProvider
-      capabilities={["setSpeed", "playbackControl"]}
-      store={store}
-      activeData={activeData}
-    >
-      <div style={{ padding: 20, margin: 100 }}>{children}</div>
-    </MockMessagePipelineProvider>
+    <AppConfigurationContext.Provider value={mockAppConfiguration}>
+      <MockMessagePipelineProvider
+        capabilities={["setSpeed", "playbackControl"]}
+        store={store}
+        activeData={activeData}
+      >
+        <div style={{ padding: 20, margin: 100 }}>{children}</div>
+      </MockMessagePipelineProvider>
+    </AppConfigurationContext.Provider>
   );
 }
 

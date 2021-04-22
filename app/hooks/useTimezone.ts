@@ -6,5 +6,5 @@ import { useAsyncAppConfigurationValue } from "@foxglove-studio/app/hooks/useAsy
 
 export default function useTimezone(): string | undefined {
   const [timezone] = useAsyncAppConfigurationValue<string>("timezone");
-  return timezone.value;
+  return timezone.value === "" ? undefined : timezone.value;
 }
