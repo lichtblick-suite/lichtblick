@@ -13,35 +13,23 @@
 
 @import "@foxglove-studio/app/styles/colors.module.scss";
 
-.container {
-  text-indent: -20px;
-  padding-left: 20px;
-  white-space: pre-wrap;
-  line-height: 1.2;
-}
-
-.fatal,
-:global(.VirtualizedSelectOption).fatal {
+.fatal {
   color: $red;
   font-weight: bold;
 }
 
-.error,
-:global(.VirtualizedSelectOption).error {
+.error {
   color: $red;
 }
 
-.warn,
-:global(.VirtualizedSelectOption).warn {
+.warn {
   color: $orange;
 }
 
-.info,
-:global(.VirtualizedSelectOption).info {
+.info {
   color: #586e75;
 }
 
-.debug,
-:global(.VirtualizedSelectOption).debug {
+.debug {
   color: #93a1a1;
 }

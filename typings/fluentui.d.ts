@@ -10,6 +10,7 @@ declare global {
   type RegisteredIconNames =
     | CustomIconNames
     | "Add"
+    | "Cancel"
     | "CheckMark"
     | "ChevronDown"
     | "ChevronRight"

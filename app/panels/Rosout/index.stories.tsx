@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { storiesOf } from "@storybook/react";
 import TestUtils from "react-dom/test-utils";
 
 import Rosout from "@foxglove-studio/app/panels/Rosout";
@@ -79,85 +78,97 @@ const fixture = {
   },
 };
 
-storiesOf("<RosoutPanel>", module)
-  .add("default", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Rosout />
-      </PanelSetup>
-    );
-  })
-  .add("topicToRender", () => {
-    function makeMessages(topic: any) {
-      return fixture.frame["/rosout"].map((msg) => ({
-        ...msg,
-        topic,
-        message: { ...msg.message, name: `${topic}${msg.message.name}` },
-      }));
-    }
-    return (
-      <PanelSetup
-        fixture={{
-          topics: [
-            { name: "/rosout", datatype: "rosgraph_msgs/Log" },
-            { name: "/foo/rosout", datatype: "rosgraph_msgs/Log" },
-            { name: "/webviz_source_2/rosout", datatype: "rosgraph_msgs/Log" },
-          ],
-          frame: {
-            "/rosout": makeMessages("/rosout"),
-            "/foo/rosout": makeMessages("/foo/rosout"),
-            "/webviz_source_2/rosout": makeMessages("/webviz_source_2/rosout"),
-          },
+export default {
+  title: "panels/Rosout/index",
+  component: Rosout,
+};
+
+export const Simple = () => {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Rosout />
+    </PanelSetup>
+  );
+};
+
+export const TopicToRender = () => {
+  function makeMessages(topic: any) {
+    return fixture.frame["/rosout"].map((msg) => ({
+      ...msg,
+      topic,
+      message: { ...msg.message, name: `${topic}${msg.message.name}` },
+    }));
+  }
+  return (
+    <PanelSetup
+      fixture={{
+        topics: [
+          { name: "/rosout", datatype: "rosgraph_msgs/Log" },
+          { name: "/foo/rosout", datatype: "rosgraph_msgs/Log" },
+          { name: "/webviz_source_2/rosout", datatype: "rosgraph_msgs/Log" },
+        ],
+        frame: {
+          "/rosout": makeMessages("/rosout"),
+          "/foo/rosout": makeMessages("/foo/rosout"),
+          "/webviz_source_2/rosout": makeMessages("/webviz_source_2/rosout"),
+        },
+      }}
+      onMount={() => {
+        TestUtils.Simulate.mouseEnter(
+          document.querySelectorAll("[data-test~=panel-mouseenter-container]")[0]!,
+        );
+        setTimeout(() => {
+          TestUtils.Simulate.click(document.querySelectorAll("[data-test=topic-set]")[0]!);
+        });
+      }}
+    >
+      <Rosout config={{ searchTerms: [], minLogLevel: 1, topicToRender: "/foo/rosout" }} />
+    </PanelSetup>
+  );
+};
+
+export const WithToolbarActive = () => {
+  return (
+    <PanelSetup
+      fixture={fixture}
+      onMount={() => {
+        TestUtils.Simulate.mouseEnter(
+          document.querySelectorAll("[data-test~=panel-mouseenter-container]")[0]!,
+        );
+        setTimeout(() => {
+          TestUtils.Simulate.click(document.querySelectorAll("[data-test=panel-settings]")[0]!);
+        });
+      }}
+    >
+      <Rosout />
+    </PanelSetup>
+  );
+};
+
+export const FilteredTerms = () => {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Rosout
+        config={{
+          searchTerms: ["multiple", "/some_topic"],
+          minLogLevel: 1,
+          topicToRender: "/rosout",
         }}
-        onMount={() => {
-          TestUtils.Simulate.mouseEnter(
-            document.querySelectorAll("[data-test~=panel-mouseenter-container]")[0]!,
-          );
-          setTimeout(() => {
-            TestUtils.Simulate.click(document.querySelectorAll("[data-test=topic-set]")[0]!);
-          });
-        }}
-      >
-        <Rosout config={{ searchTerms: [], minLogLevel: 1, topicToRender: "/foo/rosout" }} />
-      </PanelSetup>
-    );
-  })
-  .add("with toolbar active", () => {
-    return (
-      <PanelSetup
-        fixture={fixture}
-        onMount={() => {
-          TestUtils.Simulate.mouseEnter(
-            document.querySelectorAll("[data-test~=panel-mouseenter-container]")[0]!,
-          );
-          setTimeout(() => {
-            TestUtils.Simulate.click(document.querySelectorAll("[data-test=panel-settings]")[0]!);
-          });
-        }}
-      >
-        <Rosout />
-      </PanelSetup>
-    );
-  })
-  .add(`filtered terms: "multiple", "/some_topic"`, () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Rosout
-          config={{
-            searchTerms: ["multiple", "/some_topic"],
-            minLogLevel: 1,
-            topicToRender: "/rosout",
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add(`case insensitive message filtering: "could", "Ipsum"`, () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Rosout
-          config={{ searchTerms: ["could", "Ipsum"], minLogLevel: 1, topicToRender: "/rosout" }}
-        />
-      </PanelSetup>
-    );
-  });
+      />
+    </PanelSetup>
+  );
+};
+
+FilteredTerms.title = `filtered terms: "multiple", "/some_topic"`;
+
+export const CaseInsitiveFilter = () => {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Rosout
+        config={{ searchTerms: ["could", "Ipsum"], minLogLevel: 1, topicToRender: "/rosout" }}
+      />
+    </PanelSetup>
+  );
+};
+
+CaseInsitiveFilter.title = `case insensitive message filtering: "could", "Ipsum"`;

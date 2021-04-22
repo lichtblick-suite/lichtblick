@@ -15,6 +15,7 @@ const icons: {
   [N in RegisteredIconNames]: React.ReactElement;
 } = {
   Add: <Icons.AddIcon />,
+  Cancel: <Icons.CancelIcon />,
   CheckMark: <Icons.CheckMarkIcon />,
   ChevronDown: <Icons.ChevronDownIcon />,
   ChevronRight: <Icons.ChevronRightIcon />,

@@ -11,17 +11,19 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import _ from "lodash";
+import { mergeStyleSets } from "@fluentui/react";
+import { padStart } from "lodash";
 import { Time } from "rosbag";
 
-import { RosgraphMsgs$Log } from "@foxglove-studio/app/types/Messages";
+import mixins from "@foxglove-studio/app/styles/mixins.module.scss";
 
 import LevelToString from "./LevelToString";
-import style from "./LogMessage.module.scss";
+import logLevelColorsStyle from "./LogLevelColors.module.scss";
+import { RosgraphMsgs$Log } from "./types";
 
 // pad the start of `val` with 0's to make the total string length `count` size
-function PadStart(val: any, count: number) {
-  return _.padStart(`${val}`, count, "0");
+function PadStart(val: unknown, count: number) {
+  return padStart(`${val}`, count, "0");
 }
 
 function Stamp(props: { stamp: Time }) {
@@ -33,20 +35,30 @@ function Stamp(props: { stamp: Time }) {
   );
 }
 
+const classes = mergeStyleSets({
+  root: {
+    textIndent: "-20px",
+    paddingLeft: "20px",
+    whiteSpace: "pre-wrap",
+    lineHeight: "1.2",
+    fontFamily: mixins.monospaceFont,
+  },
+});
+
 export default React.memo(function LogMessage({ msg }: { msg: RosgraphMsgs$Log }) {
   const altStr = `${msg.file}:${msg.line}`;
 
   const strLevel = LevelToString(msg.level);
 
-  const levelClassName = style[strLevel.toLocaleLowerCase()];
+  const levelClassName = logLevelColorsStyle[strLevel.toLocaleLowerCase()];
 
   // the first message line is rendered with the info/stamp/name
   // following newlines are rendered on their own line
   const lines = msg.msg.split("\n");
   return (
-    <div title={altStr} className={`${style.container} ${levelClassName}`}>
+    <div title={altStr} className={`${classes.root} ${levelClassName}`}>
       <div>
-        <span>[{_.padStart(strLevel, 5, " ")}]</span>
+        <span>[{padStart(strLevel, 5, " ")}]</span>
         <span>
           [<Stamp stamp={msg.header.stamp} />]
         </span>

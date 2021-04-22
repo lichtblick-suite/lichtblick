@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { storiesOf } from "@storybook/react";
 import { Component } from "react";
 
 import LogList, { RenderRow } from "./LogList";
@@ -103,7 +102,12 @@ class Example extends Component<Props, State> {
   }
 }
 
-storiesOf("<LogList>", module).add("default", () => {
+export default {
+  title: "panels/Rosout/LogList",
+  component: LogList,
+};
+
+export const List = (): JSX.Element => {
   return (
     <Example
       renderRow={({ item, style }) => (
@@ -122,4 +126,4 @@ storiesOf("<LogList>", module).add("default", () => {
       )}
     />
   );
-});
+};

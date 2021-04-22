@@ -11,43 +11,26 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { List, AutoSizer, CellMeasurer, CellMeasurerCache } from "react-virtualized";
+import { List, AutoSizer, CellMeasurer, CellMeasurerCache, ListRowProps } from "react-virtualized";
 import { v4 as uuidv4 } from "uuid";
 
 import Button from "@foxglove-studio/app/components/Button";
 
-// TODO(Audrey): import types from react-virtualized once they are available
-// RowRendererParams, CellMeasureCache
-type RowRendererParams = {
-  className: string;
-  columns: any[];
-  index: number;
-  isScrolling: boolean;
-  onRowClick: () => void;
-  onRowDoubleClick: () => void;
-  onRowMouseOver: () => void;
-  onRowMouseOut: () => void;
-  rowData: any;
-  style: React.CSSProperties;
-  parent?: any;
-  key: number | string;
-};
-
-type RenderRowInput<Item> = RowRendererParams & {
+type RenderRowInput<Item> = ListRowProps & {
   item: Item;
+  ref?: React.RefCallback<Element>;
 };
 
-export type RenderRow<Item> = (arg0: RenderRowInput<Item>) => React.ReactNode;
+export type RenderRow<Item> = (row: RenderRowInput<Item>) => React.ReactNode;
+
+type Props<T> = {
+  items: readonly T[];
+  renderRow: RenderRow<T>;
+};
 
 // List for showing large number of items, which are expected to be appended to the end regularly.
 // Automatically scrolls to the bottom unless you explicitly scroll up.
-function LogList<Item>({
-  items,
-  renderRow,
-}: {
-  items: readonly Item[];
-  renderRow: RenderRow<Item>;
-}) {
+function LogList<Item>({ items, renderRow }: Props<Item>): JSX.Element {
   // Automatically scrolling to the bottom by default.
   const [autoScroll, setAutoScroll] = React.useState(true);
 
@@ -120,7 +103,7 @@ function LogList<Item>({
 
   return (
     <AutoSizer>
-      {({ width, height }: any) => {
+      {({ width, height }) => {
         // If the width changed, row heights might have changed, so we need to clear the cache.
         if (lastWidth.current !== width) {
           cache.current.clearAll();
@@ -135,7 +118,7 @@ function LogList<Item>({
               style={{ outline: "none" }}
               deferredMeasurementCache={cache.current}
               rowHeight={cache.current.rowHeight}
-              rowRenderer={(rowProps: any) => (
+              rowRenderer={(rowProps) => (
                 <CellMeasurer
                   key={rowProps.key}
                   cache={cache.current}
@@ -143,7 +126,9 @@ function LogList<Item>({
                   columnIndex={0}
                   rowIndex={rowProps.index}
                 >
-                  {renderRow({ ...rowProps, item: items[rowProps.index] })}
+                  {({ registerChild }) =>
+                    renderRow({ ...rowProps, item: items[rowProps.index]!, ref: registerChild })
+                  }
                 </CellMeasurer>
               )}
               rowCount={items.length}
