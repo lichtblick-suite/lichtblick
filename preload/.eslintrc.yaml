@@ -1,5 +1,3 @@
-parserOptions:
-  project: preload/tsconfig.json
 settings:
   import/resolver:
     webpack:

@@ -1,5 +1,3 @@
-parserOptions:
-  project: desktop/tsconfig.json
 settings:
   import/resolver:
     webpack:
