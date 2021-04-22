@@ -158,7 +158,7 @@ type NotificationListProps = {
 
 // exported for storybook
 export class NotificationList extends React.PureComponent<NotificationListProps> {
-  render() {
+  render(): JSX.Element {
     const { notifications, onClick } = this.props;
     return (
       <Menu style={{ marginTop: 2 }}>
@@ -200,8 +200,10 @@ export function NotificationModal({
         <ModalBody>
           {typeof details === "string" ? (
             <pre style={{ whiteSpace: "pre-wrap", lineHeight: 1.3 }}>{details}</pre>
+          ) : details != undefined && details !== "" ? (
+            details
           ) : (
-            details || "No details provided"
+            "No details provided"
           )}
         </ModalBody>
       </Modal>

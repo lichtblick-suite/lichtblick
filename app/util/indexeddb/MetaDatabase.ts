@@ -90,13 +90,13 @@ async function validateStorageQuota(): Promise<void> {
     return;
   }
 
-  if (!navigator || !navigator.storage || !navigator.storage.estimate) {
+  if (navigator?.storage?.estimate == undefined) {
     throw new Error(
       "navigator.storage.estimate not supported; we only support the latest version of Google Chrome",
     );
   }
   const { quota } = await navigator.storage.estimate();
-  if (!quota) {
+  if (quota == undefined) {
     throw new Error(
       "navigator.storage.estimate().quota not supported; we only support the latest version of Google Chrome",
     );

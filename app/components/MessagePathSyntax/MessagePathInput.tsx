@@ -205,7 +205,7 @@ class MessagePathInputUnconnected extends React.PureComponent<
     // add a "." so the user can keep typing to autocomplete the message path.
     const keepGoingAfterTopicName =
       autocompleteType === "topicName" &&
-      this.props.validTypes &&
+      this.props.validTypes != undefined &&
       !this.props.validTypes.includes("message");
     if (keepGoingAfterTopicName) {
       value += ".";
@@ -240,7 +240,7 @@ class MessagePathInputUnconnected extends React.PureComponent<
       noMultiSlices,
       timestampMethod,
       inputStyle,
-      disableAutocomplete,
+      disableAutocomplete = false,
       globalVariables,
       setGlobalVariables,
     } = this.props;
@@ -359,15 +359,16 @@ class MessagePathInputUnconnected extends React.PureComponent<
       }
     }
 
-    const noHeaderStamp = topic && topicHasNoHeaderStamp(topic, datatypes);
-    const orderedAutocompleteItems = prioritizedDatatype
-      ? flatten(
-          partition(
-            autocompleteItems,
-            (item) => getTopicsByTopicName(topics)[item]?.datatype === prioritizedDatatype,
-          ),
-        )
-      : autocompleteItems;
+    const noHeaderStamp = topic ? topicHasNoHeaderStamp(topic, datatypes) : false;
+    const orderedAutocompleteItems =
+      prioritizedDatatype != undefined
+        ? flatten(
+            partition(
+              autocompleteItems,
+              (item) => getTopicsByTopicName(topics)[item]?.datatype === prioritizedDatatype,
+            ),
+          )
+        : autocompleteItems;
 
     return (
       <div
@@ -381,16 +382,20 @@ class MessagePathInputUnconnected extends React.PureComponent<
           onSelect={(value: string, item: any, autocomplete: Autocomplete) =>
             this._onSelect(value, autocomplete, autocompleteType, autocompleteRange)
           }
-          hasError={!!autocompleteType && !disableAutocomplete && path.length > 0}
+          hasError={autocompleteType != undefined && !disableAutocomplete && path.length > 0}
           autocompleteKey={autocompleteType}
-          placeholder={placeholder || "/some/topic.msgs[0].field"}
+          placeholder={
+            placeholder != undefined && placeholder !== ""
+              ? placeholder
+              : "/some/topic.msgs[0].field"
+          }
           autoSize={autoSize}
           inputStyle={inputStyle} // Disable autoselect since people often construct complex queries, and it's very annoying
           // to have the entire input selected whenever you want to make a change to a part it.
           disableAutoSelect
         />
 
-        {timestampMethod && (
+        {timestampMethod != undefined && (
           <div className={styles.timestampMethodDropdownContainer}>
             <Dropdown
               onChange={this._onTimestampMethodChange}

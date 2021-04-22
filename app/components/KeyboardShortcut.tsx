@@ -56,11 +56,17 @@ type Props = {
   descriptionMaxWidth?: number;
 };
 
-export default function KeyboardShortcut({ keys, description, descriptionMaxWidth }: Props) {
+export default function KeyboardShortcut({
+  keys,
+  description,
+  descriptionMaxWidth,
+}: Props): JSX.Element {
   return (
     <SKeyboardShortcut>
-      {description && (
-        <SDescription style={descriptionMaxWidth ? { width: descriptionMaxWidth } : {}}>
+      {description != undefined && description.length > 0 && (
+        <SDescription
+          style={descriptionMaxWidth != undefined ? { width: descriptionMaxWidth } : {}}
+        >
           {description}
         </SDescription>
       )}

@@ -20,7 +20,7 @@ import Dropdown from "@foxglove-studio/app/components/Dropdown/index";
 import Modal from "@foxglove-studio/app/components/Modal";
 import TextContent from "@foxglove-studio/app/components/TextContent";
 
-function ContentStory({ showChildToggle }: { showChildToggle?: boolean }) {
+function ContentStory({ showChildToggle = false }: { showChildToggle?: boolean }) {
   const renderedRef = React.useRef(false);
   return (
     <Modal

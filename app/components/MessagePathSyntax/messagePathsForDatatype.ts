@@ -67,7 +67,7 @@ export function messagePathStructures(
           throw new Error(`datatype not found: "${datatype}"`);
         }
         rosDatatype.fields.forEach((msgField) => {
-          if (msgField.isConstant) {
+          if (msgField.isConstant === true) {
             return;
           }
 
@@ -79,7 +79,7 @@ export function messagePathStructures(
               }
             : structureFor(msgField.type);
 
-          if (msgField.isArray) {
+          if (msgField.isArray === true) {
             nextByName[msgField.name] = { structureType: "array", next: next as any, datatype };
           } else {
             nextByName[msgField.name] = next as any;
@@ -138,7 +138,7 @@ export function messagePathsForDatatype(
         const typicalFilterName = Object.keys(structureItem.next.nextByName).find((key) =>
           isTypicalFilterName(key),
         );
-        if (typicalFilterName) {
+        if (typicalFilterName != undefined) {
           // Find matching filter from clonedMessagePath
           const matchingFilterPart = clonedMessagePath.find(
             (pathPart) => pathPart.type === "filter" && pathPart.path[0] === typicalFilterName,
@@ -151,7 +151,9 @@ export function messagePathsForDatatype(
 
           // Format the displayed filter value
           const filterVal =
-            matchingFilterPart && matchingFilterPart.type === "filter" && matchingFilterPart.value
+            matchingFilterPart &&
+            matchingFilterPart.type === "filter" &&
+            matchingFilterPart.value != undefined
               ? matchingFilterPart.value
               : 0;
           traverse(
@@ -163,7 +165,7 @@ export function messagePathsForDatatype(
         } else {
           traverse(structureItem.next, `${builtString}[0]`);
         }
-      } else if (!noMultiSlices) {
+      } else if (noMultiSlices !== true) {
         // When dealing with an array of primitives, you likely just want a
         // scatter plot (if we can do multi-slices).
         traverse(structureItem.next, `${builtString}[:]`);

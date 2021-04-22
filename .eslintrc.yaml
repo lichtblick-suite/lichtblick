@@ -177,22 +177,6 @@ rules:
 
 overrides:
   - files:
-      - "app/components/GlobalKeyListener.ts"
-      - "app/components/GlobalVariablesMenu.tsx"
-      - "app/components/GlobalVariablesTable.tsx"
-      - "app/components/GradientPicker.stories.tsx"
-      - "app/components/KeyboardShortcut.tsx"
-      - "app/components/Menu/ExpandableMenu.tsx"
-      - "app/components/Menu/Item.tsx"
-      - "app/components/MessageOrderControls.tsx"
-      - "app/components/MessagePathSyntax/MessagePathInput.tsx"
-      - "app/components/MessagePathSyntax/messagePathsForDatatype.ts"
-      - "app/components/MessagePathSyntax/useCachedGetMessagePathDataItems.ts"
-      - "app/components/MessagePipeline/index.tsx"
-      - "app/components/MessagePipeline/warnOnOutOfSyncMessages.ts"
-      - "app/components/Modal.stories.tsx"
-      - "app/components/NotificationDisplay.tsx"
-      - "app/components/Panel.tsx"
       - "app/components/PanelLayout.tsx"
       - "app/components/PanelToolbar/index.tsx"
       - "app/components/PlaybackControls/PlaybackTimeDisplayMethod.tsx"
@@ -327,14 +311,5 @@ overrides:
       - "app/util/binaryObjects/index.ts"
       - "app/util/binaryObjects/jsWrapperObjects.ts"
       - "app/util/binaryObjects/messageDefinitionUtils.ts"
-      - "app/util/getGlobalVariablesFromUrl.ts"
-      - "app/util/getNewConnection.ts"
-      - "app/util/inAutomatedRunMode.ts"
-      - "app/util/indexeddb/Database.ts"
-      - "app/util/indexeddb/DbWriter.ts"
-      - "app/util/indexeddb/MetaDatabase.ts"
-      - "app/util/installDevtoolsFormatters.ts"
-      - "app/util/naturalSort.ts"
-      - "app/util/parseMessageDefinitionsCache.ts"
     rules:
       "@typescript-eslint/strict-boolean-expressions": off

@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 function getSearchParams(): URLSearchParams {
-  return new URLSearchParams(global.location.search || "");
+  return new URLSearchParams(global.location.search ?? "");
 }
 
 export function inVideoRecordingMode() {

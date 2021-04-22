@@ -23,7 +23,7 @@ const inNativeUndoRedoElement = (eventTarget: EventTarget) => {
     // It's not always convenient to set the data property on the textarea itself, but we can set
     // it on a nearby ancestor.
     while (element) {
-      if (element instanceof HTMLElement && element.dataset.nativeundoredo) {
+      if (element instanceof HTMLElement && element.dataset.nativeundoredo != undefined) {
         return true;
       }
       element = element.parentElement;

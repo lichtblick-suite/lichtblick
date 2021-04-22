@@ -20,8 +20,8 @@ export function getGlobalVariablesFromUrl(
   params: URLSearchParams,
 ): Record<string, string> | undefined {
   const globalVariables =
-    params.get(GLOBAL_VARIABLES_QUERY_KEY) || params.get(OLD_GLOBAL_VARIABLES_QUERY_KEY);
-  if (globalVariables) {
+    params.get(GLOBAL_VARIABLES_QUERY_KEY) ?? params.get(OLD_GLOBAL_VARIABLES_QUERY_KEY);
+  if (globalVariables != undefined) {
     try {
       return JSON.parse(globalVariables);
     } catch (error) {

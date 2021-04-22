@@ -109,7 +109,7 @@ export default class Database {
     const store = tx.objectStore(objectStore);
     const items: { key: any; value: any }[] = [];
     store.iterateCursor((cursor) => {
-      if (!cursor) {
+      if (cursor == undefined) {
         return;
       }
       const { key, value } = cursor;
@@ -163,7 +163,7 @@ export default class Database {
     const store = tx.objectStore(objectStore);
     const items: (IDBValidKey | IDBKeyRange)[] = [];
     store.iterateKeyCursor((cursor) => {
-      if (!cursor) {
+      if (cursor == undefined) {
         return;
       }
       items.push(cursor.key);
@@ -182,13 +182,13 @@ export default class Database {
   ): Promise<Record[]> {
     const tx = this.transaction(objectStore);
     let store: ObjectStore<any, any> | Index<any, any> = tx.objectStore(objectStore);
-    if (index) {
+    if (index != undefined) {
       store = store.index(index);
     }
     const range = IDBKeyRange.bound(start, end);
     const items: { key: any; value: any }[] = [];
     store.iterateCursor(range, (cursor) => {
-      if (!cursor) {
+      if (cursor == undefined) {
         return;
       }
       const { key, value } = cursor;

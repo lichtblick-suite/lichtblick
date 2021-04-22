@@ -41,9 +41,9 @@ export default function ExpandableMenu({
   icon,
   isOpen,
   setIsOpen,
-  disableOpenClose,
+  disableOpenClose = false,
   dataTest,
-}: Props) {
+}: Props): JSX.Element {
   const rootItem = (
     <Item
       icon={icon}

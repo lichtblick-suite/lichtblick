@@ -23,7 +23,7 @@ export const STORAGE_ITEM_KEY_PREFIX = "msgdefn/";
 
 let storage = new Storage();
 
-export function bustAllMessageDefinitionCache(backingStore: BackingStore, keys: string[]) {
+export function bustAllMessageDefinitionCache(backingStore: BackingStore, keys: string[]): void {
   keys.forEach((key) => {
     if (key.startsWith(STORAGE_ITEM_KEY_PREFIX)) {
       backingStore.removeItem(key);
@@ -35,15 +35,15 @@ export function bustAllMessageDefinitionCache(backingStore: BackingStore, keys: 
 // message definition cache can be busted.
 storage.registerBustStorageFn(bustAllMessageDefinitionCache);
 
-export const setStorageForTest = (quota?: number) => {
+export const setStorageForTest = (quota?: number): void => {
   storage = new Storage(new MemoryStorage(quota));
   storage.registerBustStorageFn(bustAllMessageDefinitionCache);
 };
-export const restoreStorageForTest = () => {
+export const restoreStorageForTest = (): void => {
   storage = new Storage();
 };
 
-export const getStorageForTest = () => storage;
+export const getStorageForTest = (): Storage => storage;
 
 function maybeWriteLocalStorageCache(
   md5Sum: string,
@@ -86,7 +86,7 @@ class ParseMessageDefinitionCache {
 
   parseMessageDefinition(messageDefinition: string, md5Sum?: string): RosMsgDefinition[] {
     // What if we already have this message definition stored?
-    if (md5Sum) {
+    if (md5Sum != undefined) {
       const storedDefinition = this.getStoredDefinition(md5Sum);
       if (storedDefinition != undefined) {
         return storedDefinition;
@@ -95,10 +95,10 @@ class ParseMessageDefinitionCache {
 
     // If we don't have it stored, we have to parse it.
     const parsedDefinition =
-      this._stringDefinitionsToParsedDefinitions[messageDefinition] ||
+      this._stringDefinitionsToParsedDefinitions[messageDefinition] ??
       parseMessageDefinition(messageDefinition);
     this._stringDefinitionsToParsedDefinitions[messageDefinition] = parsedDefinition;
-    if (md5Sum) {
+    if (md5Sum != undefined) {
       this._hashesToParsedDefinitions[md5Sum] = parsedDefinition;
       if (!this._localStorageCacheDisabled) {
         this._md5SumsToParsedDefinitions[md5Sum] = parsedDefinition;

@@ -57,7 +57,7 @@ export default class DbWriter extends Writable {
   _write(chunk: any, encoding: string, callback: WriteCallback) {
     this.batch.push(chunk);
     this.total++;
-    if (this.batch.length < (this.options.batchSize || DEFAULT_BATCH_SIZE)) {
+    if (this.batch.length < (this.options.batchSize ?? DEFAULT_BATCH_SIZE)) {
       // can handle more data immediately
       callback();
       return;

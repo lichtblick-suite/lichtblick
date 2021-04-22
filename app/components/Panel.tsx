@@ -177,7 +177,7 @@ export default function Panel<Config extends PanelConfig>(
     );
 
     const isOnlyPanel = useSelector((state: State) =>
-      tabId != undefined || !state.persistedState.panels.layout
+      tabId != undefined || state.persistedState.panels.layout == undefined
         ? false
         : !isParent(state.persistedState.panels.layout),
     );
@@ -232,7 +232,7 @@ export default function Panel<Config extends PanelConfig>(
         if (saveConfig) {
           saveConfig(configToSave as any);
         }
-        if (childId) {
+        if (childId != undefined) {
           actions.savePanelConfigs({
             configs: [
               { id: childId, config: configToSave, defaultConfig: PanelComponent.defaultConfig },
@@ -267,7 +267,8 @@ export default function Panel<Config extends PanelConfig>(
         const ownPath = mosaicWindowActions.getPath();
 
         // Try to find a sibling summary panel and update it with the `siblingConfig`
-        const siblingPathEnd = last(ownPath) ? getOtherBranch(last(ownPath) as any) : "second";
+        const lastNode = last(ownPath);
+        const siblingPathEnd = lastNode != undefined ? getOtherBranch(lastNode) : "second";
         const siblingPath = ownPath.slice(0, -1).concat(siblingPathEnd);
         const siblingId = getNodeAtPath(mosaicActions.getRoot(), siblingPath);
         if (typeof siblingId === "string" && getPanelTypeFromId(siblingId) === panelType) {
@@ -316,7 +317,7 @@ export default function Panel<Config extends PanelConfig>(
         if (isTabPanel(panelId) && savedConfig) {
           const { activeTabIdx, tabs } = savedConfig as TabPanelConfig;
           const activeTabLayout = tabs[activeTabIdx]?.layout;
-          if (activeTabLayout) {
+          if (activeTabLayout != undefined) {
             const childrenPanelIds = getAllPanelIds(activeTabLayout, savedProps);
             panelIdsToDeselect.push(...childrenPanelIds);
           }
@@ -326,7 +327,7 @@ export default function Panel<Config extends PanelConfig>(
         const parentTabPanelByPanelId = getParentTabPanelByPanelId(savedProps);
         let nextParentId = tabId;
         const parentTabPanelIds = [];
-        while (nextParentId) {
+        while (nextParentId != undefined) {
           parentTabPanelIds.push(nextParentId);
           nextParentId = parentTabPanelByPanelId[nextParentId];
         }
@@ -578,7 +579,7 @@ export default function Panel<Config extends PanelConfig>(
               [styles.selected!]: isSelected && !isDemoMode,
             })}
             col
-            dataTest={`panel-mouseenter-container ${childId || ""}`}
+            dataTest={`panel-mouseenter-container ${childId ?? ""}`}
             clip
           >
             {fullScreen && <div className={styles.notClickable} />}
@@ -643,7 +644,7 @@ export default function Panel<Config extends PanelConfig>(
       </Profiler>
     );
   }
-  ConnectedPanel.displayName = `Panel(${PanelComponent.displayName || PanelComponent.name || ""})`;
+  ConnectedPanel.displayName = `Panel(${PanelComponent.displayName ?? PanelComponent.name})`;
 
   return Object.assign(React.memo(ConnectedPanel), {
     defaultConfig: PanelComponent.defaultConfig,

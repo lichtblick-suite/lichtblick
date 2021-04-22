@@ -107,7 +107,7 @@ function MenuContent(menuProps: IContextualMenuProps) {
 }
 
 function GlobalVariablesMenu(props: Props): React.ReactElement {
-  const { defaultIsOpen, skipAnimation = inScreenshotTests() } = props;
+  const { defaultIsOpen = false, skipAnimation = inScreenshotTests() } = props;
   const [hasChangedVariable, setHasChangedVariable] = useState<boolean>(false);
 
   const {

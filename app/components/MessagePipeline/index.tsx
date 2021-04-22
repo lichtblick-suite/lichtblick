@@ -112,13 +112,14 @@ export function MessagePipelineProvider({
     if (rawPlayerState.presence === PlayerPresence.NOT_PRESENT) {
       return {
         ...rawPlayerState,
-        presence: maybePlayer.loading
-          ? PlayerPresence.CONSTRUCTING
-          : maybePlayer.error
-          ? PlayerPresence.ERROR
-          : maybePlayer.player
-          ? PlayerPresence.INITIALIZING
-          : PlayerPresence.NOT_PRESENT,
+        presence:
+          maybePlayer.loading === true
+            ? PlayerPresence.CONSTRUCTING
+            : maybePlayer.error
+            ? PlayerPresence.ERROR
+            : maybePlayer.player
+            ? PlayerPresence.INITIALIZING
+            : PlayerPresence.NOT_PRESENT,
       };
     }
     return rawPlayerState;
@@ -159,35 +160,35 @@ export function MessagePipelineProvider({
 
   // Delay the player listener promise until rendering has finished for the latest data.
   useLayoutEffect(() => {
-    if (playerTickState.current) {
-      // In certain cases like the player being replaced (reproduce by dragging a bag in while playing), we can
-      // replace the new playerTickState. We want to use one playerTickState throughout the entire tick, since it's
-      // implicitly tied to the player.
-      const currentPlayerTickState = playerTickState.current;
-      requestAnimationFrame(async () => {
-        if (currentPlayerTickState.resolveFn && !currentPlayerTickState.waitingForPromises) {
-          if (currentPlayerTickState.promisesToWaitFor.length > 0) {
-            // If we have finished rendering but we still have to wait for some promises wait for them here.
+    // In certain cases like the player being replaced (reproduce by dragging a bag in while playing), we can
+    // replace the new playerTickState. We want to use one playerTickState throughout the entire tick, since it's
+    // implicitly tied to the player.
+    const currentPlayerTickState = playerTickState.current;
+    requestAnimationFrame(async () => {
+      if (currentPlayerTickState.resolveFn && !currentPlayerTickState.waitingForPromises) {
+        if (currentPlayerTickState.promisesToWaitFor.length > 0) {
+          // If we have finished rendering but we still have to wait for some promises wait for them here.
 
-            const promises = currentPlayerTickState.promisesToWaitFor;
-            currentPlayerTickState.promisesToWaitFor = [];
-            currentPlayerTickState.waitingForPromises = true;
-            // If `pauseFrame` is called while we are waiting for any other promises, they just wait for the frame
-            // after the current one.
-            await pauseFrameForPromises(promises);
+          const promises = currentPlayerTickState.promisesToWaitFor;
+          currentPlayerTickState.promisesToWaitFor = [];
+          currentPlayerTickState.waitingForPromises = true;
+          // If `pauseFrame` is called while we are waiting for any other promises, they just wait for the frame
+          // after the current one.
+          await pauseFrameForPromises(promises);
 
-            currentPlayerTickState.waitingForPromises = false;
-            if (currentPlayerTickState.resolveFn) {
-              currentPlayerTickState.resolveFn();
-              currentPlayerTickState.resolveFn = undefined;
-            }
-          } else {
+          currentPlayerTickState.waitingForPromises = false;
+          // https://github.com/microsoft/TypeScript/issues/43781
+          // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+          if (currentPlayerTickState.resolveFn) {
             currentPlayerTickState.resolveFn();
             currentPlayerTickState.resolveFn = undefined;
           }
+        } else {
+          currentPlayerTickState.resolveFn();
+          currentPlayerTickState.resolveFn = undefined;
         }
-      });
-    }
+      }
+    });
   }, [playerState]);
 
   useEffect(() => {
@@ -262,7 +263,7 @@ export function MessagePipelineProvider({
     (id: string, subscriptionsForId: SubscribePayload[]) => {
       setAllSubscriptions((s) => {
         if (
-          lastTimeWhenActiveDataBecameSet.current &&
+          lastTimeWhenActiveDataBecameSet.current != undefined &&
           Date.now() <
             lastTimeWhenActiveDataBecameSet.current + WARN_ON_SUBSCRIPTIONS_WITHIN_TIME_MS &&
           !isEqual(

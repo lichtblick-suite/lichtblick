@@ -53,19 +53,19 @@ type ItemProps = {
   hoverForScreenshots?: boolean;
 };
 
-const Item = (props: ItemProps) => {
+const Item = (props: ItemProps): JSX.Element => {
   const {
     className = "",
     isHeader = false,
-    checked,
-    highlighted,
+    checked = false,
+    highlighted = false,
     children,
     icon,
-    iconSize,
-    isDropdown,
+    iconSize = "small",
+    isDropdown = false,
     onClick,
-    disabled,
-    hasSubMenu,
+    disabled = false,
+    hasSubMenu = false,
     direction = "left",
     tooltip,
     dataTest,
@@ -83,15 +83,15 @@ const Item = (props: ItemProps) => {
   const item = (
     <div className={classes} onClick={disabled ? noop : onClick} data-test={dataTest} style={style}>
       {hasSubMenu && direction === "left" && <ChevronLeftIcon className={styles.submenuIconLeft} />}
-      {icon && (
+      {icon != undefined && (
         <span className={styles.icon}>
-          <Icon {...{ [iconSize || "small"]: true }}>{icon}</Icon>
+          <Icon {...{ [iconSize]: true }}>{icon}</Icon>
         </span>
       )}
       <SContentWrapper>
         {children}
         {checked && !isDropdown && (
-          <Icon {...{ [iconSize || "small"]: true }} style={{ marginLeft: "5px" }}>
+          <Icon {...{ [iconSize]: true }} style={{ marginLeft: "5px" }}>
             <CheckCircleIcon />
           </Icon>
         )}
@@ -100,14 +100,14 @@ const Item = (props: ItemProps) => {
         <ChevronRightIcon className={styles.submenuIconRight} />
       )}
       {checked && isDropdown && (
-        <Icon {...{ [iconSize || "small"]: true }}>
+        <Icon {...{ [iconSize]: true }}>
           <CheckIcon />
         </Icon>
       )}
     </div>
   );
 
-  if (tooltip) {
+  if (tooltip != undefined && tooltip !== "") {
     return <Tooltip contents={tooltip}>{item}</Tooltip>;
   }
   return item;

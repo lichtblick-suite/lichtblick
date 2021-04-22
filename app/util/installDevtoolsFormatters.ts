@@ -44,7 +44,10 @@ const timeFormatter: DevtoolFormatter = (() => {
   function groupDigits(str: string) {
     const result = ["span", {}];
     let start = 0;
-    let end = str.length % 3 || 3;
+    let end = str.length % 3;
+    if (end === 0) {
+      end = 3;
+    }
     while (start < str.length) {
       result.push([
         "span",

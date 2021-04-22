@@ -42,7 +42,7 @@ let lastLastSeekTime: number | undefined;
 let warningTimeout: ReturnType<typeof setTimeout> | undefined;
 let incorrectMessages: Message[] = [];
 
-export default function warnOnOutOfSyncMessages(playerState: PlayerState) {
+export default function warnOnOutOfSyncMessages(playerState: PlayerState): void {
   if (!playerState.activeData) {
     return;
   }
@@ -94,7 +94,7 @@ export default function warnOnOutOfSyncMessages(playerState: PlayerState) {
 
       if (
         lastMessageTime &&
-        lastMessageTopic &&
+        lastMessageTopic != undefined &&
         TimeUtil.isLessThan(messageTime, lastMessageTime)
       ) {
         sendNotification(

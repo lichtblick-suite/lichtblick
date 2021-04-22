@@ -118,7 +118,7 @@ function getNewConnectionWithoutExistingConnection({
   if (cacheSize >= fileSize) {
     // If we have an unlimited cache, we want to read the entire file, but still prefer downloading
     // first near where the last request happened.
-    const potentialRange = { start: lastResolvedCallbackEnd || 0, end: fileSize };
+    const potentialRange = { start: lastResolvedCallbackEnd ?? 0, end: fileSize };
     if (!isRangeCoveredByRanges(potentialRange, downloadedRanges)) {
       readAheadRange = potentialRange;
     } else {

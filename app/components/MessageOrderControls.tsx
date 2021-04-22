@@ -37,7 +37,7 @@ export default function MessageOrderControls() {
     [dispatch],
   );
 
-  const orderText = messageOrderLabel[messageOrder] || defaultPlaybackConfig.messageOrder;
+  const orderText = messageOrderLabel[messageOrder] ?? defaultPlaybackConfig.messageOrder;
   const tooltip = `Order messages by ${orderText.toLowerCase()}`;
   const noHeaderTopicsButton = messageOrder === "headerStamp" && <NoHeaderTopicsButton />;
   return (

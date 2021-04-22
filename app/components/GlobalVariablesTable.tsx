@@ -97,7 +97,7 @@ const SIconWrapper = styled.span<{ isOpen?: boolean }>`
   color: ${sharedColors.LIGHT};
 
   svg {
-    opacity: ${({ isOpen }) => (isOpen ? 1 : undefined)};
+    opacity: ${({ isOpen = false }) => (isOpen ? 1 : undefined)};
   }
 `;
 

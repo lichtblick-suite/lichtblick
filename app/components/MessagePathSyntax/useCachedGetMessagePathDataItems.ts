@@ -302,7 +302,7 @@ export function getMessagePathDataItems(
         } else {
           // See if `arrayElement` has a property that we typically filter on. If so, show that.
           const name = fieldNames(arrayElement).find((key) => isTypicalFilterName(key));
-          if (name) {
+          if (name != undefined) {
             newPath = `${path}[:]{${name}==${getField(arrayElement, name)}}`;
           } else {
             // Use `i` here instead of `index`, since it's only different when `i` is negative,

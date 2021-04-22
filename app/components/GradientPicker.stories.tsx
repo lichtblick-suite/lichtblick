@@ -19,8 +19,8 @@ import { Color } from "regl-worldview";
 import GradientPicker from "./GradientPicker";
 
 function Story({
-  changeMinColorAfterMount,
-  changeMaxColorAfterMount,
+  changeMinColorAfterMount = false,
+  changeMaxColorAfterMount = false,
   initialMinColor,
   initialMaxColor,
 }: {
