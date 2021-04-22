@@ -210,6 +210,7 @@ BaseRenderer.defaultConfig = {
   autoSyncCameraState: false,
   autoTextBackgroundColor: true,
 };
+BaseRenderer.supportsStrictMode = false;
 
 export const Renderer = hoistNonReactStatics(
   React.forwardRef<Props, typeof BaseRenderer>(BaseRenderer as any),

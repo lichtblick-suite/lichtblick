@@ -159,5 +159,6 @@ GlobalVariableSliderPanel.defaultConfig = {
   sliderProps: { min: 0, max: 10, step: 1 },
   globalVariableName: "globalVariable",
 };
+GlobalVariableSliderPanel.supportsStrictMode = false;
 
 export default Panel(GlobalVariableSliderPanel);

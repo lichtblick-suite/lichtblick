@@ -46,6 +46,7 @@ type Props = {
 class DiagnosticStatusPanel extends React.Component<Props> {
   static panelType = "DiagnosticStatusPanel";
   static defaultConfig: Config = { topicToRender: DIAGNOSTIC_TOPIC, collapsedSections: [] };
+  static supportsStrictMode = false;
 
   _onSelect = (value: string, entry: DiagnosticAutocompleteEntry, autocomplete: Autocomplete) => {
     const { saveConfig, config } = this.props;

@@ -81,5 +81,6 @@ function NumberOfRenders() {
 
 NumberOfRenders.panelType = "NumberOfRenders";
 NumberOfRenders.defaultConfig = {};
+NumberOfRenders.supportsStrictMode = false;
 
 export default Panel(NumberOfRenders);

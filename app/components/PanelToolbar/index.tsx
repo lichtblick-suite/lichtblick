@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import AlertIcon from "@mdi/svg/svg/alert.svg";
 import ArrowSplitHorizontalIcon from "@mdi/svg/svg/arrow-split-horizontal.svg";
 import ArrowSplitVerticalIcon from "@mdi/svg/svg/arrow-split-vertical.svg";
 import CheckboxMultipleBlankOutlineIcon from "@mdi/svg/svg/checkbox-multiple-blank-outline.svg";
@@ -47,6 +48,7 @@ import { State } from "@foxglove-studio/app/reducers";
 import frameless from "@foxglove-studio/app/util/frameless";
 import { TAB_PANEL_TYPE } from "@foxglove-studio/app/util/globalConstants";
 import logEvent, { getEventNames, getEventTags } from "@foxglove-studio/app/util/logEvent";
+import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 import MosaicDragHandle from "./MosaicDragHandle";
 import styles from "./index.module.scss";
@@ -306,7 +308,7 @@ export default React.memo<Props>(function PanelToolbar({
   menuContent,
   showHiddenControlsOnHover,
 }: Props) {
-  const { isHovered = false, id } = useContext(PanelContext) ?? {};
+  const { isHovered = false, id, supportsStrictMode = true } = useContext(PanelContext) ?? {};
   const [isDragging, setIsDragging] = useState(false);
   const onDragStart = useCallback(() => setIsDragging(true), []);
   const onDragEnd = useCallback(() => setIsDragging(false), []);
@@ -336,17 +338,26 @@ export default React.memo<Props>(function PanelToolbar({
   // Help-shown state must be hoisted outside the controls container so the modal can remain visible
   // when the panel is no longer hovered.
   const additionalIconsWithHelp = useMemo(() => {
-    return helpContent ? (
+    return (
       <>
         {additionalIcons}
-        <Icon tooltip="Help" fade onClick={() => setShowHelp(true)}>
-          <HelpCircleOutlineIcon className={styles.icon} />
-        </Icon>
+        {!supportsStrictMode && process.env.NODE_ENV !== "production" && (
+          <Icon
+            clickable={false}
+            style={{ color: colors.YELLOW }}
+            tooltip="[DEV MODE ONLY] React Strict Mode is not enabled for this panel. Please remove supportsStrictMode=false from the panel component and manually test this panel for regressions!"
+          >
+            <AlertIcon />
+          </Icon>
+        )}
+        {helpContent && (
+          <Icon tooltip="Help" fade onClick={() => setShowHelp(true)}>
+            <HelpCircleOutlineIcon className={styles.icon} />
+          </Icon>
+        )}
       </>
-    ) : (
-      additionalIcons
     );
-  }, [additionalIcons, helpContent]);
+  }, [additionalIcons, helpContent, supportsStrictMode]);
 
   const { width, ref: sizeRef } = useResizeDetector({
     handleHeight: false,

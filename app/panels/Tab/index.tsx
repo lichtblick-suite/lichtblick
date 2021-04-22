@@ -148,5 +148,6 @@ function Tab({ config, saveConfig }: Props) {
 
 Tab.panelType = TAB_PANEL_TYPE;
 Tab.defaultConfig = DEFAULT_TAB_PANEL_CONFIG;
+Tab.supportsStrictMode = false;
 
 export default Panel(Tab);

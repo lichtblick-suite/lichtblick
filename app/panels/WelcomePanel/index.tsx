@@ -158,5 +158,6 @@ export default Panel(
   Object.assign(WelcomePanel, {
     panelType: "onboarding.welcome",
     defaultConfig: {},
+    supportsStrictMode: false,
   }),
 );

@@ -387,5 +387,6 @@ NodePlayground.defaultConfig = {
   selectedNodeId: undefined,
   autoFormatOnSave: true,
 };
+NodePlayground.supportsStrictMode = false;
 
 export default Panel(NodePlayground);

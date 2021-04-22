@@ -163,5 +163,6 @@ function SourceInfo() {
 
 SourceInfo.panelType = "SourceInfo";
 SourceInfo.defaultConfig = {};
+SourceInfo.supportsStrictMode = false;
 
 export default Panel(SourceInfo);

@@ -318,5 +318,6 @@ Plot.defaultConfig = {
   showLegend: true,
   xAxisVal: "timestamp" as const,
 };
+Plot.supportsStrictMode = false;
 
 export default Panel(Plot);

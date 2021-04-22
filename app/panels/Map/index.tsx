@@ -169,5 +169,6 @@ MapPanel.panelType = "map";
 MapPanel.defaultConfig = {
   zoomLevel: 10,
 } as Config;
+MapPanel.supportsStrictMode = false;
 
 export default Panel(MapPanel);

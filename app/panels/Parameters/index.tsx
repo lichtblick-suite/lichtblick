@@ -136,5 +136,6 @@ function Parameters(): ReactElement {
 
 Parameters.panelType = "Parameters";
 Parameters.defaultConfig = {};
+Parameters.supportsStrictMode = false;
 
 export default Panel(Parameters);

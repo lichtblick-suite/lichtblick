@@ -122,6 +122,7 @@ type ActionProps = {
 export interface PanelStatics<Config> {
   panelType: string;
   defaultConfig: Config;
+  supportsStrictMode?: boolean;
 }
 
 const EMPTY_CONFIG = Object.freeze({});
@@ -560,6 +561,7 @@ export default function Panel<Config extends PanelConfig>(
             isHovered,
             isFocused,
             tabId,
+            supportsStrictMode: PanelComponent.supportsStrictMode ?? true,
           }}
         >
           {/* Ensure user exits full-screen mode when leaving window, even if key is still pressed down */}
@@ -628,7 +630,13 @@ export default function Panel<Config extends PanelConfig>(
                 <CloseIcon /> <span>Exit fullscreen</span>
               </button>
             )}
-            <ErrorBoundary>{child}</ErrorBoundary>
+            <ErrorBoundary>
+              {PanelComponent.supportsStrictMode ?? true ? (
+                <React.StrictMode>{child}</React.StrictMode>
+              ) : (
+                child
+              )}
+            </ErrorBoundary>
             {process.env.NODE_ENV !== "production" && <PerfInfo ref={perfInfo} />}
           </Flex>
         </PanelContext.Provider>

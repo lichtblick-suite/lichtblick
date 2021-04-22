@@ -221,5 +221,6 @@ function TopicGraph() {
 
 TopicGraph.panelType = "TopicGraph";
 TopicGraph.defaultConfig = {};
+TopicGraph.supportsStrictMode = false;
 
 export default Panel(TopicGraph);

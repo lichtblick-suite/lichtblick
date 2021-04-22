@@ -694,5 +694,6 @@ ImageView.defaultConfig = {
   zoomPercentage: 100,
   offset: [0, 0],
 } as Config;
+ImageView.supportsStrictMode = false;
 
 export default Panel(ImageView);

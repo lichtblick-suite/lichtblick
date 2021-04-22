@@ -11,7 +11,7 @@ import {
   Toggle,
   useTheme,
 } from "@fluentui/react";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { CameraStore, CameraListener, CameraState, DEFAULT_CAMERA_STATE } from "regl-worldview";
 
@@ -22,7 +22,6 @@ import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import { useAssets } from "@foxglove-studio/app/context/AssetContext";
 import useCleanup from "@foxglove-studio/app/hooks/useCleanup";
-import { usePreviousValue } from "@foxglove-studio/app/hooks/usePreviousValue";
 import { JointState } from "@foxglove-studio/app/types/Messages";
 import { SaveConfig } from "@foxglove-studio/app/types/panels";
 import filterMap from "@foxglove-studio/app/util/filterMap";
@@ -59,16 +58,17 @@ function URDFViewer({ config, saveConfig }: Props) {
   }, [assets, selectedAssetId]);
 
   // Automatically select newly added URDF assets
-  const prevAssets = usePreviousValue(assets);
+  const prevAssets = useRef<typeof assets | undefined>();
   useEffect(() => {
-    const prevAssetIds = new Set(prevAssets?.map(({ uuid }) => uuid));
+    const prevAssetIds = new Set(prevAssets.current?.map(({ uuid }) => uuid));
+    prevAssets.current = assets;
     for (const asset of assets) {
       if (!prevAssetIds.has(asset.uuid) && asset.type === "urdf") {
         setSelectedAssetId(asset.uuid);
         return;
       }
     }
-  }, [assets, prevAssets, selectedAssetId]);
+  }, [assets]);
 
   const [renderer] = useState(() => new Renderer());
 

@@ -36,6 +36,7 @@ export type PanelContextType<T> = {
 
   isHovered: boolean;
   isFocused: boolean;
+  supportsStrictMode: boolean; // remove when all panels have strict mode enabled :)
 };
 // Context used for components to know which panel they are inside
 const PanelContext = React.createContext<PanelContextType<PanelConfig> | undefined>(undefined);

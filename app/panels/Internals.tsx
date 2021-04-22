@@ -246,5 +246,6 @@ function Internals() {
 }
 Internals.panelType = "Internals";
 Internals.defaultConfig = {};
+Internals.supportsStrictMode = false;
 
 export default Panel(Internals);

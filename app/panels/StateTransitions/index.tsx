@@ -446,5 +446,6 @@ export default Panel(
   Object.assign(StateTransitions, {
     panelType: "StateTransitions",
     defaultConfig: { paths: [] },
+    supportsStrictMode: false,
   }),
 );

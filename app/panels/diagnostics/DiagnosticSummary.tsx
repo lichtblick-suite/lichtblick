@@ -103,6 +103,7 @@ class DiagnosticSummary extends React.Component<Props> {
     hardwareIdFilter: "",
     topicToRender: DIAGNOSTIC_TOPIC,
   };
+  static supportsStrictMode = false;
 
   togglePinned = (info: DiagnosticInfo) => {
     this.props.saveConfig({ pinnedIds: toggle(this.props.config.pinnedIds, info.id) });

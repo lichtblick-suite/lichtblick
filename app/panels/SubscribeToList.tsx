@@ -50,5 +50,6 @@ function SubscribeToList({ config, saveConfig }: Props): React.ReactElement {
 
 SubscribeToList.panelType = "SubscribeToList";
 SubscribeToList.defaultConfig = { topics: "" };
+SubscribeToList.supportsStrictMode = false;
 
 export default Panel(SubscribeToList);

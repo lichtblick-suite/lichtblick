@@ -13,6 +13,7 @@
 
 import { mount } from "enzyme";
 import { createMemoryHistory } from "history";
+import { useEffect } from "react";
 
 import { savePanelConfigs } from "@foxglove-studio/app/actions/panels";
 import Panel from "@foxglove-studio/app/components/Panel";
@@ -23,16 +24,15 @@ import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 type DummyConfig = { someString: string };
 type DummyProps = { config: DummyConfig; saveConfig: (arg0: Partial<DummyConfig>) => void };
 
-function getDummyPanel(renderFn: any) {
-  class DummyComponent extends React.Component<DummyProps> {
-    static panelType = "Dummy";
-    static defaultConfig = { someString: "hello world" };
-
-    render() {
-      renderFn(this.props);
-      return ReactNull;
-    }
+function getDummyPanel(renderFn: jest.Mock) {
+  function DummyComponent(props: DummyProps): ReactNull {
+    // Call the mock function in an effect rather than during render, since render may happen more
+    // than once due to React.StrictMode.
+    useEffect(() => renderFn(props));
+    return ReactNull;
   }
+  DummyComponent.panelType = "Dummy";
+  DummyComponent.defaultConfig = { someString: "hello world" };
   return Panel(DummyComponent);
 }
 

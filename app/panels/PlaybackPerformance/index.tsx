@@ -160,5 +160,6 @@ function PlaybackPerformance() {
 
 PlaybackPerformance.panelType = "PlaybackPerformance";
 PlaybackPerformance.defaultConfig = {};
+PlaybackPerformance.supportsStrictMode = false;
 
 export default Panel(PlaybackPerformance);

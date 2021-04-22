@@ -586,5 +586,6 @@ RawMessages.defaultConfig = {
   showFullMessageForDiff: false,
 };
 RawMessages.panelType = "RawMessages";
+RawMessages.supportsStrictMode = false;
 
 export default Panel(RawMessages);

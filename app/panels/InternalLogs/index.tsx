@@ -76,5 +76,6 @@ InternalLogs.panelType = "InternalLogs";
 InternalLogs.defaultConfig = {
   disabledChannels: [],
 } as Config;
+InternalLogs.supportsStrictMode = false;
 
 export default Panel(InternalLogs);

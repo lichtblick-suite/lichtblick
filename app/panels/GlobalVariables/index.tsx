@@ -36,5 +36,6 @@ function GlobalVariables(): ReactElement {
 
 GlobalVariables.panelType = "Global";
 GlobalVariables.defaultConfig = {};
+GlobalVariables.supportsStrictMode = false;
 
 export default Panel(GlobalVariables);

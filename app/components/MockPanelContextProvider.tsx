@@ -34,13 +34,14 @@ const DEFAULT_MOCK_PANEL_CONTEXT: PanelContextType<any> = {
   },
   isHovered: false,
   isFocused: false,
+  supportsStrictMode: true,
 };
 function MockPanelContextProvider({
   children,
   ...rest
 }: MockProps & {
   children: ReactNode;
-}) {
+}): JSX.Element {
   return (
     <PanelContext.Provider
       value={{
