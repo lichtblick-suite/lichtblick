@@ -207,6 +207,7 @@ export function makeConfig(_: unknown, argv: WebpackArgv, options?: Options): Co
       }),
       new EnvironmentPlugin({
         SENTRY_DSN: process.env.SENTRY_DSN ?? null, // eslint-disable-line no-restricted-syntax
+        SENTRY_PROJECT: process.env.SENTRY_PROJECT ?? null, // eslint-disable-line no-restricted-syntax
         AMPLITUDE_API_KEY: process.env.AMPLITUDE_API_KEY ?? null, // eslint-disable-line no-restricted-syntax
         SIGNUP_API_URL: "https://foxglove.dev/api/signup",
         SLACK_INVITE_URL: "https://foxglove.dev/join-slack",

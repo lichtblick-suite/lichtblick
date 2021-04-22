@@ -18,12 +18,12 @@ import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import TextContent from "@foxglove-studio/app/components/TextContent";
 import TextField from "@foxglove-studio/app/components/TextField";
-import { APP_NAME } from "@foxglove-studio/app/constants";
 import { usePlayerSelection } from "@foxglove-studio/app/context/PlayerSelectionContext";
 import { useAsyncAppConfigurationValue } from "@foxglove-studio/app/hooks/useAsyncAppConfigurationValue";
 import subscribeToNewsletter from "@foxglove-studio/app/panels/WelcomePanel/subscribeToNewsletter";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { isEmail } from "@foxglove-studio/app/util/validators";
+import { APP_NAME } from "@foxglove-studio/app/version";
 
 const Term = styled.span`
   font-weight: bold;

@@ -8,7 +8,7 @@ import { PNG } from "pngjs";
 import UTIF from "utif";
 import { DOMParser } from "xmldom";
 
-import { APP_NAME } from "@foxglove-studio/app/constants";
+import { APP_NAME } from "@foxglove-studio/app/version";
 import Logger from "@foxglove/log";
 
 const log = Logger.getLogger(__filename);

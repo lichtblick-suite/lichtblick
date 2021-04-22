@@ -9,7 +9,7 @@ import os from "os";
 
 import type { OsContext, OsContextForwardedEvent } from "@foxglove-studio/app/OsContext";
 import { NetworkInterface } from "@foxglove-studio/app/OsContext";
-import { APP_NAME, APP_VERSION } from "@foxglove-studio/app/constants";
+import { APP_NAME, APP_VERSION } from "@foxglove-studio/app/version";
 import { PreloaderSockets } from "@foxglove/electron-socket/preloader";
 import Logger from "@foxglove/log";
 
@@ -27,7 +27,7 @@ if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
   initSentry({
     dsn: process.env.SENTRY_DSN,
     autoSessionTracking: true,
-    release: "studio@" + APP_VERSION,
+    release: `${process.env.SENTRY_PROJECT}@${APP_VERSION}`,
   });
 }
 

@@ -16,7 +16,7 @@ import { autoUpdater } from "electron-updater";
 import fs from "fs";
 import { URL } from "universal-url";
 
-import { APP_NAME, APP_VERSION, APP_HOMEPAGE } from "@foxglove-studio/app/constants";
+import { APP_NAME, APP_VERSION, APP_HOMEPAGE } from "@foxglove-studio/app/version";
 import Logger from "@foxglove/log";
 
 import StudioWindow from "./StudioWindow";
@@ -49,7 +49,7 @@ if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
   initSentry({
     dsn: process.env.SENTRY_DSN,
     autoSessionTracking: true,
-    release: "studio@" + APP_VERSION,
+    release: `${process.env.SENTRY_PROJECT}@${APP_VERSION}`,
   });
 }
 
