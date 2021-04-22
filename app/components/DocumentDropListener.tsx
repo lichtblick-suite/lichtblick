@@ -13,7 +13,7 @@
 
 type Props = {
   children: React.ReactNode; // Shown when dragging in a file.
-  filesSelected: (arg0: { files: FileList; shiftPressed: boolean }) => any;
+  filesSelected: (arg0: { files: FileList; shiftPressed: boolean }) => void;
 };
 
 type State = {
@@ -23,26 +23,26 @@ type State = {
 export default class DocumentDropListener extends React.PureComponent<Props, State> {
   state = { hovering: false };
 
-  componentDidMount() {
+  componentDidMount(): void {
     document.addEventListener("dragover", this._onDragOver);
     document.addEventListener("drop", this._onDrop);
     document.addEventListener("dragleave", this._onDragLeave);
   }
 
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     document.removeEventListener("dragover", this._onDragOver);
     document.removeEventListener("drop", this._onDrop);
     document.removeEventListener("dragleave", this._onDragLeave);
   }
 
-  _onDrop = (ev: DragEvent) => {
+  _onDrop = (ev: DragEvent): void => {
     const { filesSelected } = this.props;
     if (!ev.dataTransfer) {
       return;
     }
     const { files } = ev.dataTransfer;
     // allow event to bubble for non-file based drag and drop
-    if (!files.length) {
+    if (files.length === 0) {
       return;
     }
     ev.preventDefault();
@@ -51,7 +51,7 @@ export default class DocumentDropListener extends React.PureComponent<Props, Sta
     this.setState({ hovering: false });
   };
 
-  _onDragOver = (ev: DragEvent) => {
+  _onDragOver = (ev: DragEvent): void => {
     const { dataTransfer } = ev;
     // dataTransfer isn't guaranteed to exist by spec, so it must be checked
     if (dataTransfer && dataTransfer.types.length === 1 && dataTransfer.types[0] === "Files") {
@@ -62,11 +62,11 @@ export default class DocumentDropListener extends React.PureComponent<Props, Sta
     }
   };
 
-  _onDragLeave = () => {
+  _onDragLeave = (): void => {
     this.setState({ hovering: false });
   };
 
-  render() {
+  render(): JSX.Element {
     return (
       <>
         <input // Expose a hidden input for Puppeteer to use to drop a file in.

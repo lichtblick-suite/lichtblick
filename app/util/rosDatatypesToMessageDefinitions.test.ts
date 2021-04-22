@@ -34,7 +34,7 @@ describe("rosDatatypesToMessageDefinition", () => {
       WEBVIZ_MARKER_ARRAY_DATATYPE,
     );
     // Should have 1 definition without a name, the root datatype.
-    expect(definitions.filter(({ name }) => !name).length).toEqual(1);
+    expect(definitions.filter(({ name }) => name == undefined).length).toEqual(1);
     // Should not duplicate definitions.
     expect(uniqBy(definitions, "name").length).toEqual(definitions.length);
   });

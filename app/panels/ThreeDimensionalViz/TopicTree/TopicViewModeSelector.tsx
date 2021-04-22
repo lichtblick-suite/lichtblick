@@ -30,18 +30,16 @@ export const TOPIC_DISPLAY_MODES = {
     value: "SHOW_SELECTED",
     label: "Visible",
   },
-};
+} as const;
 
 const DEFAULT_DISPLAY_MODE = TOPIC_DISPLAY_MODES.SHOW_ALL.value;
 const DEFAULT_BTN_WIDTH = 88; // Width for the longest selected option in dropdown.
 const XS_WIDTH_BTN_WIDTH = 48;
 
-const dropdownOptions = Object.keys(TOPIC_DISPLAY_MODES)
-  .filter((item) => item !== "SHOW_TREE")
-  .map((key) => ({
-    label: (TOPIC_DISPLAY_MODES as any)[key].label,
-    value: (TOPIC_DISPLAY_MODES as any)[key].value,
-  }));
+const dropdownOptions = Object.keys(TOPIC_DISPLAY_MODES).map((key) => ({
+  label: (TOPIC_DISPLAY_MODES as any)[key].label,
+  value: (TOPIC_DISPLAY_MODES as any)[key].value,
+}));
 
 export type TopicDisplayMode = keyof typeof TOPIC_DISPLAY_MODES;
 

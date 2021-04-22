@@ -36,13 +36,13 @@ type Props = {
   children: React.ReactNode;
 };
 
-function CopyText({ copyText, tooltip, children }: Props) {
-  if (!copyText || !children) {
+function CopyText({ copyText, tooltip, children }: Props): JSX.Element | ReactNull {
+  if (copyText.length === 0 || children == undefined) {
     return ReactNull;
   }
   return (
     <SCopyTextWrapper onClick={() => clipboard.copy(copyText)}>
-      {children ? children : copyText}
+      {children != undefined ? children : copyText}
       <Icon fade style={{ margin: "0 8px", verticalAlign: "middle" }} tooltip={tooltip}>
         <ClipboardOutlineIcon />
       </Icon>

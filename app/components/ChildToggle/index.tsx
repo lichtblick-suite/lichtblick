@@ -62,9 +62,7 @@ type Props = {
   onToggle?: (isOpen: boolean) => void;
   // requires exactly 2 components: a toggle trigger & a content component
   children: [ReactNode, ReactNode];
-  style?: {
-    [key: string]: any;
-  };
+  style?: React.CSSProperties;
   // alignment of the content component
   position: "above" | "below" | "left" | "right" | "bottom-left";
   // don't use a portal, e.g. if you are nesting this already in a portal
@@ -83,7 +81,7 @@ export default function ChildToggle(props: Props): ReactElement {
     dataTest,
     children,
     position,
-    noPortal,
+    noPortal = false,
     style,
   } = props;
 
@@ -149,7 +147,7 @@ export default function ChildToggle(props: Props): ReactElement {
       const node = (event.target as any) as HTMLElement;
       // if there was a click outside this container and outside children[0]
       // fire the toggle callback to close expanded section
-      if (floatingEl.current.contains(node) || el.current?.contains(node)) {
+      if (floatingEl.current.contains(node) || (el.current?.contains(node) ?? false)) {
         // the click was inside our bounds and shouldn't auto-close the menu
       } else {
         // allow any nested child toggle click events to reach their dom node before removing
@@ -178,14 +176,13 @@ export default function ChildToggle(props: Props): ReactElement {
     // position menu relative to our children[0]
     const childRect = childEl.getBoundingClientRect();
     const padding = 10;
-    const styleObj = {
+    const styleObj: React.CSSProperties = {
       ...style,
       top: padding,
       bottom: padding,
       left: padding,
       right: padding,
-      height: undefined, // to appease Flow
-    } as any;
+    };
 
     let spacerSize;
     if (position === "left") {

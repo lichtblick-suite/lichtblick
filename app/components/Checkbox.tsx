@@ -18,7 +18,10 @@ import styled from "styled-components";
 import Icon from "@foxglove-studio/app/components/Icon";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
-export const SCheckbox = styled.div<any>`
+export const SCheckbox = styled.div<{
+  labelDirection: "top" | "left" | "right";
+  disabled: boolean;
+}>`
   display: flex;
   align-items: center;
   flex-direction: ${(props) => (props.labelDirection === "top" ? "column" : "row")};
@@ -27,7 +30,7 @@ export const SCheckbox = styled.div<any>`
   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
 `;
 
-export const SLabel = styled.label<any>`
+export const SLabel = styled.label<{ labelDirection: "top" | "left" | "right"; disabled: boolean }>`
   margin: ${(props) => (props.labelDirection === "top" ? "6px 6px 6px 0" : "6px")};
   color: ${(props) =>
     props.disabled || props.labelDirection === "top" ? colors.GRAY : colors.LIGHT1};
@@ -56,10 +59,10 @@ export default function Checkbox({
   checked,
   tooltip,
   onChange,
-  disabled,
+  disabled = false,
   style = {},
   dataTest,
-}: Props) {
+}: Props): JSX.Element {
   const Component = checked ? CheckboxMarkedIcon : CheckboxBlankOutlineIcon;
   const onClick = React.useCallback(() => {
     if (!disabled) {

@@ -166,7 +166,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
   // if it just was a click without a drag. In the latter case, select everything. This is very
   // similar to how, say, the browser bar in Chrome behaves.
   _onMouseDown = (_event: React.MouseEvent<HTMLInputElement>) => {
-    if (this.props.disableAutoSelect) {
+    if (this.props.disableAutoSelect ?? false) {
       return;
     }
     if (this.state.focused) {
@@ -250,7 +250,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
   render() {
     const {
       autocompleteKey,
-      autoSize,
+      autoSize = false,
       getItemValue,
       getItemText,
       items,
@@ -297,11 +297,11 @@ export default class Autocomplete<T = unknown> extends PureComponent<
         }}
         onChange={this._onChange}
         onSelect={this._onSelect}
-        value={value || ""}
+        value={value ?? ""}
         inputProps={{
           className: cx(styles.input, {
             [styles.inputError!]: hasError,
-            [styles.placeholder!]: !value,
+            [styles.placeholder!]: value == undefined || value.length === 0,
           }),
           autoCorrect: "off",
           autoCapitalize: "off",
@@ -311,7 +311,12 @@ export default class Autocomplete<T = unknown> extends PureComponent<
             ...inputStyle,
             fontFamily,
             fontSize,
-            width: autoSize ? Math.max(measureText(value || placeholder || ""), minWidth) : "100%",
+            width: autoSize
+              ? Math.max(
+                  measureText(value != undefined && value.length > 0 ? value : placeholder ?? ""),
+                  minWidth,
+                )
+              : "100%",
           },
           onFocus: this._onFocus,
           onBlur: this._onBlur,
@@ -369,7 +374,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
           );
         }}
         // @ts-expect-error renderMenuWrapper added in the fork but we don't have typings for it
-        renderMenuWrapper={(menu: any) => document.body && createPortal(menu, document.body)}
+        renderMenuWrapper={(menu: any) => createPortal(menu, document.body)}
         ref={this._autocomplete}
         wrapperStyle={{ flex: "1 1 auto", overflow: "hidden", marginLeft: 6 }}
       />

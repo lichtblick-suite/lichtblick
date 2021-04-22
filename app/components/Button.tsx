@@ -27,13 +27,13 @@ export type Props = ButtonBaseProps & {
 // Wrapper for ButtonBase which uses our standard Tooltip styling.
 export default function Button({
   tooltip,
-  disabled,
+  disabled = false,
   className,
   tooltipProps,
   onClick,
   onMouseUp,
   onMouseLeave,
-  isPrimary,
+  isPrimary = false,
   style = {},
   ...otherProps
 }: Props): React.ReactElement {
@@ -46,7 +46,7 @@ export default function Button({
   // replace disabled={true} with className="disabled" in order to allow tooltips on disabled buttons
   const newClassName = cx(className, { disabled });
 
-  if (tooltip) {
+  if (tooltip != undefined && tooltip.length > 0) {
     return (
       <Tooltip contents={tooltip} {...tooltipProps}>
         <ButtonBase style={styleAlt} {...otherProps} {...eventHandlers} className={newClassName} />

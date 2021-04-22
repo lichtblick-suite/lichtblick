@@ -72,8 +72,12 @@ export const constantsByDatatype = createSelector<any, any, any, any>(
     for (const [datatype, value] of Object.entries(datatypes)) {
       const result: Result = (results[datatype] = {});
       for (const field of value.fields) {
-        if (field.isConstant && field.value !== undefined && typeof field.value !== "boolean") {
-          if (result[field.value]) {
+        if (
+          field.isConstant === true &&
+          field.value !== undefined &&
+          typeof field.value !== "boolean"
+        ) {
+          if (result[field.value] != undefined) {
             result[field.value] = "<multiple constants match>";
           } else {
             result[field.value] = field.name;
@@ -87,7 +91,7 @@ export const constantsByDatatype = createSelector<any, any, any, any>(
 
 // webviz enum annotations are of the form: "Foo__webviz_enum" (notice double underscore)
 // This method returns type name from "Foo" or undefined name doesn't match this format
-export function extractTypeFromWebizEnumAnnotation(name: string) {
+export function extractTypeFromWebizEnumAnnotation(name: string): string | undefined {
   const match = /(.*)__webviz_enum$/.exec(name);
   if (match) {
     return match[1];
@@ -115,17 +119,21 @@ export const enumValuesByDatatypeAndField = createSelector<any, any, any, any>(
         [key: string]: string;
       } = {};
       // constants' types
-      let lastType;
+      let lastType: string | undefined;
       for (const field of value.fields) {
-        if (lastType && field.type !== lastType) {
+        if (lastType != undefined && field.type !== lastType) {
           // encountering new type resets the accumulated constants
           constants = {};
           lastType = undefined;
         }
 
-        if (field.isConstant && field.value !== undefined && typeof field.value !== "boolean") {
+        if (
+          field.isConstant === true &&
+          field.value !== undefined &&
+          typeof field.value !== "boolean"
+        ) {
           lastType = field.type;
-          if (constants[field.value]) {
+          if (constants[field.value] != undefined) {
             constants[field.value] = "<multiple constants match>";
           } else {
             constants[field.value] = field.name;
@@ -135,7 +143,7 @@ export const enumValuesByDatatypeAndField = createSelector<any, any, any, any>(
         // check if current field is annotation of the form: "Foo bar__webviz_enum"
         // This means that "bar" is enum of type "Foo"
         const fieldName = extractTypeFromWebizEnumAnnotation(field.name);
-        if (fieldName) {
+        if (fieldName != undefined) {
           // associate all constants of type field.type with the annotated field
           currentResult[fieldName] = constantsByDatatype(datatypes)[field.type];
           continue;

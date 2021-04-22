@@ -17,8 +17,8 @@ import { useState, useEffect } from "react";
 import AutoSizingCanvas from ".";
 
 function Example({
-  changeSize,
-  changePixelRatio,
+  changeSize = false,
+  changePixelRatio = false,
   devicePixelRatio,
 }: {
   changeSize?: boolean;

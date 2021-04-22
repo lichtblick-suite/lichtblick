@@ -39,7 +39,7 @@ class ButtonBaseImpl extends React.Component<Props> {
   cancelTimeoutId?: ReturnType<typeof setTimeout>;
 
   componentWillUnmount() {
-    if (this.animationId) {
+    if (this.animationId != undefined) {
       cancelAnimationFrame(this.animationId);
     }
     if (this.cancelTimeoutId) {
@@ -92,7 +92,7 @@ class ButtonBaseImpl extends React.Component<Props> {
       onFocus,
       innerRef,
     } = this.props;
-    const classes = cx("button", className || "", {
+    const classes = cx("button", className ?? "", {
       // support some bulma classes to be supplied in consumer either through bulma or custom classes
       // these provide backwards compatibility with webviz
       "is-small": small,

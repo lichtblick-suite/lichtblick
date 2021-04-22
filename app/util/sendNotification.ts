@@ -64,7 +64,7 @@ export function setNotificationHandler(handler: NotificationHandler): void {
   addNotification = handler;
 }
 
-export function unsetNotificationHandler() {
+export function unsetNotificationHandler(): void {
   if (addNotification === defaultNotificationHandler) {
     throw new Error("Tried to unset NotificationHandler but it was already the default");
   }
@@ -93,7 +93,7 @@ export default function sendNotification(
   if (type === "app") {
     const sentrySeverity =
       severity === "error" ? Severity.Error : severity === "warn" ? Severity.Warning : undefined;
-    if (sentrySeverity) {
+    if (sentrySeverity != undefined) {
       captureException(new AppError(details, message), { level: sentrySeverity });
     }
   }

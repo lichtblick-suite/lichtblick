@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import cx from "classnames";
-import { LegacyRef } from "react";
+import { CSSProperties, LegacyRef } from "react";
 
 import styles from "./Flex.module.scss";
 
@@ -21,11 +21,8 @@ type Props = {
   col?: boolean;
   row?: boolean;
   reverse?: boolean;
-  // pass a number for pixels or string percentage
-  // and the flex container will be fixed to this amount
-  fixed?: number | string;
   // custom style
-  style?: any;
+  style?: CSSProperties;
   // custom class names
   className?: string;
   // set to true to center content horizontally and vertically
@@ -55,7 +52,6 @@ const Flex = (props: Props) => {
     col,
     row,
     reverse,
-    fixed,
     style,
     className,
     center,
@@ -91,17 +87,12 @@ const Flex = (props: Props) => {
   };
   const combinedClasses = cx(styles.flex, conditionalClasses, className);
 
-  // support both numeric and string (percentage) flex directives
-  const amount = typeof fixed === "number" ? `${fixed}px` : fixed;
-  const flexStyle = amount ? { flex: `0 0 ${amount}` } : {};
-  // only copy combine flex & custom style if we were passed custom style
-  const fullStyle = style ? { ...flexStyle, ...style } : flexStyle;
   return (
     <div
       ref={ref}
       data-test={dataTest}
       className={combinedClasses}
-      style={fullStyle}
+      style={style}
       onClick={onClick as any}
       onMouseEnter={onMouseEnter as any}
       onMouseLeave={onMouseLeave as any}

@@ -22,14 +22,14 @@ import Icon from "../Icon";
 import Menu, { Item } from "../Menu";
 import styles from "./index.module.scss";
 
-type Props = {
+type Props<T> = {
   children?: ReactNode;
-  value?: any;
+  value?: T | T[];
   text?: ReactNode;
   position: "above" | "below" | "left" | "right";
-  disabled?: boolean;
-  closeOnChange?: boolean;
-  onChange?: (value: any) => void;
+  disabled: boolean;
+  closeOnChange: boolean;
+  onChange?: (value: T) => void;
   toggleComponent?: ReactNode;
   flatEdges: boolean;
   tooltip?: string;
@@ -44,21 +44,22 @@ type State = {
   isOpen: boolean;
 };
 
-export default class Dropdown extends React.Component<Props, State> {
+export default class Dropdown<T> extends React.Component<Props<T>, State> {
   state = { isOpen: false };
-  toggle = () => {
+  toggle = (): void => {
     if (!this.props.disabled) {
       this.setState({ isOpen: !this.state.isOpen });
     }
   };
 
   static defaultProps = {
+    disabled: false,
     flatEdges: true,
     closeOnChange: true,
     position: "below",
   };
 
-  onClick = (value: any) => {
+  onClick = (value: T): void => {
     const { onChange, closeOnChange } = this.props;
     if (onChange) {
       if (closeOnChange) {
@@ -68,7 +69,7 @@ export default class Dropdown extends React.Component<Props, State> {
     }
   };
 
-  renderItem(child: ReactElement) {
+  renderItem(child: ReactElement): JSX.Element {
     const { value } = this.props;
     const checked = Array.isArray(value)
       ? value.includes(child.props.value)
@@ -84,7 +85,7 @@ export default class Dropdown extends React.Component<Props, State> {
     );
   }
 
-  renderChildren() {
+  renderChildren(): ReactNode {
     const { children } = this.props;
     return React.Children.map(children, (child, i) => {
       if (child == undefined) {
@@ -96,7 +97,7 @@ export default class Dropdown extends React.Component<Props, State> {
   }
 
   renderButton(): ReactNode {
-    if (this.props.toggleComponent) {
+    if (this.props.toggleComponent != undefined) {
       return this.props.toggleComponent;
     }
     const { btnClassname, text, value, disabled, tooltip } = this.props;
@@ -107,20 +108,20 @@ export default class Dropdown extends React.Component<Props, State> {
         style={{ opacity: isOpen ? 1 : undefined, ...this.props.btnStyle }}
         data-test={this.props.dataTest}
       >
-        <span className={styles.title}>{text || value}</span>
+        <span className={styles.title}>{text ?? value}</span>
         <Icon style={{ marginLeft: 4 }}>
           <ChevronDownIcon style={{ width: 14, height: 14, opacity: 0.5 }} />
         </Icon>
       </button>
     );
-    if (tooltip && !isOpen) {
+    if (tooltip != undefined && tooltip.length > 0 && !isOpen) {
       // The tooltip often occludes the first item of the open menu.
       return <Tooltip contents={tooltip}>{button}</Tooltip>;
     }
     return button;
   }
 
-  render() {
+  render(): JSX.Element {
     const { isOpen } = this.state;
     const { position, flatEdges, menuStyle } = this.props;
     const style = {

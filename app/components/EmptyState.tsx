@@ -24,7 +24,7 @@ const Container = styled.div<Props>`
   flex: 1 1 auto;
   display: flex;
   align-items: center;
-  justify-content: ${(props) => (props.alignLeft ? "left" : "center")};
+  justify-content: ${({ alignLeft = false }) => (alignLeft ? "left" : "center")};
   margin: 20px;
   line-height: 1.4;
   color: ${colors.textMuted};
@@ -37,12 +37,10 @@ const Container = styled.div<Props>`
   }
 `;
 
-export default class EmptyState extends React.Component<Props> {
-  render() {
-    return (
-      <Container alignLeft={this.props.alignLeft}>
-        <div>{this.props.children}</div>
-      </Container>
-    );
-  }
+export default function EmptyState({ children, alignLeft }: Props): JSX.Element {
+  return (
+    <Container alignLeft={alignLeft}>
+      <div>{children}</div>
+    </Container>
+  );
 }

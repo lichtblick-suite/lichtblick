@@ -177,20 +177,6 @@ rules:
 
 overrides:
   - files:
-      - "app/components/AutoSizingCanvas/index.stories.tsx"
-      - "app/components/Autocomplete.tsx"
-      - "app/components/Button.tsx"
-      - "app/components/ButtonBase.tsx"
-      - "app/components/Checkbox.tsx"
-      - "app/components/ChildToggle/index.tsx"
-      - "app/components/CopyText.tsx"
-      - "app/components/CopyToClipboard.tsx"
-      - "app/components/DocumentDropListener.test.tsx"
-      - "app/components/DocumentDropListener.tsx"
-      - "app/components/Dropdown/index.tsx"
-      - "app/components/EmptyState.tsx"
-      - "app/components/ExpandingToolbar.tsx"
-      - "app/components/Flex.tsx"
       - "app/components/GlobalKeyListener.ts"
       - "app/components/GlobalVariablesMenu.tsx"
       - "app/components/GlobalVariablesTable.tsx"
@@ -350,11 +336,5 @@ overrides:
       - "app/util/installDevtoolsFormatters.ts"
       - "app/util/naturalSort.ts"
       - "app/util/parseMessageDefinitionsCache.ts"
-      - "app/util/performanceMeasurements.ts"
-      - "app/util/quaternionToEuler.ts"
-      - "app/util/rosDatatypesToMessageDefinition.ts"
-      - "app/util/rosDatatypesToMessageDefinitions.test.ts"
-      - "app/util/selectors.ts"
-      - "app/util/sendNotification.ts"
     rules:
       "@typescript-eslint/strict-boolean-expressions": off

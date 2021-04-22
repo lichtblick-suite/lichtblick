@@ -30,7 +30,7 @@ export const SToolGroupFixedSizePane = styled.div`
   padding: 8px 0;
 `;
 
-export function ToolGroup<T>({ children }: { name: T; children: React.ReactElement }) {
+export function ToolGroup<T>({ children }: { name: T; children: React.ReactElement }): JSX.Element {
   return children;
 }
 
@@ -38,7 +38,7 @@ export function ToolGroupFixedSizePane({
   children,
 }: {
   children: React.ReactElement | React.ReactElement[];
-}) {
+}): JSX.Element {
   return (
     <SToolGroupFixedSizePane style={{ width: PANE_WIDTH - 28, height: PANE_HEIGHT }}>
       {children}
@@ -64,18 +64,16 @@ export default function ExpandingToolbar<T extends string>({
   selectedTab,
   tooltip,
   style,
-}: Props<T>) {
-  const expanded = !!selectedTab;
+}: Props<T>): JSX.Element {
+  const expanded = selectedTab != undefined;
   if (!expanded) {
     let selectedTabLocal = selectedTab;
-    if (!selectedTabLocal) {
-      // default to the first child's name if no tab is selected
-      React.Children.forEach(children, (child) => {
-        if (!selectedTabLocal) {
-          selectedTabLocal = child.props.name as any;
-        }
-      });
-    }
+    // default to the first child's name if no tab is selected
+    React.Children.forEach(children, (child) => {
+      if (selectedTabLocal == undefined) {
+        selectedTabLocal = child.props.name as any;
+      }
+    });
     return (
       <div className={className}>
         <Button tooltip={tooltip} onClick={() => onSelectTab(selectedTabLocal)}>

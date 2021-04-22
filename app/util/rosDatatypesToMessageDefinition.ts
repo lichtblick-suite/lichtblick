@@ -28,8 +28,8 @@ export default function rosDatatypesToMessageDefinition(
 
   while (datatypeNameStack.length > 0) {
     const currentDatatypeName = datatypeNameStack.pop();
-    if (!currentDatatypeName) {
-      throw new Error(`Invariant violation - Array.pop() when lenght > 0`);
+    if (currentDatatypeName == undefined) {
+      throw new Error(`Invariant violation - Array.pop() when length > 0`);
     }
     const currentDatatype = datatypes[currentDatatypeName];
     if (!currentDatatype) {
@@ -46,7 +46,7 @@ export default function rosDatatypesToMessageDefinition(
     for (const field of currentDatatype.fields) {
       // Only search subfields if we haven't already seen it and it is "complex", IE it has its own fields and should
       // be contained in `datatypes`.
-      if (field.isComplex && !seenDatatypeNames.has(field.type)) {
+      if (field.isComplex === true && !seenDatatypeNames.has(field.type)) {
         datatypeNameStack.push(field.type);
         seenDatatypeNames.add(field.type);
       }
