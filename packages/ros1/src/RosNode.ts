@@ -15,7 +15,7 @@ import { RosParamClient } from "./RosParamClient";
 import { Subscription } from "./Subscription";
 import { TcpConnection } from "./TcpConnection";
 import { TcpSocketCreate, TcpServer, TcpAddress, NetworkInterface } from "./TcpTypes";
-import { RosXmlRpcResponse, RosXmlRpcResponseOrFault } from "./XmlRpcTypes";
+import { RosXmlRpcResponse } from "./XmlRpcTypes";
 import { isEmptyPlainObject } from "./objectTests";
 
 export type RosGraph = {
@@ -247,7 +247,7 @@ export class RosNode extends EventEmitter {
     this.parameters.clear();
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i] as string;
-      const entry = res[i] as RosXmlRpcResponseOrFault;
+      const entry = res[i];
       if (entry instanceof XmlRpcFault) {
         this._log?.warn?.(`subscribeAllParams errored on "${key}" (${entry})`);
         continue;

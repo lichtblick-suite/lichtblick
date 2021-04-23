@@ -1,25 +1,18 @@
+// Root tsconfig.json
+// Do not "extend" from this file, use tsconfig.base.json instead.
+// Do not "include" files here if they are already included by another tsconfig.json.
 {
+  "extends": "./tsconfig.base.json",
+  "include": [
+    "./*.ts",
+    "./*.js",
+    "./**/jest.config.ts",
+    "./ci/**/*.ts",
+    "./test/**/*.ts",
+    "./resources/notarize.ts"
+  ],
   "compilerOptions": {
-    "target": "es2020",
     "module": "commonjs",
-    "newLine": "lf",
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "downlevelIteration": true,
-    "importHelpers": true,
-    "sourceMap": true,
-    "moduleResolution": "node",
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "strict": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noUncheckedIndexedAccess": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": false,
-    "typeRoots": ["node_modules/@types", "./typings"]
-  },
-  "include": ["*.ts", "*.js", "test/**/*.ts", "resources/notarize.ts"],
-  "exclude": ["node_modules"]
+    "noEmit": true
+  }
 }

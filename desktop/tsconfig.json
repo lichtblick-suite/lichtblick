@@ -1,4 +1,7 @@
 {
-  "extends": "../tsconfig.json",
-  "include": ["**/*", "../typings/*.d.ts"]
+  "extends": "../tsconfig.base.json",
+  "include": ["./**/*", "../typings/*.d.ts"],
+  "compilerOptions": {
+    "noEmit": true
+  }
 }

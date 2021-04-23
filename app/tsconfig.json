@@ -1,17 +1,26 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "../tsconfig.base.json",
+  "include": [
+    "./**/*",
+    "./**/*.json",
+    "./.storybook/**/*",
+    "../package.json",
+    "../typings/*.d.ts",
+    // Webpack config is imported by Storybook
+    "../webpack.*.config.ts",
+    "../WebpackArgv.ts"
+  ],
   "compilerOptions": {
-    "baseUrl": ".",
-    "module": "es2020",
+    "noEmit": true,
+    "rootDir": "../",
     "jsx": "react-jsx",
-    "lib": ["DOM", "DOM.Iterable", "es2020"],
+    "lib": ["dom", "dom.iterable", "es2020"],
     "paths": {
+      // Storybook breaks without this
       "micro-memoize": ["../typings/micro-memoize"],
-      "@foxglove-studio/app/*": ["*"]
-    }
-  },
-  "typeAcquisition": {
-    "exclude": ["node"]
-  },
-  "include": ["**/*", "../typings/*.d.ts", ".storybook/*"]
+      // This is only needed for vscode import suggestions
+      "@foxglove-studio/app/*": ["./*"]
+    },
+    "noUnusedParameters": false
+  }
 }

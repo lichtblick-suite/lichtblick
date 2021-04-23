@@ -1,12 +1,8 @@
 {
-  "extends": "../../tsconfig.json",
-  "include": ["src/**/*.ts", "src/**/*.json", "fixtures/**/*", "jest.config.ts"],
+  "extends": "../../tsconfig.base.json",
+  "include": ["./src/**/*", "./src/**/*.json"],
   "compilerOptions": {
-    "outDir": "dist",
-    "module": "commonjs",
-    "lib": ["es2020"],
-    "declaration": true,
-    "rootDir": ".",
-    "noUnusedParameters": true
+    "rootDir": "./src",
+    "outDir": "./dist"
   }
 }

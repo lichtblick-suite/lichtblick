@@ -1,13 +1,9 @@
 {
-  "extends": "../../tsconfig.json",
-  "include": ["src/**/*.ts"],
+  "extends": "../../tsconfig.base.json",
+  "include": ["./src/**/*"],
   "compilerOptions": {
-    "outDir": "dist",
-    "module": "commonjs",
-    "lib": ["es2020"],
-    "declaration": true,
     "rootDir": "./src",
-    "noUnusedParameters": true,
-    "noEmit": true
-  }
+    "outDir": "./dist"
+  },
+  "references": [{ "path": "../ros1" }, { "path": "../xmlrpc" }]
 }
