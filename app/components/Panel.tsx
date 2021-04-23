@@ -143,7 +143,6 @@ export default function Panel<Config extends PanelConfig>(
   PanelComponent: ComponentConstructorType<{
     config: Config;
     saveConfig: SaveConfig<Config>;
-    openSiblingPanel: (arg0: string, cb: (arg0: PanelConfig) => PanelConfig) => void;
     topics: Topic[];
     capabilities: string[];
     datatypes: RosDatatypes;
@@ -511,22 +510,13 @@ export default function Panel<Config extends PanelConfig>(
         <PanelComponent
           config={panelComponentConfig}
           saveConfig={saveCompleteConfig}
-          openSiblingPanel={openSiblingPanel}
           topics={[...topics]}
           datatypes={datatypes}
           capabilities={capabilities}
           isHovered={isHovered}
         />
       ),
-      [
-        panelComponentConfig,
-        saveCompleteConfig,
-        openSiblingPanel,
-        topics,
-        datatypes,
-        capabilities,
-        isHovered,
-      ],
+      [panelComponentConfig, saveCompleteConfig, topics, datatypes, capabilities, isHovered],
     );
 
     const isDemoMode = useExperimentalFeature("demoMode");

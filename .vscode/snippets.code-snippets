@@ -1,3 +1,4 @@
+// -*- jsonc -*-
 {
   // Place your studio workspace snippets here. Each snippet is defined under a snippet name and has a scope, prefix, body and
   // description. Add comma separated ids of the languages where the snippet is applicable in the scope field. If scope
@@ -5,15 +6,24 @@
   // used to trigger the snippet and the body will be expanded and inserted. Possible variables are:
   // $1, $2 for tab stops, $0 for the final cursor position, and ${1:label}, ${2:another} for placeholders.
   // Placeholders with the same ids are connected.
-  // Example:
-  "Insert useState": {
+
+  "const [...] = useState(...)": {
     "scope": "typescriptreact",
     "prefix": "useState",
     "body": "const [${1:thing}, set${1/(.*)/${1:/capitalize}/}] = useState($3);"
   },
-  "Insert useCallback": {
+  "const fn = useCallback(...)": {
     "scope": "typescriptreact",
     "prefix": "useCallback",
     "body": "const ${1:func} = useCallback(($2) => {$3}, [$4]);"
+  },
+
+  // Intellisense can give you hints inside {}, so it's helpful to type the object before the
+  // destructured properties.
+  "const {...} = obj": {
+    "scope": "typescript, typescriptreact",
+    "prefix": "const",
+    "body": "const {$2} = $1;",
+    "description": "Destructure object"
   }
 }

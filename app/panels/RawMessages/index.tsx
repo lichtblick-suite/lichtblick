@@ -46,6 +46,7 @@ import {
 } from "@foxglove-studio/app/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { useLatestMessageDataItem } from "@foxglove-studio/app/components/MessagePathSyntax/useLatestMessageDataItem";
 import Panel from "@foxglove-studio/app/components/Panel";
+import { usePanelContext } from "@foxglove-studio/app/components/PanelContext";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import Tooltip from "@foxglove-studio/app/components/Tooltip";
 import getDiff, {
@@ -53,7 +54,6 @@ import getDiff, {
   diffLabelsByLabelText,
 } from "@foxglove-studio/app/panels/RawMessages/getDiff";
 import { cast, Topic } from "@foxglove-studio/app/players/types";
-import { PanelConfig } from "@foxglove-studio/app/types/panels";
 import { objectValues } from "@foxglove-studio/app/util";
 import {
   ArrayView,
@@ -93,7 +93,6 @@ export type RawMessagesConfig = {
 type Props = {
   config: RawMessagesConfig;
   saveConfig: (arg0: Partial<RawMessagesConfig>) => void;
-  openSiblingPanel: (arg0: string, cb: (arg0: PanelConfig) => PanelConfig) => void;
 };
 
 const isSingleElemArray = (obj: any) => {
@@ -131,7 +130,8 @@ const maybeDeepParse = (obj: unknown): unknown => {
 };
 
 function RawMessages(props: Props) {
-  const { config, saveConfig, openSiblingPanel } = props;
+  const { config, saveConfig } = props;
+  const { openSiblingPanel } = usePanelContext();
   const { topicPath, diffMethod, diffTopicPath, diffEnabled, showFullMessageForDiff } = config;
   const { topics, datatypes } = useDataSourceInfo();
 

@@ -16,6 +16,7 @@ import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import PinIcon from "@mdi/svg/svg/pin.svg";
 import cx from "classnames";
 import { compact } from "lodash";
+import { useCallback } from "react";
 import { List, AutoSizer } from "react-virtualized";
 
 import EmptyState from "@foxglove-studio/app/components/EmptyState";
@@ -23,11 +24,11 @@ import Flex from "@foxglove-studio/app/components/Flex";
 import Icon from "@foxglove-studio/app/components/Icon";
 import { Item } from "@foxglove-studio/app/components/Menu";
 import Panel from "@foxglove-studio/app/components/Panel";
+import { usePanelContext } from "@foxglove-studio/app/components/PanelContext";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import TopicToRenderMenu from "@foxglove-studio/app/components/TopicToRenderMenu";
 import DiagnosticsHistory from "@foxglove-studio/app/panels/diagnostics/DiagnosticsHistory";
 import { Topic } from "@foxglove-studio/app/players/types";
-import { PanelConfig } from "@foxglove-studio/app/types/panels";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { DIAGNOSTIC_TOPIC } from "@foxglove-studio/app/util/globalConstants";
 import toggle from "@foxglove-studio/app/util/toggle";
@@ -92,175 +93,162 @@ type Config = {
 type Props = {
   config: Config;
   saveConfig: (arg0: Partial<Config>) => void;
-  openSiblingPanel: (arg0: string, cb: (arg0: PanelConfig) => PanelConfig) => void;
   topics: Topic[];
 };
 
-class DiagnosticSummary extends React.Component<Props> {
-  static panelType = "DiagnosticSummary";
-  static defaultConfig = {
-    pinnedIds: [],
-    hardwareIdFilter: "",
-    topicToRender: DIAGNOSTIC_TOPIC,
-  };
-  static supportsStrictMode = false;
+function DiagnosticSummary(props: Props): JSX.Element {
+  const { config, saveConfig, topics } = props;
+  const { topicToRender, pinnedIds, hardwareIdFilter, sortByLevel = true } = config;
+  const { openSiblingPanel } = usePanelContext();
 
-  togglePinned = (info: DiagnosticInfo) => {
-    this.props.saveConfig({ pinnedIds: toggle(this.props.config.pinnedIds, info.id) });
-  };
+  const togglePinned = useCallback(
+    (info: DiagnosticInfo) => {
+      saveConfig({ pinnedIds: toggle(pinnedIds, info.id) });
+    },
+    [pinnedIds, saveConfig],
+  );
 
-  showDetails = (info: DiagnosticInfo) => {
-    this.props.openSiblingPanel(
-      "DiagnosticStatusPanel",
-      () =>
-        ({
-          selectedHardwareId: info.status.hardware_id,
-          selectedName: info.status.name,
-          topicToRender: this.props.config.topicToRender,
-          collapsedSections: [],
-        } as DiagnosticStatusConfig),
-    );
-  };
+  const showDetails = useCallback(
+    (info: DiagnosticInfo) => {
+      openSiblingPanel(
+        "DiagnosticStatusPanel",
+        () =>
+          ({
+            selectedHardwareId: info.status.hardware_id,
+            selectedName: info.status.name,
+            topicToRender: topicToRender,
+            collapsedSections: [],
+          } as DiagnosticStatusConfig),
+      );
+    },
+    [topicToRender, openSiblingPanel],
+  );
 
-  renderRow = ({ item, style, key }: any) => {
-    return (
-      <div key={key} style={style}>
-        <NodeRow
-          info={item}
-          isPinned={this.props.config.pinnedIds.includes(item.id)}
-          onClick={this.showDetails}
-          onClickPin={this.togglePinned}
-        />
-      </div>
-    );
-  };
+  const renderRow = useCallback(
+    ({ item, style, key }: any) => {
+      return (
+        <div key={key} style={style}>
+          <NodeRow
+            info={item}
+            isPinned={pinnedIds.includes(item.id)}
+            onClick={showDetails}
+            onClickPin={togglePinned}
+          />
+        </div>
+      );
+    },
+    [pinnedIds, showDetails, togglePinned],
+  );
 
-  renderHardwareFilter() {
-    const {
-      config: { hardwareIdFilter },
-      saveConfig,
-    } = this.props;
-    return (
-      <input
-        style={{ width: "100%", padding: "0", background: "transparent", opacity: "0.5" }}
-        value={hardwareIdFilter}
-        placeholder={"Filter hardware id"}
-        onChange={(e) => saveConfig({ hardwareIdFilter: e.target.value })}
-      />
-    );
-  }
+  const hardwareFilter = (
+    <input
+      style={{ width: "100%", padding: "0", background: "transparent", opacity: "0.5" }}
+      value={hardwareIdFilter}
+      placeholder={"Filter hardware id"}
+      onChange={(e) => saveConfig({ hardwareIdFilter: e.target.value })}
+    />
+  );
 
-  renderTopicToRenderMenu = (topics: any) => {
-    const {
-      config: { topicToRender },
-      saveConfig,
-    } = this.props;
-    return (
-      <TopicToRenderMenu
-        topicToRender={topicToRender}
-        onChange={(newTopicToRender) => saveConfig({ topicToRender: newTopicToRender })}
-        topics={topics}
-        singleTopicDatatype={"diagnostic_msgs/DiagnosticArray"}
-        defaultTopicToRender={DIAGNOSTIC_TOPIC}
-      />
-    );
-  };
+  const topicToRenderMenu = (
+    <TopicToRenderMenu
+      topicToRender={topicToRender}
+      onChange={(newTopicToRender) => saveConfig({ topicToRender: newTopicToRender })}
+      topics={topics}
+      singleTopicDatatype={"diagnostic_msgs/DiagnosticArray"}
+      defaultTopicToRender={DIAGNOSTIC_TOPIC}
+    />
+  );
 
-  _renderMenuContent() {
-    const { config, saveConfig } = this.props;
-    const { sortByLevel = true } = config;
+  const menuContent = (
+    <Item
+      icon={sortByLevel ? <CheckboxMarkedIcon /> : <CheckboxBlankOutlineIcon />}
+      onClick={() => saveConfig({ sortByLevel: !sortByLevel })}
+    >
+      Sort by level
+    </Item>
+  );
 
-    return (
-      <Item
-        icon={sortByLevel ? <CheckboxMarkedIcon /> : <CheckboxBlankOutlineIcon />}
-        onClick={() => saveConfig({ sortByLevel: !sortByLevel })}
+  return (
+    <Flex col className={styles.panel}>
+      <PanelToolbar
+        helpContent={helpContent}
+        additionalIcons={topicToRenderMenu}
+        menuContent={menuContent}
       >
-        Sort by level
-      </Item>
-    );
-  }
-
-  render() {
-    const {
-      config: { topicToRender },
-      topics,
-    } = this.props;
-    return (
-      <Flex col className={styles.panel}>
-        <PanelToolbar
-          helpContent={helpContent}
-          additionalIcons={this.renderTopicToRenderMenu(topics)}
-          menuContent={this._renderMenuContent()}
-        >
-          {this.renderHardwareFilter()}
-        </PanelToolbar>
-        <Flex col>
-          <DiagnosticsHistory topic={topicToRender}>
-            {(buffer) => {
-              if (buffer.diagnosticsByNameByTrimmedHardwareId.size === 0) {
-                return (
-                  <EmptyState>
-                    Waiting for <code>{topicToRender}</code> messages
-                  </EmptyState>
-                );
-              }
-              const { pinnedIds, hardwareIdFilter, sortByLevel = true } = this.props.config;
-              const pinnedNodes = filterMap(pinnedIds, (id) => {
-                const [_, trimmedHardwareId, name] = id.split("|");
-                if (name == undefined || trimmedHardwareId == undefined) {
-                  return;
-                }
-                const diagnosticsByName = buffer.diagnosticsByNameByTrimmedHardwareId.get(
-                  trimmedHardwareId,
-                );
-                return diagnosticsByName?.get(name);
-              });
-
-              const nodesByLevel = getDiagnosticsByLevel(buffer);
-              const levels = Array.from(nodesByLevel.keys()).sort().reverse();
-              const sortedNodes = sortByLevel
-                ? ([] as DiagnosticInfo[]).concat(
-                    ...levels.map((level) =>
-                      filterAndSortDiagnostics(
-                        nodesByLevel.get(level) ?? [],
-                        hardwareIdFilter,
-                        pinnedIds,
-                      ),
-                    ),
-                  )
-                : filterAndSortDiagnostics(
-                    ([] as DiagnosticInfo[]).concat(...nodesByLevel.values()),
-                    hardwareIdFilter,
-                    pinnedIds,
-                  );
-
-              const nodes: DiagnosticInfo[] = [...compact(pinnedNodes), ...sortedNodes];
-              if (nodes.length === 0) {
-                return ReactNull;
-              }
+        {hardwareFilter}
+      </PanelToolbar>
+      <Flex col>
+        <DiagnosticsHistory topic={topicToRender}>
+          {(buffer) => {
+            if (buffer.diagnosticsByNameByTrimmedHardwareId.size === 0) {
               return (
-                <AutoSizer>
-                  {({ height, width }) => (
-                    <List
-                      width={width}
-                      height={height}
-                      style={{ outline: "none" }}
-                      rowHeight={25}
-                      rowRenderer={(rowProps) =>
-                        this.renderRow({ ...rowProps, item: nodes[rowProps.index] })
-                      }
-                      rowCount={nodes.length}
-                      overscanRowCount={10}
-                    />
-                  )}
-                </AutoSizer>
+                <EmptyState>
+                  Waiting for <code>{topicToRender}</code> messages
+                </EmptyState>
               );
-            }}
-          </DiagnosticsHistory>
-        </Flex>
+            }
+            const pinnedNodes = filterMap(pinnedIds, (id) => {
+              const [_, trimmedHardwareId, name] = id.split("|");
+              if (name == undefined || trimmedHardwareId == undefined) {
+                return;
+              }
+              const diagnosticsByName = buffer.diagnosticsByNameByTrimmedHardwareId.get(
+                trimmedHardwareId,
+              );
+              return diagnosticsByName?.get(name);
+            });
+
+            const nodesByLevel = getDiagnosticsByLevel(buffer);
+            const levels = Array.from(nodesByLevel.keys()).sort().reverse();
+            const sortedNodes = sortByLevel
+              ? ([] as DiagnosticInfo[]).concat(
+                  ...levels.map((level) =>
+                    filterAndSortDiagnostics(
+                      nodesByLevel.get(level) ?? [],
+                      hardwareIdFilter,
+                      pinnedIds,
+                    ),
+                  ),
+                )
+              : filterAndSortDiagnostics(
+                  ([] as DiagnosticInfo[]).concat(...nodesByLevel.values()),
+                  hardwareIdFilter,
+                  pinnedIds,
+                );
+
+            const nodes: DiagnosticInfo[] = [...compact(pinnedNodes), ...sortedNodes];
+            if (nodes.length === 0) {
+              return ReactNull;
+            }
+            return (
+              <AutoSizer>
+                {({ height, width }) => (
+                  <List
+                    width={width}
+                    height={height}
+                    style={{ outline: "none" }}
+                    rowHeight={25}
+                    rowRenderer={(rowProps) =>
+                      renderRow({ ...rowProps, item: nodes[rowProps.index] })
+                    }
+                    rowCount={nodes.length}
+                    overscanRowCount={10}
+                  />
+                )}
+              </AutoSizer>
+            );
+          }}
+        </DiagnosticsHistory>
       </Flex>
-    );
-  }
+    </Flex>
+  );
 }
+DiagnosticSummary.panelType = "DiagnosticSummary";
+DiagnosticSummary.defaultConfig = {
+  pinnedIds: [],
+  hardwareIdFilter: "",
+  topicToRender: DIAGNOSTIC_TOPIC,
+};
+DiagnosticSummary.supportsStrictMode = false;
 
 export default Panel(DiagnosticSummary);

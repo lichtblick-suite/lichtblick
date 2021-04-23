@@ -1,3 +1,4 @@
+// -*- jsonc -*-
 {
   "debug.javascript.autoAttachFilter": "onlyWithFlag",
   "debug.toolBarLocation": "docked",
@@ -19,5 +20,7 @@
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "eslint.options": {
     "reportUnusedDisableDirectives": true
-  }
+  },
+  // enable intellisense in custom snippets (see snippets.code-snippets)
+  "editor.suggest.snippetsPreventQuickSuggestions": false
 }
