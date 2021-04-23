@@ -25,7 +25,6 @@ import Icon from "@foxglove-studio/app/components/Icon";
 import Menu from "@foxglove-studio/app/components/Menu";
 import Modal, { Title } from "@foxglove-studio/app/components/Modal";
 import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
-import { nbsp } from "@foxglove-studio/app/util/entities";
 import {
   DetailsType,
   NotificationType,
@@ -278,6 +277,7 @@ export default function NotificationDisplay(): React.ReactElement {
                 display: "flex",
                 flex: "none",
                 alignItems: "center",
+                whiteSpace: "nowrap",
               }}
             >
               <Icon small tooltip={name}>
@@ -285,7 +285,7 @@ export default function NotificationDisplay(): React.ReactElement {
               </Icon>
             </div>
             <Fader style={{ paddingLeft: 5, cursor: "pointer" }}>{firstNotification.message}</Fader>
-            <div style={{ fontSize: 12 }}>{unreadCount > 1 && `${nbsp}(1 of ${unreadCount})`}</div>
+            <div style={{ fontSize: 12 }}>{unreadCount > 1 && ` (1 of ${unreadCount})`}</div>
           </div>
           <NotificationList notifications={notifications} onClick={setClickedNotification} />
         </ChildToggle>

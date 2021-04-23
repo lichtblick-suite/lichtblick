@@ -19,7 +19,6 @@ import { setPlaybackConfig } from "@foxglove-studio/app/actions/panels";
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
 import Flex from "@foxglove-studio/app/components/Flex";
-import { ndash } from "@foxglove-studio/app/util/entities";
 import {
   formatDate,
   formatTime,
@@ -169,7 +168,7 @@ const PlaybackTimeDisplayMethod = ({
           </STimestamp>
         )
       ) : (
-        <span data-test="PlaybackTime-text">{ndash}</span>
+        <span data-test="PlaybackTime-text">–</span>
       )}
       <Dropdown
         position="above"

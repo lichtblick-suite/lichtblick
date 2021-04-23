@@ -19,7 +19,6 @@ import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import { PlayerCapabilities } from "@foxglove-studio/app/players/types";
-import { ndash } from "@foxglove-studio/app/util/entities";
 
 const SPEEDS = ["0.01", "0.02", "0.05", "0.1", "0.2", "0.5", "0.8", "1", "2", "3", "5"];
 
@@ -51,7 +50,7 @@ export default function PlaybackSpeedControls() {
   useEffect(() => setSpeed(configSpeed), [configSpeed, setSpeed]);
 
   const displayedSpeed = speed || configSpeed;
-  let speedText = ndash;
+  let speedText = `–`;
 
   if (displayedSpeed) {
     speedText = displayedSpeed < 0.1 ? `${displayedSpeed.toFixed(2)}x` : `${displayedSpeed}x`;

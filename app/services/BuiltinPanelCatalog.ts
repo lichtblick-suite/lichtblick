@@ -32,12 +32,11 @@ import URDFViewer from "@foxglove-studio/app/panels/URDFViewer";
 import WelcomePanel from "@foxglove-studio/app/panels/WelcomePanel";
 import DiagnosticStatusPanel from "@foxglove-studio/app/panels/diagnostics/DiagnosticStatusPanel";
 import DiagnosticSummary from "@foxglove-studio/app/panels/diagnostics/DiagnosticSummary";
-import { ndash } from "@foxglove-studio/app/util/entities";
 
 const ros: PanelInfo[] = [
   { title: "3D", component: ThreeDimensionalViz },
-  { title: `Diagnostics ${ndash} Detail`, component: DiagnosticStatusPanel },
-  { title: `Diagnostics ${ndash} Summary`, component: DiagnosticSummary },
+  { title: `Diagnostics – Detail`, component: DiagnosticStatusPanel },
+  { title: `Diagnostics – Summary`, component: DiagnosticSummary },
   { title: "Image", component: ImageViewPanel },
   { title: "Map", component: MapPanel },
   { title: "Parameters", component: ParametersPanel },

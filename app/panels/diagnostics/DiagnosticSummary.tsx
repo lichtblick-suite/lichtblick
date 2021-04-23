@@ -77,7 +77,8 @@ class NodeRow extends React.PureComponent<NodeRowProps> {
         >
           <PinIcon />
         </Icon>
-        <span>{info.displayName}</span> &ndash;{" "}
+        <span>{info.displayName}</span>
+        {" – "}
         <span className={styles.message}>{info.status.message}</span>
       </div>
     );
