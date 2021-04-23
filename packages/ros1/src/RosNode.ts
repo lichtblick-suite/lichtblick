@@ -133,8 +133,16 @@ export class RosNode extends EventEmitter {
 
   subscribe(options: SubscribeOpts): Subscription {
     const { topic, type } = options;
+
+    // Check if we are already subscribed
+    let subscription = this.subscriptions.get(topic);
+    if (subscription != undefined) {
+      this._log?.debug?.(`reusing existing subscribtion to ${topic} (${type})`);
+      return subscription;
+    }
+
     const md5sum = options.md5sum ?? "*";
-    const subscription = new Subscription(topic, md5sum, type);
+    subscription = new Subscription(topic, md5sum, type);
     this.subscriptions.set(topic, subscription);
 
     this._log?.debug?.(`subscribing to ${topic} (${type})`);

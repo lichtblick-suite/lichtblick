@@ -6,6 +6,7 @@ import net from "net";
 
 import { Cloneable, RpcCall, RpcHandler, RpcResponse } from "../shared/Rpc";
 import { TcpAddress } from "../shared/TcpTypes";
+import { dnsLookup } from "./dns";
 
 type MaybeHasFd = {
   _handle?: {
@@ -143,7 +144,7 @@ export class TcpSocketElectron {
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       this._socket
-        .connect({ host: this.host, port: this.port }, () => {
+        .connect({ host: this.host, port: this.port, lookup: dnsLookup }, () => {
           this._socket.removeListener("error", reject);
           resolve();
           this._emit("connect");
