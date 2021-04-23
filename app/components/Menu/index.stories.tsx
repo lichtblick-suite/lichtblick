@@ -16,7 +16,7 @@ import ReactDOM from "react-dom";
 
 import Menu, { Item, SubMenu } from "@foxglove-studio/app/components/Menu";
 
-storiesOf("<Menu>", module)
+storiesOf("components/Menu", module)
   .add("standard", () => {
     return (
       <div style={{ margin: 20 }}>

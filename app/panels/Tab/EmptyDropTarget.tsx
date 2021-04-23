@@ -21,7 +21,7 @@ import { addPanel } from "@foxglove-studio/app/actions/panels";
 import EmptyBoxSvg from "@foxglove-studio/app/assets/emptyBox.svg";
 import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
 import Menu from "@foxglove-studio/app/components/Menu";
-import PanelList, { PanelSelection } from "@foxglove-studio/app/panels/PanelList";
+import PanelList, { PanelSelection } from "@foxglove-studio/app/components/PanelList";
 import cssColors from "@foxglove-studio/app/styles/colors.module.scss";
 import logEvent, { getEventNames, getEventTags } from "@foxglove-studio/app/util/logEvent";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";

@@ -43,7 +43,7 @@ const topicsGroups = [
   },
 ];
 
-storiesOf("<TopicToRenderMenu>", module)
+storiesOf("components/TopicToRenderMenu", module)
   .add("example (have topicsGroups)", () => {
     return (
       <PanelSetup

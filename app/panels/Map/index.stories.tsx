@@ -9,7 +9,7 @@ import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 import MapPanel from "./index";
 
 export default {
-  title: "<MapPanel>",
+  title: "panels/Map/index",
   component: MapPanel,
   decorators: [
     (StoryComponent: Story, { parameters }: StoryContext) => {

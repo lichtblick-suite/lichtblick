@@ -37,7 +37,7 @@ const StyledMarker = styled.div<{ width?: number }>`
   left: ${(props) => (props.width ?? 0) * 100}%;
 `;
 
-storiesOf("<Slider>", module)
+storiesOf("components/Slider", module)
   .add("examples", () => {
     const [value, setValue] = useState(50);
     const [draggableValue, setDraggableValue] = useState(25);

@@ -10,7 +10,7 @@ import ImageView from "@foxglove-studio/app/panels/ImageView";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 
 export default {
-  title: "<ImageView>",
+  title: "panels/ImageView/index",
   component: ImageView,
 };
 

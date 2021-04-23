@@ -231,8 +231,6 @@ overrides:
       - "app/panels/NodePlayground/Editor.tsx"
       - "app/panels/NodePlayground/Sidebar.tsx"
       - "app/panels/NodePlayground/index.tsx"
-      - "app/panels/PanelList/index.stories.tsx"
-      - "app/panels/PanelList/index.tsx"
       - "app/panels/Plot/PlotChart.tsx"
       - "app/panels/Plot/PlotLegend.tsx"
       - "app/panels/Plot/PlotMenu.test.ts"

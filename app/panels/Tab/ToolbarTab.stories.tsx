@@ -46,7 +46,7 @@ const Container = React.forwardRef<HTMLDivElement, { children?: ReactNode }>(fun
   );
 });
 
-storiesOf("<ToolbarTab>", module)
+storiesOf("panels/Tab/ToolbarTab", module)
   .add("default", () => (
     <Container>
       <ToolbarTab {...baseProps} />

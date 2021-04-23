@@ -81,7 +81,7 @@ class MockMarkerCollector implements MarkerCollector {
   overlayIcon(_arg0: OverlayIconMarker): any {}
 }
 
-storiesOf("<3DViz> / GridBuilder", module)
+storiesOf("panels/ThreeDimensionalViz/GridBuilder", module)
   .add("renders the default grid", () => {
     const collector = new MockMarkerCollector();
     const gridBuilder = new GridBuilder();

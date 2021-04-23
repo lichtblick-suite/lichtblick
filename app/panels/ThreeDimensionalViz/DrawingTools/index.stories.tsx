@@ -61,7 +61,7 @@ const DEFAULT_PROPS = {
   },
 };
 
-storiesOf("<DrawingTools>", module).add("Polygon", () => {
+storiesOf("panels/ThreeDimensionalViz/DrawingTools", module).add("Polygon", () => {
   return (
     <div style={containerStyle}>
       <div style={{ margin: 8 }}>

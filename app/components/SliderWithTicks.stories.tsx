@@ -16,7 +16,7 @@ import { noop } from "lodash";
 
 import { SliderWithTicks } from "@foxglove-studio/app/components/SliderWithTicks";
 
-storiesOf("<SliderWithTicks>", module).add("examples", () => {
+storiesOf("components/SliderWithTicks", module).add("examples", () => {
   return (
     <div style={{ width: 300 }}>
       <SliderWithTicks sliderProps={{ min: 0, max: 10, step: 1 }} value={3} onChange={noop} />

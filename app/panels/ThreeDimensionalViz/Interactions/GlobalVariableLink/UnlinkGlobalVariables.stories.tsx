@@ -40,7 +40,10 @@ const linkedGlobalVariables = [
   },
 ];
 
-storiesOf("<UnlinkGlobalVariables>", module).add("default", () => {
+storiesOf(
+  "panels/ThreeDimensionalViz/Interactions/GlobalVariableLink/UnlinkGlobalVariables",
+  module,
+).add("default", () => {
   return (
     <PanelSetup
       fixture={{

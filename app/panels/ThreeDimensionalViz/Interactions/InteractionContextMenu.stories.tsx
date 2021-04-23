@@ -79,10 +79,15 @@ const sharedProps = {
   clickedPosition: { clientX: 100, clientY: 200 },
 };
 
-storiesOf("<InteractionContextMenu>", module).add("default", () => {
-  return (
-    <div style={{ background: "#2d2c33", display: "flex", flexDirection: "row", flexWrap: "wrap" }}>
-      <InteractionContextMenu {...sharedProps} />
-    </div>
-  );
-});
+storiesOf("panels/ThreeDimensionalViz/Interactions/InteractionContextMenu", module).add(
+  "default",
+  () => {
+    return (
+      <div
+        style={{ background: "#2d2c33", display: "flex", flexDirection: "row", flexWrap: "wrap" }}
+      >
+        <InteractionContextMenu {...sharedProps} />
+      </div>
+    );
+  },
+);

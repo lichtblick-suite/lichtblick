@@ -90,7 +90,7 @@ function Wrapper({
   );
 }
 
-storiesOf("<PlaybackControls>", module)
+storiesOf("components/PlaybackControls", module)
   .add("playing", () => {
     const pause = action("pause");
     const play = action("play");

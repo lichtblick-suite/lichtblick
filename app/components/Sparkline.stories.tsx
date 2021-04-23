@@ -30,7 +30,7 @@ const props = {
   nowStamp: 100,
 };
 
-storiesOf("<Sparkline>", module)
+storiesOf("components/Sparkline", module)
   .add("standard", () => {
     return (
       <div style={{ padding: 8 }}>

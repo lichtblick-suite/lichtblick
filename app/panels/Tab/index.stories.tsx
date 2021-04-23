@@ -88,7 +88,7 @@ const manyTabs = new Array(25)
   .fill(1)
   .map((elem, idx) => ({ title: `Tab #${idx + 1}`, layout: undefined }));
 const DEFAULT_TIMEOUT = 200;
-storiesOf("<Tab>", module)
+storiesOf("panels/Tab/index", module)
   .addParameters({
     chromatic: {
       delay: 1000,

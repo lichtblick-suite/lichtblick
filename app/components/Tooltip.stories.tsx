@@ -20,7 +20,7 @@ const Spacer = styled.div`
 `;
 
 export default {
-  title: "<Tooltip>",
+  title: "components/Tooltip",
   component: Tooltip,
 };
 

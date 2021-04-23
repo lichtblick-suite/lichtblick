@@ -26,7 +26,7 @@ function focusInput(el: any) {
   }
 }
 
-storiesOf("<Autocomplete>", module)
+storiesOf("components/Autocomplete", module)
   .add("filtering to 'o'", () => {
     class Example extends Component {
       render() {

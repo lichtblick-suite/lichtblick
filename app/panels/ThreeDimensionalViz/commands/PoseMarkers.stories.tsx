@@ -92,7 +92,7 @@ function Example({
   );
 }
 
-storiesOf("<3DViz> / PoseMarkers", module)
+storiesOf("panels/ThreeDimensionalViz/commands/PoseMarkers", module)
   .addParameters({
     chromatic: {
       // the car-model marker loads the car models asynchronously

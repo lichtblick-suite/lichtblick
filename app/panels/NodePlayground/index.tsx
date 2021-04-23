@@ -13,10 +13,8 @@
 
 import { Stack } from "@fluentui/react";
 import ArrowLeftIcon from "@mdi/svg/svg/arrow-left.svg";
-import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
-import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import PlusIcon from "@mdi/svg/svg/plus.svg";
-import { ReactElement, Suspense } from "react";
+import { Suspense } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
@@ -25,7 +23,6 @@ import { setUserNodes as setUserNodesAction } from "@foxglove-studio/app/actions
 import Button from "@foxglove-studio/app/components/Button";
 import Flex from "@foxglove-studio/app/components/Flex";
 import Icon from "@foxglove-studio/app/components/Icon";
-import Item from "@foxglove-studio/app/components/Menu/Item";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import SpinningLoadingIcon from "@foxglove-studio/app/components/SpinningLoadingIcon";
@@ -37,6 +34,8 @@ import { UserNodes } from "@foxglove-studio/app/types/panels";
 import { DEFAULT_WEBVIZ_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
+import Config from "./Config";
+import NodePlaygroundSettings from "./NodePlaygroundSettings";
 import { Script } from "./script";
 
 const Editor = React.lazy(() => import("@foxglove-studio/app/panels/NodePlayground/Editor"));
@@ -56,18 +55,9 @@ const publisher = (message: Input<>, globalVars: GlobalVariables): Output => {
 
 export default publisher;`;
 
-type Config = {
-  selectedNodeId?: string;
-  // Used only for storybook screenshot testing.
-  editorForStorybook?: React.ReactNode;
-  // Used only for storybook screenshot testing.
-  additionalBackStackItems?: Script[];
-  autoFormatOnSave?: boolean;
-};
-
 type Props = {
   config: Config;
-  saveConfig: (arg0: Partial<Config>) => void;
+  saveConfig: (config: Partial<Config>) => void;
 };
 
 const UnsavedDot = styled.div`
@@ -81,18 +71,6 @@ const UnsavedDot = styled.div`
   transform: translateY(-50%);
   background-color: ${colors.DARK9};
 `;
-
-// Exported for screenshot testing.
-export const NodePlaygroundSettings = ({ config, saveConfig }: Props): ReactElement => (
-  <>
-    <Item
-      icon={config.autoFormatOnSave ? <CheckboxMarkedIcon /> : <CheckboxBlankOutlineIcon />}
-      onClick={() => saveConfig({ autoFormatOnSave: !config.autoFormatOnSave })}
-    >
-      <span>Auto-format on save</span>
-    </Item>
-  </>
-);
 
 const SWelcomeScreen = styled.div`
   display: flex;

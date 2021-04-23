@@ -19,7 +19,7 @@ import PlayerSelectionContext, {
 } from "@foxglove-studio/app/context/PlayerSelectionContext";
 
 export default {
-  title: "<TinyConnectionPicker>",
+  title: "components/TinyConnectionPicker",
   component: TinyConnectionPicker,
 };
 

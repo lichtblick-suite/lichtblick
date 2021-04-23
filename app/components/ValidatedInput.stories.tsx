@@ -76,7 +76,7 @@ function Example({
   );
 }
 
-storiesOf("<ValidatedInput>", module)
+storiesOf("components/ValidatedInput", module)
   .add("default", () => {
     return (
       <Flex>

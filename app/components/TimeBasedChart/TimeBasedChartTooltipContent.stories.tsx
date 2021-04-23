@@ -16,7 +16,7 @@ import { useTooltip } from "@foxglove-studio/app/components/Tooltip";
 import TimeBasedChartTooltipContent from "./TimeBasedChartTooltipContent";
 
 export default {
-  title: "<TimeBasedChartTooltipContent>",
+  title: "components/TimeBasedChart/TimeBasedChartTooltipContent",
   component: TimeBasedChartTooltipContent,
 };
 

@@ -69,7 +69,7 @@ function ContentStory({ showChildToggle = false }: { showChildToggle?: boolean }
   );
 }
 
-storiesOf("<Modal>", module)
+storiesOf("components/Modal", module)
   .add("basic", () => (
     <Modal onRequestClose={() => action("close")()}>
       <div style={{ padding: 20 }}>

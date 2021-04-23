@@ -32,7 +32,7 @@ class Broken extends React.Component {
   }
 }
 
-storiesOf("<ErrorBoundary>", module).add("examples", () => {
+storiesOf("components/ErrorBoundary", module).add("examples", () => {
   return (
     <DndProvider backend={HTML5Backend}>
       <StoreSetup>

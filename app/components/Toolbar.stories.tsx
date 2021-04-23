@@ -5,7 +5,7 @@ import Toolbar from "@foxglove-studio/app/components/Toolbar";
 import WindowGeometryContext from "@foxglove-studio/app/context/WindowGeometryContext";
 
 export default {
-  title: "<Toolbar>",
+  title: "components/Toolbar",
   component: Toolbar,
 };
 

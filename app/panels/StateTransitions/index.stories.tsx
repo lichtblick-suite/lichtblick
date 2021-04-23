@@ -86,7 +86,7 @@ const fixture = {
 };
 
 export default {
-  title: "<StateTransitions>",
+  title: "panels/StateTransitions/index",
   component: StateTransitions,
   parameters: {
     chromatic: {

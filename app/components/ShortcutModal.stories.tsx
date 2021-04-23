@@ -14,7 +14,7 @@
 import ShortcutsModal from "./ShortcutsModal";
 
 export default {
-  title: "<ShortcutsModal>",
+  title: "components/ShortcutsModal",
 };
 export function Standard(): React.ReactElement {
   return <ShortcutsModal onRequestClose={() => {}} />;

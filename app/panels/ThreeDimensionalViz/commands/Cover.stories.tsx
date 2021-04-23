@@ -27,7 +27,7 @@ const SExpectedResult = styled.div`
   z-index: 1000;
 `;
 
-storiesOf("Commands / <Cover> ", module).add("renders with blending", () => {
+storiesOf("panels/ThreeDimensionalViz/Commands/Cover", module).add("renders with blending", () => {
   const transparentRed = [1, 0, 0, 0.5];
   const transparentBlue = [0, 0, 1, 0.5];
   return (

@@ -41,7 +41,7 @@ const publishConfig = (advancedView: boolean, json: string) => ({
   value: json,
 });
 
-storiesOf("<Publish>", module)
+storiesOf("panels/Publish/index", module)
   .add("example can publish, advanced", () => {
     const allowPublish = true;
     return (

@@ -53,7 +53,7 @@ const scrollToBottom = () => {
   scrollContainer.scrollTop = scrollContainer.scrollHeight;
 };
 
-storiesOf("<RawMessages>", module)
+storiesOf("panels/RawMessages/index", module)
   .add("folded", () => {
     return (
       <PanelSetup fixture={fixture} style={{ width: 350 }}>

@@ -64,7 +64,7 @@ class MockPanelCatalog implements PanelCatalog {
   }
 }
 
-storiesOf("<AddPanelMenu>", module)
+storiesOf("components/AddPanelMenu", module)
   .addParameters({
     chromatic: {
       delay: 500,

@@ -54,7 +54,7 @@ function Example({
     </div>
   );
 }
-storiesOf("<Dropdown>", module)
+storiesOf("components/Dropdown", module)
   .add("position_below", () => <Example position="below" />)
   .add("position_left", () => <Example position="left" />)
   .add("position_right", () => <Example position="right" />)

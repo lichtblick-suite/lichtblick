@@ -362,7 +362,7 @@ function ShouldCallOnRenderImage({
   );
 }
 
-storiesOf("<ImageCanvas>", module)
+storiesOf("panels/ImageView/ImageCanvas", module)
   .addParameters({
     chromatic: {
       delay: 2500,

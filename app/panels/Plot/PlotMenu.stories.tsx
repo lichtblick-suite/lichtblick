@@ -19,7 +19,7 @@ function Wrapper({ children }: any) {
   return <div style={{ display: "inline-block" }}>{children}</div>;
 }
 
-storiesOf("<PlotMenu>", module)
+storiesOf("panels/Plot/PlotMenu", module)
   .add("With min and max y set", () => (
     <Wrapper>
       <PlotMenu

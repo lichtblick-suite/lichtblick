@@ -61,7 +61,7 @@ function Example({
   );
 }
 
-storiesOf("<AutoSizingCanvas>", module)
+storiesOf("components/AutoSizingCanvas", module)
   .add("static", () => <Example />)
   .add("changing size", () => <Example changeSize />)
   .add("pixel ratio 2", () => <Example devicePixelRatio={2} />)

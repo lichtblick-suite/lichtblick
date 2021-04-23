@@ -77,7 +77,7 @@ function ControlledExample() {
     </Box>
   );
 }
-storiesOf("<SegmentedControl>", module).add("basic", () => (
+storiesOf("components/SegmentedControl", module).add("basic", () => (
   <div>
     <Box title="default">
       <SegmentedControl

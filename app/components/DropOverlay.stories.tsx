@@ -15,6 +15,6 @@ import { storiesOf } from "@storybook/react";
 
 import DropOverlay from "@foxglove-studio/app/components/DropOverlay";
 
-storiesOf("<DropOverlay>", module).add("default", () => {
+storiesOf("components/DropOverlay", module).add("default", () => {
   return <DropOverlay>Some DropOverlay</DropOverlay>;
 });

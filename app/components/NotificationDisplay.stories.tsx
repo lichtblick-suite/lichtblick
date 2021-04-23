@@ -47,7 +47,7 @@ const AddMoreButtons = () => (
   </div>
 );
 
-storiesOf("<NotificationDisplay>", module)
+storiesOf("components/NotificationDisplay", module)
   .addParameters({
     chromatic: {
       delay: 1000,

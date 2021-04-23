@@ -193,7 +193,7 @@ function PanelSetupWithData({
   );
 }
 
-storiesOf("<Interaction>", module)
+storiesOf("panels/ThreeDimensionalViz/Interactions/Interaction", module)
   .addParameters({
     chromatic: { viewport: { width: 1001, height: 1101 } },
   })
@@ -431,7 +431,7 @@ storiesOf("<Interaction>", module)
 const selectObject = () => simulateDragClick([468, 340]);
 const deselectObject = () => simulateDragClick([515, 630]);
 
-storiesOf("<Interaction> / open-close behavior", module)
+storiesOf("panels/ThreeDimensionalViz/interactions/open-close behavior", module)
   .addParameters({ chromatic: { delay: 2500 } })
   .add("auto opens the object details after selectedObject is set", () => {
     return (

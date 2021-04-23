@@ -22,7 +22,7 @@ import configureStore from "@foxglove-studio/app/store/configureStore.testing";
 
 import GlobalVariablesMenu from "./GlobalVariablesMenu";
 
-storiesOf("<GlobalVariablesMenu>", module)
+storiesOf("components/GlobalVariablesMenu", module)
   .add("closed", () => {
     return (
       <div style={{ margin: 30, paddingLeft: 300, height: 400 }}>

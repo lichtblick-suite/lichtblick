@@ -21,7 +21,7 @@ import ExperimentalFeaturesContext, {
 } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 
 export default {
-  title: "<ExperimentalFeaturesModal>",
+  title: "components/ExperimentalFeatures",
   component: ExperimentalFeatureSettings,
   parameters: {
     chromatic: {

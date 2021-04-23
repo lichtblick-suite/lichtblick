@@ -17,7 +17,7 @@ import Internals from "@foxglove-studio/app/panels/Internals";
 import SubscribeToList from "@foxglove-studio/app/panels/SubscribeToList";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 
-storiesOf("<Internals>", module)
+storiesOf("panels/Internals", module)
   .add("default", () => {
     return (
       <PanelSetup

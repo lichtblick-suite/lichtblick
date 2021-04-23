@@ -147,7 +147,7 @@ function DraggablePanelItem({
   });
 
   React.useEffect(() => {
-    if (highlighted && scrollRef.current) {
+    if (highlighted === true && scrollRef.current) {
       const highlightedItem = scrollRef.current.getBoundingClientRect();
       const scrollContainer = scrollRef.current.parentElement?.parentElement?.parentElement;
       if (scrollContainer) {
@@ -158,8 +158,8 @@ function DraggablePanelItem({
           highlightedItem.top >= scrollContainerToTop &&
           highlightedItem.top + 50 <= window.innerHeight;
 
-        if (!isInView && scrollRef.current) {
-          scrollRef.current.scrollIntoView();
+        if (!isInView) {
+          scrollRef.current?.scrollIntoView();
         }
       }
     }
@@ -204,13 +204,13 @@ function verifyPanels(panelsByCategory: Map<string, PanelInfo[]>) {
     for (const { component } of panels) {
       const { name, displayName, panelType } = component;
       const dispName = displayName ?? name ?? "<unnamed>";
-      if (!panelType) {
+      if (panelType.length === 0) {
         throw new Error(`Panel component ${dispName} must declare a unique \`static panelType\``);
       }
       const existingPanel = panelTypes.get(panelType);
       if (existingPanel) {
         const otherDisplayName =
-          existingPanel.component.displayName || existingPanel.component.name || "<unnamed>";
+          existingPanel.component.displayName ?? existingPanel.component.name ?? "<unnamed>";
         throw new Error(
           `Two components have the same panelType ('${panelType}'): ${otherDisplayName} and ${dispName}`,
         );
@@ -264,7 +264,7 @@ function PanelList(props: Props) {
 
   const getFilteredItemsForCategory = useCallback(
     (key: string) => {
-      return searchQuery
+      return searchQuery.length > 0
         ? fuzzySort
             .go(searchQuery, panelsByCategory.get(key) ?? [], { key: "title" })
             .map((searchResult) => searchResult.obj)

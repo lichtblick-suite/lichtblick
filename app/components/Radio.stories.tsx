@@ -76,7 +76,7 @@ function ControlledExample() {
     </Box>
   );
 }
-storiesOf("<Radio>", module).add("basic", () => (
+storiesOf("components/Radio", module).add("basic", () => (
   <div>
     <Box title="default">
       <Radio

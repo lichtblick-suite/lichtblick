@@ -25,7 +25,7 @@ import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 import PanelLayout from "./PanelLayout";
 
 const DEFAULT_CLICK_DELAY = 100;
-storiesOf("<PanelLayout>", module)
+storiesOf("components/PanelLayout", module)
   .add("panel not found", () => {
     const store = configureStore(createRootReducer(createMemoryHistory));
     store.dispatch(changePanelLayout({ layout: "UnknownPanel!4co6n9d" }));

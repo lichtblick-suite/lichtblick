@@ -17,7 +17,7 @@ import TestUtils from "react-dom/test-utils";
 
 import { Select, Option } from ".";
 
-storiesOf("<Select>", module)
+storiesOf("components/Select", module)
   .add("closed", () => {
     return (
       <div style={{ padding: 30, width: 300 }}>

@@ -107,7 +107,7 @@ function UncontrolledChildToggleStory({ defaultIsOpen }: { defaultIsOpen?: boole
     </div>
   );
 }
-storiesOf("<ChildToggle>", module)
+storiesOf("components/ChildToggle", module)
   .add("controlled", () => <ChildToggleStory />)
   .add("uncontrolled", () => <UncontrolledChildToggleStory />)
   .add("uncontrolled with defaultIsOpen", () => (

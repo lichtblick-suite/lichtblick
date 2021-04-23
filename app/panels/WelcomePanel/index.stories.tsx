@@ -13,7 +13,7 @@ import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 import signal from "@foxglove-studio/app/util/signal";
 
 export default {
-  title: "<WelcomePanel>",
+  title: "panels/WelcomePanel/index",
   component: WelcomePanel,
 };
 

@@ -95,7 +95,7 @@ function KeepToolbarVisibleHack() {
   );
 }
 
-storiesOf("<PanelToolbar>", module)
+storiesOf("components/PanelToolbar", module)
   .addDecorator((childrenRenderFcn) => {
     // Provide all stories with PanelContext and redux state
     return (

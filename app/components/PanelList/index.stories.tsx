@@ -19,12 +19,12 @@ import TestUtils from "react-dom/test-utils";
 import { Provider } from "react-redux";
 
 import Panel from "@foxglove-studio/app/components/Panel";
+import PanelList from "@foxglove-studio/app/components/PanelList";
 import PanelCatalogContext, {
   PanelCatalog,
   PanelCategory,
   PanelInfo,
 } from "@foxglove-studio/app/context/PanelCatalogContext";
-import PanelList from "@foxglove-studio/app/panels/PanelList";
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
 
@@ -78,7 +78,7 @@ const PanelListWithInteractions = ({
         const input: HTMLInputElement | undefined = el.querySelector("input") as any;
         if (input) {
           input.focus();
-          if (inputValue) {
+          if (inputValue != undefined) {
             input.value = inputValue;
             TestUtils.Simulate.change(input);
           }
@@ -102,7 +102,7 @@ const PanelListWithInteractions = ({
 const arrowDown = { key: "ArrowDown", code: "ArrowDown", keyCode: 40 };
 const arrowUp = { key: "ArrowUp", code: "ArrowUp", keyCode: 91 };
 
-storiesOf("<PanelList>", module)
+storiesOf("components/PanelList", module)
   .addParameters({
     chromatic: {
       // Wait for simulated key events

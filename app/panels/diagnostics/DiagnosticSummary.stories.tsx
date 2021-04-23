@@ -12,7 +12,7 @@ import { TypedMessage } from "@foxglove-studio/app/players/types";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 
 export default {
-  title: "<DiagnosticSummary>",
+  title: "panels/diagnostics/DiagnosticSummary",
   excludeStories: ["makeDiagnosticMessage"],
 };
 

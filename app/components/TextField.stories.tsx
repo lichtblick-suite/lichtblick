@@ -89,7 +89,7 @@ function ValidateOnBlurExample() {
   );
 }
 
-storiesOf("<TextField>", module).add("default", () => {
+storiesOf("components/TextField", module).add("default", () => {
   return (
     <Flex wrap>
       <Box title="default">

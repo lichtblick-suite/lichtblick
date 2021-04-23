@@ -79,7 +79,7 @@ function Example({
   );
 }
 
-storiesOf("<VisibilityToggle>", module)
+storiesOf("panels/ThreeDimensionalViz/TopicTree/VisibilityToggle", module)
   .add("default", () => {
     return (
       <div>

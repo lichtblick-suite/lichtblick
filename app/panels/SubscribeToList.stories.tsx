@@ -16,7 +16,7 @@ import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 
 import SubscribeToList from "./SubscribeToList";
 
-storiesOf("<SubscribeToList>", module).add("shows a topic list", () => {
+storiesOf("panels/SubscribeToList", module).add("shows a topic list", () => {
   return (
     <PanelSetup
       fixture={{

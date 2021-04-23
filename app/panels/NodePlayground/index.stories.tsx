@@ -14,10 +14,7 @@
 import { storiesOf } from "@storybook/react";
 
 import { setUserNodes } from "@foxglove-studio/app/actions/panels";
-import NodePlayground, {
-  Explorer,
-  NodePlaygroundSettings,
-} from "@foxglove-studio/app/panels/NodePlayground";
+import NodePlayground, { Explorer } from "@foxglove-studio/app/panels/NodePlayground";
 import Sidebar from "@foxglove-studio/app/panels/NodePlayground/Sidebar";
 import testDocs from "@foxglove-studio/app/panels/NodePlayground/index.test.md";
 import rawUserUtils from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/rawUserUtils";
@@ -117,9 +114,10 @@ const utilsSourceCode = `
   }
 `;
 
+const OPEN_BOTTOM_BAR_TIMEOUT = 500;
 const SIDEBAR_OPEN_CLICK_TIMEOUT = 500;
 
-storiesOf("<NodePlayground>", module)
+storiesOf("panels/NodePlayground", module)
   .addParameters({
     chromatic: {
       delay: 2500,
@@ -365,17 +363,8 @@ storiesOf("<NodePlayground>", module)
         <NodePlayground config={{ selectedNodeId: "nodeId1", editorForStorybook: <NeverLoad /> }} />
       </PanelSetup>
     );
-  });
-
-const OPEN_BOTTOM_BAR_TIMEOUT = 500;
-
-storiesOf("NodePlayground - <BottomBar>", module)
-  .addParameters({
-    chromatic: {
-      delay: 2500,
-    },
   })
-  .add("no errors or logs - closed", () => (
+  .add("BottomBar - no errors or logs - closed", () => (
     <PanelSetup
       fixture={{
         ...fixture,
@@ -386,7 +375,7 @@ storiesOf("NodePlayground - <BottomBar>", module)
       <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
   ))
-  .add("no errors - open", () => (
+  .add("BottomBar - no errors - open", () => (
     <PanelSetup
       fixture={{
         ...fixture,
@@ -405,7 +394,7 @@ storiesOf("NodePlayground - <BottomBar>", module)
       <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
   ))
-  .add("no logs - open", () => (
+  .add("BottomBar - no logs - open", () => (
     <PanelSetup
       fixture={{
         ...fixture,
@@ -424,7 +413,7 @@ storiesOf("NodePlayground - <BottomBar>", module)
       <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
   ))
-  .add("errors - closed", () => (
+  .add("BottomBar - errors - closed", () => (
     <PanelSetup
       fixture={{
         ...fixture,
@@ -470,7 +459,7 @@ storiesOf("NodePlayground - <BottomBar>", module)
       <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
   ))
-  .add("errors - open", () => (
+  .add("BottomBar - errors - open", () => (
     <PanelSetup
       fixture={{
         ...fixture,
@@ -524,7 +513,7 @@ storiesOf("NodePlayground - <BottomBar>", module)
       <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
   ))
-  .add("logs - closed", () => (
+  .add("BottomBar - logs - closed", () => (
     <PanelSetup
       fixture={{
         ...fixture,
@@ -541,7 +530,7 @@ storiesOf("NodePlayground - <BottomBar>", module)
       <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
   ))
-  .add("logs - open", () => (
+  .add("BottomBar - logs - open", () => (
     <PanelSetup
       fixture={{
         ...fixture,
@@ -566,7 +555,7 @@ storiesOf("NodePlayground - <BottomBar>", module)
       <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
   ))
-  .add("cleared logs", () => (
+  .add("BottomBar - cleared logs", () => (
     <PanelSetup
       fixture={{
         ...fixture,
@@ -589,27 +578,4 @@ storiesOf("NodePlayground - <BottomBar>", module)
     >
       <NodePlayground config={{ selectedNodeId: "nodeId1" }} />
     </PanelSetup>
-  ));
-
-storiesOf("<NodePlaygroundSettings>", module)
-  .addParameters({
-    chromatic: {
-      delay: 1000,
-    },
-  })
-  .add("enabled auto format on save", () => (
-    <NodePlaygroundSettings
-      config={{ selectedNodeId: undefined, autoFormatOnSave: true }}
-      saveConfig={() => {
-        // no-op
-      }}
-    />
-  ))
-  .add("both modes disabled", () => (
-    <NodePlaygroundSettings
-      config={{ selectedNodeId: undefined, autoFormatOnSave: false }}
-      saveConfig={() => {
-        // no-op
-      }}
-    />
   ));

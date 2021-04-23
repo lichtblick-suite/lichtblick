@@ -7,7 +7,7 @@ import { LEVELS } from "@foxglove-studio/app/panels/diagnostics/util";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 
 export default {
-  title: "<DiagnosticStatusPanel>",
+  title: "panels/diagnostics/DiagnosticStatusPanel",
 };
 
 const fixture = {

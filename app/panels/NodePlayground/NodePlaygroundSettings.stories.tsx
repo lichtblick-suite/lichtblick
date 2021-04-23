@@ -10,20 +10,28 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-
 import { storiesOf } from "@storybook/react";
 
-import WssErrorModal from "@foxglove-studio/app/components/WssErrorModal";
+import NodePlaygroundSettings from "./NodePlaygroundSettings";
 
-storiesOf("<WssErrorModal>", module)
+storiesOf("panels/NodePlayground/NodePlaygroundSettings", module)
   .addParameters({
     chromatic: {
       delay: 1000,
     },
   })
-  .add("standard", () => (
-    <WssErrorModal
-      onRequestClose={() => {
+  .add("enabled auto format on save", () => (
+    <NodePlaygroundSettings
+      config={{ selectedNodeId: undefined, autoFormatOnSave: true }}
+      saveConfig={() => {
+        // no-op
+      }}
+    />
+  ))
+  .add("both modes disabled", () => (
+    <NodePlaygroundSettings
+      config={{ selectedNodeId: undefined, autoFormatOnSave: false }}
+      saveConfig={() => {
         // no-op
       }}
     />

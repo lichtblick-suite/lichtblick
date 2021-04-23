@@ -34,7 +34,7 @@ function ControlsStory() {
   );
 }
 
-storiesOf("<PlaybackSpeedControls>", module)
+storiesOf("components/PlaybackSpeedControls", module)
   .add("without speed capability", () => {
     return (
       <MockMessagePipelineProvider>

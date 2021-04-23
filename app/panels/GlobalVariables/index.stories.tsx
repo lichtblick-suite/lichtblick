@@ -81,7 +81,7 @@ function PanelWithData({
 
 const DEFAULT_DELAY = 100;
 
-storiesOf("<GlobalVariables>", module)
+storiesOf("panels/GlobalVariables/index", module)
   .add("default", () => {
     return <PanelWithData />;
   })

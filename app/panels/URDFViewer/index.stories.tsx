@@ -13,7 +13,7 @@ import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 import { JointState } from "@foxglove-studio/app/types/Messages";
 
 export default {
-  title: "<URDFViewer>",
+  title: "panels/URDFViewer/index",
   component: URDFViewer,
 };
 

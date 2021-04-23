@@ -35,7 +35,7 @@ class FakeLayoutStorage implements LayoutStorage {
 }
 
 export default {
-  title: "LayoutMenu",
+  title: "components/LayoutMenu",
   component: LayoutMenu,
 };
 

@@ -15,7 +15,7 @@ import { storiesOf } from "@storybook/react";
 
 import KeyboardShortcut from "./KeyboardShortcut";
 
-storiesOf("<KeyboardShortcut>", module).add("basic", () => (
+storiesOf("components/KeyboardShortcut", module).add("basic", () => (
   <div>
     <KeyboardShortcut description="Toggle visibility" keys={["Enter"]} />
     <KeyboardShortcut description="Copy all" keys={["Shift", "Option", "V"]} />

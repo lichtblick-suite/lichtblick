@@ -27,7 +27,7 @@ const fixture = {
   globalVariables: { globalVariable: 3.5 },
 };
 
-storiesOf("<GlobalVariableSliderPanel>", module)
+storiesOf("panels/GlobalVariableSlider/index", module)
   .add("example", () => {
     return (
       <PanelSetup fixture={fixture}>

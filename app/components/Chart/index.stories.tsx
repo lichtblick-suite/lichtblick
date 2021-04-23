@@ -158,7 +158,7 @@ function DatalabelClickExample() {
 }
 
 export default {
-  title: "<ChartComponent>",
+  title: "components/Chart/index",
   component: ChartComponent,
   parameters: {
     chromatic: {

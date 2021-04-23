@@ -149,6 +149,6 @@ function Example({ hideRoot }: { hideRoot?: boolean }) {
   );
 }
 
-storiesOf("<Tree>", module)
+storiesOf("components/Tree", module)
   .add("standard hideRoot_true", () => <Example hideRoot />)
   .add("standard hideRoot_false", () => <Example />);

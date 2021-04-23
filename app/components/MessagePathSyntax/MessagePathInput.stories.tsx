@@ -113,7 +113,7 @@ function MessagePathInputStory(props: { path: string; prioritizedDatatype?: stri
   );
 }
 
-storiesOf("<MessagePathInput>", module)
+storiesOf("components/MessagePathInput", module)
   .add("autocomplete topics", () => {
     return <MessagePathInputStory path="/" />;
   })

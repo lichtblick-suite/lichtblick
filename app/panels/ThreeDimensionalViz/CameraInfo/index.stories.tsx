@@ -55,7 +55,7 @@ const CameraInfoWrapper = (props: any) => (
   </div>
 );
 
-storiesOf("<CameraInfo>", module)
+storiesOf("panels/ThreeDimensionalViz/CameraInfo", module)
   .add("Default", () => <CameraInfoWrapper />)
   .add("Follow orientation", () => <CameraInfoWrapper followOrientation />)
   .add("3D and showCrosshair", () => <CameraInfoWrapper showCrosshair />)

@@ -317,7 +317,7 @@ const exampleConfig: PlotConfig = {
   xAxisVal: "timestamp",
 };
 
-storiesOf("<Plot>", module)
+storiesOf("panels/Plot/index", module)
   .addParameters({
     chromatic: {
       delay: 50,

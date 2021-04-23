@@ -23,7 +23,7 @@ const onLayoutChange = (layout: ImportPanelLayoutPayload, _isFromUrl: boolean = 
   importPanelLayout(layout);
 };
 
-storiesOf("<ShareJsonModal>", module)
+storiesOf("components/ShareJsonModal", module)
   .add("standard", () => (
     <ShareJsonModal
       onRequestClose={() => {
