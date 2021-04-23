@@ -40,41 +40,22 @@ function getStore() {
   return configureStore(createRootReducer(createMemoryHistory()));
 }
 
-function Context(props: { children: React.ReactNode; store?: any }) {
-  const extraProps = props.store == undefined ? undefined : { store: props.store };
-  return (
-    <PanelSetup
-      fixture={{
-        topics: [{ name: "/some/topic", datatype: "some_datatype" }],
-        datatypes: { some_datatype: { fields: [] } },
-        frame: {},
-      }}
-      {...extraProps}
-    >
-      {props.children}
-    </PanelSetup>
-  );
-}
-
 describe("Panel", () => {
   it("renders properly with defaultConfig", () => {
     const renderFn = jest.fn();
     const DummyPanel = getDummyPanel(renderFn);
 
     mount(
-      <Context>
+      <PanelSetup>
         <DummyPanel />
-      </Context>,
+      </PanelSetup>,
     );
 
     expect(renderFn.mock.calls.length).toEqual(1);
     expect(renderFn.mock.calls[0]).toEqual([
       {
-        capabilities: [],
         config: { someString: "hello world" },
-        datatypes: { some_datatype: { fields: [] } },
         saveConfig: expect.any(Function),
-        topics: [{ datatype: "some_datatype", name: "/some/topic" }],
       },
     ]);
   });
@@ -89,19 +70,16 @@ describe("Panel", () => {
     const store = getStore();
     store.dispatch(savePanelConfigs({ configs: [{ id: childId, config: { someString } }] }));
     mount(
-      <Context store={store}>
+      <PanelSetup store={store}>
         <DummyPanel childId={childId} />
-      </Context>,
+      </PanelSetup>,
     );
 
     expect(renderFn.mock.calls.length).toEqual(1);
     expect(renderFn.mock.calls[0]).toEqual([
       {
-        capabilities: [],
         config: { someString },
-        datatypes: { some_datatype: { fields: [] } },
         saveConfig: expect.any(Function),
-        topics: [{ datatype: "some_datatype", name: "/some/topic" }],
       },
     ]);
   });
@@ -112,9 +90,9 @@ describe("Panel", () => {
 
     const store = getStore();
     mount(
-      <Context store={store}>
+      <PanelSetup store={store}>
         <DummyPanel />
-      </Context>,
+      </PanelSetup>,
     );
 
     expect(renderFn.mock.calls.length).toEqual(1);

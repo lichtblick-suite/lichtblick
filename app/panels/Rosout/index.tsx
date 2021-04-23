@@ -18,7 +18,6 @@ import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import TopicToRenderMenu from "@foxglove-studio/app/components/TopicToRenderMenu";
-import { Topic } from "@foxglove-studio/app/players/types";
 
 import FilterBar, { FilterBarProps } from "./FilterBar";
 import LogList from "./LogList";
@@ -36,10 +35,10 @@ type Config = {
 type Props = {
   config: Config;
   saveConfig: (arg0: Config) => void;
-  topics: Topic[];
 };
 
-const RosoutPanel = React.memo(({ config, saveConfig, topics }: Props) => {
+const RosoutPanel = React.memo(({ config, saveConfig }: Props) => {
+  const { topics } = PanelAPI.useDataSourceInfo();
   const { minLogLevel, searchTerms } = config;
 
   const onFilterChange = useCallback<FilterBarProps["onFilterChange"]>(

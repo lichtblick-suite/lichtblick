@@ -19,6 +19,7 @@ import { compact } from "lodash";
 import { useCallback } from "react";
 import { List, AutoSizer } from "react-virtualized";
 
+import { useDataSourceInfo } from "@foxglove-studio/app/PanelAPI";
 import EmptyState from "@foxglove-studio/app/components/EmptyState";
 import Flex from "@foxglove-studio/app/components/Flex";
 import Icon from "@foxglove-studio/app/components/Icon";
@@ -28,7 +29,6 @@ import { usePanelContext } from "@foxglove-studio/app/components/PanelContext";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import TopicToRenderMenu from "@foxglove-studio/app/components/TopicToRenderMenu";
 import DiagnosticsHistory from "@foxglove-studio/app/panels/diagnostics/DiagnosticsHistory";
-import { Topic } from "@foxglove-studio/app/players/types";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { DIAGNOSTIC_TOPIC } from "@foxglove-studio/app/util/globalConstants";
 import toggle from "@foxglove-studio/app/util/toggle";
@@ -93,11 +93,11 @@ type Config = {
 type Props = {
   config: Config;
   saveConfig: (arg0: Partial<Config>) => void;
-  topics: Topic[];
 };
 
 function DiagnosticSummary(props: Props): JSX.Element {
-  const { config, saveConfig, topics } = props;
+  const { config, saveConfig } = props;
+  const { topics } = useDataSourceInfo();
   const { topicToRender, pinnedIds, hardwareIdFilter, sortByLevel = true } = config;
   const { openSiblingPanel } = usePanelContext();
 

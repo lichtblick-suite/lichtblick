@@ -16,6 +16,7 @@ import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import styled from "styled-components";
 
+import { useDataSourceInfo } from "@foxglove-studio/app/PanelAPI";
 import Autocomplete from "@foxglove-studio/app/components/Autocomplete";
 import Button from "@foxglove-studio/app/components/Button";
 import Flex from "@foxglove-studio/app/components/Flex";
@@ -27,7 +28,6 @@ import PanelToolbarLabel from "@foxglove-studio/app/components/PanelToolbarLabel
 import usePublisher from "@foxglove-studio/app/hooks/usePublisher";
 import { PlayerCapabilities, Topic } from "@foxglove-studio/app/players/types";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 
 import buildSampleMessage from "./buildSampleMessage";
 
@@ -44,11 +44,6 @@ type Config = {
 type Props = {
   config: Config;
   saveConfig: (arg0: Partial<Config>) => void;
-
-  // player state
-  capabilities: string[];
-  topics: Topic[];
-  datatypes: RosDatatypes;
 };
 
 const STextArea = styled.textarea`
@@ -104,10 +99,8 @@ function parseInput(value: string): { error?: string; parsedObject?: unknown } {
 }
 
 function Publish(props: Props) {
+  const { topics, datatypes, capabilities } = useDataSourceInfo();
   const {
-    capabilities,
-    topics,
-    datatypes,
     config: { topicName, datatype, buttonText, buttonTooltip, buttonColor, advancedView, value },
     saveConfig,
   } = props;
@@ -234,7 +227,7 @@ function Publish(props: Props) {
           <SSpan>Topic:</SSpan>
           <Autocomplete
             placeholder="Choose a topic"
-            items={topics}
+            items={[...topics]}
             hasError={false}
             onChange={onChangeTopic}
             onSelect={onSelectTopic}

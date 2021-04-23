@@ -14,6 +14,7 @@
 import { sortBy } from "lodash";
 import { useCallback } from "react";
 
+import { useDataSourceInfo } from "@foxglove-studio/app/PanelAPI";
 import Autocomplete from "@foxglove-studio/app/components/Autocomplete";
 import EmptyState from "@foxglove-studio/app/components/EmptyState";
 import Flex from "@foxglove-studio/app/components/Flex";
@@ -21,7 +22,6 @@ import Panel from "@foxglove-studio/app/components/Panel";
 import { usePanelContext } from "@foxglove-studio/app/components/PanelContext";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import TopicToRenderMenu from "@foxglove-studio/app/components/TopicToRenderMenu";
-import { Topic } from "@foxglove-studio/app/players/types";
 import { DIAGNOSTIC_TOPIC } from "@foxglove-studio/app/util/globalConstants";
 
 import DiagnosticStatus from "./DiagnosticStatus";
@@ -40,11 +40,11 @@ export type Config = {
 type Props = {
   config: Config;
   saveConfig: (arg0: Partial<Config>) => void;
-  topics: Topic[];
 };
 // component to display a single diagnostic status from list
 function DiagnosticStatusPanel(props: Props) {
-  const { saveConfig, config, topics } = props;
+  const { saveConfig, config } = props;
+  const { topics } = useDataSourceInfo();
   const { openSiblingPanel } = usePanelContext();
   const {
     selectedHardwareId,

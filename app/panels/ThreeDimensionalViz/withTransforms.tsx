@@ -14,6 +14,7 @@
 import hoistNonReactStatics from "hoist-non-react-statics";
 import PropTypes from "prop-types";
 
+import { useDataSourceInfo } from "@foxglove-studio/app/PanelAPI";
 import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
 import { Frame, Message, Topic } from "@foxglove-studio/app/players/types";
 import { TF } from "@foxglove-studio/app/types/Messages";
@@ -52,7 +53,7 @@ function withTransforms<Props extends any>(ChildComponent: React.ComponentType<P
   class Component extends React.PureComponent<
     Partial<{
       frame: Frame;
-      topics: Topic[];
+      topics: readonly Topic[];
       cleared?: boolean;
       forwardedRef: any;
     }>,
@@ -148,7 +149,8 @@ function withTransforms<Props extends any>(ChildComponent: React.ComponentType<P
   }
   return hoistNonReactStatics(
     React.forwardRef((props, ref) => {
-      return <Component {...props} forwardedRef={ref} />;
+      const { topics } = useDataSourceInfo();
+      return <Component {...props} topics={topics} forwardedRef={ref} />;
     }),
     ChildComponent,
   );

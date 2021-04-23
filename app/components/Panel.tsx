@@ -43,7 +43,6 @@ import { useSelector, useDispatch, useStore } from "react-redux";
 import { bindActionCreators } from "redux";
 import styled from "styled-components";
 
-import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import {
   addSelectedPanelId,
   removeSelectedPanelId,
@@ -65,9 +64,7 @@ import PanelContext from "@foxglove-studio/app/components/PanelContext";
 import MosaicDragHandle from "@foxglove-studio/app/components/PanelToolbar/MosaicDragHandle";
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import { usePanelCatalog } from "@foxglove-studio/app/context/PanelCatalogContext";
-import { Topic } from "@foxglove-studio/app/players/types";
 import { State } from "@foxglove-studio/app/reducers";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { TabPanelConfig } from "@foxglove-studio/app/types/layouts";
 import {
   CreateTabPanelPayload,
@@ -143,9 +140,6 @@ export default function Panel<Config extends PanelConfig>(
   PanelComponent: ComponentConstructorType<{
     config: Config;
     saveConfig: SaveConfig<Config>;
-    topics: Topic[];
-    capabilities: string[];
-    datatypes: RosDatatypes;
   }> &
     PanelStatics<Config>,
 ): ComponentType<Props<Config>> & PanelStatics<Config> {
@@ -186,7 +180,6 @@ export default function Panel<Config extends PanelConfig>(
         EMPTY_CONFIG,
     );
 
-    const { topics, datatypes, capabilities } = PanelAPI.useDataSourceInfo();
     const dispatch = useDispatch();
     const actions: ActionProps = useMemo(
       () =>
@@ -505,16 +498,8 @@ export default function Panel<Config extends PanelConfig>(
     }, [exitFullScreen, onReleaseQuickActionsKey]);
 
     const child = useMemo(
-      () => (
-        <PanelComponent
-          config={panelComponentConfig}
-          saveConfig={saveCompleteConfig}
-          topics={[...topics]}
-          datatypes={datatypes}
-          capabilities={capabilities}
-        />
-      ),
-      [panelComponentConfig, saveCompleteConfig, topics, datatypes, capabilities],
+      () => <PanelComponent config={panelComponentConfig} saveConfig={saveCompleteConfig} />,
+      [panelComponentConfig, saveCompleteConfig],
     );
 
     const isDemoMode = useExperimentalFeature("demoMode");
