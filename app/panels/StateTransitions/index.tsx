@@ -24,6 +24,7 @@ import Button from "@foxglove-studio/app/components/Button";
 import MessagePathInput from "@foxglove-studio/app/components/MessagePathSyntax/MessagePathInput";
 import useMessagesByPath from "@foxglove-studio/app/components/MessagePathSyntax/useMessagesByPath";
 import Panel from "@foxglove-studio/app/components/Panel";
+import { usePanelContext } from "@foxglove-studio/app/components/PanelContext";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import TimeBasedChart, {
   getTooltipItemForMessageHistoryItem,
@@ -181,11 +182,11 @@ export function openSiblingStateTransitionsPanel(
 type Props = {
   config: StateTransitionConfig;
   saveConfig: (arg0: Partial<StateTransitionConfig>) => void;
-  isHovered: boolean;
 };
 
 const StateTransitions = React.memo(function StateTransitions(props: Props) {
-  const { config, saveConfig, isHovered } = props;
+  const { config, saveConfig } = props;
+  const { isHovered } = usePanelContext();
   const { paths } = config;
 
   const onInputChange = (value: string, index?: number) => {

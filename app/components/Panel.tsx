@@ -146,7 +146,6 @@ export default function Panel<Config extends PanelConfig>(
     topics: Topic[];
     capabilities: string[];
     datatypes: RosDatatypes;
-    isHovered: boolean;
   }> &
     PanelStatics<Config>,
 ): ComponentType<Props<Config>> & PanelStatics<Config> {
@@ -513,10 +512,9 @@ export default function Panel<Config extends PanelConfig>(
           topics={[...topics]}
           datatypes={datatypes}
           capabilities={capabilities}
-          isHovered={isHovered}
         />
       ),
-      [panelComponentConfig, saveCompleteConfig, topics, datatypes, capabilities, isHovered],
+      [panelComponentConfig, saveCompleteConfig, topics, datatypes, capabilities],
     );
 
     const isDemoMode = useExperimentalFeature("demoMode");

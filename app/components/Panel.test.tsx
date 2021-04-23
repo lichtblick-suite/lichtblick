@@ -75,7 +75,6 @@ describe("Panel", () => {
         datatypes: { some_datatype: { fields: [] } },
         saveConfig: expect.any(Function),
         topics: [{ datatype: "some_datatype", name: "/some/topic" }],
-        isHovered: false,
       },
     ]);
   });
@@ -103,7 +102,6 @@ describe("Panel", () => {
         datatypes: { some_datatype: { fields: [] } },
         saveConfig: expect.any(Function),
         topics: [{ datatype: "some_datatype", name: "/some/topic" }],
-        isHovered: false,
       },
     ]);
   });
