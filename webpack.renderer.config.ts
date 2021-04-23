@@ -8,13 +8,9 @@ import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import MonacoWebpackPlugin from "monaco-editor-webpack-plugin";
 import path from "path";
+import ReactRefreshTypescript from "react-refresh-typescript";
 import createStyledComponentsTransformer from "typescript-plugin-styled-components";
-import webpack, {
-  Configuration,
-  EnvironmentPlugin,
-  RuleSetUseItem,
-  WebpackPluginInstance,
-} from "webpack";
+import webpack, { Configuration, EnvironmentPlugin, WebpackPluginInstance } from "webpack";
 
 import { WebpackArgv } from "./WebpackArgv";
 
@@ -40,14 +36,9 @@ export function makeConfig(_: unknown, argv: WebpackArgv, options?: Options): Co
   const { allowUnusedLocals = isDev && isServe } = options ?? {};
 
   const plugins: WebpackPluginInstance[] = [];
-  const ruleUse: RuleSetUseItem[] = [];
 
   if (isServe) {
     plugins.push(new ReactRefreshPlugin());
-    ruleUse.push({
-      loader: "babel-loader",
-      options: { plugins: ["react-refresh/babel"] },
-    });
   }
 
   return {
@@ -104,7 +95,6 @@ export function makeConfig(_: unknown, argv: WebpackArgv, options?: Options): Co
           exclude: /node_modules/,
           resourceQuery: { not: [/raw/] },
           use: [
-            ...ruleUse,
             {
               loader: "ts-loader",
               options: {
@@ -113,7 +103,13 @@ export function makeConfig(_: unknown, argv: WebpackArgv, options?: Options): Co
                 // avoid looking at files which are not part of the bundle
                 onlyCompileBundledFiles: true,
                 configFile: isDev ? "tsconfig.dev.json" : "tsconfig.json",
-                getCustomTransformers: () => ({ before: [styledComponentsTransformer] }),
+                getCustomTransformers: () => ({
+                  before: [
+                    styledComponentsTransformer,
+                    // only include refresh plugin when using webpack server
+                    ...(isServe ? [ReactRefreshTypescript()] : []),
+                  ],
+                }),
               },
             },
           ],

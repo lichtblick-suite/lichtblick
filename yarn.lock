@@ -6681,7 +6681,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-loader@npm:8.2.2, babel-loader@npm:^8.2.2":
+"babel-loader@npm:^8.2.2":
   version: 8.2.2
   resolution: "babel-loader@npm:8.2.2"
   dependencies:
@@ -12098,7 +12098,6 @@ __metadata:
     "@typescript-eslint/eslint-plugin": 4.21.0
     "@typescript-eslint/parser": 4.21.0
     amplitude-js: 8.1.0
-    babel-loader: 8.2.2
     babel-plugin-transform-import-meta: 1.0.1
     browserify-zlib: 0.2.0
     circular-dependency-plugin: 5.2.2
@@ -12135,6 +12134,7 @@ __metadata:
     path-browserify: 1.0.1
     pngjs: 6.0.0
     prettier: 2.2.1
+    react-refresh-typescript: 2.0.0
     react-svg-loader: 3.0.3
     readable-stream: 3.6.0
     rimraf: 3.0.2
@@ -19953,6 +19953,16 @@ fsevents@^1.2.7:
     react-native:
       optional: true
   checksum: f789c2d9cb19d33bd5764ea381537d94faf3b3872151b0eb5f6f3c07c3d8746b446664d72026fbafcfef3af7afcab907c9c0486b2c4d283d1ffd06f71dd39be7
+  languageName: node
+  linkType: hard
+
+"react-refresh-typescript@npm:2.0.0":
+  version: 2.0.0
+  resolution: "react-refresh-typescript@npm:2.0.0"
+  peerDependencies:
+    react-refresh: 0.10.x
+    typescript: ^4
+  checksum: 7da5e065e2cff5f29962ef7a6cd6775890ead864862ac2ff4fe41a91ef1630f8c1bb75c77fad52cf80a59778e58b8fd355c3f642e51580a997d3f592b6355e56
   languageName: node
   linkType: hard
 
