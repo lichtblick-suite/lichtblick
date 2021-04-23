@@ -1,3 +1,4 @@
+// -*- jsonc -*-
 // Base TypeScript configuration
 // https://www.typescriptlang.org/tsconfig
 {
