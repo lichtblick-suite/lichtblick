@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import ReactRefreshPlugin from "@pmmmwh/react-refresh-webpack-plugin";
+import SentryWebpackPlugin from "@sentry/webpack-plugin";
 import CircularDependencyPlugin from "circular-dependency-plugin";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
@@ -13,6 +14,7 @@ import createStyledComponentsTransformer from "typescript-plugin-styled-componen
 import webpack, { Configuration, EnvironmentPlugin, WebpackPluginInstance } from "webpack";
 
 import { WebpackArgv } from "./WebpackArgv";
+import packageJson from "./package.json";
 
 const styledComponentsTransformer = createStyledComponentsTransformer({
   getDisplayName: (filename, bindingName) => {
@@ -39,6 +41,29 @@ export function makeConfig(_: unknown, argv: WebpackArgv, options?: Options): Co
 
   if (isServe) {
     plugins.push(new ReactRefreshPlugin());
+  }
+
+  // Source map upload if configuration permits
+  if (
+    !isDev &&
+    process.env.SENTRY_AUTH_TOKEN != undefined &&
+    process.env.SENTRY_ORG != undefined &&
+    process.env.SENTRY_PROJECT != undefined
+  ) {
+    plugins.push(
+      new SentryWebpackPlugin({
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+        org: process.env.SENTRY_ORG,
+        project: process.env.SENTRY_PROJECT,
+        release: `${process.env.SENTRY_PROJECT}@${packageJson.version}`,
+
+        // Since the render config appears last in the list of webpack configs, we use it to upload
+        // all the source maps under .webpack (main and renderer).
+        include: path.resolve(__dirname, ".webpack"),
+        // in production, sources are loaded from app:/// so we need to explicitly indicate this url prefix
+        urlPrefix: "app:///",
+      }),
+    );
   }
 
   return {

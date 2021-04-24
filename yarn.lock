@@ -3007,6 +3007,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/cli@npm:^1.64.1":
+  version: 1.64.1
+  resolution: "@sentry/cli@npm:1.64.1"
+  dependencies:
+    https-proxy-agent: ^5.0.0
+    mkdirp: ^0.5.5
+    node-fetch: ^2.6.0
+    npmlog: ^4.1.2
+    progress: ^2.0.3
+    proxy-from-env: ^1.1.0
+  bin:
+    sentry-cli: bin/sentry-cli
+  checksum: cbfc2f80a3679aa14cfa8d3aae77c6e90dad913360d473f3a175a26abc58b42b056f9d23d6b14415717e7fb4338927f831896216e8852f171f3dd7791b721e64
+  languageName: node
+  linkType: hard
+
 "@sentry/core@npm:5.27.6":
   version: 5.27.6
   resolution: "@sentry/core@npm:5.27.6"
@@ -3101,6 +3117,15 @@ __metadata:
     "@sentry/types": 5.27.6
     tslib: ^1.9.3
   checksum: ea0c9c04104e715a10be0f08f708d534e00084464d67c85f17a5ce83e2b2177cddc1de4e312f80e41da2648b950448870bcb3690748757ae010a7b21ed3a0d58
+  languageName: node
+  linkType: hard
+
+"@sentry/webpack-plugin@npm:1.15.1":
+  version: 1.15.1
+  resolution: "@sentry/webpack-plugin@npm:1.15.1"
+  dependencies:
+    "@sentry/cli": ^1.64.1
+  checksum: 6c80491ba17f91b1d01284379daba951d4dd82f78ff9e2dece6c649937e4b3ae213eb89125713f04f706a3c9c25093840c61ee2e6fd2f908f910c990d441622e
   languageName: node
   linkType: hard
 
@@ -12159,6 +12184,7 @@ __metadata:
     "@jest/types": 26.6.2
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.0-beta.1
     "@sentry/electron": 2.4.0
+    "@sentry/webpack-plugin": 1.15.1
     "@types/amplitude-js": 7.0.1
     "@types/babel__core": ^7
     "@types/babel__preset-env": ^7
