@@ -17,7 +17,8 @@ import { storiesOf } from "@storybook/react";
 import { useState } from "react";
 
 import Menu from "@foxglove-studio/app/components/Menu";
-import Tree, { Node } from "@foxglove-studio/app/components/Tree";
+import Tree from "@foxglove-studio/app/components/Tree";
+import { Node } from "@foxglove-studio/app/components/Tree/Node";
 
 function getInitialState() {
   const root = {

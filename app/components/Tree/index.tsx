@@ -16,9 +16,6 @@ import React, { PureComponent } from "react";
 import { Node } from "./Node";
 import TreeNode from "./TreeNode";
 
-// export the node flow type
-export { Node } from "./Node";
-
 type Props = {
   disableCheckbox?: boolean;
   enableVisibilityToggle?: boolean;

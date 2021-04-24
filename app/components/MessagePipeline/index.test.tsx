@@ -1,3 +1,4 @@
+/** @jest-environment jsdom */
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -164,26 +165,27 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
 
   it("waits for the previous frame to finish before calling setGlobalVariables again", async () => {
     const player = new FakePlayer();
-    jest.spyOn(player, "setGlobalVariables");
+    const mockSetGlobalVariables = jest.spyOn(player, "setGlobalVariables");
     const { result, rerender } = renderHook(Hook, {
       wrapper: Wrapper,
       initialProps: { maybePlayer: { player }, globalVariables: {} },
     });
     await tick();
+    await tick();
 
-    expect(player.setGlobalVariables).toHaveBeenCalledWith({});
-    expect(player.setGlobalVariables).toHaveBeenCalledTimes(1);
+    expect(mockSetGlobalVariables.mock.calls).toEqual([[{}]]);
     const onFrameRendered = result.current.pauseFrame("Wait");
 
     // Pass in new globalVariables and make sure they aren't used until the frame is done
     rerender({ maybePlayer: { player }, globalVariables: { futureTime: 1 } });
     await tick();
-    expect(player.setGlobalVariables).toHaveBeenCalledTimes(1);
+    expect(mockSetGlobalVariables.mock.calls).toEqual([[{}]]);
 
     // Once the frame is done, setGlobalVariables will be called with the new value
     onFrameRendered();
     await tick();
-    expect(player.setGlobalVariables).toHaveBeenCalledWith({ futureTime: 1 });
+    await tick();
+    expect(mockSetGlobalVariables.mock.calls).toEqual([[{}], [{ futureTime: 1 }]]);
   });
 
   it("sets subscriptions", () => {

@@ -8,6 +8,7 @@
     "./*.js",
     "./**/jest.config.ts",
     "./ci/**/*.ts",
+    "./eslint-rules/*.js",
     "./test/**/*.ts",
     "./resources/notarize.ts"
   ],

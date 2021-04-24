@@ -44,3 +44,5 @@ describe("custom expectations", () => {
     });
   });
 });
+
+export {}; // for isolatedModules

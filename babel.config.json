@@ -1,0 +1,8 @@
+{
+  "presets": [
+    ["@babel/preset-env", { "targets": { "node": "14" } }],
+    "@babel/preset-typescript",
+    "@babel/preset-react"
+  ],
+  "plugins": ["babel-plugin-transform-import-meta", "@babel/plugin-transform-modules-commonjs"]
+}

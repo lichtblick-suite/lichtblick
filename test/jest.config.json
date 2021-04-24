@@ -1,0 +1,6 @@
+{
+  "globalSetup": "<rootDir>/globalSetup.ts",
+  "testRunner": "jest-circus/runner",
+  "//": "Native find is slow because it does not exclude files: https://github.com/facebook/jest/pull/11264#issuecomment-825377579",
+  "haste": { "forceNodeFilesystemAPI": true }
+}

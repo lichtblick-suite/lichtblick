@@ -19,7 +19,8 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.preferences.importModuleSpecifier": "non-relative",
   "eslint.options": {
-    "reportUnusedDisableDirectives": true
+    "reportUnusedDisableDirectives": true,
+    "rulePaths": ["eslint-rules"]
   },
   // enable intellisense in custom snippets (see snippets.code-snippets)
   "editor.suggest.snippetsPreventQuickSuggestions": false

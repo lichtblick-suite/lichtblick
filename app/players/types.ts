@@ -87,7 +87,7 @@ export interface Player {
   setGlobalVariables(globalVariables: GlobalVariables): void;
 }
 
-export const enum PlayerPresence {
+export enum PlayerPresence {
   NOT_PRESENT = "NOT_PRESENT",
   CONSTRUCTING = "CONSTRUCTING",
   INITIALIZING = "INITIALIZING",
