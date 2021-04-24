@@ -50,10 +50,6 @@ export function makeConfig(_: unknown, argv: WebpackArgv, options?: Options): Co
     entry: "./index.tsx",
     devtool: isDev ? "eval-cheap-module-source-map" : "source-map",
 
-    optimization: {
-      minimize: false,
-    },
-
     output: {
       publicPath: isServe ? "/renderer/" : "",
       path: path.resolve(__dirname, ".webpack", "renderer"),

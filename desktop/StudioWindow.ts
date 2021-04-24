@@ -302,10 +302,14 @@ class StudioWindow {
     browserWindow.once("closed", () => {
       StudioWindow.windowsByContentId.delete(id);
     });
+  }
 
+  load(): void {
     // load after setting windowsById so any ipc handlers with id lookup work
     log.info(`window.loadURL(${rendererPath})`);
-    browserWindow.loadURL(rendererPath).then(() => log.info("window URL loaded"));
+    this._window.loadURL(rendererPath).then(() => {
+      log.info("window URL loaded");
+    });
   }
 
   addInputSource(name: string): void {

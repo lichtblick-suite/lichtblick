@@ -17,6 +17,7 @@ import LocalFileStorage from "./LocalFileStorage";
 
 const log = Logger.getLogger(__filename);
 
+log.debug(`Start Preload`);
 log.info(`${APP_NAME} ${APP_VERSION}`);
 log.info(`initializing preloader, argv="${window.process.argv.join(" ")}"`);
 
@@ -149,3 +150,5 @@ function getTelemetrySettings(): [crashReportingEnabled: boolean, telemetryEnabl
   );
   return [crashReportingEnabled, telemetryEnabled];
 }
+
+log.debug(`End Preload`);

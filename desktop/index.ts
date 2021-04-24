@@ -27,6 +27,7 @@ import {
 } from "./rosPackageResources";
 import { getTelemetrySettings } from "./telemetry";
 
+const start = Date.now();
 const log = Logger.getLogger(__filename);
 
 log.info(`${APP_NAME} ${APP_VERSION}`);
@@ -71,8 +72,68 @@ const filesToOpen: string[] = process.argv.slice(1).filter((item) => {
   }
   return false;
 });
-app.on("open-file", (_ev, filePath) => {
+
+// Our app has support for working with _File_ instances in the renderer. This avoids extra copies
+// while reading files and lets the renderer seek/read as necessary using all the browser
+// primitives for _File_ instances.
+//
+// Unfortunately Electron does not provide a way to create or send _File_ instances to the renderer.
+// To avoid sending the data over our context bridge, we use a _hack_.
+// Via the debugger we _inject_ a DOM event to set the files of an <input> element.
+const inputElementId = "electron-open-file-input";
+async function loadFilesToOpen(browserWindow: BrowserWindow) {
+  const debug = browserWindow.webContents.debugger;
+  try {
+    debug.attach("1.1");
+  } catch (err) {
+    // debugger may already be attached
+  }
+
+  try {
+    const documentRes = await debug.sendCommand("DOM.getDocument");
+    const queryRes = await debug.sendCommand("DOM.querySelector", {
+      nodeId: documentRes.root.nodeId,
+      selector: `#${inputElementId}`,
+    });
+    await debug.sendCommand("DOM.setFileInputFiles", {
+      nodeId: queryRes.nodeId,
+      files: filesToOpen,
+    });
+
+    // clear the files once we've opened them
+    filesToOpen.splice(0, filesToOpen.length);
+  } finally {
+    debug.detach();
+  }
+}
+
+// indicates the preloader has setup the file input used to inject which files to open
+let preloaderFileInputIsReady = false;
+
+// This handles user dropping files on the doc icon or double clicking a file when the app
+// is already open.
+//
+// The open-file handler registered earlier will handle adding the file to filesToOpen
+app.on("open-file", async (_ev, filePath) => {
   filesToOpen.push(filePath);
+
+  if (preloaderFileInputIsReady) {
+    const focusedWindow = BrowserWindow.getFocusedWindow();
+    if (focusedWindow) {
+      await loadFilesToOpen(focusedWindow);
+    }
+  }
+});
+
+// preload will tell us when it is ready to process the pending open file requests
+// It is important this handler is registered before any windows open because preload will call
+// this handler to get the files we were told to open on startup
+ipcMain.handle("load-pending-files", async (ev) => {
+  const browserWindow = BrowserWindow.fromId(ev.sender.id);
+  if (browserWindow) {
+    await loadFilesToOpen(browserWindow);
+  }
+  preloaderFileInputIsReady = true;
 });
 
 // works on osx - even when app is closed
@@ -108,13 +169,21 @@ registerRosPackageProtocolSchemes();
 app.on("ready", async () => {
   nativeTheme.themeSource = "dark";
 
+  const argv = process.argv;
+  const deepLinks = argv.filter((arg) => arg.startsWith("foxglove://"));
+
+  // create the initial window now to display to the user immediately
+  // loading the app url happens at the end of ready to ensure we've setup all the handlers, settings, etc
+  log.debug(`Elapsed (ms) until new StudioWindow: ${Date.now() - start}`);
+  const initialWindow = new StudioWindow([...deepLinks, ...openUrls]);
+
   registerRosPackageProtocolHandlers();
 
   // Only stable builds check for automatic updates
   if (process.env.NODE_ENV !== "production") {
     log.info("Automatic updates disabled (development environment)");
   } else if (/-(dev|nightly)/.test(APP_VERSION)) {
-    log.info("Automatic updates disabled (development build)");
+    log.info("Automatic updates disabled (development version)");
   } else {
     autoUpdater.checkForUpdatesAndNotify().catch((err) => {
       captureException(err);
@@ -250,65 +319,6 @@ app.on("ready", async () => {
     }
   });
 
-  // Our app has support for working with _File_ instances in the renderer. This avoids extra copies
-  // while reading files and lets the renderer seek/read as necessary using all the browser
-  // primitives for _File_ instances.
-  //
-  // Unfortunately Electron does not provide a way to create or send _File_ instances to the renderer.
-  // To avoid sending the data over our context bridge, we use a _hack_.
-  // Via the debugger we _inject_ a DOM event to set the files of an <input> element.
-  const inputElementId = "electron-open-file-input";
-  async function loadFilesToOpen(browserWindow: BrowserWindow) {
-    const debug = browserWindow.webContents.debugger;
-    try {
-      debug.attach("1.1");
-    } catch (err) {
-      // debugger may already be attached
-    }
-
-    try {
-      const documentRes = await debug.sendCommand("DOM.getDocument");
-      const queryRes = await debug.sendCommand("DOM.querySelector", {
-        nodeId: documentRes.root.nodeId,
-        selector: `#${inputElementId}`,
-      });
-      await debug.sendCommand("DOM.setFileInputFiles", {
-        nodeId: queryRes.nodeId,
-        files: filesToOpen,
-      });
-
-      // clear the files once we've opened them
-      filesToOpen.splice(0, filesToOpen.length);
-    } finally {
-      debug.detach();
-    }
-  }
-
-  // indicates the preloader has setup the file input used to inject which files to open
-  let preloaderFileInputIsReady = false;
-
-  // This handles user dropping files on the doc icon or double clicking a file when the app
-  // is already open.
-  //
-  // The open-file handler registered earlier will handle adding the file to filesToOpen
-  app.on("open-file", async (_ev) => {
-    if (preloaderFileInputIsReady) {
-      const focusedWindow = BrowserWindow.getFocusedWindow();
-      if (focusedWindow) {
-        await loadFilesToOpen(focusedWindow);
-      }
-    }
-  });
-
-  // preload will tell us when it is ready to process the pending open file requests
-  ipcMain.handle("load-pending-files", async (ev) => {
-    const browserWindow = BrowserWindow.fromId(ev.sender.id);
-    if (browserWindow) {
-      await loadFilesToOpen(browserWindow);
-    }
-    preloaderFileInputIsReady = true;
-  });
-
   // This event handler must be added after the "ready" event fires
   // (see https://github.com/electron/electron-quick-start/pull/382)
   app.on("activate", () => {
@@ -321,9 +331,7 @@ app.on("ready", async () => {
 
   installMenuInterface();
 
-  const argv = process.argv;
-  const deepLinks = argv.filter((arg) => arg.startsWith("foxglove://"));
-  new StudioWindow([...deepLinks, ...openUrls]);
+  initialWindow.load();
 });
 
 // Quit when all windows are closed, except on macOS. There, it's common
