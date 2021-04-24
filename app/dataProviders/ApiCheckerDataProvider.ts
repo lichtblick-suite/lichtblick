@@ -139,7 +139,7 @@ export default class ApiCheckerDataProvider implements DataProvider {
     if (!initRes) {
       this._warn("getMessages was called before initialize finished");
       // Need to return, otherwise we can't refer to initRes later, and this is a really bad violation anyway.
-      return { bobjects: undefined, parsedMessages: undefined, rosBinaryMessages: undefined };
+      return { parsedMessages: undefined, rosBinaryMessages: undefined };
     }
     if (TimeUtil.isLessThan(end, start)) {
       this._warn(
@@ -162,11 +162,7 @@ export default class ApiCheckerDataProvider implements DataProvider {
         )})`,
       );
     }
-    if (
-      !subscriptions.bobjects?.length &&
-      !subscriptions.parsedMessages?.length &&
-      !subscriptions.rosBinaryMessages?.length
-    ) {
+    if (!subscriptions.parsedMessages?.length && !subscriptions.rosBinaryMessages?.length) {
       this._warn("getMessages was called without any topics");
     }
     for (const messageType of MESSAGE_FORMATS) {

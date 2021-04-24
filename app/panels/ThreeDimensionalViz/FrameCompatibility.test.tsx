@@ -16,16 +16,9 @@ import { last } from "lodash";
 import { act } from "react-dom/test-utils";
 
 import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
-import { deepParse } from "@foxglove-studio/app/util/binaryObjects";
 
 import { FrameCompatibilityDEPRECATED } from "./FrameCompatibility";
 import { datatypes, messages } from "./FrameCompatibilityFixture";
-
-const unBobjectifyMessage = ({ message, receiveTime, topic }: any) => ({
-  message: deepParse(message),
-  receiveTime,
-  topic,
-});
 
 describe("FrameCompatibilityDEPRECATED", () => {
   it("passes in messages per frame", () => {
@@ -66,14 +59,14 @@ describe("FrameCompatibilityDEPRECATED", () => {
     expect(Object.keys(frame1)).toEqual(["/some/topic"]);
     let frameMessages = frame1["/some/topic"];
     expect(frameMessages).toHaveLength(1);
-    expect(frameMessages.map(unBobjectifyMessage)).toEqual([messages[0]]);
+    expect(frameMessages).toEqual([messages[0]]);
 
     // Make sure that we don't send `messages[0]` when receiving a new frame.
     provider.setProps({ messages: [messages[1], fooMsg1] });
     const frame2 = last(childFn.mock.calls)[0].frame;
     expect(Object.keys(frame2)).toEqual(["/some/topic"]);
     frameMessages = frame2["/some/topic"];
-    expect(frameMessages.map(unBobjectifyMessage)).toEqual([messages[1]]);
+    expect(frameMessages).toEqual([messages[1]]);
 
     // setSubscriptions should add new topics while remaining subscribed to old topics
     if (!ref.current) {
@@ -84,8 +77,8 @@ describe("FrameCompatibilityDEPRECATED", () => {
     const frame3 = last(childFn.mock.calls)[0].frame;
     expect(Object.keys(frame3).sort()).toEqual(["/foo", "/some/topic"]);
     const fooMessages = frame3["/foo"];
-    expect(fooMessages.map(unBobjectifyMessage)).toEqual([fooMsg2]);
+    expect(fooMessages).toEqual([fooMsg2]);
     const someTopicMessages = frame3["/some/topic"];
-    expect(someTopicMessages.map(unBobjectifyMessage)).toEqual([messages[2]]);
+    expect(someTopicMessages).toEqual([messages[2]]);
   });
 });

@@ -77,9 +77,8 @@ export default class MeasureDataProvider implements DataProvider {
     const startMs = Date.now();
     const argsString = `${start.sec}.${start.nsec}, ${end.sec}.${end.nsec}`;
     const result = await this._provider.getMessages(start, end, topics);
-    const { parsedMessages, rosBinaryMessages, bobjects } = result;
-    const numMessages =
-      (parsedMessages?.length || 0) + (rosBinaryMessages?.length || 0) + (bobjects?.length || 0);
+    const { parsedMessages, rosBinaryMessages } = result;
+    const numMessages = (parsedMessages?.length ?? 0) + (rosBinaryMessages?.length ?? 0);
     log.info(
       `MeasureDataProvider(${this._name}): ${
         Date.now() - startMs

@@ -35,10 +35,10 @@ import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import useDeepMemo from "@foxglove-studio/app/hooks/useDeepMemo";
 import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
-import { Message, TypedMessage } from "@foxglove-studio/app/players/types";
+import { Message } from "@foxglove-studio/app/players/types";
 import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
-import { CameraInfo } from "@foxglove-studio/app/types/Messages";
+import { CameraInfo, StampedMessage } from "@foxglove-studio/app/types/Messages";
 import { SaveConfig } from "@foxglove-studio/app/types/panels";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import naturalSort from "@foxglove-studio/app/util/naturalSort";
@@ -197,8 +197,8 @@ function renderEmptyState(
                         .map((
                           { message }, // In some cases, a user may have subscribed to a topic that does not include a header stamp.
                         ) =>
-                          message.header?.stamp
-                            ? formatTimeRaw(message.header.stamp)
+                          (message as Partial<StampedMessage>).header?.stamp
+                            ? formatTimeRaw((message as StampedMessage).header.stamp)
                             : "[ unknown ]",
                         )
                         .join(", ")
@@ -426,11 +426,11 @@ function ImageView(props: Props) {
   }, [cameraTopic, imageTopicsByNamespace, onChangeCameraTopic]);
 
   const cameraInfoTopic = getCameraInfoTopic(cameraTopic);
-  const cameraInfo: CameraInfo | undefined = PanelAPI.useMessageReducer({
+  const cameraInfo = PanelAPI.useMessageReducer({
     topics: cameraInfoTopic ? [cameraInfoTopic] : [],
     restore: useCallback((value: any) => value, []) as any,
-    addMessage: useCallback((value, { message }: TypedMessage<CameraInfo>) => message, []),
-  });
+    addMessage: useCallback((value, { message }: Message) => message, []),
+  }) as CameraInfo;
 
   const shouldSynchronize = config.synchronize && enabledMarkerTopics.length > 0;
   const imageAndMarkerTopics = useShallowMemo([
@@ -457,8 +457,8 @@ function ImageView(props: Props) {
     const stamps = {};
     for (const { topic, message } of markersToRender) {
       // In some cases, a user may have subscribed to a topic that does not include a header stamp.
-      (stamps as any)[topic] = message.header?.stamp
-        ? formatTimeRaw(message.header.stamp)
+      (stamps as any)[topic] = (message as Partial<StampedMessage>).header?.stamp
+        ? formatTimeRaw((message as StampedMessage).header.stamp)
         : "[ not available ]";
     }
     return stamps;
@@ -630,7 +630,9 @@ function ImageView(props: Props) {
     const topicTimestamp = (
       <TopicTimestamp
         style={{ padding: "8px 8px 0px 0px" }}
-        text={imageMessage ? formatTimeRaw(imageMessage.message.header.stamp) : ""}
+        text={
+          imageMessage ? formatTimeRaw((imageMessage.message as StampedMessage).header.stamp) : ""
+        }
       />
     );
 

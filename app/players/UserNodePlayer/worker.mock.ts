@@ -13,6 +13,7 @@
 
 import { isPlainObject } from "lodash";
 
+import type { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import {
   processMessage,
   registerNode,
@@ -20,7 +21,6 @@ import {
 import transform from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/transformer";
 import generateRosLib from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typegen";
 import Rpc, { Channel, createLinkedChannels } from "@foxglove-studio/app/util/Rpc";
-import { BobjectRpcReceiver } from "@foxglove-studio/app/util/binaryObjects/BobjectRpc";
 
 const validateWorkerArgs = (arg: any) => {
   expect(arg).not.toBeInstanceOf(Function);
@@ -58,11 +58,15 @@ export default class MockUserNodePlayerWorker {
     receiveAndLog("generateRosLib", generateRosLib);
     receiveAndLog("transform", transform);
     receiveAndLog("registerNode", registerNode);
-    new BobjectRpcReceiver(receiver).receive(
+    receiveAndLog(
       "processMessage",
-      "parsed",
-      async (message, globalVariables) => {
-        this.messageSpy("processMessage");
+      async ({
+        message,
+        globalVariables,
+      }: {
+        message: unknown;
+        globalVariables: GlobalVariables;
+      }) => {
         return processMessage({ message, globalVariables });
       },
     );

@@ -11,22 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { wrapMessage } from "@foxglove-studio/app/test/datatypes";
-
 import { getValueActionForValue, getStructureItemForPath } from "./getValueActionForValue";
 
-describe.each(["parsedMessages", "bobjects"])("getValueActionForValue %s", (format) => {
+describe("getValueActionForValue", () => {
   const getAction = (data: any, structureItem: any, keyPath: any) => {
-    const value =
-      format === "bobjects"
-        ? (wrapMessage({
-            topic: "/dummy",
-            receiveTime: { sec: 0, nsec: 0 },
-            message: { data },
-          }).message as any).data()
-        : data;
+    const value = data;
     return getValueActionForValue(value, structureItem, keyPath);
   };
+
   it("returns undefined if it is not a primitive", () => {
     const structureItem = {
       structureType: "message",

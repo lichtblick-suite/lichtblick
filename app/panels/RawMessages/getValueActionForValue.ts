@@ -16,7 +16,6 @@ import memoizeWeak from "memoize-weak";
 
 import { MessagePathStructureItem } from "@foxglove-studio/app/components/MessagePathSyntax/constants";
 import { isTypicalFilterName } from "@foxglove-studio/app/components/MessagePathSyntax/isTypicalFilterName";
-import { getField, getIndex, isArrayView } from "@foxglove-studio/app/util/binaryObjects";
 
 export type ValueAction =
   | {
@@ -37,7 +36,7 @@ const isObjectElement = (value: any, pathItem: any, structureItem: any): boolean
 
 const isArrayElement = (value: any, pathItem: any, structureItem: any): boolean =>
   typeof pathItem === "number" &&
-  ((structureItem.structureType === "array" && (Array.isArray(value) || isArrayView(value))) ||
+  ((structureItem.structureType === "array" && Array.isArray(value)) ||
     (structureItem.structureType === "primitive" && structureItem.primitiveType === "json"));
 
 // Given a root value (e.g. a message object), a root structureItem (e.g. a message definition),
@@ -62,7 +61,7 @@ export function getValueActionForValue(
         structureItem.structureType === "message" && typeof pathItem === "string"
           ? structureItem.nextByName[pathItem]
           : { structureType: "primitive", primitiveType: "json", datatype: "" };
-      value = getField(value, pathItem as any);
+      value = (value as any)[pathItem];
       if (multiSlicePath.endsWith("[:]")) {
         // We're just inside a message that is inside an array, so we might want to pivot on this new value.
         pivotPath = `${multiSlicePath}{${pathItem}==${JSON.stringify(value) || ""}}`;
@@ -72,7 +71,7 @@ export function getValueActionForValue(
       singleSlicePath += `.${pathItem}`;
       multiSlicePath += `.${pathItem}`;
     } else if (isArrayElement(value, pathItem, structureItem)) {
-      value = getIndex(value, pathItem as any);
+      value = (value as any)[pathItem];
       structureItem =
         structureItem.structureType === "array"
           ? structureItem.next
@@ -95,7 +94,7 @@ export function getValueActionForValue(
         typeof typicalFilterName === "string"
       ) {
         singleSlicePath += `[:]{${typicalFilterName}==${
-          JSON.stringify(getField(value, typicalFilterName)) || ""
+          JSON.stringify((value as any)[typicalFilterName]) || ""
         }}`;
       } else {
         singleSlicePath += `[${pathItem}]`;

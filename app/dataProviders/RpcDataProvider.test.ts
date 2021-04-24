@@ -27,7 +27,6 @@ const data = {
       { topic: "/some_topic", receiveTime: { sec: 102, nsec: 0 }, message: new ArrayBuffer(0) },
     ],
     parsedMessages: undefined,
-    bobjects: undefined,
   },
   topics: [{ name: "/some_topic", datatype: "some_datatype" }],
   messageDefinitionsByTopic: { some_datatype: "dummy" },
@@ -67,7 +66,6 @@ describe("RpcDataProvider", () => {
       { sec: 101, nsec: 0 },
       { rosBinaryMessages: ["/some_topic"] },
     );
-    expect(messages.bobjects).toBe(undefined);
     expect(messages.parsedMessages).toBe(undefined);
     expect(messages.rosBinaryMessages).toEqual([
       data.messages.rosBinaryMessages[0],

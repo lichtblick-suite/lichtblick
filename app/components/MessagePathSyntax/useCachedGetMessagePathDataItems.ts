@@ -15,15 +15,14 @@ import { isEqual } from "lodash";
 import { useCallback, useMemo, useRef } from "react";
 
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import { isTypicalFilterName } from "@foxglove-studio/app/components/MessagePathSyntax/isTypicalFilterName";
+import { TypicalFilterNames } from "@foxglove-studio/app/components/MessagePathSyntax/isTypicalFilterName";
 import parseRosPath from "@foxglove-studio/app/components/MessagePathSyntax/parseRosPath";
 import useChangeDetector from "@foxglove-studio/app/hooks/useChangeDetector";
 import useDeepMemo from "@foxglove-studio/app/hooks/useDeepMemo";
 import useGlobalVariables, { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
-import { Message, ReflectiveMessage, Topic } from "@foxglove-studio/app/players/types";
+import { Message, Topic } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { fieldNames, getField, getIndex } from "@foxglove-studio/app/util/binaryObjects";
 import {
   enumValuesByDatatypeAndField,
   getTopicsByTopicName,
@@ -47,7 +46,7 @@ export type MessagePathDataItem = {
 // reference, as long as topics/datatypes/global variables haven't changed in the meantime.
 export function useCachedGetMessagePathDataItems(
   paths: string[],
-): (path: string, message: ReflectiveMessage) => MessagePathDataItem[] | undefined {
+): (path: string, message: Message) => MessagePathDataItem[] | undefined {
   const { topics: providerTopics, datatypes } = PanelAPI.useDataSourceInfo();
   const { globalVariables } = useGlobalVariables();
   const memoizedPaths: string[] = useShallowMemo<string[]>(paths);
@@ -76,7 +75,7 @@ export function useCachedGetMessagePathDataItems(
   const cachesByPath = useRef<{
     [key: string]: {
       filledInPath: RosPath;
-      weakMap: WeakMap<ReflectiveMessage, MessagePathDataItem[] | undefined>;
+      weakMap: WeakMap<Message, MessagePathDataItem[] | undefined>;
     };
   }>({});
   if (useChangeDetector([providerTopics, datatypes], true)) {
@@ -95,7 +94,7 @@ export function useCachedGetMessagePathDataItems(
   }
 
   return useCallback(
-    (path: string, message: ReflectiveMessage): MessagePathDataItem[] | undefined => {
+    (path: string, message: Message): MessagePathDataItem[] | undefined => {
       if (!memoizedPaths.includes(path)) {
         throw new Error(`path (${path}) was not in the list of cached paths`);
       }
@@ -132,7 +131,7 @@ function filterMatches(filter: MessagePathFilter, value: any) {
 
   let currentValue = value;
   for (const name of filter.path) {
-    currentValue = getField(currentValue, name);
+    currentValue = currentValue[name];
     if (currentValue == undefined) {
       return false;
     }
@@ -189,7 +188,7 @@ const TIME_NEXT_BY_NAME = Object.freeze({
 // Get a new item that has `queriedData` set to the values and paths as queried by `rosPath`.
 // Exported just for tests.
 export function getMessagePathDataItems(
-  message: ReflectiveMessage,
+  message: Message,
   filledInPath: RosPath,
   providerTopics: readonly Topic[],
   datatypes: RosDatatypes,
@@ -251,19 +250,14 @@ export function getMessagePathDataItems(
         !nextStructIsJson && next
           ? next
           : { structureType: "primitive", primitiveType: "json", datatype: "" };
-      traverse(
-        getField(value, pathItem.name),
-        pathIndex + 1,
-        `${path}.${pathItem.name}`,
-        actualNext as any,
-      );
+      traverse(value[pathItem.name], pathIndex + 1, `${path}.${pathItem.name}`, actualNext as any);
     } else if (
       pathItem.type === "name" &&
       ((structureItem as any).primitiveType === "time" ||
         (structureItem as any).primitiveType === "duration")
     ) {
       traverse(
-        getField(value, pathItem.name),
+        value[pathItem.name],
         pathIndex + 1,
         `${path}.${pathItem.name}`,
         (TIME_NEXT_BY_NAME as any)[pathItem.name],
@@ -285,10 +279,10 @@ export function getMessagePathDataItems(
       }
 
       // If the `pathItem` is a slice, iterate over all the relevant elements in the array.
-      const arrayLength = getField(value, "length") as number;
+      const arrayLength = value.length as number;
       for (let i = startIdx; i <= Math.min(endIdx, arrayLength - 1); i++) {
         const index = i >= 0 ? i : arrayLength + i;
-        const arrayElement = getIndex(value, index);
+        const arrayElement = value[index];
         if (arrayElement == undefined) {
           continue;
         }
@@ -299,11 +293,11 @@ export function getMessagePathDataItems(
         if (nextPathItem && nextPathItem.type === "filter") {
           // If we have a filter set after this, it will update the path appropriately.
           newPath = `${path}[:]`;
-        } else {
+        } else if (typeof arrayElement === "object") {
           // See if `arrayElement` has a property that we typically filter on. If so, show that.
-          const name = fieldNames(arrayElement).find((key) => isTypicalFilterName(key));
+          const name = TypicalFilterNames.find((id) => id in arrayElement);
           if (name != undefined) {
-            newPath = `${path}[:]{${name}==${getField(arrayElement, name)}}`;
+            newPath = `${path}[:]{${name}==${arrayElement[name]}}`;
           } else {
             // Use `i` here instead of `index`, since it's only different when `i` is negative,
             // and in that case it's probably more useful to show to the user how many elements
@@ -311,6 +305,12 @@ export function getMessagePathDataItems(
             // (otherwise they wouldn't have chosen a negative slice).
             newPath = `${path}[${i}]`;
           }
+        } else {
+          // Use `i` here instead of `index`, since it's only different when `i` is negative,
+          // and in that case it's probably more useful to show to the user how many elements
+          // from the end of the array this data is, since they clearly are thinking in that way
+          // (otherwise they wouldn't have chosen a negative slice).
+          newPath = `${path}[${i}]`;
         }
         traverse(
           arrayElement,
@@ -327,7 +327,7 @@ export function getMessagePathDataItems(
       }
     } else if (structureIsJson && pathItem.name) {
       // Use getField just in case.
-      traverse(getField(value, pathItem.name), pathIndex + 1, `${path}.${pathItem.name}`, {
+      traverse(value[pathItem.name], pathIndex + 1, `${path}.${pathItem.name}`, {
         structureType: "primitive",
         primitiveType: "json",
         datatype: "",
@@ -353,9 +353,7 @@ export type MessageDataItemsByPath = {
 
 export function useDecodeMessagePathsForMessagesByTopic(
   paths: string[],
-): (messagesByTopic: {
-  [topicName: string]: readonly ReflectiveMessage[];
-}) => MessageDataItemsByPath {
+): (messagesByTopic: { [topicName: string]: readonly Message[] }) => MessageDataItemsByPath {
   const memoizedPaths = useShallowMemo<string[]>(paths);
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems(memoizedPaths);
   // Note: Let callers define their own memoization scheme for messagesByTopic. For regular playback

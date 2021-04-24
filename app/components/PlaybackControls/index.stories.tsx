@@ -43,7 +43,6 @@ function getPlayerState(): PlayerState {
     playerId: "1",
     activeData: {
       messages: [],
-      bobjects: [],
       messageOrder: "receiveTime",
       startTime: { sec: START_TIME, nsec: 331 },
       endTime: { sec: START_TIME + 20, nsec: 331 },

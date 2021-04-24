@@ -6,19 +6,14 @@ import { useMemo, useState } from "react";
 import { Circle, useMapEvent } from "react-leaflet";
 
 import { useMessagesByTopic } from "@foxglove-studio/app/PanelAPI";
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageBlock } from "@foxglove-studio/app/PanelAPI/useBlocksByTopic";
 
-import { BinaryNavSatFixMsg, NavSatFixMsg } from "./types";
+import { NavSatFixMsg } from "./types";
 
 type TopicTimePoint = {
-  stamp: number;
   topic: string;
   lat: number;
   lon: number;
-};
-
-type MessageBlock = {
-  readonly [topicName: string]: readonly TypedMessage<ArrayBuffer>[];
 };
 
 type Props = {
@@ -45,8 +40,8 @@ export default function FilteredPointMarkers(props: Props) {
     for (const messageBlock of blocks) {
       for (const [topic, payloads] of Object.entries(messageBlock)) {
         for (const payload of payloads) {
-          const lat = ((payload.message as unknown) as BinaryNavSatFixMsg).latitude();
-          const lon = ((payload.message as unknown) as BinaryNavSatFixMsg).longitude();
+          const lat = (payload.message as NavSatFixMsg).latitude;
+          const lon = (payload.message as NavSatFixMsg).longitude;
 
           // if the point is outside the bounds, we don't include it
           if (!localBounds.contains([lat, lon])) {
@@ -61,17 +56,16 @@ export default function FilteredPointMarkers(props: Props) {
             continue;
           }
 
-          const stamp = payload.receiveTime.sec * 1e9 + payload.receiveTime.nsec;
           (sparse2d[x] = sparse2d[x] ?? [])[y] = true;
           arr.push({
             topic,
-            stamp,
             lat,
             lon,
           });
         }
       }
     }
+
     return arr;
   }, [bounds, blocks, map]);
 
@@ -100,11 +94,9 @@ export default function FilteredPointMarkers(props: Props) {
           continue;
         }
 
-        const stamp = payload.receiveTime.sec * 1e9 + payload.receiveTime.nsec;
         (sparse2d[x] = sparse2d[x] ?? [])[y] = true;
         arr.push({
           topic,
-          stamp,
           lat,
           lon,
         });
@@ -112,24 +104,23 @@ export default function FilteredPointMarkers(props: Props) {
     }
     return arr;
   }, [bounds, map, messages]);
-
   return (
     <>
       {filteredBlocks.map((topicPoint) => {
         return (
           <Circle
-            key={`${topicPoint.topic}+${topicPoint.stamp}`}
+            key={`${topicPoint.lat}+${topicPoint.lon}`}
             center={[topicPoint.lat, topicPoint.lon]}
-            radius={0.1}
+            radius={0.01}
           />
         );
       })}
       {filteredMessages.map((topicPoint) => {
         return (
           <Circle
-            key={`${topicPoint.topic}+${topicPoint.stamp}`}
+            key={`${topicPoint.lat}+${topicPoint.lon}`}
             center={[topicPoint.lat, topicPoint.lon]}
-            radius={0.1}
+            radius={0.01}
           />
         );
       })}

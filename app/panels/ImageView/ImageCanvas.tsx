@@ -27,7 +27,7 @@ import KeyListener from "@foxglove-studio/app/components/KeyListener";
 import { Item } from "@foxglove-studio/app/components/Menu";
 import { Message, Topic } from "@foxglove-studio/app/players/types";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
-import { CameraInfo } from "@foxglove-studio/app/types/Messages";
+import { CameraInfo, StampedMessage } from "@foxglove-studio/app/types/Messages";
 import { downloadFiles } from "@foxglove-studio/app/util";
 import Rpc from "@foxglove-studio/app/util/Rpc";
 import WebWorkerManager from "@foxglove-studio/app/util/WebWorkerManager";
@@ -313,7 +313,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
       // by the browser
       // remove the leading / so the image name doesn't start with _
       const topicName = topic.name.slice(1);
-      const stamp = image.message.header ? image.message.header.stamp : { sec: 0, nsec: 0 };
+      const stamp = (image.message as Partial<StampedMessage>).header?.stamp ?? { sec: 0, nsec: 0 };
       const fileName = `${topicName}-${stamp.sec}-${stamp.nsec}`;
       downloadFiles([{ blob: blob as any, fileName }]);
     });
@@ -365,9 +365,11 @@ export default class ImageCanvas extends React.Component<Props, State> {
 
   renderCurrentImage = debouncePromise(async () => {
     const { image, topic, rawMarkerData, onStartRenderImage } = this.props;
-    if (!topic) {
+    if (!topic || !image) {
       return;
     }
+
+    const imageMessage = image?.message as any;
 
     const onFinishImageRender = onStartRenderImage();
     try {
@@ -377,7 +379,18 @@ export default class ImageCanvas extends React.Component<Props, State> {
         const worker = this._getRpcWorker();
         dimensions = await worker.send<Dimensions | undefined>("renderImage", {
           id: this._id,
-          imageMessage: image,
+          imageMessage: {
+            topic: image.topic,
+            receiveTime: image.receiveTime,
+            message: {
+              data: imageMessage.data,
+              format: imageMessage.format,
+              width: imageMessage.width,
+              height: imageMessage.height,
+              encoding: imageMessage.encoding,
+              is_bigendian: imageMessage.is_bigendian,
+            },
+          },
           imageMessageDatatype: topic.datatype,
           rawMarkerData,
         });

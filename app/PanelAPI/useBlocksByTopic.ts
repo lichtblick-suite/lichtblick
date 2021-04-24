@@ -22,29 +22,15 @@ import {
 } from "@foxglove-studio/app/components/MessagePipeline";
 import PanelContext from "@foxglove-studio/app/components/PanelContext";
 import { MemoryCacheBlock } from "@foxglove-studio/app/dataProviders/MemoryCacheDataProvider";
-import ParsedMessageCache from "@foxglove-studio/app/dataProviders/ParsedMessageCache";
 import useCleanup from "@foxglove-studio/app/hooks/useCleanup";
 import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
-import {
-  BobjectMessage,
-  SubscribePayload,
-  TypedMessage,
-  PlayerState,
-} from "@foxglove-studio/app/players/types";
+import { SubscribePayload, TypedMessage } from "@foxglove-studio/app/players/types";
 
-// Preloading users can (optionally) share this cache of recently parsed messages if they think
-// other panels might use data on the same topic.
-export const blockMessageCache = new ParsedMessageCache();
-
-// This is a fairly low-level API -- parsing eagerly and caching the result is not sustainable, but
-// anyone who asks for binary data probably wants to parse it and cache it somehow, so give the
-// user a parser and the messages in a block-format useful for caching.
-
-type MessageBlock = {
-  readonly [topicName: string]: readonly TypedMessage<ArrayBuffer>[];
+export type MessageBlock = {
+  readonly [topicName: string]: readonly TypedMessage<unknown>[];
 };
 
-type BlocksForTopics = {
+export type BlocksForTopics = {
   // TODO(jp/steel): Figure out whether it's better to return message definitions here. It's
   // possible consumers will want to pass the readers through worker boundaries.
   messageReadersByTopic: {
@@ -67,14 +53,14 @@ const filterBlockByTopics = memoizeWeak(
       // to a MemoryCacheBlock with no per-topic arrays.
       return {};
     }
-    const ret: Record<string, readonly BobjectMessage[]> = {};
+    const ret: Record<string, readonly TypedMessage<unknown>[]> = {};
     for (const topic of topics) {
       // Don't include an empty array when the data has not been cached for this topic for this
       // block. The missing entry means "we don't know the message for this topic in this block", as
       // opposed to "we know there are no messages for this topic in this block".
-      const maybeBobjectMessage = block.messagesByTopic[topic];
-      if (maybeBobjectMessage) {
-        ret[topic] = maybeBobjectMessage;
+      const blockMessages = block.messagesByTopic[topic];
+      if (blockMessages) {
+        ret[topic] = blockMessages;
       }
     }
     return ret;
@@ -94,75 +80,33 @@ const useSubscribeToTopicsForBlocks = (topics: readonly string[]) => {
   );
   const subscriptions: SubscribePayload[] = useMemo(() => {
     const requester = panelType != undefined ? { type: "panel", name: panelType } : undefined;
-    return topics.map((topic) => <SubscribePayload>{ topic, requester, format: "bobjects" });
+    return topics.map((topic) => <SubscribePayload>{ topic, requester });
   }, [panelType, topics]);
   useEffect(() => setSubscriptions(id, subscriptions), [id, setSubscriptions, subscriptions]);
   useCleanup(() => setSubscriptions(id, []));
 };
 
-function getBlocksFromPlayerState({
-  playerState,
-}: {
-  playerState: PlayerState;
-}): readonly (MemoryCacheBlock | undefined)[] | undefined {
-  return playerState.progress.messageCache?.blocks;
-}
-
 // A note: for the moment,
 //  - not all players provide blocks, and
-//  - topics for webviz nodes are not available in blocks when blocks _are_ provided,
+//  - topics for nodes are not available in blocks when blocks _are_ provided,
 // so all consumers need a "regular playback" pipeline fallback for now.
 // Consumers can rely on the presence of topics in messageDefinitionsByTopic to signal whether
 // a fallback is needed for a given topic, because entries will not be populated in these cases.
 export function useBlocksByTopic(topics: readonly string[]): BlocksForTopics {
   const requestedTopics = useShallowMemo(topics);
 
-  // Subscribe to the topics
   useSubscribeToTopicsForBlocks(requestedTopics);
 
-  // Get player data needed.
-  const parsedMessageDefinitionsByTopic = useMessagePipeline(
-    useCallback(
-      ({ playerState }: { playerState: PlayerState }) =>
-        playerState.activeData?.parsedMessageDefinitionsByTopic,
-      [],
-    ),
-  );
-
-  // Get blocks for the topics
   const allBlocks = useMessagePipeline<readonly (MemoryCacheBlock | undefined)[] | undefined>(
-    getBlocksFromPlayerState,
+    useCallback((ctx) => ctx.playerState.progress.messageCache?.blocks, []),
   );
-
-  const exposeBlockData = !!allBlocks; // The websocket player does not expose blocks.
-
-  const messageReadersByTopic = useMemo(() => {
-    if (!exposeBlockData) {
-      // Do not provide any readers if the player does not provide blocks. A missing reader
-      // signals that binary data will never appear for a topic.
-      return {};
-    }
-    const result: Record<string, MessageReader> = {};
-    for (const topic of requestedTopics) {
-      const parsedDefinition = parsedMessageDefinitionsByTopic?.[topic];
-      if (parsedDefinition) {
-        result[topic] = new MessageReader(parsedDefinition);
-      }
-    }
-    return result;
-  }, [parsedMessageDefinitionsByTopic, requestedTopics, exposeBlockData]);
-  const presentTopics = useMemo(() => Object.keys(messageReadersByTopic), [messageReadersByTopic]);
 
   const blocks = useMemo(() => {
     if (!allBlocks) {
       return [];
     }
-    const ret = [];
-    // Note: allBlocks.map() misbehaves, because allBlocks is initialized like "new Array(...)".
-    for (let i = 0; i < allBlocks.length; ++i) {
-      ret.push(filterBlockByTopics(allBlocks[i], presentTopics));
-    }
-    return ret;
-  }, [allBlocks, presentTopics]);
-  return useShallowMemo({ messageReadersByTopic, blocks });
+    return allBlocks.map((block) => filterBlockByTopics(block, requestedTopics));
+  }, [allBlocks, requestedTopics]);
+
+  return { messageReadersByTopic: {}, blocks };
 }

@@ -44,7 +44,7 @@ function parsedMessageDefinitionsToDatatypes(
       // so we get the name from the datatype.
       if (index === 0) {
         datatypes[datatypeName] = { fields: definitions };
-      } else if (name) {
+      } else if (name != undefined) {
         datatypes[name] = { fields: definitions };
       }
     });

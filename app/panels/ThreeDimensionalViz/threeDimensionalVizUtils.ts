@@ -30,7 +30,6 @@ import { LinkedGlobalVariables } from "@foxglove-studio/app/panels/ThreeDimensio
 import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
 import { MutablePose } from "@foxglove-studio/app/types/Messages";
 import { emptyPose } from "@foxglove-studio/app/util/Pose";
-import { isBobject, deepParse } from "@foxglove-studio/app/util/binaryObjects";
 
 export type TargetPose = { target: Vec3; targetOrientation: Vec4 };
 
@@ -114,13 +113,7 @@ export const getInstanceObj = (marker: any, idx: number): any => {
   if (!marker) {
     return;
   }
-  if (!isBobject(marker)) {
-    return marker?.metadataByIndex?.[idx];
-  }
-  if (!marker.metadataByIndex) {
-    return;
-  }
-  return marker.metadataByIndex()?.[idx];
+  return marker?.metadataByIndex?.[idx];
 };
 
 export const getObject = (selectedObject: MouseEventObject): any => {
@@ -129,7 +122,7 @@ export const getObject = (selectedObject: MouseEventObject): any => {
       selectedObject.object.metadataByIndex !== undefined &&
       getInstanceObj(selectedObject.object, selectedObject.instanceIndex)) ||
     selectedObject?.object;
-  return isBobject(object) ? deepParse(object) : object;
+  return object;
 };
 
 export const getInteractionData = (selectedObject: MouseEventObject): InteractionData | undefined =>

@@ -24,7 +24,7 @@ import useCleanup from "@foxglove-studio/app/hooks/useCleanup";
 import useContextSelector from "@foxglove-studio/app/hooks/useContextSelector";
 import useDeepMemo from "@foxglove-studio/app/hooks/useDeepMemo";
 import useShouldNotChangeOften from "@foxglove-studio/app/hooks/useShouldNotChangeOften";
-import { Message, MessageFormat, SubscribePayload } from "@foxglove-studio/app/players/types";
+import { Message, SubscribePayload } from "@foxglove-studio/app/players/types";
 
 type MessageReducer<T> = (arg0: T, message: Message) => T;
 type MessagesReducer<T> = (arg0: T, messages: readonly Message[]) => T;
@@ -35,14 +35,13 @@ function useReducedValue<T>(
   restore: (arg0?: T) => T,
   addMessage?: MessageReducer<T>,
   addMessages?: MessagesReducer<T>,
-  addBobjects?: MessagesReducer<T>,
   lastSeekTime?: number,
   messages?: readonly Message[],
 ): T {
   const reducedValueRef = useRef<T | undefined>();
 
   const shouldClear = useChangeDetector([lastSeekTime], false);
-  const reducersChanged = useChangeDetector([restore, addBobjects, addMessage, addMessages], false);
+  const reducersChanged = useChangeDetector([restore, addMessage, addMessages], false);
   const messagesChanged = useChangeDetector([messages], true);
 
   if (!reducedValueRef.current || shouldClear) {
@@ -55,11 +54,7 @@ function useReducedValue<T>(
 
   // Use the addMessage reducer to process new messages.
   if (messagesChanged && messages) {
-    if (addBobjects) {
-      if (messages.length > 0) {
-        reducedValueRef.current = addBobjects(reducedValueRef.current, messages);
-      }
-    } else if (addMessages) {
+    if (addMessages) {
       if (messages.length > 0) {
         reducedValueRef.current = addMessages(reducedValueRef.current, messages);
       }
@@ -81,12 +76,10 @@ function useSubscriptions({
   requestedTopics,
   panelType,
   preloadingFallback,
-  format,
 }: {
   requestedTopics: readonly RequestedTopic[];
   panelType?: string;
   preloadingFallback: boolean;
-  format: MessageFormat;
 }): SubscribePayload[] {
   return useMemo(() => {
     const requester: SubscribePayload["requester"] =
@@ -101,30 +94,28 @@ function useSubscriptions({
         // deal with multiple subscriptions to the same topic but with different metadata.
         return {
           requester,
-          format,
           preloadingFallback,
           topic: request.topic,
           encoding: "image/compressed",
           scale: request.imageScale,
         };
       }
-      return { requester, preloadingFallback, format, topic: request };
+      return { requester, preloadingFallback, topic: request };
     });
-  }, [preloadingFallback, format, panelType, requestedTopics]);
+  }, [preloadingFallback, panelType, requestedTopics]);
 }
 
 const NO_MESSAGES = Object.freeze([]);
 
-type Props<T> = {
+type Params<T> = {
   topics: readonly RequestedTopic[];
 
   // Functions called when the reducers change and for each newly received message.
   // The object is assumed to be immutable, so in order to trigger a re-render, the reducers must
   // return a new object.
-  restore: (arg0: T | undefined) => T;
+  restore: (arg: T | undefined) => T;
   addMessage?: MessageReducer<T>;
   addMessages?: MessagesReducer<T>;
-  addBobjects?: MessagesReducer<T>;
 
   // If the messages are in blocks and _all_ subscribers set `preloadingFallback`, addMessage
   // won't receive these messages. This is a useful optimization for "preloading fallback"
@@ -135,14 +126,14 @@ type Props<T> = {
   preloadingFallback?: boolean;
 };
 
-export function useMessageReducer<T>(props: Props<T>): T {
+export function useMessageReducer<T>(props: Params<T>): T {
   const [id] = useState(() => uuidv4());
   const { type: panelType = undefined } = useContext(PanelContext) ?? {};
 
   // only one of the add message callbacks should be provided
-  if ([props.addMessage, props.addMessages, props.addBobjects].filter(Boolean).length !== 1) {
+  if ([props.addMessage, props.addMessages].filter(Boolean).length !== 1) {
     throw new Error(
-      "useMessageReducer must be provided with exactly one of addMessage, addMessages or addBobjects",
+      "useMessageReducer must be provided with exactly one of addMessage or addMessages",
     );
   }
 
@@ -173,12 +164,10 @@ export function useMessageReducer<T>(props: Props<T>): T {
     () => new Set(requestedTopics.map((req) => (typeof req === "object" ? req.topic : req))),
     [requestedTopics],
   );
-  const format = props.addBobjects != undefined ? "bobjects" : "parsedMessages";
   const subscriptions = useSubscriptions({
     requestedTopics,
     panelType,
     preloadingFallback: props.preloadingFallback ?? false,
-    format,
   });
   const setSubscriptions = useMessagePipeline(
     useCallback(
@@ -208,26 +197,23 @@ export function useMessageReducer<T>(props: Props<T>): T {
   const latestRequestedTopicsRef = useRef(requestedTopicsSet);
   latestRequestedTopicsRef.current = requestedTopicsSet;
   const messages = useMessagePipeline<readonly Message[]>(
-    useCallback(
-      ({ playerState: { activeData } }: MessagePipelineContext) => {
-        if (!activeData) {
-          return NO_MESSAGES; // identity must not change to avoid unnecessary re-renders
-        }
-        const messageData = format === "bobjects" ? activeData.bobjects : activeData.messages;
-        if (lastProcessedMessagesRef.current === messageData) {
-          return useContextSelector.BAILOUT;
-        }
-        const filteredMessages = messageData.filter(({ topic }) =>
-          latestRequestedTopicsRef.current.has(topic),
-        );
-        // Bail out if we didn't want any of these messages, but not if this is our first render
-        const shouldBail =
-          lastProcessedMessagesRef.current != undefined && filteredMessages.length === 0;
-        lastProcessedMessagesRef.current = messageData;
-        return shouldBail ? useContextSelector.BAILOUT : filteredMessages;
-      },
-      [format],
-    ),
+    useCallback(({ playerState: { activeData } }: MessagePipelineContext) => {
+      if (!activeData) {
+        return NO_MESSAGES; // identity must not change to avoid unnecessary re-renders
+      }
+      const messageData = activeData.messages;
+      if (lastProcessedMessagesRef.current === messageData) {
+        return useContextSelector.BAILOUT;
+      }
+      const filteredMessages = messageData.filter(({ topic }) =>
+        latestRequestedTopicsRef.current.has(topic),
+      );
+      // Bail out if we didn't want any of these messages, but not if this is our first render
+      const shouldBail =
+        lastProcessedMessagesRef.current != undefined && filteredMessages.length === 0;
+      lastProcessedMessagesRef.current = messageData;
+      return shouldBail ? useContextSelector.BAILOUT : filteredMessages;
+    }, []),
   );
 
   const lastSeekTime = useMessagePipeline(
@@ -242,7 +228,6 @@ export function useMessageReducer<T>(props: Props<T>): T {
     props.restore,
     props.addMessage,
     props.addMessages,
-    props.addBobjects,
     lastSeekTime,
     messages,
   );

@@ -17,7 +17,6 @@ import styled from "styled-components";
 
 import Icon from "@foxglove-studio/app/components/Icon";
 import { Message } from "@foxglove-studio/app/players/types";
-import { deepParse, isBobject } from "@foxglove-studio/app/util/binaryObjects";
 import clipboard from "@foxglove-studio/app/util/clipboard";
 import { formatTimeRaw } from "@foxglove-studio/app/util/time";
 
@@ -51,10 +50,9 @@ function CopyMessageButton({ text, onClick }: any) {
 
 export default function Metadata({ data, diffData, diff, datatype, message, diffMessage }: Props) {
   const onClickCopy = useCallback(
-    (maybeBobject) => (e: React.MouseEvent<HTMLSpanElement>) => {
+    (dataToCopy) => (e: React.MouseEvent<HTMLSpanElement>) => {
       e.stopPropagation();
       e.preventDefault();
-      const dataToCopy = isBobject(maybeBobject) ? deepParse(maybeBobject) : maybeBobject;
       const dataWithoutLargeArrays = cloneDeepWith(dataToCopy, (value) => {
         if (typeof value === "object" && value.buffer) {
           return "<buffer>";

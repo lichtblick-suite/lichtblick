@@ -12,9 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import BagDataProvider from "@foxglove-studio/app/dataProviders/BagDataProvider";
-import MemoryCacheDataProvider from "@foxglove-studio/app/dataProviders/MemoryCacheDataProvider";
 import ParseMessagesDataProvider from "@foxglove-studio/app/dataProviders/ParseMessagesDataProvider";
-import RewriteBinaryDataProvider from "@foxglove-studio/app/dataProviders/RewriteBinaryDataProvider";
 import { CoreDataProviders } from "@foxglove-studio/app/dataProviders/constants";
 import createGetDataProvider from "@foxglove-studio/app/dataProviders/createGetDataProvider";
 
@@ -23,26 +21,14 @@ function getProvider() {
     {},
     [
       {
-        name: CoreDataProviders.MemoryCacheDataProvider,
-        args: {},
-        children: [
-          {
-            name: CoreDataProviders.RewriteBinaryDataProvider,
-            args: {},
-            children: [
-              {
-                name: CoreDataProviders.BagDataProvider,
-                args: {
-                  bagPath: { type: "file", file: `${__dirname}/../test/fixtures/example.bag` },
-                },
-                children: [],
-              },
-            ],
-          },
-        ],
+        name: CoreDataProviders.BagDataProvider,
+        args: {
+          bagPath: { type: "file", file: `${__dirname}/../test/fixtures/example.bag` },
+        },
+        children: [],
       },
     ],
-    createGetDataProvider({ BagDataProvider, MemoryCacheDataProvider, RewriteBinaryDataProvider }),
+    createGetDataProvider({ BagDataProvider }),
   );
 }
 
@@ -55,7 +41,10 @@ const dummyExtensionPoint = {
   },
 };
 
-describe("ParseMessagesDataProvider", () => {
+// prior to updating MemoryCacheDataProvider to lazy messages, ParseMessageDataProvider expended to query its child
+// with rosBinaryMessages topics and do the parsing itself. Since MemoryCacheDataProvider uses lazy messages
+// this is no longer necessary behavior and ParseMessageDataProvider is a passthrough.
+describe.skip("ParseMessagesDataProvider", () => {
   it("initializes", async () => {
     const provider = getProvider();
     const result = await provider.initialize(dummyExtensionPoint);
@@ -98,12 +87,18 @@ describe("ParseMessagesDataProvider", () => {
     const end = { sec: 1396293888, nsec: 60000000 };
     const messages = await provider.getMessages(start, end, {
       parsedMessages: ["/tf"],
-      bobjects: [],
     });
-    expect(messages.bobjects).toEqual([]);
     expect(messages.rosBinaryMessages).toBe(undefined);
     expect(messages.parsedMessages).toHaveLength(2);
-    expect(messages.parsedMessages).toEqual([
+    expect(
+      messages.parsedMessages?.map((event) => {
+        return {
+          topic: event.topic,
+          receiveTime: event.receiveTime,
+          message: JSON.parse(JSON.stringify(event.message)),
+        };
+      }),
+    ).toEqual([
       {
         topic: "/tf",
         receiveTime: {
@@ -147,19 +142,11 @@ describe("ParseMessagesDataProvider", () => {
     await provider.initialize(dummyExtensionPoint);
     const start = { sec: 1396293887, nsec: 844783943 };
     const end = { sec: 1396293888, nsec: 60000000 };
-    const messages1 = await provider.getMessages(start, end, {
-      parsedMessages: ["/tf"],
-      bobjects: [],
-    });
-    expect(messages1.bobjects).toEqual([]);
-    expect(messages1.rosBinaryMessages).toBe(undefined);
-    expect(messages1.parsedMessages).toHaveLength(2);
-    const messages2 = await provider.getMessages(start, end, {
+    const messages = await provider.getMessages(start, end, {
+      rosBinaryMessages: ["/tf"],
       parsedMessages: [],
-      bobjects: ["/tf"],
     });
-    expect(messages2.rosBinaryMessages).toBe(undefined);
-    expect(messages2.bobjects).toHaveLength(2);
-    expect(messages2.parsedMessages).toEqual([]);
+    expect(messages.rosBinaryMessages).toBe(undefined);
+    expect(messages.parsedMessages).toEqual([]);
   });
 });

@@ -16,9 +16,8 @@ import PropTypes from "prop-types";
 
 import { useDataSourceInfo } from "@foxglove-studio/app/PanelAPI";
 import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
-import { Frame, Message, Topic } from "@foxglove-studio/app/players/types";
-import { TF } from "@foxglove-studio/app/types/Messages";
-import { isBobject, deepParse } from "@foxglove-studio/app/util/binaryObjects";
+import { Frame, Topic, TypedMessage } from "@foxglove-studio/app/players/types";
+import { MarkerArray, StampedMessage, TF } from "@foxglove-studio/app/types/Messages";
 import {
   TF2_DATATYPE,
   TF_DATATYPE,
@@ -29,10 +28,10 @@ type State = { transforms: Transforms; topics: Topic[]; topicsToDatatypes: Map<s
 type TfMessage = { transforms: TF[] };
 type BaseProps = { frame: Frame; cleared?: boolean; topics: Topic[] };
 
-function consumeTfs(tfs: Message[] | undefined, transforms: Transforms): void {
+function consumeTfs(tfs: TypedMessage<TfMessage>[] | undefined, transforms: Transforms): void {
   if (tfs != undefined) {
     for (const { message } of tfs) {
-      const parsedMessage = (isBobject(message) ? deepParse(message) : message) as TfMessage;
+      const parsedMessage = message;
       for (const tf of parsedMessage.transforms) {
         transforms.consume(tf);
       }
@@ -40,16 +39,15 @@ function consumeTfs(tfs: Message[] | undefined, transforms: Transforms): void {
   }
 }
 
-function consumeSingleTfs(tfs: Message[] | undefined, transforms: Transforms): void {
+function consumeSingleTfs(tfs: TypedMessage<TF>[] | undefined, transforms: Transforms): void {
   if (tfs != undefined) {
     for (const { message } of tfs) {
-      const parsedMessage = (isBobject(message) ? deepParse(message) : message) as TF;
-      transforms.consume(parsedMessage);
+      transforms.consume(message);
     }
   }
 }
 
-function withTransforms<Props extends any>(ChildComponent: React.ComponentType<Props>) {
+function withTransforms<Props extends BaseProps>(ChildComponent: React.ComponentType<Props>) {
   class Component extends React.PureComponent<
     Partial<{
       frame: Frame;
@@ -70,7 +68,7 @@ function withTransforms<Props extends any>(ChildComponent: React.ComponentType<P
       nextProps: Props,
       prevState: State,
     ): Partial<State> | undefined {
-      const { frame, cleared, topics } = nextProps as BaseProps;
+      const { frame, cleared, topics } = nextProps;
       let { transforms, topicsToDatatypes } = prevState;
       if (cleared != undefined && cleared) {
         transforms = new Transforms();
@@ -85,36 +83,20 @@ function withTransforms<Props extends any>(ChildComponent: React.ComponentType<P
       // that topic) and transform frames (coordinate frames)
       for (const topic in frame) {
         const datatype = topicsToDatatypes.get(topic) ?? "";
-        const msgs = frame[topic] as Message[];
-        for (const msg of msgs) {
-          {
-            const frameId: string | undefined = isBobject(msg.message)
-              ? msg.message.header?.().frame_id?.()
-              : msg.message.header?.frame_id;
+        const msgs = frame[topic];
+        for (const msg of msgs ?? []) {
+          if ("header" in (msg.message as Partial<StampedMessage>)) {
+            const frameId = (msg.message as StampedMessage).header.frame_id;
             if (frameId != undefined) {
               transforms.register(frameId);
               continue;
             }
           }
           // A hack specific to MarkerArray messages, which don't themselves have headers, but individual markers do.
-          if (isBobject(msg.message)) {
-            const markers = msg.message.markers?.();
-            if (!markers) {
-              continue;
-            }
+          if ("markers" in (msg.message as Partial<MarkerArray>)) {
+            const markers = (msg.message as MarkerArray).markers;
             for (const marker of markers) {
-              const frameId = marker.header?.().frame_id?.();
-              if (frameId != undefined) {
-                transforms.register(frameId);
-              }
-            }
-          } else {
-            const markers = msg.message.markers;
-            if (!markers) {
-              continue;
-            }
-            for (const marker of markers) {
-              const frameId = marker.header?.frame_id;
+              const frameId = marker.header.frame_id;
               if (frameId != undefined) {
                 transforms.register(frameId);
               }
@@ -126,10 +108,10 @@ function withTransforms<Props extends any>(ChildComponent: React.ComponentType<P
         switch (datatype) {
           case TF_DATATYPE:
           case TF2_DATATYPE:
-            consumeTfs(msgs, transforms);
+            consumeTfs(msgs as TypedMessage<TfMessage>[], transforms);
             break;
           case TRANSFORM_STAMPED_DATATYPE:
-            consumeSingleTfs(msgs, transforms);
+            consumeSingleTfs(msgs as TypedMessage<TF>[], transforms);
             break;
         }
       }

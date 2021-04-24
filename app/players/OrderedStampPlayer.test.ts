@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import assert from "assert";
 import { TimeUtil } from "rosbag";
 
 import FakePlayer from "@foxglove-studio/app/components/MessagePipeline/FakePlayer";
@@ -21,7 +20,6 @@ import {
   PlayerState,
   PlayerStateActiveData,
 } from "@foxglove-studio/app/players/types";
-import { deepParse, wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
 import signal from "@foxglove-studio/app/util/signal";
 import { fromSec, TimestampMethod } from "@foxglove-studio/app/util/time";
@@ -44,27 +42,11 @@ function makeMessage(
   };
 }
 
-function makeBobject(
-  headerStamp: number | undefined,
-  receiveTime: number,
-  topic: string = "/dummy_topic",
-) {
-  return {
-    topic,
-    receiveTime: fromSec(receiveTime),
-    message: wrapJsObject(basicDatatypes, "geometry_msgs/PoseStamped", {
-      header: {
-        stamp: headerStamp == undefined ? undefined : fromSec(headerStamp),
-      },
-      pose: { position: { x: 0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 0 } },
-    }),
-  };
-}
 const markerArrayDatatype = basicDatatypes["visualization_msgs/MarkerArray"];
 const dummyDatatypeWithHeader = {
   dummyDatatypeWithHeader: {
     fields: [
-      ...(markerArrayDatatype?.fields || []),
+      ...(markerArrayDatatype?.fields ?? []),
       { type: "std_msgs/Header", name: "header", isArray: false, isComplex: true },
     ],
   },
@@ -73,7 +55,6 @@ const dummyDatatypeWithHeader = {
 function getState(hasHeaderStamp?: any): PlayerStateActiveData {
   return {
     messages: [],
-    bobjects: [],
     messageOrder: "receiveTime",
     currentTime: fromSec(10),
     startTime: fromSec(0),
@@ -141,66 +122,6 @@ describe("OrderedStampPlayer", () => {
         }),
       }),
     ]);
-  });
-
-  it("filters and reorders bobjects and updates topics by header stamp", async () => {
-    const { player, fakePlayer } = makePlayers("headerStamp");
-    const states: PlayerState[] = [];
-    player.setListener(async (playerState) => {
-      states.push(playerState);
-    });
-    const oldTopics = [
-      { name: "/dummy_topic", datatype: "dummyDatatypeWithHeader" },
-      { name: "/foo", datatype: "dummyDatatypeWithHeader" },
-      { name: "/dummy_no_header_topic", datatype: "visualization_msgs/MarkerArray" },
-    ];
-
-    const upstreamBobjects = [
-      makeBobject(8.9, 9.5),
-      makeBobject(8, 10),
-      makeBobject(9.5, 10),
-      makeBobject(undefined, 10, "/dummy_no_header_topic"),
-    ];
-
-    expect(BUFFER_DURATION_SECS).toEqual(1);
-    await fakePlayer.emit({
-      activeData: {
-        ...getState(true),
-        topics: oldTopics,
-
-        // Reordering buffer is one second long, so data before header-stamp=9 will be emitted.
-        currentTime: fromSec(10),
-        bobjects: upstreamBobjects,
-      },
-    });
-    const bobjects = states[0]?.activeData?.bobjects;
-    const topics = states[0]?.activeData?.topics;
-    assert(bobjects);
-    expect(
-      bobjects.map(({ receiveTime, message, topic }) => ({
-        topic,
-        receiveTime,
-        message: deepParse(message),
-      })),
-    ).toEqual([
-      {
-        topic: "/dummy_topic",
-        receiveTime: { sec: 10, nsec: 0 },
-        message: {
-          header: { stamp: { sec: 8, nsec: 0 } },
-          pose: { position: { x: 0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 0 } },
-        },
-      },
-      {
-        topic: "/dummy_topic",
-        receiveTime: { sec: 9, nsec: 500000000 },
-        message: {
-          header: { stamp: { sec: 8, nsec: 900000000 } },
-          pose: { position: { x: 0, y: 0, z: 0 }, orientation: { x: 0, y: 0, z: 0, w: 0 } },
-        },
-      },
-    ]);
-    expect(topics).toEqual(oldTopics.filter(({ name }) => name !== "/dummy_no_header_topic"));
   });
 
   it("filters and reorders messages and updates topics by header stamp", async () => {

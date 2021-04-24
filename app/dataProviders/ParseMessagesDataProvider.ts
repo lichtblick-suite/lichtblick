@@ -11,14 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { uniq } from "lodash";
 import { Time } from "rosbag";
 
-import ParsedMessageCache from "@foxglove-studio/app/dataProviders/ParsedMessageCache";
-import { ParsedMessageDefinitionsByTopic } from "@foxglove-studio/app/players/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { LazyMessageReader } from "@foxglove/rosmsg-deser";
-
+import rawMessageDefinitionsToParsed from "./rawMessageDefinitionsToParsed";
 import {
   DataProvider,
   InitializationResult,
@@ -27,7 +22,6 @@ import {
   GetDataProvider,
   GetMessagesResult,
   GetMessagesTopics,
-  MessageReader,
 } from "./types";
 
 // Parses raw messages as returned by `BagDataProvider`. To make it fast to seek back and forth, we keep
@@ -36,19 +30,9 @@ import {
 // be the case when using the MemoryCacheDataProvider.
 export default class ParseMessagesDataProvider implements DataProvider {
   // Underlying DataProvider.
-  _provider: DataProvider;
-  // Passed into `initialize`.
-  _parsedMessageDefinitionsByTopic?: ParsedMessageDefinitionsByTopic;
-  _messageCache = new ParsedMessageCache();
+  private _provider: DataProvider;
 
-  // Reader per topic, as generated from the underlying DataProvider's `initialize` function.
-  _readersByTopic: {
-    [topic: string]: MessageReader;
-  } = {};
-  // Use this to signal that the _readersByTopic is fully initialized.
-  _calledInitializeReaders = false;
-  _datatypes: RosDatatypes = {};
-  _datatypeNamesByTopic: {
+  private _datatypeNamesByTopic: {
     [topic: string]: string;
   } = {};
 
@@ -64,63 +48,36 @@ export default class ParseMessagesDataProvider implements DataProvider {
 
   async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
     const result = await this._provider.initialize(extensionPoint);
-    const { messageDefinitions, topics } = result;
+    const { topics } = result;
     if (result.providesParsedMessages) {
       throw new Error(
         "ParseMessagesDataProvider should not be used with a provider provides already-parsed messages",
       );
     }
-    if (messageDefinitions.type !== "parsed") {
-      throw new Error("ParseMessagesDataProvider requires parsed message definitions");
-    }
-    this._parsedMessageDefinitionsByTopic = messageDefinitions.parsedMessageDefinitionsByTopic;
-    this._datatypes = messageDefinitions.datatypes;
+    const messageDefinitions =
+      result.messageDefinitions.type === "parsed"
+        ? result.messageDefinitions
+        : rawMessageDefinitionsToParsed(result.messageDefinitions, topics);
+
     topics.forEach(({ name, datatype }) => {
       this._datatypeNamesByTopic[name] = datatype;
     });
     // Initialize the readers asynchronously - we can load data without having the readers ready to parse it.
-    return { ...result, providesParsedMessages: true };
-  }
-
-  // Make sure that we have a reader for each requested topic, but only create them on-demand.
-  _getReadersByTopic(topics: string[]): ParseMessagesDataProvider["_readersByTopic"] {
-    const parsedMessageDefinitionsByTopic = this._parsedMessageDefinitionsByTopic;
-    if (!parsedMessageDefinitionsByTopic) {
-      throw new Error("ParseMessagesDataProvider: getMessages called before initialize");
-    }
-    for (const topic of topics) {
-      if (!this._readersByTopic[topic]) {
-        const parsedDefinition = parsedMessageDefinitionsByTopic[topic];
-        if (!parsedDefinition) {
-          continue;
-        }
-        this._readersByTopic[topic] = new LazyMessageReader(parsedDefinition);
-      }
-    }
-    return this._readersByTopic;
+    return { ...result, providesParsedMessages: true, messageDefinitions };
   }
 
   async getMessages(start: Time, end: Time, topics: GetMessagesTopics): Promise<GetMessagesResult> {
-    const requestedParsedTopics = new Set(topics.parsedMessages);
-    const requestedBinaryTopics = new Set(topics.bobjects);
-    const readerTopics = [...(topics.parsedMessages || [])];
-    const childTopics = {
-      bobjects: uniq([...requestedParsedTopics, ...requestedBinaryTopics]),
-    };
-    // Kick off the request to the data provder to get the messages.
-    const getMessagesPromise = this._provider.getMessages(start, end, childTopics);
-    const readersByTopic = this._getReadersByTopic(readerTopics);
-    const { bobjects } = await getMessagesPromise;
-    if (bobjects == undefined) {
-      throw new Error("Child of ParseMessagesProvider must provide binary messages");
-    }
-    const messagesToParse = bobjects.filter(({ topic }) => requestedParsedTopics.has(topic));
-    const parsedMessages = this._messageCache.parseMessages(messagesToParse, readersByTopic);
+    // Kick off the request to the data provder to get the messages
+    // This might trigger some background reading so we can do some other work before waiting
+
+    const { parsedMessages, rosBinaryMessages } = await this._provider.getMessages(start, end, {
+      parsedMessages: topics.parsedMessages,
+      rosBinaryMessages: topics.rosBinaryMessages,
+    });
 
     return {
-      parsedMessages: parsedMessages.filter(({ topic }) => requestedParsedTopics.has(topic)),
-      bobjects: bobjects.filter(({ topic }) => requestedBinaryTopics.has(topic)),
-      rosBinaryMessages: undefined,
+      parsedMessages,
+      rosBinaryMessages,
     };
   }
 

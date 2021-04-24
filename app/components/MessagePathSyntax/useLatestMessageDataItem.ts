@@ -16,7 +16,7 @@ import { useCallback, useMemo } from "react";
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import useChangeDetector from "@foxglove-studio/app/hooks/useChangeDetector";
-import { Message, MessageFormat } from "@foxglove-studio/app/players/types";
+import { Message } from "@foxglove-studio/app/players/types";
 
 import parseRosPath from "./parseRosPath";
 import {
@@ -26,10 +26,7 @@ import {
 
 // Get the last message for a path, but *after* applying filters. In other words, we'll keep the
 // last message that matched.
-export function useLatestMessageDataItem(
-  path: string,
-  format: MessageFormat,
-): MessageAndData | undefined {
+export function useLatestMessageDataItem(path: string): MessageAndData | undefined {
   const rosPath = useMemo(() => parseRosPath(path), [path]);
   const topics = useMemo(() => (rosPath ? [rosPath.topicName] : []), [rosPath]);
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems([path]);
@@ -75,10 +72,9 @@ export function useLatestMessageDataItem(
     requestBackfill();
   }
 
-  const addMessageCallbackName = format === "parsedMessages" ? "addMessages" : "addBobjects";
   const messageAndData = PanelAPI.useMessageReducer<MessageAndData | undefined>({
     topics,
-    [addMessageCallbackName]: addMessages,
+    addMessages,
     restore,
   });
   return rosPath ? messageAndData : undefined;

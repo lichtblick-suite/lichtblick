@@ -26,7 +26,6 @@ import {
   ErrorCodes,
   NodeData,
   NodeRegistration,
-  ProcessMessageOutput,
   RegistrationOutput,
   Sources,
   UserNodeLog,
@@ -41,15 +40,13 @@ import {
   PublishPayload,
   SubscribePayload,
   Topic,
-  BobjectMessage,
   ParameterValue,
+  TypedMessage,
 } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { UserNode, UserNodes } from "@foxglove-studio/app/types/panels";
 import Rpc from "@foxglove-studio/app/util/Rpc";
 import { setupReceiveReportErrorHandler } from "@foxglove-studio/app/util/RpcMainThreadUtils";
-import { wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
-import { BobjectRpcSender } from "@foxglove-studio/app/util/binaryObjects/BobjectRpc";
 import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
 import { DEFAULT_WEBVIZ_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
@@ -103,22 +100,6 @@ const rpcFromNewSharedWorker = (worker: SharedWorker, name: string) => {
   return rpc;
 };
 
-const getBobjectMessage = async (
-  datatypes: RosDatatypes,
-  datatype: string,
-  messagePromise: Promise<Message | undefined>,
-): Promise<BobjectMessage | undefined> => {
-  const msg = await messagePromise;
-  if (!msg) {
-    return undefined;
-  }
-  return {
-    topic: msg.topic,
-    receiveTime: msg.receiveTime,
-    message: wrapJsObject(datatypes, datatype, msg.message),
-  };
-};
-
 // TODO: FUTURE - Performance tests
 // TODO: FUTURE - Consider how to incorporate with existing hardcoded nodes (esp re: stories/testing)
 // 1 - Do we convert them all over to the new node format / Typescript? What about imported libraries?
@@ -127,9 +108,7 @@ export default class UserNodePlayer implements Player {
   _player: Player;
   _nodeRegistrations: NodeRegistration[] = [];
   _subscriptions: SubscribePayload[] = [];
-  _subscribedFormatByTopic: {
-    [topic: string]: Set<"parsedMessages" | "bobjects">;
-  } = {};
+  _validTopics = new Set<string>();
   _userNodes: UserNodes = {};
   // TODO: FUTURE - Terminate unused workers (some sort of timeout, for whole array or per rpc)
   // Not sure if there is perf issue with unused workers (may just go idle) - requires more research
@@ -195,56 +174,38 @@ export default class UserNodePlayer implements Player {
     { isEqual },
   );
 
-  // When updating Webviz nodes while paused, we seek to the current time
+  // When updating nodes while paused, we seek to the current time
   // (i.e. invoke _getMessages with an empty array) to refresh messages
   _getMessages = microMemoize(
     async (
       parsedMessages: readonly Message[],
-      bobjects: readonly BobjectMessage[],
       datatypes: RosDatatypes,
       globalVariables: GlobalVariables,
       nodeRegistrations: readonly NodeRegistration[],
     ): Promise<{
       parsedMessages: readonly Message[];
-      bobjects: readonly BobjectMessage[];
     }> => {
-      const parsedMessagesPromises = [];
-      const bobjectPromises = [];
-      for (const message of bobjects) {
-        // BobjectRpc is currently not re-entrant: It has per-topic state, so we can't currently run multiple messages
-        // concurrently. This also helps us provide an ordering guarantee for stateful nodes.
-        // We run all nodes in parallel, but run all messages in series.
+      const parsedMessagesPromises: Promise<TypedMessage<unknown> | undefined>[] = [];
+      for (const message of parsedMessages) {
         const messagePromises = [];
         for (const nodeRegistration of nodeRegistrations) {
-          const subscriptions = this._subscribedFormatByTopic[nodeRegistration.output.name];
-          if (subscriptions && nodeRegistration.inputs.includes(message.topic)) {
+          if (
+            this._validTopics.has(nodeRegistration.output.name) &&
+            nodeRegistration.inputs.includes(message.topic)
+          ) {
             const messagePromise = nodeRegistration.processMessage(message, globalVariables);
             messagePromises.push(messagePromise);
-            // There should be at most 2 subscriptions.
-            for (const format of subscriptions.values()) {
-              if (format === "parsedMessages") {
-                parsedMessagesPromises.push(messagePromise);
-              } else {
-                bobjectPromises.push(
-                  getBobjectMessage(datatypes, nodeRegistration.output.datatype, messagePromise),
-                );
-              }
-            }
+            parsedMessagesPromises.push(messagePromise);
           }
         }
         await Promise.all(messagePromises);
       }
-      const [nodeParsedMessages, nodeBobjects] = await Promise.all([
-        (await Promise.all(parsedMessagesPromises)).filter(Boolean),
-        (await Promise.all(bobjectPromises)).filter(Boolean),
-      ]);
+
+      const nodeParsedMessages = (await Promise.all(parsedMessagesPromises)).filter(Boolean);
 
       return {
         parsedMessages: parsedMessages
           .concat(nodeParsedMessages as any)
-          .sort((a, b) => TimeUtil.compare(a.receiveTime, b.receiveTime)),
-        bobjects: bobjects
-          .concat(nodeBobjects as any)
           .sort((a, b) => TimeUtil.compare(a.receiveTime, b.receiveTime)),
       };
     },
@@ -292,7 +253,6 @@ export default class UserNodePlayer implements Player {
     const nodeData = await transformWorker.send<NodeData>("transform", transformMessage);
     const { inputTopics, outputTopic, transpiledCode, projectCode, outputDatatype } = nodeData;
 
-    let bobjectSender: BobjectRpcSender | undefined;
     let rpc: Rpc | undefined;
     let terminateSignal = signal<void>();
     return {
@@ -305,11 +265,10 @@ export default class UserNodePlayer implements Player {
         terminateSignal = signal<void>();
 
         // Register the node within a web worker to be executed.
-        if (!bobjectSender || !rpc) {
+        if (!rpc) {
           rpc =
             this._unusedNodeRuntimeWorkers.pop() ??
             rpcFromNewSharedWorker(UserNodePlayer.CreateNodeRuntimeWorker(), "Node runtime");
-          bobjectSender = new BobjectRpcSender(rpc);
           const { error, userNodeDiagnostics, userNodeLogs } = await rpc.send<RegistrationOutput>(
             "registerNode",
             {
@@ -332,14 +291,10 @@ export default class UserNodePlayer implements Player {
           this._addUserNodeLogs(nodeId, userNodeLogs);
         }
 
-        const result = await Promise.race([
-          bobjectSender.send<ProcessMessageOutput>(
-            "processMessage",
-            message,
-            this._globalVariables,
-          ),
+        const result = (await Promise.race([
+          rpc.send("processMessage", { message, globalVariables: this._globalVariables }),
           terminateSignal,
-        ]);
+        ])) as any;
         if (!result) {
           return;
         }
@@ -497,7 +452,7 @@ export default class UserNodePlayer implements Player {
       if (!activeData) {
         return listener(playerState);
       }
-      const { messages, topics, datatypes, bobjects } = activeData;
+      const { messages, topics, datatypes } = activeData;
 
       // Reset node state after seeking
       if (activeData.lastSeekTime !== this._lastPlayerStateActiveData?.lastSeekTime) {
@@ -514,9 +469,9 @@ export default class UserNodePlayer implements Player {
       }
 
       const allDatatypes = this._getDatatypes(datatypes, this._nodeRegistrations);
-      const { parsedMessages, bobjects: augmentedBobjects } = await this._getMessages(
+
+      const { parsedMessages } = await this._getMessages(
         messages,
-        bobjects,
         allDatatypes,
         this._globalVariables,
         this._nodeRegistrations,
@@ -527,7 +482,6 @@ export default class UserNodePlayer implements Player {
         activeData: {
           ...activeData,
           messages: parsedMessages,
-          bobjects: augmentedBobjects,
           topics: this._getTopics(
             topics,
             this._nodeRegistrations.map((nodeRegistration) => nodeRegistration.output),
@@ -571,20 +525,12 @@ export default class UserNodePlayer implements Player {
           realTopicSubscriptions.push({
             topic: inputTopic,
             requester: { type: "node", name: nodeRegistration.output.name },
-            // Bobjects are parsed inside the worker.
-            format: "bobjects",
           });
         }
       }
     }
 
-    const subscribedFormatByTopic: Record<string, any> = {};
-    for (const { topic, format } of nodeSubscriptions) {
-      subscribedFormatByTopic[topic] = subscribedFormatByTopic[topic] || new Set();
-      subscribedFormatByTopic[topic].add(format);
-    }
-    this._subscribedFormatByTopic = subscribedFormatByTopic;
-
+    this._validTopics = new Set(nodeSubscriptions.map((sub) => sub.topic));
     this._player.setSubscriptions(realTopicSubscriptions);
   }
 

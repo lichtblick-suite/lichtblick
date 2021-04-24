@@ -15,37 +15,31 @@ import { groupBy } from "lodash";
 import { useCallback } from "react";
 
 import useDeepMemo from "@foxglove-studio/app/hooks/useDeepMemo";
-import { TypedMessage, MessageFormat } from "@foxglove-studio/app/players/types";
+import { Message, TypedMessage } from "@foxglove-studio/app/players/types";
 import concatAndTruncate from "@foxglove-studio/app/util/concatAndTruncate";
 
 import { useMessageReducer } from "./useMessageReducer";
 
+// Topic types that are not known at compile time
+type UnknownMessageEventsByTopic = Record<string, readonly TypedMessage<unknown>[]>;
+
 // Convenience wrapper around `useMessageReducer`, for if you just want some
 // recent messages for a few topics.
-export function useMessagesByTopic<T = any>({
+export function useMessagesByTopic({
   topics,
   historySize,
   preloadingFallback,
-  format = "parsedMessages",
 }: {
   topics: readonly string[];
   historySize: number;
   preloadingFallback?: boolean;
-  format?: MessageFormat;
-}): {
-  [topic: string]: readonly TypedMessage<T>[];
-} {
+}): UnknownMessageEventsByTopic {
   const requestedTopics = useDeepMemo(topics);
 
   const addMessages = useCallback(
-    (
-      prevMessagesByTopic: {
-        readonly [key: string]: readonly TypedMessage<T>[];
-      },
-      messages: readonly TypedMessage<T>[],
-    ) => {
+    (prevMessagesByTopic: UnknownMessageEventsByTopic, messages: readonly Message[]) => {
       const newMessagesByTopic = groupBy(messages, "topic");
-      const ret = { ...prevMessagesByTopic };
+      const ret: UnknownMessageEventsByTopic = { ...prevMessagesByTopic };
       Object.entries(newMessagesByTopic).forEach(([topic, newMessages]) => {
         const retTopic = ret[topic];
         if (retTopic) {
@@ -58,10 +52,8 @@ export function useMessagesByTopic<T = any>({
   );
 
   const restore = useCallback(
-    (prevMessagesByTopic?: {
-      readonly [key: string]: readonly TypedMessage<T>[];
-    }): { readonly [key: string]: readonly TypedMessage<T>[] } => {
-      const newMessagesByTopic: { [topic: string]: TypedMessage<T>[] } = {};
+    (prevMessagesByTopic?: UnknownMessageEventsByTopic) => {
+      const newMessagesByTopic: UnknownMessageEventsByTopic = {};
       // When changing topics, we try to keep as many messages around from the previous set of
       // topics as possible.
       for (const topic of requestedTopics) {
@@ -77,6 +69,6 @@ export function useMessagesByTopic<T = any>({
     topics: requestedTopics,
     restore,
     preloadingFallback,
-    ...(format === "bobjects" ? { addBobjects: addMessages } : { addMessages }),
+    addMessages,
   });
 }

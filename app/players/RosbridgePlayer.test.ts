@@ -15,7 +15,6 @@ import { Time } from "rosbag";
 
 import NoopMetricsCollector from "@foxglove-studio/app/players/NoopMetricsCollector";
 import RosbridgePlayer from "@foxglove-studio/app/players/RosbridgePlayer";
-import { isBobject, deepParse } from "@foxglove-studio/app/util/binaryObjects";
 
 const headerMessage = ({
   seq,
@@ -158,7 +157,7 @@ describe("RosbridgePlayer", () => {
       ],
     });
 
-    player.setSubscriptions([{ topic: "/topic/A", format: "parsedMessages" }]);
+    player.setSubscriptions([{ topic: "/topic/A" }]);
     player.setListener(async ({ activeData }) => {
       const { topics } = activeData ?? {};
       if (!topics) {
@@ -171,7 +170,7 @@ describe("RosbridgePlayer", () => {
     });
   });
 
-  describe("bobjects", () => {
+  describe("parsedMessages", () => {
     beforeEach(() => {
       workerInstance.setup({
         topics: ["/topic/A", "/topic/B"],
@@ -205,65 +204,16 @@ describe("RosbridgePlayer", () => {
       });
     });
 
-    it("returns bobjects with complex type", (done) => {
-      player.setSubscriptions([{ topic: "/topic/A", format: "bobjects" }]);
-
-      player.setListener(async ({ activeData }) => {
-        const { messages, bobjects } = activeData ?? {};
-        if (!messages || !bobjects) {
-          return Promise.resolve();
-        }
-
-        expect(messages.length).toBe(0);
-
-        expect(bobjects.length).toBe(1);
-        expect(isBobject(bobjects[0]?.message)).toBe(true);
-        expect(deepParse(bobjects[0]?.message)).toStrictEqual({
-          header: {
-            seq: 7643,
-            stamp: { sec: 1234, nsec: 5678 },
-            frame_id: "someFrameId",
-          },
-        });
-
-        done();
-        return Promise.resolve();
-      });
-    });
-
-    it("returns bobjects with basic types", (done) => {
-      player.setSubscriptions([{ topic: "/topic/B", format: "bobjects" }]);
-
-      player.setListener(async ({ activeData }) => {
-        const { messages, bobjects } = activeData ?? {};
-        if (!messages || !bobjects) {
-          return Promise.resolve();
-        }
-
-        expect(messages.length).toBe(0);
-
-        expect(bobjects.length).toBe(1);
-        expect(isBobject(bobjects[0]?.message)).toBe(true);
-        expect(deepParse(bobjects[0]?.message)).toStrictEqual({
-          text: "some text",
-        });
-
-        done();
-        return Promise.resolve();
-      });
-    });
-
     it("returns parsedMessages with complex type", (done) => {
-      player.setSubscriptions([{ topic: "/topic/A", format: "parsedMessages" }]);
+      player.setSubscriptions([{ topic: "/topic/A" }]);
 
       player.setListener(async ({ activeData }) => {
-        const { messages, bobjects } = activeData ?? {};
-        if (!messages || !bobjects) {
+        const { messages } = activeData ?? {};
+        if (!messages) {
           return Promise.resolve();
         }
 
         expect(messages.length).toBe(1);
-        expect(isBobject(messages[0]?.message)).toBe(false);
         expect(messages[0]?.message).toEqual({
           header: {
             seq: 7643,
@@ -271,8 +221,6 @@ describe("RosbridgePlayer", () => {
             frame_id: "someFrameId",
           },
         });
-
-        expect(bobjects.length).toBe(0);
 
         done();
         return Promise.resolve();
@@ -280,90 +228,17 @@ describe("RosbridgePlayer", () => {
     });
 
     it("returns parsedMessages with basic types", (done) => {
-      player.setSubscriptions([{ topic: "/topic/B", format: "parsedMessages" }]);
+      player.setSubscriptions([{ topic: "/topic/B" }]);
 
       player.setListener(async ({ activeData }) => {
-        const { messages, bobjects } = activeData ?? {};
-        if (!messages || !bobjects) {
+        const { messages } = activeData ?? {};
+        if (!messages) {
           return Promise.resolve();
         }
 
         expect(messages.length).toBe(1);
-        expect(isBobject(messages[0]?.message)).toBe(false);
         expect(messages[0]?.message).toEqual({
           text: "some text",
-        });
-
-        expect(bobjects.length).toBe(0);
-
-        done();
-        return Promise.resolve();
-      });
-    });
-
-    it("returns mixed messages", (done) => {
-      player.setSubscriptions([
-        { topic: "/topic/A", format: "parsedMessages" },
-        { topic: "/topic/B", format: "bobjects" },
-      ]);
-
-      player.setListener(async ({ activeData }) => {
-        const { messages, bobjects } = activeData ?? {};
-        if (!messages || !bobjects) {
-          return Promise.resolve();
-        }
-
-        expect(messages.length).toBe(1);
-        expect(isBobject(messages[0]?.message)).toBe(false);
-        expect(messages[0]?.message).toEqual({
-          header: {
-            seq: 7643,
-            stamp: { sec: 1234, nsec: 5678 },
-            frame_id: "someFrameId",
-          },
-        });
-
-        expect(bobjects.length).toBe(1);
-        expect(isBobject(bobjects[0]?.message)).toBe(true);
-        expect(deepParse(bobjects[0]?.message)).toStrictEqual({
-          text: "some text",
-        });
-
-        done();
-        return Promise.resolve();
-      });
-    });
-
-    it("handles multiple subscriptions to the same topic using different formats", (done) => {
-      player.setSubscriptions([
-        { topic: "/topic/A", format: "parsedMessages" },
-        { topic: "/topic/A", format: "bobjects" },
-      ]);
-
-      player.setListener(async ({ activeData }) => {
-        const { messages, bobjects } = activeData ?? {};
-        if (!messages || !bobjects) {
-          return Promise.resolve();
-        }
-
-        expect(messages.length).toBe(1);
-        expect(isBobject(messages[0]?.message)).toBe(false);
-        expect(messages[0]?.message).toEqual({
-          header: {
-            seq: 7643,
-            stamp: { sec: 1234, nsec: 5678 },
-            frame_id: "someFrameId",
-          },
-        });
-
-        expect(bobjects.length).toBe(1);
-        expect(isBobject(bobjects[0]?.message)).toBe(true);
-        expect(deepParse(bobjects[0]?.message)).toStrictEqual({
-          header: {
-            seq: 7643,
-            stamp: { sec: 1234, nsec: 5678 },
-            frame_id: "someFrameId",
-          },
         });
 
         done();

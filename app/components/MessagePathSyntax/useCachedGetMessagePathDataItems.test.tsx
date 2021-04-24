@@ -17,12 +17,10 @@ import { cloneDeep } from "lodash";
 import { setGlobalVariables } from "@foxglove-studio/app/actions/panels";
 import parseRosPath from "@foxglove-studio/app/components/MessagePathSyntax/parseRosPath";
 import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
-import { Message, Topic } from "@foxglove-studio/app/players/types";
+import { Message, Topic, TypedMessage } from "@foxglove-studio/app/players/types";
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
-import { wrapMessages } from "@foxglove-studio/app/test/datatypes";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { deepParse, isBobject } from "@foxglove-studio/app/util/binaryObjects";
 
 import {
   fillInGlobalVariablesInPath,
@@ -32,21 +30,19 @@ import {
 } from "./useCachedGetMessagePathDataItems";
 
 function addValuesWithPathsToItems(
-  messages: any,
-  messagePath: any,
-  providerTopics: any,
-  datatypes: any,
-  useBobjects: boolean,
+  messages: TypedMessage<unknown>[],
+  messagePath: string,
+  providerTopics: Topic[],
+  datatypes: RosDatatypes,
 ) {
-  const maybeBobjectMessages = useBobjects ? wrapMessages(messages) : messages;
-  return maybeBobjectMessages.map((message: any) => {
+  return messages.map((message) => {
     const rosPath = parseRosPath(messagePath);
     if (!rosPath) {
       return undefined;
     }
     const items = getMessagePathDataItems(message, rosPath, providerTopics, datatypes);
     return items?.map(({ value, path, constantName }) => ({
-      value: isBobject(value) ? deepParse(value) : value,
+      value,
       path,
       constantName,
     }));
@@ -174,7 +170,7 @@ describe("useCachedGetMessagePathDataItems", () => {
     root.unmount();
   });
 
-  describe.each([[false], [true]])("getMessagePathDataItems (Bobjects: %p)", (useBobjects) => {
+  describe("getMessagePathDataItems", () => {
     it("traverses down the path for every item", () => {
       const messages: Message[] = [
         {
@@ -218,25 +214,24 @@ describe("useCachedGetMessagePathDataItems", () => {
           "/some/topic.some_array[:].some_message",
           topics,
           datatypes,
-          useBobjects,
         ),
       ).toEqual([
         [
           {
             value: { x: 10, y: 20 },
-            path: "/some/topic.some_array[:]{some_id==10}.some_message",
+            path: "/some/topic.some_array[0].some_message",
             constantName: undefined,
           },
         ],
         [
           {
             value: { x: 10, y: 20 },
-            path: "/some/topic.some_array[:]{some_id==10}.some_message",
+            path: "/some/topic.some_array[0].some_message",
             constantName: undefined,
           },
           {
             value: { x: 50, y: 60 },
-            path: "/some/topic.some_array[:]{some_id==50}.some_message",
+            path: "/some/topic.some_array[1].some_message",
             constantName: undefined,
           },
         ],
@@ -262,13 +257,7 @@ describe("useCachedGetMessagePathDataItems", () => {
         };
 
         expect(
-          addValuesWithPathsToItems(
-            messages,
-            "/some/topic.someJson",
-            topics,
-            datatypes,
-            useBobjects,
-          ),
+          addValuesWithPathsToItems(messages, "/some/topic.someJson", topics, datatypes),
         ).toEqual([
           [{ value: { someId: 10 }, path: "/some/topic.someJson", constantName: undefined }],
           [
@@ -280,13 +269,7 @@ describe("useCachedGetMessagePathDataItems", () => {
           ],
         ]);
         expect(
-          addValuesWithPathsToItems(
-            messages,
-            "/some/topic.someJson.someId",
-            topics,
-            datatypes,
-            useBobjects,
-          ),
+          addValuesWithPathsToItems(messages, "/some/topic.someJson.someId", topics, datatypes),
         ).toEqual([
           [{ value: 10, path: "/some/topic.someJson.someId", constantName: undefined }],
           [{ value: 11, path: "/some/topic.someJson.someId", constantName: undefined }],
@@ -307,13 +290,7 @@ describe("useCachedGetMessagePathDataItems", () => {
         };
 
         expect(
-          addValuesWithPathsToItems(
-            messages,
-            "/some/topic.jsonArr[0].foo.bar",
-            topics,
-            datatypes,
-            useBobjects,
-          ),
+          addValuesWithPathsToItems(messages, "/some/topic.jsonArr[0].foo.bar", topics, datatypes),
         ).toEqual([
           [{ value: 42, path: "/some/topic.jsonArr[0].foo.bar", constantName: undefined }],
         ]);
@@ -332,7 +309,7 @@ describe("useCachedGetMessagePathDataItems", () => {
           some_datatype: { fields: [{ name: "jsonArr", type: "json", isArray: false }] },
         };
         const path = "/some/topic.jsonArr[:]{id==1}.val";
-        expect(addValuesWithPathsToItems(messages, path, topics, datatypes, useBobjects)).toEqual([
+        expect(addValuesWithPathsToItems(messages, path, topics, datatypes)).toEqual([
           [{ value: 42, path, constantName: undefined }],
         ]);
       });
@@ -351,13 +328,7 @@ describe("useCachedGetMessagePathDataItems", () => {
         };
 
         expect(
-          addValuesWithPathsToItems(
-            messages,
-            "/some/topic.jsonArr[0].foo",
-            topics,
-            datatypes,
-            useBobjects,
-          ),
+          addValuesWithPathsToItems(messages, "/some/topic.jsonArr[0].foo", topics, datatypes),
         ).toEqual([[{ value: 42, path: "/some/topic.jsonArr[0].foo", constantName: undefined }]]);
       });
 
@@ -375,13 +346,7 @@ describe("useCachedGetMessagePathDataItems", () => {
         };
 
         expect(
-          addValuesWithPathsToItems(
-            messages,
-            "/some/topic.someJson.badPath",
-            topics,
-            datatypes,
-            useBobjects,
-          ),
+          addValuesWithPathsToItems(messages, "/some/topic.someJson.badPath", topics, datatypes),
         ).toEqual([[]]);
         expect(
           addValuesWithPathsToItems(
@@ -389,7 +354,6 @@ describe("useCachedGetMessagePathDataItems", () => {
             "/some/topic.someJson.someId.badPath",
             topics,
             datatypes,
-            useBobjects,
           ),
         ).toEqual([[]]);
         expect(
@@ -398,7 +362,6 @@ describe("useCachedGetMessagePathDataItems", () => {
             "/some/topic.someJson[0].someId.badPath",
             topics,
             datatypes,
-            useBobjects,
           ),
         ).toEqual([[]]);
       });
@@ -418,13 +381,7 @@ describe("useCachedGetMessagePathDataItems", () => {
       };
 
       expect(
-        addValuesWithPathsToItems(
-          messages,
-          "/some/topic.some_array[-2:-1]",
-          topics,
-          datatypes,
-          useBobjects,
-        ),
+        addValuesWithPathsToItems(messages, "/some/topic.some_array[-2:-1]", topics, datatypes),
       ).toEqual([
         [
           { constantName: undefined, path: "/some/topic.some_array[-2]", value: 4 },
@@ -442,9 +399,7 @@ describe("useCachedGetMessagePathDataItems", () => {
         },
       ];
       // Topic not present
-      expect(addValuesWithPathsToItems(messages, "/some/topic", [], {}, useBobjects)).toEqual([
-        undefined,
-      ]);
+      expect(addValuesWithPathsToItems(messages, "/some/topic", [], {})).toEqual([undefined]);
     });
 
     it("handles fields inside times", () => {
@@ -460,13 +415,7 @@ describe("useCachedGetMessagePathDataItems", () => {
         },
       ];
       expect(
-        addValuesWithPathsToItems(
-          messages,
-          "/some/topic.stamp.nsec",
-          topics,
-          datatypes,
-          useBobjects,
-        ),
+        addValuesWithPathsToItems(messages, "/some/topic.stamp.nsec", topics, datatypes),
       ).toEqual([[{ constantName: undefined, path: "/some/topic.stamp.nsec", value: 2 }]]);
     });
 
@@ -520,7 +469,6 @@ describe("useCachedGetMessagePathDataItems", () => {
           "/some/topic.some_array[:]{some_filter_value==0}.some_id",
           topics,
           datatypes,
-          useBobjects,
         ),
       ).toEqual([
         [
@@ -582,7 +530,6 @@ describe("useCachedGetMessagePathDataItems", () => {
           "/some/topic{str_field=='A'}.num_field",
           topics,
           datatypes,
-          useBobjects,
         ),
       ).toEqual([
         [{ value: 1, path: "/some/topic{str_field=='A'}.num_field" }],
@@ -596,7 +543,6 @@ describe("useCachedGetMessagePathDataItems", () => {
           "/some/topic{str_field=='B'}.num_field",
           topics,
           datatypes,
-          useBobjects,
         ),
       ).toEqual([[], [], [{ value: 2, path: "/some/topic{str_field=='B'}.num_field" }]]);
 
@@ -606,7 +552,6 @@ describe("useCachedGetMessagePathDataItems", () => {
           "/some/topic{num_field==2}.num_field",
           topics,
           datatypes,
-          useBobjects,
         ),
       ).toEqual([
         [],
@@ -620,7 +565,6 @@ describe("useCachedGetMessagePathDataItems", () => {
           "/some/topic{str_field=='A'}{num_field==2}.num_field",
           topics,
           datatypes,
-          useBobjects,
         ),
       ).toEqual([
         [],
@@ -634,7 +578,6 @@ describe("useCachedGetMessagePathDataItems", () => {
           "/some/topic{str_field=='C'}.num_field",
           topics,
           datatypes,
-          useBobjects,
         ),
       ).toEqual([[], [], []]);
     });
@@ -680,9 +623,7 @@ describe("useCachedGetMessagePathDataItems", () => {
         },
       };
 
-      expect(
-        addValuesWithPathsToItems(messages, "/some/topic.state", topics, datatypes, useBobjects),
-      ).toEqual([
+      expect(addValuesWithPathsToItems(messages, "/some/topic.state", topics, datatypes)).toEqual([
         [
           {
             value: 0,

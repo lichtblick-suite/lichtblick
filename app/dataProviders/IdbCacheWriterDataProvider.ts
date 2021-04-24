@@ -180,14 +180,14 @@ export default class IdbCacheWriterDataProvider implements DataProvider {
     // First, see if there are any read requests that we can resolve now.
     this._readRequests = this._readRequests.filter(({ range, topics, resolve }) => {
       if (topics.length === 0) {
-        resolve({ rosBinaryMessages: [], parsedMessages: undefined, bobjects: undefined });
+        resolve({ rosBinaryMessages: [], parsedMessages: undefined });
         return false;
       }
       const downloadedRanges: Range[] = this._getDownloadedRanges(topics);
       if (!isRangeCoveredByRanges(range, downloadedRanges)) {
         return true;
       }
-      resolve({ rosBinaryMessages: [], parsedMessages: undefined, bobjects: undefined });
+      resolve({ rosBinaryMessages: [], parsedMessages: undefined });
       this._lastResolvedCallbackEnd = range.end;
       return false;
     });
@@ -297,14 +297,14 @@ export default class IdbCacheWriterDataProvider implements DataProvider {
       // Get messages from the underlying provider.
       const startTime = TimeUtil.add(this._startTime, fromNanoSec(currentRange.start));
       const endTime = TimeUtil.add(this._startTime, fromNanoSec(currentRange.end - 1)); // endTime is inclusive.
-      const { bobjects, parsedMessages, rosBinaryMessages } = await this._provider.getMessages(
+      const { parsedMessages, rosBinaryMessages } = await this._provider.getMessages(
         startTime,
         endTime,
         {
           rosBinaryMessages: topics,
         },
       );
-      if (bobjects != undefined || parsedMessages != undefined || rosBinaryMessages == undefined) {
+      if (parsedMessages != undefined || rosBinaryMessages == undefined) {
         sendNotification("IdbCacheWriter should only have ROS binary messages", "", "app", "error");
         return;
       }

@@ -21,6 +21,5 @@ export type ThreeDimensionalVizHooks = Readonly<{
   getOccupancyGridValues: (arg0: string) => [number, string]; // arg is topic, return value is [alpha, map].
   getFlattenedPose: (arg0: Frame) => Pose | undefined;
   getSyntheticArrowMarkerColor: (arg0: string) => Color; // arg is topic
-  consumeBobject: (arg0: string, arg1: string, arg2: any, arg3: any, arg4: any) => void; // topic, datatype, message, consumeFns, misc
   addMarkerToCollector: (arg0: any, arg1: any) => boolean; // marker collector, marker
 }>;

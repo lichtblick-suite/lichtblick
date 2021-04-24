@@ -14,8 +14,6 @@
 // This file contains hooks and components comprising the public API for Webviz panel development.
 // Recommended use: import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 
-// More to come soon!
-
 export { default as useDataSourceInfo } from "./useDataSourceInfo";
 export type { DataSourceInfo } from "./useDataSourceInfo";
 

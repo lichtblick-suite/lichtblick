@@ -7,17 +7,9 @@ export type Point = {
   lon: number;
 };
 
-// stamp -> point
-export type PointCache = Map<number, Point>;
-
 // https://docs.ros.org/en/api/sensor_msgs/html/msg/NavSatFix.html
 
 export type NavSatFixMsg = {
   latitude: number;
   longitude: number;
-};
-
-export type BinaryNavSatFixMsg = {
-  latitude(): number;
-  longitude(): number;
 };

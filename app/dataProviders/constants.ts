@@ -20,8 +20,7 @@ export const CoreDataProviders = {
   MemoryCacheDataProvider: "MemoryCacheDataProvider",
   ParseMessagesDataProvider: "ParseMessagesDataProvider",
   RenameDataProvider: "RenameDataProvider",
-  RewriteBinaryDataProvider: "RewriteBinaryDataProvider",
   RpcDataProvider: "RpcDataProvider",
   WorkerDataProvider: "WorkerDataProvider",
 };
-export const MESSAGE_FORMATS = ["bobjects", "rosBinaryMessages", "parsedMessages"] as const;
+export const MESSAGE_FORMATS = ["rosBinaryMessages", "parsedMessages"] as const;

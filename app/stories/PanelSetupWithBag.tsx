@@ -73,10 +73,7 @@ export default function PanelSetupWithBag({
     (async () => {
       const player = new StoryPlayer([bag, bag2].filter(Boolean) as string[]);
       const formattedSubscriptions: SubscribePayload[] = flatten(
-        (subscriptions ?? []).map((topic) => [
-          { topic, format: "parsedMessages" },
-          { topic, format: "bobjects" },
-        ]),
+        (subscriptions ?? []).map((topic) => [{ topic }]),
       );
       player.setSubscriptions(formattedSubscriptions);
 
@@ -84,10 +81,11 @@ export default function PanelSetupWithBag({
         if (!activeData) {
           return Promise.resolve();
         }
-        const { messages, bobjects, topics } = activeData;
-        const frame = groupBy([...messages, ...bobjects], "topic");
+        const { messages, topics } = activeData;
+        const frame = groupBy(messages, "topic");
         setFixture(
           getMergedFixture({
+            activeData,
             frame,
             topics,
           }),

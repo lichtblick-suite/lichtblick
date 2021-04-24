@@ -20,7 +20,6 @@ import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
 import useGetItemStringWithTimezone from "@foxglove-studio/app/components/JsonTree/useGetItemStringWithTimezone";
 import { getInstanceObj } from "@foxglove-studio/app/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
-import { deepParse, isBobject } from "@foxglove-studio/app/util/binaryObjects";
 import { jsonTreeTheme } from "@foxglove-studio/app/util/globalConstants";
 import logEvent, { getEventNames, getEventTags } from "@foxglove-studio/app/util/logEvent";
 
@@ -75,10 +74,6 @@ function ObjectDetailsWrapper({
   };
 
   const objectToDisplay = instanceObject && showInstance ? instanceObject : object;
-  const parsedObject = React.useMemo(
-    () => (isBobject(objectToDisplay) ? deepParse(objectToDisplay) : objectToDisplay),
-    [objectToDisplay],
-  );
   return (
     <div>
       {instanceObject && (
@@ -96,7 +91,7 @@ function ObjectDetailsWrapper({
           </DropdownItem>
         </Dropdown>
       )}
-      <ObjectDetails interactionData={interactionData} objectToDisplay={parsedObject} />
+      <ObjectDetails interactionData={interactionData} objectToDisplay={objectToDisplay} />
     </div>
   );
 }

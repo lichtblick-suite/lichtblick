@@ -53,17 +53,8 @@ import getDiff, {
   diffLabels,
   diffLabelsByLabelText,
 } from "@foxglove-studio/app/panels/RawMessages/getDiff";
-import { cast, Topic } from "@foxglove-studio/app/players/types";
+import { Topic } from "@foxglove-studio/app/players/types";
 import { objectValues } from "@foxglove-studio/app/util";
-import {
-  ArrayView,
-  deepParse,
-  fieldNames,
-  getField,
-  getIndex,
-  isArrayView,
-  isBobject,
-} from "@foxglove-studio/app/util/binaryObjects";
 import { jsonTreeTheme, SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import { enumValuesByDatatypeAndField } from "@foxglove-studio/app/util/selectors";
 
@@ -95,39 +86,24 @@ type Props = {
   saveConfig: (arg0: Partial<RawMessagesConfig>) => void;
 };
 
-const isSingleElemArray = (obj: any) => {
-  if (!Array.isArray(obj) && !isArrayView(obj)) {
+const isSingleElemArray = (obj: unknown) => {
+  if (!Array.isArray(obj)) {
     return false;
   }
-  const arr = isArrayView(obj) ? cast<ArrayView<any>>(obj).toArray() : cast<any[]>(obj);
-  return arr.filter((a) => a != undefined).length === 1;
+  return obj.filter((a) => a != undefined).length === 1;
 };
 const dataWithoutWrappingArray = (data: any) => {
-  return isSingleElemArray(data) && typeof getIndex(data, 0) === "object"
-    ? getIndex(data, 0)
-    : data;
+  return isSingleElemArray(data) && typeof data[0] === "object" ? data[0] : data;
 };
 
-const maybeShallowParse = (obj: unknown): unknown => {
-  if (!isBobject(obj)) {
-    return obj;
+// lazy messages don't have own properties so we need to invoke "toJSON" to get the message
+// as a regular object
+function maybeShallowParse(val: unknown) {
+  if (val && typeof val === "object" && "toJSON" in val) {
+    return (val as { toJSON: () => unknown }).toJSON();
   }
-  if (isArrayView(obj)) {
-    return cast<ArrayView<any>>(obj).toArray();
-  }
-  const ret: any = {};
-  fieldNames(obj).forEach((field) => {
-    ret[field] = getField(obj, field);
-  });
-  return ret;
-};
-
-const maybeDeepParse = (obj: unknown): unknown => {
-  if (!isBobject(obj)) {
-    return obj;
-  }
-  return deepParse(obj);
-};
+  return val;
+}
 
 function RawMessages(props: Props) {
   const { config, saveConfig } = props;
@@ -160,7 +136,6 @@ function RawMessages(props: Props) {
   const consecutiveMsgs = useMessagesByTopic({
     topics: [topicName],
     historySize: 2,
-    format: "bobjects",
   })[topicName];
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems([topicPath]);
   const prevTickMsg = consecutiveMsgs?.[consecutiveMsgs.length - 2];
@@ -169,7 +144,7 @@ function RawMessages(props: Props) {
       message: prevTickMsg,
       queriedData: cachedGetMessagePathDataItems(topicPath, prevTickMsg) ?? [],
     },
-    useLatestMessageDataItem(topicPath, "bobjects"),
+    useLatestMessageDataItem(topicPath),
   ];
 
   const otherSourceTopic = topicName.startsWith(SECOND_SOURCE_PREFIX)
@@ -178,7 +153,6 @@ function RawMessages(props: Props) {
   const inOtherSourceDiffMode = diffEnabled && diffMethod === OTHER_SOURCE_METHOD;
   const diffTopicObj = useLatestMessageDataItem(
     diffEnabled ? (inOtherSourceDiffMode ? otherSourceTopic : diffTopicPath) : "",
-    "parsedMessages",
   );
 
   const inTimetickDiffMode = diffEnabled && diffMethod === PREV_MSG_METHOD;
@@ -320,7 +294,7 @@ function RawMessages(props: Props) {
     if (expandAll != undefined) {
       shouldExpandNode = () => expandAll;
     } else {
-      shouldExpandNode = (keypath: any) => {
+      shouldExpandNode = (keypath: (string | number)[]) => {
         return expandedFields.has(keypath.join("~"));
       };
     }
@@ -342,21 +316,27 @@ function RawMessages(props: Props) {
       return <EmptyState>Waiting for next message</EmptyState>;
     }
 
-    const data = dataWithoutWrappingArray(baseItem.queriedData.map(({ value }) => value as any));
+    const data = dataWithoutWrappingArray(baseItem.queriedData.map(({ value }) => value));
     const hideWrappingArray =
       baseItem.queriedData.length === 1 && typeof baseItem.queriedData[0]?.value === "object";
     const shouldDisplaySingleVal =
       (data !== undefined && typeof data !== "object") ||
-      (isSingleElemArray(data) &&
-        getIndex(data, 0) != undefined &&
-        typeof getIndex(data, 0) !== "object");
-    const singleVal = isSingleElemArray(data) ? getIndex(data, 0) : data;
+      (isSingleElemArray(data) && data[0] != undefined && typeof data[0] !== "object");
+    const singleVal = isSingleElemArray(data) ? data[0] : data;
 
     const diffData =
-      diffItem && dataWithoutWrappingArray(diffItem.queriedData.map(({ value }) => value as any));
+      diffItem && dataWithoutWrappingArray(diffItem.queriedData.map(({ value }) => value));
+
+    // json parse/stringify round trip is used to deep parse data and diff data which may be lazy messages
+    // lazy messages have non-enumerable getters but do have a toJSON method to turn themselves into an object
     const diff =
       diffEnabled &&
-      getDiff(maybeDeepParse(data), maybeDeepParse(diffData), undefined, showFullMessageForDiff);
+      getDiff(
+        JSON.parse(JSON.stringify(data)),
+        JSON.parse(JSON.stringify(diffData)),
+        undefined,
+        showFullMessageForDiff,
+      );
     const diffLabelTexts = objectValues(diffLabels).map(({ labelText }) => labelText);
 
     const CheckboxComponent = showFullMessageForDiff
@@ -413,13 +393,13 @@ function RawMessages(props: Props) {
               postprocessValue={(rawVal: unknown) => {
                 const val = maybeShallowParse(rawVal);
                 if (
-                  val != undefined &&
                   typeof val === "object" &&
-                  Object.keys(val as any).length === 1 &&
-                  diffLabelTexts.includes(Object.keys(val as any)[0]!)
+                  val != undefined &&
+                  Object.keys(val).length === 1 &&
+                  diffLabelTexts.includes(Object.keys(val)[0]!)
                 ) {
-                  if (Object.keys(val as any)[0] !== diffLabels.ID.labelText) {
-                    return objectValues(val as any)[0];
+                  if (Object.keys(val)[0] !== diffLabels.ID.labelText) {
+                    return Object.values(val)[0];
                   }
                 }
                 return val;

@@ -36,7 +36,6 @@ import {
   mathFunctions,
   MathFunction,
 } from "@foxglove-studio/app/panels/Plot/transformPlotRange";
-import { deepParse, isBobject } from "@foxglove-studio/app/util/binaryObjects";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { format } from "@foxglove-studio/app/util/formatTime";
 import { lightColor, lineColors } from "@foxglove-studio/app/util/plotColors";
@@ -99,10 +98,7 @@ function getXForPoint(
       if (!xItem) {
         return NaN;
       }
-      // It is possible that values are still bobjects at this point. Parse if needed.
-      const maybeBobject = xItem.queriedData[innerIdx]?.value;
-      const value =
-        maybeBobject && isBobject(maybeBobject) ? deepParse(maybeBobject) : maybeBobject;
+      const value = xItem.queriedData[innerIdx]?.value;
       return isTime(value) ? toSec(value) : Number(value);
     }
   }
@@ -128,10 +124,8 @@ function getPointsAndTooltipsForMessagePathItem(
   const elapsedTime = toSec(subtractTimes(timestamp, startTime));
   for (const [
     innerIdx,
-    { value: maybeBobject, path: queriedPath, constantName },
+    { value, path: queriedPath, constantName },
   ] of yItem.queriedData.entries()) {
-    // It is possible that values are still bobjects at this point. Parse if needed.
-    const value = isBobject(maybeBobject) ? deepParse(maybeBobject) : maybeBobject;
     if (typeof value === "number" || typeof value === "boolean" || typeof value === "string") {
       const valueNum = Number(value);
       if (!isNaN(valueNum)) {

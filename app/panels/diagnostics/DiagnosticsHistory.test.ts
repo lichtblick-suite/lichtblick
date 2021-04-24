@@ -11,12 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Message } from "@foxglove-studio/app/players/types";
+import { TypedMessage } from "@foxglove-studio/app/players/types";
 
 import { addMessages, defaultDiagnosticsBuffer } from "./DiagnosticsHistory";
-import { computeDiagnosticInfo, DiagnosticInfo, LEVELS } from "./util";
+import { computeDiagnosticInfo, DiagnosticInfo, DiagnosticStatusArrayMsg, LEVELS } from "./util";
 
-const messageAtLevel = (level: number): Message => ({
+const messageAtLevel = (level: number): TypedMessage<DiagnosticStatusArrayMsg> => ({
   message: {
     status: [
       {
@@ -27,7 +27,7 @@ const messageAtLevel = (level: number): Message => ({
         values: [],
       },
     ],
-    header: { stamp: { sec: 1547062466, nsec: 1674890 } },
+    header: { stamp: { sec: 1547062466, nsec: 1674890 }, frame_id: "", seq: 0 },
   },
   topic: "/foo",
   receiveTime: { sec: 1547062466, nsec: 1674890 },
@@ -35,7 +35,7 @@ const messageAtLevel = (level: number): Message => ({
 
 const diagnosticInfoAtLevel = (level: number): DiagnosticInfo => {
   const { message } = messageAtLevel(level);
-  return computeDiagnosticInfo(message.status[0], message.header.stamp);
+  return computeDiagnosticInfo(message.status[0]!, message.header.stamp);
 };
 
 describe("addMessages", () => {

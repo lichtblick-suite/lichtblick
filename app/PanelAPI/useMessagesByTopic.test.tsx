@@ -14,24 +14,14 @@
 import { mount } from "enzyme";
 
 import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
-import { MessageFormat } from "@foxglove-studio/app/players/types";
-import { wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 
 import * as PanelAPI from ".";
 
 describe("useMessagesByTopic", () => {
   // Create a helper component that exposes the results of the hook for mocking.
   function createTest() {
-    function Test({
-      topics,
-      historySize,
-      format = "parsedMessages",
-    }: {
-      topics: string[];
-      historySize: number;
-      format?: MessageFormat;
-    }) {
-      Test.result(PanelAPI.useMessagesByTopic({ topics, historySize, format }));
+    function Test({ topics, historySize }: { topics: string[]; historySize: number }) {
+      Test.result(PanelAPI.useMessagesByTopic({ topics, historySize }));
       return ReactNull;
     }
     Test.result = jest.fn();
@@ -115,25 +105,6 @@ describe("useMessagesByTopic", () => {
 
     // Make sure that the identities are also the same, not just deep-equal.
     expect(Test.result.mock.calls[1][0]["/foo"][0]).toBe(message2);
-
-    root.unmount();
-  });
-
-  it("respects the 'format' parameter and returns bobjects", () => {
-    const Test = createTest();
-    const message = {
-      topic: "/foo",
-      receiveTime: { sec: 0, nsec: 0 },
-      message: wrapJsObject({}, "time", { sec: 1234, nsec: 5678 }),
-    };
-
-    const root = mount(
-      <MockMessagePipelineProvider bobjects={[message] as any}>
-        <Test topics={["/foo"]} historySize={1} format="bobjects" />
-      </MockMessagePipelineProvider>,
-    );
-
-    expect(Test.result.mock.calls).toEqual([[{ "/foo": [message] }]]);
 
     root.unmount();
   });

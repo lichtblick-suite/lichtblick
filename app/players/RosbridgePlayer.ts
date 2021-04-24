@@ -11,14 +11,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { isEqual, sortBy, partition } from "lodash";
+import { isEqual, sortBy } from "lodash";
 import { MessageReader, Time, parseMessageDefinition } from "rosbag";
 import roslib from "roslib";
 import { v4 as uuidv4 } from "uuid";
 
 import {
   AdvertisePayload,
-  BobjectMessage,
   Message,
   Player,
   PlayerCapabilities,
@@ -34,7 +33,6 @@ import {
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { objectValues } from "@foxglove-studio/app/util";
 import { bagConnectionsToDatatypes } from "@foxglove-studio/app/util/bagConnectionsHelper";
-import { wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
 import { FREEZE_MESSAGES } from "@foxglove-studio/app/util/globalConstants";
 import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
@@ -76,14 +74,12 @@ export default class RosbridgePlayer implements Player {
   _topicSubscriptions = new Map<string, roslib.Topic>();
   _requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
   _parsedMessages: Message[] = []; // Queue of messages that we'll send in next _emitState() call.
-  _bobjects: BobjectMessage[] = []; // Queue of bobjects that we'll send in next _emitState() call.
   _messageOrder: TimestampMethod = "receiveTime";
   _requestTopicsTimeout?: ReturnType<typeof setTimeout>; // setTimeout() handle for _requestTopics().
   _topicPublishers: {
     [topicName: string]: roslib.Topic;
   } = {};
   _parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic = {};
-  _bobjectTopics: Set<string> = new Set();
   _parsedTopics: Set<string> = new Set();
   _receivedBytes: number = 0;
   _metricsCollector: PlayerMetricsCollectorInterface;
@@ -267,8 +263,6 @@ export default class RosbridgePlayer implements Player {
     const currentTime = this._getCurrentTime();
     const messages = this._parsedMessages;
     this._parsedMessages = [];
-    const bobjects = this._bobjects;
-    this._bobjects = [];
     return this._listener({
       presence: PlayerPresence.PRESENT,
       progress: {},
@@ -277,7 +271,6 @@ export default class RosbridgePlayer implements Player {
 
       activeData: {
         messages,
-        bobjects,
         totalBytesReceived: this._receivedBytes,
         messageOrder: this._messageOrder,
         startTime: _start,
@@ -323,12 +316,7 @@ export default class RosbridgePlayer implements Player {
     // Subscribe to additional topics used by Ros1Player itself
     this._addInternalSubscriptions(subscriptions);
 
-    const [bobjectSubscriptions, parsedSubscriptions] = partition(
-      subscriptions,
-      ({ format }) => format === "bobjects",
-    );
-    this._bobjectTopics = new Set(bobjectSubscriptions.map(({ topic }) => topic));
-    this._parsedTopics = new Set(parsedSubscriptions.map(({ topic }) => topic));
+    this._parsedTopics = new Set(subscriptions.map(({ topic }) => topic));
 
     // See what topics we actually can subscribe to.
     const availableTopicsByTopicName = getTopicsByTopicName(this._providerTopics ?? []);
@@ -368,14 +356,6 @@ export default class RosbridgePlayer implements Player {
         if (!this._hasReceivedMessage) {
           this._hasReceivedMessage = true;
           this._metricsCollector.recordTimeToFirstMsgs();
-        }
-
-        if (this._bobjectTopics.has(topicName) && this._providerDatatypes) {
-          this._bobjects.push({
-            topic: topicName,
-            receiveTime,
-            message: wrapJsObject(this._providerDatatypes, datatype, innerMessage),
-          });
         }
 
         if (this._parsedTopics.has(topicName)) {
@@ -474,15 +454,16 @@ export default class RosbridgePlayer implements Player {
       subscriptions.unshift({
         topic: "/clock",
         requester: { type: "other", name: "Ros1Player" },
-        format: "parsedMessages",
       });
     }
   }
 
-  private _handleInternalMessage(msg: BobjectMessage | Message): void {
-    if (msg.topic === "/clock" && !isNaN(msg.message.clock?.sec)) {
-      const time = msg.message.clock as Time;
-      const seconds = toSec(msg.message.clock);
+  private _handleInternalMessage(msg: Message): void {
+    const maybeClockMsg = msg.message as { clock?: Time };
+
+    if (msg.topic === "/clock" && maybeClockMsg.clock && !isNaN(maybeClockMsg.clock?.sec)) {
+      const time = maybeClockMsg.clock;
+      const seconds = toSec(maybeClockMsg.clock);
       if (isNaN(seconds)) {
         return;
       }

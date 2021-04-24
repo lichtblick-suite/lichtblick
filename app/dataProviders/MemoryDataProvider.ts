@@ -23,18 +23,18 @@ import {
   MessageDefinitions,
 } from "@foxglove-studio/app/dataProviders/types";
 import {
-  Message,
   Topic,
   MessageDefinitionsByTopic,
   ParsedMessageDefinitionsByTopic,
+  TypedMessage,
 } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 
-function filterMessages(
+function filterMessages<T>(
   start: Time,
   end: Time,
   topics: readonly string[],
-  messages: readonly Message[] | undefined,
+  messages: readonly TypedMessage<T>[] | undefined,
 ) {
   if (messages == undefined) {
     return undefined;
@@ -55,7 +55,17 @@ function filterMessages(
   return ret;
 }
 
-// In-memory data provider, for in tests.
+type MemoryDataProviderOptions = {
+  messages: GetMessagesResult;
+  topics?: Topic[];
+  datatypes?: RosDatatypes;
+  messageDefinitionsByTopic?: MessageDefinitionsByTopic;
+  parsedMessageDefinitionsByTopic?: ParsedMessageDefinitionsByTopic;
+  initiallyLoaded?: boolean;
+  providesParsedMessages?: boolean;
+};
+
+// in-memory data provider
 export default class MemoryDataProvider implements DataProvider {
   messages: GetMessagesResult;
   topics?: Topic[];
@@ -74,15 +84,7 @@ export default class MemoryDataProvider implements DataProvider {
     messageDefinitionsByTopic,
     parsedMessageDefinitionsByTopic,
     providesParsedMessages,
-  }: {
-    messages: GetMessagesResult;
-    topics?: Topic[];
-    datatypes?: RosDatatypes;
-    messageDefinitionsByTopic?: MessageDefinitionsByTopic;
-    parsedMessageDefinitionsByTopic?: ParsedMessageDefinitionsByTopic;
-    initiallyLoaded?: boolean;
-    providesParsedMessages?: boolean;
-  }) {
+  }: MemoryDataProviderOptions) {
     this.messages = messages;
     this.topics = topics;
     this.datatypes = datatypes;
@@ -101,11 +103,10 @@ export default class MemoryDataProvider implements DataProvider {
         fullyLoadedFractionRanges: [{ start: 0, end: 0 }],
       });
     }
-    const { parsedMessages, rosBinaryMessages, bobjects } = this.messages;
+    const { parsedMessages, rosBinaryMessages } = this.messages;
     const sortedMessages = [
       ...(parsedMessages ?? []),
       ...(rosBinaryMessages ?? []),
-      ...(bobjects ?? []),
     ].sort((m1, m2) => TimeUtil.compare(m1.receiveTime, m2.receiveTime));
 
     let messageDefinitions: MessageDefinitions;
@@ -143,21 +144,20 @@ export default class MemoryDataProvider implements DataProvider {
     // no-op
   }
 
-  async getMessages(start: Time, end: Time, topics: GetMessagesTopics) {
+  async getMessages(start: Time, end: Time, topics: GetMessagesTopics): Promise<GetMessagesResult> {
     return {
       parsedMessages: filterMessages(
         start,
         end,
-        topics.parsedMessages || [],
+        topics.parsedMessages ?? [],
         this.messages.parsedMessages,
       ),
       rosBinaryMessages: filterMessages(
         start,
         end,
-        topics.rosBinaryMessages || [],
+        topics.rosBinaryMessages ?? [],
         this.messages.rosBinaryMessages,
       ),
-      bobjects: filterMessages(start, end, topics.bobjects || [], this.messages.bobjects),
     };
   }
 }

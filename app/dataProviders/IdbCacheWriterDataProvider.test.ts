@@ -16,7 +16,7 @@ import { TimeUtil } from "rosbag";
 
 import MemoryDataProvider from "@foxglove-studio/app/dataProviders/MemoryDataProvider";
 import { mockExtensionPoint } from "@foxglove-studio/app/dataProviders/mockExtensionPoint";
-import { Message, TypedMessage } from "@foxglove-studio/app/players/types";
+import { TypedMessage } from "@foxglove-studio/app/players/types";
 import { getDatabasesInTests } from "@foxglove-studio/app/util/indexeddb/getDatabasesInTests";
 import naturalSort from "@foxglove-studio/app/util/naturalSort";
 
@@ -27,7 +27,7 @@ import {
 } from "./IdbCacheDataProviderDatabase";
 import IdbCacheWriterDataProvider, { BLOCK_SIZE_NS } from "./IdbCacheWriterDataProvider";
 
-function sortMessages(messages: Message[]) {
+function sortMessages(messages: TypedMessage<ArrayBuffer>[]) {
   return messages.sort(
     (a, b) => TimeUtil.compare(a.receiveTime, b.receiveTime) || naturalSort()(a.topic, b.topic),
   );
@@ -50,7 +50,6 @@ function getProvider() {
     messages: {
       rosBinaryMessages: generateMessages(["/foo", "/bar", "/baz"]),
       parsedMessages: undefined,
-      bobjects: undefined,
     },
   });
   const provider = new IdbCacheWriterDataProvider(
@@ -109,7 +108,6 @@ describe("IdbCacheWriterDataProvider", () => {
     // See comment in previous test for why we make this many calls.
     expect(mockProgressCallback.mock.calls.length).toEqual(4 + 4e9 / BLOCK_SIZE_NS);
     expect(emptyArray).toEqual({
-      bobjects: undefined,
       parsedMessages: undefined,
       rosBinaryMessages: [],
     });
@@ -172,12 +170,10 @@ describe("IdbCacheWriterDataProvider", () => {
     );
 
     expect(await getMessagesPromise1).toEqual({
-      bobjects: undefined,
       parsedMessages: undefined,
       rosBinaryMessages: [],
     });
     expect(await getMessagesPromise2).toEqual({
-      bobjects: undefined,
       parsedMessages: undefined,
       rosBinaryMessages: [],
     });

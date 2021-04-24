@@ -180,7 +180,6 @@ function Plot(props: Props) {
     //  1. A fallback for preloading when blocks are not available (nodes, websocket.)
     //  2. Playback-synced plotting of index/custom data.
     preloadingFallback: !showSingleCurrentMessage,
-    format: "bobjects",
   });
 
   const decodeMessagePathsForMessagesByTopic = useDecodeMessagePathsForMessagesByTopic(

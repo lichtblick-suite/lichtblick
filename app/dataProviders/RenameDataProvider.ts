@@ -29,8 +29,7 @@ import {
   DataProvider,
   MessageDefinitions,
 } from "@foxglove-studio/app/dataProviders/types";
-import type { BobjectMessage } from "@foxglove-studio/app/players/types";
-import { Message, Progress, Topic } from "@foxglove-studio/app/players/types";
+import { Progress, Topic, TypedMessage } from "@foxglove-studio/app/players/types";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 
 export default class RenameDataProvider implements DataProvider {
@@ -118,7 +117,7 @@ export default class RenameDataProvider implements DataProvider {
     return this._provider.close();
   }
 
-  _mapMessage = (message: Message) => ({
+  _mapMessage = <T>(message: TypedMessage<T>) => ({
     // Only map fields that we know are correctly mapped. Don't just splat in `...message` here
     // because we might miss an important mapping!
     topic: `${this._prefix}${message.topic}`,
@@ -142,12 +141,11 @@ export default class RenameDataProvider implements DataProvider {
       }
     }
     const messages = await this._provider.getMessages(start, end, childTopics);
-    const { parsedMessages, rosBinaryMessages, bobjects } = messages;
+    const { parsedMessages, rosBinaryMessages } = messages;
 
     return {
       parsedMessages: parsedMessages?.map(this._mapMessage),
       rosBinaryMessages: rosBinaryMessages?.map(this._mapMessage),
-      bobjects: bobjects?.map(this._mapMessage),
     };
   }
 
@@ -165,10 +163,7 @@ export default class RenameDataProvider implements DataProvider {
       return;
     }
 
-    const messagesByTopic: {
-      [topic: string]: readonly BobjectMessage[];
-    } = {};
-
+    const messagesByTopic: Record<string, TypedMessage<unknown>[]> = {};
     for (const [topicName, topicMessages] of Object.entries(block.messagesByTopic)) {
       messagesByTopic[`${this._prefix}${topicName}`] = topicMessages.map(this._mapMessage);
     }

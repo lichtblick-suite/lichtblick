@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { partition } from "lodash";
 import Queue from "promise-queue";
 import { Time, TimeUtil } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
@@ -23,7 +22,6 @@ import {
 } from "@foxglove-studio/app/dataProviders/types";
 import {
   AdvertisePayload,
-  BobjectMessage,
   Message,
   ParameterValue,
   Player,
@@ -81,7 +79,6 @@ export default class AutomatedRunPlayer implements Player {
   _provider: DataProvider;
   _providerResult?: InitializationResult;
   _progress: Progress = {};
-  _bobjectTopics: Set<string> = new Set();
   _parsedTopics: Set<string> = new Set();
   _listener?: (arg0: PlayerState) => Promise<void>;
   _initializeTimeout?: ReturnType<typeof setTimeout>;
@@ -138,28 +135,23 @@ export default class AutomatedRunPlayer implements Player {
     });
   }
 
-  async _getMessages(
-    start: Time,
-    end: Time,
-  ): Promise<{ parsedMessages: readonly Message[]; bobjects: readonly BobjectMessage[] }> {
+  async _getMessages(start: Time, end: Time): Promise<{ parsedMessages: readonly Message[] }> {
     if (!this._providerResult) {
       throw new Error("AutomatedRunPlayer not initialized");
     }
     const providerResult = this._providerResult;
 
     const parsedTopics = getSanitizedTopics(this._parsedTopics, this._providerResult.topics);
-    const bobjectTopics = getSanitizedTopics(this._bobjectTopics, this._providerResult.topics);
-    if (parsedTopics.length === 0 && bobjectTopics.length === 0) {
-      return { parsedMessages: [], bobjects: [] };
+    if (parsedTopics.length === 0) {
+      return { parsedMessages: [] };
     }
     start = clampTime(start, this._providerResult.start, this._providerResult.end);
     end = clampTime(end, this._providerResult.start, this._providerResult.end);
     const messages = await this._provider.getMessages(start, end, {
       parsedMessages: parsedTopics,
-      bobjects: bobjectTopics,
     });
-    const { parsedMessages, rosBinaryMessages, bobjects } = messages;
-    if (rosBinaryMessages?.length || bobjects == undefined || parsedMessages == undefined) {
+    const { parsedMessages, rosBinaryMessages } = messages;
+    if (rosBinaryMessages?.length || parsedMessages == undefined) {
       const messageTypes = Object.keys(messages)
         .filter((kind) => (messages as any)[kind]?.length)
         .join(",");
@@ -184,14 +176,10 @@ export default class AutomatedRunPlayer implements Player {
           message: message.message,
         };
       });
-    return { parsedMessages: filterMessages(parsedMessages), bobjects: filterMessages(bobjects) };
+    return { parsedMessages: filterMessages(parsedMessages) };
   }
 
-  _emitState(
-    messages: readonly Message[],
-    bobjects: readonly BobjectMessage[],
-    currentTime: Time,
-  ): Promise<void> {
+  _emitState(messages: readonly Message[], currentTime: Time): Promise<void> {
     return this._emitStateQueue.add(async () => {
       if (!this._listener) {
         return;
@@ -211,7 +199,6 @@ export default class AutomatedRunPlayer implements Player {
         playerId: this._id,
         activeData: {
           messages,
-          bobjects,
           totalBytesReceived: this._receivedBytes,
           currentTime,
           startTime: initializationResult.start,
@@ -235,12 +222,7 @@ export default class AutomatedRunPlayer implements Player {
   }
 
   setSubscriptions(subscriptions: SubscribePayload[]): void {
-    const [bobjectSubscriptions, parsedSubscriptions] = partition(
-      subscriptions,
-      ({ format }) => format === "bobjects",
-    );
-    this._bobjectTopics = new Set(bobjectSubscriptions.map(({ topic }) => topic));
-    this._parsedTopics = new Set(parsedSubscriptions.map(({ topic }) => topic));
+    this._parsedTopics = new Set(subscriptions.map(({ topic }) => topic));
 
     // Wait with running until we've subscribed to a bunch of topics.
     if (this._initializeTimeout) {
@@ -295,11 +277,11 @@ export default class AutomatedRunPlayer implements Player {
     }
 
     // Call _getMessages to start data loading and rendering for the first frame.
-    const { parsedMessages, bobjects } = await this._getMessages(
+    const { parsedMessages } = await this._getMessages(
       this._providerResult.start,
       this._providerResult.start,
     );
-    await this._emitState(parsedMessages, bobjects, this._providerResult.start);
+    await this._emitState(parsedMessages, this._providerResult.start);
     if (!this._startCalled) {
       this._client.markPreloadStart();
     }
@@ -311,7 +293,7 @@ export default class AutomatedRunPlayer implements Player {
   async _onUpdateProgress() {
     if (this._client.shouldLoadDataBeforePlaying && this._providerResult != undefined) {
       // Update the view and do preloading calculations. Not necessary if we're already playing.
-      this._emitState([], [], this._providerResult.start);
+      this._emitState([], this._providerResult.start);
     }
     this._maybeStartPlayback();
   }
@@ -348,7 +330,7 @@ export default class AutomatedRunPlayer implements Player {
     this._isPlaying = true;
     this._client.markPreloadEnd();
     logger.info("AutomatedRunPlayer._run()");
-    await this._emitState([], [], this._providerResult.start);
+    await this._emitState([], this._providerResult.start);
 
     let currentTime = this._providerResult.start;
     const workerIndex = this._client.workerIndex ?? 0;
@@ -375,11 +357,11 @@ export default class AutomatedRunPlayer implements Player {
       const end = TimeUtil.add(currentTime, { sec: 0, nsec: nsFrameTimePerWorker });
 
       this._client.markTotalFrameStart();
-      const { parsedMessages, bobjects } = await this._getMessages(currentTime, end);
+      const { parsedMessages } = await this._getMessages(currentTime, end);
       this._client.markFrameRenderStart();
 
       // Wait for the frame render to finish.
-      await this._emitState(parsedMessages, bobjects, end);
+      await this._emitState(parsedMessages, end);
 
       this._client.markTotalFrameEnd();
       const frameRenderDurationMs = this._client.markFrameRenderEnd();

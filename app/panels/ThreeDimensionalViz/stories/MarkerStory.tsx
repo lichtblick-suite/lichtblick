@@ -47,7 +47,7 @@ const fixtureData: FixtureExampleData = {
 Object.keys(markerProps).forEach((markerType, idx) => {
   const markerProp = (markerProps as any)[markerType];
   const markers = generateMarkers(markerProp, idx, markerType);
-  fixtureData.frame["/viz_markers"]?.[0]?.message.markers.push(...markers);
+  (fixtureData.frame["/viz_markers"]?.[0]?.message as any).markers.push(...markers);
 });
 
 export function MarkerStory(

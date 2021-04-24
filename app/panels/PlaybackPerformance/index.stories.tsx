@@ -20,7 +20,6 @@ import { UnconnectedPlaybackPerformance, UnconnectedPlaybackPerformanceProps } f
 
 const defaultActiveData: PlayerStateActiveData = {
   messages: [],
-  bobjects: [],
   startTime: { sec: 0, nsec: 0 },
   currentTime: { sec: 10, nsec: 0 },
   endTime: { sec: 20, nsec: 0 },

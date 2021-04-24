@@ -128,7 +128,6 @@ export type PlayerStateActiveData = {
   // this state. If there is a discontinuity in messages, `lastSeekTime` should be different than
   // the previous state. Panels collect these messages using the `PanelAPI`.
   messages: readonly Message[];
-  bobjects: readonly BobjectMessage[];
   totalBytesReceived: number; // always-increasing
 
   // The current playback position, which will be shown in the playback bar. This time should be
@@ -215,17 +214,13 @@ export type Topic = {
   numMessages?: number;
 };
 
-// A ROS-like message.
+// A message event frames message data with the topic and receive time
 export type TypedMessage<T> = Readonly<{
   topic: string;
   receiveTime: Time;
-
-  // The actual message format. This is currently not very tightly defined, but it's typically
-  // JSON-serializable, with the exception of typed arrays
-  // (see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Typed_arrays).
-  message: Readonly<T>;
+  message: T;
 }>;
-export type Message = TypedMessage<any>;
+export type Message = TypedMessage<unknown>;
 
 type RosSingularField = number | string | boolean | RosObject; // No time -- consider it a message.
 export type RosValue =
@@ -236,27 +231,14 @@ export type RosValue =
   | undefined
   // eslint-disable-next-line no-restricted-syntax
   | null;
+
 export type RosObject = Readonly<{
   [property: string]: RosValue;
 }>;
 
-// Keeping 'Bobject' opaque here ensures that we're not mixing and matching
-// parsed messages with Bobjects.
-export type Bobject = any;
-
-// Split from `TypedMessage` because Readonly<> disagrees with the opaque Bobject type and mixed.
-export type OpaqueMessage<T> = Readonly<{
-  topic: string;
-  receiveTime: Time;
-  message: T;
-}>;
-export type BobjectMessage = OpaqueMessage<Bobject>;
-export type ReflectiveMessage = OpaqueMessage<unknown>;
-export const cast = <T>(message: Readonly<RosObject> | Bobject | unknown): T => message as T;
-
-// Contains different kinds of progress indications, mostly used in the playback bar.
+// Contains different kinds of progress indications
 export type Progress = Readonly<{
-  // Used to show progress bar. Ranges are fractions, e.g. `{ start: 0, end: 0.5 }`.
+  // Indicate which ranges are loaded
   fullyLoadedFractionRanges?: Range[];
 
   // Time ranges in nanoseconds since bag start per topic. Used by
@@ -268,15 +250,12 @@ export type Progress = Readonly<{
 
   // A raw view into the cached binary data stored by the MemoryCacheDataProvider. Only present when
   // using the RandomAccessPlayer.
-  messageCache?: BlockCache;
+  readonly messageCache?: BlockCache;
 }>;
 
-// TODO(JP): Deprecated; just inline this type wherever needed.
 export type Frame = {
   [topic: string]: Message[];
 };
-
-export type MessageFormat = "parsedMessages" | "bobjects";
 
 // Represents a subscription to a single topic, for use in `setSubscriptions`.
 // TODO(JP): Pull this into two types, one for the Player (which does not care about the
@@ -301,7 +280,6 @@ export type SubscribePayload = {
   // possible. Note: If there are other subscriptions without this flag set, the messages may still
   // be delivered to the fallback subscriber.
   preloadingFallback?: boolean;
-  format: MessageFormat;
 };
 
 // Represents a single topic publisher, for use in `setPublishers`.

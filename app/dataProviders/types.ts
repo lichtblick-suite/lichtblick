@@ -14,10 +14,8 @@
 import { Time } from "rosbag";
 
 import {
-  BobjectMessage,
   Progress,
   Topic,
-  Message,
   MessageDefinitionsByTopic,
   ParsedMessageDefinitionsByTopic,
   TypedMessage,
@@ -58,13 +56,11 @@ import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 export type GetMessagesTopics = Readonly<{
   parsedMessages?: readonly string[];
   rosBinaryMessages?: readonly string[];
-  bobjects?: readonly string[];
 }>;
 
 export type GetMessagesResult = Readonly<{
-  parsedMessages?: readonly Message[];
+  parsedMessages?: readonly TypedMessage<unknown>[];
   rosBinaryMessages?: readonly TypedMessage<ArrayBuffer>[];
-  bobjects?: readonly BobjectMessage[];
 }>;
 
 export type ParsedMessageDefinitions = Readonly<{
@@ -109,7 +105,7 @@ export interface DataProvider {
 }
 
 export interface MessageReader {
-  readMessage<T>(buffer: Uint8Array): T;
+  readMessage<T>(buffer: Readonly<Uint8Array>): T;
 }
 
 export interface DataProviderConstructor {
@@ -141,12 +137,12 @@ export type InitializationResult = {
 
 export type ExtensionPoint = {
   // Report some sort of progress, e.g. of caching or downloading.
-  progressCallback: (arg0: Progress) => void;
+  progressCallback: (progress: Progress) => void;
 
   // Report some sort of metadata to the `Player`, see below for different kinds of metadata.
   // TODO(JP): this is a bit of an odd one out. Maybe we should unify this with the
   // `progressCallback` and have one type of "status" object?
-  reportMetadataCallback: (arg0: DataProviderMetadata) => void;
+  reportMetadataCallback: (metadata: DataProviderMetadata) => void;
 };
 
 export type InitializationPerformanceMetadata = Readonly<{

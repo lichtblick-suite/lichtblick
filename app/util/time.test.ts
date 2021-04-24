@@ -11,10 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { cast } from "@foxglove-studio/app/players/types";
-import { BinaryTime } from "@foxglove-studio/app/types/BinaryMessages";
-import { deepParse, wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
-
 import * as time from "./time";
 
 describe("time.toDate & time.fromDate", () => {
@@ -241,43 +237,25 @@ describe("time.getTimestampForMessage", () => {
 
     expect(
       time.getTimestampForMessage(
-        { ...messageBase, message: { header: { stamp: { sec: 123, nsec: 456 } } } },
+        {
+          ...messageBase,
+          message: { header: { stamp: { sec: 123, nsec: 456 }, seq: 0, frame_id: "" } },
+        },
         "headerStamp",
       ),
     ).toEqual({ sec: 123, nsec: 456 });
     expect(
       time.getTimestampForMessage(
-        { ...messageBase, message: { header: { stamp: { sec: 0, nsec: 0 } } } },
+        {
+          ...messageBase,
+          message: { header: { stamp: { sec: 0, nsec: 0 }, seq: 0, frame_id: "" } },
+        },
         "headerStamp",
       ),
     ).toEqual({ sec: 0, nsec: 0 });
-    expect(
-      time.getTimestampForMessage(
-        { ...messageBase, message: { header: { stamp: { sec: 123 } } } },
-        "headerStamp",
-      ),
-    ).toEqual(undefined);
-    expect(
-      time.getTimestampForMessage({ ...messageBase, message: { header: {} } }, "headerStamp"),
-    ).toEqual(undefined);
-  });
-});
-
-describe("time.compareBinaryTimes", () => {
-  it("properly orders a list of times", () => {
-    const times = [
-      { sec: 1, nsec: 1 },
-      { sec: 0, nsec: 0 },
-      { sec: 1, nsec: 0 },
-      { sec: 0, nsec: 1 },
-    ];
-    const binaryTimes = times.map((t) => cast<BinaryTime>(wrapJsObject({}, "time", t)));
-    expect(binaryTimes.sort(time.compareBinaryTimes).map(deepParse)).toEqual([
-      { sec: 0, nsec: 0 },
-      { sec: 0, nsec: 1 },
-      { sec: 1, nsec: 0 },
-      { sec: 1, nsec: 1 },
-    ]);
+    expect(time.getTimestampForMessage({ ...messageBase, message: {} }, "headerStamp")).toEqual(
+      undefined,
+    );
   });
 });
 

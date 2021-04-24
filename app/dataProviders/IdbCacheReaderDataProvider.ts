@@ -111,14 +111,14 @@ export default class IdbCacheReaderDataProvider implements DataProvider {
     if (!isRangeCoveredByRanges(range, deeplyIntersectedTopics(topics, this._rangesByTopic))) {
       // We use the child's `getMessages` promise to signal that the data is available in the database,
       // but we don't expect it to return actual messages.
-      const { parsedMessages, rosBinaryMessages, bobjects } = await this._provider.getMessages(
+      const { parsedMessages, rosBinaryMessages } = await this._provider.getMessages(
         startTime,
         endTime,
         {
           rosBinaryMessages: topics,
         },
       );
-      if (parsedMessages?.length || rosBinaryMessages?.length || bobjects?.length) {
+      if (parsedMessages?.length || rosBinaryMessages?.length) {
         throw new Error(
           "IdbCacheReaderDataProvider should not be receiving messages from child; be sure to use a IdbCacheWriterDataProvider below",
         );
@@ -153,7 +153,6 @@ export default class IdbCacheReaderDataProvider implements DataProvider {
     return {
       rosBinaryMessages: (await Promise.all(messagePromises)).map(({ message }) => message),
       parsedMessages: undefined,
-      bobjects: undefined,
     };
   }
 

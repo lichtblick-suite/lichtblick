@@ -57,7 +57,6 @@ import {
   OverlayIconMarker,
   ColorMarker,
 } from "@foxglove-studio/app/types/Messages";
-import { deepParse, isBobject } from "@foxglove-studio/app/util/binaryObjects";
 import { ReglColor } from "@foxglove-studio/app/util/colorUtils";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
@@ -308,7 +307,7 @@ export default function WorldMarkers({
             return ReactNull; // Don't render anything that's too far outside of the canvas
           }
           const originalMsg = item.interactionData?.originalMessage || {};
-          const parsedMsg = isBobject(originalMsg) ? deepParse(originalMsg) : originalMsg;
+          const parsedMsg = originalMsg;
 
           const metadata = parsedMsg?.metadata;
           if (!metadata) {

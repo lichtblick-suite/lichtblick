@@ -65,7 +65,7 @@ export default class RpcDataProvider implements DataProvider {
   }
 
   async getMessages(start: Time, end: Time, topics: GetMessagesTopics): Promise<GetMessagesResult> {
-    if (topics.bobjects || topics.parsedMessages) {
+    if (topics.parsedMessages) {
       throw new Error("RpcDataProvider only supports rosBinaryMessages");
     }
     const rpcRes = await this._rpc.send("getMessages", {
@@ -75,7 +75,6 @@ export default class RpcDataProvider implements DataProvider {
     });
     return {
       rosBinaryMessages: (rpcRes as any).messages,
-      bobjects: undefined,
       parsedMessages: undefined,
     };
   }

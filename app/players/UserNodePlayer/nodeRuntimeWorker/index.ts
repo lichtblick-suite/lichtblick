@@ -15,7 +15,6 @@ import {
   processMessage,
 } from "@foxglove-studio/app/players/UserNodePlayer/nodeRuntimeWorker/registry";
 import Rpc from "@foxglove-studio/app/util/Rpc";
-import { BobjectRpcReceiver } from "@foxglove-studio/app/util/binaryObjects/BobjectRpc";
 import { enforceFetchIsBlocked, inSharedWorker } from "@foxglove-studio/app/util/workers";
 
 let unsentErrors: string[] = [];
@@ -52,10 +51,7 @@ if (!inSharedWorker()) {
 
   // Just check fetch is blocked on registration, don't slow down message processing.
   rpc.receive("registerNode", enforceFetchIsBlocked(registerNode));
-  new BobjectRpcReceiver(rpc).receive(
-    "processMessage",
-    "parsed",
-    async (message, globalVariables) => processMessage({ message, globalVariables }),
-  );
+  rpc.receive("processMessage", processMessage);
+
   port.start();
 };

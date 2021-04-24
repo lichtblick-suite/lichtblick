@@ -34,7 +34,7 @@ function lineStrip({
     scale: { x: 1.0, y: 1.0, z: 1.0 },
     points,
     ...(closed !== undefined ? { closed } : {}),
-    header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 } },
+    header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 }, seq: 0 },
     action: 0,
     pose: { position: { x: 0, y: 0, z: 0 }, orientation: { w: 1, x: 1, y: 1, z: 1 } },
     ...(color ? { color } : {}),
@@ -48,7 +48,7 @@ function lineList({ points, color }: { points: Point[]; color?: Color }): LineLi
     ns: "bar",
     scale: { x: 1.0, y: 1.0, z: 1.0 },
     points,
-    header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 } },
+    header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 }, seq: 0 },
     action: 0,
     pose: { position: { x: 0, y: 0, z: 0 }, orientation: { w: 1, x: 1, y: 1, z: 1 } },
     ...(color ? { color } : {}),
@@ -76,11 +76,11 @@ describe("groupLineStripsIntoInstancedLineLists", () => {
       {
         action: 0,
         colors: [COLORS.RED, COLORS.RED],
-        header: { frame_id: "quux", stamp: { nsec: 2, sec: 1 } },
+        header: { frame_id: "quux", stamp: { nsec: 2, sec: 1 }, seq: 0 },
         id: "ns:bar_type:4_scalex:1_scaley:1_scalez:1",
         metadataByIndex: [
           {
-            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 } },
+            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 }, seq: 0 },
             action: 0,
             id: "foo",
             ns: "bar",
@@ -124,11 +124,11 @@ describe("groupLineStripsIntoInstancedLineLists", () => {
       {
         action: 0,
         colors: [COLORS.RED, COLORS.RED, COLORS.RED],
-        header: { frame_id: "quux", stamp: { nsec: 2, sec: 1 } },
+        header: { frame_id: "quux", stamp: { nsec: 2, sec: 1 }, seq: 0 },
         id: "ns:bar_type:4_scalex:1_scaley:1_scalez:1",
         metadataByIndex: [
           {
-            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 } },
+            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 }, seq: 0 },
             action: 0,
             id: "foo",
             ns: "bar",
@@ -143,7 +143,7 @@ describe("groupLineStripsIntoInstancedLineLists", () => {
             pose: { position: { x: 0, y: 0, z: 0 }, orientation: { w: 1, x: 1, y: 1, z: 1 } },
           },
           {
-            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 } },
+            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 }, seq: 0 },
             action: 0,
             id: "foo",
             ns: "bar",
@@ -273,11 +273,11 @@ describe("groupLineStripsIntoInstancedLineLists", () => {
       {
         action: 0,
         colors: [COLORS.WHITE, COLORS.WHITE],
-        header: { frame_id: "quux", stamp: { nsec: 2, sec: 1 } },
+        header: { frame_id: "quux", stamp: { nsec: 2, sec: 1 }, seq: 0 },
         id: "ns:bar_type:4_scalex:1_scaley:1_scalez:1",
         metadataByIndex: [
           {
-            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 } },
+            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 }, seq: 0 },
             action: 0,
             id: "foo",
             ns: "bar",
@@ -317,7 +317,7 @@ describe("groupLineStripsIntoInstancedLineLists", () => {
     ];
     expect(groupLinesIntoInstancedLineLists(markers)).toEqual([
       {
-        header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 } },
+        header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 }, seq: 0 },
         action: 0,
         ns: "bar",
         scale: { x: 1, y: 1, z: 1 },
@@ -337,7 +337,7 @@ describe("groupLineStripsIntoInstancedLineLists", () => {
               { x: 0, y: 0, z: 0 },
               { x: 1, y: 0, z: 0 },
             ],
-            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 } },
+            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 }, seq: 0 },
             action: 0,
             pose: { position: { x: 0, y: 0, z: 0 }, orientation: { w: 1, x: 1, y: 1, z: 1 } },
             color: COLORS.RED,
@@ -351,7 +351,7 @@ describe("groupLineStripsIntoInstancedLineLists", () => {
               { x: 0, y: 0, z: 0 },
               { x: 1, y: 0, z: 0 },
             ],
-            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 } },
+            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 }, seq: 0 },
             action: 0,
             pose: { position: { x: 0, y: 0, z: 0 }, orientation: { w: 1, x: 1, y: 1, z: 1 } },
             color: COLORS.RED,
@@ -385,7 +385,7 @@ describe("groupLineStripsIntoInstancedLineLists", () => {
     ];
     expect(groupLinesIntoInstancedLineLists(markers)).toEqual([
       {
-        header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 } },
+        header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 }, seq: 0 },
         action: 0,
         ns: "bar",
         scale: { x: 1, y: 1, z: 1 },
@@ -406,7 +406,7 @@ describe("groupLineStripsIntoInstancedLineLists", () => {
               { x: 1, y: 0, z: 0 },
             ],
             closed: false,
-            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 } },
+            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 }, seq: 0 },
             action: 0,
             pose: { position: { x: 0, y: 0, z: 0 }, orientation: { w: 1, x: 1, y: 1, z: 1 } },
             color: COLORS.RED,
@@ -418,7 +418,7 @@ describe("groupLineStripsIntoInstancedLineLists", () => {
         primitive: "line strip",
       },
       {
-        header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 } },
+        header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 }, seq: 0 },
         action: 0,
         ns: "bar",
         scale: { x: 1, y: 1, z: 1 },
@@ -438,7 +438,7 @@ describe("groupLineStripsIntoInstancedLineLists", () => {
               { x: 0, y: 0, z: 0 },
               { x: 1, y: 0, z: 0 },
             ],
-            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 } },
+            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 }, seq: 0 },
             action: 0,
             pose: { position: { x: 0, y: 0, z: 0 }, orientation: { w: 1, x: 1, y: 1, z: 1 } },
             color: COLORS.RED,
@@ -452,7 +452,7 @@ describe("groupLineStripsIntoInstancedLineLists", () => {
               { x: 0, y: 0, z: 0 },
               { x: 1, y: 0, z: 0 },
             ],
-            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 } },
+            header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 }, seq: 0 },
             action: 0,
             pose: { position: { x: 0, y: 0, z: 0 }, orientation: { w: 1, x: 1, y: 1, z: 1 } },
             color: COLORS.RED,

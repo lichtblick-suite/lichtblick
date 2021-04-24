@@ -28,7 +28,6 @@ import {
   Topic,
 } from "@foxglove-studio/app/players/types";
 import StoreSetup from "@foxglove-studio/app/stories/StoreSetup";
-import { wrapMessages } from "@foxglove-studio/app/test/datatypes";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { objectValues } from "@foxglove-studio/app/util";
 import naturalSort from "@foxglove-studio/app/util/naturalSort";
@@ -46,7 +45,6 @@ export default function MockMessagePipelineProvider(props: {
   topics?: Topic[];
   datatypes?: RosDatatypes;
   messages?: Message[];
-  bobjects?: Message[];
   publish?: (request: PublishPayload) => void;
   setPublishers?: (arg0: string, arg1: AdvertisePayload[]) => void;
   setSubscriptions?: (arg0: string, arg1: SubscribePayload[]) => void;
@@ -112,7 +110,6 @@ export default function MockMessagePipelineProvider(props: {
           ? undefined
           : {
               messages: props.messages ?? [],
-              bobjects: props.bobjects ?? wrapMessages(props.messages ?? []),
               topics: props.topics ?? [],
               datatypes: props.datatypes ?? NO_DATATYPES,
               startTime: props.startTime ?? startTime.current ?? { sec: 100, nsec: 0 },
@@ -130,7 +127,6 @@ export default function MockMessagePipelineProvider(props: {
       props.progress,
       props.noActiveData,
       props.messages,
-      props.bobjects,
       props.topics,
       props.datatypes,
       props.startTime,

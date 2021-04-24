@@ -11,12 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { groupBy } from "lodash";
 import { RosMsgField } from "rosbag";
 
-import { Frame, Message, Topic, TypedMessage } from "@foxglove-studio/app/players/types";
+import { Frame, Topic } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 
 type InferredObject = {
   [field: string]: FieldType;
@@ -161,6 +159,7 @@ export const createRosDatatypesFromFrame = (
   return ret;
 };
 
+/*
 export const wrapMessages = <T>(messages: readonly Message[]): TypedMessage<T>[] => {
   const frame = groupBy(messages, "topic");
   const topics = Object.keys(frame).map((topic) => ({ name: topic, datatype: topic }));
@@ -183,3 +182,5 @@ export const wrapObjects = <T>(objects: readonly any[]): T[] => {
   }));
   return wrapMessages<T>(messages).map(({ message }) => message);
 };
+
+*/

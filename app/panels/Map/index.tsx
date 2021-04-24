@@ -5,6 +5,7 @@
 import { Map as LeafMap } from "leaflet";
 import { useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
+import { useThrottle } from "react-use";
 
 import {
   useBlocksByTopic,
@@ -18,7 +19,7 @@ import Logger from "@foxglove/log";
 
 import FilteredPointMarkers from "./FilteredPointMarkers";
 import helpContent from "./index.help.md";
-import { BinaryNavSatFixMsg, NavSatFixMsg, Point } from "./types";
+import { NavSatFixMsg, Point } from "./types";
 
 import "leaflet/dist/leaflet.css";
 
@@ -59,7 +60,10 @@ function MapPanel(props: Props) {
 
   const { blocks } = useBlocksByTopic(eligibleTopics);
 
-  const navMessages = useMessagesByTopic<NavSatFixMsg>({
+  // during preloading, data comes in quickly - we don't need to render on _every_ data change
+  const throttledBlocks = useThrottle(blocks, 200);
+
+  const navMessages = useMessagesByTopic({
     topics: eligibleTopics,
     historySize: 1,
   });
@@ -75,8 +79,8 @@ function MapPanel(props: Props) {
       for (const messageBlock of blocks) {
         for (const payloads of Object.values(messageBlock)) {
           for (const payload of payloads) {
-            const lat = ((payload.message as unknown) as BinaryNavSatFixMsg).latitude();
-            const lon = ((payload.message as unknown) as BinaryNavSatFixMsg).longitude();
+            const lat = (payload.message as NavSatFixMsg).latitude;
+            const lon = (payload.message as NavSatFixMsg).longitude;
             const point: Point = {
               lat,
               lon,
@@ -102,8 +106,8 @@ function MapPanel(props: Props) {
       for (const payloads of Object.values(navMessages)) {
         for (const payload of payloads) {
           const point: Point = {
-            lat: payload.message.latitude,
-            lon: payload.message.longitude,
+            lat: (payload.message as NavSatFixMsg).latitude,
+            lon: (payload.message as NavSatFixMsg).longitude,
           };
 
           return point;
@@ -159,7 +163,7 @@ function MapPanel(props: Props) {
           maxNativeZoom={18}
           maxZoom={24}
         />
-        <FilteredPointMarkers messages={navMessages} blocks={blocks} />
+        <FilteredPointMarkers messages={navMessages} blocks={throttledBlocks} />
       </MapContainer>
     </>
   );

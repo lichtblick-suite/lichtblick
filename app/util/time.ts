@@ -14,9 +14,8 @@
 // No time functions that require `moment` should live in this file.
 import { Time, TimeUtil } from "rosbag";
 
-import { cast, Bobject, Message } from "@foxglove-studio/app/players/types";
-import { BinaryTime } from "@foxglove-studio/app/types/BinaryMessages";
-import { deepParse } from "@foxglove-studio/app/util/binaryObjects";
+import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { StampedMessage } from "@foxglove-studio/app/types/Messages";
 import {
   SEEK_TO_FRACTION_QUERY_KEY,
   SEEK_TO_RELATIVE_MS_QUERY_KEY,
@@ -314,43 +313,18 @@ export function getSeekTimeFromSpec(spec: SeekToTimeSpec, start: Time, end: Time
 }
 
 export function getTimestampForMessage(
-  message: Message,
+  messageEvent: TypedMessage<Partial<StampedMessage>>,
   timestampMethod?: TimestampMethod,
 ): Time | undefined {
   if (timestampMethod === "headerStamp") {
-    if (
-      message.message.header?.stamp?.sec != undefined &&
-      message.message.header?.stamp?.nsec != undefined
-    ) {
-      return message.message.header.stamp;
+    const stamp = messageEvent.message.header?.stamp;
+    if (stamp && "sec" in stamp && "nsec" in stamp) {
+      return stamp;
     }
     return undefined;
   }
-  return message.receiveTime;
+  return messageEvent.receiveTime;
 }
-
-export const compareBinaryTimes = (a: BinaryTime, b: BinaryTime): number => {
-  const secDiff = a.sec() - b.sec();
-  return secDiff !== 0 ? secDiff : a.nsec() - b.nsec();
-};
-
-// Descriptive -- not a real type
-type MaybeStampedBobject = Readonly<{
-  header?: () => Readonly<{ stamp?: () => unknown }>;
-}>;
-
-export const maybeGetBobjectHeaderStamp = (message: Bobject | undefined): Time | undefined => {
-  if (message == undefined) {
-    return undefined;
-  }
-  const maybeStamped = cast<MaybeStampedBobject>(message);
-  const header = maybeStamped.header?.();
-  const stamp = header?.stamp && deepParse(header.stamp());
-  if (isTime(stamp)) {
-    return stamp;
-  }
-  return undefined;
-};
 
 export const getRosTimeFromString = (text: string): Time | undefined => {
   if (text.length === 0 || isNaN(+text)) {

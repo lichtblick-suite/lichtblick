@@ -90,14 +90,11 @@ describe("useMessagesByPath", () => {
       [
         expect.any(String),
         [
-          { topic: "/some/topic", format: "parsedMessages", preloadingFallback: false },
-          { topic: "/some/other/topic", format: "parsedMessages", preloadingFallback: false },
+          { topic: "/some/topic", preloadingFallback: false },
+          { topic: "/some/other/topic", preloadingFallback: false },
         ],
       ],
-      [
-        expect.any(String),
-        [{ topic: "/some/topic", format: "parsedMessages", preloadingFallback: false }],
-      ],
+      [expect.any(String), [{ topic: "/some/topic", preloadingFallback: false }]],
       [expect.any(String), []],
     ]);
   });
@@ -119,15 +116,12 @@ describe("useMessagesByPath", () => {
     unmount();
 
     expect(setSubscriptions.mock.calls).toEqual([
-      [
-        expect.any(String),
-        [{ topic: "/some/topic", format: "parsedMessages", preloadingFallback: false }],
-      ],
+      [expect.any(String), [{ topic: "/some/topic", preloadingFallback: false }]],
       [
         expect.any(String),
         [
-          { topic: "/some/topic", format: "parsedMessages", preloadingFallback: false },
-          { topic: "/some/other/topic", format: "parsedMessages", preloadingFallback: false },
+          { topic: "/some/topic", preloadingFallback: false },
+          { topic: "/some/other/topic", preloadingFallback: false },
         ],
       ],
       [expect.any(String), []],

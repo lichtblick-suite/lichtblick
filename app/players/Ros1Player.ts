@@ -2,14 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { isEqual, sortBy, partition } from "lodash";
+import { isEqual, sortBy } from "lodash";
 import { RosMsgDefinition, Time } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
 import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import {
   AdvertisePayload,
-  BobjectMessage,
   Message,
   ParameterValue,
   Player,
@@ -22,7 +21,6 @@ import {
   Topic,
 } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
 import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
@@ -63,11 +61,8 @@ export default class Ros1Player implements Player {
   private _clockReceived: Time = { sec: 0, nsec: 0 }; // The local time when `_clockTime` was last received
   private _requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
   private _parsedMessages: Message[] = []; // Queue of messages that we'll send in next _emitState() call.
-  private _bobjects: BobjectMessage[] = []; // Queue of bobjects that we'll send in next _emitState() call.
   private _messageOrder: TimestampMethod = "receiveTime";
   private _requestTopicsTimeout?: ReturnType<typeof setTimeout>; // setTimeout() handle for _requestTopics().
-  private _bobjectTopics: Set<string> = new Set();
-  private _parsedTopics: Set<string> = new Set();
   private _hasReceivedMessage = false;
   private _metricsCollector: PlayerMetricsCollectorInterface;
   private _sentTopicsErrorNotification = false;
@@ -199,8 +194,6 @@ export default class Ros1Player implements Player {
     const currentTime = this._getCurrentTime();
     const messages = this._parsedMessages;
     this._parsedMessages = [];
-    const bobjects = this._bobjects;
-    this._bobjects = [];
     return this._listener({
       presence: PlayerPresence.PRESENT,
       progress: {},
@@ -209,7 +202,6 @@ export default class Ros1Player implements Player {
 
       activeData: {
         messages,
-        bobjects,
         totalBytesReceived: this._rosNode?.receivedBytes() ?? 0,
         messageOrder: this._messageOrder,
         startTime: start,
@@ -256,13 +248,6 @@ export default class Ros1Player implements Player {
     // Subscribe to additional topics used by Ros1Player itself
     this._addInternalSubscriptions(subscriptions);
 
-    const [bobjectSubscriptions, parsedSubscriptions] = partition(
-      subscriptions,
-      ({ format }) => format === "bobjects",
-    );
-    this._bobjectTopics = new Set(bobjectSubscriptions.map(({ topic }) => topic));
-    this._parsedTopics = new Set(parsedSubscriptions.map(({ topic }) => topic));
-
     // See what topics we actually can subscribe to.
     const availableTopicsByTopicName = getTopicsByTopicName(this._providerTopics ?? []);
     const topicNames = subscriptions
@@ -298,23 +283,13 @@ export default class Ros1Player implements Player {
           this._metricsCollector.recordTimeToFirstMsgs();
         }
 
-        if (this._bobjectTopics.has(topicName)) {
-          this._bobjects.push({
-            topic: topicName,
-            receiveTime,
-            message: wrapJsObject(this._providerDatatypes, datatype, message),
-          });
-        }
-
-        if (this._parsedTopics.has(topicName)) {
-          const msg: Message = {
-            topic: topicName,
-            receiveTime,
-            message: message as never,
-          };
-          this._parsedMessages.push(msg);
-          this._handleInternalMessage(msg);
-        }
+        const msg: Message = {
+          topic: topicName,
+          receiveTime,
+          message: message,
+        };
+        this._parsedMessages.push(msg);
+        this._handleInternalMessage(msg);
 
         this._emitState();
       });
@@ -408,15 +383,15 @@ export default class Ros1Player implements Player {
       subscriptions.unshift({
         topic: "/clock",
         requester: { type: "other", name: "Ros1Player" },
-        format: "parsedMessages",
       });
     }
   }
 
-  private _handleInternalMessage(msg: BobjectMessage | Message): void {
-    if (msg.topic === "/clock" && !isNaN(msg.message.clock?.sec)) {
-      const time = msg.message.clock as Time;
-      const seconds = toSec(msg.message.clock);
+  private _handleInternalMessage(msg: Message): void {
+    const maybeClockMsg = msg.message as { clock?: Time };
+    if (msg.topic === "/clock" && maybeClockMsg.clock && !isNaN(maybeClockMsg.clock?.sec)) {
+      const time = maybeClockMsg.clock;
+      const seconds = toSec(maybeClockMsg.clock);
       if (isNaN(seconds)) {
         return;
       }

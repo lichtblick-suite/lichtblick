@@ -39,10 +39,10 @@ export default function useContextSelector<T, U>(
 
   useShouldNotChangeOften(selector, () =>
     console.warn(
-      "useContextSelector() selector is changing frequently. " +
-        "Changing the selector will not cause the current context to be re-processed, " +
-        "so you may have a bug if the selector depends on external state. " +
-        "Wrap your selector in a useCallback() to silence this warning.",
+      `useContextSelector() selector (${selector.toString()}) is changing frequently. 
+Changing the selector will not cause the current context to be re-processed, 
+so you may have a bug if the selector depends on external state. 
+Wrap your selector in a useCallback() to silence this warning.`,
     ),
   );
 

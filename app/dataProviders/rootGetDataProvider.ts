@@ -23,7 +23,6 @@ import MeasureDataProvider, {
 import MemoryCacheDataProvider from "@foxglove-studio/app/dataProviders/MemoryCacheDataProvider";
 import ParseMessagesDataProvider from "@foxglove-studio/app/dataProviders/ParseMessagesDataProvider";
 import RenameDataProvider from "@foxglove-studio/app/dataProviders/RenameDataProvider";
-import RewriteBinaryDataProvider from "@foxglove-studio/app/dataProviders/RewriteBinaryDataProvider";
 import WorkerDataProvider from "@foxglove-studio/app/dataProviders/WorkerDataProvider";
 import createGetDataProvider from "@foxglove-studio/app/dataProviders/createGetDataProvider";
 import { DataProviderDescriptor, DataProvider } from "@foxglove-studio/app/dataProviders/types";
@@ -38,7 +37,6 @@ const getDataProviderBase = createGetDataProvider({
   MemoryCacheDataProvider,
   ParseMessagesDataProvider,
   RenameDataProvider,
-  RewriteBinaryDataProvider,
   WorkerDataProvider,
 });
 

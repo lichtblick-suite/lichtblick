@@ -33,12 +33,27 @@ type Points = readonly Point[];
 export type Header = Readonly<{
   frame_id: string;
   stamp: Time;
-  // TODO(steel): Make seq required.
-  seq?: number;
+  seq: number;
 }>;
 
 export type StampedMessage = Readonly<{
   header: Header;
+}>;
+
+export type RosgraphMsgs$Log = Readonly<{
+  header: Header;
+  level: number;
+  name: string;
+  msg: string;
+  file: string;
+  function: string;
+  line: number;
+  topics: readonly string[];
+}>;
+
+export type GeometryMsgs$PolygonStamped = Readonly<{
+  header: Header;
+  polygon: Polygon;
 }>;
 
 type Duration = Time;
@@ -243,6 +258,11 @@ export type NavMsgs$OccupancyGrid = Readonly<{
   data: readonly number[];
 }>;
 
+export type NavMsgs$Path = Readonly<{
+  header: Header;
+  poses: PoseStamped[];
+}>;
+
 export type OccupancyGridMessage = Readonly<{
   name: string;
   type: 101;
@@ -300,8 +320,6 @@ export type Marker =
 
 export type MarkerArray = Readonly<{
   markers: readonly Marker[];
-  // TODO(steel): Fix this. MarkerArrays have no header, except when they sometimes do.
-  header?: Header;
 }>;
 
 type ChannelFloat = Readonly<{

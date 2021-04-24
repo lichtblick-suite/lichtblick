@@ -2203,15 +2203,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/rosmsg-bobject@workspace:packages/rosmsg-bobject":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/rosmsg-bobject@workspace:packages/rosmsg-bobject"
-  dependencies:
-    jest: 26.6.3
-    typescript: 4.2.2
-  languageName: unknown
-  linkType: soft
-
 "@foxglove/rosmsg-deser@workspace:packages/rosmsg-deser":
   version: 0.0.0-use.local
   resolution: "@foxglove/rosmsg-deser@workspace:packages/rosmsg-deser"

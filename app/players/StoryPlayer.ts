@@ -11,13 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { partition } from "lodash";
-
 import BagDataProvider from "@foxglove-studio/app/dataProviders/BagDataProvider";
 import CombinedDataProvider from "@foxglove-studio/app/dataProviders/CombinedDataProvider";
 import ParseMessagesDataProvider from "@foxglove-studio/app/dataProviders/ParseMessagesDataProvider";
 import RenameDataProvider from "@foxglove-studio/app/dataProviders/RenameDataProvider";
-import RewriteBinaryDataProvider from "@foxglove-studio/app/dataProviders/RewriteBinaryDataProvider";
 import {
   PlayerState,
   SubscribePayload,
@@ -42,7 +39,6 @@ const NOOP_PROVIDER = [{ name: "noop", args: {}, children: [] }];
 
 export default class StoryPlayer implements Player {
   _parsedSubscribedTopics: string[] = [];
-  _bobjectSubscribedTopics: string[] = [];
   _bags: string[] = [];
   constructor(bags: string[]) {
     this._bags = bags;
@@ -63,12 +59,7 @@ export default class StoryPlayer implements Player {
         const { bagDescriptor, prefix } = args;
         return new RenameDataProvider({ prefix }, NOOP_PROVIDER, () => {
           return new ParseMessagesDataProvider({}, NOOP_PROVIDER, () => {
-            return new RewriteBinaryDataProvider({}, NOOP_PROVIDER, () => {
-              return new BagDataProvider(
-                { bagPath: bagDescriptor, cacheSizeInBytes: Infinity },
-                [],
-              );
-            });
+            return new BagDataProvider({ bagPath: bagDescriptor, cacheSizeInBytes: Infinity }, []);
           });
         });
       });
@@ -82,8 +73,7 @@ export default class StoryPlayer implements Player {
           },
         })
         .then(async ({ topics, start, end, messageDefinitions }) => {
-          const { parsedMessages = [], bobjects = [] } = await provider.getMessages(start, end, {
-            bobjects: this._bobjectSubscribedTopics,
+          const { parsedMessages = [] } = await provider.getMessages(start, end, {
             parsedMessages: this._parsedSubscribedTopics,
           });
 
@@ -104,7 +94,6 @@ export default class StoryPlayer implements Player {
               startTime: start,
               endTime: end,
               messages: parsedMessages,
-              bobjects,
               messageOrder: "receiveTime",
               lastSeekTime: 0,
               speed: 1,
@@ -118,12 +107,7 @@ export default class StoryPlayer implements Player {
   }
 
   setSubscriptions(subscriptions: SubscribePayload[]): void {
-    const [bobjectSubscriptions, parsedSubscriptions] = partition(
-      subscriptions,
-      ({ format }) => format === "bobjects",
-    );
-    this._parsedSubscribedTopics = parsedSubscriptions.map(({ topic }) => topic);
-    this._bobjectSubscribedTopics = bobjectSubscriptions.map(({ topic }) => topic);
+    this._parsedSubscribedTopics = subscriptions.map(({ topic }) => topic);
   }
 
   close = noop;

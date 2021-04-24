@@ -27,7 +27,7 @@ export function makeDiagnosticMessage(
     topic: "/diagnostics",
     receiveTime: { sec: 2, nsec: 0 },
     message: {
-      header: { frame_id: "", stamp: { sec: 1, nsec: 500_000_000 } },
+      header: { frame_id: "", stamp: { sec: 1, nsec: 500_000_000 }, seq: 0 },
       status: messages.map((message) => ({ level, name, hardware_id, message, values })),
     },
   };

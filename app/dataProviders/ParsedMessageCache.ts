@@ -14,8 +14,7 @@
 import { sortBy } from "lodash";
 
 import { MessageReader } from "@foxglove-studio/app/dataProviders/types";
-import { Message } from "@foxglove-studio/app/players/types";
-import { deepParse, inaccurateByteSize, isBobject } from "@foxglove-studio/app/util/binaryObjects";
+import { Message, TypedMessage } from "@foxglove-studio/app/players/types";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import { toSec } from "@foxglove-studio/app/util/time";
@@ -25,23 +24,22 @@ import { toSec } from "@foxglove-studio/app/util/time";
 export const CACHE_SIZE_BYTES = 200e6;
 
 function readMessage(
-  message: Message,
+  messageEvent: TypedMessage<ArrayBuffer>,
   readersByTopic: Readonly<{
     [topic: string]: MessageReader;
   }>,
 ): Message | undefined {
-  if (isBobject(message.message)) {
-    return { ...message, message: deepParse(message.message) };
-  }
-  const reader = readersByTopic[message.topic];
+  const reader = readersByTopic[messageEvent.topic];
   if (!reader) {
-    throw new Error(`Could not find message reader for topic ${message.topic}`);
+    throw new Error(`Could not find message reader for topic ${messageEvent.topic}`);
   }
   try {
-    return { ...message, message: reader.readMessage(Buffer.from(message.message as any)) };
+    // builtin rosbag reader requires Buffer type
+    // when we switch tests to lazy message reader we can use Uint8Array
+    return { ...messageEvent, message: reader.readMessage(Buffer.from(messageEvent.message)) };
   } catch (error) {
     sendNotification(
-      `Error reading messages from ${message.topic}: ${error.message}`,
+      `Error reading messages from ${messageEvent.topic}: ${error.message}`,
       error,
       "user",
       "warn",
@@ -69,19 +67,19 @@ export default class ParsedMessageCache {
   _cacheSizeInBytes: number = 0;
 
   parseMessages(
-    messages: readonly Message[],
+    messageEvents: readonly TypedMessage<ArrayBuffer>[],
     readersByTopic: Readonly<{
       [topic: string]: MessageReader;
     }>,
   ): Message[] {
-    const outputMessages: Message[] = filterMap(messages, (message) => {
+    const outputMessages: Message[] = filterMap(messageEvents, (messageEvent) => {
       // Use strings like "123.4" as the cache keys.
-      const deciSecond = Math.trunc(toSec(message.receiveTime) * 10);
+      const deciSecond = Math.trunc(toSec(messageEvent.receiveTime) * 10);
 
       // Initialize the cache.
       const cache = (this._cachesByDeciSecond[deciSecond] = this._cachesByDeciSecond[
         deciSecond
-      ] || {
+      ] ?? {
         map: new WeakMap(),
         lastAccessIndex: 0,
         sizeInBytes: 0,
@@ -90,14 +88,12 @@ export default class ParsedMessageCache {
       // Update the access time.
       cache.lastAccessIndex = this._cacheAccessIndex++;
 
-      let outputMessage: Message | undefined = cache.map.get(message);
+      let outputMessage: Message | undefined = cache.map.get(messageEvent);
       if (!outputMessage) {
-        outputMessage = readMessage(message, readersByTopic);
+        outputMessage = readMessage(messageEvent, readersByTopic);
         if (outputMessage) {
-          cache.map.set(message, outputMessage);
-          const messageSize = isBobject(message.message)
-            ? inaccurateByteSize(message.message)
-            : (message.message.byteLength as number);
+          cache.map.set(messageEvent, outputMessage);
+          const messageSize = messageEvent.message.byteLength;
           cache.sizeInBytes += messageSize;
           this._cacheSizeInBytes += messageSize;
         }

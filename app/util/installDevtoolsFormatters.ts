@@ -16,12 +16,10 @@
 
 import seedrandom from "seedrandom";
 
-import { deepParse, isBobject, isArrayView, bobjectFieldNames } from "./binaryObjects";
 import { isTime } from "./time";
 
 type HtmlTemplate = unknown;
 type DevtoolFormatterConfig = {
-  bobjectFormatter: unknown;
   key: unknown;
 };
 
@@ -94,45 +92,7 @@ const timeFormatter: DevtoolFormatter = (() => {
   return formatter;
 })();
 
-const bobjectFormatter: DevtoolFormatter = {
-  header(obj, config) {
-    // If it's a nested object, use the object key as the header.
-    if (config?.bobjectFormatter) {
-      return ["div", {}, config.key];
-    }
-    // If it's not a bobject, use the default formatter.
-    if (!isBobject(obj)) {
-      return USE_DEFAULT_FORMATTER;
-    }
-    if (isArrayView(obj)) {
-      return [
-        "div",
-        {},
-        `ArrayView Bobject with length ${(obj as { length: () => number }).length()}`,
-      ];
-    }
-    return [
-      "div",
-      {},
-      ["span", {}, "Bobject with properties: "],
-      ["span", { style: "color: #7E7D7D" }, bobjectFieldNames(obj).join(", ")],
-    ];
-  },
-  hasBody() {
-    return true;
-  },
-  body(obj) {
-    const parsedBody = isBobject(obj) ? deepParse(obj) : obj;
-    return [
-      "div",
-      { style: "margin-left: 20px; color: darkblue;" },
-      `\n${JSON.stringify(parsedBody, undefined, 2)}`,
-    ];
-  },
-};
-
 export default function installDevtoolsFormatters() {
   window.devtoolsFormatters = window.devtoolsFormatters ?? [];
   window.devtoolsFormatters.push(timeFormatter);
-  window.devtoolsFormatters.push(bobjectFormatter);
 }

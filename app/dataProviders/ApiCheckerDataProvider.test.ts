@@ -13,6 +13,7 @@
 import ApiCheckerDataProvider from "@foxglove-studio/app/dataProviders/ApiCheckerDataProvider";
 import MemoryDataProvider from "@foxglove-studio/app/dataProviders/MemoryDataProvider";
 import { mockExtensionPoint } from "@foxglove-studio/app/dataProviders/mockExtensionPoint";
+import { TypedMessage } from "@foxglove-studio/app/players/types";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 function getProvider(isRoot: boolean = false) {
@@ -22,7 +23,6 @@ function getProvider(isRoot: boolean = false) {
         { topic: "/some_topic", receiveTime: { sec: 100, nsec: 0 }, message: 0 as any },
         { topic: "/some_topic", receiveTime: { sec: 105, nsec: 0 }, message: 1 as any },
       ],
-      bobjects: undefined,
       rosBinaryMessages: undefined,
     },
     topics: [
@@ -154,7 +154,6 @@ describe("ApiCheckerDataProvider", () => {
         { sec: 105, nsec: 0 },
         { parsedMessages: ["/some_topic"] },
       );
-      expect(result.bobjects).toBe(undefined);
       expect(result.rosBinaryMessages).toBe(undefined);
       expect(result.parsedMessages).toEqual([
         { message: 0, receiveTime: { nsec: 0, sec: 100 }, topic: "/some_topic" },
@@ -245,11 +244,10 @@ describe("ApiCheckerDataProvider", () => {
         const { provider, memoryDataProvider } = getProvider();
         await provider.initialize(mockExtensionPoint().extensionPoint);
 
-        let returnMessages: any[] = [];
+        let returnMessages: TypedMessage<unknown>[] = [];
         jest.spyOn(memoryDataProvider, "getMessages").mockImplementation(() => {
           return Promise.resolve({
             parsedMessages: returnMessages,
-            bobjects: undefined,
             rosBinaryMessages: undefined,
           });
         });

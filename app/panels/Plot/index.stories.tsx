@@ -15,9 +15,9 @@ import { storiesOf } from "@storybook/react";
 import { useCallback, useRef } from "react";
 import { parseMessageDefinition } from "rosbag";
 
+import { BlockCache } from "@foxglove-studio/app/dataProviders/MemoryCacheDataProvider";
 import Plot, { PlotConfig } from "@foxglove-studio/app/panels/Plot";
 import PanelSetup, { triggerWheel } from "@foxglove-studio/app/stories/PanelSetup";
-import { wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 import { fromSec } from "@foxglove-studio/app/util/time";
 
 const float64StampedDefinition = `std_msgs/Header header
@@ -213,32 +213,33 @@ const datatypes = {
   },
 };
 
-const getPreloadedMessage = (seconds: any) => ({
+const getPreloadedMessage = (seconds: number) => ({
   topic: "/preloaded_topic",
   receiveTime: fromSec(seconds),
-  message: wrapJsObject(datatypes, "nonstd_msgs/Float64Stamped", {
+  message: {
     data: Math.pow(seconds, 2),
     header: { stamp: fromSec(seconds - 0.5), frame_id: "", seq: 0 },
-  }),
+  },
 });
 
-const messageCache = {
+const emptyBlock = {
+  messagesByTopic: {},
+  sizeInBytes: 0,
+};
+
+const messageCache: BlockCache = {
   blocks: [
     ...[0.6, 0.7, 0.8, 0.9, 1.0].map((seconds) => ({
       sizeInBytes: 0,
-      messagesByTopic: {
-        "/preloaded_topic": [getPreloadedMessage(seconds)],
-      },
+      messagesByTopic: { "/preloaded_topic": [getPreloadedMessage(seconds)] },
     })),
-    undefined, // 1.1
-    undefined, // 1.2
-    undefined, // 1.3
-    undefined, // 1.4
+    emptyBlock, // 1.1
+    emptyBlock, // 1.2
+    emptyBlock, // 1.3
+    emptyBlock, // 1.4
     ...[1.5, 1.6, 1.7, 1.8, 1.9].map((seconds) => ({
       sizeInBytes: 0,
-      messagesByTopic: {
-        "/preloaded_topic": [getPreloadedMessage(seconds)],
-      },
+      messagesByTopic: { "/preloaded_topic": [getPreloadedMessage(seconds)] },
     })),
   ],
   startTime: fromSec(0.6),

@@ -212,10 +212,7 @@ BaseRenderer.defaultConfig = {
 };
 BaseRenderer.supportsStrictMode = false;
 
-export const Renderer = hoistNonReactStatics(
-  React.forwardRef<Props, typeof BaseRenderer>(BaseRenderer as any),
-  BaseRenderer,
-);
+export const Renderer = hoistNonReactStatics(React.forwardRef(BaseRenderer), BaseRenderer);
 
 export default Panel<ThreeDimensionalVizConfig>(
   FrameCompatibilityDEPRECATED(withTransforms(Renderer), []) as any,

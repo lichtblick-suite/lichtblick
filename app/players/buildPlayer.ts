@@ -33,13 +33,7 @@ export function buildPlayerFromDescriptor(
       {
         name: CoreDataProviders.MemoryCacheDataProvider,
         args: { unlimitedCache: options.unlimitedMemoryCache },
-        children: [
-          {
-            name: CoreDataProviders.RewriteBinaryDataProvider,
-            args: {},
-            children: [childDescriptor],
-          },
-        ],
+        children: [childDescriptor],
       },
     ],
   };

@@ -13,7 +13,8 @@
 
 import { Time, TimeUtil } from "rosbag";
 
-import { Message, PlayerState } from "@foxglove-studio/app/players/types";
+import { Message, PlayerState, TypedMessage } from "@foxglove-studio/app/players/types";
+import { StampedMessage } from "@foxglove-studio/app/types/Messages";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import {
   subtractTimes,
@@ -59,7 +60,10 @@ export default function warnOnOutOfSyncMessages(playerState: PlayerState): void 
     lastMessages = messages;
     lastCurrentTime = currentTime;
     for (const message of messages) {
-      const messageTime = getTimestampForMessage(message, messageOrder);
+      const messageTime = getTimestampForMessage(
+        message as TypedMessage<Partial<StampedMessage>>,
+        messageOrder,
+      );
       if (!messageTime) {
         sendNotification(
           `Message has no ${messageOrder}`,

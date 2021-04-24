@@ -39,9 +39,9 @@ export default class RpcDataProviderRemote {
     });
     rpc.receive("getMessages", async ({ start, end, topics }: any) => {
       const messages = await provider.getMessages(start, end, { rosBinaryMessages: topics });
-      const { parsedMessages, rosBinaryMessages, bobjects } = messages;
+      const { parsedMessages, rosBinaryMessages } = messages;
       const messagesToSend = rosBinaryMessages ?? [];
-      if (parsedMessages != undefined || bobjects != undefined) {
+      if (parsedMessages != undefined) {
         throw new Error(
           "RpcDataProvider only accepts raw messages (that still need to be parsed with ParseMessagesDataProvider)",
         );

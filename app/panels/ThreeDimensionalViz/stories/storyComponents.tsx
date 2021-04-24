@@ -28,9 +28,6 @@ import PanelSetup, { Fixture } from "@foxglove-studio/app/stories/PanelSetup";
 import PanelSetupWithBag from "@foxglove-studio/app/stories/PanelSetupWithBag";
 import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
 import { ScreenshotSizedContainer } from "@foxglove-studio/app/stories/storyHelpers";
-import { createRosDatatypesFromFrame } from "@foxglove-studio/app/test/datatypes";
-import { objectValues } from "@foxglove-studio/app/util";
-import { isBobject, wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 
 type Store = ReturnType<typeof configureStore>;
 
@@ -43,26 +40,6 @@ export type FixtureExampleData = {
     [name: string]: string | number;
   };
 };
-
-function bobjectify(fixture: FixtureExampleData): FixtureExampleData {
-  const { topics, frame } = fixture;
-  const newFrame = {};
-  // The topics are sometimes arrays, sometimes objects :-(
-  const topicsArray = topics instanceof Array ? topics : objectValues(topics);
-
-  const datatypes = createRosDatatypesFromFrame(topicsArray, frame);
-  topicsArray.forEach(({ name: topicName, datatype }) => {
-    const messages = frame[topicName];
-    if (messages) {
-      (newFrame as any)[topicName] = messages.map(({ topic, receiveTime, message }) => ({
-        topic,
-        receiveTime,
-        message: !isBobject(message) ? wrapJsObject(datatypes, datatype, message) : message,
-      }));
-    }
-  });
-  return { ...fixture, frame: newFrame };
-}
 
 type FixtureExampleProps = {
   initialConfig: Partial<ThreeDimensionalVizConfig>;
@@ -112,7 +89,7 @@ export class FixtureExample extends React.Component<FixtureExampleProps, Fixture
       {
         fixture: {
           topics: Object.values(topics),
-          globalVariables: globalVariables || { futureTime: 1.5 },
+          globalVariables: globalVariables ?? { futureTime: 1.5 },
           frame: {},
         },
       }, // Delay passing in the frame in order to work around a MessageHistory behavior
@@ -122,7 +99,7 @@ export class FixtureExample extends React.Component<FixtureExampleProps, Fixture
         // *before* the fixture changes, not in the same update cycle.
         setImmediate(() => {
           this.setState((state) => ({
-            fixture: { ...(state.fixture as Fixture), frame: bobjectify(data).frame },
+            fixture: { ...(state.fixture as Fixture), frame: data.frame },
           }));
           // Additional delay to trigger updating available namespaces after consuming
           // the messages in SceneBuilder.

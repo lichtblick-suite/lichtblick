@@ -40,7 +40,6 @@ function getProvider() {
           new MemoryDataProvider({
             messages: {
               rosBinaryMessages: generateMessages(),
-              bobjects: undefined,
               parsedMessages: undefined,
             },
           }),
@@ -76,7 +75,6 @@ describe("IdbCacheReaderDataProvider", () => {
       { sec: 102, nsec: 0 },
       { rosBinaryMessages: ["/foo"] },
     );
-    expect(messages.bobjects).toBe(undefined);
     expect(messages.parsedMessages).toBe(undefined);
     expect(messages.rosBinaryMessages).toEqual(generateMessages());
   });

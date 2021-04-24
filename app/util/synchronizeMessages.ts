@@ -14,16 +14,11 @@
 import { mapValues } from "lodash";
 import { TimeUtil, Time } from "rosbag";
 
-import { cast, Message, RosObject } from "@foxglove-studio/app/players/types";
+import { Message } from "@foxglove-studio/app/players/types";
 import { StampedMessage } from "@foxglove-studio/app/types/Messages";
 
-export const defaultGetHeaderStamp = (
-  message: Readonly<RosObject> | undefined,
-): Time | undefined => {
-  if (message?.header != undefined) {
-    return cast<StampedMessage>(message).header.stamp;
-  }
-  return undefined;
+export const defaultGetHeaderStamp = (message?: Partial<StampedMessage>): Time | undefined => {
+  return message?.header?.stamp;
 };
 
 function allMessageStampsNewestFirst(
@@ -37,7 +32,7 @@ function allMessageStampsNewestFirst(
     for (const message of messages) {
       const stamp = getHeaderStamp
         ? getHeaderStamp(message)
-        : defaultGetHeaderStamp(message.message);
+        : defaultGetHeaderStamp(message.message as Partial<StampedMessage>);
       if (stamp) {
         stamps.push(stamp);
       }
@@ -63,7 +58,7 @@ function messagesMatchingStamp(
     const synchronizedMessage = messages.find((message) => {
       const thisStamp = getHeaderStamp
         ? getHeaderStamp(message)
-        : defaultGetHeaderStamp(message.message);
+        : defaultGetHeaderStamp(message.message as Partial<StampedMessage>);
       return thisStamp && TimeUtil.areSame(stamp, thisStamp);
     });
     if (synchronizedMessage != undefined) {
@@ -116,7 +111,7 @@ function getSynchronizedMessages(
   const synchronizedMessages: Record<string, any> = {};
   for (const topic of topics) {
     const matchingMessage = messages[topic]?.find(({ message }) => {
-      const thisStamp = message.header?.stamp;
+      const thisStamp = (message as Partial<StampedMessage>).header?.stamp;
       return thisStamp && TimeUtil.areSame(stamp, thisStamp);
     });
     if (!matchingMessage) {
@@ -148,7 +143,7 @@ function getSynchronizedState(
       newSynchronizedMessages = syncedMsgs;
       newMessagesByTopic = mapValues(newMessagesByTopic, (msgsByTopic) =>
         msgsByTopic.filter(({ message }) => {
-          const thisStamp = message.header?.stamp;
+          const thisStamp = (message as any).header?.stamp;
           return !TimeUtil.isLessThan(thisStamp, stamp);
         }),
       );

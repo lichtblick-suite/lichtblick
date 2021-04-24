@@ -30,7 +30,7 @@ import {
   MessageDefinitions,
   ParsedMessageDefinitions,
 } from "@foxglove-studio/app/dataProviders/types";
-import { Message, Progress } from "@foxglove-studio/app/players/types";
+import { Progress, TypedMessage } from "@foxglove-studio/app/players/types";
 import { objectValues } from "@foxglove-studio/app/util";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { deepIntersect } from "@foxglove-studio/app/util/ranges";
@@ -42,22 +42,17 @@ import rawMessageDefinitionsToParsed from "./rawMessageDefinitionsToParsed";
 const sortTimes = (times: Time[]) => times.sort(TimeUtil.compare);
 const emptyGetMessagesResult = {
   rosBinaryMessages: undefined,
-  bobjects: undefined,
   parsedMessages: undefined,
 };
 
-const memoizedMergedBlock = memoizeWeak((block1?: MemoryCacheBlock, block2?: MemoryCacheBlock) => {
-  if (block1 == undefined) {
-    return block2;
-  }
-  if (block2 == undefined) {
-    return block1;
-  }
-  return {
-    messagesByTopic: { ...block1.messagesByTopic, ...block2.messagesByTopic },
-    sizeInBytes: block1.sizeInBytes + block2.sizeInBytes,
-  };
-});
+const memoizedMergedBlock = memoizeWeak(
+  (block1?: MemoryCacheBlock, block2?: MemoryCacheBlock): MemoryCacheBlock => {
+    return {
+      messagesByTopic: { ...block1?.messagesByTopic, ...block2?.messagesByTopic },
+      sizeInBytes: (block1?.sizeInBytes ?? 0) + (block2?.sizeInBytes ?? 0),
+    };
+  },
+);
 
 // Exported for tests
 export const mergedBlocks = (
@@ -83,9 +78,9 @@ export const mergedBlocks = (
   return { blocks, startTime: cache1.startTime };
 };
 
-const merge = (
-  messages1: readonly Message[] | undefined,
-  messages2: readonly Message[] | undefined,
+const merge = <A, B>(
+  messages1: readonly TypedMessage<A>[] | undefined,
+  messages2: readonly TypedMessage<B>[] | undefined,
 ) => {
   if (messages1 == undefined) {
     return messages2;
@@ -125,7 +120,6 @@ const mergeAllMessageTypes = (
   result1: GetMessagesResult,
   result2: GetMessagesResult,
 ): GetMessagesResult => ({
-  bobjects: merge(result1.bobjects, result2.bobjects),
   parsedMessages: merge(result1.parsedMessages, result2.parsedMessages),
   rosBinaryMessages: merge(result1.rosBinaryMessages, result2.rosBinaryMessages),
 });
@@ -317,13 +311,12 @@ export default class CombinedDataProvider implements DataProvider {
       this._providers.map(async (provider, index) => {
         const initializationResult = this._initializationResultsPerProvider[index];
         if (initializationResult == undefined) {
-          return { bobjects: undefined, parsedMessages: undefined, rosBinaryMessages: undefined };
+          return { parsedMessages: undefined, rosBinaryMessages: undefined };
         }
         const availableTopics = initializationResult.topicSet;
         const filterTopics = (maybeTopics: any) =>
           maybeTopics?.filter((topic: any) => availableTopics.has(topic));
         const filteredTopicsByFormat = {
-          bobjects: filterTopics(topics.bobjects),
           parsedMessages: filterTopics(topics.parsedMessages),
           rosBinaryMessages: filterTopics(topics.rosBinaryMessages),
         };
@@ -365,7 +358,7 @@ export default class CombinedDataProvider implements DataProvider {
       }),
     );
 
-    let mergedMessages: any = emptyGetMessagesResult;
+    let mergedMessages: GetMessagesResult = emptyGetMessagesResult;
     for (const messages of messagesPerProvider) {
       mergedMessages = mergeAllMessageTypes(mergedMessages, messages);
     }

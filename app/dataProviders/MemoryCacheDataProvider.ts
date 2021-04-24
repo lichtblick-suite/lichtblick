@@ -13,7 +13,7 @@
 
 import { simplify } from "intervals-fn";
 import { isEqual, sum, uniq } from "lodash";
-import { TimeUtil, Time } from "rosbag";
+import { TimeUtil, Time, parseMessageDefinition } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -25,8 +25,7 @@ import {
   GetMessagesTopics,
   InitializationResult,
 } from "@foxglove-studio/app/dataProviders/types";
-import { BobjectMessage } from "@foxglove-studio/app/players/types";
-import { inaccurateByteSize } from "@foxglove-studio/app/util/binaryObjects";
+import { TypedMessage } from "@foxglove-studio/app/players/types";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { getNewConnection } from "@foxglove-studio/app/util/getNewConnection";
 import {
@@ -36,6 +35,7 @@ import {
 } from "@foxglove-studio/app/util/ranges";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import { fromNanoSec, subtractTimes, toNanoSec } from "@foxglove-studio/app/util/time";
+import { LazyMessageReader } from "@foxglove/rosmsg-deser";
 
 // I (JP) mostly just made these numbers up. It might be worth experimenting with different values
 // for these, but it seems to work reasonably well in my tests.
@@ -53,7 +53,7 @@ export const MAX_BLOCK_SIZE_BYTES = 50e6; // Number of bytes in a block before w
 // the underlying ArrayBuffers.
 export type MemoryCacheBlock = {
   readonly messagesByTopic: {
-    readonly [topic: string]: readonly BobjectMessage[];
+    readonly [topic: string]: TypedMessage<unknown>[];
   };
   readonly sizeInBytes: number;
 };
@@ -233,7 +233,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
   // The actual blocks that contain the messages. Blocks have a set "width" in terms of nanoseconds
   // since the start time of the bag. If a block has some messages for a topic, then by definition
   // it has *all* messages for that topic and timespan.
-  _blocks: readonly (MemoryCacheBlock | undefined)[] = [];
+  _blocks: (MemoryCacheBlock | undefined)[] = [];
 
   // The start time of the bag. Used for computing from and to nanoseconds since the start.
   _startTime: Time = { sec: 0, nsec: 0 };
@@ -281,10 +281,12 @@ export default class MemoryCacheDataProvider implements DataProvider {
   _readAheadBlocks: number = 0;
   _memCacheBlockSizeNs: number = 0;
 
+  _lazyMessageReadersByTopic = new Map<string, LazyMessageReader>();
+
   constructor(
     {
       id,
-      unlimitedCache,
+      unlimitedCache = false,
     }: {
       id: string;
       unlimitedCache?: boolean;
@@ -322,7 +324,20 @@ export default class MemoryCacheDataProvider implements DataProvider {
       throw new Error("Time range is too long to be supported");
     }
 
-    this._blocks = new Array(Math.ceil(this._totalNs / this._memCacheBlockSizeNs));
+    const blockCount = Math.ceil(this._totalNs / this._memCacheBlockSizeNs);
+    this._blocks = Array.from({ length: blockCount });
+
+    const msgDefs = result.messageDefinitions;
+    if (msgDefs.type === "parsed") {
+      for (const [topic, msgDef] of Object.entries(msgDefs.parsedMessageDefinitionsByTopic)) {
+        this._lazyMessageReadersByTopic.set(topic, new LazyMessageReader(msgDef));
+      }
+    } else if (msgDefs.type === "raw") {
+      for (const [topic, rawMsgDef] of Object.entries(msgDefs.messageDefinitionsByTopic)) {
+        const msgDef = parseMessageDefinition(rawMsgDef);
+        this._lazyMessageReadersByTopic.set(topic, new LazyMessageReader(msgDef));
+      }
+    }
 
     this._updateProgress();
 
@@ -335,7 +350,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
     subscriptions: GetMessagesTopics,
   ): Promise<GetMessagesResult> {
     // We might have a new set of topics.
-    const topics = getNormalizedTopics(subscriptions.bobjects || []);
+    const topics = getNormalizedTopics(subscriptions.parsedMessages ?? []);
     this._preloadTopics = topics; // Push a new entry to `this._readRequests`, and call `this._updateState()`.
 
     const timeRange = {
@@ -378,8 +393,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
     this._readRequests = this._readRequests.filter(({ timeRange, blockRange, topics, resolve }) => {
       if (topics.length === 0) {
         resolve({
-          bobjects: [],
-          parsedMessages: undefined,
+          parsedMessages: [],
           rosBinaryMessages: undefined,
         });
         return false;
@@ -435,8 +449,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
       }
 
       resolve({
-        bobjects: messages.sort((a, b) => TimeUtil.compare(a.receiveTime, b.receiveTime)),
-        parsedMessages: undefined,
+        parsedMessages: messages.sort((a, b) => TimeUtil.compare(a.receiveTime, b.receiveTime)),
         rosBinaryMessages: undefined,
       });
       this._lastResolvedCallbackEnd = blockRange.end;
@@ -501,7 +514,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
       return undefined; // We have loaded the whole file.
     }
 
-    const prefetchStart = getPrefetchStartPoint(uncachedRanges, this._lastResolvedCallbackEnd || 0);
+    const prefetchStart = getPrefetchStartPoint(uncachedRanges, this._lastResolvedCallbackEnd ?? 0);
     // Just request a single block. We know there's at least one there, and we don't want to cause
     // blocks that are actually useful to be evicted because of our prefetching. We could consider
     // a "low priority" connection that aborts as soon as there's memory pressure.
@@ -532,7 +545,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
         );
       });
 
-      if (!connectionSuccess) {
+      if (connectionSuccess !== true) {
         // Connection interrupted, or otherwise unsuccessful.
         break;
       }
@@ -562,13 +575,13 @@ export default class MemoryCacheDataProvider implements DataProvider {
     );
 
     const isCurrent = () => {
-      return this._currentConnection && this._currentConnection.id === id;
+      return this._currentConnection?.id === id;
     };
 
     // Just loop infinitely, but break if the connection is not current any more.
     for (;;) {
       const currentConnection = this._currentConnection;
-      if (!currentConnection || !isCurrent()) {
+      if (!isCurrent()) {
         return false;
       }
 
@@ -593,16 +606,15 @@ export default class MemoryCacheDataProvider implements DataProvider {
       const messages =
         topics.length > 0
           ? await this._provider.getMessages(startTime, endTime, {
-              bobjects: topics,
+              rosBinaryMessages: topics,
             })
           : {
-              rosBinaryMessages: undefined,
-              bobjects: [],
+              rosBinaryMessages: [],
               parsedMessages: undefined,
             };
-      const { bobjects, rosBinaryMessages, parsedMessages } = messages;
+      const { rosBinaryMessages, parsedMessages } = messages;
 
-      if (rosBinaryMessages != undefined || parsedMessages != undefined) {
+      if (parsedMessages != undefined) {
         const types = (Object.keys(messages) as (keyof typeof messages)[])
           .filter((type) => messages[type] != undefined)
           .join("\n");
@@ -616,7 +628,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
         return false;
       }
 
-      const existingBlock = this._blocks[currentBlockIndex] || EMPTY_BLOCK;
+      const existingBlock = this._blocks[currentBlockIndex] ?? EMPTY_BLOCK;
       const messagesByTopic = { ...existingBlock.messagesByTopic };
       let sizeInBytes = existingBlock.sizeInBytes;
       // Fill up the block with messages.
@@ -624,32 +636,24 @@ export default class MemoryCacheDataProvider implements DataProvider {
         messagesByTopic[topic] = [];
       }
 
-      for (const bobjectMessage of bobjects || []) {
-        (messagesByTopic[bobjectMessage.topic] as BobjectMessage[]).push(bobjectMessage);
-        const { message } = bobjectMessage;
-        sizeInBytes +=
-          message instanceof ArrayBuffer ? message.byteLength : inaccurateByteSize(message);
+      for (const rosBinaryMessage of rosBinaryMessages ?? []) {
+        const lazyReader = this._lazyMessageReadersByTopic.get(rosBinaryMessage.topic);
+        if (!lazyReader) {
+          continue;
+        }
+
+        sizeInBytes += rosBinaryMessage.message.byteLength;
+
+        const lazyMsg = lazyReader.readMessage(new Uint8Array(rosBinaryMessage.message));
+        messagesByTopic[rosBinaryMessage.topic]?.push({
+          topic: rosBinaryMessage.topic,
+          receiveTime: rosBinaryMessage.receiveTime,
+          message: lazyMsg,
+        });
       }
 
       if (sizeInBytes > MAX_BLOCK_SIZE_BYTES && !this._loggedTooLargeError) {
         this._loggedTooLargeError = true;
-        const sizes = [];
-
-        for (const [topic, topicMessages] of Object.entries(messagesByTopic)) {
-          let size = 0;
-
-          for (const bobjectMessage of topicMessages) {
-            const { message } = bobjectMessage;
-            size +=
-              message instanceof ArrayBuffer ? message.byteLength : inaccurateByteSize(message);
-          }
-
-          const roundedSize = Math.round(size / 1e6);
-
-          if (roundedSize > 0) {
-            sizes.push(`- ${topic}: ${roundedSize}MB`);
-          }
-        }
 
         sendNotification(
           "Very large block found",
@@ -657,9 +661,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
             this._memCacheBlockSizeNs / 1e6,
           )}ms) was found: ${Math.round(
             sizeInBytes / 1e6,
-          )}MB. Too much data can cause performance problems and even crashes. Please fix this where the data is being generated.\n\nBreakdown of large topics:\n${sizes
-            .sort()
-            .join("\n")}`,
+          )}MB. Too much data can cause performance problems and even crashes. Please fix this where the data is being generated.`,
           "user",
           "warn",
         );
@@ -751,14 +753,14 @@ export default class MemoryCacheDataProvider implements DataProvider {
     // Call the getBlocksToKeep helper.
     const { blockIndexesToKeep, newRecentRanges } = getBlocksToKeep({
       recentBlockRanges: this._recentBlockRanges,
-      blockSizesInBytes: this._blocks.map((block) => (block ? block.sizeInBytes : undefined)),
+      blockSizesInBytes: this._blocks.map((block) => block?.sizeInBytes ?? 0),
       maxCacheSizeInBytes: this._cacheSizeBytes,
       badEvictionRange,
     });
 
     // Update our state.
     this._recentBlockRanges = newRecentRanges;
-    const newBlocks = new Array(this._blocks.length);
+    const newBlocks: (MemoryCacheBlock | undefined)[] = Array.from({ length: this._blocks.length });
 
     for (let blockIndex = 0; blockIndex < this._blocks.length; blockIndex++) {
       if (this._blocks[blockIndex] && blockIndexesToKeep.has(blockIndex)) {

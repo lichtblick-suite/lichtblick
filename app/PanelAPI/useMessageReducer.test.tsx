@@ -15,17 +15,12 @@ import { mount } from "enzyme";
 import { act } from "react-dom/test-utils";
 
 import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
-import { wrapJsObject } from "@foxglove-studio/app/util/binaryObjects";
 
 import * as PanelAPI from ".";
 
 describe("useMessageReducer", () => {
   // Create a helper component that exposes restore, addMessage, and the results of the hook for mocking
-  function createTest(
-    useAddMessage: boolean = true,
-    useAddMessages: boolean = false,
-    useAddBobjects = false,
-  ) {
+  function createTest(useAddMessage: boolean = true, useAddMessages: boolean = false) {
     function Test({
       topics,
       addMessagesOverride,
@@ -40,7 +35,6 @@ describe("useMessageReducer", () => {
             topics,
             addMessage: useAddMessage ? Test.addMessage : undefined,
             addMessages: useAddMessages ? addMessagesOverride || Test.addMessages : undefined,
-            addBobjects: useAddBobjects ? Test.addBobjects : undefined,
             restore: Test.restore,
           }),
         );
@@ -54,7 +48,6 @@ describe("useMessageReducer", () => {
     Test.restore = jest.fn();
     Test.addMessage = jest.fn();
     Test.addMessages = jest.fn();
-    Test.addBobjects = jest.fn();
     return Test;
   }
 
@@ -77,18 +70,14 @@ describe("useMessageReducer", () => {
   });
 
   it.each([
-    [{ useAddMessage: false, useAddMessages: false, useAddBobjects: false, shouldThrow: true }],
-    [{ useAddMessage: false, useAddMessages: false, useAddBobjects: true, shouldThrow: false }],
-    [{ useAddMessage: false, useAddMessages: true, useAddBobjects: false, shouldThrow: false }],
-    [{ useAddMessage: false, useAddMessages: true, useAddBobjects: true, shouldThrow: true }],
-    [{ useAddMessage: true, useAddMessages: false, useAddBobjects: false, shouldThrow: false }],
-    [{ useAddMessage: true, useAddMessages: false, useAddBobjects: true, shouldThrow: true }],
-    [{ useAddMessage: true, useAddMessages: true, useAddBobjects: false, shouldThrow: true }],
-    [{ useAddMessage: true, useAddMessages: true, useAddBobjects: true, shouldThrow: true }],
+    [{ useAddMessage: false, useAddMessages: false, shouldThrow: true }],
+    [{ useAddMessage: false, useAddMessages: true, shouldThrow: false }],
+    [{ useAddMessage: true, useAddMessages: false, shouldThrow: false }],
+    [{ useAddMessage: true, useAddMessages: true, shouldThrow: true }],
   ])(
     "requires exactly one 'add' callback (%p)",
-    async ({ useAddMessage, useAddMessages, useAddBobjects, shouldThrow }) => {
-      const Test = createTest(useAddMessage, useAddMessages, useAddBobjects);
+    async ({ useAddMessage, useAddMessages, shouldThrow }) => {
+      const Test = createTest(useAddMessage, useAddMessages);
       mount(
         <MockMessagePipelineProvider>
           <Test topics={["/foo"]} />
@@ -152,33 +141,6 @@ describe("useMessageReducer", () => {
     expect(Test.addMessage.mock.calls).toEqual([]);
     expect(Test.addMessages.mock.calls).toEqual([[1, [message]]]);
     expect(Test.result.mock.calls).toEqual([[2]]);
-
-    root.unmount();
-  });
-
-  it("calls restore to initialize and addBobjects for initial bobjects", async () => {
-    const Test = createTest(false, false, true);
-
-    Test.restore.mockReturnValue(1);
-    Test.addBobjects.mockImplementation((_, msgs) => msgs[msgs.length - 1].message.sec());
-
-    const message = {
-      topic: "/foo",
-      receiveTime: { sec: 0, nsec: 0 },
-      message: wrapJsObject({}, "time", { sec: 1234, nsec: 5678 }),
-    };
-
-    const root = mount(
-      <MockMessagePipelineProvider bobjects={[message] as any}>
-        <Test topics={["/foo"]} />
-      </MockMessagePipelineProvider>,
-    );
-
-    expect(Test.restore.mock.calls).toEqual([[undefined]]);
-    expect(Test.addMessage.mock.calls).toEqual([]);
-    expect(Test.addMessages.mock.calls).toEqual([]);
-    expect(Test.addBobjects.mock.calls).toEqual([[1, [message]]]);
-    expect(Test.result.mock.calls).toEqual([[1234]]);
 
     root.unmount();
   });
@@ -306,15 +268,12 @@ describe("useMessageReducer", () => {
       root.unmount();
     });
     expect(setSubscriptions.mock.calls).toEqual([
-      [
-        expect.any(String),
-        [{ topic: "/foo", format: "parsedMessages", preloadingFallback: false }],
-      ],
+      [expect.any(String), [{ topic: "/foo", preloadingFallback: false }]],
       [
         expect.any(String),
         [
-          { topic: "/foo", format: "parsedMessages", preloadingFallback: false },
-          { topic: "/bar", format: "parsedMessages", preloadingFallback: false },
+          { topic: "/foo", preloadingFallback: false },
+          { topic: "/bar", preloadingFallback: false },
         ],
       ],
       [expect.any(String), []],

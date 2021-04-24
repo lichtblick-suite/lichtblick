@@ -194,22 +194,16 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     });
 
     act(() => {
-      result.current.setSubscriptions("test", [
-        { topic: "/webviz/test", format: "parsedMessages" },
-      ]);
+      result.current.setSubscriptions("test", [{ topic: "/webviz/test" }]);
     });
-    expect(result.current.subscriptions).toEqual([
-      { topic: "/webviz/test", format: "parsedMessages" },
-    ]);
+    expect(result.current.subscriptions).toEqual([{ topic: "/webviz/test" }]);
 
     act(() => {
-      result.current.setSubscriptions("bar", [
-        { topic: "/webviz/test2", format: "parsedMessages" },
-      ]);
+      result.current.setSubscriptions("bar", [{ topic: "/webviz/test2" }]);
     });
     expect(result.current.subscriptions).toEqual([
-      { topic: "/webviz/test", format: "parsedMessages" },
-      { topic: "/webviz/test2", format: "parsedMessages" },
+      { topic: "/webviz/test" },
+      { topic: "/webviz/test2" },
     ]);
     const lastSubscriptions = result.current.subscriptions;
     // cause the player to emit a frame outside the render loop to trigger another render
@@ -385,24 +379,13 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       wrapper: Wrapper,
       initialProps: { maybePlayer: { player } },
     });
-    act(() =>
-      result.current.setSubscriptions("test", [
-        { topic: "/webviz/test", format: "parsedMessages" },
-      ]),
-    );
-    act(() =>
-      result.current.setSubscriptions("bar", [
-        { topic: "/webviz/test2", format: "parsedMessages" },
-      ]),
-    );
+    act(() => result.current.setSubscriptions("test", [{ topic: "/webviz/test" }]));
+    act(() => result.current.setSubscriptions("bar", [{ topic: "/webviz/test2" }]));
     act(() => result.current.setPublishers("test", [{ topic: "/webviz/test", datatype: "test" }]));
 
     const player2 = new FakePlayer();
     rerender({ maybePlayer: { player: player2 } });
-    expect(player2.subscriptions).toEqual([
-      { topic: "/webviz/test", format: "parsedMessages" },
-      { topic: "/webviz/test2", format: "parsedMessages" },
-    ]);
+    expect(player2.subscriptions).toEqual([{ topic: "/webviz/test" }, { topic: "/webviz/test2" }]);
     expect(player2.publishers).toEqual([{ topic: "/webviz/test", datatype: "test" }]);
   });
 
@@ -414,7 +397,6 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     });
     const activeData: PlayerStateActiveData = {
       messages: [],
-      bobjects: [],
       messageOrder: "receiveTime",
       currentTime: { sec: 0, nsec: 0 },
       startTime: { sec: 0, nsec: 0 },
@@ -451,9 +433,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
 
     expect(result.all.length).toBe(1);
     act(() =>
-      (result.all[0] as MessagePipelineContext).setSubscriptions("id", [
-        { topic: "/test", format: "parsedMessages" },
-      ]),
+      (result.all[0] as MessagePipelineContext).setSubscriptions("id", [{ topic: "/test" }]),
     );
     expect(result.all.length).toBe(2);
     expect(console.warn).toHaveBeenCalledTimes(0);
@@ -461,7 +441,6 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     // Emit activeData.
     const activeData: PlayerStateActiveData = {
       messages: [],
-      bobjects: [],
       messageOrder: "receiveTime",
       currentTime: { sec: 0, nsec: 0 },
       startTime: { sec: 0, nsec: 0 },
@@ -480,16 +459,12 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
 
     // Calling setSubscriptions right after activeData is ok if the set of topics doesn't change
     act(() =>
-      (result.all[0] as MessagePipelineContext).setSubscriptions("id", [
-        { topic: "/test", format: "bobjects" },
-      ]),
+      (result.all[0] as MessagePipelineContext).setSubscriptions("id", [{ topic: "/test" }]),
     );
     expect((console.warn as jest.Mock).mock.calls).toEqual([]);
     // But changing the set of topics results in a warning
     act(() =>
-      (result.all[0] as MessagePipelineContext).setSubscriptions("id", [
-        { topic: "/test2", format: "parsedMessages" },
-      ]),
+      (result.all[0] as MessagePipelineContext).setSubscriptions("id", [{ topic: "/test2" }]),
     );
     expect((console.warn as jest.Mock).mock.calls).toEqual([
       [
@@ -500,9 +475,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     // If we wait a little bit, we shouldn't get any additional warnings.
     await delay(WARN_ON_SUBSCRIPTIONS_WITHIN_TIME_MS + 200);
     act(() =>
-      (result.all[0] as MessagePipelineContext).setSubscriptions("id", [
-        { topic: "/test", format: "parsedMessages" },
-      ]),
+      (result.all[0] as MessagePipelineContext).setSubscriptions("id", [{ topic: "/test" }]),
     );
     expect((console.warn as jest.Mock).mock.calls.length).toEqual(1);
     (console.warn as jest.Mock).mockClear();

@@ -13,8 +13,7 @@
 import { mount } from "enzyme";
 
 import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
-import { Message, MessageFormat } from "@foxglove-studio/app/players/types";
-import { deepParse } from "@foxglove-studio/app/util/binaryObjects";
+import { Message } from "@foxglove-studio/app/players/types";
 
 import { useLatestMessageDataItem } from "./useLatestMessageDataItem";
 
@@ -42,9 +41,9 @@ const messages: Message[] = [
 
 describe("useLatestMessageDataItem", () => {
   // Create a helper component that exposes the results of the hook for mocking.
-  function createTest(format: MessageFormat = "parsedMessages") {
+  function createTest() {
     function Test({ path }: { path: string }) {
-      Test.result(useLatestMessageDataItem(path, format));
+      Test.result(useLatestMessageDataItem(path));
       return ReactNull;
     }
     Test.result = jest.fn();
@@ -113,24 +112,6 @@ describe("useLatestMessageDataItem", () => {
         },
       ],
     ]);
-
-    root.unmount();
-  });
-
-  it("returns bobjects when told to", async () => {
-    const Test = createTest("bobjects");
-    const root = mount(
-      <MockMessagePipelineProvider messages={[messages[0]!]} topics={topics} datatypes={datatypes}>
-        <Test path="/topic" />
-      </MockMessagePipelineProvider>,
-    );
-    expect(Test.result.mock.calls).toHaveLength(1);
-    const {
-      message,
-      queriedData: [data],
-    } = Test.result.mock.calls[0][0] ?? {};
-    expect(deepParse(message.message)).toEqual(messages[0]?.message);
-    expect(deepParse(data.value)).toEqual(messages[0]?.message);
 
     root.unmount();
   });

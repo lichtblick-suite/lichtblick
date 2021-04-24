@@ -10,7 +10,6 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { partition } from "lodash";
 import { TimeUtil, Time } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
@@ -24,7 +23,6 @@ import {
 import NoopMetricsCollector from "@foxglove-studio/app/players/NoopMetricsCollector";
 import {
   AdvertisePayload,
-  BobjectMessage,
   Message,
   Player,
   PlayerCapabilities,
@@ -114,7 +112,6 @@ export default class RandomAccessPlayer implements Player {
   _lastSeekEmitTime: number = this._lastSeekStartTime;
   _cancelSeekBackfill: boolean = false;
   _parsedSubscribedTopics: Set<string> = new Set();
-  _bobjectSubscribedTopics: Set<string> = new Set();
   _providerTopics: Topic[] = [];
   _providerConnections: Connection[] = [];
   _providerDatatypes: RosDatatypes = {};
@@ -125,7 +122,6 @@ export default class RandomAccessPlayer implements Player {
   _progress: Progress = Object.freeze({});
   _id: string = uuidv4();
   _messages: Message[] = [];
-  _bobjects: readonly BobjectMessage[] = [];
   _receivedBytes: number = 0;
   _messageOrder: TimestampMethod = "receiveTime";
   _hasError = false;
@@ -276,10 +272,8 @@ export default class RandomAccessPlayer implements Player {
     }
 
     const messages = this._messages;
-    const bobjects = this._bobjects;
     this._messages = [];
-    this._bobjects = [];
-    if (messages.length > 0 || bobjects.length > 0) {
+    if (messages.length > 0) {
       // If we're outputting any messages, we need to cancel any in-progress backfills. Otherwise
       // we'd be "traveling back in time".
       this._cancelSeekBackfill = true;
@@ -316,7 +310,6 @@ export default class RandomAccessPlayer implements Player {
         ? undefined
         : {
             messages,
-            bobjects,
             totalBytesReceived: this._receivedBytes,
             messageOrder: this._messageOrder,
             currentTime: clampTime(lastEnd, this._start, this._end),
@@ -344,7 +337,10 @@ export default class RandomAccessPlayer implements Player {
     // compute how long of a time range we want to read by taking into account
     // the time since our last read and how fast we're currently playing back
     const tickTime = performance.now();
-    const durationMillis = this._lastTickMillis ? tickTime - this._lastTickMillis : 20;
+    const durationMillis =
+      this._lastTickMillis != undefined && this._lastTickMillis !== 0
+        ? tickTime - this._lastTickMillis
+        : 20;
     this._lastTickMillis = tickTime;
 
     // Read at most 300ms worth of messages, otherwise things can get out of control if rendering
@@ -369,7 +365,7 @@ export default class RandomAccessPlayer implements Player {
       this._end,
     );
 
-    const { parsedMessages: messages, bobjects } = await this._getMessages(start, end);
+    const { parsedMessages: messages } = await this._getMessages(start, end);
     await this._emitState.currentPromise;
 
     // if we seeked while reading then do not emit messages
@@ -389,7 +385,6 @@ export default class RandomAccessPlayer implements Player {
     }
 
     this._messages = this._messages.concat(messages);
-    this._bobjects = this._bobjects.concat(bobjects);
     this._emitState();
   }
 
@@ -410,24 +405,19 @@ export default class RandomAccessPlayer implements Player {
     }
   });
 
-  async _getMessages(
-    start: Time,
-    end: Time,
-  ): Promise<{ parsedMessages: Message[]; bobjects: readonly BobjectMessage[] }> {
+  async _getMessages(start: Time, end: Time): Promise<{ parsedMessages: Message[] }> {
     const parsedTopics = getSanitizedTopics(this._parsedSubscribedTopics, this._providerTopics);
-    const bobjectTopics = getSanitizedTopics(this._bobjectSubscribedTopics, this._providerTopics);
-    if (parsedTopics.length + bobjectTopics.length === 0) {
-      return { parsedMessages: [], bobjects: [] };
+    if (parsedTopics.length === 0) {
+      return { parsedMessages: [] };
     }
     if (!this.hasCachedRange(start, end)) {
       this._metricsCollector.recordUncachedRangeRequest();
     }
     const messages = await this._provider.getMessages(start, end, {
-      bobjects: bobjectTopics,
       parsedMessages: parsedTopics,
     });
-    const { parsedMessages, bobjects } = messages;
-    if (parsedMessages == undefined || bobjects == undefined) {
+    const { parsedMessages } = messages;
+    if (parsedMessages == undefined) {
       const messageTypes = Object.keys(messages)
         .filter((type) => (messages as any)[type] != undefined)
         .join("\n");
@@ -437,7 +427,7 @@ export default class RandomAccessPlayer implements Player {
         "app",
         "error",
       );
-      return { parsedMessages: [], bobjects: [] };
+      return { parsedMessages: [] };
     }
 
     // It is very important that we record first emitted messages here, since
@@ -445,7 +435,7 @@ export default class RandomAccessPlayer implements Player {
     // invoked unless a user's browser is focused on the current session's tab.
     // Moreover, there is a disproportionally small amount of time between when we procure
     // messages here and when they are set to playerState.
-    if (parsedMessages.length > 0 || bobjects.length > 0) {
+    if (parsedMessages.length > 0) {
       this._metricsCollector.recordTimeToFirstMsgs();
     }
     const filterMessages = (msgs: Message[], topics: string[]) =>
@@ -469,7 +459,7 @@ export default class RandomAccessPlayer implements Player {
           );
           return undefined;
         }
-        if (!topic.datatype) {
+        if (topic.datatype === "") {
           sendNotification(
             `Missing datatype for topic: ${message.topic}; skipped message`,
             `Full message details: ${JSON.stringify(message)}`,
@@ -487,7 +477,6 @@ export default class RandomAccessPlayer implements Player {
       });
     return {
       parsedMessages: filterMessages(parsedMessages as any, parsedTopics),
-      bobjects: filterMessages(bobjects as any, bobjectTopics),
     };
   }
 
@@ -538,7 +527,6 @@ export default class RandomAccessPlayer implements Player {
     this._cancelSeekBackfill = false;
     // cancel any queued _emitState that might later emit messages from before we seeked
     this._messages = [];
-    this._bobjects = [];
 
     // backfill includes the current time we've seek'd to
     // playback after backfill will load messages after the seek time
@@ -560,10 +548,7 @@ export default class RandomAccessPlayer implements Player {
 
     // Only getMessages if we have some messages to get.
     if (backfillDuration || !this._isPlaying) {
-      const { parsedMessages: messages, bobjects } = await this._getMessages(
-        backfillStart,
-        backfillEnd,
-      );
+      const { parsedMessages: messages } = await this._getMessages(backfillStart, backfillEnd);
       // Only emit the messages if we haven't seeked again / emitted messages since we
       // started loading them. Note that for the latter part just checking for `isPlaying`
       // is not enough because the user might have started playback and then paused again!
@@ -574,7 +559,6 @@ export default class RandomAccessPlayer implements Player {
         this._nextReadStartTime = TimeUtil.add(backfillEnd, { sec: 0, nsec: 1 });
 
         this._messages = messages;
-        this._bobjects = bobjects;
         this._lastSeekEmitTime = seekTime;
         this._emitState();
       }
@@ -595,16 +579,14 @@ export default class RandomAccessPlayer implements Player {
   }
 
   setSubscriptions(newSubscriptions: SubscribePayload[]): void {
-    const [bobjectSubscriptions, parsedSubscriptions] = partition(
-      // Anything we can get from the data providers will be in the blocks. Subscriptions for
-      // preloading-fallback codepaths are only needed for other data sources without blocks (like
-      // nodes and websocket.)
-      newSubscriptions.filter(({ preloadingFallback }) => !preloadingFallback),
-      ({ format }) => format === "bobjects",
+    // Anything we can get from the data providers will be in the blocks. Subscriptions for
+    // preloading-fallback codepaths are only needed for other data sources without blocks (like
+    // nodes and websocket.)
+    const parsedSubscriptions = newSubscriptions.filter(
+      ({ preloadingFallback }) => !(preloadingFallback ?? false),
     );
-    this._parsedSubscribedTopics = new Set(parsedSubscriptions.map(({ topic }) => topic));
-    this._bobjectSubscribedTopics = new Set(bobjectSubscriptions.map(({ topic }) => topic));
 
+    this._parsedSubscribedTopics = new Set(parsedSubscriptions.map(({ topic }) => topic));
     this._metricsCollector.setSubscriptions(newSubscriptions);
   }
 

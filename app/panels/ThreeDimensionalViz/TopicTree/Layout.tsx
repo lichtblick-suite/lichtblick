@@ -89,7 +89,6 @@ import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDime
 import { Frame, Topic } from "@foxglove-studio/app/players/types";
 import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
 import { Color } from "@foxglove-studio/app/types/Messages";
-import { getField } from "@foxglove-studio/app/util/binaryObjects";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import {
   COLOR_RGBA_DATATYPE,
@@ -441,11 +440,11 @@ export default function Layout({
               checks: [
                 {
                   markerKeyPath: ["id"],
-                  value: getField(marker, "id"),
+                  value: marker.id,
                 },
                 {
                   markerKeyPath: ["ns"],
-                  value: getField(marker, "ns"),
+                  value: marker.ns,
                 },
               ],
             },

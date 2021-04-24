@@ -112,7 +112,6 @@ describe("BagDataProvider", () => {
     const start = { sec: 1396293887, nsec: 844783943 };
     const end = { sec: 1396293888, nsec: 60000000 };
     const messages = await provider.getMessages(start, end, { rosBinaryMessages: ["/tf"] });
-    expect(messages.bobjects).toBe(undefined);
     expect(messages.parsedMessages).toBe(undefined);
     expect(messages.rosBinaryMessages).toEqual([
       {
@@ -136,10 +135,9 @@ describe("BagDataProvider", () => {
     await provider.initialize(dummyExtensionPoint);
     const start = { sec: 1490148912, nsec: 0 };
     const end = { sec: 1490148913, nsec: 0 };
-    const { bobjects, parsedMessages, rosBinaryMessages } = await provider.getMessages(start, end, {
+    const { parsedMessages, rosBinaryMessages } = await provider.getMessages(start, end, {
       rosBinaryMessages: ["/tf"],
     });
-    expect(bobjects).toBe(undefined);
     expect(parsedMessages).toBe(undefined);
     expect(rosBinaryMessages).toBeTruthy();
     assert(rosBinaryMessages);

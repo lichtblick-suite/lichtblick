@@ -43,10 +43,8 @@ import TimeBasedChartLegend from "@foxglove-studio/app/components/TimeBasedChart
 import makeGlobalState from "@foxglove-studio/app/components/TimeBasedChart/makeGlobalState";
 import { useTooltip } from "@foxglove-studio/app/components/Tooltip";
 import mixins from "@foxglove-studio/app/styles/mixins.module.scss";
-import { isBobject } from "@foxglove-studio/app/util/binaryObjects";
+import { StampedMessage } from "@foxglove-studio/app/types/Messages";
 import filterMap from "@foxglove-studio/app/util/filterMap";
-import { defaultGetHeaderStamp } from "@foxglove-studio/app/util/synchronizeMessages";
-import { maybeGetBobjectHeaderStamp } from "@foxglove-studio/app/util/time";
 import Logger from "@foxglove/log";
 
 import HoverBar from "./HoverBar";
@@ -63,9 +61,7 @@ export type TooltipItem = {
 
 export const getTooltipItemForMessageHistoryItem = (item: MessageAndData): TooltipItem => {
   const { message } = item.message;
-  const headerStamp = isBobject(message)
-    ? maybeGetBobjectHeaderStamp(message)
-    : defaultGetHeaderStamp(message);
+  const headerStamp = (message as Partial<StampedMessage>).header?.stamp;
   return { queriedData: item.queriedData, receiveTime: item.message.receiveTime, headerStamp };
 };
 

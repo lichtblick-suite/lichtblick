@@ -27,18 +27,17 @@ const useFrame = (
   // NOTE(JP): This is a huge abuse of the `useMessageReducer` API. Never use `useMessageReducer`
   // in this way yourself!! `restore` and `addMessage` should be pure functions and not have
   // side effects!
-  const frame = React.useRef<any>({});
+  const frame = React.useRef<Frame>({});
   const lastClearTime = PanelAPI.useMessageReducer({
     topics,
     restore: React.useCallback(() => {
       frame.current = {};
       return Date.now();
     }, [frame]),
-    addBobjects: React.useCallback(
+    addMessages: React.useCallback(
       (time, messages: readonly Message[]) => {
         for (const message of messages) {
-          frame.current[message.topic] = frame.current[message.topic] || [];
-          frame.current[message.topic].push(message);
+          (frame.current[message.topic] = frame.current[message.topic] ?? []).push(message);
         }
         return time;
       },

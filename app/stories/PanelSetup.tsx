@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { createMemoryHistory } from "history";
-import { flatten, partition } from "lodash";
+import { flatten } from "lodash";
 import { ComponentProps } from "react";
 import { DndProvider } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
@@ -58,7 +58,6 @@ import configureStore from "@foxglove-studio/app/store/configureStore.testing";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { SavedProps, UserNodes } from "@foxglove-studio/app/types/panels";
 import { objectValues } from "@foxglove-studio/app/util";
-import { isBobject } from "@foxglove-studio/app/util/binaryObjects";
 
 type Store = ReturnType<typeof configureStore>;
 
@@ -258,7 +257,6 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
       dTypes = dummyDatatypes;
     }
     const allData = flatten(objectValues(frame));
-    const [bobjects, messages] = partition(allData, ({ message }) => isBobject(message));
     return (
       <div
         style={{ width: "100%", height: "100%", display: "flex", ...this.props.style }}
@@ -277,9 +275,8 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
           capabilities={capabilities}
           topics={topics}
           datatypes={dTypes}
-          messages={messages}
+          messages={allData}
           pauseFrame={this.props.pauseFrame}
-          bobjects={bobjects.length > 0 ? bobjects : undefined}
           activeData={activeData}
           progress={progress}
           store={this.state.store}

@@ -17,9 +17,7 @@ import { Time, TimeUtil } from "rosbag";
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import UserNodePlayer from "@foxglove-studio/app/players/UserNodePlayer";
 import {
-  cast,
   AdvertisePayload,
-  BobjectMessage,
   Message,
   PublishPayload,
   SubscribePayload,
@@ -28,18 +26,12 @@ import {
   PlayerWarnings,
   Topic,
   ParameterValue,
+  TypedMessage,
 } from "@foxglove-studio/app/players/types";
-import { BinaryStampedMessage } from "@foxglove-studio/app/types/BinaryMessages";
+import { StampedMessage } from "@foxglove-studio/app/types/Messages";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { UserNodes } from "@foxglove-studio/app/types/panels";
-import { deepParse } from "@foxglove-studio/app/util/binaryObjects";
-import {
-  clampTime,
-  compareBinaryTimes,
-  isTime,
-  maybeGetBobjectHeaderStamp,
-  TimestampMethod,
-} from "@foxglove-studio/app/util/time";
+import { clampTime, isTime, TimestampMethod } from "@foxglove-studio/app/util/time";
 
 // As a compromise between playback buffering required and correctness (as well as our ability to
 // play near the ends of bags), we assume messages' headers are always between 0s and 1s earlier
@@ -58,8 +50,7 @@ export default class OrderedStampPlayer implements Player {
   _messageOrder: TimestampMethod;
   // When messageOrder is "headerStamp", contains buffered, unsorted messages with receiveTime "in
   // the near future". Only messages with headers are stored.
-  _messageBuffer: Message[] = [];
-  _bobjectBuffer: BobjectMessage[] = [];
+  _messageBuffer: TypedMessage<StampedMessage>[] = [];
   // Used to invalidate the cache. (Also signals subscription changes etc).
   _lastSeekId?: number = undefined;
   // Our best guess of "now" in case we need to force a backfill.
@@ -87,23 +78,20 @@ export default class OrderedStampPlayer implements Player {
       }
 
       if (activeData.lastSeekTime !== this._lastSeekId) {
-        this._bobjectBuffer = [];
         this._messageBuffer = [];
         this._lastSeekId = activeData.lastSeekTime;
         this._topicsWithoutHeadersSinceSeek = new Set<string>();
       }
 
       // Only store messages with a header stamp.
-      const [newMessagesWithHeaders, newMessagesWithoutHeaders] = partition(
-        activeData.messages,
-        (message) => isTime(message.message.header?.stamp),
+      const [newMessagesWithHeaders, newMessagesWithoutHeaders] = <
+        [TypedMessage<StampedMessage>[], Message[]]
+      >partition(activeData.messages, (message) =>
+        isTime((message.message as Partial<StampedMessage>).header?.stamp),
       );
-      const [newBobjectsWithHeaders, newBobjectsWithoutHeaders] = partition(
-        activeData.bobjects,
-        ({ message }) => maybeGetBobjectHeaderStamp(message),
-      );
+
       let newMissingTopic = false;
-      newMessagesWithoutHeaders.concat(newBobjectsWithoutHeaders).forEach(({ topic }) => {
+      newMessagesWithoutHeaders.forEach(({ topic }) => {
         if (!this._topicsWithoutHeadersSinceSeek.has(topic)) {
           newMissingTopic = true;
           this._topicsWithoutHeadersSinceSeek.add(topic);
@@ -113,14 +101,13 @@ export default class OrderedStampPlayer implements Player {
         this._warnings = {
           ...activeData.playerWarnings,
           topicsWithoutHeaderStamps: uniq([
-            ...(activeData.playerWarnings.topicsWithoutHeaderStamps || []),
+            ...(activeData.playerWarnings.topicsWithoutHeaderStamps ?? []),
             ...this._topicsWithoutHeadersSinceSeek,
           ]),
         };
       }
 
-      const extendedMessageBuffer = this._messageBuffer.concat(newMessagesWithHeaders);
-      const extendedBobjectBuffer = this._bobjectBuffer.concat(newBobjectsWithHeaders);
+      const extendedMessageBuffer = [...this._messageBuffer, ...newMessagesWithHeaders];
       // output messages older than this threshold (ie, send all messages up until the threshold
       // time)
       const thresholdTime = {
@@ -130,19 +117,11 @@ export default class OrderedStampPlayer implements Player {
       const [messages, newMessageBuffer] = partition(extendedMessageBuffer, (message) =>
         TimeUtil.isLessThan(message.message.header.stamp, thresholdTime),
       );
-      const [bobjects, newBobjectBuffer] = partition(extendedBobjectBuffer, (message) => {
-        const stampedMessage = cast<BinaryStampedMessage>(message.message);
-        return TimeUtil.isLessThan(deepParse(stampedMessage.header().stamp()), thresholdTime);
-      });
+
       this._messageBuffer = newMessageBuffer;
-      this._bobjectBuffer = newBobjectBuffer;
 
       messages.sort((a, b) => TimeUtil.compare(a.message.header.stamp, b.message.header.stamp));
-      bobjects.sort((a, b) => {
-        const stampedA = cast<BinaryStampedMessage>(a.message);
-        const stampedB = cast<BinaryStampedMessage>(b.message);
-        return compareBinaryTimes(stampedA.header().stamp(), stampedB.header().stamp());
-      });
+
       const currentTime = clampTime(thresholdTime, activeData.startTime, activeData.endTime);
       this._currentTime = currentTime;
       const topicsWithHeader = getTopicsWithHeader(activeData.topics, activeData.datatypes);
@@ -152,7 +131,6 @@ export default class OrderedStampPlayer implements Player {
           ...activeData,
           topics: topicsWithHeader,
           messages,
-          bobjects,
           messageOrder: "headerStamp",
           currentTime,
           endTime: clampTime(
