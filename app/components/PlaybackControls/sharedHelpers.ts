@@ -45,15 +45,3 @@ export const jumpSeek = (
     seek(nextTime);
   }
 };
-
-export const togglePlayPause = (props: {
-  player: PlayerState;
-  pause: () => void;
-  play: () => void;
-}) => {
-  const { pause, play, player } = props;
-  const { activeData } = player;
-  if (activeData) {
-    (activeData.isPlaying ? pause : play)();
-  }
-};

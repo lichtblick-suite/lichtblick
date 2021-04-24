@@ -35,7 +35,6 @@ import {
 } from "@foxglove-studio/app/components/MessagePipeline";
 import PlaybackTimeDisplayMethod from "@foxglove-studio/app/components/PlaybackControls/PlaybackTimeDisplayMethod";
 import {
-  togglePlayPause,
   jumpSeek,
   DIRECTION,
 } from "@foxglove-studio/app/components/PlaybackControls/sharedHelpers";
@@ -114,17 +113,6 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
 
     const onChange = useCallback((value: number) => seek(fromSec(value)), [seek]);
 
-    const keyDownHandlers = useMemo(
-      () => ({
-        " ": () => togglePlayPause({ pause, play, player: playerState.current }),
-        ArrowLeft: (ev: KeyboardEvent) =>
-          jumpSeek(DIRECTION.BACKWARD, { seek, player: playerState.current }, ev),
-        ArrowRight: (ev: KeyboardEvent) =>
-          jumpSeek(DIRECTION.FORWARD, { seek, player: playerState.current }, ev),
-      }),
-      [pause, play, seek],
-    );
-
     const [hoverComponentId] = useState<string>(() => uuidv4());
     const dispatch = useDispatch();
     const onMouseMove = useCallback(
@@ -175,6 +163,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
     useEffect(() => onMouseLeave, [onMouseLeave]);
 
     const { activeData, progress } = player;
+
     const { isPlaying, startTime, endTime, currentTime } = activeData ?? {};
 
     const min = (startTime && toSec(startTime)) ?? 0;
@@ -192,7 +181,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
         // if the user turns on repeat and we are at the end, we assume they want to play from start
         // even if paused
         play();
-      } else {
+      } else if (activeData?.isPlaying) {
         // no-repeat
         // pause playback to toggle pause button state
         // if the user clicks play while we are at the end, we go back to begginning
@@ -200,18 +189,38 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
       }
     }
 
-    // non-memo'd because it changes each time currentTime updates
-    const resumePlay = () => {
+    const resumePlay = useCallback(() => {
+      const { startTime: start, endTime: end, currentTime: current } =
+        playerState.current?.activeData ?? {};
       // if we are at the end, we need to go back to start
-      if (currentTime && endTime && startTime && TimeUtil.compare(currentTime, endTime) >= 0) {
-        seek(startTime);
+      if (current && end && start && TimeUtil.compare(current, end) >= 0) {
+        seek(start);
       }
       play();
-    };
+    }, [play, seek]);
 
     const toggleRepeat = useCallback(() => {
       setRepeat((old) => !old);
     }, []);
+
+    const togglePlayPause = useCallback(() => {
+      if (playerState.current?.activeData?.isPlaying) {
+        pause();
+      } else {
+        resumePlay();
+      }
+    }, [pause, resumePlay]);
+
+    const keyDownHandlers = useMemo(
+      () => ({
+        " ": togglePlayPause,
+        ArrowLeft: (ev: KeyboardEvent) =>
+          jumpSeek(DIRECTION.BACKWARD, { seek, player: playerState.current }, ev),
+        ArrowRight: (ev: KeyboardEvent) =>
+          jumpSeek(DIRECTION.FORWARD, { seek, player: playerState.current }, ev),
+      }),
+      [seek, togglePlayPause],
+    );
 
     const seekControls = useMemo(
       () => (
