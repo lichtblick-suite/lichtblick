@@ -241,13 +241,6 @@ export type Progress = Readonly<{
   // Indicate which ranges are loaded
   fullyLoadedFractionRanges?: Range[];
 
-  // Time ranges in nanoseconds since bag start per topic. Used by
-  // `IdbCacheReaderDataProvider` to determine if a range is already available
-  // in IndexedDB. Is not directly shown in the UI.
-  nsTimeRangesSinceBagStart?: {
-    [key: string]: Range[];
-  };
-
   // A raw view into the cached binary data stored by the MemoryCacheDataProvider. Only present when
   // using the RandomAccessPlayer.
   readonly messageCache?: BlockCache;

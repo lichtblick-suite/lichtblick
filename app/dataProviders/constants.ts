@@ -14,8 +14,6 @@ export const CoreDataProviders = {
   ApiCheckerDataProvider: "ApiCheckerDataProvider",
   BagDataProvider: "BagDataProvider",
   CombinedDataProvider: "CombinedDataProvider",
-  IdbCacheReaderDataProvider: "IdbCacheReaderDataProvider",
-  IdbCacheWriterDataProvider: "IdbCacheWriterDataProvider",
   MeasureDataProvider: "MeasureDataProvider",
   MemoryCacheDataProvider: "MemoryCacheDataProvider",
   ParseMessagesDataProvider: "ParseMessagesDataProvider",

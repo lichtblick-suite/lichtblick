@@ -2075,7 +2075,6 @@ __metadata:
     history: 5.0.0
     hoist-non-react-statics: 3.3.2
     http-server: 0.12.3
-    idb: 2.1.3
     int53: 1.0.0
     inter-ui: 3.18.0
     intervals-fn: 3.0.3
@@ -6966,13 +6965,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"base64-arraybuffer-es6@npm:^0.7.0":
-  version: 0.7.0
-  resolution: "base64-arraybuffer-es6@npm:0.7.0"
-  checksum: 57e389f5000d4dedae6d8f5d7575b298357defdc4ba11710115163a8e20cba2ea8a2eee115cdf89127490c209fbde4d1c172a97d19b72df98ac3b33d9b8444ea
-  languageName: node
-  linkType: hard
-
 "base64-arraybuffer@npm:0.1.5":
   version: 0.1.5
   resolution: "base64-arraybuffer@npm:0.1.5"
@@ -8772,7 +8764,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:^2.4.0, core-js@npm:^2.5.3":
+"core-js@npm:^2.4.0":
   version: 2.6.12
   resolution: "core-js@npm:2.6.12"
   checksum: b865823ce9cb5bc63336856440f6525e4996bb91af30660081e82bf447d177f36104f0986906a34ea0c9c03cb8b3d960380848a478e2621dac30c9b8198d28da
@@ -10092,15 +10084,6 @@ __metadata:
   version: 2.1.0
   resolution: "domelementtype@npm:2.1.0"
   checksum: c3e63b6c94bf74d6375e12370f612d1cd61c0d3bc21b46684d93c797b3924de2e84278b0b5cdf3dce21f64ee94c34a005994f373c0e420759ae1856f075f0f57
-  languageName: node
-  linkType: hard
-
-"domexception@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "domexception@npm:1.0.1"
-  dependencies:
-    webidl-conversions: ^4.0.2
-  checksum: 0a678e600248b8a6f0149cb6a6ddae77d698d16a6fcf39d4228b933d5ac2b9ee657a36b2cd08ea82ec6196da756535bd30b8362f697cc9e564d969e52437fcd8
   languageName: node
   linkType: hard
 
@@ -11569,16 +11552,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fake-indexeddb@npm:3.1.2":
-  version: 3.1.2
-  resolution: "fake-indexeddb@npm:3.1.2"
-  dependencies:
-    realistic-structured-clone: ^2.0.1
-    setimmediate: ^1.0.5
-  checksum: 3a7a64b20b6ee41717db27d2e78735abbc1e2fc8d82c262b386cb8f8bfaf49076d36de73f969dc172da84bf6401bb3f0a018543817bcdf484b48898c8fa54bf9
-  languageName: node
-  linkType: hard
-
 "fake-tag@npm:^2.0.0":
   version: 2.0.0
   resolution: "fake-tag@npm:2.0.0"
@@ -12128,7 +12101,6 @@ __metadata:
     eslint-plugin-prettier: 3.3.1
     eslint-plugin-react: 7.23.1
     eslint-plugin-react-hooks: 4.2.0
-    fake-indexeddb: 3.1.2
     fork-ts-checker-webpack-plugin: 6.2.1
     html-webpack-plugin: 5.3.1
     jest: 26.6.3
@@ -13578,13 +13550,6 @@ fsevents@^1.2.7:
   peerDependencies:
     postcss: ^8.1.0
   checksum: 4bf5c2e25b106a6c1f58d5f7b35134810aa785455f0c30e31939d873d4110964c5e470862026e0af51608b6d64853c614d9c724018f73cd59974106c0927e982
-  languageName: node
-  linkType: hard
-
-"idb@npm:2.1.3":
-  version: 2.1.3
-  resolution: "idb@npm:2.1.3"
-  checksum: b902b2ed3f32daba7edeedeaf3786b2dbdcaf6e194dbe1b5084b59a3a41b5458dec11bed1ce8cd51548e66fb89854ff7a0fce2c55eb1bcf08a49e2acf30a2f63
   languageName: node
   linkType: hard
 
@@ -20342,18 +20307,6 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"realistic-structured-clone@npm:^2.0.1":
-  version: 2.0.2
-  resolution: "realistic-structured-clone@npm:2.0.2"
-  dependencies:
-    core-js: ^2.5.3
-    domexception: ^1.0.1
-    typeson: ^5.8.2
-    typeson-registry: ^1.0.0-alpha.20
-  checksum: 03a5ffad08baad29cf0735dad3c464c6d974e41cda3cf0f5b2b52101ea9809fd335b6ea2d2b8b43daea37a6d72b5b6250d122eeffd7f02eac917fe66d13426b1
-  languageName: node
-  linkType: hard
-
 "rechoir@npm:^0.7.0":
   version: 0.7.0
   resolution: "rechoir@npm:0.7.0"
@@ -21522,7 +21475,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"setimmediate@npm:^1.0.4, setimmediate@npm:^1.0.5":
+"setimmediate@npm:^1.0.4":
   version: 1.0.5
   resolution: "setimmediate@npm:1.0.5"
   checksum: 87884d8add4779fe47ccf763396a5bf875640ae34d80a10802da4de5c25d87647c12f6e7748fd5b8c143b57201caf2a5a781631456c228825f166ca305c12f20
@@ -23471,34 +23424,6 @@ typescript@4.2.2:
   languageName: node
   linkType: hard
 
-"typeson-registry@npm:^1.0.0-alpha.20":
-  version: 1.0.0-alpha.39
-  resolution: "typeson-registry@npm:1.0.0-alpha.39"
-  dependencies:
-    base64-arraybuffer-es6: ^0.7.0
-    typeson: ^6.0.0
-    whatwg-url: ^8.4.0
-  checksum: 92ef7ba3b984e1129118224a2e4af4a9428b0956cac4a041938c645ff1a9365920b55cb9c6ec84c8d2a39c05132ac61dd0a1065d5d8e24dc0e66879b428d0c09
-  languageName: node
-  linkType: hard
-
-"typeson@npm:^5.8.2":
-  version: 5.18.2
-  resolution: "typeson@npm:5.18.2"
-  peerDependencies:
-    core-js-bundle: ^3.6.4
-    regenerator-runtime: ^0.13.3
-  checksum: 6d009aa83e7f7c7733b6e100d529d70041011daa8c0f3d1e546b1f6fbd7e8203d192afb3986dad9f0202cc72f6e3fd65fb84a2df2fb976841577f4d5bf83c3bf
-  languageName: node
-  linkType: hard
-
-"typeson@npm:^6.0.0":
-  version: 6.0.0
-  resolution: "typeson@npm:6.0.0"
-  checksum: e26cc8dd4f5036b73f36739f7612b52e384cf7aac7dcf91e103477bcf4ce59ada0f99e303421058e9c58d643881febcc58f59740483b84080edc4f89557b3606
-  languageName: node
-  linkType: hard
-
 "ua-parser-js@npm:^0.7.21":
   version: 0.7.24
   resolution: "ua-parser-js@npm:0.7.24"
@@ -24719,7 +24644,7 @@ typescript@4.2.2:
   languageName: node
   linkType: hard
 
-"whatwg-url@npm:^8.0.0, whatwg-url@npm:^8.4.0":
+"whatwg-url@npm:^8.0.0":
   version: 8.4.0
   resolution: "whatwg-url@npm:8.4.0"
   dependencies:

@@ -32,16 +32,6 @@ if (typeof window !== "undefined") {
   window.URLSearchParams = UrlSearchParams;
 }
 
-// you can import fakes from fake-indexeddb and attach them to the jsdom global
-// https://github.com/dumbmatter/fakeIndexedDB#use
-global.indexedDB = require("fake-indexeddb");
-global.IDBIndex = require("fake-indexeddb/lib/FDBIndex");
-global.IDBCursor = require("fake-indexeddb/lib/FDBCursor");
-global.IDBObjectStore = require("fake-indexeddb/lib/FDBObjectStore");
-global.IDBTransaction = require("fake-indexeddb/lib/FDBTransaction");
-global.IDBDatabase = require("fake-indexeddb/lib/FDBDatabase");
-global.IDBKeyRange = require("fake-indexeddb/lib/FDBKeyRange");
-
 global.TextEncoder = util.TextEncoder;
 
 // React available everywhere (matches webpack config)

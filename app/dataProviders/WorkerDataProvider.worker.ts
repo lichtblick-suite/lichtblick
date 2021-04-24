@@ -13,7 +13,6 @@
 
 import ApiCheckerDataProvider from "@foxglove-studio/app/dataProviders/ApiCheckerDataProvider";
 import BagDataProvider from "@foxglove-studio/app/dataProviders/BagDataProvider";
-import IdbCacheWriterDataProvider from "@foxglove-studio/app/dataProviders/IdbCacheWriterDataProvider";
 import MeasureDataProvider from "@foxglove-studio/app/dataProviders/MeasureDataProvider";
 import RpcDataProviderRemote from "@foxglove-studio/app/dataProviders/RpcDataProviderRemote";
 import createGetDataProvider from "@foxglove-studio/app/dataProviders/createGetDataProvider";
@@ -24,7 +23,6 @@ const getDataProvider = createGetDataProvider({
   ApiCheckerDataProvider,
   BagDataProvider,
   MeasureDataProvider,
-  IdbCacheWriterDataProvider,
 });
 
 if (inWebWorker()) {

@@ -15,25 +15,7 @@ import round from "lodash/round";
 import sortBy from "lodash/sortBy";
 import sum from "lodash/sum";
 
-import Database from "@foxglove-studio/app/util/indexeddb/Database";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
-
-type DbInfo = {
-  name: string;
-  version: number;
-  objectStoreRowCounts: { name: string; rowCount: number }[];
-};
-type IdbInfo = {
-  dbs: DbInfo[];
-
-  /*
-   * NOTE: The value below is added server-side by directly reading the
-   * IndexedDB usage on disk. The reason we don't use
-   * navigator.storage.estimate() here is because it does not return info on
-   * IndexedDB usage in Puppeteer for some reason.
-   */
-  diskUsageMb?: number;
-};
 
 export type PerformanceStats = {
   bagLengthMs: number;
@@ -53,7 +35,6 @@ export type PerformanceStats = {
   averageRenderMs: number;
   averageFrameTimeMs: number;
   frameTimePercentiles: { percentile: number; frameTimeMs: number }[];
-  idb: IdbInfo;
 };
 
 const PERFORMANCE_MEASURING_MS_FRAMERATE_PARAM = "performance-measuring-framerate";
@@ -183,29 +164,6 @@ class PerformanceMeasuringClient {
     // no-op
   }
 
-  async _collectIdbStats(): Promise<IdbInfo> {
-    const databases = await window.indexedDB.databases();
-    const databasesWithInfo = [];
-
-    for (const { name, version } of databases) {
-      const dbWrapper = await Database.open(name, version as any, () => {
-        // no-op
-      });
-      const objectStoreNames = dbWrapper.db.objectStoreNames;
-      const objectStoreRowCounts = [];
-      for (const objectStoreName of objectStoreNames) {
-        const rowCount = await dbWrapper.count(objectStoreName);
-        objectStoreRowCounts.push({ name: objectStoreName, rowCount });
-      }
-
-      databasesWithInfo.push({ name, version, objectStoreRowCounts });
-    }
-
-    return {
-      dbs: databasesWithInfo as any,
-    };
-  }
-
   async finish(): Promise<void> {
     const startTime = this.startTime;
     const bagLengthMs = this.bagLengthMs;
@@ -235,7 +193,6 @@ class PerformanceMeasuringClient {
     }));
 
     const frameRenderCount = this.frameRenderTimes.length;
-    const idb = await this._collectIdbStats();
     const detail: PerformanceStats = {
       bagLengthMs,
       speed: this.speed,
@@ -246,7 +203,6 @@ class PerformanceMeasuringClient {
       averageRenderMs,
       averageFrameTimeMs,
       frameTimePercentiles,
-      idb,
       preloadTimeMs,
     };
 

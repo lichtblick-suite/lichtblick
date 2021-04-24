@@ -143,7 +143,7 @@ type FactoryOptions = {
 async function localBagFileSource(options: FactoryOptions) {
   let file: File;
 
-  // future enhancement woudl be to store the fileHandle in indexeddb and try to restore
+  // future enhancement would be to store the fileHandle in indexeddb and try to restore
   // fileHandles can be stored in indexeddb but not localstorage
   if (!options.skipRestore) {
     return;

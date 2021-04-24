@@ -36,7 +36,7 @@ export function getLocalBagDescriptor(file: File): DataProviderDescriptor {
 export function getRemoteBagDescriptor(
   url: string,
   guid: string | undefined,
-  options: { unlimitedMemoryCache: boolean; diskBagCaching: boolean },
+  options: { unlimitedMemoryCache: boolean },
 ): DataProviderDescriptor {
   const bagDataProvider = {
     name: CoreDataProviders.BagDataProvider,
@@ -47,19 +47,5 @@ export function getRemoteBagDescriptor(
     children: [],
   };
 
-  // If we have an input identifier (which should be globally unique), then cache in indexeddb.
-  // If not, then we don't have a cache key, so just read directly from the bag in memory.
-  return guid && options.diskBagCaching
-    ? {
-        name: CoreDataProviders.IdbCacheReaderDataProvider,
-        args: { id: guid },
-        children: [
-          wrapInWorkerIfEnabled({
-            name: CoreDataProviders.IdbCacheWriterDataProvider,
-            args: { id: guid },
-            children: [bagDataProvider],
-          }),
-        ],
-      }
-    : wrapInWorkerIfEnabled(bagDataProvider);
+  return wrapInWorkerIfEnabled(bagDataProvider);
 }

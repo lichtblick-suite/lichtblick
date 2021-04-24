@@ -16,7 +16,6 @@ import ApiCheckerDataProvider, {
 } from "@foxglove-studio/app/dataProviders/ApiCheckerDataProvider";
 import BagDataProvider from "@foxglove-studio/app/dataProviders/BagDataProvider";
 import CombinedDataProvider from "@foxglove-studio/app/dataProviders/CombinedDataProvider";
-import IdbCacheReaderDataProvider from "@foxglove-studio/app/dataProviders/IdbCacheReaderDataProvider";
 import MeasureDataProvider, {
   instrumentTreeWithMeasureDataProvider,
 } from "@foxglove-studio/app/dataProviders/MeasureDataProvider";
@@ -32,7 +31,6 @@ const getDataProviderBase = createGetDataProvider({
   ApiCheckerDataProvider,
   BagDataProvider,
   CombinedDataProvider,
-  IdbCacheReaderDataProvider,
   MeasureDataProvider,
   MemoryCacheDataProvider,
   ParseMessagesDataProvider,
