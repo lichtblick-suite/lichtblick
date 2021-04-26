@@ -2167,7 +2167,7 @@ __metadata:
     use-debounce: 6.0.1
     uuid: 8.3.2
     wasm-lz4: 1.0.0
-    xacro-parser: 0.2.3
+    xacro-parser: 0.3.0
   languageName: unknown
   linkType: soft
 
@@ -2950,34 +2950,6 @@ __metadata:
     react: ^17.0.1
     react-dom: ^17.0.1
   checksum: d0819720426ae84df87eb156e6477d0bc9060f1715eeadebc774ee630124d5b94155ce007becfe62f2bee854f8bc982b5b2b862b3b77d0654ed88265f572cb30
-  languageName: node
-  linkType: hard
-
-"@rollup/plugin-node-resolve@npm:^7.0.0":
-  version: 7.1.3
-  resolution: "@rollup/plugin-node-resolve@npm:7.1.3"
-  dependencies:
-    "@rollup/pluginutils": ^3.0.8
-    "@types/resolve": 0.0.8
-    builtin-modules: ^3.1.0
-    is-module: ^1.0.0
-    resolve: ^1.14.2
-  peerDependencies:
-    rollup: ^1.20.0||^2.0.0
-  checksum: 4d751a407f752a320dae3fed9cc8be293bf15c3b2a7f387945195275580612f540572f69ffe8bbeb1d89732e63dfb19694901172603a68f58968e3ff65ce7684
-  languageName: node
-  linkType: hard
-
-"@rollup/pluginutils@npm:^3.0.8":
-  version: 3.1.0
-  resolution: "@rollup/pluginutils@npm:3.1.0"
-  dependencies:
-    "@types/estree": 0.0.39
-    estree-walker: ^1.0.1
-    picomatch: ^2.2.2
-  peerDependencies:
-    rollup: ^1.20.0||^2.0.0
-  checksum: 45da6411e045d1b034242a8144f4a5e8c02ff1b68a2e0857807f5bb4b091c416f2015e075057f0f0dec200e7b35efe6ed4e301b43e365cedea09192f01a6839b
   languageName: node
   linkType: hard
 
@@ -4437,13 +4409,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/estree@npm:0.0.39":
-  version: 0.0.39
-  resolution: "@types/estree@npm:0.0.39"
-  checksum: 43e5361de39969def145f32f4599391ab13055ec94841f1633a7cfe10f0e8a940ebf0e9a4b2770454a6bddd034b57e7e0d51a4d565cb2714ee2accf10a7718be
-  languageName: node
-  linkType: hard
-
 "@types/express-serve-static-core@npm:*, @types/express-serve-static-core@npm:^4.17.18":
   version: 4.17.18
   resolution: "@types/express-serve-static-core@npm:4.17.18"
@@ -5026,15 +4991,6 @@ __metadata:
   version: 0.1.5
   resolution: "@types/resize-observer-browser@npm:0.1.5"
   checksum: 108a1c1443a602f0022d372a8e48cfb155c809a20286840f2778fbc0d6017f9a6280f12578e5447ac1470436be11034f072e911d70aad9a345bb4b7585e61afa
-  languageName: node
-  linkType: hard
-
-"@types/resolve@npm:0.0.8":
-  version: 0.0.8
-  resolution: "@types/resolve@npm:0.0.8"
-  dependencies:
-    "@types/node": "*"
-  checksum: f54f13e4b6ac46a6c7bde9e609cd730f4369b434aa59c5230478b9262bb75e7349c3247fd2cdb917e98d053a57f5609dd552379c612a720b59a8714914d324ed
   languageName: node
   linkType: hard
 
@@ -7631,13 +7587,6 @@ __metadata:
     stat-mode: ^1.0.0
     temp-file: ^3.3.7
   checksum: 9e10a87b31d9e3d53e719bbaa3803d40294ec57f19c6af4220adf2679c0029052b39ed768902fdc088ae26976b250314699807bbb4134eff724b37423525d3bc
-  languageName: node
-  linkType: hard
-
-"builtin-modules@npm:^3.1.0":
-  version: 3.2.0
-  resolution: "builtin-modules@npm:3.2.0"
-  checksum: f0e7240f70ae472a0a0167bf76d2e828c73028fe60be8cd229939c38a27527ea68c92f700553dac1316fa124af3037bc7a765ca0e029a03d2e9201dfb372ea24
   languageName: node
   linkType: hard
 
@@ -11378,13 +11327,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"estree-walker@npm:^1.0.1":
-  version: 1.0.1
-  resolution: "estree-walker@npm:1.0.1"
-  checksum: 85e7cee763e9125a7d8a947b3a06a8b9282873936df220dd0d791d9b3315e45e40ab096b43ba71bdc99140c11a6d23fdcf686642dc119a7b2d6181004fdb24d2
-  languageName: node
-  linkType: hard
-
 "esutils@npm:^2.0.2":
   version: 2.0.3
   resolution: "esutils@npm:2.0.3"
@@ -14349,13 +14291,6 @@ fsevents@^1.2.7:
   version: 2.0.2
   resolution: "is-map@npm:2.0.2"
   checksum: 2d9b1a0b0dc19ba4486278297586200ec9f166b068bddf1e05f0c0ab9eac197fb6efac32efc2a970d1036b96fa08806337a9dd6808365a5cef6a392a88a2ca2a
-  languageName: node
-  linkType: hard
-
-"is-module@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "is-module@npm:1.0.0"
-  checksum: 2cbd41e2760874130b76aee84cc53120c4feef0d0f196fa665326857b444c8549909cc840f3f3a59652a7e8df46146a77f6c0f3f70a578704e03670975843e74
   languageName: node
   linkType: hard
 
@@ -18512,7 +18447,7 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"picomatch@npm:^2.0.4, picomatch@npm:^2.2.1, picomatch@npm:^2.2.2, picomatch@npm:^2.2.3":
+"picomatch@npm:^2.0.4, picomatch@npm:^2.2.1, picomatch@npm:^2.2.3":
   version: 2.2.3
   resolution: "picomatch@npm:2.2.3"
   checksum: f8c9323bc3b21ff448e81dd32277135d781abae5d53a1415d69a4ce6317a2c11404d449c550110b8fa402c07d5e80ff0e2657f263a312517cc809e9010d25791
@@ -25059,13 +24994,12 @@ typescript@4.2.2:
   languageName: node
   linkType: hard
 
-"xacro-parser@npm:0.2.3":
-  version: 0.2.3
-  resolution: "xacro-parser@npm:0.2.3"
+"xacro-parser@npm:0.3.0":
+  version: 0.3.0
+  resolution: "xacro-parser@npm:0.3.0"
   dependencies:
-    "@rollup/plugin-node-resolve": ^7.0.0
     expr-eval: ^2.0.2
-  checksum: 670db8503031309534648b6a336fe40f1cb1081b1c2bebd4768af1553ea973b0354d008b0d3d45d7ad09fe7fc0aa4bed17a5a9dc36950c7e80724a8cb572b1f3
+  checksum: 12909367e9a81fd5e85c8abbb7f84cbfa4d72efe5d503006ddebd207277d8293f3453233a38f74717f4c3eaef063595e24a4bf446bce741646e3e417e5d5c34b
   languageName: node
   linkType: hard
 
