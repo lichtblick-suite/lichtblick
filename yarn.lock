@@ -2048,7 +2048,7 @@ __metadata:
     "@storybook/react": 6.2.5
     "@testing-library/dom": 7.30.1
     "@testing-library/react": 11.2.6
-    "@testing-library/react-hooks": 5.1.1
+    "@testing-library/react-hooks": 5.1.2
     "@types/argparse": ^2.0.5
     "@types/classnames": 2.2.11
     "@types/css-font-loading-module": 0.0.4
@@ -4137,9 +4137,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/react-hooks@npm:5.1.1":
-  version: 5.1.1
-  resolution: "@testing-library/react-hooks@npm:5.1.1"
+"@testing-library/react-hooks@npm:5.1.2":
+  version: 5.1.2
+  resolution: "@testing-library/react-hooks@npm:5.1.2"
   dependencies:
     "@babel/runtime": ^7.12.5
     "@types/react": ">=16.9.0"
@@ -4156,7 +4156,7 @@ __metadata:
       optional: true
     react-test-renderer:
       optional: true
-  checksum: cae917a90b8cbb8d4e738b1df0d404a0af344dc8debf1afd5b7d6b6919287373994ace87d0d82544adc86927d783a6785a6d414b2818cb69545d6f6ce5672486
+  checksum: d1a1cfeb1ca596747b53bda1124a95232f2f945a94eff275433e52825b3cc883ccd7b265d5c22d2edc2d48d7b5c5fcfa424e3ce50fc2d7d61b29a978b3bfcaf5
   languageName: node
   linkType: hard
 
