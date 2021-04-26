@@ -2050,7 +2050,7 @@ __metadata:
     "@testing-library/react": 11.2.6
     "@testing-library/react-hooks": 5.1.2
     "@types/argparse": ^2.0.5
-    "@types/classnames": 2.2.11
+    "@types/classnames": 2.3.1
     "@types/css-font-loading-module": 0.0.4
     "@types/enzyme": ^3.10.8
     "@types/enzyme-adapter-react-16": 1.0.6
@@ -4312,10 +4312,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/classnames@npm:2.2.11":
-  version: 2.2.11
-  resolution: "@types/classnames@npm:2.2.11"
-  checksum: 5bbd4fd0f803a46424152ecc89cfb88464af4d655634de8a98ec54977b0b6d9da107e799c24a2b66f0133438e84bac51b2275134cf028edea749fb018f731e89
+"@types/classnames@npm:2.3.1":
+  version: 2.3.1
+  resolution: "@types/classnames@npm:2.3.1"
+  dependencies:
+    classnames: "*"
+  checksum: bfef58f03417265e6fe760abba7342ba339d36a30a0a913dcad271f7ef580fa776ec9c51d6f2487fc1ade113382a2b7a16c609373ce6528c2c10ec03eb9d2415
   languageName: node
   linkType: hard
 
@@ -8239,7 +8241,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"classnames@npm:2.3.1, classnames@npm:2.x, classnames@npm:^2.2.1, classnames@npm:^2.2.5, classnames@npm:^2.2.6":
+"classnames@npm:*, classnames@npm:2.3.1, classnames@npm:2.x, classnames@npm:^2.2.1, classnames@npm:^2.2.5, classnames@npm:^2.2.6":
   version: 2.3.1
   resolution: "classnames@npm:2.3.1"
   checksum: 57d536edede609f81425d24b062d8d720a466565faf1e38d32c881e883920baa71519ac70c7b565e9cd39201fb1c1ff9bdf8aabf8e26544bac481e7924867c83
