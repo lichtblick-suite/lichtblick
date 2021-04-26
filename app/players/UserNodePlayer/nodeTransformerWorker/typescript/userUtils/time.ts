@@ -3,16 +3,16 @@ import { Time } from "./types";
 /*
  * Checks ROS-time equality.
  */
-export const areSame = (t1: Time, t2: Time) => t1.sec === t2.sec && t1.nsec === t2.nsec;
+export const areSame = (t1: Time, t2: Time): boolean => t1.sec === t2.sec && t1.nsec === t2.nsec;
 
 /*
  * Compare two times, returning a negative value if the right is greater or a
  * positive value if the left is greater or 0 if the times are equal useful to
  * supply to Array.prototype.sort
  */
-export const compare = (left: Time, right: Time) => {
+export const compare = (left: Time, right: Time): number => {
   const secDiff = left.sec - right.sec;
-  return secDiff || left.nsec - right.nsec;
+  return secDiff !== 0 ? secDiff : left.nsec - right.nsec;
 };
 
 const fixTime = (t: Time): Time => {

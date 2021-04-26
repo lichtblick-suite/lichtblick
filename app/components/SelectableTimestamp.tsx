@@ -101,7 +101,7 @@ export default React.memo<Props>(function SelectableTimestamp({
 
   useEffect(() => {
     // Reset the timeStr when timezone becomes available.
-    if (timezone) {
+    if (timezone != undefined && timezone.length > 0) {
       setTimeStr(currentTimeStr);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

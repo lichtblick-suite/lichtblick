@@ -21,7 +21,7 @@ import Tree from "@foxglove-studio/app/components/Tree";
 import { Node } from "@foxglove-studio/app/components/Tree/Node";
 
 function getInitialState() {
-  const root = {
+  const root: Node = {
     text: "foo",
     id: "root",
     visible: true,
@@ -49,6 +49,7 @@ function getInitialState() {
                 checked: false,
                 visible: true,
                 icon: <MapMarkerIcon />,
+                children: [],
               },
               {
                 id: "leaf-2",
@@ -56,6 +57,7 @@ function getInitialState() {
                 checked: false,
                 visible: true,
                 icon: <GridIcon />,
+                children: [],
               },
             ],
           },
@@ -72,12 +74,14 @@ function getInitialState() {
             text: "child 1",
             checked: false,
             visible: true,
+            children: [],
           },
           {
             id: "invisible",
             text: "invisible",
             checked: false,
             visible: false,
+            children: [],
           },
         ],
       },
@@ -110,6 +114,7 @@ function getInitialState() {
                     checked: false,
                     visible: true,
                     disabled: true,
+                    children: [],
                   },
                 ],
               },
@@ -132,7 +137,7 @@ function Example({ hideRoot }: { hideRoot?: boolean }) {
     setState({ ...state, root });
   };
   const onNodeExpand = (node: Node) => {
-    node.expanded = !node.expanded;
+    node.expanded = !(node.expanded ?? false);
     setState({ ...state, root });
   };
 
@@ -143,7 +148,7 @@ function Example({ hideRoot }: { hideRoot?: boolean }) {
           hideRoot={hideRoot}
           onToggleCheck={onNodeCheck}
           onToggleExpand={onNodeExpand}
-          root={root as any}
+          root={root}
         />
       </Menu>
     </div>

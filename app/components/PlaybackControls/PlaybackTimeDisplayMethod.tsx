@@ -19,6 +19,7 @@ import { setPlaybackConfig } from "@foxglove-studio/app/actions/panels";
 import Dropdown from "@foxglove-studio/app/components/Dropdown";
 import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
 import Flex from "@foxglove-studio/app/components/Flex";
+import { State } from "@foxglove-studio/app/reducers";
 import {
   formatDate,
   formatTime,
@@ -55,16 +56,16 @@ const PlaybackTimeDisplayMethod = ({
   onPause,
   isPlaying,
 }: {
-  currentTime: Time;
-  startTime: Time;
-  endTime: Time;
+  currentTime?: Time;
+  startTime?: Time;
+  endTime?: Time;
   timezone?: string;
   onSeek: (arg0: Time) => void;
   onPause: () => void;
   isPlaying: boolean;
-}) => {
+}): JSX.Element => {
   const timeDisplayMethod = useSelector(
-    (state: any) => state.persistedState.panels.playbackConfig.timeDisplayMethod || "ROS",
+    (state: State) => state.persistedState.panels.playbackConfig.timeDisplayMethod ?? "ROS",
   );
   const dispatch = useDispatch();
   const setTimeDisplayMethod = useCallback(
@@ -91,7 +92,10 @@ const PlaybackTimeDisplayMethod = ({
     (e) => {
       e.preventDefault();
 
-      if (!inputText?.length) {
+      if (inputText == undefined || inputText.length === 0) {
+        return;
+      }
+      if (!startTime || !currentTime || !endTime) {
         return;
       }
 
@@ -101,7 +105,7 @@ const PlaybackTimeDisplayMethod = ({
         timezone,
       });
 
-      if (!validTimeAndMethod) {
+      if (validTimeAndMethod == undefined) {
         setHasError(true);
         return;
       }
@@ -110,7 +114,7 @@ const PlaybackTimeDisplayMethod = ({
       setHasError(false);
       setIsEditing(false);
       if (
-        validTimeAndMethod?.time &&
+        validTimeAndMethod.time &&
         isTimeInRangeInclusive(validTimeAndMethod.time, startTime, endTime)
       ) {
         onSeek(validTimeAndMethod.time);
@@ -133,7 +137,7 @@ const PlaybackTimeDisplayMethod = ({
 
   useEffect(() => {
     // If user submits an empty input field or resumes playback, clear error state and show current timestamp
-    if (hasError && (!inputText?.length || isPlaying)) {
+    if (hasError && (inputText == undefined || inputText.length === 0 || isPlaying)) {
       setIsEditing(false);
       setHasError(false);
     }

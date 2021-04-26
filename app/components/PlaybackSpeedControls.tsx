@@ -22,7 +22,7 @@ import { PlayerCapabilities } from "@foxglove-studio/app/players/types";
 
 const SPEEDS = ["0.01", "0.02", "0.05", "0.1", "0.2", "0.5", "0.8", "1", "2", "3", "5"];
 
-export default function PlaybackSpeedControls() {
+export default function PlaybackSpeedControls(): JSX.Element {
   const configSpeed = useSelector((state: any) => state.persistedState.panels.playbackConfig.speed);
   const speed = useMessagePipeline(
     useCallback(({ playerState }) => playerState.activeData?.speed, []),
@@ -49,7 +49,7 @@ export default function PlaybackSpeedControls() {
   // Set the speed to the speed that we got from the config whenever we get a new Player.
   useEffect(() => setSpeed(configSpeed), [configSpeed, setSpeed]);
 
-  const displayedSpeed = speed || configSpeed;
+  const displayedSpeed = speed ?? configSpeed;
   let speedText = `–`;
 
   if (displayedSpeed) {

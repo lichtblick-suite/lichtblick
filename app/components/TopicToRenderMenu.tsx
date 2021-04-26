@@ -67,11 +67,11 @@ export default function TopicToRenderMenu({
   topicsGroups,
   singleTopicDatatype,
   defaultTopicToRender,
-}: Props) {
-  if (topicsGroups && singleTopicDatatype) {
+}: Props): JSX.Element {
+  if (topicsGroups != undefined && singleTopicDatatype != undefined) {
     throw new Error("Cannot set both topicsGroups and singleTopicDatatype");
   }
-  if (!topicsGroups && !singleTopicDatatype) {
+  if (topicsGroups == undefined && singleTopicDatatype == undefined) {
     throw new Error("Must set either topicsGroups or singleTopicDatatype");
   }
   const availableTopics: string[] = [];
@@ -92,7 +92,8 @@ export default function TopicToRenderMenu({
   // Keeps only the first occurrence of each topic.
   const renderTopics: string[] = uniq([defaultTopicToRender, ...availableTopics, topicToRender]);
   const parentTopicSpan = (topic: string, available: boolean) => {
-    const topicDiv = topic ? topic : <span style={{ fontStyle: "italic" }}>Default</span>;
+    const topicDiv =
+      topic.length > 0 ? topic : <span style={{ fontStyle: "italic" }}>Default</span>;
     return (
       <span>
         {topicDiv}
@@ -111,9 +112,9 @@ export default function TopicToRenderMenu({
               ? `Parent topics selected by topic suffixes:\n ${topicsGroups
                   .map((group) => group.suffix)
                   .join("\n")}`
-              : `Topics selected by datatype: ${singleTopicDatatype || ""}` // add || "" is to fix flow here
+              : `Topics selected by datatype: ${singleTopicDatatype ?? ""}`
           }
-          tooltipProps={{ placement: "top" } as any}
+          tooltipProps={{ placement: "top" }}
           style={{ color: topicToRender === defaultTopicToRender ? colors.LIGHT1 : colors.ORANGE }}
           dataTest={"topic-set"}
         >

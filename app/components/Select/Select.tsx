@@ -50,12 +50,12 @@ export default class Select extends React.Component<Props, State> {
     isOpen: false,
   };
 
-  close = () => {
+  close = (): void => {
     this.setState({ isOpen: false });
     window.removeEventListener("click", this.close);
   };
 
-  open = (e: React.SyntheticEvent<HTMLDivElement>) => {
+  open = (e: React.SyntheticEvent<HTMLDivElement>): void => {
     e.stopPropagation();
     this.setState({ isOpen: true });
     // let this event hit the window before adding close listener
@@ -64,7 +64,7 @@ export default class Select extends React.Component<Props, State> {
     });
   };
 
-  renderOpen() {
+  renderOpen(): React.ReactNode {
     const { value, children, onChange } = this.props;
     const mappedChildren = React.Children.map(children, (child: any) => {
       // if the child does not have a value prop, just return it
@@ -91,7 +91,7 @@ export default class Select extends React.Component<Props, State> {
     });
     const { body } = document;
     const { el } = this;
-    if (!body || !el) {
+    if (!el) {
       return;
     }
     const box = el.getBoundingClientRect();
@@ -102,13 +102,17 @@ export default class Select extends React.Component<Props, State> {
     };
     return createPortal(
       <div style={style} className={styles.menu}>
-        {mappedChildren?.length ? mappedChildren : <SEmpty>No options available</SEmpty>}
+        {mappedChildren != undefined && mappedChildren.length > 0 ? (
+          mappedChildren
+        ) : (
+          <SEmpty>No options available</SEmpty>
+        )}
       </div>,
       body,
     );
   }
 
-  render() {
+  render(): JSX.Element {
     const { isOpen } = this.state;
     const { text, value, icon } = this.props;
     return (
@@ -118,7 +122,9 @@ export default class Select extends React.Component<Props, State> {
         onClick={this.open}
       >
         <div className={styles.select}>
-          <span className={styles.value}>{text || value}</span>
+          <span className={styles.value}>
+            {text != undefined && text.length > 0 ? text : value}
+          </span>
           <span className={styles.icon}>
             <Icon>{icon}</Icon>
           </span>

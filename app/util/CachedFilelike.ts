@@ -182,8 +182,11 @@ export default class CachedFilelike implements Filelike {
 
       // You can set READ_DELAY=<number> on the command line when testing locally to simulate a slow connection.
       let delay = 0;
-      if (process.env.READ_DELAY && process.env.NODE_ENV !== "production") {
-        delay = parseInt(process.env.READ_DELAY) || 1000;
+      if (process.env.READ_DELAY != undefined && process.env.NODE_ENV !== "production") {
+        delay = parseInt(process.env.READ_DELAY);
+        if (isNaN(delay)) {
+          delay = 1000;
+        }
       }
       setTimeout(() => callback(undefined, buffer), delay);
 
@@ -234,7 +237,7 @@ export default class CachedFilelike implements Filelike {
 
       if (this._keepReconnectingCallback) {
         // If this callback is set, just keep retrying.
-        if (!this._lastErrorTime) {
+        if (this._lastErrorTime == undefined) {
           // And if this is the first error, let the callback know.
           this._keepReconnectingCallback(true);
         }
@@ -242,7 +245,7 @@ export default class CachedFilelike implements Filelike {
         // Otherwise, if we get two errors in a short timespan (100ms) then there is probably a
         // serious error, we resolve all remaining callbacks with errors and close out.
         const lastErrorTime = this._lastErrorTime;
-        if (lastErrorTime && Date.now() - lastErrorTime < 100) {
+        if (lastErrorTime != undefined && Date.now() - lastErrorTime < 100) {
           this._logFn(
             `Connection @ ${rangeToString(
               range,
@@ -278,7 +281,7 @@ export default class CachedFilelike implements Filelike {
         return; // Ignore data from old streams.
       }
 
-      if (this._lastErrorTime) {
+      if (this._lastErrorTime != undefined) {
         // If we had an error before, then that has clearly been resolved since we received some data.
         this._lastErrorTime = undefined;
         if (this._keepReconnectingCallback) {

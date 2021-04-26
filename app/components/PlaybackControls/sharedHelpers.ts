@@ -28,20 +28,19 @@ export const jumpSeek = (
   directionSign: typeof DIRECTION[keyof typeof DIRECTION],
   playerProps: { seek: (arg0: Time) => void; player: PlayerState },
   modifierKeys?: { altKey: boolean; shiftKey: boolean },
-) => {
+): void => {
   const { player, seek } = playerProps;
   if (!player.activeData) {
     return;
   }
 
   const timeMs = toMillis(player.activeData.currentTime);
-  const deltaMs = modifierKeys?.altKey
-    ? ARROW_SEEK_BIG_MS
-    : modifierKeys?.shiftKey
-    ? ARROW_SEEK_SMALL_MS
-    : ARROW_SEEK_DEFAULT_MS;
+  const deltaMs =
+    modifierKeys?.altKey === true
+      ? ARROW_SEEK_BIG_MS
+      : modifierKeys?.shiftKey === true
+      ? ARROW_SEEK_SMALL_MS
+      : ARROW_SEEK_DEFAULT_MS;
   const nextTime = fromMillis(timeMs + deltaMs * directionSign);
-  if (nextTime) {
-    seek(nextTime);
-  }
+  seek(nextTime);
 };

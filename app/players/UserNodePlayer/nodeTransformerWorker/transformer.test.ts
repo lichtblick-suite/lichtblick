@@ -1503,7 +1503,7 @@ describe("pipeline", () => {
 
     describe("extracts datatypes from the return type of the publisher", () => {
       // Run all tests if no only/skip params have been specified.
-      let filteredTestCases = testCases.filter(({ only }) => !!only);
+      let filteredTestCases = testCases.filter(({ only }) => only === true);
       if (filteredTestCases.length === 0) {
         filteredTestCases = testCases;
       }
@@ -1512,15 +1512,15 @@ describe("pipeline", () => {
       );
       filteredTestCases.forEach(
         ({ description, sourceCode, datatypes = {}, error, outputDatatype, rosLib }) => {
-          it(`${error ? "Expected Error: " : ""}${description}`, () => {
+          it(`${error != undefined ? "Expected Error: " : ""}${description}`, () => {
             const inputNodeData = {
               ...baseNodeData,
               datatypes,
               sourceCode,
-              ...(rosLib ? { rosLib } : {}),
+              ...(rosLib != undefined ? { rosLib } : {}),
             };
             const nodeData = extract(inputNodeData, []);
-            if (!error) {
+            if (error == undefined) {
               expect(nodeData.diagnostics).toEqual([]);
               expect(nodeData.outputDatatype).toEqual(outputDatatype ?? nodeData.name);
               expect(nodeData.datatypes).toEqual(datatypes);

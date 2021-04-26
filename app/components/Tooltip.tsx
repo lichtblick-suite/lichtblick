@@ -137,7 +137,7 @@ export function useTooltip({
           clearTimeout(timeoutRef.current);
         }
       }
-      if (initiallyShown.current && !elementRef.current && element) {
+      if (initiallyShown.current === true && !elementRef.current && element) {
         forceUpdateForInitiallyShown(true);
       }
       elementRef.current = element;
@@ -148,7 +148,7 @@ export function useTooltip({
   );
 
   const tooltip =
-    contents && (controlledShown ?? shown) ? (
+    contents != undefined && (controlledShown ?? shown) ? (
       <FluentTooltip
         hidden={false}
         targetElement={elementRef.current ?? undefined}
@@ -156,7 +156,7 @@ export function useTooltip({
         calloutProps={calloutProps}
         onRenderContent={onRenderContent}
         styles={
-          controlledShown
+          controlledShown === true
             ? // Appear immediately when forcibly shown
               { root: { animation: "none" } }
             : undefined
@@ -175,7 +175,7 @@ export default function Tooltip(
   const { children } = props;
   const { ref, tooltip } = useTooltip(props);
   const child = React.Children.only(children);
-  const host = child ? React.cloneElement(child, { ref }) : undefined;
+  const host = React.cloneElement(child, { ref });
   return (
     <>
       {host}

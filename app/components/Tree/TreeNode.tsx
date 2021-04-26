@@ -37,7 +37,7 @@ type Props = {
   depth: number;
   disableCheckbox?: boolean;
   enableVisibilityToggle?: boolean;
-  onRemoveNode: (node: Node) => void;
+  onRemoveNode?: (node: Node) => void;
   onToggleExpand: (node: Node) => void;
   onToggleVisibility?: (node: Node) => void;
   onToggleCheck: (node: Node) => void;
@@ -45,20 +45,20 @@ type Props = {
 };
 
 export default class TreeNode extends Component<Props> {
-  onCheckboxClick = () => {
+  onCheckboxClick = (): void => {
     const { onToggleCheck, node } = this.props;
-    if (!node.disabled && node.hasCheckbox) {
+    if (!(node.disabled ?? false) && (node.hasCheckbox ?? false)) {
       onToggleCheck(node);
     }
   };
 
-  onRemoveNode = () => {
+  onRemoveNode = (): void => {
     if (this.props.onRemoveNode) {
       this.props.onRemoveNode(this.props.node);
     }
   };
 
-  onToggleVisibility = (e: React.SyntheticEvent<HTMLElement>) => {
+  onToggleVisibility = (e: React.SyntheticEvent<HTMLElement>): void => {
     const { onToggleVisibility, node } = this.props;
     if (onToggleVisibility) {
       // stop propagation so it does not trigger expanding/collapsing topics with namespaces
@@ -67,17 +67,17 @@ export default class TreeNode extends Component<Props> {
     }
   };
 
-  onExpandClick = (_e: React.SyntheticEvent<HTMLElement>) => {
+  onExpandClick = (_e: React.SyntheticEvent<HTMLElement>): void => {
     const { onToggleExpand, node } = this.props;
     // if the node has no children, have the entire container be a hitbox for toggling checked
-    if (node.children?.length) {
+    if (node.children.length > 0) {
       onToggleExpand(node);
     } else {
       this.onCheckboxClick();
     }
   };
 
-  renderChildren() {
+  renderChildren(): React.ReactNode {
     const {
       depth,
       disableCheckbox,
@@ -89,7 +89,7 @@ export default class TreeNode extends Component<Props> {
       onToggleExpand,
       onToggleVisibility,
     } = this.props;
-    if (!node.expanded || !node.children) {
+    if (!(node.expanded ?? false) || node.children.length === 0) {
       return ReactNull;
     }
     return node.children.map((child) => {
@@ -110,10 +110,16 @@ export default class TreeNode extends Component<Props> {
     });
   }
 
-  getCheckboxIcon() {
-    const { checked, disabled, missing, hasCheckbox, children } = this.props.node;
+  getCheckboxIcon(): React.ReactNode {
+    const {
+      checked,
+      disabled = false,
+      missing = false,
+      hasCheckbox = false,
+      children,
+    } = this.props.node;
     if (!hasCheckbox) {
-      return children?.length && <FolderIcon />;
+      return children.length > 0 && <FolderIcon />;
     }
     if (missing) {
       return <BlockHelperIcon className={styles.blockHelperIcon} />;
@@ -124,26 +130,26 @@ export default class TreeNode extends Component<Props> {
     return <CheckboxBlankOutlineIcon />;
   }
 
-  onEditClick = (e: React.MouseEvent<HTMLElement>) => {
+  onEditClick = (e: React.MouseEvent<HTMLElement>): void => {
     const { onEditClick, node } = this.props;
-    if (!node.canEdit) {
+    if (!(node.canEdit ?? false)) {
       return;
     }
     e.stopPropagation();
     onEditClick(e, node);
   };
 
-  render() {
-    const { node, depth, enableVisibilityToggle, disableCheckbox } = this.props;
+  render(): React.ReactNode {
+    const { node, depth, enableVisibilityToggle = false, disableCheckbox = false } = this.props;
     const {
-      expanded,
+      expanded = false,
       children,
       icon,
       disabled,
       tooltip,
       canEdit,
-      hasEdit,
-      filtered,
+      hasEdit = false,
+      filtered = false,
       visible,
       namespace,
     } = node;
@@ -161,7 +167,7 @@ export default class TreeNode extends Component<Props> {
       [styles.disabled!]: disabled,
     });
 
-    const extraIcon = icon && (
+    const extraIcon = icon != undefined && (
       <Icon
         fade
         className={cx(styles.extraIcon, { [styles.disabled!]: disabled })}
@@ -171,7 +177,7 @@ export default class TreeNode extends Component<Props> {
       </Icon>
     );
 
-    const editIcon = icon && canEdit && (
+    const editIcon = icon != undefined && canEdit && (
       <Icon
         style={{ padding: "0 4px" }}
         fade
@@ -232,7 +238,7 @@ export default class TreeNode extends Component<Props> {
           {removeIcon}
           <Icon
             className={cx(styles["expand-icon"], {
-              [styles.invisible!]: !children || children.length === 0,
+              [styles.invisible!]: children.length === 0,
             })}
             style={{ left: paddingLeft + depth * indentWidth - 16 }}
           >

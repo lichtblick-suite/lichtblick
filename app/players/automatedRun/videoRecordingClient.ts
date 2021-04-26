@@ -45,7 +45,7 @@ export type VideoRecordingAction = {
       // just result in { "action": "error", "error": {} }. Instead pass a string - the stack itself.
       const payload: VideoRecordingAction = {
         action: "error",
-        error: error.stack || error.message || error.toString?.() || (error as any),
+        error: error.stack ?? error.message ?? error.toString?.() ?? (error as any),
       };
       // Clear error, since if it is whitelisted we will ignore and try to keep running
       error = undefined;
@@ -55,7 +55,7 @@ export type VideoRecordingAction = {
       }
       return payload;
     }
-    if (finishedMsPerFrame) {
+    if (finishedMsPerFrame != undefined) {
       return { action: "finish", msPerFrame: finishedMsPerFrame };
     }
     if (screenshotResolve) {
@@ -75,7 +75,7 @@ export type VideoRecordingAction = {
 };
 
 const params = new URLSearchParams(location.search);
-const [workerIndex = 0, workerTotal = 1] = (params.get("video-recording-worker") || "0/1")
+const [workerIndex = 0, workerTotal = 1] = (params.get("video-recording-worker") ?? "0/1")
   .split("/")
   .map((n) => parseInt(n));
 const msPerFrame = params.has("video-recording-framerate")
@@ -149,7 +149,7 @@ class VideoRecordingClient {
     });
   }
 
-  finish() {
+  async finish() {
     logger.info("videoRecordingClient.finish()");
     finishedMsPerFrame = msPerFrame;
   }

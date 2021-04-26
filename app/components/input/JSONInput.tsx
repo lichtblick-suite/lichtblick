@@ -44,7 +44,7 @@ export function JSONInput(props: {
       }}
       onKeyDown={(e) => {
         const val = keyValMap[e.key];
-        if (typeof parsedValue === "number" && val) {
+        if (typeof parsedValue === "number" && val != undefined) {
           const newParsedValue = parsedValue + val;
           setInternalValue(`${newParsedValue}`);
           props.onChange(newParsedValue);

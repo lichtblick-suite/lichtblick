@@ -64,7 +64,7 @@ export const StyledFullWidthBar = styled.div<{ activeData?: PlayerStateActiveDat
 `;
 
 export const StyledMarker = styled.div.attrs<{ width: number }>(({ width }) => ({
-  style: { left: `calc(${(width || 0) * 100}% - 2px)` },
+  style: { left: `calc(${width * 100}% - 2px)` },
 }))<{ width: number }>`
   background-color: white;
   position: absolute;
@@ -82,7 +82,7 @@ export type PlaybackControlProps = {
   seek: (arg0: Time) => void;
 };
 
-export const TooltipItem = ({ title, value }: { title: string; value: any }) => (
+export const TooltipItem = ({ title, value }: { title: string; value: any }): JSX.Element => (
   <div>
     <span className={styles.tipTitle}>{title}:</span>
     <span className={styles.tipValue}>{value}</span>
@@ -121,8 +121,8 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
         if (!activeData) {
           return;
         }
-        const { startTime, endTime } = activeData || {};
-        if (!startTime || !endTime || el.current == undefined || slider.current == undefined) {
+        const { startTime } = activeData;
+        if (el.current == undefined || slider.current == undefined) {
           return;
         }
         const currentEl = el.current;
@@ -166,10 +166,10 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
 
     const { isPlaying, startTime, endTime, currentTime } = activeData ?? {};
 
-    const min = (startTime && toSec(startTime)) ?? 0;
-    const max = (endTime && toSec(endTime)) ?? 0;
+    const min = startTime && toSec(startTime);
+    const max = endTime && toSec(endTime);
     const value = currentTime == undefined ? undefined : toSec(currentTime);
-    const step = (max - min) / 500;
+    const step = ((max ?? 100) - (min ?? 0)) / 500;
 
     // repeat logic could also live in messagePipeline but since it is only triggered
     // from playback controls we've implemented it here for now - if there is demand
@@ -181,7 +181,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
         // if the user turns on repeat and we are at the end, we assume they want to play from start
         // even if paused
         play();
-      } else if (activeData?.isPlaying) {
+      } else if (activeData?.isPlaying === true) {
         // no-repeat
         // pause playback to toggle pause button state
         // if the user clicks play while we are at the end, we go back to begginning
@@ -204,7 +204,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
     }, []);
 
     const togglePlayPause = useCallback(() => {
-      if (playerState.current?.activeData?.isPlaying) {
+      if (playerState.current?.activeData?.isPlaying === true) {
         pause();
       } else {
         resumePlay();
@@ -261,9 +261,9 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
             <RepeatIcon />
           </Icon>
         </div>
-        <div className={styles.playIconWrapper} onClick={isPlaying ? pause : resumePlay}>
+        <div className={styles.playIconWrapper} onClick={isPlaying === true ? pause : resumePlay}>
           <Icon style={activeData ? {} : { opacity: 0.4 }} xlarge>
-            {isPlaying ? <PauseIcon /> : <PlayIcon />}
+            {isPlaying === true ? <PauseIcon /> : <PlayIcon />}
           </Icon>
         </div>
         <div className={styles.bar}>
@@ -279,8 +279,8 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
           >
             <Slider
               ref={slider}
-              min={min || 0}
-              max={max || 100}
+              min={min ?? 0}
+              max={max ?? 100}
               disabled={min == undefined || max == undefined}
               step={step}
               value={value}
@@ -292,9 +292,9 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
           <PlaybackBarHoverTicks componentId={hoverComponentId} />
         </div>
         <PlaybackTimeDisplayMethod
-          currentTime={currentTime as any}
-          startTime={startTime as any}
-          endTime={endTime as any}
+          currentTime={currentTime}
+          startTime={startTime}
+          endTime={endTime}
           onSeek={seek}
           onPause={pause}
           isPlaying={isPlaying ?? false}
@@ -318,6 +318,6 @@ const getProps = ({
   player: playerState,
 });
 
-export default function PlaybackControls() {
+export default function PlaybackControls(): JSX.Element {
   return <UnconnectedPlaybackControls {...useMessagePipeline(getProps)} />;
 }

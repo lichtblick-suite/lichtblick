@@ -26,10 +26,6 @@ export type TopicTreeConfig = {
   topicName?: string;
   children?: TopicTreeConfig[];
   description?: string;
-
-  // Previous names or ids for this item under which it might be saved in old layouts.
-  // Used for automatic conversion so that old saved layouts continue to work when tree nodes are renamed.
-  legacyIds?: string[];
 };
 
 export type TreeUINode = { title: Node; key: string; children?: TreeUINode[]; disabled?: boolean };

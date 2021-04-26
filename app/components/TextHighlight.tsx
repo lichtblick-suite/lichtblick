@@ -28,8 +28,8 @@ type Props = {
   searchText?: string;
 };
 
-export default function TextHighlight({ targetStr = "", searchText = "" }: Props) {
-  if (!searchText) {
+export default function TextHighlight({ targetStr = "", searchText = "" }: Props): JSX.Element {
+  if (searchText.length === 0) {
     return <>{targetStr}</>;
   }
   const result = fuzzySort.highlight(
@@ -40,7 +40,11 @@ export default function TextHighlight({ targetStr = "", searchText = "" }: Props
   // TODO(Audrey): compute highlighted parts separately in order to avoid dangerouslySetInnerHTML
   return (
     <STextHighlight>
-      {result ? <span dangerouslySetInnerHTML={{ __html: result }} /> : targetStr}
+      {result != undefined && result.length > 0 ? (
+        <span dangerouslySetInnerHTML={{ __html: result }} />
+      ) : (
+        targetStr
+      )}
     </STextHighlight>
   );
 }

@@ -22,7 +22,7 @@ import {
 import Rpc from "./Rpc";
 import overwriteFetch from "./overwriteFetch";
 
-export function setupSendReportNotificationHandler(rpc: Rpc) {
+export function setupSendReportNotificationHandler(rpc: Rpc): void {
   setNotificationHandler(
     (
       message: string,
@@ -32,7 +32,7 @@ export function setupSendReportNotificationHandler(rpc: Rpc) {
     ) => {
       if (!(details instanceof Error || typeof details === "string")) {
         console.warn("Invalid Error type");
-        details = JSON.stringify(details) || "<<unknown error>>";
+        details = JSON.stringify(details) ?? "<<unknown error>>";
       }
       rpc.send("sendNotification", {
         message,
@@ -44,13 +44,13 @@ export function setupSendReportNotificationHandler(rpc: Rpc) {
   );
 }
 
-export function setupLogEventHandler(rpc: Rpc) {
+export function setupLogEventHandler(rpc: Rpc): void {
   initializeLogEvent((param) => {
     rpc.send("logEvent", param);
   });
 }
 
-export function setupWorker(rpc: Rpc) {
+export function setupWorker(rpc: Rpc): void {
   if (process.env.NODE_ENV !== "test") {
     setupSendReportNotificationHandler(rpc);
     setupLogEventHandler(rpc);

@@ -33,9 +33,9 @@ export default class Option extends React.Component<Props> {
     active: false,
   };
 
-  renderRightIcon() {
+  renderRightIcon(): React.ReactNode {
     const { rightIcon } = this.props;
-    if (!rightIcon) {
+    if (rightIcon == undefined) {
       return;
     }
     return (
@@ -45,7 +45,7 @@ export default class Option extends React.Component<Props> {
     );
   }
 
-  render() {
+  render(): JSX.Element {
     const { onClick, active, disabled, children } = this.props;
     const className = cx(styles.container, {
       [styles.active!]: active,

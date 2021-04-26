@@ -21,26 +21,26 @@ type Props = {
   vertical?: boolean;
 };
 
-const Progress = (props: Props) => {
-  const { percent, vertical, color = "black" } = props;
+const Progress = (props: Props): JSX.Element => {
+  const { percent = 0, vertical = false, color = "black" } = props;
   const viewBoxWidth = vertical ? 1 : 100;
   const viewBoxHeight = vertical ? 100 : 1;
-  const style: any = {};
+  const style: React.CSSProperties = {};
   style.border = `solid ${colors.DARK3}`;
   style.borderWidth = "0 1px";
-  const max = 100 - (percent || 0);
+  const max = 100 - percent;
 
-  const lineProps: any = {};
+  const lineProps: React.SVGProps<SVGLineElement> = {};
 
   if (vertical) {
-    style.width = props.width || 10;
+    style.width = props.width ?? 10;
     style.height = "100%";
     lineProps.x1 = 0;
     lineProps.x2 = 0;
     lineProps.y1 = 100;
     lineProps.y2 = max;
   } else {
-    style.height = props.height || 10;
+    style.height = props.height ?? 10;
     style.flex = "1 1 100%";
     lineProps.x1 = 0;
     lineProps.x2 = 100 - max;

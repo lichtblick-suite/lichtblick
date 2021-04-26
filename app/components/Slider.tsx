@@ -33,9 +33,9 @@ type Props = {
   value: number | undefined;
   min: number;
   max: number;
-  disabled?: boolean; // Disable the mouse interactions.
+  disabled: boolean; // Disable the mouse interactions.
   step?: number;
-  draggable?: boolean;
+  draggable: boolean;
   onChange: (arg0: number) => void;
   renderSlider: (value?: number) => React.ReactNode;
 };
@@ -44,12 +44,12 @@ const StyledSlider = styled.div<{ disabled?: boolean }>`
   width: 100%;
   height: 100%;
   position: relative;
-  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+  cursor: ${({ disabled = false }) => (disabled ? "not-allowed" : "pointer")};
   border-radius: 2px;
 `;
 
 export const StyledRange = styled.div.attrs<{ width: number }>(({ width }) => ({
-  style: { width: `${(width || 0) * 100}%` },
+  style: { width: `${width * 100}%` },
 }))<{ width: number }>`
   background-color: rgba(255, 255, 255, 0.2);
   position: absolute;
@@ -68,6 +68,7 @@ export default class Slider extends React.Component<Props> {
   static defaultProps = {
     min: 0,
     draggable: false,
+    disabled: false,
     renderSlider: defaultRenderSlider,
   };
 
@@ -77,7 +78,7 @@ export default class Slider extends React.Component<Props> {
 
   el?: HTMLDivElement;
 
-  shouldComponentUpdate(nextProps: Props) {
+  shouldComponentUpdate(nextProps: Props): boolean {
     const { value, min, max, draggable } = this.props;
     return (
       nextProps.value !== value ||
@@ -99,7 +100,7 @@ export default class Slider extends React.Component<Props> {
     const { clientX } = e;
     const t = (clientX - left) / width;
     let interpolated = min + t * (max - min);
-    if (step) {
+    if (step != undefined && step !== 0) {
       interpolated = Math.round(interpolated / step) * step;
     }
     return clamp(interpolated, min, max);

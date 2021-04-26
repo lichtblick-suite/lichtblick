@@ -112,7 +112,7 @@ function StandardMenuItems({
   const split = useCallback(
     (store, id: string | undefined, direction: "row" | "column") => {
       const type = getPanelType();
-      if (!id || !type) {
+      if (id == undefined || type == undefined) {
         throw new Error("Trying to split unknown panel!");
       }
       const name = getEventNames().PANEL_SPLIT;
@@ -164,7 +164,7 @@ function StandardMenuItems({
   const panelContext = useContext(PanelContext);
 
   const type = getPanelType();
-  if (!type) {
+  if (type == undefined) {
     return ReactNull;
   }
 
@@ -246,14 +246,14 @@ type PanelToolbarControlsProps = Pick<
 // whole PanelToolbar when only children change.
 const PanelToolbarControls = React.memo(function PanelToolbarControls({
   additionalIcons,
-  floating,
+  floating = false,
   isRendered,
   isUnknownPanel,
   menuContent,
   onDragEnd,
   onDragStart,
-  showHiddenControlsOnHover,
-  showPanelName,
+  showHiddenControlsOnHover = false,
+  showPanelName = false,
   onEditPanelConfig,
 }: PanelToolbarControlsProps) {
   const panelData = useContext(PanelContext);
@@ -278,7 +278,7 @@ const PanelToolbarControls = React.memo(function PanelToolbarControls({
           isUnknownPanel={isUnknownPanel}
           onEditPanelConfig={onEditPanelConfig}
         />
-        {menuContent && <hr />}
+        {Boolean(menuContent) && <hr />}
         {menuContent}
       </Dropdown>
       {!isUnknownPanel && (
@@ -301,10 +301,10 @@ const PanelToolbarControls = React.memo(function PanelToolbarControls({
 export default React.memo<Props>(function PanelToolbar({
   additionalIcons,
   children,
-  floating,
+  floating = false,
   helpContent,
-  hideToolbars,
-  isUnknownPanel,
+  hideToolbars = false,
+  isUnknownPanel = false,
   menuContent,
   showHiddenControlsOnHover,
 }: Props) {
@@ -319,7 +319,7 @@ export default React.memo<Props>(function PanelToolbar({
 
   const { store } = useContext(ReactReduxContext);
   const shareModal = useMemo(() => {
-    if (!id || !showShareModal) {
+    if (id == undefined || !showShareModal) {
       return ReactNull;
     }
     const panelConfigById = store.getState().persistedState.panels.savedProps;
@@ -350,7 +350,7 @@ export default React.memo<Props>(function PanelToolbar({
             <AlertIcon />
           </Icon>
         )}
-        {helpContent && (
+        {Boolean(helpContent) && (
           <Icon tooltip="Help" fade onClick={() => setShowHelp(true)}>
             <HelpCircleOutlineIcon className={styles.icon} />
           </Icon>
@@ -378,7 +378,7 @@ export default React.memo<Props>(function PanelToolbar({
           className={cx(styles.panelToolbarContainer, {
             [styles.floating!]: floating,
             [styles.floatingShow!]: floating && isRendered,
-            [styles.hasChildren!]: !!children,
+            [styles.hasChildren!]: Boolean(children),
           })}
         >
           {(isRendered || !floating) && children}

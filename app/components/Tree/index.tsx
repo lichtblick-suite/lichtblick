@@ -31,12 +31,12 @@ type Props = {
 export default class Tree extends PureComponent<Props> {
   // make onEditClick optional. A no-op if not supplied
   static defaultProps = {
-    onEditClick: () => {
+    onEditClick: (): void => {
       // no-op
     },
   };
 
-  renderNode = (node: Node) => {
+  renderNode = (node: Node): JSX.Element => {
     const {
       disableCheckbox,
       enableVisibilityToggle,
@@ -61,12 +61,11 @@ export default class Tree extends PureComponent<Props> {
       />
     );
   };
-  render() {
-    const { root, hideRoot } = this.props;
-    const children = root.children || [];
-    if (hideRoot && !children.some((treeNode: Node) => treeNode.visible)) {
+  render(): React.ReactNode {
+    const { root, hideRoot = false } = this.props;
+    if (hideRoot && !root.children.some((treeNode: Node) => treeNode.visible)) {
       return <div style={{ padding: "8px 12px", color: "#666" }}>None</div>;
     }
-    return hideRoot ? children.map(this.renderNode) : this.renderNode(root);
+    return hideRoot ? root.children.map(this.renderNode) : this.renderNode(root);
   }
 }

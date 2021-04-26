@@ -52,7 +52,7 @@ export interface AutomatedRunClient {
   workerIndex?: number;
   workerTotal?: number;
   shouldLoadDataBeforePlaying: boolean;
-  onError(arg0: any): Promise<void>;
+  onError(arg0: unknown): Promise<void>;
   start(arg0: { bagLengthMs: number }): void;
   markTotalFrameStart(): void;
   markTotalFrameEnd(): void;
@@ -61,7 +61,7 @@ export interface AutomatedRunClient {
   markPreloadStart(): void;
   markPreloadEnd(): number;
   onFrameFinished(frameIndex: number): Promise<void>;
-  finish(): any;
+  finish(): Promise<void>;
 }
 
 export const AUTOMATED_RUN_START_DELAY = process.env.NODE_ENV === "test" ? 10 : 2000;
@@ -151,15 +151,18 @@ export default class AutomatedRunPlayer implements Player {
       parsedMessages: parsedTopics,
     });
     const { parsedMessages, rosBinaryMessages } = messages;
-    if (rosBinaryMessages?.length || parsedMessages == undefined) {
-      const messageTypes = Object.keys(messages)
-        .filter((kind) => (messages as any)[kind]?.length)
+    if (
+      (rosBinaryMessages != undefined && rosBinaryMessages.length > 0) ||
+      parsedMessages == undefined
+    ) {
+      const messageTypes = (Object.keys(messages) as (keyof typeof messages)[])
+        .filter((kind) => messages[kind]?.length)
         .join(",");
       throw new Error(`Invalid message types: ${messageTypes}`);
     }
 
-    const filterMessages = (msgs: any) =>
-      msgs.map((message: any) => {
+    const filterMessages = (msgs: typeof parsedMessages) =>
+      msgs.map((message) => {
         const topic: Topic | undefined = providerResult.topics.find(
           (t) => t.name === message.topic,
         );
@@ -167,7 +170,7 @@ export default class AutomatedRunPlayer implements Player {
           throw new Error(`Could not find topic for message ${message.topic}`);
         }
 
-        if (!topic.datatype) {
+        if (topic.datatype == undefined) {
           throw new Error(`Missing datatype for topic: ${message.topic}`);
         }
         return {
@@ -231,7 +234,7 @@ export default class AutomatedRunPlayer implements Player {
     this._initializeTimeout = setTimeout(() => void this._initialize(), AUTOMATED_RUN_START_DELAY);
   }
 
-  async _initialize() {
+  async _initialize(): Promise<void> {
     if (this._initialized) {
       return; // Prevent double loads.
     }
@@ -271,7 +274,7 @@ export default class AutomatedRunPlayer implements Player {
     await this._start();
   }
 
-  async _start() {
+  async _start(): Promise<void> {
     if (!this._providerResult) {
       throw new Error("AutomatedRunPlayer not initialized");
     }
@@ -290,7 +293,7 @@ export default class AutomatedRunPlayer implements Player {
     this._maybeStartPlayback();
   }
 
-  async _onUpdateProgress() {
+  async _onUpdateProgress(): Promise<void> {
     if (this._client.shouldLoadDataBeforePlaying && this._providerResult != undefined) {
       // Update the view and do preloading calculations. Not necessary if we're already playing.
       this._emitState([], this._providerResult.start);
@@ -298,13 +301,13 @@ export default class AutomatedRunPlayer implements Player {
     this._maybeStartPlayback();
   }
 
-  async _maybeStartPlayback() {
+  async _maybeStartPlayback(): Promise<void> {
     if (this._readyToPlay()) {
       this._run();
     }
   }
 
-  _readyToPlay() {
+  _readyToPlay(): boolean {
     if (!this._startCalled || this._providerResult == undefined) {
       return false;
     }
@@ -313,12 +316,13 @@ export default class AutomatedRunPlayer implements Player {
     }
     // If the client has shouldLoadDataBeforePlaying set to true, only start playback once all data has loaded.
     return (
-      this._progress.fullyLoadedFractionRanges?.length &&
+      this._progress.fullyLoadedFractionRanges != undefined &&
+      this._progress.fullyLoadedFractionRanges.length > 0 &&
       this._progress.fullyLoadedFractionRanges.every(({ start, end }) => start === 0 && end === 1)
     );
   }
 
-  async _run() {
+  async _run(): Promise<void> {
     if (this._isPlaying) {
       return; // Only run once
     }
@@ -372,7 +376,7 @@ export default class AutomatedRunPlayer implements Player {
       const estimatedSecondsRemaining = Math.round(((1 - percentComplete) * msPerPercent) / 1000);
       const eta = formatSeconds(
         Math.min(
-          estimatedSecondsRemaining || 0,
+          isNaN(estimatedSecondsRemaining) ? 0 : estimatedSecondsRemaining,
           24 * 60 * 60,
           /* 24 hours */
         ),
@@ -396,11 +400,11 @@ export default class AutomatedRunPlayer implements Player {
 
   /* Public API shared functions */
 
-  requestMessages() {
+  requestMessages(): void {
     // no-op
   }
 
-  setPublishers(_publishers: AdvertisePayload[]) {
+  setPublishers(_publishers: AdvertisePayload[]): void {
     // no-op
   }
 
@@ -408,34 +412,34 @@ export default class AutomatedRunPlayer implements Player {
     throw new Error(`Unsupported in AutomatedRunPlayer`);
   }
 
-  publish(_payload: PublishPayload) {
+  publish(_payload: PublishPayload): void {
     throw new Error(`Unsupported in AutomatedRunPlayer`);
   }
 
-  async close() {
+  async close(): Promise<void> {
     throw new Error(`Unsupported in AutomatedRunPlayer`);
   }
 
-  startPlayback() {
+  startPlayback(): void {
     throw new Error(`Unsupported in AutomatedRunPlayer`);
   }
 
-  pausePlayback() {
+  pausePlayback(): void {
     throw new Error(`Unsupported in AutomatedRunPlayer`);
   }
 
-  setPlaybackSpeed(_speed: number) {
+  setPlaybackSpeed(_speed: number): void {
     // This should be passed into the constructor and should not be changed.
   }
 
-  seekPlayback(_time: Time) {
+  seekPlayback(_time: Time): void {
     throw new Error(`Unsupported in AutomatedRunPlayer`);
   }
 
-  requestBackfill() {
+  requestBackfill(): void {
     // no-op
   }
-  setGlobalVariables() {
+  setGlobalVariables(): void {
     throw new Error(`Unsupported in AutomatedRunPlayer`);
   }
 }

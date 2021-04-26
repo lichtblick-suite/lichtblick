@@ -86,7 +86,7 @@ export function ValidatedInputBase({
   parse,
   stringify,
   value,
-}: BaseProps & ParseAndStringifyFn) {
+}: BaseProps & ParseAndStringifyFn): JSX.Element {
   const [error, setError] = useState<string>("");
   const [inputStr, setInputStr] = useState<string>("");
   const prevIncomingVal = useRef("");
@@ -115,7 +115,7 @@ export function ValidatedInputBase({
       }
       setError(""); // clear the previous error
       const validationResult = dataValidator(newVal);
-      if (validationResult) {
+      if (validationResult != undefined) {
         setError(validationErrorToString(validationResult));
         return;
       }
@@ -133,7 +133,7 @@ export function ValidatedInputBase({
         return;
       }
       let newVal = "";
-      let newError;
+      let newError: string | undefined;
       try {
         newVal = stringify(value);
       } catch (e) {
@@ -141,7 +141,7 @@ export function ValidatedInputBase({
       }
       setInputStr(newVal);
       prevIncomingVal.current = value;
-      if (newError) {
+      if (newError != undefined) {
         setError(newError);
         return;
       }
@@ -163,7 +163,7 @@ export function ValidatedInputBase({
   );
 
   useEffect(() => {
-    if (onError && error) {
+    if (onError && error.length > 0) {
       onError(error);
     }
   }, [error, onError]);
@@ -190,7 +190,7 @@ export function ValidatedInputBase({
         value={inputStr}
         onChange={handleChange}
       />
-      {error && <SError>{error}</SError>}
+      {error.length > 0 && <SError>{error}</SError>}
     </>
   );
 }
@@ -202,7 +202,7 @@ function JsonInput(props: BaseProps) {
   return <ValidatedInputBase parse={JSON.parse} stringify={stringify} {...props} />;
 }
 
-export function YamlInput(props: BaseProps) {
+export function YamlInput(props: BaseProps): JSX.Element {
   return <ValidatedInputBase parse={YAML.parse} stringify={YAML.stringify} {...props} />;
 }
 
@@ -212,7 +212,7 @@ export default function ValidatedInput({
   onSelectFormat,
   children,
   ...rest
-}: Props) {
+}: Props): JSX.Element {
   const InputComponent = format === EDIT_FORMAT.JSON ? JsonInput : YamlInput;
   return (
     <Flex col>
@@ -241,7 +241,10 @@ export default function ValidatedInput({
 }
 
 // For component consumers that don't care about maintaining the editFormat state, use this instead
-export function UncontrolledValidatedInput({ format = EDIT_FORMAT.YAML, ...rest }: Props) {
+export function UncontrolledValidatedInput({
+  format = EDIT_FORMAT.YAML,
+  ...rest
+}: Props): JSX.Element {
   const [editFormat, setEditFormat] = React.useState<EditFormat>(format);
   return (
     <ValidatedInput

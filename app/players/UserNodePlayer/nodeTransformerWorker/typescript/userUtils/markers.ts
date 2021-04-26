@@ -78,7 +78,7 @@ export class Marker implements IMarker {
     mesh_resource,
     mesh_use_embedded_materials,
   }: Partial<IMarker>) {
-    this.header = header || {
+    this.header = header ?? {
       frame_id: "",
       stamp: {
         sec: 0,
@@ -86,11 +86,11 @@ export class Marker implements IMarker {
       },
       seq: 0,
     };
-    this.ns = ns || "";
-    this.id = id || 0;
-    this.type = type || 0;
-    this.action = action || 0;
-    this.pose = pose || {
+    this.ns = ns ?? "";
+    this.id = id ?? 0;
+    this.type = type ?? 0;
+    this.action = action ?? 0;
+    this.pose = pose ?? {
       position: {
         x: 0,
         y: 0,
@@ -103,15 +103,15 @@ export class Marker implements IMarker {
         w: 0,
       },
     };
-    this.scale = scale || { x: 0, y: 0, z: 0 };
-    this.color = color || { r: 0, g: 0, b: 0, a: 0 };
-    this.lifetime = lifetime || { sec: 0, nsec: 0 };
-    this.frame_locked = frame_locked || false;
-    this.points = points || [];
-    this.colors = colors || [];
-    this.text = text || "";
-    this.mesh_resource = mesh_resource || "";
-    this.mesh_use_embedded_materials = mesh_use_embedded_materials || false;
+    this.scale = scale ?? { x: 0, y: 0, z: 0 };
+    this.color = color ?? { r: 0, g: 0, b: 0, a: 0 };
+    this.lifetime = lifetime ?? { sec: 0, nsec: 0 };
+    this.frame_locked = frame_locked ?? false;
+    this.points = points ?? [];
+    this.colors = colors ?? [];
+    this.text = text ?? "";
+    this.mesh_resource = mesh_resource ?? "";
+    this.mesh_use_embedded_materials = mesh_use_embedded_materials ?? false;
   }
 }
 /**

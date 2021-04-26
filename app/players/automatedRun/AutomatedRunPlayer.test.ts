@@ -12,6 +12,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Time } from "rosbag";
+
 import { Progress } from "@foxglove-studio/app/players/types";
 import delay from "@foxglove-studio/app/util/delay";
 import signal from "@foxglove-studio/app/util/signal";
@@ -30,11 +32,13 @@ class TestRunClient implements AutomatedRunClient {
   finished = false;
   frameStarted = false;
 
-  constructor({ shouldLoadDataBeforePlaying }: { shouldLoadDataBeforePlaying?: boolean } = {}) {
-    this.shouldLoadDataBeforePlaying = shouldLoadDataBeforePlaying || false;
+  constructor({
+    shouldLoadDataBeforePlaying = false,
+  }: { shouldLoadDataBeforePlaying?: boolean } = {}) {
+    this.shouldLoadDataBeforePlaying = shouldLoadDataBeforePlaying;
   }
 
-  async onError(err: any) {
+  async onError(err: unknown) {
     throw err;
   }
   start() {
@@ -57,7 +61,7 @@ class TestRunClient implements AutomatedRunClient {
   async onFrameFinished() {
     // no-op
   }
-  finish() {
+  async finish() {
     this.finished = true;
   }
 }
@@ -134,7 +138,7 @@ describe("AutomatedRunPlayer", () => {
   });
 
   it("makes calls to getMessages with the correct frames", async () => {
-    const frames: any = [];
+    const frames: { startTime: Time; endTime: Time }[] = [];
     const provider = new TestProvider({
       getMessages: async (startTime, endTime) => {
         frames.push({ startTime, endTime });
@@ -173,7 +177,7 @@ describe("AutomatedRunPlayer", () => {
     let getMessagesCallCount = 0;
     const getMessagesSignal = { signal: signal<typeof getMessagesResult>() };
     const provider = new TestProvider({
-      getMessages: async (): Promise<any> => {
+      getMessages: async () => {
         getMessagesCallCount++;
         return getMessagesSignal.signal;
       },

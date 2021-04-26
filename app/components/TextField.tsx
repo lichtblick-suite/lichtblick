@@ -40,7 +40,7 @@ type Props = {
   };
   hideInlineError?: boolean;
   label?: string;
-  onBlur: () => void;
+  onBlur?: () => void;
   onChange: (value: string) => void;
   onError?: (error?: string) => void;
   placeholder?: string;
@@ -54,32 +54,32 @@ type Props = {
 
 export default function TextField({
   defaultValue,
-  selectOnMount,
+  selectOnMount = false,
   inputStyle,
-  hideInlineError,
+  hideInlineError = false,
   label,
   onBlur,
   onChange,
   onError,
   placeholder,
   style,
-  validateOnBlur,
+  validateOnBlur = false,
   validator,
   value,
   ...rest
 }: Props): React.ReactElement {
   const [error, setError] = useState<string | undefined>();
-  const [inputStr, setInputStr] = useState<string>(value || defaultValue || "");
+  const [inputStr, setInputStr] = useState<string>(value ?? defaultValue ?? "");
 
   const prevIncomingVal = useRef<string | undefined>("");
   const inputRef = useRef<HTMLInputElement>(ReactNull);
 
   useLayoutEffect(() => {
     // only compare if it's a controlled component
-    if (!defaultValue && !validateOnBlur && prevIncomingVal.current !== value) {
+    if (defaultValue == undefined && !validateOnBlur && prevIncomingVal.current !== value) {
       const validationResult = validator(value);
-      setError(validationResult || undefined);
-      setInputStr(value || "");
+      setError(validationResult === "" ? undefined : validationResult);
+      setInputStr(value ?? "");
     }
     prevIncomingVal.current = value;
   }, [defaultValue, validateOnBlur, validator, value]);
@@ -99,7 +99,7 @@ export default function TextField({
   const validate = useCallback(
     (val) => {
       const validationResult = validator(val);
-      if (validationResult) {
+      if (validationResult != undefined) {
         setError(validationResult);
       } else {
         setError(undefined);
@@ -129,11 +129,12 @@ export default function TextField({
   }, [inputStr, onBlur, validate, validateOnBlur]);
 
   // only show red border when there is some input and it's not valid
-  const errorStyle = inputStr && error ? { border: `1px solid ${colors.RED}` } : {};
+  const errorStyle =
+    inputStr.length > 0 && error != undefined ? { border: `1px solid ${colors.RED}` } : {};
 
   return (
     <STextField style={style}>
-      {label && <STextFieldLabel>{label}</STextFieldLabel>}
+      {label != undefined && <STextFieldLabel>{label}</STextFieldLabel>}
       <input
         onBlur={handleBlur}
         ref={inputRef}
@@ -143,7 +144,7 @@ export default function TextField({
         onChange={handleChange}
         {...rest}
       />
-      {error && !hideInlineError && <SError>{error}</SError>}
+      {error != undefined && !hideInlineError && <SError>{error}</SError>}
     </STextField>
   );
 }

@@ -29,7 +29,7 @@ type DatatypeDescription = {
 export function bagConnectionsToDatatypes(
   connections: readonly DatatypeDescription[],
 ): RosDatatypes {
-  const datatypes: Record<string, any> = {};
+  const datatypes: RosDatatypes = {};
   connections.forEach((connection) => {
     const connectionTypes = parseMessageDefinition(connection.messageDefinition);
     connectionTypes.forEach(({ name, definitions }, index) => {
@@ -37,7 +37,7 @@ export function bagConnectionsToDatatypes(
       // so we get the name from the connection.
       if (index === 0) {
         datatypes[connection.type] = { fields: definitions };
-      } else if (name) {
+      } else if (name != undefined) {
         datatypes[name] = { fields: definitions };
       }
     });

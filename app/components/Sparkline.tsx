@@ -67,9 +67,9 @@ export function Sparkline(props: SparklineProps) {
         draw={(context: CanvasRenderingContext2D, width: number, height: number) => {
           draw(
             props.points,
-            props.maximum || 0,
+            props.maximum ?? 0,
             props.timeRange,
-            props.nowStamp || Date.now(),
+            props.nowStamp ?? Date.now(),
             context,
             width,
             height,

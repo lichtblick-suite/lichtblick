@@ -13,21 +13,20 @@
 
 export type Node = {
   id: string;
-  legacyIds: string[];
   text: string;
-  tooltip: React.ReactNode[] | undefined;
-  icon: React.ReactNode;
+  tooltip?: React.ReactNode[];
+  icon?: React.ReactNode;
   checked: boolean;
-  disabled: boolean;
-  expanded: boolean;
+  disabled?: boolean;
+  expanded?: boolean;
   visible: boolean;
-  filtered: boolean;
-  missing: boolean;
-  children: any[];
-  canEdit: boolean;
-  hasEdit: boolean;
-  hasCheckbox: boolean;
-  name: any;
-  topic: any;
-  namespace: any;
+  filtered?: boolean;
+  missing?: boolean;
+  children: Node[];
+  canEdit?: boolean;
+  hasEdit?: boolean;
+  hasCheckbox?: boolean;
+  name?: any;
+  topic?: any;
+  namespace?: any;
 };

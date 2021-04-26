@@ -14,10 +14,7 @@ import { Time, TimeUtil } from "rosbag";
 
 export function getBagChunksOverlapCount(
   chunkInfos: readonly { startTime: Time; endTime: Time }[],
-) {
-  if (!chunkInfos) {
-    return 0;
-  }
+): number {
   const sorted = chunkInfos
     .slice()
     .sort((left, right) => TimeUtil.compare(left.startTime, right.startTime));

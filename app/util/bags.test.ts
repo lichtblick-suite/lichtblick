@@ -11,6 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Time } from "rosbag";
+
 import { fromSec } from "@foxglove-studio/app/util/time";
 
 import { getBagChunksOverlapCount } from "./bags";
@@ -41,8 +43,8 @@ describe("permutations", () => {
   });
 });
 
-const check = (elements: any, expectedSize: number) => {
-  for (const permutation of getPermutations<any>(elements)) {
+const check = (elements: { startTime: Time; endTime: Time }[], expectedSize: number) => {
+  for (const permutation of getPermutations(elements)) {
     expect(getBagChunksOverlapCount(permutation)).toBe(expectedSize);
   }
 };

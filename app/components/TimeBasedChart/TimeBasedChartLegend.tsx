@@ -33,7 +33,7 @@ type Props = {
 
 const checkboxStyle = { height: 12, marginBottom: -2 };
 
-export default function TimeBasedChartLegend(props: Props) {
+export default function TimeBasedChartLegend(props: Props): JSX.Element {
   const onCheckboxClick = (label: string) => () => {
     const { datasetId, toggleLine } = props;
     toggleLine?.(datasetId, label);
@@ -69,12 +69,11 @@ export default function TimeBasedChartLegend(props: Props) {
           return;
         }
 
-        const CheckboxComponent = linesToHide[label]
-          ? CheckboxBlankOutlineIcon
-          : CheckboxMarkedIcon;
+        const CheckboxComponent =
+          linesToHide[label] === true ? CheckboxBlankOutlineIcon : CheckboxMarkedIcon;
         return (
           <div key={i} style={{ color: String(borderColor), fill: "white", whiteSpace: "nowrap" }}>
-            {canToggleLines && (
+            {canToggleLines === true && (
               <CheckboxComponent style={checkboxStyle} onClick={onCheckboxClick(label)} />
             )}
             {pointSvg} <span style={{ fontSize: "10px" }}>{label}</span>
