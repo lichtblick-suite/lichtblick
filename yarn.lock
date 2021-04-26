@@ -2144,7 +2144,7 @@ __metadata:
     react-resize-detector: 6.6.5
     react-table: 7.6.3
     react-transition-group: 4.4.1
-    react-use: 17.2.3
+    react-use: 17.2.4
     react-virtualized: 9.22.3
     redux: 4.0.5
     redux-devtools-extension: 2.13.9
@@ -20327,9 +20327,9 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"react-use@npm:17.2.3":
-  version: 17.2.3
-  resolution: "react-use@npm:17.2.3"
+"react-use@npm:17.2.4":
+  version: 17.2.4
+  resolution: "react-use@npm:17.2.4"
   dependencies:
     "@types/js-cookie": ^2.2.6
     "@xobotyi/scrollbar-width": ^1.9.5
@@ -20348,7 +20348,7 @@ fsevents@^1.2.7:
   peerDependencies:
     react: ^16.8.0  || ^17.0.0
     react-dom: ^16.8.0  || ^17.0.0
-  checksum: 59f40b1d52f0656b1f9748c27c99f105cdaa93efed50648571191473d51813cae1aa161918750b3e8d68975cab444fefa8e6906b5ce98850d5f2ab49eaaab7bd
+  checksum: eb215eccee832ad1de5f1c204a210019a8cc9e221902d2a215d5b80aad5a892496c39c52b4c9047a5d33b67306566c1874b8a1be2accad1cc5046ea4bd34e364
   languageName: node
   linkType: hard
 

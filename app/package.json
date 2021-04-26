@@ -63,7 +63,7 @@
     "react-resize-detector": "6.6.5",
     "react-table": "7.6.3",
     "react-transition-group": "4.4.1",
-    "react-use": "17.2.3",
+    "react-use": "17.2.4",
     "react-virtualized": "9.22.3",
     "redux": "4.0.5",
     "redux-devtools-extension": "2.13.9",
