@@ -133,7 +133,7 @@
     "enzyme": "3.11.0",
     "fetch-mock": "9.11.0",
     "http-server": "0.12.3",
-    "three": "0.127.0",
+    "three": "0.128.0",
     "urdf-loader": "0.10.1",
     "url-search-params": "1.1.0",
     "xacro-parser": "0.2.3"
