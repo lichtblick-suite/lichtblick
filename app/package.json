@@ -134,7 +134,7 @@
     "fetch-mock": "9.11.0",
     "http-server": "0.12.3",
     "three": "0.128.0",
-    "urdf-loader": "0.10.1",
+    "urdf-loader": "0.10.2",
     "url-search-params": "1.1.0",
     "xacro-parser": "0.3.0"
   }

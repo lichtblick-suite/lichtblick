@@ -2162,7 +2162,7 @@ __metadata:
     three: 0.128.0
     tinycolor2: 1.4.2
     typescript: 4.2.2
-    urdf-loader: 0.10.1
+    urdf-loader: 0.10.2
     url-search-params: 1.1.0
     use-debounce: 6.0.1
     uuid: 8.3.2
@@ -23903,12 +23903,12 @@ typescript@4.2.2:
   languageName: node
   linkType: hard
 
-"urdf-loader@npm:0.10.1":
-  version: 0.10.1
-  resolution: "urdf-loader@npm:0.10.1"
+"urdf-loader@npm:0.10.2":
+  version: 0.10.2
+  resolution: "urdf-loader@npm:0.10.2"
   peerDependencies:
     three: ">=0.105.0"
-  checksum: 24ec0257151081352f17ddeba53a7037349d24f0609473f3183e6e2bf77200b73b8e15c6946e6267e8c2d9436268ac3ab05ff3e62d9f0f37401e21961d17853e
+  checksum: c0aa210974ee13c1a8bd45fdd5638adc9b0fdb1ba763fba051e1b273246e8ae59c4482831b98e30372dd6095a6804db3d7ec23b5884783ba8833a6f7715d16b8
   languageName: node
   linkType: hard
 

@@ -70,7 +70,7 @@ export default class URDFAssetLoader implements AssetLoader {
     // URDFLoader appends the resource path to the URL we give it. We include the ROS package name
     // and the path of the URDF file so the protocol handler can look up the package location
     // relative to the dropped URDF file.
-    (loader as any).packages = (targetPkg: string) => {
+    loader.packages = (targetPkg: string) => {
       let url = `x-foxglove-ros-package:?targetPkg=${encodeURIComponent(targetPkg)}`;
       if (basePath != undefined) {
         url += `&basePath=${encodeURIComponent(basePath)}`;
