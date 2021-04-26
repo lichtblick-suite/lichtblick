@@ -2142,7 +2142,7 @@ __metadata:
     react-outside-click-handler: 1.3.0
     react-redux: 7.2.4
     react-resize-detector: 6.6.5
-    react-table: 7.6.3
+    react-table: 7.7.0
     react-transition-group: 4.4.1
     react-use: 17.2.4
     react-virtualized: 9.22.3
@@ -20268,12 +20268,12 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"react-table@npm:7.6.3":
-  version: 7.6.3
-  resolution: "react-table@npm:7.6.3"
+"react-table@npm:7.7.0":
+  version: 7.7.0
+  resolution: "react-table@npm:7.7.0"
   peerDependencies:
     react: ^16.8.3 || ^17.0.0-0
-  checksum: 48a14486951532d079ac86ec900756c384a44cc31cd1c46c5e667df6c8b4b47e05c62ca4be75f0fff03a62295e66817f09a9069bd742a4aa30483f2fbd127989
+  checksum: d609cbca2dafcfa5f691b90be9d2362e02380f992d2408c57af73ebd77dd8cc99efe706b4fa1e4fdadfd0bc5396db6d7f993fa174e2b106fb395cf8f05a80465
   languageName: node
   linkType: hard
 
