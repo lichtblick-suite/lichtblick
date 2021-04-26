@@ -84,7 +84,7 @@ describe("TcpConnection", () => {
       return Promise.resolve(new TcpSocketNode(options.host, options.port, new net.Socket()));
     };
     const socket = await tcpSocketCreate({ host: "localhost", port });
-    const connection = new TcpConnection(socket, CLIENT_HEADER);
+    const connection = new TcpConnection(socket, "localhost", port, CLIENT_HEADER);
     const p = new Promise((resolve, reject) => {
       connection.on("message", (msg, data: Uint8Array) => {
         expect(data.byteLength).toEqual(3);

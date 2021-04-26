@@ -7,8 +7,10 @@ import { MessageReader, parseMessageDefinition, RosMsgDefinition } from "rosbag"
 import { TextDecoder, TextEncoder } from "web-encoding";
 
 import { Connection, ConnectionStats } from "./Connection";
+import { LoggerService } from "./LoggerService";
 import { RosTcpMessageStream } from "./RosTcpMessageStream";
 import { TcpAddress, TcpSocket } from "./TcpTypes";
+import { backoff } from "./backoff";
 
 // Implements a subscriber for the TCPROS transport. The actual TCP transport is
 // implemented in the passed in `socket` (TcpSocket). A transform stream is used
@@ -20,7 +22,10 @@ export class TcpConnection extends EventEmitter implements Connection {
   retries = 0;
 
   private _socket: TcpSocket;
+  private _address: string;
+  private _port: number;
   private _connected = false;
+  private _shutdown = false;
   private _transportInfo = "TCPROS not connected [socket -1]";
   private _readingHeader = true;
   private _requestHeader: Map<string, string>;
@@ -35,11 +40,21 @@ export class TcpConnection extends EventEmitter implements Connection {
   private _transformer = new RosTcpMessageStream();
   private _msgDefinition: RosMsgDefinition[] = [];
   private _msgReader: MessageReader | undefined;
+  private _log?: LoggerService;
 
-  constructor(socket: TcpSocket, requestHeader: Map<string, string>) {
+  constructor(
+    socket: TcpSocket,
+    address: string,
+    port: number,
+    requestHeader: Map<string, string>,
+    log?: LoggerService,
+  ) {
     super();
     this._socket = socket;
+    this._address = address;
+    this._port = port;
     this._requestHeader = requestHeader;
+    this._log = log;
 
     socket.on("connect", this._handleConnect);
     socket.on("close", this._handleClose);
@@ -55,6 +70,29 @@ export class TcpConnection extends EventEmitter implements Connection {
 
   remoteAddress(): Promise<TcpAddress | undefined> {
     return this._socket.remoteAddress();
+  }
+
+  async connect(): Promise<void> {
+    if (this._shutdown) {
+      return;
+    }
+
+    this._log?.debug?.(`connecting to ${this.toString()} (attempt ${this.retries})`);
+
+    try {
+      await this._socket.connect();
+      this._log?.debug?.(`connected to ${this.toString()}`);
+    } catch (err) {
+      this._log?.warn?.(`${this.toString()} connection failed: ${err}`);
+      // _handleClose() will be called, triggering a reconnect attempt
+    }
+  }
+
+  private async _retryConnection(): Promise<void> {
+    if (!this._shutdown) {
+      await backoff(++this.retries);
+      this.connect();
+    }
   }
 
   connected(): boolean {
@@ -78,6 +116,10 @@ export class TcpConnection extends EventEmitter implements Connection {
   }
 
   close(): void {
+    this._log?.debug?.(`closing connection to ${this.toString()}`);
+
+    this._shutdown = true;
+    this._connected = false;
     this.removeAllListeners();
     this._socket.close();
   }
@@ -101,6 +143,10 @@ export class TcpConnection extends EventEmitter implements Connection {
     return this._transportInfo;
   }
 
+  toString(): string {
+    return `tcpros://${this._address}:${this._port}`;
+  }
+
   private _getTransportInfo = async (): Promise<string> => {
     const localPort = (await this._socket.localAddress())?.port ?? -1;
     const addr = await this._socket.remoteAddress();
@@ -113,6 +159,11 @@ export class TcpConnection extends EventEmitter implements Connection {
   };
 
   private _handleConnect = async (): Promise<void> => {
+    if (this._shutdown) {
+      this.close();
+      return;
+    }
+
     this._connected = true;
     this.retries = 0;
     this._transportInfo = await this._getTransportInfo();
@@ -123,16 +174,24 @@ export class TcpConnection extends EventEmitter implements Connection {
 
   private _handleClose = (): void => {
     this._connected = false;
-    // TODO: Enter a reconnect loop
+    if (!this._shutdown) {
+      this._log?.warn?.(`${this.toString()} closed unexpectedly. reconnecting`);
+      this._retryConnection();
+    }
   };
 
-  private _handleError = (): void => {
-    this._connected = false;
-    // TODO: Enter a reconnect loop
+  private _handleError = (err: Error): void => {
+    if (!this._shutdown) {
+      this._log?.warn?.(`${this.toString()} error: ${err}`);
+    }
   };
 
   private _handleMessage = (msgData: Uint8Array): void => {
-    this._connected = true;
+    if (this._shutdown) {
+      this.close();
+      return;
+    }
+
     this._stats.bytesReceived += msgData.byteLength;
 
     if (this._readingHeader) {

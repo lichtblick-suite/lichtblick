@@ -25,6 +25,8 @@ export interface Connection {
 
   transportType(): string;
 
+  connect(): Promise<void>;
+
   connected(): boolean;
 
   header(): Map<string, string>;

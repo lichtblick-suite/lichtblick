@@ -154,6 +154,10 @@ export class RosNode extends EventEmitter {
     return subscription;
   }
 
+  isSubscribedTo(topic: string): boolean {
+    return this._running && this.subscriptions.has(topic);
+  }
+
   unsubscribe(topic: string): boolean {
     const subscription = this.subscriptions.get(topic);
     if (!subscription) {
@@ -340,10 +344,18 @@ export class RosNode extends EventEmitter {
     topic: string,
     apiClient: RosFollowerClient,
   ): Promise<{ address: string; port: number }> {
-    const [status, msg, protocol] = await apiClient.requestTopic(name, topic, [["TCPROS"]]);
+    let res: RosXmlRpcResponse;
+    try {
+      res = await apiClient.requestTopic(name, topic, [["TCPROS"]]);
+    } catch (err) {
+      throw new Error(`requestTopic("${topic}") from ${apiClient} failed. err=${err}`);
+    }
+    const [status, msg, protocol] = res;
 
     if (status !== 1) {
-      throw new Error(`requestTopic("${name}", "${topic}") failed. status=${status}, msg=${msg}`);
+      throw new Error(
+        `requestTopic("${topic}") from ${apiClient} failed. status=${status}, msg=${msg}`,
+      );
     }
     if (!Array.isArray(protocol) || protocol.length < 3 || protocol[0] !== "TCPROS") {
       throw new Error(`TCP not supported by ${apiClient.url()} for topic "${topic}"`);
@@ -448,72 +460,94 @@ export class RosNode extends EventEmitter {
     subscription: Subscription,
     options: SubscribeOpts,
   ): Promise<void> {
+    const { topic } = options;
+
+    if (!this.isSubscribedTo(topic)) {
+      return;
+    }
+
+    // Register with with rosmaster as a subscriber to the requested topic. If
+    // this request fails, an exception is thrown
+    const publishers = await this._registerSubscriber(subscription);
+
+    if (!this.isSubscribedTo(topic)) {
+      return;
+    }
+
+    // Register with each publisher. Any failures communicating with individual node XML-RPC servers
+    // or TCP sockets will be caught and retried
+    await Promise.allSettled(
+      publishers.map((pubUrl) => this._subscribeToPublisher(pubUrl, subscription, options)),
+    );
+  }
+
+  async _subscribeToPublisher(
+    pubUrl: string,
+    subscription: Subscription,
+    options: SubscribeOpts,
+  ): Promise<void> {
     const { topic, type } = options;
     const md5sum = options.md5sum ?? "*";
     const tcpNoDelay = options.tcpNoDelay ?? false;
 
-    if (!this._running) {
+    if (!this.isSubscribedTo(topic)) {
       return;
     }
 
-    // TODO: Handle this registration failing
-    const publishers = await this._registerSubscriber(subscription);
+    let connection: TcpConnection;
+    let address: string;
+    let port: number;
 
-    if (!this._running) {
+    try {
+      // Create an XMLRPC client to talk to this publisher
+      const rosFollowerClient = new RosFollowerClient(pubUrl);
+
+      // Call requestTopic on this publisher to register ourselves as a subscriber
+      const socketInfo = await RosNode.RequestTopic(this.name, topic, rosFollowerClient);
+      ({ address, port } = socketInfo);
+      this._log?.debug?.(
+        `registered with ${pubUrl} as a subscriber to ${topic}, connecting to tcpros://${address}:${port}`,
+      );
+
+      if (!this.isSubscribedTo(topic)) {
+        return;
+      }
+
+      // Create a TCP socket connecting to this publisher
+      const socket = await this._tcpSocketCreate({ host: address, port });
+      connection = new TcpConnection(
+        socket,
+        address,
+        port,
+        new Map<string, string>([
+          ["topic", topic],
+          ["md5sum", md5sum ?? "*"],
+          ["callerid", this.name],
+          ["type", type],
+          ["tcp_nodelay", tcpNoDelay ? "1" : "0"],
+        ]),
+        this._log,
+      );
+
+      if (!this.isSubscribedTo(topic)) {
+        socket.close();
+        return;
+      }
+
+      // Hold a reference to this publisher
+      const connectionId = this._newConnectionId();
+      subscription.addPublisher(connectionId, rosFollowerClient, connection);
+    } catch (err) {
+      // Consider tracking failed RosFollower connections (node XML-RPC servers) and entering a
+      // retry loop
+      this._log?.warn?.(
+        `subscribing to ${topic} at ${pubUrl} failed (${err}), this connection will be dropped`,
+      );
       return;
     }
 
-    // Register with each publisher
-    await Promise.all(
-      publishers.map(async (pubUrl) => {
-        if (!this._running) {
-          return;
-        }
-
-        // Create an XMLRPC client to talk to this publisher
-        const rosFollowerClient = new RosFollowerClient(pubUrl);
-
-        if (!this._running) {
-          return;
-        }
-
-        // Call requestTopic on this publisher to register ourselves as a subscriber
-        // TODO: Handle this requestTopic() call failing
-        const { address, port } = await RosNode.RequestTopic(this.name, topic, rosFollowerClient);
-        this._log?.debug?.(
-          `registered with ${pubUrl} as a subscriber to ${topic}, connecting to tcpros://${address}:${port}`,
-        );
-
-        if (!this._running) {
-          return;
-        }
-
-        // Create a TCP socket connecting to this publisher
-        const socket = await this._tcpSocketCreate({ host: address, port });
-        const connection = new TcpConnection(
-          socket,
-          new Map<string, string>([
-            ["topic", topic],
-            ["md5sum", md5sum],
-            ["callerid", this.name],
-            ["type", type],
-            ["tcp_nodelay", tcpNoDelay ? "1" : "0"],
-          ]),
-        );
-
-        if (!this._running) {
-          socket.close();
-          return;
-        }
-
-        // Hold a reference to this publisher
-        const connectionId = this._newConnectionId();
-        subscription.addPublisher(connectionId, rosFollowerClient, connection);
-
-        // Asynchronously initiate the socket connection
-        socket.connect().then(() => this._log?.debug?.(`connected to tcpros://${address}:${port}`));
-      }),
-    );
+    // Asynchronously initiate the socket connection. This will enter a retry loop on failure
+    connection.connect();
   }
 
   static GetRosHostname(
