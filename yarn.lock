@@ -2046,7 +2046,7 @@ __metadata:
     "@storybook/addon-essentials": 6.2.5
     "@storybook/builder-webpack5": 6.2.5
     "@storybook/react": 6.2.5
-    "@testing-library/dom": 7.30.1
+    "@testing-library/dom": 7.30.4
     "@testing-library/react": 11.2.6
     "@testing-library/react-hooks": 5.1.2
     "@types/argparse": ^2.0.5
@@ -4121,9 +4121,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/dom@npm:7.30.1, @testing-library/dom@npm:^7.28.1":
-  version: 7.30.1
-  resolution: "@testing-library/dom@npm:7.30.1"
+"@testing-library/dom@npm:7.30.4, @testing-library/dom@npm:^7.28.1":
+  version: 7.30.4
+  resolution: "@testing-library/dom@npm:7.30.4"
   dependencies:
     "@babel/code-frame": ^7.10.4
     "@babel/runtime": ^7.12.5
@@ -4133,7 +4133,7 @@ __metadata:
     dom-accessibility-api: ^0.5.4
     lz-string: ^1.4.4
     pretty-format: ^26.6.2
-  checksum: a886bdb20955e5f029fa10932184128dd701dac866dc8016e66f339d89ab5b63185c3584ea5eb2a5ffbcb779bad6952f1f0933cc47f6772450211cd85b55861e
+  checksum: 113225e873ec36739be2d0866b5108626253178c34727b51d6c04a046fea815450e40d0b1be63849dff46745043381e0b40fd03f8c1d5a447bc24ffde0f42ec9
   languageName: node
   linkType: hard
 
