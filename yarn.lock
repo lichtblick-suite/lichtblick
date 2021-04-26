@@ -2052,6 +2052,7 @@ __metadata:
     "@types/argparse": ^2.0.5
     "@types/classnames": 2.3.1
     "@types/css-font-loading-module": 0.0.4
+    "@types/cytoscape": ^3
     "@types/enzyme": ^3.10.8
     "@types/enzyme-adapter-react-16": 1.0.6
     "@types/gl-matrix": 3.2.0
@@ -2064,7 +2065,6 @@ __metadata:
     "@types/promise-queue": 2.2.0
     "@types/react": 17.0.4
     "@types/react-autocomplete": 1.8.5
-    "@types/react-cytoscapejs": ^1
     "@types/react-dom": 17.0.3
     "@types/react-highlight-words": 0.16.2
     "@types/react-input-autosize": 2.2.0
@@ -2094,6 +2094,7 @@ __metadata:
     chartjs-plugin-zoom: "github:foxglove/chartjs-plugin-zoom#656541279943f00dce600288435f83c436293146"
     chromatic: 5.7.1
     classnames: 2.3.1
+    cytoscape: 3.18.2
     cytoscape-cola: 2.4.0
     cytoscape-dagre: 2.3.2
     enzyme: 3.11.0
@@ -2128,7 +2129,6 @@ __metadata:
     rc-tree: 4.1.5
     react: 17.0.2
     react-autocomplete: "janpaul123/react-autocomplete#bc8737070b5744069719c8fcd4e0a197192b0d48"
-    react-cytoscapejs: 1.2.1
     react-document-events: 1.5.1
     react-dom: 17.0.2
     react-highlight-words: 0.17.0
@@ -4335,10 +4335,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/cytoscape@npm:*":
-  version: 3.14.12
-  resolution: "@types/cytoscape@npm:3.14.12"
-  checksum: 306d4d72a8833e88b50a7f3abdd225bd7922dade28f331cbbc25c2dc88f5a83066d6ffe724fe18db8eca6a774a55259301fcedb9deaef1f2859ac3e278d3a59b
+"@types/cytoscape@npm:^3":
+  version: 3.14.14
+  resolution: "@types/cytoscape@npm:3.14.14"
+  checksum: 3c7d343ca76fda2d96dd6e5dfe0c2c0f3fb4ac04f0e73cf8f2e81abf745c4a8cc77d5b8cf78716c89c4d093efd587a72485216c40e0072c8ac8c44200558a812
   languageName: node
   linkType: hard
 
@@ -4869,16 +4869,6 @@ __metadata:
   dependencies:
     "@types/react": "*"
   checksum: 3325f37f87a0a2aff18c17205fe43b4c993ed9d5a4b1c34dcaaa8a2edf7c126da68809ad26e3908cbd7de53b6dc3d0f9d5e9fa0363c8c9dc0f475619f164a4b1
-  languageName: node
-  linkType: hard
-
-"@types/react-cytoscapejs@npm:^1":
-  version: 1.2.1
-  resolution: "@types/react-cytoscapejs@npm:1.2.1"
-  dependencies:
-    "@types/cytoscape": "*"
-    "@types/react": "*"
-  checksum: 5f6a630290e1d9dc85df7d36eb11a23e0dcdb788c925de1f997c37dd37419cb53199cb7334e700a0d58302ddbe042b753de5fe16d327842a532e970741e5095f
   languageName: node
   linkType: hard
 
@@ -9362,7 +9352,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cytoscape@npm:^3.2.19":
+"cytoscape@npm:3.18.2":
   version: 3.18.2
   resolution: "cytoscape@npm:3.18.2"
   dependencies:
@@ -19651,19 +19641,6 @@ fsevents@^1.2.7:
     react: ">=16.8.0"
     react-dom: ">=16.8.0"
   checksum: 7027101eb2c792c1b602a270867907b9cf20ad1d3b9ca6f3e610634a2fd5365b9ec5146c7a283050f06e20279e7a7e6c49dc6e4602ec943b0606dbf9b902d5c2
-  languageName: node
-  linkType: hard
-
-"react-cytoscapejs@npm:1.2.1":
-  version: 1.2.1
-  resolution: "react-cytoscapejs@npm:1.2.1"
-  dependencies:
-    cytoscape: ^3.2.19
-    prop-types: ^15.6.2
-  peerDependencies:
-    react: ">=15.0.0"
-    react-dom: ">=15.0.0"
-  checksum: 6de241c4f7caa08e4b3791996a63bdb37632a2f736b386c17c11f0231f15d7150c7410deca681e28765f6ddb38807e753b7a2e353c4a39146e615a7c067f9f9f
   languageName: node
   linkType: hard
 

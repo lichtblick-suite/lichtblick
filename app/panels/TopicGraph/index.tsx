@@ -11,17 +11,21 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import FitToPageIcon from "@mdi/svg/svg/fit-to-page-outline.svg";
 import Cytoscape from "cytoscape";
 import CytoscapeCola from "cytoscape-cola";
 import CytoscapeDagre from "cytoscape-dagre";
-import { useCallback, useMemo } from "react";
-import CytoscapeComponent from "react-cytoscapejs";
+import { useCallback, useMemo, useRef } from "react";
 
+import Button from "@foxglove-studio/app/components/Button";
 import EmptyState from "@foxglove-studio/app/components/EmptyState";
+import Icon from "@foxglove-studio/app/components/Icon";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 
+import Graph, { GraphMutation } from "./Graph";
+import Toolbar from "./Toolbar";
 import helpContent from "./index.help.md";
 
 const STYLESHEET: Cytoscape.Stylesheet[] = [
@@ -92,22 +96,18 @@ const STYLESHEET: Cytoscape.Stylesheet[] = [
   },
 ];
 
-const DAG_LAYOUT = ({
-  name: "dagre",
+/*
+const DCG_LAYOUT = ({
+  name: "cola",
   fit: true,
-  rankDir: "LR",
+  animate: true,
+  refresh: 1,
+  maxSimulationTime: 1000,
+  nodeDimensionsIncludeLabels: true,
+  avoidOverlap: true,
+  handleDisconnected: true,
 } as unknown) as Cytoscape.LayoutOptions;
-
-// const DCG_LAYOUT = ({
-//   name: "cola",
-//   fit: true,
-//   animate: true,
-//   refresh: 1,
-//   maxSimulationTime: 1000,
-//   nodeDimensionsIncludeLabels: true,
-//   avoidOverlap: true,
-//   handleDisconnected: true,
-// } as unknown) as Cytoscape.LayoutOptions;
+*/
 
 Cytoscape.use(CytoscapeCola);
 Cytoscape.use(CytoscapeDagre);
@@ -196,6 +196,12 @@ function TopicGraph() {
     return output;
   }, [publishedTopics, subscribedTopics, services]);
 
+  const graph = useRef<GraphMutation>();
+
+  const onZoomFit = useCallback(() => {
+    graph.current?.fit();
+  }, []);
+
   if (publishedTopics == undefined) {
     return (
       <>
@@ -208,19 +214,19 @@ function TopicGraph() {
   return (
     <>
       <PanelToolbar floating helpContent={helpContent} />
-      <CytoscapeComponent
-        elements={elements}
-        style={{ width: "100%", height: "100%" }}
-        stylesheet={STYLESHEET}
-        zoom={0.7}
-        layout={DAG_LAYOUT} // TODO: Detect cycles in the graph and switch to DCG_LAYOUT
-      ></CytoscapeComponent>
+      <Toolbar>
+        <Button tooltip="Zoom Fit" onClick={onZoomFit}>
+          <Icon style={{ color: "white" }} small>
+            <FitToPageIcon />
+          </Icon>
+        </Button>
+      </Toolbar>
+      <Graph style={STYLESHEET} elements={elements} graphRef={graph} />
     </>
   );
 }
 
 TopicGraph.panelType = "TopicGraph";
 TopicGraph.defaultConfig = {};
-TopicGraph.supportsStrictMode = false;
 
 export default Panel(TopicGraph);
