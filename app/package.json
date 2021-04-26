@@ -105,7 +105,7 @@
     "@types/moment-duration-format": "2.2.2",
     "@types/prettier": "2.2.3",
     "@types/promise-queue": "2.2.0",
-    "@types/react": "17.0.3",
+    "@types/react": "17.0.4",
     "@types/react-autocomplete": "1.8.5",
     "@types/react-cytoscapejs": "^1",
     "@types/react-dom": "17.0.3",
