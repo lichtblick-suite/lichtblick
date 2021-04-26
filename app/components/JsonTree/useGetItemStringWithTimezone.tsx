@@ -43,7 +43,7 @@ export default function useGetItemStringWithTimezone(): (
 }
 
 function getItemString(
-  type: string,
+  _type: string,
   data: any,
   itemType: ReactNode,
   itemString: string,

@@ -92,7 +92,7 @@ function TimezoneSettings(): React.ReactElement {
   }, [fixedItems, timezoneItems, filterText]);
 
   const onPendingValueChanged = useCallback(
-    (option?: IComboBoxOption, index?: number, value?: string) => {
+    (_option?: IComboBoxOption, _index?: number, value?: string) => {
       if (value != undefined) {
         setFilterText(value);
       }
@@ -108,7 +108,7 @@ function TimezoneSettings(): React.ReactElement {
       autoComplete="on"
       openOnKeyboardFocus
       selectedKey={selectedItem.key}
-      onChange={(event, option) => {
+      onChange={(_event, option) => {
         if (option) {
           setTimezone(option.data);
         }
@@ -147,12 +147,12 @@ export default function Preferences(): React.ReactElement {
             </Text>
             <Checkbox
               checked={telemetryEnabled.value ?? true}
-              onChange={(event, checked) => setTelemetryEnabled(checked)}
+              onChange={(_event, checked) => setTelemetryEnabled(checked)}
               label={`Send anonymized usage data to help us improve ${APP_NAME}`}
             />
             <Checkbox
               checked={crashReportingEnabled.value ?? true}
-              onChange={(event, checked) => setCrashReportingEnabled(checked)}
+              onChange={(_event, checked) => setCrashReportingEnabled(checked)}
               label="Send anonymized crash reports"
             />
           </Stack>

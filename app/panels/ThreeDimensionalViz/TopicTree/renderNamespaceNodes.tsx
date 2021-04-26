@@ -127,7 +127,7 @@ function NamespaceNodeRow({
 
   const onMouseLeave = useCallback(() => setHoveredMarkerMatchers([]), [setHoveredMarkerMatchers]);
   const mouseEventHandlersByColumnIdx = useMemo(() => {
-    return new Array(2).fill(0).map((topic, columnIndex) => ({
+    return new Array(2).fill(0).map((_topic, columnIndex) => ({
       onMouseEnter: () => updateHoveredMarkerMatchers(columnIndex, true),
       onMouseLeave,
     }));

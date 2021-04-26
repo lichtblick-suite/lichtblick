@@ -49,7 +49,7 @@ function isValidWidth(value: string) {
 
 function formatData(
   data: PlotChartPoint,
-  dataIndex: number,
+  _dataIndex: number,
   label: string,
   datasetKey: string,
   tooltips: TimeBasedChartTooltipData[],

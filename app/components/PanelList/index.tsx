@@ -133,7 +133,7 @@ function DraggablePanelItem({
   const [__, drag] = useDrag({
     item: { type: MosaicDragType.WINDOW },
     begin: (_monitor) => ({ mosaicId } as any),
-    end: (item, monitor) => {
+    end: (_item, monitor) => {
       const dropResult = monitor.getDropResult() || {};
       const { position, path, tabId } = dropResult;
       // dropping outside mosaic does nothing. If we have a tabId, but no

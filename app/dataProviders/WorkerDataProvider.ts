@@ -43,7 +43,7 @@ export default class WorkerDataProvider implements DataProvider {
   _provider?: RpcDataProvider;
   _child?: DataProviderDescriptor;
 
-  constructor(args: any, children: DataProviderDescriptor[]) {
+  constructor(_args: unknown, children: DataProviderDescriptor[]) {
     if (children.length !== 1) {
       throw new Error(`Incorrect number of children to WorkerDataProvider: ${children.length}`);
     }

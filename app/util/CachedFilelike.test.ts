@@ -78,7 +78,7 @@ describe("CachedFilelike", () => {
           // no-op
         },
       });
-      cachedFileReader.read(1, 2, (error: any, data: any) => {
+      cachedFileReader.read(1, 2, (_error: unknown, data: any) => {
         if (!data) {
           throw new Error("Missing `data`");
         }
@@ -187,7 +187,7 @@ describe("CachedFilelike", () => {
         },
       });
       // eslint-disable-next-line no-restricted-syntax
-      cachedFileReader.read(1, 0, (error: any, data?: Buffer | null) => {
+      cachedFileReader.read(1, 0, (_error: unknown, data?: Buffer | null) => {
         if (!data) {
           throw new Error("Missing `data`");
         }

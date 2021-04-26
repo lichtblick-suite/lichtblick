@@ -17,6 +17,7 @@ import ChevronDownIcon from "@mdi/svg/svg/unfold-less-horizontal.svg";
 import ChevronUpIcon from "@mdi/svg/svg/unfold-more-horizontal.svg";
 import cx from "classnames";
 import { clamp } from "lodash";
+import { ReactElement } from "react";
 import { createSelector } from "reselect";
 import sanitizeHtml from "sanitize-html";
 import styled from "styled-components";
@@ -200,17 +201,17 @@ class DiagnosticStatus extends React.Component<Props, any> {
     onChangeSplitFraction(splitFraction);
   };
 
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     window.removeEventListener("mousemove", this._resizeMouseMove as any);
     window.removeEventListener("mouseup", this._resizeMouseUp);
   }
 
   _renderKeyValueCell(
-    cls: string,
+    _cls: string,
     html: { __html: string } | undefined,
     str: string,
     openPlotPanelIconElem?: React.ReactNode,
-  ) {
+  ): ReactElement {
     if (html) {
       return <td className={style.valueCell} dangerouslySetInnerHTML={html} />;
     }

@@ -35,7 +35,7 @@ export function getLocalBagDescriptor(file: File): DataProviderDescriptor {
 
 export function getRemoteBagDescriptor(
   url: string,
-  guid: string | undefined,
+  _guid: string | undefined,
   options: { unlimitedMemoryCache: boolean },
 ): DataProviderDescriptor {
   const bagDataProvider = {

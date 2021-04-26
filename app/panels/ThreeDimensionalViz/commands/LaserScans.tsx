@@ -79,30 +79,30 @@ const laserScan = (regl: Regl) =>
   `,
 
     uniforms: {
-      pointSize: (context: never, props: any) => props.settings?.pointSize || 4,
-      isCircle: (context: never, props: any) =>
+      pointSize: (_context: unknown, props: any) => props.settings?.pointSize || 4,
+      isCircle: (_context: unknown, props: any) =>
         (props.settings && props.settings.pointShape === "circle") || false,
       // Color is not included in the LaserScan message - it's only included if the color is added by
       // getChildrenForHitmap.
-      isHitmap: (context: never, props: any) => !!props.color,
+      isHitmap: (_context: unknown, props: any) => !!props.color,
 
       angle_min: regl.prop("angle_min"),
       angle_increment: regl.prop("angle_increment"),
       range_min: regl.prop("range_min"),
       range_max: regl.prop("range_max"),
 
-      color: (context: never, props: any) =>
+      color: (_context: unknown, props: any) =>
         toRGBA(props.settings?.overrideColor || DEFAULT_FLAT_COLOR),
     },
 
     attributes: {
-      index: (context: never, props: any) => range(props.ranges.length),
+      index: (_context: unknown, props: any) => range(props.ranges.length),
       range: regl.prop("ranges"),
-      intensity: (context: never, props: any) =>
+      intensity: (_context: unknown, props: any) =>
         props.intensities.length === props.ranges.length
           ? props.intensities
           : new Float32Array(props.ranges.length).fill(1),
-      hitmapColor: (context: never, props: any) =>
+      hitmapColor: (_context: unknown, props: any) =>
         new Array(props.ranges.length).fill(props.color || [0, 0, 0, 1]),
     },
 

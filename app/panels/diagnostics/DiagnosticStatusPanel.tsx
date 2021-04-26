@@ -56,7 +56,7 @@ function DiagnosticStatusPanel(props: Props) {
 
   const onSelect = useCallback(
     (
-      value: string,
+      _value: string,
       entry: DiagnosticAutocompleteEntry,
       autocomplete: Autocomplete<DiagnosticAutocompleteEntry>,
     ) => {

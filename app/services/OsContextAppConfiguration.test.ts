@@ -51,7 +51,7 @@ describe("OsContextAppConfiguration", () => {
 
     let value = JSON.stringify({ abc: 123 });
     ctx.storage.get.mockImplementation(async () => value);
-    ctx.storage.put.mockImplementation(async (datastore, key, newValue) => {
+    ctx.storage.put.mockImplementation(async (_datastore, _key, newValue) => {
       if (typeof newValue !== "string") {
         throw new Error("Expected storage.put to be given a string");
       }
@@ -80,7 +80,7 @@ describe("OsContextAppConfiguration", () => {
 
     let value = JSON.stringify({ abc: 123 });
     ctx.storage.get.mockImplementation(async () => value);
-    ctx.storage.put.mockImplementation(async (datastore, key, newValue) => {
+    ctx.storage.put.mockImplementation(async (_datastore, _key, newValue) => {
       if (typeof newValue !== "string") {
         throw new Error("Expected storage.put to be given a string");
       }
@@ -108,7 +108,7 @@ describe("OsContextAppConfiguration", () => {
 
     let value = JSON.stringify({ abc: 123 });
     ctx.storage.get.mockImplementation(async () => value);
-    ctx.storage.put.mockImplementation(async (datastore, key, newValue) => {
+    ctx.storage.put.mockImplementation(async (_datastore, _key, newValue) => {
       if (typeof newValue !== "string") {
         throw new Error("Expected storage.put to be given a string");
       }

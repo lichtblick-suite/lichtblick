@@ -221,7 +221,7 @@ export default function NotificationDisplay(): React.ReactElement {
       (
         message: string,
         details: DetailsType,
-        type: NotificationType,
+        _type: NotificationType,
         severity: NotificationSeverity,
       ): void => {
         // shift notifications in to the front of the array and keep a max of 100

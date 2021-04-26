@@ -86,7 +86,7 @@ class MockPanelCatalog implements PanelCatalog {
 const fixture = { topics: [], datatypes: {}, frame: {}, layout: "Tab!a" };
 const manyTabs = new Array(25)
   .fill(1)
-  .map((elem, idx) => ({ title: `Tab #${idx + 1}`, layout: undefined }));
+  .map((_elem, idx) => ({ title: `Tab #${idx + 1}`, layout: undefined }));
 const DEFAULT_TIMEOUT = 200;
 storiesOf("panels/Tab/index", module)
   .addParameters({

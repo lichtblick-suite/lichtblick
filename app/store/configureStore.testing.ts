@@ -20,7 +20,7 @@ import { State } from "@foxglove-studio/app/reducers";
 const configureStore = (
   reducer: Reducer<State, ActionTypes>,
   middleware: Array<any> = [],
-  history?: any,
+  _history?: unknown,
   preloadedState?: State,
 ) => {
   const store = createStore(

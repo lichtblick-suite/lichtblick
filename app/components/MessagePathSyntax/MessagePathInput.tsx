@@ -379,7 +379,7 @@ class MessagePathInputUnconnected extends React.PureComponent<
           filterText={autocompleteFilterText}
           value={path}
           onChange={this._onChange}
-          onSelect={(value: string, item: any, autocomplete: Autocomplete) =>
+          onSelect={(value: string, _item: unknown, autocomplete: Autocomplete) =>
             this._onSelect(value, autocomplete, autocompleteType, autocompleteRange)
           }
           hasError={autocompleteType != undefined && !disableAutocomplete && path.length > 0}

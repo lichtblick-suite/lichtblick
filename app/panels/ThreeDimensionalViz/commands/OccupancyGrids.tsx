@@ -96,17 +96,17 @@ const occupancyGrids = (regl: any) => {
       height: regl.prop("info.height"),
       resolution: regl.prop("info.resolution"),
       // make alpha a uniform so in the future it can be controlled by topic settings
-      alpha: (context: any, props: OccupancyGridMessage) => {
+      alpha: (_context: unknown, props: OccupancyGridMessage) => {
         return props.alpha || 0.5;
       },
-      offset: (context: any, props: OccupancyGridMessage) => {
+      offset: (_context: unknown, props: OccupancyGridMessage) => {
         return pointToVec3(props.info.origin.position);
       },
-      orientation: (context: any, props: OccupancyGridMessage) => {
+      orientation: (_context: unknown, props: OccupancyGridMessage) => {
         const { x, y, z, w } = props.info.origin.orientation;
         return [x, y, z, w];
       },
-      palette: (_context: any, _props: OccupancyGridMessage) => {
+      palette: (_context: unknown, _props: OccupancyGridMessage) => {
         const palette = defaultMapPalette;
         // track which palettes we've uploaded as textures
         let texture = paletteTextures.get(palette);
@@ -125,7 +125,7 @@ const occupancyGrids = (regl: any) => {
         paletteTextures.set(palette, texture);
         return texture;
       },
-      data: (context: any, props: any) => {
+      data: (_context: unknown, props: any) => {
         return cache.get(props);
       },
     },

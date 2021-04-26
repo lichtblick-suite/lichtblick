@@ -184,7 +184,7 @@ function URDFViewer({ config, saveConfig }: Props) {
             offText="Manual joint control"
             onText="Topic"
             checked={!useCustomJointValues}
-            onChange={(event, checked) =>
+            onChange={(_event, checked) =>
               saveConfig({
                 jointStatesTopic:
                   checked ?? false ? URDFViewer.defaultConfig.jointStatesTopic : undefined,
@@ -196,7 +196,7 @@ function URDFViewer({ config, saveConfig }: Props) {
               allowFreeform
               options={topicOptions}
               selectedKey={jointStatesTopic}
-              onChange={(event, option, index, value) => {
+              onChange={(_event, option, _index, value) => {
                 if (option) {
                   saveConfig({ jointStatesTopic: option.key as string });
                 } else if (value != undefined) {
@@ -227,7 +227,7 @@ function URDFViewer({ config, saveConfig }: Props) {
               <Dropdown
                 options={assetOptions}
                 selectedKey={selectedAssetId}
-                onChange={(event, option) =>
+                onChange={(_event, option) =>
                   option != undefined && setSelectedAssetId(option.key as string)
                 }
               />

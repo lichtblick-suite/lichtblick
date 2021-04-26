@@ -143,7 +143,7 @@ export const MosaicWrapper = ({ children }: { children: React.ReactNode }): JSX.
       <Mosaic
         className="none"
         initialValue="mock"
-        renderTile={(id, path) => {
+        renderTile={(_id, path) => {
           return (
             <MosaicWindow title="" path={path} renderPreview={() => <div />}>
               {children}

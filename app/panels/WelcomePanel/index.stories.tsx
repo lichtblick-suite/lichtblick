@@ -26,8 +26,8 @@ function makeConfiguration(entries?: [string, unknown][]): AppConfiguration {
       map.set(key, value);
       [...listeners].forEach((listener) => listener());
     },
-    addChangeListener: (key, cb) => listeners.add(cb),
-    removeChangeListener: (key, cb) => listeners.delete(cb),
+    addChangeListener: (_key, cb) => listeners.add(cb),
+    removeChangeListener: (_key, cb) => listeners.delete(cb),
   };
 }
 

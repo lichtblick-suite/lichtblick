@@ -193,10 +193,10 @@ const makePointCloudCommand = () => {
       }
     `,
       attributes: {
-        position: (context: never, props: any) => {
+        position: (_context: unknown, props: any) => {
           return getCachedBuffer(positionBufferCache, props.positionBuffer);
         },
-        color: (context: never, props: any) => {
+        color: (_context: unknown, props: any) => {
           const { hitmapColors, settings, blend } = props;
           const { colorMode } = settings;
           if (hitmapColors) {
@@ -225,13 +225,13 @@ const makePointCloudCommand = () => {
       },
 
       uniforms: {
-        pointSize: (context: never, props: any) => {
+        pointSize: (_context: unknown, props: any) => {
           return props.settings?.pointSize || 2;
         },
-        isCircle: (context: never, props: any) => {
+        isCircle: (_context: unknown, props: any) => {
           return props.settings?.pointShape ? props.settings?.pointShape === "circle" : true;
         },
-        colorMode: (context: never, props: any) => {
+        colorMode: (_context: unknown, props: any) => {
           const { settings, is_bigendian, hitmapColors, blend } = props;
           if (hitmapColors) {
             // We're providing a colors array in RGB format
@@ -253,28 +253,28 @@ const makePointCloudCommand = () => {
           }
           return is_bigendian ? COLOR_MODE_RGB : COLOR_MODE_BGR;
         },
-        flatColor: (context: never, props: any) => {
+        flatColor: (_context: unknown, props: any) => {
           if (props.blend?.color) {
             // Use constant color for blending.
             return toRgba(vec4ToRGBA(props.blend.color));
           }
           return toRgba(props.settings.colorMode.flatColor || DEFAULT_FLAT_COLOR);
         },
-        minGradientColor: (context: never, props: any) => {
+        minGradientColor: (_context: unknown, props: any) => {
           return toRgba(props.settings.colorMode.minColor || DEFAULT_MIN_COLOR);
         },
-        maxGradientColor: (context: never, props: any) => {
+        maxGradientColor: (_context: unknown, props: any) => {
           return toRgba(props.settings.colorMode.maxColor || DEFAULT_MAX_COLOR);
         },
-        minColorFieldValue: (context: never, props: any) => {
+        minColorFieldValue: (_context: unknown, props: any) => {
           return props.minColorValue;
         },
-        maxColorFieldValue: (context: never, props: any) => {
+        maxColorFieldValue: (_context: unknown, props: any) => {
           return props.maxColorValue;
         },
       },
 
-      count: (context: never, props: any) => {
+      count: (_context: unknown, props: any) => {
         return props.pointCount;
       },
     });

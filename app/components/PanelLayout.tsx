@@ -69,7 +69,7 @@ const HideTopLevelDropTargets = styled.div.attrs({ style: { margin: 0 } })`
 function TabMosaicWrapper({ tabId, children }: PropsWithChildren<{ tabId?: string }>) {
   const [, drop] = useDrop({
     accept: MosaicDragType.WINDOW,
-    drop: (item, monitor) => {
+    drop: (_item, monitor) => {
       const nestedDropResult = monitor.getDropResult();
       if (nestedDropResult) {
         // The drop result may already have a tabId if it was dropped in a more deeply-nested Tab

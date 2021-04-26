@@ -198,7 +198,7 @@ describe("useMessageReducer", () => {
     const Test = createTest(false, true);
 
     Test.restore.mockReturnValue(1);
-    Test.addMessages.mockImplementation((prevValue, msgs) => msgs[msgs.length - 1].message.value);
+    Test.addMessages.mockImplementation((_prevValue, msgs) => msgs[msgs.length - 1].message.value);
 
     const message1 = {
       topic: "/foo",

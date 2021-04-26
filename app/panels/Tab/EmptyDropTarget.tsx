@@ -65,7 +65,7 @@ export const EmptyDropTarget = ({ mosaicId, tabId }: Props) => {
 
   const [{ isOver }, drop] = useDrop({
     accept: MosaicDragType.WINDOW,
-    drop: (item, monitor) => {
+    drop: (_item, monitor) => {
       if (monitor.getItem().mosaicId === mosaicId) {
         return { tabId };
       }

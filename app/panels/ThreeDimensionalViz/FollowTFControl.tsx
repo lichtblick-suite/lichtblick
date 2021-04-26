@@ -171,7 +171,7 @@ const FollowTFControl = memo<Props>((props: Props) => {
   ]);
 
   const onSelectFrame = useCallback(
-    (id: string, item: unknown, autocompleteNode: Autocomplete<TfTreeNode>) => {
+    (id: string, _item: unknown, autocompleteNode: Autocomplete<TfTreeNode>) => {
       setLastSelectedFrame(id === getDefaultFollowTransformFrame() ? undefined : id);
       onFollowChange(id, followOrientation);
       autocompleteNode.blur();

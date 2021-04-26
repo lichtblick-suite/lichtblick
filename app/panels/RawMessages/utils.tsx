@@ -42,7 +42,7 @@ function getChangeCounts(data: any, startingCounts: any) {
   return startingCounts;
 }
 
-export const getItemStringForDiff = (type: string, data: any, itemType: ReactNode): ReactNode => {
+export const getItemStringForDiff = (_type: string, data: any, itemType: ReactNode): ReactNode => {
   const { ADDED, DELETED, CHANGED, ID } = diffLabels;
   const id = data[ID.labelText];
   const idLabel = id

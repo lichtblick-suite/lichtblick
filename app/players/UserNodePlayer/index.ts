@@ -179,7 +179,7 @@ export default class UserNodePlayer implements Player {
   _getMessages = microMemoize(
     async (
       parsedMessages: readonly Message[],
-      datatypes: RosDatatypes,
+      _datatypes: RosDatatypes,
       globalVariables: GlobalVariables,
       nodeRegistrations: readonly NodeRegistration[],
     ): Promise<{

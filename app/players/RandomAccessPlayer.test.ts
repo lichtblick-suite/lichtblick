@@ -1018,8 +1018,8 @@ describe("RandomAccessPlayer", () => {
 
     let callCount = 0;
     provider.getMessages = (
-      start: Time,
-      end: Time,
+      _start: Time,
+      _end: Time,
       topics: GetMessagesTopics,
     ): Promise<GetMessagesResult> => {
       callCount++;
@@ -1101,8 +1101,8 @@ describe("RandomAccessPlayer", () => {
     let resolve: any;
     const done = new Promise((_resolve) => (resolve = _resolve));
     provider.getMessages = (
-      start: Time,
-      end: Time,
+      _start: Time,
+      _end: Time,
       topics: GetMessagesTopics,
     ): Promise<GetMessagesResult> => {
       expect(topics).toEqual({ parsedMessages: ["/foo/bar", "/baz"] });
@@ -1623,8 +1623,8 @@ describe("RandomAccessPlayer", () => {
     );
 
     provider.getMessages = (
-      start: Time,
-      end: Time,
+      _start: Time,
+      _end: Time,
       topics: GetMessagesTopics,
     ): Promise<GetMessagesResult> => {
       expect(topics).toEqual({
@@ -1661,8 +1661,8 @@ describe("RandomAccessPlayer", () => {
     );
 
     provider.getMessages = (
-      start: Time,
-      end: Time,
+      _start: Time,
+      _end: Time,
       topics: GetMessagesTopics,
     ): Promise<GetMessagesResult> => {
       expect(topics).toEqual({

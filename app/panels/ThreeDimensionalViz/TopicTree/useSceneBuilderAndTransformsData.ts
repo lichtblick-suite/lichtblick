@@ -67,7 +67,8 @@ export default function useSceneBuilderAndTransformsData({
   }, [availableTfs, sceneBuilder.allNamespaces, staticallyAvailableNamespacesByTopic]);
 
   const sceneErrorsByKey = useMemo(
-    () => mapKeys(sceneBuilder.errorsByTopic, (value, topicName) => generateNodeKey({ topicName })),
+    () =>
+      mapKeys(sceneBuilder.errorsByTopic, (_value, topicName) => generateNodeKey({ topicName })),
     [sceneBuilder.errorsByTopic],
   );
 

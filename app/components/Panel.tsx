@@ -509,8 +509,8 @@ export default function Panel<Config extends PanelConfig>(
       <Profiler
         id={childId ?? "$unknown_id"}
         onRender={(
-          id,
-          phase,
+          _id,
+          _phase,
           actualDuration,
           _baseDuration,
           _startTime,

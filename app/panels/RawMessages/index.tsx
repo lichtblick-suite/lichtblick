@@ -447,7 +447,7 @@ function RawMessages(props: Props) {
                 nestedNodeChildren: ({ style }) => ({
                   style: { ...style, textDecoration: "inherit" },
                 }),
-                value: ({ style }, nodeType, keyPath) => {
+                value: ({ style }, _nodeType, keyPath) => {
                   const baseStyle = { ...style, textDecoration: "inherit" };
                   if (!diffEnabled) {
                     return { style: baseStyle };

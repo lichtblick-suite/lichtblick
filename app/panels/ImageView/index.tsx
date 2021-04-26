@@ -429,7 +429,7 @@ function ImageView(props: Props) {
   const cameraInfo = PanelAPI.useMessageReducer({
     topics: cameraInfoTopic ? [cameraInfoTopic] : [],
     restore: useCallback((value: any) => value, []) as any,
-    addMessage: useCallback((value, { message }: Message) => message, []),
+    addMessage: useCallback((_value, { message }: Message) => message, []),
   }) as CameraInfo;
 
   const shouldSynchronize = config.synchronize && enabledMarkerTopics.length > 0;

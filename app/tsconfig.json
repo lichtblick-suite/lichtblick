@@ -20,7 +20,6 @@
       "micro-memoize": ["../typings/micro-memoize"],
       // This is only needed for vscode import suggestions
       "@foxglove-studio/app/*": ["./*"]
-    },
-    "noUnusedParameters": false
+    }
   }
 }

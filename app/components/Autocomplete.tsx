@@ -323,7 +323,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
           onMouseDown: this._onMouseDown,
           onKeyDown: this._onKeyDown,
         }}
-        renderMenu={(menuItems, val, style) => {
+        renderMenu={(menuItems, _val, style) => {
           // Hacky virtualization. Either don't show all menuItems (typical when the user is still
           // typing in the autcomplete), or do show them all (once the user scrolls). Not the most
           // sophisticated, but good enough!

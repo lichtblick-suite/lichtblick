@@ -22,7 +22,7 @@ const sceneBuilderHooks: ThreeDimensionalVizHooks = {
   getSyntheticArrowMarkerColor: () => ({ r: 0, g: 0, b: 1, a: 0.5 }),
   getFlattenedPose: () => undefined,
   getOccupancyGridValues: (_topic) => [0.5, "map"],
-  getMarkerColor: (topic, markerColor) => markerColor,
+  getMarkerColor: (_topic, markerColor) => markerColor,
 };
 
 export default sceneBuilderHooks;

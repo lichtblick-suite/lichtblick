@@ -1217,7 +1217,7 @@ describe("useTopicTree", () => {
 
     function validateVisibilityByNodeKey(
       visibiltyByNodeKey: any,
-      rootTreeNode: any,
+      _rootTreeNode: unknown,
       getIsTreeNodeVisibleInTree: any,
     ) {
       for (const key of Object.keys(visibiltyByNodeKey)) {

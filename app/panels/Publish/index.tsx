@@ -131,7 +131,7 @@ function Publish(props: Props) {
   }, [saveConfig, datatype, datatypes]);
 
   const onChangeTopic = useCallback(
-    (event: unknown, name: string) => {
+    (_event: unknown, name: string) => {
       saveConfig({ topicName: name });
     },
     [saveConfig],

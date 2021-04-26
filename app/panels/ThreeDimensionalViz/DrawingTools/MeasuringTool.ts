@@ -71,7 +71,7 @@ export default class MeasuringTool extends React.Component<Props> {
     }
   };
 
-  _canvasMouseMoveHandler = (e: MouseEvent, clickInfo: ReglClickInfo) => {
+  _canvasMouseMoveHandler = (_e: MouseEvent, clickInfo: ReglClickInfo): void => {
     const { measureState, measurePoints, onMeasureInfoChange } = this.props;
     switch (measureState) {
       case "place-start":

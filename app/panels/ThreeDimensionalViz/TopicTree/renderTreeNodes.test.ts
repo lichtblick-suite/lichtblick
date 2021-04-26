@@ -23,7 +23,7 @@ const CHECKED_BY_CHECKED_KEYS_TOPIC_NAME = "/foo_checked_by_checked_keys";
 const INVISIBLE_NAMESPACE = "ns_invisible";
 
 const getIsNamespaceCheckedByDefaultMock = (topicName: string) => {
-  return (topic: string, columnIndex: number) => {
+  return (_topic: string, columnIndex: number) => {
     if (topicName === UNAVAILABLE_TOPIC_NAME) {
       return false;
     }
@@ -44,7 +44,7 @@ const getIsNamespaceCheckedByDefaultMock = (topicName: string) => {
 };
 
 const getIsTreeNodeVisibleInSceneMock = (topicName: string) => {
-  return (node: TreeNode, columnIndex: number, namespace?: string) => {
+  return (_node: TreeNode, columnIndex: number, namespace?: string) => {
     if (topicName === UNAVAILABLE_TOPIC_NAME) {
       return false;
     }

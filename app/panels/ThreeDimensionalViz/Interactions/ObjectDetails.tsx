@@ -108,7 +108,7 @@ function ObjectDetails({ interactionData, objectToDisplay }: Props) {
       <SObjectDetails>
         <Tree
           data={objectToDisplay}
-          shouldExpandNode={(markerKeyPath, data, level) => level < 2}
+          shouldExpandNode={(_markerKeyPath, _data, level) => level < 2}
           invertTheme={false}
           theme={{ ...jsonTreeTheme, tree: { margin: 0 } }}
           hideRoot
@@ -133,7 +133,7 @@ function ObjectDetails({ interactionData, objectToDisplay }: Props) {
         theme={{ ...jsonTreeTheme, tree: { margin: 0 } }}
         hideRoot
         getItemString={getItemString}
-        labelRenderer={(markerKeyPath, p1, p2, hasChildren) => {
+        labelRenderer={(markerKeyPath, _p1, _p2, hasChildren) => {
           const label = first(markerKeyPath);
           if (!hasChildren) {
             return <span style={{ padding: "0 4px" }}>{label}</span>;

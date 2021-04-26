@@ -28,7 +28,7 @@ const sampleText = [
 const generateData = (size: number) => {
   return Array(size)
     .fill(0)
-    .map((val, idx) => {
+    .map((_val, idx) => {
       return {
         id: idx,
         text: sampleText[idx % sampleText.length],

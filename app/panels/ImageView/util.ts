@@ -48,7 +48,7 @@ export type MarkerData =
 export function getMarkerOptions(
   imageTopic: string,
   topics: readonly Topic[],
-  allCameraNamespaces: string[],
+  _allCameraNamespaces: string[],
   imageMarkerDatatypes: string[],
 ): string[] {
   const results = [];
