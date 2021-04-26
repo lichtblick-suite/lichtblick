@@ -2175,11 +2175,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/electron-socket@workspace:packages/electron-socket"
   dependencies:
-    "@jest/types": 26.6.2
     eventemitter3: 4.0.7
-    jest: 27.0.0-next.8
     multicast-dns: 7.2.2
-    tslib: 2.2.0
     typescript: 4.2.2
   peerDependencies:
     electron: ">=12"
@@ -2190,17 +2187,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/just-fetch@workspace:packages/just-fetch"
   dependencies:
-    node-fetch: ^3.0.0-beta.9
-    tslib: 2.2.0
     typescript: 4.2.2
   peerDependencies:
-    node-fetch: ">=3.0.0-beta.9"
+    node-fetch: ">=2.0.0"
   languageName: unknown
   linkType: soft
 
 "@foxglove/log@workspace:packages/log":
   version: 0.0.0-use.local
   resolution: "@foxglove/log@workspace:packages/log"
+  dependencies:
+    typescript: 4.2.2
   languageName: unknown
   linkType: soft
 
@@ -2210,7 +2207,6 @@ __metadata:
   dependencies:
     "@foxglove/ros1": "workspace:packages/ros1"
     ts-node: 9.1.1
-    tslib: 2.2.0
     typescript: 4.2.2
   languageName: unknown
   linkType: soft
@@ -2220,12 +2216,10 @@ __metadata:
   resolution: "@foxglove/ros1@workspace:packages/ros1"
   dependencies:
     "@foxglove/xmlrpc": "workspace:packages/xmlrpc"
-    "@jest/types": 26.6.2
     eventemitter3: 4.0.7
     jest: 27.0.0-next.8
     jest-circus: 27.0.0-next.8
     rosbag: "github:foxglove/rosbag.js#fc61125fbc01ff55698c5ed48987b2d9e7599572"
-    tslib: 2.2.0
     typescript: 4.2.2
     web-encoding: 1.1.5
   languageName: unknown
@@ -2244,12 +2238,10 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/velodyne-cloud@workspace:packages/velodyne-cloud"
   dependencies:
-    "@jest/types": 26.6.2
     jest: 27.0.0-next.8
     jest-circus: 27.0.0-next.8
     kelonio: 0.6.0
     rosbag: "github:foxglove/rosbag.js#fc61125fbc01ff55698c5ed48987b2d9e7599572"
-    tslib: 2.2.0
     typescript: 4.2.2
   languageName: unknown
   linkType: soft
@@ -2260,6 +2252,7 @@ __metadata:
   dependencies:
     "@types/emscripten": 1.39.4
     jest: 27.0.0-next.8
+    typescript: 4.2.2
   languageName: unknown
   linkType: soft
 
@@ -2268,13 +2261,11 @@ __metadata:
   resolution: "@foxglove/xmlrpc@workspace:packages/xmlrpc"
   dependencies:
     "@foxglove/just-fetch": "workspace:packages/just-fetch"
-    "@jest/types": 26.6.2
     "@types/sax": ^1.2.1
     byte-base64: 1.1.0
     jest: 27.0.0-next.8
     jest-circus: 27.0.0-next.8
     sax: 1.2.4
-    tslib: 2.2.0
     typescript: 4.2.2
     web-encoding: 1.1.5
     xmlbuilder2: 2.4.1
@@ -9428,13 +9419,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"data-uri-to-buffer@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "data-uri-to-buffer@npm:3.0.1"
-  checksum: 9f28217ba76eaca400a75f4b1a1d0f55058082c8152a3d88ad5feeec5e54b8c7b6d8a7bb210206bfa552a927c1b942b6102ddbb2feaa557321ea94762c4f14e2
-  languageName: node
-  linkType: hard
-
 "data-urls@npm:^2.0.0":
   version: 2.0.0
   resolution: "data-urls@npm:2.0.0"
@@ -11750,15 +11734,6 @@ __metadata:
   dependencies:
     pend: ~1.2.0
   checksum: ec759b16aea613f79540b450ffc278dcb927dccf55c89a364b68547441bec776d637f0a53aee9c9c70683406e4fc4b3aff29b1732bb388f9fa6ba200e8a79caa
-  languageName: node
-  linkType: hard
-
-"fetch-blob@npm:^2.1.1":
-  version: 2.1.1
-  resolution: "fetch-blob@npm:2.1.1"
-  peerDependencies:
-    domexception: ^2.0.1
-  checksum: 29099bba2003e825d46ce3f251227fe67104d7422e39a2aa39e0d3db8f2a3346c41d928532482c4814b89086228209882fb531d00db6f79d0e80cc46d50b9b35
   languageName: node
   linkType: hard
 
@@ -17317,16 +17292,6 @@ fsevents@^1.2.7:
   version: 2.6.1
   resolution: "node-fetch@npm:2.6.1"
   checksum: cbb171635e538162b977eac5dfe7a1e07a9a02e991924377a6435502291e2f823d306b95aabc455caebf4a118ccf836868462bc70ccc3095af02bb9da61fda37
-  languageName: node
-  linkType: hard
-
-"node-fetch@npm:^3.0.0-beta.9":
-  version: 3.0.0-beta.9
-  resolution: "node-fetch@npm:3.0.0-beta.9"
-  dependencies:
-    data-uri-to-buffer: ^3.0.1
-    fetch-blob: ^2.1.1
-  checksum: e1b71946805b6dbe44394df4dcd7287bb18c2d93bb5b1d41de24c5d87bc3ec28be5e7ec0601dfc93a62d41c05a25dc5f7c0804912e2c11bfbb23252c8ff2a155
   languageName: node
   linkType: hard
 
@@ -23335,17 +23300,17 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"tslib@npm:2.2.0, tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0":
-  version: 2.2.0
-  resolution: "tslib@npm:2.2.0"
-  checksum: 2d35468c470410871c5246e43f12dcb6d0fc363b617c176f26443b9530e5c5ee8448966892a42956168d8f495da7865bda33dfe82c26c91991e28999974a618f
-  languageName: node
-  linkType: hard
-
 "tslib@npm:^1.10.0, tslib@npm:^1.8.1, tslib@npm:^1.9.0, tslib@npm:^1.9.3":
   version: 1.14.1
   resolution: "tslib@npm:1.14.1"
   checksum: f44fe7f216946b17d3e3074df3746372703cf24e9127b4c045511456e8e4bf25515fb0a1bb3937676cc305651c5d4fcb6377b0588a4c6a957e748c4c28905d17
+  languageName: node
+  linkType: hard
+
+"tslib@npm:^2.0.0, tslib@npm:^2.0.1, tslib@npm:^2.0.3, tslib@npm:^2.1.0":
+  version: 2.2.0
+  resolution: "tslib@npm:2.2.0"
+  checksum: 2d35468c470410871c5246e43f12dcb6d0fc363b617c176f26443b9530e5c5ee8448966892a42956168d8f495da7865bda33dfe82c26c91991e28999974a618f
   languageName: node
   linkType: hard
 

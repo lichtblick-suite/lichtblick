@@ -14,14 +14,13 @@
   },
   "homepage": "https://foxglove.dev/",
   "main": "src/index.ts",
-  "module": "src/index.ts",
   "files": [
+    "dist",
     "src"
   ],
   "scripts": {
-    "test": "NODE_OPTIONS='-r ts-node/register' jest",
-    "test:debug": "NODE_OPTIONS='-r ts-node/register --inspect-brk' jest",
-    "test:watch": "NODE_OPTIONS='-r ts-node/register' jest --watch"
+    "prepack": "tsc -b",
+    "test": "jest"
   },
   "dependencies": {
     "@foxglove/just-fetch": "workspace:packages/just-fetch",
@@ -31,11 +30,9 @@
     "xmlbuilder2": "2.4.1"
   },
   "devDependencies": {
-    "@jest/types": "26.6.2",
     "@types/sax": "^1.2.1",
     "jest": "27.0.0-next.8",
     "jest-circus": "27.0.0-next.8",
-    "tslib": "2.2.0",
     "typescript": "4.2.2"
   }
 }

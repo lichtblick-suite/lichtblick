@@ -18,13 +18,13 @@
     "./renderer": "./src/renderer/index.ts"
   },
   "files": [
+    "dist",
     "src"
   ],
-  "scripts": {},
+  "scripts": {
+    "prepack": "tsc -b"
+  },
   "devDependencies": {
-    "@jest/types": "26.6.2",
-    "jest": "27.0.0-next.8",
-    "tslib": "2.2.0",
     "typescript": "4.2.2"
   },
   "dependencies": {
