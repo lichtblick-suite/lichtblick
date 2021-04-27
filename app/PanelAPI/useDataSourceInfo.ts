@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import { Time } from "rosbag";
 
 import {
@@ -31,36 +31,32 @@ export type DataSourceInfo = {
   playerId: string;
 };
 
+function selectDatatypes(ctx: MessagePipelineContext) {
+  return ctx.datatypes;
+}
+
+function selectTopics(ctx: MessagePipelineContext) {
+  return ctx.sortedTopics;
+}
+
+function selectStartTime(ctx: MessagePipelineContext) {
+  return ctx.playerState.activeData?.startTime;
+}
+
+function selectCapabilities(ctx: MessagePipelineContext) {
+  return ctx.playerState.capabilities;
+}
+
+function selectPlayerId(ctx: MessagePipelineContext) {
+  return ctx.playerState.playerId;
+}
+
 export default function useDataSourceInfo(): DataSourceInfo {
-  const datatypes = useMessagePipeline(
-    useCallback(
-      ({ datatypes: pipelineDatatypes }: MessagePipelineContext) => pipelineDatatypes,
-      [],
-    ),
-  );
-  const topics = useMessagePipeline(
-    useCallback(({ sortedTopics }: MessagePipelineContext) => sortedTopics, []),
-  );
-  const startTime = useMessagePipeline(
-    useCallback(
-      ({ playerState: { activeData } }: MessagePipelineContext) => activeData?.startTime,
-      [],
-    ),
-  );
-  const capabilities = useMessagePipeline(
-    useCallback(
-      ({ playerState: { capabilities: playerStateCapabilities } }: MessagePipelineContext) =>
-        playerStateCapabilities,
-      [],
-    ),
-  );
-  const playerId = useMessagePipeline(
-    useCallback(
-      ({ playerState: { playerId: playerStatePlayerId } }: MessagePipelineContext) =>
-        playerStatePlayerId,
-      [],
-    ),
-  );
+  const datatypes = useMessagePipeline(selectDatatypes);
+  const topics = useMessagePipeline(selectTopics);
+  const startTime = useMessagePipeline(selectStartTime);
+  const capabilities = useMessagePipeline(selectCapabilities);
+  const playerId = useMessagePipeline(selectPlayerId);
 
   // we want the returned object to have a stable identity
   return useMemo<DataSourceInfo>(() => {

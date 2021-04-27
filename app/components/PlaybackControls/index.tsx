@@ -307,18 +307,27 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
   },
 );
 
-const getProps = ({
-  pausePlayback,
-  seekPlayback,
-  startPlayback,
-  playerState,
-}: MessagePipelineContext) => ({
-  pause: pausePlayback,
-  seek: seekPlayback,
-  play: startPlayback,
-  player: playerState,
-});
+function getPause(ctx: MessagePipelineContext) {
+  return ctx.pausePlayback;
+}
+
+function getPlay(ctx: MessagePipelineContext) {
+  return ctx.startPlayback;
+}
+
+function getSeek(ctx: MessagePipelineContext) {
+  return ctx.seekPlayback;
+}
+
+function getPlayer(ctx: MessagePipelineContext) {
+  return ctx.playerState;
+}
 
 export default function PlaybackControls(): JSX.Element {
-  return <UnconnectedPlaybackControls {...useMessagePipeline(getProps)} />;
+  const pause = useMessagePipeline(getPause);
+  const play = useMessagePipeline(getPlay);
+  const seek = useMessagePipeline(getSeek);
+  const player = useMessagePipeline(getPlayer);
+
+  return <UnconnectedPlaybackControls pause={pause} seek={seek} play={play} player={player} />;
 }

@@ -121,18 +121,16 @@ function unionInto<T>(dest: Set<T>, ...iterables: Set<T>[]): void {
 }
 
 function TopicGraph() {
-  const { publishedTopics, subscribedTopics, services } = useMessagePipeline(
-    useCallback(
-      ({ playerState: { activeData } }) =>
-        activeData
-          ? {
-              publishedTopics: activeData.publishedTopics,
-              subscribedTopics: activeData.subscribedTopics,
-              services: activeData.services,
-            }
-          : { publishedTopics: undefined, subscribedTopics: undefined, services: undefined },
-      [],
-    ),
+  const publishedTopics = useMessagePipeline(
+    useCallback((ctx) => ctx.playerState.activeData?.publishedTopics, []),
+  );
+
+  const subscribedTopics = useMessagePipeline(
+    useCallback((ctx) => ctx.playerState.activeData?.subscribedTopics, []),
+  );
+
+  const services = useMessagePipeline(
+    useCallback((ctx) => ctx.playerState.activeData?.services, []),
   );
 
   const elements = useMemo<cytoscape.ElementDefinition[]>(() => {

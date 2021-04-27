@@ -27,7 +27,10 @@ import {
   MessageDataItemsByPath,
   useDecodeMessagePathsForMessagesByTopic,
 } from "@foxglove-studio/app/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@foxglove-studio/app/components/MessagePipeline";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import {
@@ -119,6 +122,18 @@ function getBlockItemsByPath(decodeMessagePathsForMessagesByTopic: any, blocks: 
     });
   });
   return ret;
+}
+
+function selectCurrentTime(ctx: MessagePipelineContext) {
+  return ctx.playerState.activeData?.currentTime;
+}
+
+function selectEndTime(ctx: MessagePipelineContext) {
+  return ctx.playerState.activeData?.endTime;
+}
+
+function selectSeek(ctx: MessagePipelineContext) {
+  return ctx.seekPlayback;
 }
 
 function Plot(props: Props) {
@@ -221,16 +236,10 @@ function Plot(props: Props) {
     [yAxisPaths, mergedItems, startTime, xAxisVal, xAxisPath],
   );
 
-  const { currentTime, endTime, seekPlayback: seek } = useMessagePipeline(
-    useCallback(
-      ({ seekPlayback, playerState: { activeData } }) => ({
-        currentTime: activeData?.currentTime,
-        endTime: activeData?.endTime,
-        seekPlayback,
-      }),
-      [],
-    ),
-  );
+  const currentTime = useMessagePipeline(selectCurrentTime);
+  const endTime = useMessagePipeline(selectEndTime);
+  const seek = useMessagePipeline(selectSeek);
+
   // Min/max x-values and playback position indicator are only used for preloaded plots. In non-
   // preloaded plots min x-value is always the last seek time, and the max x-value is the current
   // playback time.

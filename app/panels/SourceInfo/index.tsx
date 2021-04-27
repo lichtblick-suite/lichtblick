@@ -67,19 +67,12 @@ const SHeaderItem = styled.div`
 `;
 
 function SourceInfo() {
-  const { topics, startTime, endTime } = useMessagePipeline(
-    useCallback(
-      ({ playerState: { activeData } }) =>
-        activeData
-          ? {
-              topics: activeData.topics,
-              startTime: activeData.startTime,
-              endTime: activeData.endTime,
-            }
-          : { topics: [], startTime: undefined, endTime: undefined },
-      [],
-    ),
+  const topics = useMessagePipeline(useCallback((ctx) => ctx.playerState.activeData?.topics, []));
+  const startTime = useMessagePipeline(
+    useCallback((ctx) => ctx.playerState.activeData?.startTime, []),
   );
+  const endTime = useMessagePipeline(useCallback((ctx) => ctx.playerState.activeData?.endTime, []));
+
   if (!startTime || !endTime) {
     return (
       <>
