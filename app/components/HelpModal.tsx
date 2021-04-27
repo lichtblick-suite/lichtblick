@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, ReactElement } from "react";
 import styled, { CSSProperties } from "styled-components";
 
 import Modal from "@foxglove-studio/app/components/Modal";
@@ -34,11 +34,11 @@ export default function HelpModal({
   onRequestClose,
   children,
   rootStyle,
-}: PropsWithChildren<Props>) {
+}: PropsWithChildren<Props>): ReactElement {
   return (
     <Modal onRequestClose={onRequestClose}>
       <SRoot {...(rootStyle ? { style: rootStyle } : undefined)}>
-        <TextContent allowDangerousHtml={true}>{children}</TextContent>
+        <TextContent allowMarkdownHtml={true}>{children}</TextContent>
       </SRoot>
     </Modal>
   );
