@@ -11,15 +11,22 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useLayoutEffect, useState, createContext, ReactNode, ComponentType, Context } from "react";
+import {
+  useLayoutEffect,
+  createContext,
+  ReactNode,
+  ComponentType,
+  Context,
+  useRef,
+  useMemo,
+} from "react";
 
-export type SubscriberFn<T> = (arg0: T) => void;
+export type SubscriberFn<T> = (value: T) => void;
 
 export type SelectableContextHandle<T> = {
   currentValue(): T;
-  publish(value: T): void;
-  addSubscriber(arg0: SubscriberFn<T>): void;
-  removeSubscriber(arg0: SubscriberFn<T>): void;
+  addSubscriber(sub: SubscriberFn<T>): void;
+  removeSubscriber(sub: SubscriberFn<T>): void;
 };
 
 export type SelectableContext<T> = {
@@ -34,33 +41,32 @@ export default function createSelectableContext<T>(): SelectableContext<T> {
   const ctx = createContext<SelectableContextHandle<T> | undefined>(undefined);
 
   function Provider({ value, children }: { value: T; children?: ReactNode }) {
-    const [handle] = useState<SelectableContextHandle<T>>(() => {
-      let currentValue = value;
-      const subscribers = new Set<SubscriberFn<T>>();
-      return {
-        publish(val) {
-          currentValue = val;
-          for (const sub of subscribers) {
-            sub(currentValue);
-          }
-        },
-        currentValue() {
-          return currentValue;
-        },
-        addSubscriber(sub) {
-          subscribers.add(sub);
-        },
-        removeSubscriber(sub) {
-          subscribers.delete(sub);
-        },
-      };
-    });
+    const valueRef = useRef(value);
+    const lastPublishedValueRef = useRef(value);
+    const subscribersRef = useRef(new Set<SubscriberFn<T>>());
 
+    // Set the value now -- we want any consumers rendered in the same render pass to immediately see the new value.
+    valueRef.current = value;
+
+    const handle = useMemo<SelectableContextHandle<T>>(
+      () => ({
+        currentValue: () => valueRef.current,
+        addSubscriber: (sub) => subscribersRef.current.add(sub),
+        removeSubscriber: (sub) => subscribersRef.current.delete(sub),
+      }),
+      [],
+    );
+
+    // Inform all subscribers of the new value. This is necessary if there is a memoized subtree
+    // that didn't re-render at the same time as our provider.
     useLayoutEffect(() => {
-      if (value !== handle.currentValue()) {
-        handle.publish(value);
+      if (value !== lastPublishedValueRef.current) {
+        lastPublishedValueRef.current = value;
+        for (const sub of subscribersRef.current) {
+          sub(valueRef.current);
+        }
       }
-    }, [handle /*never changes*/, value]);
+    }, [value]);
 
     return <ctx.Provider value={handle}>{children}</ctx.Provider>;
   }

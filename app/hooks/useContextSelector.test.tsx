@@ -12,7 +12,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { renderHook } from "@testing-library/react-hooks";
 import { mount } from "enzyme";
+import { PropsWithChildren } from "react";
 
 import useContextSelector from "@foxglove-studio/app/hooks/useContextSelector";
 import createSelectableContext, {
@@ -43,22 +45,6 @@ describe("createSelectableContext/useContextSelector", () => {
     (console.error as any).mockClear();
   });
 
-  it("throws when first selector call returns BAILOUT", () => {
-    jest.spyOn(console, "error").mockReturnValue(); // Library logs an error.
-    const C = createSelectableContext();
-    const Consumer = createTestConsumer(C, () => useContextSelector.BAILOUT);
-
-    expect(() =>
-      mount(
-        <C.Provider value={{}}>
-          <Consumer />
-        </C.Provider>,
-      ),
-    ).toThrow("Initial selector call must not return BAILOUT");
-
-    (console.error as any).mockClear();
-  });
-
   it("calls selector and render once with initial value", () => {
     const C = createSelectableContext();
     const Consumer = createTestConsumer(C, (x) => x);
@@ -78,11 +64,33 @@ describe("createSelectableContext/useContextSelector", () => {
     root.unmount();
   });
 
-  it("re-renders when selector returns new value that isn't BAILOUT", () => {
-    const C = createSelectableContext<{ num: number }>();
-    const Consumer = createTestConsumer(C, ({ num }) =>
-      num === 3 ? useContextSelector.BAILOUT : num,
+  it("doesn't render again when provided value and selector result change at the same time", () => {
+    const C = createSelectableContext<number>();
+
+    type Props = { value: number; selector: (x: number) => number };
+    const wrapper = ({ children, value }: PropsWithChildren<Props>) => (
+      <C.Provider value={value}>{children}</C.Provider>
     );
+    const { result, rerender } = renderHook(({ selector }) => useContextSelector(C, selector), {
+      wrapper,
+      initialProps: { value: 1, selector: (x) => x * 2 },
+    });
+
+    expect(result.all).toEqual([2]);
+    rerender({ value: 2, selector: (x) => x * 3 });
+    expect(result.all).toEqual([2, 6]);
+  });
+
+  it("re-renders when selector returns new value", () => {
+    const C = createSelectableContext<{ num: number }>();
+    let prevValue = -1;
+    const Consumer = createTestConsumer(C, ({ num }) => {
+      if (num === 3) {
+        return prevValue;
+      }
+      prevValue = num;
+      return num;
+    });
 
     const root = mount(
       <C.Provider value={{ num: 1 }}>
@@ -101,7 +109,7 @@ describe("createSelectableContext/useContextSelector", () => {
     expect(Consumer.selectorFn.mock.calls).toEqual([[{ num: 1 }], [{ num: 1 }], [{ num: 2 }]]);
     expect(Consumer.renderFn.mock.calls).toEqual([[1], [2]]);
 
-    // Selector returns BAILOUT, so no update should occur
+    // Selector returns the same value, so no update should occur
     root.setProps({ value: { num: 3 } });
     expect(Consumer.selectorFn.mock.calls).toEqual([
       [{ num: 1 }],
@@ -124,17 +132,21 @@ describe("createSelectableContext/useContextSelector", () => {
     root.unmount();
   });
 
-  it("propagates value to multiple consumers", () => {
+  it("propagates value to multiple consumers, including memoized subtrees", () => {
     const C = createSelectableContext<{ one: number; two: number }>();
     const Consumer1 = createTestConsumer(C, ({ one }) => one);
     const Consumer2 = createTestConsumer(C, ({ two }) => two);
 
+    const Memoized = React.memo(function Memoized({ children }: PropsWithChildren<unknown>) {
+      return <div>{children}</div>;
+    });
+
     const root = mount(
       <C.Provider value={{ one: 1, two: 2 }}>
         <Consumer1 />
-        <div>
+        <Memoized>
           <Consumer2 />
-        </div>
+        </Memoized>
       </C.Provider>,
     );
 

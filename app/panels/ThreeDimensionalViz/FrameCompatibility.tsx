@@ -15,7 +15,6 @@ import hoistNonReactStatics from "hoist-non-react-statics";
 import { uniq } from "lodash";
 
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import useChangeDetector from "@foxglove-studio/app/hooks/useChangeDetector";
 import { Frame, Message, Topic } from "@foxglove-studio/app/players/types";
 
 const useFrame = (
@@ -28,27 +27,31 @@ const useFrame = (
   // in this way yourself!! `restore` and `addMessage` should be pure functions and not have
   // side effects!
   const frame = React.useRef<Frame>({});
-  const lastClearTime = PanelAPI.useMessageReducer({
+  const cleared = React.useRef(false);
+  const counter = React.useRef(0);
+  PanelAPI.useMessageReducer<number>({
     topics,
-    restore: React.useCallback(() => {
+    restore: React.useCallback((prevValue) => {
       frame.current = {};
-      return Date.now();
-    }, [frame]),
-    addMessages: React.useCallback(
-      (time, messages: readonly Message[]) => {
-        for (const message of messages) {
-          (frame.current[message.topic] = frame.current[message.topic] ?? []).push(message);
-        }
-        return time;
-      },
-      [frame],
-    ),
+      if (prevValue == undefined) {
+        cleared.current = true;
+      }
+      return ++counter.current;
+    }, []),
+    addMessages: React.useCallback((_, messages: readonly Message[]) => {
+      for (const message of messages) {
+        (frame.current[message.topic] = frame.current[message.topic] ?? []).push(message);
+      }
+      return ++counter.current;
+    }, []),
   });
 
-  const cleared = useChangeDetector([lastClearTime], false);
-  const latestFrame = frame.current;
-  frame.current = {};
-  return { cleared, frame: latestFrame };
+  try {
+    return { cleared: cleared.current, frame: frame.current };
+  } finally {
+    frame.current = {};
+    cleared.current = false;
+  }
 };
 
 // This higher-order component provides compatibility between the old way of Panels receiving

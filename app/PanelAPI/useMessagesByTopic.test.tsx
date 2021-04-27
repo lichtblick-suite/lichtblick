@@ -97,6 +97,9 @@ describe("useMessagesByTopic", () => {
         <Test topics={["/foo"]} historySize={Infinity} />
       </MockMessagePipelineProvider>,
     );
+
+    expect(Test.result.mock.calls).toEqual([[{ "/foo": [message1, message2] }]]);
+
     root.setProps({ messages: [], children: <Test topics={["/foo", "/bar"]} historySize={1} /> });
 
     expect(Test.result.mock.calls).toEqual([

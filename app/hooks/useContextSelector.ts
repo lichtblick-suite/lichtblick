@@ -11,25 +11,33 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useRef, useLayoutEffect, useState, useContext } from "react";
+import { useRef, useLayoutEffect, useContext, useReducer } from "react";
 
 import { SelectableContext } from "@foxglove-studio/app/util/createSelectableContext";
+import Log from "@foxglove/log";
 
-import useShouldNotChangeOften from "./useShouldNotChangeOften";
+const log = Log.getLogger(__filename);
 
-const BAILOUT: unique symbol = Symbol("BAILOUT");
+function selectWithUnstableIdentityWarning<T, U>(value: T, selector: (value: T) => U) {
+  const result = selector(value);
+  if (process.env.NODE_ENV === "development") {
+    const secondResult = selector(value);
+    if (result !== secondResult) {
+      log.warn(`Selector ${selector.toString()} produced different values for the same input.
+  This will cause unecesessery re-renders of your component.`);
+    }
+    return secondResult;
+  }
+  return result;
+}
 
-// `useContextSelector(context, selector)` behaves like `selector(useContext(context))`, but
-// only triggers a re-render when the selected value actually changes.
-//
-// Changing the selector will not cause the context to be re-processed, so the selector must
-// not have external dependencies that change over time.
-//
-// `useContextSelector.BAILOUT` can be returned from the selector as a special sentinel that indicates
-// no update should occur. (Returning BAILOUT from the first call to selector is not allowed.)
+/**
+ * `useContextSelector(context, selector)` behaves like `selector(useContext(context))`, but
+ * only triggers a re-render when the selected value actually changes.
+ */
 export default function useContextSelector<T, U>(
   context: SelectableContext<T>,
-  selector: (arg0: T) => U | typeof BAILOUT,
+  selector: (value: T) => U,
 ): U {
   // eslint-disable-next-line no-underscore-dangle
   const handle = useContext(context._ctx);
@@ -37,39 +45,35 @@ export default function useContextSelector<T, U>(
     throw new Error(`useContextSelector was used outside a corresponding <Provider />.`);
   }
 
-  useShouldNotChangeOften(selector, () =>
-    console.warn(
-      `useContextSelector() selector (${selector.toString()}) is changing frequently. 
-Changing the selector will not cause the current context to be re-processed, 
-so you may have a bug if the selector depends on external state. 
-Wrap your selector in a useCallback() to silence this warning.`,
-    ),
-  );
+  const [_, forceUpdate] = useReducer((x: number) => x + 1, 0);
+  const state = useRef<
+    Readonly<{ contextValue: T; selectedValue: U; selector: (value: T) => U }> | undefined
+  >();
+  const contextValue = handle.currentValue();
+  if (
+    state.current === undefined ||
+    contextValue !== state.current.contextValue ||
+    selector !== state.current.selector
+  ) {
+    state.current = {
+      contextValue,
+      selectedValue: selectWithUnstableIdentityWarning(contextValue, selector),
+      selector,
+    };
+  }
 
-  const [selectedValue, setSelectedValue] = useState(() => {
-    const value = selector(handle.currentValue());
-    if (value === BAILOUT) {
-      throw new Error("Initial selector call must not return BAILOUT");
-    }
-    return value;
-  });
-
-  const latestSelectedValue = useRef<symbol | U>();
+  // Subscribe to context updates, and trigger a re-render when the selected value changes.
   useLayoutEffect(() => {
-    latestSelectedValue.current = selectedValue;
-  });
-
-  // Subscribe to context updates, and setSelectedValue() only when the selected value changes.
-  useLayoutEffect(() => {
-    const sub = (newValue: T) => {
-      const newSelectedValue = selector(newValue);
-      if (newSelectedValue === BAILOUT) {
-        return;
+    const sub = (newContextValue: T) => {
+      const newSelectedValue = selectWithUnstableIdentityWarning(newContextValue, selector);
+      if (newSelectedValue !== state.current?.selectedValue) {
+        forceUpdate();
       }
-      if (newSelectedValue !== latestSelectedValue.current) {
-        // Because newSelectedValue might be a function, we have to always use the reducer form of setState.
-        setSelectedValue(() => newSelectedValue);
-      }
+      state.current = {
+        contextValue: newContextValue,
+        selectedValue: newSelectedValue,
+        selector,
+      };
     };
     handle.addSubscriber(sub);
     return () => {
@@ -77,7 +81,5 @@ Wrap your selector in a useCallback() to silence this warning.`,
     };
   }, [handle, selector]);
 
-  return selectedValue;
+  return state.current.selectedValue;
 }
-
-useContextSelector.BAILOUT = BAILOUT;

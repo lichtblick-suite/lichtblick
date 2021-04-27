@@ -16,7 +16,7 @@ import { useContext, useRef } from "react";
 import PanelContext from "@foxglove-studio/app/components/PanelContext";
 
 /**
- * @deprecated With React Strict Mode enabled, components render functions will be called twice in
+ * @deprecated With React Strict Mode enabled, components' render functions will be called twice in
  * dev mode. This means the value returned by usePreviousValue may not actually be the value from
  * the previous committed render.
  */

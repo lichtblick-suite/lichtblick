@@ -64,6 +64,7 @@ describe("FrameCompatibilityDEPRECATED", () => {
 
     // Make sure that we don't send `messages[0]` when receiving a new frame.
     provider.setProps({ messages: [messages[1], fooMsg1] });
+    expect(childFn.mock.calls.length).toBe(2);
     const frame2 = last(childFn.mock.calls)[0].frame;
     expect(Object.keys(frame2)).toEqual(["/some/topic"]);
     frameMessages = frame2["/some/topic"];
@@ -81,5 +82,58 @@ describe("FrameCompatibilityDEPRECATED", () => {
     expect(fooMessages).toEqual([fooMsg2]);
     const someTopicMessages = frame3["/some/topic"];
     expect(someTopicMessages).toEqual([messages[2]]);
+  });
+
+  it("works in a memoized subtree", () => {
+    const childFn = jest.fn().mockReturnValue(undefined);
+    const MyComponentWithFrame = React.memo(
+      FrameCompatibilityDEPRECATED(
+        function MyComponent(props) {
+          childFn(props);
+          return ReactNull;
+        },
+        ["/some/topic"],
+      ),
+    );
+
+    const provider = mount(
+      <MockMessagePipelineProvider
+        messages={[messages[0]]}
+        datatypes={datatypes}
+        topics={[{ name: "/some/topic", datatype: "some/topic" }]}
+      >
+        <MyComponentWithFrame />
+      </MockMessagePipelineProvider>,
+    );
+
+    expect(childFn.mock.calls).toEqual([
+      [
+        {
+          frame: { "/some/topic": [messages[0]] },
+          cleared: true,
+          setSubscriptions: expect.any(Function),
+        },
+      ],
+    ]);
+
+    provider.setProps({ messages: [messages[1]] });
+    expect(childFn.mock.calls).toEqual([
+      [
+        {
+          frame: { "/some/topic": [messages[0]] },
+          cleared: true,
+          setSubscriptions: expect.any(Function),
+        },
+      ],
+      [
+        {
+          frame: { "/some/topic": [messages[1]] },
+          cleared: false,
+          setSubscriptions: expect.any(Function),
+        },
+      ],
+    ]);
+
+    provider.unmount();
   });
 });

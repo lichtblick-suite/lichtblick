@@ -68,9 +68,7 @@ export type MessagePipelineContext = {
 // exported only for MockMessagePipelineProvider
 export const ContextInternal = createSelectableContext<MessagePipelineContext>();
 
-export function useMessagePipeline<T>(
-  selector: (arg0: MessagePipelineContext) => T | typeof useContextSelector.BAILOUT,
-): T {
+export function useMessagePipeline<T>(selector: (arg0: MessagePipelineContext) => T): T {
   return useContextSelector(ContextInternal, selector);
 }
 

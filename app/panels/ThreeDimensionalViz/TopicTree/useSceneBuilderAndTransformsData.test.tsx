@@ -135,11 +135,6 @@ describe("useSceneBuilderAndTransformsData", () => {
           [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"],
           ...staticallyAvailableNamespacesByTopic,
         },
-        {
-          "/foo": ["ns1", "ns2"],
-          [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"],
-          ...staticallyAvailableNamespacesByTopic,
-        },
       ]);
     });
 
@@ -149,10 +144,10 @@ describe("useSceneBuilderAndTransformsData", () => {
       expect(Test.result).toHaveBeenCalledTimes(1);
       // TFs were removed, but we still report them in the available namespaces.
       root.setProps(getMockProps({}));
-      expect(Test.result).toHaveBeenCalledTimes(3);
+      expect(Test.result).toHaveBeenCalledTimes(2);
 
       root.setProps(getMockProps({ mockTfIds: ["some_tf3"] }));
-      expect(Test.result).toHaveBeenCalledTimes(5);
+      expect(Test.result).toHaveBeenCalledTimes(3);
 
       // Technically we would only want the Test component to re-render once per props change.
       // However, this test is set up such that the MockTransforms object is replaced on each change.
@@ -160,8 +155,6 @@ describe("useSceneBuilderAndTransformsData", () => {
       expect(Test.result.mock.calls.map((args) => args[0].availableNamespacesByTopic)).toEqual([
         { [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"] },
         { [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"] },
-        { [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"] },
-        { [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2", "some_tf3"] },
         { [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2", "some_tf3"] },
       ]);
     });
@@ -171,7 +164,6 @@ describe("useSceneBuilderAndTransformsData", () => {
       const root = mount(<Test {...getMockProps({ showTransforms: true })} />);
       root.setProps({ ...getMockProps({}), messagePipelineProps: { playerId: "somePlayerId" } });
       expect(Test.result.mock.calls.map((args) => args[0].availableNamespacesByTopic)).toEqual([
-        { [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"] },
         { [TRANSFORM_TOPIC]: ["some_tf1", "some_tf2"] },
         {},
       ]);

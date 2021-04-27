@@ -14,7 +14,12 @@
 import { useRef } from "react";
 import shallowequal from "shallowequal";
 
-// Return initiallyTrue the first time, and again if any of the given deps have changed.
+/**
+ * Return initiallyTrue the first time, and again if any of the given deps have changed.
+ * @deprecated Render functions may be called more than once before effects are run, so relying on
+ * the result of useChangeDetector is dangerous. Instead, track the previously used values at the
+ * point they are being used.
+ */
 export default function useChangeDetector(deps: unknown[], initiallyTrue: boolean): boolean {
   const ref = useRef(initiallyTrue ? undefined : deps);
   const changed = !shallowequal(ref.current, deps);

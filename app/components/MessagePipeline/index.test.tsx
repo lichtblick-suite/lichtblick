@@ -134,13 +134,8 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         return ctx.playerState.presence;
       }),
     ).toEqual([
-      // Some unsightly duplication here - either an artifact of renderHook or a potential
-      // improvement by modifying useContextSelector.
-      PlayerPresence.NOT_PRESENT,
       PlayerPresence.NOT_PRESENT,
       PlayerPresence.CONSTRUCTING,
-      PlayerPresence.CONSTRUCTING,
-      PlayerPresence.ERROR,
       PlayerPresence.ERROR,
       PlayerPresence.INITIALIZING,
       PlayerPresence.PRESENT,
@@ -332,14 +327,14 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       player2.playerId = "fake player 2";
       rerender({ maybePlayer: { player: player2 } });
       expect(player.close).toHaveBeenCalledTimes(1);
-      expect(result.all.length).toBe(5);
+      expect(result.all.length).toBe(4);
     });
 
     it("closes old player when new player is supplied and stops old player message flow", async () => {
       await act(() => player2.emit());
-      expect(result.all.length).toBe(6);
+      expect(result.all.length).toBe(5);
       await act(() => player.emit());
-      expect(result.all.length).toBe(6);
+      expect(result.all.length).toBe(5);
       expect(
         result.all.map((ctx) => {
           if (ctx instanceof Error) {
@@ -347,14 +342,14 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
           }
           return ctx.playerState.playerId;
         }),
-      ).toEqual(["", "fake player 1", "fake player 1", "fake player 1", "", "fake player 2"]);
+      ).toEqual(["", "fake player 1", "fake player 1", "", "fake player 2"]);
     });
 
     it("does not think the old player is the new player if it emits first", async () => {
       await act(() => player.emit());
-      expect(result.all.length).toBe(5);
+      expect(result.all.length).toBe(4);
       await act(() => player2.emit());
-      expect(result.all.length).toBe(6);
+      expect(result.all.length).toBe(5);
       expect(
         result.all.map((ctx) => {
           if (ctx instanceof Error) {
@@ -362,7 +357,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
           }
           return ctx.playerState.playerId;
         }),
-      ).toEqual(["", "fake player 1", "fake player 1", "fake player 1", "", "fake player 2"]);
+      ).toEqual(["", "fake player 1", "fake player 1", "", "fake player 2"]);
     });
   });
 
@@ -416,7 +411,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     expect(result.all.length).toBe(2);
 
     rerender({ maybePlayer: { player: undefined } });
-    expect(result.all.length).toBe(5);
+    expect(result.all.length).toBe(4);
     expect((last(result.all) as MessagePipelineContext).playerState).toEqual({
       activeData,
       capabilities: [],

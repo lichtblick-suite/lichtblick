@@ -30,15 +30,13 @@ describe("useMessageReducer", () => {
       addMessagesOverride?: any;
     }) {
       try {
-        Test.result(
-          // eslint-disable-next-line react-hooks/rules-of-hooks
-          PanelAPI.useMessageReducer({
-            topics,
-            addMessage: useAddMessage ? Test.addMessage : undefined,
-            addMessages: useAddMessages ? addMessagesOverride || Test.addMessages : undefined,
-            restore: Test.restore,
-          }),
-        );
+        const result = PanelAPI.useMessageReducer({
+          topics,
+          addMessage: useAddMessage ? Test.addMessage : undefined,
+          addMessages: useAddMessages ? addMessagesOverride || Test.addMessages : undefined,
+          restore: Test.restore,
+        });
+        Test.result(result);
       } catch (e) {
         Test.error(e);
       }

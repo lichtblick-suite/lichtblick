@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useRef, useCallback, useMemo, useState, useEffect, useContext } from "react";
+import { useRef, useMemo, useState, useEffect, useContext, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -19,57 +19,18 @@ import {
   MessagePipelineContext,
 } from "@foxglove-studio/app/components/MessagePipeline";
 import PanelContext from "@foxglove-studio/app/components/PanelContext";
-import useChangeDetector from "@foxglove-studio/app/hooks/useChangeDetector";
 import useCleanup from "@foxglove-studio/app/hooks/useCleanup";
-import useContextSelector from "@foxglove-studio/app/hooks/useContextSelector";
 import useDeepMemo from "@foxglove-studio/app/hooks/useDeepMemo";
 import useShouldNotChangeOften from "@foxglove-studio/app/hooks/useShouldNotChangeOften";
-import { Message, SubscribePayload } from "@foxglove-studio/app/players/types";
+import {
+  Message,
+  PlayerStateActiveData,
+  SubscribePayload,
+} from "@foxglove-studio/app/players/types";
 
 type MessageReducer<T> = (arg0: T, message: Message) => T;
 type MessagesReducer<T> = (arg0: T, messages: readonly Message[]) => T;
 export type RequestedTopic = string | { topic: string; imageScale: number };
-
-// Apply changes in topics or messages to the reduced value.
-function useReducedValue<T>(
-  restore: (arg0?: T) => T,
-  addMessage?: MessageReducer<T>,
-  addMessages?: MessagesReducer<T>,
-  lastSeekTime?: number,
-  messages?: readonly Message[],
-): T {
-  const reducedValueRef = useRef<T | undefined>();
-
-  const shouldClear = useChangeDetector([lastSeekTime], false);
-  const reducersChanged = useChangeDetector([restore, addMessage, addMessages], false);
-  const messagesChanged = useChangeDetector([messages], true);
-
-  if (!reducedValueRef.current || shouldClear) {
-    // Call restore to create an initial state and whenever seek time changes.
-    reducedValueRef.current = restore(undefined);
-  } else if (reducersChanged) {
-    // Allow new reducers to restore the previous state when the reducers change.
-    reducedValueRef.current = restore(reducedValueRef.current);
-  }
-
-  // Use the addMessage reducer to process new messages.
-  if (messagesChanged && messages) {
-    if (addMessages) {
-      if (messages.length > 0) {
-        reducedValueRef.current = addMessages(reducedValueRef.current, messages);
-      }
-    } else if (addMessage) {
-      reducedValueRef.current = messages.reduce(
-        // .reduce() passes 4 args to callback function,
-        // but we want to call addMessage with only first 2 args
-        (value: T, message: Message) => addMessage(value, message),
-        reducedValueRef.current,
-      );
-    }
-  }
-
-  return reducedValueRef.current;
-}
 
 // Compute the subscriptions to be requested from the player.
 function useSubscriptions({
@@ -105,8 +66,6 @@ function useSubscriptions({
   }, [preloadingFallback, panelType, requestedTopics]);
 }
 
-const NO_MESSAGES = Object.freeze([]);
-
 type Params<T> = {
   topics: readonly RequestedTopic[];
 
@@ -125,6 +84,14 @@ type Params<T> = {
   // `useBlocksByTopic` for backwards compatibility.
   preloadingFallback?: boolean;
 };
+
+function selectRequestBackfill(ctx: MessagePipelineContext) {
+  return ctx.requestBackfill;
+}
+
+function selectSetSubscriptions(ctx: MessagePipelineContext) {
+  return ctx.setSubscriptions;
+}
 
 export function useMessageReducer<T>(props: Params<T>): T {
   const [id] = useState(() => uuidv4());
@@ -169,66 +136,82 @@ export function useMessageReducer<T>(props: Params<T>): T {
     panelType,
     preloadingFallback: props.preloadingFallback ?? false,
   });
-  const setSubscriptions = useMessagePipeline(
-    useCallback(
-      ({ setSubscriptions: pipelineSetSubscriptions }: MessagePipelineContext) =>
-        pipelineSetSubscriptions,
-      [],
-    ),
-  );
+
+  const setSubscriptions = useMessagePipeline(selectSetSubscriptions);
   useEffect(() => setSubscriptions(id, subscriptions), [id, setSubscriptions, subscriptions]);
   useCleanup(() => setSubscriptions(id, []));
 
-  const requestBackfill = useMessagePipeline(
-    useCallback(
-      ({ requestBackfill: pipelineRequestBackfill }: MessagePipelineContext) =>
-        pipelineRequestBackfill,
-      [],
-    ),
-  );
+  const requestBackfill = useMessagePipeline(selectRequestBackfill);
+
   // Whenever `subscriptions` change, request a backfill, since we'd like to show fresh data.
   useEffect(() => requestBackfill(), [requestBackfill, subscriptions]);
 
-  // Keep a reference to the last messages we processed to ensure we never process them more than once.
-  // If the topics we care about change, the player should send us new messages soon anyway (via backfill if paused).
-  const lastProcessedMessagesRef = useRef<readonly Message[] | undefined>();
-  // Keep a ref to the latest requested topics we were rendered with, because the useMessagePipeline
-  // selector's dependencies aren't allowed to change.
-  const latestRequestedTopicsRef = useRef(requestedTopicsSet);
-  latestRequestedTopicsRef.current = requestedTopicsSet;
-  const messages = useMessagePipeline<readonly Message[]>(
-    useCallback(({ playerState: { activeData } }: MessagePipelineContext) => {
-      if (!activeData) {
-        return NO_MESSAGES; // identity must not change to avoid unnecessary re-renders
-      }
-      const messageData = activeData.messages;
-      if (lastProcessedMessagesRef.current === messageData) {
-        return useContextSelector.BAILOUT;
-      }
-      const filteredMessages = messageData.filter(({ topic }) =>
-        latestRequestedTopicsRef.current.has(topic),
-      );
-      // Bail out if we didn't want any of these messages, but not if this is our first render
-      const shouldBail =
-        lastProcessedMessagesRef.current != undefined && filteredMessages.length === 0;
-      lastProcessedMessagesRef.current = messageData;
-      return shouldBail ? useContextSelector.BAILOUT : filteredMessages;
-    }, []),
-  );
+  const { restore, addMessage, addMessages } = props;
 
-  const lastSeekTime = useMessagePipeline(
+  const state = useRef<
+    | Readonly<{
+        messageEvents: PlayerStateActiveData["messages"] | undefined;
+        lastSeekTime: number | undefined;
+        reducedValue: T;
+        restore: typeof restore;
+        addMessage: typeof addMessage;
+        addMessages: typeof addMessages;
+      }>
+    | undefined
+  >();
+
+  return useMessagePipeline(
     useCallback(
-      ({ playerState: { activeData } }: MessagePipelineContext) =>
-        activeData ? activeData.lastSeekTime : 0,
-      [],
-    ),
-  );
+      // To compute the reduced value from new messages:
+      // - Call restore() to initialize state, if lastSeekTime has changed, or if reducers have changed
+      // - Call addMessage() or addMessages() if any new messages of interest have arrived
+      // - Otherwise, return the previous reducedValue so that we don't trigger an unnecessary render.
+      function selectReducedMessages(ctx: MessagePipelineContext): T {
+        const messageEvents = ctx.playerState.activeData?.messages;
+        const lastSeekTime = ctx.playerState.activeData?.lastSeekTime;
 
-  return useReducedValue<T>(
-    props.restore,
-    props.addMessage,
-    props.addMessages,
-    lastSeekTime,
-    messages,
+        let newReducedValue: T;
+        if (!state.current || lastSeekTime !== state.current.lastSeekTime) {
+          newReducedValue = restore(undefined);
+        } else if (
+          restore !== state.current.restore ||
+          addMessage !== state.current.addMessage ||
+          addMessages !== state.current.addMessages
+        ) {
+          newReducedValue = restore(state.current.reducedValue);
+        } else {
+          newReducedValue = state.current.reducedValue;
+        }
+
+        if (
+          messageEvents &&
+          messageEvents.length > 0 &&
+          messageEvents !== state.current?.messageEvents
+        ) {
+          const filtered = messageEvents.filter(({ topic }) => requestedTopicsSet.has(topic));
+          if (addMessages) {
+            if (filtered.length > 0) {
+              newReducedValue = addMessages(newReducedValue, filtered);
+            }
+          } else if (addMessage) {
+            for (const messageEvent of filtered) {
+              newReducedValue = addMessage(newReducedValue, messageEvent);
+            }
+          }
+        }
+
+        state.current = {
+          messageEvents,
+          lastSeekTime,
+          reducedValue: newReducedValue,
+          restore,
+          addMessage,
+          addMessages,
+        };
+
+        return state.current.reducedValue;
+      },
+      [addMessage, addMessages, restore, requestedTopicsSet],
+    ),
   );
 }
