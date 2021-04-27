@@ -44,7 +44,7 @@ type Props = {
   // for storybook screenshots tests
   dataTest?: string;
 
-  ref?: LegacyRef<HTMLDivElement>;
+  innerRef?: LegacyRef<HTMLDivElement>;
 };
 
 const Flex = (props: Props) => {
@@ -67,7 +67,7 @@ const Flex = (props: Props) => {
     onMouseLeave,
     onMouseMove,
     dataTest,
-    ref,
+    innerRef,
   } = props;
   if (col != undefined && col === row) {
     throw new Error("Flex col and row are mutually exclusive");
@@ -89,7 +89,7 @@ const Flex = (props: Props) => {
 
   return (
     <div
-      ref={ref}
+      ref={innerRef}
       data-test={dataTest}
       className={combinedClasses}
       style={style}

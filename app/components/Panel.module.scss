@@ -48,8 +48,7 @@
 }
 
 .tabActionsOverlay,
-.quickActionsOverlay,
-.prohibitedSelection {
+.quickActionsOverlay {
   cursor: pointer;
   position: absolute;
   top: 0;
@@ -114,16 +113,6 @@
   p {
     font-size: 12px;
     color: $text-muted;
-  }
-}
-
-.prohibitedSelection {
-  padding: 10px;
-
-  .root:hover &,
-  // for screenshot tests
-  &:global(.hoverForScreenshot) {
-    background-color: rgba(45, 45, 51, 1);
   }
 }
 

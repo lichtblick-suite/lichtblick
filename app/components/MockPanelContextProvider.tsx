@@ -35,6 +35,7 @@ const DEFAULT_MOCK_PANEL_CONTEXT: PanelContextType<any> = {
   isHovered: false,
   isFocused: false,
   supportsStrictMode: true,
+  connectToolbarDragHandle: () => {},
 };
 function MockPanelContextProvider({
   children,

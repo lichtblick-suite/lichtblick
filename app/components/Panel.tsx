@@ -61,9 +61,9 @@ import Flex from "@foxglove-studio/app/components/Flex";
 import Icon from "@foxglove-studio/app/components/Icon";
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
 import PanelContext from "@foxglove-studio/app/components/PanelContext";
-import MosaicDragHandle from "@foxglove-studio/app/components/PanelToolbar/MosaicDragHandle";
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import { usePanelCatalog } from "@foxglove-studio/app/context/PanelCatalogContext";
+import usePanelDrag from "@foxglove-studio/app/hooks/usePanelDrag";
 import { State } from "@foxglove-studio/app/reducers";
 import { TabPanelConfig } from "@foxglove-studio/app/types/layouts";
 import {
@@ -504,7 +504,25 @@ export default function Panel<Config extends PanelConfig>(
 
     const isDemoMode = useExperimentalFeature("demoMode");
     const renderCount = useRef(0);
+
     const perfInfo = useRef<HTMLDivElement>(ReactNull);
+    const quickActionsOverlayRef = useRef<HTMLDivElement>(ReactNull);
+    const onDragStart = useCallback(() => {
+      // Temporarily hide the overlay so that the panel can be shown as the drag preview image --
+      // even though the overlay is a sibling rather than a child, Chrome still includes it in the
+      // preview if it is visible. Changing the appearance in the next React render cycle is not
+      // enough; it actually needs to happen during the dragstart event.
+      // https://bugs.chromium.org/p/chromium/issues/detail?id=1203107
+      const overlay = quickActionsOverlayRef.current;
+      if (overlay) {
+        overlay.style.opacity = "0";
+        setTimeout(() => (overlay.style.opacity = "1"));
+      }
+    }, []);
+    const dragSpec = { tabId, panelId: childId, onDragStart };
+    const [connectOverlayDragSource, connectOverlayDragPreview] = usePanelDrag(dragSpec);
+    const [connectToolbarDragHandle, connectToolbarDragPreview] = usePanelDrag(dragSpec);
+
     return (
       <Profiler
         id={childId ?? "$unknown_id"}
@@ -536,6 +554,7 @@ export default function Panel<Config extends PanelConfig>(
             isFocused,
             tabId,
             supportsStrictMode: PanelComponent.supportsStrictMode ?? true,
+            connectToolbarDragHandle,
           }}
         >
           {/* Ensure user exits full-screen mode when leaving window, even if key is still pressed down */}
@@ -554,6 +573,10 @@ export default function Panel<Config extends PanelConfig>(
             col
             dataTest={`panel-mouseenter-container ${childId ?? ""}`}
             clip
+            innerRef={(el) => {
+              connectOverlayDragPreview(el);
+              connectToolbarDragPreview(el);
+            }}
           >
             {fullScreen && <div className={styles.notClickable} />}
             {isSelected && !fullScreen && numSelectedPanelsIfSelected > 1 && (
@@ -573,26 +596,31 @@ export default function Panel<Config extends PanelConfig>(
               </div>
             )}
             {type !== TAB_PANEL_TYPE && quickActionsKeyPressed && !fullScreen && (
-              <div className={styles.quickActionsOverlay} data-panel-overlay>
-                <MosaicDragHandle tabId={tabId}>
-                  <>
-                    <div>
-                      <FullscreenIcon />
-                      {shiftKeyPressed ? "Lock fullscreen" : "Fullscreen (Shift+click to lock)"}
-                    </div>
-                    <div>
-                      <Button onClick={closePanel} disabled={isOnlyPanel}>
-                        <TrashCanOutlineIcon />
-                        Remove
-                      </Button>
-                      <Button onClick={splitPanel}>
-                        <GridLargeIcon />
-                        Split
-                      </Button>
-                    </div>
-                    {!isOnlyPanel && <p>Drag to move</p>}
-                  </>
-                </MosaicDragHandle>
+              <div
+                className={styles.quickActionsOverlay}
+                ref={(el) => {
+                  quickActionsOverlayRef.current = el;
+                  connectOverlayDragSource(el);
+                }}
+                data-panel-overlay
+              >
+                <div>
+                  <div>
+                    <FullscreenIcon />
+                    {shiftKeyPressed ? "Lock fullscreen" : "Fullscreen (Shift+click to lock)"}
+                  </div>
+                  <div>
+                    <Button onClick={closePanel} disabled={isOnlyPanel}>
+                      <TrashCanOutlineIcon />
+                      Remove
+                    </Button>
+                    <Button onClick={splitPanel}>
+                      <GridLargeIcon />
+                      Split
+                    </Button>
+                  </div>
+                  {!isOnlyPanel && <p>Drag to move</p>}
+                </div>
               </div>
             )}
             {fullScreen && (
@@ -617,10 +645,10 @@ export default function Panel<Config extends PanelConfig>(
       </Profiler>
     );
   }
-  ConnectedPanel.displayName = `Panel(${PanelComponent.displayName ?? PanelComponent.name})`;
 
   return Object.assign(React.memo(ConnectedPanel), {
     defaultConfig: PanelComponent.defaultConfig,
     panelType: PanelComponent.panelType,
+    displayName: `Panel(${PanelComponent.displayName ?? PanelComponent.name})`,
   });
 }

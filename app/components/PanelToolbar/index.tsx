@@ -50,7 +50,6 @@ import { TAB_PANEL_TYPE } from "@foxglove-studio/app/util/globalConstants";
 import logEvent, { getEventNames, getEventTags } from "@foxglove-studio/app/util/logEvent";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
-import MosaicDragHandle from "./MosaicDragHandle";
 import styles from "./index.module.scss";
 
 type Props = {
@@ -235,8 +234,6 @@ type PanelToolbarControlsProps = Pick<
   "additionalIcons" | "floating" | "menuContent" | "showHiddenControlsOnHover"
 > & {
   isRendered: boolean;
-  onDragStart: () => void;
-  onDragEnd: () => void;
   showPanelName?: boolean;
   isUnknownPanel: boolean;
   onEditPanelConfig: () => void;
@@ -250,20 +247,20 @@ const PanelToolbarControls = React.memo(function PanelToolbarControls({
   isRendered,
   isUnknownPanel,
   menuContent,
-  onDragEnd,
-  onDragStart,
   showHiddenControlsOnHover = false,
   showPanelName = false,
   onEditPanelConfig,
 }: PanelToolbarControlsProps) {
-  const panelData = useContext(PanelContext);
+  const panelContext = useContext(PanelContext);
 
   return (
     <div
       className={styles.iconContainer}
       style={showHiddenControlsOnHover && !isRendered ? { visibility: "hidden" } : {}}
     >
-      {showPanelName && panelData && <div className={styles.panelName}>{panelData.title}</div>}
+      {showPanelName && panelContext && (
+        <div className={styles.panelName}>{panelContext.title}</div>
+      )}
       {additionalIcons}
       <Dropdown
         flatEdges={!floating}
@@ -274,7 +271,7 @@ const PanelToolbarControls = React.memo(function PanelToolbarControls({
         }
       >
         <StandardMenuItems
-          tabId={panelData?.tabId}
+          tabId={panelContext?.tabId}
           isUnknownPanel={isUnknownPanel}
           onEditPanelConfig={onEditPanelConfig}
         />
@@ -282,14 +279,11 @@ const PanelToolbarControls = React.memo(function PanelToolbarControls({
         {menuContent}
       </Dropdown>
       {!isUnknownPanel && (
-        <MosaicDragHandle onDragStart={onDragStart} onDragEnd={onDragEnd} tabId={panelData?.tabId}>
-          {/* Can only nest native nodes into <MosaicDragHandle>, so wrapping in a <span> */}
-          <span>
-            <Icon fade tooltip="Move panel (shortcut: ` or ~)">
-              <DragIcon className={styles.dragIcon} />
-            </Icon>
-          </span>
-        </MosaicDragHandle>
+        <span ref={panelContext?.connectToolbarDragHandle} data-test="mosaic-drag-handle">
+          <Icon fade tooltip="Move panel (shortcut: ` or ~)">
+            <DragIcon className={styles.dragIcon} />
+          </Icon>
+        </span>
       )}
     </div>
   );
@@ -309,9 +303,6 @@ export default React.memo<Props>(function PanelToolbar({
   showHiddenControlsOnHover,
 }: Props) {
   const { isHovered = false, id, supportsStrictMode = true } = useContext(PanelContext) ?? {};
-  const [isDragging, setIsDragging] = useState(false);
-  const onDragStart = useCallback(() => setIsDragging(true), []);
-  const onDragEnd = useCallback(() => setIsDragging(false), []);
   const [containsOpen, setContainsOpen] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -367,7 +358,7 @@ export default React.memo<Props>(function PanelToolbar({
     return ReactNull;
   }
 
-  const isRendered = isHovered || containsOpen || isDragging || !!isUnknownPanel;
+  const isRendered = isHovered || containsOpen || !!isUnknownPanel;
 
   return (
     <div ref={sizeRef}>
@@ -390,8 +381,6 @@ export default React.memo<Props>(function PanelToolbar({
               menuContent={menuContent}
               showPanelName={(width ?? 0) > 360}
               additionalIcons={additionalIconsWithHelp}
-              onDragStart={onDragStart}
-              onDragEnd={onDragEnd}
               isUnknownPanel={!!isUnknownPanel}
               onEditPanelConfig={() => setShowShareModal(true)}
             />

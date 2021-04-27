@@ -12,26 +12,24 @@
 //   You may not use this file except in compliance with the License.
 
 import _ from "lodash";
-import React, { useContext, ReactNode } from "react";
-import { useDrag } from "react-dnd";
+import React, { useContext } from "react";
+import { useDrag, ConnectDragSource, ConnectDragPreview } from "react-dnd";
 import { MosaicDragType, MosaicWindowContext } from "react-mosaic-component";
 import { useSelector, useDispatch } from "react-redux";
 import { bindActionCreators } from "redux";
 
 import { startDrag, endDrag } from "@foxglove-studio/app/actions/panels";
-import { usePanelContext } from "@foxglove-studio/app/components/PanelContext";
 import { State } from "@foxglove-studio/app/reducers";
 
-// HOC to integrate mosaic drag functionality into any other component
-function MosaicDragHandle(props: {
-  children: ReactNode;
+// Hook to integrate mosaic drag functionality into any other component
+export default function usePanelDrag(props: {
   tabId?: string;
+  panelId?: string;
   onDragStart?: () => void;
   onDragEnd?: () => void;
-}) {
-  const { children, tabId: sourceTabId, onDragStart, onDragEnd } = props;
+}): [ConnectDragSource, ConnectDragPreview] {
+  const { tabId: sourceTabId, panelId, onDragStart, onDragEnd } = props;
   const { mosaicWindowActions } = useContext(MosaicWindowContext);
-  const { id } = usePanelContext();
 
   const dispatch = useDispatch();
   const mosaicId = useSelector(({ mosaic }: State) => mosaic.mosaicId);
@@ -41,7 +39,7 @@ function MosaicDragHandle(props: {
     dispatch,
   ]);
 
-  const [__, drag] = useDrag<any, any, any>({
+  const [, connectDragSource, connectDragPreview] = useDrag<any, any, any>({
     item: { type: MosaicDragType.WINDOW },
     begin: (_monitor) => {
       if (onDragStart) {
@@ -65,11 +63,14 @@ function MosaicDragHandle(props: {
       const ownPath = mosaicWindowActions.getPath();
       const dropResult = monitor.getDropResult() || {};
       const { position, path: destinationPath, tabId: targetTabId } = dropResult;
+      if (panelId == undefined) {
+        return;
+      }
 
       actions.endDrag({
         originalLayout: originalLayout as any,
         originalSavedProps,
-        panelId: id,
+        panelId,
         sourceTabId,
         targetTabId,
         position,
@@ -78,11 +79,6 @@ function MosaicDragHandle(props: {
       });
     },
   });
-  return (
-    <div ref={drag} data-test="mosaic-drag-handle">
-      {children}
-    </div>
-  );
-}
 
-export default MosaicDragHandle;
+  return [connectDragSource, connectDragPreview];
+}
