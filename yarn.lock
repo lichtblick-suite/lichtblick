@@ -2168,7 +2168,7 @@ __metadata:
     use-debounce: 6.0.1
     uuid: 8.3.2
     wasm-lz4: 1.0.0
-    xacro-parser: 0.3.0
+    xacro-parser: 0.3.1
   languageName: unknown
   linkType: soft
 
@@ -24933,12 +24933,12 @@ typescript@4.2.2:
   languageName: node
   linkType: hard
 
-"xacro-parser@npm:0.3.0":
-  version: 0.3.0
-  resolution: "xacro-parser@npm:0.3.0"
+"xacro-parser@npm:0.3.1":
+  version: 0.3.1
+  resolution: "xacro-parser@npm:0.3.1"
   dependencies:
     expr-eval: ^2.0.2
-  checksum: 12909367e9a81fd5e85c8abbb7f84cbfa4d72efe5d503006ddebd207277d8293f3453233a38f74717f4c3eaef063595e24a4bf446bce741646e3e417e5d5c34b
+  checksum: 52f5562e74b72700fa7fe2f406dce3a16bca075185c95358b53ca4b99764bdc95cb0e826e349dba16eebfc7c014213cd116c0dfee7f4d210b6bff23317ffd2e6
   languageName: node
   linkType: hard
 

@@ -137,6 +137,6 @@
     "three": "0.128.0",
     "urdf-loader": "0.10.2",
     "url-search-params": "1.1.0",
-    "xacro-parser": "0.3.0"
+    "xacro-parser": "0.3.1"
   }
 }
