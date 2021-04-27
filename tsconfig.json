@@ -10,7 +10,8 @@
     "./ci/**/*.ts",
     "./eslint-rules/*.js",
     "./test/**/*.ts",
-    "./resources/notarize.ts"
+    "./resources/notarize.ts",
+    "./package.json"
   ],
   "compilerOptions": {
     "module": "commonjs",
