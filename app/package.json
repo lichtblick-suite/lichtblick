@@ -11,7 +11,7 @@
     "@mdi/svg": "5.9.55",
     "async-mutex": "0.3.1",
     "cbor-js": "0.1.0",
-    "chart.js": "3.2.0",
+    "chart.js": "3.1.1",
     "chartjs-plugin-annotation": "1.0.1",
     "chartjs-plugin-datalabels": "2.0.0-beta.1",
     "chartjs-plugin-zoom": "github:foxglove/chartjs-plugin-zoom#656541279943f00dce600288435f83c436293146",
