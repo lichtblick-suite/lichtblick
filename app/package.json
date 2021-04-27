@@ -127,7 +127,7 @@
     "@types/url-search-params": "1.1.0",
     "@types/uuid": "8.3.0",
     "@types/wicg-file-system-access": "2020.9.1",
-    "@types/ws": "7.4.1",
+    "@types/ws": "7.4.2",
     "@wojtekmaj/enzyme-adapter-react-17": "0.6.1",
     "argparse": "2.0.1",
     "chromatic": "5.7.1",
