@@ -23,6 +23,7 @@ import { Time, TimeUtil } from "rosbag";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
+import { AppSetting } from "@foxglove-studio/app/AppSetting";
 import { clearHoverValue, setHoverValue } from "@foxglove-studio/app/actions/hoverValue";
 import Button from "@foxglove-studio/app/components/Button";
 import Flex from "@foxglove-studio/app/components/Flex";
@@ -41,7 +42,7 @@ import {
 import PlaybackSpeedControls from "@foxglove-studio/app/components/PlaybackSpeedControls";
 import Slider from "@foxglove-studio/app/components/Slider";
 import { useTooltip } from "@foxglove-studio/app/components/Tooltip";
-import useTimezone from "@foxglove-studio/app/hooks/useTimezone";
+import useAppSetting from "@foxglove-studio/app/hooks/useAppSetting";
 import { PlayerState, PlayerStateActiveData } from "@foxglove-studio/app/players/types";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { formatTime } from "@foxglove-studio/app/util/formatTime";
@@ -104,7 +105,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
       contents: tooltipState?.tip,
     });
     const { seek, pause, play, player } = props;
-    const timezone = useTimezone();
+    const timezone = useAppSetting<string>(AppSetting.TIMEZONE);
 
     // playerState is unstable, and will cause callbacks to change identity every frame. They can take
     // a ref instead.

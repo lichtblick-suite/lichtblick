@@ -10,17 +10,28 @@ import {
   SelectableOptionMenuItemType,
   Stack,
   Text,
+  TextField,
   useTheme,
   VirtualizedComboBox,
 } from "@fluentui/react";
 import moment from "moment-timezone";
 import { useCallback, useMemo, useState } from "react";
 
+import { AppSetting } from "@foxglove-studio/app/AppSetting";
+import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import { ExperimentalFeatureSettings } from "@foxglove-studio/app/components/ExperimentalFeatureSettings";
 import { useAsyncAppConfigurationValue } from "@foxglove-studio/app/hooks/useAsyncAppConfigurationValue";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import fuzzyFilter from "@foxglove-studio/app/util/fuzzyFilter";
 import { APP_NAME } from "@foxglove-studio/app/version";
+import { RosNode } from "@foxglove/ros1";
+
+function nonEmptyOrUndefined(str?: string): string | undefined {
+  if (str == undefined) {
+    return undefined;
+  }
+  return str.length > 0 ? str : undefined;
+}
 
 function formatTimezone(name: string) {
   const tz = moment.tz(name);
@@ -37,7 +48,7 @@ function formatTimezone(name: string) {
 function TimezoneSettings(): React.ReactElement {
   type Option = IComboBoxOption & { data: string };
 
-  const [timezone, setTimezone] = useAsyncAppConfigurationValue<string>("timezone", {
+  const [timezone, setTimezone] = useAsyncAppConfigurationValue<string>(AppSetting.TIMEZONE, {
     optimistic: true, // prevent UI flicker while the new value is saving
   });
   const detectItem = useMemo(
@@ -122,14 +133,41 @@ function TimezoneSettings(): React.ReactElement {
   );
 }
 
+function RosHostname(): React.ReactElement {
+  const [rosHostname, setRosHostname] = useAsyncAppConfigurationValue<string>(
+    AppSetting.ROS1_ROS_HOSTNAME,
+    {
+      optimistic: true, // prevent UI flicker while the new value is saving
+    },
+  );
+
+  const os = OsContextSingleton;
+  const rosHostnamePlaceholder = useMemo(
+    () =>
+      os != undefined
+        ? RosNode.GetRosHostname(os.getEnvVar, os.getHostname, os.getNetworkInterfaces)
+        : "localhost",
+    [os],
+  );
+
+  return (
+    <TextField
+      label="ROS_HOSTNAME"
+      placeholder={rosHostnamePlaceholder}
+      value={rosHostname.value}
+      onChange={(_event, newValue) => setRosHostname(nonEmptyOrUndefined(newValue))}
+    />
+  );
+}
+
 export default function Preferences(): React.ReactElement {
   const theme = useTheme();
 
   const [crashReportingEnabled, setCrashReportingEnabled] = useAsyncAppConfigurationValue<boolean>(
-    "telemetry.crashReportingEnabled",
+    AppSetting.CRASH_REPORTING_ENABLED,
   );
   const [telemetryEnabled, setTelemetryEnabled] = useAsyncAppConfigurationValue<boolean>(
-    "telemetry.telemetryEnabled",
+    AppSetting.TELEMETRY_ENABLED,
   );
 
   return (
@@ -137,6 +175,9 @@ export default function Preferences(): React.ReactElement {
       <PivotItem headerText="Settings" style={{ padding: theme.spacing.m }}>
         <Stack.Item>
           <TimezoneSettings />
+        </Stack.Item>
+        <Stack.Item>
+          <RosHostname />
         </Stack.Item>
       </PivotItem>
       {

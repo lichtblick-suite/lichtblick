@@ -6,6 +6,8 @@ import { app } from "electron";
 import fs from "fs";
 import path from "path";
 
+import { AppSetting } from "@foxglove-studio/app/AppSetting";
+
 function getTelemetrySettings(): [crashReportingEnabled: boolean, telemetryEnabled: boolean] {
   const datastoreDir = path.join(app.getPath("userData"), "studio-datastores", "settings");
   const settingsPath = path.join(datastoreDir, "settings.json");
@@ -20,8 +22,8 @@ function getTelemetrySettings(): [crashReportingEnabled: boolean, telemetryEnabl
 
   try {
     const settings = JSON.parse(fs.readFileSync(settingsPath, { encoding: "utf8" }));
-    crashReportingEnabled = settings["telemetry.crashReportingEnabled"] ?? true;
-    telemetryEnabled = settings["telemetry.telemetryEnabled"] ?? true;
+    crashReportingEnabled = settings[AppSetting.CRASH_REPORTING_ENABLED] ?? true;
+    telemetryEnabled = settings[AppSetting.TELEMETRY_ENABLED] ?? true;
   } catch {
     // Ignore file load or parsing errors, including settings.json not existing
   }

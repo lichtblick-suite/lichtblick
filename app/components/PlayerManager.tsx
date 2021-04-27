@@ -16,6 +16,7 @@ import { connect, ConnectedProps } from "react-redux";
 import { useAsync, useLocalStorage, useMountedState } from "react-use";
 import { URL } from "universal-url";
 
+import { AppSetting } from "@foxglove-studio/app/AppSetting";
 import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import {
   setUserNodeDiagnostics,
@@ -38,6 +39,7 @@ import {
   getLocalBagDescriptor,
   getRemoteBagDescriptor,
 } from "@foxglove-studio/app/dataProviders/standardDataProviderDescriptors";
+import useAppSetting from "@foxglove-studio/app/hooks/useAppSetting";
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { usePrompt } from "@foxglove-studio/app/hooks/usePrompt";
 import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
@@ -135,6 +137,7 @@ async function buildPlayerFromBagURLs(
 
 type FactoryOptions = {
   source: PlayerSourceDefinition;
+  sourceOptions: Record<string, unknown>;
   skipRestore: boolean;
   prompt: ReturnType<typeof usePrompt>;
   storage: Storage;
@@ -281,8 +284,11 @@ async function roscoreSource(options: FactoryOptions) {
 
   const url = maybeUrl;
   options.storage.setItem(storageCacheKey, url);
+
+  const hostname = options.sourceOptions.rosHostname as string | undefined;
+
   return async (playerOptions: BuildPlayerOptions) => ({
-    player: new Ros1Player(url, playerOptions.metricsCollector),
+    player: new Ros1Player({ url, hostname, metricsCollector: playerOptions.metricsCollector }),
     sources: [url],
   });
 }
@@ -439,6 +445,8 @@ function PlayerManager({
   const prompt = usePrompt();
   const storage = useMemo(() => new Storage(), []);
 
+  const rosHostname = useAppSetting<string>(AppSetting.ROS1_ROS_HOSTNAME);
+
   useAsync(async () => {
     if (!selectedSource) {
       return;
@@ -457,8 +465,11 @@ function PlayerManager({
         throw new Error(`Could not create a player for ${selectedSource.name}`);
       }
 
+      const sourceOptions = { rosHostname };
+
       const playerBuilder = await createPlayerBuilder({
         source: selectedSource,
+        sourceOptions,
         skipRestore,
         prompt,
         storage,
@@ -474,6 +485,7 @@ function PlayerManager({
     lookupPlayerBuilderFactory,
     metricsCollector,
     prompt,
+    rosHostname,
     selectedSource,
     setPlayer,
     storage,

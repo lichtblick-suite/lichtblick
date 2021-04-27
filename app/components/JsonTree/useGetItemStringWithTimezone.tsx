@@ -13,8 +13,9 @@
 
 import { ReactNode, useCallback } from "react";
 
+import { AppSetting } from "@foxglove-studio/app/AppSetting";
 import { isTypicalFilterName } from "@foxglove-studio/app/components/MessagePathSyntax/isTypicalFilterName";
-import useTimezone from "@foxglove-studio/app/hooks/useTimezone";
+import useAppSetting from "@foxglove-studio/app/hooks/useAppSetting";
 import { format, formatDuration } from "@foxglove-studio/app/util/formatTime";
 
 const DURATION_20_YEARS_SEC = 20 * 365 * 24 * 60 * 60;
@@ -34,7 +35,7 @@ export default function useGetItemStringWithTimezone(): (
   itemType: ReactNode,
   itemString: string,
 ) => ReactNode {
-  const timezone = useTimezone();
+  const timezone = useAppSetting<string>(AppSetting.TIMEZONE);
   return useCallback(
     (type: string, data: any, itemType: ReactNode, itemString: string) =>
       getItemString(type, data, itemType, itemString, timezone),

@@ -7,6 +7,9 @@ import { promises as fs } from "fs";
 import path from "path";
 
 import type { Storage, StorageContent } from "@foxglove-studio/app/OsContext";
+import Logger from "@foxglove/log";
+
+const log = Logger.getLogger(__filename);
 
 export default class LocalFileStorage implements Storage {
   private _userDataPath = ipcRenderer.invoke("getUserDataPath");
@@ -69,6 +72,7 @@ export default class LocalFileStorage implements Storage {
 
   async put(datastore: string, key: string, value: StorageContent): Promise<void> {
     const filePath = await this.makeFilePath(datastore, key);
+    log.debug(`Writing ${key} to ${filePath}`);
     await fs.writeFile(filePath, value);
   }
 
