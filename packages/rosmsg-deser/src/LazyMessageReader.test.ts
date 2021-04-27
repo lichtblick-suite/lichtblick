@@ -68,6 +68,16 @@ describe("LazyReader", () => {
       },
     ],
     [
+      `duration stamp`,
+      [0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00],
+      {
+        stamp: {
+          sec: 0,
+          nsec: 1,
+        },
+      },
+    ],
+    [
       `int32[] arr`,
       [
         ...[0x02, 0x00, 0x00, 0x00], // length
@@ -81,7 +91,17 @@ describe("LazyReader", () => {
       { arr: [{ sec: 1, nsec: 2 }] },
     ],
     [
+      `duration[1] arr`,
+      [0x01, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00],
+      { arr: [{ sec: 1, nsec: 2 }] },
+    ],
+    [
       `time[] arr`,
+      [0x01, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00],
+      { arr: [{ sec: 2, nsec: 3 }] },
+    ],
+    [
+      `duration[] arr`,
       [0x01, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00],
       { arr: [{ sec: 2, nsec: 3 }] },
     ],

@@ -3,24 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { RosMsgDefinition, RosMsgField } from "rosbag";
 
-import deserializers from "./BuiltinDeserialize";
-
-// Sizes for builtin types - if a type has a fixed size, the deserializer is able to optimize
-const fixedSizeTypes = new Map<string, number>([
-  ["bool", 1],
-  ["int8", 1],
-  ["uint8", 1],
-  ["int16", 2],
-  ["uint16", 2],
-  ["int32", 4],
-  ["uint32", 4],
-  ["int64", 8],
-  ["uint64", 8],
-  ["float32", 4],
-  ["float64", 8],
-  ["time", 8],
-  ["duration", 8],
-]);
+import { deserializers, fixedSizeTypes, FixedSizeTypes } from "./BuiltinDeserialize";
 
 const builtinSizes = {
   // strings are the only builtin type that are variable size
@@ -75,7 +58,7 @@ function sizeFunction(field: RosMsgField): string {
     return "";
   }
 
-  const fieldSize = fixedSizeTypes.get(field.type);
+  const fieldSize = fixedSizeTypes.get(field.type as FixedSizeTypes);
 
   // if the field size is not known, size will be calculated on-demand
   if (fieldSize == undefined) {
@@ -130,7 +113,7 @@ function sizePartForDefinition(className: string, field: RosMsgField): string {
     return "";
   }
 
-  const fieldSize = fixedSizeTypes.get(field.type);
+  const fieldSize = fixedSizeTypes.get(field.type as FixedSizeTypes);
   const isFixedArray = field.isArray === true && field.arrayLength != undefined;
 
   if (fieldSize != undefined && (isFixedArray || field.isArray === false)) {
@@ -175,7 +158,7 @@ function getterFunction(field: RosMsgField): string {
   // function to return size of individual array item
   const sizeFn = isBuiltinSize ? `sizes.${field.type}` : `${sanitizeName(field.type)}.size`;
 
-  const fieldSize = fixedSizeTypes.get(field.type);
+  const fieldSize = fixedSizeTypes.get(field.type as FixedSizeTypes);
 
   if (field.isArray === true) {
     const arrLen = field.arrayLength;
