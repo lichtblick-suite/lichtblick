@@ -32,7 +32,6 @@ import {
   Topic,
 } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { objectValues } from "@foxglove-studio/app/util";
 import createSelectableContext from "@foxglove-studio/app/util/createSelectableContext";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import signal from "@foxglove-studio/app/util/signal";
@@ -139,10 +138,10 @@ export function MessagePipelineProvider({
   }>({ resolveFn: undefined, promisesToWaitFor: [], waitingForPromises: false });
 
   const subscriptions: SubscribePayload[] = useMemo(
-    () => flatten(objectValues(subscriptionsById)),
+    () => flatten(Object.values(subscriptionsById)),
     [subscriptionsById],
   );
-  const publishers: AdvertisePayload[] = useMemo(() => flatten(objectValues(publishersById)), [
+  const publishers: AdvertisePayload[] = useMemo(() => flatten(Object.values(publishersById)), [
     publishersById,
   ]);
   const player = maybePlayer.player;

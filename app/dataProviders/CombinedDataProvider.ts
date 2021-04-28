@@ -31,7 +31,6 @@ import {
   ParsedMessageDefinitions,
 } from "@foxglove-studio/app/dataProviders/types";
 import { Progress, TypedMessage } from "@foxglove-studio/app/players/types";
-import { objectValues } from "@foxglove-studio/app/util";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { deepIntersect } from "@foxglove-studio/app/util/ranges";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
@@ -320,7 +319,7 @@ export default class CombinedDataProvider implements DataProvider {
           parsedMessages: filterTopics(topics.parsedMessages),
           rosBinaryMessages: filterTopics(topics.rosBinaryMessages),
         };
-        const hasSubscriptions = objectValues(filteredTopicsByFormat).some(
+        const hasSubscriptions = Object.values(filteredTopicsByFormat).some(
           (formatTopics) => formatTopics?.length,
         );
         if (!hasSubscriptions) {
@@ -344,7 +343,7 @@ export default class CombinedDataProvider implements DataProvider {
           clampedEnd,
           filteredTopicsByFormat,
         );
-        for (const messages of objectValues(providerResult)) {
+        for (const messages of Object.values(providerResult)) {
           if (messages == undefined) {
             continue;
           }

@@ -29,7 +29,6 @@ import {
 } from "@foxglove-studio/app/players/types";
 import StoreSetup from "@foxglove-studio/app/stories/StoreSetup";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { objectValues } from "@foxglove-studio/app/util";
 import naturalSort from "@foxglove-studio/app/util/naturalSort";
 
 import { ContextInternal } from "./index";
@@ -85,7 +84,7 @@ export default function MockMessagePipelineProvider(props: {
     [key: string]: SubscribePayload[];
   }>({});
   const flattenedSubscriptions: SubscribePayload[] = useMemo(
-    () => flatten(objectValues(allSubscriptions)),
+    () => flatten(Object.values(allSubscriptions)),
     [allSubscriptions],
   );
   const setSubscriptions = useCallback(

@@ -14,7 +14,6 @@
 import { storiesOf } from "@storybook/react";
 
 import SegmentedControl, { Option } from "@foxglove-studio/app/components/SegmentedControl";
-import { objectValues } from "@foxglove-studio/app/util";
 
 const OPTIONS = {
   first: {
@@ -55,7 +54,7 @@ function Box({
   );
 }
 
-const optionArr: Option[] = objectValues(OPTIONS);
+const optionArr: Option[] = Object.values(OPTIONS);
 
 function ControlledExample() {
   const [selectedId, setSelectedId] = React.useState(OPTIONS.first.id);

@@ -54,7 +54,6 @@ import getDiff, {
   diffLabelsByLabelText,
 } from "@foxglove-studio/app/panels/RawMessages/getDiff";
 import { Topic } from "@foxglove-studio/app/players/types";
-import { objectValues } from "@foxglove-studio/app/util";
 import { jsonTreeTheme, SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import { enumValuesByDatatypeAndField } from "@foxglove-studio/app/util/selectors";
 
@@ -337,7 +336,7 @@ function RawMessages(props: Props) {
         undefined,
         showFullMessageForDiff,
       );
-    const diffLabelTexts = objectValues(diffLabels).map(({ labelText }) => labelText);
+    const diffLabelTexts = Object.values(diffLabels).map(({ labelText }) => labelText);
 
     const CheckboxComponent = showFullMessageForDiff
       ? CheckboxMarkedIcon

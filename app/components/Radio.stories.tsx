@@ -14,7 +14,6 @@
 import { storiesOf } from "@storybook/react";
 
 import Radio, { RadioOption } from "@foxglove-studio/app/components/Radio";
-import { objectValues } from "@foxglove-studio/app/util";
 
 const OPTIONS = {
   first: {
@@ -54,7 +53,7 @@ function Box({
   );
 }
 
-const optionArr: RadioOption[] = objectValues(OPTIONS);
+const optionArr: RadioOption[] = Object.values(OPTIONS);
 
 function ControlledExample() {
   const [selectedId, setSelectedId] = React.useState(OPTIONS.first.id);

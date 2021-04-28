@@ -57,7 +57,6 @@ import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { SavedProps, UserNodes } from "@foxglove-studio/app/types/panels";
-import { objectValues } from "@foxglove-studio/app/util";
 
 type Store = ReturnType<typeof configureStore>;
 
@@ -256,7 +255,7 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
       }
       dTypes = dummyDatatypes;
     }
-    const allData = flatten(objectValues(frame));
+    const allData = flatten(Object.values(frame));
     return (
       <div
         style={{ width: "100%", height: "100%", display: "flex", ...this.props.style }}

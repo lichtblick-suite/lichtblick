@@ -16,7 +16,6 @@ import Bag, { parseMessageDefinition } from "rosbag";
 import { Connection } from "@foxglove-studio/app/dataProviders/types";
 import { Topic } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { objectValues } from "@foxglove-studio/app/util";
 
 // TODO(JP): Move all this stuff into rosbag.
 
@@ -72,5 +71,5 @@ export function bagConnectionsToTopics(
       numMessages: numMessagesByConnectionIndex[index],
     };
   });
-  return objectValues(topics);
+  return Object.values(topics);
 }

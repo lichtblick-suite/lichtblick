@@ -31,7 +31,6 @@ import {
   ParameterValue,
 } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { objectValues } from "@foxglove-studio/app/util";
 import { bagConnectionsToDatatypes } from "@foxglove-studio/app/util/bagConnectionsHelper";
 import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
 import { FREEZE_MESSAGES } from "@foxglove-studio/app/util/globalConstants";
@@ -385,7 +384,7 @@ export default class RosbridgePlayer implements Player {
   setPublishers(publishers: AdvertisePayload[]): void {
     // Since `setPublishers` is rarely called, we can get away with just throwing away the old
     // Roslib.Topic objects and creating new ones.
-    for (const publisher of objectValues(this._topicPublishers)) {
+    for (const publisher of Object.values(this._topicPublishers)) {
       publisher.unadvertise();
     }
     this._topicPublishers = {};

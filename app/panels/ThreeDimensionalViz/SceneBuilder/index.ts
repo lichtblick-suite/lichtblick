@@ -37,7 +37,6 @@ import {
   GeometryMsgs$PolygonStamped,
 } from "@foxglove-studio/app/types/Messages";
 import { MarkerProvider, MarkerCollector, Scene } from "@foxglove-studio/app/types/Scene";
-import { objectValues } from "@foxglove-studio/app/util";
 import Bounds from "@foxglove-studio/app/util/Bounds";
 import { emptyPose } from "@foxglove-studio/app/util/Pose";
 import {
@@ -984,7 +983,7 @@ export default class SceneBuilder implements MarkerProvider {
   }
 
   renderMarkers(add: MarkerCollector): void {
-    for (const topic of objectValues(this.topicsByName)) {
+    for (const topic of Object.values(this.topicsByName)) {
       const collector = this.collectors[topic.name];
       if (!collector) {
         continue;

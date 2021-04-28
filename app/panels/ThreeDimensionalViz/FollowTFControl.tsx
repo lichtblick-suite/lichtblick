@@ -24,7 +24,6 @@ import Autocomplete from "@foxglove-studio/app/components/Autocomplete";
 import Button from "@foxglove-studio/app/components/Button";
 import Icon from "@foxglove-studio/app/components/Icon";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
-import { objectValues } from "@foxglove-studio/app/util";
 
 import Transforms, { Transform } from "./Transforms";
 
@@ -71,7 +70,7 @@ const buildTfTree = (transforms: Transform[]): TfTree => {
   }
 
   // Do a final pass sorting all the children lists.
-  for (const node of objectValues(tree.nodes)) {
+  for (const node of Object.values(tree.nodes)) {
     node.children = sortBy(node.children, treeNodeToTfId);
   }
   tree.roots = sortBy(tree.roots, treeNodeToTfId);
