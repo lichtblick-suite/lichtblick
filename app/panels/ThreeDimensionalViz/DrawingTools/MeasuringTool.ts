@@ -15,7 +15,6 @@ import { isEqual } from "lodash";
 import { ReglClickInfo } from "regl-worldview";
 
 import { Point } from "@foxglove-studio/app/types/Messages";
-import { arrayToPoint } from "@foxglove-studio/app/util";
 
 export type MeasureState = "idle" | "place-start" | "place-finish";
 
@@ -29,6 +28,15 @@ type Props = MeasureInfo & {
 };
 
 /* eslint-disable no-restricted-syntax */
+
+function arrayToPoint(
+  v?: [number, number, number],
+): { x: number; y: number; z: number } | undefined {
+  if (!v) {
+    return undefined;
+  }
+  return { x: v[0], y: v[1], z: v[2] };
+}
 
 export default class MeasuringTool extends React.Component<Props> {
   mouseDownCoords: number[] = [-1, -1];

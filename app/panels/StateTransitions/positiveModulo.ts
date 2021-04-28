@@ -5,13 +5,15 @@
 // This file incorporates work covered by the following copyright and
 // permission notice:
 //
-//   Copyright 2019-2021 Cruise LLC
+//   Copyright 2018-2021 Cruise LLC
 //
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-// Object.values returns mixed[], which is difficult to get Flow to accept.
-export function objectValues<T>(o: { [s: string]: T } | ArrayLike<T>): T[] {
-  return Object.values(o);
+// Equivalent to `number % modulus`, but always returns a positive number (given that modulus is
+// a positive number). This is the same as the `%` in e.g. Python.
+// See https://stackoverflow.com/a/4467559 and https://en.wikipedia.org/wiki/Modulo_operation
+export default function positiveModulo(number: number, modulus: number): number {
+  return ((number % modulus) + modulus) % modulus;
 }

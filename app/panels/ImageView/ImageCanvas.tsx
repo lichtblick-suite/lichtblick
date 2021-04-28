@@ -28,10 +28,10 @@ import { Item } from "@foxglove-studio/app/components/Menu";
 import { Message, Topic } from "@foxglove-studio/app/players/types";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { CameraInfo, StampedMessage } from "@foxglove-studio/app/types/Messages";
-import { downloadFiles } from "@foxglove-studio/app/util";
 import Rpc from "@foxglove-studio/app/util/Rpc";
 import WebWorkerManager from "@foxglove-studio/app/util/WebWorkerManager";
 import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
+import { downloadFiles } from "@foxglove-studio/app/util/download";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import supportsOffscreenCanvas from "@foxglove-studio/app/util/supportsOffscreenCanvas";
 

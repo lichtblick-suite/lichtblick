@@ -11,14 +11,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-// Log pauses longer than two seconds. Shorter durations will make more events. We can always filter
-// the events, though.
+import { debounce } from "lodash";
+
 import { ExtensionPoint } from "@foxglove-studio/app/dataProviders/types";
-import { debounceReduce } from "@foxglove-studio/app/util";
 import { fromMillis } from "@foxglove-studio/app/util/time";
 
 const STALL_THRESHOLD_MS = 2000;
 
+// Log pauses longer than two seconds. Shorter durations will make more events. We can always filter
+// the events, though.
 const getMaybeLogStall = (
   extensionPoint: ExtensionPoint,
   stallThresholdMs: number,
@@ -48,6 +49,36 @@ const getMaybeLogStall = (
     }
     lastDataReceivedTime = now;
     bytesReceived += buffer.length;
+  };
+};
+
+// Used when we want to limit some log rate, but the log contents depend on the combined contents
+// of each event (like a sum).
+export const debounceReduce = <A, T>({
+  action,
+  // Debounced function
+  wait,
+  reducer,
+  // Combining/mapping function for action's argument
+  initialValue,
+}: {
+  action: (arg0: A) => void;
+  wait: number;
+  reducer: (arg0: A, arg1: T) => A;
+  initialValue: A;
+}): ((arg0: T) => void) => {
+  let current = initialValue;
+  const debounced = debounce(
+    () => {
+      action(current);
+      current = initialValue;
+    },
+    wait,
+    { leading: true, trailing: true },
+  );
+  return (next: T) => {
+    current = reducer(current, next);
+    debounced();
   };
 };
 

@@ -20,7 +20,7 @@ import useLatestNonNull from "@foxglove-studio/app/hooks/useLatestNonNull";
 import { usePrompt } from "@foxglove-studio/app/hooks/usePrompt";
 import { State } from "@foxglove-studio/app/reducers";
 import { PanelsState } from "@foxglove-studio/app/reducers/panels";
-import { downloadTextFile } from "@foxglove-studio/app/util";
+import { downloadTextFile } from "@foxglove-studio/app/util/download";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 // A Wrapper around window.showOpenFilePicker that handles the error thrown on "cancel"

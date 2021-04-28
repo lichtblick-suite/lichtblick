@@ -5,13 +5,21 @@
 // This file incorporates work covered by the following copyright and
 // permission notice:
 //
-//   Copyright 2019-2021 Cruise LLC
+//   Copyright 2018-2021 Cruise LLC
 //
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-// Object.values returns mixed[], which is difficult to get Flow to accept.
-export function objectValues<T>(o: { [s: string]: T } | ArrayLike<T>): T[] {
-  return Object.values(o);
-}
+import positiveModulo from "./positiveModulo";
+
+describe("positiveModulo", () => {
+  it("returns a positive value between 0 (inclusive) and modulus (exclusive)", () => {
+    expect(positiveModulo(0, 10)).toEqual(0);
+    expect(positiveModulo(10, 10)).toEqual(0);
+    expect(positiveModulo(11, 10)).toEqual(1);
+    expect(positiveModulo(21, 10)).toEqual(1);
+    expect(positiveModulo(-1, 10)).toEqual(9);
+    expect(positiveModulo(-11, 10)).toEqual(9);
+  });
+});

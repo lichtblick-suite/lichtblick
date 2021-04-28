@@ -15,7 +15,7 @@ import delay from "@foxglove-studio/app/util/delay";
 import { toSec } from "@foxglove-studio/app/util/time";
 
 import { mockExtensionPoint } from "./mockExtensionPoint";
-import { getReportMetadataForChunk } from "./util";
+import { debounceReduce, getReportMetadataForChunk } from "./util";
 
 describe("getReportMetadataForChunk", () => {
   it("logs a stall", async () => {
@@ -47,5 +47,40 @@ describe("getReportMetadataForChunk", () => {
     expect(toSec(stall.requestTimeUntilStall)).toBeCloseTo(0.3, 1);
     expect(toSec(stall.stallDuration)).toBeCloseTo(0.2, 1);
     expect(toSec(stall.transferTimeUntilStall)).toBeCloseTo(0.1, 1);
+  });
+});
+
+describe("debounceReduce", () => {
+  it("combines calls that happen closely together", async () => {
+    const totals: Array<number> = [];
+    const time = 0;
+    const waitUntil = (t: number) => {
+      if (time > t) {
+        throw new Error(`It's past ${t} already`);
+      }
+      return delay(t - time);
+    };
+    const fn = debounceReduce({
+      action: (n: number) => {
+        totals.push(n);
+      },
+      wait: 100,
+      reducer: (n: number, buf: ArrayBuffer) => n + buf.byteLength,
+      initialValue: 0,
+    });
+
+    fn(new ArrayBuffer(1));
+    await waitUntil(1);
+    expect(totals).toEqual([1]);
+
+    fn(new ArrayBuffer(2));
+    await waitUntil(90);
+    expect(totals).toEqual([1]); // not yet
+    fn(new ArrayBuffer(3));
+    await waitUntil(110);
+    expect(totals).toEqual([1, 5]); // combines writes
+
+    await waitUntil(300);
+    expect(totals).toEqual([1, 5]); // no extra writes
   });
 });

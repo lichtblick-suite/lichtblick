@@ -31,7 +31,7 @@ import {
   SubscribePayload,
   AdvertisePayload,
 } from "@foxglove-studio/app/players/types";
-import { downloadTextFile } from "@foxglove-studio/app/util";
+import { downloadTextFile } from "@foxglove-studio/app/util/download";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
 

@@ -17,8 +17,8 @@ import { Component } from "react";
 import Button from "@foxglove-studio/app/components/Button";
 import Flex from "@foxglove-studio/app/components/Flex";
 import Modal from "@foxglove-studio/app/components/Modal";
-import { downloadTextFile } from "@foxglove-studio/app/util";
 import clipboard from "@foxglove-studio/app/util/clipboard";
+import { downloadTextFile } from "@foxglove-studio/app/util/download";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 import styles from "./ShareJsonModal.module.scss";

@@ -20,7 +20,7 @@ import PanelToolbarInput from "@foxglove-studio/app/components/PanelToolbarInput
 import { TimeBasedChartTooltipData } from "@foxglove-studio/app/components/TimeBasedChart";
 import { PlotConfig, PlotXAxisVal } from "@foxglove-studio/app/panels/Plot";
 import { DataSet, PlotChartPoint } from "@foxglove-studio/app/panels/Plot/PlotChart";
-import { downloadFiles } from "@foxglove-studio/app/util";
+import { downloadFiles } from "@foxglove-studio/app/util/download";
 import { formatTimeRaw } from "@foxglove-studio/app/util/time";
 
 import styles from "./PlotMenu.module.scss";

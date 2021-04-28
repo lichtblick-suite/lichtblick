@@ -20,7 +20,6 @@ import {
   DEFAULT_MAX_COLOR,
 } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
 import { PointCloud2, PointField } from "@foxglove-studio/app/types/Messages";
-import { lerp } from "@foxglove-studio/app/util";
 
 import {
   getVertexValues,
@@ -36,6 +35,16 @@ type DecodedFields = { [fieldName: string]: number[] };
 function getRange(min: number, max: number): number {
   const delta = max - min;
   return delta !== 0 ? delta : Infinity;
+}
+
+// returns the linear interpolation between a and b based on unit-range variable t
+function lerp(t: number, a: number, b: number): number {
+  // Clamp t to (0, 1)
+  t = Math.min(Math.max(t, 0.0), 1.0);
+  if (a === b) {
+    return a;
+  }
+  return a + t * (b - a);
 }
 
 export type ClickedInfo = {

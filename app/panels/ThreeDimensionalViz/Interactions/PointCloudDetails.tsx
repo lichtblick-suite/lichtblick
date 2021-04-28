@@ -24,8 +24,8 @@ import {
   getClickedInfo,
   getAllPoints,
 } from "@foxglove-studio/app/panels/ThreeDimensionalViz/commands/PointClouds/selection";
-import { downloadFiles } from "@foxglove-studio/app/util";
 import clipboard from "@foxglove-studio/app/util/clipboard";
+import { downloadFiles } from "@foxglove-studio/app/util/download";
 
 import { SValue, SLabel } from "./styling";
 

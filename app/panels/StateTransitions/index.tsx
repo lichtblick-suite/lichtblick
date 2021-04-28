@@ -31,13 +31,13 @@ import TimeBasedChart, {
   TimeBasedChartTooltipData,
 } from "@foxglove-studio/app/components/TimeBasedChart";
 import { PanelConfig } from "@foxglove-studio/app/types/panels";
-import { positiveModulo } from "@foxglove-studio/app/util";
 import { darkColor, lineColors } from "@foxglove-studio/app/util/plotColors";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 import { TimestampMethod, subtractTimes, toSec } from "@foxglove-studio/app/util/time";
 import { grey } from "@foxglove-studio/app/util/toolsColorScheme";
 
 import helpContent from "./index.help.md";
+import positiveModulo from "./positiveModulo";
 
 export const transitionableRosTypes = [
   "bool",

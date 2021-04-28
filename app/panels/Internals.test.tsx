@@ -16,15 +16,17 @@ import { mount } from "enzyme";
 import { useCallback } from "react";
 
 import { useMessagesByTopic } from "@foxglove-studio/app/PanelAPI";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@foxglove-studio/app/components/MessagePipeline";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
-import { downloadTextFile, objectValues } from "@foxglove-studio/app/util";
+import { downloadTextFile } from "@foxglove-studio/app/util/download";
 
-import { MessagePipelineContext, useMessagePipeline } from "../components/MessagePipeline";
 import Internals from "./Internals";
 
 const mockDownloadTextFile: any = downloadTextFile;
-(objectValues as any).mockImplementation(Object.values); // broken by module mock
-jest.mock("@foxglove-studio/app/util");
+jest.mock("@foxglove-studio/app/util/download");
 
 function Subscriber({ topic }: { topic: string }) {
   useMessagesByTopic({ topics: [topic], historySize: 1 });
