@@ -8,7 +8,6 @@ import {
   PanelInfo,
 } from "@foxglove-studio/app/context/PanelCatalogContext";
 import GlobalVariableSlider from "@foxglove-studio/app/panels/GlobalVariableSlider";
-import GlobalVariables from "@foxglove-studio/app/panels/GlobalVariables";
 import ImageViewPanel from "@foxglove-studio/app/panels/ImageView";
 import InternalLogs from "@foxglove-studio/app/panels/InternalLogs";
 import Internals from "@foxglove-studio/app/panels/Internals";
@@ -53,7 +52,6 @@ const ros: PanelInfo[] = [
 const utilities: PanelInfo[] = [
   { title: "Data Source Info", component: SourceInfo },
   { title: "Global Variable Slider", component: GlobalVariableSlider },
-  { title: "Global Variables", component: GlobalVariables },
   { title: "Node Playground", component: NodePlayground },
   { title: "Tab", component: Tab },
 ];

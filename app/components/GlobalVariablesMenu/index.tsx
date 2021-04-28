@@ -18,11 +18,10 @@ import {
   keyframes,
   useTheme,
 } from "@fluentui/react";
-import { useState, useCallback, useEffect, useRef, useLayoutEffect, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useState, useEffect, useRef, useLayoutEffect, useMemo } from "react";
 import styled from "styled-components";
 
-import { AddPanelPayload, addPanel } from "@foxglove-studio/app/actions/panels";
+import helpContent from "@foxglove-studio/app/components/GlobalVariablesMenu/index.help.md";
 import GlobalVariablesTable, {
   ANIMATION_RESET_DELAY_MS,
   isActiveElementEditable,
@@ -30,10 +29,7 @@ import GlobalVariablesTable, {
 import Menu from "@foxglove-studio/app/components/Menu";
 import HelpButton from "@foxglove-studio/app/components/PanelToolbar/HelpButton";
 import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
-import GlobalVariables from "@foxglove-studio/app/panels/GlobalVariables";
-import helpContent from "@foxglove-studio/app/panels/GlobalVariables/index.help.md";
 import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
-import logEvent, { getEventTags, getEventNames } from "@foxglove-studio/app/util/logEvent";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 export const SLinkUnderline = styled.span`
@@ -75,27 +71,12 @@ type Props = {
 };
 
 function MenuContent(menuProps: IContextualMenuProps) {
-  const dispatch = useDispatch();
-  const layout = useSelector((state: any) => state.persistedState.panels.layout);
-  const addPanelToLayout = useCallback(() => {
-    dispatch(addPanel({ type: GlobalVariables.panelType, layout } as AddPanelPayload));
-
-    const name = getEventNames().PANEL_ADD;
-    const type = getEventTags().PANEL_TYPE;
-    if (name != undefined && type != undefined) {
-      logEvent({
-        name,
-        tags: { [type]: GlobalVariables.panelType },
-      });
-    }
-  }, [dispatch, layout]);
   return (
     <Callout {...menuProps}>
       <Menu>
         <STitleBar>
           <STitle>Global variables</STitle>
           <SActions>
-            <SLinkUnderline onClick={addPanelToLayout}>Add panel to layout</SLinkUnderline>
             <HelpButton iconStyle={{ width: "18px", height: "18px" }}>{helpContent}</HelpButton>
           </SActions>
         </STitleBar>
