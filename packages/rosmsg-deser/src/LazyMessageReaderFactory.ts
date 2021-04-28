@@ -207,6 +207,17 @@ function getterFunction(field: RosMsgField): string {
   }
 }
 
+function format(source: string): string {
+  if (process.env.NODE_ENV !== "production") {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const prettier = require("prettier/standalone") as typeof import("prettier/standalone");
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const parserBabel = require("prettier/parser-babel") as typeof import("prettier/parser-babel");
+    return prettier.format(source, { parser: "babel", plugins: [parserBabel] });
+  }
+  return source;
+}
+
 // Create a SerializedMessageReader
 //
 // The output is a set of classes - one for each custom message type. Only the root message
@@ -312,7 +323,7 @@ export default function buildReader(types: readonly RosMsgDefinition[]): Seriali
 
   // close over our builtin deserializers and builtin size functions
   // eslint-disable-next-line no-new-func
-  const wrapFn = new Function("readers", "sizes", `${src}\nreturn __RootMsg;`);
+  const wrapFn = new Function("readers", "sizes", format(`${src}\nreturn __RootMsg;`));
   const rootMsg = wrapFn.call(undefined, deserializers, builtinSizes) as SerializedMessageReader;
   rootMsg.source = () => wrapFn.toString();
   return rootMsg;
