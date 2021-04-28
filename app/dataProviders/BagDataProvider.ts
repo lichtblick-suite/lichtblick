@@ -32,6 +32,7 @@ import { TypedMessage } from "@foxglove-studio/app/players/types";
 import CachedFilelike, { FileReader } from "@foxglove-studio/app/util/CachedFilelike";
 import { bagConnectionsToTopics } from "@foxglove-studio/app/util/bagConnectionsHelper";
 import { getBagChunksOverlapCount } from "@foxglove-studio/app/util/bags";
+import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import { UserError } from "@foxglove-studio/app/util/errors";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import { fromMillis, subtractTimes } from "@foxglove-studio/app/util/time";
@@ -183,10 +184,18 @@ export default class BagDataProvider implements DataProvider {
 
     const { startTime, endTime, chunkInfos } = this._bag;
     const connections: Connection[] = [];
-    const emptyConnections: any[] = [];
+    const emptyConnections: {
+      // eslint-disable-next-line no-restricted-syntax
+      [K in keyof Connection]?: Connection[K] | null;
+    }[] = [];
     for (const [connId, connection] of this._bag.connections) {
       const { messageDefinition, md5sum, topic, type, callerid } = connection;
-      if (messageDefinition && md5sum && topic && type) {
+      if (
+        isNonEmptyOrUndefined(messageDefinition) &&
+        isNonEmptyOrUndefined(md5sum) &&
+        isNonEmptyOrUndefined(topic) &&
+        isNonEmptyOrUndefined(type)
+      ) {
         connections.push({
           messageDefinition,
           md5sum,
@@ -264,7 +273,7 @@ export default class BagDataProvider implements DataProvider {
   // Logs some stats if it has been more than a second since the last call.
   _debouncedLogStats = debounce(this._logStats, 1000, { leading: false, trailing: true });
 
-  _queueStats(stats: TimedDataThroughput) {
+  _queueStats(stats: TimedDataThroughput): void {
     if (
       this._lastPerformanceStatsToLog != undefined &&
       statsAreAdjacent(this._lastPerformanceStatsToLog, stats)
@@ -287,7 +296,7 @@ export default class BagDataProvider implements DataProvider {
     end: Time,
     subscriptions: GetMessagesTopics,
   ): Promise<GetMessagesResult> {
-    const topics = subscriptions.rosBinaryMessages || [];
+    const topics = subscriptions.rosBinaryMessages ?? [];
     const connectionStart = fromMillis(new Date().getTime());
     let totalSizeOfMessages = 0;
     let numberOfMessages = 0;

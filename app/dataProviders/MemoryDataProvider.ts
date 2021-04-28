@@ -80,7 +80,7 @@ export default class MemoryDataProvider implements DataProvider {
     messages,
     topics,
     datatypes,
-    initiallyLoaded,
+    initiallyLoaded = false,
     messageDefinitionsByTopic,
     parsedMessageDefinitionsByTopic,
     providesParsedMessages,
@@ -88,9 +88,9 @@ export default class MemoryDataProvider implements DataProvider {
     this.messages = messages;
     this.topics = topics;
     this.datatypes = datatypes;
-    this.messageDefinitionsByTopic = messageDefinitionsByTopic || {};
+    this.messageDefinitionsByTopic = messageDefinitionsByTopic ?? {};
     this.parsedMessageDefinitionsByTopic = parsedMessageDefinitionsByTopic;
-    this.initiallyLoaded = !!initiallyLoaded;
+    this.initiallyLoaded = initiallyLoaded;
     this.providesParsedMessages = providesParsedMessages ?? messages.parsedMessages != undefined;
   }
 
@@ -113,8 +113,8 @@ export default class MemoryDataProvider implements DataProvider {
     if (this.datatypes || this.parsedMessageDefinitionsByTopic) {
       messageDefinitions = {
         type: "parsed",
-        datatypes: this.datatypes || {},
-        parsedMessageDefinitionsByTopic: this.parsedMessageDefinitionsByTopic || {},
+        datatypes: this.datatypes ?? {},
+        parsedMessageDefinitionsByTopic: this.parsedMessageDefinitionsByTopic ?? {},
         messageDefinitionsByTopic: this.messageDefinitionsByTopic,
       };
     } else {

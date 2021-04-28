@@ -28,6 +28,7 @@ import PanelToolbarLabel from "@foxglove-studio/app/components/PanelToolbarLabel
 import usePublisher from "@foxglove-studio/app/hooks/usePublisher";
 import { PlayerCapabilities, Topic } from "@foxglove-studio/app/players/types";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
+import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 
 import buildSampleMessage from "./buildSampleMessage";
 
@@ -93,7 +94,7 @@ function parseInput(value: string): { error?: string; parsedObject?: unknown } {
       parsedObject = parsedAny;
     }
   } catch (e) {
-    error = value ? e.message : "";
+    error = value.length !== 0 ? e.message : "";
   }
   return { error, parsedObject };
 }
@@ -155,7 +156,7 @@ function Publish(props: Props) {
   );
 
   const onPublishClicked = useCallback(() => {
-    if (topicName && parsedObject) {
+    if (topicName.length !== 0 && parsedObject) {
       publish(parsedObject);
     } else {
       throw new Error(`called _publish() when input was invalid`);
@@ -253,13 +254,13 @@ function Publish(props: Props) {
         <STextAreaContainer>
           <STextArea
             placeholder="Enter message content as JSON"
-            value={value || ""}
+            value={value}
             onChange={onChange}
           />
         </STextAreaContainer>
       )}
       <Flex row style={buttonRowStyle}>
-        {error && <SErrorText>{error}</SErrorText>}
+        {isNonEmptyOrUndefined(error) && <SErrorText>{error}</SErrorText>}
         <Button
           style={canPublish ? { backgroundColor: buttonColor } : {}}
           tooltip={canPublish ? buttonTooltip : "Connect to ROS to publish data"}

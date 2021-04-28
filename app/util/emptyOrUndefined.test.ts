@@ -13,6 +13,13 @@ describe("isEmptyOrUndefined", () => {
     expect(isNonEmptyOrUndefined("")).toBe(false);
     expect(isNonEmptyOrUndefined("a")).toBe(true);
   });
+  it("returns true when given a non-empty array", () => {
+    expect(isNonEmptyOrUndefined(undefined)).toBe(false);
+    expect(isNonEmptyOrUndefined([])).toBe(false);
+    expect(isNonEmptyOrUndefined([0])).toBe(true);
+    expect(isNonEmptyOrUndefined([undefined])).toBe(true);
+    expect(isNonEmptyOrUndefined(["x"])).toBe(true);
+  });
 });
 
 describe("nonEmptyOrUndefined", () => {

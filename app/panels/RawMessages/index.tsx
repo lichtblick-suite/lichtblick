@@ -178,7 +178,7 @@ function RawMessages(props: Props) {
 
   const onToggleExpandAll = useCallback(() => {
     setExpandedFields(new Set());
-    setExpandAll((currVal) => !currVal);
+    setExpandAll((currVal) => !(currVal ?? false));
   }, []);
 
   const onLabelClick = useCallback(
@@ -250,13 +250,13 @@ function RawMessages(props: Props) {
             }] `;
             itemLabel = itemValue.constructor.name;
           }
-          if (constantName) {
+          if (constantName != undefined) {
             itemLabel = `${itemLabel} (${constantName})`;
           }
           return (
             <span>
               <HighlightedValue itemLabel={itemLabel} />
-              {smallNumberArrayStr && (
+              {smallNumberArrayStr.length !== 0 && (
                 <>
                   {smallNumberArrayStr}
                   <Icon
@@ -298,7 +298,7 @@ function RawMessages(props: Props) {
       };
     }
 
-    if (!topicPath) {
+    if (topicPath.length === 0) {
       return <EmptyState>No topic selected</EmptyState>;
     }
     if (diffEnabled && diffMethod === CUSTOM_METHOD && (!baseItem || !diffItem)) {
@@ -426,7 +426,7 @@ function RawMessages(props: Props) {
                   }
                   const nestedObj = get(diff, keyPath.slice().reverse(), {});
                   const nestedObjKey = Object.keys(nestedObj)[0];
-                  if (nestedObjKey && diffLabelsByLabelText[nestedObjKey]) {
+                  if (nestedObjKey != undefined && diffLabelsByLabelText[nestedObjKey]) {
                     // @ts-expect-error backgroundColor is not a property?
                     backgroundColor = diffLabelsByLabelText[nestedObjKey].backgroundColor;
                     textDecoration =
@@ -455,7 +455,7 @@ function RawMessages(props: Props) {
                   let textDecoration;
                   const nestedObj = get(diff, keyPath.slice().reverse(), {});
                   const nestedObjKey = Object.keys(nestedObj)[0];
-                  if (nestedObjKey && diffLabelsByLabelText[nestedObjKey]) {
+                  if (nestedObjKey != undefined && diffLabelsByLabelText[nestedObjKey]) {
                     // @ts-expect-error backgroundColor is not a property?
                     backgroundColor = diffLabelsByLabelText[nestedObjKey].backgroundColor;
                     textDecoration =
@@ -465,7 +465,7 @@ function RawMessages(props: Props) {
                     style: {
                       ...baseStyle,
                       backgroundColor,
-                      textDecoration: textDecoration || "inherit",
+                      textDecoration: textDecoration ?? "inherit",
                     },
                   };
                 },
@@ -503,13 +503,13 @@ function RawMessages(props: Props) {
           <PlusMinusIcon />
         </Icon>
         <Icon
-          tooltip={expandAll ? "Collapse all" : "Expand all"}
+          tooltip={expandAll ?? false ? "Collapse all" : "Expand all"}
           medium
           fade
           onClick={onToggleExpandAll}
           style={{ position: "relative", top: 1 }}
         >
-          {expandAll ? <LessIcon /> : <MoreIcon />}
+          {expandAll ?? false ? <LessIcon /> : <MoreIcon />}
         </Icon>
         <div className={styles.topicInputs}>
           <MessagePathInput

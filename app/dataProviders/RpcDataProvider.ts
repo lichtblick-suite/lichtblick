@@ -44,23 +44,21 @@ export default class RpcDataProvider implements DataProvider {
   }
 
   initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
-    if (extensionPoint) {
-      const { progressCallback, reportMetadataCallback } = extensionPoint;
+    const { progressCallback, reportMetadataCallback } = extensionPoint;
 
-      this._rpc.receive("extensionPointCallback", ({ type, data }: any) => {
-        switch (type) {
-          case "progressCallback":
-            progressCallback(data);
-            break;
-          case "reportMetadataCallback":
-            reportMetadataCallback(data);
-            break;
-          default:
-            throw new Error(`Unsupported extension point type in RpcDataProvider: ${type}`);
-        }
-        return undefined;
-      });
-    }
+    this._rpc.receive("extensionPointCallback", ({ type, data }: any) => {
+      switch (type) {
+        case "progressCallback":
+          progressCallback(data);
+          break;
+        case "reportMetadataCallback":
+          reportMetadataCallback(data);
+          break;
+        default:
+          throw new Error(`Unsupported extension point type in RpcDataProvider: ${type}`);
+      }
+      return undefined;
+    });
     return this._rpc.send("initialize", { childDescriptor: this._childDescriptor });
   }
 

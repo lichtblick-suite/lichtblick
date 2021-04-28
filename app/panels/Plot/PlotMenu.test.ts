@@ -201,7 +201,7 @@ const tooltipsDiffTimestamp = flatten(
       datasetKey: `dataset-${num}`,
       item: {
         ...tooltip.item,
-        headerStamp: tooltip.item.headerStamp && {
+        headerStamp: {
           ...tooltip.item.headerStamp,
           sec: tooltip.item.headerStamp.sec + num,
         },

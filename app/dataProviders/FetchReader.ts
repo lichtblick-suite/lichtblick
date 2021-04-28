@@ -43,12 +43,6 @@ export default class FetchReader extends Readable {
       });
       return undefined;
     }
-    if (!data) {
-      setImmediate(() => {
-        this.emit("error", new Error(`Request failed, no data: ${this._url}`));
-      });
-      return undefined;
-    }
     if (!`${data.status}`.startsWith("2")) {
       setImmediate(() => {
         const requestId = data.headers.get("x-request-id");

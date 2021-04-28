@@ -36,6 +36,7 @@ import {
   mathFunctions,
   MathFunction,
 } from "@foxglove-studio/app/panels/Plot/transformPlotRange";
+import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { format } from "@foxglove-studio/app/util/formatTime";
 import { lightColor, lineColors } from "@foxglove-studio/app/util/plotColors";
@@ -268,7 +269,7 @@ function getDatasetAndTooltipsFromMessagePlotPath(
   const borderColor = lineColors[index % lineColors.length] ?? "#DDDDDD";
   const dataset: DataSet = {
     borderColor,
-    label: path.value || uuidv4(),
+    label: nonEmptyOrUndefined(path.value) ?? uuidv4(),
     key: datasetKey,
     showLine,
     fill: false,

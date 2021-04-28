@@ -125,7 +125,7 @@ const mergeAllMessageTypes = (
 
 const throwOnDuplicateTopics = (topics: string[]) => {
   [...topics].sort().forEach((topicName, i, sortedTopics) => {
-    if (sortedTopics[i + 1] && topicName === sortedTopics[i + 1]) {
+    if (topicName === sortedTopics[i + 1]) {
       throw new Error(`Duplicate topic found: ${topicName}`);
     }
   });
@@ -133,7 +133,7 @@ const throwOnDuplicateTopics = (topics: string[]) => {
 
 const throwOnUnequalDatatypes = (datatypes: [string, RosMsgField[]][]) => {
   datatypes
-    .sort((a, b) => (a[0] && b[0] ? +(a[0][0]! > b[0][0]!) || -1 : 0))
+    .sort((a, b) => a[0].localeCompare(b[0]))
     .forEach(([datatype, definition], i, sortedDataTypes) => {
       const next = sortedDataTypes[i + 1];
       if (next && datatype === next[0] && !isEqual(definition, next[1])) {

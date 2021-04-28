@@ -23,6 +23,7 @@ import {
   GetMessagesTopics,
   InitializationResult,
 } from "@foxglove-studio/app/dataProviders/types";
+import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import { formatTimeRaw } from "@foxglove-studio/app/util/time";
 
@@ -105,7 +106,7 @@ export default class ApiCheckerDataProvider implements DataProvider {
       if (initializationResult.messageDefinitions.type === "raw") {
         if (
           !initializationResult.providesParsedMessages &&
-          !initializationResult.messageDefinitions.messageDefinitionsByTopic[topic.name]
+          initializationResult.messageDefinitions.messageDefinitionsByTopic[topic.name] == undefined
         ) {
           this._warn(`Topic "${topic.name}"" not present in messageDefinitionsByTopic`);
         }
@@ -162,7 +163,10 @@ export default class ApiCheckerDataProvider implements DataProvider {
         )})`,
       );
     }
-    if (!subscriptions.parsedMessages?.length && !subscriptions.rosBinaryMessages?.length) {
+    if (
+      !isNonEmptyOrUndefined(subscriptions.parsedMessages) &&
+      !isNonEmptyOrUndefined(subscriptions.rosBinaryMessages)
+    ) {
       this._warn("getMessages was called without any topics");
     }
     for (const messageType of MESSAGE_FORMATS) {

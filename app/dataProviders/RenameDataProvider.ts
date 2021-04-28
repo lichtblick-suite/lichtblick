@@ -30,6 +30,7 @@ import {
   MessageDefinitions,
 } from "@foxglove-studio/app/dataProviders/types";
 import { Progress, Topic, TypedMessage } from "@foxglove-studio/app/players/types";
+import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 
 export default class RenameDataProvider implements DataProvider {
@@ -45,7 +46,7 @@ export default class RenameDataProvider implements DataProvider {
     if (children.length !== 1 || !child) {
       throw new Error(`Incorrect number of children to RenameDataProvider: ${children.length}`);
     }
-    if (args.prefix && !args.prefix.startsWith("/")) {
+    if (isNonEmptyOrUndefined(args.prefix) && !args.prefix.startsWith("/")) {
       throw new Error(`Prefix must have a leading forward slash: ${JSON.stringify(args.prefix)}`);
     }
     this._provider = getDataProvider(child);
@@ -117,7 +118,7 @@ export default class RenameDataProvider implements DataProvider {
     return this._provider.close();
   }
 
-  _mapMessage = <T>(message: TypedMessage<T>) => ({
+  _mapMessage = <T>(message: TypedMessage<T>): TypedMessage<T> => ({
     // Only map fields that we know are correctly mapped. Don't just splat in `...message` here
     // because we might miss an important mapping!
     topic: `${this._prefix}${message.topic}`,

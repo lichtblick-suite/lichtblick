@@ -127,7 +127,7 @@ function Tab({ config, saveConfig }: Props) {
           position: "relative",
         }}
       >
-        {activeLayout ? (
+        {activeLayout != undefined ? (
           <TabDndContext.Provider value={{ preventTabDrop }}>
             <UnconnectedPanelLayout
               layout={activeLayout}

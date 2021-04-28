@@ -44,11 +44,11 @@ export default function buildSampleMessage(
   }
   const obj: any = {};
   for (const field of fields) {
-    if (field.isConstant) {
+    if (field.isConstant ?? false) {
       continue;
     }
     const sample = buildSampleMessage(datatypes, field.type);
-    if (field.isArray) {
+    if (field.isArray ?? false) {
       if (field.arrayLength != undefined) {
         obj[field.name] = new Array(field.arrayLength).fill(sample);
       } else {

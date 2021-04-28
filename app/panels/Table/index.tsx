@@ -35,6 +35,7 @@ import {
 } from "@foxglove-studio/app/panels/Table/types";
 import { RosObject } from "@foxglove-studio/app/players/types";
 import { SaveConfig } from "@foxglove-studio/app/types/panels";
+import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import { ROBOTO_MONO } from "@foxglove-studio/app/util/sharedStyleConstants";
 import { toolsColorScheme } from "@foxglove-studio/app/util/toolsColorScheme";
 
@@ -92,7 +93,7 @@ function sanitizeAccessorPath(accessorPath: string) {
 function getColumnsFromObject(obj: RosObject, accessorPath: string): ColumnOptions[] {
   const columns = [
     ...Object.keys(obj).map((accessor) => {
-      const id = accessorPath ? `${accessorPath}.${accessor}` : accessor;
+      const id = accessorPath.length !== 0 ? `${accessorPath}.${accessor}` : accessor;
       return {
         Header: accessor,
         accessor,
@@ -117,7 +118,7 @@ function getColumnsFromObject(obj: RosObject, accessorPath: string): ColumnOptio
       {row.isExpanded ? <MinusIcon /> : <PlusIcon />}
     </Icon>
   );
-  if (!accessorPath) {
+  if (accessorPath.length === 0) {
     columns.unshift({
       id: "expander",
       Cell,
@@ -128,7 +129,7 @@ function getColumnsFromObject(obj: RosObject, accessorPath: string): ColumnOptio
 }
 
 const Table = ({ value, accessorPath }: { value: unknown; accessorPath: string }) => {
-  const isNested = !!accessorPath;
+  const isNested = accessorPath.length > 0;
   const columns = React.useMemo(() => {
     if (
       // eslint-disable-next-line no-restricted-syntax
@@ -207,8 +208,8 @@ const Table = ({ value, accessorPath }: { value: unknown; accessorPath: string }
                 {headerGroup.headers.map((column) => {
                   return (
                     <STableHeader
-                      isSortedAsc={(column.isSorted && !column.isSortedDesc) ?? false}
-                      isSortedDesc={(column.isSorted && column.isSortedDesc) ?? false}
+                      isSortedAsc={(column.isSorted ?? false) && !(column.isSortedDesc ?? false)}
+                      isSortedDesc={(column.isSorted ?? false) && (column.isSortedDesc ?? false)}
                       id={column.id}
                       key={column.id}
                       data-test={`column-header-${sanitizeAccessorPath(column.id)}`}
@@ -328,7 +329,7 @@ function TablePanel({ config, saveConfig }: Props) {
   const topicRosPath: RosPath | undefined = React.useMemo(() => parseRosPath(topicPath), [
     topicPath,
   ]);
-  const topicName = topicRosPath?.topicName || "";
+  const topicName = topicRosPath?.topicName ?? "";
   const msgs = useMessagesByTopic({ topics: [topicName], historySize: 1 })[topicName];
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems([topicPath]);
   const msg = msgs?.[0];
@@ -347,9 +348,11 @@ function TablePanel({ config, saveConfig }: Props) {
           />
         </div>
       </PanelToolbar>
-      {!topicPath && <EmptyState>No topic selected</EmptyState>}
-      {topicPath && !cachedMessages?.length && <EmptyState>Waiting for next message</EmptyState>}
-      {topicPath && firstCachedMessage && (
+      {topicPath.length === 0 && <EmptyState>No topic selected</EmptyState>}
+      {topicPath.length !== 0 && !isNonEmptyOrUndefined(cachedMessages) && (
+        <EmptyState>Waiting for next message</EmptyState>
+      )}
+      {topicPath.length !== 0 && firstCachedMessage && (
         <STableContainer>
           <Table value={firstCachedMessage.value} accessorPath={""} />
         </STableContainer>

@@ -168,7 +168,7 @@ export type StateTransitionConfig = { paths: StateTransitionPath[] };
 export function openSiblingStateTransitionsPanel(
   openSiblingPanel: (arg0: string, cb: (arg0: PanelConfig) => PanelConfig) => void,
   topicName: string,
-) {
+): void {
   openSiblingPanel("StateTransitions", (config: PanelConfig) => {
     return {
       ...config,
@@ -312,7 +312,8 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
 
         // if the value is different from previous value, make a new dataset
         if (value !== prevQueryValue) {
-          const label = constantName ? `${constantName} (${String(value)})` : String(value);
+          const label =
+            constantName != undefined ? `${constantName} (${String(value)})` : String(value);
 
           const elementWithLabel = {
             ...element,

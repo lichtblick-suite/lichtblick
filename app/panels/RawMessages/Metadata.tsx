@@ -59,7 +59,7 @@ export default function Metadata({ data, diffData, diff, datatype, message, diff
         }
         return undefined;
       });
-      clipboard.copy(JSON.stringify(dataWithoutLargeArrays, undefined, 2) || "");
+      clipboard.copy(JSON.stringify(dataWithoutLargeArrays, undefined, 2) ?? "");
     },
     [],
   );
@@ -75,10 +75,8 @@ export default function Metadata({ data, diffData, diff, datatype, message, diff
           {datatype}
         </a>
       )}
-      {message.receiveTime &&
-        `${diffMessage ? " base" : ""} @ ${formatTimeRaw(message.receiveTime)} ROS `}
+      {diffMessage ? " base" : ""} @ {formatTimeRaw(message.receiveTime)} ROS{" "}
       <CopyMessageButton onClick={onClickCopy(data)} text="Copy msg" />
-
       {diffMessage?.receiveTime && (
         <>
           <div>

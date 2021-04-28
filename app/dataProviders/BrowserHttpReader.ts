@@ -37,7 +37,7 @@ export default class BrowserHttpReader implements FileReader {
     } catch (error) {
       throw new Error(`Fetching remote file failed. <${this._url}> ${error}`);
     }
-    if (!response || !response.ok) {
+    if (!response.ok) {
       throw new Error(
         `Fetching remote file failed. <${this._url}> Status code: ${response.status}.`,
       );
@@ -46,7 +46,7 @@ export default class BrowserHttpReader implements FileReader {
       throw new Error(`Remote file does not support HTTP Range Requests. <${this._url}>`);
     }
     const size = response.headers.get("content-length");
-    if (!size) {
+    if (size == undefined) {
       throw new Error(`Remote file is missing file size. <${this._url}>`);
     }
     return {

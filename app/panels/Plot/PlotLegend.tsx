@@ -26,6 +26,7 @@ import {
   BasePlotPath,
   isReferenceLinePlotPathType,
 } from "@foxglove-studio/app/panels/Plot/internalTypes";
+import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import { lineColors } from "@foxglove-studio/app/util/plotColors";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 import { TimestampMethod } from "@foxglove-studio/app/util/time";
@@ -151,12 +152,12 @@ export default function PlotLegend(props: PlotLegendProps) {
         <div
           className={cx({
             [styles.itemInput!]: true,
-            [styles.itemInputDisabled!]: !xAxisPath?.enabled,
+            [styles.itemInputDisabled!]: xAxisPath?.enabled !== true,
           })}
         >
           {(xAxisVal === "custom" || xAxisVal === "currentCustom") && (
             <MessagePathInput
-              path={xAxisPath?.value || "/"}
+              path={nonEmptyOrUndefined(xAxisPath?.value) ?? "/"}
               onChange={(newXAxisPath) =>
                 saveConfig({
                   xAxisPath: { value: newXAxisPath, enabled: xAxisPath ? xAxisPath.enabled : true },

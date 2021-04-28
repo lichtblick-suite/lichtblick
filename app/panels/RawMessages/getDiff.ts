@@ -13,6 +13,7 @@
 import { every, uniq, keyBy, isEmpty } from "lodash";
 
 import { isTypicalFilterName } from "@foxglove-studio/app/components/MessagePathSyntax/isTypicalFilterName";
+import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import { jsonTreeTheme } from "@foxglove-studio/app/util/globalConstants";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
@@ -86,7 +87,7 @@ export default function getDiff(
       }
     }
 
-    if (idToCompareWith) {
+    if (idToCompareWith != undefined) {
       const unmatchedAfterById = keyBy(after, idToCompareWith);
       const diff = [];
       for (const beforeItem of before) {
@@ -141,7 +142,7 @@ export default function getDiff(
   }
   if (before === undefined) {
     const afterIsNotObj = Array.isArray(after) || typeof after !== "object";
-    if (!idLabel || afterIsNotObj) {
+    if (!isNonEmptyOrUndefined(idLabel) || afterIsNotObj) {
       return { [diffLabels.ADDED.labelText]: after };
     }
     const idLabelObj = { [diffLabels.ID.labelText]: { [idLabel]: { ...after }[idLabel] } };
@@ -149,15 +150,15 @@ export default function getDiff(
   }
   if (after === undefined) {
     const beforeIsNotObj = Array.isArray(before) || typeof before !== "object";
-    if (!idLabel || beforeIsNotObj) {
+    if (!isNonEmptyOrUndefined(idLabel) || beforeIsNotObj) {
       return { [diffLabels.DELETED.labelText]: before };
     }
     const idLabelObj = { [diffLabels.ID.labelText]: { [idLabel]: { ...before }[idLabel] } };
     return { [diffLabels.DELETED.labelText]: { ...idLabelObj, ...before } };
   }
   return {
-    [diffLabels.CHANGED.labelText]: `${JSON.stringify(before) || ""} ${diffArrow} ${
-      JSON.stringify(after) || ""
+    [diffLabels.CHANGED.labelText]: `${JSON.stringify(before) ?? ""} ${diffArrow} ${
+      JSON.stringify(after) ?? ""
     }`,
   };
 }

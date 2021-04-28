@@ -265,7 +265,7 @@ function Plot(props: Props) {
   const onClick = useCallback<NonNullable<ComponentProps<typeof PlotChart>["onClick"]>>(
     (params) => {
       const seekSeconds = params.x;
-      if (!startTime || seekSeconds == undefined || !seek || xAxisVal !== "timestamp") {
+      if (!startTime || seekSeconds == undefined || xAxisVal !== "timestamp") {
         return;
       }
       // The player validates and clamps the time.

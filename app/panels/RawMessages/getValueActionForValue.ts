@@ -29,12 +29,20 @@ export type ValueAction =
       primitiveType: string; // The ROS primitive type that these paths point at.
     };
 
-const isObjectElement = (value: any, pathItem: any, structureItem: any): boolean =>
+const isObjectElement = (
+  value: unknown,
+  pathItem: string | number,
+  structureItem: MessagePathStructureItem,
+): boolean =>
   typeof pathItem === "string" &&
   ((structureItem.structureType === "message" && typeof value === "object") ||
     (structureItem.structureType === "primitive" && structureItem.primitiveType === "json"));
 
-const isArrayElement = (value: any, pathItem: any, structureItem: any): boolean =>
+const isArrayElement = (
+  value: unknown,
+  pathItem: string | number,
+  structureItem: MessagePathStructureItem,
+): boolean =>
   typeof pathItem === "number" &&
   ((structureItem.structureType === "array" && Array.isArray(value)) ||
     (structureItem.structureType === "primitive" && structureItem.primitiveType === "json"));
@@ -64,7 +72,7 @@ export function getValueActionForValue(
       value = (value as any)[pathItem];
       if (multiSlicePath.endsWith("[:]")) {
         // We're just inside a message that is inside an array, so we might want to pivot on this new value.
-        pivotPath = `${multiSlicePath}{${pathItem}==${JSON.stringify(value) || ""}}`;
+        pivotPath = `${multiSlicePath}{${pathItem}==${JSON.stringify(value) ?? ""}}`;
       } else {
         pivotPath = "";
       }
@@ -76,9 +84,6 @@ export function getValueActionForValue(
         structureItem.structureType === "array"
           ? structureItem.next
           : { structureType: "primitive", primitiveType: "json", datatype: "" };
-      if (!structureItem) {
-        break;
-      }
       multiSlicePath = `${singleSlicePath}[:]`;
       // Ideally show something like `/topic.object[:]{id=123}` for the singleSlicePath, but fall
       // back to `/topic.object[10]` if necessary.
@@ -94,7 +99,7 @@ export function getValueActionForValue(
         typeof typicalFilterName === "string"
       ) {
         singleSlicePath += `[:]{${typicalFilterName}==${
-          JSON.stringify((value as any)[typicalFilterName]) || ""
+          JSON.stringify((value as any)[typicalFilterName]) ?? ""
         }}`;
       } else {
         singleSlicePath += `[${pathItem}]`;
@@ -109,7 +114,7 @@ export function getValueActionForValue(
   }
   // At this point we should be looking at a primitive. If not, just return nothing.
   if (structureItem && structureItem.structureType === "primitive" && value != undefined) {
-    if (pivotPath && isTypicalFilterName((last(keyPath) as any).toString())) {
+    if (pivotPath.length !== 0 && isTypicalFilterName((last(keyPath) as any).toString())) {
       return { type: "pivot", pivotPath };
     }
     return {
@@ -148,9 +153,6 @@ export const getStructureItemForPath = memoizeWeak(
         structureItem = structureItem.nextByName[pathItem];
       } else if (structureItem.structureType === "array" && typeof pathItem === "number") {
         structureItem = structureItem.next;
-        if (!structureItem) {
-          break;
-        }
       } else if (structureItem.structureType === "primitive") {
         // ROS has some primitives that contain nested data (time+duration). We currently don't
         // support looking inside them.

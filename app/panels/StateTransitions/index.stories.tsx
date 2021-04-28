@@ -49,7 +49,6 @@ const fixture = {
       fields: [
         { type: "std_msgs/Header", name: "header", isArray: false },
         { type: "int8", name: "UNKNOWN", isConstant: true, value: -1 },
-        { type: "int8", name: "", isConstant: true, value: 0 },
         { type: "int8", name: "OFF", isConstant: true, value: 1 },
         { type: "int8", name: "BOOTING", isConstant: true, value: 2 },
         { type: "int8", name: "ACTIVE", isConstant: true, value: 3 },

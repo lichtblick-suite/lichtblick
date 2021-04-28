@@ -21,6 +21,7 @@ import textWidth from "text-width";
 import Icon from "@foxglove-studio/app/components/Icon";
 import Tooltip from "@foxglove-studio/app/components/Tooltip";
 import { TabActions } from "@foxglove-studio/app/panels/Tab/TabDndContext";
+import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 import styles from "./Tab.module.scss";
@@ -42,6 +43,7 @@ const STab = styled.div<{
   tabCount: number;
   highlight: boolean;
   value: string;
+  hidden: boolean;
 }>(({ isActive, value, tabCount, isDragging, hidden, highlight }) => ({
   opacity: hidden ? 0 : 1,
   borderColor: isDragging || highlight ? colors.DARK6 : "transparent",
@@ -87,7 +89,7 @@ export function ToolbarTab(props: Props) {
   } = props;
 
   const inputRef = useRef<HTMLInputElement>(ReactNull);
-  const [title, setTitle] = useState<string>(tabTitle || "");
+  const [title, setTitle] = useState<string>(tabTitle ?? "");
   const [editingTitle, setEditingTitle] = useState<boolean>(false);
   const onChangeTitleInput = useCallback((ev) => setTitle(ev.target.value), []);
 
@@ -133,7 +135,7 @@ export function ToolbarTab(props: Props) {
   }, [endTitleEditing, setTabTitle]);
 
   const resetTitle = useCallback(() => {
-    setTitle(tabTitle || "");
+    setTitle(tabTitle);
     endTitleEditing();
   }, [endTitleEditing, tabTitle]);
 
@@ -167,12 +169,15 @@ export function ToolbarTab(props: Props) {
       isActive={isActive}
       highlight={highlight}
       tabCount={tabCount}
-      value={tabTitle || ""}
+      value={tabTitle}
       onClick={onClickTab}
       ref={innerRef}
       className={cx(styles.tab, { [styles.active!]: isActive })}
     >
-      <Tooltip contents={editingTitle ? "" : tabTitle || "Enter tab name"} placement="top">
+      <Tooltip
+        contents={editingTitle ? "" : nonEmptyOrUndefined(tabTitle) ?? "Enter tab name"}
+        placement="top"
+      >
         {/* This div has to be here because the <ToolTip> overwrites the ref of its child*/}
         <div>
           <SInput
