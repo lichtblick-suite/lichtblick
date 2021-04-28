@@ -21,11 +21,10 @@ const configureStore = (
   reducer: Reducer<State, ActionTypes>,
   middleware: Array<any> = [],
   _history?: unknown,
-  preloadedState?: State,
 ) => {
   const store = createStore(
     reducer,
-    preloadedState,
+    undefined,
     applyMiddleware<ThunkDispatch<State, undefined, ActionTypes>>(thunk, ...middleware),
   );
 

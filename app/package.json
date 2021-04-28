@@ -65,7 +65,7 @@
     "react-transition-group": "4.4.1",
     "react-use": "17.2.4",
     "react-virtualized": "9.22.3",
-    "redux": "4.0.5",
+    "redux": "4.1.0",
     "redux-devtools-extension": "2.13.9",
     "redux-thunk": "2.3.0",
     "regl-worldview": "github:foxglove/webviz#workspace=regl-worldview&commit=48979519bb7c067c7a0162255d1ef083fef49199",
