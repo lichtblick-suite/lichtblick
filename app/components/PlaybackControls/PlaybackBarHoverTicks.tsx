@@ -80,17 +80,14 @@ export default React.memo<Props>(function PlaybackBarHoverTicks({ componentId }:
       },
     };
   }, [width, startTime, endTime]);
-
-  if (!scaleBounds) {
-    return ReactNull;
-  }
-
   return (
     <div ref={ref} style={{ width: "100%" }}>
-      <HoverBar componentId={componentId} scales={scaleBounds} isTimestampScale>
-        <TopTick />
-        <BottomTick />
-      </HoverBar>
+      {scaleBounds && (
+        <HoverBar componentId={componentId} scales={scaleBounds} isTimestampScale>
+          <TopTick />
+          <BottomTick />
+        </HoverBar>
+      )}
     </div>
   );
 });
