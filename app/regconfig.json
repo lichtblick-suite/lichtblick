@@ -1,0 +1,24 @@
+{
+  "core": {
+    "workingDir": ".reg",
+    "actualDir": "storybook-screenshots",
+    "thresholdRate": 0,
+    "ximgdiff": {
+      "invocationType": "client"
+    }
+  },
+  "plugins": {
+    "reg-simple-keygen-plugin": {
+      "expectedKey": "${REG_SUIT_BASE_SHA}",
+      "actualKey": "${REG_SUIT_HEAD_SHA}"
+    },
+    "reg-notify-github-plugin": {
+      "clientId": "${REG_SUIT_GITHUB_CLIENT_ID}",
+      "prComment": true,
+      "prCommentBehavior": "default"
+    },
+    "reg-publish-gcs-plugin": {
+      "bucketName": "foxglove-studio-reg-suit"
+    }
+  }
+}

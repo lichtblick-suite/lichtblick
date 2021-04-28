@@ -3,17 +3,22 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { group } from "@actions/core";
-import { exec as execAction } from "@actions/exec";
+import { exec as execAction, ExecOptions } from "@actions/exec";
 
-export async function exec(program: string, ...args: string[]): Promise<void> {
+export async function exec(program: string, args?: string[], options?: ExecOptions): Promise<void> {
   await group(`$ ${program} ${args?.join(" ")}`, async () => {
-    await execAction(program, args);
+    await execAction(program, args, options);
   });
 }
 
-export async function execOutput(program: string, ...args: string[]): Promise<string> {
+export async function execOutput(
+  program: string,
+  args?: string[],
+  options?: ExecOptions,
+): Promise<string> {
   let output = "";
   await execAction(program, args, {
+    ...options,
     silent: true,
     listeners: {
       stdout: (data) => {

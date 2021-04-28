@@ -19,7 +19,7 @@ export default async function main(): Promise<void> {
 
   // Generate new package version
   const ver = (pkg.version as string).replace(/-.*$/, "");
-  const sha = (await execOutput("git", "rev-parse", "--short", "HEAD")).trim();
+  const sha = (await execOutput("git", ["rev-parse", "--short", "HEAD"])).trim();
   const date = new Date().toISOString().replace(/T.*$/, "").replace(/-/g, "");
 
   assert.ok(ver, "Missing package.json version");

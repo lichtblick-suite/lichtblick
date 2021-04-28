@@ -16,7 +16,7 @@
   },
   "homepage": "https://foxglove.dev/",
   "scripts": {
-    "clean": "tsc --build --clean packages/*/tsconfig.json && rimraf .webpack dist app/storybook-static",
+    "clean": "tsc --build --clean packages/*/tsconfig.json && rimraf .webpack dist app/storybook-screenshots app/storybook-static",
     "clean:package": "yarn && yarn clean && yarn build:prod && yarn package",
     "start": "electron .webpack",
     "build:packages": "tsc --build --verbose packages/*/tsconfig.json",
@@ -34,7 +34,9 @@
     "package:linux": "yarn package --linux",
     "package": "NODE_OPTIONS='-r ts-node/register' electron-builder build --publish never",
     "release:bump-nightly-version": "node -r ts-node/register ./ci/bump-nightly-version.ts",
-    "storybook": "NODE_OPTIONS='--max-old-space-size=4096' TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' yarn workspace @foxglove-studio/app run start-storybook"
+    "storybook": "ts-node ./ci/storybook.ts",
+    "storybook:ci": "ts-node ./ci/storybook.ts build capture publish",
+    "storybook:start": "ts-node ./ci/storybook.ts start"
   },
   "workspaces": {
     "packages": [
@@ -43,6 +45,7 @@
     ]
   },
   "devDependencies": {
+    "@actions/core": "1.2.7",
     "@actions/exec": "1.0.4",
     "@babel/core": "7.13.16",
     "@babel/preset-env": "7.13.15",

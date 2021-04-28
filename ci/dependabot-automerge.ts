@@ -32,7 +32,7 @@ export function shouldAutomerge(subject: string): boolean | undefined {
 
 export default async function main(): Promise<void> {
   // Get subject of _previous_ commit, since HEAD will be our yarn.lock fix
-  const subject = await execOutput("git", "show", "-s", "--format=%s", "HEAD^");
+  const subject = await execOutput("git", ["show", "-s", "--format=%s", "HEAD^"]);
 
   const merge = shouldAutomerge(subject);
   if (merge === undefined) {
@@ -42,7 +42,7 @@ export default async function main(): Promise<void> {
   }
 
   log.info("Auto-merging (minor version upgrade)");
-  await exec("gh", "pr", "merge", "--squash", "--auto");
+  await exec("gh", ["pr", "merge", "--squash", "--auto"]);
 }
 
 if (require.main === module) {
