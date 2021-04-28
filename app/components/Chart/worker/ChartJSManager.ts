@@ -101,6 +101,10 @@ export default class ChartJSManager {
       ...this.addFunctionsToConfig(options),
       devicePixelRatio,
       font: { family: "'Roboto Mono'" },
+      // we force responsive off since we manually trigger width/height updates on the chart
+      // responsive mode does not work properly with offscreen canvases and retina device pixel ratios
+      // it results in a run-away canvas that keeps doubling in size!
+      responsive: false,
     };
 
     const chartInstance = new Chart(node, {

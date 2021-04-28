@@ -347,8 +347,8 @@ function Chart(props: Props) {
   return (
     <canvas
       ref={canvasRef}
-      height={height / devicePixelRatio}
-      width={width / devicePixelRatio}
+      height={height}
+      width={width}
       id={id}
       onWheel={onWheel}
       onClick={onClick}
