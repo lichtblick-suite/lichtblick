@@ -2106,7 +2106,7 @@ __metadata:
     hoist-non-react-statics: 3.3.2
     http-server: 0.12.3
     int53: 1.0.0
-    inter-ui: 3.18.0
+    inter-ui: 3.18.1
     intervals-fn: 3.0.3
     js-yaml: 4.1.0
     jsondiffpatch: 0.4.1
@@ -13817,10 +13817,10 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"inter-ui@npm:3.18.0":
-  version: 3.18.0
-  resolution: "inter-ui@npm:3.18.0"
-  checksum: 75a05ab0f40a99217fbbd5309c7954c4dde923d315e0264f603f47b628f9cf2df34f8c50eaeca5ec5456370d960de260a8337e9d92e2228893d3cfffd961bb94
+"inter-ui@npm:3.18.1":
+  version: 3.18.1
+  resolution: "inter-ui@npm:3.18.1"
+  checksum: 0063b91132a42fd43bdfa71eba09f76b3e719d689ed9754f81f83aa7770eb8eb4c3ef8985469e9c7dbc572c9414ed42990007ed51315f2568060716857b22717
   languageName: node
   linkType: hard
 
