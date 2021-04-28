@@ -113,7 +113,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
     // If we support offscreen canvas, use the ImageCanvasWorker because it improves performance by moving canvas
     // operations off of the main thread. Allow an override for testing / stories.
     this._canvasRenderer =
-      !supportsOffscreenCanvas() || props.useMainThreadRenderingForTesting
+      !supportsOffscreenCanvas() || props.useMainThreadRenderingForTesting === true
         ? { type: "mainThread" }
         : { type: "rpc", worker: webWorkerManager.registerWorkerListener(this._id) };
   }
@@ -151,7 +151,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
   panZoomCanvas: any = undefined;
   bitmapDimensions: Dimensions = { width: 0, height: 0 };
 
-  keepInBounds = (div: HTMLElement) => {
+  keepInBounds = (div: HTMLElement): void => {
     const { x, y, scale } = this.panZoomCanvas.getTransform();
     if (isNaN(x) || isNaN(y)) {
       sendNotification(
@@ -181,7 +181,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
     }
   };
 
-  createPanZoom = () => {
+  createPanZoom = (): void => {
     const canvas = this._canvasRef.current;
     const div = this._divRef.current;
     if (canvas && div) {
@@ -209,7 +209,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
     }
   };
 
-  getImageViewport = () => {
+  getImageViewport = (): { imageViewportWidth: number; imageViewportHeight: number } => {
     const div = this._divRef.current;
 
     if (!div) {
@@ -218,7 +218,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
     return { imageViewportWidth: div.offsetWidth, imageViewportHeight: div.offsetHeight };
   };
 
-  moveToCenter = () => {
+  moveToCenter = (): void => {
     if (!this.panZoomCanvas) {
       sendNotification("Tried to center when there is no panZoomCanvas", "", "app", "error");
       return;
@@ -231,19 +231,19 @@ export default class ImageCanvas extends React.Component<Props, State> {
     );
   };
 
-  fitPercent = () => {
+  fitPercent = (): number => {
     const { width, height } = this.bitmapDimensions;
     const { imageViewportWidth, imageViewportHeight } = this.getImageViewport();
     return Math.min(imageViewportWidth / width, imageViewportHeight / height) * 100;
   };
 
-  fillPercent = () => {
+  fillPercent = (): number => {
     const { width, height } = this.bitmapDimensions;
     const { imageViewportWidth, imageViewportHeight } = this.getImageViewport();
     return Math.max(imageViewportWidth / width, imageViewportHeight / height) * 100;
   };
 
-  loadZoomFromConfig = () => {
+  loadZoomFromConfig = (): void => {
     if (this.panZoomCanvas) {
       return;
     }
@@ -251,12 +251,12 @@ export default class ImageCanvas extends React.Component<Props, State> {
     this.applyPanZoom();
   };
 
-  componentDidMount() {
+  componentDidMount(): void {
     this.renderCurrentImage();
     document.addEventListener("visibilitychange", this._onVisibilityChange);
   }
 
-  _onVisibilityChange = () => {
+  _onVisibilityChange = (): void => {
     // HACK: There is a Chrome bug that causes 2d canvas elements to get cleared when the page
     // becomes hidden on certain hardware:
     // https://bugs.chromium.org/p/chromium/issues/detail?id=588434
@@ -270,7 +270,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
     }
   };
 
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     const canvasRenderer = this._canvasRenderer;
     if (canvasRenderer.type === "rpc") {
       // Unset the PRC worker so that we can destroy the worker if it's no longer necessary.
@@ -280,7 +280,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
     document.removeEventListener("visibilitychange", this._onVisibilityChange);
   }
 
-  componentDidUpdate(prevProps: Props) {
+  componentDidUpdate(prevProps: Props): void {
     const imageChanged = !shallowequal(prevProps, this.props, (a, b, key): boolean | void => {
       if (key === "rawMarkerData") {
         return shallowequal(a, b, (innerA, innerB, innerKey): boolean | void => {
@@ -297,7 +297,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
     }
   }
 
-  downloadImage = () => {
+  downloadImage = (): void => {
     const { topic, image } = this.props;
     const canvas = this._canvasRef.current;
 
@@ -319,30 +319,30 @@ export default class ImageCanvas extends React.Component<Props, State> {
     });
   };
 
-  onCanvasRightClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  onCanvasRightClick = (e: React.MouseEvent<HTMLCanvasElement>): void => {
     e.stopPropagation();
     e.preventDefault();
     this.setState({ contextMenuEvent: e.nativeEvent });
   };
 
-  clickMagnify = () => {
+  clickMagnify = (): void => {
     this.setState((state) => ({ openZoomChart: !state.openZoomChart }));
   };
-  onZoomFit = () => {
+  onZoomFit = (): void => {
     const fitPercent = this.fitPercent();
     this.panZoomCanvas.zoomAbs(0, 0, fitPercent / 100);
     this.moveToCenter();
     (this.props as any).saveConfig({ mode: "fit", zoomPercentage: fitPercent });
   };
 
-  onZoomFill = () => {
+  onZoomFill = (): void => {
     const fillPercent = this.fillPercent();
     this.panZoomCanvas.zoomAbs(0, 0, fillPercent / 100);
     this.moveToCenter();
     (this.props as any).saveConfig({ mode: "fill", zoomPercentage: fillPercent });
   };
 
-  goToTargetPercentage = (targetPercentage: number) => {
+  goToTargetPercentage = (targetPercentage: number): void => {
     const { imageViewportWidth, imageViewportHeight } = this.getImageViewport();
     this.panZoomCanvas.zoomAbs(
       imageViewportWidth / 2,
@@ -351,15 +351,15 @@ export default class ImageCanvas extends React.Component<Props, State> {
     );
   };
 
-  onZoomMinus = () => {
+  onZoomMinus = (): void => {
     const { zoomPercentage } = this.props.config;
-    const targetPercentage = Math.max((zoomPercentage || 100) - ZOOM_STEP, this.fitPercent() * 0.8);
+    const targetPercentage = Math.max((zoomPercentage ?? 100) - ZOOM_STEP, this.fitPercent() * 0.8);
     this.goToTargetPercentage(targetPercentage);
   };
 
-  onZoomPlus = () => {
+  onZoomPlus = (): void => {
     const { zoomPercentage } = this.props.config;
-    const targetPercentage = Math.min((zoomPercentage || 100) + ZOOM_STEP, MAX_ZOOM_PERCENTAGE);
+    const targetPercentage = Math.min((zoomPercentage ?? 100) + ZOOM_STEP, MAX_ZOOM_PERCENTAGE);
     this.goToTargetPercentage(targetPercentage);
   };
 
@@ -412,7 +412,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
       }
     } catch (error) {
       console.error(error);
-      sendNotification(`failed to decode image on ${image?.topic || ""}:`, "", "user", "error");
+      sendNotification(`failed to decode image on ${image?.topic ?? ""}:`, "", "user", "error");
       this.setState({ error });
     } finally {
       onFinishImageRender();
@@ -432,7 +432,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
           <button className={styles.round} onClick={this.onZoomMinus} data-panel-minus-zoom>
             -
           </button>
-          <span>{`${(this.props.config.zoomPercentage || 100).toFixed(1)}%`}</span>
+          <span>{`${(this.props.config.zoomPercentage ?? 100).toFixed(1)}%`}</span>
           <button className={styles.round} onClick={this.onZoomPlus} data-panel-add-zoom>
             +
           </button>
@@ -460,85 +460,85 @@ export default class ImageCanvas extends React.Component<Props, State> {
     }
 
     const { imageViewportHeight, imageViewportWidth } = this.getImageViewport();
-    if (!imageViewportHeight || !imageViewportWidth) {
+    if (imageViewportHeight === 0 || imageViewportWidth === 0) {
       // While dragging, the viewport may have zero height or width, which throws off the panZoomCanvas
       return;
     }
 
     const { mode, zoomPercentage, offset } = this.props.config;
-    if (!mode || mode === "fit") {
+    if (mode == undefined || mode === "fit") {
       this.onZoomFit();
     } else if (mode === "fill") {
       this.onZoomFill();
     } else if (mode === "other") {
       // Go to prevPercentage
-      this.goToTargetPercentage(zoomPercentage || 100);
+      this.goToTargetPercentage(zoomPercentage ?? 100);
       this.panZoomCanvas.moveTo(offset ? offset[0] : 0, offset ? offset[1] : 0);
     }
   };
 
   keyDownHandlers = {
-    "=": () => {
+    "=": (): void => {
       this.onZoomPlus();
     },
-    "-": () => {
+    "-": (): void => {
       this.onZoomMinus();
     },
-    "1": (e: KeyboardEvent) => {
+    "1": (e: KeyboardEvent): void => {
       if (e.metaKey) {
         this.goToTargetPercentage(10);
       }
     },
-    "2": (e: KeyboardEvent) => {
+    "2": (e: KeyboardEvent): void => {
       if (e.metaKey) {
         this.goToTargetPercentage(20);
       }
     },
-    "3": (e: KeyboardEvent) => {
+    "3": (e: KeyboardEvent): void => {
       if (e.metaKey) {
         this.goToTargetPercentage(30);
       }
     },
-    "4": (e: KeyboardEvent) => {
+    "4": (e: KeyboardEvent): void => {
       if (e.metaKey) {
         this.goToTargetPercentage(40);
       }
     },
-    "5": (e: KeyboardEvent) => {
+    "5": (e: KeyboardEvent): void => {
       if (e.metaKey) {
         this.goToTargetPercentage(50);
       }
     },
-    "6": (e: KeyboardEvent) => {
+    "6": (e: KeyboardEvent): void => {
       if (e.metaKey) {
         this.goToTargetPercentage(60);
       }
     },
-    "7": (e: KeyboardEvent) => {
+    "7": (e: KeyboardEvent): void => {
       if (e.metaKey) {
         this.goToTargetPercentage(70);
       }
     },
-    "8": (e: KeyboardEvent) => {
+    "8": (e: KeyboardEvent): void => {
       if (e.metaKey) {
         this.goToTargetPercentage(80);
       }
     },
-    "9": (e: KeyboardEvent) => {
+    "9": (e: KeyboardEvent): void => {
       if (e.metaKey) {
         this.goToTargetPercentage(90);
       }
     },
-    "0": (e: KeyboardEvent) => {
+    "0": (e: KeyboardEvent): void => {
       if (e.metaKey) {
         this.goToTargetPercentage(100);
       }
     },
   };
 
-  render() {
+  render(): JSX.Element {
     const { mode, zoomPercentage, offset } = this.props.config;
-    if (zoomPercentage && (zoomPercentage > 150 || zoomPercentage < 0)) {
+    if (zoomPercentage != undefined && (zoomPercentage > 150 || zoomPercentage < 0)) {
       sendNotification(
         `zoomPercentage for the image panel was ${zoomPercentage}, but must be between 0 and 150. It has been reset to 100.`,
         "",
@@ -588,7 +588,9 @@ export default class ImageCanvas extends React.Component<Props, State> {
             <button className={styles.magnify} onClick={this.clickMagnify} data-magnify-icon>
               <MagnifyIcon />{" "}
               {mode === "other" && (
-                <span>{zoomPercentage ? `${zoomPercentage.toFixed(1)}%` : "null"}</span>
+                <span>
+                  {zoomPercentage != undefined ? `${zoomPercentage.toFixed(1)}%` : "null"}
+                </span>
               )}
             </button>
           </OutsideClickHandler>

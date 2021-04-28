@@ -22,6 +22,7 @@ import Panel from "@foxglove-studio/app/components/Panel";
 import { usePanelContext } from "@foxglove-studio/app/components/PanelContext";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import TopicToRenderMenu from "@foxglove-studio/app/components/TopicToRenderMenu";
+import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import { DIAGNOSTIC_TOPIC } from "@foxglove-studio/app/util/globalConstants";
 
 import DiagnosticStatus from "./DiagnosticStatus";
@@ -123,7 +124,7 @@ function DiagnosticStatusPanel(props: Props) {
                   inputStyle={{ height: "100%" }}
                 />
               </PanelToolbar>
-              {selectedItems?.length ? (
+              {selectedItems != undefined && selectedItems.length > 0 ? (
                 <Flex col scroll>
                   {sortBy(selectedItems, ({ status }) => status.name.toLowerCase()).map((item) => (
                     <DiagnosticStatus
@@ -140,7 +141,7 @@ function DiagnosticStatusPanel(props: Props) {
                     />
                   ))}
                 </Flex>
-              ) : selectedDisplayName ? (
+              ) : isNonEmptyOrUndefined(selectedDisplayName) ? (
                 <EmptyState>
                   Waiting for diagnostics from <code>{selectedDisplayName}</code>
                 </EmptyState>

@@ -50,7 +50,7 @@ export async function renderImage({
   if (!canvas) {
     return undefined;
   }
-  if (!imageMessage || !imageMessageDatatype) {
+  if (!imageMessage || imageMessageDatatype == undefined) {
     clearCanvas(canvas);
     return undefined;
   }
@@ -78,7 +78,7 @@ export async function renderImage({
 
 function toRGBA(color: Color) {
   const { r, g, b, a } = color;
-  return `rgba(${r}, ${g}, ${b}, ${a || 1})`;
+  return `rgba(${r}, ${g}, ${b}, ${a !== 0 ? a : 1})`;
 }
 
 // Note: Return type is inexact -- may contain z.
@@ -303,8 +303,8 @@ function paintMarker(
         break;
       }
 
-      const size = marker.scale || 4;
-      if (marker.outline_colors && marker.outline_colors.length === marker.points.length) {
+      const size = marker.scale !== 0 ? marker.scale : 4;
+      if (marker.outline_colors.length === marker.points.length) {
         for (let i = 0; i < marker.points.length; i++) {
           const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[i]!);
           ctx.fillStyle = toRGBA(marker.outline_colors[i]!);

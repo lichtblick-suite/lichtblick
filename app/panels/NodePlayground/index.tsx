@@ -122,7 +122,7 @@ const WelcomeScreen = ({
 
 function NodePlayground(props: Props) {
   const { config, saveConfig } = props;
-  const { autoFormatOnSave, selectedNodeId, editorForStorybook } = config;
+  const { autoFormatOnSave = false, selectedNodeId, editorForStorybook } = config;
 
   const [explorer, updateExplorer] = React.useState<Explorer>(undefined);
 
@@ -137,10 +137,10 @@ function NodePlayground(props: Props) {
   );
 
   const selectedNodeDiagnostics =
-    selectedNodeId && userNodeDiagnostics[selectedNodeId]
+    selectedNodeId != undefined && userNodeDiagnostics[selectedNodeId]
       ? userNodeDiagnostics[selectedNodeId].diagnostics
       : [];
-  const selectedNode = selectedNodeId ? userNodes[selectedNodeId] : undefined;
+  const selectedNode = selectedNodeId != undefined ? userNodes[selectedNodeId] : undefined;
   const [scriptBackStack, setScriptBackStack] = React.useState<Script[]>([]);
   // Holds the currently active script
   const currentScript =
@@ -150,7 +150,7 @@ function NodePlayground(props: Props) {
   const isNodeSaved =
     !isCurrentScriptSelectedNode || currentScript?.code === selectedNode?.sourceCode;
   const selectedNodeLogs =
-    selectedNodeId && userNodeDiagnostics[selectedNodeId]
+    selectedNodeId != undefined && userNodeDiagnostics[selectedNodeId]
       ? userNodeDiagnostics[selectedNodeId].logs
       : [];
 
@@ -193,7 +193,7 @@ function NodePlayground(props: Props) {
 
   const saveNode = React.useCallback(
     (script) => {
-      if (!selectedNodeId || !script) {
+      if (selectedNodeId == undefined || !script) {
         return;
       }
       setUserNodes({ [selectedNodeId]: { ...selectedNode, sourceCode: script } });
@@ -203,7 +203,7 @@ function NodePlayground(props: Props) {
 
   const setScriptOverride = React.useCallback(
     (script: Script, maxDepth?: number) => {
-      if (maxDepth && scriptBackStack.length >= maxDepth) {
+      if (maxDepth != undefined && maxDepth > 0 && scriptBackStack.length >= maxDepth) {
         setScriptBackStack([...scriptBackStack.slice(0, maxDepth - 1), script]);
       } else {
         setScriptBackStack([...scriptBackStack, script]);
@@ -222,7 +222,7 @@ function NodePlayground(props: Props) {
       const backStack = [...scriptBackStack];
       if (backStack.length > 0) {
         const script = backStack.pop();
-        if (!script?.readOnly) {
+        if (!(script?.readOnly ?? false)) {
           setScriptBackStack([...backStack, { ...script, code }] as any);
         }
       }
@@ -240,7 +240,7 @@ function NodePlayground(props: Props) {
           explorer={explorer}
           updateExplorer={updateExplorer}
           selectNode={(nodeId) => {
-            if (selectedNodeId && currentScript && isCurrentScriptSelectedNode) {
+            if (selectedNodeId != undefined && currentScript && isCurrentScriptSelectedNode) {
               // Save current state so that user can seamlessly go back to previous work.
               setUserNodes({
                 [selectedNodeId]: { ...selectedNode, sourceCode: currentScript.code },
@@ -278,7 +278,7 @@ function NodePlayground(props: Props) {
                 <ArrowLeftIcon />
               </Icon>
             )}
-            {selectedNodeId && (
+            {selectedNodeId != undefined && (
               <div style={{ position: "relative" }}>
                 <input
                   type="text"
@@ -310,7 +310,7 @@ function NodePlayground(props: Props) {
           </Flex>
 
           <Stack grow style={{ overflow: "hidden " }}>
-            {!selectedNodeId && (
+            {selectedNodeId == undefined && (
               <WelcomeScreen addNewNode={addNewNode as any} updateExplorer={updateExplorer} />
             )}
             <div
@@ -319,7 +319,7 @@ function NodePlayground(props: Props) {
                 flexGrow: 1,
                 width: "100%",
                 overflow: "hidden",
-                display: selectedNodeId ? "initial" : "none",
+                display: selectedNodeId != undefined ? "initial" : "none",
                 /* Ensures the monaco-editor starts loading before the user opens it */
               }}
             >
@@ -334,7 +334,7 @@ function NodePlayground(props: Props) {
               >
                 {editorForStorybook ?? (
                   <Editor
-                    autoFormatOnSave={!!autoFormatOnSave}
+                    autoFormatOnSave={autoFormatOnSave}
                     script={currentScript}
                     setScriptCode={setScriptCode}
                     setScriptOverride={setScriptOverride}

@@ -21,17 +21,11 @@ import { AppSetting } from "@foxglove-studio/app/AppSetting";
 import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import { ExperimentalFeatureSettings } from "@foxglove-studio/app/components/ExperimentalFeatureSettings";
 import { useAsyncAppConfigurationValue } from "@foxglove-studio/app/hooks/useAsyncAppConfigurationValue";
+import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import fuzzyFilter from "@foxglove-studio/app/util/fuzzyFilter";
 import { APP_NAME } from "@foxglove-studio/app/version";
 import { RosNode } from "@foxglove/ros1";
-
-function nonEmptyOrUndefined(str?: string): string | undefined {
-  if (str == undefined) {
-    return undefined;
-  }
-  return str.length > 0 ? str : undefined;
-}
 
 function formatTimezone(name: string) {
   const tz = moment.tz(name);

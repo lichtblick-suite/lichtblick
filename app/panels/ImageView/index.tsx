@@ -40,6 +40,7 @@ import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { CameraInfo, StampedMessage } from "@foxglove-studio/app/types/Messages";
 import { SaveConfig } from "@foxglove-studio/app/types/panels";
+import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import naturalSort from "@foxglove-studio/app/util/naturalSort";
 import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
@@ -355,13 +356,13 @@ function ImageView(props: Props) {
   const imageTopicDropdown = useMemo(() => {
     const cameraNamespace = getCameraNamespace(cameraTopic);
 
-    if (!imageTopicsByNamespace || imageTopicsByNamespace.size === 0) {
+    if (imageTopicsByNamespace.size === 0) {
       return (
         <Dropdown
           toggleComponent={
             <ToggleComponent
               dataTest={"topics-dropdown"}
-              text={cameraTopic || "no image topics"}
+              text={nonEmptyOrUndefined(cameraTopic) ?? "no image topics"}
               disabled
             />
           }
@@ -426,11 +427,11 @@ function ImageView(props: Props) {
   }, [cameraTopic, imageTopicsByNamespace, onChangeCameraTopic]);
 
   const cameraInfoTopic = getCameraInfoTopic(cameraTopic);
-  const cameraInfo = PanelAPI.useMessageReducer({
-    topics: cameraInfoTopic ? [cameraInfoTopic] : [],
-    restore: useCallback((value: any) => value, []) as any,
-    addMessage: useCallback((_value, { message }: Message) => message, []),
-  }) as CameraInfo;
+  const cameraInfo = PanelAPI.useMessageReducer<CameraInfo | undefined>({
+    topics: cameraInfoTopic != undefined ? [cameraInfoTopic] : [],
+    restore: useCallback((value) => value, []),
+    addMessage: useCallback((_value, { message }: Message) => message as CameraInfo, []),
+  });
 
   const shouldSynchronize = config.synchronize && enabledMarkerTopics.length > 0;
   const imageAndMarkerTopics = useShallowMemo([

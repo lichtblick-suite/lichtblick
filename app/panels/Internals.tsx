@@ -32,6 +32,7 @@ import {
   AdvertisePayload,
 } from "@foxglove-studio/app/players/types";
 import { downloadTextFile } from "@foxglove-studio/app/util/download";
+import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
 
@@ -138,7 +139,7 @@ function Internals() {
                 <li key={i}>
                   <code>
                     {sub.topic}
-                    {topicsByName[sub.topic]?.originalTopic &&
+                    {topicsByName[sub.topic]?.originalTopic != undefined &&
                       ` (original topic: ${topicsByName[sub.topic]?.originalTopic})`}
                   </code>
                 </li>
@@ -188,7 +189,10 @@ function Internals() {
   }
 
   function downloadJSON() {
-    downloadTextFile(JSON.stringify(recordedData.current) || "{}", "fixture.json");
+    downloadTextFile(
+      nonEmptyOrUndefined(JSON.stringify(recordedData.current)) ?? "{}",
+      "fixture.json",
+    );
   }
 
   return (

@@ -41,7 +41,7 @@ const minMaxValidatorFn = (str: string) =>
   isNaN(parseFloat(str)) ? "Must be valid number" : undefined;
 const stepValidatorFn = (str: string) => {
   const result = minMaxValidatorFn(str);
-  if (result) {
+  if (result != undefined) {
     return result;
   }
   const number = parseFloat(str);

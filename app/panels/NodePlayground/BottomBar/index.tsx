@@ -45,12 +45,12 @@ type HeaderItemProps = {
 const HeaderItem = ({ isOpen, numItems, text }: HeaderItemProps) => (
   <SHeaderItem
     style={{
-      color: numItems ? colors.RED : "inherit",
+      color: numItems > 0 ? colors.RED : "inherit",
       borderBottom: isOpen ? `1px solid ${colors.DARK6}` : "none",
       paddingBottom: isOpen ? 2 : 0,
     }}
   >
-    {text} {numItems || ""}
+    {text} {numItems > 0 ? numItems : ""}
   </SHeaderItem>
 );
 
@@ -120,7 +120,7 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
           disabled={isSaved}
           tooltip={"ctrl/cmd + s"}
           onClick={() => {
-            if (nodeId) {
+            if (nodeId != undefined) {
               save();
               clearLogs(nodeId);
             }

@@ -46,8 +46,8 @@ export default class PinholeCameraModel {
     }
 
     // Binning = 0 is considered the same as binning = 1 (no binning).
-    const binningX = binning_x ? binning_x : 1;
-    const binningY = binning_y ? binning_y : 1;
+    const binningX = binning_x !== 0 ? binning_x : 1;
+    const binningY = binning_y !== 0 ? binning_y : 1;
 
     const adjustBinning = binningX > 1 || binningY > 1;
     const adjustRoi = roi.x_offset !== 0 || roi.y_offset !== 0;

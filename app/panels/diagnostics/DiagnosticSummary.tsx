@@ -66,7 +66,7 @@ class NodeRow extends React.PureComponent<NodeRowProps> {
 
     return (
       <div
-        className={cx(levelName ? styles[levelName] : undefined, styles.nodeRow)}
+        className={cx(levelName != undefined ? styles[levelName] : undefined, styles.nodeRow)}
         onClick={this.onClick}
         data-test-diagnostic-row
       >

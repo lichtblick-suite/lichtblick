@@ -115,9 +115,9 @@ storiesOf("panels/GlobalVariables/index", module)
           if (addBtn) {
             addBtn.click();
             await delay(DEFAULT_DELAY);
-            const firstKeyInput = document.querySelector(
+            const firstKeyInput = document.querySelector<HTMLInputElement>(
               "[data-test='global-variable-key'] input",
-            ) as HTMLInputElement;
+            );
             if (firstKeyInput) {
               triggerInputChange(firstKeyInput, "");
             }
@@ -135,9 +135,9 @@ storiesOf("panels/GlobalVariables/index", module)
           if (addBtn) {
             addBtn.click();
             await delay(DEFAULT_DELAY);
-            const firstKeyInput = document.querySelector(
+            const firstKeyInput = document.querySelector<HTMLInputElement>(
               "[data-test='global-variable-key'] input",
-            ) as HTMLInputElement;
+            );
             if (firstKeyInput) {
               triggerInputChange(firstKeyInput, "$someText");
             }

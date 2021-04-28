@@ -44,7 +44,7 @@ type Props = {
 // https://github.com/microsoft/vscode/blob/master/src/vs/editor/standalone/browser/standaloneCodeServiceImpl.ts
 const gotoSelection = (editor: any, selection?: EditorSelection) => {
   if (selection) {
-    if (selection.endLineNumber && selection.endColumn) {
+    if (selection.endLineNumber != undefined && selection.endColumn != undefined) {
       // These fields indicate a range was selected, set the range and reveal it.
       editor.setSelection(selection);
       editor.revealRangeInCenter(

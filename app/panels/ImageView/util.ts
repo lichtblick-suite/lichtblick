@@ -15,6 +15,10 @@ import clamp from "lodash/clamp";
 
 import { Topic, Message } from "@foxglove-studio/app/players/types";
 import { CameraInfo } from "@foxglove-studio/app/types/Messages";
+import {
+  isNonEmptyOrUndefined,
+  nonEmptyOrUndefined,
+} from "@foxglove-studio/app/util/emptyOrUndefined";
 
 import CameraModel from "./CameraModel";
 
@@ -55,7 +59,7 @@ export function getMarkerOptions(
   const cameraNamespace = getCameraNamespace(imageTopic);
   for (const { name, datatype } of topics) {
     if (
-      cameraNamespace &&
+      isNonEmptyOrUndefined(cameraNamespace) &&
       (name.startsWith(cameraNamespace) || name.startsWith(`/old${cameraNamespace}`)) &&
       imageMarkerDatatypes.includes(datatype)
     ) {
@@ -82,7 +86,7 @@ export function getRelatedMarkerTopics(
 // get the sensor_msgs/CameraInfo topic associated with an image topic
 export function getCameraInfoTopic(imageTopic: string): string | undefined {
   const cameraNamespace = getCameraNamespace(imageTopic);
-  if (cameraNamespace) {
+  if (isNonEmptyOrUndefined(cameraNamespace)) {
     return `${cameraNamespace}/camera_info`;
   }
   return undefined;
@@ -103,7 +107,7 @@ export function getCameraNamespace(topicName: string): string | undefined {
 export function groupTopics(topics: Topic[]): Map<string, Topic[]> {
   const imageTopicsByNamespace: Map<string, Topic[]> = new Map();
   for (const topic of topics) {
-    const key = getCameraNamespace(topic.name) || topic.name;
+    const key = nonEmptyOrUndefined(getCameraNamespace(topic.name)) ?? topic.name;
     const vals = imageTopicsByNamespace.get(key);
     if (vals) {
       vals.push(topic);
@@ -155,18 +159,17 @@ export function buildMarkerData(rawMarkerData: RawMarkerData): MarkerData | unde
   }
 
   // Markers can only be rendered if we know the original size of the image.
-  let originalWidth;
-  let originalHeight;
-  if (cameraInfo?.width && cameraInfo.height) {
-    // Prefer using CameraInfo can be used to determine the image size.
-    originalWidth = cameraInfo.width;
-    originalHeight = cameraInfo.height;
-  } else if (scale === 1) {
-    // Otherwise, if scale === 1, the image was not downsampled, so the size of the bitmap is accurate.
-    originalWidth = undefined;
-    originalHeight = undefined;
-  } else {
-    return undefined;
+  // Prefer using CameraInfo to determine the image size.
+  let originalWidth: number | undefined = cameraInfo?.width ?? 0;
+  let originalHeight: number | undefined = cameraInfo?.height ?? 0;
+  if (originalWidth <= 0 || originalHeight <= 0) {
+    if (scale === 1) {
+      // Otherwise, if scale === 1, the image was not downsampled, so the size of the bitmap is accurate.
+      originalWidth = undefined;
+      originalHeight = undefined;
+    } else {
+      return undefined;
+    }
   }
 
   return {

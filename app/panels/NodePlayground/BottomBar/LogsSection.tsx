@@ -61,7 +61,7 @@ const LogsSection = ({ nodeId, logs, clearLogs }: Props): ReactElement => {
         data-test="np-logs-clear"
         style={{ padding: "3px 5px", position: "absolute", right: 5, top: 5 }}
         onClick={() => {
-          if (nodeId) {
+          if (nodeId != undefined) {
             clearLogs(nodeId);
           }
         }}

@@ -16,6 +16,8 @@ import { range, noop } from "lodash";
 
 import ImageView from "@foxglove-studio/app/panels/ImageView";
 import ImageCanvas from "@foxglove-studio/app/panels/ImageView/ImageCanvas";
+import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { ImageMarker } from "@foxglove-studio/app/types/Messages";
 
 const cameraInfo = {
   width: 400,
@@ -39,7 +41,7 @@ const cameraInfo = {
 const imageFormat = "image/png";
 // Image data has to be loaded asynchronously, so use this component to load it for stories.
 function LoadImageMessage({ children }: any) {
-  const [imageData, setImageData] = React.useState(undefined);
+  const [imageData, setImageData] = React.useState<Uint8Array | undefined>();
   React.useEffect(() => {
     const canvas = document.createElement("canvas");
     canvas.width = 400;
@@ -58,7 +60,7 @@ function LoadImageMessage({ children }: any) {
     ctx.strokeRect(0, 0, 400, 300);
     canvas.toBlob((blob) => {
       blob?.arrayBuffer().then((arrayBuffer) => {
-        setImageData(new Uint8Array(arrayBuffer) as any);
+        setImageData(new Uint8Array(arrayBuffer));
       });
     }, imageFormat);
   }, []);
@@ -74,147 +76,168 @@ function LoadImageMessage({ children }: any) {
   return ReactNull;
 }
 
-function marker(type: number, props: any = {}) {
+function marker(
+  type: ImageMarker["type"],
+  props: Partial<ImageMarker> = {},
+): TypedMessage<ImageMarker> {
   return {
     topic: "/foo",
     receiveTime: { sec: 0, nsec: 0 },
-    message: { ...props, type },
+    message: {
+      header: { seq: 0, stamp: { sec: 0, nsec: 0 }, frame_id: "" },
+      ns: "",
+      id: 0,
+      action: 0,
+      position: { x: 0, y: 0, z: 0 },
+      scale: 0,
+      lifetime: { sec: 0, nsec: 0 },
+      outline_color: { r: 0, g: 0, b: 0, a: 0 },
+      filled: false,
+      fill_color: { r: 0, g: 0, b: 0, a: 0 },
+      points: [],
+      outline_colors: [],
+      text: { data: "" },
+      thickness: 0,
+      ...props,
+      type,
+    },
   };
 }
 
 function makeLines(xOffset: number) {
   return [
-    { x: xOffset + 30, y: 50 },
-    { x: xOffset + 32, y: 58 },
-    { x: xOffset + 45, y: 47 },
-    { x: xOffset + 60, y: 50 },
-    { x: xOffset + 65, y: 40 },
-    { x: xOffset + 40, y: 45 },
+    { x: xOffset + 30, y: 50, z: 0 },
+    { x: xOffset + 32, y: 58, z: 0 },
+    { x: xOffset + 45, y: 47, z: 0 },
+    { x: xOffset + 60, y: 50, z: 0 },
+    { x: xOffset + 65, y: 40, z: 0 },
+    { x: xOffset + 40, y: 45, z: 0 },
   ];
 }
 
 const markers = [
   // circles
   marker(0, {
-    position: { x: 40, y: 20 },
+    position: { x: 40, y: 20, z: 0 },
     scale: 5,
     thickness: 2,
-    outline_color: { r: 255, g: 127, b: 0 },
+    outline_color: { r: 255, g: 127, b: 0, a: 255 },
   }),
   marker(0, {
-    position: { x: 55, y: 20 },
+    position: { x: 55, y: 20, z: 0 },
     scale: 5,
     thickness: -1,
-    outline_color: { r: 255, g: 0, b: 255 },
+    outline_color: { r: 255, g: 0, b: 255, a: 255 },
   }),
   marker(1, {
     thickness: 1,
     points: [
-      { x: 40, y: 20 },
-      { x: 40, y: 30 },
-      { x: 30, y: 30 },
+      { x: 40, y: 20, z: 0 },
+      { x: 40, y: 30, z: 0 },
+      { x: 30, y: 30, z: 0 },
     ],
-    outline_color: { r: 0, g: 0, b: 255 },
+    outline_color: { r: 0, g: 0, b: 255, a: 255 },
   }), // line strip
   marker(1, {
     thickness: 2,
     points: makeLines(0),
-    outline_color: { r: 255, g: 255, b: 255 },
+    outline_color: { r: 255, g: 255, b: 255, a: 255 },
   }), // line list
   marker(2, {
     thickness: 2,
     points: makeLines(50),
-    outline_color: { r: 127, g: 127, b: 255 },
+    outline_color: { r: 127, g: 127, b: 255, a: 255 },
   }), // polygon
   marker(3, {
     thickness: 2,
     points: makeLines(100),
-    outline_color: { r: 127, g: 127, b: 255 },
+    outline_color: { r: 127, g: 127, b: 255, a: 255 },
   }),
   marker(3, {
     thickness: -10,
     points: makeLines(150),
-    outline_color: { r: 127, g: 255, b: 127 },
+    outline_color: { r: 127, g: 255, b: 127, a: 255 },
   }),
   marker(3, {
     thickness: -10,
     points: [
-      { x: 100, y: 20 },
-      { x: 120, y: 20 },
-      { x: 120, y: 30 },
-      { x: 100, y: 30 },
+      { x: 100, y: 20, z: 0 },
+      { x: 120, y: 20, z: 0 },
+      { x: 120, y: 30, z: 0 },
+      { x: 100, y: 30, z: 0 },
     ],
-    outline_color: { r: 127, g: 255, b: 127 },
+    outline_color: { r: 127, g: 255, b: 127, a: 255 },
   }),
   marker(3, {
     thickness: 1,
     points: [
-      { x: 100, y: 20 },
-      { x: 120, y: 20 },
-      { x: 120, y: 30 },
-      { x: 100, y: 30 },
+      { x: 100, y: 20, z: 0 },
+      { x: 120, y: 20, z: 0 },
+      { x: 120, y: 30, z: 0 },
+      { x: 100, y: 30, z: 0 },
     ],
-    outline_color: { r: 0, g: 0, b: 0 },
+    outline_color: { r: 0, g: 0, b: 0, a: 255 },
   }),
   marker(3, {
     thickness: -10,
     points: [
-      { x: 150, y: 20 },
-      { x: 170, y: 20 },
-      { x: 170, y: 30 },
-      { x: 150, y: 30 },
+      { x: 150, y: 20, z: 0 },
+      { x: 170, y: 20, z: 0 },
+      { x: 170, y: 30, z: 0 },
+      { x: 150, y: 30, z: 0 },
     ],
-    outline_color: { r: 127, g: 255, b: 127 },
+    outline_color: { r: 127, g: 255, b: 127, a: 255 },
   }), // points
   marker(4, {
-    points: range(50).map((i) => ({ x: 20 + 5 * i, y: 130 + 10 * Math.sin(i / 2) })),
-    fill_color: { r: 255, g: 0, b: 0 },
+    points: range(50).map((i) => ({ x: 20 + 5 * i, y: 130 + 10 * Math.sin(i / 2), z: 0 })),
+    fill_color: { r: 255, g: 0, b: 0, a: 255 },
   }),
   marker(4, {
     scale: 1,
-    points: range(50).map((i) => ({ x: 20 + 5 * i, y: 150 + 10 * Math.sin(i / 2) })),
-    fill_color: { r: 127, g: 255, b: 0 },
+    points: range(50).map((i) => ({ x: 20 + 5 * i, y: 150 + 10 * Math.sin(i / 2), z: 0 })),
+    fill_color: { r: 127, g: 255, b: 0, a: 255 },
   }),
   marker(4, {
     scale: 2,
-    points: range(50).map((i) => ({ x: 20 + 5 * i, y: 170 + 10 * Math.sin(i / 2) })),
-    fill_color: { r: 0, g: 0, b: 255 },
+    points: range(50).map((i) => ({ x: 20 + 5 * i, y: 170 + 10 * Math.sin(i / 2), z: 0 })),
+    fill_color: { r: 0, g: 0, b: 255, a: 255 },
   }),
   marker(4, {
     scale: 2,
-    points: range(50).map((i) => ({ x: 20 + 5 * i, y: 190 + 10 * Math.sin(i / 2) })),
+    points: range(50).map((i) => ({ x: 20 + 5 * i, y: 190 + 10 * Math.sin(i / 2), z: 0 })),
     outline_colors: range(50).map((i) => ({
       r: Math.round(255 * Math.min(1, (2 * i) / 50)),
       g: Math.round(255 * Math.min(1, (2 * (i - 15)) / 50)),
       b: Math.round(255 * Math.min(1, (2 * (i - 30)) / 50)),
+      a: 255,
     })),
-    fill_color: { r: 0, g: 0, b: 255 },
+    fill_color: { r: 0, g: 0, b: 255, a: 255 },
   }), // text
   marker(5, {
     text: { data: "Hello!" },
-    position: { x: 30, y: 100 },
+    position: { x: 30, y: 100, z: 0 },
     scale: 1,
-    outline_color: { r: 255, g: 127, b: 127 },
+    outline_color: { r: 255, g: 127, b: 127, a: 255 },
   }),
   marker(5, {
     text: { data: "Hello!" },
-    position: { x: 130, y: 100 },
+    position: { x: 130, y: 100, z: 0 },
     scale: 1,
-    outline_color: { r: 255, g: 127, b: 127 },
+    outline_color: { r: 255, g: 127, b: 127, a: 255 },
     filled: true,
-    fill_color: { r: 50, g: 50, b: 50 },
+    fill_color: { r: 50, g: 50, b: 50, a: 255 },
   }),
   marker(0, {
-    position: { x: 30, y: 100 },
+    position: { x: 30, y: 100, z: 0 },
     scale: 2,
     thickness: -1,
-    outline_color: { r: 255, g: 255, b: 0 },
+    outline_color: { r: 255, g: 255, b: 0, a: 255 },
   }),
   marker(0, {
-    position: { x: 130, y: 100 },
+    position: { x: 130, y: 100, z: 0 },
     scale: 2,
     thickness: -1,
-    outline_color: { r: 255, g: 255, b: 0 },
+    outline_color: { r: 255, g: 255, b: 0, a: 255 },
   }),
 ];
 

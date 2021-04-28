@@ -30,6 +30,7 @@ import { openSiblingStateTransitionsPanel } from "@foxglove-studio/app/panels/St
 import { Config } from "@foxglove-studio/app/panels/diagnostics/DiagnosticStatusPanel";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { PanelConfig } from "@foxglove-studio/app/types/panels";
+import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 
 import style from "./DiagnosticStatus.module.scss";
 import { LEVEL_NAMES, DiagnosticInfo, KeyValue, DiagnosticStatusMessage } from "./util";
@@ -137,7 +138,7 @@ const HAS_ANY_HTML = new RegExp(`<(${allowedTags.join("|")})`);
 const getFormattedKeyValues = createSelector(
   (message: DiagnosticStatusMessage) => message,
   (message: DiagnosticStatusMessage): FormattedKeyValue[] => {
-    return (message.values || []).map(({ key, value }: KeyValue) => {
+    return message.values.map(({ key, value }: KeyValue) => {
       return {
         key,
         keyHtml: HAS_ANY_HTML.test(key) ? sanitize(key) : undefined,
@@ -156,7 +157,7 @@ class DiagnosticStatus extends React.Component<Props, any> {
     splitFraction: 0.5,
   };
 
-  _onClickSection(sectionObj: { name: string; section: string }) {
+  _onClickSection(sectionObj: { name: string; section: string }): void {
     const { collapsedSections, saveConfig } = this.props;
     const clickedSelectionIsCollapsed = collapsedSections.find(
       ({ name, section }) => name === sectionObj.name && section === sectionObj.section,
@@ -172,23 +173,23 @@ class DiagnosticStatus extends React.Component<Props, any> {
     }
   }
 
-  _resizeMouseDown = (event: React.MouseEvent<Element>) => {
+  _resizeMouseDown = (event: React.MouseEvent<Element>): void => {
     event.preventDefault();
     window.addEventListener("mousemove", this._resizeMouseMove as any);
     window.addEventListener("mouseup", this._resizeMouseUp);
   };
 
-  _resizeMouseUp = () => {
+  _resizeMouseUp = (): void => {
     window.removeEventListener("mousemove", this._resizeMouseMove as any);
   };
 
-  _resizeMouseMove = (event: React.MouseEvent<Element>) => {
+  _resizeMouseMove = (event: React.MouseEvent<Element>): void => {
     const {
       _tableRef,
       props: { onChangeSplitFraction },
     } = this;
 
-    if (!_tableRef.current || !onChangeSplitFraction) {
+    if (!_tableRef.current) {
       return;
     }
 
@@ -217,7 +218,7 @@ class DiagnosticStatus extends React.Component<Props, any> {
     }
     return (
       <td className={style.valueCell}>
-        {str || "\xa0"}
+        {nonEmptyOrUndefined(str) ?? "\xa0"}
         {openPlotPanelIconElem}
       </td>
     );
@@ -229,8 +230,8 @@ class DiagnosticStatus extends React.Component<Props, any> {
     let inCollapsedSection = false;
     let ellipsisShown = false;
     return formattedKeyVals.map(({ key, value, keyHtml, valueHtml }, idx) => {
-      const keyIsSection = !value && (key.startsWith("==") || key.startsWith("--"));
-      const valIsSection = !key && (value.startsWith("==") || value.startsWith("--"));
+      const keyIsSection = value.length === 0 && (key.startsWith("==") || key.startsWith("--"));
+      const valIsSection = key.length === 0 && (key.startsWith("==") || value.startsWith("--"));
       if (keyIsSection || valIsSection) {
         const sectionObj = { name: info.status.name, section: `${key}${value}` };
         inCollapsedSection = collapsedSections.find(
@@ -262,7 +263,7 @@ class DiagnosticStatus extends React.Component<Props, any> {
       // what to show in this very panel; see `selectedHardwareId` AND `selectedName` in the config.
       const valuePath = `${topicToRender}.status[:]{hardware_id=="${info.status.hardware_id}"}{name=="${info.status.name}"}.values[:]{key=="${key}"}.value`;
       let openPlotPanelIconElem = undefined;
-      if (value && value.length > 0) {
+      if (value.length > 0) {
         openPlotPanelIconElem = !isNaN(Number(value)) ? (
           <Icon
             fade
@@ -302,13 +303,13 @@ class DiagnosticStatus extends React.Component<Props, any> {
     const { info } = this.props;
     const formattedKeyVals = getFormattedKeyValues(info.status);
     return formattedKeyVals.filter(({ key, value }) => {
-      const keyIsSection = !value && (key.startsWith("==") || key.startsWith("--"));
-      const valIsSection = !key && (value.startsWith("==") || value.startsWith("--"));
+      const keyIsSection = value.length === 0 && (key.startsWith("==") || key.startsWith("--"));
+      const valIsSection = key.length === 0 && (value.startsWith("==") || value.startsWith("--"));
       return keyIsSection || valIsSection;
     });
   };
 
-  _toggleSections = () => {
+  _toggleSections = (): void => {
     const { saveConfig, collapsedSections, info } = this.props;
     const newSectionsForCurrentName =
       this._getSectionsCollapsedForCurrentName().length > 0
@@ -321,7 +322,7 @@ class DiagnosticStatus extends React.Component<Props, any> {
     saveConfig({ collapsedSections: newSectionsForCurrentName.concat(otherSections) });
   };
 
-  render() {
+  render(): JSX.Element {
     const {
       info: { status, displayName },
       splitFraction,
