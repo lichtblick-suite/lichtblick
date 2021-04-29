@@ -29,7 +29,6 @@ import {
   MutablePose,
   Pose,
   StampedMessage,
-  Point,
   MutablePoint,
   BaseMarker,
   PoseStamped,
@@ -515,73 +514,6 @@ export default class SceneBuilder implements MarkerProvider {
     }
   };
 
-  _addMarker({ topic, message, name }: { topic: string; message: Marker; name: string }) {
-    let minZ = Number.MAX_SAFE_INTEGER;
-
-    const { points, pose } = message as any;
-    const { position } = pose as Pose;
-
-    // if the marker has points, adjust bounds by the points
-    if (points?.length) {
-      points.forEach((point: Point) => {
-        const x = point.x + position.x;
-        const y = point.y + position.y;
-        const z = point.z + position.z;
-        minZ = Math.min(minZ, point.z);
-        this.bounds.update({ x, y, z });
-      });
-    } else {
-      // otherwise just adjust by the pose
-      minZ = Math.min(minZ, position.z);
-      this.bounds.update(position);
-    }
-
-    // if the minimum z value of any point (or the pose) is exactly 0
-    // then assume this marker can be flattened
-    if (minZ === 0 && this.flatten && this.flattenedZHeightPose) {
-      (position as MutablePoint).z = this.flattenedZHeightPose.position.z;
-    }
-
-    // HACK(jacob): rather than hard-coding this, we should
-    //  (a) produce this visualization dynamically from a non-marker topic
-    //  (b) fix translucency so it looks correct (harder)
-    // HACK(steel): color should always be present. But don't crash just in case?
-    const color = this._hooks.getMarkerColor(topic, message.color as any);
-
-    // Allow topic settings to override marker color (see MarkerSettingsEditor.js)
-    let { overrideColor } =
-      this._settingsByKey[`ns:${topic}:${message.ns}`] || this._settingsByKey[`t:${topic}`] || {};
-
-    // Check for matching colorOverrideMarkerMatchers for this topic
-    const colorOverrideMarkerMatchers = this._colorOverrideMarkerMatchersByTopic[topic] || [];
-    const matchingMatcher = colorOverrideMarkerMatchers.find(({ checks = [] }) =>
-      checks.every(({ markerKeyPath, value }) => {
-        const markerValue = _.get(message, markerKeyPath as any);
-        return value === markerValue;
-      }),
-    );
-    if (matchingMatcher) {
-      overrideColor = matchingMatcher.color;
-    }
-
-    // Set later in renderMarkers so it be applied to markers generated in _consumeNonMarkerMessage
-    const highlighted = false;
-    const interactionData = {
-      topic,
-      highlighted,
-      originalMessage: message,
-    };
-    const marker = {
-      ...message,
-      pose,
-      interactionData,
-      color: overrideColor || color,
-      colors: overrideColor ? [] : message.colors,
-    };
-
-    this.collectors[topic]!.addMarker(marker as any, name);
-  }
-
   _consumeMarker(topic: string, message: BaseMarker): void {
     const namespace = message.ns;
     if (namespace.length > 0) {
@@ -689,6 +621,7 @@ export default class SceneBuilder implements MarkerProvider {
       originalMessage: message,
     };
     const lifetime = message.lifetime;
+
     // This "marker-ish" thing is an unholy union of many drawable types...
     const marker: any = {
       type: (message as any).type,

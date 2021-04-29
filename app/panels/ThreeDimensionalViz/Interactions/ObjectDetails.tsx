@@ -96,9 +96,20 @@ function ObjectDetailsWrapper({
   );
 }
 
+function maybePlainObject(rawVal: unknown) {
+  if (rawVal && typeof rawVal === "object" && "toJSON" in rawVal) {
+    return (rawVal as { toJSON: () => unknown }).toJSON();
+  }
+  return rawVal;
+}
+
 function ObjectDetails({ interactionData, objectToDisplay }: Props) {
   const topic = interactionData?.topic ?? "";
-  const originalObject = omit(objectToDisplay, "interactionData");
+
+  // object to display may not be a plain-ole-data
+  // We need a plain object to sort the keys and omit interaction data
+  const plainObject = "toJSON" in objectToDisplay ? objectToDisplay.toJSON() : objectToDisplay;
+  const originalObject = omit(plainObject, "interactionData");
 
   const getItemString = useGetItemStringWithTimezone();
 
@@ -110,6 +121,7 @@ function ObjectDetails({ interactionData, objectToDisplay }: Props) {
           data={objectToDisplay}
           shouldExpandNode={(_markerKeyPath, _data, level) => level < 2}
           invertTheme={false}
+          postprocessValue={maybePlainObject}
           theme={{ ...jsonTreeTheme, tree: { margin: 0 } }}
           hideRoot
         />
@@ -133,6 +145,7 @@ function ObjectDetails({ interactionData, objectToDisplay }: Props) {
         theme={{ ...jsonTreeTheme, tree: { margin: 0 } }}
         hideRoot
         getItemString={getItemString}
+        postprocessValue={maybePlainObject}
         labelRenderer={(markerKeyPath, _p1, _p2, hasChildren) => {
           const label = first(markerKeyPath);
           if (!hasChildren) {
