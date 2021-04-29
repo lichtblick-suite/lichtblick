@@ -13,6 +13,7 @@
 
 import hoistNonReactStatics from "hoist-non-react-statics";
 import PropTypes from "prop-types";
+import { ForwardedRef } from "react";
 
 import { useDataSourceInfo } from "@foxglove-studio/app/PanelAPI";
 import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
@@ -53,7 +54,7 @@ function withTransforms<Props extends BaseProps>(ChildComponent: React.Component
       frame: Frame;
       topics: readonly Topic[];
       cleared?: boolean;
-      forwardedRef: any;
+      forwardedRef: ForwardedRef<unknown>;
     }>,
     State
   > {

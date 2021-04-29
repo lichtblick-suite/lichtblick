@@ -15,7 +15,10 @@ import hoistNonReactStatics from "hoist-non-react-statics";
 import { omit, debounce } from "lodash";
 import React, { useCallback, useMemo, useState, useRef, useEffect } from "react";
 
-import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@foxglove-studio/app/components/MessagePipeline";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelContext from "@foxglove-studio/app/components/PanelContext";
 import Layout from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/Layout";
@@ -48,7 +51,16 @@ export type Props = {
   transforms: Transforms;
 };
 
-const BaseRenderer = (props: Props, ref: any) => {
+const TimeZero = { sec: 0, nsec: 0 };
+function selectCurrentTime(ctx: MessagePipelineContext) {
+  return ctx.playerState.activeData?.currentTime ?? TimeZero;
+}
+
+function selectIsPlaying(ctx: MessagePipelineContext) {
+  return ctx.playerState.activeData?.isPlaying ?? false;
+}
+
+const BaseRenderer = (props: Props, ref: React.Ref<unknown>) => {
   const {
     cleared,
     config,
@@ -59,17 +71,10 @@ const BaseRenderer = (props: Props, ref: any) => {
     transforms,
     config: { autoSyncCameraState = false, followOrientation = false, followTf },
   } = props;
-  const { updatePanelConfig } = React.useContext(PanelContext) || {};
+  const { updatePanelConfig } = React.useContext(PanelContext) ?? {};
 
-  const currentTime = useMessagePipeline(
-    useCallback(
-      ({ playerState: { activeData } }) => activeData?.currentTime ?? { sec: 0, nsec: 0 },
-      [],
-    ),
-  );
-  const isPlaying = useMessagePipeline(
-    useCallback(({ playerState: { activeData } }) => activeData?.isPlaying ?? false, []),
-  );
+  const currentTime = useMessagePipeline(selectCurrentTime);
+  const isPlaying = useMessagePipeline(selectIsPlaying);
 
   // We use useState to store the cameraState instead of using config directly in order to
   // speed up the pan/rotate performance of the 3D panel. This allows us to update the cameraState
@@ -160,7 +165,7 @@ const BaseRenderer = (props: Props, ref: any) => {
 
       // If autoSyncCameraState is enabled, we can't wait for the debounce and need to call updatePanelConfig right away
       if (autoSyncCameraState) {
-        (updatePanelConfig as any)("3D Panel", (oldConfig: any) => ({
+        updatePanelConfig?.("3D Panel", (oldConfig) => ({
           ...oldConfig,
           cameraState: newCurrentCameraState,
         }));
@@ -172,7 +177,7 @@ const BaseRenderer = (props: Props, ref: any) => {
   );
 
   // useImperativeHandle so consumer component (e.g.Follow stories) can call onFollowChange directly.
-  React.useImperativeHandle(ref, (): any => ({ onFollowChange }));
+  React.useImperativeHandle(ref, () => ({ onFollowChange }));
 
   return (
     <Layout

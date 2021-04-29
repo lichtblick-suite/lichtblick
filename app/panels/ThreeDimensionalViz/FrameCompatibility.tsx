@@ -13,9 +13,10 @@
 
 import hoistNonReactStatics from "hoist-non-react-statics";
 import { uniq } from "lodash";
+import { ForwardedRef } from "react";
 
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import { Frame, Message, Topic } from "@foxglove-studio/app/players/types";
+import { Frame, Message } from "@foxglove-studio/app/players/types";
 
 const useFrame = (
   topics: string[],
@@ -65,7 +66,7 @@ export function FrameCompatibilityDEPRECATED<Props>(
   ChildComponent: React.ComponentType<Props>,
   baseTopics: string[],
 ) {
-  function FrameCompatibilityComponent(props: Props & { forwardedRef: any; topics: Topic[] }) {
+  function FrameCompatibilityComponent(props: Props & { forwardedRef: ForwardedRef<unknown> }) {
     const { forwardedRef, ...childProps } = props;
     const [topics, setTopics] = React.useState<string[]>(baseTopics);
     const componentSetSubscriptions = React.useCallback((newTopics: string[]) => {
@@ -84,7 +85,7 @@ export function FrameCompatibilityDEPRECATED<Props>(
   }
 
   return hoistNonReactStatics(
-    React.forwardRef(function FrameCompatibility(props: any, ref) {
+    React.forwardRef(function FrameCompatibility(props: Props, ref) {
       return <FrameCompatibilityComponent {...props} forwardedRef={ref} />;
     }),
     ChildComponent,
