@@ -18,7 +18,6 @@ import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import UserNodePlayer from "@foxglove-studio/app/players/UserNodePlayer";
 import {
   AdvertisePayload,
-  Message,
   PublishPayload,
   SubscribePayload,
   Player,
@@ -85,7 +84,7 @@ export default class OrderedStampPlayer implements Player {
 
       // Only store messages with a header stamp.
       const [newMessagesWithHeaders, newMessagesWithoutHeaders] = <
-        [TypedMessage<StampedMessage>[], Message[]]
+        [TypedMessage<StampedMessage>[], TypedMessage<unknown>[]]
       >partition(activeData.messages, (message) =>
         isTime((message.message as Partial<StampedMessage>).header?.stamp),
       );

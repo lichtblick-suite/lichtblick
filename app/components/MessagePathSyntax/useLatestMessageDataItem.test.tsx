@@ -14,7 +14,7 @@
 import { mount } from "enzyme";
 
 import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
-import { Message } from "@foxglove-studio/app/players/types";
+import { TypedMessage } from "@foxglove-studio/app/players/types";
 
 import { useLatestMessageDataItem } from "./useLatestMessageDataItem";
 
@@ -22,7 +22,7 @@ const topics = [{ name: "/topic", datatype: "datatype" }];
 const datatypes = {
   datatype: { fields: [{ name: "value", type: "uint32", isArray: false, isComplex: false }] },
 };
-const messages: Message[] = [
+const messages: TypedMessage<unknown>[] = [
   {
     topic: "/topic",
     receiveTime: { sec: 0, nsec: 0 },

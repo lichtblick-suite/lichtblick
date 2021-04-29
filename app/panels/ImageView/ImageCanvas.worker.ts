@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Message } from "@foxglove-studio/app/players/types";
+import { TypedMessage } from "@foxglove-studio/app/players/types";
 import Rpc, { Channel } from "@foxglove-studio/app/util/Rpc";
 import { setupWorker } from "@foxglove-studio/app/util/RpcWorkerUtils";
 
@@ -41,7 +41,7 @@ export default class ImageCanvasWorker {
         rawMarkerData,
       }: {
         id: string;
-        imageMessage?: Message;
+        imageMessage?: TypedMessage<unknown>;
         imageMessageDatatype?: string;
         rawMarkerData: RawMarkerData;
       }): Promise<Dimensions | undefined> => {

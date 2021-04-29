@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Message, TypedMessage } from "@foxglove-studio/app/players/types";
+import { TypedMessage } from "@foxglove-studio/app/players/types";
 import { ImageMarker, Color, Point } from "@foxglove-studio/app/types/Messages";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
@@ -43,7 +43,7 @@ export async function renderImage({
   rawMarkerData,
 }: {
   canvas?: HTMLCanvasElement | OffscreenCanvas;
-  imageMessage?: Message;
+  imageMessage?: TypedMessage<unknown>;
   imageMessageDatatype?: string;
   rawMarkerData: RawMarkerData;
 }): Promise<Dimensions | undefined> {

@@ -22,7 +22,7 @@ import {
 } from "@foxglove-studio/app/dataProviders/types";
 import {
   AdvertisePayload,
-  Message,
+  TypedMessage,
   ParameterValue,
   Player,
   PlayerPresence,
@@ -135,7 +135,10 @@ export default class AutomatedRunPlayer implements Player {
     });
   }
 
-  async _getMessages(start: Time, end: Time): Promise<{ parsedMessages: readonly Message[] }> {
+  async _getMessages(
+    start: Time,
+    end: Time,
+  ): Promise<{ parsedMessages: readonly TypedMessage<unknown>[] }> {
     if (!this._providerResult) {
       throw new Error("AutomatedRunPlayer not initialized");
     }
@@ -182,7 +185,7 @@ export default class AutomatedRunPlayer implements Player {
     return { parsedMessages: filterMessages(parsedMessages) };
   }
 
-  _emitState(messages: readonly Message[], currentTime: Time): Promise<void> {
+  _emitState(messages: readonly TypedMessage<unknown>[], currentTime: Time): Promise<void> {
     return this._emitStateQueue.add(async () => {
       if (!this._listener) {
         return;

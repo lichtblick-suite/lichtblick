@@ -18,7 +18,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import {
   AdvertisePayload,
-  Message,
+  TypedMessage,
   Player,
   PlayerCapabilities,
   PlayerState,
@@ -72,7 +72,7 @@ export default class RosbridgePlayer implements Player {
   // active subscriptions
   _topicSubscriptions = new Map<string, roslib.Topic>();
   _requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
-  _parsedMessages: Message[] = []; // Queue of messages that we'll send in next _emitState() call.
+  _parsedMessages: TypedMessage<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call.
   _messageOrder: TimestampMethod = "receiveTime";
   _requestTopicsTimeout?: ReturnType<typeof setTimeout>; // setTimeout() handle for _requestTopics().
   _topicPublishers: {
@@ -358,7 +358,7 @@ export default class RosbridgePlayer implements Player {
         }
 
         if (this._parsedTopics.has(topicName)) {
-          const msg: Message = {
+          const msg: TypedMessage<unknown> = {
             topic: topicName,
             receiveTime,
             message: innerMessage as never,
@@ -457,7 +457,7 @@ export default class RosbridgePlayer implements Player {
     }
   }
 
-  private _handleInternalMessage(msg: Message): void {
+  private _handleInternalMessage(msg: TypedMessage<unknown>): void {
     const maybeClockMsg = msg.message as { clock?: Time };
 
     if (msg.topic === "/clock" && maybeClockMsg.clock && !isNaN(maybeClockMsg.clock?.sec)) {

@@ -18,7 +18,7 @@ import { Time, TimeUtil } from "rosbag";
 import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
 import {
   AdvertisePayload,
-  Message,
+  TypedMessage,
   ParameterValue,
   PlayerPresence,
   PlayerStateActiveData,
@@ -43,7 +43,7 @@ export default function MockMessagePipelineProvider(props: {
   presence?: PlayerPresence;
   topics?: Topic[];
   datatypes?: RosDatatypes;
-  messages?: Message[];
+  messages?: TypedMessage<unknown>[];
   publish?: (request: PublishPayload) => void;
   setPublishers?: (arg0: string, arg1: AdvertisePayload[]) => void;
   setSubscriptions?: (arg0: string, arg1: SubscribePayload[]) => void;

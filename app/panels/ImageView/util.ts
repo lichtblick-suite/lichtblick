@@ -13,7 +13,7 @@
 
 import clamp from "lodash/clamp";
 
-import { Topic, Message } from "@foxglove-studio/app/players/types";
+import { Topic, TypedMessage } from "@foxglove-studio/app/players/types";
 import { CameraInfo } from "@foxglove-studio/app/types/Messages";
 import {
   isNonEmptyOrUndefined,
@@ -34,7 +34,7 @@ export type MarkerOption = {
 };
 
 export type RawMarkerData = {
-  markers: Message[];
+  markers: TypedMessage<unknown>[];
   scale: number;
   transformMarkers: boolean;
   cameraInfo?: CameraInfo;
@@ -42,7 +42,7 @@ export type RawMarkerData = {
 
 export type MarkerData =
   | {
-      markers: Message[];
+      markers: TypedMessage<unknown>[];
       originalWidth?: number; // undefined means no scaling is needed (use the image's size)
       originalHeight?: number; // undefined means no scaling is needed (use the image's size)
       cameraModel?: CameraModel; // undefined means no transformation is needed

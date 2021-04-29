@@ -17,7 +17,7 @@ import { TimeUtil, Time } from "rosbag";
 
 import { GetMessagesResult, GetMessagesTopics } from "@foxglove-studio/app/dataProviders/types";
 import {
-  Message,
+  TypedMessage,
   PlayerCapabilities,
   PlayerMetricsCollectorInterface,
   PlayerPresence,
@@ -290,7 +290,7 @@ describe("RandomAccessPlayer", () => {
           expect(start).toEqual({ sec: 10, nsec: 0 });
           expect(end).toEqual({ sec: 10, nsec: 4000000 });
           expect(topics).toEqual({ parsedMessages: ["/foo/bar"] });
-          const parsedMessages: Message[] = [
+          const parsedMessages: TypedMessage<unknown>[] = [
             {
               topic: "/foo/bar",
               receiveTime: { sec: 10, nsec: 2 },
@@ -457,7 +457,7 @@ describe("RandomAccessPlayer", () => {
           expect(start).toEqual({ sec: 10, nsec: 0 });
           expect(end).toEqual({ sec: 10, nsec: 4000000 });
           expect(topics).toEqual({ parsedMessages: ["/foo/bar"] });
-          const parsedMessages: Message[] = [
+          const parsedMessages: TypedMessage<unknown>[] = [
             {
               topic: "/foo/bar",
               receiveTime: { sec: 10, nsec: 0 },
@@ -538,7 +538,7 @@ describe("RandomAccessPlayer", () => {
         case 2: {
           expect(start).toEqual({ sec: 10, nsec: 0 });
           expect(end).toEqual({ sec: 10, nsec: 4000000 });
-          const parsedMessages: Message[] = [
+          const parsedMessages: TypedMessage<unknown>[] = [
             {
               topic: "/foo/bar",
               receiveTime: { sec: 10, nsec: 0 },
@@ -623,7 +623,7 @@ describe("RandomAccessPlayer", () => {
           provider.extensionPoint?.progressCallback({});
           await delay(1);
           // The actual message is irrelevant
-          const parsedMessages: Message[] = [
+          const parsedMessages: TypedMessage<unknown>[] = [
             {
               topic: "/foo/bar",
               receiveTime: { sec: 10, nsec: 5 },
@@ -689,7 +689,7 @@ describe("RandomAccessPlayer", () => {
           provider.extensionPoint?.progressCallback(progressDuringPlayback);
           await delay(1);
           // The actual message is irrelevant
-          const parsedMessages: Message[] = [
+          const parsedMessages: TypedMessage<unknown>[] = [
             {
               topic: "/foo/bar",
               receiveTime: { sec: 10, nsec: 5 },
@@ -767,7 +767,7 @@ describe("RandomAccessPlayer", () => {
           expect(start).toEqual({ sec: 19, nsec: 1e9 + 50 - SEEK_BACK_NANOSECONDS });
           expect(end).toEqual({ sec: 20, nsec: 50 });
           expect(topics).toEqual({ parsedMessages: ["/foo/bar"] });
-          const parsedMessages: Message[] = [
+          const parsedMessages: TypedMessage<unknown>[] = [
             {
               topic: "/foo/bar",
               receiveTime: { sec: 10, nsec: 5 },
@@ -935,7 +935,7 @@ describe("RandomAccessPlayer", () => {
     ]);
 
     store.reset(0); // We expect 0 more messages; this will throw an error later if we received more.
-    const result: Message = {
+    const result: TypedMessage<unknown> = {
       topic: "/foo/bar",
       receiveTime: { sec: 10, nsec: 5 },
       message: { payload: "foo bar" },
@@ -1076,7 +1076,7 @@ describe("RandomAccessPlayer", () => {
 
   it("reads a bunch of messages", async () => {
     const provider = new TestProvider();
-    const items: Message[] = [
+    const items: TypedMessage<unknown>[] = [
       {
         topic: "/foo/bar",
         receiveTime: { sec: 10, nsec: 0 },
@@ -1118,7 +1118,7 @@ describe("RandomAccessPlayer", () => {
       { name: "TestProvider", args: { provider }, children: [] },
       playerOptions,
     );
-    const messagesReceived: Message[] = [];
+    const messagesReceived: TypedMessage<unknown>[] = [];
     source.setListener((playerState) => {
       messagesReceived.push(
         ...(

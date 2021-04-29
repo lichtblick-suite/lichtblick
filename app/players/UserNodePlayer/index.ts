@@ -33,7 +33,6 @@ import {
 import { hasTransformerErrors } from "@foxglove-studio/app/players/UserNodePlayer/utils";
 import {
   AdvertisePayload,
-  Message,
   Player,
   PlayerState,
   PlayerStateActiveData,
@@ -178,12 +177,12 @@ export default class UserNodePlayer implements Player {
   // (i.e. invoke _getMessages with an empty array) to refresh messages
   _getMessages = microMemoize(
     async (
-      parsedMessages: readonly Message[],
+      parsedMessages: readonly TypedMessage<unknown>[],
       _datatypes: RosDatatypes,
       globalVariables: GlobalVariables,
       nodeRegistrations: readonly NodeRegistration[],
     ): Promise<{
-      parsedMessages: readonly Message[];
+      parsedMessages: readonly TypedMessage<unknown>[];
     }> => {
       const parsedMessagesPromises: Promise<TypedMessage<unknown> | undefined>[] = [];
       for (const message of parsedMessages) {
@@ -260,7 +259,7 @@ export default class UserNodePlayer implements Player {
       nodeData,
       inputs: inputTopics,
       output: { name: outputTopic, datatype: outputDatatype },
-      processMessage: async (message: Message) => {
+      processMessage: async (message: TypedMessage<unknown>) => {
         // We allow _resetWorkers to "cancel" the processing by creating a new signal every time we process a message
         terminateSignal = signal<void>();
 

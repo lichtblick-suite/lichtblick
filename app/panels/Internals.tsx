@@ -27,7 +27,7 @@ import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import TextContent from "@foxglove-studio/app/components/TextContent";
 import {
   Topic,
-  Message,
+  TypedMessage,
   SubscribePayload,
   AdvertisePayload,
 } from "@foxglove-studio/app/players/types";
@@ -87,7 +87,7 @@ function getPublisherGroup({ advertiser }: AdvertisePayload): string {
 type RecordedData = {
   readonly topics: Topic[];
   readonly frame: {
-    [key: string]: readonly Message[];
+    [key: string]: readonly TypedMessage<unknown>[];
   };
 };
 

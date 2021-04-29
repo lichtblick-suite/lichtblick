@@ -18,7 +18,7 @@ import { cloneDeep } from "lodash";
 import { setGlobalVariables } from "@foxglove-studio/app/actions/panels";
 import parseRosPath from "@foxglove-studio/app/components/MessagePathSyntax/parseRosPath";
 import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
-import { Message, Topic, TypedMessage } from "@foxglove-studio/app/players/types";
+import { Topic, TypedMessage } from "@foxglove-studio/app/players/types";
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
@@ -58,7 +58,7 @@ describe("useCachedGetMessagePathDataItems", () => {
       Test.cachedGetMessage = cachedGetMessagePathDataItems;
       return ReactNull;
     }
-    Test.cachedGetMessage = (_path: string, _message: Message) => {
+    Test.cachedGetMessage = (_path: string, _message: TypedMessage<unknown>) => {
       // no-op
     };
     return Test;
@@ -66,7 +66,7 @@ describe("useCachedGetMessagePathDataItems", () => {
 
   it("clears the cache whenever any inputs to getMessagePathDataItems change", async () => {
     const Test = createTest();
-    const message: Message = {
+    const message: TypedMessage<unknown> = {
       topic: "/topic",
       receiveTime: { sec: 0, nsec: 0 },
       message: { an_array: [5, 10, 15, 20] },
@@ -133,7 +133,7 @@ describe("useCachedGetMessagePathDataItems", () => {
 
   it("clears the cache only when relevant global variables change", async () => {
     const Test = createTest();
-    const message: Message = {
+    const message: TypedMessage<unknown> = {
       topic: "/topic",
       receiveTime: { sec: 0, nsec: 0 },
       message: { an_array: [5, 10, 15, 20] },
@@ -173,7 +173,7 @@ describe("useCachedGetMessagePathDataItems", () => {
 
   describe("getMessagePathDataItems", () => {
     it("traverses down the path for every item", () => {
-      const messages: Message[] = [
+      const messages: TypedMessage<unknown>[] = [
         {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
@@ -240,7 +240,7 @@ describe("useCachedGetMessagePathDataItems", () => {
     });
     describe("JSON", () => {
       it("traverses JSON fields", () => {
-        const messages: Message[] = [
+        const messages: TypedMessage<unknown>[] = [
           {
             topic: "/some/topic",
             receiveTime: { sec: 0, nsec: 0 },
@@ -278,7 +278,7 @@ describe("useCachedGetMessagePathDataItems", () => {
       });
 
       it("traverses nested JSON arrays", () => {
-        const messages: Message[] = [
+        const messages: TypedMessage<unknown>[] = [
           {
             topic: "/some/topic",
             receiveTime: { sec: 0, nsec: 0 },
@@ -298,7 +298,7 @@ describe("useCachedGetMessagePathDataItems", () => {
       });
 
       it("filters JSON arrays", () => {
-        const messages: Message[] = [
+        const messages: TypedMessage<unknown>[] = [
           {
             topic: "/some/topic",
             receiveTime: { sec: 0, nsec: 0 },
@@ -316,7 +316,7 @@ describe("useCachedGetMessagePathDataItems", () => {
       });
 
       it("traverses arrays of JSON", () => {
-        const messages: Message[] = [
+        const messages: TypedMessage<unknown>[] = [
           {
             topic: "/some/topic",
             receiveTime: { sec: 0, nsec: 0 },
@@ -334,7 +334,7 @@ describe("useCachedGetMessagePathDataItems", () => {
       });
 
       it("gracefully handles non-existent JSON fields", () => {
-        const messages: Message[] = [
+        const messages: TypedMessage<unknown>[] = [
           {
             topic: "/some/topic",
             receiveTime: { sec: 0, nsec: 0 },
@@ -369,7 +369,7 @@ describe("useCachedGetMessagePathDataItems", () => {
     });
 
     it("works with negative slices", () => {
-      const messages: Message[] = [
+      const messages: TypedMessage<unknown>[] = [
         {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
@@ -392,7 +392,7 @@ describe("useCachedGetMessagePathDataItems", () => {
     });
 
     it("returns nothing for invalid topics", () => {
-      const messages: Message[] = [
+      const messages: TypedMessage<unknown>[] = [
         {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
@@ -408,7 +408,7 @@ describe("useCachedGetMessagePathDataItems", () => {
       const datatypes: RosDatatypes = {
         "std_msgs/Header": { fields: [{ name: "stamp", type: "time", isArray: false }] },
       };
-      const messages: Message[] = [
+      const messages: TypedMessage<unknown>[] = [
         {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
@@ -421,7 +421,7 @@ describe("useCachedGetMessagePathDataItems", () => {
     });
 
     it("filters properly, and uses the filter name in the path", () => {
-      const messages: Message[] = [
+      const messages: TypedMessage<unknown>[] = [
         {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
@@ -483,7 +483,7 @@ describe("useCachedGetMessagePathDataItems", () => {
     });
 
     it("filters entire messages", () => {
-      const messages: Message[] = [
+      const messages: TypedMessage<unknown>[] = [
         {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },
@@ -584,7 +584,7 @@ describe("useCachedGetMessagePathDataItems", () => {
     });
 
     it("returns matching constants", () => {
-      const messages: Message[] = [
+      const messages: TypedMessage<unknown>[] = [
         {
           topic: "/some/topic",
           receiveTime: { sec: 0, nsec: 0 },

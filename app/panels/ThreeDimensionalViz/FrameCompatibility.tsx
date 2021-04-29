@@ -16,7 +16,7 @@ import { uniq } from "lodash";
 import { ForwardedRef } from "react";
 
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import { Frame, Message } from "@foxglove-studio/app/players/types";
+import { Frame, TypedMessage } from "@foxglove-studio/app/players/types";
 
 const useFrame = (
   topics: string[],
@@ -39,7 +39,7 @@ const useFrame = (
       }
       return ++counter.current;
     }, []),
-    addMessages: React.useCallback((_, messages: readonly Message[]) => {
+    addMessages: React.useCallback((_, messages: readonly TypedMessage<unknown>[]) => {
       for (const message of messages) {
         (frame.current[message.topic] = frame.current[message.topic] ?? []).push(message);
       }

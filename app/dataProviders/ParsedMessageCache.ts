@@ -14,7 +14,7 @@
 import { sortBy } from "lodash";
 
 import { MessageReader } from "@foxglove-studio/app/dataProviders/types";
-import { Message, TypedMessage } from "@foxglove-studio/app/players/types";
+import { TypedMessage } from "@foxglove-studio/app/players/types";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import { toSec } from "@foxglove-studio/app/util/time";
@@ -28,7 +28,7 @@ function readMessage(
   readersByTopic: Readonly<{
     [topic: string]: MessageReader;
   }>,
-): Message | undefined {
+): TypedMessage<unknown> | undefined {
   const reader = readersByTopic[messageEvent.topic];
   if (!reader) {
     throw new Error(`Could not find message reader for topic ${messageEvent.topic}`);
@@ -49,7 +49,7 @@ function readMessage(
 }
 
 type Cache = {
-  map: WeakMap<Message, Message>;
+  map: WeakMap<TypedMessage<unknown>, TypedMessage<unknown>>;
   lastAccessIndex: number;
   sizeInBytes: number;
 };
@@ -71,8 +71,8 @@ export default class ParsedMessageCache {
     readersByTopic: Readonly<{
       [topic: string]: MessageReader;
     }>,
-  ): Message[] {
-    const outputMessages: Message[] = filterMap(messageEvents, (messageEvent) => {
+  ): TypedMessage<unknown>[] {
+    const outputMessages: TypedMessage<unknown>[] = filterMap(messageEvents, (messageEvent) => {
       // Use strings like "123.4" as the cache keys.
       const deciSecond = Math.trunc(toSec(messageEvent.receiveTime) * 10);
 
@@ -88,7 +88,7 @@ export default class ParsedMessageCache {
       // Update the access time.
       cache.lastAccessIndex = this._cacheAccessIndex++;
 
-      let outputMessage: Message | undefined = cache.map.get(messageEvent);
+      let outputMessage: TypedMessage<unknown> | undefined = cache.map.get(messageEvent);
       if (!outputMessage) {
         outputMessage = readMessage(messageEvent, readersByTopic);
         if (outputMessage) {

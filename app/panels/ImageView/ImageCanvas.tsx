@@ -25,7 +25,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
 import { Item } from "@foxglove-studio/app/components/Menu";
-import { Message, Topic } from "@foxglove-studio/app/players/types";
+import { TypedMessage, Topic } from "@foxglove-studio/app/players/types";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { CameraInfo, StampedMessage } from "@foxglove-studio/app/types/Messages";
 import Rpc from "@foxglove-studio/app/util/Rpc";
@@ -50,9 +50,9 @@ class ImageCanvasWorker {
 type OnFinishRenderImage = () => void;
 type Props = {
   topic?: Topic;
-  image?: Message;
+  image?: TypedMessage<unknown>;
   rawMarkerData: {
-    markers: Message[];
+    markers: TypedMessage<unknown>[];
     scale: number;
     transformMarkers: boolean;
     cameraInfo?: CameraInfo;

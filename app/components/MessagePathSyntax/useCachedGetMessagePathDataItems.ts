@@ -21,7 +21,7 @@ import useChangeDetector from "@foxglove-studio/app/hooks/useChangeDetector";
 import useDeepMemo from "@foxglove-studio/app/hooks/useDeepMemo";
 import useGlobalVariables, { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
-import { Message, Topic } from "@foxglove-studio/app/players/types";
+import { TypedMessage, Topic } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import {
   enumValuesByDatatypeAndField,
@@ -46,7 +46,7 @@ export type MessagePathDataItem = {
 // reference, as long as topics/datatypes/global variables haven't changed in the meantime.
 export function useCachedGetMessagePathDataItems(
   paths: string[],
-): (path: string, message: Message) => MessagePathDataItem[] | undefined {
+): (path: string, message: TypedMessage<unknown>) => MessagePathDataItem[] | undefined {
   const { topics: providerTopics, datatypes } = PanelAPI.useDataSourceInfo();
   const { globalVariables } = useGlobalVariables();
   const memoizedPaths: string[] = useShallowMemo<string[]>(paths);
@@ -75,7 +75,7 @@ export function useCachedGetMessagePathDataItems(
   const cachesByPath = useRef<{
     [key: string]: {
       filledInPath: RosPath;
-      weakMap: WeakMap<Message, MessagePathDataItem[] | undefined>;
+      weakMap: WeakMap<TypedMessage<unknown>, MessagePathDataItem[] | undefined>;
     };
   }>({});
   if (useChangeDetector([providerTopics, datatypes], true)) {
@@ -94,7 +94,7 @@ export function useCachedGetMessagePathDataItems(
   }
 
   return useCallback(
-    (path: string, message: Message): MessagePathDataItem[] | undefined => {
+    (path: string, message: TypedMessage<unknown>): MessagePathDataItem[] | undefined => {
       if (!memoizedPaths.includes(path)) {
         throw new Error(`path (${path}) was not in the list of cached paths`);
       }
@@ -188,7 +188,7 @@ const TIME_NEXT_BY_NAME = Object.freeze({
 // Get a new item that has `queriedData` set to the values and paths as queried by `rosPath`.
 // Exported just for tests.
 export function getMessagePathDataItems(
-  message: Message,
+  message: TypedMessage<unknown>,
   filledInPath: RosPath,
   providerTopics: readonly Topic[],
   datatypes: RosDatatypes,
@@ -345,7 +345,7 @@ export function getMessagePathDataItems(
   return queriedData;
 }
 
-export type MessageAndData = { message: Message; queriedData: MessagePathDataItem[] };
+export type MessageAndData = { message: TypedMessage<unknown>; queriedData: MessagePathDataItem[] };
 
 export type MessageDataItemsByPath = {
   readonly [key: string]: readonly MessageAndData[];
@@ -353,7 +353,9 @@ export type MessageDataItemsByPath = {
 
 export function useDecodeMessagePathsForMessagesByTopic(
   paths: string[],
-): (messagesByTopic: { [topicName: string]: readonly Message[] }) => MessageDataItemsByPath {
+): (messagesByTopic: {
+  [topicName: string]: readonly TypedMessage<unknown>[];
+}) => MessageDataItemsByPath {
   const memoizedPaths = useShallowMemo<string[]>(paths);
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems(memoizedPaths);
   // Note: Let callers define their own memoization scheme for messagesByTopic. For regular playback
