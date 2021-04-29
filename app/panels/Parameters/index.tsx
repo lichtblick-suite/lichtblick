@@ -12,11 +12,14 @@
 //   You may not use this file except in compliance with the License.
 
 import { union } from "lodash";
-import { ReactElement, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ReactElement, useEffect, useMemo, useRef, useState } from "react";
 
 import EmptyState from "@foxglove-studio/app/components/EmptyState";
 import { isActiveElementEditable } from "@foxglove-studio/app/components/GlobalVariablesTable";
-import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@foxglove-studio/app/components/MessagePipeline";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import { JSONInput } from "@foxglove-studio/app/components/input/JSONInput";
@@ -32,20 +35,23 @@ import helpContent from "./index.help.md";
 // The minimum amount of time to wait between showing the parameter update animation again
 export const ANIMATION_RESET_DELAY_MS = 3000;
 
+// Keep a single empty map so selector return value is reference-equal
+const EMPTY_PARAMETERS = new Map<string, ParameterValue>();
+
+function selectCapabilities(ctx: MessagePipelineContext) {
+  return ctx.playerState.capabilities;
+}
+function selectSetParameter(ctx: MessagePipelineContext) {
+  return ctx.setParameter;
+}
+function selectParameters(ctx: MessagePipelineContext) {
+  return ctx.playerState.activeData?.parameters ?? EMPTY_PARAMETERS;
+}
+
 function Parameters(): ReactElement {
-  const { capabilities, parameters, setParameter } = useMessagePipeline(
-    useCallback(
-      ({ setParameter: setParam, playerState: { activeData, capabilities: caps } }) =>
-        activeData
-          ? {
-              capabilities: caps,
-              parameters: activeData.parameters ?? new Map(),
-              setParameter: setParam,
-            }
-          : { capabilities: [] as string[], parameters: new Map(), setParameter: undefined },
-      [],
-    ),
-  );
+  const capabilities = useMessagePipeline(selectCapabilities);
+  const setParameter = useMessagePipeline(selectSetParameter);
+  const parameters = useMessagePipeline(selectParameters);
 
   const canGetParams = capabilities.includes(PlayerCapabilities.getParameters);
   const canSetParams = capabilities.includes(PlayerCapabilities.setParameters);
@@ -117,7 +123,7 @@ function Parameters(): ReactElement {
                         <JSONInput
                           dataTest={`parameter-value-input-${value}`}
                           value={value}
-                          onChange={(newVal) => setParameter?.(name, newVal as ParameterValue)}
+                          onChange={(newVal) => setParameter(name, newVal as ParameterValue)}
                         />
                       ) : (
                         value
