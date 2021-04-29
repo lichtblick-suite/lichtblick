@@ -1,16 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import {
-  ComboBox,
-  DefaultButton,
-  Dropdown,
-  IDropdownOption,
-  Slider,
-  Stack,
-  Toggle,
-  useTheme,
-} from "@fluentui/react";
+import { ComboBox, IDropdownOption, Stack, Toggle } from "@fluentui/react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { CameraStore, CameraListener, CameraState, DEFAULT_CAMERA_STATE } from "regl-worldview";
@@ -26,10 +17,13 @@ import { MessageEvent } from "@foxglove-studio/app/players/types";
 import { JointState } from "@foxglove-studio/app/types/Messages";
 import { SaveConfig } from "@foxglove-studio/app/types/panels";
 import filterMap from "@foxglove-studio/app/util/filterMap";
+import { ROBOT_DESCRIPTION_PARAM } from "@foxglove-studio/app/util/globalConstants";
 
 import { JointValueSliders } from "./JointValueSliders";
+import OverlayControls from "./OverlayControls";
 import { Renderer } from "./Renderer";
 import helpContent from "./index.help.md";
+import useRobotDescriptionAsset from "./useRobotDescriptionAsset";
 
 export type EventTypes = {
   cameraMove: () => void;
@@ -168,13 +162,18 @@ function URDFViewer({ config, saveConfig }: Props) {
     return options;
   }, [jointStatesTopic, topics]);
 
+  const { robotDescriptionAsset, messageBar } = useRobotDescriptionAsset();
+
   const assetOptions: IDropdownOption[] = useMemo(() => {
-    return filterMap(assets, (asset) =>
+    const options = filterMap(assets, (asset) =>
       asset.type === "urdf" ? { key: asset.uuid, text: asset.name } : undefined,
     );
-  }, [assets]);
+    if (robotDescriptionAsset != undefined) {
+      options.unshift({ key: ROBOT_DESCRIPTION_PARAM, text: ROBOT_DESCRIPTION_PARAM });
+    }
+    return options;
+  }, [assets, robotDescriptionAsset]);
 
-  const theme = useTheme();
   return (
     <Flex col clip>
       <PanelToolbar helpContent={helpContent}>
@@ -207,78 +206,48 @@ function URDFViewer({ config, saveConfig }: Props) {
           )}
         </Stack>
       </PanelToolbar>
-      {model == undefined ? (
-        <EmptyState>Drag and drop a URDF file to visualize it.</EmptyState>
-      ) : (
-        <Flex row clip>
-          <div ref={resizeRef} style={{ flex: "1 1 auto", position: "relative" }}>
-            <div style={{ position: "absolute", inset: 0 }}>
-              <CameraListener cameraStore={cameraStore} shiftKeys={true}>
-                <canvas ref={(el) => setCanvas(el)} width={width} height={height} />
-              </CameraListener>
-            </div>
-            <div
-              style={{
-                position: "absolute",
-                top: theme.spacing.s1,
-                left: theme.spacing.s1,
-              }}
-            >
-              <Dropdown
-                options={assetOptions}
-                selectedKey={selectedAssetId}
-                onChange={(_event, option) =>
+      <Stack verticalFill>
+        {messageBar}
+        {model == undefined ? (
+          <EmptyState>Drag and drop a URDF file to visualize it.</EmptyState>
+        ) : (
+          <Flex row clip>
+            <div ref={resizeRef} style={{ flex: "1 1 auto", position: "relative" }}>
+              <div style={{ position: "absolute", inset: 0 }}>
+                <CameraListener cameraStore={cameraStore} shiftKeys={true}>
+                  <canvas ref={(el) => setCanvas(el)} width={width} height={height} />
+                </CameraListener>
+              </div>
+              <OverlayControls
+                assetOptions={assetOptions}
+                selectedAssetId={selectedAssetId}
+                onSelectAsset={(_event, option) =>
                   option != undefined && setSelectedAssetId(option.key as string)
                 }
+                opacity={opacity}
+                onChangeOpacity={(value) => saveConfig({ opacity: value })}
+                cameraCentered={cameraCentered}
+                onCenterCamera={() => {
+                  const newState: CameraState = {
+                    ...cameraState,
+                    targetOffset: [0, 0, 0],
+                    distance: DEFAULT_DISTANCE,
+                  };
+                  cameraStore.setCameraState(newState);
+                  setCameraState(newState);
+                }}
               />
             </div>
-            <Stack
-              horizontal
-              horizontalAlign="space-between"
-              wrap
-              style={{
-                position: "absolute",
-                bottom: theme.spacing.s1,
-                left: theme.spacing.s1,
-                right: theme.spacing.s1,
-              }}
-            >
-              <Stack.Item grow style={{ minWidth: 120, maxWidth: 300 }}>
-                <Slider
-                  ariaLabel="Opacity"
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  value={opacity}
-                  valueFormat={(value) => `${(value * 100).toFixed(0)}%`}
-                  onChange={(value) => saveConfig({ opacity: value })}
-                />
-              </Stack.Item>
-              {!cameraCentered && (
-                <DefaultButton
-                  text="Re-center"
-                  onClick={() => {
-                    const newState: CameraState = {
-                      ...cameraState,
-                      targetOffset: [0, 0, 0],
-                      distance: DEFAULT_DISTANCE,
-                    };
-                    cameraStore.setCameraState(newState);
-                    setCameraState(newState);
-                  }}
-                />
-              )}
-            </Stack>
-          </div>
-          {useCustomJointValues && model && (
-            <JointValueSliders
-              model={model}
-              customJointValues={customJointValues}
-              onChange={setCustomJointValues}
-            />
-          )}
-        </Flex>
-      )}
+            {useCustomJointValues && model && (
+              <JointValueSliders
+                model={model}
+                customJointValues={customJointValues}
+                onChange={setCustomJointValues}
+              />
+            )}
+          </Flex>
+        )}
+      </Stack>
     </Flex>
   );
 }

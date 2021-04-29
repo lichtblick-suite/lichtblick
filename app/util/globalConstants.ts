@@ -58,6 +58,8 @@ export const VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE = "visualization_msgs/Mark
 export const FOXGLOVE_GRID_TOPIC = "/foxglove/grid";
 export const FOXGLOVE_GRID_DATATYPE = "foxglove/Grid";
 
+export const ROBOT_DESCRIPTION_PARAM = "/robot_description";
+
 export const MARKER_ARRAY_DATATYPES = [
   "visualization_msgs/MarkerArray",
   FUTURE_VIZ_MSGS_DATATYPE,

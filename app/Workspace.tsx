@@ -49,6 +49,7 @@ import { PlayerPresence } from "@foxglove-studio/app/players/types";
 import { ImportPanelLayoutPayload } from "@foxglove-studio/app/types/panels";
 import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import inAutomatedRunMode from "@foxglove-studio/app/util/inAutomatedRunMode";
+import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 type TestableWindow = Window & { setPanelLayout?: (payload: ImportPanelLayoutPayload) => void };
 
@@ -156,8 +157,12 @@ export default function Workspace(): JSX.Element {
     async (files: FileList, { shiftPressed }: { shiftPressed: boolean }) => {
       const otherFiles: File[] = [];
       for (const file of files) {
-        if (!(await loadFromFile(file, file.path))) {
-          otherFiles.push(file);
+        try {
+          if (!(await loadFromFile(file, { basePath: file.path }))) {
+            otherFiles.push(file);
+          }
+        } catch (err) {
+          sendNotification(`Failed to load ${file.name}`, err, "user", "warn");
         }
       }
 

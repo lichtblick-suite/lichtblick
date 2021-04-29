@@ -13,7 +13,9 @@ function cloneModel(robot: URDFRobot): URDFRobot {
   const copy = robot.clone();
   copy.traverse((obj) => {
     if (obj instanceof THREE.Mesh) {
-      if (obj.material) {
+      if (Array.isArray(obj.material)) {
+        obj.material = obj.material.map((material) => material.clone());
+      } else if (obj.material) {
         obj.material = obj.material.clone();
       }
     }
@@ -81,7 +83,13 @@ export class Renderer extends EventEmitter<EventTypes> {
     this.opacity = opacity;
     this.model?.traverse((obj) => {
       if (obj instanceof THREE.Mesh) {
-        if (obj.material instanceof THREE.Material) {
+        if (Array.isArray(obj.material)) {
+          for (const material of obj.material) {
+            material.opacity = opacity;
+            material.transparent = opacity < 1;
+            material.depthWrite = !material.transparent;
+          }
+        } else if (obj.material) {
           obj.material.opacity = opacity;
           obj.material.transparent = opacity < 1;
           obj.material.depthWrite = !obj.material.transparent;

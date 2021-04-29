@@ -19,7 +19,6 @@ import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";
 import LayoutStorageReduxAdapter from "@foxglove-studio/app/components/LayoutStorageReduxAdapter";
 import { NativeFileMenuPlayerSelection } from "@foxglove-studio/app/components/NativeFileMenuPlayerSelection";
-import ParamAssetAdapter from "@foxglove-studio/app/components/ParamAssetAdapter";
 import PlayerManager from "@foxglove-studio/app/components/PlayerManager";
 import AnalyticsProvider from "@foxglove-studio/app/context/AnalyticsProvider";
 import { AssetsProvider } from "@foxglove-studio/app/context/AssetContext";
@@ -101,7 +100,6 @@ export default function App(): ReactElement {
     <AllProviders>
       <ErrorBoundary>
         <LayoutStorageReduxAdapter />
-        <ParamAssetAdapter />
         <NativeFileMenuPlayerSelection />
         <DndProvider backend={HTML5Backend}>
           <Suspense fallback={<></>}>

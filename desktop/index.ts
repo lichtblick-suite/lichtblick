@@ -276,7 +276,7 @@ app.on("ready", async () => {
     "style-src": "'self' 'unsafe-inline'",
     "connect-src": "'self' ws: wss: http: https: x-foxglove-ros-package:",
     "font-src": "'self' data:",
-    "img-src": "'self' data: https: x-foxglove-ros-package-converted-tiff:",
+    "img-src": "'self' data: https: x-foxglove-ros-package: x-foxglove-ros-package-converted-tiff:",
   };
 
   // Set default http headers

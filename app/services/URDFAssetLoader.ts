@@ -7,7 +7,6 @@ import URDFLoader from "urdf-loader";
 import { XacroParser } from "xacro-parser";
 
 import { AssetLoader, Asset } from "@foxglove-studio/app/context/AssetContext";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import Logger from "@foxglove/log";
 
 const log = Logger.getLogger(__filename);
@@ -15,11 +14,17 @@ const log = Logger.getLogger(__filename);
 const URDF_ROOT = "$URDF_ROOT";
 
 export default class URDFAssetLoader implements AssetLoader {
-  async load(file: File, basePath: string | undefined): Promise<Asset | undefined> {
+  async load(
+    file: File,
+    { basePath }: { basePath: string | undefined },
+  ): Promise<Asset | undefined> {
     if (!/\.(urdf|xacro|xml)$/.test(file.name)) {
       return undefined;
     }
     const text = await file.text();
+    if (text.trim().length === 0) {
+      throw new Error(`${file.name} is empty`);
+    }
 
     const xacroParser = new XacroParser();
     xacroParser.rospackCommands = {
@@ -45,6 +50,9 @@ export default class URDFAssetLoader implements AssetLoader {
     };
 
     const urdf = await xacroParser.parse(text);
+    if (urdf.getElementsByTagName("parsererror").length !== 0) {
+      throw new Error(`${file.name} could not be parsed as XML`);
+    }
     log.info("Parsing URDF", urdf);
 
     const manager = new THREE.LoadingManager();
@@ -86,14 +94,7 @@ export default class URDFAssetLoader implements AssetLoader {
     await finishedLoading;
 
     if (robot.children.length === 0) {
-      sendNotification(
-        "URDF file is empty",
-        `The processed URDF file${
-          basePath != undefined ? ` from ${basePath}` : ""
-        } contained no visual elements.`,
-        "user",
-        "warn",
-      );
+      throw new Error(`The URDF file ${file.name} contained no visual elements.`);
     }
 
     return { name: file.name, type: "urdf", model: robot };
