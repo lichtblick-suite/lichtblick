@@ -16,7 +16,7 @@ import { useCallback, useMemo } from "react";
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import useChangeDetector from "@foxglove-studio/app/hooks/useChangeDetector";
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 
 import parseRosPath from "./parseRosPath";
 import {
@@ -34,7 +34,7 @@ export function useLatestMessageDataItem(path: string): MessageAndData | undefin
   const addMessages = useCallback(
     (
       prevMessageAndData: MessageAndData | undefined,
-      messages: readonly TypedMessage<unknown>[],
+      messages: readonly MessageEvent<unknown>[],
     ) => {
       // Iterate in reverse so we can early-return and not process all messages.
       for (let i = messages.length - 1; i >= 0; --i) {

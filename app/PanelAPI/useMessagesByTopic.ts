@@ -15,13 +15,13 @@ import { groupBy } from "lodash";
 import { useCallback } from "react";
 
 import useDeepMemo from "@foxglove-studio/app/hooks/useDeepMemo";
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 import concatAndTruncate from "@foxglove-studio/app/util/concatAndTruncate";
 
 import { useMessageReducer } from "./useMessageReducer";
 
 // Topic types that are not known at compile time
-type UnknownMessageEventsByTopic = Record<string, readonly TypedMessage<unknown>[]>;
+type UnknownMessageEventsByTopic = Record<string, readonly MessageEvent<unknown>[]>;
 
 // Convenience wrapper around `useMessageReducer`, for if you just want some
 // recent messages for a few topics.
@@ -39,7 +39,7 @@ export function useMessagesByTopic({
   const addMessages = useCallback(
     (
       prevMessagesByTopic: UnknownMessageEventsByTopic,
-      messages: readonly TypedMessage<unknown>[],
+      messages: readonly MessageEvent<unknown>[],
     ) => {
       const newMessagesByTopic = groupBy(messages, "topic");
       const ret: UnknownMessageEventsByTopic = { ...prevMessagesByTopic };

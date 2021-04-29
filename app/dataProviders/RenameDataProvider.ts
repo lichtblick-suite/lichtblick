@@ -29,7 +29,7 @@ import {
   DataProvider,
   MessageDefinitions,
 } from "@foxglove-studio/app/dataProviders/types";
-import { Progress, Topic, TypedMessage } from "@foxglove-studio/app/players/types";
+import { Progress, Topic, MessageEvent } from "@foxglove-studio/app/players/types";
 import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 
@@ -118,7 +118,7 @@ export default class RenameDataProvider implements DataProvider {
     return this._provider.close();
   }
 
-  _mapMessage = <T>(message: TypedMessage<T>): TypedMessage<T> => ({
+  _mapMessage = <T>(message: MessageEvent<T>): MessageEvent<T> => ({
     // Only map fields that we know are correctly mapped. Don't just splat in `...message` here
     // because we might miss an important mapping!
     topic: `${this._prefix}${message.topic}`,
@@ -164,7 +164,7 @@ export default class RenameDataProvider implements DataProvider {
       return;
     }
 
-    const messagesByTopic: Record<string, TypedMessage<unknown>[]> = {};
+    const messagesByTopic: Record<string, MessageEvent<unknown>[]> = {};
     for (const [topicName, topicMessages] of Object.entries(block.messagesByTopic)) {
       messagesByTopic[`${this._prefix}${topicName}`] = topicMessages.map(this._mapMessage);
     }

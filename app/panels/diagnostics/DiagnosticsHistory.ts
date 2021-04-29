@@ -14,7 +14,7 @@
 import { sortedIndexBy } from "lodash";
 
 import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 
 import {
   DiagnosticStatusArrayMsg,
@@ -46,7 +46,7 @@ type Props = {
 // Returns whether the buffer has been modified
 function maybeAddMessageToBuffer(
   buffer: DiagnosticsBuffer,
-  message: TypedMessage<unknown>,
+  message: MessageEvent<unknown>,
 ): boolean {
   const { header, status: statusArray }: DiagnosticStatusArrayMsg = message.message as any;
   if (statusArray.length === 0) {
@@ -109,7 +109,7 @@ function maybeAddMessageToBuffer(
 // Exported for tests
 export function addMessages(
   buffer: DiagnosticsBuffer,
-  messages: readonly TypedMessage<unknown>[],
+  messages: readonly MessageEvent<unknown>[],
 ): DiagnosticsBuffer {
   // maybeAddMessageToBuffer mutates the buffer instead of doing an immutable update for performance
   // reasons. There are large numbers of diagnostics messages, and often many diagnostics panels in

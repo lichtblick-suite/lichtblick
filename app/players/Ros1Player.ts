@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import {
   AdvertisePayload,
-  TypedMessage,
+  MessageEvent,
   ParameterValue,
   Player,
   PlayerCapabilities,
@@ -67,7 +67,7 @@ export default class Ros1Player implements Player {
   private _clockTime?: Time; // The most recent published `/clock` time, if available
   private _clockReceived: Time = { sec: 0, nsec: 0 }; // The local time when `_clockTime` was last received
   private _requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
-  private _parsedMessages: TypedMessage<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call.
+  private _parsedMessages: MessageEvent<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call.
   private _messageOrder: TimestampMethod = "receiveTime";
   private _requestTopicsTimeout?: ReturnType<typeof setTimeout>; // setTimeout() handle for _requestTopics().
   private _hasReceivedMessage = false;
@@ -295,7 +295,7 @@ export default class Ros1Player implements Player {
           this._metricsCollector.recordTimeToFirstMsgs();
         }
 
-        const msg: TypedMessage<unknown> = {
+        const msg: MessageEvent<unknown> = {
           topic: topicName,
           receiveTime,
           message: message,
@@ -399,7 +399,7 @@ export default class Ros1Player implements Player {
     }
   }
 
-  private _handleInternalMessage(msg: TypedMessage<unknown>): void {
+  private _handleInternalMessage(msg: MessageEvent<unknown>): void {
     const maybeClockMsg = msg.message as { clock?: Time };
     if (msg.topic === "/clock" && maybeClockMsg.clock && !isNaN(maybeClockMsg.clock?.sec)) {
       const time = maybeClockMsg.clock;

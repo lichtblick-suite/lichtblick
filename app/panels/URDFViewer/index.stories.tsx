@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import AssetsContext from "@foxglove-studio/app/context/AssetContext";
 import URDFViewer from "@foxglove-studio/app/panels/URDFViewer";
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 import { JointState } from "@foxglove-studio/app/types/Messages";
 
@@ -57,7 +57,7 @@ export function CustomOpacity(): JSX.Element {
 }
 
 export function JointPositionFromTopic(): JSX.Element {
-  const jointStates: TypedMessage<JointState> = {
+  const jointStates: MessageEvent<JointState> = {
     topic: "/joint_states",
     receiveTime: { sec: 0, nsec: 0 },
     message: {

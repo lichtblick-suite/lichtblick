@@ -30,7 +30,7 @@ import {
   MessageDefinitions,
   ParsedMessageDefinitions,
 } from "@foxglove-studio/app/dataProviders/types";
-import { Progress, TypedMessage } from "@foxglove-studio/app/players/types";
+import { Progress, MessageEvent } from "@foxglove-studio/app/players/types";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { deepIntersect } from "@foxglove-studio/app/util/ranges";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
@@ -78,8 +78,8 @@ export const mergedBlocks = (
 };
 
 const merge = <A, B>(
-  messages1: readonly TypedMessage<A>[] | undefined,
-  messages2: readonly TypedMessage<B>[] | undefined,
+  messages1: readonly MessageEvent<A>[] | undefined,
+  messages2: readonly MessageEvent<B>[] | undefined,
 ) => {
   if (messages1 == undefined) {
     return messages2;

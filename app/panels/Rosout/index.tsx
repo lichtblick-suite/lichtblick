@@ -18,7 +18,7 @@ import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import TopicToRenderMenu from "@foxglove-studio/app/components/TopicToRenderMenu";
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 
 import FilterBar, { FilterBarProps } from "./FilterBar";
 import LogList from "./LogList";
@@ -52,7 +52,7 @@ const RosoutPanel = React.memo(({ config, saveConfig }: Props) => {
   const { [config.topicToRender]: messages = [] } = PanelAPI.useMessagesByTopic({
     topics: [config.topicToRender],
     historySize: 100000,
-  }) as { [key: string]: TypedMessage<RosgraphMsgs$Log>[] };
+  }) as { [key: string]: MessageEvent<RosgraphMsgs$Log>[] };
 
   // avoid making new sets for node names
   // the filter bar uess the node names during on-demand filtering

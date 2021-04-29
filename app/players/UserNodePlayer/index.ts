@@ -40,7 +40,7 @@ import {
   SubscribePayload,
   Topic,
   ParameterValue,
-  TypedMessage,
+  MessageEvent,
 } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { UserNode, UserNodes } from "@foxglove-studio/app/types/panels";
@@ -177,14 +177,14 @@ export default class UserNodePlayer implements Player {
   // (i.e. invoke _getMessages with an empty array) to refresh messages
   _getMessages = microMemoize(
     async (
-      parsedMessages: readonly TypedMessage<unknown>[],
+      parsedMessages: readonly MessageEvent<unknown>[],
       _datatypes: RosDatatypes,
       globalVariables: GlobalVariables,
       nodeRegistrations: readonly NodeRegistration[],
     ): Promise<{
-      parsedMessages: readonly TypedMessage<unknown>[];
+      parsedMessages: readonly MessageEvent<unknown>[];
     }> => {
-      const parsedMessagesPromises: Promise<TypedMessage<unknown> | undefined>[] = [];
+      const parsedMessagesPromises: Promise<MessageEvent<unknown> | undefined>[] = [];
       for (const message of parsedMessages) {
         const messagePromises = [];
         for (const nodeRegistration of nodeRegistrations) {
@@ -259,7 +259,7 @@ export default class UserNodePlayer implements Player {
       nodeData,
       inputs: inputTopics,
       output: { name: outputTopic, datatype: outputDatatype },
-      processMessage: async (message: TypedMessage<unknown>) => {
+      processMessage: async (message: MessageEvent<unknown>) => {
         // We allow _resetWorkers to "cancel" the processing by creating a new signal every time we process a message
         terminateSignal = signal<void>();
 

@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 
 import filterMessages from "./filter";
 import { RosgraphMsgs$Log } from "./types";
@@ -27,7 +27,7 @@ describe("filter", () => {
         name: "/some_topic",
       },
     },
-  ] as TypedMessage<RosgraphMsgs$Log>[];
+  ] as MessageEvent<RosgraphMsgs$Log>[];
 
   it("should remove when minLogLevel is higher than msg level", () => {
     expect(filterMessages(msgs, { minLogLevel: 3, searchTerms: [] })).toEqual([]);

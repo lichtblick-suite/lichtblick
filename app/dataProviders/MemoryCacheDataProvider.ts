@@ -25,7 +25,7 @@ import {
   GetMessagesTopics,
   InitializationResult,
 } from "@foxglove-studio/app/dataProviders/types";
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { getNewConnection } from "@foxglove-studio/app/util/getNewConnection";
 import {
@@ -53,7 +53,7 @@ export const MAX_BLOCK_SIZE_BYTES = 50e6; // Number of bytes in a block before w
 // the underlying ArrayBuffers.
 export type MemoryCacheBlock = {
   readonly messagesByTopic: {
-    readonly [topic: string]: TypedMessage<unknown>[];
+    readonly [topic: string]: MessageEvent<unknown>[];
   };
   readonly sizeInBytes: number;
 };

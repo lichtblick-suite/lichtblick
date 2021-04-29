@@ -35,7 +35,7 @@ import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import useDeepMemo from "@foxglove-studio/app/hooks/useDeepMemo";
 import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { CameraInfo, StampedMessage } from "@foxglove-studio/app/types/Messages";
@@ -159,7 +159,7 @@ function renderEmptyState(
   markerTopics: string[],
   shouldSynchronize: boolean,
   messagesByTopic: {
-    [topic: string]: TypedMessage<unknown>[];
+    [topic: string]: MessageEvent<unknown>[];
   },
 ) {
   if (cameraTopic === "") {
@@ -431,7 +431,7 @@ function ImageView(props: Props) {
     topics: cameraInfoTopic != undefined ? [cameraInfoTopic] : [],
     restore: useCallback((value) => value, []),
     addMessage: useCallback(
-      (_value, { message }: TypedMessage<unknown>) => message as CameraInfo,
+      (_value, { message }: MessageEvent<unknown>) => message as CameraInfo,
       [],
     ),
   });
@@ -446,7 +446,7 @@ function ImageView(props: Props) {
     imageAndMarkerTopics,
   );
 
-  const markersToRender: TypedMessage<unknown>[] = useMemo(
+  const markersToRender: MessageEvent<unknown>[] = useMemo(
     () =>
       shouldSynchronize
         ? synchronizedMessages

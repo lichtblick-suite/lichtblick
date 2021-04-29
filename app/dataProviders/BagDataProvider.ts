@@ -28,7 +28,7 @@ import {
   AverageThroughput,
 } from "@foxglove-studio/app/dataProviders/types";
 import { getReportMetadataForChunk } from "@foxglove-studio/app/dataProviders/util";
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 import CachedFilelike, { FileReader } from "@foxglove-studio/app/util/CachedFilelike";
 import { bagConnectionsToTopics } from "@foxglove-studio/app/util/bagConnectionsHelper";
 import { getBagChunksOverlapCount } from "@foxglove-studio/app/util/bags";
@@ -300,7 +300,7 @@ export default class BagDataProvider implements DataProvider {
     const connectionStart = fromMillis(new Date().getTime());
     let totalSizeOfMessages = 0;
     let numberOfMessages = 0;
-    const messages: TypedMessage<ArrayBuffer>[] = [];
+    const messages: MessageEvent<ArrayBuffer>[] = [];
     const onMessage = (msg: ReadResult<unknown>) => {
       const { data, topic, timestamp } = msg;
       messages.push({

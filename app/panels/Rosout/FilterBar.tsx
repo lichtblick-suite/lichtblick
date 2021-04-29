@@ -22,7 +22,7 @@ import {
 import ClipboardOutlineIcon from "@mdi/svg/svg/clipboard-outline.svg";
 
 import Icon from "@foxglove-studio/app/components/Icon";
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 import clipboard from "@foxglove-studio/app/util/clipboard";
 
 import LevelToString, { KNOWN_LOG_LEVELS } from "./LevelToString";
@@ -44,7 +44,7 @@ export type FilterBarProps = {
   searchTerms: Set<string>;
   nodeNames: Set<string>;
   minLogLevel: number;
-  messages: readonly TypedMessage<RosgraphMsgs$Log>[];
+  messages: readonly MessageEvent<RosgraphMsgs$Log>[];
 
   onFilterChange: (filter: Filter) => void;
 };

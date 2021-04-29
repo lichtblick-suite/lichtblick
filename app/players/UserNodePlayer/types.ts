@@ -13,7 +13,7 @@
 import type { SourceFile, TypeChecker } from "typescript";
 
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
-import { Topic, TypedMessage } from "@foxglove-studio/app/players/types";
+import { Topic, MessageEvent } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 
 // make sure to use import type to avoid bringing in the actual implementations to the bundle
@@ -108,9 +108,9 @@ export type NodeRegistration = {
   inputs: readonly string[];
   output: Topic;
   processMessage: (
-    arg0: TypedMessage<unknown>,
+    arg0: MessageEvent<unknown>,
     arg1: GlobalVariables,
-  ) => Promise<TypedMessage<unknown> | undefined>;
+  ) => Promise<MessageEvent<unknown> | undefined>;
   terminate: () => void;
 };
 

@@ -14,7 +14,7 @@
 // No time functions that require `moment` should live in this file.
 import { Time, TimeUtil } from "rosbag";
 
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 import { StampedMessage } from "@foxglove-studio/app/types/Messages";
 import {
   SEEK_TO_FRACTION_QUERY_KEY,
@@ -313,7 +313,7 @@ export function getSeekTimeFromSpec(spec: SeekToTimeSpec, start: Time, end: Time
 }
 
 export function getTimestampForMessage(
-  messageEvent: TypedMessage<Partial<StampedMessage>>,
+  messageEvent: MessageEvent<Partial<StampedMessage>>,
   timestampMethod?: TimestampMethod,
 ): Time | undefined {
   if (timestampMethod === "headerStamp") {

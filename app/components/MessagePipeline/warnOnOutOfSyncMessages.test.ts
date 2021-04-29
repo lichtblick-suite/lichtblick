@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { TypedMessage, PlayerPresence, PlayerState } from "@foxglove-studio/app/players/types";
+import { MessageEvent, PlayerPresence, PlayerState } from "@foxglove-studio/app/players/types";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 import warnOnOutOfSyncMessages from "./warnOnOutOfSyncMessages";
@@ -53,7 +53,7 @@ const playerStateWithMessages = (messages: any, messageOrder: any): PlayerState 
 const message = (
   headerStampSeconds: number | undefined,
   receiveTimeSeconds: number | undefined,
-): TypedMessage<unknown> => ({
+): MessageEvent<unknown> => ({
   topic: "/foo",
   receiveTime:
     receiveTimeSeconds == undefined ? undefined : ({ sec: receiveTimeSeconds, nsec: 1 } as any),

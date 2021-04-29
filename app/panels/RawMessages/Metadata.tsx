@@ -16,7 +16,7 @@ import React, { useCallback } from "react";
 import styled from "styled-components";
 
 import Icon from "@foxglove-studio/app/components/Icon";
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 import clipboard from "@foxglove-studio/app/util/clipboard";
 import { formatTimeRaw } from "@foxglove-studio/app/util/time";
 
@@ -33,8 +33,8 @@ type Props = {
   diffData: any;
   diff: any;
   datatype?: string;
-  message: TypedMessage<unknown>;
-  diffMessage?: TypedMessage<unknown>;
+  message: MessageEvent<unknown>;
+  diffMessage?: MessageEvent<unknown>;
 };
 
 function CopyMessageButton({ text, onClick }: any) {

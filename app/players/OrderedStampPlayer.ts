@@ -25,7 +25,7 @@ import {
   PlayerWarnings,
   Topic,
   ParameterValue,
-  TypedMessage,
+  MessageEvent,
 } from "@foxglove-studio/app/players/types";
 import { StampedMessage } from "@foxglove-studio/app/types/Messages";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
@@ -49,7 +49,7 @@ export default class OrderedStampPlayer implements Player {
   _messageOrder: TimestampMethod;
   // When messageOrder is "headerStamp", contains buffered, unsorted messages with receiveTime "in
   // the near future". Only messages with headers are stored.
-  _messageBuffer: TypedMessage<StampedMessage>[] = [];
+  _messageBuffer: MessageEvent<StampedMessage>[] = [];
   // Used to invalidate the cache. (Also signals subscription changes etc).
   _lastSeekId?: number = undefined;
   // Our best guess of "now" in case we need to force a backfill.
@@ -84,7 +84,7 @@ export default class OrderedStampPlayer implements Player {
 
       // Only store messages with a header stamp.
       const [newMessagesWithHeaders, newMessagesWithoutHeaders] = <
-        [TypedMessage<StampedMessage>[], TypedMessage<unknown>[]]
+        [MessageEvent<StampedMessage>[], MessageEvent<unknown>[]]
       >partition(activeData.messages, (message) =>
         isTime((message.message as Partial<StampedMessage>).header?.stamp),
       );

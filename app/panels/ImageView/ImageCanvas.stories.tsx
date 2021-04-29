@@ -16,7 +16,7 @@ import { range, noop } from "lodash";
 
 import ImageView from "@foxglove-studio/app/panels/ImageView";
 import ImageCanvas from "@foxglove-studio/app/panels/ImageView/ImageCanvas";
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 import { ImageMarker } from "@foxglove-studio/app/types/Messages";
 
 const cameraInfo = {
@@ -79,7 +79,7 @@ function LoadImageMessage({ children }: any) {
 function marker(
   type: ImageMarker["type"],
   props: Partial<ImageMarker> = {},
-): TypedMessage<ImageMarker> {
+): MessageEvent<ImageMarker> {
   return {
     topic: "/foo",
     receiveTime: { sec: 0, nsec: 0 },

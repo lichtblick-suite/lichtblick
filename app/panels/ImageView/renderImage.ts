@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 import { ImageMarker, Color, Point } from "@foxglove-studio/app/types/Messages";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
@@ -43,7 +43,7 @@ export async function renderImage({
   rawMarkerData,
 }: {
   canvas?: HTMLCanvasElement | OffscreenCanvas;
-  imageMessage?: TypedMessage<unknown>;
+  imageMessage?: MessageEvent<unknown>;
   imageMessageDatatype?: string;
   rawMarkerData: RawMarkerData;
 }): Promise<Dimensions | undefined> {
@@ -93,7 +93,7 @@ function maybeUnrectifyPoint(
 }
 
 async function decodeMessageToBitmap(
-  msg: TypedMessage<any>,
+  msg: MessageEvent<any>,
   datatype: string,
 ): Promise<ImageBitmap> {
   let image: ImageData | HTMLImageElement | Blob;
@@ -208,7 +208,7 @@ function paintBitmap(
 
 function paintMarkers(
   ctx: CanvasRenderingContext2D,
-  messages: TypedMessage<any>[],
+  messages: MessageEvent<any>[],
   cameraModel: CameraModel | undefined,
 ) {
   for (const { message } of messages) {

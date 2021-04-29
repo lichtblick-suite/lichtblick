@@ -22,7 +22,7 @@ import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import { useAssets } from "@foxglove-studio/app/context/AssetContext";
 import useCleanup from "@foxglove-studio/app/hooks/useCleanup";
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 import { JointState } from "@foxglove-studio/app/types/Messages";
 import { SaveConfig } from "@foxglove-studio/app/types/panels";
 import filterMap from "@foxglove-studio/app/util/filterMap";
@@ -98,7 +98,7 @@ function URDFViewer({ config, saveConfig }: Props) {
       topics: jointStatesTopic != undefined ? [jointStatesTopic] : [],
       historySize: 1,
     },
-  ) as Record<string, readonly TypedMessage<JointState>[]>;
+  ) as Record<string, readonly MessageEvent<JointState>[]>;
 
   const useCustomJointValues = jointStatesTopic == undefined;
   const jointValues = useMemo(() => {

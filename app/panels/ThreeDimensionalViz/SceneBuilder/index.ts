@@ -19,7 +19,7 @@ import MessageCollector from "@foxglove-studio/app/panels/ThreeDimensionalViz/Sc
 import { MarkerMatcher } from "@foxglove-studio/app/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
 import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
 import VelodyneCloudConverter from "@foxglove-studio/app/panels/ThreeDimensionalViz/VelodyneCloudConverter";
-import { Topic, Frame, TypedMessage } from "@foxglove-studio/app/players/types";
+import { Topic, Frame, MessageEvent } from "@foxglove-studio/app/players/types";
 import {
   Color,
   Marker,
@@ -68,7 +68,7 @@ export type TopicSettingsCollection = {
 // builds a syntehtic arrow marker from a geometry_msgs/PoseStamped
 // these pose sizes were manually configured in rviz; for now we hard-code them here
 export const buildSyntheticArrowMarker = (
-  { topic, message }: TypedMessage<unknown>,
+  { topic, message }: MessageEvent<unknown>,
   pose: Pose,
   getSyntheticArrowMarkerColor: (arg0: string) => Color,
 ) => ({
@@ -149,7 +149,7 @@ export function getSceneErrorsByTopic(
 }
 
 // Only display one non-lifetime message at a time, so we filter to the last one.
-export function filterOutSupersededMessages<T extends Pick<TypedMessage<unknown>, "message">>(
+export function filterOutSupersededMessages<T extends Pick<MessageEvent<unknown>, "message">>(
   messages: T[],
   datatype: string,
 ): T[] {
@@ -246,7 +246,7 @@ export default class SceneBuilder implements MarkerProvider {
   // stored message arrays allowing used to re-render topics even when the latest
   // frame does not not contain that topic
   lastSeenMessages: {
-    [key: string]: TypedMessage<unknown>[];
+    [key: string]: MessageEvent<unknown>[];
   } = {};
 
   constructor(hooks: ThreeDimensionalVizHooks) {
@@ -709,7 +709,7 @@ export default class SceneBuilder implements MarkerProvider {
     (this.collectors[topic] as any).addNonMarker(topic, mappedMessage);
   };
 
-  _consumeColor = (msg: TypedMessage<Color>): void => {
+  _consumeColor = (msg: MessageEvent<Color>): void => {
     const color = msg.message;
     if (color.r == undefined || color.g == undefined || color.b == undefined) {
       return;
@@ -791,7 +791,7 @@ export default class SceneBuilder implements MarkerProvider {
     this.topicsToRender.clear();
   }
 
-  _consumeMessage = (topic: string, datatype: string, msg: TypedMessage<unknown>): void => {
+  _consumeMessage = (topic: string, datatype: string, msg: MessageEvent<unknown>): void => {
     const { message } = msg;
     switch (datatype) {
       case WEBVIZ_MARKER_DATATYPE:
@@ -850,7 +850,7 @@ export default class SceneBuilder implements MarkerProvider {
         this._consumeNonMarkerMessage(topic, message as StampedMessage, 104);
         break;
       case COLOR_RGBA_DATATYPE:
-        this._consumeColor(msg as TypedMessage<Color>);
+        this._consumeColor(msg as MessageEvent<Color>);
         break;
       case GEOMETRY_MSGS_POLYGON_STAMPED_DATATYPE: {
         // convert Polygon to a line strip
@@ -877,7 +877,7 @@ export default class SceneBuilder implements MarkerProvider {
       }
       default: {
         if (datatype.endsWith("/Color") || datatype.endsWith("/ColorRGBA")) {
-          this._consumeColor(msg as TypedMessage<Color>);
+          this._consumeColor(msg as MessageEvent<Color>);
           break;
         }
       }

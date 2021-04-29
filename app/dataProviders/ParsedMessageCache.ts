@@ -14,7 +14,7 @@
 import { sortBy } from "lodash";
 
 import { MessageReader } from "@foxglove-studio/app/dataProviders/types";
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import { toSec } from "@foxglove-studio/app/util/time";
@@ -24,11 +24,11 @@ import { toSec } from "@foxglove-studio/app/util/time";
 export const CACHE_SIZE_BYTES = 200e6;
 
 function readMessage(
-  messageEvent: TypedMessage<ArrayBuffer>,
+  messageEvent: MessageEvent<ArrayBuffer>,
   readersByTopic: Readonly<{
     [topic: string]: MessageReader;
   }>,
-): TypedMessage<unknown> | undefined {
+): MessageEvent<unknown> | undefined {
   const reader = readersByTopic[messageEvent.topic];
   if (!reader) {
     throw new Error(`Could not find message reader for topic ${messageEvent.topic}`);
@@ -49,7 +49,7 @@ function readMessage(
 }
 
 type Cache = {
-  map: WeakMap<TypedMessage<unknown>, TypedMessage<unknown>>;
+  map: WeakMap<MessageEvent<unknown>, MessageEvent<unknown>>;
   lastAccessIndex: number;
   sizeInBytes: number;
 };
@@ -67,12 +67,12 @@ export default class ParsedMessageCache {
   _cacheSizeInBytes: number = 0;
 
   parseMessages(
-    messageEvents: readonly TypedMessage<ArrayBuffer>[],
+    messageEvents: readonly MessageEvent<ArrayBuffer>[],
     readersByTopic: Readonly<{
       [topic: string]: MessageReader;
     }>,
-  ): TypedMessage<unknown>[] {
-    const outputMessages: TypedMessage<unknown>[] = filterMap(messageEvents, (messageEvent) => {
+  ): MessageEvent<unknown>[] {
+    const outputMessages: MessageEvent<unknown>[] = filterMap(messageEvents, (messageEvent) => {
       // Use strings like "123.4" as the cache keys.
       const deciSecond = Math.trunc(toSec(messageEvent.receiveTime) * 10);
 
@@ -88,7 +88,7 @@ export default class ParsedMessageCache {
       // Update the access time.
       cache.lastAccessIndex = this._cacheAccessIndex++;
 
-      let outputMessage: TypedMessage<unknown> | undefined = cache.map.get(messageEvent);
+      let outputMessage: MessageEvent<unknown> | undefined = cache.map.get(messageEvent);
       if (!outputMessage) {
         outputMessage = readMessage(messageEvent, readersByTopic);
         if (outputMessage) {

@@ -11,14 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 
 import { RosgraphMsgs$Log } from "./types";
 
 export default function filterMessages(
-  messages: readonly TypedMessage<RosgraphMsgs$Log>[],
+  messages: readonly MessageEvent<RosgraphMsgs$Log>[],
   filter: { minLogLevel: number; searchTerms: string[] },
-): readonly TypedMessage<RosgraphMsgs$Log>[] {
+): readonly MessageEvent<RosgraphMsgs$Log>[] {
   const { minLogLevel, searchTerms } = filter;
   const hasActiveFilters = minLogLevel > 1 || searchTerms.length > 0;
   // return all messages if we wouldn't filter anything

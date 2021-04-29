@@ -13,7 +13,7 @@
 import ApiCheckerDataProvider from "@foxglove-studio/app/dataProviders/ApiCheckerDataProvider";
 import MemoryDataProvider from "@foxglove-studio/app/dataProviders/MemoryDataProvider";
 import { mockExtensionPoint } from "@foxglove-studio/app/dataProviders/mockExtensionPoint";
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 function getProvider(isRoot: boolean = false) {
@@ -244,7 +244,7 @@ describe("ApiCheckerDataProvider", () => {
         const { provider, memoryDataProvider } = getProvider();
         await provider.initialize(mockExtensionPoint().extensionPoint);
 
-        let returnMessages: TypedMessage<unknown>[] = [];
+        let returnMessages: MessageEvent<unknown>[] = [];
         jest.spyOn(memoryDataProvider, "getMessages").mockImplementation(() => {
           return Promise.resolve({
             parsedMessages: returnMessages,

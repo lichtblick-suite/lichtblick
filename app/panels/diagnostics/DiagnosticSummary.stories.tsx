@@ -8,7 +8,7 @@ import {
   KeyValue,
   LEVELS,
 } from "@foxglove-studio/app/panels/diagnostics/util";
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 
 export default {
@@ -22,7 +22,7 @@ export function makeDiagnosticMessage(
   hardware_id: string,
   messages: string[],
   values: KeyValue[] = [],
-): TypedMessage<DiagnosticStatusArrayMsg> {
+): MessageEvent<DiagnosticStatusArrayMsg> {
   return {
     topic: "/diagnostics",
     receiveTime: { sec: 2, nsec: 0 },

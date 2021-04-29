@@ -26,7 +26,7 @@ import {
   Topic,
   MessageDefinitionsByTopic,
   ParsedMessageDefinitionsByTopic,
-  TypedMessage,
+  MessageEvent,
 } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 
@@ -34,7 +34,7 @@ function filterMessages<T>(
   start: Time,
   end: Time,
   topics: readonly string[],
-  messages: readonly TypedMessage<T>[] | undefined,
+  messages: readonly MessageEvent<T>[] | undefined,
 ) {
   if (messages == undefined) {
     return undefined;

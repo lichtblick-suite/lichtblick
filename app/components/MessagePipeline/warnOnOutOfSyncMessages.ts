@@ -13,7 +13,7 @@
 
 import { Time, TimeUtil } from "rosbag";
 
-import { PlayerState, TypedMessage } from "@foxglove-studio/app/players/types";
+import { PlayerState, MessageEvent } from "@foxglove-studio/app/players/types";
 import { StampedMessage } from "@foxglove-studio/app/types/Messages";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import {
@@ -35,13 +35,13 @@ const log = Logger.getLogger(__filename);
 //
 // This is to ensure that other mechanisms that we have in place for either discarding old messages
 // or forcing an update of `player.lastSeekTime` are working properly.
-let lastMessages: readonly TypedMessage<unknown>[] | undefined;
+let lastMessages: readonly MessageEvent<unknown>[] | undefined;
 let lastCurrentTime: Time | undefined;
 let lastMessageTime: Time | undefined;
 let lastMessageTopic: string | undefined;
 let lastLastSeekTime: number | undefined;
 let warningTimeout: ReturnType<typeof setTimeout> | undefined;
-let incorrectMessages: TypedMessage<unknown>[] = [];
+let incorrectMessages: MessageEvent<unknown>[] = [];
 
 export default function warnOnOutOfSyncMessages(playerState: PlayerState): void {
   if (!playerState.activeData) {
@@ -61,7 +61,7 @@ export default function warnOnOutOfSyncMessages(playerState: PlayerState): void 
     lastCurrentTime = currentTime;
     for (const message of messages) {
       const messageTime = getTimestampForMessage(
-        message as TypedMessage<Partial<StampedMessage>>,
+        message as MessageEvent<Partial<StampedMessage>>,
         messageOrder,
       );
       if (!messageTime) {

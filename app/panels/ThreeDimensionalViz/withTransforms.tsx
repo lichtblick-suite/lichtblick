@@ -17,7 +17,7 @@ import { ForwardedRef } from "react";
 
 import { useDataSourceInfo } from "@foxglove-studio/app/PanelAPI";
 import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
-import { Frame, Topic, TypedMessage } from "@foxglove-studio/app/players/types";
+import { Frame, Topic, MessageEvent } from "@foxglove-studio/app/players/types";
 import { MarkerArray, StampedMessage, TF } from "@foxglove-studio/app/types/Messages";
 import {
   TF2_DATATYPE,
@@ -29,7 +29,7 @@ type State = { transforms: Transforms; topics: Topic[]; topicsToDatatypes: Map<s
 type TfMessage = { transforms: TF[] };
 type BaseProps = { frame: Frame; cleared?: boolean; topics: Topic[] };
 
-function consumeTfs(tfs: TypedMessage<TfMessage>[] | undefined, transforms: Transforms): void {
+function consumeTfs(tfs: MessageEvent<TfMessage>[] | undefined, transforms: Transforms): void {
   if (tfs != undefined) {
     for (const { message } of tfs) {
       const parsedMessage = message;
@@ -40,7 +40,7 @@ function consumeTfs(tfs: TypedMessage<TfMessage>[] | undefined, transforms: Tran
   }
 }
 
-function consumeSingleTfs(tfs: TypedMessage<TF>[] | undefined, transforms: Transforms): void {
+function consumeSingleTfs(tfs: MessageEvent<TF>[] | undefined, transforms: Transforms): void {
   if (tfs != undefined) {
     for (const { message } of tfs) {
       transforms.consume(message);
@@ -109,10 +109,10 @@ function withTransforms<Props extends BaseProps>(ChildComponent: React.Component
         switch (datatype) {
           case TF_DATATYPE:
           case TF2_DATATYPE:
-            consumeTfs(msgs as TypedMessage<TfMessage>[], transforms);
+            consumeTfs(msgs as MessageEvent<TfMessage>[], transforms);
             break;
           case TRANSFORM_STAMPED_DATATYPE:
-            consumeSingleTfs(msgs as TypedMessage<TF>[], transforms);
+            consumeSingleTfs(msgs as MessageEvent<TF>[], transforms);
             break;
         }
       }

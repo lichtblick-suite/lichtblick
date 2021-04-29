@@ -23,13 +23,13 @@ import useCleanup from "@foxglove-studio/app/hooks/useCleanup";
 import useDeepMemo from "@foxglove-studio/app/hooks/useDeepMemo";
 import useShouldNotChangeOften from "@foxglove-studio/app/hooks/useShouldNotChangeOften";
 import {
-  TypedMessage,
+  MessageEvent,
   PlayerStateActiveData,
   SubscribePayload,
 } from "@foxglove-studio/app/players/types";
 
-type MessageReducer<T> = (arg0: T, message: TypedMessage<unknown>) => T;
-type MessagesReducer<T> = (arg0: T, messages: readonly TypedMessage<unknown>[]) => T;
+type MessageReducer<T> = (arg0: T, message: MessageEvent<unknown>) => T;
+type MessagesReducer<T> = (arg0: T, messages: readonly MessageEvent<unknown>[]) => T;
 export type RequestedTopic = string | { topic: string; imageScale: number };
 
 // Compute the subscriptions to be requested from the player.

@@ -14,7 +14,7 @@
 import { mapValues } from "lodash";
 import { TimeUtil, Time } from "rosbag";
 
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 import { StampedMessage } from "@foxglove-studio/app/types/Messages";
 
 export const defaultGetHeaderStamp = (message?: Partial<StampedMessage>): Time | undefined => {
@@ -23,9 +23,9 @@ export const defaultGetHeaderStamp = (message?: Partial<StampedMessage>): Time |
 
 function allMessageStampsNewestFirst(
   messagesByTopic: Readonly<{
-    [topic: string]: readonly TypedMessage<unknown>[];
+    [topic: string]: readonly MessageEvent<unknown>[];
   }>,
-  getHeaderStamp?: (itemMessage: TypedMessage<unknown>) => Time | undefined,
+  getHeaderStamp?: (itemMessage: MessageEvent<unknown>) => Time | undefined,
 ) {
   const stamps = [];
   for (const messages of Object.values(messagesByTopic)) {
@@ -45,12 +45,12 @@ function allMessageStampsNewestFirst(
 function messagesMatchingStamp(
   stamp: Time,
   messagesByTopic: Readonly<{
-    [topic: string]: readonly TypedMessage<unknown>[];
+    [topic: string]: readonly MessageEvent<unknown>[];
   }>,
-  getHeaderStamp?: (itemMessage: TypedMessage<unknown>) => Time | undefined,
+  getHeaderStamp?: (itemMessage: MessageEvent<unknown>) => Time | undefined,
 ):
   | Readonly<{
-      [topic: string]: readonly TypedMessage<unknown>[];
+      [topic: string]: readonly MessageEvent<unknown>[];
     }>
   | undefined {
   const synchronizedMessagesByTopic: Record<string, any> = {};
@@ -76,12 +76,12 @@ function messagesMatchingStamp(
 // returned.
 export default function synchronizeMessages(
   messagesByTopic: Readonly<{
-    [topic: string]: readonly TypedMessage<unknown>[];
+    [topic: string]: readonly MessageEvent<unknown>[];
   }>,
-  getHeaderStamp?: (itemMessage: TypedMessage<unknown>) => Time | undefined,
+  getHeaderStamp?: (itemMessage: MessageEvent<unknown>) => Time | undefined,
 ):
   | Readonly<{
-      [topic: string]: readonly TypedMessage<unknown>[];
+      [topic: string]: readonly MessageEvent<unknown>[];
     }>
   | undefined {
   for (const stamp of allMessageStampsNewestFirst(messagesByTopic, getHeaderStamp)) {
@@ -101,11 +101,11 @@ function getSynchronizedMessages(
   stamp: Time,
   topics: readonly string[],
   messages: {
-    [topic: string]: TypedMessage<unknown>[];
+    [topic: string]: MessageEvent<unknown>[];
   },
 ):
   | {
-      [topic: string]: TypedMessage<unknown>;
+      [topic: string]: MessageEvent<unknown>;
     }
   | undefined {
   const synchronizedMessages: Record<string, any> = {};
@@ -124,9 +124,9 @@ function getSynchronizedMessages(
 
 type ReducedValue = {
   messagesByTopic: {
-    [topic: string]: TypedMessage<unknown>[];
+    [topic: string]: MessageEvent<unknown>[];
   };
-  synchronizedMessages?: { [topic: string]: TypedMessage<unknown> };
+  synchronizedMessages?: { [topic: string]: MessageEvent<unknown> };
 };
 
 function getSynchronizedState(
@@ -165,7 +165,7 @@ export function getSynchronizingReducers(topics: readonly string[]) {
     },
     addMessage: (
       { messagesByTopic, synchronizedMessages }: ReducedValue,
-      newMessage: TypedMessage<unknown>,
+      newMessage: MessageEvent<unknown>,
     ) => {
       const messages = messagesByTopic[newMessage.topic];
       return getSynchronizedState(topics, {

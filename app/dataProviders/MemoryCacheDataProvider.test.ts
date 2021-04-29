@@ -17,7 +17,7 @@ import { TimeUtil } from "rosbag";
 import MemoryDataProvider from "@foxglove-studio/app/dataProviders/MemoryDataProvider";
 import { CoreDataProviders } from "@foxglove-studio/app/dataProviders/constants";
 import { mockExtensionPoint } from "@foxglove-studio/app/dataProviders/mockExtensionPoint";
-import { TypedMessage } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 import delay from "@foxglove-studio/app/util/delay";
 import naturalSort from "@foxglove-studio/app/util/naturalSort";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
@@ -29,7 +29,7 @@ import MemoryCacheDataProvider, {
   MAX_BLOCKS,
 } from "./MemoryCacheDataProvider";
 
-function sortMessages<T>(messages: TypedMessage<T>[]) {
+function sortMessages<T>(messages: MessageEvent<T>[]) {
   return messages.sort((a, b) => {
     const timeCompare = TimeUtil.compare(a.receiveTime, b.receiveTime);
     if (timeCompare === 0) {
@@ -39,7 +39,7 @@ function sortMessages<T>(messages: TypedMessage<T>[]) {
   });
 }
 
-function generateMessages(): TypedMessage<ArrayBuffer>[] {
+function generateMessages(): MessageEvent<ArrayBuffer>[] {
   return sortMessages([
     { topic: "/foo", receiveTime: { sec: 100, nsec: 0 }, message: new ArrayBuffer(10) },
     { topic: "/foo", receiveTime: { sec: 101, nsec: 0 }, message: new ArrayBuffer(10) },
@@ -50,7 +50,7 @@ function generateMessages(): TypedMessage<ArrayBuffer>[] {
   ]);
 }
 
-function generateLargeMessages(): TypedMessage<ArrayBuffer>[] {
+function generateLargeMessages(): MessageEvent<ArrayBuffer>[] {
   // The input is 201 blocks (20.1 seconds) long, with messages every two seconds.
   return sortMessages([
     { topic: "/foo", receiveTime: { sec: 0, nsec: 0 }, message: new ArrayBuffer(600) },
@@ -67,14 +67,14 @@ function generateLargeMessages(): TypedMessage<ArrayBuffer>[] {
   ]);
 }
 
-function generateMessagesForLongInput(): TypedMessage<ArrayBuffer>[] {
+function generateMessagesForLongInput(): MessageEvent<ArrayBuffer>[] {
   return sortMessages([
     { topic: "/foo", receiveTime: { sec: 0, nsec: 0 }, message: new ArrayBuffer(10) },
     { topic: "/bar", receiveTime: { sec: 3600, nsec: 0 }, message: new ArrayBuffer(10) },
   ]);
 }
 
-function getProvider(messages: TypedMessage<ArrayBuffer>[], unlimitedCache: boolean = false) {
+function getProvider(messages: MessageEvent<ArrayBuffer>[], unlimitedCache: boolean = false) {
   const memoryDataProvider = new MemoryDataProvider({
     messages: { parsedMessages: undefined, rosBinaryMessages: messages },
     providesParsedMessages: false,

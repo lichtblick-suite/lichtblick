@@ -18,7 +18,7 @@ import {
   Topic,
   MessageDefinitionsByTopic,
   ParsedMessageDefinitionsByTopic,
-  TypedMessage,
+  MessageEvent,
 } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 
@@ -59,8 +59,8 @@ export type GetMessagesTopics = Readonly<{
 }>;
 
 export type GetMessagesResult = Readonly<{
-  parsedMessages?: readonly TypedMessage<unknown>[];
-  rosBinaryMessages?: readonly TypedMessage<ArrayBuffer>[];
+  parsedMessages?: readonly MessageEvent<unknown>[];
+  rosBinaryMessages?: readonly MessageEvent<ArrayBuffer>[];
 }>;
 
 export type ParsedMessageDefinitions = Readonly<{

@@ -23,7 +23,7 @@ import {
 import NoopMetricsCollector from "@foxglove-studio/app/players/NoopMetricsCollector";
 import {
   AdvertisePayload,
-  TypedMessage,
+  MessageEvent,
   Player,
   PlayerCapabilities,
   PlayerMetricsCollectorInterface,
@@ -121,7 +121,7 @@ export default class RandomAccessPlayer implements Player {
   _reconnecting: boolean = false;
   _progress: Progress = Object.freeze({});
   _id: string = uuidv4();
-  _messages: TypedMessage<unknown>[] = [];
+  _messages: MessageEvent<unknown>[] = [];
   _receivedBytes: number = 0;
   _messageOrder: TimestampMethod = "receiveTime";
   _hasError = false;
@@ -405,7 +405,7 @@ export default class RandomAccessPlayer implements Player {
     }
   });
 
-  async _getMessages(start: Time, end: Time): Promise<{ parsedMessages: TypedMessage<unknown>[] }> {
+  async _getMessages(start: Time, end: Time): Promise<{ parsedMessages: MessageEvent<unknown>[] }> {
     const parsedTopics = getSanitizedTopics(this._parsedSubscribedTopics, this._providerTopics);
     if (parsedTopics.length === 0) {
       return { parsedMessages: [] };
@@ -438,7 +438,7 @@ export default class RandomAccessPlayer implements Player {
     if (parsedMessages.length > 0) {
       this._metricsCollector.recordTimeToFirstMsgs();
     }
-    const filterMessages = (msgs: TypedMessage<unknown>[], topics: string[]) =>
+    const filterMessages = (msgs: MessageEvent<unknown>[], topics: string[]) =>
       filterMap(msgs, (message) => {
         if (!topics.includes(message.topic)) {
           sendNotification(
