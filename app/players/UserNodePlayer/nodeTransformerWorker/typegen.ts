@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 // @ts-nocheck
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
 
 import ts from "typescript/lib/typescript";
 

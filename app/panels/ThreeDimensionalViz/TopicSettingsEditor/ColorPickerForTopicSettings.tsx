@@ -83,7 +83,7 @@ export function ColorPickerSettingsPanel({ color, onChange }: ColorPickerSetting
 }
 
 export default function ColorPickerForTopicSettings({ color, placement, onChange, size }: Props) {
-  const isSmallSize = !!(size && size === PICKER_SIZE.SMALL.name);
+  const isSmallSize = size === PICKER_SIZE.SMALL.name;
   const hexColor = getHexFromColorSettingWithDefault(color);
 
   return (

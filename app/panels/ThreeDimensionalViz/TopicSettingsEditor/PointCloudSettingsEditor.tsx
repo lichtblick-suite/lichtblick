@@ -23,6 +23,7 @@ import { Select, Option } from "@foxglove-studio/app/components/Select";
 import CommonPointSettings from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/CommonPointSettings";
 import { TopicSettingsEditorProps } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/types";
 import { PointCloud2 } from "@foxglove-studio/app/types/Messages";
+import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 
 import ColorPickerForTopicSettings from "./ColorPickerForTopicSettings";
 import CommonDecaySettings from "./CommonDecaySettings";
@@ -97,7 +98,7 @@ export default function PointCloudSettingsEditor(
     [onSettingsChange],
   );
 
-  const hasRGB = message?.fields?.some(({ name }) => name === "rgb");
+  const hasRGB = message?.fields?.some(({ name }) => name === "rgb") ?? false;
   const defaultColorField = message?.fields?.find(({ name }) => name !== "rgb")?.name;
   const colorMode: ColorMode = (settings as any).colorMode
     ? (settings as any).colorMode
@@ -129,7 +130,7 @@ export default function PointCloudSettingsEditor(
                 if (hasRGB) {
                   return { mode: "rgb" };
                 }
-                return defaultColorField
+                return isNonEmptyOrUndefined(defaultColorField)
                   ? { mode: "rainbow", colorField: defaultColorField }
                   : undefined;
               })
@@ -238,8 +239,8 @@ export default function PointCloudSettingsEditor(
       {colorMode.mode === "gradient" && (
         <div style={{ margin: "8px" }}>
           <GradientPicker
-            minColor={colorMode.minColor || DEFAULT_MIN_COLOR}
-            maxColor={colorMode.maxColor || DEFAULT_MAX_COLOR}
+            minColor={colorMode.minColor ?? DEFAULT_MIN_COLOR}
+            maxColor={colorMode.maxColor ?? DEFAULT_MAX_COLOR}
             onChange={({ minColor, maxColor }) =>
               onColorModeChange((newColorMode: any) => ({
                 mode: "gradient",

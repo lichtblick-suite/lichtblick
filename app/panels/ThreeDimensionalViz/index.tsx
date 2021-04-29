@@ -57,7 +57,7 @@ const BaseRenderer = (props: Props, ref: any) => {
     setSubscriptions,
     topics,
     transforms,
-    config: { autoSyncCameraState, followOrientation, followTf },
+    config: { autoSyncCameraState = false, followOrientation = false, followTf },
   } = props;
   const { updatePanelConfig } = React.useContext(PanelContext) || {};
 
@@ -68,7 +68,7 @@ const BaseRenderer = (props: Props, ref: any) => {
     ),
   );
   const isPlaying = useMessagePipeline(
-    useCallback(({ playerState: { activeData } }) => !!activeData?.isPlaying, []),
+    useCallback(({ playerState: { activeData } }) => activeData?.isPlaying ?? false, []),
   );
 
   // We use useState to store the cameraState instead of using config directly in order to
@@ -180,7 +180,7 @@ const BaseRenderer = (props: Props, ref: any) => {
       config={config}
       cleared={cleared}
       currentTime={currentTime}
-      followOrientation={!!followOrientation}
+      followOrientation={followOrientation}
       followTf={followTf}
       frame={frame}
       helpContent={helpContent}

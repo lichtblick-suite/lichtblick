@@ -194,7 +194,7 @@ function StyleExpressionNode(props: any) {
         </Tooltip>
       </SLeft>
       <SRightActions>
-        {colorOverridesByColumnIdx && (
+        {colorOverridesByColumnIdx != undefined && (
           <SToggles>
             {filterMap(colorOverridesByColumnIdx, (override, sourceIdx) => {
               if (!hasFeatureColumn && sourceIdx === 1) {

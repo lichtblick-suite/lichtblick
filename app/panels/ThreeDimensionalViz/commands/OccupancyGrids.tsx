@@ -97,7 +97,7 @@ const occupancyGrids = (regl: any) => {
       resolution: regl.prop("info.resolution"),
       // make alpha a uniform so in the future it can be controlled by topic settings
       alpha: (_context: unknown, props: OccupancyGridMessage) => {
-        return props.alpha || 0.5;
+        return props.alpha ?? 0.5;
       },
       offset: (_context: unknown, props: OccupancyGridMessage) => {
         return pointToVec3(props.info.origin.position);

@@ -19,13 +19,13 @@ import VisibilityToggle, { Size, TOGGLE_SIZE_CONFIG } from "./VisibilityToggle";
 
 function Example({
   available,
-  checked: defaultChecked,
+  checked: defaultChecked = false,
   overrideColor,
   size,
   title,
-  visibleInScene,
-  showFocused,
-  showToggled,
+  visibleInScene = false,
+  showFocused = false,
+  showToggled = false,
   diffModeEnabled = false,
   columnIndex = 0,
 }: {
@@ -40,7 +40,7 @@ function Example({
   diffModeEnabled?: boolean;
   columnIndex?: number;
 }) {
-  const [checked, setChecked] = useState(!!defaultChecked);
+  const [checked, setChecked] = useState(defaultChecked);
   const onToggle = useCallback(() => {
     setChecked((currentChecked) => !currentChecked);
   }, []);
@@ -68,7 +68,7 @@ function Example({
         available={available}
         checked={checked}
         onToggle={onToggle}
-        visibleInScene={!!visibleInScene}
+        visibleInScene={visibleInScene}
         size={size}
         overrideColor={overrideColor}
         dataTest="myToggle"

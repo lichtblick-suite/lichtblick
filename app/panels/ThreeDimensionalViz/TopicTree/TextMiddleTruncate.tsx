@@ -59,7 +59,11 @@ export default function TextMiddleTruncate({
   style,
   testShowTooltip,
 }: Props): React.ReactElement {
-  const startTextLen = Math.max(0, text.length - (endTextLength || DEFAULT_END_TEXT_LENGTH));
+  const startTextLen = Math.max(
+    0,
+    text.length -
+      (endTextLength == undefined || endTextLength === 0 ? DEFAULT_END_TEXT_LENGTH : endTextLength),
+  );
   const startText = text.substr(0, startTextLen);
   const endText = text.substr(startTextLen);
 

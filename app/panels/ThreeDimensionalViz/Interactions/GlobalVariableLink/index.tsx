@@ -13,6 +13,8 @@
 
 import styled from "styled-components";
 
+import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
+
 import { getLinkedGlobalVariable } from "../interactionUtils";
 import useLinkedGlobalVariables, { LinkedGlobalVariable } from "../useLinkedGlobalVariables";
 import LinkToGlobalVariable from "./LinkToGlobalVariable";
@@ -51,21 +53,21 @@ type Props = {
 
 export default function GlobalVariableLink({
   addLinkTooltip,
-  hasNestedValue,
+  hasNestedValue = false,
   highlight,
   label,
   linkedGlobalVariable,
   markerKeyPath,
   nestedValueStyle = { marginLeft: 8 },
-  onlyRenderAddLink,
+  onlyRenderAddLink = false,
   style = { marginLeft: 4 },
   topic,
   unlinkTooltip,
   variableValue,
-}: Props) {
+}: Props): JSX.Element | ReactNull {
   const { linkedGlobalVariables } = useLinkedGlobalVariables();
   let linkedGlobalVariableLocal: LinkedGlobalVariable | undefined = linkedGlobalVariable;
-  if (!linkedGlobalVariableLocal && topic && markerKeyPath) {
+  if (!linkedGlobalVariableLocal && isNonEmptyOrUndefined(topic) && markerKeyPath) {
     linkedGlobalVariableLocal = getLinkedGlobalVariable({
       topic,
       markerKeyPath,
@@ -76,9 +78,11 @@ export default function GlobalVariableLink({
   const isArrayBuffer = ArrayBuffer.isView(variableValue);
   const renderUnlink = !!linkedGlobalVariableLocal;
   const addToLinkedGlobalVariable =
-    topic && markerKeyPath ? { topic, markerKeyPath, variableValue } : undefined;
-  const renderAddLink = !renderUnlink && !isArrayBuffer && addToLinkedGlobalVariable;
-  if (!(renderUnlink || renderAddLink)) {
+    isNonEmptyOrUndefined(topic) && markerKeyPath
+      ? { topic, markerKeyPath, variableValue }
+      : undefined;
+  const renderAddLink = !renderUnlink && !isArrayBuffer && addToLinkedGlobalVariable != undefined;
+  if (!renderUnlink && !renderAddLink) {
     return ReactNull;
   }
 
@@ -88,7 +92,7 @@ export default function GlobalVariableLink({
 
   return (
     <SWrapper>
-      {label && <SValue>{label}</SValue>}
+      {isNonEmptyOrUndefined(label) && <SValue>{label}</SValue>}
       <SGlobalVariableLink style={wrapperStyle}>
         {linkedGlobalVariableLocal && !onlyRenderAddLink && (
           <UnlinkWrapper linkedGlobalVariable={linkedGlobalVariableLocal} tooltip={unlinkTooltip}>

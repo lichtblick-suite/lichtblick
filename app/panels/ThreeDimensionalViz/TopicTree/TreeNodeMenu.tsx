@@ -23,6 +23,7 @@ import useGuaranteedContext from "@foxglove-studio/app/hooks/useGuaranteedContex
 import { ROW_HEIGHT } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/constants";
 import { TopicTreeContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
 import clipboard from "@foxglove-studio/app/util/clipboard";
+import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 import { SetCurrentEditingTopic } from "./types";
@@ -57,7 +58,7 @@ export default function TreeNodeMenu({
   providerAvailable,
   setCurrentEditingTopic,
   topicName,
-}: Props) {
+}: Props): JSX.Element | ReactNull {
   const [isOpen, setIsOpen] = useState(false);
 
   const { toggleCheckAllAncestors, toggleCheckAllDescendants } = useGuaranteedContext(
@@ -66,7 +67,7 @@ export default function TreeNodeMenu({
   );
 
   // Don't render the dot menu if the datasources are unavailable and the node is group node (topic node has option to copy topicName).
-  if (!providerAvailable && !topicName) {
+  if (!providerAvailable && topicName.length === 0) {
     return ReactNull;
   }
   return (
@@ -152,7 +153,7 @@ export default function TreeNodeMenu({
             )}
           </>
         )}
-        {topicName && (
+        {topicName.length > 0 && (
           <Item
             onClick={() => {
               clipboard.copy(topicName);
@@ -162,7 +163,7 @@ export default function TreeNodeMenu({
             Copy topic name
           </Item>
         )}
-        {datatype && (
+        {isNonEmptyOrUndefined(datatype) && (
           <Item
             dataTest={`topic-row-menu-edit-settings-${topicName}`}
             onClick={() => {

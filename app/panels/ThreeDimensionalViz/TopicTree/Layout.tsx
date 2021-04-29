@@ -89,6 +89,7 @@ import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDime
 import { Frame, Topic } from "@foxglove-studio/app/players/types";
 import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
 import { Color } from "@foxglove-studio/app/types/Messages";
+import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import {
   COLOR_RGBA_DATATYPE,
@@ -202,13 +203,13 @@ function isTopicRenderable(topic: Topic): boolean {
 export default function Layout({
   cameraState,
   children,
-  cleared,
+  cleared = false,
   currentTime,
   followOrientation,
   followTf,
   frame,
   helpContent,
-  isPlaying,
+  isPlaying = false,
   onAlignXYAxis,
   onCameraStateChange,
   onFollowChange,
@@ -218,20 +219,20 @@ export default function Layout({
   transforms,
   setSubscriptions,
   config: {
-    autoTextBackgroundColor,
+    autoTextBackgroundColor = false,
     checkedKeys,
     expandedKeys,
-    flattenMarkers,
+    flattenMarkers = false,
     modifiedNamespaceTopics,
     pinTopics,
     diffModeEnabled,
     selectedPolygonEditFormat = "yaml",
     showCrosshair,
-    autoSyncCameraState,
+    autoSyncCameraState = false,
     topicDisplayMode = TOPIC_DISPLAY_MODES.SHOW_ALL.value as TopicDisplayMode,
     settingsByKey,
     colorOverrideBySourceIdxByVariable,
-    disableAutoOpenClickedObject,
+    disableAutoOpenClickedObject = false,
   },
 }: Props): React.ReactElement {
   const [filterText, setFilterText] = useState(""); // Topic tree text for filtering to see certain topics.
@@ -430,10 +431,10 @@ export default function Layout({
       return hoveredMarkerMatchers;
     }
     // Highlight the selected object if the interactionsTab popout is open
-    if (selectedObject && !!interactionsTabType) {
+    if (selectedObject && interactionsTabType != undefined) {
       const marker = getObject(selectedObject);
       const topic = getInteractionData(selectedObject)?.topic;
-      return marker && topic
+      return marker && isNonEmptyOrUndefined(topic)
         ? [
             {
               topic,
@@ -462,7 +463,7 @@ export default function Layout({
     ).reduce((activeColorOverrideMatchers, name) => {
       return (colorOverrideBySourceIdxByVariable?.[name] ?? ([] as ColorOverride[])).flatMap(
         (override, i) =>
-          override?.active
+          override?.active ?? false
             ? [
                 ...activeColorOverrideMatchers,
                 ...(linkedGlobalVariablesByName[name] ?? []).map(({ topic, markerKeyPath }) => {
@@ -486,7 +487,7 @@ export default function Layout({
 
   const rootTf = useMemo(() => {
     // If the user specified a followTf we will only return the root frame from their followTf
-    if (followTf) {
+    if (typeof followTf === "string" && followTf.length > 0) {
       if (transforms.has(followTf)) {
         return transforms.rootOfTransform(followTf).id;
       }
@@ -513,7 +514,7 @@ export default function Layout({
   }, [playerId, sceneBuilder]);
 
   useEffect(() => {
-    if (!rootTf) {
+    if (!isNonEmptyOrUndefined(rootTf)) {
       return;
     }
     sceneBuilder.setTransforms(transforms, rootTf);
@@ -534,7 +535,7 @@ export default function Layout({
     const topicsByTopicName = getTopicsByTopicName(topics);
     const selectedTopics = filterMap(selectedTopicNames, (name) => topicsByTopicName[name]);
 
-    sceneBuilder.setFlattenMarkers(!!flattenMarkers);
+    sceneBuilder.setFlattenMarkers(flattenMarkers);
     sceneBuilder.setSelectedNamespacesByTopic(selectedNamespacesByTopic);
     sceneBuilder.setSettingsByKey(settingsByKey);
     sceneBuilder.setTopics(selectedTopics);
@@ -546,7 +547,7 @@ export default function Layout({
     sceneBuilder.render();
 
     // update the transforms and set the selected ones to render
-    if (rootTf) {
+    if (isNonEmptyOrUndefined(rootTf)) {
       transformsBuilder.setTransforms(transforms, rootTf);
     }
     transformsBuilder.setSelectedTransforms(selectedNamespacesByTopic[TRANSFORM_TOPIC] ?? []);
@@ -587,7 +588,7 @@ export default function Layout({
     saveConfig,
     selectionState,
     topics,
-    autoSyncCameraState: !!autoSyncCameraState,
+    autoSyncCameraState: autoSyncCameraState,
     isDrawing,
   });
   callbackInputsRef.current = {
@@ -599,7 +600,7 @@ export default function Layout({
     saveConfig,
     selectionState,
     topics,
-    autoSyncCameraState: !!autoSyncCameraState,
+    autoSyncCameraState: autoSyncCameraState,
     isDrawing,
   };
 
@@ -621,7 +622,7 @@ export default function Layout({
       handleDrawPolygons: currentHandleDrawPolygons,
     } = callbackInputsRef.current;
     const measuringHandler = measuringElRef.current && (measuringElRef.current as any)[eventName];
-    const measureActive = measuringElRef.current?.measureActive;
+    const measureActive = measuringElRef.current?.measureActive ?? false;
     if (measuringHandler && measureActive) {
       return measuringHandler(ev, args);
     } else if (currentDrawingTabType === POLYGON_TAB_TYPE) {
@@ -772,7 +773,7 @@ export default function Layout({
         if (e.ctrlKey || e.metaKey) {
           e.preventDefault();
           searchTextProps.toggleSearchTextOpen(true);
-          if (!searchTextProps.searchInputRef || !searchTextProps.searchInputRef.current) {
+          if (!searchTextProps.searchInputRef.current) {
             return;
           }
           searchTextProps.searchInputRef.current.select();
@@ -789,7 +790,7 @@ export default function Layout({
   ]);
 
   const cursorType = isDrawing ? "crosshair" : "";
-  const { isHovered } = useContext(PanelContext) ?? {};
+  const { isHovered = false } = useContext(PanelContext) ?? {};
   const isDemoMode = useExperimentalFeature("demoMode");
   const isHidden = isDemoMode && !isHovered;
 
@@ -833,7 +834,7 @@ export default function Layout({
         >
           <KeyListener keyDownHandlers={keyDownHandlers} />
           <PanelToolbarMenu
-            autoTextBackgroundColor={!!autoTextBackgroundColor}
+            autoTextBackgroundColor={autoTextBackgroundColor}
             checkedKeys={checkedKeys}
             flattenMarkers={!!flattenMarkers}
             helpContent={helpContent}
@@ -920,9 +921,9 @@ export default function Layout({
           <div className={styles.world}>
             <World
               key={`${callbackInputsRef.current.autoSyncCameraState ? "synced" : "not-synced"}`}
-              autoTextBackgroundColor={!!autoTextBackgroundColor}
+              autoTextBackgroundColor={autoTextBackgroundColor}
               cameraState={cameraState}
-              isPlaying={!!isPlaying}
+              isPlaying={isPlaying}
               isDemoMode={isDemoMode}
               markerProviders={markerProviders}
               onCameraStateChange={onCameraStateChange}

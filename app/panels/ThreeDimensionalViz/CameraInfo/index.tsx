@@ -112,13 +112,13 @@ export default function CameraInfo({
   targetPose,
   followOrientation,
   followTf,
-  isPlaying,
+  isPlaying = false,
   onAlignXYAxis,
   onCameraStateChange,
-  showCrosshair,
+  showCrosshair = false,
   autoSyncCameraState,
   defaultSelectedTab,
-}: CameraInfoProps) {
+}: CameraInfoProps): JSX.Element {
   const [selectedTab, setSelectedTab] = React.useState(defaultSelectedTab);
   const { updatePanelConfig, saveConfig } = React.useContext(PanelContext) || ({} as any);
   const [edit, setEdit] = React.useState<boolean>(false);
@@ -173,7 +173,7 @@ export default function CameraInfo({
               Copy
             </Button>
             <Button
-              disabled={!!isPlaying}
+              disabled={isPlaying}
               tooltip={
                 isPlaying
                   ? "Pause player to edit raw camera state object"
@@ -257,7 +257,7 @@ export default function CameraInfo({
                   </SRow>
                 )}
               </Flex>
-              {followTf ? (
+              {typeof followTf === "string" && followTf.length > 0 ? (
                 <SRow>
                   <SLabel>Following frame:</SLabel>
                   <SValue>

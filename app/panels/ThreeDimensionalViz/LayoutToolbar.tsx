@@ -85,7 +85,7 @@ function LayoutToolbar({
   setSearchText,
   setSearchTextMatches,
   setSelectedMatchIndex,
-  showCrosshair,
+  showCrosshair = false,
   isHidden,
   targetPose,
   toggleSearchTextOpen,
@@ -122,7 +122,7 @@ function LayoutToolbar({
         <div className={styles.buttons}>
           <FollowTFControl
             transforms={transforms}
-            tfToFollow={followTf ? followTf : undefined}
+            tfToFollow={typeof followTf === "string" && followTf.length > 0 ? followTf : undefined}
             followOrientation={followOrientation}
             onFollowChange={onFollowChange}
           />
@@ -155,7 +155,7 @@ function LayoutToolbar({
           isPlaying={isPlaying}
           onAlignXYAxis={onAlignXYAxis}
           onCameraStateChange={onCameraStateChange}
-          showCrosshair={!!showCrosshair}
+          showCrosshair={showCrosshair}
           autoSyncCameraState={autoSyncCameraState}
         />
       </div>

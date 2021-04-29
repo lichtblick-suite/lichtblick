@@ -30,9 +30,9 @@ type Props = {
   searchText?: string;
 };
 
-export default function TextHighlight({ targetStr = "", searchText = "" }: Props) {
-  if (!searchText) {
-    return <>targetStr</>;
+export default function TextHighlight({ targetStr = "", searchText = "" }: Props): JSX.Element {
+  if (searchText.length === 0) {
+    return <>{targetStr}</>;
   }
 
   return (

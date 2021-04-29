@@ -102,7 +102,7 @@ function ObjectDetails({ interactionData, objectToDisplay }: Props) {
 
   const getItemString = useGetItemStringWithTimezone();
 
-  if (!topic) {
+  if (topic.length === 0) {
     // show the original object directly if there is no interaction data. e.g. DrawPolygons
     return (
       <SObjectDetails>
@@ -139,7 +139,7 @@ function ObjectDetails({ interactionData, objectToDisplay }: Props) {
             return <span style={{ padding: "0 4px" }}>{label}</span>;
           }
 
-          let objectForPath = sortedDataObject;
+          let objectForPath: Record<string, any> | undefined = sortedDataObject;
           for (let i = markerKeyPath.length - 1; i >= 0; i--) {
             objectForPath = objectForPath[markerKeyPath[i]!];
             if (!objectForPath) {

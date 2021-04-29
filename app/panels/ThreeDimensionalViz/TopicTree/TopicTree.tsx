@@ -334,7 +334,7 @@ function TopicTree({
             topicDisplayMode={topicDisplayMode}
           />
         )}
-        {!filterText && (
+        {filterText.length === 0 && (
           <Icon
             dataTest="expand-all-icon"
             tooltip={topLevelNodesCollapsed ? "Expand all" : "Collapse all"}
@@ -348,7 +348,7 @@ function TopicTree({
             {topLevelNodesCollapsed ? <MoreIcon /> : <LessIcon />}
           </Icon>
         )}
-        {filterText && (
+        {filterText.length > 0 && (
           <Icon
             dataTest="clear-filter-icon"
             small
@@ -408,7 +408,7 @@ function TopicTree({
               /* Set autoExpandParent to true when filtering */
             }
             switcherIcon={
-              <SSwitcherIcon style={filterText ? { visibility: "hidden" } : {}}>
+              <SSwitcherIcon style={filterText.length > 0 ? { visibility: "hidden" } : {}}>
                 <ChevronDownIcon
                   fill="currentColor"
                   style={{ width: SWITCHER_ICON_SIZE, height: SWITCHER_ICON_SIZE }}

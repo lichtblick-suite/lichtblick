@@ -61,10 +61,11 @@ export default function TopicViewModeSelector({
   isXSWidth,
   topicDisplayMode: topicDisplayModeProp,
   saveConfig,
-}: Props) {
-  const topicDisplayMode = TOPIC_DISPLAY_MODES[topicDisplayModeProp]
-    ? topicDisplayModeProp
-    : DEFAULT_DISPLAY_MODE;
+}: Props): JSX.Element {
+  const topicDisplayMode =
+    TOPIC_DISPLAY_MODES[topicDisplayModeProp] != undefined
+      ? topicDisplayModeProp
+      : DEFAULT_DISPLAY_MODE;
   return (
     <STopicViewModeSelector>
       <Dropdown

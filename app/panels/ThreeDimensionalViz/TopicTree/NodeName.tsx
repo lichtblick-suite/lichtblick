@@ -14,6 +14,10 @@
 import styled from "styled-components";
 
 import Tooltip from "@foxglove-studio/app/components/Tooltip";
+import {
+  isNonEmptyOrUndefined,
+  nonEmptyOrUndefined,
+} from "@foxglove-studio/app/util/emptyOrUndefined";
 import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 
 import TextHighlight from "./TextHighlight";
@@ -71,20 +75,24 @@ export default function NodeName({
   searchText,
   style = {},
   tooltips,
-}: Props) {
-  let targetStr = displayName || topicName;
+}: Props): JSX.Element {
+  let targetStr = nonEmptyOrUndefined(displayName) ?? topicName;
 
-  if (searchText) {
+  if (isNonEmptyOrUndefined(searchText)) {
     let topicNameToShow = topicName;
     const prefixedTopicName = `${SECOND_SOURCE_PREFIX}${topicName}`;
 
     // Show feature topic if base topicName does not include searchText and it's still a match.
-    if (topicName && !topicName.includes(searchText) && prefixedTopicName.includes(searchText)) {
+    if (
+      topicName.length > 0 &&
+      !topicName.includes(searchText) &&
+      prefixedTopicName.includes(searchText)
+    ) {
       topicNameToShow = prefixedTopicName;
       targetStr = topicNameToShow;
     }
 
-    if (displayName && topicName && displayName !== topicName) {
+    if (displayName.length > 0 && topicName.length > 0 && displayName !== topicName) {
       targetStr = `${displayName} (${topicNameToShow})`;
     }
   }
@@ -101,30 +109,28 @@ export default function NodeName({
   const textTruncateElem = (
     <TextMiddleTruncate
       text={targetStr}
-      endTextLength={topicName ? topicName.split("/").pop()!.length + 1 : DEFAULT_END_TEXT_LENGTH}
+      endTextLength={
+        topicName.length > 0 ? topicName.split("/").pop()!.length + 1 : DEFAULT_END_TEXT_LENGTH
+      }
       tooltips={tooltips}
     />
   );
   return (
     <STopicNameDisplay style={style}>
       <SDisplayName style={{ maxWidth }}>
-        {searchText ? (
+        {isNonEmptyOrUndefined(searchText) ? (
           <TextHighlight targetStr={targetStr} searchText={searchText} />
         ) : (
           <>
             {isXSWidth ? (
               xsWidthElem
+            ) : additionalElem ? ( // eslint-disable-line @typescript-eslint/strict-boolean-expressions
+              <SWrapper style={{ width: maxWidth }}>
+                {textTruncateElem}
+                {additionalElem}
+              </SWrapper>
             ) : (
-              <>
-                {additionalElem ? (
-                  <SWrapper style={{ width: maxWidth }}>
-                    {textTruncateElem}
-                    {additionalElem}
-                  </SWrapper>
-                ) : (
-                  textTruncateElem
-                )}
-              </>
+              textTruncateElem
             )}
           </>
         )}

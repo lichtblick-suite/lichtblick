@@ -26,6 +26,7 @@ import useDeepChangeDetector from "@foxglove-studio/app/hooks/useDeepChangeDetec
 import { Interactive } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
 import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
 import { TextMarker, Color } from "@foxglove-studio/app/types/Messages";
+import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 export const YELLOW = { r: 1, b: 0, g: 1, a: 1 };
@@ -52,11 +53,11 @@ export type SearchTextProps = WorldSearchTextProps & {
 };
 
 export const getHighlightedIndices = (text: string, searchText: string): number[] => {
-  const highlightedIndicesSet = new Set();
+  const highlightedIndicesSet = new Set<number>();
   let match;
   let startingIndex = 0;
   const lowerCaseSearchText = searchText.toLowerCase();
-  const lowerCaseText = text ? text.toLowerCase() : "";
+  const lowerCaseText = text.toLowerCase();
   while ((match = lowerCaseText.indexOf(lowerCaseSearchText, startingIndex)) !== -1) {
     range(match, match + searchText.length).forEach((index) => {
       highlightedIndicesSet.add(index);
@@ -64,8 +65,7 @@ export const getHighlightedIndices = (text: string, searchText: string): number[
     startingIndex = match + 1;
   }
 
-  const highlightedIndices: any = Array.from(highlightedIndicesSet);
-  return highlightedIndices;
+  return Array.from(highlightedIndicesSet);
 };
 
 export const useGLText = ({
@@ -88,7 +88,7 @@ export const useGLText = ({
         z: marker.scale.z,
       };
 
-      if (!searchText || !searchTextOpen) {
+      if (searchText.length === 0 || !searchTextOpen) {
         return { ...marker, scale };
       }
 
@@ -174,7 +174,12 @@ export const useSearchMatches = ({
 }): void => {
   const hasCurrentMatchChanged = useDeepChangeDetector([currentMatch], true);
   React.useEffect(() => {
-    if (!currentMatch || !searchTextOpen || !rootTf || !hasCurrentMatchChanged) {
+    if (
+      !currentMatch ||
+      !searchTextOpen ||
+      !isNonEmptyOrUndefined(rootTf) ||
+      !hasCurrentMatchChanged
+    ) {
       return;
     }
 

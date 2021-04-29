@@ -33,7 +33,7 @@ export function pointsToPolygons(polygonPoints: Point2D[][]): Polygon[] {
 }
 
 function pointsToYaml(polygonPoints: Point2D[][]): string {
-  if (!polygonPoints[0]?.length) {
+  if (!polygonPoints[0] || polygonPoints[0].length === 0) {
     return "";
   }
   return YAML.stringify(polygonPoints);
@@ -46,7 +46,7 @@ function pointsToJson(polygonPoints: Point2D[][]): string {
 export function getFormattedString(
   polygonPoints: Point2D[][],
   selectedPolygonEditFormat: EditFormat,
-) {
+): string {
   return selectedPolygonEditFormat === EDIT_FORMAT.JSON
     ? pointsToJson(polygonPoints)
     : pointsToYaml(polygonPoints);

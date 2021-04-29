@@ -101,7 +101,8 @@ export default function NamespaceMenu({
 
   // Render with extra space for the reset icon if any column has the override color.
   const showResetOverrideColor =
-    hasNamespaceOverrideColorChangedByColumn[0] || hasNamespaceOverrideColorChangedByColumn[1];
+    (hasNamespaceOverrideColorChangedByColumn[0] ?? false) ||
+    (hasNamespaceOverrideColorChangedByColumn[1] ?? false);
   const colorPickerWrapperStyle = showResetOverrideColor
     ? { width: COLOR_PICKER_AND_ICON_WIDTH }
     : {};
@@ -187,7 +188,7 @@ export default function NamespaceMenu({
                           overrideColorByColumn[0] as any,
                         )}
                       />
-                      {hasNamespaceOverrideColorChangedByColumn?.[0] && (
+                      {(hasNamespaceOverrideColorChangedByColumn[0] ?? false) && (
                         <Icon
                           dataTest="reset-override-color-icon"
                           small
@@ -224,7 +225,7 @@ export default function NamespaceMenu({
                             overrideColorByColumn[1] as any,
                           )}
                         />
-                        {hasNamespaceOverrideColorChangedByColumn?.[1] && (
+                        {(hasNamespaceOverrideColorChangedByColumn[1] ?? false) && (
                           <Icon
                             dataTest="reset-override-color-icon"
                             small

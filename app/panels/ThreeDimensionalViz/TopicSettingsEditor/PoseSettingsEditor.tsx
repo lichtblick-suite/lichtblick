@@ -136,9 +136,8 @@ export default function PoseSettingsEditor(
     );
   }
 
-  const CheckboxComponent = settings.addCarOutlineBuffer
-    ? CheckboxMarkedIcon
-    : CheckboxBlankOutlineIcon;
+  const CheckboxComponent =
+    settings.addCarOutlineBuffer ?? false ? CheckboxMarkedIcon : CheckboxBlankOutlineIcon;
 
   const iconProps: ComponentProps<typeof CheckboxComponent> = {
     width: 16,
@@ -179,7 +178,10 @@ export default function PoseSettingsEditor(
         <CheckboxComponent
           {...iconProps}
           onClick={() =>
-            onSettingsChange({ ...settings, addCarOutlineBuffer: !settings.addCarOutlineBuffer })
+            onSettingsChange({
+              ...settings,
+              addCarOutlineBuffer: !(settings.addCarOutlineBuffer ?? false),
+            })
           }
         />
         <SLabel>Show error buffer</SLabel>

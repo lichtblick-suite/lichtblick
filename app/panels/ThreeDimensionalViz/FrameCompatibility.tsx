@@ -60,6 +60,7 @@ const useFrame = (
 //
 // TODO(JP): Remove FrameCompatibilityDEPRECATED from the last panel where it's still used: the 3d panel!
 // This is the "Scenebuilder refactor" project.
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function FrameCompatibilityDEPRECATED<Props>(
   ChildComponent: React.ComponentType<Props>,
   baseTopics: string[],
@@ -68,7 +69,7 @@ export function FrameCompatibilityDEPRECATED<Props>(
     const { forwardedRef, ...childProps } = props;
     const [topics, setTopics] = React.useState<string[]>(baseTopics);
     const componentSetSubscriptions = React.useCallback((newTopics: string[]) => {
-      setTopics(uniq(newTopics.concat(baseTopics || [])));
+      setTopics(uniq(newTopics.concat(baseTopics)));
     }, []);
     const { frame, cleared } = useFrame(topics);
     return (

@@ -254,13 +254,13 @@ export default class SceneBuilder implements MarkerProvider {
     this._hooks = hooks;
   }
 
-  setTransforms = (transforms: Transforms, rootTransformID: string) => {
+  setTransforms = (transforms: Transforms, rootTransformID: string): void => {
     this.transforms = transforms;
     this.rootTransformID = rootTransformID;
     this.errors.rootTransformID = rootTransformID;
   };
 
-  clear() {
+  clear(): void {
     for (const topicName of Object.keys(this.topicsByName)) {
       const collector = this.collectors[topicName];
       if (collector) {
@@ -269,7 +269,7 @@ export default class SceneBuilder implements MarkerProvider {
     }
   }
 
-  setPlayerId(playerId: string) {
+  setPlayerId(playerId: string): void {
     if (this._playerId !== playerId) {
       this.reportedErrorTopics.topicsWithBadFrameIds.clear();
       this.errors = {
@@ -284,12 +284,12 @@ export default class SceneBuilder implements MarkerProvider {
     this._playerId = playerId;
   }
 
-  setSettingsByKey(settings: TopicSettingsCollection) {
+  setSettingsByKey(settings: TopicSettingsCollection): void {
     this._settingsByKey = settings;
   }
 
   // set the topics the scene builder should consume from each frame
-  setTopics(topics: Topic[]) {
+  setTopics(topics: Topic[]): void {
     const topicsToFlush = Object.keys(this.topicsByName).filter(
       (topicName) => !topics.find((other) => other.name === topicName),
     );
@@ -308,7 +308,7 @@ export default class SceneBuilder implements MarkerProvider {
     });
   }
 
-  setFrame(frame: Frame) {
+  setFrame(frame: Frame): void {
     if (this.frame === frame) {
       return;
     }
@@ -327,11 +327,11 @@ export default class SceneBuilder implements MarkerProvider {
     this.flatten = _flatten;
   }
 
-  setEnabledNamespaces(namespaces: Namespace[]) {
+  setEnabledNamespaces(namespaces: Namespace[]): void {
     this.enabledNamespaces = namespaces;
   }
 
-  setSelectedNamespacesByTopic(selectedNamespacesByTopic: SelectedNamespacesByTopic) {
+  setSelectedNamespacesByTopic(selectedNamespacesByTopic: SelectedNamespacesByTopic): void {
     // We need to update topicsToRender here so changes to the selected namespaces will appear on the next render()
     Object.keys(selectedNamespacesByTopic).forEach((topicName) => {
       const newNamespaces = selectedNamespacesByTopic[topicName];
@@ -346,7 +346,7 @@ export default class SceneBuilder implements MarkerProvider {
     );
   }
 
-  setGlobalVariables = ({ globalVariables }: { globalVariables: GlobalVariables }) => {
+  setGlobalVariables = ({ globalVariables }: { globalVariables: GlobalVariables }): void => {
     const { getSelectionState, getTopicsToRender } = this._hooks;
     const prevSelectionState = this.selectionState;
     this.selectionState = getSelectionState(globalVariables);
@@ -357,13 +357,13 @@ export default class SceneBuilder implements MarkerProvider {
     updatedTopics.forEach((topicName) => this._markTopicToRender(topicName));
   };
 
-  setHighlightedMatchers(markerMatchers: Array<MarkerMatcher>) {
+  setHighlightedMatchers(markerMatchers: Array<MarkerMatcher>): void {
     const markerMatchersByTopic = groupBy<MarkerMatcher>(markerMatchers, ({ topic }) => topic);
     this._addTopicsToRenderForMarkerMatchers(this._highlightMarkerMatchersByTopic, markerMatchers);
     this._highlightMarkerMatchersByTopic = markerMatchersByTopic;
   }
 
-  setColorOverrideMatchers(markerMatchers: Array<MarkerMatcher>) {
+  setColorOverrideMatchers(markerMatchers: Array<MarkerMatcher>): void {
     const markerMatchersByTopic = groupBy<MarkerMatcher>(markerMatchers, ({ topic }) => topic);
     this._addTopicsToRenderForMarkerMatchers(
       this._colorOverrideMarkerMatchersByTopic,
@@ -375,7 +375,7 @@ export default class SceneBuilder implements MarkerProvider {
   _addTopicsToRenderForMarkerMatchers(
     previousMarkerMatchersByTopic: MarkerMatchersByTopic,
     newMarkerMatchers: Array<MarkerMatcher>,
-  ) {
+  ): void {
     const matchersBefore = flatten(Object.keys(previousMarkerMatchersByTopic)).flatMap(
       (topic) => previousMarkerMatchersByTopic[topic],
     );
@@ -385,13 +385,13 @@ export default class SceneBuilder implements MarkerProvider {
     }
   }
 
-  _markTopicToRender(topicName: string) {
+  _markTopicToRender(topicName: string): void {
     if (this.topicsByName[topicName]) {
       this.topicsToRender.add(topicName);
     }
   }
 
-  hasErrors() {
+  hasErrors(): boolean {
     const {
       topicsMissingFrameIds,
       topicsMissingTransforms,
@@ -406,7 +406,7 @@ export default class SceneBuilder implements MarkerProvider {
     );
   }
 
-  setOnForceUpdate(callback: () => void) {
+  setOnForceUpdate(callback: () => void): void {
     this._onForceUpdate = callback;
   }
 
@@ -420,13 +420,13 @@ export default class SceneBuilder implements MarkerProvider {
     return values;
   }
 
-  _setTopicError = (topic: string, message: string) => {
+  _setTopicError = (topic: string, message: string): void => {
     this.errors.topicsWithError.set(topic, message);
     this._updateErrorsByTopic();
   };
 
   // Update the field anytime the errors change in order to generate a new object to trigger TopicTree to rerender.
-  _updateErrorsByTopic() {
+  _updateErrorsByTopic(): void {
     if (!this.transforms) {
       return;
     }
@@ -441,7 +441,7 @@ export default class SceneBuilder implements MarkerProvider {
   }
 
   // keep a unique set of all seen namespaces
-  _consumeNamespace(topic: string, name: string) {
+  _consumeNamespace(topic: string, name: string): void {
     if (some(this.allNamespaces, (ns) => ns.topic === topic && ns.name === name)) {
       return;
     }
@@ -452,7 +452,7 @@ export default class SceneBuilder implements MarkerProvider {
   }
 
   // Only public for tests.
-  namespaceIsEnabled(topic: string, name: string) {
+  namespaceIsEnabled(topic: string, name: string): boolean {
     if (this.selectedNamespacesByTopic) {
       // enable all namespaces under a topic if it's not already set
       return this.selectedNamespacesByTopic[topic]?.has(name) ?? true;
@@ -460,7 +460,7 @@ export default class SceneBuilder implements MarkerProvider {
     return some(this.enabledNamespaces, (ns) => ns.topic === topic && ns.name === name);
   }
 
-  _reportBadFrameId(topic: string) {
+  _reportBadFrameId(topic: string): void {
     if (!this.reportedErrorTopics.topicsWithBadFrameIds.has(topic)) {
       this.reportedErrorTopics.topicsWithBadFrameIds.add(topic);
       sendNotification(
@@ -475,7 +475,7 @@ export default class SceneBuilder implements MarkerProvider {
   _transformMarkerPose = (topic: string, marker: BaseMarker): MutablePose | undefined => {
     const frame_id = marker.header.frame_id;
 
-    if (!frame_id) {
+    if (frame_id.length === 0) {
       const error = this._addError(this.errors.topicsMissingFrameIds, topic);
       error.namespaces.add(marker.ns);
       return undefined;
@@ -584,7 +584,7 @@ export default class SceneBuilder implements MarkerProvider {
 
   _consumeMarker(topic: string, message: BaseMarker): void {
     const namespace = message.ns;
-    if (namespace) {
+    if (namespace.length > 0) {
       // Consume namespaces even if the message is later discarded
       // Otherwise, the namespace won't be shown as available.
       this._consumeNamespace(topic, namespace);
@@ -634,7 +634,7 @@ export default class SceneBuilder implements MarkerProvider {
     const parsedPoints = [];
     // if the marker has points, adjust bounds by the points. (Constructed markers sometimes don't
     // have points.)
-    if (points?.length) {
+    if (points.length > 0) {
       for (const point of points) {
         const x = point.x;
         const y = point.y;
@@ -720,7 +720,7 @@ export default class SceneBuilder implements MarkerProvider {
   _consumeOccupancyGrid = (topic: string, message: NavMsgs$OccupancyGrid): void => {
     const { frame_id } = message.header;
 
-    if (!frame_id) {
+    if (frame_id.length === 0) {
       this._addError(this.errors.topicsMissingFrameIds, topic);
       return;
     }
@@ -731,8 +731,13 @@ export default class SceneBuilder implements MarkerProvider {
       error.frameIds.add(frame_id);
     }
 
-    let pose = emptyPose();
-    pose = this.transforms?.apply(pose, pose, frame_id, this.rootTransformID as any) as any;
+    let pose: MutablePose | undefined = emptyPose();
+    if (this.transforms) {
+      if (this.rootTransformID === undefined) {
+        throw new Error("missing rootTransformId");
+      }
+      pose = this.transforms.apply(pose, pose, frame_id, this.rootTransformID);
+    }
     if (!pose) {
       const error = this._addError(this.errors.topicsMissingTransforms, topic);
       error.frameIds.add(frame_id);

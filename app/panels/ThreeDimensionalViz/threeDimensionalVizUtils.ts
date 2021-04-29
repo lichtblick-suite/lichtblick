@@ -48,7 +48,7 @@ export function getTargetPose(
   followTf: string | false | undefined,
   transforms: Transforms,
 ): TargetPose | undefined {
-  if (followTf && transforms.has(followTf)) {
+  if (typeof followTf === "string" && followTf.length > 0 && transforms.has(followTf)) {
     let pose: MutablePose | undefined = emptyPose();
     pose = transforms.apply(pose, pose, followTf, transforms.rootOfTransform(followTf).id);
     if (pose) {
@@ -71,7 +71,7 @@ export function useTransformedCameraState({
 }: {
   configCameraState: Partial<CameraState>;
   followTf?: string | false;
-  followOrientation?: boolean;
+  followOrientation: boolean;
   transforms: Transforms;
 }): { transformedCameraState: CameraState; targetPose?: TargetPose } {
   const transformedCameraState = { ...configCameraState };
@@ -87,7 +87,7 @@ export function useTransformedCameraState({
     if (followOrientation) {
       transformedCameraState.targetOrientation = targetPose.targetOrientation;
     }
-  } else if (followTf && lastTargetPose) {
+  } else if (typeof followTf === "string" && followTf.length > 0 && lastTargetPose) {
     // If follow is enabled but no target is available (such as when seeking), keep the camera
     // position the same as it would have been by reusing the last seen target pose.
     transformedCameraState.target = lastTargetPose.target;
@@ -134,7 +134,11 @@ export function getUpdatedGlobalVariablesBySelectedObject(
 ): GlobalVariables | undefined {
   const object = getObject(selectedObject);
   const interactionData = getInteractionData(selectedObject);
-  if (linkedGlobalVariables.length === 0 || !interactionData?.topic) {
+  if (
+    linkedGlobalVariables.length === 0 ||
+    !interactionData ||
+    interactionData.topic.length === 0
+  ) {
     return;
   }
   const newGlobalVariables: { [key: string]: any } = {};
@@ -152,7 +156,7 @@ export function getUpdatedGlobalVariablesBySelectedObject(
 function getEquivalentOffsetsWithoutTarget(
   offsets: { readonly targetOffset: Vec3; readonly thetaOffset: number },
   targetPose: { readonly target: Vec3; readonly targetOrientation: Vec4 },
-  followOrientation?: boolean,
+  followOrientation: boolean = false,
 ): { targetOffset: Vec3; thetaOffset: number } {
   const heading = followOrientation
     ? (cameraStateSelectors.targetHeading({
@@ -173,9 +177,9 @@ export function getNewCameraStateOnFollowChange({
   prevCameraState,
   prevTargetPose,
   prevFollowTf,
-  prevFollowOrientation,
+  prevFollowOrientation = false,
   newFollowTf,
-  newFollowOrientation,
+  newFollowOrientation = false,
 }: {
   prevCameraState: Partial<CameraState>;
   prevTargetPose?: TargetPose;
@@ -185,7 +189,7 @@ export function getNewCameraStateOnFollowChange({
   newFollowOrientation?: boolean;
 }): Partial<CameraState> {
   const newCameraState = { ...prevCameraState };
-  if (newFollowTf) {
+  if (typeof newFollowTf === "string" && newFollowTf.length > 0) {
     // When switching to follow orientation, adjust thetaOffset to preserve camera rotation.
     if (newFollowOrientation && !prevFollowOrientation && prevTargetPose) {
       const heading = cameraStateSelectors.targetHeading({
@@ -201,20 +205,20 @@ export function getNewCameraStateOnFollowChange({
         (newCameraState.thetaOffset ?? DEFAULT_CAMERA_STATE.thetaOffset) - heading;
     }
     // When following a frame for the first time, snap to the origin.
-    if (!prevFollowTf) {
+    if (typeof prevFollowTf !== "string" || prevFollowTf.length === 0) {
       newCameraState.targetOffset = [0, 0, 0];
     }
-  } else if (prevFollowTf && prevTargetPose) {
+  } else if (typeof prevFollowTf === "string" && prevFollowTf.length > 0 && prevTargetPose) {
     // When unfollowing, preserve the camera position and orientation.
     Object.assign(
       newCameraState,
       getEquivalentOffsetsWithoutTarget(
         {
-          targetOffset: prevCameraState.targetOffset || DEFAULT_CAMERA_STATE.targetOffset,
-          thetaOffset: prevCameraState.thetaOffset || DEFAULT_CAMERA_STATE.thetaOffset,
+          targetOffset: prevCameraState.targetOffset ?? DEFAULT_CAMERA_STATE.targetOffset,
+          thetaOffset: prevCameraState.thetaOffset ?? DEFAULT_CAMERA_STATE.thetaOffset,
         },
         prevTargetPose,
-        !!prevFollowOrientation,
+        prevFollowOrientation,
       ),
       { target: [0, 0, 0] },
     );

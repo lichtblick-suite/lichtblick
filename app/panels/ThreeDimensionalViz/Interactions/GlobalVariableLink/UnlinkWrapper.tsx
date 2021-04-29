@@ -58,7 +58,11 @@ type Props = {
   tooltip?: ReactNode;
 };
 
-export default function UnlinkWrapper({ children, linkedGlobalVariable, tooltip }: Props) {
+export default function UnlinkWrapper({
+  children,
+  linkedGlobalVariable,
+  tooltip,
+}: Props): JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   return (
     <>
@@ -72,6 +76,7 @@ export default function UnlinkWrapper({ children, linkedGlobalVariable, tooltip 
           <Icon
             fade
             tooltipProps={{
+              // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
               contents: tooltip || (
                 <span>
                   Unlink this field from <GlobalVariableName name={linkedGlobalVariable.name} />

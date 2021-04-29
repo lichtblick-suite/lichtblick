@@ -46,10 +46,6 @@ class MessageWithLifetime {
   }
 
   isExpired(currentTime: Time) {
-    // cannot tell if a marker is expired if we don't have a clock yet
-    if (!currentTime) {
-      return false;
-    }
     if (this.lifetime == undefined) {
       // Do not expire markers if we can't tell what their lifetime is.
       // They'll be flushed later if needed (see flush below)
@@ -76,11 +72,7 @@ export default class MessageCollector {
   markers: Map<string, MessageWithLifetime> = new Map();
   clock: Time = { sec: 0, nsec: 0 };
 
-  setClock(clock: Time) {
-    if (!clock) {
-      return;
-    }
-
+  setClock(clock: Time): void {
     const clockMovedBackwards = TimeUtil.isGreaterThan(this.clock, clock);
 
     if (clockMovedBackwards) {
@@ -95,7 +87,7 @@ export default class MessageCollector {
     this.clock = clock;
   }
 
-  flush() {
+  flush(): void {
     // clear out all undefined lifetime markers
     this.markers.forEach((marker, key) => {
       if (marker.lifetime == undefined) {
@@ -113,22 +105,19 @@ export default class MessageCollector {
     }
   }
 
-  addMarker(marker: Interactive<BaseMarker>, name: string) {
+  addMarker(marker: Interactive<BaseMarker>, name: string): void {
     this._addItem(name, marker, marker.lifetime);
   }
 
-  deleteMarker(name: string) {
-    if (!name) {
-      return console.error("Cannot delete marker, it is missing name");
-    }
+  deleteMarker(name: string): void {
     this.markers.delete(name);
   }
 
-  deleteAll() {
+  deleteAll(): void {
     this.markers.clear();
   }
 
-  addNonMarker(topic: string, message: ObjectWithInteractionData, lifetime?: Time) {
+  addNonMarker(topic: string, message: ObjectWithInteractionData, lifetime?: Time): void {
     // Non-marker data is removed in two ways:
     //  - Messages with lifetimes expire only at the end of their lifetime. Multiple messages on the
     //    same topic are added and expired independently.

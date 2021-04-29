@@ -17,6 +17,7 @@ import useGuaranteedContext from "@foxglove-studio/app/hooks/useGuaranteedContex
 import { ThreeDimensionalVizContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
 import { TREE_SPACING } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/constants";
 import { TopicTreeContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
+import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import { SECOND_SOURCE_PREFIX, TRANSFORM_TOPIC } from "@foxglove-studio/app/util/globalConstants";
 import { joinTopics } from "@foxglove-studio/app/util/topicUtils";
 
@@ -102,7 +103,8 @@ function NamespaceNodeRow({
   diffModeEnabled: boolean;
   onNamespaceOverrideColorChange: OnNamespaceOverrideColorChange;
 }) {
-  const nodeVisibleInScene = !!(visibleInSceneByColumn[0] || visibleInSceneByColumn[1]);
+  const nodeVisibleInScene =
+    (visibleInSceneByColumn[0] ?? false) || (visibleInSceneByColumn[1] ?? false);
 
   const { setHoveredMarkerMatchers } = useContext(ThreeDimensionalVizContext);
   const { toggleCheckAllAncestors, toggleNamespaceChecked } = useGuaranteedContext(
@@ -114,7 +116,7 @@ function NamespaceNodeRow({
     (columnIndex, visible) => {
       if (visible) {
         const topic = [topicName, joinTopics(SECOND_SOURCE_PREFIX, topicName)][columnIndex];
-        if (!topic) {
+        if (!isNonEmptyOrUndefined(topic)) {
           return;
         }
         setHoveredMarkerMatchers([
@@ -136,7 +138,7 @@ function NamespaceNodeRow({
   const onToggle = useCallback(
     (columnIndex) => {
       toggleNamespaceChecked({ topicName, namespace, columnIndex });
-      updateHoveredMarkerMatchers(columnIndex, !visibleInSceneByColumn[columnIndex]);
+      updateHoveredMarkerMatchers(columnIndex, !(visibleInSceneByColumn[columnIndex] ?? false));
     },
     [
       toggleNamespaceChecked,
@@ -149,7 +151,7 @@ function NamespaceNodeRow({
   const onAltToggle = useCallback(
     (columnIndex) => {
       toggleCheckAllAncestors(nodeKey, columnIndex, topicName);
-      updateHoveredMarkerMatchers(columnIndex, !visibleInSceneByColumn[columnIndex]);
+      updateHoveredMarkerMatchers(columnIndex, !(visibleInSceneByColumn[columnIndex] ?? false));
     },
     [
       toggleCheckAllAncestors,
@@ -205,7 +207,7 @@ function NamespaceNodeRow({
               overrideColor={overrideColorByColumn && (overrideColorByColumn[columnIndex] as any)}
               size="SMALL"
               unavailableTooltip={unavailableTooltip}
-              visibleInScene={!!visibleInSceneByColumn[columnIndex]}
+              visibleInScene={visibleInSceneByColumn[columnIndex] ?? false}
               {...mouseEventHandlersByColumnIdx[columnIndex]}
               diffModeEnabled={diffModeEnabled}
               columnIndex={columnIndex}
@@ -213,8 +215,8 @@ function NamespaceNodeRow({
           ))}
         </SToggles>
         <NamespaceMenu
-          disableBaseColumn={!availableByColumn[0]}
-          disableFeatureColumn={!availableByColumn[1]}
+          disableBaseColumn={!(availableByColumn[0] ?? false)}
+          disableFeatureColumn={!(availableByColumn[1] ?? false)}
           featureKey={featureKey}
           hasFeatureColumn={hasFeatureColumn && (availableByColumn[1] ?? false)}
           hasNamespaceOverrideColorChangedByColumn={hasNamespaceOverrideColorChangedByColumn}

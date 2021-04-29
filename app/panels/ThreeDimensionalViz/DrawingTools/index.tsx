@@ -48,7 +48,7 @@ function DrawingTools({
     <ExpandingToolbar
       tooltip="Drawing tools"
       icon={
-        <Icon style={{ color: selectedTab ? colors.accent : "white" }}>
+        <Icon style={{ color: selectedTab != undefined ? colors.accent : "white" }}>
           <PencilIcon />
         </Icon>
       }

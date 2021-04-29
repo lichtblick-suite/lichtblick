@@ -47,8 +47,8 @@ export default function LinkToGlobalVariable({
   style = {},
   addToLinkedGlobalVariable: { topic, variableValue, markerKeyPath },
   tooltip,
-  highlight,
-}: Props) {
+  highlight = false,
+}: Props): JSX.Element {
   const [isOpen, _setIsOpen] = React.useState<boolean>(false);
   const [name, setName] = React.useState(() => getInitialName(markerKeyPath));
 
@@ -87,6 +87,7 @@ export default function LinkToGlobalVariable({
         className={classNames("link-icon", { highlight })}
         style={highlightIconStyle}
         fade={!highlight}
+        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         tooltip={tooltip || "Link this field to a global variable"}
         tooltipProps={{ placement: "top" }}
       >
@@ -105,7 +106,7 @@ export default function LinkToGlobalVariable({
           onChange={(e) => setName(e.target.value.replace(/^\$/, ""))}
         />
         <p data-test="action-buttons">
-          <Button primary={!!name} disabled={!name} onClick={addLink}>
+          <Button primary={name.length > 0} disabled={name.length === 0} onClick={addLink}>
             Add Link
           </Button>
           <Button onClick={() => setIsOpen(false)}>Cancel</Button>

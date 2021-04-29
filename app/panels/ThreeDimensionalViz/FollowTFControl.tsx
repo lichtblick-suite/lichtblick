@@ -24,6 +24,7 @@ import Autocomplete from "@foxglove-studio/app/components/Autocomplete";
 import Button from "@foxglove-studio/app/components/Button";
 import Icon from "@foxglove-studio/app/components/Icon";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
+import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 
 import Transforms, { Transform } from "./Transforms";
 
@@ -88,7 +89,7 @@ const buildTfTree = (transforms: Transform[]): TfTree => {
 type Props = {
   transforms: Transforms;
   tfToFollow?: string;
-  followOrientation?: boolean;
+  followOrientation: boolean;
   onFollowChange: (tfId?: string | false, followOrientation?: boolean) => void;
 };
 
@@ -111,11 +112,14 @@ const Container = styled.div`
 `;
 
 const arePropsEqual = (prevProps: Props, nextProps: Props) => {
-  if (!nextProps.tfToFollow) {
+  if (!isNonEmptyOrUndefined(nextProps.tfToFollow)) {
     const tfTree = buildTfTree(nextProps.transforms.values());
     const allNodes = Array.from(getDescendants(tfTree.roots));
+    // As a result of various refactors this code does not make sense anymore and is in need of
+    // cleanup. An original version can be found at
+    // https://github.com/cruise-automation/webviz/blob/7407ef1687e19615a43194c003aec6608c4f7c51/packages/webviz-core/src/panels/ThreeDimensionalViz/FollowTFControl.js#L113
     const nodesWithoutDefaultFollowTfFrame = allNodes?.length;
-    if (nodesWithoutDefaultFollowTfFrame) {
+    if (nodesWithoutDefaultFollowTfFrame !== 0) {
       return false;
     }
   }
@@ -130,18 +134,21 @@ const FollowTFControl = memo<Props>((props: Props) => {
 
   const tfTree = buildTfTree(transforms.values());
   const allNodes = Array.from(getDescendants(tfTree.roots));
+  // As a result of various refactors this code does not make sense anymore and is in need of
+  // cleanup. An original version can be found at
+  // https://github.com/cruise-automation/webviz/blob/7407ef1687e19615a43194c003aec6608c4f7c51/packages/webviz-core/src/panels/ThreeDimensionalViz/FollowTFControl.js#L113
   const nodesWithoutDefaultFollowTfFrame = allNodes?.length;
   const newFollowTfFrame = allNodes?.[0]?.tf?.id;
 
   const autocomplete = createRef<Autocomplete<TfTreeNode>>();
 
   const getDefaultFollowTransformFrame = useCallback(() => {
-    return nodesWithoutDefaultFollowTfFrame ? newFollowTfFrame : undefined;
+    return nodesWithoutDefaultFollowTfFrame !== 0 ? newFollowTfFrame : undefined;
   }, [nodesWithoutDefaultFollowTfFrame, newFollowTfFrame]);
 
   const getFollowButtonTooltip = useCallback(() => {
-    if (!tfToFollow) {
-      if (lastSelectedFrame) {
+    if (!isNonEmptyOrUndefined(tfToFollow)) {
+      if (isNonEmptyOrUndefined(lastSelectedFrame)) {
         return `Follow ${lastSelectedFrame}`;
       }
       return `Follow ${getDefaultFollowTransformFrame()}`;
@@ -152,8 +159,8 @@ const FollowTFControl = memo<Props>((props: Props) => {
   }, [tfToFollow, followOrientation, lastSelectedFrame, getDefaultFollowTransformFrame]);
 
   const onClickFollowButton = useCallback(() => {
-    if (!tfToFollow) {
-      if (lastSelectedFrame) {
+    if (!isNonEmptyOrUndefined(tfToFollow)) {
+      if (isNonEmptyOrUndefined(lastSelectedFrame)) {
         return onFollowChange(lastSelectedFrame);
       }
       return onFollowChange(getDefaultFollowTransformFrame());
@@ -203,11 +210,12 @@ const FollowTFControl = memo<Props>((props: Props) => {
     setHovering(true);
   }, [onMouseLeaveDebounced, setHovering]);
 
-  const followingCustomFrame = tfToFollow && tfToFollow !== getDefaultFollowTransformFrame();
+  const followingCustomFrame =
+    isNonEmptyOrUndefined(tfToFollow) && tfToFollow !== getDefaultFollowTransformFrame();
   const showFrameList =
     lastSelectedFrame != undefined || forceShowFrameList || followingCustomFrame;
   const selectedFrameId = tfToFollow ?? lastSelectedFrame;
-  const selectedItem: TfTreeNode | undefined = selectedFrameId
+  const selectedItem: TfTreeNode | undefined = isNonEmptyOrUndefined(selectedFrameId)
     ? { tf: new Transform(selectedFrameId), children: [], depth: 0 }
     : undefined;
 
@@ -215,7 +223,7 @@ const FollowTFControl = memo<Props>((props: Props) => {
     <Container
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeaveDebounced}
-      style={{ color: tfToFollow ? undefined : colors.textMuted }}
+      style={{ color: isNonEmptyOrUndefined(tfToFollow) ? undefined : colors.textMuted }}
     >
       {showFrameList && (
         <Autocomplete
@@ -261,7 +269,7 @@ const FollowTFControl = memo<Props>((props: Props) => {
         onClick={onClickFollowButton}
         tooltip={getFollowButtonTooltip()}
       >
-        <Icon style={{ color: tfToFollow ? colors.accent : "white" }}>
+        <Icon style={{ color: isNonEmptyOrUndefined(tfToFollow) ? colors.accent : "white" }}>
           {followOrientation ? <CompassOutlineIcon /> : <CrosshairsGpsIcon />}
         </Icon>
       </Button>

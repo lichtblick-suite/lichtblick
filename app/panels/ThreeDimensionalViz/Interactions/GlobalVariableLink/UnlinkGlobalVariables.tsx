@@ -67,7 +67,10 @@ type Props = {
   showList?: boolean;
 };
 
-export default function UnlinkGlobalVariables({ name, showList }: Props) {
+export default function UnlinkGlobalVariables({
+  name,
+  showList = false,
+}: Props): JSX.Element | ReactNull {
   const { linkedGlobalVariables, setLinkedGlobalVariables } = useLinkedGlobalVariables();
   const linkedGlobalVariablesKeyByName = memoizedGetLinkedGlobalVariablesKeyByName(
     linkedGlobalVariables,

@@ -17,6 +17,10 @@ import { useDebounce } from "use-debounce";
 
 import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
 import { TOPIC_DISPLAY_MODES } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
+import {
+  isNonEmptyOrUndefined,
+  nonEmptyOrUndefined,
+} from "@foxglove-studio/app/util/emptyOrUndefined";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import {
   FOXGLOVE_GRID_DATATYPE,
@@ -38,30 +42,30 @@ export function generateNodeKey({
   topicName,
   name,
   namespace,
-  isFeatureColumn,
+  isFeatureColumn = false,
 }: {
   topicName?: string;
   name?: string;
   namespace?: string;
   isFeatureColumn?: boolean;
 }): string {
-  const prefixedTopicName = topicName
+  const prefixedTopicName = isNonEmptyOrUndefined(topicName)
     ? isFeatureColumn
       ? `${SECOND_SOURCE_PREFIX}${topicName}`
       : topicName
     : undefined;
-  if (namespace) {
-    if (prefixedTopicName) {
+  if (isNonEmptyOrUndefined(namespace)) {
+    if (isNonEmptyOrUndefined(prefixedTopicName)) {
       return `ns:${prefixedTopicName}:${namespace}`;
     }
     throw new Error(
       "Incorrect input for generating the node key. If a namespace is present, then the topicName must be present",
     );
   }
-  if (prefixedTopicName) {
+  if (isNonEmptyOrUndefined(prefixedTopicName)) {
     return `t:${prefixedTopicName}`;
   }
-  if (name) {
+  if (isNonEmptyOrUndefined(name)) {
     return isFeatureColumn ? `name_2:${name}` : `name:${name}`;
   }
 
@@ -102,7 +106,7 @@ export function generateTreeNode(
       availableByColumn: [true],
       providerAvailable: true,
     };
-  } else if (topicName) {
+  } else if (isNonEmptyOrUndefined(topicName)) {
     const datatype =
       datatypesByTopic[topicName] ?? datatypesByTopic[`${SECOND_SOURCE_PREFIX}${topicName}`];
     return {
@@ -117,13 +121,13 @@ export function generateTreeNode(
           ]
         : [availableTopicsNamesSet.has(topicName)],
       providerAvailable,
-      ...(parentKey ? { parentKey } : undefined),
-      ...(name ? { name } : undefined),
-      ...(datatype ? { datatype } : undefined),
-      ...(description ? { description } : undefined),
+      ...(isNonEmptyOrUndefined(parentKey) ? { parentKey } : undefined),
+      ...(isNonEmptyOrUndefined(name) ? { name } : undefined),
+      ...(isNonEmptyOrUndefined(datatype) ? { datatype } : undefined),
+      ...(isNonEmptyOrUndefined(description) ? { description } : undefined),
     };
   }
-  if (name) {
+  if (isNonEmptyOrUndefined(name)) {
     const childrenNodes = children.map((config) =>
       generateTreeNode(config, {
         availableTopicsNamesSet,
@@ -147,7 +151,7 @@ export function generateTreeNode(
         : [childrenNodes.some((node) => node.availableByColumn[0])],
       providerAvailable,
       children: childrenNodes,
-      ...(parentKey ? { parentKey } : undefined),
+      ...(isNonEmptyOrUndefined(parentKey) ? { parentKey } : undefined),
     };
   }
   throw new Error(`Incorrect topic tree config. Either topicName or name must be present.`);
@@ -186,7 +190,11 @@ export default function useTree({
   const topicTreeTopics = useMemo(
     () =>
       Array.from(flattenNode(topicTreeConfig))
-        .map((node) => (node.topicName && !(node as any).namespace ? node.topicName : undefined))
+        .map((node) =>
+          isNonEmptyOrUndefined(node.topicName) && !(node as any).namespace
+            ? node.topicName
+            : undefined,
+        )
         .filter(Boolean),
     [topicTreeConfig],
   );
@@ -239,12 +247,12 @@ export default function useTree({
       // Only topic node or top level group node may not have parentKey, and if we reached this level,
       // the descendants nodes should already been selected. Specifically, if a node key is included in the checkedKeys
       // and it doesn't have any parent node, it's considered to be selected.
-      if (!baseKey) {
+      if (!isNonEmptyOrUndefined(baseKey)) {
         return true;
       }
 
       const node = nodesByKey[baseKey];
-      const featureKey = node?.featureKey || baseKey;
+      const featureKey = nonEmptyOrUndefined(node?.featureKey) ?? baseKey;
       let result: boolean;
       if (!isFeatureColumn) {
         result = isSelectedMemo[baseKey] ??=
@@ -276,10 +284,9 @@ export default function useTree({
 
     // Add namespace selections if a topic has any namespaces modified. Any topics that don't have
     // the namespaces set in selectedNamespacesByTopic will have the namespaces turned on by default.
-    const selectedNamespacesByTopic: any = (modifiedNamespaceTopics || []).reduce(
-      (memo, topicName) => ({ ...memo, [topicName]: [] }),
-      {},
-    );
+    const selectedNamespacesByTopic: {
+      [topicName: string]: string[];
+    } = modifiedNamespaceTopics.reduce((memo, topicName) => ({ ...memo, [topicName]: [] }), {});
 
     // Go through the checked namespace keys, split the key to topicName + namespace, and
     // collect the namespaces if the topic is selected.
@@ -288,14 +295,14 @@ export default function useTree({
         return;
       }
       const [_, topicName, namespace] = key.split(":");
-      if (!topicName || !namespace) {
+      if (!isNonEmptyOrUndefined(topicName) || !isNonEmptyOrUndefined(namespace)) {
         throw new Error(`Incorrect checkedNode in panelConfig: ${key}`);
       }
       if (selectedTopicNamesSet.has(topicName)) {
         if (!selectedNamespacesByTopic[topicName]) {
           selectedNamespacesByTopic[topicName] = [];
         }
-        selectedNamespacesByTopic[topicName].push(namespace);
+        selectedNamespacesByTopic[topicName]?.push(namespace);
       }
     });
 
@@ -304,8 +311,9 @@ export default function useTree({
     // If any selectedNamespaces is empty, fill in all available namespaces as default if
     // the topic for the namespace is not modified.
     difference(selectedTopicNames, modifiedNamespaceTopics).forEach((topicName) => {
-      if (availableNamespacesByTopic[topicName] && !selectedNamespacesByTopic[topicName]) {
-        selectedNamespacesByTopic[topicName] = availableNamespacesByTopic[topicName];
+      const namespaces = availableNamespacesByTopic[topicName];
+      if (namespaces) {
+        selectedNamespacesByTopic[topicName] ??= namespaces;
       }
     });
 
@@ -321,14 +329,14 @@ export default function useTree({
       }
       const baseKey = getBaseKey(node.key);
       const isFeatureColumn = columnIndex === 1;
-      if (namespace && node.type === "topic") {
+      if (isNonEmptyOrUndefined(namespace) && node.type === "topic") {
         const prefixedTopicName =
           node.type === "topic"
             ? isFeatureColumn
               ? `${SECOND_SOURCE_PREFIX}${node.topicName}`
               : node.topicName
             : undefined;
-        if (!prefixedTopicName) {
+        if (!isNonEmptyOrUndefined(prefixedTopicName)) {
           return false;
         }
         if (!(selectedNamespacesByTopic[prefixedTopicName] || []).includes(namespace)) {
@@ -337,7 +345,7 @@ export default function useTree({
         // A namespace node is visible if the parent topic node is visible.
         return getIsTreeNodeVisibleInScene(node, columnIndex);
       }
-      return !!node.availableByColumn[columnIndex] && isSelected(baseKey, isFeatureColumn);
+      return (node.availableByColumn[columnIndex] ?? false) && isSelected(baseKey, isFeatureColumn);
     }
     return {
       selectedTopicNames,
@@ -374,10 +382,12 @@ export default function useTree({
       }
       // The topic node is visible, now traverse up the tree and update all parent's visibleTopicsCount.
       const parentKey = nodesByKey[topicKey]?.parentKey;
-      let parentNode = parentKey ? nodesByKey[parentKey] : undefined;
+      let parentNode = isNonEmptyOrUndefined(parentKey) ? nodesByKey[parentKey] : undefined;
       while (parentNode) {
         ret[parentNode.key] = (ret[parentNode.key] ?? 0) + 1;
-        parentNode = parentNode.parentKey ? nodesByKey[parentNode.parentKey] : undefined;
+        parentNode = isNonEmptyOrUndefined(parentNode.parentKey)
+          ? nodesByKey[parentNode.parentKey]
+          : undefined;
       }
     });
     return ret;
@@ -421,7 +431,7 @@ export default function useTree({
               isDefaultSettings: isDefaultSettings && result[key].isDefaultSettings,
             };
       }
-      if (!key) {
+      if (!isNonEmptyOrUndefined(key)) {
         console.error(`Key ${topicKeyOrNamespaceKey} in settingsByKey is not a valid key.`);
         continue;
       }
@@ -438,7 +448,7 @@ export default function useTree({
 
   const onNamespaceOverrideColorChange = useCallback(
     (newColor: string | undefined, prefixedNamespaceKey: string) => {
-      const newSettingsByKey = newColor
+      const newSettingsByKey = isNonEmptyOrUndefined(newColor)
         ? { ...settingsByKey, [prefixedNamespaceKey]: { overrideColor: newColor } }
         : omit(settingsByKey, prefixedNamespaceKey);
       saveConfig({ settingsByKey: newSettingsByKey });
@@ -512,7 +522,7 @@ export default function useTree({
   const toggleNodeChecked = useCallback(
     (nodeKey: string, columnIndex: number) => {
       const key = columnIndex === 1 ? nodesByKey[nodeKey]?.featureKey : nodeKey;
-      if (!key) {
+      if (!isNonEmptyOrUndefined(key)) {
         return;
       }
       saveConfig({ checkedKeys: xor(checkedKeys, [key]) });
@@ -578,12 +588,15 @@ export default function useTree({
       const node = nodesByKey[nodeKey];
       let keyWithPrefix = isFeatureColumn && node ? node.featureKey : nodeKey;
       const prefixedTopicName =
-        isFeatureColumn && namespaceParentTopicName
+        isFeatureColumn && isNonEmptyOrUndefined(namespaceParentTopicName)
           ? `${SECOND_SOURCE_PREFIX}${namespaceParentTopicName}`
           : namespaceParentTopicName;
 
       let newModififiedNamespaceTopics = modifiedNamespaceTopics;
-      if (namespaceParentTopicName && prefixedTopicName) {
+      if (
+        isNonEmptyOrUndefined(namespaceParentTopicName) &&
+        isNonEmptyOrUndefined(prefixedTopicName)
+      ) {
         if (!modifiedNamespaceTopics.includes(prefixedTopicName)) {
           newModififiedNamespaceTopics = [...modifiedNamespaceTopics, prefixedTopicName];
         }
@@ -597,9 +610,9 @@ export default function useTree({
 
       let prevChecked = checkedKeys.includes(keyWithPrefix);
       let newCheckedKeys = [...checkedKeys];
-      if (!prevChecked && namespaceParentTopicName) {
+      if (!prevChecked && isNonEmptyOrUndefined(namespaceParentTopicName)) {
         prevChecked = getIsNamespaceCheckedByDefault(namespaceParentTopicName, columnIndex);
-        if (prevChecked && prefixedTopicName) {
+        if (prevChecked && isNonEmptyOrUndefined(prefixedTopicName)) {
           // Add all namespaces under the topic if it's checked by default.
           const allNsKeys = (availableNamespacesByTopic[prefixedTopicName] || []).map((ns) =>
             generateNodeKey({
@@ -614,13 +627,13 @@ export default function useTree({
       const isNowChecked = !prevChecked;
 
       const nodeAndAncestorKeys: string[] = [keyWithPrefix];
-      let parentKey = namespaceParentTopicName
+      let parentKey = isNonEmptyOrUndefined(namespaceParentTopicName)
         ? generateNodeKey({ topicName: namespaceParentTopicName })
         : node?.parentKey;
 
-      while (parentKey) {
+      while (isNonEmptyOrUndefined(parentKey)) {
         const keyToToggle = isFeatureColumn ? nodesByKey[parentKey]?.featureKey : parentKey;
-        if (keyToToggle) {
+        if (isNonEmptyOrUndefined(keyToToggle)) {
           nodeAndAncestorKeys.push(keyToToggle);
         }
         parentKey = nodesByKey[parentKey]?.parentKey;
@@ -648,7 +661,7 @@ export default function useTree({
   const toggleNodeExpanded = useCallback(
     (nodeKey: string) => {
       // Don't allow any toggling expansion when filtering because we automatically expand all nodes.
-      if (!filterTextRef.current) {
+      if (filterTextRef.current.length === 0) {
         saveConfig({ expandedKeys: xor(expandedKeys, [nodeKey]) });
       }
     },
@@ -659,11 +672,11 @@ export default function useTree({
     const result: any = {};
 
     function collectGroupErrors(groupKey: string | undefined, errors: string[]) {
-      if (!groupKey) {
+      if (!isNonEmptyOrUndefined(groupKey)) {
         return;
       }
       let nodeKey: string | undefined = groupKey;
-      while (nodeKey && nodesByKey[nodeKey]) {
+      while (isNonEmptyOrUndefined(nodeKey) && nodesByKey[nodeKey]) {
         if (!result[nodeKey]) {
           result[nodeKey] = [];
         }
@@ -723,8 +736,8 @@ export default function useTree({
       // unavailable/invisible nodes since they are not going to be rendered.
       if (providerAvailable && node.name !== "root") {
         const unavailable = hasFeatureColumn
-          ? !node.availableByColumn[0] && !node.availableByColumn[1]
-          : !node.availableByColumn[0];
+          ? !(node.availableByColumn[0] ?? false) && !(node.availableByColumn[1] ?? false)
+          : !(node.availableByColumn[0] ?? false);
         const invisibleInScene = hasFeatureColumn
           ? !getIsTreeNodeVisibleInScene(node, 0) && !getIsTreeNodeVisibleInScene(node, 1)
           : !getIsTreeNodeVisibleInScene(node, 0);
@@ -764,7 +777,7 @@ export default function useTree({
     }
 
     function getIsTreeNodeVisible(key: string): boolean {
-      if (!searchText) {
+      if (!isNonEmptyOrUndefined(searchText)) {
         return true;
       }
 
@@ -774,7 +787,7 @@ export default function useTree({
         hasCalculatedVisibility = true;
       }
 
-      return !!isVisibleByKey[key];
+      return isVisibleByKey[key] ?? false;
     }
 
     return { getIsTreeNodeVisibleInTree: getIsTreeNodeVisible };
@@ -791,7 +804,7 @@ export default function useTree({
   const { allKeys, shouldExpandAllKeys } = useMemo(() => {
     return {
       allKeys: Object.keys(nodesByKey),
-      shouldExpandAllKeys: !!debouncedFilterText,
+      shouldExpandAllKeys: isNonEmptyOrUndefined(debouncedFilterText),
     };
   }, [debouncedFilterText, nodesByKey]);
 

@@ -28,7 +28,7 @@ type ErrorsByTopic = {
 class MockTransform {
   _values: { id: string }[];
   constructor({ tfs }: { tfs: { id: string }[] }) {
-    this._values = tfs || [];
+    this._values = tfs;
   }
   values() {
     return this._values;
@@ -59,9 +59,9 @@ class MockSceneBuilder {
 }
 
 function getMockProps({
-  showNamespaces,
-  showTransforms,
-  showErrors,
+  showNamespaces = false,
+  showTransforms = false,
+  showErrors = false,
   mockTfIds,
 }: {
   showNamespaces?: boolean;

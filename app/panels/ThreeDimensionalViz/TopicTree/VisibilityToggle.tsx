@@ -19,6 +19,7 @@ import tinyColor from "tinycolor2";
 
 import Icon from "@foxglove-studio/app/components/Icon";
 import { getHexFromColorSettingWithDefault } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
+import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 import { ROW_HEIGHT } from "./constants";
@@ -153,7 +154,7 @@ export default function VisibilityToggle({
   onMouseLeave,
   diffModeEnabled,
   columnIndex,
-}: Props) {
+}: Props): JSX.Element {
   // Handle shift + click/enter, option + click/enter, and click/enter.
   const onChange = useCallback(
     (e: MouseEvent | KeyboardEvent) => {
@@ -172,7 +173,7 @@ export default function VisibilityToggle({
     return (
       <Icon
         tooltipProps={{ placement: "top" } as any}
-        tooltip={unavailableTooltip || "Unavailable"}
+        tooltip={nonEmptyOrUndefined(unavailableTooltip) ?? "Unavailable"}
         fade
         small
         clickable={false}

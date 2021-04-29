@@ -17,6 +17,7 @@ import { Component, createRef, KeyboardEvent } from "react";
 import { cameraStateSelectors, CameraState, Vec3 } from "regl-worldview";
 
 import styles from "@foxglove-studio/app/panels/ThreeDimensionalViz/PositionControl.module.scss";
+import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 
 type Props = {
   cameraState?: CameraState;
@@ -31,7 +32,7 @@ export function parsePosition(input: string): Vec3 | undefined {
   const parts = input.split(/\s*[,\n{}[\]]+\s*/).filter((part) => part !== "");
   const parseMatch = (val: string) => {
     const match = val.match(/-?\d+(\.\d+)?/);
-    return match?.[0] ? Number.parseFloat(match[0]) : undefined;
+    return match?.[0] != undefined ? Number.parseFloat(match[0]) : undefined;
   };
   // allow length 3 to ignore z value
   if (parts.length === 2 || parts.length === 3) {
@@ -48,7 +49,7 @@ export default class PositionControl extends Component<Props> {
   lastValue?: string;
   _ref = createRef<HTMLDivElement>();
 
-  onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+  onKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
     if (event.key === "Enter" || event.key === "Return") {
       event.stopPropagation();
       event.preventDefault();
@@ -56,13 +57,13 @@ export default class PositionControl extends Component<Props> {
     }
   };
 
-  onInput = () => {
+  onInput = (): void => {
     if (this._ref.current) {
       this.lastValue = this._ref.current.innerText;
     }
   };
 
-  onFocus = () => {
+  onFocus = (): void => {
     const { current: el } = this._ref;
     if (el) {
       const range = document.createRange();
@@ -73,14 +74,14 @@ export default class PositionControl extends Component<Props> {
     }
   };
 
-  onBlur = () => {
+  onBlur = (): void => {
     window.getSelection()?.removeAllRanges();
 
     const { cameraState } = this.props;
     if (!cameraState) {
       return;
     }
-    if (!this.lastValue) {
+    if (!isNonEmptyOrUndefined(this.lastValue)) {
       return;
     }
 
@@ -105,15 +106,15 @@ export default class PositionControl extends Component<Props> {
     this.resetValue();
   };
 
-  componentDidMount() {
+  componentDidMount(): void {
     this.resetValue();
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(): void {
     this.resetValue();
   }
 
-  resetValue() {
+  resetValue(): void {
     const { current: el } = this._ref;
     if (!el) {
       return;
@@ -140,7 +141,7 @@ export default class PositionControl extends Component<Props> {
       `<b>y:</b> <span class="${styles.value}">${y}</span>`;
   }
 
-  render() {
+  render(): JSX.Element {
     // "plaintext-only" is a chrome specific feature
     // See if we can declaration merge contentEditable for plaintext-only support
     // https://www.eckher.com/c/21g53gqg1g

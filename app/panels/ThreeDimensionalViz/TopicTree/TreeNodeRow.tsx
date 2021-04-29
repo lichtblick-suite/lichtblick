@@ -26,6 +26,10 @@ import {
   TREE_SPACING,
 } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/constants";
 import { TopicTreeContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
+import {
+  isNonEmptyOrUndefined,
+  nonEmptyOrUndefined,
+} from "@foxglove-studio/app/util/emptyOrUndefined";
 import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 import { joinTopics } from "@foxglove-studio/app/util/topicUtils";
@@ -143,16 +147,19 @@ export default function TreeNodeRow({
   visibleTopicsCount,
   width,
   diffModeEnabled,
-}: Props) {
+}: Props): JSX.Element {
   const topicName = node.type === "topic" ? node.topicName : "";
   const datatype = node.type === "topic" ? node.datatype : undefined;
 
-  const isDefaultSettings = derivedCustomSettings?.isDefaultSettings || !derivedCustomSettings;
-  const showTopicSettings = topicName && datatype && canEditDatatype(datatype);
+  const isDefaultSettings = !derivedCustomSettings || derivedCustomSettings.isDefaultSettings;
+  const showTopicSettings =
+    topicName.length > 0 && isNonEmptyOrUndefined(datatype) && canEditDatatype(datatype);
   const showTopicSettingsChanged = showTopicSettings && !isDefaultSettings;
 
-  const showTopicError = node.type === "topic" && sceneErrors && sceneErrors.length > 0;
-  const showGroupError = node.type === "group" && sceneErrors && sceneErrors.length > 0;
+  const showTopicError =
+    node.type === "topic" && sceneErrors != undefined && sceneErrors.length > 0;
+  const showGroupError =
+    node.type === "group" && sceneErrors != undefined && sceneErrors.length > 0;
 
   const rowWidth = width - (isXSWidth ? 0 : TREE_SPACING * 2);
 
@@ -189,7 +196,7 @@ export default function TreeNodeRow({
     (columnIndex, visible) => {
       if (visible) {
         const topic = [topicName, joinTopics(SECOND_SOURCE_PREFIX, topicName)][columnIndex];
-        if (!topic) {
+        if (!isNonEmptyOrUndefined(topic)) {
           return;
         }
         setHoveredMarkerMatchers([{ topic }]);
@@ -215,14 +222,14 @@ export default function TreeNodeRow({
   return (
     <STreeNodeRow visibleInScene={nodeVisibleInScene} style={{ width: rowWidth }}>
       <SLeft
-        style={{ cursor: hasChildren && !filterText ? "pointer" : "default" }}
+        style={{ cursor: hasChildren && filterText.length === 0 ? "pointer" : "default" }}
         data-test={`name~${key}`}
         onClick={hasChildren ? () => toggleNodeExpanded(key) : undefined}
       >
         <NodeName
           isXSWidth={isXSWidth}
           maxWidth={maxNodeNameWidth}
-          displayName={name || topicName}
+          displayName={nonEmptyOrUndefined(name) ?? topicName}
           tooltips={tooltips}
           topicName={topicName}
           searchText={filterText}
@@ -310,7 +317,7 @@ export default function TreeNodeRow({
                       ? "None of the topics in this group are currently available"
                       : "Unavailable"
                   }
-                  visibleInScene={!!visibleByColumn[columnIdx]}
+                  visibleInScene={visibleByColumn[columnIdx] ?? false}
                   {...mouseEventHandlersByColumnIdx[columnIdx]}
                   diffModeEnabled={diffModeEnabled}
                   columnIndex={columnIdx}
@@ -321,8 +328,8 @@ export default function TreeNodeRow({
         )}
         <TreeNodeMenu
           datatype={showTopicSettings ? datatype : undefined}
-          disableBaseColumn={diffModeEnabled || !availableByColumn[0]}
-          disableFeatureColumn={diffModeEnabled || !availableByColumn[1]}
+          disableBaseColumn={diffModeEnabled || !(availableByColumn[0] ?? false)}
+          disableFeatureColumn={diffModeEnabled || !(availableByColumn[1] ?? false)}
           hasFeatureColumn={hasFeatureColumn && (availableByColumn[1] ?? false)}
           nodeKey={key}
           providerAvailable={providerAvailable}

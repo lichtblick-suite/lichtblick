@@ -110,8 +110,8 @@ function LinkedGlobalVariablesDisplay() {
 
 function PanelSetupWithData({
   children,
-  showGlobalVariables,
-  showLinkedGlobalVariables,
+  showGlobalVariables = false,
+  showLinkedGlobalVariables = false,
   title,
   onMount,
   disableAutoOpenClickedObject = true,
@@ -348,9 +348,9 @@ storiesOf("panels/ThreeDimensionalViz/Interactions/Interaction", module)
             if (btn) {
               (btn as any).click();
               setImmediate(() => {
-                const linkNameInput = document.querySelector(
+                const linkNameInput = document.querySelector<HTMLInputElement>(
                   "[data-test='link-form'] input",
-                ) as HTMLInputElement;
+                );
                 if (linkNameInput) {
                   triggerInputChange(linkNameInput, "id");
                   const linkFormBtn = document.querySelector(
