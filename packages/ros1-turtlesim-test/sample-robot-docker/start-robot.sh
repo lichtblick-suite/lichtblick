@@ -16,14 +16,33 @@ HOSTNAME="$(hostname)"
 
 mkdir -p $HOME/.ros
 
-docker run \
-  -it \
-  --rm \
-  --sysctl net.ipv4.ip_local_port_range="${MIN_PORT} ${MAX_PORT}" \
-  --hostname ${HOSTNAME} \
-  -e ROS_MASTER_URI="http://${HOSTNAME}:${ROSCORE_PORT}/" \
-  -e ROS_HOSTNAME="${HOSTNAME}" \
-  -p ${ROSCORE_PORT}-${MAX_PORT}:${ROSCORE_PORT}-${MAX_PORT} \
-  -v ${HOME}/.ros:/home/rosuser/.ros \
-  --name sample-robot \
-  sample-robot
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  # Use Docker host mode networking on Linux. This allows seamless bi-directional communication
+  # between roscore and clients
+  docker run \
+    -it \
+    --rm \
+    --sysctl net.ipv4.ip_local_port_range="${MIN_PORT} ${MAX_PORT}" \
+    --net=host \
+    --hostname ${HOSTNAME} \
+    -e ROS_MASTER_URI="http://${HOSTNAME}:${ROSCORE_PORT}/" \
+    -e ROS_HOSTNAME="${HOSTNAME}" \
+    -v ${HOME}/.ros:/home/rosuser/.ros \
+    --name sample-robot \
+    sample-robot
+else
+  # Use Docker bridge mode networking on non-Linux platforms. roscore won't know how to communicate
+  # back to the host machine since it will confuse the host IP address for loopback, unless you
+  # connect with ROS_HOSTNAME=host.docker.internal
+  docker run \
+    -it \
+    --rm \
+    --sysctl net.ipv4.ip_local_port_range="${MIN_PORT} ${MAX_PORT}" \
+    --hostname ${HOSTNAME} \
+    -e ROS_MASTER_URI="http://${HOSTNAME}:${ROSCORE_PORT}/" \
+    -e ROS_HOSTNAME="${HOSTNAME}" \
+    -p ${ROSCORE_PORT}-${MAX_PORT}:${ROSCORE_PORT}-${MAX_PORT} \
+    -v ${HOME}/.ros:/home/rosuser/.ros \
+    --name sample-robot \
+    sample-robot
+fi
