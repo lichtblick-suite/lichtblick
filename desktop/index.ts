@@ -237,18 +237,6 @@ app.on("ready", async () => {
     }
   }
 
-  // Content Security Policy
-  // See: https://www.electronjs.org/docs/tutorial/security
-  const contentSecurityPolicy: Record<string, string> = {
-    "default-src": "'self'",
-    "script-src": `'self' 'unsafe-inline' 'unsafe-eval'`,
-    "worker-src": `'self' blob:`,
-    "style-src": "'self' 'unsafe-inline'",
-    "connect-src": "'self' ws: wss: http: https: x-foxglove-ros-package:",
-    "font-src": "'self' data:",
-    "img-src": "'self' data: https: x-foxglove-ros-package-converted-tiff:",
-  };
-
   const ignoredDomainSuffixes = ["api.amplitude.com", "ingest.sentry.io"];
   const ignoreRequest = (urlStr: string): boolean => {
     try {
@@ -279,6 +267,18 @@ app.on("ready", async () => {
     });
   }
 
+  // Content Security Policy
+  // See: https://www.electronjs.org/docs/tutorial/security
+  const contentSecurityPolicy: Record<string, string> = {
+    "default-src": "'self'",
+    "script-src": `'self' 'unsafe-inline' 'unsafe-eval'`,
+    "worker-src": `'self' blob:`,
+    "style-src": "'self' 'unsafe-inline'",
+    "connect-src": "'self' ws: wss: http: https: x-foxglove-ros-package:",
+    "font-src": "'self' data:",
+    "img-src": "'self' data: https: x-foxglove-ros-package-converted-tiff:",
+  };
+
   // Set default http headers
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const url = new URL(details.url);
@@ -300,7 +300,7 @@ app.on("ready", async () => {
     }
 
     // don't set CSP for internal URLs
-    if (!["chrome-extension:", "devtools:"].includes(url.protocol)) {
+    if (!["chrome-extension:", "devtools:", "data:"].includes(url.protocol)) {
       responseHeaders["Content-Security-Policy"] = [
         Object.entries(contentSecurityPolicy)
           .map(([key, val]) => `${key} ${val}`)
@@ -311,7 +311,7 @@ app.on("ready", async () => {
     callback({ responseHeaders });
   });
 
-  // When we change the focused window we switc the app menu so actions go to the correct window
+  // When we change the focused window we switch the app menu so actions go to the correct window
   app.on("browser-window-focus", (_ev, browserWindow) => {
     const studioWindow = StudioWindow.fromWebContentsId(browserWindow.webContents.id);
     if (studioWindow) {
