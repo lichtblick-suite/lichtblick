@@ -38,6 +38,12 @@ const icons: {
   "studio.ROS": <RosIcon />,
 };
 
+// By default the ThemeProvider adds an extra div to the DOM tree. We can disable this with a
+// custom `as` component to FluentThemeProvider. The component must support a `ref` property
+// otherwise we get react warnings.
+const ThemeContainer = React.forwardRef((props, _ref) => <>{props.children}</>);
+ThemeContainer.displayName = "ThemeContainer";
+
 export default function ThemeProvider({
   children,
 }: React.PropsWithChildren<unknown>): React.ReactElement | ReactNull {
@@ -51,16 +57,14 @@ export default function ThemeProvider({
     setIconsRegistered(true);
     return undefined;
   }, [iconsRegistered]);
+
   if (!iconsRegistered) {
     return ReactNull;
   }
 
   return (
     <FluentThemeProvider
-      // By default the ThemeProvider adds an extra div to the DOM tree. We can disable this with a
-      // custom `as` component, but we get React warnings if our component doesn't support ref.
-      // eslint-disable-next-line react/display-name
-      as={React.forwardRef((props, _ref) => props.children)}
+      as={ThemeContainer}
       applyTo="none" // skip default global styles for now
       theme={theme}
     >

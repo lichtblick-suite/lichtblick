@@ -10,10 +10,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ReactElement, useState, useEffect, useMemo, Suspense } from "react";
+import { ReactElement, useState, useEffect, useMemo, Suspense, PropsWithChildren } from "react";
 import { DndProvider } from "react-dnd";
 import HTML5Backend from "react-dnd-html5-backend";
-import { Provider } from "react-redux";
+import { Provider as ReduxProvider } from "react-redux";
 
 import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";
@@ -38,6 +38,17 @@ const BuiltinPanelCatalogProvider = React.lazy(
 );
 
 const Workspace = React.lazy(() => import("./Workspace"));
+
+function AllProviders({ providers, children }: PropsWithChildren<{ providers: JSX.Element[] }>) {
+  return (
+    <>
+      {providers.reduceRight(
+        (wrappedChildren, provider) => React.cloneElement(provider, undefined, wrappedChildren),
+        children,
+      )}
+    </>
+  );
+}
 
 export default function App(): ReactElement {
   const globalStore = getGlobalStore();
@@ -82,22 +93,16 @@ export default function App(): ReactElement {
     <ThemeProvider />,
     <ModalHost />, // render modal elements inside the ThemeProvider
     <WindowGeometryContext.Provider value={windowGeometry} />,
-    <Provider store={globalStore} />,
+    <ReduxProvider store={globalStore} />,
     <AnalyticsProvider />,
     <ExperimentalFeaturesLocalStorageProvider features={experimentalFeatures} />,
     <PlayerManager playerSources={playerSources} />,
     <AssetsProvider loaders={assetLoaders} />,
     /* eslint-enable react/jsx-key */
   ];
-  function AllProviders({ children }: { children: React.ReactElement }) {
-    return providers.reduceRight(
-      (wrappedChildren, provider) => React.cloneElement(provider, undefined, wrappedChildren),
-      children,
-    );
-  }
 
   return (
-    <AllProviders>
+    <AllProviders providers={providers}>
       <ErrorBoundary>
         <LayoutStorageReduxAdapter />
         <NativeFileMenuPlayerSelection />
