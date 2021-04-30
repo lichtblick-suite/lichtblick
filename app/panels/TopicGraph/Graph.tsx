@@ -3,22 +3,28 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import Cytoscape from "cytoscape";
+import CytoscapeDagre from "cytoscape-dagre";
 import { MutableRefObject, useEffect, useRef } from "react";
 
-const DAG_LAYOUT = ({
+Cytoscape.use(CytoscapeDagre);
+
+const DAG_LAYOUT = {
   name: "dagre",
   fit: false,
-  padding: 40,
-  rankDir: "LR",
-} as unknown) as Cytoscape.LayoutOptions;
+  nodesep: 20,
+  rankDir: "TB",
+  ranker: "longest-path",
+};
 
 export interface GraphMutation {
   fit: () => void;
+  resetUserPanZoom: () => void;
 }
 
 type Props = {
   style: Cytoscape.Stylesheet[];
   elements: cytoscape.ElementDefinition[];
+  rankDir: string;
   graphRef: MutableRefObject<GraphMutation | undefined>;
 };
 
@@ -49,6 +55,9 @@ export default function Graph(props: Props): JSX.Element {
         userPanZoom.current = false;
         cy.current?.fit();
       },
+      resetUserPanZoom: () => {
+        userPanZoom.current = false;
+      },
     };
 
     return () => {
@@ -56,7 +65,7 @@ export default function Graph(props: Props): JSX.Element {
     };
   }, [props.graphRef]);
 
-  const { elements } = props;
+  const { elements, rankDir } = props;
   useEffect(() => {
     if (!cy.current) {
       return;
@@ -65,13 +74,16 @@ export default function Graph(props: Props): JSX.Element {
     cy.current.batch(() => {
       cy.current?.elements().remove();
       cy.current?.add(elements);
-      cy.current?.elements().makeLayout(DAG_LAYOUT).run();
+      cy.current
+        ?.elements()
+        .makeLayout(({ ...DAG_LAYOUT, rankDir } as unknown) as Cytoscape.LayoutOptions)
+        .run();
     });
 
     if (!userPanZoom.current) {
       cy.current?.fit();
     }
-  }, [elements]);
+  }, [elements, rankDir]);
 
   useEffect(() => {
     cy.current?.style(props.style);

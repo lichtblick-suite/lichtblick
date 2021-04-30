@@ -16,6 +16,7 @@ import { Subscription } from "./Subscription";
 import { TcpConnection } from "./TcpConnection";
 import { TcpSocketCreate, TcpServer, TcpAddress, NetworkInterface } from "./TcpTypes";
 import { RosXmlRpcResponse } from "./XmlRpcTypes";
+import { difference } from "./difference";
 import { isEmptyPlainObject } from "./objectTests";
 
 export type RosGraph = {
@@ -241,14 +242,30 @@ export class RosNode extends EventEmitter {
 
   async subscribeAllParams(): Promise<Readonly<Map<string, XmlRpcValue>>> {
     const keys = await this.getParamNames();
+    const curKeys = Array.from(this.parameters.keys());
     const callerApi = this._callerApi();
-    const res = await this.rosParamClient.subscribeParams(this.name, callerApi, keys);
+
+    // Remove any local parameters the rosparam server didn't return
+    const removedKeys = difference(curKeys, keys);
+    if (removedKeys.length > 0) {
+      this._log?.debug?.(`removing missing parameters ${JSON.stringify(removedKeys)}`);
+      for (const key of removedKeys) {
+        this.parameters.delete(key);
+      }
+    }
+
+    // Check if there are any parameters we don't already have locally
+    const newKeys = difference(keys, curKeys);
+    if (newKeys.length === 0) {
+      return this.parameters;
+    }
+
+    const res = await this.rosParamClient.subscribeParams(this.name, callerApi, newKeys);
     if (res.length !== keys.length) {
       throw new Error(`subscribeAllParams returned unrecognized data: ${JSON.stringify(res)}`);
     }
 
-    // Rebuild local map of all subscribed parameters
-    this.parameters.clear();
+    // Update the local map of all subscribed parameters
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i] as string;
       const entry = res[i];

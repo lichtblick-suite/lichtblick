@@ -135,41 +135,29 @@ export default class Ros1Player implements Player {
     try {
       const topicArrays = await rosNode.getPublishedTopics();
       const topics = topicArrays.map(([name, datatype]) => ({ name, datatype }));
-      // Sort them for easy comparison. If nothing has changed here, bail out
+      // Sort them for easy comparison
       const sortedTopics: Topic[] = sortBy(topics, "name");
-      if (isEqual(sortedTopics, this._providerTopics)) {
-        return;
-      }
 
       if (this._providerTopics == undefined) {
         this._metricsCollector.initialized();
       }
 
-      this._providerTopics = sortedTopics;
+      if (!isEqual(sortedTopics, this._providerTopics)) {
+        this._providerTopics = sortedTopics;
+      }
 
       // Try subscribing again, since we might now be able to subscribe to some new topics.
       this.setSubscriptions(this._requestedSubscriptions);
 
       // Subscribe to all parameters
       const params = await rosNode.subscribeAllParams();
-      this._parameters = new Map();
-      params.forEach((value, key) => this._parameters.set(key, value));
+      if (!isEqual(params, this._parameters)) {
+        this._parameters = new Map();
+        params.forEach((value, key) => this._parameters.set(key, value));
+      }
 
       // Fetch the full graph topology
-      try {
-        const graph = await rosNode.getSystemState();
-        this._publishedTopics = graph.publishers;
-        this._subscribedTopics = graph.subscribers;
-        this._services = graph.services;
-      } catch (error) {
-        if (!this._sentNodesErrorNotification) {
-          this._sentNodesErrorNotification = true;
-          sendNotification("Failed to fetch system state from ROS", error, "user", "warn");
-        }
-        this._publishedTopics = new Map();
-        this._subscribedTopics = new Map();
-        this._services = new Map();
-      }
+      await this._updateConnectionGraph(rosNode);
 
       this._emitState();
     } catch (error) {
@@ -414,6 +402,29 @@ export default class Ros1Player implements Player {
 
       this._clockTime = time;
       this._clockReceived = msg.receiveTime;
+    }
+  }
+
+  private async _updateConnectionGraph(rosNode: RosNode): Promise<void> {
+    try {
+      const graph = await rosNode.getSystemState();
+      if (
+        !isEqual(this._publishedTopics, graph.publishers) ||
+        !isEqual(this._subscribedTopics, graph.subscribers) ||
+        !isEqual(this._services, graph.services)
+      ) {
+        this._publishedTopics = graph.publishers;
+        this._subscribedTopics = graph.subscribers;
+        this._services = graph.services;
+      }
+    } catch (error) {
+      if (!this._sentNodesErrorNotification) {
+        this._sentNodesErrorNotification = true;
+        sendNotification("Failed to fetch system state from ROS", error, "user", "warn");
+      }
+      this._publishedTopics = new Map();
+      this._subscribedTopics = new Map();
+      this._services = new Map();
     }
   }
 
