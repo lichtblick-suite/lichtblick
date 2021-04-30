@@ -11,9 +11,17 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { connect, ConnectedProps } from "react-redux";
-import { useAsync, useLocalStorage, useMountedState } from "react-use";
+import { useLocalStorage, useMountedState } from "react-use";
 import { URL } from "universal-url";
 
 import { AppSetting } from "@foxglove-studio/app/AppSetting";
@@ -43,6 +51,7 @@ import useAppSetting from "@foxglove-studio/app/hooks/useAppSetting";
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { usePrompt } from "@foxglove-studio/app/hooks/usePrompt";
 import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
+import useWarnImmediateReRender from "@foxglove-studio/app/hooks/useWarnImmediateReRender";
 import AnalyticsMetricsCollector from "@foxglove-studio/app/players/AnalyticsMetricsCollector";
 import OrderedStampPlayer from "@foxglove-studio/app/players/OrderedStampPlayer";
 import Ros1Player from "@foxglove-studio/app/players/Ros1Player";
@@ -324,6 +333,8 @@ function PlayerManager({
   addUserNodeLogs: setLogs,
   setUserNodeRosLib: setRosLib,
 }: Props) {
+  useWarnImmediateReRender();
+
   const usedFiles = useRef<File[]>([]);
   const globalVariablesRef = useRef<GlobalVariables>(globalVariables);
   const [maybePlayer, setMaybePlayer] = useState<MaybePlayer<OrderedStampPlayer>>({});
@@ -381,10 +392,6 @@ function PlayerManager({
     maybePlayer.player?.setUserNodes(userNodes);
   }, [userNodes, maybePlayer]);
 
-  const [selectedSource, setSelectedSource] = useLocalStorage<PlayerSourceDefinition>(
-    "studio.playermanager.selected-source",
-  );
-
   // Based on a source type, prompt the user for additional input and return a function to build the
   // requested player. The user input and actual building of the player are in separate async
   // operations so the player manager can delay clearing out the old player and entering the
@@ -437,62 +444,67 @@ function PlayerManager({
     }
   }, [setPlayer]);
 
-  // The first time we load a source, we restore the previous source state (i.e. url)
-  // and try to automatically load the source.
-  // Subsequent source changes do not restore the state which typically results in a user prompt
-  const skipRestoreRef = useRef<boolean>(false);
-
   const prompt = usePrompt();
   const storage = useMemo(() => new Storage(), []);
 
   const rosHostname = useAppSetting<string>(AppSetting.ROS1_ROS_HOSTNAME);
 
-  useAsync(async () => {
-    if (!selectedSource) {
-      return;
-    }
+  const [savedSource, setSavedSource] = useLocalStorage<PlayerSourceDefinition>(
+    "studio.playermanager.selected-source",
+  );
 
-    log.debug(`Select Source: ${selectedSource.name} ${selectedSource.type}`);
-    try {
-      metricsCollector.setProperty("player", selectedSource.type);
+  const selectSource = useCallback(
+    async (selectedSource: PlayerSourceDefinition, restore: boolean = false) => {
+      log.debug(`Select Source: ${selectedSource.name} ${selectedSource.type}`);
+      setSavedSource(selectedSource);
 
-      // see comment for skipRestoreRef
-      const skipRestore = skipRestoreRef.current;
-      skipRestoreRef.current = true;
+      try {
+        metricsCollector.setProperty("player", selectedSource.type);
 
-      const createPlayerBuilder = lookupPlayerBuilderFactory(selectedSource);
-      if (!createPlayerBuilder) {
-        throw new Error(`Could not create a player for ${selectedSource.name}`);
+        const createPlayerBuilder = lookupPlayerBuilderFactory(selectedSource);
+        if (!createPlayerBuilder) {
+          throw new Error(`Could not create a player for ${selectedSource.name}`);
+        }
+
+        const sourceOptions = { rosHostname };
+
+        const playerBuilder = await createPlayerBuilder({
+          source: selectedSource,
+          sourceOptions,
+          skipRestore: !restore,
+          prompt,
+          storage,
+        });
+        if (playerBuilder && isMounted()) {
+          setPlayer(playerBuilder);
+        }
+      } catch (error) {
+        setMaybePlayer({ error });
       }
+    },
+    [
+      isMounted,
+      lookupPlayerBuilderFactory,
+      metricsCollector,
+      prompt,
+      rosHostname,
+      setPlayer,
+      setSavedSource,
+      storage,
+    ],
+  );
 
-      const sourceOptions = { rosHostname };
-
-      const playerBuilder = await createPlayerBuilder({
-        source: selectedSource,
-        sourceOptions,
-        skipRestore,
-        prompt,
-        storage,
-      });
-      if (playerBuilder && isMounted()) {
-        setPlayer(playerBuilder);
-      }
-    } catch (error) {
-      setMaybePlayer({ error });
+  // restore the saved source on first mount
+  useLayoutEffect(() => {
+    if (savedSource) {
+      selectSource(savedSource, true /* restore */);
     }
-  }, [
-    isMounted,
-    lookupPlayerBuilderFactory,
-    metricsCollector,
-    prompt,
-    rosHostname,
-    selectedSource,
-    setPlayer,
-    storage,
-  ]);
+    // we only run the layout effect on first mount - never again even if the saved source changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const value: PlayerSelection = {
-    selectSource: setSelectedSource,
+    selectSource,
     setPlayerFromFiles: useCallback(
       (files: File[], { append = false }: { append?: boolean } = {}) => {
         if (files.length === 0) {

@@ -10,6 +10,9 @@ import {
   SubscribePayload,
 } from "@foxglove-studio/app/players/types";
 import { Analytics, AppEvent } from "@foxglove-studio/app/services/Analytics";
+import Log from "@foxglove/log";
+
+const log = Log.getLogger(__filename);
 
 type EventData = { [key: string]: string | number | boolean };
 
@@ -19,6 +22,7 @@ export default class AnalyticsMetricsCollector implements PlayerMetricsCollector
   private _analytics: Analytics;
 
   constructor(analytics: Analytics) {
+    log.debug("New AnalyticsMetricsCollector");
     this._analytics = analytics;
   }
 
