@@ -35,7 +35,11 @@ if (!inSharedWorker()) {
 }
 
 (global as any).onconnect = (connectEvent: MessageEvent) => {
-  const port = connectEvent.ports[0] as MessagePort;
+  const port = connectEvent.ports[0];
+  if (!port) {
+    throw new Error("NodeTransformWorker connect requires at least 1 message port.");
+  }
+
   const rpc = new Rpc(port);
 
   // If any errors occurred while nobody was connected, send them now

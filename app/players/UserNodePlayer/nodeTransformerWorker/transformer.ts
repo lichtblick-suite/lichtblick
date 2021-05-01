@@ -39,7 +39,6 @@ import {
 import { Topic } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { DEFAULT_WEBVIZ_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 export const hasTransformerErrors = (nodeData: NodeData): boolean =>
   nodeData.diagnostics.some(({ severity }) => severity === DiagnosticSeverity.Error);
@@ -385,26 +384,7 @@ export const extractDatatypes = (nodeData: NodeData): NodeData => {
       return { ...nodeData, diagnostics: [...nodeData.diagnostics, error.diagnostic] };
     }
 
-    // If we've hit this case, then we should fix it.
-    sendNotification(
-      "Unknown error encountered in Node Playground. Please report to the Foxglove team",
-      error,
-      "app",
-      "error",
-    );
-    return {
-      ...nodeData,
-      diagnostics: [
-        ...nodeData.diagnostics,
-        {
-          severity: DiagnosticSeverity.Error,
-          message:
-            "Unknown error encountered. This is likely a problem with Node Playground itself.",
-          source: Sources.DatatypeExtraction,
-          code: ErrorCodes.DatatypeExtraction.UNKNOWN_ERROR,
-        },
-      ],
-    };
+    throw err;
   }
 };
 

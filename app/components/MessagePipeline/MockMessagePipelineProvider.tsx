@@ -21,7 +21,9 @@ import {
   MessageEvent,
   ParameterValue,
   PlayerPresence,
+  PlayerState,
   PlayerStateActiveData,
+  PlayerProblem,
   Progress,
   PublishPayload,
   SubscribePayload,
@@ -44,6 +46,7 @@ export default function MockMessagePipelineProvider(props: {
   topics?: Topic[];
   datatypes?: RosDatatypes;
   messages?: MessageEvent<unknown>[];
+  problems?: PlayerProblem[];
   publish?: (request: PublishPayload) => void;
   setPublishers?: (arg0: string, arg1: AdvertisePayload[]) => void;
   setSubscriptions?: (arg0: string, arg1: SubscribePayload[]) => void;
@@ -98,12 +101,13 @@ export default function MockMessagePipelineProvider(props: {
 
   const capabilities = useShallowMemo(props.capabilities ?? []);
 
-  const playerState = useMemo(
+  const playerState = useMemo<PlayerState>(
     () => ({
       presence: props.presence ?? PlayerPresence.PRESENT,
       playerId: props.playerId ?? "1",
       progress: props.progress ?? {},
       capabilities,
+      problems: props.problems,
       activeData:
         props.noActiveData === true
           ? undefined
@@ -117,6 +121,9 @@ export default function MockMessagePipelineProvider(props: {
               isPlaying: props.isPlaying ?? false,
               speed: 0.2,
               lastSeekTime: 0,
+              totalBytesReceived: 0,
+              messageOrder: "receiveTime",
+              parsedMessageDefinitionsByTopic: {},
               ...props.activeData,
             },
     }),
@@ -132,6 +139,7 @@ export default function MockMessagePipelineProvider(props: {
       props.endTime,
       props.isPlaying,
       props.activeData,
+      props.problems,
       capabilities,
       currentTime,
     ],
@@ -141,7 +149,7 @@ export default function MockMessagePipelineProvider(props: {
     <StoreSetup store={props.store}>
       <ContextInternal.Provider
         value={{
-          playerState: playerState as any,
+          playerState: playerState,
           frame: groupBy(props.messages ?? [], "topic"),
           sortedTopics: (props.topics ?? []).sort(naturalSort("name")),
           datatypes: props.datatypes ?? NO_DATATYPES,

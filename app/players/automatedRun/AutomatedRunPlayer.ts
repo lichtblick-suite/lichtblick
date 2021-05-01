@@ -65,7 +65,6 @@ export interface AutomatedRunClient {
 }
 
 export const AUTOMATED_RUN_START_DELAY = process.env.NODE_ENV === "test" ? 10 : 2000;
-const NO_WARNINGS = Object.freeze({});
 
 function formatSeconds(sec: number): string {
   const date = new Date(0);
@@ -217,7 +216,6 @@ export default class AutomatedRunPlayer implements Player {
           datatypes: initializationResult.messageDefinitions.datatypes,
           parsedMessageDefinitionsByTopic:
             initializationResult.messageDefinitions.parsedMessageDefinitionsByTopic,
-          playerWarnings: NO_WARNINGS,
         },
       });
     });

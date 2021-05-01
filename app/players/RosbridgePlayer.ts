@@ -29,13 +29,13 @@ import {
   PlayerPresence,
   PlayerMetricsCollectorInterface,
   ParameterValue,
+  PlayerProblem,
 } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { bagConnectionsToDatatypes } from "@foxglove-studio/app/util/bagConnectionsHelper";
 import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
 import { FREEZE_MESSAGES } from "@foxglove-studio/app/util/globalConstants";
 import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import {
   addTimes,
   fromMillis,
@@ -43,51 +43,54 @@ import {
   TimestampMethod,
   toSec,
 } from "@foxglove-studio/app/util/time";
+import Log from "@foxglove/log";
 import type { RosGraph } from "@foxglove/ros1";
 
+const log = Log.getLogger(__dirname);
+
 const CAPABILITIES = [PlayerCapabilities.advertise];
-const NO_WARNINGS = Object.freeze({});
 
 // Connects to `rosbridge_server` instance using `roslibjs`. Currently doesn't support seeking or
 // showing simulated time, so current time from Date.now() is always used instead. Also doesn't yet
 // support raw ROS messages; instead we use the CBOR compression provided by roslibjs, which
 // unmarshalls into plain JS objects.
 export default class RosbridgePlayer implements Player {
-  _url: string; // WebSocket URL.
-  _rosClient?: roslib.Ros; // The roslibjs client when we're connected.
-  _id: string = uuidv4(); // Unique ID for this player.
-  _listener?: (arg0: PlayerState) => Promise<void>; // Listener for _emitState().
-  _closed: boolean = false; // Whether the player has been completely closed using close().
-  _providerTopics?: Topic[]; // Topics as published by the WebSocket.
-  _providerDatatypes?: RosDatatypes; // Datatypes as published by the WebSocket.
-  _publishedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of publisher IDs publishing each topic.
-  _subscribedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of subscriber IDs subscribed to each topic.
-  _services = new Map<string, Set<string>>(); // A map of service names to service provider IDs that provide each service.
-  _messageReadersByDatatype: {
+  private _url: string; // WebSocket URL.
+  private _rosClient?: roslib.Ros; // The roslibjs client when we're connected.
+  private _id: string = uuidv4(); // Unique ID for this player.
+  private _listener?: (arg0: PlayerState) => Promise<void>; // Listener for _emitState().
+  private _closed: boolean = false; // Whether the player has been completely closed using close().
+  private _providerTopics?: Topic[]; // Topics as published by the WebSocket.
+  private _providerDatatypes?: RosDatatypes; // Datatypes as published by the WebSocket.
+  private _publishedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of publisher IDs publishing each topic.
+  private _subscribedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of subscriber IDs subscribed to each topic.
+  private _services = new Map<string, Set<string>>(); // A map of service names to service provider IDs that provide each service.
+  private _messageReadersByDatatype: {
     [datatype: string]: MessageReader;
   } = {};
-  _start?: Time; // The time at which we started playing.
-  _clockTime?: Time; // The most recent published `/clock` time, if available
-  _clockReceived: Time = { sec: 0, nsec: 0 }; // The local time when `_clockTime` was last received
+  private _start?: Time; // The time at which we started playing.
+  private _clockTime?: Time; // The most recent published `/clock` time, if available
+  private _clockReceived: Time = { sec: 0, nsec: 0 }; // The local time when `_clockTime` was last received
   // active subscriptions
-  _topicSubscriptions = new Map<string, roslib.Topic>();
-  _requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
-  _parsedMessages: MessageEvent<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call.
-  _messageOrder: TimestampMethod = "receiveTime";
-  _requestTopicsTimeout?: ReturnType<typeof setTimeout>; // setTimeout() handle for _requestTopics().
-  _topicPublishers: {
+  private _topicSubscriptions = new Map<string, roslib.Topic>();
+  private _requestedSubscriptions: SubscribePayload[] = []; // Requested subscriptions by setSubscriptions()
+  private _parsedMessages: MessageEvent<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call.
+  private _messageOrder: TimestampMethod = "receiveTime";
+  private _requestTopicsTimeout?: ReturnType<typeof setTimeout>; // setTimeout() handle for _requestTopics().
+  private _topicPublishers: {
     [topicName: string]: roslib.Topic;
   } = {};
-  _parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic = {};
-  _parsedTopics: Set<string> = new Set();
-  _receivedBytes: number = 0;
-  _metricsCollector: PlayerMetricsCollectorInterface;
-  _hasReceivedMessage = false;
-  _sentConnectionClosedNotification = false;
-  _sentTopicsErrorNotification = false;
-  _sentNodesErrorNotification = false;
+  private _parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic = {};
+  private _parsedTopics: Set<string> = new Set();
+  private _receivedBytes: number = 0;
+  private _metricsCollector: PlayerMetricsCollectorInterface;
+  private _hasReceivedMessage = false;
+
+  private _presence: PlayerPresence = PlayerPresence.NOT_PRESENT;
+  private _problems: PlayerProblem[] = [];
 
   constructor(url: string, metricsCollector: PlayerMetricsCollectorInterface) {
+    this._presence = PlayerPresence.CONSTRUCTING;
     this._metricsCollector = metricsCollector;
     this._url = url;
     this._start = fromMillis(Date.now());
@@ -99,6 +102,8 @@ export default class RosbridgePlayer implements Player {
     if (this._closed) {
       return;
     }
+    this._problems = [];
+    log.info(`Opening connection to ${this._url}`);
 
     // `workersocket` will open the actual WebSocket connection in a WebWorker.
     const rosClient = new roslib.Ros({ url: this._url, transportLibrary: "workersocket" });
@@ -107,18 +112,25 @@ export default class RosbridgePlayer implements Player {
       if (this._closed) {
         return;
       }
+      this._presence = PlayerPresence.PRESENT;
+      this._problems = [];
       this._rosClient = rosClient;
       this._requestTopics();
     });
 
-    rosClient.on("error", (error) => {
-      // TODO(JP): Figure out which kinds of errors we can get here, and which ones we should
-      // actually show to the user.
-      // The "workersocket" transport just sends `null` as the error data: https://github.com/RobotWebTools/roslibjs/blob/6c17327cae14ca0c76ca5f71de5661279207219c/src/util/workerSocket.js#L27
-      console.warn("WebSocket error", error);
+    rosClient.on("error", (err) => {
+      if (err) {
+        this._problems.push({
+          severity: "warning",
+          message: "Rosbridge issue",
+          error: err,
+        });
+      }
     });
 
     rosClient.on("close", () => {
+      this._presence = PlayerPresence.RECONNECTING;
+
       if (this._requestTopicsTimeout) {
         clearTimeout(this._requestTopicsTimeout);
       }
@@ -127,23 +139,24 @@ export default class RosbridgePlayer implements Player {
         this._topicSubscriptions.delete(topicName);
       }
       delete this._rosClient;
+
+      this._problems.push({
+        severity: "error",
+        message: "Connection failed",
+        tip: `Check that the rosbridge WebSocket server at ${this._url} is reachable.`,
+      });
+
       this._emitState();
 
-      if (!this._sentConnectionClosedNotification) {
-        this._sentConnectionClosedNotification = true;
-        sendNotification(
-          "Rosbridge connection failed",
-          `Check that the rosbridge WebSocket server at ${this._url} is reachable.`,
-          "user",
-          "error",
-        );
-      }
       // Try connecting again.
       setTimeout(this._open, 3000);
     });
   };
 
   _requestTopics = async (): Promise<void> => {
+    // clear problems before each topics request so we don't have stale problems from previous failed requests
+    this._problems = [];
+
     if (this._requestTopicsTimeout) {
       clearTimeout(this._requestTopicsTimeout);
     }
@@ -191,14 +204,13 @@ export default class RosbridgePlayer implements Player {
       }
 
       if (topicsMissingDatatypes.length > 0) {
-        sendNotification(
-          "Could not resolve all message types",
-          `This can happen e.g. when playing a bag from a different codebase. Message types could not be found for these topics:\n${topicsMissingDatatypes.join(
-            "\n",
+        this._problems.push({
+          severity: "warning",
+          message: "Could not resolve all message types",
+          tip: `Message types could not be found for these topics: ${topicsMissingDatatypes.join(
+            ",",
           )}`,
-          "user",
-          "warn",
-        );
+        });
       }
 
       if (this._providerTopics == undefined) {
@@ -219,10 +231,10 @@ export default class RosbridgePlayer implements Player {
         this._subscribedTopics = graph.subscribers;
         this._services = graph.services;
       } catch (error) {
-        if (!this._sentNodesErrorNotification) {
-          this._sentNodesErrorNotification = true;
-          sendNotification("Failed to fetch node details from rosbridge", error, "user", "warn");
-        }
+        this._problems.push({
+          severity: "error",
+          message: "Failed to fetch node details from rosbridge",
+        });
         this._publishedTopics = new Map();
         this._subscribedTopics = new Map();
         this._services = new Map();
@@ -230,10 +242,10 @@ export default class RosbridgePlayer implements Player {
 
       this._emitState();
     } catch (error) {
-      if (!this._sentTopicsErrorNotification) {
-        this._sentTopicsErrorNotification = true;
-        sendNotification("Failed to fetch topics from rosbridge", error, "user", "error");
-      }
+      this._problems.push({
+        severity: "error",
+        message: "Failed to fetch topics from rosbridge",
+      });
     } finally {
       // Regardless of what happens, request topics again in a little bit.
       this._requestTopicsTimeout = setTimeout(this._requestTopics, 3000);
@@ -253,11 +265,15 @@ export default class RosbridgePlayer implements Player {
         capabilities: CAPABILITIES,
         playerId: this._id,
         activeData: undefined,
+        problems: this._problems,
       });
     }
 
+    // When connected
     // Time is always moving forward even if we don't get messages from the server.
-    setTimeout(this._emitState, 100);
+    if (this._presence === PlayerPresence.PRESENT) {
+      setTimeout(this._emitState, 100);
+    }
 
     const currentTime = this._getCurrentTime();
     const messages = this._parsedMessages;
@@ -267,6 +283,7 @@ export default class RosbridgePlayer implements Player {
       progress: {},
       capabilities: CAPABILITIES,
       playerId: this._id,
+      problems: this._problems,
 
       activeData: {
         messages,
@@ -286,7 +303,6 @@ export default class RosbridgePlayer implements Player {
         subscribedTopics: this._subscribedTopics,
         services: this._services,
         parsedMessageDefinitionsByTopic: this._parsedMessageDefinitionsByTopic,
-        playerWarnings: NO_WARNINGS,
       },
     });
   });
@@ -404,23 +420,15 @@ export default class RosbridgePlayer implements Player {
     }
   }
 
-  setParameter(key: string, _value: ParameterValue): void {
-    sendNotification(
-      "Parameter editing unsupported",
-      `Cannot set parameter "${key}" with rosbridge, parameter editing is not supported`,
-      "app",
-      "error",
-    );
+  setParameter(_key: string, _value: ParameterValue): void {
+    throw new Error("Parameter editing is not supported by the Rosbridge connection");
   }
 
   publish({ topic, msg }: PublishPayload): void {
     const subscription = this._topicSubscriptions.get(topic);
     if (!subscription) {
-      sendNotification(
-        "Invalid publish call",
+      throw new Error(
         `Tried to publish on a topic that is not registered as a publisher: ${topic}`,
-        "app",
-        "error",
       );
       return;
     }

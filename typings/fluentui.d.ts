@@ -29,7 +29,9 @@ declare global {
     | "Settings"
     | "Share"
     | "TestBeakerSolid"
-    | "Variable2";
+    | "Variable2"
+    | "Error"
+    | "Warning";
 }
 
 declare module "@fluentui/react/lib/components/Icon" {

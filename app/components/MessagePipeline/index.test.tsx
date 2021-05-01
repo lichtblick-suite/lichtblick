@@ -404,7 +404,6 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       topics: [{ name: "/input/foo", datatype: "foo" }],
       datatypes: { foo: { fields: [] } },
       parsedMessageDefinitionsByTopic: {},
-      playerWarnings: {},
       totalBytesReceived: 1234,
     };
     await act(() => player.emit({ activeData }));
@@ -448,7 +447,6 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       topics: [{ name: "/input/foo", datatype: "foo" }],
       datatypes: { foo: { fields: [] } },
       parsedMessageDefinitionsByTopic: {},
-      playerWarnings: {},
       totalBytesReceived: 1234,
     };
     await act(() => player.emit({ activeData }));

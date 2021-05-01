@@ -98,7 +98,6 @@ export default class StoryPlayer implements Player {
               lastSeekTime: 0,
               speed: 1,
               isPlaying: false,
-              playerWarnings: {},
               totalBytesReceived: 0,
             },
           });

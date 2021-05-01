@@ -16,6 +16,7 @@ import {
   PlayerMetricsCollectorInterface,
   PlayerPresence,
   PlayerState,
+  PlayerProblem,
   PublishPayload,
   SubscribePayload,
   Topic,
@@ -23,7 +24,6 @@ import {
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
 import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import {
   addTimes,
   fromMillis,
@@ -40,7 +40,6 @@ const log = Logger.getLogger(__filename);
 const rosLog = Logger.getLogger("ROS1");
 
 const CAPABILITIES = [PlayerCapabilities.getParameters, PlayerCapabilities.setParameters];
-const NO_WARNINGS = Object.freeze({});
 
 type Ros1PlayerOpts = {
   url: string;
@@ -72,8 +71,10 @@ export default class Ros1Player implements Player {
   private _requestTopicsTimeout?: ReturnType<typeof setTimeout>; // setTimeout() handle for _requestTopics().
   private _hasReceivedMessage = false;
   private _metricsCollector: PlayerMetricsCollectorInterface;
-  private _sentTopicsErrorNotification = false;
-  private _sentNodesErrorNotification = false;
+  private _presence: PlayerPresence = PlayerPresence.CONSTRUCTING;
+
+  // track issues within the player
+  private _problems: PlayerProblem[] = [];
 
   constructor({ url, hostname, metricsCollector }: Ros1PlayerOpts) {
     log.info(`initializing Ros1Player (url=${url})`);
@@ -90,6 +91,7 @@ export default class Ros1Player implements Player {
     if (this._closed || os == undefined) {
       return;
     }
+    this._presence = PlayerPresence.INITIALIZING;
 
     const hostname =
       this._hostname ??
@@ -120,10 +122,16 @@ export default class Ros1Player implements Player {
     }
 
     await this._rosNode.start();
-    this._requestTopics();
+    await this._requestTopics();
+    this._presence = PlayerPresence.PRESENT;
   };
 
   private _requestTopics = async (): Promise<void> => {
+    // A call to requestTopics indicates another set of "requests" our player will make to
+    // the core. We invalidate any previous connection errors - new errors that occur will
+    // be the new problems.
+    this._problems = [];
+
     if (this._requestTopicsTimeout) {
       clearTimeout(this._requestTopicsTimeout);
     }
@@ -159,12 +167,17 @@ export default class Ros1Player implements Player {
       // Fetch the full graph topology
       await this._updateConnectionGraph(rosNode);
 
+      this._presence = PlayerPresence.PRESENT;
       this._emitState();
     } catch (error) {
-      if (!this._sentTopicsErrorNotification) {
-        this._sentTopicsErrorNotification = true;
-        sendNotification("Error connecting to ROS", error, "user", "error");
-      }
+      this._presence = PlayerPresence.INITIALIZING;
+      this._problems.push({
+        severity: "error",
+        message: "ROS connection failed",
+        tip: `Ensure that roscore is running and accessible at: ${this._url}`,
+        error,
+      });
+      this._emitState();
     } finally {
       // Regardless of what happens, request topics again in a little bit.
       this._requestTopicsTimeout = setTimeout(this._requestTopics, 3000);
@@ -180,25 +193,30 @@ export default class Ros1Player implements Player {
     const start = this._start;
     if (!providerTopics || !start) {
       return this._listener({
-        presence: PlayerPresence.INITIALIZING,
+        presence: this._presence,
         progress: {},
         capabilities: CAPABILITIES,
         playerId: this._id,
+        problems: this._problems,
         activeData: undefined,
       });
     }
 
     // Time is always moving forward even if we don't get messages from the server.
-    setTimeout(this._emitState, 100);
+    // If we are not connected, don't emit updates since we are not longer getting new data
+    if (this._presence === PlayerPresence.PRESENT) {
+      setTimeout(this._emitState, 100);
+    }
 
     const currentTime = this._getCurrentTime();
     const messages = this._parsedMessages;
     this._parsedMessages = [];
     return this._listener({
-      presence: PlayerPresence.PRESENT,
+      presence: this._presence,
       progress: {},
       capabilities: CAPABILITIES,
       playerId: this._id,
+      problems: this._problems,
 
       activeData: {
         messages,
@@ -219,7 +237,6 @@ export default class Ros1Player implements Player {
         services: this._services,
         parameters: this._parameters,
         parsedMessageDefinitionsByTopic: {},
-        playerWarnings: NO_WARNINGS,
       },
     });
   });
@@ -263,6 +280,7 @@ export default class Ros1Player implements Player {
 
       const { datatype } = availTopic;
       const subscription = this._rosNode.subscribe({ topic: topicName, type: datatype });
+
       subscription.on("header", (_header, msgdef, _reader) => {
         // We have to create a new object instead of just updating _providerDatatypes because it is
         // later fed into a memoize() call
@@ -306,16 +324,9 @@ export default class Ros1Player implements Player {
   }
 
   setPublishers(publishers: AdvertisePayload[]): void {
-    // TODO: Publishing
     publishers = publishers.filter((p) => p.topic.length > 0);
     if (publishers.length > 0) {
-      const topics = publishers.map((p) => p.topic).join(", ");
-      sendNotification(
-        "Publishing not supported",
-        `Cannot publish to "${topics}", ROS publishing is not supported yet`,
-        "user",
-        "error",
-      );
+      throw new Error("Publishing not supported");
     }
   }
 
@@ -324,20 +335,8 @@ export default class Ros1Player implements Player {
     this._rosNode?.setParameter(key, value);
   }
 
-  publish({ topic, msg }: PublishPayload): void {
-    const publication = this._rosNode?.publications.get(topic);
-    if (publication == undefined) {
-      sendNotification(
-        "Invalid publish call",
-        `Tried to publish on a topic that is not registered as a publisher: ${topic}`,
-        "app",
-        "error",
-      );
-      return;
-    }
-    // TODO: Publishing
-    <void>msg;
-    // publication.publish(msg);
+  publish({ topic }: PublishPayload): void {
+    throw new Error(`Publishing not supported for topic: ${topic}`);
   }
 
   // Bunch of unsupported stuff. Just don't do anything for these.
@@ -418,10 +417,13 @@ export default class Ros1Player implements Player {
         this._services = graph.services;
       }
     } catch (error) {
-      if (!this._sentNodesErrorNotification) {
-        this._sentNodesErrorNotification = true;
-        sendNotification("Failed to fetch system state from ROS", error, "user", "warn");
-      }
+      this._problems.push({
+        severity: "warning",
+        message: "Unable to update connection graph",
+        tip: `The connection graph contains information about publishers and subscribers. A 
+stale graph may result in missing topics you expect. Ensure that roscore is reachable and healthy.`,
+        error,
+      });
       this._publishedTopics = new Map();
       this._subscribedTopics = new Map();
       this._services = new Map();

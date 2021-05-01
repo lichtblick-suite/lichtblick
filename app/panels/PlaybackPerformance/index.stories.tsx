@@ -30,7 +30,6 @@ const defaultActiveData: PlayerStateActiveData = {
   topics: [],
   datatypes: {},
   parsedMessageDefinitionsByTopic: {},
-  playerWarnings: {},
   totalBytesReceived: 0,
 };
 

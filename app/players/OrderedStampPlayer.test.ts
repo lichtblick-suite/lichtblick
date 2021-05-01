@@ -68,7 +68,6 @@ function getState(hasHeaderStamp?: any): PlayerStateActiveData {
       ...(hasHeaderStamp ? dummyDatatypeWithHeader : undefined),
     },
     parsedMessageDefinitionsByTopic: {},
-    playerWarnings: {},
     totalBytesReceived: 1234,
   };
 }
@@ -156,9 +155,6 @@ describe("OrderedStampPlayer", () => {
           currentTime: fromSec(9),
           startTime: fromSec(0),
           endTime: fromSec(20 - BUFFER_DURATION_SECS),
-          playerWarnings: {
-            topicsWithoutHeaderStamps: ["/dummy_no_header_topic"],
-          },
         }),
       }),
     ]);

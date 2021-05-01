@@ -41,15 +41,17 @@ import {
   Topic,
   ParameterValue,
   MessageEvent,
+  PlayerProblem,
 } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { UserNode, UserNodes } from "@foxglove-studio/app/types/panels";
 import Rpc from "@foxglove-studio/app/util/Rpc";
-import { setupReceiveReportErrorHandler } from "@foxglove-studio/app/util/RpcMainThreadUtils";
 import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
 import { DEFAULT_WEBVIZ_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import signal from "@foxglove-studio/app/util/signal";
+import Log from "@foxglove/log";
+
+const log = Log.getLogger(__filename);
 
 // TypeScript's built-in lib only accepts strings for the scriptURL. However, webpack only
 // understands `new URL()` to properly build the worker entry point:
@@ -65,62 +67,40 @@ type UserNodeActions = {
   setUserNodeRosLib: SetUserNodeRosLib;
 };
 
-const rpcFromNewSharedWorker = (worker: SharedWorker, name: string) => {
-  worker.onerror = (event) => {
-    console.error("SharedWorker error:", event);
-    sendNotification(
-      "An error occurred in Node Playground.",
-      `${name} worker error: ${event.message ?? "no details available"}`,
-      "app",
-      "error",
-    );
-  };
-  const port: MessagePort = worker.port;
-  port.onmessageerror = (event) => {
-    console.error("SharedWorker messageerror:", event);
-    sendNotification(
-      "An error occurred in Node Playground.",
-      `${name} message error: ${String(event.data) ?? "no details available"}`,
-      "app",
-      "error",
-    );
-  };
-  port.start();
-  const rpc = new Rpc(port);
-  rpc.receive("error", (msg) => {
-    sendNotification(
-      "An error occurred in Node Playground.",
-      `${name} error: ${msg || "no details available"}`,
-      "app",
-      "error",
-    );
-  });
-  setupReceiveReportErrorHandler(rpc);
-  return rpc;
-};
-
 // TODO: FUTURE - Performance tests
 // TODO: FUTURE - Consider how to incorporate with existing hardcoded nodes (esp re: stories/testing)
 // 1 - Do we convert them all over to the new node format / Typescript? What about imported libraries?
 // 2 - Do we keep them in the old format for a while and support both formats?
 export default class UserNodePlayer implements Player {
-  _player: Player;
-  _nodeRegistrations: NodeRegistration[] = [];
-  _subscriptions: SubscribePayload[] = [];
-  _validTopics = new Set<string>();
-  _userNodes: UserNodes = {};
+  private _player: Player;
+  private _nodeRegistrations: NodeRegistration[] = [];
+  private _subscriptions: SubscribePayload[] = [];
+  private _validTopics = new Set<string>();
+  private _userNodes: UserNodes = {};
+
+  // listener for state updates
+  private _listener?: (arg0: PlayerState) => Promise<void>;
+
   // TODO: FUTURE - Terminate unused workers (some sort of timeout, for whole array or per rpc)
   // Not sure if there is perf issue with unused workers (may just go idle) - requires more research
-  _unusedNodeRuntimeWorkers: Rpc[] = [];
-  _lastPlayerStateActiveData?: PlayerStateActiveData;
-  _setUserNodeDiagnostics: (nodeId: string, diagnostics: readonly Diagnostic[]) => void;
-  _addUserNodeLogs: (nodeId: string, logs: UserNodeLog[]) => void;
-  _setRosLib: (rosLib: string, datatypes: RosDatatypes) => void;
-  _nodeTransformRpc?: Rpc;
-  _rosLib?: string;
-  _rosLibDatatypes?: RosDatatypes; // the datatypes we last used to generate rosLib -- regenerate if they change
-  _globalVariables: GlobalVariables = {};
-  _pendingResetWorkers?: Promise<void>;
+  private _unusedNodeRuntimeWorkers: Rpc[] = [];
+  private _lastPlayerStateActiveData?: PlayerStateActiveData;
+  private _setUserNodeDiagnostics: (nodeId: string, diagnostics: readonly Diagnostic[]) => void;
+  private _addUserNodeLogs: (nodeId: string, logs: UserNodeLog[]) => void;
+  private _setRosLib: (rosLib: string, datatypes: RosDatatypes) => void;
+  private _nodeTransformRpc?: Rpc;
+  private _rosLib?: string;
+  private _rosLibDatatypes?: RosDatatypes; // the datatypes we last used to generate rosLib -- regenerate if they change
+  private _globalVariables: GlobalVariables = {};
+  private _pendingResetWorkers?: Promise<void>;
+
+  // Player state changes when the child player invokes our player state listener
+  // we may also emit state changes on internal errors
+  private _playerState?: PlayerState;
+
+  // The store tracks problems for individual userspace nodes
+  // a node may set its own problem or clear its problem
+  private _problemStore = new Map<string, PlayerProblem>();
 
   // exposed as a static to allow testing to mock/replace
   static CreateNodeTransformWorker = (): SharedWorker => {
@@ -134,6 +114,7 @@ export default class UserNodePlayer implements Player {
 
   constructor(player: Player, userNodeActions: UserNodeActions) {
     this._player = player;
+    this._player.setListener((state) => this._onPlayerState(state));
     const { setUserNodeDiagnostics, addUserNodeLogs, setUserNodeRosLib } = userNodeActions;
 
     // TODO(troy): can we make the below action flow better? Might be better to
@@ -236,7 +217,7 @@ export default class UserNodePlayer implements Player {
   }
 
   // Defines the inputs/outputs and worker interface of a user node.
-  _createNodeRegistration = async (
+  private _createNodeRegistration = async (
     nodeId: string,
     userNode: UserNode,
   ): Promise<NodeRegistration> => {
@@ -254,97 +235,202 @@ export default class UserNodePlayer implements Player {
 
     let rpc: Rpc | undefined;
     let terminateSignal = signal<void>();
+
+    // problemKey is a unique identifier for each userspace node so we can manage problems from
+    // a specific node. A node may have a problem that may later clear. Using the key we can add/remove
+    // problems for specific userspace nodes independently of other userspace nodes.
+    const problemKey = `node-id-${nodeId}`;
+
+    const processMessage = async (msgEvent: MessageEvent<unknown>) => {
+      // We allow _resetWorkers to "cancel" the processing by creating a new signal every time we process a message
+      terminateSignal = signal<void>();
+
+      // Register the node within a web worker to be executed.
+      if (!rpc) {
+        rpc = this._unusedNodeRuntimeWorkers.pop();
+
+        // initialize a new worker since no unused one is available
+        if (!rpc) {
+          const worker = UserNodePlayer.CreateNodeRuntimeWorker();
+
+          worker.onerror = (event) => {
+            log.error(event);
+
+            this._problemStore.set(problemKey, {
+              message: `Node playground runtime error: ${event.message}`,
+              severity: "error",
+            });
+
+            // trigger listener updates
+            this._emitState();
+          };
+
+          const port: MessagePort = worker.port;
+          port.onmessageerror = (event) => {
+            log.error(event);
+
+            this._problemStore.set(problemKey, {
+              severity: "error",
+              message: `Node playground runtime error: ${String(event.data)}`,
+            });
+
+            this._emitState();
+          };
+          port.start();
+          rpc = new Rpc(port);
+
+          rpc.receive("error", (msg) => {
+            log.error(msg);
+
+            this._problemStore.set(problemKey, {
+              severity: "error",
+              message: `Node playground runtime error: ${msg}`,
+            });
+
+            this._emitState();
+          });
+        }
+
+        const { error, userNodeDiagnostics, userNodeLogs } = await rpc.send<RegistrationOutput>(
+          "registerNode",
+          {
+            projectCode,
+            nodeCode: transpiledCode,
+          },
+        );
+        if (error != undefined) {
+          this._setUserNodeDiagnostics(nodeId, [
+            ...userNodeDiagnostics,
+            {
+              source: Sources.Runtime,
+              severity: DiagnosticSeverity.Error,
+              message: error,
+              code: ErrorCodes.RUNTIME,
+            },
+          ]);
+          return;
+        }
+        this._addUserNodeLogs(nodeId, userNodeLogs);
+      }
+
+      const result = (await Promise.race([
+        rpc.send("processMessage", { message: msgEvent, globalVariables: this._globalVariables }),
+        terminateSignal,
+      ])) as any;
+
+      if (!result) {
+        this._problemStore.set(problemKey, {
+          message: `Node playground node ${nodeId} timed out`,
+          severity: "warning",
+        });
+        return;
+      }
+
+      const diagnostics =
+        result.error != undefined
+          ? [
+              {
+                source: Sources.Runtime,
+                severity: DiagnosticSeverity.Error,
+                message: result.error,
+                code: ErrorCodes.RUNTIME,
+              },
+            ]
+          : [];
+      if (diagnostics.length > 0) {
+        this._setUserNodeDiagnostics(nodeId, diagnostics);
+      }
+      this._addUserNodeLogs(nodeId, result.userNodeLogs);
+
+      if (!result.message) {
+        this._problemStore.set(problemKey, {
+          severity: "warning",
+          message: `Node playground node ${nodeId} did not produce a message`,
+        });
+        return;
+      }
+
+      // At this point we've received a message successfully from the userspace node, therefore
+      // we clear any previous problem from this node.
+      this._problemStore.delete(problemKey);
+
+      return {
+        topic: outputTopic,
+        receiveTime: msgEvent.receiveTime,
+        message: result.message,
+      };
+    };
+
+    const terminate = () => {
+      this._problemStore.delete(problemKey);
+
+      terminateSignal.resolve();
+      if (rpc) {
+        this._unusedNodeRuntimeWorkers.push(rpc);
+        rpc = undefined;
+      }
+    };
+
     return {
       nodeId,
       nodeData,
       inputs: inputTopics,
       output: { name: outputTopic, datatype: outputDatatype },
-      processMessage: async (message: MessageEvent<unknown>) => {
-        // We allow _resetWorkers to "cancel" the processing by creating a new signal every time we process a message
-        terminateSignal = signal<void>();
-
-        // Register the node within a web worker to be executed.
-        if (!rpc) {
-          rpc =
-            this._unusedNodeRuntimeWorkers.pop() ??
-            rpcFromNewSharedWorker(UserNodePlayer.CreateNodeRuntimeWorker(), "Node runtime");
-          const { error, userNodeDiagnostics, userNodeLogs } = await rpc.send<RegistrationOutput>(
-            "registerNode",
-            {
-              projectCode,
-              nodeCode: transpiledCode,
-            },
-          );
-          if (error != undefined) {
-            this._setUserNodeDiagnostics(nodeId, [
-              ...userNodeDiagnostics,
-              {
-                source: Sources.Runtime,
-                severity: DiagnosticSeverity.Error,
-                message: error,
-                code: ErrorCodes.RUNTIME,
-              },
-            ]);
-            return;
-          }
-          this._addUserNodeLogs(nodeId, userNodeLogs);
-        }
-
-        const result = (await Promise.race([
-          rpc.send("processMessage", { message, globalVariables: this._globalVariables }),
-          terminateSignal,
-        ])) as any;
-        if (!result) {
-          return;
-        }
-
-        const diagnostics =
-          result.error != undefined
-            ? [
-                {
-                  source: Sources.Runtime,
-                  severity: DiagnosticSeverity.Error,
-                  message: result.error,
-                  code: ErrorCodes.RUNTIME,
-                },
-              ]
-            : [];
-        if (diagnostics.length > 0) {
-          this._setUserNodeDiagnostics(nodeId, diagnostics);
-        }
-        this._addUserNodeLogs(nodeId, result.userNodeLogs);
-
-        // TODO: FUTURE - surface runtime errors / infinite loop errors
-        if (!result.message) {
-          return;
-        }
-        return {
-          topic: outputTopic,
-          receiveTime: message.receiveTime,
-          message: result.message,
-        };
-      },
-      terminate: () => {
-        terminateSignal.resolve();
-        if (rpc) {
-          this._unusedNodeRuntimeWorkers.push(rpc);
-          rpc = undefined;
-        }
-      },
+      processMessage,
+      terminate,
     };
   };
-  _getNodeRegistration = microMemoize(this._createNodeRegistration, {
+
+  private _getNodeRegistration = microMemoize(this._createNodeRegistration, {
     isEqual,
     isPromise: true,
     maxSize: Infinity, // We prune the cache anytime the userNodes change, so it's not *actually* Infinite
   });
 
-  _getTransformWorker(): Rpc {
+  private _getTransformWorker(): Rpc {
     if (!this._nodeTransformRpc) {
-      this._nodeTransformRpc = rpcFromNewSharedWorker(
-        UserNodePlayer.CreateNodeTransformWorker(),
-        "Node transformer",
-      );
+      const worker = UserNodePlayer.CreateNodeTransformWorker();
+
+      // The errors below persist for the lifetime of the player.
+      // They are not cleared because they are irrecoverable.
+
+      worker.onerror = (event) => {
+        log.error(event);
+
+        this._problemStore.set("worker-error", {
+          severity: "error",
+          message: `Node playground error: ${event.message}`,
+        });
+
+        this._emitState();
+      };
+
+      const port: MessagePort = worker.port;
+      port.onmessageerror = (event) => {
+        log.error(event);
+
+        this._problemStore.set("worker-error", {
+          severity: "error",
+          message: `Node playground error: ${String(event.data)}`,
+        });
+
+        this._emitState();
+      };
+      port.start();
+      const rpc = new Rpc(port);
+
+      rpc.receive("error", (msg) => {
+        log.error(msg);
+
+        this._problemStore.set("worker-error", {
+          severity: "error",
+          message: `Node playground error: ${msg}`,
+        });
+
+        this._emitState();
+      });
+
+      this._nodeTransformRpc = rpc;
     }
     return this._nodeTransformRpc;
   }
@@ -445,18 +531,23 @@ export default class UserNodePlayer implements Player {
     return rosLib;
   }
 
-  setListener(listener: (arg0: PlayerState) => Promise<void>): void {
-    this._player.setListener(async (playerState: PlayerState) => {
+  // invoked when our child player state changes
+  private async _onPlayerState(playerState: PlayerState) {
+    try {
       const { activeData } = playerState;
       if (!activeData) {
-        return listener(playerState);
+        this._playerState = playerState;
+        await this._emitState();
+        return;
       }
+
       const { messages, topics, datatypes } = activeData;
 
       // Reset node state after seeking
       if (activeData.lastSeekTime !== this._lastPlayerStateActiveData?.lastSeekTime) {
         await this._resetWorkers();
       }
+
       // If we do not have active player data from a previous call, then our
       // player just spun up, meaning we should re-run our user nodes in case
       // they have inputs that now exist in the current player context.
@@ -489,9 +580,48 @@ export default class UserNodePlayer implements Player {
         },
       };
 
+      this._playerState = newPlayerState;
       this._lastPlayerStateActiveData = playerState.activeData;
-      return listener(newPlayerState);
-    });
+
+      // clear any previous problem we had from making a new player state
+      this._problemStore.delete("player-state-update");
+    } catch (err) {
+      this._problemStore.set("player-state-update", {
+        severity: "error",
+        message: err.message,
+        error: err,
+      });
+
+      this._playerState = playerState;
+    } finally {
+      await this._emitState();
+    }
+  }
+
+  private async _emitState() {
+    if (!this._playerState) {
+      return;
+    }
+
+    // only augment child problems if we have our own problems
+    // if neither child or parent have problems we do nothing
+    let problems = this._playerState.problems;
+    if (this._problemStore.size > 0) {
+      problems = (problems ?? []).concat(Array.from(this._problemStore.values()));
+    }
+
+    const playerState: PlayerState = {
+      ...this._playerState,
+      problems,
+    };
+
+    if (this._listener) {
+      await this._listener(playerState);
+    }
+  }
+
+  setListener(listener: NonNullable<UserNodePlayer["_listener"]>): void {
+    this._listener = listener;
   }
 
   setSubscriptions(subscriptions: SubscribePayload[]): void {

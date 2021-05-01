@@ -13,7 +13,8 @@ declare module "roslib" {
 
     on(eventName: "connection", cb: () => void): void;
     on(eventName: "close", cb: () => void): void;
-    on(eventName: "error", cb: (err: Error) => void): void;
+    // eslint-disable-next-line no-restricted-syntax
+    on(eventName: "error", cb: (err: Error | null) => void): void;
 
     getNodes(cb: (nodes: string[]) => void, errorCallback: (error: Error) => void): void;
 

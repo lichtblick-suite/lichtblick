@@ -96,6 +96,13 @@ export enum PlayerPresence {
   ERROR = "ERROR",
 }
 
+export type PlayerProblem = {
+  severity: "error" | "warning";
+  message: string;
+  error?: Error;
+  tip?: string;
+};
+
 export type PlayerState = {
   // Information about the player's presence or connection status, for the UI to show a loading indicator.
   presence: PlayerPresence;
@@ -113,14 +120,13 @@ export type PlayerState = {
   // out any data when switching to a new player.
   playerId: string;
 
+  // Surface issues during playback or player initialization
+  problems?: PlayerProblem[];
+
   // The actual data to render panels with. Can be empty during initialization, until all this data
   // is known. See `type PlayerStateActiveData` for more details.
   activeData?: PlayerStateActiveData;
 };
-
-export type PlayerWarnings = Readonly<{
-  topicsWithoutHeaderStamps?: readonly string[];
-}>;
 
 export type PlayerStateActiveData = {
   // An array of (ROS-like) messages that should be rendered. Should be ordered by `receiveTime`,
@@ -193,9 +199,6 @@ export type PlayerStateActiveData = {
   // Used for late-parsing of binary messages. Required to cover any topic for which binary data is
   // given to panels. (May be empty for players that only provide messages parsed into objects.)
   parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic;
-
-  // Used for communicating potential issues that surface during playback.
-  playerWarnings: PlayerWarnings;
 };
 
 // Represents a ROS topic, though the actual data does not need to come from a ROS system.

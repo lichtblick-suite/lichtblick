@@ -24,7 +24,6 @@ import {
   PlayerState,
 } from "@foxglove-studio/app/players/types";
 import delay from "@foxglove-studio/app/util/delay";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import signal from "@foxglove-studio/app/util/signal";
 import { fromNanoSec, getSeekToTime, SEEK_ON_START_NS } from "@foxglove-studio/app/util/time";
 
@@ -133,7 +132,6 @@ describe("RandomAccessPlayer", () => {
             { datatype: "baz", name: "/baz" },
           ],
           parsedMessageDefinitionsByTopic: {},
-          playerWarnings: {},
           publishedTopics: new Map<string, Set<string>>(),
         },
         capabilities: [PlayerCapabilities.setSpeed, PlayerCapabilities.playbackControl],
@@ -1194,15 +1192,20 @@ describe("RandomAccessPlayer", () => {
 
     expect(messages).toEqual([
       expect.objectContaining({ presence: PlayerPresence.INITIALIZING, activeData: undefined }),
-      expect.objectContaining({ presence: PlayerPresence.NOT_PRESENT, activeData: undefined }),
+      expect.objectContaining({
+        capabilities: [],
+        presence: PlayerPresence.ERROR,
+        activeData: undefined,
+        progress: {},
+        problems: [
+          {
+            error: new Error("fake initialization failure"),
+            message: "Error initializing player",
+            severity: "error",
+          },
+        ],
+      }),
     ]);
-    expect(sendNotification).toHaveBeenCalledWith(
-      "Error initializing player",
-      expect.any(Error),
-      "app",
-      "error",
-    );
-    (sendNotification as any).mockClear();
   });
 
   it("reports when a provider is reconnecting", (done) => {

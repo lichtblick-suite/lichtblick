@@ -45,7 +45,6 @@ const playerStateWithMessages = (messages: any, messageOrder: any): PlayerState 
     isPlaying: false,
     messages,
     messageOrder,
-    playerWarnings: {},
     totalBytesReceived: 1234,
   },
 });

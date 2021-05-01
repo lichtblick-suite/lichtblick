@@ -11,7 +11,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { ActionButton, Modal } from "@fluentui/react";
-import AlertIcon from "@mdi/svg/svg/alert.svg";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { useToasts } from "react-toast-notifications";
@@ -27,17 +26,16 @@ import DropOverlay from "@foxglove-studio/app/components/DropOverlay";
 import GlobalKeyListener from "@foxglove-studio/app/components/GlobalKeyListener";
 import GlobalVariablesMenu from "@foxglove-studio/app/components/GlobalVariablesMenu";
 import HelpModal from "@foxglove-studio/app/components/HelpModal";
-import Icon from "@foxglove-studio/app/components/Icon";
 import LayoutMenu from "@foxglove-studio/app/components/LayoutMenu";
 import messagePathHelp from "@foxglove-studio/app/components/MessagePathSyntax/index.help.md";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import NotificationDisplay from "@foxglove-studio/app/components/NotificationDisplay";
 import PanelLayout from "@foxglove-studio/app/components/PanelLayout";
 import PlaybackControls from "@foxglove-studio/app/components/PlaybackControls";
+import { PlayerStatusIndicator } from "@foxglove-studio/app/components/PlayerStatusIndicator";
 import Preferences from "@foxglove-studio/app/components/Preferences";
 import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
 import ShortcutsModal from "@foxglove-studio/app/components/ShortcutsModal";
-import SpinningLoadingIcon from "@foxglove-studio/app/components/SpinningLoadingIcon";
 import TinyConnectionPicker from "@foxglove-studio/app/components/TinyConnectionPicker";
 import Toolbar from "@foxglove-studio/app/components/Toolbar";
 import { useAppConfiguration } from "@foxglove-studio/app/context/AppConfigurationContext";
@@ -193,28 +191,6 @@ export default function Workspace(): JSX.Element {
     [openFiles],
   );
 
-  const presenceIcon = (() => {
-    switch (playerPresence) {
-      case PlayerPresence.NOT_PRESENT:
-      case PlayerPresence.PRESENT:
-        return undefined;
-      case PlayerPresence.CONSTRUCTING:
-      case PlayerPresence.INITIALIZING:
-      case PlayerPresence.RECONNECTING:
-        return (
-          <Icon small style={{ paddingLeft: 10 }}>
-            <SpinningLoadingIcon />
-          </Icon>
-        );
-      case PlayerPresence.ERROR:
-        return (
-          <Icon small style={{ paddingLeft: 10 }}>
-            <AlertIcon />
-          </Icon>
-        );
-    }
-  })();
-
   const showPlaybackControls =
     playerPresence === PlayerPresence.NOT_PRESENT || playerCapabilities.includes("playbackControl");
 
@@ -244,7 +220,7 @@ export default function Workspace(): JSX.Element {
           </SToolbarItem>
           <SToolbarItem style={{ flex: "0 1 auto" }}>
             <TruncatedText>{currentSourceName ?? "Select a data source"}</TruncatedText>{" "}
-            {presenceIcon}
+            <PlayerStatusIndicator />
           </SToolbarItem>
           <div style={{ flexGrow: 1 }}></div>
           <SToolbarItem style={{ marginRight: 5 }}>

@@ -35,6 +35,7 @@ import {
   ParsedMessageDefinitionsByTopic,
   PlayerPresence,
   ParameterValue,
+  PlayerProblem,
 } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
@@ -42,7 +43,6 @@ import delay from "@foxglove-studio/app/util/delay";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import { isRangeCoveredByRanges } from "@foxglove-studio/app/util/ranges";
 import { getSanitizedTopics } from "@foxglove-studio/app/util/selectors";
-import sendNotification, { NotificationType } from "@foxglove-studio/app/util/sendNotification";
 import {
   clampTime,
   fromMillis,
@@ -53,8 +53,6 @@ import {
   SeekToTimeSpec,
   TimestampMethod,
 } from "@foxglove-studio/app/util/time";
-
-const NO_WARNINGS = Object.freeze({});
 
 // The number of nanoseconds to seek backwards to build context during a seek
 // operation larger values mean more opportunity to capture context before the
@@ -130,6 +128,11 @@ export default class RandomAccessPlayer implements Player {
   _lastRangeMillis?: number;
   _parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic = {};
 
+  // The problem store holds problems based on keys (which may be hard-coded problem types or topics)
+  // The overall player may be healthy, but individual topics may have warnings or errors.
+  // These are set/cleared in the store to track the current set of problems
+  _problems = new Map<string, PlayerProblem>();
+
   constructor(
     providerDescriptor: DataProviderDescriptor,
     { metricsCollector, seekToTime }: RandomAccessPlayerOptions,
@@ -160,9 +163,13 @@ export default class RandomAccessPlayer implements Player {
     }
   };
 
-  _setError(message: string, details: string | Error, errorType: NotificationType): void {
-    sendNotification(message, details, errorType, "error");
+  private _setError(message: string, error?: Error): void {
     this._hasError = true;
+    this._problems.set("global-error", {
+      severity: "error",
+      message,
+      error,
+    });
     this._isPlaying = false;
     if (!this._initializing) {
       this._provider.close();
@@ -214,11 +221,13 @@ export default class RandomAccessPlayer implements Player {
       })
       .then(({ start, end, topics, connections, messageDefinitions, providesParsedMessages }) => {
         if (!providesParsedMessages) {
-          throw new Error("Use ParseMessagesDataProvider to parse raw messages");
+          this._setError("Incorrect message format");
+          return;
         }
         const parsedMessageDefinitions = messageDefinitions;
         if (parsedMessageDefinitions.type === "raw") {
-          throw new Error("RandomAccessPlayer requires parsed message definitions");
+          this._setError("Missing message definitions");
+          return;
         }
 
         const initialTime = getSeekTimeFromSpec(this._seekToTime, start, end);
@@ -247,12 +256,7 @@ export default class RandomAccessPlayer implements Player {
         }, SEEK_START_DELAY_MS);
       })
       .catch((error: Error) => {
-        this._setError(
-          "Error initializing player",
-          error,
-          // instanceof doesn't work here because errors may be sent across Rpc.
-          error.name === "UserError" ? "user" : "app",
-        );
+        this._setError("Error initializing player", error);
       });
   }
 
@@ -263,11 +267,12 @@ export default class RandomAccessPlayer implements Player {
 
     if (this._hasError) {
       return this._listener({
-        presence: PlayerPresence.NOT_PRESENT,
+        presence: PlayerPresence.ERROR,
         progress: {},
         capabilities: [],
         playerId: this._id,
         activeData: undefined,
+        problems: Array.from(this._problems.values()),
       });
     }
 
@@ -306,6 +311,7 @@ export default class RandomAccessPlayer implements Player {
       progress: this._progress,
       capabilities,
       playerId: this._id,
+      problems: this._problems.size > 0 ? Array.from(this._problems.values()) : undefined,
       activeData: this._initializing
         ? undefined
         : {
@@ -322,7 +328,6 @@ export default class RandomAccessPlayer implements Player {
             datatypes: this._providerDatatypes,
             publishedTopics,
             parsedMessageDefinitionsByTopic: this._parsedMessageDefinitionsByTopic,
-            playerWarnings: NO_WARNINGS,
           },
     };
 
@@ -400,8 +405,8 @@ export default class RandomAccessPlayer implements Player {
           await delay(16 - time);
         }
       }
-    } catch (e) {
-      this._setError(e.message, e, "app");
+    } catch (err) {
+      this._setError(err.message, err);
     }
   });
 
@@ -418,17 +423,14 @@ export default class RandomAccessPlayer implements Player {
     });
     const { parsedMessages } = messages;
     if (parsedMessages == undefined) {
-      const messageTypes = Object.keys(messages)
-        .filter((type) => (messages as any)[type] != undefined)
-        .join("\n");
-      sendNotification(
-        "Bad set of message types in RandomAccessPlayer",
-        `Message types: ${messageTypes}`,
-        "app",
-        "error",
-      );
+      this._problems.set("bad-messages", {
+        severity: "error",
+        message: `Bad set of messages`,
+        tip: `Restart the app or contact support if the issue persists.`,
+      });
       return { parsedMessages: [] };
     }
+    this._problems.delete("bad-messages");
 
     // It is very important that we record first emitted messages here, since
     // `_emitState` is awaited on `requestAnimationFrame`, which will not be
@@ -440,32 +442,28 @@ export default class RandomAccessPlayer implements Player {
     }
     const filterMessages = (msgs: MessageEvent<unknown>[], topics: string[]) =>
       filterMap(msgs, (message) => {
+        this._problems.delete(message.topic);
+
         if (!topics.includes(message.topic)) {
-          sendNotification(
-            `Unexpected topic encountered: ${message.topic}; skipped message`,
-            `Full message details: ${JSON.stringify(message)}`,
-            "app",
-            "warn",
-          );
+          this._problems.set(message.topic, {
+            severity: "warning",
+            message: `Unexpected topic encountered: ${message.topic}. Skipping message`,
+          });
           return undefined;
         }
-        const topic: Topic | undefined = this._providerTopics.find((t) => t.name === message.topic);
+        const topic = this._providerTopics.find((t) => t.name === message.topic);
         if (!topic) {
-          sendNotification(
-            `Could not find topic for message ${message.topic}; skipped message`,
-            `Full message details: ${JSON.stringify(message)}`,
-            "app",
-            "warn",
-          );
+          this._problems.set(message.topic, {
+            severity: "warning",
+            message: `Unexpected message on topic: ${message.topic}. Skipping message`,
+          });
           return undefined;
         }
         if (topic.datatype === "") {
-          sendNotification(
-            `Missing datatype for topic: ${message.topic}; skipped message`,
-            `Full message details: ${JSON.stringify(message)}`,
-            "app",
-            "warn",
-          );
+          this._problems.set(message.topic, {
+            severity: "warning",
+            message: `Missing datatype for topic: ${message.topic}. Skipping message`,
+          });
           return undefined;
         }
 
@@ -601,17 +599,12 @@ export default class RandomAccessPlayer implements Player {
     // no-op
   }
 
-  setParameter(key: string, _value: ParameterValue): void {
-    sendNotification(
-      "Parameter editing unsupported",
-      `Cannot set parameter "${key}" with RandomAccessPlayer, parameter editing is not supported`,
-      "app",
-      "error",
-    );
+  setParameter(_key: string, _value: ParameterValue): void {
+    throw new Error("Parameter editing is not supported by this data source");
   }
 
   publish(_payload: PublishPayload): void {
-    console.warn("Publishing is not supported in RandomAccessPlayer");
+    throw new Error("Publishing is not supported by this data source");
   }
 
   close(): void {

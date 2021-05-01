@@ -13,10 +13,8 @@
 
 import { action } from "@storybook/addon-actions";
 import { storiesOf } from "@storybook/react";
-import { createMemoryHistory } from "history";
 import TestUtils from "react-dom/test-utils";
 
-import { setPlaybackConfig } from "@foxglove-studio/app/actions/panels";
 import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
 import AppConfigurationContext, {
   AppConfiguration,
@@ -27,8 +25,6 @@ import {
   PlayerState,
   PlayerStateActiveData,
 } from "@foxglove-studio/app/players/types";
-import createRootReducer from "@foxglove-studio/app/reducers";
-import configureStore from "@foxglove-studio/app/store/configureStore.testing";
 
 import { UnconnectedPlaybackControls } from ".";
 import styles from "./index.module.scss";
@@ -53,7 +49,6 @@ function getPlayerState(): PlayerState {
       topics: [{ name: "/empty_topic", datatype: "VoidType" }],
       datatypes: { VoidType: { fields: [] } },
       parsedMessageDefinitionsByTopic: {},
-      playerWarnings: {},
       totalBytesReceived: 1234,
     },
   };
@@ -158,68 +153,6 @@ storiesOf("components/PlaybackControls", module)
     return (
       <Wrapper>
         <UnconnectedPlaybackControls player={player} pause={pause} play={play} seek={seek} />
-      </Wrapper>
-    );
-  })
-  .add("missing headers", () => {
-    const store = configureStore(createRootReducer(createMemoryHistory()));
-    store.dispatch(setPlaybackConfig({ messageOrder: "headerStamp" }));
-    const defaultPlayerState = getPlayerState();
-    const player = {
-      ...defaultPlayerState,
-      activeData: {
-        ...defaultPlayerState.activeData,
-        messageOrder: "headerStamp",
-        playerWarnings: {
-          topicsWithoutHeaderStamps: ["/empty_topic"],
-        },
-      },
-    };
-    const pause = action("pause");
-    const play = action("play");
-    const seek = action("seek");
-    return (
-      <Wrapper activeData={player.activeData as any} store={store}>
-        <UnconnectedPlaybackControls player={player as any} pause={pause} play={play} seek={seek} />
-      </Wrapper>
-    );
-  })
-  .add("missing headers modal", () => {
-    const store = configureStore(createRootReducer(createMemoryHistory()));
-    store.dispatch(setPlaybackConfig({ messageOrder: "headerStamp" }));
-    const defaultPlayerState = getPlayerState();
-    const player = {
-      ...defaultPlayerState,
-      activeData: {
-        ...defaultPlayerState.activeData,
-        messageOrder: "headerStamp",
-        playerWarnings: {
-          topicsWithoutHeaderStamps: ["/empty_topic"],
-        },
-      },
-    };
-    const pause = action("pause");
-    const play = action("play");
-    const seek = action("seek");
-
-    function click() {
-      const element = document.querySelector("[data-test='missing-headers-icon']");
-      if (element) {
-        TestUtils.Simulate.click(element);
-      }
-    }
-
-    // wrap the component so we can get a ref to it and force a mouse over and out event
-    function ControlsWithModal() {
-      React.useEffect(() => click());
-      return (
-        <UnconnectedPlaybackControls player={player as any} pause={pause} play={play} seek={seek} />
-      );
-    }
-
-    return (
-      <Wrapper activeData={player.activeData as any} store={store}>
-        <ControlsWithModal />
       </Wrapper>
     );
   });

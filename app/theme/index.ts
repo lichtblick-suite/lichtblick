@@ -14,11 +14,15 @@ import {
 } from "@fluentui/react";
 import { createTheme } from "@fluentui/theme";
 
+import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+
 // https://aka.ms/themedesigner
 export default createTheme({
   semanticColors: {
     menuBackground: "#242429",
     menuItemBackgroundHovered: "#2e2e39",
+    errorBackground: colors.RED1,
+    warningBackground: colors.YELLOW1,
   },
   components: {
     ContextualMenu: {
