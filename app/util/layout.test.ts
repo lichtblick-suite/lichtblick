@@ -11,11 +11,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import CBOR from "cbor-js";
 import { getNodeAtPath, MosaicNode, MosaicParent, updateTree } from "react-mosaic-component";
-import zlib from "zlib";
-
-import { defaultPlaybackConfig } from "@foxglove-studio/app/reducers/panels";
 
 import {
   getPanelTypeFromId,
@@ -29,11 +25,8 @@ import {
   validateTabPanelConfig,
   moveTabBetweenTabPanels,
   reorderTabWithinTabPanel,
-  getLayoutPatch,
-  getUpdatedURLWithPatch,
   getUpdatedURLWithNewVersion,
   stringifyParams,
-  dictForPatchCompression,
   getPathFromNode,
 } from "./layout";
 
@@ -622,33 +615,6 @@ describe("layout", () => {
     });
   });
 
-  describe("getLayoutPatch", () => {
-    it("gets the diff between 2 panel states", () => {
-      expect(
-        getLayoutPatch(
-          {
-            layout: "abc",
-            globalVariables: { globalVar1: 1, globalVar2: 2 },
-            linkedGlobalVariables: [],
-            playbackConfig: defaultPlaybackConfig,
-            userNodes: {},
-            savedProps: {},
-          },
-          {
-            layout: "def",
-            globalVariables: { globalVar1: 1, globalVar3: 3 },
-            linkedGlobalVariables: [],
-            playbackConfig: { ...defaultPlaybackConfig, speed: 0.5 },
-            userNodes: {},
-            savedProps: {},
-          },
-        ),
-      ).toEqual(
-        '{"layout":["abc","def"],"globalVariables":{"globalVar2":[2,0,0],"globalVar3":[3]},"playbackConfig":{"speed":[0.2,0.5]}}',
-      );
-    });
-  });
-
   describe("stringifyParams", () => {
     it("returns stringified url query", () => {
       const layoutParams = "?layout=foo%401500000000&randomKey=randomValue";
@@ -660,24 +626,6 @@ describe("layout", () => {
       expect(stringifyParams(new URLSearchParams(layoutUrlParamsDecoded))).toMatch(
         layoutUrlParamsDecoded,
       );
-    });
-  });
-
-  describe("getUpdatedURLWithPatch", () => {
-    it("returns a new URL with the patch attached", () => {
-      const stringifiedPatch = JSON.stringify({ somePatch: "somePatch" });
-      const diffBuffer = Buffer.from(CBOR.encode(JSON.parse(stringifiedPatch)));
-      const dictionaryBuffer = Buffer.from(CBOR.encode(dictForPatchCompression));
-      const compressedPatch = zlib
-        .deflateSync(diffBuffer, { dictionary: dictionaryBuffer })
-        .toString("base64");
-      expect(getUpdatedURLWithPatch("?layout=foo&someKey=someVal", stringifiedPatch)).toMatch(
-        `?layout=foo&someKey=someVal&patch=${encodeURIComponent(compressedPatch)}`,
-      );
-    });
-    it("does not change the search if the diff input is empty", async () => {
-      const search = "?layout=foo&someKey=someVal&patch=bar";
-      expect(getUpdatedURLWithPatch(search, "")).toBe(search);
     });
   });
 

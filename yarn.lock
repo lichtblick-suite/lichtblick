@@ -2087,7 +2087,6 @@ __metadata:
     "@wojtekmaj/enzyme-adapter-react-17": 0.6.1
     argparse: 2.0.1
     async-mutex: 0.3.1
-    cbor-js: 0.1.0
     chart.js: 3.2.0
     chartjs-plugin-annotation: 1.0.1
     chartjs-plugin-datalabels: 2.0.0-beta.1
@@ -2108,7 +2107,6 @@ __metadata:
     inter-ui: 3.18.1
     intervals-fn: 3.0.3
     js-yaml: 4.1.0
-    jsondiffpatch: 0.4.1
     leaflet: 1.7.1
     lodash: 4.17.21
     memoize-weak: 1.0.2
@@ -8139,7 +8137,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cbor-js@npm:0.1.0, cbor-js@npm:^0.1.0":
+"cbor-js@npm:^0.1.0":
   version: 0.1.0
   resolution: "cbor-js@npm:0.1.0"
   checksum: fe77bcfb39658f3b787b6637972b28a6aa0a1e9d0a865842f1629984606e991eab2b88190b5fcc8b322c2baf4eff2c34162115173d73cd3e266e3d8f7f1ffa2c
@@ -8163,7 +8161,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chalk@npm:2.4.2, chalk@npm:^2.0.0, chalk@npm:^2.3.0, chalk@npm:^2.4.1, chalk@npm:^2.4.2":
+"chalk@npm:2.4.2, chalk@npm:^2.0.0, chalk@npm:^2.4.1, chalk@npm:^2.4.2":
   version: 2.4.2
   resolution: "chalk@npm:2.4.2"
   dependencies:
@@ -10224,13 +10222,6 @@ __metadata:
     asap: ^2.0.0
     wrappy: 1
   checksum: 05bfff5425006438f6413c788e378af06a60538a68dcf15ce6f0ba5737ab97348ee0cb67a6fe8623700775cdda707eb3cb00a770c832d542349a7bf7a602e804
-  languageName: node
-  linkType: hard
-
-"diff-match-patch@npm:^1.0.0":
-  version: 1.0.5
-  resolution: "diff-match-patch@npm:1.0.5"
-  checksum: 4694f40dbfd725e6ceaaa94c4779b60ceaf2d3b382229118310154d469f983d665ecfddae3c5c402bc5bb51930db63a1d27bd30c5d91e38de13f9d8054f2f4ae
   languageName: node
   linkType: hard
 
@@ -16308,18 +16299,6 @@ __metadata:
   bin:
     json5: lib/cli.js
   checksum: 07b1f90c2801dc52df2b0ac8d606cc400a85cda79130e754780fa2ab9805d0fb85a0e61b6a5cdd68e88e5d0c8f9109ec415af08283175556cdccaa8563853908
-  languageName: node
-  linkType: hard
-
-"jsondiffpatch@npm:0.4.1":
-  version: 0.4.1
-  resolution: "jsondiffpatch@npm:0.4.1"
-  dependencies:
-    chalk: ^2.3.0
-    diff-match-patch: ^1.0.0
-  bin:
-    jsondiffpatch: ./bin/jsondiffpatch
-  checksum: 1dbcabd80395a480967521a3324698b5ff55641855d3bd9cab3bb704f7bcf8ebc3c0e3cb2b1d058b30209926b8d75e87b418cf3703a83b4e508e3c2e1e3e253c
   languageName: node
   linkType: hard
 

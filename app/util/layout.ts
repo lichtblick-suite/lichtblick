@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { captureException } from "@sentry/electron";
-import CBOR from "cbor-js";
-import { create as JsonDiffCreate } from "jsondiffpatch";
 import { compact, cloneDeep, flatMap, isEmpty, xor, uniq } from "lodash";
 import {
   createRemoveUpdate,
@@ -25,7 +23,6 @@ import {
   MosaicPath,
 } from "react-mosaic-component";
 import { MosaicKey } from "react-mosaic-component/lib/types";
-import zlib from "zlib";
 
 import { PanelsState } from "@foxglove-studio/app/reducers/panels";
 import { TabLocation, TabPanelConfig } from "@foxglove-studio/app/types/layouts";
@@ -48,8 +45,6 @@ import Logger from "@foxglove/log";
 import { isInIFrame } from "./iframeUtils";
 
 const log = Logger.getLogger(__filename);
-
-const jsondiffpatch = JsonDiffCreate({});
 
 const IS_IN_IFRAME = isInIFrame();
 
@@ -559,14 +554,6 @@ export function getConfigsForNestedPanelsInsideTab(
   return configs;
 }
 
-export function getLayoutPatch(
-  baseState: PanelsState | undefined,
-  newState: PanelsState | undefined,
-): string {
-  const delta = jsondiffpatch.diff(baseState, newState);
-  return delta ? JSON.stringify(delta) : "";
-}
-
 export function stringifyParams(params: URLSearchParams): string {
   const stringifiedParams = [];
   for (const [key, value] of params) {
@@ -577,42 +564,6 @@ export function stringifyParams(params: URLSearchParams): string {
     }
   }
   return stringifiedParams.length > 0 ? `?${stringifiedParams.join("&")}` : "";
-}
-
-const stateKeyMap = {
-  layout: "l",
-  savedProps: "sa",
-  globalVariables: "g",
-  userNodes: "u",
-  linkedGlobalVariables: "lg",
-  version: "v",
-  playbackConfig: "p",
-};
-const layoutKeyMap = {
-  direction: "d",
-  first: "f",
-  second: "se",
-  row: "r",
-  column: "c",
-  splitPercentage: "sp",
-};
-export const dictForPatchCompression = { ...layoutKeyMap, ...stateKeyMap };
-
-export function getUpdatedURLWithPatch(search: string, diff: string): string {
-  // Return the original search directly if the diff is empty.
-  if (diff.length === 0) {
-    return search;
-  }
-  const params = new URLSearchParams(search);
-
-  const diffBuffer = Buffer.from(CBOR.encode(JSON.parse(diff)));
-  const dictionaryBuffer = Buffer.from(CBOR.encode(dictForPatchCompression));
-  const zlibPatch = zlib
-    .deflateSync(diffBuffer, { dictionary: dictionaryBuffer })
-    .toString("base64");
-
-  params.set(PATCH_QUERY_KEY, zlibPatch);
-  return stringifyParams(params);
 }
 
 export function getUpdatedURLWithNewVersion(

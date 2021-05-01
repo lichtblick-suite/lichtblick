@@ -10,11 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import CBOR from "cbor-js";
-import { create as JsonDiffCreate } from "jsondiffpatch";
-import { cloneDeep } from "lodash";
 import { MosaicNode, MosaicPath } from "react-mosaic-component";
-import zlib from "zlib";
 
 import { LinkedGlobalVariables } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { Dispatcher } from "@foxglove-studio/app/reducers";
@@ -33,10 +29,6 @@ import {
   SetFetchedLayoutPayload,
   MosaicDropTargetPosition,
 } from "@foxglove-studio/app/types/panels";
-import { dictForPatchCompression } from "@foxglove-studio/app/util/layout";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
-
-const jsondiffpatch = JsonDiffCreate({});
 
 export enum PANELS_ACTION_TYPES {
   CHANGE_PANEL_LAYOUT = "CHANGE_PANEL_LAYOUT",
@@ -130,34 +122,6 @@ export const clearLayoutUrlReplacedByDefault = (): Dispatcher<CLEAR_LAYOUT_URL_R
 ) => {
   return dispatch({ type: PANELS_ACTION_TYPES.CLEAR_LAYOUT_URL_REPLACED_BY_DEFAULT });
 };
-
-export function applyPatchToLayout(patch: string | undefined, layout: PanelsState): PanelsState {
-  if (patch == undefined || patch.length === 0) {
-    return layout;
-  }
-  try {
-    const patchBuffer = Buffer.from(patch, "base64");
-    const dictionaryBuffer = Buffer.from(CBOR.encode(dictForPatchCompression));
-    const uint8Arr = zlib.inflateSync(patchBuffer, { dictionary: dictionaryBuffer });
-
-    const buffer = uint8Arr.buffer.slice(
-      uint8Arr.byteOffset,
-      uint8Arr.byteLength + uint8Arr.byteOffset,
-    );
-    const bufferToJS = CBOR.decode(buffer);
-    const clonedLayout = cloneDeep(layout);
-    jsondiffpatch.patch(clonedLayout, bufferToJS as Record<string, unknown>);
-    return clonedLayout;
-  } catch (e) {
-    sendNotification(
-      "Failed to apply patch on top of the layout.",
-      `Ignoring the patch "${patch}".\n\n${e}`,
-      "user",
-      "warn",
-    );
-    return layout;
-  }
-}
 
 type OVERWRITE_GLOBAL_DATA = {
   type: "OVERWRITE_GLOBAL_DATA";
