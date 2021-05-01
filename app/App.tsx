@@ -20,6 +20,7 @@ import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";
 import LayoutStorageReduxAdapter from "@foxglove-studio/app/components/LayoutStorageReduxAdapter";
 import { NativeFileMenuPlayerSelection } from "@foxglove-studio/app/components/NativeFileMenuPlayerSelection";
 import PlayerManager from "@foxglove-studio/app/components/PlayerManager";
+import StudioToastProvider from "@foxglove-studio/app/components/StudioToastProvider";
 import AnalyticsProvider from "@foxglove-studio/app/context/AnalyticsProvider";
 import { AssetsProvider } from "@foxglove-studio/app/context/AssetContext";
 import ExperimentalFeaturesLocalStorageProvider from "@foxglove-studio/app/context/ExperimentalFeaturesLocalStorageProvider";
@@ -93,6 +94,7 @@ export default function App(): ReactElement {
     <ThemeProvider />,
     <ModalHost />, // render modal elements inside the ThemeProvider
     <WindowGeometryContext.Provider value={windowGeometry} />,
+    <StudioToastProvider />,
     <ReduxProvider store={globalStore} />,
     <AnalyticsProvider />,
     <ExperimentalFeaturesLocalStorageProvider features={experimentalFeatures} />,

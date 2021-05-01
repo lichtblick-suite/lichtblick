@@ -12,14 +12,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { noop } from "lodash";
 import ReactDOM from "react-dom";
+import { act } from "react-dom/test-utils";
+import { ToastProvider } from "react-toast-notifications";
 
 import DocumentDropListener from "@foxglove-studio/app/components/DocumentDropListener";
 
 describe("<DocumentDropListener>", () => {
-  let wrapper: any;
-  let windowDragoverHandler: any;
+  let wrapper: HTMLDivElement;
+  let windowDragoverHandler: typeof jest.fn;
 
   beforeEach(() => {
     windowDragoverHandler = jest.fn();
@@ -30,9 +31,11 @@ describe("<DocumentDropListener>", () => {
 
     ReactDOM.render(
       <div>
-        <DocumentDropListener filesSelected={noop}>
-          <div />
-        </DocumentDropListener>
+        <ToastProvider>
+          <DocumentDropListener allowedExtensions={[]}>
+            <div />
+          </DocumentDropListener>
+        </ToastProvider>
       </div>,
       wrapper,
     );
@@ -40,7 +43,9 @@ describe("<DocumentDropListener>", () => {
 
   it("allows the event to bubble if the dataTransfer has no files", async () => {
     // The event should bubble up from the document to the window
-    document.dispatchEvent(new CustomEvent("dragover", { bubbles: true, cancelable: true }));
+    act(() => {
+      document.dispatchEvent(new CustomEvent("dragover", { bubbles: true, cancelable: true }));
+    });
     expect(windowDragoverHandler).toHaveBeenCalled();
   });
 
@@ -53,7 +58,9 @@ describe("<DocumentDropListener>", () => {
     event.dataTransfer = {
       types: ["Files"],
     };
-    document.dispatchEvent(event); // The event should NOT bubble up from the document to the window
+    act(() => {
+      document.dispatchEvent(event); // The event should NOT bubble up from the document to the window
+    });
     expect(windowDragoverHandler).not.toHaveBeenCalled();
   });
 

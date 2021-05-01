@@ -1671,7 +1671,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/core@npm:^10.1.1":
+"@emotion/core@npm:^10.0.14, @emotion/core@npm:^10.1.1":
   version: 10.1.1
   resolution: "@emotion/core@npm:10.1.1"
   dependencies:
@@ -2141,6 +2141,7 @@ __metadata:
     react-redux: 7.2.4
     react-resize-detector: 6.7.0
     react-table: 7.7.0
+    react-toast-notifications: 2.4.4
     react-transition-group: 4.4.1
     react-use: 17.2.4
     react-virtualized: 9.22.3
@@ -21225,7 +21226,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-transition-group@npm:4.4.1":
+"react-toast-notifications@npm:2.4.4":
+  version: 2.4.4
+  resolution: "react-toast-notifications@npm:2.4.4"
+  dependencies:
+    "@emotion/core": ^10.0.14
+    react-transition-group: ^4.4.1
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0
+    react-dom: ^16.8.0 || ^17.0.0
+  checksum: c80f724344c2d0f48783b2151fecfa1147c8a776bacec6beeabe116c879ae7ff1fb3baab98ac8181c3c1f7df59dc458c9c9be5392945f6d3a11687c896df10de
+  languageName: node
+  linkType: hard
+
+"react-transition-group@npm:4.4.1, react-transition-group@npm:^4.4.1":
   version: 4.4.1
   resolution: "react-transition-group@npm:4.4.1"
   dependencies:

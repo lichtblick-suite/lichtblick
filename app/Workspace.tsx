@@ -14,6 +14,7 @@ import { ActionButton, Modal } from "@fluentui/react";
 import AlertIcon from "@mdi/svg/svg/alert.svg";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
+import { useToasts } from "react-toast-notifications";
 import { useMountedState } from "react-use";
 import styled from "styled-components";
 
@@ -47,9 +48,7 @@ import useElectronFilesToOpen from "@foxglove-studio/app/hooks/useElectronFilesT
 import welcomeLayout from "@foxglove-studio/app/layouts/welcomeLayout";
 import { PlayerPresence } from "@foxglove-studio/app/players/types";
 import { ImportPanelLayoutPayload } from "@foxglove-studio/app/types/panels";
-import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import inAutomatedRunMode from "@foxglove-studio/app/util/inAutomatedRunMode";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 type TestableWindow = Window & { setPanelLayout?: (payload: ImportPanelLayoutPayload) => void };
 
@@ -70,6 +69,9 @@ const TruncatedText = styled.span`
   overflow: hidden;
   line-height: normal;
 `;
+
+// file types we support for drag/drop
+const allowedDropExtensions = [".bag", ".urdf"];
 
 export default function Workspace(): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(ReactNull);
@@ -137,6 +139,7 @@ export default function Workspace(): JSX.Element {
   }, [dispatch, openWelcomeLayout]);
 
   const appConfiguration = useAppConfiguration();
+  const { addToast } = useToasts();
 
   // Show welcome layout on first run
   useEffect(() => {
@@ -162,7 +165,9 @@ export default function Workspace(): JSX.Element {
             otherFiles.push(file);
           }
         } catch (err) {
-          sendNotification(`Failed to load ${file.name}`, err, "user", "warn");
+          addToast(`Failed to load ${file.name}`, {
+            appearance: "error",
+          });
         }
       }
 
@@ -170,7 +175,7 @@ export default function Workspace(): JSX.Element {
         setPlayerFromFiles(otherFiles, { append: shiftPressed });
       }
     },
-    [loadFromFile, setPlayerFromFiles],
+    [addToast, loadFromFile, setPlayerFromFiles],
   );
 
   // files the main thread told us to open
@@ -215,14 +220,9 @@ export default function Workspace(): JSX.Element {
 
   return (
     <LinkHandlerContext.Provider value={handleInternalLink}>
-      <DocumentDropListener filesSelected={dropHandler}>
+      <DocumentDropListener filesSelected={dropHandler} allowedExtensions={allowedDropExtensions}>
         <DropOverlay>
-          <div style={{ fontSize: "4em", marginBottom: "1em" }}>Drop a bag file to load it!</div>
-          <div style={{ fontSize: "2em" }}>
-            (hold SHIFT while dropping a second bag file to add it
-            <br />
-            with all topics prefixed with {SECOND_SOURCE_PREFIX})
-          </div>
+          <div style={{ fontSize: "4em", marginBottom: "1em" }}>Drop a file here</div>
         </DropOverlay>
       </DocumentDropListener>
       <div ref={containerRef} className="app-container" tabIndex={0}>
