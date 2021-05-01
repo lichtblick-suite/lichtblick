@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@fluentui/react": "8.14.0",
-    "@fluentui/react-icons-mdl2": "1.0.5",
+    "@fluentui/react-icons-mdl2": "1.1.0",
     "@mdi/svg": "5.9.55",
     "async-mutex": "0.3.1",
     "chart.js": "3.2.0",
