@@ -17,7 +17,7 @@ import HelpModal from "@foxglove-studio/app/components/HelpModal";
 
 const stories = storiesOf("Help pages", module);
 
-export function makeHelpPageStories(req: any) {
+export function makeHelpPageStories(req: ReturnType<typeof require.context>): void {
   const helpData = req.keys().map((name: any) => ({ name, data: req(name) }));
 
   helpData.forEach(({ name, data }: any) => {

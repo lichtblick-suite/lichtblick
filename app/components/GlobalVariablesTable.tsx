@@ -32,6 +32,7 @@ import { colors as sharedColors } from "@foxglove-studio/app/util/sharedStyleCon
 export const ANIMATION_RESET_DELAY_MS = 3000;
 
 // Returns an keyframe object that animates between two styles– "highlight twice then return to normal"
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const makeFlashAnimation = (initialCssProps: any, highlightCssProps: any) => {
   return css`
     ${keyframes`

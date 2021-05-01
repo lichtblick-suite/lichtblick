@@ -97,7 +97,7 @@ export default {
   },
 };
 
-export const Simple = () => {
+export const Simple = (): JSX.Element => {
   return (
     <div style={{ width: "100%", height: "100%", background: "black" }}>
       <MockMessagePipelineProvider>
@@ -108,7 +108,7 @@ export const Simple = () => {
 };
 
 // zoom and update without resetting zoom
-export const CanZoomAndUpdate = () => {
+export const CanZoomAndUpdate = (): JSX.Element => {
   const [chartProps, setChartProps] = useState(cloneDeep(commonProps));
   const callCountRef = useRef(0);
 
@@ -160,7 +160,7 @@ CanZoomAndUpdate.parameters = {
   },
 };
 
-export const CleansUpTooltipOnUnmount = () => {
+export const CleansUpTooltipOnUnmount = (): JSX.Element | ReactNull => {
   const [hasRenderedOnce, setHasRenderedOnce] = useState<boolean>(false);
   useMount(async () => {
     await new Promise((resolve) => setTimeout(resolve, 200));
@@ -195,7 +195,7 @@ CleansUpTooltipOnUnmount.parameters = {
   },
 };
 
-export const CallPauseOnInitialMount = () => {
+export const CallPauseOnInitialMount = (): JSX.Element => {
   const [unpauseFrameCount, setUnpauseFrameCount] = useState(0);
   const pauseFrame = useCallback(() => {
     return () => {
@@ -224,7 +224,7 @@ export const CallPauseOnInitialMount = () => {
 // (`resumeFrame`) fires.
 // - `resumeFrame` should then fire exactly once.
 // shows `SUCCESS` message with no chart visible
-export const ResumeFrameOnUnmount = () => {
+export const ResumeFrameOnUnmount = (): JSX.Element => {
   const [showChart, setShowChart] = useState(true);
   const [statusMessage, setStatusMessage] = useState("FAILURE - START");
   const pauseFrame = useCallback(() => {

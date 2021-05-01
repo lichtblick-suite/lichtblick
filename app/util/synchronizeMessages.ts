@@ -154,7 +154,12 @@ function getSynchronizedState(
 }
 
 // Returns reducers for use with PanelAPI.useMessageReducer
-export function getSynchronizingReducers(topics: readonly string[]) {
+export function getSynchronizingReducers(
+  topics: readonly string[],
+): {
+  restore: (value?: ReducedValue) => ReducedValue;
+  addMessage: (value: ReducedValue, newMessage: MessageEvent<unknown>) => ReducedValue;
+} {
   return {
     restore: (previousValue?: ReducedValue) => {
       const messagesByTopic: Record<string, any> = {};

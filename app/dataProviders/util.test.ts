@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { DataProviderStall } from "@foxglove-studio/app/dataProviders/types";
 import delay from "@foxglove-studio/app/util/delay";
 import { toSec } from "@foxglove-studio/app/util/time";
 
@@ -42,7 +43,7 @@ describe("getReportMetadataForChunk", () => {
     reportMetadataForChunk(Buffer.allocUnsafe(100));
     const stalls = metadata.filter(({ type }) => type === "data_provider_stall");
     expect(stalls).toHaveLength(1);
-    const stall = stalls[0];
+    const stall = stalls[0]! as DataProviderStall;
     expect(stall.bytesReceivedBeforeStall).toEqual(300);
     expect(toSec(stall.requestTimeUntilStall)).toBeCloseTo(0.3, 1);
     expect(toSec(stall.stallDuration)).toBeCloseTo(0.2, 1);

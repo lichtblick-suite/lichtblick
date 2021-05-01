@@ -21,7 +21,10 @@ type AutoSizingCanvasProps = {
   overrideDevicePixelRatioForTest?: number;
 };
 
-const AutoSizingCanvas = ({ draw, overrideDevicePixelRatioForTest }: AutoSizingCanvasProps) => {
+const AutoSizingCanvas = ({
+  draw,
+  overrideDevicePixelRatioForTest,
+}: AutoSizingCanvasProps): JSX.Element => {
   const canvasRef = useRef<HTMLCanvasElement>(ReactNull);
 
   const { width, height } = useResizeDetector({

@@ -119,7 +119,7 @@ export default function PlotMenu({
   datasets: DataSet[];
   xAxisVal: PlotXAxisVal;
   tooltips: TimeBasedChartTooltipData[];
-}) {
+}): JSX.Element {
   // We want to avoid rerendering every frame, but datasets and tooltips change frequently. Create
   // stable refs (with values updated every frame) for the callbacks that need the data.
   const stableDatasets = useRef<DataSet[]>(datasets);

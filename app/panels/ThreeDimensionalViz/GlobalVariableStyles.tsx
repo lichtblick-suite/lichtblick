@@ -104,7 +104,7 @@ type Props = {
   setColorOverrideBySourceIdxByVariable: (arg0: ColorOverrideBySourceIdxByVariable) => void;
 };
 
-export default function GlobalVariableStyles(props: Props) {
+export default function GlobalVariableStyles(props: Props): JSX.Element {
   const {
     defaultSelectedTab,
     colorOverrideBySourceIdxByVariable = {},

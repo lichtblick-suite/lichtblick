@@ -25,7 +25,7 @@ const messageOrderLabel = {
   headerStamp: "Header stamp",
 };
 
-export default function MessageOrderControls() {
+export default function MessageOrderControls(): JSX.Element {
   const messageOrder = useSelector(
     (state: State) => state.persistedState.panels.playbackConfig.messageOrder,
   );

@@ -45,7 +45,7 @@ function validate(stats: any) {
 
 // Shows debug regl stats in the 3d panel.  Crashes the panel if regl stats drift outside of acceptable ranges.
 // TODO(bmc): move to regl-worldview at some point
-export default function DebugStats() {
+export default function DebugStats(): JSX.Element | ReactNull {
   const context = useContext<WorldviewContextType>(WorldviewReactContext);
   const renderCount = useRef(0);
   renderCount.current = renderCount.current + 1;

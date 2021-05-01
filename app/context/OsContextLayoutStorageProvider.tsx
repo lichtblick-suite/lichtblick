@@ -9,7 +9,9 @@ import LayoutStorageContext from "@foxglove-studio/app/context/LayoutStorageCont
 import OsContextLayoutStorage from "@foxglove-studio/app/services/OsContextLayoutStorage";
 
 // Provide an instance of the OsContextLayoutStorage
-export default function OsContextLayoutStorageProvider(props: PropsWithChildren<unknown>) {
+export default function OsContextLayoutStorageProvider(
+  props: PropsWithChildren<unknown>,
+): JSX.Element {
   const provider = useMemo(() => {
     if (!OsContextSingleton) {
       return undefined;

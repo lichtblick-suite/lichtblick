@@ -389,7 +389,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
     return this._preloadTopics;
   }
 
-  _resolveFinishedReadRequests() {
+  _resolveFinishedReadRequests(): void {
     this._readRequests = this._readRequests.filter(({ timeRange, blockRange, topics, resolve }) => {
       if (topics.length === 0) {
         resolve({
@@ -458,7 +458,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
   }
 
   // Gets called any time our "connection", read requests, or topics change.
-  _updateState() {
+  _updateState(): void {
     // First, see if there are any read requests that we can resolve now.
     this._resolveFinishedReadRequests();
 
@@ -732,7 +732,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
     );
   }
 
-  _purgeOldBlocks() {
+  _purgeOldBlocks(): void {
     if (this._cacheSizeBytes === Infinity) {
       return;
     }
@@ -771,7 +771,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
     this._blocks = newBlocks;
   }
 
-  _updateProgress() {
+  _updateProgress(): void {
     this._extensionPoint?.progressCallback({
       fullyLoadedFractionRanges: this._getDownloadedBlockRanges().map((range) => ({
         // Convert block ranges into fractions.
@@ -785,7 +785,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
     });
   }
 
-  setCacheSizeBytesInTests(cacheSizeBytes: number) {
+  setCacheSizeBytesInTests(cacheSizeBytes: number): void {
     this._cacheSizeBytes = cacheSizeBytes;
   }
 }

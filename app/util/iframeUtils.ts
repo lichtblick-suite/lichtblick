@@ -19,7 +19,7 @@ export type IframeMessage = {
   data: any;
 };
 
-export function postMessageToIframeHost(iframeMessage: IframeMessage) {
+export function postMessageToIframeHost(iframeMessage: IframeMessage): void {
   if (isInIFrame()) {
     window.parent.postMessage({ location: window.location.href, ...iframeMessage }, "*");
   }

@@ -13,7 +13,7 @@ import { State } from "@foxglove-studio/app/reducers";
 import sendNotification from "@foxglove-studio/app/util/sendNotification";
 
 // LayoutStorageReduxAdapter persists the current panel state from redux to the current LayoutStorage context
-export default function LayoutStorageReduxAdapter() {
+export default function LayoutStorageReduxAdapter(): ReactNull {
   const panelsState = useSelector((state: State) => state.persistedState.panels);
   const dispatch = useDispatch();
 

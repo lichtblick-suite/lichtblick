@@ -42,6 +42,7 @@ function getChangeCounts(data: any, startingCounts: any) {
   return startingCounts;
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const getItemStringForDiff = (_type: string, data: any, itemType: ReactNode): ReactNode => {
   const { ADDED, DELETED, CHANGED, ID } = diffLabels;
   const id = data[ID.labelText];

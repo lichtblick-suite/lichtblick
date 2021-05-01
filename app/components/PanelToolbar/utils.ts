@@ -11,18 +11,22 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { getNodeAtPath } from "react-mosaic-component";
+import { getNodeAtPath, MosaicRootActions, MosaicWindowActions } from "react-mosaic-component";
+import { MosaicKey } from "react-mosaic-component/lib/types";
 
 import { getPanelTypeFromId } from "@foxglove-studio/app/util/layout";
 
 export function getPanelTypeFromMosaic(
-  mosaicWindowActions: any,
-  mosaicActions: any,
+  mosaicWindowActions?: MosaicWindowActions,
+  mosaicActions?: MosaicRootActions<MosaicKey>,
 ): string | undefined {
   if (!mosaicWindowActions || !mosaicActions) {
     return undefined;
   }
   const node = getNodeAtPath(mosaicActions.getRoot(), mosaicWindowActions.getPath());
+  if (typeof node !== "string") {
+    throw new Error(`Used getPanelTypeFromMosaic on non-leaf node: ${JSON.stringify(node)}`);
+  }
   const type = getPanelTypeFromId(node);
 
   return type;

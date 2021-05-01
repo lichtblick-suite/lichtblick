@@ -31,7 +31,7 @@ class FakeRpc {
   }
 }
 
-export function getFakeRpcs() {
+export function getFakeRpcs(): { workerRpc: FakeRpc; mainThreadRpc: FakeRpc } {
   const workerRpc = new FakeRpc();
   const mainThreadRpc = new FakeRpc();
   workerRpc.proxiedWorker = mainThreadRpc;

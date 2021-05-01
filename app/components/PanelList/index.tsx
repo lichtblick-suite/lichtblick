@@ -220,7 +220,7 @@ function verifyPanels(panelsByCategory: Map<string, PanelInfo[]>) {
   }
 }
 
-function PanelList(props: Props) {
+function PanelList(props: Props): JSX.Element {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [highlightedPanelIdx, setHighlightedPanelIdx] = React.useState<number | undefined>();
   const { onPanelSelect, selectedPanelTitle } = props;

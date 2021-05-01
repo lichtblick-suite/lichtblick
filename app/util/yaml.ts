@@ -19,7 +19,7 @@ export default {
     // There should be checking on the result with a schema to ensure object is actually T
     return yaml.load(str);
   },
-  stringify: (obj: any, options: any = {}): string => {
+  stringify: (obj: unknown, options: yaml.DumpOptions = {}): string => {
     // do not quote 'y' and 'yes' for older yaml versions
     return yaml
       .dump(obj, { noCompatMode: true, ...options })

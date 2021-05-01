@@ -16,7 +16,7 @@ import tick from "@foxglove-studio/app/util/tick";
 export async function dragAndDrop(
   source: (Element | undefined) | (() => Element | undefined),
   target: (Element | undefined) | (() => Element | undefined),
-) {
+): Promise<void> {
   const sourceEl = typeof source === "function" ? source() : source;
   if (!sourceEl) {
     return;

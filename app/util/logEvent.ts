@@ -52,7 +52,7 @@ export function initializeLogEvent(
   initialLogEvent: (arg0: { name: string; tags: Tags }) => void,
   initialEventNames?: Record<string, string>,
   initialEventTags?: Record<string, string>,
-) {
+): void {
   if (logEventImpl && process.env.NODE_ENV !== "test") {
     throw new Error("logEvent has already been set, it can only be set once");
   }
@@ -65,14 +65,14 @@ export function initializeLogEvent(
   }
 }
 
-export default function logEvent(params: { name: string; tags: Tags }) {
+export default function logEvent(params: { name: string; tags: Tags }): void {
   if (!logEventImpl) {
     throw new Error("logEvent has been called but it has not yet been initialized");
   }
   logEventImpl(params);
 }
 
-export function resetLogEventForTests() {
+export function resetLogEventForTests(): void {
   logEventImpl = () => {
     // no-op
   };

@@ -47,7 +47,7 @@ type Props = {
   innerRef?: LegacyRef<HTMLDivElement>;
 };
 
-const Flex = (props: Props) => {
+const Flex = (props: Props): JSX.Element => {
   const {
     col,
     row,

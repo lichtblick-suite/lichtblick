@@ -5,7 +5,7 @@ type vec3 = [number, number, number];
 /*
  * Dot-product of two vectors.
  */
-export function dot(vec1: number[], vec2: number[]) {
+export function dot(vec1: number[], vec2: number[]): number {
   let ret = 0.0;
   for (let i = 0; i < vec1.length && i < vec2.length; ++i) {
     ret += vec1[i]! * vec2[i]!;
@@ -16,17 +16,16 @@ export function dot(vec1: number[], vec2: number[]) {
 /*
  * Cross-product of two vectors.
  */
-export function cross(vec1: vec3, vec2: vec3) {
+export function cross(vec1: vec3, vec2: vec3): vec3 {
   const [ax, ay, az] = vec1;
   const [bx, by, bz] = vec2;
-  const ret = [ay * bz - az * by, az * bx - ax * bz, ax * by - ay * bx];
-  return ret;
+  return [ay * bz - az * by, az * bx - ax * bz, ax * by - ay * bx];
 }
 
 /*
  * Performs a rotation transformation on a point.
  */
-export function rotate(rotation: Rotation, point: Point) {
+export function rotate(rotation: Rotation, point: Point): Point {
   const v: vec3 = [point.x, point.y, point.z];
 
   // Extract the vector part of the quaternion
@@ -42,16 +41,16 @@ export function rotate(rotation: Rotation, point: Point) {
   const d = vectorAddition([t1, t2, t3]);
 
   return {
-    x: d[0],
-    y: d[1],
-    z: d[2],
+    x: d[0]!,
+    y: d[1]!,
+    z: d[2]!,
   };
 }
 
 /*
  * Scales a vector.
  */
-export function scalarMultiply(vector: number[], scalar: number) {
+export function scalarMultiply(vector: number[], scalar: number): number[] {
   const ret = vector.slice();
   let i;
   for (i = 0; i < ret.length; ++i) {

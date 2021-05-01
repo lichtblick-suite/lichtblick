@@ -48,7 +48,14 @@ function CopyMessageButton({ text, onClick }: any) {
   );
 }
 
-export default function Metadata({ data, diffData, diff, datatype, message, diffMessage }: Props) {
+export default function Metadata({
+  data,
+  diffData,
+  diff,
+  datatype,
+  message,
+  diffMessage,
+}: Props): JSX.Element {
   const onClickCopy = useCallback(
     (dataToCopy) => (e: React.MouseEvent<HTMLSpanElement>) => {
       e.stopPropagation();

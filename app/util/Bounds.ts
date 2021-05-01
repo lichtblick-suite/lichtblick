@@ -43,13 +43,13 @@ export default class Bounds {
   }
 
   // update the bounds based on a point
-  update(point: Point) {
+  update(point: Point): void {
     this.x.update(point.x);
     this.y.update(point.y);
     this.z.update(point.z);
   }
 
-  reset() {
+  reset(): void {
     this.x.reset();
     this.y.reset();
     this.z.reset();

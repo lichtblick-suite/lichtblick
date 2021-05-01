@@ -68,7 +68,10 @@ export function getRGBAFromColor(color: { color: string; alpha: number }): Color
   };
 }
 // A tiny wrapper to set up the default handling of color and onChange for ColorPickerPanel.
-export function ColorPickerSettingsPanel({ color, onChange }: ColorPickerSettingsPanelProps) {
+export function ColorPickerSettingsPanel({
+  color,
+  onChange,
+}: ColorPickerSettingsPanelProps): JSX.Element {
   const hexColor = getHexFromColorSettingWithDefault(color);
   return (
     <ColorPickerPanel
@@ -82,7 +85,12 @@ export function ColorPickerSettingsPanel({ color, onChange }: ColorPickerSetting
   );
 }
 
-export default function ColorPickerForTopicSettings({ color, placement, onChange, size }: Props) {
+export default function ColorPickerForTopicSettings({
+  color,
+  placement,
+  onChange,
+  size,
+}: Props): JSX.Element {
   const isSmallSize = size === PICKER_SIZE.SMALL.name;
   const hexColor = getHexFromColorSettingWithDefault(color);
 

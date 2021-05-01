@@ -14,7 +14,7 @@
 import { Component } from "react";
 
 export default class MockSvg extends Component<any> {
-  render() {
+  render(): JSX.Element {
     return <svg {...this.props} />;
   }
 }

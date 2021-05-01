@@ -148,7 +148,7 @@ export default class RandomAccessPlayer implements Player {
 
   // If the user switches tabs, we won't actually play because no requestAnimationFrames will be called.
   // Make sure this is reflected in application state and in metrics as a pause and resume.
-  _handleDocumentVisibilityChange = () => {
+  _handleDocumentVisibilityChange = (): void => {
     if (document.visibilityState === "hidden") {
       if (this._isPlaying) {
         this.pausePlayback();
@@ -160,7 +160,7 @@ export default class RandomAccessPlayer implements Player {
     }
   };
 
-  _setError(message: string, details: string | Error, errorType: NotificationType) {
+  _setError(message: string, details: string | Error, errorType: NotificationType): void {
     sendNotification(message, details, errorType, "error");
     this._hasError = true;
     this._isPlaying = false;
@@ -170,7 +170,7 @@ export default class RandomAccessPlayer implements Player {
     this._emitState();
   }
 
-  setListener(listener: (arg0: PlayerState) => Promise<void>) {
+  setListener(listener: (arg0: PlayerState) => Promise<void>): void {
     this._listener = listener;
     this._emitState();
 
@@ -508,7 +508,7 @@ export default class RandomAccessPlayer implements Player {
     this._emitState();
   }
 
-  _reportInitialized() {
+  _reportInitialized(): void {
     if (this._initializing || this._initialized) {
       return;
     }
@@ -590,14 +590,14 @@ export default class RandomAccessPlayer implements Player {
     this._metricsCollector.setSubscriptions(newSubscriptions);
   }
 
-  requestBackfill() {
+  requestBackfill(): void {
     if (this._isPlaying || this._initializing) {
       return;
     }
     this.seekPlayback(this._nextReadStartTime);
   }
 
-  setPublishers(_publishers: AdvertisePayload[]) {
+  setPublishers(_publishers: AdvertisePayload[]): void {
     // no-op
   }
 
@@ -610,11 +610,11 @@ export default class RandomAccessPlayer implements Player {
     );
   }
 
-  publish(_payload: PublishPayload) {
+  publish(_payload: PublishPayload): void {
     console.warn("Publishing is not supported in RandomAccessPlayer");
   }
 
-  close() {
+  close(): void {
     this._isPlaying = false;
     this._closed = true;
     if (!this._initializing && !this._hasError) {
@@ -625,7 +625,7 @@ export default class RandomAccessPlayer implements Player {
   }
 
   // Exposed for testing.
-  hasCachedRange(start: Time, end: Time) {
+  hasCachedRange(start: Time, end: Time): boolean {
     const fractionStart = percentOf(this._start, this._end, start) / 100;
     const fractionEnd = percentOf(this._start, this._end, end) / 100;
     return isRangeCoveredByRanges(
@@ -634,7 +634,7 @@ export default class RandomAccessPlayer implements Player {
     );
   }
 
-  setGlobalVariables() {
+  setGlobalVariables(): void {
     // no-op
   }
 }

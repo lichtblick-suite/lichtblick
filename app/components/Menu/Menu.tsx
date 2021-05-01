@@ -27,7 +27,7 @@ type Props = {
 // and provides a helper { Item } component which can be used
 // to render typical menu items with text & an icon
 export default class Menu extends React.PureComponent<Props> {
-  render() {
+  render(): JSX.Element {
     const { children, className, style } = this.props;
     const classes = cx(styles.container, className);
     return (

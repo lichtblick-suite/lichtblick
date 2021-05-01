@@ -20,7 +20,7 @@ export function ValidatedResizingInput(props: {
   onChange: (arg0: string) => void;
   invalidInputs: string[];
   dataTest?: string;
-}) {
+}): JSX.Element {
   const [internalValue, setInternalValue] = useState<string>(props.value);
   const lastPropsValue = useRef<string>(props.value);
   if (lastPropsValue.current !== props.value) {

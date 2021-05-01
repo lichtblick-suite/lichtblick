@@ -60,7 +60,7 @@ export default function GradientPicker({
   minColor: Color;
   maxColor: Color;
   onChange: (arg0: { minColor: Color; maxColor: Color }) => void;
-}) {
+}): JSX.Element {
   const hexMinColor = getHexFromColorSettingWithDefault(minColor);
   const hexMaxColor = getHexFromColorSettingWithDefault(maxColor);
 

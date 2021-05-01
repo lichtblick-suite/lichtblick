@@ -12,7 +12,7 @@ export default {
   title: "panels/Map/index",
   component: MapPanel,
   decorators: [
-    (StoryComponent: Story, { parameters }: StoryContext) => {
+    (StoryComponent: Story, { parameters }: StoryContext): JSX.Element => {
       return (
         <PanelSetup fixture={parameters.panelSetup?.fixture}>
           <StoryComponent />
@@ -22,11 +22,11 @@ export default {
   ],
 };
 
-export const EmptyState = () => {
+export const EmptyState = (): JSX.Element => {
   return <MapPanel />;
 };
 
-export const SinglePoint = () => {
+export const SinglePoint = (): JSX.Element => {
   return <MapPanel />;
 };
 

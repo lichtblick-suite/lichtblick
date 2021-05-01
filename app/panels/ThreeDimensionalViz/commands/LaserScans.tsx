@@ -113,7 +113,7 @@ type Props = CommonCommandProps & {
   children: LaserScan[];
 };
 
-export default function LaserScans(props: Props) {
+export default function LaserScans(props: Props): JSX.Element {
   return (
     <Command
       getChildrenForHitmap={nonInstancedGetChildrenForHitmap}

@@ -60,7 +60,7 @@ type Props = {
   tabId?: string;
 };
 
-export const EmptyDropTarget = ({ mosaicId, tabId }: Props) => {
+export const EmptyDropTarget = ({ mosaicId, tabId }: Props): JSX.Element => {
   const dispatch = useDispatch();
 
   const [{ isOver }, drop] = useDrop({

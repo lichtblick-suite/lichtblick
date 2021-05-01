@@ -10,11 +10,8 @@ import { v4 as uuidv4 } from "uuid";
 import { RpcElement, RpcScales } from "@foxglove-studio/app/components/Chart/types";
 import WebWorkerManager from "@foxglove-studio/app/util/WebWorkerManager";
 
-// Webworker Manager wants a constructor so we need to have a "class" wrapper
-class ChartJSWorker {
-  constructor() {
-    return new Worker(new URL("./worker/main", import.meta.url));
-  }
+function makeChartJSWorker() {
+  return new Worker(new URL("./worker/main", import.meta.url));
 }
 
 type OnClickArg = {
@@ -51,7 +48,7 @@ type Props = {
 
 const devicePixelRatio = window.devicePixelRatio ?? 1;
 
-const webWorkerManager = new WebWorkerManager(ChartJSWorker, 4);
+const webWorkerManager = new WebWorkerManager(makeChartJSWorker, 4);
 
 // turn a React.MouseEvent into an object we can send over rpc
 function rpcMouseEvent(event: React.MouseEvent<HTMLCanvasElement>) {
@@ -68,7 +65,7 @@ function rpcMouseEvent(event: React.MouseEvent<HTMLCanvasElement>) {
 }
 
 // Chart component renders data using workers with chartjs offscreen canvas
-function Chart(props: Props) {
+function Chart(props: Props): JSX.Element {
   const [id] = useState(uuidv4());
   const initialized = useRef(false);
   const canvasRef = useRef<HTMLCanvasElement>(ReactNull);

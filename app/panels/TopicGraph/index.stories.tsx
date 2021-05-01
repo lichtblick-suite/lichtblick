@@ -13,7 +13,7 @@ export default {
   component: TopicGraph,
 };
 
-export const Empty = () => {
+export const Empty = (): JSX.Element => {
   return (
     <PanelSetup>
       <TopicGraph />
@@ -21,7 +21,7 @@ export const Empty = () => {
   );
 };
 
-export const OneTopic = () => {
+export const OneTopic = (): JSX.Element => {
   const [fixture] = useState<Fixture>({
     frame: {},
     topics: [{ name: "/topic", datatype: "std_msgs/Header" }],
@@ -47,7 +47,7 @@ export const OneTopic = () => {
 };
 
 // Adding new active data should cause the graph to re-layout
-export const ReLayout = () => {
+export const ReLayout = (): JSX.Element => {
   const [fixture, setFixture] = useState<Fixture>({
     frame: {},
     topics: [{ name: "/topic", datatype: "std_msgs/Header" }],

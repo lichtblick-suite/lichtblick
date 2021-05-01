@@ -36,7 +36,11 @@ export default class ParseMessagesDataProvider implements DataProvider {
     [topic: string]: string;
   } = {};
 
-  constructor(_args: any, children: DataProviderDescriptor[], getDataProvider: GetDataProvider) {
+  constructor(
+    _args: unknown,
+    children: DataProviderDescriptor[],
+    getDataProvider: GetDataProvider,
+  ) {
     const child = children[0];
     if (children.length !== 1 || !child) {
       throw new Error(

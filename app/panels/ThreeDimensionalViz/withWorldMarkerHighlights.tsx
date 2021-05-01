@@ -21,7 +21,9 @@ import {
   LAYER_INDEX_HIGHLIGHT_BASE,
 } from "@foxglove-studio/app/panels/ThreeDimensionalViz/constants";
 
-const withHighlights = (BaseWorldMarkers: ComponentType<WorldMarkerProps>) => {
+const withHighlights = (
+  BaseWorldMarkers: ComponentType<WorldMarkerProps>,
+): React.FC<WorldMarkerProps> => {
   const WorldMarkersWithHighlights = (props: WorldMarkerProps) => {
     const { markersByType } = props;
 

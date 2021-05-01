@@ -60,10 +60,10 @@ export default class NoopMetricsCollector implements PlayerMetricsCollectorInter
   recordTimeToFirstMsgs(): void {
     // no-op
   }
-  recordDataProviderInitializePerformance() {
+  recordDataProviderInitializePerformance(): void {
     // no-op
   }
-  recordDataProviderStall() {
+  recordDataProviderStall(): void {
     // no-op
   }
 }

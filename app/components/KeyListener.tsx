@@ -29,7 +29,7 @@ export default class KeyListener extends React.Component<Props> {
     global: false,
   };
 
-  componentDidMount() {
+  componentDidMount(): void {
     const { global } = this.props;
     const target = global ? document : (this.el || {}).parentElement;
     if (target) {
@@ -39,7 +39,7 @@ export default class KeyListener extends React.Component<Props> {
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     const { global } = this.props;
     const target = global ? document : (this.el || {}).parentElement;
     if (target) {
@@ -49,7 +49,7 @@ export default class KeyListener extends React.Component<Props> {
     }
   }
 
-  callHandlers(handlers: KeyHandlers | undefined, event: KeyboardEvent) {
+  callHandlers(handlers: KeyHandlers | undefined, event: KeyboardEvent): void {
     if (!handlers) {
       return;
     }
@@ -59,7 +59,7 @@ export default class KeyListener extends React.Component<Props> {
     }
   }
 
-  handleEvent = (event: KeyboardEvent) => {
+  handleEvent = (event: KeyboardEvent): void => {
     const { target, type } = event;
     if (
       target instanceof HTMLInputElement ||
@@ -85,7 +85,7 @@ export default class KeyListener extends React.Component<Props> {
     }
   };
 
-  render() {
+  render(): JSX.Element {
     return <div style={{ display: "none" }} ref={(el) => (this.el = el ?? undefined)} />;
   }
 }

@@ -63,7 +63,7 @@ export type UnconnectedPlaybackPerformanceProps = {
 export function UnconnectedPlaybackPerformance({
   timestamp,
   activeData,
-}: UnconnectedPlaybackPerformanceProps) {
+}: UnconnectedPlaybackPerformanceProps): JSX.Element {
   const playbackInfo = React.useRef<
     { timestamp: number; activeData: PlayerStateActiveData } | undefined
   >();

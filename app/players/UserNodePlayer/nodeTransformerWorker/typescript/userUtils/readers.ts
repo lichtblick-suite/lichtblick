@@ -114,7 +114,7 @@ export class Int16Reader implements FieldReader {
   }
 }
 
-export function getReader(datatype: number, offset: number) {
+export function getReader(datatype: number, offset: number): FieldReader {
   switch (datatype) {
     case DATATYPE.float32:
       return new Float32Reader(offset);

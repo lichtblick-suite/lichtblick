@@ -12,7 +12,7 @@ type DropdownItemProps = {
 // What value the dropdown will have when the item is selected.
 //
 // A childless DropdownItem will render as a <span>. Specify children to customize the appearence.
-export default function DropdownItem(props: PropsWithChildren<DropdownItemProps>) {
+export default function DropdownItem(props: PropsWithChildren<DropdownItemProps>): JSX.Element {
   if (props.children === undefined) {
     return <span>{String(props.value)}</span>;
   }

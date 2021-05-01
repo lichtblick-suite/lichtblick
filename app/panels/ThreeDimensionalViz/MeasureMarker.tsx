@@ -28,7 +28,7 @@ const defaultSphere: any = Object.freeze({
 });
 const defaultPose: any = Object.freeze({ orientation: { x: 0, y: 0, z: 0, w: 1 } });
 
-export default function MeasureMarker({ measurePoints: { start, end } }: Props) {
+export default function MeasureMarker({ measurePoints: { start, end } }: Props): JSX.Element {
   const spheres = [];
   const lines = [];
   if (start) {

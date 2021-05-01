@@ -631,7 +631,7 @@ export default function Layout({
   }, []);
 
   const updateGlobalVariablesFromSelection = useCallback(
-    (newSelectedObject: MouseEventObject) => {
+    (newSelectedObject?: MouseEventObject) => {
       if (newSelectedObject) {
         const newGlobalVariables = getUpdatedGlobalVariablesBySelectedObject(
           newSelectedObject,
@@ -650,7 +650,7 @@ export default function Layout({
   const updateInteractionsTabVisibility = useCallback(
     (newSelectedObject?: MouseEventObject) => {
       if (!isDrawing) {
-        const shouldBeOpen = newSelectedObject && !disableAutoOpenClickedObject;
+        const shouldBeOpen = newSelectedObject != undefined && !disableAutoOpenClickedObject;
         setInteractionsTabType(shouldBeOpen ? (OBJECT_TAB_TYPE as any) : undefined);
       }
     },

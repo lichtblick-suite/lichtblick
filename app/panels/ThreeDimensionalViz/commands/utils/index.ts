@@ -31,7 +31,7 @@ export const COLORS = {
   PURPLE: tinycolor("purple"),
 };
 
-export function setRgba(buffer: Uint8Array, index: number, color: tinycolor.Instance) {
+export function setRgba(buffer: Uint8Array, index: number, color: tinycolor.Instance): void {
   const rgba255 = color.toRgb();
   rgba255.a *= 255;
   buffer[index] = rgba255.r;
@@ -139,12 +139,12 @@ export class TextureCache {
   // regl context
   regl: any;
 
-  constructor(regl: any) {
+  constructor(regl: unknown) {
     this.regl = regl;
   }
 
   // returns a regl texture for a given marker
-  get(marker: OccupancyGridMessage) {
+  get(marker: OccupancyGridMessage): any {
     const { name } = marker;
     const item = this.store[name];
     if (!item) {

@@ -34,7 +34,11 @@ const keysToCheck = [
 // If any stats change it will output a red error box instead of the child regl components.
 // Do not use in a scene that changes a lot or has external animation frames as this is only meant to render once.
 // If the components within this are having their props updated externally its probably not going to work correctly.
-export default function ReglLeakChecker({ children }: { children: React.ReactNode }) {
+export default function ReglLeakChecker({
+  children,
+}: {
+  children: React.ReactNode;
+}): React.ReactNode {
   const context = useContext<WorldviewContextType>(WorldviewReactContext);
   const [renderCount, setRenderCount] = useState<number>(1);
   const originalStats = useRef<any>(undefined);

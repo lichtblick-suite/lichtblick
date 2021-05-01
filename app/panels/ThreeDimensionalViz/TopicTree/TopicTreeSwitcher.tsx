@@ -68,7 +68,7 @@ export default function TopicTreeSwitcher({
   saveConfig,
   setShowTopicTree,
   showErrorBadge,
-}: Props) {
+}: Props): JSX.Element {
   const onClick = useCallback(() => setShowTopicTree((shown) => !shown), [setShowTopicTree]);
   return (
     <STopicTreeSwitcher>

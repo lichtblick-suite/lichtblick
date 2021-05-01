@@ -86,7 +86,7 @@ function DiffModeIconEnabled() {
   );
 }
 
-export default function DiffModeSettings({ enabled, saveConfig }: Props) {
+export default function DiffModeSettings({ enabled, saveConfig }: Props): JSX.Element {
   const updateDiffModeFlag = () => {
     saveConfig({ diffModeEnabled: !enabled });
     logEvent({

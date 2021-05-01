@@ -151,7 +151,7 @@ export default function PanelToolbarMenu({
   saveConfig,
   flattenMarkers,
   autoTextBackgroundColor,
-}: Props) {
+}: Props): JSX.Element {
   return (
     <PanelToolbar
       floating

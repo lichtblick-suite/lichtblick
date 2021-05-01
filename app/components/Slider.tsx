@@ -106,7 +106,7 @@ export default class Slider extends React.Component<Props> {
     return clamp(interpolated, min, max);
   }
 
-  _onClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  _onClick = (e: React.MouseEvent<HTMLDivElement>): void => {
     const { draggable, onChange, disabled } = this.props;
     if (disabled) {
       return;
@@ -155,7 +155,7 @@ export default class Slider extends React.Component<Props> {
     this.forceUpdate();
   };
 
-  render() {
+  render(): JSX.Element {
     const { min, max, value, renderSlider, draggable, disabled } = this.props;
     const { mouseDown } = this;
 

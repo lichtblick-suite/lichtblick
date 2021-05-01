@@ -79,7 +79,7 @@ const jsonInterfaceDeclaration = ts.createInterfaceDeclaration(
   /* members */
 );
 
-export const formatInterfaceName = (type: string) => type.replace(/\//g, "__");
+export const formatInterfaceName = (type: string): string => type.replace(/\//g, "__");
 
 // http://wiki.ros.org/msg
 const rosPrimitivesToTypeScriptMap = {

@@ -29,7 +29,7 @@ export default function GlobalVariableName({
 }: {
   name: string;
   leftPadding?: boolean;
-}) {
+}): JSX.Element {
   return (
     <SGlobalVariableName title={name} leftPadding={leftPadding}>
       ${name}

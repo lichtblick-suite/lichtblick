@@ -167,7 +167,7 @@ export default {
   },
 };
 
-export const Basic = () => {
+export const Basic = (): JSX.Element => {
   return (
     <div style={divStyle}>
       <ChartComponent {...props} />
@@ -175,7 +175,7 @@ export const Basic = () => {
   );
 };
 
-export const CanUpdate = () => {
+export const CanUpdate = (): JSX.Element => {
   return <DatalabelUpdateExample />;
 };
 
@@ -185,7 +185,7 @@ CanUpdate.parameters = {
   },
 };
 
-export const WithDatalabels = () => {
+export const WithDatalabels = (): JSX.Element => {
   return (
     <div style={divStyle}>
       <ChartComponent {...propsWithDatalabels} />
@@ -193,7 +193,7 @@ export const WithDatalabels = () => {
   );
 };
 
-export const AllowsClickingOnDatalabels = () => {
+export const AllowsClickingOnDatalabels = (): JSX.Element => {
   return <DatalabelClickExample />;
 };
 

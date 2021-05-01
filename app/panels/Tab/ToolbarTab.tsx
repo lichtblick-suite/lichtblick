@@ -75,7 +75,7 @@ type Props = {
   tabTitle: string;
 };
 
-export function ToolbarTab(props: Props) {
+export function ToolbarTab(props: Props): JSX.Element {
   const {
     tabIndex,
     isActive,

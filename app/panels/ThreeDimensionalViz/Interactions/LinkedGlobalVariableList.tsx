@@ -38,7 +38,7 @@ type Props = {
   linkedGlobalVariables: LinkedGlobalVariables;
 };
 
-export default function LinkedGlobalVariableList({ linkedGlobalVariables }: Props) {
+export default function LinkedGlobalVariableList({ linkedGlobalVariables }: Props): JSX.Element {
   if (linkedGlobalVariables.length === 0) {
     return (
       <SEmptyState>

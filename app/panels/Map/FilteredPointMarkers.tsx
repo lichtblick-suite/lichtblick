@@ -22,7 +22,7 @@ type Props = {
 };
 
 // renders circle markers for all topic/points excluding points at the same pixel
-export default function FilteredPointMarkers(props: Props) {
+export default function FilteredPointMarkers(props: Props): JSX.Element {
   const [bounds, setBounds] = useState<LatLngBounds | undefined>();
 
   const map = useMapEvent("moveend", () => {

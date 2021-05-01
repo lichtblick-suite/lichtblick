@@ -80,7 +80,7 @@ const InteractionsBaseComponent = React.memo<PropsWithConfig>(function Interacti
     >
       <ToolGroup name={OBJECT_TAB_TYPE}>
         <ToolGroupFixedSizePane>
-          {selectedObject ? (
+          {maybeFullyDecodedObject ? (
             <>
               {selectedInteractionData && (
                 <SRow>
@@ -118,7 +118,7 @@ const InteractionsBaseComponent = React.memo<PropsWithConfig>(function Interacti
 
 // Wrap the Interactions so that we don't rerender every time any part of the PanelContext config changes, but just the
 // one value that we care about.
-export default function Interactions(props: Props) {
+export default function Interactions(props: Props): JSX.Element {
   const { saveConfig, config: { disableAutoOpenClickedObject } = {} as any } =
     React.useContext(PanelContext) || {};
   return (

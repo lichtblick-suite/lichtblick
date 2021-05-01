@@ -52,7 +52,7 @@ function useTopicsWithoutHeaders() {
   }, [topicsWithoutHeaderStamps, topics]);
 }
 
-export default function NoHeaderTopicsButton() {
+export default function NoHeaderTopicsButton(): JSX.Element | ReactNull {
   const topicsWithoutHeaders = useTopicsWithoutHeaders();
   const [showingModal, setShowingModal] = useState(false);
   return useMemo(() => {

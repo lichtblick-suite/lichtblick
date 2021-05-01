@@ -197,7 +197,7 @@ export default function WorldMarkers({
   markersByType,
   clearCachedMarkers,
   cameraDistance,
-}: WorldMarkerProps) {
+}: WorldMarkerProps): JSX.Element {
   const getChildrenForHitmap = useMemo(() => createInstancedGetChildrenForHitmap(1), []);
   const {
     arrow,

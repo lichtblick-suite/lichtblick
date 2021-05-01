@@ -78,6 +78,7 @@ rules:
   "@typescript-eslint/restrict-plus-operands": [error, { checkCompoundAssignments: true }]
   "@typescript-eslint/switch-exhaustiveness-check": error
   "@typescript-eslint/unbound-method": [error, { ignoreStatic: true }]
+  "@typescript-eslint/explicit-module-boundary-types": error
   react/jsx-uses-react: off
   react/react-in-jsx-scope: off
   react/prop-types: off # Unnecessary with typescript validation

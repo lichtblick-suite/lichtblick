@@ -29,7 +29,7 @@ type MarkerSettings = {
 
 export default function MarkerSettingsEditor(
   props: TopicSettingsEditorProps<Marker | MarkerArray, MarkerSettings>,
-) {
+): JSX.Element {
   const { settings = {}, onFieldChange } = props;
   return (
     <Flex col>

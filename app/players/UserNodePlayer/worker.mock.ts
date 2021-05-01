@@ -73,7 +73,7 @@ export default class MockUserNodePlayerWorker {
   }
 
   // So tests can spy on what gets called
-  messageSpy(_action: string) {
+  messageSpy(_action: string): void {
     // no-op
   }
 }

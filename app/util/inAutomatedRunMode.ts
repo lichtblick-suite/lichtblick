@@ -15,15 +15,15 @@ function getSearchParams(): URLSearchParams {
   return new URLSearchParams(global.location.search ?? "");
 }
 
-export function inVideoRecordingMode() {
+export function inVideoRecordingMode(): boolean {
   return getSearchParams().has("video-recording-mode");
 }
 
-export function inPlaybackPerformanceMeasuringMode() {
+export function inPlaybackPerformanceMeasuringMode(): boolean {
   return getSearchParams().has("measure-playback-performance-mode");
 }
 
-export function inLoadPerformanceMode() {
+export function inLoadPerformanceMode(): boolean {
   return getSearchParams().has("measure-load-performance-mode");
 }
 

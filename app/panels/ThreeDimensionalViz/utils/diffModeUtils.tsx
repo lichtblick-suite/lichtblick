@@ -102,7 +102,9 @@ export function getDiffBySource(markers: InteractiveMarkersByType): InteractiveM
   return ret;
 }
 
-export const withDiffMode = (BaseWorldMarkers: ComponentType<WorldMarkerProps>) => {
+export const withDiffMode = (
+  BaseWorldMarkers: ComponentType<WorldMarkerProps>,
+): React.FC<WorldMarkerProps> => {
   const WorldMarkersWithDiffMode = (props: WorldMarkerProps) => {
     const { diffModeEnabled } = props;
     if (diffModeEnabled) {

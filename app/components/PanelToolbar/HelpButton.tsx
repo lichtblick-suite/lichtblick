@@ -23,7 +23,7 @@ type Props = {
   iconStyle?: CSSProperties;
 };
 
-export default function HelpButton(props: PropsWithChildren<Props>) {
+export default function HelpButton(props: PropsWithChildren<Props>): JSX.Element {
   const [showHelp, setShowHelp] = useState<boolean>(false);
 
   return (

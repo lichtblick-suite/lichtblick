@@ -16,7 +16,7 @@ export function decodeYUV(
   width: number,
   height: number,
   output: Uint8ClampedArray,
-) {
+): void {
   let c = 0;
   let off = 0;
 
@@ -50,7 +50,7 @@ export function decodeRGB8(
   width: number,
   height: number,
   output: Uint8ClampedArray,
-) {
+): void {
   let inIdx = 0;
   let outIdx = 0;
 
@@ -71,7 +71,7 @@ export function decodeBGR8(
   width: number,
   height: number,
   output: Uint8ClampedArray,
-) {
+): void {
   let inIdx = 0;
   let outIdx = 0;
 
@@ -93,7 +93,7 @@ export function decodeFloat1c(
   height: number,
   is_bigendian: boolean,
   output: Uint8ClampedArray,
-) {
+): void {
   const view = new DataView(gray.buffer, gray.byteOffset);
 
   let outIdx = 0;
@@ -111,7 +111,7 @@ export function decodeMono8(
   width: number,
   height: number,
   output: Uint8ClampedArray,
-) {
+): void {
   let inIdx = 0;
   let outIdx = 0;
 
@@ -130,7 +130,7 @@ export function decodeMono16(
   height: number,
   is_bigendian: boolean,
   output: Uint8ClampedArray,
-) {
+): void {
   const view = new DataView(mono16.buffer, mono16.byteOffset);
 
   let outIdx = 0;

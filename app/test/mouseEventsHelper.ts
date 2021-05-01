@@ -24,7 +24,7 @@ export function findCanvas(): HTMLCanvasElement {
 export async function simulateMouseMove(
   point: number[] = [0, 0],
   canvas: HTMLCanvasElement | undefined,
-) {
+): Promise<void> {
   const [clientX, clientY] = point;
   canvas = canvas || findCanvas();
   canvas.dispatchEvent(
@@ -36,7 +36,10 @@ export async function simulateMouseMove(
   );
 }
 
-export async function simulateDragClick(point: number[] = [0, 0], canvas?: HTMLCanvasElement) {
+export async function simulateDragClick(
+  point: number[] = [0, 0],
+  canvas?: HTMLCanvasElement,
+): Promise<void> {
   const [clientX, clientY] = point;
   canvas = canvas ?? findCanvas();
   canvas.dispatchEvent(

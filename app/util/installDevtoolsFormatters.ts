@@ -92,7 +92,7 @@ const timeFormatter: DevtoolFormatter = (() => {
   return formatter;
 })();
 
-export default function installDevtoolsFormatters() {
+export default function installDevtoolsFormatters(): void {
   window.devtoolsFormatters = window.devtoolsFormatters ?? [];
   window.devtoolsFormatters.push(timeFormatter);
 }

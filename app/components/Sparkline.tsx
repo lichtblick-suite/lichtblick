@@ -52,7 +52,7 @@ function draw(
   context.stroke();
 }
 
-export function Sparkline(props: SparklineProps) {
+export function Sparkline(props: SparklineProps): JSX.Element {
   return (
     <div
       style={{

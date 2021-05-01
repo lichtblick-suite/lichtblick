@@ -25,7 +25,7 @@ type ProgressProps = {
   progress: Progress;
 };
 
-export function ProgressPlot(props: ProgressProps) {
+export function ProgressPlot(props: ProgressProps): JSX.Element {
   const { fullyLoadedFractionRanges } = props.progress;
   const draw = useCallback(
     (context: CanvasRenderingContext2D, width: number, height: number) => {

@@ -13,7 +13,7 @@
 
 // Overwrite the default fetch error handler with one that catches one message: "Failed to fetch". We see this often
 // in our logs and want the logs to more fully reflect the error message.
-export default function overwriteFetch() {
+export default function overwriteFetch(): void {
   const originalFetch = global.fetch;
   global.fetch = (url: RequestInfo, init?: RequestInit) => {
     // Use this replacement error instead of the original one, because this one will have the correct stack trace.

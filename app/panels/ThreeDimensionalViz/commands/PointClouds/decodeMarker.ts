@@ -27,6 +27,7 @@ import { PointCloudMarker } from "./types";
 
 // Decode a marker and generate position and color buffers for rendering
 // The resulting marker should be memoized for better performance
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function decodeMarker(marker: PointCloudMarker) {
   const {
     fields = [],

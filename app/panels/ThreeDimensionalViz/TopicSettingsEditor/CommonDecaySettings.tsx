@@ -21,7 +21,7 @@ export default function CommonDecaySettings({
 }: {
   settings: { decayTime?: number };
   onFieldChange: (name: string, value: any) => any;
-}) {
+}): JSX.Element {
   const decayTime = settings.decayTime;
   const decayTimeValue = decayTime === undefined ? "" : decayTime;
 

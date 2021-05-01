@@ -60,7 +60,7 @@ type Props = CommonCommandProps & {
 export default function CarModel({
   children: { pose, alpha = 1, scale = { x: 0.01, y: 0.01, z: 0.01 }, interactionData },
   layerIndex,
-}: Props) {
+}: Props): JSX.Element {
   return (
     <GLTFScene layerIndex={layerIndex} model={loadCarModel}>
       {{ pose, alpha, scale, interactionData }}

@@ -56,13 +56,16 @@ declare module "regl-worldview" {
 
   class Polygon {
     points: any;
-    constructor(arg: any);
+    constructor(name: string);
   }
   class PolygonPoint {
-    constructor(arg: any);
+    constructor(point: Vec3);
   }
 
-  type MouseEventObject = any;
+  type MouseEventObject = {
+    object: any;
+    instanceIndex?: number;
+  };
   type Vec3 = readonly [number, number, number];
   type Vec4 = readonly [number, number, number, number];
   type CameraState = {

@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { History } from "history";
 import { isEmpty, isEqual, dropRight, pick, cloneDeep } from "lodash";
 import {
   updateTree,
@@ -143,7 +144,7 @@ export const defaultPersistedState = Object.freeze<PersistedState>({
 // too expensive.
 let initialPersistedState: PersistedState | undefined = undefined;
 export function getInitialPersistedStateAndMaybeUpdateLocalStorageAndURL(
-  history: any,
+  history: History,
 ): PersistedState {
   if (initialPersistedState == undefined) {
     const oldPersistedState: any = storage.getItem(GLOBAL_STATE_STORAGE_KEY);

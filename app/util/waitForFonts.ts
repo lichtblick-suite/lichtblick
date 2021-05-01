@@ -18,6 +18,6 @@
 // Without waiting, initial measureText calls have the wrong result, and the font sometimes doesn't
 // appear in screenshot tests.
 
-export default function waitForFonts() {
+export default function waitForFonts(): Promise<unknown> {
   return Promise.all([...document.fonts].map((font) => font.load()));
 }

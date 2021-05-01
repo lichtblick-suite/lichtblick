@@ -41,7 +41,7 @@ function arrayToPoint(
 export default class MeasuringTool extends React.Component<Props> {
   mouseDownCoords: number[] = [-1, -1];
 
-  toggleMeasureState = () => {
+  toggleMeasureState = (): void => {
     const newMeasureState = this.props.measureState === "idle" ? "place-start" : "idle";
     this.props.onMeasureInfoChange({
       measureState: newMeasureState,
@@ -49,18 +49,18 @@ export default class MeasuringTool extends React.Component<Props> {
     });
   };
 
-  reset = () => {
+  reset = (): void => {
     this.props.onMeasureInfoChange({
       measureState: "idle",
       measurePoints: { start: undefined, end: undefined },
     });
   };
 
-  _canvasMouseDownHandler = (e: MouseEvent, _clickInfo: ReglClickInfo) => {
+  _canvasMouseDownHandler = (e: MouseEvent, _clickInfo: ReglClickInfo): void => {
     this.mouseDownCoords = [e.clientX, e.clientY];
   };
 
-  _canvasMouseUpHandler = (e: MouseEvent, _clickInfo: ReglClickInfo) => {
+  _canvasMouseUpHandler = (e: MouseEvent, _clickInfo: ReglClickInfo): void => {
     const mouseUpCoords = [e.clientX, e.clientY];
     const { measureState, measurePoints, onMeasureInfoChange } = this.props;
 
@@ -146,7 +146,7 @@ export default class MeasuringTool extends React.Component<Props> {
     return dist_string;
   }
 
-  render() {
+  render(): ReactNull {
     return ReactNull;
   }
 }

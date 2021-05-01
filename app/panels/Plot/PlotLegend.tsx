@@ -57,7 +57,7 @@ const shortXAxisLabel = (path: PlotXAxisVal): string => {
   throw new Error(`unknown path: ${path}`);
 };
 
-export default function PlotLegend(props: PlotLegendProps) {
+export default function PlotLegend(props: PlotLegendProps): JSX.Element {
   const {
     paths,
     saveConfig,

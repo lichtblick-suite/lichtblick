@@ -44,19 +44,19 @@ export default class SubMenu extends React.Component<Props, State> {
     direction: "right",
   };
 
-  toggle = () => {
+  toggle = (): void => {
     if (this._unmounted) {
       return;
     }
     this.setState(({ open }) => ({ open: !open }));
   };
 
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     // the submenu might unmount on click, so don't update state if its gone
     this._unmounted = true;
   }
 
-  render() {
+  render(): JSX.Element {
     const { text, children, checked, direction, icon, dataTest, style } = this.props;
     const { open } = this.state;
     return (

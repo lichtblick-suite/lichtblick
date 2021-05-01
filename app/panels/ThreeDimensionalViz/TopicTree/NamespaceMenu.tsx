@@ -96,7 +96,7 @@ export default function NamespaceMenu({
   providerAvailable,
   setEditingNamespace,
   topicName,
-}: Props) {
+}: Props): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
 
   // Render with extra space for the reset icon if any column has the override color.

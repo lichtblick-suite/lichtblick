@@ -138,7 +138,7 @@ export function useDiagnostics(topic: string): DiagnosticsBuffer {
   });
 }
 
-export default function DiagnosticsHistory({ children, topic }: Props) {
+export default function DiagnosticsHistory({ children, topic }: Props): JSX.Element {
   const diagnostics = useDiagnostics(topic);
   return children(diagnostics);
 }

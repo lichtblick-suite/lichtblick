@@ -83,7 +83,7 @@ export default {
   component: Rosout,
 };
 
-export const Simple = () => {
+export const Simple = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture}>
       <Rosout />
@@ -91,7 +91,7 @@ export const Simple = () => {
   );
 };
 
-export const TopicToRender = () => {
+export const TopicToRender = (): JSX.Element => {
   function makeMessages(topic: any) {
     return fixture.frame["/rosout"].map((msg) => ({
       ...msg,
@@ -127,7 +127,7 @@ export const TopicToRender = () => {
   );
 };
 
-export const WithToolbarActive = () => {
+export const WithToolbarActive = (): JSX.Element => {
   return (
     <PanelSetup
       fixture={fixture}
@@ -145,7 +145,7 @@ export const WithToolbarActive = () => {
   );
 };
 
-export const FilteredTerms = () => {
+export const FilteredTerms = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture}>
       <Rosout
@@ -161,7 +161,7 @@ export const FilteredTerms = () => {
 
 FilteredTerms.title = `filtered terms: "multiple", "/some_topic"`;
 
-export const CaseInsitiveFilter = () => {
+export const CaseInsitiveFilter = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture}>
       <Rosout

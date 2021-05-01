@@ -33,7 +33,7 @@ type Props = {
 export default function UnlinkGlobalVariable({
   linkedGlobalVariable: { topic, markerKeyPath, name },
   setIsOpen,
-}: Props) {
+}: Props): JSX.Element {
   const { linkedGlobalVariables, setLinkedGlobalVariables } = useLinkedGlobalVariables();
   return (
     <SGlobalVariableForm style={{ marginLeft: 8 }} data-test="unlink-form">

@@ -48,6 +48,7 @@ function consumeSingleTfs(tfs: MessageEvent<TF>[] | undefined, transforms: Trans
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 function withTransforms<Props extends BaseProps>(ChildComponent: React.ComponentType<Props>) {
   class Component extends React.PureComponent<
     Partial<{

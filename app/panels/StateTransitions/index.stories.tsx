@@ -94,7 +94,7 @@ export default {
   },
 };
 
-export const OnePath = () => {
+export const OnePath = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture}>
       <StateTransitions
@@ -106,7 +106,7 @@ export const OnePath = () => {
   );
 };
 
-export const MultiplePaths = () => {
+export const MultiplePaths = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture}>
       <StateTransitions
@@ -121,7 +121,7 @@ export const MultiplePaths = () => {
   );
 };
 
-export const MultiplePathsWithHover = () => {
+export const MultiplePathsWithHover = (): JSX.Element => {
   return (
     <PanelSetup
       fixture={fixture}
@@ -145,7 +145,7 @@ export const MultiplePathsWithHover = () => {
   );
 };
 
-export const LongPath = () => {
+export const LongPath = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture} style={{ maxWidth: 100 }}>
       <StateTransitions
@@ -157,7 +157,7 @@ export const LongPath = () => {
   );
 };
 
-export const JsonPath = () => {
+export const JsonPath = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture}>
       <StateTransitions
@@ -169,7 +169,7 @@ export const JsonPath = () => {
   );
 };
 
-export const WithAHoveredTooltip = () => {
+export const WithAHoveredTooltip = (): JSX.Element => {
   return (
     <PanelSetup
       fixture={fixture}

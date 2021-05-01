@@ -56,7 +56,7 @@ export type { PlotConfig, PlotXAxisVal } from "./types";
 export function openSiblingPlotPanel(
   openSiblingPanel: (arg0: string, cb: (arg0: PanelConfig) => PanelConfig) => void,
   topicName: string,
-) {
+): void {
   openSiblingPanel("Plot", (config: PanelConfig) => ({
     ...config,
     paths: uniq(

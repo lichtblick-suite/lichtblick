@@ -67,7 +67,7 @@ export type TopicSettingsCollection = {
 
 // builds a syntehtic arrow marker from a geometry_msgs/PoseStamped
 // these pose sizes were manually configured in rviz; for now we hard-code them here
-export const buildSyntheticArrowMarker = (
+const buildSyntheticArrowMarker = (
   { topic, message }: MessageEvent<unknown>,
   pose: Pose,
   getSyntheticArrowMarkerColor: (arg0: string) => Color,
@@ -508,7 +508,7 @@ export default class SceneBuilder implements MarkerProvider {
     return pose;
   };
 
-  _consumeMarkerArray = (topic: string, message: any): void => {
+  private _consumeMarkerArray = (topic: string, message: any): void => {
     for (const marker of message.markers) {
       this._consumeMarker(topic, marker);
     }
@@ -721,7 +721,7 @@ export default class SceneBuilder implements MarkerProvider {
     this._consumeNonMarkerMessage(msg.topic, newMessage, 110);
   };
 
-  _consumeNonMarkerMessage = (
+  private _consumeNonMarkerMessage = (
     topic: string,
     drawData: StampedMessage,
     type: number,
@@ -884,7 +884,7 @@ export default class SceneBuilder implements MarkerProvider {
     }
   };
 
-  _consumeTopic = (topic: string) => {
+  private _consumeTopic = (topic: string) => {
     if (!this.frame) {
       return;
     }
@@ -958,7 +958,7 @@ export default class SceneBuilder implements MarkerProvider {
     }
   }
 
-  _addMarkerToCollector(add: MarkerCollector, topic: Topic, originalMarker: any) {
+  private _addMarkerToCollector(add: MarkerCollector, topic: Topic, originalMarker: any) {
     let marker = originalMarker;
     switch (marker.type) {
       case 1:

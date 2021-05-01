@@ -56,11 +56,11 @@ export const readPoints = (message: sensor_msgs__PointCloud2): Array<Field[]> =>
   return points;
 };
 
-export function norm({ x, y, z }: Point) {
+export function norm({ x, y, z }: Point): number {
   return Math.sqrt(x * x + y * y + z * z);
 }
 
-export function setRayDistance(pt: Point, distance: number) {
+export function setRayDistance(pt: Point, distance: number): Point {
   const { x, y, z } = pt;
   const scale = distance / norm(pt);
   return {
@@ -70,7 +70,7 @@ export function setRayDistance(pt: Point, distance: number) {
   };
 }
 
-export function convertToRangeView(points: Point[], range: number, makeColors: boolean) {
+export function convertToRangeView(points: Point[], range: number, makeColors: boolean): RGBA[] {
   const colors: RGBA[] = makeColors ? new Array(points.length) : [];
   // First pass to get min and max ranges
   // TODO: Could be more efficient and extract this during

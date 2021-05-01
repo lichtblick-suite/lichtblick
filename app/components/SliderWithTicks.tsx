@@ -47,7 +47,7 @@ export function SliderWithTicks(props: {
   value: number;
   sliderProps: SliderProps;
   onChange: (arg0: number) => void;
-}) {
+}): JSX.Element {
   const { value, sliderProps, onChange } = props;
   return (
     <SSliderContainer>

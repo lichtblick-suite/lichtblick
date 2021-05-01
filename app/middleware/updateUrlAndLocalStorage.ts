@@ -77,7 +77,7 @@ const updateUrlActions = [
 
 const updateUrlAndLocalStorageMiddlewareDebounced = (store: Store) => (
   next: (action: ActionTypes) => State,
-) => (action: ActionTypes) => {
+) => (action: ActionTypes): State => {
   const result = next(action);
   // Any action that changes panels state should potentially trigger a URL update.
   let skipSettingLocalStorage = false;

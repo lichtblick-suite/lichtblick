@@ -23,7 +23,7 @@ export type FramePromise = { name: string; promise: Promise<void> };
 // Wait longer before erroring if there's no user waiting (in automated run)
 export const MAX_PROMISE_TIMEOUT_TIME_MS = inAutomatedRunMode() ? 30000 : 5000;
 
-export async function pauseFrameForPromises(promises: FramePromise[]) {
+export async function pauseFrameForPromises(promises: FramePromise[]): Promise<void> {
   try {
     await promiseTimeout(
       Promise.all(promises.map(({ promise }) => promise)),

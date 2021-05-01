@@ -72,7 +72,7 @@ export default function Cover({
   // When enabled, the cover will overwrite the depth buffer when it is drawn.
   // This is useful if you'd like to draw new content on top of the Cover.
   overwriteDepthBuffer?: boolean;
-}) {
+}): JSX.Element {
   // Two triangles covering the entire screen
   const points = [
     [-1, -1],

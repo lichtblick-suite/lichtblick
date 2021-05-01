@@ -138,7 +138,7 @@ type Props = CommonCommandProps & {
   children: OccupancyGridMessage[];
 };
 
-export default function OccupancyGrids(props: Props) {
+export default function OccupancyGrids(props: Props): JSX.Element {
   // We can click through OccupancyGrids.
   return <Command getChildrenForHitmap={undefined} {...props} reglCommand={occupancyGrids} />;
 }

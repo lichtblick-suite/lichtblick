@@ -38,7 +38,7 @@ type Props = {
   dataTest?: string;
 };
 
-const Icon = (props: Props) => {
+const Icon = (props: Props): JSX.Element => {
   const {
     children,
     xlarge,
@@ -101,7 +101,7 @@ const Icon = (props: Props) => {
 
 Icon.displayName = "Icon";
 
-export const WrappedIcon = (props: Props) => {
+export const WrappedIcon = (props: Props): JSX.Element => {
   return (
     <Icon
       {...props}

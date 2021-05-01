@@ -236,7 +236,7 @@ export default class ApiCheckerDataProvider implements DataProvider {
     return this._provider?.close();
   }
 
-  _warn(message: string) {
+  _warn(message: string): void {
     const prefixedMessage = `ApiCheckerDataProvider(${this._name}): ${message}`;
     sendNotification("Internal data provider assertion failed", prefixedMessage, "app", "warn");
 

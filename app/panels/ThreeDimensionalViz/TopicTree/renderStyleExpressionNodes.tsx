@@ -25,6 +25,7 @@ import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToB
 import Tooltip from "@foxglove-studio/app/components/Tooltip";
 import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { getDefaultColorOverrideBySourceIdx } from "@foxglove-studio/app/panels/ThreeDimensionalViz/GlobalVariableStyles";
+import { LinkedGlobalVariable } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { ThreeDimensionalVizContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
 import {
   ColorPickerSettingsPanel,
@@ -63,10 +64,16 @@ export function renderStyleExpressionNodes({
   topicName,
   hasFeatureColumn,
   linkedGlobalVariablesByTopic,
-}: any): TreeUINode[] {
+}: {
+  width: number;
+  isXSWidth: boolean;
+  topicName: string;
+  hasFeatureColumn: boolean;
+  linkedGlobalVariablesByTopic: Record<string, LinkedGlobalVariable[]>;
+}): TreeUINode[] {
   const rowWidth = width - (isXSWidth ? 0 : TREE_SPACING * 2) - OUTER_LEFT_MARGIN;
   const linkedGlobalVariablesByVariableName = groupBy(
-    linkedGlobalVariablesByTopic[topicName] || [],
+    linkedGlobalVariablesByTopic[topicName] ?? [],
     ({ name }) => name,
   );
   return Object.keys(linkedGlobalVariablesByVariableName).map((variableName, rowIndex) => {

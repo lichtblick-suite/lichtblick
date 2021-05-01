@@ -38,8 +38,8 @@ export const diffLabels = {
 export const diffLabelsByLabelText = keyBy(Object.values(diffLabels), "labelText");
 
 export default function getDiff(
-  before: any,
-  after: any,
+  before: any, // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
+  after: any, // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
   idLabel?: string,
   showFullMessageForDiff: boolean = false,
 ): any {

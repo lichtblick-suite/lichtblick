@@ -5,6 +5,6 @@
 import { PropsWithChildren } from "react";
 import { createPortal } from "react-dom";
 
-export function RenderToBodyComponent({ children }: PropsWithChildren<unknown>) {
+export function RenderToBodyComponent({ children }: PropsWithChildren<unknown>): React.ReactPortal {
   return createPortal(children, document.body);
 }

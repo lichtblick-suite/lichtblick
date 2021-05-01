@@ -69,7 +69,7 @@ export default class ShareJsonModal extends Component<Props, State> {
     copied: false,
   };
 
-  onChange = () => {
+  onChange = (): void => {
     const { onChange, onRequestClose } = this.props;
     let { value } = this.state;
     if (value.length === 0) {
@@ -86,7 +86,7 @@ export default class ShareJsonModal extends Component<Props, State> {
     }
   };
 
-  onCopy = () => {
+  onCopy = (): void => {
     const { value } = this.state;
     clipboard.copy(value).then(() => {
       this.setState({ copied: true });
@@ -94,12 +94,12 @@ export default class ShareJsonModal extends Component<Props, State> {
     });
   };
 
-  onDownload = () => {
+  onDownload = (): void => {
     const { value } = this.state;
     downloadTextFile(value, "layout.json");
   };
 
-  renderError() {
+  renderError(): React.ReactNode {
     const { error } = this.state;
     if (!error) {
       return ReactNull;
@@ -107,7 +107,7 @@ export default class ShareJsonModal extends Component<Props, State> {
     return <div className="notification is-danger">The input you provided is invalid.</div>;
   }
 
-  render() {
+  render(): JSX.Element {
     const { value, copied } = this.state;
 
     return (

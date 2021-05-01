@@ -17,6 +17,7 @@ import thunk, { ThunkDispatch } from "redux-thunk";
 import { ActionTypes } from "@foxglove-studio/app/actions";
 import { State } from "@foxglove-studio/app/reducers";
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const configureStore = (reducer: Reducer<State, ActionTypes>, middleware: Array<any> = []) => {
   let enhancer = applyMiddleware<ThunkDispatch<State, undefined, ActionTypes>>(
     thunk,

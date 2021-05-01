@@ -37,7 +37,7 @@ export type PoseSettings = {
 
 export default function PoseSettingsEditor(
   props: TopicSettingsEditorProps<PoseStamped, PoseSettings>,
-) {
+): JSX.Element {
   const { message, settings, onFieldChange, onSettingsChange } = props;
 
   const settingsByCarType = React.useMemo(() => {

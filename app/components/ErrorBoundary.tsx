@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { captureException } from "@sentry/electron";
+import { ErrorInfo } from "react";
 import styled from "styled-components";
 
 import Button from "@foxglove-studio/app/components/Button";
@@ -49,12 +50,12 @@ export default class ErrorBoundary extends React.Component<
     errorInfo: undefined,
   };
 
-  componentDidCatch(error: Error, errorInfo: any) {
+  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     captureException(new AppError(error, errorInfo));
     this.setState({ error, errorInfo });
   }
 
-  render() {
+  render(): React.ReactNode {
     const { error, errorInfo } = this.state;
     if (error) {
       let name = "this panel";

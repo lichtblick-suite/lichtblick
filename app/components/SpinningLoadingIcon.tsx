@@ -17,7 +17,7 @@ import { PureComponent } from "react";
 import styles from "./SpinningLoadingIcon.module.scss";
 
 export default class SpinningLoadingIcon extends PureComponent {
-  render() {
+  render(): JSX.Element {
     return <LoadingIcon className={styles.spin} />;
   }
 }

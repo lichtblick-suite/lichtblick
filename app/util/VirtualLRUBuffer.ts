@@ -172,7 +172,7 @@ export default class VirtualLRUBuffer {
   // For a given position, calculate `blockIndex` (which block is this position in);
   // `positionInBlock` (byte index of `position` within that block); and `remainingBytesInBlock`
   // (how many bytes are there in that block after that position).
-  _calculatePosition(position: number) {
+  private _calculatePosition(position: number) {
     if (position < 0 || position >= this.byteLength) {
       throw new Error("VirtualLRUBuffer#_calculatePosition invalid input");
     }

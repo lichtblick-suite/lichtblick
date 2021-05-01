@@ -231,7 +231,7 @@ export default class CombinedDataProvider implements DataProvider {
   _progressPerProvider: (Progress | undefined)[];
   _extensionPoint?: ExtensionPoint;
 
-  constructor(_: any, children: DataProviderDescriptor[], getDataProvider: GetDataProvider) {
+  constructor(_: unknown, children: DataProviderDescriptor[], getDataProvider: GetDataProvider) {
     this._providers = children.map((descriptor) =>
       process.env.NODE_ENV === "test" && descriptor.name === "TestProvider"
         ? descriptor.args.provider
@@ -364,7 +364,7 @@ export default class CombinedDataProvider implements DataProvider {
     return mergedMessages;
   }
 
-  _updateProgressForChild(providerIdx: number, progress: Progress) {
+  _updateProgressForChild(providerIdx: number, progress: Progress): void {
     this._progressPerProvider[providerIdx] = progress;
     // Assume empty for unreported progress
     const cleanProgresses = this._progressPerProvider.map((p) => p || emptyProgress());

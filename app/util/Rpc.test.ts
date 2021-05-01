@@ -14,7 +14,7 @@
 
 import delay from "@foxglove-studio/app/util/delay";
 
-import Rpc, { ChannelImpl, createLinkedChannels } from "./Rpc";
+import Rpc, { Channel, createLinkedChannels } from "./Rpc";
 
 describe("Rpc", () => {
   it("only allows setting Rpc once per channel", () => {
@@ -97,7 +97,7 @@ describe("Rpc", () => {
 
   it("can send and receive transferrables", async () => {
     const expectedTransfer = new ArrayBuffer(1);
-    const mainChannel: ChannelImpl = {
+    const mainChannel: Channel = {
       onmessage: undefined,
       postMessage(data: any, _transfer?: ArrayBuffer[]) {
         const ev = new MessageEvent("message", { data });
@@ -110,7 +110,7 @@ describe("Rpc", () => {
       },
     };
 
-    const workerChannel: ChannelImpl = {
+    const workerChannel: Channel = {
       onmessage: undefined,
       postMessage(data: any, transfer?: ArrayBuffer[]) {
         const ev = new MessageEvent("message", { data });

@@ -26,7 +26,7 @@ export const SDiffSpan = styled.span`
   white-space: pre-line;
 `;
 
-export function HighlightedValue({ itemLabel }: { itemLabel: string }) {
+export function HighlightedValue({ itemLabel }: { itemLabel: string }): JSX.Element {
   const diffArrowStr = ` ${diffArrow} `;
   // react-json-tree's valueRenderer only gets called for primitives, so diff before/after values must be at same level by the time it gets to the tree
   const splitItemLabel = `${itemLabel}`.split(diffArrowStr);
@@ -51,7 +51,7 @@ export function HighlightedValue({ itemLabel }: { itemLabel: string }) {
   );
 }
 
-export function MaybeCollapsedValue({ itemLabel }: { itemLabel: string }) {
+export function MaybeCollapsedValue({ itemLabel }: { itemLabel: string }): JSX.Element {
   const lengthOverLimit = itemLabel.length >= COLLAPSE_TEXT_OVER_LENGTH;
   const [showingEntireLabel, setShowingEntireLabel] = useState(!lengthOverLimit);
   const itemLabelToShow = showingEntireLabel

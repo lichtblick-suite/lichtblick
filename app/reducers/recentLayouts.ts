@@ -33,7 +33,7 @@ export function getRecentLayouts(): RecentLayoutId[] {
   return storage.getItem(LOCALSTORAGE_KEY) || [];
 }
 
-export function maybeStoreNewRecentLayout(newPersistedState: PersistedState) {
+export function maybeStoreNewRecentLayout(newPersistedState: PersistedState): void {
   const oldRecentLayouts = getRecentLayouts();
   const newestRecentLayout = recentLayoutFromPersistedState(newPersistedState);
   if (newestRecentLayout == undefined || oldRecentLayouts[0] === newestRecentLayout) {

@@ -36,22 +36,24 @@ type SET_USER_NODE_ROS_LIB = {
   payload: string;
 };
 
-export const setUserNodeDiagnostics = (diagnostics: UserNodeDiagnostics) => ({
+export const setUserNodeDiagnostics = (
+  diagnostics: UserNodeDiagnostics,
+): SET_USER_NODE_DIAGNOSTICS => ({
   type: "SET_USER_NODE_DIAGNOSTICS",
   payload: { diagnostics, skipSettingLocalStorage: true },
 });
 
-export const addUserNodeLogs = (payload: UserNodeLogs) => ({
+export const addUserNodeLogs = (payload: UserNodeLogs): ADD_USER_NODE_LOGS => ({
   type: "ADD_USER_NODE_LOGS",
   payload,
 });
 
-export const clearUserNodeLogs = (payload: string) => ({
+export const clearUserNodeLogs = (payload: string): CLEAR_USER_NODE_LOGS => ({
   type: "CLEAR_USER_NODE_LOGS",
   payload,
 });
 
-export const setUserNodeRosLib = (payload: string) => ({
+export const setUserNodeRosLib = (payload: string): SET_USER_NODE_ROS_LIB => ({
   type: "SET_USER_NODE_ROS_LIB",
   payload,
 });

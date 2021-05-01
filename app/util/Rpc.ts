@@ -17,22 +17,15 @@
 export interface Channel {
   postMessage(data: any, transfer?: any[]): void;
   onmessage?: ((ev: MessageEvent) => unknown) | null; // eslint-disable-line no-restricted-syntax
-}
-
-// Flow complains when some variables are declared with the above interface type, but
-// not when given this non-interface type...
-export type ChannelImpl = {
-  postMessage(data: any, transfer?: any[]): void;
-  onmessage?: ((ev: MessageEvent) => unknown) | null; // eslint-disable-line no-restricted-syntax
   terminate: () => void;
-};
+}
 
 const RESPONSE = "$$RESPONSE";
 const ERROR = "$$ERROR";
 
 // helper function to create linked channels for testing
 export function createLinkedChannels(): { local: Channel; remote: Channel } {
-  const local: ChannelImpl = {
+  const local: Channel = {
     onmessage: undefined,
 
     postMessage(data: any, _transfer?: Array<ArrayBuffer>) {
@@ -46,7 +39,7 @@ export function createLinkedChannels(): { local: Channel; remote: Channel } {
     },
   };
 
-  const remote: ChannelImpl = {
+  const remote: Channel = {
     onmessage: undefined,
 
     postMessage(data: any, _transfer?: Array<ArrayBuffer>) {
@@ -74,14 +67,14 @@ export function createLinkedChannels(): { local: Channel; remote: Channel } {
 // Check out the tests for more examples.
 export default class Rpc {
   static transferrables = "$$TRANSFERRABLES";
-  _channel: Channel;
+  _channel: Omit<Channel, "terminate">;
   _messageId: number = 0;
   _pendingCallbacks: {
     [key: number]: (arg0: any) => void;
   } = {};
   _receivers: Map<string, (arg0: any) => any> = new Map();
 
-  constructor(channel: Channel) {
+  constructor(channel: Omit<Channel, "terminate">) {
     this._channel = channel;
     if (this._channel.onmessage) {
       throw new Error(
@@ -91,7 +84,7 @@ export default class Rpc {
     this._channel.onmessage = this._onChannelMessage;
   }
 
-  _onChannelMessage = (ev: MessageEvent) => {
+  _onChannelMessage = (ev: MessageEvent): void => {
     const { id, topic, data } = ev.data;
     if (topic === RESPONSE) {
       this._pendingCallbacks[id]?.(ev.data);
@@ -138,7 +131,7 @@ export default class Rpc {
   // send a message across the rpc boundary to a receiver on the other side
   // this returns a promise for the receiver's response.  If there is no registered
   // receiver for the given topic, this method throws
-  send<TResult>(topic: string, data?: any, transfer?: any[]): Promise<TResult> {
+  send<TResult>(topic: string, data?: unknown, transfer?: any[]): Promise<TResult> {
     const id = this._messageId++;
     const message = { topic, id, data };
     const result = new Promise<TResult>((resolve, reject) => {

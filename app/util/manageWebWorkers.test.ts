@@ -11,6 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Channel } from "@foxglove-studio/app/util/Rpc";
+
 import WebWorkerManager from "./WebWorkerManager";
 
 jest.mock("@foxglove-studio/app/util/Rpc", () => {
@@ -20,16 +22,19 @@ jest.mock("@foxglove-studio/app/util/Rpc", () => {
     }
   };
 });
-class FakeWorker {
+class FakeWorker implements Channel {
   terminated = false;
   terminate() {
     this.terminated = true;
+  }
+  postMessage() {
+    throw new Error("not supported");
   }
 }
 
 describe("WebWorkerManager", () => {
   it("kills the worker when unregistering it", () => {
-    const webWorkerManager = new WebWorkerManager(FakeWorker, 1);
+    const webWorkerManager = new WebWorkerManager(() => new FakeWorker(), 1);
     webWorkerManager.registerWorkerListener("1");
     const worker = webWorkerManager.testing_getWorkerState("1")?.worker;
     expect(worker?.terminated).toEqual(false);
@@ -39,7 +44,7 @@ describe("WebWorkerManager", () => {
   });
 
   it("does not unregister the worker until the last listener stops listening", () => {
-    const webWorkerManager = new WebWorkerManager(FakeWorker, 1);
+    const webWorkerManager = new WebWorkerManager(() => new FakeWorker(), 1);
     // We create two listeners for the same worker.
     const firstRpc = webWorkerManager.registerWorkerListener("0");
     webWorkerManager.registerWorkerListener("1");
@@ -58,7 +63,7 @@ describe("WebWorkerManager", () => {
   });
 
   it("can add and remove multiple listeners to the same worker", () => {
-    const webWorkerManager = new WebWorkerManager(FakeWorker, 2);
+    const webWorkerManager = new WebWorkerManager(() => new FakeWorker(), 2);
     webWorkerManager.registerWorkerListener("1");
     webWorkerManager.registerWorkerListener("2");
     webWorkerManager.registerWorkerListener("3");
@@ -77,13 +82,13 @@ describe("WebWorkerManager", () => {
   });
 
   it("throws when registering an ID twice", () => {
-    const webWorkerManager = new WebWorkerManager(FakeWorker, 2);
+    const webWorkerManager = new WebWorkerManager(() => new FakeWorker(), 2);
     webWorkerManager.registerWorkerListener("1");
     expect(() => webWorkerManager.registerWorkerListener("1")).toThrow();
   });
 
   it("throws when unregistering an ID twice", () => {
-    const webWorkerManager = new WebWorkerManager(FakeWorker, 2);
+    const webWorkerManager = new WebWorkerManager(() => new FakeWorker(), 2);
     webWorkerManager.registerWorkerListener("1");
     webWorkerManager.unregisterWorkerListener("1");
     expect(() => webWorkerManager.unregisterWorkerListener("1")).toThrow();

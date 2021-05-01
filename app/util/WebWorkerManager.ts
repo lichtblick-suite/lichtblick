@@ -14,28 +14,28 @@
 import findIndex from "lodash/findIndex";
 import sortBy from "lodash/sortBy";
 
-import Rpc from "@foxglove-studio/app/util/Rpc";
+import Rpc, { Channel } from "@foxglove-studio/app/util/Rpc";
 import { setupMainThreadRpc } from "@foxglove-studio/app/util/RpcMainThreadUtils";
 
 // This file provides a convenient way to set up and tear down workers as needed. It will create only a single worker
 // of each class, and terminate the worker when all listeners are unregistered.
 
-type WorkerListenerState = { rpc: Rpc; worker: any; listenerIds: string[] };
+type WorkerListenerState<W> = { rpc: Rpc; worker: W; listenerIds: string[] };
 
-export default class WebWorkerManager {
-  _classType: any;
+export default class WebWorkerManager<W extends Channel> {
+  _createWorker: () => W;
   _maxWorkerCount: number;
-  _workerStates: (WorkerListenerState | undefined)[];
+  _workerStates: (WorkerListenerState<W> | undefined)[];
   _allListeners: Set<string>;
 
-  constructor(classType: any, maxWorkerCount: number) {
-    this._classType = classType;
+  constructor(createWorker: () => W, maxWorkerCount: number) {
+    this._createWorker = createWorker;
     this._maxWorkerCount = maxWorkerCount;
     this._workerStates = new Array(maxWorkerCount);
     this._allListeners = new Set();
   }
 
-  testing_getWorkerState(id: string): WorkerListenerState | undefined {
+  testing_getWorkerState(id: string): WorkerListenerState<W> | undefined {
     return this._workerStates.find((workerState) => workerState?.listenerIds.includes(id));
   }
 
@@ -47,7 +47,7 @@ export default class WebWorkerManager {
 
     const currentWorkerCount = this._workerStates.filter(Boolean).length;
     if (currentWorkerCount < this._maxWorkerCount) {
-      const worker = new this._classType();
+      const worker = this._createWorker();
       const rpc = new Rpc(worker);
       setupMainThreadRpc(rpc);
 
@@ -67,7 +67,7 @@ export default class WebWorkerManager {
     return workerState.rpc;
   }
 
-  unregisterWorkerListener(id: string) {
+  unregisterWorkerListener(id: string): void {
     if (!this._allListeners.has(id)) {
       throw new Error("Cannot find listener to unregister");
     }

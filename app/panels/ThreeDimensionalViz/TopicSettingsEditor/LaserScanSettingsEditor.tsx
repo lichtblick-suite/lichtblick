@@ -31,7 +31,7 @@ type LaserScanSettings = {
 
 export default function LaserScanSettingsEditor(
   props: TopicSettingsEditorProps<LaserScan, LaserScanSettings>,
-) {
+): JSX.Element {
   const { settings, onFieldChange } = props;
 
   return (

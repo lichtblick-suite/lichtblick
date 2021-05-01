@@ -75,7 +75,7 @@ function getTriangleChildrenForHitmap(
   return getChildrenForHitmapWithOriginalMarker(triangles, assignNextColors, excludedObjects);
 }
 
-export default function LinedConvexHulls({ children, ...rest }: Props) {
+export default function LinedConvexHulls({ children, ...rest }: Props): JSX.Element {
   return (
     <>
       {/* Render all the lines, even if we can't generate a convex hull from them. */}

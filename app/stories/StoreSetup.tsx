@@ -25,7 +25,7 @@ type Props = {
   store?: Store;
 };
 
-export default function StoreSetup(props: Props) {
+export default function StoreSetup(props: Props): JSX.Element {
   const storeRef = useRef(props.store ?? configureStore(createRootReducer(createMemoryHistory())));
 
   return <Provider store={storeRef.current}>{props.children}</Provider>;

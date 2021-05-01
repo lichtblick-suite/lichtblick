@@ -57,7 +57,7 @@ export function MarkerStory(
     overrideColor?: Color;
     onMount?: (arg0?: HTMLDivElement) => void;
   } = {},
-) {
+): JSX.Element {
   const { data, overrideColor, onMount, initialConfigOverride } = props;
 
   return (

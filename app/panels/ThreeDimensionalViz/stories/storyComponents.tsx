@@ -54,7 +54,7 @@ type FixtureExampleState = {
   config: Partial<ThreeDimensionalVizConfig>;
 };
 
-export const WorldviewContainer = (props: { children: React.ReactNode }) => {
+export const WorldviewContainer = (props: { children: React.ReactNode }): JSX.Element => {
   return (
     <Worldview {...props} hideDebug={inScreenshotTests()}>
       {props.children}
@@ -65,7 +65,7 @@ export const WorldviewContainer = (props: { children: React.ReactNode }) => {
 export class FixtureExample extends React.Component<FixtureExampleProps, FixtureExampleState> {
   state: FixtureExampleState = { fixture: undefined, config: this.props.initialConfig };
 
-  componentDidMount() {
+  componentDidMount(): void {
     const { data, loadData } = this.props;
     if (data) {
       this.updateState(data);
@@ -77,13 +77,13 @@ export class FixtureExample extends React.Component<FixtureExampleProps, Fixture
     }
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: FixtureExampleProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: FixtureExampleProps): void {
     if (nextProps.data) {
       this.updateState(nextProps.data);
     }
   }
 
-  updateState = (data: FixtureExampleData) => {
+  updateState = (data: FixtureExampleData): void => {
     const { topics, globalVariables } = data;
     this.setState(
       {
@@ -111,7 +111,7 @@ export class FixtureExample extends React.Component<FixtureExampleProps, Fixture
     );
   };
 
-  render() {
+  render(): JSX.Element | ReactNull {
     const { fixture } = this.state;
     if (!fixture) {
       return ReactNull;
@@ -147,7 +147,7 @@ export const ThreeDimPanelSetupWithBag = ({
   threeDimensionalConfig: Partial<ThreeDimensionalVizConfig>;
   globalVariables: any;
   bag: string;
-}) => {
+}): JSX.Element => {
   const store: Store = configureStore(createRootReducer(createMemoryHistory()));
   const topics = uniq(
     threeDimensionalConfig.checkedKeys

@@ -13,28 +13,12 @@
 
 import {
   isEmail,
-  layoutNameValidator,
   cameraStateValidator,
   polygonPointsValidator,
   point2DValidator,
   isWebsocketUrl,
-  getLayoutNameError,
   getWebsocketUrlError,
 } from "./validators";
-
-describe("isLayoutName", () => {
-  it("validates layoutName", () => {
-    expect(layoutNameValidator("")).toBe("must contain at least 1 character");
-    expect(
-      layoutNameValidator(
-        "Labore adipisicing ut eu velit irure voluptate id nulla sunt amet reprehenderit anim. Consequat reprehenderit magna id cillum aute ut Lorem qui duis sunt proident veniam in. Aliquip enim paria",
-      ),
-    ).toBe("must contain at most 120 characters");
-    expect(layoutNameValidator("abc@")).toBe(getLayoutNameError("abc@"));
-    expect(layoutNameValidator("abc#")).toBe(undefined);
-    expect(layoutNameValidator("abc_some-allowed*characters")).toBe(undefined);
-  });
-});
 
 describe("isEmail", () => {
   it("validates email", () => {

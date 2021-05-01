@@ -18,19 +18,19 @@ import Rpc from "./Rpc";
 
 // This function should be called inside the parent thread; it sets up receiving a message from the worker thread and
 // calling sendNotification.
-export function setupReceiveReportErrorHandler(rpc: Rpc) {
+export function setupReceiveReportErrorHandler(rpc: Rpc): void {
   rpc.receive("sendNotification", ({ message, details, type, severity }: any) => {
     sendNotification(message, details, type, severity);
   });
 }
 
-export function setupReceiveLogEventHandler(rpc: Rpc) {
+export function setupReceiveLogEventHandler(rpc: Rpc): void {
   rpc.receive("logEvent", (arg: any) => {
     logEvent(arg);
   });
 }
 
-export function setupMainThreadRpc(rpc: Rpc) {
+export function setupMainThreadRpc(rpc: Rpc): void {
   setupReceiveReportErrorHandler(rpc);
   setupReceiveLogEventHandler(rpc);
 }

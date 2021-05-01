@@ -25,15 +25,13 @@ import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "reac
 // The enabled option (default true) is provided as a way to turn off global state updates
 // If enabled is set to false, you will not receive updates to value
 // You can still invoke updates on value
-function makeGlobalState<T>() {
+function makeGlobalState<T>(): (options: {
+  enabled?: boolean;
+}) => [T | undefined, Dispatch<SetStateAction<T | undefined>>] {
   const emitter = new EventEmitter();
   let existingValue: T | undefined;
 
-  return function useGlobalState({
-    enabled = true,
-  }: {
-    enabled?: boolean;
-  }): [T | undefined, Dispatch<SetStateAction<T | undefined>>] {
+  return function useGlobalState({ enabled = true }) {
     // if enabled, the user gets any existing value for the initial state
     // if we are not enabled then the user gets undefined for initial state
     const [localValue, setLocalValue] = useState<T | undefined>(

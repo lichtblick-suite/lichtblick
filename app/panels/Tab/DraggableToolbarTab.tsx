@@ -32,7 +32,7 @@ type Props = {
   setDraggingTabState: (arg0: { isOver: boolean; item?: DraggingTabItem }) => void;
 };
 
-export function DraggableToolbarTab(props: Props) {
+export function DraggableToolbarTab(props: Props): JSX.Element {
   const { isActive, tabCount, actions, panelId, tabTitle, tabIndex } = props;
 
   const ref = useRef(ReactNull);

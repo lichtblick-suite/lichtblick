@@ -13,7 +13,7 @@
 
 import { FRAMELESS } from "@foxglove-studio/app/util/globalConstants";
 
-function frameless() {
+function frameless(): boolean {
   return new URLSearchParams(window.location.search).has(FRAMELESS);
 }
 

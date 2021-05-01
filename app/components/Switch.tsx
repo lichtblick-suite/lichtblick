@@ -65,7 +65,7 @@ type Props = {
   onChange: () => void;
 };
 
-export default function Switch({ isChecked, onChange }: Props) {
+export default function Switch({ isChecked, onChange }: Props): JSX.Element {
   return (
     <SSwitch className="switch">
       <input type="checkbox" checked={isChecked} onChange={onChange} />

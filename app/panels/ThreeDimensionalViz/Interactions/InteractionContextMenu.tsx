@@ -74,14 +74,14 @@ const SId = styled.span`
 type Props = {
   clickedPosition: ClickedPosition;
   clickedObjects: MouseEventObject[];
-  selectObject: (arg0: MouseEventObject) => void;
+  selectObject: (arg0?: MouseEventObject) => void;
 };
 
 export default function InteractionContextMenu({
   clickedObjects = [],
   clickedPosition = { clientX: 0, clientY: 0 },
   selectObject,
-}: Props) {
+}: Props): JSX.Element {
   return (
     <SInteractionContextMenu
       style={{

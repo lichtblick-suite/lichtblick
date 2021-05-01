@@ -42,7 +42,7 @@ const Inner = styled.div`
   line-height: normal;
 `;
 
-function DropOverlay({ children }: { children: React.ReactNode }) {
+function DropOverlay({ children }: { children: React.ReactNode }): JSX.Element {
   return (
     <Outer>
       <Inner>{children}</Inner>

@@ -18,7 +18,7 @@ type Props = {
   cameraState: CameraState;
 };
 
-export default function Crosshair({ cameraState }: Props) {
+export default function Crosshair({ cameraState }: Props): JSX.Element {
   const { target, targetOffset, distance, thetaOffset } = cameraState;
   const targetHeading = cameraStateSelectors.targetHeading(cameraState) as number;
   // move the crosshair to the center of the camera's viewport: the target + targetOffset rotated by heading
