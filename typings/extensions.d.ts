@@ -5,6 +5,17 @@
 // Tells TypeScript how to treat file types that we import specially with WebPack loaders
 // (see webpack.renderer.ts for details)
 
+// our eslint import/order rules don't understand separate declare module blocks and complain
+// about the import order and grouping
+/* eslint-disable import/order */
+
+declare module "*.svg" {
+  import type { FunctionComponent, SVGProps } from "react";
+
+  const IconComponent: FunctionComponent<SVGProps<SVGSVGElement>>;
+  export default IconComponent;
+}
+
 declare module "*.bag" {
   const content: string;
   export default content;
