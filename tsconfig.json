@@ -1,8 +1,8 @@
 // Root tsconfig.json
-// Do not "extend" from this file, use tsconfig.base.json instead.
+// Do not "extend" from this file, use @foxglove/tsconfig/tsconfig.base.json instead.
 // Do not "include" files here if they are already included by another tsconfig.json.
 {
-  "extends": "./tsconfig.base.json",
+  "extends": "@foxglove/tsconfig/tsconfig.base.json",
   "include": [
     "./*.ts",
     "./*.js",
