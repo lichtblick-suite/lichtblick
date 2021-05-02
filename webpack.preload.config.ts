@@ -12,7 +12,7 @@ export default (_: unknown, argv: WebpackArgv): Configuration => {
   const isDev = argv.mode === "development";
 
   return {
-    context: path.resolve("./preload"),
+    context: path.resolve(__dirname, "./preload"),
     entry: "./index.ts",
     target: "electron-preload",
     devtool: isDev ? "eval-cheap-module-source-map" : "source-map",

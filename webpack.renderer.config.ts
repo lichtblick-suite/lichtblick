@@ -71,7 +71,7 @@ export function makeConfig(_: unknown, argv: WebpackArgv, options?: Options): Co
     // Fixes "require is not defined" errors if nodeIntegration is off
     // https://gist.github.com/msafi/d1b8571aa921feaaa0f893ab24bb727b
     target: "web",
-    context: path.resolve("./app"),
+    context: path.resolve(__dirname, "./app"),
     entry: "./index.tsx",
     devtool: isDev ? "eval-cheap-module-source-map" : "source-map",
 

@@ -29,7 +29,7 @@ const devServerConfig: WebpackConfiguration = {
   },
 
   devServer: {
-    contentBase: path.join(__dirname, ".webpack"),
+    contentBase: path.resolve(__dirname, ".webpack"),
     writeToDisk: (filePath) => {
       // Electron needs to open the main thread source and preload source from disk
       // avoid writing the hot-update js and json files

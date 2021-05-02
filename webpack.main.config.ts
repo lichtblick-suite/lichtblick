@@ -32,7 +32,7 @@ export default (_: unknown, argv: WebpackArgv): Configuration => {
     : "`file://${require('path').join(__dirname, '..', 'renderer', 'index.html')}`";
 
   return {
-    context: path.resolve("./desktop"),
+    context: path.resolve(__dirname, "./desktop"),
     entry: "./index.ts",
     target: "electron-main",
     devtool: isDev ? "eval-cheap-module-source-map" : "source-map",
