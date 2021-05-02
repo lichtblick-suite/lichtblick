@@ -43,9 +43,6 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "forceConsistentCasingInFileNames": true,
-
-    // load our custom types
-    "typeRoots": ["./node_modules/@types", "./typings"]
+    "forceConsistentCasingInFileNames": true
   }
 }
