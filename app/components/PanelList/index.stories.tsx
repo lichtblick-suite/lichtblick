@@ -14,7 +14,7 @@
 import { storiesOf } from "@storybook/react";
 import { createMemoryHistory } from "history";
 import { DndProvider } from "react-dnd";
-import HTML5Backend from "react-dnd-html5-backend";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import TestUtils from "react-dom/test-utils";
 import { Provider } from "react-redux";
 

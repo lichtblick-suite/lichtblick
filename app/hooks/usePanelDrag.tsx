@@ -20,6 +20,11 @@ import { bindActionCreators } from "redux";
 
 import { startDrag, endDrag } from "@foxglove-studio/app/actions/panels";
 import { State } from "@foxglove-studio/app/reducers";
+import { MosaicDropResult } from "@foxglove-studio/app/types/panels";
+
+export type PanelDragObject = {
+  deferredHide: number;
+};
 
 // Hook to integrate mosaic drag functionality into any other component
 export default function usePanelDrag(props: {
@@ -39,9 +44,13 @@ export default function usePanelDrag(props: {
     dispatch,
   ]);
 
-  const [, connectDragSource, connectDragPreview] = useDrag<any, any, any>({
-    item: { type: MosaicDragType.WINDOW },
-    begin: (_monitor) => {
+  const [, connectDragSource, connectDragPreview] = useDrag<
+    PanelDragObject,
+    MosaicDropResult,
+    never
+  >({
+    type: MosaicDragType.WINDOW,
+    item: () => {
       if (onDragStart) {
         onDragStart();
       }
@@ -53,7 +62,7 @@ export default function usePanelDrag(props: {
       });
       return { mosaicId, deferredHide };
     },
-    end: (item: any, monitor) => {
+    end: (item, monitor) => {
       if (onDragEnd) {
         onDragEnd();
       }
@@ -61,7 +70,7 @@ export default function usePanelDrag(props: {
       // If the hide call hasn't happened yet, cancel it
       window.clearTimeout(item.deferredHide);
       const ownPath = mosaicWindowActions.getPath();
-      const dropResult = monitor.getDropResult() || {};
+      const dropResult = monitor.getDropResult() ?? {};
       const { position, path: destinationPath, tabId: targetTabId } = dropResult;
       if (panelId == undefined) {
         return;

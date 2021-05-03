@@ -232,8 +232,8 @@ export const addPanel = (payload: AddPanelPayload): ADD_PANEL => ({
 
 export type DropPanelPayload = {
   newPanelType: string;
-  destinationPath: MosaicPath;
-  position: "top" | "bottom" | "left" | "right";
+  destinationPath?: MosaicPath;
+  position?: "top" | "bottom" | "left" | "right";
   tabId?: string;
   config?: PanelConfig;
   relatedConfigs?: SavedProps;
@@ -260,8 +260,8 @@ export type EndDragPayload = {
   panelId: string;
   sourceTabId?: string;
   targetTabId?: string;
-  position: MosaicDropTargetPosition;
-  destinationPath: MosaicPath;
+  position?: MosaicDropTargetPosition;
+  destinationPath?: MosaicPath;
   ownPath: MosaicPath;
 };
 type END_DRAG = { type: "END_DRAG"; payload: EndDragPayload };

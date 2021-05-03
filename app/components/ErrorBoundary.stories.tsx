@@ -13,7 +13,7 @@
 
 import { storiesOf } from "@storybook/react";
 import { DndProvider } from "react-dnd";
-import HTML5Backend from "react-dnd-html5-backend";
+import { HTML5Backend } from "react-dnd-html5-backend";
 
 import StoreSetup from "@foxglove-studio/app/stories/StoreSetup";
 

@@ -12,7 +12,7 @@
 
 import { ReactElement, useState, useEffect, useMemo, Suspense, PropsWithChildren } from "react";
 import { DndProvider } from "react-dnd";
-import HTML5Backend from "react-dnd-html5-backend";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import { Provider as ReduxProvider } from "react-redux";
 
 import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";

@@ -573,7 +573,7 @@ const dropPanel = (
       ? panelsState.layout
       : updateTree<string>(
           panelsState.layout!,
-          createAddUpdates(panelsState.layout, id, destinationPath, position),
+          createAddUpdates(panelsState.layout, id, destinationPath, position ?? "left"),
         );
 
   // 'relatedConfigs' are used in Tab panel presets, so that the panels'
@@ -848,7 +848,13 @@ const endDrag = (panelsState: PanelsState, dragPayload: EndDragPayload): PanelsS
     return config ? { id, config } : undefined;
   });
 
-  if (withinSameTab && sourceTabConfig && sourceTabId != undefined) {
+  if (
+    withinSameTab &&
+    sourceTabConfig &&
+    sourceTabId != undefined &&
+    position != undefined &&
+    destinationPath != undefined
+  ) {
     return dragWithinSameTab(panelsState, {
       originalLayout,
       sourceTabId,
@@ -860,7 +866,13 @@ const endDrag = (panelsState: PanelsState, dragPayload: EndDragPayload): PanelsS
     });
   }
 
-  if (toMainFromTab && sourceTabConfig && sourceTabId != undefined) {
+  if (
+    toMainFromTab &&
+    sourceTabConfig &&
+    sourceTabId != undefined &&
+    position != undefined &&
+    destinationPath != undefined
+  ) {
     return dragToMainFromTab(panelsState, {
       originalLayout,
       sourceTabId,

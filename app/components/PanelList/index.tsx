@@ -25,11 +25,13 @@ import Icon from "@foxglove-studio/app/components/Icon";
 import { Item } from "@foxglove-studio/app/components/Menu";
 import TextHighlight from "@foxglove-studio/app/components/TextHighlight";
 import { PanelInfo, usePanelCatalog } from "@foxglove-studio/app/context/PanelCatalogContext";
+import { State } from "@foxglove-studio/app/reducers";
 import { TabPanelConfig } from "@foxglove-studio/app/types/layouts";
 import {
   PanelConfig,
   MosaicDropTargetPosition,
   SavedProps,
+  MosaicDropResult,
 } from "@foxglove-studio/app/types/panels";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
@@ -98,8 +100,8 @@ type DropDescription = {
   type: string;
   config?: PanelConfig;
   relatedConfigs?: SavedProps;
-  position: MosaicDropTargetPosition;
-  path: MosaicPath;
+  position?: MosaicDropTargetPosition;
+  path?: MosaicPath;
   tabId?: string;
 };
 type PanelItemProps = {
@@ -113,9 +115,6 @@ type PanelItemProps = {
   checked?: boolean;
   highlighted?: boolean;
   onClick: () => void;
-  // the props here are actually used in the dragSource
-  // beginDrag and endDrag callbacks - the props are passed via react-dnd
-  // so keep the flow defs here so those functions can have access to some type info
   mosaicId: string;
   onDrop: (arg0: DropDescription) => void;
 };
@@ -130,15 +129,16 @@ function DraggablePanelItem({
   mosaicId,
 }: PanelItemProps) {
   const scrollRef = React.useRef<HTMLDivElement>(ReactNull);
-  const [__, drag] = useDrag({
-    item: { type: MosaicDragType.WINDOW },
-    begin: (_monitor) => ({ mosaicId } as any),
+  const [, drag] = useDrag<unknown, MosaicDropResult, never>({
+    type: MosaicDragType.WINDOW,
+    // mosaicId is needed for react-mosaic to accept the drop
+    item: () => ({ mosaicId }),
     end: (_item, monitor) => {
       const dropResult = monitor.getDropResult() || {};
       const { position, path, tabId } = dropResult;
       // dropping outside mosaic does nothing. If we have a tabId, but no
       // position or path, we're dragging into an empty tab.
-      if ((!position || !path) && !tabId) {
+      if ((position == undefined || path == undefined) && tabId == undefined) {
         return;
       }
       const { type, config, relatedConfigs } = panel;
@@ -226,9 +226,7 @@ function PanelList(props: Props): JSX.Element {
   const { onPanelSelect, selectedPanelTitle } = props;
 
   const dispatch = useDispatch();
-  const { mosaicId }: { mosaicId: string } = useSelector((state: any) => ({
-    mosaicId: state.mosaic.mosaicId,
-  }));
+  const mosaicId = useSelector((state: State) => state.mosaic.mosaicId);
 
   // Update panel layout in Redux when a panel menu item is dropped;
   // actual operations to change layout supplied by react-mosaic-component
