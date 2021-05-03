@@ -39,6 +39,8 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
   const windowOptions: BrowserWindowConstructorOptions = {
     height: 800,
     width: 1200,
+    minWidth: 350,
+    minHeight: 250,
     autoHideMenuBar: true,
     title: APP_NAME,
     webPreferences: {
