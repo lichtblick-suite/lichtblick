@@ -48,6 +48,7 @@ const markerObject = {
   header: { frame_id: "some_frame", stamp: { sec: 0, nsec: 0 } },
   action: 0,
   ns: "",
+  text: "hello\nthere",
   type: 0,
   scale: {
     x: 2,
