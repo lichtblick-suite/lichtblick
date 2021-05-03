@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Provision Vagrant VM
 # This script must be idempotent
 
@@ -5,7 +7,7 @@ set -euxo pipefail
 
 # Install Ubuntu Desktop
 apt-get update
-apt-get install -qq ubuntu-desktop-minimal net-tools gnupg2
+apt-get install -qq curl gnupg2 net-tools ubuntu-desktop-minimal
 
 # Add ROS sources
 curl -fsSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
@@ -14,13 +16,13 @@ sh -c 'echo "deb [arch=$(dpkg --print-architecture)] http://packages.ros.org/ros
 apt-get update
 
 # Install ROS 1
-apt-get install -qq ros-noetic-desktop ros-noetic-rosbridge-suite
+apt-get install -qq ros-noetic-desktop ros-noetic-image-transport-plugins ros-noetic-rosbridge-suite
 
 # Install ROS 2
-apt-get install -qq ros-foxy-desktop
+apt-get install -qq ros-foxy-desktop ros-foxy-image-transport-plugins
 
 # Add ROS config to bashrc
-sudo -su vagrant bash -eux -o pipefail <<EOF
+sudo -su '#1000' bash -eux -o pipefail <<EOF
 if ! grep -q '/opt/ros' ~/.bashrc; then
     echo >> ~/.bashrc
     echo "source /opt/ros/noetic/setup.bash  # ros1" >> ~/.bashrc
