@@ -4,12 +4,21 @@
 
 import { createContext, useContext } from "react";
 
+// individual app configuration values are basic primitive types
+export type AppConfigurationValue = string | number | boolean | undefined;
+
+export type ChangeHandler = (newValue: AppConfigurationValue) => void;
+
 // Exposes an interface for reading and writing user-configurable options and other persistent application state.
 export interface AppConfiguration {
-  get(key: string): Promise<unknown | undefined>;
-  set(key: string, value: unknown): Promise<void>;
-  addChangeListener(key: string, cb: () => void): void;
-  removeChangeListener(key: string, cb: () => void): void;
+  // get the current value for the key
+  get(key: string): AppConfigurationValue;
+  // set key to value - This returns a promise to track the progress for setting the value
+  set(key: string, value: AppConfigurationValue): Promise<void>;
+  // register a change handler for a particular key
+  addChangeListener(key: string, cb: ChangeHandler): void;
+  // remove a change handler on a given key
+  removeChangeListener(key: string, cb: ChangeHandler): void;
 }
 
 const AppConfigurationContext = createContext<AppConfiguration | undefined>(undefined);

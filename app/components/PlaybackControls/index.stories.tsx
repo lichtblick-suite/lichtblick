@@ -56,7 +56,7 @@ function getPlayerState(): PlayerState {
 }
 
 const mockAppConfiguration: AppConfiguration = {
-  get: async () => undefined,
+  get: () => undefined,
   set: async () => {},
   addChangeListener: () => {},
   removeChangeListener: () => {},

@@ -47,7 +47,7 @@ import {
   getLocalBagDescriptor,
   getRemoteBagDescriptor,
 } from "@foxglove-studio/app/dataProviders/standardDataProviderDescriptors";
-import useAppSetting from "@foxglove-studio/app/hooks/useAppSetting";
+import { useAppConfigurationValue } from "@foxglove-studio/app/hooks/useAppConfigurationValue";
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
 import { usePrompt } from "@foxglove-studio/app/hooks/usePrompt";
 import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
@@ -447,7 +447,7 @@ function PlayerManager({
   const prompt = usePrompt();
   const storage = useMemo(() => new Storage(), []);
 
-  const rosHostname = useAppSetting<string>(AppSetting.ROS1_ROS_HOSTNAME);
+  const [rosHostname] = useAppConfigurationValue<string>(AppSetting.ROS1_ROS_HOSTNAME);
 
   const [savedSource, setSavedSource] = useLocalStorage<PlayerSourceDefinition>(
     "studio.playermanager.selected-source",

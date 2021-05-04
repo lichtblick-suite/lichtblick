@@ -19,7 +19,7 @@ import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import TextContent from "@foxglove-studio/app/components/TextContent";
 import TextField from "@foxglove-studio/app/components/TextField";
 import { usePlayerSelection } from "@foxglove-studio/app/context/PlayerSelectionContext";
-import { useAsyncAppConfigurationValue } from "@foxglove-studio/app/hooks/useAsyncAppConfigurationValue";
+import { useAppConfigurationValue } from "@foxglove-studio/app/hooks/useAppConfigurationValue";
 import subscribeToNewsletter from "@foxglove-studio/app/panels/WelcomePanel/subscribeToNewsletter";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { isEmail } from "@foxglove-studio/app/util/validators";
@@ -35,7 +35,7 @@ function validateEmail(str: string): string | undefined {
 }
 
 function WelcomePanel() {
-  const [subscribedState, setSubscribed] = useAsyncAppConfigurationValue<boolean>(
+  const [subscribed = false, setSubscribed] = useAppConfigurationValue<boolean>(
     "onboarding.subscribed",
   );
   const [subscribeChecked, setSubscribeChecked] = useState(true);
@@ -55,9 +55,8 @@ function WelcomePanel() {
 
   const { setPlayerFromDemoBag } = usePlayerSelection();
 
-  const loading = subscribedState.loading || submitState.loading;
-  const error = submitState.error ?? subscribedState.error;
-  const subscribed = subscribedState.value ?? false;
+  const loading = submitState.loading;
+  const error = submitState.error;
 
   const submitEnabled =
     (subscribeChecked || slackInviteChecked) &&
@@ -133,19 +132,13 @@ function WelcomePanel() {
           onChange={setSlackInviteChecked}
         />
         <div style={{ marginTop: "0.5em" }}>
-          <Button
-            isPrimary={
-              !subscribedState.loading && !subscribedState.error && subscribedState.value !== true
-            }
-            disabled={!submitEnabled}
-            onClick={submit}
-          >
-            {loading ? "Loading…" : "Sign Up"}
+          <Button isPrimary={!subscribed} disabled={!submitEnabled} onClick={submit}>
+            {loading ? "Signing Up..." : "Sign Up"}
           </Button>
           &nbsp;
           {error ? (
             <span style={{ color: colors.red }}>{error.toString()}</span>
-          ) : subscribed ? (
+          ) : subscribed && !submitState.loading ? (
             <span style={{ color: colors.green }}>Thanks for signing up!</span>
           ) : undefined}
         </div>

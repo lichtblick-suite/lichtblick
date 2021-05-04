@@ -7,11 +7,12 @@ import { PropsWithChildren } from "react";
 
 import AppConfigurationContext, {
   AppConfiguration,
+  AppConfigurationValue,
 } from "@foxglove-studio/app/context/AppConfigurationContext";
-import { useAsyncAppConfigurationValue } from "@foxglove-studio/app/hooks/useAsyncAppConfigurationValue";
+import { useAppConfigurationValue } from "@foxglove-studio/app/hooks/useAppConfigurationValue";
 
 class FakeProvider implements AppConfiguration {
-  async get(key: string): Promise<unknown> {
+  get(key: string): AppConfigurationValue {
     return key;
   }
   async set(_key: string, _value: unknown): Promise<void> {
@@ -21,8 +22,8 @@ class FakeProvider implements AppConfiguration {
   removeChangeListener() {}
 }
 
-describe("useAsyncAppConfigurationValue", () => {
-  it("gets the value", async () => {
+describe("useAppConfigurationValue", () => {
+  it("should have the value on first mount", async () => {
     const wrapper = ({ children }: PropsWithChildren<unknown>) => {
       return (
         <AppConfigurationContext.Provider value={new FakeProvider()}>
@@ -31,25 +32,16 @@ describe("useAsyncAppConfigurationValue", () => {
       );
     };
 
-    const { result, unmount, waitForNextUpdate } = renderHook(
-      () => useAsyncAppConfigurationValue("test.value"),
-      { wrapper },
-    );
-
-    // immediately on mount loading should be true
-    expect(result.current[0]).toMatchObject({ loading: true, retry: undefined });
-
-    await waitForNextUpdate();
-    expect(result.current[0]).toMatchObject({
-      loading: false,
-      value: "test.value",
-      retry: undefined,
+    const { result, unmount } = renderHook(() => useAppConfigurationValue("test.value"), {
+      wrapper,
     });
 
+    // immediately on mount loading should be false and value should be available
+    expect(result.current[0]).toEqual("test.value");
     unmount();
   });
 
-  it("optimistically returns set value", async () => {
+  it("should treat empty string value as undefined", async () => {
     const wrapper = ({ children }: PropsWithChildren<unknown>) => {
       return (
         <AppConfigurationContext.Provider value={new FakeProvider()}>
@@ -58,21 +50,12 @@ describe("useAsyncAppConfigurationValue", () => {
       );
     };
 
-    const { result, unmount, waitForNextUpdate } = renderHook(
-      () => useAsyncAppConfigurationValue("test.value"),
-      { wrapper },
-    );
-
-    // immediately on mount loading should be true
-    expect(result.current[0]).toMatchObject({ loading: true, retry: undefined });
-
-    await waitForNextUpdate();
-    expect(result.current[0]).toMatchObject({
-      loading: false,
-      value: "test.value",
-      retry: undefined,
+    const { result, unmount } = renderHook(() => useAppConfigurationValue(""), {
+      wrapper,
     });
 
+    // immediately on mount loading should be false and value should be available
+    expect(result.current[0]).toEqual(undefined);
     unmount();
   });
 });

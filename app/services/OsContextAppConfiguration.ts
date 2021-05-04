@@ -4,38 +4,47 @@
 import { Mutex } from "async-mutex";
 
 import { OsContext } from "@foxglove-studio/app/OsContext";
-import { AppConfiguration } from "@foxglove-studio/app/context/AppConfigurationContext";
+import {
+  AppConfiguration,
+  AppConfigurationValue,
+  ChangeHandler,
+} from "@foxglove-studio/app/context/AppConfigurationContext";
 
 export default class OsContextAppConfiguration implements AppConfiguration {
   static STORE_NAME = "settings";
   static STORE_KEY = "settings.json";
 
   private readonly _ctx: Pick<OsContext, "storage">;
-  private _listeners = new Map<string, Set<() => void>>();
+  private _listeners = new Map<string, Set<ChangeHandler>>();
 
   // Protect access to currentValue to avoid read-modify-write races between multiple set() calls.
   private _mutex = new Mutex();
   private _currentValue: unknown;
 
-  constructor(ctx: Pick<OsContext, "storage">) {
+  // Use OsContextAppConfiguration.initialize to create a new instance
+  private constructor(ctx: Pick<OsContext, "storage">, initialValue?: unknown) {
     this._ctx = ctx;
-    this._mutex.runExclusive(async () => {
-      const value = await this._ctx.storage.get(
-        OsContextAppConfiguration.STORE_NAME,
-        OsContextAppConfiguration.STORE_KEY,
-        { encoding: "utf8" },
-      );
-      this._currentValue = JSON.parse(value ?? "{}");
-    });
+    this._currentValue = initialValue;
   }
 
-  async get(key: string): Promise<unknown | undefined> {
-    return await this._mutex.runExclusive(
-      () => (this._currentValue as Record<string, unknown>)[key],
+  // create a new OsContextAppConfiguration
+  static async Initialize(ctx: Pick<OsContext, "storage">): Promise<OsContextAppConfiguration> {
+    const value = await ctx.storage.get(
+      OsContextAppConfiguration.STORE_NAME,
+      OsContextAppConfiguration.STORE_KEY,
+      { encoding: "utf8" },
     );
+    const currentValue = JSON.parse(value ?? "{}");
+    const config = new OsContextAppConfiguration(ctx, currentValue);
+
+    return config;
   }
 
-  async set(key: string, value: unknown): Promise<void> {
+  get(key: string): AppConfigurationValue | undefined {
+    return (this._currentValue as Record<string, AppConfigurationValue>)[key];
+  }
+
+  async set(key: string, value: AppConfigurationValue): Promise<void> {
     await this._mutex.runExclusive(async () => {
       const currentConfig = await this._ctx.storage.get(
         OsContextAppConfiguration.STORE_NAME,
@@ -55,11 +64,11 @@ export default class OsContextAppConfiguration implements AppConfiguration {
     const listeners = this._listeners.get(key);
     if (listeners) {
       // Copy the list of listeners to protect against mutation during iteration
-      [...listeners].forEach((listener) => listener());
+      [...listeners].forEach((listener) => listener(value));
     }
   }
 
-  addChangeListener(key: string, cb: () => void): void {
+  addChangeListener(key: string, cb: ChangeHandler): void {
     let listeners = this._listeners.get(key);
     if (!listeners) {
       listeners = new Set();
@@ -68,7 +77,7 @@ export default class OsContextAppConfiguration implements AppConfiguration {
     listeners.add(cb);
   }
 
-  removeChangeListener(key: string, cb: () => void): void {
+  removeChangeListener(key: string, cb: ChangeHandler): void {
     const listeners = this._listeners.get(key);
     if (listeners) {
       listeners.delete(cb);

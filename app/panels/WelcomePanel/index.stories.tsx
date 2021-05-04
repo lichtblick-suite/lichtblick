@@ -7,6 +7,8 @@ import ReactTestUtils from "react-dom/test-utils";
 
 import AppConfigurationContext, {
   AppConfiguration,
+  AppConfigurationValue,
+  ChangeHandler,
 } from "@foxglove-studio/app/context/AppConfigurationContext";
 import WelcomePanel from "@foxglove-studio/app/panels/WelcomePanel";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
@@ -17,14 +19,14 @@ export default {
   component: WelcomePanel,
 };
 
-function makeConfiguration(entries?: [string, unknown][]): AppConfiguration {
-  const map = new Map<string, unknown>(entries);
-  const listeners = new Set<() => void>();
+function makeConfiguration(entries?: [string, AppConfigurationValue][]): AppConfiguration {
+  const map = new Map<string, AppConfigurationValue>(entries);
+  const listeners = new Set<ChangeHandler>();
   return {
-    get: async (key: string) => map.get(key),
-    set: async (key: string, value: unknown) => {
+    get: (key: string) => map.get(key),
+    set: async (key: string, value: AppConfigurationValue) => {
       map.set(key, value);
-      [...listeners].forEach((listener) => listener());
+      [...listeners].forEach((listener) => listener(value));
     },
     addChangeListener: (_key, cb) => listeners.add(cb),
     removeChangeListener: (_key, cb) => listeners.delete(cb),
@@ -44,22 +46,6 @@ export function Default(): React.ReactElement {
 
 export function AlreadySignedUp(): React.ReactElement {
   const [config] = useState(() => makeConfiguration([["onboarding.subscribed", true]]));
-  return (
-    <PanelSetup>
-      <AppConfigurationContext.Provider value={config}>
-        <WelcomePanel />
-      </AppConfigurationContext.Provider>
-    </PanelSetup>
-  );
-}
-
-export function LoadingGet(): React.ReactElement {
-  const [config] = useState(() => ({
-    get: () => signal(),
-    set: () => signal(),
-    addChangeListener() {},
-    removeChangeListener() {},
-  }));
   return (
     <PanelSetup>
       <AppConfigurationContext.Provider value={config}>

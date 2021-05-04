@@ -228,8 +228,10 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
       store: props.store ?? configureStore(createRootReducer(createMemoryHistory())),
       mockPanelCatalog: props.panelCatalog ?? new MockPanelCatalog(),
       mockAppConfiguration: {
+        get() {
+          return undefined;
+        },
         async set() {},
-        async get() {},
         addChangeListener() {},
         removeChangeListener() {},
       },

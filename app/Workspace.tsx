@@ -142,8 +142,8 @@ export default function Workspace(): JSX.Element {
   // Show welcome layout on first run
   useEffect(() => {
     (async () => {
-      const welcomeLayoutShown = await appConfiguration.get("onboarding.welcome-layout.shown");
-      if (!welcomeLayoutShown) {
+      const welcomeLayoutShown = appConfiguration.get("onboarding.welcome-layout.shown");
+      if (welcomeLayoutShown == undefined || welcomeLayoutShown === false) {
         // Set configuration *before* opening the layout to avoid infinite recursion when the player
         // loading state causes us to re-render.
         await appConfiguration.set("onboarding.welcome-layout.shown", true);

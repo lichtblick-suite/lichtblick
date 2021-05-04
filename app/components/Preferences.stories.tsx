@@ -17,16 +17,17 @@ import { useState } from "react";
 import Preferences from "@foxglove-studio/app/components/Preferences";
 import AppConfigurationContext, {
   AppConfiguration,
+  AppConfigurationValue,
 } from "@foxglove-studio/app/context/AppConfigurationContext";
 
-function makeConfiguration(entries?: [string, unknown][]): AppConfiguration {
-  const map = new Map<string, unknown>(entries);
-  const listeners = new Set<() => void>();
+function makeConfiguration(entries?: [string, AppConfigurationValue][]): AppConfiguration {
+  const map = new Map<string, AppConfigurationValue>(entries);
+  const listeners = new Set<(newValue: AppConfigurationValue) => void>();
   return {
-    get: async (key: string) => map.get(key),
-    set: async (key: string, value: unknown) => {
+    get: (key: string) => map.get(key),
+    set: async (key: string, value: AppConfigurationValue) => {
       map.set(key, value);
-      [...listeners].forEach((listener) => listener());
+      [...listeners].forEach((listener) => listener(value));
     },
     addChangeListener: (_key, cb) => listeners.add(cb),
     removeChangeListener: (_key, cb) => listeners.delete(cb),

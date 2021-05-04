@@ -42,7 +42,7 @@ import {
 import PlaybackSpeedControls from "@foxglove-studio/app/components/PlaybackSpeedControls";
 import Slider from "@foxglove-studio/app/components/Slider";
 import { useTooltip } from "@foxglove-studio/app/components/Tooltip";
-import useAppSetting from "@foxglove-studio/app/hooks/useAppSetting";
+import { useAppConfigurationValue } from "@foxglove-studio/app/hooks/useAppConfigurationValue";
 import { PlayerState, PlayerStateActiveData } from "@foxglove-studio/app/players/types";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { formatTime } from "@foxglove-studio/app/util/formatTime";
@@ -105,7 +105,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
       contents: tooltipState?.tip,
     });
     const { seek, pause, play, player } = props;
-    const timezone = useAppSetting<string>(AppSetting.TIMEZONE);
+    const [timezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
 
     // playerState is unstable, and will cause callbacks to change identity every frame. They can take
     // a ref instead.
