@@ -2101,7 +2101,7 @@ __metadata:
     chartjs-plugin-annotation: 1.0.1
     chartjs-plugin-datalabels: 2.0.0-beta.1
     chartjs-plugin-zoom: "github:foxglove/chartjs-plugin-zoom#656541279943f00dce600288435f83c436293146"
-    chromatic: 5.7.1
+    chromatic: 5.8.0
     classnames: 2.3.1
     cytoscape: 3.18.2
     cytoscape-dagre: 2.3.2
@@ -8481,9 +8481,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:5.7.1":
-  version: 5.7.1
-  resolution: "chromatic@npm:5.7.1"
+"chromatic@npm:5.8.0":
+  version: 5.8.0
+  resolution: "chromatic@npm:5.8.0"
   dependencies:
     "@actions/core": ^1.2.4
     "@actions/github": ^4.0.0
@@ -8513,6 +8513,7 @@ __metadata:
     progress-stream: ^2.0.0
     semver: ^7.3.4
     slash: ^3.0.0
+    string-argv: ^0.3.1
     strip-ansi: 6.0.0
     tmp-promise: 3.0.2
     tree-kill: ^1.2.2
@@ -8524,7 +8525,7 @@ __metadata:
     chroma: bin/register.js
     chromatic: bin/register.js
     chromatic-cli: bin/register.js
-  checksum: 58f16e493967c0b77e18b0715d6b0d6d3806f6f3e2729f063f359f71fb9356f4da56a31a6ed1370bcead5b545120bf9ad21b399c859408cc42f07b255659d568
+  checksum: 28d1dd528465be098c738679673f4ad3a8ac3cf88e90787c9b3f009e690085a4bc94df3c278828d7be1ad68e3b0b44cf039c4d2340cf42a338dfbdbbe3c2fb99
   languageName: node
   linkType: hard
 
@@ -23690,6 +23691,13 @@ resolve@^2.0.0-next.3:
   version: 1.1.0
   resolution: "strict-uri-encode@npm:1.1.0"
   checksum: 6c80f6998a45414d7c124772383cc10ce7bd22586af80762407cded1569666564fb8c0a4c9c997ac39a1116d46dfffc5d57135e759a0acb66a4da1191f5a3a4a
+  languageName: node
+  linkType: hard
+
+"string-argv@npm:^0.3.1":
+  version: 0.3.1
+  resolution: "string-argv@npm:0.3.1"
+  checksum: 002a6902698eff6bd463ddd2b03864bf9be08a1359879243d94d3906ebbe984ff355d73224064be7504d20262eadb06897b3d40b5d7cefccacc69c9dc45c8d0e
   languageName: node
   linkType: hard
 
