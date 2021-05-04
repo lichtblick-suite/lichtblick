@@ -94,7 +94,7 @@ class ButtonBaseImpl extends React.Component<Props> {
     } = this.props;
     const classes = cx("button", className ?? "", {
       // support some bulma classes to be supplied in consumer either through bulma or custom classes
-      // these provide backwards compatibility with webviz
+      // these provide backwards compatibility with Studio
       "is-small": small,
       "is-large": large,
       "is-primary": primary,

@@ -24,7 +24,7 @@ import MockUserNodePlayerWorker from "@foxglove-studio/app/players/UserNodePlaye
 import { PlayerStateActiveData } from "@foxglove-studio/app/players/types";
 import Storage from "@foxglove-studio/app/util/Storage";
 import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
-import { DEFAULT_WEBVIZ_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import signal from "@foxglove-studio/app/util/signal";
 
 const storage = new Storage();
@@ -32,7 +32,7 @@ const nodeId = "nodeId";
 
 const nodeUserCode = `
   export const inputs = ["/np_input"];
-  export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}1";
+  export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
   let lastStamp, lastReceiveTime;
   export default (message: { message: { payload: string } }): { custom_np_field: string, value: string } => {
     return { custom_np_field: "abc", value: message.message.payload };
@@ -43,7 +43,7 @@ const nodeUserCodeWithPointClouds = `
   import { convertToRangeView } from "./pointClouds";
   import { RGBA } from "./types";
   export const inputs = ["/np_input"];
-  export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}1";
+  export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
   export default (message: { message: { payload: string } }): RGBA => {
     const colors = convertToRangeView([{x:0.1, y:0.2, z:0.3}], 0.4, true);
     return colors[0];
@@ -52,7 +52,7 @@ const nodeUserCodeWithPointClouds = `
 
 const nodeUserCodeWithGlobalVars = `
   export const inputs = ["/np_input"];
-  export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}1";
+  export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
   let lastStamp, lastReceiveTime;
   type GlobalVariables = { globalValue: string };
   export default (message: { message: { payload: string } }, globalVars: GlobalVariables): { custom_np_field: string, value: string } => {
@@ -62,7 +62,7 @@ const nodeUserCodeWithGlobalVars = `
 
 const nodeUserCodeWithLogAndError = `
   export const inputs = ["/np_input"];
-  export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}1";
+  export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
   export default (message: { message: { payload: string } }): { success: boolean } => {
     if (message.message.payload === "bar") {
       log('Running. Will fail.');
@@ -153,9 +153,9 @@ describe("UserNodePlayer", () => {
       userNodePlayer.setListener(async () => {
         // no-op
       });
-      userNodePlayer.setSubscriptions([{ topic: "/webviz/test" }, { topic: "/input/baz" }]);
+      userNodePlayer.setSubscriptions([{ topic: "/studio/test" }, { topic: "/input/baz" }]);
       expect(fakePlayer.subscriptions).toEqual([
-        { topic: "/webviz/test" },
+        { topic: "/studio/test" },
         { topic: "/input/baz" },
       ]);
     });
@@ -232,7 +232,7 @@ describe("UserNodePlayer", () => {
       });
 
       userNodePlayer.setUserNodes({
-        nodeId: { name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`, sourceCode: nodeUserCode },
+        nodeId: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
       });
 
       const [done] = setListenerHelper(userNodePlayer);
@@ -243,7 +243,7 @@ describe("UserNodePlayer", () => {
           messages: [],
           messageOrder: "receiveTime",
           currentTime: { sec: 0, nsec: 0 },
-          topics: [{ name: "/np_input", datatype: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }],
+          topics: [{ name: "/np_input", datatype: `${DEFAULT_STUDIO_NODE_PREFIX}1` }],
           datatypes: { foo: { fields: [] } },
         },
       });
@@ -252,7 +252,7 @@ describe("UserNodePlayer", () => {
 
       expect(mockSetNodeDiagnostics).toHaveBeenCalledWith({ nodeId: { diagnostics: [] } });
       expect(messages.length).toEqual(0);
-      expect(topicNames).toEqual(["/np_input", `${DEFAULT_WEBVIZ_NODE_PREFIX}1`]);
+      expect(topicNames).toEqual(["/np_input", `${DEFAULT_STUDIO_NODE_PREFIX}1`]);
     });
 
     it("memoizes topics and datatypes (even after seeking / reinitializing nodes)", async () => {
@@ -264,7 +264,7 @@ describe("UserNodePlayer", () => {
       });
 
       userNodePlayer.setUserNodes({
-        nodeId: { name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`, sourceCode: nodeUserCode },
+        nodeId: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
       });
 
       const [done1, done2, done3] = setListenerHelper(userNodePlayer, 3);
@@ -282,11 +282,11 @@ describe("UserNodePlayer", () => {
       const { topics: firstTopics, datatypes: firstDatatypes }: any = await done1;
       expect(firstTopics).toEqual([
         { name: "/np_input", datatype: "/np_input_datatype" },
-        { name: "/webviz_node/1", datatype: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` },
+        { name: "/studio_node/1", datatype: `${DEFAULT_STUDIO_NODE_PREFIX}1` },
       ]);
       expect(firstDatatypes).toEqual({
         foo: { fields: [] },
-        [`${DEFAULT_WEBVIZ_NODE_PREFIX}1`]: {
+        [`${DEFAULT_STUDIO_NODE_PREFIX}1`]: {
           fields: [
             { name: "custom_np_field", type: "string", isArray: false, isComplex: false },
             { name: "value", type: "string", isArray: false, isComplex: false },
@@ -317,10 +317,10 @@ describe("UserNodePlayer", () => {
         addUserNodeLogs: mockAddUserNodeLogs,
       });
 
-      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }]);
+      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
       userNodePlayer.setUserNodes({
         nodeId: {
-          name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
+          name: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
           sourceCode: `${nodeUserCode}\nlog("LOG VALUE HERE");`,
         },
       });
@@ -335,7 +335,7 @@ describe("UserNodePlayer", () => {
           messages: messagesArray,
           messageOrder: "receiveTime",
           currentTime: { sec: 0, nsec: 0 },
-          topics: [{ name: "/np_input", datatype: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }],
+          topics: [{ name: "/np_input", datatype: `${DEFAULT_STUDIO_NODE_PREFIX}1` }],
           datatypes: { foo: { fields: [] } },
         },
       });
@@ -348,7 +348,7 @@ describe("UserNodePlayer", () => {
           messages: messagesArray,
           messageOrder: "receiveTime",
           currentTime: { sec: 0, nsec: 0 },
-          topics: [{ name: "/np_input", datatype: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }],
+          topics: [{ name: "/np_input", datatype: `${DEFAULT_STUDIO_NODE_PREFIX}1` }],
           datatypes: { foo: { fields: [] } },
         },
       });
@@ -389,7 +389,7 @@ describe("UserNodePlayer", () => {
       const [done] = setListenerHelper(userNodePlayer);
 
       userNodePlayer.setUserNodes({
-        [nodeId]: { name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`, sourceCode: nodeUserCode },
+        [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
       });
 
       fakePlayer.emit({
@@ -404,7 +404,7 @@ describe("UserNodePlayer", () => {
       });
 
       const { messages, topicNames }: any = await done;
-      expect(topicNames).toEqual(["/np_input", `${DEFAULT_WEBVIZ_NODE_PREFIX}1`]);
+      expect(topicNames).toEqual(["/np_input", `${DEFAULT_STUDIO_NODE_PREFIX}1`]);
       expect(messages).toEqual([upstreamFirst]);
     });
 
@@ -414,9 +414,9 @@ describe("UserNodePlayer", () => {
 
       const [done] = setListenerHelper(userNodePlayer);
 
-      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }]);
+      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
       await userNodePlayer.setUserNodes({
-        [nodeId]: { name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`, sourceCode: nodeUserCode },
+        [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
       });
 
       fakePlayer.emit({
@@ -435,7 +435,7 @@ describe("UserNodePlayer", () => {
       expect(messages).toEqual([
         upstreamFirst,
         {
-          topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
+          topic: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
           receiveTime: upstreamFirst.receiveTime,
           message: { custom_np_field: "abc", value: "bar" },
         },
@@ -453,9 +453,9 @@ describe("UserNodePlayer", () => {
 
       const [done] = setListenerHelper(userNodePlayer);
 
-      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }]);
+      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
       await userNodePlayer.setUserNodes({
-        [nodeId]: { name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`, sourceCode: nodeUserCode },
+        [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
       });
 
       fakePlayer.emit({
@@ -485,10 +485,10 @@ describe("UserNodePlayer", () => {
       const datatypes = { foo: { fields: [{ name: "payload", type: "string" }] } };
 
       const [done1, done2] = setListenerHelper(userNodePlayer, 2);
-      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }]);
+      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
       await userNodePlayer.setUserNodes({
         [nodeId]: {
-          name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
+          name: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
           sourceCode: nodeUserCodeWithLogAndError,
         },
       });
@@ -543,10 +543,10 @@ describe("UserNodePlayer", () => {
 
       const [done] = setListenerHelper(userNodePlayer);
 
-      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }]);
+      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
       await userNodePlayer.setUserNodes({
         [nodeId]: {
-          name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
+          name: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
           sourceCode: nodeUserCodeWithPointClouds,
         },
       });
@@ -567,7 +567,7 @@ describe("UserNodePlayer", () => {
       expect(messages).toEqual([
         upstreamFirst,
         {
-          topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
+          topic: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
           receiveTime: upstreamFirst.receiveTime,
           message: { a: 1, b: 0.7483314773547883, g: 0.7483314773547883, r: 1 },
         },
@@ -582,7 +582,7 @@ describe("UserNodePlayer", () => {
 
       const unionTypeReturn = `
         export const inputs = ["/np_input"];
-        export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}1";
+        export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
         let lastStamp, lastReceiveTime;
         export default (message: { message: { payload: string } }): { custom_np_field: string, value: string } | undefined => {
           if (message.message.payload === "bar") {
@@ -593,9 +593,9 @@ describe("UserNodePlayer", () => {
       `;
 
       // TODO: test here to make sure the user node does not produce messages if not subscribed to.
-      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }]);
+      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
       await userNodePlayer.setUserNodes({
-        [nodeId]: { name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`, sourceCode: unionTypeReturn },
+        [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: unionTypeReturn },
       });
 
       fakePlayer.emit({
@@ -627,7 +627,7 @@ describe("UserNodePlayer", () => {
       expect(nextResult.messages).toEqual([
         upstreamSecond,
         {
-          topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
+          topic: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
           receiveTime: upstreamSecond.receiveTime,
           message: { custom_np_field: "abc", value: "baz" },
         },
@@ -644,16 +644,16 @@ describe("UserNodePlayer", () => {
       const [done] = setListenerHelper(userNodePlayer);
 
       userNodePlayer.setUserNodes({
-        [`${DEFAULT_WEBVIZ_NODE_PREFIX}1`]: {
-          name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
+        [`${DEFAULT_STUDIO_NODE_PREFIX}1`]: {
+          name: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
           sourceCode: nodeUserCode,
         },
-        [`${DEFAULT_WEBVIZ_NODE_PREFIX}2`]: {
-          name: `${DEFAULT_WEBVIZ_NODE_PREFIX}2`,
+        [`${DEFAULT_STUDIO_NODE_PREFIX}2`]: {
+          name: `${DEFAULT_STUDIO_NODE_PREFIX}2`,
           sourceCode: nodeUserCode,
         },
       });
-      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }]);
+      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
 
       fakePlayer.emit({
         activeData: {
@@ -671,18 +671,18 @@ describe("UserNodePlayer", () => {
       expect(messages).toHaveLength(2);
       expect(topics).toEqual([
         { name: "/np_input", datatype: "std_msgs/Header" },
-        { name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`, datatype: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` },
+        { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, datatype: `${DEFAULT_STUDIO_NODE_PREFIX}1` },
       ]);
       expect(mockSetNodeDiagnostics).toHaveBeenCalledWith({
-        [`${DEFAULT_WEBVIZ_NODE_PREFIX}1`]: { diagnostics: [] },
+        [`${DEFAULT_STUDIO_NODE_PREFIX}1`]: { diagnostics: [] },
       });
       expect(mockSetNodeDiagnostics).toHaveBeenCalledWith({
-        [`${DEFAULT_WEBVIZ_NODE_PREFIX}2`]: {
+        [`${DEFAULT_STUDIO_NODE_PREFIX}2`]: {
           diagnostics: [
             {
               source: Sources.OutputTopicChecker,
               severity: DiagnosticSeverity.Error,
-              message: `Output "${DEFAULT_WEBVIZ_NODE_PREFIX}1" must be unique`,
+              message: `Output "${DEFAULT_STUDIO_NODE_PREFIX}1" must be unique`,
               code: ErrorCodes.OutputTopicChecker.NOT_UNIQUE,
             },
           ],
@@ -697,27 +697,27 @@ describe("UserNodePlayer", () => {
       const [done] = setListenerHelper(userNodePlayer);
 
       userNodePlayer.setUserNodes({
-        [`${DEFAULT_WEBVIZ_NODE_PREFIX}1`]: {
-          name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
+        [`${DEFAULT_STUDIO_NODE_PREFIX}1`]: {
+          name: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
           sourceCode: nodeUserCode,
         },
       });
 
       const nodeUserCode2 = nodeUserCode.replace(
-        `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
-        `${DEFAULT_WEBVIZ_NODE_PREFIX}2`,
+        `${DEFAULT_STUDIO_NODE_PREFIX}1`,
+        `${DEFAULT_STUDIO_NODE_PREFIX}2`,
       );
       userNodePlayer.setUserNodes({
-        [nodeId]: { name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`, sourceCode: nodeUserCode },
+        [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
         [`${nodeId}2`]: {
-          name: `${DEFAULT_WEBVIZ_NODE_PREFIX}2`,
+          name: `${DEFAULT_STUDIO_NODE_PREFIX}2`,
           sourceCode: nodeUserCode2,
         },
       });
 
       userNodePlayer.setSubscriptions([
-        { topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` },
-        { topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}2` },
+        { topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` },
+        { topic: `${DEFAULT_STUDIO_NODE_PREFIX}2` },
       ]);
 
       fakePlayer.emit({
@@ -736,12 +736,12 @@ describe("UserNodePlayer", () => {
       expect(messages).toEqual([
         upstreamFirst,
         {
-          topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
+          topic: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
           receiveTime: upstreamFirst.receiveTime,
           message: { custom_np_field: "abc", value: "bar" },
         },
         {
-          topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}2`,
+          topic: `${DEFAULT_STUDIO_NODE_PREFIX}2`,
           receiveTime: upstreamFirst.receiveTime,
           message: { custom_np_field: "abc", value: "bar" },
         },
@@ -752,7 +752,7 @@ describe("UserNodePlayer", () => {
       const sourceCode = `
         let innerState = 0;
         export const inputs = ["/np_input"];
-        export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}1";
+        export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
         export default (): { innerState: number } => {
           innerState += 1;
           return { innerState };
@@ -763,10 +763,10 @@ describe("UserNodePlayer", () => {
       const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
 
       userNodePlayer.setUserNodes({
-        [nodeId]: { name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`, sourceCode },
+        [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode },
       });
 
-      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }]);
+      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
 
       const [firstDone, secondDone] = setListenerHelper(userNodePlayer, 2);
 
@@ -805,7 +805,7 @@ describe("UserNodePlayer", () => {
       {
         code: `
           export const inputs = ["/np_input"];
-          export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}1";
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
           export default (messages: any): { num: number } => {
             if (messages.message) {
               throw new Error("error path");
@@ -817,7 +817,7 @@ describe("UserNodePlayer", () => {
       {
         code: `
           export const inputs = ["/np_input"];
-          export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}1";
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
           export default (messages: any): { num: number } => {
             if (messages.message) {
              const badPropertyAccess = messages.message.message.message;
@@ -829,7 +829,7 @@ describe("UserNodePlayer", () => {
       {
         code: `
           export const inputs = ["/np_input"];
-          export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}1";
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
           const x: any = {};
           const y = x.bad.bad;
           export default (messages: any): { num: number } => {
@@ -840,7 +840,7 @@ describe("UserNodePlayer", () => {
       {
         code: `
           export const inputs = ["/np_input"];
-          export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}1";
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
           throw "";
           export default (messages: any): { num: number } => {
             return { num: 42 };
@@ -850,7 +850,7 @@ describe("UserNodePlayer", () => {
       {
         code: `
         export const inputs = ["/np_input"];
-        export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}1";
+        export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
         export default (messages: any): { num: number } => {
           throw ""
           return { num: 42 };
@@ -860,7 +860,7 @@ describe("UserNodePlayer", () => {
       {
         code: `
           export const inputs = ["/np_input"];
-          export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}1";
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
           export default (messages: any): { num: number } => {
           if (messages.message) {
             throw new Error("");
@@ -872,7 +872,7 @@ describe("UserNodePlayer", () => {
       {
         code: `
         export const inputs = ["/np_input"];
-        export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}1";
+        export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
         if (inputs.length) {
           throw new Error("");
         }
@@ -889,9 +889,9 @@ describe("UserNodePlayer", () => {
         setUserNodeDiagnostics: mockSetNodeDiagnostics,
       });
 
-      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }]);
+      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
       userNodePlayer.setUserNodes({
-        nodeId: { name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`, sourceCode: code },
+        nodeId: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: code },
       });
 
       const [done] = setListenerHelper(userNodePlayer);
@@ -922,9 +922,9 @@ describe("UserNodePlayer", () => {
       });
       // Sanity check to ensure none of the user node messages made it through if there was an error.
       expect(messages.map(({ topic }: any) => topic)).not.toContain(
-        `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
+        `${DEFAULT_STUDIO_NODE_PREFIX}1`,
       );
-      expect(topicNames).toEqual(["/np_input", `${DEFAULT_WEBVIZ_NODE_PREFIX}1`]);
+      expect(topicNames).toEqual(["/np_input", `${DEFAULT_STUDIO_NODE_PREFIX}1`]);
     });
 
     it("properly clears user node registrations", async () => {
@@ -932,7 +932,7 @@ describe("UserNodePlayer", () => {
       const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
 
       userNodePlayer.setUserNodes({
-        [nodeId]: { name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`, sourceCode: nodeUserCode },
+        [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
       });
 
       const [firstDone, secondDone] = setListenerHelper(userNodePlayer, 2);
@@ -949,7 +949,7 @@ describe("UserNodePlayer", () => {
       });
 
       const { topicNames: firstTopicNames }: any = await firstDone;
-      expect(firstTopicNames).toEqual(["/np_input", `${DEFAULT_WEBVIZ_NODE_PREFIX}1`]);
+      expect(firstTopicNames).toEqual(["/np_input", `${DEFAULT_STUDIO_NODE_PREFIX}1`]);
 
       userNodePlayer.setUserNodes({});
       fakePlayer.emit({
@@ -979,7 +979,7 @@ describe("UserNodePlayer", () => {
       });
 
       userNodePlayer.setUserNodes({
-        nodeId: { name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`, sourceCode: code },
+        nodeId: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: code },
       });
 
       const [done] = setListenerHelper(userNodePlayer);
@@ -1008,7 +1008,7 @@ describe("UserNodePlayer", () => {
         type MarkerArray = { markers: Marker[] }
 
         export const inputs = ["/np_input"];
-        export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}1";
+        export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
         const publisher = (message: { message: any }): MarkerArray => {
           log("inside publisher", message.message);
           return { markers: [] };
@@ -1046,9 +1046,9 @@ describe("UserNodePlayer", () => {
         });
         const [done] = setListenerHelper(userNodePlayer);
 
-        userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }]);
+        userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
         userNodePlayer.setUserNodes({
-          [nodeId]: { name: `${DEFAULT_WEBVIZ_NODE_PREFIX}nodeName`, sourceCode: code },
+          [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}nodeName`, sourceCode: code },
         });
 
         fakePlayer.emit({
@@ -1065,7 +1065,7 @@ describe("UserNodePlayer", () => {
         const { topicNames }: any = await done;
         expect(mockAddNodeLogs).toHaveBeenCalled();
         expect(mockAddNodeLogs.mock.calls).toEqual(logs.map((log) => [{ nodeId: { logs: log } }]));
-        expect(topicNames).toEqual(["/np_input", `${DEFAULT_WEBVIZ_NODE_PREFIX}1`]);
+        expect(topicNames).toEqual(["/np_input", `${DEFAULT_STUDIO_NODE_PREFIX}1`]);
       });
 
       it("does not record logs if there is an error", async () => {
@@ -1076,7 +1076,7 @@ describe("UserNodePlayer", () => {
         type MarkerArray = { markers: Marker[] }
 
         export const inputs = ["/np_input"];
-        export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}1";
+        export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
         const publisher = (message: Message<InputTopicMsg>): MarkerArray => {
           log("inside publisher", message.message);
           return { markers: [] };
@@ -1106,7 +1106,7 @@ describe("UserNodePlayer", () => {
           },
         });
 
-        userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }]);
+        userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
         userNodePlayer.setUserNodes({ nodeId: { name: "nodeName", sourceCode: code } });
 
         const { topicNames }: any = await done;
@@ -1120,7 +1120,7 @@ describe("UserNodePlayer", () => {
         const sourceCode = `
         let innerState = 0;
         export const inputs = ["/np_input"];
-        export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}innerState";
+        export const output = "${DEFAULT_STUDIO_NODE_PREFIX}innerState";
         export default (): { innerState: number } => {
           innerState += 1;
           return { innerState };
@@ -1129,7 +1129,7 @@ describe("UserNodePlayer", () => {
 
         const fakePlayer = new FakePlayer();
         const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
-        const firstName = `${DEFAULT_WEBVIZ_NODE_PREFIX}innerState`;
+        const firstName = `${DEFAULT_STUDIO_NODE_PREFIX}innerState`;
 
         userNodePlayer.setUserNodes({
           [nodeId]: { name: firstName, sourceCode },
@@ -1137,7 +1137,7 @@ describe("UserNodePlayer", () => {
         userNodePlayer.setSubscriptions([{ topic: firstName }]);
 
         // Update the name of the node.
-        const secondName = `${DEFAULT_WEBVIZ_NODE_PREFIX}state`;
+        const secondName = `${DEFAULT_STUDIO_NODE_PREFIX}state`;
         const secondSourceCode = sourceCode.replace(/innerState/g, "state");
 
         userNodePlayer.setUserNodes({
@@ -1165,8 +1165,8 @@ describe("UserNodePlayer", () => {
         expect(topics).toEqual([
           { name: "/np_input", datatype: "std_msgs/Header" },
           {
-            name: `${DEFAULT_WEBVIZ_NODE_PREFIX}state`,
-            datatype: `${DEFAULT_WEBVIZ_NODE_PREFIX}state`,
+            name: `${DEFAULT_STUDIO_NODE_PREFIX}state`,
+            datatype: `${DEFAULT_STUDIO_NODE_PREFIX}state`,
           },
         ]);
       });
@@ -1175,7 +1175,7 @@ describe("UserNodePlayer", () => {
           import { Input, Messages } from 'ros';
           let innerState = 0;
           export const inputs = ["/np_input"];
-          export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}state";
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}state";
           export default (message: Input<"/np_input">): Messages.std_msgs__Header => {
             return message.message;
           };
@@ -1183,7 +1183,7 @@ describe("UserNodePlayer", () => {
 
         const fakePlayer = new FakePlayer();
         const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
-        const firstName = `${DEFAULT_WEBVIZ_NODE_PREFIX}state`;
+        const firstName = `${DEFAULT_STUDIO_NODE_PREFIX}state`;
 
         userNodePlayer.setUserNodes({
           [nodeId]: { name: firstName, sourceCode },
@@ -1206,7 +1206,7 @@ describe("UserNodePlayer", () => {
         const { topics }: any = await done;
         expect(topics).toEqual([
           { name: "/np_input", datatype: "std_msgs/Header" },
-          { name: `${DEFAULT_WEBVIZ_NODE_PREFIX}state`, datatype: "std_msgs/Header" },
+          { name: `${DEFAULT_STUDIO_NODE_PREFIX}state`, datatype: "std_msgs/Header" },
         ]);
       });
     });
@@ -1218,10 +1218,10 @@ describe("UserNodePlayer", () => {
         const [done, done2] = setListenerHelper(userNodePlayer, 2);
 
         userNodePlayer.setGlobalVariables({ globalValue: "aaa" });
-        userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1` }]);
+        userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
         await userNodePlayer.setUserNodes({
           [nodeId]: {
-            name: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
+            name: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
             sourceCode: nodeUserCodeWithGlobalVars,
           },
         });
@@ -1240,7 +1240,7 @@ describe("UserNodePlayer", () => {
         expect(messages).toEqual([
           upstreamFirst,
           {
-            topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
+            topic: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
             receiveTime: upstreamFirst.receiveTime,
             message: { custom_np_field: "aaa", value: "aaa" },
           },
@@ -1253,7 +1253,7 @@ describe("UserNodePlayer", () => {
         expect(messages2).toEqual([
           upstreamFirst,
           {
-            topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}1`,
+            topic: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
             receiveTime: upstreamFirst.receiveTime,
             message: { custom_np_field: "bbb", value: "bbb" },
           },
@@ -1295,7 +1295,7 @@ describe("UserNodePlayer", () => {
         expect(messages).toEqual([
           upstreamFirst,
           {
-            topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}0`,
+            topic: `${DEFAULT_STUDIO_NODE_PREFIX}0`,
             receiveTime: upstreamFirst.receiveTime,
             message: { key: sourceIndex },
           },
@@ -1308,10 +1308,10 @@ describe("UserNodePlayer", () => {
 
     const [userNode0, userNode1, userNode2] = new Array(3).fill(0).map((_, i) => {
       return {
-        name: `${DEFAULT_WEBVIZ_NODE_PREFIX}0`,
+        name: `${DEFAULT_STUDIO_NODE_PREFIX}0`,
         sourceCode: `
           export const inputs = ["/np_input"];
-          export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}0";
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}0";
           export default (): { key: number } => {
             return { key: ${i} };
           };
@@ -1321,7 +1321,7 @@ describe("UserNodePlayer", () => {
 
     it("creates node registrations when userNodes change", async () => {
       const donePromises = setListenerHelper(userNodePlayer, 5);
-      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_WEBVIZ_NODE_PREFIX}0` }]);
+      userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}0` }]);
 
       // New node 0, needs registration
       await userNodePlayer.setUserNodes({ nodeId0: userNode0 });

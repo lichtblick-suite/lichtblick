@@ -37,7 +37,7 @@ export default function Button({
   style = {},
   ...otherProps
 }: Props): React.ReactElement {
-  // overwrite the primary color for Webviz
+  // overwrite the primary color for Studio
   // using `isPrimary` instead of `primary` now to prevent global UI changes until we are ready to migrate all styles
   const styleAlt = isPrimary ? { ...style, backgroundColor: colors.PRIMARY } : style;
 

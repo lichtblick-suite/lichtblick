@@ -7,7 +7,7 @@
 <plist version="1.0">
 <dict>
 	<key>name</key>
-	<string>WebvizTheme</string>
+	<string>StudioTheme</string>
 	<key>settings</key>
 	<array>
 		<dict>
@@ -292,6 +292,6 @@
 	<key>colorSpaceName</key>
 	<string>sRGB</string>
 	<key>semanticClass</key>
-	<string>theme.dark.webviz_theme</string>
+	<string>theme.dark.studio_theme</string>
 </dict>
 </plist>

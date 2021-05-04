@@ -84,8 +84,8 @@ const runUseGLTextTest = (
 
 describe("<SearchText />", () => {
   describe("getHighlightedIndices", () => {
-    expect(getHighlightedIndices("hello webviz", "e")).toEqual([1, 7]);
-    expect(getHighlightedIndices("hello webviz", "hello ")).toEqual([0, 1, 2, 3, 4, 5]);
+    expect(getHighlightedIndices("hello everyone", "e")).toEqual([1, 6, 8, 13]);
+    expect(getHighlightedIndices("hello everyone", "hello ")).toEqual([0, 1, 2, 3, 4, 5]);
     it("is case insensitive", () => {
       expect(getHighlightedIndices("Car", "car")).toEqual([0, 1, 2]);
       expect(getHighlightedIndices("car", "Car")).toEqual([0, 1, 2]);
@@ -127,8 +127,8 @@ describe("<SearchText />", () => {
     it("sets a custom highlight color to the correct index", async () => {
       const setSearchTextMatches = jest.fn();
       const markers = [
-        createMarker("hello webviz"),
-        createMarker("hello cruies"),
+        createMarker("hello Studio"),
+        createMarker("hello past"),
         createMarker("hello future"),
       ];
       const glTextMarkers = runUseGLTextTest(markers, "hello", [], setSearchTextMatches, 2);

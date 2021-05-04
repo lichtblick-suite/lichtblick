@@ -29,7 +29,7 @@ const WorkerDataProviderWorker = () => {
   return new Worker(new URL("./WorkerDataProvider.worker", import.meta.url));
 };
 
-// We almost always use a WorkerDataProvider in Webviz. By initializing the first worker before we actually construct
+// We almost always use a WorkerDataProvider in Studio. By initializing the first worker before we actually construct
 // the WorkerDataProvider we can potentially improve performance by loading while waiting for async requests.
 let preinitializedWorkers: any[] = [];
 if (process.env.NODE_ENV !== "test") {

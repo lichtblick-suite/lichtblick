@@ -24,7 +24,7 @@ const style: CSSProperties = {
 };
 
 // Looks at the regl stats and throws errors if it seems we're going over acceptable (arbitrary) max ranges.
-// The maxes are arbitrarily set to be an order of magnitude higher than the 'steady state' of a pretty loaded webviz scene to
+// The maxes are arbitrarily set to be an order of magnitude higher than the 'steady state' of a pretty loaded Studio scene to
 // allow for plenty of headroom.
 function validate(stats: any) {
   if (stats.bufferCount > 500) {

@@ -24,7 +24,7 @@ import {
   POSE_STAMPED_DATATYPE,
   SENSOR_MSGS_LASER_SCAN_DATATYPE,
   VELODYNE_SCAN_DATATYPE,
-  WEBVIZ_MARKER_DATATYPE,
+  STUDIO_MARKER_DATATYPE,
 } from "@foxglove-studio/app/util/globalConstants";
 
 import LaserScanSettingsEditor from "./LaserScanSettingsEditor";
@@ -46,7 +46,7 @@ export function topicSettingsEditorForDatatype(
     [VELODYNE_SCAN_DATATYPE, PointCloudSettingsEditor],
     [POSE_STAMPED_DATATYPE, PoseSettingsEditor],
     [SENSOR_MSGS_LASER_SCAN_DATATYPE, LaserScanSettingsEditor],
-    [WEBVIZ_MARKER_DATATYPE, MarkerSettingsEditor],
+    [STUDIO_MARKER_DATATYPE, MarkerSettingsEditor],
     ["visualization_msgs/Marker", MarkerSettingsEditor],
     ["visualization_msgs/MarkerArray", MarkerSettingsEditor],
     [NAV_MSGS_PATH_DATATYPE, MarkerSettingsEditor],

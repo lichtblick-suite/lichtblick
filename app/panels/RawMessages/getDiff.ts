@@ -20,19 +20,19 @@ import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 export const diffArrow = "->";
 export const diffLabels = {
   ADDED: {
-    labelText: "WEBVIZ_DIFF___ADDED",
+    labelText: "STUDIO_DIFF___ADDED",
     color: colors.DARK6,
     backgroundColor: "#182924",
     indicator: "+",
   },
   DELETED: {
-    labelText: "WEBVIZ_DIFF___DELETED",
+    labelText: "STUDIO_DIFF___DELETED",
     color: colors.DARK6,
     backgroundColor: "#3d2327",
     indicator: "-",
   },
-  CHANGED: { labelText: "WEBVIZ_DIFF___CHANGED", color: jsonTreeTheme.base0B },
-  ID: { labelText: "WEBVIZ_DIFF___ID" },
+  CHANGED: { labelText: "STUDIO_DIFF___CHANGED", color: jsonTreeTheme.base0B },
+  ID: { labelText: "STUDIO_DIFF___ID" },
 };
 
 export const diffLabelsByLabelText = keyBy(Object.values(diffLabels), "labelText");

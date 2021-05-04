@@ -70,10 +70,10 @@ describe("useTopicTree", () => {
       expect(getBaseKey("name_2:Foo")).toEqual("name:Foo");
     });
     it("returns base key for bag2 topic key ", () => {
-      expect(getBaseKey("t:/webviz_source_2/foo")).toEqual("t:/foo");
+      expect(getBaseKey("t:/studio_source_2/foo")).toEqual("t:/foo");
     });
     it("returns base key for bag2 namespace key ", () => {
-      expect(getBaseKey("ns:/webviz_source_2/foo:ns1")).toEqual("ns:/foo:ns1");
+      expect(getBaseKey("ns:/studio_source_2/foo:ns1")).toEqual("ns:/foo:ns1");
     });
     it("returns the original key if for non-bag2 keys ", () => {
       expect(getBaseKey("name:Bar")).toEqual("name:Bar");
@@ -103,13 +103,13 @@ describe("useTopicTree", () => {
     });
     it("generates key for bag2 topic", () => {
       expect(generateNodeKey({ topicName: "/foo", name: "Foo", isFeatureColumn: true })).toEqual(
-        "t:/webviz_source_2/foo",
+        "t:/studio_source_2/foo",
       );
     });
     it("generates key for bag2 namespace", () => {
       expect(
         generateNodeKey({ topicName: "/foo", namespace: "ns1", isFeatureColumn: true }),
-      ).toEqual("ns:/webviz_source_2/foo:ns1");
+      ).toEqual("ns:/studio_source_2/foo:ns1");
     });
   });
 
@@ -128,7 +128,7 @@ describe("useTopicTree", () => {
         children: [
           {
             availableByColumn: [false],
-            featureKey: "t:/webviz_source_2/foo",
+            featureKey: "t:/studio_source_2/foo",
             key: "t:/foo",
             providerAvailable: false,
             topicName: "/foo",
@@ -148,7 +148,7 @@ describe("useTopicTree", () => {
       const root = mount(
         <Test
           {...sharedProps}
-          providerTopics={makeTopics(["/bar", "/webviz_source_2/foo"])}
+          providerTopics={makeTopics(["/bar", "/studio_source_2/foo"])}
           topicTreeConfig={{ name: "root", children: [{ topicName: "/foo" }] }}
           filterText=""
           availableNamespacesByTopic={{}}
@@ -158,7 +158,7 @@ describe("useTopicTree", () => {
       expect(Test.result.mock.calls[0][0].rootTreeNode.children).toEqual([
         {
           availableByColumn: [false, true],
-          featureKey: "t:/webviz_source_2/foo",
+          featureKey: "t:/studio_source_2/foo",
           datatype: "visualization_msgs/MarkerArray",
           key: "t:/foo",
           providerAvailable: true,
@@ -171,7 +171,7 @@ describe("useTopicTree", () => {
             {
               availableByColumn: [true, false],
               datatype: "visualization_msgs/MarkerArray",
-              featureKey: "t:/webviz_source_2/bar",
+              featureKey: "t:/studio_source_2/bar",
               key: "t:/bar",
               parentKey: "name:(Uncategorized)",
               providerAvailable: true,
@@ -192,7 +192,7 @@ describe("useTopicTree", () => {
       expect(Test.result.mock.calls[1][0].rootTreeNode.children).toEqual([
         {
           availableByColumn: [false],
-          featureKey: "t:/webviz_source_2/foo",
+          featureKey: "t:/studio_source_2/foo",
           key: "t:/foo",
           providerAvailable: true,
           topicName: "/foo",
@@ -204,7 +204,7 @@ describe("useTopicTree", () => {
             {
               availableByColumn: [true],
               datatype: "visualization_msgs/MarkerArray",
-              featureKey: "t:/webviz_source_2/bar1",
+              featureKey: "t:/studio_source_2/bar1",
               key: "t:/bar1",
               parentKey: "name:(Uncategorized)",
               providerAvailable: true,
@@ -226,7 +226,7 @@ describe("useTopicTree", () => {
     it("defaults to empty", () => {
       const Test = createTest();
       mount(
-        <Test {...sharedProps} providerTopics={makeTopics(["/bar", "/webviz_source_2/foo"])} />,
+        <Test {...sharedProps} providerTopics={makeTopics(["/bar", "/studio_source_2/foo"])} />,
       );
       expect(Test.result.mock.calls[0][0].visibleTopicsCountByKey).toEqual({});
     });
@@ -239,13 +239,13 @@ describe("useTopicTree", () => {
           checkedKeys={[
             "t:/bar",
             "t:/foo",
-            "t:/webviz_source_2/foo",
+            "t:/studio_source_2/foo",
             "name:Group1",
             "name_2:Group1",
             "name:Group2",
             "name:Nested Group",
           ]}
-          providerTopics={makeTopics(["/bar", "/foo", "/webviz_source_2/foo"])}
+          providerTopics={makeTopics(["/bar", "/foo", "/studio_source_2/foo"])}
         />,
       );
       expect(Test.result.mock.calls[0][0].visibleTopicsCountByKey).toEqual({
@@ -258,9 +258,9 @@ describe("useTopicTree", () => {
         checkedKeys: [
           "t:/bar",
           "t:/bar1",
-          "t:/webviz_source_2/bar",
+          "t:/studio_source_2/bar",
           "t:/foo",
-          "t:/webviz_source_2/foo",
+          "t:/studio_source_2/foo",
           "name:Group1",
           "name_2:Group2",
           "name_2:Nested Group",
@@ -268,9 +268,9 @@ describe("useTopicTree", () => {
         ],
         providerTopics: makeTopics([
           "/bar",
-          "/webviz_source_2/bar",
+          "/studio_source_2/bar",
           "/foo",
-          "/webviz_source_2/foo",
+          "/studio_source_2/foo",
           "/bar1",
         ]),
       });
@@ -290,7 +290,7 @@ describe("useTopicTree", () => {
         <Test
           {...sharedProps}
           checkedKeys={["/foo"]}
-          providerTopics={makeTopics(["/bar", "/webviz_source_2/foo"])}
+          providerTopics={makeTopics(["/bar", "/studio_source_2/foo"])}
         />,
       );
 
@@ -298,11 +298,11 @@ describe("useTopicTree", () => {
       root.setProps({ checkedKeys: ["name:Group1", "t:/foo", "t:/bar"] });
       expect(Test.result.mock.calls[1][0].selectedTopicNames).toEqual(["/foo"]);
       root.setProps({
-        checkedKeys: ["name:Group1", "t:/foo", "t:/bar", "t:/webviz_source_2/foo", "name_2:Group1"],
+        checkedKeys: ["name:Group1", "t:/foo", "t:/bar", "t:/studio_source_2/foo", "name_2:Group1"],
       });
       expect(Test.result.mock.calls[2][0].selectedTopicNames).toEqual([
         "/foo",
-        "/webviz_source_2/foo",
+        "/studio_source_2/foo",
       ]);
     });
 
@@ -315,7 +315,7 @@ describe("useTopicTree", () => {
             "name:(Uncategorized)",
             "t:/fiz",
             "name_2:(Uncategorized)",
-            "t:/webviz_source_2/fiz",
+            "t:/studio_source_2/fiz",
           ]}
           providerTopics={[]}
         />,
@@ -323,7 +323,7 @@ describe("useTopicTree", () => {
 
       expect(Test.result.mock.calls[0][0].selectedTopicNames).toEqual([
         "/fiz",
-        "/webviz_source_2/fiz",
+        "/studio_source_2/fiz",
       ]);
     });
 
@@ -334,7 +334,7 @@ describe("useTopicTree", () => {
         <Test
           {...sharedProps}
           checkedKeys={checkedKeys}
-          providerTopics={makeTopics(["/bar", "/webviz_source_2/foo"])}
+          providerTopics={makeTopics(["/bar", "/studio_source_2/foo"])}
         />,
       );
       expect(Test.result.mock.calls[0][0].selectedNamespacesByTopic).toEqual({});
@@ -367,7 +367,7 @@ describe("useTopicTree", () => {
         <Test
           {...sharedProps}
           settingsByKey={{}}
-          providerTopics={makeTopics(["/bar", "/webviz_source_2/foo"])}
+          providerTopics={makeTopics(["/bar", "/studio_source_2/foo"])}
         />,
       );
 
@@ -393,11 +393,11 @@ describe("useTopicTree", () => {
             someSetting1: "some value",
             overrideColor: { r: 0.48, g: 0.48, b: 0.48, a: 1 },
           },
-          "t:/webviz_source_2/bar1": {
+          "t:/studio_source_2/bar1": {
             someSetting1: "some value2",
             overrideColor: { r: 0.48, g: 0.39, b: 0.39, a: 1 },
           },
-          "t:/webviz_source_2/foo": {
+          "t:/studio_source_2/foo": {
             overrideColor: { r: 0.39, g: 0.48, b: 0.47, a: 1 },
           },
         },
@@ -425,17 +425,17 @@ describe("useTopicTree", () => {
           {...sharedProps}
           defaultTopicSettings={{
             "/bar": { pointSize: 1 },
-            "/webviz_source_2/bar": { pointSize: 1 },
-            "/webviz_source_2/foo": { someSetting: 1 },
+            "/studio_source_2/bar": { pointSize: 1 },
+            "/studio_source_2/foo": { someSetting: 1 },
             "/foo1": { pointSize: 2 },
           }}
           settingsByKey={{
             "t:/bar": { pointSize: 1 },
-            "t:/webviz_source_2/bar": { pointSize: 1 },
+            "t:/studio_source_2/bar": { pointSize: 1 },
             "t:/foo": { someSetting: 1, overrideColor: { r: 1, g: 0, b: 0, a: 0.9 } },
-            "t:/webviz_source_2/foo": { someSetting: 1 },
+            "t:/studio_source_2/foo": { someSetting: 1 },
             "t:/foo1": { pointSize: 1 },
-            "t:/webviz_source_2/foo1": { pointSize: 1 },
+            "t:/studio_source_2/foo1": { pointSize: 1 },
           }}
         />,
       );
@@ -456,11 +456,11 @@ describe("useTopicTree", () => {
           {...sharedProps}
           settingsByKey={{
             "t:/bar": { pointSize: 1 },
-            "t:/webviz_source_2/bar": { overrideColor: { r: 0.1, g: 0.1, b: 0.1, a: 0.1 } },
+            "t:/studio_source_2/bar": { overrideColor: { r: 0.1, g: 0.1, b: 0.1, a: 0.1 } },
             "ns:/foo:ns1": { overrideColor: { r: 0.2, g: 0.2, b: 0.2, a: 0.2 } },
-            "ns:/webviz_source_2/bar:ns2": { overrideColor: { r: 0.2, g: 0.2, b: 0.2, a: 0.2 } },
+            "ns:/studio_source_2/bar:ns2": { overrideColor: { r: 0.2, g: 0.2, b: 0.2, a: 0.2 } },
           }}
-          providerTopics={makeTopics(["/foo", "/webviz_source_2/foo"])}
+          providerTopics={makeTopics(["/foo", "/studio_source_2/foo"])}
         />,
       );
       expect(Test.result.mock.calls[0][0].derivedCustomSettingsByKey).toEqual({
@@ -486,7 +486,7 @@ describe("useTopicTree", () => {
             "t:/bar": { pointSize: 1 },
             "ns:/foo:ns1": { overrideColor: { r: 0.2, g: 0.2, b: 0.2, a: 0.2 } },
           }}
-          providerTopics={makeTopics(["/foo", "/webviz_source_2/foo"])}
+          providerTopics={makeTopics(["/foo", "/studio_source_2/foo"])}
         />,
       );
       Test.result.mock.calls[0][0].onNamespaceOverrideColorChange(
@@ -501,13 +501,13 @@ describe("useTopicTree", () => {
       });
       Test.result.mock.calls[0][0].onNamespaceOverrideColorChange(
         "3,3,3,3",
-        "ns:/webviz_source/2/foo:ns1",
+        "ns:/studio_source/2/foo:ns1",
       );
       expect(saveConfigMock.mock.calls[1][0]).toEqual({
         settingsByKey: {
           "t:/bar": { pointSize: 1 },
           "ns:/foo:ns1": { overrideColor: { r: 0.2, g: 0.2, b: 0.2, a: 0.2 } },
-          "ns:/webviz_source/2/foo:ns1": { overrideColor: "3,3,3,3" },
+          "ns:/studio_source/2/foo:ns1": { overrideColor: "3,3,3,3" },
         },
       });
     });
@@ -523,7 +523,7 @@ describe("useTopicTree", () => {
             "t:/bar": { pointSize: 1 },
             "ns:/foo:ns1": { overrideColor: { r: 0.2, g: 0.2, b: 0.2, a: 0.2 } },
           }}
-          providerTopics={makeTopics(["/foo", "/webviz_source_2/foo"])}
+          providerTopics={makeTopics(["/foo", "/studio_source_2/foo"])}
         />,
       );
       Test.result.mock.calls[0][0].onNamespaceOverrideColorChange(undefined, "ns:/foo:ns1");
@@ -556,7 +556,7 @@ describe("useTopicTree", () => {
 
     it("returns visibility for a bag2 group node", () => {
       const nameNodeKey = "name:Nested Group";
-      const checkedKeys = ["name:Group2", nameNodeKey, "t:/webviz_source_2/bar"];
+      const checkedKeys = ["name:Group2", nameNodeKey, "t:/studio_source_2/bar"];
       const Test = createTest();
       const root = mount(
         <Test {...sharedProps} checkedKeys={checkedKeys} providerTopics={makeTopics(["/bar"])} />,
@@ -571,7 +571,7 @@ describe("useTopicTree", () => {
       const node1 = result1.nodesByKey[nameNodeKey];
       expect(result1.getIsTreeNodeVisibleInScene(node1, 1)).toEqual(false);
 
-      root.setProps({ providerTopics: makeTopics(["/webviz_source_2/bar"]) });
+      root.setProps({ providerTopics: makeTopics(["/studio_source_2/bar"]) });
       const result2 = Test.result.mock.calls[2][0];
       const node2 = result2.nodesByKey[nameNodeKey];
       expect(result2.getIsTreeNodeVisibleInScene(node2, 1)).toEqual(true);
@@ -588,7 +588,7 @@ describe("useTopicTree", () => {
       expect(result0.getIsTreeNodeVisibleInScene(node, 0)).toEqual(false);
 
       // Not visible if ancestor nodes are not all checked.
-      root.setProps({ providerTopics: makeTopics(["/foo", "/webviz_source_2/foo"]) });
+      root.setProps({ providerTopics: makeTopics(["/foo", "/studio_source_2/foo"]) });
       const result1 = Test.result.mock.calls[1][0];
       const node1 = result1.nodesByKey[topicNodeKey];
       expect(result1.getIsTreeNodeVisibleInScene(node1, 0)).toEqual(false);
@@ -606,7 +606,7 @@ describe("useTopicTree", () => {
       const root = mount(
         <Test
           {...sharedProps}
-          providerTopics={makeTopics(["/webviz_source_2/foo"])}
+          providerTopics={makeTopics(["/studio_source_2/foo"])}
           checkedKeys={[topicNodeKey]}
         />,
       );
@@ -615,7 +615,7 @@ describe("useTopicTree", () => {
       const node = result0.nodesByKey[topicNodeKey];
       expect(result0.getIsTreeNodeVisibleInScene(node, 1)).toEqual(false);
 
-      root.setProps({ checkedKeys: ["name_2:Group1", "t:/webviz_source_2/foo"] });
+      root.setProps({ checkedKeys: ["name_2:Group1", "t:/studio_source_2/foo"] });
       const result1 = Test.result.mock.calls[1][0];
       const node1 = result1.nodesByKey[topicNodeKey];
       expect(result1.getIsTreeNodeVisibleInScene(node1, 1)).toEqual(true);
@@ -634,7 +634,7 @@ describe("useTopicTree", () => {
       expect(result0.getIsTreeNodeVisibleInScene(topicNode0, 0)).toEqual(false);
       expect(result0.getIsTreeNodeVisibleInScene(topicNode0, 0, "ns1")).toEqual(false);
 
-      root.setProps({ providerTopics: makeTopics(["/foo", "/webviz_source_2/foo"]) });
+      root.setProps({ providerTopics: makeTopics(["/foo", "/studio_source_2/foo"]) });
       const result1 = Test.result.mock.calls[1][0];
       const topicNode1 = result1.nodesByKey[topicNodeKey];
       expect(result1.getIsTreeNodeVisibleInScene(topicNode1, 0)).toEqual(false);
@@ -683,14 +683,14 @@ describe("useTopicTree", () => {
 
     it("returns visibility for a bag2 namespace node", () => {
       const topicNodeKey = "t:/foo";
-      const namespaceNodeKey = "ns:/webviz_source_2/foo:ns1";
+      const namespaceNodeKey = "ns:/studio_source_2/foo:ns1";
 
       const Test = createTest();
       const root = mount(
         <Test
           {...sharedProps}
-          availableNamespacesByTopic={{ "/foo": ["ns1", "ns2"], "/webviz_source_2/foo": ["ns1"] }}
-          providerTopics={makeTopics(["/foo", "/webviz_source_2/foo"])}
+          availableNamespacesByTopic={{ "/foo": ["ns1", "ns2"], "/studio_source_2/foo": ["ns1"] }}
+          providerTopics={makeTopics(["/foo", "/studio_source_2/foo"])}
           checkedKeys={[namespaceNodeKey]}
         />,
       );
@@ -702,8 +702,8 @@ describe("useTopicTree", () => {
       expect(result0.getIsTreeNodeVisibleInScene(topicNode0, 1, "ns1")).toEqual(false);
 
       root.setProps({
-        checkedKeys: ["name_2:Group1", "t:/webviz_source_2/foo", "ns:/webviz_source_2/foo:ns1"],
-        providerTopics: makeTopics(["/webviz_source_2/foo"]),
+        checkedKeys: ["name_2:Group1", "t:/studio_source_2/foo", "ns:/studio_source_2/foo:ns1"],
+        providerTopics: makeTopics(["/studio_source_2/foo"]),
       });
       const result1 = Test.result.mock.calls[1][0];
       const topicNode1 = result1.nodesByKey[topicNodeKey];
@@ -712,8 +712,8 @@ describe("useTopicTree", () => {
 
       // Visible by default (without namespace being checked).
       root.setProps({
-        checkedKeys: ["name_2:Group1", "t:/webviz_source_2/foo"],
-        providerTopics: makeTopics(["/webviz_source_2/foo"]),
+        checkedKeys: ["name_2:Group1", "t:/studio_source_2/foo"],
+        providerTopics: makeTopics(["/studio_source_2/foo"]),
       });
       const result2 = Test.result.mock.calls[2][0];
       const topicNode2 = result2.nodesByKey[topicNodeKey];
@@ -722,9 +722,9 @@ describe("useTopicTree", () => {
 
       // Not visible if the namespace has been modified and not checked.
       root.setProps({
-        checkedKeys: ["name_2:Group1", "t:/webviz_source_2/foo"],
-        providerTopics: makeTopics(["/webviz_source_2/foo"]),
-        modifiedNamespaceTopics: ["/webviz_source_2/foo"],
+        checkedKeys: ["name_2:Group1", "t:/studio_source_2/foo"],
+        providerTopics: makeTopics(["/studio_source_2/foo"]),
+        modifiedNamespaceTopics: ["/studio_source_2/foo"],
       });
       const result3 = Test.result.mock.calls[3][0];
       const topicNode3 = result3.nodesByKey[topicNodeKey];
@@ -777,20 +777,20 @@ describe("useTopicTree", () => {
     });
 
     it("returns the checked state for namespace nodes by default for bag2", () => {
-      const topicNodeKey = "t:/webviz_source_2/foo";
+      const topicNodeKey = "t:/studio_source_2/foo";
       const Test = createTest();
       const root = mount(
         <Test
           {...sharedProps}
-          availableNamespacesByTopic={{ "/webviz_source_2/foo": ["ns1", "ns2"] }}
-          providerTopics={makeTopics(["/webviz_source_2/foo"])}
+          availableNamespacesByTopic={{ "/studio_source_2/foo": ["ns1", "ns2"] }}
+          providerTopics={makeTopics(["/studio_source_2/foo"])}
           checkedKeys={[topicNodeKey, "name_2:Group1"]}
         />,
       );
       expect(Test.result.mock.calls[0][0].getIsNamespaceCheckedByDefault("/foo", 1)).toEqual(true);
       root.setProps({
-        checkedKeys: ["ns:/webviz_source_2/foo:ns2"],
-        modifiedNamespaceTopics: ["/webviz_source_2/foo"],
+        checkedKeys: ["ns:/studio_source_2/foo:ns2"],
+        modifiedNamespaceTopics: ["/studio_source_2/foo"],
       });
       expect(Test.result.mock.calls[1][0].getIsNamespaceCheckedByDefault("/foo", 1)).toEqual(false);
     });
@@ -834,7 +834,7 @@ describe("useTopicTree", () => {
       const root = mount(
         <Test
           {...sharedProps}
-          checkedKeys={["name_2:Nested Group", "t:/webviz_source_2/bar"]}
+          checkedKeys={["name_2:Nested Group", "t:/studio_source_2/bar"]}
           saveConfig={saveConfigMock}
         />,
       );
@@ -849,17 +849,17 @@ describe("useTopicTree", () => {
       // Topic node with namespace children.
       root.setProps({
         checkedKeys: [],
-        providerTopics: makeTopics(["/webviz_source_2/bar"]),
-        availableNamespacesByTopic: { "/webviz_source_2/bar": ["ns1", "ns2"] },
+        providerTopics: makeTopics(["/studio_source_2/bar"]),
+        availableNamespacesByTopic: { "/studio_source_2/bar": ["ns1", "ns2"] },
       });
       Test.result.mock.calls[1][0].toggleCheckAllDescendants("t:/bar", 1);
       expect(saveConfigMock.mock.calls[1][0]).toEqual({
         checkedKeys: [
-          "t:/webviz_source_2/bar",
-          "ns:/webviz_source_2/bar:ns1",
-          "ns:/webviz_source_2/bar:ns2",
+          "t:/studio_source_2/bar",
+          "ns:/studio_source_2/bar:ns1",
+          "ns:/studio_source_2/bar:ns2",
         ],
-        modifiedNamespaceTopics: ["/webviz_source_2/bar"],
+        modifiedNamespaceTopics: ["/studio_source_2/bar"],
       });
     });
   });
@@ -928,38 +928,38 @@ describe("useTopicTree", () => {
       root.setProps({ checkedKeys: expected.checkedKeys });
       Test.result.mock.calls[1][0].toggleCheckAllAncestors("t:/bar", 1);
       expect(saveConfigMock.mock.calls[1][0]).toEqual({
-        checkedKeys: ["name_2:Nested Group", "name_2:Group2", "t:/webviz_source_2/bar"],
+        checkedKeys: ["name_2:Nested Group", "name_2:Group2", "t:/studio_source_2/bar"],
         modifiedNamespaceTopics: [],
       });
 
       // Namespace node.
       root.setProps({
-        checkedKeys: ["ns:/webviz_source_2/bar:ns2"],
-        providerTopics: makeTopics(["/webviz_source_2/bar"]),
-        availableNamespacesByTopic: { "/webviz_source_2/bar": ["ns1", "ns2"] },
+        checkedKeys: ["ns:/studio_source_2/bar:ns2"],
+        providerTopics: makeTopics(["/studio_source_2/bar"]),
+        availableNamespacesByTopic: { "/studio_source_2/bar": ["ns1", "ns2"] },
       });
       Test.result.mock.calls[2][0].toggleCheckAllAncestors("ns:/bar:ns1", 1, "/bar");
       expect(saveConfigMock.mock.calls[2][0]).toEqual({
         checkedKeys: [
-          "ns:/webviz_source_2/bar:ns2",
-          "ns:/webviz_source_2/bar:ns1",
-          "t:/webviz_source_2/bar",
+          "ns:/studio_source_2/bar:ns2",
+          "ns:/studio_source_2/bar:ns1",
+          "t:/studio_source_2/bar",
           "name_2:Nested Group",
           "name_2:Group2",
         ],
-        modifiedNamespaceTopics: ["/webviz_source_2/bar"],
+        modifiedNamespaceTopics: ["/studio_source_2/bar"],
       });
 
       // Namespace node checked by default.
       root.setProps({
-        checkedKeys: ["t:/webviz_source_2/bar", "name_2:Nested Group", "name_2:Group2"],
-        providerTopics: makeTopics(["/webviz_source_2/bar"]),
-        availableNamespacesByTopic: { "/webviz_source_2/bar": ["ns1", "ns2"] },
+        checkedKeys: ["t:/studio_source_2/bar", "name_2:Nested Group", "name_2:Group2"],
+        providerTopics: makeTopics(["/studio_source_2/bar"]),
+        availableNamespacesByTopic: { "/studio_source_2/bar": ["ns1", "ns2"] },
       });
       Test.result.mock.calls[3][0].toggleCheckAllAncestors("ns:/bar:ns1", 1, "/bar");
       expect(saveConfigMock.mock.calls[3][0]).toEqual({
-        checkedKeys: ["ns:/webviz_source_2/bar:ns2"],
-        modifiedNamespaceTopics: ["/webviz_source_2/bar"],
+        checkedKeys: ["ns:/studio_source_2/bar:ns2"],
+        modifiedNamespaceTopics: ["/studio_source_2/bar"],
       });
     });
   });
@@ -974,7 +974,7 @@ describe("useTopicTree", () => {
           {...sharedProps}
           modifiedNamespaceTopics={["/bar"]}
           saveConfig={saveConfigMock}
-          checkedKeys={["ns:/foo:ns1", "ns:/webviz_source_2/foo:ns2"]}
+          checkedKeys={["ns:/foo:ns1", "ns:/studio_source_2/foo:ns2"]}
         />,
       );
 
@@ -984,7 +984,7 @@ describe("useTopicTree", () => {
         columnIndex: 0,
       });
       const expected = {
-        checkedKeys: ["ns:/webviz_source_2/foo:ns2"],
+        checkedKeys: ["ns:/studio_source_2/foo:ns2"],
         modifiedNamespaceTopics: ["/bar", "/foo"],
       };
       expect(saveConfigMock.mock.calls[0][0]).toEqual(expected);
@@ -1000,7 +1000,7 @@ describe("useTopicTree", () => {
         columnIndex: 0,
       });
       expect(saveConfigMock.mock.calls[1][0]).toEqual({
-        checkedKeys: ["ns:/webviz_source_2/foo:ns2", "ns:/some_topic:ns1"],
+        checkedKeys: ["ns:/studio_source_2/foo:ns2", "ns:/some_topic:ns1"],
         modifiedNamespaceTopics: ["/bar", "/foo", "/some_topic"],
       });
     });
@@ -1037,10 +1037,10 @@ describe("useTopicTree", () => {
       const root = mount(
         <Test
           {...sharedProps}
-          availableNamespacesByTopic={{ "/webviz_source_2/foo": ["ns1", "ns2", "ns3"] }}
+          availableNamespacesByTopic={{ "/studio_source_2/foo": ["ns1", "ns2", "ns3"] }}
           modifiedNamespaceTopics={["/bar"]}
           saveConfig={saveConfigMock}
-          checkedKeys={["name:Group1", "t:/webviz_source_2/foo"]}
+          checkedKeys={["name:Group1", "t:/studio_source_2/foo"]}
         />,
       );
 
@@ -1053,17 +1053,17 @@ describe("useTopicTree", () => {
       expect(saveConfigMock.mock.calls[0][0]).toEqual({
         checkedKeys: [
           "name:Group1",
-          "t:/webviz_source_2/foo",
-          "ns:/webviz_source_2/foo:ns2",
-          "ns:/webviz_source_2/foo:ns3",
+          "t:/studio_source_2/foo",
+          "ns:/studio_source_2/foo:ns2",
+          "ns:/studio_source_2/foo:ns3",
         ],
-        modifiedNamespaceTopics: ["/bar", "/webviz_source_2/foo"],
+        modifiedNamespaceTopics: ["/bar", "/studio_source_2/foo"],
       });
 
       // Namespace checked by checkedKeys
       root.setProps({
         modifiedNamespaceTopics: [],
-        checkedKeys: ["name_2:Group1", "t:/webviz_source_2/foo", "ns:/webviz_source_2/foo:ns1"],
+        checkedKeys: ["name_2:Group1", "t:/studio_source_2/foo", "ns:/studio_source_2/foo:ns1"],
       });
 
       Test.result.mock.calls[1][0].toggleNamespaceChecked({
@@ -1072,8 +1072,8 @@ describe("useTopicTree", () => {
         columnIndex: 1,
       });
       expect(saveConfigMock.mock.calls[1][0]).toEqual({
-        checkedKeys: ["name_2:Group1", "t:/webviz_source_2/foo"],
-        modifiedNamespaceTopics: ["/webviz_source_2/foo"],
+        checkedKeys: ["name_2:Group1", "t:/studio_source_2/foo"],
+        modifiedNamespaceTopics: ["/studio_source_2/foo"],
       });
     });
 
@@ -1085,7 +1085,7 @@ describe("useTopicTree", () => {
           {...sharedProps}
           modifiedNamespaceTopics={["/bar", "/bar", "/foo"]}
           saveConfig={saveConfigMock}
-          checkedKeys={["t:/foo", "ns:/foo:ns1", "ns:/webviz_source_2/foo:ns2"]}
+          checkedKeys={["t:/foo", "ns:/foo:ns1", "ns:/studio_source_2/foo:ns2"]}
         />,
       );
       Test.result.mock.calls[0][0].toggleNamespaceChecked({
@@ -1094,7 +1094,7 @@ describe("useTopicTree", () => {
         columnIndex: 0,
       });
       expect(saveConfigMock.mock.calls[0][0]).toEqual({
-        checkedKeys: ["t:/foo", "ns:/webviz_source_2/foo:ns2"],
+        checkedKeys: ["t:/foo", "ns:/studio_source_2/foo:ns2"],
         modifiedNamespaceTopics: ["/bar", "/foo"],
       });
     });
@@ -1185,9 +1185,9 @@ describe("useTopicTree", () => {
       expect(saveConfigMock.mock.calls[0][0]).toEqual({ expandedKeys: expected });
 
       root.setProps({ checkedKeys: expected });
-      Test.result.mock.calls[1][0].toggleNodeExpanded("t:/webviz_source_2/bar");
+      Test.result.mock.calls[1][0].toggleNodeExpanded("t:/studio_source_2/bar");
       expect(saveConfigMock.mock.calls[1][0]).toEqual({
-        expandedKeys: ["t:/foo", ...expected, "t:/webviz_source_2/bar"],
+        expandedKeys: ["t:/foo", ...expected, "t:/studio_source_2/bar"],
       });
     });
 
@@ -1377,12 +1377,12 @@ describe("useTopicTree", () => {
       const root = mount(
         <Test
           {...sharedProps}
-          providerTopics={makeTopics(["/some_topic", "/webviz_source_2/some_topic"])}
+          providerTopics={makeTopics(["/some_topic", "/studio_source_2/some_topic"])}
           sceneErrorsByTopicKey={{
             "t:/bar": ["some err1"],
-            "t:/webviz_source_2/bar": ["some bag2 err1"],
+            "t:/studio_source_2/bar": ["some bag2 err1"],
             "t:/some_topic": ["some err1", "some err2"],
-            "t:/webviz_source_2/some_topic": ["some err1"],
+            "t:/studio_source_2/some_topic": ["some err1"],
           }}
         />,
       );
@@ -1392,15 +1392,15 @@ describe("useTopicTree", () => {
         "name:(Uncategorized)": [
           "/some_topic: some err1",
           "/some_topic: some err2",
-          "/webviz_source_2/some_topic: some err1",
+          "/studio_source_2/some_topic: some err1",
         ],
-        "name:Group2": ["/bar: some err1", "/webviz_source_2/bar: some bag2 err1"],
-        "name:Nested Group": ["/bar: some err1", "/webviz_source_2/bar: some bag2 err1"],
-        "t:/bar": ["/bar: some err1", "/webviz_source_2/bar: some bag2 err1"],
+        "name:Group2": ["/bar: some err1", "/studio_source_2/bar: some bag2 err1"],
+        "name:Nested Group": ["/bar: some err1", "/studio_source_2/bar: some bag2 err1"],
+        "t:/bar": ["/bar: some err1", "/studio_source_2/bar: some bag2 err1"],
         "t:/some_topic": [
           "/some_topic: some err1",
           "/some_topic: some err2",
-          "/webviz_source_2/some_topic: some err1",
+          "/studio_source_2/some_topic: some err1",
         ],
       });
 

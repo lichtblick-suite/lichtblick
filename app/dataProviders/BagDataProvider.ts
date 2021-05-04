@@ -213,7 +213,7 @@ export default class BagDataProvider implements DataProvider {
       // `if (messageDefinition)` in a bunch of places.
       sendNotification(
         "Empty connections found",
-        `This bag has some empty connections, which Webviz does not currently support. We'll try to play the remaining topics. Details:\n\n${JSON.stringify(
+        `This bag has some empty connections, which Studio does not currently support. We'll try to play the remaining topics. Details:\n\n${JSON.stringify(
           emptyConnections,
         )}`,
         "user",

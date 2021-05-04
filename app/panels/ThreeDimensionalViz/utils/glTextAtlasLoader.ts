@@ -16,8 +16,8 @@ import { memoize } from "lodash";
 // The textureAtlasData.bin texture is a hardcoded text atlas, and it is tied to the values in the textAtlas.json. I
 // generated this by modifying the GLText command from regl-worldview and capturing the output of the
 // `memoizedGenerateAtlas` function there. I used a max texture width of 2048 to ensure that this works on all computers
-// using Webviz (max texture width is system-dependent but should always be at least 2048), and also used the default
-// hardcoded alphabet that Webviz uses.
+// using Studio (max texture width is system-dependent but should always be at least 2048), and also used the default
+// hardcoded alphabet that Studio uses.
 
 import textAtlas from "./textAtlas.json";
 import glTextAtlasUrl from "./textureAtlasData.bin";

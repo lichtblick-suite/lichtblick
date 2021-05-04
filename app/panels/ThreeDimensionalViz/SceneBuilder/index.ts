@@ -42,8 +42,8 @@ import {
   POSE_MARKER_SCALE,
   LINED_CONVEX_HULL_RENDERING_SETTING,
   MARKER_ARRAY_DATATYPES,
-  WEBVIZ_MARKER_DATATYPE,
-  WEBVIZ_MARKER_ARRAY_DATATYPE,
+  STUDIO_MARKER_DATATYPE,
+  STUDIO_MARKER_ARRAY_DATATYPE,
   VISUALIZATION_MSGS_MARKER_DATATYPE,
   VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE,
   POSE_STAMPED_DATATYPE,
@@ -464,7 +464,7 @@ export default class SceneBuilder implements MarkerProvider {
       this.reportedErrorTopics.topicsWithBadFrameIds.add(topic);
       sendNotification(
         `Topic ${topic} has bad frame`,
-        "Non-root transforms may be out of sync, since webviz uses the latest transform message instead of the one matching header.stamp",
+        "Non-root transforms may be out of sync, since Studio uses the latest transform message instead of the one matching header.stamp",
         "user",
         "warn",
       );
@@ -794,12 +794,12 @@ export default class SceneBuilder implements MarkerProvider {
   _consumeMessage = (topic: string, datatype: string, msg: MessageEvent<unknown>): void => {
     const { message } = msg;
     switch (datatype) {
-      case WEBVIZ_MARKER_DATATYPE:
+      case STUDIO_MARKER_DATATYPE:
       case VISUALIZATION_MSGS_MARKER_DATATYPE:
         this._consumeMarker(topic, message as BaseMarker);
 
         break;
-      case WEBVIZ_MARKER_ARRAY_DATATYPE:
+      case STUDIO_MARKER_ARRAY_DATATYPE:
       case VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE:
         this._consumeMarkerArray(topic, message);
 

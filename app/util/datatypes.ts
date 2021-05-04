@@ -14,8 +14,8 @@
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import {
   FUTURE_VIZ_MSGS_DATATYPE,
-  WEBVIZ_MARKER_DATATYPE,
-  WEBVIZ_MARKER_ARRAY_DATATYPE,
+  STUDIO_MARKER_DATATYPE,
+  STUDIO_MARKER_ARRAY_DATATYPE,
 } from "@foxglove-studio/app/util/globalConstants";
 
 const markerFields = [
@@ -71,19 +71,19 @@ export const basicDatatypes: RosDatatypes = {
         isArray: true,
         isComplex: true,
         name: "allMarkers",
-        type: WEBVIZ_MARKER_DATATYPE,
+        type: STUDIO_MARKER_DATATYPE,
         arrayLength: undefined,
       },
     ],
   },
-  [WEBVIZ_MARKER_ARRAY_DATATYPE]: {
+  [STUDIO_MARKER_ARRAY_DATATYPE]: {
     fields: [
       {
         isArray: true,
         isComplex: true,
         arrayLength: undefined,
         name: "markers",
-        type: WEBVIZ_MARKER_DATATYPE,
+        type: STUDIO_MARKER_DATATYPE,
       },
       {
         isArray: false,
@@ -106,8 +106,8 @@ export const basicDatatypes: RosDatatypes = {
   },
   "visualization_msgs/Marker": { fields: markerFields },
   // This is a special marker type that has a string instead of an int ID field and an additional JSON "metadata" field.
-  // For use internally to webviz, when we need to add extra data to markers.
-  [WEBVIZ_MARKER_DATATYPE]: {
+  // For use internally to Studio, when we need to add extra data to markers.
+  [STUDIO_MARKER_DATATYPE]: {
     fields: markerFields
       .filter(({ name }) => name !== "id")
       .concat([

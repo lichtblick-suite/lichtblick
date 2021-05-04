@@ -17,7 +17,7 @@ import {
   ProcessMessageOutput,
   RegistrationOutput,
 } from "@foxglove-studio/app/players/UserNodePlayer/types";
-import { DEFAULT_WEBVIZ_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 
 // Each node runtime worker runs one node at a time, hence why we have one
 // global declaration of 'nodeCallback'.
@@ -68,7 +68,7 @@ const getArgsToPrint = (args: any[]) => {
 
 // Exported for tests.
 export const requireImplementation = (id: string, projectCode: Map<string, string>): unknown => {
-  const requestedFile = `${path.join(DEFAULT_WEBVIZ_NODE_PREFIX, id)}.js`;
+  const requestedFile = `${path.join(DEFAULT_STUDIO_NODE_PREFIX, id)}.js`;
   for (const [file, source] of projectCode.entries()) {
     if (requestedFile.endsWith(file)) {
       const sourceExports = {};

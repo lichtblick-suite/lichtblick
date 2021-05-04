@@ -1,6 +1,6 @@
 # PanelAPI
 
-The `PanelAPI` namespace contains React [Hooks](https://reactjs.org/docs/hooks-intro.html) and components which allow panel authors to access Webviz data and metadata inside their panels. Using these APIs across all panels helps ensure that data appears consistent among panels, and makes it easier for panels to support advanced features (such as multiple simultaneous data sources).
+The `PanelAPI` namespace contains React [Hooks](https://reactjs.org/docs/hooks-intro.html) and components which allow panel authors to access Studio data and metadata inside their panels. Using these APIs across all panels helps ensure that data appears consistent among panels, and makes it easier for panels to support advanced features (such as multiple simultaneous data sources).
 
 To use PanelAPI, it's recommended that you import the whole namespace, so that all usage sites look consistent, like `PanelAPI.useSomething()`.
 
@@ -10,7 +10,7 @@ import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
 
 ## [`PanelAPI.useDataSourceInfo()`](useDataSourceInfo.js)
 
-"Data source info" encapsulates **rarely-changing** metadata about the sources from which Webviz is loading data. (A data source might be a local [bag file](http://wiki.ros.org/Bags/Format) dropped into the browser, or a bag stored on a remote server; see [players](../players) and [dataSources](../dataSources) for more details.)
+"Data source info" encapsulates **rarely-changing** metadata about the sources from which Studio is loading data. (A data source might be a local [bag file](http://wiki.ros.org/Bags/Format) dropped into the browser, or a bag stored on a remote server; see [players](../players) and [dataSources](../dataSources) for more details.)
 
 Using this hook inside a panel will cause the panel to re-render automatically when the metadata changes, but this won't happen very often or during playback.
 
@@ -63,7 +63,7 @@ These reducers should be wrapped in [`useCallback()`](https://reactjs.org/docs/h
 
 - `restore: (?T) => T`:
 
-  - Called with `undefined` to initialize a new state when the panel first renders, and when the user seeks to a different playback time (at which point Webviz automatically clears out state across all panels).
+  - Called with `undefined` to initialize a new state when the panel first renders, and when the user seeks to a different playback time (at which point Studio automatically clears out state across all panels).
   - Called with the previous state when the `restore` or `addMessage`/`addMessages` reducer functions change. This allows the panel an opportunity to reuse its previous state when a parameter changes, without totally discarding it (as in the case of a seek) and waiting for new messages to come in from the data source.
 
     For example, a panel that filters some incoming messages can use `restore` to create a filtered value immediately when the filter changes. To implement this, the caller might switch from unfiltered reducers:

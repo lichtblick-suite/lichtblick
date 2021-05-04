@@ -31,12 +31,12 @@ export const GLOBAL_VARIABLES_QUERY_KEY = "global-variables";
 export const TEST_EVERYTHING_LAYOUT_QUERY_VAL = "_integration-test-everything-layout";
 export const FRAMELESS = "frameless";
 
-export const DEFAULT_WEBVIZ_NODE_PREFIX = "/webviz_node/";
+export const DEFAULT_STUDIO_NODE_PREFIX = "/studio_node/";
 
 export const TRANSFORM_TOPIC = "/tf";
 export const DIAGNOSTIC_TOPIC = "/diagnostics";
 export const SOCKET_KEY = "dataSource.websocket";
-export const SECOND_SOURCE_PREFIX = "/webviz_source_2";
+export const SECOND_SOURCE_PREFIX = "/studio_source_2";
 
 export const COLOR_RGBA_DATATYPE = "std_msgs/ColorRGBA";
 export const GEOMETRY_MSGS_POLYGON_STAMPED_DATATYPE = "geometry_msgs/PolygonStamped";
@@ -45,9 +45,9 @@ export const NAV_MSGS_PATH_DATATYPE = "nav_msgs/Path";
 export const POINT_CLOUD_DATATYPE = "sensor_msgs/PointCloud2";
 export const POSE_STAMPED_DATATYPE = "geometry_msgs/PoseStamped";
 export const SENSOR_MSGS_LASER_SCAN_DATATYPE = "sensor_msgs/LaserScan";
-export const WEBVIZ_MARKER_DATATYPE = "visualization_msgs/WebvizMarker";
-export const WEBVIZ_MARKER_ARRAY_DATATYPE = "visualization_msgs/WebvizMarkerArray";
-export const FUTURE_VIZ_MSGS_DATATYPE = "future_visualization_msgs/WebvizMarkerArray";
+export const STUDIO_MARKER_DATATYPE = "visualization_msgs/StudioMarker";
+export const STUDIO_MARKER_ARRAY_DATATYPE = "visualization_msgs/StudioMarkerArray";
+export const FUTURE_VIZ_MSGS_DATATYPE = "future_visualization_msgs/StudioMarkerArray";
 export const TRANSFORM_STAMPED_DATATYPE = "geometry_msgs/TransformStamped";
 export const TF_DATATYPE = "tf/tfMessage";
 export const TF2_DATATYPE = "tf2_msgs/TFMessage";
@@ -63,10 +63,10 @@ export const ROBOT_DESCRIPTION_PARAM = "/robot_description";
 export const MARKER_ARRAY_DATATYPES = [
   "visualization_msgs/MarkerArray",
   FUTURE_VIZ_MSGS_DATATYPE,
-  WEBVIZ_MARKER_ARRAY_DATATYPE,
+  STUDIO_MARKER_ARRAY_DATATYPE,
 ];
 
-export const USER_ERROR_PREFIX = "[WEBVIZ USER ERROR]";
+export const USER_ERROR_PREFIX = "[STUDIO USER ERROR]";
 
 // In testing there seems to be a small (~4%) performance penalty to freezing messages, so for now
 // we only do it in development/testing. StackOverflow says that there should be no difference

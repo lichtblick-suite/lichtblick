@@ -22,7 +22,7 @@ import {
   ros_lib_filename,
   ros_lib_dts,
 } from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/ros";
-import { DEFAULT_WEBVIZ_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 
 import { lib_filename, lib_es6_dts } from "./lib";
 
@@ -41,7 +41,7 @@ export type NodeProjectConfig = {
 
 const utilityFiles: NodeProjectFile[] = rawUserUtils.map((utility) => ({
   ...utility,
-  filePath: `${DEFAULT_WEBVIZ_NODE_PREFIX}${utility.fileName}`,
+  filePath: `${DEFAULT_STUDIO_NODE_PREFIX}${utility.fileName}`,
 }));
 
 export function getNodeProjectConfig(): NodeProjectConfig {

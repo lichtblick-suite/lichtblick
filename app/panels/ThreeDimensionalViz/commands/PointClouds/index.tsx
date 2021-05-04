@@ -45,7 +45,7 @@ const COLOR_MODE_RAINBOW = 3;
 // Implements a custom caching mechanism for vertex buffers.
 // Any memoized vertex buffer needs to be re-created whenever the Regl context
 // changes. That happens mostly when resizing the canvas or adding/removing new
-// panels on Webviz. Whenever Regl context changes, pointCloud() is called again
+// panels on Studio. Whenever Regl context changes, pointCloud() is called again
 // and creates new instances for both position and color caches, leading to regenerating
 // all buffers again.
 // Memoized buffers are automatically deleted by WebGL whenever its context

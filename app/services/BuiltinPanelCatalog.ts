@@ -32,7 +32,7 @@ import WelcomePanel from "@foxglove-studio/app/panels/WelcomePanel";
 import DiagnosticStatusPanel from "@foxglove-studio/app/panels/diagnostics/DiagnosticStatusPanel";
 import DiagnosticSummary from "@foxglove-studio/app/panels/diagnostics/DiagnosticSummary";
 
-const ros: PanelInfo[] = [
+const visualization: PanelInfo[] = [
   { title: "3D", component: ThreeDimensionalViz },
   { title: `Diagnostics – Detail`, component: DiagnosticStatusPanel },
   { title: `Diagnostics – Summary`, component: DiagnosticSummary },
@@ -49,7 +49,7 @@ const ros: PanelInfo[] = [
   { title: "Topic Graph", component: TopicGraph },
 ];
 
-const utilities: PanelInfo[] = [
+const utility: PanelInfo[] = [
   { title: "Data Source Info", component: SourceInfo },
   { title: "Global Variable Slider", component: GlobalVariableSlider },
   { title: "Node Playground", component: NodePlayground },
@@ -75,8 +75,8 @@ class BuiltinPanelCatalog implements PanelCatalog {
 
   constructor() {
     this._panelsByCategory = new Map<string, PanelInfo[]>([
-      ["ros", ros],
-      ["utilities", utilities],
+      ["visualization", visualization],
+      ["utility", utility],
       ["debugging", debugging],
       ["hidden", hidden],
     ]);
@@ -95,8 +95,8 @@ class BuiltinPanelCatalog implements PanelCatalog {
   getPanelCategories(): PanelCategory[] {
     // hidden panels are not present in the display categories
     return [
-      { label: "ROS", key: "ros" },
-      { label: "Utilities", key: "utilities" },
+      { label: "Visualization", key: "visualization" },
+      { label: "Utility", key: "utility" },
       { label: "Debugging", key: "debugging" },
     ];
   }

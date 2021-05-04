@@ -5,7 +5,7 @@ import { Marker, MarkerTypes } from "./markers";
 type GlobalVariables = { id: number };
 
 export const inputs = [];
-export const output = "/webviz_node/";
+export const output = "/studio_node/";
 
 // Populate 'Input' with a parameter to properly type your inputs, e.g. 'Input<"/your_input_topic">'
 const publisher = (

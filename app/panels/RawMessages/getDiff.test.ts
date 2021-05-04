@@ -185,7 +185,7 @@ describe("getDiff", () => {
         name: { [diffLabels.CHANGED.labelText]: '"TWO" -> "ONE"' },
         some_id: { [diffLabels.CHANGED.labelText]: "2 -> 1" },
       },
-      "2": { WEBVIZ_DIFF___ADDED: { name: "TWO" } },
+      "2": { STUDIO_DIFF___ADDED: { name: "TWO" } },
     });
 
     expect(getDiff([obj1, obj2], [obj3, obj1, { ...newObj2, name: "XYZ" }])).toEqual({
@@ -197,7 +197,7 @@ describe("getDiff", () => {
         name: { [diffLabels.CHANGED.labelText]: '"TWO" -> "ONE"' },
         some_id: { [diffLabels.CHANGED.labelText]: "2 -> 1" },
       },
-      "2": { WEBVIZ_DIFF___ADDED: { name: "XYZ" } },
+      "2": { STUDIO_DIFF___ADDED: { name: "XYZ" } },
     });
   });
 

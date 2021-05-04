@@ -779,7 +779,7 @@ describe("state.persistedState", () => {
     });
   });
 
-  it("saves and overwrites Webviz nodes", () => {
+  it("saves and overwrites Studio nodes", () => {
     const { store, checkState } = getStore();
     const firstPayload = { foo: { name: "foo", sourceCode: "bar" } };
     const secondPayload = { bar: { name: "bar", sourceCode: "baz" } };

@@ -20,7 +20,7 @@ describe("getPrettifiedCode", () => {
       const VALUE =
       "val";
       const publisher = (message: Input< "/foo/bar">
-      ): Messages.visualization_msgs__WebvizMarkerArray | undefined => {
+      ): Messages.visualization_msgs__StudioMarkerArray | undefined => {
         return { VALUE
         }}
     `;

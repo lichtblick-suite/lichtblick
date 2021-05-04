@@ -115,7 +115,7 @@ export default class AutomatedRunPlayer implements Player {
         if (type === "user") {
           error = new Error(`${USER_ERROR_PREFIX} ${message} // ${detailsToString(details)}`);
         } else if (type === "app") {
-          error = new Error(`[WEBVIZ APPLICATION ERROR] ${detailsToString(details)}`);
+          error = new Error(`[STUDIO APPLICATION ERROR] ${detailsToString(details)}`);
         } else {
           error = new Error(`Unknown error type! ${type} // ${detailsToString(details)}`);
         }

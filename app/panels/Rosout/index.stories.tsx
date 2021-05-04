@@ -105,12 +105,12 @@ export const TopicToRender = (): JSX.Element => {
         topics: [
           { name: "/rosout", datatype: "rosgraph_msgs/Log" },
           { name: "/foo/rosout", datatype: "rosgraph_msgs/Log" },
-          { name: "/webviz_source_2/rosout", datatype: "rosgraph_msgs/Log" },
+          { name: "/studio_source_2/rosout", datatype: "rosgraph_msgs/Log" },
         ],
         frame: {
           "/rosout": makeMessages("/rosout"),
           "/foo/rosout": makeMessages("/foo/rosout"),
-          "/webviz_source_2/rosout": makeMessages("/webviz_source_2/rosout"),
+          "/studio_source_2/rosout": makeMessages("/studio_source_2/rosout"),
         },
       }}
       onMount={() => {

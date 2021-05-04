@@ -38,7 +38,7 @@ import {
 } from "@foxglove-studio/app/players/UserNodePlayer/types";
 import { Topic } from "@foxglove-studio/app/players/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { DEFAULT_WEBVIZ_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 
 export const hasTransformerErrors = (nodeData: NodeData): boolean =>
   nodeData.diagnostics.some(({ severity }) => severity === DiagnosticSeverity.Error);
@@ -136,7 +136,7 @@ export const getOutputTopic = (nodeData: NodeData): NodeData => {
   if (!outputTopic) {
     const error = {
       severity: DiagnosticSeverity.Error,
-      message: `Must include an output, e.g. export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}your_output_topic";`,
+      message: `Must include an output, e.g. export const output = "${DEFAULT_STUDIO_NODE_PREFIX}your_output_topic";`,
       source: Sources.OutputTopicChecker,
       code: ErrorCodes.OutputTopicChecker.NO_OUTPUTS,
     };
@@ -155,7 +155,7 @@ export const getOutputTopic = (nodeData: NodeData): NodeData => {
 
 export const validateInputTopics = (nodeData: NodeData, topics: Topic[]): NodeData => {
   const badInputTopic = nodeData.inputTopics.find((topic) =>
-    topic.startsWith(DEFAULT_WEBVIZ_NODE_PREFIX),
+    topic.startsWith(DEFAULT_STUDIO_NODE_PREFIX),
   );
   if (badInputTopic) {
     const error = {
@@ -193,14 +193,14 @@ export const validateInputTopics = (nodeData: NodeData, topics: Topic[]): NodeDa
 
 export const validateOutputTopic = (nodeData: NodeData): NodeData => {
   const { outputTopic } = nodeData;
-  if (!outputTopic.startsWith(DEFAULT_WEBVIZ_NODE_PREFIX)) {
+  if (!outputTopic.startsWith(DEFAULT_STUDIO_NODE_PREFIX)) {
     return {
       ...nodeData,
       diagnostics: [
         ...nodeData.diagnostics,
         {
           severity: DiagnosticSeverity.Error,
-          message: `Output "${outputTopic}" must start with "${DEFAULT_WEBVIZ_NODE_PREFIX}"`,
+          message: `Output "${outputTopic}" must start with "${DEFAULT_STUDIO_NODE_PREFIX}"`,
           source: Sources.OutputTopicChecker,
           code: ErrorCodes.OutputTopicChecker.BAD_PREFIX,
         },
@@ -219,10 +219,10 @@ export const compile = (nodeData: NodeData): NodeData => {
 
   // If a node name does not start with a forward slash, the compiler host will
   // not be able to match the correct filename.
-  if (!nodeData.name.startsWith(DEFAULT_WEBVIZ_NODE_PREFIX)) {
+  if (!nodeData.name.startsWith(DEFAULT_STUDIO_NODE_PREFIX)) {
     const error: Diagnostic = {
       severity: DiagnosticSeverity.Error,
-      message: `The filename of your node "${nodeData.name}" must start with "/webviz_node/."`,
+      message: `The filename of your node "${nodeData.name}" must start with "/studio_node/."`,
       source: Sources.Other,
       code: ErrorCodes.Other.FILENAME,
     };

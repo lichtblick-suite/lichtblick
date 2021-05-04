@@ -177,14 +177,14 @@ describe("useSceneBuilderAndTransformsData", () => {
         namespaces: [],
         errorsByTopic: {
           "/topic_a": ["error msg foo", "missing transforms to root transform: some_root_tf"],
-          "/webviz_bag_2/topic_a": ["error msg bar", "missing frame id"],
+          "/studio_bag_2/topic_a": ["error msg bar", "missing frame id"],
         },
       });
       const root = mount(<Test {...getMockProps({})} sceneBuilder={mockSceneBuilder} />);
 
       expect(Test.result.mock.calls[0][0].sceneErrorsByKey).toEqual({
         "t:/topic_a": ["error msg foo", "missing transforms to root transform: some_root_tf"],
-        "t:/webviz_bag_2/topic_a": ["error msg bar", "missing frame id"],
+        "t:/studio_bag_2/topic_a": ["error msg bar", "missing frame id"],
       });
 
       // Update scene errors.

@@ -22,7 +22,7 @@ Post in #typescript for TypeScript questions.
 Every node must declare 3 exports that determine how it should execute:
 
 - An inputs array of topic names.
-- An output topic with an enforced prefix: `/webviz_node/`.
+- An output topic with an enforced prefix: `/studio_node/`.
 - A publisher function that takes messages from input topics and publishes messages under your output topic.
 
 Here is a basic node that echoes its input:
@@ -31,7 +31,7 @@ Here is a basic node that echoes its input:
 import { Input, Messages } from "ros";
 
 export const inputs = ["/rosout"];
-export const output = "/webviz_node/echo";
+export const output = "/studio_node/echo";
 
 const publisher = (message: Input<"/rosout">): Messages.rosgraph_msgs__Log => {
   return message.message;
@@ -40,7 +40,7 @@ const publisher = (message: Input<"/rosout">): Messages.rosgraph_msgs__Log => {
 export default publisher;
 ```
 
-If you drag in a bag, you should now be able to subscribe to the “/webviz_node/echo” topic in the Raw Messages panel.
+If you drag in a bag, you should now be able to subscribe to the “/studio_node/echo” topic in the Raw Messages panel.
 
 But let’s say you want to render some markers in the 3D panel. When you create a new node, you’ll be presented with some boilerplate:
 
@@ -51,7 +51,7 @@ type Output = {};
 type GlobalVariables = { id: number };
 
 export const inputs = [];
-export const output = "/webviz_node/";
+export const output = "/studio_node/";
 
 // Populate 'Input' with a parameter to properly type your inputs, e.g. 'Input<"/your_input_topic">'
 const publisher = (message: Input<>, globalVars: GlobalVariables): Output => {
@@ -87,7 +87,7 @@ In some cases, you will want to define multiple input topics:
 import { Input, Messages } from "ros";
 
 export const inputs = ["/rosout", "/tf"];
-export const output = "/webviz_node/echo";
+export const output = "/studio_node/echo";
 
 const publisher = (message: Input<"/rosout"> | Input<"/tf">): { data: number[] } => {
   if (message.topic === "/rosout") {
@@ -110,7 +110,7 @@ To combine messages from multiple topics, create a variable in your node's globa
 import { Input, Messages, Time } from "ros";
 
 export const inputs = ["/rosout", "/tf"];
-export const output = "/webviz_node/echo";
+export const output = "/studio_node/echo";
 
 let lastReceiveTime: Time = { sec: 0, nsec: 0 };
 const myScope: {
@@ -151,7 +151,7 @@ type Output = {};
 type GlobalVariables = { someGlobalId: number };
 
 export const inputs = [];
-export const output = "/webviz_node/";
+export const output = "/studio_node/";
 
 const publisher = (message: Input<"/foo_marker">, globalVars: GlobalVariables): Output => {
   if (message.message.id === globalVars.someGlobalId) {
@@ -191,7 +191,7 @@ All you need to do is do an early (or late) return in your function body that is
 import { Input } from "ros";
 
 export const inputs = ["/state"];
-export const output = "/webviz_node/manual_metrics";
+export const output = "/studio_node/manual_metrics";
 
 const publisher = (msg: Input<"/state">): { metrics: number } | undefined => {
   if (msg.message.constant === 3) {
@@ -215,7 +215,7 @@ Yes! Node Playground supports the `json` type. You can import it from the "ros" 
 import { Input, json } from "ros";
 
 export const inputs = ["/state"];
-export const output = "/webviz_node/json_data";
+export const output = "/studio_node/json_data";
 
 const publisher = (msg: Input<"/state">): { data: json } => ({
   data: {

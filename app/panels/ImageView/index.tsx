@@ -298,7 +298,7 @@ function ImageView(props: Props) {
   }, [topics]);
 
   const imageMarkerDatatypes = useMemo(
-    () => ["visualization_msgs/ImageMarker", "webviz_msgs/ImageMarkerArray"],
+    () => ["visualization_msgs/ImageMarker", "studio_msgs/ImageMarkerArray"],
     [],
   );
   const defaultAvailableMarkerTopics = useMemo(
@@ -651,8 +651,8 @@ function ImageView(props: Props) {
           onClick={() => saveConfig({ transformMarkers: !transformMarkers })}
           tooltip={
             transformMarkers
-              ? "Markers are being transformed by webviz based on the camera model. Click to turn it off."
-              : `Markers can be transformed by webviz based on the camera model. Click to turn it on.`
+              ? "Markers are being transformed by Studio based on the camera model. Click to turn it off."
+              : `Markers can be transformed by Studio based on the camera model. Click to turn it on.`
           }
           fade
           medium

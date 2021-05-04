@@ -32,11 +32,11 @@ import {
   NodeData,
 } from "@foxglove-studio/app/players/UserNodePlayer/types";
 import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { DEFAULT_WEBVIZ_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 
 // Exported for use in other tests.
 export const baseNodeData: NodeData = {
-  name: `${DEFAULT_WEBVIZ_NODE_PREFIX}main`,
+  name: `${DEFAULT_STUDIO_NODE_PREFIX}main`,
   sourceCode: "",
   projectCode: new Map<string, string>(),
   transpiledCode: "",
@@ -88,7 +88,7 @@ describe("pipeline", () => {
       ],
       [
         `export const inputs = [];
-       export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}1";
+       export const output = "${DEFAULT_STUDIO_NODE_PREFIX}1";
        const randomVar = [];`,
         [],
       ],
@@ -179,7 +179,7 @@ describe("pipeline", () => {
     });
     it("errs when a node tries to input another user node", () => {
       const { diagnostics } = validateInputTopics(
-        { ...baseNodeData, inputTopics: [`${DEFAULT_WEBVIZ_NODE_PREFIX}my_topic`] },
+        { ...baseNodeData, inputTopics: [`${DEFAULT_STUDIO_NODE_PREFIX}my_topic`] },
         [],
       );
       expect(diagnostics.length).toEqual(1);
@@ -196,7 +196,7 @@ describe("pipeline", () => {
       );
       expect(diagnostics[0]?.code).toEqual(ErrorCodes.Other.FILENAME);
     });
-    it.each(["const x: string = 'hello webviz'", "const num: number = 1222"])(
+    it.each(["const x: string = 'hello Studio'", "const num: number = 1222"])(
       "can compile",
       (sourceCode) => {
         const { diagnostics } = compile({ ...baseNodeData, sourceCode });
@@ -274,7 +274,7 @@ describe("pipeline", () => {
     );
     it.each([
       { sourceCode: "const x: string = 42;", errorCode: 2322 },
-      { sourceCode: "export const x: number = 'hello webviz';", errorCode: 2322 },
+      { sourceCode: "export const x: number = 'hello Studio';", errorCode: 2322 },
       { sourceCode: "import { x } from './y'", errorCode: 2307 },
       { sourceCode: "const x: string = [];", errorCode: 2322 },
       {
@@ -319,7 +319,7 @@ describe("pipeline", () => {
           import { Input, Messages } from "ros";
 
           export const inputs = ["/tick_information"];
-          export const output = "/webviz_node/my_node";
+          export const output = "/studio_node/my_node";
 
           const publisher = (message: Input<"/tick_information">): Messages.std_msgs__TickInfo => {
             return {
@@ -341,13 +341,13 @@ describe("pipeline", () => {
       });
     });
 
-    it.each(["const x: string = 'hello webviz'"])("produces transpiled code", (sourceCode) => {
+    it.each(["const x: string = 'hello Studio'"])("produces transpiled code", (sourceCode) => {
       const { transpiledCode, diagnostics } = compile({ ...baseNodeData, sourceCode });
       expect(typeof transpiledCode).toEqual("string");
       expect(diagnostics.length).toEqual(0);
     });
     it.each([
-      "const x: string = 'hello webviz'",
+      "const x: string = 'hello Studio'",
       `
       import {norm} from "./pointClouds";
       const x = norm({x:1, y:2, z:3});
@@ -752,7 +752,7 @@ describe("pipeline", () => {
         description: "Multiple exports",
         sourceCode: `
           export const inputs = [];
-          export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}";
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
           export default (msg: any): { num: number } => {
             return { num: 1 };
           };`,
@@ -964,7 +964,7 @@ describe("pipeline", () => {
         sourceCode: `
           type Details<N, C> = { name: N, count: C };
           export default (msg: any): { details: Details<string, number> } => {
-            return { details: { name: 'webviz', count: 1 } };
+            return { details: { name: 'Studio', count: 1 } };
           };`,
         datatypes: mixedDatatypes,
       },
@@ -973,7 +973,7 @@ describe("pipeline", () => {
         sourceCode: `
           type Details<N, C = number> = { name: N, count: C };
           export default (msg: any): { details: Details<string> } => {
-            return { details: { name: 'webviz', count: 1 } };
+            return { details: { name: 'Studio', count: 1 } };
           };`,
         datatypes: mixedDatatypes,
       },
@@ -1049,7 +1049,7 @@ describe("pipeline", () => {
 
           type Output = Point;
           export const inputs = [];
-          export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}";
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
           const publisher = (message: any): Output => {
               return { x: 1, y: 1, z: 1 }
           };
@@ -1062,7 +1062,7 @@ describe("pipeline", () => {
           import { LineStripMarker } from "DEPRECATED__ros";
 
           export const inputs = [];
-          export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}";
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
 
           const publisher = (message: any): { markers: LineStripMarker[] } => {
             return { markers: [] };
@@ -1078,7 +1078,7 @@ describe("pipeline", () => {
           import { Messages } from "ros";
 
           export const inputs = [];
-          export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}";
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
 
           const publisher = (message: any): Messages.std_msgs__ColorRGBA => {
             return { r: 1, g: 1, b: 1, a: 1 };
@@ -1095,7 +1095,7 @@ describe("pipeline", () => {
           import { Messages } from "ros";
 
           export const inputs = [];
-          export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}";
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
 
           type ReturnType = { color: Messages.std_msgs__ColorRGBA };
 
@@ -1104,7 +1104,7 @@ describe("pipeline", () => {
           };
           export default publisher;`,
         datatypes: baseDatatypesWithNestedColor,
-        outputDatatype: "/webviz_node/main",
+        outputDatatype: "/studio_node/main",
       },
       {
         description: "Should handle type aliases",
@@ -1112,7 +1112,7 @@ describe("pipeline", () => {
           import { Messages } from "ros";
 
           export const inputs = [];
-          export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}";
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
 
           type ReturnType = Messages.std_msgs__ColorRGBA;
 
@@ -1130,7 +1130,7 @@ describe("pipeline", () => {
           import { Messages, TopicsToMessageDefinition } from "ros";
 
           export const inputs = [];
-          export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}";
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
 
           const publisher = (message: any): TopicsToMessageDefinition["/some_topic"] => {
             return { r: 1, g: 1, b: 1, a: 1 };
@@ -1146,7 +1146,7 @@ describe("pipeline", () => {
           import { Messages, TopicsToMessageDefinition } from "ros";
 
           export const inputs = [];
-          export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}";
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
 
           type Alias = TopicsToMessageDefinition["/some_topic"]
 
@@ -1164,7 +1164,7 @@ describe("pipeline", () => {
           import { Messages, json } from "ros";
 
           export const inputs = [];
-          export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}";
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
 
           type Output = {
             foo: string;
@@ -1177,7 +1177,7 @@ describe("pipeline", () => {
           export default publisher;
         `,
         datatypes: {
-          "/webviz_node/main": {
+          "/studio_node/main": {
             fields: [
               {
                 arrayLength: undefined,
@@ -1196,7 +1196,7 @@ describe("pipeline", () => {
             ],
           },
         },
-        outputDatatype: "/webviz_node/main",
+        outputDatatype: "/studio_node/main",
       },
       /*
       ERRORS
@@ -1325,7 +1325,7 @@ describe("pipeline", () => {
       {
         description: "Export a string as default export.",
         sourceCode: `
-          export default 'hello webviz';`,
+          export default 'hello Studio';`,
         error: ErrorCodes.DatatypeExtraction.NON_FUNC_DEFAULT_EXPORT,
       },
       {
@@ -1420,7 +1420,7 @@ describe("pipeline", () => {
 
           type Output = { m: LineStripMarker[] };
           export const inputs = [];
-          export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}";
+          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
           const publisher = (message: any): Output => {
               return { m: [] }
           };

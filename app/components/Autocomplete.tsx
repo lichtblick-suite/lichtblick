@@ -34,7 +34,7 @@ function measureText(text: string): number {
 
 const rowHeight = parseInt(styles.rowHeight ?? "24");
 
-// <Autocomplete> is a Webviz-specific autocomplete with support for things like multiple
+// <Autocomplete> is a Studio-specific autocomplete with support for things like multiple
 // autocompletes that seamlessly transition into each other, e.g. when building more complex
 // strings like in the Plot panel.
 //

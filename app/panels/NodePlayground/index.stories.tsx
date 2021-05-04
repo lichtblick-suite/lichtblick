@@ -21,11 +21,11 @@ import rawUserUtils from "@foxglove-studio/app/players/UserNodePlayer/nodeTransf
 import { UserNodeLog } from "@foxglove-studio/app/players/UserNodePlayer/types";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 import { SExpectedResult } from "@foxglove-studio/app/stories/storyHelpers";
-import { DEFAULT_WEBVIZ_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 
 const userNodes = {
-  nodeId1: { name: "/webviz_node/node", sourceCode: "const someVariableName = 1;" },
-  nodeId2: { name: "/webviz_node/node2", sourceCode: "const anotherVariableName = 2;" },
+  nodeId1: { name: "/studio_node/node", sourceCode: "const someVariableName = 1;" },
+  nodeId2: { name: "/studio_node/node2", sourceCode: "const anotherVariableName = 2;" },
 };
 
 const userNodeRosLib = `
@@ -69,7 +69,7 @@ const sourceCodeWithLogs = `
   import { Messages } from "ros";
 
   export const inputs = ["/my_topic"];
-  export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}";
+  export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
 
   const publisher = (): Messages.std_msgs__ColorRGBA => {
     log({ "someKey": { "nestedKey": "nestedValue" } });
@@ -96,7 +96,7 @@ const sourceCodeWithUtils = `
   import { norm } from "./pointClouds";
 
   export const inputs = ["/my_topic"];
-  export const output = "${DEFAULT_WEBVIZ_NODE_PREFIX}/1";
+  export const output = "${DEFAULT_STUDIO_NODE_PREFIX}/1";
 
   const publisher = (message: Input<"/my_topic">): { val: number } => {
     const val = norm({x:1, y:2, z:3});
@@ -147,7 +147,7 @@ storiesOf("panels/NodePlayground", module)
         ...fixture,
         userNodes: {
           nodeId1: {
-            name: "/webviz_node/node",
+            name: "/studio_node/node",
             sourceCode: sourceCodeWithUtils,
           },
         },
@@ -164,7 +164,7 @@ storiesOf("panels/NodePlayground", module)
         ...fixture,
         userNodes: {
           nodeId1: {
-            name: "/webviz_node/node",
+            name: "/studio_node/node",
             sourceCode: sourceCodeWithUtils,
           },
         },
@@ -177,7 +177,7 @@ storiesOf("panels/NodePlayground", module)
           store.dispatch(
             setUserNodes({
               nodeId1: {
-                name: "/webviz_node/node",
+                name: "/studio_node/node",
                 sourceCode: utilsSourceCode,
               },
             }),
@@ -198,7 +198,7 @@ storiesOf("panels/NodePlayground", module)
         ...fixture,
         userNodes: {
           nodeId1: {
-            name: "/webviz_node/node",
+            name: "/studio_node/node",
             sourceCode: sourceCodeWithUtils,
           },
         },
@@ -211,7 +211,7 @@ storiesOf("panels/NodePlayground", module)
           selectedNodeId: "nodeId1",
           additionalBackStackItems: [
             {
-              filePath: "/webviz_node/pointClouds",
+              filePath: "/studio_node/pointClouds",
               code: utilsSourceCode,
               readOnly: true,
             },
@@ -226,7 +226,7 @@ storiesOf("panels/NodePlayground", module)
         ...fixture,
         userNodes: {
           nodeId1: {
-            name: "/webviz_node/node",
+            name: "/studio_node/node",
             sourceCode: sourceCodeWithUtils,
           },
         },
@@ -244,7 +244,7 @@ storiesOf("panels/NodePlayground", module)
           selectedNodeId: "nodeId1",
           additionalBackStackItems: [
             {
-              filePath: "/webviz_node/pointClouds",
+              filePath: "/studio_node/pointClouds",
               code: utilsSourceCode,
               readOnly: true,
             },
@@ -368,7 +368,7 @@ storiesOf("panels/NodePlayground", module)
     <PanelSetup
       fixture={{
         ...fixture,
-        userNodes: { nodeId1: { name: "/webviz_node/node", sourceCode: "" } },
+        userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
         userNodeDiagnostics: { nodeId1: { diagnostics: [] } },
       }}
     >
@@ -379,7 +379,7 @@ storiesOf("panels/NodePlayground", module)
     <PanelSetup
       fixture={{
         ...fixture,
-        userNodes: { nodeId1: { name: "/webviz_node/node", sourceCode: "" } },
+        userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
         userNodeDiagnostics: { nodeId1: { diagnostics: [] } },
       }}
       onMount={(el: any) => {
@@ -398,7 +398,7 @@ storiesOf("panels/NodePlayground", module)
     <PanelSetup
       fixture={{
         ...fixture,
-        userNodes: { nodeId1: { name: "/webviz_node/node", sourceCode: "" } },
+        userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
         userNodeDiagnostics: { nodeId1: { diagnostics: [] } },
       }}
       onMount={(el: any) => {
@@ -417,7 +417,7 @@ storiesOf("panels/NodePlayground", module)
     <PanelSetup
       fixture={{
         ...fixture,
-        userNodes: { nodeId1: { name: "/webviz_node/node", sourceCode: "" } },
+        userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
         userNodeDiagnostics: {
           nodeId1: {
             diagnostics: [
@@ -463,7 +463,7 @@ storiesOf("panels/NodePlayground", module)
     <PanelSetup
       fixture={{
         ...fixture,
-        userNodes: { nodeId1: { name: "/webviz_node/node", sourceCode: "" } },
+        userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
         userNodeDiagnostics: {
           nodeId1: {
             diagnostics: [
@@ -519,7 +519,7 @@ storiesOf("panels/NodePlayground", module)
         ...fixture,
         userNodes: {
           nodeId1: {
-            name: "/webviz_node/node",
+            name: "/studio_node/node",
             sourceCode: sourceCodeWithLogs,
           },
         },
@@ -536,7 +536,7 @@ storiesOf("panels/NodePlayground", module)
         ...fixture,
         userNodes: {
           nodeId1: {
-            name: "/webviz_node/node",
+            name: "/studio_node/node",
             sourceCode: sourceCodeWithLogs,
           },
         },
@@ -559,7 +559,7 @@ storiesOf("panels/NodePlayground", module)
     <PanelSetup
       fixture={{
         ...fixture,
-        userNodes: { nodeId1: { name: "/webviz_node/node", sourceCode: "" } },
+        userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
         userNodeDiagnostics: { nodeId1: { diagnostics: [] } },
         userNodeLogs: { nodeId1: { logs } },
       }}

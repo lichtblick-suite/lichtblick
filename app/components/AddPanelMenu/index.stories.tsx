@@ -46,14 +46,14 @@ const MockPanel2 = Panel(SamplePanel2);
 class MockPanelCatalog implements PanelCatalog {
   getPanelCategories(): PanelCategory[] {
     return [
-      { label: "ROS", key: "ros" },
-      { label: "DEBUG", key: "debug" },
+      { label: "VISUALIZATION", key: "visualization" },
+      { label: "DEBUGGING", key: "debugging" },
     ];
   }
   getPanelsByCategory(): Map<string, PanelInfo[]> {
     return new Map([
-      ["ros", [{ title: "A Panel", component: MockPanel1 }]],
-      ["debug", [{ title: "B Panel", component: MockPanel2 }]],
+      ["visualization", [{ title: "A Panel", component: MockPanel1 }]],
+      ["debugging", [{ title: "B Panel", component: MockPanel2 }]],
     ]);
   }
   getPanelsByType(): Map<string, PanelInfo> {

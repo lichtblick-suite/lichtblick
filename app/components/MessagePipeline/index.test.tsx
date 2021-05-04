@@ -191,16 +191,16 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     });
 
     act(() => {
-      result.current.setSubscriptions("test", [{ topic: "/webviz/test" }]);
+      result.current.setSubscriptions("test", [{ topic: "/studio/test" }]);
     });
-    expect(result.current.subscriptions).toEqual([{ topic: "/webviz/test" }]);
+    expect(result.current.subscriptions).toEqual([{ topic: "/studio/test" }]);
 
     act(() => {
-      result.current.setSubscriptions("bar", [{ topic: "/webviz/test2" }]);
+      result.current.setSubscriptions("bar", [{ topic: "/studio/test2" }]);
     });
     expect(result.current.subscriptions).toEqual([
-      { topic: "/webviz/test" },
-      { topic: "/webviz/test2" },
+      { topic: "/studio/test" },
+      { topic: "/studio/test2" },
     ]);
     const lastSubscriptions = result.current.subscriptions;
     // cause the player to emit a frame outside the render loop to trigger another render
@@ -218,13 +218,13 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       initialProps: { maybePlayer: { player } },
     });
 
-    act(() => result.current.setPublishers("test", [{ topic: "/webviz/test", datatype: "test" }]));
-    expect(result.current.publishers).toEqual([{ topic: "/webviz/test", datatype: "test" }]);
+    act(() => result.current.setPublishers("test", [{ topic: "/studio/test", datatype: "test" }]));
+    expect(result.current.publishers).toEqual([{ topic: "/studio/test", datatype: "test" }]);
 
-    act(() => result.current.setPublishers("bar", [{ topic: "/webviz/test2", datatype: "test2" }]));
+    act(() => result.current.setPublishers("bar", [{ topic: "/studio/test2", datatype: "test2" }]));
     expect(result.current.publishers).toEqual([
-      { topic: "/webviz/test", datatype: "test" },
-      { topic: "/webviz/test2", datatype: "test2" },
+      { topic: "/studio/test", datatype: "test" },
+      { topic: "/studio/test2", datatype: "test2" },
     ]);
 
     const lastPublishers = result.current.publishers;
@@ -376,14 +376,14 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       wrapper: Wrapper,
       initialProps: { maybePlayer: { player } },
     });
-    act(() => result.current.setSubscriptions("test", [{ topic: "/webviz/test" }]));
-    act(() => result.current.setSubscriptions("bar", [{ topic: "/webviz/test2" }]));
-    act(() => result.current.setPublishers("test", [{ topic: "/webviz/test", datatype: "test" }]));
+    act(() => result.current.setSubscriptions("test", [{ topic: "/studio/test" }]));
+    act(() => result.current.setSubscriptions("bar", [{ topic: "/studio/test2" }]));
+    act(() => result.current.setPublishers("test", [{ topic: "/studio/test", datatype: "test" }]));
 
     const player2 = new FakePlayer();
     rerender({ maybePlayer: { player: player2 } });
-    expect(player2.subscriptions).toEqual([{ topic: "/webviz/test" }, { topic: "/webviz/test2" }]);
-    expect(player2.publishers).toEqual([{ topic: "/webviz/test", datatype: "test" }]);
+    expect(player2.subscriptions).toEqual([{ topic: "/studio/test" }, { topic: "/studio/test2" }]);
+    expect(player2.publishers).toEqual([{ topic: "/studio/test", datatype: "test" }]);
   });
 
   it("keeps activeData when closing a player", async () => {

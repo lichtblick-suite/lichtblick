@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`rosDatatypesToMessageDefinition Includes all of the definitions for "visualization_msgs/WebvizMarkerArray" 1`] = `
+exports[`rosDatatypesToMessageDefinition Includes all of the definitions for "visualization_msgs/StudioMarkerArray" 1`] = `
 Array [
   Object {
     "definitions": Array [
@@ -9,7 +9,7 @@ Array [
         "isArray": true,
         "isComplex": true,
         "name": "markers",
-        "type": "visualization_msgs/WebvizMarker",
+        "type": "visualization_msgs/StudioMarker",
       },
       Object {
         "isArray": false,
@@ -233,7 +233,7 @@ Array [
         "type": "json",
       },
     ],
-    "name": "visualization_msgs/WebvizMarker",
+    "name": "visualization_msgs/StudioMarker",
   },
   Object {
     "definitions": Array [

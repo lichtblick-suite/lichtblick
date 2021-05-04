@@ -98,9 +98,9 @@ describe("ImageView", () => {
       expect(getCameraNamespace("/old/camera_back_left/compressed")).toEqual("/camera_back_left");
       expect(getCameraNamespace("/camera_back_left/old/compressed")).toEqual("/camera_back_left");
     });
-    it("includes webviz_source_2 in camera topics", () => {
-      expect(getCameraNamespace("/webviz_source_2/camera_back_left/compressed")).toEqual(
-        "/webviz_source_2/camera_back_left",
+    it("includes studio_source_2 in camera topics", () => {
+      expect(getCameraNamespace("/studio_source_2/camera_back_left/compressed")).toEqual(
+        "/studio_source_2/camera_back_left",
       );
     });
     it("Returns undefined when encountering a single level topic", () => {
@@ -144,23 +144,23 @@ describe("ImageView", () => {
       );
     });
 
-    it("Separates /webviz_source_2 topics", () => {
+    it("Separates /studio_source_2 topics", () => {
       expect(
         groupTopics([
           topic("/camera_1/foo"),
           topic("/camera_1/bar"),
-          topic("/webviz_source_2/camera_1/foo"),
-          topic("/webviz_source_2/camera_1/bar"),
-          topic("/webviz_source_2/camera_2/foo"),
+          topic("/studio_source_2/camera_1/foo"),
+          topic("/studio_source_2/camera_1/bar"),
+          topic("/studio_source_2/camera_2/foo"),
         ]),
       ).toEqual(
         new Map([
           ["/camera_1", [topic("/camera_1/foo"), topic("/camera_1/bar")]],
           [
-            "/webviz_source_2/camera_1",
-            [topic("/webviz_source_2/camera_1/foo"), topic("/webviz_source_2/camera_1/bar")],
+            "/studio_source_2/camera_1",
+            [topic("/studio_source_2/camera_1/foo"), topic("/studio_source_2/camera_1/bar")],
           ],
-          ["/webviz_source_2/camera_2", [topic("/webviz_source_2/camera_2/foo")]],
+          ["/studio_source_2/camera_2", [topic("/studio_source_2/camera_2/foo")]],
         ]),
       );
     });

@@ -24,7 +24,7 @@ import generateRosLib, {
 import { NodeData } from "@foxglove-studio/app/players/UserNodePlayer/types";
 
 const baseNodeData: NodeData = {
-  name: "/webviz_node/main",
+  name: "/studio_node/main",
   sourceCode: "",
   transpiledCode: "",
   diagnostics: [],

@@ -147,8 +147,8 @@ export const setGlobalVariables = (payload: { [key: string]: unknown }): SET_GLO
   payload,
 });
 
-type SET_WEBVIZ_NODES = { type: "SET_USER_NODES"; payload: UserNodes };
-export const setUserNodes = (payload: UserNodes): SET_WEBVIZ_NODES => ({
+type SET_STUDIO_NODES = { type: "SET_USER_NODES"; payload: UserNodes };
+export const setUserNodes = (payload: UserNodes): SET_STUDIO_NODES => ({
   type: PANELS_ACTION_TYPES.SET_USER_NODES,
   payload,
 });
@@ -278,7 +278,7 @@ export type PanelsActions =
   | CREATE_TAB_PANEL
   | OVERWRITE_GLOBAL_DATA
   | SET_GLOBAL_DATA
-  | SET_WEBVIZ_NODES
+  | SET_STUDIO_NODES
   | SET_LINKED_GLOBAL_VARIABLES
   | SET_PLAYBACK_CONFIG
   | CLOSE_PANEL

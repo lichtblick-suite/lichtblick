@@ -148,7 +148,7 @@ describe("BagDataProvider", () => {
     sendNotification.expectCalledDuringTest();
   });
 
-  // Regression test for https://github.com/cruise-automation/webviz/issues/373
+  // Regression test for https://github.com/cruise-automation/studio/issues/373
   it("treats an empty message definition as a non-existent connection (therefore thinking this bag is empty)", async () => {
     const provider = new BagDataProvider(
       {
@@ -164,7 +164,7 @@ describe("BagDataProvider", () => {
     expect((sendNotification as any).mock.calls).toEqual([
       [
         "Empty connections found",
-        'This bag has some empty connections, which Webviz does not currently support. We\'ll try to play the remaining topics. Details:\n\n[{"conn":0,"topic":"/led_array_status","type":"led_array_msgs/Status","md5sum":"53a14e6cadee4d14930b099922d25397","messageDefinition":"","callerid":"/led_array_node","latching":false,"offset":5254,"dataOffset":5310,"end":5475,"length":221}]',
+        'This bag has some empty connections, which Studio does not currently support. We\'ll try to play the remaining topics. Details:\n\n[{"conn":0,"topic":"/led_array_status","type":"led_array_msgs/Status","md5sum":"53a14e6cadee4d14930b099922d25397","messageDefinition":"","callerid":"/led_array_node","latching":false,"offset":5254,"dataOffset":5310,"end":5475,"length":221}]',
         "user",
         "warn",
       ],

@@ -21,11 +21,11 @@ const topics = [
     datatype: "abc_msgs/foo",
   },
   {
-    name: "/webviz_source_2/foo",
+    name: "/studio_source_2/foo",
     datatype: "abc_msgs/foo",
   },
   {
-    name: "/webviz_source_2/foo",
+    name: "/studio_source_2/foo",
     datatype: "bad_datatype/abc_msgs/foo",
   },
 ];
@@ -105,7 +105,7 @@ storiesOf("components/TopicToRenderMenu", module)
           onChange={() => {
             // no-op
           }}
-          topicToRender="/webviz_source_2/foo"
+          topicToRender="/studio_source_2/foo"
           topics={topics}
           singleTopicDatatype={"abc_msgs/foo"}
           defaultTopicToRender="/foo"
@@ -151,7 +151,7 @@ storiesOf("components/TopicToRenderMenu", module)
           onChange={() => {
             // no-op
           }}
-          topicToRender="/webviz_source_2"
+          topicToRender="/studio_source_2"
           topics={[]}
           topicsGroups={topicsGroups}
           defaultTopicToRender=""

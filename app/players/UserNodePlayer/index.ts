@@ -47,7 +47,7 @@ import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 import { UserNode, UserNodes } from "@foxglove-studio/app/types/panels";
 import Rpc from "@foxglove-studio/app/util/Rpc";
 import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
-import { DEFAULT_WEBVIZ_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
 import signal from "@foxglove-studio/app/util/signal";
 import Log from "@foxglove/log";
 
@@ -631,8 +631,8 @@ export default class UserNodePlayer implements Player {
     const realTopicSubscriptions: SubscribePayload[] = [];
     const nodeSubscriptions: SubscribePayload[] = [];
     for (const subscription of subscriptions) {
-      // For performance, only check topics that start with DEFAULT_WEBVIZ_NODE_PREFIX.
-      if (!subscription.topic.startsWith(DEFAULT_WEBVIZ_NODE_PREFIX)) {
+      // For performance, only check topics that start with DEFAULT_STUDIO_NODE_PREFIX.
+      if (!subscription.topic.startsWith(DEFAULT_STUDIO_NODE_PREFIX)) {
         realTopicSubscriptions.push(subscription);
         continue;
       }
