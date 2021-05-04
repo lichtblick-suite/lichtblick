@@ -29,6 +29,7 @@ import usePublisher from "@foxglove-studio/app/hooks/usePublisher";
 import { PlayerCapabilities, Topic } from "@foxglove-studio/app/players/types";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
+import { useRethrow } from "@foxglove/hooks";
 
 import buildSampleMessage from "./buildSampleMessage";
 
@@ -155,13 +156,15 @@ function Publish(props: Props) {
     [saveConfig],
   );
 
-  const onPublishClicked = useCallback(() => {
-    if (topicName.length !== 0 && parsedObject) {
-      publish(parsedObject);
-    } else {
-      throw new Error(`called _publish() when input was invalid`);
-    }
-  }, [publish, parsedObject, topicName]);
+  const onPublishClicked = useRethrow(
+    useCallback(() => {
+      if (topicName.length !== 0 && parsedObject) {
+        publish(parsedObject);
+      } else {
+        throw new Error(`called _publish() when input was invalid`);
+      }
+    }, [publish, parsedObject, topicName]),
+  );
 
   const onChange = useCallback(
     (event: React.SyntheticEvent<HTMLTextAreaElement>) => {

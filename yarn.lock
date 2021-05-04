@@ -2041,6 +2041,7 @@ __metadata:
   dependencies:
     "@fluentui/react": 8.14.0
     "@fluentui/react-icons-mdl2": 1.1.0
+    "@foxglove/hooks": "workspace:packages/@foxglove/hooks"
     "@foxglove/velodyne-cloud": "workspace:packages/velodyne-cloud"
     "@mdi/svg": 5.9.55
     "@storybook/addon-actions": 6.2.5
@@ -2193,6 +2194,14 @@ __metadata:
     typescript: 4.2.2
   peerDependencies:
     electron: ">=12"
+  languageName: unknown
+  linkType: soft
+
+"@foxglove/hooks@workspace:packages/@foxglove/hooks":
+  version: 0.0.0-use.local
+  resolution: "@foxglove/hooks@workspace:packages/@foxglove/hooks"
+  dependencies:
+    typescript: 4.2.2
   languageName: unknown
   linkType: soft
 
