@@ -10,7 +10,6 @@ import ReactDOM from "react-dom";
 
 import "@foxglove-studio/app/styles/global.scss";
 
-import App from "@foxglove-studio/app/App";
 import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import installDevtoolsFormatters from "@foxglove-studio/app/util/installDevtoolsFormatters";
 import { initializeLogEvent } from "@foxglove-studio/app/util/logEvent";
@@ -19,6 +18,8 @@ import waitForFonts from "@foxglove-studio/app/util/waitForFonts";
 import { APP_VERSION } from "@foxglove-studio/app/version";
 import { Sockets } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
+
+import App from "./App";
 
 const log = Logger.getLogger(__filename);
 

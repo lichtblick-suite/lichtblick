@@ -1,4 +1,0 @@
-settings:
-  import/resolver:
-    webpack:
-      config: ./webpack.preload.config.ts

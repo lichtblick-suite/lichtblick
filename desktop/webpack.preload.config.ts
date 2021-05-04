@@ -6,7 +6,7 @@ import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import path from "path";
 import { Configuration, EnvironmentPlugin } from "webpack";
 
-import { WebpackArgv } from "./WebpackArgv";
+import { WebpackArgv } from "@foxglove-studio/app/WebpackArgv";
 
 export default (_: unknown, argv: WebpackArgv): Configuration => {
   const isDev = argv.mode === "development";

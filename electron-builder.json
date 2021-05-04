@@ -4,7 +4,7 @@
   "npmRebuild": false,
   "asar": true,
   "directories": {
-    "app": ".webpack",
+    "app": "desktop/.webpack",
     "buildResources": "resources"
   },
   "artifactName": "${name}-${version}-${os}-${arch}.${ext}",

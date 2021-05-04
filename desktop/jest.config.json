@@ -1,5 +1,5 @@
 {
-  "globalSetup": "<rootDir>/globalSetup.ts",
+  "globalSetup": "<rootDir>/test/globalSetup.ts",
   "testRunner": "jest-circus/runner",
   "transform": {
     "\\.[jt]sx?$": ["babel-jest", { "rootMode": "upward" }]

@@ -2,6 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+// These modules declaration merge into chart.js declarations for plugins
+// Since we don't use the modules directly in this file, we need to load the types as references
+// so typescript will have the merged declarations.
+/// <reference types="chartjs-plugin-datalabels" />
+/// <reference types="chartjs-plugin-zoom" />
+
 import { ChartOptions, ChartData, ScatterDataPoint } from "chart.js";
 import Hammer from "hammerjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

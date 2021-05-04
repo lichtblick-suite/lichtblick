@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { Configuration } from "webpack";
 
-import { makeConfig } from "../../webpack.renderer.config";
+import { makeConfig } from "@foxglove-studio/app/webpack";
 
 module.exports = {
   stories: ["../**/*.stories.@(ts|tsx)"],
@@ -24,6 +24,7 @@ module.exports = {
       { mode: config.mode },
       { allowUnusedLocals: true },
     );
+
     return {
       ...config,
       resolve: {
@@ -37,7 +38,7 @@ module.exports = {
         },
       },
       module: rendererConfig.module,
-      plugins: [...(config.plugins ?? []), ...(rendererConfig.plugins ?? [])],
+      plugins: (config.plugins ?? []).concat(rendererConfig.plugins ?? []),
     };
   },
 };

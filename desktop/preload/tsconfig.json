@@ -1,6 +1,6 @@
 {
   "extends": "@foxglove/tsconfig/tsconfig.base.json",
-  "include": ["./**/*", "../typings/*.d.ts"],
+  "include": ["./**/*"],
   "compilerOptions": {
     "noEmit": true,
     "lib": ["dom", "es2020"]

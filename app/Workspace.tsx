@@ -159,7 +159,9 @@ export default function Workspace(): JSX.Element {
       const otherFiles: File[] = [];
       for (const file of files) {
         try {
-          if (!(await loadFromFile(file, { basePath: file.path }))) {
+          // electron extends File with a `path` field which is not available in browsers
+          const basePath = (file as { path?: string }).path ?? "";
+          if (!(await loadFromFile(file, { basePath }))) {
             otherFiles.push(file);
           }
         } catch (err) {

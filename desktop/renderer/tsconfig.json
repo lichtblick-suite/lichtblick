@@ -1,9 +1,8 @@
 {
   "extends": "@foxglove/tsconfig/tsconfig.base.json",
-  "include": ["./**/*", "./**/*.json", "./.storybook/**/*", "../package.json"],
+  "include": ["./**/*", "./**/*.json"],
   "compilerOptions": {
     "noEmit": true,
-    "rootDir": "../",
     "jsx": "react-jsx",
     "lib": ["dom", "dom.iterable", "es2020"],
     "paths": {
@@ -14,9 +13,7 @@
         "./node_modules/@types/micro-memoize",
         "../node_modules/@types/micro-memoize",
         "../../node_modules/@types/micro-memoize"
-      ],
-      // This is only needed for vscode import suggestions
-      "@foxglove-studio/app/*": ["./*"]
+      ]
     }
   }
 }

@@ -2,12 +2,15 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import electron from "electron";
 import path from "path";
 import { Application } from "spectron";
 
 jest.setTimeout(10000);
 
-const electronPath = path.join(__dirname, "..", "node_modules", ".bin", "electron");
+// In node.js the electron import gives us the path to the electron binary
+// Our type definitions don't realize this so cast the variable to a string
+const electronPath = (electron as unknown) as string;
 const appPath = path.join(__dirname, "..", ".webpack");
 
 const app = new Application({

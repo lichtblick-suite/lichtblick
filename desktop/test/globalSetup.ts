@@ -3,7 +3,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import webpack from "webpack";
 
-import { WebpackArgv } from "../WebpackArgv";
 import webpackConfig from "../webpack.config";
 
 // global jest test setup builds the webpack build before running any integration tests
@@ -12,11 +11,10 @@ export default async (): Promise<void> => {
     return;
   }
 
-  const webpackArgs: WebpackArgv = { mode: "production" };
   const compiler = webpack(
     webpackConfig.map((config) => {
       if (typeof config === "function") {
-        return config(undefined, webpackArgs);
+        return config(undefined, { mode: "production" });
       }
 
       return config;

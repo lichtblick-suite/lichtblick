@@ -8,7 +8,7 @@ import path from "path";
 import type { Configuration } from "webpack";
 import type { Configuration as WebpackDevServerConfiguration } from "webpack-dev-server";
 
-import packageJson from "./package.json";
+import packageJson from "../package.json";
 import main from "./webpack.main.config";
 import preload from "./webpack.preload.config";
 import renderer from "./webpack.renderer.config";

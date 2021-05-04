@@ -38,7 +38,7 @@ const BuiltinPanelCatalogProvider = React.lazy(
   () => import("@foxglove-studio/app/context/BuiltinPanelCatalogProvider"),
 );
 
-const Workspace = React.lazy(() => import("./Workspace"));
+const Workspace = React.lazy(() => import("@foxglove-studio/app/Workspace"));
 
 function AllProviders({ providers, children }: PropsWithChildren<{ providers: JSX.Element[] }>) {
   return (

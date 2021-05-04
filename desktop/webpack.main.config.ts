@@ -6,7 +6,7 @@ import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import path from "path";
 import { Configuration, ResolveOptions, DefinePlugin, EnvironmentPlugin } from "webpack";
 
-import { WebpackArgv } from "./WebpackArgv";
+import { WebpackArgv } from "@foxglove-studio/app/WebpackArgv";
 
 export default (_: unknown, argv: WebpackArgv): Configuration => {
   const isServe = argv.env?.WEBPACK_SERVE ?? false;
@@ -32,7 +32,7 @@ export default (_: unknown, argv: WebpackArgv): Configuration => {
     : "`file://${require('path').join(__dirname, '..', 'renderer', 'index.html')}`";
 
   return {
-    context: path.resolve(__dirname, "./desktop"),
+    context: path.resolve(__dirname, "./main"),
     entry: "./index.ts",
     target: "electron-main",
     devtool: isDev ? "eval-cheap-module-source-map" : "source-map",
