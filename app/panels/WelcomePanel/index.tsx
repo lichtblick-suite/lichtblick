@@ -111,7 +111,7 @@ function WelcomePanel() {
           .
         </p>
         <p style={{ marginTop: "3em" }}>
-          To get in touch with us and learn more tips &amp; tricks, join our Slack workspace and
+          To get in touch with us and learn more tips &amp; tricks, join our Slack community and
           subscribe to our mailing list:
         </p>
         <TextField
@@ -128,7 +128,7 @@ function WelcomePanel() {
         />
         <Checkbox
           dataTest="slack-invite"
-          label={`Invite me to the Slack workspace`}
+          label={`Invite me to the Slack community`}
           checked={slackInviteChecked}
           onChange={setSlackInviteChecked}
         />
