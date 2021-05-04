@@ -2,7 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { addBreadcrumb, setUser, Severity } from "@sentry/electron";
+import {
+  addBreadcrumb as addSentryBreadcrumb,
+  setUser as setSentryUser,
+  Severity,
+} from "@sentry/electron";
 import amplitude from "amplitude-js";
 import { v4 as uuidv4 } from "uuid";
 
@@ -29,7 +33,7 @@ export enum AppEvent {
 }
 
 export class Analytics {
-  private _amplitude?: amplitude.AmplitudeClient;
+  private _amplitude: Promise<amplitude.AmplitudeClient | undefined>;
   private _crashReporting: boolean;
   private _storage = new Storage();
 
@@ -40,31 +44,41 @@ export class Analytics {
   }) {
     const amplitudeApiKey = options.amplitudeApiKey;
     const optOut = options.optOut ?? false;
-    this._crashReporting = !(options.crashReportingOptOut ?? false);
+
     if (!optOut && amplitudeApiKey != undefined && amplitudeApiKey.length > 0) {
-      const userId = this.getUserId();
-      const deviceId = this.getDeviceId();
-      const appVersion = this.getAppVersion();
-      log.info(
-        `Initializing telemetry as user ${userId}, device ${deviceId} (version ${appVersion})`,
-      );
-      this._amplitude = amplitude.getInstance();
-      this._amplitude.init(amplitudeApiKey);
-      this._amplitude.setUserId(userId);
-      this._amplitude.setDeviceId(deviceId);
-      this._amplitude.setVersionName(appVersion);
-      this._amplitude.logEvent(AppEvent.APP_INIT);
+      this._amplitude = this.createAmplitude(amplitudeApiKey);
     } else {
-      log.info("Telemetry is disabled");
+      this._amplitude = Promise.resolve(undefined);
     }
 
+    this._crashReporting = !(options.crashReportingOptOut ?? false);
     if (this._crashReporting) {
-      const id = this.getUserId();
-      const deviceId = this.getDeviceId();
-      setUser({ id, deviceId });
+      this.getDeviceId().then((deviceId) => {
+        const id = this.getUserId();
+        setSentryUser({ id, deviceId });
+      });
     } else {
       log.info("Crash reporting is disabled");
     }
+
+    this.logEvent(AppEvent.APP_INIT);
+  }
+
+  private async createAmplitude(apiKey: string): Promise<amplitude.AmplitudeClient> {
+    const userId = this.getUserId();
+    const deviceId = await this.getDeviceId();
+    const appVersion = this.getAppVersion();
+    log.info(
+      `Initializing telemetry as user ${userId}, device ${deviceId} (version ${appVersion})`,
+    );
+
+    const amp = amplitude.getInstance();
+    amp.init(apiKey);
+    amp.setUserId(userId);
+    amp.setDeviceId(deviceId);
+    amp.setVersionName(appVersion);
+
+    return amp;
   }
 
   getAppVersion(): string {
@@ -80,13 +94,22 @@ export class Analytics {
     return userId;
   }
 
-  getDeviceId(): string {
-    return OsContextSingleton?.getMachineId() ?? UUID_ZERO;
+  // OsContextSingleton.getMachineId() can take 500-2000ms on macOS
+  async getDeviceId(): Promise<string> {
+    return (await OsContextSingleton?.getMachineId()) ?? UUID_ZERO;
   }
 
   async logEvent(event: AppEvent, data?: { [key: string]: unknown }): Promise<void> {
+    const amp = await this._amplitude;
+    if (amp != undefined) {
+      await new Promise<void>((resolve) => {
+        amp.logEvent(event, data, () => resolve());
+      });
+    }
+
+    // important that this happens after await amplitude (after setSentryUser() call)
     if (this._crashReporting) {
-      addBreadcrumb({
+      addSentryBreadcrumb({
         type: "user",
         category: event,
         level: Severity.Info,
@@ -94,12 +117,5 @@ export class Analytics {
         timestamp: Date.now() / 1000,
       });
     }
-
-    return new Promise((resolve) => {
-      if (this._amplitude == undefined) {
-        return resolve();
-      }
-      this._amplitude.logEvent(event, data, () => resolve());
-    });
   }
 }

@@ -4,7 +4,7 @@
 
 import { init as initSentry } from "@sentry/electron";
 import { contextBridge, ipcRenderer } from "electron";
-import { machineIdSync } from "node-machine-id";
+import { machineId } from "node-machine-id";
 import os from "os";
 
 import type { OsContext, OsContextForwardedEvent } from "@foxglove-studio/app/OsContext";
@@ -56,6 +56,10 @@ window.addEventListener(
 );
 
 const localFileStorage = new LocalFileStorage();
+
+// machineId() can sometimes take 500-2000ms on macOS
+// we fetch it early so that it is ready for Analytics.ts
+const machineIdPromise = machineId();
 
 const ctx: OsContext = {
   platform: process.platform,
@@ -111,8 +115,8 @@ const ctx: OsContext = {
     }
     return output;
   },
-  getMachineId: (): string => {
-    return machineIdSync();
+  getMachineId: (): Promise<string> => {
+    return machineIdPromise;
   },
   getAppVersion: (): string => {
     return APP_VERSION;

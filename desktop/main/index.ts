@@ -46,7 +46,7 @@ if (require("electron-squirrel-startup")) {
 // Load opt-out settings for crash reporting and telemetry
 const [allowCrashReporting] = getTelemetrySettings();
 if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
-  log.info("initializing Sentry in renderer");
+  log.info("initializing Sentry in main");
   initSentry({
     dsn: process.env.SENTRY_DSN,
     autoSessionTracking: true,

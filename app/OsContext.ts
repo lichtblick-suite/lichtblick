@@ -73,7 +73,7 @@ export interface OsContext {
   // Get a listing for every network interface discovered on the system
   getNetworkInterfaces: () => NetworkInterface[];
   // Get a unique identifier for the system from the operating system
-  getMachineId: () => string;
+  getMachineId: () => Promise<string>;
   // Get the version string from package.json
   getAppVersion: () => string;
 
