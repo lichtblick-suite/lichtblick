@@ -34,6 +34,13 @@ if (
     dsn: process.env.SENTRY_DSN,
     autoSessionTracking: true,
     release: `${process.env.SENTRY_PROJECT}@${APP_VERSION}`,
+    // Remove the default breadbrumbs integration - it does not accurately track breadcrumbs and
+    // creates more noise than benefit.
+    integrations: (integrations) => {
+      return integrations.filter((integration) => {
+        return integration.name !== "Breadcrumbs";
+      });
+    },
   });
 }
 

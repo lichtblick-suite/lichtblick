@@ -6,7 +6,7 @@
 /* eslint-disable no-restricted-syntax */
 
 import "colors";
-import { addBreadcrumb, captureException, init as initSentry } from "@sentry/electron";
+import { captureException, init as initSentry } from "@sentry/electron";
 import { app, BrowserWindow, ipcMain, Menu, session, nativeTheme } from "electron";
 import installExtension, {
   REACT_DEVELOPER_TOOLS,
@@ -237,36 +237,6 @@ app.on("ready", async () => {
     }
   }
 
-  const ignoredDomainSuffixes = ["api.amplitude.com", "ingest.sentry.io"];
-  const ignoreRequest = (urlStr: string): boolean => {
-    try {
-      const url = new URL(urlStr);
-      for (const suffix of ignoredDomainSuffixes) {
-        if (url.hostname.endsWith(suffix)) {
-          return true;
-        }
-      }
-    } catch {
-      // Don't ignore requests to unparseable URLs
-    }
-    return false;
-  };
-
-  if (allowCrashReporting) {
-    session.defaultSession.webRequest.onBeforeRequest((details, callback) => {
-      // Log web requests as crash reporting breadcrumbs
-      if (!ignoreRequest(details.url)) {
-        addBreadcrumb({
-          type: "http",
-          category: "request",
-          timestamp: details.timestamp / 1000.0,
-          data: { url: details.url, method: details.method },
-        });
-      }
-      callback({});
-    });
-  }
-
   // Content Security Policy
   // See: https://www.electronjs.org/docs/tutorial/security
   const contentSecurityPolicy: Record<string, string> = {
@@ -283,21 +253,6 @@ app.on("ready", async () => {
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const url = new URL(details.url);
     const responseHeaders = { ...details.responseHeaders };
-
-    // Log web responses as crash reporting breadcrumbs
-    if (allowCrashReporting && !ignoreRequest(details.url)) {
-      addBreadcrumb({
-        type: "http",
-        category: "response",
-        timestamp: details.timestamp / 1000.0,
-        data: {
-          url: details.url,
-          method: details.method,
-          status_code: details.statusCode,
-          reason: details.statusLine,
-        },
-      });
-    }
 
     // don't set CSP for internal URLs
     if (!["chrome-extension:", "devtools:", "data:"].includes(url.protocol)) {
