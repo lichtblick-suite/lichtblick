@@ -7,6 +7,7 @@ import CytoscapeDagre from "cytoscape-dagre";
 import { MutableRefObject, useEffect, useRef } from "react";
 
 Cytoscape.use(CytoscapeDagre);
+Cytoscape.warnings(false);
 
 const DAG_LAYOUT = {
   name: "dagre",

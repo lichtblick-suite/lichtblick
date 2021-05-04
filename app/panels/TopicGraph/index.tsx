@@ -213,6 +213,9 @@ function TopicGraph() {
             const subscribers = subscribedTopics.get(topic);
             if (subscribers != undefined) {
               for (const subNode of subscribers) {
+                if (subNode === pubNode) {
+                  continue;
+                }
                 const source = `n:${pubNode}`;
                 const target = `n:${subNode}`;
                 output.push({ data: { id: `${source}-${target}`, source, target } });
