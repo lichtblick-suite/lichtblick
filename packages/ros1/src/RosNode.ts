@@ -241,7 +241,7 @@ export class RosNode extends EventEmitter {
   }
 
   async subscribeAllParams(): Promise<Readonly<Map<string, XmlRpcValue>>> {
-    const keys = await this.getParamNames();
+    let keys = await this.getParamNames();
     const curKeys = Array.from(this.parameters.keys());
     const callerApi = this._callerApi();
 
@@ -255,14 +255,18 @@ export class RosNode extends EventEmitter {
     }
 
     // Check if there are any parameters we don't already have locally
-    const newKeys = difference(keys, curKeys);
-    if (newKeys.length === 0) {
+    keys = difference(keys, curKeys);
+    if (keys.length === 0) {
       return this.parameters;
     }
 
-    const res = await this.rosParamClient.subscribeParams(this.name, callerApi, newKeys);
+    const res = await this.rosParamClient.subscribeParams(this.name, callerApi, keys);
     if (res.length !== keys.length) {
-      throw new Error(`subscribeAllParams returned unrecognized data: ${JSON.stringify(res)}`);
+      throw new Error(
+        `subscribeAllParams returned ${res.length} entries, expected ${
+          keys.length
+        }: ${JSON.stringify(res)}`,
+      );
     }
 
     // Update the local map of all subscribed parameters
@@ -283,9 +287,7 @@ export class RosNode extends EventEmitter {
       this.parameters.set(key, adjustedValue);
     }
 
-    this._log?.debug?.(
-      `subscribed ${callerApi} to all parameters (${Array.from(this.parameters.keys())})`,
-    );
+    this._log?.debug?.(`subscribed ${callerApi} to parameters (${keys})`);
     return this.parameters;
   }
 
@@ -294,7 +296,7 @@ export class RosNode extends EventEmitter {
     const callerApi = this._callerApi();
     const res = await this.rosParamClient.unsubscribeParams(this.name, callerApi, keys);
     if (res.length !== keys.length) {
-      throw new Error(`subscribeAllParams returned unrecognized data: ${JSON.stringify(res)}`);
+      throw new Error(`unsubscribeAllParams returned unrecognized data: ${JSON.stringify(res)}`);
     }
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i] as string;
