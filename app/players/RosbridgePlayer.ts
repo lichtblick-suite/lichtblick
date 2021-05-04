@@ -77,15 +77,15 @@ export default class RosbridgePlayer implements Player {
   private _parsedMessages: MessageEvent<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call.
   private _messageOrder: TimestampMethod = "receiveTime";
   private _requestTopicsTimeout?: ReturnType<typeof setTimeout>; // setTimeout() handle for _requestTopics().
-  private _topicPublishers: {
-    [topicName: string]: roslib.Topic;
-  } = {};
+  // active publishers for the current connection
+  private _topicPublishers = new Map<string, roslib.Topic>();
+  // which topics we want to advertise to other nodes
+  private _advertisements: AdvertisePayload[] = [];
   private _parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic = {};
   private _parsedTopics: Set<string> = new Set();
   private _receivedBytes: number = 0;
   private _metricsCollector: PlayerMetricsCollectorInterface;
   private _hasReceivedMessage = false;
-
   private _presence: PlayerPresence = PlayerPresence.NOT_PRESENT;
   private _problems: PlayerProblem[] = [];
 
@@ -115,6 +115,8 @@ export default class RosbridgePlayer implements Player {
       this._presence = PlayerPresence.PRESENT;
       this._problems = [];
       this._rosClient = rosClient;
+
+      this._setupPublishers();
       this._requestTopics();
     });
 
@@ -260,7 +262,7 @@ export default class RosbridgePlayer implements Player {
     const { _providerTopics, _providerDatatypes, _start } = this;
     if (!_providerTopics || !_providerDatatypes || !_start) {
       return this._listener({
-        presence: PlayerPresence.INITIALIZING,
+        presence: this._presence,
         progress: {},
         capabilities: CAPABILITIES,
         playerId: this._id,
@@ -279,7 +281,7 @@ export default class RosbridgePlayer implements Player {
     const messages = this._parsedMessages;
     this._parsedMessages = [];
     return this._listener({
-      presence: PlayerPresence.PRESENT,
+      presence: this._presence,
       progress: {},
       capabilities: CAPABILITIES,
       playerId: this._id,
@@ -400,24 +402,12 @@ export default class RosbridgePlayer implements Player {
   setPublishers(publishers: AdvertisePayload[]): void {
     // Since `setPublishers` is rarely called, we can get away with just throwing away the old
     // Roslib.Topic objects and creating new ones.
-    for (const publisher of Object.values(this._topicPublishers)) {
+    for (const publisher of this._topicPublishers.values()) {
       publisher.unadvertise();
     }
-    this._topicPublishers = {};
-
-    if (publishers.length > 0) {
-      if (!this._rosClient) {
-        throw new Error("RosbridgePlayer not connected");
-      }
-      for (const { topic, datatype } of publishers) {
-        this._topicPublishers[topic] = new roslib.Topic({
-          ros: this._rosClient,
-          name: topic,
-          messageType: datatype,
-          queue_size: 0,
-        });
-      }
-    }
+    this._topicPublishers.clear();
+    this._advertisements = publishers;
+    this._setupPublishers();
   }
 
   setParameter(_key: string, _value: ParameterValue): void {
@@ -425,14 +415,13 @@ export default class RosbridgePlayer implements Player {
   }
 
   publish({ topic, msg }: PublishPayload): void {
-    const subscription = this._topicSubscriptions.get(topic);
-    if (!subscription) {
+    const publisher = this._topicPublishers.get(topic);
+    if (!publisher) {
       throw new Error(
         `Tried to publish on a topic that is not registered as a publisher: ${topic}`,
       );
-      return;
     }
-    subscription.publish(msg);
+    publisher.publish(msg);
   }
 
   // Bunch of unsupported stuff. Just don't do anything for these.
@@ -453,6 +442,29 @@ export default class RosbridgePlayer implements Player {
   }
   setGlobalVariables(): void {
     // no-op
+  }
+
+  private _setupPublishers(): void {
+    // This function will be called again once a connection is established
+    if (!this._rosClient) {
+      return;
+    }
+
+    if (this._advertisements.length <= 0) {
+      return;
+    }
+
+    for (const { topic, datatype } of this._advertisements) {
+      this._topicPublishers.set(
+        topic,
+        new roslib.Topic({
+          ros: this._rosClient,
+          name: topic,
+          messageType: datatype,
+          queue_size: 0,
+        }),
+      );
+    }
   }
 
   private _addInternalSubscriptions(subscriptions: SubscribePayload[]): void {

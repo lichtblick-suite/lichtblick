@@ -104,8 +104,8 @@ export default function App(): ReactElement {
   ];
 
   return (
-    <AllProviders providers={providers}>
-      <ErrorBoundary>
+    <ErrorBoundary>
+      <AllProviders providers={providers}>
         <LayoutStorageReduxAdapter />
         <NativeFileMenuPlayerSelection />
         <DndProvider backend={HTML5Backend}>
@@ -115,7 +115,7 @@ export default function App(): ReactElement {
             </BuiltinPanelCatalogProvider>
           </Suspense>
         </DndProvider>
-      </ErrorBoundary>
-    </AllProviders>
+      </AllProviders>
+    </ErrorBoundary>
   );
 }
