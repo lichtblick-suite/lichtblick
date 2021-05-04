@@ -16,7 +16,7 @@ import CloseIcon from "@mdi/svg/svg/close.svg";
 import cx from "classnames";
 import React, { Ref as ReactRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styled from "styled-components";
-import textWidth from "text-width";
+import textMetrics from "text-metrics";
 
 import Icon from "@foxglove-studio/app/components/Icon";
 import Tooltip from "@foxglove-studio/app/components/Tooltip";
@@ -26,15 +26,18 @@ import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 import styles from "./Tab.module.scss";
 
-const FONT_SIZE = 12;
-const FONT_FAMILY = "'Inter UI', -apple-system, BlinkMacSystemFont, sans-serif";
-
 const MAX_TAB_WIDTH = 100;
 const MIN_ACTIVE_TAB_WIDTH = 40;
 const MIN_OTHER_TAB_WIDTH = 14;
 
+const fontFamily = "'Inter UI', -apple-system, BlinkMacSystemFont, sans-serif";
+const fontSize = "12px";
+let textMeasure: textMetrics.TextMeasure;
 function measureText(text: string): number {
-  return textWidth(text, { family: FONT_FAMILY, size: FONT_SIZE }) + 3;
+  if (textMeasure == undefined) {
+    textMeasure = textMetrics.init({ fontFamily, fontSize });
+  }
+  return textMeasure.width(text) + 3;
 }
 
 const STab = styled.div<{

@@ -2086,7 +2086,7 @@ __metadata:
     "@types/shallowequal": 1.1.1
     "@types/string-hash": 1.1.1
     "@types/styled-components": 5.1.9
-    "@types/text-width": "workspace:packages/@types/text-width"
+    "@types/text-metrics": "workspace:packages/@types/text-metrics"
     "@types/three": ^0
     "@types/tinycolor2": 1.4.2
     "@types/universal-url": "workspace:packages/@types/universal-url"
@@ -2171,7 +2171,6 @@ __metadata:
     string-hash: 1.1.3
     styled-components: 5.2.3
     text-metrics: 2.0.9
-    text-width: 1.2.0
     three: 0.128.0
     tinycolor2: 1.4.2
     typescript: 4.2.2
@@ -5378,12 +5377,6 @@ __metadata:
 "@types/text-metrics@workspace:packages/@types/text-metrics":
   version: 0.0.0-use.local
   resolution: "@types/text-metrics@workspace:packages/@types/text-metrics"
-  languageName: unknown
-  linkType: soft
-
-"@types/text-width@workspace:packages/@types/text-width":
-  version: 0.0.0-use.local
-  resolution: "@types/text-width@workspace:packages/@types/text-width"
   languageName: unknown
   linkType: soft
 
@@ -24406,15 +24399,6 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"text-width@npm:1.2.0":
-  version: 1.2.0
-  resolution: "text-width@npm:1.2.0"
-  dependencies:
-    xtend: ~4.0.0
-  checksum: f53826a58dbd23b6bf55ea22ce165b80206c6fa50e7657a3569304e756dae7c97be7dca5063a903be5d3af4d08619e00b8575632cd45470c2a8a5e0b852f04c1
-  languageName: node
-  linkType: hard
-
 "textextensions@npm:^5.11.0":
   version: 5.12.0
   resolution: "textextensions@npm:5.12.0"
@@ -26539,7 +26523,7 @@ typescript@4.2.2:
   languageName: node
   linkType: hard
 
-"xtend@npm:^4.0.0, xtend@npm:^4.0.1, xtend@npm:~4.0.0, xtend@npm:~4.0.1":
+"xtend@npm:^4.0.0, xtend@npm:^4.0.1, xtend@npm:~4.0.1":
   version: 4.0.2
   resolution: "xtend@npm:4.0.2"
   checksum: 37ee522a3e9fb9b143a400c30b21dc122aa8c9c9411c6afae1005a4617dc20a21765c114d544e37a6bb60c2733dd8ee0a44ed9e80d884ac78cccd30b5e0ab0da
