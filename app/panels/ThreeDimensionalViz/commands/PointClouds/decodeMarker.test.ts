@@ -92,7 +92,7 @@ describe("<PointClouds />", () => {
       } as any);
       const { colorBuffer, data } = result;
       expect(colorBuffer).not.toBeNullOrUndefined();
-      const { buffer, offset, stride } = colorBuffer || {};
+      const { buffer, offset, stride } = colorBuffer ?? {};
       if (!buffer) {
         throw new Error("Buffer is undefined");
       }
@@ -112,7 +112,7 @@ describe("<PointClouds />", () => {
       } as any);
       const { colorBuffer, data } = result;
       expect(colorBuffer).not.toBeNullOrUndefined();
-      const { buffer, offset, stride } = colorBuffer || {};
+      const { buffer, offset, stride } = colorBuffer ?? {};
       if (!buffer) {
         throw new Error("Buffer is undefined");
       }

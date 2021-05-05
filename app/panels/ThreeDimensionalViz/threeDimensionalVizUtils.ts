@@ -106,7 +106,7 @@ export function useTransformedCameraState({
     (objVal, srcVal) => objVal ?? srcVal,
   );
 
-  return { transformedCameraState: mergedCameraState, targetPose: targetPose || lastTargetPose };
+  return { transformedCameraState: mergedCameraState, targetPose: targetPose ?? lastTargetPose };
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
@@ -200,7 +200,7 @@ export function getNewCameraStateOnFollowChange({
       });
       newCameraState.targetOffset = vec3.rotateZ(
         [0, 0, 0],
-        newCameraState.targetOffset || DEFAULT_CAMERA_STATE.targetOffset,
+        newCameraState.targetOffset ?? DEFAULT_CAMERA_STATE.targetOffset,
         [0, 0, 0],
         heading,
       ) as Vec3;

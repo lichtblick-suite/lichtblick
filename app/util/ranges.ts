@@ -42,7 +42,7 @@ export function isRangeCoveredByRanges(
 }
 
 export function deepIntersect(arraysOfRanges: Range[][]): Range[] {
-  let result = arraysOfRanges[0] || [];
+  let result = arraysOfRanges[0] ?? [];
   for (const arrayOfRanges of arraysOfRanges.slice(1)) {
     result = intersect(result, arrayOfRanges);
   }

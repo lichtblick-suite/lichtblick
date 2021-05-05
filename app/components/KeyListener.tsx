@@ -31,7 +31,7 @@ export default class KeyListener extends React.Component<Props> {
 
   componentDidMount(): void {
     const { global } = this.props;
-    const target = global ? document : (this.el || {}).parentElement;
+    const target = global ? document : this.el?.parentElement;
     if (target) {
       target.addEventListener("keydown", this.handleEvent as any);
       target.addEventListener("keypress", this.handleEvent as any);
@@ -41,7 +41,7 @@ export default class KeyListener extends React.Component<Props> {
 
   componentWillUnmount(): void {
     const { global } = this.props;
-    const target = global ? document : (this.el || {}).parentElement;
+    const target = global ? document : this.el?.parentElement;
     if (target) {
       target.removeEventListener("keydown", this.handleEvent as any);
       target.removeEventListener("keypress", this.handleEvent as any);

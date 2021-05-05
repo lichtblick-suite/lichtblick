@@ -142,7 +142,7 @@ export default class RandomAccessPlayer implements Player {
     } else {
       this._provider = rootGetDataProvider(providerDescriptor);
     }
-    this._metricsCollector = metricsCollector || new NoopMetricsCollector();
+    this._metricsCollector = metricsCollector ?? new NoopMetricsCollector();
     this._seekToTime = seekToTime;
     this._metricsCollector.playerConstructed();
 

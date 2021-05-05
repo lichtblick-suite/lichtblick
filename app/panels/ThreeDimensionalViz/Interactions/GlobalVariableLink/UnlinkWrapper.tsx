@@ -76,8 +76,7 @@ export default function UnlinkWrapper({
           <Icon
             fade
             tooltipProps={{
-              // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-              contents: tooltip || (
+              contents: tooltip ?? (
                 <span>
                   Unlink this field from <GlobalVariableName name={linkedGlobalVariable.name} />
                 </span>

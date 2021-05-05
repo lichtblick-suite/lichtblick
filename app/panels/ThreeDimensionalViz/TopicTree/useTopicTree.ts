@@ -496,7 +496,7 @@ export default function useTree({
       let newCheckedKeys;
       if (isNamespaceCheckedByDefault) {
         // Add all other namespaces under the topic to the checked keys.
-        const allNsKeys = (availableNamespacesByTopic[prefixedTopicName] || []).map((ns) =>
+        const allNsKeys = (availableNamespacesByTopic[prefixedTopicName] ?? []).map((ns) =>
           generateNodeKey({ topicName, namespace: ns, isFeatureColumn }),
         );
         const otherNamespaceKeys = difference(allNsKeys, [prefixedNamespaceKey]);
@@ -614,7 +614,7 @@ export default function useTree({
         prevChecked = getIsNamespaceCheckedByDefault(namespaceParentTopicName, columnIndex);
         if (prevChecked && isNonEmptyOrUndefined(prefixedTopicName)) {
           // Add all namespaces under the topic if it's checked by default.
-          const allNsKeys = (availableNamespacesByTopic[prefixedTopicName] || []).map((ns) =>
+          const allNsKeys = (availableNamespacesByTopic[prefixedTopicName] ?? []).map((ns) =>
             generateNodeKey({
               topicName: namespaceParentTopicName,
               namespace: ns,

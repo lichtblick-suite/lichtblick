@@ -70,7 +70,7 @@ export default function MockMessagePipelineProvider(props: {
   const startTime = useRef();
   let currentTime = props.currentTime;
   if (!currentTime) {
-    for (const message of props.messages || []) {
+    for (const message of props.messages ?? []) {
       if (
         startTime.current == undefined ||
         TimeUtil.isLessThan(message.receiveTime, startTime.current as any)

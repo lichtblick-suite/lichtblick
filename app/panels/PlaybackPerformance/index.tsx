@@ -44,7 +44,7 @@ function PlaybackPerformanceItem(props: PlaybackPerformanceItemProps): ReactElem
         timeRange={TIME_RANGE}
       />
       <div style={{ display: "inline-block", marginLeft: 12, verticalAlign: "middle" }}>
-        {(last(props.points) || { value: 0 }).value.toFixed(props.decimalPlaces)}
+        {(last(props.points) ?? { value: 0 }).value.toFixed(props.decimalPlaces)}
         {props.children}
         <div style={{ color: "#aaa" }}>
           {(sumBy(props.points, "value") / props.points.length).toFixed(props.decimalPlaces)} avg

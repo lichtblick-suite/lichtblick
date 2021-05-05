@@ -334,7 +334,7 @@ export default class SceneBuilder implements MarkerProvider {
     // We need to update topicsToRender here so changes to the selected namespaces will appear on the next render()
     Object.keys(selectedNamespacesByTopic).forEach((topicName) => {
       const newNamespaces = selectedNamespacesByTopic[topicName];
-      const previousNamespaces = [...(this.selectedNamespacesByTopic?.[topicName] || [])];
+      const previousNamespaces = [...(this.selectedNamespacesByTopic?.[topicName] ?? [])];
       if (xor(newNamespaces, previousNamespaces).length > 0) {
         this._markTopicToRender(topicName);
       }
@@ -598,7 +598,7 @@ export default class SceneBuilder implements MarkerProvider {
       this._settingsByKey[`ns:${topic}:${namespace}`] || this._settingsByKey[`t:${topic}`] || {};
 
     // Check for matching colorOverrideMarkerMatchers for this topic
-    const colorOverrideMarkerMatchers = this._colorOverrideMarkerMatchersByTopic[topic] || [];
+    const colorOverrideMarkerMatchers = this._colorOverrideMarkerMatchersByTopic[topic] ?? [];
     const matchingMatcher = colorOverrideMarkerMatchers.find(({ checks = [] }) =>
       checks.every(({ markerKeyPath = [], value }) => {
         // Get the item at the key path
@@ -776,7 +776,7 @@ export default class SceneBuilder implements MarkerProvider {
   // extracts renderable markers from the ros frame
   render(): void {
     this.flattenedZHeightPose =
-      this._hooks.getFlattenedPose(this.frame as any) || this.flattenedZHeightPose;
+      this._hooks.getFlattenedPose(this.frame as any) ?? this.flattenedZHeightPose;
 
     if (this.flattenedZHeightPose?.position) {
       this.bounds.update(this.flattenedZHeightPose.position);
@@ -888,7 +888,7 @@ export default class SceneBuilder implements MarkerProvider {
     if (!this.frame) {
       return;
     }
-    const messages = this.frame[topic] || this.lastSeenMessages[topic];
+    const messages = this.frame[topic] ?? this.lastSeenMessages[topic];
     if (!messages) {
       return;
     }
@@ -938,7 +938,7 @@ export default class SceneBuilder implements MarkerProvider {
         // Highlight if marker matches any of this topic's highlightMarkerMatchers; dim other markers
         // Markers that are not re-processed on this frame (i.e. older markers whose lifetime has
         // not expired) do not get a new copy of interactionData, so they always need to be reset.
-        const markerMatches = (this._highlightMarkerMatchersByTopic[topic.name] || []).some(
+        const markerMatches = (this._highlightMarkerMatchersByTopic[topic.name] ?? []).some(
           ({ checks = [] }) =>
             checks.every(({ markerKeyPath, value }) => {
               const markerValue = _.get(message, markerKeyPath as any);

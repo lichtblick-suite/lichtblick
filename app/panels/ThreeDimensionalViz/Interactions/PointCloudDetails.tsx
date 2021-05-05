@@ -23,6 +23,7 @@ import Item from "@foxglove-studio/app/components/Menu/Item";
 import {
   getClickedInfo,
   getAllPoints,
+  ClickedInfo,
 } from "@foxglove-studio/app/panels/ThreeDimensionalViz/commands/PointClouds/selection";
 import clipboard from "@foxglove-studio/app/util/clipboard";
 import { downloadFiles } from "@foxglove-studio/app/util/download";
@@ -45,10 +46,9 @@ export default function PointCloudDetails({
 }: Props): JSX.Element | ReactNull {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const { clickedPoint, clickedPointColor, additionalFieldValues } =
-    useMemo(() => {
-      return getClickedInfo(object, instanceIndex);
-    }, [instanceIndex, object]) || {};
+  const { clickedPoint, clickedPointColor, additionalFieldValues } = useMemo(() => {
+    return getClickedInfo(object, instanceIndex) ?? ({} as Partial<ClickedInfo>);
+  }, [instanceIndex, object]);
 
   const additionalFieldNames = useMemo(
     () => (additionalFieldValues && Object.keys(additionalFieldValues)) || [],

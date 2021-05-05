@@ -37,7 +37,6 @@ const SValue = styled.span`
 `;
 
 type Props = {
-  addLinkTooltip?: React.ReactNode;
   hasNestedValue?: boolean;
   highlight?: boolean;
   label?: string;
@@ -52,7 +51,6 @@ type Props = {
 };
 
 export default function GlobalVariableLink({
-  addLinkTooltip,
   hasNestedValue = false,
   highlight,
   label,
@@ -104,7 +102,6 @@ export default function GlobalVariableLink({
         {renderAddLink && addToLinkedGlobalVariable && (
           <LinkToGlobalVariable
             highlight={highlight}
-            tooltip={addLinkTooltip}
             addToLinkedGlobalVariable={addToLinkedGlobalVariable}
           />
         )}

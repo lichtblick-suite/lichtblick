@@ -593,7 +593,7 @@ function ImageView(props: Props) {
   }
   // Keep the last image message, if it exists, to render on the ImageCanvas.
   // Improve perf by hiding the ImageCanvas while seeking, instead of unmounting and remounting it.
-  const imageMessageToRender = imageMessage || lastImageMessageRef.current;
+  const imageMessageToRender = imageMessage ?? lastImageMessageRef.current;
 
   const pauseFrame = useMessagePipeline(
     useCallback((messagePipeline) => messagePipeline.pauseFrame, []),

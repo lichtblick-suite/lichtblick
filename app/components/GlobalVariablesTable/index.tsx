@@ -279,7 +279,7 @@ function GlobalVariablesTable(): ReactElement {
     }
     const newChangedVariables = union(
       Object.keys(globalVariables),
-      Object.keys(previousGlobalVariablesRef.current || {}),
+      Object.keys(previousGlobalVariablesRef.current ?? {}),
     ).filter((name) => {
       const previousValue = previousGlobalVariablesRef.current?.[name];
       return previousValue !== globalVariables[name];

@@ -26,7 +26,7 @@ export async function simulateMouseMove(
   canvas: HTMLCanvasElement | undefined,
 ): Promise<void> {
   const [clientX, clientY] = point;
-  canvas = canvas || findCanvas();
+  canvas = canvas ?? findCanvas();
   canvas.dispatchEvent(
     new MouseEvent("mousemove", {
       bubbles: true,

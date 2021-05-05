@@ -49,7 +49,7 @@ export default function Polygons({
   polygonBuilder,
   selectedPolygonEditFormat,
 }: Props): JSX.Element {
-  const { saveConfig } = React.useContext(PanelContext) || {};
+  const { saveConfig } = React.useContext(PanelContext) ?? {};
   const polygons: Polygon[] = polygonBuilder.polygons;
   const [polygonPoints, setPolygonPoints] = React.useState<Point2D[][]>(() =>
     polygonsToPoints(polygons),

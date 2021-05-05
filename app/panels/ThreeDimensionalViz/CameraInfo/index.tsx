@@ -120,7 +120,7 @@ export default function CameraInfo({
   defaultSelectedTab,
 }: CameraInfoProps): JSX.Element {
   const [selectedTab, setSelectedTab] = React.useState(defaultSelectedTab);
-  const { updatePanelConfig, saveConfig } = React.useContext(PanelContext) || ({} as any);
+  const { updatePanelConfig, saveConfig } = React.useContext(PanelContext) ?? ({} as any);
   const [edit, setEdit] = React.useState<boolean>(false);
   const onEditToggle = React.useCallback(() => setEdit((currVal) => !currVal), []);
 

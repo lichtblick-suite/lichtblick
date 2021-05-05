@@ -272,7 +272,7 @@ export default class CombinedDataProvider implements DataProvider {
 
     // Any providers that didn't report progress in `initialize` are assumed fully loaded
     this._progressPerProvider.forEach((p, i) => {
-      this._progressPerProvider[i] = p || fullyLoadedProgress();
+      this._progressPerProvider[i] = p ?? fullyLoadedProgress();
     });
 
     const start = sortTimes(results.map((result) => result.start)).shift();
@@ -367,7 +367,7 @@ export default class CombinedDataProvider implements DataProvider {
   _updateProgressForChild(providerIdx: number, progress: Progress): void {
     this._progressPerProvider[providerIdx] = progress;
     // Assume empty for unreported progress
-    const cleanProgresses = this._progressPerProvider.map((p) => p || emptyProgress());
+    const cleanProgresses = this._progressPerProvider.map((p) => p ?? emptyProgress());
     const intersected = intersectProgress(cleanProgresses);
     this._extensionPoint?.progressCallback(intersected);
   }

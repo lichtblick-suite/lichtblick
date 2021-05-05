@@ -120,7 +120,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
     const canvasRenderer = this._canvasRenderer;
     if (canvasRenderer.type === "rpc") {
       // Create the worker if it hasn't been initialized yet.
-      const worker = canvasRenderer.worker || webWorkerManager.registerWorkerListener(this._id);
+      const worker = canvasRenderer.worker ?? webWorkerManager.registerWorkerListener(this._id);
       if (!canvasRenderer.worker) {
         canvasRenderer.worker = worker;
       }

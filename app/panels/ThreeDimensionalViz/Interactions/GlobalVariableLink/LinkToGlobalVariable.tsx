@@ -36,7 +36,6 @@ type Props = {
   highlight?: boolean;
   addToLinkedGlobalVariable: AddToLinkedGlobalVariable;
   style?: any;
-  tooltip?: React.ReactNode;
 };
 
 function getInitialName(markerKeyPath: string[]) {
@@ -46,7 +45,6 @@ function getInitialName(markerKeyPath: string[]) {
 export default function LinkToGlobalVariable({
   style = {},
   addToLinkedGlobalVariable: { topic, variableValue, markerKeyPath },
-  tooltip,
   highlight = false,
 }: Props): JSX.Element {
   const [isOpen, _setIsOpen] = React.useState<boolean>(false);
@@ -87,8 +85,7 @@ export default function LinkToGlobalVariable({
         className={classNames("link-icon", { highlight })}
         style={highlightIconStyle}
         fade={!highlight}
-        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-        tooltip={tooltip || "Link this field to a global variable"}
+        tooltip="Link this field to a global variable"
         tooltipProps={{ placement: "top" }}
       >
         <LinkPlusIcon />

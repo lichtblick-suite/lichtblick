@@ -30,7 +30,7 @@ function recentLayoutFromPersistedState(state: PersistedState): RecentLayoutId |
 // We ALWAYS read from localStorage here, because multiple tabs could be writing to recent layouts.
 // Note that changes to recent layouts will not force a re-render.
 export function getRecentLayouts(): RecentLayoutId[] {
-  return storage.getItem(LOCALSTORAGE_KEY) || [];
+  return storage.getItem(LOCALSTORAGE_KEY) ?? [];
 }
 
 export function maybeStoreNewRecentLayout(newPersistedState: PersistedState): void {

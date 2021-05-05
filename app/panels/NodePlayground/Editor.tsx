@@ -204,14 +204,14 @@ const Editor = ({
       projectConfig.utilityFiles.forEach((sourceFile) => {
         const filePath = monacoApi.Uri.parse(`file://${sourceFile.filePath}`);
         const model =
-          monaco.editor.getModel(filePath) ||
+          monaco.editor.getModel(filePath) ??
           monaco.editor.createModel(sourceFile.sourceCode, "typescript", filePath);
         model.updateOptions({ tabSize: 2 });
       });
 
       const filePath = monacoApi.Uri.parse(`file://${script.filePath}`);
       const model =
-        monaco.editor.getModel(filePath) ||
+        monaco.editor.getModel(filePath) ??
         monaco.editor.createModel(script.code, "typescript", filePath);
 
       // Because anything else is blasphemy.

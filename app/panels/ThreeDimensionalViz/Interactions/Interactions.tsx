@@ -55,7 +55,7 @@ const InteractionsBaseComponent = React.memo<PropsWithConfig>(function Interacti
   disableAutoOpenClickedObject,
   saveConfig,
 }: PropsWithConfig) {
-  const { object } = selectedObject || {};
+  const { object } = selectedObject ?? {};
   const isPointCloud = object && object.type === 102;
   const maybeFullyDecodedObject = React.useMemo(
     () =>
@@ -120,7 +120,7 @@ const InteractionsBaseComponent = React.memo<PropsWithConfig>(function Interacti
 // one value that we care about.
 export default function Interactions(props: Props): JSX.Element {
   const { saveConfig, config: { disableAutoOpenClickedObject } = {} as any } =
-    React.useContext(PanelContext) || {};
+    React.useContext(PanelContext) ?? {};
   return (
     <InteractionsBaseComponent
       {...props}

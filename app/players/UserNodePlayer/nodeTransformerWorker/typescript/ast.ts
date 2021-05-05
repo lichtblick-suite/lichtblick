@@ -111,7 +111,7 @@ const buildTypeMapFromParams = (
     const currentParam = typeParameters[i];
     newTypeParamMap[currentParam.name.escapedText] = {
       current: currentParam,
-      parent: typeMap[i] || { parent: undefined, current: currentParam.default },
+      parent: typeMap[i] ?? { parent: undefined, current: currentParam.default },
     };
   }
   return newTypeParamMap;
