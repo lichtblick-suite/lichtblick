@@ -8,6 +8,9 @@ import {
   Stack,
   useTheme,
 } from "@fluentui/react";
+import { useCallback } from "react";
+
+import { useTooltip } from "@foxglove-studio/app/components/Tooltip";
 
 export const BUTTON_SIZE = 50;
 export const ICON_SIZE = 24;
@@ -29,11 +32,14 @@ export default function SidebarButton({
   menuProps?: IContextualMenuProps;
 }): JSX.Element {
   const theme = useTheme();
+  const { ref: tooltipRef, tooltip } = useTooltip({ contents: title, placement: "right" });
+  const renderStack = useCallback((props) => <div {...props} ref={tooltipRef} />, [tooltipRef]);
+
   return (
-    <Stack style={{ position: "relative", flexGrow: 1 }}>
+    <Stack style={{ position: "relative", flexGrow: 1 }} as={renderStack}>
+      {tooltip}
       <CommandBarButton
         data-sidebar-key={dataSidebarKey}
-        title={title}
         style={{ height: BUTTON_SIZE, margin: 0 }}
         iconProps={{
           styles: {
