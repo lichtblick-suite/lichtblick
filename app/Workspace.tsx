@@ -50,6 +50,7 @@ import useSelectPanel from "@foxglove-studio/app/hooks/useSelectPanel";
 import welcomeLayout from "@foxglove-studio/app/layouts/welcomeLayout";
 import { PlayerPresence } from "@foxglove-studio/app/players/types";
 import { ImportPanelLayoutPayload } from "@foxglove-studio/app/types/panels";
+import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import inAutomatedRunMode from "@foxglove-studio/app/util/inAutomatedRunMode";
 
 type TestableWindow = Window & { setPanelLayout?: (payload: ImportPanelLayoutPayload) => void };
@@ -102,10 +103,10 @@ function Variables() {
 // file types we support for drag/drop
 const allowedDropExtensions = [".bag", ".urdf"];
 
-export default function Workspace(): JSX.Element {
+export default function Workspace(props: { demoBagUrl?: string }): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(ReactNull);
   const dispatch = useDispatch();
-  const { currentSourceName, setPlayerFromFiles, setPlayerFromDemoBag } = usePlayerSelection();
+  const { currentSourceName, selectSource } = usePlayerSelection();
   const playerPresence = useMessagePipeline(
     useCallback(({ playerState }) => playerState.presence, []),
   );
@@ -121,9 +122,16 @@ export default function Workspace(): JSX.Element {
   const openWelcomeLayout = useCallback(async () => {
     if (isMounted()) {
       dispatch(loadLayout(welcomeLayout));
-      await setPlayerFromDemoBag();
+      if (isNonEmptyOrUndefined(props.demoBagUrl)) {
+        selectSource(
+          { name: "Demo Bag", type: "http" },
+          {
+            url: props.demoBagUrl,
+          },
+        );
+      }
     }
-  }, [dispatch, setPlayerFromDemoBag, isMounted]);
+  }, [isMounted, dispatch, selectSource, props.demoBagUrl]);
 
   const handleInternalLink = useCallback((event: React.MouseEvent, href: string) => {
     if (href === "#help:message-path-syntax") {
@@ -205,10 +213,16 @@ export default function Workspace(): JSX.Element {
       }
 
       if (otherFiles.length > 0) {
-        setPlayerFromFiles(otherFiles, { append: shiftPressed });
+        selectSource(
+          { name: "Local Files", type: "file" },
+          {
+            files: otherFiles,
+            append: shiftPressed,
+          },
+        );
       }
     },
-    [addToast, loadFromFile, setPlayerFromFiles],
+    [addToast, loadFromFile, selectSource],
   );
 
   // files the main thread told us to open

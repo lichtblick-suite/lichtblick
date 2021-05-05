@@ -4,24 +4,41 @@
 
 import { createContext, useContext } from "react";
 
+type SourceTypes = "file" | "ros1-core" | "ws" | "http";
+
 export type PlayerSourceDefinition = {
   name: string;
-  type: "file" | "ros1-core" | "ws" | "http";
+  type: SourceTypes;
 };
+
+type FileSourceParams = {
+  files?: File[];
+  append?: boolean;
+};
+
+type HttpSourceParams = {
+  url?: string;
+};
+
+type SpecializedPlayerSource<T extends SourceTypes> = Omit<PlayerSourceDefinition, "type"> & {
+  type: T;
+};
+
+interface SelectSourceFunction {
+  (definition: SpecializedPlayerSource<"file">, params?: FileSourceParams): void;
+  (definition: SpecializedPlayerSource<"http">, params?: HttpSourceParams): void;
+  (definition: PlayerSourceDefinition, params?: never): void;
+}
 
 // PlayerSelection provides the user with a select function and the items to select
 export interface PlayerSelection {
-  selectSource: (definition: PlayerSourceDefinition) => void;
-  setPlayerFromFiles: (files: File[], options?: { append: boolean }) => void;
-  setPlayerFromDemoBag: () => Promise<void>;
+  selectSource: SelectSourceFunction;
   availableSources: PlayerSourceDefinition[];
   currentSourceName?: string;
 }
 
 const PlayerSelectionContext = createContext<PlayerSelection>({
   selectSource: () => {},
-  setPlayerFromFiles: () => {},
-  setPlayerFromDemoBag: async () => {},
   availableSources: [],
 });
 

@@ -18,7 +18,6 @@ import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import TextContent from "@foxglove-studio/app/components/TextContent";
 import TextField from "@foxglove-studio/app/components/TextField";
-import { usePlayerSelection } from "@foxglove-studio/app/context/PlayerSelectionContext";
 import { useAppConfigurationValue } from "@foxglove-studio/app/hooks/useAppConfigurationValue";
 import subscribeToNewsletter from "@foxglove-studio/app/panels/WelcomePanel/subscribeToNewsletter";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
@@ -52,8 +51,6 @@ function WelcomePanel() {
     }
     await setSubscribed(true);
   }, [slackInviteChecked, subscribeChecked, setSubscribed, emailValue]);
-
-  const { setPlayerFromDemoBag } = usePlayerSelection();
 
   const loading = submitState.loading;
   const error = submitState.error;
@@ -103,11 +100,7 @@ function WelcomePanel() {
           <Icon clickable={false}>
             <DatabaseIcon />
           </Icon>{" "}
-          in the upper left to select another data source, or try loading our{" "}
-          <a href="#" onClick={setPlayerFromDemoBag}>
-            example bag file
-          </a>
-          .
+          in the upper left to select another data source.
         </p>
         <p style={{ marginTop: "3em" }}>
           To get in touch with us and learn more tips &amp; tricks, join our Slack community and

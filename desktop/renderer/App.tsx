@@ -41,6 +41,8 @@ const BuiltinPanelCatalogProvider = React.lazy(
 
 const Workspace = React.lazy(() => import("@foxglove-studio/app/Workspace"));
 
+const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo.bag";
+
 export default function App(): ReactElement {
   const globalStore = getGlobalStore();
 
@@ -101,7 +103,7 @@ export default function App(): ReactElement {
         <DndProvider backend={HTML5Backend}>
           <Suspense fallback={<></>}>
             <BuiltinPanelCatalogProvider>
-              <Workspace />
+              <Workspace demoBagUrl={DEMO_BAG_URL} />
             </BuiltinPanelCatalogProvider>
           </Suspense>
         </DndProvider>
