@@ -51,6 +51,7 @@ if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
     dsn: process.env.SENTRY_DSN,
     autoSessionTracking: true,
     release: `${process.env.SENTRY_PROJECT}@${APP_VERSION}`,
+    maxBreadcrumbs: 10,
   });
 }
 

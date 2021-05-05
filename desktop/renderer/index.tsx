@@ -41,6 +41,7 @@ if (
         return integration.name !== "Breadcrumbs";
       });
     },
+    maxBreadcrumbs: 10,
   });
 }
 
