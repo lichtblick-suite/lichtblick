@@ -46,6 +46,7 @@ import { useAssets } from "@foxglove-studio/app/context/AssetContext";
 import LinkHandlerContext from "@foxglove-studio/app/context/LinkHandlerContext";
 import { usePlayerSelection } from "@foxglove-studio/app/context/PlayerSelectionContext";
 import useElectronFilesToOpen from "@foxglove-studio/app/hooks/useElectronFilesToOpen";
+import useNativeAppMenuEvent from "@foxglove-studio/app/hooks/useNativeAppMenuEvent";
 import useSelectPanel from "@foxglove-studio/app/hooks/useSelectPanel";
 import welcomeLayout from "@foxglove-studio/app/layouts/welcomeLayout";
 import { PlayerPresence } from "@foxglove-studio/app/players/types";
@@ -148,34 +149,50 @@ export default function Workspace(props: { demoBagUrl?: string }): JSX.Element {
     // Add a hook for integration tests.
     (window as TestableWindow).setPanelLayout = (payload: ImportPanelLayoutPayload) =>
       dispatch(importPanelLayout(payload));
+  }, [dispatch, openWelcomeLayout]);
 
-    // For undo/redo events, first try the browser's native undo/redo, and if that is disabled, then
-    // undo/redo the layout history. Note that in GlobalKeyListener we also handle the keyboard
-    // events for undo/redo, so if an input or textarea element that would handle the event is not
-    // focused, the GlobalKeyListener will handle it. The listeners here are to handle the case when
-    // an editable element is focused, or when the user directly chooses the undo/redo menu item.
-    OsContextSingleton?.addIpcEventListener("undo", () => {
+  // For undo/redo events, first try the browser's native undo/redo, and if that is disabled, then
+  // undo/redo the layout history. Note that in GlobalKeyListener we also handle the keyboard
+  // events for undo/redo, so if an input or textarea element that would handle the event is not
+  // focused, the GlobalKeyListener will handle it. The listeners here are to handle the case when
+  // an editable element is focused, or when the user directly chooses the undo/redo menu item.
+
+  useNativeAppMenuEvent(
+    "undo",
+    useCallback(() => {
       if (!document.execCommand("undo")) {
         dispatch(undoLayoutChange());
       }
-    });
-    OsContextSingleton?.addIpcEventListener("redo", () => {
+    }, [dispatch]),
+  );
+
+  useNativeAppMenuEvent(
+    "redo",
+    useCallback(() => {
       if (!document.execCommand("redo")) {
         dispatch(redoLayoutChange());
       }
-    });
+    }, [dispatch]),
+  );
 
-    OsContextSingleton?.addIpcEventListener("open-preferences", () =>
-      setSelectedSidebarItem((item) => (item === "preferences" ? undefined : "preferences")),
-    );
-    OsContextSingleton?.addIpcEventListener("open-message-path-syntax-help", () =>
-      setMessagePathSyntaxModalOpen(true),
-    );
-    OsContextSingleton?.addIpcEventListener("open-keyboard-shortcuts", () =>
-      setShortcutsModalOpen(true),
-    );
-    OsContextSingleton?.addIpcEventListener("open-welcome-layout", () => openWelcomeLayout());
-  }, [dispatch, openWelcomeLayout]);
+  useNativeAppMenuEvent(
+    "open-preferences",
+    useCallback(() => {
+      setSelectedSidebarItem((item) => (item === "preferences" ? undefined : "preferences"));
+    }, []),
+  );
+
+  useNativeAppMenuEvent(
+    "open-message-path-syntax-help",
+    useCallback(() => setMessagePathSyntaxModalOpen(true), []),
+  );
+
+  useNativeAppMenuEvent(
+    "open-keyboard-shortcuts",
+    useCallback(() => setShortcutsModalOpen(true), []),
+  );
+
+  useNativeAppMenuEvent("open-welcome-layout", openWelcomeLayout);
 
   const appConfiguration = useAppConfiguration();
   const { addToast } = useToasts();

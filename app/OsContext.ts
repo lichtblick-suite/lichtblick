@@ -56,6 +56,7 @@ export interface OsContext {
 
   // Events from the native window are available in the main process but not the renderer, so we forward them through the bridge.
   addIpcEventListener(eventName: OsContextForwardedEvent, handler: () => void): void;
+  removeIpcEventListener(eventName: OsContextForwardedEvent, handler: () => void): void;
 
   // Manage file menu input source menu items
   menuAddInputSource(name: string, handler: () => void): Promise<void>;

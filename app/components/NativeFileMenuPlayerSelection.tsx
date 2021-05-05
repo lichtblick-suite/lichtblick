@@ -4,26 +4,32 @@
 
 import { ReactElement, useEffect } from "react";
 
-import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
+import { useNativeAppMenu } from "@foxglove-studio/app/context/NativeAppMenuContext";
 import { usePlayerSelection } from "@foxglove-studio/app/context/PlayerSelectionContext";
 
 // NativeFileMenuPlayerSelection adds available player selection items to the apps native OS menubar
 export function NativeFileMenuPlayerSelection(): ReactElement {
   const { selectSource, availableSources } = usePlayerSelection();
 
+  const nativeAppMenu = useNativeAppMenu();
+
   useEffect(() => {
+    if (!nativeAppMenu) {
+      return;
+    }
+
     for (const item of availableSources) {
-      OsContextSingleton?.menuAddInputSource(item.name, () => {
+      nativeAppMenu.addFileEntry(item.name, () => {
         selectSource(item);
       });
     }
 
     return () => {
       for (const item of availableSources) {
-        OsContextSingleton?.menuRemoveInputSource(item.name);
+        nativeAppMenu.removeFileEntry(item.name);
       }
     };
-  }, [availableSources, selectSource]);
+  }, [availableSources, nativeAppMenu, selectSource]);
 
   return <></>;
 }

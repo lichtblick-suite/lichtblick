@@ -33,6 +33,8 @@ import URDFAssetLoader from "@foxglove-studio/app/services/URDFAssetLoader";
 import getGlobalStore from "@foxglove-studio/app/store/getGlobalStore";
 import ThemeProvider from "@foxglove-studio/app/theme/ThemeProvider";
 
+import NativeAppMenuProvider from "./components/NativeAppMenuProvider";
+
 const BuiltinPanelCatalogProvider = React.lazy(
   () => import("@foxglove-studio/app/context/BuiltinPanelCatalogProvider"),
 );
@@ -89,6 +91,7 @@ export default function App(): ReactElement {
     <AnalyticsProvider />,
     <PlayerManager playerSources={playerSources} />,
     <AssetsProvider loaders={assetLoaders} />,
+    <NativeAppMenuProvider />,
     /* eslint-enable react/jsx-key */
   ];
 

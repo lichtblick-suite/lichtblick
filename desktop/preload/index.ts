@@ -78,6 +78,9 @@ const ctx: OsContext = {
   addIpcEventListener(eventName: OsContextForwardedEvent, handler: () => void) {
     ipcRenderer.on(eventName, () => handler());
   },
+  removeIpcEventListener(eventName: OsContextForwardedEvent, handler: () => void) {
+    ipcRenderer.off(eventName, () => handler());
+  },
   async menuAddInputSource(name: string, handler: () => void) {
     if (menuClickListeners.has(name)) {
       throw new Error(`Menu input source ${name} already exists`);
