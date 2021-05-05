@@ -30,8 +30,14 @@ declare global {
     | "Share"
     | "TestBeakerSolid"
     | "Variable2"
+    | "ColumnVerticalSectionEdit"
+    | "MediaAdd"
+    | "Rename"
+    | "Variable2"
     | "Error"
-    | "Warning";
+    | "Warning"
+    | "More"
+    | never; // never has no effect here other than keeping the semicolon on a separate line for easier conflict resolution
 }
 
 declare module "@fluentui/react/lib/components/Icon" {

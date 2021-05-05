@@ -10,7 +10,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ReactElement, useState, useEffect, useMemo, Suspense, PropsWithChildren } from "react";
+import { ReactElement, useState, useEffect, useMemo, Suspense } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Provider as ReduxProvider } from "react-redux";
@@ -18,6 +18,7 @@ import { Provider as ReduxProvider } from "react-redux";
 import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";
 import LayoutStorageReduxAdapter from "@foxglove-studio/app/components/LayoutStorageReduxAdapter";
+import MultiProvider from "@foxglove-studio/app/components/MultiProvider";
 import { NativeFileMenuPlayerSelection } from "@foxglove-studio/app/components/NativeFileMenuPlayerSelection";
 import PlayerManager from "@foxglove-studio/app/components/PlayerManager";
 import StudioToastProvider from "@foxglove-studio/app/components/StudioToastProvider";
@@ -39,17 +40,6 @@ const BuiltinPanelCatalogProvider = React.lazy(
 );
 
 const Workspace = React.lazy(() => import("@foxglove-studio/app/Workspace"));
-
-function AllProviders({ providers, children }: PropsWithChildren<{ providers: JSX.Element[] }>) {
-  return (
-    <>
-      {providers.reduceRight(
-        (wrappedChildren, provider) => React.cloneElement(provider, undefined, wrappedChildren),
-        children,
-      )}
-    </>
-  );
-}
 
 export default function App(): ReactElement {
   const globalStore = getGlobalStore();
@@ -105,7 +95,7 @@ export default function App(): ReactElement {
 
   return (
     <ErrorBoundary>
-      <AllProviders providers={providers}>
+      <MultiProvider providers={providers}>
         <LayoutStorageReduxAdapter />
         <NativeFileMenuPlayerSelection />
         <DndProvider backend={HTML5Backend}>
@@ -115,7 +105,7 @@ export default function App(): ReactElement {
             </BuiltinPanelCatalogProvider>
           </Suspense>
         </DndProvider>
-      </AllProviders>
+      </MultiProvider>
     </ErrorBoundary>
   );
 }

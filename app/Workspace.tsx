@@ -10,7 +10,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ActionButton, Modal } from "@fluentui/react";
+import { Stack } from "@fluentui/react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { useToasts } from "react-toast-notifications";
@@ -20,22 +20,25 @@ import styled from "styled-components";
 import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import { redoLayoutChange, undoLayoutChange } from "@foxglove-studio/app/actions/layoutHistory";
 import { importPanelLayout, loadLayout } from "@foxglove-studio/app/actions/panels";
-import AddPanelMenu from "@foxglove-studio/app/components/AddPanelMenu";
 import DocumentDropListener from "@foxglove-studio/app/components/DocumentDropListener";
 import DropOverlay from "@foxglove-studio/app/components/DropOverlay";
 import GlobalKeyListener from "@foxglove-studio/app/components/GlobalKeyListener";
-import GlobalVariablesMenu from "@foxglove-studio/app/components/GlobalVariablesMenu";
+import GlobalVariablesTable from "@foxglove-studio/app/components/GlobalVariablesTable";
+import variablesHelp from "@foxglove-studio/app/components/GlobalVariablesTable/index.help.md";
 import HelpModal from "@foxglove-studio/app/components/HelpModal";
 import LayoutMenu from "@foxglove-studio/app/components/LayoutMenu";
 import messagePathHelp from "@foxglove-studio/app/components/MessagePathSyntax/index.help.md";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import NotificationDisplay from "@foxglove-studio/app/components/NotificationDisplay";
 import PanelLayout from "@foxglove-studio/app/components/PanelLayout";
+import PanelList from "@foxglove-studio/app/components/PanelList";
 import PlaybackControls from "@foxglove-studio/app/components/PlaybackControls";
 import { PlayerStatusIndicator } from "@foxglove-studio/app/components/PlayerStatusIndicator";
 import Preferences from "@foxglove-studio/app/components/Preferences";
 import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
 import ShortcutsModal from "@foxglove-studio/app/components/ShortcutsModal";
+import Sidebar, { SidebarItem } from "@foxglove-studio/app/components/Sidebar";
+import { SidebarContent } from "@foxglove-studio/app/components/SidebarContent";
 import TinyConnectionPicker from "@foxglove-studio/app/components/TinyConnectionPicker";
 import Toolbar from "@foxglove-studio/app/components/Toolbar";
 import { useAppConfiguration } from "@foxglove-studio/app/context/AppConfigurationContext";
@@ -43,6 +46,7 @@ import { useAssets } from "@foxglove-studio/app/context/AssetContext";
 import LinkHandlerContext from "@foxglove-studio/app/context/LinkHandlerContext";
 import { usePlayerSelection } from "@foxglove-studio/app/context/PlayerSelectionContext";
 import useElectronFilesToOpen from "@foxglove-studio/app/hooks/useElectronFilesToOpen";
+import useSelectPanel from "@foxglove-studio/app/hooks/useSelectPanel";
 import welcomeLayout from "@foxglove-studio/app/layouts/welcomeLayout";
 import { PlayerPresence } from "@foxglove-studio/app/players/types";
 import { ImportPanelLayoutPayload } from "@foxglove-studio/app/types/panels";
@@ -68,6 +72,33 @@ const TruncatedText = styled.span`
   line-height: normal;
 `;
 
+type SidebarItemKey = "add-panel" | "variables" | "preferences";
+
+const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
+  ["add-panel", { iconName: "MediaAdd", title: "Add Panel", component: AddPanel }],
+  ["variables", { iconName: "Rename", title: "Variables", component: Variables }],
+  ["preferences", { iconName: "Settings", title: "Preferences", component: Preferences }],
+]);
+
+const SIDEBAR_BOTTOM_ITEMS: readonly SidebarItemKey[] = ["preferences"];
+
+function AddPanel() {
+  const selectPanel = useSelectPanel();
+  return (
+    <SidebarContent noPadding title="Add panel">
+      <PanelList onPanelSelect={selectPanel} />
+    </SidebarContent>
+  );
+}
+
+function Variables() {
+  return (
+    <SidebarContent title="Variables" helpContent={variablesHelp}>
+      <GlobalVariablesTable />
+    </SidebarContent>
+  );
+}
+
 // file types we support for drag/drop
 const allowedDropExtensions = [".bag", ".urdf"];
 
@@ -81,7 +112,7 @@ export default function Workspace(): JSX.Element {
   const playerCapabilities = useMessagePipeline(
     useCallback(({ playerState }) => playerState.capabilities, []),
   );
-  const [preferencesOpen, setPreferencesOpen] = useState(false);
+  const [selectedSidebarItem, setSelectedSidebarItem] = useState<SidebarItemKey | undefined>();
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
   const [messagePathSyntaxModalOpen, setMessagePathSyntaxModalOpen] = useState(false);
 
@@ -126,7 +157,9 @@ export default function Workspace(): JSX.Element {
       }
     });
 
-    OsContextSingleton?.addIpcEventListener("open-preferences", () => setPreferencesOpen(true));
+    OsContextSingleton?.addIpcEventListener("open-preferences", () =>
+      setSelectedSidebarItem((item) => (item === "preferences" ? undefined : "preferences")),
+    );
     OsContextSingleton?.addIpcEventListener("open-message-path-syntax-help", () =>
       setMessagePathSyntaxModalOpen(true),
     );
@@ -231,31 +264,22 @@ export default function Workspace(): JSX.Element {
           <SToolbarItem>
             <LayoutMenu />
           </SToolbarItem>
-          <SToolbarItem>
-            <AddPanelMenu />
-          </SToolbarItem>
-          <SToolbarItem>
-            <GlobalVariablesMenu />
-          </SToolbarItem>
-          <SToolbarItem>
-            <ActionButton
-              iconProps={{
-                iconName: "Settings",
-                styles: { root: { "& span": { verticalAlign: "baseline" } } },
-              }}
-              onClick={() => setPreferencesOpen(true)}
-            />
-            <Modal
-              styles={{ main: { width: "80vw", maxWidth: 850, height: "80vh", maxHeight: 600 } }}
-              isOpen={preferencesOpen}
-              onDismiss={() => setPreferencesOpen(false)}
-            >
-              <Preferences />
-            </Modal>
-          </SToolbarItem>
         </Toolbar>
-        <PanelLayout />
-        {showPlaybackControls && <PlaybackControls />}
+        <Sidebar
+          items={SIDEBAR_ITEMS}
+          bottomItems={SIDEBAR_BOTTOM_ITEMS}
+          selectedKey={selectedSidebarItem}
+          onSelectKey={setSelectedSidebarItem}
+        >
+          <Stack>
+            <PanelLayout />
+            {showPlaybackControls && (
+              <Stack.Item disableShrink>
+                <PlaybackControls />
+              </Stack.Item>
+            )}
+          </Stack>
+        </Sidebar>
       </div>
     </LinkHandlerContext.Provider>
   );

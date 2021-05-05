@@ -20,6 +20,7 @@ import { useCallback, useMemo, useState } from "react";
 import { AppSetting } from "@foxglove-studio/app/AppSetting";
 import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import { ExperimentalFeatureSettings } from "@foxglove-studio/app/components/ExperimentalFeatureSettings";
+import { SidebarContent } from "@foxglove-studio/app/components/SidebarContent";
 import { useAppConfigurationValue } from "@foxglove-studio/app/hooks/useAppConfigurationValue";
 import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import filterMap from "@foxglove-studio/app/util/filterMap";
@@ -143,7 +144,7 @@ function RosHostname(): React.ReactElement {
     <TextField
       label="ROS_HOSTNAME"
       placeholder={rosHostnamePlaceholder}
-      value={rosHostname}
+      value={rosHostname ?? ""}
       onChange={(_event, newValue) => setRosHostname(nonEmptyOrUndefined(newValue))}
     />
   );
@@ -160,17 +161,19 @@ export default function Preferences(): React.ReactElement {
   );
 
   return (
-    <Pivot>
-      <PivotItem headerText="Settings" style={{ padding: theme.spacing.m }}>
-        <Stack.Item>
-          <TimezoneSettings />
-        </Stack.Item>
-        <Stack.Item>
-          <RosHostname />
-        </Stack.Item>
-      </PivotItem>
-      {
-        <PivotItem headerText="Privacy" style={{ padding: theme.spacing.m }}>
+    <SidebarContent title="Preferences">
+      <Pivot>
+        <PivotItem headerText="General" style={{ paddingTop: theme.spacing.m }}>
+          <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
+            <Stack.Item>
+              <TimezoneSettings />
+            </Stack.Item>
+            <Stack.Item>
+              <RosHostname />
+            </Stack.Item>
+          </Stack>
+        </PivotItem>
+        <PivotItem headerText="Privacy" style={{ paddingTop: theme.spacing.m }}>
           <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
             <Text style={{ color: theme.palette.neutralSecondary }}>
               Changes will take effect the next time {APP_NAME} is launched.
@@ -187,10 +190,10 @@ export default function Preferences(): React.ReactElement {
             />
           </Stack>
         </PivotItem>
-      }
-      <PivotItem headerText="Experimental Features">
-        <ExperimentalFeatureSettings />
-      </PivotItem>
-    </Pivot>
+        <PivotItem headerText="Experimental Features">
+          <ExperimentalFeatureSettings />
+        </PivotItem>
+      </Pivot>
+    </SidebarContent>
   );
 }

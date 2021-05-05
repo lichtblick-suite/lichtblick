@@ -16,7 +16,6 @@ import { isEqual } from "lodash";
 import { ActionTypes } from "@foxglove-studio/app/actions";
 import { panelEditingActions } from "@foxglove-studio/app/actions/panels";
 import { State, PersistedState } from "@foxglove-studio/app/reducers";
-import { EditHistoryOptions } from "@foxglove-studio/app/types/panels";
 import {
   pushState,
   redoChange,
@@ -92,14 +91,9 @@ const pushLayoutChange = (
   oldPersistedState: PersistedState | undefined,
   newPersistedState: PersistedState,
   layoutHistory: LayoutHistory,
-  action: any,
 ): LayoutHistory => {
   const time = Date.now();
-  const historyOptions: EditHistoryOptions | undefined = action.payload?.historyOptions;
-  if (
-    historyOptions === "SUPPRESS_HISTORY_ENTRY" ||
-    isEqual(oldPersistedState, newPersistedState)
-  ) {
+  if (isEqual(oldPersistedState, newPersistedState)) {
     return layoutHistory;
   }
   if (oldPersistedState && time - layoutHistory.lastTimestamp > NEVER_PUSH_LAYOUT_THRESHOLD_MS) {
@@ -148,7 +142,6 @@ export default function (
           oldPersistedState,
           state.persistedState,
           state.layoutHistory,
-          action,
         );
         return { ...state, layoutHistory: newLayoutHistory };
       }

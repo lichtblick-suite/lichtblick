@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import cx from "classnames";
-import { CSSProperties, LegacyRef } from "react";
+import { CSSProperties } from "react";
 
 import styles from "./Flex.module.scss";
 
@@ -43,11 +43,9 @@ type Props = {
   onMouseMove?: (arg0: MouseEvent) => void;
   // for storybook screenshots tests
   dataTest?: string;
-
-  innerRef?: LegacyRef<HTMLDivElement>;
 };
 
-const Flex = (props: Props): JSX.Element => {
+const Flex = React.forwardRef((props: Props, ref: React.ForwardedRef<HTMLDivElement>) => {
   const {
     col,
     row,
@@ -67,7 +65,6 @@ const Flex = (props: Props): JSX.Element => {
     onMouseLeave,
     onMouseMove,
     dataTest,
-    innerRef,
   } = props;
   if (col != undefined && col === row) {
     throw new Error("Flex col and row are mutually exclusive");
@@ -89,7 +86,7 @@ const Flex = (props: Props): JSX.Element => {
 
   return (
     <div
-      ref={innerRef}
+      ref={ref}
       data-test={dataTest}
       className={combinedClasses}
       style={style}
@@ -101,7 +98,7 @@ const Flex = (props: Props): JSX.Element => {
       {children}
     </div>
   );
-};
+});
 
 Flex.displayName = "Flex";
 export default Flex;

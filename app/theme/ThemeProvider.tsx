@@ -35,8 +35,12 @@ const icons: {
   Share: <Icons.ShareIcon />,
   TestBeakerSolid: <Icons.TestBeakerSolidIcon />,
   Variable2: <Icons.Variable2Icon />,
+  ColumnVerticalSectionEdit: <Icons.ColumnVerticalSectionEditIcon />,
+  MediaAdd: <Icons.MediaAddIcon />,
+  Rename: <Icons.RenameIcon />,
   Error: <Icons.ErrorIcon />,
   Warning: <Icons.WarningIcon />,
+  More: <Icons.MoreIcon />,
   "studio.ROS": <RosIcon />,
 };
 

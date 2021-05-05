@@ -160,22 +160,6 @@ describe("state.layoutHistory", () => {
     });
   });
 
-  it("suppresses history entries when told to", async () => {
-    const { store, checkState } = getStore();
-    store.dispatch(changePanelLayout({ layout: "foo!1234" }));
-    checkState(({ layoutHistory }) => {
-      expect(layoutHistory.undoStates.length).toEqual(1); // original state
-    });
-
-    await delay(NEVER_PUSH_LAYOUT_THRESHOLD_MS + 100);
-    store.dispatch(
-      changePanelLayout({ layout: "bar!5678", historyOptions: "SUPPRESS_HISTORY_ENTRY" }),
-    );
-    checkState(({ layoutHistory }) => {
-      expect(layoutHistory.undoStates.length).toEqual(1); // unchanged
-    });
-  });
-
   it("suppresses history entries when nothing changed", async () => {
     const { store, checkState } = getStore();
     store.dispatch(changePanelLayout({ layout: "foo!1234" }));

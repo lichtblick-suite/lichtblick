@@ -87,7 +87,10 @@ describe("ExperimentalFeatures", () => {
 
     // Clicking on an item in the modal should trigger a rerender of all components that use
     // `useExperimentalFeature`, and so the `renderedSettings` should be updated with the new value.
-    container.find("[data-test='alwaysOff']").first().simulate("click");
+    container
+      .find("input")
+      .at(2)
+      .simulate("change", { target: { checked: true } });
     expect(renderCount).toEqual(2);
     expect(renderedSettings).toEqual({
       feat1: false,

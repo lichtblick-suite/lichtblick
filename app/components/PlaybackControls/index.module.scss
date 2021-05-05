@@ -16,7 +16,7 @@
 @import "@foxglove-studio/app/styles/variables.module.scss";
 
 .container {
-  padding: 16px;
+  padding: 0 8px;
   height: $playbackControlHeight;
   align-items: center;
 
@@ -54,12 +54,11 @@
   display: flex;
 }
 .bar {
-  margin: 0px 0px 0px 5px;
   flex: 1;
   display: flex;
   flex-direction: row;
   position: relative;
-  height: 100%;
+  height: 28px;
 }
 
 .sliderContainer {

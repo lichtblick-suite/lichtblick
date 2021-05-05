@@ -97,7 +97,7 @@ export const EmptyDropTarget = ({ tabId }: Props): JSX.Element => {
             <PanelList onPanelSelect={onPanelSelect} />
           </Menu>
         </ChildToggle>{" "}
-        {" or drag one in to get started."}
+        or drag one in to get started.
       </SEmptyStateText>
     </SDropTarget>
   );

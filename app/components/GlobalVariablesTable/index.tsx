@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { Callout, IconButton } from "@fluentui/react";
+import { Callout, DefaultButton, IconButton } from "@fluentui/react";
 import CloseIcon from "@mdi/svg/svg/close.svg";
 import { partition, pick, union, without } from "lodash";
 import { useEffect, useMemo, useCallback, useRef, useState, ReactElement } from "react";
@@ -63,17 +63,14 @@ const SGlobalVariablesTable = styled.div`
 
   th,
   td {
-    padding: 0px 16px;
     line-height: 100%;
     border: none;
   }
 
   tr:first-child th {
-    padding: 8px 16px;
     border: none;
     text-align: left;
     color: rgba(255, 255, 255, 0.6);
-    min-width: 120px;
   }
 
   td {
@@ -83,7 +80,7 @@ const SGlobalVariablesTable = styled.div`
       width: 100%;
       padding-left: 0;
       padding-right: 0;
-      min-width: 40px;
+      min-width: 0;
     }
     &:last-child {
       color: rgba(255, 255, 255, 0.6);
@@ -241,7 +238,7 @@ function LinkedGlobalVariableRow({ name }: { name: string }): ReactElement {
                       </span>
                     </Item>
                   ))}
-                  <Item onClick={unlinkAndDelete}>Delete global variable</Item>
+                  <Item onClick={unlinkAndDelete}>Delete variable</Item>
                 </Menu>
               </Callout>
             )}
@@ -298,7 +295,7 @@ function GlobalVariablesTable(): ReactElement {
       <table>
         <thead>
           <tr>
-            <th>Global variable</th>
+            <th>Variable</th>
             <th>Value</th>
             <th>Topic(s)</th>
           </tr>
@@ -358,14 +355,12 @@ function GlobalVariablesTable(): ReactElement {
           ))}
         </tbody>
       </table>
-      <Flex style={{ margin: "20px 16px 16px", justifyContent: "flex-end" }}>
-        <button
+      <Flex style={{ marginTop: 20 }}>
+        <DefaultButton
+          text="Add variable"
           disabled={globalVariables[""] != undefined}
           onClick={() => setGlobalVariables({ "": "" })}
-          data-test="add-variable-btn"
-        >
-          Add variable
-        </button>
+        />
       </Flex>
     </SGlobalVariablesTable>
   );

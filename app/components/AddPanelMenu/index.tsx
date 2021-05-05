@@ -12,34 +12,18 @@
 //   You may not use this file except in compliance with the License.
 
 import { ActionButton, Callout, IButton, IContextualMenuProps } from "@fluentui/react";
-import { useCallback, useRef, useLayoutEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useRef, useLayoutEffect } from "react";
 
-import { addPanel, AddPanelPayload } from "@foxglove-studio/app/actions/panels";
 import Menu from "@foxglove-studio/app/components/Menu";
-import PanelList, { PanelSelection } from "@foxglove-studio/app/components/PanelList";
-import { State as ReduxState } from "@foxglove-studio/app/reducers";
-import logEvent, { getEventNames, getEventTags } from "@foxglove-studio/app/util/logEvent";
+import PanelList from "@foxglove-studio/app/components/PanelList";
+import useSelectPanel from "@foxglove-studio/app/hooks/useSelectPanel";
 
 type Props = {
   defaultIsOpen?: boolean; // just for testing
 };
 
 function MenuContent(menuProps: IContextualMenuProps) {
-  const dispatch = useDispatch();
-  const layout = useSelector((state: ReduxState) => state.persistedState.panels.layout);
-  const onPanelSelect = useCallback(
-    ({ type, config, relatedConfigs }: PanelSelection) => {
-      dispatch(addPanel({ type, layout, config, relatedConfigs } as AddPanelPayload));
-
-      const name = getEventNames().PANEL_ADD;
-      const panelType = getEventTags().PANEL_TYPE;
-      if (name != undefined && panelType != undefined) {
-        logEvent({ name: name, tags: { [panelType]: type } });
-      }
-    },
-    [dispatch, layout],
-  );
+  const selectPanel = useSelectPanel();
   return (
     <Callout
       {...menuProps}
@@ -50,7 +34,7 @@ function MenuContent(menuProps: IContextualMenuProps) {
       }}
     >
       <Menu>
-        <PanelList onPanelSelect={onPanelSelect} />
+        <PanelList onPanelSelect={selectPanel} />
       </Menu>
     </Callout>
   );

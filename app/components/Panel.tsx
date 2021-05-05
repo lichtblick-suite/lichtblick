@@ -68,7 +68,6 @@ import { State } from "@foxglove-studio/app/reducers";
 import { TabPanelConfig } from "@foxglove-studio/app/types/layouts";
 import {
   CreateTabPanelPayload,
-  EditHistoryOptions,
   SaveConfigsPayload,
   SaveFullConfigPayload,
   PanelConfig,
@@ -216,10 +215,7 @@ export default function Panel<Config extends PanelConfig>(
 
     // Mix partial config with current config or `defaultConfig`
     const saveCompleteConfig = useCallback(
-      (
-        configToSave: Partial<Config>,
-        options: { historyOptions?: EditHistoryOptions } | undefined,
-      ) => {
+      (configToSave: Partial<Config>) => {
         if (saveConfig) {
           saveConfig(configToSave as any);
         }
@@ -228,7 +224,6 @@ export default function Panel<Config extends PanelConfig>(
             configs: [
               { id: childId, config: configToSave, defaultConfig: PanelComponent.defaultConfig },
             ],
-            historyOptions: options?.historyOptions,
           });
         }
       },
@@ -236,12 +231,8 @@ export default function Panel<Config extends PanelConfig>(
     );
 
     const updatePanelConfig = useCallback(
-      (
-        panelType: string,
-        perPanelFunc: (arg0: PanelConfig) => PanelConfig,
-        historyOptions?: EditHistoryOptions,
-      ) => {
-        actions.saveFullPanelConfig({ panelType, perPanelFunc, historyOptions });
+      (panelType: string, perPanelFunc: (arg0: PanelConfig) => PanelConfig) => {
+        actions.saveFullPanelConfig({ panelType, perPanelFunc });
       },
       [actions],
     );
@@ -573,7 +564,7 @@ export default function Panel<Config extends PanelConfig>(
             col
             dataTest={`panel-mouseenter-container ${childId ?? ""}`}
             clip
-            innerRef={(el) => {
+            ref={(el) => {
               connectOverlayDragPreview(el);
               connectToolbarDragPreview(el);
             }}

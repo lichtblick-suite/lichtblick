@@ -51,7 +51,7 @@ const visualization: PanelInfo[] = [
 
 const utility: PanelInfo[] = [
   { title: "Data Source Info", component: SourceInfo },
-  { title: "Global Variable Slider", component: GlobalVariableSlider },
+  { title: "Variable Slider", component: GlobalVariableSlider },
   { title: "Node Playground", component: NodePlayground },
   { title: "Tab", component: Tab },
 ];
