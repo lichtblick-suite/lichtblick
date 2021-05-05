@@ -19,7 +19,7 @@
     "clean": "tsc --build --clean packages/*/tsconfig.json && rimraf .webpack dist app/storybook-screenshots app/storybook-static",
     "clean:package": "yarn && yarn clean && yarn build:prod && yarn package",
     "start": "electron desktop/.webpack",
-    "build:packages": "tsc --build --verbose packages/*/tsconfig.json",
+    "build:packages": "tsc --build --verbose packages/**/tsconfig.json",
     "build:prod": "webpack --mode production --progress --config desktop/webpack.config.ts",
     "build:dev": "webpack --mode development --progress --config desktop/webpack.config.ts",
     "serve": "webpack serve --mode development --progress --config desktop/webpack.config.ts",
