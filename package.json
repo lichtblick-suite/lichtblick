@@ -51,7 +51,6 @@
     "@babel/preset-typescript": "7.13.0",
     "@foxglove/electron-socket": "workspace:packages/electron-socket",
     "@foxglove/tsconfig": "workspace:packages/@foxglove/tsconfig",
-    "@jest/types": "26.6.2",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.0-beta.1",
     "@sentry/electron": "2.4.0",
     "@sentry/webpack-plugin": "1.15.1",
