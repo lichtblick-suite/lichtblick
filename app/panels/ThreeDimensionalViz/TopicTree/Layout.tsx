@@ -39,7 +39,6 @@ import KeyListener from "@foxglove-studio/app/components/KeyListener";
 import Modal from "@foxglove-studio/app/components/Modal";
 import PanelContext from "@foxglove-studio/app/components/PanelContext";
 import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
-import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
 import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
 import { Save3DConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz";
@@ -791,8 +790,7 @@ export default function Layout({
 
   const cursorType = isDrawing ? "crosshair" : "";
   const { isHovered = false } = useContext(PanelContext) ?? {};
-  const isDemoMode = useExperimentalFeature("demoMode");
-  const isHidden = isDemoMode && !isHovered;
+  const isHidden = !isHovered;
 
   const { videoRecordingStyle } = useMemo(
     () => ({
@@ -853,7 +851,7 @@ export default function Layout({
               }
               ref={topicTreeSizeRef}
             >
-              {(!isDemoMode || (isDemoMode && isHovered)) && (
+              {isHovered && (
                 <TopicTree
                   allKeys={allKeys}
                   availableNamespacesByTopic={availableNamespacesByTopic}
@@ -924,7 +922,6 @@ export default function Layout({
               autoTextBackgroundColor={autoTextBackgroundColor}
               cameraState={cameraState}
               isPlaying={isPlaying}
-              isDemoMode={isDemoMode}
               markerProviders={markerProviders}
               onCameraStateChange={onCameraStateChange}
               diffModeEnabled={hasFeatureColumn && diffModeEnabled}

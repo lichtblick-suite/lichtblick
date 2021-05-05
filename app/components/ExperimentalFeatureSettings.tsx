@@ -11,53 +11,61 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ChoiceGroup, Stack, Text, useTheme } from "@fluentui/react";
-import { useContext } from "react";
+import { Toggle, Stack, Text, useTheme } from "@fluentui/react";
 
-import ExperimentalFeaturesContext, {
-  getDefaultKey,
-} from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
+import { AppSetting } from "@foxglove-studio/app/AppSetting";
+import { useAppConfigurationValue } from "@foxglove-studio/app/hooks/useAppConfigurationValue";
+
+type Feature = {
+  key: AppSetting;
+  name: string;
+  description: JSX.Element;
+};
+
+const features: Feature[] = [
+  {
+    key: AppSetting.UNLIMITED_MEMORY_CACHE,
+    name: "Unlimited in-memory cache (requires restart)",
+    description: <>Fully buffer a bag into memory. This may use up a lot of system memory.</>,
+  },
+];
+
+function ExperimentalFeatureItem(props: { feature: Feature }) {
+  const { feature } = props;
+
+  const [enabled, setEnabled] = useAppConfigurationValue<boolean>(feature.key);
+  return (
+    <Stack>
+      <Stack horizontal>
+        <Stack grow>
+          <Text as="h2" variant="medium">
+            {feature.name}
+          </Text>
+        </Stack>
+        <Toggle
+          checked={enabled}
+          onChange={(_, checked) => setEnabled(checked)}
+          onText="Enabled"
+          offText="Disabled"
+        />
+      </Stack>
+      <div>{feature.description}</div>
+    </Stack>
+  );
+}
 
 export function ExperimentalFeatureSettings(): React.ReactElement {
-  const { settings, features, changeFeature } = useContext(ExperimentalFeaturesContext);
   const theme = useTheme();
   return (
     <Stack style={{ padding: theme.spacing.m }} tokens={{ childrenGap: theme.spacing.m }}>
-      {Object.keys(features).length === 0 && (
+      {features.length === 0 && (
         <p>
           <em>Currently there are no experimental features.</em>
         </p>
       )}
-      {Object.entries(features).map(([id, feature]) => {
-        const { enabled = false, manuallySet = false } = settings[id] ?? {};
-        return (
-          <Stack key={id}>
-            <Text as="h2" variant="medium">
-              {feature.name} <code style={{ fontSize: 12 }}>{id}</code>
-            </Text>
-            <ChoiceGroup
-              options={[
-                { key: "default", text: `Default (${feature[getDefaultKey()] ? "on" : "off"})` },
-                { key: "alwaysOn", text: "On" },
-                { key: "alwaysOff", text: "Off" },
-              ]}
-              selectedKey={manuallySet ? (enabled ? "alwaysOn" : "alwaysOff") : "default"}
-              onChange={(_event, option) => {
-                if (option) {
-                  if (
-                    option.key !== "default" &&
-                    option.key !== "alwaysOn" &&
-                    option.key !== "alwaysOff"
-                  ) {
-                    throw new Error(`Invalid value for radio button: ${option.key}`);
-                  }
-                  changeFeature(id, option.key);
-                }
-              }}
-            />
-          </Stack>
-        );
-      })}
+      {features.map((feature) => (
+        <ExperimentalFeatureItem key={feature.key} feature={feature} />
+      ))}
     </Stack>
   );
 }

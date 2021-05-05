@@ -18,7 +18,6 @@ import { getSeekToTime } from "@foxglove-studio/app/util/time";
 
 export type BuildPlayerOptions = {
   unlimitedMemoryCache: boolean;
-  diskBagCaching: boolean;
   metricsCollector: PlayerMetricsCollectorInterface;
 };
 

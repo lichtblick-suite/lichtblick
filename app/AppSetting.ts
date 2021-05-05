@@ -7,4 +7,5 @@ export enum AppSetting {
   ROS1_ROS_HOSTNAME = "ros1.ros_hostname",
   TELEMETRY_ENABLED = "telemetry.telemetryEnabled",
   TIMEZONE = "timezone",
+  UNLIMITED_MEMORY_CACHE = "experimental.unlimited-memory-cache",
 }

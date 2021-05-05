@@ -32,7 +32,6 @@ import {
 } from "@foxglove-studio/app/actions/panels";
 import Flex from "@foxglove-studio/app/components/Flex";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import { usePanelCatalog } from "@foxglove-studio/app/context/PanelCatalogContext";
 import { EmptyDropTarget } from "@foxglove-studio/app/panels/Tab/EmptyDropTarget";
 import { State, Dispatcher } from "@foxglove-studio/app/reducers";
@@ -140,13 +139,12 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
     },
     [createTile, tabId, panelCatalog],
   );
-  const isDemoMode = useExperimentalFeature("demoMode");
   const bodyToRender = useMemo(
     () =>
       layout != undefined || layout === "" ? (
         <MosaicWithoutDragDropContext
           renderTile={renderTile}
-          className={isDemoMode ? "borderless" : "none"}
+          className={"none"}
           resize={{ minimumPaneSizePercentage: 2 }}
           value={layout}
           onChange={onChange}
@@ -155,7 +153,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
       ) : (
         <EmptyDropTarget tabId={tabId} />
       ),
-    [isDemoMode, layout, mosaicId, onChange, renderTile, tabId],
+    [layout, mosaicId, onChange, renderTile, tabId],
   );
 
   return <ErrorBoundary ref={props.forwardedRef as any}>{bodyToRender}</ErrorBoundary>;

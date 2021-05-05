@@ -32,7 +32,6 @@ import { Item, SubMenu } from "@foxglove-studio/app/components/Menu";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import useDeepMemo from "@foxglove-studio/app/hooks/useDeepMemo";
 import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
 import { MessageEvent } from "@foxglove-studio/app/players/types";
@@ -279,7 +278,6 @@ function ImageView(props: Props) {
     customMarkerTopicOptions = NO_CUSTOM_OPTIONS,
   } = config;
   const { topics } = PanelAPI.useDataSourceInfo();
-  const isDemoMode = useExperimentalFeature("demoMode");
   const cameraTopicFullObject = useMemo(() => getTopicsByTopicName(topics)[cameraTopic], [
     cameraTopic,
     topics,
@@ -683,7 +681,7 @@ function ImageView(props: Props) {
           onStartRenderImage={onStartRenderImage}
         />
       )}
-      {!showEmptyState && !isDemoMode && renderBottomBar()}
+      {!showEmptyState && renderBottomBar()}
     </Flex>
   );
 }

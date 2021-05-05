@@ -22,7 +22,6 @@ import {
   Pose,
 } from "regl-worldview";
 
-import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import { InteractionData } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
 import { PoseSettings } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/PoseSettingsEditor";
 import { Color, Header, Scale } from "@foxglove-studio/app/types/Messages";
@@ -34,7 +33,6 @@ const originalScaling = {
   x: 1,
   y: 1,
 };
-const updatedScaling = originalScaling;
 
 const getScaledCarOutlineBufferPoints = (scaling: { x: number; y: number }) => {
   const vectorSum = carOutlinePoints.reduce(
@@ -84,10 +82,9 @@ type PoseMarkerProps = CommonCommandProps & {
 };
 
 function PoseMarkers({ markers, layerIndex }: PoseMarkerProps): ReactElement {
-  const useUpdatedScaling = useExperimentalFeature("updatedPoseErrorScaling");
   const scaledCarOutlineBufferPoints = React.useMemo(
-    () => getScaledCarOutlineBufferPoints(useUpdatedScaling ? updatedScaling : originalScaling),
-    [useUpdatedScaling],
+    () => getScaledCarOutlineBufferPoints(originalScaling),
+    [],
   );
   const models: any = [];
   const filledPolygons: any = [];

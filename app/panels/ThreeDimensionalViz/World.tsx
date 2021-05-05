@@ -32,7 +32,6 @@ type Props = WorldSearchTextProps & {
   cameraState: CameraState;
   children?: Node;
   isPlaying: boolean;
-  isDemoMode: boolean;
   markerProviders: MarkerProvider[];
   onCameraStateChange: (arg0: CameraState) => void;
   onClick: MouseHandler;
@@ -116,7 +115,6 @@ function World(
     diffModeEnabled,
     cameraState,
     isPlaying,
-    isDemoMode,
     markerProviders,
     onDoubleClick,
     onMouseDown,
@@ -159,7 +157,7 @@ function World(
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
-      resolutionScale={isDemoMode ? 2 : 1}
+      resolutionScale={1}
       ref={ref}
       contextAttributes={{ preserveDrawingBuffer: true }}
     >
@@ -170,7 +168,6 @@ function World(
           markersByType: processedMarkersByType,
           layerIndex: LAYER_INDEX_DEFAULT_BASE,
           clearCachedMarkers: false,
-          isDemoMode,
           cameraDistance: cameraState.distance ?? DEFAULT_CAMERA_STATE.distance,
           diffModeEnabled,
         }}

@@ -61,7 +61,6 @@ import Flex from "@foxglove-studio/app/components/Flex";
 import Icon from "@foxglove-studio/app/components/Icon";
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
 import PanelContext from "@foxglove-studio/app/components/PanelContext";
-import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import { usePanelCatalog } from "@foxglove-studio/app/context/PanelCatalogContext";
 import usePanelDrag from "@foxglove-studio/app/hooks/usePanelDrag";
 import { State } from "@foxglove-studio/app/reducers";
@@ -493,7 +492,6 @@ export default function Panel<Config extends PanelConfig>(
       [panelComponentConfig, saveCompleteConfig],
     );
 
-    const isDemoMode = useExperimentalFeature("demoMode");
     const renderCount = useRef(0);
 
     const perfInfo = useRef<HTMLDivElement>(ReactNull);
@@ -559,7 +557,7 @@ export default function Panel<Config extends PanelConfig>(
             className={cx({
               [styles.root!]: true,
               [styles.rootFullScreen!]: fullScreen,
-              [styles.selected!]: isSelected && !isDemoMode,
+              [styles.selected!]: isSelected,
             })}
             col
             dataTest={`panel-mouseenter-container ${childId ?? ""}`}

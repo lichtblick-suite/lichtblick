@@ -36,7 +36,6 @@ import {
   MessagePipelineProvider,
 } from "@foxglove-studio/app/components/MessagePipeline";
 import { useAnalytics } from "@foxglove-studio/app/context/AnalyticsContext";
-import { useExperimentalFeature } from "@foxglove-studio/app/context/ExperimentalFeaturesContext";
 import PlayerSelectionContext, {
   PlayerSelection,
   PlayerSourceDefinition,
@@ -365,9 +364,11 @@ function PlayerManager({
     return new AnalyticsMetricsCollector(analytics);
   }, [analytics]);
 
+  const [unlimitedMemoryCache = false] = useAppConfigurationValue<boolean>(
+    AppSetting.UNLIMITED_MEMORY_CACHE,
+  );
   const buildPlayerOptions: BuildPlayerOptions = useShallowMemo({
-    diskBagCaching: useExperimentalFeature("diskBagCaching"),
-    unlimitedMemoryCache: useExperimentalFeature("unlimitedMemoryCache"),
+    unlimitedMemoryCache: unlimitedMemoryCache,
     metricsCollector: metricsCollector,
   });
 
