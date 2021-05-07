@@ -30,8 +30,6 @@ import { formatTimeRaw, isTimeInRangeInclusive } from "@foxglove-studio/app/util
 
 import styles from "./index.module.scss";
 
-const MAX_WIDTH = 200;
-
 const SInput = styled.input`
   padding: 8px 4px;
   width: calc(100% - 4px);
@@ -144,7 +142,7 @@ const PlaybackTimeDisplayMethod = ({
   }, [hasError, inputText, isPlaying]);
 
   return (
-    <Flex start style={{ maxWidth: `${MAX_WIDTH}px`, alignItems: "center", marginLeft: "8px" }}>
+    <Flex start style={{ flexGrow: 0, alignItems: "center", marginLeft: "8px" }}>
       {currentTime ? (
         isEditing ? (
           <form onSubmit={onSubmit} style={{ width: "100%" }}>
@@ -177,10 +175,6 @@ const PlaybackTimeDisplayMethod = ({
       <Dropdown
         position="above"
         value={timeDisplayMethod}
-        menuStyle={{
-          width: `${MAX_WIDTH - 45}px`,
-          marginLeft: currentTime ? `-${MAX_WIDTH - 90}px` : `-${MAX_WIDTH - 90}px`,
-        }}
         text={timeDisplayMethod}
         onChange={(val) => setTimeDisplayMethod(val)}
         btnClassname={styles.timeDisplayMethodButton}

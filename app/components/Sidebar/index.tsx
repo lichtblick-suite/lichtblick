@@ -17,6 +17,7 @@ import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { MosaicNode, MosaicWithoutDragDropContext } from "react-mosaic-component";
 import styled from "styled-components";
 
+import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 
 import SidebarButton, { BUTTON_SIZE } from "./SidebarButton";
@@ -214,9 +215,11 @@ export default function Sidebar<K extends string>({
           className=""
           value={mosaicValue}
           onChange={(value) => value != undefined && setMosaicValue(value)}
-          renderTile={(id) =>
-            id === "children" ? (children as JSX.Element) : <SelectedComponent />
-          }
+          renderTile={(id) => (
+            <ErrorBoundary>
+              {id === "children" ? (children as JSX.Element) : <SelectedComponent />}
+            </ErrorBoundary>
+          )}
           resize={{ minimumPaneSizePercentage: 30 }}
         />
       </HideRootDropTargets>

@@ -50,7 +50,7 @@ export function CustomOpacity(): JSX.Element {
   return (
     <ExampleAssetsProvider>
       <PanelSetup>
-        <URDFViewer config={{ opacity: 0.25 }} />
+        <URDFViewer overrideConfig={{ opacity: 0.25 }} />
       </PanelSetup>
     </ExampleAssetsProvider>
   );
@@ -87,7 +87,7 @@ export function ManualJointPosition(): JSX.Element {
     <ExampleAssetsProvider>
       <PanelSetup>
         <URDFViewer
-          config={{ jointStatesTopic: undefined, customJointValues: { base_rotation: 1 } }}
+          overrideConfig={{ jointStatesTopic: undefined, customJointValues: { base_rotation: 1 } }}
         />
       </PanelSetup>
     </ExampleAssetsProvider>

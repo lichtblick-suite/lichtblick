@@ -2,10 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { action } from "@storybook/addon-actions";
 import { useEffect, useRef } from "react";
 import TestUtils from "react-dom/test-utils";
 
+import SchemaEditor from "@foxglove-studio/app/components/PanelSettings/SchemaEditor";
 import ImageView from "@foxglove-studio/app/panels/ImageView";
 import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
 
@@ -39,7 +39,7 @@ export function NoTopic(): React.ReactElement {
 export function TopicButNoDataSource(): React.ReactElement {
   return (
     <PanelSetup>
-      <ImageView config={{ ...ImageView.defaultConfig, cameraTopic: "a_topic" }} />
+      <ImageView overrideConfig={{ ...ImageView.defaultConfig, cameraTopic: "a_topic" }} />
     </PanelSetup>
   );
 }
@@ -48,7 +48,7 @@ export function TopicButNoDataSourceHovered(): React.ReactElement {
   useHoverOnPanel();
   return (
     <PanelSetup>
-      <ImageView config={{ ...ImageView.defaultConfig, cameraTopic: "a_topic" }} />
+      <ImageView overrideConfig={{ ...ImageView.defaultConfig, cameraTopic: "a_topic" }} />
     </PanelSetup>
   );
 }
@@ -82,10 +82,7 @@ function AvailableTopicsStory({
         frame: {},
       }}
     >
-      <ImageView
-        saveConfig={action("saveConfig")}
-        config={{ ...ImageView.defaultConfig, cameraTopic, scale: 1 }}
-      />
+      <ImageView overrideConfig={{ ...ImageView.defaultConfig, cameraTopic, scale: 1 }} />
     </PanelSetup>
   );
 }
@@ -103,3 +100,14 @@ export const AvailableTopicsDescendentSelected = (): React.ReactElement => (
 export const AvailableTopicsMarkers = (): React.ReactElement => (
   <AvailableTopicsStory openMarkersMenu cameraTopic="/baz_image/compressed" />
 );
+
+export function Settings(): JSX.Element {
+  return (
+    <SchemaEditor
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      configSchema={ImageView.configSchema!}
+      config={ImageView.defaultConfig}
+      saveConfig={() => {}}
+    />
+  );
+}

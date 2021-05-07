@@ -24,6 +24,7 @@ import Menu from "@foxglove-studio/app/components/Menu";
 import PanelList, { PanelSelection } from "@foxglove-studio/app/components/PanelList";
 import cssColors from "@foxglove-studio/app/styles/colors.module.scss";
 import { MosaicDropResult } from "@foxglove-studio/app/types/panels";
+import { getPanelIdForType } from "@foxglove-studio/app/util/layout";
 import logEvent, { getEventNames, getEventTags } from "@foxglove-studio/app/util/logEvent";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
@@ -75,7 +76,8 @@ export const EmptyDropTarget = ({ tabId }: Props): JSX.Element => {
 
   const onPanelSelect = useCallback(
     ({ type, config, relatedConfigs }: PanelSelection) => {
-      dispatch(addPanel({ tabId, type, layout: undefined, config, relatedConfigs }));
+      const id = getPanelIdForType(type);
+      dispatch(addPanel({ tabId, id, layout: undefined, config, relatedConfigs }));
       const name = getEventNames().PANEL_ADD;
       const eventType = getEventTags().PANEL_TYPE;
       if (name != undefined && eventType != undefined) {

@@ -28,6 +28,7 @@ import PanelSetup, { Fixture } from "@foxglove-studio/app/stories/PanelSetup";
 import PanelSetupWithBag from "@foxglove-studio/app/stories/PanelSetupWithBag";
 import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
 import { ScreenshotSizedContainer } from "@foxglove-studio/app/stories/storyHelpers";
+import { getPanelIdForType } from "@foxglove-studio/app/util/layout";
 
 type Store = ReturnType<typeof configureStore>;
 
@@ -52,6 +53,7 @@ type FixtureExampleProps = {
 type FixtureExampleState = {
   fixture?: Fixture;
   config: Partial<ThreeDimensionalVizConfig>;
+  panelId: string;
 };
 
 export const WorldviewContainer = (props: { children: React.ReactNode }): JSX.Element => {
@@ -63,7 +65,11 @@ export const WorldviewContainer = (props: { children: React.ReactNode }): JSX.El
 };
 
 export class FixtureExample extends React.Component<FixtureExampleProps, FixtureExampleState> {
-  state: FixtureExampleState = { fixture: undefined, config: this.props.initialConfig };
+  state: FixtureExampleState = {
+    fixture: undefined,
+    config: this.props.initialConfig,
+    panelId: getPanelIdForType(ThreeDimensionalViz.panelType),
+  };
 
   componentDidMount(): void {
     const { data, loadData } = this.props;
@@ -91,6 +97,9 @@ export class FixtureExample extends React.Component<FixtureExampleProps, Fixture
           topics: Object.values(topics),
           globalVariables: globalVariables ?? { futureTime: 1.5 },
           frame: {},
+          savedProps: {
+            [this.state.panelId]: this.props.initialConfig,
+          },
         },
       }, // Delay passing in the frame in order to work around a MessageHistory behavior
       // where the existing frame is not re-processed when the set of topics changes.
@@ -119,14 +128,11 @@ export class FixtureExample extends React.Component<FixtureExampleProps, Fixture
     return (
       <PanelSetup fixture={fixture} onMount={this.props.onMount}>
         <Flex col>
-          <ThreeDimensionalViz
-            config={this.state.config as any}
-            saveConfig={(config) => this.setState({ config: { ...this.state.config, ...config } })}
-          />
+          <ThreeDimensionalViz childId={this.state.panelId} />
           {this.props.futureTime != undefined && (
             <div style={{ height: "100px" }}>
               <GlobalVariableSliderPanel
-                config={{
+                overrideConfig={{
                   sliderProps: { min: 0, max: 12, step: 0.5 },
                   globalVariableName: "futureTime",
                 }}

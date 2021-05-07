@@ -238,7 +238,7 @@ storiesOf("panels/Tab/index", module)
   .add("with chosen active tab", () => (
     <PanelSetup panelCatalog={new MockPanelCatalog()} fixture={fixture}>
       <Tab
-        config={{
+        overrideConfig={{
           activeTabIdx: 1,
           tabs: [
             {
@@ -283,7 +283,7 @@ storiesOf("panels/Tab/index", module)
         TestUtils.Simulate.mouseEnter(mouseEnterContainer);
       }}
     >
-      <Tab config={{ activeTabIdx: 1, tabs: manyTabs }} />
+      <Tab overrideConfig={{ activeTabIdx: 1, tabs: manyTabs }} />
     </PanelSetup>
   ))
   .add("add tab", () => {

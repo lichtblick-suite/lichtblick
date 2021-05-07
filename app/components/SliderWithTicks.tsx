@@ -92,7 +92,7 @@ function drawTicks(futureTime: number | undefined, sliderConfig: SliderProps) {
   const measuredLabels: any = [];
 
   // Represents the number of gaps, not the number of ticks
-  const steps = Math.ceil((max - min) / step);
+  const steps = Math.ceil((max - min) / (step == undefined || step === 0 ? 1 : step));
   for (let i = 0; i <= steps; i++) {
     const value = Math.min(min + (i / steps) * (max - min), max);
     const text = value.toFixed(1);

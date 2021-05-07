@@ -46,7 +46,7 @@ storiesOf("panels/Publish/index", module)
     const allowPublish = true;
     return (
       <PanelSetup fixture={getFixture(allowPublish)}>
-        <Publish config={publishConfig(true, advancedJSON)} />
+        <Publish overrideConfig={publishConfig(true, advancedJSON)} />
       </PanelSetup>
     );
   })
@@ -54,7 +54,7 @@ storiesOf("panels/Publish/index", module)
     const allowPublish = false;
     return (
       <PanelSetup fixture={getFixture(allowPublish)}>
-        <Publish config={publishConfig(true, advancedJSON)} />
+        <Publish overrideConfig={publishConfig(true, advancedJSON)} />
       </PanelSetup>
     );
   })
@@ -62,14 +62,14 @@ storiesOf("panels/Publish/index", module)
     const allowPublish = false;
     return (
       <PanelSetup fixture={getFixture(allowPublish)}>
-        <Publish config={publishConfig(false, advancedJSON)} />
+        <Publish overrideConfig={publishConfig(false, advancedJSON)} />
       </PanelSetup>
     );
   })
   .add("Example with datatype that no longer exists", () => {
     return (
       <PanelSetup fixture={{ topics: [], datatypes: {}, frame: {}, capabilities: [] }}>
-        <Publish config={publishConfig(true, advancedJSON)} />
+        <Publish overrideConfig={publishConfig(true, advancedJSON)} />
       </PanelSetup>
     );
   })
@@ -89,7 +89,7 @@ storiesOf("panels/Publish/index", module)
 
     return (
       <PanelSetup fixture={fixture}>
-        <Publish config={publishConfig(true, validJSON)} />
+        <Publish overrideConfig={publishConfig(true, validJSON)} />
       </PanelSetup>
     );
   })
@@ -109,7 +109,7 @@ storiesOf("panels/Publish/index", module)
 
     return (
       <PanelSetup fixture={fixture}>
-        <Publish config={publishConfig(true, invalid)} />
+        <Publish overrideConfig={publishConfig(true, invalid)} />
       </PanelSetup>
     );
   });

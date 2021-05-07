@@ -515,9 +515,8 @@ const moveTab = (panelsState: PanelsState, { source, target }: MoveTabPayload): 
 
 const addPanel = (
   panelsState: PanelsState,
-  { tabId, layout, type, config, relatedConfigs }: AddPanelPayload,
+  { tabId, layout, id, config, relatedConfigs }: AddPanelPayload,
 ) => {
-  const id = getPanelIdForType(type);
   let newPanelsState = { ...panelsState };
   let saveConfigsPayload: { configs: ConfigsPayload[] } = { configs: [] };
   if (config) {
@@ -1013,9 +1012,15 @@ const panelsReducer = function (state: State, action: ActionTypes): State {
       };
       break;
 
-    case "CLOSE_PANEL":
+    case "CLOSE_PANEL": {
       newState.persistedState.panels = closePanel(newState.persistedState.panels, action.payload);
+      // Deselect the removed panel
+      const removedId = getNodeAtPath(action.payload.root, action.payload.path);
+      newState.mosaic.selectedPanelIds = newState.mosaic.selectedPanelIds.filter(
+        (id) => id !== removedId,
+      );
       break;
+    }
 
     case "SPLIT_PANEL":
       newState.persistedState.panels = splitPanel(state, action.payload);

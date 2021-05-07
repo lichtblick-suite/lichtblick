@@ -41,7 +41,7 @@ export function SelectedHardwareIDOnly(): JSX.Element {
   return (
     <PanelSetup fixture={fixture}>
       <DiagnosticStatusPanel
-        config={{
+        overrideConfig={{
           topicToRender: "/diagnostics",
           selectedHardwareId: "hardware_id1",
           selectedName: undefined,
@@ -56,7 +56,7 @@ export function SelectedName(): JSX.Element {
   return (
     <PanelSetup fixture={fixture}>
       <DiagnosticStatusPanel
-        config={{
+        overrideConfig={{
           topicToRender: "/diagnostics",
           selectedHardwareId: "hardware_id1",
           selectedName: "name2",
@@ -71,7 +71,7 @@ export function MovedDivider(): JSX.Element {
   return (
     <PanelSetup fixture={fixture}>
       <DiagnosticStatusPanel
-        config={{
+        overrideConfig={{
           topicToRender: "/diagnostics",
           selectedHardwareId: "hardware_id1",
           selectedName: undefined,

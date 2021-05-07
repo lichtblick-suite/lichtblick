@@ -11,7 +11,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Stack } from "@fluentui/react";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { useToasts } from "react-toast-notifications";
 import { useMountedState } from "react-use";
@@ -29,9 +29,11 @@ import HelpModal from "@foxglove-studio/app/components/HelpModal";
 import LayoutMenu from "@foxglove-studio/app/components/LayoutMenu";
 import messagePathHelp from "@foxglove-studio/app/components/MessagePathSyntax/index.help.md";
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
+import MultiProvider from "@foxglove-studio/app/components/MultiProvider";
 import NotificationDisplay from "@foxglove-studio/app/components/NotificationDisplay";
 import PanelLayout from "@foxglove-studio/app/components/PanelLayout";
 import PanelList from "@foxglove-studio/app/components/PanelList";
+import PanelSettings from "@foxglove-studio/app/components/PanelSettings";
 import PlaybackControls from "@foxglove-studio/app/components/PlaybackControls";
 import { PlayerStatusIndicator } from "@foxglove-studio/app/components/PlayerStatusIndicator";
 import Preferences from "@foxglove-studio/app/components/Preferences";
@@ -44,10 +46,11 @@ import Toolbar from "@foxglove-studio/app/components/Toolbar";
 import { useAppConfiguration } from "@foxglove-studio/app/context/AppConfigurationContext";
 import { useAssets } from "@foxglove-studio/app/context/AssetContext";
 import LinkHandlerContext from "@foxglove-studio/app/context/LinkHandlerContext";
+import { PanelSettingsContext } from "@foxglove-studio/app/context/PanelSettingsContext";
 import { usePlayerSelection } from "@foxglove-studio/app/context/PlayerSelectionContext";
+import useAddPanel from "@foxglove-studio/app/hooks/useAddPanel";
 import useElectronFilesToOpen from "@foxglove-studio/app/hooks/useElectronFilesToOpen";
 import useNativeAppMenuEvent from "@foxglove-studio/app/hooks/useNativeAppMenuEvent";
-import useSelectPanel from "@foxglove-studio/app/hooks/useSelectPanel";
 import welcomeLayout from "@foxglove-studio/app/layouts/welcomeLayout";
 import { PlayerPresence } from "@foxglove-studio/app/players/types";
 import { ImportPanelLayoutPayload } from "@foxglove-studio/app/types/panels";
@@ -74,21 +77,25 @@ const TruncatedText = styled.span`
   line-height: normal;
 `;
 
-type SidebarItemKey = "add-panel" | "variables" | "preferences";
+type SidebarItemKey = "add-panel" | "panel-settings" | "variables" | "preferences";
 
 const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
-  ["add-panel", { iconName: "MediaAdd", title: "Add Panel", component: AddPanel }],
-  ["variables", { iconName: "Rename", title: "Variables", component: Variables }],
+  ["add-panel", { iconName: "RectangularClipping", title: "Add Panel", component: AddPanel }],
+  [
+    "panel-settings",
+    { iconName: "SingleColumnEdit", title: "Panel Settings", component: PanelSettings },
+  ],
+  ["variables", { iconName: "Variable2", title: "Variables", component: Variables }],
   ["preferences", { iconName: "Settings", title: "Preferences", component: Preferences }],
 ]);
 
 const SIDEBAR_BOTTOM_ITEMS: readonly SidebarItemKey[] = ["preferences"];
 
 function AddPanel() {
-  const selectPanel = useSelectPanel();
+  const addPanel = useAddPanel();
   return (
     <SidebarContent noPadding title="Add panel">
-      <PanelList onPanelSelect={selectPanel} />
+      <PanelList onPanelSelect={addPanel} />
     </SidebarContent>
   );
 }
@@ -260,8 +267,23 @@ export default function Workspace(props: { demoBagUrl?: string }): JSX.Element {
   const showPlaybackControls =
     playerPresence === PlayerPresence.NOT_PRESENT || playerCapabilities.includes("playbackControl");
 
+  const panelSettings = useMemo(
+    () => ({
+      panelSettingsOpen: selectedSidebarItem === "panel-settings",
+      openPanelSettings: () => setSelectedSidebarItem("panel-settings"),
+    }),
+    [selectedSidebarItem],
+  );
+
   return (
-    <LinkHandlerContext.Provider value={handleInternalLink}>
+    <MultiProvider
+      providers={[
+        /* eslint-disable react/jsx-key */
+        <LinkHandlerContext.Provider value={handleInternalLink} />,
+        <PanelSettingsContext.Provider value={panelSettings} />,
+        /* eslint-enable react/jsx-key */
+      ]}
+    >
       <DocumentDropListener filesSelected={dropHandler} allowedExtensions={allowedDropExtensions}>
         <DropOverlay>
           <div style={{ fontSize: "4em", marginBottom: "1em" }}>Drop a file here</div>
@@ -312,6 +334,6 @@ export default function Workspace(props: { demoBagUrl?: string }): JSX.Element {
           </Stack>
         </Sidebar>
       </div>
-    </LinkHandlerContext.Provider>
+    </MultiProvider>
   );
 }

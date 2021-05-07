@@ -55,21 +55,21 @@ storiesOf("panels/Table/index", module)
   .add("no topic path", () => {
     return (
       <PanelSetup fixture={{ frame: {}, topics: [] }}>
-        <Table config={{ topicPath: "" }} />
+        <Table overrideConfig={{ topicPath: "" }} />
       </PanelSetup>
     );
   })
   .add("no data", () => {
     return (
       <PanelSetup fixture={{ frame: {}, topics: [] }}>
-        <Table config={{ topicPath: "/unknown" }} />
+        <Table overrideConfig={{ topicPath: "/unknown" }} />
       </PanelSetup>
     );
   })
   .add("arrays", () => {
     return (
       <PanelSetup fixture={fixture}>
-        <Table config={{ topicPath: "/my_arr.array" }} />
+        <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
       </PanelSetup>
     );
   })
@@ -83,7 +83,7 @@ storiesOf("panels/Table/index", module)
           });
         }}
       >
-        <Table config={{ topicPath: "/my_arr.array" }} />
+        <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
       </PanelSetup>
     );
   })
@@ -97,7 +97,7 @@ storiesOf("panels/Table/index", module)
           });
         }}
       >
-        <Table config={{ topicPath: "/my_arr.array" }} />
+        <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
       </PanelSetup>
     );
   })
@@ -111,7 +111,7 @@ storiesOf("panels/Table/index", module)
           });
         }}
       >
-        <Table config={{ topicPath: "/my_arr.array" }} />
+        <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
       </PanelSetup>
     );
   })
@@ -126,7 +126,7 @@ storiesOf("panels/Table/index", module)
           });
         }}
       >
-        <Table config={{ topicPath: "/my_arr.array" }} />
+        <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
       </PanelSetup>
     );
   })
@@ -141,14 +141,14 @@ storiesOf("panels/Table/index", module)
           });
         }}
       >
-        <Table config={{ topicPath: "/my_arr.array" }} />
+        <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
       </PanelSetup>
     );
   })
   .add("filtering", () => {
     return (
       <PanelSetup fixture={fixture}>
-        <Table config={{ topicPath: "/my_arr.array[:]{val==3}" }} />
+        <Table overrideConfig={{ topicPath: "/my_arr.array[:]{val==3}" }} />
       </PanelSetup>
     );
   })
@@ -163,21 +163,21 @@ storiesOf("panels/Table/index", module)
           });
         }}
       >
-        <Table config={{ topicPath: "/my_arr.array" }} />
+        <Table overrideConfig={{ topicPath: "/my_arr.array" }} />
       </PanelSetup>
     );
   })
   .add("handles primitives", () => {
     return (
       <PanelSetup fixture={fixture}>
-        <Table config={{ topicPath: "/my_arr.array[:].val" }} />
+        <Table overrideConfig={{ topicPath: "/my_arr.array[:].val" }} />
       </PanelSetup>
     );
   })
   .add("handles arrays of primitives", () => {
     return (
       <PanelSetup fixture={fixture}>
-        <Table config={{ topicPath: "/my_arr.array[:].primitiveArray" }} />
+        <Table overrideConfig={{ topicPath: "/my_arr.array[:].primitiveArray" }} />
       </PanelSetup>
     );
   })
@@ -185,7 +185,7 @@ storiesOf("panels/Table/index", module)
     return (
       <PanelSetup fixture={fixture}>
         <div style={{ width: "100px" }}>
-          <Table config={{ topicPath: "/my_arr.array[:]{val==3}" }} />
+          <Table overrideConfig={{ topicPath: "/my_arr.array[:]{val==3}" }} />
         </div>
       </PanelSetup>
     );

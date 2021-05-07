@@ -218,7 +218,10 @@ export const moveTab = (payload: MoveTabPayload): MOVE_TAB => ({
 });
 
 export type AddPanelPayload = {
-  type: string;
+  /** id must be formatted as returned by `getPanelIdForType`. This is required as an argument
+   * rather than automatically generated because the caller may want to use the new id for
+   * something, such as selecting the newly added panel. */
+  id: string;
   layout?: MosaicNode<string>;
   tabId?: string;
   config?: PanelConfig;

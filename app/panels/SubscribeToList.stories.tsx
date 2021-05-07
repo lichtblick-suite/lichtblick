@@ -32,7 +32,7 @@ storiesOf("panels/SubscribeToList", module).add("shows a topic list", () => {
         },
       }}
     >
-      <SubscribeToList config={{ topics: "/my/topic" }} />
+      <SubscribeToList overrideConfig={{ topics: "/my/topic" }} />
     </PanelSetup>
   );
 });

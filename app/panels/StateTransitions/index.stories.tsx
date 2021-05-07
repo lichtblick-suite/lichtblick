@@ -98,7 +98,7 @@ export const OnePath = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture}>
       <StateTransitions
-        config={{
+        overrideConfig={{
           paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
         }}
       />
@@ -110,7 +110,7 @@ export const MultiplePaths = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture}>
       <StateTransitions
-        config={{
+        overrideConfig={{
           paths: new Array(5).fill({
             value: "/some/topic/with/state.state",
             timestampMethod: "receiveTime",
@@ -134,7 +134,7 @@ export const MultiplePathsWithHover = (): JSX.Element => {
       style={{ width: 370 }}
     >
       <StateTransitions
-        config={{
+        overrideConfig={{
           paths: new Array(5).fill({
             value: "/some/topic/with/state.state",
             timestampMethod: "receiveTime",
@@ -149,7 +149,7 @@ export const LongPath = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture} style={{ maxWidth: 100 }}>
       <StateTransitions
-        config={{
+        overrideConfig={{
           paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
         }}
       />
@@ -161,7 +161,7 @@ export const JsonPath = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture}>
       <StateTransitions
-        config={{
+        overrideConfig={{
           paths: [{ value: "/some/topic/with/state.data.value", timestampMethod: "receiveTime" }],
         }}
       />
@@ -186,7 +186,7 @@ export const WithAHoveredTooltip = (): JSX.Element => {
       style={{ width: 370 }}
     >
       <StateTransitions
-        config={{
+        overrideConfig={{
           paths: new Array(5).fill({
             value: "/some/topic/with/state.state",
             timestampMethod: "receiveTime",

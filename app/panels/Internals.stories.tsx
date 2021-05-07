@@ -31,7 +31,7 @@ storiesOf("panels/Internals", module)
       >
         <Internals />
         <div style={{ display: "none" }}>
-          <SubscribeToList config={{ topics: "/my/topic\n/another/topic" }} />
+          <SubscribeToList overrideConfig={{ topics: "/my/topic\n/another/topic" }} />
         </div>
       </PanelSetup>
     );

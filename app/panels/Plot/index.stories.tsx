@@ -327,14 +327,14 @@ storiesOf("panels/Plot/index", module)
   .add("line graph", () => {
     return (
       <PanelSetup fixture={fixture}>
-        <Plot config={exampleConfig} />
+        <Plot overrideConfig={exampleConfig} />
       </PanelSetup>
     );
   })
   .add("line graph with legends hidden", () => {
     return (
       <PanelSetup fixture={fixture}>
-        <Plot config={{ ...exampleConfig, showLegend: false }} />
+        <Plot overrideConfig={{ ...exampleConfig, showLegend: false }} />
       </PanelSetup>
     );
   })
@@ -342,7 +342,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={fixture} style={{ flexDirection: "column" }}>
         <Plot
-          config={{
+          overrideConfig={{
             ...exampleConfig,
             paths: [
               {
@@ -354,7 +354,7 @@ storiesOf("panels/Plot/index", module)
           }}
         />
         <Plot
-          config={{
+          overrideConfig={{
             ...exampleConfig,
             paths: [
               {
@@ -398,7 +398,7 @@ storiesOf("panels/Plot/index", module)
 
     return (
       <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
-        <Plot config={exampleConfig} />
+        <Plot overrideConfig={exampleConfig} />
       </PanelSetup>
     );
   })
@@ -406,7 +406,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={fixture}>
         <Plot
-          config={{
+          overrideConfig={{
             ...exampleConfig,
             paths: [
               {
@@ -425,7 +425,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={fixture} style={{ maxWidth: 250 }}>
         <Plot
-          config={{
+          overrideConfig={{
             ...exampleConfig,
             paths: [
               {
@@ -443,7 +443,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={fixture}>
         <Plot
-          config={{
+          overrideConfig={{
             ...exampleConfig,
             paths: [
               {
@@ -466,7 +466,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={fixture}>
         <Plot
-          config={{
+          overrideConfig={{
             xAxisVal: "timestamp",
             paths: [
               { value: "0", enabled: true, timestampMethod: "receiveTime" }, // Test typing a period for decimal values. value: "1.", enabled: true, timestampMethod: "receiveTime",
@@ -486,7 +486,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={fixture}>
         <Plot
-          config={{
+          overrideConfig={{
             xAxisVal: "timestamp",
             paths: [
               {
@@ -507,7 +507,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={fixture}>
         <Plot
-          config={{
+          overrideConfig={{
             xAxisVal: "timestamp",
             paths: [
               {
@@ -528,7 +528,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={fixture}>
         <Plot
-          config={{
+          overrideConfig={{
             xAxisVal: "timestamp",
             paths: [
               {
@@ -549,7 +549,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={fixture}>
         <Plot
-          config={{
+          overrideConfig={{
             xAxisVal: "timestamp",
             paths: [
               {
@@ -570,7 +570,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={fixture}>
         <Plot
-          config={{
+          overrideConfig={{
             xAxisVal: "timestamp",
             paths: [
               {
@@ -591,7 +591,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={fixture}>
         <Plot
-          config={{
+          overrideConfig={{
             ...exampleConfig,
             paths: [
               {
@@ -621,7 +621,7 @@ storiesOf("panels/Plot/index", module)
 
     return (
       <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
-        <Plot config={exampleConfig} />
+        <Plot overrideConfig={exampleConfig} />
       </PanelSetup>
     );
   })
@@ -629,7 +629,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={fixture}>
         <Plot
-          config={{
+          overrideConfig={{
             ...exampleConfig,
             xAxisVal: "index",
             paths: [
@@ -649,7 +649,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={fixture}>
         <Plot
-          config={{
+          overrideConfig={{
             ...exampleConfig,
             xAxisVal: "custom",
             paths: [
@@ -670,7 +670,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={fixture}>
         <Plot
-          config={{
+          overrideConfig={{
             ...exampleConfig,
             xAxisVal: "currentCustom",
             paths: [
@@ -690,7 +690,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={fixture}>
         <Plot
-          config={{
+          overrideConfig={{
             ...exampleConfig,
             xAxisVal: "custom",
             paths: [
@@ -748,7 +748,7 @@ storiesOf("panels/Plot/index", module)
         }}
       >
         <Plot
-          config={{
+          overrideConfig={{
             ...exampleConfig,
             paths: [{ value: "/some_number.data", enabled: true, timestampMethod: "receiveTime" }],
           }}
@@ -760,7 +760,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={fixture}>
         <Plot
-          config={{
+          overrideConfig={{
             ...exampleConfig,
             xAxisVal: "custom",
             paths: [
@@ -780,7 +780,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
         <Plot
-          config={{
+          overrideConfig={{
             ...exampleConfig,
             paths: [
               { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
@@ -795,7 +795,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={withEndTime(fixture, { sec: 3, nsec: 0 })}>
         <Plot
-          config={{
+          overrideConfig={{
             ...exampleConfig,
             paths: [
               {
@@ -814,7 +814,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
         <Plot
-          config={{
+          overrideConfig={{
             ...exampleConfig,
             paths: [
               { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
@@ -833,7 +833,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
         <Plot
-          config={{
+          overrideConfig={{
             ...exampleConfig,
             paths: [
               { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
@@ -852,7 +852,7 @@ storiesOf("panels/Plot/index", module)
     return (
       <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
         <Plot
-          config={{
+          overrideConfig={{
             ...exampleConfig,
             paths: [
               { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },

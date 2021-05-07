@@ -122,7 +122,7 @@ export const TopicToRender = (): JSX.Element => {
         });
       }}
     >
-      <Rosout config={{ searchTerms: [], minLogLevel: 1, topicToRender: "/foo/rosout" }} />
+      <Rosout overrideConfig={{ searchTerms: [], minLogLevel: 1, topicToRender: "/foo/rosout" }} />
     </PanelSetup>
   );
 };
@@ -149,7 +149,7 @@ export const FilteredTerms = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture}>
       <Rosout
-        config={{
+        overrideConfig={{
           searchTerms: ["multiple", "/some_topic"],
           minLogLevel: 1,
           topicToRender: "/rosout",
@@ -165,7 +165,11 @@ export const CaseInsitiveFilter = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture}>
       <Rosout
-        config={{ searchTerms: ["could", "Ipsum"], minLogLevel: 1, topicToRender: "/rosout" }}
+        overrideConfig={{
+          searchTerms: ["could", "Ipsum"],
+          minLogLevel: 1,
+          topicToRender: "/rosout",
+        }}
       />
     </PanelSetup>
   );
