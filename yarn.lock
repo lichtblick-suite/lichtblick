@@ -2141,7 +2141,7 @@ __metadata:
     react-input-autosize: 3.0.0
     react-json-tree: 0.15.0
     react-leaflet: 3.1.0
-    react-markdown: 6.0.1
+    react-markdown: 6.0.2
     react-monaco-editor: 0.43.0
     react-mosaic-component: 5.0.0
     react-outside-click-handler: 1.3.0
@@ -21056,9 +21056,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-markdown@npm:6.0.1":
-  version: 6.0.1
-  resolution: "react-markdown@npm:6.0.1"
+"react-markdown@npm:6.0.2":
+  version: 6.0.2
+  resolution: "react-markdown@npm:6.0.2"
   dependencies:
     "@types/hast": ^2.0.0
     "@types/unist": ^2.0.3
@@ -21072,10 +21072,11 @@ __metadata:
     style-to-object: ^0.3.0
     unified: ^9.0.0
     unist-util-visit: ^2.0.0
+    vfile: ^4.0.0
   peerDependencies:
     "@types/react": ">=16"
     react: ">=16"
-  checksum: 81900e3aedac97c5491e08fae756c776127507b871f93a53f00f3aa82573be770b06498f3d2e7636ee0e3e433cb13aa43423e10862916853ec334d552da9a2ea
+  checksum: 8aea1f47a5adde357ef59b67cab4997c8e34e728c9c96b387eeadf13eb89911d1250b5232ab9d07f955c2d20704aa4f71d9ea1b8784e07cf74aa18827d15b240
   languageName: node
   linkType: hard
 
