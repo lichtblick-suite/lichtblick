@@ -1956,9 +1956,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluentui/react@npm:8.14.2":
-  version: 8.14.2
-  resolution: "@fluentui/react@npm:8.14.2"
+"@fluentui/react@npm:8.14.4":
+  version: 8.14.4
+  resolution: "@fluentui/react@npm:8.14.4"
   dependencies:
     "@fluentui/date-time-utilities": ^8.1.0
     "@fluentui/font-icons-mdl2": ^8.1.0
@@ -1978,7 +1978,7 @@ __metadata:
     "@types/react-dom": ">=16.8.0 <18.0.0"
     react: ">=16.8.0 <18.0.0"
     react-dom: ">=16.8.0 <18.0.0"
-  checksum: 2beec3307b33a8149eea6e59cd64bfdcc990b6714c4fcd17332497537795a592f7160662df77d9977f7b5d9a36e6077b95ee660cd02766ffa60fc4162541f48c
+  checksum: 614b56a276cc2e3ed630545f4ca8dd4b6cdac8829699d3f8b933838d3d8fe9a100f220ac43ab0bafe332874d2d25d260c6fe2d8d7cfcfcc56957069259ab6b82
   languageName: node
   linkType: hard
 
@@ -2039,7 +2039,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove-studio/app@workspace:app"
   dependencies:
-    "@fluentui/react": 8.14.2
+    "@fluentui/react": 8.14.4
     "@fluentui/react-icons-mdl2": 1.1.0
     "@foxglove/hooks": "workspace:packages/@foxglove/hooks"
     "@foxglove/velodyne-cloud": "workspace:packages/velodyne-cloud"
