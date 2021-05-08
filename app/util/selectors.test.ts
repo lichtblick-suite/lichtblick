@@ -122,7 +122,7 @@ describe("selectors", () => {
             fields: [
               {
                 type: "another/state/values",
-                name: "state__studio_enum",
+                name: "state__foxglove_enum",
                 isArray: false,
                 isComplex: false,
               },
@@ -147,10 +147,12 @@ describe("selectors", () => {
 
 describe("extractTypeFromStudioEnumAnnotation", () => {
   it("returns type for field matching pattern", () => {
-    expect(extractTypeFromStudioEnumAnnotation("Foo__studio_enum")).toEqual("Foo");
+    expect(extractTypeFromStudioEnumAnnotation("Foo__foxglove_enum")).toEqual("Foo");
+    expect(extractTypeFromStudioEnumAnnotation("Foo__webviz_enum")).toEqual("Foo");
   });
 
   it("returns undefined for field not mathcing", () => {
-    expect(extractTypeFromStudioEnumAnnotation("Foo__studio_enum_EXTRA")).toBeUndefined();
+    expect(extractTypeFromStudioEnumAnnotation("Foo__foxglove_enum_EXTRA")).toBeUndefined();
+    expect(extractTypeFromStudioEnumAnnotation("Foo__webviz_enum_EXTRA")).toBeUndefined();
   });
 });

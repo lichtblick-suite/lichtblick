@@ -235,7 +235,7 @@ const exampleMessage = {
   state: 1,
   justField: 0,
   color: 2,
-  animal__studio_enum: {},
+  animal__foxglove_enum: {},
   animal: 10000,
   sentence: 'String with "quotes" and /slashes/.',
 };
@@ -252,7 +252,7 @@ export const enumAdvancedFixture = {
         { type: "uint8", name: "YELLOW", isConstant: true, value: 1 },
         { type: "uint8", name: "GREEN", isConstant: true, value: 2 },
         { type: "uint8", name: "color", isArray: false },
-        { type: "baz/animals", name: "animal__studio_enum", isArray: false },
+        { type: "baz/animals", name: "animal__foxglove_enum", isArray: false },
         { type: "uint32", name: "animal", isArray: false },
       ],
     },
