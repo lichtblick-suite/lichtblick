@@ -11,7 +11,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Stack } from "@fluentui/react";
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useToasts } from "react-toast-notifications";
 import { useMountedState } from "react-use";
@@ -20,6 +20,7 @@ import styled from "styled-components";
 import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import { redoLayoutChange, undoLayoutChange } from "@foxglove-studio/app/actions/layoutHistory";
 import { importPanelLayout, loadLayout } from "@foxglove-studio/app/actions/panels";
+import ConnectionList from "@foxglove-studio/app/components/ConnectionList";
 import DocumentDropListener from "@foxglove-studio/app/components/DocumentDropListener";
 import DropOverlay from "@foxglove-studio/app/components/DropOverlay";
 import GlobalKeyListener from "@foxglove-studio/app/components/GlobalKeyListener";
@@ -41,7 +42,6 @@ import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToB
 import ShortcutsModal from "@foxglove-studio/app/components/ShortcutsModal";
 import Sidebar, { SidebarItem } from "@foxglove-studio/app/components/Sidebar";
 import { SidebarContent } from "@foxglove-studio/app/components/SidebarContent";
-import TinyConnectionPicker from "@foxglove-studio/app/components/TinyConnectionPicker";
 import Toolbar from "@foxglove-studio/app/components/Toolbar";
 import { useAppConfiguration } from "@foxglove-studio/app/context/AppConfigurationContext";
 import { useAssets } from "@foxglove-studio/app/context/AssetContext";
@@ -56,6 +56,7 @@ import { PlayerPresence } from "@foxglove-studio/app/players/types";
 import { ImportPanelLayoutPayload } from "@foxglove-studio/app/types/panels";
 import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import inAutomatedRunMode from "@foxglove-studio/app/util/inAutomatedRunMode";
+import { APP_NAME } from "@foxglove-studio/app/version";
 
 type TestableWindow = Window & { setPanelLayout?: (payload: ImportPanelLayoutPayload) => void };
 
@@ -77,9 +78,13 @@ const TruncatedText = styled.span`
   line-height: normal;
 `;
 
-type SidebarItemKey = "add-panel" | "panel-settings" | "variables" | "preferences";
+type SidebarItemKey = "connection" | "add-panel" | "panel-settings" | "variables" | "preferences";
 
 const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
+  [
+    "connection",
+    { iconName: "DataManagementSettings", title: "Connection", component: Connection },
+  ],
   ["add-panel", { iconName: "RectangularClipping", title: "Add Panel", component: AddPanel }],
   [
     "panel-settings",
@@ -90,6 +95,14 @@ const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
 ]);
 
 const SIDEBAR_BOTTOM_ITEMS: readonly SidebarItemKey[] = ["preferences"];
+
+function Connection() {
+  return (
+    <SidebarContent title="Connection">
+      <ConnectionList />
+    </SidebarContent>
+  );
+}
 
 function AddPanel() {
   const addPanel = useAddPanel();
@@ -121,7 +134,24 @@ export default function Workspace(props: { demoBagUrl?: string }): JSX.Element {
   const playerCapabilities = useMessagePipeline(
     useCallback(({ playerState }) => playerState.capabilities, []),
   );
-  const [selectedSidebarItem, setSelectedSidebarItem] = useState<SidebarItemKey | undefined>();
+  const [selectedSidebarItem, setSelectedSidebarItem] = useState<SidebarItemKey | undefined>(
+    // Start with the sidebar open if no connection has been made
+    currentSourceName == undefined ? "connection" : undefined,
+  );
+
+  // Automatically close the connection sidebar when a connection is chosen
+  const prevSourceName = useRef(currentSourceName);
+  useLayoutEffect(() => {
+    if (
+      selectedSidebarItem === "connection" &&
+      prevSourceName.current == undefined &&
+      currentSourceName != undefined
+    ) {
+      setSelectedSidebarItem(undefined);
+    }
+    prevSourceName.current = currentSourceName;
+  }, [selectedSidebarItem, currentSourceName]);
+
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
   const [messagePathSyntaxModalOpen, setMessagePathSyntaxModalOpen] = useState(false);
 
@@ -303,14 +333,14 @@ export default function Workspace(props: { demoBagUrl?: string }): JSX.Element {
         )}
 
         <Toolbar onDoubleClick={OsContextSingleton?.handleToolbarDoubleClick}>
+          <div style={{ flexGrow: 1 }} />
           <SToolbarItem>
-            <TinyConnectionPicker />
-          </SToolbarItem>
-          <SToolbarItem style={{ flex: "0 1 auto" }}>
-            <TruncatedText>{currentSourceName ?? "Select a data source"}</TruncatedText>{" "}
             <PlayerStatusIndicator />
           </SToolbarItem>
-          <div style={{ flexGrow: 1 }}></div>
+          <SToolbarItem>
+            <TruncatedText>{currentSourceName ?? APP_NAME}</TruncatedText>{" "}
+          </SToolbarItem>
+          <div style={{ flexGrow: 1 }} />
           <SToolbarItem style={{ marginRight: 5 }}>
             {!inAutomatedRunMode() && <NotificationDisplay />}
           </SToolbarItem>

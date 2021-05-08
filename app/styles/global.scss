@@ -190,7 +190,7 @@ button {
     background-color: $background-control;
   }
 
-  &:not(.disabled):not(:disabled):hover {
+  &:not(.disabled):not(:disabled):not(.ms-Button):hover {
     cursor: pointer;
     color: $text-control-hover;
   }

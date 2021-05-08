@@ -42,6 +42,7 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
     minWidth: 350,
     minHeight: 250,
     autoHideMenuBar: true,
+    trafficLightPosition: { x: 12, y: 10 },
     title: APP_NAME,
     webPreferences: {
       contextIsolation: true,

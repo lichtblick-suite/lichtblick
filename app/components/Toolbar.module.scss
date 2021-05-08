@@ -30,8 +30,7 @@
 $toolbar-inset-width: 78px;
 
 .insetToolbar {
-  margin-left: $toolbar-inset-width;
-  border-left: 2px groove #29292f;
+  padding-left: $toolbar-inset-width;
 }
 
 :export {
