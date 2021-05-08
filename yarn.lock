@@ -2113,7 +2113,6 @@ __metadata:
     history: 5.0.0
     hoist-non-react-statics: 3.3.2
     http-server: 0.12.3
-    inter-ui: 3.18.1
     intervals-fn: 3.0.3
     js-yaml: 4.1.0
     leaflet: 1.7.1
@@ -14597,13 +14596,6 @@ __metadata:
   version: 1.0.0
   resolution: "int53@npm:1.0.0"
   checksum: d20e2b78e6085b402f189e94041690369aa72f7c3bad0b0ec41e85fc3dece50a6ceb495a6fa55f5717216727cbbf80d25a56002b11f7364058c0bd808dbf574f
-  languageName: node
-  linkType: hard
-
-"inter-ui@npm:3.18.1":
-  version: 3.18.1
-  resolution: "inter-ui@npm:3.18.1"
-  checksum: 0063b91132a42fd43bdfa71eba09f76b3e719d689ed9754f81f83aa7770eb8eb4c3ef8985469e9c7dbc572c9414ed42990007ed51315f2568060716857b22717
   languageName: node
   linkType: hard
 

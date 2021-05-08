@@ -26,7 +26,7 @@
 }
 
 .tip {
-  @include monospace;
+  @include ff-monospace;
   white-space: nowrap;
 
   > div {
@@ -47,7 +47,7 @@
 }
 
 .tipValue {
-  @include monospace;
+  @include ff-monospace;
 }
 
 .playIconWrapper {
@@ -115,7 +115,7 @@
   background-color: transparent;
   margin: 0px 4px;
   padding: 8px 4px;
-  font-family: $monospace-font;
+  @include ff-monospace;
   color: $light;
   opacity: 1;
 

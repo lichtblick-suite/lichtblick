@@ -12,9 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 @import "./reset.scss";
-@import "./colors.module.scss";
 @import "./mixins.module.scss";
-@import "./fonts.module.scss";
 @import "~rc-color-picker/assets/index.css";
 
 .rc-color-picker-panel {
@@ -53,7 +51,7 @@ body,
 
   font-size: $text-size;
   color: $text-normal;
-  @include sans-serif;
+  @include ff-sans-serif;
 }
 
 // Make sure everything uses box-sizing: border-box.
@@ -80,7 +78,7 @@ html {
 code,
 pre,
 tt {
-  @include monospace;
+  @include ff-monospace;
   overflow-wrap: break-word;
 }
 
@@ -94,7 +92,7 @@ button,
 input,
 select,
 textarea {
-  @include sans-serif;
+  @include ff-sans-serif;
   color: $text-control;
   font-size: 1rem;
   text-align: left;
@@ -126,7 +124,7 @@ textarea {
 }
 
 textarea {
-  @include monospace;
+  @include ff-monospace;
   border: 2px solid $text-normal;
   color: $text-normal;
   background-color: $dark;

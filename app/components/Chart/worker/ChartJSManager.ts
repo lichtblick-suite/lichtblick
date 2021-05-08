@@ -19,6 +19,7 @@ import EventEmitter from "eventemitter3";
 import merge from "lodash/merge";
 
 import { RpcElement, RpcScales } from "@foxglove-studio/app/components/Chart/types";
+import { monospace } from "@foxglove-studio/app/styles/fonts";
 import Logger from "@foxglove/log";
 
 const log = Logger.getLogger(__filename);
@@ -50,7 +51,6 @@ type InitOpts = {
   data: ChartData;
   options: ChartOptions;
   devicePixelRatio: number;
-  fontLoaded: Promise<FontFace>;
 };
 
 export default class ChartJSManager {
@@ -64,17 +64,8 @@ export default class ChartJSManager {
     this.init(initOpts);
   }
 
-  async init({
-    id,
-    node,
-    type,
-    data,
-    options,
-    devicePixelRatio,
-    fontLoaded,
-  }: InitOpts): Promise<void> {
-    const font = await fontLoaded;
-    log.debug(`ChartJSManager(${id}) init, default font "${font.family}" status=${font.status}`);
+  async init({ id, node, type, data, options, devicePixelRatio }: InitOpts): Promise<void> {
+    log.debug(`ChartJSManager(${id}) init`);
 
     const fakeNode = {
       addEventListener: addEventListener(this._fakeNodeEvents),
@@ -100,7 +91,7 @@ export default class ChartJSManager {
     const fullOptions: ChartOptions = {
       ...this.addFunctionsToConfig(options),
       devicePixelRatio,
-      font: { family: "'Roboto Mono'" },
+      font: { family: monospace },
       // we force responsive off since we manually trigger width/height updates on the chart
       // responsive mode does not work properly with offscreen canvases and retina device pixel ratios
       // it results in a run-away canvas that keeps doubling in size!

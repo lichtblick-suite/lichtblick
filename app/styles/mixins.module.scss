@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 @import "./colors.module.scss";
+@import "./fonts.module.scss";
 
 $padding: 8px;
 $text-size: 12px;
@@ -77,18 +78,6 @@ $control-margin: 0 0.2em;
   background-color: $dark5;
 }
 
-$sans-serif-font: "Inter UI";
-
-@mixin sans-serif {
-  font-family: $sans-serif-font;
-  font-feature-settings: "tnum";
-}
-
-$monospace-font: "Roboto Mono";
-@mixin monospace {
-  font-family: $monospace-font;
-}
-
 %list-item-icon {
   margin-right: 4px;
   svg {
@@ -96,8 +85,4 @@ $monospace-font: "Roboto Mono";
     position: relative;
     top: -1px;
   }
-}
-
-:export {
-  monospaceFont: $monospace-font;
 }

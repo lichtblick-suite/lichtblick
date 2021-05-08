@@ -1,51 +1,38 @@
-// To make screenshot tests more deterministic, we don't use CDNs or fonts that are already
-// installed on the user's computer here, instead opting only for fonts that we explicitly have in
-// our codebase. This makes it so that we always load the fonts from the same source, which makes it
-// more consistent across different tests and different platforms.
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-@font-face {
-  font-family: "Inter UI";
-  src: url("~inter-ui/Inter (web)/Inter.var.woff2") format("woff2-variations");
-  font-weight: 400 900;
-  font-style: oblique 0deg 10deg;
+// Prefer system fonts
+// - https://meta.stackexchange.com/q/364048
+// - https://markdotto.com/2018/02/07/github-system-fonts/
+// - https://infinnie.github.io/blog/2017/systemui.html
+
+// Keep in sync with fonts.ts
+
+@mixin ff-sans-serif {
+  font-family:
+    // Apple
+    -apple-system, BlinkMacSystemFont,
+    // Windows
+    "Segoe UI",
+    // Ubuntu
+    "Ubuntu",
+    // Chrome OS and Android
+    "Roboto",
+    // Fallback
+    sans-serif;
 }
-
-@font-face {
-  font-family: "Roboto Mono";
-  font-style: italic;
-  font-weight: 400;
-  src: url("./assets/latin-roboto-mono-italic.woff2") format("woff2");
-  /* latin */
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F,
-    U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-  font-family: "Roboto Mono";
-  font-style: italic;
-  font-weight: 700;
-  src: url("./assets/latin-roboto-mono-bold-italic.woff2") format("woff2");
-  /* latin */
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F,
-    U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-  font-family: "Roboto Mono";
-  font-style: normal;
-  font-weight: 400;
-  src: url("./assets/latin-roboto-mono.woff2") format("woff2");
-  /* latin */
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F,
-    U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
-@font-face {
-  font-family: "Roboto Mono";
-  font-style: normal;
-  font-weight: 700;
-  src: url("./assets/latin-roboto-mono-bold.woff2") format("woff2");
-  /* latin */
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F,
-    U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+@mixin ff-monospace {
+  font-family:
+    // Apple
+    "SFMono-Regular",
+    // Windows
+    "Cascadia Mono",
+    "Segoe UI Mono", "Consolas",
+    // Ubuntu
+    "Ubuntu Mono",
+    // Chrome OS and Android
+    "Roboto Mono",
+    // Fallback
+    monospace;
 }

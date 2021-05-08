@@ -15,7 +15,7 @@
 @import "@foxglove-studio/app/styles/mixins.module.scss";
 
 .root {
-  @include monospace;
+  @include ff-monospace;
   font-size: 11px;
   line-height: 1.4;
   max-width: 350px;

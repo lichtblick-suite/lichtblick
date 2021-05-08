@@ -8,7 +8,7 @@
 }
 
 .container {
-  @include sans-serif;
+  @include ff-sans-serif;
 
   .topicName {
     @extend %modal-subtitle;

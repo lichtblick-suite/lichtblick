@@ -34,9 +34,9 @@ import {
   ColumnOptions,
 } from "@foxglove-studio/app/panels/Table/types";
 import { RosObject } from "@foxglove-studio/app/players/types";
+import { monospace } from "@foxglove-studio/app/styles/fonts";
 import { SaveConfig } from "@foxglove-studio/app/types/panels";
 import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
-import { ROBOTO_MONO } from "@foxglove-studio/app/util/sharedStyleConstants";
 import { toolsColorScheme } from "@foxglove-studio/app/util/toolsColorScheme";
 
 import helpContent from "./index.help.md";
@@ -83,7 +83,7 @@ const STableContainer = styled.div`
   overflow: auto;
   display: flex;
   flex-direction: column;
-  font-family: ${ROBOTO_MONO};
+  font-family: ${monospace};
 `;
 
 function sanitizeAccessorPath(accessorPath: string) {

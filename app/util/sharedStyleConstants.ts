@@ -109,5 +109,3 @@ export const rounded = {
   PILL: "999px",
   CIRCLE: "50%",
 };
-
-export const ROBOTO_MONO = "Roboto Mono";

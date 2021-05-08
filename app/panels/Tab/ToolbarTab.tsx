@@ -21,6 +21,7 @@ import textMetrics from "text-metrics";
 import Icon from "@foxglove-studio/app/components/Icon";
 import Tooltip from "@foxglove-studio/app/components/Tooltip";
 import { TabActions } from "@foxglove-studio/app/panels/Tab/TabDndContext";
+import { sansSerif } from "@foxglove-studio/app/styles/fonts";
 import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
@@ -30,7 +31,7 @@ const MAX_TAB_WIDTH = 100;
 const MIN_ACTIVE_TAB_WIDTH = 40;
 const MIN_OTHER_TAB_WIDTH = 14;
 
-const fontFamily = "'Inter UI', -apple-system, BlinkMacSystemFont, sans-serif";
+const fontFamily = sansSerif;
 const fontSize = "12px";
 let textMeasure: textMetrics.TextMeasure;
 function measureText(text: string): number {
