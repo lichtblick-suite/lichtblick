@@ -2074,6 +2074,7 @@ __metadata:
     "@types/react-highlight-words": 0.16.2
     "@types/react-hover-observer": "workspace:packages/@types/react-hover-observer"
     "@types/react-input-autosize": 2.2.0
+    "@types/react-is": ^17
     "@types/react-outside-click-handler": 1.3.0
     "@types/react-redux": 7.1.16
     "@types/react-table": 7.7.0
@@ -2138,6 +2139,7 @@ __metadata:
     react-highlight-words: 0.17.0
     react-hover-observer: 2.1.1
     react-input-autosize: 3.0.0
+    react-is: 17.0.2
     react-json-tree: 0.15.0
     react-leaflet: 3.1.0
     react-markdown: 6.0.2
@@ -5150,6 +5152,15 @@ __metadata:
   dependencies:
     "@types/react": "*"
   checksum: 7e6e0da2316f3df8bef4b7e439286508d12a8e32f8a0bcbf69263bdc73c697d9016b7f80f3e4d3b117a990ede58fd5cf3022cd82d5d0cc072a33d73f980c4485
+  languageName: node
+  linkType: hard
+
+"@types/react-is@npm:^17":
+  version: 17.0.0
+  resolution: "@types/react-is@npm:17.0.0"
+  dependencies:
+    "@types/react": "*"
+  checksum: d0734c30ba645c42626ea580addb24f1d23bd35b3f52a3a78ff876ceadfb0ada4b6a4bb55b8730ab17ca240019aa2c5ea67302308f3a8e95ee8b9b20812a76a8
   languageName: node
   linkType: hard
 
@@ -21016,10 +21027,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-is@npm:^16.12.0 || ^17.0.0, react-is@npm:^17.0.0, react-is@npm:^17.0.1":
-  version: 17.0.1
-  resolution: "react-is@npm:17.0.1"
-  checksum: 5a83dfc78e7adcb93d632bf367b0733db650e3abd2e9c57c33b87e50d201212c1884b0d7bcf13e692f1556189fa1b87f9f3e0ba10fe858fd6aebe83ed4fcd1ea
+"react-is@npm:17.0.2, react-is@npm:^16.12.0 || ^17.0.0, react-is@npm:^17.0.0, react-is@npm:^17.0.1":
+  version: 17.0.2
+  resolution: "react-is@npm:17.0.2"
+  checksum: 3eff23f410d40ab9bc5177f147a92c7f42c356a21ecea340e0554566956d67e5e1ba56f26cc7fa22339ac3c7151744177bd6305eaa26d3cbf15f354358c9d9b6
   languageName: node
   linkType: hard
 
