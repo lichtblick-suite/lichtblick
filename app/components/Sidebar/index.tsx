@@ -75,7 +75,7 @@ export default function Sidebar<K extends string>({
           direction: "row",
           first: "sidebar",
           second: "children",
-          splitPercentage: 30,
+          splitPercentage: 23,
         });
       }
       prevSelectedKey.current = selectedKey;
@@ -220,7 +220,7 @@ export default function Sidebar<K extends string>({
               {id === "children" ? (children as JSX.Element) : <SelectedComponent />}
             </ErrorBoundary>
           )}
-          resize={{ minimumPaneSizePercentage: 30 }}
+          resize={{ minimumPaneSizePercentage: 10 }}
         />
       </HideRootDropTargets>
     </Stack>
