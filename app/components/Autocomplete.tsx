@@ -18,12 +18,12 @@ import ReactAutocomplete from "react-autocomplete";
 import { createPortal } from "react-dom";
 import textMetrics from "text-metrics";
 
-import { sansSerif } from "@foxglove-studio/app/styles/fonts";
+import { SANS_SERIF } from "@foxglove-studio/app/styles/fonts";
 import fuzzyFilter from "@foxglove-studio/app/util/fuzzyFilter";
 
 import styles from "./Autocomplete.module.scss";
 
-const fontFamily = sansSerif;
+const fontFamily = SANS_SERIF;
 const fontSize = "12px";
 let textMeasure: textMetrics.TextMeasure;
 function measureText(text: string): number {

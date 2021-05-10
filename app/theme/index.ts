@@ -14,13 +14,13 @@ import {
 } from "@fluentui/react";
 import { createTheme } from "@fluentui/theme";
 
-import { sansSerif } from "@foxglove-studio/app/styles/fonts";
+import { SANS_SERIF } from "@foxglove-studio/app/styles/fonts";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 // https://aka.ms/themedesigner
 export default createTheme({
   defaultFontStyle: {
-    fontFamily: sansSerif,
+    fontFamily: SANS_SERIF,
   },
   semanticColors: {
     menuBackground: "#242429",
