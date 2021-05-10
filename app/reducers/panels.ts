@@ -84,6 +84,7 @@ import {
 
 const storage = new Storage();
 
+export const DEPRECATED_GLOBAL_STATE_STORAGE_KEY = "webvizGlobalState";
 export const GLOBAL_STATE_STORAGE_KEY = "studioGlobalState";
 export const defaultPlaybackConfig: PlaybackConfig = {
   speed: 0.2,
@@ -147,7 +148,10 @@ export function getInitialPersistedStateAndMaybeUpdateLocalStorageAndURL(
   history: History,
 ): PersistedState {
   if (initialPersistedState == undefined) {
-    const oldPersistedState: any = storage.getItem(GLOBAL_STATE_STORAGE_KEY);
+    const oldPersistedState: any =
+      storage.getItem(GLOBAL_STATE_STORAGE_KEY) ??
+      storage.getItem(DEPRECATED_GLOBAL_STATE_STORAGE_KEY);
+    storage.removeItem(DEPRECATED_GLOBAL_STATE_STORAGE_KEY);
 
     // cast to PersistedState to remove the Readonly created by the Object.freeze above
     const newPersistedState = cloneDeep(defaultPersistedState) as PersistedState;
