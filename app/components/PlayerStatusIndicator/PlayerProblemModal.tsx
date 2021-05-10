@@ -29,7 +29,7 @@ const styles = mergeStyleSets({
   },
   error: {
     fontFamily: mixins.monospaceFont,
-    overflow: "scroll",
+    whiteSpace: "normal",
   },
 });
 
