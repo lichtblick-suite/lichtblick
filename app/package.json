@@ -87,7 +87,7 @@
     "@storybook/addon-essentials": "6.2.5",
     "@storybook/builder-webpack5": "6.2.5",
     "@storybook/react": "6.2.5",
-    "@testing-library/dom": "7.30.4",
+    "@testing-library/dom": "7.31.0",
     "@testing-library/react": "11.2.6",
     "@testing-library/react-hooks": "5.1.2",
     "@types/argparse": "^2.0.5",
