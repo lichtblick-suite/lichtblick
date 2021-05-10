@@ -21,18 +21,21 @@
     "Roboto",
     // Fallback
     sans-serif;
+  // Use fixed width numbers (important for numbers that update during playback)
+  font-feature-settings: "tnum";
 }
 @mixin ff-monospace {
   font-family:
     // Apple
-    "SFMono-Regular",
+    ui-monospace,
     // Windows
     "Cascadia Mono",
-    "Segoe UI Mono", "Consolas",
+    "Segoe UI Mono",
     // Ubuntu
     "Ubuntu Mono",
     // Chrome OS and Android
     "Roboto Mono",
     // Fallback
-    monospace;
+    "Menlo",
+    "Monaco", "Consolas", monospace;
 }
