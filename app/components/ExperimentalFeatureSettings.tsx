@@ -57,7 +57,7 @@ function ExperimentalFeatureItem(props: { feature: Feature }) {
 export function ExperimentalFeatureSettings(): React.ReactElement {
   const theme = useTheme();
   return (
-    <Stack style={{ padding: theme.spacing.m }} tokens={{ childrenGap: theme.spacing.m }}>
+    <Stack tokens={{ childrenGap: theme.spacing.m }}>
       {features.length === 0 && (
         <p>
           <em>Currently there are no experimental features.</em>

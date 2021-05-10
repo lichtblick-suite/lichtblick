@@ -5,8 +5,6 @@ import {
   Checkbox,
   DirectionalHint,
   IComboBoxOption,
-  Pivot,
-  PivotItem,
   SelectableOptionMenuItemType,
   Stack,
   Text,
@@ -150,6 +148,23 @@ function RosHostname(): React.ReactElement {
   );
 }
 
+function SectionHeader({ children }: React.PropsWithChildren<unknown>) {
+  const theme = useTheme();
+  return (
+    <Text
+      block
+      as="h2"
+      variant="large"
+      style={{
+        marginBottom: theme.spacing.s1,
+        color: theme.palette.themeSecondary,
+      }}
+    >
+      {children}
+    </Text>
+  );
+}
+
 export default function Preferences(): React.ReactElement {
   const theme = useTheme();
 
@@ -162,8 +177,9 @@ export default function Preferences(): React.ReactElement {
 
   return (
     <SidebarContent title="Preferences">
-      <Pivot>
-        <PivotItem headerText="General" style={{ paddingTop: theme.spacing.m }}>
+      <Stack tokens={{ childrenGap: 30 }}>
+        <Stack.Item>
+          <SectionHeader>General</SectionHeader>
           <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
             <Stack.Item>
               <TimezoneSettings />
@@ -172,8 +188,9 @@ export default function Preferences(): React.ReactElement {
               <RosHostname />
             </Stack.Item>
           </Stack>
-        </PivotItem>
-        <PivotItem headerText="Privacy" style={{ paddingTop: theme.spacing.m }}>
+        </Stack.Item>
+        <Stack.Item>
+          <SectionHeader>Privacy</SectionHeader>
           <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
             <Text style={{ color: theme.palette.neutralSecondary }}>
               Changes will take effect the next time {APP_NAME} is launched.
@@ -189,11 +206,12 @@ export default function Preferences(): React.ReactElement {
               label="Send anonymized crash reports"
             />
           </Stack>
-        </PivotItem>
-        <PivotItem headerText="Experimental Features">
+        </Stack.Item>
+        <Stack.Item>
+          <SectionHeader>Experimental Features</SectionHeader>
           <ExperimentalFeatureSettings />
-        </PivotItem>
-      </Pivot>
+        </Stack.Item>
+      </Stack>
     </SidebarContent>
   );
 }
