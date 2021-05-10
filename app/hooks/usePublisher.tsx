@@ -15,6 +15,7 @@ import { useCallback, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
+import { PlayerCapabilities } from "@foxglove-studio/app/players/types";
 
 type Props = {
   topic: string;
@@ -22,20 +23,30 @@ type Props = {
   name: string;
 };
 
-// Registers a publisher with the player and returns a publish() function to publish data.
+// Registers a publisher with the player and returns a publish() function to publish data. This uses
+// no-op functions if the player does not have the `advertise` capability
 export default function usePublisher({ topic, datatype, name }: Props): (msg: unknown) => void {
   const [id] = useState(() => uuidv4());
+  const canPublish = useMessagePipeline((context) =>
+    context.playerState.capabilities.includes(PlayerCapabilities.advertise),
+  );
   const publish = useMessagePipeline((context) => context.publish);
   const setPublishers = useMessagePipeline((context) => context.setPublishers);
   useEffect(() => {
-    setPublishers(id, [{ topic, datatype, advertiser: { type: "panel", name } }]);
-    return () => setPublishers(id, []);
-  }, [id, topic, datatype, name, setPublishers]);
+    if (canPublish) {
+      setPublishers(id, [{ topic, datatype, advertiser: { type: "panel", name } }]);
+      return () => setPublishers(id, []);
+    } else {
+      return undefined;
+    }
+  }, [id, topic, datatype, name, setPublishers, canPublish]);
 
   return useCallback(
     (msg: unknown) => {
-      publish({ topic, msg });
+      if (canPublish) {
+        publish({ topic, msg });
+      }
     },
-    [publish, topic],
+    [publish, topic, canPublish],
   );
 }
