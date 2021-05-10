@@ -9,7 +9,8 @@ const REAL_YARN = path.join(__dirname, "releases", "yarn-2.4.1.cjs");
 try {
   if (fs.statSync(REAL_YARN).size < 10000) {
     throw new Error(
-      "Error: Please configure Git LFS ( https://git-lfs.github.com/ ) then run `git lfs pull`.",
+      "Foxglove Error: Please configure Git LFS ( https://git-lfs.github.com/ ) " +
+        "then run `git lfs pull` before running yarn.",
     );
   }
 } catch (e) {
