@@ -2094,7 +2094,7 @@ __metadata:
     "@types/url-search-params": 1.1.0
     "@types/uuid": 8.3.0
     "@types/wicg-file-system-access": 2020.9.1
-    "@types/ws": 7.4.2
+    "@types/ws": 7.4.4
     "@wojtekmaj/enzyme-adapter-react-17": 0.6.1
     argparse: 2.0.1
     async-mutex: 0.3.1
@@ -5528,12 +5528,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/ws@npm:7.4.2":
-  version: 7.4.2
-  resolution: "@types/ws@npm:7.4.2"
+"@types/ws@npm:7.4.4":
+  version: 7.4.4
+  resolution: "@types/ws@npm:7.4.4"
   dependencies:
     "@types/node": "*"
-  checksum: 29fc34b61cc039c0f51e835ff8746faf7b98186e6bf785fb099c9fb006ae79825312e62a0c1e856b405543ae6302e196d1a1d372753dbcdce59ab5b72011a9f2
+  checksum: 6a02b3164250813510c5e73998a2bbca1fb98dc23428d70c2c6d664dfbac3fde32cd8d4eb34c335a0221f49a6f02d71b09645b236b01de1aea85f80352f67e1f
   languageName: node
   linkType: hard
 
