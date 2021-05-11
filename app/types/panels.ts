@@ -110,9 +110,9 @@ export type UpdatePanelConfig<Config> = (
 export type OpenSiblingPanel = (arg0: string, cb: (arg0: PanelConfig) => PanelConfig) => void;
 
 type KeyPathsOfImpl<T, Prefix extends string> =
-  // return string when given any/unknown
+  // return never when given any/unknown
   unknown extends T
-    ? string
+    ? never
     : // only extract keys from object types - not things like String.indexOf and Number.toString
     T extends Record<string, unknown>
     ? {
@@ -140,4 +140,6 @@ export type PanelConfigSchemaEntry<ConfigKey> =
       title: string;
       options: { value: string | number; text: string }[];
     };
-export type PanelConfigSchema<Config> = PanelConfigSchemaEntry<KeyPathsOf<Config>>[];
+export type PanelConfigSchema<Config> = unknown extends Config
+  ? PanelConfigSchemaEntry<string>[]
+  : PanelConfigSchemaEntry<KeyPathsOf<Config>>[];

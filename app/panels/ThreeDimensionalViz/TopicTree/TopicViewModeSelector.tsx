@@ -44,6 +44,7 @@ const dropdownOptions = Object.keys(TOPIC_DISPLAY_MODES).map((key) => ({
 export type TopicDisplayMode = keyof typeof TOPIC_DISPLAY_MODES;
 
 const STopicViewModeSelector = styled.div`
+  margin-right: 4px;
   div {
     button {
       justify-content: space-between;

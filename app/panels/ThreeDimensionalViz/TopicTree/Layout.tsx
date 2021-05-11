@@ -12,15 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { groupBy } from "lodash";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import {
   Worldview,
@@ -37,7 +29,7 @@ import { useDebouncedCallback } from "use-debounce";
 import useDataSourceInfo from "@foxglove-studio/app/PanelAPI/useDataSourceInfo";
 import KeyListener from "@foxglove-studio/app/components/KeyListener";
 import Modal from "@foxglove-studio/app/components/Modal";
-import PanelContext from "@foxglove-studio/app/components/PanelContext";
+import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
 import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
 import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
@@ -59,7 +51,6 @@ import {
 import useLinkedGlobalVariables from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import styles from "@foxglove-studio/app/panels/ThreeDimensionalViz/Layout.module.scss";
 import LayoutToolbar from "@foxglove-studio/app/panels/ThreeDimensionalViz/LayoutToolbar";
-import PanelToolbarMenu from "@foxglove-studio/app/panels/ThreeDimensionalViz/PanelToolbarMenu";
 import SceneBuilder from "@foxglove-studio/app/panels/ThreeDimensionalViz/SceneBuilder";
 import sceneBuilderHooks from "@foxglove-studio/app/panels/ThreeDimensionalViz/SceneBuilder/defaultHooks";
 import { useSearchText } from "@foxglove-studio/app/panels/ThreeDimensionalViz/SearchText";
@@ -789,8 +780,6 @@ export default function Layout({
   ]);
 
   const cursorType = isDrawing ? "crosshair" : "";
-  const { isHovered = false } = useContext(PanelContext) ?? {};
-  const isHidden = !isHovered;
 
   const { videoRecordingStyle } = useMemo(
     () => ({
@@ -831,14 +820,7 @@ export default function Layout({
           data-test="3dviz-layout"
         >
           <KeyListener keyDownHandlers={keyDownHandlers} />
-          <PanelToolbarMenu
-            autoTextBackgroundColor={autoTextBackgroundColor}
-            checkedKeys={checkedKeys}
-            flattenMarkers={!!flattenMarkers}
-            helpContent={helpContent}
-            saveConfig={saveConfig}
-            settingsByKey={settingsByKey}
-          />
+          <PanelToolbar floating helpContent={helpContent} />
           <div style={{ position: "absolute", width: "100%", height: "100%" }}>
             <div
               style={
@@ -851,37 +833,36 @@ export default function Layout({
               }
               ref={topicTreeSizeRef}
             >
-              {isHovered && (
-                <TopicTree
-                  allKeys={allKeys}
-                  availableNamespacesByTopic={availableNamespacesByTopic}
-                  checkedKeys={checkedKeys}
-                  containerHeight={containerHeight ?? 0}
-                  containerWidth={containerWidth ?? 0}
-                  derivedCustomSettingsByKey={derivedCustomSettingsByKey}
-                  expandedKeys={expandedKeys}
-                  filterText={filterText}
-                  getIsNamespaceCheckedByDefault={getIsNamespaceCheckedByDefault}
-                  getIsTreeNodeVisibleInScene={getIsTreeNodeVisibleInScene}
-                  getIsTreeNodeVisibleInTree={getIsTreeNodeVisibleInTree}
-                  hasFeatureColumn={hasFeatureColumn}
-                  onExitTopicTreeFocus={onExitTopicTreeFocus}
-                  onNamespaceOverrideColorChange={onNamespaceOverrideColorChange}
-                  pinTopics={pinTopics}
-                  diffModeEnabled={diffModeEnabled}
-                  rootTreeNode={rootTreeNode}
-                  saveConfig={saveConfig}
-                  sceneErrorsByKey={sceneErrorsByKey}
-                  setCurrentEditingTopic={setCurrentEditingTopic}
-                  setEditingNamespace={setEditingNamespace}
-                  setFilterText={setFilterText}
-                  setShowTopicTree={setShowTopicTree}
-                  shouldExpandAllKeys={shouldExpandAllKeys}
-                  showTopicTree={showTopicTree}
-                  topicDisplayMode={topicDisplayMode}
-                  visibleTopicsCountByKey={visibleTopicsCountByKey}
-                />
-              )}
+              <TopicTree
+                allKeys={allKeys}
+                availableNamespacesByTopic={availableNamespacesByTopic}
+                checkedKeys={checkedKeys}
+                containerHeight={containerHeight ?? 0}
+                containerWidth={containerWidth ?? 0}
+                settingsByKey={settingsByKey}
+                derivedCustomSettingsByKey={derivedCustomSettingsByKey}
+                expandedKeys={expandedKeys}
+                filterText={filterText}
+                getIsNamespaceCheckedByDefault={getIsNamespaceCheckedByDefault}
+                getIsTreeNodeVisibleInScene={getIsTreeNodeVisibleInScene}
+                getIsTreeNodeVisibleInTree={getIsTreeNodeVisibleInTree}
+                hasFeatureColumn={hasFeatureColumn}
+                onExitTopicTreeFocus={onExitTopicTreeFocus}
+                onNamespaceOverrideColorChange={onNamespaceOverrideColorChange}
+                pinTopics={pinTopics}
+                diffModeEnabled={diffModeEnabled}
+                rootTreeNode={rootTreeNode}
+                saveConfig={saveConfig}
+                sceneErrorsByKey={sceneErrorsByKey}
+                setCurrentEditingTopic={setCurrentEditingTopic}
+                setEditingNamespace={setEditingNamespace}
+                setFilterText={setFilterText}
+                setShowTopicTree={setShowTopicTree}
+                shouldExpandAllKeys={shouldExpandAllKeys}
+                showTopicTree={showTopicTree}
+                topicDisplayMode={topicDisplayMode}
+                visibleTopicsCountByKey={visibleTopicsCountByKey}
+              />
               {currentEditingTopic && (
                 <TopicSettingsModal
                   currentEditingTopic={currentEditingTopic}
@@ -970,7 +951,6 @@ export default function Layout({
                   targetPose={targetPose}
                   transforms={transforms}
                   rootTf={rootTf}
-                  isHidden={isHidden}
                   {...searchTextProps}
                 />
               </div>

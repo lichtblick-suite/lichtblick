@@ -11,9 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { syncBags, SYNC_OPTIONS } from "./PanelToolbarMenu";
+import { syncBags, SYNC_OPTIONS } from "./syncBags";
 
-describe("PanelToolbarMenu utils", () => {
+describe("syncBags", () => {
   describe("syncBag1ToBag2", () => {
     it("wipes bag2 checkedKeys and settingsByKey and copies checkedKeys and settingsByKey from bag1 to bag2", () => {
       expect(
@@ -37,7 +37,7 @@ describe("PanelToolbarMenu utils", () => {
               "ns:/studio_source_2/bar:ns1": { color: "black" },
             },
           },
-          SYNC_OPTIONS.bag1ToBag2 as any,
+          SYNC_OPTIONS.bag1ToBag2,
         ),
       ).toEqual({
         checkedKeys: [
@@ -83,7 +83,7 @@ describe("PanelToolbarMenu utils", () => {
               "ns:/studio_source_2/bar:ns1": { color: "black" },
             },
           },
-          SYNC_OPTIONS.bag2ToBag1 as any,
+          SYNC_OPTIONS.bag2ToBag1,
         ),
       ).toEqual({
         checkedKeys: [
@@ -126,7 +126,7 @@ describe("PanelToolbarMenu utils", () => {
               "ns:/studio_source_2/bar:ns1": { color: "black" },
             },
           },
-          SYNC_OPTIONS.swapBag1AndBag2 as any,
+          SYNC_OPTIONS.swapBag1AndBag2,
         ),
       ).toEqual({
         checkedKeys: [

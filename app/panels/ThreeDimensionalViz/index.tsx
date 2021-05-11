@@ -31,7 +31,7 @@ import {
 import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz/types";
 import withTransforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/withTransforms";
 import { Frame, Topic } from "@foxglove-studio/app/players/types";
-import { SaveConfig } from "@foxglove-studio/app/types/panels";
+import { PanelConfigSchema, SaveConfig } from "@foxglove-studio/app/types/panels";
 
 import { FrameCompatibilityDEPRECATED } from "./FrameCompatibility";
 
@@ -202,6 +202,19 @@ const BaseRenderer = (props: Props, ref: React.Ref<unknown>) => {
   );
 };
 
+const configSchema: PanelConfigSchema<ThreeDimensionalVizConfig> = [
+  {
+    key: "flattenMarkers",
+    type: "toggle",
+    title: "Flatten markers with a z-value of 0 to be located at the base frame's z value",
+  },
+  {
+    key: "autoTextBackgroundColor",
+    type: "toggle",
+    title: "Automatically apply dark/light background color to text",
+  },
+];
+
 BaseRenderer.displayName = "ThreeDimensionalViz";
 BaseRenderer.panelType = "3D Panel";
 BaseRenderer.defaultConfig = {
@@ -216,6 +229,7 @@ BaseRenderer.defaultConfig = {
   autoTextBackgroundColor: true,
 };
 BaseRenderer.supportsStrictMode = false;
+BaseRenderer.configSchema = configSchema;
 
 export const Renderer = hoistNonReactStatics(React.forwardRef(BaseRenderer), BaseRenderer);
 

@@ -51,7 +51,6 @@ type Props = LayoutToolbarSharedProps &
     setInteractionsTabType: (arg0?: TabType) => void;
     setMeasureInfo: (arg0: MeasureInfo) => void;
     showCrosshair?: boolean;
-    isHidden: boolean;
   };
 
 function LayoutToolbar({
@@ -86,14 +85,11 @@ function LayoutToolbar({
   setSearchTextMatches,
   setSelectedMatchIndex,
   showCrosshair = false,
-  isHidden,
   targetPose,
   toggleSearchTextOpen,
   transforms,
 }: Props) {
-  return isHidden ? (
-    ReactNull
-  ) : (
+  return (
     <>
       <MeasuringTool
         ref={measuringElRef}
