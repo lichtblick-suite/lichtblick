@@ -153,7 +153,7 @@ export const deserializers: BuiltinReaders & {
   string: (view, offset) => {
     const len = view.getInt32(offset, true);
     const codePoints = new Uint8Array(view.buffer, view.byteOffset + offset + 4, len);
-    const decoder = new (global as any).TextDecoder("utf8");
+    const decoder = new TextDecoder("utf8");
     return decoder.decode(codePoints);
   },
   boolArray: (view, offset, len) => {

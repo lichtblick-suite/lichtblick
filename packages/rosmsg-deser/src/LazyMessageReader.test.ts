@@ -8,7 +8,7 @@ import { LazyMessageReader } from "./LazyMessageReader";
 
 // Jest runs in a node environment, TextDecoder is not available globally.
 // We provide TextDecoder from the util module.
-(global as any).TextDecoder = TextDecoder;
+(global as { TextDecoder: typeof TextDecoder }).TextDecoder = TextDecoder;
 
 const serializeString = (str: string): Uint8Array => {
   const data = Buffer.from(str, "utf8");
@@ -255,18 +255,21 @@ describe("LazyReader", () => {
         ],
       },
     ],
-  ])("should deserialize %s", (msgDef: string, arr: Iterable<number>, expected: any) => {
-    const buffer = Uint8Array.from(arr);
-    const reader = new LazyMessageReader(parseMessageDefinition(msgDef));
-    const read = reader.readMessage(buffer);
+  ])(
+    "should deserialize %s",
+    (msgDef: string, arr: Iterable<number>, expected: Record<string, unknown>) => {
+      const buffer = Uint8Array.from(arr);
+      const reader = new LazyMessageReader(parseMessageDefinition(msgDef));
+      const read = reader.readMessage(buffer);
 
-    // check that our reader expected size matches the buffer size
-    expect(reader.size(buffer)).toEqual(buffer.length);
+      // check that our reader expected size matches the buffer size
+      expect(reader.size(buffer)).toEqual(buffer.length);
 
-    // allows for easier review of the generated parser source
-    expect(reader.source()).toMatchSnapshot(msgDef);
+      // allows for easier review of the generated parser source
+      expect(reader.source()).toMatchSnapshot(msgDef);
 
-    // check that our message matches the object
-    expect(read.toJSON()).toMatchObject(expected);
-  });
+      // check that our message matches the object
+      expect(read.toJSON()).toMatchObject(expected);
+    },
+  );
 });

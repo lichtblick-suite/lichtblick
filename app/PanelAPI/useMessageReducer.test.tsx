@@ -16,6 +16,7 @@ import { mount } from "enzyme";
 import { act } from "react-dom/test-utils";
 
 import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
+import { MessageEvent } from "@foxglove-studio/app/players/types";
 
 import * as PanelAPI from ".";
 
@@ -27,13 +28,13 @@ describe("useMessageReducer", () => {
       addMessagesOverride,
     }: {
       topics: string[];
-      addMessagesOverride?: any;
+      addMessagesOverride?: (value: unknown, messages: readonly MessageEvent<unknown>[]) => unknown;
     }) {
       try {
         const result = PanelAPI.useMessageReducer({
           topics,
           addMessage: useAddMessage ? Test.addMessage : undefined,
-          addMessages: useAddMessages ? addMessagesOverride || Test.addMessages : undefined,
+          addMessages: useAddMessages ? addMessagesOverride ?? Test.addMessages : undefined,
           restore: Test.restore,
         });
         Test.result(result);

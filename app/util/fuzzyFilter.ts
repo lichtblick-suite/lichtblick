@@ -16,7 +16,7 @@
 export default function fuzzyFilter<T>(
   options: T[],
   filter: string | undefined,
-  getText: (arg0: T) => string = (x: any) => x,
+  getText: (option: T) => string,
   sort: boolean = true,
 ): T[] {
   if (filter == undefined || filter === "") {

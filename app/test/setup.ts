@@ -34,7 +34,7 @@ if (typeof window !== "undefined") {
 
   // jsdom removes Node's setImmediate from global, but we have tests & app code that use it
   // https://github.com/facebook/jest/pull/11222
-  (window as any).setImmediate ??= setImmediate;
+  (window as { setImmediate?: typeof setImmediate }).setImmediate ??= setImmediate;
 }
 
 global.TextEncoder = util.TextEncoder;
@@ -53,10 +53,10 @@ class ResizeObserverMock {
   disconnect() {}
 
   observe() {
-    const entry: any = {
+    const entry = {
       contentRect: { width: 150, height: 150 },
     };
-    this._callback([entry], this);
+    this._callback([entry as ResizeObserverEntry], this);
   }
 
   unobserve() {}

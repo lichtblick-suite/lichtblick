@@ -282,6 +282,8 @@ class StudioWindow {
       if (Menu.getApplicationMenu() === this._menu) {
         const existingMenu = Menu.getApplicationMenu();
         const fileMenu = existingMenu?.getMenuItemById("fileMenu");
+        // https://github.com/electron/electron/issues/8598
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (fileMenu?.submenu as any)?.clear();
         fileMenu?.submenu?.append(
           new MenuItem({
@@ -364,6 +366,8 @@ class StudioWindow {
   private rebuildFileMenu(fileMenu: MenuItem): void {
     const browserWindow = this._window;
 
+    // https://github.com/electron/electron/issues/8598
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (fileMenu.submenu as any).clear();
     fileMenu.submenu?.items.splice(0, fileMenu.submenu.items.length);
 

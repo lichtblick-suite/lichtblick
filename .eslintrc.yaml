@@ -176,7 +176,6 @@ overrides:
   - rules:
       "@typescript-eslint/no-explicit-any": warn
     files:
-      - "app/PanelAPI/useMessageReducer.test.tsx"
       - "app/components/Autocomplete.stories.tsx"
       - "app/components/Autocomplete.tsx"
       - "app/components/ButtonBase.tsx"
@@ -419,7 +418,6 @@ overrides:
       - "app/test/MemoryStorage.ts"
       - "app/test/mocks/MockSvg.tsx"
       - "app/test/mouseEventsHelper.ts"
-      - "app/test/setup.ts"
       - "app/types/Messages.ts"
       - "app/types/Scene.ts"
       - "app/types/panels.ts"
@@ -430,7 +428,6 @@ overrides:
       - "app/util/Rpc.ts"
       - "app/util/RpcMainThreadUtils.ts"
       - "app/util/errors.ts"
-      - "app/util/fuzzyFilter.ts"
       - "app/util/history.ts"
       - "app/util/iframeUtils.ts"
       - "app/util/layout.ts"
@@ -440,10 +437,7 @@ overrides:
       - "app/util/topicUtils.ts"
       - "app/util/validators.ts"
       - "app/util/workers.ts"
-      - "desktop/main/StudioWindow.ts"
       - "packages/@types/regl-worldview/index.d.ts"
-      - "packages/rosmsg-deser/src/BuiltinDeserialize.ts"
-      - "packages/rosmsg-deser/src/LazyMessageReader.test.ts"
 
   - rules:
       "@typescript-eslint/no-non-null-assertion": warn
