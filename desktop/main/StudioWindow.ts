@@ -142,7 +142,7 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
       {
         label: "New Window",
         click: () => {
-          new StudioWindow();
+          new StudioWindow().load();
         },
       },
       { type: "separator" },
@@ -287,7 +287,7 @@ class StudioWindow {
           new MenuItem({
             label: "New Window",
             click: () => {
-              new StudioWindow();
+              new StudioWindow().load();
             },
           }),
         );
@@ -371,7 +371,7 @@ class StudioWindow {
       new MenuItem({
         label: "New Window",
         click: () => {
-          new StudioWindow();
+          new StudioWindow().load();
         },
       }),
     );
