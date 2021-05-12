@@ -131,7 +131,18 @@ type KeyPathsOf<T> = KeyPathsOfImpl<T, "">;
 
 export type PanelConfigSchemaEntry<ConfigKey> =
   | { key: ConfigKey; type: "text"; title: string; placeholder?: string }
-  | { key: ConfigKey; type: "number"; title: string; validate?: (value: number) => number }
+  | {
+      key: ConfigKey;
+      type: "number";
+      title: string;
+      /**
+       * If validate returns undefined, the field value will not be changed. Otherwise the returned
+       * value will be used instead of the input value.
+       */
+      validate?: (value: number) => number | undefined;
+      placeholder?: string;
+      allowEmpty?: boolean;
+    }
   | { key: ConfigKey; type: "color"; title: string }
   | { key: ConfigKey; type: "toggle"; title: string }
   | {

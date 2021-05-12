@@ -13,12 +13,12 @@ export type PlotXAxisVal =
 
 export type PlotConfig = {
   paths: PlotPath[];
-  minYValue: string;
-  maxYValue: string;
+  minYValue?: string | number;
+  maxYValue?: string | number;
   showLegend: boolean;
   xAxisVal: PlotXAxisVal;
   xAxisPath?: BasePlotPath;
-  followingViewWidth?: string;
+  followingViewWidth?: string | number;
 };
 
 export const plotableRosTypes = [

@@ -15,6 +15,7 @@ import { storiesOf } from "@storybook/react";
 import { useCallback, useRef } from "react";
 import { parseMessageDefinition } from "rosbag";
 
+import SchemaEditor from "@foxglove-studio/app/components/PanelSettings/SchemaEditor";
 import { BlockCache } from "@foxglove-studio/app/dataProviders/MemoryCacheDataProvider";
 import Plot, { PlotConfig } from "@foxglove-studio/app/panels/Plot";
 import PanelSetup, { triggerWheel } from "@foxglove-studio/app/stories/PanelSetup";
@@ -865,5 +866,15 @@ storiesOf("panels/Plot/index", module)
           }}
         />
       </PanelSetup>
+    );
+  })
+  .add("Settings", () => {
+    return (
+      <SchemaEditor
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        configSchema={Plot.configSchema!}
+        config={Plot.defaultConfig}
+        saveConfig={() => {}}
+      />
     );
   });

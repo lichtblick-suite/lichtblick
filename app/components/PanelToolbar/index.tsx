@@ -56,8 +56,6 @@ type Props = {
   children?: React.ReactNode;
   floating?: boolean;
   helpContent?: React.ReactNode;
-  /** @deprecated Use Panel configSchema instead */
-  menuContent?: React.ReactNode;
   additionalIcons?: React.ReactNode;
   hideToolbars?: boolean;
   showHiddenControlsOnHover?: boolean;
@@ -236,7 +234,7 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
 
 type PanelToolbarControlsProps = Pick<
   Props,
-  "additionalIcons" | "floating" | "menuContent" | "showHiddenControlsOnHover"
+  "additionalIcons" | "floating" | "showHiddenControlsOnHover"
 > & {
   isRendered: boolean;
   showPanelName?: boolean;
@@ -250,7 +248,6 @@ const PanelToolbarControls = React.memo(function PanelToolbarControls({
   floating = false,
   isRendered,
   isUnknownPanel,
-  menuContent,
   showHiddenControlsOnHover = false,
   showPanelName = false,
 }: PanelToolbarControlsProps) {
@@ -274,8 +271,6 @@ const PanelToolbarControls = React.memo(function PanelToolbarControls({
         }
       >
         <StandardMenuItems tabId={panelContext?.tabId} isUnknownPanel={isUnknownPanel} />
-        {Boolean(menuContent) && <hr />}
-        {menuContent}
       </Dropdown>
       {!isUnknownPanel && (
         <span ref={panelContext?.connectToolbarDragHandle} data-test="mosaic-drag-handle">
@@ -298,7 +293,6 @@ export default React.memo<Props>(function PanelToolbar({
   helpContent,
   hideToolbars = false,
   isUnknownPanel = false,
-  menuContent,
   showHiddenControlsOnHover,
 }: Props) {
   const { isHovered = false, supportsStrictMode = true } = useContext(PanelContext) ?? {};
@@ -356,7 +350,6 @@ export default React.memo<Props>(function PanelToolbar({
               isRendered={isRendered}
               showHiddenControlsOnHover={showHiddenControlsOnHover}
               floating={floating}
-              menuContent={menuContent}
               showPanelName={(width ?? 0) > 360}
               additionalIcons={additionalIconsWithHelp}
               isUnknownPanel={!!isUnknownPanel}

@@ -18,9 +18,10 @@ import {
 // We need lodash.get for dynamic key path support
 // eslint-disable-next-line no-restricted-imports
 import { get, set, cloneDeep } from "lodash";
-import { useCallback, useRef, useState } from "react";
+import { SyntheticEvent, useCallback, useRef, useState } from "react";
 
 import { PanelConfigSchemaEntry, SaveConfig } from "@foxglove-studio/app/types/panels";
+import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import Logger from "@foxglove/log";
 
 const log = Logger.getLogger(__filename);
@@ -79,28 +80,56 @@ export default function SchemaEntryEditor({
       );
     }
     case "number": {
+      const { allowEmpty = false, placeholder, validate } = entry;
       let value;
-      if (typeof currentValue === "number") {
+      if ((typeof currentValue === "undefined" || currentValue === "") && allowEmpty) {
+        value = "";
+      } else if (typeof currentValue === "number") {
+        value = currentValue.toString();
+      } else if (typeof currentValue === "string" && !isNaN(+currentValue)) {
         value = currentValue;
       } else {
-        value = 0;
+        value = "0";
         log.warn(`Unexpected type for ${key}:`, currentValue);
       }
-      const validate = entry.validate;
       return (
-        <SpinButton
-          label={title}
-          value={value.toString()}
-          onValidate={
-            validate != undefined
-              ? (newValue) => validate(parseFloat(newValue)).toString()
-              : undefined
-          }
-          onChange={(_event, newValue) =>
-            newValue != undefined &&
-            setValue(validate != undefined ? validate(parseFloat(newValue)) : parseFloat(newValue))
-          }
-        />
+        <Stack horizontal wrap tokens={(_props, theme) => ({ childrenGap: theme.spacing.s1 })}>
+          <Stack.Item align="center">
+            <Label>{title}</Label>
+          </Stack.Item>
+          <Stack.Item grow style={{ flexBasis: 0, minWidth: 86 }}>
+            <SpinButton
+              inputProps={{ placeholder }}
+              value={value}
+              styles={{ root: { rowGap: "10px" } }}
+              onValidate={(inputValue) => {
+                if (inputValue.trim().length > 0) {
+                  if (!isNaN(+inputValue)) {
+                    if (validate != undefined) {
+                      return validate(+inputValue)?.toString();
+                    }
+                    return inputValue;
+                  }
+                } else if (allowEmpty) {
+                  return "";
+                }
+                return undefined; // onChange will not be called
+              }}
+              onChange={(event: SyntheticEvent | undefined, inputValue) => {
+                if (event?.currentTarget.nodeName === "DIV") {
+                  // FluentUI bug: onChange event is added as event listener on wrapper div
+                  // Also, event is typed as non-nullable but actually may be undefined
+                  // https://github.com/microsoft/fluentui/issues/18153
+                  return;
+                }
+                inputValue = nonEmptyOrUndefined(inputValue?.trim());
+                if ((inputValue != undefined && !isNaN(+inputValue)) || allowEmpty) {
+                  setValue(inputValue != undefined ? +inputValue : undefined);
+                }
+              }}
+            />
+          </Stack.Item>
+        </Stack>
       );
     }
 
