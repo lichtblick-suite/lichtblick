@@ -977,7 +977,6 @@ export default class SceneBuilder implements MarkerProvider {
     // allow topic settings to override renderable marker command (see MarkerSettingsEditor.js)
     const { overrideCommand } = this._settingsByKey[`t:${topic.name}`] || {};
 
-    // prettier-ignore
     switch (marker.type) {
       case 0:
         return add.arrow(marker);
@@ -1026,13 +1025,11 @@ export default class SceneBuilder implements MarkerProvider {
         return add.overlayIcon(marker);
       case 110:
         return add.color(marker);
-      default:
-        {
-          if (!this._hooks.addMarkerToCollector(add, marker)) {
-            this._setTopicError(topic.name, `Unsupported marker type: ${marker.type}`);
-          }
+      default: {
+        if (!this._hooks.addMarkerToCollector(add, marker)) {
+          this._setTopicError(topic.name, `Unsupported marker type: ${marker.type}`);
         }
-
+      }
     }
   }
 }

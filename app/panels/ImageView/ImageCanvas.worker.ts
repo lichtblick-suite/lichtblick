@@ -16,7 +16,7 @@ import Rpc, { Channel } from "@foxglove-studio/app/util/Rpc";
 import { setupWorker } from "@foxglove-studio/app/util/RpcWorkerUtils";
 
 import { renderImage } from "./renderImage";
-import { Dimensions, RawMarkerData, OffscreenCanvas } from "./util";
+import { Dimensions, RawMarkerData, OffscreenCanvas, RenderOptions } from "./util";
 
 export default class ImageCanvasWorker {
   _idToCanvas: {
@@ -39,14 +39,16 @@ export default class ImageCanvasWorker {
         imageMessage,
         imageMessageDatatype,
         rawMarkerData,
+        options,
       }: {
         id: string;
         imageMessage?: MessageEvent<unknown>;
         imageMessageDatatype?: string;
         rawMarkerData: RawMarkerData;
+        options: RenderOptions;
       }): Promise<Dimensions | undefined> => {
         const canvas = this._idToCanvas[id];
-        return renderImage({ canvas, imageMessage, imageMessageDatatype, rawMarkerData });
+        return renderImage({ canvas, imageMessage, imageMessageDatatype, rawMarkerData, options });
       },
     );
   }

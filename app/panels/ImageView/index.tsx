@@ -70,17 +70,13 @@ type DefaultConfig = {
   synchronize: boolean;
 };
 
-export type ImageViewPanelHooks = {
-  defaultConfig: DefaultConfig;
-  imageMarkerDatatypes: string[];
-};
-
 export type Config = DefaultConfig & {
-  panelHooks?: ImageViewPanelHooks;
   transformMarkers: boolean;
   mode?: "fit" | "fill" | "other";
   zoomPercentage?: number;
   offset?: number[];
+  minValue?: number;
+  maxValue?: number;
   saveStoryConfig?: () => void;
 };
 
@@ -272,7 +268,6 @@ function ImageView(props: Props) {
     scale,
     cameraTopic,
     enabledMarkerTopics,
-    panelHooks,
     transformMarkers,
     customMarkerTopicOptions = NO_CUSTOM_OPTIONS,
   } = config;
@@ -626,7 +621,6 @@ function ImageView(props: Props) {
       {/* Always render the ImageCanvas because it's expensive to unmount and start up. */}
       {imageMessageToRender && (
         <ImageCanvas
-          panelHooks={panelHooks}
           topic={cameraTopicFullObject}
           image={imageMessageToRender}
           rawMarkerData={rawMarkerData}
@@ -654,6 +648,20 @@ const defaultConfig: Config = {
 
 const configSchema: PanelConfigSchema<Config> = [
   { key: "synchronize", type: "toggle", title: "Synchronize images and markers" },
+  {
+    key: "minValue",
+    type: "number",
+    title: "Minimum value (depth images)",
+    placeholder: "0",
+    allowEmpty: true,
+  },
+  {
+    key: "maxValue",
+    type: "number",
+    title: "Maximum value (depth images)",
+    placeholder: "10000",
+    allowEmpty: true,
+  },
   {
     key: "scale",
     type: "dropdown",

@@ -18,7 +18,6 @@ describe("decodeBayer*()", () => {
     const output = new Uint8ClampedArray(2 * 2 * 4);
     decodeBayerRGGB8(new Uint8Array([10, 20, 30, 40]), 2, 2, output);
     expect(output).toStrictEqual(
-      // prettier-ignore
       new Uint8ClampedArray([10, 20, 40, 255, 10, 20, 40, 255, 10, 30, 40, 255, 10, 30, 40, 255]),
     );
   });

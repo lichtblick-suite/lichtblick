@@ -36,9 +36,9 @@ import sendNotification from "@foxglove-studio/app/util/sendNotification";
 import supportsOffscreenCanvas from "@foxglove-studio/app/util/supportsOffscreenCanvas";
 
 import styles from "./ImageCanvas.module.scss";
-import { ImageViewPanelHooks, Config, SaveImagePanelConfig } from "./index";
+import { Config, SaveImagePanelConfig } from "./index";
 import { renderImage } from "./renderImage";
-import { checkOutOfBounds, Dimensions } from "./util";
+import { checkOutOfBounds, Dimensions, RenderOptions } from "./util";
 
 function makeImageCanvasWorker() {
   return new Worker(new URL("ImageCanvas.worker", import.meta.url));
@@ -54,7 +54,6 @@ type Props = {
     transformMarkers: boolean;
     cameraInfo?: CameraInfo;
   };
-  panelHooks?: ImageViewPanelHooks;
   config: Config;
   saveConfig: SaveImagePanelConfig;
   onStartRenderImage: () => OnFinishRenderImage;
@@ -361,12 +360,20 @@ export default class ImageCanvas extends React.Component<Props, State> {
   };
 
   renderCurrentImage = debouncePromise(async () => {
-    const { image, topic, rawMarkerData, onStartRenderImage } = this.props;
+    const {
+      image,
+      topic,
+      rawMarkerData,
+      config: { minValue, maxValue },
+      onStartRenderImage,
+    } = this.props;
     if (!topic || !image) {
       return;
     }
 
     const imageMessage = image?.message as any;
+
+    const options: RenderOptions = { minValue, maxValue };
 
     const onFinishImageRender = onStartRenderImage();
     try {
@@ -390,6 +397,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
           },
           imageMessageDatatype: topic.datatype,
           rawMarkerData,
+          options,
         });
       } else {
         dimensions = await renderImage({
@@ -397,6 +405,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
           imageMessage: image,
           imageMessageDatatype: topic.datatype,
           rawMarkerData,
+          options,
         });
       }
 

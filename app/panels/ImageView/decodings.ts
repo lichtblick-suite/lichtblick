@@ -11,6 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { RenderOptions } from "@foxglove-studio/app/panels/ImageView/util";
+
 export function decodeYUV(
   yuv: Int8Array,
   width: number,
@@ -130,20 +132,26 @@ export function decodeMono16(
   height: number,
   is_bigendian: boolean,
   output: Uint8ClampedArray,
+  options?: RenderOptions,
 ): void {
   const view = new DataView(mono16.buffer, mono16.byteOffset);
+
+  // Use user-provided max/min values, or default to 0-10000, consistent with image_view's default.
+  // References:
+  // https://github.com/ros-perception/image_pipeline/blob/42266892502427eb566a4dffa61b009346491ce7/image_view/src/nodes/image_view.cpp#L80-L88
+  // https://github.com/ros-visualization/rqt_image_view/blob/fe076acd265a05c11c04f9d04392fda951878f54/src/rqt_image_view/image_view.cpp#L582
+  // https://github.com/ros-visualization/rviz/blob/68b464fb6571b8760f91e8eca6fb933ba31190bf/src/rviz/image/ros_image_texture.cpp#L114
+  const minValue = options?.minValue ?? 0;
+  let maxValue = options?.maxValue ?? 10000;
+  if (maxValue === minValue) {
+    maxValue = minValue + 1;
+  }
 
   let outIdx = 0;
   for (let i = 0; i < width * height * 2; i += 2) {
     let val = view.getUint16(i, !is_bigendian);
 
-    // For now, just assume values are in the range 0-10000, consistent with image_view's default.
-    // TODO: support dynamic range adjustment and/or user-selectable range
-    // References:
-    // https://github.com/ros-perception/image_pipeline/blob/42266892502427eb566a4dffa61b009346491ce7/image_view/src/nodes/image_view.cpp#L80-L88
-    // https://github.com/ros-visualization/rqt_image_view/blob/fe076acd265a05c11c04f9d04392fda951878f54/src/rqt_image_view/image_view.cpp#L582
-    // https://github.com/ros-visualization/rviz/blob/68b464fb6571b8760f91e8eca6fb933ba31190bf/src/rviz/image/ros_image_texture.cpp#L114
-    val = (val / 10000) * 255;
+    val = ((val - minValue) / (maxValue - minValue)) * 255;
 
     output[outIdx++] = val;
     output[outIdx++] = val;

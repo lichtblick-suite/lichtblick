@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { storiesOf } from "@storybook/react";
 import { range, noop } from "lodash";
 
 import ImageView from "@foxglove-studio/app/panels/ImageView";
@@ -326,7 +325,15 @@ function BayerStory({ encoding }: { encoding: string }) {
   );
 }
 
-function Mono16Story({ bigEndian }: { bigEndian: boolean }) {
+function Mono16Story({
+  bigEndian,
+  minValue,
+  maxValue,
+}: {
+  minValue?: number;
+  maxValue?: number;
+  bigEndian: boolean;
+}) {
   const width = 2000;
   const height = 1000;
   const data = new Uint8Array(width * height * 2);
@@ -346,7 +353,7 @@ function Mono16Story({ bigEndian }: { bigEndian: boolean }) {
         message: { data, width, height, encoding: "16UC1", is_bigendian: bigEndian ? 1 : 0 },
       }}
       rawMarkerData={noMarkersMarkerData}
-      config={config}
+      config={{ ...config, minValue, maxValue }}
       saveConfig={noop}
       onStartRenderImage={() => () => undefined}
     />
@@ -385,183 +392,194 @@ function ShouldCallOnRenderImage({
   );
 }
 
-storiesOf("panels/ImageView/ImageCanvas", module)
-  .addParameters({
+export default {
+  title: "panels/ImageView/ImageCanvas",
+  component: ImageCanvas,
+  parameters: {
     chromatic: {
       delay: 2500,
     },
-  })
-  .add("markers", () => (
-    <LoadImageMessage>
-      {(imageMessage: any) => (
-        <div>
-          <h2>original markers</h2>
-          <ImageCanvas
-            topic={topics[1]}
-            image={imageMessage}
-            rawMarkerData={{
-              markers,
-              cameraInfo: undefined,
-              scale: 1,
-              transformMarkers: false,
-            }}
-            config={config}
-            saveConfig={noop}
-            onStartRenderImage={() => () => undefined}
-          />
-          <br />
-          <h2>transformed markers</h2>
-          <ImageCanvas
-            topic={topics[1]}
-            image={imageMessage}
-            rawMarkerData={{
-              markers,
-              cameraInfo: cameraInfo as any,
-              scale: 1,
-              transformMarkers: true,
-            }}
-            config={config}
-            saveConfig={noop}
-            onStartRenderImage={() => () => undefined}
-          />
-          <h2>markers with different original image size</h2>
-          <ImageCanvas
-            topic={topics[1]}
-            image={imageMessage}
-            rawMarkerData={{
-              markers,
-              cameraInfo: { ...cameraInfo, width: 200, height: 150 } as any,
-              scale: 1,
-              transformMarkers: true,
-            }}
-            config={config}
-            saveConfig={noop}
-            onStartRenderImage={() => () => undefined}
-          />
-        </div>
+  },
+};
+export const Markers = (): JSX.Element => (
+  <LoadImageMessage>
+    {(imageMessage: any) => (
+      <div>
+        <h2>original markers</h2>
+        <ImageCanvas
+          topic={topics[1]}
+          image={imageMessage}
+          rawMarkerData={{
+            markers,
+            cameraInfo: undefined,
+            scale: 1,
+            transformMarkers: false,
+          }}
+          config={config}
+          saveConfig={noop}
+          onStartRenderImage={() => () => undefined}
+        />
+        <br />
+        <h2>transformed markers</h2>
+        <ImageCanvas
+          topic={topics[1]}
+          image={imageMessage}
+          rawMarkerData={{
+            markers,
+            cameraInfo: cameraInfo as any,
+            scale: 1,
+            transformMarkers: true,
+          }}
+          config={config}
+          saveConfig={noop}
+          onStartRenderImage={() => () => undefined}
+        />
+        <h2>markers with different original image size</h2>
+        <ImageCanvas
+          topic={topics[1]}
+          image={imageMessage}
+          rawMarkerData={{
+            markers,
+            cameraInfo: { ...cameraInfo, width: 200, height: 150 } as any,
+            scale: 1,
+            transformMarkers: true,
+          }}
+          config={config}
+          saveConfig={noop}
+          onStartRenderImage={() => () => undefined}
+        />
+      </div>
+    )}
+  </LoadImageMessage>
+);
+export const MarkersWithFallbackRenderingUsingMainThread = (): JSX.Element => (
+  <LoadImageMessage>
+    {(imageMessage: any) => (
+      <div>
+        <h2>original markers</h2>
+        <ImageCanvas
+          topic={topics[1]}
+          image={imageMessage}
+          rawMarkerData={{
+            markers,
+            cameraInfo: undefined,
+            scale: 1,
+            transformMarkers: false,
+          }}
+          config={config}
+          saveConfig={noop}
+          useMainThreadRenderingForTesting
+          onStartRenderImage={() => () => undefined}
+        />
+        <br />
+        <h2>transformed markers</h2>
+        <ImageCanvas
+          topic={topics[1]}
+          image={imageMessage}
+          rawMarkerData={{
+            markers,
+            cameraInfo: cameraInfo as any,
+            scale: 1,
+            transformMarkers: true,
+          }}
+          config={config}
+          saveConfig={noop}
+          useMainThreadRenderingForTesting
+          onStartRenderImage={() => () => undefined}
+        />
+        <h2>markers with different original image size</h2>
+        <ImageCanvas
+          topic={topics[1]}
+          image={imageMessage}
+          rawMarkerData={{
+            markers,
+            cameraInfo: { ...cameraInfo, width: 200, height: 150 } as any,
+            scale: 1,
+            transformMarkers: true,
+          }}
+          config={config}
+          saveConfig={noop}
+          useMainThreadRenderingForTesting
+          onStartRenderImage={() => () => undefined}
+        />
+      </div>
+    )}
+  </LoadImageMessage>
+);
+export const ErrorState = (): JSX.Element => {
+  return (
+    <ImageCanvas
+      topic={topics[0]}
+      image={{
+        topic: "/foo",
+        receiveTime: { sec: 0, nsec: 0 },
+        message: { data: new Uint8Array([]), width: 100, height: 50, encoding: "Foo" },
+      }}
+      rawMarkerData={noMarkersMarkerData}
+      config={config}
+      saveConfig={noop}
+      onStartRenderImage={() => () => undefined}
+    />
+  );
+};
+export const CallsOnRenderFrameWhenRenderingSucceeds = (): JSX.Element => {
+  return (
+    <ShouldCallOnRenderImage>
+      {(onStartRenderImage) => (
+        <LoadImageMessage>
+          {(imageMessage: any) => (
+            <ImageCanvas
+              topic={topics[0]}
+              image={imageMessage}
+              rawMarkerData={{
+                markers,
+                cameraInfo: undefined,
+                scale: 1,
+                transformMarkers: false,
+              }}
+              config={config}
+              saveConfig={noop}
+              onStartRenderImage={onStartRenderImage}
+            />
+          )}
+        </LoadImageMessage>
       )}
-    </LoadImageMessage>
-  ))
-  .add("Markers with fallback rendering using the main thread", () => (
-    <LoadImageMessage>
-      {(imageMessage: any) => (
-        <div>
-          <h2>original markers</h2>
-          <ImageCanvas
-            topic={topics[1]}
-            image={imageMessage}
-            rawMarkerData={{
-              markers,
-              cameraInfo: undefined,
-              scale: 1,
-              transformMarkers: false,
-            }}
-            config={config}
-            saveConfig={noop}
-            useMainThreadRenderingForTesting
-            onStartRenderImage={() => () => undefined}
-          />
-          <br />
-          <h2>transformed markers</h2>
-          <ImageCanvas
-            topic={topics[1]}
-            image={imageMessage}
-            rawMarkerData={{
-              markers,
-              cameraInfo: cameraInfo as any,
-              scale: 1,
-              transformMarkers: true,
-            }}
-            config={config}
-            saveConfig={noop}
-            useMainThreadRenderingForTesting
-            onStartRenderImage={() => () => undefined}
-          />
-          <h2>markers with different original image size</h2>
-          <ImageCanvas
-            topic={topics[1]}
-            image={imageMessage}
-            rawMarkerData={{
-              markers,
-              cameraInfo: { ...cameraInfo, width: 200, height: 150 } as any,
-              scale: 1,
-              transformMarkers: true,
-            }}
-            config={config}
-            saveConfig={noop}
-            useMainThreadRenderingForTesting
-            onStartRenderImage={() => () => undefined}
-          />
-        </div>
+    </ShouldCallOnRenderImage>
+  );
+};
+export const CallsOnRenderFrameWhenRenderingFails = (): JSX.Element => {
+  return (
+    <ShouldCallOnRenderImage>
+      {(onStartRenderImage) => (
+        <ImageCanvas
+          topic={topics[0]}
+          image={{
+            topic: "/foo",
+            receiveTime: { sec: 0, nsec: 0 },
+            message: { data: new Uint8Array([]), width: 100, height: 50, encoding: "Foo" },
+          }}
+          rawMarkerData={noMarkersMarkerData}
+          config={config}
+          saveConfig={noop}
+          onStartRenderImage={onStartRenderImage}
+        />
       )}
-    </LoadImageMessage>
-  ))
-  .add("error state", () => {
-    return (
-      <ImageCanvas
-        topic={topics[0]}
-        image={{
-          topic: "/foo",
-          receiveTime: { sec: 0, nsec: 0 },
-          message: { data: new Uint8Array([]), width: 100, height: 50, encoding: "Foo" },
-        }}
-        rawMarkerData={noMarkersMarkerData}
-        config={config}
-        saveConfig={noop}
-        onStartRenderImage={() => () => undefined}
-      />
-    );
-  })
-  .add("Calls onRenderFrame when rendering succeeds", () => {
-    return (
-      <ShouldCallOnRenderImage>
-        {(onStartRenderImage) => (
-          <LoadImageMessage>
-            {(imageMessage: any) => (
-              <ImageCanvas
-                topic={topics[0]}
-                image={imageMessage}
-                rawMarkerData={{
-                  markers,
-                  cameraInfo: undefined,
-                  scale: 1,
-                  transformMarkers: false,
-                }}
-                config={config}
-                saveConfig={noop}
-                onStartRenderImage={onStartRenderImage}
-              />
-            )}
-          </LoadImageMessage>
-        )}
-      </ShouldCallOnRenderImage>
-    );
-  })
-  .add("calls onRenderFrame when rendering fails", () => {
-    return (
-      <ShouldCallOnRenderImage>
-        {(onStartRenderImage) => (
-          <ImageCanvas
-            topic={topics[0]}
-            image={{
-              topic: "/foo",
-              receiveTime: { sec: 0, nsec: 0 },
-              message: { data: new Uint8Array([]), width: 100, height: 50, encoding: "Foo" },
-            }}
-            rawMarkerData={noMarkersMarkerData}
-            config={config}
-            saveConfig={noop}
-            onStartRenderImage={onStartRenderImage}
-          />
-        )}
-      </ShouldCallOnRenderImage>
-    );
-  })
-  .add("rgb8", () => <RGBStory encoding="rgb8" />)
-  .add("bgr8", () => <RGBStory encoding="bgr8" />)
-  .add("mono16 big endian", () => <Mono16Story bigEndian={true} />)
-  .add("mono16 little endian", () => <Mono16Story bigEndian={false} />)
-  .add("bayer_rggb8", () => <BayerStory encoding="bayer_rggb8" />)
-  .add("bayer_bggr8", () => <BayerStory encoding="bayer_bggr8" />)
-  .add("bayer_gbrg8", () => <BayerStory encoding="bayer_gbrg8" />)
-  .add("bayer_grbg8", () => <BayerStory encoding="bayer_grbg8" />);
+    </ShouldCallOnRenderImage>
+  );
+};
+export const RGB8 = (): JSX.Element => <RGBStory encoding="rgb8" />;
+export const BGR8 = (): JSX.Element => <RGBStory encoding="bgr8" />;
+
+export const Mono16BigEndian = (): JSX.Element => <Mono16Story bigEndian={true} />;
+export const Mono16LittleEndian = (): JSX.Element => <Mono16Story bigEndian={false} />;
+
+const mono16Args = { minValue: 5000, maxValue: 20000 };
+export const Mono16CustomMinMax = (args: typeof mono16Args): JSX.Element => (
+  <Mono16Story bigEndian {...args} />
+);
+Mono16CustomMinMax.args = mono16Args;
+
+export const BayerRGGB8 = (): JSX.Element => <BayerStory encoding="bayer_rggb8" />;
+export const BayerBGGR8 = (): JSX.Element => <BayerStory encoding="bayer_bggr8" />;
+export const BayerGBRG8 = (): JSX.Element => <BayerStory encoding="bayer_gbrg8" />;
+export const BayerGRBG8 = (): JSX.Element => <BayerStory encoding="bayer_grbg8" />;

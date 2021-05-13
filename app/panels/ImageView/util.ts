@@ -26,6 +26,11 @@ import CameraModel from "./CameraModel";
 // TODO: change this to the Flow definition once it's been added.
 export type OffscreenCanvas = HTMLCanvasElement;
 
+export type RenderOptions = {
+  minValue?: number;
+  maxValue?: number;
+};
+
 export type Dimensions = { width: number; height: number };
 
 export type MarkerOption = {
