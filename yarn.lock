@@ -2070,7 +2070,7 @@ __metadata:
     "@types/react": 17.0.5
     "@types/react-autocomplete": 1.8.5
     "@types/react-document-events": "workspace:packages/@types/react-document-events"
-    "@types/react-dom": 17.0.4
+    "@types/react-dom": 17.0.5
     "@types/react-highlight-words": 0.16.2
     "@types/react-hover-observer": "workspace:packages/@types/react-hover-observer"
     "@types/react-input-autosize": 2.2.0
@@ -5122,12 +5122,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@types/react-dom@npm:17.0.4, @types/react-dom@npm:>=16.9.0":
-  version: 17.0.4
-  resolution: "@types/react-dom@npm:17.0.4"
+"@types/react-dom@npm:17.0.5, @types/react-dom@npm:>=16.9.0":
+  version: 17.0.5
+  resolution: "@types/react-dom@npm:17.0.5"
   dependencies:
     "@types/react": "*"
-  checksum: 2c69fc56cbb6231d0725fbcec09386fccd797863b3b67ebe046be0f777f25c0d4a147f3601a3cf62ef45aea1f0af2df74d063c1ccdac18211ec43f5029b233d9
+  checksum: b3e23acb7be9405050abb4bcd443d14b16b2f3ded2d1853528199e4307b17b25186f905ddd236c27b6ef0297e6779b7fedd11fd24ee9170771be45a7e8e70f4b
   languageName: node
   linkType: hard
 

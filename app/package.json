@@ -110,7 +110,7 @@
     "@types/react": "17.0.5",
     "@types/react-autocomplete": "1.8.5",
     "@types/react-document-events": "workspace:packages/@types/react-document-events",
-    "@types/react-dom": "17.0.4",
+    "@types/react-dom": "17.0.5",
     "@types/react-highlight-words": "0.16.2",
     "@types/react-hover-observer": "workspace:packages/@types/react-hover-observer",
     "@types/react-input-autosize": "2.2.0",
