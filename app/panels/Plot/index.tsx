@@ -34,6 +34,7 @@ import {
 import Panel from "@foxglove-studio/app/components/Panel";
 import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import {
+  ChartDefaultView,
   getTooltipItemForMessageHistoryItem,
   TooltipItem,
 } from "@foxglove-studio/app/components/TimeBasedChart";
@@ -233,7 +234,7 @@ function Plot(props: Props) {
   const preloadingDisplayTime = timeToXValueForPreloading(currentTime);
   const preloadingStartTime = timeToXValueForPreloading(startTime); // zero or undefined
   const preloadingEndTime = timeToXValueForPreloading(endTime);
-  let defaultView;
+  let defaultView: ChartDefaultView | undefined;
   if (preloadingDisplayTime != undefined) {
     if (followingViewWidth != undefined && +followingViewWidth > 0) {
       // Will be ignored in TimeBasedChart for non-preloading plots and non-timestamp plots.
@@ -269,7 +270,7 @@ function Plot(props: Props) {
         xAxisVal={xAxisVal}
         currentTime={preloadingDisplayTime}
         onClick={onClick}
-        defaultView={defaultView as any}
+        defaultView={defaultView}
       />
       <PlotLegend
         paths={yAxisPaths}

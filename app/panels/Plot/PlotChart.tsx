@@ -363,7 +363,7 @@ type PlotChartProps = {
   tooltips: TimeBasedChartTooltipData[];
   xAxisVal: PlotXAxisVal;
   currentTime?: number;
-  defaultView: ChartDefaultView;
+  defaultView?: ChartDefaultView;
   onClick?: TimeBasedChartProps["onClick"];
 };
 export default memo<PlotChartProps>(function PlotChart(props: PlotChartProps) {

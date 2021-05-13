@@ -540,6 +540,11 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     if (defaultView?.type === "fixed") {
       min = defaultView.minXValue;
       max = defaultView.maxXValue;
+    } else if (defaultView?.type === "following") {
+      max = datasetBounds.x.max;
+      if (max != undefined) {
+        min = max - defaultView.width;
+      }
     } else {
       min = datasetBounds.x.min;
       max = datasetBounds.x.max;
@@ -552,7 +557,8 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
       if (globalBounds.userInteraction) {
         min = globalBounds.min;
         max = globalBounds.max;
-      } else {
+      } else if (defaultView?.type !== "following") {
+        // if following and no user interaction - we leave our bounds as they are
         min = Math.min(min ?? globalBounds.min, globalBounds.min);
         max = Math.max(max ?? globalBounds.max, globalBounds.max);
       }
