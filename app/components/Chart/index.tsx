@@ -10,7 +10,8 @@
 
 import { ChartOptions, ChartData, ScatterDataPoint } from "chart.js";
 import Hammer from "hammerjs";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useAsync, useMountedState } from "react-use";
 import { v4 as uuidv4 } from "uuid";
 
 import { RpcElement, RpcScales } from "@foxglove-studio/app/components/Chart/types";
@@ -72,9 +73,10 @@ function rpcMouseEvent(event: React.MouseEvent<HTMLCanvasElement>) {
 
 // Chart component renders data using workers with chartjs offscreen canvas
 function Chart(props: Props): JSX.Element {
-  const [id] = useState(uuidv4());
+  const [id] = useState(() => uuidv4());
   const initialized = useRef(false);
   const canvasRef = useRef<HTMLCanvasElement>(ReactNull);
+  const isMounted = useMountedState();
 
   // to avoid changing useCallback deps for callbacks which access the scale value
   // at the time they are invoked
@@ -85,14 +87,12 @@ function Chart(props: Props): JSX.Element {
 
   const { type, data, options, width, height } = props;
 
-  const rpc = useMemo(() => {
-    return webWorkerManager.registerWorkerListener(id);
-  }, [id]);
+  const [rpc] = useState(() => webWorkerManager.registerWorkerListener(id));
 
   // helper function to send rpc to our worker - all invocations need an _id_ so we inject it here
   const rpcSend = useCallback(
     <T extends unknown>(topic: string, payload?: any, transferrables?: unknown[]) => {
-      return rpc.send<T>(topic, { id, ...payload }, transferrables);
+      return rpc.send<T>(topic, { id: id, ...payload }, transferrables);
     },
     [id, rpc],
   );
@@ -110,6 +110,10 @@ function Chart(props: Props): JSX.Element {
 
   const maybeUpdateScales = useCallback(
     (newScales: RpcScales, opt?: { userInteraction: boolean }) => {
+      if (!isMounted()) {
+        return;
+      }
+
       const oldScales = currentScalesRef.current;
       currentScalesRef.current = newScales;
 
@@ -121,11 +125,11 @@ function Chart(props: Props): JSX.Element {
         onScalesUpdateRef.current?.(newScales, opt ?? { userInteraction: false });
       }
     },
-    [],
+    [isMounted],
   );
 
   // first time initialization
-  useEffect(() => {
+  const { error: initError } = useAsync(async () => {
     // initialization happens once - even if the props for this effect change
     if (initialized.current) {
       return;
@@ -140,50 +144,61 @@ function Chart(props: Props): JSX.Element {
       throw new Error("Chart requires browsers with offscreen canvas support");
     }
 
-    initialized.current = true;
     const offscreenCanvas = canvas.transferControlToOffscreen();
+    initialized.current = true;
+    const scales = await rpcSend<RpcScales>(
+      "initialize",
+      {
+        node: offscreenCanvas,
+        type,
+        data,
+        options,
+        devicePixelRatio,
+        width,
+        height,
+      },
+      [offscreenCanvas],
+    );
+    maybeUpdateScales(scales);
+  }, [rpcSend, type, data, options, width, height, maybeUpdateScales]);
 
-    (async function () {
-      const scales = await rpcSend<RpcScales>(
-        "initialize",
-        {
-          node: offscreenCanvas,
-          type,
-          data,
-          options,
-          devicePixelRatio,
-          width,
-          height,
-        },
-        [offscreenCanvas],
-      );
-      maybeUpdateScales(scales);
-    })();
-  }, [type, data, options, width, height, rpcSend, maybeUpdateScales]);
+  if (initError) {
+    throw initError;
+  }
 
   // call this when chart finishes rendering new data
   const { onChartUpdate } = props;
 
-  useEffect(() => {
-    (async function () {
-      const scales = await rpcSend<RpcScales>("update-data", {
-        data,
-      });
-      maybeUpdateScales(scales);
-      onChartUpdate?.();
-    })();
-  }, [data, maybeUpdateScales, onChartUpdate, rpcSend]);
+  const { error: updateDataError } = useAsync(async () => {
+    const scales = await rpcSend<RpcScales>("update-data", {
+      data,
+    });
 
-  useEffect(() => {
-    (async function () {
-      const scales = await rpcSend<RpcScales>("update", {
-        options,
-        width,
-        height,
-      });
-      maybeUpdateScales(scales);
-    })();
-  }, [height, maybeUpdateScales, onChartUpdate, options, rpcSend, width]);
+    if (!isMounted()) {
+      return;
+    }
+
+    maybeUpdateScales(scales);
+    onChartUpdate?.();
+  }, [data, isMounted, maybeUpdateScales, onChartUpdate, rpcSend]);
+
+  if (updateDataError) {
+    throw updateDataError;
+  }
+
+  const { error: updateError } = useAsync(async () => {
+    const scales = await rpcSend<RpcScales>("update", {
+      options,
+      width,
+      height,
+    });
+
+    maybeUpdateScales(scales);
+  }, [height, maybeUpdateScales, options, rpcSend, width]);
+
+  if (updateError) {
+    throw updateError;
+  }
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -299,10 +314,14 @@ function Chart(props: Props): JSX.Element {
         const elements = await rpcSend<RpcElement[]>("getElementsAtEvent", {
           event: rpcMouseEvent(event),
         });
+
+        if (!isMounted()) {
+          return;
+        }
         onHover(elements);
       }
     },
-    [rpcSend, onHover],
+    [onHover, rpcSend, isMounted],
   );
 
   const onClick = useCallback(
@@ -320,6 +339,10 @@ function Chart(props: Props): JSX.Element {
       const datalabel = await rpcSend("getDatalabelAtEvent", {
         event: { x: mouseX, y: mouseY, type: "click" },
       });
+
+      if (!isMounted()) {
+        return;
+      }
 
       let xVal: number | undefined;
       let yVal: number | undefined;
@@ -344,7 +367,7 @@ function Chart(props: Props): JSX.Element {
         y: yVal,
       });
     },
-    [props, rpcSend],
+    [isMounted, props, rpcSend],
   );
 
   return (
@@ -352,7 +375,6 @@ function Chart(props: Props): JSX.Element {
       ref={canvasRef}
       height={height}
       width={width}
-      id={id}
       onWheel={onWheel}
       onClick={onClick}
       onMouseDown={onMouseDown}
