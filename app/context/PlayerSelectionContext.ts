@@ -13,7 +13,6 @@ export type PlayerSourceDefinition = {
 
 type FileSourceParams = {
   files?: File[];
-  append?: boolean;
 };
 
 type HttpSourceParams = {

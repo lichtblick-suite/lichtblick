@@ -247,6 +247,10 @@ export default function Workspace(props: { demoBagUrl?: string }): JSX.Element {
     })();
   }, [appConfiguration, openWelcomeLayout]);
 
+  // previously loaded files are tracked so support the "add bag" feature which loads a second bag
+  // file when the user presses shift during a drag/drop
+  const previousFiles = useRef<File[]>([]);
+
   const { loadFromFile } = useAssets();
 
   const openFiles = useCallback(
@@ -267,11 +271,15 @@ export default function Workspace(props: { demoBagUrl?: string }): JSX.Element {
       }
 
       if (otherFiles.length > 0) {
+        if (shiftPressed) {
+          previousFiles.current = previousFiles.current.concat(otherFiles);
+        } else {
+          previousFiles.current = otherFiles;
+        }
         selectSource(
           { name: "Local Files", type: "file" },
           {
-            files: otherFiles,
-            append: shiftPressed,
+            files: previousFiles.current,
           },
         );
       }

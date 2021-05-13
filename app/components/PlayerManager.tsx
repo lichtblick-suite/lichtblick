@@ -348,7 +348,6 @@ function PlayerManager({
 }: Props) {
   useWarnImmediateReRender();
 
-  const usedFiles = useRef<File[]>([]);
   const globalVariablesRef = useRef<GlobalVariables>(globalVariables);
   const [maybePlayer, setMaybePlayer] = useState<MaybePlayer<OrderedStampPlayer>>({});
   const [currentSourceName, setCurrentSourceName] = useState<string | undefined>(undefined);
@@ -479,14 +478,6 @@ function PlayerManager({
         const createPlayerBuilder = lookupPlayerBuilderFactory(selectedSource);
         if (!createPlayerBuilder) {
           throw new Error(`Could not create a player for ${selectedSource.name}`);
-        }
-
-        if (selectedSource.type === "file") {
-          if (!params?.append) {
-            usedFiles.current = [];
-          } else if (params?.files instanceof Array) {
-            usedFiles.current = params.files;
-          }
         }
 
         if (!params) {
