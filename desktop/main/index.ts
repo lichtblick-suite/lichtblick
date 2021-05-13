@@ -25,6 +25,7 @@ import {
   registerRosPackageProtocolHandlers,
   registerRosPackageProtocolSchemes,
 } from "./rosPackageResources";
+import setDevModeDockIcon from "./setDevModeDockIcon";
 import { getTelemetrySettings } from "./telemetry";
 
 const start = Date.now();
@@ -227,15 +228,7 @@ app.on("ready", async () => {
     ]);
     console.groupEnd();
 
-    // In development, we run with the pre-packaged Electron binary, so we need to manually set the Dock icon.
-    try {
-      if (app.dock != undefined) {
-        // This fails when opening the app from a packaged DMG.
-        app.dock.setIcon("resources/icon/icon.png");
-      }
-    } catch (error) {
-      console.error("Unable to set icon", error);
-    }
+    setDevModeDockIcon();
   }
 
   // Content Security Policy
