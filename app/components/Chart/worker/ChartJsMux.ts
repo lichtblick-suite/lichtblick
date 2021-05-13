@@ -28,11 +28,27 @@ import {
 } from "chart.js";
 import AnnotationPlugin from "chartjs-plugin-annotation";
 
+import RobotoMono from "@foxglove-studio/app/styles/assets/latin-roboto-mono.woff2";
 import { RpcLike } from "@foxglove-studio/app/util/FakeRpc";
 import Rpc from "@foxglove-studio/app/util/Rpc";
 import { setupWorker } from "@foxglove-studio/app/util/RpcWorkerUtils";
 
 import ChartJSManager from "./ChartJSManager";
+
+// Explicitly load the "Roboto Mono" font, since custom fonts from the main renderer are not
+// inherited by web workers. This is required to draw "Roboto Mono" on an OffscreenCanvas, and it
+// also appears to fix a crash a large portion of Windows users were seeing where the rendering
+// thread would crash in skia code related to DirectWrite font loading when the system display
+// scaling is set >100%.
+async function loadDefaultFont(): Promise<FontFace> {
+  const fontFace = new FontFace("Roboto Mono", `url(${RobotoMono}) format('woff2')`);
+  ((self as unknown) as WorkerGlobalScope).fonts.add(fontFace);
+  return fontFace.load();
+}
+
+// Immediately start font loading in the Worker thread. Each ChartJSManager we instantiate will
+// wait on this promise before instantiating a new Chart instance, which kicks off rendering
+const fontLoaded = loadDefaultFont();
 
 // Register the features we support globally on our chartjs instance
 // Note: Annotation plugin must be registered, it does not work _inline_ (i.e. per instance)
@@ -68,6 +84,7 @@ export default class ChartJsMux {
     // create a new chartjs instance
     // this must be done before sending any other rpc requests to the instance
     rpc.receive("initialize", (args: any) => {
+      args.fontLoaded = fontLoaded;
       const manager = new ChartJSManager(args);
       this._managers.set(args.id, manager);
       return manager.getScales();

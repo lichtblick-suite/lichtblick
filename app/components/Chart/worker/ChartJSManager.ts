@@ -51,6 +51,7 @@ type InitOpts = {
   data: ChartData;
   options: ChartOptions;
   devicePixelRatio: number;
+  fontLoaded: Promise<FontFace>;
 };
 
 export default class ChartJSManager {
@@ -64,8 +65,17 @@ export default class ChartJSManager {
     this.init(initOpts);
   }
 
-  async init({ id, node, type, data, options, devicePixelRatio }: InitOpts): Promise<void> {
-    log.debug(`ChartJSManager(${id}) init`);
+  async init({
+    id,
+    node,
+    type,
+    data,
+    options,
+    devicePixelRatio,
+    fontLoaded,
+  }: InitOpts): Promise<void> {
+    const font = await fontLoaded;
+    log.debug(`ChartJSManager(${id}) init, default font "${font.family}" status=${font.status}`);
 
     const fakeNode = {
       addEventListener: addEventListener(this._fakeNodeEvents),
