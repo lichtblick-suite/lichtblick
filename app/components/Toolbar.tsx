@@ -14,8 +14,6 @@
 import cx from "classnames";
 import { ReactNode, useCallback } from "react";
 
-import { useWindowGeometry } from "@foxglove-studio/app/context/WindowGeometryContext";
-
 import styles from "./Toolbar.module.scss";
 
 type Props = {
@@ -27,8 +25,6 @@ type Props = {
 function Toolbar(props: Props): React.ReactElement {
   const { className = "", onDoubleClick } = props;
 
-  const { insetToolbar } = useWindowGeometry();
-
   const clickHandler = useCallback(
     (event: React.MouseEvent) => {
       // Only process the click event if the toolbar itself was clicked, not e.g. a button
@@ -39,12 +35,7 @@ function Toolbar(props: Props): React.ReactElement {
     [onDoubleClick],
   );
   return (
-    <div
-      className={cx(styles.toolbar, className, {
-        [styles.insetToolbar as string]: insetToolbar,
-      })}
-      onDoubleClick={clickHandler}
-    >
+    <div className={cx(styles.toolbar, className)} onDoubleClick={clickHandler}>
       {props.children}
     </div>
   );

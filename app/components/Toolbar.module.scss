@@ -29,10 +29,6 @@
 
 $toolbar-inset-width: 78px;
 
-.insetToolbar {
-  padding-left: $toolbar-inset-width;
-}
-
 :export {
   toolbarInsetWidth: $toolbar-inset-width;
 }

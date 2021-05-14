@@ -11,10 +11,12 @@ import {
   ITooltipStyles,
   ITooltipStyleProps,
   IToggleStyles,
+  IStyle,
 } from "@fluentui/react";
 import { createTheme } from "@fluentui/theme";
 
 import { SANS_SERIF } from "@foxglove-studio/app/styles/fonts";
+import styles from "@foxglove-studio/app/styles/variables.module.scss";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
 // https://aka.ms/themedesigner
@@ -108,6 +110,13 @@ export default createTheme({
           alignItems: "baseline",
         },
       } as IToggleStyles,
+    },
+    Titlebar: {
+      styles: {
+        root: {
+          height: styles.topBarHeight,
+        } as IStyle,
+      },
     },
   },
   isInverted: true,

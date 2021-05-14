@@ -4,11 +4,14 @@
 
 import { PropsWithChildren, useMemo } from "react";
 
-import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import NativeAppMenuContext, {
   NativeAppMenu,
   NativeAppMenuEvent,
 } from "@foxglove-studio/app/context/NativeAppMenuContext";
+
+import { NativeMenuBridge } from "../../common/types";
+
+const menuBridge = (global as { menuBridge?: NativeMenuBridge }).menuBridge;
 
 type Handler = () => void;
 
@@ -16,16 +19,16 @@ export default function NativeAppMenuProvider(props: PropsWithChildren<unknown>)
   const value = useMemo<NativeAppMenu>(() => {
     return {
       addFileEntry: (name: string, handler: Handler) => {
-        OsContextSingleton?.menuAddInputSource(name, handler);
+        menuBridge?.menuAddInputSource(name, handler);
       },
       removeFileEntry: (name: string) => {
-        OsContextSingleton?.menuRemoveInputSource(name);
+        menuBridge?.menuRemoveInputSource(name);
       },
       on: (name: NativeAppMenuEvent, listener: Handler) => {
-        OsContextSingleton?.addIpcEventListener(name, listener);
+        menuBridge?.addIpcEventListener(name, listener);
       },
       off: (name: NativeAppMenuEvent, listener: Handler) => {
-        OsContextSingleton?.removeIpcEventListener(name, listener);
+        menuBridge?.removeIpcEventListener(name, listener);
       },
     };
   }, []);

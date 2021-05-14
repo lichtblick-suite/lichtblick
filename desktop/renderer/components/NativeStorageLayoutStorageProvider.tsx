@@ -4,21 +4,20 @@
 
 import { PropsWithChildren, useMemo } from "react";
 
-import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import LayoutStorageContext from "@foxglove-studio/app/context/LayoutStorageContext";
-import OsContextLayoutStorage from "@foxglove-studio/app/services/OsContextLayoutStorage";
+
+import { useNativeStorage } from "../context/NativeStorageContext";
+import NativeStorageLayoutStorage from "../services/NativeStorageLayoutStorage";
 
 // Provide an instance of the OsContextLayoutStorage
-export default function OsContextLayoutStorageProvider(
+export default function NativeStorageLayoutStorageProvider(
   props: PropsWithChildren<unknown>,
 ): JSX.Element {
-  const provider = useMemo(() => {
-    if (!OsContextSingleton) {
-      return undefined;
-    }
+  const storage = useNativeStorage();
 
-    return new OsContextLayoutStorage(OsContextSingleton);
-  }, []);
+  const provider = useMemo(() => {
+    return new NativeStorageLayoutStorage(storage);
+  }, [storage]);
 
   return (
     <LayoutStorageContext.Provider value={provider}>{props.children}</LayoutStorageContext.Provider>

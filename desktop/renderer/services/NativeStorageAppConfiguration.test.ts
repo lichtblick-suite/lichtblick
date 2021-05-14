@@ -2,49 +2,48 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { OsContext } from "@foxglove-studio/app/OsContext";
-import OsContextAppConfiguration from "@foxglove-studio/app/services/OsContextAppConfiguration";
+import { Storage } from "../../common/types";
+import NativeStorageAppConfiguration from "./NativeStorageAppConfiguration";
 
 type MockStorage = {
-  [K in keyof OsContext["storage"]]: jest.Mock<
-    ReturnType<OsContext["storage"][K]>,
-    Parameters<OsContext["storage"][K]>
-  >;
+  [K in keyof Storage]: jest.Mock<ReturnType<Storage[K]>, Parameters<Storage[K]>>;
 };
-function makeMockContext(): Pick<OsContext, "storage"> & { storage: MockStorage } {
+
+function makeMockContext(): Storage & MockStorage {
   function raise(name: string) {
     throw new Error(`Unexpected call to ${name}`);
   }
+
   return {
-    storage: {
-      list: jest.fn().mockImplementation(() => raise("list")),
-      all: jest.fn().mockImplementation(() => raise("all")),
-      get: jest.fn().mockImplementation(() => raise("get")),
-      put: jest.fn().mockImplementation(() => raise("put")),
-      delete: jest.fn().mockImplementation(() => raise("delete")),
-    },
+    list: jest.fn().mockImplementation(() => raise("list")),
+    all: jest.fn().mockImplementation(() => raise("all")),
+    get: jest.fn().mockImplementation(() => raise("get")),
+    put: jest.fn().mockImplementation(() => raise("put")),
+    delete: jest.fn().mockImplementation(() => raise("delete")),
   };
 }
 
 describe("OsContextAppConfiguration", () => {
   it("loads state upon construction and returns values from cached state", async () => {
     const ctx = makeMockContext();
-    ctx.storage.get.mockImplementationOnce(async () => {
+    ctx.get.mockImplementationOnce(async () => {
       return JSON.stringify({ abc: 123 });
     });
 
-    const config = await OsContextAppConfiguration.Initialize(ctx);
+    const config = await NativeStorageAppConfiguration.Initialize(ctx);
     expect(config.get("abc")).toEqual(123);
     expect(config.get("abc")).toEqual(123);
-    expect((ctx.storage as MockStorage).get).toHaveBeenCalledTimes(1);
+    // ctx.get is intentionally unbound in the expect() call
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    expect(ctx.get).toHaveBeenCalledTimes(1);
   });
 
   it("serializes reads and writes", async () => {
     const ctx = makeMockContext();
 
     let value = JSON.stringify({ abc: 123 });
-    ctx.storage.get.mockImplementation(async () => value);
-    ctx.storage.put.mockImplementation(async (_datastore, _key, newValue) => {
+    ctx.get.mockImplementation(async () => value);
+    ctx.put.mockImplementation(async (_datastore, _key, newValue) => {
       if (typeof newValue !== "string") {
         throw new Error("Expected storage.put to be given a string");
       }
@@ -52,7 +51,7 @@ describe("OsContextAppConfiguration", () => {
     });
 
     // construction calls storage.get()
-    const config = await OsContextAppConfiguration.Initialize(ctx);
+    const config = await NativeStorageAppConfiguration.Initialize(ctx);
     expect(config.get("abc")).toEqual(123);
 
     // each set calls storage.get() before adding its value
@@ -62,7 +61,7 @@ describe("OsContextAppConfiguration", () => {
 
     expect(config.get("abc")).toEqual(234);
     expect(config.get("xyz")).toEqual(true);
-    expect(ctx.storage.put.mock.calls).toEqual([
+    expect(ctx.put.mock.calls).toEqual([
       ["settings", "settings.json", JSON.stringify({ abc: 234 })],
       ["settings", "settings.json", JSON.stringify({ abc: 234, xyz: true })],
     ]);
@@ -72,15 +71,15 @@ describe("OsContextAppConfiguration", () => {
     const ctx = makeMockContext();
 
     let value = JSON.stringify({ abc: 123 });
-    ctx.storage.get.mockImplementation(async () => value);
-    ctx.storage.put.mockImplementation(async (_datastore, _key, newValue) => {
+    ctx.get.mockImplementation(async () => value);
+    ctx.put.mockImplementation(async (_datastore, _key, newValue) => {
       if (typeof newValue !== "string") {
         throw new Error("Expected storage.put to be given a string");
       }
       value = newValue;
     });
 
-    const config = await OsContextAppConfiguration.Initialize(ctx);
+    const config = await NativeStorageAppConfiguration.Initialize(ctx);
 
     const listener = jest.fn();
     config.addChangeListener("abc", listener);
@@ -100,15 +99,15 @@ describe("OsContextAppConfiguration", () => {
     const ctx = makeMockContext();
 
     let value = JSON.stringify({ abc: 123 });
-    ctx.storage.get.mockImplementation(async () => value);
-    ctx.storage.put.mockImplementation(async (_datastore, _key, newValue) => {
+    ctx.get.mockImplementation(async () => value);
+    ctx.put.mockImplementation(async (_datastore, _key, newValue) => {
       if (typeof newValue !== "string") {
         throw new Error("Expected storage.put to be given a string");
       }
       value = newValue;
     });
 
-    const config = await OsContextAppConfiguration.Initialize(ctx);
+    const config = await NativeStorageAppConfiguration.Initialize(ctx);
 
     const listener1 = jest.fn();
     const listener2 = jest.fn();

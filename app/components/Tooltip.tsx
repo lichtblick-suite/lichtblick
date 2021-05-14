@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { IRawStyleBase } from "@fluentui/merge-styles";
 import {
   DirectionalHint,
   ICalloutProps,
@@ -10,10 +11,6 @@ import {
   ICalloutContentStyles,
 } from "@fluentui/react";
 import { useCallback, useRef, useState } from "react";
-
-import toolbarStyles from "@foxglove-studio/app/components/Toolbar.module.scss";
-import { useWindowGeometry } from "@foxglove-studio/app/context/WindowGeometryContext";
-import styles from "@foxglove-studio/app/styles/variables.module.scss";
 
 type Contents = React.ReactNode | (() => React.ReactNode);
 
@@ -53,7 +50,9 @@ export function useTooltip({
     [contents],
   );
   const theme = useTheme();
-  const { insetToolbar } = useWindowGeometry();
+
+  const titlebarHeight = (theme.components?.Titlebar?.styles as { root?: IRawStyleBase })?.root
+    ?.height;
 
   // Styles which ideally we would be able to set in the theme for all Tooltips:
   // https://github.com/microsoft/fluentui/discussions/17772
@@ -69,24 +68,18 @@ export function useTooltip({
       calloutMain: { background: theme.palette.neutralDark },
     },
     // Customize bounds to leave space for the window traffic light icons
-    bounds: (target, win) => {
+    bounds: (_target, win) => {
       if (!win) {
         return undefined;
       }
       const rect = {
-        top: 8,
+        top: typeof titlebarHeight === "string" ? parseFloat(titlebarHeight) : 8,
         left: 8,
         bottom: win.innerHeight - 8,
         right: win.innerWidth - 8,
         width: win.innerWidth - 2 * 8,
         height: win.innerHeight - 2 * 8,
       };
-      if (insetToolbar && target instanceof Element) {
-        const targetRect = target.getBoundingClientRect();
-        if (targetRect.left < parseInt(toolbarStyles.toolbarInsetWidth as string)) {
-          rect.top = parseInt(styles.topBarHeight as string);
-        }
-      }
       return rect;
     },
   };

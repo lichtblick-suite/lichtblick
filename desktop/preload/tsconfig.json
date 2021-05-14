@@ -1,7 +1,8 @@
 {
   "extends": "@foxglove/tsconfig/tsconfig.base.json",
-  "include": ["./**/*"],
+  "include": ["./**/*", "../common/types.ts"],
   "compilerOptions": {
+    "rootDir": "../",
     "noEmit": true,
     "lib": ["dom", "es2020"]
   }

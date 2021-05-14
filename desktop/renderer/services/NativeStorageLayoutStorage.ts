@@ -2,8 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { OsContext } from "@foxglove-studio/app/OsContext";
 import { Layout, LayoutStorage } from "@foxglove-studio/app/context/LayoutStorageContext";
+
+import { Storage } from "../../common/types";
 
 function assertLayout(value: unknown): asserts value is Layout {
   if (typeof value !== "object" || value == undefined) {
@@ -16,17 +17,17 @@ function assertLayout(value: unknown): asserts value is Layout {
 }
 
 // Implement a LayoutStorage interface over OsContext
-export default class OsContextLayoutStorage implements LayoutStorage {
+export default class NativeStorageLayoutStorage implements LayoutStorage {
   private static STORE_NAME = "layouts";
 
-  private _ctx: OsContext;
+  private _ctx: Storage;
 
-  constructor(osContext: OsContext) {
-    this._ctx = osContext;
+  constructor(storage: Storage) {
+    this._ctx = storage;
   }
 
   async list(): Promise<Layout[]> {
-    const items = await this._ctx.storage.all(OsContextLayoutStorage.STORE_NAME);
+    const items = await this._ctx.all(NativeStorageLayoutStorage.STORE_NAME);
 
     const layouts: Layout[] = [];
     for (const item of items) {
@@ -44,7 +45,7 @@ export default class OsContextLayoutStorage implements LayoutStorage {
   }
 
   async get(id: string): Promise<Layout | undefined> {
-    const item = await this._ctx.storage.get(OsContextLayoutStorage.STORE_NAME, id);
+    const item = await this._ctx.get(NativeStorageLayoutStorage.STORE_NAME, id);
     if (!(item instanceof Uint8Array)) {
       throw new Error("Invariant violation - layout item is not a buffer");
     }
@@ -58,10 +59,10 @@ export default class OsContextLayoutStorage implements LayoutStorage {
 
   async put(layout: Layout): Promise<void> {
     const content = JSON.stringify(layout);
-    return this._ctx.storage.put(OsContextLayoutStorage.STORE_NAME, layout.id, content);
+    return this._ctx.put(NativeStorageLayoutStorage.STORE_NAME, layout.id, content);
   }
 
   async delete(id: string): Promise<void> {
-    return this._ctx.storage.delete(OsContextLayoutStorage.STORE_NAME, id);
+    return this._ctx.delete(NativeStorageLayoutStorage.STORE_NAME, id);
   }
 }

@@ -3,18 +3,19 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { Mutex } from "async-mutex";
 
-import { OsContext } from "@foxglove-studio/app/OsContext";
 import {
   AppConfiguration,
   AppConfigurationValue,
   ChangeHandler,
 } from "@foxglove-studio/app/context/AppConfigurationContext";
 
-export default class OsContextAppConfiguration implements AppConfiguration {
+import { Storage } from "../../common/types";
+
+export default class NativeStorageAppConfiguration implements AppConfiguration {
   static STORE_NAME = "settings";
   static STORE_KEY = "settings.json";
 
-  private readonly _ctx: Pick<OsContext, "storage">;
+  private readonly _ctx: Storage;
   private _listeners = new Map<string, Set<ChangeHandler>>();
 
   // Protect access to currentValue to avoid read-modify-write races between multiple set() calls.
@@ -22,20 +23,20 @@ export default class OsContextAppConfiguration implements AppConfiguration {
   private _currentValue: unknown;
 
   // Use OsContextAppConfiguration.initialize to create a new instance
-  private constructor(ctx: Pick<OsContext, "storage">, initialValue?: unknown) {
+  private constructor(ctx: Storage, initialValue?: unknown) {
     this._ctx = ctx;
     this._currentValue = initialValue;
   }
 
   // create a new OsContextAppConfiguration
-  static async Initialize(ctx: Pick<OsContext, "storage">): Promise<OsContextAppConfiguration> {
-    const value = await ctx.storage.get(
-      OsContextAppConfiguration.STORE_NAME,
-      OsContextAppConfiguration.STORE_KEY,
+  static async Initialize(ctx: Storage): Promise<NativeStorageAppConfiguration> {
+    const value = await ctx.get(
+      NativeStorageAppConfiguration.STORE_NAME,
+      NativeStorageAppConfiguration.STORE_KEY,
       { encoding: "utf8" },
     );
     const currentValue = JSON.parse(value ?? "{}");
-    const config = new OsContextAppConfiguration(ctx, currentValue);
+    const config = new NativeStorageAppConfiguration(ctx, currentValue);
 
     return config;
   }
@@ -46,17 +47,17 @@ export default class OsContextAppConfiguration implements AppConfiguration {
 
   async set(key: string, value: AppConfigurationValue): Promise<void> {
     await this._mutex.runExclusive(async () => {
-      const currentConfig = await this._ctx.storage.get(
-        OsContextAppConfiguration.STORE_NAME,
-        OsContextAppConfiguration.STORE_KEY,
+      const currentConfig = await this._ctx.get(
+        NativeStorageAppConfiguration.STORE_NAME,
+        NativeStorageAppConfiguration.STORE_KEY,
         { encoding: "utf8" },
       );
 
       const newConfig: unknown = { ...JSON.parse(currentConfig ?? "{}"), [key]: value };
 
-      await this._ctx.storage.put(
-        OsContextAppConfiguration.STORE_NAME,
-        OsContextAppConfiguration.STORE_KEY,
+      await this._ctx.put(
+        NativeStorageAppConfiguration.STORE_NAME,
+        NativeStorageAppConfiguration.STORE_KEY,
         JSON.stringify(newConfig),
       );
       this._currentValue = newConfig;

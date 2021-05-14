@@ -5,24 +5,23 @@
 import { PropsWithChildren } from "react";
 import { useAsync } from "react-use";
 
-import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import AppConfigurationContext from "@foxglove-studio/app/context/AppConfigurationContext";
-import OsContextAppConfiguration from "@foxglove-studio/app/services/OsContextAppConfiguration";
 import Log from "@foxglove/log";
+
+import { useNativeStorage } from "../context/NativeStorageContext";
+import NativeStorageAppConfiguration from "../services/NativeStorageAppConfiguration";
 
 const log = Log.getLogger(__filename);
 
-export default function OsContextAppConfigurationProvider({
+export default function NativeStorageAppConfigurationProvider({
   children,
 }: PropsWithChildren<unknown>): React.ReactElement | ReactNull {
-  const { value, error } = useAsync(() => {
-    if (!OsContextSingleton) {
-      throw new Error("OsContext is not available");
-    }
+  const storage = useNativeStorage();
 
+  const { value, error } = useAsync(() => {
     log.debug("Initializing app configuration");
-    return OsContextAppConfiguration.Initialize(OsContextSingleton);
-  }, []);
+    return NativeStorageAppConfiguration.Initialize(storage);
+  }, [storage]);
 
   if (error) {
     throw error;
