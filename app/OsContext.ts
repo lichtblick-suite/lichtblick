@@ -25,11 +25,6 @@ export interface OsContext {
 
   handleToolbarDoubleClick: () => void;
 
-  // Return true unless the user has opted out of crash reporting
-  isCrashReportingEnabled(): boolean;
-  // Return true unless the user has opted out of telemetry
-  isTelemetryEnabled(): boolean;
-
   // Retrieve an environment variable
   getEnvVar: (envVar: string) => string | undefined;
   // Get the operating system hostname

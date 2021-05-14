@@ -10,7 +10,6 @@ import ReactDOM from "react-dom";
 
 import "@foxglove-studio/app/styles/global.scss";
 
-import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
 import installDevtoolsFormatters from "@foxglove-studio/app/util/installDevtoolsFormatters";
 import { initializeLogEvent } from "@foxglove-studio/app/util/logEvent";
 import overwriteFetch from "@foxglove-studio/app/util/overwriteFetch";
@@ -25,10 +24,11 @@ const log = Logger.getLogger(__filename);
 
 log.debug("initializing renderer");
 
-if (
-  (OsContextSingleton?.isCrashReportingEnabled() ?? false) &&
-  typeof process.env.SENTRY_DSN === "string"
-) {
+// preload injects the crash reporting global based on app settings received from the main process
+const isCrashReportingEnabled =
+  (global as { allowCrashReporting?: boolean }).allowCrashReporting ?? false;
+
+if (isCrashReportingEnabled && typeof process.env.SENTRY_DSN === "string") {
   log.info("initializing Sentry in renderer");
   initSentry({
     dsn: process.env.SENTRY_DSN,

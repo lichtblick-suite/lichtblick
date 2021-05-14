@@ -23,7 +23,7 @@ log.info(`${APP_NAME} ${APP_VERSION}`);
 log.info(`initializing preloader, argv="${window.process.argv.join(" ")}"`);
 
 // Load opt-out settings for crash reporting and telemetry
-const [allowCrashReporting, allowTelemetry] = getTelemetrySettings();
+const [allowCrashReporting] = getTelemetrySettings();
 if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
   log.debug("initializing Sentry in preload");
   initSentry({
@@ -76,9 +76,6 @@ const ctx: OsContext = {
   handleToolbarDoubleClick() {
     ipcRenderer.send("window.toolbar-double-clicked");
   },
-
-  isCrashReportingEnabled: (): boolean => allowCrashReporting,
-  isTelemetryEnabled: (): boolean => allowTelemetry,
 
   // Environment queries
   getEnvVar: (envVar: string) => process.env[envVar],
@@ -161,17 +158,15 @@ const menuBridge: NativeMenuBridge = {
 contextBridge.exposeInMainWorld("ctxbridge", ctx);
 contextBridge.exposeInMainWorld("menuBridge", menuBridge);
 contextBridge.exposeInMainWorld("storageBridge", storageBridge);
+contextBridge.exposeInMainWorld("allowCrashReporting", allowCrashReporting);
 
 // Load telemetry opt-out settings from window.process.argv
-function getTelemetrySettings(): [crashReportingEnabled: boolean, telemetryEnabled: boolean] {
+function getTelemetrySettings(): [crashReportingEnabled: boolean] {
   const argv = window.process.argv;
   const crashReportingEnabled = Boolean(
     parseInt(argv.find((arg) => arg.indexOf("--allowCrashReporting=") === 0)?.split("=")[1] ?? "0"),
   );
-  const telemetryEnabled = Boolean(
-    parseInt(argv.find((arg) => arg.indexOf("--allowTelemetry=") === 0)?.split("=")[1] ?? "0"),
-  );
-  return [crashReportingEnabled, telemetryEnabled];
+  return [crashReportingEnabled];
 }
 
 log.debug(`End Preload`);
