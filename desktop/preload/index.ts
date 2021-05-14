@@ -13,7 +13,7 @@ import { APP_NAME, APP_VERSION } from "@foxglove-studio/app/version";
 import { PreloaderSockets } from "@foxglove/electron-socket/preloader";
 import Logger from "@foxglove/log";
 
-import { ForwardedMenuEvent, NativeMenuBridge, Storage } from "../common/types";
+import { Desktop, ForwardedMenuEvent, NativeMenuBridge, Storage } from "../common/types";
 import LocalFileStorage from "./LocalFileStorage";
 
 const log = Logger.getLogger(__filename);
@@ -73,9 +73,6 @@ const machineIdPromise = machineId();
 const ctx: OsContext = {
   platform: process.platform,
   pid: process.pid,
-  handleToolbarDoubleClick() {
-    ipcRenderer.send("window.toolbar-double-clicked");
-  },
 
   // Environment queries
   getEnvVar: (envVar: string) => process.env[envVar],
@@ -100,7 +97,12 @@ const ctx: OsContext = {
   getAppVersion: (): string => {
     return APP_VERSION;
   },
+};
 
+const desktopBridge: Desktop = {
+  handleToolbarDoubleClick() {
+    ipcRenderer.send("window.toolbar-double-clicked");
+  },
   getDeepLinks: (): string[] => {
     return window.process.argv.filter((arg) => arg.startsWith("foxglove://"));
   },
@@ -159,6 +161,7 @@ contextBridge.exposeInMainWorld("ctxbridge", ctx);
 contextBridge.exposeInMainWorld("menuBridge", menuBridge);
 contextBridge.exposeInMainWorld("storageBridge", storageBridge);
 contextBridge.exposeInMainWorld("allowCrashReporting", allowCrashReporting);
+contextBridge.exposeInMainWorld("desktopBridge", desktopBridge);
 
 // Load telemetry opt-out settings from window.process.argv
 function getTelemetrySettings(): [crashReportingEnabled: boolean] {

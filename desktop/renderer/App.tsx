@@ -10,7 +10,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ReactElement, useState, Suspense } from "react";
+import { ReactElement, useState, Suspense, useCallback, useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Provider as ReduxProvider } from "react-redux";
@@ -29,6 +29,7 @@ import URDFAssetLoader from "@foxglove-studio/app/services/URDFAssetLoader";
 import getGlobalStore from "@foxglove-studio/app/store/getGlobalStore";
 import ThemeProvider from "@foxglove-studio/app/theme/ThemeProvider";
 
+import { Desktop } from "../common/types";
 import NativeAppMenuProvider from "./components/NativeAppMenuProvider";
 import NativeStorageAppConfigurationProvider from "./components/NativeStorageAppConfigurationProvider";
 import NativeStorageLayoutStorageProvider from "./components/NativeStorageLayoutStorageProvider";
@@ -40,6 +41,8 @@ const BuiltinPanelCatalogProvider = React.lazy(
 const Workspace = React.lazy(() => import("@foxglove-studio/app/Workspace"));
 
 const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo.bag";
+
+const desktopBridge = (global as { desktopBridge?: Desktop }).desktopBridge;
 
 export default function App(): ReactElement {
   const globalStore = getGlobalStore();
@@ -80,6 +83,14 @@ export default function App(): ReactElement {
     /* eslint-enable react/jsx-key */
   ];
 
+  const deepLinks = useMemo(() => {
+    return desktopBridge?.getDeepLinks() ?? [];
+  }, []);
+
+  const handleToolbarDoubleClick = useCallback(() => {
+    desktopBridge?.handleToolbarDoubleClick();
+  }, []);
+
   return (
     <ErrorBoundary>
       <MultiProvider providers={providers}>
@@ -88,7 +99,11 @@ export default function App(): ReactElement {
         <DndProvider backend={HTML5Backend}>
           <Suspense fallback={<></>}>
             <BuiltinPanelCatalogProvider>
-              <Workspace demoBagUrl={DEMO_BAG_URL} />
+              <Workspace
+                demoBagUrl={DEMO_BAG_URL}
+                deepLinks={deepLinks}
+                onToolbarDoubleClick={handleToolbarDoubleClick}
+              />
             </BuiltinPanelCatalogProvider>
           </Suspense>
         </DndProvider>

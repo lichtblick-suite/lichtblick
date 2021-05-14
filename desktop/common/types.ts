@@ -43,4 +43,11 @@ interface Storage {
   delete(datastore: string, key: string): Promise<void>;
 }
 
-export type { NativeMenuBridge, Storage, StorageContent };
+interface Desktop {
+  handleToolbarDoubleClick: () => void;
+
+  // Get an array of deep links provided on app launch
+  getDeepLinks: () => string[];
+}
+
+export type { NativeMenuBridge, Storage, StorageContent, Desktop };

@@ -22,7 +22,6 @@ import {
 } from "react";
 import { connect, ConnectedProps } from "react-redux";
 import { useLocalStorage, useMountedState } from "react-use";
-import { URL } from "universal-url";
 
 import { AppSetting } from "@foxglove-studio/app/AppSetting";
 import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
@@ -429,34 +428,6 @@ function PlayerManager({
         return;
     }
   }, []);
-
-  useEffect(() => {
-    const links = OsContextSingleton?.getDeepLinks() ?? [];
-    const firstLink = links[0];
-    if (firstLink == undefined) {
-      return;
-    }
-
-    try {
-      const url = new URL(firstLink);
-      // only support the open command
-
-      // Test if the pathname matches //open or //open/
-      if (!/\/\/open\/?/.test(url.pathname)) {
-        return;
-      }
-
-      // only support rosbag urls
-      const type = url.searchParams.get("type");
-      const bagUrl = url.searchParams.get("url");
-      if (type !== "rosbag" || bagUrl == undefined) {
-        return;
-      }
-      setPlayer(async (options: BuildPlayerOptions) => buildPlayerFromBagURLs([bagUrl], options));
-    } catch (err) {
-      log.error(err);
-    }
-  }, [setPlayer]);
 
   const prompt = usePrompt();
   const storage = useMemo(() => new Storage(), []);

@@ -2,9 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-// Events that are forwarded from the main process and can be listened to using ctxbridge.addIpcEventListener
-export type OsContextForwardedEvent = "enter-full-screen" | "leave-full-screen";
-
 export interface NetworkInterface {
   name: string;
   family: "IPv4" | "IPv6";
@@ -23,8 +20,6 @@ export interface OsContext {
   // The process id of this application
   pid: number;
 
-  handleToolbarDoubleClick: () => void;
-
   // Retrieve an environment variable
   getEnvVar: (envVar: string) => string | undefined;
   // Get the operating system hostname
@@ -35,7 +30,4 @@ export interface OsContext {
   getMachineId: () => Promise<string>;
   // Get the version string from package.json
   getAppVersion: () => string;
-
-  // Get an array of deep links provided on app launch
-  getDeepLinks: () => string[];
 }
