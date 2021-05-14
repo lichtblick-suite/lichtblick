@@ -9,7 +9,6 @@ import LayoutStorageContext from "@foxglove-studio/app/context/LayoutStorageCont
 import { useNativeStorage } from "../context/NativeStorageContext";
 import NativeStorageLayoutStorage from "../services/NativeStorageLayoutStorage";
 
-// Provide an instance of the OsContextLayoutStorage
 export default function NativeStorageLayoutStorageProvider(
   props: PropsWithChildren<unknown>,
 ): JSX.Element {
