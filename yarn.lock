@@ -2063,7 +2063,6 @@ __metadata:
     "@types/js-yaml": 4.0.1
     "@types/leaflet": 1.7.0
     "@types/memoize-weak": "workspace:packages/@types/memoize-weak"
-    "@types/micro-memoize": "workspace:packages/@types/micro-memoize"
     "@types/moment-duration-format": 2.2.2
     "@types/prettier": 2.2.3
     "@types/promise-queue": 2.2.0
@@ -2119,7 +2118,6 @@ __metadata:
     leaflet: 1.7.1
     lodash: 4.17.21
     memoize-weak: 1.0.2
-    micro-memoize: 4.0.9
     moment: 2.29.1
     moment-duration-format: 2.3.2
     moment-timezone: 0.5.33
@@ -4852,12 +4850,6 @@ __metadata:
 "@types/memoize-weak@workspace:packages/@types/memoize-weak":
   version: 0.0.0-use.local
   resolution: "@types/memoize-weak@workspace:packages/@types/memoize-weak"
-  languageName: unknown
-  linkType: soft
-
-"@types/micro-memoize@workspace:packages/@types/micro-memoize":
-  version: 0.0.0-use.local
-  resolution: "@types/micro-memoize@workspace:packages/@types/micro-memoize"
   languageName: unknown
   linkType: soft
 
@@ -17623,13 +17615,6 @@ __metadata:
   version: 1.1.2
   resolution: "methods@npm:1.1.2"
   checksum: 450e4ea0fd4a0f3de8c0593d753c7d6c8f2ee49766f5ef35c68cc2ac41699d5e295b7d6330fc2b7271b8569a07857e3eb0b5df0599a353c5808265b4b5066168
-  languageName: node
-  linkType: hard
-
-"micro-memoize@npm:4.0.9":
-  version: 4.0.9
-  resolution: "micro-memoize@npm:4.0.9"
-  checksum: 67e7a8d1da9f3030be9f898b407ad0135b897bb541be3b995cb6bf70051fefd3e4bf38e17ed5085663266a3b945a469b2df27ffd06cf6362d77ba03280de0958
   languageName: node
   linkType: hard
 

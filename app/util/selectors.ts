@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { intersection, keyBy } from "lodash";
-import microMemoize from "micro-memoize";
+import memoizeWeak from "memoize-weak";
 import { createSelectorCreator, defaultMemoize, createSelector } from "reselect";
 import shallowequal from "shallowequal";
 
@@ -30,7 +30,7 @@ export const getTopicNames = createSelector<any, any, any, any>(
   (topics: Topic[]): string[] => topics.map((topic) => topic.name),
 ) as FixedParametricSelector<any, any, any>;
 
-export const getSanitizedTopics = microMemoize(
+export const getSanitizedTopics = memoizeWeak(
   (subscribedTopics: Set<string>, providerTopics: Topic[]): string[] => {
     return intersection(
       Array.from(subscribedTopics),

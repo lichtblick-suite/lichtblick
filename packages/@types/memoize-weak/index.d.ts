@@ -3,5 +3,5 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 declare module "memoize-weak" {
-  export default function <T>(fn: T): T;
+  export default function <T>(fn: T): T & { clear(): void };
 }

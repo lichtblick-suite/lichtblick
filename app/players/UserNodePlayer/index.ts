@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { isEqual, groupBy, partition } from "lodash";
-import microMemoize from "micro-memoize";
+import memoizeWeak from "memoize-weak";
 import { TimeUtil, Time } from "rosbag";
+import shallowequal from "shallowequal";
 
 import {
   SetUserNodeDiagnostics,
@@ -73,7 +74,12 @@ type UserNodeActions = {
 // 2 - Do we keep them in the old format for a while and support both formats?
 export default class UserNodePlayer implements Player {
   private _player: Player;
-  private _nodeRegistrations: NodeRegistration[] = [];
+
+  private _nodeRegistrations: readonly NodeRegistration[] = [];
+  // Datatypes and topics are derived from nodeRegistrations, but memoized so they only change when needed
+  private _memoizedNodeDatatypes: readonly RosDatatypes[] = [];
+  private _memoizedNodeTopics: readonly Topic[] = [];
+
   private _subscriptions: SubscribePayload[] = [];
   private _validTopics = new Set<string>();
   private _userNodes: UserNodes = {};
@@ -137,59 +143,77 @@ export default class UserNodePlayer implements Player {
     };
   }
 
-  _getTopics = microMemoize(
-    (topics: Topic[], nodeTopics: Topic[]): Topic[] => [...topics, ...nodeTopics],
-    {
-      isEqual,
-    },
-  );
-  _getDatatypes = microMemoize(
-    (datatypes: RosDatatypes, nodeRegistrations: NodeRegistration[]): RosDatatypes => {
-      const userNodeDatatypes = nodeRegistrations.reduce(
-        (allDatatypes, { nodeData }) => ({ ...allDatatypes, ...nodeData.datatypes }),
-        { ...basicDatatypes },
+  _getTopics = memoizeWeak((topics: readonly Topic[], nodeTopics: readonly Topic[]): Topic[] => [
+    ...topics,
+    ...nodeTopics,
+  ]);
+
+  _getDatatypes = memoizeWeak(
+    (datatypes: RosDatatypes, nodeDatatypes: readonly RosDatatypes[]): RosDatatypes => {
+      return nodeDatatypes.reduce(
+        (allDatatypes, userNodeDatatypes) => ({ ...allDatatypes, ...userNodeDatatypes }),
+        { ...datatypes, ...basicDatatypes },
       );
-      return { ...datatypes, ...userNodeDatatypes };
     },
-    { isEqual },
   );
+
+  // Basic memoization by remembering the last values passed to getMessages
+  private _lastGetMessagesInput: {
+    parsedMessages: readonly MessageEvent<unknown>[];
+    globalVariables: GlobalVariables;
+    nodeRegistrations: readonly NodeRegistration[];
+  } = { parsedMessages: [], globalVariables: {}, nodeRegistrations: [] };
+  private _lastGetMessagesResult: { parsedMessages: readonly MessageEvent<unknown>[] } = {
+    parsedMessages: [],
+  };
 
   // When updating nodes while paused, we seek to the current time
   // (i.e. invoke _getMessages with an empty array) to refresh messages
-  _getMessages = microMemoize(
-    async (
-      parsedMessages: readonly MessageEvent<unknown>[],
-      _datatypes: RosDatatypes,
-      globalVariables: GlobalVariables,
-      nodeRegistrations: readonly NodeRegistration[],
-    ): Promise<{
-      parsedMessages: readonly MessageEvent<unknown>[];
-    }> => {
-      const parsedMessagesPromises: Promise<MessageEvent<unknown> | undefined>[] = [];
-      for (const message of parsedMessages) {
-        const messagePromises = [];
-        for (const nodeRegistration of nodeRegistrations) {
-          if (
-            this._validTopics.has(nodeRegistration.output.name) &&
-            nodeRegistration.inputs.includes(message.topic)
-          ) {
-            const messagePromise = nodeRegistration.processMessage(message, globalVariables);
-            messagePromises.push(messagePromise);
-            parsedMessagesPromises.push(messagePromise);
-          }
+  _getMessages = async (
+    parsedMessages: readonly MessageEvent<unknown>[],
+    globalVariables: GlobalVariables,
+    nodeRegistrations: readonly NodeRegistration[],
+  ): Promise<{
+    parsedMessages: readonly MessageEvent<unknown>[];
+  }> => {
+    if (
+      shallowequal(this._lastGetMessagesInput, {
+        parsedMessages,
+        globalVariables,
+        nodeRegistrations,
+      })
+    ) {
+      return this._lastGetMessagesResult;
+    }
+    const parsedMessagesPromises: Promise<MessageEvent<unknown> | undefined>[] = [];
+    for (const message of parsedMessages) {
+      const messagePromises = [];
+      for (const nodeRegistration of nodeRegistrations) {
+        if (
+          this._validTopics.has(nodeRegistration.output.name) &&
+          nodeRegistration.inputs.includes(message.topic)
+        ) {
+          const messagePromise = nodeRegistration.processMessage(message, globalVariables);
+          messagePromises.push(messagePromise);
+          parsedMessagesPromises.push(messagePromise);
         }
-        await Promise.all(messagePromises);
       }
+      await Promise.all(messagePromises);
+    }
 
-      const nodeParsedMessages = (await Promise.all(parsedMessagesPromises)).filter(Boolean);
+    const nodeParsedMessages = (await Promise.all(parsedMessagesPromises)).filter(
+      (value): value is MessageEvent<unknown> => value != undefined,
+    );
 
-      return {
-        parsedMessages: parsedMessages
-          .concat(nodeParsedMessages as any)
-          .sort((a, b) => TimeUtil.compare(a.receiveTime, b.receiveTime)),
-      };
-    },
-  );
+    const result = {
+      parsedMessages: parsedMessages
+        .concat(nodeParsedMessages)
+        .sort((a, b) => TimeUtil.compare(a.receiveTime, b.receiveTime)),
+    };
+    this._lastGetMessagesInput = { parsedMessages, globalVariables, nodeRegistrations };
+    this._lastGetMessagesResult = result;
+    return result;
+  };
 
   setGlobalVariables(globalVariables: GlobalVariables): void {
     this._globalVariables = globalVariables;
@@ -199,11 +223,10 @@ export default class UserNodePlayer implements Player {
   async setUserNodes(userNodes: UserNodes): Promise<void> {
     this._userNodes = userNodes;
 
-    // Prune the nodeDefinition cache so it doesn't grow forever.
+    // Prune the node registration cache so it doesn't grow forever.
     // We add one to the count so we don't have to recompile nodes if users undo/redo node changes.
     const maxNodeRegistrationCacheCount = Object.keys(userNodes).length + 1;
-    this._getNodeRegistration.cache.keys.splice(maxNodeRegistrationCacheCount, Infinity);
-    this._getNodeRegistration.cache.values.splice(maxNodeRegistrationCacheCount, Infinity);
+    this._nodeRegistrationCache.splice(maxNodeRegistrationCacheCount);
 
     // This code causes us to reset workers twice because the forceSeek resets the workers too
     // TODO: Only reset workers once
@@ -216,11 +239,21 @@ export default class UserNodePlayer implements Player {
     });
   }
 
+  private _nodeRegistrationCache: {
+    nodeId: string;
+    userNode: UserNode;
+    result: NodeRegistration;
+  }[] = [];
   // Defines the inputs/outputs and worker interface of a user node.
   private _createNodeRegistration = async (
     nodeId: string,
     userNode: UserNode,
   ): Promise<NodeRegistration> => {
+    for (const cacheEntry of this._nodeRegistrationCache) {
+      if (nodeId === cacheEntry.nodeId && isEqual(userNode, cacheEntry.userNode)) {
+        return cacheEntry.result;
+      }
+    }
     // Pass all the nodes a set of basic datatypes that we know how to render.
     // These could be overwritten later by bag datatypes, but these datatype definitions should be very stable.
     const { topics = [], datatypes = {} } = this._lastPlayerStateActiveData ?? {};
@@ -371,7 +404,7 @@ export default class UserNodePlayer implements Player {
       }
     };
 
-    return {
+    const result = {
       nodeId,
       nodeData,
       inputs: inputTopics,
@@ -379,13 +412,9 @@ export default class UserNodePlayer implements Player {
       processMessage,
       terminate,
     };
+    this._nodeRegistrationCache.push({ nodeId, userNode, result });
+    return result;
   };
-
-  private _getNodeRegistration = microMemoize(this._createNodeRegistration, {
-    isEqual,
-    isPromise: true,
-    maxSize: Infinity, // We prune the cache anytime the userNodes change, so it's not *actually* Infinite
-  });
 
   private _getTransformWorker(): Rpc {
     if (!this._nodeTransformRpc) {
@@ -470,7 +499,7 @@ export default class UserNodePlayer implements Player {
 
     const allNodeRegistrations = await Promise.all(
       Object.entries(this._userNodes).map(async ([nodeId, userNode]) =>
-        this._getNodeRegistration(nodeId, userNode),
+        this._createNodeRegistration(nodeId, userNode),
       ),
     );
 
@@ -504,6 +533,15 @@ export default class UserNodePlayer implements Player {
     });
 
     this._nodeRegistrations = validNodeRegistrations;
+    const nodeTopics = this._nodeRegistrations.map(({ output }) => output);
+    if (!isEqual(nodeTopics, this._memoizedNodeTopics)) {
+      this._memoizedNodeTopics = nodeTopics;
+    }
+    const nodeDatatypes = this._nodeRegistrations.map(({ nodeData: { datatypes } }) => datatypes);
+    if (!isEqual(nodeDatatypes, this._memoizedNodeDatatypes)) {
+      this._memoizedNodeDatatypes = nodeDatatypes;
+    }
+
     this._nodeRegistrations.forEach(({ nodeId }) => this._setUserNodeDiagnostics(nodeId, []));
 
     this._pendingResetWorkers = undefined;
@@ -558,11 +596,10 @@ export default class UserNodePlayer implements Player {
         this.requestBackfill();
       }
 
-      const allDatatypes = this._getDatatypes(datatypes, this._nodeRegistrations);
+      const allDatatypes = this._getDatatypes(datatypes, this._memoizedNodeDatatypes);
 
       const { parsedMessages } = await this._getMessages(
         messages,
-        allDatatypes,
         this._globalVariables,
         this._nodeRegistrations,
       );
@@ -572,10 +609,7 @@ export default class UserNodePlayer implements Player {
         activeData: {
           ...activeData,
           messages: parsedMessages,
-          topics: this._getTopics(
-            topics,
-            this._nodeRegistrations.map((nodeRegistration) => nodeRegistration.output),
-          ),
+          topics: this._getTopics(topics, this._memoizedNodeTopics),
           datatypes: allDatatypes,
         },
       };

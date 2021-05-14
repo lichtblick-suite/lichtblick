@@ -440,7 +440,7 @@ export default class RandomAccessPlayer implements Player {
     if (parsedMessages.length > 0) {
       this._metricsCollector.recordTimeToFirstMsgs();
     }
-    const filterMessages = (msgs: MessageEvent<unknown>[], topics: string[]) =>
+    const filterMessages = (msgs: readonly MessageEvent<unknown>[], topics: string[]) =>
       filterMap(msgs, (message) => {
         this._problems.delete(message.topic);
 
@@ -474,7 +474,7 @@ export default class RandomAccessPlayer implements Player {
         };
       });
     return {
-      parsedMessages: filterMessages(parsedMessages as any, parsedTopics),
+      parsedMessages: filterMessages(parsedMessages, parsedTopics),
     };
   }
 

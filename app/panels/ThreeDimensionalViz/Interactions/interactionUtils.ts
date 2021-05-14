@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { keyBy } from "lodash";
-import memoize from "micro-memoize";
 
 import {
   LinkedGlobalVariables,
@@ -43,10 +42,6 @@ export function getLinkedGlobalVariableKeyByTopicWithPath(
   );
 }
 
-const memoizedGetLinkedVariablesKeyByTopicWithPath = memoize(
-  getLinkedGlobalVariableKeyByTopicWithPath,
-);
-
 export function getLinkedGlobalVariable({
   topic,
   markerKeyPath,
@@ -56,21 +51,9 @@ export function getLinkedGlobalVariable({
   markerKeyPath: string[];
   linkedGlobalVariables: LinkedGlobalVariables;
 }): LinkedGlobalVariable | undefined {
-  const linkedGlobalVariablesKeyByTopicWithPath = memoizedGetLinkedVariablesKeyByTopicWithPath(
+  const linkedGlobalVariablesKeyByTopicWithPath = getLinkedGlobalVariableKeyByTopicWithPath(
     linkedGlobalVariables,
   );
   const topicWithPath = getTopicWithPath({ topic, markerKeyPath });
   return linkedGlobalVariablesKeyByTopicWithPath[topicWithPath];
 }
-
-function getLinkedGlobalVariablesKeyByName(linkedGlobalVariables: LinkedGlobalVariables) {
-  return linkedGlobalVariables.reduce((memo, { name, topic, markerKeyPath }) => {
-    if (!memo[name]) {
-      memo[name] = [];
-    }
-    memo[name].push({ topic, markerKeyPath, name });
-    return memo;
-  }, {} as any);
-}
-
-export const memoizedGetLinkedGlobalVariablesKeyByName = memoize(getLinkedGlobalVariablesKeyByName);

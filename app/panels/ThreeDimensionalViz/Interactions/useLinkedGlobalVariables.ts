@@ -11,10 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { bindActionCreators } from "redux";
 
 import { setLinkedGlobalVariables } from "@foxglove-studio/app/actions/panels";
+import { State } from "@foxglove-studio/app/reducers";
 
 export type LinkedGlobalVariable = {
   topic: string;
@@ -27,13 +29,22 @@ export type LinkedGlobalVariables = LinkedGlobalVariable[];
 export default function useLinkedGlobalVariables(): {
   linkedGlobalVariables: LinkedGlobalVariables;
   setLinkedGlobalVariables: (arg0: LinkedGlobalVariables) => void;
+  linkedGlobalVariablesByName: { [name: string]: LinkedGlobalVariable[] };
 } {
   const linkedGlobalVariables = useSelector(
-    (state: any) => state.persistedState.panels.linkedGlobalVariables,
+    (state: State) => state.persistedState.panels.linkedGlobalVariables,
   );
+  const linkedGlobalVariablesByName = useMemo(() => {
+    const linksByName: { [name: string]: LinkedGlobalVariable[] } = {};
+    for (const link of linkedGlobalVariables) {
+      (linksByName[link.name] ??= []).push(link);
+    }
+    return linksByName;
+  }, [linkedGlobalVariables]);
   const dispatch = useDispatch();
   return {
     linkedGlobalVariables,
+    linkedGlobalVariablesByName,
     ...bindActionCreators({ setLinkedGlobalVariables }, dispatch),
   };
 }

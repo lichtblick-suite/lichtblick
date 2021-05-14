@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { partition } from "lodash";
-import microMemoize from "micro-memoize";
+import memoizeWeak from "memoize-weak";
 import { Time, TimeUtil } from "rosbag";
 
 import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
@@ -37,7 +37,7 @@ import { clampTime, isTime, TimestampMethod } from "@foxglove-studio/app/util/ti
 // than their receive times.
 export const BUFFER_DURATION_SECS = 1.0;
 
-const getTopicsWithHeader = microMemoize((topics: Topic[], datatypes: RosDatatypes) => {
+const getTopicsWithHeader = memoizeWeak((topics: Topic[], datatypes: RosDatatypes) => {
   return topics.filter(({ datatype }) => {
     const fields = datatypes[datatype]?.fields;
     return fields?.find((field) => field.type === "std_msgs/Header");
