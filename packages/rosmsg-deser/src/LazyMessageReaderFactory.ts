@@ -256,15 +256,16 @@ export default function buildReader(types: readonly RosMsgDefinition[]): Seriali
       } else {
         // offsets tell you where the raw data of your field starts (including any length bytes)
         // they are the size of the offset of the previous field + size of previous field
+        // use # to keep the property private (non-enumerable)
         offsetFns.push(`
-          _${field.name}_offset_cache = undefined;
+          #_${field.name}_offset_cache = undefined;
           ${field.name}_offset(view, initOffset) {
-            if (this._${field.name}_offset_cache) {
-              return this._${field.name}_offset_cache;
+            if (this.#_${field.name}_offset_cache) {
+              return this.#_${field.name}_offset_cache;
             }
             const prevOffset = this.${prevField.name}_offset(view, initOffset);
             const totalOffset = prevOffset + ${name}.${prevField.name}_size(view, prevOffset);
-            this._${field.name}_offset_cache = totalOffset;
+            this.#_${field.name}_offset_cache = totalOffset;
             return totalOffset;
           }`);
       }

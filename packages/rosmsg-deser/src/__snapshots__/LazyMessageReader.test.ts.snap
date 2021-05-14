@@ -868,14 +868,14 @@ class __RootMsg {
     return initOffset;
   }
 
-  _second_offset_cache = undefined;
+  #_second_offset_cache = undefined;
   second_offset(view, initOffset) {
-    if (this._second_offset_cache) {
-      return this._second_offset_cache;
+    if (this.#_second_offset_cache) {
+      return this.#_second_offset_cache;
     }
     const prevOffset = this.first_offset(view, initOffset);
     const totalOffset = prevOffset + __RootMsg.first_size(view, prevOffset);
-    this._second_offset_cache = totalOffset;
+    this.#_second_offset_cache = totalOffset;
     return totalOffset;
   }
 
@@ -1128,14 +1128,14 @@ class __RootMsg {
     return initOffset;
   }
 
-  _second_offset_cache = undefined;
+  #_second_offset_cache = undefined;
   second_offset(view, initOffset) {
-    if (this._second_offset_cache) {
-      return this._second_offset_cache;
+    if (this.#_second_offset_cache) {
+      return this.#_second_offset_cache;
     }
     const prevOffset = this.first_offset(view, initOffset);
     const totalOffset = prevOffset + __RootMsg.first_size(view, prevOffset);
-    this._second_offset_cache = totalOffset;
+    this.#_second_offset_cache = totalOffset;
     return totalOffset;
   }
 
@@ -1842,14 +1842,14 @@ class __RootMsg {
     return initOffset;
   }
 
-  _second_offset_cache = undefined;
+  #_second_offset_cache = undefined;
   second_offset(view, initOffset) {
-    if (this._second_offset_cache) {
-      return this._second_offset_cache;
+    if (this.#_second_offset_cache) {
+      return this.#_second_offset_cache;
     }
     const prevOffset = this.first_offset(view, initOffset);
     const totalOffset = prevOffset + __RootMsg.first_size(view, prevOffset);
-    this._second_offset_cache = totalOffset;
+    this.#_second_offset_cache = totalOffset;
     return totalOffset;
   }
 
@@ -2352,14 +2352,14 @@ class __RootMsg {
     return initOffset;
   }
 
-  _arr_offset_cache = undefined;
+  #_arr_offset_cache = undefined;
   arr_offset(view, initOffset) {
-    if (this._arr_offset_cache) {
-      return this._arr_offset_cache;
+    if (this.#_arr_offset_cache) {
+      return this.#_arr_offset_cache;
     }
     const prevOffset = this.blank_offset(view, initOffset);
     const totalOffset = prevOffset + __RootMsg.blank_size(view, prevOffset);
-    this._arr_offset_cache = totalOffset;
+    this.#_arr_offset_cache = totalOffset;
     return totalOffset;
   }
 
@@ -2437,14 +2437,14 @@ class __RootMsg {
     return initOffset;
   }
 
-  _arr_offset_cache = undefined;
+  #_arr_offset_cache = undefined;
   arr_offset(view, initOffset) {
-    if (this._arr_offset_cache) {
-      return this._arr_offset_cache;
+    if (this.#_arr_offset_cache) {
+      return this.#_arr_offset_cache;
     }
     const prevOffset = this.blank_offset(view, initOffset);
     const totalOffset = prevOffset + __RootMsg.blank_size(view, prevOffset);
-    this._arr_offset_cache = totalOffset;
+    this.#_arr_offset_cache = totalOffset;
     return totalOffset;
   }
 
@@ -2525,14 +2525,14 @@ class __RootMsg {
     return initOffset;
   }
 
-  _arr_offset_cache = undefined;
+  #_arr_offset_cache = undefined;
   arr_offset(view, initOffset) {
-    if (this._arr_offset_cache) {
-      return this._arr_offset_cache;
+    if (this.#_arr_offset_cache) {
+      return this.#_arr_offset_cache;
     }
     const prevOffset = this.blank_offset(view, initOffset);
     const totalOffset = prevOffset + __RootMsg.blank_size(view, prevOffset);
-    this._arr_offset_cache = totalOffset;
+    this.#_arr_offset_cache = totalOffset;
     return totalOffset;
   }
 
@@ -2614,14 +2614,14 @@ class __RootMsg {
     return initOffset;
   }
 
-  _arr_offset_cache = undefined;
+  #_arr_offset_cache = undefined;
   arr_offset(view, initOffset) {
-    if (this._arr_offset_cache) {
-      return this._arr_offset_cache;
+    if (this.#_arr_offset_cache) {
+      return this.#_arr_offset_cache;
     }
     const prevOffset = this.blank_offset(view, initOffset);
     const totalOffset = prevOffset + __RootMsg.blank_size(view, prevOffset);
-    this._arr_offset_cache = totalOffset;
+    this.#_arr_offset_cache = totalOffset;
     return totalOffset;
   }
 
