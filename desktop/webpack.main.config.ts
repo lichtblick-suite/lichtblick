@@ -54,6 +54,7 @@ export default (_: unknown, argv: WebpackArgv): Configuration => {
               // https://github.com/TypeStrong/ts-loader#onlycompilebundledfiles
               // avoid looking at files which are not part of the bundle
               onlyCompileBundledFiles: true,
+              projectReferences: true,
             },
           },
         },

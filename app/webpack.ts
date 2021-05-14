@@ -82,6 +82,7 @@ export function makeConfig(
                 // https://github.com/TypeStrong/ts-loader#onlycompilebundledfiles
                 // avoid looking at files which are not part of the bundle
                 onlyCompileBundledFiles: true,
+                projectReferences: true,
                 configFile: isDev ? "tsconfig.dev.json" : "tsconfig.json",
                 getCustomTransformers: () => ({
                   before: [
