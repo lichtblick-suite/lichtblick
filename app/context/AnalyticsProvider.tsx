@@ -12,8 +12,8 @@ import { Analytics } from "@foxglove-studio/app/services/Analytics";
 export default function AnalyticsProvider(
   props: PropsWithChildren<{ amplitudeApiKey?: string }>,
 ): React.ReactElement {
-  const [enableTelemetry = false] = useAppConfigurationValue<boolean>(AppSetting.TELEMETRY_ENABLED);
-  const [enableCrashReporting = false] = useAppConfigurationValue<boolean>(
+  const [enableTelemetry = true] = useAppConfigurationValue<boolean>(AppSetting.TELEMETRY_ENABLED);
+  const [enableCrashReporting = true] = useAppConfigurationValue<boolean>(
     AppSetting.CRASH_REPORTING_ENABLED,
   );
 
