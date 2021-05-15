@@ -231,8 +231,9 @@ describe("parseRosPath", () => {
           value: true,
           nameLoc: "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{bar==3}.c{bar==-1}.d{bar==false}.e[:]{"
             .length,
-          valueLoc: "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{bar==3}.c{bar==-1}.d{bar==false}.e[:]{bar.baz=="
-            .length,
+          valueLoc:
+            "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{bar==3}.c{bar==-1}.d{bar==false}.e[:]{bar.baz=="
+              .length,
           repr: "bar.baz==true",
         },
       ],

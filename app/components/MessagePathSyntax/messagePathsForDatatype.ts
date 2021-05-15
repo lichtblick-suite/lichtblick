@@ -50,44 +50,40 @@ import {
 // }
 let lastDatatypes: RosDatatypes | undefined;
 let lastStructures: Record<string, MessagePathStructureItemMessage>;
-export function messagePathStructures(
-  datatypes: RosDatatypes,
-): {
+export function messagePathStructures(datatypes: RosDatatypes): {
   [key: string]: MessagePathStructureItemMessage;
 } {
   if (lastDatatypes !== datatypes) {
     lastDatatypes = undefined;
-    const structureFor = memoize(
-      (datatype: string): MessagePathStructureItemMessage => {
-        const nextByName: {
-          [key: string]: MessagePathStructureItem;
-        } = {};
-        const rosDatatype = datatype === "json" ? { fields: [] } : datatypes[datatype];
-        if (!rosDatatype) {
-          throw new Error(`datatype not found: "${datatype}"`);
+    const structureFor = memoize((datatype: string): MessagePathStructureItemMessage => {
+      const nextByName: {
+        [key: string]: MessagePathStructureItem;
+      } = {};
+      const rosDatatype = datatype === "json" ? { fields: [] } : datatypes[datatype];
+      if (!rosDatatype) {
+        throw new Error(`datatype not found: "${datatype}"`);
+      }
+      rosDatatype.fields.forEach((msgField) => {
+        if (msgField.isConstant === true) {
+          return;
         }
-        rosDatatype.fields.forEach((msgField) => {
-          if (msgField.isConstant === true) {
-            return;
-          }
 
-          const next = rosPrimitives.includes(msgField.type)
-            ? {
-                structureType: "primitive",
-                primitiveType: (msgField.type as any) as RosPrimitive, // Flow doesn't understand includes()
-                datatype,
-              }
-            : structureFor(msgField.type);
+        const next = rosPrimitives.includes(msgField.type)
+          ? {
+              structureType: "primitive",
+              primitiveType: msgField.type as any as RosPrimitive, // Flow doesn't understand includes()
+              datatype,
+            }
+          : structureFor(msgField.type);
 
-          if (msgField.isArray === true) {
-            nextByName[msgField.name] = { structureType: "array", next: next as any, datatype };
-          } else {
-            nextByName[msgField.name] = next as any;
-          }
-        });
-        return { structureType: "message", nextByName, datatype };
-      },
-    );
+        if (msgField.isArray === true) {
+          nextByName[msgField.name] = { structureType: "array", next: next as any, datatype };
+        } else {
+          nextByName[msgField.name] = next as any;
+        }
+      });
+      return { structureType: "message", nextByName, datatype };
+    });
 
     lastStructures = {};
     Object.keys(datatypes).forEach((datatype) => {

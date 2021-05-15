@@ -2177,7 +2177,7 @@ __metadata:
     monaco-editor: 0.24.0
     natsort: 2.0.2
     panzoom: 9.4.2
-    prettier: 2.2.1
+    prettier: 2.3.0
     promise-queue: 2.2.5
     quickhull3d: 2.0.4
     rc-color-picker: 1.2.6
@@ -2304,7 +2304,7 @@ __metadata:
   dependencies:
     "@types/prettier": 2.2.3
     jest: 27.0.0-next.8
-    prettier: 2.2.1
+    prettier: 2.3.0
     typescript: 4.2.4
   languageName: unknown
   linkType: soft
@@ -12825,7 +12825,7 @@ __metadata:
     node-machine-id: 1.1.12
     path-browserify: 1.0.1
     pngjs: 6.0.0
-    prettier: 2.2.1
+    prettier: 2.3.0
     react-refresh: 0.10.0
     react-refresh-typescript: 2.0.0
     react-svg-loader: 3.0.3
@@ -19928,7 +19928,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:2.2.1, prettier@npm:~2.2.1":
+"prettier@npm:2.3.0":
+  version: 2.3.0
+  resolution: "prettier@npm:2.3.0"
+  bin:
+    prettier: bin-prettier.js
+  checksum: 652640cc8b71bc5277cfb8bf6f161783ca588efcf683c3d630837b39da8d57fef35c9e00ae5855a8e3c75136c42274046c913cc2b2d2968558315f31c6a26981
+  languageName: node
+  linkType: hard
+
+"prettier@npm:~2.2.1":
   version: 2.2.1
   resolution: "prettier@npm:2.2.1"
   bin:

@@ -27,10 +27,7 @@ describe("threeDimensionalVizUtils", () => {
       const prevTargetPose: TargetPose = {
         target: [1322.127197265625, -1484.3931884765625, -20.19326400756836],
         targetOrientation: [
-          -0.004656290448945672,
-          0.00933881579479869,
-          0.04371859882195202,
-          0.9989893841257927,
+          -0.004656290448945672, 0.00933881579479869, 0.04371859882195202, 0.9989893841257927,
         ],
       };
       const prevCameraState: CameraState = {

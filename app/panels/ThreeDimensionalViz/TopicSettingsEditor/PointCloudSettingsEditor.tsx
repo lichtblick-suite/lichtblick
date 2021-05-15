@@ -152,20 +152,18 @@ export default function PointCloudSettingsEditor(
               text={colorMode.mode === "rgb" ? "rgb" : colorMode.colorField}
               value={colorMode.mode === "rgb" ? "rgb" : colorMode.colorField}
               onChange={(value) =>
-                onColorModeChange(
-                  (newColorMode): ColorMode => {
-                    if (value === "rgb") {
-                      return { mode: "rgb" };
-                    }
-                    if (newColorMode && newColorMode.mode === "gradient") {
-                      return { ...newColorMode, colorField: value };
-                    }
-                    if (newColorMode && newColorMode.mode === "rainbow") {
-                      return { ...newColorMode, colorField: value };
-                    }
-                    return { mode: "rainbow", colorField: value };
-                  },
-                )
+                onColorModeChange((newColorMode): ColorMode => {
+                  if (value === "rgb") {
+                    return { mode: "rgb" };
+                  }
+                  if (newColorMode && newColorMode.mode === "gradient") {
+                    return { ...newColorMode, colorField: value };
+                  }
+                  if (newColorMode && newColorMode.mode === "rainbow") {
+                    return { ...newColorMode, colorField: value };
+                  }
+                  return { mode: "rainbow", colorField: value };
+                })
               }
             >
               {!message

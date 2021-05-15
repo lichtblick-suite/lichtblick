@@ -51,9 +51,8 @@ export function getLinkedGlobalVariable({
   markerKeyPath: string[];
   linkedGlobalVariables: LinkedGlobalVariables;
 }): LinkedGlobalVariable | undefined {
-  const linkedGlobalVariablesKeyByTopicWithPath = getLinkedGlobalVariableKeyByTopicWithPath(
-    linkedGlobalVariables,
-  );
+  const linkedGlobalVariablesKeyByTopicWithPath =
+    getLinkedGlobalVariableKeyByTopicWithPath(linkedGlobalVariables);
   const topicWithPath = getTopicWithPath({ topic, markerKeyPath });
   return linkedGlobalVariablesKeyByTopicWithPath[topicWithPath];
 }

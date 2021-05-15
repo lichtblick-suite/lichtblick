@@ -75,38 +75,39 @@ const updateUrlActions = [
   END_DRAG,
 ].map((item) => item.toString());
 
-const updateUrlAndLocalStorageMiddlewareDebounced = (store: Store) => (
-  next: (action: ActionTypes) => State,
-) => (action: ActionTypes): State => {
-  const result = next(action);
-  // Any action that changes panels state should potentially trigger a URL update.
-  let skipSettingLocalStorage = false;
-  if (
-    action.payload !== undefined &&
-    typeof action.payload === "object" &&
-    "skipSettingLocalStorage" in action.payload
-  ) {
-    skipSettingLocalStorage = Boolean(action.payload.skipSettingLocalStorage);
-  }
-
-  if (updateUrlActions.includes(action.type)) {
-    if (updateUrlTimer) {
-      clearTimeout(updateUrlTimer);
+const updateUrlAndLocalStorageMiddlewareDebounced =
+  (store: Store) =>
+  (next: (action: ActionTypes) => State) =>
+  (action: ActionTypes): State => {
+    const result = next(action);
+    // Any action that changes panels state should potentially trigger a URL update.
+    let skipSettingLocalStorage = false;
+    if (
+      action.payload !== undefined &&
+      typeof action.payload === "object" &&
+      "skipSettingLocalStorage" in action.payload
+    ) {
+      skipSettingLocalStorage = Boolean(action.payload.skipSettingLocalStorage);
     }
-    updateUrlTimer = setTimeout(async () => {
-      const shouldProcessPatch = getShouldProcessPatch();
-      if (!shouldProcessPatch) {
+
+    if (updateUrlActions.includes(action.type)) {
+      if (updateUrlTimer) {
+        clearTimeout(updateUrlTimer);
+      }
+      updateUrlTimer = setTimeout(async () => {
+        const shouldProcessPatch = getShouldProcessPatch();
+        if (!shouldProcessPatch) {
+          maybeSetPersistedStateInLocalStorage(store, skipSettingLocalStorage);
+          return result;
+        }
+
         maybeSetPersistedStateInLocalStorage(store, skipSettingLocalStorage);
         return result;
-      }
+      }, 500);
+    }
 
-      maybeSetPersistedStateInLocalStorage(store, skipSettingLocalStorage);
-      return result;
-    }, 500);
-  }
-
-  maybeSetPersistedStateInLocalStorage(store, skipSettingLocalStorage);
-  return result;
-};
+    maybeSetPersistedStateInLocalStorage(store, skipSettingLocalStorage);
+    return result;
+  };
 
 export default updateUrlAndLocalStorageMiddlewareDebounced;

@@ -76,8 +76,7 @@ const fixture = {
     { name: "/some_topic/location", datatype: "msgs/PoseDebug" },
     { name: "/some_topic/state", datatype: "msgs/State" },
     {
-      name:
-        "/very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_long_topic_name/state",
+      name: "/very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_very_long_topic_name/state",
       datatype: "msgs/State",
     },
     { name: "/some_logs_topic", datatype: "msgs/Log" },

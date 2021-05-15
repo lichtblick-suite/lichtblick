@@ -690,7 +690,7 @@ export default function useTree({
       if (!result[baseKey]) {
         result[baseKey] = [];
       }
-      const errorsWithTopicName = ((errors as any) as string[]).map(
+      const errorsWithTopicName = (errors as any as string[]).map(
         (err) => `${topicKey.substr("t:".length)}: ${err}`,
       );
       result[baseKey].push(...(hasFeatureColumn ? errorsWithTopicName : errors));

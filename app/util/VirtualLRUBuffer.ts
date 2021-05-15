@@ -83,9 +83,8 @@ export default class VirtualLRUBuffer {
     // TODO(JP): We could throw an error in that case if this is causing a lot of trouble.
     let position = range.start;
     while (position < range.end) {
-      const { blockIndex, positionInBlock, remainingBytesInBlock } = this._calculatePosition(
-        position,
-      );
+      const { blockIndex, positionInBlock, remainingBytesInBlock } =
+        this._calculatePosition(position);
       source.copy(this._getBlock(blockIndex), positionInBlock, position - targetStart);
       position += remainingBytesInBlock;
     }
@@ -116,9 +115,8 @@ export default class VirtualLRUBuffer {
     const result = buffer.Buffer.allocUnsafe(size);
     let position = start;
     while (position < end) {
-      const { blockIndex, positionInBlock, remainingBytesInBlock } = this._calculatePosition(
-        position,
-      );
+      const { blockIndex, positionInBlock, remainingBytesInBlock } =
+        this._calculatePosition(position);
       // Note that these calls to `_getBlock` will never cause any eviction, since we verified using
       // the `VirtualLRUBuffer#hasData` precondition that all these buffers exist already.
       this._getBlock(blockIndex).copy(result, position - start, positionInBlock);

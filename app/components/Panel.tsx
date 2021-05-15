@@ -131,9 +131,8 @@ export default function Panel<Config extends PanelConfig>(
   function ConnectedPanel(props: Props<Config>) {
     const { childId, overrideConfig, tabId } = props;
     const { mosaicActions }: { mosaicActions: MosaicRootActions<any> } = useContext(MosaicContext);
-    const { mosaicWindowActions }: { mosaicWindowActions: MosaicWindowActions } = useContext(
-      MosaicWindowContext,
-    );
+    const { mosaicWindowActions }: { mosaicWindowActions: MosaicWindowActions } =
+      useContext(MosaicWindowContext);
 
     // Used by actions that need to operate on the current state without causing the panel to
     // re-render by subscribing to various unnecessary parts of the state.
@@ -192,10 +191,10 @@ export default function Panel<Config extends PanelConfig>(
     const title = useMemo(() => panelsByType.get(type)?.title ?? "", [panelsByType, type]);
 
     const [config, saveConfig] = useConfigById<Config>(childId, PanelComponent.defaultConfig);
-    const panelComponentConfig = useMemo(() => ({ ...config, ...overrideConfig }), [
-      config,
-      overrideConfig,
-    ]);
+    const panelComponentConfig = useMemo(
+      () => ({ ...config, ...overrideConfig }),
+      [config, overrideConfig],
+    );
 
     const updatePanelConfig = useCallback(
       (panelType: string, perPanelFunc: (arg0: PanelConfig) => PanelConfig) => {

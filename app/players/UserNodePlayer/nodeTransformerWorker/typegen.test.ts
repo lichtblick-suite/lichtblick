@@ -206,7 +206,7 @@ describe("typegen", () => {
             },
           });
           const formattedTypes = formatTypeDef(declarations);
-          const type = (jsType as any) as string;
+          const type = jsType as any as string;
           expect(formattedTypes).toEqual({
             "std_msgs/Data": `export interface std_msgs__Data { x: ${type}; }`,
           });

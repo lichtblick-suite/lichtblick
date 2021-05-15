@@ -95,9 +95,10 @@ export default function MockMessagePipelineProvider(props: {
     [setAllSubscriptions],
   );
 
-  const requestBackfill = useMemo(() => props.requestBackfill ?? (() => {}), [
-    props.requestBackfill,
-  ]);
+  const requestBackfill = useMemo(
+    () => props.requestBackfill ?? (() => {}),
+    [props.requestBackfill],
+  );
 
   const capabilities = useShallowMemo(props.capabilities ?? []);
 

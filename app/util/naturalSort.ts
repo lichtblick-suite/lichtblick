@@ -25,7 +25,7 @@ function naturalSort<T, K extends StringOrNumberFields<T>>(key?: K): unknown {
   return key === undefined
     ? sortFn
     : (a: T, b: T) =>
-        sortFn((a[key] as unknown) as string | number, (b[key] as unknown) as string | number);
+        sortFn(a[key] as unknown as string | number, b[key] as unknown as string | number);
 }
 
 export default naturalSort;

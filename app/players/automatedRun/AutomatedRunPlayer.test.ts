@@ -227,11 +227,8 @@ describe("AutomatedRunPlayer", () => {
   }
 
   it("awaits the previous emit promise before calling getMessages", async () => {
-    const {
-      resolveNextGetMessages,
-      resolveNextEmitState,
-      getGetMessagesCallCount,
-    } = await setupEventLoopTest();
+    const { resolveNextGetMessages, resolveNextEmitState, getGetMessagesCallCount } =
+      await setupEventLoopTest();
 
     resolveNextGetMessages();
     await delay(10);

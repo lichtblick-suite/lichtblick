@@ -69,23 +69,23 @@ type LOAD_LAYOUT = { type: "LOAD_LAYOUT"; payload: PanelsState };
 
 type SET_FETCHED_LAYOUT = { type: "SET_FETCHED_LAYOUT"; payload: SetFetchedLayoutPayload };
 type SET_FETCH_LAYOUT_FAILED = { type: "SET_FETCH_LAYOUT_FAILED"; payload: Error };
-export const setFetchedLayout = (
-  payload: SetFetchedLayoutPayload,
-): Dispatcher<SET_FETCHED_LAYOUT> => (dispatch) => {
-  return dispatch({ type: PANELS_ACTION_TYPES.SET_FETCHED_LAYOUT, payload });
-};
+export const setFetchedLayout =
+  (payload: SetFetchedLayoutPayload): Dispatcher<SET_FETCHED_LAYOUT> =>
+  (dispatch) => {
+    return dispatch({ type: PANELS_ACTION_TYPES.SET_FETCHED_LAYOUT, payload });
+  };
 
-export const savePanelConfigs = (payload: SaveConfigsPayload): Dispatcher<SAVE_PANEL_CONFIGS> => (
-  dispatch,
-) => {
-  return dispatch({ type: PANELS_ACTION_TYPES.SAVE_PANEL_CONFIGS, payload });
-};
+export const savePanelConfigs =
+  (payload: SaveConfigsPayload): Dispatcher<SAVE_PANEL_CONFIGS> =>
+  (dispatch) => {
+    return dispatch({ type: PANELS_ACTION_TYPES.SAVE_PANEL_CONFIGS, payload });
+  };
 
-export const saveFullPanelConfig = (
-  payload: SaveFullConfigPayload,
-): Dispatcher<SAVE_FULL_PANEL_CONFIG> => (dispatch) => {
-  return dispatch({ type: PANELS_ACTION_TYPES.SAVE_FULL_PANEL_CONFIG, payload });
-};
+export const saveFullPanelConfig =
+  (payload: SaveFullConfigPayload): Dispatcher<SAVE_FULL_PANEL_CONFIG> =>
+  (dispatch) => {
+    return dispatch({ type: PANELS_ACTION_TYPES.SAVE_FULL_PANEL_CONFIG, payload });
+  };
 
 export const createTabPanel = (payload: CreateTabPanelPayload): CREATE_TAB_PANEL => ({
   type: PANELS_ACTION_TYPES.CREATE_TAB_PANEL,
@@ -93,35 +93,38 @@ export const createTabPanel = (payload: CreateTabPanelPayload): CREATE_TAB_PANEL
 });
 
 type IMPORT_PANEL_LAYOUT = { type: "IMPORT_PANEL_LAYOUT"; payload: ImportPanelLayoutPayload };
-export const importPanelLayout = (
-  payload: ImportPanelLayoutPayload,
-  { skipSettingLocalStorage = false }: { skipSettingLocalStorage?: boolean } = {},
-): Dispatcher<IMPORT_PANEL_LAYOUT> => (dispatch) => {
-  return dispatch({
-    type: PANELS_ACTION_TYPES.IMPORT_PANEL_LAYOUT,
-    payload: skipSettingLocalStorage ? { ...payload, skipSettingLocalStorage } : payload,
-  });
-};
+export const importPanelLayout =
+  (
+    payload: ImportPanelLayoutPayload,
+    { skipSettingLocalStorage = false }: { skipSettingLocalStorage?: boolean } = {},
+  ): Dispatcher<IMPORT_PANEL_LAYOUT> =>
+  (dispatch) => {
+    return dispatch({
+      type: PANELS_ACTION_TYPES.IMPORT_PANEL_LAYOUT,
+      payload: skipSettingLocalStorage ? { ...payload, skipSettingLocalStorage } : payload,
+    });
+  };
 
-export const changePanelLayout = (
-  payload: ChangePanelLayoutPayload,
-): Dispatcher<CHANGE_PANEL_LAYOUT> => (dispatch) => {
-  return dispatch({ type: PANELS_ACTION_TYPES.CHANGE_PANEL_LAYOUT, payload });
-};
+export const changePanelLayout =
+  (payload: ChangePanelLayoutPayload): Dispatcher<CHANGE_PANEL_LAYOUT> =>
+  (dispatch) => {
+    return dispatch({ type: PANELS_ACTION_TYPES.CHANGE_PANEL_LAYOUT, payload });
+  };
 
-export const loadLayout = (layout: PanelsState): Dispatcher<LOAD_LAYOUT> => (dispatch) => {
-  return dispatch({ type: PANELS_ACTION_TYPES.LOAD_LAYOUT, payload: layout });
-};
+export const loadLayout =
+  (layout: PanelsState): Dispatcher<LOAD_LAYOUT> =>
+  (dispatch) => {
+    return dispatch({ type: PANELS_ACTION_TYPES.LOAD_LAYOUT, payload: layout });
+  };
 
 type CLEAR_LAYOUT_URL_REPLACED_BY_DEFAULT = {
   type: "CLEAR_LAYOUT_URL_REPLACED_BY_DEFAULT";
   payload?: never;
 };
-export const clearLayoutUrlReplacedByDefault = (): Dispatcher<CLEAR_LAYOUT_URL_REPLACED_BY_DEFAULT> => (
-  dispatch,
-) => {
-  return dispatch({ type: PANELS_ACTION_TYPES.CLEAR_LAYOUT_URL_REPLACED_BY_DEFAULT });
-};
+export const clearLayoutUrlReplacedByDefault =
+  (): Dispatcher<CLEAR_LAYOUT_URL_REPLACED_BY_DEFAULT> => (dispatch) => {
+    return dispatch({ type: PANELS_ACTION_TYPES.CLEAR_LAYOUT_URL_REPLACED_BY_DEFAULT });
+  };
 
 type OVERWRITE_GLOBAL_DATA = {
   type: "OVERWRITE_GLOBAL_DATA";

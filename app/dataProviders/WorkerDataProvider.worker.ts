@@ -27,5 +27,5 @@ const getDataProvider = createGetDataProvider({
 
 if (inWebWorker()) {
   // not yet using TS Worker lib: FG-64
-  new RpcDataProviderRemote(new Rpc((global as unknown) as Channel), getDataProvider);
+  new RpcDataProviderRemote(new Rpc(global as unknown as Channel), getDataProvider);
 }

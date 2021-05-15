@@ -131,9 +131,9 @@ storiesOf("panels/Tab/index", module)
             await tick();
             (document.querySelectorAll('[data-test="pick-a-panel"]')[0] as any).click();
             await tick();
-            (document.querySelectorAll(
-              '[data-test="panel-menu-item Some Panel"]',
-            )[0] as any).click();
+            (
+              document.querySelectorAll('[data-test="panel-menu-item Some Panel"]')[0] as any
+            ).click();
           }, DEFAULT_TIMEOUT);
         }}
       >
@@ -159,9 +159,9 @@ storiesOf("panels/Tab/index", module)
             await tick();
             (document.querySelectorAll('[data-test="pick-a-panel"]')[0] as any).click();
             await tick();
-            (document.querySelectorAll(
-              '[data-test="panel-menu-item Some Panel"]',
-            )[0] as any).click();
+            (
+              document.querySelectorAll('[data-test="panel-menu-item Some Panel"]')[0] as any
+            ).click();
           }, DEFAULT_TIMEOUT);
         }}
       >
@@ -483,9 +483,9 @@ storiesOf("panels/Tab/index", module)
         onMount={() => {
           setTimeout(async () => {
             // Create a new tab on the left side
-            (document.querySelectorAll(
-              '[data-test~="Tab!Left"] [data-test="add-tab"]',
-            )[0] as any).click();
+            (
+              document.querySelectorAll('[data-test~="Tab!Left"] [data-test="add-tab"]')[0] as any
+            ).click();
 
             const dragHandle =
               document.querySelector(

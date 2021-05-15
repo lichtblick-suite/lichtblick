@@ -20,18 +20,18 @@ import { getClickedInfo, getAllPoints, decodeAdditionalFields } from "./selectio
 describe("<PointClouds />", () => {
   describe("getClickedInfo", () => {
     it("returns undefined when points field is empty", () => {
-      const partiallyDecodedMarker = (decodeMarker(
+      const partiallyDecodedMarker = decodeMarker(
         POINT_CLOUD_WITH_ADDITIONAL_FIELDS as any,
-      ) as any) as PointCloud2;
+      ) as any as PointCloud2;
       const fullyDecodedMarker = decodeAdditionalFields(partiallyDecodedMarker);
       fullyDecodedMarker.positionBuffer = [];
       expect(getClickedInfo(fullyDecodedMarker, 1000)).toEqual(undefined);
     });
 
     it("returns undefined when instanceIndex does not match any point", () => {
-      const partiallyDecodedMarker = (decodeMarker(
+      const partiallyDecodedMarker = decodeMarker(
         POINT_CLOUD_WITH_ADDITIONAL_FIELDS as any,
-      ) as any) as PointCloud2;
+      ) as any as PointCloud2;
       const fullyDecodedMarker = decodeAdditionalFields(partiallyDecodedMarker);
       expect(getClickedInfo(fullyDecodedMarker, undefined)).toEqual(undefined);
       expect(getClickedInfo(fullyDecodedMarker, 1000)).toEqual(undefined);
@@ -42,15 +42,10 @@ describe("<PointClouds />", () => {
       const clickInfo = getClickedInfo(marker, 1);
       expect(clickInfo).not.toBeNullOrUndefined();
       expect((clickInfo?.clickedPoint ?? []).map((v) => Math.floor(v))).toStrictEqual([
-        -2239,
-        -706,
-        -3,
+        -2239, -706, -3,
       ]);
       expect((clickInfo?.clickedPointColor ?? []).map((v) => Math.floor(v))).toStrictEqual([
-        127,
-        255,
-        255,
-        1,
+        127, 255, 255, 1,
       ]);
       expect(clickInfo?.additionalFieldValues).toBeUndefined();
     });
@@ -60,15 +55,10 @@ describe("<PointClouds />", () => {
       const clickInfo = getClickedInfo(marker, 0);
       expect(clickInfo).not.toBeNullOrUndefined();
       expect((clickInfo?.clickedPoint ?? []).map((v) => Math.floor(v))).toStrictEqual([
-        -2239,
-        -706,
-        -3,
+        -2239, -706, -3,
       ]);
       expect((clickInfo?.clickedPointColor ?? []).map((v) => Math.floor(v))).toStrictEqual([
-        127,
-        225,
-        255,
-        1,
+        127, 225, 255, 1,
       ]);
       expect(clickInfo?.additionalFieldValues).toBeUndefined();
     });
@@ -82,15 +72,10 @@ describe("<PointClouds />", () => {
       const clickInfo = getClickedInfo(marker, 1);
       expect(clickInfo).not.toBeNullOrUndefined();
       expect((clickInfo?.clickedPoint ?? []).map((v) => Math.floor(v))).toStrictEqual([
-        -2239,
-        -706,
-        -3,
+        -2239, -706, -3,
       ]);
       expect((clickInfo?.clickedPointColor ?? []).map((v) => Math.floor(v))).toStrictEqual([
-        255,
-        255,
-        127,
-        1,
+        255, 255, 127, 1,
       ]);
       expect(clickInfo?.additionalFieldValues).toBeUndefined();
     });
@@ -104,15 +89,10 @@ describe("<PointClouds />", () => {
       const clickInfo = getClickedInfo(marker, 1);
       expect(clickInfo).not.toBeNullOrUndefined();
       expect((clickInfo?.clickedPoint ?? []).map((v) => Math.floor(v))).toStrictEqual([
-        -2239,
-        -706,
-        -3,
+        -2239, -706, -3,
       ]);
       expect((clickInfo?.clickedPointColor ?? []).map((v) => Math.floor(v))).toStrictEqual([
-        255,
-        0,
-        255,
-        1,
+        255, 0, 255, 1,
       ]);
       expect(clickInfo?.additionalFieldValues).toBeUndefined();
     });
@@ -134,10 +114,7 @@ describe("<PointClouds />", () => {
       expect(clickInfo).not.toBeNullOrUndefined();
       expect((clickInfo?.clickedPoint ?? []).map((v) => Math.floor(v))).toStrictEqual([0, 1, 2]);
       expect((clickInfo?.clickedPointColor ?? []).map((v) => Math.floor(v))).toStrictEqual([
-        0,
-        0,
-        255,
-        1,
+        0, 0, 255, 1,
       ]);
       expect(clickInfo?.additionalFieldValues).toStrictEqual({});
     });
@@ -152,10 +129,7 @@ describe("<PointClouds />", () => {
       expect(clickInfo).not.toBeNullOrUndefined();
       expect((clickInfo?.clickedPoint ?? []).map((v) => Math.floor(v))).toStrictEqual([0, 1, 2]);
       expect((clickInfo?.clickedPointColor ?? []).map((v) => Math.floor(v))).toStrictEqual([
-        255,
-        0,
-        255,
-        1,
+        255, 0, 255, 1,
       ]);
       expect(clickInfo?.additionalFieldValues).toStrictEqual({
         bar: 8,

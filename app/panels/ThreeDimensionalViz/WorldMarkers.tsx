@@ -138,9 +138,7 @@ function getIconScaleByCameraDistance(distance: number): number {
   );
 }
 
-function getIconStyles(
-  distance: number,
-): {
+function getIconStyles(distance: number): {
   iconWrapperStyles: {
     [attr: string]: string | number;
   };

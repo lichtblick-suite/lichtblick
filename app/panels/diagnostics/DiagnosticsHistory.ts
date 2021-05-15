@@ -58,9 +58,8 @@ function maybeAddMessageToBuffer(
     let newHardwareId = false;
     let newDiagnostic = false;
     const trimmedHardwareId = trimHardwareId(status.hardware_id);
-    const hardwareDiagnosticsByName = buffer.diagnosticsByNameByTrimmedHardwareId.get(
-      trimmedHardwareId,
-    );
+    const hardwareDiagnosticsByName =
+      buffer.diagnosticsByNameByTrimmedHardwareId.get(trimmedHardwareId);
     if (hardwareDiagnosticsByName == undefined) {
       newHardwareId = true;
       newDiagnostic = true;

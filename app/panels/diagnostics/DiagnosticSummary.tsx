@@ -178,9 +178,8 @@ function DiagnosticSummary(props: Props): JSX.Element {
               if (name == undefined || trimmedHardwareId == undefined) {
                 return;
               }
-              const diagnosticsByName = buffer.diagnosticsByNameByTrimmedHardwareId.get(
-                trimmedHardwareId,
-              );
+              const diagnosticsByName =
+                buffer.diagnosticsByNameByTrimmedHardwareId.get(trimmedHardwareId);
               return diagnosticsByName?.get(name);
             });
 

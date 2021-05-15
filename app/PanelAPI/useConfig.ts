@@ -63,10 +63,10 @@ export function useConfigById<Config>(
     [dispatch, defaultConfig, panelId],
   );
 
-  const mergedConfig = useMemo(() => ({ ...(defaultConfig as Config), ...config }), [
-    defaultConfig,
-    config,
-  ]);
+  const mergedConfig = useMemo(
+    () => ({ ...(defaultConfig as Config), ...config }),
+    [defaultConfig, config],
+  );
 
   return [mergedConfig, saveConfig];
 }

@@ -14,15 +14,12 @@ describe("XmlRpcServer", () => {
   it("Can receive a chunked request", (done) => {
     let handledMethod = false;
     const server = new XmlRpcServer(new HttpServerNodejs());
-    server.setHandler(
-      "testMethod",
-      (methodName, args): Promise<XmlRpcValue> => {
-        handledMethod = true;
-        expect(methodName).toEqual("testMethod");
-        expect(args).toEqual(["Param A", "Param B"]);
-        return Promise.resolve([1, "test", undefined]);
-      },
-    );
+    server.setHandler("testMethod", (methodName, args): Promise<XmlRpcValue> => {
+      handledMethod = true;
+      expect(methodName).toEqual("testMethod");
+      expect(args).toEqual(["Param A", "Param B"]);
+      return Promise.resolve([1, "test", undefined]);
+    });
     server.listen().then(() => {
       const port = parseInt(new URL(server.server.url() as string).port);
       expect(port).not.toBeNaN();
@@ -64,20 +61,14 @@ describe("XmlRpcServer", () => {
 
   it("serializes faults", async () => {
     const server = new XmlRpcServer(new HttpServerNodejs());
-    server.setHandler(
-      "testMethod1",
-      (methodName, _args): Promise<XmlRpcValue> => {
-        expect(methodName).toEqual("testMethod1");
-        throw new Error("Example error");
-      },
-    );
-    server.setHandler(
-      "testMethod2",
-      (methodName, _args): Promise<XmlRpcValue> => {
-        expect(methodName).toEqual("testMethod2");
-        throw new XmlRpcFault("Example error", 123);
-      },
-    );
+    server.setHandler("testMethod1", (methodName, _args): Promise<XmlRpcValue> => {
+      expect(methodName).toEqual("testMethod1");
+      throw new Error("Example error");
+    });
+    server.setHandler("testMethod2", (methodName, _args): Promise<XmlRpcValue> => {
+      expect(methodName).toEqual("testMethod2");
+      throw new XmlRpcFault("Example error", 123);
+    });
 
     await server.listen();
     const port = parseInt(new URL(server.server.url() as string).port);

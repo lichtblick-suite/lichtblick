@@ -96,9 +96,8 @@ export default function createRootReducer(
   };
   return (state: State | undefined, action: ActionTypes): State => {
     const oldPersistedState: PersistedState | undefined = state?.persistedState;
-    const reducers: Array<
-      (arg0: State, arg1: ActionTypes, arg2?: PersistedState) => State
-    > = getReducers() as any;
+    const reducers: Array<(arg0: State, arg1: ActionTypes, arg2?: PersistedState) => State> =
+      getReducers() as any;
     return reducers.reduce(
       (builtState, reducer) => reducer(builtState, action, oldPersistedState),
       {

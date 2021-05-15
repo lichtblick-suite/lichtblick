@@ -179,9 +179,8 @@ function Plot(props: Props) {
     preloadingFallback: !showSingleCurrentMessage,
   });
 
-  const decodeMessagePathsForMessagesByTopic = useDecodeMessagePathsForMessagesByTopic(
-    memoizedPaths,
-  );
+  const decodeMessagePathsForMessagesByTopic =
+    useDecodeMessagePathsForMessagesByTopic(memoizedPaths);
 
   const streamedItemsByPath = useMemo(
     () => getPlotDataByPath(decodeMessagePathsForMessagesByTopic(messagesByTopic)),

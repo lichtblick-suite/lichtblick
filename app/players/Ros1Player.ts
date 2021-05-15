@@ -109,7 +109,7 @@ export default class Ros1Player implements Player {
         hostname,
         pid: os.pid,
         rosMasterUri: this._url,
-        httpServer: (httpServer as unknown) as HttpServer,
+        httpServer: httpServer as unknown as HttpServer,
         tcpSocketCreate,
         log: rosLog,
       });

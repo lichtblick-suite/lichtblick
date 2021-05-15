@@ -48,9 +48,10 @@ function TablePanel({ config, saveConfig }: Props) {
     [saveConfig],
   );
 
-  const topicRosPath: RosPath | undefined = React.useMemo(() => parseRosPath(topicPath), [
-    topicPath,
-  ]);
+  const topicRosPath: RosPath | undefined = React.useMemo(
+    () => parseRosPath(topicPath),
+    [topicPath],
+  );
   const topicName = topicRosPath?.topicName ?? "";
   const msgs = useMessagesByTopic({ topics: [topicName], historySize: 1 })[topicName];
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems([topicPath]);

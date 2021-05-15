@@ -104,10 +104,9 @@ export default class MemoryDataProvider implements DataProvider {
       });
     }
     const { parsedMessages, rosBinaryMessages } = this.messages;
-    const sortedMessages = [
-      ...(parsedMessages ?? []),
-      ...(rosBinaryMessages ?? []),
-    ].sort((m1, m2) => TimeUtil.compare(m1.receiveTime, m2.receiveTime));
+    const sortedMessages = [...(parsedMessages ?? []), ...(rosBinaryMessages ?? [])].sort(
+      (m1, m2) => TimeUtil.compare(m1.receiveTime, m2.receiveTime),
+    );
 
     let messageDefinitions: MessageDefinitions;
     if (this.datatypes || this.parsedMessageDefinitionsByTopic) {

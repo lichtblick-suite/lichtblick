@@ -77,7 +77,7 @@ export default function Graph(props: Props): JSX.Element {
       cy.current?.add(elements);
       cy.current
         ?.elements()
-        .makeLayout(({ ...DAG_LAYOUT, rankDir } as unknown) as Cytoscape.LayoutOptions)
+        .makeLayout({ ...DAG_LAYOUT, rankDir } as unknown as Cytoscape.LayoutOptions)
         .run();
     });
 

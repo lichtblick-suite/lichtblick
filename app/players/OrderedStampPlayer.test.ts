@@ -72,9 +72,10 @@ function getState(hasHeaderStamp?: any): PlayerStateActiveData {
   };
 }
 
-function makePlayers(
-  initialOrder: TimestampMethod,
-): { player: OrderedStampPlayer; fakePlayer: FakePlayer } {
+function makePlayers(initialOrder: TimestampMethod): {
+  player: OrderedStampPlayer;
+  fakePlayer: FakePlayer;
+} {
   const fakePlayer = new FakePlayer();
   fakePlayer.setCapabilities([PlayerCapabilities.setSpeed, PlayerCapabilities.playbackControl]);
   return {

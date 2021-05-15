@@ -60,7 +60,7 @@ export class TcpSocketNode extends EventEmitter implements TcpSocket {
     // where sockets have file descriptors. See
     // <https://github.com/nodejs/help/issues/1312>
     // eslint-disable-next-line no-underscore-dangle
-    return Promise.resolve(((this._socket as unknown) as MaybeHasFd)._handle?.fd);
+    return Promise.resolve((this._socket as unknown as MaybeHasFd)._handle?.fd);
   }
 
   connected(): Promise<boolean> {

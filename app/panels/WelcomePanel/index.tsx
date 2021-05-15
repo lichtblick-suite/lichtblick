@@ -34,9 +34,8 @@ function validateEmail(str: string): string | undefined {
 }
 
 function WelcomePanel() {
-  const [subscribed = false, setSubscribed] = useAppConfigurationValue<boolean>(
-    "onboarding.subscribed",
-  );
+  const [subscribed = false, setSubscribed] =
+    useAppConfigurationValue<boolean>("onboarding.subscribed");
   const [subscribeChecked, setSubscribeChecked] = useState(true);
   const [slackInviteChecked, setSlackInviteChecked] = useState(true);
   const [emailValue, setEmailValue] = useState("");

@@ -268,9 +268,10 @@ function PanelList(props: Props): JSX.Element {
     [filteredItemsByCategoryIdx],
   );
 
-  const filteredItems = React.useMemo(() => flatMap(Object.values(filteredItemsByCategoryIdx)), [
-    filteredItemsByCategoryIdx,
-  ]);
+  const filteredItems = React.useMemo(
+    () => flatMap(Object.values(filteredItemsByCategoryIdx)),
+    [filteredItemsByCategoryIdx],
+  );
 
   const highlightedPanel = React.useMemo(
     () => (highlightedPanelIdx != undefined ? filteredItems[highlightedPanelIdx] : undefined),

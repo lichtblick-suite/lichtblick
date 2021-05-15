@@ -59,9 +59,10 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
   const [autoScroll, setAutoScroll] = useState(true);
 
   const dispatch = useDispatch();
-  const clearLogs = React.useCallback((payload: string) => dispatch(clearUserNodeLogs(payload)), [
-    dispatch,
-  ]);
+  const clearLogs = React.useCallback(
+    (payload: string) => dispatch(clearUserNodeLogs(payload)),
+    [dispatch],
+  );
   const scrollContainer = useRef<HTMLDivElement>(ReactNull);
 
   useEffect(() => {

@@ -39,15 +39,11 @@ export const transformDiagnosticToMarkerData = (diagnostic: ts.Diagnostic): Diag
     throw new Error("Invariant: diagnostic is not initialized");
   }
 
-  const {
-    line: startLineNumber,
-    character: startColumn,
-  } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
+  const { line: startLineNumber, character: startColumn } =
+    diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
 
-  const {
-    line: endLineNumber,
-    character: endColumn,
-  } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start + diagnostic.length);
+  const { line: endLineNumber, character: endColumn } =
+    diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start + diagnostic.length);
 
   return {
     message: flattenDiagnosticMessageText(diagnostic.messageText, "\n"),

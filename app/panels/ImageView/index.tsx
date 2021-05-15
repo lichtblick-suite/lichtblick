@@ -190,12 +190,13 @@ function renderEmptyState(
                   <code>{topic}</code>:{" "}
                   {topicMessages.length > 0
                     ? topicMessages
-                        .map((
-                          { message }, // In some cases, a user may have subscribed to a topic that does not include a header stamp.
-                        ) =>
-                          (message as Partial<StampedMessage>).header?.stamp
-                            ? formatTimeRaw((message as StampedMessage).header.stamp)
-                            : "[ unknown ]",
+                        .map(
+                          (
+                            { message }, // In some cases, a user may have subscribed to a topic that does not include a header stamp.
+                          ) =>
+                            (message as Partial<StampedMessage>).header?.stamp
+                              ? formatTimeRaw((message as StampedMessage).header.stamp)
+                              : "[ unknown ]",
                         )
                         .join(", ")
                     : "no messages"}
@@ -272,10 +273,10 @@ function ImageView(props: Props) {
     customMarkerTopicOptions = NO_CUSTOM_OPTIONS,
   } = config;
   const { topics } = PanelAPI.useDataSourceInfo();
-  const cameraTopicFullObject = useMemo(() => getTopicsByTopicName(topics)[cameraTopic], [
-    cameraTopic,
-    topics,
-  ]);
+  const cameraTopicFullObject = useMemo(
+    () => getTopicsByTopicName(topics)[cameraTopic],
+    [cameraTopic, topics],
+  );
 
   // Namespaces represent marker topics based on the camera topic prefix (e.g. "/camera_front_medium")
   const { allCameraNamespaces, imageTopicsByNamespace } = useMemo(() => {

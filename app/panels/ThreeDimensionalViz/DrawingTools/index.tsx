@@ -40,9 +40,8 @@ function DrawingTools({
   polygonBuilder,
   selectedPolygonEditFormat,
 }: Props) {
-  const [selectedTab, setSelectedTab] = React.useState<DrawingTabType | undefined>(
-    defaultSelectedTab,
-  );
+  const [selectedTab, setSelectedTab] =
+    React.useState<DrawingTabType | undefined>(defaultSelectedTab);
 
   return (
     <ExpandingToolbar

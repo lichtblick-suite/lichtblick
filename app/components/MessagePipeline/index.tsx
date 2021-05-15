@@ -141,9 +141,10 @@ export function MessagePipelineProvider({
     () => flatten(Object.values(subscriptionsById)),
     [subscriptionsById],
   );
-  const publishers: AdvertisePayload[] = useMemo(() => flatten(Object.values(publishersById)), [
-    publishersById,
-  ]);
+  const publishers: AdvertisePayload[] = useMemo(
+    () => flatten(Object.values(publishersById)),
+    [publishersById],
+  );
   const player = maybePlayer.player;
   useEffect(() => player?.setSubscriptions(subscriptions), [player, subscriptions]);
   useEffect(() => player?.setPublishers(publishers), [player, publishers]);

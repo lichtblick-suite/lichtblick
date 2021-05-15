@@ -24,9 +24,7 @@ type SyncOption = keyof typeof SYNC_OPTIONS;
 type BagSyncData = { checkedKeys: string[]; settingsByKey: TopicSettingsCollection };
 type Keys = { bag1: string[]; bag2: string[] };
 
-function partitionKeys(
-  keys: string[],
-): {
+function partitionKeys(keys: string[]): {
   groupKeys: Keys;
   topicKeys: Keys;
   namespaceKeys: Keys;

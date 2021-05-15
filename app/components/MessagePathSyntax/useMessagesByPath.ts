@@ -35,11 +35,10 @@ export default function useMessagesByPath(
     historySize,
   });
 
-  const decodeMessagePathsForMessagesByTopic = useDecodeMessagePathsForMessagesByTopic(
-    memoizedPaths,
+  const decodeMessagePathsForMessagesByTopic =
+    useDecodeMessagePathsForMessagesByTopic(memoizedPaths);
+  return useMemo(
+    () => decodeMessagePathsForMessagesByTopic(messagesByTopic),
+    [decodeMessagePathsForMessagesByTopic, messagesByTopic],
   );
-  return useMemo(() => decodeMessagePathsForMessagesByTopic(messagesByTopic), [
-    decodeMessagePathsForMessagesByTopic,
-    messagesByTopic,
-  ]);
 }

@@ -71,11 +71,8 @@ export default function UnlinkGlobalVariables({
   name,
   showList = false,
 }: Props): JSX.Element | ReactNull {
-  const {
-    linkedGlobalVariables,
-    linkedGlobalVariablesByName,
-    setLinkedGlobalVariables,
-  } = useLinkedGlobalVariables();
+  const { linkedGlobalVariables, linkedGlobalVariablesByName, setLinkedGlobalVariables } =
+    useLinkedGlobalVariables();
 
   const links: LinkedGlobalVariable[] = linkedGlobalVariablesByName[name] ?? [];
   const firstLink = links[0];

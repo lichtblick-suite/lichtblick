@@ -119,7 +119,7 @@ export class TcpSocketElectron {
     // where sockets have file descriptors. See
     // <https://github.com/nodejs/help/issues/1312>
     // eslint-disable-next-line no-underscore-dangle
-    return ((this._socket as unknown) as MaybeHasFd)._handle?.fd;
+    return (this._socket as unknown as MaybeHasFd)._handle?.fd;
   }
 
   setKeepAlive(enable?: boolean, initialDelay?: number): this {

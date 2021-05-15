@@ -319,7 +319,7 @@ function instancedGetChildrenForHitmap<
     settings?: {
       pointSize?: number;
     };
-  }
+  },
 >(props: T[], assignNextColors: AssignNextColorsFn, excludedObjects: MouseEventObject[]): T[] {
   return filterMap(props, (prop) => {
     // exclude all points if one has been interacted with because iterating through all points

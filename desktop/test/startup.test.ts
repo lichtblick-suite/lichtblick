@@ -10,7 +10,7 @@ jest.setTimeout(10000);
 
 // In node.js the electron import gives us the path to the electron binary
 // Our type definitions don't realize this so cast the variable to a string
-const electronPath = (electron as unknown) as string;
+const electronPath = electron as unknown as string;
 const appPath = path.join(__dirname, "..", ".webpack");
 
 const app = new Application({

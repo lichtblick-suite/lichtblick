@@ -144,7 +144,7 @@ export default function ChildToggle(props: Props): ReactElement {
       if (!floatingEl.current) {
         return;
       }
-      const node = (event.target as any) as HTMLElement;
+      const node = event.target as any as HTMLElement;
       // if there was a click outside this container and outside children[0]
       // fire the toggle callback to close expanded section
       if (floatingEl.current.contains(node) || (el.current?.contains(node) ?? false)) {

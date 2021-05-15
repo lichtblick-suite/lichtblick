@@ -16,8 +16,9 @@ import { Command } from "regl-worldview";
 import { ReglColor } from "@foxglove-studio/app/util/colorUtils";
 
 const makeReglCommand = memoize(
-  ({ overwriteDepthBuffer }: { overwriteDepthBuffer?: boolean }) => (regl: any) => ({
-    vert: `
+  ({ overwriteDepthBuffer }: { overwriteDepthBuffer?: boolean }) =>
+    (regl: any) => ({
+      vert: `
       precision mediump float;
       attribute vec2 position;
       void main () {
@@ -25,39 +26,39 @@ const makeReglCommand = memoize(
       }
     `,
 
-    frag: `
+      frag: `
       precision mediump float;
       uniform vec4 color;
       void main () {
         gl_FragColor = color;
     }`,
 
-    attributes: {
-      position: regl.prop("points"),
-    },
-
-    uniforms: {
-      color: regl.prop("color"),
-    },
-
-    count: regl.prop("points.length"),
-
-    blend: {
-      enable: true,
-      func: {
-        src: "src alpha",
-        dst: "one minus src alpha",
+      attributes: {
+        position: regl.prop("points"),
       },
-    },
 
-    depth: {
-      // If overwriteDepthBuffer is enabled, we will always
-      // write to the depth buffer with a "far away" value of 1.
-      // The result is similar to calling regl.clear({ depth: 1 }).
-      enable: overwriteDepthBuffer ?? false,
-      func: "always",
-    },
-  }),
+      uniforms: {
+        color: regl.prop("color"),
+      },
+
+      count: regl.prop("points.length"),
+
+      blend: {
+        enable: true,
+        func: {
+          src: "src alpha",
+          dst: "one minus src alpha",
+        },
+      },
+
+      depth: {
+        // If overwriteDepthBuffer is enabled, we will always
+        // write to the depth buffer with a "far away" value of 1.
+        // The result is similar to calling regl.clear({ depth: 1 }).
+        enable: overwriteDepthBuffer ?? false,
+        func: "always",
+      },
+    }),
   (...args) => JSON.stringify(args),
 );
 

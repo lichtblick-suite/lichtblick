@@ -135,25 +135,26 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
   );
 
   const swap = useCallback(
-    (id?: string) => ({ type, config, relatedConfigs }: PanelSelection) => {
-      actions.swapPanel({
-        tabId,
-        originalId: id as any,
-        type,
-        root: mosaicActions.getRoot() as any,
-        path: mosaicWindowActions.getPath(),
-        config: config as any,
-        relatedConfigs,
-      });
-      const name = getEventNames().PANEL_SWAP;
-      const eventType = getEventTags().PANEL_TYPE;
-      if (name != undefined && eventType != undefined) {
-        logEvent({
-          name: name,
-          tags: { [eventType]: type },
+    (id?: string) =>
+      ({ type, config, relatedConfigs }: PanelSelection) => {
+        actions.swapPanel({
+          tabId,
+          originalId: id as any,
+          type,
+          root: mosaicActions.getRoot() as any,
+          path: mosaicWindowActions.getPath(),
+          config: config as any,
+          relatedConfigs,
         });
-      }
-    },
+        const name = getEventNames().PANEL_SWAP;
+        const eventType = getEventTags().PANEL_TYPE;
+        if (name != undefined && eventType != undefined) {
+          logEvent({
+            name: name,
+            tags: { [eventType]: type },
+          });
+        }
+      },
     [actions, mosaicActions, mosaicWindowActions, tabId],
   );
 

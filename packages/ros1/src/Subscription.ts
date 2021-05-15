@@ -86,34 +86,24 @@ export class Subscription extends EventEmitter {
   }
 
   getInfo(): PublisherInfo[] {
-    return Array.from(this._publishers.values()).map(
-      (pub): PublisherInfo => {
-        return [
-          pub.connectionId,
-          pub.publisherXmlRpcUrl().toString(),
-          "i",
-          pub.connection.transportType(),
-          this.name,
-          1,
-          pub.connection.getTransportInfo(),
-        ];
-      },
-    );
+    return Array.from(this._publishers.values()).map((pub): PublisherInfo => {
+      return [
+        pub.connectionId,
+        pub.publisherXmlRpcUrl().toString(),
+        "i",
+        pub.connection.transportType(),
+        this.name,
+        1,
+        pub.connection.getTransportInfo(),
+      ];
+    });
   }
 
   getStats(): [string, PublisherStats[]] {
-    const pubStats = Array.from(this._publishers.values()).map(
-      (pub): PublisherStats => {
-        const stats = pub.connection.stats();
-        return [
-          pub.connectionId,
-          stats.bytesReceived,
-          stats.messagesReceived,
-          stats.dropEstimate,
-          0,
-        ];
-      },
-    );
+    const pubStats = Array.from(this._publishers.values()).map((pub): PublisherStats => {
+      const stats = pub.connection.stats();
+      return [pub.connectionId, stats.bytesReceived, stats.messagesReceived, stats.dropEstimate, 0];
+    });
     return [this.name, pubStats];
   }
 

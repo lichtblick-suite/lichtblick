@@ -58,14 +58,8 @@ const shortXAxisLabel = (path: PlotXAxisVal): string => {
 };
 
 export default function PlotLegend(props: PlotLegendProps): JSX.Element {
-  const {
-    paths,
-    saveConfig,
-    showLegend,
-    xAxisVal,
-    xAxisPath,
-    pathsWithMismatchedDataLengths,
-  } = props;
+  const { paths, saveConfig, showLegend, xAxisVal, xAxisPath, pathsWithMismatchedDataLengths } =
+    props;
   const lastPath = last(paths);
 
   const onInputChange = useCallback(

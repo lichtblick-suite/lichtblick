@@ -104,7 +104,7 @@ export default class ParsedMessageCache {
 
     if (this._cacheSizeInBytes > CACHE_SIZE_BYTES) {
       // Delete the least recently used caches, once they exceed CACHE_SIZE_BYTES.
-      const cacheEntries = (Object.entries(this._cachesByDeciSecond) as any) as [number, Cache][];
+      const cacheEntries = Object.entries(this._cachesByDeciSecond) as any as [number, Cache][];
       const sortedCaches = sortBy(cacheEntries, (val) => -val[1].lastAccessIndex);
       let totalBytes = 0;
       for (const [deciSecond, { sizeInBytes }] of sortedCaches) {

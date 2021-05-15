@@ -85,9 +85,7 @@ function MainEditor({
   onSettingsChange: (
     settings:
       | any
-      | ((
-          prevSettings: never,
-        ) => {
+      | ((prevSettings: never) => {
           // no-op
         }),
   ) => void;
@@ -147,9 +145,7 @@ function TopicSettingsModal({
     (
       settings:
         | any
-        | ((
-            prevSettings: never,
-          ) => {
+        | ((prevSettings: never) => {
             // no-op
           }),
     ) => {

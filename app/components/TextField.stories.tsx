@@ -46,7 +46,7 @@ function ControlledExample() {
     <div
       ref={(el) => {
         if (el) {
-          const input = (el.querySelector("input") as any) as HTMLInputElement;
+          const input = el.querySelector("input") as any as HTMLInputElement;
           triggerInputChange(input, "another value");
         }
       }}
@@ -75,7 +75,7 @@ function ValidateOnBlurExample() {
     <div
       ref={(el) => {
         if (el) {
-          const input = (el.querySelector("input") as any) as HTMLInputElement;
+          const input = el.querySelector("input") as any as HTMLInputElement;
           // only see the validation error after input blur
           triggerInputChange(input, "invalid_val");
           setTimeout(() => {

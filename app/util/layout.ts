@@ -134,7 +134,7 @@ function getLayoutWithNewPanelIds(
     }
   }
   // TODO: Refactor above to allow for better typing here.
-  return (newLayout as any) as MosaicNode<string>;
+  return newLayout as any as MosaicNode<string>;
 }
 
 // Recursively removes all empty nodes from a layout
@@ -213,20 +213,22 @@ export const getParentTabPanelByPanelId = (
     return memo;
   }, {});
 
-const replaceMaybeTabLayoutWithNewPanelIds = (panelIdMap: PanelIdMap) => ({ id, config }: any) => {
-  return config.tabs
-    ? {
-        id,
-        config: {
-          ...config,
-          tabs: config.tabs.map((t: any) => ({
-            ...t,
-            layout: getLayoutWithNewPanelIds(t.layout, panelIdMap),
-          })),
-        },
-      }
-    : { id, config };
-};
+const replaceMaybeTabLayoutWithNewPanelIds =
+  (panelIdMap: PanelIdMap) =>
+  ({ id, config }: any) => {
+    return config.tabs
+      ? {
+          id,
+          config: {
+            ...config,
+            tabs: config.tabs.map((t: any) => ({
+              ...t,
+              layout: getLayoutWithNewPanelIds(t.layout, panelIdMap),
+            })),
+          },
+        }
+      : { id, config };
+  };
 
 export const getSaveConfigsPayloadForAddedPanel = ({
   id,
@@ -380,7 +382,7 @@ export const addPanelToTab = (
   tabId: string,
 ): SaveConfigsPayload => {
   const safeTabConfig = validateTabPanelConfig(tabConfig)
-    ? ((tabConfig as any) as TabPanelConfig)
+    ? (tabConfig as any as TabPanelConfig)
     : DEFAULT_TAB_PANEL_CONFIG;
 
   const currentTabLayout = safeTabConfig.tabs[safeTabConfig.activeTabIdx]?.layout;

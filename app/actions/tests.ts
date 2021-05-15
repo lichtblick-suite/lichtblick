@@ -25,16 +25,16 @@ export enum TEST_ACTION_TYPES {
   TEST_SET_AUTH_STATE = "TEST_SET_AUTH_STATE",
 }
 
-export const testOverwritePersistedState = (
-  payload: PersistedState,
-): Dispatcher<TEST_SET_PERSISTED_STATE> => (dispatch) => {
-  return dispatch({ type: TEST_ACTION_TYPES.TEST_SET_PERSISTED_STATE, payload });
-};
+export const testOverwritePersistedState =
+  (payload: PersistedState): Dispatcher<TEST_SET_PERSISTED_STATE> =>
+  (dispatch) => {
+    return dispatch({ type: TEST_ACTION_TYPES.TEST_SET_PERSISTED_STATE, payload });
+  };
 
-export const testOverwriteAuthState = (payload: AuthState): Dispatcher<TEST_SET_AUTH_STATE> => (
-  dispatch,
-) => {
-  return dispatch({ type: TEST_ACTION_TYPES.TEST_SET_AUTH_STATE, payload });
-};
+export const testOverwriteAuthState =
+  (payload: AuthState): Dispatcher<TEST_SET_AUTH_STATE> =>
+  (dispatch) => {
+    return dispatch({ type: TEST_ACTION_TYPES.TEST_SET_AUTH_STATE, payload });
+  };
 
 export type TestsActions = TEST_SET_PERSISTED_STATE | TEST_SET_AUTH_STATE;

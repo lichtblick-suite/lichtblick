@@ -104,11 +104,10 @@ export function ToolbarTab(props: Props): JSX.Element {
     }),
     [actions, tabIndex],
   );
-  const setTabTitle = useCallback(() => actions.setTabTitle(tabIndex, title), [
-    actions,
-    tabIndex,
-    title,
-  ]);
+  const setTabTitle = useCallback(
+    () => actions.setTabTitle(tabIndex, title),
+    [actions, tabIndex, title],
+  );
 
   const onClickTab = useCallback(() => {
     if (!isActive) {

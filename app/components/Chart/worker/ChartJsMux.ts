@@ -42,7 +42,7 @@ import ChartJSManager from "./ChartJSManager";
 // scaling is set >100%.
 async function loadDefaultFont(): Promise<FontFace> {
   const fontFace = new FontFace("Roboto Mono", `url(${RobotoMono}) format('woff2')`);
-  ((self as unknown) as WorkerGlobalScope).fonts.add(fontFace);
+  (self as unknown as WorkerGlobalScope).fonts.add(fontFace);
   return fontFace.load();
 }
 

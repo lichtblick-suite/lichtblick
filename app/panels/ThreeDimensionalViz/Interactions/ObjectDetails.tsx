@@ -130,10 +130,9 @@ function ObjectDetails({ interactionData, objectToDisplay }: Props) {
   }
 
   const sortedDataObject = Object.fromEntries(
-    sortBy(
-      Object.keys(originalObject),
-      (key) => -PREFERRED_OBJECT_KEY_ORDER.indexOf(key),
-    ).map((key) => [key, originalObject[key]]),
+    sortBy(Object.keys(originalObject), (key) => -PREFERRED_OBJECT_KEY_ORDER.indexOf(key)).map(
+      (key) => [key, originalObject[key]],
+    ),
   );
 
   return (

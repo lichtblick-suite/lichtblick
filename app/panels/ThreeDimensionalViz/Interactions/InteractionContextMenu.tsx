@@ -132,10 +132,10 @@ function InteractionContextMenuItem({
   const onMouseLeave = useCallback(() => setHoveredMarkerMatchers([]), [setHoveredMarkerMatchers]);
   useEffect(() => onMouseLeave, [onMouseLeave]);
 
-  const selectItemObject = useCallback(() => selectObject(interactiveObject), [
-    interactiveObject,
-    selectObject,
-  ]);
+  const selectItemObject = useCallback(
+    () => selectObject(interactiveObject),
+    [interactiveObject, selectObject],
+  );
 
   return (
     <SMenuItem

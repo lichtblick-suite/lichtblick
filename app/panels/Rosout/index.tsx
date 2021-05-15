@@ -61,11 +61,10 @@ const RosoutPanel = React.memo(({ config, saveConfig }: Props) => {
 
   const searchTermsSet = useMemo(() => new Set(searchTerms), [searchTerms]);
 
-  const filteredMessages = useMemo(() => filterMessages(messages, { minLogLevel, searchTerms }), [
-    messages,
-    minLogLevel,
-    searchTerms,
-  ]);
+  const filteredMessages = useMemo(
+    () => filterMessages(messages, { minLogLevel, searchTerms }),
+    [messages, minLogLevel, searchTerms],
+  );
 
   const topicToRenderMenu = (
     <TopicToRenderMenu

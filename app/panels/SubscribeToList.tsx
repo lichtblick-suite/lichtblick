@@ -37,9 +37,10 @@ function SubscribeToList({ config, saveConfig }: Props): React.ReactElement {
         style={{ flexGrow: 1, border: "none" }}
         placeholder="add /some/topics/here separated by newlines or commas or whitespace"
         value={config.topics}
-        onChange={React.useCallback((event) => saveConfig({ topics: event.target.value }), [
-          saveConfig,
-        ])}
+        onChange={React.useCallback(
+          (event) => saveConfig({ topics: event.target.value }),
+          [saveConfig],
+        )}
       />
       <div style={{ position: "absolute", bottom: 8, right: 12 }}>
         messages seen: {messagesSeen}

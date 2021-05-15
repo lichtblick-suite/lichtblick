@@ -455,9 +455,9 @@ storiesOf("panels/ThreeDimensionalViz/interactions/open-close behavior", module)
           onMount={(_) =>
             setImmediate(async () => {
               await delay(100);
-              (document.querySelectorAll(
-                '[data-test="ExpandingToolbar-Drawing tools"]',
-              )[0] as any).click(); // Start drawing
+              (
+                document.querySelectorAll('[data-test="ExpandingToolbar-Drawing tools"]')[0] as any
+              ).click(); // Start drawing
               await delay(250);
               selectObject();
             })

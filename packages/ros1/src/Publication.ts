@@ -31,28 +31,24 @@ export class Publication {
   }
 
   getInfo(): SubscriberInfo[] {
-    return Array.from(this._subscribers.values()).map(
-      (sub): SubscriberInfo => {
-        return [
-          sub.connectionId,
-          sub.destinationCallerId,
-          "o",
-          sub.connection.transportType(),
-          this.name,
-          1,
-          sub.connection.getTransportInfo(),
-        ];
-      },
-    );
+    return Array.from(this._subscribers.values()).map((sub): SubscriberInfo => {
+      return [
+        sub.connectionId,
+        sub.destinationCallerId,
+        "o",
+        sub.connection.transportType(),
+        this.name,
+        1,
+        sub.connection.getTransportInfo(),
+      ];
+    });
   }
 
   getStats(): [string, SubscriberStats[]] {
-    const subStats = Array.from(this._subscribers.values()).map(
-      (sub): SubscriberStats => {
-        const stats = sub.connection.stats();
-        return [sub.connectionId, stats.bytesSent, stats.bytesSent, stats.messagesSent, 0];
-      },
-    );
+    const subStats = Array.from(this._subscribers.values()).map((sub): SubscriberStats => {
+      const stats = sub.connection.stats();
+      return [sub.connectionId, stats.bytesSent, stats.bytesSent, stats.messagesSent, 0];
+    });
     return [this.name, subStats];
   }
 }

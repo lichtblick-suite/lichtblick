@@ -74,9 +74,8 @@ export default function getDiff(
         }
       }
       for (const idKey in candidateIdsToCompareWith) {
-        const { before: candidateIdBefore, after: candidateIdAfter } = candidateIdsToCompareWith[
-          idKey
-        ];
+        const { before: candidateIdBefore, after: candidateIdAfter } =
+          candidateIdsToCompareWith[idKey];
         if (
           uniq(candidateIdBefore).length === before.length &&
           uniq(candidateIdAfter).length === after.length

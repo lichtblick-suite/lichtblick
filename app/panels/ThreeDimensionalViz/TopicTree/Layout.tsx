@@ -237,13 +237,14 @@ export default function Layout({
     measurePoints: { start: undefined, end: undefined },
   });
   const [currentEditingTopic, setCurrentEditingTopic] = useState<Topic | undefined>(undefined);
-  const [editingNamespace, setEditingNamespace] = useState<
-    | {
-        namespaceKey: string;
-        namespaceColor?: string;
-      }
-    | undefined
-  >();
+  const [editingNamespace, setEditingNamespace] =
+    useState<
+      | {
+          namespaceKey: string;
+          namespaceColor?: string;
+        }
+      | undefined
+    >();
 
   const searchTextProps = useSearchText();
   const {
@@ -257,9 +258,8 @@ export default function Layout({
   const [_, forceUpdate] = useReducer((x: number) => x + 1, 0);
   const measuringElRef = useRef<MeasuringTool>(ReactNull);
   const [drawingTabType, setDrawingTabType] = useState<DrawingTabType | undefined>(undefined);
-  const [interactionsTabType, setInteractionsTabType] = useState<DrawingTabType | undefined>(
-    undefined,
-  );
+  const [interactionsTabType, setInteractionsTabType] =
+    useState<DrawingTabType | undefined>(undefined);
 
   const [selectionState, setSelectionState] = useState<UserSelectionState>({
     clickedObjects: [],
@@ -341,14 +341,12 @@ export default function Layout({
     [],
   );
 
-  const {
-    availableNamespacesByTopic,
-    sceneErrorsByKey: sceneErrorsByTopicKey,
-  } = useSceneBuilderAndTransformsData({
-    sceneBuilder,
-    staticallyAvailableNamespacesByTopic,
-    transforms,
-  });
+  const { availableNamespacesByTopic, sceneErrorsByKey: sceneErrorsByTopicKey } =
+    useSceneBuilderAndTransformsData({
+      sceneBuilder,
+      staticallyAvailableNamespacesByTopic,
+      transforms,
+    });
 
   // Use deep compare so that we only regenerate rootTreeNode when topics change.
   const memoizedTopics = useShallowMemo(topics);
@@ -607,10 +605,8 @@ export default function Layout({
     if (!args) {
       return;
     }
-    const {
-      drawingTabType: currentDrawingTabType,
-      handleDrawPolygons: currentHandleDrawPolygons,
-    } = callbackInputsRef.current;
+    const { drawingTabType: currentDrawingTabType, handleDrawPolygons: currentHandleDrawPolygons } =
+      callbackInputsRef.current;
     const measuringHandler = measuringElRef.current && (measuringElRef.current as any)[eventName];
     const measureActive = measuringElRef.current?.measureActive ?? false;
     if (measuringHandler && measureActive) {
@@ -712,10 +708,8 @@ export default function Layout({
       onSetPolygons: (polygons: Polygon[]) => setPolygonBuilder(new PolygonBuilder(polygons)),
       toggleDebug: () => setDebug(!callbackInputsRef.current.debug),
       toggleCameraMode: () => {
-        const {
-          cameraState: currentCameraState,
-          saveConfig: currentSaveConfig,
-        } = callbackInputsRef.current;
+        const { cameraState: currentCameraState, saveConfig: currentSaveConfig } =
+          callbackInputsRef.current;
         currentSaveConfig({
           cameraState: { ...currentCameraState, perspective: !currentCameraState.perspective },
         });
@@ -773,11 +767,10 @@ export default function Layout({
     return handlers;
   }, [pinTopics, saveConfig, searchTextProps, toggleCameraMode]);
 
-  const markerProviders = useMemo(() => [gridBuilder, sceneBuilder, transformsBuilder], [
-    gridBuilder,
-    sceneBuilder,
-    transformsBuilder,
-  ]);
+  const markerProviders = useMemo(
+    () => [gridBuilder, sceneBuilder, transformsBuilder],
+    [gridBuilder, sceneBuilder, transformsBuilder],
+  );
 
   const cursorType = isDrawing ? "crosshair" : "";
 

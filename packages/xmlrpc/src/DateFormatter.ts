@@ -14,7 +14,8 @@ export class DateFormatter {
   private _ms = true;
 
   // Regular Expression that dissects an ISO 8601 formatted string into an array of parts
-  static ISO8601 = /([0-9]{4})([-]?([0-9]{2}))([-]?([0-9]{2}))(T-?([0-9]{2})(((:?([0-9]{2}))?((:?([0-9]{2}))?(\.([0-9]+))?))?)(Z|([+-]([0-9]{2}(:?([0-9]{2}))?)))?)?/;
+  static ISO8601 =
+    /([0-9]{4})([-]?([0-9]{2}))([-]?([0-9]{2}))(T-?([0-9]{2})(((:?([0-9]{2}))?((:?([0-9]{2}))?(\.([0-9]+))?))?)(Z|([+-]([0-9]{2}(:?([0-9]{2}))?)))?)?/;
 
   constructor(options?: DateFormatterOptions) {
     if (options) {

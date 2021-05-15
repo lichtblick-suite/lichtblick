@@ -81,11 +81,10 @@ function TimezoneSettings(): React.ReactElement {
     return map;
   }, [fixedItems, timezoneItems]);
 
-  const selectedItem = useMemo(() => itemsByData.get(timezone ?? "") ?? detectItem, [
-    itemsByData,
-    timezone,
-    detectItem,
-  ]);
+  const selectedItem = useMemo(
+    () => itemsByData.get(timezone ?? "") ?? detectItem,
+    [itemsByData, timezone, detectItem],
+  );
 
   const [filterText, setFilterText] = useState<string>("");
   const filteredItems = useMemo(() => {

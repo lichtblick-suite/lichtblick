@@ -79,9 +79,9 @@ storiesOf("panels/Table/index", module)
         fixture={fixture}
         onMount={() => {
           setImmediate(() => {
-            (document.querySelectorAll(
-              "[data-test=expand-row-0]",
-            )[0] as HTMLTableCellElement).click();
+            (
+              document.querySelectorAll("[data-test=expand-row-0]")[0] as HTMLTableCellElement
+            ).click();
           });
         }}
       >
@@ -95,9 +95,9 @@ storiesOf("panels/Table/index", module)
         fixture={fixture}
         onMount={() => {
           setImmediate(() => {
-            (document.querySelectorAll(
-              "[data-test=expand-cell-obj-0]",
-            )[0] as HTMLTableCellElement).click();
+            (
+              document.querySelectorAll("[data-test=expand-cell-obj-0]")[0] as HTMLTableCellElement
+            ).click();
           });
         }}
       >
@@ -111,9 +111,9 @@ storiesOf("panels/Table/index", module)
         fixture={fixture}
         onMount={() => {
           setImmediate(() => {
-            (document.querySelectorAll(
-              "[data-test=expand-cell-arr-0]",
-            )[0] as HTMLTableCellElement).click();
+            (
+              document.querySelectorAll("[data-test=expand-cell-arr-0]")[0] as HTMLTableCellElement
+            ).click();
           });
         }}
       >
@@ -127,12 +127,14 @@ storiesOf("panels/Table/index", module)
         fixture={fixture}
         onMount={() => {
           setImmediate(() => {
-            (document.querySelectorAll(
-              "[data-test=expand-row-0]",
-            )[0] as HTMLTableCellElement).click();
-            (document.querySelectorAll(
-              "[data-test=expand-cell-arr-obj-0]",
-            )[0] as HTMLTableCellElement).click();
+            (
+              document.querySelectorAll("[data-test=expand-row-0]")[0] as HTMLTableCellElement
+            ).click();
+            (
+              document.querySelectorAll(
+                "[data-test=expand-cell-arr-obj-0]",
+              )[0] as HTMLTableCellElement
+            ).click();
           });
         }}
       >
@@ -146,12 +148,12 @@ storiesOf("panels/Table/index", module)
         fixture={fixture}
         onMount={() => {
           setImmediate(() => {
-            (document.querySelectorAll(
-              "[data-test=expand-row-0]",
-            )[0] as HTMLTableCellElement).click();
-            (document.querySelectorAll(
-              "[data-test=expand-row-1]",
-            )[0] as HTMLTableCellElement).click();
+            (
+              document.querySelectorAll("[data-test=expand-row-0]")[0] as HTMLTableCellElement
+            ).click();
+            (
+              document.querySelectorAll("[data-test=expand-row-1]")[0] as HTMLTableCellElement
+            ).click();
           });
         }}
       >
@@ -172,12 +174,12 @@ storiesOf("panels/Table/index", module)
         fixture={fixture}
         onMount={() => {
           setImmediate(() => {
-            (document.querySelectorAll(
-              "[data-test=column-header-val]",
-            )[0] as HTMLTableCellElement).click();
-            (document.querySelectorAll(
-              "[data-test=column-header-val]",
-            )[0] as HTMLTableCellElement).click();
+            (
+              document.querySelectorAll("[data-test=column-header-val]")[0] as HTMLTableCellElement
+            ).click();
+            (
+              document.querySelectorAll("[data-test=column-header-val]")[0] as HTMLTableCellElement
+            ).click();
           });
         }}
       >

@@ -22,7 +22,8 @@ function isEmpty(value: unknown) {
 }
 
 export const isEmail = (value?: unknown): boolean => {
-  const regex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const regex =
+    /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return !isEmpty(value) && regex.test(String(value));
 };
 
@@ -35,19 +36,21 @@ export const isNumber = (value: unknown): string | undefined =>
 export const isBoolean = (value: unknown): string | undefined =>
   !isEmpty(value) && typeof value !== "boolean" ? `must be "true" or "false"` : undefined;
 
-export const isNumberArray = (expectArrLen = 0) => (value: unknown): string | undefined => {
-  if (Array.isArray(value)) {
-    if (value.length !== expectArrLen) {
-      return `must contain ${expectArrLen} array items`;
-    }
-    for (const item of value) {
-      if (typeof item !== "number") {
-        return `must contain only numbers in the array. "${item}" is not a number.`;
+export const isNumberArray =
+  (expectArrLen = 0) =>
+  (value: unknown): string | undefined => {
+    if (Array.isArray(value)) {
+      if (value.length !== expectArrLen) {
+        return `must contain ${expectArrLen} array items`;
+      }
+      for (const item of value) {
+        if (typeof item !== "number") {
+          return `must contain only numbers in the array. "${item}" is not a number.`;
+        }
       }
     }
-  }
-  return undefined;
-};
+    return undefined;
+  };
 
 export const isOrientation = (value: unknown): string | undefined => {
   const isNumberArrayErr = isNumberArray(4)(value);
@@ -67,40 +70,46 @@ export const isOrientation = (value: unknown): string | undefined => {
 export const isString = (value: unknown): string | undefined =>
   typeof value !== "string" ? "must be string" : undefined;
 
-export const minLen = (minLength = 0) => (value: unknown): string | undefined => {
-  if (Array.isArray(value)) {
-    return value.length < minLength
-      ? `must contain at least ${minLength} array ${minLength === 1 ? "item" : "items"}`
-      : undefined;
-  } else if (typeof value === "string") {
-    return value.length < minLength
-      ? `must contain at least ${minLength} ${minLength === 1 ? "character" : "characters"}`
-      : undefined;
-  }
-  return undefined;
-};
+export const minLen =
+  (minLength = 0) =>
+  (value: unknown): string | undefined => {
+    if (Array.isArray(value)) {
+      return value.length < minLength
+        ? `must contain at least ${minLength} array ${minLength === 1 ? "item" : "items"}`
+        : undefined;
+    } else if (typeof value === "string") {
+      return value.length < minLength
+        ? `must contain at least ${minLength} ${minLength === 1 ? "character" : "characters"}`
+        : undefined;
+    }
+    return undefined;
+  };
 
-export const maxLen = (maxLength = 0) => (value: unknown): string | undefined => {
-  if (Array.isArray(value)) {
-    return value.length > maxLength ? `must contain at most ${maxLength} array items` : undefined;
-  } else if (typeof value === "string") {
-    return value.length > maxLength ? `must contain at most ${maxLength} characters` : undefined;
-  }
-  return undefined;
-};
+export const maxLen =
+  (maxLength = 0) =>
+  (value: unknown): string | undefined => {
+    if (Array.isArray(value)) {
+      return value.length > maxLength ? `must contain at most ${maxLength} array items` : undefined;
+    } else if (typeof value === "string") {
+      return value.length > maxLength ? `must contain at most ${maxLength} characters` : undefined;
+    }
+    return undefined;
+  };
 
-export const hasLen = (len = 0) => (value: unknown): string | undefined => {
-  if (Array.isArray(value)) {
-    return value.length !== len
-      ? `must contain exact ${len} array items (current item count: ${value.length})`
-      : undefined;
-  } else if (typeof value === "string") {
-    return value.length !== len
-      ? `must contain ${len} characters (current count: ${value.length})`
-      : undefined;
-  }
-  return undefined;
-};
+export const hasLen =
+  (len = 0) =>
+  (value: unknown): string | undefined => {
+    if (Array.isArray(value)) {
+      return value.length !== len
+        ? `must contain exact ${len} array items (current item count: ${value.length})`
+        : undefined;
+    } else if (typeof value === "string") {
+      return value.length !== len
+        ? `must contain ${len} characters (current count: ${value.length})`
+        : undefined;
+    }
+    return undefined;
+  };
 
 // return the first error
 const join = (rules: Array<Rule>) => (value: unknown) =>

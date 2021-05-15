@@ -113,19 +113,16 @@ export class HttpServerElectron {
       const body = Buffer.concat(chunks).toString();
 
       const requestId = this._nextRequestId++;
-      this._requests.set(
-        requestId,
-        (incomingRes): Promise<void> => {
-          res.chunkedEncoding = incomingRes.chunkedEncoding ?? res.chunkedEncoding;
-          res.shouldKeepAlive = incomingRes.shouldKeepAlive ?? res.shouldKeepAlive;
-          res.useChunkedEncodingByDefault =
-            incomingRes.useChunkedEncodingByDefault ?? res.useChunkedEncodingByDefault;
-          res.sendDate = incomingRes.sendDate ?? res.sendDate;
+      this._requests.set(requestId, (incomingRes): Promise<void> => {
+        res.chunkedEncoding = incomingRes.chunkedEncoding ?? res.chunkedEncoding;
+        res.shouldKeepAlive = incomingRes.shouldKeepAlive ?? res.shouldKeepAlive;
+        res.useChunkedEncodingByDefault =
+          incomingRes.useChunkedEncodingByDefault ?? res.useChunkedEncodingByDefault;
+        res.sendDate = incomingRes.sendDate ?? res.sendDate;
 
-          res.writeHead(incomingRes.statusCode, incomingRes.statusMessage, incomingRes.headers);
-          return new Promise((resolve) => res.end(incomingRes.body, resolve));
-        },
-      );
+        res.writeHead(incomingRes.statusCode, incomingRes.statusMessage, incomingRes.headers);
+        return new Promise((resolve) => res.end(incomingRes.body, resolve));
+      });
 
       const request: HttpRequest = {
         body,

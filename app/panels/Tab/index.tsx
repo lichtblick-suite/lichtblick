@@ -97,12 +97,10 @@ function Tab({ config, saveConfig }: Props) {
     },
     [config, saveConfig],
   );
-  const actions = useMemo(() => ({ addTab, removeTab, selectTab, setTabTitle }), [
-    addTab,
-    removeTab,
-    selectTab,
-    setTabTitle,
-  ]);
+  const actions = useMemo(
+    () => ({ addTab, removeTab, selectTab, setTabTitle }),
+    [addTab, removeTab, selectTab, setTabTitle],
+  );
 
   // If the user drags the active tab out of the toolbar, we'll hide the
   // active layout in order to prevent tabs from dropping into child tabs.
