@@ -4280,10 +4280,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/amplitude-js@npm:7.0.1":
-  version: 7.0.1
-  resolution: "@types/amplitude-js@npm:7.0.1"
-  checksum: c613d3d828c444cc7cb93f6870b403d25ae6148cc97136f717be5a156d2e57f7d7d1c5c180edd0c2d3ef795f40972e9e950f04ef7702c64a4c7037320fb9a6a8
+"@types/amplitude-js@npm:8.0.0":
+  version: 8.0.0
+  resolution: "@types/amplitude-js@npm:8.0.0"
+  checksum: e16bdea6e90329fc2f8e40686e11a2e4b28214929ca12e01f31bdcf104d03b1d381b0176835ad735f4c7128ba418e25ba293e59b84e8313ea3491d3d9075eb51
   languageName: node
   linkType: hard
 
@@ -6376,15 +6376,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"amplitude-js@npm:8.1.0":
-  version: 8.1.0
-  resolution: "amplitude-js@npm:8.1.0"
+"amplitude-js@npm:8.2.1":
+  version: 8.2.1
+  resolution: "amplitude-js@npm:8.2.1"
   dependencies:
     "@amplitude/ua-parser-js": 0.7.24
     "@amplitude/utils": ^1.0.5
     blueimp-md5: ^2.10.0
     query-string: 5
-  checksum: 68bded962e582b217d635b95ae1d0b7aa0fb18f60021dee3d7586c734ba2e9e553f59ef94911833ed85c1b8ddfbd464d8112a751aa472cd2243ac831f3adaee7
+  checksum: 8afa7cd0f1b5dd90eab08e60392b5dc20956930f90c16303624e35e5c34302d03a1f56bbe2059b25d5a3e41bdc7219de5453e573f5f98ad707600f1a0a782ad7
   languageName: node
   linkType: hard
 
@@ -12719,7 +12719,7 @@ __metadata:
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.0-beta.8
     "@sentry/electron": 2.4.0
     "@sentry/webpack-plugin": 1.15.1
-    "@types/amplitude-js": 7.0.1
+    "@types/amplitude-js": 8.0.0
     "@types/babel__core": ^7
     "@types/babel__preset-env": ^7
     "@types/case-sensitive-paths-webpack-plugin": 2.1.5
@@ -12736,7 +12736,7 @@ __metadata:
     "@types/xmldom": ^0
     "@typescript-eslint/eslint-plugin": 4.21.0
     "@typescript-eslint/parser": 4.21.0
-    amplitude-js: 8.1.0
+    amplitude-js: 8.2.1
     babel-jest: 27.0.0-next.8
     babel-plugin-transform-import-meta: 1.0.1
     browserify-zlib: 0.2.0
