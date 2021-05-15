@@ -117,7 +117,7 @@
     "spectron": "https://github.com/foxglove/spectron.git#commit=7f88e8fe148ee14b3efc14c3646c08c4ed0a6747",
     "string-replace-loader": "3.0.1",
     "style-loader": "2.0.0",
-    "ts-loader": "8.2.0",
+    "ts-loader": "9.1.2",
     "ts-node": "9.1.1",
     "typescript": "4.2.2",
     "typescript-plugin-css-modules": "3.2.0",
