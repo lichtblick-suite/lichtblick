@@ -3166,9 +3166,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/electron@npm:2.4.0":
-  version: 2.4.0
-  resolution: "@sentry/electron@npm:2.4.0"
+"@sentry/electron@npm:2.4.1":
+  version: 2.4.1
+  resolution: "@sentry/electron@npm:2.4.1"
   dependencies:
     "@sentry/browser": 5.27.6
     "@sentry/core": 5.27.6
@@ -3176,8 +3176,8 @@ __metadata:
     "@sentry/node": 5.27.6
     "@sentry/types": 5.27.6
     "@sentry/utils": 5.27.6
-    tslib: ^1.9.3
-  checksum: c80ad63d5929b98623a52724e3552f2f28d1236d14f5f3eac73ce63d1244ba780b43b77f65573b009e604ee6fd30b22e2d8fb14213887ca5c09f3085e9e9dc7c
+    tslib: ^2.1.0
+  checksum: d8888369be2ca261852b443307e0fd4d693e5cf65555dd02179afa0e3be3ced68bbc979949065072f2400922c016d8366aee8de1f25e94c432e1ccbdd891a391
   languageName: node
   linkType: hard
 
@@ -12770,7 +12770,7 @@ __metadata:
     "@foxglove/electron-socket": "workspace:packages/electron-socket"
     "@foxglove/tsconfig": "workspace:packages/@foxglove/tsconfig"
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.0-beta.8
-    "@sentry/electron": 2.4.0
+    "@sentry/electron": 2.4.1
     "@sentry/webpack-plugin": 1.15.1
     "@types/amplitude-js": 8.0.0
     "@types/babel__core": ^7.1.14
