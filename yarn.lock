@@ -2931,24 +2931,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pmmmwh/react-refresh-webpack-plugin@npm:0.5.0-beta.1":
-  version: 0.5.0-beta.1
-  resolution: "@pmmmwh/react-refresh-webpack-plugin@npm:0.5.0-beta.1"
+"@pmmmwh/react-refresh-webpack-plugin@npm:0.5.0-beta.8":
+  version: 0.5.0-beta.8
+  resolution: "@pmmmwh/react-refresh-webpack-plugin@npm:0.5.0-beta.8"
   dependencies:
     ansi-html: ^0.0.7
     core-js-pure: ^3.8.1
     error-stack-parser: ^2.0.6
     html-entities: ^2.1.0
-    native-url: ^0.3.4
+    loader-utils: ^2.0.0
     schema-utils: ^3.0.0
     source-map: ^0.7.3
   peerDependencies:
     "@types/webpack": 4.x
-    react-refresh: ">=0.8.3 <0.10.0"
+    react-refresh: ^0.10.0
     sockjs-client: ^1.4.0
-    type-fest: ">=0.13.1 <1.0.0"
+    type-fest: ^1.0.2
     webpack: ">=4.43.0 <6.0.0"
-    webpack-dev-server: 3.x || 4.x
+    webpack-dev-server: 3.x || >=4.0.0-beta.0
     webpack-hot-middleware: 2.x
     webpack-plugin-serve: 0.x || 1.x
   peerDependenciesMeta:
@@ -2964,7 +2964,7 @@ __metadata:
       optional: true
     webpack-plugin-serve:
       optional: true
-  checksum: 5773e41360e99c965979e81888ec5cb22e46efa5ed77879de58bd4ca0d5e59a70f34556053c053f2bca5753edaed0263670e6ba04b18e6aaaa036c60df320935
+  checksum: 282ea202f070330732c94413c3759a6205d82df18fa4f90eff327359c9d86d077149839c19f992de511f7b165ffd718032d3eb8ef0b93afbb3f1422f872f6260
   languageName: node
   linkType: hard
 
@@ -12715,7 +12715,7 @@ __metadata:
     "@babel/preset-typescript": 7.13.0
     "@foxglove/electron-socket": "workspace:packages/electron-socket"
     "@foxglove/tsconfig": "workspace:packages/@foxglove/tsconfig"
-    "@pmmmwh/react-refresh-webpack-plugin": 0.5.0-beta.1
+    "@pmmmwh/react-refresh-webpack-plugin": 0.5.0-beta.8
     "@sentry/electron": 2.4.0
     "@sentry/webpack-plugin": 1.15.1
     "@types/amplitude-js": 7.0.1
@@ -18143,15 +18143,6 @@ __metadata:
   dependencies:
     querystring: ^0.2.0
   checksum: 064e580759f06060740636184ba8dbd8cf21a1237c769625591f8a0e956714ea27d58d601fe84c4b9600dfabc88edfb3bf51fc7a579764b5d60e0d9392aec9df
-  languageName: node
-  linkType: hard
-
-"native-url@npm:^0.3.4":
-  version: 0.3.4
-  resolution: "native-url@npm:0.3.4"
-  dependencies:
-    querystring: ^0.2.0
-  checksum: 26a3716a257db5d88d2678691175144d4732cb1b12d35925f939f837b7bb9d98ce18f1d7750409fb8988f190ad075b4b72310b0e212d61fd3d832e6d073ab89b
   languageName: node
   linkType: hard
 
