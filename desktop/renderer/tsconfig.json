@@ -5,16 +5,6 @@
     "rootDir": "../",
     "noEmit": true,
     "jsx": "react-jsx",
-    "lib": ["dom", "dom.iterable", "es2020"],
-    "paths": {
-      // micro-memoize types do not work with our strict compiler settings
-      // This overrides the module provided types with our @types package.
-      // We use several node_module fallbacks to be flexible to where the @types package is installed.
-      "micro-memoize": [
-        "./node_modules/@types/micro-memoize",
-        "../node_modules/@types/micro-memoize",
-        "../../node_modules/@types/micro-memoize"
-      ]
-    }
+    "lib": ["dom", "dom.iterable", "es2020"]
   }
 }
