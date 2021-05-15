@@ -90,7 +90,7 @@
     "@testing-library/dom": "7.31.0",
     "@testing-library/react": "11.2.7",
     "@testing-library/react-hooks": "5.1.2",
-    "@types/argparse": "^2.0.5",
+    "@types/argparse": "^2.0.6",
     "@types/classnames": "2.3.1",
     "@types/css-font-loading-module": "0.0.4",
     "@types/cytoscape": "^3",
