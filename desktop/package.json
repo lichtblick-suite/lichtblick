@@ -1,0 +1,7 @@
+{
+  "name": "desktop",
+  "private": true,
+  "dependencies": {
+    "@foxglove-studio/app": "workspace:app"
+  }
+}

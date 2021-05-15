@@ -18,7 +18,7 @@ import { APP_VERSION } from "@foxglove-studio/app/version";
 import { Sockets } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
 
-import App from "./App";
+import Root from "./Root";
 
 const log = Logger.getLogger(__filename);
 
@@ -64,7 +64,7 @@ async function main() {
 
   initializeLogEvent(() => undefined, {}, {});
 
-  ReactDOM.render(<App />, rootEl, () => {
+  ReactDOM.render(<Root />, rootEl, () => {
     // Integration tests look for this console log to indicate the app has rendered once
     log.debug("App rendered");
   });

@@ -10271,6 +10271,14 @@ __metadata:
   languageName: node
   linkType: hard
 
+"desktop@workspace:desktop":
+  version: 0.0.0-use.local
+  resolution: "desktop@workspace:desktop"
+  dependencies:
+    "@foxglove-studio/app": "workspace:app"
+  languageName: unknown
+  linkType: soft
+
 "destroy@npm:~1.0.4":
   version: 1.0.4
   resolution: "destroy@npm:1.0.4"
