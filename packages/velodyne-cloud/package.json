@@ -27,6 +27,6 @@
     "jest-circus": "27.0.0-next.8",
     "kelonio": "0.6.0",
     "rosbag": "github:foxglove/rosbag.js#fc61125fbc01ff55698c5ed48987b2d9e7599572",
-    "typescript": "4.2.2"
+    "typescript": "4.2.4"
   }
 }

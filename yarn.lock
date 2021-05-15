@@ -2225,7 +2225,7 @@ __metadata:
     text-metrics: 2.0.9
     three: 0.128.0
     tinycolor2: 1.4.2
-    typescript: 4.2.2
+    typescript: 4.2.4
     urdf-loader: 0.10.2
     url-search-params: 1.1.0
     use-debounce: 6.0.1
@@ -2242,7 +2242,7 @@ __metadata:
     "@types/dns-packet": 5.2.0
     dns-packet: 5.2.1
     eventemitter3: 4.0.7
-    typescript: 4.2.2
+    typescript: 4.2.4
   peerDependencies:
     electron: ">=12"
   languageName: unknown
@@ -2252,7 +2252,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/hooks@workspace:packages/@foxglove/hooks"
   dependencies:
-    typescript: 4.2.2
+    typescript: 4.2.4
   languageName: unknown
   linkType: soft
 
@@ -2260,7 +2260,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/just-fetch@workspace:packages/just-fetch"
   dependencies:
-    typescript: 4.2.2
+    typescript: 4.2.4
   peerDependencies:
     node-fetch: ">=2.0.0"
   languageName: unknown
@@ -2270,7 +2270,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/log@workspace:packages/log"
   dependencies:
-    typescript: 4.2.2
+    typescript: 4.2.4
   languageName: unknown
   linkType: soft
 
@@ -2280,7 +2280,7 @@ __metadata:
   dependencies:
     "@foxglove/ros1": "workspace:packages/ros1"
     ts-node: 9.1.1
-    typescript: 4.2.2
+    typescript: 4.2.4
   languageName: unknown
   linkType: soft
 
@@ -2293,7 +2293,7 @@ __metadata:
     jest: 27.0.0-next.8
     jest-circus: 27.0.0-next.8
     rosbag: "github:foxglove/rosbag.js#fc61125fbc01ff55698c5ed48987b2d9e7599572"
-    typescript: 4.2.2
+    typescript: 4.2.4
     web-encoding: 1.1.5
   languageName: unknown
   linkType: soft
@@ -2305,7 +2305,7 @@ __metadata:
     "@types/prettier": 2.2.3
     jest: 27.0.0-next.8
     prettier: 2.2.1
-    typescript: 4.2.2
+    typescript: 4.2.4
   languageName: unknown
   linkType: soft
 
@@ -2323,7 +2323,7 @@ __metadata:
     jest-circus: 27.0.0-next.8
     kelonio: 0.6.0
     rosbag: "github:foxglove/rosbag.js#fc61125fbc01ff55698c5ed48987b2d9e7599572"
-    typescript: 4.2.2
+    typescript: 4.2.4
   languageName: unknown
   linkType: soft
 
@@ -2333,7 +2333,7 @@ __metadata:
   dependencies:
     "@types/emscripten": 1.39.4
     jest: 27.0.0-next.8
-    typescript: 4.2.2
+    typescript: 4.2.4
   languageName: unknown
   linkType: soft
 
@@ -2347,7 +2347,7 @@ __metadata:
     jest: 27.0.0-next.8
     jest-circus: 27.0.0-next.8
     sax: 1.2.4
-    typescript: 4.2.2
+    typescript: 4.2.4
     web-encoding: 1.1.5
     xmlbuilder2: 2.4.1
   languageName: unknown
@@ -12838,7 +12838,7 @@ __metadata:
     style-loader: 2.0.0
     ts-loader: 9.1.2
     ts-node: 9.1.1
-    typescript: 4.2.2
+    typescript: 4.2.4
     typescript-plugin-css-modules: 3.2.0
     typescript-plugin-styled-components: 1.5.0
     universal-url: 2.0.0
@@ -25029,23 +25029,23 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-typescript@4.2.2:
-  version: 4.2.2
-  resolution: "typescript@npm:4.2.2"
+typescript@4.2.4:
+  version: 4.2.4
+  resolution: "typescript@npm:4.2.4"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: b2e3d5551a12c51b6b7a14f0e78d2664c136fab4dfb3eecaaf7a6e8e7e608f2cf43c6ebe81387d194db2588793b769720d2df523d445a1664b7585c5b9a85984
+  checksum: edaede2fa77f56b7fba80ee624a2368ab1216e75b0434d968ccb47ab0a5e2f6d94f848b3b111c1237dd71e988cd376af26370dcdad3b94355c76e759f0dd0a1e
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@4.2.2#builtin<compat/typescript>":
-  version: 4.2.2
-  resolution: "typescript@patch:typescript@npm%3A4.2.2#builtin<compat/typescript>::version=4.2.2&hash=a45b0e"
+"typescript@patch:typescript@4.2.4#builtin<compat/typescript>":
+  version: 4.2.4
+  resolution: "typescript@patch:typescript@npm%3A4.2.4#builtin<compat/typescript>::version=4.2.4&hash=a45b0e"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: ea1f1b6be22c9e3348f61692719d3169dd4abaad34b2132edff44a8d5a748bde8f3116fa2fae41d61c92b3a7cf1c35d0c7276058b2f35196ff3cde3b7d57c84b
+  checksum: 3be44317593182e8ce494c114e7ad9b0bb2553a22f3085cc6da4f0a36912c20850daa9be4c898af2ab6fc8b12f430c1c9e46ac715721867cd38643f2350d3ef9
   languageName: node
   linkType: hard
 
