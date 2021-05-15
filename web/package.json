@@ -1,0 +1,17 @@
+{
+  "name": "web",
+  "private": true,
+  "scripts": {
+    "serve": "webpack serve --mode development --progress",
+    "build:dev": "webpack --mode development --progress",
+    "build:prod": "webpack --mode production --progress"
+  },
+  "dependencies": {
+    "@foxglove-studio/app": "workspace:app"
+  },
+  "devDependencies": {
+    "@types/copy-webpack-plugin": "8.0.0",
+    "copy-webpack-plugin": "8.1.1",
+    "webpack": "5.37.0"
+  }
+}

@@ -41,7 +41,8 @@
     "packages": [
       "app",
       "desktop",
-      "packages/**"
+      "packages/**",
+      "web"
     ]
   },
   "devDependencies": {

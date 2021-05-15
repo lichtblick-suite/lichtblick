@@ -28,6 +28,8 @@ jobs:
               yarn run lint:ci
           - name: packages
             command: yarn build:packages
+          - name: web
+            command: yarn workspace web build:dev
           - name: test
             command: yarn run test --maxWorkers=100%
           - name: storybook
@@ -37,6 +39,8 @@ jobs:
             config: { name: lint }
           - os: windows-2019
             config: { name: test }
+          - os: windows-2019
+            config: { name: web }
           - os: windows-2019
             config: { name: storybook }
 
