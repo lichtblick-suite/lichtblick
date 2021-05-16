@@ -7,9 +7,8 @@ import { contextBridge, ipcRenderer } from "electron";
 import { machineId } from "node-machine-id";
 import os from "os";
 
-import type { OsContext } from "@foxglove-studio/app/OsContext";
-import { NetworkInterface } from "@foxglove-studio/app/OsContext";
-import { APP_NAME, APP_VERSION } from "@foxglove-studio/app/version";
+import { NetworkInterface, OsContext } from "@foxglove-studio/app/OsContext";
+import pkgInfo from "@foxglove-studio/app/version";
 import { PreloaderSockets } from "@foxglove/electron-socket/preloader";
 import Logger from "@foxglove/log";
 
@@ -19,7 +18,7 @@ import LocalFileStorage from "./LocalFileStorage";
 const log = Logger.getLogger(__filename);
 
 log.debug(`Start Preload`);
-log.info(`${APP_NAME} ${APP_VERSION}`);
+log.info(`${pkgInfo.name} ${pkgInfo.version}`);
 log.info(`initializing preloader, argv="${window.process.argv.join(" ")}"`);
 
 // Load opt-out settings for crash reporting and telemetry
@@ -29,7 +28,7 @@ if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
   initSentry({
     dsn: process.env.SENTRY_DSN,
     autoSessionTracking: true,
-    release: `${process.env.SENTRY_PROJECT}@${APP_VERSION}`,
+    release: `${process.env.SENTRY_PROJECT}@${pkgInfo.version}`,
     // Remove the default breadbrumbs integration - it does not accurately track breadcrumbs and
     // creates more noise than benefit.
     integrations: (integrations) => {
@@ -95,7 +94,7 @@ const ctx: OsContext = {
     return machineIdPromise;
   },
   getAppVersion: (): string => {
-    return APP_VERSION;
+    return pkgInfo.version;
   },
 };
 

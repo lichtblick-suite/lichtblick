@@ -8,12 +8,30 @@
 // See typings/index.d.ts for additional included references
 /// <reference types="./typings" />
 
-import App from "@foxglove-studio/app/App";
-import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";
-import MultiProvider from "@foxglove-studio/app/components/MultiProvider";
-import { PlayerSourceDefinition } from "@foxglove-studio/app/context/PlayerSelectionContext";
-import ThemeProvider from "@foxglove-studio/app/theme/ThemeProvider";
+import App from "./App";
+import { NetworkInterface, OsContext } from "./OsContext";
+import ErrorBoundary from "./components/ErrorBoundary";
+import MultiProvider from "./components/MultiProvider";
+import { PlayerSourceDefinition } from "./context/PlayerSelectionContext";
+import ThemeProvider from "./theme/ThemeProvider";
+import installDevtoolsFormatters from "./util/installDevtoolsFormatters";
+import { initializeLogEvent } from "./util/logEvent";
+import overwriteFetch from "./util/overwriteFetch";
+import waitForFonts from "./util/waitForFonts";
+import version from "./version";
 
-export { App, ErrorBoundary, MultiProvider, ThemeProvider };
+const pkgInfo = version;
 
-export type { PlayerSourceDefinition };
+export {
+  pkgInfo,
+  App,
+  ErrorBoundary,
+  MultiProvider,
+  ThemeProvider,
+  installDevtoolsFormatters,
+  initializeLogEvent,
+  overwriteFetch,
+  waitForFonts,
+};
+
+export type { PlayerSourceDefinition, OsContext, NetworkInterface };

@@ -31,6 +31,7 @@ export default async (): Promise<void> => {
         return;
       }
       if (!result || result.hasErrors()) {
+        console.error(result?.toString());
         reject(new Error("webpack build failed"));
         return;
       }

@@ -7,11 +7,12 @@ import ReactDOM from "react-dom";
 
 import "@foxglove-studio/app/styles/global.scss";
 
-import installDevtoolsFormatters from "@foxglove-studio/app/util/installDevtoolsFormatters";
-import { initializeLogEvent } from "@foxglove-studio/app/util/logEvent";
-import overwriteFetch from "@foxglove-studio/app/util/overwriteFetch";
-import waitForFonts from "@foxglove-studio/app/util/waitForFonts";
-import { APP_VERSION } from "@foxglove-studio/app/version";
+import {
+  installDevtoolsFormatters,
+  initializeLogEvent,
+  overwriteFetch,
+  waitForFonts,
+} from "@foxglove-studio/app";
 import Logger from "@foxglove/log";
 
 import Root from "./Root";
@@ -25,7 +26,6 @@ if (typeof process.env.SENTRY_DSN === "string") {
   initSentry({
     dsn: process.env.SENTRY_DSN,
     autoSessionTracking: true,
-    release: `${process.env.SENTRY_PROJECT}@${APP_VERSION}`,
     // Remove the default breadbrumbs integration - it does not accurately track breadcrumbs and
     // creates more noise than benefit.
     integrations: (integrations) => {
