@@ -16,7 +16,6 @@ import updateUrlAndLocalStorageMiddleware from "@foxglove-studio/app/middleware/
 import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store";
 import configureTestingStore from "@foxglove-studio/app/store/configureStore.testing";
-import history from "@foxglove-studio/app/util/history";
 
 type Store = ReturnType<typeof configureStore>;
 
@@ -27,7 +26,7 @@ interface TestStore extends Store {
 let store: Store | undefined = undefined;
 function getGlobalStore(): Store {
   if (!store) {
-    store = configureStore(createRootReducer(history), [updateUrlAndLocalStorageMiddleware]);
+    store = configureStore(createRootReducer(), [updateUrlAndLocalStorageMiddleware]);
   }
   return store;
 }
@@ -35,7 +34,7 @@ function getGlobalStore(): Store {
 export function getGlobalStoreForTest(args?: { search?: string; testAuth?: unknown }): TestStore {
   const memoryHistory = createMemoryHistory();
   const testStore = configureTestingStore(
-    createRootReducer(memoryHistory, { testAuth: args?.testAuth }),
+    createRootReducer({ testAuth: args?.testAuth }),
     [updateUrlAndLocalStorageMiddleware],
     memoryHistory,
   );

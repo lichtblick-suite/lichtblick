@@ -16,7 +16,6 @@ import { PANELS_ACTION_TYPES } from "@foxglove-studio/app/actions/panels";
 import { State } from "@foxglove-studio/app/reducers";
 import { setPersistedStateInLocalStorage } from "@foxglove-studio/app/reducers/panels";
 import { Store } from "@foxglove-studio/app/types/Store";
-import { getShouldProcessPatch } from "@foxglove-studio/app/util/layout";
 
 let updateUrlTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -95,12 +94,6 @@ const updateUrlAndLocalStorageMiddlewareDebounced =
         clearTimeout(updateUrlTimer);
       }
       updateUrlTimer = setTimeout(async () => {
-        const shouldProcessPatch = getShouldProcessPatch();
-        if (!shouldProcessPatch) {
-          maybeSetPersistedStateInLocalStorage(store, skipSettingLocalStorage);
-          return result;
-        }
-
         maybeSetPersistedStateInLocalStorage(store, skipSettingLocalStorage);
         return result;
       }, 500);

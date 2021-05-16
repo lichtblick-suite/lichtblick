@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { createMemoryHistory } from "history";
 import { uniq } from "lodash";
 import { Worldview } from "regl-worldview";
 
@@ -154,7 +153,7 @@ export const ThreeDimPanelSetupWithBag = ({
   globalVariables: any;
   bag: string;
 }): JSX.Element => {
-  const store: Store = configureStore(createRootReducer(createMemoryHistory()));
+  const store: Store = configureStore(createRootReducer());
   const topics = uniq(
     threeDimensionalConfig.checkedKeys
       ?.filter((key) => key.startsWith("t:"))

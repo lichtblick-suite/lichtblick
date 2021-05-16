@@ -13,7 +13,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { mount } from "enzyme";
-import { createMemoryHistory } from "history";
 
 import * as layoutHistoryActions from "@foxglove-studio/app/actions/layoutHistory";
 import GlobalKeyListener from "@foxglove-studio/app/components/GlobalKeyListener";
@@ -22,7 +21,7 @@ import createRootReducer from "@foxglove-studio/app/reducers";
 import configureStore from "@foxglove-studio/app/store/configureStore.testing";
 
 function getStore() {
-  return configureStore(createRootReducer(createMemoryHistory()));
+  return configureStore(createRootReducer());
 }
 
 function Context(props: any) {

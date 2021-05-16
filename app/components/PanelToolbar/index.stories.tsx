@@ -13,7 +13,6 @@
 
 import DatabaseIcon from "@mdi/svg/svg/database.svg";
 import { storiesOf } from "@storybook/react";
-import { createMemoryHistory } from "history";
 import { Mosaic, MosaicWindow } from "react-mosaic-component";
 import { Provider } from "react-redux";
 
@@ -99,7 +98,7 @@ storiesOf("components/PanelToolbar", module)
   .addDecorator((childrenRenderFcn) => {
     // Provide all stories with PanelContext and redux state
     return (
-      <Provider store={configureStore(createRootReducer(createMemoryHistory()))}>
+      <Provider store={configureStore(createRootReducer())}>
         <MockPanelContextProvider>{childrenRenderFcn()}</MockPanelContextProvider>
       </Provider>
     );

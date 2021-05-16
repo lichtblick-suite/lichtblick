@@ -12,25 +12,6 @@
 //   You may not use this file except in compliance with the License.
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
-// URL params
-// DANGER: if you change this you break existing urls
-export const REMOTE_BAG_URL_QUERY_KEY = "remote-bag-url";
-export const REMOTE_BAG_URL_2_QUERY_KEY = "remote-bag-url-2";
-export const ROSBRIDGE_WEBSOCKET_URL_QUERY_KEY = "rosbridge-websocket-url";
-export const MEASURE_DATA_PROVIDERS_QUERY_KEY = "_measureDataProviders";
-export const DEMO_QUERY_KEY = "demo";
-export const DISABLE_WORKERS_QUERY_KEY = "no-workers";
-export const SEEK_TO_UNIX_MS_QUERY_KEY = "seek-to"; // Used on load and set when paused
-export const SEEK_TO_RELATIVE_MS_QUERY_KEY = "seek-by"; // Only used on load. Can be negative.
-export const SEEK_TO_FRACTION_QUERY_KEY = "seek-fraction"; // Only used on load
-export const LAYOUT_QUERY_KEY = "layout";
-export const LAYOUT_URL_QUERY_KEY = "layout-url";
-export const PATCH_QUERY_KEY = "patch";
-export const OLD_GLOBAL_VARIABLES_QUERY_KEY = "global-data";
-export const GLOBAL_VARIABLES_QUERY_KEY = "global-variables";
-export const TEST_EVERYTHING_LAYOUT_QUERY_VAL = "_integration-test-everything-layout";
-export const FRAMELESS = "frameless";
-
 export const DEFAULT_STUDIO_NODE_PREFIX = "/studio_node/";
 
 export const TRANSFORM_TOPIC = "/tf";

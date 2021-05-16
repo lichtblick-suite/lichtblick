@@ -2,7 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { createMemoryHistory } from "history";
 import { useMemo } from "react";
 import { Provider } from "react-redux";
 
@@ -41,7 +40,7 @@ export default {
 
 export function Empty(): JSX.Element {
   const storage = useMemo(() => new FakeLayoutStorage(), []);
-  const store = useMemo(() => configureStore(createRootReducer(createMemoryHistory())), []);
+  const store = useMemo(() => configureStore(createRootReducer()), []);
 
   return (
     <div style={{ display: "flex", height: 400 }}>
@@ -77,7 +76,7 @@ export function LayoutList(): JSX.Element {
     [],
   );
   const store = useMemo(() => {
-    const newStore = configureStore(createRootReducer(createMemoryHistory()));
+    const newStore = configureStore(createRootReducer());
 
     // set an id for the current panel state so we can see it highlited in the menu
     const state = newStore.getState();

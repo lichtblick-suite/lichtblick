@@ -13,7 +13,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { mount } from "enzyme";
-import { createMemoryHistory } from "history";
 import { useEffect } from "react";
 
 import { savePanelConfigs } from "@foxglove-studio/app/actions/panels";
@@ -38,7 +37,7 @@ function getDummyPanel(renderFn: jest.Mock) {
 }
 
 function getStore() {
-  return configureStore(createRootReducer(createMemoryHistory()));
+  return configureStore(createRootReducer());
 }
 
 describe("Panel", () => {

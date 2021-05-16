@@ -34,21 +34,10 @@ import {
   SavedProps,
 } from "@foxglove-studio/app/types/panels";
 import filterMap from "@foxglove-studio/app/util/filterMap";
-import {
-  TAB_PANEL_TYPE,
-  LAYOUT_QUERY_KEY,
-  LAYOUT_URL_QUERY_KEY,
-  PATCH_QUERY_KEY,
-} from "@foxglove-studio/app/util/globalConstants";
+import { TAB_PANEL_TYPE } from "@foxglove-studio/app/util/globalConstants";
 import Logger from "@foxglove/log";
 
-import { isInIFrame } from "./iframeUtils";
-
 const log = Logger.getLogger(__filename);
-
-const IS_IN_IFRAME = isInIFrame();
-
-const PARAMS_TO_DECODE = new Set([LAYOUT_URL_QUERY_KEY]);
 
 // given a panel type, create a unique id for a panel
 // with the type embedded within the id
@@ -554,38 +543,6 @@ export function getConfigsForNestedPanelsInsideTab(
     }
   });
   return configs;
-}
-
-export function stringifyParams(params: URLSearchParams): string {
-  const stringifiedParams = [];
-  for (const [key, value] of params) {
-    if (PARAMS_TO_DECODE.has(key)) {
-      stringifiedParams.push(`${key}=${decodeURIComponent(value)}`);
-    } else {
-      stringifiedParams.push(`${key}=${encodeURIComponent(value)}`);
-    }
-  }
-  return stringifiedParams.length > 0 ? `?${stringifiedParams.join("&")}` : "";
-}
-
-export function getUpdatedURLWithNewVersion(
-  search: string,
-  name: string,
-  version?: string,
-): string {
-  const params = new URLSearchParams(search);
-  params.set(LAYOUT_QUERY_KEY, `${name}${version != undefined ? `@${version}` : ""}`);
-  params.delete(PATCH_QUERY_KEY);
-  return stringifyParams(params);
-}
-export function getShouldProcessPatch(): boolean {
-  // Skip processing patch in iframe (currently used for MiniViz) since we can't update the URL anyway.
-  return !IS_IN_IFRAME;
-}
-// If we have a URL patch, the user has edited the layout.
-export function hasEditedLayout(): boolean {
-  const params = new URLSearchParams(window.location.search);
-  return params.has(PATCH_QUERY_KEY);
 }
 
 export function setDefaultFields(defaultLayout: PanelsState, layout: PanelsState): PanelsState {

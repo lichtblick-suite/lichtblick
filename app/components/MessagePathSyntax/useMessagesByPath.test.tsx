@@ -13,7 +13,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { act, renderHook } from "@testing-library/react-hooks";
-import { createMemoryHistory } from "history";
 import React, { PropsWithChildren } from "react";
 
 import { setGlobalVariables } from "@foxglove-studio/app/actions/panels";
@@ -331,7 +330,7 @@ describe("useMessagesByPath", () => {
       },
     };
     it("updates queriedData when a global variable changes", () => {
-      const store = configureStore(createRootReducer(createMemoryHistory()));
+      const store = configureStore(createRootReducer());
 
       store.dispatch(setGlobalVariables({ foo: 0 }));
 

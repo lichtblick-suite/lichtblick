@@ -25,8 +25,6 @@ import {
   validateTabPanelConfig,
   moveTabBetweenTabPanels,
   reorderTabWithinTabPanel,
-  getUpdatedURLWithNewVersion,
-  stringifyParams,
   getPathFromNode,
 } from "./layout";
 
@@ -612,30 +610,6 @@ describe("layout", () => {
       expect(validateTabPanelConfig({ activeTabIdx: 1 })).toEqual(false);
       expect(validateTabPanelConfig({ tabs, activeTabIdx: 0 })).toEqual(true);
       expect(validateTabPanelConfig(undefined)).toEqual(false);
-    });
-  });
-
-  describe("stringifyParams", () => {
-    it("returns stringified url query", () => {
-      const layoutParams = "?layout=foo%401500000000&randomKey=randomValue";
-      expect(stringifyParams(new URLSearchParams(layoutParams))).toMatch(layoutParams);
-
-      const layoutUrlParams = "?layout-url=https%3A%2F%2Ffoo%40bar.com&randomKey=randomValue";
-      const layoutUrlParamsDecoded = "?layout-url=https://foo@bar.com&randomKey=randomValue";
-      expect(stringifyParams(new URLSearchParams(layoutUrlParams))).toMatch(layoutUrlParamsDecoded);
-      expect(stringifyParams(new URLSearchParams(layoutUrlParamsDecoded))).toMatch(
-        layoutUrlParamsDecoded,
-      );
-    });
-  });
-
-  describe("getUpdatedURLWithNewVersion", () => {
-    it("returns a new URL with the version attached", () => {
-      const timestampAndPatchHash =
-        "1596745459_9c4a1b372d257004f40918022d87d3ae0fa3bf871116516ec0cbc010bd67ce8";
-      expect(
-        getUpdatedURLWithNewVersion("?layout=foo&patch=somePatch", "bar", timestampAndPatchHash),
-      ).toMatch(`?layout=bar%40${timestampAndPatchHash}`);
     });
   });
 });

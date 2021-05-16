@@ -13,7 +13,6 @@
 
 import { Time } from "rosbag";
 
-import { CoreDataProviders } from "@foxglove-studio/app/dataProviders/constants";
 import {
   DataProvider,
   DataProviderDescriptor,
@@ -27,25 +26,6 @@ import {
 import Logger from "@foxglove/log";
 
 const log = Logger.getLogger(__filename);
-
-// Wrap each DataProvider in the tree with a MeasureDataProvider.
-export function instrumentTreeWithMeasureDataProvider(
-  treeRoot: DataProviderDescriptor,
-  depth: number = 1,
-): DataProviderDescriptor {
-  return {
-    name: CoreDataProviders.MeasureDataProvider,
-    args: { name: `${new Array(depth * 2 + 1).join("-")}> ${treeRoot.name}` },
-    children: [
-      {
-        ...treeRoot,
-        children: treeRoot.children.map((node) =>
-          instrumentTreeWithMeasureDataProvider(node, depth + 1),
-        ),
-      },
-    ],
-  };
-}
 
 // Log to the console how long each `getMessages` call takes.
 export default class MeasureDataProvider implements DataProvider {

@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { History } from "history";
 import { Reducer } from "redux";
 import { ThunkAction } from "redux-thunk";
 import { v4 as uuidv4 } from "uuid";
@@ -69,11 +68,8 @@ export type State = {
   };
 };
 
-export default function createRootReducer(
-  history: History,
-  args?: { testAuth?: any },
-): Reducer<State, ActionTypes> {
-  const persistedState = getInitialPersistedStateAndMaybeUpdateLocalStorageAndURL(history);
+export default function createRootReducer(args?: { testAuth?: any }): Reducer<State, ActionTypes> {
+  const persistedState = getInitialPersistedStateAndMaybeUpdateLocalStorageAndURL();
   maybeStoreNewRecentLayout(persistedState);
   const initialState: State = {
     persistedState,

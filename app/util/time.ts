@@ -16,11 +16,6 @@ import { Time, TimeUtil } from "rosbag";
 
 import { MessageEvent } from "@foxglove-studio/app/players/types";
 import { StampedMessage } from "@foxglove-studio/app/types/Messages";
-import {
-  SEEK_TO_FRACTION_QUERY_KEY,
-  SEEK_TO_RELATIVE_MS_QUERY_KEY,
-  SEEK_TO_UNIX_MS_QUERY_KEY,
-} from "@foxglove-studio/app/util/globalConstants";
 import log from "@foxglove/log";
 
 type BatchTimestamp = {
@@ -273,29 +268,10 @@ export type SeekToTimeSpec = AbsoluteSeekToTime | RelativeSeekToTime | SeekFract
 export const SEEK_ON_START_NS = 99 * 1e6; /* ms */
 
 export function getSeekToTime(): SeekToTimeSpec {
-  const params = new URLSearchParams(window.location.search);
-  const absoluteSeek = params.get(SEEK_TO_UNIX_MS_QUERY_KEY);
   const defaultResult: SeekToTimeSpec = {
     type: "relative",
     startOffset: fromNanoSec(SEEK_ON_START_NS),
   };
-  if (absoluteSeek != undefined) {
-    return isNaN(+absoluteSeek)
-      ? defaultResult
-      : { type: "absolute", time: fromMillis(parseInt(absoluteSeek)) };
-  }
-  const relativeSeek = params.get(SEEK_TO_RELATIVE_MS_QUERY_KEY);
-  if (relativeSeek != undefined) {
-    return isNaN(+relativeSeek)
-      ? defaultResult
-      : { type: "relative", startOffset: fromMillis(parseInt(relativeSeek)) };
-  }
-  const seekFraction = params.get(SEEK_TO_FRACTION_QUERY_KEY);
-  if (seekFraction != undefined) {
-    return isNaN(+seekFraction)
-      ? defaultResult
-      : { type: "fraction", fraction: parseFloat(seekFraction) };
-  }
   return defaultResult;
 }
 

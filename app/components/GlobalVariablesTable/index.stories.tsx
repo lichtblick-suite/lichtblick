@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { createMemoryHistory } from "history";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Provider } from "react-redux";
@@ -30,7 +29,7 @@ export function Table(): JSX.Element {
   return (
     <div style={{ margin: 30, paddingLeft: 300, height: 400 }}>
       <DndProvider backend={HTML5Backend}>
-        <Provider store={configureStore(createRootReducer(createMemoryHistory()))}>
+        <Provider store={configureStore(createRootReducer())}>
           <GlobalVariablesTable />
         </Provider>
       </DndProvider>

@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { createMemoryHistory } from "history";
 import { flatten } from "lodash";
 import { ComponentProps } from "react";
 import { DndProvider } from "react-dnd";
@@ -225,7 +224,7 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      store: props.store ?? configureStore(createRootReducer(createMemoryHistory())),
+      store: props.store ?? configureStore(createRootReducer()),
       mockPanelCatalog: props.panelCatalog ?? new MockPanelCatalog(),
       mockAppConfiguration: {
         get() {

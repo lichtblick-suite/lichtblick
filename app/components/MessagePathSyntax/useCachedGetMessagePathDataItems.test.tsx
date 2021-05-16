@@ -12,7 +12,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { mount } from "enzyme";
-import { createMemoryHistory } from "history";
 import { cloneDeep } from "lodash";
 
 import { setGlobalVariables } from "@foxglove-studio/app/actions/panels";
@@ -76,7 +75,7 @@ describe("useCachedGetMessagePathDataItems", () => {
       datatype: { fields: [{ name: "an_array", type: "uint32", isArray: true, isComplex: false }] },
     };
 
-    const store = configureStore(createRootReducer(createMemoryHistory()));
+    const store = configureStore(createRootReducer());
 
     const root = mount(
       <MockMessagePipelineProvider store={store} topics={topics} datatypes={datatypes}>
@@ -143,7 +142,7 @@ describe("useCachedGetMessagePathDataItems", () => {
       datatype: { fields: [{ name: "an_array", type: "uint32", isArray: true, isComplex: false }] },
     };
 
-    const store = configureStore(createRootReducer(createMemoryHistory()));
+    const store = configureStore(createRootReducer());
     store.dispatch(setGlobalVariables({ foo: 0 }));
 
     const root = mount(
@@ -736,7 +735,7 @@ describe("useDecodeMessagePathsForMessagesByTopic", () => {
 
   it("results in missing entries when no array is provided for a topic", () => {
     const Test = createTest();
-    const store = configureStore(createRootReducer(createMemoryHistory()));
+    const store = configureStore(createRootReducer());
     const topics = [
       { name: "/topic1", datatype: "datatype" },
       { name: "/topic2", datatype: "datatype" },

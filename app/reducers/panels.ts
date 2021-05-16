@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { History } from "history";
 import { isEmpty, isEqual, dropRight, pick, cloneDeep } from "lodash";
 import {
   updateTree,
@@ -55,12 +54,7 @@ import {
 } from "@foxglove-studio/app/types/panels";
 import Storage from "@foxglove-studio/app/util/Storage";
 import filterMap from "@foxglove-studio/app/util/filterMap";
-import {
-  TAB_PANEL_TYPE,
-  LAYOUT_QUERY_KEY,
-  LAYOUT_URL_QUERY_KEY,
-  PATCH_QUERY_KEY,
-} from "@foxglove-studio/app/util/globalConstants";
+import { TAB_PANEL_TYPE } from "@foxglove-studio/app/util/globalConstants";
 import {
   setDefaultFields,
   updateTabPanelLayout,
@@ -78,7 +72,6 @@ import {
   moveTabBetweenTabPanels,
   createAddUpdates,
   removePanelFromTabPanel,
-  stringifyParams,
   getPathFromNode,
 } from "@foxglove-studio/app/util/layout";
 
@@ -144,9 +137,7 @@ export const defaultPersistedState = Object.freeze<PersistedState>({
 // new stores they will use the new values in localStorage. Re-initializing it for every action is
 // too expensive.
 let initialPersistedState: PersistedState | undefined = undefined;
-export function getInitialPersistedStateAndMaybeUpdateLocalStorageAndURL(
-  history: History,
-): PersistedState {
+export function getInitialPersistedStateAndMaybeUpdateLocalStorageAndURL(): PersistedState {
   if (initialPersistedState == undefined) {
     const oldPersistedState: any =
       storage.getItem(GLOBAL_STATE_STORAGE_KEY) ??
@@ -156,53 +147,13 @@ export function getInitialPersistedStateAndMaybeUpdateLocalStorageAndURL(
     // cast to PersistedState to remove the Readonly created by the Object.freeze above
     const newPersistedState = cloneDeep(defaultPersistedState) as PersistedState;
 
-    const { search: currentSearch, pathname } = history.location;
-    const currentSearchParams = new URLSearchParams(currentSearch);
     const oldFetchedLayoutState = oldPersistedState?.fetchedLayout;
-    const oldPersistedSearch = oldPersistedState?.search;
     const fetchedLayoutDataFromLocalStorage = oldFetchedLayoutState?.data;
 
-    let isInitializedFromLocalStorage = false;
+    const isInitializedFromLocalStorage = false;
 
     if (oldFetchedLayoutState) {
       newPersistedState.fetchedLayout = oldFetchedLayoutState;
-    }
-
-    // 1. Get layout from localStorage and update URL if there are no layout params and the fetchedLayout is not from layout-url param.
-    if (
-      fetchedLayoutDataFromLocalStorage &&
-      !oldFetchedLayoutState.isFromLayoutUrlParam &&
-      currentSearchParams.get(LAYOUT_QUERY_KEY) == undefined &&
-      currentSearchParams.get(LAYOUT_URL_QUERY_KEY) == undefined
-    ) {
-      if (oldPersistedSearch) {
-        // Get the `layout` and `patch` params by reading `persistedState.search` from localStorage and update the URL.
-        const localStorageParams = new URLSearchParams(oldPersistedSearch);
-        const layoutParamVal = localStorageParams.get(LAYOUT_QUERY_KEY);
-        const patchParamVal = localStorageParams.get(PATCH_QUERY_KEY);
-        if (layoutParamVal != undefined) {
-          currentSearchParams.set(LAYOUT_QUERY_KEY, layoutParamVal);
-        }
-        if (patchParamVal != undefined) {
-          currentSearchParams.set(PATCH_QUERY_KEY, patchParamVal);
-        }
-      } else {
-        // Read layout name and version from fetchedLayout.
-        const { name, releasedVersion, fileSuffix } = fetchedLayoutDataFromLocalStorage;
-        let layoutParam = name;
-        if (fileSuffix) {
-          layoutParam = `${name}@${fileSuffix}`;
-        } else if (releasedVersion) {
-          layoutParam = `${name}@${releasedVersion}`;
-        }
-        currentSearchParams.set(LAYOUT_QUERY_KEY, layoutParam);
-      }
-
-      isInitializedFromLocalStorage = true;
-      const newSearch = stringifyParams(currentSearchParams);
-      history.push({ pathname, search: newSearch });
-      // Store the current search in localStorage. It'll get updated later when user makes layout edits.
-      newPersistedState.search = newSearch;
     }
 
     // 2. Set fetchedLayout state if it's available in localStorage.

@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { storiesOf } from "@storybook/react";
-import { createMemoryHistory } from "history";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
@@ -27,7 +26,7 @@ import PanelLayout from "./PanelLayout";
 const DEFAULT_CLICK_DELAY = 100;
 storiesOf("components/PanelLayout", module)
   .add("panel not found", () => {
-    const store = configureStore(createRootReducer(createMemoryHistory()));
+    const store = configureStore(createRootReducer());
     store.dispatch(changePanelLayout({ layout: "UnknownPanel!4co6n9d" }));
     return (
       <DndProvider backend={HTML5Backend}>
@@ -47,7 +46,7 @@ storiesOf("components/PanelLayout", module)
     );
   })
   .add("remove unknown panel", () => {
-    const store = configureStore(createRootReducer(createMemoryHistory()));
+    const store = configureStore(createRootReducer());
     store.dispatch(changePanelLayout({ layout: "UnknownPanel!4co6n9d" }));
     return (
       <DndProvider backend={HTML5Backend}>

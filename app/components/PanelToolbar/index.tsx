@@ -46,7 +46,6 @@ import PanelList, { PanelSelection } from "@foxglove-studio/app/components/Panel
 import { getPanelTypeFromMosaic } from "@foxglove-studio/app/components/PanelToolbar/utils";
 import { usePanelSettings } from "@foxglove-studio/app/context/PanelSettingsContext";
 import { State } from "@foxglove-studio/app/reducers";
-import frameless from "@foxglove-studio/app/util/frameless";
 import logEvent, { getEventNames, getEventTags } from "@foxglove-studio/app/util/logEvent";
 import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
 
@@ -328,7 +327,7 @@ export default React.memo<Props>(function PanelToolbar({
     handleHeight: false,
   });
 
-  if (frameless() || hideToolbars) {
+  if (hideToolbars) {
     return ReactNull;
   }
 

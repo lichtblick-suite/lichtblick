@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { storiesOf } from "@storybook/react";
-import { createBrowserHistory } from "history";
 import TestUtils from "react-dom/test-utils";
 
 import Panel from "@foxglove-studio/app/components/Panel";
@@ -35,7 +34,7 @@ import tick from "@foxglove-studio/app/util/tick";
 
 import Tab from "./index";
 
-const rootReducer = createRootReducer(createBrowserHistory());
+const rootReducer = createRootReducer();
 
 const SamplePanel1 = function () {
   return <div>Sample Panel 1</div>;
