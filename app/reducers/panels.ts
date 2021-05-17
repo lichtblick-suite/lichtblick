@@ -150,21 +150,17 @@ export function getInitialPersistedStateAndMaybeUpdateLocalStorageAndURL(): Pers
     const oldFetchedLayoutState = oldPersistedState?.fetchedLayout;
     const fetchedLayoutDataFromLocalStorage = oldFetchedLayoutState?.data;
 
-    const isInitializedFromLocalStorage = false;
-
     if (oldFetchedLayoutState) {
       newPersistedState.fetchedLayout = oldFetchedLayoutState;
     }
 
     // 2. Set fetchedLayout state if it's available in localStorage.
     if (fetchedLayoutDataFromLocalStorage) {
-      // Set `isInitializedFromLocalStorage` flag to skip initial layout fetch.
       newPersistedState.fetchedLayout = {
         ...oldFetchedLayoutState,
         data: {
           ...fetchedLayoutDataFromLocalStorage,
         },
-        isInitializedFromLocalStorage,
       };
       newPersistedState.search = oldPersistedState.search;
     }

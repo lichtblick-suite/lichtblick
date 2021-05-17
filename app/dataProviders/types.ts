@@ -48,10 +48,7 @@ import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
 // does some in-memory read-ahead caching based on the most recent time range that was requested.
 // These trees of DataProviders are described by `DataProviderDescriptor`.
 //
-// DataProviders have a strict API which is enforced automatically in ApiCheckerDataProvider. It's
-// also easy to measure the performance of each DataProvider in a tree by putting using the
-// `_measureDataProviders` URL param, which causes every DataProvider to be wrapped in a
-// MeasureDataProvider.
+// DataProviders have a strict API which is enforced automatically in ApiCheckerDataProvider.
 
 export type GetMessagesTopics = Readonly<{
   parsedMessages?: readonly string[];

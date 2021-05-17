@@ -96,7 +96,6 @@ export type SetFetchedLayoutPayload = {
   error?: Error;
   data?: LayoutFetchResult;
   isFromLayoutUrlParam?: boolean;
-  isInitializedFromLocalStorage?: boolean;
   layoutUrlReplacedByDefault?: LayoutUrl;
 };
 
