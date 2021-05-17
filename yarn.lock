@@ -2152,7 +2152,7 @@ __metadata:
     async-mutex: 0.3.1
     chart.js: 3.2.1
     chartjs-plugin-annotation: 1.0.1
-    chartjs-plugin-datalabels: 2.0.0-beta.1
+    chartjs-plugin-datalabels: 2.0.0-rc
     chartjs-plugin-zoom: "github:foxglove/chartjs-plugin-zoom#656541279943f00dce600288435f83c436293146"
     chromatic: 5.8.0
     classnames: 2.3.1
@@ -8416,12 +8416,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chartjs-plugin-datalabels@npm:2.0.0-beta.1":
-  version: 2.0.0-beta.1
-  resolution: "chartjs-plugin-datalabels@npm:2.0.0-beta.1"
+"chartjs-plugin-datalabels@npm:2.0.0-rc":
+  version: 2.0.0-rc
+  resolution: "chartjs-plugin-datalabels@npm:2.0.0-rc"
   peerDependencies:
-    chart.js: ^3.0.0-beta.13
-  checksum: a7d0d7798e7d1ecc3d8a3ae37c55f281c7e56a155db9560ef7dc84b2e2cc59fab3a67d303ffb2490c6dd40873d062e811a472644d8ed2128c4067619e4722687
+    chart.js: ^3.0.0
+  checksum: 6c06a229309c6ab78bef1220a057a1cec2e21239927ff9c716a3372f609712a0b2d17982c38cd70a5958c3821439a92235261c9c10c1b1ecd6d1f2f905625810
   languageName: node
   linkType: hard
 
