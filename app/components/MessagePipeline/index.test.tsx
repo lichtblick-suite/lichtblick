@@ -26,7 +26,6 @@ import tick from "@foxglove/studio-base/util/tick";
 
 import {
   MessagePipelineProvider,
-  WARN_ON_SUBSCRIPTIONS_WITHIN_TIME_MS,
   useMessagePipeline,
   MaybePlayer,
   MessagePipelineContext,
@@ -418,62 +417,6 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       playerId: "",
       progress: {},
     });
-  });
-
-  it("logs a warning if a panel subscribes just after activeData becomes available", async () => {
-    const player = new FakePlayer();
-    const { result } = renderHook(Hook, {
-      wrapper: Wrapper,
-      initialProps: { maybePlayer: { player } },
-    });
-
-    expect(result.all.length).toBe(1);
-    act(() =>
-      (result.all[0] as MessagePipelineContext).setSubscriptions("id", [{ topic: "/test" }]),
-    );
-    expect(result.all.length).toBe(2);
-    expect(console.warn).toHaveBeenCalledTimes(0);
-
-    // Emit activeData.
-    const activeData: PlayerStateActiveData = {
-      messages: [],
-      messageOrder: "receiveTime",
-      currentTime: { sec: 0, nsec: 0 },
-      startTime: { sec: 0, nsec: 0 },
-      endTime: { sec: 1, nsec: 0 },
-      isPlaying: true,
-      speed: 0.2,
-      lastSeekTime: 1234,
-      topics: [{ name: "/input/foo", datatype: "foo" }],
-      datatypes: { foo: { fields: [] } },
-      parsedMessageDefinitionsByTopic: {},
-      totalBytesReceived: 1234,
-    };
-    await act(() => player.emit({ activeData }));
-    expect(result.all.length).toBe(3);
-
-    // Calling setSubscriptions right after activeData is ok if the set of topics doesn't change
-    act(() =>
-      (result.all[0] as MessagePipelineContext).setSubscriptions("id", [{ topic: "/test" }]),
-    );
-    expect((console.warn as jest.Mock).mock.calls).toEqual([]);
-    // But changing the set of topics results in a warning
-    act(() =>
-      (result.all[0] as MessagePipelineContext).setSubscriptions("id", [{ topic: "/test2" }]),
-    );
-    expect((console.warn as jest.Mock).mock.calls).toEqual([
-      [
-        "Panel subscribed right after Player loaded, which causes unnecessary requests. Please let the Foxglove team know about this. Topics: /test2",
-      ],
-    ]);
-
-    // If we wait a little bit, we shouldn't get any additional warnings.
-    await delay(WARN_ON_SUBSCRIPTIONS_WITHIN_TIME_MS + 200);
-    act(() =>
-      (result.all[0] as MessagePipelineContext).setSubscriptions("id", [{ topic: "/test" }]),
-    );
-    expect((console.warn as jest.Mock).mock.calls.length).toEqual(1);
-    (console.warn as jest.Mock).mockClear();
   });
 
   describe("pauseFrame", () => {
