@@ -407,7 +407,6 @@ overrides:
       - "app/players/types.ts"
       - "app/reducers/index.ts"
       - "app/reducers/panels.ts"
-      - "app/reducers/recentLayouts.test.ts"
       - "app/reducers/userNodes.ts"
       - "app/store/configureStore.testing.ts"
       - "app/store/configureStore.ts"

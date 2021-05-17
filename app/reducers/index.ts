@@ -27,14 +27,10 @@ import panels, {
   PanelsState,
   getInitialPersistedStateAndMaybeUpdateLocalStorageAndURL,
 } from "@foxglove-studio/app/reducers/panels";
-import recentLayouts, {
-  maybeStoreNewRecentLayout,
-} from "@foxglove-studio/app/reducers/recentLayouts";
 import tests from "@foxglove-studio/app/reducers/tests";
 import userNodes, { UserNodeDiagnostics } from "@foxglove-studio/app/reducers/userNodes";
 import { Auth as AuthState } from "@foxglove-studio/app/types/Auth";
 import { HoverValue } from "@foxglove-studio/app/types/hoverValue";
-import { SetFetchedLayoutPayload } from "@foxglove-studio/app/types/panels";
 
 const getReducers = () => [
   panels,
@@ -42,13 +38,11 @@ const getReducers = () => [
   hoverValue,
   userNodes,
   layoutHistory,
-  recentLayouts,
   ...(process.env.NODE_ENV === "test" ? [tests] : []),
 ];
 
 export type PersistedState = {
   panels: PanelsState;
-  fetchedLayout: SetFetchedLayoutPayload;
   search?: string;
 };
 
@@ -61,16 +55,10 @@ export type State = {
   hoverValue?: HoverValue;
   userNodes: { userNodeDiagnostics: UserNodeDiagnostics; rosLib: string };
   layoutHistory: LayoutHistory;
-  commenting: {
-    fetchedCommentsBase: Comment[];
-    fetchedCommentsFeature: Comment[];
-    sourceToShow: string;
-  };
 };
 
 export default function createRootReducer(args?: { testAuth?: any }): Reducer<State, ActionTypes> {
   const persistedState = getInitialPersistedStateAndMaybeUpdateLocalStorageAndURL();
-  maybeStoreNewRecentLayout(persistedState);
   const initialState: State = {
     persistedState,
     mosaic: {
@@ -88,7 +76,6 @@ export default function createRootReducer(args?: { testAuth?: any }): Reducer<St
       rosLib: ros_lib_dts,
     },
     layoutHistory: initialLayoutHistoryState,
-    commenting: { fetchedCommentsBase: [], fetchedCommentsFeature: [], sourceToShow: "Both" },
   };
   return (state: State | undefined, action: ActionTypes): State => {
     const oldPersistedState: PersistedState | undefined = state?.persistedState;

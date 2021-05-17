@@ -106,7 +106,6 @@ export const setPersistedStateInLocalStorage = (persistedState: PersistedState):
 
 // All panel fields have to be present.
 export const defaultPersistedState = Object.freeze<PersistedState>({
-  fetchedLayout: { isLoading: false, data: undefined },
   search: "",
   panels: {
     layout: {
@@ -147,25 +146,6 @@ export function getInitialPersistedStateAndMaybeUpdateLocalStorageAndURL(): Pers
     // cast to PersistedState to remove the Readonly created by the Object.freeze above
     const newPersistedState = cloneDeep(defaultPersistedState) as PersistedState;
 
-    const oldFetchedLayoutState = oldPersistedState?.fetchedLayout;
-    const fetchedLayoutDataFromLocalStorage = oldFetchedLayoutState?.data;
-
-    if (oldFetchedLayoutState) {
-      newPersistedState.fetchedLayout = oldFetchedLayoutState;
-    }
-
-    // 2. Set fetchedLayout state if it's available in localStorage.
-    if (fetchedLayoutDataFromLocalStorage) {
-      newPersistedState.fetchedLayout = {
-        ...oldFetchedLayoutState,
-        data: {
-          ...fetchedLayoutDataFromLocalStorage,
-        },
-      };
-      newPersistedState.search = oldPersistedState.search;
-    }
-
-    // 3. Handle panel state.
     if (oldPersistedState?.panels) {
       newPersistedState.panels = oldPersistedState.panels;
     } else if (oldPersistedState?.layout) {
@@ -1001,15 +981,6 @@ const panelsReducer = function (state: State, action: ActionTypes): State {
       newState.persistedState.panels = endDrag(newState.persistedState.panels, action.payload);
       break;
 
-    case "SET_FETCHED_LAYOUT":
-      newState.persistedState.fetchedLayout = action.payload;
-      break;
-    case "SET_FETCH_LAYOUT_FAILED":
-      // Keep the previous fetched layout data, but set isLoading to false.
-      newState.persistedState.fetchedLayout.isLoading = false;
-      newState.persistedState.fetchedLayout.error = action.payload;
-      break;
-
     case "LOAD_LAYOUT":
       // Dispatched when loading the page with a layout query param, or when manually selecting a different layout.
       // Do not update URL based on ensuing migration changes.
@@ -1017,10 +988,6 @@ const panelsReducer = function (state: State, action: ActionTypes): State {
         newState.persistedState.panels,
         action.payload,
       );
-      break;
-
-    case "CLEAR_LAYOUT_URL_REPLACED_BY_DEFAULT":
-      newState.persistedState.fetchedLayout.layoutUrlReplacedByDefault = undefined;
       break;
 
     default:
