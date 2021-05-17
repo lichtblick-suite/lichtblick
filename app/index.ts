@@ -18,12 +18,8 @@ import installDevtoolsFormatters from "./util/installDevtoolsFormatters";
 import { initializeLogEvent } from "./util/logEvent";
 import overwriteFetch from "./util/overwriteFetch";
 import waitForFonts from "./util/waitForFonts";
-import version from "./version";
-
-const pkgInfo = version;
 
 export {
-  pkgInfo,
   App,
   ErrorBoundary,
   MultiProvider,

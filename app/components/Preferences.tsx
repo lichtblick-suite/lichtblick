@@ -23,7 +23,6 @@ import { useAppConfigurationValue } from "@foxglove-studio/app/hooks/useAppConfi
 import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import filterMap from "@foxglove-studio/app/util/filterMap";
 import fuzzyFilter from "@foxglove-studio/app/util/fuzzyFilter";
-import { APP_NAME } from "@foxglove-studio/app/version";
 import { RosNode } from "@foxglove/ros1";
 
 function formatTimezone(name: string) {
@@ -192,12 +191,12 @@ export default function Preferences(): React.ReactElement {
           <SectionHeader>Privacy</SectionHeader>
           <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
             <Text style={{ color: theme.palette.neutralSecondary }}>
-              Changes will take effect the next time {APP_NAME} is launched.
+              Changes will take effect the next time Foxglove Studio is launched.
             </Text>
             <Checkbox
               checked={telemetryEnabled ?? true}
               onChange={(_event, checked) => setTelemetryEnabled(checked)}
-              label={`Send anonymized usage data to help us improve ${APP_NAME}`}
+              label={`Send anonymized usage data to help us improve Foxglove Studio`}
             />
             <Checkbox
               checked={crashReportingEnabled ?? true}

@@ -16,9 +16,9 @@ import { autoUpdater } from "electron-updater";
 import fs from "fs";
 import { URL } from "universal-url";
 
-import pkgInfo from "@foxglove-studio/app/version";
 import Logger from "@foxglove/log";
 
+import pkgInfo from "../../package.json";
 import StudioWindow from "./StudioWindow";
 import { installMenuInterface } from "./menu";
 import {
@@ -31,7 +31,7 @@ import { getTelemetrySettings } from "./telemetry";
 const start = Date.now();
 const log = Logger.getLogger(__filename);
 
-log.info(`${pkgInfo.name} ${pkgInfo.version}`);
+log.info(`${pkgInfo.productName} ${pkgInfo.version}`);
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -200,7 +200,7 @@ app.on("ready", async () => {
   }
 
   app.setAboutPanelOptions({
-    applicationName: pkgInfo.name,
+    applicationName: pkgInfo.productName,
     applicationVersion: pkgInfo.version,
     version: process.platform,
     copyright: undefined,

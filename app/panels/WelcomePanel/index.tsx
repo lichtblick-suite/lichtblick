@@ -22,7 +22,6 @@ import { useAppConfigurationValue } from "@foxglove-studio/app/hooks/useAppConfi
 import subscribeToNewsletter from "@foxglove-studio/app/panels/WelcomePanel/subscribeToNewsletter";
 import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import { isEmail } from "@foxglove-studio/app/util/validators";
-import { APP_NAME } from "@foxglove-studio/app/version";
 
 const Term = styled.span`
   font-weight: bold;
@@ -70,8 +69,8 @@ function WelcomePanel() {
       <TextContent style={{ padding: 12 }}>
         <h2 style={{ fontSize: "1.5em", marginBottom: "0.8em" }}>Welcome</h2>
         <p>
-          {APP_NAME} is an integrated visualization and debugging tool for robotics. It allows you
-          to quickly and easily understand what’s happening in real-time, and provides a unique
+          Foxglove Studio is an integrated visualization and debugging tool for robotics. It allows
+          you to quickly and easily understand what’s happening in real-time, and provides a unique
           visualization and development experience.
         </p>
         <p>
@@ -94,8 +93,8 @@ function WelcomePanel() {
           icon to remove it.)
         </p>
         <p>
-          Want to view data from your own ROS bag file? Double-click a bag file to open it with{" "}
-          {APP_NAME}, or just drag &amp; drop it into the app. Click{" "}
+          Want to view data from your own ROS bag file? Double-click a bag file to open it with
+          Foxglove Studio, or just drag &amp; drop it into the app. Click{" "}
           <Icon clickable={false}>
             <DatabaseIcon />
           </Icon>{" "}
@@ -113,7 +112,7 @@ function WelcomePanel() {
           validator={validateEmail}
         />
         <Checkbox
-          label={`Send me updates about ${APP_NAME}`}
+          label={`Send me updates about Foxglove Studio`}
           checked={subscribeChecked}
           onChange={setSubscribeChecked}
         />

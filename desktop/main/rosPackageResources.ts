@@ -8,8 +8,9 @@ import { PNG } from "pngjs";
 import UTIF from "utif";
 import { DOMParser } from "xmldom";
 
-import { APP_NAME } from "@foxglove-studio/app/version";
 import Logger from "@foxglove/log";
+
+import pkgInfo from "../../package.json";
 
 const log = Logger.getLogger(__filename);
 
@@ -98,7 +99,7 @@ async function findRosPackageResource(urlString: string): Promise<string> {
     throw new Error(
       `ROS package ${targetPkg} not found${
         basePath != undefined ? ` relative to ${basePath}` : ""
-      }. Set the ROS_PACKAGE_PATH environment variable before launching ${APP_NAME}.`,
+      }. Set the ROS_PACKAGE_PATH environment variable before launching ${pkgInfo.productName}.`,
     );
   }
   return path.join(pkgRoot, ...resourcePathParts);

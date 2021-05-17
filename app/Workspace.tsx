@@ -55,7 +55,6 @@ import { PlayerPresence } from "@foxglove-studio/app/players/types";
 import { ImportPanelLayoutPayload } from "@foxglove-studio/app/types/panels";
 import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import inAutomatedRunMode from "@foxglove-studio/app/util/inAutomatedRunMode";
-import { APP_NAME } from "@foxglove-studio/app/version";
 import Log from "@foxglove/log";
 
 const log = Log.getLogger(__filename);
@@ -387,7 +386,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
             <PlayerStatusIndicator />
           </SToolbarItem>
           <SToolbarItem>
-            <TruncatedText>{currentSourceName ?? APP_NAME}</TruncatedText>{" "}
+            <TruncatedText>{currentSourceName ?? "Foxglove Studio"}</TruncatedText>{" "}
           </SToolbarItem>
           <div style={{ flexGrow: 1 }} />
           <SToolbarItem style={{ marginRight: 5 }}>

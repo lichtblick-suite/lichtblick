@@ -11,7 +11,6 @@ import ReactDOM from "react-dom";
 import "@foxglove-studio/app/styles/global.scss";
 
 import {
-  pkgInfo,
   installDevtoolsFormatters,
   initializeLogEvent,
   overwriteFetch,
@@ -20,6 +19,7 @@ import {
 import { Sockets } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
 
+import pkgInfo from "../../package.json";
 import Root from "./Root";
 
 const log = Logger.getLogger(__filename);

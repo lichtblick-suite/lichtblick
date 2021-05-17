@@ -8,17 +8,17 @@ import { machineId } from "node-machine-id";
 import os from "os";
 
 import { NetworkInterface, OsContext } from "@foxglove-studio/app/OsContext";
-import pkgInfo from "@foxglove-studio/app/version";
 import { PreloaderSockets } from "@foxglove/electron-socket/preloader";
 import Logger from "@foxglove/log";
 
+import pkgInfo from "../../package.json";
 import { Desktop, ForwardedMenuEvent, NativeMenuBridge, Storage } from "../common/types";
 import LocalFileStorage from "./LocalFileStorage";
 
 const log = Logger.getLogger(__filename);
 
 log.debug(`Start Preload`);
-log.info(`${pkgInfo.name} ${pkgInfo.version}`);
+log.info(`${pkgInfo.productName} ${pkgInfo.version}`);
 log.info(`initializing preloader, argv="${window.process.argv.join(" ")}"`);
 
 // Load opt-out settings for crash reporting and telemetry
