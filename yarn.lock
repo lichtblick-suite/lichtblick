@@ -2104,7 +2104,7 @@ __metadata:
     "@testing-library/dom": 7.31.0
     "@testing-library/react": 11.2.7
     "@testing-library/react-hooks": 5.1.2
-    "@types/argparse": ^2.0.6
+    "@types/argparse": ^2.0.7
     "@types/classnames": 2.3.1
     "@types/css-font-loading-module": 0.0.4
     "@types/cytoscape": ^3
@@ -4347,10 +4347,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/argparse@npm:^2.0.6":
-  version: 2.0.6
-  resolution: "@types/argparse@npm:2.0.6"
-  checksum: 8643e8cc2f5594daf0d1c37491a9f0ad3eda16cba7498c71816fb5356ff235c0befc5fd0fb591bed72ee23e2faea7846e5b2aa6d6f82d6b8b053afb5add713ff
+"@types/argparse@npm:^2.0.7":
+  version: 2.0.7
+  resolution: "@types/argparse@npm:2.0.7"
+  checksum: 312214ffa3ed0c2416f0bdaa4e917e0f7662eca216710e628bdd04c1f44af2e4a82f38fe244a536cb64a2e1d6b150ca01a96c787040913b0110220ea82f2e3ca
   languageName: node
   linkType: hard
 
