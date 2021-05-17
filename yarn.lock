@@ -2192,7 +2192,7 @@ __metadata:
     react-input-autosize: 3.0.0
     react-is: 17.0.2
     react-json-tree: 0.15.0
-    react-leaflet: 3.1.0
+    react-leaflet: 3.2.0
     react-markdown: 6.0.2
     react-monaco-editor: 0.43.0
     react-mosaic-component: 5.0.0
@@ -3100,14 +3100,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-leaflet/core@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "@react-leaflet/core@npm:1.0.2"
+"@react-leaflet/core@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@react-leaflet/core@npm:1.1.0"
   peerDependencies:
     leaflet: ^1.7.1
     react: ^17.0.1
     react-dom: ^17.0.1
-  checksum: d0819720426ae84df87eb156e6477d0bc9060f1715eeadebc774ee630124d5b94155ce007becfe62f2bee854f8bc982b5b2b862b3b77d0654ed88265f572cb30
+  checksum: 4e52e24efc34ef695299e52456ca39f09bb85259b61432280ce1f6644e9624ae3435b1a6f745e904420fcc6b1e7e65e6e034e992c60d5d83d23c4f534edd73b1
   languageName: node
   linkType: hard
 
@@ -21132,16 +21132,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-leaflet@npm:3.1.0":
-  version: 3.1.0
-  resolution: "react-leaflet@npm:3.1.0"
+"react-leaflet@npm:3.2.0":
+  version: 3.2.0
+  resolution: "react-leaflet@npm:3.2.0"
   dependencies:
-    "@react-leaflet/core": ^1.0.2
+    "@react-leaflet/core": ^1.1.0
   peerDependencies:
     leaflet: ^1.7.1
     react: ^17.0.1
     react-dom: ^17.0.1
-  checksum: 983744e95dd29891f97cd5977feb9c6eafe97c2abf9f8ca63cbc93e17311b80beac211d9f6dc860aab3fffae62ce17382eca37f61b3a36229b3c23f86365d948
+  checksum: fb0cb3a90ea78180a21bacbb13e327c05a6a4b7858252369029e1bdd10d22f6eb429d3cbbab47546d9c1374300f03a407dd2db20e4e5570bef5da790af5e60e3
   languageName: node
   linkType: hard
 
