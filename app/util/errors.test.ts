@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { AppError, UserError } from "@foxglove-studio/app/util/errors";
+import { AppError, UserError } from "@foxglove/studio-base/util/errors";
 
 describe("errors", () => {
   describe("AppError", () => {

@@ -14,7 +14,7 @@
 import { List, AutoSizer, CellMeasurer, CellMeasurerCache, ListRowProps } from "react-virtualized";
 import { v4 as uuidv4 } from "uuid";
 
-import Button from "@foxglove-studio/app/components/Button";
+import Button from "@foxglove/studio-base/components/Button";
 
 type RenderRowInput<Item> = ListRowProps & {
   item: Item;

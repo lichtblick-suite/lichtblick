@@ -20,14 +20,14 @@ import { range, throttle } from "lodash";
 import React, { useState, useRef, useEffect, useCallback, KeyboardEvent } from "react";
 import { CameraState, cameraStateSelectors } from "regl-worldview";
 
-import Button from "@foxglove-studio/app/components/Button";
-import Icon from "@foxglove-studio/app/components/Icon";
-import useDeepChangeDetector from "@foxglove-studio/app/hooks/useDeepChangeDetector";
-import { Interactive } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
-import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
-import { TextMarker, Color } from "@foxglove-studio/app/types/Messages";
-import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import Button from "@foxglove/studio-base/components/Button";
+import Icon from "@foxglove/studio-base/components/Icon";
+import useDeepChangeDetector from "@foxglove/studio-base/hooks/useDeepChangeDetector";
+import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
+import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
+import { TextMarker, Color } from "@foxglove/studio-base/types/Messages";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export const YELLOW = { r: 1, b: 0, g: 1, a: 1 };
 export const ORANGE = { r: 0.97, g: 0.58, b: 0.02, a: 1 };

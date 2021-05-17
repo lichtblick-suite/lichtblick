@@ -24,12 +24,12 @@ import {
   DEFAULT_CAMERA_STATE,
 } from "regl-worldview";
 
-import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
-import { InteractionData } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
-import { LinkedGlobalVariables } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
-import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
-import { MutablePose } from "@foxglove-studio/app/types/Messages";
-import { emptyPose } from "@foxglove-studio/app/util/Pose";
+import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
+import { InteractionData } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
+import { LinkedGlobalVariables } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
+import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
+import { MutablePose } from "@foxglove/studio-base/types/Messages";
+import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 export type TargetPose = { target: Vec3; targetOrientation: Vec4 };
 

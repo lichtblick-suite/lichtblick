@@ -15,12 +15,12 @@ import { useCallback } from "react";
 import { Color } from "regl-worldview";
 import styled from "styled-components";
 
-import AutoSizingCanvas from "@foxglove-studio/app/components/AutoSizingCanvas";
+import AutoSizingCanvas from "@foxglove/studio-base/components/AutoSizingCanvas";
 import ColorPickerForTopicSettings, {
   PICKER_SIZE,
   getHexFromColorSettingWithDefault,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const COLOR_PICKER_SIZE = PICKER_SIZE.NORMAL.size;
 const GRADIENT_BAR_INSET = Math.floor(COLOR_PICKER_SIZE / 2);

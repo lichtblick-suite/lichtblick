@@ -13,7 +13,7 @@
 
 import { renderHook } from "@testing-library/react-hooks";
 
-import useDeepChangeDetector from "@foxglove-studio/app/hooks/useDeepChangeDetector";
+import useDeepChangeDetector from "@foxglove/studio-base/hooks/useDeepChangeDetector";
 
 describe("useDeepChangeDetector", () => {
   it("returns true only when value changes", () => {

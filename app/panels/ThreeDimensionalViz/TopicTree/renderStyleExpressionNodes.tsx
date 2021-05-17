@@ -17,29 +17,29 @@ import { groupBy, defaults } from "lodash";
 import { useCallback, useContext, useMemo, useState } from "react";
 import styled from "styled-components";
 
-import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
-import Icon from "@foxglove-studio/app/components/Icon";
-import Menu, { Item } from "@foxglove-studio/app/components/Menu";
-import Modal from "@foxglove-studio/app/components/Modal";
-import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
-import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
-import { getDefaultColorOverrideBySourceIdx } from "@foxglove-studio/app/panels/ThreeDimensionalViz/GlobalVariableStyles";
-import { LinkedGlobalVariable } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
-import { ThreeDimensionalVizContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
+import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
+import Icon from "@foxglove/studio-base/components/Icon";
+import Menu, { Item } from "@foxglove/studio-base/components/Menu";
+import Modal from "@foxglove/studio-base/components/Modal";
+import { RenderToBodyComponent } from "@foxglove/studio-base/components/RenderToBodyComponent";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
+import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
+import { getDefaultColorOverrideBySourceIdx } from "@foxglove/studio-base/panels/ThreeDimensionalViz/GlobalVariableStyles";
+import { LinkedGlobalVariable } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
+import { ThreeDimensionalVizContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
 import {
   ColorPickerSettingsPanel,
   PICKER_SIZE,
   getHexFromColorSettingWithDefault,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
-import { ColorOverride } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/Layout";
-import TooltipRow from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/TooltipRow";
-import TooltipTable from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/TooltipTable";
-import { TreeUINode } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/types";
-import { Color } from "@foxglove-studio/app/types/Messages";
-import filterMap from "@foxglove-studio/app/util/filterMap";
-import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
-import { joinTopics } from "@foxglove-studio/app/util/topicUtils";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
+import { ColorOverride } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
+import TooltipRow from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TooltipRow";
+import TooltipTable from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TooltipTable";
+import { TreeUINode } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/types";
+import { Color } from "@foxglove/studio-base/types/Messages";
+import filterMap from "@foxglove/studio-base/util/filterMap";
+import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
+import { joinTopics } from "@foxglove/studio-base/util/topicUtils";
 
 import { SLeft, SRightActions, SToggles, STreeNodeRow } from "./TreeNodeRow";
 import VisibilityToggle from "./VisibilityToggle";

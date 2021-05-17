@@ -16,6 +16,7 @@ import { isEqual, sum, uniq } from "lodash";
 import { TimeUtil, Time, parseMessageDefinition } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
+import { LazyMessageReader } from "@foxglove/rosmsg-deser";
 import {
   DataProvider,
   DataProviderDescriptor,
@@ -24,18 +25,17 @@ import {
   GetMessagesResult,
   GetMessagesTopics,
   InitializationResult,
-} from "@foxglove-studio/app/dataProviders/types";
-import { MessageEvent } from "@foxglove-studio/app/players/types";
-import filterMap from "@foxglove-studio/app/util/filterMap";
-import { getNewConnection } from "@foxglove-studio/app/util/getNewConnection";
+} from "@foxglove/studio-base/dataProviders/types";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
+import filterMap from "@foxglove/studio-base/util/filterMap";
+import { getNewConnection } from "@foxglove/studio-base/util/getNewConnection";
 import {
   Range,
   mergeNewRangeIntoUnsortedNonOverlappingList,
   missingRanges,
-} from "@foxglove-studio/app/util/ranges";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
-import { fromNanoSec, subtractTimes, toNanoSec } from "@foxglove-studio/app/util/time";
-import { LazyMessageReader } from "@foxglove/rosmsg-deser";
+} from "@foxglove/studio-base/util/ranges";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
+import { fromNanoSec, subtractTimes, toNanoSec } from "@foxglove/studio-base/util/time";
 
 // I (JP) mostly just made these numbers up. It might be worth experimenting with different values
 // for these, but it seems to work reasonably well in my tests.

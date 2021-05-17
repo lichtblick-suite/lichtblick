@@ -12,20 +12,20 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import FakePlayer from "@foxglove-studio/app/components/MessagePipeline/FakePlayer";
-import UserNodePlayer from "@foxglove-studio/app/players/UserNodePlayer";
-import exampleDatatypes from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes.json";
+import FakePlayer from "@foxglove/studio-base/components/MessagePipeline/FakePlayer";
+import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
+import exampleDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes.json";
 import {
   Sources,
   DiagnosticSeverity,
   ErrorCodes,
-} from "@foxglove-studio/app/players/UserNodePlayer/types";
-import MockUserNodePlayerWorker from "@foxglove-studio/app/players/UserNodePlayer/worker.mock";
-import { PlayerStateActiveData } from "@foxglove-studio/app/players/types";
-import Storage from "@foxglove-studio/app/util/Storage";
-import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
-import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
-import signal from "@foxglove-studio/app/util/signal";
+} from "@foxglove/studio-base/players/UserNodePlayer/types";
+import MockUserNodePlayerWorker from "@foxglove/studio-base/players/UserNodePlayer/worker.mock";
+import { PlayerStateActiveData } from "@foxglove/studio-base/players/types";
+import Storage from "@foxglove/studio-base/util/Storage";
+import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
+import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
+import signal from "@foxglove/studio-base/util/signal";
 
 const storage = new Storage();
 const nodeId = "nodeId";

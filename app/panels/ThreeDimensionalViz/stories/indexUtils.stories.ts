@@ -13,7 +13,7 @@
 
 import { Color } from "regl-worldview";
 
-import { MARKER_MSG_TYPES } from "@foxglove-studio/app/util/globalConstants";
+import { MARKER_MSG_TYPES } from "@foxglove/studio-base/util/globalConstants";
 
 const GAP = 11;
 const TOTAL = 11;

@@ -15,9 +15,9 @@ import CogIcon from "@mdi/svg/svg/cog.svg";
 import { storiesOf } from "@storybook/react";
 import { useState } from "react";
 
-import Dropdown from "@foxglove-studio/app/components/Dropdown";
-import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
-import Icon from "@foxglove-studio/app/components/Icon";
+import Dropdown from "@foxglove/studio-base/components/Dropdown";
+import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
+import Icon from "@foxglove/studio-base/components/Icon";
 
 function Example({
   position = "below",

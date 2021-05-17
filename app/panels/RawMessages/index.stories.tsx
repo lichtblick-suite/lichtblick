@@ -16,9 +16,9 @@ import { storiesOf } from "@storybook/react";
 import RawMessages, {
   PREV_MSG_METHOD,
   OTHER_SOURCE_METHOD,
-} from "@foxglove-studio/app/panels/RawMessages";
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
-import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+} from "@foxglove/studio-base/panels/RawMessages";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 import {
   fixture,

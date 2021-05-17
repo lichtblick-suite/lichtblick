@@ -14,11 +14,11 @@
 import { action } from "@storybook/addon-actions";
 import { storiesOf } from "@storybook/react";
 
-import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
-import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
-import Dropdown from "@foxglove-studio/app/components/Dropdown/index";
-import Modal from "@foxglove-studio/app/components/Modal";
-import TextContent from "@foxglove-studio/app/components/TextContent";
+import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
+import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
+import Dropdown from "@foxglove/studio-base/components/Dropdown/index";
+import Modal from "@foxglove/studio-base/components/Modal";
+import TextContent from "@foxglove/studio-base/components/TextContent";
 
 function ContentStory({ showChildToggle = false }: { showChildToggle?: boolean }) {
   const renderedRef = React.useRef(false);

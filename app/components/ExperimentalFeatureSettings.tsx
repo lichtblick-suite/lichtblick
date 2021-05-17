@@ -13,8 +13,8 @@
 
 import { Toggle, Stack, Text, useTheme } from "@fluentui/react";
 
-import { AppSetting } from "@foxglove-studio/app/AppSetting";
-import { useAppConfigurationValue } from "@foxglove-studio/app/hooks/useAppConfigurationValue";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 
 type Feature = {
   key: AppSetting;

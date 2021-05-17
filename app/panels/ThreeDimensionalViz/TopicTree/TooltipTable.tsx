@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import styled from "styled-components";
 
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export default styled.table`
   th,

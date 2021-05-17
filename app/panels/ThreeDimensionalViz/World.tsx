@@ -17,15 +17,15 @@ import { Worldview, CameraState, MouseHandler, DEFAULT_CAMERA_STATE } from "regl
 import {
   WorldSearchTextProps,
   useGLText,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/SearchText";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/SearchText";
 import WorldMarkers, {
   InteractiveMarkersByType,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/WorldMarkers";
-import { LAYER_INDEX_DEFAULT_BASE } from "@foxglove-studio/app/panels/ThreeDimensionalViz/constants";
-import { withDiffMode } from "@foxglove-studio/app/panels/ThreeDimensionalViz/utils/diffModeUtils";
-import withHighlights from "@foxglove-studio/app/panels/ThreeDimensionalViz/withWorldMarkerHighlights";
-import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
-import { MarkerCollector, MarkerProvider } from "@foxglove-studio/app/types/Scene";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/WorldMarkers";
+import { LAYER_INDEX_DEFAULT_BASE } from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
+import { withDiffMode } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/diffModeUtils";
+import withHighlights from "@foxglove/studio-base/panels/ThreeDimensionalViz/withWorldMarkerHighlights";
+import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
+import { MarkerCollector, MarkerProvider } from "@foxglove/studio-base/types/Scene";
 
 type Props = WorldSearchTextProps & {
   autoTextBackgroundColor: boolean;

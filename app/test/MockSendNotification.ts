@@ -19,7 +19,7 @@ import type {
   NotificationHandler,
   NotificationSeverity,
   NotificationType,
-} from "@foxglove-studio/app/util/sendNotification";
+} from "@foxglove/studio-base/util/sendNotification";
 
 let currentHandler: NotificationHandler | undefined = undefined;
 

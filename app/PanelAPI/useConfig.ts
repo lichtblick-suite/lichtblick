@@ -5,12 +5,12 @@
 import { useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { savePanelConfigs } from "@foxglove-studio/app/actions/panels";
-import { usePanelCatalog } from "@foxglove-studio/app/context/PanelCatalogContext";
-import { usePanelId } from "@foxglove-studio/app/context/PanelIdContext";
-import { State } from "@foxglove-studio/app/reducers";
-import { SaveConfig } from "@foxglove-studio/app/types/panels";
-import { getPanelTypeFromId } from "@foxglove-studio/app/util/layout";
+import { savePanelConfigs } from "@foxglove/studio-base/actions/panels";
+import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
+import { usePanelId } from "@foxglove/studio-base/context/PanelIdContext";
+import { State } from "@foxglove/studio-base/reducers";
+import { SaveConfig } from "@foxglove/studio-base/types/panels";
+import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 /**
  * Mix partial panel config from savedProps with the panel type's `defaultConfig` to form the complete panel configuration.

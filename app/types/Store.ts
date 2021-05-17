@@ -14,8 +14,8 @@
 import type { Action, Store as ReduxStore } from "redux";
 import type { ThunkDispatch } from "redux-thunk";
 
-import { ActionTypes } from "@foxglove-studio/app/actions";
-import { State } from "@foxglove-studio/app/reducers";
+import { ActionTypes } from "@foxglove/studio-base/actions";
+import { State } from "@foxglove/studio-base/reducers";
 
 export type Store<S = State, A extends Action<unknown> = ActionTypes> = ReduxStore<S, A> & {
   dispatch: ThunkDispatch<S, undefined, A>;

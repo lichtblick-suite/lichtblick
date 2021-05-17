@@ -17,19 +17,19 @@ import { DropTargetMonitor, useDrop } from "react-dnd";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
 
-import { moveTab, MoveTabPayload } from "@foxglove-studio/app/actions/panels";
-import Icon from "@foxglove-studio/app/components/Icon";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import { DraggableToolbarTab } from "@foxglove-studio/app/panels/Tab/DraggableToolbarTab";
+import { moveTab, MoveTabPayload } from "@foxglove/studio-base/actions/panels";
+import Icon from "@foxglove/studio-base/components/Icon";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import { DraggableToolbarTab } from "@foxglove/studio-base/panels/Tab/DraggableToolbarTab";
 import {
   DraggingTabItem,
   TAB_DRAG_TYPE,
   TabActions,
   TabDndContext,
-} from "@foxglove-studio/app/panels/Tab/TabDndContext";
-import helpContent from "@foxglove-studio/app/panels/Tab/index.help.md";
-import { TabConfig } from "@foxglove-studio/app/types/layouts";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+} from "@foxglove/studio-base/panels/Tab/TabDndContext";
+import helpContent from "@foxglove/studio-base/panels/Tab/index.help.md";
+import { TabConfig } from "@foxglove/studio-base/types/layouts";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const STabbedToolbar = styled.div<{ highlight: boolean }>`
   flex: 0 0;

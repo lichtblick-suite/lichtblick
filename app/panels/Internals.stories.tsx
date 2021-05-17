@@ -13,9 +13,9 @@
 
 import { storiesOf } from "@storybook/react";
 
-import Internals from "@foxglove-studio/app/panels/Internals";
-import SubscribeToList from "@foxglove-studio/app/panels/SubscribeToList";
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+import Internals from "@foxglove/studio-base/panels/Internals";
+import SubscribeToList from "@foxglove/studio-base/panels/SubscribeToList";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 storiesOf("panels/Internals", module)
   .add("default", () => {

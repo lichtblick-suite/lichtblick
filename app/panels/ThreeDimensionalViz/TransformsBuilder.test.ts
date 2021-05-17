@@ -13,8 +13,8 @@
 
 import { mat4 } from "gl-matrix";
 
-import { Transform } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
-import { getArrowToParentMarkers } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TransformsBuilder";
+import { Transform } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
+import { getArrowToParentMarkers } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TransformsBuilder";
 
 describe("TransformBuilder", () => {
   describe("getArrowToParentMarkers", () => {

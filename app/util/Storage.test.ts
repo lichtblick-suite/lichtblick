@@ -12,7 +12,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import MemoryStorage from "@foxglove-studio/app/test/MemoryStorage";
+import MemoryStorage from "@foxglove/studio-base/test/MemoryStorage";
 
 import Storage, { clearBustStorageFnsMap } from "./Storage";
 

@@ -4,8 +4,8 @@
 
 import styled, { css } from "styled-components";
 
-import { makeFlashAnimation } from "@foxglove-studio/app/components/GlobalVariablesTable";
-import { colors as sharedColors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { makeFlashAnimation } from "@foxglove/studio-base/components/GlobalVariablesTable";
+import { colors as sharedColors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const FlashRowAnimation = makeFlashAnimation(
   css`

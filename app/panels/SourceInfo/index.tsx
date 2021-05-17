@@ -14,14 +14,14 @@
 import { useCallback } from "react";
 import styled from "styled-components";
 
-import EmptyState from "@foxglove-studio/app/components/EmptyState";
-import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
-import Panel from "@foxglove-studio/app/components/Panel";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import SelectableTimestamp from "@foxglove-studio/app/components/SelectableTimestamp";
-import clipboard from "@foxglove-studio/app/util/clipboard";
-import { formatDuration } from "@foxglove-studio/app/util/formatTime";
-import { subtractTimes, toSec } from "@foxglove-studio/app/util/time";
+import EmptyState from "@foxglove/studio-base/components/EmptyState";
+import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
+import Panel from "@foxglove/studio-base/components/Panel";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import SelectableTimestamp from "@foxglove/studio-base/components/SelectableTimestamp";
+import clipboard from "@foxglove/studio-base/util/clipboard";
+import { formatDuration } from "@foxglove/studio-base/util/formatTime";
+import { subtractTimes, toSec } from "@foxglove/studio-base/util/time";
 
 const STableContainer = styled.div`
   overflow-y: auto;

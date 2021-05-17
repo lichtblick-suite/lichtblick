@@ -4,7 +4,7 @@
 
 import styled from "styled-components";
 
-import { colors as sharedColors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { colors as sharedColors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const ParametersTable = styled.div`
   display: flex;

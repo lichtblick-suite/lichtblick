@@ -16,12 +16,12 @@ import Tree from "react-json-tree";
 import { MouseEventObject } from "regl-worldview";
 import styled from "styled-components";
 
-import Dropdown from "@foxglove-studio/app/components/Dropdown";
-import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
-import useGetItemStringWithTimezone from "@foxglove-studio/app/components/JsonTree/useGetItemStringWithTimezone";
-import { getInstanceObj } from "@foxglove-studio/app/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
-import { jsonTreeTheme } from "@foxglove-studio/app/util/globalConstants";
-import logEvent, { getEventNames, getEventTags } from "@foxglove-studio/app/util/logEvent";
+import Dropdown from "@foxglove/studio-base/components/Dropdown";
+import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
+import useGetItemStringWithTimezone from "@foxglove/studio-base/components/JsonTree/useGetItemStringWithTimezone";
+import { getInstanceObj } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
+import { jsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
+import logEvent, { getEventNames, getEventTags } from "@foxglove/studio-base/util/logEvent";
 
 import GlobalVariableLink from "./GlobalVariableLink/index";
 import { InteractionData } from "./types";

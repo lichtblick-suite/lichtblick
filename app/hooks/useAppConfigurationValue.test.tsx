@@ -8,8 +8,8 @@ import { PropsWithChildren } from "react";
 import AppConfigurationContext, {
   AppConfiguration,
   AppConfigurationValue,
-} from "@foxglove-studio/app/context/AppConfigurationContext";
-import { useAppConfigurationValue } from "@foxglove-studio/app/hooks/useAppConfigurationValue";
+} from "@foxglove/studio-base/context/AppConfigurationContext";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 
 class FakeProvider implements AppConfiguration {
   get(key: string): AppConfigurationValue {

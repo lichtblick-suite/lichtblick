@@ -13,8 +13,8 @@
 
 import { Time } from "rosbag";
 
-import NoopMetricsCollector from "@foxglove-studio/app/players/NoopMetricsCollector";
-import RosbridgePlayer from "@foxglove-studio/app/players/RosbridgePlayer";
+import NoopMetricsCollector from "@foxglove/studio-base/players/NoopMetricsCollector";
+import RosbridgePlayer from "@foxglove/studio-base/players/RosbridgePlayer";
 
 const headerMessage = ({
   seq,

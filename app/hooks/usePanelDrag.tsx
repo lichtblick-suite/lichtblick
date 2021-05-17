@@ -18,9 +18,9 @@ import { MosaicDragType, MosaicWindowContext } from "react-mosaic-component";
 import { useSelector, useDispatch } from "react-redux";
 import { bindActionCreators } from "redux";
 
-import { startDrag, endDrag } from "@foxglove-studio/app/actions/panels";
-import { State } from "@foxglove-studio/app/reducers";
-import { MosaicDropResult } from "@foxglove-studio/app/types/panels";
+import { startDrag, endDrag } from "@foxglove/studio-base/actions/panels";
+import { State } from "@foxglove/studio-base/reducers";
+import { MosaicDropResult } from "@foxglove/studio-base/types/panels";
 
 export type PanelDragObject = {
   deferredHide: number;

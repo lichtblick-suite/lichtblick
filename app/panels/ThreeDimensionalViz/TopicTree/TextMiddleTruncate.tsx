@@ -13,7 +13,7 @@
 
 import styled from "styled-components";
 
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
 
 export const DEFAULT_END_TEXT_LENGTH = 16;
 

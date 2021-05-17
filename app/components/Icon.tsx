@@ -13,7 +13,7 @@
 
 import cx from "classnames";
 
-import Tooltip, { useTooltip } from "@foxglove-studio/app/components/Tooltip";
+import Tooltip, { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 
 import styles from "./icon.module.scss";
 

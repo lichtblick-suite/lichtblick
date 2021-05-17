@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { TimestampMethod } from "@foxglove-studio/app/util/time";
+import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 export type BasePlotPath = {
   value: string;

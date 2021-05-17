@@ -16,18 +16,18 @@
 
 import ts from "typescript/lib/typescript";
 
-import { formatInterfaceName } from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typegen";
+import { formatInterfaceName } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typegen";
 import {
   constructDatatypes,
   findReturnType,
   findDefaultExportFunction,
   DatatypeExtractionError,
-} from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/ast";
-import { getNodeProjectConfig } from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
+} from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/ast";
+import { getNodeProjectConfig } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
 import {
   baseCompilerOptions,
   transformDiagnosticToMarkerData,
-} from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/utils";
+} from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/utils";
 import {
   DiagnosticSeverity,
   Sources,
@@ -35,10 +35,10 @@ import {
   NodeData,
   Diagnostic,
   NodeDataTransformer,
-} from "@foxglove-studio/app/players/UserNodePlayer/types";
-import { Topic } from "@foxglove-studio/app/players/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+} from "@foxglove/studio-base/players/UserNodePlayer/types";
+import { Topic } from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 export const hasTransformerErrors = (nodeData: NodeData): boolean =>
   nodeData.diagnostics.some(({ severity }) => severity === DiagnosticSeverity.Error);

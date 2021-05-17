@@ -14,8 +14,8 @@ import { partition } from "lodash";
 import memoizeWeak from "memoize-weak";
 import { Time, TimeUtil } from "rosbag";
 
-import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
-import UserNodePlayer from "@foxglove-studio/app/players/UserNodePlayer";
+import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
+import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
 import {
   AdvertisePayload,
   PublishPayload,
@@ -26,11 +26,11 @@ import {
   ParameterValue,
   MessageEvent,
   PlayerProblem,
-} from "@foxglove-studio/app/players/types";
-import { StampedMessage } from "@foxglove-studio/app/types/Messages";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { UserNodes } from "@foxglove-studio/app/types/panels";
-import { clampTime, isTime, TimestampMethod } from "@foxglove-studio/app/util/time";
+} from "@foxglove/studio-base/players/types";
+import { StampedMessage } from "@foxglove/studio-base/types/Messages";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { UserNodes } from "@foxglove/studio-base/types/panels";
+import { clampTime, isTime, TimestampMethod } from "@foxglove/studio-base/util/time";
 
 // As a compromise between playback buffering required and correctness (as well as our ability to
 // play near the ends of bags), we assume messages' headers are always between 0s and 1s earlier

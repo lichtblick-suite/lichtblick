@@ -15,7 +15,7 @@ import { flatten, groupBy } from "lodash";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Time, TimeUtil } from "rosbag";
 
-import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
+import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
 import {
   AdvertisePayload,
   MessageEvent,
@@ -28,10 +28,10 @@ import {
   PublishPayload,
   SubscribePayload,
   Topic,
-} from "@foxglove-studio/app/players/types";
-import StoreSetup from "@foxglove-studio/app/stories/StoreSetup";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import naturalSort from "@foxglove-studio/app/util/naturalSort";
+} from "@foxglove/studio-base/players/types";
+import StoreSetup from "@foxglove/studio-base/stories/StoreSetup";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import naturalSort from "@foxglove/studio-base/util/naturalSort";
 
 import { ContextInternal } from "./index";
 

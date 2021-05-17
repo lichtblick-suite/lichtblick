@@ -14,8 +14,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
-import { PlayerCapabilities } from "@foxglove-studio/app/players/types";
+import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
+import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 
 type Props = {
   topic: string;

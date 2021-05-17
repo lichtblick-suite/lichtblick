@@ -14,7 +14,7 @@
 import { isEqual } from "lodash";
 import { ReglClickInfo } from "regl-worldview";
 
-import { Point } from "@foxglove-studio/app/types/Messages";
+import { Point } from "@foxglove/studio-base/types/Messages";
 
 export type MeasureState = "idle" | "place-start" | "place-finish";
 

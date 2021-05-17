@@ -14,7 +14,7 @@
 import {
   DEFAULT_FLAT_COLOR,
   ColorMode,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
 
 import {
   getFieldOffsetsAndReaders,

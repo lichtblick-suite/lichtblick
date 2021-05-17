@@ -13,9 +13,9 @@
 
 import { storiesOf } from "@storybook/react";
 
-import Flex from "@foxglove-studio/app/components/Flex";
-import MockPanelContextProvider from "@foxglove-studio/app/components/MockPanelContextProvider";
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+import Flex from "@foxglove/studio-base/components/Flex";
+import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import MessagePathInput from "./MessagePathInput";
 

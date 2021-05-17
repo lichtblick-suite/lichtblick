@@ -16,7 +16,7 @@ import ChevronUpIcon from "@mdi/svg/svg/chevron-up.svg";
 import { ReactNode } from "react";
 import styled from "styled-components";
 
-import Icon from "@foxglove-studio/app/components/Icon";
+import Icon from "@foxglove/studio-base/components/Icon";
 
 import Item from "./Item";
 

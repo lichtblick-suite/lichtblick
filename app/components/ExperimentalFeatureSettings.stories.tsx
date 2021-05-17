@@ -13,11 +13,11 @@
 
 import { ReactElement, useState } from "react";
 
-import { ExperimentalFeatureSettings } from "@foxglove-studio/app/components/ExperimentalFeatureSettings";
+import { ExperimentalFeatureSettings } from "@foxglove/studio-base/components/ExperimentalFeatureSettings";
 import AppConfigurationContext, {
   AppConfiguration,
   AppConfigurationValue,
-} from "@foxglove-studio/app/context/AppConfigurationContext";
+} from "@foxglove/studio-base/context/AppConfigurationContext";
 
 function makeConfiguration(entries?: [string, AppConfigurationValue][]): AppConfiguration {
   const map = new Map<string, AppConfigurationValue>(entries);

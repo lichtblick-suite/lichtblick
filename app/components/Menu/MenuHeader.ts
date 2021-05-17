@@ -13,7 +13,7 @@
 
 import styled from "styled-components";
 
-import { colors, textSize } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { colors, textSize } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const MenuHeader = styled.div`
   color: ${colors.LIGHT};

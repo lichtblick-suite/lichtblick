@@ -6,31 +6,31 @@ import {
   PanelCatalog,
   PanelCategory,
   PanelInfo,
-} from "@foxglove-studio/app/context/PanelCatalogContext";
-import GlobalVariableSlider from "@foxglove-studio/app/panels/GlobalVariableSlider";
-import ImageViewPanel from "@foxglove-studio/app/panels/ImageView";
-import InternalLogs from "@foxglove-studio/app/panels/InternalLogs";
-import Internals from "@foxglove-studio/app/panels/Internals";
-import MapPanel from "@foxglove-studio/app/panels/Map";
-import NodePlayground from "@foxglove-studio/app/panels/NodePlayground";
-import NumberOfRenders from "@foxglove-studio/app/panels/NumberOfRenders";
-import ParametersPanel from "@foxglove-studio/app/panels/Parameters";
-import PlaybackPerformance from "@foxglove-studio/app/panels/PlaybackPerformance";
-import Plot from "@foxglove-studio/app/panels/Plot";
-import Publish from "@foxglove-studio/app/panels/Publish";
-import RawMessages from "@foxglove-studio/app/panels/RawMessages";
-import Rosout from "@foxglove-studio/app/panels/Rosout";
-import SourceInfo from "@foxglove-studio/app/panels/SourceInfo";
-import StateTransitions from "@foxglove-studio/app/panels/StateTransitions";
-import SubscribeToList from "@foxglove-studio/app/panels/SubscribeToList";
-import Tab from "@foxglove-studio/app/panels/Tab";
-import Table from "@foxglove-studio/app/panels/Table";
-import ThreeDimensionalViz from "@foxglove-studio/app/panels/ThreeDimensionalViz";
-import TopicGraph from "@foxglove-studio/app/panels/TopicGraph";
-import URDFViewer from "@foxglove-studio/app/panels/URDFViewer";
-import WelcomePanel from "@foxglove-studio/app/panels/WelcomePanel";
-import DiagnosticStatusPanel from "@foxglove-studio/app/panels/diagnostics/DiagnosticStatusPanel";
-import DiagnosticSummary from "@foxglove-studio/app/panels/diagnostics/DiagnosticSummary";
+} from "@foxglove/studio-base/context/PanelCatalogContext";
+import GlobalVariableSlider from "@foxglove/studio-base/panels/GlobalVariableSlider";
+import ImageViewPanel from "@foxglove/studio-base/panels/ImageView";
+import InternalLogs from "@foxglove/studio-base/panels/InternalLogs";
+import Internals from "@foxglove/studio-base/panels/Internals";
+import MapPanel from "@foxglove/studio-base/panels/Map";
+import NodePlayground from "@foxglove/studio-base/panels/NodePlayground";
+import NumberOfRenders from "@foxglove/studio-base/panels/NumberOfRenders";
+import ParametersPanel from "@foxglove/studio-base/panels/Parameters";
+import PlaybackPerformance from "@foxglove/studio-base/panels/PlaybackPerformance";
+import Plot from "@foxglove/studio-base/panels/Plot";
+import Publish from "@foxglove/studio-base/panels/Publish";
+import RawMessages from "@foxglove/studio-base/panels/RawMessages";
+import Rosout from "@foxglove/studio-base/panels/Rosout";
+import SourceInfo from "@foxglove/studio-base/panels/SourceInfo";
+import StateTransitions from "@foxglove/studio-base/panels/StateTransitions";
+import SubscribeToList from "@foxglove/studio-base/panels/SubscribeToList";
+import Tab from "@foxglove/studio-base/panels/Tab";
+import Table from "@foxglove/studio-base/panels/Table";
+import ThreeDimensionalViz from "@foxglove/studio-base/panels/ThreeDimensionalViz";
+import TopicGraph from "@foxglove/studio-base/panels/TopicGraph";
+import URDFViewer from "@foxglove/studio-base/panels/URDFViewer";
+import WelcomePanel from "@foxglove/studio-base/panels/WelcomePanel";
+import DiagnosticStatusPanel from "@foxglove/studio-base/panels/diagnostics/DiagnosticStatusPanel";
+import DiagnosticSummary from "@foxglove/studio-base/panels/diagnostics/DiagnosticSummary";
 
 const visualization: PanelInfo[] = [
   { title: "3D", component: ThreeDimensionalViz },

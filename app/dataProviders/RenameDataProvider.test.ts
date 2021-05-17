@@ -24,10 +24,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import MemoryDataProvider from "@foxglove-studio/app/dataProviders/MemoryDataProvider";
-import RenameDataProvider from "@foxglove-studio/app/dataProviders/RenameDataProvider";
-import { mockExtensionPoint } from "@foxglove-studio/app/dataProviders/mockExtensionPoint";
-import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+import MemoryDataProvider from "@foxglove/studio-base/dataProviders/MemoryDataProvider";
+import RenameDataProvider from "@foxglove/studio-base/dataProviders/RenameDataProvider";
+import { mockExtensionPoint } from "@foxglove/studio-base/dataProviders/mockExtensionPoint";
+import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 // reusable providers
 function getProvider() {

@@ -4,7 +4,7 @@
 
 import { ActionButton, Text, useTheme } from "@fluentui/react";
 
-import { usePlayerSelection } from "@foxglove-studio/app/context/PlayerSelectionContext";
+import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 
 export default function ConnectionList(): JSX.Element {
   const { selectSource, availableSources } = usePlayerSelection();

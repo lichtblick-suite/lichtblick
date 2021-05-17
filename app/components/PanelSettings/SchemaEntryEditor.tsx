@@ -20,9 +20,9 @@ import {
 import { get, set, cloneDeep } from "lodash";
 import { SyntheticEvent, useCallback, useRef, useState } from "react";
 
-import { PanelConfigSchemaEntry, SaveConfig } from "@foxglove-studio/app/types/panels";
-import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import Logger from "@foxglove/log";
+import { PanelConfigSchemaEntry, SaveConfig } from "@foxglove/studio-base/types/panels";
+import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 const log = Logger.getLogger(__filename);
 

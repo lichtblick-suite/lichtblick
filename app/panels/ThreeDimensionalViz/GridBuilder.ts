@@ -13,14 +13,14 @@
 
 import { isEqual } from "lodash";
 
-import { TopicSettingsCollection } from "@foxglove-studio/app/panels/ThreeDimensionalViz/SceneBuilder";
+import { TopicSettingsCollection } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
 import {
   DEFAULT_GRID_COLOR,
   GridSettings,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/GridSettingsEditor";
-import { Point, InstancedLineListMarker } from "@foxglove-studio/app/types/Messages";
-import { MarkerProvider, MarkerCollector } from "@foxglove-studio/app/types/Scene";
-import { FOXGLOVE_GRID_TOPIC } from "@foxglove-studio/app/util/globalConstants";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/GridSettingsEditor";
+import { Point, InstancedLineListMarker } from "@foxglove/studio-base/types/Messages";
+import { MarkerProvider, MarkerCollector } from "@foxglove/studio-base/types/Scene";
+import { FOXGLOVE_GRID_TOPIC } from "@foxglove/studio-base/util/globalConstants";
 
 export default class GridBuilder implements MarkerProvider {
   grid: InstancedLineListMarker;

@@ -7,16 +7,16 @@ import { StrictMode, useContext, useMemo, useState } from "react";
 import { ReactReduxContext, useDispatch, useSelector } from "react-redux";
 import { useUnmount } from "react-use";
 
-import { useConfigById } from "@foxglove-studio/app/PanelAPI";
-import { removeSelectedPanelId } from "@foxglove-studio/app/actions/mosaic";
-import { savePanelConfigs } from "@foxglove-studio/app/actions/panels";
-import ShareJsonModal from "@foxglove-studio/app/components/ShareJsonModal";
-import { SidebarContent } from "@foxglove-studio/app/components/SidebarContent";
-import { usePanelCatalog } from "@foxglove-studio/app/context/PanelCatalogContext";
-import { PanelIdContext } from "@foxglove-studio/app/context/PanelIdContext";
-import { State } from "@foxglove-studio/app/reducers";
-import { TAB_PANEL_TYPE } from "@foxglove-studio/app/util/globalConstants";
-import { getPanelTypeFromId } from "@foxglove-studio/app/util/layout";
+import { useConfigById } from "@foxglove/studio-base/PanelAPI";
+import { removeSelectedPanelId } from "@foxglove/studio-base/actions/mosaic";
+import { savePanelConfigs } from "@foxglove/studio-base/actions/panels";
+import ShareJsonModal from "@foxglove/studio-base/components/ShareJsonModal";
+import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
+import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
+import { PanelIdContext } from "@foxglove/studio-base/context/PanelIdContext";
+import { State } from "@foxglove/studio-base/reducers";
+import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
+import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 import SchemaEditor from "./SchemaEditor";
 

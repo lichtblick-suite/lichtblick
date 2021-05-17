@@ -16,7 +16,7 @@ import { uniqBy } from "lodash";
 import {
   STUDIO_MARKER_ARRAY_DATATYPE,
   STUDIO_MARKER_DATATYPE,
-} from "@foxglove-studio/app/util/globalConstants";
+} from "@foxglove/studio-base/util/globalConstants";
 
 import { basicDatatypes } from "./datatypes";
 import rosDatatypesToMessageDefinition from "./rosDatatypesToMessageDefinition";

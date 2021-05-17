@@ -15,7 +15,7 @@ import { storiesOf } from "@storybook/react";
 import { Component } from "react";
 import TestUtils from "react-dom/test-utils";
 
-import Autocomplete from "@foxglove-studio/app/components/Autocomplete";
+import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
 
 function focusInput(el: any) {
   if (el) {

@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 import type { MosaicNode, MosaicPath } from "react-mosaic-component";
 
-import { PanelsState } from "@foxglove-studio/app/reducers/panels";
-import { TimestampMethod } from "@foxglove-studio/app/util/time";
+import { PanelsState } from "@foxglove/studio-base/reducers/panels";
+import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 // Mosaic Types
 export type MosaicDropTargetPosition = "top" | "bottom" | "left" | "right";

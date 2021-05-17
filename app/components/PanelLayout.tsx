@@ -29,14 +29,14 @@ import {
   changePanelLayout,
   savePanelConfigs,
   SAVE_PANEL_CONFIGS,
-} from "@foxglove-studio/app/actions/panels";
-import Flex from "@foxglove-studio/app/components/Flex";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import { usePanelCatalog } from "@foxglove-studio/app/context/PanelCatalogContext";
-import { EmptyDropTarget } from "@foxglove-studio/app/panels/Tab/EmptyDropTarget";
-import { State, Dispatcher } from "@foxglove-studio/app/reducers";
-import { MosaicDropResult, SaveConfigsPayload } from "@foxglove-studio/app/types/panels";
-import { getPanelIdForType, getPanelTypeFromId } from "@foxglove-studio/app/util/layout";
+} from "@foxglove/studio-base/actions/panels";
+import Flex from "@foxglove/studio-base/components/Flex";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
+import { EmptyDropTarget } from "@foxglove/studio-base/panels/Tab/EmptyDropTarget";
+import { State, Dispatcher } from "@foxglove/studio-base/reducers";
+import { MosaicDropResult, SaveConfigsPayload } from "@foxglove/studio-base/types/panels";
+import { getPanelIdForType, getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 import ErrorBoundary from "./ErrorBoundary";
 

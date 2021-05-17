@@ -16,13 +16,13 @@
 import {
   DEPRECATED__ros_lib_dts,
   DEPRECATED__ros_lib_filename,
-} from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/DEPRECATED_ros";
-import rawUserUtils from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/rawUserUtils";
+} from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/DEPRECATED_ros";
+import rawUserUtils from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/rawUserUtils";
 import {
   ros_lib_filename,
   ros_lib_dts,
-} from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/ros";
-import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+} from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/ros";
+import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 import { lib_filename, lib_es6_dts } from "./lib";
 

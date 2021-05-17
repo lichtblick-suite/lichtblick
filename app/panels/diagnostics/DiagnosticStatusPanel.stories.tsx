@@ -1,10 +1,10 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import DiagnosticStatusPanel from "@foxglove-studio/app/panels/diagnostics/DiagnosticStatusPanel";
-import { makeDiagnosticMessage } from "@foxglove-studio/app/panels/diagnostics/DiagnosticSummary.stories";
-import { LEVELS } from "@foxglove-studio/app/panels/diagnostics/util";
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+import DiagnosticStatusPanel from "@foxglove/studio-base/panels/diagnostics/DiagnosticStatusPanel";
+import { makeDiagnosticMessage } from "@foxglove/studio-base/panels/diagnostics/DiagnosticSummary.stories";
+import { LEVELS } from "@foxglove/studio-base/panels/diagnostics/util";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 export default {
   title: "panels/diagnostics/DiagnosticStatusPanel",

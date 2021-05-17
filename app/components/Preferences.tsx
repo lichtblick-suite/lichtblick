@@ -15,15 +15,15 @@ import {
 import moment from "moment-timezone";
 import { useCallback, useMemo, useState } from "react";
 
-import { AppSetting } from "@foxglove-studio/app/AppSetting";
-import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
-import { ExperimentalFeatureSettings } from "@foxglove-studio/app/components/ExperimentalFeatureSettings";
-import { SidebarContent } from "@foxglove-studio/app/components/SidebarContent";
-import { useAppConfigurationValue } from "@foxglove-studio/app/hooks/useAppConfigurationValue";
-import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
-import filterMap from "@foxglove-studio/app/util/filterMap";
-import fuzzyFilter from "@foxglove-studio/app/util/fuzzyFilter";
 import { RosNode } from "@foxglove/ros1";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
+import { ExperimentalFeatureSettings } from "@foxglove/studio-base/components/ExperimentalFeatureSettings";
+import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
+import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
+import filterMap from "@foxglove/studio-base/util/filterMap";
+import fuzzyFilter from "@foxglove/studio-base/util/fuzzyFilter";
 
 function formatTimezone(name: string) {
   const tz = moment.tz(name);

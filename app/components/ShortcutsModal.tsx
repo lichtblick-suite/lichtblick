@@ -13,9 +13,9 @@
 
 import styled from "styled-components";
 
-import HelpModal from "@foxglove-studio/app/components/HelpModal";
-import KeyboardShortcut from "@foxglove-studio/app/components/KeyboardShortcut";
-import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
+import HelpModal from "@foxglove/studio-base/components/HelpModal";
+import KeyboardShortcut from "@foxglove/studio-base/components/KeyboardShortcut";
+import { RenderToBodyComponent } from "@foxglove/studio-base/components/RenderToBodyComponent";
 
 const STitle = styled.h3`
   margin: 16px 0 8px 0;

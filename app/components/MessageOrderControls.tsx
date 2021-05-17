@@ -13,11 +13,11 @@
 import { useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
-import { setPlaybackConfig } from "@foxglove-studio/app/actions/panels";
-import Dropdown from "@foxglove-studio/app/components/Dropdown";
-import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
-import { State } from "@foxglove-studio/app/reducers";
-import { defaultPlaybackConfig } from "@foxglove-studio/app/reducers/panels";
+import { setPlaybackConfig } from "@foxglove/studio-base/actions/panels";
+import Dropdown from "@foxglove/studio-base/components/Dropdown";
+import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
+import { State } from "@foxglove/studio-base/reducers";
+import { defaultPlaybackConfig } from "@foxglove/studio-base/reducers/panels";
 
 const messageOrderLabel = {
   receiveTime: "Receive time",

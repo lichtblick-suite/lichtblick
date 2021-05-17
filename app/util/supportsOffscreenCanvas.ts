@@ -13,7 +13,7 @@
 
 import memoize from "lodash/memoize";
 
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 const supportsOffscreenCanvas: () => boolean = memoize((): boolean => {
   try {

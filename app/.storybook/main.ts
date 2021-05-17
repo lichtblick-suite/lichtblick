@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { Configuration } from "webpack";
 
-import { makeConfig } from "@foxglove-studio/app/webpack";
+import { makeConfig } from "@foxglove/studio-base/webpack";
 
 module.exports = {
   stories: ["../**/*.stories.@(ts|tsx)"],
@@ -32,7 +32,7 @@ module.exports = {
         alias: {
           ...rendererConfig.resolve?.alias,
           // Modules to replace with mock equivalents in the storybook build:
-          "@foxglove-studio/app/panels/WelcomePanel/subscribeToNewsletter": require.resolve(
+          "@foxglove/studio-base/panels/WelcomePanel/subscribeToNewsletter": require.resolve(
             "./__mocks__/subscribeToNewsletter",
           ),
         },

@@ -13,10 +13,10 @@
 
 import { sortBy, sortedUniq } from "lodash";
 
-import inAutomatedRunMode from "@foxglove-studio/app/util/inAutomatedRunMode";
-import logEvent, { getEventNames, getEventTags } from "@foxglove-studio/app/util/logEvent";
-import promiseTimeout from "@foxglove-studio/app/util/promiseTimeout";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
+import inAutomatedRunMode from "@foxglove/studio-base/util/inAutomatedRunMode";
+import logEvent, { getEventNames, getEventTags } from "@foxglove/studio-base/util/logEvent";
+import promiseTimeout from "@foxglove/studio-base/util/promiseTimeout";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 export type FramePromise = { name: string; promise: Promise<void> };
 

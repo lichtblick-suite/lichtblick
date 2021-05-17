@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 import { storiesOf } from "@storybook/react";
 
-import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
-import PlaybackSpeedControls from "@foxglove-studio/app/components/PlaybackSpeedControls";
+import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpeedControls";
 
 const CAPABILITIES = ["setSpeed", "playbackControl"];
 

@@ -13,7 +13,7 @@
 
 import { MosaicNode } from "react-mosaic-component";
 
-import { PanelsState } from "@foxglove-studio/app/reducers/panels";
+import { PanelsState } from "@foxglove/studio-base/reducers/panels";
 
 export type LayoutDescription = {
   id: string;

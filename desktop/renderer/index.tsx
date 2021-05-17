@@ -8,16 +8,16 @@
 import { init as initSentry } from "@sentry/electron";
 import ReactDOM from "react-dom";
 
-import "@foxglove-studio/app/styles/global.scss";
+import "@foxglove/studio-base/styles/global.scss";
 
+import { Sockets } from "@foxglove/electron-socket/renderer";
+import Logger from "@foxglove/log";
 import {
   installDevtoolsFormatters,
   initializeLogEvent,
   overwriteFetch,
   waitForFonts,
-} from "@foxglove-studio/app";
-import { Sockets } from "@foxglove/electron-socket/renderer";
-import Logger from "@foxglove/log";
+} from "@foxglove/studio-base";
 
 import pkgInfo from "../../package.json";
 import Root from "./Root";

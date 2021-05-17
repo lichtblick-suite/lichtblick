@@ -14,19 +14,21 @@
 import { isEqual } from "lodash";
 import { useCallback, useMemo, useRef } from "react";
 
-import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import { TypicalFilterNames } from "@foxglove-studio/app/components/MessagePathSyntax/isTypicalFilterName";
-import parseRosPath from "@foxglove-studio/app/components/MessagePathSyntax/parseRosPath";
-import useChangeDetector from "@foxglove-studio/app/hooks/useChangeDetector";
-import useDeepMemo from "@foxglove-studio/app/hooks/useDeepMemo";
-import useGlobalVariables, { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
-import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
-import { MessageEvent, Topic } from "@foxglove-studio/app/players/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
+import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
+import { TypicalFilterNames } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
+import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
+import useChangeDetector from "@foxglove/studio-base/hooks/useChangeDetector";
+import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
+import useGlobalVariables, {
+  GlobalVariables,
+} from "@foxglove/studio-base/hooks/useGlobalVariables";
+import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
+import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import {
   enumValuesByDatatypeAndField,
   getTopicsByTopicName,
-} from "@foxglove-studio/app/util/selectors";
+} from "@foxglove/studio-base/util/selectors";
 
 import { MessagePathFilter, MessagePathStructureItem, RosPath } from "./constants";
 import { messagePathStructures } from "./messagePathsForDatatype";

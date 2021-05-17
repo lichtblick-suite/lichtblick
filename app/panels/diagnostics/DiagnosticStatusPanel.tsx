@@ -14,16 +14,16 @@
 import { sortBy } from "lodash";
 import { useCallback } from "react";
 
-import { useDataSourceInfo } from "@foxglove-studio/app/PanelAPI";
-import Autocomplete from "@foxglove-studio/app/components/Autocomplete";
-import EmptyState from "@foxglove-studio/app/components/EmptyState";
-import Flex from "@foxglove-studio/app/components/Flex";
-import Panel from "@foxglove-studio/app/components/Panel";
-import { usePanelContext } from "@foxglove-studio/app/components/PanelContext";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import TopicToRenderMenu from "@foxglove-studio/app/components/TopicToRenderMenu";
-import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
-import { DIAGNOSTIC_TOPIC } from "@foxglove-studio/app/util/globalConstants";
+import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
+import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
+import EmptyState from "@foxglove/studio-base/components/EmptyState";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Panel from "@foxglove/studio-base/components/Panel";
+import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import TopicToRenderMenu from "@foxglove/studio-base/components/TopicToRenderMenu";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
+import { DIAGNOSTIC_TOPIC } from "@foxglove/studio-base/util/globalConstants";
 
 import DiagnosticStatus from "./DiagnosticStatus";
 import helpContent from "./DiagnosticStatusPanel.help.md";

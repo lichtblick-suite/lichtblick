@@ -16,6 +16,8 @@ import { MessageReader, Time, parseMessageDefinition } from "rosbag";
 import roslib from "roslib";
 import { v4 as uuidv4 } from "uuid";
 
+import Log from "@foxglove/log";
+import type { RosGraph } from "@foxglove/ros1";
 import {
   AdvertisePayload,
   MessageEvent,
@@ -30,21 +32,19 @@ import {
   PlayerMetricsCollectorInterface,
   ParameterValue,
   PlayerProblem,
-} from "@foxglove-studio/app/players/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { bagConnectionsToDatatypes } from "@foxglove-studio/app/util/bagConnectionsHelper";
-import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
-import { FREEZE_MESSAGES } from "@foxglove-studio/app/util/globalConstants";
-import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
+} from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { bagConnectionsToDatatypes } from "@foxglove/studio-base/util/bagConnectionsHelper";
+import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
+import { FREEZE_MESSAGES } from "@foxglove/studio-base/util/globalConstants";
+import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 import {
   addTimes,
   fromMillis,
   subtractTimes,
   TimestampMethod,
   toSec,
-} from "@foxglove-studio/app/util/time";
-import Log from "@foxglove/log";
-import type { RosGraph } from "@foxglove/ros1";
+} from "@foxglove/studio-base/util/time";
 
 const log = Log.getLogger(__dirname);
 

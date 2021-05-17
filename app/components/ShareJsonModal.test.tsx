@@ -14,7 +14,7 @@
 
 import { mount } from "enzyme";
 
-import ThemeProvider from "@foxglove-studio/app/theme/ThemeProvider";
+import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 
 import ShareJsonModal from "./ShareJsonModal";
 

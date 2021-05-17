@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import {
   NativeAppMenuEvent,
   useNativeAppMenu,
-} from "@foxglove-studio/app/context/NativeAppMenuContext";
+} from "@foxglove/studio-base/context/NativeAppMenuContext";
 
 type EventHandler = () => void;
 

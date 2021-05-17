@@ -13,8 +13,8 @@
 
 import React, { CSSProperties, ReactNode } from "react";
 
-import Button from "@foxglove-studio/app/components/Button";
-import Icon from "@foxglove-studio/app/components/Icon";
+import Button from "@foxglove/studio-base/components/Button";
+import Icon from "@foxglove/studio-base/components/Icon";
 
 type Props = {
   tooltip: string;

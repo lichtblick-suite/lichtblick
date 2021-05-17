@@ -13,8 +13,8 @@
 
 import { sortedIndexBy } from "lodash";
 
-import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import { MessageEvent } from "@foxglove-studio/app/players/types";
+import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
 
 import {
   DiagnosticStatusArrayMsg,

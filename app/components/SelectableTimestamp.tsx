@@ -15,12 +15,12 @@ import React, { useEffect } from "react";
 import { Time } from "rosbag";
 import styled from "styled-components";
 
-import CopyText from "@foxglove-studio/app/components/CopyText";
-import Icon from "@foxglove-studio/app/components/Icon";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
-import mixins from "@foxglove-studio/app/styles/mixins.module.scss";
-import { formatDate, formatTime, parseTimeStr } from "@foxglove-studio/app/util/formatTime";
-import { parseRosTimeStr, clampTime, formatTimeRaw } from "@foxglove-studio/app/util/time";
+import CopyText from "@foxglove/studio-base/components/CopyText";
+import Icon from "@foxglove/studio-base/components/Icon";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import mixins from "@foxglove/studio-base/styles/mixins.module.scss";
+import { formatDate, formatTime, parseTimeStr } from "@foxglove/studio-base/util/formatTime";
+import { parseRosTimeStr, clampTime, formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 const SRoot = styled.div`
   display: flex;

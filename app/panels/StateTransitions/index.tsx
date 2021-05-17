@@ -19,23 +19,23 @@ import stringHash from "string-hash";
 import styled, { css } from "styled-components";
 import tinycolor from "tinycolor2";
 
-import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import Button from "@foxglove-studio/app/components/Button";
-import MessagePathInput from "@foxglove-studio/app/components/MessagePathSyntax/MessagePathInput";
-import useMessagesByPath from "@foxglove-studio/app/components/MessagePathSyntax/useMessagesByPath";
-import Panel from "@foxglove-studio/app/components/Panel";
-import { usePanelContext } from "@foxglove-studio/app/components/PanelContext";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
+import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
+import Button from "@foxglove/studio-base/components/Button";
+import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
+import useMessagesByPath from "@foxglove/studio-base/components/MessagePathSyntax/useMessagesByPath";
+import Panel from "@foxglove/studio-base/components/Panel";
+import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import TimeBasedChart, {
   getTooltipItemForMessageHistoryItem,
   TimeBasedChartTooltipData,
-} from "@foxglove-studio/app/components/TimeBasedChart";
-import { MONOSPACE } from "@foxglove-studio/app/styles/fonts";
-import { PanelConfig } from "@foxglove-studio/app/types/panels";
-import { darkColor, lineColors } from "@foxglove-studio/app/util/plotColors";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
-import { TimestampMethod, subtractTimes, toSec } from "@foxglove-studio/app/util/time";
-import { grey } from "@foxglove-studio/app/util/toolsColorScheme";
+} from "@foxglove/studio-base/components/TimeBasedChart";
+import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
+import { PanelConfig } from "@foxglove/studio-base/types/panels";
+import { darkColor, lineColors } from "@foxglove/studio-base/util/plotColors";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { TimestampMethod, subtractTimes, toSec } from "@foxglove/studio-base/util/time";
+import { grey } from "@foxglove/studio-base/util/toolsColorScheme";
 
 import helpContent from "./index.help.md";
 import positiveModulo from "./positiveModulo";

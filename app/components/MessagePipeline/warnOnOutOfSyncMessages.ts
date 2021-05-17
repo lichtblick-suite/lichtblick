@@ -13,16 +13,16 @@
 
 import { Time, TimeUtil } from "rosbag";
 
-import { PlayerState, MessageEvent } from "@foxglove-studio/app/players/types";
-import { StampedMessage } from "@foxglove-studio/app/types/Messages";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
+import Logger from "@foxglove/log";
+import { PlayerState, MessageEvent } from "@foxglove/studio-base/players/types";
+import { StampedMessage } from "@foxglove/studio-base/types/Messages";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
 import {
   subtractTimes,
   toSec,
   formatFrame,
   getTimestampForMessage,
-} from "@foxglove-studio/app/util/time";
-import Logger from "@foxglove/log";
+} from "@foxglove/studio-base/util/time";
 
 const DRIFT_THRESHOLD_SEC = 1; // Maximum amount of drift allowed.
 const WAIT_FOR_SEEK_SEC = 1; // How long we wait for a change in `lastSeekTime` before warning.

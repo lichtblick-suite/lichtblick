@@ -13,7 +13,7 @@
 
 import { renderHook } from "@testing-library/react-hooks";
 
-import useChangeDetector from "@foxglove-studio/app/hooks/useChangeDetector";
+import useChangeDetector from "@foxglove/studio-base/hooks/useChangeDetector";
 
 describe("useChangeDetector", () => {
   it("returns true only when value changes", () => {

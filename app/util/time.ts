@@ -14,9 +14,9 @@
 // No time functions that require `moment` should live in this file.
 import { Time, TimeUtil } from "rosbag";
 
-import { MessageEvent } from "@foxglove-studio/app/players/types";
-import { StampedMessage } from "@foxglove-studio/app/types/Messages";
 import log from "@foxglove/log";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
+import { StampedMessage } from "@foxglove/studio-base/types/Messages";
 
 type BatchTimestamp = {
   seconds: number;

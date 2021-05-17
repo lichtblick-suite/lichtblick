@@ -15,10 +15,10 @@ import { captureException } from "@sentry/electron";
 import { ErrorInfo } from "react";
 import styled from "styled-components";
 
-import Button from "@foxglove-studio/app/components/Button";
-import Flex from "@foxglove-studio/app/components/Flex";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import { AppError } from "@foxglove-studio/app/util/errors";
+import Button from "@foxglove/studio-base/components/Button";
+import Flex from "@foxglove/studio-base/components/Flex";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import { AppError } from "@foxglove/studio-base/util/errors";
 
 const Heading = styled.div`
   font-size: 1.2em;

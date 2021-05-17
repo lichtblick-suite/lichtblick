@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import logEvent from "@foxglove-studio/app/util/logEvent";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
+import logEvent from "@foxglove/studio-base/util/logEvent";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 import Rpc from "./Rpc";
 

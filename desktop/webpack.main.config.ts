@@ -6,7 +6,7 @@ import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import path from "path";
 import { Configuration, ResolveOptions, DefinePlugin, EnvironmentPlugin } from "webpack";
 
-import { WebpackArgv } from "@foxglove-studio/app/WebpackArgv";
+import { WebpackArgv } from "@foxglove/studio-base/WebpackArgv";
 
 export default (_: unknown, argv: WebpackArgv): Configuration => {
   const isServe = argv.env?.WEBPACK_SERVE ?? false;

@@ -14,7 +14,7 @@ import { useCallback, useMemo, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { bindActionCreators } from "redux";
 
-import { redoLayoutChange, undoLayoutChange } from "@foxglove-studio/app/actions/layoutHistory";
+import { redoLayoutChange, undoLayoutChange } from "@foxglove/studio-base/actions/layoutHistory";
 
 const inNativeUndoRedoElement = (eventTarget: EventTarget) => {
   if (eventTarget instanceof HTMLTextAreaElement) {

@@ -19,21 +19,21 @@ import { MosaicDragType, MosaicPath } from "react-mosaic-component";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 
-import { dropPanel } from "@foxglove-studio/app/actions/panels";
-import Flex from "@foxglove-studio/app/components/Flex";
-import Icon from "@foxglove-studio/app/components/Icon";
-import { Item } from "@foxglove-studio/app/components/Menu";
-import TextHighlight from "@foxglove-studio/app/components/TextHighlight";
-import { PanelInfo, usePanelCatalog } from "@foxglove-studio/app/context/PanelCatalogContext";
-import { State } from "@foxglove-studio/app/reducers";
-import { TabPanelConfig } from "@foxglove-studio/app/types/layouts";
+import { dropPanel } from "@foxglove/studio-base/actions/panels";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Icon from "@foxglove/studio-base/components/Icon";
+import { Item } from "@foxglove/studio-base/components/Menu";
+import TextHighlight from "@foxglove/studio-base/components/TextHighlight";
+import { PanelInfo, usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
+import { State } from "@foxglove/studio-base/reducers";
+import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
 import {
   PanelConfig,
   MosaicDropTargetPosition,
   SavedProps,
   MosaicDropResult,
-} from "@foxglove-studio/app/types/panels";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+} from "@foxglove/studio-base/types/panels";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import styles from "./index.module.scss";
 

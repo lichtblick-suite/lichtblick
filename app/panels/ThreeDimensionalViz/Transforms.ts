@@ -13,7 +13,7 @@
 
 import { mat4, vec3, quat, vec4 } from "gl-matrix";
 
-import { TF, MutablePose, Pose, Point, Orientation } from "@foxglove-studio/app/types/Messages";
+import { TF, MutablePose, Pose, Point, Orientation } from "@foxglove/studio-base/types/Messages";
 
 // allocate some temporary variables
 // so we can copy/in out of them during tf application

@@ -13,7 +13,7 @@
 
 import { storiesOf } from "@storybook/react";
 
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import UnlinkGlobalVariables from "./UnlinkGlobalVariables";
 

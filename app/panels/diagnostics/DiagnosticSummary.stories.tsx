@@ -1,16 +1,16 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import SchemaEditor from "@foxglove-studio/app/components/PanelSettings/SchemaEditor";
-import DiagnosticSummary from "@foxglove-studio/app/panels/diagnostics/DiagnosticSummary";
+import SchemaEditor from "@foxglove/studio-base/components/PanelSettings/SchemaEditor";
+import DiagnosticSummary from "@foxglove/studio-base/panels/diagnostics/DiagnosticSummary";
 import {
   DiagnosticStatusArrayMsg,
   getDiagnosticId,
   KeyValue,
   LEVELS,
-} from "@foxglove-studio/app/panels/diagnostics/util";
-import { MessageEvent } from "@foxglove-studio/app/players/types";
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+} from "@foxglove/studio-base/panels/diagnostics/util";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 export default {
   title: "panels/diagnostics/DiagnosticSummary",

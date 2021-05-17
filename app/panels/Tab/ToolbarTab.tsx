@@ -18,12 +18,12 @@ import React, { Ref as ReactRef, useCallback, useEffect, useMemo, useRef, useSta
 import styled from "styled-components";
 import textMetrics from "text-metrics";
 
-import Icon from "@foxglove-studio/app/components/Icon";
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
-import { TabActions } from "@foxglove-studio/app/panels/Tab/TabDndContext";
-import { SANS_SERIF } from "@foxglove-studio/app/styles/fonts";
-import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import Icon from "@foxglove/studio-base/components/Icon";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
+import { TabActions } from "@foxglove/studio-base/panels/Tab/TabDndContext";
+import { SANS_SERIF } from "@foxglove/studio-base/styles/fonts";
+import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import styles from "./Tab.module.scss";
 

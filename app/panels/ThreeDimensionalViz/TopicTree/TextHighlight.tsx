@@ -14,7 +14,7 @@
 import Highlighter from "react-highlight-words";
 import styled from "styled-components";
 
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const HIGHLIGHT_CLASSNAME = "rc-TextHighlight-highlight";
 const STextHighlight = styled.span`

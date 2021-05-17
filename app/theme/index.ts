@@ -15,9 +15,9 @@ import {
 } from "@fluentui/react";
 import { createTheme } from "@fluentui/theme";
 
-import { SANS_SERIF } from "@foxglove-studio/app/styles/fonts";
-import styles from "@foxglove-studio/app/styles/variables.module.scss";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { SANS_SERIF } from "@foxglove/studio-base/styles/fonts";
+import styles from "@foxglove/studio-base/styles/variables.module.scss";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 // https://aka.ms/themedesigner
 export default createTheme({

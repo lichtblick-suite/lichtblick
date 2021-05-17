@@ -15,15 +15,15 @@ import React, { useCallback } from "react";
 import { Color } from "regl-worldview";
 import styled from "styled-components";
 
-import Flex from "@foxglove-studio/app/components/Flex";
-import GradientPicker from "@foxglove-studio/app/components/GradientPicker";
-import Radio from "@foxglove-studio/app/components/Radio";
-import SegmentedControl from "@foxglove-studio/app/components/SegmentedControl";
-import { Select, Option } from "@foxglove-studio/app/components/Select";
-import CommonPointSettings from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/CommonPointSettings";
-import { TopicSettingsEditorProps } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/types";
-import { PointCloud2 } from "@foxglove-studio/app/types/Messages";
-import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
+import Flex from "@foxglove/studio-base/components/Flex";
+import GradientPicker from "@foxglove/studio-base/components/GradientPicker";
+import Radio from "@foxglove/studio-base/components/Radio";
+import SegmentedControl from "@foxglove/studio-base/components/SegmentedControl";
+import { Select, Option } from "@foxglove/studio-base/components/Select";
+import CommonPointSettings from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/CommonPointSettings";
+import { TopicSettingsEditorProps } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/types";
+import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 import ColorPickerForTopicSettings from "./ColorPickerForTopicSettings";
 import CommonDecaySettings from "./CommonDecaySettings";

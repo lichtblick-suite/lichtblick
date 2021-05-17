@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { MutablePose, Orientation, Point } from "@foxglove-studio/app/types/Messages";
+import { MutablePose, Orientation, Point } from "@foxglove/studio-base/types/Messages";
 
 // contains backing classes for point, orientation, and pose
 // because we create them a _lot_

@@ -14,21 +14,21 @@
 import { storiesOf } from "@storybook/react";
 import styled from "styled-components";
 
-import Flex from "@foxglove-studio/app/components/Flex";
-import MockPanelContextProvider from "@foxglove-studio/app/components/MockPanelContextProvider";
-import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
-import { decodeMarker } from "@foxglove-studio/app/panels/ThreeDimensionalViz/commands/PointClouds/decodeMarker";
+import Flex from "@foxglove/studio-base/components/Flex";
+import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
+import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
+import { decodeMarker } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/decodeMarker";
 import {
   POINT_CLOUD_MESSAGE,
   POINT_CLOUD_WITH_ADDITIONAL_FIELDS,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/commands/PointClouds/fixture/pointCloudData";
-import { MarkerStory } from "@foxglove-studio/app/panels/ThreeDimensionalViz/stories/MarkerStory";
-import PanelSetup, { triggerInputChange } from "@foxglove-studio/app/stories/PanelSetup";
-import { ScreenshotSizedContainer } from "@foxglove-studio/app/stories/storyHelpers";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
-import { simulateDragClick } from "@foxglove-studio/app/test/mouseEventsHelper";
-import delay from "@foxglove-studio/app/util/delay";
-import tick from "@foxglove-studio/app/util/tick";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/fixture/pointCloudData";
+import { MarkerStory } from "@foxglove/studio-base/panels/ThreeDimensionalViz/stories/MarkerStory";
+import PanelSetup, { triggerInputChange } from "@foxglove/studio-base/stories/PanelSetup";
+import { ScreenshotSizedContainer } from "@foxglove/studio-base/stories/storyHelpers";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import { simulateDragClick } from "@foxglove/studio-base/test/mouseEventsHelper";
+import delay from "@foxglove/studio-base/util/delay";
+import tick from "@foxglove/studio-base/util/tick";
 
 import Interactions, { OBJECT_TAB_TYPE, LINKED_VARIABLES_TAB_TYPE } from "./index";
 import useLinkedGlobalVariables from "./useLinkedGlobalVariables";

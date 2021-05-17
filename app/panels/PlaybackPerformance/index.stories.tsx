@@ -13,8 +13,8 @@
 
 import { storiesOf } from "@storybook/react";
 
-import { PlayerStateActiveData } from "@foxglove-studio/app/players/types";
-import StoreSetup from "@foxglove-studio/app/stories/StoreSetup";
+import { PlayerStateActiveData } from "@foxglove/studio-base/players/types";
+import StoreSetup from "@foxglove/studio-base/stories/StoreSetup";
 
 import { UnconnectedPlaybackPerformance, UnconnectedPlaybackPerformanceProps } from ".";
 

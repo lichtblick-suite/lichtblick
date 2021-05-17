@@ -18,11 +18,11 @@ import { ReactElement } from "react";
 import MonacoEditor, { EditorDidMount, EditorWillMount } from "react-monaco-editor";
 import { useResizeDetector } from "react-resize-detector";
 
-import getPrettifiedCode from "@foxglove-studio/app/panels/NodePlayground/prettier";
-import { Script, EditorSelection } from "@foxglove-studio/app/panels/NodePlayground/script";
-import vsStudioTheme from "@foxglove-studio/app/panels/NodePlayground/theme/vs-studio.json";
-import { getNodeProjectConfig } from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
-import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
+import getPrettifiedCode from "@foxglove/studio-base/panels/NodePlayground/prettier";
+import { Script, EditorSelection } from "@foxglove/studio-base/panels/NodePlayground/script";
+import vsStudioTheme from "@foxglove/studio-base/panels/NodePlayground/theme/vs-studio.json";
+import { getNodeProjectConfig } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
+import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 
 const VS_STUDIO_THEME = "vs-studio";
 

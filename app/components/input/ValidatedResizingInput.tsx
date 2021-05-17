@@ -13,7 +13,7 @@
 import { useRef, useState } from "react";
 import ReactInputAutosize from "react-input-autosize";
 
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export function ValidatedResizingInput(props: {
   value: string;

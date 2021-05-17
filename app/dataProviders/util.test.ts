@@ -11,9 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { DataProviderStall } from "@foxglove-studio/app/dataProviders/types";
-import delay from "@foxglove-studio/app/util/delay";
-import { toSec } from "@foxglove-studio/app/util/time";
+import { DataProviderStall } from "@foxglove/studio-base/dataProviders/types";
+import delay from "@foxglove/studio-base/util/delay";
+import { toSec } from "@foxglove/studio-base/util/time";
 
 import { mockExtensionPoint } from "./mockExtensionPoint";
 import { debounceReduce, getReportMetadataForChunk } from "./util";

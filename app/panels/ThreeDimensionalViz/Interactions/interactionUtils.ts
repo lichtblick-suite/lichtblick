@@ -16,7 +16,7 @@ import { keyBy } from "lodash";
 import {
   LinkedGlobalVariables,
   LinkedGlobalVariable,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 
 export function getTopicWithPath({
   topic,

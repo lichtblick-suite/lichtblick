@@ -15,8 +15,8 @@ import hoistNonReactStatics from "hoist-non-react-statics";
 import { uniq } from "lodash";
 import { ForwardedRef } from "react";
 
-import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import { Frame, MessageEvent } from "@foxglove-studio/app/players/types";
+import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
+import { Frame, MessageEvent } from "@foxglove/studio-base/players/types";
 
 const useFrame = (
   topics: string[],

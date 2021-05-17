@@ -20,11 +20,11 @@ import React, { memo, createRef, useCallback, useState } from "react";
 import shallowequal from "shallowequal";
 import styled from "styled-components";
 
-import Autocomplete from "@foxglove-studio/app/components/Autocomplete";
-import Button from "@foxglove-studio/app/components/Button";
-import Icon from "@foxglove-studio/app/components/Icon";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
-import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
+import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
+import Button from "@foxglove/studio-base/components/Button";
+import Icon from "@foxglove/studio-base/components/Icon";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 import Transforms, { Transform } from "./Transforms";
 

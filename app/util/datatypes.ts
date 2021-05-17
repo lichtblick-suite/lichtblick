@@ -11,12 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import {
   FUTURE_VIZ_MSGS_DATATYPE,
   STUDIO_MARKER_DATATYPE,
   STUDIO_MARKER_ARRAY_DATATYPE,
-} from "@foxglove-studio/app/util/globalConstants";
+} from "@foxglove/studio-base/util/globalConstants";
 
 const markerFields = [
   { type: "uint8", name: "ARROW", isConstant: true, value: 0 },

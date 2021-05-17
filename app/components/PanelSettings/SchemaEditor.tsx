@@ -4,7 +4,7 @@
 
 import { Stack, useTheme } from "@fluentui/react";
 
-import { PanelConfigSchema, SaveConfig } from "@foxglove-studio/app/types/panels";
+import { PanelConfigSchema, SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import SchemaEntryEditor from "./SchemaEntryEditor";
 

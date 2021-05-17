@@ -14,10 +14,10 @@
 import assert from "assert";
 import { MessageReader, parseMessageDefinition } from "rosbag";
 
-import BagDataProvider from "@foxglove-studio/app/dataProviders/BagDataProvider";
+import BagDataProvider from "@foxglove/studio-base/dataProviders/BagDataProvider";
 import ParsedMessageCache, {
   CACHE_SIZE_BYTES,
-} from "@foxglove-studio/app/dataProviders/ParsedMessageCache";
+} from "@foxglove/studio-base/dataProviders/ParsedMessageCache";
 
 describe("parsedMessageCache", () => {
   it("does some basic caching of messages", async () => {

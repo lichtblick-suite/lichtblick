@@ -13,7 +13,7 @@
 
 import { storiesOf } from "@storybook/react";
 
-import { Sparkline, SparklinePoint } from "@foxglove-studio/app/components/Sparkline";
+import { Sparkline, SparklinePoint } from "@foxglove/studio-base/components/Sparkline";
 
 const points: SparklinePoint[] = [
   { value: 5, timestamp: 10 },

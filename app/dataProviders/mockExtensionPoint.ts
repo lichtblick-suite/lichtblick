@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { DataProviderMetadata, ExtensionPoint } from "@foxglove-studio/app/dataProviders/types";
+import { DataProviderMetadata, ExtensionPoint } from "@foxglove/studio-base/dataProviders/types";
 
 export function mockExtensionPoint(): {
   extensionPoint: ExtensionPoint;

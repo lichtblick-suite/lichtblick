@@ -14,12 +14,12 @@
 import cx from "classnames";
 import { Component } from "react";
 
-import Button from "@foxglove-studio/app/components/Button";
-import Flex from "@foxglove-studio/app/components/Flex";
-import Modal from "@foxglove-studio/app/components/Modal";
-import clipboard from "@foxglove-studio/app/util/clipboard";
-import { downloadTextFile } from "@foxglove-studio/app/util/download";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
+import Button from "@foxglove/studio-base/components/Button";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Modal from "@foxglove/studio-base/components/Modal";
+import clipboard from "@foxglove/studio-base/util/clipboard";
+import { downloadTextFile } from "@foxglove/studio-base/util/download";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 import styles from "./ShareJsonModal.module.scss";
 

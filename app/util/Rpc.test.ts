@@ -12,7 +12,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import delay from "@foxglove-studio/app/util/delay";
+import delay from "@foxglove/studio-base/util/delay";
 
 import Rpc, { Channel, createLinkedChannels } from "./Rpc";
 

@@ -14,13 +14,13 @@
 import { first, flatten, last } from "lodash";
 import { TimeUtil } from "rosbag";
 
-import MemoryDataProvider from "@foxglove-studio/app/dataProviders/MemoryDataProvider";
-import { CoreDataProviders } from "@foxglove-studio/app/dataProviders/constants";
-import { mockExtensionPoint } from "@foxglove-studio/app/dataProviders/mockExtensionPoint";
-import { MessageEvent } from "@foxglove-studio/app/players/types";
-import delay from "@foxglove-studio/app/util/delay";
-import naturalSort from "@foxglove-studio/app/util/naturalSort";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
+import MemoryDataProvider from "@foxglove/studio-base/dataProviders/MemoryDataProvider";
+import { CoreDataProviders } from "@foxglove/studio-base/dataProviders/constants";
+import { mockExtensionPoint } from "@foxglove/studio-base/dataProviders/mockExtensionPoint";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
+import delay from "@foxglove/studio-base/util/delay";
+import naturalSort from "@foxglove/studio-base/util/naturalSort";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 import MemoryCacheDataProvider, {
   getBlocksToKeep,

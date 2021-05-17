@@ -12,9 +12,9 @@
 //   You may not use this file except in compliance with the License.
 import type { SourceFile, TypeChecker } from "typescript";
 
-import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
-import { Topic, MessageEvent } from "@foxglove-studio/app/players/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
+import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
+import { Topic, MessageEvent } from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 // make sure to use import type to avoid bringing in the actual implementations to the bundle
 

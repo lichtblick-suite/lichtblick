@@ -16,17 +16,17 @@ import { useMemo, useState, useCallback } from "react";
 import { MouseEventObject } from "regl-worldview";
 import styled from "styled-components";
 
-import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
-import Icon from "@foxglove-studio/app/components/Icon";
-import Menu from "@foxglove-studio/app/components/Menu";
-import Item from "@foxglove-studio/app/components/Menu/Item";
+import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
+import Icon from "@foxglove/studio-base/components/Icon";
+import Menu from "@foxglove/studio-base/components/Menu";
+import Item from "@foxglove/studio-base/components/Menu/Item";
 import {
   getClickedInfo,
   getAllPoints,
   ClickedInfo,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/commands/PointClouds/selection";
-import clipboard from "@foxglove-studio/app/util/clipboard";
-import { downloadFiles } from "@foxglove-studio/app/util/download";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/selection";
+import clipboard from "@foxglove/studio-base/util/clipboard";
+import { downloadFiles } from "@foxglove/studio-base/util/download";
 
 import { SValue, SLabel } from "./styling";
 

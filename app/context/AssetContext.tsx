@@ -6,7 +6,7 @@ import { createContext, useCallback, useContext, useState } from "react";
 import { URDFRobot } from "urdf-loader";
 import { v4 as uuidv4 } from "uuid";
 
-import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
+import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
 
 export type Asset = { name: string } & { type: "urdf"; model: URDFRobot };
 type AssetWithUUID = Asset & { uuid: string };

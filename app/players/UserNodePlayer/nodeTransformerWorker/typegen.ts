@@ -16,9 +16,9 @@
 
 import ts from "typescript/lib/typescript";
 
-import { Topic } from "@foxglove-studio/app/players/types";
-import { RosDatatypes, RosDatatype } from "@foxglove-studio/app/types/RosDatatypes";
-import filterMap from "@foxglove-studio/app/util/filterMap";
+import { Topic } from "@foxglove/studio-base/players/types";
+import { RosDatatypes, RosDatatype } from "@foxglove/studio-base/types/RosDatatypes";
+import filterMap from "@foxglove/studio-base/util/filterMap";
 
 export type InterfaceDeclarations = {
   [datatype: string]: ts.InterfaceDeclaration;

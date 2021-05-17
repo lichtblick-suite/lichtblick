@@ -12,16 +12,16 @@
 //   You may not use this file except in compliance with the License.
 import { useCallback } from "react";
 
-import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import Flex from "@foxglove-studio/app/components/Flex";
-import useMessagesByPath from "@foxglove-studio/app/components/MessagePathSyntax/useMessagesByPath";
+import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
+import Flex from "@foxglove/studio-base/components/Flex";
+import useMessagesByPath from "@foxglove/studio-base/components/MessagePathSyntax/useMessagesByPath";
 import {
   MessagePipelineContext,
   useMessagePipeline,
-} from "@foxglove-studio/app/components/MessagePipeline";
-import Panel from "@foxglove-studio/app/components/Panel";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
+} from "@foxglove/studio-base/components/MessagePipeline";
+import Panel from "@foxglove/studio-base/components/Panel";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 
 const MAX_ALLOWABLE_RENDER_COUNT = 10;
 

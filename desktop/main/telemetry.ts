@@ -6,7 +6,7 @@ import { app } from "electron";
 import fs from "fs";
 import path from "path";
 
-import { AppSetting } from "@foxglove-studio/app/AppSetting";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
 
 function getTelemetrySettings(): [crashReportingEnabled: boolean, telemetryEnabled: boolean] {
   const datastoreDir = path.join(app.getPath("userData"), "studio-datastores", "settings");

@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { getNonOverlappingLabels } from "@foxglove-studio/app/components/SliderWithTicks";
+import { getNonOverlappingLabels } from "@foxglove/studio-base/components/SliderWithTicks";
 
 describe("getNonOverlappingLabels", () => {
   const label = {

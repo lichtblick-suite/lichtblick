@@ -13,7 +13,7 @@
 
 import { storiesOf } from "@storybook/react";
 
-import DropOverlay from "@foxglove-studio/app/components/DropOverlay";
+import DropOverlay from "@foxglove/studio-base/components/DropOverlay";
 
 storiesOf("components/DropOverlay", module).add("default", () => {
   return <DropOverlay>Some DropOverlay</DropOverlay>;

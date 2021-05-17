@@ -16,13 +16,13 @@ import DotsHorizontalIcon from "@mdi/svg/svg/dots-horizontal.svg";
 import TargetIcon from "@mdi/svg/svg/target.svg";
 import { ReactElement, useCallback } from "react";
 
-import Icon from "@foxglove-studio/app/components/Icon";
-import { openSiblingPlotPanel, plotableRosTypes } from "@foxglove-studio/app/panels/Plot";
+import Icon from "@foxglove/studio-base/components/Icon";
+import { openSiblingPlotPanel, plotableRosTypes } from "@foxglove/studio-base/panels/Plot";
 import {
   openSiblingStateTransitionsPanel,
   transitionableRosTypes,
-} from "@foxglove-studio/app/panels/StateTransitions";
-import { PanelConfig } from "@foxglove-studio/app/types/panels";
+} from "@foxglove/studio-base/panels/StateTransitions";
+import { PanelConfig } from "@foxglove/studio-base/types/panels";
 
 import { ValueAction } from "./getValueActionForValue";
 import styles from "./index.module.scss";

@@ -15,7 +15,7 @@ import { clamp } from "lodash";
 import DocumentEvents from "react-document-events";
 import styled from "styled-components";
 
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 // A low level slider component.
 //

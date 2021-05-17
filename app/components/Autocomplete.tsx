@@ -18,8 +18,8 @@ import ReactAutocomplete from "react-autocomplete";
 import { createPortal } from "react-dom";
 import textMetrics from "text-metrics";
 
-import { SANS_SERIF } from "@foxglove-studio/app/styles/fonts";
-import fuzzyFilter from "@foxglove-studio/app/util/fuzzyFilter";
+import { SANS_SERIF } from "@foxglove/studio-base/styles/fonts";
+import fuzzyFilter from "@foxglove/studio-base/util/fuzzyFilter";
 
 import styles from "./Autocomplete.module.scss";
 

@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { CoreDataProviders } from "@foxglove-studio/app/dataProviders/constants";
-import { DataProviderDescriptor } from "@foxglove-studio/app/dataProviders/types";
+import { CoreDataProviders } from "@foxglove/studio-base/dataProviders/constants";
+import { DataProviderDescriptor } from "@foxglove/studio-base/dataProviders/types";
 
 function wrapInWorker(descriptor: DataProviderDescriptor): DataProviderDescriptor {
   return { name: CoreDataProviders.WorkerDataProvider, args: {}, children: [descriptor] };

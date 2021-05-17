@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { RosObject } from "@foxglove-studio/app/players/types";
-import { Marker } from "@foxglove-studio/app/types/Messages";
+import { RosObject } from "@foxglove/studio-base/players/types";
+import { Marker } from "@foxglove/studio-base/types/Messages";
 
 export type InteractionData = {
   readonly topic: string;

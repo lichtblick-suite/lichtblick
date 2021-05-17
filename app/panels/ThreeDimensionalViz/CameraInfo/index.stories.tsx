@@ -16,7 +16,7 @@ import { DEFAULT_CAMERA_STATE } from "regl-worldview";
 
 import CameraInfo, {
   CAMERA_TAB_TYPE,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/CameraInfo";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/CameraInfo";
 
 const containerStyle = {
   margin: 8,

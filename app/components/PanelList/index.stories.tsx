@@ -17,15 +17,15 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import TestUtils from "react-dom/test-utils";
 import { Provider } from "react-redux";
 
-import Panel from "@foxglove-studio/app/components/Panel";
-import PanelList from "@foxglove-studio/app/components/PanelList";
+import Panel from "@foxglove/studio-base/components/Panel";
+import PanelList from "@foxglove/studio-base/components/PanelList";
 import PanelCatalogContext, {
   PanelCatalog,
   PanelCategory,
   PanelInfo,
-} from "@foxglove-studio/app/context/PanelCatalogContext";
-import createRootReducer from "@foxglove-studio/app/reducers";
-import configureStore from "@foxglove-studio/app/store/configureStore.testing";
+} from "@foxglove/studio-base/context/PanelCatalogContext";
+import createRootReducer from "@foxglove/studio-base/reducers";
+import configureStore from "@foxglove/studio-base/store/configureStore.testing";
 
 const SamplePanel1 = function () {
   return <div></div>;

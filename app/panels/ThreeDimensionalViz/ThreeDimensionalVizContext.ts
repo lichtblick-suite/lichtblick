@@ -13,8 +13,8 @@
 
 import { noop } from "lodash";
 
-import { ColorOverrideBySourceIdxByVariable } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/Layout";
-import { Color } from "@foxglove-studio/app/types/Messages";
+import { ColorOverrideBySourceIdxByVariable } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
+import { Color } from "@foxglove/studio-base/types/Messages";
 
 // Used to check if a Marker's path matches a value
 // For a marker: { foo: { bar: "baz" } }

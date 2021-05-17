@@ -13,10 +13,10 @@
 
 import { ReactNode, useCallback } from "react";
 
-import { AppSetting } from "@foxglove-studio/app/AppSetting";
-import { isTypicalFilterName } from "@foxglove-studio/app/components/MessagePathSyntax/isTypicalFilterName";
-import { useAppConfigurationValue } from "@foxglove-studio/app/hooks/useAppConfigurationValue";
-import { format, formatDuration } from "@foxglove-studio/app/util/formatTime";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
+import { format, formatDuration } from "@foxglove/studio-base/util/formatTime";
 
 const DURATION_20_YEARS_SEC = 20 * 365 * 24 * 60 * 60;
 

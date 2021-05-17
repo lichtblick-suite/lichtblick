@@ -7,12 +7,12 @@ import { PropsWithChildren, useCallback, useContext, useMemo } from "react";
 import {
   MessagePipelineContext,
   useMessagePipeline,
-} from "@foxglove-studio/app/components/MessagePipeline";
-import { PlayerPrecenceIcon } from "@foxglove-studio/app/components/PlayerStatusIndicator/PlayerPresenceIcon";
-import PlayerProblemModal from "@foxglove-studio/app/components/PlayerStatusIndicator/PlayerProblemModal";
-import ModalContext from "@foxglove-studio/app/context/ModalContext";
-import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
-import { PlayerPresence, PlayerProblem } from "@foxglove-studio/app/players/types";
+} from "@foxglove/studio-base/components/MessagePipeline";
+import { PlayerPrecenceIcon } from "@foxglove/studio-base/components/PlayerStatusIndicator/PlayerPresenceIcon";
+import PlayerProblemModal from "@foxglove/studio-base/components/PlayerStatusIndicator/PlayerProblemModal";
+import ModalContext from "@foxglove/studio-base/context/ModalContext";
+import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
+import { PlayerPresence, PlayerProblem } from "@foxglove/studio-base/players/types";
 
 import { Badge } from "./Badge";
 import { PresenceToString } from "./PresenceToString";

@@ -26,9 +26,9 @@ import {
   DEFAULT_FLAT_COLOR,
   DEFAULT_MIN_COLOR,
   DEFAULT_MAX_COLOR,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
-import { toRgba } from "@foxglove-studio/app/panels/ThreeDimensionalViz/commands/PointClouds/selection";
-import filterMap from "@foxglove-studio/app/util/filterMap";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
+import { toRgba } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/selection";
+import filterMap from "@foxglove/studio-base/util/filterMap";
 
 import VertexBufferCache from "./VertexBufferCache";
 import { FLOAT_SIZE } from "./buffers";

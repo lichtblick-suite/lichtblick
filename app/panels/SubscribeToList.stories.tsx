@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import { storiesOf } from "@storybook/react";
 
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import SubscribeToList from "./SubscribeToList";
 

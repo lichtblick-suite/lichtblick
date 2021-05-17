@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 type Props = {
   percent: number;

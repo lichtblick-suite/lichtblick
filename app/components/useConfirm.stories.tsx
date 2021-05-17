@@ -14,7 +14,7 @@
 import { action } from "@storybook/addon-actions";
 import { useLayoutEffect } from "react";
 
-import useConfirm from "@foxglove-studio/app/components/useConfirm";
+import useConfirm from "@foxglove/studio-base/components/useConfirm";
 
 export default {
   title: "useConfirm",

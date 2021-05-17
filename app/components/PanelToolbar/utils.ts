@@ -14,7 +14,7 @@
 import { getNodeAtPath, MosaicRootActions, MosaicWindowActions } from "react-mosaic-component";
 import { MosaicKey } from "react-mosaic-component/lib/types";
 
-import { getPanelTypeFromId } from "@foxglove-studio/app/util/layout";
+import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 export function getPanelTypeFromMosaic(
   mosaicWindowActions?: MosaicWindowActions,

@@ -14,8 +14,8 @@
 import { storiesOf } from "@storybook/react";
 import styled from "styled-components";
 
-import PanelSetupWithBag from "@foxglove-studio/app/stories/PanelSetupWithBag";
-import bagFile from "@foxglove-studio/app/test/fixtures/example.bag";
+import PanelSetupWithBag from "@foxglove/studio-base/stories/PanelSetupWithBag";
+import bagFile from "@foxglove/studio-base/test/fixtures/example.bag";
 
 import SourceInfo from "./index";
 

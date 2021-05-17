@@ -14,9 +14,9 @@
 import cx from "classnames";
 import { CSSProperties } from "react";
 
-import ButtonBase, { Props as ButtonBaseProps } from "@foxglove-studio/app/components/ButtonBase";
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import ButtonBase, { Props as ButtonBaseProps } from "@foxglove/studio-base/components/ButtonBase";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export type Props = ButtonBaseProps & {
   tooltipProps?: Partial<React.ComponentProps<typeof Tooltip> & { alwaysShown?: false }>;

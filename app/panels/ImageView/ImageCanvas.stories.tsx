@@ -13,10 +13,10 @@
 
 import { range, noop } from "lodash";
 
-import ImageView from "@foxglove-studio/app/panels/ImageView";
-import ImageCanvas from "@foxglove-studio/app/panels/ImageView/ImageCanvas";
-import { MessageEvent } from "@foxglove-studio/app/players/types";
-import { ImageMarker } from "@foxglove-studio/app/types/Messages";
+import ImageView from "@foxglove/studio-base/panels/ImageView";
+import ImageCanvas from "@foxglove/studio-base/panels/ImageView/ImageCanvas";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
+import { ImageMarker } from "@foxglove/studio-base/types/Messages";
 
 const cameraInfo = {
   width: 400,

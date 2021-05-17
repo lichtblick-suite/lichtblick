@@ -15,17 +15,17 @@ import { renderHook, act } from "@testing-library/react-hooks";
 import { mount } from "enzyme";
 import { CameraState, DEFAULT_CAMERA_STATE } from "regl-worldview";
 
-import { Interactive } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
+import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import {
   GLTextMarker,
   useGLText,
   ORANGE,
   getHighlightedIndices,
   useSearchMatches,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/SearchText";
-import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
-import { TextMarker } from "@foxglove-studio/app/types/Messages";
-import { MARKER_MSG_TYPES } from "@foxglove-studio/app/util/globalConstants";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/SearchText";
+import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
+import { TextMarker } from "@foxglove/studio-base/types/Messages";
+import { MARKER_MSG_TYPES } from "@foxglove/studio-base/util/globalConstants";
 
 export const ROOT_FRAME_ID = "root_frame";
 export const CHILD_FRAME_ID = "child_frame";

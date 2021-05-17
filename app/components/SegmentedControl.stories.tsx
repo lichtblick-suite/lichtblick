@@ -13,7 +13,7 @@
 
 import { storiesOf } from "@storybook/react";
 
-import SegmentedControl, { Option } from "@foxglove-studio/app/components/SegmentedControl";
+import SegmentedControl, { Option } from "@foxglove/studio-base/components/SegmentedControl";
 
 const OPTIONS = {
   first: {

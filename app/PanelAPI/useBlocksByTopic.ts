@@ -19,12 +19,12 @@ import { v4 as uuidv4 } from "uuid";
 import {
   useMessagePipeline,
   MessagePipelineContext,
-} from "@foxglove-studio/app/components/MessagePipeline";
-import PanelContext from "@foxglove-studio/app/components/PanelContext";
-import { MemoryCacheBlock } from "@foxglove-studio/app/dataProviders/MemoryCacheDataProvider";
-import useCleanup from "@foxglove-studio/app/hooks/useCleanup";
-import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
-import { SubscribePayload, MessageEvent } from "@foxglove-studio/app/players/types";
+} from "@foxglove/studio-base/components/MessagePipeline";
+import PanelContext from "@foxglove/studio-base/components/PanelContext";
+import { MemoryCacheBlock } from "@foxglove/studio-base/dataProviders/MemoryCacheDataProvider";
+import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
+import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
+import { SubscribePayload, MessageEvent } from "@foxglove/studio-base/players/types";
 
 export type MessageBlock = {
   readonly [topicName: string]: readonly MessageEvent<unknown>[];

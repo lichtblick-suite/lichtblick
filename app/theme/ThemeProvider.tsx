@@ -7,8 +7,8 @@ import { registerIcons, unregisterIcons } from "@fluentui/style-utilities";
 import { useLayoutEffect, useState } from "react";
 import { ThemeProvider as StyledThemeProvider } from "styled-components";
 
-import RosIcon from "@foxglove-studio/app/components/RosIcon";
-import theme from "@foxglove-studio/app/theme";
+import RosIcon from "@foxglove/studio-base/components/RosIcon";
+import theme from "@foxglove/studio-base/theme";
 
 const icons: {
   // This makes it a type error to forget to add an icon here once it has been added to RegisteredIconNames.

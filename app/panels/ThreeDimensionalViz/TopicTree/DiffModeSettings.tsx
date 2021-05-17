@@ -13,9 +13,9 @@
 
 import styled from "styled-components";
 
-import Switch from "@foxglove-studio/app/components/Switch";
-import logEvent, { getEventNames } from "@foxglove-studio/app/util/logEvent";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import Switch from "@foxglove/studio-base/components/Switch";
+import logEvent, { getEventNames } from "@foxglove/studio-base/util/logEvent";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { Save3DConfig } from "../index";
 

@@ -6,10 +6,10 @@ import { MessageBar, MessageBarType } from "@fluentui/react";
 import { useLayoutEffect, useState } from "react";
 import { useAsync } from "react-use";
 
-import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import { Asset } from "@foxglove-studio/app/context/AssetContext";
-import URDFAssetLoader from "@foxglove-studio/app/services/URDFAssetLoader";
-import { ROBOT_DESCRIPTION_PARAM } from "@foxglove-studio/app/util/globalConstants";
+import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
+import { Asset } from "@foxglove/studio-base/context/AssetContext";
+import URDFAssetLoader from "@foxglove/studio-base/services/URDFAssetLoader";
+import { ROBOT_DESCRIPTION_PARAM } from "@foxglove/studio-base/util/globalConstants";
 
 export default function useRobotDescriptionAsset(): {
   robotDescriptionAsset: Asset | undefined;

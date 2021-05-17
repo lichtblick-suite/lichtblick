@@ -15,7 +15,7 @@ import { mergeStyleSets } from "@fluentui/react";
 import { padStart } from "lodash";
 import { Time } from "rosbag";
 
-import mixins from "@foxglove-studio/app/styles/mixins.module.scss";
+import mixins from "@foxglove/studio-base/styles/mixins.module.scss";
 
 import LevelToString from "./LevelToString";
 import logLevelColorsStyle from "./LogLevelColors.module.scss";

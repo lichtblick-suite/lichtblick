@@ -13,14 +13,14 @@
 
 import { isPlainObject } from "lodash";
 
-import type { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
+import type { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import {
   processMessage,
   registerNode,
-} from "@foxglove-studio/app/players/UserNodePlayer/nodeRuntimeWorker/registry";
-import transform from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/transformer";
-import generateRosLib from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typegen";
-import Rpc, { Channel, createLinkedChannels } from "@foxglove-studio/app/util/Rpc";
+} from "@foxglove/studio-base/players/UserNodePlayer/nodeRuntimeWorker/registry";
+import transform from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/transformer";
+import generateRosLib from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typegen";
+import Rpc, { Channel, createLinkedChannels } from "@foxglove/studio-base/util/Rpc";
 
 const validateWorkerArgs = (arg: any) => {
   expect(arg).not.toBeInstanceOf(Function);

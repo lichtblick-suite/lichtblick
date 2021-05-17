@@ -23,39 +23,39 @@ import { useState, useCallback, useMemo } from "react";
 import ReactHoverObserver from "react-hover-observer";
 import Tree from "react-json-tree";
 
-import { useDataSourceInfo, useMessagesByTopic } from "@foxglove-studio/app/PanelAPI";
-import Dropdown from "@foxglove-studio/app/components/Dropdown";
-import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
-import EmptyState from "@foxglove-studio/app/components/EmptyState";
-import Flex from "@foxglove-studio/app/components/Flex";
-import Icon from "@foxglove-studio/app/components/Icon";
-import useGetItemStringWithTimezone from "@foxglove-studio/app/components/JsonTree/useGetItemStringWithTimezone";
-import MessagePathInput from "@foxglove-studio/app/components/MessagePathSyntax/MessagePathInput";
+import { useDataSourceInfo, useMessagesByTopic } from "@foxglove/studio-base/PanelAPI";
+import Dropdown from "@foxglove/studio-base/components/Dropdown";
+import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
+import EmptyState from "@foxglove/studio-base/components/EmptyState";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Icon from "@foxglove/studio-base/components/Icon";
+import useGetItemStringWithTimezone from "@foxglove/studio-base/components/JsonTree/useGetItemStringWithTimezone";
+import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
 import {
   RosPath,
   MessagePathStructureItem,
-} from "@foxglove-studio/app/components/MessagePathSyntax/constants";
+} from "@foxglove/studio-base/components/MessagePathSyntax/constants";
 import {
   messagePathStructures,
   traverseStructure,
-} from "@foxglove-studio/app/components/MessagePathSyntax/messagePathsForDatatype";
-import parseRosPath from "@foxglove-studio/app/components/MessagePathSyntax/parseRosPath";
+} from "@foxglove/studio-base/components/MessagePathSyntax/messagePathsForDatatype";
+import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import {
   useCachedGetMessagePathDataItems,
   MessagePathDataItem,
-} from "@foxglove-studio/app/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import { useLatestMessageDataItem } from "@foxglove-studio/app/components/MessagePathSyntax/useLatestMessageDataItem";
-import Panel from "@foxglove-studio/app/components/Panel";
-import { usePanelContext } from "@foxglove-studio/app/components/PanelContext";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
+} from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { useLatestMessageDataItem } from "@foxglove/studio-base/components/MessagePathSyntax/useLatestMessageDataItem";
+import Panel from "@foxglove/studio-base/components/Panel";
+import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import getDiff, {
   diffLabels,
   diffLabelsByLabelText,
-} from "@foxglove-studio/app/panels/RawMessages/getDiff";
-import { Topic } from "@foxglove-studio/app/players/types";
-import { jsonTreeTheme, SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
-import { enumValuesByDatatypeAndField } from "@foxglove-studio/app/util/selectors";
+} from "@foxglove/studio-base/panels/RawMessages/getDiff";
+import { Topic } from "@foxglove/studio-base/players/types";
+import { jsonTreeTheme, SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
+import { enumValuesByDatatypeAndField } from "@foxglove/studio-base/util/selectors";
 
 import { HighlightedValue, SDiffSpan, MaybeCollapsedValue } from "./Diff";
 import Metadata from "./Metadata";

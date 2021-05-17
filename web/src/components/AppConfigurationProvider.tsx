@@ -6,7 +6,7 @@ import { PropsWithChildren, useState } from "react";
 
 import AppConfigurationContext, {
   AppConfiguration,
-} from "@foxglove-studio/app/context/AppConfigurationContext";
+} from "@foxglove/studio-base/context/AppConfigurationContext";
 
 export default function AppConfigurationProvider(props: PropsWithChildren<unknown>): JSX.Element {
   const [ctx] = useState(() => {

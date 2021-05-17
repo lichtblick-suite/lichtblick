@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ColorMode } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
-import { PointField } from "@foxglove-studio/app/types/Messages";
+import { ColorMode } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
+import { PointField } from "@foxglove/studio-base/types/Messages";
 
 import { FieldReader, Uint8Reader, getReader } from "./readers";
 import { DATATYPE, VertexBuffer } from "./types";

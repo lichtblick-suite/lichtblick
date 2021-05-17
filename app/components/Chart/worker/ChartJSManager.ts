@@ -18,9 +18,9 @@ import { Zoom as ZoomPlugin } from "chartjs-plugin-zoom";
 import EventEmitter from "eventemitter3";
 import merge from "lodash/merge";
 
-import { RpcElement, RpcScales } from "@foxglove-studio/app/components/Chart/types";
-import { MONOSPACE } from "@foxglove-studio/app/styles/fonts";
 import Logger from "@foxglove/log";
+import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/types";
+import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
 
 const log = Logger.getLogger(__filename);
 

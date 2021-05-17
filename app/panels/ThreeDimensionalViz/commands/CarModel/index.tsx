@@ -13,8 +13,8 @@
 import { vec3 } from "gl-matrix";
 import { GLTFScene, parseGLB, Pose, Scale, CommonCommandProps } from "regl-worldview";
 
-import { InteractionData } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
-import carModelURL from "@foxglove-studio/app/panels/ThreeDimensionalViz/commands/CarModel/carModel.glb";
+import { InteractionData } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
+import carModelURL from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/CarModel/carModel.glb";
 
 async function loadCarModel() {
   const response = await fetch(carModelURL);

@@ -17,10 +17,10 @@ import { isEqual } from "lodash";
 import {
   mockSendNotification,
   mockSetNotificationHandler,
-} from "@foxglove-studio/app/test/MockSendNotification";
+} from "@foxglove/studio-base/test/MockSendNotification";
 
 // Mock out sendNotification for all tests
-jest.mock("@foxglove-studio/app/util/sendNotification", () => {
+jest.mock("@foxglove/studio-base/util/sendNotification", () => {
   return {
     __esModule: true,
     default: mockSendNotification,

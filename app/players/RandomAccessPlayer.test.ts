@@ -15,17 +15,17 @@
 import { omit } from "lodash";
 import { TimeUtil, Time } from "rosbag";
 
-import { GetMessagesResult, GetMessagesTopics } from "@foxglove-studio/app/dataProviders/types";
+import { GetMessagesResult, GetMessagesTopics } from "@foxglove/studio-base/dataProviders/types";
 import {
   MessageEvent,
   PlayerCapabilities,
   PlayerMetricsCollectorInterface,
   PlayerPresence,
   PlayerState,
-} from "@foxglove-studio/app/players/types";
-import delay from "@foxglove-studio/app/util/delay";
-import signal from "@foxglove-studio/app/util/signal";
-import { fromNanoSec, getSeekToTime, SEEK_ON_START_NS } from "@foxglove-studio/app/util/time";
+} from "@foxglove/studio-base/players/types";
+import delay from "@foxglove/studio-base/util/delay";
+import signal from "@foxglove/studio-base/util/signal";
+import { fromNanoSec, getSeekToTime, SEEK_ON_START_NS } from "@foxglove/studio-base/util/time";
 
 import RandomAccessPlayer, {
   RandomAccessPlayerOptions,

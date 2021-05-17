@@ -29,8 +29,8 @@ import {
 } from "regl-worldview";
 import styled from "styled-components";
 
-import { Interactive } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
-import { GLTextMarker } from "@foxglove-studio/app/panels/ThreeDimensionalViz/SearchText";
+import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
+import { GLTextMarker } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SearchText";
 import {
   Cover,
   OccupancyGrids,
@@ -38,11 +38,11 @@ import {
   PointClouds,
   PoseMarkers,
   LinedConvexHulls,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/commands";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands";
 import {
   LAYER_INDEX_TEXT,
   LAYER_INDEX_OCCUPANCY_GRIDS,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/constants";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
 import {
   BaseMarker,
   CubeListMarker,
@@ -56,9 +56,9 @@ import {
   TextMarker,
   OverlayIconMarker,
   ColorMarker,
-} from "@foxglove-studio/app/types/Messages";
-import { ReglColor } from "@foxglove-studio/app/util/colorUtils";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+} from "@foxglove/studio-base/types/Messages";
+import { ReglColor } from "@foxglove/studio-base/util/colorUtils";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import glTextAtlasLoader, { TextAtlas } from "./utils/glTextAtlasLoader";
 import { groupLinesIntoInstancedLineLists } from "./utils/groupingUtils";

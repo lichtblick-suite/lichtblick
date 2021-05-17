@@ -13,12 +13,12 @@
 
 import clamp from "lodash/clamp";
 
-import { Topic, MessageEvent } from "@foxglove-studio/app/players/types";
-import { CameraInfo } from "@foxglove-studio/app/types/Messages";
+import { Topic, MessageEvent } from "@foxglove/studio-base/players/types";
+import { CameraInfo } from "@foxglove/studio-base/types/Messages";
 import {
   isNonEmptyOrUndefined,
   nonEmptyOrUndefined,
-} from "@foxglove-studio/app/util/emptyOrUndefined";
+} from "@foxglove/studio-base/util/emptyOrUndefined";
 
 import CameraModel from "./CameraModel";
 

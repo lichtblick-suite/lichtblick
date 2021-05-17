@@ -13,9 +13,9 @@
 
 import { fromPairs, uniq } from "lodash";
 
-import { Topic, ParsedMessageDefinitionsByTopic } from "@foxglove-studio/app/players/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import parseMessageDefinitionsCache from "@foxglove-studio/app/util/parseMessageDefinitionsCache";
+import { Topic, ParsedMessageDefinitionsByTopic } from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import parseMessageDefinitionsCache from "@foxglove/studio-base/util/parseMessageDefinitionsCache";
 
 import { MessageDefinitions, ParsedMessageDefinitions } from "./types";
 

@@ -6,7 +6,7 @@
 import { screen, fireEvent, act } from "@testing-library/react";
 import { renderHook } from "@testing-library/react-hooks/dom";
 
-import ModalHost from "@foxglove-studio/app/context/ModalHost";
+import ModalHost from "@foxglove/studio-base/context/ModalHost";
 
 import { usePrompt } from "./usePrompt";
 

@@ -13,12 +13,12 @@
 import { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { useDataSourceInfo } from "@foxglove-studio/app/PanelAPI";
-import { setPlaybackConfig } from "@foxglove-studio/app/actions/panels";
-import Dropdown from "@foxglove-studio/app/components/Dropdown";
-import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
-import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
-import { PlayerCapabilities } from "@foxglove-studio/app/players/types";
+import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
+import { setPlaybackConfig } from "@foxglove/studio-base/actions/panels";
+import Dropdown from "@foxglove/studio-base/components/Dropdown";
+import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
+import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
+import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 
 const SPEEDS = ["0.01", "0.02", "0.05", "0.1", "0.2", "0.5", "0.8", "1", "2", "3", "5"];
 

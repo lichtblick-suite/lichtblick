@@ -26,9 +26,9 @@ import {
 } from "react-table";
 import styled from "styled-components";
 
-import EmptyState from "@foxglove-studio/app/components/EmptyState";
-import Icon from "@foxglove-studio/app/components/Icon";
-import { toolsColorScheme } from "@foxglove-studio/app/util/toolsColorScheme";
+import EmptyState from "@foxglove/studio-base/components/EmptyState";
+import Icon from "@foxglove/studio-base/components/Icon";
+import { toolsColorScheme } from "@foxglove/studio-base/util/toolsColorScheme";
 
 import TableCell from "./TableCell";
 import { sanitizeAccessorPath } from "./sanitizeAccessorPath";

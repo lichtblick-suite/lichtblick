@@ -16,7 +16,7 @@ import { mount } from "enzyme";
 import { last } from "lodash";
 import { act } from "react-dom/test-utils";
 
-import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
+import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 
 import { FrameCompatibilityDEPRECATED } from "./FrameCompatibility";
 import { datatypes, messages } from "./FrameCompatibilityFixture";

@@ -4,8 +4,8 @@
 
 import { ReactElement, useEffect } from "react";
 
-import { useNativeAppMenu } from "@foxglove-studio/app/context/NativeAppMenuContext";
-import { usePlayerSelection } from "@foxglove-studio/app/context/PlayerSelectionContext";
+import { useNativeAppMenu } from "@foxglove/studio-base/context/NativeAppMenuContext";
+import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 
 // NativeFileMenuPlayerSelection adds available player selection items to the apps native OS menubar
 export function NativeFileMenuPlayerSelection(): ReactElement {

@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Layout, LayoutStorage } from "@foxglove-studio/app/context/LayoutStorageContext";
+import { Layout, LayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
 
 import { Storage } from "../../common/types";
 

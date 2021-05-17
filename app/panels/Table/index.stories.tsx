@@ -13,8 +13,8 @@
 
 import { storiesOf } from "@storybook/react";
 
-import Table from "@foxglove-studio/app/panels/Table";
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+import Table from "@foxglove/studio-base/panels/Table";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 const makeArrayData = (length = 50, nestArray = true): unknown => {
   return new Array(length).fill(0).map((_, i) => {

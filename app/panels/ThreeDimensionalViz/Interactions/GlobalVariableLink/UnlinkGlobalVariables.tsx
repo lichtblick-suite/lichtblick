@@ -14,9 +14,9 @@
 import { isEqual } from "lodash";
 import styled from "styled-components";
 
-import Button from "@foxglove-studio/app/components/Button";
-import GlobalVariableName from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/GlobalVariableName";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import Button from "@foxglove/studio-base/components/Button";
+import GlobalVariableName from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/GlobalVariableName";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { getPath } from "../interactionUtils";
 import useLinkedGlobalVariables, { LinkedGlobalVariable } from "../useLinkedGlobalVariables";

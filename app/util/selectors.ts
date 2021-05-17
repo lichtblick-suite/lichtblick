@@ -16,9 +16,9 @@ import memoizeWeak from "memoize-weak";
 import { createSelectorCreator, defaultMemoize, createSelector } from "reselect";
 import shallowequal from "shallowequal";
 
-import { Topic } from "@foxglove-studio/app/players/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+import { Topic } from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 // The ParametricSelector type declaration in reselect requires the props argument
 // The props argument is not actually required so we need to fix the declaration.

@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { TopicSettingsCollection } from "@foxglove-studio/app/panels/ThreeDimensionalViz/SceneBuilder";
-import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+import { TopicSettingsCollection } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
+import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 export const SYNC_OPTIONS = {
   bag1ToBag2: "bag1ToBag2",

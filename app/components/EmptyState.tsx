@@ -13,7 +13,7 @@
 
 import styled from "styled-components";
 
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
 
 type Props = {
   children: React.ReactNode;

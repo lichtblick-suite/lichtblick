@@ -11,11 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import Flex from "@foxglove-studio/app/components/Flex";
-import Panel from "@foxglove-studio/app/components/Panel";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import { SaveConfig } from "@foxglove-studio/app/types/panels";
+import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Panel from "@foxglove/studio-base/components/Panel";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 // Little dummy panel that just subscribes to a bunch of topics. Doesn't actually
 // do anything with them.

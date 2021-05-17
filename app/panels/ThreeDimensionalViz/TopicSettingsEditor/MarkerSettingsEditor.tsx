@@ -13,10 +13,10 @@
 
 import { Color } from "regl-worldview";
 
-import Checkbox from "@foxglove-studio/app/components/Checkbox";
-import Flex from "@foxglove-studio/app/components/Flex";
-import { Marker, MarkerArray } from "@foxglove-studio/app/types/Messages";
-import { LINED_CONVEX_HULL_RENDERING_SETTING } from "@foxglove-studio/app/util/globalConstants";
+import Checkbox from "@foxglove/studio-base/components/Checkbox";
+import Flex from "@foxglove/studio-base/components/Flex";
+import { Marker, MarkerArray } from "@foxglove/studio-base/types/Messages";
+import { LINED_CONVEX_HULL_RENDERING_SETTING } from "@foxglove/studio-base/util/globalConstants";
 
 import { TopicSettingsEditorProps } from ".";
 import ColorPickerForTopicSettings from "./ColorPickerForTopicSettings";

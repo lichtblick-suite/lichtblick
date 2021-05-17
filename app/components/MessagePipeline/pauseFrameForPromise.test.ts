@@ -11,18 +11,18 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import delay from "@foxglove-studio/app/util/delay";
-import inAutomatedRunMode from "@foxglove-studio/app/util/inAutomatedRunMode";
-import { initializeLogEvent, resetLogEventForTests } from "@foxglove-studio/app/util/logEvent";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
-import signal from "@foxglove-studio/app/util/signal";
+import delay from "@foxglove/studio-base/util/delay";
+import inAutomatedRunMode from "@foxglove/studio-base/util/inAutomatedRunMode";
+import { initializeLogEvent, resetLogEventForTests } from "@foxglove/studio-base/util/logEvent";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
+import signal from "@foxglove/studio-base/util/signal";
 
 import { pauseFrameForPromises, MAX_PROMISE_TIMEOUT_TIME_MS } from "./pauseFrameForPromise";
 
 const sendNotificationAny: any = sendNotification;
 
 jest.setTimeout(MAX_PROMISE_TIMEOUT_TIME_MS * 3);
-jest.mock("@foxglove-studio/app/util/inAutomatedRunMode", () => jest.fn(() => false));
+jest.mock("@foxglove/studio-base/util/inAutomatedRunMode", () => jest.fn(() => false));
 
 describe("pauseFrameForPromise", () => {
   afterEach(() => {

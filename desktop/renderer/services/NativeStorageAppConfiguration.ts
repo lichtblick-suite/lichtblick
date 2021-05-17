@@ -7,7 +7,7 @@ import {
   AppConfiguration,
   AppConfigurationValue,
   ChangeHandler,
-} from "@foxglove-studio/app/context/AppConfigurationContext";
+} from "@foxglove/studio-base/context/AppConfigurationContext";
 
 import { Storage } from "../../common/types";
 

@@ -14,21 +14,21 @@
 import { PolygonBuilder, Polygon } from "regl-worldview";
 import styled from "styled-components";
 
-import Button from "@foxglove-studio/app/components/Button";
-import PanelContext from "@foxglove-studio/app/components/PanelContext";
-import ValidatedInput, { EditFormat } from "@foxglove-studio/app/components/ValidatedInput";
+import Button from "@foxglove/studio-base/components/Button";
+import PanelContext from "@foxglove/studio-base/components/PanelContext";
+import ValidatedInput, { EditFormat } from "@foxglove/studio-base/components/ValidatedInput";
 import {
   SValue,
   SLabel,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/styling";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/styling";
 import {
   polygonsToPoints,
   getFormattedString,
   pointsToPolygons,
   getPolygonLineDistances,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/utils/drawToolUtils";
-import clipboard from "@foxglove-studio/app/util/clipboard";
-import { polygonPointsValidator } from "@foxglove-studio/app/util/validators";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/drawToolUtils";
+import clipboard from "@foxglove/studio-base/util/clipboard";
+import { polygonPointsValidator } from "@foxglove/studio-base/util/validators";
 
 export type Point2D = { x: number; y: number };
 

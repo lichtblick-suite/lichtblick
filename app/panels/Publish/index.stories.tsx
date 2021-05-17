@@ -13,9 +13,9 @@
 import { action } from "@storybook/addon-actions";
 import { storiesOf } from "@storybook/react";
 
-import Publish from "@foxglove-studio/app/panels/Publish";
-import { PlayerCapabilities } from "@foxglove-studio/app/players/types";
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+import Publish from "@foxglove/studio-base/panels/Publish";
+import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 const getFixture = (allowPublish: any) => {
   return {

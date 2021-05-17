@@ -10,7 +10,7 @@ import {
   MultiProvider,
   PlayerSourceDefinition,
   ThemeProvider,
-} from "@foxglove-studio/app";
+} from "@foxglove/studio-base";
 
 import { Desktop } from "../common/types";
 import NativeAppMenuProvider from "./components/NativeAppMenuProvider";

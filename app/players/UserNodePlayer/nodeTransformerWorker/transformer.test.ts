@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import exampleDatatypes from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes.json";
+import exampleDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes.json";
 import {
   getOutputTopic,
   validateOutputTopic,
@@ -21,18 +21,18 @@ import {
   extractGlobalVariables,
   compose,
   getInputTopics,
-} from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/transformer";
-import generateRosLib from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typegen";
-import baseDatatypes from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/baseDatatypes";
-import rawUserUtils from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/rawUserUtils";
+} from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/transformer";
+import generateRosLib from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typegen";
+import baseDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/baseDatatypes";
+import rawUserUtils from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/rawUserUtils";
 import {
   DiagnosticSeverity,
   ErrorCodes,
   Sources,
   NodeData,
-} from "@foxglove-studio/app/players/UserNodePlayer/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+} from "@foxglove/studio-base/players/UserNodePlayer/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 // Exported for use in other tests.
 export const baseNodeData: NodeData = {

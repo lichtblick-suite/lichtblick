@@ -13,8 +13,8 @@
 
 import { upperFirst } from "lodash";
 
-import Flex from "@foxglove-studio/app/components/Flex";
-import { Select, Option } from "@foxglove-studio/app/components/Select";
+import Flex from "@foxglove/studio-base/components/Flex";
+import { Select, Option } from "@foxglove/studio-base/components/Select";
 
 import { SLabel, SInput } from "./common";
 

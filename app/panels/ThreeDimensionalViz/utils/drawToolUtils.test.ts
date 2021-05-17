@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { EDIT_FORMAT } from "@foxglove-studio/app/components/ValidatedInput";
+import { EDIT_FORMAT } from "@foxglove/studio-base/components/ValidatedInput";
 
 import { polygonsToPoints, pointsToPolygons, getFormattedString } from "./drawToolUtils";
 

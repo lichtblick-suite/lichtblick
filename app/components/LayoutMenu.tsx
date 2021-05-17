@@ -14,14 +14,14 @@ import { useDispatch, useSelector, useStore } from "react-redux";
 import { useAsyncFn, useMountedState } from "react-use";
 import { v4 as uuidv4 } from "uuid";
 
-import { loadLayout } from "@foxglove-studio/app/actions/panels";
-import { Layout, useLayoutStorage } from "@foxglove-studio/app/context/LayoutStorageContext";
-import useLatestNonNull from "@foxglove-studio/app/hooks/useLatestNonNull";
-import { usePrompt } from "@foxglove-studio/app/hooks/usePrompt";
-import { State } from "@foxglove-studio/app/reducers";
-import { PanelsState } from "@foxglove-studio/app/reducers/panels";
-import { downloadTextFile } from "@foxglove-studio/app/util/download";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
+import { loadLayout } from "@foxglove/studio-base/actions/panels";
+import { Layout, useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
+import useLatestNonNull from "@foxglove/studio-base/hooks/useLatestNonNull";
+import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
+import { State } from "@foxglove/studio-base/reducers";
+import { PanelsState } from "@foxglove/studio-base/reducers/panels";
+import { downloadTextFile } from "@foxglove/studio-base/util/download";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 // A Wrapper around window.showOpenFilePicker that handles the error thrown on "cancel"
 // Why the api is designed this was is beyond me

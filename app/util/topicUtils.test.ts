@@ -15,7 +15,7 @@ import {
   cartesianProduct,
   joinTopics,
   makeTopicCombos,
-} from "@foxglove-studio/app/util/topicUtils";
+} from "@foxglove/studio-base/util/topicUtils";
 
 describe("topicUtil", () => {
   describe("joinTopics", () => {

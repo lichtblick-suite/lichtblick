@@ -22,9 +22,9 @@ import {
   Pose,
 } from "regl-worldview";
 
-import { InteractionData } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
-import { PoseSettings } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/PoseSettingsEditor";
-import { Color, Header, Scale } from "@foxglove-studio/app/types/Messages";
+import { InteractionData } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
+import { PoseSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PoseSettingsEditor";
+import { Color, Header, Scale } from "@foxglove/studio-base/types/Messages";
 
 import CarModel from "./CarModel";
 import carOutlinePoints from "./CarModel/carOutline.json";

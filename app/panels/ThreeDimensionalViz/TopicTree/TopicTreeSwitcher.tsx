@@ -16,10 +16,10 @@ import PinIcon from "@mdi/svg/svg/pin.svg";
 import { useCallback } from "react";
 import styled from "styled-components";
 
-import Icon from "@foxglove-studio/app/components/Icon";
-import KeyboardShortcut from "@foxglove-studio/app/components/KeyboardShortcut";
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import Icon from "@foxglove/studio-base/components/Icon";
+import KeyboardShortcut from "@foxglove/studio-base/components/KeyboardShortcut";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { Save3DConfig } from "../index";
 

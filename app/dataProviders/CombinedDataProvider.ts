@@ -18,7 +18,7 @@ import { TimeUtil, Time, RosMsgField } from "rosbag";
 import {
   BlockCache,
   MemoryCacheBlock,
-} from "@foxglove-studio/app/dataProviders/MemoryCacheDataProvider";
+} from "@foxglove/studio-base/dataProviders/MemoryCacheDataProvider";
 import {
   DataProviderDescriptor,
   ExtensionPoint,
@@ -29,12 +29,12 @@ import {
   DataProvider,
   MessageDefinitions,
   ParsedMessageDefinitions,
-} from "@foxglove-studio/app/dataProviders/types";
-import { Progress, MessageEvent } from "@foxglove-studio/app/players/types";
-import filterMap from "@foxglove-studio/app/util/filterMap";
-import { deepIntersect } from "@foxglove-studio/app/util/ranges";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
-import { clampTime } from "@foxglove-studio/app/util/time";
+} from "@foxglove/studio-base/dataProviders/types";
+import { Progress, MessageEvent } from "@foxglove/studio-base/players/types";
+import filterMap from "@foxglove/studio-base/util/filterMap";
+import { deepIntersect } from "@foxglove/studio-base/util/ranges";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
+import { clampTime } from "@foxglove/studio-base/util/time";
 
 import rawMessageDefinitionsToParsed from "./rawMessageDefinitionsToParsed";
 

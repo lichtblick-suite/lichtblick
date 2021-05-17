@@ -15,9 +15,9 @@ import { CSSProperties, useMemo } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 
-import { RpcScales } from "@foxglove-studio/app/components/Chart/types";
-import { State } from "@foxglove-studio/app/reducers";
-import { HoverValue } from "@foxglove-studio/app/types/hoverValue";
+import { RpcScales } from "@foxglove/studio-base/components/Chart/types";
+import { State } from "@foxglove/studio-base/reducers";
+import { HoverValue } from "@foxglove/studio-base/types/hoverValue";
 
 const SWrapper = styled.div`
   top: 0;

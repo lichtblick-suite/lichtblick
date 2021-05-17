@@ -21,14 +21,14 @@ import {
   InitializationResult,
   DataProvider,
   MessageDefinitions,
-} from "@foxglove-studio/app/dataProviders/types";
+} from "@foxglove/studio-base/dataProviders/types";
 import {
   Topic,
   MessageDefinitionsByTopic,
   ParsedMessageDefinitionsByTopic,
   MessageEvent,
-} from "@foxglove-studio/app/players/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
+} from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 function filterMessages<T>(
   start: Time,

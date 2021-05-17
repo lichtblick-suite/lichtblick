@@ -16,8 +16,8 @@ import { isEqual } from "lodash";
 import { Component, createRef, KeyboardEvent } from "react";
 import { cameraStateSelectors, CameraState, Vec3 } from "regl-worldview";
 
-import styles from "@foxglove-studio/app/panels/ThreeDimensionalViz/PositionControl.module.scss";
-import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
+import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/PositionControl.module.scss";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 type Props = {
   cameraState?: CameraState;

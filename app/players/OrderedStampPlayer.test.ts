@@ -13,16 +13,16 @@
 
 import { TimeUtil } from "rosbag";
 
-import FakePlayer from "@foxglove-studio/app/components/MessagePipeline/FakePlayer";
-import UserNodePlayer from "@foxglove-studio/app/players/UserNodePlayer";
+import FakePlayer from "@foxglove/studio-base/components/MessagePipeline/FakePlayer";
+import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
 import {
   PlayerCapabilities,
   PlayerState,
   PlayerStateActiveData,
-} from "@foxglove-studio/app/players/types";
-import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
-import signal from "@foxglove-studio/app/util/signal";
-import { fromSec, TimestampMethod } from "@foxglove-studio/app/util/time";
+} from "@foxglove/studio-base/players/types";
+import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
+import signal from "@foxglove/studio-base/util/signal";
+import { fromSec, TimestampMethod } from "@foxglove/studio-base/util/time";
 
 import OrderedStampPlayer, { BUFFER_DURATION_SECS } from "./OrderedStampPlayer";
 

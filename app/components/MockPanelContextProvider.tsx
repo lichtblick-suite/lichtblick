@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import { ReactNode } from "react";
 
-import PanelContext, { PanelContextType } from "@foxglove-studio/app/components/PanelContext";
+import PanelContext, { PanelContextType } from "@foxglove/studio-base/components/PanelContext";
 
 type MockProps = Partial<PanelContextType<any>>;
 const DEFAULT_MOCK_PANEL_CONTEXT: PanelContextType<any> = {

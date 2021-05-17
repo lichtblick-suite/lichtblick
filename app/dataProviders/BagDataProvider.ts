@@ -16,7 +16,8 @@ import Bag, { open, Time, BagReader, TimeUtil } from "rosbag";
 import ReadResult from "rosbag/dist/ReadResult";
 import decompressLZ4 from "wasm-lz4";
 
-import BrowserHttpReader from "@foxglove-studio/app/dataProviders/BrowserHttpReader";
+import Logger from "@foxglove/log";
+import BrowserHttpReader from "@foxglove/studio-base/dataProviders/BrowserHttpReader";
 import {
   DataProvider,
   DataProviderDescriptor,
@@ -26,17 +27,16 @@ import {
   GetMessagesTopics,
   InitializationResult,
   AverageThroughput,
-} from "@foxglove-studio/app/dataProviders/types";
-import { getReportMetadataForChunk } from "@foxglove-studio/app/dataProviders/util";
-import { MessageEvent } from "@foxglove-studio/app/players/types";
-import CachedFilelike, { FileReader } from "@foxglove-studio/app/util/CachedFilelike";
-import { bagConnectionsToTopics } from "@foxglove-studio/app/util/bagConnectionsHelper";
-import { getBagChunksOverlapCount } from "@foxglove-studio/app/util/bags";
-import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
-import { UserError } from "@foxglove-studio/app/util/errors";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
-import { fromMillis, subtractTimes } from "@foxglove-studio/app/util/time";
-import Logger from "@foxglove/log";
+} from "@foxglove/studio-base/dataProviders/types";
+import { getReportMetadataForChunk } from "@foxglove/studio-base/dataProviders/util";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
+import CachedFilelike, { FileReader } from "@foxglove/studio-base/util/CachedFilelike";
+import { bagConnectionsToTopics } from "@foxglove/studio-base/util/bagConnectionsHelper";
+import { getBagChunksOverlapCount } from "@foxglove/studio-base/util/bags";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
+import { UserError } from "@foxglove/studio-base/util/errors";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
+import { fromMillis, subtractTimes } from "@foxglove/studio-base/util/time";
 import Bzip2 from "@foxglove/wasm-bz2";
 
 type BagPath = { type: "file"; file: File | string } | { type: "remoteBagUrl"; url: string };

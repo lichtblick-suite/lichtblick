@@ -20,7 +20,7 @@ import {
   AdvertisePayload,
   PlayerPresence,
   ParameterValue,
-} from "@foxglove-studio/app/players/types";
+} from "@foxglove/studio-base/players/types";
 
 export default class FakePlayer implements Player {
   listener?: (arg0: PlayerState) => Promise<void>;

@@ -16,7 +16,7 @@ import Markdown, { PluggableList } from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { CSSProperties } from "styled-components";
 
-import LinkHandlerContext from "@foxglove-studio/app/context/LinkHandlerContext";
+import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
 
 import styles from "./TextContent.module.scss";
 

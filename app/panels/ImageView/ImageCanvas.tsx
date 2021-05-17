@@ -23,17 +23,17 @@ import shallowequal from "shallowequal";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
-import KeyListener from "@foxglove-studio/app/components/KeyListener";
-import { Item } from "@foxglove-studio/app/components/Menu";
-import { MessageEvent, Topic } from "@foxglove-studio/app/players/types";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
-import { CameraInfo, StampedMessage } from "@foxglove-studio/app/types/Messages";
-import Rpc from "@foxglove-studio/app/util/Rpc";
-import WebWorkerManager from "@foxglove-studio/app/util/WebWorkerManager";
-import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
-import { downloadFiles } from "@foxglove-studio/app/util/download";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
-import supportsOffscreenCanvas from "@foxglove-studio/app/util/supportsOffscreenCanvas";
+import KeyListener from "@foxglove/studio-base/components/KeyListener";
+import { Item } from "@foxglove/studio-base/components/Menu";
+import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import { CameraInfo, StampedMessage } from "@foxglove/studio-base/types/Messages";
+import Rpc from "@foxglove/studio-base/util/Rpc";
+import WebWorkerManager from "@foxglove/studio-base/util/WebWorkerManager";
+import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
+import { downloadFiles } from "@foxglove/studio-base/util/download";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
+import supportsOffscreenCanvas from "@foxglove/studio-base/util/supportsOffscreenCanvas";
 
 import styles from "./ImageCanvas.module.scss";
 import { Config, SaveImagePanelConfig } from "./index";

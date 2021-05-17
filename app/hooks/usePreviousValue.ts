@@ -13,7 +13,7 @@
 
 import { useContext, useRef } from "react";
 
-import PanelContext from "@foxglove-studio/app/components/PanelContext";
+import PanelContext from "@foxglove/studio-base/components/PanelContext";
 
 /**
  * @deprecated With React Strict Mode enabled, components' render functions will be called twice in

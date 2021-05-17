@@ -14,13 +14,13 @@
 import { mount } from "enzyme";
 import { cloneDeep } from "lodash";
 
-import { setGlobalVariables } from "@foxglove-studio/app/actions/panels";
-import parseRosPath from "@foxglove-studio/app/components/MessagePathSyntax/parseRosPath";
-import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
-import { Topic, MessageEvent } from "@foxglove-studio/app/players/types";
-import createRootReducer from "@foxglove-studio/app/reducers";
-import configureStore from "@foxglove-studio/app/store/configureStore.testing";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
+import { setGlobalVariables } from "@foxglove/studio-base/actions/panels";
+import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
+import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import { Topic, MessageEvent } from "@foxglove/studio-base/players/types";
+import createRootReducer from "@foxglove/studio-base/reducers";
+import configureStore from "@foxglove/studio-base/store/configureStore.testing";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 import {
   fillInGlobalVariablesInPath,

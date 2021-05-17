@@ -13,7 +13,7 @@
 
 import ts from "typescript/lib/typescript";
 
-import { DiagnosticSeverity, Diagnostic } from "@foxglove-studio/app/players/UserNodePlayer/types";
+import { DiagnosticSeverity, Diagnostic } from "@foxglove/studio-base/players/UserNodePlayer/types";
 
 const mapCategoryToDiagnosticSeverity = (
   category: ts.DiagnosticCategory,

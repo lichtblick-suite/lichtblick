@@ -6,7 +6,7 @@ import { PropsWithChildren, useState } from "react";
 
 import LayourStorageContext, {
   LayoutStorage,
-} from "@foxglove-studio/app/context/LayoutStorageContext";
+} from "@foxglove/studio-base/context/LayoutStorageContext";
 
 export default function NoOpLayoutStorageProvider(props: PropsWithChildren<unknown>): JSX.Element {
   const [ctx] = useState<LayoutStorage>(() => {

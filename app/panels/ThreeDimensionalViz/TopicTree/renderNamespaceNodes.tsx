@@ -13,13 +13,13 @@
 
 import { useCallback, useContext, useMemo } from "react";
 
-import useGuaranteedContext from "@foxglove-studio/app/hooks/useGuaranteedContext";
-import { ThreeDimensionalVizContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
-import { TREE_SPACING } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/constants";
-import { TopicTreeContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
-import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
-import { SECOND_SOURCE_PREFIX, TRANSFORM_TOPIC } from "@foxglove-studio/app/util/globalConstants";
-import { joinTopics } from "@foxglove-studio/app/util/topicUtils";
+import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
+import { ThreeDimensionalVizContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
+import { TREE_SPACING } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/constants";
+import { TopicTreeContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
+import { SECOND_SOURCE_PREFIX, TRANSFORM_TOPIC } from "@foxglove/studio-base/util/globalConstants";
+import { joinTopics } from "@foxglove/studio-base/util/topicUtils";
 
 import NamespaceMenu from "./NamespaceMenu";
 import NodeName from "./NodeName";

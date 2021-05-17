@@ -15,12 +15,13 @@ import memoizeWeak from "memoize-weak";
 import { TimeUtil, Time } from "rosbag";
 import shallowequal from "shallowequal";
 
+import Log from "@foxglove/log";
 import {
   SetUserNodeDiagnostics,
   AddUserNodeLogs,
   SetUserNodeRosLib,
-} from "@foxglove-studio/app/actions/userNodes";
-import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
+} from "@foxglove/studio-base/actions/userNodes";
+import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import {
   Diagnostic,
   DiagnosticSeverity,
@@ -30,8 +31,8 @@ import {
   RegistrationOutput,
   Sources,
   UserNodeLog,
-} from "@foxglove-studio/app/players/UserNodePlayer/types";
-import { hasTransformerErrors } from "@foxglove-studio/app/players/UserNodePlayer/utils";
+} from "@foxglove/studio-base/players/UserNodePlayer/types";
+import { hasTransformerErrors } from "@foxglove/studio-base/players/UserNodePlayer/utils";
 import {
   AdvertisePayload,
   Player,
@@ -43,14 +44,13 @@ import {
   ParameterValue,
   MessageEvent,
   PlayerProblem,
-} from "@foxglove-studio/app/players/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { UserNode, UserNodes } from "@foxglove-studio/app/types/panels";
-import Rpc from "@foxglove-studio/app/util/Rpc";
-import { basicDatatypes } from "@foxglove-studio/app/util/datatypes";
-import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
-import signal from "@foxglove-studio/app/util/signal";
-import Log from "@foxglove/log";
+} from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { UserNode, UserNodes } from "@foxglove/studio-base/types/panels";
+import Rpc from "@foxglove/studio-base/util/Rpc";
+import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
+import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
+import signal from "@foxglove/studio-base/util/signal";
 
 const log = Log.getLogger(__filename);
 

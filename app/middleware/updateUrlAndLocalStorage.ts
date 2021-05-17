@@ -11,11 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ActionTypes } from "@foxglove-studio/app/actions";
-import { PANELS_ACTION_TYPES } from "@foxglove-studio/app/actions/panels";
-import { State } from "@foxglove-studio/app/reducers";
-import { setPersistedStateInLocalStorage } from "@foxglove-studio/app/reducers/panels";
-import { Store } from "@foxglove-studio/app/types/Store";
+import { ActionTypes } from "@foxglove/studio-base/actions";
+import { PANELS_ACTION_TYPES } from "@foxglove/studio-base/actions/panels";
+import { State } from "@foxglove/studio-base/reducers";
+import { setPersistedStateInLocalStorage } from "@foxglove/studio-base/reducers/panels";
+import { Store } from "@foxglove/studio-base/types/Store";
 
 let updateUrlTimer: ReturnType<typeof setTimeout> | undefined;
 

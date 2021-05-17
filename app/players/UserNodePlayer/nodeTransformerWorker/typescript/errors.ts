@@ -14,7 +14,7 @@ import {
   DiagnosticSeverity,
   Sources,
   ErrorCodes,
-} from "@foxglove-studio/app/players/UserNodePlayer/types";
+} from "@foxglove/studio-base/players/UserNodePlayer/types";
 
 export const noFuncError = {
   severity: DiagnosticSeverity.Error,

@@ -16,9 +16,9 @@ import PlusCircleIcon from "@mdi/svg/svg/plus-circle.svg";
 import { storiesOf } from "@storybook/react";
 import { ReactNode, useEffect, useState } from "react";
 
-import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
-import Flex from "@foxglove-studio/app/components/Flex";
-import Icon from "@foxglove-studio/app/components/Icon";
+import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Icon from "@foxglove/studio-base/components/Icon";
 
 const Block = (props: { children: ReactNode }) => (
   <div style={{ width: 50, backgroundColor: "red" }}>{props.children}</div>

@@ -5,7 +5,7 @@
 import {
   nonEmptyOrUndefined,
   isNonEmptyOrUndefined,
-} from "@foxglove-studio/app/util/emptyOrUndefined";
+} from "@foxglove/studio-base/util/emptyOrUndefined";
 
 describe("isEmptyOrUndefined", () => {
   it("returns true when given a non-empty string", () => {

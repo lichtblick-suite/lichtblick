@@ -13,8 +13,8 @@
 import { uniq } from "lodash";
 import { getLeaves } from "react-mosaic-component";
 
-import { ActionTypes } from "@foxglove-studio/app/actions";
-import { State } from "@foxglove-studio/app/reducers";
+import { ActionTypes } from "@foxglove/studio-base/actions";
+import { State } from "@foxglove/studio-base/reducers";
 
 export default function mosaicReducer(state: State, action: ActionTypes): State {
   switch (action.type) {

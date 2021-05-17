@@ -12,7 +12,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { MessageEvent } from "@foxglove-studio/app/players/types";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
 
 import { addMessages, defaultDiagnosticsBuffer } from "./DiagnosticsHistory";
 import { computeDiagnosticInfo, DiagnosticInfo, DiagnosticStatusArrayMsg, LEVELS } from "./util";

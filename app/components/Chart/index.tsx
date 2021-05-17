@@ -14,8 +14,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useAsync, useMountedState } from "react-use";
 import { v4 as uuidv4 } from "uuid";
 
-import { RpcElement, RpcScales } from "@foxglove-studio/app/components/Chart/types";
-import WebWorkerManager from "@foxglove-studio/app/util/WebWorkerManager";
+import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/types";
+import WebWorkerManager from "@foxglove/studio-base/util/WebWorkerManager";
 
 function makeChartJSWorker() {
   return new Worker(new URL("./worker/main", import.meta.url));

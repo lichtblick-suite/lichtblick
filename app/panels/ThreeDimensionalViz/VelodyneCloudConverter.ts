@@ -6,8 +6,8 @@ import {
   VelodynePacket,
   VelodyneScan,
   VelodyneScanDecoded,
-} from "@foxglove-studio/app/types/Messages";
-import { toSec } from "@foxglove-studio/app/util/time";
+} from "@foxglove/studio-base/types/Messages";
+import { toSec } from "@foxglove/studio-base/util/time";
 import { Calibration, Model, PointCloud, RawPacket, Transformer } from "@foxglove/velodyne-cloud";
 
 // Converts `velodyne_msgs/VelodyneScan` messages into `VelodyneScanDecoded`

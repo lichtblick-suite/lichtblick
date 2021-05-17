@@ -15,7 +15,7 @@ import { ReactElement } from "react";
 import styled from "styled-components";
 import tinyColor from "tinycolor2";
 
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export const colorToAlpha = (hex: string, alpha: number): string => {
   const color = tinyColor(hex);

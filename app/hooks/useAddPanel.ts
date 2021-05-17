@@ -4,13 +4,13 @@
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { setSelectedPanelIds } from "@foxglove-studio/app/actions/mosaic";
-import { addPanel } from "@foxglove-studio/app/actions/panels";
-import { PanelSelection } from "@foxglove-studio/app/components/PanelList";
-import { usePanelSettings } from "@foxglove-studio/app/context/PanelSettingsContext";
-import { State as ReduxState } from "@foxglove-studio/app/reducers";
-import { getPanelIdForType } from "@foxglove-studio/app/util/layout";
-import logEvent, { getEventNames, getEventTags } from "@foxglove-studio/app/util/logEvent";
+import { setSelectedPanelIds } from "@foxglove/studio-base/actions/mosaic";
+import { addPanel } from "@foxglove/studio-base/actions/panels";
+import { PanelSelection } from "@foxglove/studio-base/components/PanelList";
+import { usePanelSettings } from "@foxglove/studio-base/context/PanelSettingsContext";
+import { State as ReduxState } from "@foxglove/studio-base/reducers";
+import { getPanelIdForType } from "@foxglove/studio-base/util/layout";
+import logEvent, { getEventNames, getEventTags } from "@foxglove/studio-base/util/logEvent";
 
 export default function useAddPanel(): (selection: PanelSelection) => void {
   const dispatch = useDispatch();

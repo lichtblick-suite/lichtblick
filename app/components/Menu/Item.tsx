@@ -19,8 +19,8 @@ import cx from "classnames";
 import { noop } from "lodash";
 import styled from "styled-components";
 
-import Icon from "@foxglove-studio/app/components/Icon";
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
+import Icon from "@foxglove/studio-base/components/Icon";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
 
 import styles from "./index.module.scss";
 

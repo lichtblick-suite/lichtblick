@@ -5,8 +5,8 @@
 import { PropsWithChildren } from "react";
 import { useAsync } from "react-use";
 
-import AppConfigurationContext from "@foxglove-studio/app/context/AppConfigurationContext";
 import Log from "@foxglove/log";
+import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 
 import { useNativeStorage } from "../context/NativeStorageContext";
 import NativeStorageAppConfiguration from "../services/NativeStorageAppConfiguration";

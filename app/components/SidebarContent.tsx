@@ -4,7 +4,7 @@
 
 import { Stack, Text, useTheme } from "@fluentui/react";
 
-import HelpButton from "@foxglove-studio/app/components/PanelToolbar/HelpButton";
+import HelpButton from "@foxglove/studio-base/components/PanelToolbar/HelpButton";
 
 export function SidebarContent({
   noPadding = false,

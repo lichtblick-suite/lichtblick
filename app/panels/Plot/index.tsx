@@ -20,32 +20,32 @@ import {
   useBlocksByTopic,
   useDataSourceInfo,
   useMessagesByTopic,
-} from "@foxglove-studio/app/PanelAPI";
-import Flex from "@foxglove-studio/app/components/Flex";
-import { getTopicsFromPaths } from "@foxglove-studio/app/components/MessagePathSyntax/parseRosPath";
+} from "@foxglove/studio-base/PanelAPI";
+import Flex from "@foxglove/studio-base/components/Flex";
+import { getTopicsFromPaths } from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import {
   MessageDataItemsByPath,
   useDecodeMessagePathsForMessagesByTopic,
-} from "@foxglove-studio/app/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+} from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import {
   MessagePipelineContext,
   useMessagePipeline,
-} from "@foxglove-studio/app/components/MessagePipeline";
-import Panel from "@foxglove-studio/app/components/Panel";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
+} from "@foxglove/studio-base/components/MessagePipeline";
+import Panel from "@foxglove/studio-base/components/Panel";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import {
   ChartDefaultView,
   getTooltipItemForMessageHistoryItem,
   TooltipItem,
-} from "@foxglove-studio/app/components/TimeBasedChart";
-import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
+} from "@foxglove/studio-base/components/TimeBasedChart";
+import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
 import PlotChart, {
   getDatasetsAndTooltips,
   PlotDataByPath,
-} from "@foxglove-studio/app/panels/Plot/PlotChart";
-import PlotLegend from "@foxglove-studio/app/panels/Plot/PlotLegend";
-import { PanelConfig, PanelConfigSchema } from "@foxglove-studio/app/types/panels";
-import { fromSec, subtractTimes, toSec } from "@foxglove-studio/app/util/time";
+} from "@foxglove/studio-base/panels/Plot/PlotChart";
+import PlotLegend from "@foxglove/studio-base/panels/Plot/PlotLegend";
+import { PanelConfig, PanelConfigSchema } from "@foxglove/studio-base/types/panels";
+import { fromSec, subtractTimes, toSec } from "@foxglove/studio-base/util/time";
 
 import helpContent from "./index.help.md";
 import { PlotConfig } from "./types";

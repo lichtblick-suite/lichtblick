@@ -14,7 +14,7 @@
 import { memoize, uniq } from "lodash";
 import { Parser, Grammar } from "nearley";
 
-import filterMap from "@foxglove-studio/app/util/filterMap";
+import filterMap from "@foxglove/studio-base/util/filterMap";
 
 import { RosPath } from "./constants";
 import grammar from "./grammar.ne";

@@ -13,7 +13,7 @@
 
 import cx from "classnames";
 
-import Icon from "@foxglove-studio/app/components/Icon";
+import Icon from "@foxglove/studio-base/components/Icon";
 
 import styles from "./Option.module.scss";
 

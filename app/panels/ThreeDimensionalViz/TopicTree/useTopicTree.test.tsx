@@ -14,7 +14,7 @@
 
 import { mount } from "enzyme";
 
-import { Topic } from "@foxglove-studio/app/players/types";
+import { Topic } from "@foxglove/studio-base/players/types";
 
 import { UseTreeInput } from "./types";
 import useTopicTree, { generateNodeKey, getBaseKey } from "./useTopicTree";

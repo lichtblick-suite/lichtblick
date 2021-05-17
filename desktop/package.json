@@ -2,6 +2,6 @@
   "name": "desktop",
   "private": true,
   "dependencies": {
-    "@foxglove-studio/app": "workspace:app"
+    "@foxglove/studio-base": "workspace:app"
   }
 }

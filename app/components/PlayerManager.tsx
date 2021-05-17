@@ -23,49 +23,49 @@ import {
 import { connect, ConnectedProps } from "react-redux";
 import { useLocalStorage, useMountedState } from "react-use";
 
-import { AppSetting } from "@foxglove-studio/app/AppSetting";
-import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
+import Logger from "@foxglove/log";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import {
   setUserNodeDiagnostics,
   addUserNodeLogs,
   setUserNodeRosLib,
-} from "@foxglove-studio/app/actions/userNodes";
+} from "@foxglove/studio-base/actions/userNodes";
 import {
   MaybePlayer,
   MessagePipelineProvider,
-} from "@foxglove-studio/app/components/MessagePipeline";
-import { useAnalytics } from "@foxglove-studio/app/context/AnalyticsContext";
+} from "@foxglove/studio-base/components/MessagePipeline";
+import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import PlayerSelectionContext, {
   PlayerSelection,
   PlayerSourceDefinition,
-} from "@foxglove-studio/app/context/PlayerSelectionContext";
-import { CoreDataProviders } from "@foxglove-studio/app/dataProviders/constants";
-import { getRemoteBagGuid } from "@foxglove-studio/app/dataProviders/getRemoteBagGuid";
+} from "@foxglove/studio-base/context/PlayerSelectionContext";
+import { CoreDataProviders } from "@foxglove/studio-base/dataProviders/constants";
+import { getRemoteBagGuid } from "@foxglove/studio-base/dataProviders/getRemoteBagGuid";
 import {
   getLocalBagDescriptor,
   getRemoteBagDescriptor,
-} from "@foxglove-studio/app/dataProviders/standardDataProviderDescriptors";
-import { useAppConfigurationValue } from "@foxglove-studio/app/hooks/useAppConfigurationValue";
-import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
-import { usePrompt } from "@foxglove-studio/app/hooks/usePrompt";
-import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
-import useWarnImmediateReRender from "@foxglove-studio/app/hooks/useWarnImmediateReRender";
-import AnalyticsMetricsCollector from "@foxglove-studio/app/players/AnalyticsMetricsCollector";
-import OrderedStampPlayer from "@foxglove-studio/app/players/OrderedStampPlayer";
-import Ros1Player from "@foxglove-studio/app/players/Ros1Player";
-import RosbridgePlayer from "@foxglove-studio/app/players/RosbridgePlayer";
-import UserNodePlayer from "@foxglove-studio/app/players/UserNodePlayer";
+} from "@foxglove/studio-base/dataProviders/standardDataProviderDescriptors";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
+import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
+import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
+import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
+import useWarnImmediateReRender from "@foxglove/studio-base/hooks/useWarnImmediateReRender";
+import AnalyticsMetricsCollector from "@foxglove/studio-base/players/AnalyticsMetricsCollector";
+import OrderedStampPlayer from "@foxglove/studio-base/players/OrderedStampPlayer";
+import Ros1Player from "@foxglove/studio-base/players/Ros1Player";
+import RosbridgePlayer from "@foxglove/studio-base/players/RosbridgePlayer";
+import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
 import {
   buildPlayerFromDescriptor,
   BuildPlayerOptions,
-} from "@foxglove-studio/app/players/buildPlayer";
-import { Player } from "@foxglove-studio/app/players/types";
-import { State } from "@foxglove-studio/app/reducers";
-import Storage from "@foxglove-studio/app/util/Storage";
-import { AppError } from "@foxglove-studio/app/util/errors";
-import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
-import { parseInputUrl } from "@foxglove-studio/app/util/url";
-import Logger from "@foxglove/log";
+} from "@foxglove/studio-base/players/buildPlayer";
+import { Player } from "@foxglove/studio-base/players/types";
+import { State } from "@foxglove/studio-base/reducers";
+import Storage from "@foxglove/studio-base/util/Storage";
+import { AppError } from "@foxglove/studio-base/util/errors";
+import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
+import { parseInputUrl } from "@foxglove/studio-base/util/url";
 
 const log = Logger.getLogger(__filename);
 

@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { rgbStrToReglRGB, hexToRgbString } from "@foxglove-studio/app/util/colorUtils";
+import { rgbStrToReglRGB, hexToRgbString } from "@foxglove/studio-base/util/colorUtils";
 
 describe("colorUtils", () => {
   it("hexToRgbString", () => {

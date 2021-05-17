@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ActionTypes } from "@foxglove-studio/app/actions";
-import { State } from "@foxglove-studio/app/reducers";
+import { ActionTypes } from "@foxglove/studio-base/actions";
+import { State } from "@foxglove/studio-base/reducers";
 
 export default function testsReducer(state: State, action: ActionTypes): State {
   switch (action.type) {

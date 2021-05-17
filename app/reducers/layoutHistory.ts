@@ -13,15 +13,15 @@
 
 import { isEqual } from "lodash";
 
-import { ActionTypes } from "@foxglove-studio/app/actions";
-import { panelEditingActions } from "@foxglove-studio/app/actions/panels";
-import { State, PersistedState } from "@foxglove-studio/app/reducers";
+import { ActionTypes } from "@foxglove/studio-base/actions";
+import { panelEditingActions } from "@foxglove/studio-base/actions/panels";
+import { State, PersistedState } from "@foxglove/studio-base/reducers";
 import {
   pushState,
   redoChange,
   undoChange,
   StateHistory,
-} from "@foxglove-studio/app/util/stateHistory";
+} from "@foxglove/studio-base/util/stateHistory";
 
 const LAYOUT_HISTORY_SIZE = 20;
 // Threshold is a guess, and could be refined if it seems we're saving too few or too many entries

@@ -13,7 +13,7 @@
 
 import buffer from "buffer";
 
-import delay from "@foxglove-studio/app/util/delay";
+import delay from "@foxglove/studio-base/util/delay";
 
 import CachedFilelike, { FileReader, FileStream } from "./CachedFilelike";
 

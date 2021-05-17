@@ -15,12 +15,12 @@ import LinkPlusIcon from "@mdi/svg/svg/link-plus.svg";
 import classNames from "classnames";
 import React, { FormEvent } from "react";
 
-import Button from "@foxglove-studio/app/components/Button";
-import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
-import Icon from "@foxglove-studio/app/components/Icon";
-import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
-import GlobalVariableName from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/GlobalVariableName";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
+import Button from "@foxglove/studio-base/components/Button";
+import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
+import Icon from "@foxglove/studio-base/components/Icon";
+import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
+import GlobalVariableName from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/GlobalVariableName";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
 
 import useLinkedGlobalVariables from "../useLinkedGlobalVariables";
 import SGlobalVariableForm from "./SGlobalVariableForm";

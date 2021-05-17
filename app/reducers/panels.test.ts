@@ -14,7 +14,7 @@
 
 import { getLeaves, MosaicParent } from "react-mosaic-component";
 
-import { setSelectedPanelIds } from "@foxglove-studio/app/actions/mosaic";
+import { setSelectedPanelIds } from "@foxglove/studio-base/actions/mosaic";
 import {
   changePanelLayout,
   savePanelConfigs,
@@ -29,24 +29,24 @@ import {
   moveTab,
   startDrag,
   endDrag,
-} from "@foxglove-studio/app/actions/panels";
-import { State, PersistedState } from "@foxglove-studio/app/reducers";
+} from "@foxglove/studio-base/actions/panels";
+import { State, PersistedState } from "@foxglove/studio-base/reducers";
 import {
   PanelsState,
   GLOBAL_STATE_STORAGE_KEY,
   resetInitialPersistedState,
   defaultPlaybackConfig,
   defaultPersistedState,
-} from "@foxglove-studio/app/reducers/panels";
-import { getGlobalStoreForTest } from "@foxglove-studio/app/store/getGlobalStore";
+} from "@foxglove/studio-base/reducers/panels";
+import { getGlobalStoreForTest } from "@foxglove/studio-base/store/getGlobalStore";
 import {
   CreateTabPanelPayload,
   ImportPanelLayoutPayload,
   MosaicDropTargetPosition,
-} from "@foxglove-studio/app/types/panels";
-import Storage from "@foxglove-studio/app/util/Storage";
-import { TAB_PANEL_TYPE } from "@foxglove-studio/app/util/globalConstants";
-import { getPanelTypeFromId } from "@foxglove-studio/app/util/layout";
+} from "@foxglove/studio-base/types/panels";
+import Storage from "@foxglove/studio-base/util/Storage";
+import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
+import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 const storage = new Storage();
 

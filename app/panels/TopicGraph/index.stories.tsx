@@ -4,7 +4,7 @@
 
 import { useEffect, useState } from "react";
 
-import PanelSetup, { Fixture } from "@foxglove-studio/app/stories/PanelSetup";
+import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
 import TopicGraph from "./index";
 

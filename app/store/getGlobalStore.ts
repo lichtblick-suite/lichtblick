@@ -12,10 +12,10 @@
 //   You may not use this file except in compliance with the License.
 import { createMemoryHistory } from "history";
 
-import updateUrlAndLocalStorageMiddleware from "@foxglove-studio/app/middleware/updateUrlAndLocalStorage";
-import createRootReducer from "@foxglove-studio/app/reducers";
-import configureStore from "@foxglove-studio/app/store";
-import configureTestingStore from "@foxglove-studio/app/store/configureStore.testing";
+import updateUrlAndLocalStorageMiddleware from "@foxglove/studio-base/middleware/updateUrlAndLocalStorage";
+import createRootReducer from "@foxglove/studio-base/reducers";
+import configureStore from "@foxglove/studio-base/store";
+import configureTestingStore from "@foxglove/studio-base/store/configureStore.testing";
 
 type Store = ReturnType<typeof configureStore>;
 

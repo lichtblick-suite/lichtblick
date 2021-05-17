@@ -13,15 +13,15 @@
 
 import ApiCheckerDataProvider, {
   instrumentTreeWithApiCheckerDataProvider,
-} from "@foxglove-studio/app/dataProviders/ApiCheckerDataProvider";
-import BagDataProvider from "@foxglove-studio/app/dataProviders/BagDataProvider";
-import CombinedDataProvider from "@foxglove-studio/app/dataProviders/CombinedDataProvider";
-import MemoryCacheDataProvider from "@foxglove-studio/app/dataProviders/MemoryCacheDataProvider";
-import ParseMessagesDataProvider from "@foxglove-studio/app/dataProviders/ParseMessagesDataProvider";
-import RenameDataProvider from "@foxglove-studio/app/dataProviders/RenameDataProvider";
-import WorkerDataProvider from "@foxglove-studio/app/dataProviders/WorkerDataProvider";
-import createGetDataProvider from "@foxglove-studio/app/dataProviders/createGetDataProvider";
-import { DataProviderDescriptor, DataProvider } from "@foxglove-studio/app/dataProviders/types";
+} from "@foxglove/studio-base/dataProviders/ApiCheckerDataProvider";
+import BagDataProvider from "@foxglove/studio-base/dataProviders/BagDataProvider";
+import CombinedDataProvider from "@foxglove/studio-base/dataProviders/CombinedDataProvider";
+import MemoryCacheDataProvider from "@foxglove/studio-base/dataProviders/MemoryCacheDataProvider";
+import ParseMessagesDataProvider from "@foxglove/studio-base/dataProviders/ParseMessagesDataProvider";
+import RenameDataProvider from "@foxglove/studio-base/dataProviders/RenameDataProvider";
+import WorkerDataProvider from "@foxglove/studio-base/dataProviders/WorkerDataProvider";
+import createGetDataProvider from "@foxglove/studio-base/dataProviders/createGetDataProvider";
+import { DataProviderDescriptor, DataProvider } from "@foxglove/studio-base/dataProviders/types";
 
 const getDataProviderBase = createGetDataProvider({
   ApiCheckerDataProvider,

@@ -13,18 +13,18 @@
 
 import styled from "styled-components";
 
-import { useMessagesByTopic } from "@foxglove-studio/app/PanelAPI";
-import EmptyState from "@foxglove-studio/app/components/EmptyState";
-import Flex from "@foxglove-studio/app/components/Flex";
-import MessagePathInput from "@foxglove-studio/app/components/MessagePathSyntax/MessagePathInput";
-import { RosPath } from "@foxglove-studio/app/components/MessagePathSyntax/constants";
-import parseRosPath from "@foxglove-studio/app/components/MessagePathSyntax/parseRosPath";
-import { useCachedGetMessagePathDataItems } from "@foxglove-studio/app/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import Panel from "@foxglove-studio/app/components/Panel";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import { MONOSPACE } from "@foxglove-studio/app/styles/fonts";
-import { SaveConfig } from "@foxglove-studio/app/types/panels";
-import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
+import { useMessagesByTopic } from "@foxglove/studio-base/PanelAPI";
+import EmptyState from "@foxglove/studio-base/components/EmptyState";
+import Flex from "@foxglove/studio-base/components/Flex";
+import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
+import { RosPath } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
+import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
+import { useCachedGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import Panel from "@foxglove/studio-base/components/Panel";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
+import { SaveConfig } from "@foxglove/studio-base/types/panels";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 import Table from "./Table";
 import helpContent from "./index.help.md";

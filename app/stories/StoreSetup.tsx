@@ -14,8 +14,8 @@
 import { useRef, ReactNode } from "react";
 import { Provider } from "react-redux";
 
-import createRootReducer from "@foxglove-studio/app/reducers";
-import configureStore from "@foxglove-studio/app/store/configureStore";
+import createRootReducer from "@foxglove/studio-base/reducers";
+import configureStore from "@foxglove/studio-base/store/configureStore";
 
 type Store = ReturnType<typeof configureStore>;
 

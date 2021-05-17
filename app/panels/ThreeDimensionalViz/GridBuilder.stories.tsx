@@ -16,8 +16,8 @@ import { noop } from "lodash";
 import { DEFAULT_CAMERA_STATE, Lines, Worldview } from "regl-worldview";
 import styled from "styled-components";
 
-import { TopicSettingsCollection } from "@foxglove-studio/app/panels/ThreeDimensionalViz/SceneBuilder";
-import { GridSettings } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/GridSettingsEditor";
+import { TopicSettingsCollection } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
+import { GridSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/GridSettingsEditor";
 import {
   ArrowMarker,
   ColorMarker,
@@ -37,9 +37,9 @@ import {
   SphereMarker,
   TextMarker,
   TriangleListMarker,
-} from "@foxglove-studio/app/types/Messages";
-import { MarkerCollector } from "@foxglove-studio/app/types/Scene";
-import { FOXGLOVE_GRID_TOPIC } from "@foxglove-studio/app/util/globalConstants";
+} from "@foxglove/studio-base/types/Messages";
+import { MarkerCollector } from "@foxglove/studio-base/types/Scene";
+import { FOXGLOVE_GRID_TOPIC } from "@foxglove/studio-base/util/globalConstants";
 
 import GridBuilder from "./GridBuilder";
 

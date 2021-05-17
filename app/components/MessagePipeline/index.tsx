@@ -14,10 +14,10 @@
 import { debounce, flatten, groupBy, isEqual } from "lodash";
 import { Time } from "rosbag";
 
-import useContextSelector from "@foxglove-studio/app/hooks/useContextSelector";
-import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
-import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
-import useShouldNotChangeOften from "@foxglove-studio/app/hooks/useShouldNotChangeOften";
+import useContextSelector from "@foxglove/studio-base/hooks/useContextSelector";
+import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
+import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
+import useShouldNotChangeOften from "@foxglove/studio-base/hooks/useShouldNotChangeOften";
 import {
   AdvertisePayload,
   Frame,
@@ -30,11 +30,11 @@ import {
   PublishPayload,
   SubscribePayload,
   Topic,
-} from "@foxglove-studio/app/players/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import createSelectableContext from "@foxglove-studio/app/util/createSelectableContext";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
-import signal from "@foxglove-studio/app/util/signal";
+} from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import createSelectableContext from "@foxglove/studio-base/util/createSelectableContext";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
+import signal from "@foxglove/studio-base/util/signal";
 
 import { pauseFrameForPromises, FramePromise } from "./pauseFrameForPromise";
 import warnOnOutOfSyncMessages from "./warnOnOutOfSyncMessages";

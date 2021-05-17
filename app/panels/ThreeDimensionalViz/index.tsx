@@ -18,20 +18,20 @@ import React, { useCallback, useMemo, useState, useRef, useEffect } from "react"
 import {
   MessagePipelineContext,
   useMessagePipeline,
-} from "@foxglove-studio/app/components/MessagePipeline";
-import Panel from "@foxglove-studio/app/components/Panel";
-import PanelContext from "@foxglove-studio/app/components/PanelContext";
-import Layout from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/Layout";
-import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
-import helpContent from "@foxglove-studio/app/panels/ThreeDimensionalViz/index.help.md";
+} from "@foxglove/studio-base/components/MessagePipeline";
+import Panel from "@foxglove/studio-base/components/Panel";
+import PanelContext from "@foxglove/studio-base/components/PanelContext";
+import Layout from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
+import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
+import helpContent from "@foxglove/studio-base/panels/ThreeDimensionalViz/index.help.md";
 import {
   useTransformedCameraState,
   getNewCameraStateOnFollowChange,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
-import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz/types";
-import withTransforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/withTransforms";
-import { Frame, Topic } from "@foxglove-studio/app/players/types";
-import { PanelConfigSchema, SaveConfig } from "@foxglove-studio/app/types/panels";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
+import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
+import withTransforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/withTransforms";
+import { Frame, Topic } from "@foxglove/studio-base/players/types";
+import { PanelConfigSchema, SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import { FrameCompatibilityDEPRECATED } from "./FrameCompatibility";
 

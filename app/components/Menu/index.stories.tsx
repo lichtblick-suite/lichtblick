@@ -14,7 +14,7 @@
 import { storiesOf } from "@storybook/react";
 import ReactDOM from "react-dom";
 
-import Menu, { Item, SubMenu } from "@foxglove-studio/app/components/Menu";
+import Menu, { Item, SubMenu } from "@foxglove/studio-base/components/Menu";
 
 storiesOf("components/Menu", module)
   .add("standard", () => {

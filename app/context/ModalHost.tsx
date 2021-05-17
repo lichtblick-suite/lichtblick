@@ -4,7 +4,7 @@
 
 import { useMemo, useRef, useState, Fragment } from "react";
 
-import ModalContext from "@foxglove-studio/app/context/ModalContext";
+import ModalContext from "@foxglove/studio-base/context/ModalContext";
 
 export default function ModalHost({
   children,

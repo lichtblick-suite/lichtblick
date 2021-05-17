@@ -10,7 +10,7 @@ import {
   MultiProvider,
   PlayerSourceDefinition,
   ThemeProvider,
-} from "@foxglove-studio/app";
+} from "@foxglove/studio-base";
 
 import AppConfigurationProvider from "./components/AppConfigurationProvider";
 import NoOpLayoutStorageProvider from "./components/NoOpLayoutStorageProvider";

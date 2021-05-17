@@ -13,8 +13,8 @@
 
 import TestUtils from "react-dom/test-utils";
 
-import Rosout from "@foxglove-studio/app/panels/Rosout";
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+import Rosout from "@foxglove/studio-base/panels/Rosout";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 const fixture = {
   topics: [{ name: "/rosout", datatype: "dummy" }],

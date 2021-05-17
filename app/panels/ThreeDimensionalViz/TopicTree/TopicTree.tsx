@@ -27,14 +27,14 @@ import { useResizeDetector } from "react-resize-detector";
 import { CSSTransition } from "react-transition-group";
 import styled from "styled-components";
 
-import Dropdown from "@foxglove-studio/app/components/Dropdown";
-import Icon from "@foxglove-studio/app/components/Icon";
-import { Item } from "@foxglove-studio/app/components/Menu";
-import useChangeDetector from "@foxglove-studio/app/hooks/useChangeDetector";
-import useLinkedGlobalVariables from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
-import { TopicSettingsCollection } from "@foxglove-studio/app/panels/ThreeDimensionalViz/SceneBuilder";
-import { syncBags, SYNC_OPTIONS } from "@foxglove-studio/app/panels/ThreeDimensionalViz/syncBags";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import Dropdown from "@foxglove/studio-base/components/Dropdown";
+import Icon from "@foxglove/studio-base/components/Icon";
+import { Item } from "@foxglove/studio-base/components/Menu";
+import useChangeDetector from "@foxglove/studio-base/hooks/useChangeDetector";
+import useLinkedGlobalVariables from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
+import { TopicSettingsCollection } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
+import { syncBags, SYNC_OPTIONS } from "@foxglove/studio-base/panels/ThreeDimensionalViz/syncBags";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { Save3DConfig } from "../index";
 import DiffModeSettings from "./DiffModeSettings";

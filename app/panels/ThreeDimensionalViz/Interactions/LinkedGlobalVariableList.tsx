@@ -14,7 +14,7 @@
 import LinkPlusIcon from "@mdi/svg/svg/link-plus.svg";
 import styled from "styled-components";
 
-import Icon from "@foxglove-studio/app/components/Icon";
+import Icon from "@foxglove/studio-base/components/Icon";
 
 import GlobalVariableLink from "./GlobalVariableLink/index";
 import GlobalVariableName from "./GlobalVariableName";

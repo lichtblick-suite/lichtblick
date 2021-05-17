@@ -4,7 +4,7 @@
 
 import { renderHook } from "@testing-library/react-hooks";
 
-import useLatestNonNull from "@foxglove-studio/app/hooks/useLatestNonNull";
+import useLatestNonNull from "@foxglove/studio-base/hooks/useLatestNonNull";
 
 describe("useLatestNonNull", () => {
   it("returns latest value if not null", () => {

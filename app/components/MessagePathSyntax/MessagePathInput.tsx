@@ -15,16 +15,18 @@ import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
 import cx from "classnames";
 import { flatten, flatMap, partition } from "lodash";
 
-import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import Autocomplete from "@foxglove-studio/app/components/Autocomplete";
-import Dropdown from "@foxglove-studio/app/components/Dropdown";
-import Icon from "@foxglove-studio/app/components/Icon";
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
-import useGlobalVariables, { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
-import { Topic } from "@foxglove-studio/app/players/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { getTopicNames, getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
-import { TimestampMethod } from "@foxglove-studio/app/util/time";
+import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
+import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
+import Dropdown from "@foxglove/studio-base/components/Dropdown";
+import Icon from "@foxglove/studio-base/components/Icon";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
+import useGlobalVariables, {
+  GlobalVariables,
+} from "@foxglove/studio-base/hooks/useGlobalVariables";
+import { Topic } from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { getTopicNames, getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
+import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 import styles from "./MessagePathInput.module.scss";
 import { RosPath, RosPrimitive } from "./constants";

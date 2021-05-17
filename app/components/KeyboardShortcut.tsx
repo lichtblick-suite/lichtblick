@@ -13,7 +13,7 @@
 
 import styled from "styled-components";
 
-import { colors, textSize, rounded } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { colors, textSize, rounded } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const SKeyboardShortcut = styled.div`
   padding: 4px 0;

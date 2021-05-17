@@ -11,11 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import GlobalVariableSlider from "@foxglove-studio/app/components/GlobalVariableSlider";
-import Panel from "@foxglove-studio/app/components/Panel";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import { SliderProps } from "@foxglove-studio/app/components/SliderWithTicks";
-import { PanelConfigSchema } from "@foxglove-studio/app/types/panels";
+import GlobalVariableSlider from "@foxglove/studio-base/components/GlobalVariableSlider";
+import Panel from "@foxglove/studio-base/components/Panel";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import { SliderProps } from "@foxglove/studio-base/components/SliderWithTicks";
+import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
 
 export type GlobalVariableSliderConfig = {
   sliderProps: SliderProps;

@@ -15,8 +15,8 @@ import { useState, useCallback, useRef } from "react";
 import TestUtils from "react-dom/test-utils";
 import { useMount } from "react-use";
 
-import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
-import { triggerWheel } from "@foxglove-studio/app/stories/PanelSetup";
+import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import { triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
 
 import TimeBasedChart, { TimeBasedChartTooltipData } from "./index";
 import type { Props } from "./index";

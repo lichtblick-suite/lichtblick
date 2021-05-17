@@ -14,11 +14,11 @@
 
 import { mount } from "enzyme";
 
-import * as layoutHistoryActions from "@foxglove-studio/app/actions/layoutHistory";
-import GlobalKeyListener from "@foxglove-studio/app/components/GlobalKeyListener";
-import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
-import createRootReducer from "@foxglove-studio/app/reducers";
-import configureStore from "@foxglove-studio/app/store/configureStore.testing";
+import * as layoutHistoryActions from "@foxglove/studio-base/actions/layoutHistory";
+import GlobalKeyListener from "@foxglove/studio-base/components/GlobalKeyListener";
+import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import createRootReducer from "@foxglove/studio-base/reducers";
+import configureStore from "@foxglove/studio-base/store/configureStore.testing";
 
 function getStore() {
   return configureStore(createRootReducer());

@@ -13,7 +13,7 @@
 
 import styled from "styled-components";
 
-import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 import { getLinkedGlobalVariable } from "../interactionUtils";
 import useLinkedGlobalVariables, { LinkedGlobalVariable } from "../useLinkedGlobalVariables";

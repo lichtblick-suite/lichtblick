@@ -5,13 +5,13 @@
 import { useMemo } from "react";
 import { Provider } from "react-redux";
 
-import LayoutMenu from "@foxglove-studio/app/components/LayoutMenu";
+import LayoutMenu from "@foxglove/studio-base/components/LayoutMenu";
 import LayoutStorageContext, {
   Layout,
   LayoutStorage,
-} from "@foxglove-studio/app/context/LayoutStorageContext";
-import createRootReducer from "@foxglove-studio/app/reducers";
-import configureStore from "@foxglove-studio/app/store/configureStore.testing";
+} from "@foxglove/studio-base/context/LayoutStorageContext";
+import createRootReducer from "@foxglove/studio-base/reducers";
+import configureStore from "@foxglove/studio-base/store/configureStore.testing";
 
 class FakeLayoutStorage implements LayoutStorage {
   private _layouts: Layout[];

@@ -11,9 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import SchemaEditor from "@foxglove-studio/app/components/PanelSettings/SchemaEditor";
-import GlobalVariableSliderPanel from "@foxglove-studio/app/panels/GlobalVariableSlider/index";
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+import SchemaEditor from "@foxglove/studio-base/components/PanelSettings/SchemaEditor";
+import GlobalVariableSliderPanel from "@foxglove/studio-base/panels/GlobalVariableSlider/index";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 const fixture = {
   topics: [],

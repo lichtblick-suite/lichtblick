@@ -17,27 +17,27 @@ import React, { useCallback } from "react";
 import styled from "styled-components";
 import tinyColor from "tinycolor2";
 
-import Checkbox from "@foxglove-studio/app/components/Checkbox";
+import Checkbox from "@foxglove/studio-base/components/Checkbox";
 import ExpandingToolbar, {
   ToolGroup,
   ToolGroupFixedSizePane,
-} from "@foxglove-studio/app/components/ExpandingToolbar";
-import Icon from "@foxglove-studio/app/components/Icon";
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
-import { JSONInput } from "@foxglove-studio/app/components/input/JSONInput";
-import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
-import useLinkedGlobalVariables from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
-import styles from "@foxglove-studio/app/panels/ThreeDimensionalViz/Layout.module.scss";
+} from "@foxglove/studio-base/components/ExpandingToolbar";
+import Icon from "@foxglove/studio-base/components/Icon";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
+import { JSONInput } from "@foxglove/studio-base/components/input/JSONInput";
+import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
+import useLinkedGlobalVariables from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
+import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
 import ColorPickerForTopicSettings, {
   PICKER_SIZE,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
 import {
   ColorOverride,
   ColorOverrideBySourceIdxByVariable,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/Layout";
-import { hexToColorObj } from "@foxglove-studio/app/util/colorUtils";
-import { lineColors } from "@foxglove-studio/app/util/plotColors";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
+import { hexToColorObj } from "@foxglove/studio-base/util/colorUtils";
+import { lineColors } from "@foxglove/studio-base/util/plotColors";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export const SRow = styled.div`
   display: flex;

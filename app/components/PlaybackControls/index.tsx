@@ -23,31 +23,31 @@ import { Time, TimeUtil } from "rosbag";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
-import { AppSetting } from "@foxglove-studio/app/AppSetting";
-import { clearHoverValue, setHoverValue } from "@foxglove-studio/app/actions/hoverValue";
-import Button from "@foxglove-studio/app/components/Button";
-import Flex from "@foxglove-studio/app/components/Flex";
-import Icon from "@foxglove-studio/app/components/Icon";
-import KeyListener from "@foxglove-studio/app/components/KeyListener";
-import MessageOrderControls from "@foxglove-studio/app/components/MessageOrderControls";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import { clearHoverValue, setHoverValue } from "@foxglove/studio-base/actions/hoverValue";
+import Button from "@foxglove/studio-base/components/Button";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Icon from "@foxglove/studio-base/components/Icon";
+import KeyListener from "@foxglove/studio-base/components/KeyListener";
+import MessageOrderControls from "@foxglove/studio-base/components/MessageOrderControls";
 import {
   MessagePipelineContext,
   useMessagePipeline,
-} from "@foxglove-studio/app/components/MessagePipeline";
-import PlaybackTimeDisplayMethod from "@foxglove-studio/app/components/PlaybackControls/PlaybackTimeDisplayMethod";
+} from "@foxglove/studio-base/components/MessagePipeline";
+import PlaybackTimeDisplayMethod from "@foxglove/studio-base/components/PlaybackControls/PlaybackTimeDisplayMethod";
 import {
   jumpSeek,
   DIRECTION,
-} from "@foxglove-studio/app/components/PlaybackControls/sharedHelpers";
-import PlaybackSpeedControls from "@foxglove-studio/app/components/PlaybackSpeedControls";
-import Slider from "@foxglove-studio/app/components/Slider";
-import { useTooltip } from "@foxglove-studio/app/components/Tooltip";
-import { useAppConfigurationValue } from "@foxglove-studio/app/hooks/useAppConfigurationValue";
-import { PlayerState, PlayerStateActiveData } from "@foxglove-studio/app/players/types";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
-import { formatTime } from "@foxglove-studio/app/util/formatTime";
-import { colors as sharedColors } from "@foxglove-studio/app/util/sharedStyleConstants";
-import { subtractTimes, toSec, fromSec, formatTimeRaw } from "@foxglove-studio/app/util/time";
+} from "@foxglove/studio-base/components/PlaybackControls/sharedHelpers";
+import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpeedControls";
+import Slider from "@foxglove/studio-base/components/Slider";
+import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
+import { PlayerState, PlayerStateActiveData } from "@foxglove/studio-base/players/types";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import { formatTime } from "@foxglove/studio-base/util/formatTime";
+import { colors as sharedColors } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { subtractTimes, toSec, fromSec, formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";
 import { ProgressPlot } from "./ProgressPlot";

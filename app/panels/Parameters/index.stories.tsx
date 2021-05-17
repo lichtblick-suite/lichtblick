@@ -4,8 +4,8 @@
 
 import { storiesOf } from "@storybook/react";
 
-import { ParameterValue, PlayerCapabilities } from "@foxglove-studio/app/players/types";
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+import { ParameterValue, PlayerCapabilities } from "@foxglove/studio-base/players/types";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import Parameters from "./index";
 

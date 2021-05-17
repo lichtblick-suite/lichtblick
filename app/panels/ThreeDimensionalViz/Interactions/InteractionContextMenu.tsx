@@ -15,15 +15,15 @@ import { useCallback, useContext, useEffect } from "react";
 import { MouseEventObject } from "regl-worldview";
 import styled from "styled-components";
 
-import { SelectedObject } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
-import { ThreeDimensionalVizContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
-import { ClickedPosition } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/Layout";
+import { SelectedObject } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
+import { ThreeDimensionalVizContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
+import { ClickedPosition } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
 import {
   getInteractionData,
   getObject,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
-import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const SInteractionContextMenu = styled.div`
   position: fixed;

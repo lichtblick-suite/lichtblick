@@ -13,8 +13,8 @@
 
 import { Time } from "rosbag";
 
-import { PlayerState } from "@foxglove-studio/app/players/types";
-import { toMillis, fromMillis } from "@foxglove-studio/app/util/time";
+import { PlayerState } from "@foxglove/studio-base/players/types";
+import { toMillis, fromMillis } from "@foxglove/studio-base/util/time";
 
 export const ARROW_SEEK_BIG_MS = 500;
 export const ARROW_SEEK_DEFAULT_MS = 100;

@@ -17,9 +17,9 @@ import { TimeUtil } from "rosbag";
 import BagDataProvider, {
   statsAreAdjacent,
   TimedDataThroughput,
-} from "@foxglove-studio/app/dataProviders/BagDataProvider";
-import delay from "@foxglove-studio/app/util/delay";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
+} from "@foxglove/studio-base/dataProviders/BagDataProvider";
+import delay from "@foxglove/studio-base/util/delay";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 const dummyExtensionPoint = {
   progressCallback() {

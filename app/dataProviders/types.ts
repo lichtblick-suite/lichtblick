@@ -19,8 +19,8 @@ import {
   MessageDefinitionsByTopic,
   ParsedMessageDefinitionsByTopic,
   MessageEvent,
-} from "@foxglove-studio/app/players/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
+} from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 // `DataProvider` describes a more specific kind of data ingesting than `Player`, namely ingesting
 // data that we have random access to. From Wikipedia:

@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { TimeBasedChartTooltipData } from "@foxglove-studio/app/components/TimeBasedChart";
-import { PlotChartPoint } from "@foxglove-studio/app/panels/Plot/PlotChart";
+import { TimeBasedChartTooltipData } from "@foxglove/studio-base/components/TimeBasedChart";
+import { PlotChartPoint } from "@foxglove/studio-base/panels/Plot/PlotChart";
 
 export type MathFunction = (arg0: number) => number;
 

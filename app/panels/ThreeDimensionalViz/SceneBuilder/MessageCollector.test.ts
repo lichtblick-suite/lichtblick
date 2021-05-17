@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Interactive } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
-import { BaseMarker } from "@foxglove-studio/app/types/Messages";
+import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
+import { BaseMarker } from "@foxglove/studio-base/types/Messages";
 
 import MessageCollector from "./MessageCollector";
 

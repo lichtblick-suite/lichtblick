@@ -7,9 +7,9 @@ import { contextBridge, ipcRenderer } from "electron";
 import { machineId } from "node-machine-id";
 import os from "os";
 
-import { NetworkInterface, OsContext } from "@foxglove-studio/app/OsContext";
 import { PreloaderSockets } from "@foxglove/electron-socket/preloader";
 import Logger from "@foxglove/log";
+import { NetworkInterface, OsContext } from "@foxglove/studio-base/OsContext";
 
 import pkgInfo from "../../package.json";
 import { Desktop, ForwardedMenuEvent, NativeMenuBridge, Storage } from "../common/types";

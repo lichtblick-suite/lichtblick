@@ -20,14 +20,14 @@ import Cytoscape from "cytoscape";
 import { useCallback, useMemo, useRef, useState } from "react";
 import textMetrics from "text-metrics";
 
-import Button from "@foxglove-studio/app/components/Button";
-import EmptyState from "@foxglove-studio/app/components/EmptyState";
-import Icon from "@foxglove-studio/app/components/Icon";
-import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
-import Panel from "@foxglove-studio/app/components/Panel";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import styles from "@foxglove-studio/app/panels/ThreeDimensionalViz/Layout.module.scss";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
+import Button from "@foxglove/studio-base/components/Button";
+import EmptyState from "@foxglove/studio-base/components/EmptyState";
+import Icon from "@foxglove/studio-base/components/Icon";
+import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
+import Panel from "@foxglove/studio-base/components/Panel";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
 
 import Graph, { GraphMutation } from "./Graph";
 import Toolbar from "./Toolbar";

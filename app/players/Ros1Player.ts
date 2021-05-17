@@ -6,7 +6,10 @@ import { isEqual, sortBy } from "lodash";
 import { RosMsgDefinition, Time } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
-import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
+import { Sockets } from "@foxglove/electron-socket/renderer";
+import Logger from "@foxglove/log";
+import { RosNode, TcpSocket } from "@foxglove/ros1";
+import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import {
   AdvertisePayload,
   MessageEvent,
@@ -20,20 +23,17 @@ import {
   PublishPayload,
   SubscribePayload,
   Topic,
-} from "@foxglove-studio/app/players/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import debouncePromise from "@foxglove-studio/app/util/debouncePromise";
-import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
+} from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
+import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 import {
   addTimes,
   fromMillis,
   subtractTimes,
   TimestampMethod,
   toSec,
-} from "@foxglove-studio/app/util/time";
-import { Sockets } from "@foxglove/electron-socket/renderer";
-import Logger from "@foxglove/log";
-import { RosNode, TcpSocket } from "@foxglove/ros1";
+} from "@foxglove/studio-base/util/time";
 import { HttpServer } from "@foxglove/xmlrpc";
 
 const log = Logger.getLogger(__filename);

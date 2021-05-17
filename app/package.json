@@ -1,5 +1,5 @@
 {
-  "name": "@foxglove-studio/app",
+  "name": "@foxglove/studio-base",
   "private": true,
   "scripts": {
     "chromatic": "chromatic --project-token $CHROMATIC_PROJECT_TOKEN --build-script-name storybook:build --exit-once-uploaded",

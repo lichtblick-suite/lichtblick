@@ -15,13 +15,13 @@ import BugIcon from "@mdi/svg/svg/bug.svg";
 import RulerIcon from "@mdi/svg/svg/ruler.svg";
 import Video3dIcon from "@mdi/svg/svg/video-3d.svg";
 
-import Button from "@foxglove-studio/app/components/Button";
-import Icon from "@foxglove-studio/app/components/Icon";
+import Button from "@foxglove/studio-base/components/Button";
+import Icon from "@foxglove/studio-base/components/Icon";
 import MeasuringTool, {
   MeasureInfo,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/DrawingTools/MeasuringTool";
-import styles from "@foxglove-studio/app/panels/ThreeDimensionalViz/Layout.module.scss";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/DrawingTools/MeasuringTool";
+import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
 
 type Props = {
   measuringTool?: MeasuringTool;

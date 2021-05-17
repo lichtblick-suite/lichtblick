@@ -10,8 +10,8 @@ import HtmlWebpackPlugin from "html-webpack-plugin";
 import path from "path";
 import { Configuration, EnvironmentPlugin, WebpackPluginInstance } from "webpack";
 
-import type { WebpackArgv } from "@foxglove-studio/app/WebpackArgv";
-import { makeConfig } from "@foxglove-studio/app/webpack";
+import type { WebpackArgv } from "@foxglove/studio-base/WebpackArgv";
+import { makeConfig } from "@foxglove/studio-base/webpack";
 
 export default (env: unknown, argv: WebpackArgv): Configuration => {
   const isDev = argv.mode === "development";

@@ -13,7 +13,7 @@
 
 import TestUtils from "react-dom/test-utils";
 
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import StateTransitions from "./index";
 

@@ -15,8 +15,8 @@ import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
 
-import Icon from "@foxglove-studio/app/components/Icon";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
+import Icon from "@foxglove/studio-base/components/Icon";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
 
 import styles from "./Select.module.scss";
 

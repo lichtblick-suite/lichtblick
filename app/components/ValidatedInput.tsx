@@ -14,11 +14,11 @@
 import { isEqual } from "lodash";
 import styled from "styled-components";
 
-import Dropdown from "@foxglove-studio/app/components/Dropdown";
-import Flex from "@foxglove-studio/app/components/Flex";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
-import { validationErrorToString, ValidationResult } from "@foxglove-studio/app/util/validators";
-import YAML from "@foxglove-studio/app/util/yaml";
+import Dropdown from "@foxglove/studio-base/components/Dropdown";
+import Flex from "@foxglove/studio-base/components/Flex";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import { validationErrorToString, ValidationResult } from "@foxglove/studio-base/util/validators";
+import YAML from "@foxglove/studio-base/util/yaml";
 
 const { useState, useCallback, useRef, useLayoutEffect, useEffect } = React;
 

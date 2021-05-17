@@ -15,11 +15,11 @@ import { storiesOf } from "@storybook/react";
 import { useCallback, useRef } from "react";
 import { parseMessageDefinition } from "rosbag";
 
-import SchemaEditor from "@foxglove-studio/app/components/PanelSettings/SchemaEditor";
-import { BlockCache } from "@foxglove-studio/app/dataProviders/MemoryCacheDataProvider";
-import Plot, { PlotConfig } from "@foxglove-studio/app/panels/Plot";
-import PanelSetup, { triggerWheel } from "@foxglove-studio/app/stories/PanelSetup";
-import { fromSec } from "@foxglove-studio/app/util/time";
+import SchemaEditor from "@foxglove/studio-base/components/PanelSettings/SchemaEditor";
+import { BlockCache } from "@foxglove/studio-base/dataProviders/MemoryCacheDataProvider";
+import Plot, { PlotConfig } from "@foxglove/studio-base/panels/Plot";
+import PanelSetup, { triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
+import { fromSec } from "@foxglove/studio-base/util/time";
 
 const float64StampedDefinition = `std_msgs/Header header
 float64 data

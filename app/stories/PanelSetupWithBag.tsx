@@ -14,10 +14,10 @@
 import { flatten, groupBy } from "lodash";
 import { useEffect, useState } from "react";
 
-import StoryPlayer from "@foxglove-studio/app/players/StoryPlayer";
-import { PlayerState, SubscribePayload } from "@foxglove-studio/app/players/types";
-import PanelSetup, { Fixture } from "@foxglove-studio/app/stories/PanelSetup";
-import { Store } from "@foxglove-studio/app/types/Store";
+import StoryPlayer from "@foxglove/studio-base/players/StoryPlayer";
+import { PlayerState, SubscribePayload } from "@foxglove/studio-base/players/types";
+import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
+import { Store } from "@foxglove/studio-base/types/Store";
 
 const defaultGetMergedFixture = (bagFixture: Fixture) => bagFixture;
 

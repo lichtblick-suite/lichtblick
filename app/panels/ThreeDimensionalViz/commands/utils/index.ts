@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import tinycolor from "tinycolor2";
 
-import { OccupancyGridMessage } from "@foxglove-studio/app/types/Messages";
+import { OccupancyGridMessage } from "@foxglove/studio-base/types/Messages";
 
 export const COLORS = {
   BLACK: tinycolor("black"),

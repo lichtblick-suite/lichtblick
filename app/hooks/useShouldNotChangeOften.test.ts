@@ -13,7 +13,7 @@
 
 import { renderHook } from "@testing-library/react-hooks";
 
-import useShouldNotChangeOften from "@foxglove-studio/app/hooks/useShouldNotChangeOften";
+import useShouldNotChangeOften from "@foxglove/studio-base/hooks/useShouldNotChangeOften";
 
 describe("useShouldNotChangeOften", () => {
   it("logs when value changes twice in a row", () => {

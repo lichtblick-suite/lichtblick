@@ -27,7 +27,7 @@ import {
   vec4ToRGBA,
 } from "regl-worldview";
 
-import filterMap from "@foxglove-studio/app/util/filterMap";
+import filterMap from "@foxglove/studio-base/util/filterMap";
 
 type Props = CommonCommandProps & {
   children: Line[];

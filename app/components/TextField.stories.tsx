@@ -13,9 +13,9 @@
 
 import { storiesOf } from "@storybook/react";
 
-import Flex from "@foxglove-studio/app/components/Flex";
-import { triggerInputChange, triggerInputBlur } from "@foxglove-studio/app/stories/PanelSetup";
-import { createPrimitiveValidator, hasLen } from "@foxglove-studio/app/util/validators";
+import Flex from "@foxglove/studio-base/components/Flex";
+import { triggerInputChange, triggerInputBlur } from "@foxglove/studio-base/stories/PanelSetup";
+import { createPrimitiveValidator, hasLen } from "@foxglove/studio-base/util/validators";
 
 import TextField from "./TextField";
 

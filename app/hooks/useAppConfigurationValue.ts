@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   AppConfigurationValue,
   useAppConfiguration,
-} from "@foxglove-studio/app/context/AppConfigurationContext";
+} from "@foxglove/studio-base/context/AppConfigurationContext";
 
 /**
  * Load a value from app configuration and provide a function to change it

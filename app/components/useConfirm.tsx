@@ -13,10 +13,10 @@
 
 import React, { useState, useCallback } from "react";
 
-import Button from "@foxglove-studio/app/components/Button";
-import Flex from "@foxglove-studio/app/components/Flex";
-import Modal, { Title } from "@foxglove-studio/app/components/Modal";
-import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
+import Button from "@foxglove/studio-base/components/Button";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Modal, { Title } from "@foxglove/studio-base/components/Modal";
+import { RenderToBodyComponent } from "@foxglove/studio-base/components/RenderToBodyComponent";
 
 import styles from "./Confirm.module.scss";
 

@@ -18,8 +18,8 @@ import {
   DEFAULT_FLAT_COLOR,
   DEFAULT_MIN_COLOR,
   DEFAULT_MAX_COLOR,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
-import { PointCloud2, PointField } from "@foxglove-studio/app/types/Messages";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
+import { PointCloud2, PointField } from "@foxglove/studio-base/types/Messages";
 
 import {
   getVertexValues,

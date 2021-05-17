@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Point } from "@foxglove-studio/app/types/Messages";
+import { Point } from "@foxglove/studio-base/types/Messages";
 
 // a single min/max value
 class Bound {

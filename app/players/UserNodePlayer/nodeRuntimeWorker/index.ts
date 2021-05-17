@@ -13,9 +13,9 @@
 import {
   registerNode,
   processMessage,
-} from "@foxglove-studio/app/players/UserNodePlayer/nodeRuntimeWorker/registry";
-import Rpc from "@foxglove-studio/app/util/Rpc";
-import { enforceFetchIsBlocked, inSharedWorker } from "@foxglove-studio/app/util/workers";
+} from "@foxglove/studio-base/players/UserNodePlayer/nodeRuntimeWorker/registry";
+import Rpc from "@foxglove/studio-base/util/Rpc";
+import { enforceFetchIsBlocked, inSharedWorker } from "@foxglove/studio-base/util/workers";
 
 let unsentErrors: string[] = [];
 (global as any).onerror = (event: ErrorEvent) => {

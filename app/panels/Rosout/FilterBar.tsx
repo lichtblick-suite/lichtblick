@@ -21,9 +21,9 @@ import {
 } from "@fluentui/react";
 import ClipboardOutlineIcon from "@mdi/svg/svg/clipboard-outline.svg";
 
-import Icon from "@foxglove-studio/app/components/Icon";
-import { MessageEvent } from "@foxglove-studio/app/players/types";
-import clipboard from "@foxglove-studio/app/util/clipboard";
+import Icon from "@foxglove/studio-base/components/Icon";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
+import clipboard from "@foxglove/studio-base/util/clipboard";
 
 import LevelToString, { KNOWN_LOG_LEVELS } from "./LevelToString";
 import logStyle from "./LogLevelColors.module.scss";

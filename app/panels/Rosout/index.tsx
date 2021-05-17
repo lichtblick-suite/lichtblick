@@ -14,11 +14,11 @@
 import { Stack } from "@fluentui/react";
 import { useCallback, useMemo, useRef } from "react";
 
-import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import Panel from "@foxglove-studio/app/components/Panel";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import TopicToRenderMenu from "@foxglove-studio/app/components/TopicToRenderMenu";
-import { MessageEvent } from "@foxglove-studio/app/players/types";
+import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
+import Panel from "@foxglove/studio-base/components/Panel";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import TopicToRenderMenu from "@foxglove/studio-base/components/TopicToRenderMenu";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
 
 import FilterBar, { FilterBarProps } from "./FilterBar";
 import LogList from "./LogList";

@@ -14,7 +14,7 @@
 import {
   UserNodeDiagnostics,
   UserNodeLogs,
-} from "@foxglove-studio/app/players/UserNodePlayer/types";
+} from "@foxglove/studio-base/players/UserNodePlayer/types";
 
 type SET_USER_NODE_DIAGNOSTICS = {
   type: "SET_USER_NODE_DIAGNOSTICS";

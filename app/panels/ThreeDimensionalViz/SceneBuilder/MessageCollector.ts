@@ -13,8 +13,8 @@
 import { TimeUtil, Time } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
-import { Interactive } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/types";
-import { BaseMarker } from "@foxglove-studio/app/types/Messages";
+import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
+import { BaseMarker } from "@foxglove/studio-base/types/Messages";
 
 const ZERO_TIME = { sec: 0, nsec: 0 };
 

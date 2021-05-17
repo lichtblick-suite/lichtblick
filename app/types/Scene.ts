@@ -30,8 +30,8 @@ import {
   InstancedLineListMarker,
   OverlayIconMarker,
   ColorMarker,
-} from "@foxglove-studio/app/types/Messages";
-import Bounds from "@foxglove-studio/app/util/Bounds";
+} from "@foxglove/studio-base/types/Messages";
+import Bounds from "@foxglove/studio-base/util/Bounds";
 
 export type Scene = {
   flattenedZHeightPose?: Pose;

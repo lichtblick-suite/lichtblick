@@ -13,7 +13,7 @@
 
 import { renderHook } from "@testing-library/react-hooks";
 
-import useDeepMemo from "@foxglove-studio/app/hooks/useDeepMemo";
+import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
 
 describe("useDeepMemo", () => {
   it("returns original object when deep equal", () => {

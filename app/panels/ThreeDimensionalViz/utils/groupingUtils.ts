@@ -17,9 +17,9 @@ import {
   LineListMarker,
   LineStripMarker,
   InstancedLineListMarker,
-} from "@foxglove-studio/app/types/Messages";
-import { emptyPose } from "@foxglove-studio/app/util/Pose";
-import { COLORS, MARKER_MSG_TYPES } from "@foxglove-studio/app/util/globalConstants";
+} from "@foxglove/studio-base/types/Messages";
+import { emptyPose } from "@foxglove/studio-base/util/Pose";
+import { COLORS, MARKER_MSG_TYPES } from "@foxglove/studio-base/util/globalConstants";
 
 // Group multiple line strip and line list markers into as few as possible.
 // This reduces the amount of draw calls required to render line them and increases performance.

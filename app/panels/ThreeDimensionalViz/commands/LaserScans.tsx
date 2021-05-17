@@ -21,7 +21,7 @@ import {
   nonInstancedGetChildrenForHitmap,
 } from "regl-worldview";
 
-import { LaserScan } from "@foxglove-studio/app/types/Messages";
+import { LaserScan } from "@foxglove/studio-base/types/Messages";
 
 export const DEFAULT_FLAT_COLOR = { r: 0.5, g: 0.5, b: 1, a: 1 };
 

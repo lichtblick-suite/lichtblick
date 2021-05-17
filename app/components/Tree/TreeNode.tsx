@@ -25,9 +25,9 @@ import LeadPencilIcon from "@mdi/svg/svg/lead-pencil.svg";
 import cx from "classnames";
 import React, { Component } from "react";
 
-import Icon from "@foxglove-studio/app/components/Icon";
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
+import Icon from "@foxglove/studio-base/components/Icon";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
 
 import { Node } from "./Node";
 import styles from "./index.module.scss";

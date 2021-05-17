@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import { useRef, useState } from "react";
 
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const keyValMap: Record<string, number> = { ArrowDown: -1, ArrowUp: 1 };
 

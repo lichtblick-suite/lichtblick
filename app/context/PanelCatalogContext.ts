@@ -4,7 +4,7 @@
 
 import { ComponentType, createContext, useContext } from "react";
 
-import { PanelStatics } from "@foxglove-studio/app/components/Panel";
+import { PanelStatics } from "@foxglove/studio-base/components/Panel";
 
 export type PanelInfo = {
   title: string;

@@ -17,10 +17,10 @@ import { Color } from "regl-worldview";
 import styled from "styled-components";
 import tinyColor from "tinycolor2";
 
-import Icon from "@foxglove-studio/app/components/Icon";
-import { getHexFromColorSettingWithDefault } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
-import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import Icon from "@foxglove/studio-base/components/Icon";
+import { getHexFromColorSettingWithDefault } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
+import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { ROW_HEIGHT } from "./constants";
 

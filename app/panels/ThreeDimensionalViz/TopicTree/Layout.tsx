@@ -26,61 +26,61 @@ import {
 import { Time } from "rosbag";
 import { useDebouncedCallback } from "use-debounce";
 
-import useDataSourceInfo from "@foxglove-studio/app/PanelAPI/useDataSourceInfo";
-import KeyListener from "@foxglove-studio/app/components/KeyListener";
-import Modal from "@foxglove-studio/app/components/Modal";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
-import useGlobalVariables from "@foxglove-studio/app/hooks/useGlobalVariables";
-import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
-import { Save3DConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz";
-import DebugStats from "@foxglove-studio/app/panels/ThreeDimensionalViz/DebugStats";
+import useDataSourceInfo from "@foxglove/studio-base/PanelAPI/useDataSourceInfo";
+import KeyListener from "@foxglove/studio-base/components/KeyListener";
+import Modal from "@foxglove/studio-base/components/Modal";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import { RenderToBodyComponent } from "@foxglove/studio-base/components/RenderToBodyComponent";
+import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
+import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
+import { Save3DConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz";
+import DebugStats from "@foxglove/studio-base/panels/ThreeDimensionalViz/DebugStats";
 import {
   POLYGON_TAB_TYPE,
   DrawingTabType,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/DrawingTools";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/DrawingTools";
 import MeasuringTool, {
   MeasureInfo,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/DrawingTools/MeasuringTool";
-import GridBuilder from "@foxglove-studio/app/panels/ThreeDimensionalViz/GridBuilder";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/DrawingTools/MeasuringTool";
+import GridBuilder from "@foxglove/studio-base/panels/ThreeDimensionalViz/GridBuilder";
 import {
   InteractionContextMenu,
   OBJECT_TAB_TYPE,
   TabType,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions";
-import useLinkedGlobalVariables from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
-import styles from "@foxglove-studio/app/panels/ThreeDimensionalViz/Layout.module.scss";
-import LayoutToolbar from "@foxglove-studio/app/panels/ThreeDimensionalViz/LayoutToolbar";
-import SceneBuilder from "@foxglove-studio/app/panels/ThreeDimensionalViz/SceneBuilder";
-import sceneBuilderHooks from "@foxglove-studio/app/panels/ThreeDimensionalViz/SceneBuilder/defaultHooks";
-import { useSearchText } from "@foxglove-studio/app/panels/ThreeDimensionalViz/SearchText";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions";
+import useLinkedGlobalVariables from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
+import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
+import LayoutToolbar from "@foxglove/studio-base/panels/ThreeDimensionalViz/LayoutToolbar";
+import SceneBuilder from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
+import sceneBuilderHooks from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder/defaultHooks";
+import { useSearchText } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SearchText";
 import {
   MarkerMatcher,
   ThreeDimensionalVizContext,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
-import { ColorPickerSettingsPanel } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
-import TopicSettingsModal from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/TopicSettingsModal";
-import TopicTree from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/TopicTree";
-import { TOPIC_DISPLAY_MODES } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
-import { TopicDisplayMode } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/types";
-import useSceneBuilderAndTransformsData from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/useSceneBuilderAndTransformsData";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
+import { ColorPickerSettingsPanel } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
+import TopicSettingsModal from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TopicSettingsModal";
+import TopicTree from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TopicTree";
+import { TOPIC_DISPLAY_MODES } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
+import { TopicDisplayMode } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/types";
+import useSceneBuilderAndTransformsData from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/useSceneBuilderAndTransformsData";
 import Transforms, {
   DEFAULT_ROOT_FRAME_IDS,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
-import TransformsBuilder from "@foxglove-studio/app/panels/ThreeDimensionalViz/TransformsBuilder";
-import World from "@foxglove-studio/app/panels/ThreeDimensionalViz/World";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
+import TransformsBuilder from "@foxglove/studio-base/panels/ThreeDimensionalViz/TransformsBuilder";
+import World from "@foxglove/studio-base/panels/ThreeDimensionalViz/World";
 import {
   TargetPose,
   getInteractionData,
   getObject,
   getUpdatedGlobalVariablesBySelectedObject,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
-import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz/types";
-import { Frame, Topic } from "@foxglove-studio/app/players/types";
-import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
-import { Color } from "@foxglove-studio/app/types/Messages";
-import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
-import filterMap from "@foxglove-studio/app/util/filterMap";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
+import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
+import { Frame, Topic } from "@foxglove/studio-base/players/types";
+import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
+import { Color } from "@foxglove/studio-base/types/Messages";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
+import filterMap from "@foxglove/studio-base/util/filterMap";
 import {
   COLOR_RGBA_DATATYPE,
   FOXGLOVE_GRID_TOPIC,
@@ -100,10 +100,10 @@ import {
   STUDIO_MARKER_ARRAY_DATATYPE,
   STUDIO_MARKER_DATATYPE,
   TRANSFORM_STAMPED_DATATYPE,
-} from "@foxglove-studio/app/util/globalConstants";
-import { inVideoRecordingMode } from "@foxglove-studio/app/util/inAutomatedRunMode";
-import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
-import { joinTopics } from "@foxglove-studio/app/util/topicUtils";
+} from "@foxglove/studio-base/util/globalConstants";
+import { inVideoRecordingMode } from "@foxglove/studio-base/util/inAutomatedRunMode";
+import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
+import { joinTopics } from "@foxglove/studio-base/util/topicUtils";
 
 import useTopicTree, { TopicTreeContext } from "./useTopicTree";
 

@@ -14,7 +14,7 @@
 import fuzzySort from "fuzzysort";
 import styled from "styled-components";
 
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const STextHighlight = styled.span`
   .TextHighlight-highlight {

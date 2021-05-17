@@ -16,7 +16,7 @@ import { PropsWithChildren } from "react";
 import { Row } from "react-table";
 import styled from "styled-components";
 
-import Icon from "@foxglove-studio/app/components/Icon";
+import Icon from "@foxglove/studio-base/components/Icon";
 
 import { sanitizeAccessorPath } from "./sanitizeAccessorPath";
 

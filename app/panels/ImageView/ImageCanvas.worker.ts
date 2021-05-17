@@ -11,9 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { MessageEvent } from "@foxglove-studio/app/players/types";
-import Rpc, { Channel } from "@foxglove-studio/app/util/Rpc";
-import { setupWorker } from "@foxglove-studio/app/util/RpcWorkerUtils";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
+import Rpc, { Channel } from "@foxglove/studio-base/util/Rpc";
+import { setupWorker } from "@foxglove/studio-base/util/RpcWorkerUtils";
 
 import { renderImage } from "./renderImage";
 import { Dimensions, RawMarkerData, OffscreenCanvas, RenderOptions } from "./util";

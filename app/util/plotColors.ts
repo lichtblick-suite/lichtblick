@@ -14,7 +14,7 @@
 import { memoize } from "lodash";
 import tinycolor from "tinycolor2";
 
-import { toolsColorScheme } from "@foxglove-studio/app/util/toolsColorScheme";
+import { toolsColorScheme } from "@foxglove/studio-base/util/toolsColorScheme";
 
 // Inspired by the "light" scheme from https://personal.sron.nl/~pault/#sec:qualitative
 // but using our standard tools colors.

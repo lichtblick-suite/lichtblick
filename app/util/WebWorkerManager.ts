@@ -14,8 +14,8 @@
 import findIndex from "lodash/findIndex";
 import sortBy from "lodash/sortBy";
 
-import Rpc, { Channel } from "@foxglove-studio/app/util/Rpc";
-import { setupMainThreadRpc } from "@foxglove-studio/app/util/RpcMainThreadUtils";
+import Rpc, { Channel } from "@foxglove/studio-base/util/Rpc";
+import { setupMainThreadRpc } from "@foxglove/studio-base/util/RpcMainThreadUtils";
 
 // This file provides a convenient way to set up and tear down workers as needed. It will create only a single worker
 // of each class, and terminate the worker when all listeners are unregistered.

@@ -14,14 +14,14 @@
 // Pulled from our open source demo bag: https://open-source-webviz-ui.s3.amazonaws.com/demo.bag
 import ts from "typescript/lib/typescript";
 
-import stressTestDatatypes from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes.json";
-import { compile } from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/transformer";
+import stressTestDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes.json";
+import { compile } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/transformer";
 import generateRosLib, {
   generateTypeDefs,
   typedArrayMap,
   InterfaceDeclarations,
-} from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typegen";
-import { NodeData } from "@foxglove-studio/app/players/UserNodePlayer/types";
+} from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typegen";
+import { NodeData } from "@foxglove/studio-base/players/UserNodePlayer/types";
 
 const baseNodeData: NodeData = {
   name: "/studio_node/main",

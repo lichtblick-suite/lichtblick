@@ -15,18 +15,18 @@ import { difference, keyBy, uniq, mapValues, xor, isEqual, flatten, omit } from 
 import { useMemo, useCallback, useRef, createContext } from "react";
 import { useDebounce } from "use-debounce";
 
-import useShallowMemo from "@foxglove-studio/app/hooks/useShallowMemo";
-import { TOPIC_DISPLAY_MODES } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
+import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
+import { TOPIC_DISPLAY_MODES } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
 import {
   isNonEmptyOrUndefined,
   nonEmptyOrUndefined,
-} from "@foxglove-studio/app/util/emptyOrUndefined";
-import filterMap from "@foxglove-studio/app/util/filterMap";
+} from "@foxglove/studio-base/util/emptyOrUndefined";
+import filterMap from "@foxglove/studio-base/util/filterMap";
 import {
   FOXGLOVE_GRID_DATATYPE,
   FOXGLOVE_GRID_TOPIC,
   SECOND_SOURCE_PREFIX,
-} from "@foxglove-studio/app/util/globalConstants";
+} from "@foxglove/studio-base/util/globalConstants";
 
 import {
   TreeNode,

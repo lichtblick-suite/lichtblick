@@ -20,7 +20,7 @@ import {
   useState,
 } from "react";
 
-import ModalContext from "@foxglove-studio/app/context/ModalContext";
+import ModalContext from "@foxglove/studio-base/context/ModalContext";
 
 type PromptOptions = {
   title: string;

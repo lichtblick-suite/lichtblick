@@ -13,7 +13,7 @@
 
 import styled from "styled-components";
 
-import Dropdown from "@foxglove-studio/app/components/Dropdown";
+import Dropdown from "@foxglove/studio-base/components/Dropdown";
 
 import { Save3DConfig } from "..";
 

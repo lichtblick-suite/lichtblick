@@ -12,14 +12,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import delay from "@foxglove-studio/app/util/delay";
+import delay from "@foxglove/studio-base/util/delay";
 import logEvent, {
   initializeLogEvent,
   resetLogEventForTests,
-} from "@foxglove-studio/app/util/logEvent";
+} from "@foxglove/studio-base/util/logEvent";
 import sendNotification, {
   setNotificationHandler,
-} from "@foxglove-studio/app/util/sendNotification";
+} from "@foxglove/studio-base/util/sendNotification";
 
 import Rpc, { createLinkedChannels } from "./Rpc";
 import { setupReceiveReportErrorHandler, setupReceiveLogEventHandler } from "./RpcMainThreadUtils";

@@ -13,7 +13,7 @@
 
 import { storiesOf } from "@storybook/react";
 
-import Radio, { RadioOption } from "@foxglove-studio/app/components/Radio";
+import Radio, { RadioOption } from "@foxglove/studio-base/components/Radio";
 
 const OPTIONS = {
   first: {

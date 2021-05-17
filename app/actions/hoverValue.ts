@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { HoverValue } from "@foxglove-studio/app/types/hoverValue";
+import { HoverValue } from "@foxglove/studio-base/types/hoverValue";
 
 export type SET_HOVER_VALUE = {
   type: "SET_HOVER_VALUE";

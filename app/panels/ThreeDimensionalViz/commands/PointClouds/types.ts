@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { PointCloudSettings } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
-import { PointCloud2 } from "@foxglove-studio/app/types/Messages";
+import { PointCloudSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
+import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
 
 export enum DATATYPE {
   INT8 = 1,

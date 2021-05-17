@@ -13,12 +13,12 @@
 
 import styled from "styled-components";
 
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import {
   isNonEmptyOrUndefined,
   nonEmptyOrUndefined,
-} from "@foxglove-studio/app/util/emptyOrUndefined";
-import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+} from "@foxglove/studio-base/util/emptyOrUndefined";
+import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 import TextHighlight from "./TextHighlight";
 import TextMiddleTruncate from "./TextMiddleTruncate";

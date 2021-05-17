@@ -16,7 +16,7 @@ import {
   getTopicsByTopicName,
   enumValuesByDatatypeAndField,
   extractTypeFromStudioEnumAnnotation,
-} from "@foxglove-studio/app/util/selectors";
+} from "@foxglove/studio-base/util/selectors";
 
 describe("selectors", () => {
   describe("getTopicNames", () => {

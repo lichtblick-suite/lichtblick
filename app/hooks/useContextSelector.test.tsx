@@ -16,10 +16,10 @@ import { renderHook } from "@testing-library/react-hooks";
 import { mount } from "enzyme";
 import { PropsWithChildren } from "react";
 
-import useContextSelector from "@foxglove-studio/app/hooks/useContextSelector";
+import useContextSelector from "@foxglove/studio-base/hooks/useContextSelector";
 import createSelectableContext, {
   SelectableContext,
-} from "@foxglove-studio/app/util/createSelectableContext";
+} from "@foxglove/studio-base/util/createSelectableContext";
 
 describe("createSelectableContext/useContextSelector", () => {
   function createTestConsumer<T, U>(ctx: SelectableContext<T>, selector: (arg0: T) => U) {

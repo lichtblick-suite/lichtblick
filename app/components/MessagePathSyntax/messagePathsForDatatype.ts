@@ -14,9 +14,9 @@
 import { memoize } from "lodash";
 import memoizeWeak from "memoize-weak";
 
-import { isTypicalFilterName } from "@foxglove-studio/app/components/MessagePathSyntax/isTypicalFilterName";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import naturalSort from "@foxglove-studio/app/util/naturalSort";
+import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import naturalSort from "@foxglove/studio-base/util/naturalSort";
 
 import {
   MessagePathPart,

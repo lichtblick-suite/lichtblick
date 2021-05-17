@@ -14,9 +14,9 @@
 
 import { Time } from "rosbag";
 
-import { Progress } from "@foxglove-studio/app/players/types";
-import delay from "@foxglove-studio/app/util/delay";
-import signal from "@foxglove-studio/app/util/signal";
+import { Progress } from "@foxglove/studio-base/players/types";
+import delay from "@foxglove/studio-base/util/delay";
+import signal from "@foxglove/studio-base/util/signal";
 
 import TestProvider from "../TestProvider";
 import AutomatedRunPlayer, {

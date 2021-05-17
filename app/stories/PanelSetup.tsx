@@ -23,27 +23,27 @@ import {
   savePanelConfigs,
   setLinkedGlobalVariables,
   setUserNodes,
-} from "@foxglove-studio/app/actions/panels";
+} from "@foxglove/studio-base/actions/panels";
 import {
   setUserNodeDiagnostics,
   addUserNodeLogs,
   setUserNodeRosLib,
-} from "@foxglove-studio/app/actions/userNodes";
-import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
+} from "@foxglove/studio-base/actions/userNodes";
+import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import AppConfigurationContext, {
   AppConfiguration,
-} from "@foxglove-studio/app/context/AppConfigurationContext";
+} from "@foxglove/studio-base/context/AppConfigurationContext";
 import PanelCatalogContext, {
   PanelCatalog,
   PanelCategory,
   PanelInfo,
-} from "@foxglove-studio/app/context/PanelCatalogContext";
-import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
-import { LinkedGlobalVariables } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
+} from "@foxglove/studio-base/context/PanelCatalogContext";
+import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
+import { LinkedGlobalVariables } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import {
   UserNodeDiagnostics,
   UserNodeLogs,
-} from "@foxglove-studio/app/players/UserNodePlayer/types";
+} from "@foxglove/studio-base/players/UserNodePlayer/types";
 import {
   Frame,
   Topic,
@@ -51,11 +51,11 @@ import {
   Progress,
   PublishPayload,
   AdvertisePayload,
-} from "@foxglove-studio/app/players/types";
-import createRootReducer from "@foxglove-studio/app/reducers";
-import configureStore from "@foxglove-studio/app/store/configureStore.testing";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
-import { SavedProps, UserNodes } from "@foxglove-studio/app/types/panels";
+} from "@foxglove/studio-base/players/types";
+import createRootReducer from "@foxglove/studio-base/reducers";
+import configureStore from "@foxglove/studio-base/store/configureStore.testing";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { SavedProps, UserNodes } from "@foxglove/studio-base/types/panels";
 
 type Store = ReturnType<typeof configureStore>;
 

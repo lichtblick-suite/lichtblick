@@ -14,11 +14,11 @@
 import { storiesOf } from "@storybook/react";
 import { useState } from "react";
 
-import Preferences from "@foxglove-studio/app/components/Preferences";
+import Preferences from "@foxglove/studio-base/components/Preferences";
 import AppConfigurationContext, {
   AppConfiguration,
   AppConfigurationValue,
-} from "@foxglove-studio/app/context/AppConfigurationContext";
+} from "@foxglove/studio-base/context/AppConfigurationContext";
 
 function makeConfiguration(entries?: [string, AppConfigurationValue][]): AppConfiguration {
   const map = new Map<string, AppConfigurationValue>(entries);

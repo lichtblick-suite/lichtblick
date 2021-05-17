@@ -75,7 +75,7 @@ export default async function main(): Promise<void> {
   if (args.command.includes(Command.start)) {
     await exec(
       "yarn",
-      ["workspace", "@foxglove-studio/app", "run", "start-storybook"],
+      ["workspace", "@foxglove/studio-base", "run", "start-storybook"],
       storybookEnv,
     );
     return;
@@ -84,7 +84,7 @@ export default async function main(): Promise<void> {
   if (args.command.includes(Command.build)) {
     await exec(
       "yarn",
-      ["workspace", "@foxglove-studio/app", "run", "build-storybook"],
+      ["workspace", "@foxglove/studio-base", "run", "build-storybook"],
       storybookEnv,
     );
   }
@@ -92,7 +92,7 @@ export default async function main(): Promise<void> {
   if (args.command.includes(Command.capture)) {
     await exec("yarn", [
       "workspace",
-      "@foxglove-studio/app",
+      "@foxglove/studio-base",
       "run",
       "storycap",
       "http://localhost:9001",
@@ -135,11 +135,11 @@ export default async function main(): Promise<void> {
       publishArgs.push("-n");
     }
 
-    await exec("yarn", ["workspace", "@foxglove-studio/app", "run", "reg-suit", "sync-expected"]);
-    await exec("yarn", ["workspace", "@foxglove-studio/app", "run", "reg-suit", "compare"]);
+    await exec("yarn", ["workspace", "@foxglove/studio-base", "run", "reg-suit", "sync-expected"]);
+    await exec("yarn", ["workspace", "@foxglove/studio-base", "run", "reg-suit", "compare"]);
     await exec("yarn", [
       "workspace",
-      "@foxglove-studio/app",
+      "@foxglove/studio-base",
       "run",
       "reg-suit",
       "publish",

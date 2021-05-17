@@ -14,14 +14,14 @@ import { useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import { useDispatch } from "react-redux";
 
-import { moveTab, MoveTabPayload } from "@foxglove-studio/app/actions/panels";
+import { moveTab, MoveTabPayload } from "@foxglove/studio-base/actions/panels";
 import {
   DraggingTabItem,
   TAB_DRAG_TYPE,
   TabActions,
-} from "@foxglove-studio/app/panels/Tab/TabDndContext";
-import { ToolbarTab } from "@foxglove-studio/app/panels/Tab/ToolbarTab";
-import { TabLocation } from "@foxglove-studio/app/types/layouts";
+} from "@foxglove/studio-base/panels/Tab/TabDndContext";
+import { ToolbarTab } from "@foxglove/studio-base/panels/Tab/ToolbarTab";
+import { TabLocation } from "@foxglove/studio-base/types/layouts";
 
 type Props = {
   isActive: boolean;

@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import { max } from "lodash";
 
-import AutoSizingCanvas from "@foxglove-studio/app/components/AutoSizingCanvas";
+import AutoSizingCanvas from "@foxglove/studio-base/components/AutoSizingCanvas";
 
 export type SparklinePoint = { value: number; timestamp: number };
 

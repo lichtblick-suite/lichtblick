@@ -179,7 +179,7 @@ export function makeConfig(
         // the buffer module exposes the Buffer class as a property
         Buffer: ["buffer", "Buffer"],
         process: "process/browser",
-        setImmediate: ["@foxglove-studio/app/util/setImmediate", "default"],
+        setImmediate: ["@foxglove/studio-base/util/setImmediate", "default"],
       }),
       new webpack.DefinePlugin({
         // Should match webpack-defines.d.ts

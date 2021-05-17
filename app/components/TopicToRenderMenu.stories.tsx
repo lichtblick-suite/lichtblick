@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 import { storiesOf } from "@storybook/react";
 
-import TopicToRenderMenu from "@foxglove-studio/app/components/TopicToRenderMenu";
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+import TopicToRenderMenu from "@foxglove/studio-base/components/TopicToRenderMenu";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 const topics = [
   {

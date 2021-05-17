@@ -14,8 +14,8 @@
 import { PropsWithChildren, ReactElement } from "react";
 import styled, { CSSProperties } from "styled-components";
 
-import Modal from "@foxglove-studio/app/components/Modal";
-import TextContent from "@foxglove-studio/app/components/TextContent";
+import Modal from "@foxglove/studio-base/components/Modal";
+import TextContent from "@foxglove/studio-base/components/TextContent";
 
 const SRoot = styled.div`
   max-width: 700px; // Px value because beyond a certain absolute width the lines become harder to read.

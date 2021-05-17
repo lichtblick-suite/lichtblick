@@ -16,23 +16,23 @@ import LeadPencilIcon from "@mdi/svg/svg/lead-pencil.svg";
 import { useCallback, useContext, useMemo } from "react";
 import styled from "styled-components";
 
-import Icon from "@foxglove-studio/app/components/Icon";
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
-import useGuaranteedContext from "@foxglove-studio/app/hooks/useGuaranteedContext";
-import { ThreeDimensionalVizContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
-import { canEditDatatype } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor";
+import Icon from "@foxglove/studio-base/components/Icon";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
+import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
+import { ThreeDimensionalVizContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
+import { canEditDatatype } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor";
 import {
   ROW_HEIGHT,
   TREE_SPACING,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/constants";
-import { TopicTreeContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/constants";
+import { TopicTreeContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
 import {
   isNonEmptyOrUndefined,
   nonEmptyOrUndefined,
-} from "@foxglove-studio/app/util/emptyOrUndefined";
-import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
-import { joinTopics } from "@foxglove-studio/app/util/topicUtils";
+} from "@foxglove/studio-base/util/emptyOrUndefined";
+import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { joinTopics } from "@foxglove/studio-base/util/topicUtils";
 
 import NodeName from "./NodeName";
 import TreeNodeMenu, { DOT_MENU_WIDTH } from "./TreeNodeMenu";

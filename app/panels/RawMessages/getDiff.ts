@@ -12,10 +12,10 @@
 //   You may not use this file except in compliance with the License.
 import { every, uniq, keyBy, isEmpty } from "lodash";
 
-import { isTypicalFilterName } from "@foxglove-studio/app/components/MessagePathSyntax/isTypicalFilterName";
-import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
-import { jsonTreeTheme } from "@foxglove-studio/app/util/globalConstants";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
+import { jsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export const diffArrow = "->";
 export const diffLabels = {

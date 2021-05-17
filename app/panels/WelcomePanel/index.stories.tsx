@@ -9,10 +9,10 @@ import AppConfigurationContext, {
   AppConfiguration,
   AppConfigurationValue,
   ChangeHandler,
-} from "@foxglove-studio/app/context/AppConfigurationContext";
-import WelcomePanel from "@foxglove-studio/app/panels/WelcomePanel";
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
-import signal from "@foxglove-studio/app/util/signal";
+} from "@foxglove/studio-base/context/AppConfigurationContext";
+import WelcomePanel from "@foxglove/studio-base/panels/WelcomePanel";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import signal from "@foxglove/studio-base/util/signal";
 
 export default {
   title: "panels/WelcomePanel/index",

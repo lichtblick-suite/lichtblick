@@ -5,9 +5,9 @@
 import { useEffect, useRef } from "react";
 import TestUtils from "react-dom/test-utils";
 
-import SchemaEditor from "@foxglove-studio/app/components/PanelSettings/SchemaEditor";
-import ImageView from "@foxglove-studio/app/panels/ImageView";
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+import SchemaEditor from "@foxglove/studio-base/components/PanelSettings/SchemaEditor";
+import ImageView from "@foxglove/studio-base/panels/ImageView";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 export default {
   title: "panels/ImageView/index",

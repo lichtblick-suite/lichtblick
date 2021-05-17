@@ -19,25 +19,25 @@ import { useSelector, useDispatch } from "react-redux";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
-import { setUserNodes as setUserNodesAction } from "@foxglove-studio/app/actions/panels";
-import Button from "@foxglove-studio/app/components/Button";
-import Flex from "@foxglove-studio/app/components/Flex";
-import Icon from "@foxglove-studio/app/components/Icon";
-import Panel from "@foxglove-studio/app/components/Panel";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import SpinningLoadingIcon from "@foxglove-studio/app/components/SpinningLoadingIcon";
-import TextContent from "@foxglove-studio/app/components/TextContent";
-import BottomBar from "@foxglove-studio/app/panels/NodePlayground/BottomBar";
-import Sidebar from "@foxglove-studio/app/panels/NodePlayground/Sidebar";
-import Playground from "@foxglove-studio/app/panels/NodePlayground/playground-icon.svg";
-import { PanelConfigSchema, UserNodes } from "@foxglove-studio/app/types/panels";
-import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { setUserNodes as setUserNodesAction } from "@foxglove/studio-base/actions/panels";
+import Button from "@foxglove/studio-base/components/Button";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Icon from "@foxglove/studio-base/components/Icon";
+import Panel from "@foxglove/studio-base/components/Panel";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import SpinningLoadingIcon from "@foxglove/studio-base/components/SpinningLoadingIcon";
+import TextContent from "@foxglove/studio-base/components/TextContent";
+import BottomBar from "@foxglove/studio-base/panels/NodePlayground/BottomBar";
+import Sidebar from "@foxglove/studio-base/panels/NodePlayground/Sidebar";
+import Playground from "@foxglove/studio-base/panels/NodePlayground/playground-icon.svg";
+import { PanelConfigSchema, UserNodes } from "@foxglove/studio-base/types/panels";
+import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import Config from "./Config";
 import { Script } from "./script";
 
-const Editor = React.lazy(() => import("@foxglove-studio/app/panels/NodePlayground/Editor"));
+const Editor = React.lazy(() => import("@foxglove/studio-base/panels/NodePlayground/Editor"));
 
 const skeletonBody = `import { Input, Messages } from "ros";
 

@@ -4,11 +4,11 @@
 
 import { useMemo } from "react";
 
-import Checkbox from "@foxglove-studio/app/components/Checkbox";
-import Flex from "@foxglove-studio/app/components/Flex";
-import Panel from "@foxglove-studio/app/components/Panel";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
 import log from "@foxglove/log";
+import Checkbox from "@foxglove/studio-base/components/Checkbox";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Panel from "@foxglove/studio-base/components/Panel";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 
 type Config = {
   // we store disabled channels so any new channels are default enabled

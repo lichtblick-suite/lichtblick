@@ -13,7 +13,7 @@
 
 import { cloneDeep } from "lodash";
 
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 import {
   traverseStructure,

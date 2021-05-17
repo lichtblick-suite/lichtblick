@@ -13,7 +13,7 @@
 
 import { RosMsgDefinition } from "rosbag";
 
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 // For one datatype in the datatypes, find the RosMsgDefinition that we can use to either write or parse it.
 // `datatypes` should contain the root datatype and all complex sub-datatypes.

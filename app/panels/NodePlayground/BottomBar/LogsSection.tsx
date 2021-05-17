@@ -15,9 +15,9 @@ import { ReactElement } from "react";
 import Tree from "react-json-tree";
 import styled from "styled-components";
 
-import { UserNodeLog } from "@foxglove-studio/app/players/UserNodePlayer/types";
-import { jsonTreeTheme } from "@foxglove-studio/app/util/globalConstants";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
+import { jsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const SListItem = styled.li`
   display: flex;

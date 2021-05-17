@@ -12,14 +12,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { redoLayoutChange, undoLayoutChange } from "@foxglove-studio/app/actions/layoutHistory";
-import { changePanelLayout, savePanelConfigs } from "@foxglove-studio/app/actions/panels";
-import { State } from "@foxglove-studio/app/reducers";
-import { NEVER_PUSH_LAYOUT_THRESHOLD_MS } from "@foxglove-studio/app/reducers/layoutHistory";
-import { GLOBAL_STATE_STORAGE_KEY } from "@foxglove-studio/app/reducers/panels";
-import { getGlobalStoreForTest } from "@foxglove-studio/app/store/getGlobalStore";
-import Storage from "@foxglove-studio/app/util/Storage";
-import delay from "@foxglove-studio/app/util/delay";
+import { redoLayoutChange, undoLayoutChange } from "@foxglove/studio-base/actions/layoutHistory";
+import { changePanelLayout, savePanelConfigs } from "@foxglove/studio-base/actions/panels";
+import { State } from "@foxglove/studio-base/reducers";
+import { NEVER_PUSH_LAYOUT_THRESHOLD_MS } from "@foxglove/studio-base/reducers/layoutHistory";
+import { GLOBAL_STATE_STORAGE_KEY } from "@foxglove/studio-base/reducers/panels";
+import { getGlobalStoreForTest } from "@foxglove/studio-base/store/getGlobalStore";
+import Storage from "@foxglove/studio-base/util/Storage";
+import delay from "@foxglove/studio-base/util/delay";
 
 const storage = new Storage();
 

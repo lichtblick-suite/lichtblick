@@ -13,8 +13,8 @@
 
 import { Color } from "regl-worldview";
 
-import Flex from "@foxglove-studio/app/components/Flex";
-import { LaserScan } from "@foxglove-studio/app/types/Messages";
+import Flex from "@foxglove/studio-base/components/Flex";
+import { LaserScan } from "@foxglove/studio-base/types/Messages";
 
 import ColorPickerForTopicSettings from "./ColorPickerForTopicSettings";
 import CommonDecaySettings from "./CommonDecaySettings";

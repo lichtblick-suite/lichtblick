@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Fixture } from "@foxglove-studio/app/stories/PanelSetup";
+import { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
 const nestedTabLayoutFixture: Fixture = {
   topics: [],

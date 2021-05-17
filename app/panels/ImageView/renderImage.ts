@@ -11,9 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { MessageEvent } from "@foxglove-studio/app/players/types";
-import { ImageMarker, Color, Point } from "@foxglove-studio/app/types/Messages";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
+import { ImageMarker, Color, Point } from "@foxglove/studio-base/types/Messages";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 import CameraModel from "./CameraModel";
 import {

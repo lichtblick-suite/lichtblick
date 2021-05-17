@@ -12,12 +12,12 @@
 //   You may not use this file except in compliance with the License.
 import path from "path";
 
-import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
+import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import {
   ProcessMessageOutput,
   RegistrationOutput,
-} from "@foxglove-studio/app/players/UserNodePlayer/types";
-import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+} from "@foxglove/studio-base/players/UserNodePlayer/types";
+import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 // Each node runtime worker runs one node at a time, hence why we have one
 // global declaration of 'nodeCallback'.

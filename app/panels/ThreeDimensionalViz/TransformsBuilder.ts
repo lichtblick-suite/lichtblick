@@ -13,10 +13,10 @@
 
 import { mat4, quat, vec3 } from "gl-matrix";
 
-import Transforms, { Transform } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
-import { Marker, ArrowMarker, Color, MutablePose } from "@foxglove-studio/app/types/Messages";
-import { MarkerProvider, MarkerCollector } from "@foxglove-studio/app/types/Scene";
-import { MARKER_MSG_TYPES } from "@foxglove-studio/app/util/globalConstants";
+import Transforms, { Transform } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
+import { Marker, ArrowMarker, Color, MutablePose } from "@foxglove/studio-base/types/Messages";
+import { MarkerProvider, MarkerCollector } from "@foxglove/studio-base/types/Scene";
+import { MARKER_MSG_TYPES } from "@foxglove/studio-base/util/globalConstants";
 
 const originPosition = { x: 0, y: 0, z: 0 };
 const originOrientation = { x: 0, y: 0, z: 0, w: 1 };

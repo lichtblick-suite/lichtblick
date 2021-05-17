@@ -13,8 +13,8 @@
 
 import { PropsWithChildren } from "react";
 
-import { formatTime } from "@foxglove-studio/app/util/formatTime";
-import { subtractTimes, toSec, formatTimeRaw } from "@foxglove-studio/app/util/time";
+import { formatTime } from "@foxglove/studio-base/util/formatTime";
+import { subtractTimes, toSec, formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import styles from "./TimeBasedChartTooltipContent.module.scss";
 import { TimeBasedChartTooltipData } from "./index";

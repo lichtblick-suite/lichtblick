@@ -14,24 +14,24 @@
 import cx from "classnames";
 import { PolygonBuilder, MouseEventObject, Polygon } from "regl-worldview";
 
-import CameraInfo from "@foxglove-studio/app/panels/ThreeDimensionalViz/CameraInfo";
-import Crosshair from "@foxglove-studio/app/panels/ThreeDimensionalViz/Crosshair";
+import CameraInfo from "@foxglove/studio-base/panels/ThreeDimensionalViz/CameraInfo";
+import Crosshair from "@foxglove/studio-base/panels/ThreeDimensionalViz/Crosshair";
 import DrawingTools, {
   DrawingTabType,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/DrawingTools";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/DrawingTools";
 import MeasuringTool, {
   MeasureInfo,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/DrawingTools/MeasuringTool";
-import FollowTFControl from "@foxglove-studio/app/panels/ThreeDimensionalViz/FollowTFControl";
-import Interactions from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions";
-import { TabType } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/Interactions";
-import styles from "@foxglove-studio/app/panels/ThreeDimensionalViz/Layout.module.scss";
-import MainToolbar from "@foxglove-studio/app/panels/ThreeDimensionalViz/MainToolbar";
-import MeasureMarker from "@foxglove-studio/app/panels/ThreeDimensionalViz/MeasureMarker";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/DrawingTools/MeasuringTool";
+import FollowTFControl from "@foxglove/studio-base/panels/ThreeDimensionalViz/FollowTFControl";
+import Interactions from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions";
+import { TabType } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/Interactions";
+import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
+import MainToolbar from "@foxglove/studio-base/panels/ThreeDimensionalViz/MainToolbar";
+import MeasureMarker from "@foxglove/studio-base/panels/ThreeDimensionalViz/MeasureMarker";
 import SearchText, {
   SearchTextProps,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/SearchText";
-import { LayoutToolbarSharedProps } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/Layout";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/SearchText";
+import { LayoutToolbarSharedProps } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
 
 type Props = LayoutToolbarSharedProps &
   SearchTextProps & {

@@ -24,7 +24,7 @@ import {
   MosaicNode,
 } from "react-mosaic-component";
 
-import { ActionTypes } from "@foxglove-studio/app/actions";
+import { ActionTypes } from "@foxglove/studio-base/actions";
 import {
   StartDragPayload,
   EndDragPayload,
@@ -34,11 +34,11 @@ import {
   AddPanelPayload,
   ClosePanelPayload,
   MoveTabPayload,
-} from "@foxglove-studio/app/actions/panels";
-import { GlobalVariables } from "@foxglove-studio/app/hooks/useGlobalVariables";
-import { LinkedGlobalVariables } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
-import { State, PersistedState } from "@foxglove-studio/app/reducers";
-import { TabPanelConfig } from "@foxglove-studio/app/types/layouts";
+} from "@foxglove/studio-base/actions/panels";
+import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
+import { LinkedGlobalVariables } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
+import { State, PersistedState } from "@foxglove/studio-base/reducers";
+import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
 import {
   PanelConfig,
   ConfigsPayload,
@@ -51,10 +51,10 @@ import {
   UserNodes,
   PlaybackConfig,
   MosaicDropTargetPosition,
-} from "@foxglove-studio/app/types/panels";
-import Storage from "@foxglove-studio/app/util/Storage";
-import filterMap from "@foxglove-studio/app/util/filterMap";
-import { TAB_PANEL_TYPE } from "@foxglove-studio/app/util/globalConstants";
+} from "@foxglove/studio-base/types/panels";
+import Storage from "@foxglove/studio-base/util/Storage";
+import filterMap from "@foxglove/studio-base/util/filterMap";
+import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 import {
   setDefaultFields,
   updateTabPanelLayout,
@@ -73,7 +73,7 @@ import {
   createAddUpdates,
   removePanelFromTabPanel,
   getPathFromNode,
-} from "@foxglove-studio/app/util/layout";
+} from "@foxglove/studio-base/util/layout";
 
 const storage = new Storage();
 

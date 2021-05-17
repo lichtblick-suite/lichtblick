@@ -19,9 +19,9 @@ import {
   DataProvider,
   GetMessagesResult,
   GetMessagesTopics,
-} from "@foxglove-studio/app/dataProviders/types";
-import { Topic } from "@foxglove-studio/app/players/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
+} from "@foxglove/studio-base/dataProviders/types";
+import { Topic } from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 const defaultStart = { sec: 10, nsec: 0 };
 const defaultEnd = { sec: 100, nsec: 0 };

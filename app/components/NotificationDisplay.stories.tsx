@@ -19,8 +19,8 @@ import NotificationDisplay, {
   NotificationList,
   NotificationModal,
   NotificationMessage,
-} from "@foxglove-studio/app/components/NotificationDisplay";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
+} from "@foxglove/studio-base/components/NotificationDisplay";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 const randomNum = () => Math.floor(Math.random() * 1000);
 const addError = () =>

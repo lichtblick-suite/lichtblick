@@ -16,10 +16,10 @@ import CloseIcon from "@mdi/svg/svg/close.svg";
 import { CSSProperties, PropsWithChildren } from "react";
 import styled from "styled-components";
 
-import Icon from "@foxglove-studio/app/components/Icon";
-import KeyListener from "@foxglove-studio/app/components/KeyListener";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
-import { colors as sharedColors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import Icon from "@foxglove/studio-base/components/Icon";
+import KeyListener from "@foxglove/studio-base/components/KeyListener";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import { colors as sharedColors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export const Title = styled.h3`
   padding: 18px 24px;

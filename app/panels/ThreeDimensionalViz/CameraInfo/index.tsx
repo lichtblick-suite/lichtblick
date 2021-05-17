@@ -17,29 +17,29 @@ import { isEqual } from "lodash";
 import { CameraState, cameraStateSelectors, Vec3 } from "regl-worldview";
 import styled from "styled-components";
 
-import Button from "@foxglove-studio/app/components/Button";
-import ExpandingToolbar, { ToolGroup } from "@foxglove-studio/app/components/ExpandingToolbar";
-import Flex from "@foxglove-studio/app/components/Flex";
-import Icon from "@foxglove-studio/app/components/Icon";
-import PanelContext from "@foxglove-studio/app/components/PanelContext";
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
+import Button from "@foxglove/studio-base/components/Button";
+import ExpandingToolbar, { ToolGroup } from "@foxglove/studio-base/components/ExpandingToolbar";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Icon from "@foxglove/studio-base/components/Icon";
+import PanelContext from "@foxglove/studio-base/components/PanelContext";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import {
   UncontrolledValidatedInput,
   YamlInput,
-} from "@foxglove-studio/app/components/ValidatedInput";
+} from "@foxglove/studio-base/components/ValidatedInput";
 import {
   SValue,
   SLabel,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/styling";
-import styles from "@foxglove-studio/app/panels/ThreeDimensionalViz/Layout.module.scss";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/styling";
+import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
 import {
   getNewCameraStateOnFollowChange,
   TargetPose,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
-import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz/types";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
-import clipboard from "@foxglove-studio/app/util/clipboard";
-import { point2DValidator, cameraStateValidator } from "@foxglove-studio/app/util/validators";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
+import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import clipboard from "@foxglove/studio-base/util/clipboard";
+import { point2DValidator, cameraStateValidator } from "@foxglove/studio-base/util/validators";
 
 export const CAMERA_TAB_TYPE = "Camera";
 

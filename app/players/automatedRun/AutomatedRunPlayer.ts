@@ -16,11 +16,12 @@ import Queue from "promise-queue";
 import { Time, TimeUtil } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
+import Logger from "@foxglove/log";
 import {
   DataProvider,
   DataProviderMetadata,
   InitializationResult,
-} from "@foxglove-studio/app/dataProviders/types";
+} from "@foxglove/studio-base/dataProviders/types";
 import {
   AdvertisePayload,
   MessageEvent,
@@ -32,17 +33,16 @@ import {
   PublishPayload,
   SubscribePayload,
   Topic,
-} from "@foxglove-studio/app/players/types";
-import { USER_ERROR_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+} from "@foxglove/studio-base/players/types";
+import { USER_ERROR_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import sendNotification, {
   NotificationType,
   NotificationSeverity,
   DetailsType,
   detailsToString,
   setNotificationHandler,
-} from "@foxglove-studio/app/util/sendNotification";
-import { clampTime, subtractTimes, toMillis } from "@foxglove-studio/app/util/time";
-import Logger from "@foxglove/log";
+} from "@foxglove/studio-base/util/sendNotification";
+import { clampTime, subtractTimes, toMillis } from "@foxglove/studio-base/util/time";
 
 const logger = Logger.getLogger(__filename);
 

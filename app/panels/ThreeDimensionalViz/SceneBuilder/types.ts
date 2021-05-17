@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Frame } from "@foxglove-studio/app/players/types";
-import { Color, Pose } from "@foxglove-studio/app/types/Messages";
+import { Frame } from "@foxglove/studio-base/players/types";
+import { Color, Pose } from "@foxglove/studio-base/types/Messages";
 
 export type ThreeDimensionalVizHooks = Readonly<{
   getSelectionState: (arg0: { [key: string]: any }) => any; // arg is globalVariables

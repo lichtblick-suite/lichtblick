@@ -13,7 +13,7 @@
 
 import { renderHook } from "@testing-library/react-hooks";
 
-import useMustNotChange from "@foxglove-studio/app/hooks/useMustNotChange";
+import useMustNotChange from "@foxglove/studio-base/hooks/useMustNotChange";
 
 describe("useMustNotChange", () => {
   it("throws when value changes", () => {

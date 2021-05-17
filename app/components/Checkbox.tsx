@@ -15,8 +15,8 @@ import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import styled from "styled-components";
 
-import Icon from "@foxglove-studio/app/components/Icon";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import Icon from "@foxglove/studio-base/components/Icon";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export const SCheckbox = styled.div<{
   labelDirection: "top" | "left" | "right";

@@ -22,15 +22,15 @@ import { createSelector } from "reselect";
 import sanitizeHtml from "sanitize-html";
 import styled from "styled-components";
 
-import Flex from "@foxglove-studio/app/components/Flex";
-import Icon from "@foxglove-studio/app/components/Icon";
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
-import { openSiblingPlotPanel } from "@foxglove-studio/app/panels/Plot";
-import { openSiblingStateTransitionsPanel } from "@foxglove-studio/app/panels/StateTransitions";
-import { Config } from "@foxglove-studio/app/panels/diagnostics/DiagnosticStatusPanel";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
-import { PanelConfig } from "@foxglove-studio/app/types/panels";
-import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Icon from "@foxglove/studio-base/components/Icon";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
+import { openSiblingPlotPanel } from "@foxglove/studio-base/panels/Plot";
+import { openSiblingStateTransitionsPanel } from "@foxglove/studio-base/panels/StateTransitions";
+import { Config } from "@foxglove/studio-base/panels/diagnostics/DiagnosticStatusPanel";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import { PanelConfig } from "@foxglove/studio-base/types/panels";
+import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 import style from "./DiagnosticStatus.module.scss";
 import { LEVEL_NAMES, DiagnosticInfo, KeyValue, DiagnosticStatusMessage } from "./util";

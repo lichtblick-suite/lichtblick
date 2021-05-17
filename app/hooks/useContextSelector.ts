@@ -13,8 +13,8 @@
 
 import { useRef, useLayoutEffect, useContext, useReducer } from "react";
 
-import { SelectableContext } from "@foxglove-studio/app/util/createSelectableContext";
 import Log from "@foxglove/log";
+import { SelectableContext } from "@foxglove/studio-base/util/createSelectableContext";
 
 const log = Log.getLogger(__filename);
 

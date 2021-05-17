@@ -4,12 +4,12 @@
 
 import { Story } from "@storybook/react";
 
-import ThemeProvider from "@foxglove-studio/app/theme/ThemeProvider";
-import waitForFonts from "@foxglove-studio/app/util/waitForFonts";
+import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
+import waitForFonts from "@foxglove/studio-base/util/waitForFonts";
 
 import { withMockSubscribeToNewsletter } from "./__mocks__/subscribeToNewsletter";
 
-import "@foxglove-studio/app/styles/global.scss";
+import "@foxglove/studio-base/styles/global.scss";
 import "./styles.scss";
 
 let loaded = false;

@@ -24,8 +24,8 @@ import {
   useState,
 } from "react";
 
-import Flex from "@foxglove-studio/app/components/Flex";
-import KeyListener from "@foxglove-studio/app/components/KeyListener";
+import Flex from "@foxglove/studio-base/components/Flex";
+import KeyListener from "@foxglove/studio-base/components/KeyListener";
 
 import styles from "./index.module.scss";
 

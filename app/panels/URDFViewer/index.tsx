@@ -6,18 +6,18 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { useResizeDetector } from "react-resize-detector";
 import { CameraStore, CameraListener, CameraState, DEFAULT_CAMERA_STATE } from "regl-worldview";
 
-import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import EmptyState from "@foxglove-studio/app/components/EmptyState";
-import Flex from "@foxglove-studio/app/components/Flex";
-import Panel from "@foxglove-studio/app/components/Panel";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import { useAssets } from "@foxglove-studio/app/context/AssetContext";
-import useCleanup from "@foxglove-studio/app/hooks/useCleanup";
-import { MessageEvent } from "@foxglove-studio/app/players/types";
-import { JointState } from "@foxglove-studio/app/types/Messages";
-import { SaveConfig } from "@foxglove-studio/app/types/panels";
-import filterMap from "@foxglove-studio/app/util/filterMap";
-import { ROBOT_DESCRIPTION_PARAM } from "@foxglove-studio/app/util/globalConstants";
+import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
+import EmptyState from "@foxglove/studio-base/components/EmptyState";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Panel from "@foxglove/studio-base/components/Panel";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import { useAssets } from "@foxglove/studio-base/context/AssetContext";
+import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
+import { JointState } from "@foxglove/studio-base/types/Messages";
+import { SaveConfig } from "@foxglove/studio-base/types/panels";
+import filterMap from "@foxglove/studio-base/util/filterMap";
+import { ROBOT_DESCRIPTION_PARAM } from "@foxglove/studio-base/util/globalConstants";
 
 import { JointValueSliders } from "./JointValueSliders";
 import OverlayControls from "./OverlayControls";

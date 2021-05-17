@@ -15,16 +15,16 @@ import DotsVerticalIcon from "@mdi/svg/svg/dots-vertical.svg";
 import { useState } from "react";
 import styled from "styled-components";
 
-import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
-import Icon from "@foxglove-studio/app/components/Icon";
-import KeyboardShortcut from "@foxglove-studio/app/components/KeyboardShortcut";
-import Menu, { Item } from "@foxglove-studio/app/components/Menu";
-import useGuaranteedContext from "@foxglove-studio/app/hooks/useGuaranteedContext";
-import { ROW_HEIGHT } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/constants";
-import { TopicTreeContext } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
-import clipboard from "@foxglove-studio/app/util/clipboard";
-import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
+import Icon from "@foxglove/studio-base/components/Icon";
+import KeyboardShortcut from "@foxglove/studio-base/components/KeyboardShortcut";
+import Menu, { Item } from "@foxglove/studio-base/components/Menu";
+import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
+import { ROW_HEIGHT } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/constants";
+import { TopicTreeContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
+import clipboard from "@foxglove/studio-base/util/clipboard";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { SetCurrentEditingTopic } from "./types";
 

@@ -17,9 +17,9 @@ import InformationIcon from "@mdi/svg/svg/information.svg";
 import { invert } from "lodash";
 import { ReactElement } from "react";
 
-import Icon from "@foxglove-studio/app/components/Icon";
-import { Diagnostic, DiagnosticSeverity } from "@foxglove-studio/app/players/UserNodePlayer/types";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import Icon from "@foxglove/studio-base/components/Icon";
+import { Diagnostic, DiagnosticSeverity } from "@foxglove/studio-base/players/UserNodePlayer/types";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const severityColors = {
   Hint: colors.YELLOWL1,

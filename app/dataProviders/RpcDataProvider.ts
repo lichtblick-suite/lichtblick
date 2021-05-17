@@ -20,9 +20,9 @@ import {
   GetMessagesTopics,
   InitializationResult,
   DataProvider,
-} from "@foxglove-studio/app/dataProviders/types";
-import Rpc from "@foxglove-studio/app/util/Rpc";
-import { setupMainThreadRpc } from "@foxglove-studio/app/util/RpcMainThreadUtils";
+} from "@foxglove/studio-base/dataProviders/types";
+import Rpc from "@foxglove/studio-base/util/Rpc";
+import { setupMainThreadRpc } from "@foxglove/studio-base/util/RpcMainThreadUtils";
 
 // Looks a bit like a regular `DataProvider`, but is not intended to be used directly in a
 // DataProviderDescriptor tree, but rather in another DataProvider where we instantiate an Rpc, e.g.

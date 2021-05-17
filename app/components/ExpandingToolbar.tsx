@@ -15,9 +15,9 @@ import ArrowCollapseIcon from "@mdi/svg/svg/arrow-collapse.svg";
 import cx from "classnames";
 import styled from "styled-components";
 
-import Button from "@foxglove-studio/app/components/Button";
-import Flex from "@foxglove-studio/app/components/Flex";
-import Icon from "@foxglove-studio/app/components/Icon";
+import Button from "@foxglove/studio-base/components/Button";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Icon from "@foxglove/studio-base/components/Icon";
 
 import styles from "./ExpandingToolbar.module.scss";
 

@@ -15,11 +15,11 @@
 import { mount } from "enzyme";
 import { useEffect } from "react";
 
-import { savePanelConfigs } from "@foxglove-studio/app/actions/panels";
-import Panel from "@foxglove-studio/app/components/Panel";
-import createRootReducer from "@foxglove-studio/app/reducers";
-import configureStore from "@foxglove-studio/app/store/configureStore.testing";
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
+import { savePanelConfigs } from "@foxglove/studio-base/actions/panels";
+import Panel from "@foxglove/studio-base/components/Panel";
+import createRootReducer from "@foxglove/studio-base/reducers";
+import configureStore from "@foxglove/studio-base/store/configureStore.testing";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 type DummyConfig = { someString: string };
 type DummyProps = { config: DummyConfig; saveConfig: (arg0: Partial<DummyConfig>) => void };

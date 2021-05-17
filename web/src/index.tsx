@@ -5,15 +5,15 @@
 import { init as initSentry } from "@sentry/browser";
 import ReactDOM from "react-dom";
 
-import "@foxglove-studio/app/styles/global.scss";
+import "@foxglove/studio-base/styles/global.scss";
 
+import Logger from "@foxglove/log";
 import {
   installDevtoolsFormatters,
   initializeLogEvent,
   overwriteFetch,
   waitForFonts,
-} from "@foxglove-studio/app";
-import Logger from "@foxglove/log";
+} from "@foxglove/studio-base";
 
 import Root from "./Root";
 

@@ -19,8 +19,8 @@
 import { captureException, Severity } from "@sentry/electron";
 import { ReactNode } from "react";
 
-import { AppError } from "@foxglove-studio/app/util/errors";
-import { inWebWorker } from "@foxglove-studio/app/util/workers";
+import { AppError } from "@foxglove/studio-base/util/errors";
+import { inWebWorker } from "@foxglove/studio-base/util/workers";
 
 export type NotificationType = "app" | "user";
 export type DetailsType = string | Error | ReactNode;

@@ -7,15 +7,15 @@ import { useEffect, useMemo, useState } from "react";
 import { MapContainer, TileLayer } from "react-leaflet";
 import { useThrottle } from "react-use";
 
+import Logger from "@foxglove/log";
 import {
   useBlocksByTopic,
   useDataSourceInfo,
   useMessagesByTopic,
-} from "@foxglove-studio/app/PanelAPI";
-import EmptyState from "@foxglove-studio/app/components/EmptyState";
-import Panel from "@foxglove-studio/app/components/Panel";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import Logger from "@foxglove/log";
+} from "@foxglove/studio-base/PanelAPI";
+import EmptyState from "@foxglove/studio-base/components/EmptyState";
+import Panel from "@foxglove/studio-base/components/Panel";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 
 import FilteredPointMarkers from "./FilteredPointMarkers";
 import helpContent from "./index.help.md";

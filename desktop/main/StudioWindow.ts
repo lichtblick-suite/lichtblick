@@ -14,8 +14,8 @@ import {
 } from "electron";
 import path from "path";
 
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
 import Logger from "@foxglove/log";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
 
 import pkgInfo from "../../package.json";
 import { simulateUserClick } from "./simulateUserClick";

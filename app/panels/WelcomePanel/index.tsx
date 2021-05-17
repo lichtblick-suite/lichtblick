@@ -9,19 +9,19 @@ import { useState } from "react";
 import { useAsyncFn } from "react-use";
 import styled from "styled-components";
 
-import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
-import Button from "@foxglove-studio/app/components/Button";
-import Checkbox from "@foxglove-studio/app/components/Checkbox";
-import Flex from "@foxglove-studio/app/components/Flex";
-import Icon from "@foxglove-studio/app/components/Icon";
-import Panel from "@foxglove-studio/app/components/Panel";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import TextContent from "@foxglove-studio/app/components/TextContent";
-import TextField from "@foxglove-studio/app/components/TextField";
-import { useAppConfigurationValue } from "@foxglove-studio/app/hooks/useAppConfigurationValue";
-import subscribeToNewsletter from "@foxglove-studio/app/panels/WelcomePanel/subscribeToNewsletter";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
-import { isEmail } from "@foxglove-studio/app/util/validators";
+import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
+import Button from "@foxglove/studio-base/components/Button";
+import Checkbox from "@foxglove/studio-base/components/Checkbox";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Icon from "@foxglove/studio-base/components/Icon";
+import Panel from "@foxglove/studio-base/components/Panel";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import TextContent from "@foxglove/studio-base/components/TextContent";
+import TextField from "@foxglove/studio-base/components/TextField";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
+import subscribeToNewsletter from "@foxglove/studio-base/panels/WelcomePanel/subscribeToNewsletter";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import { isEmail } from "@foxglove/studio-base/util/validators";
 
 const Term = styled.span`
   font-weight: bold;

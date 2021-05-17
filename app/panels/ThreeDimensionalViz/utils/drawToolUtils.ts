@@ -13,9 +13,9 @@
 
 import { Polygon, PolygonPoint } from "regl-worldview";
 
-import { EDIT_FORMAT, EditFormat } from "@foxglove-studio/app/components/ValidatedInput";
-import { Point2D } from "@foxglove-studio/app/panels/ThreeDimensionalViz/DrawingTools";
-import YAML from "@foxglove-studio/app/util/yaml";
+import { EDIT_FORMAT, EditFormat } from "@foxglove/studio-base/components/ValidatedInput";
+import { Point2D } from "@foxglove/studio-base/panels/ThreeDimensionalViz/DrawingTools";
+import YAML from "@foxglove/studio-base/util/yaml";
 
 export function polygonsToPoints(polygons: Polygon[]): Point2D[][] {
   return polygons.map((poly) => {

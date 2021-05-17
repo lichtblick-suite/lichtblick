@@ -15,16 +15,16 @@ import { action } from "@storybook/addon-actions";
 import { storiesOf } from "@storybook/react";
 import TestUtils from "react-dom/test-utils";
 
-import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
+import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import AppConfigurationContext, {
   AppConfiguration,
-} from "@foxglove-studio/app/context/AppConfigurationContext";
+} from "@foxglove/studio-base/context/AppConfigurationContext";
 import {
   PlayerCapabilities,
   PlayerPresence,
   PlayerState,
   PlayerStateActiveData,
-} from "@foxglove-studio/app/players/types";
+} from "@foxglove/studio-base/players/types";
 
 import { UnconnectedPlaybackControls } from ".";
 import styles from "./index.module.scss";

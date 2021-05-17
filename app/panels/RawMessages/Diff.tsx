@@ -14,8 +14,8 @@
 import { useCallback, useState } from "react";
 import styled from "styled-components";
 
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
-import { diffLabels, diffArrow } from "@foxglove-studio/app/panels/RawMessages/getDiff";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
+import { diffLabels, diffArrow } from "@foxglove/studio-base/panels/RawMessages/getDiff";
 
 // Strings longer than this many characters will start off collapsed.
 const COLLAPSE_TEXT_OVER_LENGTH = 512;

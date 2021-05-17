@@ -13,7 +13,7 @@
 
 import { TimeUtil, Time } from "rosbag";
 
-import { CoreDataProviders, MESSAGE_FORMATS } from "@foxglove-studio/app/dataProviders/constants";
+import { CoreDataProviders, MESSAGE_FORMATS } from "@foxglove/studio-base/dataProviders/constants";
 import {
   DataProvider,
   DataProviderDescriptor,
@@ -22,10 +22,10 @@ import {
   GetMessagesResult,
   GetMessagesTopics,
   InitializationResult,
-} from "@foxglove-studio/app/dataProviders/types";
-import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
-import { formatTimeRaw } from "@foxglove-studio/app/util/time";
+} from "@foxglove/studio-base/dataProviders/types";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
+import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 // We wrap every DataProvider in an ApiCheckerDataProvider to strictly enforce
 // the API guarantees. This makes it harder to make mistakes with DataProviders,

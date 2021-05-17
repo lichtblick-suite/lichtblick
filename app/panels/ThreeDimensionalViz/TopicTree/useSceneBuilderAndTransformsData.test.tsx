@@ -15,9 +15,9 @@
 import { mount } from "enzyme";
 import { omit } from "lodash";
 
-import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
-import { Namespace } from "@foxglove-studio/app/types/Messages";
-import { TRANSFORM_TOPIC } from "@foxglove-studio/app/util/globalConstants";
+import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import { Namespace } from "@foxglove/studio-base/types/Messages";
+import { TRANSFORM_TOPIC } from "@foxglove/studio-base/util/globalConstants";
 
 import { UseSceneBuilderAndTransformsDataInput } from "./types";
 import useSceneBuilderAndTransformsData from "./useSceneBuilderAndTransformsData";

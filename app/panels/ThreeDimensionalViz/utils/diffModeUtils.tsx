@@ -18,9 +18,9 @@ import { vec4ToRGBA } from "regl-worldview";
 import {
   InteractiveMarkersByType,
   WorldMarkerProps,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/WorldMarkers";
-import { LAYER_INDEX_DIFF_MODE_BASE_PER_PASS } from "@foxglove-studio/app/panels/ThreeDimensionalViz/constants";
-import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/WorldMarkers";
+import { LAYER_INDEX_DIFF_MODE_BASE_PER_PASS } from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
+import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 export const BASE_COLOR = [0.5, 0.5, 0.5, 1.0];
 export const SOURCE_1_COLOR = [1, 0, 1, 1];

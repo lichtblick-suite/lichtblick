@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 import SceneBuilder, {
   filterOutSupersededMessages,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/SceneBuilder";
-import sceneBuilderHooks from "@foxglove-studio/app/panels/ThreeDimensionalViz/SceneBuilder/defaultHooks";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
+import sceneBuilderHooks from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder/defaultHooks";
 
 describe("SceneBuilder", () => {
   it("on setFrame, modified topics rendered", () => {

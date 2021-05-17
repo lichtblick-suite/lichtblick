@@ -17,8 +17,8 @@ import { Time } from "rosbag";
 import {
   BlockCache,
   MemoryCacheBlock,
-} from "@foxglove-studio/app/dataProviders/MemoryCacheDataProvider";
-import { MESSAGE_FORMATS } from "@foxglove-studio/app/dataProviders/constants";
+} from "@foxglove/studio-base/dataProviders/MemoryCacheDataProvider";
+import { MESSAGE_FORMATS } from "@foxglove/studio-base/dataProviders/constants";
 import {
   DataProviderDescriptor,
   ExtensionPoint,
@@ -28,10 +28,10 @@ import {
   InitializationResult,
   DataProvider,
   MessageDefinitions,
-} from "@foxglove-studio/app/dataProviders/types";
-import { Progress, Topic, MessageEvent } from "@foxglove-studio/app/players/types";
-import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
-import filterMap from "@foxglove-studio/app/util/filterMap";
+} from "@foxglove/studio-base/dataProviders/types";
+import { Progress, Topic, MessageEvent } from "@foxglove/studio-base/players/types";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
+import filterMap from "@foxglove/studio-base/util/filterMap";
 
 export default class RenameDataProvider implements DataProvider {
   _provider: DataProvider;

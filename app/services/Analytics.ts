@@ -10,9 +10,9 @@ import {
 import amplitude from "amplitude-js";
 import { v4 as uuidv4 } from "uuid";
 
-import OsContextSingleton from "@foxglove-studio/app/OsContextSingleton";
-import Storage from "@foxglove-studio/app/util/Storage";
 import Logger from "@foxglove/log";
+import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
+import Storage from "@foxglove/studio-base/util/Storage";
 
 const UUID_ZERO = "00000000-0000-0000-0000-000000000000";
 const USER_ID_KEY = "analytics_user_id";

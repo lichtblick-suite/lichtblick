@@ -20,19 +20,19 @@ import styled from "styled-components";
 import tinyColor from "tinycolor2";
 import { v4 as uuidv4 } from "uuid";
 
-import ChildToggle from "@foxglove-studio/app/components/ChildToggle";
-import Icon from "@foxglove-studio/app/components/Icon";
-import Menu from "@foxglove-studio/app/components/Menu";
-import Modal, { Title } from "@foxglove-studio/app/components/Modal";
-import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
+import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
+import Icon from "@foxglove/studio-base/components/Icon";
+import Menu from "@foxglove/studio-base/components/Menu";
+import Modal, { Title } from "@foxglove/studio-base/components/Modal";
+import { RenderToBodyComponent } from "@foxglove/studio-base/components/RenderToBodyComponent";
 import {
   DetailsType,
   NotificationType,
   setNotificationHandler,
   unsetNotificationHandler,
   NotificationSeverity,
-} from "@foxglove-studio/app/util/sendNotification";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+} from "@foxglove/studio-base/util/sendNotification";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export type NotificationMessage = {
   readonly id: string;

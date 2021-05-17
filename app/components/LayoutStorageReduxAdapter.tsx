@@ -7,10 +7,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { useAsync, useThrottle } from "react-use";
 import { v4 as uuidv4 } from "uuid";
 
-import { loadLayout } from "@foxglove-studio/app/actions/panels";
-import { useLayoutStorage } from "@foxglove-studio/app/context/LayoutStorageContext";
-import { State } from "@foxglove-studio/app/reducers";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
+import { loadLayout } from "@foxglove/studio-base/actions/panels";
+import { useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
+import { State } from "@foxglove/studio-base/reducers";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 // LayoutStorageReduxAdapter persists the current panel state from redux to the current LayoutStorage context
 export default function LayoutStorageReduxAdapter(): ReactNull {

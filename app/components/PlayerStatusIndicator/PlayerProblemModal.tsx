@@ -5,9 +5,9 @@
 import { mergeStyleSets } from "@fluentui/react";
 import { ComponentProps } from "react";
 
-import Modal, { Title } from "@foxglove-studio/app/components/Modal";
-import { PlayerProblem } from "@foxglove-studio/app/players/types";
-import mixins from "@foxglove-studio/app/styles/mixins.module.scss";
+import Modal, { Title } from "@foxglove/studio-base/components/Modal";
+import { PlayerProblem } from "@foxglove/studio-base/players/types";
+import mixins from "@foxglove/studio-base/styles/mixins.module.scss";
 
 type ModalProps = ComponentProps<typeof Modal>;
 

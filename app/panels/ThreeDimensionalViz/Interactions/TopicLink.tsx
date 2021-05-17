@@ -13,11 +13,11 @@
 
 import styled from "styled-components";
 
-import { usePanelContext } from "@foxglove-studio/app/components/PanelContext";
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
-import RawMessages from "@foxglove-studio/app/panels/RawMessages/index";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
-import { PanelConfig } from "@foxglove-studio/app/types/panels";
+import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
+import RawMessages from "@foxglove/studio-base/panels/RawMessages/index";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import { PanelConfig } from "@foxglove/studio-base/types/panels";
 
 const STopicLink = styled.span`
   cursor: pointer;

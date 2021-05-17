@@ -16,8 +16,8 @@ import { Command, withPose, pointToVec3, defaultBlend, CommonCommandProps } from
 import {
   defaultMapPalette,
   TextureCache,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/commands/utils";
-import { OccupancyGridMessage } from "@foxglove-studio/app/types/Messages";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/utils";
+import { OccupancyGridMessage } from "@foxglove/studio-base/types/Messages";
 
 const occupancyGrids = (regl: any) => {
   // make a buffer holding the verticies of a 1x1 plane

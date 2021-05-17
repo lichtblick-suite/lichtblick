@@ -14,9 +14,9 @@ import { sumBy } from "lodash";
 import styled from "styled-components";
 import textMetrics from "text-metrics";
 
-import AutoSizingCanvas from "@foxglove-studio/app/components/AutoSizingCanvas";
-import Slider from "@foxglove-studio/app/components/Slider";
-import mixins from "@foxglove-studio/app/styles/mixins.module.scss";
+import AutoSizingCanvas from "@foxglove/studio-base/components/AutoSizingCanvas";
+import Slider from "@foxglove/studio-base/components/Slider";
+import mixins from "@foxglove/studio-base/styles/mixins.module.scss";
 
 // The minimum ratio between the width of the panel and the total width taken by the labels.
 // If the ratio drops below this value, (due to the width of the panel changing)

@@ -4,13 +4,13 @@
 
 import { Time } from "rosbag";
 
-import { PlayerSourceDefinition } from "@foxglove-studio/app/context/PlayerSelectionContext";
+import Log from "@foxglove/log";
+import { PlayerSourceDefinition } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import {
   PlayerMetricsCollectorInterface,
   SubscribePayload,
-} from "@foxglove-studio/app/players/types";
-import { Analytics, AppEvent } from "@foxglove-studio/app/services/Analytics";
-import Log from "@foxglove/log";
+} from "@foxglove/studio-base/players/types";
+import { Analytics, AppEvent } from "@foxglove/studio-base/services/Analytics";
 
 const log = Log.getLogger(__filename);
 

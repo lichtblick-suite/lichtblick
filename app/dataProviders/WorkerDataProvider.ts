@@ -13,8 +13,8 @@
 
 import { Time } from "rosbag";
 
-import RpcDataProvider from "@foxglove-studio/app/dataProviders/RpcDataProvider";
-import Rpc from "@foxglove-studio/app/util/Rpc";
+import RpcDataProvider from "@foxglove/studio-base/dataProviders/RpcDataProvider";
+import Rpc from "@foxglove/studio-base/util/Rpc";
 
 import {
   DataProvider,

@@ -13,8 +13,8 @@
 //   You may not use this file except in compliance with the License.
 import { mount } from "enzyme";
 
-import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
-import { MessageEvent } from "@foxglove-studio/app/players/types";
+import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
 
 import { useLatestMessageDataItem } from "./useLatestMessageDataItem";
 

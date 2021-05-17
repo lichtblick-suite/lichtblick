@@ -16,7 +16,7 @@ import ReactDOM from "react-dom";
 import { act } from "react-dom/test-utils";
 import { ToastProvider } from "react-toast-notifications";
 
-import DocumentDropListener from "@foxglove-studio/app/components/DocumentDropListener";
+import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
 
 describe("<DocumentDropListener>", () => {
   let wrapper: HTMLDivElement;

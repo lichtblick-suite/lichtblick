@@ -14,12 +14,12 @@
 import { partition } from "lodash";
 import { ComponentType } from "react";
 
-import { WorldMarkerProps } from "@foxglove-studio/app/panels/ThreeDimensionalViz/WorldMarkers";
-import Cover from "@foxglove-studio/app/panels/ThreeDimensionalViz/commands/Cover";
+import { WorldMarkerProps } from "@foxglove/studio-base/panels/ThreeDimensionalViz/WorldMarkers";
+import Cover from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/Cover";
 import {
   LAYER_INDEX_HIGHLIGHT_OVERLAY,
   LAYER_INDEX_HIGHLIGHT_BASE,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/constants";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
 
 const withHighlights = (
   BaseWorldMarkers: ComponentType<WorldMarkerProps>,

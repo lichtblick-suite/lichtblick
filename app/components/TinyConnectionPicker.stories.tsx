@@ -11,12 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import MockMessagePipelineProvider from "@foxglove-studio/app/components/MessagePipeline/MockMessagePipelineProvider";
-import TinyConnectionPicker from "@foxglove-studio/app/components/TinyConnectionPicker";
+import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import TinyConnectionPicker from "@foxglove/studio-base/components/TinyConnectionPicker";
 import PlayerSelectionContext, {
   PlayerSelection,
   PlayerSourceDefinition,
-} from "@foxglove-studio/app/context/PlayerSelectionContext";
+} from "@foxglove/studio-base/context/PlayerSelectionContext";
 
 export default {
   title: "components/TinyConnectionPicker",

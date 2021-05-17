@@ -15,8 +15,8 @@ import { useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { bindActionCreators } from "redux";
 
-import { setGlobalVariables, overwriteGlobalVariables } from "@foxglove-studio/app/actions/panels";
-import { State } from "@foxglove-studio/app/reducers";
+import { setGlobalVariables, overwriteGlobalVariables } from "@foxglove/studio-base/actions/panels";
+import { State } from "@foxglove/studio-base/reducers";
 
 export type GlobalVariables = {
   [key: string]: any;

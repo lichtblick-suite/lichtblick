@@ -15,26 +15,26 @@ import { groupBy, sortBy } from "lodash";
 import { Fragment } from "react";
 import styled from "styled-components";
 
-import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import Button from "@foxglove-studio/app/components/Button";
-import Dropdown from "@foxglove-studio/app/components/Dropdown";
-import DropdownItem from "@foxglove-studio/app/components/Dropdown/DropdownItem";
-import Flex from "@foxglove-studio/app/components/Flex";
-import { Item } from "@foxglove-studio/app/components/Menu";
-import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
-import Panel from "@foxglove-studio/app/components/Panel";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import TextContent from "@foxglove-studio/app/components/TextContent";
+import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
+import Button from "@foxglove/studio-base/components/Button";
+import Dropdown from "@foxglove/studio-base/components/Dropdown";
+import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
+import Flex from "@foxglove/studio-base/components/Flex";
+import { Item } from "@foxglove/studio-base/components/Menu";
+import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
+import Panel from "@foxglove/studio-base/components/Panel";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import TextContent from "@foxglove/studio-base/components/TextContent";
 import {
   Topic,
   MessageEvent,
   SubscribePayload,
   AdvertisePayload,
-} from "@foxglove-studio/app/players/types";
-import { downloadTextFile } from "@foxglove-studio/app/util/download";
-import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
-import filterMap from "@foxglove-studio/app/util/filterMap";
-import { getTopicsByTopicName } from "@foxglove-studio/app/util/selectors";
+} from "@foxglove/studio-base/players/types";
+import { downloadTextFile } from "@foxglove/studio-base/util/download";
+import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
+import filterMap from "@foxglove/studio-base/util/filterMap";
+import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 
 const { useCallback } = React;
 

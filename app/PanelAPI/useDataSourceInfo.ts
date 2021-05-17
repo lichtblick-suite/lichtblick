@@ -17,9 +17,9 @@ import { Time } from "rosbag";
 import {
   useMessagePipeline,
   MessagePipelineContext,
-} from "@foxglove-studio/app/components/MessagePipeline";
-import { Topic } from "@foxglove-studio/app/players/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
+} from "@foxglove/studio-base/components/MessagePipeline";
+import { Topic } from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 // Metadata about the source of data currently being displayed.
 // This is not expected to change often, usually when changing data sources.

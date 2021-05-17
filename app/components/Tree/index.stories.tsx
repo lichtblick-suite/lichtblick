@@ -16,9 +16,9 @@ import MapMarkerIcon from "@mdi/svg/svg/map-marker.svg";
 import { storiesOf } from "@storybook/react";
 import { useState } from "react";
 
-import Menu from "@foxglove-studio/app/components/Menu";
-import Tree from "@foxglove-studio/app/components/Tree";
-import { Node } from "@foxglove-studio/app/components/Tree/Node";
+import Menu from "@foxglove/studio-base/components/Menu";
+import Tree from "@foxglove/studio-base/components/Tree";
+import { Node } from "@foxglove/studio-base/components/Tree/Node";
 
 function getInitialState() {
   const root: Node = {

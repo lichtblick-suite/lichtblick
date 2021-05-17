@@ -17,20 +17,20 @@ import FileMultipleIcon from "@mdi/svg/svg/file-multiple.svg";
 import HelpCircleIcon from "@mdi/svg/svg/help-circle.svg";
 import styled from "styled-components";
 
-import Flex from "@foxglove-studio/app/components/Flex";
-import Icon from "@foxglove-studio/app/components/Icon";
-import TextContent from "@foxglove-studio/app/components/TextContent";
-import { Explorer } from "@foxglove-studio/app/panels/NodePlayground";
-import TemplateIcon from "@foxglove-studio/app/panels/NodePlayground/assets/file-document-edit.svg";
-import HammerWrenchIcon from "@foxglove-studio/app/panels/NodePlayground/assets/hammer-wrench.svg";
-import nodePlaygroundDocs from "@foxglove-studio/app/panels/NodePlayground/index.help.md";
-import { Script } from "@foxglove-studio/app/panels/NodePlayground/script";
-import { getNodeProjectConfig } from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
-import templates from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/templates";
-import userUtilsReadMe from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/README.md";
-import { UserNodes } from "@foxglove-studio/app/types/panels";
-import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Icon from "@foxglove/studio-base/components/Icon";
+import TextContent from "@foxglove/studio-base/components/TextContent";
+import { Explorer } from "@foxglove/studio-base/panels/NodePlayground";
+import TemplateIcon from "@foxglove/studio-base/panels/NodePlayground/assets/file-document-edit.svg";
+import HammerWrenchIcon from "@foxglove/studio-base/panels/NodePlayground/assets/hammer-wrench.svg";
+import nodePlaygroundDocs from "@foxglove/studio-base/panels/NodePlayground/index.help.md";
+import { Script } from "@foxglove/studio-base/panels/NodePlayground/script";
+import { getNodeProjectConfig } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
+import templates from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/templates";
+import userUtilsReadMe from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/README.md";
+import { UserNodes } from "@foxglove/studio-base/types/panels";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const MenuWrapper = styled.div`
   display: flex;

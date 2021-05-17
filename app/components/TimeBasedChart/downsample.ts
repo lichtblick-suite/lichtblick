@@ -4,7 +4,7 @@
 
 import { ChartData, ScatterDataPoint } from "chart.js";
 
-import filterMap from "@foxglove-studio/app/util/filterMap";
+import filterMap from "@foxglove/studio-base/util/filterMap";
 
 // Chartjs typings use _null_ to indicate _gaps_ in the dataset
 // eslint-disable-next-line no-restricted-syntax

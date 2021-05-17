@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { DetailsType } from "@foxglove-studio/app/util/sendNotification";
+import { DetailsType } from "@foxglove/studio-base/util/sendNotification";
 
 export class AppError extends Error {
   details: DetailsType;

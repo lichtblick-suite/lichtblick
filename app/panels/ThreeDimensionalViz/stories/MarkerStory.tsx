@@ -17,12 +17,12 @@ import { Color } from "regl-worldview";
 import {
   markerProps,
   generateMarkers,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/stories/indexUtils.stories";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/stories/indexUtils.stories";
 import {
   FixtureExampleData,
   FixtureExample,
-} from "@foxglove-studio/app/panels/ThreeDimensionalViz/stories/storyComponents";
-import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz/types";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/stories/storyComponents";
+import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
 
 const fixtureData: FixtureExampleData = {
   topics: {

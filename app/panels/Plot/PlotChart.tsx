@@ -24,29 +24,29 @@ import TimeBasedChart, {
   ChartDefaultView,
   TimeBasedChartTooltipData,
   TooltipItem,
-} from "@foxglove-studio/app/components/TimeBasedChart";
+} from "@foxglove/studio-base/components/TimeBasedChart";
 import {
   PlotPath,
   BasePlotPath,
   isReferenceLinePlotPathType,
-} from "@foxglove-studio/app/panels/Plot/internalTypes";
+} from "@foxglove/studio-base/panels/Plot/internalTypes";
 import {
   derivative,
   applyToDataOrTooltips,
   mathFunctions,
   MathFunction,
-} from "@foxglove-studio/app/panels/Plot/transformPlotRange";
-import { nonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
-import filterMap from "@foxglove-studio/app/util/filterMap";
-import { format } from "@foxglove-studio/app/util/formatTime";
-import { lightColor, lineColors } from "@foxglove-studio/app/util/plotColors";
+} from "@foxglove/studio-base/panels/Plot/transformPlotRange";
+import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
+import filterMap from "@foxglove/studio-base/util/filterMap";
+import { format } from "@foxglove/studio-base/util/formatTime";
+import { lightColor, lineColors } from "@foxglove/studio-base/util/plotColors";
 import {
   isTime,
   subtractTimes,
   toSec,
   formatTimeRaw,
   TimestampMethod,
-} from "@foxglove-studio/app/util/time";
+} from "@foxglove/studio-base/util/time";
 
 import styles from "./PlotChart.module.scss";
 import { PlotXAxisVal } from "./index";

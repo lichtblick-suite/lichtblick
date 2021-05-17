@@ -4,10 +4,10 @@
 
 import { PropsWithChildren, useMemo } from "react";
 
-import { AppSetting } from "@foxglove-studio/app/AppSetting";
-import AnalyticsContext from "@foxglove-studio/app/context/AnalyticsContext";
-import { useAppConfigurationValue } from "@foxglove-studio/app/hooks/useAppConfigurationValue";
-import { Analytics } from "@foxglove-studio/app/services/Analytics";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import AnalyticsContext from "@foxglove/studio-base/context/AnalyticsContext";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
+import { Analytics } from "@foxglove/studio-base/services/Analytics";
 
 export default function AnalyticsProvider(
   props: PropsWithChildren<{ amplitudeApiKey?: string }>,

@@ -13,9 +13,9 @@
 
 import Bag, { parseMessageDefinition } from "rosbag";
 
-import { Connection } from "@foxglove-studio/app/dataProviders/types";
-import { Topic } from "@foxglove-studio/app/players/types";
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
+import { Connection } from "@foxglove/studio-base/dataProviders/types";
+import { Topic } from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 // TODO(JP): Move all this stuff into rosbag.
 

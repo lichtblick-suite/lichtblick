@@ -13,7 +13,7 @@
 
 import { MessageReader, parseMessageDefinition } from "rosbag";
 
-import { FREEZE_MESSAGES } from "@foxglove-studio/app/util/globalConstants";
+import { FREEZE_MESSAGES } from "@foxglove/studio-base/util/globalConstants";
 
 class ReaderItem {
   md5: string;

@@ -4,10 +4,10 @@
 
 import AlertIcon from "@mdi/svg/svg/alert.svg";
 
-import Icon from "@foxglove-studio/app/components/Icon";
-import SpinningLoadingIcon from "@foxglove-studio/app/components/SpinningLoadingIcon";
-import { PlayerPresence, PlayerState } from "@foxglove-studio/app/players/types";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import Icon from "@foxglove/studio-base/components/Icon";
+import SpinningLoadingIcon from "@foxglove/studio-base/components/SpinningLoadingIcon";
+import { PlayerPresence, PlayerState } from "@foxglove/studio-base/players/types";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 type Props = {
   presence: PlayerState["presence"];

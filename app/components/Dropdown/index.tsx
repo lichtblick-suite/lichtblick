@@ -15,7 +15,7 @@ import ChevronDownIcon from "@mdi/svg/svg/chevron-down.svg";
 import cx from "classnames";
 import { ReactNode, CSSProperties, ReactElement } from "react";
 
-import Tooltip from "@foxglove-studio/app/components/Tooltip";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
 
 import ChildToggle from "../ChildToggle";
 import Icon from "../Icon";

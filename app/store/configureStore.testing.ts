@@ -14,8 +14,8 @@
 import { createStore, applyMiddleware, Reducer } from "redux";
 import thunk, { ThunkDispatch } from "redux-thunk";
 
-import { ActionTypes } from "@foxglove-studio/app/actions";
-import { State } from "@foxglove-studio/app/reducers";
+import { ActionTypes } from "@foxglove/studio-base/actions";
+import { State } from "@foxglove/studio-base/reducers";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 const configureStore = (

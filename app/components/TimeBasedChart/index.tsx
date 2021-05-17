@@ -29,23 +29,23 @@ import styled from "styled-components";
 import { useDebouncedCallback } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
 
-import { clearHoverValue, setHoverValue } from "@foxglove-studio/app/actions/hoverValue";
-import Button from "@foxglove-studio/app/components/Button";
-import ChartComponent from "@foxglove-studio/app/components/Chart/index";
-import { RpcElement, RpcScales } from "@foxglove-studio/app/components/Chart/types";
-import KeyListener from "@foxglove-studio/app/components/KeyListener";
+import Logger from "@foxglove/log";
+import { clearHoverValue, setHoverValue } from "@foxglove/studio-base/actions/hoverValue";
+import Button from "@foxglove/studio-base/components/Button";
+import ChartComponent from "@foxglove/studio-base/components/Chart/index";
+import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/types";
+import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import {
   MessageAndData,
   MessagePathDataItem,
-} from "@foxglove-studio/app/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
-import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
-import TimeBasedChartLegend from "@foxglove-studio/app/components/TimeBasedChart/TimeBasedChartLegend";
-import makeGlobalState from "@foxglove-studio/app/components/TimeBasedChart/makeGlobalState";
-import { useTooltip } from "@foxglove-studio/app/components/Tooltip";
-import mixins from "@foxglove-studio/app/styles/mixins.module.scss";
-import { StampedMessage } from "@foxglove-studio/app/types/Messages";
-import filterMap from "@foxglove-studio/app/util/filterMap";
-import Logger from "@foxglove/log";
+} from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
+import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
+import TimeBasedChartLegend from "@foxglove/studio-base/components/TimeBasedChart/TimeBasedChartLegend";
+import makeGlobalState from "@foxglove/studio-base/components/TimeBasedChart/makeGlobalState";
+import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
+import mixins from "@foxglove/studio-base/styles/mixins.module.scss";
+import { StampedMessage } from "@foxglove/studio-base/types/Messages";
+import filterMap from "@foxglove/studio-base/util/filterMap";
 
 import HoverBar from "./HoverBar";
 import TimeBasedChartTooltipContent from "./TimeBasedChartTooltipContent";

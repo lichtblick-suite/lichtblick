@@ -13,7 +13,7 @@
 
 import { Color } from "regl-worldview";
 
-import Flex from "@foxglove-studio/app/components/Flex";
+import Flex from "@foxglove/studio-base/components/Flex";
 
 import { TopicSettingsEditorProps } from ".";
 import ColorPickerForTopicSettings from "./ColorPickerForTopicSettings";

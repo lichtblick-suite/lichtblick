@@ -14,13 +14,13 @@ import React, { useState, useRef, useEffect, ReactElement } from "react";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
 
-import { clearUserNodeLogs } from "@foxglove-studio/app/actions/userNodes";
-import Button from "@foxglove-studio/app/components/Button";
-import Flex from "@foxglove-studio/app/components/Flex";
-import DiagnosticsSection from "@foxglove-studio/app/panels/NodePlayground/BottomBar/DiagnosticsSection";
-import LogsSection from "@foxglove-studio/app/panels/NodePlayground/BottomBar/LogsSection";
-import { Diagnostic, UserNodeLog } from "@foxglove-studio/app/players/UserNodePlayer/types";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { clearUserNodeLogs } from "@foxglove/studio-base/actions/userNodes";
+import Button from "@foxglove/studio-base/components/Button";
+import Flex from "@foxglove/studio-base/components/Flex";
+import DiagnosticsSection from "@foxglove/studio-base/panels/NodePlayground/BottomBar/DiagnosticsSection";
+import LogsSection from "@foxglove/studio-base/panels/NodePlayground/BottomBar/LogsSection";
+import { Diagnostic, UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const SHeaderItem = styled.div`
   cursor: pointer;

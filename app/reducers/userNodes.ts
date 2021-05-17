@@ -11,9 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ActionTypes } from "@foxglove-studio/app/actions";
-import { Diagnostic, UserNodeLog } from "@foxglove-studio/app/players/UserNodePlayer/types";
-import { State } from "@foxglove-studio/app/reducers";
+import { ActionTypes } from "@foxglove/studio-base/actions";
+import { Diagnostic, UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
+import { State } from "@foxglove/studio-base/reducers";
 
 export type UserNodeDiagnostics = {
   diagnostics: Diagnostic[];

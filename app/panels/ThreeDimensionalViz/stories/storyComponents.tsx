@@ -14,20 +14,20 @@
 import { uniq } from "lodash";
 import { Worldview } from "regl-worldview";
 
-import { selectAllPanelIds } from "@foxglove-studio/app/actions/mosaic";
-import Flex from "@foxglove-studio/app/components/Flex";
-import PanelLayout from "@foxglove-studio/app/components/PanelLayout";
-import GlobalVariableSliderPanel from "@foxglove-studio/app/panels/GlobalVariableSlider";
-import ThreeDimensionalViz from "@foxglove-studio/app/panels/ThreeDimensionalViz";
-import { ThreeDimensionalVizConfig } from "@foxglove-studio/app/panels/ThreeDimensionalViz/types";
-import { Frame, Topic } from "@foxglove-studio/app/players/types";
-import createRootReducer from "@foxglove-studio/app/reducers";
-import configureStore from "@foxglove-studio/app/store/configureStore";
-import PanelSetup, { Fixture } from "@foxglove-studio/app/stories/PanelSetup";
-import PanelSetupWithBag from "@foxglove-studio/app/stories/PanelSetupWithBag";
-import inScreenshotTests from "@foxglove-studio/app/stories/inScreenshotTests";
-import { ScreenshotSizedContainer } from "@foxglove-studio/app/stories/storyHelpers";
-import { getPanelIdForType } from "@foxglove-studio/app/util/layout";
+import { selectAllPanelIds } from "@foxglove/studio-base/actions/mosaic";
+import Flex from "@foxglove/studio-base/components/Flex";
+import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
+import GlobalVariableSliderPanel from "@foxglove/studio-base/panels/GlobalVariableSlider";
+import ThreeDimensionalViz from "@foxglove/studio-base/panels/ThreeDimensionalViz";
+import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
+import { Frame, Topic } from "@foxglove/studio-base/players/types";
+import createRootReducer from "@foxglove/studio-base/reducers";
+import configureStore from "@foxglove/studio-base/store/configureStore";
+import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
+import PanelSetupWithBag from "@foxglove/studio-base/stories/PanelSetupWithBag";
+import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
+import { ScreenshotSizedContainer } from "@foxglove/studio-base/stories/storyHelpers";
+import { getPanelIdForType } from "@foxglove/studio-base/util/layout";
 
 type Store = ReturnType<typeof configureStore>;
 

@@ -28,10 +28,10 @@ import {
 } from "chart.js";
 import AnnotationPlugin from "chartjs-plugin-annotation";
 
-import RobotoMono from "@foxglove-studio/app/styles/assets/latin-roboto-mono.woff2";
-import { RpcLike } from "@foxglove-studio/app/util/FakeRpc";
-import Rpc from "@foxglove-studio/app/util/Rpc";
-import { setupWorker } from "@foxglove-studio/app/util/RpcWorkerUtils";
+import RobotoMono from "@foxglove/studio-base/styles/assets/latin-roboto-mono.woff2";
+import { RpcLike } from "@foxglove/studio-base/util/FakeRpc";
+import Rpc from "@foxglove/studio-base/util/Rpc";
+import { setupWorker } from "@foxglove/studio-base/util/RpcWorkerUtils";
 
 import ChartJSManager from "./ChartJSManager";
 

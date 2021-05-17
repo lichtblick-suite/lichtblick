@@ -13,7 +13,7 @@
 
 import { storiesOf } from "@storybook/react";
 
-import HelpModal from "@foxglove-studio/app/components/HelpModal";
+import HelpModal from "@foxglove/studio-base/components/HelpModal";
 
 const stories = storiesOf("Help pages", module);
 

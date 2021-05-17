@@ -16,14 +16,14 @@ import Tabs, { TabPane } from "rc-tabs";
 import React, { useCallback } from "react";
 import styled from "styled-components";
 
-import Button from "@foxglove-studio/app/components/Button";
-import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";
-import Modal from "@foxglove-studio/app/components/Modal";
-import { RenderToBodyComponent } from "@foxglove-studio/app/components/RenderToBodyComponent";
-import { topicSettingsEditorForDatatype } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor";
-import { Topic } from "@foxglove-studio/app/players/types";
-import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import Button from "@foxglove/studio-base/components/Button";
+import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
+import Modal from "@foxglove/studio-base/components/Modal";
+import { RenderToBodyComponent } from "@foxglove/studio-base/components/RenderToBodyComponent";
+import { topicSettingsEditorForDatatype } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor";
+import { Topic } from "@foxglove/studio-base/players/types";
+import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { Save3DConfig } from "../index";
 

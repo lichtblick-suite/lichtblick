@@ -16,7 +16,7 @@ import {
   DataProviderConstructor,
   DataProviderDescriptor,
   GetDataProvider,
-} from "@foxglove-studio/app/dataProviders/types";
+} from "@foxglove/studio-base/dataProviders/types";
 
 export default function createGetDataProvider(descriptorMap: {
   [name: string]: DataProviderConstructor;

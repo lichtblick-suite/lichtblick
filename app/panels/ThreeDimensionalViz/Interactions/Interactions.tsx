@@ -14,19 +14,19 @@
 import CursorDefault from "@mdi/svg/svg/cursor-default.svg";
 import { MouseEventObject } from "regl-worldview";
 
-import Checkbox from "@foxglove-studio/app/components/Checkbox";
+import Checkbox from "@foxglove/studio-base/components/Checkbox";
 import ExpandingToolbar, {
   ToolGroup,
   ToolGroupFixedSizePane,
-} from "@foxglove-studio/app/components/ExpandingToolbar";
-import Icon from "@foxglove-studio/app/components/Icon";
-import PanelContext from "@foxglove-studio/app/components/PanelContext";
-import ObjectDetails from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/ObjectDetails";
-import TopicLink from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/TopicLink";
-import styles from "@foxglove-studio/app/panels/ThreeDimensionalViz/Layout.module.scss";
-import { decodeAdditionalFields } from "@foxglove-studio/app/panels/ThreeDimensionalViz/commands/PointClouds/selection";
-import { getInteractionData } from "@foxglove-studio/app/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
-import { SaveConfig, PanelConfig } from "@foxglove-studio/app/types/panels";
+} from "@foxglove/studio-base/components/ExpandingToolbar";
+import Icon from "@foxglove/studio-base/components/Icon";
+import PanelContext from "@foxglove/studio-base/components/PanelContext";
+import ObjectDetails from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/ObjectDetails";
+import TopicLink from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/TopicLink";
+import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
+import { decodeAdditionalFields } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/selection";
+import { getInteractionData } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
+import { SaveConfig, PanelConfig } from "@foxglove/studio-base/types/panels";
 
 import LinkedGlobalVariableList from "./LinkedGlobalVariableList";
 import PointCloudDetails from "./PointCloudDetails";

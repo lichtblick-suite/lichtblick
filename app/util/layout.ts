@@ -24,18 +24,18 @@ import {
 } from "react-mosaic-component";
 import { MosaicKey } from "react-mosaic-component/lib/types";
 
-import { PanelsState } from "@foxglove-studio/app/reducers/panels";
-import { TabLocation, TabPanelConfig } from "@foxglove-studio/app/types/layouts";
+import Logger from "@foxglove/log";
+import { PanelsState } from "@foxglove/studio-base/reducers/panels";
+import { TabLocation, TabPanelConfig } from "@foxglove/studio-base/types/layouts";
 import {
   ConfigsPayload,
   PanelConfig,
   SaveConfigsPayload,
   MosaicDropTargetPosition,
   SavedProps,
-} from "@foxglove-studio/app/types/panels";
-import filterMap from "@foxglove-studio/app/util/filterMap";
-import { TAB_PANEL_TYPE } from "@foxglove-studio/app/util/globalConstants";
-import Logger from "@foxglove/log";
+} from "@foxglove/studio-base/types/panels";
+import filterMap from "@foxglove/studio-base/util/filterMap";
+import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 
 const log = Logger.getLogger(__filename);
 

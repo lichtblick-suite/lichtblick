@@ -14,7 +14,7 @@
 import { storiesOf } from "@storybook/react";
 import { PolygonBuilder } from "regl-worldview";
 
-import { pointsToPolygons } from "@foxglove-studio/app/panels/ThreeDimensionalViz/utils/drawToolUtils";
+import { pointsToPolygons } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/drawToolUtils";
 
 import DrawingTools, { POLYGON_TAB_TYPE } from "./index";
 

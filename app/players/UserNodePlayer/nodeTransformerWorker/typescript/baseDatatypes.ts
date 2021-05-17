@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 // TODO: Delete this file once we have a "smart" 3D panel that visualizes messages that look like markers.
-import { RosDatatypes } from "@foxglove-studio/app/types/RosDatatypes";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 const baseDatatypes: RosDatatypes = {
   "visualization_msgs/MarkerArray": {

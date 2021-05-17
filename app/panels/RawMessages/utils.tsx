@@ -13,8 +13,8 @@
 import { first, last } from "lodash";
 import { ReactNode } from "react";
 
-import { diffLabels } from "@foxglove-studio/app/panels/RawMessages/getDiff";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import { diffLabels } from "@foxglove/studio-base/panels/RawMessages/getDiff";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export const DATA_ARRAY_PREVIEW_LIMIT = 20;
 export const ROS_COMMON_MSGS: Set<string> = new Set([

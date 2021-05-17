@@ -13,7 +13,7 @@
 import memoize from "lodash/memoize";
 import { Command } from "regl-worldview";
 
-import { ReglColor } from "@foxglove-studio/app/util/colorUtils";
+import { ReglColor } from "@foxglove/studio-base/util/colorUtils";
 
 const makeReglCommand = memoize(
   ({ overwriteDepthBuffer }: { overwriteDepthBuffer?: boolean }) =>

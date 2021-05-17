@@ -13,10 +13,10 @@
 
 import { useCallback, useMemo } from "react";
 
-import * as PanelAPI from "@foxglove-studio/app/PanelAPI";
-import { useMessagePipeline } from "@foxglove-studio/app/components/MessagePipeline";
-import useChangeDetector from "@foxglove-studio/app/hooks/useChangeDetector";
-import { MessageEvent } from "@foxglove-studio/app/players/types";
+import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
+import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
+import useChangeDetector from "@foxglove/studio-base/hooks/useChangeDetector";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
 
 import parseRosPath from "./parseRosPath";
 import {

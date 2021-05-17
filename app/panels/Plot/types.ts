@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { BasePlotPath, PlotPath } from "@foxglove-studio/app/panels/Plot/internalTypes";
+import type { BasePlotPath, PlotPath } from "@foxglove/studio-base/panels/Plot/internalTypes";
 
 // X-axis values:
 export type PlotXAxisVal =

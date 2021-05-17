@@ -15,15 +15,15 @@ import hoistNonReactStatics from "hoist-non-react-statics";
 import PropTypes from "prop-types";
 import { ForwardedRef } from "react";
 
-import { useDataSourceInfo } from "@foxglove-studio/app/PanelAPI";
-import Transforms from "@foxglove-studio/app/panels/ThreeDimensionalViz/Transforms";
-import { Frame, Topic, MessageEvent } from "@foxglove-studio/app/players/types";
-import { MarkerArray, StampedMessage, TF } from "@foxglove-studio/app/types/Messages";
+import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
+import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
+import { Frame, Topic, MessageEvent } from "@foxglove/studio-base/players/types";
+import { MarkerArray, StampedMessage, TF } from "@foxglove/studio-base/types/Messages";
 import {
   TF2_DATATYPE,
   TF_DATATYPE,
   TRANSFORM_STAMPED_DATATYPE,
-} from "@foxglove-studio/app/util/globalConstants";
+} from "@foxglove/studio-base/util/globalConstants";
 
 type State = { transforms: Transforms; topics: Topic[]; topicsToDatatypes: Map<string, string> };
 type TfMessage = { transforms: TF[] };

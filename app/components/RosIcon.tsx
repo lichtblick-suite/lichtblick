@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { createSvgIcon } from "@fluentui/react-icons-mdl2";
 
-import RosSvg from "@foxglove-studio/app/assets/ros.svg";
+import RosSvg from "@foxglove/studio-base/assets/ros.svg";
 
 export default createSvgIcon({
   displayName: "RosIcon",

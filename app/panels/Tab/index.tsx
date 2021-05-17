@@ -14,22 +14,22 @@ import { useCallback, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 
-import { savePanelConfigs } from "@foxglove-studio/app/actions/panels";
-import Flex from "@foxglove-studio/app/components/Flex";
-import Panel from "@foxglove-studio/app/components/Panel";
-import { usePanelContext } from "@foxglove-studio/app/components/PanelContext";
-import { UnconnectedPanelLayout } from "@foxglove-studio/app/components/PanelLayout";
-import { EmptyDropTarget } from "@foxglove-studio/app/panels/Tab/EmptyDropTarget";
+import { savePanelConfigs } from "@foxglove/studio-base/actions/panels";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Panel from "@foxglove/studio-base/components/Panel";
+import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
+import { UnconnectedPanelLayout } from "@foxglove/studio-base/components/PanelLayout";
+import { EmptyDropTarget } from "@foxglove/studio-base/panels/Tab/EmptyDropTarget";
 import {
   DraggingTabPanelState,
   TabDndContext,
-} from "@foxglove-studio/app/panels/Tab/TabDndContext";
-import { TabbedToolbar } from "@foxglove-studio/app/panels/Tab/TabbedToolbar";
-import { TabPanelConfig as Config } from "@foxglove-studio/app/types/layouts";
-import { SaveConfig } from "@foxglove-studio/app/types/panels";
-import { TAB_PANEL_TYPE } from "@foxglove-studio/app/util/globalConstants";
-import { DEFAULT_TAB_PANEL_CONFIG, updateTabPanelLayout } from "@foxglove-studio/app/util/layout";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+} from "@foxglove/studio-base/panels/Tab/TabDndContext";
+import { TabbedToolbar } from "@foxglove/studio-base/panels/Tab/TabbedToolbar";
+import { TabPanelConfig as Config } from "@foxglove/studio-base/types/layouts";
+import { SaveConfig } from "@foxglove/studio-base/types/panels";
+import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
+import { DEFAULT_TAB_PANEL_CONFIG, updateTabPanelLayout } from "@foxglove/studio-base/util/layout";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const SPanelCover = styled.div`
   top: 0;

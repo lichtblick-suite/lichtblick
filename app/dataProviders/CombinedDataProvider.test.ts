@@ -27,18 +27,18 @@
 
 import { parseMessageDefinition } from "rosbag";
 
-import BagDataProvider from "@foxglove-studio/app/dataProviders/BagDataProvider";
+import BagDataProvider from "@foxglove/studio-base/dataProviders/BagDataProvider";
 import CombinedDataProvider, {
   mergedBlocks,
-} from "@foxglove-studio/app/dataProviders/CombinedDataProvider";
-import MemoryDataProvider from "@foxglove-studio/app/dataProviders/MemoryDataProvider";
-import RenameDataProvider from "@foxglove-studio/app/dataProviders/RenameDataProvider";
-import { mockExtensionPoint } from "@foxglove-studio/app/dataProviders/mockExtensionPoint";
-import { InitializationResult } from "@foxglove-studio/app/dataProviders/types";
-import delay from "@foxglove-studio/app/util/delay";
-import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
-import { fromMillis } from "@foxglove-studio/app/util/time";
+} from "@foxglove/studio-base/dataProviders/CombinedDataProvider";
+import MemoryDataProvider from "@foxglove/studio-base/dataProviders/MemoryDataProvider";
+import RenameDataProvider from "@foxglove/studio-base/dataProviders/RenameDataProvider";
+import { mockExtensionPoint } from "@foxglove/studio-base/dataProviders/mockExtensionPoint";
+import { InitializationResult } from "@foxglove/studio-base/dataProviders/types";
+import delay from "@foxglove/studio-base/util/delay";
+import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
+import { fromMillis } from "@foxglove/studio-base/util/time";
 
 // reusable providers
 function provider1(initiallyLoaded = false) {

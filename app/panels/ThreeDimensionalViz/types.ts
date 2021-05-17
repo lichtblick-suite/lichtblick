@@ -13,9 +13,9 @@
 
 import { CameraState } from "regl-worldview";
 
-import { TopicSettingsCollection } from "@foxglove-studio/app/panels/ThreeDimensionalViz/SceneBuilder";
-import { ColorOverrideBySourceIdxByVariable } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/Layout";
-import { TopicDisplayMode } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/types";
+import { TopicSettingsCollection } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
+import { ColorOverrideBySourceIdxByVariable } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
+import { TopicDisplayMode } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/types";
 
 export type ThreeDimensionalVizConfig = {
   enableShortDisplayNames?: boolean;

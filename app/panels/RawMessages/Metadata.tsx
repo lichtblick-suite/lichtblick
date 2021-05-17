@@ -15,10 +15,10 @@ import { cloneDeepWith } from "lodash";
 import React, { useCallback } from "react";
 import styled from "styled-components";
 
-import Icon from "@foxglove-studio/app/components/Icon";
-import { MessageEvent } from "@foxglove-studio/app/players/types";
-import clipboard from "@foxglove-studio/app/util/clipboard";
-import { formatTimeRaw } from "@foxglove-studio/app/util/time";
+import Icon from "@foxglove/studio-base/components/Icon";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
+import clipboard from "@foxglove/studio-base/util/clipboard";
+import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import { getMessageDocumentationLink } from "./utils";
 

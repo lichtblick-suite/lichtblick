@@ -15,11 +15,11 @@ import DatabaseIcon from "@mdi/svg/svg/database.svg";
 import { uniq } from "lodash";
 import styled from "styled-components";
 
-import Dropdown from "@foxglove-studio/app/components/Dropdown";
-import Icon from "@foxglove-studio/app/components/Icon";
-import styles from "@foxglove-studio/app/components/PanelToolbar/index.module.scss";
-import { Topic } from "@foxglove-studio/app/players/types";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import Dropdown from "@foxglove/studio-base/components/Dropdown";
+import Icon from "@foxglove/studio-base/components/Icon";
+import styles from "@foxglove/studio-base/components/PanelToolbar/index.module.scss";
+import { Topic } from "@foxglove/studio-base/players/types";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export type TopicGroup = {
   suffix: string;

@@ -14,19 +14,19 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import styled from "styled-components";
 
-import { useDataSourceInfo } from "@foxglove-studio/app/PanelAPI";
-import Autocomplete from "@foxglove-studio/app/components/Autocomplete";
-import Button from "@foxglove-studio/app/components/Button";
-import Flex from "@foxglove-studio/app/components/Flex";
-import Panel from "@foxglove-studio/app/components/Panel";
-import PanelToolbar from "@foxglove-studio/app/components/PanelToolbar";
-import PanelToolbarLabel from "@foxglove-studio/app/components/PanelToolbarLabel";
-import usePublisher from "@foxglove-studio/app/hooks/usePublisher";
-import { PlayerCapabilities, Topic } from "@foxglove-studio/app/players/types";
-import colors from "@foxglove-studio/app/styles/colors.module.scss";
-import { PanelConfigSchema } from "@foxglove-studio/app/types/panels";
-import { isNonEmptyOrUndefined } from "@foxglove-studio/app/util/emptyOrUndefined";
 import { useRethrow } from "@foxglove/hooks";
+import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
+import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
+import Button from "@foxglove/studio-base/components/Button";
+import Flex from "@foxglove/studio-base/components/Flex";
+import Panel from "@foxglove/studio-base/components/Panel";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import PanelToolbarLabel from "@foxglove/studio-base/components/PanelToolbarLabel";
+import usePublisher from "@foxglove/studio-base/hooks/usePublisher";
+import { PlayerCapabilities, Topic } from "@foxglove/studio-base/players/types";
+import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 import buildSampleMessage from "./buildSampleMessage";
 

@@ -14,7 +14,7 @@
 import { storiesOf } from "@storybook/react";
 import { noop } from "lodash";
 
-import { SliderWithTicks } from "@foxglove-studio/app/components/SliderWithTicks";
+import { SliderWithTicks } from "@foxglove/studio-base/components/SliderWithTicks";
 
 storiesOf("components/SliderWithTicks", module).add("examples", () => {
   return (

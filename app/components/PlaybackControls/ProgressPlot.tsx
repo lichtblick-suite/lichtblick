@@ -13,9 +13,9 @@
 import { complement } from "intervals-fn";
 import { useCallback } from "react";
 
-import AutoSizingCanvas from "@foxglove-studio/app/components/AutoSizingCanvas";
-import { Progress } from "@foxglove-studio/app/players/types";
-import { colors } from "@foxglove-studio/app/util/sharedStyleConstants";
+import AutoSizingCanvas from "@foxglove/studio-base/components/AutoSizingCanvas";
+import { Progress } from "@foxglove/studio-base/players/types";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const BAR_HEIGHT = 28;
 const LINE_START = 12;

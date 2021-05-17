@@ -13,16 +13,16 @@
 
 import { storiesOf } from "@storybook/react";
 
-import { setUserNodes } from "@foxglove-studio/app/actions/panels";
-import SchemaEditor from "@foxglove-studio/app/components/PanelSettings/SchemaEditor";
-import NodePlayground, { Explorer } from "@foxglove-studio/app/panels/NodePlayground";
-import Sidebar from "@foxglove-studio/app/panels/NodePlayground/Sidebar";
-import testDocs from "@foxglove-studio/app/panels/NodePlayground/index.test.md";
-import rawUserUtils from "@foxglove-studio/app/players/UserNodePlayer/nodeTransformerWorker/typescript/rawUserUtils";
-import { UserNodeLog } from "@foxglove-studio/app/players/UserNodePlayer/types";
-import PanelSetup from "@foxglove-studio/app/stories/PanelSetup";
-import { SExpectedResult } from "@foxglove-studio/app/stories/storyHelpers";
-import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
+import { setUserNodes } from "@foxglove/studio-base/actions/panels";
+import SchemaEditor from "@foxglove/studio-base/components/PanelSettings/SchemaEditor";
+import NodePlayground, { Explorer } from "@foxglove/studio-base/panels/NodePlayground";
+import Sidebar from "@foxglove/studio-base/panels/NodePlayground/Sidebar";
+import testDocs from "@foxglove/studio-base/panels/NodePlayground/index.test.md";
+import rawUserUtils from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/rawUserUtils";
+import { UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import { SExpectedResult } from "@foxglove/studio-base/stories/storyHelpers";
+import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 const userNodes = {
   nodeId1: { name: "/studio_node/node", sourceCode: "const someVariableName = 1;" },

@@ -14,8 +14,8 @@
 import { last } from "lodash";
 import memoizeWeak from "memoize-weak";
 
-import { MessagePathStructureItem } from "@foxglove-studio/app/components/MessagePathSyntax/constants";
-import { isTypicalFilterName } from "@foxglove-studio/app/components/MessagePathSyntax/isTypicalFilterName";
+import { MessagePathStructureItem } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
+import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
 
 export type ValueAction =
   | {

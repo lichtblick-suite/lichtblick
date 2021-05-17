@@ -14,7 +14,7 @@
 import { ActionButton, IButton } from "@fluentui/react";
 import { ReactElement, useLayoutEffect, useRef } from "react";
 
-import { usePlayerSelection } from "@foxglove-studio/app/context/PlayerSelectionContext";
+import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 
 type TinyConnectionPickerProps = {
   defaultIsOpen?: boolean;

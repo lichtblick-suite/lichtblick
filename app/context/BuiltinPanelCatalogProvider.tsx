@@ -4,8 +4,8 @@
 
 import { PropsWithChildren, useMemo } from "react";
 
-import PanelCatalogContext from "@foxglove-studio/app/context/PanelCatalogContext";
-import BuiltinPanelCatalog from "@foxglove-studio/app/services/BuiltinPanelCatalog";
+import PanelCatalogContext from "@foxglove/studio-base/context/PanelCatalogContext";
+import BuiltinPanelCatalog from "@foxglove/studio-base/services/BuiltinPanelCatalog";
 
 export default function BuiltinPanelCatalogProvider(
   props: PropsWithChildren<unknown>,

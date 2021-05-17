@@ -10,7 +10,7 @@ import {
 } from "@fluentui/react";
 import { useCallback } from "react";
 
-import { useTooltip } from "@foxglove-studio/app/components/Tooltip";
+import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 
 export const BUTTON_SIZE = 50;
 export const ICON_SIZE = 24;

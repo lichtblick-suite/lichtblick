@@ -13,8 +13,8 @@
 import ClipboardOutlineIcon from "@mdi/svg/svg/clipboard-outline.svg";
 import styled from "styled-components";
 
-import Icon from "@foxglove-studio/app/components/Icon";
-import clipboard from "@foxglove-studio/app/util/clipboard";
+import Icon from "@foxglove/studio-base/components/Icon";
+import clipboard from "@foxglove/studio-base/util/clipboard";
 
 const SCopyTextWrapper = styled.div`
   display: flex;

@@ -17,8 +17,8 @@ import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { MosaicNode, MosaicWithoutDragDropContext } from "react-mosaic-component";
 import styled from "styled-components";
 
-import ErrorBoundary from "@foxglove-studio/app/components/ErrorBoundary";
-import filterMap from "@foxglove-studio/app/util/filterMap";
+import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
+import filterMap from "@foxglove/studio-base/util/filterMap";
 
 import SidebarButton, { BUTTON_SIZE } from "./SidebarButton";
 

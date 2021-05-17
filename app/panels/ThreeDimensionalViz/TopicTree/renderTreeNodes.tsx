@@ -14,16 +14,16 @@
 import { uniq } from "lodash";
 import styled from "styled-components";
 
-import { LinkedGlobalVariable } from "@foxglove-studio/app/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
-import { canEditNamespaceOverrideColorDatatype } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicSettingsEditor/index";
-import { TOPIC_DISPLAY_MODES } from "@foxglove-studio/app/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
+import { LinkedGlobalVariable } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
+import { canEditNamespaceOverrideColorDatatype } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/index";
+import { TOPIC_DISPLAY_MODES } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
 import {
   isNonEmptyOrUndefined,
   nonEmptyOrUndefined,
-} from "@foxglove-studio/app/util/emptyOrUndefined";
-import filterMap from "@foxglove-studio/app/util/filterMap";
-import { SECOND_SOURCE_PREFIX } from "@foxglove-studio/app/util/globalConstants";
-import naturalSort from "@foxglove-studio/app/util/naturalSort";
+} from "@foxglove/studio-base/util/emptyOrUndefined";
+import filterMap from "@foxglove/studio-base/util/filterMap";
+import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
+import naturalSort from "@foxglove/studio-base/util/naturalSort";
 
 import TooltipRow from "./TooltipRow";
 import TooltipTable from "./TooltipTable";

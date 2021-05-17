@@ -15,7 +15,7 @@ import round from "lodash/round";
 import sortBy from "lodash/sortBy";
 import sum from "lodash/sum";
 
-import sendNotification from "@foxglove-studio/app/util/sendNotification";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 export type PerformanceStats = {
   bagLengthMs: number;

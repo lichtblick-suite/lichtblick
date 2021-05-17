@@ -13,7 +13,7 @@
 
 import { Time } from "rosbag";
 
-import { fromSec } from "@foxglove-studio/app/util/time";
+import { fromSec } from "@foxglove/studio-base/util/time";
 
 import { getBagChunksOverlapCount } from "./bags";
 

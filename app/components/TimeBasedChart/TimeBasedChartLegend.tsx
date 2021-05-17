@@ -17,7 +17,7 @@ import { ChartDataset, ScatterDataPoint } from "chart.js";
 import {
   PLOT_DASHED_STYLE,
   PLOT_DOT_DASHED_STYLE,
-} from "@foxglove-studio/app/components/TimeBasedChart/constants";
+} from "@foxglove/studio-base/components/TimeBasedChart/constants";
 
 type Props = {
   canToggleLines?: boolean;
