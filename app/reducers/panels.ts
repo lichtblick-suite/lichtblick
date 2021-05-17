@@ -46,7 +46,6 @@ import {
   ChangePanelLayoutPayload,
   SaveConfigsPayload,
   SaveFullConfigPayload,
-  ImportPanelLayoutPayload,
   SavedProps,
   UserNodes,
   PlaybackConfig,
@@ -418,22 +417,19 @@ export const createTabPanelWithMultipleTabs = (
   };
 };
 
-function importPanelLayout(state: PanelsState, payload: ImportPanelLayoutPayload): PanelsState {
-  try {
-    const newPanelsState = {
-      ...payload,
-      layout: payload.layout,
-      savedProps: payload.savedProps ?? {},
-      globalVariables: payload.globalVariables ?? {},
-      userNodes: payload.userNodes ?? {},
-      linkedGlobalVariables: payload.linkedGlobalVariables ?? [],
-      playbackConfig: payload.playbackConfig ?? defaultPlaybackConfig,
-    };
-
-    return newPanelsState;
-  } catch (err) {
-    return state;
-  }
+function loadLayout(
+  _state: PanelsState,
+  payload: Partial<Omit<PanelsState, "id" | "name">>,
+): PanelsState {
+  return {
+    ...payload,
+    layout: payload.layout,
+    savedProps: payload.savedProps ?? {},
+    globalVariables: payload.globalVariables ?? {},
+    userNodes: payload.userNodes ?? {},
+    linkedGlobalVariables: payload.linkedGlobalVariables ?? [],
+    playbackConfig: payload.playbackConfig ?? defaultPlaybackConfig,
+  };
 }
 
 const moveTab = (panelsState: PanelsState, { source, target }: MoveTabPayload): PanelsState => {
@@ -896,11 +892,8 @@ const panelsReducer = function (state: State, action: ActionTypes): State {
         : createTabPanelWithMultipleTabs(newState, action.payload);
       break;
 
-    case "IMPORT_PANEL_LAYOUT":
-      newState.persistedState.panels = importPanelLayout(
-        newState.persistedState.panels,
-        action.payload,
-      );
+    case "LOAD_LAYOUT":
+      newState.persistedState.panels = loadLayout(newState.persistedState.panels, action.payload);
       break;
 
     case "OVERWRITE_GLOBAL_DATA":
@@ -979,15 +972,6 @@ const panelsReducer = function (state: State, action: ActionTypes): State {
 
     case "END_DRAG":
       newState.persistedState.panels = endDrag(newState.persistedState.panels, action.payload);
-      break;
-
-    case "LOAD_LAYOUT":
-      // Dispatched when loading the page with a layout query param, or when manually selecting a different layout.
-      // Do not update URL based on ensuing migration changes.
-      newState.persistedState.panels = importPanelLayout(
-        newState.persistedState.panels,
-        action.payload,
-      );
       break;
 
     default:

@@ -19,7 +19,7 @@ import styled from "styled-components";
 
 import Log from "@foxglove/log";
 import { redoLayoutChange, undoLayoutChange } from "@foxglove/studio-base/actions/layoutHistory";
-import { importPanelLayout, loadLayout } from "@foxglove/studio-base/actions/panels";
+import { loadLayout } from "@foxglove/studio-base/actions/panels";
 import ConnectionList from "@foxglove/studio-base/components/ConnectionList";
 import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
 import DropOverlay from "@foxglove/studio-base/components/DropOverlay";
@@ -53,13 +53,10 @@ import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFiles
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
 import welcomeLayout from "@foxglove/studio-base/layouts/welcomeLayout";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
-import { ImportPanelLayoutPayload } from "@foxglove/studio-base/types/panels";
 import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import inAutomatedRunMode from "@foxglove/studio-base/util/inAutomatedRunMode";
 
 const log = Log.getLogger(__filename);
-
-type TestableWindow = Window & { setPanelLayout?: (payload: ImportPanelLayoutPayload) => void };
 
 const SToolbarItem = styled.div`
   flex: 0 0 auto;
@@ -190,10 +187,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     if (containerRef.current) {
       containerRef.current.focus();
     }
-    // Add a hook for integration tests.
-    (window as TestableWindow).setPanelLayout = (payload: ImportPanelLayoutPayload) =>
-      dispatch(importPanelLayout(payload));
-  }, [dispatch, openWelcomeLayout]);
+  }, []);
 
   // For undo/redo events, first try the browser's native undo/redo, and if that is disabled, then
   // undo/redo the layout history. Note that in GlobalKeyListener we also handle the keyboard

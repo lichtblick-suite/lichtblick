@@ -70,9 +70,7 @@ export type CreateTabPanelPayload = {
   singleTab: boolean;
 };
 
-export type ImportPanelLayoutPayload = Partial<Omit<PanelsState, "id" | "name">> & {
-  skipSettingLocalStorage?: boolean;
-};
+export type LoadLayoutPayload = Partial<Omit<PanelsState, "id" | "name">>;
 
 export type SaveConfig<Config> = (arg0: Partial<Config>) => void;
 

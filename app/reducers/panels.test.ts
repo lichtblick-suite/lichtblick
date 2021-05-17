@@ -18,7 +18,7 @@ import { setSelectedPanelIds } from "@foxglove/studio-base/actions/mosaic";
 import {
   changePanelLayout,
   savePanelConfigs,
-  importPanelLayout,
+  loadLayout,
   createTabPanel,
   setUserNodes,
   closePanel,
@@ -41,7 +41,7 @@ import {
 import { getGlobalStoreForTest } from "@foxglove/studio-base/store/getGlobalStore";
 import {
   CreateTabPanelPayload,
-  ImportPanelLayoutPayload,
+  LoadLayoutPayload,
   MosaicDropTargetPosition,
 } from "@foxglove/studio-base/types/panels";
 import Storage from "@foxglove/studio-base/util/Storage";
@@ -97,7 +97,7 @@ describe("state.persistedState", () => {
       expect(panels.savedProps).toEqual({});
     });
 
-    store.dispatch(importPanelLayout(payload));
+    store.dispatch(loadLayout(payload));
     checkState(({ persistedState: { panels } }) => {
       expect(panels.layout).toEqual("foo!bar");
       expect(panels.savedProps).toEqual({ "foo!bar": { test: true } });
@@ -141,7 +141,7 @@ describe("state.persistedState", () => {
       futureFieldName: "foo",
     };
 
-    store.dispatch(importPanelLayout(payload));
+    store.dispatch(loadLayout(payload));
     checkState(({ persistedState: { panels } }) => {
       const result = {
         layout: "foo!bar",
@@ -166,7 +166,7 @@ describe("state.persistedState", () => {
       savedProps: { foo: { test: true } },
     };
 
-    store.dispatch(importPanelLayout(payload));
+    store.dispatch(loadLayout(payload));
     checkState(() => {
       const globalState = GetGlobalState();
       expect(globalState.panels.globalVariables).toEqual({});
@@ -182,7 +182,7 @@ describe("state.persistedState", () => {
       savedProps: { foo: { test: true } },
     };
 
-    store.dispatch(importPanelLayout(payload));
+    store.dispatch(loadLayout(payload));
     checkState(() => {
       const globalState = GetGlobalState();
       expect(globalState.panels.playbackConfig).toEqual({
@@ -208,7 +208,7 @@ describe("state.persistedState", () => {
       linkedGlobalVariables,
     };
 
-    store.dispatch(importPanelLayout(payload));
+    store.dispatch(loadLayout(payload));
     checkState(() => {
       const globalState = GetGlobalState();
       expect(globalState.panels.globalVariables).toEqual(globalVariables);
@@ -226,7 +226,7 @@ describe("state.persistedState", () => {
           "Tab!a": { activeTabIdx: 0, tabs: [{ title: "A" }, { title: "B" }, { title: "C" }] },
         },
       };
-      store.dispatch(importPanelLayout(panelLayout));
+      store.dispatch(loadLayout(panelLayout));
       store.dispatch(
         addPanel({
           id: "Audio!x",
@@ -255,7 +255,7 @@ describe("state.persistedState", () => {
           "Tab!a": { activeTabIdx: 0, tabs: [{ title: "A" }, { title: "B" }, { title: "C" }] },
         },
       };
-      store.dispatch(importPanelLayout(panelLayout));
+      store.dispatch(loadLayout(panelLayout));
       store.dispatch(
         addPanel({ id: "Audio!x", tabId: "Tab!a", layout: undefined, config: { foo: "bar" } }),
       );
@@ -292,7 +292,7 @@ describe("state.persistedState", () => {
           "Tab!a": { activeTabIdx: 0, tabs: [{ title: "A" }, { title: "B" }, { title: "C" }] },
         },
       };
-      store.dispatch(importPanelLayout(panelLayout));
+      store.dispatch(loadLayout(panelLayout));
       store.dispatch(
         dropPanel({
           newPanelType: "Audio",
@@ -318,7 +318,7 @@ describe("state.persistedState", () => {
     it("drops Tab panel into app layout", () => {
       const { store, checkState } = getStore();
       const panelLayout = { layout: "Audio!a", savedProps: { "Audio!a": { foo: "bar" } } };
-      store.dispatch(importPanelLayout(panelLayout));
+      store.dispatch(loadLayout(panelLayout));
       store.dispatch(
         dropPanel({
           newPanelType: "Tab",
@@ -359,7 +359,7 @@ describe("state.persistedState", () => {
           "Tab!a": { activeTabIdx: 0, tabs: [{ title: "A" }, { title: "B" }, { title: "C" }] },
         },
       };
-      store.dispatch(importPanelLayout(panelLayout));
+      store.dispatch(loadLayout(panelLayout));
       store.dispatch(
         dropPanel({
           newPanelType: "Audio",
@@ -393,7 +393,7 @@ describe("state.persistedState", () => {
           "Tab!b": { activeTabIdx: 0, tabs: [{ title: "B", layout: "Plot!a" }] },
         },
       };
-      store.dispatch(importPanelLayout(panelLayout));
+      store.dispatch(loadLayout(panelLayout));
       store.dispatch(
         dropPanel({
           newPanelType: "Audio",
@@ -423,7 +423,7 @@ describe("state.persistedState", () => {
     it("drops nested Tab panel into main layout", () => {
       const { store, checkState } = getStore();
       const panelLayout = { layout: "Audio!a" };
-      store.dispatch(importPanelLayout(panelLayout));
+      store.dispatch(loadLayout(panelLayout));
       store.dispatch(
         dropPanel({
           newPanelType: "Tab",
@@ -470,7 +470,7 @@ describe("state.persistedState", () => {
           "Tab!a": { activeTabIdx: 0, tabs: [{ title: "A" }, { title: "B" }, { title: "C" }] },
         },
       };
-      store.dispatch(importPanelLayout(panelLayout));
+      store.dispatch(loadLayout(panelLayout));
       store.dispatch(
         moveTab({
           source: { panelId: "Tab!a", tabIndex: 0 },
@@ -500,7 +500,7 @@ describe("state.persistedState", () => {
           },
         },
       };
-      store.dispatch(importPanelLayout(panelLayout));
+      store.dispatch(loadLayout(panelLayout));
       store.dispatch(
         moveTab({
           source: { panelId: "Tab!a", tabIndex: 0 },
@@ -521,9 +521,7 @@ describe("state.persistedState", () => {
 
   it("closes a panel in single-panel layout", () => {
     const { store, checkState } = getStore();
-    store.dispatch(
-      importPanelLayout({ layout: "Audio!a", savedProps: { "Audio!a": { foo: "bar" } } }),
-    );
+    store.dispatch(loadLayout({ layout: "Audio!a", savedProps: { "Audio!a": { foo: "bar" } } }));
     store.dispatch(setSelectedPanelIds(["Audio!a", "unknown!b"]));
     store.dispatch(closePanel({ root: "Audio!a", path: [] }));
     checkState(
@@ -547,7 +545,7 @@ describe("state.persistedState", () => {
       layout,
       savedProps: { "Audio!a": { foo: "bar" }, "Audio!b": { foo: "baz" } },
     };
-    store.dispatch(importPanelLayout(panelLayout));
+    store.dispatch(loadLayout(panelLayout));
     store.dispatch(setSelectedPanelIds(["Audio!a", "Audio!b"]));
     store.dispatch(closePanel({ root: panelLayout.layout, path: ["first"] }));
     checkState(({ persistedState: { panels }, mosaic: { selectedPanelIds } }) => {
@@ -566,7 +564,7 @@ describe("state.persistedState", () => {
         "Audio!a": { foo: "bar" },
       },
     };
-    store.dispatch(importPanelLayout(panelLayout));
+    store.dispatch(loadLayout(panelLayout));
     store.dispatch(setSelectedPanelIds(["Audio!a"]));
     store.dispatch(closePanel({ root: "Audio!a", path: [], tabId: "Tab!a" }));
     checkState(({ persistedState: { panels }, mosaic: { selectedPanelIds } }) => {
@@ -589,7 +587,7 @@ describe("state.persistedState", () => {
 
   it("resets panels to a valid state when importing an empty layout", () => {
     const { store, checkState } = getStore();
-    store.dispatch(importPanelLayout({ layout: undefined }));
+    store.dispatch(loadLayout({ layout: undefined }));
     checkState(({ persistedState: { panels } }) => {
       expect(panels).toEqual({
         globalVariables: {},
@@ -602,26 +600,14 @@ describe("state.persistedState", () => {
     });
   });
 
-  it("will set local storage when importing a panel layout, if reducer is not told to skipSettingLocalStorage", () => {
+  it("will set local storage when importing a panel layout", () => {
     const { store, checkState } = getStore();
 
-    const x = importPanelLayout({ layout: "myNewLayout", savedProps: {} }, {});
+    const x = loadLayout({ layout: "myNewLayout", savedProps: {} });
     store.dispatch(x);
     checkState(() => {
       const globalState = GetGlobalState();
       expect(globalState.panels.layout).toEqual("myNewLayout");
-    });
-  });
-
-  it("will not set local storage when importing a panel layout, if reducer is told to skipSettingLocalStorage", () => {
-    const { store, checkState } = getStore();
-
-    store.dispatch(
-      importPanelLayout({ layout: undefined, savedProps: {} }, { skipSettingLocalStorage: true }),
-    );
-    checkState(({ persistedState: { panels } }) => {
-      const globalState = GetGlobalState();
-      expect(globalState.panels.layout).not.toEqual(panels.layout);
     });
   });
 
@@ -634,7 +620,7 @@ describe("state.persistedState", () => {
         direction: "row",
       },
       savedProps: { "Audio!a": { foo: "bar" }, "RawMessages!a": { foo: "baz" } },
-    } as ImportPanelLayoutPayload;
+    } as LoadLayoutPayload;
     const basePayload = {
       idToReplace: "Audio!a",
       newId: "Tab!a",
@@ -661,7 +647,7 @@ describe("state.persistedState", () => {
         "Audio!b": { foo: "baz" },
         "RawMessages!a": { raw: "messages" },
       },
-    } as ImportPanelLayoutPayload;
+    } as LoadLayoutPayload;
     const createTabPanelPayload = {
       ...basePayload,
       layout: regularLayoutPayload.layout,
@@ -672,7 +658,7 @@ describe("state.persistedState", () => {
     } as CreateTabPanelPayload;
 
     it("will group selected panels into a Tab panel", () => {
-      store.dispatch(importPanelLayout(regularLayoutPayload, { skipSettingLocalStorage: true }));
+      store.dispatch(loadLayout(regularLayoutPayload));
       store.dispatch(createTabPanel({ ...createTabPanelPayload, singleTab: true }));
 
       checkState(
@@ -701,7 +687,7 @@ describe("state.persistedState", () => {
     });
 
     it("will group selected panels into a Tab panel, even when a selected panel is nested", () => {
-      store.dispatch(importPanelLayout(nestedLayoutPayload, { skipSettingLocalStorage: true }));
+      store.dispatch(loadLayout(nestedLayoutPayload));
       store.dispatch(createTabPanel({ ...nestedCreateTabPanelPayload, singleTab: true }));
 
       checkState(
@@ -731,7 +717,7 @@ describe("state.persistedState", () => {
     });
 
     it("will create individual tabs for selected panels in a new Tab panel", () => {
-      store.dispatch(importPanelLayout(regularLayoutPayload, { skipSettingLocalStorage: true }));
+      store.dispatch(loadLayout(regularLayoutPayload));
       store.dispatch(createTabPanel({ ...createTabPanelPayload, singleTab: false }));
 
       checkState(
@@ -758,7 +744,7 @@ describe("state.persistedState", () => {
     });
 
     it("will create individual tabs for selected panels in a new Tab panel, even when a selected panel is nested", () => {
-      store.dispatch(importPanelLayout(nestedLayoutPayload, { skipSettingLocalStorage: true }));
+      store.dispatch(loadLayout(nestedLayoutPayload));
       store.dispatch(createTabPanel({ ...nestedCreateTabPanelPayload, singleTab: false }));
 
       checkState(
@@ -1176,7 +1162,7 @@ describe("state.persistedState", () => {
   describe("handles dragging panels", () => {
     it("does not remove panel from single-panel layout when starting drag", () => {
       const { store, checkState } = getStore();
-      store.dispatch(importPanelLayout({ layout: "Audio!a", savedProps: {} }));
+      store.dispatch(loadLayout({ layout: "Audio!a", savedProps: {} }));
       store.dispatch(startDrag({ sourceTabId: undefined, path: [] }));
       checkState(
         ({
@@ -1191,7 +1177,7 @@ describe("state.persistedState", () => {
     it("hides panel from multi-panel layout when starting drag", () => {
       const { store, checkState } = getStore();
       store.dispatch(
-        importPanelLayout({
+        loadLayout({
           layout: { first: "Audio!a", second: "RawMessages!a", direction: "column" },
           savedProps: {},
         }),
@@ -1215,7 +1201,7 @@ describe("state.persistedState", () => {
     it("removes non-Tab panel from single-panel tab layout when starting drag", () => {
       const { store, checkState } = getStore();
       store.dispatch(
-        importPanelLayout({
+        loadLayout({
           layout: { first: "Tab!a", second: "RawMessages!a", direction: "column" },
           savedProps: {
             "Tab!a": { activeTabIdx: 0, tabs: [{ title: "A", layout: "Audio!a" }] },
@@ -1240,7 +1226,7 @@ describe("state.persistedState", () => {
     it("hides panel from multi-panel Tab layout when starting drag", () => {
       const { store, checkState } = getStore();
       store.dispatch(
-        importPanelLayout({
+        loadLayout({
           layout: { first: "Tab!a", second: "RawMessages!a", direction: "column" },
           savedProps: {
             "Tab!a": {
@@ -1285,7 +1271,7 @@ describe("state.persistedState", () => {
           tabs: [{ title: "A", layout: { first: "Audio!a", second: "Plot!a", direction: "row" } }],
         },
       };
-      store.dispatch(importPanelLayout({ layout: "Tab!a", savedProps: originalSavedProps }));
+      store.dispatch(loadLayout({ layout: "Tab!a", savedProps: originalSavedProps }));
       store.dispatch(startDrag({ sourceTabId: "Tab!a", path: ["first"] }));
       store.dispatch(
         endDrag({
@@ -1328,7 +1314,7 @@ describe("state.persistedState", () => {
           tabs: [{ title: "A", layout: { first: "Audio!a", second: "Plot!a", direction: "row" } }],
         },
       };
-      store.dispatch(importPanelLayout({ layout: originalLayout, savedProps: originalSavedProps }));
+      store.dispatch(loadLayout({ layout: originalLayout, savedProps: originalSavedProps }));
       store.dispatch(startDrag({ sourceTabId: "Tab!a", path: ["first"] }));
       store.dispatch(
         endDrag({
@@ -1374,7 +1360,7 @@ describe("state.persistedState", () => {
         },
       };
       store.dispatch(
-        importPanelLayout({
+        loadLayout({
           layout: originalLayout,
           savedProps: originalSavedProps,
         }),
@@ -1437,7 +1423,7 @@ describe("state.persistedState", () => {
           ],
         },
       };
-      store.dispatch(importPanelLayout({ layout: originalLayout, savedProps: originalSavedProps }));
+      store.dispatch(loadLayout({ layout: originalLayout, savedProps: originalSavedProps }));
       store.dispatch(startDrag({ sourceTabId: "Tab!a", path: ["first"] }));
       store.dispatch(
         endDrag({
@@ -1500,7 +1486,7 @@ describe("state.persistedState", () => {
         "Tab!b": { activeTabIdx: 0, tabs: [{ title: "B" }] },
         "Tab!c": tabCConfig,
       };
-      store.dispatch(importPanelLayout({ layout: originalLayout, savedProps: originalSavedProps }));
+      store.dispatch(loadLayout({ layout: originalLayout, savedProps: originalSavedProps }));
       store.dispatch(startDrag({ sourceTabId: "Tab!a", path: ["first"] }));
       store.dispatch(
         endDrag({
@@ -1535,7 +1521,7 @@ describe("state.persistedState", () => {
     });
     it("handles drags in single-panel layouts", () => {
       const { store, checkState } = getStore();
-      store.dispatch(importPanelLayout({ layout: "Audio!a" }));
+      store.dispatch(loadLayout({ layout: "Audio!a" }));
       store.dispatch(startDrag({ sourceTabId: undefined, path: [] }));
       store.dispatch(
         endDrag({
@@ -1566,7 +1552,7 @@ describe("state.persistedState", () => {
         second: "Plot!a",
         direction: "row",
       } as MosaicParent<string>;
-      store.dispatch(importPanelLayout({ layout: originalLayout }));
+      store.dispatch(loadLayout({ layout: originalLayout }));
       store.dispatch(startDrag({ sourceTabId: undefined, path: ["first"] }));
       store.dispatch(
         endDrag({
@@ -1597,7 +1583,7 @@ describe("state.persistedState", () => {
         second: "Plot!a",
         direction: "row",
       } as MosaicParent<string>;
-      store.dispatch(importPanelLayout({ layout: originalLayout }));
+      store.dispatch(loadLayout({ layout: originalLayout }));
       store.dispatch(startDrag({ sourceTabId: undefined, path: ["first"] }));
       store.dispatch(
         endDrag({

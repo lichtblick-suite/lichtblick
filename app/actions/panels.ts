@@ -14,11 +14,10 @@ import { MosaicNode, MosaicPath } from "react-mosaic-component";
 
 import { LinkedGlobalVariables } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { Dispatcher } from "@foxglove/studio-base/reducers";
-import { PanelsState } from "@foxglove/studio-base/reducers/panels";
 import { TabLocation } from "@foxglove/studio-base/types/layouts";
 import {
   CreateTabPanelPayload,
-  ImportPanelLayoutPayload,
+  LoadLayoutPayload,
   ChangePanelLayoutPayload,
   SaveConfigsPayload,
   SaveFullConfigPayload,
@@ -61,7 +60,7 @@ export type CHANGE_PANEL_LAYOUT = {
   type: "CHANGE_PANEL_LAYOUT";
   payload: ChangePanelLayoutPayload;
 };
-type LOAD_LAYOUT = { type: "LOAD_LAYOUT"; payload: PanelsState };
+type LOAD_LAYOUT = { type: "LOAD_LAYOUT"; payload: LoadLayoutPayload };
 
 export const savePanelConfigs =
   (payload: SaveConfigsPayload): Dispatcher<SAVE_PANEL_CONFIGS> =>
@@ -80,19 +79,6 @@ export const createTabPanel = (payload: CreateTabPanelPayload): CREATE_TAB_PANEL
   payload,
 });
 
-type IMPORT_PANEL_LAYOUT = { type: "IMPORT_PANEL_LAYOUT"; payload: ImportPanelLayoutPayload };
-export const importPanelLayout =
-  (
-    payload: ImportPanelLayoutPayload,
-    { skipSettingLocalStorage = false }: { skipSettingLocalStorage?: boolean } = {},
-  ): Dispatcher<IMPORT_PANEL_LAYOUT> =>
-  (dispatch) => {
-    return dispatch({
-      type: PANELS_ACTION_TYPES.IMPORT_PANEL_LAYOUT,
-      payload: skipSettingLocalStorage ? { ...payload, skipSettingLocalStorage } : payload,
-    });
-  };
-
 export const changePanelLayout =
   (payload: ChangePanelLayoutPayload): Dispatcher<CHANGE_PANEL_LAYOUT> =>
   (dispatch) => {
@@ -100,9 +86,9 @@ export const changePanelLayout =
   };
 
 export const loadLayout =
-  (layout: PanelsState): Dispatcher<LOAD_LAYOUT> =>
+  (payload: LoadLayoutPayload): Dispatcher<LOAD_LAYOUT> =>
   (dispatch) => {
-    return dispatch({ type: PANELS_ACTION_TYPES.LOAD_LAYOUT, payload: layout });
+    return dispatch({ type: PANELS_ACTION_TYPES.LOAD_LAYOUT, payload });
   };
 
 type OVERWRITE_GLOBAL_DATA = {
@@ -257,7 +243,6 @@ export const endDrag = (payload: EndDragPayload): END_DRAG => ({
 
 export type PanelsActions =
   | CHANGE_PANEL_LAYOUT
-  | IMPORT_PANEL_LAYOUT
   | SAVE_PANEL_CONFIGS
   | SAVE_FULL_PANEL_CONFIG
   | CREATE_TAB_PANEL
