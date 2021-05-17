@@ -111,7 +111,7 @@ class ButtonBaseImpl extends React.Component<Props> {
         onFocus={onFocus}
         onMouseLeave={this.onMouseLeave}
         onMouseUp={this.onMouseUp}
-        style={{ position: "relative", zIndex: 0, overflow: "hidden", ...style }}
+        style={{ position: "relative", ...style }}
         title={tooltip}
         disabled={disabled}
         ref={innerRef}
