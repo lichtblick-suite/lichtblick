@@ -13,8 +13,8 @@
 
 import { storiesOf } from "@storybook/react";
 import { useCallback, useRef } from "react";
-import { parseMessageDefinition } from "rosbag";
 
+import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import SchemaEditor from "@foxglove/studio-base/components/PanelSettings/SchemaEditor";
 import { BlockCache } from "@foxglove/studio-base/dataProviders/MemoryCacheDataProvider";
 import Plot, { PlotConfig } from "@foxglove/studio-base/panels/Plot";

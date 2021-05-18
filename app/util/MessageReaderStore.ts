@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { MessageReader, parseMessageDefinition } from "rosbag";
+import { MessageReader } from "rosbag";
 
+import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { FREEZE_MESSAGES } from "@foxglove/studio-base/util/globalConstants";
 
 class ReaderItem {

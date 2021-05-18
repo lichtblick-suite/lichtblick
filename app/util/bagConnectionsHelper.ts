@@ -11,13 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import Bag, { parseMessageDefinition } from "rosbag";
+import Bag from "rosbag";
 
+import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { Connection } from "@foxglove/studio-base/dataProviders/types";
 import { Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-
-// TODO(JP): Move all this stuff into rosbag.
 
 type DatatypeDescription = {
   messageDefinition: string;

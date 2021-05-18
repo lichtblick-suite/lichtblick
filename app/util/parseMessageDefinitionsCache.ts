@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { fromPairs, difference } from "lodash";
-import { parseMessageDefinition, RosMsgDefinition } from "rosbag";
 
+import { parse as parseMessageDefinition, RosMsgDefinition } from "@foxglove/rosmsg";
 import MemoryStorage from "@foxglove/studio-base/test/MemoryStorage";
 import Storage, { BackingStore, BustStorageFn } from "@foxglove/studio-base/util/Storage";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";

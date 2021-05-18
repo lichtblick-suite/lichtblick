@@ -15,9 +15,9 @@
 /* eslint-disable @typescript-eslint/strict-boolean-expressions */
 
 import { without } from "lodash";
-import type { RosMsgField } from "rosbag";
 import ts from "typescript/lib/typescript";
 
+import { RosMsgField } from "@foxglove/rosmsg";
 import baseDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/baseDatatypes";
 import {
   noFuncError,

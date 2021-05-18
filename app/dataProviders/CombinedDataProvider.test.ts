@@ -25,8 +25,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { parseMessageDefinition } from "rosbag";
-
+import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import BagDataProvider from "@foxglove/studio-base/dataProviders/BagDataProvider";
 import CombinedDataProvider, {
   mergedBlocks,

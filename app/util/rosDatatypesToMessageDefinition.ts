@@ -11,8 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { RosMsgDefinition } from "rosbag";
-
+import { RosMsgDefinition } from "@foxglove/rosmsg";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 // For one datatype in the datatypes, find the RosMsgDefinition that we can use to either write or parse it.

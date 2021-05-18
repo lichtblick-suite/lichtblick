@@ -3,8 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { EventEmitter } from "eventemitter3";
-import { MessageReader, parseMessageDefinition, RosMsgDefinition } from "rosbag";
+import { MessageReader } from "rosbag";
 import { TextDecoder, TextEncoder } from "web-encoding";
+
+import { parse as parseMessageDefinition, RosMsgDefinition } from "@foxglove/rosmsg";
 
 import { Connection, ConnectionStats } from "./Connection";
 import { LoggerService } from "./LoggerService";

@@ -11,8 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Time, RosMsgDefinition } from "rosbag";
+import { Time } from "rosbag";
 
+import { RosMsgDefinition } from "@foxglove/rosmsg";
 import { BlockCache } from "@foxglove/studio-base/dataProviders/MemoryCacheDataProvider";
 import {
   AverageThroughput,

@@ -13,8 +13,9 @@
 
 import { assign, flatten, isEqual } from "lodash";
 import memoizeWeak from "memoize-weak";
-import { TimeUtil, Time, RosMsgField } from "rosbag";
+import { TimeUtil, Time } from "rosbag";
 
+import { RosMsgField } from "@foxglove/rosmsg";
 import {
   BlockCache,
   MemoryCacheBlock,

@@ -12,8 +12,9 @@
 //   You may not use this file except in compliance with the License.
 
 import assert from "assert";
-import { MessageReader, parseMessageDefinition } from "rosbag";
+import { MessageReader } from "rosbag";
 
+import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import BagDataProvider from "@foxglove/studio-base/dataProviders/BagDataProvider";
 import ParsedMessageCache, {
   CACHE_SIZE_BYTES,
