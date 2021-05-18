@@ -14,6 +14,7 @@
 import { useRef, useMemo, useState, useEffect, useContext, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
 
+import Log from "@foxglove/log";
 import {
   useMessagePipeline,
   MessagePipelineContext,
@@ -27,6 +28,8 @@ import {
   PlayerStateActiveData,
   SubscribePayload,
 } from "@foxglove/studio-base/players/types";
+
+const log = Log.getLogger(__filename);
 
 type MessageReducer<T> = (arg0: T, message: MessageEvent<unknown>) => T;
 type MessagesReducer<T> = (arg0: T, messages: readonly MessageEvent<unknown>[]) => T;
@@ -105,23 +108,23 @@ export function useMessageReducer<T>(props: Params<T>): T {
   }
 
   useShouldNotChangeOften(props.restore, () =>
-    console.warn(
+    log.warn(
       "useMessageReducer restore() is changing frequently. " +
         "restore() will be called each time it changes, so a new function " +
         "shouldn't be created on each render. (If you're using Hooks, try useCallback.)",
     ),
   );
   useShouldNotChangeOften(props.addMessage, () =>
-    console.warn(
+    log.warn(
       "useMessageReducer addMessage() is changing frequently. " +
-        "restore() will be called each time it changes, so a new function " +
+        "addMessage() will be called each time it changes, so a new function " +
         "shouldn't be created on each render. (If you're using Hooks, try useCallback.)",
     ),
   );
   useShouldNotChangeOften(props.addMessages, () =>
-    console.warn(
+    log.warn(
       "useMessageReducer addMessages() is changing frequently. " +
-        "restore() will be called each time it changes, so a new function " +
+        "addMessages() will be called each time it changes, so a new function " +
         "shouldn't be created on each render. (If you're using Hooks, try useCallback.)",
     ),
   );

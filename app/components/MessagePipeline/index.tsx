@@ -17,7 +17,6 @@ import { Time } from "rosbag";
 import useContextSelector from "@foxglove/studio-base/hooks/useContextSelector";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
-import useShouldNotChangeOften from "@foxglove/studio-base/hooks/useShouldNotChangeOften";
 import {
   AdvertisePayload,
   Frame,
@@ -240,16 +239,7 @@ export function MessagePipelineProvider({
     };
   }, [player]);
 
-  const topics: Topic[] | undefined = playerState.activeData?.topics;
-  useShouldNotChangeOften(topics, () => {
-    sendNotification(
-      "Provider topics should not change often",
-      "If they do they are probably not memoized properly. Please let the Foxglove team know if you see this warning.",
-      "app",
-      "warn",
-    );
-  });
-
+  const topics: Topic[] | undefined = useShallowMemo(playerState.activeData?.topics);
   const unmemoizedDatatypes: RosDatatypes | undefined = playerState.activeData?.datatypes;
   const messages: readonly MessageEvent<unknown>[] | undefined = playerState.activeData?.messages;
   const frame = useMemo(() => groupBy(messages ?? [], "topic"), [messages]);
