@@ -12,6 +12,16 @@ import App from "./App";
 import { NetworkInterface, OsContext } from "./OsContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import MultiProvider from "./components/MultiProvider";
+import AppConfigurationContext, {
+  AppConfiguration,
+  AppConfigurationValue,
+  ChangeHandler,
+} from "./context/AppConfigurationContext";
+import LayoutStorageContext, { Layout, LayoutStorage } from "./context/LayoutStorageContext";
+import NativeAppMenuContext, {
+  NativeAppMenu,
+  NativeAppMenuEvent,
+} from "./context/NativeAppMenuContext";
 import { PlayerSourceDefinition } from "./context/PlayerSelectionContext";
 import ThemeProvider from "./theme/ThemeProvider";
 import installDevtoolsFormatters from "./util/installDevtoolsFormatters";
@@ -21,13 +31,27 @@ import waitForFonts from "./util/waitForFonts";
 
 export {
   App,
+  AppConfigurationContext,
   ErrorBoundary,
-  MultiProvider,
-  ThemeProvider,
-  installDevtoolsFormatters,
   initializeLogEvent,
+  installDevtoolsFormatters,
+  LayoutStorageContext,
+  MultiProvider,
+  NativeAppMenuContext,
   overwriteFetch,
+  ThemeProvider,
   waitForFonts,
 };
 
-export type { PlayerSourceDefinition, OsContext, NetworkInterface };
+export type {
+  AppConfiguration,
+  AppConfigurationValue,
+  ChangeHandler,
+  Layout,
+  LayoutStorage,
+  NativeAppMenu,
+  NativeAppMenuEvent,
+  NetworkInterface,
+  OsContext,
+  PlayerSourceDefinition,
+};

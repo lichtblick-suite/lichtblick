@@ -4,9 +4,7 @@
 
 import { PropsWithChildren, useState } from "react";
 
-import LayourStorageContext, {
-  LayoutStorage,
-} from "@foxglove/studio-base/context/LayoutStorageContext";
+import { LayoutStorageContext, LayoutStorage } from "@foxglove/studio-base";
 
 export default function NoOpLayoutStorageProvider(props: PropsWithChildren<unknown>): JSX.Element {
   const [ctx] = useState<LayoutStorage>(() => {
@@ -27,6 +25,6 @@ export default function NoOpLayoutStorageProvider(props: PropsWithChildren<unkno
   });
 
   return (
-    <LayourStorageContext.Provider value={ctx}>{props.children}</LayourStorageContext.Provider>
+    <LayoutStorageContext.Provider value={ctx}>{props.children}</LayoutStorageContext.Provider>
   );
 }

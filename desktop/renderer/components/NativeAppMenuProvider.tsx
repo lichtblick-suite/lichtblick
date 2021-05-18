@@ -4,10 +4,7 @@
 
 import { PropsWithChildren, useMemo } from "react";
 
-import NativeAppMenuContext, {
-  NativeAppMenu,
-  NativeAppMenuEvent,
-} from "@foxglove/studio-base/context/NativeAppMenuContext";
+import { NativeAppMenuContext, NativeAppMenu, NativeAppMenuEvent } from "@foxglove/studio-base";
 
 import { NativeMenuBridge } from "../../common/types";
 

@@ -4,7 +4,7 @@
 
 import { PropsWithChildren, useMemo } from "react";
 
-import LayoutStorageContext from "@foxglove/studio-base/context/LayoutStorageContext";
+import { LayoutStorageContext } from "@foxglove/studio-base";
 
 import { useNativeStorage } from "../context/NativeStorageContext";
 import NativeStorageLayoutStorage from "../services/NativeStorageLayoutStorage";

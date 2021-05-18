@@ -3,11 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { Mutex } from "async-mutex";
 
-import {
-  AppConfiguration,
-  AppConfigurationValue,
-  ChangeHandler,
-} from "@foxglove/studio-base/context/AppConfigurationContext";
+import { AppConfiguration, AppConfigurationValue, ChangeHandler } from "@foxglove/studio-base";
 
 import { Storage } from "../../common/types";
 
