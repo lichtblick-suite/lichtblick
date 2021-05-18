@@ -1,4 +1,4 @@
-# Foxglove Studio
+# <img src="resources/icon/icon.png" width="40" height="40" align="top"> Foxglove Studio
 
 Foxglove Studio ([foxglove.dev](https://foxglove.dev)) is an integrated visualization and diagnosis tool for robotics.
 
