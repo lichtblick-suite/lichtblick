@@ -47,6 +47,7 @@
   },
   "resolutions": {
     "@types/node": "15.3.0",
+    "esbuild-runner/esbuild": "0.12.0",
     "spectron/electron-chromedriver": "foxglove/chromedriver#7edaf1852173776e0e0db364acad12d4a9a8d17f"
   },
   "devDependencies": {

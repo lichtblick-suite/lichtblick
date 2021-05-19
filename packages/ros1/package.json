@@ -24,7 +24,6 @@
     "test": "jest"
   },
   "devDependencies": {
-    "esbuild": "0.12.0",
     "esbuild-runner": "1.3.2",
     "jest": "27.0.0-next.8",
     "jest-circus": "27.0.0-next.8",
