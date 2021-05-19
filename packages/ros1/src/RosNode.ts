@@ -4,8 +4,13 @@
 
 import { EventEmitter } from "eventemitter3";
 import { Md5 } from "md5-typescript";
-import { MessageWriter, parseMessageDefinition, RosMsgDefinition } from "rosbag";
+import { MessageWriter } from "rosbag";
 
+import {
+  parse as parseMessageDefinition,
+  stringify as rosMsgDefinitionText,
+  RosMsgDefinition,
+} from "@foxglove/rosmsg";
 import { HttpServer, XmlRpcFault, XmlRpcValue } from "@foxglove/xmlrpc";
 
 import { Client } from "./Client";
@@ -22,7 +27,6 @@ import { TcpSocketCreate, TcpServer, TcpAddress, NetworkInterface } from "./TcpT
 import { RosXmlRpcResponse } from "./XmlRpcTypes";
 import { difference } from "./difference";
 import { isEmptyPlainObject } from "./objectTests";
-import { rosMsgDefinitionText } from "./rosmsg";
 
 export type RosGraph = {
   publishers: Map<string, Set<string>>; // Maps topic names to arrays of nodes publishing each topic

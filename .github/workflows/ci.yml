@@ -61,8 +61,8 @@ jobs:
           path: |
             .yarn/cache
             **/node_modules
-          key: ${{ runner.os }}-yarn-1-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: ${{ runner.os }}-yarn-1-
+          key: ${{ runner.os }}-yarn-3-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-3-
       - run: yarn install --immutable
       - run: ${{ matrix.config.command }}
         env:

@@ -2,11 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { RosMsgDefinition } from "rosbag";
+import { RosMsgDefinition } from "./types";
 
 // Converts a ROS message definition (http://wiki.ros.org/msg) into a canonical
 // message description format that is suitable for MD5 checksum generation
-export function rosMsgDefinitionText(msgDefs: RosMsgDefinition[]): string {
+export function stringify(msgDefs: RosMsgDefinition[]): string {
   let output = "";
   for (let i = 0; i < msgDefs.length; i++) {
     const msgDef = msgDefs[i] as RosMsgDefinition;
