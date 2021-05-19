@@ -96,6 +96,11 @@ export class TcpSocketNode extends EventEmitter implements TcpSocket {
     });
   }
 
+  setNoDelay(noDelay?: boolean): Promise<void> {
+    this._socket.setNoDelay(noDelay);
+    return Promise.resolve();
+  }
+
   static Create({ host, port }: { host: string; port: number }): Promise<TcpSocket> {
     return Promise.resolve(new TcpSocketNode(host, port, new net.Socket()));
   }

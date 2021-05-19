@@ -16,6 +16,13 @@ type ValueInfo = { index?: number; keys?: string[]; value: XmlRpcValue; xml: XML
 const illegalChars = /^(?![^<&]*]]>[^<&]*)[^<&]*$/;
 const dateFormatter = new DateFormatter();
 
+// ref <http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php>
+export enum XmlRpcError {
+  APPLICATION_ERROR = -32500,
+  NOT_FOUND_ERROR = -32601,
+  INVALID_PARAMS_ERROR = -32602,
+}
+
 // Creates the XML for an XML-RPC method call
 export function serializeMethodCall(
   method: string,
@@ -44,11 +51,8 @@ export function serializeMethodResponse(result: XmlRpcValue): string {
 }
 
 export function serializeFault(fault: XmlRpcFault): string {
-  // ref <http://xmlrpc-epi.sourceforge.net/specs/rfc.fault_codes.php>
-  const APPLICATION_ERROR = -32500;
-
   const xml = createXml().ele("methodResponse", { version: "1.0" }).ele("fault");
-  const faultCode = fault.faultCode ?? APPLICATION_ERROR;
+  const faultCode = fault.faultCode ?? XmlRpcError.APPLICATION_ERROR;
   const faultString = fault.faultString ?? fault.message;
   serializeValue({ faultCode, faultString }, xml);
 

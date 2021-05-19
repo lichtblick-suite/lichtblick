@@ -27,6 +27,7 @@ export interface TcpSocket {
   connect(): Promise<void>;
   close(): Promise<void>;
   write(data: Uint8Array): Promise<void>;
+  setNoDelay(noDelay?: boolean): Promise<void>;
 
   on(eventName: "connect", listener: () => void): this;
   on(eventName: "close", listener: () => void): this;

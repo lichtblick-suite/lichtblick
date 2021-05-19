@@ -81,7 +81,7 @@ export class Deserializer {
   private _onDone = (): void => {
     if (!this._error) {
       if (this._type == undefined || this._marks.length !== 0) {
-        this._callback(new Error("Invalid XML-RPC message"));
+        this._callback(new Error(`Invalid XML-RPC ${this._type ?? "message"}`));
       } else if (this._responseType === "fault") {
         const createFault = (fault: XmlRpcStruct) => {
           const faultString = typeof fault.faultString === "string" ? fault.faultString : undefined;

@@ -146,7 +146,7 @@ export class TcpConnection extends EventEmitter implements Connection {
   }
 
   toString(): string {
-    return `tcpros://${this._address}:${this._port}`;
+    return TcpConnection.Uri(this._address, this._port);
   }
 
   private _getTransportInfo = async (): Promise<string> => {
@@ -155,7 +155,8 @@ export class TcpConnection extends EventEmitter implements Connection {
     const fd = (await this._socket.fd()) ?? -1;
     if (addr) {
       const { address, port } = addr;
-      return `TCPROS connection on port ${localPort} to [${address}:${port} on socket ${fd}]`;
+      const host = address.includes(":") ? `[${address}]` : address;
+      return `TCPROS connection on port ${localPort} to [${host}:${port} on socket ${fd}]`;
     }
     return `TCPROS not connected [socket ${fd}]`;
   };
@@ -214,6 +215,13 @@ export class TcpConnection extends EventEmitter implements Connection {
       }
     }
   };
+
+  static Uri(address: string, port: number): string {
+    // RFC2732 requires IPv6 addresses that include ":" characters to be wrapped in "[]" brackets
+    // when used in a URI
+    const host = address.includes(":") ? `[${address}]` : address;
+    return `tcpros://${host}:${port}`;
+  }
 
   static SerializeHeader(header: Map<string, string>): Uint8Array {
     const encoder = new TextEncoder();

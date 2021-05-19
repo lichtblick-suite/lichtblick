@@ -10,7 +10,7 @@ const ALLOWED_LICENSES = [
   "MIT",
   "BSD",
   "BSD-2-clause",
-  "Apache-2.0",
+  "Apache",
   "ISC",
   "Python-2.0",
   "PSF",
@@ -28,27 +28,36 @@ jest.setTimeout(30 * 1000);
 
 describe("Dependency licenses", () => {
   it("must adhere to the allowed list of licenses", async () => {
-    const packages = await new Promise<checker.ModuleInfos>((resolve, reject) => {
-      checker.init(
-        {
-          start: join(__dirname),
-          summary: true,
-          onlyAllow: ALLOWED_LICENSES.join(";"),
-          excludePackages: EXCLUDED_PACKAGES.join(";"),
-          excludePrivatePackages: true,
-          color: false,
-        },
-        (err, modules) => {
-          if (err != undefined) {
-            reject(err);
-            return;
-          }
-          resolve(modules);
-        },
-      );
-    });
-
-    // eslint-disable-next-line
-    console.log((checker as any).asSummary(packages));
+    // await printLicenses();
+    await checkLicenses(ALLOWED_LICENSES.join(";"));
   });
 });
+
+// Uncomment this and the printLicenses() call above to print the full list of
+// found licenses. This can be helpful when debugging failures for this test
+// async function printLicenses() {
+//   // eslint-disable-next-line
+//   console.log((checker as any).asSummary(await checkLicenses()));
+// }
+
+function checkLicenses(onlyAllow?: string): Promise<checker.ModuleInfos> {
+  return new Promise<checker.ModuleInfos>((resolve, reject) => {
+    checker.init(
+      {
+        start: join(__dirname),
+        summary: true,
+        onlyAllow,
+        excludePackages: EXCLUDED_PACKAGES.join(";"),
+        excludePrivatePackages: true,
+        color: false,
+      },
+      (err, modules) => {
+        if (err != undefined) {
+          reject(err);
+          return;
+        }
+        resolve(modules);
+      },
+    );
+  });
+}

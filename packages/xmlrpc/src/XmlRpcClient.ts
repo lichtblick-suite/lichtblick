@@ -37,6 +37,12 @@ export class XmlRpcClient {
       body,
     });
 
+    if (!res.ok) {
+      throw new Error(
+        `XML-RPC call "${method}" to ${this.url} returned ${res.status}: "${res.statusText}"`,
+      );
+    }
+
     const resText = await res.text();
     const deserializer = new Deserializer(this.encoding);
     return deserializer.deserializeMethodResponse(resText);

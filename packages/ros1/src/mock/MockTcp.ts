@@ -47,6 +47,10 @@ export class MockTcpSocket extends EventEmitter implements TcpSocket {
   write(_data: Uint8Array): Promise<void> {
     return Promise.resolve();
   }
+
+  setNoDelay(_noDelay?: boolean): Promise<void> {
+    return Promise.resolve();
+  }
 }
 
 export class MockTcpServer extends EventEmitter implements TcpServer {
