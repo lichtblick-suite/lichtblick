@@ -12,13 +12,14 @@
 //   You may not use this file except in compliance with the License.
 
 import { isEqual, sortBy } from "lodash";
-import { MessageReader, Time } from "rosbag";
+import { Time } from "rosbag";
 import roslib from "roslib";
 import { v4 as uuidv4 } from "uuid";
 
 import Log from "@foxglove/log";
 import type { RosGraph } from "@foxglove/ros1";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
+import { LazyMessageReader } from "@foxglove/rosmsg-deser";
 import {
   AdvertisePayload,
   MessageEvent,
@@ -37,7 +38,6 @@ import {
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { bagConnectionsToDatatypes } from "@foxglove/studio-base/util/bagConnectionsHelper";
 import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
-import { FREEZE_MESSAGES } from "@foxglove/studio-base/util/globalConstants";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 import {
   addTimes,
@@ -67,7 +67,7 @@ export default class RosbridgePlayer implements Player {
   private _subscribedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of subscriber IDs subscribed to each topic.
   private _services = new Map<string, Set<string>>(); // A map of service names to service provider IDs that provide each service.
   private _messageReadersByDatatype: {
-    [datatype: string]: MessageReader;
+    [datatype: string]: LazyMessageReader;
   } = {};
   private _start?: Time; // The time at which we started playing.
   private _clockTime?: Time; // The most recent published `/clock` time, if available
@@ -178,7 +178,7 @@ export default class RosbridgePlayer implements Player {
       const topicsMissingDatatypes: string[] = [];
       const topics = [];
       const datatypeDescriptions = [];
-      const messageReaders: Record<string, MessageReader> = {};
+      const messageReaders: Record<string, LazyMessageReader> = {};
 
       for (let i = 0; i < result.topics.length; i++) {
         const topicName = result.topics[i] as string;
@@ -195,8 +195,7 @@ export default class RosbridgePlayer implements Player {
           typeof messageDefinition === "string"
             ? parseMessageDefinition(messageDefinition)
             : messageDefinition;
-        messageReaders[type] =
-          messageReaders[type] ?? new MessageReader(parsedDefinition, { freeze: FREEZE_MESSAGES });
+        messageReaders[type] = messageReaders[type] ?? new LazyMessageReader(parsedDefinition);
         this._parsedMessageDefinitionsByTopic[topicName] = parsedDefinition;
       }
 

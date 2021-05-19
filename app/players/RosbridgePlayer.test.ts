@@ -214,7 +214,7 @@ describe("RosbridgePlayer", () => {
         }
 
         expect(messages.length).toBe(1);
-        expect(messages[0]?.message).toEqual({
+        expect(messages[0]?.message).toMatchObject({
           header: {
             seq: 7643,
             stamp: { sec: 1234, nsec: 5678 },
@@ -237,7 +237,7 @@ describe("RosbridgePlayer", () => {
         }
 
         expect(messages.length).toBe(1);
-        expect(messages[0]?.message).toEqual({
+        expect(messages[0]?.message).toMatchObject({
           text: "some text",
         });
 
