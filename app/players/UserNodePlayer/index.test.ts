@@ -212,7 +212,7 @@ describe("UserNodePlayer", () => {
       const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
       expect(fakePlayer.setPublishers).not.toHaveBeenCalled();
       expect(fakePlayer.publish).not.toHaveBeenCalled();
-      const publishers = [{ topic: "/foo", datatype: "foo" }];
+      const publishers = [{ topic: "/foo", datatype: "foo", datatypes: {} }];
       userNodePlayer.setPublishers(publishers);
       expect(fakePlayer.setPublishers).toHaveBeenLastCalledWith(publishers);
       expect(fakePlayer.publish).not.toHaveBeenCalled();

@@ -145,7 +145,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
     }
 
     for (const pubTopic of Array.from(this.publications.keys())) {
-      this.unpublish(pubTopic);
+      this.unadvertise(pubTopic);
     }
 
     this.subscriptions.clear();
@@ -180,8 +180,9 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
   async advertise(options: PublishOpts): Promise<Publication> {
     const { topic, dataType } = options;
 
-    if (!this._tcpPublisher == undefined) {
-      throw new Error(`cannot publish ${topic} without a tcpServer`);
+    const addr = await this.tcpServerAddress();
+    if (addr == undefined) {
+      throw new Error(`cannot publish ${topic} without a listening tcpServer`);
     }
 
     // Check if we are already publishing
@@ -222,7 +223,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
     return publication;
   }
 
-  publish(topic: string, message: unknown): Promise<void> {
+  async publish(topic: string, message: unknown): Promise<void> {
     if (this._tcpPublisher == undefined) {
       throw new Error(`cannot publish without a tcpServer`);
     }
@@ -256,7 +257,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
     return true;
   }
 
-  unpublish(topic: string): boolean {
+  unadvertise(topic: string): boolean {
     const publication = this.publications.get(topic);
     if (!publication) {
       return false;
@@ -430,8 +431,8 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
     };
   }
 
-  tcpServerAddress(): TcpAddress | undefined {
-    return this._tcpPublisher?.address();
+  tcpServerAddress(): Promise<TcpAddress | undefined> {
+    return this._tcpPublisher?.address() ?? Promise.resolve(undefined);
   }
 
   receivedBytes(): number {

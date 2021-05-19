@@ -287,8 +287,12 @@ export type AdvertisePayload = {
   // exists.
   topic: string;
 
-  // The datatype name. Must already exist in `datatypes`.
+  // The datatype name
   datatype: string;
+
+  // A map of datatype names to ROS message definitions. This must include
+  // message definitions for all types referenced by `datatype` and its children
+  datatypes: RosDatatypes;
 
   // Optionally, where the request came from. Used in the "Internals" panel to improve debugging.
   advertiser?: { type: "panel"; name: string };

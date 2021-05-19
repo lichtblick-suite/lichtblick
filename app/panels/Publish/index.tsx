@@ -104,7 +104,7 @@ function Publish(props: Props) {
     saveConfig,
   } = props;
 
-  const publish = usePublisher({ name: "Publish", topic: topicName, datatype });
+  const publish = usePublisher({ name: "Publish", topic: topicName, datatype, datatypes });
 
   const datatypeNames = useMemo(() => Object.keys(datatypes).sort(), [datatypes]);
   const { error, parsedObject } = useMemo(() => parseInput(value), [value]);
@@ -165,7 +165,7 @@ function Publish(props: Props) {
 
   const onChange = useCallback(
     (event: React.SyntheticEvent<HTMLTextAreaElement>) => {
-      saveConfig({ value: (event.target as any).value });
+      saveConfig({ value: (event.target as { value?: string }).value });
     },
     [saveConfig],
   );

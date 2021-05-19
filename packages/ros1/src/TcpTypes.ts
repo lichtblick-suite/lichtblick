@@ -53,7 +53,7 @@ export interface TcpServerEvents {
 }
 
 export interface TcpServer {
-  address(): TcpAddress | undefined;
+  address(): Promise<TcpAddress | undefined>;
   close(): void;
 
   on(eventName: "close", listener: () => void): this;

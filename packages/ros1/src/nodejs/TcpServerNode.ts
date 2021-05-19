@@ -26,7 +26,7 @@ export class TcpServerNode extends EventEmitter<TcpServerEvents> implements TcpS
     server.on("error", (err) => this.emit("error", err));
   }
 
-  address(): TcpAddress | undefined {
+  async address(): Promise<TcpAddress | undefined> {
     const addr = this._server.address();
     if (addr == undefined || typeof addr === "string") {
       // Address will only be a string for an IPC (named pipe) server, which

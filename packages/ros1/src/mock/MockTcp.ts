@@ -60,8 +60,10 @@ export class MockTcpServer extends EventEmitter<TcpServerEvents> implements TcpS
     super();
   }
 
-  address(): TcpAddress | undefined {
-    return this.listening ? { address: "192.168.1.1", port: 20000, family: "IPv4" } : undefined;
+  address(): Promise<TcpAddress | undefined> {
+    return Promise.resolve(
+      this.listening ? { address: "192.168.1.1", port: 20000, family: "IPv4" } : undefined,
+    );
   }
 
   close(): void {

@@ -20,7 +20,11 @@ import { act } from "react-dom/test-utils";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { PlayerPresence, PlayerStateActiveData } from "@foxglove/studio-base/players/types";
 import delay from "@foxglove/studio-base/util/delay";
-import { initializeLogEvent, resetLogEventForTests } from "@foxglove/studio-base/util/logEvent";
+import {
+  initializeLogEvent,
+  resetLogEventForTests,
+  Tags,
+} from "@foxglove/studio-base/util/logEvent";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 import tick from "@foxglove/studio-base/util/tick";
 
@@ -217,13 +221,23 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       initialProps: { maybePlayer: { player } },
     });
 
-    act(() => result.current.setPublishers("test", [{ topic: "/studio/test", datatype: "test" }]));
-    expect(result.current.publishers).toEqual([{ topic: "/studio/test", datatype: "test" }]);
-
-    act(() => result.current.setPublishers("bar", [{ topic: "/studio/test2", datatype: "test2" }]));
+    act(() =>
+      result.current.setPublishers("test", [
+        { topic: "/studio/test", datatype: "test", datatypes: {} },
+      ]),
+    );
     expect(result.current.publishers).toEqual([
-      { topic: "/studio/test", datatype: "test" },
-      { topic: "/studio/test2", datatype: "test2" },
+      { topic: "/studio/test", datatype: "test", datatypes: {} },
+    ]);
+
+    act(() =>
+      result.current.setPublishers("bar", [
+        { topic: "/studio/test2", datatype: "test2", datatypes: {} },
+      ]),
+    );
+    expect(result.current.publishers).toEqual([
+      { topic: "/studio/test", datatype: "test", datatypes: {} },
+      { topic: "/studio/test2", datatype: "test2", datatypes: {} },
     ]);
 
     const lastPublishers = result.current.publishers;
@@ -246,7 +260,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     await act(() => player.emit());
     for (const [key, value] of Object.entries(result.current)) {
       if (typeof value === "function") {
-        expect((lastContext as any)[key]).toBe(value);
+        expect((lastContext as Record<string, unknown>)[key]).toBe(value);
       }
     }
   });
@@ -306,8 +320,8 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
   });
 
   describe("when changing the player", () => {
-    let player: any;
-    let player2: any;
+    let player: FakePlayer;
+    let player2: FakePlayer;
     let result: RenderResult<MessagePipelineContext>;
     beforeEach(async () => {
       player = new FakePlayer();
@@ -377,12 +391,18 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     });
     act(() => result.current.setSubscriptions("test", [{ topic: "/studio/test" }]));
     act(() => result.current.setSubscriptions("bar", [{ topic: "/studio/test2" }]));
-    act(() => result.current.setPublishers("test", [{ topic: "/studio/test", datatype: "test" }]));
+    act(() =>
+      result.current.setPublishers("test", [
+        { topic: "/studio/test", datatype: "test", datatypes: {} },
+      ]),
+    );
 
     const player2 = new FakePlayer();
     rerender({ maybePlayer: { player: player2 } });
     expect(player2.subscriptions).toEqual([{ topic: "/studio/test" }, { topic: "/studio/test2" }]);
-    expect(player2.publishers).toEqual([{ topic: "/studio/test", datatype: "test" }]);
+    expect(player2.publishers).toEqual([
+      { topic: "/studio/test", datatype: "test", datatypes: {} },
+    ]);
   });
 
   it("keeps activeData when closing a player", async () => {
@@ -420,7 +440,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
   });
 
   describe("pauseFrame", () => {
-    let logger: any;
+    let logger: (args: { name: string; tags: Tags }) => void;
 
     beforeEach(async () => {
       logger = jest.fn();

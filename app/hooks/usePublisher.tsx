@@ -16,16 +16,23 @@ import { v4 as uuidv4 } from "uuid";
 
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 type Props = {
   topic: string;
   datatype: string;
+  datatypes: RosDatatypes;
   name: string;
 };
 
 // Registers a publisher with the player and returns a publish() function to publish data. This uses
 // no-op functions if the player does not have the `advertise` capability
-export default function usePublisher({ topic, datatype, name }: Props): (msg: unknown) => void {
+export default function usePublisher({
+  topic,
+  datatype,
+  datatypes,
+  name,
+}: Props): (msg: unknown) => void {
   const [id] = useState(() => uuidv4());
   const canPublish = useMessagePipeline((context) =>
     context.playerState.capabilities.includes(PlayerCapabilities.advertise),
@@ -34,12 +41,12 @@ export default function usePublisher({ topic, datatype, name }: Props): (msg: un
   const setPublishers = useMessagePipeline((context) => context.setPublishers);
   useEffect(() => {
     if (canPublish) {
-      setPublishers(id, [{ topic, datatype, advertiser: { type: "panel", name } }]);
+      setPublishers(id, [{ topic, datatype, datatypes, advertiser: { type: "panel", name } }]);
       return () => setPublishers(id, []);
     } else {
       return undefined;
     }
-  }, [id, topic, datatype, name, setPublishers, canPublish]);
+  }, [id, topic, datatype, datatypes, name, setPublishers, canPublish]);
 
   return useCallback(
     (msg: unknown) => {

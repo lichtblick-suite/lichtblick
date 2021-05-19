@@ -177,24 +177,28 @@ export class RosFollower extends EventEmitter<RosFollowerEvents> {
     return Promise.resolve([1, "", 0]);
   };
 
-  requestTopic = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  requestTopic = async (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     const err = CheckArguments(args, ["string", "string", "*"]);
     if (err) {
       return Promise.reject(err);
     }
 
-    // const topic = args[1] as string;
-    const protocols = args[2];
-    if (!Array.isArray(protocols) || !TcpRequested(protocols)) {
-      return Promise.resolve([0, "unsupported protocol", []]);
+    const topic = args[1] as string;
+    if (!this._rosNode.publications.has(topic)) {
+      return [0, `topic "${topic} is not advertised by node ${this._rosNode.name}"`, []];
     }
 
-    const addr = this._rosNode.tcpServerAddress();
-    if (!addr) {
-      return Promise.resolve([0, "cannot receive incoming connections", []]);
+    const protocols = args[2];
+    if (!Array.isArray(protocols) || !TcpRequested(protocols)) {
+      return [0, "unsupported protocol", []];
+    }
+
+    const addr = await this._rosNode.tcpServerAddress();
+    if (addr == undefined) {
+      return [0, "cannot receive incoming connections", []];
     }
 
     const tcp = ["TCPROS", addr.address, addr.port];
-    return Promise.resolve([1, "", tcp]);
+    return [1, "", tcp];
   };
 }
