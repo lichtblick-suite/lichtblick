@@ -14,13 +14,23 @@ import { RosTcpMessageStream } from "./RosTcpMessageStream";
 import { TcpAddress, TcpSocket } from "./TcpTypes";
 import { backoff } from "./backoff";
 
+export interface TcpConnectionEvents {
+  header: (
+    header: Map<string, string>,
+    messageDefinition: RosMsgDefinition[],
+    messageReader: MessageReader,
+  ) => void;
+  message: (msg: unknown, msgData: Uint8Array) => void;
+  error: (err: Error) => void;
+}
+
 // Implements a subscriber for the TCPROS transport. The actual TCP transport is
 // implemented in the passed in `socket` (TcpSocket). A transform stream is used
 // internally for parsing the TCPROS message format (4 byte length followed by
 // message payload) so "message" events represent one full message each without
 // the length prefix. A transform class that meets this requirements is
 // implemented in `RosTcpMessageStream`.
-export class TcpConnection extends EventEmitter implements Connection {
+export class TcpConnection extends EventEmitter<TcpConnectionEvents> implements Connection {
   retries = 0;
 
   private _socket: TcpSocket;
@@ -186,6 +196,7 @@ export class TcpConnection extends EventEmitter implements Connection {
   private _handleError = (err: Error): void => {
     if (!this._shutdown) {
       this._log?.warn?.(`${this.toString()} error: ${err}`);
+      this.emit("error", err);
     }
   };
 

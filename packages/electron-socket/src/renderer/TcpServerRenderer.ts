@@ -8,7 +8,13 @@ import { Cloneable, RpcCall, RpcEvent, RpcResponse } from "../shared/Rpc";
 import { TcpAddress } from "../shared/TcpTypes";
 import { TcpSocketRenderer } from "./TcpSocketRenderer";
 
-export class TcpServerRenderer extends EventEmitter {
+export interface TcpServerRendererEvents {
+  close: () => void;
+  connection: (socket: TcpSocketRenderer) => void;
+  error: (err: Error) => void;
+}
+
+export class TcpServerRenderer extends EventEmitter<TcpServerRendererEvents> {
   private _messagePort: MessagePort;
   private _callbacks = new Map<number, (result: Cloneable[]) => void>();
   private _nextCallId = 0;

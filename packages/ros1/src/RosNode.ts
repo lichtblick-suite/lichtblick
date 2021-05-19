@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { EventEmitter, ListenerFn } from "eventemitter3";
+import { EventEmitter } from "eventemitter3";
 import { Md5 } from "md5-typescript";
 import { MessageWriter, parseMessageDefinition, RosMsgDefinition } from "rosbag";
 
@@ -62,13 +62,12 @@ export type PublisherUpdateArgs = {
 
 const OK = 1;
 
-export declare interface RosNode {
-  on(event: "paramUpdate", listener: (args: ParamUpdateArgs) => void): this;
-  on(event: "publisherUpdate", listener: (args: PublisherUpdateArgs) => void): this;
-  on(event: string, listener: ListenerFn): this;
+export interface RosNodeEvents {
+  paramUpdate: (args: ParamUpdateArgs) => void;
+  publisherUpdate: (args: PublisherUpdateArgs) => void;
 }
 
-export class RosNode extends EventEmitter {
+export class RosNode extends EventEmitter<RosNodeEvents> {
   readonly name: string;
   readonly hostname: string;
   readonly pid: number;

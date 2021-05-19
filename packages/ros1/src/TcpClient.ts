@@ -23,12 +23,12 @@ type TcpClientOpts = {
   log?: LoggerService;
 };
 
-export declare interface TcpClient {
-  on(eventName: "close", listener: () => void): this;
-  on(eventName: "subscribe", listener: (topic: string, destinationCallerId: string) => void): this;
+export interface TcpClientEvents {
+  close: () => void;
+  subscribe: (topic: string, destinationCallerId: string) => void;
 }
 
-export class TcpClient extends EventEmitter implements Client {
+export class TcpClient extends EventEmitter<TcpClientEvents> implements Client {
   private _socket: TcpSocket;
   private _address: string;
   private _port: number;

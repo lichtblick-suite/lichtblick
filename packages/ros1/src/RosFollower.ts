@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { EventEmitter, ListenerFn } from "eventemitter3";
+import { EventEmitter } from "eventemitter3";
 
 import { HttpServer, XmlRpcServer, XmlRpcValue } from "@foxglove/xmlrpc";
 
@@ -34,19 +34,12 @@ function TcpRequested(protocols: XmlRpcValue[]): boolean {
   return false;
 }
 
-export declare interface RosFollower {
-  on(
-    event: "paramUpdate",
-    listener: (paramKey: string, paramValue: XmlRpcValue, callerId: string) => void,
-  ): this;
-  on(
-    event: "publisherUpdate",
-    listener: (topic: string, publishers: string[], callerId: string) => void,
-  ): this;
-  on(event: string, listener: ListenerFn): this;
+export interface RosFollowerEvents {
+  paramUpdate: (paramKey: string, paramValue: XmlRpcValue, callerId: string) => void;
+  publisherUpdate: (topic: string, publishers: string[], callerId: string) => void;
 }
 
-export class RosFollower extends EventEmitter {
+export class RosFollower extends EventEmitter<RosFollowerEvents> {
   private _rosNode: RosNode;
   private _server: XmlRpcServer;
   private _url?: string;

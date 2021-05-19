@@ -37,22 +37,16 @@ type SubscriptionOpts = {
   tcpNoDelay: boolean;
 };
 
-export declare interface Subscription {
-  on(
-    event: "header",
-    listener: (
-      header: Map<string, string>,
-      msgDef: RosMsgDefinition[],
-      msgReader: MessageReader,
-    ) => void,
-  ): this;
-  on(
-    event: "message",
-    listener: (msg: unknown, data: Uint8Array, publisher: PublisherLink) => void,
-  ): this;
+export interface SubscriptionEvents {
+  header: (
+    header: Map<string, string>,
+    msgDef: RosMsgDefinition[],
+    msgReader: MessageReader,
+  ) => void;
+  message: (msg: unknown, data: Uint8Array, publisher: PublisherLink) => void;
 }
 
-export class Subscription extends EventEmitter {
+export class Subscription extends EventEmitter<SubscriptionEvents> {
   readonly name: string;
   readonly md5sum: string;
   readonly dataType: string;

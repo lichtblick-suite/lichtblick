@@ -5,7 +5,7 @@
 import EventEmitter from "eventemitter3";
 import net from "net";
 
-import { TcpAddress, TcpSocket } from "../TcpTypes";
+import { TcpAddress, TcpSocket, TcpSocketEvents } from "../TcpTypes";
 
 type MaybeHasFd = {
   _handle?: {
@@ -13,7 +13,7 @@ type MaybeHasFd = {
   };
 };
 
-export class TcpSocketNode extends EventEmitter implements TcpSocket {
+export class TcpSocketNode extends EventEmitter<TcpSocketEvents> implements TcpSocket {
   private _host: string;
   private _port: number;
   private _socket: net.Socket;

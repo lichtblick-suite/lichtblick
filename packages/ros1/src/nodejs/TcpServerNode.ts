@@ -5,10 +5,10 @@
 import EventEmitter from "eventemitter3";
 import net from "net";
 
-import { TcpAddress, TcpServer } from "../TcpTypes";
+import { TcpAddress, TcpServer, TcpServerEvents } from "../TcpTypes";
 import { TcpSocketNode } from "./TcpSocketNode";
 
-export class TcpServerNode extends EventEmitter implements TcpServer {
+export class TcpServerNode extends EventEmitter<TcpServerEvents> implements TcpServer {
   private _server: net.Server;
 
   constructor(server: net.Server) {

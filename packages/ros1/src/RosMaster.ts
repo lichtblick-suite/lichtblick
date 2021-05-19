@@ -2,8 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { EventEmitter } from "eventemitter3";
-
 import { HttpServer, XmlRpcServer, XmlRpcValue } from "@foxglove/xmlrpc";
 
 import { LoggerService } from "./LoggerService";
@@ -29,7 +27,7 @@ function CheckArguments(args: XmlRpcValue[], expected: string[]): Error | undefi
 // <http://wiki.ros.org/ROS/Parameter%20Server%20API> APIs. This can be used as
 // an alternative server implementation than roscore provided by the ros_comm
 // library.
-export class RosMaster extends EventEmitter {
+export class RosMaster {
   private _server: XmlRpcServer;
   private _log?: LoggerService;
   private _url?: string;
@@ -44,7 +42,6 @@ export class RosMaster extends EventEmitter {
   private _paramSubscriptions = new Map<string, Map<string, string>>();
 
   constructor(httpServer: HttpServer, log?: LoggerService) {
-    super();
     this._server = new XmlRpcServer(httpServer);
     this._log = log;
   }

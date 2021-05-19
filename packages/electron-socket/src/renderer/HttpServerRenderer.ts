@@ -8,7 +8,12 @@ import { HttpHandler, HttpRequest, HttpResponse } from "../shared/HttpTypes";
 import { Cloneable, RpcCall, RpcEvent, RpcResponse } from "../shared/Rpc";
 import { TcpAddress } from "../shared/TcpTypes";
 
-export class HttpServerRenderer extends EventEmitter {
+export interface HttpServerRendererEvents {
+  close: () => void;
+  error: (err: Error) => void;
+}
+
+export class HttpServerRenderer extends EventEmitter<HttpServerRendererEvents> {
   handler: HttpHandler;
 
   private _url?: string;

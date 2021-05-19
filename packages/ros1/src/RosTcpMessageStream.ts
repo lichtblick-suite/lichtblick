@@ -2,19 +2,18 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { EventEmitter, ListenerFn } from "eventemitter3";
+import { EventEmitter } from "eventemitter3";
 
 import { concatData } from "./concatData";
 
-export declare interface RosTcpMessageStream {
-  on(event: "message", listener: (message: Uint8Array) => void): this;
-  on(event: string, listener: ListenerFn): this;
+export interface RosTcpMessageStreamEvents {
+  message: (message: Uint8Array) => void;
 }
 
 // A stateful transformer that takes a raw TCPROS data stream and parses the
 // TCPROS format of 4 byte length prefixes followed by message payloads into one
 // complete message per "message" event, discarding the length prefix
-export class RosTcpMessageStream extends EventEmitter {
+export class RosTcpMessageStream extends EventEmitter<RosTcpMessageStreamEvents> {
   private _inMessage = false;
   private _bytesNeeded = 4;
   private _chunks: Uint8Array[] = [];
