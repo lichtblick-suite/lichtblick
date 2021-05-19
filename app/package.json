@@ -105,7 +105,7 @@
     "@types/moment-duration-format": "2.2.2",
     "@types/prettier": "2.2.3",
     "@types/promise-queue": "2.2.0",
-    "@types/react": "17.0.5",
+    "@types/react": "17.0.6",
     "@types/react-autocomplete": "1.8.5",
     "@types/react-document-events": "workspace:packages/@types/react-document-events",
     "@types/react-dom": "17.0.5",
