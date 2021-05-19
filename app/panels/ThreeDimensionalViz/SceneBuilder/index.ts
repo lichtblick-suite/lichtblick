@@ -684,8 +684,21 @@ export default class SceneBuilder implements MarkerProvider {
     // in the future these will be customizable via the UI
     const [alpha, map] = this._hooks.getOccupancyGridValues(topic);
 
+    const { header, info, data } = message;
     const mappedMessage = {
-      ...message,
+      header: {
+        frame_id: header.frame_id,
+        stamp: header.stamp,
+        seq: header.seq,
+      },
+      info: {
+        map_load_time: info.map_load_time,
+        resolution: info.resolution,
+        width: info.width,
+        height: info.height,
+        origin: info.origin,
+      },
+      data,
       alpha,
       map,
       type,
