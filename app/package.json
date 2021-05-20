@@ -15,7 +15,7 @@
     "async-mutex": "0.3.1",
     "chart.js": "3.2.1",
     "chartjs-plugin-annotation": "1.0.1",
-    "chartjs-plugin-datalabels": "2.0.0-rc",
+    "chartjs-plugin-datalabels": "2.0.0-rc.1",
     "chartjs-plugin-zoom": "github:foxglove/chartjs-plugin-zoom#656541279943f00dce600288435f83c436293146",
     "classnames": "2.3.1",
     "cytoscape": "3.19.0",
