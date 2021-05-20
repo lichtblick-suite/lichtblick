@@ -10,6 +10,7 @@ import {
   IComboBoxStyles,
   ITooltipStyles,
   ITooltipStyleProps,
+  IColorPickerStyles,
   IToggleStyles,
   IStyle,
 } from "@fluentui/react";
@@ -31,6 +32,22 @@ export default createTheme({
     warningBackground: colors.YELLOW1,
   },
   components: {
+    ColorPicker: {
+      styles: {
+        root: { maxWidth: 250 },
+        colorRectangle: { minWidth: 100, minHeight: 100 },
+        table: {
+          // We need to remove table styles from global.scss, but for now, changing them
+          // to e.g. "#root td" messes with the styling in various places because the
+          // selector becomes more specific. So for now, just disable them directly here.
+          "tr, th, td, tr:hover th, tr:hover td": {
+            border: "none",
+            background: "none",
+            cursor: "unset",
+          },
+        },
+      } as IColorPickerStyles,
+    },
     ContextualMenu: {
       styles: {
         subComponentStyles: {

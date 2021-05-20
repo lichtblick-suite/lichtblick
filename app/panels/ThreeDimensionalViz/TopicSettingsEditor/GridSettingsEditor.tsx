@@ -13,10 +13,10 @@
 
 import { Color } from "regl-worldview";
 
+import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Flex from "@foxglove/studio-base/components/Flex";
 
 import { TopicSettingsEditorProps } from ".";
-import ColorPickerForTopicSettings from "./ColorPickerForTopicSettings";
 import { SLabel, SDescription, SInput } from "./common";
 
 export type GridSettings = {
@@ -38,7 +38,7 @@ export default function GridSettingsEditor(
     <Flex col>
       <SLabel>Color</SLabel>
       <SDescription>Set the grid color.</SDescription>
-      <ColorPickerForTopicSettings
+      <ColorPicker
         color={settings.overrideColor ?? DEFAULT_GRID_COLOR}
         onChange={(newColor) => onFieldChange("overrideColor", newColor)}
       />

@@ -331,7 +331,6 @@ overrides:
       - "app/panels/ThreeDimensionalViz/SceneBuilder/types.ts"
       - "app/panels/ThreeDimensionalViz/SearchText.test.tsx"
       - "app/panels/ThreeDimensionalViz/ThreeDimensionalVizContext.ts"
-      - "app/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings.tsx"
       - "app/panels/ThreeDimensionalViz/TopicSettingsEditor/CommonDecaySettings.tsx"
       - "app/panels/ThreeDimensionalViz/TopicSettingsEditor/CommonPointSettings.tsx"
       - "app/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor.tsx"

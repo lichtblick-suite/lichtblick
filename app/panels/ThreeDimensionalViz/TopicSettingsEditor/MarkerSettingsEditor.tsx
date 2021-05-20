@@ -14,12 +14,12 @@
 import { Color } from "regl-worldview";
 
 import Checkbox from "@foxglove/studio-base/components/Checkbox";
+import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Flex from "@foxglove/studio-base/components/Flex";
 import { Marker, MarkerArray } from "@foxglove/studio-base/types/Messages";
 import { LINED_CONVEX_HULL_RENDERING_SETTING } from "@foxglove/studio-base/util/globalConstants";
 
 import { TopicSettingsEditorProps } from ".";
-import ColorPickerForTopicSettings from "./ColorPickerForTopicSettings";
 import { SLabel, SDescription } from "./common";
 
 type MarkerSettings = {
@@ -37,7 +37,7 @@ export default function MarkerSettingsEditor(
       <SDescription>
         Overrides <code>color</code>/<code>colors</code> for all markers on this topic.
       </SDescription>
-      <ColorPickerForTopicSettings
+      <ColorPicker
         color={settings.overrideColor}
         onChange={(newColor) => onFieldChange("overrideColor", newColor)}
       />

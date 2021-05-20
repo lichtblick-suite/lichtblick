@@ -15,12 +15,12 @@ import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import { ComponentProps } from "react";
 
+import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Flex from "@foxglove/studio-base/components/Flex";
 import { Color, PoseStamped } from "@foxglove/studio-base/types/Messages";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { TopicSettingsEditorProps } from ".";
-import ColorPickerForTopicSettings from "./ColorPickerForTopicSettings";
 import { SLabel, SInput } from "./common";
 
 export type PoseSettings = {
@@ -62,7 +62,7 @@ export default function PoseSettingsEditor(
         return (
           <>
             <SLabel>Color of outline</SLabel>
-            <ColorPickerForTopicSettings
+            <ColorPicker
               color={settings.overrideColor}
               onChange={(newColor) => onFieldChange("overrideColor", newColor)}
             />
@@ -77,7 +77,7 @@ export default function PoseSettingsEditor(
         return (
           <Flex col>
             <SLabel>Color</SLabel>
-            <ColorPickerForTopicSettings
+            <ColorPicker
               color={settings.overrideColor as any}
               onChange={(newColor) => onFieldChange("overrideColor", newColor)}
             />

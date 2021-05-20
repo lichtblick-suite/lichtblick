@@ -18,7 +18,7 @@ import styled from "styled-components";
 import tinyColor from "tinycolor2";
 
 import Icon from "@foxglove/studio-base/components/Icon";
-import { getHexFromColorSettingWithDefault } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
+import { defaultedRGBStringFromColorObj } from "@foxglove/studio-base/util/colorUtils";
 import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -120,11 +120,11 @@ function getStyles({
     };
   }
 
-  const overrideHexColor = getHexFromColorSettingWithDefault(overrideColor);
+  const overrideRGB = defaultedRGBStringFromColorObj(overrideColor);
   const { enabledColor, disabledColor } = overrideColor
     ? {
-        enabledColor: overrideHexColor,
-        disabledColor: tinyColor(overrideHexColor).setAlpha(0.5).toRgbString(),
+        enabledColor: overrideRGB,
+        disabledColor: tinyColor(overrideRGB).setAlpha(0.5).toRgbString(),
       }
     : { enabledColor: DEFAULT_COLOR, disabledColor: DISABLED_COLOR };
 

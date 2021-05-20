@@ -28,9 +28,7 @@ import { useDebouncedCallback } from "use-debounce";
 
 import useDataSourceInfo from "@foxglove/studio-base/PanelAPI/useDataSourceInfo";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
-import Modal from "@foxglove/studio-base/components/Modal";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import { RenderToBodyComponent } from "@foxglove/studio-base/components/RenderToBodyComponent";
 import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
 import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
 import { Save3DConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz";
@@ -58,7 +56,6 @@ import {
   MarkerMatcher,
   ThreeDimensionalVizContext,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
-import { ColorPickerSettingsPanel } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
 import TopicSettingsModal from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TopicSettingsModal";
 import TopicTree from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TopicTree";
 import { TOPIC_DISPLAY_MODES } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
@@ -233,14 +230,6 @@ export default function Layout({
     measurePoints: { start: undefined, end: undefined },
   });
   const [currentEditingTopic, setCurrentEditingTopic] = useState<Topic | undefined>(undefined);
-  const [editingNamespace, setEditingNamespace] =
-    useState<
-      | {
-          namespaceKey: string;
-          namespaceColor?: string;
-        }
-      | undefined
-    >();
 
   const searchTextProps = useSearchText();
   const {
@@ -842,7 +831,6 @@ export default function Layout({
                 saveConfig={saveConfig}
                 sceneErrorsByKey={sceneErrorsByKey}
                 setCurrentEditingTopic={setCurrentEditingTopic}
-                setEditingNamespace={setEditingNamespace}
                 setFilterText={setFilterText}
                 setShowTopicTree={setShowTopicTree}
                 shouldExpandAllKeys={shouldExpandAllKeys}
@@ -861,26 +849,6 @@ export default function Layout({
                   saveConfig={saveConfig}
                   settingsByKey={settingsByKey}
                 />
-              )}
-              {editingNamespace && (
-                <RenderToBodyComponent>
-                  <Modal
-                    onRequestClose={() => setEditingNamespace(undefined)}
-                    contentStyle={{
-                      maxHeight: "calc(100vh - 200px)",
-                      maxWidth: 480,
-                      display: "flex",
-                      flexDirection: "column",
-                    }}
-                  >
-                    <ColorPickerSettingsPanel
-                      color={settingsByKey[editingNamespace.namespaceKey]?.overrideColor}
-                      onChange={(newColor) =>
-                        onNamespaceOverrideColorChange(newColor, editingNamespace.namespaceKey)
-                      }
-                    />
-                  </Modal>
-                </RenderToBodyComponent>
               )}
             </div>
           </div>

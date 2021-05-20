@@ -16,14 +16,11 @@ import { Color } from "regl-worldview";
 import styled from "styled-components";
 
 import AutoSizingCanvas from "@foxglove/studio-base/components/AutoSizingCanvas";
-import ColorPickerForTopicSettings, {
-  PICKER_SIZE,
-  getHexFromColorSettingWithDefault,
-} from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
+import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
+import { defaultedRGBStringFromColorObj } from "@foxglove/studio-base/util/colorUtils";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const COLOR_PICKER_SIZE = PICKER_SIZE.NORMAL.size;
-const GRADIENT_BAR_INSET = Math.floor(COLOR_PICKER_SIZE / 2);
+const GRADIENT_BAR_INSET = 15;
 const GRADIENT_BAR_HEIGHT = 10;
 const GRADIENT_LINE_HEIGHT = 6;
 
@@ -61,30 +58,32 @@ export default function GradientPicker({
   maxColor: Color;
   onChange: (arg0: { minColor: Color; maxColor: Color }) => void;
 }): JSX.Element {
-  const hexMinColor = getHexFromColorSettingWithDefault(minColor);
-  const hexMaxColor = getHexFromColorSettingWithDefault(maxColor);
+  const rgbMinColor = defaultedRGBStringFromColorObj(minColor);
+  const rgbMaxColor = defaultedRGBStringFromColorObj(maxColor);
 
   const drawGradient = useCallback(
     (ctx, width, height) => {
       const gradient = ctx.createLinearGradient(0, 0, width, 0);
-      gradient.addColorStop(0, hexMinColor);
-      gradient.addColorStop(1, hexMaxColor);
+      gradient.addColorStop(0, rgbMinColor);
+      gradient.addColorStop(1, rgbMaxColor);
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, width, height);
     },
-    [hexMaxColor, hexMinColor],
+    [rgbMaxColor, rgbMinColor],
   );
 
   return (
     <>
       <SPickerWrapper>
-        <ColorPickerForTopicSettings
+        <ColorPicker
+          buttonShape={"circle"}
           color={minColor}
-          onChange={(newColor: any) => onChange({ minColor: newColor, maxColor })}
+          onChange={(newColor) => onChange({ minColor: newColor, maxColor })}
         />
-        <ColorPickerForTopicSettings
+        <ColorPicker
+          buttonShape={"circle"}
           color={maxColor}
-          onChange={(newColor: any) => onChange({ minColor, maxColor: newColor })}
+          onChange={(newColor) => onChange({ minColor, maxColor: newColor })}
         />
       </SPickerWrapper>
       <SBarWrapper>

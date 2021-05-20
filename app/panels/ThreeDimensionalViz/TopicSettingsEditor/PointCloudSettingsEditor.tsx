@@ -15,6 +15,7 @@ import React, { useCallback } from "react";
 import { Color } from "regl-worldview";
 import styled from "styled-components";
 
+import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Flex from "@foxglove/studio-base/components/Flex";
 import GradientPicker from "@foxglove/studio-base/components/GradientPicker";
 import Radio from "@foxglove/studio-base/components/Radio";
@@ -25,7 +26,6 @@ import { TopicSettingsEditorProps } from "@foxglove/studio-base/panels/ThreeDime
 import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
 import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
-import ColorPickerForTopicSettings from "./ColorPickerForTopicSettings";
 import CommonDecaySettings from "./CommonDecaySettings";
 import { SLabel, SInput } from "./common";
 
@@ -143,7 +143,7 @@ export default function PointCloudSettingsEditor(
         </SegmentedControlWrapper>
         <Flex row style={{ margin: "2px 0 2px 12px", alignItems: "center" }}>
           {colorMode.mode === "flat" ? ( // For flat mode, pick a single color
-            <ColorPickerForTopicSettings
+            <ColorPicker
               color={colorMode.flatColor}
               onChange={(flatColor) => onColorModeChange({ mode: "flat", flatColor })}
             /> // Otherwise, choose a field from the point cloud to color by

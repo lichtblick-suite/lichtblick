@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { useCallback, useContext, useMemo } from "react";
+import { Color } from "regl-worldview";
 
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 import { ThreeDimensionalVizContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
@@ -30,7 +31,6 @@ import VisibilityToggle, { TOGGLE_WRAPPER_SIZE } from "./VisibilityToggle";
 import {
   GetIsTreeNodeVisibleInTree,
   OnNamespaceOverrideColorChange,
-  SetEditingNamespace,
   TreeTopicNode,
   TreeUINode,
 } from "./types";
@@ -45,7 +45,7 @@ export type NamespaceNode = {
   hasNamespaceOverrideColorChangedByColumn: boolean[];
   key: string;
   namespace: string;
-  overrideColorByColumn?: (string | undefined)[];
+  overrideColorByColumn?: (Color | undefined)[];
   visibleInSceneByColumn: boolean[];
 };
 
@@ -56,7 +56,6 @@ type Props = {
   hasFeatureColumn: boolean;
   isXSWidth: boolean;
   onNamespaceOverrideColorChange: OnNamespaceOverrideColorChange;
-  setEditingNamespace: SetEditingNamespace;
   topicNode: TreeTopicNode;
   width: number;
   diffModeEnabled: boolean;
@@ -64,7 +63,6 @@ type Props = {
 
 function NamespaceNodeRow({
   nodeKey,
-  featureKey,
   hasNamespaceOverrideColorChangedByColumn,
   namespace,
   checkedByColumn,
@@ -80,7 +78,6 @@ function NamespaceNodeRow({
   hasFeatureColumn,
   topicName,
   onNamespaceOverrideColorChange,
-  setEditingNamespace,
   diffModeEnabled,
 }: {
   nodeKey: string;
@@ -89,14 +86,13 @@ function NamespaceNodeRow({
   namespace: string;
   availableByColumn: boolean[];
   checkedByColumn: boolean[];
-  overrideColorByColumn?: (string | undefined)[];
+  overrideColorByColumn?: (Color | undefined)[];
   visibleInSceneByColumn: boolean[];
   rowWidth: number;
   isXSWidth: boolean;
   maxNodeNameLen: number;
   filterText: string;
   topicNodeAvailable: boolean;
-  setEditingNamespace: SetEditingNamespace;
   unavailableTooltip: string;
   hasFeatureColumn: boolean;
   topicName: string;
@@ -217,7 +213,6 @@ function NamespaceNodeRow({
         <NamespaceMenu
           disableBaseColumn={!(availableByColumn[0] ?? false)}
           disableFeatureColumn={!(availableByColumn[1] ?? false)}
-          featureKey={featureKey}
           hasFeatureColumn={hasFeatureColumn && (availableByColumn[1] ?? false)}
           hasNamespaceOverrideColorChangedByColumn={hasNamespaceOverrideColorChangedByColumn}
           namespace={namespace}
@@ -225,7 +220,6 @@ function NamespaceNodeRow({
           onNamespaceOverrideColorChange={onNamespaceOverrideColorChange}
           overrideColorByColumn={overrideColorByColumn}
           providerAvailable={topicNodeAvailable}
-          setEditingNamespace={setEditingNamespace}
           topicName={topicName}
         />
       </SRightActions>
@@ -241,7 +235,6 @@ export default function renderNamespaceNodes({
   hasFeatureColumn,
   isXSWidth,
   onNamespaceOverrideColorChange,
-  setEditingNamespace,
   topicNode,
   width,
   diffModeEnabled,
@@ -265,7 +258,6 @@ export default function renderNamespaceNodes({
     filterText,
     topicNodeAvailable,
     onNamespaceOverrideColorChange,
-    setEditingNamespace,
     unavailableTooltip,
     hasFeatureColumn,
     topicName: topicNode.topicName,

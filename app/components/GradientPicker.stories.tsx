@@ -37,25 +37,21 @@ function Story({
     if (!(changeMinColorAfterMount || changeMaxColorAfterMount)) {
       return;
     }
-    const [minTriggerEl, maxTriggerEl] = document.querySelectorAll(".rc-color-picker-trigger");
+    const [minTriggerEl, maxTriggerEl] = document.querySelectorAll("button[class^=ms-Button]");
 
     if (changeMinColorAfterMount) {
       (minTriggerEl as any).click();
       setImmediate(() => {
-        const hexInput = document.querySelector(
-          ".rc-color-picker-panel-params-hex",
-        ) as HTMLInputElement;
-        hexInput.value = "#d2ff03";
+        const hexInput = document.querySelector("input[aria-label=Hex]") as HTMLInputElement;
+        hexInput.value = "d2ff03";
         TestUtils.Simulate.change(hexInput);
         TestUtils.Simulate.blur(hexInput);
       });
     } else {
       (maxTriggerEl as any).click();
       setImmediate(() => {
-        const hexInput = document.querySelector(
-          ".rc-color-picker-panel-params-hex",
-        ) as HTMLInputElement;
-        hexInput.value = "#c501ff";
+        const hexInput = document.querySelector("input[aria-label=Hex]") as HTMLInputElement;
+        hexInput.value = "c501ff";
         TestUtils.Simulate.change(hexInput);
         TestUtils.Simulate.blur(hexInput);
       });

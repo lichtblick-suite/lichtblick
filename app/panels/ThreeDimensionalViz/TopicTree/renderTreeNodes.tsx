@@ -39,7 +39,6 @@ import {
   OnNamespaceOverrideColorChange,
   SceneErrorsByKey,
   SetCurrentEditingTopic,
-  SetEditingNamespace,
   TopicDisplayMode,
   TreeNode,
   TreeTopicNode,
@@ -78,7 +77,6 @@ type Props = {
   onNamespaceOverrideColorChange: OnNamespaceOverrideColorChange;
   sceneErrorsByKey: SceneErrorsByKey;
   setCurrentEditingTopic: SetCurrentEditingTopic;
-  setEditingNamespace: SetEditingNamespace;
   topicDisplayMode: TopicDisplayMode;
   visibleTopicsCountByKey: VisibleTopicsCountByKey;
   width: number;
@@ -194,7 +192,6 @@ export default function renderTreeNodes({
   onNamespaceOverrideColorChange,
   sceneErrorsByKey,
   setCurrentEditingTopic,
-  setEditingNamespace,
   topicDisplayMode,
   visibleTopicsCountByKey,
   width,
@@ -319,7 +316,6 @@ export default function renderTreeNodes({
           hasFeatureColumn,
           isXSWidth,
           onNamespaceOverrideColorChange,
-          setEditingNamespace,
           topicNode: item,
           width: titleWidth,
           filterText,
@@ -338,7 +334,6 @@ export default function renderTreeNodes({
         hasFeatureColumn,
         isXSWidth,
         onNamespaceOverrideColorChange,
-        setEditingNamespace,
         topicDisplayMode,
         sceneErrorsByKey,
         setCurrentEditingTopic,

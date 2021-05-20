@@ -14,24 +14,18 @@
 import DotsVerticalIcon from "@mdi/svg/svg/dots-vertical.svg";
 import EarthIcon from "@mdi/svg/svg/earth.svg";
 import { groupBy, defaults } from "lodash";
-import { useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo } from "react";
 import styled from "styled-components";
 
 import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
+import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Icon from "@foxglove/studio-base/components/Icon";
 import Menu, { Item } from "@foxglove/studio-base/components/Menu";
-import Modal from "@foxglove/studio-base/components/Modal";
-import { RenderToBodyComponent } from "@foxglove/studio-base/components/RenderToBodyComponent";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { getDefaultColorOverrideBySourceIdx } from "@foxglove/studio-base/panels/ThreeDimensionalViz/GlobalVariableStyles";
 import { LinkedGlobalVariable } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { ThreeDimensionalVizContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
-import {
-  ColorPickerSettingsPanel,
-  PICKER_SIZE,
-  getHexFromColorSettingWithDefault,
-} from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
 import { ColorOverride } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
 import TooltipRow from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TooltipRow";
 import TooltipTable from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TooltipTable";
@@ -98,23 +92,9 @@ const SItemContent = styled.div`
   align-items: center;
   justify-content: space-between;
 `;
-const SColorPickerWrapper = styled.span`
-  display: inline-flex;
-  align-items: center;
-`;
-
-const SColorTrigger = styled.span<any>`
-  display: inline-block;
-  cursor: pointer;
-  background: ${({ hexColor }) => hexColor};
-  width: ${PICKER_SIZE.SMALL.size}px;
-  height: ${PICKER_SIZE.SMALL.size}px;
-  border-radius: ${PICKER_SIZE.SMALL.size / 2}px;
-`;
 
 function StyleExpressionNode(props: any) {
   const { topic, rowWidth, rowIndex, hasFeatureColumn, linkedGlobalVariables } = props;
-  const [editingColorForSourceIdx, setEditingColorForSourceIdx] = useState(false);
 
   const {
     colorOverrideBySourceIdxByVariable,
@@ -255,60 +235,31 @@ function StyleExpressionNode(props: any) {
             <DotsVerticalIcon />
           </Icon>
           <Menu>
-            <Item
-              onClick={() => setEditingColorForSourceIdx(0 as any)}
-              style={{ padding: "0 12px", height: 28 }}
-            >
+            <Item style={{ padding: "0 12px", height: 28 }}>
               <SItemContent>
                 <span style={{ paddingRight: 8 }}>Marker color</span>
-                <SColorPickerWrapper>
-                  <SColorTrigger
-                    hexColor={getHexFromColorSettingWithDefault(
-                      (colorOverridesByColumnIdx[0] as any).color,
-                    )}
-                  />
-                </SColorPickerWrapper>
-                {/* @ts-expect-error-error fix comparison operator */}
-                {editingColorForSourceIdx === 0 && (
-                  <ColorPickerOverlay
-                    color={(colorOverridesByColumnIdx[0] as any).color}
-                    onChangeColor={(color) => {
-                      updateSettingsForGlobalVariable(
-                        name,
-                        { color, active: (colorOverridesByColumnIdx[0] as any).active },
-                        0,
-                      );
-                    }}
-                    onRequestClose={() => setEditingColorForSourceIdx(-1 as any)}
-                  />
-                )}
+                <ColorPicker
+                  color={colorOverridesByColumnIdx[0]?.color}
+                  buttonShape={"circle"}
+                  onChange={(color) => {
+                    const active = (colorOverridesByColumnIdx[0] as any).active;
+                    updateSettingsForGlobalVariable(name, { color, active }, 0);
+                  }}
+                />
               </SItemContent>
             </Item>
             {hasFeatureColumn && (
-              <Item
-                onClick={() => setEditingColorForSourceIdx(1 as any)}
-                style={{ padding: "0 12px", height: 28 }}
-              >
+              <Item style={{ padding: "0 12px", height: 28 }}>
                 <SItemContent>
                   <span style={{ paddingRight: 8 }}>Feature marker color</span>
-                  <SColorPickerWrapper>
-                    <SColorTrigger
-                      hexColor={getHexFromColorSettingWithDefault(
-                        (colorOverridesByColumnIdx[1] as any).color,
-                      )}
-                    />
-                  </SColorPickerWrapper>
-                  {/* @ts-expect-error-error fix comparison operator */}
-                  {editingColorForSourceIdx === 1 && (
-                    <ColorPickerOverlay
-                      color={(colorOverridesByColumnIdx[1] as any).color}
-                      onChangeColor={(color) => {
-                        const active = (colorOverridesByColumnIdx[1] as any).active;
-                        updateSettingsForGlobalVariable(name, { color, active }, 1);
-                      }}
-                      onRequestClose={() => setEditingColorForSourceIdx(-1 as any)}
-                    />
-                  )}
+                  <ColorPicker
+                    color={colorOverridesByColumnIdx[1]?.color}
+                    buttonShape={"circle"}
+                    onChange={(color) => {
+                      const active = (colorOverridesByColumnIdx[1] as any).active;
+                      updateSettingsForGlobalVariable(name, { color, active }, 1);
+                    }}
+                  />
                 </SItemContent>
               </Item>
             )}
@@ -316,31 +267,5 @@ function StyleExpressionNode(props: any) {
         </ChildToggle>
       </SRightActions>
     </STreeNodeRow>
-  );
-}
-
-function ColorPickerOverlay({
-  onChangeColor,
-  onRequestClose,
-  color,
-}: {
-  color: Color;
-  onChangeColor: (color: Color) => void;
-  onRequestClose: () => void;
-}) {
-  return (
-    <RenderToBodyComponent>
-      <Modal
-        onRequestClose={onRequestClose}
-        contentStyle={{
-          maxHeight: "calc(100vh - 200px)",
-          maxWidth: 480,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <ColorPickerSettingsPanel color={color} onChange={onChangeColor} />
-      </Modal>
-    </RenderToBodyComponent>
   );
 }

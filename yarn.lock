@@ -2278,7 +2278,6 @@ __metadata:
     prettier: 2.3.0
     promise-queue: 2.2.5
     quickhull3d: 2.0.4
-    rc-color-picker: 1.2.6
     rc-tabs: 11.9.0
     rc-tree: 4.1.5
     react: 17.0.2
@@ -5165,12 +5164,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/rc-color-picker@workspace:packages/@types/rc-color-picker":
-  version: 0.0.0-use.local
-  resolution: "@types/rc-color-picker@workspace:packages/@types/rc-color-picker"
-  languageName: unknown
-  linkType: soft
-
 "@types/reach__router@npm:^1.3.7":
   version: 1.3.7
   resolution: "@types/reach__router@npm:1.3.7"
@@ -6313,15 +6306,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"add-dom-event-listener@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "add-dom-event-listener@npm:1.1.0"
-  dependencies:
-    object-assign: 4.x
-  checksum: 2ce5c9e1aaa5243e4f4f51242f6e39d5d1cc742d2435f13ad34173e5f2469eabf5a8a043dea67495e36c035b376d998dfec9ebf6fa44119549339639d428a683
-  languageName: node
-  linkType: hard
-
 "address@npm:1.1.2, address@npm:^1.0.1":
   version: 1.1.2
   resolution: "address@npm:1.1.2"
@@ -7434,7 +7418,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-runtime@npm:6.x, babel-runtime@npm:^6.26.0, babel-runtime@npm:^6.9.2":
+"babel-runtime@npm:^6.9.2":
   version: 6.26.0
   resolution: "babel-runtime@npm:6.26.0"
   dependencies:
@@ -9081,15 +9065,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"component-classes@npm:^1.2.5":
-  version: 1.2.6
-  resolution: "component-classes@npm:1.2.6"
-  dependencies:
-    component-indexof: 0.0.3
-  checksum: 4a493ed672e24457a09f79ccf125cc22ab46ef5338eebc1821992e033a3243458dba66ffef0e403ef6601b127a6aa3d2ab4ba36d5a91ea53b83b67dc2b76cbd5
-  languageName: node
-  linkType: hard
-
 "component-emitter@npm:1.2.1":
   version: 1.2.1
   resolution: "component-emitter@npm:1.2.1"
@@ -9101,13 +9076,6 @@ __metadata:
   version: 1.3.0
   resolution: "component-emitter@npm:1.3.0"
   checksum: fc4edbf1014f0aed88dcec33ca02d2938734e428423f640d8a3f94975615b8e8c506c19e29b93949637c5a281353e75fa79e299e0d57732f42a9fe346cb2cad6
-  languageName: node
-  linkType: hard
-
-"component-indexof@npm:0.0.3":
-  version: 0.0.3
-  resolution: "component-indexof@npm:0.0.3"
-  checksum: cc776e2316292ef7be3be1d899c15bfcc063649f90bdaf12467ee92cc2117712e262cba4785bce662c93d381c4d55ea824717d5f0bd485b5c8ed0f9417ed1d1d
   languageName: node
   linkType: hard
 
@@ -9568,16 +9536,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"create-react-class@npm:15.x":
-  version: 15.7.0
-  resolution: "create-react-class@npm:15.7.0"
-  dependencies:
-    loose-envify: ^1.3.1
-    object-assign: ^4.1.1
-  checksum: b961a66896ff89ad5451e6cf6a686c03716ecb50f7c61b24864cda5aa18d52ce817b94bbeace3e126b19a1cc926c75f34c0777a6f4004fc947221836b13d4479
-  languageName: node
-  linkType: hard
-
 "create-react-context@npm:0.3.0":
   version: 0.3.0
   resolution: "create-react-context@npm:0.3.0"
@@ -9645,16 +9603,6 @@ __metadata:
   version: 2.0.0
   resolution: "crypto-random-string@npm:2.0.0"
   checksum: 7bc19f6cafe3194a434198c9414941cc36d874e1f85b6fcba573b5623f77a440c0a10a94c0d0da26d7d23d85b6fe07354e589ef1a0fe2d7b32e0bab9e70ca4c1
-  languageName: node
-  linkType: hard
-
-"css-animation@npm:^1.3.2":
-  version: 1.6.1
-  resolution: "css-animation@npm:1.6.1"
-  dependencies:
-    babel-runtime: 6.x
-    component-classes: ^1.2.5
-  checksum: 1a9511320be61688884797979dcafdd760d0ad8769408313fe1533ddd8df337c844af1e045ed97206252bbc5444f13a908f35d4aa927b11a486f36eac902594c
   languageName: node
   linkType: hard
 
@@ -17226,7 +17174,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loose-envify@npm:^1.0.0, loose-envify@npm:^1.1.0, loose-envify@npm:^1.3.1, loose-envify@npm:^1.4.0":
+"loose-envify@npm:^1.0.0, loose-envify@npm:^1.1.0, loose-envify@npm:^1.4.0":
   version: 1.4.0
   resolution: "loose-envify@npm:1.4.0"
   dependencies:
@@ -18675,7 +18623,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"object-assign@npm:4.x, object-assign@npm:^4.0.1, object-assign@npm:^4.1.0, object-assign@npm:^4.1.1":
+"object-assign@npm:^4.0.1, object-assign@npm:^4.1.0, object-assign@npm:^4.1.1":
   version: 4.1.1
   resolution: "object-assign@npm:4.1.1"
   checksum: 66cf021898fc1b13ea573ea8635fbd5a76533f50cecbc2fcd5eee1e8029af41bcebe7023788b6d0e06cbe4401ecea075d972f78ec74467cdc571a0f1a4d1a081
@@ -20181,7 +20129,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:15.x, prop-types@npm:^15.0.0, prop-types@npm:^15.5.10, prop-types@npm:^15.5.8, prop-types@npm:^15.6.0, prop-types@npm:^15.6.1, prop-types@npm:^15.6.2, prop-types@npm:^15.7.0, prop-types@npm:^15.7.2":
+"prop-types@npm:^15.0.0, prop-types@npm:^15.5.10, prop-types@npm:^15.5.8, prop-types@npm:^15.6.0, prop-types@npm:^15.6.1, prop-types@npm:^15.6.2, prop-types@npm:^15.7.0, prop-types@npm:^15.7.2":
   version: 15.7.2
   resolution: "prop-types@npm:15.7.2"
   dependencies:
@@ -20474,7 +20422,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"raf@npm:^3.4.0, raf@npm:^3.4.1":
+"raf@npm:^3.4.1":
   version: 3.4.1
   resolution: "raf@npm:3.4.1"
   dependencies:
@@ -20575,18 +20523,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rc-align@npm:2.x":
-  version: 2.4.5
-  resolution: "rc-align@npm:2.4.5"
-  dependencies:
-    babel-runtime: ^6.26.0
-    dom-align: ^1.7.0
-    prop-types: ^15.5.8
-    rc-util: ^4.0.4
-  checksum: 3af4aba0e5d1178ca5e1907bd613aad95e4265e0661f6d30975b9ab6df38d0ac9438106bf07bb7e1bbd0da5fba1bc6b8ba59931387f3bf65d7d3da7b91a664ec
-  languageName: node
-  linkType: hard
-
 "rc-align@npm:^4.0.0":
   version: 4.0.9
   resolution: "rc-align@npm:4.0.9"
@@ -20600,37 +20536,6 @@ __metadata:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
   checksum: 28c74fd133bc4ffb877564d93eb88ed7df2be1fce8f70ca4dd859d0d9384556b95a60a935c3e064e785232d13cd0edb32a07f1d6b08be7bd49e6e7a0575a7e88
-  languageName: node
-  linkType: hard
-
-"rc-animate@npm:2.x":
-  version: 2.11.1
-  resolution: "rc-animate@npm:2.11.1"
-  dependencies:
-    babel-runtime: 6.x
-    classnames: ^2.2.6
-    css-animation: ^1.3.2
-    prop-types: 15.x
-    raf: ^3.4.0
-    rc-util: ^4.15.3
-    react-lifecycles-compat: ^3.0.4
-  checksum: 36e2cf4f33befd210310583a795b3ed8a90bdad4f217d57fd7b2bdf537994d46819745cfaf4419521feaa52db391bb55ba8905ea07328d502448149371bda342
-  languageName: node
-  linkType: hard
-
-"rc-color-picker@npm:1.2.6":
-  version: 1.2.6
-  resolution: "rc-color-picker@npm:1.2.6"
-  dependencies:
-    classnames: ^2.2.5
-    prop-types: ^15.5.8
-    rc-trigger: 1.x
-    rc-util: ^4.0.2
-    tinycolor2: ^1.4.1
-  peerDependencies:
-    react: 16.x
-    react-dom: 16.x
-  checksum: 7382575c9bae6a0c5ff3918b16ae465cd75802c23c3735c5447ea406b7899c12d947b84ab95b82ad4e8e88800b969cbe37c319a515c2b1552ac4c370ceb806c0
   languageName: node
   linkType: hard
 
@@ -20745,20 +20650,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rc-trigger@npm:1.x":
-  version: 1.11.5
-  resolution: "rc-trigger@npm:1.11.5"
-  dependencies:
-    babel-runtime: 6.x
-    create-react-class: 15.x
-    prop-types: 15.x
-    rc-align: 2.x
-    rc-animate: 2.x
-    rc-util: 4.x
-  checksum: e10e17fb07c1c4d1b37f4b7d53323c923bfde037ab0e9e40d9226901afd87df531ca4eeb0329a23a93af3a0a286ce328381b4d1d03aec5b9b29ebdb350909128
-  languageName: node
-  linkType: hard
-
 "rc-trigger@npm:^5.0.4, rc-trigger@npm:^5.1.2":
   version: 5.2.3
   resolution: "rc-trigger@npm:5.2.3"
@@ -20772,19 +20663,6 @@ __metadata:
     react: ">=16.9.0"
     react-dom: ">=16.9.0"
   checksum: e4fdfc7ef5d00ba79923e6f532a61ab447d7b619bcad563de9aca7dbd6f44a079fc7f4fbd4c5fa6faec409a9f577254a3079e7cc44f273157483d91aef1817d3
-  languageName: node
-  linkType: hard
-
-"rc-util@npm:4.x, rc-util@npm:^4.0.2, rc-util@npm:^4.0.4, rc-util@npm:^4.15.3":
-  version: 4.21.1
-  resolution: "rc-util@npm:4.21.1"
-  dependencies:
-    add-dom-event-listener: ^1.1.0
-    prop-types: ^15.5.10
-    react-is: ^16.12.0
-    react-lifecycles-compat: ^3.0.4
-    shallowequal: ^1.1.0
-  checksum: 68c3907f765793abacd20ec44e2cc2e0d102c6aebb49a6ba36ead079e9468818738b8aac30705c69ef9a7607086483ccc9e5ab09e0ebb50f78e172fe126cb500
   languageName: node
   linkType: hard
 
@@ -24627,7 +24505,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"tinycolor2@npm:1.4.2, tinycolor2@npm:^1.4.1":
+"tinycolor2@npm:1.4.2":
   version: 1.4.2
   resolution: "tinycolor2@npm:1.4.2"
   checksum: cf33d084cb378d2988fad1b214e62f38be75ba1a9a6df98d4dadf77c31f82796d40822100e6d3e1973c9233ddf0ddbbbfdcac40e2288c958bca3c6d310e2ccb4

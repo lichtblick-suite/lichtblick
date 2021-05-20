@@ -2,44 +2,19 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  Callout,
-  ColorPicker,
-  DefaultButton,
-  DirectionalHint,
-  Dropdown,
-  IColorPickerStyles,
-  Label,
-  SpinButton,
-  Stack,
-  TextField,
-  Toggle,
-} from "@fluentui/react";
+import { Dropdown, Label, SpinButton, Stack, TextField, Toggle } from "@fluentui/react";
 // We need lodash.get for dynamic key path support
 // eslint-disable-next-line no-restricted-imports
 import { get, set, cloneDeep } from "lodash";
-import { SyntheticEvent, useCallback, useRef, useState } from "react";
+import { SyntheticEvent, useCallback } from "react";
 
 import Logger from "@foxglove/log";
+import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import { PanelConfigSchemaEntry, SaveConfig } from "@foxglove/studio-base/types/panels";
+import { hexToColorObj, colorObjToIColor } from "@foxglove/studio-base/util/colorUtils";
 import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 const log = Logger.getLogger(__filename);
-
-const COLOR_PICKER_STYLES: IColorPickerStyles = {
-  root: { maxWidth: 250 },
-  colorRectangle: { minWidth: 100, minHeight: 100 },
-  table: {
-    // We need to remove table styles from global.scss, but for now, changing them
-    // to e.g. "#root td" messes with the styling in various places because the
-    // selector becomes more specific. So for now, just disable them directly here.
-    "tr, th, td, tr:hover th, tr:hover td": {
-      border: "none",
-      background: "none",
-      cursor: "unset",
-    },
-  },
-};
 
 export default function SchemaEntryEditor({
   entry,
@@ -58,8 +33,6 @@ export default function SchemaEntryEditor({
     [config, key, saveConfig],
   );
   const currentValue = get(config, key);
-  const [colorPickerShown, setColorPickerShown] = useState(false);
-  const colorButtonRef = useRef<HTMLElement>(ReactNull);
 
   switch (entry.type) {
     case "text": {
@@ -179,29 +152,10 @@ export default function SchemaEntryEditor({
       return (
         <Stack.Item>
           <Label>{title}</Label>
-          <DefaultButton
-            elementRef={colorButtonRef}
-            styles={{
-              root: { backgroundColor: value },
-              rootHovered: { backgroundColor: value, opacity: 0.8 },
-              rootPressed: { backgroundColor: value, opacity: 0.6 },
-            }}
-            onClick={() => setColorPickerShown(!colorPickerShown)}
+          <ColorPicker
+            color={hexToColorObj(value)}
+            onChange={(newColor) => setValue(`#${colorObjToIColor(newColor).hex}`)}
           />
-          {colorPickerShown && (
-            <Callout
-              directionalHint={DirectionalHint.rightCenter}
-              target={colorButtonRef.current}
-              onDismiss={() => setColorPickerShown(false)}
-            >
-              <ColorPicker
-                color={value}
-                alphaType="none"
-                onChange={(_event, newValue) => setValue(`#${newValue.hex}`)}
-                styles={COLOR_PICKER_STYLES}
-              />
-            </Callout>
-          )}
         </Stack.Item>
       );
     }

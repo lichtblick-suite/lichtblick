@@ -33,8 +33,6 @@ export type TreeUINode = { title: Node; key: string; children?: TreeUINode[]; di
 export type NamespacesByTopic = {
   [topicName: string]: string[];
 };
-type EditingNamespace = { namespaceKey: string; namespaceColor?: string };
-export type SetEditingNamespace = (arg0?: EditingNamespace) => void;
 
 export type TreeGroupNode = {
   type: "group";

@@ -14,69 +14,57 @@
 import DotsVerticalIcon from "@mdi/svg/svg/dots-vertical.svg";
 import UndoVariantIcon from "@mdi/svg/svg/undo-variant.svg";
 import { useState } from "react";
+import { Color } from "regl-worldview";
 import styled from "styled-components";
 
 import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
+import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Icon from "@foxglove/studio-base/components/Icon";
 import KeyboardShortcut from "@foxglove/studio-base/components/KeyboardShortcut";
 import Menu, { Item } from "@foxglove/studio-base/components/Menu";
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
-import {
-  getHexFromColorSettingWithDefault,
-  PICKER_SIZE,
-} from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/ColorPickerForTopicSettings";
 import { ROW_HEIGHT } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/constants";
 import { TopicTreeContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
 import clipboard from "@foxglove/studio-base/util/clipboard";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { SDotMenuPlaceholder } from "./TreeNodeRow";
-import { OnNamespaceOverrideColorChange, SetEditingNamespace } from "./types";
+import { OnNamespaceOverrideColorChange } from "./types";
 
 const DISABLED_STYLE = { cursor: "not-allowed", color: colors.TEXT_MUTED };
 const ICON_SIZE = 18; // The width of the small icon.
-const COLOR_PIKCER_ICON_SPACING = 4;
+const COLOR_PICKER_ICON_SPACING = 4;
+const COLOR_PICKER_SIZE = 16;
 export const DOT_MENU_WIDTH = ICON_SIZE; // The width of the small icon.
-const COLOR_PICKER_SIZE = PICKER_SIZE.SMALL.size;
-const COLOR_PICKER_AND_ICON_WIDTH = COLOR_PICKER_SIZE + ICON_SIZE + COLOR_PIKCER_ICON_SPACING;
+const COLOR_PICKER_AND_ICON_WIDTH = COLOR_PICKER_SIZE + ICON_SIZE + COLOR_PICKER_ICON_SPACING;
 
 const SItemContent = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
 `;
+
 const SColorPickerWrapper = styled.span`
   display: inline-flex;
   align-items: center;
 `;
 
-const SColorTrigger = styled.span<any>`
-  display: inline-block;
-  cursor: pointer;
-  background: ${({ hexColor }) => hexColor};
-  width: ${PICKER_SIZE.SMALL.size}px;
-  height: ${PICKER_SIZE.SMALL.size}px;
-  border-radius: ${PICKER_SIZE.SMALL.size / 2}px;
-`;
-
 type Props = {
   disableBaseColumn: boolean;
   disableFeatureColumn: boolean;
-  featureKey: string;
   hasFeatureColumn: boolean;
   hasNamespaceOverrideColorChangedByColumn: boolean[];
   namespace: string;
   nodeKey: string;
   onNamespaceOverrideColorChange: OnNamespaceOverrideColorChange;
-  overrideColorByColumn?: (string | undefined)[];
+  overrideColorByColumn?: (Color | undefined)[];
   providerAvailable: boolean;
-  setEditingNamespace: SetEditingNamespace;
   topicName: string;
 };
 
 const overrideColorChangedIconStyle = {
   color: colors.HIGHLIGHT,
-  marginLeft: COLOR_PIKCER_ICON_SPACING,
+  marginLeft: COLOR_PICKER_ICON_SPACING,
   height: ROW_HEIGHT,
   display: "inline-flex",
   alignItems: "center",
@@ -86,7 +74,6 @@ const overrideColorChangedIconStyle = {
 export default function NamespaceMenu({
   disableBaseColumn,
   disableFeatureColumn,
-  featureKey,
   hasFeatureColumn,
   hasNamespaceOverrideColorChangedByColumn,
   namespace,
@@ -94,7 +81,6 @@ export default function NamespaceMenu({
   onNamespaceOverrideColorChange,
   overrideColorByColumn,
   providerAvailable,
-  setEditingNamespace,
   topicName,
 }: Props): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
@@ -168,12 +154,6 @@ export default function NamespaceMenu({
             {overrideColorByColumn && (
               <>
                 <Item
-                  onClick={() =>
-                    setEditingNamespace({
-                      namespaceColor: overrideColorByColumn[0],
-                      namespaceKey: nodeKey,
-                    })
-                  }
                   style={{
                     padding: "0 12px",
                     height: 28,
@@ -183,10 +163,10 @@ export default function NamespaceMenu({
                   <SItemContent>
                     <span style={{ paddingRight: 8 }}>Marker color</span>
                     <SColorPickerWrapper style={colorPickerWrapperStyle}>
-                      <SColorTrigger
-                        hexColor={getHexFromColorSettingWithDefault(
-                          overrideColorByColumn[0] as any,
-                        )}
+                      <ColorPicker
+                        color={overrideColorByColumn[0]}
+                        buttonShape={"circle"}
+                        onChange={(newColor) => onNamespaceOverrideColorChange(newColor, nodeKey)}
                       />
                       {(hasNamespaceOverrideColorChangedByColumn[0] ?? false) && (
                         <Icon
@@ -205,12 +185,6 @@ export default function NamespaceMenu({
                 </Item>
                 {hasFeatureColumn && (
                   <Item
-                    onClick={() =>
-                      setEditingNamespace({
-                        namespaceColor: overrideColorByColumn[1],
-                        namespaceKey: featureKey,
-                      })
-                    }
                     style={{
                       padding: "0 12px",
                       height: 28,
@@ -220,26 +194,21 @@ export default function NamespaceMenu({
                     <SItemContent>
                       <span style={{ paddingRight: 8 }}>Feature marker color</span>
                       <SColorPickerWrapper style={colorPickerWrapperStyle}>
-                        <SColorTrigger
-                          hexColor={getHexFromColorSettingWithDefault(
-                            overrideColorByColumn[1] as any,
-                          )}
+                        <Icon
+                          dataTest="reset-override-color-icon"
+                          small
+                          fade
+                          tooltipProps={{ placement: "top", contents: "Reset to default" }}
+                          onClick={() => onNamespaceOverrideColorChange(undefined, nodeKey)}
+                          style={overrideColorChangedIconStyle}
+                        >
+                          <UndoVariantIcon />
+                        </Icon>
+                        <ColorPicker
+                          color={overrideColorByColumn[1]}
+                          buttonShape={"circle"}
+                          onChange={(newColor) => onNamespaceOverrideColorChange(newColor, nodeKey)}
                         />
-                        {(hasNamespaceOverrideColorChangedByColumn[1] ?? false) && (
-                          <Icon
-                            dataTest="reset-override-color-icon"
-                            small
-                            fade
-                            tooltipProps={{
-                              placement: "top",
-                              contents: "Reset color to default.",
-                            }}
-                            onClick={() => onNamespaceOverrideColorChange(undefined, featureKey)}
-                            style={overrideColorChangedIconStyle}
-                          >
-                            <UndoVariantIcon />
-                          </Icon>
-                        )}
                       </SColorPickerWrapper>
                     </SItemContent>
                   </Item>

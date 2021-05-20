@@ -53,7 +53,6 @@ import {
   OnNamespaceOverrideColorChange,
   SceneErrorsByKey,
   SetCurrentEditingTopic,
-  SetEditingNamespace,
   TopicDisplayMode,
   TreeNode,
   VisibleTopicsCountByKey,
@@ -224,7 +223,6 @@ type SharedProps = {
   saveConfig: Save3DConfig;
   sceneErrorsByKey: SceneErrorsByKey;
   setCurrentEditingTopic: SetCurrentEditingTopic;
-  setEditingNamespace: SetEditingNamespace;
   setFilterText: (arg0: string) => void;
   setShowTopicTree: (arg0: boolean | ((arg0: boolean) => boolean)) => void;
   shouldExpandAllKeys: boolean;
@@ -263,7 +261,6 @@ function TopicTree({
   saveConfig,
   sceneErrorsByKey,
   setCurrentEditingTopic,
-  setEditingNamespace,
   setFilterText,
   setShowTopicTree,
   shouldExpandAllKeys,
@@ -427,7 +424,6 @@ function TopicTree({
               sceneErrorsByKey,
               setCurrentEditingTopic,
               derivedCustomSettingsByKey,
-              setEditingNamespace,
               topicDisplayMode,
               visibleTopicsCountByKey,
               width: treeWidth,
