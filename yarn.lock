@@ -2314,7 +2314,7 @@ __metadata:
     reselect: 4.0.0
     rosbag: "github:foxglove/rosbag.js#6ce4e00c16b80973e270d53e9fb362a516e74e03"
     roslib: "github:foxglove/roslibjs#364a19d5f3ada7543fac9194a50b96087c7556ba"
-    sanitize-html: 2.3.3
+    sanitize-html: 2.4.0
     seedrandom: 3.0.5
     shallowequal: 1.1.0
     storycap: 3.0.4
@@ -22729,9 +22729,9 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"sanitize-html@npm:2.3.3":
-  version: 2.3.3
-  resolution: "sanitize-html@npm:2.3.3"
+"sanitize-html@npm:2.4.0":
+  version: 2.4.0
+  resolution: "sanitize-html@npm:2.4.0"
   dependencies:
     deepmerge: ^4.2.2
     escape-string-regexp: ^4.0.0
@@ -22740,7 +22740,7 @@ resolve@^2.0.0-next.3:
     klona: ^2.0.3
     parse-srcset: ^1.0.2
     postcss: ^8.0.2
-  checksum: 68cef1cf949bd58afb4c6fcfd55ba6ac9f342dcf5c8cf5aacd5fd532bca3c77d15c29c753eef7089923583a75e4877dede2fd72581ef535028651f8f144971e2
+  checksum: 1eb1d4a42d51be39b2c8a379b0b729d687d67986374415c3f565b4a6f9f8e86087c11c762ade78b96f4c0bfb4312fb389d3340b561971cc10d719ccfc2d7998e
   languageName: node
   linkType: hard
 
