@@ -4,11 +4,14 @@
     "<rootDir>/jest.config.json",
     "<rootDir>/app/jest.config.json",
     "<rootDir>/ci/jest.config.json",
-    "<rootDir>/packages/*/jest.config.json"
+    "<rootDir>/packages/*/jest.config.json",
+    "<rootDir>/packages/@foxglove/*/jest.config.json"
   ],
   "testRunner": "jest-circus/runner",
   "transform": {
     "\\.[jt]sx?$": ["babel-jest", { "rootMode": "upward" }]
   },
-  "testMatch": ["**/licenses.test.ts"]
+  "testMatch": ["**/licenses.test.ts"],
+  "//": "Native find is slow because it does not exclude files: https://github.com/facebook/jest/pull/11264#issuecomment-825377579",
+  "haste": { "forceNodeFilesystemAPI": true }
 }

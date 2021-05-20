@@ -7,7 +7,7 @@ import { act, renderHook } from "@testing-library/react-hooks";
 import useRethrow from "./useRethrow";
 
 describe("useRethrow", () => {
-  it("should catch errors throw", async () => {
+  it("should catch errors thrown", () => {
     const { result } = renderHook(() => {
       return useRethrow(() => {
         throw new Error("foobar");
