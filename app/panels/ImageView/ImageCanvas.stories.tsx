@@ -13,7 +13,7 @@
 
 import { range, noop } from "lodash";
 
-import ImageView from "@foxglove/studio-base/panels/ImageView";
+import ImageView, { Config } from "@foxglove/studio-base/panels/ImageView";
 import ImageCanvas from "@foxglove/studio-base/panels/ImageView/ImageCanvas";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { ImageMarker } from "@foxglove/studio-base/types/Messages";
@@ -251,7 +251,7 @@ const topics = [
   { name: "/storybook_image", datatype: "sensor_msgs/Image" },
   { name: "/storybook_compressed_image", datatype: "sensor_msgs/CompressedImage" },
 ];
-const config = ImageView.defaultConfig;
+const config: Config = { ...ImageView.defaultConfig, mode: "other" };
 
 function RGBStory({ encoding }: { encoding: string }) {
   const width = 2560;

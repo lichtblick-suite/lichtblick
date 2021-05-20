@@ -48,7 +48,7 @@ import { getSynchronizingReducers } from "@foxglove/studio-base/util/synchronize
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 import toggle from "@foxglove/studio-base/util/toggle";
 
-import ImageCanvas from "./ImageCanvas";
+import ImageCanvas, { DEFAULT_MAX_ZOOM } from "./ImageCanvas";
 import imageCanvasStyles from "./ImageCanvas.module.scss";
 import helpContent from "./index.help.md";
 import style from "./index.module.scss";
@@ -73,8 +73,10 @@ type DefaultConfig = {
 export type Config = DefaultConfig & {
   transformMarkers: boolean;
   mode?: "fit" | "fill" | "other";
+  smooth?: boolean;
   zoomPercentage?: number;
-  offset?: number[];
+  offset?: [number, number];
+  maxZoom?: number;
   minValue?: number;
   maxValue?: number;
   saveStoryConfig?: () => void;
@@ -115,7 +117,7 @@ const TopicTimestamp = ({
 const BottomBar = ({ children }: { children?: React.ReactNode }) => (
   <div
     className={cx(imageCanvasStyles["bottom-bar"], {
-      [imageCanvasStyles.inScreenshotTests!]: inScreenshotTests(),
+      [imageCanvasStyles.inScreenshotTests as string]: inScreenshotTests(),
     })}
   >
     {children}
@@ -261,7 +263,7 @@ const AddTopic = ({
   );
 };
 
-const NO_CUSTOM_OPTIONS: any = [];
+const NO_CUSTOM_OPTIONS: string[] = [];
 
 function ImageView(props: Props) {
   const { config, saveConfig } = props;
@@ -439,10 +441,10 @@ function ImageView(props: Props) {
 
   // Timestamps are displayed for informational purposes in the markers menu
   const renderedMarkerTimestamps = useMemo(() => {
-    const stamps = {};
+    const stamps: Record<string, string> = {};
     for (const { topic, message } of markersToRender) {
       // In some cases, a user may have subscribed to a topic that does not include a header stamp.
-      (stamps as any)[topic] = (message as Partial<StampedMessage>).header?.stamp
+      stamps[topic] = (message as Partial<StampedMessage>).header?.stamp
         ? formatTimeRaw((message as StampedMessage).header.stamp)
         : "[ not available ]";
     }
@@ -503,7 +505,7 @@ function ImageView(props: Props) {
             className={style.dropdownItem}
           >
             <span style={{ display: "inline-block", marginRight: "15px" }}>{topic}</span>
-            <TopicTimestamp text={(renderedMarkerTimestamps as any)[topic] || ""} />
+            <TopicTimestamp text={renderedMarkerTimestamps[topic] ?? ""} />
             {customMarkerTopicOptions.includes(topic) && (
               <Icon
                 style={{ position: "absolute", right: "10px" }}
@@ -513,7 +515,7 @@ function ImageView(props: Props) {
                       (topicOption) => topicOption !== topic,
                     ),
                     customMarkerTopicOptions: customMarkerTopicOptions.filter(
-                      (topicOption: any) => topicOption !== topic,
+                      (topicOption) => topicOption !== topic,
                     ),
                   })
                 }
@@ -644,11 +646,25 @@ const defaultConfig: Config = {
   synchronize: false,
   mode: "fit",
   zoomPercentage: 100,
+  maxZoom: DEFAULT_MAX_ZOOM,
   offset: [0, 0],
 };
 
 const configSchema: PanelConfigSchema<Config> = [
   { key: "synchronize", type: "toggle", title: "Synchronize images and markers" },
+  {
+    key: "smooth",
+    type: "toggle",
+    title: "Bilinear smoothing",
+  },
+  {
+    key: "maxZoom",
+    type: "number",
+    title: "Maximum zoom %",
+    placeholder: `${DEFAULT_MAX_ZOOM}`,
+    allowEmpty: true,
+    validate: (value) => Math.max(100, value),
+  },
   {
     key: "minValue",
     type: "number",

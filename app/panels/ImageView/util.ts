@@ -134,7 +134,7 @@ export function checkOutOfBounds(
   outsideHeight: number,
   insideWidth: number,
   insideHeight: number,
-): number[] {
+): [number, number] {
   const leftX = 0;
   const topY = 0;
   const rightX = outsideWidth - insideWidth;
