@@ -1933,9 +1933,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluentui/react-focus@npm:^8.1.0":
-  version: 8.1.0
-  resolution: "@fluentui/react-focus@npm:8.1.0"
+"@fluentui/react-focus@npm:^8.1.1":
+  version: 8.1.1
+  resolution: "@fluentui/react-focus@npm:8.1.1"
   dependencies:
     "@fluentui/keyboard-key": ^0.3.0
     "@fluentui/merge-styles": ^8.1.0
@@ -1946,7 +1946,7 @@ __metadata:
   peerDependencies:
     "@types/react": ">=16.8.0 <18.0.0"
     react: ">=16.8.0 <18.0.0"
-  checksum: 642e551af647e9f284ddcea1e6103c9aa4e89393e4ac3288a4176003ae60a787adf79474e3d5b03ca6f589138a99c4f347f1c7e8facde510bb07ede6d20e44a2
+  checksum: 428a22a78335f909b21470db7440eb4a457796deae8f865c66f3b8ac7306a287ec8db1063b58242f37c7075965e3ea8518f1febb53e1685e643e845114885fec
   languageName: node
   linkType: hard
 
@@ -2009,15 +2009,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluentui/react@npm:8.14.10":
-  version: 8.14.10
-  resolution: "@fluentui/react@npm:8.14.10"
+"@fluentui/react@npm:8.14.11":
+  version: 8.14.11
+  resolution: "@fluentui/react@npm:8.14.11"
   dependencies:
     "@fluentui/date-time-utilities": ^8.1.0
     "@fluentui/font-icons-mdl2": ^8.1.0
     "@fluentui/foundation-legacy": ^8.1.0
     "@fluentui/merge-styles": ^8.1.0
-    "@fluentui/react-focus": ^8.1.0
+    "@fluentui/react-focus": ^8.1.1
     "@fluentui/react-hooks": ^8.2.0
     "@fluentui/react-window-provider": ^2.1.0
     "@fluentui/set-version": ^8.1.0
@@ -2031,7 +2031,7 @@ __metadata:
     "@types/react-dom": ">=16.8.0 <18.0.0"
     react: ">=16.8.0 <18.0.0"
     react-dom: ">=16.8.0 <18.0.0"
-  checksum: 0fadc444abb22e55c8cbc0525487fd4b4fc411c1a8f348869203639177c5c03d6a7e798a707e8a27cbb7106c832561682abe5f1f42812dfea6626abb0068a733
+  checksum: 716a494b93ba47ed40754296d7774665c150e924057cfde1478e7b7b8024ba45a1b23f813807813330394831bd10728ab68f0f759f5430e29b4a6847f446f12e
   languageName: node
   linkType: hard
 
@@ -2177,7 +2177,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/studio-base@workspace:app"
   dependencies:
-    "@fluentui/react": 8.14.10
+    "@fluentui/react": 8.14.11
     "@fluentui/react-icons-mdl2": 1.1.0
     "@foxglove/hooks": "workspace:packages/@foxglove/hooks"
     "@foxglove/velodyne-cloud": "workspace:packages/velodyne-cloud"
