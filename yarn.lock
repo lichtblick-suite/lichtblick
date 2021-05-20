@@ -2093,7 +2093,7 @@ __metadata:
   resolution: "@foxglove/electron-socket@workspace:packages/electron-socket"
   dependencies:
     "@types/dns-packet": 5.2.0
-    dns-packet: 5.2.1
+    dns-packet: 5.2.2
     eventemitter3: 4.0.7
     typescript: 4.2.4
   peerDependencies:
@@ -10555,12 +10555,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dns-packet@npm:5.2.1":
-  version: 5.2.1
-  resolution: "dns-packet@npm:5.2.1"
+"dns-packet@npm:5.2.2":
+  version: 5.2.2
+  resolution: "dns-packet@npm:5.2.2"
   dependencies:
     ip: ^1.1.5
-  checksum: 624075ff4fc4956fa22916713a337440c5a4db805da44d5cf6b4286dea7a40c9071f5fc7745b5ead7cb9f03670bd1832d443c79d76d53005da748607a3922948
+  checksum: ab986dcb02bf867334bb2e10f985d0a206fd43e4d009fb591c92bb77c4f6976b9f2a8a09d905589e7b0defb00dd3074bab16d71688cfe929ff224c391eb418a9
   languageName: node
   linkType: hard
 
