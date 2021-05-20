@@ -2308,7 +2308,7 @@ __metadata:
     reg-publish-gcs-plugin: 0.10.15
     reg-simple-keygen-plugin: 0.10.15
     reg-suit: 0.10.15
-    regl-worldview: "github:foxglove/webviz#workspace=regl-worldview&commit=48979519bb7c067c7a0162255d1ef083fef49199"
+    regl-worldview: "github:foxglove/webviz#workspace=regl-worldview&commit=6eb0e8c45eff795f8718f33bf3e10478951e7249"
     rehype-raw: 5.1.0
     reselect: 4.0.0
     rosbag: "github:foxglove/rosbag.js#6ce4e00c16b80973e270d53e9fb362a516e74e03"
@@ -21922,9 +21922,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"regl-worldview@github:foxglove/webviz#workspace=regl-worldview&commit=48979519bb7c067c7a0162255d1ef083fef49199":
+"regl-worldview@github:foxglove/webviz#workspace=regl-worldview&commit=6eb0e8c45eff795f8718f33bf3e10478951e7249":
   version: 0.16.1
-  resolution: "regl-worldview@https://github.com/foxglove/webviz.git#workspace=regl-worldview&commit=48979519bb7c067c7a0162255d1ef083fef49199"
+  resolution: "regl-worldview@https://github.com/foxglove/webviz.git#workspace=regl-worldview&commit=6eb0e8c45eff795f8718f33bf3e10478951e7249"
   dependencies:
     "@babel/runtime": ^7.3.1
     "@mapbox/tiny-sdf": ^1.1.1
