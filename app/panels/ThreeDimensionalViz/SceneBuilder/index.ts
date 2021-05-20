@@ -602,9 +602,10 @@ export default class SceneBuilder implements MarkerProvider {
     const matchingMatcher = colorOverrideMarkerMatchers.find(({ checks = [] }) =>
       checks.every(({ markerKeyPath = [], value }) => {
         // Get the item at the key path
+        // i.e. key path: ["foo", "bar"] would return "value" in an object like {foo: {bar: "value" }}
         const markerValue = markerKeyPath.reduce(
-          (item: any, key) => item?.[key] && item[key](),
-          message as any,
+          (item: any, key) => item?.[key],
+          message as Record<string, unknown> | undefined,
         );
         return value === markerValue;
       }),
