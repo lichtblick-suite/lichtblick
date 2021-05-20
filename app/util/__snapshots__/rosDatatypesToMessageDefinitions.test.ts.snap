@@ -5,42 +5,12 @@ Array [
   Object {
     "definitions": Array [
       Object {
-        "arrayLength": undefined,
         "isArray": true,
         "isComplex": true,
         "name": "markers",
-        "type": "visualization_msgs/StudioMarker",
-      },
-      Object {
-        "isArray": false,
-        "isComplex": true,
-        "name": "header",
-        "type": "std_msgs/Header",
+        "type": "visualization_msgs/Marker",
       },
     ],
-  },
-  Object {
-    "definitions": Array [
-      Object {
-        "isArray": false,
-        "isComplex": false,
-        "name": "seq",
-        "type": "uint32",
-      },
-      Object {
-        "isArray": false,
-        "isComplex": false,
-        "name": "stamp",
-        "type": "time",
-      },
-      Object {
-        "isArray": false,
-        "isComplex": false,
-        "name": "frame_id",
-        "type": "string",
-      },
-    ],
-    "name": "std_msgs/Header",
   },
   Object {
     "definitions": Array [
@@ -135,6 +105,12 @@ Array [
         "value": 2,
       },
       Object {
+        "isConstant": true,
+        "name": "DELETEALL",
+        "type": "uint8",
+        "value": 3,
+      },
+      Object {
         "isArray": false,
         "isComplex": true,
         "name": "header",
@@ -145,6 +121,12 @@ Array [
         "isComplex": false,
         "name": "ns",
         "type": "string",
+      },
+      Object {
+        "isArray": false,
+        "isComplex": false,
+        "name": "id",
+        "type": "int32",
       },
       Object {
         "isArray": false,
@@ -189,14 +171,12 @@ Array [
         "type": "bool",
       },
       Object {
-        "arrayLength": undefined,
         "isArray": true,
         "isComplex": true,
         "name": "points",
         "type": "geometry_msgs/Point",
       },
       Object {
-        "arrayLength": undefined,
         "isArray": true,
         "isComplex": true,
         "name": "colors",
@@ -220,20 +200,8 @@ Array [
         "name": "mesh_use_embedded_materials",
         "type": "bool",
       },
-      Object {
-        "isArray": false,
-        "isComplex": false,
-        "name": "id",
-        "type": "string",
-      },
-      Object {
-        "isArray": false,
-        "isComplex": false,
-        "name": "metadata",
-        "type": "json",
-      },
     ],
-    "name": "visualization_msgs/StudioMarker",
+    "name": "visualization_msgs/Marker",
   },
   Object {
     "definitions": Array [
@@ -355,6 +323,29 @@ Array [
       },
     ],
     "name": "geometry_msgs/Quaternion",
+  },
+  Object {
+    "definitions": Array [
+      Object {
+        "isArray": false,
+        "isComplex": false,
+        "name": "seq",
+        "type": "uint32",
+      },
+      Object {
+        "isArray": false,
+        "isComplex": false,
+        "name": "stamp",
+        "type": "time",
+      },
+      Object {
+        "isArray": false,
+        "isComplex": false,
+        "name": "frame_id",
+        "type": "string",
+      },
+    ],
+    "name": "std_msgs/Header",
   },
 ]
 `;

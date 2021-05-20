@@ -26,9 +26,6 @@ export const NAV_MSGS_PATH_DATATYPE = "nav_msgs/Path";
 export const POINT_CLOUD_DATATYPE = "sensor_msgs/PointCloud2";
 export const POSE_STAMPED_DATATYPE = "geometry_msgs/PoseStamped";
 export const SENSOR_MSGS_LASER_SCAN_DATATYPE = "sensor_msgs/LaserScan";
-export const STUDIO_MARKER_DATATYPE = "visualization_msgs/StudioMarker";
-export const STUDIO_MARKER_ARRAY_DATATYPE = "visualization_msgs/StudioMarkerArray";
-export const FUTURE_VIZ_MSGS_DATATYPE = "future_visualization_msgs/StudioMarkerArray";
 export const TRANSFORM_STAMPED_DATATYPE = "geometry_msgs/TransformStamped";
 export const TF_DATATYPE = "tf/tfMessage";
 export const TF2_DATATYPE = "tf2_msgs/TFMessage";
@@ -41,11 +38,7 @@ export const FOXGLOVE_GRID_DATATYPE = "foxglove/Grid";
 
 export const ROBOT_DESCRIPTION_PARAM = "/robot_description";
 
-export const MARKER_ARRAY_DATATYPES = [
-  "visualization_msgs/MarkerArray",
-  FUTURE_VIZ_MSGS_DATATYPE,
-  STUDIO_MARKER_ARRAY_DATATYPE,
-];
+export const MARKER_ARRAY_DATATYPES = [VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE];
 
 export const USER_ERROR_PREFIX = "[STUDIO USER ERROR]";
 

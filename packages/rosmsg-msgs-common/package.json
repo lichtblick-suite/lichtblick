@@ -1,0 +1,34 @@
+{
+  "name": "@foxglove/rosmsg-msgs-common",
+  "version": "0.0.0",
+  "license": "MPL-2.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/foxglove/studio.git"
+  },
+  "author": {
+    "name": "Foxglove Technologies",
+    "email": "support@foxglove.dev"
+  },
+  "homepage": "https://foxglove.dev/",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "msgdefs",
+    "src"
+  ],
+  "scripts": {
+    "prepack": "node -r esbuild-runner/register src/index.ts"
+  },
+  "dependencies": {
+    "@foxglove/rosmsg": "workspace:packages/rosmsg"
+  },
+  "devDependencies": {
+    "@types/prettier": "2.2.3",
+    "esbuild-runner": "1.3.2",
+    "prettier": "2.3.0",
+    "typescript": "4.2.4"
+  }
+}

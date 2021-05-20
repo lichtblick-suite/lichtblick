@@ -9,6 +9,7 @@
     "@fluentui/react": "8.14.11",
     "@fluentui/react-icons-mdl2": "1.1.0",
     "@foxglove/hooks": "workspace:packages/@foxglove/hooks",
+    "@foxglove/rosmsg-msgs-common": "workspace:packages/rosmsg-msgs-common",
     "@foxglove/velodyne-cloud": "workspace:packages/velodyne-cloud",
     "@mdi/svg": "5.9.55",
     "async-mutex": "0.3.1",

@@ -14,8 +14,8 @@
 import { uniqBy } from "lodash";
 
 import {
-  STUDIO_MARKER_ARRAY_DATATYPE,
-  STUDIO_MARKER_DATATYPE,
+  VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE,
+  VISUALIZATION_MSGS_MARKER_DATATYPE,
 } from "@foxglove/studio-base/util/globalConstants";
 
 import { basicDatatypes } from "./datatypes";
@@ -24,14 +24,14 @@ import rosDatatypesToMessageDefinition from "./rosDatatypesToMessageDefinition";
 describe("rosDatatypesToMessageDefinition", () => {
   it(`Includes all of the definitions for "visualization_msgs/StudioMarkerArray"`, () => {
     expect(
-      rosDatatypesToMessageDefinition(basicDatatypes, STUDIO_MARKER_ARRAY_DATATYPE),
+      rosDatatypesToMessageDefinition(basicDatatypes, VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE),
     ).toMatchSnapshot();
   });
 
   it("produces a correct message definition", () => {
     const definitions = rosDatatypesToMessageDefinition(
       basicDatatypes,
-      STUDIO_MARKER_ARRAY_DATATYPE,
+      VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE,
     );
     // Should have 1 definition without a name, the root datatype.
     expect(definitions.filter(({ name }) => name == undefined).length).toEqual(1);
@@ -41,26 +41,28 @@ describe("rosDatatypesToMessageDefinition", () => {
 
   it("Errors if it can't find the definition", () => {
     const datatypes = {
-      [STUDIO_MARKER_ARRAY_DATATYPE]: {
+      [VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE]: {
         fields: [
           {
             isArray: true,
             isComplex: true,
             arrayLength: undefined,
             name: "markers",
-            type: STUDIO_MARKER_DATATYPE,
+            type: VISUALIZATION_MSGS_MARKER_DATATYPE,
           },
           {
             isArray: false,
             isComplex: true,
             name: "header",
-            type: "std_msgs/Header",
+            type: "std_msgs/CustomHeader",
           },
         ],
       },
     };
-    expect(() => rosDatatypesToMessageDefinition(datatypes, STUDIO_MARKER_ARRAY_DATATYPE)).toThrow(
-      `While searching datatypes for "visualization_msgs/StudioMarkerArray", could not find datatype "std_msgs/Header"`,
+    expect(() =>
+      rosDatatypesToMessageDefinition(datatypes, VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE),
+    ).toThrow(
+      `While searching datatypes for "${VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE}", could not find datatype "std_msgs/CustomHeader"`,
     );
   });
 });
