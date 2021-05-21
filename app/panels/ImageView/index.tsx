@@ -41,6 +41,10 @@ import { CameraInfo, StampedMessage } from "@foxglove/studio-base/types/Messages
 import { PanelConfigSchema, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import filterMap from "@foxglove/studio-base/util/filterMap";
+import {
+  VISUALIZATION_MSGS_IMAGE_MARKER_ARRAY_DATATYPE,
+  VISUALIZATION_MSGS_IMAGE_MARKER_DATATYPE,
+} from "@foxglove/studio-base/util/globalConstants";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 import { colors as sharedColors } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -293,7 +297,10 @@ function ImageView(props: Props) {
   }, [topics]);
 
   const imageMarkerDatatypes = useMemo(
-    () => ["visualization_msgs/ImageMarker", "studio_msgs/ImageMarkerArray"],
+    () => [
+      VISUALIZATION_MSGS_IMAGE_MARKER_DATATYPE,
+      VISUALIZATION_MSGS_IMAGE_MARKER_ARRAY_DATATYPE,
+    ],
     [],
   );
   const defaultAvailableMarkerTopics = useMemo(
