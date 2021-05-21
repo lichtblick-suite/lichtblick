@@ -35,9 +35,9 @@ export default function ColorPicker({ color, onChange, buttonShape }: Props): JS
           styles={{
             root: {
               backgroundColor: fluentColor.str,
-              width: "24px",
-              height: "24px",
-              borderRadius: "12px",
+              width: "26px",
+              height: "26px",
+              borderRadius: "13px",
             },
             rootHovered: { backgroundColor: fluentColor.str, opacity: 0.8 },
             rootPressed: { backgroundColor: fluentColor.str, opacity: 0.6 },
@@ -66,7 +66,7 @@ export default function ColorPicker({ color, onChange, buttonShape }: Props): JS
       {button}
       {colorPickerShown && (
         <Callout
-          directionalHint={DirectionalHint.topAutoEdge}
+          directionalHint={DirectionalHint.topCenter}
           target={colorButtonRef.current}
           onDismiss={() => {
             setColorPickerShown(false);
