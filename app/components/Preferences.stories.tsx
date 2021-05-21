@@ -15,24 +15,8 @@ import { storiesOf } from "@storybook/react";
 import { useState } from "react";
 
 import Preferences from "@foxglove/studio-base/components/Preferences";
-import AppConfigurationContext, {
-  AppConfiguration,
-  AppConfigurationValue,
-} from "@foxglove/studio-base/context/AppConfigurationContext";
-
-function makeConfiguration(entries?: [string, AppConfigurationValue][]): AppConfiguration {
-  const map = new Map<string, AppConfigurationValue>(entries);
-  const listeners = new Set<(newValue: AppConfigurationValue) => void>();
-  return {
-    get: (key: string) => map.get(key),
-    set: async (key: string, value: AppConfigurationValue) => {
-      map.set(key, value);
-      [...listeners].forEach((listener) => listener(value));
-    },
-    addChangeListener: (_key, cb) => listeners.add(cb),
-    removeChangeListener: (_key, cb) => listeners.delete(cb),
-  };
-}
+import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
+import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration";
 
 export function Default(): React.ReactElement {
   const [config] = useState(() => makeConfiguration());

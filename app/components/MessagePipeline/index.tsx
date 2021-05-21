@@ -14,6 +14,8 @@
 import { debounce, flatten, groupBy } from "lodash";
 import { Time } from "rosbag";
 
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import useContextSelector from "@foxglove/studio-base/hooks/useContextSelector";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
@@ -32,6 +34,7 @@ import {
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import createSelectableContext from "@foxglove/studio-base/util/createSelectableContext";
+import { requestThrottledAnimationFrame } from "@foxglove/studio-base/util/requestThrottledAnimationFrame";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 import signal from "@foxglove/studio-base/util/signal";
 
@@ -153,13 +156,17 @@ export function MessagePipelineProvider({
     }
   }, [maybePlayer.error]);
 
+  // Slow down the message pipeline framerate to the given FPS if it is set to less than 60
+  const [messageRate] = useAppConfigurationValue<number>(AppSetting.MESSAGE_RATE);
+  const skipFrames = 60 / (messageRate ?? 60) - 1;
+
   // Delay the player listener promise until rendering has finished for the latest data.
   useLayoutEffect(() => {
     // In certain cases like the player being replaced (reproduce by dragging a bag in while playing), we can
     // replace the new playerTickState. We want to use one playerTickState throughout the entire tick, since it's
     // implicitly tied to the player.
     const currentPlayerTickState = playerTickState.current;
-    requestAnimationFrame(async () => {
+    requestThrottledAnimationFrame(async () => {
       if (currentPlayerTickState.resolveFn && !currentPlayerTickState.waitingForPromises) {
         if (currentPlayerTickState.promisesToWaitFor.length > 0) {
           // If we have finished rendering but we still have to wait for some promises wait for them here.
@@ -183,8 +190,8 @@ export function MessagePipelineProvider({
           currentPlayerTickState.resolveFn = undefined;
         }
       }
-    });
-  }, [playerState]);
+    }, skipFrames);
+  }, [playerState, skipFrames]);
 
   useEffect(() => {
     currentPlayer.current = player;

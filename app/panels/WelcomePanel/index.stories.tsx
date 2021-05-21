@@ -5,33 +5,16 @@ import { action } from "@storybook/addon-actions";
 import { useEffect, useRef, useState } from "react";
 import ReactTestUtils from "react-dom/test-utils";
 
-import AppConfigurationContext, {
-  AppConfiguration,
-  AppConfigurationValue,
-  ChangeHandler,
-} from "@foxglove/studio-base/context/AppConfigurationContext";
+import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import WelcomePanel from "@foxglove/studio-base/panels/WelcomePanel";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration";
 import signal from "@foxglove/studio-base/util/signal";
 
 export default {
   title: "panels/WelcomePanel/index",
   component: WelcomePanel,
 };
-
-function makeConfiguration(entries?: [string, AppConfigurationValue][]): AppConfiguration {
-  const map = new Map<string, AppConfigurationValue>(entries);
-  const listeners = new Set<ChangeHandler>();
-  return {
-    get: (key: string) => map.get(key),
-    set: async (key: string, value: AppConfigurationValue) => {
-      map.set(key, value);
-      [...listeners].forEach((listener) => listener(value));
-    },
-    addChangeListener: (_key, cb) => listeners.add(cb),
-    removeChangeListener: (_key, cb) => listeners.delete(cb),
-  };
-}
 
 export function Default(): React.ReactElement {
   const [config] = useState(() => makeConfiguration());

@@ -14,9 +14,10 @@
 
 import { renderHook, RenderResult } from "@testing-library/react-hooks/dom";
 import { last } from "lodash";
-import { PropsWithChildren, useCallback } from "react";
+import { PropsWithChildren, useCallback, useState } from "react";
 import { act } from "react-dom/test-utils";
 
+import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { PlayerPresence, PlayerStateActiveData } from "@foxglove/studio-base/players/types";
 import delay from "@foxglove/studio-base/util/delay";
@@ -25,6 +26,7 @@ import {
   resetLogEventForTests,
   Tags,
 } from "@foxglove/studio-base/util/logEvent";
+import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 import tick from "@foxglove/studio-base/util/tick";
 
@@ -43,14 +45,19 @@ type WrapperProps = {
   maybePlayer: MaybePlayer;
   globalVariables?: GlobalVariables;
 };
+
 function Hook(_props: WrapperProps) {
   return useMessagePipeline(useCallback((value) => value, []));
 }
+
 function Wrapper({ children, maybePlayer, globalVariables }: PropsWithChildren<WrapperProps>) {
+  const [config] = useState(() => makeConfiguration());
   return (
-    <MessagePipelineProvider maybePlayer={maybePlayer} globalVariables={globalVariables}>
-      {children}
-    </MessagePipelineProvider>
+    <AppConfigurationContext.Provider value={config}>
+      <MessagePipelineProvider maybePlayer={maybePlayer} globalVariables={globalVariables}>
+        {children}
+      </MessagePipelineProvider>
+    </AppConfigurationContext.Provider>
   );
 }
 

@@ -25,6 +25,8 @@ import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined
 import filterMap from "@foxglove/studio-base/util/filterMap";
 import fuzzyFilter from "@foxglove/studio-base/util/fuzzyFilter";
 
+const MESSAGE_RATES = [1, 3, 5, 10, 15, 20, 30, 60];
+
 function formatTimezone(name: string) {
   const tz = moment.tz(name);
   const zoneAbbr = tz.zoneAbbr();
@@ -122,6 +124,33 @@ function TimezoneSettings(): React.ReactElement {
   );
 }
 
+function MessageFramerate(): React.ReactElement {
+  const [messageRate, setMesageRate] = useAppConfigurationValue<number>(AppSetting.MESSAGE_RATE);
+  const entries = useMemo(
+    () => MESSAGE_RATES.map((rate) => ({ key: rate, text: `${rate}`, data: rate })),
+    [],
+  );
+
+  return (
+    <VirtualizedComboBox
+      label="Message rate (Hz):"
+      options={entries}
+      autoComplete="on"
+      openOnKeyboardFocus
+      selectedKey={messageRate ?? 60}
+      onChange={(_event, option) => {
+        if (option) {
+          setMesageRate(option.data);
+        }
+      }}
+      calloutProps={{
+        directionalHint: DirectionalHint.bottomLeftEdge,
+        directionalHintFixed: true,
+      }}
+    />
+  );
+}
+
 function RosHostname(): React.ReactElement {
   const [rosHostname, setRosHostname] = useAppConfigurationValue<string>(
     AppSetting.ROS1_ROS_HOSTNAME,
@@ -181,6 +210,9 @@ export default function Preferences(): React.ReactElement {
           <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
             <Stack.Item>
               <TimezoneSettings />
+            </Stack.Item>
+            <Stack.Item>
+              <MessageFramerate />
             </Stack.Item>
             <Stack.Item>
               <RosHostname />

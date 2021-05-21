@@ -4,6 +4,7 @@
 
 export enum AppSetting {
   CRASH_REPORTING_ENABLED = "telemetry.crashReportingEnabled",
+  MESSAGE_RATE = "messageRate",
   ROS1_ROS_HOSTNAME = "ros1.ros_hostname",
   TELEMETRY_ENABLED = "telemetry.telemetryEnabled",
   TIMEZONE = "timezone",
