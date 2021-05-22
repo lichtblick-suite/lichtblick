@@ -12,9 +12,8 @@
 //   You may not use this file except in compliance with the License.
 import { useRef } from "react";
 import { useDrag, useDrop } from "react-dnd";
-import { useDispatch } from "react-redux";
 
-import { moveTab, MoveTabPayload } from "@foxglove/studio-base/actions/panels";
+import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import {
   DraggingTabItem,
   TAB_DRAG_TYPE,
@@ -35,9 +34,9 @@ type Props = {
 
 export function DraggableToolbarTab(props: Props): JSX.Element {
   const { isActive, tabCount, actions, panelId, tabTitle, tabIndex } = props;
+  const { moveTab } = useCurrentLayoutActions();
 
   const ref = useRef(ReactNull);
-  const dispatch = useDispatch();
   const [{ isDragging }, dragRef] = useDrag<TabLocation, void, { isDragging: boolean }>({
     type: TAB_DRAG_TYPE,
     item: { panelId, tabIndex },
@@ -57,7 +56,7 @@ export function DraggableToolbarTab(props: Props): JSX.Element {
         tabIndex: sourceItem.tabIndex,
       };
       const target = { tabIndex, panelId };
-      dispatch(moveTab({ source, target } as MoveTabPayload));
+      moveTab({ source, target });
     },
   });
 

@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PanelsState } from "@foxglove/studio-base/reducers/panels";
+import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 
 const state: PanelsState = {
   id: "eb73965c-7fce-4dcc-9666-efc543c068ee",
@@ -43,7 +43,7 @@ const state: PanelsState = {
     direction: "row",
     splitPercentage: 64.34231378763867,
   },
-  savedProps: {
+  configById: {
     "ImageViewPanel!4evmpi6": {
       cameraTopic: "/image_color/compressed",
       enabledMarkerTopics: [],

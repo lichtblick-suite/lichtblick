@@ -12,14 +12,11 @@
 
 import { Stack } from "@fluentui/react";
 import { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect } from "react";
-import { useDispatch } from "react-redux";
 import { useToasts } from "react-toast-notifications";
 import { useMountedState } from "react-use";
 import styled from "styled-components";
 
 import Log from "@foxglove/log";
-import { redoLayoutChange, undoLayoutChange } from "@foxglove/studio-base/actions/layoutHistory";
-import { loadLayout } from "@foxglove/studio-base/actions/panels";
 import ConnectionList from "@foxglove/studio-base/components/ConnectionList";
 import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
 import DropOverlay from "@foxglove/studio-base/components/DropOverlay";
@@ -45,6 +42,7 @@ import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent"
 import Toolbar from "@foxglove/studio-base/components/Toolbar";
 import { useAppConfiguration } from "@foxglove/studio-base/context/AppConfigurationContext";
 import { useAssets } from "@foxglove/studio-base/context/AssetContext";
+import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
 import { PanelSettingsContext } from "@foxglove/studio-base/context/PanelSettingsContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
@@ -130,7 +128,6 @@ type WorkspaceProps = {
 
 export default function Workspace(props: WorkspaceProps): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(ReactNull);
-  const dispatch = useDispatch();
   const { currentSourceName, selectSource } = usePlayerSelection();
   const playerPresence = useMessagePipeline(
     useCallback(({ playerState }) => playerState.presence, []),
@@ -161,9 +158,11 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const isMounted = useMountedState();
 
+  const { loadLayout } = useCurrentLayoutActions();
+
   const openWelcomeLayout = useCallback(async () => {
     if (isMounted()) {
-      dispatch(loadLayout(welcomeLayout));
+      loadLayout(welcomeLayout);
       if (isNonEmptyOrUndefined(props.demoBagUrl)) {
         selectSource(
           { name: "Demo Bag", type: "http" },
@@ -173,7 +172,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         );
       }
     }
-  }, [isMounted, dispatch, selectSource, props.demoBagUrl]);
+  }, [isMounted, loadLayout, selectSource, props.demoBagUrl]);
 
   const handleInternalLink = useCallback((event: React.MouseEvent, href: string) => {
     if (href === "#help:message-path-syntax") {
@@ -195,22 +194,24 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   // focused, the GlobalKeyListener will handle it. The listeners here are to handle the case when
   // an editable element is focused, or when the user directly chooses the undo/redo menu item.
 
+  const { undoLayoutChange, redoLayoutChange } = useCurrentLayoutActions();
+
   useNativeAppMenuEvent(
     "undo",
     useCallback(() => {
       if (!document.execCommand("undo")) {
-        dispatch(undoLayoutChange());
+        undoLayoutChange();
       }
-    }, [dispatch]),
+    }, [undoLayoutChange]),
   );
 
   useNativeAppMenuEvent(
     "redo",
     useCallback(() => {
       if (!document.execCommand("redo")) {
-        dispatch(redoLayoutChange());
+        redoLayoutChange();
       }
-    }, [dispatch]),
+    }, [redoLayoutChange]),
   );
 
   useNativeAppMenuEvent(

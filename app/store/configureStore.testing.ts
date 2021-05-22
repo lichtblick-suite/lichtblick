@@ -18,15 +18,11 @@ import { ActionTypes } from "@foxglove/studio-base/actions";
 import { State } from "@foxglove/studio-base/reducers";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-const configureStore = (
-  reducer: Reducer<State, ActionTypes>,
-  middleware: Array<any> = [],
-  _history?: unknown,
-) => {
+const configureStore = (reducer: Reducer<State, ActionTypes>, _history?: unknown) => {
   const store = createStore(
     reducer,
     undefined,
-    applyMiddleware<ThunkDispatch<State, undefined, ActionTypes>>(thunk, ...middleware),
+    applyMiddleware<ThunkDispatch<State, undefined, ActionTypes>>(thunk),
   );
 
   return store;

@@ -3,15 +3,17 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useMemo } from "react";
-import { Provider } from "react-redux";
 
 import LayoutMenu from "@foxglove/studio-base/components/LayoutMenu";
+import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
 import LayoutStorageContext, {
   Layout,
   LayoutStorage,
 } from "@foxglove/studio-base/context/LayoutStorageContext";
-import createRootReducer from "@foxglove/studio-base/reducers";
-import configureStore from "@foxglove/studio-base/store/configureStore.testing";
+import CurrentLayoutState, {
+  DEFAULT_LAYOUT_FOR_TESTS,
+} from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
+import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 
 class FakeLayoutStorage implements LayoutStorage {
   private _layouts: Layout[];
@@ -40,15 +42,15 @@ export default {
 
 export function Empty(): JSX.Element {
   const storage = useMemo(() => new FakeLayoutStorage(), []);
-  const store = useMemo(() => configureStore(createRootReducer()), []);
+  const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
 
   return (
     <div style={{ display: "flex", height: 400 }}>
-      <Provider store={store}>
+      <CurrentLayoutContext.Provider value={currentLayout}>
         <LayoutStorageContext.Provider value={storage}>
           <LayoutMenu defaultIsOpen />
         </LayoutStorageContext.Provider>
-      </Provider>
+      </CurrentLayoutContext.Provider>
     </div>
   );
 }
@@ -75,23 +77,28 @@ export function LayoutList(): JSX.Element {
       ]),
     [],
   );
-  const store = useMemo(() => {
-    const newStore = configureStore(createRootReducer());
 
-    // set an id for the current panel state so we can see it highlited in the menu
-    const state = newStore.getState();
-    state.persistedState.panels.id = "test-id";
-
-    return newStore;
+  const mockLayoutContext = useMemo(() => {
+    const mockLayout = {
+      id: "test-id",
+      configById: {},
+      globalVariables: {},
+      userNodes: {},
+      linkedGlobalVariables: [],
+      playbackConfig: defaultPlaybackConfig,
+    };
+    const state = new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS);
+    state.actions.loadLayout(mockLayout);
+    return state;
   }, []);
 
   return (
     <div style={{ display: "flex", height: 400 }}>
-      <Provider store={store}>
+      <CurrentLayoutContext.Provider value={mockLayoutContext}>
         <LayoutStorageContext.Provider value={storage}>
           <LayoutMenu defaultIsOpen />
         </LayoutStorageContext.Provider>
-      </Provider>
+      </CurrentLayoutContext.Provider>
     </div>
   );
 }

@@ -10,6 +10,7 @@ import {
   MultiProvider,
   PlayerSourceDefinition,
   ThemeProvider,
+  UserProfileLocalStorageProvider,
 } from "@foxglove/studio-base";
 
 import { Desktop } from "../common/types";
@@ -46,6 +47,7 @@ export default function Root(): ReactElement {
     <NativeStorageAppConfigurationProvider />,
     <NativeStorageLayoutStorageProvider />,
     <NativeAppMenuProvider />,
+    <UserProfileLocalStorageProvider />,
     /* eslint-enable react/jsx-key */
   ];
 

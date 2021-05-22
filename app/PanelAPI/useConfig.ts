@@ -3,12 +3,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useCallback, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
 
-import { savePanelConfigs } from "@foxglove/studio-base/actions/panels";
+import {
+  useCurrentLayoutActions,
+  useCurrentLayoutSelector,
+} from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { usePanelId } from "@foxglove/studio-base/context/PanelIdContext";
-import { State } from "@foxglove/studio-base/reducers";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
@@ -39,28 +40,23 @@ export function useConfigById<Config>(
   panelId: string | undefined,
   defaultConfig: Config | undefined,
 ): [Config, SaveConfig<Config>] {
-  const config = useSelector((state: State) =>
-    panelId != undefined
-      ? (state.persistedState.panels.savedProps[panelId] as Config | undefined)
-      : undefined,
+  const { savePanelConfigs } = useCurrentLayoutActions();
+  const config = useCurrentLayoutSelector((state) =>
+    panelId != undefined ? (state.configById[panelId] as Config | undefined) : undefined,
   );
   if (panelId != undefined && !defaultConfig) {
     throw new Error(`Attempt to useConfig() but panel ${panelId} has no defaultConfig`);
   }
 
-  const dispatch = useDispatch();
-
   const saveConfig: SaveConfig<Config> = useCallback(
     (newConfig) => {
       if (panelId != undefined && defaultConfig != undefined) {
-        dispatch(
-          savePanelConfigs({
-            configs: [{ id: panelId, config: newConfig, defaultConfig }],
-          }),
-        );
+        savePanelConfigs({
+          configs: [{ id: panelId, config: newConfig, defaultConfig }],
+        });
       }
     },
-    [dispatch, defaultConfig, panelId],
+    [panelId, defaultConfig, savePanelConfigs],
   );
 
   const mergedConfig = useMemo(

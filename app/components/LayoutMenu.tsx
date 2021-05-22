@@ -10,16 +10,14 @@ import {
 } from "@fluentui/react";
 import path from "path";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { useDispatch, useSelector, useStore } from "react-redux";
 import { useAsyncFn, useMountedState } from "react-use";
 import { v4 as uuidv4 } from "uuid";
 
-import { loadLayout } from "@foxglove/studio-base/actions/panels";
+import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { Layout, useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
 import useLatestNonNull from "@foxglove/studio-base/hooks/useLatestNonNull";
 import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
-import { State } from "@foxglove/studio-base/reducers";
-import { PanelsState } from "@foxglove/studio-base/reducers/panels";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
@@ -55,7 +53,6 @@ export default function LayoutMenu({
   defaultIsOpen?: boolean;
 }): React.ReactElement {
   const prompt = usePrompt();
-  const dispatch = useDispatch();
   const isMounted = useMountedState();
   const buttonRef = useRef<IButton>(ReactNull);
   useLayoutEffect(() => {
@@ -64,12 +61,8 @@ export default function LayoutMenu({
     }
   }, [defaultIsOpen]);
 
+  const { getCurrentLayout, loadLayout } = useCurrentLayoutActions();
   const layoutStorage = useLayoutStorage();
-
-  const currentLayoutId = useSelector((state: State) => state.persistedState.panels.id);
-  // Access the store directly so we can lazily read store.persistedState.panels rather than
-  // subscribing to updates.
-  const store = useStore<State>();
 
   // a basic stale-while-revalidate pattern to avoid flicker of layout menu when we reload the layout list
   // When we re-visit local/remote layouts we will want to look at something like swr (https://swr.vercel.app/)
@@ -100,18 +93,18 @@ export default function LayoutMenu({
       if (value !== undefined && value.length > 0 && layout.state) {
         layout.name = value;
         layout.state.name = value;
-        dispatch(loadLayout(layout.state));
+        loadLayout(layout.state);
       }
     },
-    [dispatch, isMounted, prompt],
+    [loadLayout, isMounted, prompt],
   );
 
   const exportAction = useCallback(() => {
-    const currentPanelsState = store.getState().persistedState.panels;
+    const currentPanelsState = getCurrentLayout();
     const name = currentPanelsState.name ?? "unnamed";
     const content = JSON.stringify(currentPanelsState, undefined, 2);
     downloadTextFile(content, `${name}.json`);
-  }, [store]);
+  }, [getCurrentLayout]);
 
   const importAction = useCallback<() => void>(async () => {
     const fileHandle = await showOpenFilePicker();
@@ -136,17 +129,18 @@ export default function LayoutMenu({
     const state = parsedState as PanelsState;
     state.id = uuidv4();
     state.name = layoutName;
+    await layoutStorage.put({ id: state.id, name: state.name, state });
 
-    dispatch(loadLayout(state));
-  }, [dispatch, isMounted]);
+    loadLayout(state);
+  }, [isMounted, layoutStorage, loadLayout]);
 
   const selectAction = useCallback(
     (layout: Layout) => {
       if (layout.state) {
-        dispatch(loadLayout(layout.state));
+        loadLayout(layout.state);
       }
     },
-    [dispatch],
+    [loadLayout],
   );
 
   const deleteLayout = useCallback(
@@ -158,7 +152,7 @@ export default function LayoutMenu({
   );
 
   const duplicateLayout = useCallback(() => {
-    const currentPanelsState = store.getState().persistedState.panels;
+    const currentPanelsState = getCurrentLayout();
     const name = `${currentPanelsState.name ?? "unnamed"} copy`;
     const id = uuidv4();
 
@@ -168,13 +162,14 @@ export default function LayoutMenu({
       name: name,
     };
 
-    dispatch(loadLayout(newState));
-  }, [dispatch, store]);
+    loadLayout(newState);
+  }, [loadLayout, getCurrentLayout]);
 
   const layoutItems: IContextualMenuItem[] = useMemo(() => {
     if (loading || layouts === undefined) {
       return [];
     }
+    const currentLayout = getCurrentLayout();
 
     // Panel state may not have an ID yet. To make highlighting current layout work we need the ID.
     // Here we set one locally until the currentPanelState has one
@@ -183,12 +178,14 @@ export default function LayoutMenu({
 
     // current panel state is not in our storage layouts list - this happens after creating a new
     // layout since useLayoutStorage does not subscribe to updates when layouts are added.
-    if (currentLayoutId != undefined && !layouts.some((layout) => layout.id === currentLayoutId)) {
-      const currentPanelsState = store.getState().persistedState.panels;
+    if (
+      currentLayout.id != undefined &&
+      !layouts.some((layout) => layout.id === currentLayout.id)
+    ) {
       layouts.push({
-        id: currentLayoutId,
-        name: currentPanelsState.name ?? "unnamed",
-        state: currentPanelsState,
+        id: currentLayout.id,
+        name: currentLayout.name ?? "unnamed",
+        state: currentLayout,
       });
     }
 
@@ -198,11 +195,11 @@ export default function LayoutMenu({
         text: layout.name,
         split: true,
         onClick: () => {
-          if (layout.id !== currentLayoutId) {
+          if (layout.id !== currentLayout.id) {
             selectAction(layout);
           }
         },
-        iconProps: layout.id === currentLayoutId ? { iconName: "CheckMark" } : undefined,
+        iconProps: layout.id === currentLayout.id ? { iconName: "CheckMark" } : undefined,
         subMenuProps: {
           items: [
             {
@@ -216,7 +213,7 @@ export default function LayoutMenu({
               text: "Delete",
               iconProps: { iconName: "Delete" },
               // delete only available for non-current layouts to avoid "what happens when I delete last layout"
-              disabled: layout.id === currentLayoutId,
+              disabled: layout.id === currentLayout.id,
               onClick: (event) => {
                 // Leave the menu open on delete but reload the menu items.
                 // This gives visual feedback to the user that their action worked.
@@ -229,7 +226,7 @@ export default function LayoutMenu({
         },
       }),
     );
-  }, [loading, layouts, store, currentLayoutId, renameAction, selectAction, deleteLayout]);
+  }, [loading, layouts, renameAction, selectAction, deleteLayout, getCurrentLayout]);
 
   const items: IContextualMenuItem[] = [
     ...layoutItems,

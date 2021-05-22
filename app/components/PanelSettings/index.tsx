@@ -3,38 +3,39 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { DefaultButton, Stack, Text, useTheme } from "@fluentui/react";
-import { StrictMode, useContext, useMemo, useState } from "react";
-import { ReactReduxContext, useDispatch, useSelector } from "react-redux";
+import { StrictMode, useMemo, useState } from "react";
 import { useUnmount } from "react-use";
 
 import { useConfigById } from "@foxglove/studio-base/PanelAPI";
-import { removeSelectedPanelId } from "@foxglove/studio-base/actions/mosaic";
-import { savePanelConfigs } from "@foxglove/studio-base/actions/panels";
 import ShareJsonModal from "@foxglove/studio-base/components/ShareJsonModal";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
+import {
+  useCurrentLayoutActions,
+  useSelectedPanels,
+} from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { PanelIdContext } from "@foxglove/studio-base/context/PanelIdContext";
-import { State } from "@foxglove/studio-base/reducers";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 import SchemaEditor from "./SchemaEditor";
 
 export default function PanelSettings(): JSX.Element {
-  const dispatch = useDispatch();
-  const selectedPanelId = useSelector((state: State) =>
-    state.mosaic.selectedPanelIds.length === 1 ? state.mosaic.selectedPanelIds[0] : undefined,
+  const { selectedPanelIds, setSelectedPanelIds } = useSelectedPanels();
+  const selectedPanelId = useMemo(
+    () => (selectedPanelIds.length === 1 ? selectedPanelIds[0] : undefined),
+    [selectedPanelIds],
   );
   useUnmount(() => {
     // Automatically deselect the panel we were editing when the settings sidebar closes
     if (selectedPanelId != undefined) {
-      dispatch(removeSelectedPanelId(selectedPanelId));
+      setSelectedPanelIds([]);
     }
   });
 
   const theme = useTheme();
   const panelCatalog = usePanelCatalog();
-  const { store } = useContext(ReactReduxContext);
+  const { getCurrentLayout, savePanelConfigs } = useCurrentLayoutActions();
   const panelType = useMemo(
     () => (selectedPanelId != undefined ? getPanelTypeFromId(selectedPanelId) : undefined),
     [selectedPanelId],
@@ -49,18 +50,18 @@ export default function PanelSettings(): JSX.Element {
     if (selectedPanelId == undefined || !showShareModal) {
       return ReactNull;
     }
-    const panelConfigById = store.getState().persistedState.panels.savedProps;
+    const panelConfigById = getCurrentLayout().configById;
     return (
       <ShareJsonModal
         onRequestClose={() => setShowShareModal(false)}
         value={panelConfigById[selectedPanelId] ?? {}}
         onChange={(config) =>
-          dispatch(savePanelConfigs({ configs: [{ id: selectedPanelId, config, override: true }] }))
+          savePanelConfigs({ configs: [{ id: selectedPanelId, config, override: true }] })
         }
         noun="panel configuration"
       />
     );
-  }, [selectedPanelId, showShareModal, store, dispatch]);
+  }, [selectedPanelId, showShareModal, getCurrentLayout, savePanelConfigs]);
 
   const [config, saveConfig] = useConfigById<Record<string, unknown>>(
     selectedPanelId,
@@ -125,11 +126,9 @@ export default function PanelSettings(): JSX.Element {
               styles: { root: { "& span": { verticalAlign: "baseline" } } },
             }}
             onClick={() =>
-              dispatch(
-                savePanelConfigs({
-                  configs: [{ id: selectedPanelId, config: {}, override: true }],
-                }),
-              )
+              savePanelConfigs({
+                configs: [{ id: selectedPanelId, config: {}, override: true }],
+              })
             }
           />
         </Stack.Item>

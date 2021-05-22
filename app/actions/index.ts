@@ -12,16 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { HoverValueActions } from "./hoverValue";
-import { LayoutHistoryActions } from "./layoutHistory";
-import { MosaicActions } from "./mosaic";
-import { PanelsActions } from "./panels";
-import { TestsActions } from "./tests";
 import { UserNodesActions } from "./userNodes";
 
-export type ActionTypes =
-  | TestsActions
-  | HoverValueActions
-  | LayoutHistoryActions
-  | MosaicActions
-  | PanelsActions
-  | UserNodesActions;
+export type ActionTypes = HoverValueActions | UserNodesActions;

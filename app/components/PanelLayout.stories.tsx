@@ -15,10 +15,7 @@ import { storiesOf } from "@storybook/react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import { changePanelLayout } from "@foxglove/studio-base/actions/panels";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
-import createRootReducer from "@foxglove/studio-base/reducers";
-import configureStore from "@foxglove/studio-base/store/configureStore.testing";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import PanelLayout from "./PanelLayout";
@@ -26,8 +23,6 @@ import PanelLayout from "./PanelLayout";
 const DEFAULT_CLICK_DELAY = 100;
 storiesOf("components/PanelLayout", module)
   .add("panel not found", () => {
-    const store = configureStore(createRootReducer());
-    store.dispatch(changePanelLayout({ layout: "UnknownPanel!4co6n9d" }));
     return (
       <DndProvider backend={HTML5Backend}>
         <PanelSetup
@@ -36,8 +31,7 @@ storiesOf("components/PanelLayout", module)
               (document.querySelectorAll("[data-test=panel-settings]")[0] as any).click();
             }, DEFAULT_CLICK_DELAY);
           }}
-          fixture={{ topics: [], datatypes: {}, frame: {} }}
-          store={store}
+          fixture={{ topics: [], datatypes: {}, frame: {}, layout: "UnknownPanel!4co6n9d" }}
           omitDragAndDrop
         >
           <PanelLayout />
@@ -46,8 +40,6 @@ storiesOf("components/PanelLayout", module)
     );
   })
   .add("remove unknown panel", () => {
-    const store = configureStore(createRootReducer());
-    store.dispatch(changePanelLayout({ layout: "UnknownPanel!4co6n9d" }));
     return (
       <DndProvider backend={HTML5Backend}>
         <PanelSetup
@@ -57,8 +49,7 @@ storiesOf("components/PanelLayout", module)
               (document.querySelectorAll("[data-test=panel-settings-remove]")[0] as any).click();
             }, DEFAULT_CLICK_DELAY);
           }}
-          fixture={{ topics: [], datatypes: {}, frame: {} }}
-          store={store}
+          fixture={{ topics: [], datatypes: {}, frame: {}, layout: "UnknownPanel!4co6n9d" }}
           omitDragAndDrop
         >
           <MockPanelContextProvider>

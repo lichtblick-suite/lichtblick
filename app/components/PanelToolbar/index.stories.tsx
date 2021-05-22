@@ -13,14 +13,16 @@
 
 import DatabaseIcon from "@mdi/svg/svg/database.svg";
 import { storiesOf } from "@storybook/react";
+import { useMemo } from "react";
 import { Mosaic, MosaicWindow } from "react-mosaic-component";
-import { Provider } from "react-redux";
 
 import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
 import Icon from "@foxglove/studio-base/components/Icon";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
-import createRootReducer from "@foxglove/studio-base/reducers";
-import configureStore from "@foxglove/studio-base/store/configureStore.testing";
+import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
+import CurrentLayoutState, {
+  DEFAULT_LAYOUT_FOR_TESTS,
+} from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
 
 import PanelToolbar from "./index";
 
@@ -96,11 +98,12 @@ function KeepToolbarVisibleHack() {
 
 storiesOf("components/PanelToolbar", module)
   .addDecorator((childrenRenderFcn) => {
+    const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
     // Provide all stories with PanelContext and redux state
     return (
-      <Provider store={configureStore(createRootReducer())}>
+      <CurrentLayoutContext.Provider value={currentLayout}>
         <MockPanelContextProvider>{childrenRenderFcn()}</MockPanelContextProvider>
-      </Provider>
+      </CurrentLayoutContext.Provider>
     );
   })
   .add("non-floating (narrow)", () => {

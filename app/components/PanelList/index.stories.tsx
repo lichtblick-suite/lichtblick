@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { storiesOf } from "@storybook/react";
+import { useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import TestUtils from "react-dom/test-utils";
@@ -19,11 +20,15 @@ import { Provider } from "react-redux";
 
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelList from "@foxglove/studio-base/components/PanelList";
+import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
 import PanelCatalogContext, {
   PanelCatalog,
   PanelCategory,
   PanelInfo,
 } from "@foxglove/studio-base/context/PanelCatalogContext";
+import CurrentLayoutState, {
+  DEFAULT_LAYOUT_FOR_TESTS,
+} from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
 import createRootReducer from "@foxglove/studio-base/reducers";
 import configureStore from "@foxglove/studio-base/store/configureStore.testing";
 
@@ -108,15 +113,20 @@ storiesOf("components/PanelList", module)
       delay: 100,
     },
   })
-  .addDecorator((childrenRenderFcn) => (
-    <DndProvider backend={HTML5Backend}>
-      <Provider store={configureStore(createRootReducer())}>
-        <PanelCatalogContext.Provider value={new MockPanelCatalog()}>
-          {childrenRenderFcn()}
-        </PanelCatalogContext.Provider>
-      </Provider>
-    </DndProvider>
-  ))
+  .addDecorator((childrenRenderFcn) => {
+    const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
+    return (
+      <DndProvider backend={HTML5Backend}>
+        <Provider store={configureStore(createRootReducer())}>
+          <PanelCatalogContext.Provider value={new MockPanelCatalog()}>
+            <CurrentLayoutContext.Provider value={currentLayout}>
+              {childrenRenderFcn()}
+            </CurrentLayoutContext.Provider>
+          </PanelCatalogContext.Provider>
+        </Provider>
+      </DndProvider>
+    );
+  })
   .add("panel list", () => (
     <div style={{ margin: 50, height: 480 }}>
       <PanelList

@@ -20,8 +20,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { connect, ConnectedProps } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useLocalStorage, useMountedState } from "react-use";
+import { bindActionCreators } from "redux";
 
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
@@ -36,6 +37,7 @@ import {
   MessagePipelineProvider,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
+import { useCurrentLayoutSelector } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import PlayerSelectionContext, {
   PlayerSelection,
   PlayerSourceDefinition,
@@ -61,7 +63,6 @@ import {
   BuildPlayerOptions,
 } from "@foxglove/studio-base/players/buildPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
-import { State } from "@foxglove/studio-base/reducers";
 import Storage from "@foxglove/studio-base/util/Storage";
 import { AppError } from "@foxglove/studio-base/util/errors";
 import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
@@ -314,38 +315,24 @@ async function roscoreSource(options: FactoryOptions) {
   });
 }
 
-const connector = connect(
-  (state: State, _ownProps: OwnProps) => ({
-    messageOrder: state.persistedState.panels.playbackConfig.messageOrder,
-    userNodes: state.persistedState.panels.userNodes,
-    globalVariables: state.persistedState.panels.globalVariables,
-  }),
-  {
-    setUserNodeDiagnostics,
-    addUserNodeLogs,
-    setUserNodeRosLib,
-  },
-);
-
-type ReduxProps = ConnectedProps<typeof connector>;
-
-type OwnProps = PropsWithChildren<{
-  playerSources: PlayerSourceDefinition[];
-}>;
-
-type Props = OwnProps & ReduxProps;
-
-function PlayerManager({
+export default function PlayerManager({
   children,
   playerSources,
-  messageOrder,
-  userNodes,
-  globalVariables,
-  setUserNodeDiagnostics: setDiagnostics,
-  addUserNodeLogs: setLogs,
-  setUserNodeRosLib: setRosLib,
-}: Props) {
+}: PropsWithChildren<{
+  playerSources: PlayerSourceDefinition[];
+}>): JSX.Element {
   useWarnImmediateReRender();
+
+  const dispatch = useDispatch();
+  const userNodeActions = useMemo(
+    () =>
+      bindActionCreators({ setUserNodeDiagnostics, addUserNodeLogs, setUserNodeRosLib }, dispatch),
+    [dispatch],
+  );
+
+  const messageOrder = useCurrentLayoutSelector((state) => state.playbackConfig.messageOrder);
+  const userNodes = useCurrentLayoutSelector((state) => state.userNodes);
+  const globalVariables = useCurrentLayoutSelector((state) => state.globalVariables);
 
   const globalVariablesRef = useRef<GlobalVariables>(globalVariables);
   const [maybePlayer, setMaybePlayer] = useState<MaybePlayer<OrderedStampPlayer>>({});
@@ -383,11 +370,7 @@ function PlayerManager({
         }
         setCurrentSourceName(builtPlayer.sources.join(","));
 
-        const userNodePlayer = new UserNodePlayer(builtPlayer.player, {
-          setUserNodeDiagnostics: setDiagnostics,
-          addUserNodeLogs: setLogs,
-          setUserNodeRosLib: setRosLib,
-        });
+        const userNodePlayer = new UserNodePlayer(builtPlayer.player, userNodeActions);
         const headerStampPlayer = new OrderedStampPlayer(userNodePlayer, initialMessageOrder);
         headerStampPlayer.setGlobalVariables(globalVariablesRef.current);
         setMaybePlayer({ player: headerStampPlayer });
@@ -395,7 +378,7 @@ function PlayerManager({
         setMaybePlayer({ error });
       }
     },
-    [buildPlayerOptions, setDiagnostics, setLogs, setRosLib, initialMessageOrder],
+    [buildPlayerOptions, userNodeActions, initialMessageOrder],
   );
 
   useEffect(() => {
@@ -506,5 +489,3 @@ function PlayerManager({
     </>
   );
 }
-
-export default connector(PlayerManager);

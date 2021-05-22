@@ -12,18 +12,20 @@
 //   You may not use this file except in compliance with the License.
 
 import _ from "lodash";
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { useDrag, ConnectDragSource, ConnectDragPreview } from "react-dnd";
-import { MosaicDragType, MosaicWindowContext } from "react-mosaic-component";
-import { useSelector, useDispatch } from "react-redux";
-import { bindActionCreators } from "redux";
+import { MosaicDragType, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
 
-import { startDrag, endDrag } from "@foxglove/studio-base/actions/panels";
-import { State } from "@foxglove/studio-base/reducers";
-import { MosaicDropResult } from "@foxglove/studio-base/types/panels";
+import {
+  useCurrentLayoutActions,
+  usePanelMosaicId,
+} from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { MosaicDropResult, SavedProps } from "@foxglove/studio-base/types/panels";
 
-export type PanelDragObject = {
+type PanelDragObject = {
   deferredHide: number;
+  originalLayout: MosaicNode<string> | undefined;
+  originalConfigById: SavedProps;
 };
 
 // Hook to integrate mosaic drag functionality into any other component
@@ -36,14 +38,9 @@ export default function usePanelDrag(props: {
   const { tabId: sourceTabId, panelId, onDragStart, onDragEnd } = props;
   const { mosaicWindowActions } = useContext(MosaicWindowContext);
 
-  const dispatch = useDispatch();
-  const mosaicId = useSelector(({ mosaic }: State) => mosaic.mosaicId);
-  const originalLayout = useSelector((state: State) => state.persistedState.panels.layout);
-  const originalSavedProps = useSelector((state: State) => state.persistedState.panels.savedProps);
-  const actions = React.useMemo(
-    () => bindActionCreators({ startDrag, endDrag }, dispatch),
-    [dispatch],
-  );
+  const mosaicId = usePanelMosaicId();
+
+  const { getCurrentLayout, startDrag, endDrag } = useCurrentLayoutActions();
 
   const [, connectDragSource, connectDragPreview] = useDrag<
     PanelDragObject,
@@ -56,16 +53,21 @@ export default function usePanelDrag(props: {
         onDragStart();
       }
 
+      const { layout: originalLayout, configById: originalConfigById } = getCurrentLayout();
+
       // The defer is necessary as the element must be present on start for HTML DnD to not cry
       const path = mosaicWindowActions.getPath();
       const deferredHide = _.defer(() => {
-        actions.startDrag({ path, sourceTabId });
+        startDrag({ path, sourceTabId });
       });
-      return { mosaicId, deferredHide };
+      return { mosaicId, deferredHide, originalLayout, originalConfigById };
     },
     end: (item, monitor) => {
       if (onDragEnd) {
         onDragEnd();
+      }
+      if (item.originalLayout == undefined) {
+        return;
       }
 
       // If the hide call hasn't happened yet, cancel it
@@ -77,9 +79,9 @@ export default function usePanelDrag(props: {
         return;
       }
 
-      actions.endDrag({
-        originalLayout: originalLayout as any,
-        originalSavedProps,
+      endDrag({
+        originalLayout: item.originalLayout,
+        originalSavedProps: item.originalConfigById,
         panelId,
         sourceTabId,
         targetTabId,

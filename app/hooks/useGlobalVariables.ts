@@ -11,12 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { useMemo } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { bindActionCreators } from "redux";
-
-import { setGlobalVariables, overwriteGlobalVariables } from "@foxglove/studio-base/actions/panels";
-import { State } from "@foxglove/studio-base/reducers";
+import {
+  useCurrentLayoutActions,
+  useCurrentLayoutSelector,
+} from "@foxglove/studio-base/context/CurrentLayoutContext";
 
 export type GlobalVariables = {
   [key: string]: any;
@@ -27,13 +25,7 @@ export default function useGlobalVariables(): {
   setGlobalVariables: (arg0: GlobalVariables) => void;
   overwriteGlobalVariables: (arg0: GlobalVariables) => void;
 } {
-  const globalVariables = useSelector(
-    (state: State) => state.persistedState.panels.globalVariables,
-  );
-  const dispatch = useDispatch();
-  const actionCreators = useMemo(
-    () => bindActionCreators({ setGlobalVariables, overwriteGlobalVariables }, dispatch),
-    [dispatch],
-  );
-  return { ...actionCreators, globalVariables };
+  const { setGlobalVariables, overwriteGlobalVariables } = useCurrentLayoutActions();
+  const globalVariables = useCurrentLayoutSelector((state) => state.globalVariables);
+  return { setGlobalVariables, overwriteGlobalVariables, globalVariables };
 }

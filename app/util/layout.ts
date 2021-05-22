@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { captureException } from "@sentry/electron";
-import { compact, cloneDeep, flatMap, isEmpty, xor, uniq } from "lodash";
+import { compact, flatMap, xor, uniq } from "lodash";
 import {
   createRemoveUpdate,
   getLeaves,
@@ -25,12 +25,13 @@ import {
 import { MosaicKey } from "react-mosaic-component/lib/types";
 
 import Logger from "@foxglove/log";
-import { PanelsState } from "@foxglove/studio-base/reducers/panels";
-import { TabLocation, TabPanelConfig } from "@foxglove/studio-base/types/layouts";
 import {
   ConfigsPayload,
-  PanelConfig,
   SaveConfigsPayload,
+} from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
+import { TabLocation, TabPanelConfig } from "@foxglove/studio-base/types/layouts";
+import {
+  PanelConfig,
   MosaicDropTargetPosition,
   SavedProps,
 } from "@foxglove/studio-base/types/panels";
@@ -170,7 +171,7 @@ function replaceLeafLayouts(
 export function inlineTabPanelLayouts(
   layout: MosaicNode<string>,
   savedProps: SavedProps,
-  preserveTabPanelIds: string[],
+  preserveTabPanelIds: readonly string[],
 ): MosaicNode<string> {
   const tabFreeLayout = replaceLeafLayouts(layout, (id) => {
     if (typeof id === "string" && isTabPanel(id) && !preserveTabPanelIds.includes(id)) {
@@ -491,7 +492,7 @@ export const replaceAndRemovePanels = (
   panelArgs: {
     originalId?: string;
     newId?: string;
-    idsToRemove?: string[];
+    idsToRemove?: readonly string[];
   },
   layout: MosaicNode<string>,
 ): MosaicNode<string> | undefined => {
@@ -525,7 +526,7 @@ export const replaceAndRemovePanels = (
 export function getConfigsForNestedPanelsInsideTab(
   panelIdToReplace: string | undefined,
   tabPanelId: string | undefined,
-  panelIdsToRemove: string[],
+  panelIdsToRemove: readonly string[],
   savedProps: SavedProps,
 ): ConfigsPayload[] {
   const configs: ConfigsPayload[] = [];
@@ -543,17 +544,4 @@ export function getConfigsForNestedPanelsInsideTab(
     }
   });
   return configs;
-}
-
-export function setDefaultFields(defaultLayout: PanelsState, layout: PanelsState): PanelsState {
-  const clonedLayout = cloneDeep(layout) as any;
-
-  // Extra checks to make sure all the common fields for panels are present.
-  Object.keys(defaultLayout).forEach((fieldName) => {
-    const newFieldValue = clonedLayout[fieldName];
-    if (isEmpty(newFieldValue)) {
-      clonedLayout[fieldName] = (defaultLayout as any)[fieldName];
-    }
-  });
-  return clonedLayout;
 }

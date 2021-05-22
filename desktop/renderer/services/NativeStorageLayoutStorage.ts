@@ -46,6 +46,9 @@ export default class NativeStorageLayoutStorage implements LayoutStorage {
 
   async get(id: string): Promise<Layout | undefined> {
     const item = await this._ctx.get(NativeStorageLayoutStorage.STORE_NAME, id);
+    if (item == undefined) {
+      return undefined;
+    }
     if (!(item instanceof Uint8Array)) {
       throw new Error("Invariant violation - layout item is not a buffer");
     }

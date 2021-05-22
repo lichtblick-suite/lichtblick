@@ -14,14 +14,13 @@
 import { useCallback } from "react";
 import { useDrop } from "react-dnd";
 import { MosaicDragType } from "react-mosaic-component";
-import { useDispatch } from "react-redux";
 import styled from "styled-components";
 
-import { addPanel } from "@foxglove/studio-base/actions/panels";
 import EmptyBoxSvg from "@foxglove/studio-base/assets/emptyBox.svg";
 import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
 import Menu from "@foxglove/studio-base/components/Menu";
 import PanelList, { PanelSelection } from "@foxglove/studio-base/components/PanelList";
+import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import cssColors from "@foxglove/studio-base/styles/colors.module.scss";
 import { MosaicDropResult } from "@foxglove/studio-base/types/panels";
 import { getPanelIdForType } from "@foxglove/studio-base/util/layout";
@@ -62,7 +61,7 @@ type Props = {
 };
 
 export const EmptyDropTarget = ({ tabId }: Props): JSX.Element => {
-  const dispatch = useDispatch();
+  const { addPanel } = useCurrentLayoutActions();
 
   const [{ isOver }, drop] = useDrop<unknown, MosaicDropResult, { isOver: boolean }>({
     accept: MosaicDragType.WINDOW,
@@ -77,14 +76,14 @@ export const EmptyDropTarget = ({ tabId }: Props): JSX.Element => {
   const onPanelSelect = useCallback(
     ({ type, config, relatedConfigs }: PanelSelection) => {
       const id = getPanelIdForType(type);
-      dispatch(addPanel({ tabId, id, layout: undefined, config, relatedConfigs }));
+      addPanel({ tabId, id, layout: undefined, config, relatedConfigs });
       const name = getEventNames().PANEL_ADD;
       const eventType = getEventTags().PANEL_TYPE;
       if (name != undefined && eventType != undefined) {
         logEvent({ name, tags: { [eventType]: type } });
       }
     },
-    [dispatch, tabId],
+    [addPanel, tabId],
   );
 
   return (

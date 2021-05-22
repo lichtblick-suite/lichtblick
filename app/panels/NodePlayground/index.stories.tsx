@@ -13,7 +13,6 @@
 
 import { storiesOf } from "@storybook/react";
 
-import { setUserNodes } from "@foxglove/studio-base/actions/panels";
 import SchemaEditor from "@foxglove/studio-base/components/PanelSettings/SchemaEditor";
 import NodePlayground, { Explorer } from "@foxglove/studio-base/panels/NodePlayground";
 import Sidebar from "@foxglove/studio-base/panels/NodePlayground/Sidebar";
@@ -172,18 +171,16 @@ storiesOf("panels/NodePlayground", module)
         userNodeDiagnostics: { nodeId1: { diagnostics: [] } },
         userNodeLogs: { nodeId1: { logs: [] } },
       }}
-      onMount={(el: any, store: any) => {
+      onMount={(el, _store, actions) => {
         setTimeout(() => {
           // Change the userNodes to confirm the code in the Editor updates
-          store.dispatch(
-            setUserNodes({
-              nodeId1: {
-                name: "/studio_node/node",
-                sourceCode: utilsSourceCode,
-              },
-            }),
-          );
-          el.querySelectorAll("[data-test=node-explorer]")[0].click();
+          actions.setUserNodes({
+            nodeId1: {
+              name: "/studio_node/node",
+              sourceCode: utilsSourceCode,
+            },
+          });
+          el.querySelectorAll<HTMLElement>("[data-test=node-explorer]")[0]?.click();
         }, 500);
       }}
     >

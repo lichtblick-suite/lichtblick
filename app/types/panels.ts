@@ -10,9 +10,8 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import type { MosaicNode, MosaicPath } from "react-mosaic-component";
+import type { MosaicPath } from "react-mosaic-component";
 
-import { PanelsState } from "@foxglove/studio-base/reducers/panels";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 // Mosaic Types
@@ -26,7 +25,6 @@ export type MosaicDropResult = {
 export type PanelConfig = {
   [key: string]: any;
 };
-export type PerPanelFunc<Config> = (arg0: Config) => Config;
 
 export type PlaybackConfig = {
   speed: number;
@@ -39,45 +37,11 @@ export type UserNodes = {
   [nodeId: string]: UserNode;
 };
 
-export type ConfigsPayload = {
-  id: string;
-  // if you set override to true, existing config will be completely overriden by new passed in config
-  override?: boolean;
-  config: PanelConfig;
-  defaultConfig?: PanelConfig;
-};
-export type ChangePanelLayoutPayload = {
-  layout?: MosaicNode<string>;
-  trimSavedProps?: boolean;
-};
-export type SaveConfigsPayload = {
-  configs: ConfigsPayload[];
-};
-
-export type SaveFullConfigPayload = {
-  panelType: string;
-  perPanelFunc: PerPanelFunc<any>;
-};
+export type SaveConfig<Config> = (arg0: Partial<Config>) => void;
 
 export type SavedProps = {
   [panelId: string]: PanelConfig;
 };
-
-export type CreateTabPanelPayload = {
-  idToReplace?: string;
-  layout: MosaicNode<string>;
-  idsToRemove: string[];
-  singleTab: boolean;
-};
-
-export type LoadLayoutPayload = Partial<Omit<PanelsState, "id" | "name">>;
-
-export type SaveConfig<Config> = (arg0: Partial<Config>) => void;
-
-export type UpdatePanelConfig<Config> = (
-  panelType: string,
-  perPanelFunc: PerPanelFunc<Config>,
-) => void;
 
 export type OpenSiblingPanel = (arg0: string, cb: (arg0: PanelConfig) => PanelConfig) => void;
 

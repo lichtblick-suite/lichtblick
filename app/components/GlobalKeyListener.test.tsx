@@ -14,54 +14,55 @@
 
 import { mount } from "enzyme";
 
-import * as layoutHistoryActions from "@foxglove/studio-base/actions/layoutHistory";
 import GlobalKeyListener from "@foxglove/studio-base/components/GlobalKeyListener";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import createRootReducer from "@foxglove/studio-base/reducers";
-import configureStore from "@foxglove/studio-base/store/configureStore.testing";
+import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
+import CurrentLayoutState, {
+  DEFAULT_LAYOUT_FOR_TESTS,
+} from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
 
-function getStore() {
-  return configureStore(createRootReducer());
-}
-
-function Context(props: any) {
-  return (
-    <MockMessagePipelineProvider store={props.store}> {props.children}</MockMessagePipelineProvider>
-  );
-}
 describe("GlobalKeyListener", () => {
-  let redoActionCreator: any;
-  let undoActionCreator: any;
+  let undoSpy: jest.SpyInstance | undefined;
+  let redoSpy: jest.SpyInstance | undefined;
+  let unmount: (() => void) | undefined;
 
   beforeEach(() => {
-    redoActionCreator = jest.spyOn(layoutHistoryActions, "redoLayoutChange");
-    undoActionCreator = jest.spyOn(layoutHistoryActions, "undoLayoutChange");
+    const mockContext = new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS);
+    undoSpy = jest.spyOn(mockContext.actions, "undoLayoutChange");
+    redoSpy = jest.spyOn(mockContext.actions, "redoLayoutChange");
+
     const wrapper = document.createElement("div");
     document.body.appendChild(wrapper);
-    mount(
-      <Context store={getStore()}>
-        <div data-nativeundoredo="true">
-          <textarea id="some-text-area" />
-        </div>
-        <GlobalKeyListener />
-        <textarea id="other-text-area" />
-      </Context>,
+    const root = mount(
+      <CurrentLayoutContext.Provider value={mockContext}>
+        <MockMessagePipelineProvider>
+          <div data-nativeundoredo="true">
+            <textarea id="some-text-area" />
+          </div>
+          <GlobalKeyListener />
+          <textarea id="other-text-area" />
+        </MockMessagePipelineProvider>
+      </CurrentLayoutContext.Provider>,
       { attachTo: wrapper },
     );
+    unmount = () => root.unmount();
+  });
+  afterEach(() => {
+    unmount?.();
   });
 
   it("fires undo events", () => {
     document.dispatchEvent(new KeyboardEvent("keydown", { key: "z", ctrlKey: true }));
-    expect(redoActionCreator).not.toHaveBeenCalled();
-    expect(undoActionCreator).toHaveBeenCalledTimes(1);
+    expect(redoSpy).not.toHaveBeenCalled();
+    expect(undoSpy).toHaveBeenCalledTimes(1);
   });
 
   it("fires redo events", () => {
     document.dispatchEvent(
       new KeyboardEvent("keydown", { key: "z", ctrlKey: true, shiftKey: true }),
     );
-    expect(redoActionCreator).toHaveBeenCalledTimes(1);
-    expect(undoActionCreator).not.toHaveBeenCalled();
+    expect(redoSpy).toHaveBeenCalledTimes(1);
+    expect(undoSpy).not.toHaveBeenCalled();
   });
 
   it("does not fire undo/redo events from editable fields", () => {
@@ -72,8 +73,8 @@ describe("GlobalKeyListener", () => {
     shareTextarea.dispatchEvent(
       new KeyboardEvent("keydown", { key: "z", ctrlKey: true, bubbles: true }),
     );
-    expect(undoActionCreator).not.toHaveBeenCalled();
-    expect(redoActionCreator).not.toHaveBeenCalled();
+    expect(undoSpy).not.toHaveBeenCalled();
+    expect(redoSpy).not.toHaveBeenCalled();
 
     // Check that it does fire in a different text area.
     const otherTextarea = document.getElementById("other-text-area");
@@ -83,7 +84,7 @@ describe("GlobalKeyListener", () => {
     otherTextarea.dispatchEvent(
       new KeyboardEvent("keydown", { key: "z", ctrlKey: true, bubbles: true }),
     );
-    expect(undoActionCreator).not.toHaveBeenCalled();
-    expect(redoActionCreator).not.toHaveBeenCalled();
+    expect(undoSpy).not.toHaveBeenCalled();
+    expect(redoSpy).not.toHaveBeenCalled();
   });
 });

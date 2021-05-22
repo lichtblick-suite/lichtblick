@@ -71,7 +71,7 @@ const BaseRenderer = (props: Props, ref: React.Ref<unknown>) => {
     transforms,
     config: { autoSyncCameraState = false, followOrientation = false, followTf },
   } = props;
-  const { updatePanelConfig } = React.useContext(PanelContext) ?? {};
+  const { updatePanelConfigs } = React.useContext(PanelContext) ?? {};
 
   const currentTime = useMessagePipeline(selectCurrentTime);
   const isPlaying = useMessagePipeline(selectIsPlaying);
@@ -165,7 +165,7 @@ const BaseRenderer = (props: Props, ref: React.Ref<unknown>) => {
 
       // If autoSyncCameraState is enabled, we can't wait for the debounce and need to call updatePanelConfig right away
       if (autoSyncCameraState) {
-        updatePanelConfig?.("3D Panel", (oldConfig) => ({
+        updatePanelConfigs?.("3D Panel", (oldConfig) => ({
           ...oldConfig,
           cameraState: newCurrentCameraState,
         }));
@@ -173,7 +173,7 @@ const BaseRenderer = (props: Props, ref: React.Ref<unknown>) => {
         saveCameraStateDebounced(newCurrentCameraState);
       }
     },
-    [autoSyncCameraState, saveCameraStateDebounced, updatePanelConfig],
+    [autoSyncCameraState, saveCameraStateDebounced, updatePanelConfigs],
   );
 
   // useImperativeHandle so consumer component (e.g.Follow stories) can call onFollowChange directly.

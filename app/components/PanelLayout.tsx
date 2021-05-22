@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import React, { useCallback, useMemo, forwardRef, ElementRef, PropsWithChildren } from "react";
+import React, { useCallback, useMemo, PropsWithChildren } from "react";
 import { useDrop } from "react-dnd";
 import {
   MosaicWithoutDragDropContext,
@@ -18,24 +18,21 @@ import {
   MosaicDragType,
   MosaicNode,
 } from "react-mosaic-component";
-import { useSelector, useDispatch } from "react-redux";
 import "react-mosaic-component/react-mosaic-component.css";
-import { bindActionCreators } from "redux";
 import styled from "styled-components";
 
 import "./PanelLayout.scss";
 
-import {
-  changePanelLayout,
-  savePanelConfigs,
-  SAVE_PANEL_CONFIGS,
-} from "@foxglove/studio-base/actions/panels";
 import Flex from "@foxglove/studio-base/components/Flex";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import {
+  useCurrentLayoutActions,
+  useCurrentLayoutSelector,
+  usePanelMosaicId,
+} from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { EmptyDropTarget } from "@foxglove/studio-base/panels/Tab/EmptyDropTarget";
-import { State, Dispatcher } from "@foxglove/studio-base/reducers";
-import { MosaicDropResult, SaveConfigsPayload } from "@foxglove/studio-base/types/panels";
+import { MosaicDropResult } from "@foxglove/studio-base/types/panels";
 import { getPanelIdForType, getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 import ErrorBoundary from "./ErrorBoundary";
@@ -43,9 +40,6 @@ import ErrorBoundary from "./ErrorBoundary";
 type Props = {
   layout?: MosaicNode<string>;
   onChange: (panels: any) => void;
-  savePanelConfigs: (arg0: SaveConfigsPayload) => Dispatcher<SAVE_PANEL_CONFIGS>;
-  forwardedRef?: ElementRef<any>;
-  mosaicId?: string;
   tabId?: string;
 };
 
@@ -86,18 +80,20 @@ function TabMosaicWrapper({ tabId, children }: PropsWithChildren<{ tabId?: strin
 }
 
 export function UnconnectedPanelLayout(props: Props): React.ReactElement {
-  const { layout, onChange, savePanelConfigs: saveConfigs, tabId, mosaicId } = props;
+  const { savePanelConfigs } = useCurrentLayoutActions();
+  const mosaicId = usePanelMosaicId();
+  const { layout, onChange, tabId } = props;
   const createTile = useCallback(
     (config: any) => {
       const defaultPanelType = "RosOut";
       const type = config ? config.type || defaultPanelType : defaultPanelType;
       const id = getPanelIdForType(type);
       if (config.panelConfig) {
-        saveConfigs({ configs: [{ id, config: config.panelConfig }] });
+        savePanelConfigs({ configs: [{ id, config: config.panelConfig }] });
       }
       return id;
     },
-    [saveConfigs],
+    [savePanelConfigs],
   );
 
   const panelCatalog = usePanelCatalog();
@@ -156,33 +152,17 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
     [layout, mosaicId, onChange, renderTile, tabId],
   );
 
-  return <ErrorBoundary ref={props.forwardedRef as any}>{bodyToRender}</ErrorBoundary>;
+  return <ErrorBoundary>{bodyToRender}</ErrorBoundary>;
 }
 
-const ConnectedPanelLayout = (_: any, ref: any) => {
-  const layout = useSelector((state: State) => state.persistedState.panels.layout);
-  const dispatch = useDispatch();
-  const actions = React.useMemo(
-    () => bindActionCreators({ changePanelLayout, savePanelConfigs }, dispatch),
-    [dispatch],
-  );
+export default function PanelLayout(): JSX.Element {
+  const { changePanelLayout } = useCurrentLayoutActions();
+  const layout = useCurrentLayoutSelector((state) => state.layout);
   const onChange = useCallback(
     (newLayout: MosaicNode<string>) => {
-      actions.changePanelLayout({ layout: newLayout });
+      changePanelLayout({ layout: newLayout });
     },
-    [actions],
+    [changePanelLayout],
   );
-  const mosaicId = useSelector(({ mosaic }: State) => mosaic.mosaicId);
-  return (
-    <UnconnectedPanelLayout
-      forwardedRef={ref}
-      layout={layout}
-      onChange={onChange}
-      savePanelConfigs={actions.savePanelConfigs}
-      mosaicId={mosaicId}
-    />
-  );
-};
-export default forwardRef(function PanelLayout(props, ref) {
-  return ConnectedPanelLayout(props, ref);
-});
+  return <UnconnectedPanelLayout layout={layout} onChange={onChange} />;
+}

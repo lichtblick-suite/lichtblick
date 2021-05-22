@@ -11,15 +11,16 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { Time } from "rosbag";
 import styled from "styled-components";
 
-import { setPlaybackConfig } from "@foxglove/studio-base/actions/panels";
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
 import Flex from "@foxglove/studio-base/components/Flex";
-import { State } from "@foxglove/studio-base/reducers";
+import {
+  useCurrentLayoutActions,
+  useCurrentLayoutSelector,
+} from "@foxglove/studio-base/context/CurrentLayoutContext";
 import {
   formatDate,
   formatTime,
@@ -62,14 +63,13 @@ const PlaybackTimeDisplayMethod = ({
   onPause: () => void;
   isPlaying: boolean;
 }): JSX.Element => {
-  const timeDisplayMethod = useSelector(
-    (state: State) => state.persistedState.panels.playbackConfig.timeDisplayMethod ?? "ROS",
+  const timeDisplayMethod = useCurrentLayoutSelector(
+    (state) => state.playbackConfig.timeDisplayMethod ?? "ROS",
   );
-  const dispatch = useDispatch();
+  const { setPlaybackConfig } = useCurrentLayoutActions();
   const setTimeDisplayMethod = useCallback(
-    (newTimeDisplayMethod) =>
-      dispatch(setPlaybackConfig({ timeDisplayMethod: newTimeDisplayMethod })),
-    [dispatch],
+    (newTimeDisplayMethod) => setPlaybackConfig({ timeDisplayMethod: newTimeDisplayMethod }),
+    [setPlaybackConfig],
   );
 
   const timestampInputRef = useRef<HTMLInputElement>(ReactNull);

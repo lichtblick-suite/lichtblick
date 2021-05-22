@@ -8,7 +8,6 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { Provider as ReduxProvider } from "react-redux";
 
 import Workspace from "@foxglove/studio-base/Workspace";
-import LayoutStorageReduxAdapter from "@foxglove/studio-base/components/LayoutStorageReduxAdapter";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import { NativeFileMenuPlayerSelection } from "@foxglove/studio-base/components/NativeFileMenuPlayerSelection";
 import PlayerManager from "@foxglove/studio-base/components/PlayerManager";
@@ -17,6 +16,7 @@ import AnalyticsProvider from "@foxglove/studio-base/context/AnalyticsProvider";
 import { AssetsProvider } from "@foxglove/studio-base/context/AssetContext";
 import ModalHost from "@foxglove/studio-base/context/ModalHost";
 import { PlayerSourceDefinition } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
 import URDFAssetLoader from "@foxglove/studio-base/services/URDFAssetLoader";
 import getGlobalStore from "@foxglove/studio-base/store/getGlobalStore";
 
@@ -43,13 +43,13 @@ export default function App(props: AppProps): JSX.Element {
     <StudioToastProvider />,
     <AssetsProvider loaders={assetLoaders} />,
     <ReduxProvider store={globalStore} />,
+    <CurrentLayoutProvider />,
     <PlayerManager playerSources={props.availableSources} />,
     /* eslint-enable react/jsx-key */
   ];
 
   return (
     <MultiProvider providers={providers}>
-      <LayoutStorageReduxAdapter />
       <NativeFileMenuPlayerSelection />
       <DndProvider backend={HTML5Backend}>
         <Suspense fallback={<></>}>

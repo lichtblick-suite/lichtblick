@@ -15,28 +15,22 @@ import { HoverValue } from "@foxglove/studio-base/types/hoverValue";
 
 export type SET_HOVER_VALUE = {
   type: "SET_HOVER_VALUE";
-  payload: {
-    value: HoverValue;
-    skipSettingLocalStorage: true;
-  };
+  payload: { value: HoverValue };
 };
 
 export type CLEAR_HOVER_VALUE = {
   type: "CLEAR_HOVER_VALUE";
-  payload: {
-    componentId: string;
-    skipSettingLocalStorage: true;
-  };
+  payload: { componentId: string };
 };
 
-export const setHoverValue = (payload: HoverValue): SET_HOVER_VALUE => ({
+export const setHoverValue = (value: HoverValue): SET_HOVER_VALUE => ({
   type: "SET_HOVER_VALUE",
-  payload: { value: payload, skipSettingLocalStorage: true },
+  payload: { value },
 });
 
 export const clearHoverValue = (payload: { componentId: string }): CLEAR_HOVER_VALUE => ({
   type: "CLEAR_HOVER_VALUE",
-  payload: { ...payload, skipSettingLocalStorage: true },
+  payload,
 });
 
 export type HoverValueActions = SET_HOVER_VALUE | CLEAR_HOVER_VALUE;

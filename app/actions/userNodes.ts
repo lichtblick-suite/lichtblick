@@ -18,7 +18,7 @@ import {
 
 type SET_USER_NODE_DIAGNOSTICS = {
   type: "SET_USER_NODE_DIAGNOSTICS";
-  payload: { diagnostics: UserNodeDiagnostics; skipSettingLocalStorage: true };
+  payload: { diagnostics: UserNodeDiagnostics };
 };
 
 type ADD_USER_NODE_LOGS = {
@@ -40,7 +40,7 @@ export const setUserNodeDiagnostics = (
   diagnostics: UserNodeDiagnostics,
 ): SET_USER_NODE_DIAGNOSTICS => ({
   type: "SET_USER_NODE_DIAGNOSTICS",
-  payload: { diagnostics, skipSettingLocalStorage: true },
+  payload: { diagnostics },
 });
 
 export const addUserNodeLogs = (payload: UserNodeLogs): ADD_USER_NODE_LOGS => ({

@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import TestUtils from "react-dom/test-utils";
 
 import SchemaEditor from "@foxglove/studio-base/components/PanelSettings/SchemaEditor";
@@ -16,7 +16,7 @@ export default {
 
 function useHoverOnPanel(andThen?: () => void) {
   const callback = useRef(andThen); // should not change
-  useEffect(() => {
+  return () => {
     const container = document.querySelector("[data-test~='panel-mouseenter-container']");
     if (!container) {
       throw new Error("missing mouseenter container");
@@ -25,7 +25,7 @@ function useHoverOnPanel(andThen?: () => void) {
 
     // wait for hover to complete
     setTimeout(() => callback.current?.(), 10);
-  }, []);
+  };
 }
 
 export function NoTopic(): React.ReactElement {
@@ -45,9 +45,9 @@ export function TopicButNoDataSource(): React.ReactElement {
 }
 
 export function TopicButNoDataSourceHovered(): React.ReactElement {
-  useHoverOnPanel();
+  const onMount = useHoverOnPanel();
   return (
-    <PanelSetup>
+    <PanelSetup onMount={onMount}>
       <ImageView overrideConfig={{ ...ImageView.defaultConfig, cameraTopic: "a_topic" }} />
     </PanelSetup>
   );
@@ -60,7 +60,7 @@ function AvailableTopicsStory({
   cameraTopic: string;
   openMarkersMenu?: boolean;
 }): React.ReactElement {
-  useHoverOnPanel(() => {
+  const onMount = useHoverOnPanel(() => {
     const button = document.querySelector(
       openMarkersMenu ? "[data-test~='markers-dropdown']" : "[data-test~='topics-dropdown']",
     );
@@ -71,6 +71,7 @@ function AvailableTopicsStory({
   });
   return (
     <PanelSetup
+      onMount={onMount}
       fixture={{
         topics: [
           { name: "/foo_image", datatype: "sensor_msgs/Image" },

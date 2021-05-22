@@ -11,10 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { useCallback, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 
-import { savePanelConfigs } from "@foxglove/studio-base/actions/panels";
 import Flex from "@foxglove/studio-base/components/Flex";
 import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
@@ -45,11 +43,6 @@ type Props = { config: Config; saveConfig: SaveConfig<Config> };
 
 function Tab({ config, saveConfig }: Props) {
   const panelId = usePanelContext().id;
-  const dispatch = useDispatch();
-  const mosaicId = useSelector(({ mosaic }: any) => mosaic.mosaicId);
-  // something sinister is going on here and needs to be fixed - FG-70
-  // eslint-disable-next-line
-  const savePanelConfigsFn = useCallback(dispatch(savePanelConfigs), [dispatch]);
 
   const { tabs, activeTabIdx } = config;
   const activeTab = tabs[activeTabIdx];
@@ -129,9 +122,7 @@ function Tab({ config, saveConfig }: Props) {
           <TabDndContext.Provider value={{ preventTabDrop }}>
             <UnconnectedPanelLayout
               layout={activeLayout}
-              savePanelConfigs={savePanelConfigsFn}
               onChange={onChangeLayout}
-              mosaicId={mosaicId}
               tabId={panelId}
             />
           </TabDndContext.Provider>

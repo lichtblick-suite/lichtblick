@@ -14,6 +14,10 @@
 import { flatten, groupBy } from "lodash";
 import { useEffect, useState } from "react";
 
+import {
+  CurrentLayoutActions,
+  SelectedPanelActions,
+} from "@foxglove/studio-base/context/CurrentLayoutContext";
 import StoryPlayer from "@foxglove/studio-base/players/StoryPlayer";
 import { PlayerState, SubscribePayload } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
@@ -28,7 +32,12 @@ type Props = {
   subscriptions?: string[];
   // merge the bag data with existing fixture data
   getMergedFixture?: (bagFixture: Fixture) => Fixture;
-  onMount?: (arg0: HTMLDivElement) => void;
+  onMount?: (
+    arg0: HTMLDivElement,
+    store: Store,
+    actions: CurrentLayoutActions,
+    selectedPanelActions: SelectedPanelActions,
+  ) => void;
   onFirstMount?: (arg0: HTMLDivElement) => void;
   store?: Store;
   frameHistoryCompatibility?: boolean;

@@ -12,27 +12,24 @@
 //   You may not use this file except in compliance with the License.
 
 import { flatten } from "lodash";
-import { ComponentProps } from "react";
+import { ComponentProps, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Mosaic, MosaicNode, MosaicWindow } from "react-mosaic-component";
 
-import {
-  changePanelLayout,
-  overwriteGlobalVariables,
-  savePanelConfigs,
-  setLinkedGlobalVariables,
-  setUserNodes,
-} from "@foxglove/studio-base/actions/panels";
 import {
   setUserNodeDiagnostics,
   addUserNodeLogs,
   setUserNodeRosLib,
 } from "@foxglove/studio-base/actions/userNodes";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import AppConfigurationContext, {
-  AppConfiguration,
-} from "@foxglove/studio-base/context/AppConfigurationContext";
+import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
+import CurrentLayoutContext, {
+  CurrentLayoutActions,
+  SelectedPanelActions,
+  useCurrentLayoutActions,
+  useSelectedPanels,
+} from "@foxglove/studio-base/context/CurrentLayoutContext";
 import PanelCatalogContext, {
   PanelCatalog,
   PanelCategory,
@@ -52,6 +49,9 @@ import {
   PublishPayload,
   AdvertisePayload,
 } from "@foxglove/studio-base/players/types";
+import CurrentLayoutState, {
+  DEFAULT_LAYOUT_FOR_TESTS,
+} from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
 import createRootReducer from "@foxglove/studio-base/reducers";
 import configureStore from "@foxglove/studio-base/store/configureStore.testing";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
@@ -60,8 +60,8 @@ import { SavedProps, UserNodes } from "@foxglove/studio-base/types/panels";
 type Store = ReturnType<typeof configureStore>;
 
 export type Fixture = {
-  frame: Frame;
-  topics: Topic[];
+  frame?: Frame;
+  topics?: Topic[];
   capabilities?: string[];
   activeData?: Partial<PlayerStateActiveData>;
   progress?: Progress;
@@ -83,20 +83,19 @@ type Props = {
   children: React.ReactNode;
   fixture?: Fixture;
   panelCatalog?: PanelCatalog;
-  omitDragAndDrop: boolean;
+  omitDragAndDrop?: boolean;
   pauseFrame?: ComponentProps<typeof MockMessagePipelineProvider>["pauseFrame"];
-  onMount?: (arg0: HTMLDivElement, store: Store) => void;
+  onMount?: (
+    arg0: HTMLDivElement,
+    store: Store,
+    actions: CurrentLayoutActions,
+    selectedPanelActions: SelectedPanelActions,
+  ) => void;
   onFirstMount?: (arg0: HTMLDivElement) => void;
   store?: Store;
   style?: {
     [key: string]: any;
   };
-};
-
-type State = {
-  store: any;
-  mockPanelCatalog: PanelCatalog;
-  mockAppConfiguration: AppConfiguration;
 };
 
 function setNativeValue(element: unknown, value: unknown) {
@@ -169,12 +168,28 @@ class MockPanelCatalog implements PanelCatalog {
   }
 }
 
-export default class PanelSetup extends React.PureComponent<Props, State> {
-  static defaultProps = {
-    omitDragAndDrop: false,
-  };
-  static getDerivedStateFromProps(props: Props, prevState: State): Partial<State> {
-    const { store } = prevState;
+function UnconnectedPanelSetup(props: Props): JSX.Element | ReactNull {
+  const [store] = useState(() => props.store ?? configureStore(createRootReducer()));
+  const [mockPanelCatalog] = useState(() => props.panelCatalog ?? new MockPanelCatalog());
+  const [mockAppConfiguration] = useState(() => ({
+    get() {
+      return undefined;
+    },
+    async set() {},
+    addChangeListener() {},
+    removeChangeListener() {},
+  }));
+
+  const hasMounted = useRef(false);
+
+  const actions = useCurrentLayoutActions();
+  const selectedPanels = useSelectedPanels();
+
+  const [initialized, setInitialized] = useState(false);
+  useLayoutEffect(() => {
+    if (initialized) {
+      return;
+    }
     const {
       globalVariables,
       userNodes,
@@ -186,16 +201,16 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
       savedProps,
     } = props.fixture ?? {};
     if (globalVariables) {
-      store.dispatch(overwriteGlobalVariables(globalVariables));
+      actions.overwriteGlobalVariables(globalVariables);
     }
     if (userNodes) {
-      store.dispatch(setUserNodes(userNodes));
+      actions.setUserNodes(userNodes);
     }
     if (layout !== undefined) {
-      store.dispatch(changePanelLayout({ layout }));
+      actions.changePanelLayout({ layout });
     }
     if (linkedGlobalVariables) {
-      store.dispatch(setLinkedGlobalVariables(linkedGlobalVariables));
+      actions.setLinkedGlobalVariables(linkedGlobalVariables);
     }
     if (userNodeDiagnostics) {
       store.dispatch(setUserNodeDiagnostics(userNodeDiagnostics));
@@ -207,97 +222,81 @@ export default class PanelSetup extends React.PureComponent<Props, State> {
       store.dispatch(setUserNodeRosLib(userNodeRosLib));
     }
     if (savedProps) {
-      store.dispatch(
-        savePanelConfigs({
-          configs: Object.entries(savedProps).map(([id, config]: [string, any]) => ({
-            id,
-            config,
-          })),
-        }),
-      );
+      actions.savePanelConfigs({
+        configs: Object.entries(savedProps).map(([id, config]: [string, any]) => ({ id, config })),
+      });
     }
-    return { store };
-  }
+    setInitialized(true);
+  }, [initialized, props.fixture, store, actions]);
 
-  _hasMounted: boolean = false;
-
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      store: props.store ?? configureStore(createRootReducer()),
-      mockPanelCatalog: props.panelCatalog ?? new MockPanelCatalog(),
-      mockAppConfiguration: {
-        get() {
-          return undefined;
-        },
-        async set() {},
-        addChangeListener() {},
-        removeChangeListener() {},
-      },
-    };
-  }
-
-  renderInner(): JSX.Element {
-    const {
-      frame = {},
-      topics = [],
-      datatypes,
-      capabilities,
-      activeData,
-      progress,
-      publish,
-      setPublishers,
-    } = this.props.fixture ?? {};
-    let dTypes = datatypes;
-    if (!dTypes) {
-      const dummyDatatypes: RosDatatypes = {};
-      for (const { datatype } of topics) {
-        dummyDatatypes[datatype] = { fields: [] };
-      }
-      dTypes = dummyDatatypes;
+  const {
+    frame = {},
+    topics = [],
+    datatypes,
+    capabilities,
+    activeData,
+    progress,
+    publish,
+    setPublishers,
+  } = props.fixture ?? {};
+  let dTypes = datatypes;
+  if (!dTypes) {
+    const dummyDatatypes: RosDatatypes = {};
+    for (const { datatype } of topics) {
+      dummyDatatypes[datatype] = { fields: [] };
     }
-    const allData = flatten(Object.values(frame));
-    return (
-      <div
-        style={{ width: "100%", height: "100%", display: "flex", ...this.props.style }}
-        ref={(el) => {
-          const { onFirstMount, onMount } = this.props;
-          if (el && onFirstMount && !this._hasMounted) {
-            this._hasMounted = true;
-            onFirstMount(el);
-          }
-          if (el && onMount) {
-            onMount(el, this.state.store);
-          }
-        }}
+    dTypes = dummyDatatypes;
+  }
+  const allData = flatten(Object.values(frame));
+  const inner = (
+    <div
+      style={{ width: "100%", height: "100%", display: "flex", ...props.style }}
+      ref={(el) => {
+        const { onFirstMount, onMount } = props;
+        if (el && onFirstMount && !hasMounted.current) {
+          hasMounted.current = true;
+          onFirstMount(el);
+        }
+        if (el && onMount) {
+          onMount(el, store, actions, selectedPanels);
+        }
+      }}
+    >
+      <MockMessagePipelineProvider
+        capabilities={capabilities}
+        topics={topics}
+        datatypes={dTypes}
+        messages={allData}
+        pauseFrame={props.pauseFrame}
+        activeData={activeData}
+        progress={progress}
+        store={store}
+        publish={publish}
+        setPublishers={setPublishers}
       >
-        <MockMessagePipelineProvider
-          capabilities={capabilities}
-          topics={topics}
-          datatypes={dTypes}
-          messages={allData}
-          pauseFrame={this.props.pauseFrame}
-          activeData={activeData}
-          progress={progress}
-          store={this.state.store}
-          publish={publish}
-          setPublishers={setPublishers}
-        >
-          <PanelCatalogContext.Provider value={this.state.mockPanelCatalog}>
-            <AppConfigurationContext.Provider value={this.state.mockAppConfiguration}>
-              {this.props.children}
-            </AppConfigurationContext.Provider>
-          </PanelCatalogContext.Provider>
-        </MockMessagePipelineProvider>
-      </div>
-    );
+        <PanelCatalogContext.Provider value={mockPanelCatalog}>
+          <AppConfigurationContext.Provider value={mockAppConfiguration}>
+            {props.children}
+          </AppConfigurationContext.Provider>
+        </PanelCatalogContext.Provider>
+      </MockMessagePipelineProvider>
+    </div>
+  );
+
+  // Wait to render children until we've initialized state as requested in the fixture
+  if (!initialized) {
+    return ReactNull;
   }
 
-  render(): JSX.Element {
-    return this.props.omitDragAndDrop ? (
-      this.renderInner()
-    ) : (
-      <MosaicWrapper>{this.renderInner()}</MosaicWrapper>
-    );
-  }
+  const { omitDragAndDrop = false } = props;
+  return omitDragAndDrop ? inner : <MosaicWrapper>{inner}</MosaicWrapper>;
+}
+
+export default function PanelSetup(props: Props): JSX.Element {
+  const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
+  return (
+    <CurrentLayoutContext.Provider value={currentLayout}>
+      <UnconnectedPanelSetup {...props} />
+    </CurrentLayoutContext.Provider>
+  );
 }

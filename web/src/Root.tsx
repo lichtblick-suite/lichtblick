@@ -10,6 +10,7 @@ import {
   MultiProvider,
   PlayerSourceDefinition,
   ThemeProvider,
+  UserProfileLocalStorageProvider,
 } from "@foxglove/studio-base";
 
 import AppConfigurationProvider from "./components/AppConfigurationProvider";
@@ -37,6 +38,7 @@ export default function Root(): ReactElement {
     /* eslint-disable react/jsx-key */
     <AppConfigurationProvider />,
     <NoOpLayoutStorageProvider />,
+    <UserProfileLocalStorageProvider />,
     /* eslint-enable react/jsx-key */
   ];
 

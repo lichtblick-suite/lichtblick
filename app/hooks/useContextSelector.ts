@@ -13,23 +13,9 @@
 
 import { useRef, useLayoutEffect, useContext, useReducer } from "react";
 
-import Log from "@foxglove/log";
 import { SelectableContext } from "@foxglove/studio-base/util/createSelectableContext";
 
-const log = Log.getLogger(__filename);
-
-function selectWithUnstableIdentityWarning<T, U>(value: T, selector: (value: T) => U) {
-  const result = selector(value);
-  if (process.env.NODE_ENV === "development") {
-    const secondResult = selector(value);
-    if (result !== secondResult) {
-      log.warn(`Selector ${selector.toString()} produced different values for the same input.
-  This will cause unecesessery re-renders of your component.`);
-    }
-    return secondResult;
-  }
-  return result;
-}
+import { selectWithUnstableIdentityWarning } from "./selectWithUnstableIdentityWarning";
 
 /**
  * `useContextSelector(context, selector)` behaves like `selector(useContext(context))`, but

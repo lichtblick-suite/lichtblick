@@ -14,12 +14,11 @@
 import PlusIcon from "@mdi/svg/svg/plus.svg";
 import { useContext, useEffect } from "react";
 import { DropTargetMonitor, useDrop } from "react-dnd";
-import { useDispatch } from "react-redux";
 import styled from "styled-components";
 
-import { moveTab, MoveTabPayload } from "@foxglove/studio-base/actions/panels";
 import Icon from "@foxglove/studio-base/components/Icon";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { DraggableToolbarTab } from "@foxglove/studio-base/panels/Tab/DraggableToolbarTab";
 import {
   DraggingTabItem,
@@ -65,8 +64,8 @@ type Props = {
 
 export function TabbedToolbar(props: Props): JSX.Element {
   const { panelId, actions, tabs, activeTabIdx, setDraggingTabState } = props;
+  const { moveTab } = useCurrentLayoutActions();
 
-  const dispatch = useDispatch();
   const { preventTabDrop } = useContext(TabDndContext);
   const [{ isOver, item }, dropRef] = useDrop({
     accept: TAB_DRAG_TYPE,
@@ -85,7 +84,7 @@ export function TabbedToolbar(props: Props): JSX.Element {
         tabIndex: sourceItem.tabIndex,
       };
       const target = { panelId };
-      dispatch(moveTab({ source, target } as MoveTabPayload));
+      moveTab({ source, target });
     },
   });
   useEffect(() => {

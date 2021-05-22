@@ -11,12 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { Provider } from "react-redux";
 
-import createRootReducer from "@foxglove/studio-base/reducers";
-import configureStore from "@foxglove/studio-base/store/configureStore.testing";
+import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
+import CurrentLayoutState, {
+  DEFAULT_LAYOUT_FOR_TESTS,
+} from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
 
 import GlobalVariablesTable from ".";
 
@@ -26,12 +28,13 @@ export default {
 };
 
 export function Table(): JSX.Element {
+  const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
   return (
     <div style={{ margin: 30, paddingLeft: 300, height: 400 }}>
       <DndProvider backend={HTML5Backend}>
-        <Provider store={configureStore(createRootReducer())}>
+        <CurrentLayoutContext.Provider value={currentLayout}>
           <GlobalVariablesTable />
-        </Provider>
+        </CurrentLayoutContext.Provider>
       </DndProvider>
     </div>
   );

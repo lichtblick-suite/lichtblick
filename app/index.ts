@@ -29,6 +29,8 @@ import { initializeLogEvent } from "./util/logEvent";
 import overwriteFetch from "./util/overwriteFetch";
 import waitForFonts from "./util/waitForFonts";
 
+export { default as UserProfileLocalStorageProvider } from "./providers/UserProfileLocalStorageProvider";
+
 export {
   App,
   AppConfigurationContext,

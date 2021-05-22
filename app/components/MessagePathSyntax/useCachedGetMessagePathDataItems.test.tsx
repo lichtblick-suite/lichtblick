@@ -11,15 +11,18 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { mount } from "enzyme";
+import { act, renderHook } from "@testing-library/react-hooks";
 import { cloneDeep } from "lodash";
+import { useMemo } from "react";
 
-import { setGlobalVariables } from "@foxglove/studio-base/actions/panels";
 import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { Topic, MessageEvent } from "@foxglove/studio-base/players/types";
-import createRootReducer from "@foxglove/studio-base/reducers";
-import configureStore from "@foxglove/studio-base/store/configureStore.testing";
+import CurrentLayoutState, {
+  DEFAULT_LAYOUT_FOR_TESTS,
+} from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 import {
@@ -50,124 +53,125 @@ function addValuesWithPathsToItems(
 }
 
 describe("useCachedGetMessagePathDataItems", () => {
-  // Create a helper component that exposes the results of the hook for mocking.
-  function createTest() {
-    function Test({ paths }: { paths: string[] }) {
-      const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems(paths);
-      Test.cachedGetMessage = cachedGetMessagePathDataItems;
-      return ReactNull;
-    }
-    Test.cachedGetMessage = (_path: string, _message: MessageEvent<unknown>) => {
-      // no-op
+  const initialTopics = [{ name: "/topic", datatype: "datatype" }];
+  const initialDatatypes = {
+    datatype: { fields: [{ name: "an_array", type: "uint32", isArray: true, isComplex: false }] },
+  };
+
+  function setup(initialPaths: string[], initialGlobalVariables?: GlobalVariables) {
+    const initialProps = {
+      paths: initialPaths,
+      topics: initialTopics,
+      datatypes: initialDatatypes,
     };
-    return Test;
+
+    let setGlobalVariables = (_: GlobalVariables) => {};
+
+    const { result, rerender } = renderHook(
+      ({ paths }) => useCachedGetMessagePathDataItems(paths),
+      {
+        initialProps,
+        wrapper: function Wrapper({ topics, datatypes, children }) {
+          const currentLayout = useMemo(() => {
+            const state = new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS);
+            setGlobalVariables = state.actions.setGlobalVariables;
+            if (initialGlobalVariables != undefined) {
+              state.actions.setGlobalVariables(initialGlobalVariables);
+            }
+            return state;
+          }, []);
+          return (
+            <CurrentLayoutContext.Provider value={currentLayout}>
+              <MockMessagePipelineProvider topics={topics} datatypes={datatypes}>
+                {children}
+              </MockMessagePipelineProvider>
+            </CurrentLayoutContext.Provider>
+          );
+        },
+      },
+    );
+
+    return {
+      result,
+      rerender,
+      initialProps,
+      setGlobalVariables,
+    };
   }
 
   it("clears the cache whenever any inputs to getMessagePathDataItems change", async () => {
-    const Test = createTest();
     const message: MessageEvent<unknown> = {
       topic: "/topic",
       receiveTime: { sec: 0, nsec: 0 },
       message: { an_array: [5, 10, 15, 20] },
     };
-    const topics = [{ name: "/topic", datatype: "datatype" }];
-    const datatypes = {
-      datatype: { fields: [{ name: "an_array", type: "uint32", isArray: true, isComplex: false }] },
-    };
 
-    const store = configureStore(createRootReducer());
+    const { result, rerender, initialProps } = setup(["/topic.an_array[0]", "/topic.an_array[1]"]);
 
-    const root = mount(
-      <MockMessagePipelineProvider store={store} topics={topics} datatypes={datatypes}>
-        <Test paths={["/topic.an_array[0]", "/topic.an_array[1]"]} />
-      </MockMessagePipelineProvider>,
-    );
-
-    const data0 = Test.cachedGetMessage("/topic.an_array[0]", message);
-    const data1 = Test.cachedGetMessage("/topic.an_array[1]", message);
+    const data0 = result.current("/topic.an_array[0]", message);
+    const data1 = result.current("/topic.an_array[1]", message);
     expect(data0).toEqual([{ path: "/topic.an_array[0]", value: 5 }]);
     expect(data1).toEqual([{ path: "/topic.an_array[1]", value: 10 }]);
 
     // Calling again returns cached version.
-    expect(Test.cachedGetMessage("/topic.an_array[0]", message)).toBe(data0);
+    expect(result.current("/topic.an_array[0]", message)).toBe(data0);
 
     // Throws when asking for a path not in the list.
-    expect(() => Test.cachedGetMessage("/topic.an_array[2]", message)).toThrow(
+    expect(() => result.current("/topic.an_array[2]", message)).toThrow(
       "not in the list of cached paths",
     );
 
     // Using the exact same paths but with a new array instance will keep the returned function exactly the same.
-    const originalCachedGetMessage = Test.cachedGetMessage;
-    root.setProps({ children: <Test paths={["/topic.an_array[0]", "/topic.an_array[1]"]} /> });
-    expect(Test.cachedGetMessage).toBe(originalCachedGetMessage);
+    const originalCachedGetMessage = result.current;
+    rerender({ ...initialProps, paths: ["/topic.an_array[0]", "/topic.an_array[1]"] });
+    expect(result.current).toBe(originalCachedGetMessage);
 
     // Changing paths maintains cache for the remaining path.
-    root.setProps({ children: <Test paths={["/topic.an_array[0]"]} /> });
-    expect(Test.cachedGetMessage("/topic.an_array[0]", message)).toBe(data0);
-    expect(() => Test.cachedGetMessage("/topic.an_array[1]", message)).toThrow(
+    rerender({ ...initialProps, paths: ["/topic.an_array[0]"] });
+    expect(result.current("/topic.an_array[0]", message)).toBe(data0);
+    expect(() => result.current("/topic.an_array[1]", message)).toThrow(
       "not in the list of cached paths",
     );
-    expect(Test.cachedGetMessage).not.toBe(originalCachedGetMessage); // Function should also be different.
+    expect(result.current).not.toBe(originalCachedGetMessage); // Function should also be different.
     // Change it back to make sure that we indeed cleared the cache for the path that we removed.
-    root.setProps({ children: <Test paths={["/topic.an_array[0]", "/topic.an_array[1]"]} /> });
-    expect(Test.cachedGetMessage("/topic.an_array[1]", message)).not.toBe(data1);
-    expect(Test.cachedGetMessage("/topic.an_array[0]", message)).toBe(data0); // Another sanity check.
+    rerender({ ...initialProps, paths: ["/topic.an_array[0]", "/topic.an_array[1]"] });
+    expect(result.current("/topic.an_array[1]", message)).not.toBe(data1);
+    expect(result.current("/topic.an_array[0]", message)).toBe(data0); // Another sanity check.
 
     // Invalidate cache with topics.
-    const data0BeforeProviderTopicsChange = Test.cachedGetMessage("/topic.an_array[0]", message);
-    root.setProps({ topics: cloneDeep(topics) });
-    expect(Test.cachedGetMessage("/topic.an_array[0]", message)).not.toBe(
-      data0BeforeProviderTopicsChange,
-    );
+    const data0BeforeProviderTopicsChange = result.current("/topic.an_array[0]", message);
+    rerender({ ...initialProps, topics: cloneDeep(initialTopics) });
+    expect(result.current("/topic.an_array[0]", message)).not.toBe(data0BeforeProviderTopicsChange);
 
     // Invalidate cache with datatypes.
-    const data0BeforeDatatypesChange = Test.cachedGetMessage("/topic.an_array[0]", message);
-    root.setProps({ datatypes: cloneDeep(datatypes) });
-    expect(Test.cachedGetMessage("/topic.an_array[0]", message)).not.toBe(
-      data0BeforeDatatypesChange,
-    );
-
-    root.unmount();
+    const data0BeforeDatatypesChange = result.current("/topic.an_array[0]", message);
+    rerender({ ...initialProps, datatypes: cloneDeep(initialDatatypes) });
+    expect(result.current("/topic.an_array[0]", message)).not.toBe(data0BeforeDatatypesChange);
   });
 
   it("clears the cache only when relevant global variables change", async () => {
-    const Test = createTest();
     const message: MessageEvent<unknown> = {
       topic: "/topic",
       receiveTime: { sec: 0, nsec: 0 },
       message: { an_array: [5, 10, 15, 20] },
     };
-    const topics = [{ name: "/topic", datatype: "datatype" }];
-    const datatypes = {
-      datatype: { fields: [{ name: "an_array", type: "uint32", isArray: true, isComplex: false }] },
-    };
+    const { result, setGlobalVariables } = setup(["/topic.an_array[$foo]"], { foo: 0 });
 
-    const store = configureStore(createRootReducer());
-    store.dispatch(setGlobalVariables({ foo: 0 }));
-
-    const root = mount(
-      <MockMessagePipelineProvider store={store} topics={topics} datatypes={datatypes}>
-        <Test paths={["/topic.an_array[$foo]"]} />
-      </MockMessagePipelineProvider>,
-    );
-
-    const data0 = Test.cachedGetMessage("/topic.an_array[$foo]", message);
+    const data0 = result.current("/topic.an_array[$foo]", message);
     expect(data0).toEqual([{ path: "/topic.an_array[0]", value: 5 }]);
 
     // Sanity check.
-    expect(Test.cachedGetMessage("/topic.an_array[$foo]", message)).toBe(data0);
+    expect(result.current("/topic.an_array[$foo]", message)).toBe(data0);
 
     // Changing an unrelated global variable should not invalidate the cache.
-    store.dispatch(setGlobalVariables({ bar: 0 }));
-    expect(Test.cachedGetMessage("/topic.an_array[$foo]", message)).toBe(data0);
+    act(() => setGlobalVariables({ bar: 0 }));
+    expect(result.current("/topic.an_array[$foo]", message)).toBe(data0);
 
     // Changing a relevant global variable.
-    store.dispatch(setGlobalVariables({ foo: 1 }));
-    expect(Test.cachedGetMessage("/topic.an_array[$foo]", message)).toEqual([
+    act(() => setGlobalVariables({ foo: 1 }));
+    expect(result.current("/topic.an_array[$foo]", message)).toEqual([
       { path: "/topic.an_array[1]", value: 10 },
     ]);
-
-    root.unmount();
   });
 
   describe("getMessagePathDataItems", () => {
@@ -724,18 +728,7 @@ describe("fillInGlobalVariablesInPath", () => {
 });
 
 describe("useDecodeMessagePathsForMessagesByTopic", () => {
-  // Create a helper component that exposes the results of the hook for mocking.
-  function createTest() {
-    function Test({ paths }: { paths: string[] }) {
-      (Test as any).hook = useDecodeMessagePathsForMessagesByTopic(paths);
-      return ReactNull;
-    }
-    return Test;
-  }
-
   it("results in missing entries when no array is provided for a topic", () => {
-    const Test = createTest();
-    const store = configureStore(createRootReducer());
     const topics = [
       { name: "/topic1", datatype: "datatype" },
       { name: "/topic2", datatype: "datatype" },
@@ -744,11 +737,19 @@ describe("useDecodeMessagePathsForMessagesByTopic", () => {
     const datatypes = {
       datatype: { fields: [{ name: "value", type: "uint32", isArray: false, isComplex: false }] },
     };
-    const root = mount(
-      <MockMessagePipelineProvider store={store} topics={topics} datatypes={datatypes}>
-        <Test paths={["/topic1.value", "/topic2.value", "/topic3.value", "/topic3..value"]} />
-      </MockMessagePipelineProvider>,
-    );
+    const currentLayout = new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS);
+    const { result } = renderHook((paths) => useDecodeMessagePathsForMessagesByTopic(paths), {
+      initialProps: ["/topic1.value", "/topic2.value", "/topic3.value", "/topic3..value"],
+      wrapper({ children }) {
+        return (
+          <CurrentLayoutContext.Provider value={currentLayout}>
+            <MockMessagePipelineProvider topics={topics} datatypes={datatypes}>
+              {children}
+            </MockMessagePipelineProvider>
+          </CurrentLayoutContext.Provider>
+        );
+      },
+    });
 
     const message = {
       topic: "/topic1",
@@ -759,7 +760,7 @@ describe("useDecodeMessagePathsForMessagesByTopic", () => {
       "/topic1": [message],
       "/topic2": [],
     };
-    expect((Test as any).hook(messagesByTopic)).toEqual({
+    expect(result.current(messagesByTopic)).toEqual({
       // Value for /topic1.value
       "/topic1.value": [{ message, queriedData: [{ path: "/topic1.value", value: 1 }] }],
       // Empty array for /topic2.value
@@ -768,6 +769,5 @@ describe("useDecodeMessagePathsForMessagesByTopic", () => {
       // Empty array for /topic3..value because path is invalid.
       "/topic3..value": [],
     });
-    root.unmount();
   });
 });

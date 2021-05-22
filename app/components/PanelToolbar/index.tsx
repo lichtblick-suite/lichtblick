@@ -24,18 +24,8 @@ import TrashCanOutlineIcon from "@mdi/svg/svg/trash-can-outline.svg";
 import cx from "classnames";
 import { useContext, useState, useCallback, useMemo } from "react";
 import { MosaicContext, MosaicWindowContext } from "react-mosaic-component";
-import { useDispatch, useSelector, ReactReduxContext } from "react-redux";
 import { useResizeDetector } from "react-resize-detector";
-import { bindActionCreators } from "redux";
 
-import { setSelectedPanelIds } from "@foxglove/studio-base/actions/mosaic";
-import {
-  savePanelConfigs,
-  changePanelLayout,
-  closePanel,
-  splitPanel,
-  swapPanel,
-} from "@foxglove/studio-base/actions/panels";
 import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import HelpModal from "@foxglove/studio-base/components/HelpModal";
@@ -44,8 +34,11 @@ import { Item, SubMenu } from "@foxglove/studio-base/components/Menu";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import PanelList, { PanelSelection } from "@foxglove/studio-base/components/PanelList";
 import { getPanelTypeFromMosaic } from "@foxglove/studio-base/components/PanelToolbar/utils";
+import {
+  useCurrentLayoutActions,
+  useSelectedPanels,
+} from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePanelSettings } from "@foxglove/studio-base/context/PanelSettingsContext";
-import { State } from "@foxglove/studio-base/reducers";
 import logEvent, { getEventNames, getEventTags } from "@foxglove/studio-base/util/logEvent";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -66,23 +59,8 @@ type Props = {
 function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknownPanel: boolean }) {
   const { mosaicActions } = useContext(MosaicContext);
   const { mosaicWindowActions } = useContext(MosaicWindowContext);
-  const savedProps = useSelector((state: State) => state.persistedState.panels.savedProps);
-  const dispatch = useDispatch();
-  const actions = useMemo(
-    () =>
-      bindActionCreators(
-        {
-          savePanelConfigs,
-          changePanelLayout,
-          closePanel,
-          splitPanel,
-          swapPanel,
-          setSelectedPanelIds,
-        },
-        dispatch,
-      ),
-    [dispatch],
-  );
+  const { getCurrentLayout, closePanel, splitPanel, swapPanel } = useCurrentLayoutActions();
+  const { setSelectedPanelIds } = useSelectedPanels();
 
   const getPanelType = useCallback(
     () => getPanelTypeFromMosaic(mosaicWindowActions, mosaicActions),
@@ -98,15 +76,15 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
         tags: { [type]: getPanelType() },
       });
     }
-    actions.closePanel({
+    closePanel({
       tabId,
       root: mosaicActions.getRoot() as any,
       path: mosaicWindowActions.getPath(),
     });
-  }, [actions, getPanelType, mosaicActions, mosaicWindowActions, tabId]);
+  }, [closePanel, getPanelType, mosaicActions, mosaicWindowActions, tabId]);
 
   const split = useCallback(
-    (_store, id: string | undefined, direction: "row" | "column") => {
+    (id: string | undefined, direction: "row" | "column") => {
       const type = getPanelType();
       if (id == undefined || type == undefined) {
         throw new Error("Trying to split unknown panel!");
@@ -120,8 +98,8 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
         });
       }
 
-      const config = savedProps[id] ?? {};
-      actions.splitPanel({
+      const config = getCurrentLayout().configById[id] ?? {};
+      splitPanel({
         id,
         tabId,
         direction,
@@ -130,13 +108,13 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
         config,
       });
     },
-    [actions, getPanelType, mosaicActions, mosaicWindowActions, savedProps, tabId],
+    [getCurrentLayout, getPanelType, mosaicActions, mosaicWindowActions, splitPanel, tabId],
   );
 
   const swap = useCallback(
     (id?: string) =>
       ({ type, config, relatedConfigs }: PanelSelection) => {
-        actions.swapPanel({
+        swapPanel({
           tabId,
           originalId: id as any,
           type,
@@ -154,19 +132,18 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
           });
         }
       },
-    [actions, mosaicActions, mosaicWindowActions, tabId],
+    [mosaicActions, mosaicWindowActions, swapPanel, tabId],
   );
 
-  const { store } = useContext(ReactReduxContext);
   const panelContext = useContext(PanelContext);
 
   const { openPanelSettings } = usePanelSettings();
   const openSettings = useCallback(() => {
     if (panelContext?.id != undefined) {
-      actions.setSelectedPanelIds([panelContext.id]);
+      setSelectedPanelIds([panelContext.id]);
       openPanelSettings();
     }
-  }, [actions, openPanelSettings, panelContext?.id]);
+  }, [setSelectedPanelIds, openPanelSettings, panelContext?.id]);
 
   const type = getPanelType();
   if (type == undefined) {
@@ -204,7 +181,7 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
           </Item>
           <Item
             icon={<ArrowSplitHorizontalIcon />}
-            onClick={() => split(store, panelContext?.id, "column")}
+            onClick={() => split(panelContext?.id, "column")}
             dataTest="panel-settings-hsplit"
             tooltip="(shortcut: ` or ~)"
           >
@@ -212,7 +189,7 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
           </Item>
           <Item
             icon={<ArrowSplitVerticalIcon />}
-            onClick={() => split(store, panelContext?.id, "row")}
+            onClick={() => split(panelContext?.id, "row")}
             dataTest="panel-settings-vsplit"
             tooltip="(shortcut: ` or ~)"
           >

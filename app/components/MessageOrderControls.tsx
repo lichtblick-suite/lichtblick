@@ -11,13 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { useCallback } from "react";
-import { useSelector, useDispatch } from "react-redux";
 
-import { setPlaybackConfig } from "@foxglove/studio-base/actions/panels";
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
-import { State } from "@foxglove/studio-base/reducers";
-import { defaultPlaybackConfig } from "@foxglove/studio-base/reducers/panels";
+import {
+  useCurrentLayoutActions,
+  useCurrentLayoutSelector,
+} from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 
 const messageOrderLabel = {
   receiveTime: "Receive time",
@@ -25,15 +26,14 @@ const messageOrderLabel = {
 };
 
 export default function MessageOrderControls(): JSX.Element {
-  const messageOrder = useSelector(
-    (state: State) => state.persistedState.panels.playbackConfig.messageOrder,
-  );
-  const dispatch = useDispatch();
+  const messageOrder = useCurrentLayoutSelector((state) => state.playbackConfig.messageOrder);
+  const { setPlaybackConfig } = useCurrentLayoutActions();
+
   const setMessageOrder = useCallback(
     (newMessageOrder) => {
-      dispatch(setPlaybackConfig({ messageOrder: newMessageOrder }));
+      setPlaybackConfig({ messageOrder: newMessageOrder });
     },
-    [dispatch],
+    [setPlaybackConfig],
   );
 
   const orderText = messageOrderLabel[messageOrder] ?? defaultPlaybackConfig.messageOrder;

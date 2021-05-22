@@ -14,7 +14,6 @@
 import { uniq } from "lodash";
 import { Worldview } from "regl-worldview";
 
-import { selectAllPanelIds } from "@foxglove/studio-base/actions/mosaic";
 import Flex from "@foxglove/studio-base/components/Flex";
 import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
 import GlobalVariableSliderPanel from "@foxglove/studio-base/panels/GlobalVariableSlider";
@@ -167,11 +166,11 @@ export const ThreeDimPanelSetupWithBag = ({
         bag={bag}
         subscriptions={topics}
         store={store}
-        onMount={() => {
+        onMount={(_el, _store, _layoutActions, selectedPanelActions) => {
           // Wait for the panel to finish resizing
           setTimeout(() => {
             // Select the panel so we can control with the keyboard
-            store.dispatch(selectAllPanelIds() as any);
+            selectedPanelActions.selectAllPanels();
           }, 500);
         }}
         getMergedFixture={(bagFixture: any) => ({

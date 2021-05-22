@@ -12,13 +12,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { act, renderHook } from "@testing-library/react-hooks";
 import { mount } from "enzyme";
 import { useEffect } from "react";
 
-import { savePanelConfigs } from "@foxglove/studio-base/actions/panels";
 import Panel from "@foxglove/studio-base/components/Panel";
-import createRootReducer from "@foxglove/studio-base/reducers";
-import configureStore from "@foxglove/studio-base/store/configureStore.testing";
+import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 type DummyConfig = { someString: string };
@@ -34,10 +33,6 @@ function getDummyPanel(renderFn: jest.Mock) {
   DummyComponent.panelType = "Dummy";
   DummyComponent.defaultConfig = { someString: "hello world" };
   return Panel(DummyComponent);
-}
-
-function getStore() {
-  return configureStore(createRootReducer());
 }
 
 describe("Panel", () => {
@@ -67,20 +62,19 @@ describe("Panel", () => {
     const childId = "Dummy!1my2ydk";
     const someString = "someNewString";
 
-    const store = getStore();
-    store.dispatch(savePanelConfigs({ configs: [{ id: childId, config: { someString } }] }));
     mount(
-      <PanelSetup store={store}>
+      <PanelSetup fixture={{ savedProps: { [childId]: { someString } } }}>
         <DummyPanel childId={childId} />
       </PanelSetup>,
     );
 
-    expect(renderFn.mock.calls.length).toEqual(1);
-    expect(renderFn.mock.calls[0]).toEqual([
-      {
-        config: { someString },
-        saveConfig: expect.any(Function),
-      },
+    expect(renderFn.mock.calls).toEqual([
+      [
+        {
+          config: { someString },
+          saveConfig: expect.any(Function),
+        },
+      ],
     ]);
   });
 
@@ -88,15 +82,19 @@ describe("Panel", () => {
     const renderFn = jest.fn();
     const DummyPanel = getDummyPanel(renderFn);
 
-    const store = getStore();
-    mount(
-      <PanelSetup store={store}>
-        <DummyPanel />
-      </PanelSetup>,
-    );
+    const { result: actions } = renderHook(() => useCurrentLayoutActions(), {
+      wrapper({ children }) {
+        return (
+          <PanelSetup>
+            {children}
+            <DummyPanel />
+          </PanelSetup>
+        );
+      },
+    });
 
     expect(renderFn.mock.calls.length).toEqual(1);
-    store.dispatch(savePanelConfigs({ configs: [{ id: "someOtherId", config: {} }] }));
+    act(() => actions.current.savePanelConfigs({ configs: [{ id: "someOtherId", config: {} }] }));
     expect(renderFn.mock.calls.length).toEqual(1);
   });
 });

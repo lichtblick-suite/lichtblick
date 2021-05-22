@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { action } from "@storybook/addon-actions";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import ReactTestUtils from "react-dom/test-utils";
 
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
@@ -47,7 +47,7 @@ function Example({ mockSetConfig }: { mockSetConfig?: () => Promise<void> }): Re
     return configuration;
   });
   const wrapper = useRef<HTMLDivElement>(ReactNull);
-  useEffect(() => {
+  const onMount = useCallback(() => {
     const input = wrapper.current?.querySelector("input");
     const button = wrapper.current?.querySelector("[data-test='welcome-content'] button");
     const inviteCheckbox = wrapper.current?.querySelector("[data-test='slack-invite']");
@@ -66,7 +66,7 @@ function Example({ mockSetConfig }: { mockSetConfig?: () => Promise<void> }): Re
   }, []);
   return (
     <div style={{ flex: "1 1 auto" }} ref={wrapper}>
-      <PanelSetup>
+      <PanelSetup onMount={onMount}>
         <AppConfigurationContext.Provider value={config}>
           <WelcomePanel />
         </AppConfigurationContext.Provider>
