@@ -67,7 +67,7 @@ export default async function main(): Promise<void> {
   const storybookEnv = {
     env: {
       ...process.env,
-      NODE_OPTIONS: "--max-old-space-size=4096",
+      NODE_OPTIONS: "--max-old-space-size=6144",
       TS_NODE_COMPILER_OPTIONS: '{"module":"commonjs"}',
     },
   };

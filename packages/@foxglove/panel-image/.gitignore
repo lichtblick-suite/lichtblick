@@ -3,9 +3,8 @@
 .DS_Store
 .webpack/
 dist/
+out/
 node_modules/
-storybook-screenshots/
-storybook-static/
 
 # Yarn
 .yarn/*

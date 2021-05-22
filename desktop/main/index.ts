@@ -164,10 +164,9 @@ app.on("open-url", (ev, url) => {
   }
 });
 
-// support preload lookups for the user data path
-ipcMain.handle("getUserDataPath", () => {
-  return app.getPath("userData");
-});
+// support preload lookups for the user data path and home directory
+ipcMain.handle("getUserDataPath", () => app.getPath("userData"));
+ipcMain.handle("getHomePath", () => app.getPath("home"));
 
 // Must be called before app.ready event
 registerRosPackageProtocolSchemes();
@@ -242,7 +241,8 @@ app.on("ready", async () => {
   // See: https://www.electronjs.org/docs/tutorial/security
   const contentSecurityPolicy: Record<string, string> = {
     "default-src": "'self'",
-    "script-src": `'self' 'unsafe-inline' 'unsafe-eval'`,
+    // We should use x-foxglove-extension: instead of file: (see https://github.com/foxglove/studio/issues/895)
+    "script-src": `'self' 'unsafe-inline' 'unsafe-eval' file:`,
     "worker-src": `'self' blob:`,
     "style-src": "'self' 'unsafe-inline'",
     "connect-src": "'self' ws: wss: http: https: x-foxglove-ros-package:",

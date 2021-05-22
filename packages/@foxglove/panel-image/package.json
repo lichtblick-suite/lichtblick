@@ -1,0 +1,32 @@
+{
+  "name": "@foxglove/panel-image",
+  "displayName": "Image",
+  "description": "",
+  "version": "0.0.1",
+  "license": "MPL-2.0",
+  "engines": {
+    "@foxglove/studio": "^0.1.0"
+  },
+  "module": "./dist/extension.js",
+  "scripts": {
+    "foxglove:prepublish": "yarn run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "package-extension": "fox package",
+    "install-extension": "webpack && fox install",
+    "pretest": "yarn run tsc -p ./ && yarn run lint",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@foxglove/fox": "workspace:packages/@foxglove/fox",
+    "@foxglove/studio": "workspace:packages/@foxglove/studio",
+    "@typescript-eslint/eslint-plugin": "4.21.0",
+    "@typescript-eslint/parser": "4.21.0",
+    "eslint": "7.23.0",
+    "ts-loader": "8.1.0",
+    "typescript": "4.2.2",
+    "webpack": "5.36.0",
+    "webpack-cli": "4.6.0"
+  }
+}
