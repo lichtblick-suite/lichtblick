@@ -81,11 +81,10 @@ export default class OrderedStampPlayer implements Player {
       }
 
       // Only store messages with a header stamp.
-      const [newMessagesWithHeaders, newMessagesWithoutHeaders] = <
-        [MessageEvent<StampedMessage>[], MessageEvent<unknown>[]]
-      >partition(activeData.messages, (message) =>
-        isTime((message.message as Partial<StampedMessage>).header?.stamp),
-      );
+      const [newMessagesWithHeaders, newMessagesWithoutHeaders] = partition(
+        activeData.messages,
+        (message) => isTime((message.message as Partial<StampedMessage>).header?.stamp),
+      ) as [MessageEvent<StampedMessage>[], MessageEvent<unknown>[]];
 
       const topicsWithoutHeaders = new Set<string>();
       newMessagesWithoutHeaders.forEach(({ topic }) => {

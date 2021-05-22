@@ -770,7 +770,7 @@ export default class SceneBuilder implements MarkerProvider {
     // to an infinite lifetime. But do allow for 0 values based on user preferences.
     const decayTimeInSec = this._settingsByKey[`t:${topic}`]?.decayTime;
     const lifetime = decayTimeInSec ? fromSec(decayTimeInSec) : undefined;
-    (<MessageCollector>this.collectors[topic]).addNonMarker(topic, mappedMessage, lifetime);
+    (this.collectors[topic] as MessageCollector).addNonMarker(topic, mappedMessage, lifetime);
   };
 
   setCurrentTime = (currentTime: { sec: number; nsec: number }): void => {
@@ -908,10 +908,10 @@ export default class SceneBuilder implements MarkerProvider {
     this.errors.topicsWithBadFrameIds.delete(topic);
     this.errors.topicsWithError.delete(topic);
     this.collectors[topic] ??= new MessageCollector();
-    (<MessageCollector>this.collectors[topic]).setClock(this._clock ?? { sec: 0, nsec: 0 });
-    (<MessageCollector>this.collectors[topic]).flush();
+    (this.collectors[topic] as MessageCollector).setClock(this._clock ?? { sec: 0, nsec: 0 });
+    (this.collectors[topic] as MessageCollector).flush();
 
-    const datatype = (<Topic>this.topicsByName[topic]).datatype;
+    const datatype = (this.topicsByName[topic] as Topic).datatype;
     // If topic has a decayTime set, markers with no lifetime will get one
     // later on, so we don't need to filter them. Note: A decayTime of zero is
     // defined as an infinite lifetime

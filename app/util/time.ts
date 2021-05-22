@@ -174,16 +174,16 @@ export function findClosestTimestampIndex(
     return -1;
   }
   let [l, r] = [0, maxIdx];
-  if (currT <= <number>timestamps[0]) {
+  if (currT <= (timestamps[0] as number)) {
     return 0;
-  } else if (currT >= <number>timestamps[maxIdx]) {
+  } else if (currT >= (timestamps[maxIdx] as number)) {
     return maxIdx;
   }
 
   while (l <= r) {
     const m = l + Math.floor((r - l) / 2);
-    const prevT = <number>timestamps[m];
-    const nextT = <number>timestamps[m + 1];
+    const prevT = timestamps[m] as number;
+    const nextT = timestamps[m + 1] as number;
 
     if (prevT <= currT && currT < nextT) {
       return m;

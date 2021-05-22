@@ -147,7 +147,7 @@ export default class BagDataProvider implements DataProvider {
         try {
           await remoteReader.open(); // Important that we call this first, because it might throw an error if the file can't be read.
         } catch (err) {
-          sendNotification("Fetching remote bag failed", (<Error>err).message, "user", "error");
+          sendNotification("Fetching remote bag failed", (err as Error).message, "user", "error");
           return new Promise(() => {}); // Just never finish initializing.
         }
         if (remoteReader.size() === 0) {
@@ -160,7 +160,7 @@ export default class BagDataProvider implements DataProvider {
         try {
           await this._bag.open();
         } catch (err) {
-          sendNotification("Opening remote bag failed", (<Error>err).message, "user", "error");
+          sendNotification("Opening remote bag failed", (err as Error).message, "user", "error");
           return new Promise(() => {}); // Just never finish initializing.
         }
       } else {

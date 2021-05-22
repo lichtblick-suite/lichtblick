@@ -71,6 +71,9 @@ rules:
   "@typescript-eslint/prefer-regexp-exec": off
   "@typescript-eslint/no-unnecessary-condition": off # similar to strict-boolean-expressions, but catches more (noisy) cases?
 
+  "@typescript-eslint/consistent-type-assertions":
+    - error
+    - { assertionStyle: as }
   "@typescript-eslint/no-explicit-any": error
   "@typescript-eslint/prefer-nullish-coalescing": error
   "@typescript-eslint/no-non-null-assertion": error

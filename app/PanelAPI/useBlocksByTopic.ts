@@ -80,7 +80,7 @@ const useSubscribeToTopicsForBlocks = (topics: readonly string[]) => {
   );
   const subscriptions: SubscribePayload[] = useMemo(() => {
     const requester = panelType != undefined ? { type: "panel", name: panelType } : undefined;
-    return topics.map((topic) => <SubscribePayload>{ topic, requester });
+    return topics.map((topic) => ({ topic, requester } as SubscribePayload));
   }, [panelType, topics]);
   useEffect(() => setSubscriptions(id, subscriptions), [id, setSubscriptions, subscriptions]);
   useCleanup(() => setSubscriptions(id, []));
