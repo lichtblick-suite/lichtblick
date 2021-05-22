@@ -4,6 +4,7 @@
 
 import { init as initSentry } from "@sentry/electron";
 import { contextBridge, ipcRenderer } from "electron";
+import { existsSync } from "fs";
 import { readdir, readFile } from "fs/promises";
 import { machineId } from "node-machine-id";
 import os from "os";
@@ -113,6 +114,9 @@ const desktopBridge: Desktop = {
 
     const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
     const rootFolder = pathJoin(homePath, ".foxglove-studio", "extensions");
+    if (!existsSync(rootFolder)) {
+      return extensions;
+    }
     const rootFolderContents = await readdir(rootFolder, { withFileTypes: true });
     for (const entry of rootFolderContents) {
       if (entry.isDirectory()) {
