@@ -45,6 +45,7 @@ const dummyExtensionPoint = {
 // prior to updating MemoryCacheDataProvider to lazy messages, ParseMessageDataProvider expended to query its child
 // with rosBinaryMessages topics and do the parsing itself. Since MemoryCacheDataProvider uses lazy messages
 // this is no longer necessary behavior and ParseMessageDataProvider is a passthrough.
+// eslint-disable-next-line jest/no-disabled-tests
 describe.skip("ParseMessagesDataProvider", () => {
   it("initializes", async () => {
     const provider = getProvider();

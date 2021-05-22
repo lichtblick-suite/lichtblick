@@ -18,6 +18,7 @@ plugins:
   - react-hooks
   - "@typescript-eslint"
   - file-progress
+  - jest
 
 extends:
   - eslint:recommended
@@ -176,6 +177,8 @@ rules:
       allowNumber: false
       # Keeps the error count manageable while we enhance type information from the flow conversion
       allowAny: true
+
+  jest/no-disabled-tests: error
 
 overrides:
   - rules:
