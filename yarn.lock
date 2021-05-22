@@ -2313,7 +2313,7 @@ __metadata:
     react-mosaic-component: 5.0.0
     react-outside-click-handler: 1.3.0
     react-redux: 7.2.4
-    react-resize-detector: 6.7.1
+    react-resize-detector: 6.7.2
     react-table: 7.7.0
     react-toast-notifications: 2.4.4
     react-transition-group: 4.4.1
@@ -21262,9 +21262,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-resize-detector@npm:6.7.1":
-  version: 6.7.1
-  resolution: "react-resize-detector@npm:6.7.1"
+"react-resize-detector@npm:6.7.2":
+  version: 6.7.2
+  resolution: "react-resize-detector@npm:6.7.2"
   dependencies:
     "@types/resize-observer-browser": ^0.1.5
     lodash.debounce: ^4.0.8
@@ -21273,7 +21273,7 @@ __metadata:
   peerDependencies:
     react: ^16.0.0 || ^17.0.0
     react-dom: ^16.0.0 || ^17.0.0
-  checksum: d663d85e3de40d865f85f1b94b8468d1d5412add2bb7d8716939f9554623bcb4a08d48536e340632af4b5aa9b5760cdfa6cd9b6efd247ae2d248b69adc79a701
+  checksum: ff088e8c96e813bc30c3e40dd1705164fbf44d225f31bea0ee19fbe05a3c8581ba23dc7423f51ac3d49ade8fa1429e5fac838829a455036f397b300c84e4b080
   languageName: node
   linkType: hard
 
