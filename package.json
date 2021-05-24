@@ -24,7 +24,7 @@
     "build:dev": "webpack --mode development --progress --config desktop/webpack.config.ts",
     "serve": "webpack serve --mode development --progress --config desktop/webpack.config.ts",
     "lint": "TIMING=1 eslint --rulesdir eslint-rules --report-unused-disable-directives --fix .",
-    "lint:ci": "TIMING=1 NODE_OPTIONS='--max-old-space-size=6144' eslint --rulesdir eslint-rules --report-unused-disable-directives --config .eslintrc.ci.yaml .",
+    "lint:ci": "TIMING=1 eslint --rulesdir eslint-rules --report-unused-disable-directives --config .eslintrc.ci.yaml .",
     "test": "jest",
     "test:debug": "NODE_OPTIONS='--inspect-brk' jest",
     "test:watch": "jest --watch",

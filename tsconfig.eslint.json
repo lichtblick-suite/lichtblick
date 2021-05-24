@@ -1,0 +1,26 @@
+// tsconfig.json for eslint
+//
+// Because the typescript-eslint plugin does not receive information from eslint about the overall
+// set of files to be linted, it's forced to hold all TypeScript projects in memory at once. Since
+// our monorepo contains several separate projects, we run into memory limits when running eslint on
+// all the projects in a single run.
+//
+// Making eslint use just a single tsconfig means it doesn't need to hold as much in memory. This
+// works as long as our packages' tsconfigs don't vary much beyond the base config.
+//
+// Another alternative would be to run eslint separately on each project's files. This would be a
+// bit trickier to maintain since it requires a script to make multiple eslint runs, and possibly a
+// separate eslintrc file for each project to point it at the appropriate tsconfig (although it's
+// not clear this part is necessary).
+//
+// More detailed discussion at:
+// https://github.com/typescript-eslint/typescript-eslint/issues/1192#issuecomment-846491212
+{
+  "extends": "@foxglove/tsconfig/tsconfig.base.json",
+  "include": ["**/*", "app/.storybook/**/*"],
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "es2020"],
+    "jsx": "react-jsx"
+  }
+}
