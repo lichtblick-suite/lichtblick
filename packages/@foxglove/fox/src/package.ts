@@ -21,7 +21,7 @@ export interface PackageManifest {
   publisher?: string;
   namespaceOrPublisher: string;
   version: string;
-  module: string;
+  main: string;
   files?: string[];
   scripts?: {
     "foxglove:prepublish"?: string;
@@ -87,8 +87,8 @@ async function readManifest(extensionPath: string): Promise<PackageManifest> {
   if (typeof manifest.version !== "string") {
     throw new Error(`Missing required field "version" in ${pkgPath}`);
   }
-  if (typeof manifest.module !== "string") {
-    throw new Error(`Missing required field "module" in ${pkgPath}`);
+  if (typeof manifest.main !== "string") {
+    throw new Error(`Missing required field "main" in ${pkgPath}`);
   }
   if (manifest.files != undefined && !Array.isArray(manifest.files)) {
     throw new Error(`Invalid "files" entry in ${pkgPath}`);
@@ -131,7 +131,7 @@ async function collect(extensionPath: string, pkg: PackageManifest): Promise<str
     join(extensionPath, "package.json"),
     join(extensionPath, "README.md"),
     join(extensionPath, "CHANGELOG.md"),
-    join(extensionPath, pkg.module),
+    join(extensionPath, pkg.main),
   ];
 
   for (const file of baseFiles) {

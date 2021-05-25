@@ -1,25 +1,21 @@
 {
-  "include": ["./src/**/*.ts"],
+  "include": ["./src/**/*"],
   "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
     "module": "commonjs",
     "target": "es2019",
     "lib": ["es2019"],
-    "rootDir": "./src",
-    "outDir": "./dist",
 
-    "moduleResolution": "node",
+    "allowJs": true,
+    "composite": true,
     "esModuleInterop": true,
     "isolatedModules": true,
-    "allowJs": false,
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
     "newLine": "lf",
     "resolveJsonModule": true,
-
     "skipLibCheck": true,
-
-    "noEmit": false,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
 
     // be as strict as possible, but no stricter
     "strict": true,

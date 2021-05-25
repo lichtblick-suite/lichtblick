@@ -1,0 +1,3 @@
+# ${NAME}
+
+## Foxglove Studio extension

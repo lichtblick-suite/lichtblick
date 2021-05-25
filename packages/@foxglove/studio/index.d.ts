@@ -16,6 +16,8 @@ declare module "@foxglove/studio" {
   };
 
   interface ExtensionContext {
+    readonly extensionMode: "production" | "development" | "test";
+
     registerPanel(params: ExtensionPanelRegistration): void;
   }
 

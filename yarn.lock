@@ -5,6 +5,15 @@ __metadata:
   version: 4
   cacheKey: 7
 
+"${NAME}@workspace:packages/@foxglove/fox/template":
+  version: 0.0.0-use.local
+  resolution: "${NAME}@workspace:packages/@foxglove/fox/template"
+  dependencies:
+    "@foxglove/fox": 0.1.0
+    "@foxglove/studio": 0.1.0
+  languageName: unknown
+  linkType: soft
+
 "7zip-bin@npm:~5.0.3":
   version: 5.0.3
   resolution: "7zip-bin@npm:5.0.3"
@@ -2101,18 +2110,21 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/fox@workspace:packages/@foxglove/fox":
+"@foxglove/fox@0.1.0, @foxglove/fox@workspace:packages/@foxglove/fox":
   version: 0.0.0-use.local
   resolution: "@foxglove/fox@workspace:packages/@foxglove/fox"
   dependencies:
+    "@types/mkdirp": ^1
     "@types/ncp": ^2
     "@types/node": ^12
     "@types/rimraf": ^3
     commander: 7.2.0
     jszip: 3.6.0
+    mkdirp: 1.0.4
     ncp: 2.0.0
     rimraf: 3.0.2
-    typescript: 4.2.2
+    sanitize-filename: 1.6.3
+    typescript: 4.2.4
   bin:
     fox: dist/fox
   languageName: unknown
@@ -2350,7 +2362,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/studio@workspace:packages/@foxglove/studio":
+"@foxglove/studio@0.1.0, @foxglove/studio@workspace:packages/@foxglove/studio":
   version: 0.0.0-use.local
   resolution: "@foxglove/studio@workspace:packages/@foxglove/studio"
   languageName: unknown
@@ -5001,7 +5013,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mkdirp@npm:^1.0.0, @types/mkdirp@npm:^1.0.1":
+"@types/mkdirp@npm:^1, @types/mkdirp@npm:^1.0.0, @types/mkdirp@npm:^1.0.1":
   version: 1.0.1
   resolution: "@types/mkdirp@npm:1.0.1"
   dependencies:
@@ -18124,6 +18136,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mkdirp@npm:1.0.4, mkdirp@npm:^1.0.0, mkdirp@npm:^1.0.3, mkdirp@npm:^1.0.4, mkdirp@npm:~1.0.4":
+  version: 1.0.4
+  resolution: "mkdirp@npm:1.0.4"
+  bin:
+    mkdirp: bin/cmd.js
+  checksum: 1aa3a6a2d7514f094a91329ec09994f5d32d2955a4985ecbb3d86f2aaeafc4aa11521f98d606144c1d49cd9835004d9a73342709b8c692c92e59eacf37412468
+  languageName: node
+  linkType: hard
+
 "mkdirp@npm:^0.5.1, mkdirp@npm:^0.5.3, mkdirp@npm:^0.5.4, mkdirp@npm:^0.5.5, mkdirp@npm:~0.5.1":
   version: 0.5.5
   resolution: "mkdirp@npm:0.5.5"
@@ -18132,15 +18153,6 @@ __metadata:
   bin:
     mkdirp: bin/cmd.js
   checksum: 9dd9792e891927b14ca02226dbe1daeb717b9517a001620d5e2658bbc72c5e4f06887b6cbcbb60595fa5a56e701073cf250f1ed69c1988a6b89faf9fd6a4d049
-  languageName: node
-  linkType: hard
-
-"mkdirp@npm:^1.0.0, mkdirp@npm:^1.0.3, mkdirp@npm:^1.0.4, mkdirp@npm:~1.0.4":
-  version: 1.0.4
-  resolution: "mkdirp@npm:1.0.4"
-  bin:
-    mkdirp: bin/cmd.js
-  checksum: 1aa3a6a2d7514f094a91329ec09994f5d32d2955a4985ecbb3d86f2aaeafc4aa11521f98d606144c1d49cd9835004d9a73342709b8c692c92e59eacf37412468
   languageName: node
   linkType: hard
 
@@ -22726,7 +22738,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"sanitize-filename@npm:^1.6.3":
+"sanitize-filename@npm:1.6.3, sanitize-filename@npm:^1.6.3":
   version: 1.6.3
   resolution: "sanitize-filename@npm:1.6.3"
   dependencies:
@@ -25128,16 +25140,6 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-typescript@4.2.2:
-  version: 4.2.2
-  resolution: "typescript@npm:4.2.2"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: b2e3d5551a12c51b6b7a14f0e78d2664c136fab4dfb3eecaaf7a6e8e7e608f2cf43c6ebe81387d194db2588793b769720d2df523d445a1664b7585c5b9a85984
-  languageName: node
-  linkType: hard
-
 typescript@4.2.4:
   version: 4.2.4
   resolution: "typescript@npm:4.2.4"
@@ -25145,16 +25147,6 @@ typescript@4.2.4:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: edaede2fa77f56b7fba80ee624a2368ab1216e75b0434d968ccb47ab0a5e2f6d94f848b3b111c1237dd71e988cd376af26370dcdad3b94355c76e759f0dd0a1e
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@4.2.2#builtin<compat/typescript>":
-  version: 4.2.2
-  resolution: "typescript@patch:typescript@npm%3A4.2.2#builtin<compat/typescript>::version=4.2.2&hash=a45b0e"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: ea1f1b6be22c9e3348f61692719d3169dd4abaad34b2132edff44a8d5a748bde8f3116fa2fae41d61c92b3a7cf1c35d0c7276058b2f35196ff3cde3b7d57c84b
   languageName: node
   linkType: hard
 

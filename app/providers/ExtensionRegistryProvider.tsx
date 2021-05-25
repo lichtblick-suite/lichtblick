@@ -44,7 +44,17 @@ export default function ExtensionRegistryProvider(props: PropsWithChildren<unkno
       fn(module, require, {});
       const wrappedExtensionModule = module.exports as ExtensionModule;
 
+      // Pass the current app execution mode along to the extension
+      const extensionMode =
+        process.env.NODE_ENV === "production"
+          ? "production"
+          : process.env.NODE_ENV === "test"
+          ? "test"
+          : "development";
+
       const ctx: ExtensionContext = {
+        extensionMode,
+
         registerPanel(params) {
           log.debug(`Extension ${extension.name} registering panel: ${params.name}`);
 
