@@ -53,6 +53,8 @@ export default (env: unknown, argv: WebpackArgv): Configuration => {
   const config: Configuration = {
     ...appWebpackConfig,
 
+    name: "renderer",
+
     // force web target instead of electron-render
     // Fixes "require is not defined" errors if nodeIntegration is off
     // https://gist.github.com/msafi/d1b8571aa921feaaa0f893ab24bb727b

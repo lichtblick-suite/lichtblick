@@ -8,6 +8,7 @@ import {
   PanelInfo,
 } from "@foxglove/studio-base/context/PanelCatalogContext";
 import GlobalVariableSlider from "@foxglove/studio-base/panels/GlobalVariableSlider";
+import HelloWorld from "@foxglove/studio-base/panels/HelloWorldExtension";
 import ImageViewPanel from "@foxglove/studio-base/panels/ImageView";
 import InternalLogs from "@foxglove/studio-base/panels/InternalLogs";
 import Internals from "@foxglove/studio-base/panels/Internals";
@@ -63,6 +64,10 @@ const debugging: PanelInfo[] = [
   { title: "Studio Logs", component: InternalLogs },
   { title: "Subscribe to List", component: SubscribeToList },
 ];
+
+if (process.env.NODE_ENV !== "production") {
+  debugging.push({ title: "Hello World", component: HelloWorld });
+}
 
 // Hidden panels are not present in panels by category or panel categories
 // They are only accessible by type

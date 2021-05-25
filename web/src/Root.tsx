@@ -15,8 +15,9 @@ import {
 
 import AppConfigurationProvider from "./components/AppConfigurationProvider";
 import NoOpLayoutStorageProvider from "./components/NoOpLayoutStorageProvider";
+import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
 
-const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo.bag";
+const DEMO_BAG_URL = "fixme"; //https://storage.googleapis.com/foxglove-public-assets/demo.bag";
 
 export default function Root(): ReactElement {
   const playerSources: PlayerSourceDefinition[] = [
@@ -39,6 +40,7 @@ export default function Root(): ReactElement {
     <AppConfigurationProvider />,
     <NoOpLayoutStorageProvider />,
     <UserProfileLocalStorageProvider />,
+    <ExtensionLoaderProvider />,
     /* eslint-enable react/jsx-key */
   ];
 

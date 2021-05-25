@@ -9,11 +9,51 @@ import CopyPlugin from "copy-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import path from "path";
 import { Configuration, EnvironmentPlugin, WebpackPluginInstance } from "webpack";
+import type { Configuration as WebpackDevServerConfiguration } from "webpack-dev-server";
 
 import type { WebpackArgv } from "@foxglove/studio-base/WebpackArgv";
 import { makeConfig } from "@foxglove/studio-base/webpack";
 
-export default (env: unknown, argv: WebpackArgv): Configuration => {
+import extensions from "./webpack.extensions.config";
+
+interface WebpackConfiguration extends Configuration {
+  devServer?: WebpackDevServerConfiguration;
+}
+
+const devServerConfig: WebpackConfiguration = {
+  // Use empty entry to avoid webpack default fallback to /src
+  entry: {},
+
+  // Output path must be specified here for HtmlWebpackPlugin within render config to work
+  output: {
+    publicPath: "",
+    path: path.resolve(__dirname, ".webpack"),
+  },
+
+  devServer: {
+    contentBase: path.resolve(__dirname, ".webpack"),
+    hot: true,
+    // The problem and solution are described at <https://github.com/webpack/webpack-dev-server/issues/1604>.
+    // When running in dev mode two errors are logged to the dev console:
+    //  "Invalid Host/Origin header"
+    //  "[WDS] Disconnected!"
+    // Since we are only connecting to localhost, DNS rebinding attacks are not a concern during dev
+    disableHostCheck: true,
+
+    // (For now) extensions also do not work with hot reloading because we need load the extension as a module
+    // and injecting hot reloading breaks the "library" export we've setup in extensions.config.ts
+    injectClient: (compilerConfig) => {
+      return compilerConfig.name === "main";
+    },
+    injectHot: (compilerConfig) => {
+      return compilerConfig.name === "main";
+    },
+  },
+
+  plugins: [new CleanWebpackPlugin()],
+};
+
+const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
   const isDev = argv.mode === "development";
   const isServe = argv.env?.WEBPACK_SERVE ?? false;
 
@@ -45,6 +85,8 @@ export default (env: unknown, argv: WebpackArgv): Configuration => {
   const appWebpackConfig = makeConfig(env, argv, { allowUnusedVariables });
 
   const config: Configuration = {
+    name: "main",
+
     ...appWebpackConfig,
 
     target: "web",
@@ -52,24 +94,12 @@ export default (env: unknown, argv: WebpackArgv): Configuration => {
     entry: "./src/index.tsx",
     devtool: isDev ? "eval-cheap-module-source-map" : "source-map",
 
-    devServer: {
-      contentBase: path.resolve(__dirname, ".webpack"),
-      hot: true,
-      // The problem and solution are described at <https://github.com/webpack/webpack-dev-server/issues/1604>.
-      // When running in dev mode two errors are logged to the dev console:
-      //  "Invalid Host/Origin header"
-      //  "[WDS] Disconnected!"
-      // Since we are only connecting to localhost, DNS rebinding attacks are not a concern during dev
-      disableHostCheck: true,
-    },
-
     output: {
       publicPath: "/",
       path: path.resolve(__dirname, ".webpack"),
     },
 
     plugins: [
-      new CleanWebpackPlugin(),
       ...plugins,
       ...(appWebpackConfig.plugins ?? []),
       new EnvironmentPlugin({
@@ -112,3 +142,5 @@ export default (env: unknown, argv: WebpackArgv): Configuration => {
 
   return config;
 };
+
+export default [devServerConfig, mainConfig, extensions];

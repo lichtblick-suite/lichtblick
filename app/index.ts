@@ -17,6 +17,10 @@ import AppConfigurationContext, {
   AppConfigurationValue,
   ChangeHandler,
 } from "./context/AppConfigurationContext";
+import ExtensionLoaderContext, {
+  ExtensionLoader,
+  ExtensionDetail,
+} from "./context/ExtensionLoaderContext";
 import LayoutStorageContext, { Layout, LayoutStorage } from "./context/LayoutStorageContext";
 import NativeAppMenuContext, {
   NativeAppMenu,
@@ -43,6 +47,7 @@ export {
   overwriteFetch,
   ThemeProvider,
   waitForFonts,
+  ExtensionLoaderContext,
 };
 
 export type {
@@ -56,4 +61,6 @@ export type {
   NetworkInterface,
   OsContext,
   PlayerSourceDefinition,
+  ExtensionLoader,
+  ExtensionDetail,
 };

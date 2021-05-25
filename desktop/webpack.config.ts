@@ -9,6 +9,7 @@ import type { Configuration } from "webpack";
 import type { Configuration as WebpackDevServerConfiguration } from "webpack-dev-server";
 
 import packageJson from "../package.json";
+import extensions from "./webpack.extensions.config";
 import main from "./webpack.main.config";
 import preload from "./webpack.preload.config";
 import renderer from "./webpack.renderer.config";
@@ -34,7 +35,7 @@ const devServerConfig: WebpackConfiguration = {
       // Electron needs to open the main thread source and preload source from disk
       // avoid writing the hot-update js and json files
       // allow writing package.json at root -> needed for electron to find entrypoint
-      return /\.webpack[\\/](main[\\/](?!.*hot-update)|package\.json)/.test(filePath);
+      return /\.webpack[\\/]((main|extensions)[\\/](?!.*hot-update)|package\.json)/.test(filePath);
     },
     hot: true,
     // The problem and solution are described at <https://github.com/webpack/webpack-dev-server/issues/1604>.
@@ -43,6 +44,17 @@ const devServerConfig: WebpackConfiguration = {
     //  "[WDS] Disconnected!"
     // Since we are only connecting to localhost, DNS rebinding attacks are not a concern during dev
     disableHostCheck: true,
+
+    // Only renderer and preloader load in the browser and should receive devserver config and hot reloading
+    // main does not work with devserver or hot reloading
+    // (For now) extensions also do not work with hot reloading because we need load the extension as a module
+    // and injecting hot reloading breaks the "library" export we've setup in extensions.config.ts
+    injectClient: (compilerConfig) => {
+      return compilerConfig.name === "renderer" || compilerConfig.name === "preloader";
+    },
+    injectHot: (compilerConfig) => {
+      return compilerConfig.name === "renderer" || compilerConfig.name === "preloader";
+    },
   },
   plugins: [
     new CleanWebpackPlugin(),
@@ -64,4 +76,4 @@ const devServerConfig: WebpackConfiguration = {
   ],
 };
 
-export default [devServerConfig, main, preload, renderer];
+export default [devServerConfig, extensions, main, preload, renderer];

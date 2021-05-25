@@ -12,6 +12,8 @@ export default (_: unknown, argv: WebpackArgv): Configuration => {
   const isDev = argv.mode === "development";
 
   return {
+    name: "preloader",
+
     context: path.resolve(__dirname, "./preload"),
     entry: "./index.ts",
     target: "electron-preload",

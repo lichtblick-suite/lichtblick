@@ -1,0 +1,7 @@
+{
+  "extends": "@foxglove/tsconfig/tsconfig.base.json",
+  "include": ["./**/*"],
+  "compilerOptions": {
+    "jsx": "react-jsx"
+  }
+}

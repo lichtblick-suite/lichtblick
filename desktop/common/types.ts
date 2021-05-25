@@ -43,14 +43,20 @@ interface Storage {
   delete(datastore: string, key: string): Promise<void>;
 }
 
+type DesktopExtension = {
+  name: string;
+  packageJson: unknown;
+  source: string;
+};
+
 interface Desktop {
   handleToolbarDoubleClick: () => void;
 
   // Get an array of deep links provided on app launch
   getDeepLinks: () => string[];
 
-  // Get an array of available extension URIs and parsed package.json files
-  getExtensions: () => Promise<{ uri: string; packageJson: unknown }[]>;
+  // Get an array of available extensions and parsed package.json files
+  getExtensions: () => Promise<DesktopExtension[]>;
 }
 
-export type { NativeMenuBridge, Storage, StorageContent, Desktop };
+export type { NativeMenuBridge, Storage, StorageContent, Desktop, DesktopExtension };
