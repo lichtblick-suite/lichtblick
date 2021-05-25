@@ -17,7 +17,7 @@ export default (env: unknown, argv: WebpackArgv): Configuration => {
   const isDev = argv.mode === "development";
   const isServe = argv.env?.WEBPACK_SERVE ?? false;
 
-  const allowUnusedLocals = isDev && isServe;
+  const allowUnusedVariables = isDev && isServe;
 
   const plugins: WebpackPluginInstance[] = [];
 
@@ -42,7 +42,7 @@ export default (env: unknown, argv: WebpackArgv): Configuration => {
     );
   }
 
-  const appWebpackConfig = makeConfig(env, argv, { allowUnusedLocals });
+  const appWebpackConfig = makeConfig(env, argv, { allowUnusedVariables });
 
   const config: Configuration = {
     ...appWebpackConfig,

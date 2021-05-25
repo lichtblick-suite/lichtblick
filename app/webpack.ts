@@ -23,7 +23,7 @@ type Options = {
   // During hot reloading and development it is useful to comment out code while iterating.
   // We ignore errors from unused locals to avoid having to also comment
   // those out while iterating.
-  allowUnusedLocals?: boolean;
+  allowUnusedVariables?: boolean;
 };
 
 // Create a partial webpack configuration required to build app using webpack.
@@ -36,7 +36,7 @@ export function makeConfig(
   const isDev = argv.mode === "development";
   const isServe = argv.env?.WEBPACK_SERVE ?? false;
 
-  const { allowUnusedLocals = isDev && isServe } = options ?? {};
+  const { allowUnusedVariables = isDev && isServe } = options ?? {};
 
   return {
     resolve: {
@@ -198,7 +198,8 @@ export function makeConfig(
         typescript: {
           configOverwrite: {
             compilerOptions: {
-              noUnusedLocals: !allowUnusedLocals,
+              noUnusedLocals: !allowUnusedVariables,
+              noUnusedParameters: !allowUnusedVariables,
             },
           },
         },

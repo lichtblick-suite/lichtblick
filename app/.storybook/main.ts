@@ -22,7 +22,7 @@ module.exports = {
     const rendererConfig = makeConfig(
       undefined,
       { mode: config.mode },
-      { allowUnusedLocals: true },
+      { allowUnusedVariables: true },
     );
 
     return {

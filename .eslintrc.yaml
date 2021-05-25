@@ -98,6 +98,8 @@ rules:
   foxglove-license-header: error
 
   curly: error
+  # This rule is similar to TS's noUnusedLocals/noUnusedParameters, but we still want to enable the
+  # check for any .js files
   "@typescript-eslint/no-unused-vars":
     - error
     - { vars: all, args: after-used, varsIgnorePattern: "^_", argsIgnorePattern: "^_" }
