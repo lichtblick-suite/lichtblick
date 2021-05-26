@@ -4,6 +4,7 @@
 
 import {
   app,
+  dialog,
   BrowserWindow,
   BrowserWindowConstructorOptions,
   Menu,
@@ -240,6 +241,15 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
     ],
   });
 
+  const showAboutDialog = () => {
+    dialog.showMessageBox(browserWindow, {
+      type: "info",
+      title: `About ${pkgInfo.productName}`,
+      message: pkgInfo.productName,
+      detail: `Version: ${pkgInfo.version}`,
+    });
+  };
+
   menuTemplate.push({
     role: "help",
     submenu: [
@@ -260,6 +270,17 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
         label: "Learn More",
         click: async () => shell.openExternal("https://foxglove.dev"),
       },
+      ...(isMac
+        ? []
+        : [
+            { type: "separator" } as const,
+            {
+              label: "About",
+              click() {
+                showAboutDialog();
+              },
+            },
+          ]),
     ],
   });
 
