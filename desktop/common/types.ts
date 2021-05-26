@@ -50,6 +50,12 @@ type DesktopExtension = {
 };
 
 interface Desktop {
+  /**
+   * Initiate login in an external browser and return a parameter string sent back from the login
+   * flow
+   */
+  authenticateViaExternalBrowser: () => Promise<string>;
+
   handleToolbarDoubleClick: () => void;
 
   // Get an array of deep links provided on app launch

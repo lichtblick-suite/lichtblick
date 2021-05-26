@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import type { FirebaseOptions } from "@firebase/app";
 import { ReactElement, useCallback, useMemo } from "react";
 
 import {
@@ -11,6 +12,8 @@ import {
   PlayerSourceDefinition,
   ThemeProvider,
   UserProfileLocalStorageProvider,
+  StudioToastProvider,
+  FirebaseAppProvider,
 } from "@foxglove/studio-base";
 
 import { Desktop } from "../common/types";
@@ -18,10 +21,11 @@ import NativeAppMenuProvider from "./components/NativeAppMenuProvider";
 import NativeStorageAppConfigurationProvider from "./components/NativeStorageAppConfigurationProvider";
 import NativeStorageLayoutStorageProvider from "./components/NativeStorageLayoutStorageProvider";
 import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
+import ExternalBrowserFirebaseAuthProvider from "./providers/ExternalBrowserFirebaseAuthProvider";
 
 const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo.bag";
 
-const desktopBridge = (global as { desktopBridge?: Desktop }).desktopBridge;
+const desktopBridge = (global as unknown as { desktopBridge: Desktop }).desktopBridge;
 
 export default function Root(): ReactElement {
   const playerSources: PlayerSourceDefinition[] = [
@@ -43,23 +47,30 @@ export default function Root(): ReactElement {
     },
   ];
 
+  const firebaseConfig = useMemo(() => {
+    const config = process.env.FIREBASE_CONFIG;
+    if (config == undefined) {
+      throw new Error("Firebase is not configured");
+    }
+    return JSON.parse(config) as FirebaseOptions;
+  }, []);
+
   const providers = [
     /* eslint-disable react/jsx-key */
+    <StudioToastProvider />,
     <NativeStorageAppConfigurationProvider />,
     <NativeStorageLayoutStorageProvider />,
     <NativeAppMenuProvider />,
     <UserProfileLocalStorageProvider />,
+    <FirebaseAppProvider config={firebaseConfig} />,
+    <ExternalBrowserFirebaseAuthProvider />,
     <ExtensionLoaderProvider />,
     /* eslint-enable react/jsx-key */
   ];
 
-  const deepLinks = useMemo(() => {
-    return desktopBridge?.getDeepLinks() ?? [];
-  }, []);
+  const deepLinks = useMemo(() => desktopBridge.getDeepLinks(), []);
 
-  const handleToolbarDoubleClick = useCallback(() => {
-    desktopBridge?.handleToolbarDoubleClick();
-  }, []);
+  const handleToolbarDoubleClick = useCallback(() => desktopBridge.handleToolbarDoubleClick(), []);
 
   return (
     <ThemeProvider>

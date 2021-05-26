@@ -3,15 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 // Allow console logs in this file
-/* eslint-disable no-restricted-syntax */
 
 import "colors";
 import { captureException, init as initSentry } from "@sentry/electron";
-import { app, BrowserWindow, ipcMain, Menu, session, nativeTheme } from "electron";
-import installExtension, {
-  REACT_DEVELOPER_TOOLS,
-  REDUX_DEVTOOLS,
-} from "electron-devtools-installer";
+import { app, BrowserWindow, ipcMain, Menu, session, nativeTheme, shell } from "electron";
 import { autoUpdater } from "electron-updater";
 import fs from "fs";
 import { URL } from "universal-url";
@@ -20,6 +15,8 @@ import Logger from "@foxglove/log";
 
 import pkgInfo from "../../package.json";
 import StudioWindow from "./StudioWindow";
+import injectFilesToOpen from "./injectFilesToOpen";
+import installChromeExtensions from "./installChromeExtensions";
 import { installMenuInterface } from "./menu";
 import {
   registerRosPackageProtocolHandlers,
@@ -28,272 +25,281 @@ import {
 import setDevModeDockIcon from "./setDevModeDockIcon";
 import { getTelemetrySettings } from "./telemetry";
 
-const start = Date.now();
 const log = Logger.getLogger(__filename);
 
-log.info(`${pkgInfo.productName} ${pkgInfo.version}`);
-
-const isProduction = process.env.NODE_ENV === "production";
-
-// Suppress Electron Security Warning in development
-// See the comment for the webSecurity setting on browser window
-process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = isProduction ? "false" : "true";
-
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require("electron-squirrel-startup")) {
-  app.quit();
-}
-
-// Load opt-out settings for crash reporting and telemetry
-const [allowCrashReporting] = getTelemetrySettings();
-if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
-  log.info("initializing Sentry in main");
-  initSentry({
-    dsn: process.env.SENTRY_DSN,
-    autoSessionTracking: true,
-    release: `${process.env.SENTRY_PROJECT}@${pkgInfo.version}`,
-    // Remove the default breadbrumbs integration - it does not accurately track breadcrumbs and
-    // creates more noise than benefit.
-    integrations: (integrations) => {
-      return integrations.filter((integration) => {
-        return integration.name !== "Breadcrumbs";
-      });
-    },
-    maxBreadcrumbs: 10,
-  });
-}
-
-if (!app.isDefaultProtocolClient("foxglove")) {
-  if (!app.setAsDefaultProtocolClient("foxglove")) {
-    log.warn("Could not set app as handler for foxglove://");
-  }
-}
-
-// files our app should open - either from user double-click on a supported fileAssociation
-// or command line arguments. For now limit to .bag file arguments
-// Note: in dev we launch electron with `electron .webpack` so we need to filter out things that are not files
-const filesToOpen: string[] = process.argv.slice(1).filter((item) => {
+/**
+ * Determine whether an item in argv is a file that we should try opening as a data source.
+ *
+ * Note: in dev we launch electron with `electron .webpack` so we need to filter out things that are not files
+ */
+function isFileToOpen(arg: string) {
   // Anything that isn't a file or directory will throw, we filter those out too
   try {
-    return fs.statSync(item).isFile();
+    return fs.statSync(arg).isFile();
   } catch (err) {
     // ignore
   }
   return false;
-});
-
-// Our app has support for working with _File_ instances in the renderer. This avoids extra copies
-// while reading files and lets the renderer seek/read as necessary using all the browser
-// primitives for _File_ instances.
-//
-// Unfortunately Electron does not provide a way to create or send _File_ instances to the renderer.
-// To avoid sending the data over our context bridge, we use a _hack_.
-// Via the debugger we _inject_ a DOM event to set the files of an <input> element.
-const inputElementId = "electron-open-file-input";
-async function loadFilesToOpen(browserWindow: BrowserWindow) {
-  const debug = browserWindow.webContents.debugger;
-  try {
-    debug.attach("1.1");
-  } catch (err) {
-    // debugger may already be attached
-  }
-
-  try {
-    const documentRes = await debug.sendCommand("DOM.getDocument");
-    const queryRes = await debug.sendCommand("DOM.querySelector", {
-      nodeId: documentRes.root.nodeId,
-      selector: `#${inputElementId}`,
-    });
-    await debug.sendCommand("DOM.setFileInputFiles", {
-      nodeId: queryRes.nodeId,
-      files: filesToOpen,
-    });
-
-    // clear the files once we've opened them
-    filesToOpen.splice(0, filesToOpen.length);
-  } finally {
-    debug.detach();
-  }
 }
 
-// indicates the preloader has setup the file input used to inject which files to open
-let preloaderFileInputIsReady = false;
+function main() {
+  const start = Date.now();
+  log.info(`${pkgInfo.productName} ${pkgInfo.version}`);
 
-// This handles user dropping files on the doc icon or double clicking a file when the app
-// is already open.
-//
-// The open-file handler registered earlier will handle adding the file to filesToOpen
-app.on("open-file", async (_ev, filePath) => {
-  filesToOpen.push(filePath);
+  const isProduction = process.env.NODE_ENV === "production";
 
-  if (preloaderFileInputIsReady) {
-    const focusedWindow = BrowserWindow.getFocusedWindow();
-    if (focusedWindow) {
-      await loadFilesToOpen(focusedWindow);
-    }
-  }
-});
+  // Suppress Electron Security Warning in development
+  // See the comment for the webSecurity setting on browser window
+  process.env["ELECTRON_DISABLE_SECURITY_WARNINGS"] = isProduction ? "false" : "true";
 
-// preload will tell us when it is ready to process the pending open file requests
-// It is important this handler is registered before any windows open because preload will call
-// this handler to get the files we were told to open on startup
-ipcMain.handle("load-pending-files", async (ev) => {
-  const browserWindow = BrowserWindow.fromId(ev.sender.id);
-  if (browserWindow) {
-    await loadFilesToOpen(browserWindow);
-  }
-  preloaderFileInputIsReady = true;
-});
-
-// works on osx - even when app is closed
-// tho it is a bit strange since it isn't clear when this runs...
-const openUrls: string[] = [];
-app.on("open-url", (ev, url) => {
-  if (!url.startsWith("foxglove://")) {
+  // Handle creating/removing shortcuts on Windows when installing/uninstalling.
+  if (require("electron-squirrel-startup")) {
+    app.quit();
     return;
   }
 
-  ev.preventDefault();
-
-  if (app.isReady()) {
-    if (url.startsWith("foxglove://")) {
-      new StudioWindow([url]);
-    }
-  } else {
-    openUrls.push(url);
+  // If another instance of the app is already open, this call triggers the "second-instance" event
+  // in the original instance and returns false.
+  if (!app.requestSingleInstanceLock()) {
+    log.info(`Another instance of ${pkgInfo.productName} is already running. Quitting.`);
+    app.quit();
+    return;
   }
-});
 
-// support preload lookups for the user data path and home directory
-ipcMain.handle("getUserDataPath", () => app.getPath("userData"));
-ipcMain.handle("getHomePath", () => app.getPath("home"));
+  // Forward urls/files opened in a second instance to our default handlers so it's as if we opened
+  // them with this instance.
+  app.on("second-instance", (_ev, argv, _workingDirectory) => {
+    log.debug("Received arguments from second app instance:", argv);
 
-// Must be called before app.ready event
-registerRosPackageProtocolSchemes();
+    // Bring the app to the front
+    const someWindow = BrowserWindow.getAllWindows()[0];
+    someWindow?.restore();
+    someWindow?.focus();
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on("ready", async () => {
-  nativeTheme.themeSource = "dark";
+    const deepLinks = argv.slice(1).filter((arg) => arg.startsWith("foxglove://"));
+    for (const link of deepLinks) {
+      app.emit("open-url", { preventDefault() {} }, link);
+    }
 
-  const argv = process.argv;
-  const deepLinks = argv.filter((arg) => arg.startsWith("foxglove://"));
+    const files = argv.slice(1).filter((arg) => isFileToOpen(arg));
+    for (const file of files) {
+      app.emit("open-file", { preventDefault() {} }, file);
+    }
+  });
 
-  // create the initial window now to display to the user immediately
-  // loading the app url happens at the end of ready to ensure we've setup all the handlers, settings, etc
-  log.debug(`Elapsed (ms) until new StudioWindow: ${Date.now() - start}`);
-  const initialWindow = new StudioWindow([...deepLinks, ...openUrls]);
-
-  registerRosPackageProtocolHandlers();
-
-  // Only stable builds check for automatic updates
-  if (process.env.NODE_ENV !== "production") {
-    log.info("Automatic updates disabled (development environment)");
-  } else if (/-(dev|nightly)/.test(pkgInfo.version)) {
-    log.info("Automatic updates disabled (development version)");
-  } else {
-    autoUpdater.checkForUpdatesAndNotify().catch((err) => {
-      captureException(err);
+  // Load opt-out settings for crash reporting and telemetry
+  const [allowCrashReporting] = getTelemetrySettings();
+  if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
+    log.info("initializing Sentry in main");
+    initSentry({
+      dsn: process.env.SENTRY_DSN,
+      autoSessionTracking: true,
+      release: `${process.env.SENTRY_PROJECT}@${pkgInfo.version}`,
+      // Remove the default breadbrumbs integration - it does not accurately track breadcrumbs and
+      // creates more noise than benefit.
+      integrations: (integrations) => {
+        return integrations.filter((integration) => {
+          return integration.name !== "Breadcrumbs";
+        });
+      },
+      maxBreadcrumbs: 10,
     });
   }
 
-  app.setAboutPanelOptions({
-    applicationName: pkgInfo.productName,
-    applicationVersion: pkgInfo.version,
-    version: process.platform,
-    copyright: undefined,
-    website: pkgInfo.homepage,
-    iconPath: undefined,
-  });
-
-  if (!isProduction) {
-    console.group("Installing Chrome extensions for development...");
-    // Extension installation sometimes gets stuck between the download step and the extension loading step, for unknown reasons.
-    // So don't wait indefinitely for installation to complete.
-    let finished = false;
-    await Promise.race([
-      Promise.allSettled([
-        installExtension(REACT_DEVELOPER_TOOLS),
-        (process.env.REDUX_DEVTOOLS ?? "") !== "" ? installExtension(REDUX_DEVTOOLS) : null,
-      ]).then((results) => {
-        finished = true;
-        console.log("Finished:", results);
-      }),
-      new Promise<void>((resolve) => {
-        setTimeout(() => {
-          if (!finished) {
-            console.warn(
-              "Warning: extension installation may be stuck; try relaunching electron or deleting its extensions directory. Continuing for now."
-                .yellow,
-            );
-          }
-          resolve();
-        }, 5000);
-      }),
-    ]);
-    console.groupEnd();
-
-    setDevModeDockIcon();
+  if (!app.isDefaultProtocolClient("foxglove")) {
+    if (!app.setAsDefaultProtocolClient("foxglove")) {
+      log.warn("Could not set app as handler for foxglove://");
+    }
   }
 
-  // Content Security Policy
-  // See: https://www.electronjs.org/docs/tutorial/security
-  const contentSecurityPolicy: Record<string, string> = {
-    "default-src": "'self'",
-    "script-src": `'self' 'unsafe-inline' 'unsafe-eval'`,
-    "worker-src": `'self' blob:`,
-    "style-src": "'self' 'unsafe-inline'",
-    "connect-src": "'self' ws: wss: http: https: x-foxglove-ros-package:",
-    "font-src": "'self' data:",
-    "img-src": "'self' data: https: x-foxglove-ros-package: x-foxglove-ros-package-converted-tiff:",
-  };
+  // files our app should open - either from user double-click on a supported fileAssociation
+  // or command line arguments.
+  const filesToOpen: string[] = process.argv.slice(1).filter(isFileToOpen);
 
-  // Set default http headers
-  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    const url = new URL(details.url);
-    const responseHeaders = { ...details.responseHeaders };
+  // indicates the preloader has setup the file input used to inject which files to open
+  let preloaderFileInputIsReady = false;
 
-    // don't set CSP for internal URLs
-    if (!["chrome-extension:", "devtools:", "data:"].includes(url.protocol)) {
-      responseHeaders["Content-Security-Policy"] = [
-        Object.entries(contentSecurityPolicy)
-          .map(([key, val]) => `${key} ${val}`)
-          .join("; "),
-      ];
-    }
+  // This handles user dropping files on the dock icon or double clicking a file when the app
+  // is already open.
+  //
+  // The open-file handler registered earlier will handle adding the file to filesToOpen
+  app.on("open-file", async (_ev, filePath) => {
+    log.debug("open-file handler", filePath);
+    filesToOpen.push(filePath);
 
-    callback({ responseHeaders });
-  });
-
-  // When we change the focused window we switch the app menu so actions go to the correct window
-  app.on("browser-window-focus", (_ev, browserWindow) => {
-    const studioWindow = StudioWindow.fromWebContentsId(browserWindow.webContents.id);
-    if (studioWindow) {
-      Menu.setApplicationMenu(studioWindow.getMenu());
+    if (preloaderFileInputIsReady) {
+      const focusedWindow = BrowserWindow.getFocusedWindow();
+      if (focusedWindow) {
+        await injectFilesToOpen(focusedWindow, filesToOpen);
+      }
     }
   });
 
-  // This event handler must be added after the "ready" event fires
-  // (see https://github.com/electron/electron-quick-start/pull/382)
-  app.on("activate", () => {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) {
-      new StudioWindow().load();
+  // preload will tell us when it is ready to process the pending open file requests
+  // It is important this handler is registered before any windows open because preload will call
+  // this handler to get the files we were told to open on startup
+  ipcMain.handle("load-pending-files", async (ev) => {
+    const browserWindow = BrowserWindow.fromId(ev.sender.id);
+    if (browserWindow) {
+      await injectFilesToOpen(browserWindow, filesToOpen);
+    }
+    preloaderFileInputIsReady = true;
+  });
+
+  const openUrls: string[] = [];
+  let loginPromise:
+    | { resolve: (_: string | undefined) => void; reject: (_: Error) => void }
+    | undefined;
+
+  // works on osx - even when app is closed
+  // tho it is a bit strange since it isn't clear when this runs...
+  app.on("open-url", (ev, url) => {
+    log.debug("open-url handler", url);
+    if (!url.startsWith("foxglove://")) {
+      return;
+    }
+
+    ev.preventDefault();
+
+    // Note that `new URL(url).pathname` is different between main & preload, so we just use startsWith
+    if (url.startsWith("foxglove://auth/login-complete?")) {
+      loginPromise?.resolve(new URL(url).search);
+      loginPromise = undefined;
+    } else {
+      if (app.isReady()) {
+        new StudioWindow([url]).load();
+      } else {
+        openUrls.push(url);
+      }
     }
   });
 
-  installMenuInterface();
+  ipcMain.handle(
+    "authenticateViaExternalBrowser",
+    () =>
+      new Promise<string | undefined>((resolve, reject) => {
+        loginPromise?.resolve(undefined);
+        loginPromise = { resolve, reject };
+        if (process.env.AUTH_URL == undefined) {
+          reject(new Error("Authentication URL not configured."));
+          return;
+        }
+        shell.openExternal("https://foxglove.dev/auth?source=studio").catch((err) => {
+          reject(err);
+          loginPromise = undefined;
+        });
+      }),
+  );
 
-  initialWindow.load();
-});
+  // support preload lookups for the user data path and home directory
+  ipcMain.handle("getUserDataPath", () => app.getPath("userData"));
+  ipcMain.handle("getHomePath", () => app.getPath("home"));
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
-});
+  // Must be called before app.ready event
+  registerRosPackageProtocolSchemes();
+
+  // This method will be called when Electron has finished
+  // initialization and is ready to create browser windows.
+  // Some APIs can only be used after this event occurs.
+  app.on("ready", async () => {
+    nativeTheme.themeSource = "dark";
+
+    const argv = process.argv;
+    const deepLinks = argv.filter((arg) => arg.startsWith("foxglove://"));
+
+    // create the initial window now to display to the user immediately
+    // loading the app url happens at the end of ready to ensure we've setup all the handlers, settings, etc
+    log.debug(`Elapsed (ms) until new StudioWindow: ${Date.now() - start}`);
+    const initialWindow = new StudioWindow([...deepLinks, ...openUrls]);
+
+    registerRosPackageProtocolHandlers();
+
+    // Only stable builds check for automatic updates
+    if (process.env.NODE_ENV !== "production") {
+      log.info("Automatic updates disabled (development environment)");
+    } else if (/-(dev|nightly)/.test(pkgInfo.version)) {
+      log.info("Automatic updates disabled (development version)");
+    } else {
+      autoUpdater.checkForUpdatesAndNotify().catch((err) => {
+        captureException(err);
+      });
+    }
+
+    app.setAboutPanelOptions({
+      applicationName: pkgInfo.productName,
+      applicationVersion: pkgInfo.version,
+      version: process.platform,
+      copyright: undefined,
+      website: pkgInfo.homepage,
+      iconPath: undefined,
+    });
+
+    if (!isProduction) {
+      await installChromeExtensions();
+      setDevModeDockIcon();
+    }
+
+    // Content Security Policy
+    // See: https://www.electronjs.org/docs/tutorial/security
+    const contentSecurityPolicy: Record<string, string> = {
+      "default-src": "'self'",
+      "script-src": `'self' 'unsafe-inline' 'unsafe-eval'`,
+      "worker-src": `'self' blob:`,
+      "style-src": "'self' 'unsafe-inline'",
+      "connect-src": "'self' ws: wss: http: https: x-foxglove-ros-package:",
+      "font-src": "'self' data:",
+      "img-src":
+        "'self' data: https: x-foxglove-ros-package: x-foxglove-ros-package-converted-tiff:",
+    };
+
+    // Set default http headers
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+      const url = new URL(details.url);
+      const responseHeaders = { ...details.responseHeaders };
+
+      // don't set CSP for internal URLs
+      if (!["chrome-extension:", "devtools:", "data:"].includes(url.protocol)) {
+        responseHeaders["Content-Security-Policy"] = [
+          Object.entries(contentSecurityPolicy)
+            .map(([key, val]) => `${key} ${val}`)
+            .join("; "),
+        ];
+      }
+
+      callback({ responseHeaders });
+    });
+
+    // When we change the focused window we switch the app menu so actions go to the correct window
+    app.on("browser-window-focus", (_ev, browserWindow) => {
+      const studioWindow = StudioWindow.fromWebContentsId(browserWindow.webContents.id);
+      if (studioWindow) {
+        Menu.setApplicationMenu(studioWindow.getMenu());
+      }
+    });
+
+    // This event handler must be added after the "ready" event fires
+    // (see https://github.com/electron/electron-quick-start/pull/382)
+    app.on("activate", () => {
+      // On macOS it's common to re-create a window in the app when the
+      // dock icon is clicked and there are no other windows open.
+      if (BrowserWindow.getAllWindows().length === 0) {
+        new StudioWindow().load();
+      }
+    });
+
+    installMenuInterface();
+
+    initialWindow.load();
+  });
+
+  // Quit when all windows are closed, except on macOS. There, it's common
+  // for applications and their menu bar to stay active until the user quits
+  // explicitly with Cmd + Q.
+  app.on("window-all-closed", () => {
+    if (process.platform !== "darwin") {
+      app.quit();
+    }
+  });
+}
+
+main();

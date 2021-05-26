@@ -8,59 +8,30 @@
 // See typings/index.d.ts for additional included references
 /// <reference types="./typings" />
 
-import App from "./App";
-import { NetworkInterface, OsContext } from "./OsContext";
-import ErrorBoundary from "./components/ErrorBoundary";
-import MultiProvider from "./components/MultiProvider";
-import AppConfigurationContext, {
-  AppConfiguration,
-  AppConfigurationValue,
-  ChangeHandler,
-} from "./context/AppConfigurationContext";
-import ExtensionLoaderContext, {
-  ExtensionLoader,
-  ExtensionDetail,
-} from "./context/ExtensionLoaderContext";
-import LayoutStorageContext, { Layout, LayoutStorage } from "./context/LayoutStorageContext";
-import NativeAppMenuContext, {
-  NativeAppMenu,
-  NativeAppMenuEvent,
-} from "./context/NativeAppMenuContext";
-import { PlayerSourceDefinition } from "./context/PlayerSelectionContext";
-import ThemeProvider from "./theme/ThemeProvider";
-import installDevtoolsFormatters from "./util/installDevtoolsFormatters";
-import { initializeLogEvent } from "./util/logEvent";
-import overwriteFetch from "./util/overwriteFetch";
-import waitForFonts from "./util/waitForFonts";
-
-export { default as UserProfileLocalStorageProvider } from "./providers/UserProfileLocalStorageProvider";
-
-export {
-  App,
-  AppConfigurationContext,
-  ErrorBoundary,
-  initializeLogEvent,
-  installDevtoolsFormatters,
-  LayoutStorageContext,
-  MultiProvider,
-  NativeAppMenuContext,
-  overwriteFetch,
-  ThemeProvider,
-  waitForFonts,
-  ExtensionLoaderContext,
-};
-
+export { default as App } from "./App";
+export type { NetworkInterface, OsContext } from "./OsContext";
+export { default as ErrorBoundary } from "./components/ErrorBoundary";
+export { default as MultiProvider } from "./components/MultiProvider";
+export { default as AppConfigurationContext } from "./context/AppConfigurationContext";
 export type {
   AppConfiguration,
   AppConfigurationValue,
   ChangeHandler,
-  Layout,
-  LayoutStorage,
-  NativeAppMenu,
-  NativeAppMenuEvent,
-  NetworkInterface,
-  OsContext,
-  PlayerSourceDefinition,
-  ExtensionLoader,
-  ExtensionDetail,
-};
+} from "./context/AppConfigurationContext";
+export { default as LayoutStorageContext } from "./context/LayoutStorageContext";
+export type { Layout, LayoutStorage } from "./context/LayoutStorageContext";
+export { default as NativeAppMenuContext } from "./context/NativeAppMenuContext";
+export type { NativeAppMenu, NativeAppMenuEvent } from "./context/NativeAppMenuContext";
+export type { PlayerSourceDefinition } from "./context/PlayerSelectionContext";
+export { default as ThemeProvider } from "./theme/ThemeProvider";
+export { default as installDevtoolsFormatters } from "./util/installDevtoolsFormatters";
+export { initializeLogEvent } from "./util/logEvent";
+export { default as overwriteFetch } from "./util/overwriteFetch";
+export { default as waitForFonts } from "./util/waitForFonts";
+export { default as UserProfileLocalStorageProvider } from "./providers/UserProfileLocalStorageProvider";
+export { default as FirebaseAppProvider } from "./providers/FirebaseAppProvider";
+export { useFirebase } from "./context/FirebaseAppContext";
+export { default as FirebaseAuthProvider } from "./providers/FirebaseAuthProvider";
+export { default as StudioToastProvider } from "./components/StudioToastProvider";
+export { default as ExtensionLoaderContext } from "./context/ExtensionLoaderContext";
+export type { ExtensionLoader, ExtensionDetail } from "./context/ExtensionLoaderContext";

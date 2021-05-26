@@ -11,7 +11,6 @@ import Workspace from "@foxglove/studio-base/Workspace";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import { NativeFileMenuPlayerSelection } from "@foxglove/studio-base/components/NativeFileMenuPlayerSelection";
 import PlayerManager from "@foxglove/studio-base/components/PlayerManager";
-import StudioToastProvider from "@foxglove/studio-base/components/StudioToastProvider";
 import AnalyticsProvider from "@foxglove/studio-base/context/AnalyticsProvider";
 import { AssetsProvider } from "@foxglove/studio-base/context/AssetContext";
 import ModalHost from "@foxglove/studio-base/context/ModalHost";
@@ -41,7 +40,6 @@ export default function App(props: AppProps): JSX.Element {
     /* eslint-disable react/jsx-key */
     <AnalyticsProvider />,
     <ModalHost />, // render modal elements inside the ThemeProvider
-    <StudioToastProvider />,
     <AssetsProvider loaders={assetLoaders} />,
     <ReduxProvider store={globalStore} />,
     <CurrentLayoutProvider />,

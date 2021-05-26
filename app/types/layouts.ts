@@ -13,22 +13,6 @@
 
 import { MosaicNode } from "react-mosaic-component";
 
-import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-
-export type LayoutDescription = {
-  id: string;
-  name: string;
-  folderId: string;
-  private: boolean;
-};
-export type SaveLayoutPayload = {
-  name: string;
-  folderId: string;
-  layout: PanelsState;
-  fileSuffix?: string;
-  isAutosaved?: boolean;
-};
-
 export type TabConfig = { title: string; layout?: MosaicNode<string> };
 
 export type TabPanelConfig = {

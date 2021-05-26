@@ -20,6 +20,7 @@ declare global {
     | "Clear"
     | "ClearSelection"
     | "CodeEdit"
+    | "Contact"
     | "DataManagementSettings"
     | "Delete"
     | "Edit"

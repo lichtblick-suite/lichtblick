@@ -17,6 +17,7 @@ import { useMountedState } from "react-use";
 import styled from "styled-components";
 
 import Log from "@foxglove/log";
+import AccountSettings from "@foxglove/studio-base/components/AccountSettings";
 import ConnectionList from "@foxglove/studio-base/components/ConnectionList";
 import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
 import DropOverlay from "@foxglove/studio-base/components/DropOverlay";
@@ -74,7 +75,13 @@ const TruncatedText = styled.span`
   line-height: normal;
 `;
 
-type SidebarItemKey = "connection" | "add-panel" | "panel-settings" | "variables" | "preferences";
+type SidebarItemKey =
+  | "connection"
+  | "add-panel"
+  | "panel-settings"
+  | "variables"
+  | "account"
+  | "preferences";
 
 const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
   [
@@ -88,9 +95,15 @@ const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
   ],
   ["variables", { iconName: "Variable2", title: "Variables", component: Variables }],
   ["preferences", { iconName: "Settings", title: "Preferences", component: Preferences }],
+  ...(process.env.NODE_ENV === "production"
+    ? []
+    : [
+        ["account", { iconName: "Contact", title: "Account", component: AccountSettings }] as const,
+      ]),
 ]);
 
-const SIDEBAR_BOTTOM_ITEMS: readonly SidebarItemKey[] = ["preferences"];
+const SIDEBAR_BOTTOM_ITEMS: readonly SidebarItemKey[] =
+  process.env.NODE_ENV === "production" ? ["preferences"] : ["account", "preferences"];
 
 function Connection() {
   return (
