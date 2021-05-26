@@ -1,8 +1,4 @@
-# visualization_msgs/ImageMarkerArray
-ImageMarker[] markers
-
-================================================================================
-MSG: visualization_msgs/ImageMarker
+# visualization_msgs/ImageMarker
 uint8 CIRCLE=0
 uint8 LINE_STRIP=1
 uint8 LINE_LIST=2

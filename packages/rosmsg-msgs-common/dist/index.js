@@ -971,12 +971,6 @@ const definitions = {
       { type: "duration", name: "time_from_start", isArray: false, isComplex: false },
     ],
   },
-  "visualization_msgs/ImageMarkerArray": {
-    name: "visualization_msgs/ImageMarkerArray",
-    definitions: [
-      { type: "visualization_msgs/ImageMarker", name: "markers", isArray: true, isComplex: true },
-    ],
-  },
   "visualization_msgs/ImageMarker": {
     name: "visualization_msgs/ImageMarker",
     definitions: [

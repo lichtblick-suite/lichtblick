@@ -3,14 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { mkdir, readdir, readFile, writeFile } from "fs/promises";
-import { join, basename, sep } from "path";
+import { join, basename } from "path";
 import { format, Options } from "prettier";
 
 import { parse, RosMsgDefinition } from "@foxglove/rosmsg";
-
-const LICENSE = `// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at http://mozilla.org/MPL/2.0/`;
 
 const PRETTIER_OPTS: Options = {
   parser: "babel",
@@ -22,7 +18,7 @@ const PRETTIER_OPTS: Options = {
 };
 
 async function main() {
-  const msgdefsPath = join(__dirname, "..", "msgdefs");
+  const msgdefsPath = join(__dirname, "..", "msg");
   const distDir = join(__dirname, "..", "dist");
   const libFile = join(distDir, "index.js");
   const declFile = join(distDir, "index.d.ts");
@@ -63,15 +59,12 @@ async function getMsgFiles(dir: string): Promise<string[]> {
 }
 
 function filenameToDataType(filename: string): string {
-  const parts = filename.split(sep);
-  return `${parts[parts.length - 2]}/${basename(filename, ".msg")}`;
+  return `foxglove_msgs/${basename(filename, ".msg")}`;
 }
 
 function generateLibrary(definitions: Record<string, RosMsgDefinition>): string {
   return format(
-    `${LICENSE}
-
-const definitions = ${JSON.stringify(definitions)}
+    `const definitions = ${JSON.stringify(definitions)}
 
 module.exports = { definitions };
 `,
@@ -84,11 +77,9 @@ function generateDefinitions(definitions: Record<string, RosMsgDefinition>): str
     .sort()
     .map((key) => `    "${key}": RosMsgDefinition;`)
     .join("\n");
-  return `${LICENSE}
+  return `import { RosMsgDefinition } from "@foxglove/rosmsg";
 
-import { RosMsgDefinition } from "@foxglove/rosmsg";
-
-declare module "@foxglove/rosmsg-msgs-common" {
+declare module "@foxglove/rosmsg-msgs-foxglove" {
   type RosMsgCommonDefinitions = {
 ${entries}
   };

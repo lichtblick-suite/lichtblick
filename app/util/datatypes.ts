@@ -11,21 +11,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { RosMsgDefinition } from "@foxglove/rosmsg";
-import { definitions } from "@foxglove/rosmsg-msgs-common";
-import { RosDatatype, RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
+import { definitions as foxgloveDefs } from "@foxglove/rosmsg-msgs-foxglove";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
-function objectMap<T1, T2>(
-  object: Record<string, T1>,
-  mapFn: (key: string, value: T1) => T2,
-): Record<string, T2> {
-  return Object.keys(object).reduce((result, key) => {
-    result[key] = mapFn(key, object[key] as T1);
-    return result;
-  }, {} as Record<string, T2>);
+export const basicDatatypes: RosDatatypes = {};
+
+for (const [name, def] of Object.entries(commonDefs)) {
+  basicDatatypes[name] = { fields: def.definitions };
 }
-
-export const basicDatatypes: RosDatatypes = objectMap<RosMsgDefinition, RosDatatype>(
-  definitions,
-  (_, { definitions: fields }) => ({ fields }),
-);
+for (const [name, def] of Object.entries(foxgloveDefs)) {
+  basicDatatypes[name] = { fields: def.definitions };
+}

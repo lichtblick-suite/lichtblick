@@ -42,7 +42,7 @@ import { PanelConfigSchema, SaveConfig } from "@foxglove/studio-base/types/panel
 import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import filterMap from "@foxglove/studio-base/util/filterMap";
 import {
-  VISUALIZATION_MSGS_IMAGE_MARKER_ARRAY_DATATYPE,
+  FOXGLOVE_MSGS_IMAGE_MARKER_ARRAY_DATATYPE,
   VISUALIZATION_MSGS_IMAGE_MARKER_DATATYPE,
 } from "@foxglove/studio-base/util/globalConstants";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
@@ -297,10 +297,7 @@ function ImageView(props: Props) {
   }, [topics]);
 
   const imageMarkerDatatypes = useMemo(
-    () => [
-      VISUALIZATION_MSGS_IMAGE_MARKER_DATATYPE,
-      VISUALIZATION_MSGS_IMAGE_MARKER_ARRAY_DATATYPE,
-    ],
+    () => [VISUALIZATION_MSGS_IMAGE_MARKER_DATATYPE, FOXGLOVE_MSGS_IMAGE_MARKER_ARRAY_DATATYPE],
     [],
   );
   const defaultAvailableMarkerTopics = useMemo(

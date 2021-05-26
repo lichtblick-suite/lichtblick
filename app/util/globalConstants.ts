@@ -33,7 +33,7 @@ export const VELODYNE_SCAN_DATATYPE = "velodyne_msgs/VelodyneScan";
 export const VISUALIZATION_MSGS_MARKER_DATATYPE = "visualization_msgs/Marker";
 export const VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE = "visualization_msgs/MarkerArray";
 export const VISUALIZATION_MSGS_IMAGE_MARKER_DATATYPE = "visualization_msgs/ImageMarker";
-export const VISUALIZATION_MSGS_IMAGE_MARKER_ARRAY_DATATYPE = "visualization_msgs/ImageMarkerArray";
+export const FOXGLOVE_MSGS_IMAGE_MARKER_ARRAY_DATATYPE = "foxglove_msgs/ImageMarkerArray";
 
 export const FOXGLOVE_GRID_TOPIC = "/foxglove/grid";
 export const FOXGLOVE_GRID_DATATYPE = "foxglove/Grid";

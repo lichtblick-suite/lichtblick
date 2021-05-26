@@ -114,7 +114,6 @@ declare module "@foxglove/rosmsg-msgs-common" {
     "trajectory_msgs/MultiDOFJointTrajectory": RosMsgDefinition;
     "trajectory_msgs/MultiDOFJointTrajectoryPoint": RosMsgDefinition;
     "visualization_msgs/ImageMarker": RosMsgDefinition;
-    "visualization_msgs/ImageMarkerArray": RosMsgDefinition;
     "visualization_msgs/InteractiveMarker": RosMsgDefinition;
     "visualization_msgs/InteractiveMarkerControl": RosMsgDefinition;
     "visualization_msgs/Marker": RosMsgDefinition;
