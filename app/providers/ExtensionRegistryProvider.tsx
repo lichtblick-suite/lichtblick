@@ -7,7 +7,8 @@ import ReactDOM from "react-dom";
 import { useAsync } from "react-use";
 
 import Logger from "@foxglove/log";
-import { ExtensionContext, ExtensionModule } from "@foxglove/studio";
+import StudioApi, { ExtensionContext, ExtensionModule } from "@foxglove/studio";
+import { useConfig, useMessagesByTopic, useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
 import ExtensionRegistryContext, {
   ExtensionRegistry,
@@ -15,6 +16,14 @@ import ExtensionRegistryContext, {
 } from "@foxglove/studio-base/context/ExtensionRegistryContext";
 
 const log = Logger.getLogger(__filename);
+
+const FoxgloveStudio: StudioApi = {
+  panel: {
+    useMessagesByTopic,
+    useDataSourceInfo,
+    useConfig,
+  },
+};
 
 export default function ExtensionRegistryProvider(props: PropsWithChildren<unknown>): JSX.Element {
   const extensionLoader = useExtensionLoader();
@@ -37,14 +46,13 @@ export default function ExtensionRegistryProvider(props: PropsWithChildren<unkno
 
       const module = { exports: {} };
       const require = (name: string) => {
-        return { React, ReactDOM }[name];
+        return { React, ReactDOM, FoxgloveStudio }[name];
       };
 
       // load the extension module exports
       fn(module, require, {});
       const wrappedExtensionModule = module.exports as ExtensionModule;
 
-      // Pass the current app execution mode along to the extension
       const extensionMode =
         process.env.NODE_ENV === "production"
           ? "production"
@@ -53,7 +61,7 @@ export default function ExtensionRegistryProvider(props: PropsWithChildren<unkno
           : "development";
 
       const ctx: ExtensionContext = {
-        extensionMode,
+        mode: extensionMode,
 
         registerPanel(params) {
           log.debug(`Extension ${extension.name} registering panel: ${params.name}`);

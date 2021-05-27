@@ -12,24 +12,12 @@
 //   You may not use this file except in compliance with the License.
 
 import { useMemo } from "react";
-import { Time } from "rosbag";
 
+import { DataSourceInfo, panel } from "@foxglove/studio";
 import {
   useMessagePipeline,
   MessagePipelineContext,
 } from "@foxglove/studio-base/components/MessagePipeline";
-import { Topic } from "@foxglove/studio-base/players/types";
-import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-
-// Metadata about the source of data currently being displayed.
-// This is not expected to change often, usually when changing data sources.
-export type DataSourceInfo = {
-  topics: readonly Topic[];
-  datatypes: RosDatatypes;
-  capabilities: string[];
-  startTime?: Time; // Only `startTime`, since `endTime` can change rapidly when connected to a live system.
-  playerId: string;
-};
 
 function selectDatatypes(ctx: MessagePipelineContext) {
   return ctx.datatypes;
@@ -51,7 +39,7 @@ function selectPlayerId(ctx: MessagePipelineContext) {
   return ctx.playerState.playerId;
 }
 
-export default function useDataSourceInfo(): DataSourceInfo {
+export const useDataSourceInfo: typeof panel.useDataSourceInfo = () => {
   const datatypes = useMessagePipeline(selectDatatypes);
   const topics = useMessagePipeline(selectTopics);
   const startTime = useMessagePipeline(selectStartTime);
@@ -68,4 +56,4 @@ export default function useDataSourceInfo(): DataSourceInfo {
       playerId,
     };
   }, [capabilities, datatypes, playerId, startTime, topics]);
-}
+};

@@ -14,6 +14,7 @@
 import { groupBy } from "lodash";
 import { useCallback } from "react";
 
+import { panel } from "@foxglove/studio";
 import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import concatAndTruncate from "@foxglove/studio-base/util/concatAndTruncate";
@@ -25,15 +26,11 @@ type UnknownMessageEventsByTopic = Record<string, readonly MessageEvent<unknown>
 
 // Convenience wrapper around `useMessageReducer`, for if you just want some
 // recent messages for a few topics.
-export function useMessagesByTopic({
+export const useMessagesByTopic: typeof panel.useMessagesByTopic = ({
   topics,
   historySize,
   preloadingFallback,
-}: {
-  topics: readonly string[];
-  historySize: number;
-  preloadingFallback?: boolean;
-}): UnknownMessageEventsByTopic {
+}) => {
   const requestedTopics = useDeepMemo(topics);
 
   const addMessages = useCallback(
@@ -74,4 +71,4 @@ export function useMessagesByTopic({
     preloadingFallback,
     addMessages,
   });
-}
+};
