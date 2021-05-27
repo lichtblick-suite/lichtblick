@@ -21,6 +21,7 @@ declare global {
     | "ClearSelection"
     | "CodeEdit"
     | "Contact"
+    | "Copy"
     | "DataManagementSettings"
     | "Delete"
     | "Edit"

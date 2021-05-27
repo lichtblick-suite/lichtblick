@@ -18,6 +18,7 @@ import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/
 import { Layout, useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
 import useLatestNonNull from "@foxglove/studio-base/hooks/useLatestNonNull";
 import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
+import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
@@ -151,6 +152,24 @@ export default function LayoutMenu({
     [layoutStorage, fetchLayouts],
   );
 
+  const newEmptyLayout = useCallback(() => {
+    const name = "empty layout";
+    const id = uuidv4();
+
+    const newState: PanelsState = {
+      id: id,
+      name: name,
+      globalVariables: {},
+      layout: undefined,
+      linkedGlobalVariables: [],
+      playbackConfig: defaultPlaybackConfig,
+      configById: {},
+      userNodes: {},
+    };
+
+    loadLayout(newState);
+  }, [loadLayout]);
+
   const duplicateLayout = useCallback(() => {
     const currentPanelsState = getCurrentLayout();
     const name = `${currentPanelsState.name ?? "unnamed"} copy`;
@@ -231,7 +250,13 @@ export default function LayoutMenu({
   const items: IContextualMenuItem[] = [
     ...layoutItems,
     { key: "divider_1", itemType: ContextualMenuItemType.Divider },
-    { key: "new", text: "New", onClick: duplicateLayout, iconProps: { iconName: "Add" } },
+    { key: "new", text: "New", onClick: newEmptyLayout, iconProps: { iconName: "Add" } },
+    {
+      key: "duplicate",
+      text: "Duplicate",
+      onClick: duplicateLayout,
+      iconProps: { iconName: "Copy" },
+    },
     { key: "export", text: "Export", onClick: exportAction, iconProps: { iconName: "Share" } },
     { key: "import", text: "Import", onClick: importAction, iconProps: { iconName: "OpenFile" } },
   ];
