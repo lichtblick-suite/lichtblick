@@ -32,7 +32,6 @@ import CurrentLayoutContext, {
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import PanelCatalogContext, {
   PanelCatalog,
-  PanelCategory,
   PanelInfo,
 } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
@@ -154,16 +153,10 @@ export const MosaicWrapper = ({ children }: { children: React.ReactNode }): JSX.
 
 // empty catalog if one is not provided via props
 class MockPanelCatalog implements PanelCatalog {
-  getPanelCategories(): PanelCategory[] {
+  getPanels(): PanelInfo[] {
     return [];
   }
-  getPanelsByCategory(): Map<string, PanelInfo[]> {
-    return new Map();
-  }
-  getPanelsByType(): Map<string, PanelInfo> {
-    return new Map();
-  }
-  getComponentForType(_type: string): PanelInfo["component"] | undefined {
+  getPanelByType(_type: string): PanelInfo | undefined {
     return undefined;
   }
 }

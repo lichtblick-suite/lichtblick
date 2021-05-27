@@ -7,8 +7,10 @@ import { ExtensionActivate } from "@foxglove/studio";
 import HelloWorldPanel from "./panels/HelloWorldPanel";
 
 export const activate: ExtensionActivate = (extensionContext) => {
-  extensionContext.registerPanel({
-    name: "hello",
-    component: HelloWorldPanel,
-  });
+  if (process.env.NODE_ENV !== "production") {
+    extensionContext.registerPanel({
+      name: "Hello",
+      component: HelloWorldPanel,
+    });
+  }
 };

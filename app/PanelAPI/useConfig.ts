@@ -22,7 +22,7 @@ export function useConfig<Config>(): [Config, SaveConfig<Config>] {
   const panelComponent = useMemo(
     () =>
       panelId != undefined
-        ? panelCatalog.getComponentForType(getPanelTypeFromId(panelId))
+        ? panelCatalog.getPanelByType(getPanelTypeFromId(panelId))?.component
         : undefined,
     [panelCatalog, panelId],
   );

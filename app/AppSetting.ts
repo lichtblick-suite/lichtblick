@@ -9,4 +9,5 @@ export enum AppSetting {
   TELEMETRY_ENABLED = "telemetry.telemetryEnabled",
   TIMEZONE = "timezone",
   UNLIMITED_MEMORY_CACHE = "experimental.unlimited-memory-cache",
+  SHOW_DEBUG_PANELS = "showDebugPanels",
 }

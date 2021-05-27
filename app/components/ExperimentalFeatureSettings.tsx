@@ -28,6 +28,11 @@ const features: Feature[] = [
     name: "Unlimited in-memory cache (requires restart)",
     description: <>Fully buffer a bag into memory. This may use up a lot of system memory.</>,
   },
+  {
+    key: AppSetting.SHOW_DEBUG_PANELS,
+    name: "Studio Debug Panels",
+    description: <>Show Studio debug panels in the add panel list.</>,
+  },
 ];
 
 function ExperimentalFeatureItem(props: { feature: Feature }) {

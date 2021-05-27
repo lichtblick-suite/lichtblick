@@ -41,7 +41,7 @@ export default function PanelSettings(): JSX.Element {
     [selectedPanelId],
   );
   const panelInfo = useMemo(
-    () => (panelType != undefined ? panelCatalog.getPanelsByType().get(panelType) : undefined),
+    () => (panelType != undefined ? panelCatalog.getPanelByType(panelType) : undefined),
     [panelCatalog, panelType],
   );
 

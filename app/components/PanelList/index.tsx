@@ -12,8 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import MagnifyIcon from "@mdi/svg/svg/magnify.svg";
 import fuzzySort from "fuzzysort";
-import { flatMap } from "lodash";
-import { useCallback, useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useDrag } from "react-dnd";
 import { MosaicDragType, MosaicPath } from "react-mosaic-component";
 import styled from "styled-components";
@@ -184,28 +183,26 @@ type Props = {
 };
 
 // sanity checks to help panel authors debug issues
-function verifyPanels(panelsByCategory: Map<string, PanelInfo[]>) {
+function verifyPanels(panels: PanelInfo[]) {
   const panelTypes: Map<
     string,
     { component: React.ComponentType<any>; presetSettings?: PresetSettings }
   > = new Map();
-  for (const panels of panelsByCategory.values()) {
-    for (const { component } of panels) {
-      const { name, displayName, panelType } = component;
-      const dispName = displayName ?? name ?? "<unnamed>";
-      if (panelType.length === 0) {
-        throw new Error(`Panel component ${dispName} must declare a unique \`static panelType\``);
-      }
-      const existingPanel = panelTypes.get(panelType);
-      if (existingPanel) {
-        const otherDisplayName =
-          existingPanel.component.displayName ?? existingPanel.component.name ?? "<unnamed>";
-        throw new Error(
-          `Two components have the same panelType ('${panelType}'): ${otherDisplayName} and ${dispName}`,
-        );
-      }
-      panelTypes.set(panelType, { component });
+  for (const { component } of panels) {
+    const { name, displayName, panelType } = component;
+    const dispName = displayName ?? name ?? "<unnamed>";
+    if (panelType.length === 0) {
+      throw new Error(`Panel component ${dispName} must declare a unique \`static panelType\``);
     }
+    const existingPanel = panelTypes.get(panelType);
+    if (existingPanel) {
+      const otherDisplayName =
+        existingPanel.component.displayName ?? existingPanel.component.name ?? "<unnamed>";
+      throw new Error(
+        `Two components have the same panelType ('${panelType}'): ${otherDisplayName} and ${dispName}`,
+      );
+    }
+    panelTypes.set(panelType, { component });
   }
 }
 
@@ -240,50 +237,65 @@ function PanelList(props: Props): JSX.Element {
   }, []);
 
   const panelCatalog = usePanelCatalog();
-  const panelCategories = useMemo(() => panelCatalog.getPanelCategories(), [panelCatalog]);
-  const panelsByCategory = useMemo(() => panelCatalog.getPanelsByCategory(), [panelCatalog]);
+  const allPanels = useMemo(() => {
+    return panelCatalog.getPanels();
+  }, [panelCatalog]);
+  /*
+  const panelsByCategory = useMemo(() => {
+    const allPanels = panelCatalog.getPanels();
+    const panelsByCat = new Map<string, PanelInfo[]>();
+
+    for (const panel of allPanels) {
+      const existing = panelsByCat.get(panel.category ?? "misc") ?? [];
+      existing.push(panel);
+      panelsByCat.set(panel.category ?? "misc", existing);
+    }
+    return panelsByCat;
+  }, [panelCatalog]);
+  */
+
+  //const panelCategories = useMemo(() => Array.from(panelsByCategory.keys()), [panelsByCategory]);
 
   useEffect(() => {
-    verifyPanels(panelsByCategory);
-  }, [panelsByCategory]);
+    verifyPanels(allPanels);
+  }, [allPanels]);
 
-  const getFilteredItemsForCategory = useCallback(
-    (key: string) => {
-      return searchQuery.length > 0
-        ? fuzzySort
-            .go(searchQuery, panelsByCategory.get(key) ?? [], { key: "title" })
-            .map((searchResult) => searchResult.obj)
-        : panelsByCategory.get(key);
-    },
-    [panelsByCategory, searchQuery],
-  );
+  /*
   const filteredItemsByCategoryIdx = React.useMemo(
-    () => panelCategories.map(({ key }) => getFilteredItemsForCategory(key)),
+    () => panelCategories.map((category) => getFilteredItemsForCategory(category)),
     [getFilteredItemsForCategory, panelCategories],
   );
+  */
 
+  /*
   const noResults = React.useMemo(
     () => filteredItemsByCategoryIdx.every((items) => !items || items.length === 0),
     [filteredItemsByCategoryIdx],
   );
+  */
 
-  const filteredItems = React.useMemo(
-    () => flatMap(Object.values(filteredItemsByCategoryIdx)),
-    [filteredItemsByCategoryIdx],
-  );
+  const filteredPanels = React.useMemo(() => {
+    return searchQuery.length > 0
+      ? fuzzySort
+          .go(searchQuery, allPanels, { key: "title" })
+          .map((searchResult) => searchResult.obj)
+      : allPanels;
+  }, [allPanels, searchQuery]);
 
   const highlightedPanel = React.useMemo(
-    () => (highlightedPanelIdx != undefined ? filteredItems[highlightedPanelIdx] : undefined),
-    [filteredItems, highlightedPanelIdx],
+    () => (highlightedPanelIdx != undefined ? filteredPanels[highlightedPanelIdx] : undefined),
+    [filteredPanels, highlightedPanelIdx],
   );
+
+  const noResults = filteredPanels.length === 0;
 
   const onKeyDown = React.useCallback(
     (e) => {
       if (e.key === "ArrowDown" && highlightedPanelIdx != undefined) {
-        setHighlightedPanelIdx((highlightedPanelIdx + 1) % filteredItems.length);
+        setHighlightedPanelIdx((highlightedPanelIdx + 1) % filteredPanels.length);
       } else if (e.key === "ArrowUp" && highlightedPanelIdx != undefined) {
-        const newIdx = (highlightedPanelIdx - 1) % (filteredItems.length - 1);
-        setHighlightedPanelIdx(newIdx >= 0 ? newIdx : filteredItems.length + newIdx);
+        const newIdx = (highlightedPanelIdx - 1) % (filteredPanels.length - 1);
+        setHighlightedPanelIdx(newIdx >= 0 ? newIdx : filteredPanels.length + newIdx);
       } else if (e.key === "Enter" && highlightedPanel) {
         const { component } = highlightedPanel;
         onPanelSelect({
@@ -291,7 +303,7 @@ function PanelList(props: Props): JSX.Element {
         });
       }
     },
-    [filteredItems.length, highlightedPanel, highlightedPanelIdx, onPanelSelect],
+    [filteredPanels.length, highlightedPanel, highlightedPanelIdx, onPanelSelect],
   );
 
   const displayPanelListItem = React.useCallback(
@@ -352,25 +364,7 @@ function PanelList(props: Props): JSX.Element {
       </StickyDiv>
       <SScrollContainer>
         {noResults && <SEmptyState>No panels match search criteria.</SEmptyState>}
-        {panelCategories.map(({ label }, categoryIdx) => {
-          const prevItems = flatMap(filteredItemsByCategoryIdx.slice(0, categoryIdx));
-          const localFilteredItems = filteredItemsByCategoryIdx[categoryIdx];
-          if (!localFilteredItems || localFilteredItems.length === 0) {
-            return ReactNull;
-          }
-          return (
-            <div key={label} style={{ paddingTop: "8px" }}>
-              {categoryIdx !== 0 && prevItems.length > 0 && <hr />}
-              <Item
-                isHeader
-                style={categoryIdx === 0 || prevItems.length === 0 ? { paddingTop: 0 } : {}}
-              >
-                {label}
-              </Item>
-              {localFilteredItems.map(displayPanelListItem)}
-            </div>
-          );
-        })}
+        {filteredPanels.map(displayPanelListItem)}
       </SScrollContainer>
     </div>
   );

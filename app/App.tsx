@@ -17,12 +17,9 @@ import ModalHost from "@foxglove/studio-base/context/ModalHost";
 import { PlayerSourceDefinition } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
 import ExtensionRegistryProvider from "@foxglove/studio-base/providers/ExtensionRegistryProvider";
+import PanelCatalogProvider from "@foxglove/studio-base/providers/PanelCatalogProvider";
 import URDFAssetLoader from "@foxglove/studio-base/services/URDFAssetLoader";
 import getGlobalStore from "@foxglove/studio-base/store/getGlobalStore";
-
-const BuiltinPanelCatalogProvider = React.lazy(
-  () => import("@foxglove/studio-base/context/BuiltinPanelCatalogProvider"),
-);
 
 type AppProps = {
   availableSources: PlayerSourceDefinition[];
@@ -53,13 +50,13 @@ export default function App(props: AppProps): JSX.Element {
       <NativeFileMenuPlayerSelection />
       <DndProvider backend={HTML5Backend}>
         <Suspense fallback={<></>}>
-          <BuiltinPanelCatalogProvider>
+          <PanelCatalogProvider>
             <Workspace
               demoBagUrl={props.demoBagUrl}
               deepLinks={props.deepLinks}
               onToolbarDoubleClick={props.onFullscreenToggle}
             />
-          </BuiltinPanelCatalogProvider>
+          </PanelCatalogProvider>
         </Suspense>
       </DndProvider>
     </MultiProvider>

@@ -23,7 +23,6 @@ import PanelList from "@foxglove/studio-base/components/PanelList";
 import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
 import PanelCatalogContext, {
   PanelCatalog,
-  PanelCategory,
   PanelInfo,
 } from "@foxglove/studio-base/context/PanelCatalogContext";
 import CurrentLayoutState, {
@@ -47,24 +46,17 @@ SamplePanel2.defaultConfig = {};
 const MockPanel1 = Panel(SamplePanel1);
 const MockPanel2 = Panel(SamplePanel2);
 
+const allPanels = [
+  { title: "Some Panel", component: MockPanel1 },
+  { title: "Happy Panel", component: MockPanel2 },
+];
+
 class MockPanelCatalog implements PanelCatalog {
-  getPanelCategories(): PanelCategory[] {
-    return [
-      { label: "VISUALIZATION", key: "visualization" },
-      { label: "DEBUGGING", key: "debugging" },
-    ];
+  getPanels(): PanelInfo[] {
+    return allPanels;
   }
-  getPanelsByCategory(): Map<string, PanelInfo[]> {
-    return new Map([
-      ["visualization", [{ title: "Some Panel", component: MockPanel1 }]],
-      ["debugging", [{ title: "Happy Panel", component: MockPanel2 }]],
-    ]);
-  }
-  getPanelsByType(): Map<string, PanelInfo> {
-    return new Map();
-  }
-  getComponentForType(_type: string): PanelInfo["component"] | undefined {
-    return undefined;
+  getPanelByType(type: string): PanelInfo | undefined {
+    return allPanels.find((panel) => panel.component.panelType === type);
   }
 }
 

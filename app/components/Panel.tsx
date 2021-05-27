@@ -152,9 +152,11 @@ export default function Panel<Config extends PanelConfig>(
     const [fullScreenLocked, setFullScreenLocked] = useState(false);
     const panelCatalog = usePanelCatalog();
 
-    const panelsByType = useMemo(() => panelCatalog.getPanelsByType(), [panelCatalog]);
     const type = PanelComponent.panelType;
-    const title = useMemo(() => panelsByType.get(type)?.title ?? "", [panelsByType, type]);
+    const title = useMemo(
+      () => panelCatalog.getPanelByType(type)?.title ?? "",
+      [panelCatalog, type],
+    );
 
     const [config, saveConfig] = useConfigById<Config>(childId, PanelComponent.defaultConfig);
     const panelComponentConfig = useMemo(
@@ -166,7 +168,8 @@ export default function Panel<Config extends PanelConfig>(
     // If such a panel already exists, we update it with the new props.
     const openSiblingPanel = useCallback(
       (panelType: string, siblingConfigCreator: (arg0: PanelConfig) => PanelConfig) => {
-        const siblingComponent = panelCatalog.getComponentForType(panelType);
+        const siblingPanel = panelCatalog.getPanelByType(panelType);
+        const siblingComponent = siblingPanel?.component;
         if (!siblingComponent) {
           return;
         }

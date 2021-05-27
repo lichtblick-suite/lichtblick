@@ -16,11 +16,7 @@ import TestUtils from "react-dom/test-utils";
 
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
-import {
-  PanelCatalog,
-  PanelCategory,
-  PanelInfo,
-} from "@foxglove/studio-base/context/PanelCatalogContext";
+import { PanelCatalog, PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
 import {
   nestedTabLayoutFixture,
   nestedTabLayoutFixture2,
@@ -51,34 +47,18 @@ SamplePanel2.defaultConfig = {};
 const MockPanel1 = Panel(SamplePanel1);
 const MockPanel2 = Panel(SamplePanel2);
 
+const allPanels = [
+  { title: "Some Panel", component: MockPanel1 },
+  { title: "Happy Panel", component: MockPanel2 },
+  { title: "Tab", component: Tab },
+];
+
 class MockPanelCatalog implements PanelCatalog {
-  getPanelCategories(): PanelCategory[] {
-    return [
-      { label: "VISUALIZATION", key: "visualization" },
-      { label: "DEBUGGING", key: "debugging" },
-    ];
+  getPanels(): PanelInfo[] {
+    return allPanels;
   }
-  getPanelsByCategory(): Map<string, PanelInfo[]> {
-    return new Map([
-      [
-        "visualization",
-        [
-          { title: "Some Panel", component: MockPanel1 },
-          { title: "Happy Panel", component: MockPanel2 },
-        ],
-      ],
-      ["debugging", [{ title: "Tab", component: Tab }]],
-    ]);
-  }
-  getPanelsByType(): Map<string, PanelInfo> {
-    return new Map([
-      [MockPanel1.panelType, { title: "Some Panel", component: SamplePanel1 }],
-      [MockPanel2.panelType, { title: "Happy Panel", component: SamplePanel2 }],
-      [Tab.panelType, { title: "Tab", component: Tab }],
-    ]);
-  }
-  getComponentForType(type: string): PanelInfo["component"] | undefined {
-    return this.getPanelsByType().get(type)?.component;
+  getPanelByType(type: string): PanelInfo | undefined {
+    return allPanels.find((panel) => panel.component.panelType === type);
   }
 }
 

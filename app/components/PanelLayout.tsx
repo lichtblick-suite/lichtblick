@@ -106,7 +106,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
       }
       const type = getPanelTypeFromId(id);
 
-      const PanelComponent = panelCatalog.getComponentForType(type);
+      const PanelComponent = panelCatalog.getPanelByType(type)?.component;
       const panel = PanelComponent ? (
         <PanelComponent childId={id} tabId={tabId} />
       ) : (
