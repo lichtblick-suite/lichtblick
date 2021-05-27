@@ -23,6 +23,7 @@
     "build:prod": "webpack --mode production --progress --config desktop/webpack.config.ts",
     "build:dev": "webpack --mode development --progress --config desktop/webpack.config.ts",
     "serve": "webpack serve --mode development --progress --config desktop/webpack.config.ts",
+    "license-check": "node -r esbuild-runner/register ci/license-check.ts",
     "lint": "TIMING=1 eslint --rulesdir eslint-rules --report-unused-disable-directives --fix .",
     "lint:ci": "TIMING=1 eslint --rulesdir eslint-rules --report-unused-disable-directives --config .eslintrc.ci.yaml .",
     "test": "jest",
