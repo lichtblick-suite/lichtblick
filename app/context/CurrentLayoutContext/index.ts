@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { createContext, useCallback, useLayoutEffect, useState } from "react";
+import { createContext, useCallback, useLayoutEffect, useReducer, useRef, useState } from "react";
 import { getLeaves } from "react-mosaic-component";
 
 import { selectWithUnstableIdentityWarning } from "@foxglove/studio-base/hooks/selectWithUnstableIdentityWarning";
@@ -102,17 +102,33 @@ export function useCurrentLayoutActions(): CurrentLayoutActions {
 }
 export function useCurrentLayoutSelector<T>(selector: (panelsState: PanelsState) => T): T {
   const currentLayout = useGuaranteedContext(CurrentLayoutContext);
-  const [value, setValue] = useState(() => selector(currentLayout.actions.getCurrentLayout()));
+  const [_, forceUpdate] = useReducer((x: number) => x + 1, 0);
 
+  const state = useRef<{ value: T; selector: typeof selector } | undefined>(undefined);
+  if (!state.current || selector !== state.current.selector) {
+    state.current = {
+      value: selectWithUnstableIdentityWarning(currentLayout.actions.getCurrentLayout(), selector),
+      selector,
+    };
+  }
   useLayoutEffect(() => {
     const listener = (newState: PanelsState) => {
-      setValue(selectWithUnstableIdentityWarning(newState, selector));
+      const newValue = selectWithUnstableIdentityWarning(newState, selector);
+      if (newValue !== state.current?.value) {
+        forceUpdate();
+      }
+      state.current = {
+        value: newValue,
+        selector,
+      };
     };
+    // Update if necessary, i.e. if the state has changed between render and this effect
+    listener(currentLayout.actions.getCurrentLayout());
     currentLayout.addPanelsStateListener(listener);
     return () => currentLayout.removePanelsStateListener(listener);
   }, [currentLayout, selector]);
 
-  return value;
+  return state.current.value;
 }
 export function useSelectedPanels(): SelectedPanelActions {
   const currentLayout = useGuaranteedContext(CurrentLayoutContext);
