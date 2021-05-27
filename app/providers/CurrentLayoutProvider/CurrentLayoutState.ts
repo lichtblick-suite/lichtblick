@@ -65,6 +65,10 @@ export default class CurrentLayoutState implements CurrentLayout {
       historySize: LAYOUT_HISTORY_SIZE,
       throttleMs: LAYOUT_HISTORY_THROTTLE_MS,
     });
+
+    this.addPanelsStateListener((state) => {
+      this.undoRedo.updateState(state);
+    });
   }
 
   addPanelsStateListener = (listener: (_: PanelsState) => void): void => {
