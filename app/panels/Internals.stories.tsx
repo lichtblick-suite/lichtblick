@@ -14,7 +14,6 @@
 import { storiesOf } from "@storybook/react";
 
 import Internals from "@foxglove/studio-base/panels/Internals";
-import SubscribeToList from "@foxglove/studio-base/panels/SubscribeToList";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 storiesOf("panels/Internals", module)
@@ -30,9 +29,6 @@ storiesOf("panels/Internals", module)
         }}
       >
         <Internals />
-        <div style={{ display: "none" }}>
-          <SubscribeToList overrideConfig={{ topics: "/my/topic\n/another/topic" }} />
-        </div>
       </PanelSetup>
     );
   })

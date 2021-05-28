@@ -15,7 +15,6 @@ import RawMessages from "./RawMessages";
 import Rosout from "./Rosout";
 import SourceInfo from "./SourceInfo";
 import StateTransitions from "./StateTransitions";
-import SubscribeToList from "./SubscribeToList";
 import Tab from "./Tab";
 import Table from "./Table";
 import ThreeDimensionalViz from "./ThreeDimensionalViz";
@@ -50,7 +49,6 @@ const debug = [
   { title: "Studio - Playback Performance", component: PlaybackPerformance },
   { title: "Studio - Internals", component: Internals },
   { title: "Studio - Logs", component: InternalLogs },
-  { title: "Studio - Subscribe to List", component: SubscribeToList },
 ];
 
 const hidden = [{ title: "Welcome", component: WelcomePanel }];
