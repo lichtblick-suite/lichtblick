@@ -157,7 +157,7 @@ type NotificationListProps = {
 
 // exported for storybook
 export class NotificationList extends React.PureComponent<NotificationListProps> {
-  render(): JSX.Element {
+  override render(): JSX.Element {
     const { notifications, onClick } = this.props;
     return (
       <Menu style={{ marginTop: 2 }}>

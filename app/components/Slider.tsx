@@ -78,7 +78,7 @@ export default class Slider extends React.Component<Props> {
 
   el?: HTMLDivElement;
 
-  shouldComponentUpdate(nextProps: Props): boolean {
+  override shouldComponentUpdate(nextProps: Props): boolean {
     const { value, min, max, draggable } = this.props;
     return (
       nextProps.value !== value ||
@@ -155,7 +155,7 @@ export default class Slider extends React.Component<Props> {
     this.forceUpdate();
   };
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     const { min, max, value, renderSlider, draggable, disabled } = this.props;
     const { mouseDown } = this;
 

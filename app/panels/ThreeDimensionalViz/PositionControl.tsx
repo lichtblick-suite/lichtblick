@@ -106,11 +106,11 @@ export default class PositionControl extends Component<Props> {
     this.resetValue();
   };
 
-  componentDidMount(): void {
+  override componentDidMount(): void {
     this.resetValue();
   }
 
-  componentDidUpdate(): void {
+  override componentDidUpdate(): void {
     this.resetValue();
   }
 
@@ -141,7 +141,7 @@ export default class PositionControl extends Component<Props> {
       `<b>y:</b> <span class="${styles.value}">${y}</span>`;
   }
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     // "plaintext-only" is a chrome specific feature
     // See if we can declaration merge contentEditable for plaintext-only support
     // https://www.eckher.com/c/21g53gqg1g

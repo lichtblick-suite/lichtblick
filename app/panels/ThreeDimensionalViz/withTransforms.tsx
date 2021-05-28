@@ -64,7 +64,11 @@ function withTransforms<Props extends BaseProps>(ChildComponent: React.Component
     })`;
     static contextTypes = { store: PropTypes.any };
 
-    state: State = { transforms: new Transforms(), topics: [], topicsToDatatypes: new Map() };
+    override state: State = {
+      transforms: new Transforms(),
+      topics: [],
+      topicsToDatatypes: new Map(),
+    };
 
     static getDerivedStateFromProps(
       nextProps: Props,
@@ -121,7 +125,7 @@ function withTransforms<Props extends BaseProps>(ChildComponent: React.Component
       return { transforms, topics, topicsToDatatypes };
     }
 
-    render() {
+    override render() {
       return (
         <ChildComponent
           {...(this.props as any)}

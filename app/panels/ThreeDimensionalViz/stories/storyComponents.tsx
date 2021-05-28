@@ -63,13 +63,13 @@ export const WorldviewContainer = (props: { children: React.ReactNode }): JSX.El
 };
 
 export class FixtureExample extends React.Component<FixtureExampleProps, FixtureExampleState> {
-  state: FixtureExampleState = {
+  override state: FixtureExampleState = {
     fixture: undefined,
     config: this.props.initialConfig,
     panelId: getPanelIdForType(ThreeDimensionalViz.panelType),
   };
 
-  componentDidMount(): void {
+  override componentDidMount(): void {
     const { data, loadData } = this.props;
     if (data) {
       this.updateState(data);
@@ -81,7 +81,7 @@ export class FixtureExample extends React.Component<FixtureExampleProps, Fixture
     }
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: FixtureExampleProps): void {
+  override UNSAFE_componentWillReceiveProps(nextProps: FixtureExampleProps): void {
     if (nextProps.data) {
       this.updateState(nextProps.data);
     }
@@ -118,7 +118,7 @@ export class FixtureExample extends React.Component<FixtureExampleProps, Fixture
     );
   };
 
-  render(): JSX.Element | ReactNull {
+  override render(): JSX.Element | ReactNull {
     const { fixture } = this.state;
     if (!fixture) {
       return ReactNull;

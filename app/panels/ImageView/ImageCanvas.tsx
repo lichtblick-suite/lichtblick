@@ -100,7 +100,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
   _divRef = React.createRef<HTMLDivElement>();
   _id: string;
   _canvasRenderer: CanvasRenderer;
-  state: State = { openZoomChart: false };
+  override state: State = { openZoomChart: false };
 
   constructor(props: Props) {
     super(props);
@@ -253,7 +253,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
     this.applyPanZoom();
   };
 
-  componentDidMount(): void {
+  override componentDidMount(): void {
     this.renderCurrentImage();
     document.addEventListener("visibilitychange", this._onVisibilityChange);
   }
@@ -272,7 +272,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
     }
   };
 
-  componentWillUnmount(): void {
+  override componentWillUnmount(): void {
     const canvasRenderer = this._canvasRenderer;
     if (canvasRenderer.type === "rpc") {
       // Unset the PRC worker so that we can destroy the worker if it's no longer necessary.
@@ -282,7 +282,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
     document.removeEventListener("visibilitychange", this._onVisibilityChange);
   }
 
-  componentDidUpdate(prevProps: Props): void {
+  override componentDidUpdate(prevProps: Props): void {
     const imageChanged = !shallowequal(prevProps, this.props, (a, b, key): boolean | void => {
       if (key === "rawMarkerData") {
         return shallowequal(a, b, (innerA, innerB, innerKey): boolean | void => {
@@ -576,7 +576,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
     },
   };
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     const { smooth, mode, zoomPercentage, offset } = this.props.config;
     const maxZoom = this.props.config.maxZoom ?? DEFAULT_MAX_ZOOM;
 

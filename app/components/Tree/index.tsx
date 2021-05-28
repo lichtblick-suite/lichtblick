@@ -61,7 +61,7 @@ export default class Tree extends PureComponent<Props> {
       />
     );
   };
-  render(): React.ReactNode {
+  override render(): React.ReactNode {
     const { root, hideRoot = false } = this.props;
     if (hideRoot && !root.children.some((treeNode: Node) => treeNode.visible)) {
       return <div style={{ padding: "8px 12px", color: "#666" }}>None</div>;

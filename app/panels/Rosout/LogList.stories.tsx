@@ -47,15 +47,15 @@ type State = {
 
 class Example extends Component<Props, State> {
   _intervalId?: ReturnType<typeof setInterval>;
-  state = { items: generateData(MSG_BATCH_SIZE), paused: true };
+  override state = { items: generateData(MSG_BATCH_SIZE), paused: true };
 
-  componentDidMount() {
+  override componentDidMount() {
     if (!this.state.paused) {
       this._startTimer();
     }
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     if (this._intervalId) {
       clearInterval(this._intervalId);
     }
@@ -81,7 +81,7 @@ class Example extends Component<Props, State> {
     this.setState({ paused });
   };
 
-  render() {
+  override render() {
     const { renderRow } = this.props;
     const { items, paused } = this.state;
 

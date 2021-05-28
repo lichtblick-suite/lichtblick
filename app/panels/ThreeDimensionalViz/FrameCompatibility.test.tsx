@@ -36,7 +36,7 @@ describe("FrameCompatibilityDEPRECATED", () => {
 
     const childFn = jest.fn().mockReturnValue(undefined);
     class MyComponent extends React.Component<any> {
-      render() {
+      override render() {
         childFn(this.props);
         return ReactNull;
       }

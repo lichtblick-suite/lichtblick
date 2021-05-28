@@ -58,7 +58,7 @@ storiesOf("components/NotificationDisplay", module)
   })
   .add("With one error", () => {
     class Wrapper extends React.Component<any> {
-      componentDidMount() {
+      override componentDidMount() {
         sendNotification(
           "Something bad happened",
           "This error is on purpose - it comes from the story",
@@ -67,7 +67,7 @@ storiesOf("components/NotificationDisplay", module)
         );
       }
 
-      render() {
+      override render() {
         return <NotificationDisplayWrapper />;
       }
     }
@@ -75,7 +75,7 @@ storiesOf("components/NotificationDisplay", module)
   })
   .add("With one warning", () => {
     class Wrapper extends React.Component<any> {
-      componentDidMount() {
+      override componentDidMount() {
         sendNotification(
           "This is the final countdown",
           "This warning is on purpose - it comes from the story",
@@ -84,7 +84,7 @@ storiesOf("components/NotificationDisplay", module)
         );
       }
 
-      render() {
+      override render() {
         return <NotificationDisplayWrapper />;
       }
     }
@@ -92,7 +92,7 @@ storiesOf("components/NotificationDisplay", module)
   })
   .add("With one message", () => {
     class Wrapper extends React.Component<any> {
-      componentDidMount() {
+      override componentDidMount() {
         sendNotification(
           "Here's a helpful tip",
           "These are the details of the message",
@@ -101,7 +101,7 @@ storiesOf("components/NotificationDisplay", module)
         );
       }
 
-      render() {
+      override render() {
         return <NotificationDisplayWrapper />;
       }
     }

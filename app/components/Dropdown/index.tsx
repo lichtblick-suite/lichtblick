@@ -45,7 +45,7 @@ type State = {
 };
 
 export default class Dropdown<T> extends React.Component<Props<T>, State> {
-  state = { isOpen: false };
+  override state = { isOpen: false };
   toggle = (): void => {
     if (!this.props.disabled) {
       this.setState({ isOpen: !this.state.isOpen });
@@ -122,7 +122,7 @@ export default class Dropdown<T> extends React.Component<Props<T>, State> {
     return button;
   }
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     const { isOpen } = this.state;
     const { position, flatEdges, menuStyle } = this.props;
     const style = {

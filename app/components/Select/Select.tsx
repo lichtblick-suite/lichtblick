@@ -46,7 +46,7 @@ export default class Select extends React.Component<Props, State> {
 
   el?: HTMLDivElement;
 
-  state = {
+  override state = {
     isOpen: false,
   };
 
@@ -112,7 +112,7 @@ export default class Select extends React.Component<Props, State> {
     );
   }
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     const { isOpen } = this.state;
     const { text, value, icon } = this.props;
     return (

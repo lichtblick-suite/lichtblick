@@ -63,7 +63,7 @@ function selectText(element?: HTMLTextAreaElement | ReactNull): void {
 }
 
 export default class ShareJsonModal extends Component<Props, State> {
-  state = {
+  override state = {
     value: encode(this.props.value),
     error: false,
     copied: false,
@@ -107,7 +107,7 @@ export default class ShareJsonModal extends Component<Props, State> {
     return <div className="notification is-danger">The input you provided is invalid.</div>;
   }
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     const { value, copied } = this.state;
 
     return (

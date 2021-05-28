@@ -45,7 +45,7 @@ export default class Option extends React.Component<Props> {
     );
   }
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     const { onClick, active, disabled, children } = this.props;
     const className = cx(styles.container, {
       [styles.active as string]: active,

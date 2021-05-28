@@ -37,7 +37,7 @@ class ButtonBaseImpl extends React.Component<Props> {
   animationId?: ReturnType<typeof requestAnimationFrame>;
   cancelTimeoutId?: ReturnType<typeof setTimeout>;
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     if (this.animationId != undefined) {
       cancelAnimationFrame(this.animationId);
     }
@@ -75,7 +75,7 @@ class ButtonBaseImpl extends React.Component<Props> {
     this.setState({ mouseDown: false });
   };
 
-  render() {
+  override render() {
     const {
       children,
       id,

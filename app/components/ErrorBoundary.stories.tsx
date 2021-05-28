@@ -20,7 +20,7 @@ import StoreSetup from "@foxglove/studio-base/stories/StoreSetup";
 import ErrorBoundary from "./ErrorBoundary";
 
 class Broken extends React.Component {
-  render() {
+  override render() {
     throw {
       stack: `
   an error occurred

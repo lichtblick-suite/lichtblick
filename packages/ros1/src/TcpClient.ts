@@ -94,7 +94,7 @@ export class TcpClient extends EventEmitter<TcpClientEvents> implements Client {
     return this._transportInfo;
   }
 
-  toString(): string {
+  override toString(): string {
     return TcpConnection.Uri(this._address, this._port);
   }
 

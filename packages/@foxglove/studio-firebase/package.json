@@ -21,7 +21,7 @@
     "prepack": "tsc -b"
   },
   "devDependencies": {
-    "typescript": "4.2.4"
+    "typescript": "4.3.2"
   },
   "dependencies": {
     "@foxglove/log": "workspace:packages/log",

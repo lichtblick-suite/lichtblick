@@ -31,7 +31,7 @@ class MosaicWrapper extends React.Component<{
   children: React.ReactNode;
   width?: number;
 }> {
-  render() {
+  override render() {
     const { width = 300 } = this.props;
     return (
       <Mosaic
@@ -56,7 +56,7 @@ class MosaicWrapper extends React.Component<{
 }
 
 class PanelToolbarWithOpenMenu extends React.PureComponent<{ hideToolbars?: boolean }> {
-  render() {
+  override render() {
     return (
       <div
         ref={(el) => {
@@ -149,7 +149,7 @@ storiesOf("components/PanelToolbar", module)
   })
   .add("menu (only panel)", () => {
     class Story extends React.Component {
-      render() {
+      override render() {
         return (
           <MosaicWrapper>
             <PanelToolbarWithOpenMenu />
@@ -161,7 +161,7 @@ storiesOf("components/PanelToolbar", module)
   })
   .add("menu (with sibling panel)", () => {
     class Story extends React.Component {
-      render() {
+      override render() {
         return (
           <MosaicWrapper layout={{ direction: "row", first: "dummy", second: "Sibling" }}>
             <PanelToolbarWithOpenMenu />
@@ -173,7 +173,7 @@ storiesOf("components/PanelToolbar", module)
   })
   .add("menu for Tab panel", () => {
     class Story extends React.Component {
-      render() {
+      override render() {
         return (
           <MosaicWrapper layout={{ direction: "row", first: "Tab", second: "Sibling" }}>
             <PanelToolbarWithOpenMenu />
@@ -185,7 +185,7 @@ storiesOf("components/PanelToolbar", module)
   })
   .add("no toolbars", () => {
     class Story extends React.Component {
-      render() {
+      override render() {
         return (
           <MosaicWrapper layout={{ direction: "row", first: "dummy", second: "Sibling" }}>
             <PanelToolbarWithOpenMenu hideToolbars />

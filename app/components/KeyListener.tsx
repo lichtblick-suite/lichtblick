@@ -29,7 +29,7 @@ export default class KeyListener extends React.Component<Props> {
     global: false,
   };
 
-  componentDidMount(): void {
+  override componentDidMount(): void {
     const { global } = this.props;
     const target = global ? document : this.el?.parentElement;
     if (target) {
@@ -39,7 +39,7 @@ export default class KeyListener extends React.Component<Props> {
     }
   }
 
-  componentWillUnmount(): void {
+  override componentWillUnmount(): void {
     const { global } = this.props;
     const target = global ? document : this.el?.parentElement;
     if (target) {
@@ -85,7 +85,7 @@ export default class KeyListener extends React.Component<Props> {
     }
   };
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     return <div style={{ display: "none" }} ref={(el) => (this.el = el ?? undefined)} />;
   }
 }

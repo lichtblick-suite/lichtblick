@@ -82,7 +82,7 @@ export default class FetchReader extends Readable {
     return this._reader;
   }
 
-  _read(): void {
+  override _read(): void {
     this._getReader().then((reader) => {
       // if no reader is returned then we've encountered an error
       if (!reader) {
@@ -117,7 +117,7 @@ export default class FetchReader extends Readable {
   }
 
   // aborts the xhr request if user calls stream.destroy()
-  _destroy(): void {
+  override _destroy(): void {
     this._aborted = true;
     this._controller.abort();
   }

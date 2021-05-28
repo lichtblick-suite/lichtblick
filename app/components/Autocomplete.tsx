@@ -118,7 +118,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
   // When we lose the scrollbar, we can safely set `showAllItems: false` again, because all items
   // will be in view anyway. We cannot set it to false earlier, as `<ReactAutocomplete>` may have a
   // reference to the highlighted element, which can cause an error if we hide it.
-  componentDidUpdate(): void {
+  override componentDidUpdate(): void {
     if (
       (this._autocomplete.current?.refs.menu as Element)?.scrollHeight <=
         (this._autocomplete.current?.refs.menu as Element)?.clientHeight &&
@@ -256,7 +256,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
     }
   };
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     const {
       autocompleteKey,
       autoSize = false,

@@ -29,7 +29,7 @@ function focusInput(el: any) {
 storiesOf("components/Autocomplete", module)
   .add("filtering to 'o'", () => {
     class Example extends Component {
-      render() {
+      override render() {
         return (
           <div style={{ padding: 20 }} ref={focusInput}>
             <Autocomplete
@@ -137,7 +137,7 @@ storiesOf("components/Autocomplete", module)
   })
   .add("at the right edge of the screen", () => {
     class Example extends Component {
-      render() {
+      override render() {
         return (
           <div style={{ position: "absolute", right: 0, padding: 20 }} ref={focusInput}>
             <Autocomplete
@@ -155,7 +155,7 @@ storiesOf("components/Autocomplete", module)
   })
   .add("with a long truncated path (and autoSize)", () => {
     class Example extends Component {
-      render() {
+      override render() {
         return (
           <div style={{ maxWidth: 200 }} ref={focusInput}>
             <Autocomplete

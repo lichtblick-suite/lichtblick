@@ -53,7 +53,14 @@ export function makeConfig(
         crypto: require.resolve("crypto-browserify"),
         fs: false,
         pnpapi: false,
-        perf_hooks: false, // TypeScript tries to use this when running in node
+
+        // TypeScript tries to use this when running in node
+        perf_hooks: false,
+        // Yarn patches these imports into TypeScript for PnP support
+        // https://github.com/microsoft/TypeScript/pull/35206
+        // https://github.com/yarnpkg/berry/pull/2889#issuecomment-849905154
+        module: false,
+
         // These are optional for react-mosaic-component
         "@blueprintjs/core": false,
         "@blueprintjs/icons": false,
@@ -154,6 +161,7 @@ export function makeConfig(
         {
           // TypeScript uses dynamic requires()s when running in node. We can disable these when we
           // bundle it for the renderer.
+          // https://github.com/microsoft/TypeScript/issues/39436
           test: /[\\/]node_modules[\\/]typescript[\\/]lib[\\/]typescript\.js$/,
           loader: "string-replace-loader",
           options: {

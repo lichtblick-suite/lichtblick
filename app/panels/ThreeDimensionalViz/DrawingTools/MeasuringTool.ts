@@ -146,7 +146,7 @@ export default class MeasuringTool extends React.Component<Props> {
     return dist_string;
   }
 
-  render(): ReactNull {
+  override render(): ReactNull {
     return ReactNull;
   }
 }

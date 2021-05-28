@@ -139,7 +139,7 @@ export default class TreeNode extends Component<Props> {
     onEditClick(e, node);
   };
 
-  render(): React.ReactNode {
+  override render(): React.ReactNode {
     const { node, depth, enableVisibilityToggle = false, disableCheckbox = false } = this.props;
     const {
       expanded = false,

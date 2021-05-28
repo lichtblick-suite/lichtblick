@@ -202,7 +202,7 @@ class DiagnosticStatus extends React.Component<Props, any> {
     onChangeSplitFraction(splitFraction);
   };
 
-  componentWillUnmount(): void {
+  override componentWillUnmount(): void {
     window.removeEventListener("mousemove", this._resizeMouseMove as any);
     window.removeEventListener("mouseup", this._resizeMouseUp);
   }
@@ -322,7 +322,7 @@ class DiagnosticStatus extends React.Component<Props, any> {
     saveConfig({ collapsedSections: newSectionsForCurrentName.concat(otherSections) });
   };
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     const {
       info: { status, displayName },
       splitFraction,

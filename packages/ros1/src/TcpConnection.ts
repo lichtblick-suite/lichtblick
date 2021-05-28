@@ -155,7 +155,7 @@ export class TcpConnection extends EventEmitter<TcpConnectionEvents> implements 
     return this._transportInfo;
   }
 
-  toString(): string {
+  override toString(): string {
     return TcpConnection.Uri(this._address, this._port);
   }
 

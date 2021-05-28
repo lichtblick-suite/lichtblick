@@ -35,7 +35,7 @@ type Props = {
 export default class SubMenu extends React.Component<Props, State> {
   _unmounted: boolean = false;
 
-  state = {
+  override state = {
     open: false,
   };
 
@@ -51,12 +51,12 @@ export default class SubMenu extends React.Component<Props, State> {
     this.setState(({ open }) => ({ open: !open }));
   };
 
-  componentWillUnmount(): void {
+  override componentWillUnmount(): void {
     // the submenu might unmount on click, so don't update state if its gone
     this._unmounted = true;
   }
 
-  render(): JSX.Element {
+  override render(): JSX.Element {
     const { text, children, checked, direction, icon, dataTest, style } = this.props;
     const { open } = this.state;
     return (

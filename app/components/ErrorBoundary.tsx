@@ -45,17 +45,17 @@ export default class ErrorBoundary extends React.Component<
   { children: React.ReactNode; hideSourceLocations?: boolean },
   State
 > {
-  state: State = {
+  override state: State = {
     error: undefined,
     errorInfo: undefined,
   };
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
+  override componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     captureException(new AppError(error, errorInfo));
     this.setState({ error, errorInfo });
   }
 
-  render(): React.ReactNode {
+  override render(): React.ReactNode {
     const { error, errorInfo } = this.state;
     if (error) {
       let name = "this panel";

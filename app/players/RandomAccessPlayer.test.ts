@@ -1172,7 +1172,7 @@ describe("RandomAccessPlayer", () => {
 
   it("doesn't try to close provider after initialization error", async () => {
     class FailTestProvider extends TestProvider {
-      initialize() {
+      override initialize() {
         return Promise.reject(new Error("fake initialization failure"));
       }
     }

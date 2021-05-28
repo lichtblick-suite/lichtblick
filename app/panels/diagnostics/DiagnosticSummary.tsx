@@ -58,7 +58,7 @@ class NodeRow extends React.PureComponent<NodeRowProps> {
     onClickPin(info);
   };
 
-  render() {
+  override render() {
     const { info, isPinned } = this.props;
     const levelName = LEVEL_NAMES[info.status.level];
 

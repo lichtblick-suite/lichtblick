@@ -231,7 +231,7 @@ class MessagePathInputUnconnected extends React.PureComponent<
     }
   };
 
-  render() {
+  override render() {
     const {
       path,
       topics,
