@@ -19,6 +19,7 @@ import Logger from "@foxglove/log";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 
 import pkgInfo from "../../package.json";
+import getDevModeIcon from "./getDevModeIcon";
 import { simulateUserClick } from "./simulateUserClick";
 import { getTelemetrySettings } from "./telemetry";
 
@@ -62,6 +63,12 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
     },
     backgroundColor: colors.background,
   };
+  if (!isProduction) {
+    const devIcon = getDevModeIcon();
+    if (devIcon) {
+      windowOptions.icon = devIcon;
+    }
+  }
   if (isMac) {
     windowOptions.titleBarStyle = "hiddenInset";
   }

@@ -15,6 +15,7 @@ import Logger from "@foxglove/log";
 
 import pkgInfo from "../../package.json";
 import StudioWindow from "./StudioWindow";
+import getDevModeIcon from "./getDevModeIcon";
 import injectFilesToOpen from "./injectFilesToOpen";
 import installChromeExtensions from "./installChromeExtensions";
 import { installMenuInterface } from "./menu";
@@ -22,7 +23,6 @@ import {
   registerRosPackageProtocolHandlers,
   registerRosPackageProtocolSchemes,
 } from "./rosPackageResources";
-import setDevModeDockIcon from "./setDevModeDockIcon";
 import { getTelemetrySettings } from "./telemetry";
 
 const log = Logger.getLogger(__filename);
@@ -47,6 +47,13 @@ function main() {
   log.info(`${pkgInfo.productName} ${pkgInfo.version}`);
 
   const isProduction = process.env.NODE_ENV === "production";
+
+  if (!isProduction && app.dock != undefined) {
+    const devIcon = getDevModeIcon();
+    if (devIcon) {
+      app.dock.setIcon(devIcon);
+    }
+  }
 
   // Suppress Electron Security Warning in development
   // See the comment for the webSecurity setting on browser window
@@ -236,7 +243,6 @@ function main() {
 
     if (!isProduction) {
       await installChromeExtensions();
-      setDevModeDockIcon();
     }
 
     // Content Security Policy
