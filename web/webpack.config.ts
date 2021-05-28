@@ -6,6 +6,7 @@ import ReactRefreshPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import SentryWebpackPlugin from "@sentry/webpack-plugin";
 import { CleanWebpackPlugin } from "clean-webpack-plugin";
 import CopyPlugin from "copy-webpack-plugin";
+import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import path from "path";
 import { Configuration, EnvironmentPlugin, WebpackPluginInstance } from "webpack";
@@ -116,6 +117,11 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
           messagingSenderId: "667544771216",
           appId: "1:667544771216:web:f8e6d9705a3c28e73a5615",
         }),
+      }),
+      new ForkTsCheckerWebpackPlugin({
+        typescript: {
+          configFile: "src/tsconfig.json",
+        },
       }),
       new CopyPlugin({
         patterns: [{ from: "public" }],

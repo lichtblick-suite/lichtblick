@@ -4,7 +4,7 @@
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "@firebase/auth";
 import { useCallback } from "react";
 
-import { FirebaseAuthProvider, useFirebase } from "@foxglove/studio-base";
+import { FirebaseAuthProvider, useFirebase } from "@foxglove/studio-firebase";
 
 export default function FirebasePopupAuthProvider({
   children,
