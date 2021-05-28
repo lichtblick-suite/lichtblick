@@ -51,7 +51,6 @@ export function NarrowLayout(): JSX.Element {
 export function Settings(): JSX.Element {
   return (
     <SchemaEditor
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       configSchema={GlobalVariableSliderPanel.configSchema!}
       config={GlobalVariableSliderPanel.defaultConfig}
       saveConfig={() => {}}

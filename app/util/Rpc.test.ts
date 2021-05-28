@@ -95,7 +95,7 @@ describe("Rpc", () => {
       });
   });
 
-  it("can send and receive transferrables", async () => {
+  it("can send and receive transferables", async () => {
     const expectedTransfer = new ArrayBuffer(1);
     const mainChannel: Channel = {
       onmessage: undefined,
@@ -131,7 +131,7 @@ describe("Rpc", () => {
       await delay(10);
       return {
         bar: msg.foo,
-        [Rpc.transferrables]: [expectedTransfer],
+        [Rpc.transferables]: [expectedTransfer],
       };
     });
     const result = await local.send("foo", { foo: "baz" });

@@ -15,10 +15,10 @@ import { DetailsType } from "@foxglove/studio-base/util/sendNotification";
 
 export class AppError extends Error {
   details: DetailsType;
-  extraInfo: any;
+  extraInfo: unknown;
   message: string;
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  constructor(details: DetailsType, extraInfo?: any) {
+
+  constructor(details: DetailsType, extraInfo?: unknown) {
     super();
     this.details = details;
     this.extraInfo = extraInfo;
@@ -34,8 +34,8 @@ export class AppError extends Error {
     if (extraInfo) {
       // If `extraInfo` was passed via a componentDidCatch:
       // https://reactjs.org/docs/react-component.html#componentdidcatch
-      if (extraInfo.componentStack) {
-        this.message += `\n\n${extraInfo.componentStack}`;
+      if ((extraInfo as { componentStack: unknown }).componentStack) {
+        this.message += `\n\n${(extraInfo as { componentStack: unknown }).componentStack}`;
       } else {
         try {
           const stringifiedExtraInfo = JSON.stringify(extraInfo);

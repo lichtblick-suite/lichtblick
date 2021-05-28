@@ -57,28 +57,28 @@ class MockMarkerCollector implements MarkerCollector {
     instancedLineList: [] as InstancedLineListMarker[],
   };
 
-  arrow(_arg0: ArrowMarker): any {}
-  color(_arg0: ColorMarker): any {}
-  cube(_arg0: CubeMarker): any {}
-  cubeList(_arg0: CubeListMarker): any {}
-  sphere(_arg0: SphereMarker): any {}
-  sphereList(_arg0: SphereListMarker): any {}
-  cylinder(_arg0: CylinderMarker): any {}
-  poseMarker(_arg0: ArrowMarker): any {}
-  lineStrip(_arg0: LineStripMarker): any {}
-  lineList(_arg0: LineListMarker): any {}
-  points(_arg0: PointsMarker): any {}
-  text(_arg0: TextMarker): any {}
-  triangleList(_arg0: TriangleListMarker): any {}
-  grid(_arg0: OccupancyGridMessage): any {}
-  pointcloud(_arg0: PointCloud): any {}
-  laserScan(_arg0: LaserScan): any {}
-  linedConvexHull(_arg0: LineListMarker | LineStripMarker): any {}
-  filledPolygon(_arg0: FilledPolygonMarker): any {}
-  instancedLineList(arg0: InstancedLineListMarker): any {
+  arrow(_arg0: ArrowMarker): void {}
+  color(_arg0: ColorMarker): void {}
+  cube(_arg0: CubeMarker): void {}
+  cubeList(_arg0: CubeListMarker): void {}
+  sphere(_arg0: SphereMarker): void {}
+  sphereList(_arg0: SphereListMarker): void {}
+  cylinder(_arg0: CylinderMarker): void {}
+  poseMarker(_arg0: ArrowMarker): void {}
+  lineStrip(_arg0: LineStripMarker): void {}
+  lineList(_arg0: LineListMarker): void {}
+  points(_arg0: PointsMarker): void {}
+  text(_arg0: TextMarker): void {}
+  triangleList(_arg0: TriangleListMarker): void {}
+  grid(_arg0: OccupancyGridMessage): void {}
+  pointcloud(_arg0: PointCloud): void {}
+  laserScan(_arg0: LaserScan): void {}
+  linedConvexHull(_arg0: LineListMarker | LineStripMarker): void {}
+  filledPolygon(_arg0: FilledPolygonMarker): void {}
+  instancedLineList(arg0: InstancedLineListMarker): void {
     this.data.instancedLineList.push(arg0);
   }
-  overlayIcon(_arg0: OverlayIconMarker): any {}
+  overlayIcon(_arg0: OverlayIconMarker): void {}
 }
 
 storiesOf("panels/ThreeDimensionalViz/GridBuilder", module)

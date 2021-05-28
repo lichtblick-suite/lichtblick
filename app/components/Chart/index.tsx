@@ -91,8 +91,8 @@ function Chart(props: Props): JSX.Element {
 
   // helper function to send rpc to our worker - all invocations need an _id_ so we inject it here
   const rpcSend = useCallback(
-    <T extends unknown>(topic: string, payload?: any, transferrables?: unknown[]) => {
-      return rpc.send<T>(topic, { id: id, ...payload }, transferrables);
+    <T extends unknown>(topic: string, payload?: any, transferables?: Transferable[]) => {
+      return rpc.send<T>(topic, { id: id, ...payload }, transferables);
     },
     [id, rpc],
   );

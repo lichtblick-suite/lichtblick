@@ -913,7 +913,6 @@ storiesOf("panels/Plot/index", module)
   .add("Settings", () => {
     return (
       <SchemaEditor
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         configSchema={Plot.configSchema!}
         config={Plot.defaultConfig}
         saveConfig={() => {}}

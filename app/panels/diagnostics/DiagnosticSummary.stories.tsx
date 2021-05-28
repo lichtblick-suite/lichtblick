@@ -113,7 +113,6 @@ export function Filtered(): JSX.Element {
 export function Settings(): JSX.Element {
   return (
     <SchemaEditor
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       configSchema={DiagnosticSummary.configSchema!}
       config={DiagnosticSummary.defaultConfig}
       saveConfig={() => {}}

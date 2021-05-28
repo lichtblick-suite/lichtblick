@@ -105,7 +105,6 @@ export const AvailableTopicsMarkers = (): React.ReactElement => (
 export function Settings(): JSX.Element {
   return (
     <SchemaEditor
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       configSchema={ImageView.configSchema!}
       config={ImageView.defaultConfig}
       saveConfig={() => {}}

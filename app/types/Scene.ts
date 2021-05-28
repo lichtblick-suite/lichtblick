@@ -39,26 +39,26 @@ export type Scene = {
 };
 
 export interface MarkerCollector {
-  arrow(arg0: ArrowMarker): any;
-  color(arg0: ColorMarker): any;
-  cube(arg0: CubeMarker): any;
-  cubeList(arg0: CubeListMarker): any;
-  sphere(arg0: SphereMarker): any;
-  sphereList(arg0: SphereListMarker): any;
-  cylinder(arg0: CylinderMarker): any;
-  poseMarker(arg0: ArrowMarker): any;
-  lineStrip(arg0: LineStripMarker): any;
-  lineList(arg0: LineListMarker): any;
-  points(arg0: PointsMarker): any;
-  text(arg0: TextMarker): any;
-  triangleList(arg0: TriangleListMarker): any;
-  grid(arg0: OccupancyGridMessage): any;
-  pointcloud(arg0: PointCloud): any;
-  laserScan(arg0: LaserScan): any;
-  linedConvexHull(arg0: LineListMarker | LineStripMarker): any;
-  filledPolygon(arg0: FilledPolygonMarker): any;
-  instancedLineList(arg0: InstancedLineListMarker): any;
-  overlayIcon(arg0: OverlayIconMarker): any;
+  arrow(arg0: ArrowMarker): void;
+  color(arg0: ColorMarker): void;
+  cube(arg0: CubeMarker): void;
+  cubeList(arg0: CubeListMarker): void;
+  sphere(arg0: SphereMarker): void;
+  sphereList(arg0: SphereListMarker): void;
+  cylinder(arg0: CylinderMarker): void;
+  poseMarker(arg0: ArrowMarker): void;
+  lineStrip(arg0: LineStripMarker): void;
+  lineList(arg0: LineListMarker): void;
+  points(arg0: PointsMarker): void;
+  text(arg0: TextMarker): void;
+  triangleList(arg0: TriangleListMarker): void;
+  grid(arg0: OccupancyGridMessage): void;
+  pointcloud(arg0: PointCloud): void;
+  laserScan(arg0: LaserScan): void;
+  linedConvexHull(arg0: LineListMarker | LineStripMarker): void;
+  filledPolygon(arg0: FilledPolygonMarker): void;
+  instancedLineList(arg0: InstancedLineListMarker): void;
+  overlayIcon(arg0: OverlayIconMarker): void;
 }
 
 export interface MarkerProvider {

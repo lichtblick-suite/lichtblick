@@ -582,7 +582,6 @@ storiesOf("panels/NodePlayground", module)
   .add("Settings", () => {
     return (
       <SchemaEditor
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         configSchema={NodePlayground.configSchema!}
         config={NodePlayground.defaultConfig}
         saveConfig={() => {}}

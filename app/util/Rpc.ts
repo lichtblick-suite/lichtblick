@@ -15,7 +15,7 @@
 // instances of web-workers and shared-workers respectively, as well as avaiable on
 // 'global' within them.
 export interface Channel {
-  postMessage(data: any, transfer?: any[]): void;
+  postMessage(data: unknown, transfer?: Transferable[]): void;
   onmessage?: ((ev: MessageEvent) => unknown) | null; // eslint-disable-line no-restricted-syntax
   terminate: () => void;
 }
@@ -28,7 +28,7 @@ export function createLinkedChannels(): { local: Channel; remote: Channel } {
   const local: Channel = {
     onmessage: undefined,
 
-    postMessage(data: any, _transfer?: Array<ArrayBuffer>) {
+    postMessage(data: unknown, _transfer?: Array<ArrayBuffer>) {
       const ev = new MessageEvent("message", { data });
       if (remote.onmessage) {
         remote.onmessage(ev);
@@ -42,7 +42,7 @@ export function createLinkedChannels(): { local: Channel; remote: Channel } {
   const remote: Channel = {
     onmessage: undefined,
 
-    postMessage(data: any, _transfer?: Array<ArrayBuffer>) {
+    postMessage(data: unknown, _transfer?: Array<ArrayBuffer>) {
       const ev = new MessageEvent("message", { data });
       if (local.onmessage) {
         local.onmessage(ev);
@@ -58,7 +58,7 @@ export function createLinkedChannels(): { local: Channel; remote: Channel } {
 // This class allows you to hook up bi-directional async calls across web-worker
 // boundaries where a single call to or from a worker can 'wait' on the response.
 // Errors in receivers are propigated back to the caller as a rejection.
-// It also supports returning transferrables over the web-worker postMessage api,
+// It also supports returning transferables over the web-worker postMessage api,
 // which was the main shortcomming with the worker-rpc npm module.
 // To attach rpc to an instance of a worker in the main thread:
 //   const rpc = new Rpc(workerInstace);
@@ -66,12 +66,14 @@ export function createLinkedChannels(): { local: Channel; remote: Channel } {
 //   const rpc = new Rpc(global);
 // Check out the tests for more examples.
 export default class Rpc {
-  static transferrables = "$$TRANSFERRABLES";
+  static transferables = "$$TRANSFERABLES";
   _channel: Omit<Channel, "terminate">;
   _messageId: number = 0;
   _pendingCallbacks: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: number]: (arg0: any) => void;
   } = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   _receivers: Map<string, (arg0: any) => any> = new Map();
 
   constructor(channel: Omit<Channel, "terminate">) {
@@ -92,7 +94,7 @@ export default class Rpc {
       return;
     }
     // invoke the receive handler in a promise so if it throws synchronously we can reject
-    new Promise<any>((resolve) => {
+    new Promise<Record<string, Transferable[] | undefined> | undefined>((resolve) => {
       const handler = this._receivers.get(topic);
       if (!handler) {
         throw new Error(`no receiver registered for ${topic}`);
@@ -104,14 +106,14 @@ export default class Rpc {
         if (!result) {
           return this._channel.postMessage({ topic: RESPONSE, id });
         }
-        const transferrables = result[Rpc.transferrables];
-        delete result[Rpc.transferrables];
+        const transferables = result[Rpc.transferables];
+        delete result[Rpc.transferables];
         const message = {
           topic: RESPONSE,
           id,
           data: result,
         };
-        this._channel.postMessage(message, transferrables);
+        this._channel.postMessage(message, transferables);
       })
       .catch((err) => {
         const message = {
@@ -131,7 +133,7 @@ export default class Rpc {
   // send a message across the rpc boundary to a receiver on the other side
   // this returns a promise for the receiver's response.  If there is no registered
   // receiver for the given topic, this method throws
-  send<TResult>(topic: string, data?: unknown, transfer?: any[]): Promise<TResult> {
+  send<TResult>(topic: string, data?: unknown, transfer?: Transferable[]): Promise<TResult> {
     const id = this._messageId++;
     const message = { topic, id, data };
     const result = new Promise<TResult>((resolve, reject) => {

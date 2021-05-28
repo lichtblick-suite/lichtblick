@@ -50,7 +50,7 @@ export default class RpcDataProviderRemote {
       for (const message of messagesToSend) {
         arrayBuffers.add(message.message);
       }
-      return { messages: messagesToSend, [Rpc.transferrables]: Array.from(arrayBuffers) };
+      return { messages: messagesToSend, [Rpc.transferables]: Array.from(arrayBuffers) };
     });
 
     rpc.receive("close", () => provider.close());
