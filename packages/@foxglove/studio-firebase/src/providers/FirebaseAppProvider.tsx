@@ -6,9 +6,14 @@ import { FirebaseApp, initializeApp, deleteApp, FirebaseOptions } from "@firebas
 import { useLayoutEffect, useState } from "react";
 
 import Logger from "@foxglove/log";
-import { FirebaseAppContext } from "@foxglove/studio-base/context/FirebaseAppContext";
+
+import { FirebaseAppContext } from "../context/FirebaseAppContext";
 
 const log = Logger.getLogger(__filename);
+
+// eslint-disable-next-line no-restricted-syntax
+const ReactNull = null;
+type ReactNull = typeof ReactNull;
 
 /** Initialize a Firebase app from the given config object. */
 export default function FirebaseAppProvider({

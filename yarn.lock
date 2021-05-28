@@ -2800,6 +2800,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@foxglove/studio-firebase@workspace:packages/@foxglove/studio-firebase":
+  version: 0.0.0-use.local
+  resolution: "@foxglove/studio-firebase@workspace:packages/@foxglove/studio-firebase"
+  dependencies:
+    "@foxglove/log": "workspace:packages/log"
+    "@foxglove/studio-base": "workspace:app"
+    firebase: 9.0.0-beta.1
+    typescript: 4.2.4
+  languageName: unknown
+  linkType: soft
+
 "@foxglove/studio@workspace:packages/@foxglove/studio":
   version: 0.0.0-use.local
   resolution: "@foxglove/studio@workspace:packages/@foxglove/studio"
@@ -10859,6 +10870,7 @@ __metadata:
   resolution: "desktop@workspace:desktop"
   dependencies:
     "@foxglove/studio-base": "workspace:app"
+    "@foxglove/studio-firebase": "workspace:packages/@foxglove/studio-firebase"
   languageName: unknown
   linkType: soft
 
@@ -13474,7 +13486,6 @@ __metadata:
     eslint-plugin-prettier: 3.4.0
     eslint-plugin-react: 7.23.2
     eslint-plugin-react-hooks: 4.2.0
-    firebase: 9.0.0-beta.1
     fork-ts-checker-webpack-plugin: 6.2.9
     html-webpack-plugin: 5.3.1
     jest: 27.0.0-next.8
@@ -26471,6 +26482,7 @@ typescript@4.2.4:
   resolution: "web@workspace:web"
   dependencies:
     "@foxglove/studio-base": "workspace:app"
+    "@foxglove/studio-firebase": "workspace:packages/@foxglove/studio-firebase"
     "@types/copy-webpack-plugin": 8.0.0
     copy-webpack-plugin: 9.0.0
     webpack: 5.37.0

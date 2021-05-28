@@ -2,6 +2,7 @@
   "name": "desktop",
   "private": true,
   "dependencies": {
-    "@foxglove/studio-base": "workspace:app"
+    "@foxglove/studio-base": "workspace:app",
+    "@foxglove/studio-firebase": "workspace:packages/@foxglove/studio-firebase"
   }
 }

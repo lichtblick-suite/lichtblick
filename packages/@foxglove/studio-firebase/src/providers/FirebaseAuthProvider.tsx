@@ -15,9 +15,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useToasts } from "react-toast-notifications";
 
 import Log from "@foxglove/log";
-import AuthContext, { Auth, CurrentUser } from "@foxglove/studio-base/context/AuthContext";
-import { useFirebase } from "@foxglove/studio-base/context/FirebaseAppContext";
+import { AuthContext, Auth, CurrentUser } from "@foxglove/studio-base";
 import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
+
+import { useFirebase } from "../context/FirebaseAppContext";
 
 const log = Log.getLogger(__filename);
 

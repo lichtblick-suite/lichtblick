@@ -4,7 +4,7 @@
 import { OAuthCredential } from "@firebase/auth";
 import { useCallback } from "react";
 
-import { FirebaseAuthProvider } from "@foxglove/studio-base";
+import { FirebaseAuthProvider } from "@foxglove/studio-firebase";
 
 import { Desktop } from "../../common/types";
 

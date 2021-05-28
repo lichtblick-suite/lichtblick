@@ -13,8 +13,8 @@ import {
   ThemeProvider,
   UserProfileLocalStorageProvider,
   StudioToastProvider,
-  FirebaseAppProvider,
 } from "@foxglove/studio-base";
+import { FirebaseAppProvider } from "@foxglove/studio-firebase";
 
 import { Desktop } from "../common/types";
 import NativeAppMenuProvider from "./components/NativeAppMenuProvider";
