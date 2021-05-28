@@ -13,6 +13,7 @@ import { NativeFileMenuPlayerSelection } from "@foxglove/studio-base/components/
 import PlayerManager from "@foxglove/studio-base/components/PlayerManager";
 import AnalyticsProvider from "@foxglove/studio-base/context/AnalyticsProvider";
 import { AssetsProvider } from "@foxglove/studio-base/context/AssetContext";
+import { HoverValueProvider } from "@foxglove/studio-base/context/HoverValueContext";
 import ModalHost from "@foxglove/studio-base/context/ModalHost";
 import { PlayerSourceDefinition } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
@@ -39,6 +40,7 @@ export default function App(props: AppProps): JSX.Element {
     <ModalHost />, // render modal elements inside the ThemeProvider
     <AssetsProvider loaders={assetLoaders} />,
     <ReduxProvider store={globalStore} />,
+    <HoverValueProvider />,
     <CurrentLayoutProvider />,
     <ExtensionRegistryProvider />,
     <PlayerManager playerSources={props.availableSources} />,

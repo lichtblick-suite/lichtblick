@@ -18,13 +18,11 @@ import SkipNextOutlineIcon from "@mdi/svg/svg/skip-next-outline.svg";
 import SkipPreviousOutlineIcon from "@mdi/svg/svg/skip-previous-outline.svg";
 import classnames from "classnames";
 import React, { memo, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
 import { Time, TimeUtil } from "rosbag";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import { clearHoverValue, setHoverValue } from "@foxglove/studio-base/actions/hoverValue";
 import Button from "@foxglove/studio-base/components/Button";
 import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
@@ -42,6 +40,10 @@ import {
 import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpeedControls";
 import Slider from "@foxglove/studio-base/components/Slider";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
+import {
+  useClearHoverValue,
+  useSetHoverValue,
+} from "@foxglove/studio-base/context/HoverValueContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { PlayerState, PlayerStateActiveData } from "@foxglove/studio-base/players/types";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
@@ -105,6 +107,8 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
     });
     const { seek, pause, play, player } = props;
     const [timezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
+    const clearHoverValue = useClearHoverValue();
+    const setHoverValue = useSetHoverValue();
 
     // playerState is unstable, and will cause callbacks to change identity every frame. They can take
     // a ref instead.
@@ -114,7 +118,6 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
     const onChange = useCallback((value: number) => seek(fromSec(value)), [seek]);
 
     const [hoverComponentId] = useState<string>(() => uuidv4());
-    const dispatch = useDispatch();
     const onMouseMove = useCallback(
       (e: React.MouseEvent<HTMLDivElement>) => {
         const { activeData } = playerState.current;
@@ -143,21 +146,19 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
           </div>
         );
         setTooltipState({ x, y, tip });
-        dispatch(
-          setHoverValue({
-            componentId: hoverComponentId,
-            type: "PLAYBACK_SECONDS",
-            value: toSec(timeFromStart),
-          }),
-        );
+        setHoverValue({
+          componentId: hoverComponentId,
+          type: "PLAYBACK_SECONDS",
+          value: toSec(timeFromStart),
+        });
       },
-      [playerState, dispatch, hoverComponentId],
+      [setHoverValue, hoverComponentId],
     );
 
     const onMouseLeave = useCallback(() => {
       setTooltipState(undefined);
-      dispatch(clearHoverValue({ componentId: hoverComponentId }));
-    }, [dispatch, hoverComponentId]);
+      clearHoverValue(hoverComponentId);
+    }, [clearHoverValue, hoverComponentId]);
 
     // Clean up the hover value when we are unmounted -- important for storybook.
     useEffect(() => onMouseLeave, [onMouseLeave]);

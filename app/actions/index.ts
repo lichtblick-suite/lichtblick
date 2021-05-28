@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { HoverValueActions } from "./hoverValue";
 import { UserNodesActions } from "./userNodes";
 
-export type ActionTypes = HoverValueActions | UserNodesActions;
+export type ActionTypes = UserNodesActions;

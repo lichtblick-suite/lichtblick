@@ -5,6 +5,8 @@
 import { Story } from "@storybook/react";
 import { ToastProvider } from "react-toast-notifications";
 
+import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
+import { HoverValueProvider } from "@foxglove/studio-base/context/HoverValueContext";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import waitForFonts from "@foxglove/studio-base/util/waitForFonts";
 
@@ -15,19 +17,18 @@ import "./styles.scss";
 
 let loaded = false;
 
-function withTheme(Child: Story): JSX.Element {
+function withContextProviders(Child: Story): JSX.Element {
+  const providers = [
+    /* eslint-disable react/jsx-key */
+    <ThemeProvider />,
+    <ToastProvider>{undefined}</ToastProvider>,
+    <HoverValueProvider />,
+    /* eslint-enable react/jsx-key */
+  ];
   return (
-    <ThemeProvider>
+    <MultiProvider providers={providers}>
       <Child />
-    </ThemeProvider>
-  );
-}
-
-function withToasts(Child: Story): JSX.Element {
-  return (
-    <ToastProvider>
-      <Child />
-    </ToastProvider>
+    </MultiProvider>
   );
 }
 
@@ -42,7 +43,7 @@ export const loaders = [
   },
 ];
 
-export const decorators = [withTheme, withToasts, withMockSubscribeToNewsletter];
+export const decorators = [withContextProviders, withMockSubscribeToNewsletter];
 
 export const parameters = {
   // Disable default padding around the page body

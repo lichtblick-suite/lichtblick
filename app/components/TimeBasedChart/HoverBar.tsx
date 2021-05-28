@@ -12,12 +12,10 @@
 //   You may not use this file except in compliance with the License.
 
 import { CSSProperties, useMemo } from "react";
-import { useSelector } from "react-redux";
 import styled from "styled-components";
 
 import { RpcScales } from "@foxglove/studio-base/components/Chart/types";
-import { State } from "@foxglove/studio-base/reducers";
-import { HoverValue } from "@foxglove/studio-base/types/hoverValue";
+import { useHoverValue } from "@foxglove/studio-base/context/HoverValueContext";
 
 const SWrapper = styled.div`
   top: 0;
@@ -35,29 +33,17 @@ type Props = {
   isTimestampScale: boolean;
 };
 
-function shouldShowBar(hoverValue: HoverValue, componentId: string, isTimestampScale: boolean) {
-  if (hoverValue == undefined) {
-    return false;
-  }
-  if (hoverValue.type === "PLAYBACK_SECONDS" && isTimestampScale) {
-    // Always show playback-time hover values for timestamp-based charts.
-    return true;
-  }
-  // Otherwise just show a hover bar when hovering over the panel itself.
-  return hoverValue.componentId === componentId;
-}
-
 export default React.memo<Props>(function HoverBar({
   children,
   componentId,
   isTimestampScale,
   scales,
 }: Props) {
-  const hoverValue = useSelector((state: State) => state.hoverValue);
+  const hoverValue = useHoverValue({ componentId, isTimestampScale });
 
   const positionX = useMemo(() => {
     const xScale = scales?.x;
-    if (!xScale || !hoverValue || !shouldShowBar(hoverValue, componentId, isTimestampScale)) {
+    if (!xScale || !hoverValue) {
       return;
     }
 
@@ -70,7 +56,7 @@ export default React.memo<Props>(function HoverBar({
       return;
     }
     return pos;
-  }, [scales?.x, hoverValue, componentId, isTimestampScale]);
+  }, [scales?.x, hoverValue]);
 
   const { visibility, transform } = useMemo((): CSSProperties => {
     if (positionX == undefined || isNaN(positionX)) {

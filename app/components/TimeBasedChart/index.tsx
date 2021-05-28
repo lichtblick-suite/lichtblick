@@ -23,14 +23,12 @@ import React, {
   useMemo,
   MouseEvent,
 } from "react";
-import { useDispatch } from "react-redux";
 import { Time } from "rosbag";
 import styled from "styled-components";
 import { useDebouncedCallback } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
 
 import Logger from "@foxglove/log";
-import { clearHoverValue, setHoverValue } from "@foxglove/studio-base/actions/hoverValue";
 import Button from "@foxglove/studio-base/components/Button";
 import ChartComponent from "@foxglove/studio-base/components/Chart/index";
 import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/types";
@@ -43,6 +41,10 @@ import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipe
 import TimeBasedChartLegend from "@foxglove/studio-base/components/TimeBasedChart/TimeBasedChartLegend";
 import makeGlobalState from "@foxglove/studio-base/components/TimeBasedChart/makeGlobalState";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
+import {
+  useClearHoverValue,
+  useSetHoverValue,
+} from "@foxglove/studio-base/context/HoverValueContext";
 import mixins from "@foxglove/studio-base/styles/mixins.module.scss";
 import { StampedMessage } from "@foxglove/studio-base/types/Messages";
 import filterMap from "@foxglove/studio-base/util/filterMap";
@@ -425,21 +427,20 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   );
 
   const hoverComponentId = useMemo(() => uuidv4(), []);
-  const dispatch = useDispatch();
+  const setHoverValue = useSetHoverValue();
+  const clearHoverValue = useClearHoverValue();
   const clearGlobalHoverTime = useCallback(
-    () => dispatch(clearHoverValue({ componentId: hoverComponentId })),
-    [dispatch, hoverComponentId],
+    () => clearHoverValue(hoverComponentId),
+    [clearHoverValue, hoverComponentId],
   );
   const setGlobalHoverTime = useCallback(
     (value) =>
-      dispatch(
-        setHoverValue({
-          componentId: hoverComponentId,
-          value,
-          type: xAxisIsPlaybackTime ? "PLAYBACK_SECONDS" : "OTHER",
-        }),
-      ),
-    [dispatch, hoverComponentId, xAxisIsPlaybackTime],
+      setHoverValue({
+        componentId: hoverComponentId,
+        value,
+        type: xAxisIsPlaybackTime ? "PLAYBACK_SECONDS" : "OTHER",
+      }),
+    [setHoverValue, hoverComponentId, xAxisIsPlaybackTime],
   );
 
   const onMouseOut = useCallback(() => {
