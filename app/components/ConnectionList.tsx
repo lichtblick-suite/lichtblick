@@ -40,7 +40,14 @@ export default function ConnectionList(): JSX.Element {
         return (
           <div key={source.name}>
             <ActionButton
-              styles={{ root: { margin: 0, padding: 0, width: "100%" } }}
+              styles={{
+                root: {
+                  margin: 0,
+                  padding: 0,
+                  width: "100%",
+                  textAlign: "left",
+                },
+              }}
               iconProps={{
                 iconName,
                 styles: { root: { "& span": { verticalAlign: "baseline" } } },
