@@ -15,6 +15,7 @@ docker run ^
   --hostname %HOSTNAME% ^
   -e ROS_MASTER_URI="http://%HOSTNAME%:%ROSCORE_PORT%/" ^
   -e ROS_HOSTNAME="%HOSTNAME%" ^
+  -p 9090:9090 ^
   -p %ROSCORE_PORT%-%MAX_PORT%:%ROSCORE_PORT%-%MAX_PORT% ^
   --name sample-robot ^
   sample-robot

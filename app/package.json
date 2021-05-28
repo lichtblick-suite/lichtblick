@@ -70,7 +70,7 @@
     "rehype-raw": "5.1.0",
     "reselect": "4.0.0",
     "rosbag": "github:foxglove/rosbag.js#6ce4e00c16b80973e270d53e9fb362a516e74e03",
-    "roslib": "github:foxglove/roslibjs#364a19d5f3ada7543fac9194a50b96087c7556ba",
+    "roslib": "github:foxglove/roslibjs#1c29f898683cc07945d400ec97916520920041a2",
     "sanitize-html": "2.4.0",
     "seedrandom": "3.0.5",
     "shallowequal": "1.1.0",

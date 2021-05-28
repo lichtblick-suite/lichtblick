@@ -25,12 +25,7 @@ const ALLOWED_LICENSES = [
   "OFL-1.1",
 ];
 
-const EXCLUDED_PACKAGES = [
-  "@react-leaflet/core@1.1.0",
-  "gl-vec3@1.1.3",
-  "pngparse@2.0.1",
-  "react-leaflet@3.2.0",
-];
+const EXCLUDED_PACKAGES = ["@react-leaflet/core@1.1.0", "gl-vec3@1.1.3", "react-leaflet@3.2.0"];
 
 async function main() {
   const output = await initChecker({

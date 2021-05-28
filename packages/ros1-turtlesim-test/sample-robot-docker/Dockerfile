@@ -2,6 +2,7 @@ FROM ros:noetic-robot-focal
 
 RUN apt-get update && apt-get install -y \
   ros-noetic-ros-tutorials \
+  ros-noetic-rosbridge-suite \
   xvfb \
   && rm -rf /var/lib/apt/lists/*
 

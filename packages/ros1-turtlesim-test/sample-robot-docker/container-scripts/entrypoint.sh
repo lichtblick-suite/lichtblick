@@ -2,6 +2,6 @@
 
 source ~/catkin_ws/devel/setup.bash
 
-roscore &
+roslaunch rosbridge_server rosbridge_websocket.launch &
 
 xvfb-run --auto-servernum rosrun turtlesim turtlesim_node
