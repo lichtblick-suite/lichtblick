@@ -7,7 +7,6 @@ import InternalLogs from "./InternalLogs";
 import Internals from "./Internals";
 import MapPanel from "./Map";
 import NodePlayground from "./NodePlayground";
-import NumberOfRenders from "./NumberOfRenders";
 import ParametersPanel from "./Parameters";
 import PlaybackPerformance from "./PlaybackPerformance";
 import Plot from "./Plot";
@@ -48,7 +47,6 @@ const builtin = [
 ];
 
 const debug = [
-  { title: "Studio - Number of Renders", component: NumberOfRenders },
   { title: "Studio - Playback Performance", component: PlaybackPerformance },
   { title: "Studio - Internals", component: Internals },
   { title: "Studio - Logs", component: InternalLogs },
