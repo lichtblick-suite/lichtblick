@@ -9,7 +9,6 @@ import { captureException, init as initSentry } from "@sentry/electron";
 import { app, BrowserWindow, ipcMain, Menu, session, nativeTheme, shell } from "electron";
 import { autoUpdater } from "electron-updater";
 import fs from "fs";
-import { URL } from "universal-url";
 
 import Logger from "@foxglove/log";
 

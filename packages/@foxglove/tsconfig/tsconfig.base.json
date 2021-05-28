@@ -9,7 +9,7 @@
     "lib": ["es2020"],
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "importHelpers": false,
+    "importHelpers": true,
 
     // required for testing with babel-jest + babel-plugin-transform-typescript
     "isolatedModules": true,

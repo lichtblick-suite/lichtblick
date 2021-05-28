@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { ESBuildMinifyPlugin } from "esbuild-loader";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import path from "path";
 import { Configuration, EnvironmentPlugin } from "webpack";
@@ -44,6 +45,11 @@ export default (_: unknown, argv: WebpackArgv): Configuration => {
           },
         },
       ],
+    },
+
+    optimization: {
+      removeAvailableModules: true,
+      minimizer: [new ESBuildMinifyPlugin({ target: "es2020" })],
     },
 
     plugins: [

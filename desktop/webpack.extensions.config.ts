@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import CopyPlugin from "copy-webpack-plugin";
+import { ESBuildMinifyPlugin } from "esbuild-loader";
 import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import path from "path";
 import { Configuration } from "webpack";
@@ -83,7 +84,17 @@ export default (_: unknown, argv: WebpackArgv): Configuration => {
             { loader: "css-loader", options: { sourceMap: true } },
           ],
         },
+        {
+          test: /\.s?css$/,
+          loader: "esbuild-loader",
+          options: { loader: "css", minify: !isDev },
+        },
       ],
+    },
+
+    optimization: {
+      removeAvailableModules: true,
+      minimizer: [new ESBuildMinifyPlugin({ target: "es2020" })],
     },
 
     plugins: [
