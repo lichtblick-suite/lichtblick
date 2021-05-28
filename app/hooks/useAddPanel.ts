@@ -10,7 +10,6 @@ import {
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePanelSettings } from "@foxglove/studio-base/context/PanelSettingsContext";
 import { getPanelIdForType } from "@foxglove/studio-base/util/layout";
-import logEvent, { getEventNames, getEventTags } from "@foxglove/studio-base/util/logEvent";
 
 export default function useAddPanel(): (selection: PanelSelection) => void {
   const { addPanel, getCurrentLayout } = useCurrentLayoutActions();
@@ -22,12 +21,6 @@ export default function useAddPanel(): (selection: PanelSelection) => void {
       addPanel({ id, layout: getCurrentLayout().layout, config, relatedConfigs });
       setSelectedPanelIds([id]);
       openPanelSettings();
-
-      const name = getEventNames().PANEL_ADD;
-      const panelType = getEventTags().PANEL_TYPE;
-      if (name != undefined && panelType != undefined) {
-        logEvent({ name: name, tags: { [panelType]: type } });
-      }
     },
     [addPanel, setSelectedPanelIds, getCurrentLayout, openPanelSettings],
   );

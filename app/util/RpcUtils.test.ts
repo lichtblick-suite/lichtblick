@@ -13,17 +13,13 @@
 //   You may not use this file except in compliance with the License.
 
 import delay from "@foxglove/studio-base/util/delay";
-import logEvent, {
-  initializeLogEvent,
-  resetLogEventForTests,
-} from "@foxglove/studio-base/util/logEvent";
 import sendNotification, {
   setNotificationHandler,
 } from "@foxglove/studio-base/util/sendNotification";
 
 import Rpc, { createLinkedChannels } from "./Rpc";
-import { setupReceiveReportErrorHandler, setupReceiveLogEventHandler } from "./RpcMainThreadUtils";
-import { setupSendReportNotificationHandler, setupLogEventHandler } from "./RpcWorkerUtils";
+import { setupReceiveReportErrorHandler } from "./RpcMainThreadUtils";
+import { setupSendReportNotificationHandler } from "./RpcWorkerUtils";
 
 describe("RpcWorkerUtils and RpcMainThreadUtils", () => {
   describe("sendNotification", () => {
@@ -76,36 +72,6 @@ describe("RpcWorkerUtils and RpcMainThreadUtils", () => {
       });
 
       sendNotification.expectCalledDuringTest();
-    });
-  });
-
-  describe("logEvent", () => {
-    it("sends a logged event", () => {
-      const { local: mainChannel, remote: workerChannel } = createLinkedChannels();
-      const main = new Rpc(mainChannel);
-      const logEventMock = jest.fn();
-      main.receive("logEvent", logEventMock);
-
-      const worker = new Rpc(workerChannel);
-      setupLogEventHandler(worker);
-      logEvent({ name: "test", tags: { a: "1" } });
-
-      expect(logEventMock).toHaveBeenCalledWith({ name: "test", tags: { a: "1" } });
-      resetLogEventForTests();
-    });
-
-    it("receives a logged event", () => {
-      const { local: mainChannel, remote: workerChannel } = createLinkedChannels();
-      const main = new Rpc(mainChannel);
-      const logEventMock = jest.fn();
-      initializeLogEvent(logEventMock);
-      setupReceiveLogEventHandler(main);
-
-      const worker = new Rpc(workerChannel);
-      worker.send("logEvent", { name: "test", tags: { a: "1" } });
-
-      expect(logEventMock).toHaveBeenCalledWith({ name: "test", tags: { a: "1" } });
-      resetLogEventForTests();
     });
   });
 });

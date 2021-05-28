@@ -68,7 +68,6 @@ import {
   getPathFromNode,
   updateTabPanelLayout,
 } from "@foxglove/studio-base/util/layout";
-import logEvent, { getEventTags, getEventNames } from "@foxglove/studio-base/util/logEvent";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import styles from "./Panel.module.scss";
@@ -281,20 +280,12 @@ export default function Panel<Config extends PanelConfig>(
     }, [getCurrentLayout, getSelectedPanelIds, createTabPanel, childId]);
 
     const removePanel = useCallback(() => {
-      const name = getEventNames().PANEL_REMOVE;
-      const eventType = getEventTags().PANEL_TYPE;
-      if (name != undefined && eventType !== undefined) {
-        logEvent({
-          name,
-          tags: { [eventType]: type },
-        });
-      }
       closePanel({
         path: mosaicWindowActions.getPath(),
         root: mosaicActions.getRoot() as MosaicNode<string>,
         tabId,
       });
-    }, [closePanel, mosaicActions, mosaicWindowActions, tabId, type]);
+    }, [closePanel, mosaicActions, mosaicWindowActions, tabId]);
 
     const splitPanel = useCallback(() => {
       const savedProps = getCurrentLayout().configById;
@@ -322,15 +313,7 @@ export default function Panel<Config extends PanelConfig>(
       } else {
         mosaicWindowActions.split({ type: PanelComponent.panelType });
       }
-      const name = getEventNames().PANEL_SPLIT;
-      const eventType = getEventTags().PANEL_TYPE;
-      if (name != undefined && eventType !== undefined) {
-        logEvent({
-          name,
-          tags: { [eventType]: type },
-        });
-      }
-    }, [childId, config, getCurrentLayout, mosaicWindowActions, savePanelConfigs, tabId, type]);
+    }, [childId, config, getCurrentLayout, mosaicWindowActions, savePanelConfigs, tabId]);
 
     const { onMouseEnter, onMouseLeave, onMouseMove, enterFullscreen, exitFullScreen } = useMemo(
       () => ({

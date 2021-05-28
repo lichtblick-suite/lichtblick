@@ -13,7 +13,6 @@
 
 import delay from "@foxglove/studio-base/util/delay";
 import inAutomatedRunMode from "@foxglove/studio-base/util/inAutomatedRunMode";
-import { initializeLogEvent, resetLogEventForTests } from "@foxglove/studio-base/util/logEvent";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 import signal from "@foxglove/studio-base/util/signal";
 
@@ -27,29 +26,6 @@ jest.mock("@foxglove/studio-base/util/inAutomatedRunMode", () => jest.fn(() => f
 describe("pauseFrameForPromise", () => {
   afterEach(() => {
     (inAutomatedRunMode as any).mockImplementation(() => false);
-  });
-
-  it("sends the paused frame panel types to amplitude", async () => {
-    const logger = jest.fn();
-    initializeLogEvent(
-      logger,
-      { PAUSE_FRAME_TIMEOUT: "pause_frame_timeout" },
-      { PANEL_TYPES: "panel_types" },
-    );
-
-    pauseFrameForPromises([
-      { promise: signal(), name: "foo" },
-      { promise: signal(), name: "bar" },
-      { promise: signal(), name: "zoo" },
-      { promise: signal(), name: "bar" },
-    ]);
-    await delay(MAX_PROMISE_TIMEOUT_TIME_MS + 20);
-
-    expect(logger).toHaveBeenCalledWith({
-      name: "pause_frame_timeout",
-      tags: { panel_types: ["bar", "foo", "zoo"] },
-    });
-    resetLogEventForTests();
   });
 
   it("always reports an error in automated run mode", async () => {

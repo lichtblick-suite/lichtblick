@@ -8,12 +8,7 @@ import ReactDOM from "react-dom";
 import "@foxglove/studio-base/styles/global.scss";
 
 import Logger from "@foxglove/log";
-import {
-  installDevtoolsFormatters,
-  initializeLogEvent,
-  overwriteFetch,
-  waitForFonts,
-} from "@foxglove/studio-base";
+import { installDevtoolsFormatters, overwriteFetch, waitForFonts } from "@foxglove/studio-base";
 
 import Root from "./Root";
 
@@ -48,8 +43,6 @@ if (!rootEl) {
 async function main() {
   // consider moving waitForFonts into App to display an app loading screen
   await waitForFonts();
-
-  initializeLogEvent(() => undefined, {}, {});
 
   ReactDOM.render(<Root />, rootEl, () => {
     // Integration tests look for this console log to indicate the app has rendered once

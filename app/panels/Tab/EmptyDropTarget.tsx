@@ -24,7 +24,6 @@ import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLa
 import cssColors from "@foxglove/studio-base/styles/colors.module.scss";
 import { MosaicDropResult } from "@foxglove/studio-base/types/panels";
 import { getPanelIdForType } from "@foxglove/studio-base/util/layout";
-import logEvent, { getEventNames, getEventTags } from "@foxglove/studio-base/util/logEvent";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const SDropTarget = styled.div<{ isOver: boolean }>`
@@ -77,11 +76,6 @@ export const EmptyDropTarget = ({ tabId }: Props): JSX.Element => {
     ({ type, config, relatedConfigs }: PanelSelection) => {
       const id = getPanelIdForType(type);
       addPanel({ tabId, id, layout: undefined, config, relatedConfigs });
-      const name = getEventNames().PANEL_ADD;
-      const eventType = getEventTags().PANEL_TYPE;
-      if (name != undefined && eventType != undefined) {
-        logEvent({ name, tags: { [eventType]: type } });
-      }
     },
     [addPanel, tabId],
   );

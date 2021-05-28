@@ -11,10 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { sortBy, sortedUniq } from "lodash";
-
 import inAutomatedRunMode from "@foxglove/studio-base/util/inAutomatedRunMode";
-import logEvent, { getEventNames, getEventTags } from "@foxglove/studio-base/util/logEvent";
 import promiseTimeout from "@foxglove/studio-base/util/promiseTimeout";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
@@ -35,17 +32,6 @@ export async function pauseFrameForPromises(promises: FramePromise[]): Promise<v
     if (!isTimeoutError || inAutomatedRunMode()) {
       sendNotification("Player ", error, "app", "error");
       return;
-    }
-
-    // Log the panelTypes so we can track which panels timeout regularly.
-    const sortedUniquePanelTypes = sortedUniq(sortBy(promises.map(({ name }) => name)));
-    const name = getEventNames().PAUSE_FRAME_TIMEOUT;
-    const type = getEventTags().PANEL_TYPES;
-    if (name != undefined && type != undefined) {
-      logEvent({
-        name,
-        tags: { [type]: sortedUniquePanelTypes },
-      });
     }
   }
 }

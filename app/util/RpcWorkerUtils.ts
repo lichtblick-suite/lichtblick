@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { initializeLogEvent } from "@foxglove/studio-base/util/logEvent";
 import {
   setNotificationHandler,
   DetailsType,
@@ -44,16 +43,9 @@ export function setupSendReportNotificationHandler(rpc: Rpc): void {
   );
 }
 
-export function setupLogEventHandler(rpc: Rpc): void {
-  initializeLogEvent((param) => {
-    rpc.send("logEvent", param);
-  });
-}
-
 export function setupWorker(rpc: Rpc): void {
   if (process.env.NODE_ENV !== "test") {
     setupSendReportNotificationHandler(rpc);
-    setupLogEventHandler(rpc);
     overwriteFetch();
   }
 }

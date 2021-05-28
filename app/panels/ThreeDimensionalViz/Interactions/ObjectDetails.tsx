@@ -21,7 +21,6 @@ import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem
 import useGetItemStringWithTimezone from "@foxglove/studio-base/components/JsonTree/useGetItemStringWithTimezone";
 import { getInstanceObj } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
 import { jsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
-import logEvent, { getEventNames, getEventTags } from "@foxglove/studio-base/util/logEvent";
 
 import GlobalVariableLink from "./GlobalVariableLink/index";
 import { InteractionData } from "./types";
@@ -65,12 +64,6 @@ function ObjectDetailsWrapper({
 
   const updateShowInstance = (shouldShowInstance: any) => {
     setShowInstance(shouldShowInstance);
-    logEvent({
-      // @ts-expect-error Event logging is not currently well typed
-      name: getEventNames()["3D_PANEL.OBJECT_DETAILS_SHOW_INSTANCE"],
-      // @ts-expect-error Event logging is not currently well typed
-      tags: { [getEventTags().PANEL_TYPE]: "3D Panel" },
-    });
   };
 
   const objectToDisplay = instanceObject && showInstance ? instanceObject : object;

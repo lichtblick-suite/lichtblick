@@ -25,7 +25,6 @@ export type { NativeAppMenu, NativeAppMenuEvent } from "./context/NativeAppMenuC
 export type { PlayerSourceDefinition } from "./context/PlayerSelectionContext";
 export { default as ThemeProvider } from "./theme/ThemeProvider";
 export { default as installDevtoolsFormatters } from "./util/installDevtoolsFormatters";
-export { initializeLogEvent } from "./util/logEvent";
 export { default as overwriteFetch } from "./util/overwriteFetch";
 export { default as waitForFonts } from "./util/waitForFonts";
 export { default as UserProfileLocalStorageProvider } from "./providers/UserProfileLocalStorageProvider";

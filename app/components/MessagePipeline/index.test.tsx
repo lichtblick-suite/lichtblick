@@ -21,11 +21,6 @@ import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurat
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { PlayerPresence, PlayerStateActiveData } from "@foxglove/studio-base/players/types";
 import delay from "@foxglove/studio-base/util/delay";
-import {
-  initializeLogEvent,
-  resetLogEventForTests,
-  Tags,
-} from "@foxglove/studio-base/util/logEvent";
 import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 import tick from "@foxglove/studio-base/util/tick";
@@ -447,21 +442,6 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
   });
 
   describe("pauseFrame", () => {
-    let logger: (args: { name: string; tags: Tags }) => void;
-
-    beforeEach(async () => {
-      logger = jest.fn();
-      initializeLogEvent(
-        logger,
-        { PAUSE_FRAME_TIMEOUT: "pause_frame_timeout" },
-        { PANEL_TYPES: "panel_types" },
-      );
-    });
-
-    afterEach(() => {
-      resetLogEventForTests();
-    });
-
     it("frames automatically resolve without calling pauseFrame", async () => {
       let hasFinishedFrame = false;
       const player = new FakePlayer();
@@ -597,7 +577,6 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
 
       await delay(MAX_PROMISE_TIMEOUT_TIME_MS + 20);
       expect(hasFinishedFrame).toEqual(true);
-      expect(logger).toHaveBeenCalled();
     });
 
     it("Adding multiple promises that do not resolve eventually results in an error, and then continues playing", async () => {
@@ -623,7 +602,6 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
 
       await delay(MAX_PROMISE_TIMEOUT_TIME_MS + 20);
       expect(hasFinishedFrame).toEqual(true);
-      expect(logger).toHaveBeenCalled();
     });
 
     it("does not accidentally resolve the second player's promise when replacing the player", async () => {

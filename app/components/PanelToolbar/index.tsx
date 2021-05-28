@@ -39,7 +39,6 @@ import {
   useSelectedPanels,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePanelSettings } from "@foxglove/studio-base/context/PanelSettingsContext";
-import logEvent, { getEventNames, getEventTags } from "@foxglove/studio-base/util/logEvent";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import styles from "./index.module.scss";
@@ -68,34 +67,18 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
   );
 
   const close = useCallback(() => {
-    const name = getEventNames().PANEL_REMOVE;
-    const type = getEventTags().PANEL_TYPE;
-    if (name != undefined && type != undefined) {
-      logEvent({
-        name: name,
-        tags: { [type]: getPanelType() },
-      });
-    }
     closePanel({
       tabId,
       root: mosaicActions.getRoot() as any,
       path: mosaicWindowActions.getPath(),
     });
-  }, [closePanel, getPanelType, mosaicActions, mosaicWindowActions, tabId]);
+  }, [closePanel, mosaicActions, mosaicWindowActions, tabId]);
 
   const split = useCallback(
     (id: string | undefined, direction: "row" | "column") => {
       const type = getPanelType();
       if (id == undefined || type == undefined) {
         throw new Error("Trying to split unknown panel!");
-      }
-      const name = getEventNames().PANEL_SPLIT;
-      const eventType = getEventTags().PANEL_TYPE;
-      if (name != undefined && eventType != undefined) {
-        logEvent({
-          name: name,
-          tags: { [eventType]: type },
-        });
       }
 
       const config = getCurrentLayout().configById[id] ?? {};
@@ -123,14 +106,6 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
           config: config as any,
           relatedConfigs,
         });
-        const name = getEventNames().PANEL_SWAP;
-        const eventType = getEventTags().PANEL_TYPE;
-        if (name != undefined && eventType != undefined) {
-          logEvent({
-            name: name,
-            tags: { [eventType]: type },
-          });
-        }
       },
     [mosaicActions, mosaicWindowActions, swapPanel, tabId],
   );
