@@ -5,15 +5,6 @@ __metadata:
   version: 4
   cacheKey: 7
 
-"${NAME}@workspace:packages/@foxglove/fox/template":
-  version: 0.0.0-use.local
-  resolution: "${NAME}@workspace:packages/@foxglove/fox/template"
-  dependencies:
-    "@foxglove/fox": 0.1.0
-    "@foxglove/studio": 0.1.0
-  languageName: unknown
-  linkType: soft
-
 "7zip-bin@npm:~5.0.3":
   version: 5.0.3
   resolution: "7zip-bin@npm:5.0.3"
@@ -2565,26 +2556,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/fox@0.1.0, @foxglove/fox@workspace:packages/@foxglove/fox":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/fox@workspace:packages/@foxglove/fox"
-  dependencies:
-    "@types/mkdirp": ^1
-    "@types/ncp": ^2
-    "@types/node": ^12
-    "@types/rimraf": ^3
-    commander: 7.2.0
-    jszip: 3.6.0
-    mkdirp: 1.0.4
-    ncp: 2.0.0
-    rimraf: 3.0.2
-    sanitize-filename: 1.6.3
-    typescript: 4.2.4
-  bin:
-    fox: dist/fox
-  languageName: unknown
-  linkType: soft
-
 "@foxglove/hooks@workspace:packages/@foxglove/hooks":
   version: 0.0.0-use.local
   resolution: "@foxglove/hooks@workspace:packages/@foxglove/hooks"
@@ -2830,7 +2801,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/studio@0.1.0, @foxglove/studio@workspace:packages/@foxglove/studio":
+"@foxglove/studio@workspace:packages/@foxglove/studio":
   version: 0.0.0-use.local
   resolution: "@foxglove/studio@workspace:packages/@foxglove/studio"
   languageName: unknown
@@ -5601,7 +5572,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/mkdirp@npm:^1, @types/mkdirp@npm:^1.0.0, @types/mkdirp@npm:^1.0.1":
+"@types/mkdirp@npm:^1.0.0, @types/mkdirp@npm:^1.0.1":
   version: 1.0.1
   resolution: "@types/mkdirp@npm:1.0.1"
   dependencies:
@@ -5616,15 +5587,6 @@ __metadata:
   dependencies:
     moment: ">=2.14.0"
   checksum: 1784d37fb57753b1a6fc23ea6a207ec39fb2e55c29a49985e33c863080fb5eff78a4190ed86ea500e23cb0c93d385ed594cbf35c793a014d879bc02eb2651b36
-  languageName: node
-  linkType: hard
-
-"@types/ncp@npm:^2":
-  version: 2.0.4
-  resolution: "@types/ncp@npm:2.0.4"
-  dependencies:
-    "@types/node": "*"
-  checksum: 9d5f5b6eb74ebd712783eaf1c30517800a1378edee7c02a128fec0b084ad9df1d76e4b118a5a6606f34ec6114d305ae3eb55ecd01b9e8506cc4f34d0800d656c
   languageName: node
   linkType: hard
 
@@ -5963,7 +5925,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/rimraf@npm:^3, @types/rimraf@npm:^3.0.0":
+"@types/rimraf@npm:^3.0.0":
   version: 3.0.0
   resolution: "@types/rimraf@npm:3.0.0"
   dependencies:
@@ -9659,13 +9621,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"commander@npm:7.2.0, commander@npm:^7.0.0":
-  version: 7.2.0
-  resolution: "commander@npm:7.2.0"
-  checksum: bdc0eca5e25cd24af8440163d3c9a996785bbac4b49a590365699cdc1ed08cefbac8f268153208ab2bc5dc3cb1d3fb573fd1590c681e36e371342186bd331a4c
-  languageName: node
-  linkType: hard
-
 "commander@npm:^2.19.0, commander@npm:^2.20.0":
   version: 2.20.3
   resolution: "commander@npm:2.20.3"
@@ -9691,6 +9646,13 @@ __metadata:
   version: 6.2.1
   resolution: "commander@npm:6.2.1"
   checksum: 47856aae6f194404122e359d8463e5e1a18f7cbab26722ce69f1379be8514bd49a160ef81a983d3d2091e3240022643354101d1276c797dcdd0b5bfc3c3f04a3
+  languageName: node
+  linkType: hard
+
+"commander@npm:^7.0.0":
+  version: 7.2.0
+  resolution: "commander@npm:7.2.0"
+  checksum: bdc0eca5e25cd24af8440163d3c9a996785bbac4b49a590365699cdc1ed08cefbac8f268153208ab2bc5dc3cb1d3fb573fd1590c681e36e371342186bd331a4c
   languageName: node
   linkType: hard
 
@@ -17168,7 +17130,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jszip@npm:3.6.0, jszip@npm:^3.1.0, jszip@npm:^3.5.0":
+"jszip@npm:^3.1.0, jszip@npm:^3.5.0":
   version: 3.6.0
   resolution: "jszip@npm:3.6.0"
   dependencies:
@@ -18651,15 +18613,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mkdirp@npm:1.0.4, mkdirp@npm:^1.0.0, mkdirp@npm:^1.0.3, mkdirp@npm:^1.0.4, mkdirp@npm:~1.0.4":
-  version: 1.0.4
-  resolution: "mkdirp@npm:1.0.4"
-  bin:
-    mkdirp: bin/cmd.js
-  checksum: 1aa3a6a2d7514f094a91329ec09994f5d32d2955a4985ecbb3d86f2aaeafc4aa11521f98d606144c1d49cd9835004d9a73342709b8c692c92e59eacf37412468
-  languageName: node
-  linkType: hard
-
 "mkdirp@npm:^0.5.1, mkdirp@npm:^0.5.3, mkdirp@npm:^0.5.4, mkdirp@npm:^0.5.5, mkdirp@npm:~0.5.1":
   version: 0.5.5
   resolution: "mkdirp@npm:0.5.5"
@@ -18668,6 +18621,15 @@ __metadata:
   bin:
     mkdirp: bin/cmd.js
   checksum: 9dd9792e891927b14ca02226dbe1daeb717b9517a001620d5e2658bbc72c5e4f06887b6cbcbb60595fa5a56e701073cf250f1ed69c1988a6b89faf9fd6a4d049
+  languageName: node
+  linkType: hard
+
+"mkdirp@npm:^1.0.0, mkdirp@npm:^1.0.3, mkdirp@npm:^1.0.4, mkdirp@npm:~1.0.4":
+  version: 1.0.4
+  resolution: "mkdirp@npm:1.0.4"
+  bin:
+    mkdirp: bin/cmd.js
+  checksum: 1aa3a6a2d7514f094a91329ec09994f5d32d2955a4985ecbb3d86f2aaeafc4aa11521f98d606144c1d49cd9835004d9a73342709b8c692c92e59eacf37412468
   languageName: node
   linkType: hard
 
@@ -18889,15 +18851,6 @@ __metadata:
   version: 1.4.0
   resolution: "natural-compare@npm:1.4.0"
   checksum: 2daf93d9bb516eddb06e2e80657a605af2e494d47c65d090ba43691aaffbc41f520840f1c9d3b7b641977af950217a4ab6ffb85bafcd5dfa8ba6fe4e68c43b53
-  languageName: node
-  linkType: hard
-
-"ncp@npm:2.0.0":
-  version: 2.0.0
-  resolution: "ncp@npm:2.0.0"
-  bin:
-    ncp: ./bin/ncp
-  checksum: a751e4c94bc810b34b81c8cad288b90ac59fa83890e701483fd70f800d3c2228bea9eff84d1c034074cd1b393cec40696c04558a70b17476eba7acb06e20e71c
   languageName: node
   linkType: hard
 
@@ -23244,7 +23197,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"sanitize-filename@npm:1.6.3, sanitize-filename@npm:^1.6.3":
+"sanitize-filename@npm:^1.6.3":
   version: 1.6.3
   resolution: "sanitize-filename@npm:1.6.3"
   dependencies:
