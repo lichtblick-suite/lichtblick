@@ -14,6 +14,7 @@
 import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
 import cx from "classnames";
 import { flatten, flatMap, partition } from "lodash";
+import { CSSProperties } from "react";
 
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
@@ -153,7 +154,7 @@ type MessagePathInputBaseProps = {
   noMultiSlices?: boolean; // Don't suggest slices with multiple values `[:]`, only single values like `[0]`.
   autoSize?: boolean;
   placeholder?: string;
-  inputStyle?: any;
+  inputStyle?: CSSProperties;
   disableAutocomplete?: boolean; // Treat this as a normal input, with no autocomplete.
   prioritizedDatatype?: string;
 
@@ -181,12 +182,12 @@ class MessagePathInputUnconnected extends React.PureComponent<
   _onChange = (event: React.SyntheticEvent<HTMLInputElement>, value: string) => {
     // When typing a "{" character, also  insert a "}", so you get an
     // autocomplete window immediately for selecting a filter name.
-    if ((event.nativeEvent as any).data === "{") {
-      const newCursorPosition = (event.target as any).selectionEnd;
+    if ((event.nativeEvent as InputEvent).data === "{") {
+      const target = event.target as HTMLInputElement;
+      const newCursorPosition = target.selectionEnd ?? 0;
       value = `${value.slice(0, newCursorPosition)}}${value.slice(newCursorPosition)}`;
 
-      const target = event.target;
-      setImmediate(() => (target as any).setSelectionRange(newCursorPosition, newCursorPosition));
+      setImmediate(() => target.setSelectionRange(newCursorPosition, newCursorPosition));
     }
     this.props.onChange(value, this.props.index);
   };
@@ -406,8 +407,8 @@ class MessagePathInputUnconnected extends React.PureComponent<
                 <Tooltip contents="Timestamp used for x-axis" placement="top">
                   <div
                     className={cx({
-                      [styles.timestampMethodDropdown!]: true,
-                      [styles.timestampMethodDropdownError!]:
+                      [styles.timestampMethodDropdown as string]: true,
+                      [styles.timestampMethodDropdownError as string]:
                         timestampMethod === "headerStamp" && noHeaderStamp,
                     })}
                   >
@@ -455,7 +456,7 @@ class MessagePathInputUnconnected extends React.PureComponent<
               >
                 <span
                   className={cx({
-                    [styles.timestampItemError!]: noHeaderStamp,
+                    [styles.timestampItemError as string]: noHeaderStamp,
                   })}
                 >
                   header.stamp

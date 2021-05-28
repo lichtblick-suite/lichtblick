@@ -17,7 +17,7 @@ import RepeatIcon from "@mdi/svg/svg/repeat.svg";
 import SkipNextOutlineIcon from "@mdi/svg/svg/skip-next-outline.svg";
 import SkipPreviousOutlineIcon from "@mdi/svg/svg/skip-previous-outline.svg";
 import classnames from "classnames";
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { memo, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Time, TimeUtil } from "rosbag";
 import styled from "styled-components";
@@ -77,13 +77,13 @@ export const StyledMarker = styled.div.attrs<{ width: number }>(({ width }) => (
 
 export type PlaybackControlProps = {
   player: PlayerState;
-  auxiliaryData?: any;
+  auxiliaryData?: unknown;
   pause: () => void;
   play: () => void;
   seek: (arg0: Time) => void;
 };
 
-export const TooltipItem = ({ title, value }: { title: string; value: any }): JSX.Element => (
+export const TooltipItem = ({ title, value }: { title: string; value: ReactNode }): JSX.Element => (
   <div>
     <span className={styles.tipTitle}>{title}:</span>
     <span className={styles.tipValue}>{value}</span>
@@ -231,7 +231,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
           <Button
             onClick={() => jumpSeek(DIRECTION.BACKWARD, { seek, player: playerState.current })}
             style={{ borderRadius: "4px 0px 0px 4px", marginLeft: "16px", marginRight: "1px" }}
-            className={cx([styles.seekBtn, { [styles.inactive!]: !activeData }])}
+            className={cx([styles.seekBtn, { [styles.inactive as string]: !activeData }])}
             tooltip="Seek backward"
           >
             <Icon medium>
@@ -241,7 +241,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
           <Button
             onClick={() => jumpSeek(DIRECTION.FORWARD, { seek, player: playerState.current })}
             style={{ borderRadius: "0px 4px 4px 0px" }}
-            className={cx([styles.seekBtn, { [styles.inactive!]: !activeData }])}
+            className={cx([styles.seekBtn, { [styles.inactive as string]: !activeData }])}
             tooltip="Seek forward"
           >
             <Icon medium>

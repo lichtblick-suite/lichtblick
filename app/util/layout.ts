@@ -22,14 +22,14 @@ import {
   MosaicNode,
   MosaicPath,
 } from "react-mosaic-component";
-import { MosaicKey } from "react-mosaic-component/lib/types";
+import { MosaicDirection, MosaicKey } from "react-mosaic-component/lib/types";
 
 import Logger from "@foxglove/log";
 import {
   ConfigsPayload,
   SaveConfigsPayload,
 } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { TabLocation, TabPanelConfig } from "@foxglove/studio-base/types/layouts";
+import { TabConfig, TabLocation, TabPanelConfig } from "@foxglove/studio-base/types/layouts";
 import {
   PanelConfig,
   MosaicDropTargetPosition,
@@ -97,8 +97,10 @@ function mapTemplateIdsToNewIds(templateIds: string[]): PanelIdMap {
   return result;
 }
 
+type IndexableMosaic = MosaicNode<string> & Record<string, unknown>;
+
 function getLayoutWithNewPanelIds(
-  layout: MosaicNode<string>,
+  layout: IndexableMosaic,
   panelIdMap: PanelIdMap,
 ): MosaicNode<string> | undefined {
   if (typeof layout === "string") {
@@ -110,21 +112,18 @@ function getLayoutWithNewPanelIds(
   if (layout == undefined) {
     return undefined;
   }
-  const newLayout: Record<string, any> = {};
+  const newLayout: Record<string, unknown> = {};
   for (const key in layout) {
-    if (typeof (layout as any)[key] === "object" && !Array.isArray((layout as any)[key])) {
-      newLayout[key] = getLayoutWithNewPanelIds((layout as any)[key], panelIdMap);
-    } else if (
-      typeof (layout as any)[key] === "string" &&
-      panelIdMap[(layout as any)[key]] != undefined
-    ) {
-      newLayout[key] = panelIdMap[(layout as any)[key]];
+    if (typeof layout[key] === "object" && !Array.isArray(layout[key])) {
+      newLayout[key] = getLayoutWithNewPanelIds(layout[key] as IndexableMosaic, panelIdMap);
+    } else if (typeof layout[key] === "string" && panelIdMap[layout[key] as string] != undefined) {
+      newLayout[key] = panelIdMap[layout[key] as string];
     } else {
-      newLayout[key] = (layout as any)[key];
+      newLayout[key] = layout[key];
     }
   }
   // TODO: Refactor above to allow for better typing here.
-  return newLayout as any as MosaicNode<string>;
+  return newLayout as unknown as MosaicNode<string>;
 }
 
 // Recursively removes all empty nodes from a layout
@@ -192,11 +191,11 @@ export const getParentTabPanelByPanelId = (
 ): {
   [key: string]: string;
 } =>
-  Object.entries(savedProps).reduce((memo: any, [savedPanelId, savedConfig]) => {
+  Object.entries(savedProps).reduce((memo: Record<string, string>, [savedPanelId, savedConfig]) => {
     if (isTabPanel(savedPanelId) && savedConfig != undefined) {
-      const tabPanelConfig: TabPanelConfig = savedConfig as any;
-      tabPanelConfig.tabs.forEach((tab: any) => {
-        const panelIdsInTab = getLeaves(tab.layout);
+      const tabPanelConfig = savedConfig as TabPanelConfig;
+      tabPanelConfig.tabs.forEach((tab) => {
+        const panelIdsInTab = getLeaves(tab.layout ?? ReactNull);
         panelIdsInTab.forEach((id) => (memo[id] = savedPanelId));
       });
     }
@@ -205,15 +204,15 @@ export const getParentTabPanelByPanelId = (
 
 const replaceMaybeTabLayoutWithNewPanelIds =
   (panelIdMap: PanelIdMap) =>
-  ({ id, config }: any) => {
+  ({ id, config }: { id: string; config: PanelConfig }) => {
     return config.tabs
       ? {
           id,
           config: {
             ...config,
-            tabs: config.tabs.map((t: any) => ({
-              ...t,
-              layout: getLayoutWithNewPanelIds(t.layout, panelIdMap),
+            tabs: config.tabs.map((tab: TabConfig) => ({
+              ...tab,
+              layout: getLayoutWithNewPanelIds(tab.layout as IndexableMosaic, panelIdMap),
             })),
           },
         }
@@ -254,13 +253,13 @@ export const getSaveConfigsPayloadForAddedPanel = ({
 
 export function getPanelIdsInsideTabPanels(panelIds: string[], savedProps: SavedProps): string[] {
   const tabPanelIds = panelIds.filter(isTabPanel);
-  const tabLayouts: any = [];
+  const tabLayouts: MosaicNode<string>[] = [];
   tabPanelIds.forEach((panelId) => {
     if (savedProps[panelId]?.tabs) {
-      savedProps[panelId]?.tabs.forEach((tab: any) => {
+      savedProps[panelId]?.tabs.forEach((tab: TabConfig) => {
         tabLayouts.push(
-          tab.layout,
-          ...getPanelIdsInsideTabPanels(getLeaves(tab.layout), savedProps),
+          tab.layout as MosaicNode<string>,
+          ...getPanelIdsInsideTabPanels(getLeaves(tab.layout ?? ReactNull), savedProps),
         );
       });
     }
@@ -336,9 +335,8 @@ export const removePanelFromTabPanel = (
   if (path.length === 0) {
     newTree = undefined;
   } else {
-    // eslint-disable-next-line no-restricted-syntax
-    const update = createRemoveUpdate(currentTabLayout ?? null, path);
-    newTree = updateTree<string>(currentTabLayout!, [update]);
+    const update = createRemoveUpdate(currentTabLayout ?? ReactNull, path);
+    newTree = updateTree<string>(currentTabLayout as MosaicNode<string>, [update]);
   }
 
   const saveConfigsPayload = {
@@ -356,12 +354,12 @@ export const createAddUpdates = (
   if (tree == undefined) {
     return [];
   }
-  const node = getNodeAtPath(tree, newPath);
+  const node = getNodeAtPath(tree, newPath) as MosaicNode<string>;
   const before = position === "left" || position === "top";
   const [first, second] = before ? [panelId, node] : [node, panelId];
-  const direction = position === "left" || position === "right" ? "row" : "column";
+  const direction: MosaicDirection = position === "left" || position === "right" ? "row" : "column";
   const updates = [{ path: newPath, spec: { $set: { first, second, direction } } }];
-  return updates as any;
+  return updates;
 };
 
 export const addPanelToTab = (
@@ -372,7 +370,7 @@ export const addPanelToTab = (
   tabId: string,
 ): SaveConfigsPayload => {
   const safeTabConfig = validateTabPanelConfig(tabConfig)
-    ? (tabConfig as any as TabPanelConfig)
+    ? (tabConfig as TabPanelConfig)
     : DEFAULT_TAB_PANEL_CONFIG;
 
   const currentTabLayout = safeTabConfig.tabs[safeTabConfig.activeTabIdx]?.layout;
@@ -503,19 +501,19 @@ export const replaceAndRemovePanels = (
   }
 
   return uniq(compact([...idsToRemove, originalId])).reduce(
-    (currentLayout: any, panelIdToRemove: any) => {
+    (currentLayout: MosaicNode<string> | undefined, panelIdToRemove) => {
       if (!panelIds.includes(panelIdToRemove)) {
         return currentLayout;
       } else if (currentLayout === originalId) {
         return newId;
-      } else if (!currentLayout || currentLayout === panelIdToRemove) {
+      } else if (currentLayout == undefined || currentLayout === panelIdToRemove) {
         return undefined;
       }
 
       const pathToNode = getPathFromNode(panelIdToRemove, currentLayout);
       const update =
         panelIdToRemove === originalId
-          ? { path: pathToNode, spec: { $set: newId } }
+          ? ({ path: pathToNode, spec: { $set: newId } } as MosaicUpdate<string>)
           : createRemoveUpdate(currentLayout, pathToNode);
       return updateTree(currentLayout, [update]);
     },
@@ -539,7 +537,10 @@ export function getConfigsForNestedPanelsInsideTab(
         { originalId: panelIdToReplace, newId: tabPanelId, idsToRemove: panelIdsToRemove },
         tabLayout,
       );
-      const newTabConfig = updateTabPanelLayout(newTabLayout, savedProps[panelId] as any);
+      const newTabConfig = updateTabPanelLayout(
+        newTabLayout,
+        savedProps[panelId] as TabPanelConfig,
+      );
       configs.push({ id: panelId, config: newTabConfig });
     }
   });

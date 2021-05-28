@@ -77,12 +77,12 @@ export default function downsample(dataset: DataSet, bounds: DownsampleBounds): 
     if (datumBucket.length === 0) {
       return;
     }
+    const firstDatum = datumBucket[0] as ScatterDataPoint;
 
     // 1 previous value, we just add that to output
     if (datumBucket.length === 1) {
-      const datum = datumBucket[0]!;
       datumBucket = [];
-      return datum;
+      return firstDatum;
     }
 
     // many bucket values, avg them
@@ -95,7 +95,7 @@ export default function downsample(dataset: DataSet, bounds: DownsampleBounds): 
         return curr;
       }
       return prev;
-    }, datumBucket[0]!);
+    }, firstDatum);
 
     datumBucket = [];
     return closestDatum;

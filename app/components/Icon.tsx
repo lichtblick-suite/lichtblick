@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import cx from "classnames";
+import { CSSProperties } from "react";
 
 import Tooltip, { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 
@@ -30,9 +31,7 @@ type Props = {
   onClick?: (e: React.MouseEvent<HTMLElement>) => void;
   clickable?: boolean;
   className?: string;
-  style?: {
-    [key: string]: any;
-  };
+  style?: CSSProperties;
   tooltip?: React.ReactNode;
   tooltipProps?: Partial<React.ComponentProps<typeof Tooltip> & { alwaysShown?: false }>;
   dataTest?: string;
@@ -58,21 +57,21 @@ const Icon = (props: Props): JSX.Element => {
     dataTest,
   } = props;
   const classNames = cx("icon", styles.icon, className, {
-    [styles.fade!]: fade,
-    [styles.clickable!]: !!onClick || clickable == undefined || clickable,
-    [styles.active!]: active,
-    [styles.xlarge!]: xlarge,
-    [styles.large!]: large,
-    [styles.medium!]: medium,
-    [styles.small!]: small,
-    [styles.xsmall!]: xsmall,
-    [styles.xxsmall!]: xxsmall,
+    [styles.fade as string]: fade,
+    [styles.clickable as string]: !!onClick || clickable == undefined || clickable,
+    [styles.active as string]: active,
+    [styles.xlarge as string]: xlarge,
+    [styles.large as string]: large,
+    [styles.medium as string]: medium,
+    [styles.small as string]: small,
+    [styles.xsmall as string]: xsmall,
+    [styles.xxsmall as string]: xxsmall,
   });
 
   // if we have a click handler
   // cancel the bubbling on the event and process it
   // in our click handler callback; otherwise, let it bubble
-  const clickHandler = (e: any) => {
+  const clickHandler = (e: React.MouseEvent<HTMLElement>) => {
     if (onClick) {
       e.preventDefault();
       e.stopPropagation();

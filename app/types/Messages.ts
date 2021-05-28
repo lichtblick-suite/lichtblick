@@ -136,7 +136,7 @@ export type BaseMarker = Readonly<
     text?: string;
     mesh_resource?: string; // TODO: required
     primitive?: string;
-    metadata?: Readonly<any>;
+    metadata?: Readonly<Record<string, unknown>>;
   }
 >;
 
@@ -290,7 +290,7 @@ export type InstancedLineListMarker = Readonly<
   BaseMarker &
     MultiPointMarker & {
       type: 108;
-      metadataByIndex?: readonly Readonly<any>[];
+      metadataByIndex?: readonly Readonly<Record<number, unknown>>[];
       scaleInvariant?: boolean;
     }
 >;

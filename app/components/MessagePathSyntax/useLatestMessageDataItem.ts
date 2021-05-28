@@ -34,11 +34,11 @@ export function useLatestMessageDataItem(path: string): MessageAndData | undefin
   const addMessages = useCallback(
     (
       prevMessageAndData: MessageAndData | undefined,
-      messages: readonly MessageEvent<unknown>[],
+      messages: Readonly<MessageEvent<unknown>[]>,
     ) => {
       // Iterate in reverse so we can early-return and not process all messages.
       for (let i = messages.length - 1; i >= 0; --i) {
-        const message = messages[i]!;
+        const message = messages[i] as MessageEvent<unknown>;
         const queriedData = cachedGetMessagePathDataItems(path, message);
         if (queriedData == undefined) {
           // Invalid path.
