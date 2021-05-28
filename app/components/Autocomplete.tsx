@@ -13,7 +13,7 @@
 
 import cx from "classnames";
 import { maxBy } from "lodash";
-import React, { PureComponent, RefObject } from "react";
+import React, { CSSProperties, PureComponent, RefObject } from "react";
 import ReactAutocomplete from "react-autocomplete";
 import { createPortal } from "react-dom";
 import textMetrics from "text-metrics";
@@ -67,8 +67,8 @@ type AutocompleteProps<T = unknown> = {
   sortWhenFiltering: boolean;
   clearOnFocus: boolean; // only for uncontrolled use (when onChange is not set)
   minWidth: number;
-  menuStyle?: any;
-  inputStyle?: any;
+  menuStyle?: CSSProperties;
+  inputStyle?: CSSProperties;
   disableAutoSelect?: boolean;
 };
 
@@ -79,11 +79,15 @@ type AutocompleteState = {
 };
 
 function defaultGetText(name: string) {
-  return function (item: any) {
+  return function (item: unknown) {
     if (typeof item === "string") {
       return item;
-    } else if (item && typeof item === "object" && typeof item.value === "string") {
-      return item.value;
+    } else if (
+      item &&
+      typeof item === "object" &&
+      typeof (item as { value?: string }).value === "string"
+    ) {
+      return (item as { value?: string }).value;
     }
     throw new Error(`you need to provide an implementation of ${name}`);
   };
@@ -116,8 +120,8 @@ export default class Autocomplete<T = unknown> extends PureComponent<
   // reference to the highlighted element, which can cause an error if we hide it.
   componentDidUpdate(): void {
     if (
-      (this._autocomplete.current?.refs.menu as any)?.scrollHeight <=
-        (this._autocomplete.current?.refs.menu as any)?.clientHeight &&
+      (this._autocomplete.current?.refs.menu as Element)?.scrollHeight <=
+        (this._autocomplete.current?.refs.menu as Element)?.clientHeight &&
       this.state.showAllItems
     ) {
       this.setState({ showAllItems: false });
@@ -126,7 +130,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
 
   setSelectionRange(selectionStart: number, selectionEnd: number): void {
     if (this._autocomplete.current?.refs.input) {
-      (this._autocomplete.current.refs.input as any).setSelectionRange(
+      (this._autocomplete.current.refs.input as HTMLInputElement).setSelectionRange(
         selectionStart,
         selectionEnd,
       );
@@ -136,13 +140,13 @@ export default class Autocomplete<T = unknown> extends PureComponent<
 
   focus(): void {
     if (this._autocomplete.current?.refs.input) {
-      (this._autocomplete.current.refs.input as any).focus();
+      (this._autocomplete.current.refs.input as HTMLInputElement).focus();
     }
   }
 
   blur(): void {
     if (this._autocomplete.current?.refs.input) {
-      (this._autocomplete.current.refs.input as any).blur();
+      (this._autocomplete.current.refs.input as HTMLInputElement).blur();
     }
     this._ignoreBlur = false;
     this.setState({ focused: false });
@@ -185,10 +189,10 @@ export default class Autocomplete<T = unknown> extends PureComponent<
         document.activeElement === this._autocomplete.current.refs.input
       ) {
         if (
-          (this._autocomplete.current.refs.input as any).selectionStart ===
-          (this._autocomplete.current.refs.input as any).selectionEnd
+          (this._autocomplete.current.refs.input as HTMLInputElement).selectionStart ===
+          (this._autocomplete.current.refs.input as HTMLInputElement).selectionEnd
         ) {
-          (this._autocomplete.current.refs.input as any).select();
+          (this._autocomplete.current.refs.input as HTMLInputElement).select();
           e.stopPropagation();
           e.preventDefault();
         }
@@ -218,9 +222,9 @@ export default class Autocomplete<T = unknown> extends PureComponent<
 
   _onChange = (event: React.SyntheticEvent<HTMLInputElement>): void => {
     if (this.props.onChange) {
-      this.props.onChange(event, (event.target as any).value);
+      this.props.onChange(event, (event.target as HTMLInputElement).value);
     } else {
-      this.setState({ value: (event.target as any).value });
+      this.setState({ value: (event.target as HTMLInputElement).value });
     }
   };
 
@@ -229,7 +233,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
   // `blur()`.
   _onSelect = (value: string, item: T): void => {
     if (this._autocomplete.current?.refs.input) {
-      (this._autocomplete.current.refs.input as any).focus();
+      (this._autocomplete.current.refs.input as HTMLInputElement).focus();
       this.setState({ focused: true, value: undefined }, () => {
         this.props.onSelect(value, item, this);
       });
@@ -291,8 +295,8 @@ export default class Autocomplete<T = unknown> extends PureComponent<
               data-highlighted={isHighlighted}
               data-test-auto-item
               className={cx(styles.autocompleteItem, {
-                [styles.highlighted!]: isHighlighted,
-                [styles.selected!]:
+                [styles.highlighted as string]: isHighlighted,
+                [styles.selected as string]:
                   selectedItemValue != undefined && itemValue === selectedItemValue,
               })}
             >
@@ -305,8 +309,8 @@ export default class Autocomplete<T = unknown> extends PureComponent<
         value={value ?? ""}
         inputProps={{
           className: cx(styles.input, {
-            [styles.inputError!]: hasError,
-            [styles.placeholder!]: value == undefined || value.length === 0,
+            [styles.inputError as string]: hasError,
+            [styles.placeholder as string]: value == undefined || value.length === 0,
           }),
           autoCorrect: "off",
           autoCapitalize: "off",
@@ -379,7 +383,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
           );
         }}
         // @ts-expect-error renderMenuWrapper added in the fork but we don't have typings for it
-        renderMenuWrapper={(menu: any) => createPortal(menu, document.body)}
+        renderMenuWrapper={(menu: React.ReactNode) => createPortal(menu, document.body)}
         ref={this._autocomplete}
         wrapperStyle={{ flex: "1 1 auto", overflow: "hidden", marginLeft: 6 }}
       />

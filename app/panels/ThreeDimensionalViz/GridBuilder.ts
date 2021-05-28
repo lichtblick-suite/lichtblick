@@ -77,9 +77,8 @@ export default class GridBuilder implements MarkerProvider {
       color: settings.overrideColor ?? DEFAULT_GRID_COLOR,
       frame_locked: false,
       points: gridPoints,
+      scaleInvariant: true,
     };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (grid as any).scaleInvariant = true;
     return grid;
   }
 }

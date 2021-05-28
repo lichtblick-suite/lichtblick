@@ -80,8 +80,7 @@ function changePanelLayout(
   state: PanelsState,
   { layout, trimConfigById = true }: ChangePanelLayoutPayload,
 ): PanelsState {
-  // eslint-disable-next-line no-restricted-syntax
-  const panelIds = getLeaves(layout ?? null).filter((panelId) => !isEmpty(panelId));
+  const panelIds: string[] = getLeaves(layout ?? ReactNull).filter((panelId) => !isEmpty(panelId));
   const panelIdsInsideTabPanels = getPanelIdsInsideTabPanels(panelIds, state.configById);
   // Filter configById in case a panel was removed from the layout
   // We don't want its configById hanging around forever

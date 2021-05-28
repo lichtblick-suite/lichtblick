@@ -291,6 +291,7 @@ export type InstancedLineListMarker = Readonly<
     MultiPointMarker & {
       type: 108;
       metadataByIndex?: readonly Readonly<any>[];
+      scaleInvariant?: boolean;
     }
 >;
 

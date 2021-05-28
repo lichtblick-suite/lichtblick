@@ -38,16 +38,16 @@ const mockSetNotificationHandler = (handler?: NotificationHandler): void => {
 
 // The sendNotification function is monkey-patched with "expectCalledDuringTest"
 // Our jest mock doesn't have such a property and typescript complains
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-(mockSendNotification as any).expectCalledDuringTest = () => {
-  if (mockSendNotification.mock.calls.length === 0) {
-    throw new Error(
-      "Expected sendNotification to have been called during the test, but it was never called!",
-    );
-  }
-  mockSendNotification.mockClear();
-  // Reset the error handler to the default (no error handler).
-  mockSetNotificationHandler();
-};
+(mockSendNotification as unknown as { expectCalledDuringTest: () => void }).expectCalledDuringTest =
+  () => {
+    if (mockSendNotification.mock.calls.length === 0) {
+      throw new Error(
+        "Expected sendNotification to have been called during the test, but it was never called!",
+      );
+    }
+    mockSendNotification.mockClear();
+    // Reset the error handler to the default (no error handler).
+    mockSetNotificationHandler();
+  };
 
 export { mockSendNotification, mockSetNotificationHandler };

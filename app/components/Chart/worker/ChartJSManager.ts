@@ -24,8 +24,18 @@ import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
 
 const log = Logger.getLogger(__filename);
 
+export type InitOpts = {
+  id: string;
+  node: OffscreenCanvas;
+  type: ChartType;
+  data: ChartData;
+  options: ChartOptions;
+  devicePixelRatio: number;
+  fontLoaded: Promise<FontFace>;
+};
+
 // allows us to override the chart.ctx instance field which zoom plugin uses for adding event listeners
-type MutableContext = Omit<Chart, "ctx"> & { ctx: any };
+type MutableContext<T> = Omit<Chart, "ctx"> & { ctx: T };
 
 function addEventListener(emitter: EventEmitter) {
   return (eventName: string, fn?: () => void) => {
@@ -44,14 +54,12 @@ function removeEventListener(emitter: EventEmitter) {
   };
 }
 
-type InitOpts = {
-  id: string;
-  node: OffscreenCanvas;
-  type: ChartType;
-  data: ChartData;
-  options: ChartOptions;
-  devicePixelRatio: number;
-  fontLoaded: Promise<FontFace>;
+type ZoomableChart = Chart & {
+  $zoom: {
+    panStartHandler(event: HammerInput): void;
+    panHandler(event: HammerInput): void;
+    panEndHandler(event: HammerInput): void;
+  };
 };
 
 export default class ChartJSManager {
@@ -87,13 +95,13 @@ export default class ChartJSManager {
     };
 
     const origZoomStart = ZoomPlugin.start?.bind(ZoomPlugin);
-    ZoomPlugin.start = (chartInstance: MutableContext, args, pluginOptions) => {
+    ZoomPlugin.start = (chartInstance: MutableContext<unknown>, args, pluginOptions) => {
       // swap the canvas with our fake dom node canvas to support zoom plugin addEventListener
       const ctx = chartInstance.ctx;
       chartInstance.ctx = {
-        canvas: fakeNode as any,
+        canvas: fakeNode,
       };
-      const res = origZoomStart?.(chartInstance, args, pluginOptions);
+      const res = origZoomStart?.(chartInstance as Chart, args, pluginOptions);
       chartInstance.ctx = ctx;
       return res;
     };
@@ -119,52 +127,52 @@ export default class ChartJSManager {
     this._chartInstance = chartInstance;
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  wheel(event: any): RpcScales {
-    event.target.getBoundingClientRect = () => event.target.boundingClientRect;
+  wheel(event: WheelEvent): RpcScales {
+    const target = event.target as Element & { boundingClientRect: DOMRect };
+    target.getBoundingClientRect = () => target.boundingClientRect;
     this._fakeNodeEvents.emit("wheel", event);
     return this.getScales();
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  mousedown(event: any): RpcScales {
-    event.target.getBoundingClientRect = () => event.target.boundingClientRect;
+  mousedown(event: MouseEvent): RpcScales {
+    const target = event.target as Element & { boundingClientRect: DOMRect };
+    target.getBoundingClientRect = () => target.boundingClientRect;
     this._fakeNodeEvents.emit("mousedown", event);
     return this.getScales();
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  mousemove(event: any): RpcScales {
-    event.target.getBoundingClientRect = () => event.target.boundingClientRect;
+  mousemove(event: MouseEvent): RpcScales {
+    const target = event.target as Element & { boundingClientRect: DOMRect };
+    target.getBoundingClientRect = () => target.boundingClientRect;
     this._fakeNodeEvents.emit("mousemove", event);
     return this.getScales();
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  mouseup(event: any): RpcScales {
-    event.target.getBoundingClientRect = () => event.target.boundingClientRect;
+  mouseup(event: MouseEvent): RpcScales {
+    const target = event.target as Element & { boundingClientRect: DOMRect };
+    target.getBoundingClientRect = () => target.boundingClientRect;
     this._fakeDocumentEvents.emit("mouseup", event);
     return this.getScales();
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  panstart(event: any): RpcScales {
-    event.target.getBoundingClientRect = () => event.target.boundingClientRect;
-    (this._chartInstance as any)?.$zoom.panStartHandler(event);
+  panstart(event: HammerInput): RpcScales {
+    const target = event.target as HTMLElement & { boundingClientRect: DOMRect };
+    target.getBoundingClientRect = () => target.boundingClientRect;
+    (this._chartInstance as ZoomableChart)?.$zoom.panStartHandler(event);
     return this.getScales();
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  panmove(event: any): RpcScales {
-    event.target.getBoundingClientRect = () => event.target.boundingClientRect;
-    (this._chartInstance as any)?.$zoom.panHandler(event);
+  panmove(event: HammerInput): RpcScales {
+    const target = event.target as HTMLElement & { boundingClientRect: DOMRect };
+    target.getBoundingClientRect = () => target.boundingClientRect;
+    (this._chartInstance as ZoomableChart)?.$zoom.panHandler(event);
     return this.getScales();
   }
 
-  // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-  panend(event: any): RpcScales {
-    event.target.getBoundingClientRect = () => event.target.boundingClientRect;
-    (this._chartInstance as any)?.$zoom.panEndHandler(event);
+  panend(event: HammerInput): RpcScales {
+    const target = event.target as HTMLElement & { boundingClientRect: DOMRect };
+    target.getBoundingClientRect = () => target.boundingClientRect;
+    (this._chartInstance as ZoomableChart)?.$zoom.panEndHandler(event);
     return this.getScales();
   }
 
@@ -214,7 +222,7 @@ export default class ChartJSManager {
     this._chartInstance?.destroy();
   }
 
-  getElementsAtEvent({ event }: { event: any }): RpcElement[] {
+  getElementsAtEvent({ event }: { event: MouseEvent }): RpcElement[] {
     const ev = {
       native: true,
       x: event.clientX,
@@ -225,7 +233,7 @@ export default class ChartJSManager {
     // ev is specified as a dom Event - but the implementation does not require it for the basic platform
     const elements =
       this._chartInstance?.getElementsAtEventForMode(
-        ev as any,
+        ev as unknown as Event,
         this._chartInstance.options.hover?.mode ?? "intersect",
         this._chartInstance.options.hover ?? {},
         false,
@@ -304,7 +312,7 @@ export default class ChartJSManager {
       };
 
       // Only display labels for datapoints that include a "label" property
-      config.plugins.datalabels.formatter = (value: any, _context: any) => {
+      config.plugins.datalabels.formatter = (value: { label?: string }, _context: unknown) => {
         // Return "null" if we don't want this label to be displayed.
         // Returning "undefined" falls back to the default formatting and will display
         // eslint-disable-next-line no-restricted-syntax
@@ -313,9 +321,10 @@ export default class ChartJSManager {
 
       // Override color so that it can be set per-dataset.
       const staticColor = config.plugins.datalabels.color ?? "white";
-      config.plugins.datalabels.color = (context: any) => {
+      config.plugins.datalabels.color = (context: DatalabelContext) => {
         const value = context.dataset.data[context.dataIndex];
-        return value?.labelColor ?? staticColor;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (value as any)?.labelColor ?? staticColor;
       };
     }
 

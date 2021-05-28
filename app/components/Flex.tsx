@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import cx from "classnames";
-import { CSSProperties } from "react";
+import { CSSProperties, MouseEventHandler } from "react";
 
 import styles from "./Flex.module.scss";
 
@@ -37,10 +37,10 @@ type Props = {
   scrollX?: boolean;
   children?: React.ReactNode;
 
-  onClick?: (arg0: MouseEvent) => void;
-  onMouseEnter?: (arg0: MouseEvent) => void;
-  onMouseLeave?: (arg0: MouseEvent) => void;
-  onMouseMove?: (arg0: MouseEvent) => void;
+  onClick?: MouseEventHandler<HTMLDivElement>;
+  onMouseEnter?: MouseEventHandler<HTMLDivElement>;
+  onMouseLeave?: MouseEventHandler<HTMLDivElement>;
+  onMouseMove?: MouseEventHandler<HTMLDivElement>;
   // for storybook screenshots tests
   dataTest?: string;
 };
@@ -72,15 +72,15 @@ const Flex = React.forwardRef((props: Props, ref: React.ForwardedRef<HTMLDivElem
 
   // toggle conditional classes based on props
   const conditionalClasses = {
-    [styles.col!]: col,
-    [styles.reverse!]: reverse,
-    [styles.center!]: center,
-    [styles.start!]: start,
-    [styles.end!]: end,
-    [styles.wrap!]: wrap,
-    [styles.clip!]: clip,
-    [styles.scroll!]: scroll,
-    [styles.scrollX!]: scrollX,
+    [styles.col as string]: col,
+    [styles.reverse as string]: reverse,
+    [styles.center as string]: center,
+    [styles.start as string]: start,
+    [styles.end as string]: end,
+    [styles.wrap as string]: wrap,
+    [styles.clip as string]: clip,
+    [styles.scroll as string]: scroll,
+    [styles.scrollX as string]: scrollX,
   };
   const combinedClasses = cx(styles.flex, conditionalClasses, className);
 
@@ -90,10 +90,10 @@ const Flex = React.forwardRef((props: Props, ref: React.ForwardedRef<HTMLDivElem
       data-test={dataTest}
       className={combinedClasses}
       style={style}
-      onClick={onClick as any}
-      onMouseEnter={onMouseEnter as any}
-      onMouseLeave={onMouseLeave as any}
-      onMouseMove={onMouseMove as any}
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onMouseMove={onMouseMove}
     >
       {children}
     </div>

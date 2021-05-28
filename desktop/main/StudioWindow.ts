@@ -33,6 +33,8 @@ const closeMenuItem: MenuItemConstructorOptions = isMac ? { role: "close" } : { 
 
 const log = Logger.getLogger(__filename);
 
+type ClearableMenu = Menu & { clear: () => void };
+
 function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
   const [allowCrashReporting, allowTelemetry] = getTelemetrySettings();
 
@@ -321,8 +323,7 @@ class StudioWindow {
         const existingMenu = Menu.getApplicationMenu();
         const fileMenu = existingMenu?.getMenuItemById("fileMenu");
         // https://github.com/electron/electron/issues/8598
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (fileMenu?.submenu as any)?.clear();
+        (fileMenu?.submenu as ClearableMenu)?.clear();
         fileMenu?.submenu?.append(
           new MenuItem({
             label: "New Window",
@@ -405,8 +406,7 @@ class StudioWindow {
     const browserWindow = this._window;
 
     // https://github.com/electron/electron/issues/8598
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (fileMenu.submenu as any).clear();
+    (fileMenu.submenu as ClearableMenu).clear();
     fileMenu.submenu?.items.splice(0, fileMenu.submenu.items.length);
 
     fileMenu.submenu?.append(

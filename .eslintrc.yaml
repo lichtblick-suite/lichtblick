@@ -195,16 +195,6 @@ overrides:
   - rules:
       "@typescript-eslint/no-explicit-any": warn
     files:
-      - "app/components/Autocomplete.tsx"
-      - "app/components/ButtonBase.tsx"
-      - "app/components/Chart/index.tsx"
-      - "app/components/Chart/worker/ChartJSManager.ts"
-      - "app/components/Chart/worker/ChartJsMux.ts"
-      - "app/components/ChildToggle/index.tsx"
-      - "app/components/Dropdown/index.tsx"
-      - "app/components/ErrorBoundary.tsx"
-      - "app/components/ExpandingToolbar.tsx"
-      - "app/components/Flex.tsx"
       - "app/components/GlobalKeyListener.ts"
       - "app/components/GlobalVariablesTable/index.tsx"
       - "app/components/GradientPicker.tsx"
@@ -219,7 +209,6 @@ overrides:
       - "app/components/MessagePipeline/MockMessagePipelineProvider.tsx"
       - "app/components/MessagePipeline/index.tsx"
       - "app/components/MockPanelContextProvider.tsx"
-      - "app/components/Panel.tsx"
       - "app/components/PanelLayout.tsx"
       - "app/components/PanelList/index.tsx"
       - "app/components/PanelToolbar/index.tsx"
@@ -387,7 +376,6 @@ overrides:
       - "app/components/Menu/Item.tsx"
       - "app/components/MessagePathSyntax/MessagePathInput.tsx"
       - "app/components/MessagePathSyntax/useLatestMessageDataItem.ts"
-      - "app/components/Panel.tsx"
       - "app/components/PanelToolbar/index.tsx"
       - "app/components/PlaybackControls/index.tsx"
       - "app/components/Select/Option.tsx"

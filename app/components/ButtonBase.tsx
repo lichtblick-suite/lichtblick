@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import cx from "classnames";
+import { CSSProperties } from "react";
 
 export type Props = {
   id?: string;
@@ -27,9 +28,7 @@ export type Props = {
   onMouseLeave?: (event: React.SyntheticEvent<HTMLButtonElement>) => void;
   children: React.ReactNode;
   className?: string;
-  style?: {
-    [key: string]: any;
-  };
+  style?: CSSProperties;
   tooltip?: string;
   innerRef?: React.Ref<HTMLButtonElement>;
 };

@@ -25,6 +25,8 @@ import {
   Legend,
   Title,
   Tooltip,
+  ChartOptions,
+  ChartData,
 } from "chart.js";
 import AnnotationPlugin from "chartjs-plugin-annotation";
 
@@ -33,7 +35,21 @@ import { RpcLike } from "@foxglove/studio-base/util/FakeRpc";
 import Rpc from "@foxglove/studio-base/util/Rpc";
 import { setupWorker } from "@foxglove/studio-base/util/RpcWorkerUtils";
 
-import ChartJSManager from "./ChartJSManager";
+import ChartJSManager, { InitOpts } from "./ChartJSManager";
+
+type RpcEvent<EventType> = { id: string; event: EventType };
+
+type RpcUpdateEvent = {
+  id: string;
+  options: ChartOptions;
+  width: number;
+  height: number;
+};
+
+type RpcUpdateDataEvent = {
+  id: string;
+  data: ChartData;
+};
 
 // Explicitly load the "Roboto Mono" font, since custom fonts from the main renderer are not
 // inherited by web workers. This is required to draw "Roboto Mono" on an OffscreenCanvas, and it
@@ -83,33 +99,47 @@ export default class ChartJsMux {
 
     // create a new chartjs instance
     // this must be done before sending any other rpc requests to the instance
-    rpc.receive("initialize", (args: any) => {
+    rpc.receive("initialize", (args: InitOpts) => {
       args.fontLoaded = fontLoaded;
       const manager = new ChartJSManager(args);
       this._managers.set(args.id, manager);
       return manager.getScales();
     });
-    rpc.receive("wheel", (args: any) => this._getChart(args.id).wheel(args.event));
-    rpc.receive("mousedown", (args: any) => this._getChart(args.id).mousedown(args.event));
-    rpc.receive("mousemove", (args: any) => this._getChart(args.id).mousemove(args.event));
-    rpc.receive("mouseup", (args: any) => this._getChart(args.id).mouseup(args.event));
-    rpc.receive("panstart", (args: any) => this._getChart(args.id).panstart(args.event));
-    rpc.receive("panend", (args: any) => this._getChart(args.id).panend(args.event));
-    rpc.receive("panmove", (args: any) => this._getChart(args.id).panmove(args.event));
+    rpc.receive("wheel", (args: RpcEvent<WheelEvent>) => this._getChart(args.id).wheel(args.event));
+    rpc.receive("mousedown", (args: RpcEvent<MouseEvent>) =>
+      this._getChart(args.id).mousedown(args.event),
+    );
+    rpc.receive("mousemove", (args: RpcEvent<MouseEvent>) =>
+      this._getChart(args.id).mousemove(args.event),
+    );
+    rpc.receive("mouseup", (args: RpcEvent<MouseEvent>) =>
+      this._getChart(args.id).mouseup(args.event),
+    );
+    rpc.receive("panstart", (args: RpcEvent<HammerInput>) =>
+      this._getChart(args.id).panstart(args.event),
+    );
+    rpc.receive("panend", (args: RpcEvent<HammerInput>) =>
+      this._getChart(args.id).panend(args.event),
+    );
+    rpc.receive("panmove", (args: RpcEvent<HammerInput>) =>
+      this._getChart(args.id).panmove(args.event),
+    );
 
-    rpc.receive("update", (args: any) => this._getChart(args.id).update(args));
-    rpc.receive("update-data", (args: any) => this._getChart(args.id).updateData(args));
-    rpc.receive("destroy", (args: any) => {
+    rpc.receive("update", (args: RpcUpdateEvent) => this._getChart(args.id).update(args));
+    rpc.receive("update-data", (args: RpcUpdateDataEvent) =>
+      this._getChart(args.id).updateData(args),
+    );
+    rpc.receive("destroy", (args: RpcEvent<void>) => {
       const manager = this._managers.get(args.id);
       if (manager) {
         manager.destroy();
         this._managers.delete(args.id);
       }
     });
-    rpc.receive("getElementsAtEvent", (args: any) =>
+    rpc.receive("getElementsAtEvent", (args: RpcEvent<MouseEvent>) =>
       this._getChart(args.id).getElementsAtEvent(args),
     );
-    rpc.receive("getDatalabelAtEvent", (args: any) =>
+    rpc.receive("getDatalabelAtEvent", (args: RpcEvent<Event>) =>
       this._getChart(args.id).getDatalabelAtEvent(args),
     );
   }

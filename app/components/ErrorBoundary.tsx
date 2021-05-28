@@ -38,7 +38,7 @@ const ErrorBanner = styled.div`
 
 type State = {
   error?: Error;
-  errorInfo?: any;
+  errorInfo?: ErrorInfo;
 };
 
 export default class ErrorBoundary extends React.Component<
@@ -61,8 +61,8 @@ export default class ErrorBoundary extends React.Component<
       let name = "this panel";
       if (errorInfo && typeof errorInfo.componentStack === "string") {
         const matches = errorInfo.componentStack.match(/^\s*at ([\w()]+) \(/);
-        if (matches && matches.length > 0) {
-          name = matches[1];
+        if (matches && matches.length > 1) {
+          name = matches[1] as string;
         }
       }
       return (

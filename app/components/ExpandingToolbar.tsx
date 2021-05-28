@@ -13,6 +13,7 @@
 
 import ArrowCollapseIcon from "@mdi/svg/svg/arrow-collapse.svg";
 import cx from "classnames";
+import { ReactElement } from "react";
 import styled from "styled-components";
 
 import Button from "@foxglove/studio-base/components/Button";
@@ -71,7 +72,7 @@ export default function ExpandingToolbar<T extends string>({
     // default to the first child's name if no tab is selected
     React.Children.forEach(children, (child) => {
       if (selectedTabLocal == undefined) {
-        selectedTabLocal = child.props.name as any;
+        selectedTabLocal = child.props.name as T;
       }
     });
     return (
@@ -82,7 +83,7 @@ export default function ExpandingToolbar<T extends string>({
       </div>
     );
   }
-  let selectedChild: any;
+  let selectedChild: ReactElement | undefined;
   React.Children.forEach(children, (child) => {
     if (!selectedChild || child.props.name === selectedTab) {
       selectedChild = child;
@@ -94,8 +95,8 @@ export default function ExpandingToolbar<T extends string>({
         {React.Children.map(children, (child) => {
           return (
             <Button
-              className={cx(styles.tab, { [styles.selected!]: child === selectedChild })}
-              onClick={() => onSelectTab(child.props.name as any)}
+              className={cx(styles.tab, { [styles.selected as string]: child === selectedChild })}
+              onClick={() => onSelectTab(child.props.name as T)}
             >
               {child.props.name}
             </Button>
