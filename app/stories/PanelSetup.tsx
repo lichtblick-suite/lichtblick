@@ -17,11 +17,6 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Mosaic, MosaicNode, MosaicWindow } from "react-mosaic-component";
 
-import {
-  setUserNodeDiagnostics,
-  addUserNodeLogs,
-  setUserNodeRosLib,
-} from "@foxglove/studio-base/actions/userNodes";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import CurrentLayoutContext, {
@@ -34,12 +29,14 @@ import PanelCatalogContext, {
   PanelCatalog,
   PanelInfo,
 } from "@foxglove/studio-base/context/PanelCatalogContext";
-import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { LinkedGlobalVariables } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import {
-  UserNodeDiagnostics,
-  UserNodeLogs,
-} from "@foxglove/studio-base/players/UserNodePlayer/types";
+  UserNodeStateProvider,
+  useUserNodeState,
+} from "@foxglove/studio-base/context/UserNodeStateContext";
+import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
+import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
+import { LinkedGlobalVariables } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
+import { Diagnostic, UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
 import {
   Frame,
   Topic,
@@ -51,12 +48,8 @@ import {
 import CurrentLayoutState, {
   DEFAULT_LAYOUT_FOR_TESTS,
 } from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
-import createRootReducer from "@foxglove/studio-base/reducers";
-import configureStore from "@foxglove/studio-base/store/configureStore.testing";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { SavedProps, UserNodes } from "@foxglove/studio-base/types/panels";
-
-type Store = ReturnType<typeof configureStore>;
 
 export type Fixture = {
   frame?: Frame;
@@ -69,9 +62,9 @@ export type Fixture = {
   layout?: MosaicNode<string>;
   linkedGlobalVariables?: LinkedGlobalVariables;
   userNodes?: UserNodes;
-  userNodeDiagnostics?: UserNodeDiagnostics;
+  userNodeDiagnostics?: { [nodeId: string]: readonly Diagnostic[] };
   userNodeFlags?: { id: string };
-  userNodeLogs?: UserNodeLogs;
+  userNodeLogs?: { [nodeId: string]: readonly UserNodeLog[] };
   userNodeRosLib?: string;
   savedProps?: SavedProps;
   publish?: (request: PublishPayload) => void;
@@ -86,12 +79,10 @@ type Props = {
   pauseFrame?: ComponentProps<typeof MockMessagePipelineProvider>["pauseFrame"];
   onMount?: (
     arg0: HTMLDivElement,
-    store: Store,
     actions: CurrentLayoutActions,
     selectedPanelActions: SelectedPanelActions,
   ) => void;
   onFirstMount?: (arg0: HTMLDivElement) => void;
-  store?: Store;
   style?: {
     [key: string]: any;
   };
@@ -162,7 +153,6 @@ class MockPanelCatalog implements PanelCatalog {
 }
 
 function UnconnectedPanelSetup(props: Props): JSX.Element | ReactNull {
-  const [store] = useState(() => props.store ?? configureStore(createRootReducer()));
   const [mockPanelCatalog] = useState(() => props.panelCatalog ?? new MockPanelCatalog());
   const [mockAppConfiguration] = useState(() => ({
     get() {
@@ -177,6 +167,12 @@ function UnconnectedPanelSetup(props: Props): JSX.Element | ReactNull {
 
   const actions = useCurrentLayoutActions();
   const selectedPanels = useSelectedPanels();
+  const { setUserNodeDiagnostics, addUserNodeLogs, setUserNodeRosLib } = useUserNodeState();
+  const userNodeActions = useShallowMemo({
+    setUserNodeDiagnostics,
+    addUserNodeLogs,
+    setUserNodeRosLib,
+  });
 
   const [initialized, setInitialized] = useState(false);
   useLayoutEffect(() => {
@@ -206,13 +202,17 @@ function UnconnectedPanelSetup(props: Props): JSX.Element | ReactNull {
       actions.setLinkedGlobalVariables(linkedGlobalVariables);
     }
     if (userNodeDiagnostics) {
-      store.dispatch(setUserNodeDiagnostics(userNodeDiagnostics));
+      for (const [nodeId, diagnostics] of Object.entries(userNodeDiagnostics)) {
+        userNodeActions.setUserNodeDiagnostics(nodeId, diagnostics);
+      }
     }
     if (userNodeLogs) {
-      store.dispatch(addUserNodeLogs(userNodeLogs));
+      for (const [nodeId, logs] of Object.entries(userNodeLogs)) {
+        userNodeActions.addUserNodeLogs(nodeId, logs);
+      }
     }
     if (userNodeRosLib != undefined) {
-      store.dispatch(setUserNodeRosLib(userNodeRosLib));
+      userNodeActions.setUserNodeRosLib(userNodeRosLib);
     }
     if (savedProps) {
       actions.savePanelConfigs({
@@ -220,7 +220,7 @@ function UnconnectedPanelSetup(props: Props): JSX.Element | ReactNull {
       });
     }
     setInitialized(true);
-  }, [initialized, props.fixture, store, actions]);
+  }, [initialized, props.fixture, actions, userNodeActions]);
 
   const {
     frame = {},
@@ -251,7 +251,7 @@ function UnconnectedPanelSetup(props: Props): JSX.Element | ReactNull {
           onFirstMount(el);
         }
         if (el && onMount) {
-          onMount(el, store, actions, selectedPanels);
+          onMount(el, actions, selectedPanels);
         }
       }}
     >
@@ -263,7 +263,6 @@ function UnconnectedPanelSetup(props: Props): JSX.Element | ReactNull {
         pauseFrame={props.pauseFrame}
         activeData={activeData}
         progress={progress}
-        store={store}
         publish={publish}
         setPublishers={setPublishers}
       >
@@ -288,8 +287,10 @@ function UnconnectedPanelSetup(props: Props): JSX.Element | ReactNull {
 export default function PanelSetup(props: Props): JSX.Element {
   const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
   return (
-    <CurrentLayoutContext.Provider value={currentLayout}>
-      <UnconnectedPanelSetup {...props} />
-    </CurrentLayoutContext.Provider>
+    <UserNodeStateProvider>
+      <CurrentLayoutContext.Provider value={currentLayout}>
+        <UnconnectedPanelSetup {...props} />
+      </CurrentLayoutContext.Provider>
+    </UserNodeStateProvider>
   );
 }

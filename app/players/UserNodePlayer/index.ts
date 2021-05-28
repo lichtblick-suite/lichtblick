@@ -16,11 +16,6 @@ import { TimeUtil, Time } from "rosbag";
 import shallowequal from "shallowequal";
 
 import Log from "@foxglove/log";
-import {
-  SetUserNodeDiagnostics,
-  AddUserNodeLogs,
-  SetUserNodeRosLib,
-} from "@foxglove/studio-base/actions/userNodes";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import {
   Diagnostic,
@@ -63,9 +58,9 @@ declare let SharedWorker: {
 };
 
 type UserNodeActions = {
-  setUserNodeDiagnostics: SetUserNodeDiagnostics;
-  addUserNodeLogs: AddUserNodeLogs;
-  setUserNodeRosLib: SetUserNodeRosLib;
+  setUserNodeDiagnostics: (nodeId: string, diagnostics: readonly Diagnostic[]) => void;
+  addUserNodeLogs: (nodeId: string, logs: readonly UserNodeLog[]) => void;
+  setUserNodeRosLib: (rosLib: string) => void;
 };
 
 // TODO: FUTURE - Performance tests
@@ -127,18 +122,18 @@ export default class UserNodePlayer implements Player {
     // just add an id, and the thing you want to update? Instead of passing in
     // objects?
     this._setUserNodeDiagnostics = (nodeId: string, diagnostics: readonly Diagnostic[]) => {
-      setUserNodeDiagnostics({ [nodeId]: { diagnostics } });
+      setUserNodeDiagnostics(nodeId, diagnostics);
     };
     this._addUserNodeLogs = (nodeId: string, logs: UserNodeLog[]) => {
       if (logs.length > 0) {
-        addUserNodeLogs({ [nodeId]: { logs } });
+        addUserNodeLogs(nodeId, logs);
       }
     };
 
     this._setRosLib = (rosLib: string, datatypes: RosDatatypes) => {
       this._rosLib = rosLib;
       this._rosLibDatatypes = datatypes;
-      // We set this in Redux as the monaco editor needs to refer to it.
+      // We set this for the monaco editor to refer to it.
       setUserNodeRosLib(rosLib);
     };
   }

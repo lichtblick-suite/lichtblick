@@ -20,18 +20,11 @@ import {
   useRef,
   useState,
 } from "react";
-import { useDispatch } from "react-redux";
 import { useLocalStorage, useMountedState } from "react-use";
-import { bindActionCreators } from "redux";
 
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
-import {
-  setUserNodeDiagnostics,
-  addUserNodeLogs,
-  setUserNodeRosLib,
-} from "@foxglove/studio-base/actions/userNodes";
 import {
   MaybePlayer,
   MessagePipelineProvider,
@@ -42,6 +35,7 @@ import PlayerSelectionContext, {
   PlayerSelection,
   PlayerSourceDefinition,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import { useUserNodeState } from "@foxglove/studio-base/context/UserNodeStateContext";
 import { CoreDataProviders } from "@foxglove/studio-base/dataProviders/constants";
 import { getRemoteBagGuid } from "@foxglove/studio-base/dataProviders/getRemoteBagGuid";
 import {
@@ -323,12 +317,12 @@ export default function PlayerManager({
 }>): JSX.Element {
   useWarnImmediateReRender();
 
-  const dispatch = useDispatch();
-  const userNodeActions = useMemo(
-    () =>
-      bindActionCreators({ setUserNodeDiagnostics, addUserNodeLogs, setUserNodeRosLib }, dispatch),
-    [dispatch],
-  );
+  const { setUserNodeDiagnostics, addUserNodeLogs, setUserNodeRosLib } = useUserNodeState();
+  const userNodeActions = useShallowMemo({
+    setUserNodeDiagnostics,
+    addUserNodeLogs,
+    setUserNodeRosLib,
+  });
 
   const messageOrder = useCurrentLayoutSelector((state) => state.playbackConfig.messageOrder);
   const userNodes = useCurrentLayoutSelector((state) => state.userNodes);

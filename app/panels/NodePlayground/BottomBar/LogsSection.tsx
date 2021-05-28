@@ -32,7 +32,7 @@ const SListItem = styled.li`
 
 type Props = {
   nodeId?: string;
-  logs: UserNodeLog[];
+  logs: readonly UserNodeLog[];
   clearLogs: (nodeId: string) => void;
 };
 

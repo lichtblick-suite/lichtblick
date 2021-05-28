@@ -21,16 +21,12 @@ import {
   nestedTabLayoutFixture,
   nestedTabLayoutFixture2,
 } from "@foxglove/studio-base/panels/Tab/nestedTabLayoutFixture";
-import createRootReducer from "@foxglove/studio-base/reducers";
-import configureStore from "@foxglove/studio-base/store/configureStore.testing";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { SExpectedResult } from "@foxglove/studio-base/stories/storyHelpers";
 import { dragAndDrop } from "@foxglove/studio-base/test/dragAndDropHelper";
 import tick from "@foxglove/studio-base/util/tick";
 
 import Tab from "./index";
-
-const rootReducer = createRootReducer();
 
 const SamplePanel1 = function () {
   return <div>Sample Panel 1</div>;
@@ -149,7 +145,6 @@ storiesOf("panels/Tab/index", module)
     );
   })
   .add("dragging a panel from the panel list updates the tab's layout", () => {
-    const store = configureStore(rootReducer);
     return (
       <PanelSetup
         panelCatalog={new MockPanelCatalog()}
@@ -162,7 +157,6 @@ storiesOf("panels/Tab/index", module)
             },
           },
         }}
-        store={store}
         onMount={() => {
           setTimeout(async () => {
             await tick();
@@ -182,7 +176,6 @@ storiesOf("panels/Tab/index", module)
     );
   })
   .add("dragging a panel from the panel list creates a new tab if there are none", () => {
-    const store = configureStore(rootReducer);
     return (
       <PanelSetup
         panelCatalog={new MockPanelCatalog()}
@@ -195,7 +188,6 @@ storiesOf("panels/Tab/index", module)
             },
           },
         }}
-        store={store}
         onMount={() => {
           setTimeout(async () => {
             await tick();
@@ -266,7 +258,6 @@ storiesOf("panels/Tab/index", module)
     </PanelSetup>
   ))
   .add("add tab", () => {
-    const store = configureStore(rootReducer);
     return (
       <PanelSetup
         panelCatalog={new MockPanelCatalog()}
@@ -277,7 +268,6 @@ storiesOf("panels/Tab/index", module)
           },
         }}
         style={{ width: "100%" }}
-        store={store}
         onMount={() => {
           setTimeout(async () => {
             const addTabBtn = document.querySelector("[data-test=add-tab]");
@@ -292,7 +282,6 @@ storiesOf("panels/Tab/index", module)
     );
   })
   .add("remove tab", () => {
-    const store = configureStore(rootReducer);
     return (
       <PanelSetup
         panelCatalog={new MockPanelCatalog()}
@@ -303,7 +292,6 @@ storiesOf("panels/Tab/index", module)
           },
         }}
         style={{ width: "100%" }}
-        store={store}
         onMount={() => {
           setTimeout(async () => {
             const removeTabBtn = document.querySelector("[data-test=tab-icon]");
@@ -318,7 +306,6 @@ storiesOf("panels/Tab/index", module)
     );
   })
   .add("reorder tabs within Tab panel by dropping on tab", () => {
-    const store = configureStore(rootReducer);
     return (
       <PanelSetup
         panelCatalog={new MockPanelCatalog()}
@@ -329,7 +316,6 @@ storiesOf("panels/Tab/index", module)
           },
         }}
         style={{ width: "100%" }}
-        store={store}
         onMount={() => {
           setTimeout(async () => {
             await tick();
@@ -346,7 +332,6 @@ storiesOf("panels/Tab/index", module)
     );
   })
   .add("reorder tabs within Tab panel by dropping on toolbar", () => {
-    const store = configureStore(rootReducer);
     return (
       <PanelSetup
         panelCatalog={new MockPanelCatalog()}
@@ -357,7 +342,6 @@ storiesOf("panels/Tab/index", module)
           },
         }}
         style={{ width: "100%" }}
-        store={store}
         onMount={() => {
           setTimeout(async () => {
             await tick();
@@ -375,7 +359,6 @@ storiesOf("panels/Tab/index", module)
     );
   })
   .add("move tab to different Tab panel", () => {
-    const store = configureStore(rootReducer);
     return (
       <PanelSetup
         panelCatalog={new MockPanelCatalog()}
@@ -393,7 +376,6 @@ storiesOf("panels/Tab/index", module)
           },
         }}
         style={{ width: "100%" }}
-        store={store}
         onMount={() => {
           setTimeout(async () => {
             await tick();
@@ -412,7 +394,6 @@ storiesOf("panels/Tab/index", module)
     );
   })
   .add("prevent dragging selected parent tab into child tab panel", () => {
-    const store = configureStore(rootReducer);
     return (
       <PanelSetup
         panelCatalog={new MockPanelCatalog()}
@@ -427,7 +408,6 @@ storiesOf("panels/Tab/index", module)
           },
         }}
         style={{ width: "100%" }}
-        store={store}
         onMount={() => {
           setTimeout(async () => {
             await tick();
@@ -452,13 +432,11 @@ storiesOf("panels/Tab/index", module)
     );
   })
   .add("dragging and dropping a nested tab panel does not remove any tabs", () => {
-    const store = configureStore(rootReducer);
     return (
       <PanelSetup
         panelCatalog={new MockPanelCatalog()}
         fixture={nestedTabLayoutFixture}
         style={{ width: "100%" }}
-        store={store}
         onMount={() => {
           setTimeout(async () => {
             // Create a new tab on the left side
@@ -484,13 +462,11 @@ storiesOf("panels/Tab/index", module)
     );
   })
   .add("supports dragging between tabs anywhere in the layout", () => {
-    const store = configureStore(rootReducer);
     return (
       <PanelSetup
         panelCatalog={new MockPanelCatalog()}
         fixture={nestedTabLayoutFixture2}
         style={{ width: "100%" }}
-        store={store}
         onMount={() => {
           setTimeout(async () => {
             const mouseEnterContainer = document.querySelectorAll('[data-test~="Plot!1"]')[0];

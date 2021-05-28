@@ -7,6 +7,7 @@ import { ToastProvider } from "react-toast-notifications";
 
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import { HoverValueProvider } from "@foxglove/studio-base/context/HoverValueContext";
+import { UserNodeStateProvider } from "@foxglove/studio-base/context/UserNodeStateContext";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import waitForFonts from "@foxglove/studio-base/util/waitForFonts";
 
@@ -23,6 +24,7 @@ function withContextProviders(Child: Story): JSX.Element {
     <ThemeProvider />,
     <ToastProvider>{undefined}</ToastProvider>,
     <HoverValueProvider />,
+    <UserNodeStateProvider />,
     /* eslint-enable react/jsx-key */
   ];
   return (

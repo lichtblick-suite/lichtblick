@@ -125,7 +125,7 @@ export type UserNodeDiagnostics = {
   [nodeId: string]: { diagnostics: readonly Diagnostic[] };
 };
 export type UserNodeLogs = {
-  [nodeId: string]: { logs: UserNodeLog[] };
+  [nodeId: string]: { logs: readonly UserNodeLog[] };
 };
 
 export type RegistrationOutput = {

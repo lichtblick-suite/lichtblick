@@ -21,7 +21,6 @@ import {
 import StoryPlayer from "@foxglove/studio-base/players/StoryPlayer";
 import { PlayerState, SubscribePayload } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
-import { Store } from "@foxglove/studio-base/types/Store";
 
 const defaultGetMergedFixture = (bagFixture: Fixture) => bagFixture;
 
@@ -34,12 +33,10 @@ type Props = {
   getMergedFixture?: (bagFixture: Fixture) => Fixture;
   onMount?: (
     arg0: HTMLDivElement,
-    store: Store,
     actions: CurrentLayoutActions,
     selectedPanelActions: SelectedPanelActions,
   ) => void;
   onFirstMount?: (arg0: HTMLDivElement) => void;
-  store?: Store;
   frameHistoryCompatibility?: boolean;
 };
 
@@ -60,7 +57,6 @@ export default function PanelSetupWithBag({
   subscriptions,
   onMount,
   onFirstMount,
-  store,
   frameHistoryCompatibility = false,
 }: Props): JSX.Element | ReactNull {
   const [fixture, setFixture] = useState<Fixture | undefined>(undefined);
@@ -105,7 +101,7 @@ export default function PanelSetupWithBag({
   }, [bag, bag2, getMergedFixture, subscriptions]);
 
   return fixture ? (
-    <PanelSetup fixture={fixture} onMount={onMount} onFirstMount={onFirstMount} store={store}>
+    <PanelSetup fixture={fixture} onMount={onMount} onFirstMount={onFirstMount}>
       {children}
     </PanelSetup>
   ) : (

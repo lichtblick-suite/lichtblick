@@ -10,13 +10,12 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import React, { useState, useRef, useEffect, ReactElement } from "react";
-import { useDispatch } from "react-redux";
+import { useState, useRef, useEffect, ReactElement } from "react";
 import styled from "styled-components";
 
-import { clearUserNodeLogs } from "@foxglove/studio-base/actions/userNodes";
 import Button from "@foxglove/studio-base/components/Button";
 import Flex from "@foxglove/studio-base/components/Flex";
+import { useUserNodeState } from "@foxglove/studio-base/context/UserNodeStateContext";
 import DiagnosticsSection from "@foxglove/studio-base/panels/NodePlayground/BottomBar/DiagnosticsSection";
 import LogsSection from "@foxglove/studio-base/panels/NodePlayground/BottomBar/LogsSection";
 import { Diagnostic, UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
@@ -32,8 +31,8 @@ type Props = {
   nodeId?: string;
   isSaved: boolean;
   save: () => void;
-  diagnostics: Diagnostic[];
-  logs: UserNodeLog[];
+  diagnostics: readonly Diagnostic[];
+  logs: readonly UserNodeLog[];
 };
 
 type HeaderItemProps = {
@@ -58,11 +57,7 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
   const [bottomBarDisplay, setBottomBarDisplay] = useState("closed");
   const [autoScroll, setAutoScroll] = useState(true);
 
-  const dispatch = useDispatch();
-  const clearLogs = React.useCallback(
-    (payload: string) => dispatch(clearUserNodeLogs(payload)),
-    [dispatch],
-  );
+  const { clearUserNodeLogs } = useUserNodeState();
   const scrollContainer = useRef<HTMLDivElement>(ReactNull);
 
   useEffect(() => {
@@ -74,7 +69,7 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
   }, [autoScroll, logs]);
 
   return (
-    <Flex col style={{ backgroundColor: colors.DARK1, bottom: 0, right: 0, left: 0 }}>
+    <Flex col style={{ backgroundColor: colors.DARK1, position: "relative" }}>
       <Flex
         row
         start
@@ -123,7 +118,7 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
           onClick={() => {
             if (nodeId != undefined) {
               save();
-              clearLogs(nodeId);
+              clearUserNodeLogs(nodeId);
             }
           }}
         >
@@ -148,7 +143,7 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
       >
         {bottomBarDisplay === "diagnostics" && <DiagnosticsSection diagnostics={diagnostics} />}
         {bottomBarDisplay === "logs" && (
-          <LogsSection nodeId={nodeId} logs={logs} clearLogs={clearLogs} />
+          <LogsSection nodeId={nodeId} logs={logs} clearLogs={clearUserNodeLogs} />
         )}
       </div>
     </Flex>

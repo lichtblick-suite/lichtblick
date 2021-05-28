@@ -36,7 +36,7 @@ const severityIcons = {
 };
 
 type Props = {
-  diagnostics: Diagnostic[];
+  diagnostics: readonly Diagnostic[];
 };
 
 const DiagnosticsSection = ({ diagnostics }: Props): ReactElement => {

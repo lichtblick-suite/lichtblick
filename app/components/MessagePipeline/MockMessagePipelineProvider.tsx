@@ -29,7 +29,6 @@ import {
   SubscribePayload,
   Topic,
 } from "@foxglove/studio-base/players/types";
-import StoreSetup from "@foxglove/studio-base/stories/StoreSetup";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 
@@ -54,7 +53,6 @@ export default function MockMessagePipelineProvider(props: {
   noActiveData?: boolean;
   activeData?: Partial<PlayerStateActiveData>;
   capabilities?: string[];
-  store?: any;
   startPlayback?: () => void;
   pausePlayback?: () => void;
   seekPlayback?: (arg0: Time) => void;
@@ -147,29 +145,27 @@ export default function MockMessagePipelineProvider(props: {
   );
 
   return (
-    <StoreSetup store={props.store}>
-      <ContextInternal.Provider
-        value={{
-          playerState: playerState,
-          frame: groupBy(props.messages ?? [], "topic"),
-          sortedTopics: (props.topics ?? []).sort(naturalSort("name")),
-          datatypes: props.datatypes ?? NO_DATATYPES,
-          subscriptions: flattenedSubscriptions,
-          publishers: [],
-          setSubscriptions: props.setSubscriptions ?? setSubscriptions,
-          setPublishers: props.setPublishers ?? noop,
-          setParameter: props.setParameter ?? noop,
-          publish: props.publish ?? noop,
-          startPlayback: props.startPlayback ?? noop,
-          pausePlayback: props.pausePlayback ?? noop,
-          setPlaybackSpeed: noop,
-          seekPlayback: props.seekPlayback ?? noop,
-          pauseFrame: props.pauseFrame ?? (() => noop),
-          requestBackfill,
-        }}
-      >
-        {props.children}
-      </ContextInternal.Provider>
-    </StoreSetup>
+    <ContextInternal.Provider
+      value={{
+        playerState: playerState,
+        frame: groupBy(props.messages ?? [], "topic"),
+        sortedTopics: (props.topics ?? []).sort(naturalSort("name")),
+        datatypes: props.datatypes ?? NO_DATATYPES,
+        subscriptions: flattenedSubscriptions,
+        publishers: [],
+        setSubscriptions: props.setSubscriptions ?? setSubscriptions,
+        setPublishers: props.setPublishers ?? noop,
+        setParameter: props.setParameter ?? noop,
+        publish: props.publish ?? noop,
+        startPlayback: props.startPlayback ?? noop,
+        pausePlayback: props.pausePlayback ?? noop,
+        setPlaybackSpeed: noop,
+        seekPlayback: props.seekPlayback ?? noop,
+        pauseFrame: props.pauseFrame ?? (() => noop),
+        requestBackfill,
+      }}
+    >
+      {props.children}
+    </ContextInternal.Provider>
   );
 }

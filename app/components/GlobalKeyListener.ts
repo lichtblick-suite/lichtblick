@@ -55,7 +55,7 @@ export default function GlobalKeyListener(): ReactNull {
         // they can be connected to the Edit menu items.
 
         // Don't use ctrl-Z for layout history actions inside the Monaco Editor. It isn't
-        // controlled, and changes inside it don't result in updates to the Redux state. We could
+        // controlled, and changes inside it don't result in updates to the layout history. We could
         // consider making the editor controlled, with a separate "unsaved state".
         if (inNativeUndoRedoElement(e.target as any)) {
           return;

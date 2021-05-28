@@ -16,7 +16,6 @@ import ArrowLeftIcon from "@mdi/svg/svg/arrow-left.svg";
 import PlusIcon from "@mdi/svg/svg/plus.svg";
 import { omit } from "lodash";
 import { Suspense } from "react";
-import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
@@ -31,10 +30,10 @@ import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { useUserNodeState } from "@foxglove/studio-base/context/UserNodeStateContext";
 import BottomBar from "@foxglove/studio-base/panels/NodePlayground/BottomBar";
 import Sidebar from "@foxglove/studio-base/panels/NodePlayground/Sidebar";
 import Playground from "@foxglove/studio-base/panels/NodePlayground/playground-icon.svg";
-import { State } from "@foxglove/studio-base/reducers";
 import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -131,15 +130,17 @@ function NodePlayground(props: Props) {
   const [explorer, updateExplorer] = React.useState<Explorer>(undefined);
 
   const userNodes = useCurrentLayoutSelector((state) => state.userNodes);
-  const userNodeDiagnostics = useSelector((state: any) => state.userNodes.userNodeDiagnostics);
-  const rosLib = useSelector((state: State) => state.userNodes.rosLib);
+  const {
+    state: { nodeStates: userNodeDiagnostics, rosLib },
+  } = useUserNodeState();
+  // const userNodeDiagnostics = useSelector((state: any) => state.userNodes.userNodeDiagnostics);
+  // const rosLib = useSelector((state: State) => state.userNodes.rosLib);
 
   const { setUserNodes } = useCurrentLayoutActions();
 
   const selectedNodeDiagnostics =
-    selectedNodeId != undefined && userNodeDiagnostics[selectedNodeId]
-      ? userNodeDiagnostics[selectedNodeId].diagnostics
-      : [];
+    (selectedNodeId != undefined ? userNodeDiagnostics[selectedNodeId]?.diagnostics : undefined) ??
+    [];
   const selectedNode = selectedNodeId != undefined ? userNodes[selectedNodeId] : undefined;
   const [scriptBackStack, setScriptBackStack] = React.useState<Script[]>([]);
   // Holds the currently active script
@@ -150,9 +151,7 @@ function NodePlayground(props: Props) {
   const isNodeSaved =
     !isCurrentScriptSelectedNode || currentScript?.code === selectedNode?.sourceCode;
   const selectedNodeLogs =
-    selectedNodeId != undefined && userNodeDiagnostics[selectedNodeId]
-      ? userNodeDiagnostics[selectedNodeId].logs
-      : [];
+    (selectedNodeId != undefined ? userNodeDiagnostics[selectedNodeId]?.logs : undefined) ?? [];
 
   const inputTitle = currentScript
     ? currentScript.filePath + (currentScript.readOnly ? " (READONLY)" : "")

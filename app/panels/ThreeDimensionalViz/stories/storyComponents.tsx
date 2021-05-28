@@ -20,15 +20,11 @@ import GlobalVariableSliderPanel from "@foxglove/studio-base/panels/GlobalVariab
 import ThreeDimensionalViz from "@foxglove/studio-base/panels/ThreeDimensionalViz";
 import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
 import { Frame, Topic } from "@foxglove/studio-base/players/types";
-import createRootReducer from "@foxglove/studio-base/reducers";
-import configureStore from "@foxglove/studio-base/store/configureStore";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 import PanelSetupWithBag from "@foxglove/studio-base/stories/PanelSetupWithBag";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import { ScreenshotSizedContainer } from "@foxglove/studio-base/stories/storyHelpers";
 import { getPanelIdForType } from "@foxglove/studio-base/util/layout";
-
-type Store = ReturnType<typeof configureStore>;
 
 export type FixtureExampleData = {
   topics: {
@@ -45,7 +41,7 @@ type FixtureExampleProps = {
   data?: FixtureExampleData;
   loadData?: Promise<FixtureExampleData>;
   futureTime?: boolean;
-  onMount?: (arg0: HTMLDivElement | undefined, store?: Store) => void;
+  onMount?: (arg0: HTMLDivElement | undefined) => void;
 };
 
 type FixtureExampleState = {
@@ -152,7 +148,6 @@ export const ThreeDimPanelSetupWithBag = ({
   globalVariables: any;
   bag: string;
 }): JSX.Element => {
-  const store: Store = configureStore(createRootReducer());
   const topics = uniq(
     threeDimensionalConfig.checkedKeys
       ?.filter((key) => key.startsWith("t:"))
@@ -165,8 +160,7 @@ export const ThreeDimPanelSetupWithBag = ({
         frameHistoryCompatibility
         bag={bag}
         subscriptions={topics}
-        store={store}
-        onMount={(_el, _store, _layoutActions, selectedPanelActions) => {
+        onMount={(_el, _layoutActions, selectedPanelActions) => {
           // Wait for the panel to finish resizing
           setTimeout(() => {
             // Select the panel so we can control with the keyboard

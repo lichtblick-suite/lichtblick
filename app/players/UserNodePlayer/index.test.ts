@@ -250,7 +250,7 @@ describe("UserNodePlayer", () => {
 
       const { topicNames, messages }: any = await done;
 
-      expect(mockSetNodeDiagnostics).toHaveBeenCalledWith({ nodeId: { diagnostics: [] } });
+      expect(mockSetNodeDiagnostics).toHaveBeenCalledWith(nodeId, []);
       expect(messages.length).toEqual(0);
       expect(topicNames).toEqual(["/np_input", `${DEFAULT_STUDIO_NODE_PREFIX}1`]);
     });
@@ -518,23 +518,19 @@ describe("UserNodePlayer", () => {
       await done2;
 
       expect(addUserNodeLogs.mock.calls).toEqual([
-        [{ [nodeId]: { logs: [{ source: "processMessage", value: "Running. Will fail." }] } }],
-        [{ [nodeId]: { logs: [{ source: "processMessage", value: "Running. Will succeed." }] } }],
+        [nodeId, [{ source: "processMessage", value: "Running. Will fail." }]],
+        [nodeId, [{ source: "processMessage", value: "Running. Will succeed." }]],
       ]);
       // Errors are not immediately cleared by successful calls -- they stick around for the user
       // to read.
-      expect(setUserNodeDiagnostics).toHaveBeenLastCalledWith({
-        [nodeId]: {
-          diagnostics: [
-            {
-              code: ErrorCodes.RUNTIME,
-              message: "Error: Error!",
-              severity: DiagnosticSeverity.Error,
-              source: Sources.Runtime,
-            },
-          ],
+      expect(setUserNodeDiagnostics).toHaveBeenLastCalledWith(nodeId, [
+        {
+          code: ErrorCodes.RUNTIME,
+          message: "Error: Error!",
+          severity: DiagnosticSeverity.Error,
+          source: Sources.Runtime,
         },
-      });
+      ]);
     });
 
     it("provides access to './pointClouds' library for user input node code", async () => {
@@ -673,21 +669,15 @@ describe("UserNodePlayer", () => {
         { name: "/np_input", datatype: "std_msgs/Header" },
         { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, datatype: `${DEFAULT_STUDIO_NODE_PREFIX}1` },
       ]);
-      expect(mockSetNodeDiagnostics).toHaveBeenCalledWith({
-        [`${DEFAULT_STUDIO_NODE_PREFIX}1`]: { diagnostics: [] },
-      });
-      expect(mockSetNodeDiagnostics).toHaveBeenCalledWith({
-        [`${DEFAULT_STUDIO_NODE_PREFIX}2`]: {
-          diagnostics: [
-            {
-              source: Sources.OutputTopicChecker,
-              severity: DiagnosticSeverity.Error,
-              message: `Output "${DEFAULT_STUDIO_NODE_PREFIX}1" must be unique`,
-              code: ErrorCodes.OutputTopicChecker.NOT_UNIQUE,
-            },
-          ],
+      expect(mockSetNodeDiagnostics).toHaveBeenCalledWith(`${DEFAULT_STUDIO_NODE_PREFIX}1`, []);
+      expect(mockSetNodeDiagnostics).toHaveBeenCalledWith(`${DEFAULT_STUDIO_NODE_PREFIX}2`, [
+        {
+          source: Sources.OutputTopicChecker,
+          severity: DiagnosticSeverity.Error,
+          message: `Output "${DEFAULT_STUDIO_NODE_PREFIX}1" must be unique`,
+          code: ErrorCodes.OutputTopicChecker.NOT_UNIQUE,
         },
-      });
+      ]);
     });
 
     it("should handle multiple user nodes", async () => {
@@ -908,18 +898,14 @@ describe("UserNodePlayer", () => {
       });
 
       const { topicNames, messages }: any = await done;
-      expect(mockSetNodeDiagnostics).toHaveBeenLastCalledWith({
-        nodeId: {
-          diagnostics: [
-            {
-              source: Sources.Runtime,
-              severity: DiagnosticSeverity.Error,
-              message: error,
-              code: ErrorCodes.RUNTIME,
-            },
-          ],
+      expect(mockSetNodeDiagnostics).toHaveBeenLastCalledWith(nodeId, [
+        {
+          source: Sources.Runtime,
+          severity: DiagnosticSeverity.Error,
+          message: error,
+          code: ErrorCodes.RUNTIME,
         },
-      });
+      ]);
       // Sanity check to ensure none of the user node messages made it through if there was an error.
       expect(messages.map(({ topic }: any) => topic)).not.toContain(
         `${DEFAULT_STUDIO_NODE_PREFIX}1`,
@@ -985,18 +971,14 @@ describe("UserNodePlayer", () => {
       const [done] = setListenerHelper(userNodePlayer);
       fakePlayer.emit({ activeData: basicPlayerState });
       await done;
-      expect(mockSetNodeDiagnostics).toHaveBeenLastCalledWith({
-        nodeId: {
-          diagnostics: [
-            {
-              severity: DiagnosticSeverity.Error,
-              message: expect.any(String),
-              source: Sources.OutputTopicChecker,
-              code: ErrorCodes.OutputTopicChecker.BAD_PREFIX,
-            },
-          ],
+      expect(mockSetNodeDiagnostics).toHaveBeenLastCalledWith(nodeId, [
+        {
+          severity: DiagnosticSeverity.Error,
+          message: expect.any(String),
+          source: Sources.OutputTopicChecker,
+          code: ErrorCodes.OutputTopicChecker.BAD_PREFIX,
         },
-      });
+      ]);
     });
 
     describe("user logging", () => {
@@ -1064,7 +1046,7 @@ describe("UserNodePlayer", () => {
 
         const { topicNames }: any = await done;
         expect(mockAddNodeLogs).toHaveBeenCalled();
-        expect(mockAddNodeLogs.mock.calls).toEqual(logs.map((log) => [{ nodeId: { logs: log } }]));
+        expect(mockAddNodeLogs.mock.calls).toEqual(logs.map((log) => [nodeId, log]));
         expect(topicNames).toEqual(["/np_input", `${DEFAULT_STUDIO_NODE_PREFIX}1`]);
       });
 

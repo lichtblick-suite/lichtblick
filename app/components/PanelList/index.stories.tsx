@@ -16,7 +16,6 @@ import { useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import TestUtils from "react-dom/test-utils";
-import { Provider } from "react-redux";
 
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelList from "@foxglove/studio-base/components/PanelList";
@@ -28,8 +27,6 @@ import PanelCatalogContext, {
 import CurrentLayoutState, {
   DEFAULT_LAYOUT_FOR_TESTS,
 } from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
-import createRootReducer from "@foxglove/studio-base/reducers";
-import configureStore from "@foxglove/studio-base/store/configureStore.testing";
 
 const SamplePanel1 = function () {
   return <div></div>;
@@ -109,13 +106,11 @@ storiesOf("components/PanelList", module)
     const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
     return (
       <DndProvider backend={HTML5Backend}>
-        <Provider store={configureStore(createRootReducer())}>
-          <PanelCatalogContext.Provider value={new MockPanelCatalog()}>
-            <CurrentLayoutContext.Provider value={currentLayout}>
-              {childrenRenderFcn()}
-            </CurrentLayoutContext.Provider>
-          </PanelCatalogContext.Provider>
-        </Provider>
+        <PanelCatalogContext.Provider value={new MockPanelCatalog()}>
+          <CurrentLayoutContext.Provider value={currentLayout}>
+            {childrenRenderFcn()}
+          </CurrentLayoutContext.Provider>
+        </PanelCatalogContext.Provider>
       </DndProvider>
     );
   })

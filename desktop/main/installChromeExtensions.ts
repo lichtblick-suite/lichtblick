@@ -2,10 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import installExtension, {
-  REACT_DEVELOPER_TOOLS,
-  REDUX_DEVTOOLS,
-} from "electron-devtools-installer";
+import installExtension, { REACT_DEVELOPER_TOOLS } from "electron-devtools-installer";
 
 import Logger from "@foxglove/log";
 
@@ -17,10 +14,7 @@ export default async function installChromeExtensions(): Promise<void> {
   // So don't wait indefinitely for installation to complete.
   let finished = false;
   await Promise.race([
-    Promise.allSettled([
-      installExtension(REACT_DEVELOPER_TOOLS),
-      (process.env.REDUX_DEVTOOLS ?? "") !== "" ? installExtension(REDUX_DEVTOOLS) : undefined,
-    ]).then((results) => {
+    Promise.allSettled([installExtension(REACT_DEVELOPER_TOOLS)]).then((results) => {
       finished = true;
       log.info("Finished:", results);
     }),

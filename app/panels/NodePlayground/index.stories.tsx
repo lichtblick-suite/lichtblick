@@ -151,8 +151,8 @@ storiesOf("panels/NodePlayground", module)
             sourceCode: sourceCodeWithUtils,
           },
         },
-        userNodeDiagnostics: { nodeId1: { diagnostics: [] } },
-        userNodeLogs: { nodeId1: { logs: [] } },
+        userNodeDiagnostics: { nodeId1: [] },
+        userNodeLogs: { nodeId1: [] },
       }}
     >
       <NodePlayground overrideConfig={{ selectedNodeId: "nodeId1" }} />
@@ -168,10 +168,10 @@ storiesOf("panels/NodePlayground", module)
             sourceCode: sourceCodeWithUtils,
           },
         },
-        userNodeDiagnostics: { nodeId1: { diagnostics: [] } },
-        userNodeLogs: { nodeId1: { logs: [] } },
+        userNodeDiagnostics: { nodeId1: [] },
+        userNodeLogs: { nodeId1: [] },
       }}
-      onMount={(el, _store, actions) => {
+      onMount={(el, actions) => {
         setTimeout(() => {
           // Change the userNodes to confirm the code in the Editor updates
           actions.setUserNodes({
@@ -200,8 +200,8 @@ storiesOf("panels/NodePlayground", module)
             sourceCode: sourceCodeWithUtils,
           },
         },
-        userNodeDiagnostics: { nodeId1: { diagnostics: [] } },
-        userNodeLogs: { nodeId1: { logs: [] } },
+        userNodeDiagnostics: { nodeId1: [] },
+        userNodeLogs: { nodeId1: [] },
       }}
     >
       <NodePlayground
@@ -228,8 +228,8 @@ storiesOf("panels/NodePlayground", module)
             sourceCode: sourceCodeWithUtils,
           },
         },
-        userNodeDiagnostics: { nodeId1: { diagnostics: [] } },
-        userNodeLogs: { nodeId1: { logs: [] } },
+        userNodeDiagnostics: { nodeId1: [] },
+        userNodeLogs: { nodeId1: [] },
       }}
       onMount={(el: any) => {
         setTimeout(() => {
@@ -369,7 +369,7 @@ storiesOf("panels/NodePlayground", module)
       fixture={{
         ...fixture,
         userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
-        userNodeDiagnostics: { nodeId1: { diagnostics: [] } },
+        userNodeDiagnostics: { nodeId1: [] },
       }}
     >
       <NodePlayground overrideConfig={{ selectedNodeId: "nodeId1" }} />
@@ -380,7 +380,7 @@ storiesOf("panels/NodePlayground", module)
       fixture={{
         ...fixture,
         userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
-        userNodeDiagnostics: { nodeId1: { diagnostics: [] } },
+        userNodeDiagnostics: { nodeId1: [] },
       }}
       onMount={(el: any) => {
         setTimeout(() => {
@@ -399,7 +399,7 @@ storiesOf("panels/NodePlayground", module)
       fixture={{
         ...fixture,
         userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
-        userNodeDiagnostics: { nodeId1: { diagnostics: [] } },
+        userNodeDiagnostics: { nodeId1: [] },
       }}
       onMount={(el: any) => {
         setTimeout(() => {
@@ -419,40 +419,38 @@ storiesOf("panels/NodePlayground", module)
         ...fixture,
         userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
         userNodeDiagnostics: {
-          nodeId1: {
-            diagnostics: [
-              {
-                message: `Type '"bad number"' is not assignable to type 'number[]'.`,
-                severity: 8,
-                source: "Typescript",
-                startLineNumber: 0,
-                startColumn: 6,
-                endLineNumber: 72,
-                endColumn: 20,
-                code: 2304,
-              },
-              {
-                message: "This is a warning message (without line or column numbers).",
-                severity: 4,
-                source: "Source A",
-                endLineNumber: 72,
-                endColumn: 20,
-                code: 2304,
-              },
-              {
-                message: "This is an info message (without line or column numbers).",
-                severity: 2,
-                source: "Source B",
-                code: 2304,
-              },
-              {
-                message: "This is a hint message (without line or column numbers).",
-                severity: 1,
-                source: "Source C",
-                code: 2304,
-              },
-            ],
-          },
+          nodeId1: [
+            {
+              message: `Type '"bad number"' is not assignable to type 'number[]'.`,
+              severity: 8,
+              source: "Typescript",
+              startLineNumber: 0,
+              startColumn: 6,
+              endLineNumber: 72,
+              endColumn: 20,
+              code: 2304,
+            },
+            {
+              message: "This is a warning message (without line or column numbers).",
+              severity: 4,
+              source: "Source A",
+              endLineNumber: 72,
+              endColumn: 20,
+              code: 2304,
+            },
+            {
+              message: "This is an info message (without line or column numbers).",
+              severity: 2,
+              source: "Source B",
+              code: 2304,
+            },
+            {
+              message: "This is a hint message (without line or column numbers).",
+              severity: 1,
+              source: "Source C",
+              code: 2304,
+            },
+          ],
         },
       }}
     >
@@ -465,40 +463,38 @@ storiesOf("panels/NodePlayground", module)
         ...fixture,
         userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
         userNodeDiagnostics: {
-          nodeId1: {
-            diagnostics: [
-              {
-                message: `Type '"bad number"' is not assignable to type 'number[]'.`,
-                severity: 8,
-                source: "Typescript",
-                startLineNumber: 0,
-                startColumn: 6,
-                endLineNumber: 72,
-                endColumn: 20,
-                code: 2304,
-              },
-              {
-                message: "This is a warning message (without line or column numbers).",
-                severity: 4,
-                source: "Source A",
-                endLineNumber: 72,
-                endColumn: 20,
-                code: 2304,
-              },
-              {
-                message: "This is an info message (without line or column numbers).",
-                severity: 2,
-                source: "Source B",
-                code: 2304,
-              },
-              {
-                message: "This is a hint message (without line or column numbers).",
-                severity: 1,
-                source: "Source C",
-                code: 2304,
-              },
-            ],
-          },
+          nodeId1: [
+            {
+              message: `Type '"bad number"' is not assignable to type 'number[]'.`,
+              severity: 8,
+              source: "Typescript",
+              startLineNumber: 0,
+              startColumn: 6,
+              endLineNumber: 72,
+              endColumn: 20,
+              code: 2304,
+            },
+            {
+              message: "This is a warning message (without line or column numbers).",
+              severity: 4,
+              source: "Source A",
+              endLineNumber: 72,
+              endColumn: 20,
+              code: 2304,
+            },
+            {
+              message: "This is an info message (without line or column numbers).",
+              severity: 2,
+              source: "Source B",
+              code: 2304,
+            },
+            {
+              message: "This is a hint message (without line or column numbers).",
+              severity: 1,
+              source: "Source C",
+              code: 2304,
+            },
+          ],
         },
       }}
       onMount={(el: any) => {
@@ -523,8 +519,8 @@ storiesOf("panels/NodePlayground", module)
             sourceCode: sourceCodeWithLogs,
           },
         },
-        userNodeDiagnostics: { nodeId1: { diagnostics: [] } },
-        userNodeLogs: { nodeId1: { logs } },
+        userNodeDiagnostics: { nodeId1: [] },
+        userNodeLogs: { nodeId1: logs },
       }}
     >
       <NodePlayground overrideConfig={{ selectedNodeId: "nodeId1" }} />
@@ -540,8 +536,8 @@ storiesOf("panels/NodePlayground", module)
             sourceCode: sourceCodeWithLogs,
           },
         },
-        userNodeDiagnostics: { nodeId1: { diagnostics: [] } },
-        userNodeLogs: { nodeId1: { logs } },
+        userNodeDiagnostics: { nodeId1: [] },
+        userNodeLogs: { nodeId1: logs },
       }}
       onMount={(el: any) => {
         setTimeout(() => {
@@ -560,10 +556,10 @@ storiesOf("panels/NodePlayground", module)
       fixture={{
         ...fixture,
         userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
-        userNodeDiagnostics: { nodeId1: { diagnostics: [] } },
-        userNodeLogs: { nodeId1: { logs } },
+        userNodeDiagnostics: { nodeId1: [] },
+        userNodeLogs: { nodeId1: logs },
       }}
-      onMount={(el: any) => {
+      onFirstMount={(el: any) => {
         setTimeout(() => {
           const logsLabel = el.querySelector("[data-test=np-logs]");
           if (logsLabel) {

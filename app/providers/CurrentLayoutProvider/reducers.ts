@@ -103,7 +103,7 @@ function savePanelConfigs(state: PanelsState, payload: SaveConfigsPayload): Pane
               // merge new config with old one
               // similar to how this.setState merges props
               // When updating the panel state, we merge the new config (which may be just a part of config) with the old config and the default config every time.
-              // Previously this was done inside the component, but since the lifecycle of Redux is Action => Reducer => new state => Component,
+              // Previously this was done inside the component, but since the lifecycle is Action => Reducer => new state => Component,
               // dispatching an update to the panel state is not instant and can take some time to propagate back to the component.
               // If the existing panel config is the complete config1, and two actions were fired in quick succession the component with partial config2 and config3,
               // the correct behavior is to merge config2 with config1 and dispatch that, and then merge config 3 with the combined config2 and config1.
@@ -846,10 +846,7 @@ const panelsReducer = function (panelsState: PanelsState, action: PanelsActions)
       break;
 
     default:
-      // avoid returning a copy of the state if we did not handle the action
-      throw new Error(
-        "This reducer should only be used for panel actions, not as a general Redux reducer",
-      );
+      throw new Error("This reducer should only be used for panel actions");
   }
 
   return newPanelsState;

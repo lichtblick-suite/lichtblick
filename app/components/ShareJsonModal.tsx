@@ -26,7 +26,7 @@ import styles from "./ShareJsonModal.module.scss";
 type Props = {
   onRequestClose: () => void;
   onChange?: (value: any) => void;
-  // the panel state from redux
+  // the panel state
   // this will be serialized to json & displayed
   value: any;
   noun: string;

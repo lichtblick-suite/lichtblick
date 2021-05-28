@@ -5,7 +5,6 @@
 import { Suspense, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { Provider as ReduxProvider } from "react-redux";
 
 import Workspace from "@foxglove/studio-base/Workspace";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
@@ -16,11 +15,11 @@ import { AssetsProvider } from "@foxglove/studio-base/context/AssetContext";
 import { HoverValueProvider } from "@foxglove/studio-base/context/HoverValueContext";
 import ModalHost from "@foxglove/studio-base/context/ModalHost";
 import { PlayerSourceDefinition } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import { UserNodeStateProvider } from "@foxglove/studio-base/context/UserNodeStateContext";
 import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
 import ExtensionRegistryProvider from "@foxglove/studio-base/providers/ExtensionRegistryProvider";
 import PanelCatalogProvider from "@foxglove/studio-base/providers/PanelCatalogProvider";
 import URDFAssetLoader from "@foxglove/studio-base/services/URDFAssetLoader";
-import getGlobalStore from "@foxglove/studio-base/store/getGlobalStore";
 
 type AppProps = {
   availableSources: PlayerSourceDefinition[];
@@ -30,8 +29,6 @@ type AppProps = {
 };
 
 export default function App(props: AppProps): JSX.Element {
-  const globalStore = getGlobalStore();
-
   const [assetLoaders] = useState(() => [new URDFAssetLoader()]);
 
   const providers = [
@@ -39,8 +36,8 @@ export default function App(props: AppProps): JSX.Element {
     <AnalyticsProvider />,
     <ModalHost />, // render modal elements inside the ThemeProvider
     <AssetsProvider loaders={assetLoaders} />,
-    <ReduxProvider store={globalStore} />,
     <HoverValueProvider />,
+    <UserNodeStateProvider />,
     <CurrentLayoutProvider />,
     <ExtensionRegistryProvider />,
     <PlayerManager playerSources={props.availableSources} />,

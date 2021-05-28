@@ -105,7 +105,7 @@ type ComponentConstructorType<P> = { displayName?: string } & (
 // Gives panel a `config` and `saveConfig`.
 //   export default Panel(MyPanelComponent)
 //
-// `config` comes from Redux, but in stories / tests you can pass in your own:
+// `config` comes from the current layout, but in stories / tests you can pass in your own:
 //   `<MyPanel config={…} />`
 export default function Panel<Config extends PanelConfig>(
   PanelComponent: ComponentConstructorType<{

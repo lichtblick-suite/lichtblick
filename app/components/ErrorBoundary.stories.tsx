@@ -15,8 +15,6 @@ import { storiesOf } from "@storybook/react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import StoreSetup from "@foxglove/studio-base/stories/StoreSetup";
-
 import ErrorBoundary from "./ErrorBoundary";
 
 class Broken extends React.Component {
@@ -35,11 +33,9 @@ class Broken extends React.Component {
 storiesOf("components/ErrorBoundary", module).add("examples", () => {
   return (
     <DndProvider backend={HTML5Backend}>
-      <StoreSetup>
-        <ErrorBoundary hideSourceLocations>
-          <Broken />
-        </ErrorBoundary>
-      </StoreSetup>
+      <ErrorBoundary hideSourceLocations>
+        <Broken />
+      </ErrorBoundary>
     </DndProvider>
   );
 });

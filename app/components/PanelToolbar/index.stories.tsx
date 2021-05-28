@@ -99,7 +99,7 @@ function KeepToolbarVisibleHack() {
 storiesOf("components/PanelToolbar", module)
   .addDecorator((childrenRenderFcn) => {
     const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
-    // Provide all stories with PanelContext and redux state
+    // Provide all stories with PanelContext and current layout
     return (
       <CurrentLayoutContext.Provider value={currentLayout}>
         <MockPanelContextProvider>{childrenRenderFcn()}</MockPanelContextProvider>
