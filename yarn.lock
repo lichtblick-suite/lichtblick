@@ -2815,6 +2815,9 @@ __metadata:
 "@foxglove/studio@workspace:packages/@foxglove/studio":
   version: 0.0.0-use.local
   resolution: "@foxglove/studio@workspace:packages/@foxglove/studio"
+  dependencies:
+    "@types/react": 17.0.6
+    react: 17.0.2
   languageName: unknown
   linkType: soft
 

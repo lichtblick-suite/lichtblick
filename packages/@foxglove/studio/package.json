@@ -3,5 +3,11 @@
   "version": "0.1.0",
   "license": "MPL-2.0",
   "main": "",
-  "types": "index.d.ts"
+  "types": "index.d.ts",
+  "dependencies": {
+    "react": "17.0.2"
+  },
+  "devDependencies": {
+    "@types/react": "17.0.6"
+  }
 }
