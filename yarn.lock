@@ -2671,7 +2671,7 @@ __metadata:
     "@storybook/react": 6.2.9
     "@testing-library/dom": 7.31.0
     "@testing-library/react": 11.2.7
-    "@testing-library/react-hooks": 6.0.0
+    "@testing-library/react-hooks": 7.0.0
     "@types/argparse": ^2.0.8
     "@types/classnames": 2.3.1
     "@types/css-font-loading-module": 0.0.4
@@ -4889,15 +4889,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/react-hooks@npm:6.0.0":
-  version: 6.0.0
-  resolution: "@testing-library/react-hooks@npm:6.0.0"
+"@testing-library/react-hooks@npm:7.0.0":
+  version: 7.0.0
+  resolution: "@testing-library/react-hooks@npm:7.0.0"
   dependencies:
     "@babel/runtime": ^7.12.5
     "@types/react": ">=16.9.0"
     "@types/react-dom": ">=16.9.0"
     "@types/react-test-renderer": ">=16.9.0"
-    filter-console: ^0.1.1
     react-error-boundary: ^3.1.0
   peerDependencies:
     react: ">=16.9.0"
@@ -4908,7 +4907,7 @@ __metadata:
       optional: true
     react-test-renderer:
       optional: true
-  checksum: 31460e61f56bccc9d2b8413a786b6ef4f62867b4e9e93fb954d25a7623a03fb7bdde180dac97c37e41487216a8dd7d169e1b18266a37af1b5b62ea84e0bea5a1
+  checksum: 3c5e91459b2b939276bfa383cc73f40a2e5abec781d33b13db7dc1efd4796e7341ecbac638526623e8868ba23e4266b88bc537298931066797b11b3c0053e3d2
   languageName: node
   linkType: hard
 
@@ -13070,13 +13069,6 @@ __metadata:
   dependencies:
     to-regex-range: ^5.0.1
   checksum: cc283f4e65b504259e64fd969bcf4def4eb08d85565e906b7d36516e87819db52029a76b6363d0f02d0d532f0033c9603b9e2d943d56ee3b0d4f7ad3328ff917
-  languageName: node
-  linkType: hard
-
-"filter-console@npm:^0.1.1":
-  version: 0.1.1
-  resolution: "filter-console@npm:0.1.1"
-  checksum: 020a6aee2b0b7f0e7fdff76b2b86429a7cfc0fd2bae131a8d0d6eaddad05ffbeac16e3267f382a2beaead9568d6b90f2aba923daeb8dd0c97720d8eba885ede2
   languageName: node
   linkType: hard
 
