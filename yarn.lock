@@ -2716,7 +2716,7 @@ __metadata:
     "@wojtekmaj/enzyme-adapter-react-17": 0.6.1
     argparse: 2.0.1
     async-mutex: 0.3.1
-    chart.js: 3.2.1
+    chart.js: 3.3.2
     chartjs-plugin-annotation: 1.0.1
     chartjs-plugin-datalabels: 2.0.0-rc.1
     chartjs-plugin-zoom: "github:foxglove/chartjs-plugin-zoom#656541279943f00dce600288435f83c436293146"
@@ -8953,10 +8953,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chart.js@npm:3.2.1":
-  version: 3.2.1
-  resolution: "chart.js@npm:3.2.1"
-  checksum: 326d995f7d137bab262bf813135c7e06b2d244a2f0a82be13d3a3e1e6206294392313f858aa796412ee7c3da51d1216ecbf00ad421dfb27fc86aa87cd627019c
+"chart.js@npm:3.3.2":
+  version: 3.3.2
+  resolution: "chart.js@npm:3.3.2"
+  checksum: 0aaebab52cb5eacfc969210f7c304cad7e20b03a37b33f4e0332b5eeb9319e2929b085e0a8654ec33752566a55982ffe6bb3f2ba620c2a9b3bc71806ca7b9cb7
   languageName: node
   linkType: hard
 
