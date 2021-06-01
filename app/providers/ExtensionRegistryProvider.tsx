@@ -46,12 +46,8 @@ export default function ExtensionRegistryProvider(props: PropsWithChildren<unkno
 
       const module = { exports: {} };
       const require = (name: string) => {
-        return { React, ReactDOM, FoxgloveStudio }[name];
+        return { react: React, "react-dom": ReactDOM, "@foxglove/studio": FoxgloveStudio }[name];
       };
-
-      // load the extension module exports
-      fn(module, require, {});
-      const wrappedExtensionModule = module.exports as ExtensionModule;
 
       const extensionMode =
         process.env.NODE_ENV === "production"
@@ -80,6 +76,10 @@ export default function ExtensionRegistryProvider(props: PropsWithChildren<unkno
       };
 
       try {
+        // load the extension module exports
+        fn(module, require, {});
+        const wrappedExtensionModule = module.exports as ExtensionModule;
+
         wrappedExtensionModule.activate(ctx);
       } catch (err) {
         log.error(err);

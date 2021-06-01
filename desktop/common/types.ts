@@ -44,7 +44,6 @@ interface Storage {
 }
 
 type DesktopExtension = {
-  name: string;
   packageJson: unknown;
   source: string;
 };

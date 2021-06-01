@@ -25,7 +25,7 @@ export async function loadExtensions(rootFolder: string): Promise<DesktopExtensi
       continue;
     }
     try {
-      log.debug(`Loading extension ${entry.name}`);
+      log.debug(`Loading extension at ${entry.name}`);
       const extensionRootPath = pathJoin(rootFolder, entry.name);
       const packagePath = pathJoin(extensionRootPath, "package.json");
 
@@ -35,7 +35,7 @@ export async function loadExtensions(rootFolder: string): Promise<DesktopExtensi
       const sourcePath = pathJoin(extensionRootPath, packageJson.main);
 
       const source = await readFile(sourcePath, { encoding: "utf-8" });
-      extensions.push({ name: entry.name, packageJson, source });
+      extensions.push({ packageJson, source });
     } catch (err) {
       log.error(err);
     }

@@ -13,14 +13,20 @@ import { Desktop } from "../../common/types";
 const log = Logger.getLogger(__filename);
 const desktopBridge = (global as { desktopBridge?: Desktop }).desktopBridge;
 
+type PackageInfo = {
+  name: string;
+};
+
 export default function ExtensionLoaderProvider(props: PropsWithChildren<unknown>): JSX.Element {
   const { value: extensionLoader, error } = useAsync(async () => {
     const extensionList = (await desktopBridge?.getExtensions()) ?? [];
     log.debug(`Loaded ${extensionList?.length ?? 0} extension(s)`);
 
     const extensions = extensionList.map<ExtensionDetail>((item) => {
+      const pkgInfo = item.packageJson as PackageInfo;
+
       return {
-        name: item.name,
+        name: pkgInfo.name,
         source: item.source,
       };
     });
