@@ -29,7 +29,7 @@
     "typescript": "4.3.2"
   },
   "dependencies": {
-    "dns-packet": "5.2.2",
+    "dns-packet": "5.2.4",
     "eventemitter3": "4.0.7"
   },
   "peerDependencies": {
