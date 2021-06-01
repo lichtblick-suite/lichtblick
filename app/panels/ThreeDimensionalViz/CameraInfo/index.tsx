@@ -21,7 +21,7 @@ import Button from "@foxglove/studio-base/components/Button";
 import ExpandingToolbar, { ToolGroup } from "@foxglove/studio-base/components/ExpandingToolbar";
 import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
-import PanelContext from "@foxglove/studio-base/components/PanelContext";
+import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import {
   UncontrolledValidatedInput,
@@ -36,7 +36,6 @@ import {
   getNewCameraStateOnFollowChange,
   TargetPose,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
-import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 import clipboard from "@foxglove/studio-base/util/clipboard";
 import { point2DValidator, cameraStateValidator } from "@foxglove/studio-base/util/validators";
@@ -120,7 +119,7 @@ export default function CameraInfo({
   defaultSelectedTab,
 }: CameraInfoProps): JSX.Element {
   const [selectedTab, setSelectedTab] = React.useState(defaultSelectedTab);
-  const { updatePanelConfig, saveConfig } = React.useContext(PanelContext) ?? ({} as any);
+  const { updatePanelConfigs, saveConfig } = usePanelContext();
   const [edit, setEdit] = React.useState<boolean>(false);
   const onEditToggle = React.useCallback(() => setEdit((currVal) => !currVal), []);
 
@@ -134,7 +133,7 @@ export default function CameraInfo({
   const camPos2DTrimmed = camPos2D.map((num: any) => +num.toFixed(2));
 
   const syncCameraState = () => {
-    updatePanelConfig("3D Panel", (config: ThreeDimensionalVizConfig) => {
+    updatePanelConfigs("3D Panel", (config) => {
       // Transform the camera state by whichever TF or orientation the other panels are following.
       const newCameraState = getNewCameraStateOnFollowChange({
         prevCameraState: cameraState,
@@ -210,7 +209,7 @@ export default function CameraInfo({
                       type="checkbox"
                       checked={autoSyncCameraState}
                       onChange={() =>
-                        updatePanelConfig("3D Panel", (config: any) => ({
+                        updatePanelConfigs("3D Panel", (config) => ({
                           ...config,
                           cameraState,
                           autoSyncCameraState: !autoSyncCameraState,

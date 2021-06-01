@@ -14,6 +14,7 @@
 import { storiesOf } from "@storybook/react";
 import { DEFAULT_CAMERA_STATE } from "regl-worldview";
 
+import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import CameraInfo, {
   CAMERA_TAB_TYPE,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/CameraInfo";
@@ -51,7 +52,9 @@ const DEFAULT_PROPS = {
 
 const CameraInfoWrapper = (props: any) => (
   <div style={containerStyle}>
-    <CameraInfo {...DEFAULT_PROPS} defaultSelectedTab={CAMERA_TAB_TYPE} {...props} />
+    <MockPanelContextProvider>
+      <CameraInfo {...DEFAULT_PROPS} defaultSelectedTab={CAMERA_TAB_TYPE} {...props} />
+    </MockPanelContextProvider>
   </div>
 );
 
