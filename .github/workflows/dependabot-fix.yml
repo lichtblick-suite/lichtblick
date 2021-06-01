@@ -53,6 +53,10 @@ jobs:
           restore-keys: ${{ runner.os }}-yarn-
 
       - run: yarn install --skip-builds
+        env:
+          # yarn runs in immutable mode "by default" in CI -- turning this off requires an
+          # undocumented env var
+          YARN_ENABLE_IMMUTABLE_INSTALLS: false
 
       - run: yarn dedupe
 
