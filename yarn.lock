@@ -2681,7 +2681,6 @@ __metadata:
     "@types/gl-matrix": 3.2.0
     "@types/hammerjs": 2.0.39
     "@types/http-server": ^0.10.1
-    "@types/js-yaml": 4.0.1
     "@types/leaflet": 1.7.0
     "@types/memoize-weak": "workspace:packages/@types/memoize-weak"
     "@types/moment-duration-format": 2.2.2
@@ -2733,7 +2732,6 @@ __metadata:
     hoist-non-react-statics: 3.3.2
     http-server: 0.12.3
     intervals-fn: 3.0.3
-    js-yaml: 4.1.0
     leaflet: 1.7.1
     lodash: 4.17.21
     memoize-weak: 1.0.2
@@ -5447,13 +5445,6 @@ __metadata:
   version: 2.2.6
   resolution: "@types/js-cookie@npm:2.2.6"
   checksum: 97c50ff6cd0a27409b028aad94b0c4eb5cc43623532a1bdbbcccdb200539593eff3cc7f0d874b6b9bee586167638e3a10093c811ff6603ff2a9639564c82b3b1
-  languageName: node
-  linkType: hard
-
-"@types/js-yaml@npm:4.0.1":
-  version: 4.0.1
-  resolution: "@types/js-yaml@npm:4.0.1"
-  checksum: c1bc8a72272197d4dfb04c6b043346eff618be760116371b3d20b9e069e78b6964c58bcc75d5868afaa98055e1817ef3f6b57e76462c44f1f6edf54b784fe01d
   languageName: node
   linkType: hard
 
@@ -16839,17 +16830,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-yaml@npm:4.1.0, js-yaml@npm:^4.0.0":
-  version: 4.1.0
-  resolution: "js-yaml@npm:4.1.0"
-  dependencies:
-    argparse: ^2.0.1
-  bin:
-    js-yaml: bin/js-yaml.js
-  checksum: c7830dfd456c3ef2c6e355cc5a92e6700ceafa1d14bba54497b34a99f0376cecbb3e9ac14d3e5849b426d5a5140709a66237a8c991c675431271c4ce5504151a
-  languageName: node
-  linkType: hard
-
 "js-yaml@npm:^3.13.1":
   version: 3.14.1
   resolution: "js-yaml@npm:3.14.1"
@@ -16859,6 +16839,17 @@ __metadata:
   bin:
     js-yaml: bin/js-yaml.js
   checksum: bef146085f472d44dee30ec34e5cf36bf89164f5d585435a3d3da89e52622dff0b188a580e4ad091c3341889e14cb88cac6e4deb16dc5b1e9623bb0601fc255c
+  languageName: node
+  linkType: hard
+
+"js-yaml@npm:^4.0.0":
+  version: 4.1.0
+  resolution: "js-yaml@npm:4.1.0"
+  dependencies:
+    argparse: ^2.0.1
+  bin:
+    js-yaml: bin/js-yaml.js
+  checksum: c7830dfd456c3ef2c6e355cc5a92e6700ceafa1d14bba54497b34a99f0376cecbb3e9ac14d3e5849b426d5a5140709a66237a8c991c675431271c4ce5504151a
   languageName: node
   linkType: hard
 

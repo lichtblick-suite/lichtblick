@@ -54,7 +54,6 @@ const DEFAULT_PROPS = {
   saveConfig: () => {
     // no-op
   },
-  selectedPolygonEditFormat: "yaml",
   type: POLYGON_TAB_TYPE,
   updatePanelConfig: () => {
     // no-op
@@ -65,18 +64,10 @@ storiesOf("panels/ThreeDimensionalViz/DrawingTools", module).add("Polygon", () =
   return (
     <div style={containerStyle}>
       <div style={{ margin: 8 }}>
-        <DrawingTools
-          {...DEFAULT_PROPS}
-          defaultSelectedTab={POLYGON_TAB_TYPE}
-          selectedPolygonEditFormat="yaml"
-        />
+        <DrawingTools {...DEFAULT_PROPS} defaultSelectedTab={POLYGON_TAB_TYPE} />
       </div>
       <div style={{ margin: 8 }}>
-        <DrawingTools
-          {...DEFAULT_PROPS}
-          defaultSelectedTab={POLYGON_TAB_TYPE}
-          selectedPolygonEditFormat="json"
-        />
+        <DrawingTools {...DEFAULT_PROPS} defaultSelectedTab={POLYGON_TAB_TYPE} />
       </div>
     </div>
   );

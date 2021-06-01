@@ -13,9 +13,7 @@
 
 import { Polygon, PolygonPoint } from "regl-worldview";
 
-import { EDIT_FORMAT, EditFormat } from "@foxglove/studio-base/components/ValidatedInput";
 import { Point2D } from "@foxglove/studio-base/panels/ThreeDimensionalViz/DrawingTools";
-import YAML from "@foxglove/studio-base/util/yaml";
 
 export function polygonsToPoints(polygons: Polygon[]): Point2D[][] {
   return polygons.map((poly) => {
@@ -32,24 +30,12 @@ export function pointsToPolygons(polygonPoints: Point2D[][]): Polygon[] {
   });
 }
 
-function pointsToYaml(polygonPoints: Point2D[][]): string {
-  if (!polygonPoints[0] || polygonPoints[0].length === 0) {
-    return "";
-  }
-  return YAML.stringify(polygonPoints);
-}
-
 function pointsToJson(polygonPoints: Point2D[][]): string {
   return JSON.stringify(polygonPoints, undefined, 2);
 }
 
-export function getFormattedString(
-  polygonPoints: Point2D[][],
-  selectedPolygonEditFormat: EditFormat,
-): string {
-  return selectedPolygonEditFormat === EDIT_FORMAT.JSON
-    ? pointsToJson(polygonPoints)
-    : pointsToYaml(polygonPoints);
+export function getFormattedString(polygonPoints: Point2D[][]): string {
+  return pointsToJson(polygonPoints);
 }
 
 // calculate the sum of the line distances

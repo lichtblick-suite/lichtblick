@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { EDIT_FORMAT } from "@foxglove/studio-base/components/ValidatedInput";
-
 import { polygonsToPoints, pointsToPolygons, getFormattedString } from "./drawToolUtils";
 
 const points = [
@@ -63,29 +61,10 @@ describe("drawToolUtils", () => {
   });
   describe("getFormattedString", () => {
     it("returns json format", async () => {
-      expect(JSON.parse(getFormattedString(points, EDIT_FORMAT.JSON))).toEqual(points);
+      expect(JSON.parse(getFormattedString(points))).toEqual(points);
     });
     it("handles empty input for json format", async () => {
-      expect(getFormattedString([], EDIT_FORMAT.JSON)).toEqual("[]");
-    });
-    it("returns yaml format", () => {
-      expect(getFormattedString(points, EDIT_FORMAT.YAML)).toEqual(`- - x: 1
-    y: 1
-  - x: 2
-    y: 2
-  - x: 3
-    y: 3
-
-- - x: 4
-    y: 4
-  - x: 5
-    y: 5
-  - x: 6
-    y: 6`);
-    });
-    it("handles empty input for yaml format", async () => {
-      expect(getFormattedString([], EDIT_FORMAT.YAML)).toEqual("");
-      expect(getFormattedString([[]], EDIT_FORMAT.YAML)).toEqual("");
+      expect(getFormattedString([])).toEqual("[]");
     });
   });
 });

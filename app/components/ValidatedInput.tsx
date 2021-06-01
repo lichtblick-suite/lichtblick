@@ -14,30 +14,17 @@
 import { isEqual } from "lodash";
 import styled from "styled-components";
 
-import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import Flex from "@foxglove/studio-base/components/Flex";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 import { validationErrorToString, ValidationResult } from "@foxglove/studio-base/util/validators";
-import YAML from "@foxglove/studio-base/util/yaml";
 
 const { useState, useCallback, useRef, useLayoutEffect, useEffect } = React;
-
-export const EDIT_FORMAT: any = { JSON: "json", YAML: "yaml" };
 
 const SEditBox = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 200px;
   max-height: 800px;
-`;
-// TODO(Audrey): work with design to update Dropdown UI
-const STransparentDropdownButton = styled.div`
-  padding-top: 6px;
-  display: inline-flex;
-  button {
-    background: transparent;
-    display: inline-flex;
-  }
 `;
 const StyledTextarea = styled.textarea`
   flex: 1 1 auto;
@@ -54,7 +41,6 @@ type ParseAndStringifyFn = {
   stringify: (obj: any) => string;
   parse: (val: string) => any;
 };
-export type EditFormat = typeof EDIT_FORMAT[keyof typeof EDIT_FORMAT];
 export type BaseProps = {
   dataValidator?: (data: any) => ValidationResult | undefined;
   inputStyle?: {
@@ -65,9 +51,7 @@ export type BaseProps = {
   value: Value;
 };
 type Props = BaseProps & {
-  format: EditFormat;
-  children?: React.ReactNode; // addition UI next to the format select
-  onSelectFormat?: (format: EditFormat) => void;
+  children?: React.ReactNode;
 };
 
 /**
@@ -195,62 +179,28 @@ export function ValidatedInputBase({
   );
 }
 
-function JsonInput(props: BaseProps) {
-  function stringify(val: any) {
+export function JsonInput(props: BaseProps): JSX.Element {
+  function stringify(val: unknown) {
     return JSON.stringify(val, undefined, 2);
   }
-  return <ValidatedInputBase parse={JSON.parse} stringify={stringify} {...props} />;
+  return (
+    <SEditBox>
+      <ValidatedInputBase parse={JSON.parse} stringify={stringify} {...props} />
+    </SEditBox>
+  );
 }
 
-export function YamlInput(props: BaseProps): JSX.Element {
-  return <ValidatedInputBase parse={YAML.parse} stringify={YAML.stringify} {...props} />;
-}
-
-// An enhanced input component that allows editing values in json or yaml format with custom validations
-export default function ValidatedInput({
-  format = EDIT_FORMAT.JSON,
-  onSelectFormat,
-  children,
-  ...rest
-}: Props): JSX.Element {
-  const InputComponent = format === EDIT_FORMAT.JSON ? JsonInput : YamlInput;
+// An enhanced input component that allows editing values in json format with custom validations
+export default function ValidatedInput({ children, ...rest }: Props): JSX.Element {
+  const InputComponent = JsonInput;
   return (
     <Flex col>
       <Flex row reverse>
         {children}
-        <STransparentDropdownButton>
-          <Dropdown
-            position="right"
-            value={format}
-            text={format.toUpperCase()}
-            onChange={onSelectFormat}
-          >
-            {Object.keys(EDIT_FORMAT).map((key) => (
-              <option value={EDIT_FORMAT[key]} key={key}>
-                {key}
-              </option>
-            ))}
-          </Dropdown>
-        </STransparentDropdownButton>
       </Flex>
       <SEditBox>
         <InputComponent {...rest} />
       </SEditBox>
     </Flex>
-  );
-}
-
-// For component consumers that don't care about maintaining the editFormat state, use this instead
-export function UncontrolledValidatedInput({
-  format = EDIT_FORMAT.YAML,
-  ...rest
-}: Props): JSX.Element {
-  const [editFormat, setEditFormat] = React.useState<EditFormat>(format);
-  return (
-    <ValidatedInput
-      {...rest}
-      format={editFormat}
-      onSelectFormat={(newFormat) => setEditFormat(newFormat)}
-    />
   );
 }

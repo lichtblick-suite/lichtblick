@@ -47,7 +47,6 @@ type Props = LayoutToolbarSharedProps &
     polygonBuilder: PolygonBuilder;
     rootTf?: string;
     selectedObject?: MouseEventObject;
-    selectedPolygonEditFormat: "json" | "yaml";
     setInteractionsTabType: (arg0?: TabType) => void;
     setMeasureInfo: (arg0: MeasureInfo) => void;
     showCrosshair?: boolean;
@@ -78,7 +77,6 @@ function LayoutToolbar({
   searchTextOpen,
   selectedMatchIndex,
   selectedObject,
-  selectedPolygonEditFormat,
   setInteractionsTabType,
   setMeasureInfo,
   setSearchText,
@@ -140,7 +138,6 @@ function LayoutToolbar({
         <DrawingTools
           onSetPolygons={onSetPolygons}
           polygonBuilder={polygonBuilder}
-          selectedPolygonEditFormat={selectedPolygonEditFormat}
           onSetDrawingTabType={onSetDrawingTabType}
         />
         <CameraInfo

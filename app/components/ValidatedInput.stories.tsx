@@ -18,13 +18,10 @@ import Flex from "@foxglove/studio-base/components/Flex";
 import { triggerInputChange, triggerInputBlur } from "@foxglove/studio-base/stories/PanelSetup";
 import { createValidator, isNumber, ValidationResult } from "@foxglove/studio-base/util/validators";
 
-import ValidatedInput, { EDIT_FORMAT, EditFormat } from "./ValidatedInput";
+import ValidatedInput from "./ValidatedInput";
 
 const INPUT_OBJ = { id: 1, name: "foo" };
 const INPUT_OBJ1 = { id: 2, name: "bar" };
-
-const json = EDIT_FORMAT.JSON;
-const yaml = EDIT_FORMAT.YAML;
 
 function myValidator(data: any = {}): ValidationResult | undefined {
   const rules = { id: [isNumber] };
@@ -38,12 +35,10 @@ function Box({ children }: any) {
 }
 
 function Example({
-  format = EDIT_FORMAT.JSON,
   obj = INPUT_OBJ,
   changedObj = INPUT_OBJ1,
   onMount,
 }: {
-  format?: EditFormat;
   obj?: any;
   changedObj?: any;
   onMount?: (arg0: HTMLTextAreaElement) => void;
@@ -70,7 +65,7 @@ function Example({
           }
         }}
       >
-        <ValidatedInput format={format} value={value} />
+        <ValidatedInput value={value} />
       </div>
     </Box>
   );
@@ -81,10 +76,7 @@ storiesOf("components/ValidatedInput", module)
     return (
       <Flex>
         <Box>
-          <ValidatedInput format={json} value={INPUT_OBJ} />
-        </Box>
-        <Box>
-          <ValidatedInput format={yaml} value={INPUT_OBJ} />
+          <ValidatedInput value={INPUT_OBJ} />
         </Box>
       </Flex>
     );
@@ -94,10 +86,7 @@ storiesOf("components/ValidatedInput", module)
     return (
       <Flex>
         <Box>
-          <ValidatedInput format={json} value={invalidValue} dataValidator={myValidator} />
-        </Box>
-        <Box>
-          <ValidatedInput format={yaml} value={invalidValue} dataValidator={myValidator} />
+          <ValidatedInput value={invalidValue} dataValidator={myValidator} />
         </Box>
       </Flex>
     );
@@ -105,8 +94,7 @@ storiesOf("components/ValidatedInput", module)
   .add("value change affects the input value", () => {
     return (
       <Flex>
-        <Example format={json} />
-        <Example format={yaml} />
+        <Example />
       </Flex>
     );
   })

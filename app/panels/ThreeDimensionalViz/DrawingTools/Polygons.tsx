@@ -15,8 +15,7 @@ import { PolygonBuilder, Polygon } from "regl-worldview";
 import styled from "styled-components";
 
 import Button from "@foxglove/studio-base/components/Button";
-import PanelContext from "@foxglove/studio-base/components/PanelContext";
-import ValidatedInput, { EditFormat } from "@foxglove/studio-base/components/ValidatedInput";
+import ValidatedInput from "@foxglove/studio-base/components/ValidatedInput";
 import {
   SValue,
   SLabel,
@@ -41,15 +40,9 @@ export const SRow = styled.div`
 type Props = {
   onSetPolygons: (polygons: Polygon[]) => void;
   polygonBuilder: PolygonBuilder;
-  selectedPolygonEditFormat: EditFormat;
 };
 
-export default function Polygons({
-  onSetPolygons,
-  polygonBuilder,
-  selectedPolygonEditFormat,
-}: Props): JSX.Element {
-  const { saveConfig } = React.useContext(PanelContext) ?? {};
+export default function Polygons({ onSetPolygons, polygonBuilder }: Props): JSX.Element {
   const polygons: Polygon[] = polygonBuilder.polygons;
   const [polygonPoints, setPolygonPoints] = React.useState<Point2D[][]>(() =>
     polygonsToPoints(polygons),
@@ -62,11 +55,7 @@ export default function Polygons({
   return (
     <>
       <ValidatedInput
-        format={selectedPolygonEditFormat}
         value={polygonPoints}
-        onSelectFormat={(selectedFormat) =>
-          (saveConfig as any)({ selectedPolygonEditFormat: selectedFormat })
-        }
         onChange={(newPolygonPoints) => {
           if (newPolygonPoints) {
             setPolygonPoints(newPolygonPoints);
@@ -79,7 +68,7 @@ export default function Polygons({
           small
           tooltip="Copy Polygons"
           onClick={() => {
-            clipboard.copy(getFormattedString(polygonPoints, selectedPolygonEditFormat));
+            clipboard.copy(getFormattedString(polygonPoints));
           }}
         >
           Copy

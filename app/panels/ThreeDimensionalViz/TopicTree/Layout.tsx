@@ -209,7 +209,6 @@ export default function Layout({
     modifiedNamespaceTopics,
     pinTopics,
     diffModeEnabled,
-    selectedPolygonEditFormat = "yaml",
     showCrosshair,
     autoSyncCameraState = false,
     topicDisplayMode = TOPIC_DISPLAY_MODES.SHOW_ALL.value as TopicDisplayMode,
@@ -900,7 +899,6 @@ export default function Layout({
                   polygonBuilder={polygonBuilder}
                   saveConfig={saveConfig}
                   selectedObject={selectedObject}
-                  selectedPolygonEditFormat={selectedPolygonEditFormat}
                   setMeasureInfo={setMeasureInfo}
                   showCrosshair={showCrosshair}
                   targetPose={targetPose}

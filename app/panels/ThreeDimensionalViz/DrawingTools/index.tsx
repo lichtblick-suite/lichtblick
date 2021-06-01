@@ -15,7 +15,6 @@ import { PolygonBuilder, Polygon } from "regl-worldview";
 
 import ExpandingToolbar, { ToolGroup } from "@foxglove/studio-base/components/ExpandingToolbar";
 import Icon from "@foxglove/studio-base/components/Icon";
-import { EDIT_FORMAT, EditFormat } from "@foxglove/studio-base/components/ValidatedInput";
 import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 
@@ -27,7 +26,6 @@ export type Point2D = { x: number; y: number };
 type Props = {
   onSetPolygons: (polygons: Polygon[]) => void;
   polygonBuilder: PolygonBuilder;
-  selectedPolygonEditFormat: EditFormat;
   onSetDrawingTabType: (arg0?: DrawingTabType) => void;
   defaultSelectedTab?: DrawingTabType; // for UI testing
 };
@@ -38,7 +36,6 @@ function DrawingTools({
   onSetDrawingTabType,
   onSetPolygons,
   polygonBuilder,
-  selectedPolygonEditFormat,
 }: Props) {
   const [selectedTab, setSelectedTab] =
     React.useState<DrawingTabType | undefined>(defaultSelectedTab);
@@ -59,18 +56,10 @@ function DrawingTools({
       }}
     >
       <ToolGroup name={POLYGON_TAB_TYPE}>
-        <Polygons
-          onSetPolygons={onSetPolygons}
-          polygonBuilder={polygonBuilder}
-          selectedPolygonEditFormat={selectedPolygonEditFormat}
-        />
+        <Polygons onSetPolygons={onSetPolygons} polygonBuilder={polygonBuilder} />
       </ToolGroup>
     </ExpandingToolbar>
   );
 }
-
-DrawingTools.defaultProps = {
-  selectedPolygonEditFormat: EDIT_FORMAT.YAML,
-};
 
 export default React.memo<Props>(DrawingTools);

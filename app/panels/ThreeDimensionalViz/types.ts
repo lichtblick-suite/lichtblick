@@ -28,7 +28,6 @@ export type ThreeDimensionalVizConfig = {
   diffModeEnabled: boolean;
   topicDisplayMode?: TopicDisplayMode;
   flattenMarkers?: boolean;
-  selectedPolygonEditFormat?: "json" | "yaml";
   showCrosshair?: boolean;
 
   expandedKeys: string[];
