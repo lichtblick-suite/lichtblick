@@ -2765,7 +2765,7 @@ __metadata:
     react-resize-detector: 6.7.2
     react-table: 7.7.0
     react-toast-notifications: 2.4.4
-    react-transition-group: 4.4.1
+    react-transition-group: 4.4.2
     react-use: 17.2.4
     react-virtualized: 9.22.3
     reg-notify-github-plugin: 0.10.15
@@ -21869,9 +21869,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-transition-group@npm:4.4.1, react-transition-group@npm:^4.4.1":
-  version: 4.4.1
-  resolution: "react-transition-group@npm:4.4.1"
+"react-transition-group@npm:4.4.2, react-transition-group@npm:^4.4.1":
+  version: 4.4.2
+  resolution: "react-transition-group@npm:4.4.2"
   dependencies:
     "@babel/runtime": ^7.5.5
     dom-helpers: ^5.0.1
@@ -21880,7 +21880,7 @@ __metadata:
   peerDependencies:
     react: ">=16.6.0"
     react-dom: ">=16.6.0"
-  checksum: 0bcd8af483709832e318dcef84c26ebddeb866bf4f58010286367ef0c1e7c5106e00cfc65688b9102414cb3d572c63909c2eb7ea972b4420fc70a78c10b6e8ad
+  checksum: b67bf5b3e86dbab72d658b9a52a3589e5960583ab28c7c66272427d8fe30d4c7de422d5046ae96bd2683cdf80cc3264b2516f5ce80cae1dbe6cf3ca6dda392c5
   languageName: node
   linkType: hard
 
