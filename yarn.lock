@@ -2784,7 +2784,7 @@ __metadata:
     string-hash: 1.1.3
     styled-components: 5.3.0
     text-metrics: 2.0.9
-    three: 0.128.0
+    three: 0.129.0
     tinycolor2: 1.4.2
     typescript: 4.3.2
     urdf-loader: 0.10.2
@@ -24940,10 +24940,10 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"three@npm:0.128.0":
-  version: 0.128.0
-  resolution: "three@npm:0.128.0"
-  checksum: 94d2b0e0ab1093acbc97e7de2ba38073f0479d2285f5ec333d1f900f1bf8c6a435f5815f24678f38a9898fc1ca39595a0c865cf83b3ce9c4164bba3393108dd3
+"three@npm:0.129.0":
+  version: 0.129.0
+  resolution: "three@npm:0.129.0"
+  checksum: 1fbe60ee56a3f1ff0d715f078364f3f521907e15d632e52a786ffd493e400fbcdab71e04150523bf15e69b310dd5267cd8dd3f97c5f3e2b3abfa5522b954fb5b
   languageName: node
   linkType: hard
 
