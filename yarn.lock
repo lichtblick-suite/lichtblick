@@ -2687,7 +2687,7 @@ __metadata:
     "@types/moment-duration-format": 2.2.2
     "@types/prettier": 2.2.3
     "@types/promise-queue": 2.2.0
-    "@types/react": 17.0.6
+    "@types/react": 17.0.8
     "@types/react-autocomplete": 1.8.5
     "@types/react-document-events": "workspace:packages/@types/react-document-events"
     "@types/react-dom": 17.0.5
@@ -5889,7 +5889,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:17.0.6, @types/react@npm:>=16.9.0":
+"@types/react@npm:*, @types/react@npm:17.0.8, @types/react@npm:>=16.9.0":
+  version: 17.0.8
+  resolution: "@types/react@npm:17.0.8"
+  dependencies:
+    "@types/prop-types": "*"
+    "@types/scheduler": "*"
+    csstype: ^3.0.2
+  checksum: 6398dc200623dbf213747f3a1cf9f3c3bcac29b519e49c9fcb81d2665dadb21155c485381cddbb04b483a5bf3ddddefaff1a1a6ef4fa5080b1b9b144c789673e
+  languageName: node
+  linkType: hard
+
+"@types/react@npm:17.0.6":
   version: 17.0.6
   resolution: "@types/react@npm:17.0.6"
   dependencies:
