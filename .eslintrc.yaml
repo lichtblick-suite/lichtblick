@@ -15,125 +15,49 @@ ignorePatterns:
   - app/test/transformers/rawImportPreprocessor.ts
 
 plugins:
-  - react
-  - react-hooks
-  - "@typescript-eslint"
   - file-progress
   - jest
 
 extends:
-  - eslint:recommended
-  - plugin:react/recommended
-  - plugin:@typescript-eslint/eslint-recommended
-  - plugin:@typescript-eslint/recommended
-  - plugin:@typescript-eslint/recommended-requiring-type-checking
-  - plugin:import/errors
-  - plugin:import/warnings
-  - plugin:import/typescript
-
-parser: "@typescript-eslint/parser"
-parserOptions:
-  ecmaVersion: 2020
-  sourceType: module
-  project: ./tsconfig.eslint.json
+  - plugin:@foxglove/base
+  - plugin:@foxglove/react
 
 settings:
-  react:
-    version: detect
   import/internal-regex: "^@foxglove"
 
 rules:
-  file-progress/activate: 1
+  "@foxglove/license-header": error
+  "@foxglove/strict-equality": off # will replace some no-restricted-syntax in the future
+
+  # show progress while linting
+  file-progress/activate: warn
+
+  # enabled in .eslintrc.ci.yaml
+  prettier/prettier: off
+  import/no-self-import: off
+  import/no-duplicates: off
+
   id-denylist:
     - error
     - useEffectOnce
     - window # don't allow redefining window
   no-console: off # configured in no-restricted-syntax
-  "@typescript-eslint/ban-ts-comment":
-    - error
-    # TODO: remove once we fix all TS issues
-    - ts-expect-error: allow-with-description
-      ts-ignore: true
-      ts-nocheck: false
-      ts-check: true
-  # It's sometimes useful to explicitly name to guard against future changes
-  "@typescript-eslint/no-inferrable-types": off
-  "@typescript-eslint/no-empty-function": off
-  "@typescript-eslint/no-implied-eval": off
 
-  # These could theoretically be turned on (or merit investigation) but are currently noisy
-  "@typescript-eslint/no-misused-promises": off
-  "@typescript-eslint/no-floating-promises": off
-  "@typescript-eslint/restrict-template-expressions": off
-  "@typescript-eslint/no-unsafe-member-access": off
-  "@typescript-eslint/no-unsafe-return": off
-  "@typescript-eslint/no-unsafe-assignment": off
-  "@typescript-eslint/no-unsafe-call": off
-  "@typescript-eslint/require-await": off
-  "@typescript-eslint/prefer-regexp-exec": off
-  "@typescript-eslint/no-unnecessary-condition": off # similar to strict-boolean-expressions, but catches more (noisy) cases?
-
-  "@typescript-eslint/consistent-type-assertions":
-    - error
-    - { assertionStyle: as }
-  "@typescript-eslint/no-explicit-any": error
-  "@typescript-eslint/prefer-nullish-coalescing": error
-  "@typescript-eslint/no-non-null-assertion": error
-  "@typescript-eslint/no-confusing-non-null-assertion": error
-  "@typescript-eslint/no-unnecessary-boolean-literal-compare": error
-  "@typescript-eslint/prefer-includes": error
-  "@typescript-eslint/prefer-optional-chain": error
-  "@typescript-eslint/restrict-plus-operands": [error, { checkCompoundAssignments: true }]
-  "@typescript-eslint/switch-exhaustiveness-check": error
-  "@typescript-eslint/unbound-method": [error, { ignoreStatic: true }]
-  "@typescript-eslint/explicit-module-boundary-types": error
   react/jsx-uses-react: off
   react/react-in-jsx-scope: off
   react/prop-types: off # Unnecessary with typescript validation
-  react/no-unused-prop-types: error
-  react-hooks/rules-of-hooks: error
   react-hooks/exhaustive-deps:
     - error
     - additionalHooks: "(useAsync(?!AppConfigurationValue))"
-  no-new-func: error
-  foxglove-license-header: error
 
-  curly: error
-  # This rule is similar to TS's noUnusedLocals/noUnusedParameters, but we still want to enable the
-  # check for any .js files
-  "@typescript-eslint/no-unused-vars":
-    - error
-    - { vars: all, args: after-used, varsIgnorePattern: "^_", argsIgnorePattern: "^_" }
-  no-underscore-dangle:
-    - error
-    - allowAfterThis: true
   no-warning-comments:
     - error
     - terms: ["fixme", "xxx"]
       location: anywhere
-  # Some good ones that people really should be adding to import/recommended:
-  import/first: error
-  import/no-useless-path-segments: error
-  import/no-mutable-exports: error
-  import/newline-after-import: error
-  # Group imports into three groups [external, @foxglove, relative] and sort alphabetically within each group
-  import/order:
-    - error
-    - alphabetize: { order: asc }
-      newlines-between: always
-      groups: [[builtin, external], [internal], [parent, sibling, index]]
-
-  # we let typescript and webpack handle whether imports exist or not
-  import/namespace: off
-  import/default: off
-  import/no-named-as-default: off
-  import/no-named-as-default-member: off
-  import/no-unresolved: off
 
   prefer-arrow-callback:
     - error
     - allowNamedFunctions: true
-  "@typescript-eslint/no-shadow": error
   no-restricted-imports:
     - error
     - paths:
@@ -142,6 +66,7 @@ rules:
           message: "Use optional chaining instead of lodash.get."
         - name: lodash/get
           message: "Use optional chaining instead of lodash.get."
+
   no-restricted-syntax:
     - error
     - selector: "MethodDefinition[kind='get'], Property[kind='get']"
@@ -169,21 +94,49 @@ rules:
         `// eslint-disable-next-line no-restricted-syntax`. For rationale, see:
         https://github.com/sindresorhus/meta/discussions/7"
 
-    - selector: "TSPrivateIdentifier"
-      message: "Use private instead of #"
-
-  "@typescript-eslint/strict-boolean-expressions":
-    - error
-      # Force explicit checks that strings are empty
-    - allowString: false
-      # Force explicit checks that numbers are != 0 or NaN
-      allowNumber: false
-      # Keeps the error count manageable while we enhance type information from the flow conversion
-      allowAny: true
-
   jest/no-disabled-tests: error
 
 overrides:
+  - files: ["*.ts", "*.tsx"]
+    extends:
+      - plugin:@foxglove/typescript
+    parserOptions:
+      project: ./tsconfig.eslint.json
+    rules:
+      "@typescript-eslint/ban-ts-comment":
+        - error
+        # TODO: remove once we fix all TS issues
+        - ts-expect-error: allow-with-description
+          ts-ignore: true
+          ts-nocheck: false
+          ts-check: true
+      "@typescript-eslint/strict-boolean-expressions":
+        - error
+          # Force explicit checks that strings are empty
+        - allowString: false
+          # Force explicit checks that numbers are != 0 or NaN
+          allowNumber: false
+          # Keeps the error count manageable while we enhance type information from the flow conversion
+          allowAny: true
+
+      # It's sometimes useful to explicitly name to guard against future changes
+      "@typescript-eslint/no-inferrable-types": off
+      "@typescript-eslint/no-empty-function": off
+      "@typescript-eslint/no-implied-eval": off
+
+      # These could theoretically be turned on (or merit investigation) but are currently noisy
+      "@typescript-eslint/no-misused-promises": off
+      "@typescript-eslint/no-floating-promises": off
+      "@typescript-eslint/restrict-template-expressions": off
+      "@typescript-eslint/no-unsafe-member-access": off
+      "@typescript-eslint/no-unsafe-return": off
+      "@typescript-eslint/no-unsafe-assignment": off
+      "@typescript-eslint/no-unsafe-call": off
+      "@typescript-eslint/require-await": off
+      "@typescript-eslint/prefer-regexp-exec": off
+      "@typescript-eslint/no-unnecessary-condition": off # similar to strict-boolean-expressions, but catches more (noisy) cases?
+      "@typescript-eslint/unbound-method": [error, { ignoreStatic: true }]
+
   - rules:
       "@typescript-eslint/no-explicit-any": off
       "@typescript-eslint/no-non-null-assertion": off

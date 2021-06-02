@@ -1,11 +1,11 @@
 # We keep some slow lint rules here, and only run them in CI.
 # Please only add rules here if they are unlikely to be encountered
 # during normal development.
-extends:
-  # VScode is already configured to format on save locally
-  - plugin:prettier/recommended
-
 rules:
+  # disable progress spinner
+  file-progress/activate: off
+  # VScode is already configured to run prettier on save
+  prettier/prettier: error
   # Common sense should prevent triggering this in development
   import/no-self-import: error
   # https://github.com/benmosher/eslint-plugin-import/issues/242#issuecomment-230118951
