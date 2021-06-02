@@ -60,7 +60,7 @@
     "@babel/preset-typescript": "7.13.0",
     "@foxglove/electron-socket": "workspace:packages/electron-socket",
     "@foxglove/eslint-plugin": "0.6.0",
-    "@foxglove/tsconfig": "workspace:packages/@foxglove/tsconfig",
+    "@foxglove/tsconfig": "workspace:packages/tsconfig",
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.0-beta.8",
     "@sentry/electron": "2.4.1",
     "@sentry/webpack-plugin": "1.15.1",
