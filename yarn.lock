@@ -2570,9 +2570,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/hooks@workspace:packages/@foxglove/hooks":
+"@foxglove/hooks@workspace:packages/hooks":
   version: 0.0.0-use.local
-  resolution: "@foxglove/hooks@workspace:packages/@foxglove/hooks"
+  resolution: "@foxglove/hooks@workspace:packages/hooks"
   dependencies:
     typescript: 4.3.2
   languageName: unknown
@@ -2672,7 +2672,7 @@ __metadata:
   dependencies:
     "@fluentui/react": 8.16.0
     "@fluentui/react-icons-mdl2": 1.1.1
-    "@foxglove/hooks": "workspace:packages/@foxglove/hooks"
+    "@foxglove/hooks": "workspace:packages/hooks"
     "@foxglove/rosmsg-msgs-common": "workspace:packages/rosmsg-msgs-common"
     "@foxglove/rosmsg-msgs-foxglove": "workspace:packages/rosmsg-msgs-foxglove"
     "@foxglove/studio": "workspace:packages/@foxglove/studio"
@@ -2811,7 +2811,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/studio-firebase@workspace:packages/@foxglove/studio-firebase"
   dependencies:
-    "@foxglove/hooks": "workspace:packages/@foxglove/hooks"
+    "@foxglove/hooks": "workspace:packages/hooks"
     "@foxglove/log": "workspace:packages/log"
     "@foxglove/studio-base": "workspace:packages/studio-base"
     firebase: 9.0.0-beta.1

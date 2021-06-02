@@ -25,7 +25,7 @@
   "dependencies": {
     "@fluentui/react": "8.16.0",
     "@fluentui/react-icons-mdl2": "1.1.1",
-    "@foxglove/hooks": "workspace:packages/@foxglove/hooks",
+    "@foxglove/hooks": "workspace:packages/hooks",
     "@foxglove/rosmsg-msgs-common": "workspace:packages/rosmsg-msgs-common",
     "@foxglove/rosmsg-msgs-foxglove": "workspace:packages/rosmsg-msgs-foxglove",
     "@foxglove/velodyne-cloud": "workspace:packages/velodyne-cloud",
