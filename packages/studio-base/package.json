@@ -96,7 +96,7 @@
     "wasm-lz4": "1.0.0"
   },
   "devDependencies": {
-    "@foxglove/studio": "workspace:packages/@foxglove/studio",
+    "@foxglove/studio": "workspace:packages/studio",
     "@storybook/addon-actions": "6.2.9",
     "@storybook/addon-essentials": "6.2.9",
     "@storybook/builder-webpack5": "6.2.9",

@@ -2675,7 +2675,7 @@ __metadata:
     "@foxglove/hooks": "workspace:packages/hooks"
     "@foxglove/rosmsg-msgs-common": "workspace:packages/rosmsg-msgs-common"
     "@foxglove/rosmsg-msgs-foxglove": "workspace:packages/rosmsg-msgs-foxglove"
-    "@foxglove/studio": "workspace:packages/@foxglove/studio"
+    "@foxglove/studio": "workspace:packages/studio"
     "@foxglove/velodyne-cloud": "workspace:packages/velodyne-cloud"
     "@mdi/svg": 5.9.55
     "@storybook/addon-actions": 6.2.9
@@ -2819,9 +2819,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/studio@workspace:packages/@foxglove/studio":
+"@foxglove/studio@workspace:packages/studio":
   version: 0.0.0-use.local
-  resolution: "@foxglove/studio@workspace:packages/@foxglove/studio"
+  resolution: "@foxglove/studio@workspace:packages/studio"
   dependencies:
     "@types/react": 17.0.6
     react: 17.0.2

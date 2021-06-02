@@ -57,8 +57,8 @@ jobs:
           path: |
             .yarn/cache
             **/node_modules
-          key: 4-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: ${{ runner.os }}-yarn-4-
+          key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: v5-${{ runner.os }}-yarn-
       - run: yarn install --immutable
       - run: ${{ matrix.config.command }}
         env:
@@ -89,8 +89,8 @@ jobs:
           path: |
             .yarn/cache
             **/node_modules
-          key: 4-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: ${{ runner.os }}-yarn-
+          key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: v5-${{ runner.os }}-yarn-
       - run: yarn install --immutable
       - name: test:integration
         if: matrix.os == 'ubuntu-20.04'
