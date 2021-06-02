@@ -14,6 +14,7 @@
 import { isEqual } from "lodash";
 import { useCallback, useMemo, useRef } from "react";
 
+import { useShallowMemo } from "@foxglove/hooks";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import { TypicalFilterNames } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
 import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
@@ -22,7 +23,6 @@ import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
 import useGlobalVariables, {
   GlobalVariables,
 } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
 import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import {

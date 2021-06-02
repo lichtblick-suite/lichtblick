@@ -20,6 +20,7 @@ import cx from "classnames";
 import { last, uniq } from "lodash";
 import styled from "styled-components";
 
+import { useShallowMemo } from "@foxglove/hooks";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
@@ -33,7 +34,6 @@ import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipe
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
-import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";

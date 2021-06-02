@@ -3,3 +3,4 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export { default as useRethrow } from "./useRethrow";
+export { default as useShallowMemo } from "./useShallowMemo";

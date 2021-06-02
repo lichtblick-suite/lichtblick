@@ -15,7 +15,7 @@ import { difference, keyBy, uniq, mapValues, xor, isEqual, flatten, omit } from 
 import { useMemo, useCallback, useRef, createContext } from "react";
 import { useDebounce } from "use-debounce";
 
-import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
+import { useShallowMemo } from "@foxglove/hooks";
 import { TOPIC_DISPLAY_MODES } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
 import {
   isNonEmptyOrUndefined,

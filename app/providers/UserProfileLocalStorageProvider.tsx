@@ -4,11 +4,11 @@
 
 import { useCallback } from "react";
 
+import { useShallowMemo } from "@foxglove/hooks";
 import {
   UserProfile,
   UserProfileStorageContext,
 } from "@foxglove/studio-base/context/UserProfileStorageContext";
-import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
 
 const DEFAULT_PROFILE: UserProfile = {};
 const LOCAL_STORAGE_KEY = "studio.profile-data";

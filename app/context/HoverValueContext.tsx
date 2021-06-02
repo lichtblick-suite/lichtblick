@@ -14,8 +14,8 @@
 import { isEqual } from "lodash";
 import { useCallback, useState } from "react";
 
+import { useShallowMemo } from "@foxglove/hooks";
 import useContextSelector from "@foxglove/studio-base/hooks/useContextSelector";
-import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
 import type { HoverValue } from "@foxglove/studio-base/types/hoverValue";
 import createSelectableContext from "@foxglove/studio-base/util/createSelectableContext";
 

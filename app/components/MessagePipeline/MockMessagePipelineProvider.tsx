@@ -15,7 +15,7 @@ import { flatten, groupBy } from "lodash";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Time, TimeUtil } from "rosbag";
 
-import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
+import { useShallowMemo } from "@foxglove/hooks";
 import {
   AdvertisePayload,
   MessageEvent,

@@ -4,6 +4,7 @@
 import { IconButton, IContextualMenuItem, useTheme } from "@fluentui/react";
 import { PropsWithChildren, useCallback, useContext, useMemo } from "react";
 
+import { useShallowMemo } from "@foxglove/hooks";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -11,7 +12,6 @@ import {
 import { PlayerPrecenceIcon } from "@foxglove/studio-base/components/PlayerStatusIndicator/PlayerPresenceIcon";
 import PlayerProblemModal from "@foxglove/studio-base/components/PlayerStatusIndicator/PlayerProblemModal";
 import ModalContext from "@foxglove/studio-base/context/ModalContext";
-import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
 import { PlayerPresence, PlayerProblem } from "@foxglove/studio-base/players/types";
 
 import { Badge } from "./Badge";

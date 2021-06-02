@@ -16,6 +16,7 @@ import memoizeWeak from "memoize-weak";
 import { useEffect, useCallback, useMemo, useRef, ComponentProps } from "react";
 import { Time, TimeUtil } from "rosbag";
 
+import { useShallowMemo } from "@foxglove/hooks";
 import {
   useBlocksByTopic,
   useDataSourceInfo,
@@ -38,7 +39,6 @@ import {
   getTooltipItemForMessageHistoryItem,
   TooltipItem,
 } from "@foxglove/studio-base/components/TimeBasedChart";
-import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
 import PlotChart, {
   getDatasetsAndTooltips,
   PlotDataByPath,

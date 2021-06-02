@@ -26,11 +26,11 @@ import {
 import { Time } from "rosbag";
 import { useDebouncedCallback } from "use-debounce";
 
+import { useShallowMemo } from "@foxglove/hooks";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
-import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
 import { Save3DConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz";
 import DebugStats from "@foxglove/studio-base/panels/ThreeDimensionalViz/DebugStats";
 import {

@@ -14,11 +14,11 @@
 import { debounce, flatten, groupBy } from "lodash";
 import { Time } from "rosbag";
 
+import { useShallowMemo } from "@foxglove/hooks";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import useContextSelector from "@foxglove/studio-base/hooks/useContextSelector";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import useShallowMemo from "@foxglove/studio-base/hooks/useShallowMemo";
 import {
   AdvertisePayload,
   Frame,
