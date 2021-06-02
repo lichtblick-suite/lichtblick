@@ -2807,9 +2807,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/studio-firebase@workspace:packages/@foxglove/studio-firebase":
+"@foxglove/studio-firebase@workspace:packages/studio-firebase":
   version: 0.0.0-use.local
-  resolution: "@foxglove/studio-firebase@workspace:packages/@foxglove/studio-firebase"
+  resolution: "@foxglove/studio-firebase@workspace:packages/studio-firebase"
   dependencies:
     "@foxglove/hooks": "workspace:packages/hooks"
     "@foxglove/log": "workspace:packages/log"
@@ -10849,7 +10849,7 @@ __metadata:
   resolution: "desktop@workspace:desktop"
   dependencies:
     "@foxglove/studio-base": "workspace:packages/studio-base"
-    "@foxglove/studio-firebase": "workspace:packages/@foxglove/studio-firebase"
+    "@foxglove/studio-firebase": "workspace:packages/studio-firebase"
   languageName: unknown
   linkType: soft
 
@@ -26398,7 +26398,7 @@ typescript@4.3.2:
   resolution: "web@workspace:web"
   dependencies:
     "@foxglove/studio-base": "workspace:packages/studio-base"
-    "@foxglove/studio-firebase": "workspace:packages/@foxglove/studio-firebase"
+    "@foxglove/studio-firebase": "workspace:packages/studio-firebase"
     "@types/copy-webpack-plugin": 8.0.0
     copy-webpack-plugin: 9.0.0
     webpack: 5.37.0
