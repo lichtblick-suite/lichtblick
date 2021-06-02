@@ -19,7 +19,7 @@ module.exports = {
   // Storybook's config is required, for instance the HtmlWebpackPlugin that they
   // use to generate the main iframe page.
   webpackFinal: (config: Configuration): Configuration => {
-    const rendererConfig = makeConfig(
+    const studioWebpackConfig = makeConfig(
       undefined,
       { mode: config.mode },
       { allowUnusedVariables: true },
@@ -28,17 +28,13 @@ module.exports = {
     return {
       ...config,
       resolve: {
-        ...rendererConfig.resolve,
+        ...studioWebpackConfig.resolve,
         alias: {
-          ...rendererConfig.resolve?.alias,
-          // Modules to replace with mock equivalents in the storybook build:
-          "@foxglove/studio-base/panels/WelcomePanel/subscribeToNewsletter": require.resolve(
-            "./__mocks__/subscribeToNewsletter",
-          ),
+          ...studioWebpackConfig.resolve?.alias,
         },
       },
-      module: rendererConfig.module,
-      plugins: (config.plugins ?? []).concat(rendererConfig.plugins ?? []),
+      module: studioWebpackConfig.module,
+      plugins: (config.plugins ?? []).concat(studioWebpackConfig.plugins ?? []),
     };
   },
 };

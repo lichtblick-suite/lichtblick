@@ -6,10 +6,12 @@ import { useCallback, useRef, useState } from "react";
 import ReactTestUtils from "react-dom/test-utils";
 
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import WelcomePanel from "@foxglove/studio-base/panels/WelcomePanel";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration";
 import signal from "@foxglove/studio-base/util/signal";
+
+import SubscribeContext, { SubscribeNewsletterFn } from "./SubscribeContext";
+import WelcomePanel from "./index";
 
 export default {
   title: "panels/WelcomePanel/index",
@@ -38,7 +40,15 @@ export function AlreadySignedUp(): React.ReactElement {
   );
 }
 
-function Example({ mockSetConfig }: { mockSetConfig?: () => Promise<void> }): React.ReactElement {
+type ExampleProps = {
+  mockSetConfig?: () => Promise<void>;
+  mockSubscribe?: SubscribeNewsletterFn;
+};
+
+function Example({
+  mockSetConfig,
+  mockSubscribe = () => Promise.resolve(),
+}: ExampleProps): React.ReactElement {
   const [config] = useState(() => {
     const configuration = makeConfiguration();
     if (mockSetConfig) {
@@ -68,25 +78,30 @@ function Example({ mockSetConfig }: { mockSetConfig?: () => Promise<void> }): Re
     <div style={{ flex: "1 1 auto" }} ref={wrapper}>
       <PanelSetup onMount={onMount}>
         <AppConfigurationContext.Provider value={config}>
-          <WelcomePanel />
+          <SubscribeContext.Provider value={mockSubscribe}>
+            <WelcomePanel />
+          </SubscribeContext.Provider>
         </AppConfigurationContext.Provider>
       </PanelSetup>
     </div>
   );
 }
 
-export const LoadingSet = (): React.ReactElement => <Example mockSetConfig={() => signal()} />;
-LoadingSet.parameters = { mockSubscribeToNewsletter: action("subscribeToNewsletter") };
+export const LoadingSet = (): React.ReactElement => (
+  <Example mockSetConfig={() => signal()} mockSubscribe={action("subscribeToNewsletter")} />
+);
 
 export const SetFailed = (): React.ReactElement => (
-  <Example mockSetConfig={() => Promise.reject("Example set error")} />
+  <Example
+    mockSetConfig={() => Promise.reject("Example set error")}
+    mockSubscribe={action("subscribeToNewsletter")}
+  />
 );
-SetFailed.parameters = { mockSubscribeToNewsletter: action("subscribeToNewsletter") };
 
-export const SubscribeFailed = (): React.ReactElement => <Example />;
-SubscribeFailed.parameters = {
-  mockSubscribeToNewsletter: () => Promise.reject("Example subscribe error"),
-};
+export const SubscribeFailed = (): React.ReactElement => (
+  <Example mockSubscribe={() => Promise.reject("Example subscribe error")} />
+);
 
-export const Success = (): React.ReactElement => <Example />;
-Success.parameters = { mockSubscribeToNewsletter: () => Promise.resolve() };
+export const Success = (): React.ReactElement => (
+  <Example mockSubscribe={() => Promise.resolve()} />
+);

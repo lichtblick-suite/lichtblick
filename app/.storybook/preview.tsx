@@ -11,8 +11,6 @@ import { UserNodeStateProvider } from "@foxglove/studio-base/context/UserNodeSta
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import waitForFonts from "@foxglove/studio-base/util/waitForFonts";
 
-import { withMockSubscribeToNewsletter } from "./__mocks__/subscribeToNewsletter";
-
 import "@foxglove/studio-base/styles/global.scss";
 import "./styles.scss";
 
@@ -45,7 +43,7 @@ export const loaders = [
   },
 ];
 
-export const decorators = [withContextProviders, withMockSubscribeToNewsletter];
+export const decorators = [withContextProviders];
 
 export const parameters = {
   // Disable default padding around the page body

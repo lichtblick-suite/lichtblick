@@ -19,7 +19,7 @@ import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import TextContent from "@foxglove/studio-base/components/TextContent";
 import TextField from "@foxglove/studio-base/components/TextField";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
-import subscribeToNewsletter from "@foxglove/studio-base/panels/WelcomePanel/subscribeToNewsletter";
+import { useSubscribeContext } from "@foxglove/studio-base/panels/WelcomePanel/SubscribeContext";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 import { isEmail } from "@foxglove/studio-base/util/validators";
 
@@ -39,6 +39,7 @@ function WelcomePanel() {
   const [slackInviteChecked, setSlackInviteChecked] = useState(true);
   const [emailValue, setEmailValue] = useState("");
   const [emailError, setEmailError] = useState<string | undefined>();
+  const subscribeToNewsletter = useSubscribeContext();
 
   const [submitState, submit] = useAsyncFn(async () => {
     if (slackInviteChecked && process.env.SLACK_INVITE_URL != undefined) {
@@ -48,7 +49,7 @@ function WelcomePanel() {
       await subscribeToNewsletter(emailValue);
     }
     await setSubscribed(true);
-  }, [slackInviteChecked, subscribeChecked, setSubscribed, emailValue]);
+  }, [slackInviteChecked, subscribeChecked, setSubscribed, emailValue, subscribeToNewsletter]);
 
   const loading = submitState.loading;
   const error = submitState.error;
