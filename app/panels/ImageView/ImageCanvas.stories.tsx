@@ -11,12 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Story } from "@storybook/react";
 import { range, noop } from "lodash";
 
 import ImageView, { Config } from "@foxglove/studio-base/panels/ImageView";
 import ImageCanvas from "@foxglove/studio-base/panels/ImageView/ImageCanvas";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { ImageMarker } from "@foxglove/studio-base/types/Messages";
+import signal from "@foxglove/studio-base/util/signal";
 
 const cameraInfo = {
   width: 400,
@@ -401,7 +403,8 @@ export default {
     },
   },
 };
-export const Markers = (): JSX.Element => (
+
+export const Markers: Story = (_args, ctx) => (
   <LoadImageMessage>
     {(imageMessage: any) => (
       <div>
@@ -417,7 +420,7 @@ export const Markers = (): JSX.Element => (
           }}
           config={config}
           saveConfig={noop}
-          onStartRenderImage={() => () => undefined}
+          onStartRenderImage={() => () => ctx.parameters.screenshot.signal.resolve()}
         />
         <br />
         <h2>transformed markers</h2>
@@ -432,7 +435,7 @@ export const Markers = (): JSX.Element => (
           }}
           config={config}
           saveConfig={noop}
-          onStartRenderImage={() => () => undefined}
+          onStartRenderImage={() => () => ctx.parameters.screenshot.signal.resolve()}
         />
         <h2>markers with different original image size</h2>
         <ImageCanvas
@@ -446,12 +449,18 @@ export const Markers = (): JSX.Element => (
           }}
           config={config}
           saveConfig={noop}
-          onStartRenderImage={() => () => undefined}
+          onStartRenderImage={() => () => ctx.parameters.screenshot.signal.resolve()}
         />
       </div>
     )}
   </LoadImageMessage>
 );
+Markers.parameters = {
+  screenshot: {
+    signal: signal(),
+  },
+};
+
 export const MarkersWithFallbackRenderingUsingMainThread = (): JSX.Element => (
   <LoadImageMessage>
     {(imageMessage: any) => (
@@ -506,6 +515,7 @@ export const MarkersWithFallbackRenderingUsingMainThread = (): JSX.Element => (
     )}
   </LoadImageMessage>
 );
+
 export const ErrorState = (): JSX.Element => {
   return (
     <ImageCanvas
@@ -522,6 +532,7 @@ export const ErrorState = (): JSX.Element => {
     />
   );
 };
+
 export const CallsOnRenderFrameWhenRenderingSucceeds = (): JSX.Element => {
   return (
     <ShouldCallOnRenderImage>
@@ -547,6 +558,7 @@ export const CallsOnRenderFrameWhenRenderingSucceeds = (): JSX.Element => {
     </ShouldCallOnRenderImage>
   );
 };
+
 export const CallsOnRenderFrameWhenRenderingFails = (): JSX.Element => {
   return (
     <ShouldCallOnRenderImage>
@@ -567,6 +579,7 @@ export const CallsOnRenderFrameWhenRenderingFails = (): JSX.Element => {
     </ShouldCallOnRenderImage>
   );
 };
+
 export const RGB8 = (): JSX.Element => <RGBStory encoding="rgb8" />;
 export const BGR8 = (): JSX.Element => <RGBStory encoding="bgr8" />;
 

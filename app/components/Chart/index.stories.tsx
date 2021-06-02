@@ -10,9 +10,12 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import { Story } from "@storybook/react";
 import cloneDeep from "lodash/cloneDeep";
-import { useState, useCallback, ComponentProps } from "react";
+import { useState, useCallback, ComponentProps, useEffect } from "react";
 import TestUtils from "react-dom/test-utils";
+
+import signal from "@foxglove/studio-base/util/signal";
 
 import ChartComponent from ".";
 
@@ -107,98 +110,86 @@ if (propsWithDatalabels.data.datasets[0]?.datalabels) {
 
 const divStyle = { width: 600, height: 800, background: "black" };
 
-function DatalabelUpdateExample() {
-  const [hasRenderedOnce, setHasRenderedOnce] = useState<boolean>(false);
-  const refFn = useCallback(() => {
-    setTimeout(() => setHasRenderedOnce(true), 200);
-  }, []);
-
-  const chartProps = cloneDeep(props);
-  if (hasRenderedOnce) {
-    if (
-      chartProps.data.datasets[0]?.data[0] != undefined &&
-      typeof chartProps.data.datasets[0]?.data[0] !== "number"
-    ) {
-      chartProps.data.datasets[0].data[0].x++;
-    }
-  }
-  return (
-    <div style={divStyle} ref={refFn}>
-      <ChartComponent {...chartProps} />
-    </div>
-  );
-}
-
-function DatalabelClickExample() {
-  const [clickedDatalabel, setClickedDatalabel] = useState<any>(undefined);
-  const refFn = useCallback(() => {
-    setTimeout(() => {
-      if (!clickedDatalabel) {
-        const [canvas] = document.getElementsByTagName("canvas");
-        TestUtils.Simulate.click(canvas!, { clientX: 245, clientY: 419 });
-      }
-    }, 200);
-  }, [clickedDatalabel]);
-
-  return (
-    <div style={divStyle} ref={refFn}>
-      <div style={{ padding: 6, fontSize: 16 }}>
-        {clickedDatalabel
-          ? `Clicked datalabel with selection id: ${String(clickedDatalabel.selectionObj)}`
-          : "Have not clicked datalabel"}
-      </div>
-      <ChartComponent
-        {...propsWithDatalabels}
-        onClick={(ev) => {
-          setClickedDatalabel(ev.datalabel);
-        }}
-      />
-    </div>
-  );
-}
-
 export default {
   title: "components/Chart/index",
   component: ChartComponent,
   parameters: {
     chromatic: {
+      // additional delay for any final clicks or renders
       delay: 100,
     },
   },
 };
 
-export const Basic = (): JSX.Element => {
+export const Basic: Story = (_args, ctx) => {
+  const storyRendered = () => {
+    ctx.parameters.screenshot.signal.resolve();
+  };
+
   return (
     <div style={divStyle}>
-      <ChartComponent {...props} />
+      <ChartComponent {...props} onChartUpdate={storyRendered} />
     </div>
   );
 };
-
-export const CanUpdate = (): JSX.Element => {
-  return <DatalabelUpdateExample />;
-};
-
-CanUpdate.parameters = {
-  chromatic: {
-    delay: 500,
+Basic.parameters = {
+  screenshot: {
+    signal: signal(),
   },
 };
 
-export const WithDatalabels = (): JSX.Element => {
+export const WithDatalabels: Story = (_args, ctx) => {
+  const storyRendered = () => {
+    ctx.parameters.screenshot.signal.resolve();
+  };
+
   return (
     <div style={divStyle}>
-      <ChartComponent {...propsWithDatalabels} />
+      <ChartComponent {...propsWithDatalabels} onChartUpdate={storyRendered} />
     </div>
   );
 };
 
-export const AllowsClickingOnDatalabels = (): JSX.Element => {
-  return <DatalabelClickExample />;
+WithDatalabels.parameters = {
+  screenshot: {
+    signal: signal(),
+  },
+};
+
+export const AllowsClickingOnDatalabels: Story = (_args, ctx) => {
+  const [clickedDatalabel, setClickedDatalabel] = useState<any>(undefined);
+
+  const doClick = useCallback(() => {
+    if (!clickedDatalabel) {
+      const [canvas] = document.getElementsByTagName("canvas");
+      TestUtils.Simulate.click(canvas!, { clientX: 245, clientY: 419 });
+    }
+  }, [clickedDatalabel]);
+
+  const onClick = useCallback((ev) => {
+    setClickedDatalabel(ev.datalabel);
+  }, []);
+
+  useEffect(() => {
+    if (clickedDatalabel) {
+      ctx.parameters.screenshot.signal.resolve();
+    }
+  }, [ctx, clickedDatalabel]);
+
+  return (
+    <div style={divStyle}>
+      <div style={{ padding: 6, fontSize: 16 }}>
+        {clickedDatalabel
+          ? `Clicked datalabel with selection id: ${String(clickedDatalabel.selectionObj)}`
+          : "Have not clicked datalabel"}
+      </div>
+      <ChartComponent {...propsWithDatalabels} onChartUpdate={doClick} onClick={onClick} />
+    </div>
+  );
 };
 
 AllowsClickingOnDatalabels.parameters = {
-  chromatic: {
-    delay: 500,
+  screenshot: {
+    signal: signal(),
   },
 };

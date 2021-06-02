@@ -1,0 +1,27 @@
+diff --git a/dist/esm/client/preview/render.js b/dist/esm/client/preview/render.js
+index e9b656fd056af94efebb2ba6dc25921144bba441..534f4c0f20eed9254a5bc4b6102bc52841995a9b 100644
+--- a/dist/esm/client/preview/render.js
++++ b/dist/esm/client/preview/render.js
+@@ -35,9 +35,11 @@ import React, { Component, StrictMode, Fragment } from 'react';
+ import ReactDOM from 'react-dom';
+ var rootEl = document ? document.getElementById('root') : null;
+ 
+-var render = function render(node, el) {
++var render = function render(node, el, maybeSignal) {
+   return new Promise(function (resolve) {
+-    ReactDOM.render(node, el, resolve);
++    ReactDOM.render(node, el, () => {
++      maybeSignal ? maybeSignal.then(resolve) : resolve();
++    });
+   });
+ };
+ 
+@@ -128,7 +130,7 @@ function _renderMain() {
+             }
+ 
+             _context.next = 7;
+-            return render(element, rootEl);
++            return render(element, rootEl, storyContext.parameters?.screenshot?.signal);
+ 
+           case 7:
+           case "end":
