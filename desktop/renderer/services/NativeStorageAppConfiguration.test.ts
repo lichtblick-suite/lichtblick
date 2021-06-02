@@ -23,7 +23,7 @@ function makeMockContext(): Storage & MockStorage {
   };
 }
 
-describe("OsContextAppConfiguration", () => {
+describe("NativeStorageAppConfiguration", () => {
   it("loads state upon construction and returns values from cached state", async () => {
     const ctx = makeMockContext();
     ctx.get.mockImplementationOnce(async () => {
