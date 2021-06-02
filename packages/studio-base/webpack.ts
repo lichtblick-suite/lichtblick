@@ -43,6 +43,7 @@ export function makeConfig(
     resolve: {
       extensions: [".js", ".ts", ".jsx", ".tsx"],
       alias: {
+        "@foxglove/studio-base": path.resolve(__dirname, "src"),
         "react-dnd": require.resolve("react-dnd"),
         "styled-components": require.resolve("styled-components"),
       },
@@ -218,6 +219,9 @@ export function makeConfig(
             compilerOptions: {
               noUnusedLocals: !allowUnusedVariables,
               noUnusedParameters: !allowUnusedVariables,
+              paths: {
+                "@foxglove/studio-base/*": [path.join(__dirname, "src/*")],
+              },
             },
           },
         },

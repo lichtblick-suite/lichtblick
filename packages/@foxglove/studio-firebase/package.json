@@ -26,7 +26,7 @@
   "dependencies": {
     "@foxglove/hooks": "workspace:packages/@foxglove/hooks",
     "@foxglove/log": "workspace:packages/log",
-    "@foxglove/studio-base": "workspace:app",
+    "@foxglove/studio-base": "workspace:packages/studio-base",
     "firebase": "9.0.0-beta.1"
   }
 }

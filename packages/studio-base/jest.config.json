@@ -1,0 +1,28 @@
+{
+  "//": "Note: we use babel-jest rather than ts-jest for performance reasons.",
+  "transform": {
+    "\\.tsx?$": "<rootDir>/src/test/transformers/typescriptTransformerWithRawImports.js",
+    "\\.ne$": "<rootDir>/src/test/transformers/neTransformer.js",
+    "\\.(bin|template|wasm)$": "<rootDir>/src/test/transformers/rawTransformer.js"
+  },
+  "globals": {
+    "ReactNull": null
+  },
+  "setupFiles": [
+    "<rootDir>/src/test/setup.ts",
+    "<rootDir>/src/test/setupEnzyme.ts",
+    "jest-canvas-mock"
+  ],
+  "setupFilesAfterEnv": ["<rootDir>/src/test/setupTestFramework.ts"],
+  "restoreMocks": true,
+  "moduleNameMapper": {
+    "\\.svg$": "<rootDir>/src/test/mocks/MockSvg.tsx",
+    "react-monaco-editor": "<rootDir>/src/test/stubs/MonacoEditor.tsx",
+    "\\.(glb|md|png)$": "<rootDir>/src/test/mocks/fileMock.ts",
+    "\\.(css|scss)$": "<rootDir>/src/test/mocks/styleMock.ts",
+    "@foxglove/studio-base/(.*)": "<rootDir>/src/$1"
+  },
+  "testRunner": "jest-circus/runner",
+  "//": "Native find is slow because it does not exclude files: https://github.com/facebook/jest/pull/11264#issuecomment-825377579",
+  "haste": { "forceNodeFilesystemAPI": true }
+}

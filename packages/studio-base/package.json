@@ -1,9 +1,26 @@
 {
   "name": "@foxglove/studio-base",
+  "version": "0.0.1",
+  "description": "Core components of Foxglove Studio",
+  "license": "MPL-2.0",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/foxglove/studio.git"
+  },
+  "author": {
+    "name": "Foxglove Technologies",
+    "email": "support@foxglove.dev"
+  },
+  "homepage": "https://foxglove.dev/",
+  "main": "src/index.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "chromatic": "chromatic --project-token $CHROMATIC_PROJECT_TOKEN --build-script-name storybook:build --exit-once-uploaded",
-    "storybook:build": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' build-storybook"
+    "storybook:build": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' build-storybook --config-dir src/.storybook"
   },
   "dependencies": {
     "@fluentui/react": "8.16.0",
@@ -83,7 +100,7 @@
     "@storybook/addon-actions": "6.2.9",
     "@storybook/addon-essentials": "6.2.9",
     "@storybook/builder-webpack5": "6.2.9",
-    "@storybook/react": "patch:@storybook/react@6.2.9#../patches/storybook-react.patch",
+    "@storybook/react": "patch:@storybook/react@6.2.9#../../patches/storybook-react.patch",
     "@testing-library/dom": "7.31.0",
     "@testing-library/react": "11.2.7",
     "@testing-library/react-hooks": "7.0.0",

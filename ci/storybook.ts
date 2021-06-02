@@ -75,7 +75,14 @@ export default async function main(): Promise<void> {
   if (args.command.includes(Command.start)) {
     await exec(
       "yarn",
-      ["workspace", "@foxglove/studio-base", "run", "start-storybook"],
+      [
+        "workspace",
+        "@foxglove/studio-base",
+        "run",
+        "start-storybook",
+        "--config-dir",
+        "src/.storybook",
+      ],
       storybookEnv,
     );
     return;
@@ -84,7 +91,14 @@ export default async function main(): Promise<void> {
   if (args.command.includes(Command.build)) {
     await exec(
       "yarn",
-      ["workspace", "@foxglove/studio-base", "run", "build-storybook"],
+      [
+        "workspace",
+        "@foxglove/studio-base",
+        "run",
+        "build-storybook",
+        "--config-dir",
+        "src/.storybook",
+      ],
       storybookEnv,
     );
   }

@@ -2666,9 +2666,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/studio-base@workspace:app":
+"@foxglove/studio-base@workspace:packages/studio-base":
   version: 0.0.0-use.local
-  resolution: "@foxglove/studio-base@workspace:app"
+  resolution: "@foxglove/studio-base@workspace:packages/studio-base"
   dependencies:
     "@fluentui/react": 8.16.0
     "@fluentui/react-icons-mdl2": 1.1.1
@@ -2681,7 +2681,7 @@ __metadata:
     "@storybook/addon-actions": 6.2.9
     "@storybook/addon-essentials": 6.2.9
     "@storybook/builder-webpack5": 6.2.9
-    "@storybook/react": "patch:@storybook/react@6.2.9#../patches/storybook-react.patch"
+    "@storybook/react": "patch:@storybook/react@6.2.9#../../patches/storybook-react.patch"
     "@testing-library/dom": 7.31.0
     "@testing-library/react": 11.2.7
     "@testing-library/react-hooks": 7.0.0
@@ -2813,7 +2813,7 @@ __metadata:
   dependencies:
     "@foxglove/hooks": "workspace:packages/@foxglove/hooks"
     "@foxglove/log": "workspace:packages/log"
-    "@foxglove/studio-base": "workspace:app"
+    "@foxglove/studio-base": "workspace:packages/studio-base"
     firebase: 9.0.0-beta.1
     typescript: 4.3.2
   languageName: unknown
@@ -4750,9 +4750,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@storybook/react@patch:@storybook/react@6.2.9#../patches/storybook-react.patch::locator=%40foxglove%2Fstudio-base%40workspace%3Aapp":
+"@storybook/react@patch:@storybook/react@6.2.9#../../patches/storybook-react.patch::locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base":
   version: 6.2.9
-  resolution: "@storybook/react@patch:@storybook/react@npm%3A6.2.9#../patches/storybook-react.patch::version=6.2.9&hash=969b8b&locator=%40foxglove%2Fstudio-base%40workspace%3Aapp"
+  resolution: "@storybook/react@patch:@storybook/react@npm%3A6.2.9#../../patches/storybook-react.patch::version=6.2.9&hash=969b8b&locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base"
   dependencies:
     "@babel/preset-flow": ^7.12.1
     "@babel/preset-react": ^7.12.10
@@ -10848,7 +10848,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "desktop@workspace:desktop"
   dependencies:
-    "@foxglove/studio-base": "workspace:app"
+    "@foxglove/studio-base": "workspace:packages/studio-base"
     "@foxglove/studio-firebase": "workspace:packages/@foxglove/studio-firebase"
   languageName: unknown
   linkType: soft
@@ -26397,7 +26397,7 @@ typescript@4.3.2:
   version: 0.0.0-use.local
   resolution: "web@workspace:web"
   dependencies:
-    "@foxglove/studio-base": "workspace:app"
+    "@foxglove/studio-base": "workspace:packages/studio-base"
     "@foxglove/studio-firebase": "workspace:packages/@foxglove/studio-firebase"
     "@types/copy-webpack-plugin": 8.0.0
     copy-webpack-plugin: 9.0.0

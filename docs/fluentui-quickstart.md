@@ -38,7 +38,7 @@ Intellisense/autocomplete and the "header" documentation in .d.ts files is prett
 
 ## Theme
 
-Our theme is configured in [theme/index.ts](../app/theme/index.ts) and provided to components via [ThemeProvider](../app/theme/ThemeProvider.tsx). It has a `palette` of colors as well as some "slots" for [semantic colors](https://docs.microsoft.com/en-us/javascript/api/theme/isemanticcolors?view=office-ui-fabric-react-latest) (such as `buttonBackground`) to customize certain components. You can also configure fonts, spacing, effects, and more in the theme object.
+Our theme is configured in [theme/index.ts](../packages/studio-base/theme/index.ts) and provided to components via [ThemeProvider](../packages/studio-base/theme/ThemeProvider.tsx). It has a `palette` of colors as well as some "slots" for [semantic colors](https://docs.microsoft.com/en-us/javascript/api/theme/isemanticcolors?view=office-ui-fabric-react-latest) (such as `buttonBackground`) to customize certain components. You can also configure fonts, spacing, effects, and more in the theme object.
 
 There's a Theme Designer tool at https://aka.ms/themedesigner. It has limited customization capabilities, but helps you get a feel for what theme colors will look like.
 
@@ -89,11 +89,11 @@ The list of icons can be found at: https://developer.microsoft.com/en-us/fluentu
 
 ### Using a new icon
 
-Since we only import the SVG icons we need, icons must be registered before they are used. This is done in the [ThemeProvider](../app/theme/ThemeProvider.tsx), and there is a corresponding type definition tracking the `RegisteredIconNames` at [fluentui.d.ts](../typings/fluentui.d.ts). The TypeScript compiler will prompt you to update both of these places before you can use a new icon.
+Since we only import the SVG icons we need, icons must be registered before they are used. This is done in the [ThemeProvider](../packages/studio-base/theme/ThemeProvider.tsx), and there is a corresponding type definition tracking the `RegisteredIconNames` at [fluentui.d.ts](../typings/fluentui.d.ts). The TypeScript compiler will prompt you to update both of these places before you can use a new icon.
 
 ### Custom SVG icons
 
-You can make a custom SVG icon conform to the Fluent UI theme by using `createSvgIcon()`. See [RosIcon.tsx](../app/components/RosIcon.tsx) for an example.
+You can make a custom SVG icon conform to the Fluent UI theme by using `createSvgIcon()`. See [RosIcon.tsx](../packages/studio-base/components/RosIcon.tsx) for an example.
 
 ```tsx
 import { createSvgIcon } from "@fluentui/react-icons-mdl2";
