@@ -11489,15 +11489,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron-chromedriver@foxglove/chromedriver#7edaf1852173776e0e0db364acad12d4a9a8d17f":
-  version: 13.0.0-beta.27
-  resolution: "electron-chromedriver@https://github.com/foxglove/chromedriver.git#commit=7edaf1852173776e0e0db364acad12d4a9a8d17f"
+"electron-chromedriver@npm:13.0.0":
+  version: 13.0.0
+  resolution: "electron-chromedriver@npm:13.0.0"
   dependencies:
     "@electron/get": ^1.12.4
     extract-zip: ^2.0.0
   bin:
-    chromedriver: ./chromedriver.js
-  checksum: c9b381b9bab75c3fecdcbf0ba6b01b24dfcf1fe8b9f8e1eee9d07203f5421b213bedb66fea27df65ba7d3a0f4a0ad5c6c5d06ff84662eed8206dca892c5123bd
+    chromedriver: chromedriver.js
+  checksum: 6f8c1fb440117bbe2d212a6d4920db1a9e2464ade4cf948c5ff8a89903d9b9674f015513d761c033308338a94c0403d0595abbd057bb362848f278067d5a9cd9
   languageName: node
   linkType: hard
 
@@ -11569,16 +11569,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:13.0.0-beta.27":
-  version: 13.0.0-beta.27
-  resolution: "electron@npm:13.0.0-beta.27"
+"electron@npm:13.0.1":
+  version: 13.0.1
+  resolution: "electron@npm:13.0.1"
   dependencies:
     "@electron/get": ^1.0.1
     "@types/node": ^14.6.2
     extract-zip: ^1.0.3
   bin:
     electron: cli.js
-  checksum: 6b150ea3dd11dfd222e40fe71d05a32cf2a3076786227e9de86ea12e2a2aeaf410b0ba5bb502697a0b6610063864311f143d3521c8f8556b39034e5a83ffc689
+  checksum: e380f7673bfa32bc0b28907f4c5698cdef7f2354b0de716b2f9eab9f6cfa24bd3e222850a3fc78461e3f685e9ba6efe5d8c4caf5550ed2698066f87e1e8e5583
   languageName: node
   linkType: hard
 
@@ -13391,7 +13391,7 @@ __metadata:
     cross-env: 7.0.3
     crypto-browserify: 3.12.0
     css-loader: 5.2.4
-    electron: 13.0.0-beta.27
+    electron: 13.0.1
     electron-builder: 22.10.5
     electron-devtools-installer: 3.1.1
     electron-notarize: 1.0.0
