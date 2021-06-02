@@ -10,24 +10,34 @@ import { ExtensionDetail, ExtensionLoader, ExtensionLoaderContext } from "@foxgl
 
 const log = Logger.getLogger(__filename);
 
+// example provider showing how to load extensions from a separate js file
 export default function ExtensionRegistryProvider(props: PropsWithChildren<unknown>): JSX.Element {
   const { value: registry, error } = useAsync(async () => {
     log.info("Fetching builtin extensions");
 
-    const builtinExtensionFetch = await fetch("/builtinextensions.js");
-    const source = await builtinExtensionFetch.text();
+    try {
+      const builtinExtensionFetch = await fetch("/builtinextensions.js");
+      const source = await builtinExtensionFetch.text();
 
-    const extensions: ExtensionDetail[] = [
-      {
-        name: "builtin",
-        source: source,
-      },
-    ];
+      const extensions: ExtensionDetail[] = [
+        {
+          name: "builtin",
+          source: source,
+        },
+      ];
 
-    const loader: ExtensionLoader = {
-      getExtensions: () => Promise.resolve(extensions),
-    };
-    return loader;
+      const loader: ExtensionLoader = {
+        getExtensions: () => Promise.resolve(extensions),
+      };
+      return loader;
+    } catch (err) {
+      log.error(err);
+
+      const loader: ExtensionLoader = {
+        getExtensions: () => Promise.resolve([]),
+      };
+      return loader;
+    }
   }, []);
 
   if (error) {

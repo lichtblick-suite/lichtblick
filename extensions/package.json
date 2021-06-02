@@ -1,7 +1,0 @@
-{
-  "name": "builtin",
-  "main": "index.js",
-  "devDependencies": {
-    "@foxglove/studio": "workspace:packages/@foxglove/studio"
-  }
-}

@@ -111,14 +111,11 @@ const desktopBridge: Desktop = {
     return window.process.argv.filter((arg) => arg.startsWith("foxglove://"));
   },
   async getExtensions() {
-    const builtinRoot = pathJoin(__dirname, "..", "extensions");
-    const builtinExtensions = await loadExtensions(builtinRoot);
-
     const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
     const userExtensionRoot = pathJoin(homePath, ".foxglove-studio", "extensions");
     const userExtensions = await loadExtensions(userExtensionRoot);
 
-    return [...builtinExtensions, ...userExtensions];
+    return userExtensions;
   },
 };
 

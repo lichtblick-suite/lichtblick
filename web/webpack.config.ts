@@ -15,8 +15,6 @@ import type { Configuration as WebpackDevServerConfiguration } from "webpack-dev
 import type { WebpackArgv } from "@foxglove/studio-base/WebpackArgv";
 import { makeConfig } from "@foxglove/studio-base/webpack";
 
-import extensions from "./webpack.extensions.config";
-
 interface WebpackConfiguration extends Configuration {
   devServer?: WebpackDevServerConfiguration;
 }
@@ -157,4 +155,4 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
   return config;
 };
 
-export default [devServerConfig, mainConfig, extensions];
+export default [devServerConfig, mainConfig];

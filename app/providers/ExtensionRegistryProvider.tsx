@@ -39,11 +39,6 @@ export default function ExtensionRegistryProvider(props: PropsWithChildren<unkno
     for (const extension of extensionList) {
       log.debug(`Activating extension ${extension.name}`);
 
-      const unwrappedExtensionSource = extension.source;
-
-      // eslint-disable-next-line no-new-func
-      const fn = new Function("module", "require", unwrappedExtensionSource);
-
       const module = { exports: {} };
       const require = (name: string) => {
         return { react: React, "react-dom": ReactDOM, "@foxglove/studio": FoxgloveStudio }[name];
@@ -76,6 +71,11 @@ export default function ExtensionRegistryProvider(props: PropsWithChildren<unkno
       };
 
       try {
+        const unwrappedExtensionSource = extension.source;
+
+        // eslint-disable-next-line no-new-func
+        const fn = new Function("module", "require", unwrappedExtensionSource);
+
         // load the extension module exports
         fn(module, require, {});
         const wrappedExtensionModule = module.exports as ExtensionModule;
