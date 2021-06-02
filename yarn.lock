@@ -2694,7 +2694,7 @@ __metadata:
     "@types/gl-matrix": 3.2.0
     "@types/hammerjs": 2.0.39
     "@types/http-server": ^0.10.1
-    "@types/leaflet": 1.7.0
+    "@types/leaflet": 1.7.1
     "@types/memoize-weak": "workspace:packages/@types/memoize-weak"
     "@types/moment-duration-format": 2.2.2
     "@types/prettier": 2.2.3
@@ -5529,12 +5529,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/leaflet@npm:1.7.0":
-  version: 1.7.0
-  resolution: "@types/leaflet@npm:1.7.0"
+"@types/leaflet@npm:1.7.1":
+  version: 1.7.1
+  resolution: "@types/leaflet@npm:1.7.1"
   dependencies:
     "@types/geojson": "*"
-  checksum: e26a97579fb2eb7e110e3a20b63f3563f293be64fe6460b58ed51300b627bf9a22836319f444fb2c9207ba159311fa894695a4d19e5212dc0ec467fbd35c4d8c
+  checksum: 72cc94a21cd1c3ef2abe402279120a12170c5b7c643d4f605449248448acfb66b834c332e0c5cd627c14dbeec3cdc3eeaf391cfdff97f66ef617d858a4a0a945
   languageName: node
   linkType: hard
 
