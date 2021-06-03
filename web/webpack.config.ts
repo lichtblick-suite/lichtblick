@@ -6,6 +6,7 @@ import ReactRefreshPlugin from "@pmmmwh/react-refresh-webpack-plugin";
 import SentryWebpackPlugin from "@sentry/webpack-plugin";
 import { CleanWebpackPlugin } from "clean-webpack-plugin";
 import CopyPlugin from "copy-webpack-plugin";
+import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import path from "path";
 import { Configuration, EnvironmentPlugin, WebpackPluginInstance } from "webpack";
@@ -114,6 +115,15 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
           messagingSenderId: "667544771216",
           appId: "1:667544771216:web:f8e6d9705a3c28e73a5615",
         }),
+      }),
+      new ForkTsCheckerWebpackPlugin({
+        typescript: {
+          // By default the ForkTsChecker provided by appWebpackConfig will look at
+          // web/tsconfig.json, which is only used for top-level .ts files in the web folder (i.e.
+          // this webpack config file) but will not typecheck files under src. We need another
+          // ForkTsChecker to check these files.
+          configFile: "src/tsconfig.json",
+        },
       }),
       new CopyPlugin({
         patterns: [{ from: "public" }],
