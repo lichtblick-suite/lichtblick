@@ -228,7 +228,7 @@ describe("time.parseRosTimeStr", () => {
   });
 });
 
-describe("time.getTimestampForMessage", () => {
+describe("time.getTimestampForMessageEvent", () => {
   it("uses headerStamp when available", () => {
     const messageBase = {
       topic: "/foo",
@@ -236,7 +236,7 @@ describe("time.getTimestampForMessage", () => {
     };
 
     expect(
-      time.getTimestampForMessage(
+      time.getTimestampForMessageEvent(
         {
           ...messageBase,
           message: { header: { stamp: { sec: 123, nsec: 456 }, seq: 0, frame_id: "" } },
@@ -245,7 +245,7 @@ describe("time.getTimestampForMessage", () => {
       ),
     ).toEqual({ sec: 123, nsec: 456 });
     expect(
-      time.getTimestampForMessage(
+      time.getTimestampForMessageEvent(
         {
           ...messageBase,
           message: { header: { stamp: { sec: 0, nsec: 0 }, seq: 0, frame_id: "" } },
@@ -253,9 +253,9 @@ describe("time.getTimestampForMessage", () => {
         "headerStamp",
       ),
     ).toEqual({ sec: 0, nsec: 0 });
-    expect(time.getTimestampForMessage({ ...messageBase, message: {} }, "headerStamp")).toEqual(
-      undefined,
-    );
+    expect(
+      time.getTimestampForMessageEvent({ ...messageBase, message: {} }, "headerStamp"),
+    ).toEqual(undefined);
   });
 });
 

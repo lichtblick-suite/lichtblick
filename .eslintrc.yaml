@@ -189,11 +189,6 @@ overrides:
       - "packages/studio-base/src/dataProviders/types.ts"
       - "packages/studio-base/src/hooks/useGlobalVariables.ts"
       - "packages/studio-base/src/hooks/usePanelDrag.tsx"
-      - "packages/studio-base/src/panels/ImageView/ImageCanvas.tsx"
-      - "packages/studio-base/src/panels/ImageView/ImageCanvas.worker.ts"
-      - "packages/studio-base/src/panels/ImageView/decodings.ts"
-      - "packages/studio-base/src/panels/ImageView/index.tsx"
-      - "packages/studio-base/src/panels/ImageView/renderImage.ts"
       - "packages/studio-base/src/panels/NodePlayground/BottomBar/DiagnosticsSection.tsx"
       - "packages/studio-base/src/panels/NodePlayground/BottomBar/LogsSection.tsx"
       - "packages/studio-base/src/panels/NodePlayground/BottomBar/index.tsx"
@@ -317,14 +312,11 @@ overrides:
   - rules:
       "@typescript-eslint/no-non-null-assertion": warn
     files:
+      - "packages/rosmsg-deser/src/BuiltinDeserialize.ts"
       - "packages/studio-base/src/components/PanelToolbar/index.tsx"
       - "packages/studio-base/src/components/Tree/TreeNode.tsx"
       - "packages/studio-base/src/dataProviders/CombinedDataProvider.ts"
       - "packages/studio-base/src/dataProviders/MemoryCacheDataProvider.ts"
-      - "packages/studio-base/src/panels/ImageView/CameraModel.ts"
-      - "packages/studio-base/src/panels/ImageView/decodings.ts"
-      - "packages/studio-base/src/panels/ImageView/index.tsx"
-      - "packages/studio-base/src/panels/ImageView/renderImage.ts"
       - "packages/studio-base/src/panels/Plot/PlotLegend.tsx"
       - "packages/studio-base/src/panels/Plot/transformPlotRange.ts"
       - "packages/studio-base/src/panels/RawMessages/fixture.ts"
@@ -346,4 +338,3 @@ overrides:
       - "packages/studio-base/src/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/readers.ts"
       - "packages/studio-base/src/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/vectors.ts"
       - "packages/studio-base/src/util/concatAndTruncate.ts"
-      - "packages/rosmsg-deser/src/BuiltinDeserialize.ts"

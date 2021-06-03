@@ -428,6 +428,10 @@ export type ImageMarker = Readonly<{
   thickness: number;
 }>;
 
+export type ImageMarkerArray = Readonly<{
+  markers: ImageMarker[];
+}>;
+
 type Roi = Readonly<{
   x_offset: number;
   y_offset: number;

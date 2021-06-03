@@ -43,13 +43,16 @@ import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined
 import filterMap from "@foxglove/studio-base/util/filterMap";
 import {
   FOXGLOVE_MSGS_IMAGE_MARKER_ARRAY_DATATYPE,
+  STUDIO_MSGS_IMAGE_MARKER_ARRAY_DATATYPE,
+  VISUALIZATION_MSGS_IMAGE_MARKER_ARRAY_DATATYPE,
   VISUALIZATION_MSGS_IMAGE_MARKER_DATATYPE,
+  WEBVIZ_MSGS_IMAGE_MARKER_ARRAY_DATATYPE,
 } from "@foxglove/studio-base/util/globalConstants";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 import { colors as sharedColors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { getSynchronizingReducers } from "@foxglove/studio-base/util/synchronizeMessages";
-import { formatTimeRaw } from "@foxglove/studio-base/util/time";
+import { formatTimeRaw, getTimestampForMessage } from "@foxglove/studio-base/util/time";
 import toggle from "@foxglove/studio-base/util/toggle";
 
 import ImageCanvas, { DEFAULT_MAX_ZOOM } from "./ImageCanvas";
@@ -160,7 +163,7 @@ function renderEmptyState(
   markerTopics: string[],
   shouldSynchronize: boolean,
   messagesByTopic: {
-    [topic: string]: MessageEvent<unknown>[];
+    [topic: string]: readonly MessageEvent<unknown>[];
   },
 ) {
   if (cameraTopic === "") {
@@ -199,10 +202,10 @@ function renderEmptyState(
                         .map(
                           (
                             { message }, // In some cases, a user may have subscribed to a topic that does not include a header stamp.
-                          ) =>
-                            (message as Partial<StampedMessage>).header?.stamp
-                              ? formatTimeRaw((message as StampedMessage).header.stamp)
-                              : "[ unknown ]",
+                          ) => {
+                            const stamp = getTimestampForMessage(message);
+                            return stamp != undefined ? formatTimeRaw(stamp) : "[ unknown ]";
+                          },
                         )
                         .join(", ")
                     : "no messages"}
@@ -297,7 +300,15 @@ function ImageView(props: Props) {
   }, [topics]);
 
   const imageMarkerDatatypes = useMemo(
-    () => [VISUALIZATION_MSGS_IMAGE_MARKER_DATATYPE, FOXGLOVE_MSGS_IMAGE_MARKER_ARRAY_DATATYPE],
+    () => [
+      // Single marker
+      VISUALIZATION_MSGS_IMAGE_MARKER_DATATYPE,
+      // Marker arrays
+      FOXGLOVE_MSGS_IMAGE_MARKER_ARRAY_DATATYPE,
+      STUDIO_MSGS_IMAGE_MARKER_ARRAY_DATATYPE,
+      VISUALIZATION_MSGS_IMAGE_MARKER_ARRAY_DATATYPE,
+      WEBVIZ_MSGS_IMAGE_MARKER_ARRAY_DATATYPE,
+    ],
     [],
   );
   const defaultAvailableMarkerTopics = useMemo(
@@ -448,9 +459,8 @@ function ImageView(props: Props) {
     const stamps: Record<string, string> = {};
     for (const { topic, message } of markersToRender) {
       // In some cases, a user may have subscribed to a topic that does not include a header stamp.
-      stamps[topic] = (message as Partial<StampedMessage>).header?.stamp
-        ? formatTimeRaw((message as StampedMessage).header.stamp)
-        : "[ not available ]";
+      const stamp = getTimestampForMessage(message);
+      stamps[topic] = stamp != undefined ? formatTimeRaw(stamp) : "[ not available ]";
     }
     return stamps;
   }, [markersToRender]);

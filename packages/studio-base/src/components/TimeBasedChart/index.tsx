@@ -46,8 +46,8 @@ import {
   useSetHoverValue,
 } from "@foxglove/studio-base/context/HoverValueContext";
 import mixins from "@foxglove/studio-base/styles/mixins.module.scss";
-import { StampedMessage } from "@foxglove/studio-base/types/Messages";
 import filterMap from "@foxglove/studio-base/util/filterMap";
+import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
 import HoverBar from "./HoverBar";
 import TimeBasedChartTooltipContent from "./TimeBasedChartTooltipContent";
@@ -63,7 +63,7 @@ export type TooltipItem = {
 
 export const getTooltipItemForMessageHistoryItem = (item: MessageAndData): TooltipItem => {
   const { message } = item.message;
-  const headerStamp = (message as Partial<StampedMessage>).header?.stamp;
+  const headerStamp = getTimestampForMessage(message);
   return { queriedData: item.queriedData, receiveTime: item.message.receiveTime, headerStamp };
 };
 

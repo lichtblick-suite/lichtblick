@@ -12,7 +12,15 @@
 //   You may not use this file except in compliance with the License.
 
 import { MessageEvent } from "@foxglove/studio-base/players/types";
-import { ImageMarker, Color, Point } from "@foxglove/studio-base/types/Messages";
+import {
+  Image,
+  ImageMarker,
+  Color,
+  Point,
+  CompressedImage,
+  ImageMarkerArray,
+} from "@foxglove/studio-base/types/Messages";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 import CameraModel from "./CameraModel";
@@ -36,6 +44,8 @@ import {
   OffscreenCanvas,
   RenderOptions,
 } from "./util";
+
+const IMAGE_DATATYPES = ["sensor_msgs/CompressedImage", "sensor_msgs/Image"];
 
 // Just globally keep track of if we've shown an error in rendering, since typically when you get
 // one error, you'd then get a whole bunch more, which is spammy.
@@ -102,12 +112,12 @@ function maybeUnrectifyPoint(
 }
 
 async function decodeMessageToBitmap(
-  msg: MessageEvent<any>,
+  msg: MessageEvent<unknown>,
   datatype: string,
   options: RenderOptions = {},
 ): Promise<ImageBitmap> {
   let image: ImageData | HTMLImageElement | Blob;
-  const { data: rawData, is_bigendian, width, height, encoding } = msg.message;
+  const { data: rawData } = msg.message as Partial<Image>;
   if (!(rawData instanceof Uint8Array)) {
     throw new Error("Message must have data of type Uint8Array");
   }
@@ -117,11 +127,15 @@ async function decodeMessageToBitmap(
   // compressed verisons of topics, in which case the message datatype can
   // differ from the one recorded during initialization. So here we just check
   // for properties consistent with either datatype, and render accordingly.
-  if (datatype === "sensor_msgs/Image" && encoding) {
+  if (
+    datatype === "sensor_msgs/Image" &&
+    isNonEmptyOrUndefined((msg.message as Partial<Image>).encoding)
+  ) {
+    const { is_bigendian, width, height, encoding } = msg.message as Image;
     image = new ImageData(width, height);
     switch (encoding) {
       case "yuv422":
-        decodeYUV(rawData as any, width, height, image.data);
+        decodeYUV(rawData as unknown as Int8Array, width, height, image.data);
         break;
       case "rgb8":
         decodeRGB8(rawData, width, height, image.data);
@@ -157,10 +171,11 @@ async function decodeMessageToBitmap(
         throw new Error(`Unsupported encoding ${encoding}`);
     }
   } else if (
-    ["sensor_msgs/CompressedImage", "sensor_msgs/Image"].includes(datatype) ||
-    msg.message.format
+    IMAGE_DATATYPES.includes(datatype) ||
+    isNonEmptyOrUndefined((msg.message as Partial<CompressedImage>).format)
   ) {
-    image = new Blob([rawData], { type: `image/${msg.message.format}` });
+    const { format } = msg.message as CompressedImage;
+    image = new Blob([rawData], { type: `image/${format}` });
   } else {
     throw new Error(`Message type is not usable for rendering images.`);
   }
@@ -208,7 +223,7 @@ function paintBitmap(
   ctx.restore();
   ctx.save();
   try {
-    paintMarkers(ctx, markers, cameraModel);
+    paintMarkers(ctx, markers as MessageEvent<ImageMarker | ImageMarkerArray>[], cameraModel);
   } catch (err) {
     console.warn("error painting markers:", err);
   } finally {
@@ -219,18 +234,18 @@ function paintBitmap(
 
 function paintMarkers(
   ctx: CanvasRenderingContext2D,
-  messages: MessageEvent<any>[],
+  messages: MessageEvent<ImageMarker | ImageMarkerArray>[],
   cameraModel: CameraModel | undefined,
 ) {
   for (const { message } of messages) {
     ctx.save();
     try {
-      if (Array.isArray(message.markers)) {
-        for (const marker of message.markers) {
+      if (Array.isArray((message as Partial<ImageMarkerArray>).markers)) {
+        for (const marker of (message as ImageMarkerArray).markers) {
           paintMarker(ctx, marker, cameraModel);
         }
       } else {
-        paintMarker(ctx, message, cameraModel);
+        paintMarker(ctx, message as ImageMarker, cameraModel);
       }
     } catch (e) {
       console.error("Unable to paint marker to ImageView", e, message);
@@ -271,8 +286,8 @@ function paintMarker(
       ctx.lineWidth = marker.thickness;
 
       for (let i = 0; i < marker.points.length; i += 2) {
-        const { x: x1, y: y1 } = maybeUnrectifyPoint(cameraModel, marker.points[i]!);
-        const { x: x2, y: y2 } = maybeUnrectifyPoint(cameraModel, marker.points[i + 1]!);
+        const { x: x1, y: y1 } = maybeUnrectifyPoint(cameraModel, marker.points[i] as Point);
+        const { x: x2, y: y2 } = maybeUnrectifyPoint(cameraModel, marker.points[i + 1] as Point);
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
@@ -288,10 +303,10 @@ function paintMarker(
         break;
       }
       ctx.beginPath();
-      const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[0]!);
+      const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[0] as Point);
       ctx.moveTo(x, y);
       for (let i = 1; i < marker.points.length; i++) {
-        const maybeUnrectifiedPoint = maybeUnrectifyPoint(cameraModel, marker.points[i]!);
+        const maybeUnrectifiedPoint = maybeUnrectifyPoint(cameraModel, marker.points[i] as Point);
         ctx.lineTo(maybeUnrectifiedPoint.x, maybeUnrectifiedPoint.y);
       }
       if (marker.type === 3) {
@@ -317,8 +332,8 @@ function paintMarker(
       const size = marker.scale !== 0 ? marker.scale : 4;
       if (marker.outline_colors.length === marker.points.length) {
         for (let i = 0; i < marker.points.length; i++) {
-          const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[i]!);
-          ctx.fillStyle = toRGBA(marker.outline_colors[i]!);
+          const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[i] as Point);
+          ctx.fillStyle = toRGBA(marker.outline_colors[i] as Color);
           ctx.beginPath();
           ctx.arc(x, y, size, 0, 2 * Math.PI);
           ctx.fill();
@@ -326,7 +341,7 @@ function paintMarker(
       } else {
         ctx.beginPath();
         for (let i = 0; i < marker.points.length; i++) {
-          const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[i]!);
+          const { x, y } = maybeUnrectifyPoint(cameraModel, marker.points[i] as Point);
           ctx.arc(x, y, size, 0, 2 * Math.PI);
           ctx.closePath();
         }

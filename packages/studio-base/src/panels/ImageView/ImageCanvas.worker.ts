@@ -54,7 +54,7 @@ export default class ImageCanvasWorker {
   }
 }
 
-if ((global as any).postMessage && !global.onmessage) {
+if ((global as unknown as Partial<Channel>).postMessage && !global.onmessage) {
   // not yet using TS Worker lib: FG-64
   new ImageCanvasWorker(new Rpc(global as unknown as Channel));
 }

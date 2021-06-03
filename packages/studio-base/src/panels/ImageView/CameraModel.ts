@@ -11,6 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import { Point, CameraInfo } from "@foxglove/studio-base/types/Messages";
 
 const DISTORTION_STATE = {

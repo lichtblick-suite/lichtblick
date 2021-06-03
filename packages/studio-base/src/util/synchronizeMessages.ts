@@ -15,16 +15,17 @@ import { mapValues } from "lodash";
 import { TimeUtil, Time } from "rosbag";
 
 import { MessageEvent } from "@foxglove/studio-base/players/types";
-import { StampedMessage } from "@foxglove/studio-base/types/Messages";
+import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
-export const defaultGetHeaderStamp = (message?: Partial<StampedMessage>): Time | undefined => {
-  return message?.header?.stamp;
+type MessagesByTopic = { [topic: string]: readonly MessageEvent<unknown>[] };
+type MessageByTopic = { [topic: string]: MessageEvent<unknown> };
+
+export const defaultGetHeaderStamp = (message?: unknown): Time | undefined => {
+  return message != undefined ? getTimestampForMessage(message) : undefined;
 };
 
 function allMessageStampsNewestFirst(
-  messagesByTopic: Readonly<{
-    [topic: string]: readonly MessageEvent<unknown>[];
-  }>,
+  messagesByTopic: Readonly<MessagesByTopic>,
   getHeaderStamp?: (itemMessage: MessageEvent<unknown>) => Time | undefined,
 ) {
   const stamps = [];
@@ -32,7 +33,7 @@ function allMessageStampsNewestFirst(
     for (const message of messages) {
       const stamp = getHeaderStamp
         ? getHeaderStamp(message)
-        : defaultGetHeaderStamp(message.message as Partial<StampedMessage>);
+        : defaultGetHeaderStamp(message.message);
       if (stamp) {
         stamps.push(stamp);
       }
@@ -44,21 +45,15 @@ function allMessageStampsNewestFirst(
 // Get a subset of items matching a particular timestamp
 function messagesMatchingStamp(
   stamp: Time,
-  messagesByTopic: Readonly<{
-    [topic: string]: readonly MessageEvent<unknown>[];
-  }>,
+  messagesByTopic: Readonly<MessagesByTopic>,
   getHeaderStamp?: (itemMessage: MessageEvent<unknown>) => Time | undefined,
-):
-  | Readonly<{
-      [topic: string]: readonly MessageEvent<unknown>[];
-    }>
-  | undefined {
-  const synchronizedMessagesByTopic: Record<string, any> = {};
+): Readonly<MessagesByTopic> | undefined {
+  const synchronizedMessagesByTopic: MessagesByTopic = {};
   for (const [topic, messages] of Object.entries(messagesByTopic)) {
     const synchronizedMessage = messages.find((message) => {
       const thisStamp = getHeaderStamp
         ? getHeaderStamp(message)
-        : defaultGetHeaderStamp(message.message as Partial<StampedMessage>);
+        : defaultGetHeaderStamp(message.message);
       return thisStamp && TimeUtil.areSame(stamp, thisStamp);
     });
     if (synchronizedMessage != undefined) {
@@ -75,15 +70,9 @@ function messagesMatchingStamp(
 // If multiple sets of synchronized messages are included, the one with the later header.stamp is
 // returned.
 export default function synchronizeMessages(
-  messagesByTopic: Readonly<{
-    [topic: string]: readonly MessageEvent<unknown>[];
-  }>,
+  messagesByTopic: Readonly<MessagesByTopic>,
   getHeaderStamp?: (itemMessage: MessageEvent<unknown>) => Time | undefined,
-):
-  | Readonly<{
-      [topic: string]: readonly MessageEvent<unknown>[];
-    }>
-  | undefined {
+): Readonly<MessagesByTopic> | undefined {
   for (const stamp of allMessageStampsNewestFirst(messagesByTopic, getHeaderStamp)) {
     const synchronizedMessagesByTopic = messagesMatchingStamp(
       stamp,
@@ -100,18 +89,12 @@ export default function synchronizeMessages(
 function getSynchronizedMessages(
   stamp: Time,
   topics: readonly string[],
-  messages: {
-    [topic: string]: MessageEvent<unknown>[];
-  },
-):
-  | {
-      [topic: string]: MessageEvent<unknown>;
-    }
-  | undefined {
-  const synchronizedMessages: Record<string, any> = {};
+  messages: MessagesByTopic,
+): MessageByTopic | undefined {
+  const synchronizedMessages: MessageByTopic = {};
   for (const topic of topics) {
     const matchingMessage = messages[topic]?.find(({ message }) => {
-      const thisStamp = (message as Partial<StampedMessage>).header?.stamp;
+      const thisStamp = getTimestampForMessage(message);
       return thisStamp && TimeUtil.areSame(stamp, thisStamp);
     });
     if (!matchingMessage) {
@@ -123,10 +106,8 @@ function getSynchronizedMessages(
 }
 
 type ReducedValue = {
-  messagesByTopic: {
-    [topic: string]: MessageEvent<unknown>[];
-  };
-  synchronizedMessages?: { [topic: string]: MessageEvent<unknown> };
+  messagesByTopic: MessagesByTopic;
+  synchronizedMessages?: MessageByTopic;
 };
 
 function getSynchronizedState(
@@ -143,8 +124,8 @@ function getSynchronizedState(
       newSynchronizedMessages = syncedMsgs;
       newMessagesByTopic = mapValues(newMessagesByTopic, (msgsByTopic) =>
         msgsByTopic.filter(({ message }) => {
-          const thisStamp = (message as any).header?.stamp;
-          return !TimeUtil.isLessThan(thisStamp, stamp);
+          const thisStamp = getTimestampForMessage(message);
+          return thisStamp != undefined && !TimeUtil.isLessThan(thisStamp, stamp);
         }),
       );
       break;
@@ -160,7 +141,7 @@ export function getSynchronizingReducers(topics: readonly string[]): {
 } {
   return {
     restore: (previousValue?: ReducedValue) => {
-      const messagesByTopic: Record<string, any> = {};
+      const messagesByTopic: MessagesByTopic = {};
       for (const topic of topics) {
         messagesByTopic[topic] = previousValue?.messagesByTopic[topic] ?? [];
       }

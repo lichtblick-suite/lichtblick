@@ -27,13 +27,14 @@ import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import { Item } from "@foxglove/studio-base/components/Menu";
 import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
-import { CameraInfo, StampedMessage } from "@foxglove/studio-base/types/Messages";
+import { CameraInfo } from "@foxglove/studio-base/types/Messages";
 import Rpc from "@foxglove/studio-base/util/Rpc";
 import WebWorkerManager from "@foxglove/studio-base/util/WebWorkerManager";
 import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
 import { downloadFiles } from "@foxglove/studio-base/util/download";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 import supportsOffscreenCanvas from "@foxglove/studio-base/util/supportsOffscreenCanvas";
+import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
 import styles from "./ImageCanvas.module.scss";
 import { Config, SaveImagePanelConfig } from "./index";
@@ -324,7 +325,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
       // by the browser
       // remove the leading / so the image name doesn't start with _
       const topicName = topic.name.slice(1);
-      const stamp = (image.message as Partial<StampedMessage>).header?.stamp ?? { sec: 0, nsec: 0 };
+      const stamp = getTimestampForMessage(image.message) ?? { sec: 0, nsec: 0 };
       const fileName = `${topicName}-${stamp.sec}-${stamp.nsec}`;
       downloadFiles([{ blob, fileName }]);
     });
@@ -422,7 +423,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
             },
           },
           imageMessageDatatype: topic.datatype,
-          rawMarkerData,
+          rawMarkerData: JSON.parse(JSON.stringify(rawMarkerData)),
           options,
         });
       } else {

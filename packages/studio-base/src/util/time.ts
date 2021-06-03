@@ -16,7 +16,7 @@ import { Time, TimeUtil } from "rosbag";
 
 import log from "@foxglove/log";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
-import { StampedMessage } from "@foxglove/studio-base/types/Messages";
+import { MarkerArray, StampedMessage } from "@foxglove/studio-base/types/Messages";
 
 type BatchTimestamp = {
   seconds: number;
@@ -288,18 +288,31 @@ export function getSeekTimeFromSpec(spec: SeekToTimeSpec, start: Time, end: Time
   return clampTime(rawSpecTime, start, end);
 }
 
-export function getTimestampForMessage(
-  messageEvent: MessageEvent<Partial<StampedMessage>>,
+export function getTimestampForMessageEvent(
+  messageEvent: MessageEvent<unknown>,
   timestampMethod?: TimestampMethod,
 ): Time | undefined {
-  if (timestampMethod === "headerStamp") {
-    const stamp = messageEvent.message.header?.stamp;
-    if (stamp && "sec" in stamp && "nsec" in stamp) {
+  return timestampMethod === "headerStamp"
+    ? getTimestampForMessage(messageEvent.message)
+    : messageEvent.receiveTime;
+}
+
+export function getTimestampForMessage(message: unknown): Time | undefined {
+  if ((message as Partial<StampedMessage>).header != undefined) {
+    // This message has a "header" field
+    const stamp = (message as StampedMessage).header.stamp;
+    if (stamp != undefined && "sec" in stamp && "nsec" in stamp) {
       return stamp;
     }
-    return undefined;
+  } else if ((message as Partial<MarkerArray>).markers?.[0]?.header != undefined) {
+    // This is a marker array message with a "markers" array and at least one entry
+    const stamp = (message as MarkerArray).markers[0]?.header.stamp;
+    if (stamp != undefined && "sec" in stamp && "nsec" in stamp) {
+      return stamp;
+    }
   }
-  return messageEvent.receiveTime;
+
+  return undefined;
 }
 
 export const getRosTimeFromString = (text: string): Time | undefined => {

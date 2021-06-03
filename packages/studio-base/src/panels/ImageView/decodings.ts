@@ -11,6 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import { RenderOptions } from "@foxglove/studio-base/panels/ImageView/util";
 
 export function decodeYUV(
@@ -163,10 +165,10 @@ export function decodeMono16(
 // Specialize the Bayer decode function to a certain encoding. For performance reasons, we use
 // new Function() -- this is about 20% faster than a switch statement and .bind().
 function makeSpecializedDecodeBayer(
-  tl: any,
-  tr: any,
-  bl: any,
-  br: any,
+  tl: string,
+  tr: string,
+  bl: string,
+  br: string,
 ): (data: Uint8Array, width: number, height: number, output: Uint8ClampedArray) => void {
   // We probably can't afford real debayering/demosaicking, so do something simpler
   // The input array look like a single-plane array of pixels.  However, each pixel represents a one particular color
@@ -227,7 +229,7 @@ function makeSpecializedDecodeBayer(
       output[outBottomIdx++] = 255;
     }
   }`,
-  ) as any;
+  ) as ReturnType<typeof makeSpecializedDecodeBayer>;
 }
 
 export const decodeBayerRGGB8 = makeSpecializedDecodeBayer("r", "g0", "g1", "b");

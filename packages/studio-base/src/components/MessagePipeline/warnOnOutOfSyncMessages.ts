@@ -15,13 +15,12 @@ import { Time, TimeUtil } from "rosbag";
 
 import Logger from "@foxglove/log";
 import { PlayerState, MessageEvent } from "@foxglove/studio-base/players/types";
-import { StampedMessage } from "@foxglove/studio-base/types/Messages";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 import {
   subtractTimes,
   toSec,
   formatFrame,
-  getTimestampForMessage,
+  getTimestampForMessageEvent,
 } from "@foxglove/studio-base/util/time";
 
 const DRIFT_THRESHOLD_SEC = 1; // Maximum amount of drift allowed.
@@ -60,10 +59,7 @@ export default function warnOnOutOfSyncMessages(playerState: PlayerState): void 
     lastMessages = messages;
     lastCurrentTime = currentTime;
     for (const message of messages) {
-      const messageTime = getTimestampForMessage(
-        message as MessageEvent<Partial<StampedMessage>>,
-        messageOrder,
-      );
+      const messageTime = getTimestampForMessageEvent(message, messageOrder);
       if (!messageTime) {
         sendNotification(
           `Message has no ${messageOrder}`,
