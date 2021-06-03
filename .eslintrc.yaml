@@ -160,7 +160,6 @@ overrides:
       - "packages/studio-base/src/components/MessagePathSyntax/messagePathsForDatatype.ts"
       - "packages/studio-base/src/components/MessagePathSyntax/useCachedGetMessagePathDataItems.ts"
       - "packages/studio-base/src/components/MessagePipeline/MockMessagePipelineProvider.tsx"
-      - "packages/studio-base/src/components/MessagePipeline/index.tsx"
       - "packages/studio-base/src/components/MockPanelContextProvider.tsx"
       - "packages/studio-base/src/components/PanelLayout.tsx"
       - "packages/studio-base/src/components/PanelList/index.tsx"

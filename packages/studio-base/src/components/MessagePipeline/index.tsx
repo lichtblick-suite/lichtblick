@@ -205,7 +205,7 @@ export function MessagePipelineProvider({
       waitingForPromises: false,
     };
 
-    player.setListener((newPlayerState: PlayerState): any => {
+    player.setListener((newPlayerState: PlayerState) => {
       warnOnOutOfSyncMessages(newPlayerState);
       if (currentPlayer.current !== player) {
         return Promise.resolve();
@@ -214,8 +214,8 @@ export function MessagePipelineProvider({
         throw new Error("New playerState was emitted before last playerState was rendered.");
       }
 
-      const promise = new Promise((resolve) => {
-        playerTickState.current.resolveFn = resolve as any;
+      const promise = new Promise<void>((resolve) => {
+        playerTickState.current.resolveFn = resolve;
       });
       setRawPlayerState((currentPlayerState) => {
         if (currentPlayer.current !== player) {
