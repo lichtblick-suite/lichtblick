@@ -83,9 +83,7 @@ type Props = {
     selectedPanelActions: SelectedPanelActions,
   ) => void;
   onFirstMount?: (arg0: HTMLDivElement) => void;
-  style?: {
-    [key: string]: any;
-  };
+  style?: React.CSSProperties;
 };
 
 function setNativeValue(element: unknown, value: unknown) {
@@ -118,9 +116,7 @@ export function triggerInputBlur(node: HTMLInputElement | HTMLTextAreaElement): 
 }
 
 export function triggerWheel(target: HTMLElement, deltaX: number): void {
-  const event = document.createEvent("MouseEvents");
-  event.initEvent("wheel", true, true);
-  (event as any).deltaX = deltaX;
+  const event = new WheelEvent("wheel", { deltaX, bubbles: true, cancelable: true });
   target.dispatchEvent(event);
 }
 
@@ -216,7 +212,7 @@ function UnconnectedPanelSetup(props: Props): JSX.Element | ReactNull {
     }
     if (savedProps) {
       actions.savePanelConfigs({
-        configs: Object.entries(savedProps).map(([id, config]: [string, any]) => ({ id, config })),
+        configs: Object.entries(savedProps).map(([id, config]) => ({ id, config })),
       });
     }
     setInitialized(true);

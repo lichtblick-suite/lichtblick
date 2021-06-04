@@ -121,27 +121,27 @@ function SourceInfo() {
           </SHeaderItem>
         </SHeader>
         <STable>
-          {(topics as any).map((t: any) => (
-            <SRow key={t.name}>
+          {topics?.map((topic) => (
+            <SRow key={topic.name}>
               <SCell
-                title={`Click to copy topic name ${t.name} to clipboard.`}
+                title={`Click to copy topic name ${topic.name} to clipboard.`}
                 onClick={() => {
-                  clipboard.copy(t.name);
+                  clipboard.copy(topic.name);
                 }}
               >
-                {t.name}
+                {topic.name}
               </SCell>
               <SCell
-                title={`Click to copy topic type ${t.datatype} to clipboard.`}
+                title={`Click to copy topic type ${topic.datatype} to clipboard.`}
                 onClick={() => {
-                  clipboard.copy(t.datatype);
+                  clipboard.copy(topic.datatype);
                 }}
               >
-                {t.datatype}
+                {topic.datatype}
               </SCell>
-              {t.numMessages != undefined ? (
+              {topic.numMessages != undefined ? (
                 <SCell>
-                  {t.numMessages} msgs ({(t.numMessages / toSec(duration)).toFixed(2)} Hz)
+                  {topic.numMessages} msgs ({(topic.numMessages / toSec(duration)).toFixed(2)} Hz)
                 </SCell>
               ) : (
                 <SCell />

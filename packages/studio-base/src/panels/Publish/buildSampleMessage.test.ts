@@ -47,9 +47,9 @@ describe("buildSampleMessage", () => {
 
   it("handles builtin types", () => {
     for (const type in builtinSampleValues) {
-      expect(buildSampleMessage({}, type)).toEqual((builtinSampleValues as any)[type]);
+      expect(buildSampleMessage({}, type)).toEqual(builtinSampleValues[type]);
       expect(buildSampleMessage({ A: { fields: [{ name: "data", type }] } }, "A")).toEqual({
-        data: (builtinSampleValues as any)[type],
+        data: builtinSampleValues[type],
       });
     }
   });

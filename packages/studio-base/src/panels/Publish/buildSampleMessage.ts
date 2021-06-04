@@ -13,7 +13,7 @@
 
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
-export const builtinSampleValues = {
+export const builtinSampleValues: Record<string, unknown> = {
   bool: false,
   int8: 0,
   uint8: 0,
@@ -33,16 +33,16 @@ export const builtinSampleValues = {
 export default function buildSampleMessage(
   datatypes: RosDatatypes,
   datatype: string,
-): any | undefined {
-  const builtin = (builtinSampleValues as any)[datatype];
+): unknown | undefined {
+  const builtin = builtinSampleValues[datatype];
   if (builtin != undefined) {
     return builtin;
   }
   const fields = datatypes[datatype]?.fields;
   if (!fields) {
-    return ReactNull;
+    return undefined;
   }
-  const obj: any = {};
+  const obj: Record<string, unknown> = {};
   for (const field of fields) {
     if (field.isConstant ?? false) {
       continue;

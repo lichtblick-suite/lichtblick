@@ -11,10 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Component } from "react";
-
-export default class MockSvg extends Component<any> {
-  override render(): JSX.Element {
-    return <svg {...this.props} />;
-  }
+export default function MockSvg(): JSX.Element {
+  return <svg />;
 }

@@ -14,7 +14,7 @@
 import tick from "@foxglove/studio-base/util/tick";
 
 export function findCanvas(): HTMLCanvasElement {
-  const canvas = document.querySelectorAll("canvas")[0] as any;
+  const canvas = document.querySelector("canvas");
   if (!canvas) {
     throw new Error("Could not find canvas element");
   }

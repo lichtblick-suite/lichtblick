@@ -26,7 +26,7 @@ export default function GlobalVariableSlider(props: Props): ReactElement {
   const globalVariableValue = globalVariables[props.globalVariableName];
 
   const onChange = useCallback(
-    (newValue) => {
+    (newValue: number) => {
       if (newValue !== globalVariableValue) {
         setGlobalVariables({ [props.globalVariableName]: newValue });
       }
@@ -35,7 +35,7 @@ export default function GlobalVariableSlider(props: Props): ReactElement {
   );
   return (
     <SliderWithTicks
-      value={globalVariableValue}
+      value={typeof globalVariableValue === "number" ? globalVariableValue : 0}
       sliderProps={props.sliderProps}
       onChange={onChange}
     />

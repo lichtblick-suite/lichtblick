@@ -16,9 +16,7 @@ import {
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 
-export type GlobalVariables = {
-  [key: string]: any;
-};
+export type GlobalVariables = { [key: string]: unknown };
 
 export default function useGlobalVariables(): {
   globalVariables: GlobalVariables;

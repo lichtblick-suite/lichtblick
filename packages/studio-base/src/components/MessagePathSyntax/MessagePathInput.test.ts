@@ -15,19 +15,11 @@
 import { tryToSetDefaultGlobalVar, getFirstInvalidVariableFromRosPath } from "./MessagePathInput";
 import { RosPath } from "./constants";
 
-const defaultGlobalVars = new Map<string, unknown>();
-
 describe("tryToSetDefaultGlobalVar", () => {
   it("correctly returns true/false depending on whether a global variable has a default", () => {
     const setGlobalVars = jest.fn();
     expect(tryToSetDefaultGlobalVar("some_var_without_default", setGlobalVars)).toEqual(false);
     expect(setGlobalVars).not.toHaveBeenCalled();
-    for (const [defaultKey, defaultValue] of defaultGlobalVars) {
-      expect(tryToSetDefaultGlobalVar(defaultKey, setGlobalVars)).toEqual(true);
-      expect(setGlobalVars).toHaveBeenCalledWith({
-        [defaultKey]: defaultValue,
-      });
-    }
   });
 });
 
@@ -60,32 +52,5 @@ describe("getFirstInvalidVariableFromRosPath", () => {
       getFirstInvalidVariableFromRosPath(rosPath, { not_yet_set_global_var: 5 }, setGlobalVars),
     ).toEqual(undefined);
     expect(setGlobalVars).not.toHaveBeenCalled();
-
-    const getRosPathWithDefaultGlobalVar = (defaultKey: string): RosPath => ({
-      topicName: "/some_topic",
-      messagePath: [
-        { type: "name", name: "fieldName" },
-        { type: "slice", start: 0, end: Infinity },
-        {
-          type: "filter",
-          path: ["myId"],
-          value: { variableName: defaultKey, startLoc: 10 },
-          nameLoc: 11,
-          valueLoc: 10,
-          repr: `myId==$${defaultKey}`,
-        },
-      ],
-      modifier: undefined,
-    });
-    Object.keys(defaultGlobalVars).forEach((defaultKey) => {
-      expect(
-        getFirstInvalidVariableFromRosPath(
-          getRosPathWithDefaultGlobalVar(defaultKey),
-          defaultGlobalVars,
-          setGlobalVars,
-        ),
-      ).toEqual(undefined);
-      expect(setGlobalVars).not.toHaveBeenCalled();
-    });
   });
 });
