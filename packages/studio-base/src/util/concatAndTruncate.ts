@@ -20,7 +20,7 @@ export default function concatAndTruncate<T>(
   const ret = toTakeFromArray1 <= 0 ? [] : array1.slice(-toTakeFromArray1);
   const toTakeFromArray2 = limit - ret.length;
   for (let i = Math.max(0, array2.length - toTakeFromArray2); i < array2.length; ++i) {
-    ret.push(array2[i]!);
+    ret.push(array2[i] as T);
   }
   return ret;
 }

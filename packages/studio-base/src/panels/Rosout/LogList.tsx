@@ -127,7 +127,11 @@ function LogList<Item>({ items, renderRow }: Props<Item>): JSX.Element {
                   rowIndex={rowProps.index}
                 >
                   {({ registerChild }) =>
-                    renderRow({ ...rowProps, item: items[rowProps.index]!, ref: registerChild })
+                    renderRow({
+                      ...rowProps,
+                      item: items[rowProps.index] as Item,
+                      ref: registerChild,
+                    })
                   }
                 </CellMeasurer>
               )}

@@ -182,7 +182,7 @@ function RawMessages(props: Props) {
   }, []);
 
   const onLabelClick = useCallback(
-    (keypath: string[]) => {
+    (keypath: (string | number)[]) => {
       // Create a unique key according to the keypath / raw
       const key = keypath.join("~");
       const expandedFieldsCopy = new Set(expandedFields);
@@ -209,7 +209,7 @@ function RawMessages(props: Props) {
     ) => (
       <ReactHoverObserver className={styles.iconWrapper}>
         {({ isHovering }: any) => {
-          const lastKeyPath: number = last(keyPath) as any;
+          const lastKeyPath = last(keyPath) as number;
           let valueAction: ValueAction | undefined;
           if (isHovering && structureItem) {
             valueAction = getValueActionForValue(
@@ -371,7 +371,7 @@ function RawMessages(props: Props) {
             )}
             <Tree
               labelRenderer={(raw) => (
-                <SDiffSpan onClick={() => onLabelClick(raw as any)}>{first(raw)}</SDiffSpan>
+                <SDiffSpan onClick={() => onLabelClick(raw)}>{first(raw)}</SDiffSpan>
               )}
               shouldExpandNode={shouldExpandNode}
               hideRoot
@@ -393,7 +393,7 @@ function RawMessages(props: Props) {
                   typeof val === "object" &&
                   val != undefined &&
                   Object.keys(val).length === 1 &&
-                  diffLabelTexts.includes(Object.keys(val)[0]!)
+                  diffLabelTexts.includes(Object.keys(val)[0] as string)
                 ) {
                   if (Object.keys(val)[0] !== diffLabels.ID.labelText) {
                     return Object.values(val)[0];

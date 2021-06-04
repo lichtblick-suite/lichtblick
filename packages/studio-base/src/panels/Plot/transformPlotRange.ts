@@ -23,8 +23,8 @@ export function derivative(
   const points = [];
   const newTooltips = [];
   for (let i = 1; i < data.length; i++) {
-    const item = data[i]!;
-    const prevItem = data[i - 1]!;
+    const item = data[i] as PlotChartPoint;
+    const prevItem = data[i - 1] as PlotChartPoint;
     const secondsDifference = item.x - prevItem.x;
     const value = (item.y - prevItem.y) / secondsDifference;
     const previousTooltip = tooltips[i];
@@ -72,9 +72,12 @@ export const mathFunctions: { [fn: string]: MathFunction } = {
 };
 
 // Apply a function to the y-value of the data or tooltips passed in.
-export function applyToDataOrTooltips<T>(dataOrTooltips: T[], func: (arg0: number) => number): T[] {
+export function applyToDataOrTooltips<T extends { y: number | string }>(
+  dataOrTooltips: T[],
+  func: (arg0: number) => number,
+): T[] {
   return dataOrTooltips.map((item) => {
-    let y: number | string = (item as any).y;
+    let y = (item as { y: number | string }).y;
     const numericYValue: number = Number(y);
     // Only apply the function if the Y value is a valid number.
     if (!isNaN(numericYValue)) {

@@ -154,23 +154,23 @@ export default class TreeNode extends Component<Props> {
       namespace,
     } = node;
     const headerClasses = cx(styles.header, {
-      [styles.hasChildren!]: children?.length,
-      [styles.disabled!]: disabled,
-      [styles.canEdit!]: canEdit,
+      [styles.hasChildren as string]: children?.length,
+      [styles.disabled as string]: disabled,
+      [styles.canEdit as string]: canEdit,
     });
 
-    const indentWidth = parseInt(styles.indentWidth!);
-    const paddingLeft = parseInt(styles.paddingLeft!);
+    const indentWidth = parseInt(styles.indentWidth as string);
+    const paddingLeft = parseInt(styles.paddingLeft as string);
     const style = { paddingLeft: paddingLeft + depth * indentWidth };
 
     const checkboxClasses = cx(styles.checkbox, {
-      [styles.disabled!]: disabled,
+      [styles.disabled as string]: disabled,
     });
 
     const extraIcon = icon != undefined && (
       <Icon
         fade
-        className={cx(styles.extraIcon, { [styles.disabled!]: disabled })}
+        className={cx(styles.extraIcon, { [styles.disabled as string]: disabled })}
         style={{ color: hasEdit ? colors.accent : "#666" }}
       >
         {icon}
@@ -238,7 +238,7 @@ export default class TreeNode extends Component<Props> {
           {removeIcon}
           <Icon
             className={cx(styles["expand-icon"], {
-              [styles.invisible!]: children.length === 0,
+              [styles.invisible as string]: children.length === 0,
             })}
             style={{ left: paddingLeft + depth * indentWidth - 16 }}
           >

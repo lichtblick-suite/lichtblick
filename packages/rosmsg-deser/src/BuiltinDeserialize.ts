@@ -188,8 +188,8 @@ export const deserializers: BuiltinReaders & {
       const intArr = new Int32Array(view.buffer, totalOffset, len * 2);
       for (let i = 0, j = 0; i < len; ++i, j = j + 2) {
         timeArr[i] = {
-          sec: intArr[j]!,
-          nsec: intArr[j + 1]!,
+          sec: intArr[j] as number,
+          nsec: intArr[j + 1] as number,
         };
       }
     } else {

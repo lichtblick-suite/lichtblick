@@ -145,8 +145,8 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
         </div>
         <div
           className={cx({
-            [styles.itemInput!]: true,
-            [styles.itemInputDisabled!]: xAxisPath?.enabled !== true,
+            [styles.itemInput as string]: true,
+            [styles.itemInputDisabled as string]: xAxisPath?.enabled !== true,
           })}
         >
           {(xAxisVal === "custom" || xAxisVal === "currentCustom") && (
@@ -198,8 +198,8 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
               </div>
               <div
                 className={cx({
-                  [styles.itemInput!]: true,
-                  [styles.itemInputDisabled!]: !path.enabled,
+                  [styles.itemInput as string]: true,
+                  [styles.itemInputDisabled as string]: !path.enabled,
                 })}
               >
                 <MessagePathInput
@@ -218,7 +218,7 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
                     style={{ color: colors.RED }}
                     clickable={false}
                     small
-                    tooltipProps={{ placement: "top" } as any}
+                    tooltipProps={{ placement: "top" }}
                     tooltip="Mismatch in the number of elements in x-axis and y-axis messages"
                   >
                     <AlertCircleIcon />

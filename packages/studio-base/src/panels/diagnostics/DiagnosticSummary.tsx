@@ -71,7 +71,7 @@ class NodeRow extends React.PureComponent<NodeRowProps> {
         <Icon
           fade={!isPinned}
           onClick={this.onClickPin}
-          className={cx(styles.pinIcon, { [styles.pinned!]: isPinned })}
+          className={cx(styles.pinIcon, { [styles.pinned as string]: isPinned })}
         >
           <PinIcon />
         </Icon>
@@ -124,7 +124,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
   );
 
   const renderRow = useCallback(
-    ({ item, style, key }: any) => {
+    ({ item, style, key }) => {
       return (
         <div key={key} style={style}>
           <NodeRow

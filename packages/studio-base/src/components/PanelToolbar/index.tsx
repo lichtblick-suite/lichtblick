@@ -23,7 +23,7 @@ import HelpCircleOutlineIcon from "@mdi/svg/svg/help-circle-outline.svg";
 import TrashCanOutlineIcon from "@mdi/svg/svg/trash-can-outline.svg";
 import cx from "classnames";
 import { useContext, useState, useCallback, useMemo } from "react";
-import { MosaicContext, MosaicWindowContext } from "react-mosaic-component";
+import { MosaicContext, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
 import { useResizeDetector } from "react-resize-detector";
 
 import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
@@ -69,7 +69,7 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
   const close = useCallback(() => {
     closePanel({
       tabId,
-      root: mosaicActions.getRoot() as any,
+      root: mosaicActions.getRoot() as MosaicNode<string>,
       path: mosaicWindowActions.getPath(),
     });
   }, [closePanel, mosaicActions, mosaicWindowActions, tabId]);
@@ -86,7 +86,7 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
         id,
         tabId,
         direction,
-        root: mosaicActions.getRoot() as any,
+        root: mosaicActions.getRoot() as MosaicNode<string>,
         path: mosaicWindowActions.getPath(),
         config,
       });
@@ -99,11 +99,11 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
       ({ type, config, relatedConfigs }: PanelSelection) => {
         swapPanel({
           tabId,
-          originalId: id as any,
+          originalId: id ?? "",
           type,
-          root: mosaicActions.getRoot() as any,
+          root: mosaicActions.getRoot() as MosaicNode<string>,
           path: mosaicWindowActions.getPath(),
-          config: config as any,
+          config: config ?? {},
           relatedConfigs,
         });
       },
@@ -291,9 +291,9 @@ export default React.memo<Props>(function PanelToolbar({
         {showHelp && <HelpModal onRequestClose={() => setShowHelp(false)}>{helpContent}</HelpModal>}
         <div
           className={cx(styles.panelToolbarContainer, {
-            [styles.floating!]: floating,
-            [styles.floatingShow!]: floating && isRendered,
-            [styles.hasChildren!]: Boolean(children),
+            [styles.floating as string]: floating,
+            [styles.floatingShow as string]: floating && isRendered,
+            [styles.hasChildren as string]: Boolean(children),
           })}
         >
           {(isRendered || !floating) && children}

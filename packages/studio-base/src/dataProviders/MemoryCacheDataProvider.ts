@@ -112,7 +112,7 @@ export function getBlocksToKeep({
 
   // Go through all the ranges, from most to least recent.
   for (let blockRangeIndex = 0; blockRangeIndex < recentBlockRanges.length; blockRangeIndex++) {
-    const blockRange = recentBlockRanges[blockRangeIndex]!;
+    const blockRange = recentBlockRanges[blockRangeIndex] as Range;
     // Work through blocks from highest priority to lowest. Break and discard low-priority blocks if
     // we exceed our memory budget.
     const { startIndex, endIndex, increment } = getBlocksToKeepDirection(

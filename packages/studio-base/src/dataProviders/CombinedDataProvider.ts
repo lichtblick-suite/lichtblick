@@ -15,7 +15,6 @@ import { assign, flatten, isEqual } from "lodash";
 import memoizeWeak from "memoize-weak";
 import { TimeUtil, Time } from "rosbag";
 
-import { RosMsgField } from "@foxglove/rosmsg";
 import {
   BlockCache,
   MemoryCacheBlock,
@@ -32,6 +31,7 @@ import {
   ParsedMessageDefinitions,
 } from "@foxglove/studio-base/dataProviders/types";
 import { Progress, MessageEvent } from "@foxglove/studio-base/players/types";
+import { RosDatatype } from "@foxglove/studio-base/types/RosDatatypes";
 import filterMap from "@foxglove/studio-base/util/filterMap";
 import { deepIntersect } from "@foxglove/studio-base/util/ranges";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
@@ -93,8 +93,8 @@ const merge = <A, B>(
   let index1 = 0;
   let index2 = 0;
   while (index1 < messages1.length && index2 < messages2.length) {
-    const m1 = messages1[index1]!;
-    const m2 = messages2[index2]!;
+    const m1 = messages1[index1] as MessageEvent<A>;
+    const m2 = messages2[index2] as MessageEvent<B>;
     if (TimeUtil.isGreaterThan(m1.receiveTime, m2.receiveTime)) {
       messages[idx] = m2;
       ++index2;
@@ -132,7 +132,7 @@ const throwOnDuplicateTopics = (topics: string[]) => {
   });
 };
 
-const throwOnUnequalDatatypes = (datatypes: [string, RosMsgField[]][]) => {
+const throwOnUnequalDatatypes = (datatypes: [string, RosDatatype][]) => {
   datatypes
     .sort((a, b) => a[0].localeCompare(b[0]))
     .forEach(([datatype, definition], i, sortedDataTypes) => {
@@ -152,7 +152,7 @@ function mergeMessageDefinitions(initResult: InitializationResult[]): MessageDef
     rawMessageDefinitionsToParsed(result.messageDefinitions, result.topics),
   );
   throwOnUnequalDatatypes(
-    flatten(parsedMessageDefinitionArr.map(({ datatypes }) => Object.entries(datatypes)) as any),
+    flatten(parsedMessageDefinitionArr.map(({ datatypes }) => Object.entries(datatypes))),
   );
   throwOnDuplicateTopics(
     flatten(
@@ -257,10 +257,10 @@ export default class CombinedDataProvider implements DataProvider {
     const results = filterMap(initializeOutcomes, (result) => {
       return result.status === "fulfilled" ? result.value : undefined;
     });
-    this._initializationResultsPerProvider = initializeOutcomes.map((outcome: any) => {
+    this._initializationResultsPerProvider = initializeOutcomes.map((outcome) => {
       if (outcome.status === "fulfilled") {
         const { start, end, topics } = outcome.value;
-        return { start, end, topicSet: new Set(topics.map((t: any) => t.name)) };
+        return { start, end, topicSet: new Set(topics.map((t) => t.name)) };
       }
       sendNotification("Data unavailable", outcome.reason, "user", "warn");
       return undefined;
@@ -314,8 +314,8 @@ export default class CombinedDataProvider implements DataProvider {
           return { parsedMessages: undefined, rosBinaryMessages: undefined };
         }
         const availableTopics = initializationResult.topicSet;
-        const filterTopics = (maybeTopics: any) =>
-          maybeTopics?.filter((topic: any) => availableTopics.has(topic));
+        const filterTopics = (maybeTopics: readonly string[] | undefined) =>
+          maybeTopics?.filter((topic: string) => availableTopics.has(topic));
         const filteredTopicsByFormat = {
           parsedMessages: filterTopics(topics.parsedMessages),
           rosBinaryMessages: filterTopics(topics.rosBinaryMessages),
