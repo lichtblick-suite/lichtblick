@@ -17,13 +17,12 @@ export type Signal<T> = Promise<T> & {
 };
 
 export default function signal<T = void>(): Signal<T> {
-  let resolve;
-  let reject;
-  const promise: any = new Promise((res, rej) => {
+  let resolve: ((_: T) => void) | undefined;
+  let reject: ((_: Error) => void) | undefined;
+  const promise = new Promise<T>((res, rej) => {
     resolve = res;
     reject = rej;
   });
-  promise.resolve = resolve;
-  promise.reject = reject;
-  return promise;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return Object.assign(promise, { resolve: resolve!, reject: reject! });
 }

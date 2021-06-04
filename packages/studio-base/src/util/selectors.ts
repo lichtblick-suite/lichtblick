@@ -20,15 +20,10 @@ import { Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
-// The ParametricSelector type declaration in reselect requires the props argument
-// The props argument is not actually required so we need to fix the declaration.
-// We do that by casing the return type of the createSelector call to this new declaration
-type FixedParametricSelector<S, P, R> = (state: S, props?: P, ...args: any[]) => R;
-
-export const getTopicNames = createSelector<any, any, any, any>(
-  (topics: Topic[]) => topics,
-  (topics: Topic[]): string[] => topics.map((topic) => topic.name),
-) as FixedParametricSelector<any, any, any>;
+export const getTopicNames = createSelector(
+  (topics: readonly Topic[]) => topics,
+  (topics: readonly Topic[]): string[] => topics.map((topic) => topic.name),
+);
 
 export const getSanitizedTopics = memoizeWeak(
   (subscribedTopics: Set<string>, providerTopics: Topic[]): string[] => {
@@ -58,7 +53,7 @@ export const getTopicsByTopicName = createSelector(
 );
 
 // Only exported for tests
-export const constantsByDatatype = createSelector<any, any, any, any>(
+export const constantsByDatatype = createSelector(
   (datatypes: RosDatatypes) => datatypes,
   (
     datatypes: RosDatatypes,
@@ -87,7 +82,7 @@ export const constantsByDatatype = createSelector<any, any, any, any>(
     }
     return results;
   },
-) as FixedParametricSelector<any, any, any>;
+);
 
 // Studio enum annotations are of the form: "Foo__foxglove_enum" (notice double underscore)
 // This method returns type name from "Foo" or undefined name doesn't match this format
@@ -100,24 +95,16 @@ export function extractTypeFromStudioEnumAnnotation(name: string): string | unde
 }
 
 // returns a map of the form {datatype -> {field -> {value -> name}}}
-export const enumValuesByDatatypeAndField = createSelector<any, any, any, any>(
+export const enumValuesByDatatypeAndField = createSelector(
   (datatypes: RosDatatypes) => datatypes,
   (
     datatypes: RosDatatypes,
-  ): {
-    [key: string]: {
-      [key: string]: {
-        [key: string]: string;
-      };
-    };
-  } => {
-    const results: Record<string, any> = {};
+  ): { [datatype: string]: { [field: string]: { [value: string]: string } } } => {
+    const results: { [datatype: string]: { [field: string]: { [value: string]: string } } } = {};
     for (const [datatype, value] of Object.entries(datatypes)) {
-      const currentResult: Record<string, any> = {};
+      const currentResult: { [field: string]: { [value: string]: string } } = {};
       // keep track of parsed constants
-      let constants: {
-        [key: string]: string;
-      } = {};
+      let constants: { [key: string]: string } = {};
       // constants' types
       let lastType: string | undefined;
       for (const field of value.fields) {
@@ -145,7 +132,10 @@ export const enumValuesByDatatypeAndField = createSelector<any, any, any, any>(
         const fieldName = extractTypeFromStudioEnumAnnotation(field.name);
         if (fieldName != undefined) {
           // associate all constants of type field.type with the annotated field
-          currentResult[fieldName] = constantsByDatatype(datatypes)[field.type];
+          const fieldConstants = constantsByDatatype(datatypes)[field.type];
+          if (fieldConstants) {
+            currentResult[fieldName] = fieldConstants;
+          }
           continue;
         }
 
@@ -168,7 +158,7 @@ export const enumValuesByDatatypeAndField = createSelector<any, any, any, any>(
     }
     return results;
   },
-) as FixedParametricSelector<any, any, any>;
+);
 
 // @ts-expect-error createSelectorCreator does not vibe with shallowequal
 export const shallowEqualSelector = createSelectorCreator(defaultMemoize, shallowequal);

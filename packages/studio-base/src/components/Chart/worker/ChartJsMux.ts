@@ -31,7 +31,6 @@ import {
 import AnnotationPlugin from "chartjs-plugin-annotation";
 
 import RobotoMono from "@foxglove/studio-base/styles/assets/latin-roboto-mono.woff2";
-import { RpcLike } from "@foxglove/studio-base/util/FakeRpc";
 import Rpc from "@foxglove/studio-base/util/Rpc";
 import { setupWorker } from "@foxglove/studio-base/util/RpcWorkerUtils";
 
@@ -87,10 +86,10 @@ Chart.register(
 // Since we use a capped number of web-workers, a single web-worker may be running multiple chartjs instances
 // The ChartJsWorkerMux forwards an rpc request for a specific chartjs instance id to the appropriate instance
 export default class ChartJsMux {
-  private _rpc: RpcLike;
+  private _rpc: Rpc;
   private _managers = new Map<string, ChartJSManager>();
 
-  constructor(rpc: RpcLike) {
+  constructor(rpc: Rpc) {
     this._rpc = rpc;
 
     if (this._rpc instanceof Rpc) {

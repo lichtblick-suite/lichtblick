@@ -200,7 +200,7 @@ class MessagePathInputUnconnected extends React.PureComponent<
 
   _onSelect = (
     value: string,
-    autocomplete: Autocomplete,
+    autocomplete: Autocomplete<string>,
     autocompleteType: ("topicName" | "messagePath" | "globalVariables") | undefined,
     autocompleteRange: { start: number; end: number },
   ) => {
@@ -276,7 +276,7 @@ class MessagePathInputUnconnected extends React.PureComponent<
       autocompleteType = "topicName";
     }
 
-    let autocompleteItems = [];
+    let autocompleteItems: string[] = [];
     let autocompleteFilterText = "";
     let autocompleteRange = { start: 0, end: Infinity };
     if (disableAutocomplete) {
@@ -382,7 +382,7 @@ class MessagePathInputUnconnected extends React.PureComponent<
           filterText={autocompleteFilterText}
           value={path}
           onChange={this._onChange}
-          onSelect={(value: string, _item: unknown, autocomplete: Autocomplete) =>
+          onSelect={(value: string, _item: unknown, autocomplete: Autocomplete<string>) =>
             this._onSelect(value, autocomplete, autocompleteType, autocompleteRange)
           }
           hasError={autocompleteType != undefined && !disableAutocomplete && path.length > 0}

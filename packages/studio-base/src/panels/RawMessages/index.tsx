@@ -230,9 +230,7 @@ function RawMessages(props: Props) {
               if (typeof field === "string") {
                 const enumMapping = enumValuesByDatatypeAndField(datatypes);
                 const datatype = childStructureItem.datatype;
-                if (enumMapping[datatype]?.[field]?.[itemValue as any]) {
-                  constantName = enumMapping[datatype][field][itemValue as any];
-                }
+                constantName = enumMapping[datatype]?.[field]?.[itemValue as any];
               }
             }
           }

@@ -48,7 +48,8 @@ import { Range } from "./ranges";
 // byte range. If the cache spans the entire file size, we try to download the entire file.
 
 export type FileStream = {
-  on: (arg0: string, arg1: any) => void; // We only use "data" and "error".
+  on<T>(event: "data", listener: (chunk: T) => void): void;
+  on(event: "error", listener: (err: Error) => void): void;
   destroy: () => void;
 };
 export interface FileReader {

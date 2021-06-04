@@ -239,9 +239,7 @@ export function getMessagePathDataItems(
       if (prevPathItem && prevPathItem.type === "name") {
         const fieldName = prevPathItem.name;
         const enumMap = enumValuesByDatatypeAndField(datatypes)[structureItem.datatype];
-        if (enumMap?.[fieldName]) {
-          constantName = enumMap[fieldName][value];
-        }
+        constantName = enumMap?.[fieldName]?.[value];
       }
       queriedData.push({ value, path, constantName });
     } else if (pathItem.type === "name" && structureItem.structureType === "message") {

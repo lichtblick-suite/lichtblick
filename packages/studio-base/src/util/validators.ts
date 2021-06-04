@@ -128,7 +128,7 @@ export const isWebsocketUrl = (value: string): string | undefined => {
 
 export const createValidator = (rules: Rules) => {
   return (
-    data: any = {},
+    data: Record<string, unknown> = {},
   ): {
     [field: string]: string;
   } => {
@@ -171,7 +171,7 @@ export const validationErrorToString = (validationResult: ValidationResult): str
         .join(", ");
 
 export const cameraStateValidator = (jsonData: unknown): ValidationResult | undefined => {
-  const data = typeof jsonData !== "object" ? {} : jsonData;
+  const data = (typeof jsonData !== "object" ? {} : jsonData ?? {}) as Record<string, unknown>;
   const rules = {
     distance: [isNumber],
     perspective: [isBoolean],
@@ -229,7 +229,7 @@ export const polygonPointsValidator = (jsonData?: unknown): ValidationResult | u
 };
 
 export const point2DValidator = (jsonData?: unknown): ValidationResult | undefined => {
-  const data = typeof jsonData !== "object" ? {} : jsonData;
+  const data = (typeof jsonData !== "object" ? {} : jsonData ?? {}) as Record<string, unknown>;
   const rules = { x: [isRequired, isNumber], y: [isRequired, isNumber] };
   const validator = createValidator(rules);
   const result = validator(data);

@@ -284,19 +284,6 @@ overrides:
       - "packages/studio-base/src/types/Messages.ts"
       - "packages/studio-base/src/types/Scene.ts"
       - "packages/studio-base/src/types/panels.ts"
-      - "packages/studio-base/src/util/CachedFilelike.ts"
-      - "packages/studio-base/src/util/FakeRpc.ts"
-      - "packages/studio-base/src/util/Rpc.ts"
-      - "packages/studio-base/src/util/RpcMainThreadUtils.ts"
-      - "packages/studio-base/src/util/errors.ts"
-      - "packages/studio-base/src/util/history.ts"
-      - "packages/studio-base/src/util/iframeUtils.ts"
-      - "packages/studio-base/src/util/selectors.ts"
-      - "packages/studio-base/src/util/signal.ts"
-      - "packages/studio-base/src/util/synchronizeMessages.ts"
-      - "packages/studio-base/src/util/topicUtils.ts"
-      - "packages/studio-base/src/util/validators.ts"
-      - "packages/studio-base/src/util/workers.ts"
 
   - rules:
       "@typescript-eslint/no-non-null-assertion": warn

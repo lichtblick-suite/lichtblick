@@ -11,16 +11,33 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import sendNotification from "@foxglove/studio-base/util/sendNotification";
+import sendNotification, {
+  DetailsType,
+  NotificationSeverity,
+  NotificationType,
+} from "@foxglove/studio-base/util/sendNotification";
 
 import Rpc from "./Rpc";
 
 // This function should be called inside the parent thread; it sets up receiving a message from the worker thread and
 // calling sendNotification.
 export function setupReceiveReportErrorHandler(rpc: Rpc): void {
-  rpc.receive("sendNotification", ({ message, details, type, severity }: any) => {
-    sendNotification(message, details, type, severity);
-  });
+  rpc.receive(
+    "sendNotification",
+    ({
+      message,
+      details,
+      type,
+      severity,
+    }: {
+      message: string;
+      details: DetailsType;
+      type: NotificationType;
+      severity: NotificationSeverity;
+    }) => {
+      sendNotification(message, details, type, severity);
+    },
+  );
 }
 
 export function setupMainThreadRpc(rpc: Rpc): void {

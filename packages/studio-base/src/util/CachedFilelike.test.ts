@@ -30,7 +30,7 @@ class InMemoryFileReader implements FileReader {
 
   fetch(offset: number, length: number): FileStream {
     return {
-      on: (type, callback) => {
+      on: (type: "data" | "error", callback: ((_: Buffer) => void) & ((_: Error) => void)) => {
         if (type === "data") {
           setTimeout(() => callback(this._buffer.slice(offset, offset + length)));
         }
@@ -93,7 +93,7 @@ describe("CachedFilelike", () => {
       let destroyed: any;
       jest.spyOn(fileReader, "fetch").mockImplementation(() => {
         return {
-          on: (type, callback) => {
+          on: (type: "data" | "error", callback: ((_: Buffer) => void) & ((_: Error) => void)) => {
             if (type === "error") {
               interval = setInterval(() => callback(new Error("Dummy error")), 20);
             }
@@ -125,7 +125,7 @@ describe("CachedFilelike", () => {
       let stopSendingErrors = false;
       jest.spyOn(fileReader, "fetch").mockImplementation(() => {
         return {
-          on: (type, callback) => {
+          on: (type: "data" | "error", callback: ((_: Buffer) => void) & ((_: Error) => void)) => {
             if (type === "data") {
               dataCallback = callback;
             }
