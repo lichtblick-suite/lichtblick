@@ -2797,7 +2797,7 @@ __metadata:
     url-search-params: 1.1.0
     use-debounce: 6.0.1
     uuid: 8.3.2
-    wasm-lz4: 1.0.0
+    wasm-lz4: 2.0.0
     xacro-parser: 0.3.1
   languageName: unknown
   linkType: soft
@@ -26307,10 +26307,10 @@ typescript@4.3.2:
   languageName: node
   linkType: hard
 
-"wasm-lz4@npm:1.0.0":
-  version: 1.0.0
-  resolution: "wasm-lz4@npm:1.0.0"
-  checksum: 38816f0d0352bbee188dab1f90e1e837fede9059bff7b4189926bdce767dade94c59b537eff439f9d2892952d3db12af38357486653e074cbb81a5bda7f5f7e7
+"wasm-lz4@npm:2.0.0":
+  version: 2.0.0
+  resolution: "wasm-lz4@npm:2.0.0"
+  checksum: d224f106b00fc72a86eaaaa2f18a2b1f1786d9da1af9405fab82e001e56e820cce723f9573fc745c8c62b6f294fc709f8941411ba0e2cd38ccf75a1051996583
   languageName: node
   linkType: hard
 
