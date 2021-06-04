@@ -16,6 +16,7 @@ import memoizeWeak from "memoize-weak";
 
 import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import { assertNever } from "@foxglove/studio-base/util/assertNever";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 
 import {
@@ -25,6 +26,10 @@ import {
   MessagePathStructureItem,
   MessagePathStructureItemMessage,
 } from "./constants";
+
+function isRosPrimitive(type: string): type is RosPrimitive {
+  return rosPrimitives.includes(type as RosPrimitive);
+}
 
 // Generate an easily navigable flat structure given some `datatypes`. We cache
 // this loosely as `datatypes` don't change after the player has connected.
@@ -68,18 +73,18 @@ export function messagePathStructures(datatypes: RosDatatypes): {
           return;
         }
 
-        const next = rosPrimitives.includes(msgField.type)
+        const next: MessagePathStructureItem = isRosPrimitive(msgField.type)
           ? {
               structureType: "primitive",
-              primitiveType: msgField.type as any as RosPrimitive, // Flow doesn't understand includes()
+              primitiveType: msgField.type,
               datatype,
             }
           : structureFor(msgField.type);
 
         if (msgField.isArray === true) {
-          nextByName[msgField.name] = { structureType: "array", next: next as any, datatype };
+          nextByName[msgField.name] = { structureType: "array", next, datatype };
         } else {
-          nextByName[msgField.name] = next as any;
+          nextByName[msgField.name] = next;
         }
       });
       return { structureType: "message", nextByName, datatype };
@@ -203,7 +208,7 @@ export const traverseStructure = memoizeWeak(
       if (!structureItem) {
         return { valid: false, msgPathPart, structureItem };
       }
-      if ((structureItem as any).primitiveType === "json") {
+      if ("primitiveType" in structureItem && structureItem.primitiveType === "json") {
         // No need to continue validating if we're dealing with JSON. We
         // essentially treat all nested values as valid.
         continue;
@@ -213,8 +218,8 @@ export const traverseStructure = memoizeWeak(
         }
         const next: MessagePathStructureItem | undefined =
           structureItem.nextByName[msgPathPart.name];
-        const nextStructureIsJson: any =
-          next && next.structureType === "primitive" && next.primitiveType === "json";
+        const nextStructureIsJson: boolean =
+          next != undefined && next.structureType === "primitive" && next.primitiveType === "json";
         structureItem = !nextStructureIsJson
           ? next
           : {
@@ -235,7 +240,7 @@ export const traverseStructure = memoizeWeak(
         ) {
           return { valid: false, msgPathPart, structureItem };
         }
-        let currentItem: any = structureItem;
+        let currentItem: MessagePathStructureItem | undefined = structureItem;
         for (const name of msgPathPart.path) {
           if (currentItem.structureType !== "message") {
             return { valid: false, msgPathPart, structureItem };
@@ -246,8 +251,10 @@ export const traverseStructure = memoizeWeak(
           }
         }
       } else {
-        (msgPathPart as any).type as never;
-        throw new Error(`Invalid msgPathPart.type: ${(msgPathPart as any).type}`);
+        assertNever(
+          msgPathPart,
+          `Invalid msgPathPart.type: ${(msgPathPart as MessagePathPart).type}`,
+        );
       }
     }
     return { valid: true, msgPathPart: undefined, structureItem };

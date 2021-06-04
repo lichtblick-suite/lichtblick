@@ -14,7 +14,7 @@ import { Callout, DefaultButton, IconButton } from "@fluentui/react";
 import CloseIcon from "@mdi/svg/svg/close.svg";
 import { partition, pick, union, without } from "lodash";
 import { useEffect, useMemo, useCallback, useRef, useState, ReactElement } from "react";
-import styled, { css, keyframes } from "styled-components";
+import styled, { css, FlattenSimpleInterpolation, keyframes } from "styled-components";
 
 import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
@@ -33,8 +33,10 @@ import { colors as sharedColors } from "@foxglove/studio-base/util/sharedStyleCo
 export const ANIMATION_RESET_DELAY_MS = 3000;
 
 // Returns an keyframe object that animates between two styles– "highlight twice then return to normal"
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const makeFlashAnimation = (initialCssProps: any, highlightCssProps: any) => {
+export const makeFlashAnimation = (
+  initialCssProps: FlattenSimpleInterpolation,
+  highlightCssProps: FlattenSimpleInterpolation,
+): FlattenSimpleInterpolation => {
   return css`
     ${keyframes`
       0%, 20%, 100% {
@@ -118,7 +120,7 @@ const FlashRowAnimation = makeFlashAnimation(
 );
 
 const AnimationDuration = 3;
-const SAnimatedRow = styled.tr<{ animate: boolean; skipAnimation: any }>`
+const SAnimatedRow = styled.tr<{ animate: boolean; skipAnimation: boolean }>`
   background: transparent;
   animation: ${({ animate, skipAnimation }) =>
       animate && !skipAnimation ? FlashRowAnimation : "none"}
@@ -141,9 +143,9 @@ export function isActiveElementEditable(): boolean {
 const changeGlobalKey = (
   newKey: string,
   oldKey: string,
-  globalVariables: any,
+  globalVariables: GlobalVariables,
   idx: number,
-  overwriteGlobalVariables: any,
+  overwriteGlobalVariables: (_: GlobalVariables) => void,
 ) => {
   const keys = Object.keys(globalVariables);
   overwriteGlobalVariables({
@@ -161,8 +163,8 @@ function LinkedGlobalVariableRow({ name }: { name: string }): ReactElement {
   const linkedTopicPaths = useMemo(
     () =>
       linkedGlobalVariables
-        .filter((variable: any) => variable.name === name)
-        .map(({ topic, markerKeyPath }: any) => [topic, ...markerKeyPath].join(".")),
+        .filter((variable) => variable.name === name)
+        .map(({ topic, markerKeyPath }) => [topic, ...markerKeyPath].join(".")),
     [linkedGlobalVariables, name],
   );
 
@@ -170,7 +172,7 @@ function LinkedGlobalVariableRow({ name }: { name: string }): ReactElement {
     (path) => {
       setLinkedGlobalVariables(
         linkedGlobalVariables.filter(
-          ({ name: varName, topic, markerKeyPath }: any) =>
+          ({ name: varName, topic, markerKeyPath }) =>
             !(varName === name && [topic, ...markerKeyPath].join(".") === path),
         ),
       );
@@ -180,7 +182,7 @@ function LinkedGlobalVariableRow({ name }: { name: string }): ReactElement {
 
   const unlinkAndDelete = useCallback(() => {
     const newLinkedGlobalVariables = linkedGlobalVariables.filter(
-      ({ name: varName }: any) => varName !== name,
+      ({ name: varName }) => varName !== name,
     );
     setLinkedGlobalVariables(newLinkedGlobalVariables);
     setGlobalVariables({ [name]: undefined });
@@ -209,7 +211,7 @@ function LinkedGlobalVariableRow({ name }: { name: string }): ReactElement {
                     <div style={{ fontWeight: "bold", opacity: 0.4 }}>
                       {linkedTopicPaths.length} LINKED TOPIC{linkedTopicPaths.length > 1 ? "S" : ""}
                     </div>
-                    {linkedTopicPaths.map((path: any) => (
+                    {linkedTopicPaths.map((path) => (
                       <div key={path} style={{ paddingTop: "5px" }}>
                         {path}
                       </div>
@@ -232,7 +234,7 @@ function LinkedGlobalVariableRow({ name }: { name: string }): ReactElement {
               // use Callout instead of a menu on the button for now so that we can style the menu text
               <Callout target={moreButton} isBeakVisible={false} onDismiss={() => setIsOpen(false)}>
                 <Menu style={{ padding: "4px 0px" }}>
-                  {linkedTopicPaths.map((path: any) => (
+                  {linkedTopicPaths.map((path) => (
                     <Item dataTest="unlink-path" key={path} onClick={() => unlink(path)}>
                       <span>
                         Remove <span style={{ color: sharedColors.LIGHT, opacity: 1 }}>{path}</span>
@@ -311,7 +313,7 @@ function GlobalVariablesTable(): ReactElement {
           {unlinked.map((name, idx) => (
             <SAnimatedRow
               key={`unlinked-${idx}`}
-              skipAnimation={skipAnimation}
+              skipAnimation={skipAnimation.current}
               animate={changedVariables.includes(name)}
             >
               <td data-test="global-variable-key">

@@ -14,7 +14,7 @@ import { useCallback, useEffect } from "react";
 
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 
-const inNativeUndoRedoElement = (eventTarget: EventTarget) => {
+const inNativeUndoRedoElement = (eventTarget?: EventTarget) => {
   if (eventTarget instanceof HTMLTextAreaElement) {
     // eslint-disable-next-line no-restricted-syntax
     let element: Element | null | undefined = eventTarget;
@@ -57,7 +57,7 @@ export default function GlobalKeyListener(): ReactNull {
         // Don't use ctrl-Z for layout history actions inside the Monaco Editor. It isn't
         // controlled, and changes inside it don't result in updates to the layout history. We could
         // consider making the editor controlled, with a separate "unsaved state".
-        if (inNativeUndoRedoElement(e.target as any)) {
+        if (inNativeUndoRedoElement(e.target ?? undefined)) {
           return;
         }
 

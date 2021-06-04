@@ -31,13 +31,13 @@ function getArrow(x: number, y: number) {
 
 export default function useGetItemStringWithTimezone(): (
   type: string,
-  data: any,
+  data: unknown,
   itemType: ReactNode,
   itemString: string,
 ) => ReactNode {
   const [timezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
   return useCallback(
-    (type: string, data: any, itemType: ReactNode, itemString: string) =>
+    (type: string, data: unknown, itemType: ReactNode, itemString: string) =>
       getItemString(type, data, itemType, itemString, timezone),
     [timezone],
   );
@@ -45,28 +45,36 @@ export default function useGetItemStringWithTimezone(): (
 
 function getItemString(
   _type: string,
-  data: any,
+  data: unknown,
   itemType: ReactNode,
   itemString: string,
   timezone?: string,
 ): ReactNode {
+  if (typeof data !== "object" || data == undefined) {
+    return (
+      <span>
+        {itemType} {itemString}
+      </span>
+    );
+  }
+
   const keys = Object.keys(data);
   if (keys.length === 2) {
-    const { sec, nsec } = data;
-    if (sec != undefined && nsec != undefined) {
+    const { sec, nsec } = data as { sec?: number; nsec?: number };
+    if (typeof sec === "number" && typeof nsec === "number") {
       // Values "too small" to be absolute epoch-based times are probably relative durations.
       return sec < DURATION_20_YEARS_SEC ? (
-        formatDuration(data)
+        formatDuration({ sec, nsec })
       ) : (
-        <span>{format(data, timezone)}</span>
+        <span>{format({ sec, nsec }, timezone)}</span>
       );
     }
   }
 
   // for vectors/points display length
   if (keys.length === 2) {
-    const { x, y } = data;
-    if (x != undefined && y != undefined) {
+    const { x, y } = data as { x?: unknown; y?: unknown };
+    if (typeof x === "number" && typeof y === "number") {
       const length = Math.sqrt(x * x + y * y);
       return (
         <span>
@@ -77,8 +85,8 @@ function getItemString(
   }
 
   if (keys.length === 3) {
-    const { x, y, z } = data;
-    if (x != undefined && y != undefined && z != undefined) {
+    const { x, y, z } = data as { x?: unknown; y?: unknown; z?: unknown };
+    if (typeof x === "number" && typeof y === "number" && typeof z === "number") {
       const length = Math.sqrt(x * x + y * y + z * z);
       return (
         <span>
@@ -91,7 +99,7 @@ function getItemString(
   // Surface typically-used keys directly in the object summary so the user doesn't have to expand it.
   const filterKeys = keys
     .filter(isTypicalFilterName)
-    .map((key) => `${key}: ${data[key]}`)
+    .map((key) => `${key}: ${(data as { [key: string]: unknown })[key]}`)
     .join(", ");
   return (
     <span>

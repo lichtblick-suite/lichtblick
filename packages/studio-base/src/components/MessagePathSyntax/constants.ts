@@ -30,7 +30,7 @@ const RosPrimitives = {
 };
 
 export type RosPrimitive = keyof typeof RosPrimitives;
-export const rosPrimitives: string[] = Object.keys(RosPrimitives);
+export const rosPrimitives = Object.keys(RosPrimitives) as RosPrimitive[];
 
 export type MessagePathFilter = {
   type: "filter";

@@ -33,9 +33,9 @@ export default class KeyListener extends React.Component<Props> {
     const { global } = this.props;
     const target = global ? document : this.el?.parentElement;
     if (target) {
-      target.addEventListener("keydown", this.handleEvent as any);
-      target.addEventListener("keypress", this.handleEvent as any);
-      target.addEventListener("keyup", this.handleEvent as any);
+      target.addEventListener("keydown", this.handleEvent);
+      target.addEventListener("keypress", this.handleEvent);
+      target.addEventListener("keyup", this.handleEvent);
     }
   }
 
@@ -43,9 +43,9 @@ export default class KeyListener extends React.Component<Props> {
     const { global } = this.props;
     const target = global ? document : this.el?.parentElement;
     if (target) {
-      target.removeEventListener("keydown", this.handleEvent as any);
-      target.removeEventListener("keypress", this.handleEvent as any);
-      target.removeEventListener("keyup", this.handleEvent as any);
+      target.removeEventListener("keydown", this.handleEvent);
+      target.removeEventListener("keypress", this.handleEvent);
+      target.removeEventListener("keyup", this.handleEvent);
     }
   }
 
@@ -59,7 +59,10 @@ export default class KeyListener extends React.Component<Props> {
     }
   }
 
-  handleEvent = (event: KeyboardEvent): void => {
+  handleEvent = (event: Event): void => {
+    if (!(event instanceof KeyboardEvent)) {
+      return;
+    }
     const { target, type } = event;
     if (
       target instanceof HTMLInputElement ||

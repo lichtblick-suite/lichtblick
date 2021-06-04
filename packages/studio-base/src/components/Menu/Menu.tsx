@@ -15,13 +15,10 @@ import cx from "classnames";
 
 import styles from "./index.module.scss";
 
-type Props = {
-  children: any;
+type Props = React.PropsWithChildren<{
   className?: string;
-  style?: {
-    [key: string]: any;
-  };
-};
+  style?: React.CSSProperties;
+}>;
 
 // a small component which wraps its children in menu styles
 // and provides a helper { Item } component which can be used

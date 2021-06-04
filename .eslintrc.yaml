@@ -148,16 +148,6 @@ overrides:
   - rules:
       "@typescript-eslint/no-explicit-any": warn
     files:
-      - "packages/studio-base/src/components/GlobalKeyListener.ts"
-      - "packages/studio-base/src/components/GlobalVariablesTable/index.tsx"
-      - "packages/studio-base/src/components/GradientPicker.tsx"
-      - "packages/studio-base/src/components/Icon.tsx"
-      - "packages/studio-base/src/components/JsonTree/useGetItemStringWithTimezone.tsx"
-      - "packages/studio-base/src/components/KeyListener.tsx"
-      - "packages/studio-base/src/components/Menu/Menu.tsx"
-      - "packages/studio-base/src/components/Menu/SubMenu.tsx"
-      - "packages/studio-base/src/components/MessagePathSyntax/MessagePathInput.tsx"
-      - "packages/studio-base/src/components/MessagePathSyntax/messagePathsForDatatype.ts"
       - "packages/studio-base/src/components/MessagePathSyntax/useCachedGetMessagePathDataItems.ts"
       - "packages/studio-base/src/components/MessagePipeline/MockMessagePipelineProvider.tsx"
       - "packages/studio-base/src/components/MockPanelContextProvider.tsx"

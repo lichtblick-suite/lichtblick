@@ -26,9 +26,7 @@ type Props = {
   checked?: boolean;
   direction: "left" | "right";
   icon?: React.ReactNode;
-  style?: {
-    [key: string]: any;
-  };
+  style?: React.CSSProperties;
   dataTest?: string;
 };
 
