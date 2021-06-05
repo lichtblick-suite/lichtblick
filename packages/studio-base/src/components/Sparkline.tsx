@@ -10,7 +10,6 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { max } from "lodash";
 
 import AutoSizingCanvas from "@foxglove/studio-base/components/AutoSizingCanvas";
 
@@ -34,7 +33,7 @@ function draw(
   width: number,
   height: number,
 ) {
-  const maxValue = Math.max(maximum, max(points.map(({ value }: any) => value)));
+  const maxValue = Math.max(maximum, ...points.map(({ value }) => value));
   context.clearRect(0, 0, width, height);
   context.beginPath();
   context.strokeStyle = "white";

@@ -13,9 +13,10 @@
 import { ReactNode } from "react";
 
 import PanelContext, { PanelContextType } from "@foxglove/studio-base/components/PanelContext";
+import { PanelConfig } from "@foxglove/studio-base/types/panels";
 
-type MockProps = Partial<PanelContextType<any>>;
-const DEFAULT_MOCK_PANEL_CONTEXT: PanelContextType<any> = {
+type MockProps = Partial<PanelContextType<PanelConfig>>;
+const DEFAULT_MOCK_PANEL_CONTEXT: PanelContextType<PanelConfig> = {
   type: "foo",
   id: "bar",
   title: "Foo Panel",

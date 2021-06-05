@@ -54,7 +54,7 @@ export default class Tree extends PureComponent<Props> {
         key={node.id}
         node={node}
         onEditClick={onEditClick}
-        onRemoveNode={onRemoveNode as any}
+        onRemoveNode={onRemoveNode}
         onToggleCheck={onToggleCheck}
         onToggleExpand={onToggleExpand}
         onToggleVisibility={onToggleVisibility}

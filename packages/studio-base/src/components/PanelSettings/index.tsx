@@ -15,6 +15,7 @@ import {
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { PanelIdContext } from "@foxglove/studio-base/context/PanelIdContext";
+import { PanelConfig } from "@foxglove/studio-base/types/panels";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
@@ -56,7 +57,9 @@ export default function PanelSettings(): JSX.Element {
         onRequestClose={() => setShowShareModal(false)}
         value={panelConfigById[selectedPanelId] ?? {}}
         onChange={(config) =>
-          savePanelConfigs({ configs: [{ id: selectedPanelId, config, override: true }] })
+          savePanelConfigs({
+            configs: [{ id: selectedPanelId, config: config as PanelConfig, override: true }],
+          })
         }
         noun="panel configuration"
       />

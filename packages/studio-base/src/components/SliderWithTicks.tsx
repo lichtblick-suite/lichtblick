@@ -89,7 +89,7 @@ function drawTicks(futureTime: number | undefined, sliderConfig: SliderProps) {
 
   // First, measure all the step labels' text widths.
   // we do this outside the canvas context function so it can be cached.
-  const measuredLabels: any = [];
+  const measuredLabels: MeasuredLabel[] = [];
 
   // Represents the number of gaps, not the number of ticks
   const steps = Math.ceil((max - min) / (step == undefined || step === 0 ? 1 : step));

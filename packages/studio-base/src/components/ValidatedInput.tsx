@@ -35,14 +35,14 @@ const SError = styled.div`
   padding: 8px 4px;
 `;
 
-type Value = any;
-type OnChange = (obj: any) => void;
+type Value = unknown;
+type OnChange = (obj: unknown) => void;
 type ParseAndStringifyFn = {
-  stringify: (obj: any) => string;
-  parse: (val: string) => any;
+  stringify: (obj: unknown) => string;
+  parse: (val: string) => unknown;
 };
 export type BaseProps = {
-  dataValidator?: (data: any) => ValidationResult | undefined;
+  dataValidator?: (data: unknown) => ValidationResult | undefined;
   inputStyle?: {
     [attr: string]: string | number;
   };
@@ -61,9 +61,7 @@ type Props = BaseProps & {
  * and validation error will trigger onError.
  */
 export function ValidatedInputBase({
-  dataValidator = (): any => {
-    // no-op
-  },
+  dataValidator = () => undefined,
   inputStyle = {},
   onChange,
   onError,
@@ -73,7 +71,7 @@ export function ValidatedInputBase({
 }: BaseProps & ParseAndStringifyFn): JSX.Element {
   const [error, setError] = useState<string>("");
   const [inputStr, setInputStr] = useState<string>("");
-  const prevIncomingVal = useRef("");
+  const prevIncomingVal = useRef<unknown>("");
   const inputRef = useRef<HTMLTextAreaElement>(ReactNull);
   const [isEditing, setIsEditing] = useState<boolean>(false);
 

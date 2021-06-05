@@ -58,8 +58,8 @@ export default function Polygons({ onSetPolygons, polygonBuilder }: Props): JSX.
         value={polygonPoints}
         onChange={(newPolygonPoints) => {
           if (newPolygonPoints) {
-            setPolygonPoints(newPolygonPoints);
-            onSetPolygons(pointsToPolygons(newPolygonPoints));
+            setPolygonPoints(newPolygonPoints as Point2D[][]);
+            onSetPolygons(pointsToPolygons(newPolygonPoints as Point2D[][]));
           }
         }}
         dataValidator={polygonPointsValidator}

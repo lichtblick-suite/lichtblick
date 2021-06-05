@@ -26,7 +26,7 @@ export type Node = {
   canEdit?: boolean;
   hasEdit?: boolean;
   hasCheckbox?: boolean;
-  name?: any;
-  topic?: any;
-  namespace?: any;
+  name?: string;
+  topic?: string;
+  namespace?: string;
 };

@@ -77,12 +77,6 @@ type PresetSettings =
   | { config: TabPanelConfig; relatedConfigs: SavedProps }
   | { config: PanelConfig; relatedConfigs: typeof undefined };
 
-export type PanelListItem = {
-  title: string;
-  component: React.ComponentType<any>;
-  presetSettings?: PresetSettings;
-};
-
 type DropDescription = {
   type: string;
   config?: PanelConfig;
@@ -186,7 +180,7 @@ type Props = {
 function verifyPanels(panels: PanelInfo[]) {
   const panelTypes: Map<
     string,
-    { component: React.ComponentType<any>; presetSettings?: PresetSettings }
+    { component: React.ComponentType<unknown>; presetSettings?: PresetSettings }
   > = new Map();
   for (const { component } of panels) {
     const { name, displayName, panelType } = component;
@@ -232,7 +226,7 @@ function PanelList(props: Props): JSX.Element {
 
   const handleSearchChange = React.useCallback((e: React.SyntheticEvent<HTMLInputElement>) => {
     // TODO(Audrey): press enter to select the first item, allow using arrow key to go up and down
-    setSearchQuery((e.target as any).value);
+    setSearchQuery(e.currentTarget.value);
     setHighlightedPanelIdx(0);
   }, []);
 

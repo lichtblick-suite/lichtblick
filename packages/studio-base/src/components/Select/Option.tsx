@@ -19,7 +19,7 @@ import styles from "./Option.module.scss";
 
 type Props = {
   // value is used by the Select component
-  value?: any; // eslint-disable-line
+  value: string;
   children: React.ReactNode;
   onClick?: (e: React.MouseEvent<HTMLDivElement>) => void;
   disabled: boolean;

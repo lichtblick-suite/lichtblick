@@ -58,7 +58,7 @@ export function useCachedGetMessagePathDataItems(
   const unmemoizedFilledInPaths: {
     [key: string]: RosPath;
   } = useMemo(() => {
-    const filledInPaths: any = {};
+    const filledInPaths: Record<string, RosPath> = {};
     for (const path of memoizedPaths) {
       const rosPath = parseRosPath(path);
       if (rosPath) {
@@ -127,6 +127,7 @@ export function useCachedGetMessagePathDataItems(
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function filterMatches(filter: MessagePathFilter, value: any) {
   if (typeof filter.value === "object") {
     throw new Error("filterMatches only works on paths where global variables have been filled in");
@@ -183,7 +184,7 @@ export function fillInGlobalVariablesInPath(
   };
 }
 
-const TIME_NEXT_BY_NAME = Object.freeze({
+const TIME_NEXT_BY_NAME: Record<string, MessagePathStructureItem> = Object.freeze({
   sec: { structureType: "primitive", primitiveType: "int32", datatype: "time" },
   nsec: { structureType: "primitive", primitiveType: "int32", datatype: "time" },
 });
@@ -216,19 +217,20 @@ export function getMessagePathDataItems(
     }
   }
 
-  const queriedData: any[] = [];
+  const queriedData: MessagePathDataItem[] = [];
   // Traverse the message (via `value`) and the `messagePath` at the same time. Also keep track
   // of a `path` string that we should show in the tooltip of the point.
   function traverse(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     value: any,
     pathIndex: number,
     path: string,
-    structureItem: MessagePathStructureItem,
+    structureItem: MessagePathStructureItem | undefined,
   ) {
     if (value === undefined || structureItem === undefined) {
       return;
     }
-    const pathItem: any = filledInPath.messagePath[pathIndex];
+    const pathItem = filledInPath.messagePath[pathIndex];
     const nextPathItem = filledInPath.messagePath[pathIndex + 1];
     const structureIsJson =
       structureItem.structureType === "primitive" && structureItem.primitiveType === "json";
@@ -247,21 +249,21 @@ export function getMessagePathDataItems(
       const next = structureItem.nextByName[pathItem.name];
       const nextStructIsJson = next?.structureType === "primitive" && next.primitiveType === "json";
 
-      const actualNext =
+      const actualNext: MessagePathStructureItem =
         !nextStructIsJson && next
           ? next
           : { structureType: "primitive", primitiveType: "json", datatype: "" };
-      traverse(value[pathItem.name], pathIndex + 1, `${path}.${pathItem.name}`, actualNext as any);
+      traverse(value[pathItem.name], pathIndex + 1, `${path}.${pathItem.name}`, actualNext);
     } else if (
       pathItem.type === "name" &&
-      ((structureItem as any).primitiveType === "time" ||
-        (structureItem as any).primitiveType === "duration")
+      structureItem.structureType === "primitive" &&
+      (structureItem.primitiveType === "time" || structureItem.primitiveType === "duration")
     ) {
       traverse(
         value[pathItem.name],
         pathIndex + 1,
         `${path}.${pathItem.name}`,
-        (TIME_NEXT_BY_NAME as any)[pathItem.name],
+        TIME_NEXT_BY_NAME[pathItem.name],
       );
     } else if (
       pathItem.type === "slice" &&
@@ -326,7 +328,7 @@ export function getMessagePathDataItems(
       if (filterMatches(pathItem, value)) {
         traverse(value, pathIndex + 1, `${path}{${pathItem.repr}}`, structureItem);
       }
-    } else if (structureIsJson && pathItem.name) {
+    } else if (structureIsJson && pathItem.type === "name") {
       // Use getField just in case.
       traverse(value[pathItem.name], pathIndex + 1, `${path}.${pathItem.name}`, {
         structureType: "primitive",
@@ -387,7 +389,7 @@ export function useDecodeMessagePathsForMessagesByTopic(
           // Add the item (if it exists) to the array.
           const queriedData = cachedGetMessagePathDataItems(path, message);
           if (queriedData) {
-            messagesForThisPath.push({ message: message as any, queriedData });
+            messagesForThisPath.push({ message, queriedData });
           }
         }
       }

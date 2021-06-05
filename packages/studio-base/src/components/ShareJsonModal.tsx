@@ -25,10 +25,10 @@ import styles from "./ShareJsonModal.module.scss";
 
 type Props = {
   onRequestClose: () => void;
-  onChange?: (value: any) => void;
+  onChange?: (value: unknown) => void;
   // the panel state
   // this will be serialized to json & displayed
-  value: any;
+  value: unknown;
   noun: string;
 };
 
@@ -38,7 +38,7 @@ type State = {
   copied: boolean;
 };
 
-function encode(value: any): string {
+function encode(value: unknown): string {
   try {
     return JSON.stringify(value, undefined, 2);
   } catch (e) {
@@ -47,7 +47,7 @@ function encode(value: any): string {
   }
 }
 
-function decode(value: any): string {
+function decode(value: string): unknown {
   try {
     return JSON.parse(value);
   } catch (err) {

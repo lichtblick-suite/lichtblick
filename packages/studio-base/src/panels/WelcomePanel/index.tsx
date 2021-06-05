@@ -28,7 +28,7 @@ const Term = styled.span`
   font-style: italic;
 `;
 
-function validateEmail(str: string): string | undefined {
+function validateEmail(str: string | undefined): string | undefined {
   return isEmail(str) ? undefined : "Enter a valid e-mail address";
 }
 

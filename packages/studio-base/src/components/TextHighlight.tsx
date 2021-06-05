@@ -33,7 +33,7 @@ export default function TextHighlight({ targetStr = "", searchText = "" }: Props
     return <>{targetStr}</>;
   }
   const result = fuzzySort.highlight(
-    fuzzySort.single(searchText, targetStr) as any,
+    fuzzySort.single(searchText, targetStr) ?? undefined,
     "<span class='TextHighlight-highlight'>",
     "</span>",
   );

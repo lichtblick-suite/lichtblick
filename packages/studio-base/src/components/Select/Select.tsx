@@ -16,6 +16,7 @@ import { createPortal } from "react-dom";
 import styled from "styled-components";
 
 import Icon from "@foxglove/studio-base/components/Icon";
+import Option from "@foxglove/studio-base/components/Select/Option";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 
 import styles from "./Select.module.scss";
@@ -27,12 +28,12 @@ const SEmpty = styled.div`
 `;
 
 type Props = {
-  children: React.ReactNode;
-  // specify text specifically if the value is not a string
+  children: React.ReactElement<Option["props"]>[];
+  // specify text to be displayed instead of value
   text?: string;
-  value: any;
+  value: string;
   icon: React.ReactNode;
-  onChange: (value: any) => void;
+  onChange: (value: string) => void;
 };
 
 type State = {
@@ -66,29 +67,32 @@ export default class Select extends React.Component<Props, State> {
 
   renderOpen(): React.ReactNode {
     const { value, children, onChange } = this.props;
-    const mappedChildren = React.Children.map(children, (child: any) => {
-      // if the child does not have a value prop, just return it
-      // e.g. <hr />
-      if (!child.props.value) {
-        return child;
-      }
-      const onClick = (e: React.SyntheticEvent<HTMLDivElement>) => {
-        e.stopPropagation();
-        e.preventDefault();
-        if (child.props.disabled) {
-          return;
+    const mappedChildren = React.Children.map(
+      children,
+      (child: React.ReactElement<Option["props"]>) => {
+        // if the child does not have a value prop, just return it
+        // e.g. <hr />
+        if (child.props.value == undefined) {
+          return child;
         }
-        const childValue = child.props.value;
-        // don't allow <hr /> clicks to close
-        if (!childValue) {
-          return;
-        }
-        this.close();
-        onChange(child.props.value);
-      };
-      const active = value === child.props.value;
-      return React.cloneElement(child, { onClick, active });
-    });
+        const onClick = (e: React.SyntheticEvent<HTMLDivElement>) => {
+          e.stopPropagation();
+          e.preventDefault();
+          if (child.props.disabled) {
+            return;
+          }
+          const childValue = child.props.value;
+          // don't allow <hr /> clicks to close
+          if (childValue == undefined) {
+            return;
+          }
+          this.close();
+          onChange(child.props.value);
+        };
+        const active = value === child.props.value;
+        return React.cloneElement(child, { onClick, active });
+      },
+    );
     const { body } = document;
     const { el } = this;
     if (!el) {

@@ -233,8 +233,9 @@ export default function CameraInfo({
                       <JsonInput
                         inputStyle={{ width: 140 }}
                         value={{ x: camPos2DTrimmed[0], y: camPos2DTrimmed[1] }}
-                        onChange={(data: { x: number; y: number }) => {
-                          const newPos = [data.x, data.y, 0];
+                        onChange={(data) => {
+                          const point = data as { x: number; y: number };
+                          const newPos = [point.x, point.y, 0];
                           // extract the targetOffset by subtracting from the target and un-rotating by heading
                           const newTargetOffset = vec3.rotateZ(
                             [0, 0, 0],

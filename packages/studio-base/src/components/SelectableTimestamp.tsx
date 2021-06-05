@@ -109,7 +109,7 @@ export default React.memo<Props>(function SelectableTimestamp({
 
   const rawTime = formatTimeRaw(currentTime);
 
-  function onSeekTime(ev: any, isRosTime: any) {
+  function onSeekTime(ev: React.FormEvent<HTMLFormElement>, isRosTime: boolean) {
     ev.preventDefault();
     setIsEditingRosTime(false);
     setIsEditingTime(false);
@@ -121,7 +121,7 @@ export default React.memo<Props>(function SelectableTimestamp({
     }
   }
 
-  function onTimeChange(ev: any, isRosTime: any) {
+  function onTimeChange(ev: React.ChangeEvent<HTMLInputElement>, isRosTime: boolean) {
     const val = ev.target.value;
     if (isRosTime) {
       setRosTimeStr(val);
@@ -133,7 +133,7 @@ export default React.memo<Props>(function SelectableTimestamp({
     setError(!validTime);
   }
 
-  function onTimeTextClick(isRosTime: any) {
+  function onTimeTextClick(isRosTime: boolean) {
     // pause playback to focus on editing
     pausePlayback();
     setError(false);

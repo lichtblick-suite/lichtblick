@@ -19,6 +19,7 @@ import ShareJsonModal from "@foxglove/studio-base/components/ShareJsonModal";
 import CurrentLayoutContext, {
   useCurrentLayoutActions,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import CurrentLayoutState, {
   DEFAULT_LAYOUT_FOR_TESTS,
 } from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
@@ -63,7 +64,7 @@ storiesOf("components/ShareJsonModal", module)
             // no-op
           }}
           value={""}
-          onChange={loadLayout}
+          onChange={(value) => loadLayout(value as Partial<PanelsState>)}
           noun="layout"
         />
       </div>

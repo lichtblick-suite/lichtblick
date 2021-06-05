@@ -65,15 +65,15 @@ export default function MockMessagePipelineProvider(props: {
   requestBackfill?: () => void;
   progress?: Progress;
 }): React.ReactElement {
-  const startTime = useRef();
+  const startTime = useRef<Time | undefined>();
   let currentTime = props.currentTime;
   if (!currentTime) {
     for (const message of props.messages ?? []) {
       if (
         startTime.current == undefined ||
-        TimeUtil.isLessThan(message.receiveTime, startTime.current as any)
+        TimeUtil.isLessThan(message.receiveTime, startTime.current)
       ) {
-        startTime.current = message.receiveTime as any;
+        startTime.current = message.receiveTime;
       }
       if (!currentTime || TimeUtil.isLessThan(currentTime, message.receiveTime)) {
         currentTime = message.receiveTime;
