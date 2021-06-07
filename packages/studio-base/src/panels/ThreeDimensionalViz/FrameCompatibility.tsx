@@ -75,7 +75,7 @@ export function FrameCompatibilityDEPRECATED<Props>(
     const { frame, cleared } = useFrame(topics);
     return (
       <ChildComponent
-        {...(childProps as any)}
+        {...(childProps as unknown as Props)}
         ref={forwardedRef}
         frame={frame}
         setSubscriptions={componentSetSubscriptions}

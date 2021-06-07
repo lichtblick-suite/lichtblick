@@ -78,7 +78,7 @@ export default function PoseSettingsEditor(
           <Flex col>
             <SLabel>Color</SLabel>
             <ColorPicker
-              color={settings.overrideColor as any}
+              color={settings.overrideColor}
               onChange={(newColor) => onFieldChange("overrideColor", newColor)}
             />
             <SLabel>Shaft width</SLabel>
@@ -124,7 +124,7 @@ export default function PoseSettingsEditor(
   }, [onFieldChange, onSettingsChange, settings]);
 
   const badModelTypeSetting = React.useMemo(
-    () => !["car-model", "car-outline", "arrow"].includes(settings.modelType as any),
+    () => !["car-model", "car-outline", "arrow"].includes(settings.modelType!),
     [settings],
   );
 
@@ -155,7 +155,11 @@ export default function PoseSettingsEditor(
       <div
         style={{ display: "flex", margin: "4px", flexDirection: "column" }}
         onChange={(e) => {
-          onSettingsChange({ ...settings, modelType: (e.target as any).value, alpha: undefined });
+          onSettingsChange({
+            ...settings,
+            modelType: (e.target as HTMLFormElement).value,
+            alpha: undefined,
+          });
         }}
       >
         {[

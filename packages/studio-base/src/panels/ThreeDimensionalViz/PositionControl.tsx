@@ -68,7 +68,7 @@ export default class PositionControl extends Component<Props> {
     if (el) {
       const range = document.createRange();
       range.selectNodeContents(el);
-      const sel: any = window.getSelection();
+      const sel = window.getSelection()!;
       sel.removeAllRanges();
       sel.addRange(range);
     }

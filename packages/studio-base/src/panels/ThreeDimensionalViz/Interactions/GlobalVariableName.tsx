@@ -13,14 +13,14 @@
 
 import styled from "styled-components";
 
-const SGlobalVariableName = styled.span<any>`
+const SGlobalVariableName = styled.span<{ leftPadding?: boolean }>`
   color: #ccb862;
   font-weight: bold;
   max-width: 100px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding-left: ${(props) => (props.leftPadding ? "6px" : 0)};
+  padding-left: ${(props) => (props.leftPadding === true ? "6px" : 0)};
 `;
 
 export default function GlobalVariableName({

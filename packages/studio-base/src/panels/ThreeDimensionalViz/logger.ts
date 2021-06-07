@@ -15,10 +15,10 @@ import { throttle } from "lodash";
 const DELAY = 1000;
 
 /* eslint-disable no-restricted-syntax */
-const warn = throttle((...args: any[]) => console.warn(...args), DELAY);
-const error = throttle((...args: any[]) => console.error(...args), DELAY);
-const info = throttle((...args: any[]) => console.info(...args), DELAY);
-const debug = throttle((...args: any[]) => console.log(...args), DELAY);
+const warn = throttle((...args: unknown[]) => console.warn(...args), DELAY);
+const error = throttle((...args: unknown[]) => console.error(...args), DELAY);
+const info = throttle((...args: unknown[]) => console.info(...args), DELAY);
+const debug = throttle((...args: unknown[]) => console.log(...args), DELAY);
 
 export default {
   debug,

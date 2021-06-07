@@ -156,7 +156,7 @@ function Publish(props: Props) {
   const onPublishClicked = useRethrow(
     useCallback(() => {
       if (topicName.length !== 0 && parsedObject) {
-        publish(parsedObject);
+        publish(parsedObject as Record<string, unknown>);
       } else {
         throw new Error(`called _publish() when input was invalid`);
       }

@@ -39,7 +39,7 @@ async function loadCarModel() {
       nodes,
 
       // change sampler minFilter to avoid blurry textures
-      samplers: model.json.samplers.map((sampler: any) => ({
+      samplers: model.json.samplers.map((sampler: Record<string, unknown>) => ({
         ...sampler,
         minFilter: WebGLRenderingContext.LINEAR,
       })),

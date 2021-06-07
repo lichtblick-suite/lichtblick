@@ -19,7 +19,7 @@ import { BaseMarker } from "@foxglove/studio-base/types/Messages";
 const ZERO_TIME = { sec: 0, nsec: 0 };
 
 // Not a concrete type, just descriptive.
-type ObjectWithInteractionData = Interactive<any>;
+type ObjectWithInteractionData = Interactive<unknown>;
 
 class MessageWithLifetime {
   message: ObjectWithInteractionData;
@@ -148,7 +148,7 @@ export default class MessageCollector {
   }
 
   getMessages(): ObjectWithInteractionData[] {
-    const result: any = [];
+    const result: ObjectWithInteractionData[] = [];
     this.markers.forEach((marker, key) => {
       // Check if the marker has a lifetime and should be deleted
       if (marker.isExpired(this.clock)) {

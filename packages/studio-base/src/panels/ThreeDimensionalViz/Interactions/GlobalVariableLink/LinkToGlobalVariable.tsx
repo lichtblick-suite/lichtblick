@@ -13,7 +13,7 @@
 
 import LinkPlusIcon from "@mdi/svg/svg/link-plus.svg";
 import classNames from "classnames";
-import React, { FormEvent } from "react";
+import React, { CSSProperties, FormEvent } from "react";
 
 import Button from "@foxglove/studio-base/components/Button";
 import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
@@ -29,13 +29,13 @@ import UnlinkGlobalVariables from "./UnlinkGlobalVariables";
 type AddToLinkedGlobalVariable = {
   topic: string;
   markerKeyPath: string[];
-  variableValue: any;
+  variableValue: unknown;
 };
 
 type Props = {
   highlight?: boolean;
   addToLinkedGlobalVariable: AddToLinkedGlobalVariable;
-  style?: any;
+  style?: CSSProperties;
 };
 
 function getInitialName(markerKeyPath: string[]) {

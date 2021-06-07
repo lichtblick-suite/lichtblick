@@ -108,7 +108,7 @@ export default function GlobalVariableStyles(props: Props): JSX.Element {
     colorOverrideBySourceIdxByVariable = {},
     setColorOverrideBySourceIdxByVariable,
   } = props;
-  const [selectedTab, setSelectedTab] = React.useState<any>(defaultSelectedTab);
+  const [selectedTab, setSelectedTab] = React.useState<string | undefined>(defaultSelectedTab);
 
   const { linkedGlobalVariables } = useLinkedGlobalVariables();
   const linkedGlobalVariablesByName = groupBy(linkedGlobalVariables, ({ name }) => name);
@@ -151,7 +151,7 @@ export default function GlobalVariableStyles(props: Props): JSX.Element {
                 colorOverrideBySourceIdxByVariable[name],
                 getDefaultColorOverrideBySourceIdx(i),
               )}
-              linkedGlobalVariablesForRow={linkedGlobalVariablesByName[name]}
+              linkedGlobalVariablesForRow={linkedGlobalVariablesByName[name]!}
               updateSettingsForGlobalVariable={updateSettingsForGlobalVariable}
             />
           ))}
@@ -169,13 +169,13 @@ function GlobalVariableStylesRow({
 }: {
   name: string;
   overrides: ColorOverride[];
-  linkedGlobalVariablesForRow: any;
+  linkedGlobalVariablesForRow: { topic: string; markerKeyPath: string[] }[];
   updateSettingsForGlobalVariable: (arg0: string, settings: ColorOverride, arg2: number) => void;
 }) {
   const { globalVariables } = useGlobalVariables();
   const value = globalVariables[name];
 
-  const { topic, markerKeyPath } = linkedGlobalVariablesForRow[0];
+  const { topic, markerKeyPath } = linkedGlobalVariablesForRow[0]!;
   const tooltip = `${topic}.${markerKeyPath.join(".")} ${
     linkedGlobalVariablesForRow.length > 1
       ? `and ${linkedGlobalVariablesForRow.length - 1} more...`

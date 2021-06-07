@@ -73,7 +73,7 @@ export default function TopicViewModeSelector({
         btnStyle={{ width: isXSWidth ? XS_WIDTH_BTN_WIDTH : DEFAULT_BTN_WIDTH }}
         position="below"
         value={topicDisplayMode}
-        text={(TOPIC_DISPLAY_MODES as any)[topicDisplayMode].label}
+        text={TOPIC_DISPLAY_MODES[topicDisplayMode].label}
         onChange={(newValue) => saveConfig({ topicDisplayMode: newValue })}
       >
         {dropdownOptions.map(({ label, value }) => (

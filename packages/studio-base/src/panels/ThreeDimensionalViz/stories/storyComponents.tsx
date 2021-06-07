@@ -145,7 +145,7 @@ export const ThreeDimPanelSetupWithBag = ({
   bag,
 }: {
   threeDimensionalConfig: Partial<ThreeDimensionalVizConfig>;
-  globalVariables: any;
+  globalVariables: Record<string, unknown>;
   bag: string;
 }): JSX.Element => {
   const topics = uniq(
@@ -167,7 +167,7 @@ export const ThreeDimPanelSetupWithBag = ({
             selectedPanelActions.selectAllPanels();
           }, 500);
         }}
-        getMergedFixture={(bagFixture: any) => ({
+        getMergedFixture={(bagFixture: Record<string, unknown>) => ({
           ...bagFixture,
           globalVariables: { ...globalVariables },
           layout: {

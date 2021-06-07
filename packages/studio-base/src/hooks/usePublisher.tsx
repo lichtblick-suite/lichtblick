@@ -32,7 +32,7 @@ export default function usePublisher({
   datatype,
   datatypes,
   name,
-}: Props): (msg: unknown) => void {
+}: Props): (msg: Record<string, unknown>) => void {
   const [id] = useState(() => uuidv4());
   const canPublish = useMessagePipeline((context) =>
     context.playerState.capabilities.includes(PlayerCapabilities.advertise),
@@ -49,7 +49,7 @@ export default function usePublisher({
   }, [id, topic, datatype, datatypes, name, setPublishers, canPublish]);
 
   return useCallback(
-    (msg: unknown) => {
+    (msg) => {
       if (canPublish) {
         publish({ topic, msg });
       }

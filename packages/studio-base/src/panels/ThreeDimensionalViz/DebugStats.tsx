@@ -14,6 +14,16 @@
 import { CSSProperties, useContext, useRef } from "react";
 import { WorldviewReactContext, WorldviewContextType } from "regl-worldview";
 
+type Stats = {
+  bufferCount: number;
+  elementsCount: number;
+  textureCount: number;
+  shaderCount: number;
+
+  getTotalTextureSize(): number;
+  getTotalBufferSize(): number;
+};
+
 const style: CSSProperties = {
   position: "absolute",
   bottom: 5,
@@ -26,7 +36,7 @@ const style: CSSProperties = {
 // Looks at the regl stats and throws errors if it seems we're going over acceptable (arbitrary) max ranges.
 // The maxes are arbitrarily set to be an order of magnitude higher than the 'steady state' of a pretty loaded Studio scene to
 // allow for plenty of headroom.
-function validate(stats: any) {
+function validate(stats: Stats) {
   if (stats.bufferCount > 500) {
     throw new Error(`Possible gl buffer leak detected. Buffer count: ${stats.bufferCount}`);
   }
@@ -50,7 +60,7 @@ export default function DebugStats(): JSX.Element | ReactNull {
   const renderCount = useRef(0);
   renderCount.current = renderCount.current + 1;
   if (context.initializedData.regl) {
-    const { stats } = context.initializedData.regl;
+    const { stats } = context.initializedData.regl as { stats: Stats };
     validate(stats);
     const textureSize = (stats.getTotalTextureSize() / (1024 * 1024)).toFixed(1);
     const bufferSize = (stats.getTotalBufferSize() / (1024 * 1024)).toFixed(1);

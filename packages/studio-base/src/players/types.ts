@@ -299,7 +299,7 @@ export type AdvertisePayload = {
 };
 
 // The actual message to publish.
-export type PublishPayload = { topic: string; msg: any };
+export type PublishPayload = { topic: string; msg: Record<string, unknown> };
 
 // Capabilities that are not shared by all players.
 export const PlayerCapabilities = {

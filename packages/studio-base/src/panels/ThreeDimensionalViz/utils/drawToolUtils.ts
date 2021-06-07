@@ -17,7 +17,10 @@ import { Point2D } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Drawin
 
 export function polygonsToPoints(polygons: Polygon[]): Point2D[][] {
   return polygons.map((poly) => {
-    return poly.points.map((point: any) => ({ x: point.point[0], y: point.point[1] }));
+    return poly.points.map((point: { point: [number, number] }) => ({
+      x: point.point[0],
+      y: point.point[1],
+    }));
   });
 }
 

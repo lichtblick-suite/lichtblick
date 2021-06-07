@@ -54,6 +54,7 @@ import {
   SceneErrorsByKey,
   SetCurrentEditingTopic,
   TopicDisplayMode,
+  TreeGroupNode,
   TreeNode,
   VisibleTopicsCountByKey,
 } from "./types";
@@ -88,7 +89,7 @@ const STopicTree = styled.div`
   transition: opacity 0.15s linear, transform 0.15s linear;
 `;
 
-const STopicTreeInner = styled.div<any>`
+const STopicTreeInner = styled.div<{ isXSWidth: boolean }>`
   .rc-tree {
     li {
       ul {
@@ -310,7 +311,7 @@ function TopicTree({
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === "Escape" && document.activeElement) {
-        (document.activeElement as any).blur();
+        (document.activeElement as HTMLInputElement).blur();
         setShowTopicTree(false);
       }
     },
@@ -414,7 +415,7 @@ function TopicTree({
             treeData={renderTreeNodes({
               availableNamespacesByTopic,
               checkedKeysSet,
-              children: (rootTreeNode as any).children || [],
+              children: (rootTreeNode as TreeGroupNode).children,
               getIsTreeNodeVisibleInScene,
               getIsTreeNodeVisibleInTree,
               getIsNamespaceCheckedByDefault,
@@ -440,7 +441,7 @@ function TopicTree({
             selectable={false}
             onExpand={(newExpandedKeys) => {
               if (!shouldExpandAllKeys) {
-                saveConfig({ expandedKeys: newExpandedKeys as any });
+                saveConfig({ expandedKeys: newExpandedKeys as string[] });
               }
             }}
             expandedKeys={shouldExpandAllKeys ? allKeys : expandedKeysRef.current}

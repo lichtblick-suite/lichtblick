@@ -30,7 +30,7 @@ export default function CommonPointSettings({
     pointSize?: number;
     pointShape?: string;
   };
-  onFieldChange: (name: string, value: any) => void;
+  onFieldChange: (name: string, value: unknown) => void;
 }): JSX.Element {
   const pointSizeVal = settings.pointSize === undefined ? "" : settings.pointSize;
 
@@ -49,7 +49,7 @@ export default function CommonPointSettings({
         data-test="point-size-input"
         type="number"
         placeholder={defaultPointSize.toString()}
-        value={pointSizeVal as any}
+        value={pointSizeVal}
         min={1}
         max={50}
         step={1}

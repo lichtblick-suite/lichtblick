@@ -362,13 +362,14 @@ export default class RosbridgePlayer implements Player {
         continue;
       }
 
-      topic.subscribe((message: any) => {
+      topic.subscribe((message) => {
         if (!this._providerTopics) {
           return;
         }
 
+        const bytes = (message as { bytes: ArrayBuffer }).bytes;
         const receiveTime = fromMillis(Date.now());
-        const innerMessage = messageReader.readMessage(Buffer.from(message.bytes));
+        const innerMessage = messageReader.readMessage(Buffer.from(bytes));
 
         if (!this._hasReceivedMessage) {
           this._hasReceivedMessage = true;

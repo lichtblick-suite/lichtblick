@@ -41,20 +41,20 @@ export default function ReglLeakChecker({
 }): React.ReactNode {
   const context = useContext<WorldviewContextType>(WorldviewReactContext);
   const [renderCount, setRenderCount] = useState<number>(1);
-  const originalStats = useRef<any>(undefined);
+  const originalStats = useRef<Record<string, number> | undefined>(undefined);
   if (renderCount < MAX_RENDER_COUNT) {
     requestAnimationFrame(() => setRenderCount((count) => count + 1));
   }
   // the first two renders w/ regl initialized should initialize buffers & textures
   if (context.initializedData && renderCount > 2) {
-    const stats: any = Object.keys(context.initializedData.regl.stats).reduce((prev, key) => {
+    const stats = Object.keys(context.initializedData.regl.stats).reduce((prev, key) => {
       if (keysToCheck.includes(key)) {
         prev[key] = context.initializedData.regl.stats[key];
       }
       return prev;
-    }, {} as any);
+    }, {} as Record<string, number>);
     // save a snapshot of the first "initialized" render pass stats
-    originalStats.current = originalStats.current || stats;
+    originalStats.current = originalStats.current ?? stats;
     if (renderCount >= MAX_RENDER_COUNT) {
       for (const key in originalStats.current) {
         const originalValue = originalStats.current[key];

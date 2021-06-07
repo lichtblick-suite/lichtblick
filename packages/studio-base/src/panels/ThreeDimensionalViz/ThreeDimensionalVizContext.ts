@@ -21,7 +21,7 @@ import { Color } from "@foxglove/studio-base/types/Messages";
 // markerKeyPath: ['foo', 'bar'] has a value of "baz"
 export type MarkerPathCheck = {
   markerKeyPath?: string[];
-  value?: any;
+  value?: unknown;
 };
 
 export type MarkerMatcher = {

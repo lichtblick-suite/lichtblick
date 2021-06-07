@@ -230,7 +230,7 @@ const FollowTFControl = memo<Props>((props: Props) => {
           ref={autocomplete}
           items={allNodes}
           getItemValue={treeNodeToTfId}
-          getItemText={getItemText as any}
+          getItemText={getItemText}
           selectedItem={selectedItem}
           placeholder={selectedItem ? getItemText(selectedItem) : "choose a target frame"}
           onSelect={onSelectFrame}

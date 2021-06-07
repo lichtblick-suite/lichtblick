@@ -200,7 +200,7 @@ function NamespaceNodeRow({
               key={columnIndex}
               onAltToggle={() => onAltToggle(columnIndex)}
               onToggle={() => onToggle(columnIndex)}
-              overrideColor={overrideColorByColumn && (overrideColorByColumn[columnIndex] as any)}
+              overrideColor={overrideColorByColumn?.[columnIndex]}
               size="SMALL"
               unavailableTooltip={unavailableTooltip}
               visibleInScene={visibleInSceneByColumn[columnIndex] ?? false}

@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { CSSProperties } from "react";
 import styled from "styled-components";
 
 import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
@@ -42,12 +43,12 @@ type Props = {
   label?: string;
   linkedGlobalVariable?: LinkedGlobalVariable;
   markerKeyPath?: string[];
-  nestedValueStyle?: any;
+  nestedValueStyle?: CSSProperties;
   onlyRenderAddLink?: boolean;
-  style?: any;
+  style?: CSSProperties;
   topic?: string;
   unlinkTooltip?: React.ReactNode;
-  variableValue?: any;
+  variableValue?: unknown;
 };
 
 export default function GlobalVariableLink({

@@ -20,7 +20,7 @@ export default function CommonDecaySettings({
   onFieldChange,
 }: {
   settings: { decayTime?: number };
-  onFieldChange: (name: string, value: any) => any;
+  onFieldChange: (name: string, value: unknown) => unknown;
 }): JSX.Element {
   const decayTime = settings.decayTime;
   const decayTimeValue = decayTime === undefined ? "" : decayTime;
@@ -32,7 +32,7 @@ export default function CommonDecaySettings({
       <SInput
         type="number"
         placeholder="0"
-        value={decayTimeValue as any}
+        value={decayTimeValue}
         min={0}
         step={0.1}
         onChange={(e) => {
