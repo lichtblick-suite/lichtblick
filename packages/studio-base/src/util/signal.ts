@@ -23,6 +23,5 @@ export default function signal<T = void>(): Signal<T> {
     resolve = res;
     reject = rej;
   });
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return Object.assign(promise, { resolve: resolve!, reject: reject! });
 }

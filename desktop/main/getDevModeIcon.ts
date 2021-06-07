@@ -14,7 +14,6 @@ export default function getDevModeIcon(): NativeImage | undefined {
 
     const buffer = originalIcon.toBitmap();
     for (let i = 0; i + 3 < buffer.length; i += 4) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const hsv = rgb2hsv(buffer[i]!, buffer[i + 1]!, buffer[i + 2]!);
       hsv.h = (hsv.h + ROTATION_DEGREES) % 360;
       ({ r: buffer[i], g: buffer[i + 1], b: buffer[i + 2] } = hsv2rgb(hsv.h, hsv.s, hsv.v));

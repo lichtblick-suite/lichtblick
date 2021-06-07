@@ -71,7 +71,7 @@ class NodeRow extends React.PureComponent<NodeRowProps> {
         <Icon
           fade={!isPinned}
           onClick={this.onClickPin}
-          className={cx(styles.pinIcon, { [styles.pinned as string]: isPinned })}
+          className={cx(styles.pinIcon, { [styles.pinned!]: isPinned })}
         >
           <PinIcon />
         </Icon>

@@ -384,7 +384,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
       throw new Error(`unsubscribeAllParams returned unrecognized data: ${JSON.stringify(res)}`);
     }
     for (let i = 0; i < keys.length; i++) {
-      const key = keys[i] as string;
+      const key = keys[i]!;
       const [status, msg] = res[i] as RosXmlRpcResponse;
       if (status !== OK) {
         this._log?.warn?.(`unsubscribeAllParams failed for "${key}" (status=${status}): ${msg}`);

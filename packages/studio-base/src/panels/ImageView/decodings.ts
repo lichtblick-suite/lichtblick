@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import { RenderOptions } from "@foxglove/studio-base/panels/ImageView/util";
 
 export function decodeYUV(

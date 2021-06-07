@@ -35,7 +35,7 @@ export default class MemoryStorage {
 
   _getUsedSize(): number {
     return Object.keys(this._internal_items).reduce((memo, key) => {
-      return memo + new Blob([this.getItem(key) as string]).size;
+      return memo + new Blob([this.getItem(key)!]).size;
     }, 0);
   }
 

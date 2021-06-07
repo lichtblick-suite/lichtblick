@@ -95,7 +95,7 @@ export default function ExpandingToolbar<T extends string>({
         {React.Children.map(children, (child) => {
           return (
             <Button
-              className={cx(styles.tab, { [styles.selected as string]: child === selectedChild })}
+              className={cx(styles.tab, { [styles.selected!]: child === selectedChild })}
               onClick={() => onSelectTab(child.props.name as T)}
             >
               {child.props.name}

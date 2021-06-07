@@ -175,7 +175,7 @@ export function ToolbarTab(props: Props): JSX.Element {
       value={tabTitle}
       onClick={onClickTab}
       ref={innerRef}
-      className={cx(styles.tab, { [styles.active as string]: isActive })}
+      className={cx(styles.tab, { [styles.active!]: isActive })}
     >
       <Tooltip
         contents={editingTitle ? "" : nonEmptyOrUndefined(tabTitle) ?? "Enter tab name"}

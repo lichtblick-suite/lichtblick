@@ -295,8 +295,8 @@ export default class Autocomplete<T = unknown> extends PureComponent<
               data-highlighted={isHighlighted}
               data-test-auto-item
               className={cx(styles.autocompleteItem, {
-                [styles.highlighted as string]: isHighlighted,
-                [styles.selected as string]:
+                [styles.highlighted!]: isHighlighted,
+                [styles.selected!]:
                   selectedItemValue != undefined && itemValue === selectedItemValue,
               })}
             >
@@ -309,8 +309,8 @@ export default class Autocomplete<T = unknown> extends PureComponent<
         value={value ?? ""}
         inputProps={{
           className: cx(styles.input, {
-            [styles.inputError as string]: hasError,
-            [styles.placeholder as string]: value == undefined || value.length === 0,
+            [styles.inputError!]: hasError,
+            [styles.placeholder!]: value == undefined || value.length === 0,
           }),
           autoCorrect: "off",
           autoCapitalize: "off",

@@ -72,15 +72,15 @@ const Flex = React.forwardRef((props: Props, ref: React.ForwardedRef<HTMLDivElem
 
   // toggle conditional classes based on props
   const conditionalClasses = {
-    [styles.col as string]: col,
-    [styles.reverse as string]: reverse,
-    [styles.center as string]: center,
-    [styles.start as string]: start,
-    [styles.end as string]: end,
-    [styles.wrap as string]: wrap,
-    [styles.clip as string]: clip,
-    [styles.scroll as string]: scroll,
-    [styles.scrollX as string]: scrollX,
+    [styles.col!]: col,
+    [styles.reverse!]: reverse,
+    [styles.center!]: center,
+    [styles.start!]: start,
+    [styles.end!]: end,
+    [styles.wrap!]: wrap,
+    [styles.clip!]: clip,
+    [styles.scroll!]: scroll,
+    [styles.scrollX!]: scrollX,
   };
   const combinedClasses = cx(styles.flex, conditionalClasses, className);
 

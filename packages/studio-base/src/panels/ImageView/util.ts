@@ -82,7 +82,6 @@ export function getRelatedMarkerTopics(
     return enabledMarkerTopics.some((enabledTopic) =>
       // Splitting with a non-empty string will always produce an array of at least 1 element
       // "If the string and separator are both empty strings, an empty array is returned"
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       topic.endsWith(enabledTopic.split("/").pop()!),
     );
   });

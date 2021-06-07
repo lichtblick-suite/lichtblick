@@ -119,6 +119,10 @@ overrides:
           # Keeps the error count manageable while we enhance type information from the flow conversion
           allowAny: true
 
+      # The ! assertion is used (sparingly) in cases where tsc cannot automatically do bounds
+      # checking such as indexed array iteration
+      "@typescript-eslint/no-non-null-assertion": off
+
       # It's sometimes useful to explicitly name to guard against future changes
       "@typescript-eslint/no-inferrable-types": off
       "@typescript-eslint/no-empty-function": off
@@ -139,7 +143,6 @@ overrides:
 
   - rules:
       "@typescript-eslint/no-explicit-any": off
-      "@typescript-eslint/no-non-null-assertion": off
     files:
       - "**/*.stories.tsx"
       - "**/*.test.tsx"
@@ -256,19 +259,3 @@ overrides:
       - "packages/studio-base/src/types/Messages.ts"
       - "packages/studio-base/src/types/Scene.ts"
       - "packages/studio-base/src/types/panels.ts"
-
-  - rules:
-      "@typescript-eslint/no-non-null-assertion": warn
-    files:
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/GlobalVariableStyles.tsx"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/Interactions/ObjectDetails.tsx"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/PositionControl.tsx"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/SceneBuilder/index.ts"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/TopicTree/NodeName.tsx"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/commands/PointClouds/buffers.ts"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/commands/PointClouds/selection.ts"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/commands/utils/index.ts"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/utils/drawToolUtils.ts"
-      - "packages/studio-base/src/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/pointClouds.ts"
-      - "packages/studio-base/src/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/readers.ts"
-      - "packages/studio-base/src/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/vectors.ts"

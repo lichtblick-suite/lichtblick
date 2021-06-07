@@ -124,7 +124,7 @@ const TopicTimestamp = ({
 const BottomBar = ({ children }: { children?: React.ReactNode }) => (
   <div
     className={cx(imageCanvasStyles["bottom-bar"], {
-      [imageCanvasStyles.inScreenshotTests as string]: inScreenshotTests(),
+      [imageCanvasStyles.inScreenshotTests!]: inScreenshotTests(),
     })}
   >
     {children}

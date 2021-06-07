@@ -145,8 +145,8 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
         </div>
         <div
           className={cx({
-            [styles.itemInput as string]: true,
-            [styles.itemInputDisabled as string]: xAxisPath?.enabled !== true,
+            [styles.itemInput!]: true,
+            [styles.itemInputDisabled!]: xAxisPath?.enabled !== true,
           })}
         >
           {(xAxisVal === "custom" || xAxisVal === "currentCustom") && (
@@ -198,8 +198,8 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
               </div>
               <div
                 className={cx({
-                  [styles.itemInput as string]: true,
-                  [styles.itemInputDisabled as string]: !path.enabled,
+                  [styles.itemInput!]: true,
+                  [styles.itemInputDisabled!]: !path.enabled,
                 })}
               >
                 <MessagePathInput

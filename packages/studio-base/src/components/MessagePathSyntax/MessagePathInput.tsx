@@ -407,8 +407,8 @@ class MessagePathInputUnconnected extends React.PureComponent<
                 <Tooltip contents="Timestamp used for x-axis" placement="top">
                   <div
                     className={cx({
-                      [styles.timestampMethodDropdown as string]: true,
-                      [styles.timestampMethodDropdownError as string]:
+                      [styles.timestampMethodDropdown!]: true,
+                      [styles.timestampMethodDropdownError!]:
                         timestampMethod === "headerStamp" && noHeaderStamp,
                     })}
                   >
@@ -456,7 +456,7 @@ class MessagePathInputUnconnected extends React.PureComponent<
               >
                 <span
                   className={cx({
-                    [styles.timestampItemError as string]: noHeaderStamp,
+                    [styles.timestampItemError!]: noHeaderStamp,
                   })}
                 >
                   header.stamp

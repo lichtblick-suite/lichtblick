@@ -450,9 +450,9 @@ export default function Panel<Config extends PanelConfig>(
             onMouseLeave={onMouseLeave}
             onMouseMove={onMouseMove}
             className={cx({
-              [styles.root as string]: true,
-              [styles.rootFullScreen as string]: fullScreen,
-              [styles.selected as string]: isSelected,
+              [styles.root!]: true,
+              [styles.rootFullScreen!]: fullScreen,
+              [styles.selected!]: isSelected,
             })}
             col
             dataTest={`panel-mouseenter-container ${childId ?? ""}`}

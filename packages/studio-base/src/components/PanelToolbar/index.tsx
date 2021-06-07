@@ -291,9 +291,9 @@ export default React.memo<Props>(function PanelToolbar({
         {showHelp && <HelpModal onRequestClose={() => setShowHelp(false)}>{helpContent}</HelpModal>}
         <div
           className={cx(styles.panelToolbarContainer, {
-            [styles.floating as string]: floating,
-            [styles.floatingShow as string]: floating && isRendered,
-            [styles.hasChildren as string]: Boolean(children),
+            [styles.floating!]: floating,
+            [styles.floatingShow!]: floating && isRendered,
+            [styles.hasChildren!]: Boolean(children),
           })}
         >
           {(isRendered || !floating) && children}
