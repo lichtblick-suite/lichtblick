@@ -119,10 +119,6 @@ overrides:
           # Keeps the error count manageable while we enhance type information from the flow conversion
           allowAny: true
 
-      # The ! assertion is used (sparingly) in cases where tsc cannot automatically do bounds
-      # checking such as indexed array iteration
-      "@typescript-eslint/no-non-null-assertion": off
-
       # It's sometimes useful to explicitly name to guard against future changes
       "@typescript-eslint/no-inferrable-types": off
       "@typescript-eslint/no-empty-function": off
