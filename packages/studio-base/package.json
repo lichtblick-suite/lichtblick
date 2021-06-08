@@ -23,7 +23,7 @@
     "storybook:build": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' build-storybook --config-dir src/.storybook"
   },
   "dependencies": {
-    "@fluentui/react": "8.16.0",
+    "@fluentui/react": "8.17.0",
     "@fluentui/react-icons-mdl2": "1.1.1",
     "@foxglove/hooks": "workspace:packages/hooks",
     "@foxglove/rosmsg-msgs-common": "workspace:packages/rosmsg-msgs-common",

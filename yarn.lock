@@ -2460,9 +2460,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluentui/react@npm:8.16.0":
-  version: 8.16.0
-  resolution: "@fluentui/react@npm:8.16.0"
+"@fluentui/react@npm:8.17.0":
+  version: 8.17.0
+  resolution: "@fluentui/react@npm:8.17.0"
   dependencies:
     "@fluentui/date-time-utilities": ^8.1.1
     "@fluentui/font-icons-mdl2": ^8.1.1
@@ -2482,7 +2482,7 @@ __metadata:
     "@types/react-dom": ">=16.8.0 <18.0.0"
     react: ">=16.8.0 <18.0.0"
     react-dom: ">=16.8.0 <18.0.0"
-  checksum: c6e101468a05dd64b46fa40b980fe73bca5ab186a29155f982ef134fc0c8891a6f59b35eaa19aabf66b19ae009aa8d914a096acff50a1486bb559da1ca91582c
+  checksum: 2684f73f74c9c8cda458c410bd822b4f3b5174419f872dbedce83d0947c4853c9e1ca8f871dbed271af87c2bbd73450a22807a8e35cfcf46137636902d851f29
   languageName: node
   linkType: hard
 
@@ -2665,7 +2665,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/studio-base@workspace:packages/studio-base"
   dependencies:
-    "@fluentui/react": 8.16.0
+    "@fluentui/react": 8.17.0
     "@fluentui/react-icons-mdl2": 1.1.1
     "@foxglove/hooks": "workspace:packages/hooks"
     "@foxglove/rosmsg-msgs-common": "workspace:packages/rosmsg-msgs-common"
