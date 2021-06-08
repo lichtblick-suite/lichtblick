@@ -31,7 +31,7 @@ const WorkerDataProviderWorker = () => {
 
 // We almost always use a WorkerDataProvider in Studio. By initializing the first worker before we actually construct
 // the WorkerDataProvider we can potentially improve performance by loading while waiting for async requests.
-let preinitializedWorkers: any[] = [];
+let preinitializedWorkers: Worker[] = [];
 if (process.env.NODE_ENV !== "test") {
   preinitializedWorkers = [WorkerDataProviderWorker(), WorkerDataProviderWorker()];
 }

@@ -69,10 +69,10 @@ export default class RenameDataProvider implements DataProvider {
     });
     const { messageDefinitions } = result;
 
-    const convertTopicNameKey = (objWithTopicNameKeys: any) => {
-      const topicKeyResult: Record<string, any> = {};
-      for (const topicName of Object.keys(objWithTopicNameKeys)) {
-        topicKeyResult[`${this._prefix}${topicName}`] = objWithTopicNameKeys[topicName];
+    const convertTopicNameKey = <T>(objWithTopicNameKeys: Record<string, T>) => {
+      const topicKeyResult: Record<string, T> = {};
+      for (const [topicName, value] of Object.entries(objWithTopicNameKeys)) {
+        topicKeyResult[`${this._prefix}${topicName}`] = value;
       }
       return topicKeyResult;
     };

@@ -130,6 +130,9 @@ export default class ApiCheckerDataProvider implements DataProvider {
     end: Time,
     subscriptions: GetMessagesTopics,
   ): Promise<GetMessagesResult> {
+    if (!this._provider) {
+      throw new Error("Provider not initialized");
+    }
     if (!Number.isInteger(start.sec) || !Number.isInteger(start.nsec)) {
       this._warn(`start time ${JSON.stringify(start)} must only contain integers`);
     }
@@ -170,7 +173,7 @@ export default class ApiCheckerDataProvider implements DataProvider {
       this._warn("getMessages was called without any topics");
     }
     for (const messageType of MESSAGE_FORMATS) {
-      for (const topic of (subscriptions as any)[messageType] ?? []) {
+      for (const topic of subscriptions[messageType] ?? []) {
         if (!this._topicNames.includes(topic)) {
           this._warn(
             `Requested topic (${topic}) is not in the list of topics published by "initialize" (${JSON.stringify(
@@ -181,14 +184,14 @@ export default class ApiCheckerDataProvider implements DataProvider {
       }
     }
 
-    const providerResult = (await this._provider?.getMessages(start, end, subscriptions)) as any;
+    const providerResult = await this._provider?.getMessages(start, end, subscriptions);
 
     for (const messageType of MESSAGE_FORMATS) {
       const messages = providerResult[messageType];
       if (messages == undefined) {
         continue;
       }
-      const topics = (subscriptions as any)[messageType] ?? [];
+      const topics = subscriptions[messageType] ?? [];
       let lastTime: Time | undefined;
       for (const message of messages) {
         if (!topics.includes(message.topic)) {

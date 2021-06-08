@@ -108,6 +108,7 @@ export interface MessageReader {
 export interface DataProviderConstructor {
   new (
     // The arguments to this particular DataProvider; typically an object.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     args: any,
     // The children we should instantiate below. Many DataProviders cannot have any children (leaf
     // nodes in the tree), many require exactly one child, and the `CombinedDataProvider` can take
@@ -197,6 +198,7 @@ export type Connection = {
 // means that you can describe a chain of data providers that includes a Worker or a WebSocket.
 export type DataProviderDescriptor = {
   name: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   args: any;
   children: DataProviderDescriptor[];
 };

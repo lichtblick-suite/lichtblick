@@ -46,19 +46,29 @@ export default class RpcDataProvider implements DataProvider {
   initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
     const { progressCallback, reportMetadataCallback } = extensionPoint;
 
-    this._rpc.receive("extensionPointCallback", ({ type, data }: any) => {
-      switch (type) {
-        case "progressCallback":
-          progressCallback(data);
-          break;
-        case "reportMetadataCallback":
-          reportMetadataCallback(data);
-          break;
-        default:
-          throw new Error(`Unsupported extension point type in RpcDataProvider: ${type}`);
-      }
-      return undefined;
-    });
+    type ExtensionPointParams<K> = K extends keyof ExtensionPoint
+      ? { type: K; data: Parameters<ExtensionPoint[K]>[0] }
+      : never;
+    this._rpc.receive(
+      "extensionPointCallback",
+      (value: ExtensionPointParams<keyof ExtensionPoint>) => {
+        switch (value.type) {
+          case "progressCallback":
+            progressCallback(value.data);
+            break;
+          case "reportMetadataCallback":
+            reportMetadataCallback(value.data);
+            break;
+          default:
+            throw new Error(
+              `Unsupported extension point type in RpcDataProvider: ${
+                (value as ExtensionPointParams<keyof ExtensionPoint>).type
+              }`,
+            );
+        }
+        return undefined;
+      },
+    );
     return this._rpc.send("initialize", { childDescriptor: this._childDescriptor });
   }
 
@@ -66,13 +76,16 @@ export default class RpcDataProvider implements DataProvider {
     if (topics.parsedMessages) {
       throw new Error("RpcDataProvider only supports rosBinaryMessages");
     }
-    const rpcRes = await this._rpc.send("getMessages", {
-      start,
-      end,
-      topics: topics.rosBinaryMessages,
-    });
+    const rpcRes = await this._rpc.send<{ messages: GetMessagesResult["rosBinaryMessages"] }>(
+      "getMessages",
+      {
+        start,
+        end,
+        topics: topics.rosBinaryMessages,
+      },
+    );
     return {
-      rosBinaryMessages: (rpcRes as any).messages,
+      rosBinaryMessages: rpcRes.messages,
       parsedMessages: undefined,
     };
   }

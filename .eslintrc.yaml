@@ -149,13 +149,6 @@ overrides:
     files:
       - "packages/studio-base/src/components/PanelLayout.tsx"
       - "packages/studio-base/src/context/PanelCatalogContext.ts"
-      - "packages/studio-base/src/dataProviders/ApiCheckerDataProvider.ts"
-      - "packages/studio-base/src/dataProviders/ParsedMessageCache.ts"
-      - "packages/studio-base/src/dataProviders/RenameDataProvider.ts"
-      - "packages/studio-base/src/dataProviders/RpcDataProvider.ts"
-      - "packages/studio-base/src/dataProviders/RpcDataProviderRemote.ts"
-      - "packages/studio-base/src/dataProviders/WorkerDataProvider.ts"
-      - "packages/studio-base/src/dataProviders/types.ts"
       - "packages/studio-base/src/panels/NodePlayground/BottomBar/DiagnosticsSection.tsx"
       - "packages/studio-base/src/panels/NodePlayground/BottomBar/LogsSection.tsx"
       - "packages/studio-base/src/panels/NodePlayground/BottomBar/index.tsx"
