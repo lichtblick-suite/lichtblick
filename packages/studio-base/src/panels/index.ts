@@ -1,6 +1,8 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+import { PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
+
 import GlobalVariableSlider from "./GlobalVariableSlider";
 import ImageViewPanel from "./ImageView";
 import InternalLogs from "./InternalLogs";
@@ -24,7 +26,7 @@ import WelcomePanel from "./WelcomePanel";
 import DiagnosticStatusPanel from "./diagnostics/DiagnosticStatusPanel";
 import DiagnosticSummary from "./diagnostics/DiagnosticSummary";
 
-const builtin = [
+const builtin: PanelInfo[] = [
   { title: "3D", component: ThreeDimensionalViz },
   { title: `Diagnostics – Detail`, component: DiagnosticStatusPanel },
   { title: `Diagnostics – Summary`, component: DiagnosticSummary },

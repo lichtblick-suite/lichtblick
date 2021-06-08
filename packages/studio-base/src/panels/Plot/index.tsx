@@ -13,7 +13,7 @@
 
 import { compact, uniq } from "lodash";
 import memoizeWeak from "memoize-weak";
-import { useEffect, useCallback, useMemo, useRef, ComponentProps } from "react";
+import { useEffect, useCallback, useMemo, ComponentProps } from "react";
 import { Time, TimeUtil } from "rosbag";
 
 import { useShallowMemo } from "@foxglove/hooks";
@@ -22,6 +22,7 @@ import {
   useDataSourceInfo,
   useMessagesByTopic,
 } from "@foxglove/studio-base/PanelAPI";
+import { MessageBlock } from "@foxglove/studio-base/PanelAPI/useBlocksByTopic";
 import Flex from "@foxglove/studio-base/components/Flex";
 import { getTopicsFromPaths } from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import {
@@ -60,9 +61,9 @@ export function openSiblingPlotPanel(
   openSiblingPanel("Plot", (config: PanelConfig) => ({
     ...config,
     paths: uniq(
-      config.paths
+      (config as PlotConfig).paths
         .concat([{ value: topicName, enabled: true, timestampMethod: "receiveTime" }])
-        .filter(({ value }: any) => value),
+        .filter(({ value }) => value),
     ),
   }));
 }
@@ -83,23 +84,29 @@ const getPlotDataByPath = (itemsByPath: MessageDataItemsByPath): PlotDataByPath 
 };
 
 const getMessagePathItemsForBlock = memoizeWeak(
-  (decodeMessagePathsForMessagesByTopic: any, block: any): PlotDataByPath => {
+  (
+    decodeMessagePathsForMessagesByTopic: (_: MessageBlock) => MessageDataItemsByPath,
+    block: MessageBlock,
+  ): PlotDataByPath => {
     return Object.freeze(getPlotDataByPath(decodeMessagePathsForMessagesByTopic(block)));
   },
 );
 
 const ZERO_TIME = { sec: 0, nsec: 0 };
 
-function getBlockItemsByPath(decodeMessagePathsForMessagesByTopic: any, blocks: any) {
-  const ret = {};
-  const lastBlockIndexForPath: any = {};
-  blocks.forEach((block: any, i: number) => {
+function getBlockItemsByPath(
+  decodeMessagePathsForMessagesByTopic: (_: MessageBlock) => MessageDataItemsByPath,
+  blocks: readonly MessageBlock[],
+) {
+  const ret: Record<string, TooltipItem[][]> = {};
+  const lastBlockIndexForPath: Record<string, number> = {};
+  blocks.forEach((block, i: number) => {
     const messagePathItemsForBlock: PlotDataByPath = getMessagePathItemsForBlock(
       decodeMessagePathsForMessagesByTopic,
       block,
     );
     Object.entries(messagePathItemsForBlock).forEach(([path, messagePathItems]) => {
-      const existingItems: TooltipItem[][] = (ret as any)[path] || [];
+      const existingItems = ret[path] ?? [];
       // getMessagePathItemsForBlock returns an array of exactly one range of items.
       const [pathItems] = messagePathItems;
       if (lastBlockIndexForPath[path] === i - 1) {
@@ -117,7 +124,7 @@ function getBlockItemsByPath(decodeMessagePathsForMessagesByTopic: any, blocks: 
           existingItems.push(pathItems.slice());
         }
       }
-      (ret as any)[path] = existingItems;
+      ret[path] = existingItems;
       lastBlockIndexForPath[path] = i;
     });
   });
@@ -147,17 +154,6 @@ function Plot(props: Props) {
     xAxisVal,
     xAxisPath,
   } = config;
-  // Note that the below values are refs since they are only used in callbacks and are not rendered anywhere.
-  const currentMinY = useRef<number>(ReactNull);
-  const currentMaxY = useRef<number>(ReactNull);
-  const currentViewWidth = useRef<number>(ReactNull);
-
-  const saveCurrentView = useCallback((minY: number, maxY: number, width: number) => {
-    currentMinY.current = minY;
-    currentMaxY.current = maxY;
-    currentViewWidth.current = width;
-  }, []);
-
   useEffect(() => {
     if (yAxisPaths.length === 0) {
       saveConfig({ paths: [{ value: "", enabled: true, timestampMethod: "receiveTime" }] });
@@ -199,9 +195,7 @@ function Plot(props: Props) {
 
   // If every streaming key is in the blocks, just use the blocks object for a stable identity.
   const mergedItems = useMemo(() => {
-    return Object.keys(streamedItemsByPath).every(
-      (path) => (blockItemsByPath as any)[path] != undefined,
-    )
+    return Object.keys(streamedItemsByPath).every((path) => blockItemsByPath[path] != undefined)
       ? blockItemsByPath
       : { ...streamedItemsByPath, ...blockItemsByPath };
   }, [blockItemsByPath, streamedItemsByPath]);
@@ -263,7 +257,6 @@ function Plot(props: Props) {
         paths={yAxisPaths}
         minYValue={parseFloat((minYValue ?? "")?.toString())}
         maxYValue={parseFloat((maxYValue ?? "")?.toString())}
-        saveCurrentView={saveCurrentView as any}
         datasets={datasets}
         tooltips={tooltips}
         xAxisVal={xAxisVal}

@@ -33,8 +33,8 @@ const SDropTarget = styled.div<{ isOver: boolean }>`
   flex-direction: column;
   width: 100%;
   height: 100%;
-  background-color: ${({ isOver }: any) => (isOver ? cssColors.textDisabled : "transparent")};
-  border: ${({ isOver }: any) => (isOver ? `1px solid ${cssColors.textMuted}` : "none")};
+  background-color: ${({ isOver }) => (isOver ? cssColors.textDisabled : "transparent")};
+  border: ${({ isOver }) => (isOver ? `1px solid ${cssColors.textMuted}` : "none")};
 `;
 
 const SEmptyStateText = styled.div`

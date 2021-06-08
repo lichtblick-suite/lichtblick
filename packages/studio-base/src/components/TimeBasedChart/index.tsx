@@ -148,7 +148,6 @@ export type Props = {
   };
   datasetId?: string;
   onClick?: ChartComponentProps["onClick"];
-  saveCurrentView?: (minY: number, maxY: number, width?: number) => void;
   // If the x axis represents playback time ("timestamp"), the hover cursor will be synced.
   // Note, this setting should not be used for other time values.
   xAxisIsPlaybackTime: boolean;

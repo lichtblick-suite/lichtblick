@@ -358,7 +358,6 @@ type PlotChartProps = {
   paths: PlotPath[];
   minYValue: number;
   maxYValue: number;
-  saveCurrentView: (minY: number, maxY: number, width?: number) => void;
   datasets: ComponentProps<typeof TimeBasedChart>["data"]["datasets"];
   tooltips: TimeBasedChartTooltipData[];
   xAxisVal: PlotXAxisVal;
@@ -373,7 +372,6 @@ export default memo<PlotChartProps>(function PlotChart(props: PlotChartProps) {
     defaultView,
     minYValue,
     maxYValue,
-    saveCurrentView,
     datasets,
     onClick,
     tooltips,
@@ -416,7 +414,6 @@ export default memo<PlotChartProps>(function PlotChart(props: PlotChartProps) {
         annotations={annotations}
         type="scatter"
         yAxes={yAxes}
-        saveCurrentView={saveCurrentView}
         xAxisIsPlaybackTime={xAxisVal === "timestamp"}
         currentTime={currentTime}
         defaultView={defaultView}

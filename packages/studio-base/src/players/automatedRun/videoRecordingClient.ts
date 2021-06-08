@@ -38,14 +38,18 @@ export type VideoRecordingAction = {
   msPerFrame?: number;
 };
 
-(window as any).videoRecording = {
+type VideoRecording = {
+  nextAction(): VideoRecordingAction | undefined;
+  hasTakenScreenshot(): void;
+};
+(window as typeof window & { videoRecording: VideoRecording }).videoRecording = {
   nextAction(): VideoRecordingAction | undefined {
     if (error) {
       // This object is serialized and deserialized to pass it to Puppeteer, so passing the error object itself will
       // just result in { "action": "error", "error": {} }. Instead pass a string - the stack itself.
       const payload: VideoRecordingAction = {
         action: "error",
-        error: error.stack ?? error.message ?? error.toString?.() ?? (error as any),
+        error: error.stack ?? error.message ?? error.toString?.() ?? error,
       };
       // Clear error, since if it is whitelisted we will ignore and try to keep running
       error = undefined;

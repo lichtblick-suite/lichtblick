@@ -70,7 +70,7 @@ const clearBgStyle = { backgroundColor: "transparent", padding: 0 };
 type Props = {
   hidden: boolean;
   highlight: boolean;
-  innerRef?: ReactRef<any>;
+  innerRef?: ReactRef<HTMLDivElement>;
   isActive: boolean;
   isDragging: boolean;
   actions: TabActions;
@@ -127,8 +127,8 @@ export function ToolbarTab(props: Props): JSX.Element {
 
   const endTitleEditing = useCallback(() => {
     setEditingTitle(false);
-    if (document.activeElement) {
-      (document.activeElement as any).blur();
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
     }
   }, []);
 

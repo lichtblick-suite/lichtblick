@@ -36,7 +36,7 @@ export function DraggableToolbarTab(props: Props): JSX.Element {
   const { isActive, tabCount, actions, panelId, tabTitle, tabIndex } = props;
   const { moveTab } = useCurrentLayoutActions();
 
-  const ref = useRef(ReactNull);
+  const ref = useRef<HTMLDivElement>(ReactNull);
   const [{ isDragging }, dragRef] = useDrag<TabLocation, void, { isDragging: boolean }>({
     type: TAB_DRAG_TYPE,
     item: { panelId, tabIndex },
