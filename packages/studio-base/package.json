@@ -101,7 +101,7 @@
     "@storybook/addon-essentials": "6.2.9",
     "@storybook/builder-webpack5": "6.2.9",
     "@storybook/react": "patch:@storybook/react@6.2.9#../../patches/storybook-react.patch",
-    "@testing-library/dom": "7.31.0",
+    "@testing-library/dom": "7.31.2",
     "@testing-library/react": "11.2.7",
     "@testing-library/react-hooks": "7.0.0",
     "@types/argparse": "^2.0.8",
