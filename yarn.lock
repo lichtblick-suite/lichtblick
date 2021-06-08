@@ -2596,7 +2596,7 @@ __metadata:
   resolution: "@foxglove/ros1-turtlesim-test@workspace:packages/ros1-turtlesim-test"
   dependencies:
     "@foxglove/ros1": "workspace:packages/ros1"
-    esbuild-runner: 2.1.0
+    esbuild-runner: 2.2.0
     typescript: 4.3.2
   languageName: unknown
   linkType: soft
@@ -2606,7 +2606,7 @@ __metadata:
   resolution: "@foxglove/ros1@workspace:packages/ros1"
   dependencies:
     "@foxglove/xmlrpc": "workspace:packages/xmlrpc"
-    esbuild-runner: 2.1.0
+    esbuild-runner: 2.2.0
     eventemitter3: 4.0.7
     jest: 27.0.0-next.8
     jest-circus: 27.0.0-next.8
@@ -2634,7 +2634,7 @@ __metadata:
   dependencies:
     "@foxglove/rosmsg": "workspace:packages/rosmsg"
     "@types/prettier": 2.2.3
-    esbuild-runner: 2.1.0
+    esbuild-runner: 2.2.0
     prettier: 2.3.0
     typescript: 4.3.2
   languageName: unknown
@@ -2646,7 +2646,7 @@ __metadata:
   dependencies:
     "@foxglove/rosmsg": "workspace:packages/rosmsg"
     "@types/prettier": 2.2.3
-    esbuild-runner: 2.1.0
+    esbuild-runner: 2.2.0
     prettier: 2.3.0
     typescript: 4.3.2
   languageName: unknown
@@ -12031,9 +12031,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild-runner@npm:2.1.0":
-  version: 2.1.0
-  resolution: "esbuild-runner@npm:2.1.0"
+"esbuild-runner@npm:2.2.0":
+  version: 2.2.0
+  resolution: "esbuild-runner@npm:2.2.0"
   dependencies:
     source-map-support: 0.5.19
     tslib: 2.2.0
@@ -12041,7 +12041,7 @@ __metadata:
     esbuild: "*"
   bin:
     esr: bin/esr.js
-  checksum: f00c027fb63c111e7a9c21c7211a5a0c504859c0f23741115916531b74c9e395de49e69a99a024bd7dc0d5a97a3ea4f53e50a15cc1303374a295ae4bcfdb711d
+  checksum: 0a97b900bc9bb0e345cef6686fe83346d26eea1956da3304e16b3976e5f03ecb69678541baea3a0e965fa4a3f6bba1b89baeab00ebc5a6cff9914ca91ba26e3b
   languageName: node
   linkType: hard
 

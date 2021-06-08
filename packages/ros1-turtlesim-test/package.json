@@ -24,7 +24,7 @@
     "turtlesim": "node -r esbuild-runner/register src/turtlesim.ts"
   },
   "devDependencies": {
-    "esbuild-runner": "2.1.0",
+    "esbuild-runner": "2.2.0",
     "typescript": "4.3.2"
   },
   "dependencies": {
