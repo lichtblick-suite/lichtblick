@@ -14,29 +14,34 @@ import path from "path";
 
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import {
+  Diagnostic,
   ProcessMessageOutput,
   RegistrationOutput,
+  UserNodeLog,
 } from "@foxglove/studio-base/players/UserNodePlayer/types";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 // Each node runtime worker runs one node at a time, hence why we have one
 // global declaration of 'nodeCallback'.
-let nodeCallback: (message: any, globalVariables: GlobalVariables) => any;
+let nodeCallback: (
+  message: unknown,
+  globalVariables: GlobalVariables,
+) => Record<string, unknown> | undefined;
 
 if (process.env.NODE_ENV === "test") {
   // When in tests, clear out the callback between tests.
   beforeEach(() => {
     nodeCallback = () => {
-      // no-op
+      return undefined;
     };
   });
 }
 
-export const containsFuncDeclaration = (args: any[]): boolean => {
+export const containsFuncDeclaration = (args: unknown[]): boolean => {
   for (const arg of args) {
     if (typeof arg === "function") {
       return true;
-    } else if (arg != undefined && typeof arg === "object") {
+    } else if (typeof arg === "object" && arg != undefined) {
       for (const value of Object.values(arg)) {
         if (containsFuncDeclaration([value])) {
           return true;
@@ -60,7 +65,7 @@ export const stringifyFuncsInObject = (arg: unknown): unknown => {
   return arg;
 };
 
-const getArgsToPrint = (args: any[]) => {
+const getArgsToPrint = (args: unknown[]) => {
   return args
     .map(stringifyFuncsInObject)
     .map((arg) => (typeof arg === "object" ? JSON.stringify(arg) : arg));
@@ -88,9 +93,9 @@ export const registerNode = ({
   nodeCode: string;
   projectCode: Map<string, string>;
 }): RegistrationOutput => {
-  const userNodeLogs: any[] = [];
-  const userNodeDiagnostics: any[] = [];
-  (self as any).log = function (...args: any) {
+  const userNodeLogs: UserNodeLog[] = [];
+  const userNodeDiagnostics: Diagnostic[] = [];
+  (self as { log?: unknown }).log = function (...args: unknown[]) {
     // recursively check that args do not contain a function declaration
     if (containsFuncDeclaration(args)) {
       const argsToPrint = getArgsToPrint(args);
@@ -100,18 +105,18 @@ export const registerNode = ({
         )})`,
       );
     }
-    userNodeLogs.push(...args.map((value: any) => ({ source: "registerNode", value })));
+    userNodeLogs.push(...args.map((value) => ({ source: "registerNode" as const, value })));
   };
   // TODO: Blacklist global methods.
   try {
-    const nodeExports: any = {};
+    const nodeExports: { default?: typeof nodeCallback } = {};
 
     const require = (id: string) => requireImplementation(id, projectCode);
 
     // Using new Function in order to execute user-input text in Node Playground as code
     // eslint-disable-next-line no-new-func
     new Function("exports", "require", nodeCode)(nodeExports, require);
-    nodeCallback = nodeExports.default;
+    nodeCallback = nodeExports.default!;
     return {
       error: undefined,
       userNodeLogs,
@@ -131,12 +136,12 @@ export const processMessage = ({
   message,
   globalVariables,
 }: {
-  message: any;
+  message: unknown;
   globalVariables: GlobalVariables;
 }): ProcessMessageOutput => {
-  const userNodeLogs: any[] = [];
-  const userNodeDiagnostics: any[] = [];
-  (self as any).log = function (...args: any) {
+  const userNodeLogs: UserNodeLog[] = [];
+  const userNodeDiagnostics: Diagnostic[] = [];
+  (self as { log?: unknown }).log = function (...args: unknown[]) {
     // recursively check that args do not contain a function declaration
     if (containsFuncDeclaration(args)) {
       const argsToPrint = getArgsToPrint(args);
@@ -146,7 +151,7 @@ export const processMessage = ({
         )})`,
       );
     }
-    userNodeLogs.push(...args.map((value: any) => ({ source: "processMessage", value })));
+    userNodeLogs.push(...args.map((value) => ({ source: "processMessage" as const, value })));
   };
   try {
     const newMessage = nodeCallback(message, globalVariables);

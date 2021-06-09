@@ -80,7 +80,9 @@ const LogsSection = ({ nodeId, logs, clearLogs }: Props): ReactElement => {
                 <Tree hideRoot data={value} invertTheme={false} theme={jsonTreeTheme} />
               ) : (
                 <span style={{ color: (valueColorMap as any)[typeof value] || colors.LIGHT }}>
-                  {value == undefined || value === false ? String(value) : value}
+                  {value == undefined || value === false
+                    ? String(value)
+                    : (value as React.ReactNode)}
                 </span>
               )}
               <div style={{ color: colors.DARK9, textDecoration: "underline" }}>{source}</div>

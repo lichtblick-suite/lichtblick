@@ -23,6 +23,7 @@ import {
   ErrorCodes,
   NodeData,
   NodeRegistration,
+  ProcessMessageOutput,
   RegistrationOutput,
   Sources,
   UserNodeLog,
@@ -341,10 +342,13 @@ export default class UserNodePlayer implements Player {
         this._addUserNodeLogs(nodeId, userNodeLogs);
       }
 
-      const result = (await Promise.race([
-        rpc.send("processMessage", { message: msgEvent, globalVariables: this._globalVariables }),
+      const result = await Promise.race([
+        rpc.send<ProcessMessageOutput>("processMessage", {
+          message: msgEvent,
+          globalVariables: this._globalVariables,
+        }),
         terminateSignal,
-      ])) as any;
+      ]);
 
       if (!result) {
         this._problemStore.set(problemKey, {

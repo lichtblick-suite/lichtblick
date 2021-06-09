@@ -11,9 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-declare class SharedWorkerGlobalScope {}
-declare class WorkerGlobalScope {}
-
 export const inWebWorker = (): boolean => {
   return (
     typeof global.postMessage !== "undefined" &&

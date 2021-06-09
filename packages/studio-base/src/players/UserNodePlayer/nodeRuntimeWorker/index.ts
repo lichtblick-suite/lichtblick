@@ -18,10 +18,12 @@ import Rpc from "@foxglove/studio-base/util/Rpc";
 import { enforceFetchIsBlocked, inSharedWorker } from "@foxglove/studio-base/util/workers";
 
 let unsentErrors: string[] = [];
-(global as any).onerror = (event: ErrorEvent) => {
+(global as unknown as SharedWorkerGlobalScope).onerror = (event: ErrorEvent) => {
   unsentErrors.push(event.error.toString());
 };
-(global as any).onunhandledrejection = (event: PromiseRejectionEvent) => {
+(global as unknown as SharedWorkerGlobalScope).onunhandledrejection = (
+  event: PromiseRejectionEvent,
+) => {
   unsentErrors.push(String(event.reason instanceof Error ? event.reason.message : event.reason));
 };
 
@@ -35,17 +37,19 @@ if (!inSharedWorker()) {
   throw new Error("Not in a SharedWorker.");
 }
 
-(global as any).onconnect = (e: any) => {
-  const port = e.ports[0];
+(global as unknown as SharedWorkerGlobalScope).onconnect = (e) => {
+  const port = e.ports[0]!;
   const rpc = new Rpc(port);
 
   // If any errors occurred while nobody was connected, send them now
   unsentErrors.forEach((message) => rpc.send("error", message));
   unsentErrors = [];
-  (global as any).onerror = (event: ErrorEvent) => {
+  (global as unknown as SharedWorkerGlobalScope).onerror = (event: ErrorEvent) => {
     rpc.send("error", event.error.toString());
   };
-  (global as any).onunhandledrejection = (event: PromiseRejectionEvent) => {
+  (global as unknown as SharedWorkerGlobalScope).onunhandledrejection = (
+    event: PromiseRejectionEvent,
+  ) => {
     rpc.send("error", String(event.reason instanceof Error ? event.reason.message : event.reason));
   };
 

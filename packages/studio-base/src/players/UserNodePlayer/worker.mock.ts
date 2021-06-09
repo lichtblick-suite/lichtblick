@@ -22,10 +22,10 @@ import transform from "@foxglove/studio-base/players/UserNodePlayer/nodeTransfor
 import generateRosLib from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typegen";
 import Rpc, { Channel, createLinkedChannels } from "@foxglove/studio-base/util/Rpc";
 
-const validateWorkerArgs = (arg: any) => {
+const validateWorkerArgs = (arg: unknown) => {
   expect(arg).not.toBeInstanceOf(Function);
 
-  if (isPlainObject(arg)) {
+  if (isPlainObject(arg) && typeof arg === "object" && arg != undefined) {
     Object.values(arg).forEach((val) => {
       validateWorkerArgs(val);
     });
@@ -42,15 +42,18 @@ export default class MockUserNodePlayerWorker {
     const { local, remote } = createLinkedChannels();
     this.port = local;
 
-    (local as any).start = () => {
+    (local as { start?: () => void }).start = () => {
       // no-op
     };
     const receiver = new Rpc(remote);
-    const receiveAndLog = (action: any, impl: any) => {
+    const receiveAndLog = <Args extends unknown[]>(
+      action: string,
+      impl: (..._: Args) => unknown,
+    ) => {
       receiver.receive(action, (...args) => {
         validateWorkerArgs(args);
         this.messageSpy(action);
-        const ret = impl(...args);
+        const ret = impl(...(args as unknown as Args));
         validateWorkerArgs(ret);
         return ret;
       });

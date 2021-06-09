@@ -111,7 +111,7 @@ const rosSpecialTypesToTypescriptMap = {
 // Creates a 1-1 mapping of ROS datatypes to Typescript interface declarations.
 export const generateTypeDefs = (datatypes: RosDatatypes): InterfaceDeclarations => {
   const interfaceDeclarations: InterfaceDeclarations = {};
-  const datatypeEntries = Object.entries(datatypes) as any as Array<[string, RosDatatype]>;
+  const datatypeEntries = Object.entries(datatypes) as unknown as Array<[string, RosDatatype]>;
 
   for (const [datatype, definition] of datatypeEntries) {
     if (interfaceDeclarations[datatype]) {
