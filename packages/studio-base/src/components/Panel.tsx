@@ -148,7 +148,6 @@ export default function Panel<Config extends PanelConfig>(
     const [shiftKeyPressed, setShiftKeyPressed] = useState(false);
     const [cmdKeyPressed, setCmdKeyPressed] = useState(false);
     const [fullScreen, setFullScreen] = useState(false);
-    const [isHovered, setIsHovered] = useState(false);
     const [fullScreenLocked, setFullScreenLocked] = useState(false);
     const panelCatalog = usePanelCatalog();
 
@@ -315,10 +314,8 @@ export default function Panel<Config extends PanelConfig>(
       }
     }, [childId, config, getCurrentLayout, mosaicWindowActions, savePanelConfigs, tabId]);
 
-    const { onMouseEnter, onMouseLeave, onMouseMove, enterFullscreen, exitFullScreen } = useMemo(
+    const { onMouseMove, enterFullscreen, exitFullScreen } = useMemo(
       () => ({
-        onMouseEnter: () => setIsHovered(true),
-        onMouseLeave: () => setIsHovered(false),
         onMouseMove: ((e) => {
           if (e.metaKey !== cmdKeyPressed) {
             setCmdKeyPressed(e.metaKey);
@@ -430,7 +427,6 @@ export default function Panel<Config extends PanelConfig>(
                 updatePanelConfigs,
                 openSiblingPanel,
                 enterFullscreen,
-                isHovered,
                 hasSettings: PanelComponent.configSchema != undefined,
                 tabId,
                 supportsStrictMode: PanelComponent.supportsStrictMode ?? true,
@@ -446,8 +442,6 @@ export default function Panel<Config extends PanelConfig>(
           <KeyListener global keyUpHandlers={keyUpHandlers} keyDownHandlers={keyDownHandlers} />
           <Flex
             onClick={onOverlayClick}
-            onMouseEnter={onMouseEnter}
-            onMouseLeave={onMouseLeave}
             onMouseMove={onMouseMove}
             className={cx({
               [styles.root!]: true,

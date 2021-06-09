@@ -29,7 +29,6 @@ export type PanelContextType<T> = {
   openSiblingPanel: OpenSiblingPanel;
   enterFullscreen: () => void;
 
-  isHovered: boolean;
   hasSettings: boolean;
   connectToolbarDragHandle: (el: Element | ReactNull) => void;
   supportsStrictMode: boolean; // remove when all panels have strict mode enabled :)

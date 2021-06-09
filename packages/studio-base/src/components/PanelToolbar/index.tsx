@@ -49,7 +49,6 @@ type Props = {
   helpContent?: React.ReactNode;
   additionalIcons?: React.ReactNode;
   hideToolbars?: boolean;
-  showHiddenControlsOnHover?: boolean;
   isUnknownPanel?: boolean;
 };
 
@@ -184,11 +183,8 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
   );
 }
 
-type PanelToolbarControlsProps = Pick<
-  Props,
-  "additionalIcons" | "floating" | "showHiddenControlsOnHover"
-> & {
-  isRendered: boolean;
+type PanelToolbarControlsProps = Pick<Props, "additionalIcons" | "floating"> & {
+  showControls?: boolean;
   showPanelName?: boolean;
   isUnknownPanel: boolean;
 };
@@ -197,18 +193,19 @@ type PanelToolbarControlsProps = Pick<
 // whole PanelToolbar when only children change.
 const PanelToolbarControls = React.memo(function PanelToolbarControls({
   additionalIcons,
+  showControls = false,
   floating = false,
-  isRendered,
   isUnknownPanel,
-  showHiddenControlsOnHover = false,
   showPanelName = false,
 }: PanelToolbarControlsProps) {
   const panelContext = useContext(PanelContext);
 
   return (
     <div
-      className={styles.iconContainer}
-      style={showHiddenControlsOnHover && !isRendered ? { visibility: "hidden" } : {}}
+      style={showControls ? { display: "flex" } : {}}
+      className={cx(styles.iconContainer, {
+        panelToolbarHovered: !floating,
+      })}
     >
       {showPanelName && panelContext && (
         <div className={styles.panelName}>{panelContext.title}</div>
@@ -245,9 +242,8 @@ export default React.memo<Props>(function PanelToolbar({
   helpContent,
   hideToolbars = false,
   isUnknownPanel = false,
-  showHiddenControlsOnHover,
 }: Props) {
-  const { isHovered = false, supportsStrictMode = true } = useContext(PanelContext) ?? {};
+  const { supportsStrictMode = true } = useContext(PanelContext) ?? {};
   const [containsOpen, setContainsOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
 
@@ -283,7 +279,9 @@ export default React.memo<Props>(function PanelToolbar({
     return ReactNull;
   }
 
-  const isRendered = isHovered || containsOpen || !!isUnknownPanel;
+  // floating toolbars only show when hovered - but hovering over a context menu would hide the toolbar
+  // showToolbar is used to force-show elements even if not hovered
+  const showToolbar = containsOpen || !!isUnknownPanel;
 
   return (
     <div ref={sizeRef}>
@@ -291,22 +289,20 @@ export default React.memo<Props>(function PanelToolbar({
         {showHelp && <HelpModal onRequestClose={() => setShowHelp(false)}>{helpContent}</HelpModal>}
         <div
           className={cx(styles.panelToolbarContainer, {
+            panelToolbarHovered: floating,
             [styles.floating!]: floating,
-            [styles.floatingShow!]: floating && isRendered,
             [styles.hasChildren!]: Boolean(children),
           })}
+          style={showToolbar ? { display: "flex" } : {}}
         >
-          {(isRendered || !floating) && children}
-          {(isRendered || showHiddenControlsOnHover) && (
-            <PanelToolbarControls
-              isRendered={isRendered}
-              showHiddenControlsOnHover={showHiddenControlsOnHover}
-              floating={floating}
-              showPanelName={(width ?? 0) > 360}
-              additionalIcons={additionalIconsWithHelp}
-              isUnknownPanel={!!isUnknownPanel}
-            />
-          )}
+          {children}
+          <PanelToolbarControls
+            showControls={showToolbar}
+            floating={floating}
+            showPanelName={(width ?? 0) > 360}
+            additionalIcons={additionalIconsWithHelp}
+            isUnknownPanel={!!isUnknownPanel}
+          />
         </div>
       </ChildToggle.ContainsOpen>
     </div>

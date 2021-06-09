@@ -93,7 +93,7 @@ export function TabbedToolbar(props: Props): JSX.Element {
 
   return (
     <STabbedToolbar highlight={isOver}>
-      <PanelToolbar helpContent={helpContent} showHiddenControlsOnHover>
+      <PanelToolbar helpContent={helpContent}>
         <STabs ref={dropRef} data-test="toolbar-droppable">
           {tabs.map((tab, i) => (
             <DraggableToolbarTab

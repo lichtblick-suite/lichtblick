@@ -243,20 +243,6 @@ storiesOf("panels/Tab/index", module)
       />
     </PanelSetup>
   ))
-  .add("many tabs do not cover panel toolbar", () => (
-    <PanelSetup
-      panelCatalog={new MockPanelCatalog()}
-      fixture={fixture}
-      onMount={() => {
-        const mouseEnterContainer = document.querySelectorAll(
-          "[data-test~=panel-mouseenter-container",
-        )[0]!;
-        TestUtils.Simulate.mouseEnter(mouseEnterContainer);
-      }}
-    >
-      <Tab overrideConfig={{ activeTabIdx: 1, tabs: manyTabs }} />
-    </PanelSetup>
-  ))
   .add("add tab", () => {
     return (
       <PanelSetup

@@ -54,9 +54,7 @@ $panelToolbarSpacing: 4px;
     width: 100%;
     z-index: 5000;
     background-color: transparent;
-    transform: translateY(-10px);
     pointer-events: none;
-    opacity: 0;
 
     * {
       pointer-events: auto;
@@ -76,11 +74,6 @@ $panelToolbarSpacing: 4px;
 
   &:not(.floating) {
     min-height: $panelToolbarHeight + $panelToolbarSpacing;
-  }
-
-  &.floatingShow {
-    transform: translateY(0);
-    opacity: 1;
   }
 }
 

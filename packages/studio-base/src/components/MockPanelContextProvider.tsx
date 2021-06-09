@@ -33,7 +33,6 @@ const DEFAULT_MOCK_PANEL_CONTEXT: PanelContextType<PanelConfig> = {
   enterFullscreen: () => {
     // no-op
   },
-  isHovered: false,
   hasSettings: false,
   supportsStrictMode: true,
   connectToolbarDragHandle: () => {},

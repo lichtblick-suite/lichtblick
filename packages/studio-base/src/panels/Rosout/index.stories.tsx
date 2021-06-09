@@ -126,24 +126,6 @@ export const TopicToRender = (): JSX.Element => {
   );
 };
 
-export const WithToolbarActive = (): JSX.Element => {
-  return (
-    <PanelSetup
-      fixture={fixture}
-      onMount={() => {
-        TestUtils.Simulate.mouseEnter(
-          document.querySelectorAll("[data-test~=panel-mouseenter-container]")[0]!,
-        );
-        setTimeout(() => {
-          TestUtils.Simulate.click(document.querySelectorAll("[data-test=panel-settings]")[0]!);
-        });
-      }}
-    >
-      <Rosout />
-    </PanelSetup>
-  );
-};
-
 export const FilteredTerms = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture}>

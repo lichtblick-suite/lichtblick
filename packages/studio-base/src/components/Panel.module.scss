@@ -6,6 +6,17 @@
   background-color: $dark;
   position: relative;
 
+  // To use css to hide/show toolbars on hover we use a global panelToolbar class
+  // because the PanelToolbar component is currently added within each panels render
+  // function rather than handling by the panel HOC
+  :global(.panelToolbarHovered) {
+    display: none;
+  }
+
+  &:hover :global(.panelToolbarHovered) {
+    display: flex;
+  }
+
   &:after {
     content: "";
     top: 0px;
