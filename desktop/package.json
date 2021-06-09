@@ -4,5 +4,10 @@
   "dependencies": {
     "@foxglove/studio-base": "workspace:packages/studio-base",
     "@foxglove/studio-firebase": "workspace:packages/studio-firebase"
+  },
+  "devDependencies": {
+    "@types/plist": "^3",
+    "plist": "3.0.2",
+    "quicklookjs": "0.0.2"
   }
 }

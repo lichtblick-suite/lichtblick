@@ -5710,7 +5710,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/plist@npm:^3.0.1":
+"@types/plist@npm:^3, @types/plist@npm:^3.0.1":
   version: 3.0.2
   resolution: "@types/plist@npm:3.0.2"
   dependencies:
@@ -8082,7 +8082,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"base64-js@npm:^1.0.2, base64-js@npm:^1.2.3, base64-js@npm:^1.3.0, base64-js@npm:^1.3.1":
+"base64-js@npm:^1.0.2, base64-js@npm:^1.3.0, base64-js@npm:^1.3.1, base64-js@npm:^1.5.1":
   version: 1.5.1
   resolution: "base64-js@npm:1.5.1"
   checksum: 669632eb3745404c2f822a18fc3a0122d2f9a7a13f7fb8b5823ee19d1d2ff9ee5b52c53367176ea4ad093c332fd5ab4bd0ebae5a8e27917a4105a4cfc86b1005
@@ -10845,6 +10845,9 @@ __metadata:
   dependencies:
     "@foxglove/studio-base": "workspace:packages/studio-base"
     "@foxglove/studio-firebase": "workspace:packages/studio-firebase"
+    "@types/plist": ^3
+    plist: 3.0.2
+    quicklookjs: 0.0.2
   languageName: unknown
   linkType: soft
 
@@ -20183,14 +20186,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"plist@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "plist@npm:3.0.1"
+"plist@npm:3.0.2, plist@npm:^3.0.1":
+  version: 3.0.2
+  resolution: "plist@npm:3.0.2"
   dependencies:
-    base64-js: ^1.2.3
+    base64-js: ^1.5.1
     xmlbuilder: ^9.0.7
-    xmldom: 0.1.x
-  checksum: 4027bffff6f97020ba4ec82e9a0bd7d43ef6001d42746334c6d0695c8a2fd47a22239a94ecaf57b264321bc7b710642a08a1757d5bae0fe70912fb7a73b54fc5
+    xmldom: ^0.5.0
+  checksum: ee5efcfed3efae2401373d913114be4a2e07ef78b9a42f2477a36aacfc3ad667be17cfbd2235d59502a4d0bf77cb39bc53fc3ee93f73a2ebec99c20cb5dd029a
   languageName: node
   linkType: hard
 
@@ -20994,6 +20997,13 @@ __metadata:
     gl-vec3: ^1.0.3
     point-line-distance: ^1.0.0
   checksum: 341d98ccb69b20268e632ae8c8d479b608200f2aeb5bc51116d1f62ae23c83307177ab10afde49fd31a2971d7c4213a97ec95eb073ac336fe0f0298f552fff1e
+  languageName: node
+  linkType: hard
+
+"quicklookjs@npm:0.0.2":
+  version: 0.0.2
+  resolution: "quicklookjs@npm:0.0.2"
+  checksum: 8dc3b44b73a729ed4bb9e39b186432a5cc33a1da0344ad205ba4ca6cbef058188af67cf184dc85848b43e12f945ee10a3dc1b21e60d067e1bd62d91fd744dd89
   languageName: node
   linkType: hard
 
@@ -27053,17 +27063,17 @@ typescript@4.3.2:
   languageName: node
   linkType: hard
 
-"xmldom@npm:0.1.x":
-  version: 0.1.31
-  resolution: "xmldom@npm:0.1.31"
-  checksum: 3073ca4a096892f86991ad0fce9aa1e874f16a974aa2c0911b1a218922d80fe3762b56aa3a2d9fe4a46d61416193c6dc0839776748b24e0cfb56197babf77a94
-  languageName: node
-  linkType: hard
-
 "xmldom@npm:0.6.0, xmldom@npm:^0.6.0":
   version: 0.6.0
   resolution: "xmldom@npm:0.6.0"
   checksum: 710f64f5b2ba8ac1cbcf62c2e35b095a2f9ccbd596062efe037a5ca85d3ee077b691c4d74952ff476e4bab0dd82727604262899f25dddbb02f89ddeea4cca7f9
+  languageName: node
+  linkType: hard
+
+"xmldom@npm:^0.5.0":
+  version: 0.5.0
+  resolution: "xmldom@npm:0.5.0"
+  checksum: 6afbfc9f4de847d1e12a3a95e393750a55f6b074881cd3c6192c99421a8548b0687b7851113d6318ff0121615674d3b064924f1c478da1c840757626bdfe4c18
   languageName: node
   linkType: hard
 

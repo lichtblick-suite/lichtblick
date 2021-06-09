@@ -11,6 +11,7 @@ import type { Configuration as WebpackDevServerConfiguration } from "webpack-dev
 import packageJson from "../package.json";
 import main from "./webpack.main.config";
 import preload from "./webpack.preload.config";
+import quicklook from "./webpack.quicklook.config";
 import renderer from "./webpack.renderer.config";
 
 interface WebpackConfiguration extends Configuration {
@@ -64,4 +65,4 @@ const devServerConfig: WebpackConfiguration = {
   ],
 };
 
-export default [devServerConfig, main, preload, renderer];
+export default [devServerConfig, main, preload, renderer, quicklook];

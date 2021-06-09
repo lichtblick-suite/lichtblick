@@ -47,14 +47,6 @@ export function formatTime(stamp: Time, timezone?: string): string {
     .format("h:mm:ss.SSS A z");
 }
 
-export function formatTimeRaw(stamp: Time): string {
-  if (stamp.sec < 0 || stamp.nsec < 0) {
-    console.error("Times are not allowed to be negative");
-    return "(invalid negative time)";
-  }
-  return `${stamp.sec}.${stamp.nsec.toFixed().padStart(9, "0")}`;
-}
-
 export function formatDuration(stamp: Time): string {
   return moment
     .duration(Math.round(stamp.sec * 1000 + stamp.nsec / 1e6))
