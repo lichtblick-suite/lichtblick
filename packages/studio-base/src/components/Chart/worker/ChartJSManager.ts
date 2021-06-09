@@ -207,13 +207,24 @@ export default class ChartJSManager {
     // scales are special because we can mutate them interally via the zoom plugin
     instance.options.scales = merge(instance.options.scales, options.scales);
 
-    instance.update();
-
-    if (instance.width !== width || instance.height !== height) {
-      instance.canvas.width = width;
-      instance.canvas.height = height;
-      instance.resize(width, height);
+    // Internally chartjs rounds width and height before updating the instance.
+    // If our update has decimal width and height that will cause a resize on every update.
+    // To avoid this we truncate the decimal from the width and height to present chartjs with whole
+    // numbers.
+    const wholeWidth = Math.floor(width);
+    const wholeHeight = Math.floor(height);
+    if (
+      Math.abs(instance.width - wholeWidth) > Number.EPSILON ||
+      Math.abs(instance.height - wholeHeight) > Number.EPSILON
+    ) {
+      instance.canvas.width = wholeWidth;
+      instance.canvas.height = wholeHeight;
+      instance.resize(wholeWidth, wholeHeight);
     }
+
+    // While the chartjs API doesn't indicate update should be called after resize, in practice
+    // we've found that performing a resize after an update sometimes results in a blank chart.
+    instance.update();
 
     return this.getScales();
   }
