@@ -15,6 +15,13 @@ const desktopBridge = (global as { desktopBridge?: Desktop }).desktopBridge;
 
 type PackageInfo = {
   name: string;
+  displayName: string;
+  description: string;
+  publisher: string;
+  homepage: string;
+  license: string;
+  version: string;
+  keywords: string[];
 };
 
 export default function ExtensionLoaderProvider(props: PropsWithChildren<unknown>): JSX.Element {
@@ -26,7 +33,14 @@ export default function ExtensionLoaderProvider(props: PropsWithChildren<unknown
       const pkgInfo = item.packageJson as PackageInfo;
 
       return {
-        name: pkgInfo.name,
+        id: pkgInfo.name,
+        name: pkgInfo.displayName,
+        description: pkgInfo.description,
+        publisher: pkgInfo.publisher,
+        homepage: pkgInfo.homepage,
+        license: pkgInfo.license,
+        version: pkgInfo.version,
+        keywords: pkgInfo.keywords,
         source: item.source,
       };
     });

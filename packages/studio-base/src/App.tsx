@@ -17,6 +17,7 @@ import ModalHost from "@foxglove/studio-base/context/ModalHost";
 import { PlayerSourceDefinition } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { UserNodeStateProvider } from "@foxglove/studio-base/context/UserNodeStateContext";
 import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
+import ExtensionMarketplaceProvider from "@foxglove/studio-base/providers/ExtensionMarketplaceProvider";
 import ExtensionRegistryProvider from "@foxglove/studio-base/providers/ExtensionRegistryProvider";
 import PanelCatalogProvider from "@foxglove/studio-base/providers/PanelCatalogProvider";
 import URDFAssetLoader from "@foxglove/studio-base/services/URDFAssetLoader";
@@ -39,6 +40,7 @@ export default function App(props: AppProps): JSX.Element {
     <HoverValueProvider />,
     <UserNodeStateProvider />,
     <CurrentLayoutProvider />,
+    <ExtensionMarketplaceProvider />,
     <ExtensionRegistryProvider />,
     <PlayerManager playerSources={props.availableSources} />,
     /* eslint-enable react/jsx-key */

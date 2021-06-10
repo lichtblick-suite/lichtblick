@@ -15,10 +15,12 @@ const icons: {
   [N in RegisteredIconNames]: React.ReactElement;
 } = {
   Add: <Icons.AddIcon />,
+  AddIn: <Icons.AddInIcon />,
   Cancel: <Icons.CancelIcon />,
   CheckMark: <Icons.CheckMarkIcon />,
   ChevronDown: <Icons.ChevronDownIcon />,
   ChevronDownSmall: <Icons.ChevronDownSmallIcon />,
+  ChevronLeft: <Icons.ChevronLeftIcon />,
   ChevronRight: <Icons.ChevronRightIcon />,
   ChevronUpSmall: <Icons.ChevronUpSmallIcon />,
   CirclePlus: <Icons.CirclePlusIcon />,

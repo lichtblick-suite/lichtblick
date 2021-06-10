@@ -5,7 +5,14 @@
 import { createContext, useContext } from "react";
 
 export interface ExtensionDetail {
+  id: string;
   name: string;
+  description: string;
+  publisher: string;
+  homepage: string;
+  license: string;
+  version: string;
+  keywords: string[];
   source: string;
 }
 

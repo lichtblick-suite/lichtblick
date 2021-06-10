@@ -10,4 +10,5 @@ export enum AppSetting {
   TIMEZONE = "timezone",
   UNLIMITED_MEMORY_CACHE = "experimental.unlimited-memory-cache",
   SHOW_DEBUG_PANELS = "showDebugPanels",
+  EXTENSION_MARKETPLACE = "extensionMarketplace",
 }

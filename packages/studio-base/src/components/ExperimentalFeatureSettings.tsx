@@ -33,6 +33,11 @@ const features: Feature[] = [
     name: "Studio Debug Panels",
     description: <>Show Studio debug panels in the add panel list.</>,
   },
+  {
+    key: AppSetting.EXTENSION_MARKETPLACE,
+    name: "Extension Marketplace",
+    description: <>Enable the extension marketplace for installing/uninstalling extensions</>,
+  },
 ];
 
 function ExperimentalFeatureItem(props: { feature: Feature }) {

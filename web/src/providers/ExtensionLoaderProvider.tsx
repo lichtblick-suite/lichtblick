@@ -21,7 +21,14 @@ export default function ExtensionRegistryProvider(props: PropsWithChildren<unkno
 
       const extensions: ExtensionDetail[] = [
         {
-          name: "builtin",
+          id: "foxglove.builtin",
+          name: "Built-In Extensions",
+          description: "Foxglove Studio built-in extensions",
+          publisher: "Foxglove",
+          homepage: "https://github.com/foxglove/studio",
+          license: "MPL-2.0",
+          version: "0.0.0",
+          keywords: [],
           source: source,
         },
       ];
