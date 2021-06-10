@@ -15,6 +15,7 @@ import { debounce, flatten, groupBy } from "lodash";
 import { Time } from "rosbag";
 
 import { useShallowMemo } from "@foxglove/hooks";
+import { MessageEvent } from "@foxglove/studio";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import useContextSelector from "@foxglove/studio-base/hooks/useContextSelector";
@@ -22,7 +23,6 @@ import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables"
 import {
   AdvertisePayload,
   Frame,
-  MessageEvent,
   ParameterValue,
   Player,
   PlayerPresence,
@@ -234,6 +234,7 @@ export function MessagePipelineProvider({
         lastActiveData.current = newPlayerState.activeData;
         return newPlayerState;
       });
+
       return promise;
     });
     return () => {

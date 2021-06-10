@@ -13,7 +13,7 @@
 
 import { useMemo } from "react";
 
-import { DataSourceInfo, panel } from "@foxglove/studio";
+import { DataSourceInfo } from "@foxglove/studio";
 import {
   useMessagePipeline,
   MessagePipelineContext,
@@ -39,7 +39,13 @@ function selectPlayerId(ctx: MessagePipelineContext) {
   return ctx.playerState.playerId;
 }
 
-export const useDataSourceInfo: typeof panel.useDataSourceInfo = () => {
+/**
+ * Data source info" encapsulates **rarely-changing** metadata about the source from which
+ * Studio is loading data.
+ *
+ * A data source might be a local file, a remote file, or a streaming source.
+ */
+export function useDataSourceInfo(): DataSourceInfo {
   const datatypes = useMessagePipeline(selectDatatypes);
   const topics = useMessagePipeline(selectTopics);
   const startTime = useMessagePipeline(selectStartTime);
@@ -56,4 +62,4 @@ export const useDataSourceInfo: typeof panel.useDataSourceInfo = () => {
       playerId,
     };
   }, [capabilities, datatypes, playerId, startTime, topics]);
-};
+}

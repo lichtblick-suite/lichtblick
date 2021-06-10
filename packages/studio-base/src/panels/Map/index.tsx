@@ -2,177 +2,40 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Map as LeafMap } from "leaflet";
-import { useEffect, useMemo, useState } from "react";
-import { MapContainer, TileLayer } from "react-leaflet";
-import { useThrottle } from "react-use";
+import ReactDOM from "react-dom";
 
-import Logger from "@foxglove/log";
-import {
-  useBlocksByTopic,
-  useDataSourceInfo,
-  useMessagesByTopic,
-} from "@foxglove/studio-base/PanelAPI";
-import EmptyState from "@foxglove/studio-base/components/EmptyState";
+import { PanelExtensionContext } from "@foxglove/studio";
 import Panel from "@foxglove/studio-base/components/Panel";
-import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import PanelExtensionAdapter from "@foxglove/studio-base/components/PanelExtensionAdapter";
+import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
-import FilteredPointMarkers from "./FilteredPointMarkers";
+import MapPanel from "./MapPanel";
 import helpContent from "./index.help.md";
-import { NavSatFixMsg, Point } from "./types";
 
 import "leaflet/dist/leaflet.css";
 
-const log = Logger.getLogger(__filename);
-
-// persisted panel state
-type Config = {
-  zoomLevel?: number;
-};
+function initPanel(context: PanelExtensionContext) {
+  ReactDOM.render(<MapPanel context={context} />, context.panelElement);
+}
 
 type Props = {
-  config: Config;
-  saveConfig: (config: Config) => void;
+  config: unknown;
+  saveConfig: SaveConfig<unknown>;
 };
 
-function MapPanel(props: Props) {
-  const { saveConfig, config } = props;
-  const [center, setCenter] = useState<Point | undefined>();
-  const { topics, playerId } = useDataSourceInfo();
-
-  // clear cached points when the player changes
-  useEffect(() => {
-    setCenter(undefined);
-  }, [playerId]);
-
-  // eligible topics are those that match the message datatypes we support
-  const eligibleTopics = useMemo(() => {
-    return topics
-      .filter((topic) => {
-        return topic.datatype === "sensor_msgs/NavSatFix";
-      })
-      .map((topic) => topic.name);
-  }, [topics]);
-
-  useEffect(() => {
-    log.debug("Eligible Topics: ", eligibleTopics);
-  }, [eligibleTopics]);
-
-  const { blocks } = useBlocksByTopic(eligibleTopics);
-
-  // during preloading, data comes in quickly - we don't need to render on _every_ data change
-  const throttledBlocks = useThrottle(blocks, 200);
-
-  const navMessages = useMessagesByTopic({
-    topics: eligibleTopics,
-    historySize: 1,
-  });
-
-  // calculate center point from blocks if we don't have a center point
-  useEffect(() => {
-    setCenter((old) => {
-      // set center only once
-      if (old) {
-        return old;
-      }
-
-      for (const messageBlock of blocks) {
-        for (const payloads of Object.values(messageBlock)) {
-          for (const payload of payloads) {
-            const lat = (payload.message as NavSatFixMsg).latitude;
-            const lon = (payload.message as NavSatFixMsg).longitude;
-            const point: Point = {
-              lat,
-              lon,
-            };
-
-            return point;
-          }
-        }
-      }
-
-      return;
-    });
-  }, [blocks]);
-
-  // calculate center point from streaming messages if we don't have a center point
-  useEffect(() => {
-    setCenter((old) => {
-      // set center only once
-      if (old) {
-        return old;
-      }
-
-      for (const payloads of Object.values(navMessages)) {
-        for (const payload of payloads) {
-          const point: Point = {
-            lat: (payload.message as NavSatFixMsg).latitude,
-            lon: (payload.message as NavSatFixMsg).longitude,
-          };
-
-          return point;
-        }
-      }
-      return;
-    });
-  }, [navMessages]);
-
-  const [currentMap, setCurrentMap] = useState<LeafMap | undefined>(undefined);
-
-  // persist panel config on zoom changes
-  useEffect(() => {
-    if (!currentMap) {
-      return;
-    }
-
-    const zoomChange = () => {
-      saveConfig({
-        zoomLevel: currentMap.getZoom(),
-      });
-    };
-
-    currentMap.on("zoom", zoomChange);
-    return () => {
-      currentMap.off("zoom", zoomChange);
-    };
-  }, [currentMap, saveConfig]);
-
-  if (!center) {
-    return (
-      <>
-        <PanelToolbar floating helpContent={helpContent} />
-        <EmptyState>Waiting for first gps point...</EmptyState>
-      </>
-    );
-  }
-
+function MapPanelAdapter(props: Props) {
   return (
-    <>
-      <PanelToolbar floating helpContent={helpContent} />
-      <MapContainer
-        whenCreated={setCurrentMap}
-        preferCanvas
-        style={{ width: "100%", height: "100%" }}
-        center={[center.lat, center.lon]}
-        zoom={config.zoomLevel ?? 15}
-        scrollWheelZoom={false}
-      >
-        <TileLayer
-          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          maxNativeZoom={18}
-          maxZoom={24}
-        />
-        <FilteredPointMarkers messages={navMessages} blocks={throttledBlocks} />
-      </MapContainer>
-    </>
+    <PanelExtensionAdapter
+      config={props.config}
+      saveConfig={props.saveConfig}
+      help={helpContent}
+      initPanel={initPanel}
+    />
   );
 }
 
-MapPanel.panelType = "map";
-MapPanel.defaultConfig = {
-  zoomLevel: 10,
-} as Config;
-MapPanel.supportsStrictMode = false;
+MapPanelAdapter.panelType = "map";
+MapPanelAdapter.defaultConfig = {};
+MapPanelAdapter.supportsStrictMode = false;
 
-export default Panel(MapPanel);
+export default Panel(MapPanelAdapter);

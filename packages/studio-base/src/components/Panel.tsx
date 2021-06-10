@@ -78,8 +78,9 @@ const PerfInfo = styled.div`
   bottom: 2px;
   left: 2px;
   font-size: 9px;
-  opacity: 0.5;
+  opacity: 0.7;
   user-select: none;
+  mix-blend-mode: difference;
 `;
 
 type Props<Config> = {

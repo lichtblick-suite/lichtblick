@@ -41,12 +41,75 @@ declare module "@foxglove/studio" {
     playerId: string;
   };
 
-  // A message event frames message data with the topic and receive time
+  /**
+   * A message event frames message data with the topic and receive time
+   */
   export type MessageEvent<T> = Readonly<{
     topic: string;
     receiveTime: Time;
     message: T;
   }>;
+
+  export interface RenderState {
+    /**
+     * The latest messages for the current render frame. These are new messages since the last render frame.
+     */
+    currentFrame?: readonly MessageEvent<unknown>[];
+
+    /**
+     * All available messages. Best-effort list of all available messages.
+     */
+    allFrames?: readonly MessageEvent<unknown>[];
+
+    /**
+     * List of available topics. This list includes subscribed and unsubscribed topics.
+     */
+    topics?: readonly Topic[];
+  }
+
+  export type PanelExtensionContext = {
+    /**
+     * The root element for the panel. Add your panel elements as children under this element.
+     */
+    readonly panelElement: HTMLDivElement;
+
+    /**
+     * Initial panel state
+     */
+    readonly initialState: unknown;
+
+    /**
+     * Subscribe to updates on this field within the render state. Render will only be invoked when
+     * this field changes.
+     */
+    watch: (field: keyof RenderState) => void;
+
+    /**
+     * Save arbitrary object as persisted panel state. This state is persisted for the panel
+     * within a layout.
+     *
+     * The state value should be JSON serializable.
+     */
+    saveState: (state: Partial<unknown>) => void;
+
+    /**
+     * Process render events for the panel. Each render event receives a render state and a done callback.
+     * Render events occur frequently (60hz, 30hz, etc).
+     *
+     * The done callback should be called once the panel has rendered the render state.
+     */
+    onRender?: (renderState: Readonly<RenderState>, done: () => void) => void;
+
+    /**
+     * Subscribe to an array of topic names.
+     */
+    subscribe(topics: string[]): void;
+
+    /**
+     * Unsubscribe from all topics.
+     */
+    unsubscribeAll(): void;
+  };
 
   export type ExtensionPanelRegistration = {
     // Unique name of the panel within your extension
@@ -56,8 +119,8 @@ declare module "@foxglove/studio" {
     // your panel.
     name: string;
 
-    // Panel component
-    component: () => JSX.Element;
+    // This function is invoked when your panel is initialized
+    initPanel: (context: PanelExtensionContext) => void;
   };
 
   export interface ExtensionContext {
@@ -76,46 +139,4 @@ declare module "@foxglove/studio" {
   export interface ExtensionModule {
     activate: ExtensionActivate;
   }
-
-  // The entire public API interface
-  interface StudioApi {
-    panel: {
-      /**
-       * useMessagesByTopic makes it easy to request some messages on some topics.
-       *
-       * Using this hook will cause the panel to re-render when new messages arrive on the requested topics.
-       * - During file playback the panel will re-render when the file is playing or when the user is scrubbing.
-       * - During live playback the panel will re-render when new messages arrive.
-       */
-      useMessagesByTopic(params: {
-        topics: readonly string[];
-        historySize: number;
-        preloadingFallback?: boolean;
-      }): Record<string, readonly MessageEvent<unknown>[]>;
-
-      /**
-       * Load/Save panel configuration. This behaves in a manner similar to React.useState except the state
-       * is persisted with the current layout.
-       */
-      useConfig<Config>(): [Config, (config: Partial<Config>) => void];
-
-      /**
-       * Data source info" encapsulates **rarely-changing** metadata about the source from which
-       * Studio is loading data.
-       *
-       * A data source might be a local file, a remote file, or a streaming source.
-       */
-      useDataSourceInfo(): DataSourceInfo;
-    };
-  }
-
-  // Individual apis are exposed as constants
-  // This is to support a pattern of `import { panel } from "@foxglove/studio"`
-
-  /**
-   * APIs for use within panels
-   */
-  export const panel: StudioApi["panel"];
-
-  export = StudioApi;
 }

@@ -6,6 +6,7 @@ import { PropsWithChildren, useMemo } from "react";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import Panel from "@foxglove/studio-base/components/Panel";
+import PanelExtensionAdapter from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { useExtensionRegistry } from "@foxglove/studio-base/context/ExtensionRegistryContext";
 import PanelCatalogContext, {
@@ -14,6 +15,12 @@ import PanelCatalogContext, {
 } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import panels from "@foxglove/studio-base/panels";
+import { SaveConfig } from "@foxglove/studio-base/types/panels";
+
+type PanelProps = {
+  config: unknown;
+  saveConfig: SaveConfig<unknown>;
+};
 
 export default function PanelCatalogProvider(
   props: PropsWithChildren<unknown>,
@@ -26,12 +33,15 @@ export default function PanelCatalogProvider(
 
     return extensionPanels.map((panel) => {
       const panelType = `${panel.extensionName}.${panel.registration.name}`;
-      const PanelComponent = panel.registration.component;
-      const PanelWrapper = () => {
+      const PanelWrapper = (panelProps: PanelProps) => {
         return (
           <>
             <PanelToolbar floating />
-            <PanelComponent />
+            <PanelExtensionAdapter
+              config={panelProps.config}
+              saveConfig={panelProps.saveConfig}
+              initPanel={panel.registration.initPanel}
+            />
           </>
         );
       };

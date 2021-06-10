@@ -14,7 +14,6 @@
 import { groupBy } from "lodash";
 import { useCallback } from "react";
 
-import { panel } from "@foxglove/studio";
 import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import concatAndTruncate from "@foxglove/studio-base/util/concatAndTruncate";
@@ -24,13 +23,19 @@ import { useMessageReducer } from "./useMessageReducer";
 // Topic types that are not known at compile time
 type UnknownMessageEventsByTopic = Record<string, readonly MessageEvent<unknown>[]>;
 
-// Convenience wrapper around `useMessageReducer`, for if you just want some
-// recent messages for a few topics.
-export const useMessagesByTopic: typeof panel.useMessagesByTopic = ({
-  topics,
-  historySize,
-  preloadingFallback,
-}) => {
+/**
+ * useMessagesByTopic makes it easy to request some messages on some topics.
+ *
+ * Using this hook will cause the panel to re-render when new messages arrive on the requested topics.
+ * - During file playback the panel will re-render when the file is playing or when the user is scrubbing.
+ * - During live playback the panel will re-render when new messages arrive.
+ */
+export function useMessagesByTopic(params: {
+  topics: readonly string[];
+  historySize: number;
+  preloadingFallback?: boolean;
+}): Record<string, readonly MessageEvent<unknown>[]> {
+  const { historySize, topics, preloadingFallback } = params;
   const requestedTopics = useDeepMemo(topics);
 
   const addMessages = useCallback(
@@ -71,4 +76,4 @@ export const useMessagesByTopic: typeof panel.useMessagesByTopic = ({
     preloadingFallback,
     addMessages,
   });
-};
+}

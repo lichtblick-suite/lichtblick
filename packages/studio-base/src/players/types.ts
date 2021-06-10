@@ -14,6 +14,7 @@
 import { Time } from "rosbag";
 
 import { RosMsgDefinition } from "@foxglove/rosmsg";
+import type { MessageEvent } from "@foxglove/studio";
 import { BlockCache } from "@foxglove/studio-base/dataProviders/MemoryCacheDataProvider";
 import {
   AverageThroughput,
@@ -24,6 +25,9 @@ import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables"
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { Range } from "@foxglove/studio-base/util/ranges";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
+
+// re-exported until other import sites are updated from players/types to @foxglove/studio
+export type { MessageEvent };
 
 export type MessageDefinitionsByTopic = {
   [topic: string]: string;
@@ -217,13 +221,6 @@ export type Topic = {
   // messages, such as bags.
   numMessages?: number;
 };
-
-// A message event frames message data with the topic and receive time
-export type MessageEvent<T> = Readonly<{
-  topic: string;
-  receiveTime: Time;
-  message: T;
-}>;
 
 type RosSingularField = number | string | boolean | RosObject; // No time -- consider it a message.
 export type RosValue =

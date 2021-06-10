@@ -4,7 +4,6 @@
 
 import { useCallback, useMemo } from "react";
 
-import { panel } from "@foxglove/studio";
 import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
@@ -15,9 +14,10 @@ import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 /**
- * Mix partial panel config from savedProps with the panel type's `defaultConfig` to form the complete panel configuration.
+ * Load/Save panel configuration. This behaves in a manner similar to React.useState except the state
+ * is persisted with the current layout.
  */
-export const useConfig: typeof panel.useConfig = () => {
+export function useConfig<Config>(): [Config, (config: Partial<Config>) => void] {
   const panelId = usePanelId();
   const panelCatalog = usePanelCatalog();
   const panelComponent = useMemo(
@@ -31,7 +31,7 @@ export const useConfig: typeof panel.useConfig = () => {
     throw new Error(`Attempt to useConfig() with unknown panel id ${panelId}`);
   }
   return useConfigById(panelId, panelComponent?.defaultConfig);
-};
+}
 
 /**
  * Like `useConfig`, but for a specific panel id. This generally shouldn't be used by panels
