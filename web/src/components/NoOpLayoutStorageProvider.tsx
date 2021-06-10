@@ -4,27 +4,29 @@
 
 import { PropsWithChildren, useState } from "react";
 
-import { LayoutStorageContext, LayoutStorage } from "@foxglove/studio-base";
+import { LocalLayoutStorage, LocalLayoutStorageContext } from "@foxglove/studio-base";
 
 export default function NoOpLayoutStorageProvider(props: PropsWithChildren<unknown>): JSX.Element {
-  const [ctx] = useState<LayoutStorage>(() => {
+  const [ctx] = useState<LocalLayoutStorage>(() => {
     return {
-      list() {
-        return Promise.resolve([]);
+      async list() {
+        return [];
       },
-      get() {
-        return Promise.resolve();
+      async get() {
+        return undefined;
       },
-      put() {
-        return Promise.resolve();
+      async put() {
+        return undefined;
       },
-      delete() {
-        return Promise.resolve();
+      async delete() {
+        return undefined;
       },
-    } as LayoutStorage;
+    };
   });
 
   return (
-    <LayoutStorageContext.Provider value={ctx}>{props.children}</LayoutStorageContext.Provider>
+    <LocalLayoutStorageContext.Provider value={ctx}>
+      {props.children}
+    </LocalLayoutStorageContext.Provider>
   );
 }

@@ -37,7 +37,6 @@ export type PanelsState = {
   userNodes: UserNodes;
   linkedGlobalVariables: LinkedGlobalVariables;
   playbackConfig: PlaybackConfig;
-  version?: number;
 };
 
 export type ConfigsPayload = {

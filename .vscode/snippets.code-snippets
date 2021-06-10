@@ -25,5 +25,11 @@
     "prefix": "const",
     "body": "const {$2} = $1;",
     "description": "Destructure object"
+  },
+
+  "React component": {
+    "scope": "typescriptreact",
+    "prefix": "component",
+    "body": "export default function ${1:$TM_FILENAME_BASE}({ children }: React.PropsWithChildren<${2:unknown}>): JSX.Element {\n\t$0\n}"
   }
 }

@@ -15,10 +15,11 @@ import { v4 as uuidv4 } from "uuid";
 
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { Layout, useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
+import { useLocalLayoutStorage } from "@foxglove/studio-base/context/LocalLayoutStorageContext";
 import useLatestNonNull from "@foxglove/studio-base/hooks/useLatestNonNull";
 import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
+import { LocalLayout } from "@foxglove/studio-base/services/LocalLayoutStorage";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
@@ -63,7 +64,7 @@ export default function LayoutMenu({
   }, [defaultIsOpen]);
 
   const { getCurrentLayout, loadLayout } = useCurrentLayoutActions();
-  const layoutStorage = useLayoutStorage();
+  const layoutStorage = useLocalLayoutStorage();
 
   // a basic stale-while-revalidate pattern to avoid flicker of layout menu when we reload the layout list
   // When we re-visit local/remote layouts we will want to look at something like swr (https://swr.vercel.app/)
@@ -83,7 +84,7 @@ export default function LayoutMenu({
   }, [error]);
 
   const renameAction = useCallback(
-    async (layout: Layout) => {
+    async (layout: LocalLayout) => {
       const value = await prompt({
         title: "Rename layout",
         value: layout.name,
@@ -136,7 +137,7 @@ export default function LayoutMenu({
   }, [isMounted, layoutStorage, loadLayout]);
 
   const selectAction = useCallback(
-    (layout: Layout) => {
+    (layout: LocalLayout) => {
       if (layout.state) {
         loadLayout(layout.state);
       }
@@ -145,7 +146,7 @@ export default function LayoutMenu({
   );
 
   const deleteLayout = useCallback(
-    async (layout: Layout) => {
+    async (layout: LocalLayout) => {
       await layoutStorage.delete(layout.id);
       fetchLayouts();
     },

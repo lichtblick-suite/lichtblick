@@ -4,20 +4,7 @@
 
 import { createContext, useContext } from "react";
 
-import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-
-export type Layout = {
-  id: string;
-  name: string;
-  state?: PanelsState;
-};
-
-export interface LayoutStorage {
-  list(): Promise<Layout[]>;
-  get(id: string): Promise<Layout | undefined>;
-  put(layout: Layout): Promise<void>;
-  delete(id: string): Promise<void>;
-}
+import { LayoutStorage } from "@foxglove/studio-base/services/LayoutStorage";
 
 const LayoutStorageContext = createContext<LayoutStorage | undefined>(undefined);
 

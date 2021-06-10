@@ -6,25 +6,23 @@ import { useMemo } from "react";
 
 import LayoutMenu from "@foxglove/studio-base/components/LayoutMenu";
 import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
-import LayoutStorageContext, {
-  Layout,
-  LayoutStorage,
-} from "@foxglove/studio-base/context/LayoutStorageContext";
+import LocalLayoutStorageContext from "@foxglove/studio-base/context/LocalLayoutStorageContext";
 import CurrentLayoutState, {
   DEFAULT_LAYOUT_FOR_TESTS,
 } from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
+import { LocalLayout, LocalLayoutStorage } from "@foxglove/studio-base/services/LocalLayoutStorage";
 
-class FakeLayoutStorage implements LayoutStorage {
-  private _layouts: Layout[];
+class FakeLayoutStorage implements LocalLayoutStorage {
+  private _layouts: LocalLayout[];
 
-  constructor(layouts: Layout[] = []) {
+  constructor(layouts: LocalLayout[] = []) {
     this._layouts = layouts;
   }
-  list(): Promise<Layout[]> {
+  list(): Promise<LocalLayout[]> {
     return Promise.resolve(this._layouts);
   }
-  get(_id: string): Promise<Layout | undefined> {
+  get(_id: string): Promise<LocalLayout | undefined> {
     throw new Error("Method not implemented.");
   }
   put(_layout: unknown): Promise<void> {
@@ -47,9 +45,9 @@ export function Empty(): JSX.Element {
   return (
     <div style={{ display: "flex", height: 400 }}>
       <CurrentLayoutContext.Provider value={currentLayout}>
-        <LayoutStorageContext.Provider value={storage}>
+        <LocalLayoutStorageContext.Provider value={storage}>
           <LayoutMenu defaultIsOpen />
-        </LayoutStorageContext.Provider>
+        </LocalLayoutStorageContext.Provider>
       </CurrentLayoutContext.Provider>
     </div>
   );
@@ -95,9 +93,9 @@ export function LayoutList(): JSX.Element {
   return (
     <div style={{ display: "flex", height: 400 }}>
       <CurrentLayoutContext.Provider value={mockLayoutContext}>
-        <LayoutStorageContext.Provider value={storage}>
+        <LocalLayoutStorageContext.Provider value={storage}>
           <LayoutMenu defaultIsOpen />
-        </LayoutStorageContext.Provider>
+        </LocalLayoutStorageContext.Provider>
       </CurrentLayoutContext.Provider>
     </div>
   );

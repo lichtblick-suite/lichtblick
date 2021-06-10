@@ -4,7 +4,7 @@
 
 import { PropsWithChildren, useMemo } from "react";
 
-import { LayoutStorageContext } from "@foxglove/studio-base";
+import { LocalLayoutStorageContext } from "@foxglove/studio-base";
 
 import { useNativeStorage } from "../context/NativeStorageContext";
 import NativeStorageLayoutStorage from "../services/NativeStorageLayoutStorage";
@@ -19,6 +19,8 @@ export default function NativeStorageLayoutStorageProvider(
   }, [storage]);
 
   return (
-    <LayoutStorageContext.Provider value={provider}>{props.children}</LayoutStorageContext.Provider>
+    <LocalLayoutStorageContext.Provider value={provider}>
+      {props.children}
+    </LocalLayoutStorageContext.Provider>
   );
 }
