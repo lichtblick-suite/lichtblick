@@ -203,6 +203,7 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
                 })}
               >
                 <MessagePathInput
+                  supportsMathModifiers
                   path={path.value}
                   onChange={onInputChange}
                   onTimestampMethodChange={onInputTimestampMethodChange}

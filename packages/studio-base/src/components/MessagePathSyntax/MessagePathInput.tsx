@@ -147,6 +147,7 @@ function getExamplePrimitive(primitiveType: RosPrimitive) {
 }
 
 type MessagePathInputBaseProps = {
+  supportsMathModifiers?: boolean;
   path: string; // A path of the form `/topic.some_field[:]{id==42}.x`
   index?: number; // Optional index field which gets passed to `onChange` (so you don't have to create anonymous functions)
   onChange: (value: string, index?: number) => void;
@@ -233,6 +234,7 @@ class MessagePathInputUnconnected extends React.PureComponent<
 
   override render() {
     const {
+      supportsMathModifiers,
       path,
       topics,
       datatypes,
@@ -373,6 +375,9 @@ class MessagePathInputUnconnected extends React.PureComponent<
           )
         : autocompleteItems;
 
+    const usesUnsupportedMathModifier =
+      (supportsMathModifiers == undefined || !supportsMathModifiers) && path.includes(".@");
+
     return (
       <div
         style={{ display: "flex", flex: "1 1 auto", minWidth: 0, justifyContent: "space-between" }}
@@ -385,7 +390,10 @@ class MessagePathInputUnconnected extends React.PureComponent<
           onSelect={(value: string, _item: unknown, autocomplete: Autocomplete<string>) =>
             this._onSelect(value, autocomplete, autocompleteType, autocompleteRange)
           }
-          hasError={autocompleteType != undefined && !disableAutocomplete && path.length > 0}
+          hasError={
+            usesUnsupportedMathModifier ||
+            (autocompleteType != undefined && !disableAutocomplete && path.length > 0)
+          }
           autocompleteKey={autocompleteType}
           placeholder={
             placeholder != undefined && placeholder !== ""

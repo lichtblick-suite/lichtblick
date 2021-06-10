@@ -149,6 +149,9 @@ storiesOf("components/MessagePathInput", module)
   .add("autocomplete for path with globalVariables variables in slice (start and end idx)", () => {
     return <MessagePathInputStory path="/some_topic/state.items[$global_var_2:$]" />;
   })
+  .add("path with invalid math modifier", () => {
+    return <MessagePathInputStory path="/some_topic/location.pose.x.@negative" />;
+  })
   .add("autocomplete when prioritized datatype is available", () => {
     return <MessagePathInputStory path="/" prioritizedDatatype="msgs/State" />;
   })
