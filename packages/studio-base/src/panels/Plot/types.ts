@@ -18,7 +18,7 @@ export type PlotConfig = {
   showLegend: boolean;
   xAxisVal: PlotXAxisVal;
   xAxisPath?: BasePlotPath;
-  followingViewWidth?: string | number;
+  followingViewWidth?: number;
 };
 
 export const plotableRosTypes = [

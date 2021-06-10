@@ -229,6 +229,9 @@ function Plot(props: Props) {
   const preloadingEndTime = timeToXValueForPreloading(endTime);
   let defaultView: ChartDefaultView | undefined;
   if (preloadingDisplayTime != undefined) {
+    // display time == end time when streamking data..., and start time was 0
+    // could use start time of 0 to indicate live stream?
+    //console.log(preloadingDisplayTime, preloadingStartTime, preloadingEndTime);
     if (followingViewWidth != undefined && +followingViewWidth > 0) {
       // Will be ignored in TimeBasedChart for non-preloading plots and non-timestamp plots.
       defaultView = { type: "following", width: +followingViewWidth };

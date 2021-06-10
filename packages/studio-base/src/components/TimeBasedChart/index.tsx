@@ -258,7 +258,10 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
       setDownsampleFlush((old) => old + 1);
     },
     100,
-    { leading: false },
+    // maxWait equal to debounce timeout makes the debounce act like a throttle
+    // Without a maxWait - invocations of the debounced invalidate reset the countdown
+    // resulting in no invalidation when scales are constantly changing (playback)
+    { leading: false, maxWait: 100 },
   );
 
   const updateScales = useCallback(
@@ -542,10 +545,8 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
       min = defaultView.minXValue;
       max = defaultView.maxXValue;
     } else if (defaultView?.type === "following") {
-      max = datasetBounds.x.max;
-      if (max != undefined) {
-        min = max - defaultView.width;
-      }
+      max = currentTime ?? 0;
+      min = max - defaultView.width;
     } else {
       min = datasetBounds.x.min;
       max = datasetBounds.x.max;
@@ -573,6 +574,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
 
     return { min, max };
   }, [
+    currentTime,
     datasetBounds.x.max,
     datasetBounds.x.min,
     defaultView,
