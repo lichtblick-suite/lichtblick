@@ -274,7 +274,7 @@ function getDatasetAndTooltipsFromMessagePlotPath(
     showLine,
     fill: false,
     borderWidth: 1,
-    pointRadius: 1.5,
+    pointRadius: 1,
     pointHoverRadius: 3,
     pointBackgroundColor: lightColor(borderColor),
     pointBorderColor: "transparent",

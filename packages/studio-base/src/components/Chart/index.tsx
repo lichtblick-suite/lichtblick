@@ -10,7 +10,7 @@
 
 import { ChartOptions, ChartData, ScatterDataPoint } from "chart.js";
 import Hammer from "hammerjs";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useAsync, useMountedState } from "react-use";
 import { v4 as uuidv4 } from "uuid";
 
@@ -87,7 +87,9 @@ function Chart(props: Props): JSX.Element {
 
   const { type, data, options, width, height } = props;
 
-  const [rpc] = useState(() => webWorkerManager.registerWorkerListener(id));
+  const rpc = useMemo(() => {
+    return webWorkerManager.registerWorkerListener(id);
+  }, [id]);
 
   // helper function to send rpc to our worker - all invocations need an _id_ so we inject it here
   const rpcSend = useCallback(
@@ -101,10 +103,12 @@ function Chart(props: Props): JSX.Element {
     [id, rpc],
   );
 
-  useEffect(() => {
+  // when a layout changes - component is unmounted and a new chart is mounted
+  useLayoutEffect(() => {
+    const actualId = id;
     return () => {
       rpcSend("destroy");
-      webWorkerManager.unregisterWorkerListener(id);
+      webWorkerManager.unregisterWorkerListener(actualId);
     };
   }, [id, rpcSend]);
 

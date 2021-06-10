@@ -23,6 +23,7 @@ import React, {
   useMemo,
   MouseEvent,
 } from "react";
+import { useThrottle } from "react-use";
 import { Time } from "rosbag";
 import styled from "styled-components";
 import { useDebouncedCallback } from "use-debounce";
@@ -201,7 +202,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     resumeFrame.current = undefined;
 
     if (current) {
-      // allow the chart offscreen canvas to render to screen
+      // allow the chart offscreen canvas to render to screen before calling done
       requestAnimationFrame(current);
     }
   }, []);
@@ -213,7 +214,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   const linesToHide = useMemo(() => props.linesToHide ?? {}, [props.linesToHide]);
 
   useEffect(() => {
-    // cleanup pased frames on unmount or dataset changes
+    // cleanup paused frames on unmount or dataset changes
     return () => {
       onChartUpdate();
     };
@@ -251,11 +252,11 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   }, [datasets]);
 
   // avoid re-doing a downsample on every scale change, instead mark the downsample as dirty
-  // with a debounce and if downsampling hasn't happened after some time, trigger a downsample
-  const [invalidateDownsample, setDownsampleFlush] = useState(1);
+  // with a debounce and if downsampling hasn't happened after some time, trigger a downsample via state update
+  const [invalidateDownsample, setDownsampleFlush] = useState({});
   const queueDownsampleInvalidate = useDebouncedCallback(
     () => {
-      setDownsampleFlush((old) => old + 1);
+      setDownsampleFlush({});
     },
     100,
     // maxWait equal to debounce timeout makes the debounce act like a throttle
@@ -652,6 +653,8 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     } as ScaleOptions;
   }, [datasetBounds.y, yAxes, hasUserPannedOrZoomed]);
 
+  const datasetBoundsRef = useRef(datasetBounds);
+  datasetBoundsRef.current = datasetBounds;
   const downsampleDatasets = useCallback(
     (fullDatasets: typeof datasets) => {
       const currentScales = currentScalesRef.current;
@@ -678,8 +681,36 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
         };
       }
 
+      const dataBounds = datasetBoundsRef.current;
+
+      // if we don't have bounds (chart not initialized) but do have dataset bounds
+      // then setup bounds as x/y min/max around the dataset values rather than the scales
+      if (
+        !bounds &&
+        dataBounds.x.min != undefined &&
+        dataBounds.x.max != undefined &&
+        dataBounds.y.min != undefined &&
+        dataBounds.y.max != undefined
+      ) {
+        bounds = {
+          width,
+          height,
+          x: {
+            min: dataBounds.x.min,
+            max: dataBounds.x.max,
+          },
+          y: {
+            min: dataBounds.y.min,
+            max: dataBounds.y.max,
+          },
+        };
+      }
+
+      // If we don't have any bounds - we assume the component is still initializing and return no data
+      // The other alternative is to return the full data set. This leads to rendering full fidelity data
+      // which causes render pauses and blank charts for large data sets.
       if (!bounds) {
-        return fullDatasets;
+        return [];
       }
 
       return fullDatasets.map((dataset) => {
@@ -715,9 +746,18 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     });
   }, [datasets, linesToHide]);
 
-  const downsampledData = useMemo(() => {
+  // throttle the downsampleDatasets callback since this is an input to the downsampledData memo
+  // avoids down a downsample if the callback changes rapidly
+  const throttledDownsample = useThrottle(() => downsampleDatasets, 100);
+
+  // downsample datasets with the latest downsample function
+  const downsampledDatasets = useMemo(() => {
     invalidateDownsample;
 
+    return throttledDownsample(visibleDatasets);
+  }, [invalidateDownsample, throttledDownsample, visibleDatasets]);
+
+  const downsampledData = useMemo(() => {
     if (resumeFrame.current) {
       log.warn("force resumed paused frame");
       resumeFrame.current();
@@ -728,9 +768,9 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
 
     return {
       labels,
-      datasets: downsampleDatasets(visibleDatasets),
+      datasets: downsampledDatasets,
     };
-  }, [visibleDatasets, downsampleDatasets, labels, pauseFrame, invalidateDownsample]);
+  }, [pauseFrame, labels, downsampledDatasets]);
 
   const options = useMemo<ChartOptions>(() => {
     return {

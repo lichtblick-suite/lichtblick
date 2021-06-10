@@ -20,9 +20,9 @@ type DownsampleBounds = {
 };
 
 export default function downsample(dataset: DataSet, bounds: DownsampleBounds): DataSet {
-  // each datum point is treated as occupying 4x the pixels
-  const pixelPerXValue = bounds.width / 4 / (bounds.x.max - bounds.x.min);
-  const pixelPerYValue = bounds.height / 4 / (bounds.y.max - bounds.y.min);
+  // each datum point is treated as occupying a pixel
+  const pixelPerXValue = bounds.width / (bounds.x.max - bounds.x.min);
+  const pixelPerYValue = bounds.height / (bounds.y.max - bounds.y.min);
 
   // degenerate case
   if (dataset.data.length <= 1) {

@@ -2772,7 +2772,7 @@ __metadata:
     react-table: 7.7.0
     react-toast-notifications: 2.4.4
     react-transition-group: 4.4.2
-    react-use: 17.2.4
+    react-use: "patch:react-use@17.2.4#../../patches/react-use.patch"
     react-virtualized: 9.22.3
     reg-notify-github-plugin: 0.10.15
     reg-publish-gcs-plugin: 0.10.15
@@ -21938,7 +21938,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-use@npm:17.2.4":
+react-use@17.2.4:
   version: 17.2.4
   resolution: "react-use@npm:17.2.4"
   dependencies:
@@ -21960,6 +21960,31 @@ __metadata:
     react: ^16.8.0  || ^17.0.0
     react-dom: ^16.8.0  || ^17.0.0
   checksum: 3c885c3798bb07581f78f8445c0a9545c1bb8876ea5bdbe0236ebf3f923dc3572a0f71324f02ecddb8515b0625d7f3e2560da751bdf51f5a2fdb47290a689292
+  languageName: node
+  linkType: hard
+
+"react-use@patch:react-use@17.2.4#../../patches/react-use.patch::locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base":
+  version: 17.2.4
+  resolution: "react-use@patch:react-use@npm%3A17.2.4#../../patches/react-use.patch::version=17.2.4&hash=d5e839&locator=%40foxglove%2Fstudio-base%40workspace%3Apackages%2Fstudio-base"
+  dependencies:
+    "@types/js-cookie": ^2.2.6
+    "@xobotyi/scrollbar-width": ^1.9.5
+    copy-to-clipboard: ^3.3.1
+    fast-deep-equal: ^3.1.3
+    fast-shallow-equal: ^1.0.0
+    js-cookie: ^2.2.1
+    nano-css: ^5.3.1
+    react-universal-interface: ^0.6.2
+    resize-observer-polyfill: ^1.5.1
+    screenfull: ^5.1.0
+    set-harmonic-interval: ^1.0.1
+    throttle-debounce: ^3.0.1
+    ts-easing: ^0.2.0
+    tslib: ^2.1.0
+  peerDependencies:
+    react: ^16.8.0  || ^17.0.0
+    react-dom: ^16.8.0  || ^17.0.0
+  checksum: 19b8ae4330e3c9d4da553b7b6d00ce2eac384741c0bb5814724012b49baaf554b96f37acc3d2cd2bfeaf3fddd842a85db6e3606fdae615dcfa115d0d8039a2fc
   languageName: node
   linkType: hard
 
