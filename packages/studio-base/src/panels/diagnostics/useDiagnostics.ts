@@ -38,17 +38,12 @@ export type DiagnosticsBuffer = {
   sortedAutocompleteEntries: DiagnosticAutocompleteEntry[];
 };
 
-type Props = {
-  children: (arg0: DiagnosticsBuffer) => any;
-  topic: string;
-};
-
 // Returns whether the buffer has been modified
 function maybeAddMessageToBuffer(
   buffer: DiagnosticsBuffer,
-  message: MessageEvent<unknown>,
+  message: MessageEvent<DiagnosticStatusArrayMsg>,
 ): boolean {
-  const { header, status: statusArray }: DiagnosticStatusArrayMsg = message.message as any;
+  const { header, status: statusArray }: DiagnosticStatusArrayMsg = message.message;
   if (statusArray.length === 0) {
     return false;
   }
@@ -115,7 +110,9 @@ export function addMessages(
   // a layout.
   let modified = false;
   for (const message of messages) {
-    modified = maybeAddMessageToBuffer(buffer, message) || modified;
+    modified =
+      maybeAddMessageToBuffer(buffer, message as MessageEvent<DiagnosticStatusArrayMsg>) ||
+      modified;
   }
   // We shallow-copy the buffer when it changes to help users know when to rerender.
   return modified ? { ...buffer } : buffer;
@@ -129,15 +126,10 @@ export function defaultDiagnosticsBuffer(): DiagnosticsBuffer {
   };
 }
 
-export function useDiagnostics(topic: string): DiagnosticsBuffer {
+export default function useDiagnostics(topic: string): DiagnosticsBuffer {
   return PanelAPI.useMessageReducer<DiagnosticsBuffer>({
     topics: [topic],
     restore: defaultDiagnosticsBuffer,
     addMessages,
   });
-}
-
-export default function DiagnosticsHistory({ children, topic }: Props): JSX.Element {
-  const diagnostics = useDiagnostics(topic);
-  return children(diagnostics);
 }

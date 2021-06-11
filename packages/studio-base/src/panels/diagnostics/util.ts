@@ -14,9 +14,10 @@
 import { sortBy, truncate } from "lodash";
 import { Time } from "rosbag";
 
-import { DiagnosticsBuffer } from "@foxglove/studio-base/panels/diagnostics/DiagnosticsHistory";
 import { Header } from "@foxglove/studio-base/types/Messages";
 import fuzzyFilter from "@foxglove/studio-base/util/fuzzyFilter";
+
+import { DiagnosticsBuffer } from "./useDiagnostics";
 
 // Trim the message if it's too long. We sometimes get crazy massive messages here that can
 // otherwise crash our entire UI. I looked at a bunch of messages manually and they are typically

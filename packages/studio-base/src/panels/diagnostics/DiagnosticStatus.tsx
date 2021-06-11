@@ -150,7 +150,7 @@ const getFormattedKeyValues = createSelector(
 );
 
 // component to display a single diagnostic status
-class DiagnosticStatus extends React.Component<Props, any> {
+class DiagnosticStatus extends React.Component<Props, unknown> {
   _tableRef = React.createRef<HTMLTableElement>();
 
   static defaultProps = {
@@ -175,15 +175,15 @@ class DiagnosticStatus extends React.Component<Props, any> {
 
   _resizeMouseDown = (event: React.MouseEvent<Element>): void => {
     event.preventDefault();
-    window.addEventListener("mousemove", this._resizeMouseMove as any);
+    window.addEventListener("mousemove", this._resizeMouseMove);
     window.addEventListener("mouseup", this._resizeMouseUp);
   };
 
   _resizeMouseUp = (): void => {
-    window.removeEventListener("mousemove", this._resizeMouseMove as any);
+    window.removeEventListener("mousemove", this._resizeMouseMove);
   };
 
-  _resizeMouseMove = (event: React.MouseEvent<Element>): void => {
+  _resizeMouseMove = (event: MouseEvent): void => {
     const {
       _tableRef,
       props: { onChangeSplitFraction },
@@ -203,7 +203,7 @@ class DiagnosticStatus extends React.Component<Props, any> {
   };
 
   override componentWillUnmount(): void {
-    window.removeEventListener("mousemove", this._resizeMouseMove as any);
+    window.removeEventListener("mousemove", this._resizeMouseMove);
     window.removeEventListener("mouseup", this._resizeMouseUp);
   }
 
@@ -234,9 +234,9 @@ class DiagnosticStatus extends React.Component<Props, any> {
       const valIsSection = key.length === 0 && (key.startsWith("==") || value.startsWith("--"));
       if (keyIsSection || valIsSection) {
         const sectionObj = { name: info.status.name, section: `${key}${value}` };
-        inCollapsedSection = collapsedSections.find(
+        inCollapsedSection = collapsedSections.some(
           ({ name, section }) => name === sectionObj.name && section === sectionObj.section,
-        ) as any;
+        );
         ellipsisShown = false;
         return (
           <tr key={idx} className={style.section} onClick={() => this._onClickSection(sectionObj)}>

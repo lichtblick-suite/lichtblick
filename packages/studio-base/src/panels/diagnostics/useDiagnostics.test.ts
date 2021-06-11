@@ -14,7 +14,7 @@
 
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 
-import { addMessages, defaultDiagnosticsBuffer } from "./DiagnosticsHistory";
+import { addMessages, defaultDiagnosticsBuffer } from "./useDiagnostics";
 import { computeDiagnosticInfo, DiagnosticInfo, DiagnosticStatusArrayMsg, LEVELS } from "./util";
 
 const messageAtLevel = (level: number): MessageEvent<DiagnosticStatusArrayMsg> => ({

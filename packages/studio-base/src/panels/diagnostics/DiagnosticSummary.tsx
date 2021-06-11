@@ -14,7 +14,7 @@
 import PinIcon from "@mdi/svg/svg/pin.svg";
 import cx from "classnames";
 import { compact } from "lodash";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { List, AutoSizer } from "react-virtualized";
 
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
@@ -25,7 +25,6 @@ import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import TopicToRenderMenu from "@foxglove/studio-base/components/TopicToRenderMenu";
-import DiagnosticsHistory from "@foxglove/studio-base/panels/diagnostics/DiagnosticsHistory";
 import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
 import filterMap from "@foxglove/studio-base/util/filterMap";
 import { DIAGNOSTIC_TOPIC } from "@foxglove/studio-base/util/globalConstants";
@@ -34,6 +33,7 @@ import toggle from "@foxglove/studio-base/util/toggle";
 import { Config as DiagnosticStatusConfig } from "./DiagnosticStatusPanel";
 import helpContent from "./DiagnosticSummary.help.md";
 import styles from "./DiagnosticSummary.module.scss";
+import useDiagnostics from "./useDiagnostics";
 import {
   DiagnosticId,
   DiagnosticInfo,
@@ -158,73 +158,66 @@ function DiagnosticSummary(props: Props): JSX.Element {
     />
   );
 
+  const diagnostics = useDiagnostics(topicToRender);
+  const summary = useMemo(() => {
+    if (diagnostics.diagnosticsByNameByTrimmedHardwareId.size === 0) {
+      return (
+        <EmptyState>
+          Waiting for <code>{topicToRender}</code> messages
+        </EmptyState>
+      );
+    }
+    const pinnedNodes = filterMap(pinnedIds, (id) => {
+      const [_, trimmedHardwareId, name] = id.split("|");
+      if (name == undefined || trimmedHardwareId == undefined) {
+        return;
+      }
+      const diagnosticsByName =
+        diagnostics.diagnosticsByNameByTrimmedHardwareId.get(trimmedHardwareId);
+      return diagnosticsByName?.get(name);
+    });
+
+    const nodesByLevel = getDiagnosticsByLevel(diagnostics);
+    const levels = Array.from(nodesByLevel.keys()).sort().reverse();
+    const sortedNodes = sortByLevel
+      ? ([] as DiagnosticInfo[]).concat(
+          ...levels.map((level) =>
+            filterAndSortDiagnostics(nodesByLevel.get(level) ?? [], hardwareIdFilter, pinnedIds),
+          ),
+        )
+      : filterAndSortDiagnostics(
+          ([] as DiagnosticInfo[]).concat(...nodesByLevel.values()),
+          hardwareIdFilter,
+          pinnedIds,
+        );
+
+    const nodes: DiagnosticInfo[] = [...compact(pinnedNodes), ...sortedNodes];
+    if (nodes.length === 0) {
+      return ReactNull;
+    }
+    return (
+      <AutoSizer>
+        {({ height, width }) => (
+          <List
+            width={width}
+            height={height}
+            style={{ outline: "none" }}
+            rowHeight={25}
+            rowRenderer={(rowProps) => renderRow({ ...rowProps, item: nodes[rowProps.index] })}
+            rowCount={nodes.length}
+            overscanRowCount={10}
+          />
+        )}
+      </AutoSizer>
+    );
+  }, [diagnostics, hardwareIdFilter, pinnedIds, renderRow, sortByLevel, topicToRender]);
+
   return (
     <Flex col className={styles.panel}>
       <PanelToolbar helpContent={helpContent} additionalIcons={topicToRenderMenu}>
         {hardwareFilter}
       </PanelToolbar>
-      <Flex col>
-        <DiagnosticsHistory topic={topicToRender}>
-          {(buffer) => {
-            if (buffer.diagnosticsByNameByTrimmedHardwareId.size === 0) {
-              return (
-                <EmptyState>
-                  Waiting for <code>{topicToRender}</code> messages
-                </EmptyState>
-              );
-            }
-            const pinnedNodes = filterMap(pinnedIds, (id) => {
-              const [_, trimmedHardwareId, name] = id.split("|");
-              if (name == undefined || trimmedHardwareId == undefined) {
-                return;
-              }
-              const diagnosticsByName =
-                buffer.diagnosticsByNameByTrimmedHardwareId.get(trimmedHardwareId);
-              return diagnosticsByName?.get(name);
-            });
-
-            const nodesByLevel = getDiagnosticsByLevel(buffer);
-            const levels = Array.from(nodesByLevel.keys()).sort().reverse();
-            const sortedNodes = sortByLevel
-              ? ([] as DiagnosticInfo[]).concat(
-                  ...levels.map((level) =>
-                    filterAndSortDiagnostics(
-                      nodesByLevel.get(level) ?? [],
-                      hardwareIdFilter,
-                      pinnedIds,
-                    ),
-                  ),
-                )
-              : filterAndSortDiagnostics(
-                  ([] as DiagnosticInfo[]).concat(...nodesByLevel.values()),
-                  hardwareIdFilter,
-                  pinnedIds,
-                );
-
-            const nodes: DiagnosticInfo[] = [...compact(pinnedNodes), ...sortedNodes];
-            if (nodes.length === 0) {
-              return ReactNull;
-            }
-            return (
-              <AutoSizer>
-                {({ height, width }) => (
-                  <List
-                    width={width}
-                    height={height}
-                    style={{ outline: "none" }}
-                    rowHeight={25}
-                    rowRenderer={(rowProps) =>
-                      renderRow({ ...rowProps, item: nodes[rowProps.index] })
-                    }
-                    rowCount={nodes.length}
-                    overscanRowCount={10}
-                  />
-                )}
-              </AutoSizer>
-            );
-          }}
-        </DiagnosticsHistory>
-      </Flex>
+      <Flex col>{summary}</Flex>
     </Flex>
   );
 }
