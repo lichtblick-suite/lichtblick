@@ -5,6 +5,7 @@
 import { CSSProperties, useLayoutEffect, useRef, useState } from "react";
 import { v4 as uuid } from "uuid";
 
+import Logger from "@foxglove/log";
 import { MessageEvent, PanelExtensionContext, RenderState, Topic } from "@foxglove/studio";
 import {
   MessagePipelineContext,
@@ -13,6 +14,8 @@ import {
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { PlayerState } from "@foxglove/studio-base/players/types";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
+
+const log = Logger.getLogger(__filename);
 
 type PanelExtensionAdapterProps = {
   /** function that initializes the panel extension */
@@ -27,6 +30,14 @@ type PanelExtensionAdapterProps = {
 
 const EmptyTopics: readonly Topic[] = [];
 
+function selectSetSubscriptions(ctx: MessagePipelineContext) {
+  return ctx.setSubscriptions;
+}
+
+function selectRequestBackfill(ctx: MessagePipelineContext) {
+  return ctx.requestBackfill;
+}
+
 /**
  * PanelExtensionAdapter renders a panel extension via initPanel
  *
@@ -38,7 +49,8 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   // We don't want changes to the config value to re-invoke initPanel in useLayoutEffect
   const configRef = useRef(config);
 
-  const setSubscriptions = useMessagePipeline((ctx) => ctx.setSubscriptions);
+  const setSubscriptions = useMessagePipeline(selectSetSubscriptions);
+  const requestBackfill = useMessagePipeline(selectRequestBackfill);
 
   const watchedFieldsRef = useRef(new Set<keyof RenderState>());
   const subscribedTopicsRef = useRef(new Set<string>());
@@ -156,6 +168,9 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
 
     const subscriberId = uuid();
 
+    type RenderFn = (renderState: Readonly<RenderState>, done: () => void) => void;
+    let renderFn: RenderFn | undefined = undefined;
+
     const panelExtensionContext: PanelExtensionContext = {
       panelElement: panelElementRef.current,
 
@@ -168,27 +183,46 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       },
 
       subscribe: (topics: string[]) => {
+        if (topics.length === 0) {
+          return;
+        }
+
         const subscribePayloads = topics.map((topic) => ({ topic }));
         setSubscriptions(subscriberId, subscribePayloads);
         for (const topic of topics) {
           subscribedTopicsRef.current.add(topic);
         }
+
+        requestBackfill();
       },
 
       unsubscribeAll: () => {
         subscribedTopicsRef.current.clear();
         setSubscriptions(subscriberId, []);
       },
+
+      // eslint-disable-next-line no-restricted-syntax
+      get onRender() {
+        return renderFn;
+      },
+
+      // When a panel sets the render function queue a render
+      // eslint-disable-next-line no-restricted-syntax
+      set onRender(renderFunction: RenderFn | undefined) {
+        renderFn = renderFunction;
+        requestAnimationFrame(renderPanel);
+      },
     };
 
     panelContextRef.current = panelExtensionContext;
+    log.info(`Init panel ${subscriberId}`);
     initPanel(panelExtensionContext);
 
     return () => {
       panelContextRef.current = undefined;
       setSubscriptions(subscriberId, []);
     };
-  }, [initPanel, saveConfig, setSubscriptions]);
+  }, [initPanel, saveConfig, setSubscriptions, requestBackfill]);
 
   const style: CSSProperties = {};
   if (slowRender) {
