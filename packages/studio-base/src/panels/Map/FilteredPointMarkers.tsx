@@ -1,123 +1,59 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import { LatLngBounds } from "leaflet";
-import { useMemo, useState } from "react";
-import { Circle, useMapEvent } from "react-leaflet";
+import { Map, LatLngBounds, LayerGroup, Circle } from "leaflet";
 
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 
 import { NavSatFixMsg } from "./types";
 
-type TopicTimePoint = {
-  topic: string;
-  lat: number;
-  lon: number;
+type Args = {
+  map: Map;
+  bounds: LatLngBounds;
+  color: string;
+  navSatMessageEvents: readonly MessageEvent<unknown>[];
 };
 
-type Props = {
-  currentPoints: readonly MessageEvent<unknown>[];
-  allPoints: readonly MessageEvent<unknown>[];
-};
+/**
+ * Create a leaflet LayerGroup with filtered points
+ */
+function FilteredPointLayer(args: Args): LayerGroup {
+  const { navSatMessageEvents: points, bounds, map } = args;
 
-// renders circle markers for all topic/points excluding points at the same pixel
-export default function FilteredPointMarkers(props: Props): JSX.Element {
-  const [bounds, setBounds] = useState<LatLngBounds | undefined>();
+  const markersLayer = new LayerGroup();
 
-  const map = useMapEvent("moveend", () => {
-    setBounds(map.getBounds());
-  });
+  const localBounds = bounds;
 
-  const { currentPoints, allPoints } = props;
-  const filteredAllPoints = useMemo<TopicTimePoint[]>(() => {
-    const arr: TopicTimePoint[] = [];
-    const localBounds = bounds ?? map.getBounds();
+  // track which pixels have been used
+  const sparse2d: (boolean | undefined)[][] = [];
 
-    // track which pixels have been used
-    const sparse2d: (boolean | undefined)[][] = [];
+  for (const messageEvent of points) {
+    const lat = (messageEvent.message as NavSatFixMsg).latitude;
+    const lon = (messageEvent.message as NavSatFixMsg).longitude;
 
-    for (const messageEvent of allPoints) {
-      const lat = (messageEvent.message as NavSatFixMsg).latitude;
-      const lon = (messageEvent.message as NavSatFixMsg).longitude;
-
-      // if the point is outside the bounds, we don't include it
-      if (!localBounds.contains([lat, lon])) {
-        continue;
-      }
-
-      // get the integer pixel coordinate of the lat/lon and ignore pixels we already have
-      const pixelPoint = map.latLngToContainerPoint([lat, lon]);
-      const x = Math.trunc(pixelPoint.x);
-      const y = Math.trunc(pixelPoint.y);
-      if (sparse2d[x]?.[y] === true) {
-        continue;
-      }
-
-      (sparse2d[x] = sparse2d[x] ?? [])[y] = true;
-      arr.push({
-        topic: messageEvent.topic,
-        lat,
-        lon,
-      });
+    // if the point is outside the bounds, we don't include it
+    if (!localBounds.contains([lat, lon])) {
+      continue;
     }
 
-    return arr;
-  }, [bounds, allPoints, map]);
-
-  const filteredCurrentPoints = useMemo<TopicTimePoint[]>(() => {
-    const arr: TopicTimePoint[] = [];
-    const localBounds = bounds ?? map.getBounds();
-
-    // track which pixels have been used
-    const sparse2d: (boolean | undefined)[][] = [];
-
-    for (const messageEvent of currentPoints) {
-      const lat = (messageEvent.message as NavSatFixMsg).latitude;
-      const lon = (messageEvent.message as NavSatFixMsg).longitude;
-
-      // if the point is outside the bounds, we don't include it
-      if (!localBounds.contains([lat, lon])) {
-        continue;
-      }
-
-      // get the integer pixel coordinate of the lat/lon and ignore pixels we already have
-      const pixelPoint = map.latLngToContainerPoint([lat, lon]);
-      const x = Math.trunc(pixelPoint.x);
-      const y = Math.trunc(pixelPoint.y);
-      if (sparse2d[x]?.[y] === true) {
-        continue;
-      }
-
-      (sparse2d[x] = sparse2d[x] ?? [])[y] = true;
-      arr.push({
-        topic: messageEvent.topic,
-        lat,
-        lon,
-      });
+    // get the integer pixel coordinate of the lat/lon and ignore pixels we already have
+    const pixelPoint = map.latLngToContainerPoint([lat, lon]);
+    const x = Math.trunc(pixelPoint.x);
+    const y = Math.trunc(pixelPoint.y);
+    if (sparse2d[x]?.[y] === true) {
+      continue;
     }
-    return arr;
-  }, [bounds, map, currentPoints]);
 
-  return (
-    <>
-      {filteredAllPoints.map((topicPoint) => {
-        return (
-          <Circle
-            key={`${topicPoint.lat}+${topicPoint.lon}`}
-            center={[topicPoint.lat, topicPoint.lon]}
-            radius={0.01}
-          />
-        );
-      })}
-      {filteredCurrentPoints.map((topicPoint) => {
-        return (
-          <Circle
-            key={`${topicPoint.lat}+${topicPoint.lon}`}
-            center={[topicPoint.lat, topicPoint.lon]}
-            radius={0.01}
-          />
-        );
-      })}
-    </>
-  );
+    (sparse2d[x] = sparse2d[x] ?? [])[y] = true;
+
+    const marker = new Circle([lat, lon], {
+      radius: 0.1,
+      color: args.color,
+    });
+    marker.addTo(markersLayer);
+  }
+
+  return markersLayer;
 }
+
+export default FilteredPointLayer;

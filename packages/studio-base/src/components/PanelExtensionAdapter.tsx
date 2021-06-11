@@ -84,15 +84,11 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     const newRenderState: RenderState = prevRenderState.current;
 
     if (watchedFieldsRef.current.has("currentFrame")) {
-      const currentFrame =
-        playerState.activeData?.messages.filter((messageEvent) => {
-          return subscribedTopicsRef.current.has(messageEvent.topic);
-        }) ?? [];
-      // if there are new frames we should update
-      if (currentFrame?.length !== 0 || prevRenderState.current.currentFrame?.length !== 0) {
-        shouldRender = true;
-        newRenderState.currentFrame = currentFrame;
-      }
+      const currentFrame = playerState.activeData?.messages.filter((messageEvent) => {
+        return subscribedTopicsRef.current.has(messageEvent.topic);
+      });
+      shouldRender = true;
+      newRenderState.currentFrame = currentFrame;
     }
 
     if (watchedFieldsRef.current.has("topics")) {
