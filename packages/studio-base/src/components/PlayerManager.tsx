@@ -30,6 +30,7 @@ import {
   MaybePlayer,
   MessagePipelineProvider,
 } from "@foxglove/studio-base/components/MessagePipeline";
+import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValueChange";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import { useCurrentLayoutSelector } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import PlayerSelectionContext, {
@@ -477,7 +478,8 @@ export default function PlayerManager({
     <>
       <PlayerSelectionContext.Provider value={value}>
         <MessagePipelineProvider maybePlayer={maybePlayer} globalVariables={globalVariables}>
-          {children}
+          {/* To ensure no stale player state remains, we unmount all children when players change */}
+          <RemountOnValueChange value={maybePlayer}>{children}</RemountOnValueChange>
         </MessagePipelineProvider>
       </PlayerSelectionContext.Provider>
     </>
