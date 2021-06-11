@@ -270,7 +270,7 @@ describe("LazyReader", () => {
       expect(reader.source()).toMatchSnapshot(msgDef);
 
       // check that our message matches the object
-      expect(read.toJSON()).toMatchObject(expected);
+      expect(read.toJSON()).toEqual(expected);
     },
   );
 });

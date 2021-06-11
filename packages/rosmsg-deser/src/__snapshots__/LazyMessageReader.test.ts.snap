@@ -45,7 +45,8 @@ class custom_type_CustomType {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       first: this.first,
@@ -97,10 +98,11 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
-      custom: this.custom,
+      custom: this.custom.toJSON(),
     };
   }
 
@@ -165,7 +167,8 @@ class custom_type_MoreCustom {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       field: this.field,
@@ -217,10 +220,11 @@ class custom_type_CustomType {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
-      another: this.another,
+      another: this.another.toJSON(),
     };
   }
 
@@ -269,10 +273,11 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
-      custom: this.custom,
+      custom: this.custom.map((item) => item.toJSON()),
     };
   }
 
@@ -337,7 +342,8 @@ class custom_type_CustomType {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       first: this.first,
@@ -389,10 +395,11 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
-      custom: this.custom,
+      custom: this.custom.map((item) => item.toJSON()),
     };
   }
 
@@ -457,7 +464,8 @@ class custom_type_CustomType {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       first: this.first,
@@ -509,10 +517,11 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
-      custom: this.custom,
+      custom: this.custom.map((item) => item.toJSON()),
     };
   }
 
@@ -572,7 +581,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       stamp: this.stamp,
@@ -632,7 +642,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       arr: this.arr,
@@ -690,7 +701,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       arr: this.arr,
@@ -747,7 +759,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -807,7 +820,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       arr: this.arr,
@@ -894,7 +908,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       first: this.first,
@@ -960,7 +975,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       arr: this.arr,
@@ -1017,7 +1033,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -1077,7 +1094,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       status: this.status,
@@ -1154,7 +1172,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       first: this.first,
@@ -1215,7 +1234,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -1271,7 +1291,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -1331,7 +1352,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       first: this.first,
@@ -1389,7 +1411,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       first: this.first,
@@ -1446,7 +1469,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -1502,7 +1526,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -1558,7 +1583,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -1614,7 +1640,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -1674,7 +1701,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       arr: this.arr,
@@ -1732,7 +1760,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -1788,7 +1817,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -1868,7 +1898,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       first: this.first,
@@ -1932,7 +1963,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -1991,7 +2023,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -2050,7 +2083,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       first: this.first,
@@ -2115,7 +2149,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       first: this.first,
@@ -2178,7 +2213,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       stamp: this.stamp,
@@ -2238,7 +2274,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       arr: this.arr,
@@ -2296,7 +2333,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       arr: this.arr,
@@ -2378,7 +2416,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       blank: this.blank,
@@ -2463,7 +2502,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       blank: this.blank,
@@ -2551,7 +2591,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       blank: this.blank,
@@ -2640,7 +2681,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       blank: this.blank,
@@ -2704,7 +2746,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -2760,7 +2803,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -2816,7 +2860,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       first: this.first,
@@ -2873,7 +2918,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -2929,7 +2975,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -2985,7 +3032,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -3041,7 +3089,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -3097,7 +3146,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,
@@ -3153,7 +3203,8 @@ class __RootMsg {
   }
 
   // return a json object of the fields
-  // this fully parses the message
+  // This fully deserializes all fields of the message into native types
+  // Typed arrays are considered native types and remain as typed arrays
   toJSON() {
     return {
       sample: this.sample,

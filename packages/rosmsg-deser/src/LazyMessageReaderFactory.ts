@@ -271,7 +271,17 @@ export default function buildReader(types: readonly RosMsgDefinition[]): Seriali
           }`);
       }
 
-      fields.push(`${field.name}: this.${field.name}`);
+      // If the field is a simply type we use accessor notiation, this is sufficient to deserialized
+      // Builtin typed arrays fall into this category as well as builtin values
+      if (field.isComplex !== true) {
+        fields.push(`${field.name}: this.${field.name}`);
+      } else if (field.isArray === true) {
+        // The field is an array of complex values, we map each one using toJSON
+        fields.push(`${field.name}: this.${field.name}.map((item) => item.toJSON())`);
+      } else {
+        // The field is a single item complex value
+        fields.push(`${field.name}: this.${field.name}.toJSON()`);
+      }
 
       prevField = field;
     }
@@ -306,7 +316,8 @@ export default function buildReader(types: readonly RosMsgDefinition[]): Seriali
         }
 
         // return a json object of the fields
-        // this fully parses the message
+        // This fully deserializes all fields of the message into native types
+        // Typed arrays are considered native types and remain as typed arrays
         toJSON() {
           return {
             ${fields.join(",\n")}

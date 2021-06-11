@@ -64,6 +64,13 @@ type UserNodeActions = {
   setUserNodeRosLib: (rosLib: string) => void;
 };
 
+function maybePlainObject(rawVal: unknown) {
+  if (rawVal && typeof rawVal === "object" && "toJSON" in rawVal) {
+    return (rawVal as { toJSON: () => unknown }).toJSON();
+  }
+  return rawVal;
+}
+
 // TODO: FUTURE - Performance tests
 // TODO: FUTURE - Consider how to incorporate with existing hardcoded nodes (esp re: stories/testing)
 // 1 - Do we convert them all over to the new node format / Typescript? What about imported libraries?
@@ -342,9 +349,16 @@ export default class UserNodePlayer implements Player {
         this._addUserNodeLogs(nodeId, userNodeLogs);
       }
 
+      // To send the message over RPC we invoke maybePlainObject which calls toJSON on the message
+      // and builds a plain js object of the entire message. This is expensive so a future enhancement
+      // would be to send the underlying message array and build a lazy message reader
       const result = await Promise.race([
         rpc.send<ProcessMessageOutput>("processMessage", {
-          message: msgEvent,
+          message: {
+            topic: msgEvent.topic,
+            receiveTime: msgEvent.receiveTime,
+            message: maybePlainObject(msgEvent.message),
+          },
           globalVariables: this._globalVariables,
         }),
         terminateSignal,
