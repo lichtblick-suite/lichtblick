@@ -52,6 +52,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   const setSubscriptions = useMessagePipeline(selectSetSubscriptions);
   const requestBackfill = useMessagePipeline(selectRequestBackfill);
 
+  const [error, setError] = useState<Error | undefined>();
   const watchedFieldsRef = useRef(new Set<keyof RenderState>());
   const subscribedTopicsRef = useRef(new Set<string>());
   const panelElementRef = useRef<HTMLDivElement>(ReactNull);
@@ -141,9 +142,14 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
 
     // tell the panel to render and lockout future renders until rendering is complete
     renderingRef.current = true;
-    panelContext.onRender(newRenderState, () => {
-      renderingRef.current = false;
-    });
+    try {
+      setError(undefined);
+      panelContext.onRender(newRenderState, () => {
+        renderingRef.current = false;
+      });
+    } catch (err) {
+      setError(err);
+    }
   }
 
   useMessagePipeline((ctx) => {
@@ -229,6 +235,10 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     style.borderColor = "orange";
     style.borderWidth = "1px";
     style.borderStyle = "solid";
+  }
+
+  if (error) {
+    throw error;
   }
 
   return (
