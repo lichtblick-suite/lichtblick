@@ -26,7 +26,6 @@
   "devDependencies": {
     "esbuild-runner": "2.2.0",
     "jest": "27.0.4",
-    "jest-circus": "27.0.0-next.8",
     "typescript": "4.3.2"
   },
   "dependencies": {

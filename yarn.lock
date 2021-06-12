@@ -2632,7 +2632,6 @@ __metadata:
     esbuild-runner: 2.2.0
     eventemitter3: 4.0.7
     jest: 27.0.4
-    jest-circus: 27.0.0-next.8
     md5-typescript: 1.0.5
     rosbag: "github:foxglove/rosbag.js#6ce4e00c16b80973e270d53e9fb362a516e74e03"
     typescript: 4.3.2
@@ -2853,7 +2852,6 @@ __metadata:
   resolution: "@foxglove/velodyne-cloud@workspace:packages/velodyne-cloud"
   dependencies:
     jest: 27.0.4
-    jest-circus: 27.0.0-next.8
     kelonio: 0.6.0
     rosbag: "github:foxglove/rosbag.js#6ce4e00c16b80973e270d53e9fb362a516e74e03"
     typescript: 4.3.2
@@ -2878,7 +2876,6 @@ __metadata:
     "@types/sax": ^1.2.1
     byte-base64: 1.1.0
     jest: 27.0.4
-    jest-circus: 27.0.0-next.8
     sax: 1.2.4
     typescript: 4.3.2
     web-encoding: 1.1.5
@@ -3067,7 +3064,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/environment@npm:^27.0.0-next.8, @jest/environment@npm:^27.0.3":
+"@jest/environment@npm:^27.0.3":
   version: 27.0.3
   resolution: "@jest/environment@npm:27.0.3"
   dependencies:
@@ -3152,7 +3149,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/test-result@npm:^27.0.0-next.8, @jest/test-result@npm:^27.0.2":
+"@jest/test-result@npm:^27.0.2":
   version: 27.0.2
   resolution: "@jest/test-result@npm:27.0.2"
   dependencies:
@@ -3199,7 +3196,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/transform@npm:^27.0.0-next.8, @jest/transform@npm:^27.0.2":
+"@jest/transform@npm:^27.0.2":
   version: 27.0.2
   resolution: "@jest/transform@npm:27.0.2"
   dependencies:
@@ -3235,7 +3232,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jest/types@npm:^27.0.0-next.8, @jest/types@npm:^27.0.2":
+"@jest/types@npm:^27.0.2":
   version: 27.0.2
   resolution: "@jest/types@npm:27.0.2"
   dependencies:
@@ -7761,25 +7758,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-jest@npm:27.0.0-next.8":
-  version: 27.0.0-next.8
-  resolution: "babel-jest@npm:27.0.0-next.8"
-  dependencies:
-    "@jest/transform": ^27.0.0-next.8
-    "@jest/types": ^27.0.0-next.8
-    "@types/babel__core": ^7.1.14
-    babel-plugin-istanbul: ^6.0.0
-    babel-preset-jest: ^27.0.0-next.3
-    chalk: ^4.0.0
-    graceful-fs: ^4.2.4
-    slash: ^3.0.0
-  peerDependencies:
-    "@babel/core": ^7.8.0
-  checksum: d4829b10f890dbaeddd88632b4f9d1d941d300dd401dde163f90f4761939adc54826276ef23415a8eba01c9ff98c19700cade1e06ce7072918c696469dbfb260
-  languageName: node
-  linkType: hard
-
-"babel-jest@npm:^27.0.2":
+"babel-jest@npm:27.0.2, babel-jest@npm:^27.0.2":
   version: 27.0.2
   resolution: "babel-jest@npm:27.0.2"
   dependencies:
@@ -8046,7 +8025,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"babel-preset-jest@npm:^27.0.0-next.3, babel-preset-jest@npm:^27.0.1":
+"babel-preset-jest@npm:^27.0.1":
   version: 27.0.1
   resolution: "babel-preset-jest@npm:27.0.1"
   dependencies:
@@ -12618,7 +12597,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"expect@npm:^27.0.0-next.8, expect@npm:^27.0.2":
+"expect@npm:^27.0.2":
   version: 27.0.2
   resolution: "expect@npm:27.0.2"
   dependencies:
@@ -13414,7 +13393,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": 4.26.0
     "@typescript-eslint/parser": 4.26.0
     amplitude-js: 8.2.1
-    babel-jest: 27.0.0-next.8
+    babel-jest: 27.0.2
     babel-plugin-transform-import-meta: 2.0.0
     browserify-zlib: 0.2.0
     circular-dependency-plugin: 5.2.2
@@ -16234,33 +16213,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-circus@npm:27.0.0-next.8":
-  version: 27.0.0-next.8
-  resolution: "jest-circus@npm:27.0.0-next.8"
-  dependencies:
-    "@jest/environment": ^27.0.0-next.8
-    "@jest/test-result": ^27.0.0-next.8
-    "@jest/types": ^27.0.0-next.8
-    "@types/node": "*"
-    chalk: ^4.0.0
-    co: ^4.6.0
-    dedent: ^0.7.0
-    expect: ^27.0.0-next.8
-    is-generator-fn: ^2.0.0
-    jest-each: ^27.0.0-next.8
-    jest-matcher-utils: ^27.0.0-next.8
-    jest-message-util: ^27.0.0-next.8
-    jest-runner: ^27.0.0-next.8
-    jest-runtime: ^27.0.0-next.8
-    jest-snapshot: ^27.0.0-next.8
-    jest-util: ^27.0.0-next.8
-    pretty-format: ^27.0.0-next.8
-    stack-utils: ^2.0.3
-    throat: ^6.0.1
-  checksum: c15302acbbf1b27b65ad5adfa218a93e06c8e1707ded5ae749f608715a9288387173ed1b5e75ebdbd5601ef95166f9e3ba429ff6f6cde072f63978f917f83181
-  languageName: node
-  linkType: hard
-
 "jest-circus@npm:^27.0.4":
   version: 27.0.4
   resolution: "jest-circus@npm:27.0.4"
@@ -16382,7 +16334,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-each@npm:^27.0.0-next.8, jest-each@npm:^27.0.2":
+"jest-each@npm:^27.0.2":
   version: 27.0.2
   resolution: "jest-each@npm:27.0.2"
   dependencies:
@@ -16523,7 +16475,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-matcher-utils@npm:^27.0.0-next.8, jest-matcher-utils@npm:^27.0.2":
+"jest-matcher-utils@npm:^27.0.2":
   version: 27.0.2
   resolution: "jest-matcher-utils@npm:27.0.2"
   dependencies:
@@ -16535,7 +16487,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-message-util@npm:^27.0.0-next.8, jest-message-util@npm:^27.0.2":
+"jest-message-util@npm:^27.0.2":
   version: 27.0.2
   resolution: "jest-message-util@npm:27.0.2"
   dependencies:
@@ -16616,7 +16568,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-runner@npm:^27.0.0-next.8, jest-runner@npm:^27.0.4":
+"jest-runner@npm:^27.0.4":
   version: 27.0.4
   resolution: "jest-runner@npm:27.0.4"
   dependencies:
@@ -16646,7 +16598,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-runtime@npm:^27.0.0-next.8, jest-runtime@npm:^27.0.4":
+"jest-runtime@npm:^27.0.4":
   version: 27.0.4
   resolution: "jest-runtime@npm:27.0.4"
   dependencies:
@@ -16700,7 +16652,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-snapshot@npm:^27.0.0-next.8, jest-snapshot@npm:^27.0.4":
+"jest-snapshot@npm:^27.0.4":
   version: 27.0.4
   resolution: "jest-snapshot@npm:27.0.4"
   dependencies:
@@ -16746,7 +16698,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-util@npm:^27.0.0-next.8, jest-util@npm:^27.0.2":
+"jest-util@npm:^27.0.2":
   version: 27.0.2
   resolution: "jest-util@npm:27.0.2"
   dependencies:
@@ -20575,7 +20527,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pretty-format@npm:^27.0.0-next.8, pretty-format@npm:^27.0.2":
+"pretty-format@npm:^27.0.2":
   version: 27.0.2
   resolution: "pretty-format@npm:27.0.2"
   dependencies:

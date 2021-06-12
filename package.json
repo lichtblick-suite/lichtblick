@@ -82,7 +82,7 @@
     "@typescript-eslint/eslint-plugin": "4.26.0",
     "@typescript-eslint/parser": "4.26.0",
     "amplitude-js": "8.2.1",
-    "babel-jest": "27.0.0-next.8",
+    "babel-jest": "27.0.2",
     "babel-plugin-transform-import-meta": "2.0.0",
     "browserify-zlib": "0.2.0",
     "circular-dependency-plugin": "5.2.2",
