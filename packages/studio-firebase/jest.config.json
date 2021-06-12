@@ -1,5 +1,4 @@
 {
-  "testRunner": "jest-circus/runner",
   "testMatch": ["<rootDir>/src/**/*.test.ts"],
   "transform": {
     "\\.[jt]sx?$": ["babel-jest", { "rootMode": "upward" }]

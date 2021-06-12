@@ -23,7 +23,7 @@
     "test": "jest"
   },
   "devDependencies": {
-    "jest": "27.0.0-next.8",
+    "jest": "27.0.4",
     "jest-circus": "27.0.0-next.8",
     "kelonio": "0.6.0",
     "rosbag": "github:foxglove/rosbag.js#6ce4e00c16b80973e270d53e9fb362a516e74e03",

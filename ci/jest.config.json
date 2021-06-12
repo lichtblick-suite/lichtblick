@@ -1,5 +1,4 @@
 {
-  "testRunner": "jest-circus/runner",
   "transform": {
     "\\.[jt]sx?$": ["babel-jest", { "rootMode": "upward" }]
   },
