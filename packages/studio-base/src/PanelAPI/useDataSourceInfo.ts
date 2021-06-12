@@ -13,11 +13,12 @@
 
 import { useMemo } from "react";
 
-import { DataSourceInfo } from "@foxglove/studio";
+import { Time, Topic } from "@foxglove/studio";
 import {
   useMessagePipeline,
   MessagePipelineContext,
 } from "@foxglove/studio-base/components/MessagePipeline";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 function selectDatatypes(ctx: MessagePipelineContext) {
   return ctx.datatypes;
@@ -38,6 +39,16 @@ function selectCapabilities(ctx: MessagePipelineContext) {
 function selectPlayerId(ctx: MessagePipelineContext) {
   return ctx.playerState.playerId;
 }
+
+// Metadata about the source of data currently being displayed.
+// This is not expected to change often, usually when changing data sources.
+export type DataSourceInfo = {
+  topics: readonly Topic[];
+  datatypes: RosDatatypes;
+  capabilities: string[];
+  startTime?: Time; // Only `startTime`, since `endTime` can change rapidly when connected to a live system.
+  playerId: string;
+};
 
 /**
  * Data source info" encapsulates **rarely-changing** metadata about the source from which
