@@ -2734,7 +2734,7 @@ __metadata:
     "@types/seedrandom": 3.0.0
     "@types/shallowequal": 1.1.1
     "@types/string-hash": 1.1.1
-    "@types/styled-components": 5.1.9
+    "@types/styled-components": 5.1.10
     "@types/text-metrics": "workspace:packages/@types/text-metrics"
     "@types/three": ^0
     "@types/tinycolor2": 1.4.2
@@ -6071,14 +6071,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/styled-components@npm:5.1.9":
-  version: 5.1.9
-  resolution: "@types/styled-components@npm:5.1.9"
+"@types/styled-components@npm:5.1.10":
+  version: 5.1.10
+  resolution: "@types/styled-components@npm:5.1.10"
   dependencies:
     "@types/hoist-non-react-statics": "*"
     "@types/react": "*"
     csstype: ^3.0.2
-  checksum: 99b5e069a01980b6baec40ecb273bcb51baabbb5ca12905e59d575ab8672e2db1b60a5cf3715214ccf99597d4094aebbaa5d5c54c314332332fe6ec41a19e6c6
+  checksum: 87b3bc1798d9d84d6aeef2652200908484de43b100755496150b9cdf11d681288ad93a6a48e049b52b8ca4fcae34a97f1e81893bd931ccba48c0bf306fd308cf
   languageName: node
   linkType: hard
 

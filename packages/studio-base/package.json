@@ -135,7 +135,7 @@
     "@types/seedrandom": "3.0.0",
     "@types/shallowequal": "1.1.1",
     "@types/string-hash": "1.1.1",
-    "@types/styled-components": "5.1.9",
+    "@types/styled-components": "5.1.10",
     "@types/text-metrics": "workspace:packages/@types/text-metrics",
     "@types/three": "^0",
     "@types/tinycolor2": "1.4.2",
