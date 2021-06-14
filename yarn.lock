@@ -2795,7 +2795,7 @@ __metadata:
     react-transition-group: 4.4.2
     react-use: "patch:react-use@17.2.4#../../patches/react-use.patch"
     react-virtualized: 9.22.3
-    reg-notify-github-plugin: 0.10.15
+    reg-notify-github-plugin: 0.10.16
     reg-publish-gcs-plugin: 0.10.15
     reg-simple-keygen-plugin: 0.10.15
     reg-suit: 0.10.15
@@ -22240,17 +22240,17 @@ react-use@17.2.4:
   languageName: node
   linkType: hard
 
-"reg-notify-github-plugin@npm:0.10.15":
-  version: 0.10.15
-  resolution: "reg-notify-github-plugin@npm:0.10.15"
+"reg-notify-github-plugin@npm:0.10.16":
+  version: 0.10.16
+  resolution: "reg-notify-github-plugin@npm:0.10.16"
   dependencies:
     open: ^8.0.0
     reg-gh-app-interface: ^1.2.0
-    reg-suit-util: ^0.10.15
+    reg-suit-util: ^0.10.16
     request: ^2.88.2
     request-promise: ^4.2.6
     tiny-commit-walker: ^1.1.2
-  checksum: 10033b02db61d276f3bc10b3bd50a8c79426bad4cb6fac8189e97c4d0fb42828f593be5f6ab77786fcb7bb1588ca429aadd881f8ba20421a338f3fe0026181e4
+  checksum: 52922401d30029e6abc170bc31ae2c4ce3d374947f0a2e3910971cea55760110184da88dad73dc8c86609c9626f166a6f7e320d7eef4cfa41d83ee8a45743a28
   languageName: node
   linkType: hard
 
@@ -22286,9 +22286,9 @@ react-use@17.2.4:
   languageName: node
   linkType: hard
 
-"reg-suit-util@npm:^0.10.15":
-  version: 0.10.15
-  resolution: "reg-suit-util@npm:0.10.15"
+"reg-suit-util@npm:^0.10.15, reg-suit-util@npm:^0.10.16":
+  version: 0.10.16
+  resolution: "reg-suit-util@npm:0.10.16"
   dependencies:
     "@types/cli-progress": ^3.8.0
     "@types/cli-spinner": ^0.2.0
@@ -22303,7 +22303,7 @@ react-use@17.2.4:
     lodash: ^4.17.20
     mime-types: ^2.1.27
     mkdirp: ^1.0.4
-  checksum: b64c48029feb9e91a563f8ee1d5753201340dc01ef4c756fce84c1b93cee3485c7a2588b567c8f3f57fba4487a9b4de1a2e21c48906cad9b5f37cdaef1c208e3
+  checksum: f53235e7e13e484ba3ac785e933155e9ff7596c9341bc550fc84fbd1a32002cbe6998cd0ecd7fd6c776f52a80043d5df12b52e41cac07275db31a6c66ebaacf4
   languageName: node
   linkType: hard
 
