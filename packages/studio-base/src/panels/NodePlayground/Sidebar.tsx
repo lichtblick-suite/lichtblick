@@ -140,7 +140,7 @@ type Props = {
   updateExplorer: (explorer: Explorer) => void;
   setScriptOverride: (script: Script, maxDepth?: number) => void;
   script?: Script;
-  addNewNode: (_: any, sourceCode?: string) => void;
+  addNewNode: (sourceCode?: string) => void;
 };
 
 const { utilityFiles } = getNodeProjectConfig();
@@ -260,10 +260,7 @@ const Sidebar = ({
             collapse={() => updateExplorer(undefined)}
           />
           {templates.map(({ name, description, template }, i) => (
-            <TemplateItem
-              key={`${name}-${i}`}
-              onClick={addNewNode.bind(undefined, undefined, template)}
-            >
+            <TemplateItem key={`${name}-${i}`} onClick={() => addNewNode(template)}>
               <span style={{ fontWeight: "bold" }}>{name}</span>
               <span>{description}</span>
             </TemplateItem>

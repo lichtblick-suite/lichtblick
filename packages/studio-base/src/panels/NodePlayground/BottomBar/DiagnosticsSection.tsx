@@ -43,20 +43,18 @@ const DiagnosticsSection = ({ diagnostics }: Props): ReactElement => {
   return diagnostics.length > 0 ? (
     <ul>
       {diagnostics.map(({ severity, message, source, startColumn, startLineNumber }, i) => {
-        const severityLabel = invert(DiagnosticSeverity)[severity] ?? "Error";
+        const severityLabel =
+          (invert(DiagnosticSeverity) as Record<string, keyof typeof DiagnosticSeverity>)[
+            severity
+          ] ?? "Error";
         const errorLoc =
           startLineNumber != undefined && startColumn != undefined
             ? `[${startLineNumber + 1},${startColumn + 1}]`
             : undefined;
         return (
           <li key={`${message}_${i}`}>
-            <Icon
-              tooltip="Severity"
-              small
-              style={{ color: (severityColors as any)[severityLabel] }}
-              active
-            >
-              {(severityIcons as any)[severityLabel]}
+            <Icon tooltip="Severity" small style={{ color: severityColors[severityLabel] }} active>
+              {severityIcons[severityLabel]}
             </Icon>
             <span style={{ padding: "5px" }}>{message}</span>
             <span style={{ color: colors.GRAY }}>

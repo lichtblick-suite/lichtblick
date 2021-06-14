@@ -127,8 +127,9 @@ const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactEl
       </Flex>
       <div
         ref={scrollContainer}
-        onScroll={({ target }: any) => {
-          const scrolledUp = target.scrollHeight - target.scrollTop > target.clientHeight;
+        onScroll={({ currentTarget }) => {
+          const scrolledUp =
+            currentTarget.scrollHeight - currentTarget.scrollTop > currentTarget.clientHeight;
           if (scrolledUp && autoScroll) {
             setAutoScroll(false);
           } else if (!scrolledUp && !autoScroll) {

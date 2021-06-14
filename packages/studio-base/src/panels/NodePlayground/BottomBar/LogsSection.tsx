@@ -36,7 +36,7 @@ type Props = {
   clearLogs: (nodeId: string) => void;
 };
 
-const valueColorMap = {
+const valueColorMap: Record<string, string> = {
   string: jsonTreeTheme.base0B,
   number: jsonTreeTheme.base09,
   boolean: jsonTreeTheme.base09,
@@ -79,7 +79,7 @@ const LogsSection = ({ nodeId, logs, clearLogs }: Props): ReactElement => {
               {renderTreeObj ? (
                 <Tree hideRoot data={value} invertTheme={false} theme={jsonTreeTheme} />
               ) : (
-                <span style={{ color: (valueColorMap as any)[typeof value] || colors.LIGHT }}>
+                <span style={{ color: valueColorMap[typeof value] ?? colors.LIGHT }}>
                   {value == undefined || value === false
                     ? String(value)
                     : (value as React.ReactNode)}

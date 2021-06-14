@@ -94,7 +94,7 @@ const WelcomeScreen = ({
   addNewNode,
   updateExplorer,
 }: {
-  addNewNode: () => void;
+  addNewNode: (code?: string) => void;
   updateExplorer: (explorer: Explorer) => void;
 }) => {
   return (
@@ -113,7 +113,7 @@ const WelcomeScreen = ({
         </a>
         , or just create a new node.
       </TextContent>
-      <Button style={{ marginTop: "8px" }} onClick={addNewNode}>
+      <Button style={{ marginTop: "8px" }} onClick={() => addNewNode()}>
         <Icon medium>
           <PlusIcon />
         </Icon>{" "}
@@ -175,7 +175,7 @@ function NodePlayground(props: Props) {
   }, [props.config.additionalBackStackItems, selectedNode]);
 
   const addNewNode = React.useCallback(
-    (_, code?: string) => {
+    (code?: string) => {
       const newNodeId = uuidv4();
       const sourceCode = code ?? skeletonBody;
       // TODO: Add integration test for this flow.
@@ -220,9 +220,9 @@ function NodePlayground(props: Props) {
       // update code at top of backstack
       const backStack = [...scriptBackStack];
       if (backStack.length > 0) {
-        const script = backStack.pop();
+        const script = backStack.pop()!;
         if (!(script?.readOnly ?? false)) {
-          setScriptBackStack([...backStack, { ...script, code }] as any);
+          setScriptBackStack([...backStack, { ...script, code }]);
         }
       }
     },
@@ -305,7 +305,7 @@ function NodePlayground(props: Props) {
               tooltip="new node"
               dataTest="new-node"
               style={{ color: colors.DARK9, padding: "0 5px" }}
-              onClick={addNewNode}
+              onClick={() => addNewNode()}
             >
               <PlusIcon />
             </Icon>
@@ -313,7 +313,7 @@ function NodePlayground(props: Props) {
 
           <Stack grow style={{ overflow: "hidden " }}>
             {selectedNodeId == undefined && (
-              <WelcomeScreen addNewNode={addNewNode as any} updateExplorer={updateExplorer} />
+              <WelcomeScreen addNewNode={addNewNode} updateExplorer={updateExplorer} />
             )}
             <div
               data-nativeundoredo="true"
