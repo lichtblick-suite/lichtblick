@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Map as LeafMap, TileLayer, Control, LatLngBounds } from "leaflet";
+import { Map as LeafMap, TileLayer, Control, LatLngBounds, Circle } from "leaflet";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -39,6 +39,8 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
   const [currentMap, setCurrentMap] = useState<LeafMap | undefined>(undefined);
 
+  const [previewTime, setPreviewTime] = useState<number | undefined>();
+
   // Subscribe to relevant topics
   useEffect(() => {
     // The map only supports sensor_msgs/NavSatFix
@@ -65,7 +67,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       maxZoom: 24,
     });
 
-    const satelite = new TileLayer(
+    const satelliteLayer = new TileLayer(
       "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
       {
         attribution:
@@ -85,7 +87,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     // layer controls for user selection between satellite and map
     const layerControl = new Control.Layers();
     layerControl.addBaseLayer(tileLayer, "map");
-    layerControl.addBaseLayer(satelite, "satellite");
+    layerControl.addBaseLayer(satelliteLayer, "satellite");
     layerControl.setPosition("topleft");
     layerControl.addTo(map);
 
@@ -95,12 +97,15 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     context.watch("topics");
     context.watch("currentFrame");
     context.watch("allFrames");
+    context.watch("previewTime");
 
     // The render event handler updates the state for our messages an triggers a component render
     //
     // The panel must call the _done_ function passed to render indicating the render completed.
     // The panel will not receive render calls until it calls done.
     context.onRender = (renderState, done) => {
+      setPreviewTime(renderState.previewTime);
+
       if (renderState.topics) {
         setTopics(renderState.topics);
       }
@@ -207,6 +212,41 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       currentMap?.removeLayer(pointLayer);
     };
   }, [currentMap, filterBounds, navMessages]);
+
+  // create a marker for the closest gps message to our current preview time
+  useEffect(() => {
+    if (!currentMap || previewTime == undefined) {
+      return;
+    }
+
+    // get the point occuring most recently before preview time but not after preview time
+    let point: Point | undefined;
+    let stampDelta = Number.MAX_VALUE;
+    for (const msgEvent of allNavMessages) {
+      const stamp = msgEvent.receiveTime.sec + msgEvent.receiveTime.nsec / 1e9;
+      const delta = previewTime - stamp;
+      if (delta < stampDelta && delta >= 0) {
+        stampDelta = delta;
+        point = {
+          lat: (msgEvent.message as NavSatFixMsg).latitude,
+          lon: (msgEvent.message as NavSatFixMsg).longitude,
+        };
+      }
+    }
+    if (!point) {
+      return;
+    }
+
+    const marker = new Circle([point.lat, point.lon], {
+      radius: 0.1,
+      color: "yellow",
+    });
+
+    marker.addTo(currentMap);
+    return () => {
+      marker.remove();
+    };
+  }, [allNavMessages, currentMap, filterBounds, previewTime]);
 
   // persist panel config on zoom changes
   useEffect(() => {

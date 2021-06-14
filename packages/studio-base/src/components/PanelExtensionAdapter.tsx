@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { CSSProperties, useLayoutEffect, useRef, useState } from "react";
+import { CSSProperties, useCallback, useLayoutEffect, useRef, useState } from "react";
 import { v4 as uuid } from "uuid";
 
 import Logger from "@foxglove/log";
@@ -12,6 +12,11 @@ import {
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import {
+  useClearHoverValue,
+  useHoverValue,
+  useSetHoverValue,
+} from "@foxglove/studio-base/context/HoverValueContext";
 import { PlayerState } from "@foxglove/studio-base/players/types";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
@@ -74,7 +79,19 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   // multiple times so we gate requesting new message frames
   const rafRequestedRef = useRef(false);
 
-  function renderPanel() {
+  const hoverValue = useHoverValue({
+    componentId: "PanelExtensionAdatper",
+    isTimestampScale: true,
+  });
+  const setHoverValue = useSetHoverValue();
+  const clearHoverValue = useClearHoverValue();
+
+  // To avoid re-creating the renderPanel function when hover value changes we put it into a ref
+  // It is sufficient for renderPanel to use the latest value when called.
+  const hoverValueRef = useRef<typeof hoverValue>();
+  hoverValueRef.current = hoverValue;
+
+  const renderPanel = useCallback(() => {
     rafRequestedRef.current = false;
 
     const ctx = latestPipelineContextRef.current;
@@ -136,6 +153,22 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       prevBlocksRef.current = newBlocks;
     }
 
+    if (watchedFieldsRef.current.has("previewTime")) {
+      const startTime = ctx.playerState.activeData?.startTime;
+      const hoverVal = hoverValueRef.current?.value;
+
+      if (startTime != undefined && hoverVal != undefined) {
+        const startStamp = startTime.sec + startTime.nsec / 1e9;
+        const stamp = startStamp + hoverVal;
+        if (stamp !== newRenderState.previewTime) {
+          shouldRender = true;
+        }
+        newRenderState.previewTime = stamp;
+      } else {
+        newRenderState.previewTime = undefined;
+      }
+    }
+
     if (!shouldRender) {
       return;
     }
@@ -150,7 +183,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     } catch (err) {
       setError(err);
     }
-  }
+  }, []);
 
   useMessagePipeline((ctx) => {
     latestPipelineContextRef.current = ctx;
@@ -183,6 +216,26 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       initialState: configRef.current,
 
       saveState: saveConfig,
+
+      setPreviewTime: (stamp: number | undefined) => {
+        if (stamp === undefined) {
+          clearHoverValue("PanelExtensionAdatper");
+        } else {
+          const ctx = latestPipelineContextRef.current;
+          const startTime = ctx?.playerState.activeData?.startTime;
+          // if we don't have a start time we cannot correctly set the playback seconds hover value
+          // this hover value needs seconds from start
+          if (!startTime) {
+            return;
+          }
+          const secondsFromStart = stamp - startTime.sec + startTime.nsec / 1e9;
+          setHoverValue({
+            type: "PLAYBACK_SECONDS",
+            componentId: "PanelExtensionAdatper",
+            value: secondsFromStart,
+          });
+        }
+      },
 
       watch: (field: keyof RenderState) => {
         watchedFieldsRef.current.add(field);
@@ -228,7 +281,15 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       panelContextRef.current = undefined;
       setSubscriptions(subscriberId, []);
     };
-  }, [initPanel, saveConfig, setSubscriptions, requestBackfill]);
+  }, [
+    clearHoverValue,
+    initPanel,
+    renderPanel,
+    requestBackfill,
+    saveConfig,
+    setHoverValue,
+    setSubscriptions,
+  ]);
 
   const style: CSSProperties = {};
   if (slowRender) {

@@ -40,6 +40,16 @@ declare module "@foxglove/studio" {
      * List of available topics. This list includes subscribed and unsubscribed topics.
      */
     topics?: readonly Topic[];
+
+    /**
+     * A seconds value indicating a preview time. The preview time is set when a user hovers
+     * over the seek bar or when a panel sets the preview time explicitly. The preview time
+     * is a seconds value within the playback range.
+     *
+     * i.e. A plot panel may set the preview time when a user is hovering over the plot to signal
+     * to other panels where the user is currently hovering and allow them to render accordingly.
+     */
+    previewTime?: number;
   }
 
   export type PanelExtensionContext = {
@@ -66,6 +76,11 @@ declare module "@foxglove/studio" {
      * The state value should be JSON serializable.
      */
     saveState: (state: Partial<unknown>) => void;
+
+    /**
+     * Set the active preview time. Setting the preview time to undefined clears the preview time.
+     */
+    setPreviewTime: (time: number | undefined) => void;
 
     /**
      * Process render events for the panel. Each render event receives a render state and a done callback.
