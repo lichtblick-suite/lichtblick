@@ -16,7 +16,12 @@ export const CatchRenderError = (): JSX.Element => {
     context.watch("topics");
 
     context.onRender = () => {
-      throw new Error("sample render error");
+      const err = new Error("sample render error");
+      // The default stacktrace contains paths from the webpack bundle. These paths have the bundle
+      // identifier/hash and change whenever the bundle changes. This makes the story change.
+      // To avoid the story changing we set the stacktrace explicitly.
+      err.stack = "sample stacktrace";
+      throw err;
     };
   };
 
