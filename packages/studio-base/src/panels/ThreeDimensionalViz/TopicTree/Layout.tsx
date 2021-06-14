@@ -242,8 +242,9 @@ export default function Layout({
   const [_, forceUpdate] = useReducer((x: number) => x + 1, 0);
   const measuringElRef = useRef<MeasuringTool>(ReactNull);
   const [drawingTabType, setDrawingTabType] = useState<DrawingTabType | undefined>(undefined);
-  const [interactionsTabType, setInteractionsTabType] =
-    useState<DrawingTabType | undefined>(undefined);
+  const [interactionsTabType, setInteractionsTabType] = useState<DrawingTabType | undefined>(
+    undefined,
+  );
 
   const [selectionState, setSelectionState] = useState<UserSelectionState>({
     clickedObjects: [],

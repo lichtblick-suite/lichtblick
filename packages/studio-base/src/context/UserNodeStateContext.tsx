@@ -19,17 +19,16 @@ type UserNodeState = {
   };
 };
 
-export const UserNodeStateContext =
-  createContext<
-    | {
-        state: UserNodeState;
-        setUserNodeDiagnostics: (nodeId: string, diagnostics: readonly Diagnostic[]) => void;
-        addUserNodeLogs: (nodeId: string, logs: readonly UserNodeLog[]) => void;
-        clearUserNodeLogs: (nodeId: string) => void;
-        setUserNodeRosLib: (rosLib: string) => void;
-      }
-    | undefined
-  >(undefined);
+export const UserNodeStateContext = createContext<
+  | {
+      state: UserNodeState;
+      setUserNodeDiagnostics: (nodeId: string, diagnostics: readonly Diagnostic[]) => void;
+      addUserNodeLogs: (nodeId: string, logs: readonly UserNodeLog[]) => void;
+      clearUserNodeLogs: (nodeId: string) => void;
+      setUserNodeRosLib: (rosLib: string) => void;
+    }
+  | undefined
+>(undefined);
 
 export function UserNodeStateProvider({ children }: React.PropsWithChildren<unknown>): JSX.Element {
   const [state, setState] = useState<UserNodeState>({ rosLib: ros_lib_dts, nodeStates: {} });

@@ -151,18 +151,17 @@ export function useMessageReducer<T>(props: Params<T>): T {
 
   const { restore, addMessage, addMessages } = props;
 
-  const state =
-    useRef<
-      | Readonly<{
-          messageEvents: PlayerStateActiveData["messages"] | undefined;
-          lastSeekTime: number | undefined;
-          reducedValue: T;
-          restore: typeof restore;
-          addMessage: typeof addMessage;
-          addMessages: typeof addMessages;
-        }>
-      | undefined
-    >();
+  const state = useRef<
+    | Readonly<{
+        messageEvents: PlayerStateActiveData["messages"] | undefined;
+        lastSeekTime: number | undefined;
+        reducedValue: T;
+        restore: typeof restore;
+        addMessage: typeof addMessage;
+        addMessages: typeof addMessages;
+      }>
+    | undefined
+  >();
 
   return useMessagePipeline(
     useCallback(

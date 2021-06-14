@@ -387,12 +387,11 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
 
   // We use a custom tooltip so we can style it more nicely, and so that it can break
   // out of the bounds of the canvas, in case the panel is small.
-  const [activeTooltip, setActiveTooltip] =
-    useState<{
-      x: number;
-      y: number;
-      data: TimeBasedChartTooltipData;
-    }>();
+  const [activeTooltip, setActiveTooltip] = useState<{
+    x: number;
+    y: number;
+    data: TimeBasedChartTooltipData;
+  }>();
   const { tooltip } = useTooltip({
     shown: true,
     noPointerEvents: true,

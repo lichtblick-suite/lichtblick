@@ -67,10 +67,9 @@ export function useCachedGetMessagePathDataItems(
     }
     return filledInPaths;
   }, [globalVariables, memoizedPaths]);
-  const memoizedFilledInPaths =
-    useDeepMemo<{
-      [key: string]: RosPath;
-    }>(unmemoizedFilledInPaths);
+  const memoizedFilledInPaths = useDeepMemo<{
+    [key: string]: RosPath;
+  }>(unmemoizedFilledInPaths);
 
   // Cache MessagePathDataItem arrays by Message. We need to clear out this cache whenever
   // the topics or datatypes change, since that's what getMessagePathDataItems

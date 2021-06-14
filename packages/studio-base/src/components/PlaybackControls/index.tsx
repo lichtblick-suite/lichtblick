@@ -97,8 +97,9 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
     const el = useRef<HTMLDivElement>(ReactNull);
     const slider = useRef<Slider>(ReactNull);
     const [repeat, setRepeat] = useState(false);
-    const [tooltipState, setTooltipState] =
-      useState<{ x: number; y: number; tip: JSX.Element } | undefined>();
+    const [tooltipState, setTooltipState] = useState<
+      { x: number; y: number; tip: JSX.Element } | undefined
+    >();
     const { tooltip } = useTooltip({
       shown: tooltipState != undefined,
       noPointerEvents: true,

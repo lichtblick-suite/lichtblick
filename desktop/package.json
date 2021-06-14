@@ -6,7 +6,7 @@
     "@foxglove/studio-firebase": "workspace:packages/studio-firebase"
   },
   "devDependencies": {
-    "@types/plist": "^3",
+    "@types/plist": "^3.0.2",
     "plist": "3.0.2",
     "quicklookjs": "0.0.2"
   }

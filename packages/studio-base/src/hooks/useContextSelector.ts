@@ -32,10 +32,9 @@ export default function useContextSelector<T, U>(
   }
 
   const [_, forceUpdate] = useReducer((x: number) => x + 1, 0);
-  const state =
-    useRef<
-      Readonly<{ contextValue: T; selectedValue: U; selector: (value: T) => U }> | undefined
-    >();
+  const state = useRef<
+    Readonly<{ contextValue: T; selectedValue: U; selector: (value: T) => U }> | undefined
+  >();
   const contextValue = handle.currentValue();
   if (
     state.current === undefined ||

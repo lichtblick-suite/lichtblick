@@ -64,8 +64,9 @@ export function UnconnectedPlaybackPerformance({
   timestamp,
   activeData,
 }: UnconnectedPlaybackPerformanceProps): JSX.Element {
-  const playbackInfo =
-    React.useRef<{ timestamp: number; activeData: PlayerStateActiveData } | undefined>();
+  const playbackInfo = React.useRef<
+    { timestamp: number; activeData: PlayerStateActiveData } | undefined
+  >();
   const lastPlaybackInfo = playbackInfo.current;
   if (activeData && (!playbackInfo.current || playbackInfo.current.activeData !== activeData)) {
     playbackInfo.current = { timestamp, activeData };
