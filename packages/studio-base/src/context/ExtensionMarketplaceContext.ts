@@ -6,7 +6,6 @@ import { createContext, useContext } from "react";
 
 export type ExtensionMarketplaceDetail = {
   id: string;
-  installed?: boolean;
   name: string;
   description: string;
   publisher: string;

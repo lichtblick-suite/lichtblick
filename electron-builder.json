@@ -31,6 +31,11 @@
         "mimeType": "application/octet-stream"
       },
       {
+        "ext": "foxe",
+        "name": "Foxglove Studio Extension",
+        "mimeType": "application/zip"
+      },
+      {
         "ext": "urdf",
         "name": "Unified Robot Description Format File",
         "mimeType": "text/xml"
@@ -50,6 +55,11 @@
         "ext": "bag",
         "name": "ROS Bag File",
         "icon": "resources/icon/BagIcon.ico"
+      },
+      {
+        "ext": "foxe",
+        "name": "Foxglove Studio Extension",
+        "mimeType": "application/zip"
       },
       {
         "ext": "urdf",
@@ -80,6 +90,7 @@
     ],
     "extraResources": [
       { "from": "resources/icon/BagIcon.png", "to": "BagIcon.png" },
+      { "from": "resources/icon/FoxeIcon.png", "to": "FoxeIcon.png" },
       { "from": "resources/icon/URDFIcon.png", "to": "URDFIcon.png" },
       { "from": "resources/icon/XacroIcon.png", "to": "XacroIcon.png" }
     ],
@@ -93,6 +104,15 @@
           "LSHandlerRank": "Default",
           "CFBundleTypeIconSystemGenerated": 1,
           "LSItemContentTypes": ["org.ros.bag"]
+        },
+        {
+          "CFBundleTypeExtensions": ["foxe"],
+          "CFBundleTypeIconFile": "FoxeIcon",
+          "CFBundleTypeName": "Foxglove Studio Extension File",
+          "CFBundleTypeRole": "Viewer",
+          "LSHandlerRank": "Default",
+          "CFBundleTypeIconSystemGenerated": 1,
+          "LSItemContentTypes": ["dev.foxglove.extension"]
         },
         {
           "CFBundleTypeExtensions": ["urdf"],
@@ -126,6 +146,13 @@
           "UTTypeIcons": { "UTTypeIconText": "bag" },
           "UTTypeIdentifier": "org.ros.bag",
           "UTTypeTagSpecification": { "public.filename-extension": "bag" }
+        },
+        {
+          "UTTypeConformsTo": ["public.data", "public.archive", "public.zip-archive"],
+          "UTTypeDescription": "Foxglove Studio Extension File",
+          "UTTypeIcons": { "UTTypeIconText": "foxe" },
+          "UTTypeIdentifier": "dev.foxglove.extension",
+          "UTTypeTagSpecification": { "public.filename-extension": "foxe" }
         },
         {
           "UTTypeConformsTo": ["public.xml"],

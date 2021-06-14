@@ -4,20 +4,35 @@
 
 import { createContext, useContext } from "react";
 
-export interface ExtensionDetail {
+export type ExtensionInfo = {
   id: string;
   name: string;
+  displayName: string;
   description: string;
   publisher: string;
   homepage: string;
   license: string;
   version: string;
   keywords: string[];
-  source: string;
-}
+};
 
 export interface ExtensionLoader {
-  getExtensions(): Promise<ExtensionDetail[]>;
+  // get a list of installed extensions
+  getExtensions(): Promise<ExtensionInfo[]>;
+
+  // load the source code for a specific extension
+  loadExtension(id: string): Promise<string>;
+
+  // download a .foxe file from a web URL and store it in memory. The resulting binary data can be
+  // passed into `installExtension`
+  downloadExtension(url: string): Promise<Uint8Array>;
+
+  // install extension contained within the file data
+  installExtension(foxeFileData: Uint8Array): Promise<ExtensionInfo>;
+
+  // uninstall extension with id
+  // return true if the extension was found and uninstalled, false if not found
+  uninstallExtension(id: string): Promise<boolean>;
 }
 
 const ExtensionLoaderContext = createContext<ExtensionLoader | undefined>(undefined);

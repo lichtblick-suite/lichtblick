@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { mergeStyles, MessageBar, MessageBarType, Stack, useTheme } from "@fluentui/react";
-import { SetStateAction, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useAsync } from "react-use";
 import styled from "styled-components";
 
@@ -73,10 +73,13 @@ export default function ExtensionsSidebar(): React.ReactElement {
 
   const [shouldFetch, setShouldFetch] = useState<boolean>(true);
   const [marketplaceEntries, setMarketplaceEntries] = useState<ExtensionMarketplaceDetail[]>([]);
-  const [focusedExtension, setFocusedExtension] = useState<ExtensionMarketplaceDetail | undefined>(
-    undefined,
-  );
-
+  const [focusedExtension, setFocusedExtension] = useState<
+    | {
+        installed: boolean;
+        entry: ExtensionMarketplaceDetail;
+      }
+    | undefined
+  >(undefined);
   const extensionLoader = useExtensionLoader();
   const marketplace = useExtensionMarketplace();
 
@@ -99,20 +102,17 @@ export default function ExtensionsSidebar(): React.ReactElement {
     setMarketplaceEntries(entries);
   }, [marketplace, shouldFetch]);
 
-  const marketplaceMap = useMemo(
-    () =>
-      new Map<string, ExtensionMarketplaceDetail>(
-        marketplaceEntries.map((entry) => [entry.id, entry]),
-      ),
-    [marketplaceEntries],
-  );
+  const marketplaceMap = useMemo(() => {
+    return new Map<string, ExtensionMarketplaceDetail>(
+      marketplaceEntries.map((entry) => [entry.id, entry]),
+    );
+  }, [marketplaceEntries]);
 
   const installedEntries = useMemo<ExtensionMarketplaceDetail[]>(
     () =>
       (installed ?? []).map((entry) => {
         const marketplaceEntry = marketplaceMap.get(entry.id);
         if (marketplaceEntry != undefined) {
-          marketplaceEntry.installed = true;
           return marketplaceEntry;
         }
 
@@ -131,17 +131,24 @@ export default function ExtensionsSidebar(): React.ReactElement {
     [installed, marketplaceMap],
   );
 
+  // Hide installed extensions from the list of available extensions
+  const filteredMarketplaceEntries = useMemo(() => {
+    const installedIds = new Set<string>(installed?.map((entry) => entry.id));
+    return marketplaceEntries.filter((entry) => !installedIds.has(entry.id));
+  }, [marketplaceEntries, installed]);
+
   if (focusedExtension != undefined) {
     return (
       <ExtensionDetails
-        extension={focusedExtension}
+        installed={focusedExtension.installed}
+        extension={focusedExtension.entry}
         onClose={() => setFocusedExtension(undefined)}
       />
     );
   }
 
   if (availableError) {
-    return FetchError(() => setShouldFetch(true));
+    return <FetchError onRetry={() => setShouldFetch(true)}></FetchError>;
   }
 
   return (
@@ -151,14 +158,36 @@ export default function ExtensionsSidebar(): React.ReactElement {
           <SectionHeader>Installed</SectionHeader>
           <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
             {installedEntries.length > 0
-              ? installedEntries.map((entry) => ExtensionListEntry(entry, setFocusedExtension))
+              ? installedEntries.map((entry) => (
+                  <ExtensionListEntry
+                    key={entry.id}
+                    entry={entry}
+                    onClick={() =>
+                      setFocusedExtension({
+                        installed: true,
+                        entry,
+                      })
+                    }
+                  />
+                ))
               : "No installed extensions"}
           </Stack>
         </Stack.Item>
         <Stack.Item>
           <SectionHeader>Available</SectionHeader>
           <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
-            {marketplaceEntries.map((entry) => ExtensionListEntry(entry, setFocusedExtension))}
+            {filteredMarketplaceEntries.map((entry) => (
+              <ExtensionListEntry
+                key={entry.id}
+                entry={entry}
+                onClick={() =>
+                  setFocusedExtension({
+                    installed: false,
+                    entry,
+                  })
+                }
+              />
+            ))}
           </Stack>
         </Stack.Item>
       </Stack>
@@ -166,16 +195,13 @@ export default function ExtensionsSidebar(): React.ReactElement {
   );
 }
 
-function ExtensionListEntry(
-  entry: ExtensionMarketplaceDetail,
-  setFocusedExtension: (value: SetStateAction<ExtensionMarketplaceDetail | undefined>) => void,
-): React.ReactElement {
+function ExtensionListEntry(props: {
+  entry: ExtensionMarketplaceDetail;
+  onClick: () => void;
+}): JSX.Element {
+  const { entry } = props;
   return (
-    <Stack.Item
-      key={entry.id}
-      className={ListItemStyles}
-      onClick={() => setFocusedExtension(entry)}
-    >
+    <Stack.Item key={entry.id} className={ListItemStyles} onClick={props.onClick}>
       <NameLine>
         <Name>{entry.name}</Name>
         <Version>{entry.version}</Version>
@@ -190,7 +216,7 @@ function ExtensionListEntry(
   );
 }
 
-function FetchError(onRetry: () => void): React.ReactElement {
+function FetchError(props: { onRetry: () => void }): React.ReactElement {
   const errorMsg =
     "Failed to fetch the list of available extensions. Check your Internet connection and try again.";
   return (
@@ -209,7 +235,7 @@ function FetchError(onRetry: () => void): React.ReactElement {
           left: "50%",
           transform: "translate(-50%, -50%)",
         }}
-        onClick={onRetry}
+        onClick={props.onRetry}
       >
         Retry Fetching Extensions
       </Button>

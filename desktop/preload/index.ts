@@ -15,7 +15,7 @@ import { NetworkInterface, OsContext } from "@foxglove/studio-base/src/OsContext
 import pkgInfo from "../../package.json";
 import { Desktop, ForwardedMenuEvent, NativeMenuBridge, Storage } from "../common/types";
 import LocalFileStorage from "./LocalFileStorage";
-import { loadExtensions } from "./extensions";
+import { getExtensions, loadExtension, installExtension, uninstallExtension } from "./extensions";
 
 const log = Logger.getLogger(__filename);
 
@@ -113,9 +113,23 @@ const desktopBridge: Desktop = {
   async getExtensions() {
     const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
     const userExtensionRoot = pathJoin(homePath, ".foxglove-studio", "extensions");
-    const userExtensions = await loadExtensions(userExtensionRoot);
-
+    const userExtensions = await getExtensions(userExtensionRoot);
     return userExtensions;
+  },
+  async loadExtension(id: string) {
+    const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
+    const userExtensionRoot = pathJoin(homePath, ".foxglove-studio", "extensions");
+    return await loadExtension(id, userExtensionRoot);
+  },
+  async installExtension(foxeFileData: Uint8Array) {
+    const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
+    const userExtensionRoot = pathJoin(homePath, ".foxglove-studio", "extensions");
+    return installExtension(foxeFileData, userExtensionRoot);
+  },
+  async uninstallExtension(id: string): Promise<boolean> {
+    const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
+    const userExtensionRoot = pathJoin(homePath, ".foxglove-studio", "extensions");
+    return uninstallExtension(id, userExtensionRoot);
   },
 };
 

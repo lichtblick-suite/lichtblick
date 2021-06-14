@@ -46,6 +46,7 @@ import Toolbar from "@foxglove/studio-base/components/Toolbar";
 import { useAppConfiguration } from "@foxglove/studio-base/context/AppConfigurationContext";
 import { useAssets } from "@foxglove/studio-base/context/AssetContext";
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
 import { PanelSettingsContext } from "@foxglove/studio-base/context/PanelSettingsContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
@@ -136,7 +137,7 @@ function Variables() {
 }
 
 // file types we support for drag/drop
-const allowedDropExtensions = [".bag", ".urdf"];
+const allowedDropExtensions = [".bag", ".foxe", ".urdf"];
 
 type WorkspaceProps = {
   demoBagUrl?: string;
@@ -273,20 +274,37 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const { loadFromFile } = useAssets();
 
+  const extensionLoader = useExtensionLoader();
+
   const openFiles = useCallback(
     async (files: FileList, { shiftPressed }: { shiftPressed: boolean }) => {
       const otherFiles: File[] = [];
       for (const file of files) {
-        try {
-          // electron extends File with a `path` field which is not available in browsers
-          const basePath = (file as { path?: string }).path ?? "";
-          if (!(await loadFromFile(file, { basePath }))) {
-            otherFiles.push(file);
+        // electron extends File with a `path` field which is not available in browsers
+        const basePath = (file as { path?: string }).path ?? "";
+
+        if (file.name.endsWith(".foxe")) {
+          // Extension installation
+          try {
+            const arrayBuffer = await file.arrayBuffer();
+            const data = new Uint8Array(arrayBuffer);
+            const extension = await extensionLoader.installExtension(data);
+            addToast(`Installed extension ${extension.id}`, { appearance: "success" });
+          } catch (err) {
+            addToast(`Failed to install extension ${file.name}: ${err.message}`, {
+              appearance: "error",
+            });
           }
-        } catch (err) {
-          addToast(`Failed to load ${file.name}`, {
-            appearance: "error",
-          });
+        } else {
+          try {
+            if (!(await loadFromFile(file, { basePath }))) {
+              otherFiles.push(file);
+            }
+          } catch (err) {
+            addToast(`Failed to load ${file.name}`, {
+              appearance: "error",
+            });
+          }
         }
       }
 
@@ -304,7 +322,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         );
       }
     },
-    [addToast, loadFromFile, selectSource],
+    [addToast, extensionLoader, loadFromFile, selectSource],
   );
 
   // files the main thread told us to open

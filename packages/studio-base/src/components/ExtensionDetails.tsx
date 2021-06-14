@@ -3,18 +3,22 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { ActionButton, Pivot, PivotItem } from "@fluentui/react";
-import { useAsync } from "react-use";
+import { useCallback, useState } from "react";
+import { useToasts } from "react-toast-notifications";
+import { useAsync, useMountedState } from "react-use";
 import styled from "styled-components";
 
 import Button from "@foxglove/studio-base/components/Button";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import TextContent from "@foxglove/studio-base/components/TextContent";
+import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
 import {
   ExtensionMarketplaceDetail,
   useExtensionMarketplace,
 } from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
 
 type Props = {
+  installed: boolean;
   extension: ExtensionMarketplaceDetail;
   onClose: () => void;
 };
@@ -24,6 +28,11 @@ const ExtensionId = styled.a`
   background-color: rgba(255, 255, 255, 0.2);
   padding: 3px;
   text-decoration: none;
+  white-space: nowrap;
+  display: inline-block;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  overflow: hidden;
 `;
 
 const Publisher = styled.div`
@@ -49,10 +58,15 @@ const Description = styled.div`
   margin-bottom: 16px;
 `;
 
-export function ExtensionDetails({ extension, onClose }: Props): React.ReactElement {
+export function ExtensionDetails({ extension, onClose, installed }: Props): React.ReactElement {
+  const [isInstalled, setIsInstalled] = useState(installed);
+  const isMounted = useMountedState();
+  const extensionLoader = useExtensionLoader();
   const marketplace = useExtensionMarketplace();
+  const { addToast } = useToasts();
   const readmeUrl = extension.readme;
   const changelogUrl = extension.changelog;
+  const canInstall = extension.foxe != undefined;
 
   const { value: readmeContent } = useAsync(
     async () => (readmeUrl != undefined ? await marketplace.getMarkdown(readmeUrl) : ""),
@@ -62,6 +76,27 @@ export function ExtensionDetails({ extension, onClose }: Props): React.ReactElem
     async () => (changelogUrl != undefined ? await marketplace.getMarkdown(changelogUrl) : ""),
     [marketplace, changelogUrl],
   );
+
+  const install = useCallback(async () => {
+    const url = extension.foxe;
+    try {
+      if (url == undefined) {
+        throw new Error(`Cannot install extension ${extension.id}, "foxe" URL is missing`);
+      }
+      const data = await extensionLoader.downloadExtension(url);
+      await extensionLoader.installExtension(data);
+      isMounted() && setIsInstalled(true);
+    } catch (err) {
+      addToast(`Failed to download extension ${extension.id}: ${err.message}`, {
+        appearance: "error",
+      });
+    }
+  }, [extension.id, extension.foxe, extensionLoader, isMounted, addToast]);
+
+  const uninstall = useCallback(async () => {
+    await extensionLoader.uninstallExtension(extension.id);
+    isMounted() && setIsInstalled(false);
+  }, [extension.id, extensionLoader, isMounted]);
 
   return (
     <SidebarContent title={extension.name} paddingLeft="32px">
@@ -77,7 +112,11 @@ export function ExtensionDetails({ extension, onClose }: Props): React.ReactElem
       <License>{extension.license}</License>
       <Publisher>{extension.publisher}</Publisher>
       <Description>{extension.description}</Description>
-      {extension.installed === true ? <UninstallButton /> : <InstallButton />}
+      {isInstalled ? (
+        <UninstallButton onClick={uninstall} />
+      ) : canInstall ? (
+        <InstallButton onClick={install} />
+      ) : undefined}
       <Pivot style={{ marginTop: "16px" }}>
         <PivotItem headerText="README">
           <TextContent>{readmeContent}</TextContent>
@@ -90,17 +129,17 @@ export function ExtensionDetails({ extension, onClose }: Props): React.ReactElem
   );
 }
 
-function UninstallButton(): React.ReactElement {
+function UninstallButton({ onClick }: { onClick: () => void }): React.ReactElement {
   return (
-    <Button style={{ minWidth: "100px" }} onClick={() => {}}>
+    <Button style={{ minWidth: "100px" }} onClick={onClick}>
       Uninstall
     </Button>
   );
 }
 
-function InstallButton(): React.ReactElement {
+function InstallButton({ onClick }: { onClick: () => void }): React.ReactElement {
   return (
-    <Button style={{ minWidth: "100px" }} onClick={() => {}}>
+    <Button style={{ minWidth: "100px" }} onClick={onClick}>
       Install
     </Button>
   );

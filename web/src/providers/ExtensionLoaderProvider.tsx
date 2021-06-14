@@ -6,7 +6,7 @@ import { PropsWithChildren } from "react";
 import { useAsync } from "react-use";
 
 import Logger from "@foxglove/log";
-import { ExtensionDetail, ExtensionLoader, ExtensionLoaderContext } from "@foxglove/studio-base";
+import { ExtensionInfo, ExtensionLoader, ExtensionLoaderContext } from "@foxglove/studio-base";
 
 const log = Logger.getLogger(__filename);
 
@@ -17,24 +17,32 @@ export default function ExtensionRegistryProvider(props: PropsWithChildren<unkno
 
     try {
       const builtinExtensionFetch = await fetch("/builtinextensions.js");
-      const source = await builtinExtensionFetch.text();
 
-      const extensions: ExtensionDetail[] = [
+      const extensions: ExtensionInfo[] = [
         {
           id: "foxglove.builtin",
-          name: "Built-In Extensions",
+          name: "builtin",
+          displayName: "Built-In Extensions",
           description: "Foxglove Studio built-in extensions",
           publisher: "Foxglove",
           homepage: "https://github.com/foxglove/studio",
           license: "MPL-2.0",
           version: "0.0.0",
           keywords: [],
-          source: source,
         },
       ];
 
       const loader: ExtensionLoader = {
         getExtensions: () => Promise.resolve(extensions),
+        loadExtension: (id: string): Promise<string> => {
+          if (id === "foxglove.builtin") {
+            return builtinExtensionFetch.text();
+          }
+          throw new Error(`Cannot load ${id}, extension loading is not currently supported on web`);
+        },
+        downloadExtension,
+        installExtension,
+        uninstallExtension,
       };
       return loader;
     } catch (err) {
@@ -42,6 +50,10 @@ export default function ExtensionRegistryProvider(props: PropsWithChildren<unkno
 
       const loader: ExtensionLoader = {
         getExtensions: () => Promise.resolve([]),
+        loadExtension: () => Promise.resolve(""),
+        downloadExtension,
+        installExtension,
+        uninstallExtension,
       };
       return loader;
     }
@@ -60,4 +72,18 @@ export default function ExtensionRegistryProvider(props: PropsWithChildren<unkno
       {props.children}
     </ExtensionLoaderContext.Provider>
   );
+}
+
+async function downloadExtension(url: string): Promise<Uint8Array> {
+  const res = await fetch(url);
+  return new Uint8Array(await res.arrayBuffer());
+}
+
+async function installExtension(_foxeFileData: Uint8Array): Promise<ExtensionInfo> {
+  // The web view can load extensions, but can't install them
+  throw new Error("Extensions cannot be installed from the web viewer");
+}
+
+async function uninstallExtension(_id: string): Promise<boolean> {
+  return false;
 }
