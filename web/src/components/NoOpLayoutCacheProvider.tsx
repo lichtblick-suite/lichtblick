@@ -4,10 +4,10 @@
 
 import { PropsWithChildren, useState } from "react";
 
-import { LocalLayoutStorage, LocalLayoutStorageContext } from "@foxglove/studio-base";
+import { ILayoutCache, LayoutCacheContext } from "@foxglove/studio-base";
 
-export default function NoOpLayoutStorageProvider(props: PropsWithChildren<unknown>): JSX.Element {
-  const [ctx] = useState<LocalLayoutStorage>(() => {
+export default function NoOpLayoutCacheProvider(props: PropsWithChildren<unknown>): JSX.Element {
+  const [ctx] = useState<ILayoutCache>(() => {
     return {
       async list() {
         return [];
@@ -24,9 +24,5 @@ export default function NoOpLayoutStorageProvider(props: PropsWithChildren<unkno
     };
   });
 
-  return (
-    <LocalLayoutStorageContext.Provider value={ctx}>
-      {props.children}
-    </LocalLayoutStorageContext.Provider>
-  );
+  return <LayoutCacheContext.Provider value={ctx}>{props.children}</LayoutCacheContext.Provider>;
 }

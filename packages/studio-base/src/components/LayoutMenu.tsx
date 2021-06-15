@@ -15,11 +15,11 @@ import { v4 as uuidv4 } from "uuid";
 
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { useLocalLayoutStorage } from "@foxglove/studio-base/context/LocalLayoutStorageContext";
+import { useLayoutCache } from "@foxglove/studio-base/context/LayoutCacheContext";
 import useLatestNonNull from "@foxglove/studio-base/hooks/useLatestNonNull";
 import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
-import { LocalLayout } from "@foxglove/studio-base/services/LocalLayoutStorage";
+import { CachedLayout } from "@foxglove/studio-base/services/ILayoutCache";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
@@ -64,13 +64,13 @@ export default function LayoutMenu({
   }, [defaultIsOpen]);
 
   const { getCurrentLayout, loadLayout } = useCurrentLayoutActions();
-  const layoutStorage = useLocalLayoutStorage();
+  const layoutStorage = useLayoutCache();
 
   // a basic stale-while-revalidate pattern to avoid flicker of layout menu when we reload the layout list
   // When we re-visit local/remote layouts we will want to look at something like swr (https://swr.vercel.app/)
   // that will handle this and other nice things for us.
   const [{ value: asyncLayouts, error, loading }, fetchLayouts] = useAsyncFn(async () => {
-    const list = await layoutStorage.list();
+    const list = [...(await layoutStorage.list())];
     list.sort((a, b) => a.name.localeCompare(b.name));
     return list;
   }, [layoutStorage]);
@@ -84,7 +84,7 @@ export default function LayoutMenu({
   }, [error]);
 
   const renameAction = useCallback(
-    async (layout: LocalLayout) => {
+    async (layout: CachedLayout) => {
       const value = await prompt({
         title: "Rename layout",
         value: layout.name,
@@ -131,13 +131,13 @@ export default function LayoutMenu({
     const state = parsedState as PanelsState;
     state.id = uuidv4();
     state.name = layoutName;
-    await layoutStorage.put({ id: state.id, name: state.name, state });
+    await layoutStorage.put({ id: state.id, path: undefined, name: state.name, state });
 
     loadLayout(state);
   }, [isMounted, layoutStorage, loadLayout]);
 
   const selectAction = useCallback(
-    (layout: LocalLayout) => {
+    (layout: CachedLayout) => {
       if (layout.state) {
         loadLayout(layout.state);
       }
@@ -146,7 +146,7 @@ export default function LayoutMenu({
   );
 
   const deleteLayout = useCallback(
-    async (layout: LocalLayout) => {
+    async (layout: CachedLayout) => {
       await layoutStorage.delete(layout.id);
       fetchLayouts();
     },
@@ -204,6 +204,7 @@ export default function LayoutMenu({
     ) {
       layouts.push({
         id: currentLayout.id,
+        path: undefined,
         name: currentLayout.name ?? "unnamed",
         state: currentLayout,
       });

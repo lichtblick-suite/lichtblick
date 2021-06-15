@@ -2530,6 +2530,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@foxglove/den@workspace:packages/den":
+  version: 0.0.0-use.local
+  resolution: "@foxglove/den@workspace:packages/den"
+  dependencies:
+    async-mutex: 0.3.1
+    typescript: 4.3.2
+  languageName: unknown
+  linkType: soft
+
 "@foxglove/electron-socket@workspace:packages/electron-socket":
   version: 0.0.0-use.local
   resolution: "@foxglove/electron-socket@workspace:packages/electron-socket"
@@ -2657,6 +2666,7 @@ __metadata:
   dependencies:
     "@fluentui/react": 8.18.0
     "@fluentui/react-icons-mdl2": 1.1.2
+    "@foxglove/den": "workspace:packages/den"
     "@foxglove/hooks": "workspace:packages/hooks"
     "@foxglove/rosmsg-msgs-common": "workspace:packages/rosmsg-msgs-common"
     "@foxglove/rosmsg-msgs-foxglove": "workspace:packages/rosmsg-msgs-foxglove"

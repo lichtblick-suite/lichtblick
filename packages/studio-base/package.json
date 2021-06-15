@@ -95,6 +95,7 @@
     "wasm-lz4": "2.0.0"
   },
   "devDependencies": {
+    "@foxglove/den": "workspace:packages/den",
     "@foxglove/studio": "workspace:packages/studio",
     "@storybook/addon-actions": "6.2.9",
     "@storybook/addon-essentials": "6.2.9",

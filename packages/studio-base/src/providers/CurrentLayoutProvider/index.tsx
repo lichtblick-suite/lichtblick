@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { useLocalLayoutStorage } from "@foxglove/studio-base/context/LocalLayoutStorageContext";
+import { useLayoutCache } from "@foxglove/studio-base/context/LayoutCacheContext";
 import { useUserProfileStorage } from "@foxglove/studio-base/context/UserProfileStorageContext";
 import welcomeLayout from "@foxglove/studio-base/layouts/welcomeLayout";
 import CurrentLayoutState from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
@@ -42,7 +42,7 @@ function CurrentLayoutProviderWithInitialState({
   const { addToast } = useToasts();
 
   const { setUserProfile } = useUserProfileStorage();
-  const layoutStorage = useLocalLayoutStorage();
+  const layoutStorage = useLayoutCache();
 
   const [stateInstance] = useState(() => new CurrentLayoutState(initialState));
   const [panelsState, setPanelsState] = useState(() => stateInstance.actions.getCurrentLayout());
@@ -87,6 +87,7 @@ function CurrentLayoutProviderWithInitialState({
     layoutStorage
       .put({
         id: throttledPanelsState.id,
+        path: undefined,
         name: throttledPanelsState.name,
         state: throttledPanelsState,
       })
@@ -130,7 +131,7 @@ export default function CurrentLayoutProvider({
   const { addToast } = useToasts();
 
   const { getUserProfile } = useUserProfileStorage();
-  const layoutStorage = useLocalLayoutStorage();
+  const layoutStorage = useLayoutCache();
 
   const loadInitialState = useAsync(async (): Promise<PanelsState | undefined> => {
     try {

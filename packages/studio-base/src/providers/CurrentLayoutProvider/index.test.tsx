@@ -14,11 +14,11 @@ import {
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import LocalLayoutStorageContext from "@foxglove/studio-base/context/LocalLayoutStorageContext";
+import LayoutCacheContext from "@foxglove/studio-base/context/LayoutCacheContext";
 import { UserProfileStorageContext } from "@foxglove/studio-base/context/UserProfileStorageContext";
 import welcomeLayout from "@foxglove/studio-base/layouts/welcomeLayout";
 import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
-import { LocalLayout } from "@foxglove/studio-base/services/LocalLayoutStorage";
+import { CachedLayout } from "@foxglove/studio-base/services/ILayoutCache";
 import Storage from "@foxglove/studio-base/util/Storage";
 import signal from "@foxglove/studio-base/util/signal";
 
@@ -76,13 +76,13 @@ function renderTest({
   }
   mount(
     <ToastProvider>
-      <LocalLayoutStorageContext.Provider value={mockLayoutStorage}>
+      <LayoutCacheContext.Provider value={mockLayoutStorage}>
         <UserProfileStorageContext.Provider value={mockUserProfile}>
           <CurrentLayoutProvider>
             <Child />
           </CurrentLayoutProvider>
         </UserProfileStorageContext.Provider>
-      </LocalLayoutStorageContext.Provider>
+      </LayoutCacheContext.Provider>
     </ToastProvider>,
   );
   return { currentLayoutStates, actions, childMounted };
@@ -133,7 +133,7 @@ describe("CurrentLayoutProvider", () => {
             id: expect.any(String),
             name: "unnamed",
             state: expectedPanelsState,
-          } as LocalLayout,
+          } as CachedLayout,
         ],
       ]);
 
@@ -190,9 +190,9 @@ describe("CurrentLayoutProvider", () => {
     };
     const layoutStorageGetCalled = signal();
     const mockLayoutStorage = makeMockLayoutStorage();
-    mockLayoutStorage.get.mockImplementation(async (): Promise<LocalLayout> => {
+    mockLayoutStorage.get.mockImplementation(async (): Promise<CachedLayout> => {
       layoutStorageGetCalled.resolve();
-      return { id: "example", name: "Example layout", state: expectedState };
+      return { id: "example", path: undefined, name: "Example layout", state: expectedState };
     });
 
     const mockUserProfile = makeMockUserProfile();
@@ -207,8 +207,8 @@ describe("CurrentLayoutProvider", () => {
 
   it("saves new layout selection into UserProfile", async () => {
     const mockLayoutStorage = makeMockLayoutStorage();
-    mockLayoutStorage.get.mockImplementation(async (): Promise<LocalLayout> => {
-      return { id: "example", name: "Example layout", state: TEST_LAYOUT };
+    mockLayoutStorage.get.mockImplementation(async (): Promise<CachedLayout> => {
+      return { id: "example", path: undefined, name: "Example layout", state: TEST_LAYOUT };
     });
 
     const userProfileSetCalled = signal();
@@ -239,8 +239,8 @@ describe("CurrentLayoutProvider", () => {
   it("saves layout updates into LayoutStorage", async () => {
     const layoutStoragePutCalled = signal();
     const mockLayoutStorage = makeMockLayoutStorage();
-    mockLayoutStorage.get.mockImplementation(async (): Promise<LocalLayout> => {
-      return { id: TEST_LAYOUT.id, name: TEST_LAYOUT.name, state: TEST_LAYOUT };
+    mockLayoutStorage.get.mockImplementation(async (): Promise<CachedLayout> => {
+      return { id: TEST_LAYOUT.id, path: undefined, name: TEST_LAYOUT.name, state: TEST_LAYOUT };
     });
     mockLayoutStorage.put.mockImplementation(async () => layoutStoragePutCalled.resolve());
 

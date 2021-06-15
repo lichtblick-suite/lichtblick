@@ -19,7 +19,7 @@ import { FirebaseAppProvider } from "@foxglove/studio-firebase";
 import { Desktop } from "../common/types";
 import NativeAppMenuProvider from "./components/NativeAppMenuProvider";
 import NativeStorageAppConfigurationProvider from "./components/NativeStorageAppConfigurationProvider";
-import NativeStorageLayoutStorageProvider from "./components/NativeStorageLayoutStorageProvider";
+import NativeStorageLayoutCacheProvider from "./components/NativeStorageLayoutCacheProvider";
 import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
 import ExternalBrowserFirebaseAuthProvider from "./providers/ExternalBrowserFirebaseAuthProvider";
 
@@ -59,7 +59,7 @@ export default function Root(): ReactElement {
     /* eslint-disable react/jsx-key */
     <StudioToastProvider />,
     <NativeStorageAppConfigurationProvider />,
-    <NativeStorageLayoutStorageProvider />,
+    <NativeStorageLayoutCacheProvider />,
     <NativeAppMenuProvider />,
     <UserProfileLocalStorageProvider />,
     <FirebaseAppProvider config={firebaseConfig} />,

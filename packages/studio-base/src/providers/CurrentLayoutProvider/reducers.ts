@@ -71,7 +71,7 @@ import {
 } from "@foxglove/studio-base/util/layout";
 
 export const defaultPlaybackConfig: PlaybackConfig = {
-  speed: 0.2,
+  speed: 1.0,
   messageOrder: "receiveTime",
   timeDisplayMethod: "ROS",
 };

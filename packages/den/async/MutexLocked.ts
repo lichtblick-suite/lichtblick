@@ -1,0 +1,20 @@
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at http://mozilla.org/MPL/2.0/
+
+import { Mutex } from "async-mutex";
+
+/**
+ * A wrapper around an object that ensures all accesses are guarded by a mutex lock.
+ *
+ * This is less race-prone than using an async-mutex directly because it requires all external
+ * access to be protected by the mutex.
+ */
+export default class MutexLocked<T> {
+  private mutex = new Mutex();
+  constructor(private value: T) {}
+
+  async runExclusive<Result>(body: (value: T) => Promise<Result>): Promise<Result> {
+    return this.mutex.runExclusive(() => body(this.value));
+  }
+}

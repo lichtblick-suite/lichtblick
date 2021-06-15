@@ -4,11 +4,11 @@
 
 import { createContext, useContext } from "react";
 
-import { LayoutStorage } from "@foxglove/studio-base/services/LayoutStorage";
+import { ILayoutStorage } from "@foxglove/studio-base/services/ILayoutStorage";
 
-const LayoutStorageContext = createContext<LayoutStorage | undefined>(undefined);
+const LayoutStorageContext = createContext<ILayoutStorage | undefined>(undefined);
 
-export function useLayoutStorage(): LayoutStorage {
+export function useLayoutStorage(): ILayoutStorage {
   const ctx = useContext(LayoutStorageContext);
   if (ctx === undefined) {
     throw new Error("A LayoutStorage provider is required to useLayoutStorage");

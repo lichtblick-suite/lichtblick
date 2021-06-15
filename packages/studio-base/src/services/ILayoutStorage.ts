@@ -25,15 +25,12 @@ export type LayoutMetadata = {
   createdAt: ISO8601Timestamp | undefined;
   updatedAt: ISO8601Timestamp | undefined;
   permission: "creator_write" | "org_read" | "org_write";
+  data?: never;
 };
 
-export type Layout = {
-  name: string;
-  data: PanelsState;
-  metadata: LayoutMetadata;
-};
+export type Layout = Omit<LayoutMetadata, "data"> & { data: PanelsState };
 
-export interface LayoutStorage {
+export interface ILayoutStorage {
   getLayouts(): Promise<LayoutMetadata[]>;
 
   getLayout(id: LayoutID): Promise<Layout | undefined>;
@@ -47,7 +44,7 @@ export interface LayoutStorage {
     targetID: LayoutID;
   }): Promise<void>;
 
-  supportsSharing: boolean;
+  readonly supportsSharing: boolean;
 
   shareLayout(params: {
     sourceID: LayoutID;

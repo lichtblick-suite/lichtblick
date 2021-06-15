@@ -6,24 +6,24 @@ import { v4 as uuidv4 } from "uuid";
 
 import Logger from "@foxglove/log";
 import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
+import { CachedLayout, ILayoutCache } from "@foxglove/studio-base/services/ILayoutCache";
 import {
   Layout,
   LayoutID,
   LayoutMetadata,
-  LayoutStorage,
-} from "@foxglove/studio-base/services/LayoutStorage";
-import { LocalLayout, LocalLayoutStorage } from "@foxglove/studio-base/services/LocalLayoutStorage";
+  ILayoutStorage,
+} from "@foxglove/studio-base/services/ILayoutStorage";
 
 const log = Logger.getLogger(__filename);
 
-function getMetadata(layout: LocalLayout): LayoutMetadata {
+function getMetadata(layout: CachedLayout): LayoutMetadata {
   if (layout.serverMetadata) {
     log.warn(`Local-only layout ${layout.id} has unexpected server metadata`);
   }
   return {
     id: layout.id as LayoutID,
     name: layout.name,
-    path: [],
+    path: layout.path ?? [],
     creator: undefined,
     createdAt: undefined,
     updatedAt: undefined,
@@ -32,29 +32,28 @@ function getMetadata(layout: LocalLayout): LayoutMetadata {
 }
 
 /**
- * A LayoutStorage that's backed solely by a LocalLayoutStorage. This is used when centralized
+ * A ILayoutStorage that's backed solely by an ILayoutCache. This is used when centralized
  * layout storage is not available because the user is not logged in to an account.
  *
  * Any `serverMetadata` on the local layout is ignored and generally is not expected to be present.
  */
-export default class LocalOnlyLayoutStorage implements LayoutStorage {
+export default class CacheOnlyLayoutStorage implements ILayoutStorage {
   supportsSharing = false;
 
-  constructor(private storage: LocalLayoutStorage) {}
+  constructor(private storage: ILayoutCache) {}
 
   async getLayouts(): Promise<LayoutMetadata[]> {
     return (await this.storage.list()).map(getMetadata);
   }
 
   async getLayout(id: LayoutID): Promise<Layout | undefined> {
-    const localLayout = await this.storage.get(id);
-    if (!localLayout || !localLayout.state) {
+    const cachedLayout = await this.storage.get(id);
+    if (!cachedLayout || !cachedLayout.state) {
       return undefined;
     }
     return {
-      name: localLayout.name,
-      data: localLayout.state,
-      metadata: getMetadata(localLayout),
+      ...getMetadata(cachedLayout),
+      data: cachedLayout.state,
     };
   }
 
@@ -67,11 +66,8 @@ export default class LocalOnlyLayoutStorage implements LayoutStorage {
     name: string;
     data: PanelsState;
   }): Promise<void> {
-    if (path.length !== 0) {
-      throw new Error("Layout paths are not supported in local-only storage");
-    }
     const id = uuidv4() as LayoutID;
-    await this.storage.put({ id, name, state: data });
+    await this.storage.put({ id, name, path, state: data });
   }
 
   async updateLayout({
@@ -85,10 +81,7 @@ export default class LocalOnlyLayoutStorage implements LayoutStorage {
     data: PanelsState;
     targetID: LayoutID;
   }): Promise<void> {
-    if (path.length !== 0) {
-      throw new Error("Layout paths are not supported in local-only storage");
-    }
-    await this.storage.put({ id: targetID, name, state: data });
+    await this.storage.put({ id: targetID, name, path, state: data });
   }
 
   async shareLayout(_: unknown): Promise<void> {
@@ -112,13 +105,10 @@ export default class LocalOnlyLayoutStorage implements LayoutStorage {
     name: string;
     path: string[];
   }): Promise<void> {
-    if (path.length !== 0) {
-      throw new Error("Layout paths are not supported in local-only storage");
-    }
     const target = await this.storage.get(id);
     if (!target) {
       throw new Error(`Layout id ${id} not found`);
     }
-    await this.storage.put({ id, name, state: target.state });
+    await this.storage.put({ id, name, path, state: target.state });
   }
 }

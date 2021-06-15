@@ -6,32 +6,12 @@ import { useMemo } from "react";
 
 import LayoutMenu from "@foxglove/studio-base/components/LayoutMenu";
 import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
-import LocalLayoutStorageContext from "@foxglove/studio-base/context/LocalLayoutStorageContext";
+import LayoutCacheContext from "@foxglove/studio-base/context/LayoutCacheContext";
 import CurrentLayoutState, {
   DEFAULT_LAYOUT_FOR_TESTS,
 } from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
-import { LocalLayout, LocalLayoutStorage } from "@foxglove/studio-base/services/LocalLayoutStorage";
-
-class FakeLayoutStorage implements LocalLayoutStorage {
-  private _layouts: LocalLayout[];
-
-  constructor(layouts: LocalLayout[] = []) {
-    this._layouts = layouts;
-  }
-  list(): Promise<LocalLayout[]> {
-    return Promise.resolve(this._layouts);
-  }
-  get(_id: string): Promise<LocalLayout | undefined> {
-    throw new Error("Method not implemented.");
-  }
-  put(_layout: unknown): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  delete(_id: string): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-}
+import MockLayoutCache from "@foxglove/studio-base/services/MockLayoutCache";
 
 export default {
   title: "components/LayoutMenu",
@@ -39,15 +19,15 @@ export default {
 };
 
 export function Empty(): JSX.Element {
-  const storage = useMemo(() => new FakeLayoutStorage(), []);
+  const storage = useMemo(() => new MockLayoutCache(), []);
   const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
 
   return (
     <div style={{ display: "flex", height: 400 }}>
       <CurrentLayoutContext.Provider value={currentLayout}>
-        <LocalLayoutStorageContext.Provider value={storage}>
+        <LayoutCacheContext.Provider value={storage}>
           <LayoutMenu defaultIsOpen />
-        </LocalLayoutStorageContext.Provider>
+        </LayoutCacheContext.Provider>
       </CurrentLayoutContext.Provider>
     </div>
   );
@@ -56,20 +36,23 @@ export function Empty(): JSX.Element {
 export function LayoutList(): JSX.Element {
   const storage = useMemo(
     () =>
-      new FakeLayoutStorage([
+      new MockLayoutCache([
         {
           id: "not-current",
           name: "Another Layout",
+          path: undefined,
           state: undefined,
         },
         {
           id: "test-id",
           name: "Current Layout",
+          path: undefined,
           state: undefined,
         },
         {
           id: "short-id",
           name: "Short",
+          path: undefined,
           state: undefined,
         },
       ]),
@@ -93,9 +76,9 @@ export function LayoutList(): JSX.Element {
   return (
     <div style={{ display: "flex", height: 400 }}>
       <CurrentLayoutContext.Provider value={mockLayoutContext}>
-        <LocalLayoutStorageContext.Provider value={storage}>
+        <LayoutCacheContext.Provider value={storage}>
           <LayoutMenu defaultIsOpen />
-        </LocalLayoutStorageContext.Provider>
+        </LayoutCacheContext.Provider>
       </CurrentLayoutContext.Provider>
     </div>
   );

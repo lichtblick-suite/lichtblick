@@ -18,11 +18,8 @@ export type {
   AppConfigurationValue,
   ChangeHandler,
 } from "./context/AppConfigurationContext";
-export { default as LocalLayoutStorageContext } from "./context/LocalLayoutStorageContext";
-export type {
-  LocalLayout,
-  LocalLayoutStorage,
-} from "@foxglove/studio-base/services/LocalLayoutStorage";
+export { default as LayoutCacheContext } from "./context/LayoutCacheContext";
+export type { CachedLayout, ILayoutCache } from "@foxglove/studio-base/services/ILayoutCache";
 export { default as NativeAppMenuContext } from "./context/NativeAppMenuContext";
 export type { NativeAppMenu, NativeAppMenuEvent } from "./context/NativeAppMenuContext";
 export type { PlayerSourceDefinition } from "./context/PlayerSelectionContext";
@@ -37,4 +34,4 @@ export type { ExtensionLoader, ExtensionInfo } from "./context/ExtensionLoaderCo
 export { default as AuthContext, useAuth } from "./context/AuthContext";
 export type { Auth, CurrentUser } from "./context/AuthContext";
 export { default as LayoutStorageContext } from "./context/LayoutStorageContext";
-export type { RemoteLayoutStorage } from "@foxglove/studio-base/services/RemoteLayoutStorage";
+export type { IRemoteLayoutStorage as RemoteLayoutStorage } from "@foxglove/studio-base/services/IRemoteLayoutStorage";

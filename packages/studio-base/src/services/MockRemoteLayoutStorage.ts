@@ -11,24 +11,28 @@ import {
   ISO8601Timestamp,
   UserID,
   UserMetadata,
-} from "@foxglove/studio-base/services/LayoutStorage";
+} from "@foxglove/studio-base/services/ILayoutStorage";
 import {
   RemoteLayout,
   RemoteLayoutMetadata,
-  RemoteLayoutStorage,
-} from "@foxglove/studio-base/services/RemoteLayoutStorage";
+  IRemoteLayoutStorage,
+} from "@foxglove/studio-base/services/IRemoteLayoutStorage";
 
-const FAKE_USER: UserMetadata = {
+export const FAKE_USER: UserMetadata = {
   id: "fakeuser" as UserID,
   email: "fakeuser@example.com",
   name: "Fake User",
 };
 
-export default class MockRemoteLayoutStorage implements RemoteLayoutStorage {
+export default class MockRemoteLayoutStorage implements IRemoteLayoutStorage {
   private layoutsById = new Map<LayoutID, RemoteLayout>();
 
-  async getLayouts(): Promise<RemoteLayoutMetadata[]> {
-    return Array.from(this.layoutsById.values(), (layout) => layout.metadata);
+  constructor(layouts: RemoteLayout[] = []) {
+    this.layoutsById = new Map(layouts.map((layout) => [layout.id, layout]));
+  }
+
+  async getLayouts(): Promise<readonly RemoteLayoutMetadata[]> {
+    return Array.from(this.layoutsById.values(), ({ data: _, ...metadata }) => metadata);
   }
 
   async getLayout(id: LayoutID): Promise<RemoteLayout | undefined> {
@@ -44,11 +48,11 @@ export default class MockRemoteLayoutStorage implements RemoteLayoutStorage {
     name: string;
     data: PanelsState;
   }): Promise<{ status: "success"; newMetadata: RemoteLayoutMetadata } | { status: "conflict" }> {
-    for (const { metadata } of this.layoutsById.values()) {
+    for (const layout of this.layoutsById.values()) {
       if (
-        isEqual(path, metadata.path) &&
-        name === metadata.name &&
-        metadata.permission === "creator_write"
+        isEqual(path, layout.path) &&
+        name === layout.name &&
+        layout.permission === "creator_write"
       ) {
         return { status: "conflict" };
       }
@@ -64,7 +68,7 @@ export default class MockRemoteLayoutStorage implements RemoteLayoutStorage {
       createdAt: now,
       updatedAt: now,
     };
-    this.layoutsById.set(id, { data, metadata: newMetadata });
+    this.layoutsById.set(id, { ...newMetadata, data });
     return { status: "success", newMetadata };
   }
 
@@ -89,17 +93,18 @@ export default class MockRemoteLayoutStorage implements RemoteLayoutStorage {
     if (!target) {
       return { status: "conflict" };
     }
-    if (Date.parse(target.metadata.updatedAt) !== Date.parse(ifUnmodifiedSince)) {
+    const { data: _, ...targetMetadata } = target;
+    if (Date.parse(targetMetadata.updatedAt) !== Date.parse(ifUnmodifiedSince)) {
       return { status: "precondition-failed" };
     }
     const now = new Date().toISOString() as ISO8601Timestamp;
     const newMetadata: RemoteLayoutMetadata = {
-      ...target.metadata,
+      ...targetMetadata,
       path,
       name,
       updatedAt: now,
     };
-    this.layoutsById.set(targetID, { ...target, data, metadata: newMetadata });
+    this.layoutsById.set(targetID, { ...newMetadata, data });
     return { status: "success", newMetadata };
   }
 
@@ -118,7 +123,7 @@ export default class MockRemoteLayoutStorage implements RemoteLayoutStorage {
     if (!source) {
       return { status: "conflict" };
     }
-    for (const { metadata } of this.layoutsById.values()) {
+    for (const { data: _, ...metadata } of this.layoutsById.values()) {
       if (
         isEqual(path, metadata.path) &&
         name === metadata.name &&
@@ -138,7 +143,7 @@ export default class MockRemoteLayoutStorage implements RemoteLayoutStorage {
       createdAt: now,
       updatedAt: now,
     };
-    this.layoutsById.set(id, { data: source.data, metadata: newMetadata });
+    this.layoutsById.set(id, { ...newMetadata, data: source.data });
     return { status: "success", newMetadata };
   }
 
@@ -169,46 +174,47 @@ export default class MockRemoteLayoutStorage implements RemoteLayoutStorage {
     if (!target) {
       return { status: "conflict" };
     }
-    if (Date.parse(target.metadata.updatedAt) !== Date.parse(ifUnmodifiedSince)) {
+    const { data: _, ...metadata } = target;
+    if (Date.parse(metadata.updatedAt) !== Date.parse(ifUnmodifiedSince)) {
       return { status: "precondition-failed" };
     }
     const now = new Date().toISOString() as ISO8601Timestamp;
     const newMetadata: RemoteLayoutMetadata = {
-      ...target.metadata,
+      ...metadata,
       name,
       path,
       permission,
       updatedAt: now,
     };
-    this.layoutsById.set(targetID, { ...target, data: source.data, metadata: newMetadata });
+    this.layoutsById.set(targetID, { ...newMetadata, data: source.data });
     return { status: "success", newMetadata };
   }
 
   async deleteLayout({
-    id,
+    targetID,
     ifUnmodifiedSince,
   }: {
-    id: LayoutID;
+    targetID: LayoutID;
     ifUnmodifiedSince: ISO8601Timestamp;
   }): Promise<{ status: "success" | "precondition-failed" }> {
-    const target = this.layoutsById.get(id);
+    const target = this.layoutsById.get(targetID);
     if (!target) {
       return { status: "success" };
     }
-    if (Date.parse(target.metadata.updatedAt) !== Date.parse(ifUnmodifiedSince)) {
+    if (Date.parse(target.updatedAt) !== Date.parse(ifUnmodifiedSince)) {
       return { status: "precondition-failed" };
     }
-    this.layoutsById.delete(id);
+    this.layoutsById.delete(targetID);
     return { status: "success" };
   }
 
   async renameLayout({
-    id,
+    targetID,
     name,
     path,
     ifUnmodifiedSince,
   }: {
-    id: LayoutID;
+    targetID: LayoutID;
     name: string;
     path: string[];
     ifUnmodifiedSince: ISO8601Timestamp;
@@ -217,10 +223,10 @@ export default class MockRemoteLayoutStorage implements RemoteLayoutStorage {
     | { status: "conflict" }
     | { status: "precondition-failed" }
   > {
-    const target = this.layoutsById.get(id);
+    const target = this.layoutsById.get(targetID);
     if (!target) {
       return { status: "conflict" };
     }
-    return this.updateLayout({ targetID: id, name, path, ifUnmodifiedSince, data: target.data });
+    return this.updateLayout({ targetID, name, path, ifUnmodifiedSince, data: target.data });
   }
 }
