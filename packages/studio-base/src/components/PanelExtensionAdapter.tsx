@@ -201,7 +201,9 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   });
 
   useLayoutEffect(() => {
-    if (!panelElementRef.current) {
+    const panelElement = panelElementRef.current;
+
+    if (!panelElement) {
       return;
     }
 
@@ -211,7 +213,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     let renderFn: RenderFn | undefined = undefined;
 
     const panelExtensionContext: PanelExtensionContext = {
-      panelElement: panelElementRef.current,
+      panelElement,
 
       initialState: configRef.current,
 
@@ -277,7 +279,13 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     log.info(`Init panel ${subscriberId}`);
     initPanel(panelExtensionContext);
 
+    // Our use effect dependency list contains dependencies which change when the player changes.
+    // This is by design. We want to clear the panel extension and initialize it again when a player
+    // changes so panel authors don't need to worry about handling these cases.
     return () => {
+      // clear the panel element and allow the next initPanel call to have a clean element
+      panelElement.innerHTML = "";
+
       panelContextRef.current = undefined;
       setSubscriptions(subscriberId, []);
     };
