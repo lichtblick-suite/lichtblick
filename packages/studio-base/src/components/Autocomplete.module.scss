@@ -65,5 +65,5 @@ $row-height: 24px;
 }
 
 :export {
-  rowHeight: $row-height / 1px;
+  rowHeight: div($row-height, 1px);
 }

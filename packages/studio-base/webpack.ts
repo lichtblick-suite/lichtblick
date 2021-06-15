@@ -163,7 +163,8 @@ export function makeConfig(
           // TypeScript uses dynamic requires()s when running in node. We can disable these when we
           // bundle it for the renderer.
           // https://github.com/microsoft/TypeScript/issues/39436
-          test: /[\\/]node_modules[\\/]typescript[\\/]lib[\\/]typescript\.js$/,
+          // Prettier's TS parser also bundles the same code: https://github.com/prettier/prettier/issues/11076
+          test: /[\\/]node_modules[\\/]typescript[\\/]lib[\\/]typescript\.js$|[\\/]node_modules[\\/]prettier[\\/]parser-typescript\.js$/,
           loader: "string-replace-loader",
           options: {
             multiple: [
@@ -173,8 +174,17 @@ export function makeConfig(
                   "throw new Error('[Foxglove] This module is not supported in the browser.');",
               },
               {
+                search: `typescript-etw";r=require(i)`,
+                replace: `typescript-etw";throw new Error('[Foxglove] This module is not supported in the browser.');`,
+              },
+              {
                 search:
                   "return { module: require(modulePath), modulePath: modulePath, error: undefined };",
+                replace:
+                  "throw new Error('[Foxglove] This module is not supported in the browser.');",
+              },
+              {
+                search: `return{module:require(n),modulePath:n,error:void 0}`,
                 replace:
                   "throw new Error('[Foxglove] This module is not supported in the browser.');",
               },
