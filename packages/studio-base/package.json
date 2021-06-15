@@ -19,8 +19,8 @@
     "src"
   ],
   "scripts": {
-    "chromatic": "chromatic --project-token $CHROMATIC_PROJECT_TOKEN --build-script-name storybook:build --exit-once-uploaded",
-    "storybook:build": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' build-storybook --config-dir src/.storybook"
+    "chromatic": "chromatic --project-token $CHROMATIC_PROJECT_TOKEN --build-script-name storybook:build --exit-once-uploaded --only-changed",
+    "storybook:build": "cross-env NODE_OPTIONS='--max-old-space-size=6144' TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' build-storybook --webpack-stats-json --config-dir src/.storybook"
   },
   "dependencies": {
     "@fluentui/react": "8.18.0",
@@ -146,6 +146,7 @@
     "@wojtekmaj/enzyme-adapter-react-17": "0.6.2",
     "argparse": "2.0.1",
     "chromatic": "5.9.1",
+    "cross-env": "7.0.3",
     "enzyme": "3.11.0",
     "fetch-mock": "9.11.0",
     "http-server": "0.12.3",

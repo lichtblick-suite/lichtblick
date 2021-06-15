@@ -2719,6 +2719,7 @@ __metadata:
     chartjs-plugin-zoom: "github:foxglove/chartjs-plugin-zoom#656541279943f00dce600288435f83c436293146"
     chromatic: 5.9.1
     classnames: 2.3.1
+    cross-env: 7.0.3
     cytoscape: 3.19.0
     cytoscape-dagre: 2.3.2
     enzyme: 3.11.0
