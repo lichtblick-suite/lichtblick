@@ -28,7 +28,7 @@
     "test": "jest",
     "test:debug": "cross-env NODE_OPTIONS='--inspect-brk' jest",
     "test:watch": "jest --watch",
-    "test:integration": "cross-env NODE_OPTIONS='--max-old-space-size=6144' jest --forceExit --projects desktop",
+    "test:integration": "cross-env NODE_OPTIONS='--max-old-space-size=6144' jest --forceExit --projects desktop/integration-test",
     "package:win": "yarn package --win",
     "package:darwin": "yarn package --mac",
     "package:linux": "yarn package --linux",
@@ -49,8 +49,7 @@
     "@types/node": "15.3.0",
     "esbuild-loader/esbuild": "0.12.4",
     "esbuild-runner/esbuild": "0.12.4",
-    "node-libs-browser/punycode": "2.1.1",
-    "spectron/electron-chromedriver": "13.0.0"
+    "node-libs-browser/punycode": "2.1.1"
   },
   "devDependencies": {
     "@actions/core": "1.4.0",
@@ -117,6 +116,7 @@
     "nearley-loader": "2.0.0",
     "node-machine-id": "1.1.12",
     "path-browserify": "1.0.1",
+    "playwright": "1.12.2",
     "pngjs": "6.0.0",
     "prettier": "2.3.1",
     "react-refresh": "0.10.0",
@@ -127,7 +127,6 @@
     "sass": "1.34.1",
     "sass-loader": "12.1.0",
     "semver": "7.3.5",
-    "spectron": "https://github.com/foxglove/spectron.git#commit=7f88e8fe148ee14b3efc14c3646c08c4ed0a6747",
     "string-replace-loader": "3.0.2",
     "style-loader": "2.0.0",
     "ts-loader": "9.2.3",

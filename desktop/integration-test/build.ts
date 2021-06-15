@@ -1,9 +1,13 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+import path from "path";
 import webpack from "webpack";
 
 import webpackConfig from "../webpack.config";
+
+const appPath = path.join(__dirname, "..", ".webpack");
+export { appPath };
 
 // global jest test setup builds the webpack build before running any integration tests
 export default async (): Promise<void> => {
@@ -23,7 +27,7 @@ export default async (): Promise<void> => {
 
   return new Promise<void>((resolve, reject) => {
     // eslint-disable-next-line no-restricted-syntax
-    console.info("Building Webpack");
+    console.info("Building Webpack. To skip, set INTEGRATION_SKIP_BUILD=1");
     compiler.run((err, result) => {
       compiler.close(() => {});
       if (err) {

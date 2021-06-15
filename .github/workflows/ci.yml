@@ -69,6 +69,7 @@ jobs:
 
   integration:
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -92,13 +93,16 @@ jobs:
             **/node_modules
           key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: v5-${{ runner.os }}-yarn-
+
       - run: yarn install --immutable
+
       - name: test:integration
         if: matrix.os == 'ubuntu-20.04'
         uses: GabrielBB/xvfb-action@v1.5
         with:
           working-directory: ./
           run: yarn run test:integration
+
       - name: test:integration
         if: matrix.os != 'ubuntu-20.04'
         run: yarn run test:integration
