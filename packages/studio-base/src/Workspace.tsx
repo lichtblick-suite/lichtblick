@@ -38,6 +38,7 @@ import PanelSettings from "@foxglove/studio-base/components/PanelSettings";
 import PlaybackControls from "@foxglove/studio-base/components/PlaybackControls";
 import { PlayerStatusIndicator } from "@foxglove/studio-base/components/PlayerStatusIndicator";
 import Preferences from "@foxglove/studio-base/components/Preferences";
+import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValueChange";
 import { RenderToBodyComponent } from "@foxglove/studio-base/components/RenderToBodyComponent";
 import ShortcutsModal from "@foxglove/studio-base/components/ShortcutsModal";
 import Sidebar, { SidebarItem } from "@foxglove/studio-base/components/Sidebar";
@@ -154,6 +155,11 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   const playerCapabilities = useMessagePipeline(
     useCallback(({ playerState }) => playerState.capabilities, []),
   );
+
+  // we use requestBackfill to signal when a player changes for RemountOnValueChange below
+  // see comment below above the RemountOnValueChange component
+  const requestBackfill = useMessagePipeline(useCallback((ctx) => ctx.requestBackfill, []));
+
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<SidebarItemKey | undefined>(
     // Start with the sidebar open if no connection has been made
     currentSourceName == undefined ? "connection" : undefined,
@@ -444,14 +450,17 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           selectedKey={selectedSidebarItem}
           onSelectKey={setSelectedSidebarItem}
         >
-          <Stack>
-            <PanelLayout />
-            {showPlaybackControls && (
-              <Stack.Item disableShrink>
-                <PlaybackControls />
-              </Stack.Item>
-            )}
-          </Stack>
+          {/* To ensure no stale player state remains, we unmount all panels when players change */}
+          <RemountOnValueChange value={requestBackfill}>
+            <Stack>
+              <PanelLayout />
+              {showPlaybackControls && (
+                <Stack.Item disableShrink>
+                  <PlaybackControls />
+                </Stack.Item>
+              )}
+            </Stack>
+          </RemountOnValueChange>
         </Sidebar>
       </div>
     </MultiProvider>
