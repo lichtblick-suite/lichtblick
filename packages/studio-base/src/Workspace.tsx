@@ -27,7 +27,7 @@ import GlobalKeyListener from "@foxglove/studio-base/components/GlobalKeyListene
 import GlobalVariablesTable from "@foxglove/studio-base/components/GlobalVariablesTable";
 import variablesHelp from "@foxglove/studio-base/components/GlobalVariablesTable/index.help.md";
 import HelpModal from "@foxglove/studio-base/components/HelpModal";
-import LayoutMenu from "@foxglove/studio-base/components/LayoutMenu";
+import LayoutBrowser from "@foxglove/studio-base/components/LayoutBrowser";
 import messagePathHelp from "@foxglove/studio-base/components/MessagePathSyntax/index.help.md";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
@@ -87,6 +87,7 @@ type SidebarItemKey =
   | "variables"
   | "extensions"
   | "account"
+  | "layouts"
   | "preferences";
 
 const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
@@ -94,6 +95,7 @@ const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
     "connection",
     { iconName: "DataManagementSettings", title: "Connection", component: Connection },
   ],
+  ["layouts", { iconName: "FiveTileGrid", title: "Layouts", component: LayoutBrowser }],
   ["add-panel", { iconName: "RectangularClipping", title: "Add Panel", component: AddPanel }],
   [
     "panel-settings",
@@ -439,9 +441,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           <div style={{ flexGrow: 1 }} />
           <SToolbarItem style={{ marginRight: 5 }}>
             {!inAutomatedRunMode() && <NotificationDisplay />}
-          </SToolbarItem>
-          <SToolbarItem>
-            <LayoutMenu />
           </SToolbarItem>
         </Toolbar>
         <Sidebar

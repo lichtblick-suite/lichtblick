@@ -23,10 +23,10 @@ import styles from "./Confirm.module.scss";
 type ConfirmStyle = "danger" | "primary";
 
 type Props = {
-  // the title of the confirm modal - defaults to 'Are you sure?'
-  title?: string;
+  // the title of the confirm modal
+  title: string;
   // the prompt text in the body of the confirm modal
-  prompt: string;
+  prompt?: string;
   // the text for the OK button - defaults to "OK"
   ok?: string;
   // the text for the cancel button - defaults to "Cancel"
@@ -61,10 +61,10 @@ export default function useConfirm(props: Props): {
     <RenderToBodyComponent>
       <Modal onRequestClose={() => close(false)}>
         <div className={styles.container}>
-          <Title>{props.title ?? "Are you sure?"}</Title>
+          <Title>{props.title}</Title>
           <hr />
           <Flex col style={{ padding: "32px" }}>
-            <div className={styles.prompt}>{props.prompt}</div>
+            {props.prompt != undefined && <div className={styles.prompt}>{props.prompt}</div>}
             <div className={styles.controls}>
               {props.cancel !== false && (
                 <Button onClick={() => close(false)}>{props.cancel ?? "Cancel"}</Button>

@@ -8,17 +8,29 @@ import HelpButton from "@foxglove/studio-base/components/PanelToolbar/HelpButton
 
 export function SidebarContent({
   noPadding = false,
-  paddingLeft,
   title,
   children,
   helpContent,
+  leadingItems,
+  trailingItems,
 }: React.PropsWithChildren<{
   title: string;
   helpContent?: React.ReactNode;
   noPadding?: boolean;
-  paddingLeft?: string;
+
+  /** Buttons/items to display on the leading (left) side of the header */
+  leadingItems?: React.ReactNode[];
+  /** Buttons/items to display on the trailing (right) side of the header */
+  trailingItems?: React.ReactNode[];
 }>): JSX.Element {
   const theme = useTheme();
+
+  if (helpContent != undefined) {
+    (trailingItems ??= []).push(
+      <HelpButton iconStyle={{ width: "18px", height: "18px" }}>{helpContent}</HelpButton>,
+    );
+  }
+
   return (
     <Stack
       verticalFill
@@ -32,17 +44,30 @@ export function SidebarContent({
       <Stack
         horizontal
         horizontalAlign="space-between"
+        verticalAlign="center"
         style={{
           padding: noPadding ? theme.spacing.m : undefined,
           paddingBottom: theme.spacing.m,
-          paddingLeft,
         }}
       >
-        <Text as="h2" variant="xLarge">
-          {title}
-        </Text>
-        {Boolean(helpContent) && (
-          <HelpButton iconStyle={{ width: "18px", height: "18px" }}>{helpContent}</HelpButton>
+        {leadingItems && (
+          <Stack horizontal verticalAlign="center">
+            {leadingItems.map((item, i) => (
+              <Stack.Item key={i}>{item}</Stack.Item>
+            ))}
+          </Stack>
+        )}
+        <Stack.Item grow>
+          <Text as="h2" variant="xLarge">
+            {title}
+          </Text>
+        </Stack.Item>
+        {trailingItems && (
+          <Stack horizontal verticalAlign="center">
+            {trailingItems.map((item, i) => (
+              <Stack.Item key={i}>{item}</Stack.Item>
+            ))}
+          </Stack>
         )}
       </Stack>
       <Stack.Item>{children}</Stack.Item>

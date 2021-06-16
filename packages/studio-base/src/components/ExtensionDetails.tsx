@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ActionButton, Pivot, PivotItem } from "@fluentui/react";
+import { IconButton, Pivot, PivotItem } from "@fluentui/react";
 import { useCallback, useState } from "react";
 import { useToasts } from "react-toast-notifications";
 import { useAsync, useMountedState } from "react-use";
@@ -99,12 +99,13 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
   }, [extension.id, extensionLoader, isMounted]);
 
   return (
-    <SidebarContent title={extension.name} paddingLeft="32px">
-      <ActionButton
-        iconProps={{ iconName: "ChevronLeft" }}
-        style={{ position: "absolute", top: "5px", left: "8px" }}
-        onClick={onClose}
-      ></ActionButton>
+    <SidebarContent
+      title={extension.name}
+      leadingItems={[
+        // eslint-disable-next-line react/jsx-key
+        <IconButton iconProps={{ iconName: "ChevronLeft" }} onClick={onClose} />,
+      ]}
+    >
       <ExtensionId href={extension.homepage} target="_blank">
         {extension.id}
       </ExtensionId>
