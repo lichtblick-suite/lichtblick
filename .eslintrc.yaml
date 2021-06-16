@@ -44,7 +44,6 @@ rules:
   no-console: off # configured in no-restricted-syntax
 
   react/jsx-uses-react: off
-  react/react-in-jsx-scope: off
   react/prop-types: off # Unnecessary with typescript validation
   react-hooks/exhaustive-deps:
     - error
