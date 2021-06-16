@@ -2,16 +2,23 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { CSSProperties, useCallback, useLayoutEffect, useRef, useState } from "react";
+import { CSSProperties, RefCallback, useCallback, useMemo, useRef, useState } from "react";
 import { v4 as uuid } from "uuid";
 
 import Logger from "@foxglove/log";
-import { MessageEvent, PanelExtensionContext, RenderState, Topic } from "@foxglove/studio";
+import {
+  ExtensionPanelRegistration,
+  MessageEvent,
+  PanelExtensionContext,
+  RenderState,
+  Topic,
+} from "@foxglove/studio";
 import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
+import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValueChange";
 import {
   useClearHoverValue,
   useHoverValue,
@@ -24,7 +31,7 @@ const log = Logger.getLogger(__filename);
 
 type PanelExtensionAdapterProps = {
   /** function that initializes the panel extension */
-  initPanel: (context: PanelExtensionContext) => void;
+  initPanel: ExtensionPanelRegistration["initPanel"];
 
   config: unknown;
   saveConfig: SaveConfig<unknown>;
@@ -57,10 +64,11 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   const setSubscriptions = useMessagePipeline(selectSetSubscriptions);
   const requestBackfill = useMessagePipeline(selectRequestBackfill);
 
+  const [subscriberId] = useState(() => uuid());
+
   const [error, setError] = useState<Error | undefined>();
   const watchedFieldsRef = useRef(new Set<keyof RenderState>());
   const subscribedTopicsRef = useRef(new Set<string>());
-  const panelElementRef = useRef<HTMLDivElement>(ReactNull);
   const previousPlayerStateRef = useRef<PlayerState | undefined>(undefined);
   const panelContextRef = useRef<PanelExtensionContext | undefined>(undefined);
 
@@ -111,21 +119,29 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
 
     // Should render indicates whether any fields of render state are updated
     let shouldRender = false;
-    const newRenderState: RenderState = prevRenderState.current;
+
+    // The render state stats with the previous render state and changes are applied as detected
+    const renderState: RenderState = prevRenderState.current;
 
     if (watchedFieldsRef.current.has("currentFrame")) {
       const currentFrame = playerState.activeData?.messages.filter((messageEvent) => {
         return subscribedTopicsRef.current.has(messageEvent.topic);
       });
-      shouldRender = true;
-      newRenderState.currentFrame = currentFrame;
+      // If there are new frames we render
+      // If there are old frames we render (new frames either replace old or no new frames)
+      // Note: renderState.currentFrame.length !== currentFrame.length is wrong because it
+      // won't render when the number of messages is the same from old to new
+      if (renderState.currentFrame?.length !== 0 || currentFrame?.length !== 0) {
+        shouldRender = true;
+        renderState.currentFrame = currentFrame;
+      }
     }
 
     if (watchedFieldsRef.current.has("topics")) {
       const newTopics = playerState.activeData?.topics ?? EmptyTopics;
       if (newTopics !== prevRenderState.current.topics) {
         shouldRender = true;
-        newRenderState.topics = newTopics;
+        renderState.topics = newTopics;
       }
     }
 
@@ -134,7 +150,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       const newBlocks = playerState.progress.messageCache?.blocks;
       if (newBlocks && prevBlocksRef.current !== newBlocks) {
         shouldRender = true;
-        const frames: MessageEvent<unknown>[] = (newRenderState.allFrames = []);
+        const frames: MessageEvent<unknown>[] = (renderState.allFrames = []);
         for (const block of newBlocks) {
           if (!block) {
             continue;
@@ -160,12 +176,12 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       if (startTime != undefined && hoverVal != undefined) {
         const startStamp = startTime.sec + startTime.nsec / 1e9;
         const stamp = startStamp + hoverVal;
-        if (stamp !== newRenderState.previewTime) {
+        if (stamp !== renderState.previewTime) {
           shouldRender = true;
         }
-        newRenderState.previewTime = stamp;
+        renderState.previewTime = stamp;
       } else {
-        newRenderState.previewTime = undefined;
+        renderState.previewTime = undefined;
       }
     }
 
@@ -177,7 +193,13 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     renderingRef.current = true;
     try {
       setError(undefined);
-      panelContext.onRender(newRenderState, () => {
+      let doneCalled = false;
+      panelContext.onRender(renderState, () => {
+        // ignore any additional done calls from the panel
+        if (doneCalled) {
+          return;
+        }
+        doneCalled = true;
         renderingRef.current = false;
       });
     } catch (err) {
@@ -200,21 +222,12 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     requestAnimationFrame(renderPanel);
   });
 
-  useLayoutEffect(() => {
-    const panelElement = panelElementRef.current;
-
-    if (!panelElement) {
-      return;
-    }
-
-    const subscriberId = uuid();
-
+  type PartialPanelExtensionContext = Omit<PanelExtensionContext, "panelElement">;
+  const partialExtensionContext = useMemo<PartialPanelExtensionContext>(() => {
     type RenderFn = (renderState: Readonly<RenderState>, done: () => void) => void;
     let renderFn: RenderFn | undefined = undefined;
 
-    const panelExtensionContext: PanelExtensionContext = {
-      panelElement,
-
+    return {
       initialState: configRef.current,
 
       saveState: saveConfig,
@@ -274,30 +287,37 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
         requestAnimationFrame(renderPanel);
       },
     };
-
-    panelContextRef.current = panelExtensionContext;
-    log.info(`Init panel ${subscriberId}`);
-    initPanel(panelExtensionContext);
-
-    // Our use effect dependency list contains dependencies which change when the player changes.
-    // This is by design. We want to clear the panel extension and initialize it again when a player
-    // changes so panel authors don't need to worry about handling these cases.
-    return () => {
-      // clear the panel element and allow the next initPanel call to have a clean element
-      panelElement.innerHTML = "";
-
-      panelContextRef.current = undefined;
-      setSubscriptions(subscriberId, []);
-    };
   }, [
     clearHoverValue,
-    initPanel,
     renderPanel,
     requestBackfill,
     saveConfig,
     setHoverValue,
     setSubscriptions,
+    subscriberId,
   ]);
+
+  // invoked when the dom node changes
+  const refCallback = useCallback<RefCallback<HTMLDivElement>>(
+    (node) => {
+      // invoked when the dom node has gone away
+      if (node === ReactNull) {
+        panelContextRef.current = undefined;
+
+        // clear the panel's subscriptions since it may be unmounting
+        setSubscriptions(subscriberId, []);
+        return;
+      }
+
+      log.info(`Init panel ${subscriberId}`);
+      panelContextRef.current = {
+        panelElement: node,
+        ...partialExtensionContext,
+      };
+      initPanel(panelContextRef.current);
+    },
+    [initPanel, partialExtensionContext, setSubscriptions, subscriberId],
+  );
 
   const style: CSSProperties = {};
   if (slowRender) {
@@ -313,7 +333,11 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   return (
     <div style={{ width: "100%", height: "100%", overflow: "hidden", zIndex: 0, ...style }}>
       <PanelToolbar floating helpContent={props.help} />
-      <div style={{ width: "100%", height: "100%", overflow: "hidden" }} ref={panelElementRef} />
+      {/* If the ref callback changes it means the panel context changed.
+      We clear the old element and make a new one to re-initialize the panel */}
+      <RemountOnValueChange value={refCallback}>
+        <div style={{ width: "100%", height: "100%", overflow: "hidden" }} ref={refCallback} />
+      </RemountOnValueChange>
     </div>
   );
 }

@@ -37,9 +37,14 @@ function MapPanel(props: MapPanelProps): JSX.Element {
   // Panel state management to track the list of available topics
   const [topics, setTopics] = useState<readonly Topic[]>([]);
 
+  // Panel state management to track the current preview time
+  const [previewTime, setPreviewTime] = useState<number | undefined>();
+
   const [currentMap, setCurrentMap] = useState<LeafMap | undefined>(undefined);
 
-  const [previewTime, setPreviewTime] = useState<number | undefined>();
+  // panel extensions must notify when they've completed rendering
+  // onRender will setRenderDone to a done callback which we can invoke after we've rendered
+  const [renderDone, setRenderDone] = useState<() => void>(() => () => {});
 
   // Subscribe to relevant topics
   useEffect(() => {
@@ -104,6 +109,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     // The panel must call the _done_ function passed to render indicating the render completed.
     // The panel will not receive render calls until it calls done.
     context.onRender = (renderState, done) => {
+      setRenderDone(() => done);
       setPreviewTime(renderState.previewTime);
 
       if (renderState.topics) {
@@ -118,14 +124,10 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       if (renderState.allFrames) {
         setAllNavMessages(renderState.allFrames);
       }
-
-      // since map panel renders in the main thread, rendering the component will block and so
-      // we don't need to delay invoking done until the render happens
-      done();
     };
 
-    // Remove any subscriptions if the effect happens to change
     return () => {
+      map.remove();
       context.onRender = undefined;
     };
   }, [context]);
@@ -134,13 +136,6 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
   const [center, setCenter] = useState<Point | undefined>();
   const [filterBounds, setFilterBounds] = useState<LatLngBounds | undefined>();
-
-  // cleanup the leaflet map on unmount
-  useEffect(() => {
-    return () => {
-      currentMap?.remove();
-    };
-  }, [currentMap]);
 
   // calculate center point from blocks if we don't have a center point
   useEffect(() => {
@@ -300,6 +295,11 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
     currentMap?.setView([center.lat, center.lon], config.zoomLevel ?? 10);
   }, [center, config.zoomLevel, currentMap]);
+
+  // Indicate render is complete - the effect runs after the dom is updated
+  useEffect(() => {
+    renderDone();
+  }, [renderDone]);
 
   return (
     <div style={{ width: "100%", height: "100%" }}>
