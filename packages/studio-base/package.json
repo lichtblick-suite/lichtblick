@@ -20,7 +20,7 @@
   ],
   "scripts": {
     "chromatic": "chromatic --project-token $CHROMATIC_PROJECT_TOKEN --build-script-name storybook:build --exit-once-uploaded --only-changed",
-    "storybook:build": "cross-env NODE_OPTIONS='--max-old-space-size=6144' TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' build-storybook --webpack-stats-json --config-dir src/.storybook"
+    "storybook:build": "cross-env NODE_OPTIONS='--max-old-space-size=6144' TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' build-storybook --config-dir src/.storybook"
   },
   "dependencies": {
     "@fluentui/react": "8.18.0",
