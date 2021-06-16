@@ -11,11 +11,18 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import GlobalVariableSlider from "@foxglove/studio-base/components/GlobalVariableSlider";
+import { Slider } from "@fluentui/react";
+
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import { SliderProps } from "@foxglove/studio-base/components/SliderWithTicks";
+import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
+
+type SliderProps = {
+  min: number;
+  max: number;
+  step: number;
+};
 
 export type GlobalVariableSliderConfig = {
   sliderProps: SliderProps;
@@ -27,13 +34,55 @@ type Props = {
 };
 
 function GlobalVariableSliderPanel(props: Props): React.ReactElement {
-  const { config } = props;
-  const { sliderProps, globalVariableName } = config;
+  const { sliderProps, globalVariableName } = props.config;
+  const { globalVariables, setGlobalVariables } = useGlobalVariables();
+
+  const globalVariableValue = globalVariables[globalVariableName];
+
+  const sliderOnChange = (value: number) => {
+    if (value !== globalVariableValue) {
+      setGlobalVariables({ [globalVariableName]: value });
+    }
+  };
 
   return (
     <div style={{ padding: "25px 4px 4px" }}>
       <PanelToolbar floating />
-      <GlobalVariableSlider sliderProps={sliderProps} globalVariableName={globalVariableName} />
+      <Slider
+        min={sliderProps.min}
+        max={sliderProps.max}
+        step={sliderProps.step}
+        showValue
+        snapToStep
+        value={typeof globalVariableValue === "number" ? globalVariableValue : 0}
+        onChange={sliderOnChange}
+        styles={{
+          // render min/max labels under the slider
+          slideBox: {
+            "::after": {
+              position: "absolute",
+              bottom: "-60%",
+              left: 0,
+              paddingLeft: "8px",
+              fontSize: "0.75em",
+              width: "100%",
+              mixBlendMode: "difference",
+              content: `'${sliderProps.min}'`,
+            },
+            "::before": {
+              position: "absolute",
+              bottom: "-60%",
+              left: 0,
+              fontSize: "0.75em",
+              paddingRight: "8px",
+              textAlign: "right",
+              width: "100%",
+              mixBlendMode: "difference",
+              content: `'${sliderProps.max}'`,
+            },
+          },
+        }}
+      />
     </div>
   );
 }
