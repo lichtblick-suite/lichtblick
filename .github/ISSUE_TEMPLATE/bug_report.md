@@ -18,6 +18,3 @@ labels: "bug"
 
 
 **Actual Behavior**
-
-
-**Current Behavior**
