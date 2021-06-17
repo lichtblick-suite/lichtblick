@@ -36,7 +36,8 @@
     "package:e2e": "yarn && yarn clean && yarn build:prod && yarn package",
     "release:bump-nightly-version": "node -r ts-node/register ./ci/bump-nightly-version.ts",
     "storybook": "cross-env NODE_OPTIONS='--max-old-space-size=6144' TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' yarn workspace @foxglove/studio-base run start-storybook --config-dir src/.storybook",
-    "storybook:ci": "ts-node ./ci/storybook.ts"
+    "storybook:ci": "ts-node ./ci/storybook.ts",
+    "version:all": "yarn workspaces foreach version"
   },
   "workspaces": {
     "packages": [
