@@ -793,12 +793,14 @@ const panelsReducer = function (panelsState: PanelsState, action: PanelsActions)
 
     case "SET_USER_NODES": {
       const userNodes = { ...newPanelsState.userNodes, ...action.payload };
-      Object.keys(action.payload).forEach((key) => {
+      Object.keys(userNodes).forEach((key) => {
         if (userNodes[key] === undefined) {
           delete userNodes[key];
         }
       });
-      newPanelsState.userNodes = userNodes;
+      newPanelsState.userNodes = userNodes as {
+        [K in keyof typeof userNodes]-?: NonNullable<typeof userNodes[K]>;
+      };
       break;
     }
 

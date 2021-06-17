@@ -66,7 +66,7 @@ export interface CurrentLayout {
     loadLayout: (payload: LoadLayoutPayload) => void;
     overwriteGlobalVariables: (payload: { [key: string]: unknown }) => void;
     setGlobalVariables: (payload: { [key: string]: unknown }) => void;
-    setUserNodes: (payload: UserNodes) => void;
+    setUserNodes: (payload: Partial<UserNodes>) => void;
     setLinkedGlobalVariables: (payload: LinkedGlobalVariables) => void;
     setPlaybackConfig: (payload: Partial<PlaybackConfig>) => void;
     closePanel: (payload: ClosePanelPayload) => void;

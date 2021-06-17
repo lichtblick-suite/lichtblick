@@ -14,7 +14,7 @@
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 // @ts-expect-error why doesn't this import the base monaco?
 import { StaticServices } from "monaco-editor/esm/vs/editor/standalone/browser/standaloneServices";
-import { ReactElement } from "react";
+import { ReactElement, useRef } from "react";
 import MonacoEditor, { EditorDidMount, EditorWillMount } from "react-monaco-editor";
 import { useResizeDetector } from "react-resize-detector";
 
@@ -234,18 +234,20 @@ const Editor = ({
     }
   }, [save, script]);
 
-  const didMount = React.useCallback<EditorDidMount>(
-    (editor) => {
-      editorRef.current = editor;
-      editor.addAction({
-        id: "ctrl-s",
-        label: "Save current node",
-        keybindings: [monacoApi.KeyMod.CtrlCmd | monacoApi.KeyCode.KEY_S],
-        run: saveCode,
-      });
-    },
-    [saveCode],
-  );
+  const saveCodeRef = useRef(saveCode);
+  saveCodeRef.current = saveCode;
+  const didMount = React.useCallback<EditorDidMount>((editor) => {
+    editorRef.current = editor;
+    editor.addAction({
+      id: "ctrl-s",
+      label: "Save current node",
+      keybindings: [monacoApi.KeyMod.CtrlCmd | monacoApi.KeyCode.KEY_S],
+
+      // Because this didMount function only runs once, we need to store the saveCode function in a
+      // ref so the command can always access the latest version.
+      run: () => saveCodeRef.current(),
+    });
+  }, []);
 
   const onChange = React.useCallback((srcCode: string) => setScriptCode(srcCode), [setScriptCode]);
 

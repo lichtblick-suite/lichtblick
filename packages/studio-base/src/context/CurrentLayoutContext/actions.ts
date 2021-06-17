@@ -122,7 +122,7 @@ export type SET_GLOBAL_DATA = {
   };
 };
 
-export type SET_STUDIO_NODES = { type: "SET_USER_NODES"; payload: UserNodes };
+export type SET_STUDIO_NODES = { type: "SET_USER_NODES"; payload: Partial<UserNodes> };
 
 export type SET_LINKED_GLOBAL_VARIABLES = {
   type: "SET_LINKED_GLOBAL_VARIABLES";
