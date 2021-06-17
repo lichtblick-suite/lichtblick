@@ -264,7 +264,6 @@ export default function renderNamespaceNodes({
     diffModeEnabled,
   };
 
-  // @ts-expect-error unmangle this
   return children
     .filter(({ key }) => getIsTreeNodeVisibleInTree(key))
     .map(

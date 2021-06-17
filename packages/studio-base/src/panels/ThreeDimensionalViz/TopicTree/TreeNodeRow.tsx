@@ -126,7 +126,7 @@ type Props = {
   derivedCustomSettings?: DerivedCustomSettings;
   width: number;
   filterText: string;
-  tooltips?: Node[];
+  tooltips?: React.ReactNode[];
   visibleTopicsCount: number;
   diffModeEnabled: boolean;
 };

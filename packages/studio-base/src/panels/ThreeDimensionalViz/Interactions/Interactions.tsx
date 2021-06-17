@@ -119,12 +119,13 @@ const InteractionsBaseComponent = React.memo<PropsWithConfig>(function Interacti
 // Wrap the Interactions so that we don't rerender every time any part of the PanelContext config changes, but just the
 // one value that we care about.
 export default function Interactions(props: Props): JSX.Element {
-  const { saveConfig, config: { disableAutoOpenClickedObject } = {} as any } =
-    React.useContext(PanelContext) ?? {};
+  const { saveConfig, config: { disableAutoOpenClickedObject = false } = {} } = React.useContext(
+    PanelContext,
+  ) ?? { saveConfig: () => {} };
   return (
     <InteractionsBaseComponent
       {...props}
-      saveConfig={saveConfig as any}
+      saveConfig={saveConfig}
       disableAutoOpenClickedObject={disableAutoOpenClickedObject}
     />
   );

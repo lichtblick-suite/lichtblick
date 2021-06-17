@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { first, omit, sortBy } from "lodash";
+import { useCallback } from "react";
 import Tree from "react-json-tree";
 import { MouseEventObject } from "regl-worldview";
 import styled from "styled-components";
@@ -47,7 +48,7 @@ type CommonProps = { readonly interactionData?: InteractionData };
 
 type WrapperProps = CommonProps & { readonly selectedObject: MouseEventObject };
 
-type Props = CommonProps & { readonly objectToDisplay: any };
+type Props = CommonProps & { readonly objectToDisplay: unknown };
 
 // Used for switching between views of individual and combined objects.
 // TODO(steel): Only show the combined object when the individual objects are semantically related.
@@ -62,9 +63,9 @@ function ObjectDetailsWrapper({
     full: "Show full object",
   };
 
-  const updateShowInstance = (shouldShowInstance: any) => {
+  const updateShowInstance = useCallback((shouldShowInstance: boolean) => {
     setShowInstance(shouldShowInstance);
-  };
+  }, []);
 
   const objectToDisplay = instanceObject && showInstance ? instanceObject : object;
   return (
@@ -101,8 +102,11 @@ function ObjectDetails({ interactionData, objectToDisplay }: Props) {
 
   // object to display may not be a plain-ole-data
   // We need a plain object to sort the keys and omit interaction data
-  const plainObject = "toJSON" in objectToDisplay ? objectToDisplay.toJSON() : objectToDisplay;
-  const originalObject = omit(plainObject, "interactionData");
+  const plainObject =
+    "toJSON" in (objectToDisplay as { toJSON?: () => unknown })
+      ? (objectToDisplay as { toJSON: () => unknown }).toJSON()
+      : objectToDisplay;
+  const originalObject = omit(plainObject as Record<string, unknown>, "interactionData");
 
   const getItemString = useGetItemStringWithTimezone();
 
@@ -144,9 +148,9 @@ function ObjectDetails({ interactionData, objectToDisplay }: Props) {
             return <span style={{ padding: "0 4px" }}>{label}</span>;
           }
 
-          let objectForPath: Record<string, any> | undefined = sortedDataObject;
+          let objectForPath: Record<string, unknown> | undefined = sortedDataObject;
           for (let i = markerKeyPath.length - 1; i >= 0; i--) {
-            objectForPath = objectForPath[markerKeyPath[i]!];
+            objectForPath = objectForPath[markerKeyPath[i]!] as Record<string, unknown> | undefined;
             if (!objectForPath) {
               break;
             }
@@ -157,8 +161,8 @@ function ObjectDetails({ interactionData, objectToDisplay }: Props) {
               <GlobalVariableLink
                 hasNestedValue
                 style={{ marginLeft: 4 }}
-                label={label as any}
-                markerKeyPath={markerKeyPath as any}
+                label={label?.toString()}
+                markerKeyPath={markerKeyPath.map((item) => item.toString())}
                 topic={topic}
                 variableValue={objectForPath}
               />
@@ -166,12 +170,16 @@ function ObjectDetails({ interactionData, objectToDisplay }: Props) {
           }
           return <></>;
         }}
-        valueRenderer={(label: string, itemValue: any, ...markerKeyPath: (string | number)[]) => {
+        valueRenderer={(
+          label: string,
+          itemValue: unknown,
+          ...markerKeyPath: (string | number)[]
+        ) => {
           return (
             <GlobalVariableLink
               style={{ marginLeft: 16 }}
               label={label}
-              markerKeyPath={markerKeyPath as any}
+              markerKeyPath={markerKeyPath.map((item) => item.toString())}
               topic={topic}
               variableValue={itemValue}
             />

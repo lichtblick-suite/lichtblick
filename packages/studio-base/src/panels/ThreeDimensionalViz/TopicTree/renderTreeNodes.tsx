@@ -200,7 +200,6 @@ export default function renderTreeNodes({
 }: Props): TreeUINode[] {
   const titleWidth = width - SWITCHER_WIDTH;
 
-  // @ts-expect-error this needs to be untangled
   return filterMap(children, (item) => {
     const { key, providerAvailable } = item;
     if (!getIsTreeNodeVisibleInTree(key)) {

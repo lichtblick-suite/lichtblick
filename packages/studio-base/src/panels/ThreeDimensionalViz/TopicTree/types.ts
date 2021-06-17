@@ -28,7 +28,12 @@ export type TopicTreeConfig = {
   description?: string;
 };
 
-export type TreeUINode = { title: Node; key: string; children?: TreeUINode[]; disabled?: boolean };
+export type TreeUINode = {
+  title: React.ReactNode;
+  key: string;
+  children?: TreeUINode[];
+  disabled?: boolean;
+};
 
 export type NamespacesByTopic = {
   [topicName: string]: string[];

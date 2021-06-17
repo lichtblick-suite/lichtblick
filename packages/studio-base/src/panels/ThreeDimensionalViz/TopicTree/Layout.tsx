@@ -126,11 +126,11 @@ export type LayoutTopicSettingsSharedProps = {
 
 type Props = LayoutToolbarSharedProps &
   LayoutTopicSettingsSharedProps & {
-    children?: Node;
+    children?: React.ReactNode;
     cleared?: boolean;
     currentTime: Time;
     frame?: Frame;
-    helpContent: Node | string;
+    helpContent: React.ReactNode | string;
     isPlaying?: boolean;
     config: ThreeDimensionalVizConfig;
     saveConfig: Save3DConfig;

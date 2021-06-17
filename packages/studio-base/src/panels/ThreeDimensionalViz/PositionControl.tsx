@@ -142,15 +142,14 @@ export default class PositionControl extends Component<Props> {
   }
 
   override render(): JSX.Element {
-    // "plaintext-only" is a chrome specific feature
-    // See if we can declaration merge contentEditable for plaintext-only support
-    // https://www.eckher.com/c/21g53gqg1g
     return (
       <div
-        {...({ contentEditable: "plaintext-only" } as any)}
         ref={this._ref}
         className={styles.inputField}
-        contentEditable="plaintext-only"
+        contentEditable={
+          // "plaintext-only" is not supported by all browsers, and not covered by React typings
+          "plaintext-only" as React.HTMLAttributes<HTMLDivElement>["contentEditable"]
+        }
         onInput={this.onInput}
         onFocus={this.onFocus}
         onBlur={this.onBlur}
