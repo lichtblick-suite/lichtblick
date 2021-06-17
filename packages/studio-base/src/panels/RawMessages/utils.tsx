@@ -13,7 +13,7 @@
 import { first, last } from "lodash";
 import { ReactNode } from "react";
 
-import { diffLabels } from "@foxglove/studio-base/panels/RawMessages/getDiff";
+import { diffLabels, DiffObject } from "@foxglove/studio-base/panels/RawMessages/getDiff";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export const DATA_ARRAY_PREVIEW_LIMIT = 20;
@@ -30,22 +30,34 @@ export const ROS_COMMON_MSGS: Set<string> = new Set([
   "visualization_msgs",
   "turtlesim",
 ]);
-function getChangeCounts(data: any, startingCounts: any) {
-  const possibleLabelTexts = Object.keys(startingCounts);
+
+function getChangeCounts(
+  data: DiffObject,
+  startingCounts: {
+    -readonly [K in typeof diffLabels["ADDED" | "CHANGED" | "DELETED"]["labelText"]]: number;
+  },
+) {
   for (const key in data) {
-    if (possibleLabelTexts.includes(key)) {
+    if (
+      key === diffLabels.ADDED.labelText ||
+      key === diffLabels.CHANGED.labelText ||
+      key === diffLabels.DELETED.labelText
+    ) {
       startingCounts[key]++;
-    } else if (typeof data[key] === "object") {
-      getChangeCounts(data[key], startingCounts);
+    } else if (typeof data[key] === "object" && data[key] != undefined) {
+      getChangeCounts(data[key] as DiffObject, startingCounts);
     }
   }
   return startingCounts;
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const getItemStringForDiff = (_type: string, data: any, itemType: ReactNode): ReactNode => {
+export const getItemStringForDiff = (
+  _type: string,
+  data: DiffObject,
+  itemType: ReactNode,
+): ReactNode => {
   const { ADDED, DELETED, CHANGED, ID } = diffLabels;
-  const id = data[ID.labelText];
+  const id = data[ID.labelText] as DiffObject | undefined;
   const idLabel = id
     ? Object.keys(id)
         .map((key) => `${key}: ${id[key]}`)
@@ -61,7 +73,7 @@ export const getItemStringForDiff = (_type: string, data: any, itemType: ReactNo
         </span>
       ) : undefined}
       <span style={{ float: "right", color: CHANGED.color }}>
-        {counts[ADDED.labelText] || counts[DELETED.labelText] ? (
+        {counts[ADDED.labelText] !== 0 || counts[DELETED.labelText] !== 0 ? (
           <span
             style={{
               display: "inline-block",
@@ -73,18 +85,18 @@ export const getItemStringForDiff = (_type: string, data: any, itemType: ReactNo
             }}
           >
             <span style={{ color: colors.GREEN }}>
-              {counts[ADDED.labelText]
+              {counts[ADDED.labelText] !== 0
                 ? `${diffLabels.ADDED.indicator}${counts[ADDED.labelText]} `
                 : undefined}
             </span>
             <span style={{ color: colors.RED }}>
-              {counts[DELETED.labelText]
+              {counts[DELETED.labelText] !== 0
                 ? `${diffLabels.DELETED.indicator}${counts[DELETED.labelText]}`
                 : undefined}
             </span>
           </span>
         ) : undefined}
-        {counts[CHANGED.labelText] ? (
+        {counts[CHANGED.labelText] !== 0 ? (
           <span
             style={{
               display: "inline-block",
@@ -95,7 +107,7 @@ export const getItemStringForDiff = (_type: string, data: any, itemType: ReactNo
               marginRight: 5,
             }}
           >
-            {counts[CHANGED.labelText] ? " " : undefined}
+            {counts[CHANGED.labelText] !== 0 ? " " : undefined}
           </span>
         ) : undefined}
       </span>
@@ -103,11 +115,11 @@ export const getItemStringForDiff = (_type: string, data: any, itemType: ReactNo
   );
 };
 
-export function getMessageDocumentationLink(datatype: string): string | undefined {
+export function getMessageDocumentationLink(datatype: string): string {
   const parts = datatype.split("/");
   const pkg = first(parts);
   const filename = last(parts);
-  return ROS_COMMON_MSGS.has(pkg as any)
+  return pkg != undefined && ROS_COMMON_MSGS.has(pkg)
     ? `http://docs.ros.org/api/${pkg}/html/msg/${filename}.html`
     : `https://www.google.com/search?q=${pkg}/${filename}`;
 }

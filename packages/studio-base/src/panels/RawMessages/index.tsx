@@ -13,7 +13,6 @@
 
 import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
-import ConsoleLineIcon from "@mdi/svg/svg/console-line.svg";
 import PlusMinusIcon from "@mdi/svg/svg/plus-minus.svg";
 import LessIcon from "@mdi/svg/svg/unfold-less-horizontal.svg";
 import MoreIcon from "@mdi/svg/svg/unfold-more-horizontal.svg";
@@ -57,9 +56,9 @@ import { Topic } from "@foxglove/studio-base/players/types";
 import { jsonTreeTheme, SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import { enumValuesByDatatypeAndField } from "@foxglove/studio-base/util/selectors";
 
-import { HighlightedValue, SDiffSpan, MaybeCollapsedValue } from "./Diff";
+import { SDiffSpan, MaybeCollapsedValue } from "./Diff";
 import Metadata from "./Metadata";
-import RawMessagesIcons from "./RawMessagesIcons";
+import Value from "./Value";
 import {
   ValueAction,
   getValueActionForValue,
@@ -85,13 +84,13 @@ type Props = {
   saveConfig: (arg0: Partial<RawMessagesConfig>) => void;
 };
 
-const isSingleElemArray = (obj: unknown) => {
+const isSingleElemArray = (obj: unknown): obj is unknown[] => {
   if (!Array.isArray(obj)) {
     return false;
   }
   return obj.filter((a) => a != undefined).length === 1;
 };
-const dataWithoutWrappingArray = (data: any) => {
+const dataWithoutWrappingArray = (data: unknown) => {
   return isSingleElemArray(data) && typeof data[0] === "object" ? data[0] : data;
 };
 
@@ -198,6 +197,54 @@ function RawMessages(props: Props) {
     [expandedFields],
   );
 
+  const getValueLabels = useCallback(
+    ({
+      constantName,
+      label,
+      itemValue,
+    }: {
+      constantName: string | undefined;
+      label: string;
+      itemValue: unknown;
+    }): { arrLabel: string; itemLabel: string } => {
+      let itemLabel = label;
+      // output preview for the first x items if the data is in binary format
+      // sample output: Int8Array(331776) [-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, ...]
+      let arrLabel = "";
+      if (ArrayBuffer.isView(itemValue)) {
+        const array = itemValue as Uint8Array;
+        const itemPart = array.slice(0, DATA_ARRAY_PREVIEW_LIMIT).join(", ");
+        const length = array.length;
+        arrLabel = `(${length}) [${itemPart}${length >= DATA_ARRAY_PREVIEW_LIMIT ? ", ..." : ""}] `;
+        itemLabel = itemValue.constructor.name;
+      }
+      if (constantName != undefined) {
+        itemLabel = `${itemLabel} (${constantName})`;
+      }
+      return { arrLabel, itemLabel };
+    },
+    [],
+  );
+
+  const renderDiffLabel = useCallback(
+    (label: string, itemValue: unknown) => {
+      let constantName: string | undefined;
+      const { arrLabel, itemLabel } = getValueLabels({ constantName, label, itemValue });
+      return (
+        <Value
+          arrLabel={arrLabel}
+          basePath=""
+          itemLabel={itemLabel}
+          itemValue={itemValue}
+          valueAction={undefined}
+          onTopicPathChange={onTopicPathChange}
+          openSiblingPanel={openSiblingPanel}
+        />
+      );
+    },
+    [getValueLabels, onTopicPathChange, openSiblingPanel],
+  );
+
   const valueRenderer = useCallback(
     (
       structureItem: MessagePathStructureItem | undefined,
@@ -207,8 +254,8 @@ function RawMessages(props: Props) {
       itemValue: unknown,
       ...keyPath: (number | string)[]
     ) => (
-      <ReactHoverObserver className={styles.iconWrapper}>
-        {({ isHovering }: any) => {
+      <ReactHoverObserver className={styles.iconWrapper ?? ""}>
+        {({ isHovering }: { isHovering: boolean }) => {
           const lastKeyPath = last(keyPath) as number;
           let valueAction: ValueAction | undefined;
           if (isHovering && structureItem) {
@@ -230,60 +277,27 @@ function RawMessages(props: Props) {
               if (typeof field === "string") {
                 const enumMapping = enumValuesByDatatypeAndField(datatypes);
                 const datatype = childStructureItem.datatype;
-                constantName = enumMapping[datatype]?.[field]?.[itemValue as any];
+                constantName = enumMapping[datatype]?.[field]?.[String(itemValue)];
               }
             }
           }
           const basePath = queriedData[lastKeyPath]?.path ?? "";
-          let itemLabel = label;
-          // output preview for the first x items if the data is in binary format
-          // sample output: Int8Array(331776) [-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, ...]
-          let smallNumberArrayStr = "";
-          if (ArrayBuffer.isView(itemValue)) {
-            const array = itemValue as Uint8Array;
-            const itemPart = array.slice(0, DATA_ARRAY_PREVIEW_LIMIT).join(", ");
-            const length = array.length;
-            smallNumberArrayStr = `(${length}) [${itemPart}${
-              length >= DATA_ARRAY_PREVIEW_LIMIT ? ", ..." : ""
-            }] `;
-            itemLabel = itemValue.constructor.name;
-          }
-          if (constantName != undefined) {
-            itemLabel = `${itemLabel} (${constantName})`;
-          }
+          const { arrLabel, itemLabel } = getValueLabels({ constantName, label, itemValue });
           return (
-            <span>
-              <HighlightedValue itemLabel={itemLabel} />
-              {smallNumberArrayStr.length !== 0 && (
-                <>
-                  {smallNumberArrayStr}
-                  <Icon
-                    fade
-                    className={styles.icon}
-                    // eslint-disable-next-line no-restricted-syntax
-                    onClick={() => console.log(itemValue)}
-                    tooltip="Log data to browser console"
-                  >
-                    <ConsoleLineIcon />
-                  </Icon>
-                </>
-              )}
-              <span className={styles.iconBox}>
-                {valueAction && (
-                  <RawMessagesIcons
-                    valueAction={valueAction}
-                    basePath={basePath}
-                    onTopicPathChange={onTopicPathChange}
-                    openSiblingPanel={openSiblingPanel}
-                  />
-                )}
-              </span>
-            </span>
+            <Value
+              arrLabel={arrLabel}
+              basePath={basePath}
+              itemLabel={itemLabel}
+              itemValue={itemValue}
+              valueAction={valueAction}
+              onTopicPathChange={onTopicPathChange}
+              openSiblingPanel={openSiblingPanel}
+            />
           );
         }}
       </ReactHoverObserver>
     ),
-    [datatypes, onTopicPathChange, openSiblingPanel],
+    [datatypes, getValueLabels, onTopicPathChange, openSiblingPanel],
   );
 
   const renderSingleTopicOrDiffOutput = useCallback(() => {
@@ -326,9 +340,9 @@ function RawMessages(props: Props) {
 
     // json parse/stringify round trip is used to deep parse data and diff data which may be lazy messages
     // lazy messages have non-enumerable getters but do have a toJSON method to turn themselves into an object
-    const diff =
-      diffEnabled &&
-      getDiff(maybeDeepParse(data), maybeDeepParse(diffData), undefined, showFullMessageForDiff);
+    const diff = diffEnabled
+      ? getDiff(maybeDeepParse(data), maybeDeepParse(diffData), undefined, showFullMessageForDiff)
+      : {};
     const diffLabelTexts = Object.values(diffLabels).map(({ labelText }) => labelText);
 
     const CheckboxComponent = showFullMessageForDiff
@@ -336,17 +350,17 @@ function RawMessages(props: Props) {
       : CheckboxBlankOutlineIcon;
 
     return (
-      <Flex col clip scroll className={styles.container}>
+      <Flex col clip scroll className={styles.container ?? ""}>
         <Metadata
           data={data}
           diffData={diffData}
           diff={diff}
-          datatype={topic?.datatype}
           message={baseItem.message}
-          diffMessage={diffItem?.message}
+          {...(topic ? { datatype: topic.datatype } : undefined)}
+          {...(diffItem ? { diffMessage: diffItem.message } : undefined)}
         />
         {shouldDisplaySingleVal ? (
-          <div className={styles.singleVal}>
+          <div className={styles.singleVal ?? ""}>
             <MaybeCollapsedValue itemLabel={String(singleVal)} />
           </div>
         ) : diffEnabled && isEqual({}, diff) ? (
@@ -374,13 +388,18 @@ function RawMessages(props: Props) {
               getItemString={diffEnabled ? getItemStringForDiff : getItemString}
               valueRenderer={(...args) => {
                 if (diffEnabled) {
-                  return valueRenderer(undefined, diff, diff, ...args);
+                  return renderDiffLabel(args[0], args[1]);
                 }
                 if (hideWrappingArray) {
                   // When the wrapping array is hidden, put it back here.
                   return valueRenderer(rootStructureItem, [data], baseItem.queriedData, ...args, 0);
                 }
-                return valueRenderer(rootStructureItem, data, baseItem.queriedData, ...args);
+                return valueRenderer(
+                  rootStructureItem,
+                  data as unknown[],
+                  baseItem.queriedData,
+                  ...args,
+                );
               }}
               postprocessValue={(rawVal: unknown) => {
                 const val = maybeDeepParse(rawVal);
@@ -388,7 +407,7 @@ function RawMessages(props: Props) {
                   typeof val === "object" &&
                   val != undefined &&
                   Object.keys(val).length === 1 &&
-                  diffLabelTexts.includes(Object.keys(val)[0] as string)
+                  (diffLabelTexts as string[]).includes(Object.keys(val)[0] as string)
                 ) {
                   if (Object.keys(val)[0] !== diffLabels.ID.labelText) {
                     return Object.values(val)[0];
@@ -486,6 +505,7 @@ function RawMessages(props: Props) {
     topic,
     topicPath,
     valueRenderer,
+    renderDiffLabel,
     getItemString,
   ]);
 
@@ -504,7 +524,7 @@ function RawMessages(props: Props) {
         >
           {expandAll ?? false ? <LessIcon /> : <MoreIcon />}
         </Icon>
-        <div className={styles.topicInputs}>
+        <div className={styles.topicInputs ?? ""}>
           <MessagePathInput
             index={0}
             path={topicPath}
@@ -538,7 +558,7 @@ function RawMessages(props: Props) {
                   path={diffTopicPath}
                   onChange={onDiffTopicPathChange}
                   inputStyle={{ height: "100%" }}
-                  prioritizedDatatype={topic?.datatype}
+                  {...(topic ? { prioritizedDatatype: topic.datatype } : {})}
                 />
               ) : undefined}
             </Flex>

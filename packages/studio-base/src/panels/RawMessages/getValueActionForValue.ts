@@ -69,7 +69,7 @@ export function getValueActionForValue(
         structureItem.structureType === "message" && typeof pathItem === "string"
           ? structureItem.nextByName[pathItem]
           : { structureType: "primitive", primitiveType: "json", datatype: "" };
-      value = (value as any)[pathItem];
+      value = (value as Record<string, unknown>)[pathItem];
       if (multiSlicePath.endsWith("[:]")) {
         // We're just inside a message that is inside an array, so we might want to pivot on this new value.
         pivotPath = `${multiSlicePath}{${pathItem}==${JSON.stringify(value) ?? ""}}`;
@@ -79,7 +79,7 @@ export function getValueActionForValue(
       singleSlicePath += `.${pathItem}`;
       multiSlicePath += `.${pathItem}`;
     } else if (isArrayElement(value, pathItem, structureItem)) {
-      value = (value as any)[pathItem];
+      value = (value as Record<string, unknown>)[pathItem];
       structureItem =
         structureItem.structureType === "array"
           ? structureItem.next
@@ -99,7 +99,7 @@ export function getValueActionForValue(
         typeof typicalFilterName === "string"
       ) {
         singleSlicePath += `[:]{${typicalFilterName}==${
-          JSON.stringify((value as any)[typicalFilterName]) ?? ""
+          JSON.stringify((value as Record<string, unknown>)[typicalFilterName]) ?? ""
         }}`;
       } else {
         singleSlicePath += `[${pathItem}]`;
@@ -114,7 +114,11 @@ export function getValueActionForValue(
   }
   // At this point we should be looking at a primitive. If not, just return nothing.
   if (structureItem && structureItem.structureType === "primitive" && value != undefined) {
-    if (pivotPath.length !== 0 && isTypicalFilterName((last(keyPath) as any).toString())) {
+    if (
+      pivotPath.length !== 0 &&
+      keyPath.length > 0 &&
+      isTypicalFilterName(last(keyPath)!.toString())
+    ) {
       return { type: "pivot", pivotPath };
     }
     return {
@@ -138,8 +142,8 @@ export const getStructureItemForPath = memoizeWeak(
     // split the path and parse into numbers and strings
     const keyPath: (number | string)[] = [];
     for (const part of keyPathJoined.split(",")) {
-      if (!isNaN(part as any)) {
-        keyPath.push(parseInt(part));
+      if (!isNaN(+part)) {
+        keyPath.push(+part);
       } else {
         keyPath.push(part);
       }

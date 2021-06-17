@@ -29,15 +29,21 @@ const SMetadata = styled.div`
   color: #aaa;
 `;
 type Props = {
-  data: any;
-  diffData: any;
-  diff: any;
+  data: unknown;
+  diffData: unknown;
+  diff: unknown;
   datatype?: string;
   message: MessageEvent<unknown>;
   diffMessage?: MessageEvent<unknown>;
 };
 
-function CopyMessageButton({ text, onClick }: any) {
+function CopyMessageButton({
+  text,
+  onClick,
+}: {
+  text: string;
+  onClick: (e: React.MouseEvent<HTMLElement>) => void;
+}) {
   return (
     <a onClick={onClick} href="#" style={{ textDecoration: "none" }}>
       <Icon tooltip="Copy entire message to clipboard" style={{ position: "relative", top: -1 }}>
@@ -57,7 +63,7 @@ export default function Metadata({
   diffMessage,
 }: Props): JSX.Element {
   const onClickCopy = useCallback(
-    (dataToCopy) => (e: React.MouseEvent<HTMLSpanElement>) => {
+    (dataToCopy: unknown) => (e: React.MouseEvent<HTMLElement>) => {
       e.stopPropagation();
       e.preventDefault();
       const dataWithoutLargeArrays = cloneDeepWith(dataToCopy, (value) => {
@@ -77,7 +83,7 @@ export default function Metadata({
           style={{ color: "inherit" }}
           target="_blank"
           rel="noopener noreferrer"
-          href={getMessageDocumentationLink(datatype) as any}
+          href={getMessageDocumentationLink(datatype)}
         >
           {datatype}
         </a>
