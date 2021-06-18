@@ -22,7 +22,7 @@ import CommonPointSettings from "./CommonPointSettings";
 import { SLabel } from "./common";
 import { TopicSettingsEditorProps } from "./types";
 
-type LaserScanSettings = {
+export type LaserScanSettings = {
   pointSize?: number;
   pointShape?: string;
   decayTime?: number;

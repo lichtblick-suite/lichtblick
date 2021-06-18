@@ -10,6 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import type REGL from "regl";
 import tinycolor from "tinycolor2";
 
 import { OccupancyGridMessage } from "@foxglove/studio-base/types/Messages";
@@ -92,11 +93,11 @@ function toTypedArray(data: readonly number[] | Int8Array): Uint8Array {
 
 class TextureCacheEntry {
   marker: OccupancyGridMessage;
-  texture: any;
+  texture: REGL.Texture2D;
   // regl context
-  regl: any;
+  regl: REGL.Regl;
 
-  constructor(regl: any, marker: OccupancyGridMessage) {
+  constructor(regl: REGL.Regl, marker: OccupancyGridMessage) {
     this.marker = marker;
     this.regl = regl;
     const { info, data } = marker;
@@ -137,14 +138,14 @@ export class TextureCache {
     [key: string]: TextureCacheEntry;
   } = {};
   // regl context
-  regl: any;
+  regl: REGL.Regl;
 
-  constructor(regl: unknown) {
+  constructor(regl: REGL.Regl) {
     this.regl = regl;
   }
 
   // returns a regl texture for a given marker
-  get(marker: OccupancyGridMessage): any {
+  get(marker: OccupancyGridMessage): REGL.Texture2D {
     const { name } = marker;
     const item = this.store[name];
     if (!item) {

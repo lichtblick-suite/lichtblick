@@ -12,16 +12,18 @@
 //   You may not use this file except in compliance with the License.
 
 import { range } from "lodash";
+import type REGL from "regl";
 import {
   Command,
   withPose,
   toRGBA,
-  Regl,
   CommonCommandProps,
   nonInstancedGetChildrenForHitmap,
 } from "regl-worldview";
 
+import { LaserScanSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/LaserScanSettingsEditor";
 import { LaserScan } from "@foxglove/studio-base/types/Messages";
+import { ReglColor } from "@foxglove/studio-base/util/colorUtils";
 
 export const DEFAULT_FLAT_COLOR = { r: 0.5, g: 0.5, b: 1, a: 1 };
 
@@ -61,8 +63,30 @@ const LaserScanVert = `
   }
 `;
 
-const laserScan = (regl: Regl) =>
-  withPose({
+type Uniforms = {
+  pointSize: number;
+  angle_min: number;
+  angle_increment: number;
+  range_min: number;
+  range_max: number;
+  isHitmap: boolean;
+  isCircle: boolean;
+  color: number[];
+};
+type Attributes = {
+  index: readonly number[];
+  range: readonly number[];
+  intensity: ArrayLike<number>;
+  hitmapColor: number[][];
+};
+type OwnContext = Record<string, never>;
+type CommandProps = LaserScan & {
+  color?: ReglColor;
+  settings?: LaserScanSettings;
+};
+
+const laserScan = (regl: REGL.Regl) =>
+  withPose<Uniforms, Attributes, CommandProps, OwnContext, REGL.DefaultContext>({
     primitive: "points",
     vert: LaserScanVert,
     frag: `
@@ -79,31 +103,30 @@ const laserScan = (regl: Regl) =>
   `,
 
     uniforms: {
-      pointSize: (_context: unknown, props: any) => props.settings?.pointSize || 4,
-      isCircle: (_context: unknown, props: any) =>
+      pointSize: (_context, props) => props.settings?.pointSize ?? 4,
+      isCircle: (_context, props) =>
         (props.settings && props.settings.pointShape === "circle") || false,
       // Color is not included in the LaserScan message - it's only included if the color is added by
       // getChildrenForHitmap.
-      isHitmap: (_context: unknown, props: any) => !!props.color,
+      isHitmap: (_context, props) => !!props.color,
 
       angle_min: regl.prop("angle_min"),
       angle_increment: regl.prop("angle_increment"),
       range_min: regl.prop("range_min"),
       range_max: regl.prop("range_max"),
 
-      color: (_context: unknown, props: any) =>
-        toRGBA(props.settings?.overrideColor || DEFAULT_FLAT_COLOR),
+      color: (_context, props) => toRGBA(props.settings?.overrideColor ?? DEFAULT_FLAT_COLOR),
     },
 
     attributes: {
-      index: (_context: unknown, props: any) => range(props.ranges.length),
+      index: (_context, props) => range(props.ranges.length),
       range: regl.prop("ranges"),
-      intensity: (_context: unknown, props: any) =>
+      intensity: (_context, props) =>
         props.intensities.length === props.ranges.length
           ? props.intensities
           : new Float32Array(props.ranges.length).fill(1),
-      hitmapColor: (_context: unknown, props: any) =>
-        new Array(props.ranges.length).fill(props.color || [0, 0, 0, 1]),
+      hitmapColor: (_context, props) =>
+        new Array(props.ranges.length).fill(props.color ?? [0, 0, 0, 1]),
     },
 
     count: regl.prop("ranges.length"),

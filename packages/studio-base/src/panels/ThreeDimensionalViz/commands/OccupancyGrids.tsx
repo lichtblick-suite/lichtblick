@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import type REGL from "regl";
 import { Command, withPose, pointToVec3, defaultBlend, CommonCommandProps } from "regl-worldview";
 
 import {
@@ -19,15 +20,30 @@ import {
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/utils";
 import { OccupancyGridMessage } from "@foxglove/studio-base/types/Messages";
 
-const occupancyGrids = (regl: any) => {
+type Uniforms = {
+  offset: number[];
+  orientation: number[];
+  width: number;
+  height: number;
+  resolution: number;
+  alpha: number;
+  palette: REGL.Texture2D;
+  data: REGL.Texture2D;
+};
+type Attributes = {
+  point: REGL.Buffer;
+};
+type CommandProps = OccupancyGridMessage;
+
+const occupancyGrids = (regl: REGL.Regl) => {
   // make a buffer holding the verticies of a 1x1 plane
   // it will be resized in the shader
   const positionBuffer = regl.buffer([0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0]);
 
   const cache = new TextureCache(regl);
-  const paletteTextures = new Map<Uint8Array, any>();
+  const paletteTextures = new Map<Uint8Array, REGL.Texture2D>();
 
-  return withPose({
+  return withPose<Uniforms, Attributes, CommandProps, Record<string, never>, REGL.DefaultContext>({
     primitive: "triangle strip",
 
     vert: `
@@ -96,13 +112,13 @@ const occupancyGrids = (regl: any) => {
       height: regl.prop("info.height"),
       resolution: regl.prop("info.resolution"),
       // make alpha a uniform so in the future it can be controlled by topic settings
-      alpha: (_context: unknown, props: OccupancyGridMessage) => {
+      alpha: (_context, props) => {
         return props.alpha ?? 0.5;
       },
-      offset: (_context: unknown, props: OccupancyGridMessage) => {
+      offset: (_context, props) => {
         return pointToVec3(props.info.origin.position);
       },
-      orientation: (_context: unknown, props: OccupancyGridMessage) => {
+      orientation: (_context, props) => {
         const { x, y, z, w } = props.info.origin.orientation;
         return [x, y, z, w];
       },
@@ -125,7 +141,7 @@ const occupancyGrids = (regl: any) => {
         paletteTextures.set(palette, texture);
         return texture;
       },
-      data: (_context: unknown, props: any) => {
+      data: (_context: unknown, props: OccupancyGridMessage) => {
         return cache.get(props);
       },
     },

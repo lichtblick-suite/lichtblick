@@ -11,13 +11,34 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import memoize from "lodash/memoize";
+import type REGL from "regl";
 import { Command } from "regl-worldview";
 
 import { ReglColor } from "@foxglove/studio-base/util/colorUtils";
 
+type Uniforms = {
+  color: ReglColor;
+};
+type Attributes = {
+  position: number[][];
+};
+type Props = {
+  color: ReglColor;
+  points: number[][];
+  ["points.length"]: number;
+};
+
 const makeReglCommand = memoize(
   ({ overwriteDepthBuffer }: { overwriteDepthBuffer?: boolean }) =>
-    (regl: any) => ({
+    (
+      regl: REGL.Regl,
+    ): REGL.DrawConfig<
+      Uniforms,
+      Attributes,
+      Props,
+      Record<string, never>,
+      REGL.DefaultContext
+    > => ({
       vert: `
       precision mediump float;
       attribute vec2 position;

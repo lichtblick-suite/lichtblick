@@ -4,6 +4,22 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import type REGL from "regl";
+
+// Support for nested like "foo.length" in regl props
+type PropType<Props, Key> = Key extends `${infer K1}.${infer K2}`
+  ? PropType<PropType<Props, K1>, K2>
+  : Props[Key];
+
+// Overrides regl's definition of prop for better type inference
+declare module "regl" {
+  export interface Regl {
+    prop<Context extends REGL.DefaultContext, Props, K extends string>(
+      key: K,
+    ): REGL.MaybeDynamic<PropType<Props, K>, Context, Props>;
+  }
+}
+
 declare module "regl-worldview" {
   export interface Color {
     r: number;
@@ -38,7 +54,9 @@ declare module "regl-worldview" {
   function pointToVec3(arg: any): any;
   function orientationToVec4(arg: any): any;
   function vec3ToPoint(arg: any): any;
-  function withPose(arg: any): any;
+  function withPose<Uniforms, Attributes, Props, OwnContext, ParentContext>(
+    arg: REGL.DrawConfig<Uniforms, Attributes, Props, OwnContext, ParentContext>,
+  ): REGL.DrawConfig<Uniforms, Attributes, Props, OwnContext, ParentContext>;
   function parseGLB(arg: any): any;
   function vec4ToRGBA(arg: any): any;
   function toRGBA(arg: any): any;
@@ -85,7 +103,7 @@ declare module "regl-worldview" {
   type CameraStateSelectors = any;
   type Scale = any;
   type Pose = any;
-  type Regl = any;
+  type Regl = REGL.Regl;
   type AssignNextColorsFn = any;
   type Line = any;
   type TriangleList = any;
