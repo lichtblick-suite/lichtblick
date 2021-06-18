@@ -16,29 +16,12 @@ export default function ExtensionRegistryProvider(props: PropsWithChildren<unkno
     log.info("Fetching builtin extensions");
 
     try {
-      const builtinExtensionFetch = await fetch("/builtinextensions.js");
-
-      const extensions: ExtensionInfo[] = [
-        {
-          id: "foxglove.builtin",
-          name: "builtin",
-          displayName: "Built-In Extensions",
-          description: "Foxglove Studio built-in extensions",
-          publisher: "Foxglove",
-          homepage: "https://github.com/foxglove/studio",
-          license: "MPL-2.0",
-          version: "0.0.0",
-          keywords: [],
-        },
-      ];
+      const extensions: ExtensionInfo[] = [];
 
       const loader: ExtensionLoader = {
         getExtensions: () => Promise.resolve(extensions),
-        loadExtension: (id: string): Promise<string> => {
-          if (id === "foxglove.builtin") {
-            return builtinExtensionFetch.text();
-          }
-          throw new Error(`Cannot load ${id}, extension loading is not currently supported on web`);
+        loadExtension: (_id: string): Promise<string> => {
+          throw new Error(`not implemented`);
         },
         downloadExtension,
         installExtension,
