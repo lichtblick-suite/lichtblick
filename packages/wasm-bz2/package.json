@@ -1,6 +1,6 @@
 {
   "name": "@foxglove/wasm-bz2",
-  "version": "0.0.1",
+  "version": "0.12.0",
   "description": "Bzip2 decompression compiled to WebAssembly",
   "license": "MPL-2.0",
   "private": true,

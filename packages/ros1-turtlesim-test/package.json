@@ -1,6 +1,6 @@
 {
   "name": "@foxglove/ros1-turtlesim-test",
-  "version": "0.0.2",
+  "version": "0.12.0",
   "description": "Example @foxglove/ros1 client that interacts with turtlesim",
   "license": "MPL-2.0",
   "private": true,
