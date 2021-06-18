@@ -1,6 +1,6 @@
 {
   "name": "@foxglove/electron-socket",
-  "version": "0.12.0",
+  "version": "0.12.0-dev",
   "description": "Networking sockets for Electron apps",
   "license": "MPL-2.0",
   "private": true,
