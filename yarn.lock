@@ -10570,7 +10570,7 @@ __metadata:
     "@types/plist": ^3.0.2
     jszip: 3.6.0
     plist: 3.0.2
-    quicklookjs: 0.0.2
+    quicklookjs: 0.0.3
   languageName: unknown
   linkType: soft
 
@@ -20492,10 +20492,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"quicklookjs@npm:0.0.2":
-  version: 0.0.2
-  resolution: "quicklookjs@npm:0.0.2"
-  checksum: 8dc3b44b73a729ed4bb9e39b186432a5cc33a1da0344ad205ba4ca6cbef058188af67cf184dc85848b43e12f945ee10a3dc1b21e60d067e1bd62d91fd744dd89
+"quicklookjs@npm:0.0.3":
+  version: 0.0.3
+  resolution: "quicklookjs@npm:0.0.3"
+  checksum: e11d4a5976233c686c69ff6da8efe5fb7ac203d789ccb51d7d69d402fcfe634da39dac056a9c8a4325b7e5efea729819b2e5b445578a12ddbaf35b233a66b78c
   languageName: node
   linkType: hard
 

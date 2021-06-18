@@ -3,11 +3,21 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { exec } from "@actions/exec";
+import type MacPackager from "app-builder-lib/out/macPackager";
 import { log, Arch } from "builder-util";
 import { AfterPackContext } from "electron-builder";
 import fs from "fs/promises";
 import path from "path";
 import plist, { PlistObject } from "plist";
+
+async function getKeychainFile(context: AfterPackContext): Promise<string | undefined> {
+  const macPackager = context.packager as MacPackager;
+  if (macPackager.codeSigningInfo == undefined) {
+    log.error("No code signing info available.");
+    return;
+  }
+  return (await macPackager.codeSigningInfo.value).keychainFile ?? undefined;
+}
 
 export default async function afterPack(context: AfterPackContext): Promise<void> {
   await configureQuickLookExtension(context);
@@ -79,10 +89,27 @@ async function configureQuickLookExtension(context: AfterPackContext) {
   await exec("lipo", ["-extract", arch, appexExecutablePath, "-output", appexExecutablePath]);
   log.info(`Extracted ${arch} from appex executable`);
 
+  // The notarization step requires a valid signature from our "Developer ID Application"
+  // certificate. However this certificate is only available in CI, so for packaging to succeed in a
+  // local development workflow, we just use the "-" ad-hoc signing identity.
+  //
+  // electron-builder's MacPackager creates a temporary keychain to hold the signing info. The
+  // certificate is not in the regular system keychain so we have to use the temporary keychain for
+  // signing.
+  const keychainFile = await getKeychainFile(context);
+  if (keychainFile != undefined) {
+    await exec("security", ["find-identity", "-v", "-p", "codesigning", keychainFile]);
+  }
+  const signingArgs =
+    process.env.CI != undefined && keychainFile != undefined
+      ? ["--keychain", keychainFile, "--sign", "Developer ID Application"]
+      : ["--sign", "-"];
+
   await exec("codesign", [
-    "--sign",
-    "-",
+    ...signingArgs,
     "--force",
+    "--options",
+    "runtime", // notarization requires Hardened Runtime to be enabled
     "--entitlements",
     path.join("node_modules", "quicklookjs", "dist", "PreviewExtension.entitlements"),
     appexPath,
