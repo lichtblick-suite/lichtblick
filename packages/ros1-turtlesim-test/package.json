@@ -28,6 +28,6 @@
     "typescript": "4.3.2"
   },
   "dependencies": {
-    "@foxglove/ros1": "workspace:packages/ros1"
+    "@foxglove/ros1": "workspace:*"
   }
 }

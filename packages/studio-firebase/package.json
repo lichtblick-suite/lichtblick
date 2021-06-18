@@ -24,9 +24,9 @@
     "typescript": "4.3.2"
   },
   "dependencies": {
-    "@foxglove/hooks": "workspace:packages/hooks",
-    "@foxglove/log": "workspace:packages/log",
-    "@foxglove/studio-base": "workspace:packages/studio-base",
+    "@foxglove/hooks": "workspace:*",
+    "@foxglove/log": "workspace:*",
+    "@foxglove/studio-base": "workspace:*",
     "firebase": "9.0.0-beta.3"
   }
 }

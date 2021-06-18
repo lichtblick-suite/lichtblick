@@ -2,8 +2,8 @@
   "name": "desktop",
   "private": true,
   "dependencies": {
-    "@foxglove/studio-base": "workspace:packages/studio-base",
-    "@foxglove/studio-firebase": "workspace:packages/studio-firebase",
+    "@foxglove/studio-base": "workspace:*",
+    "@foxglove/studio-firebase": "workspace:*",
     "jszip": "3.6.0"
   },
   "devDependencies": {

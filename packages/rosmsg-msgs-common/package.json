@@ -23,7 +23,7 @@
     "prepack": "node -r esbuild-runner/register src/index.ts"
   },
   "dependencies": {
-    "@foxglove/rosmsg": "workspace:packages/rosmsg"
+    "@foxglove/rosmsg": "workspace:*"
   },
   "devDependencies": {
     "@types/prettier": "2.3.0",

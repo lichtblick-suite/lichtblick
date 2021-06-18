@@ -2530,7 +2530,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/den@workspace:packages/den":
+"@foxglove/den@workspace:*, @foxglove/den@workspace:packages/den":
   version: 0.0.0-use.local
   resolution: "@foxglove/den@workspace:packages/den"
   dependencies:
@@ -2539,7 +2539,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/electron-socket@workspace:packages/electron-socket":
+"@foxglove/electron-socket@workspace:*, @foxglove/electron-socket@workspace:packages/electron-socket":
   version: 0.0.0-use.local
   resolution: "@foxglove/electron-socket@workspace:packages/electron-socket"
   dependencies:
@@ -2565,7 +2565,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/hooks@workspace:packages/hooks":
+"@foxglove/hooks@workspace:*, @foxglove/hooks@workspace:packages/hooks":
   version: 0.0.0-use.local
   resolution: "@foxglove/hooks@workspace:packages/hooks"
   dependencies:
@@ -2573,7 +2573,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/just-fetch@workspace:packages/just-fetch":
+"@foxglove/just-fetch@workspace:*, @foxglove/just-fetch@workspace:packages/just-fetch":
   version: 0.0.0-use.local
   resolution: "@foxglove/just-fetch@workspace:packages/just-fetch"
   dependencies:
@@ -2583,7 +2583,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/log@workspace:packages/log":
+"@foxglove/log@workspace:*, @foxglove/log@workspace:packages/log":
   version: 0.0.0-use.local
   resolution: "@foxglove/log@workspace:packages/log"
   dependencies:
@@ -2595,17 +2595,17 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/ros1-turtlesim-test@workspace:packages/ros1-turtlesim-test"
   dependencies:
-    "@foxglove/ros1": "workspace:packages/ros1"
+    "@foxglove/ros1": "workspace:*"
     esbuild-runner: 2.2.0
     typescript: 4.3.2
   languageName: unknown
   linkType: soft
 
-"@foxglove/ros1@workspace:packages/ros1":
+"@foxglove/ros1@workspace:*, @foxglove/ros1@workspace:packages/ros1":
   version: 0.0.0-use.local
   resolution: "@foxglove/ros1@workspace:packages/ros1"
   dependencies:
-    "@foxglove/xmlrpc": "workspace:packages/xmlrpc"
+    "@foxglove/xmlrpc": "workspace:*"
     esbuild-runner: 2.2.0
     eventemitter3: 4.0.7
     jest: 27.0.4
@@ -2627,11 +2627,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/rosmsg-msgs-common@workspace:packages/rosmsg-msgs-common":
+"@foxglove/rosmsg-msgs-common@workspace:*, @foxglove/rosmsg-msgs-common@workspace:packages/rosmsg-msgs-common":
   version: 0.0.0-use.local
   resolution: "@foxglove/rosmsg-msgs-common@workspace:packages/rosmsg-msgs-common"
   dependencies:
-    "@foxglove/rosmsg": "workspace:packages/rosmsg"
+    "@foxglove/rosmsg": "workspace:*"
     "@types/prettier": 2.3.0
     esbuild-runner: 2.2.0
     prettier: 2.3.1
@@ -2639,11 +2639,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/rosmsg-msgs-foxglove@workspace:packages/rosmsg-msgs-foxglove":
+"@foxglove/rosmsg-msgs-foxglove@workspace:*, @foxglove/rosmsg-msgs-foxglove@workspace:packages/rosmsg-msgs-foxglove":
   version: 0.0.0-use.local
   resolution: "@foxglove/rosmsg-msgs-foxglove@workspace:packages/rosmsg-msgs-foxglove"
   dependencies:
-    "@foxglove/rosmsg": "workspace:packages/rosmsg"
+    "@foxglove/rosmsg": "workspace:*"
     "@types/prettier": 2.3.0
     esbuild-runner: 2.2.0
     prettier: 2.3.1
@@ -2651,7 +2651,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/rosmsg@workspace:packages/rosmsg":
+"@foxglove/rosmsg@workspace:*, @foxglove/rosmsg@workspace:packages/rosmsg":
   version: 0.0.0-use.local
   resolution: "@foxglove/rosmsg@workspace:packages/rosmsg"
   dependencies:
@@ -2660,18 +2660,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/studio-base@workspace:packages/studio-base":
+"@foxglove/studio-base@workspace:*, @foxglove/studio-base@workspace:packages/studio-base":
   version: 0.0.0-use.local
   resolution: "@foxglove/studio-base@workspace:packages/studio-base"
   dependencies:
     "@fluentui/react": 8.18.0
     "@fluentui/react-icons-mdl2": 1.1.2
-    "@foxglove/den": "workspace:packages/den"
-    "@foxglove/hooks": "workspace:packages/hooks"
-    "@foxglove/rosmsg-msgs-common": "workspace:packages/rosmsg-msgs-common"
-    "@foxglove/rosmsg-msgs-foxglove": "workspace:packages/rosmsg-msgs-foxglove"
-    "@foxglove/studio": "workspace:packages/studio"
-    "@foxglove/velodyne-cloud": "workspace:packages/velodyne-cloud"
+    "@foxglove/den": "workspace:*"
+    "@foxglove/hooks": "workspace:*"
+    "@foxglove/rosmsg-msgs-common": "workspace:*"
+    "@foxglove/rosmsg-msgs-foxglove": "workspace:*"
+    "@foxglove/studio": "workspace:*"
+    "@foxglove/velodyne-cloud": "workspace:*"
     "@mdi/svg": 5.9.55
     "@storybook/addon-actions": 6.2.9
     "@storybook/addon-essentials": 6.2.9
@@ -2690,30 +2690,30 @@ __metadata:
     "@types/hammerjs": 2.0.39
     "@types/http-server": ^0.12.0
     "@types/leaflet": 1.7.2
-    "@types/memoize-weak": "workspace:packages/@types/memoize-weak"
+    "@types/memoize-weak": "workspace:*"
     "@types/moment-duration-format": 2.2.2
     "@types/prettier": 2.3.0
     "@types/promise-queue": 2.2.0
     "@types/react": 17.0.11
     "@types/react-autocomplete": 1.8.5
-    "@types/react-document-events": "workspace:packages/@types/react-document-events"
+    "@types/react-document-events": "workspace:*"
     "@types/react-dom": 17.0.7
     "@types/react-highlight-words": 0.16.2
-    "@types/react-hover-observer": "workspace:packages/@types/react-hover-observer"
+    "@types/react-hover-observer": "workspace:*"
     "@types/react-input-autosize": 2.2.0
     "@types/react-is": ^17.0.1
     "@types/react-outside-click-handler": 1.3.0
     "@types/react-table": 7.7.1
     "@types/react-transition-group": ^4.4.1
     "@types/react-virtualized": 9.21.11
-    "@types/regl-worldview": "workspace:packages/@types/regl-worldview"
-    "@types/roslib": "workspace:packages/@types/roslib"
+    "@types/regl-worldview": "workspace:*"
+    "@types/roslib": "workspace:*"
     "@types/sanitize-html": 2.3.1
     "@types/seedrandom": 3.0.0
     "@types/shallowequal": 1.1.1
     "@types/string-hash": 1.1.1
     "@types/styled-components": 5.1.10
-    "@types/text-metrics": "workspace:packages/@types/text-metrics"
+    "@types/text-metrics": "workspace:*"
     "@types/three": ^0.129.1
     "@types/tinycolor2": 1.4.2
     "@types/url-search-params": 1.1.0
@@ -2802,31 +2802,31 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/studio-firebase@workspace:packages/studio-firebase":
+"@foxglove/studio-firebase@workspace:*, @foxglove/studio-firebase@workspace:packages/studio-firebase":
   version: 0.0.0-use.local
   resolution: "@foxglove/studio-firebase@workspace:packages/studio-firebase"
   dependencies:
-    "@foxglove/hooks": "workspace:packages/hooks"
-    "@foxglove/log": "workspace:packages/log"
-    "@foxglove/studio-base": "workspace:packages/studio-base"
+    "@foxglove/hooks": "workspace:*"
+    "@foxglove/log": "workspace:*"
+    "@foxglove/studio-base": "workspace:*"
     firebase: 9.0.0-beta.3
     typescript: 4.3.2
   languageName: unknown
   linkType: soft
 
-"@foxglove/studio@workspace:packages/studio":
+"@foxglove/studio@workspace:*, @foxglove/studio@workspace:packages/studio":
   version: 0.0.0-use.local
   resolution: "@foxglove/studio@workspace:packages/studio"
   languageName: unknown
   linkType: soft
 
-"@foxglove/tsconfig@workspace:packages/tsconfig":
+"@foxglove/tsconfig@workspace:*, @foxglove/tsconfig@workspace:packages/tsconfig":
   version: 0.0.0-use.local
   resolution: "@foxglove/tsconfig@workspace:packages/tsconfig"
   languageName: unknown
   linkType: soft
 
-"@foxglove/velodyne-cloud@workspace:packages/velodyne-cloud":
+"@foxglove/velodyne-cloud@workspace:*, @foxglove/velodyne-cloud@workspace:packages/velodyne-cloud":
   version: 0.0.0-use.local
   resolution: "@foxglove/velodyne-cloud@workspace:packages/velodyne-cloud"
   dependencies:
@@ -2847,11 +2847,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/xmlrpc@workspace:packages/xmlrpc":
+"@foxglove/xmlrpc@workspace:*, @foxglove/xmlrpc@workspace:packages/xmlrpc":
   version: 0.0.0-use.local
   resolution: "@foxglove/xmlrpc@workspace:packages/xmlrpc"
   dependencies:
-    "@foxglove/just-fetch": "workspace:packages/just-fetch"
+    "@foxglove/just-fetch": "workspace:*"
     "@types/sax": ^1.2.1
     byte-base64: 1.1.0
     jest: 27.0.4
@@ -5569,7 +5569,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/memoize-weak@workspace:packages/@types/memoize-weak":
+"@types/memoize-weak@workspace:*, @types/memoize-weak@workspace:packages/@types/memoize-weak":
   version: 0.0.0-use.local
   resolution: "@types/memoize-weak@workspace:packages/@types/memoize-weak"
   languageName: unknown
@@ -5799,7 +5799,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-document-events@workspace:packages/@types/react-document-events":
+"@types/react-document-events@workspace:*, @types/react-document-events@workspace:packages/@types/react-document-events":
   version: 0.0.0-use.local
   resolution: "@types/react-document-events@workspace:packages/@types/react-document-events"
   languageName: unknown
@@ -5823,7 +5823,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-hover-observer@workspace:packages/@types/react-hover-observer":
+"@types/react-hover-observer@workspace:*, @types/react-hover-observer@workspace:packages/@types/react-hover-observer":
   version: 0.0.0-use.local
   resolution: "@types/react-hover-observer@workspace:packages/@types/react-hover-observer"
   languageName: unknown
@@ -5913,7 +5913,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/regl-worldview@workspace:packages/@types/regl-worldview":
+"@types/regl-worldview@workspace:*, @types/regl-worldview@workspace:packages/@types/regl-worldview":
   version: 0.0.0-use.local
   resolution: "@types/regl-worldview@workspace:packages/@types/regl-worldview"
   languageName: unknown
@@ -5945,7 +5945,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/roslib@workspace:packages/@types/roslib":
+"@types/roslib@workspace:*, @types/roslib@workspace:packages/@types/roslib":
   version: 0.0.0-use.local
   resolution: "@types/roslib@workspace:packages/@types/roslib"
   languageName: unknown
@@ -6055,7 +6055,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/text-metrics@workspace:packages/@types/text-metrics":
+"@types/text-metrics@workspace:*, @types/text-metrics@workspace:packages/@types/text-metrics":
   version: 0.0.0-use.local
   resolution: "@types/text-metrics@workspace:packages/@types/text-metrics"
   languageName: unknown
@@ -10565,8 +10565,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "desktop@workspace:desktop"
   dependencies:
-    "@foxglove/studio-base": "workspace:packages/studio-base"
-    "@foxglove/studio-firebase": "workspace:packages/studio-firebase"
+    "@foxglove/studio-base": "workspace:*"
+    "@foxglove/studio-firebase": "workspace:*"
     "@types/plist": ^3.0.2
     jszip: 3.6.0
     plist: 3.0.2
@@ -13028,9 +13028,9 @@ __metadata:
     "@babel/core": 7.14.5
     "@babel/preset-env": 7.14.5
     "@babel/preset-typescript": 7.14.5
-    "@foxglove/electron-socket": "workspace:packages/electron-socket"
+    "@foxglove/electron-socket": "workspace:*"
     "@foxglove/eslint-plugin": 0.8.0
-    "@foxglove/tsconfig": "workspace:packages/tsconfig"
+    "@foxglove/tsconfig": "workspace:*"
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.0-beta.8
     "@sentry/electron": 2.4.1
     "@sentry/webpack-plugin": 1.15.1
@@ -25814,8 +25814,8 @@ typescript@4.3.2:
   version: 0.0.0-use.local
   resolution: "web@workspace:web"
   dependencies:
-    "@foxglove/studio-base": "workspace:packages/studio-base"
-    "@foxglove/studio-firebase": "workspace:packages/studio-firebase"
+    "@foxglove/studio-base": "workspace:*"
+    "@foxglove/studio-firebase": "workspace:*"
     "@types/copy-webpack-plugin": 8.0.0
     copy-webpack-plugin: 9.0.0
     webpack: 5.38.1
