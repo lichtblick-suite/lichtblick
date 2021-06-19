@@ -15,30 +15,30 @@ exports.default = async function (context: AfterPackContext) {
   const appPath = `${appOutDir}/${appName}.app`;
 
   const appId = context.packager.config.appId;
-  const appleId = process.env.APPLE_ID;
-  const applePassword = process.env.APPLE_PASSWORD;
+  const appleApiKeyId = process.env.APPLE_API_KEY_ID;
+  const appleApiIssuer = process.env.APPLE_API_KEY_ISSUER;
 
   if (appId == undefined) {
     log.warn({ reason: "'appId' missing from builder config" }, "skipped notarizing");
     return;
   }
 
-  if (appleId === undefined || applePassword === undefined) {
+  if (appleApiIssuer === undefined || appleApiKeyId === undefined) {
     log.warn(
       {
-        reason: "'APPLE_ID' or 'APPLE_PASSWORD' environment variables not set",
+        reason: "'APPLE_API_KEY_ID' or 'APPLE_API_KEY_ISSUER' environment variables not set",
       },
       "skipped notarizing",
     );
     return;
   }
 
-  log.info({ appPath: appPath, appleId: appleId }, "notarizing");
+  log.info({ appPath, appleApiKeyId }, "notarizing");
 
   return notarize({
     appBundleId: appId,
     appPath: appPath,
-    appleId: appleId,
-    appleIdPassword: applePassword,
+    appleApiKey: appleApiKeyId,
+    appleApiIssuer,
   });
 };
