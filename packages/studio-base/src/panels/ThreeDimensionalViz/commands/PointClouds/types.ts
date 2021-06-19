@@ -11,6 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import type REGL from "regl";
+
 import { PointCloudSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
 import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
 
@@ -50,7 +52,7 @@ export type MemoizedMarker = {
 
 export type MemoizedVertexBuffer = {
   vertexBuffer: VertexBuffer;
-  buffer: any;
+  buffer: REGL.Buffer;
   offset: number;
   stride: number;
   divisor: number;

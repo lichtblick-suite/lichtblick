@@ -97,7 +97,8 @@ function getMarkers(markerProviders: MarkerProvider[]): InteractiveMarkersByType
     instancedLineList: (o) =>
       markers.instancedLineList.push(o as unknown as Interactive<BaseMarker>),
     laserScan: (o) => markers.laserScan.push(o as unknown as Interactive<BaseMarker>),
-    linedConvexHull: (o) => markers.linedConvexHull.push(o as unknown as Interactive<BaseMarker>),
+    linedConvexHull: (o) =>
+      markers.linedConvexHull.push(o as unknown as Interactive<LineListMarker | LineStripMarker>),
     lineList: (o) => markers.lineList.push(o as Interactive<LineListMarker>),
     lineStrip: (o) => markers.lineStrip.push(o as Interactive<LineStripMarker>),
     overlayIcon: (o) => markers.overlayIcon.push(o as Interactive<OverlayIconMarker>),

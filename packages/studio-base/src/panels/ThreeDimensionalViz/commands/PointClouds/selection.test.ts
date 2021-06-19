@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
+import { PointCloudSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
 
 import { decodeMarker } from "./decodeMarker";
 import { POINT_CLOUD_MESSAGE, POINT_CLOUD_WITH_ADDITIONAL_FIELDS } from "./fixture/pointCloudData";
@@ -20,25 +20,20 @@ import { getClickedInfo, getAllPoints, decodeAdditionalFields } from "./selectio
 describe("<PointClouds />", () => {
   describe("getClickedInfo", () => {
     it("returns undefined when points field is empty", () => {
-      const partiallyDecodedMarker = decodeMarker(
-        POINT_CLOUD_WITH_ADDITIONAL_FIELDS as any,
-      ) as any as PointCloud2;
+      const partiallyDecodedMarker = decodeMarker(POINT_CLOUD_WITH_ADDITIONAL_FIELDS);
       const fullyDecodedMarker = decodeAdditionalFields(partiallyDecodedMarker);
-      fullyDecodedMarker.positionBuffer = [];
       expect(getClickedInfo(fullyDecodedMarker, 1000)).toEqual(undefined);
     });
 
     it("returns undefined when instanceIndex does not match any point", () => {
-      const partiallyDecodedMarker = decodeMarker(
-        POINT_CLOUD_WITH_ADDITIONAL_FIELDS as any,
-      ) as any as PointCloud2;
+      const partiallyDecodedMarker = decodeMarker(POINT_CLOUD_WITH_ADDITIONAL_FIELDS);
       const fullyDecodedMarker = decodeAdditionalFields(partiallyDecodedMarker);
       expect(getClickedInfo(fullyDecodedMarker, undefined)).toEqual(undefined);
       expect(getClickedInfo(fullyDecodedMarker, 1000)).toEqual(undefined);
     });
 
     it("returns selected point positions and colors", () => {
-      const marker = decodeMarker(POINT_CLOUD_MESSAGE as any);
+      const marker = decodeMarker(POINT_CLOUD_MESSAGE);
       const clickInfo = getClickedInfo(marker, 1);
       expect(clickInfo).not.toBeNullOrUndefined();
       expect((clickInfo?.clickedPoint ?? []).map((v) => Math.floor(v))).toStrictEqual([
@@ -51,7 +46,7 @@ describe("<PointClouds />", () => {
     });
 
     it("returns selected point positions and colors when instanceIndex is zero", () => {
-      const marker = decodeMarker(POINT_CLOUD_MESSAGE as any);
+      const marker = decodeMarker(POINT_CLOUD_MESSAGE);
       const clickInfo = getClickedInfo(marker, 0);
       expect(clickInfo).not.toBeNullOrUndefined();
       expect((clickInfo?.clickedPoint ?? []).map((v) => Math.floor(v))).toStrictEqual([
@@ -68,7 +63,7 @@ describe("<PointClouds />", () => {
         ...POINT_CLOUD_MESSAGE,
         settings: { colorMode: { mode: "rgb" } },
         is_bigendian: true,
-      } as any);
+      });
       const clickInfo = getClickedInfo(marker, 1);
       expect(clickInfo).not.toBeNullOrUndefined();
       expect((clickInfo?.clickedPoint ?? []).map((v) => Math.floor(v))).toStrictEqual([
@@ -83,9 +78,9 @@ describe("<PointClouds />", () => {
     it("handles rainbow colors", () => {
       const input = {
         ...POINT_CLOUD_MESSAGE,
-        settings: { colorMode: { mode: "rainbow", colorField: "y" } },
+        settings: { colorMode: { mode: "rainbow", colorField: "y" } } as PointCloudSettings,
       };
-      const marker = decodeMarker(input as any);
+      const marker = decodeMarker(input);
       const clickInfo = getClickedInfo(marker, 1);
       expect(clickInfo).not.toBeNullOrUndefined();
       expect((clickInfo?.clickedPoint ?? []).map((v) => Math.floor(v))).toStrictEqual([
@@ -107,9 +102,9 @@ describe("<PointClouds />", () => {
             maxColor: { r: 0, g: 0, b: 1, a: 1 },
             colorField: "foo",
           },
-        },
+        } as PointCloudSettings,
       };
-      const marker = decodeMarker(input as any);
+      const marker = decodeMarker(input);
       const clickInfo = getClickedInfo(marker, 1);
       expect(clickInfo).not.toBeNullOrUndefined();
       expect((clickInfo?.clickedPoint ?? []).map((v) => Math.floor(v))).toStrictEqual([0, 1, 2]);
@@ -122,9 +117,9 @@ describe("<PointClouds />", () => {
     it("handles additional fields", () => {
       const input = {
         ...POINT_CLOUD_WITH_ADDITIONAL_FIELDS,
-        settings: { colorMode: { mode: "rainbow", colorField: "bar" } },
+        settings: { colorMode: { mode: "rainbow", colorField: "bar" } } as PointCloudSettings,
       };
-      const marker = decodeMarker(input as any);
+      const marker = decodeMarker(input);
       const clickInfo = getClickedInfo(decodeAdditionalFields(marker), 1);
       expect(clickInfo).not.toBeNullOrUndefined();
       expect((clickInfo?.clickedPoint ?? []).map((v) => Math.floor(v))).toStrictEqual([0, 1, 2]);
@@ -142,7 +137,7 @@ describe("<PointClouds />", () => {
 
   describe("getAllPoints", () => {
     it("converts float array to numbers", () => {
-      const marker = decodeMarker(POINT_CLOUD_MESSAGE as any);
+      const marker = decodeMarker(POINT_CLOUD_MESSAGE);
       const points = getAllPoints(marker);
       expect(points.map((v) => Math.floor(v))).toStrictEqual([-2239, -706, -3, -2239, -706, -3]);
     });
@@ -150,7 +145,7 @@ describe("<PointClouds />", () => {
 
   describe("decodeAdditionalFields", () => {
     it("decodes additional fields", () => {
-      const fullyDecodedMarker = decodeAdditionalFields(POINT_CLOUD_WITH_ADDITIONAL_FIELDS as any);
+      const fullyDecodedMarker = decodeAdditionalFields(POINT_CLOUD_WITH_ADDITIONAL_FIELDS);
       expect(fullyDecodedMarker.bar).toEqual([6, 8]);
       expect(fullyDecodedMarker.baz).toEqual([5, 7]);
       expect(fullyDecodedMarker.foo).toEqual([7, 9]);

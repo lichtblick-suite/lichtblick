@@ -1,6 +1,15 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+//
+// This file incorporates work covered by the following copyright and
+// permission notice:
+//
+//   Copyright 2018-2021 Cruise LLC
+//
+//   This source code is licensed under the Apache License, Version 2.0,
+//   found at http://www.apache.org/licenses/LICENSE-2.0
+//   You may not use this file except in compliance with the License.
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -27,6 +36,11 @@ declare module "regl-worldview" {
     b: number;
     a: number;
   }
+
+  type Point = { x: number; y: number; z: number };
+  type Position = Point;
+  type Orientation = { x: number; y: number; z: number; w: number };
+  type Pose = { position: Position; orientation: Orientation };
 
   class PolygonBuilder {
     polygons: any;
@@ -60,8 +74,16 @@ declare module "regl-worldview" {
   function parseGLB(arg: any): any;
   function vec4ToRGBA(arg: any): any;
   function toRGBA(arg: any): any;
-  function nonInstancedGetChildrenForHitmap(arg: any): any;
-  function getChildrenForHitmapWithOriginalMarker(arg0: any, arg1: any, arg2: any): any;
+  function nonInstancedGetChildrenForHitmap<T>(
+    props: T,
+    assignNextColors: AssignNextColorsFn,
+    excludedObjects: MouseEventObject[],
+  ): T extends unknown[] ? T : T | undefined;
+  function getChildrenForHitmapWithOriginalMarker<T>(
+    props: T,
+    assignNextColors: AssignNextColorsFn,
+    excludedObjects: MouseEventObject[],
+  ): T extends unknown[] ? T : T | undefined;
   function shouldConvert(arg: any): any;
 
   // jsx elements
@@ -104,8 +126,17 @@ declare module "regl-worldview" {
   type Scale = any;
   type Pose = any;
   type Regl = REGL.Regl;
-  type AssignNextColorsFn = any;
-  type Line = any;
+  type AssignNextColorsFn = (object: unknown, count: number) => Vec4[];
+
+  export type BaseShape = {
+    pose: Pose;
+    scale: Scale;
+    color?: Color | Vec4;
+  };
+  type Line = BaseShape & {
+    points: readonly (Point | Vec3)[];
+    poses?: readonly Pose[];
+  };
   type TriangleList = any;
   type MouseHandler = any;
 

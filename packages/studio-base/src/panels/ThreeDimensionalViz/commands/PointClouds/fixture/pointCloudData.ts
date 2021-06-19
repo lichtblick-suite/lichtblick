@@ -11,7 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-export const POINT_CLOUD_MESSAGE = {
+import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
+
+export const POINT_CLOUD_MESSAGE: PointCloud2 = {
   fields: [
     {
       name: "x",
@@ -39,12 +41,12 @@ export const POINT_CLOUD_MESSAGE = {
     },
   ],
   type: 102,
-  name: "foo",
   pose: {
     position: { x: 0, y: 0, z: 0 },
     orientation: { x: 0, y: 0, z: 0, w: 0 },
   },
   header: {
+    seq: 0,
     frame_id: "root_frame_id",
     stamp: {
       sec: 10,
@@ -158,7 +160,7 @@ export const POINT_CLOUD_MESSAGE = {
   ]),
 };
 
-export const POINT_CLOUD_WITH_ADDITIONAL_FIELDS = {
+export const POINT_CLOUD_WITH_ADDITIONAL_FIELDS: PointCloud2 = {
   fields: [
     {
       name: "x",
@@ -204,12 +206,12 @@ export const POINT_CLOUD_WITH_ADDITIONAL_FIELDS = {
     },
   ],
   type: 102,
-  name: "foo",
   pose: {
     position: { x: 0, y: 0, z: 0 },
     orientation: { x: 0, y: 0, z: 0, w: 0 },
   },
   header: {
+    seq: 0,
     frame_id: "root_frame_id",
     stamp: {
       sec: 10,

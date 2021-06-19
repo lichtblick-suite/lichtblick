@@ -86,9 +86,9 @@ function PoseMarkers({ markers, layerIndex }: PoseMarkerProps): ReactElement {
     () => getScaledCarOutlineBufferPoints(originalScaling),
     [],
   );
-  const models: any = [];
-  const filledPolygons: any = [];
-  const arrowMarkers: any = [];
+  const models: React.ReactNode[] = [];
+  const filledPolygons: React.ReactNode[] = [];
+  const arrowMarkers: React.ReactNode[] = [];
 
   markers.forEach((marker, idx) => {
     const { pose, settings, interactionData } = marker;

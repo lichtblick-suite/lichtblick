@@ -12,10 +12,10 @@
 //   You may not use this file except in compliance with the License.
 
 import { useRef, useState } from "react";
+import type REGL from "regl";
 import {
   Command,
   withPose,
-  Regl,
   CommonCommandProps,
   AssignNextColorsFn,
   MouseEventObject,
@@ -32,7 +32,7 @@ import filterMap from "@foxglove/studio-base/util/filterMap";
 
 import VertexBufferCache from "./VertexBufferCache";
 import { FLOAT_SIZE } from "./buffers";
-import { decodeMarker } from "./decodeMarker";
+import { DecodedMarker, decodeMarker } from "./decodeMarker";
 import { updateMarkerCache } from "./memoization";
 import { MemoizedMarker, MemoizedVertexBuffer, PointCloudMarker, VertexBuffer } from "./types";
 
@@ -41,6 +41,21 @@ const COLOR_MODE_RGB = 1;
 const COLOR_MODE_BGR = -1;
 const COLOR_MODE_GRADIENT = 2;
 const COLOR_MODE_RAINBOW = 3;
+
+type Uniforms = {
+  pointSize: number;
+  isCircle: boolean;
+  colorMode: 2 | 3 | 1 | -1 | 0;
+  flatColor: [number, number, number, number];
+  minGradientColor: [number, number, number, number];
+  maxGradientColor: [number, number, number, number];
+  minColorFieldValue: number;
+  maxColorFieldValue: number;
+};
+type Attributes = {
+  position: MemoizedVertexBuffer;
+  color: number[] | MemoizedVertexBuffer;
+};
 
 // Implements a custom caching mechanism for vertex buffers.
 // Any memoized vertex buffer needs to be re-created whenever the Regl context
@@ -59,7 +74,7 @@ const makePointCloudCommand = () => {
   const positionBufferCache = new VertexBufferCache();
   const colorBufferCache = new VertexBufferCache();
 
-  return (regl: Regl) => {
+  return (regl: REGL.Regl) => {
     const getCachedBuffer = (
       cache: VertexBufferCache,
       vertexBuffer: VertexBuffer,
@@ -87,7 +102,13 @@ const makePointCloudCommand = () => {
       return memoized;
     };
 
-    const pointCloudCommand = withPose({
+    const pointCloudCommand = withPose<
+      Uniforms,
+      Attributes,
+      DecodedMarker,
+      Record<string, never>,
+      REGL.DefaultContext
+    >({
       primitive: "points",
       vert: `
       precision mediump float;
@@ -193,10 +214,10 @@ const makePointCloudCommand = () => {
       }
     `,
       attributes: {
-        position: (_context: unknown, props: any) => {
+        position: (_context, props) => {
           return getCachedBuffer(positionBufferCache, props.positionBuffer);
         },
-        color: (_context: unknown, props: any) => {
+        color: (_context, props) => {
           const { hitmapColors, settings, blend } = props;
           const { colorMode } = settings;
           if (hitmapColors) {
@@ -219,19 +240,23 @@ const makePointCloudCommand = () => {
           // TODO (Hernan): I tried using the constant option provided by Regl, but it leads to
           // visual artifacts. I need to check if this is a bug in Regl.
           const colorBuffer =
-            !colorMode || colorMode.mode === "flat" ? props.positionBuffer : props.colorBuffer;
-          return getCachedBuffer(colorBufferCache, colorBuffer);
+            colorMode == undefined || colorMode.mode === "flat"
+              ? props.positionBuffer
+              : props.colorBuffer;
+          return getCachedBuffer(colorBufferCache, colorBuffer!);
         },
       },
 
       uniforms: {
-        pointSize: (_context: unknown, props: any) => {
-          return props.settings?.pointSize || 2;
+        pointSize: (_context, props) => {
+          return props.settings?.pointSize ?? 2;
         },
-        isCircle: (_context: unknown, props: any) => {
-          return props.settings?.pointShape ? props.settings?.pointShape === "circle" : true;
+        isCircle: (_context, props) => {
+          return props.settings?.pointShape != undefined
+            ? props.settings?.pointShape === "circle"
+            : true;
         },
-        colorMode: (_context: unknown, props: any) => {
+        colorMode: (_context, props) => {
           const { settings, is_bigendian, hitmapColors, blend } = props;
           if (hitmapColors) {
             // We're providing a colors array in RGB format
@@ -253,41 +278,41 @@ const makePointCloudCommand = () => {
           }
           return is_bigendian ? COLOR_MODE_RGB : COLOR_MODE_BGR;
         },
-        flatColor: (_context: unknown, props: any) => {
+        flatColor: (_context, props) => {
           if (props.blend?.color) {
             // Use constant color for blending.
             return toRgba(vec4ToRGBA(props.blend.color));
           }
-          return toRgba(props.settings.colorMode.flatColor || DEFAULT_FLAT_COLOR);
+          return toRgba(props.settings.colorMode.flatColor ?? DEFAULT_FLAT_COLOR);
         },
-        minGradientColor: (_context: unknown, props: any) => {
-          return toRgba(props.settings.colorMode.minColor || DEFAULT_MIN_COLOR);
+        minGradientColor: (_context, props) => {
+          return toRgba(props.settings.colorMode.minColor ?? DEFAULT_MIN_COLOR);
         },
-        maxGradientColor: (_context: unknown, props: any) => {
-          return toRgba(props.settings.colorMode.maxColor || DEFAULT_MAX_COLOR);
+        maxGradientColor: (_context, props) => {
+          return toRgba(props.settings.colorMode.maxColor ?? DEFAULT_MAX_COLOR);
         },
-        minColorFieldValue: (_context: unknown, props: any) => {
+        minColorFieldValue: (_context, props) => {
           return props.minColorValue;
         },
-        maxColorFieldValue: (_context: unknown, props: any) => {
+        maxColorFieldValue: (_context, props) => {
           return props.maxColorValue;
         },
       },
 
-      count: (_context: unknown, props: any) => {
+      count: (_context, props) => {
         return props.pointCount;
       },
     });
 
     const command = regl(pointCloudCommand);
 
-    return (props: any) => {
+    return (props: DecodedMarker[]) => {
       // Call 'onPreRender' for both caches before rendering a frame.
       positionBufferCache.onPreRender();
       colorBufferCache.onPreRender();
 
       if (props.length > 0) {
-        const { depth, blend } = props[0];
+        const { depth, blend } = props[0]!;
         if (depth || blend) {
           // If there are custom rendering states, we create a new command
           // with those values to render the markers. NOTE: This assumes that all
@@ -338,8 +363,8 @@ function instancedGetChildrenForHitmap<
       return undefined;
     }
     const idColors = assignNextColors(prop, instanceCount);
-    const allColors: any = [];
-    idColors.forEach((color: any) => {
+    const allColors: number[] = [];
+    idColors.forEach((color) => {
       allColors.push(color[0] * 255);
       allColors.push(color[1] * 255);
       allColors.push(color[2] * 255);

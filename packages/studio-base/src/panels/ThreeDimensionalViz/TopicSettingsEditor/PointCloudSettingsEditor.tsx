@@ -30,10 +30,27 @@ import CommonDecaySettings from "./CommonDecaySettings";
 import { SLabel, SInput } from "./common";
 
 export type ColorMode =
-  | { mode: "rgb" }
-  | { mode: "flat"; flatColor: Color }
+  | {
+      mode: "rgb";
+      flatColor?: never;
+      colorField?: never;
+      minColor?: never;
+      maxColor?: never;
+      minValue?: never;
+      maxValue?: never;
+    }
+  | {
+      mode: "flat";
+      flatColor: Color;
+      colorField?: never;
+      minColor?: never;
+      maxColor?: never;
+      minValue?: never;
+      maxValue?: never;
+    }
   | {
       mode: "gradient";
+      flatColor?: never;
       colorField: string;
       minColor: Color;
       maxColor: Color;
@@ -42,9 +59,12 @@ export type ColorMode =
     }
   | {
       mode: "rainbow";
+      flatColor?: never;
       colorField: string;
       minValue?: number;
       maxValue?: number;
+      minColor?: never;
+      maxColor?: never;
     };
 
 export const DEFAULT_FLAT_COLOR = { r: 1, g: 1, b: 1, a: 1 };

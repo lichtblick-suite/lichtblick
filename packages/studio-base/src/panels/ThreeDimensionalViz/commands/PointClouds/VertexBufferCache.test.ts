@@ -11,10 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import type REGL from "regl";
+
 import VertexBufferCache from "./VertexBufferCache";
 import { VertexBuffer, MemoizedVertexBuffer } from "./types";
 
-function reglBuffer(data: Float32Array) {
+type MockBuffer = REGL.Buffer & { buffer: { data?: Float32Array } };
+
+function reglBuffer(data: Float32Array): MockBuffer {
   const buffer: {
     data?: Float32Array;
   } = {
@@ -25,7 +29,7 @@ function reglBuffer(data: Float32Array) {
     destroy: () => {
       buffer.data = undefined;
     },
-  };
+  } as MockBuffer;
 }
 
 const makeVertexBuffer = () => {
@@ -71,7 +75,7 @@ describe("VertexBufferCache", () => {
 
     // Set same value again
     cache.set(vertexBuffer, memoized);
-    expect(memoized.buffer.buffer.data).not.toBeUndefined();
+    expect((memoized.buffer as MockBuffer).buffer.data).not.toBeUndefined();
   });
 
   it("overrides a vertex buffer and destroys data", () => {
@@ -88,7 +92,7 @@ describe("VertexBufferCache", () => {
     expect(cache.get(vertexBuffer)).toBe(memo2);
 
     // Destroys memo1 data since it's no longer cached
-    expect(memo1.buffer.buffer.data).toBeUndefined();
+    expect((memo1.buffer as MockBuffer).buffer.data).toBeUndefined();
   });
 
   it("persists vertex buffers in between frames", () => {
@@ -110,13 +114,13 @@ describe("VertexBufferCache", () => {
     // Frame 2: VB is read
     cache.onPreRender();
     expect(cache.get(vertexBuffer)).toBe(memoized);
-    expect(memoized.buffer.buffer.data).not.toBeUndefined();
+    expect((memoized.buffer as MockBuffer).buffer.data).not.toBeUndefined();
     cache.onPostRender();
 
     // Frame 3: VB is read
     cache.onPreRender();
     expect(cache.get(vertexBuffer)).toBe(memoized);
-    expect(memoized.buffer.buffer.data).not.toBeUndefined();
+    expect((memoized.buffer as MockBuffer).buffer.data).not.toBeUndefined();
     cache.onPostRender();
   });
 
@@ -139,7 +143,7 @@ describe("VertexBufferCache", () => {
     // Frame 2: VB is read
     cache.onPreRender();
     expect(cache.get(vertexBuffer)).toBe(memoized);
-    expect(memoized.buffer.buffer.data).not.toBeUndefined();
+    expect((memoized.buffer as MockBuffer).buffer.data).not.toBeUndefined();
     cache.onPostRender();
 
     // Frame 3: VB is not read
@@ -149,7 +153,7 @@ describe("VertexBufferCache", () => {
     // Frame 4: VB is no longer cached and it's data has been erased
     cache.onPreRender();
     expect(cache.get(vertexBuffer)).toBeUndefined();
-    expect(memoized.buffer.buffer.data).toBeUndefined();
+    expect((memoized.buffer as MockBuffer).buffer.data).toBeUndefined();
     cache.onPostRender();
   });
 
@@ -195,6 +199,6 @@ describe("VertexBufferCache", () => {
     cache.set(vb, vbMemo2);
     cache.onPostRender();
 
-    expect(vbMemo1.buffer.buffer.data).toBeUndefined();
+    expect((vbMemo1.buffer as MockBuffer).buffer.data).toBeUndefined();
   });
 });

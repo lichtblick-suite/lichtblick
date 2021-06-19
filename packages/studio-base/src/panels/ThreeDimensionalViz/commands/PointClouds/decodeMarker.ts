@@ -11,9 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import REGL from "regl";
+
 import {
   DEFAULT_FLAT_COLOR,
   ColorMode,
+  PointCloudSettings,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
 
 import {
@@ -23,15 +26,27 @@ import {
   getVertexCount,
   getVertexValue,
 } from "./buffers";
-import { PointCloudMarker } from "./types";
+import { PointCloudMarker, VertexBuffer } from "./types";
+
+export type DecodedMarker = PointCloudMarker & {
+  depth?: REGL.DepthTestOptions;
+  blend?: REGL.BlendingOptions;
+  pointCount: number;
+  positionBuffer: VertexBuffer;
+  colorBuffer?: VertexBuffer;
+  minColorValue: number;
+  maxColorValue: number;
+  settings: PointCloudSettings & {
+    colorMode: ColorMode;
+  };
+};
 
 // Decode a marker and generate position and color buffers for rendering
 // The resulting marker should be memoized for better performance
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function decodeMarker(marker: PointCloudMarker) {
+export function decodeMarker(marker: PointCloudMarker): DecodedMarker {
   const {
     fields = [],
-    settings = {} as any,
+    settings = {},
     point_step: stride,
     width,
     height,
@@ -39,7 +54,7 @@ export function decodeMarker(marker: PointCloudMarker) {
     data,
   } = marker;
   const offsetsAndReaders = getFieldOffsetsAndReaders(data, fields);
-  const { rgb: { offset: rgbOffset } = {} as any } = offsetsAndReaders;
+  const rgbOffset = offsetsAndReaders.rgb?.offset;
 
   // Calculate the number of points in the cloud.
   // Do not use data.length, since it doesn't work with sparse point clouds.

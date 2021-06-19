@@ -88,7 +88,7 @@ export type InteractiveMarkersByType = {
   grid: Interactive<BaseMarker>[];
   instancedLineList: Interactive<BaseMarker>[];
   laserScan: Interactive<BaseMarker>[];
-  linedConvexHull: Interactive<BaseMarker>[];
+  linedConvexHull: Interactive<LineListMarker | LineStripMarker>[];
   lineList: Interactive<LineListMarker>[];
   lineStrip: Interactive<LineStripMarker>[];
   overlayIcon: Interactive<OverlayIconMarker>[];

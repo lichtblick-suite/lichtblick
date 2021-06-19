@@ -19,6 +19,7 @@ import {
   DEFAULT_MIN_COLOR,
   DEFAULT_MAX_COLOR,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
+import { DecodedMarker } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/decodeMarker";
 import { PointCloud2, PointField } from "@foxglove/studio-base/types/Messages";
 
 import {
@@ -61,7 +62,7 @@ export function toRgba(rgba: Color): [number, number, number, number] {
 
 // extract clicked point's position, color and additional field values to display in the UI
 export function getClickedInfo(
-  maybeFullyDecodedMarker: any, // eslint-disable-line @typescript-eslint/explicit-module-boundary-types
+  maybeFullyDecodedMarker: Omit<DecodedMarker, "data">,
   instanceIndex: number | undefined,
 ): ClickedInfo | undefined {
   const { positionBuffer, colorBuffer, fields, settings, is_bigendian } = maybeFullyDecodedMarker;
@@ -79,9 +80,9 @@ export function getClickedInfo(
   const clickedPoint = getVertexValues(positionBuffer, pointIndex, 3);
 
   let clickedPointColor: number[] = [];
-  const { colorMode } = settings;
-  if (colorMode) {
-    if (colorMode.mode === "rgb" && !isEmpty(colorBuffer)) {
+  const colorMode = settings?.colorMode;
+  if (colorMode != undefined) {
+    if (colorMode.mode === "rgb" && colorBuffer) {
       // Extract [r, g, b, a] from colors buffer
       clickedPointColor = [
         ...getVertexValues(colorBuffer, pointIndex, 3), // alpha value is set to 1 since 'colorBuffer' only stores
@@ -96,21 +97,21 @@ export function getClickedInfo(
         clickedPointColor[2] = clickedPointColor[0] as number;
         clickedPointColor[0] = temp;
       }
-    } else if (colorMode.mode === "gradient" && !isEmpty(colorBuffer)) {
+    } else if (colorMode.mode === "gradient" && colorBuffer) {
       const { minColorValue, maxColorValue } = maybeFullyDecodedMarker as MinMaxColors;
       const colorFieldValue = getVertexValue(colorBuffer, pointIndex);
       const colorFieldRange = getRange(minColorValue, maxColorValue);
       const pct = Math.max(0, Math.min((colorFieldValue - minColorValue) / colorFieldRange, 1));
       const { minColor, maxColor } = colorMode;
-      const parsedMinColor = toRgba(minColor || DEFAULT_MIN_COLOR);
-      const parsedMaxColor = toRgba(maxColor || DEFAULT_MAX_COLOR);
+      const parsedMinColor = toRgba(minColor ?? DEFAULT_MIN_COLOR);
+      const parsedMaxColor = toRgba(maxColor ?? DEFAULT_MAX_COLOR);
       clickedPointColor = [
         lerp(pct, parsedMinColor[0], parsedMaxColor[0]), // R
         lerp(pct, parsedMinColor[1], parsedMaxColor[1]), // G
         lerp(pct, parsedMinColor[2], parsedMaxColor[2]), // B
         1.0,
       ];
-    } else if (colorMode.mode === "rainbow" && !isEmpty(colorBuffer)) {
+    } else if (colorMode.mode === "rainbow" && colorBuffer) {
       const { minColorValue, maxColorValue } = maybeFullyDecodedMarker as MinMaxColors;
       const colorFieldValue = getVertexValue(colorBuffer, pointIndex);
       const colorFieldRange = getRange(minColorValue, maxColorValue);
@@ -118,7 +119,7 @@ export function getClickedInfo(
       clickedPointColor = [0, 0, 0, 1];
       setRainbowColor(clickedPointColor, 0, pct);
     } else if (colorMode.mode === "flat") {
-      clickedPointColor = toRgba(colorMode.flatColor || DEFAULT_FLAT_COLOR);
+      clickedPointColor = toRgba(colorMode.flatColor ?? DEFAULT_FLAT_COLOR);
     }
   }
 
@@ -126,7 +127,7 @@ export function getClickedInfo(
   const additionalField = getAdditionalFieldNames(fields);
   if (additionalField.length > 0) {
     additionalFieldValues = additionalField.reduce((memo, fieldName) => {
-      const values = maybeFullyDecodedMarker[fieldName];
+      const values = (maybeFullyDecodedMarker as unknown as Record<string, number[]>)[fieldName];
       if (values) {
         memo[fieldName] = values[pointIndex];
       }
@@ -142,8 +143,7 @@ export function getClickedInfo(
 }
 
 // Extract positions so they can be saved to a file
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function getAllPoints(maybeFullyDecodedMarker: any): number[] {
+export function getAllPoints(maybeFullyDecodedMarker: DecodedMarker): number[] {
   const { pointCount, positionBuffer } = maybeFullyDecodedMarker;
   const ret = [];
   for (let i = 0; i < pointCount; i++) {
@@ -160,7 +160,9 @@ export function getAdditionalFieldNames(fields: readonly PointField[]): string[]
   return difference(allFields, ["rgb", "x", "y", "z"]);
 }
 
-export function decodeAdditionalFields(marker: PointCloud2): any {
+export function decodeAdditionalFields<T extends PointCloud2>(
+  marker: T,
+): Omit<T, "data"> & Record<string, unknown> {
   const { fields, data, width, row_step, height, point_step } = marker;
   const offsets = getFieldOffsetsAndReaders(data, fields);
 

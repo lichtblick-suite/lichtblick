@@ -24,7 +24,7 @@ import {
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/stories/storyComponents";
 import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
 
-const fixtureData: FixtureExampleData = {
+const fixtureData = {
   topics: {
     "/smoothed_localized_pose": {
       name: "/smoothed_localized_pose",
@@ -38,16 +38,16 @@ const fixtureData: FixtureExampleData = {
         topic: "/viz_markers",
         receiveTime: { sec: 1534827954, nsec: 199901839 },
         message: {
-          markers: [],
+          markers: [] as ReturnType<typeof generateMarkers>,
         },
       },
     ],
   },
 };
 Object.keys(markerProps).forEach((markerType, idx) => {
-  const markerProp = (markerProps as any)[markerType];
+  const markerProp = markerProps[markerType as keyof typeof markerProps];
   const markers = generateMarkers(markerProp, idx, markerType);
-  (fixtureData.frame["/viz_markers"]?.[0]?.message as any).markers.push(...markers);
+  fixtureData.frame["/viz_markers"]?.[0]?.message.markers.push(...markers);
 });
 
 export function MarkerStory(
