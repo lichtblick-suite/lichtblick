@@ -120,22 +120,22 @@ export type LayoutToolbarSharedProps = {
 
 export type LayoutTopicSettingsSharedProps = {
   transforms: Transforms;
-  topics: Topic[];
+  topics: readonly Topic[];
   saveConfig: Save3DConfig;
 };
 
 type Props = LayoutToolbarSharedProps &
   LayoutTopicSettingsSharedProps & {
     children?: React.ReactNode;
-    cleared?: boolean;
     currentTime: Time;
-    frame?: Frame;
+    resetFrame: boolean;
+    frame: Frame;
     helpContent: React.ReactNode | string;
     isPlaying?: boolean;
     config: ThreeDimensionalVizConfig;
     saveConfig: Save3DConfig;
     setSubscriptions: (subscriptions: string[]) => void;
-    topics: Topic[];
+    topics: readonly Topic[];
     transforms: Transforms;
   };
 
@@ -186,10 +186,10 @@ function isTopicRenderable(topic: Topic): boolean {
 export default function Layout({
   cameraState,
   children,
-  cleared = false,
   currentTime,
   followOrientation,
   followTf,
+  resetFrame,
   frame,
   helpContent,
   isPlaying = false,
@@ -480,28 +480,20 @@ export default function Layout({
     return firstFrameId != undefined ? tfStore.get(firstFrameId)?.rootTransform().id : undefined;
   }, [transforms, followTf]);
 
-  useEffect(() => {
-    sceneBuilder.setPlayerId(playerId);
-  }, [playerId, sceneBuilder]);
-
-  useEffect(() => {
-    if (!isNonEmptyOrUndefined(rootTf)) {
-      return;
-    }
-    sceneBuilder.setTransforms(transforms, rootTf);
-  }, [rootTf, sceneBuilder, transforms]);
-
   useMemo(() => {
     gridBuilder.setVisible(selectedTopicNames.includes(FOXGLOVE_GRID_TOPIC));
     gridBuilder.setSettingsByKey(settingsByKey);
 
-    // TODO(Audrey): add tests for the clearing behavior
-    if (cleared) {
+    if (resetFrame) {
       sceneBuilder.clear();
     }
-    if (!frame) {
-      return;
+
+    sceneBuilder.setPlayerId(playerId);
+
+    if (isNonEmptyOrUndefined(rootTf)) {
+      sceneBuilder.setTransforms(transforms, rootTf);
     }
+
     // Toggle scene builder topics based on visible topic nodes in the tree
     const topicsByTopicName = getTopicsByTopicName(topics);
     const selectedTopics = filterMap(selectedTopicNames, (name) => topicsByTopicName[name]);
@@ -523,7 +515,6 @@ export default function Layout({
     }
     transformsBuilder.setSelectedTransforms(selectedNamespacesByTopic[TRANSFORM_TOPIC] ?? []);
   }, [
-    cleared,
     colorOverrideMarkerMatchers,
     currentTime,
     flattenMarkers,
@@ -531,6 +522,8 @@ export default function Layout({
     globalVariables,
     gridBuilder,
     highlightMarkerMatchers,
+    playerId,
+    resetFrame,
     rootTf,
     sceneBuilder,
     selectedNamespacesByTopic,

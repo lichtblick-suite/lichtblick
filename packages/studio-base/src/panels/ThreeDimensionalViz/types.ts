@@ -29,7 +29,6 @@ export type ThreeDimensionalVizConfig = {
   topicDisplayMode?: TopicDisplayMode;
   flattenMarkers?: boolean;
   showCrosshair?: boolean;
-
   expandedKeys: string[];
   checkedKeys: string[];
   settingsByKey: TopicSettingsCollection;

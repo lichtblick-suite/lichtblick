@@ -11,10 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import hoistNonReactStatics from "hoist-non-react-statics";
-import { omit, debounce } from "lodash";
+import { uniq, omit, debounce } from "lodash";
 import React, { useCallback, useMemo, useState, useRef, useEffect } from "react";
 
+import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import {
   MessagePipelineContext,
   useMessagePipeline,
@@ -22,18 +22,16 @@ import {
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import Layout from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
-import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
 import helpContent from "@foxglove/studio-base/panels/ThreeDimensionalViz/index.help.md";
 import {
   useTransformedCameraState,
   getNewCameraStateOnFollowChange,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
 import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
-import withTransforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/withTransforms";
-import { Frame, Topic } from "@foxglove/studio-base/players/types";
 import { PanelConfigSchema, SaveConfig } from "@foxglove/studio-base/types/panels";
 
-import { FrameCompatibilityDEPRECATED } from "./FrameCompatibility";
+import useFrame from "./useFrame";
+import useTransforms from "./useTransforms";
 
 // The amount of time to wait before dispatching the saveConfig action to save the cameraState into the layout
 export const CAMERA_STATE_UPDATE_DEBOUNCE_DELAY_MS = 250;
@@ -41,14 +39,8 @@ export const CAMERA_STATE_UPDATE_DEBOUNCE_DELAY_MS = 250;
 export type Save3DConfig = SaveConfig<ThreeDimensionalVizConfig>;
 
 export type Props = {
-  cleared?: boolean;
   config: ThreeDimensionalVizConfig;
-  frame: Frame;
-  helpContent: React.ReactNode;
   saveConfig: Save3DConfig;
-  setSubscriptions: (subscriptions: string[]) => void;
-  topics: Topic[];
-  transforms: Transforms;
 };
 
 const TimeZero = { sec: 0, nsec: 0 };
@@ -60,19 +52,23 @@ function selectIsPlaying(ctx: MessagePipelineContext) {
   return ctx.playerState.activeData?.isPlaying ?? false;
 }
 
-const BaseRenderer = (props: Props, ref: React.Ref<unknown>) => {
+function BaseRenderer(props: Props): JSX.Element {
   const {
-    cleared,
     config,
-    frame,
     saveConfig,
-    setSubscriptions,
-    topics,
-    transforms,
     config: { autoSyncCameraState = false, followOrientation = false, followTf },
   } = props;
   const { updatePanelConfigs } = React.useContext(PanelContext) ?? {};
 
+  const { topics } = useDataSourceInfo();
+
+  const [subscribedTopics, setSubscribedTopics] = useState<string[]>([]);
+  const setSubscriptions = useCallback((newTopics: string[]) => {
+    setSubscribedTopics(uniq(newTopics));
+  }, []);
+
+  const { reset: resetFrame, frame } = useFrame(subscribedTopics);
+  const transforms = useTransforms(topics, frame, resetFrame);
   const currentTime = useMessagePipeline(selectCurrentTime);
   const isPlaying = useMessagePipeline(selectIsPlaying);
 
@@ -176,17 +172,14 @@ const BaseRenderer = (props: Props, ref: React.Ref<unknown>) => {
     [autoSyncCameraState, saveCameraStateDebounced, updatePanelConfigs],
   );
 
-  // useImperativeHandle so consumer component (e.g.Follow stories) can call onFollowChange directly.
-  React.useImperativeHandle(ref, () => ({ onFollowChange }));
-
   return (
     <Layout
       cameraState={transformedCameraState}
       config={config}
-      cleared={cleared}
       currentTime={currentTime}
       followOrientation={followOrientation}
       followTf={followTf}
+      resetFrame={resetFrame}
       frame={frame}
       helpContent={helpContent}
       isPlaying={isPlaying}
@@ -200,7 +193,7 @@ const BaseRenderer = (props: Props, ref: React.Ref<unknown>) => {
       setSubscriptions={onSetSubscriptions}
     />
   );
-};
+}
 
 const configSchema: PanelConfigSchema<ThreeDimensionalVizConfig> = [
   {
@@ -221,22 +214,16 @@ BaseRenderer.defaultConfig = {
   checkedKeys: ["name:Topics"],
   expandedKeys: ["name:Topics"],
   followTf: undefined,
+  followOrientation: false,
   cameraState: {},
   modifiedNamespaceTopics: [],
   pinTopics: false,
   settingsByKey: {},
   autoSyncCameraState: false,
   autoTextBackgroundColor: true,
-};
+  diffModeEnabled: true,
+} as ThreeDimensionalVizConfig;
 BaseRenderer.supportsStrictMode = false;
 BaseRenderer.configSchema = configSchema;
 
-export const Renderer = hoistNonReactStatics(React.forwardRef(BaseRenderer), BaseRenderer);
-
-export default Panel<ThreeDimensionalVizConfig>(
-  // Getting HOC types right is hard - luckily we can sidestep this problem if we refactor
-  // compatibility and withTransforms to both use hooks. This panel is the only user of them.
-  // https://github.com/foxglove/studio/issues/1255
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  FrameCompatibilityDEPRECATED(withTransforms(Renderer), []) as any,
-);
+export default Panel(BaseRenderer);

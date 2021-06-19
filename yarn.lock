@@ -2738,7 +2738,6 @@ __metadata:
     gl-matrix: 3.3.0
     hammerjs: 2.0.8
     history: 5.0.0
-    hoist-non-react-statics: 3.3.2
     http-server: 0.12.3
     intervals-fn: 3.0.3
     leaflet: 1.7.1
@@ -14172,7 +14171,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hoist-non-react-statics@npm:3.3.2, hoist-non-react-statics@npm:^3.0.0, hoist-non-react-statics@npm:^3.3.0, hoist-non-react-statics@npm:^3.3.2":
+"hoist-non-react-statics@npm:^3.0.0, hoist-non-react-statics@npm:^3.3.0, hoist-non-react-statics@npm:^3.3.2":
   version: 3.3.2
   resolution: "hoist-non-react-statics@npm:3.3.2"
   dependencies:
