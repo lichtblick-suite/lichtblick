@@ -14,7 +14,7 @@ export type ExtensionMarketplaceDetail = {
   version: string;
   readme?: string;
   changelog?: string;
-  shasum?: string;
+  sha256sum?: string;
   foxe?: string;
   keywords?: string[];
   time?: Record<string, string>;
