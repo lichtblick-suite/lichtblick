@@ -2746,7 +2746,7 @@ __metadata:
     moment: 2.29.1
     moment-duration-format: 2.3.2
     moment-timezone: 0.5.33
-    monaco-editor: 0.25.0
+    monaco-editor: 0.25.2
     natsort: 2.0.2
     panzoom: 9.4.2
     prettier: 2.3.1
@@ -18142,10 +18142,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"monaco-editor@npm:*, monaco-editor@npm:0.25.0":
-  version: 0.25.0
-  resolution: "monaco-editor@npm:0.25.0"
-  checksum: b77d92530278f9bba4840a08fca0c803dedd97b67057777bb1816b464a784017e01c593b4be54dd04207f63e8be949b5f324392833b8bd346e020effa16ebe1e
+"monaco-editor@npm:*, monaco-editor@npm:0.25.2":
+  version: 0.25.2
+  resolution: "monaco-editor@npm:0.25.2"
+  checksum: 27a581f147984d3fca1f2d036a81a4265fe3f8fa65fcfa5d92f67473177ae87ff9e08891260d54efe765a2b534eece1f1d5f1751992f4e80bfb795f40abe6c27
   languageName: node
   linkType: hard
 
