@@ -27,6 +27,6 @@
     "@foxglove/hooks": "workspace:*",
     "@foxglove/log": "workspace:*",
     "@foxglove/studio-base": "workspace:*",
-    "firebase": "9.0.0-beta.3"
+    "firebase": "9.0.0-beta.5"
   }
 }
