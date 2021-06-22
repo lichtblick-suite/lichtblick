@@ -2727,7 +2727,7 @@ __metadata:
     chartjs-plugin-annotation: 1.0.2
     chartjs-plugin-datalabels: 2.0.0-rc.1
     chartjs-plugin-zoom: "github:foxglove/chartjs-plugin-zoom#656541279943f00dce600288435f83c436293146"
-    chromatic: 5.9.1
+    chromatic: 5.9.2
     classnames: 2.3.1
     cross-env: 7.0.3
     cytoscape: 3.19.0
@@ -8949,9 +8949,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"chromatic@npm:5.9.1":
-  version: 5.9.1
-  resolution: "chromatic@npm:5.9.1"
+"chromatic@npm:5.9.2":
+  version: 5.9.2
+  resolution: "chromatic@npm:5.9.2"
   dependencies:
     "@actions/core": ^1.2.4
     "@actions/github": ^4.0.0
@@ -8994,7 +8994,7 @@ __metadata:
     chroma: bin/register.js
     chromatic: bin/register.js
     chromatic-cli: bin/register.js
-  checksum: 5b872f39a87e8bd01a31b8e723bde82bc77f7aedb9f73c0ffcabd2a108505f5a7f15b568d052361e0b794cdc1ed3c9b4230cd95ee8ad76fdcaca17391b8e3b88
+  checksum: 395b78f107dd508371c6e7ac9f44ec5bce9e05d517c05d94a20137cde07d316d9dedfa32d1d8a646f657e384f68daf4ffd93700e31e769da6e6a854b6dbd67c3
   languageName: node
   linkType: hard
 

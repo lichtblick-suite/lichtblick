@@ -145,7 +145,7 @@
     "@types/ws": "7.4.5",
     "@wojtekmaj/enzyme-adapter-react-17": "0.6.2",
     "argparse": "2.0.1",
-    "chromatic": "5.9.1",
+    "chromatic": "5.9.2",
     "cross-env": "7.0.3",
     "enzyme": "3.11.0",
     "fetch-mock": "9.11.0",
