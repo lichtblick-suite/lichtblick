@@ -2794,7 +2794,7 @@ __metadata:
     typescript: 4.3.2
     urdf-loader: 0.10.2
     url-search-params: 1.1.0
-    use-debounce: 6.0.1
+    use-debounce: 7.0.0
     uuid: 8.3.2
     wasm-lz4: 2.0.0
     xacro-parser: 0.3.1
@@ -25417,12 +25417,12 @@ typescript@4.3.2:
   languageName: node
   linkType: hard
 
-"use-debounce@npm:6.0.1":
-  version: 6.0.1
-  resolution: "use-debounce@npm:6.0.1"
+"use-debounce@npm:7.0.0":
+  version: 7.0.0
+  resolution: "use-debounce@npm:7.0.0"
   peerDependencies:
     react: ">=16.8.0"
-  checksum: 9f811075652712b418dd0f6b09de62a37b0e1bb65295d3b6f797aed0eb2267188def0039e820f67aa5b6cb866a00f02da9bcf680e098a524d22e7d33438e4935
+  checksum: 966629520977488b5add406487c0945bc77e6b940969a1c71b32e083a711ae3a73c2627e439a29ff20583b994ff382f49d16231aab5920eb6282f048e5e5d86e
   languageName: node
   linkType: hard
 
