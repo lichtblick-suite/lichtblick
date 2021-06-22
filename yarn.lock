@@ -2329,30 +2329,30 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluentui/font-icons-mdl2@npm:^8.1.2":
-  version: 8.1.2
-  resolution: "@fluentui/font-icons-mdl2@npm:8.1.2"
+"@fluentui/font-icons-mdl2@npm:^8.1.3":
+  version: 8.1.3
+  resolution: "@fluentui/font-icons-mdl2@npm:8.1.3"
   dependencies:
     "@fluentui/set-version": ^8.1.2
-    "@fluentui/style-utilities": ^8.1.2
+    "@fluentui/style-utilities": ^8.1.3
     tslib: ^2.1.0
-  checksum: ad31c662c940b1263c447b52d8e0173c7ecba5e8cfd784cd951ed24ded1481b07b6dc33072f36b808ac77c2bde70310658a66aaf167369aa35061f91212909c4
+  checksum: bf085d4f3c04d4ed71714381461751dea61f56a3c6e1347c321f62559cf947559368574e6da82347ee0f4df593ef2f1b8f92dc7654fe5e2e0b992e7f5d930279
   languageName: node
   linkType: hard
 
-"@fluentui/foundation-legacy@npm:^8.1.2":
-  version: 8.1.2
-  resolution: "@fluentui/foundation-legacy@npm:8.1.2"
+"@fluentui/foundation-legacy@npm:^8.1.3":
+  version: 8.1.3
+  resolution: "@fluentui/foundation-legacy@npm:8.1.3"
   dependencies:
     "@fluentui/merge-styles": ^8.1.2
     "@fluentui/set-version": ^8.1.2
-    "@fluentui/style-utilities": ^8.1.2
+    "@fluentui/style-utilities": ^8.1.3
     "@fluentui/utilities": ^8.1.2
     tslib: ^2.1.0
   peerDependencies:
     "@types/react": ">=16.8.0 <18.0.0"
     react: ">=16.8.0 <18.0.0"
-  checksum: 71357f0ddfd404671e6559031aa600db22b3535a88ac017e030ed36890b90b1c9d536f5d12ae0fde1fa584a8667d48ed7b15f14561b52a2286a8ca7762f54678
+  checksum: 9ac804cb1651d1e52e20c42d7cea8b2efbb85d1d93350784710aa3c29ee84ed59789cdfa5d82fc8d7f5b44e4b846f09e3bc3f756301e06128074bd6b1c635421
   languageName: node
   linkType: hard
 
@@ -2375,20 +2375,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluentui/react-focus@npm:^8.1.3":
-  version: 8.1.3
-  resolution: "@fluentui/react-focus@npm:8.1.3"
+"@fluentui/react-focus@npm:^8.1.4":
+  version: 8.1.4
+  resolution: "@fluentui/react-focus@npm:8.1.4"
   dependencies:
     "@fluentui/keyboard-key": ^0.3.2
     "@fluentui/merge-styles": ^8.1.2
     "@fluentui/set-version": ^8.1.2
-    "@fluentui/style-utilities": ^8.1.2
+    "@fluentui/style-utilities": ^8.1.3
     "@fluentui/utilities": ^8.1.2
     tslib: ^2.1.0
   peerDependencies:
     "@types/react": ">=16.8.0 <18.0.0"
     react: ">=16.8.0 <18.0.0"
-  checksum: 6e4af3424c45ccd671861c5009a9d2f49f33f981d22a0694edf3e97b02688d3e4937f87d215c91766d542576b3969003be3f7366fa6ecefd00a2292aa37dec76
+  checksum: 85f202ac0a745075ddd39497ff11ab489e7405e091fbfdedb0f83da4182432ae1885a7afe007c18ee9f96a51fa8ac29cf78311fc2cbe2c5839b5988c2fccfc30
   languageName: node
   linkType: hard
 
@@ -2451,19 +2451,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluentui/react@npm:8.18.0":
-  version: 8.18.0
-  resolution: "@fluentui/react@npm:8.18.0"
+"@fluentui/react@npm:8.20.2":
+  version: 8.20.2
+  resolution: "@fluentui/react@npm:8.20.2"
   dependencies:
     "@fluentui/date-time-utilities": ^8.1.2
-    "@fluentui/font-icons-mdl2": ^8.1.2
-    "@fluentui/foundation-legacy": ^8.1.2
+    "@fluentui/font-icons-mdl2": ^8.1.3
+    "@fluentui/foundation-legacy": ^8.1.3
     "@fluentui/merge-styles": ^8.1.2
-    "@fluentui/react-focus": ^8.1.3
+    "@fluentui/react-focus": ^8.1.4
     "@fluentui/react-hooks": ^8.2.2
     "@fluentui/react-window-provider": ^2.1.2
     "@fluentui/set-version": ^8.1.2
-    "@fluentui/style-utilities": ^8.1.2
+    "@fluentui/style-utilities": ^8.1.3
     "@fluentui/theme": ^2.1.2
     "@fluentui/utilities": ^8.1.2
     "@microsoft/load-themed-styles": ^1.10.26
@@ -2473,7 +2473,7 @@ __metadata:
     "@types/react-dom": ">=16.8.0 <18.0.0"
     react: ">=16.8.0 <18.0.0"
     react-dom: ">=16.8.0 <18.0.0"
-  checksum: bc76788ef87ab14ac0528303ee866e2ee533cbb5ce420ca339e704920567859b707e3b5ff172b3f9da6b61b97a0f4ebd4dd06b016b3e050bf5e24d2b11c4014e
+  checksum: 72bcf6c1accf5cd914b71ea6e57accace70833781fc8181798dd85559ff0ace8ff86efec4194bb13d6b734b8fdf18c26b13940fee04afb05171d7dbb65aeb60e
   languageName: node
   linkType: hard
 
@@ -2486,7 +2486,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fluentui/style-utilities@npm:^8.1.2, @fluentui/style-utilities@npm:^8.1.3":
+"@fluentui/style-utilities@npm:^8.1.3":
   version: 8.1.3
   resolution: "@fluentui/style-utilities@npm:8.1.3"
   dependencies:
@@ -2664,7 +2664,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/studio-base@workspace:packages/studio-base"
   dependencies:
-    "@fluentui/react": 8.18.0
+    "@fluentui/react": 8.20.2
     "@fluentui/react-icons-mdl2": 1.1.3
     "@foxglove/den": "workspace:*"
     "@foxglove/hooks": "workspace:*"
