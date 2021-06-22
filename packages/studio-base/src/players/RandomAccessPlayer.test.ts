@@ -86,9 +86,6 @@ describe("RandomAccessPlayer", () => {
   let mockDateNow: jest.SpyInstance<number, []>;
   beforeEach(() => {
     mockDateNow = jest.spyOn(Date, "now").mockReturnValue(0);
-    // Remove any seek-to param in the URL
-    // eslint-disable-next-line no-restricted-syntax
-    history.replaceState(null, (window as any).title, location.pathname);
   });
   afterEach(async () => {
     mockDateNow.mockRestore();
@@ -1607,6 +1604,26 @@ describe("RandomAccessPlayer", () => {
     await Promise.resolve();
     player.seekPlayback({ sec: 10, nsec: 0 });
     expect(provider.getMessages).toHaveBeenCalled();
+
+    player.close();
+  });
+
+  it("keeps currentTime reference equality if current time does not change", async () => {
+    const provider = new TestProvider();
+    provider.getMessages = jest.fn().mockImplementation(() => Promise.resolve(getMessagesResult));
+    const player = new RandomAccessPlayer(
+      { name: "TestProvider", args: { provider }, children: [] },
+      playerOptions,
+    );
+    const store = new MessageStore(3);
+    player.setListener(store.add);
+    await Promise.resolve();
+
+    player.setPlaybackSpeed(1);
+
+    const messages = await store.done;
+    expect(messages[1]?.activeData?.currentTime).toEqual({ sec: 10, nsec: 0 });
+    expect(messages[1]?.activeData?.currentTime).toBe(messages[2]?.activeData?.currentTime);
 
     player.close();
   });

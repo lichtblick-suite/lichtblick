@@ -128,6 +128,10 @@ export default class RandomAccessPlayer implements Player {
   _lastRangeMillis?: number;
   _parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic = {};
 
+  // To keep reference equality for downstream user memoization cache the currentTime provided in the last activeData update
+  // See additional comments below where _currentTime is set
+  _currentTime?: Time;
+
   // The problem store holds problems based on keys (which may be hard-coded problem types or topics)
   // The overall player may be healthy, but individual topics may have warnings or errors.
   // These are set/cleared in the store to track the current set of problems
@@ -302,6 +306,15 @@ export default class RandomAccessPlayer implements Player {
       publishers.add(conn.callerid);
     }
 
+    // Downstream consumers of activeData rely on fields maintaining reference stability to detect changes
+    // lastEnd is not stable due to the above TimeUtil.add which returns a new lastEnd value on ever call
+    // Here we check if lastEnd is the same as the currentTime we've already set and avoid assigning
+    // a new reference value to current time if the underlying time value is unchanged
+    const clampedLastEnd = clampTime(lastEnd, this._start, this._end);
+    if (!this._currentTime || TimeUtil.compare(this._currentTime, clampedLastEnd) !== 0) {
+      this._currentTime = clampedLastEnd;
+    }
+
     const data: PlayerState = {
       presence: this._reconnecting
         ? PlayerPresence.RECONNECTING
@@ -318,7 +331,7 @@ export default class RandomAccessPlayer implements Player {
             messages,
             totalBytesReceived: this._receivedBytes,
             messageOrder: this._messageOrder,
-            currentTime: clampTime(lastEnd, this._start, this._end),
+            currentTime: this._currentTime,
             startTime: this._start,
             endTime: this._end,
             isPlaying: this._isPlaying,
