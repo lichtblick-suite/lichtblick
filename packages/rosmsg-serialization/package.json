@@ -1,5 +1,5 @@
 {
-  "name": "@foxglove/rosmsg-deser",
+  "name": "@foxglove/rosmsg-serialization",
   "version": "0.12.0-dev",
   "license": "MPL-2.0",
   "private": true,

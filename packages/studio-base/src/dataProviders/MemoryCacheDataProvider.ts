@@ -17,7 +17,7 @@ import { TimeUtil, Time } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
-import { LazyMessageReader } from "@foxglove/rosmsg-deser";
+import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
 import {
   DataProvider,
   DataProviderDescriptor,
