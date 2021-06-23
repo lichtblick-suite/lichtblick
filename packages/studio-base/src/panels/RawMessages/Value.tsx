@@ -7,7 +7,7 @@ import ConsoleLineIcon from "@mdi/svg/svg/console-line.svg";
 import Icon from "@foxglove/studio-base/components/Icon";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
 
-import { HighlightedValue } from "./Diff";
+import HighlightedValue from "./HighlightedValue";
 import RawMessagesIcons from "./RawMessagesIcons";
 import { ValueAction } from "./getValueActionForValue";
 import styles from "./index.module.scss";

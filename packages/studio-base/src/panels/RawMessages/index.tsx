@@ -56,7 +56,8 @@ import { Topic } from "@foxglove/studio-base/players/types";
 import { jsonTreeTheme, SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import { enumValuesByDatatypeAndField } from "@foxglove/studio-base/util/selectors";
 
-import { SDiffSpan, MaybeCollapsedValue } from "./Diff";
+import DiffSpan from "./DiffSpan";
+import MaybeCollapsedValue from "./MaybeCollapsedValue";
 import Metadata from "./Metadata";
 import Value from "./Value";
 import {
@@ -208,6 +209,9 @@ function RawMessages(props: Props) {
       itemValue: unknown;
     }): { arrLabel: string; itemLabel: string } => {
       let itemLabel = label;
+      if (typeof itemValue === "bigint") {
+        itemLabel = itemValue.toString();
+      }
       // output preview for the first x items if the data is in binary format
       // sample output: Int8Array(331776) [-4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, -4, ...]
       let arrLabel = "";
@@ -380,25 +384,36 @@ function RawMessages(props: Props) {
             )}
             <Tree
               labelRenderer={(raw) => (
-                <SDiffSpan onClick={() => onLabelClick(raw)}>{first(raw)}</SDiffSpan>
+                <DiffSpan onClick={() => onLabelClick(raw)}>{first(raw)}</DiffSpan>
               )}
               shouldExpandNode={shouldExpandNode}
               hideRoot
               invertTheme={false}
               getItemString={diffEnabled ? getItemStringForDiff : getItemString}
-              valueRenderer={(...args) => {
+              valueRenderer={(valueAsString, value, ...keyPath) => {
                 if (diffEnabled) {
-                  return renderDiffLabel(args[0], args[1]);
+                  return renderDiffLabel(valueAsString, value);
                 }
                 if (hideWrappingArray) {
                   // When the wrapping array is hidden, put it back here.
-                  return valueRenderer(rootStructureItem, [data], baseItem.queriedData, ...args, 0);
+                  return valueRenderer(
+                    rootStructureItem,
+                    [data],
+                    baseItem.queriedData,
+                    valueAsString,
+                    value,
+                    ...keyPath,
+                    0,
+                  );
                 }
+
                 return valueRenderer(
                   rootStructureItem,
                   data as unknown[],
                   baseItem.queriedData,
-                  ...args,
+                  valueAsString,
+                  value,
+                  ...keyPath,
                 );
               }}
               postprocessValue={(rawVal: unknown) => {

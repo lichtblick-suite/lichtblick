@@ -20,6 +20,7 @@ export const fixture = {
     { name: "/foo", datatype: "std_msgs/String" },
     { name: `${SECOND_SOURCE_PREFIX}/foo`, datatype: "std_msgs/String" },
     { name: "/baz/num", datatype: "baz/num" },
+    { name: "/baz/bigint", datatype: "baz/bigint" },
     { name: "/baz/text", datatype: "baz/text" },
     { name: "/baz/array", datatype: "baz/array" },
     { name: "/baz/array/obj", datatype: "baz/array/obj" },
@@ -86,6 +87,18 @@ export const fixture = {
         message: { value: 3425363211 },
       },
     ],
+    "/baz/bigint": [
+      {
+        topic: "/baz/bigint",
+        receiveTime: { sec: 123, nsec: 456789012 },
+        message: { value: 18446744073709551615n },
+      },
+      {
+        topic: "/baz/bigint",
+        receiveTime: { sec: 123, nsec: 456789013 },
+        message: { value: 18446744073709551616n },
+      },
+    ],
     "/baz/text": [
       {
         topic: "/baz/text",
@@ -134,6 +147,7 @@ export const fixture = {
   },
   datatypes: {
     "baz/num": { fields: [{ name: "value", type: "float64" }] },
+    "baz/bigint": { fields: [{ name: "value", type: "uint64" }] },
     "baz/text": {
       fields: [
         { name: "value", type: "string" },

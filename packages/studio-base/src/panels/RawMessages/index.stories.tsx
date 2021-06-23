@@ -75,6 +75,20 @@ storiesOf("panels/RawMessages/index", module)
       </PanelSetup>
     );
   })
+  .add("display message with bigint value", () => {
+    return (
+      <PanelSetup fixture={fixture} style={{ width: 350 }}>
+        <RawMessages overrideConfig={{ topicPath: "/baz/bigint", ...noDiffConfig } as any} />
+      </PanelSetup>
+    );
+  })
+  .add("display bigint value", () => {
+    return (
+      <PanelSetup fixture={fixture} style={{ width: 350 }}>
+        <RawMessages overrideConfig={{ topicPath: "/baz/bigint.value", ...noDiffConfig } as any} />
+      </PanelSetup>
+    );
+  })
   .add("display big value – text", () => {
     return (
       <PanelSetup fixture={fixture} style={{ width: 350 }}>
@@ -214,6 +228,21 @@ storiesOf("panels/RawMessages/index", module)
         <RawMessages
           overrideConfig={{
             topicPath: "/foo",
+            diffMethod: PREV_MSG_METHOD,
+            diffTopicPath: "",
+            diffEnabled: true,
+            showFullMessageForDiff: true,
+          }}
+        />
+      </PanelSetup>
+    );
+  })
+  .add("diff consecutive messages with bigint", () => {
+    return (
+      <PanelSetup fixture={fixture} style={{ width: 350 }} onMount={expandAll}>
+        <RawMessages
+          overrideConfig={{
+            topicPath: "/baz/bigint",
             diffMethod: PREV_MSG_METHOD,
             diffTopicPath: "",
             diffEnabled: true,

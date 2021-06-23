@@ -172,9 +172,11 @@ export default function getDiff(
       [diffLabels.DELETED.labelText]: { ...idLabelObj, ...(before as DiffObject) },
     };
   }
+
+  const beforeText = typeof before === "bigint" ? before.toString() : JSON.stringify(before);
+  const afterText = typeof after === "bigint" ? after.toString() : JSON.stringify(after);
+
   return {
-    [diffLabels.CHANGED.labelText]: `${JSON.stringify(before) ?? ""} ${diffArrow} ${
-      JSON.stringify(after) ?? ""
-    }`,
+    [diffLabels.CHANGED.labelText]: `${beforeText} ${diffArrow} ${afterText}`,
   };
 }
