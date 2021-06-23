@@ -149,23 +149,7 @@ export default class RandomAccessPlayer implements Player {
     this._metricsCollector = metricsCollector ?? new NoopMetricsCollector();
     this._seekToTime = seekToTime;
     this._metricsCollector.playerConstructed();
-
-    document.addEventListener("visibilitychange", this._handleDocumentVisibilityChange, false);
   }
-
-  // If the user switches tabs, we won't actually play because no requestAnimationFrames will be called.
-  // Make sure this is reflected in application state and in metrics as a pause and resume.
-  _handleDocumentVisibilityChange = (): void => {
-    if (document.visibilityState === "hidden") {
-      if (this._isPlaying) {
-        this.pausePlayback();
-        this._wasPlayingBeforeTabSwitch = true;
-      }
-    } else if (document.visibilityState === "visible" && this._wasPlayingBeforeTabSwitch) {
-      this._wasPlayingBeforeTabSwitch = false;
-      this.startPlayback();
-    }
-  };
 
   private _setError(message: string, error?: Error): void {
     this._hasError = true;
@@ -627,7 +611,6 @@ export default class RandomAccessPlayer implements Player {
       this._provider.close();
     }
     this._metricsCollector.close();
-    document.removeEventListener("visibilitychange", this._handleDocumentVisibilityChange);
   }
 
   // Exposed for testing.
