@@ -20,13 +20,35 @@ export default {
   title: "useConfirm",
 };
 
-export const UpdateYourBrowser = (): unknown => {
+export const Primary = (): unknown => {
   const { modal, open } = useConfirm({
-    title: "Update your browser",
-    prompt: "Chrome 1.2.3 is not supported. Please use Chrome 68 or later to continue.",
+    title: "Example title",
+    prompt: "Example prompt",
     confirmStyle: "primary",
-    ok: "Update Chrome",
+    ok: "Custom OK",
     cancel: "Continue anyway",
+    action: action("action"),
+  });
+  useLayoutEffect(() => open(), [open]);
+  return modal;
+};
+
+export const Defaults = (): unknown => {
+  const { modal, open } = useConfirm({
+    title: "Example title",
+    confirmStyle: "primary",
+    action: action("action"),
+  });
+  useLayoutEffect(() => open(), [open]);
+  return modal;
+};
+
+export const Danger = (): unknown => {
+  const { modal, open } = useConfirm({
+    title: "Example title",
+    prompt: "Example prompt",
+    confirmStyle: "danger",
+    ok: "Destroy",
     action: action("action"),
   });
   useLayoutEffect(() => open(), [open]);

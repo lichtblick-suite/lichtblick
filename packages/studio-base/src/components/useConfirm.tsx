@@ -11,14 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { DefaultButton, Dialog, DialogFooter } from "@fluentui/react";
 import React, { useState, useCallback } from "react";
-
-import Button from "@foxglove/studio-base/components/Button";
-import Flex from "@foxglove/studio-base/components/Flex";
-import Modal, { Title } from "@foxglove/studio-base/components/Modal";
-import { RenderToBodyComponent } from "@foxglove/studio-base/components/RenderToBodyComponent";
-
-import styles from "./Confirm.module.scss";
 
 type ConfirmStyle = "danger" | "primary";
 
@@ -34,15 +28,13 @@ type Props = {
   cancel?: string | false;
 
   // whether to use red/green/no color on the confirm button
-  confirmStyle?: ConfirmStyle;
+  confirmStyle: ConfirmStyle;
 
   // action to run when the dialog is closed
   action(ok: boolean): void;
 };
 
 // shows a confirmation modal to the user with an ok and a cancel button
-// returns a promise which resolves with true if the user confirmed the modal
-// or false if the user closed the modal with escape or clicked the cancel button
 export default function useConfirm(props: Props): {
   modal?: React.ReactElement | ReactNull;
   open: () => void;
@@ -55,32 +47,54 @@ export default function useConfirm(props: Props): {
     props.action(ok);
   }
   const confirmStyle = props.confirmStyle ?? "danger";
-  const modal = !isOpen ? (
-    ReactNull
-  ) : (
-    <RenderToBodyComponent>
-      <Modal onRequestClose={() => close(false)}>
-        <div className={styles.container}>
-          <Title>{props.title}</Title>
-          <hr />
-          <Flex col style={{ padding: "32px" }}>
-            {props.prompt != undefined && <div className={styles.prompt}>{props.prompt}</div>}
-            <div className={styles.controls}>
-              {props.cancel !== false && (
-                <Button onClick={() => close(false)}>{props.cancel ?? "Cancel"}</Button>
-              )}
-              <Button
-                danger={confirmStyle === "danger"}
-                primary={confirmStyle === "primary"}
-                onClick={() => close(true)}
-              >
-                {props.ok ?? "OK"}
-              </Button>
-            </div>
-          </Flex>
-        </div>
-      </Modal>
-    </RenderToBodyComponent>
+
+  const buttons = [
+    props.cancel !== false && (
+      <DefaultButton onClick={() => close(false)} text={props.cancel ?? "Cancel"} />
+    ),
+    <DefaultButton
+      key="confirm"
+      primary={confirmStyle === "primary"}
+      styles={
+        confirmStyle === "danger"
+          ? {
+              root: { backgroundColor: "#c72121", borderColor: "#c72121", color: "white" },
+              rootHovered: {
+                backgroundColor: "#b31b1b",
+                borderColor: "#b31b1b",
+                color: "white",
+              },
+              rootPressed: {
+                backgroundColor: "#771010",
+                borderColor: "#771010",
+                color: "white",
+              },
+            }
+          : undefined
+      }
+      type="submit"
+      text={props.ok ?? "OK"}
+    />,
+  ];
+  if (confirmStyle === "danger") {
+    buttons.reverse();
+  }
+
+  const modal = (
+    <Dialog
+      hidden={!isOpen}
+      onDismiss={() => close(false)}
+      dialogContentProps={{ title: props.title, subText: props.prompt }}
+    >
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          close(true);
+        }}
+      >
+        <DialogFooter styles={{ actions: { whiteSpace: "nowrap" } }}>{buttons}</DialogFooter>
+      </form>
+    </Dialog>
   );
 
   return { modal, open };
