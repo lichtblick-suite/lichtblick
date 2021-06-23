@@ -1,6 +1,5 @@
 {
   "name": "@foxglove/xmlrpc",
-  "version": "0.12.0-dev",
   "description": "TypeScript library implementing a XMLRPC client and server with pluggable server backend.",
   "license": "MPL-2.0",
   "private": true,

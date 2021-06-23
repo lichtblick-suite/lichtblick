@@ -1,6 +1,5 @@
 {
   "name": "@foxglove/rosmsg-msgs-foxglove",
-  "version": "0.12.0-dev",
   "license": "MIT",
   "repository": {
     "type": "git",

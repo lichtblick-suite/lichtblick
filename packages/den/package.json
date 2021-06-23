@@ -1,7 +1,6 @@
 {
   "name": "@foxglove/den",
   "description": "Incubation area for code that may be released under future @foxglove packages",
-  "version": "0.12.0-dev",
   "license": "MPL-2.0",
   "private": true,
   "repository": {
