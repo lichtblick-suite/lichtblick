@@ -79,17 +79,15 @@ function MainEditor({
   topicName: _topicName,
 }: {
   datatype: string;
-  collectorMessage: any;
+  collectorMessage: unknown;
   columnIndex: number;
-  onFieldChange: (fieldName: string, value: any) => void;
+  onFieldChange: (fieldName: string, value: unknown) => void;
   onSettingsChange: (
     settings:
-      | any
-      | ((prevSettings: never) => {
-          // no-op
-        }),
+      | Record<string, unknown>
+      | ((prevSettings: Record<string, unknown>) => Record<string, unknown>),
   ) => void;
-  settings: any;
+  settings: Record<string, unknown>;
   topicName: string;
 }) {
   const Editor = topicSettingsEditorForDatatype(datatype);
@@ -124,10 +122,10 @@ type Props = {
   currentEditingTopic: Topic;
   hasFeatureColumn: boolean;
   saveConfig: Save3DConfig;
-  sceneBuilderMessage: any;
+  sceneBuilderMessage: unknown;
   setCurrentEditingTopic: (arg0?: Topic) => void;
   settingsByKey: {
-    [topic: string]: any;
+    [topic: string]: Record<string, unknown>;
   };
 };
 
@@ -144,10 +142,8 @@ function TopicSettingsModal({
   const onSettingsChange = useCallback(
     (
       settings:
-        | any
-        | ((prevSettings: never) => {
-            // no-op
-          }),
+        | Record<string, unknown>
+        | ((prevSettings: Record<string, unknown>) => Record<string, unknown>),
     ) => {
       if (typeof settings !== "function" && isEmpty(settings)) {
         // Remove the field if the topic settings are empty to prevent the panelConfig from every growing.
@@ -159,7 +155,7 @@ function TopicSettingsModal({
           ...settingsByKey,
           [topicSettingsKey]:
             typeof settings === "function"
-              ? settings(settingsByKey[topicSettingsKey] || {})
+              ? settings(settingsByKey[topicSettingsKey] ?? {})
               : settings,
         },
       });
@@ -168,8 +164,11 @@ function TopicSettingsModal({
   );
 
   const onFieldChange = useCallback(
-    (fieldName: string, value: any) => {
-      onSettingsChange((newSettings: any) => ({ ...newSettings, [fieldName]: value }));
+    (fieldName: string, value: unknown) => {
+      onSettingsChange((prevSettings: Record<string, unknown>) => ({
+        ...prevSettings,
+        [fieldName]: value,
+      }));
     },
     [onSettingsChange],
   );
@@ -185,7 +184,7 @@ function TopicSettingsModal({
       datatype={datatype}
       onFieldChange={onFieldChange}
       onSettingsChange={onSettingsChange}
-      settings={settingsByKey[topicSettingsKey] || {}}
+      settings={settingsByKey[topicSettingsKey] ?? {}}
       topicName={nonPrefixedTopic}
     />
   );

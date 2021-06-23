@@ -27,9 +27,9 @@ export type PoseSettings = {
   overrideColor?: Color;
   alpha?: number;
   size?: {
-    headLength: number;
-    headWidth: number;
-    shaftWidth: number;
+    headLength?: number;
+    headWidth?: number;
+    shaftWidth?: number;
   };
   modelType?: "car-model" | "arrow" | "car-outline";
   addCarOutlineBuffer?: boolean;

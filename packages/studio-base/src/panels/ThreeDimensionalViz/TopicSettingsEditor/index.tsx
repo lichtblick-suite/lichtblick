@@ -38,10 +38,12 @@ export const LINED_CONVEX_HULL_RENDERING_SETTING = "LinedConvexHull";
 
 export type { TopicSettingsEditorProps } from "./types";
 
-export function topicSettingsEditorForDatatype(
-  datatype: string,
-): ComponentType<TopicSettingsEditorProps<any, any>> | undefined {
-  const editors = new Map<string, any>([
+export function topicSettingsEditorForDatatype(datatype: string):
+  | (ComponentType<TopicSettingsEditorProps<unknown, Record<string, unknown>>> & {
+      canEditNamespaceOverrideColor?: boolean;
+    })
+  | undefined {
+  const editors = new Map<string, unknown>([
     [FOXGLOVE_GRID_DATATYPE, GridSettingsEditor],
     [POINT_CLOUD_DATATYPE, PointCloudSettingsEditor],
     [VELODYNE_SCAN_DATATYPE, PointCloudSettingsEditor],
@@ -52,7 +54,11 @@ export function topicSettingsEditorForDatatype(
     [NAV_MSGS_PATH_DATATYPE, MarkerSettingsEditor],
   ]);
 
-  return editors.get(datatype);
+  return editors.get(datatype) as
+    | (ComponentType<TopicSettingsEditorProps<unknown, Record<string, unknown>>> & {
+        canEditNamespaceOverrideColor?: boolean;
+      })
+    | undefined;
 }
 
 export function canEditDatatype(datatype: string): boolean {
@@ -61,14 +67,18 @@ export function canEditDatatype(datatype: string): boolean {
 
 export function canEditNamespaceOverrideColorDatatype(datatype: string): boolean {
   const editor = topicSettingsEditorForDatatype(datatype);
-  return !!(editor && (editor as any).canEditNamespaceOverrideColor);
+  return editor?.canEditNamespaceOverrideColor === true;
 }
 
 type Props = {
   topic: Topic;
-  message: any;
-  settings?: any;
-  onSettingsChange: (arg0: any) => void;
+  message: unknown;
+  settings?: Record<string, unknown>;
+  onSettingsChange: (
+    arg0:
+      | Record<string, unknown>
+      | ((prevSettings: Record<string, unknown>) => Record<string, unknown>),
+  ) => void;
 };
 
 const TopicSettingsEditor = React.memo<Props>(function TopicSettingsEditor({
@@ -78,8 +88,8 @@ const TopicSettingsEditor = React.memo<Props>(function TopicSettingsEditor({
   onSettingsChange,
 }: Props) {
   const onFieldChange = useCallback(
-    (fieldName: string, value: any) => {
-      onSettingsChange((newSettings: any) => ({ ...newSettings, [fieldName]: value }));
+    (fieldName: string, value: unknown) => {
+      onSettingsChange((newSettings) => ({ ...newSettings, [fieldName]: value }));
     },
     [onSettingsChange],
   );
@@ -98,7 +108,7 @@ const TopicSettingsEditor = React.memo<Props>(function TopicSettingsEditor({
       <ErrorBoundary>
         <Editor
           message={message}
-          settings={settings || {}}
+          settings={settings ?? {}}
           onFieldChange={onFieldChange}
           onSettingsChange={onSettingsChange}
         />

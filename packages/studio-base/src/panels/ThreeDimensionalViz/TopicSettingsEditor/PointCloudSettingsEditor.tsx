@@ -109,8 +109,10 @@ export default function PointCloudSettingsEditor(
   const { message, settings = {}, onFieldChange, onSettingsChange } = props;
 
   const onColorModeChange = useCallback(
-    (newValue: (ColorMode | undefined) | ((arg0?: ColorMode) => ColorMode | undefined)) => {
-      onSettingsChange((newSettings: any) => ({
+    (
+      newValue: (ColorMode | undefined) | ((prevColorMode?: ColorMode) => ColorMode | undefined),
+    ) => {
+      onSettingsChange((newSettings) => ({
         ...newSettings,
         colorMode: typeof newValue === "function" ? newValue(newSettings.colorMode) : newValue,
       }));
@@ -120,11 +122,9 @@ export default function PointCloudSettingsEditor(
 
   const hasRGB = message?.fields?.some(({ name }) => name === "rgb") ?? false;
   const defaultColorField = message?.fields?.find(({ name }) => name !== "rgb")?.name;
-  const colorMode: ColorMode = (settings as any).colorMode
-    ? (settings as any).colorMode
-    : hasRGB
-    ? { mode: "rgb" }
-    : { mode: "flat", flatColor: DEFAULT_FLAT_COLOR };
+  const colorMode: ColorMode =
+    settings.colorMode ??
+    (hasRGB ? { mode: "rgb" } : { mode: "flat", flatColor: DEFAULT_FLAT_COLOR });
 
   return (
     <Flex col>
@@ -137,13 +137,13 @@ export default function PointCloudSettingsEditor(
           <SegmentedControl
             selectedId={colorMode.mode === "flat" ? "flat" : "data"}
             onChange={(id) =>
-              onColorModeChange((newColorMode) => {
+              onColorModeChange((prevColorMode) => {
                 if (id === "flat") {
                   return {
                     mode: "flat",
                     flatColor:
-                      newColorMode && newColorMode.mode === "gradient"
-                        ? newColorMode.minColor
+                      prevColorMode && prevColorMode.mode === "gradient"
+                        ? prevColorMode.minColor
                         : DEFAULT_FLAT_COLOR,
                   };
                 }
@@ -172,15 +172,15 @@ export default function PointCloudSettingsEditor(
               text={colorMode.mode === "rgb" ? "rgb" : colorMode.colorField}
               value={colorMode.mode === "rgb" ? "rgb" : colorMode.colorField}
               onChange={(value) =>
-                onColorModeChange((newColorMode): ColorMode => {
+                onColorModeChange((prevColorMode) => {
                   if (value === "rgb") {
                     return { mode: "rgb" };
                   }
-                  if (newColorMode && newColorMode.mode === "gradient") {
-                    return { ...newColorMode, colorField: value };
+                  if (prevColorMode?.mode === "gradient") {
+                    return { ...prevColorMode, colorField: value };
                   }
-                  if (newColorMode && newColorMode.mode === "rainbow") {
-                    return { ...newColorMode, colorField: value };
+                  if (prevColorMode?.mode === "rainbow") {
+                    return { ...prevColorMode, colorField: value };
                   }
                   return { mode: "rainbow", colorField: value };
                 })
@@ -207,10 +207,11 @@ export default function PointCloudSettingsEditor(
               <SValueRangeInput
                 value={colorMode.minValue ?? ""}
                 onChange={({ target: { value } }) =>
-                  onColorModeChange((newColorMode: any) => ({
-                    ...newColorMode,
-                    minValue: value === "" ? undefined : +value,
-                  }))
+                  onColorModeChange((prevColorMode) =>
+                    prevColorMode?.mode === "gradient" || prevColorMode?.mode === "rainbow"
+                      ? { ...prevColorMode, minValue: value === "" ? undefined : +value }
+                      : prevColorMode,
+                  )
                 }
               />
             </Flex>
@@ -219,10 +220,11 @@ export default function PointCloudSettingsEditor(
               <SValueRangeInput
                 value={colorMode.maxValue ?? ""}
                 onChange={({ target: { value } }) =>
-                  onColorModeChange((newColorMode: any) => ({
-                    ...newColorMode,
-                    maxValue: value === "" ? undefined : +value,
-                  }))
+                  onColorModeChange((prevColorMode) =>
+                    prevColorMode?.mode === "gradient" || prevColorMode?.mode === "rainbow"
+                      ? { ...prevColorMode, maxValue: value === "" ? undefined : +value }
+                      : prevColorMode,
+                  )
                 }
               />
             </Flex>
@@ -230,18 +232,22 @@ export default function PointCloudSettingsEditor(
           <Radio
             selectedId={colorMode.mode}
             onChange={(id) =>
-              onColorModeChange(({ colorField, minValue, maxValue }: any) =>
-                id === "rainbow"
-                  ? { mode: "rainbow", colorField, minValue, maxValue }
-                  : {
-                      mode: "gradient",
-                      colorField,
-                      minValue,
-                      maxValue,
-                      minColor: DEFAULT_MIN_COLOR,
-                      maxColor: DEFAULT_MAX_COLOR,
-                    },
-              )
+              onColorModeChange((prevColorMode) => {
+                if (prevColorMode?.mode === "rainbow" || prevColorMode?.mode === "gradient") {
+                  const { colorField, minValue, maxValue } = prevColorMode;
+                  return id === "rainbow"
+                    ? { mode: "rainbow", colorField, minValue, maxValue }
+                    : {
+                        mode: "gradient",
+                        colorField,
+                        minValue,
+                        maxValue,
+                        minColor: DEFAULT_MIN_COLOR,
+                        maxColor: DEFAULT_MAX_COLOR,
+                      };
+                }
+                return prevColorMode;
+              })
             }
             options={[
               {
@@ -260,12 +266,11 @@ export default function PointCloudSettingsEditor(
             minColor={colorMode.minColor ?? DEFAULT_MIN_COLOR}
             maxColor={colorMode.maxColor ?? DEFAULT_MAX_COLOR}
             onChange={({ minColor, maxColor }) =>
-              onColorModeChange((newColorMode: any) => ({
-                mode: "gradient",
-                ...newColorMode,
-                minColor,
-                maxColor,
-              }))
+              onColorModeChange((prevColorMode) =>
+                prevColorMode?.mode === "gradient"
+                  ? { ...prevColorMode, minColor, maxColor }
+                  : prevColorMode,
+              )
             }
           />
         </div>

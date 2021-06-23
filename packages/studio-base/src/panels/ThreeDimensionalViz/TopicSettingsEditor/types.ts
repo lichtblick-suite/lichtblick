@@ -5,6 +5,6 @@
 export type TopicSettingsEditorProps<Msg, Settings> = {
   message?: Msg;
   settings: Settings;
-  onFieldChange: (name: string, value: any) => void;
-  onSettingsChange: (arg0: any | ((arg0: any) => any)) => void;
+  onFieldChange: (name: string, value: unknown) => void;
+  onSettingsChange: (arg0: Settings | ((arg0: Settings) => Settings)) => void;
 };
