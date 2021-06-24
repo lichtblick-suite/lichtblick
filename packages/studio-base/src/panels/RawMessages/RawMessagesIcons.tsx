@@ -13,7 +13,7 @@
 import ChartBubbleIcon from "@mdi/svg/svg/chart-bubble.svg";
 import ChartLineVariantIcon from "@mdi/svg/svg/chart-line-variant.svg";
 import DotsHorizontalIcon from "@mdi/svg/svg/dots-horizontal.svg";
-import TargetIcon from "@mdi/svg/svg/target.svg";
+import FilterIcon from "@mdi/svg/svg/filter.svg";
 import { ReactElement, useCallback } from "react";
 
 import Icon from "@foxglove/studio-base/components/Icon";
@@ -40,6 +40,8 @@ export default function RawMessagesIcons({
   onTopicPathChange,
   openSiblingPanel,
 }: Props): ReactElement {
+  const { singleSlicePath, multiSlicePath, primitiveType, filterPath } = valueAction;
+
   const openPlotPanel = useCallback(
     (pathSuffix: string) => () => {
       openSiblingPlotPanel(openSiblingPanel, `${basePath}${pathSuffix}`);
@@ -52,27 +54,24 @@ export default function RawMessagesIcons({
     },
     [basePath, openSiblingPanel],
   );
-  const onPivot = useCallback(
-    () =>
-      onTopicPathChange(`${basePath}${valueAction.type === "pivot" ? valueAction.pivotPath : ""}`),
-    [basePath, onTopicPathChange, valueAction],
+  const onFilter = useCallback(
+    () => onTopicPathChange(`${basePath}${filterPath}`),
+    [basePath, filterPath, onTopicPathChange],
   );
-  if (valueAction.type === "pivot") {
-    return (
-      <Icon
-        fade
-        className={styles.icon}
-        onClick={onPivot}
-        tooltip="Pivot on this value"
-        key="pivot"
-      >
-        <TargetIcon />
-      </Icon>
-    );
-  }
-  const { singleSlicePath, multiSlicePath, primitiveType } = valueAction;
+
   return (
     <span>
+      {filterPath.length > 0 && (
+        <Icon
+          fade
+          className={styles.icon}
+          onClick={onFilter}
+          tooltip="filter on this value"
+          key="filter"
+        >
+          <FilterIcon />
+        </Icon>
+      )}
       {plotableRosTypes.includes(primitiveType) && (
         <Icon
           fade

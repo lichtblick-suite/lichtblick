@@ -11,23 +11,17 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { last } from "lodash";
 import memoizeWeak from "memoize-weak";
 
 import { MessagePathStructureItem } from "@foxglove/studio-base/components/MessagePathSyntax/constants";
 import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
 
-export type ValueAction =
-  | {
-      type: "pivot";
-      pivotPath: string; // Path to filter on using the current value, if the current value is an id.
-    }
-  | {
-      type: "primitive";
-      singleSlicePath: string; // Path that will only return one value per unit of time (for line charts).
-      multiSlicePath: string; // Path that might return multiple values per unit of time (for scatter plots).
-      primitiveType: string; // The ROS primitive type that these paths point at.
-    };
+export type ValueAction = {
+  singleSlicePath: string; // Path that will only return one value per unit of time (for line charts).
+  multiSlicePath: string; // Path that might return multiple values per unit of time (for scatter plots).
+  primitiveType: string; // The ROS primitive type that these paths point at.
+  filterPath: string; // Path to filter on using the current value
+};
 
 const isObjectElement = (
   value: unknown,
@@ -57,7 +51,7 @@ export function getValueActionForValue(
 ): ValueAction | undefined {
   let singleSlicePath = "";
   let multiSlicePath = "";
-  let pivotPath = "";
+  let filterPath = "";
   let value: unknown = rootValue;
   let structureItem: MessagePathStructureItem | undefined = rootStructureItem;
   // Walk down the keyPath, while updating `value` and `structureItem`
@@ -72,9 +66,14 @@ export function getValueActionForValue(
       value = (value as Record<string, unknown>)[pathItem];
       if (multiSlicePath.endsWith("[:]")) {
         // We're just inside a message that is inside an array, so we might want to pivot on this new value.
-        pivotPath = `${multiSlicePath}{${pathItem}==${JSON.stringify(value) ?? ""}}`;
+
+        if (typeof value === "bigint") {
+          filterPath = `${multiSlicePath}{${pathItem}==${value.toString()}}`;
+        } else {
+          filterPath = `${multiSlicePath}{${pathItem}==${JSON.stringify(value) ?? ""}}`;
+        }
       } else {
-        pivotPath = "";
+        filterPath = "";
       }
       singleSlicePath += `.${pathItem}`;
       multiSlicePath += `.${pathItem}`;
@@ -85,6 +84,7 @@ export function getValueActionForValue(
           ? structureItem.next
           : { structureType: "primitive", primitiveType: "json", datatype: "" };
       multiSlicePath = `${singleSlicePath}[:]`;
+
       // Ideally show something like `/topic.object[:]{id=123}` for the singleSlicePath, but fall
       // back to `/topic.object[10]` if necessary.
       let typicalFilterName;
@@ -114,18 +114,11 @@ export function getValueActionForValue(
   }
   // At this point we should be looking at a primitive. If not, just return nothing.
   if (structureItem && structureItem.structureType === "primitive" && value != undefined) {
-    if (
-      pivotPath.length !== 0 &&
-      keyPath.length > 0 &&
-      isTypicalFilterName(last(keyPath)!.toString())
-    ) {
-      return { type: "pivot", pivotPath };
-    }
     return {
-      type: "primitive",
       singleSlicePath,
       multiSlicePath,
       primitiveType: structureItem.primitiveType,
+      filterPath,
     };
   }
   return undefined;

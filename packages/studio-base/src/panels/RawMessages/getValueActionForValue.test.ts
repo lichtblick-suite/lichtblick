@@ -28,7 +28,7 @@ describe("getValueActionForValue", () => {
     expect(getAction({}, structureItem, [])).toEqual(undefined);
   });
 
-  it("returns a pivot path when pointed at an id inside an array", () => {
+  it("returns paths for an id inside an array", () => {
     const structureItem = {
       structureType: "array",
       next: {
@@ -45,8 +45,10 @@ describe("getValueActionForValue", () => {
       datatype: "",
     };
     expect(getAction([{ some_id: 123 }], structureItem, [0, "some_id"])).toEqual({
-      type: "pivot",
-      pivotPath: "[:]{some_id==123}",
+      filterPath: "[:]{some_id==123}",
+      multiSlicePath: "[:].some_id",
+      primitiveType: "uint32",
+      singleSlicePath: "[:]{some_id==123}.some_id",
     });
   });
 
@@ -63,7 +65,7 @@ describe("getValueActionForValue", () => {
       datatype: "",
     };
     expect(getAction({ some_id: 123 }, structureItem, ["some_id"])).toEqual({
-      type: "primitive",
+      filterPath: "",
       singleSlicePath: ".some_id",
       multiSlicePath: ".some_id",
       primitiveType: "uint32",
@@ -87,7 +89,7 @@ describe("getValueActionForValue", () => {
       datatype: "",
     };
     expect(getAction([{ some_value: 456 }], structureItem, [0, "some_value"])).toEqual({
-      type: "primitive",
+      filterPath: "[:]{some_value==456}",
       singleSlicePath: "[0].some_value",
       multiSlicePath: "[:].some_value",
       primitiveType: "uint32",
@@ -118,7 +120,7 @@ describe("getValueActionForValue", () => {
     expect(
       getAction([{ some_id: 123, some_value: 456 }], structureItem, [0, "some_value"]),
     ).toEqual({
-      type: "primitive",
+      filterPath: "[:]{some_value==456}",
       singleSlicePath: "[:]{some_id==123}.some_value",
       multiSlicePath: "[:].some_value",
       primitiveType: "uint32",
@@ -128,10 +130,10 @@ describe("getValueActionForValue", () => {
   it("returns value when looking inside a 'json' primitive", () => {
     const structureItem = { structureType: "primitive", primitiveType: "json", datatype: "" };
     expect(getAction({ abc: 0, def: 0 }, structureItem, ["abc"])).toEqual({
+      filterPath: "",
       multiSlicePath: ".abc",
       primitiveType: "json",
       singleSlicePath: ".abc",
-      type: "primitive",
     });
   });
 
@@ -154,7 +156,7 @@ describe("getValueActionForValue", () => {
         "nested_key",
       ]),
     ).toEqual({
-      type: "primitive",
+      filterPath: "",
       singleSlicePath: "[0].outer_key.nested_key",
       multiSlicePath: "[:].outer_key.nested_key",
       primitiveType: "json",
@@ -183,7 +185,7 @@ describe("getValueActionForValue", () => {
       datatype: "",
     };
     expect(getAction({ some_id: 123 }, structureItem, ["some_id"])).toEqual({
-      type: "primitive",
+      filterPath: "",
       singleSlicePath: ".some_id",
       multiSlicePath: ".some_id",
       primitiveType: "json",
@@ -226,7 +228,7 @@ describe("getValueActionForValue", () => {
       datatype: "msgs/nodeArray",
     };
     expect(getAction(rootValue, rootStructureItem, ["status", 0, "level"])).toEqual({
-      type: "primitive",
+      filterPath: ".status[:]{level==0}",
       singleSlicePath: '.status[:]{node_id=="/my_node"}.level',
       multiSlicePath: ".status[:].level",
       primitiveType: "int8",
