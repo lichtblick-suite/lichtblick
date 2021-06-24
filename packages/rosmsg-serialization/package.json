@@ -22,8 +22,8 @@
   },
   "devDependencies": {
     "@types/prettier": "2.3.0",
-    "jest": "27.0.4",
+    "jest": "27.0.5",
     "prettier": "2.3.1",
-    "typescript": "4.3.2"
+    "typescript": "4.3.4"
   }
 }

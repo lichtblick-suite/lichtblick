@@ -1,9 +1,9 @@
 diff --git a/dist/esm/client/preview/render.js b/dist/esm/client/preview/render.js
-index e9b656fd056af94efebb2ba6dc25921144bba441..534f4c0f20eed9254a5bc4b6102bc52841995a9b 100644
+index 5883ed6c7e9db640cd8f209a3b840efb1d54c6a7..03c377000bdc7eb620c2f9107a2635e820d69247 100644
 --- a/dist/esm/client/preview/render.js
 +++ b/dist/esm/client/preview/render.js
-@@ -35,9 +35,11 @@ import React, { Component, StrictMode, Fragment } from 'react';
- import ReactDOM from 'react-dom';
+@@ -44,9 +44,11 @@ var document = global.document,
+     FRAMEWORK_OPTIONS = global.FRAMEWORK_OPTIONS;
  var rootEl = document ? document.getElementById('root') : null;
  
 -var render = function render(node, el) {
@@ -16,7 +16,7 @@ index e9b656fd056af94efebb2ba6dc25921144bba441..534f4c0f20eed9254a5bc4b6102bc528
    });
  };
  
-@@ -128,7 +130,7 @@ function _renderMain() {
+@@ -137,7 +139,7 @@ function _renderMain() {
              }
  
              _context.next = 7;

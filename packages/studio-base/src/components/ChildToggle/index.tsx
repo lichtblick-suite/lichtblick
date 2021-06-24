@@ -254,4 +254,4 @@ export default function ChildToggle(props: Props): ReactElement {
   );
 }
 
-ChildToggle.ContainsOpen = ChildToggleContainsOpen;
+export { ChildToggleContainsOpen };

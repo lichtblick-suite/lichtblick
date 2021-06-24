@@ -26,7 +26,7 @@ import { useContext, useState, useCallback, useMemo } from "react";
 import { MosaicContext, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
 import { useResizeDetector } from "react-resize-detector";
 
-import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
+import { ChildToggleContainsOpen } from "@foxglove/studio-base/components/ChildToggle";
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import HelpModal from "@foxglove/studio-base/components/HelpModal";
 import Icon from "@foxglove/studio-base/components/Icon";
@@ -285,7 +285,7 @@ export default React.memo<Props>(function PanelToolbar({
 
   return (
     <div ref={sizeRef}>
-      <ChildToggle.ContainsOpen onChange={setContainsOpen}>
+      <ChildToggleContainsOpen onChange={setContainsOpen}>
         {showHelp && <HelpModal onRequestClose={() => setShowHelp(false)}>{helpContent}</HelpModal>}
         <div
           className={cx(styles.panelToolbarContainer, {
@@ -304,7 +304,7 @@ export default React.memo<Props>(function PanelToolbar({
             isUnknownPanel={!!isUnknownPanel}
           />
         </div>
-      </ChildToggle.ContainsOpen>
+      </ChildToggleContainsOpen>
     </div>
   );
 });

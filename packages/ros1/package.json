@@ -24,8 +24,8 @@
   },
   "devDependencies": {
     "esbuild-runner": "2.2.0",
-    "jest": "27.0.4",
-    "typescript": "4.3.2"
+    "jest": "27.0.5",
+    "typescript": "4.3.4"
   },
   "dependencies": {
     "@foxglove/rosmsg": "workspace:packages/rosmsg",

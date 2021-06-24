@@ -16,7 +16,7 @@ import PlusCircleIcon from "@mdi/svg/svg/plus-circle.svg";
 import { storiesOf } from "@storybook/react";
 import { ReactNode, useEffect, useState } from "react";
 
-import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
+import ChildToggle, { ChildToggleContainsOpen } from "@foxglove/studio-base/components/ChildToggle";
 import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
 
@@ -70,7 +70,7 @@ function ChildToggleStory() {
         </ChildToggle>
       </div>
       <div style={{ margin: MARGIN, border: "1px solid gray" }}>
-        <ChildToggle.ContainsOpen onChange={setContainsOpen1}>
+        <ChildToggleContainsOpen onChange={setContainsOpen1}>
           <div>
             Contains an open child toggle: {JSON.stringify(containsOpen1)}
             <ChildToggle position="below" onToggle={setIsOpen} isOpen={isOpen}>
@@ -78,10 +78,10 @@ function ChildToggleStory() {
               <Block>this opens below</Block>
             </ChildToggle>
           </div>
-        </ChildToggle.ContainsOpen>
+        </ChildToggleContainsOpen>
       </div>
       <div style={{ margin: MARGIN, border: "1px solid gray" }}>
-        <ChildToggle.ContainsOpen onChange={setContainsOpen2}>
+        <ChildToggleContainsOpen onChange={setContainsOpen2}>
           <div>
             Contains an open child toggle: {JSON.stringify(containsOpen2)}
             <ChildToggle position="below">
@@ -89,7 +89,7 @@ function ChildToggleStory() {
               <Block>this should never be visible</Block>
             </ChildToggle>
           </div>
-        </ChildToggle.ContainsOpen>
+        </ChildToggleContainsOpen>
       </div>
     </Flex>
   );
