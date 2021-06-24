@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-// @ts-nocheck
-
 import {
   DEPRECATED__ros_lib_dts,
   DEPRECATED__ros_lib_filename,
@@ -24,7 +22,7 @@ import {
 } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/ros";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
-import { lib_filename, lib_es6_dts } from "./lib";
+import { lib_filename, lib_dts } from "./lib";
 
 export type NodeProjectFile = {
   fileName: string;
@@ -50,7 +48,7 @@ export function getNodeProjectConfig(): NodeProjectConfig {
   declarations.push({
     fileName: lib_filename,
     filePath: lib_filename,
-    sourceCode: lib_es6_dts,
+    sourceCode: lib_dts,
   });
   declarations.push({
     fileName: DEPRECATED__ros_lib_filename,

@@ -407,6 +407,15 @@ export const constructDatatypes = (
         return getRosMsgField(name, tsNode.elementType, true, true, typeMap, innerDepth + 1);
       }
 
+      case ts.SyntaxKind.BigIntKeyword:
+        // bigint has no distinction for signed or unsigned so we've selected int64 for the datatype
+        return {
+          name,
+          type: "int64",
+          isArray,
+          isComplex,
+          arrayLength: undefined,
+        };
       case ts.SyntaxKind.NumberKeyword:
         return {
           name,

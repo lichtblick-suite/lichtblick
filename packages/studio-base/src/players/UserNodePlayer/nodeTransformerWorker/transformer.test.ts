@@ -260,18 +260,6 @@ describe("pipeline", () => {
       });
     });
 
-    it.each([{ sourceCode: 'Promise.resolve("plz do not use");', errorCode: 2585 }])(
-      "catches inappropriate api usage",
-      ({ sourceCode, errorCode }) => {
-        const { diagnostics } = compile({ ...baseNodeData, sourceCode });
-        expect(diagnostics.length).toEqual(1);
-        const { source, message, severity, code } = diagnostics[0]!;
-        expect(code).toEqual(errorCode);
-        expect(source).toEqual("Typescript");
-        expect(typeof message).toEqual("string");
-        expect(severity).toEqual(DiagnosticSeverity.Error);
-      },
-    );
     it.each([
       { sourceCode: "const x: string = 42;", errorCode: 2322 },
       { sourceCode: "export const x: number = 'hello Studio';", errorCode: 2322 },
