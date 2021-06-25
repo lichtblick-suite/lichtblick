@@ -2605,7 +2605,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/ros1@workspace:packages/ros1"
   dependencies:
-    "@foxglove/rosmsg": "workspace:packages/rosmsg"
+    "@foxglove/rosmsg": 0.1.1
     "@foxglove/rosmsg-serialization": "workspace:packages/rosmsg-serialization"
     "@foxglove/xmlrpc": "workspace:*"
     esbuild-runner: 2.2.0
@@ -2621,7 +2621,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/rosmsg-msgs-common@workspace:packages/rosmsg-msgs-common"
   dependencies:
-    "@foxglove/rosmsg": "workspace:*"
+    "@foxglove/rosmsg": 0.1.1
     "@types/prettier": 2.3.0
     esbuild-runner: 2.2.0
     prettier: 2.3.1
@@ -2633,7 +2633,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/rosmsg-msgs-foxglove@workspace:packages/rosmsg-msgs-foxglove"
   dependencies:
-    "@foxglove/rosmsg": "workspace:*"
+    "@foxglove/rosmsg": 0.1.1
     "@types/prettier": 2.3.0
     esbuild-runner: 2.2.0
     prettier: 2.3.1
@@ -2645,6 +2645,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/rosmsg-serialization@workspace:packages/rosmsg-serialization"
   dependencies:
+    "@foxglove/rosmsg": 0.1.1
     "@types/prettier": 2.3.0
     jest: 27.0.5
     prettier: 2.3.1
@@ -2652,14 +2653,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/rosmsg@workspace:*, @foxglove/rosmsg@workspace:packages/rosmsg":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/rosmsg@workspace:packages/rosmsg"
+"@foxglove/rosmsg@npm:0.1.1":
+  version: 0.1.1
+  resolution: "@foxglove/rosmsg@npm:0.1.1"
   dependencies:
-    jest: 27.0.5
-    typescript: 4.3.4
-  languageName: unknown
-  linkType: soft
+    moo: ^0.5.1
+    nearley: ^2.20.1
+  checksum: 54309a60a8c590c7c35aa2dcf039831f5a0ba041bbc40288a92d6c769fbfafe1fae588332530ad966c7430f521717323bd7f6fc3b71c2b50cf6e4695653f0db4
+  languageName: node
+  linkType: hard
 
 "@foxglove/studio-base@workspace:*, @foxglove/studio-base@workspace:packages/studio-base":
   version: 0.0.0-use.local
@@ -18315,7 +18317,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moo@npm:^0.5.0":
+"moo@npm:^0.5.0, moo@npm:^0.5.1":
   version: 0.5.1
   resolution: "moo@npm:0.5.1"
   checksum: 2d8c013f1f9aad8e5c7a9d4a03dbb4eecd91b9fe5e9446fbc7561fd38d4d161c742434acff385722542fe7b360fce9c586da62442379e62e4158ad49c7e1a6b7
@@ -18487,7 +18489,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nearley@npm:2.20.1, nearley@npm:^2.7.10":
+"nearley@npm:2.20.1, nearley@npm:^2.20.1, nearley@npm:^2.7.10":
   version: 2.20.1
   resolution: "nearley@npm:2.20.1"
   dependencies:

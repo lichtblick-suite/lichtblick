@@ -97,65 +97,6 @@ describe("MessageWriter", () => {
       expect(writer.writeMessage({ name: "test" })).toEqual(buff);
     });
 
-    it("writes JSON", () => {
-      const writer = new MessageWriter(
-        parseMessageDefinition("#pragma rosbag_parse_json\nstring dummy"),
-      );
-      const buff = getStringBytes('{"foo":123,"bar":{"nestedFoo":456}}');
-      expect(
-        writer.writeMessage({
-          dummy: { foo: 123, bar: { nestedFoo: 456 } },
-        }),
-      ).toEqual(buff);
-
-      const writerWithNestedComplexType = new MessageWriter(
-        parseMessageDefinition(`#pragma rosbag_parse_json
-      string dummy
-      Account account
-      ============
-      MSG: custom_type/Account
-      string name
-      uint16 id
-      `),
-      );
-      expect(
-        writerWithNestedComplexType.writeMessage({
-          dummy: { foo: 123, bar: { nestedFoo: 456 } },
-          account: { name: '{"first":"First","last":"Last"}}', id: 100 },
-        }),
-      ).toEqual(
-        concat([
-          buff,
-          getStringBytes('{"first":"First","last":"Last"}}'),
-          new Uint8Array([100, 0x00]),
-        ]),
-      );
-
-      const writerWithTrailingPragmaComment = new MessageWriter(
-        parseMessageDefinition(`#pragma rosbag_parse_json
-      string dummy
-      Account account
-      #pragma rosbag_parse_json
-      ============
-      MSG: custom_type/Account
-      string name
-      uint16 id
-      `),
-      );
-      expect(
-        writerWithTrailingPragmaComment.writeMessage({
-          dummy: { foo: 123, bar: { nestedFoo: 456 } },
-          account: { name: '{"first":"First","last":"Last"}}', id: 100 },
-        }),
-      ).toEqual(
-        concat([
-          buff,
-          getStringBytes('{"first":"First","last":"Last"}}'),
-          new Uint8Array([100, 0x00]),
-        ]),
-      );
-    });
-
     it("writes time", () => {
       const writer = new MessageWriter(parseMessageDefinition("time right_now"));
       const buff = new Uint8Array(8);

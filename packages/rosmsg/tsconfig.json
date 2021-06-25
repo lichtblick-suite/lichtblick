@@ -1,8 +1,0 @@
-{
-  "extends": "@foxglove/tsconfig/tsconfig.base.json",
-  "include": ["./src/**/*"],
-  "compilerOptions": {
-    "rootDir": "./src",
-    "outDir": "./dist"
-  }
-}

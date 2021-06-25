@@ -28,7 +28,7 @@
     "typescript": "4.3.4"
   },
   "dependencies": {
-    "@foxglove/rosmsg": "workspace:packages/rosmsg",
+    "@foxglove/rosmsg": "0.1.1",
     "@foxglove/rosmsg-serialization": "workspace:packages/rosmsg-serialization",
     "@foxglove/xmlrpc": "workspace:*",
     "eventemitter3": "4.0.7",
