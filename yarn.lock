@@ -2757,7 +2757,7 @@ __metadata:
     promise-queue: 2.2.5
     quickhull3d: 2.0.4
     rc-tabs: 11.9.1
-    rc-tree: 4.1.5
+    rc-tree: 4.2.1
     react: 17.0.2
     react-autocomplete: "janpaul123/react-autocomplete#bc8737070b5744069719c8fcd4e0a197192b0d48"
     react-document-events: 1.5.1
@@ -20877,9 +20877,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rc-tree@npm:4.1.5":
-  version: 4.1.5
-  resolution: "rc-tree@npm:4.1.5"
+"rc-tree@npm:4.2.1":
+  version: 4.2.1
+  resolution: "rc-tree@npm:4.2.1"
   dependencies:
     "@babel/runtime": ^7.10.1
     classnames: 2.x
@@ -20889,7 +20889,7 @@ __metadata:
   peerDependencies:
     react: "*"
     react-dom: "*"
-  checksum: b5a4a78ebfc9bc6954fbdda86a89112c052e3cb619c777ba69a34448775d75e3886392d48917fd99de94d560a07ef6fea6d84bbdca29ea2c644029791a219ba2
+  checksum: 395183e16a09d9032bf81a5184350a04ed2b82125a4f4e637b2c20595749fb709277994880321c077e89e7b3c0f8aa8b6551958b86ec9016b7df361632d1a925
   languageName: node
   linkType: hard
 
