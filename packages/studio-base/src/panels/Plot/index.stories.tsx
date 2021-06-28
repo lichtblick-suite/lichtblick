@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { storiesOf } from "@storybook/react";
 import { useCallback, useRef } from "react";
 
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
@@ -319,603 +318,664 @@ const exampleConfig: PlotConfig = {
   xAxisVal: "timestamp",
 };
 
-storiesOf("panels/Plot/index", module)
-  .addParameters({
-    chromatic: {
-      delay: 50,
-    },
-  })
-  .add("line graph", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot overrideConfig={exampleConfig} />
-      </PanelSetup>
-    );
-  })
-  .add("line graph with legends hidden", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot overrideConfig={{ ...exampleConfig, showLegend: false }} />
-      </PanelSetup>
-    );
-  })
-  .add("in a line graph with multiple plots, x-axes are synced", () => {
-    return (
-      <PanelSetup fixture={fixture} style={{ flexDirection: "column" }}>
-        <Plot
-          overrideConfig={{
-            ...exampleConfig,
-            paths: [
-              {
-                value: "/some_topic/location.pose.acceleration",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-          }}
-        />
-        <Plot
-          overrideConfig={{
-            ...exampleConfig,
-            paths: [
-              {
-                value: "/some_topic/location_subset.pose.velocity",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("line graph after zoom", () => {
-    const pauseState = useRef<"zoom" | "ready">("zoom");
+export default {
+  title: "panels/Plot/index",
+  component: Plot,
+  parameters: {
+    chromatic: { delay: 50 },
+  },
+};
 
-    const doZoom = useCallback(() => {
-      const canvasEl = document.querySelector("canvas");
-      // Zoom is a continuous event, so we need to simulate wheel multiple times
-      if (canvasEl) {
-        for (let i = 0; i < 5; i++) {
-          triggerWheel(canvasEl, 1);
-        }
-      }
+LineGraph.storyName = "line graph";
+export function LineGraph(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot overrideConfig={exampleConfig} />
+    </PanelSetup>
+  );
+}
 
-      // indicate our next render completion should mark the scene ready
-      pauseState.current = "ready";
-    }, []);
+LineGraphWithLegendsHidden.storyName = "line graph with legends hidden";
+export function LineGraphWithLegendsHidden(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot overrideConfig={{ ...exampleConfig, showLegend: false }} />
+    </PanelSetup>
+  );
+}
 
-    const pauseFrame = useCallback(() => {
-      return () => {
-        switch (pauseState.current) {
-          case "zoom":
-            doZoom();
-            break;
-          default:
-            break;
-        }
-      };
-    }, [doZoom]);
-
-    return (
-      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
-        <Plot overrideConfig={exampleConfig} />
-      </PanelSetup>
-    );
-  })
-  .add("timestampMethod: headerStamp", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot
-          overrideConfig={{
-            ...exampleConfig,
-            paths: [
-              {
-                value: "/some_topic/location.pose.velocity",
-                enabled: true,
-                timestampMethod: "headerStamp",
-              },
-              { value: "/boolean_topic.data", enabled: true, timestampMethod: "headerStamp" },
-            ],
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("long path", () => {
-    return (
-      <PanelSetup fixture={fixture} style={{ maxWidth: 250 }}>
-        <Plot
-          overrideConfig={{
-            ...exampleConfig,
-            paths: [
-              {
-                value: "/some_topic/location.pose.velocity",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("disabled path", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot
-          overrideConfig={{
-            ...exampleConfig,
-            paths: [
-              {
-                value: "/some_topic/location.pose.velocity",
-                enabled: false,
-                timestampMethod: "receiveTime",
-              },
-              {
-                value: "/some_topic/location.pose.acceleration",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("reference line", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot
-          overrideConfig={{
-            xAxisVal: "timestamp",
-            paths: [
-              { value: "0", enabled: true, timestampMethod: "receiveTime" }, // Test typing a period for decimal values. value: "1.", enabled: true, timestampMethod: "receiveTime",
-              { value: "1.", enabled: true, timestampMethod: "receiveTime" },
-              { value: "1.5", enabled: true, timestampMethod: "receiveTime" },
-              { value: "1", enabled: false, timestampMethod: "receiveTime" },
-            ],
-            minYValue: "-1",
-            maxYValue: "2",
-            showLegend: true,
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("with min and max Y values", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot
-          overrideConfig={{
-            xAxisVal: "timestamp",
-            paths: [
-              {
-                value: "/some_topic/location.pose.velocity",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-            minYValue: "1",
-            maxYValue: "2.8",
-            showLegend: true,
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("with just min Y value less than minimum value", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot
-          overrideConfig={{
-            xAxisVal: "timestamp",
-            paths: [
-              {
-                value: "/some_topic/location.pose.velocity",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-            minYValue: "1",
-            maxYValue: "",
-            showLegend: true,
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("with just min Y value more than minimum value", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot
-          overrideConfig={{
-            xAxisVal: "timestamp",
-            paths: [
-              {
-                value: "/some_topic/location.pose.velocity",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-            minYValue: "1.4",
-            maxYValue: "",
-            showLegend: true,
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("with just min Y value more than maximum value", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot
-          overrideConfig={{
-            xAxisVal: "timestamp",
-            paths: [
-              {
-                value: "/some_topic/location.pose.velocity",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-            minYValue: "5",
-            maxYValue: "",
-            showLegend: true,
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("with just max Y value less than maximum value", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot
-          overrideConfig={{
-            xAxisVal: "timestamp",
-            paths: [
-              {
-                value: "/some_topic/location.pose.velocity",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-            minYValue: "",
-            maxYValue: "1.8",
-            showLegend: true,
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("with just max Y value more than maximum value", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot
-          overrideConfig={{
-            xAxisVal: "timestamp",
-            paths: [
-              {
-                value: "/some_topic/location.pose.velocity",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-            minYValue: "",
-            maxYValue: "2.8",
-            showLegend: true,
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("with just max Y value less than minimum value", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot
-          overrideConfig={{
-            xAxisVal: "timestamp",
-            paths: [
-              {
-                value: "/some_topic/location.pose.velocity",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-            minYValue: "",
-            maxYValue: "1",
-            showLegend: true,
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("scatter plot plus line graph plus reference line", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot
-          overrideConfig={{
-            ...exampleConfig,
-            paths: [
-              {
-                value: "/some_topic/state.items[:].speed",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-              {
-                value: "/some_topic/location.pose.velocity",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-              { value: "3", enabled: true, timestampMethod: "receiveTime" },
-            ],
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("open x-axis dropdown menu", () => {
-    const pauseFrame = useCallback(() => {
-      return () => {
-        const xAxisDropdown = document.querySelectorAll("[data-test=plot-legend-x-axis-menu]")[0];
-        (xAxisDropdown as any).click();
-      };
-    }, []);
-
-    return (
-      <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
-        <Plot overrideConfig={exampleConfig} />
-      </PanelSetup>
-    );
-  })
-  .add("index-based x-axis for array", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot
-          overrideConfig={{
-            ...exampleConfig,
-            xAxisVal: "index",
-            paths: [
-              {
-                value: "/some_topic/state.items[:].speed",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              }, // Should show up only in the legend: For now index plots always use playback data, and ignore preloaded data.
-              { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-            ],
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("custom x-axis topic", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot
-          overrideConfig={{
-            ...exampleConfig,
-            xAxisVal: "custom",
-            paths: [
-              {
-                value: "/some_topic/location.pose.acceleration",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-            xAxisPath: { value: "/some_topic/location.pose.velocity", enabled: true },
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("current custom x-axis topic", () => {
-    // As above, but just shows a single point instead of the whole line.
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot
-          overrideConfig={{
-            ...exampleConfig,
-            xAxisVal: "currentCustom",
-            paths: [
-              {
-                value: "/some_topic/location.pose.acceleration",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-            xAxisPath: { value: "/some_topic/location.pose.velocity", enabled: true },
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("custom x-axis topic with mismatched data lengths", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot
-          overrideConfig={{
-            ...exampleConfig,
-            xAxisVal: "custom",
-            paths: [
-              // Extra items in y-axis
-              {
-                value: "/some_topic/location.pose.acceleration",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              }, // Same number of items
-              {
-                value: "/some_topic/location_subset.pose.acceleration",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              }, // Fewer items in y-axis
-              {
-                value: "/some_topic/state.items[:].speed",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-            xAxisPath: { value: "/some_topic/location_subset.pose.velocity", enabled: true },
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("super close values", () => {
-    return (
-      <PanelSetup
-        fixture={{
-          datatypes: {
-            "std_msgs/Float32": { fields: [{ name: "data", type: "float32", isArray: false }] },
-          },
-          topics: [{ name: "/some_number", datatype: "std_msgs/Float32" }],
-          activeData: {
-            startTime: { sec: 0, nsec: 0 },
-            endTime: { sec: 10, nsec: 0 },
-            isPlaying: false,
-            speed: 0.2,
-          },
-          frame: {
-            "/some_number": [
-              {
-                topic: "/some_number",
-                receiveTime: { sec: 0, nsec: 0 },
-                message: { data: 1.8548483304974972 },
-              },
-              {
-                topic: "/some_number",
-                receiveTime: { sec: 1, nsec: 0 },
-                message: { data: 1.8548483304974974 },
-              },
-            ],
-          },
+InALineGraphWithMultiplePlotsXAxesAreSynced.storyName =
+  "in a line graph with multiple plots, x-axes are synced";
+export function InALineGraphWithMultiplePlotsXAxesAreSynced(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture} style={{ flexDirection: "column" }}>
+      <Plot
+        overrideConfig={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/location.pose.acceleration",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
         }}
-      >
-        <Plot
-          overrideConfig={{
-            ...exampleConfig,
-            paths: [{ value: "/some_number.data", enabled: true, timestampMethod: "receiveTime" }],
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("time values", () => {
-    return (
-      <PanelSetup fixture={fixture}>
-        <Plot
-          overrideConfig={{
-            ...exampleConfig,
-            xAxisVal: "custom",
-            paths: [
-              {
-                value: "/some_topic/location.pose.velocity",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-            xAxisPath: { value: "/some_topic/location.header.stamp", enabled: true },
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("preloaded data in binary blocks", () => {
-    return (
-      <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
-        <Plot
-          overrideConfig={{
-            ...exampleConfig,
-            paths: [
-              { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-              { value: "/preloaded_topic.data", enabled: true, timestampMethod: "headerStamp" },
-            ],
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("mixed streamed and preloaded data", () => {
-    return (
-      <PanelSetup fixture={withEndTime(fixture, { sec: 3, nsec: 0 })}>
-        <Plot
-          overrideConfig={{
-            ...exampleConfig,
-            paths: [
-              {
-                value: "/some_topic/state.items[0].speed",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-              { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-            ],
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("preloaded data and its derivative", () => {
-    return (
-      <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
-        <Plot
-          overrideConfig={{
-            ...exampleConfig,
-            paths: [
-              { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-              {
-                value: "/preloaded_topic.data.@derivative",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("preloaded data and its negative", () => {
-    return (
-      <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
-        <Plot
-          overrideConfig={{
-            ...exampleConfig,
-            paths: [
-              { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-              {
-                value: "/preloaded_topic.data.@negative",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("preloaded data and its absolute value", () => {
-    return (
-      <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
-        <Plot
-          overrideConfig={{
-            ...exampleConfig,
-            paths: [
-              { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
-              {
-                value: "/preloaded_topic.data.@abs",
-                enabled: true,
-                timestampMethod: "receiveTime",
-              },
-            ],
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("Settings", () => {
-    return (
-      <SchemaEditor
-        configSchema={Plot.configSchema!}
-        config={Plot.defaultConfig}
-        saveConfig={() => {}}
       />
-    );
-  });
+      <Plot
+        overrideConfig={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/location_subset.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+LineGraphAfterZoom.storyName = "line graph after zoom";
+export function LineGraphAfterZoom(): JSX.Element {
+  const pauseState = useRef<"zoom" | "ready">("zoom");
+
+  const doZoom = useCallback(() => {
+    const canvasEl = document.querySelector("canvas");
+    // Zoom is a continuous event, so we need to simulate wheel multiple times
+    if (canvasEl) {
+      for (let i = 0; i < 5; i++) {
+        triggerWheel(canvasEl, 1);
+      }
+    }
+
+    // indicate our next render completion should mark the scene ready
+    pauseState.current = "ready";
+  }, []);
+
+  const pauseFrame = useCallback(() => {
+    return () => {
+      switch (pauseState.current) {
+        case "zoom":
+          doZoom();
+          break;
+        default:
+          break;
+      }
+    };
+  }, [doZoom]);
+
+  return (
+    <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
+      <Plot overrideConfig={exampleConfig} />
+    </PanelSetup>
+  );
+}
+
+TimestampMethodHeaderStamp.storyName = "timestampMethod: headerStamp";
+export function TimestampMethodHeaderStamp(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot
+        overrideConfig={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "headerStamp",
+            },
+            { value: "/boolean_topic.data", enabled: true, timestampMethod: "headerStamp" },
+          ],
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+LongPath.storyName = "long path";
+export function LongPath(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture} style={{ maxWidth: 250 }}>
+      <Plot
+        overrideConfig={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+DisabledPath.storyName = "disabled path";
+export function DisabledPath(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot
+        overrideConfig={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: false,
+              timestampMethod: "receiveTime",
+            },
+            {
+              value: "/some_topic/location.pose.acceleration",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+ReferenceLine.storyName = "reference line";
+export function ReferenceLine(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot
+        overrideConfig={{
+          xAxisVal: "timestamp",
+          paths: [
+            { value: "0", enabled: true, timestampMethod: "receiveTime" }, // Test typing a period for decimal values. value: "1.", enabled: true, timestampMethod: "receiveTime",
+            { value: "1.", enabled: true, timestampMethod: "receiveTime" },
+            { value: "1.5", enabled: true, timestampMethod: "receiveTime" },
+            { value: "1", enabled: false, timestampMethod: "receiveTime" },
+          ],
+          minYValue: "-1",
+          maxYValue: "2",
+          showLegend: true,
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+WithMinAndMaxYValues.storyName = "with min and max Y values";
+export function WithMinAndMaxYValues(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot
+        overrideConfig={{
+          xAxisVal: "timestamp",
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          minYValue: "1",
+          maxYValue: "2.8",
+          showLegend: true,
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+WithJustMinYValueLessThanMinimumValue.storyName = "with just min Y value less than minimum value";
+export function WithJustMinYValueLessThanMinimumValue(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot
+        overrideConfig={{
+          xAxisVal: "timestamp",
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          minYValue: "1",
+          maxYValue: "",
+          showLegend: true,
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+WithJustMinYValueMoreThanMinimumValue.storyName = "with just min Y value more than minimum value";
+export function WithJustMinYValueMoreThanMinimumValue(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot
+        overrideConfig={{
+          xAxisVal: "timestamp",
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          minYValue: "1.4",
+          maxYValue: "",
+          showLegend: true,
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+WithJustMinYValueMoreThanMaximumValue.storyName = "with just min Y value more than maximum value";
+export function WithJustMinYValueMoreThanMaximumValue(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot
+        overrideConfig={{
+          xAxisVal: "timestamp",
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          minYValue: "5",
+          maxYValue: "",
+          showLegend: true,
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+WithJustMaxYValueLessThanMaximumValue.storyName = "with just max Y value less than maximum value";
+export function WithJustMaxYValueLessThanMaximumValue(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot
+        overrideConfig={{
+          xAxisVal: "timestamp",
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          minYValue: "",
+          maxYValue: "1.8",
+          showLegend: true,
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+WithJustMaxYValueMoreThanMaximumValue.storyName = "with just max Y value more than maximum value";
+export function WithJustMaxYValueMoreThanMaximumValue(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot
+        overrideConfig={{
+          xAxisVal: "timestamp",
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          minYValue: "",
+          maxYValue: "2.8",
+          showLegend: true,
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+WithJustMaxYValueLessThanMinimumValue.storyName = "with just max Y value less than minimum value";
+export function WithJustMaxYValueLessThanMinimumValue(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot
+        overrideConfig={{
+          xAxisVal: "timestamp",
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          minYValue: "",
+          maxYValue: "1",
+          showLegend: true,
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+ScatterPlotPlusLineGraphPlusReferenceLine.storyName =
+  "scatter plot plus line graph plus reference line";
+export function ScatterPlotPlusLineGraphPlusReferenceLine(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot
+        overrideConfig={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/state.items[:].speed",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+            { value: "3", enabled: true, timestampMethod: "receiveTime" },
+          ],
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+OpenXAxisDropdownMenu.storyName = "open x-axis dropdown menu";
+export function OpenXAxisDropdownMenu(): JSX.Element {
+  const pauseFrame = useCallback(() => {
+    return () => {
+      const xAxisDropdown = document.querySelectorAll("[data-test=plot-legend-x-axis-menu]")[0];
+      (xAxisDropdown as any).click();
+    };
+  }, []);
+
+  return (
+    <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
+      <Plot overrideConfig={exampleConfig} />
+    </PanelSetup>
+  );
+}
+
+IndexBasedXAxisForArray.storyName = "index-based x-axis for array";
+export function IndexBasedXAxisForArray(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot
+        overrideConfig={{
+          ...exampleConfig,
+          xAxisVal: "index",
+          paths: [
+            {
+              value: "/some_topic/state.items[:].speed",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            }, // Should show up only in the legend: For now index plots always use playback data, and ignore preloaded data.
+            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+          ],
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+CustomXAxisTopic.storyName = "custom x-axis topic";
+export function CustomXAxisTopic(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot
+        overrideConfig={{
+          ...exampleConfig,
+          xAxisVal: "custom",
+          paths: [
+            {
+              value: "/some_topic/location.pose.acceleration",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          xAxisPath: { value: "/some_topic/location.pose.velocity", enabled: true },
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+CurrentCustomXAxisTopic.storyName = "current custom x-axis topic";
+export function CurrentCustomXAxisTopic(): JSX.Element {
+  // As above, but just shows a single point instead of the whole line.
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot
+        overrideConfig={{
+          ...exampleConfig,
+          xAxisVal: "currentCustom",
+          paths: [
+            {
+              value: "/some_topic/location.pose.acceleration",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          xAxisPath: { value: "/some_topic/location.pose.velocity", enabled: true },
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+CustomXAxisTopicWithMismatchedDataLengths.storyName =
+  "custom x-axis topic with mismatched data lengths";
+export function CustomXAxisTopicWithMismatchedDataLengths(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot
+        overrideConfig={{
+          ...exampleConfig,
+          xAxisVal: "custom",
+          paths: [
+            // Extra items in y-axis
+            {
+              value: "/some_topic/location.pose.acceleration",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            }, // Same number of items
+            {
+              value: "/some_topic/location_subset.pose.acceleration",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            }, // Fewer items in y-axis
+            {
+              value: "/some_topic/state.items[:].speed",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          xAxisPath: { value: "/some_topic/location_subset.pose.velocity", enabled: true },
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+SuperCloseValues.storyName = "super close values";
+export function SuperCloseValues(): JSX.Element {
+  return (
+    <PanelSetup
+      fixture={{
+        datatypes: {
+          "std_msgs/Float32": { fields: [{ name: "data", type: "float32", isArray: false }] },
+        },
+        topics: [{ name: "/some_number", datatype: "std_msgs/Float32" }],
+        activeData: {
+          startTime: { sec: 0, nsec: 0 },
+          endTime: { sec: 10, nsec: 0 },
+          isPlaying: false,
+          speed: 0.2,
+        },
+        frame: {
+          "/some_number": [
+            {
+              topic: "/some_number",
+              receiveTime: { sec: 0, nsec: 0 },
+              message: { data: 1.8548483304974972 },
+            },
+            {
+              topic: "/some_number",
+              receiveTime: { sec: 1, nsec: 0 },
+              message: { data: 1.8548483304974974 },
+            },
+          ],
+        },
+      }}
+    >
+      <Plot
+        overrideConfig={{
+          ...exampleConfig,
+          paths: [{ value: "/some_number.data", enabled: true, timestampMethod: "receiveTime" }],
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+TimeValues.storyName = "time values";
+export function TimeValues(): JSX.Element {
+  return (
+    <PanelSetup fixture={fixture}>
+      <Plot
+        overrideConfig={{
+          ...exampleConfig,
+          xAxisVal: "custom",
+          paths: [
+            {
+              value: "/some_topic/location.pose.velocity",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+          xAxisPath: { value: "/some_topic/location.header.stamp", enabled: true },
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+PreloadedDataInBinaryBlocks.storyName = "preloaded data in binary blocks";
+export function PreloadedDataInBinaryBlocks(): JSX.Element {
+  return (
+    <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
+      <Plot
+        overrideConfig={{
+          ...exampleConfig,
+          paths: [
+            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "headerStamp" },
+          ],
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+MixedStreamedAndPreloadedData.storyName = "mixed streamed and preloaded data";
+export function MixedStreamedAndPreloadedData(): JSX.Element {
+  return (
+    <PanelSetup fixture={withEndTime(fixture, { sec: 3, nsec: 0 })}>
+      <Plot
+        overrideConfig={{
+          ...exampleConfig,
+          paths: [
+            {
+              value: "/some_topic/state.items[0].speed",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+          ],
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+PreloadedDataAndItsDerivative.storyName = "preloaded data and its derivative";
+export function PreloadedDataAndItsDerivative(): JSX.Element {
+  return (
+    <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
+      <Plot
+        overrideConfig={{
+          ...exampleConfig,
+          paths: [
+            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+            {
+              value: "/preloaded_topic.data.@derivative",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+PreloadedDataAndItsNegative.storyName = "preloaded data and its negative";
+export function PreloadedDataAndItsNegative(): JSX.Element {
+  return (
+    <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
+      <Plot
+        overrideConfig={{
+          ...exampleConfig,
+          paths: [
+            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+            {
+              value: "/preloaded_topic.data.@negative",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+PreloadedDataAndItsAbsoluteValue.storyName = "preloaded data and its absolute value";
+export function PreloadedDataAndItsAbsoluteValue(): JSX.Element {
+  return (
+    <PanelSetup fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
+      <Plot
+        overrideConfig={{
+          ...exampleConfig,
+          paths: [
+            { value: "/preloaded_topic.data", enabled: true, timestampMethod: "receiveTime" },
+            {
+              value: "/preloaded_topic.data.@abs",
+              enabled: true,
+              timestampMethod: "receiveTime",
+            },
+          ],
+        }}
+      />
+    </PanelSetup>
+  );
+}
+
+export function Settings(): JSX.Element {
+  return (
+    <SchemaEditor
+      configSchema={Plot.configSchema!}
+      config={Plot.defaultConfig}
+      saveConfig={() => {}}
+    />
+  );
+}
