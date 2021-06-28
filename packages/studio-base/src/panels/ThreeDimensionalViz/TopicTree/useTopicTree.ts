@@ -13,6 +13,7 @@
 
 import { difference, keyBy, uniq, mapValues, xor, isEqual, flatten, omit } from "lodash";
 import { useMemo, useCallback, useRef, createContext } from "react";
+import { Color } from "regl-worldview";
 import { useDebounce } from "use-debounce";
 
 import { useShallowMemo } from "@foxglove/hooks";
@@ -34,6 +35,7 @@ import {
   UseTreeInput,
   UseTreeOutput,
   DerivedCustomSettingsByKey,
+  OnNamespaceOverrideColorChange,
 } from "./types";
 
 const DEFAULT_TOPICS_COUNT_BY_KEY = {};
@@ -161,8 +163,8 @@ export function* flattenNode<T extends TreeNode | TopicTreeConfig>(
   node: T,
 ): Generator<T, void, void> {
   yield node;
-  if ((node as any).children) {
-    for (const subNode of (node as any).children) {
+  if (node.children) {
+    for (const subNode of node.children as T[]) {
       yield* flattenNode(subNode);
     }
   }
@@ -191,7 +193,7 @@ export default function useTree({
     () =>
       Array.from(flattenNode(topicTreeConfig))
         .map((node) =>
-          isNonEmptyOrUndefined(node.topicName) && !(node as any).namespace
+          isNonEmptyOrUndefined(node.topicName) && !(node as { namespace?: unknown }).namespace
             ? node.topicName
             : undefined,
         )
@@ -397,7 +399,7 @@ export default function useTree({
   const memoizedSelectedTopicNames = useShallowMemo(selectedTopicNames);
 
   const derivedCustomSettingsByKey = useMemo((): DerivedCustomSettingsByKey => {
-    const result: any = {};
+    const result: DerivedCustomSettingsByKey = {};
     for (const [topicKeyOrNamespaceKey, settings] of Object.entries(settingsByKey)) {
       const isFeatureTopicOrNamespace = topicKeyOrNamespaceKey.includes(SECOND_SOURCE_PREFIX);
       const columnIndex = isFeatureTopicOrNamespace ? 1 : 0;
@@ -428,7 +430,7 @@ export default function useTree({
           ? { isDefaultSettings } // Both base and feature have to be default settings for `isDefaultSettings` to be true.
           : {
               ...result[key],
-              isDefaultSettings: isDefaultSettings && result[key].isDefaultSettings,
+              isDefaultSettings: isDefaultSettings && result[key]?.isDefaultSettings === true,
             };
       }
       if (!isNonEmptyOrUndefined(key)) {
@@ -437,18 +439,20 @@ export default function useTree({
       }
 
       if (settings.overrideColor) {
-        if (!result[key].overrideColorByColumn) {
-          result[key].overrideColorByColumn = [undefined, undefined];
+        if (!result[key]!.overrideColorByColumn) {
+          result[key]!.overrideColorByColumn = [undefined, undefined];
         }
-        result[key].overrideColorByColumn[columnIndex] = settings.overrideColor;
+        result[key]!.overrideColorByColumn![columnIndex] = settings.overrideColor as
+          | string
+          | undefined;
       }
     }
     return result;
   }, [defaultTopicSettings, settingsByKey]);
 
-  const onNamespaceOverrideColorChange = useCallback(
-    (newColor: string | undefined, prefixedNamespaceKey: string) => {
-      const newSettingsByKey = isNonEmptyOrUndefined(newColor)
+  const onNamespaceOverrideColorChange: OnNamespaceOverrideColorChange = useCallback(
+    (newColor: Color | undefined, prefixedNamespaceKey: string) => {
+      const newSettingsByKey = newColor
         ? { ...settingsByKey, [prefixedNamespaceKey]: { overrideColor: newColor } }
         : omit(settingsByKey, prefixedNamespaceKey);
       saveConfig({ settingsByKey: newSettingsByKey });
@@ -562,8 +566,8 @@ export default function useTree({
         const prefixedTopicName = isFeatureColumn
           ? `${SECOND_SOURCE_PREFIX}${topicName}`
           : topicName;
-        if (availableNamespacesByTopic[prefixedTopicName as any]) {
-          newModififiedNamespaceTopics.push(prefixedTopicName as any);
+        if (availableNamespacesByTopic[prefixedTopicName]) {
+          newModififiedNamespaceTopics.push(prefixedTopicName);
         }
       });
       newModififiedNamespaceTopics = isEqual(newModififiedNamespaceTopics, modifiedNamespaceTopics)
@@ -669,7 +673,7 @@ export default function useTree({
   );
 
   const sceneErrorsByKey = useMemo(() => {
-    const result: any = {};
+    const result: Record<string, string[]> = {};
 
     function collectGroupErrors(groupKey: string | undefined, errors: string[]) {
       if (!isNonEmptyOrUndefined(groupKey)) {
@@ -680,7 +684,7 @@ export default function useTree({
         if (!result[nodeKey]) {
           result[nodeKey] = [];
         }
-        result[nodeKey].push(...errors);
+        result[nodeKey]!.push(...errors);
         nodeKey = nodesByKey[nodeKey]?.parentKey;
       }
     }
@@ -690,10 +694,8 @@ export default function useTree({
       if (!result[baseKey]) {
         result[baseKey] = [];
       }
-      const errorsWithTopicName = (errors as any as string[]).map(
-        (err) => `${topicKey.substr("t:".length)}: ${err}`,
-      );
-      result[baseKey].push(...(hasFeatureColumn ? errorsWithTopicName : errors));
+      const errorsWithTopicName = errors.map((err) => `${topicKey.substr("t:".length)}: ${err}`);
+      result[baseKey]!.push(...(hasFeatureColumn ? errorsWithTopicName : errors));
       const topicNode = nodesByKey[baseKey];
       collectGroupErrors(topicNode?.parentKey, errorsWithTopicName);
     }
@@ -816,7 +818,7 @@ export default function useTree({
     getIsTreeNodeVisibleInTree,
     hasFeatureColumn,
     nodesByKey, // For testing.
-    onNamespaceOverrideColorChange: onNamespaceOverrideColorChange as any,
+    onNamespaceOverrideColorChange,
     rootTreeNode,
     sceneErrorsByKey,
     selectedNamespacesByTopic,

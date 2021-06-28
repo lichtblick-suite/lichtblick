@@ -62,6 +62,7 @@ export type TreeTopicNode = {
   description?: string;
   providerAvailable: boolean;
   availableByColumn: boolean[];
+  children?: undefined;
 };
 
 export type TreeNode = TreeGroupNode | TreeTopicNode;
@@ -90,7 +91,7 @@ export type UseTreeInput = {
   availableNamespacesByTopic: NamespacesByTopic;
   checkedKeys: string[];
   defaultTopicSettings: {
-    [topicName: string]: any;
+    [topicName: string]: Record<string, unknown>;
   };
   expandedKeys: string[];
   filterText: string;
@@ -100,7 +101,7 @@ export type UseTreeInput = {
   sceneErrorsByTopicKey: SceneErrorsByKey;
   topicDisplayMode: TopicDisplayMode;
   settingsByKey: {
-    [topicOrNamespaceKey: string]: any;
+    [topicOrNamespaceKey: string]: Record<string, unknown>;
   };
   topicTreeConfig: TopicTreeConfig; // Never changes!
   uncategorizedGroupName: string;
@@ -127,7 +128,7 @@ export type ToggleNamespaceChecked = (arg0: {
 export type GetIsNamespaceCheckedByDefault = (topicName: string, columnIndex: number) => boolean;
 export type DerivedCustomSettings = {
   overrideColorByColumn?: (string | undefined)[];
-  isDefaultSettings: boolean;
+  isDefaultSettings?: boolean;
 };
 export type DerivedCustomSettingsByKey = {
   [key: string]: DerivedCustomSettings;

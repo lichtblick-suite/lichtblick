@@ -152,7 +152,8 @@ export default function TreeNodeRow({
   const topicName = node.type === "topic" ? node.topicName : "";
   const datatype = node.type === "topic" ? node.datatype : undefined;
 
-  const isDefaultSettings = !derivedCustomSettings || derivedCustomSettings.isDefaultSettings;
+  const isDefaultSettings =
+    !derivedCustomSettings || (derivedCustomSettings.isDefaultSettings ?? false);
   const showTopicSettings =
     topicName.length > 0 && isNonEmptyOrUndefined(datatype) && canEditDatatype(datatype);
   const showTopicSettingsChanged = showTopicSettings && !isDefaultSettings;

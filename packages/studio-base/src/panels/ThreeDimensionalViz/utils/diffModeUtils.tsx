@@ -32,13 +32,19 @@ export const SOURCE_2_COLOR_RGBA = vec4ToRGBA(SOURCE_2_COLOR);
 
 // Group markers into different collections in order to render them with different colors
 // based on their source.
-export function getDiffBySource(markers: InteractiveMarkersByType): InteractiveMarkersByType[] {
-  const ret: any = [{}, {}, {}];
+export function getDiffBySource(
+  markers: InteractiveMarkersByType,
+): [InteractiveMarkersByType, InteractiveMarkersByType, InteractiveMarkersByType] {
+  const ret: [
+    Partial<InteractiveMarkersByType>,
+    Partial<InteractiveMarkersByType>,
+    Partial<InteractiveMarkersByType>,
+  ] = [{}, {}, {}];
 
   // Look for each marker type, spliting them into two sets if possible (one for each source)
   // Then, modify the markers so they're rendered based on their source.
-  for (const key of Object.keys(markers)) {
-    const value = (markers as any)[key];
+  for (const key of Object.keys(markers) as (keyof InteractiveMarkersByType)[]) {
+    const value = markers[key];
     const elems = Array.isArray(value) ? value : [value];
     const [source1, source2] = partition(elems, (m) => {
       const { interactionData } = m;
@@ -99,7 +105,7 @@ export function getDiffBySource(markers: InteractiveMarkersByType): InteractiveM
       },
     }));
   }
-  return ret;
+  return ret as [InteractiveMarkersByType, InteractiveMarkersByType, InteractiveMarkersByType];
 }
 
 export const withDiffMode = (

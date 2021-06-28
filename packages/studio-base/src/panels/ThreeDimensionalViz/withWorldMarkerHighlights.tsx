@@ -14,7 +14,10 @@
 import { partition } from "lodash";
 import { ComponentType } from "react";
 
-import { WorldMarkerProps } from "@foxglove/studio-base/panels/ThreeDimensionalViz/WorldMarkers";
+import {
+  InteractiveMarkersByType,
+  WorldMarkerProps,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/WorldMarkers";
 import Cover from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/Cover";
 import {
   LAYER_INDEX_HIGHLIGHT_OVERLAY,
@@ -29,13 +32,13 @@ const withHighlights = (
 
     // We only want to render the dim <Cover> overlay if there's at least one highlighted marker in the scene.
     let hasHighlightedMarkers = false;
-    const highlightedMarkersByType: any = {};
-    const nonHighlightedMarkersByType: any = {};
+    const highlightedMarkersByType: Partial<InteractiveMarkersByType> = {};
+    const nonHighlightedMarkersByType: Partial<InteractiveMarkersByType> = {};
 
     // Partition the markersByType into two sets: highlighted and non-highlighted
-    Object.keys(markersByType).forEach((type) => {
+    (Object.keys(markersByType) as (keyof InteractiveMarkersByType)[]).forEach((type) => {
       const [highlightedMarkers, nonHighlightedMarkers] = partition(
-        (markersByType as any)[type],
+        markersByType[type],
         ({ interactionData }) => interactionData?.highlighted,
       );
 
@@ -46,7 +49,14 @@ const withHighlights = (
 
     return (
       <>
-        <BaseWorldMarkers {...{ ...props, markersByType: nonHighlightedMarkersByType }} />
+        <BaseWorldMarkers
+          {...{
+            ...props,
+            markersByType: nonHighlightedMarkersByType as Required<
+              typeof nonHighlightedMarkersByType
+            >,
+          }}
+        />
         <Cover
           color={[0, 0, 0, hasHighlightedMarkers ? 0.6 : 0]}
           layerIndex={LAYER_INDEX_HIGHLIGHT_OVERLAY}
@@ -56,7 +66,7 @@ const withHighlights = (
           {...{
             ...props,
             layerIndex: LAYER_INDEX_HIGHLIGHT_BASE,
-            markersByType: highlightedMarkersByType,
+            markersByType: highlightedMarkersByType as Required<typeof highlightedMarkersByType>,
           }}
         />
       </>
