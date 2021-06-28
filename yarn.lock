@@ -2686,7 +2686,7 @@ __metadata:
     "@testing-library/react-hooks": 7.0.0
     "@types/argparse": ^2.0.8
     "@types/classnames": 2.3.1
-    "@types/css-font-loading-module": 0.0.4
+    "@types/css-font-loading-module": 0.0.5
     "@types/cytoscape": ^3.14.15
     "@types/enzyme": ^3.10.8
     "@types/enzyme-adapter-react-16": 1.0.6
@@ -5381,10 +5381,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/css-font-loading-module@npm:0.0.4":
-  version: 0.0.4
-  resolution: "@types/css-font-loading-module@npm:0.0.4"
-  checksum: d3b9469962cbd9e9fe230755513f79ba9767d2ea4d99b56bc89f9bb0b6c5ca3b4793ae21785dbe9cdc95be5389f5da264b815ba1d6b4cd04c137817b07756e85
+"@types/css-font-loading-module@npm:0.0.5":
+  version: 0.0.5
+  resolution: "@types/css-font-loading-module@npm:0.0.5"
+  checksum: ef71254d6f5de33169505981d9bd8b66c249297d0468a58e73dca74939fe41d4e619b7d8b2f2abad6624ad799656b07c1d3ea3d8cccdc2aff7459436f2868087
   languageName: node
   linkType: hard
 
