@@ -10,13 +10,15 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import { StoryContext } from "@storybook/react";
 import cloneDeep from "lodash/cloneDeep";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import TestUtils from "react-dom/test-utils";
-import { useMount } from "react-use";
+import { useAsync } from "react-use";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
+import signal from "@foxglove/studio-base/util/signal";
 
 import TimeBasedChart, { TimeBasedChartTooltipData } from "./index";
 import type { Props } from "./index";
@@ -97,7 +99,7 @@ export default {
   },
 };
 
-export const Simple = (): JSX.Element => {
+export function Simple(): JSX.Element {
   return (
     <div style={{ width: "100%", height: "100%", background: "black" }}>
       <MockMessagePipelineProvider>
@@ -105,10 +107,10 @@ export const Simple = (): JSX.Element => {
       </MockMessagePipelineProvider>
     </div>
   );
-};
+}
 
 // zoom and update without resetting zoom
-export const CanZoomAndUpdate = (): JSX.Element => {
+export function CanZoomAndUpdate(): JSX.Element {
   const [chartProps, setChartProps] = useState(cloneDeep(commonProps));
   const callCountRef = useRef(0);
 
@@ -152,7 +154,7 @@ export const CanZoomAndUpdate = (): JSX.Element => {
       </MockMessagePipelineProvider>
     </div>
   );
-};
+}
 
 CanZoomAndUpdate.parameters = {
   chromatic: {
@@ -160,24 +162,39 @@ CanZoomAndUpdate.parameters = {
   },
 };
 
-export const CleansUpTooltipOnUnmount = (): JSX.Element | ReactNull => {
+CleansUpTooltipOnUnmount.parameters = { screenshot: { signal: signal() } };
+export function CleansUpTooltipOnUnmount(
+  _args: unknown,
+  ctx: StoryContext,
+): JSX.Element | ReactNull {
   const [hasRenderedOnce, setHasRenderedOnce] = useState<boolean>(false);
-  useMount(async () => {
-    await new Promise((resolve) => setTimeout(resolve, 200));
-
+  const { error } = useAsync(async () => {
     const [canvas] = document.getElementsByTagName("canvas");
     const { top, left } = canvas!.getBoundingClientRect();
-    TestUtils.Simulate.mouseMove(canvas!, { clientX: 333 + left, clientY: 650 + top });
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    const tooltip = document.querySelector("[data-test~=TimeBasedChartTooltipContent]");
+    // wait for chart to render before triggering tooltip
+    let tooltip: Element | undefined;
+    for (let i = 0; !tooltip && i < 20; i++) {
+      TestUtils.Simulate.mouseMove(canvas!, { clientX: 333 + left, clientY: 650 + top });
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      tooltip = document.querySelector("[data-test~=TimeBasedChartTooltipContent]") ?? undefined;
+    }
     if (tooltip == undefined) {
       throw new Error("could not find tooltip");
     }
     setHasRenderedOnce(true);
-  });
+  }, []);
+  if (error) {
+    throw error;
+  }
+
+  useEffect(() => {
+    if (hasRenderedOnce) {
+      ctx.parameters.screenshot.signal.resolve();
+    }
+  }, [hasRenderedOnce, ctx.parameters.screenshot.signal]);
 
   if (hasRenderedOnce) {
-    return ReactNull;
+    return <></>;
   }
 
   return (
@@ -187,15 +204,9 @@ export const CleansUpTooltipOnUnmount = (): JSX.Element | ReactNull => {
       </MockMessagePipelineProvider>
     </div>
   );
-};
+}
 
-CleansUpTooltipOnUnmount.parameters = {
-  chromatic: {
-    delay: 3000,
-  },
-};
-
-export const CallPauseOnInitialMount = (): JSX.Element => {
+export function CallPauseOnInitialMount(): JSX.Element {
   const [unpauseFrameCount, setUnpauseFrameCount] = useState(0);
   const pauseFrame = useCallback(() => {
     return () => {
@@ -213,7 +224,7 @@ export const CallPauseOnInitialMount = (): JSX.Element => {
       </MockMessagePipelineProvider>
     </div>
   );
-};
+}
 
 // We should still call resumeFrame exactly once when removed in the middle of an update.
 // The way this test works:
@@ -224,7 +235,7 @@ export const CallPauseOnInitialMount = (): JSX.Element => {
 // (`resumeFrame`) fires.
 // - `resumeFrame` should then fire exactly once.
 // shows `SUCCESS` message with no chart visible
-export const ResumeFrameOnUnmount = (): JSX.Element => {
+export function ResumeFrameOnUnmount(): JSX.Element {
   const [showChart, setShowChart] = useState(true);
   const [statusMessage, setStatusMessage] = useState("FAILURE - START");
   const pauseFrame = useCallback(() => {
@@ -248,4 +259,4 @@ export const ResumeFrameOnUnmount = (): JSX.Element => {
       </MockMessagePipelineProvider>
     </div>
   );
-};
+}
