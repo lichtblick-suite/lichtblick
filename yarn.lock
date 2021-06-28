@@ -9816,9 +9816,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"copy-webpack-plugin@npm:9.0.0":
-  version: 9.0.0
-  resolution: "copy-webpack-plugin@npm:9.0.0"
+"copy-webpack-plugin@npm:9.0.1":
+  version: 9.0.1
+  resolution: "copy-webpack-plugin@npm:9.0.1"
   dependencies:
     fast-glob: ^3.2.5
     glob-parent: ^6.0.0
@@ -9826,10 +9826,10 @@ __metadata:
     normalize-path: ^3.0.0
     p-limit: ^3.1.0
     schema-utils: ^3.0.0
-    serialize-javascript: ^5.0.1
+    serialize-javascript: ^6.0.0
   peerDependencies:
     webpack: ^5.1.0
-  checksum: f3ca9d206b4fcf7860e63afdaf3c3b24ffc0983f2584df7f0e4c98d57b538dfcee4a75333156a22e9a0afcba2acce6796a15f957ce6595d3997df7992ffce574
+  checksum: f3e69883e173f9a298b63dcf35ba5aafc02e252c67c236029424af19fb2e36fc93de94054bd7a9ada8b4cbcc4e96e9a3a269f972e4a45f4fd1b32a3d199d2cae
   languageName: node
   linkType: hard
 
@@ -23050,6 +23050,15 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
+"serialize-javascript@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "serialize-javascript@npm:6.0.0"
+  dependencies:
+    randombytes: ^2.1.0
+  checksum: 56f90b562a1bdc92e55afb3e657c6397c01a902c588c0fe3d4c490efdcc97dcd2a3074ba12df9e94630f33a5ce5b76a74784a7041294628a6f4306e0ec84bf93
+  languageName: node
+  linkType: hard
+
 "serve-favicon@npm:^2.5.0":
   version: 2.5.0
   resolution: "serve-favicon@npm:2.5.0"
@@ -25986,7 +25995,7 @@ typescript@4.3.4:
     "@foxglove/studio-base": "workspace:*"
     "@foxglove/studio-firebase": "workspace:*"
     "@types/copy-webpack-plugin": 8.0.0
-    copy-webpack-plugin: 9.0.0
+    copy-webpack-plugin: 9.0.1
     webpack: 5.40.0
   languageName: unknown
   linkType: soft
