@@ -57,7 +57,12 @@ type Props = {
 function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknownPanel: boolean }) {
   const { mosaicActions } = useContext(MosaicContext);
   const { mosaicWindowActions } = useContext(MosaicWindowContext);
-  const { getCurrentLayout, closePanel, splitPanel, swapPanel } = useCurrentLayoutActions();
+  const {
+    getCurrentLayoutState: getCurrentLayout,
+    closePanel,
+    splitPanel,
+    swapPanel,
+  } = useCurrentLayoutActions();
   const { setSelectedPanelIds } = useSelectedPanels();
 
   const getPanelType = useCallback(
@@ -80,7 +85,7 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
         throw new Error("Trying to split unknown panel!");
       }
 
-      const config = getCurrentLayout().configById[id] ?? {};
+      const config = getCurrentLayout().selectedLayout?.data.configById[id] ?? {};
       splitPanel({
         id,
         tabId,

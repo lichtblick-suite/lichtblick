@@ -25,7 +25,9 @@ import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 const SPEEDS = ["0.01", "0.02", "0.05", "0.1", "0.2", "0.5", "0.8", "1", "2", "3", "5"];
 
 export default function PlaybackSpeedControls(): JSX.Element {
-  const configSpeed = useCurrentLayoutSelector((state) => state.playbackConfig.speed);
+  const configSpeed = useCurrentLayoutSelector(
+    (state) => state.selectedLayout?.data.playbackConfig.speed,
+  );
   const speed = useMessagePipeline(
     useCallback(({ playerState }) => playerState.activeData?.speed, []),
   );

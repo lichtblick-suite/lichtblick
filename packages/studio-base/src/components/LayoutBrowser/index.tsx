@@ -1,14 +1,14 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import { IconButton, Spinner } from "@fluentui/react";
+import { IconButton, Spinner, Stack } from "@fluentui/react";
+import { partition } from "lodash";
 import moment from "moment";
 import path from "path";
 import { useCallback, useEffect } from "react";
 import { useToasts } from "react-toast-notifications";
 import { useMountedState } from "react-use";
 import useAsyncFn from "react-use/lib/useAsyncFn";
-import { v4 as uuidv4 } from "uuid";
 
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
@@ -17,10 +17,10 @@ import {
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { useLayoutCache } from "@foxglove/studio-base/context/LayoutCacheContext";
+import { useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
 import welcomeLayout from "@foxglove/studio-base/layouts/welcomeLayout";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
-import { CachedLayout } from "@foxglove/studio-base/services/ILayoutCache";
+import { LayoutMetadata } from "@foxglove/studio-base/services/ILayoutStorage";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
 
 import LayoutSection from "./LayoutSection";
@@ -33,14 +33,24 @@ export default function LayoutBrowser({
 }>): JSX.Element {
   const isMounted = useMountedState();
   const { addToast } = useToasts();
-  const layoutCache = useLayoutCache();
+  const layoutStorage = useLayoutStorage();
 
-  const currentLayoutId = useCurrentLayoutSelector((state) => state.id);
-  const { loadLayout } = useCurrentLayoutActions();
+  const currentLayoutId = useCurrentLayoutSelector((state) => state.selectedLayout?.id);
+  const { setSelectedLayout } = useCurrentLayoutActions();
 
-  const [layouts, reloadLayouts] = useAsyncFn(() => layoutCache.list(), [layoutCache], {
-    loading: true,
-  });
+  const [layouts, reloadLayouts] = useAsyncFn(
+    async () => {
+      const [personal, shared] = partition(
+        await layoutStorage.getLayouts(),
+        layoutStorage.supportsSharing
+          ? (layout) => layout.permission === "creator_write"
+          : () => true,
+      );
+      return { personal, shared };
+    },
+    [layoutStorage],
+    { loading: true },
+  );
 
   // Start loading on first mount
   useEffect(() => {
@@ -48,92 +58,101 @@ export default function LayoutBrowser({
   }, [reloadLayouts]);
 
   const onSelectLayout = useCallback(
-    async (item: CachedLayout) => {
-      const layout = await layoutCache.get(item.id);
-      if (layout?.state) {
-        loadLayout(layout.state);
+    async (item: LayoutMetadata) => {
+      const layout = await layoutStorage.getLayout(item.id);
+      if (layout) {
+        setSelectedLayout(layout);
       }
     },
-    [layoutCache, loadLayout],
+    [layoutStorage, setSelectedLayout],
   );
 
   const onRenameLayout = useCallback(
-    async (item: CachedLayout, newName: string) => {
-      const newState: PanelsState | undefined = item.state
-        ? { ...item.state, name: newName }
-        : undefined;
-      await layoutCache.put({
-        ...item,
-        name: newName,
-        state: newState,
-      });
-      if (newState && currentLayoutId === item.id) {
-        loadLayout(newState);
+    async (item: LayoutMetadata, newName: string) => {
+      await layoutStorage.renameLayout({ id: item.id, path: [], name: newName });
+      if (currentLayoutId === item.id) {
+        await onSelectLayout(item);
       }
-      reloadLayouts();
+      await reloadLayouts();
     },
-    [currentLayoutId, layoutCache, loadLayout, reloadLayouts],
+    [currentLayoutId, layoutStorage, onSelectLayout, reloadLayouts],
   );
 
   const onDuplicateLayout = useCallback(
-    async (item: CachedLayout) => {
-      const newId = uuidv4();
-      const newName = `${item.name} copy`;
-      const newLayout = {
-        ...item,
-        id: newId,
-        name: newName,
-        state: item.state ? { ...item.state, id: newId, name: newName } : undefined,
-      };
-      await layoutCache.put(newLayout);
-      if (newLayout.state) {
-        loadLayout(newLayout.state);
+    async (item: LayoutMetadata) => {
+      const source = await layoutStorage.getLayout(item.id);
+      if (source) {
+        const newLayout = await layoutStorage.saveNewLayout({
+          path: [],
+          name: `${item.name} copy`,
+          data: source.data,
+        });
+        await onSelectLayout(newLayout);
       }
-      reloadLayouts();
+      await reloadLayouts();
     },
-    [layoutCache, loadLayout, reloadLayouts],
+    [layoutStorage, onSelectLayout, reloadLayouts],
   );
 
   const onDeleteLayout = useCallback(
-    async (item: CachedLayout) => {
-      await layoutCache.delete(item.id);
-      const firstLayout = (await layoutCache.list()).find(
-        (layout): layout is typeof layout & { state: PanelsState } => layout.state != undefined,
-      );
-      if (firstLayout) {
-        loadLayout(firstLayout.state);
-      } else {
-        loadLayout(welcomeLayout);
+    async (item: LayoutMetadata) => {
+      await layoutStorage.deleteLayout({ id: item.id });
+      try {
+        if (currentLayoutId !== item.id) {
+          return;
+        }
+        // If the layout was selected, select a different available layout
+        for (const { id } of await layoutStorage.getLayouts()) {
+          const layout = await layoutStorage.getLayout(id);
+          if (layout) {
+            setSelectedLayout(layout);
+            return;
+          }
+        }
+        // If no existing layout could be selected, use the welcome layout
+        const newLayout = await layoutStorage.saveNewLayout({
+          path: [],
+          name: welcomeLayout.name,
+          data: welcomeLayout.data,
+        });
+        await onSelectLayout(newLayout);
+      } finally {
+        await reloadLayouts();
       }
-      reloadLayouts();
     },
-    [layoutCache, loadLayout, reloadLayouts],
+    [currentLayoutId, layoutStorage, setSelectedLayout, onSelectLayout, reloadLayouts],
   );
 
   const createNewLayout = useCallback(async () => {
-    const state: PanelsState = {
-      name: `Unnamed layout ${moment(currentDateForStorybook).format("l")} at ${moment(
-        currentDateForStorybook,
-      ).format("LT")}`,
-      id: uuidv4(),
+    const name = `Unnamed layout ${moment(currentDateForStorybook).format("l")} at ${moment(
+      currentDateForStorybook,
+    ).format("LT")}`;
+    const state: Omit<PanelsState, "name" | "id"> = {
       configById: {},
       globalVariables: {},
       userNodes: {},
       linkedGlobalVariables: [],
       playbackConfig: defaultPlaybackConfig,
     };
-    await layoutCache.put({ id: state.id, name: state.name, path: [], state });
-    loadLayout(state);
+    const newLayout = await layoutStorage.saveNewLayout({
+      name,
+      path: [],
+      data: state as PanelsState,
+    });
+    onSelectLayout(newLayout);
     reloadLayouts();
-  }, [currentDateForStorybook, layoutCache, loadLayout, reloadLayouts]);
+  }, [currentDateForStorybook, layoutStorage, onSelectLayout, reloadLayouts]);
 
-  const onExportLayout = useCallback((item: CachedLayout) => {
-    if (item.state) {
-      const name = item.state.name ?? "unnamed layout";
-      const content = JSON.stringify(item.state, undefined, 2);
-      downloadTextFile(content, `${name}.json`);
-    }
-  }, []);
+  const onExportLayout = useCallback(
+    async (item: LayoutMetadata) => {
+      const layout = await layoutStorage.getLayout(item.id);
+      if (layout) {
+        const content = JSON.stringify(layout.data, undefined, 2);
+        downloadTextFile(content, `${item.name}.json`);
+      }
+    },
+    [layoutStorage],
+  );
 
   const importLayout = useCallback(async () => {
     const [fileHandle] = await showOpenFilePicker({
@@ -166,14 +185,11 @@ export default function LayoutBrowser({
       return;
     }
 
-    const state = parsedState as PanelsState;
-    state.id = uuidv4();
-    state.name = layoutName;
-    await layoutCache.put({ id: state.id, path: undefined, name: state.name, state });
-
-    loadLayout(state);
+    const data = parsedState as PanelsState;
+    const newLayout = await layoutStorage.saveNewLayout({ path: [], name: layoutName, data });
+    onSelectLayout(newLayout);
     reloadLayouts();
-  }, [addToast, isMounted, layoutCache, loadLayout, reloadLayouts]);
+  }, [addToast, isMounted, layoutStorage, onSelectLayout, reloadLayouts]);
 
   const createLayoutTooltip = useTooltip({ contents: "Create new layout" });
   const importLayoutTooltip = useTooltip({ contents: "Import layout" });
@@ -205,15 +221,37 @@ export default function LayoutBrowser({
         </IconButton>,
       ]}
     >
-      <LayoutSection<CachedLayout>
-        items={layouts}
-        selectedId={currentLayoutId}
-        onSelect={onSelectLayout}
-        onRename={onRenameLayout}
-        onDuplicate={onDuplicateLayout}
-        onDelete={onDeleteLayout}
-        onExport={onExportLayout}
-      />
+      <Stack verticalFill>
+        <Stack.Item>
+          <LayoutSection
+            title={layoutStorage.supportsSharing ? "Personal" : undefined}
+            emptyText="Add a new layout to get started with Foxglove Studio!"
+            items={layouts.value?.personal}
+            selectedId={currentLayoutId}
+            onSelect={onSelectLayout}
+            onRename={onRenameLayout}
+            onDuplicate={onDuplicateLayout}
+            onDelete={onDeleteLayout}
+            onExport={onExportLayout}
+          />
+        </Stack.Item>
+        <Stack.Item>
+          {layoutStorage.supportsSharing && (
+            <LayoutSection
+              title="Shared"
+              emptyText="Your organization doesn’t have any shared layouts yet. Share a personal layout to collaborate with other team members."
+              items={layouts.value?.shared}
+              selectedId={currentLayoutId}
+              onSelect={onSelectLayout}
+              onRename={onRenameLayout}
+              onDuplicate={onDuplicateLayout}
+              onDelete={onDeleteLayout}
+              onExport={onExportLayout}
+            />
+          )}
+        </Stack.Item>
+        <div style={{ flexGrow: 1 }} />
+      </Stack>
     </SidebarContent>
   );
 }

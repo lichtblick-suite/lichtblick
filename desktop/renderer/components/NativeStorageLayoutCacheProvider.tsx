@@ -7,7 +7,7 @@ import { PropsWithChildren, useMemo } from "react";
 import { LayoutCacheContext } from "@foxglove/studio-base";
 
 import { useNativeStorage } from "../context/NativeStorageContext";
-import NativeStorageLayoutStorage from "../services/NativeStorageLayoutStorage";
+import NativeStorageLayoutCache from "../services/NativeStorageLayoutCache";
 
 export default function NativeStorageLayoutCacheProvider(
   props: PropsWithChildren<unknown>,
@@ -15,7 +15,7 @@ export default function NativeStorageLayoutCacheProvider(
   const storage = useNativeStorage();
 
   const provider = useMemo(() => {
-    return new NativeStorageLayoutStorage(storage);
+    return new NativeStorageLayoutCache(storage);
   }, [storage]);
 
   return (

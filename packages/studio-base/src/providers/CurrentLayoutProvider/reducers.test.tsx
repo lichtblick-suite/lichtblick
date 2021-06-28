@@ -1,4 +1,3 @@
-/** @jest-environment jsdom */
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -22,12 +21,12 @@ import CurrentLayoutContext, {
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import {
   CreateTabPanelPayload,
-  LoadLayoutPayload,
   PanelsState,
 } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import CurrentLayoutState, {
   DEFAULT_LAYOUT_FOR_TESTS,
 } from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
+import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
 import { MosaicDropTargetPosition } from "@foxglove/studio-base/types/panels";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
@@ -39,7 +38,8 @@ function renderProvider() {
   const currentLayout = new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS);
   const { result } = renderHook(
     () => ({
-      state: useCurrentLayoutSelector((state) => state),
+      selectedId: useCurrentLayoutSelector((state) => state.selectedLayout?.id),
+      state: useCurrentLayoutSelector((state) => state.selectedLayout?.data),
       actions: useCurrentLayoutActions(),
       selectedPanels: useSelectedPanels(),
     }),
@@ -68,15 +68,14 @@ describe("layout reducers", () => {
         },
       };
       act(() => {
-        result.current.actions.loadLayout(panelLayout);
+        result.current.actions.setSelectedLayout({ id: "X" as LayoutID, data: panelLayout });
         result.current.actions.addPanel({
           id: "Audio!x",
           tabId: undefined,
-          layout: panelLayout.layout,
           config: { foo: "bar" },
         });
       });
-      const panels = result.current.state;
+      const panels = result.current.state!;
       const layout = panels.layout as MosaicParent<string>;
       const firstStr = layout.first as string;
       const secondStr = layout.second as string;
@@ -84,8 +83,8 @@ describe("layout reducers", () => {
       expect(firstStr).toEqual("Audio!x");
       expect(layout.second).toEqual("Tab!a");
 
-      expect(result.current.state.configById[firstStr]).toEqual({ foo: "bar" });
-      expect(result.current.state.configById[secondStr]).toEqual(panelLayout.configById["Tab!a"]);
+      expect(panels.configById[firstStr]).toEqual({ foo: "bar" });
+      expect(panels.configById[secondStr]).toEqual(panelLayout.configById["Tab!a"]);
     });
     it("adds panel to empty Tab layout", () => {
       const { result } = renderProvider();
@@ -96,16 +95,15 @@ describe("layout reducers", () => {
         },
       };
       act(() => {
-        result.current.actions.loadLayout(panelLayout);
+        result.current.actions.setSelectedLayout({ id: "X" as LayoutID, data: panelLayout });
         result.current.actions.addPanel({
           id: "Audio!x",
           tabId: "Tab!a",
-          layout: undefined,
           config: { foo: "bar" },
         });
       });
 
-      const { layout, configById } = result.current.state;
+      const { layout, configById } = result.current.state!;
       const tabs = configById["Tab!a"]?.tabs;
       const newAudioId = tabs[0].layout;
       expect(layout).toEqual("Tab!a");
@@ -132,7 +130,7 @@ describe("layout reducers", () => {
         },
       };
       act(() => {
-        result.current.actions.loadLayout(panelLayout);
+        result.current.actions.setSelectedLayout({ id: "X" as LayoutID, data: panelLayout });
         result.current.actions.dropPanel({
           newPanelType: "Audio",
           destinationPath: [],
@@ -141,7 +139,7 @@ describe("layout reducers", () => {
           relatedConfigs: undefined,
         });
       });
-      const layout = result.current.state.layout as MosaicParent<string>;
+      const layout = result.current.state!.layout as MosaicParent<string>;
       expect(layout.direction).toEqual("row");
       expect(layout.first).toEqual("Tab!a");
       expect(getPanelTypeFromId(layout.second as string)).toEqual("Audio");
@@ -150,7 +148,7 @@ describe("layout reducers", () => {
       const { result } = renderProvider();
       const panelLayout = { layout: "Audio!a", configById: { "Audio!a": { foo: "bar" } } };
       act(() => {
-        result.current.actions.loadLayout(panelLayout);
+        result.current.actions.setSelectedLayout({ id: "X" as LayoutID, data: panelLayout });
         result.current.actions.dropPanel({
           newPanelType: "Tab",
           destinationPath: [],
@@ -159,8 +157,8 @@ describe("layout reducers", () => {
           relatedConfigs: { "Audio!b": { foo: "baz" } },
         });
       });
-      const { configById } = result.current.state;
-      const layout = result.current.state.layout as MosaicParent<string>;
+      const { configById } = result.current.state!;
+      const layout = result.current.state!.layout as MosaicParent<string>;
       expect(layout.direction).toEqual("row");
       expect(layout.first).toEqual("Audio!a");
       expect(getPanelTypeFromId(layout.second as string)).toEqual("Tab");
@@ -184,7 +182,7 @@ describe("layout reducers", () => {
         },
       };
       act(() => {
-        result.current.actions.loadLayout(panelLayout);
+        result.current.actions.setSelectedLayout({ id: "X" as LayoutID, data: panelLayout });
         result.current.actions.dropPanel({
           newPanelType: "Audio",
           destinationPath: [],
@@ -194,7 +192,7 @@ describe("layout reducers", () => {
           relatedConfigs: undefined,
         });
       });
-      const { layout, configById } = result.current.state;
+      const { layout, configById } = result.current.state!;
       expect(layout).toEqual("Tab!a");
       const tabs = configById["Tab!a"]?.tabs;
       expect(tabs[0].title).toEqual("A");
@@ -211,7 +209,7 @@ describe("layout reducers", () => {
         },
       };
       act(() => {
-        result.current.actions.loadLayout(panelLayout);
+        result.current.actions.setSelectedLayout({ id: "X" as LayoutID, data: panelLayout });
         result.current.actions.dropPanel({
           newPanelType: "Audio",
           destinationPath: [],
@@ -221,7 +219,7 @@ describe("layout reducers", () => {
           relatedConfigs: undefined,
         });
       });
-      const { layout, configById } = result.current.state;
+      const { layout, configById } = result.current.state!;
       expect(layout).toEqual("Tab!a");
       expect(configById["Tab!a"]).toEqual(panelLayout.configById["Tab!a"]);
       const tabBTabs = configById["Tab!b"]?.tabs;
@@ -234,7 +232,7 @@ describe("layout reducers", () => {
       const { result } = renderProvider();
       const panelLayout = { layout: "Audio!a" };
       act(() => {
-        result.current.actions.loadLayout(panelLayout);
+        result.current.actions.setSelectedLayout({ id: "X" as LayoutID, data: panelLayout });
         result.current.actions.dropPanel({
           newPanelType: "Tab",
           destinationPath: [],
@@ -245,8 +243,8 @@ describe("layout reducers", () => {
           },
         });
       });
-      const { configById } = result.current.state;
-      const layout = result.current.state.layout as MosaicParent<string>;
+      const { configById } = result.current.state!;
+      const layout = result.current.state!.layout as MosaicParent<string>;
       expect(layout.first).toEqual("Audio!a");
       expect(getPanelTypeFromId(layout.second as string)).toEqual("Tab");
 
@@ -274,13 +272,13 @@ describe("layout reducers", () => {
         },
       };
       act(() => {
-        result.current.actions.loadLayout(panelLayout);
+        result.current.actions.setSelectedLayout({ id: "X" as LayoutID, data: panelLayout });
         result.current.actions.moveTab({
           source: { panelId: "Tab!a", tabIndex: 0 },
           target: { panelId: "Tab!a", tabIndex: 1 },
         });
       });
-      const { configById } = result.current.state;
+      const { configById } = result.current.state!;
       expect(configById).toEqual({
         "Tab!a": { activeTabIdx: 1, tabs: [{ title: "B" }, { title: "A" }, { title: "C" }] },
       });
@@ -303,13 +301,13 @@ describe("layout reducers", () => {
         },
       };
       act(() => {
-        result.current.actions.loadLayout(panelLayout);
+        result.current.actions.setSelectedLayout({ id: "X" as LayoutID, data: panelLayout });
         result.current.actions.moveTab({
           source: { panelId: "Tab!a", tabIndex: 0 },
           target: { panelId: "Tab!b", tabIndex: 1 },
         });
       });
-      const { configById } = result.current.state;
+      const { configById } = result.current.state!;
       expect(configById).toEqual({
         "Tab!a": { activeTabIdx: 0, tabs: [{ title: "B" }, { title: "C" }] },
         "Tab!b": {
@@ -323,14 +321,17 @@ describe("layout reducers", () => {
   it("closes a panel in single-panel layout", () => {
     const { result } = renderProvider();
     act(() => {
-      result.current.actions.loadLayout({
-        layout: "Audio!a",
-        configById: { "Audio!a": { foo: "bar" } },
+      result.current.actions.setSelectedLayout({
+        id: "X" as LayoutID,
+        data: {
+          layout: "Audio!a",
+          configById: { "Audio!a": { foo: "bar" } },
+        },
       });
       result.current.selectedPanels.setSelectedPanelIds(["Audio!a", "unknown!b"]);
       result.current.actions.closePanel({ root: "Audio!a", path: [] });
     });
-    const { layout, configById } = result.current.state;
+    const { layout, configById } = result.current.state!;
     expect(layout).toEqual(undefined);
     expect(configById).toEqual({});
     expect(result.current.selectedPanels.selectedPanelIds).toEqual(["unknown!b"]);
@@ -344,12 +345,12 @@ describe("layout reducers", () => {
       configById: { "Audio!a": { foo: "bar" }, "Audio!b": { foo: "baz" } },
     };
     act(() => {
-      result.current.actions.loadLayout(panelLayout);
+      result.current.actions.setSelectedLayout({ id: "X" as LayoutID, data: panelLayout });
       result.current.selectedPanels.setSelectedPanelIds(["Audio!a", "Audio!b"]);
       result.current.actions.closePanel({ root: panelLayout.layout, path: ["first"] });
     });
-    expect(result.current.state.layout).toEqual("Audio!b");
-    expect(result.current.state.configById).toEqual({ "Audio!b": { foo: "baz" } });
+    expect(result.current.state!.layout).toEqual("Audio!b");
+    expect(result.current.state!.configById).toEqual({ "Audio!b": { foo: "baz" } });
     expect(result.current.selectedPanels.selectedPanelIds).toEqual(["Audio!b"]);
   });
 
@@ -363,12 +364,12 @@ describe("layout reducers", () => {
       },
     };
     act(() => {
-      result.current.actions.loadLayout(panelLayout);
+      result.current.actions.setSelectedLayout({ id: "X" as LayoutID, data: panelLayout });
       result.current.selectedPanels.setSelectedPanelIds(["Audio!a"]);
       result.current.actions.closePanel({ root: "Audio!a", path: [], tabId: "Tab!a" });
     });
-    expect(result.current.state.layout).toEqual("Tab!a");
-    expect(result.current.state.configById).toEqual({
+    expect(result.current.state!.layout).toEqual("Tab!a");
+    expect(result.current.state!.configById).toEqual({
       "Tab!a": { activeTabIdx: 0, tabs: [{ title: "A", layout: undefined }] },
     });
     expect(result.current.selectedPanels.selectedPanelIds).toEqual([]);
@@ -376,21 +377,24 @@ describe("layout reducers", () => {
 
   it("loads a layout", () => {
     const { result } = renderProvider();
-    const panelsState: LoadLayoutPayload = { layout: "foo" };
+    const panelsState: Partial<PanelsState> = { layout: "foo" };
     act(() => {
-      result.current.actions.loadLayout(panelsState);
+      result.current.actions.setSelectedLayout({ id: "X" as LayoutID, data: panelsState });
     });
-    expect(result.current.state.layout).toEqual("foo");
+    expect(result.current.selectedId).toEqual("X");
+    expect(result.current.state!.layout).toEqual("foo");
   });
 
   it("resets panels to a valid state when importing an empty layout", () => {
     const { result } = renderProvider();
     act(() => {
-      result.current.actions.loadLayout({ layout: undefined });
+      result.current.actions.setSelectedLayout({
+        id: "X" as LayoutID,
+        data: { layout: undefined },
+      });
     });
+    expect(result.current.selectedId).toEqual("X");
     expect(result.current.state).toEqual({
-      id: expect.any(String),
-      name: "unnamed",
       globalVariables: {},
       layout: undefined,
       linkedGlobalVariables: [],
@@ -401,7 +405,7 @@ describe("layout reducers", () => {
   });
 
   describe("creates Tab panels from existing panels correctly", () => {
-    const regularLayoutPayload: LoadLayoutPayload & { layout: MosaicNode<string> } = {
+    const regularLayoutPayload: Partial<PanelsState> & { layout: MosaicNode<string> } = {
       layout: {
         first: "Audio!a",
         second: { first: "RawMessages!a", second: "Audio!c", direction: "column" },
@@ -415,7 +419,7 @@ describe("layout reducers", () => {
       idsToRemove: ["Audio!a", "RawMessages!a"],
       singleTab: false,
     };
-    const nestedLayoutPayload: LoadLayoutPayload & { layout: MosaicNode<string> } = {
+    const nestedLayoutPayload: Partial<PanelsState> & { layout: MosaicNode<string> } = {
       layout: {
         first: "Audio!a",
         second: "Tab!z",
@@ -448,11 +452,14 @@ describe("layout reducers", () => {
     it("will group selected panels into a Tab panel", () => {
       const { result } = renderProvider();
       act(() => {
-        result.current.actions.loadLayout(regularLayoutPayload);
+        result.current.actions.setSelectedLayout({
+          id: "X" as LayoutID,
+          data: regularLayoutPayload,
+        });
         result.current.actions.createTabPanel({ ...createTabPanelPayload, singleTab: true });
       });
-      const { configById } = result.current.state;
-      const layout = result.current.state.layout as MosaicParent<string>;
+      const { configById } = result.current.state!;
+      const layout = result.current.state!.layout as MosaicParent<string>;
       expect(getPanelTypeFromId(layout.first as string)).toEqual(TAB_PANEL_TYPE);
       expect(getPanelTypeFromId(layout.second as string)).toEqual("Audio");
       expect(configById[layout.first as string]).toEqual({
@@ -472,11 +479,14 @@ describe("layout reducers", () => {
     it("will group selected panels into a Tab panel, even when a selected panel is nested", () => {
       const { result } = renderProvider();
       act(() => {
-        result.current.actions.loadLayout(nestedLayoutPayload);
+        result.current.actions.setSelectedLayout({
+          id: "X" as LayoutID,
+          data: nestedLayoutPayload,
+        });
         result.current.actions.createTabPanel({ ...nestedCreateTabPanelPayload, singleTab: true });
       });
-      const { configById } = result.current.state;
-      const layout = result.current.state.layout as MosaicParent<string>;
+      const { configById } = result.current.state!;
+      const layout = result.current.state!.layout as MosaicParent<string>;
       expect(getPanelTypeFromId(layout.first as string)).toEqual(TAB_PANEL_TYPE);
       expect(getPanelTypeFromId(layout.second as string)).toEqual(TAB_PANEL_TYPE);
       expect(configById[layout.first as string]).toEqual({
@@ -497,11 +507,14 @@ describe("layout reducers", () => {
     it("will create individual tabs for selected panels in a new Tab panel", () => {
       const { result } = renderProvider();
       act(() => {
-        result.current.actions.loadLayout(regularLayoutPayload);
+        result.current.actions.setSelectedLayout({
+          id: "X" as LayoutID,
+          data: regularLayoutPayload,
+        });
         result.current.actions.createTabPanel({ ...createTabPanelPayload, singleTab: false });
       });
-      const { configById } = result.current.state;
-      const layout = result.current.state.layout as MosaicParent<string>;
+      const { configById } = result.current.state!;
+      const layout = result.current.state!.layout as MosaicParent<string>;
       expect(getPanelTypeFromId(layout.first as string)).toEqual(TAB_PANEL_TYPE);
       expect(getPanelTypeFromId(layout.second as string)).toEqual("Audio");
       expect(configById[layout.first as string]).toEqual({
@@ -519,11 +532,14 @@ describe("layout reducers", () => {
     it("will create individual tabs for selected panels in a new Tab panel, even when a selected panel is nested", () => {
       const { result } = renderProvider();
       act(() => {
-        result.current.actions.loadLayout(nestedLayoutPayload);
+        result.current.actions.setSelectedLayout({
+          id: "X" as LayoutID,
+          data: nestedLayoutPayload,
+        });
         result.current.actions.createTabPanel({ ...nestedCreateTabPanelPayload, singleTab: false });
       });
-      const { configById } = result.current.state;
-      const layout = result.current.state.layout as MosaicParent<string>;
+      const { configById } = result.current.state!;
+      const layout = result.current.state!.layout as MosaicParent<string>;
       expect(getPanelTypeFromId(layout.first as string)).toEqual(TAB_PANEL_TYPE);
       expect(getPanelTypeFromId(layout.second as string)).toEqual(TAB_PANEL_TYPE);
       expect(configById[layout.first as string]).toEqual({
@@ -548,12 +564,12 @@ describe("layout reducers", () => {
     act(() => {
       result.current.actions.setUserNodes(firstPayload);
     });
-    expect(result.current.state.userNodes).toEqual(firstPayload);
+    expect(result.current.state!.userNodes).toEqual(firstPayload);
 
     act(() => {
       result.current.actions.setUserNodes(secondPayload);
     });
-    expect(result.current.state.userNodes).toEqual({ ...firstPayload, ...secondPayload });
+    expect(result.current.state!.userNodes).toEqual({ ...firstPayload, ...secondPayload });
   });
 
   describe("panel toolbar actions", () => {
@@ -575,8 +591,8 @@ describe("layout reducers", () => {
           root: "Audio!a",
         });
       });
-      const { configById } = result.current.state;
-      const layout = result.current.state.layout as MosaicParent<string>;
+      const { configById } = result.current.state!;
+      const layout = result.current.state!.layout as MosaicParent<string>;
       expect(layout.first).toEqual("Audio!a");
       expect(getPanelTypeFromId(layout.second as string)).toEqual("Audio");
       expect(layout.direction).toEqual("row");
@@ -607,8 +623,8 @@ describe("layout reducers", () => {
         });
       });
 
-      const { configById } = result.current.state;
-      const layout = result.current.state.layout as MosaicParent<string>;
+      const { configById } = result.current.state!;
+      const layout = result.current.state!.layout as MosaicParent<string>;
       expect(layout.first).toEqual("Tab!a");
       expect(getPanelTypeFromId(layout.second as string)).toEqual("Tab");
       expect(layout.direction).toEqual("row");
@@ -642,7 +658,7 @@ describe("layout reducers", () => {
           root: "Audio!a",
         });
       });
-      const { layout, configById } = result.current.state;
+      const { layout, configById } = result.current.state!;
       expect(layout).toEqual("Tab!a");
       const tabLayout = configById["Tab!a"]?.tabs[0].layout;
       expect(tabLayout.first).toEqual("Audio!a");
@@ -670,8 +686,8 @@ describe("layout reducers", () => {
           root: "Audio!a",
         });
       });
-      const { configById } = result.current.state;
-      const layout = result.current.state.layout as string;
+      const { configById } = result.current.state!;
+      const layout = result.current.state!.layout as string;
       expect(getPanelTypeFromId(layout)).toEqual("RawMessages");
       expect(configById["Audio!a"]).toEqual(undefined);
       expect(configById[layout]).toEqual(rawMessagesConfig);
@@ -698,8 +714,8 @@ describe("layout reducers", () => {
           root: "Audio!a",
         });
       });
-      const { configById } = result.current.state;
-      const layout = result.current.state.layout as string;
+      const { configById } = result.current.state!;
+      const layout = result.current.state!.layout as string;
       expect(getPanelTypeFromId(layout)).toEqual("Tab");
       const tabLayout = configById[layout]?.tabs[0].layout;
       expect(getPanelTypeFromId(tabLayout)).toEqual("RawMessages");
@@ -726,7 +742,7 @@ describe("layout reducers", () => {
           root: "Audio!a",
         });
       });
-      const { layout, configById } = result.current.state;
+      const { layout, configById } = result.current.state!;
       expect(layout).toEqual("Tab!a");
       const tabLayout = configById["Tab!a"]?.tabs[0].layout;
       expect(getPanelTypeFromId(tabLayout)).toEqual("RawMessages");
@@ -772,7 +788,7 @@ describe("layout reducers", () => {
       expect(leaves).toContain("SecondPanel!2wydzut");
       expect(leaves).toContain("ThirdPanel!ye6m1m");
       expect(leaves).toContain("FourthPanel!abc");
-      expect(result.current.state.configById).toEqual({});
+      expect(result.current.state!.configById).toEqual({});
 
       const panelConfig = {
         id: "SecondPanel!2wydzut",
@@ -787,7 +803,7 @@ describe("layout reducers", () => {
           ],
         });
       });
-      expect(result.current.state.configById).toEqual({
+      expect(result.current.state!.configById).toEqual({
         "SecondPanel!2wydzut": { foo: "bar" },
         "FirstPanel!34otwwt": { baz: true },
       });
@@ -796,7 +812,7 @@ describe("layout reducers", () => {
           layout: { direction: "row", first: "FirstPanel!34otwwt", second: "SecondPanel!2wydzut" },
         });
       });
-      expect(result.current.state.configById).toEqual({
+      expect(result.current.state!.configById).toEqual({
         "SecondPanel!2wydzut": { foo: "bar" },
         "FirstPanel!34otwwt": { baz: true },
       });
@@ -805,19 +821,19 @@ describe("layout reducers", () => {
           layout: { direction: "row", first: "FirstPanel!34otwwt", second: "ThirdPanel!ye6m1m" },
         });
       });
-      expect(result.current.state.configById).toEqual({
+      expect(result.current.state!.configById).toEqual({
         "FirstPanel!34otwwt": { baz: true },
       });
       act(() => {
         result.current.actions.changePanelLayout({ layout: "foo!1234" });
       });
-      expect(result.current.state.configById).toEqual({});
+      expect(result.current.state!.configById).toEqual({});
       act(() => {
         result.current.actions.savePanelConfigs({
           configs: [{ id: "foo!1234", config: { okay: true }, defaultConfig: { okay: false } }],
         });
       });
-      expect(result.current.state.configById).toEqual({
+      expect(result.current.state!.configById).toEqual({
         "foo!1234": { okay: true },
       });
     });
@@ -834,7 +850,7 @@ describe("layout reducers", () => {
       expect(leaves).toContain("SecondPanel!2wydzut");
       expect(leaves).toContain("ThirdPanel!ye6m1m");
       expect(leaves).toContain("Tab!abc");
-      expect(result.current.state.configById).toEqual({});
+      expect(result.current.state!.configById).toEqual({});
 
       const baseTabConfig = {
         id: "Tab!abc",
@@ -844,12 +860,12 @@ describe("layout reducers", () => {
       act(() => {
         result.current.actions.savePanelConfigs({ configs: [baseTabConfig] });
       });
-      expect(result.current.state.configById).toEqual({ "Tab!abc": baseTabConfig.config });
+      expect(result.current.state!.configById).toEqual({ "Tab!abc": baseTabConfig.config });
 
       act(() => {
         result.current.actions.savePanelConfigs({ configs: [nestedPanelConfig] });
       });
-      expect(result.current.state.configById).toEqual({
+      expect(result.current.state!.configById).toEqual({
         "Tab!abc": baseTabConfig.config,
         "NestedPanel!xyz": nestedPanelConfig.config,
       });
@@ -862,7 +878,7 @@ describe("layout reducers", () => {
         result.current.actions.savePanelConfigs({ configs: [emptyTabConfig] });
       });
       // "NestedPanel!xyz" key in configById should be gone
-      expect(result.current.state.configById).toEqual({ "Tab!abc": emptyTabConfig.config });
+      expect(result.current.state!.configById).toEqual({ "Tab!abc": emptyTabConfig.config });
     });
 
     it("does not remove old configById when trimConfigById = false", () => {
@@ -874,7 +890,7 @@ describe("layout reducers", () => {
         });
         result.current.actions.changePanelLayout({ layout: tabPanelState.layout });
       });
-      expect(result.current.state.configById).toEqual({});
+      expect(result.current.state!.configById).toEqual({});
 
       act(() => {
         result.current.actions.changePanelLayout({ layout: "foo!bar" });
@@ -886,7 +902,7 @@ describe("layout reducers", () => {
           trimConfigById: false,
         });
       });
-      expect(result.current.state.configById).toEqual({ "foo!bar": { foo: "baz" } });
+      expect(result.current.state!.configById).toEqual({ "foo!bar": { foo: "baz" } });
     });
   });
 
@@ -894,21 +910,27 @@ describe("layout reducers", () => {
     it("does not remove panel from single-panel layout when starting drag", () => {
       const { result } = renderProvider();
       act(() => {
-        result.current.actions.loadLayout({ layout: "Audio!a", configById: {} });
+        result.current.actions.setSelectedLayout({
+          id: "X" as LayoutID,
+          data: { layout: "Audio!a", configById: {} },
+        });
         result.current.actions.startDrag({ sourceTabId: undefined, path: [] });
       });
-      expect(result.current.state.layout).toEqual("Audio!a");
+      expect(result.current.state!.layout).toEqual("Audio!a");
     });
     it("hides panel from multi-panel layout when starting drag", () => {
       const { result } = renderProvider();
       act(() => {
-        result.current.actions.loadLayout({
-          layout: { first: "Audio!a", second: "RawMessages!a", direction: "column" },
-          configById: {},
+        result.current.actions.setSelectedLayout({
+          id: "X" as LayoutID,
+          data: {
+            layout: { first: "Audio!a", second: "RawMessages!a", direction: "column" },
+            configById: {},
+          },
         });
         result.current.actions.startDrag({ sourceTabId: undefined, path: ["second"] });
       });
-      expect(result.current.state.layout).toEqual({
+      expect(result.current.state!.layout).toEqual({
         first: "Audio!a",
         second: "RawMessages!a",
         direction: "column",
@@ -918,15 +940,18 @@ describe("layout reducers", () => {
     it("removes non-Tab panel from single-panel tab layout when starting drag", () => {
       const { result } = renderProvider();
       act(() => {
-        result.current.actions.loadLayout({
-          layout: { first: "Tab!a", second: "RawMessages!a", direction: "column" },
-          configById: {
-            "Tab!a": { activeTabIdx: 0, tabs: [{ title: "A", layout: "Audio!a" }] },
+        result.current.actions.setSelectedLayout({
+          id: "X" as LayoutID,
+          data: {
+            layout: { first: "Tab!a", second: "RawMessages!a", direction: "column" },
+            configById: {
+              "Tab!a": { activeTabIdx: 0, tabs: [{ title: "A", layout: "Audio!a" }] },
+            },
           },
         });
         result.current.actions.startDrag({ sourceTabId: "Tab!a", path: [] });
       });
-      const { layout, configById } = result.current.state;
+      const { layout, configById } = result.current.state!;
       expect(layout).toEqual({ first: "Tab!a", second: "RawMessages!a", direction: "column" });
       expect(configById["Tab!a"]).toEqual({
         activeTabIdx: 0,
@@ -936,20 +961,23 @@ describe("layout reducers", () => {
     it("hides panel from multi-panel Tab layout when starting drag", () => {
       const { result } = renderProvider();
       act(() => {
-        result.current.actions.loadLayout({
-          layout: { first: "Tab!a", second: "RawMessages!a", direction: "column" },
-          configById: {
-            "Tab!a": {
-              activeTabIdx: 0,
-              tabs: [
-                { title: "A", layout: { first: "Audio!a", second: "Plot!a", direction: "row" } },
-              ],
+        result.current.actions.setSelectedLayout({
+          id: "X" as LayoutID,
+          data: {
+            layout: { first: "Tab!a", second: "RawMessages!a", direction: "column" },
+            configById: {
+              "Tab!a": {
+                activeTabIdx: 0,
+                tabs: [
+                  { title: "A", layout: { first: "Audio!a", second: "Plot!a", direction: "row" } },
+                ],
+              },
             },
           },
         });
         result.current.actions.startDrag({ sourceTabId: "Tab!a", path: ["first"] });
       });
-      const { layout, configById } = result.current.state;
+      const { layout, configById } = result.current.state!;
       expect(layout).toEqual({ first: "Tab!a", second: "RawMessages!a", direction: "column" });
       expect(configById["Tab!a"]).toEqual({
         activeTabIdx: 0,
@@ -975,7 +1003,10 @@ describe("layout reducers", () => {
         },
       };
       act(() => {
-        result.current.actions.loadLayout({ layout: "Tab!a", configById: originalSavedProps });
+        result.current.actions.setSelectedLayout({
+          id: "X" as LayoutID,
+          data: { layout: "Tab!a", configById: originalSavedProps },
+        });
         result.current.actions.startDrag({ sourceTabId: "Tab!a", path: ["first"] });
         result.current.actions.endDrag({
           originalLayout: "Tab!a",
@@ -988,7 +1019,7 @@ describe("layout reducers", () => {
           ownPath: ["first"],
         });
       });
-      const { layout, configById } = result.current.state;
+      const { layout, configById } = result.current.state!;
       expect(layout).toEqual("Tab!a");
       expect(configById["Tab!a"]).toEqual({
         activeTabIdx: 0,
@@ -1009,9 +1040,12 @@ describe("layout reducers", () => {
         },
       };
       act(() => {
-        result.current.actions.loadLayout({
-          layout: originalLayout,
-          configById: originalSavedProps,
+        result.current.actions.setSelectedLayout({
+          id: "X" as LayoutID,
+          data: {
+            layout: originalLayout,
+            configById: originalSavedProps,
+          },
         });
         result.current.actions.startDrag({ sourceTabId: "Tab!a", path: ["first"] });
         result.current.actions.endDrag({
@@ -1025,7 +1059,7 @@ describe("layout reducers", () => {
           ownPath: ["first"],
         });
       });
-      const { layout, configById } = result.current.state;
+      const { layout, configById } = result.current.state!;
       expect(layout).toEqual({
         first: "Tab!a",
         second: { first: "RawMessages!a", second: "Audio!a", direction: "row" },
@@ -1050,9 +1084,12 @@ describe("layout reducers", () => {
         },
       };
       act(() => {
-        result.current.actions.loadLayout({
-          layout: originalLayout,
-          configById: originalSavedProps,
+        result.current.actions.setSelectedLayout({
+          id: "X" as LayoutID,
+          data: {
+            layout: originalLayout,
+            configById: originalSavedProps,
+          },
         });
         result.current.actions.startDrag({ sourceTabId: undefined, path: ["second"] });
         result.current.actions.endDrag({
@@ -1066,7 +1103,7 @@ describe("layout reducers", () => {
           ownPath: ["second"],
         });
       });
-      const { layout, configById } = result.current.state;
+      const { layout, configById } = result.current.state!;
       expect(layout).toEqual("Tab!a");
       expect(configById["Tab!a"]).toEqual({
         activeTabIdx: 0,
@@ -1105,9 +1142,12 @@ describe("layout reducers", () => {
         },
       };
       act(() => {
-        result.current.actions.loadLayout({
-          layout: originalLayout,
-          configById: originalSavedProps,
+        result.current.actions.setSelectedLayout({
+          id: "X" as LayoutID,
+          data: {
+            layout: originalLayout,
+            configById: originalSavedProps,
+          },
         });
         result.current.actions.startDrag({ sourceTabId: "Tab!a", path: ["first"] });
         result.current.actions.endDrag({
@@ -1121,7 +1161,7 @@ describe("layout reducers", () => {
           ownPath: ["first"],
         });
       });
-      const { layout, configById } = result.current.state;
+      const { layout, configById } = result.current.state!;
       expect(layout).toEqual({ first: "Tab!a", second: "Tab!b", direction: "column" });
       expect(configById["Tab!a"]).toEqual({
         activeTabIdx: 0,
@@ -1164,9 +1204,12 @@ describe("layout reducers", () => {
         "Tab!c": tabCConfig,
       };
       act(() => {
-        result.current.actions.loadLayout({
-          layout: originalLayout,
-          configById: originalSavedProps,
+        result.current.actions.setSelectedLayout({
+          id: "X" as LayoutID,
+          data: {
+            layout: originalLayout,
+            configById: originalSavedProps,
+          },
         });
         result.current.actions.startDrag({ sourceTabId: "Tab!a", path: ["first"] });
         result.current.actions.endDrag({
@@ -1180,7 +1223,7 @@ describe("layout reducers", () => {
           ownPath: ["first"],
         });
       });
-      const { layout, configById } = result.current.state;
+      const { layout, configById } = result.current.state!;
       expect(layout).toEqual({ first: "Tab!a", second: "Tab!b", direction: "column" });
       expect(configById["Tab!a"]).toEqual({
         activeTabIdx: 0,
@@ -1195,7 +1238,10 @@ describe("layout reducers", () => {
     it("handles drags in single-panel layouts", () => {
       const { result } = renderProvider();
       act(() => {
-        result.current.actions.loadLayout({ layout: "Audio!a" });
+        result.current.actions.setSelectedLayout({
+          id: "X" as LayoutID,
+          data: { layout: "Audio!a" },
+        });
         result.current.actions.startDrag({ sourceTabId: undefined, path: [] });
         result.current.actions.endDrag({
           originalLayout: "Audio!a",
@@ -1208,7 +1254,7 @@ describe("layout reducers", () => {
           ownPath: [],
         });
       });
-      expect(result.current.state.layout).toEqual("Audio!a");
+      expect(result.current.state!.layout).toEqual("Audio!a");
     });
     it("handles drags in multi-panel layouts", () => {
       const { result } = renderProvider();
@@ -1218,7 +1264,10 @@ describe("layout reducers", () => {
         direction: "row",
       } as MosaicParent<string>;
       act(() => {
-        result.current.actions.loadLayout({ layout: originalLayout });
+        result.current.actions.setSelectedLayout({
+          id: "X" as LayoutID,
+          data: { layout: originalLayout },
+        });
         result.current.actions.startDrag({ sourceTabId: undefined, path: ["first"] });
         result.current.actions.endDrag({
           originalLayout,
@@ -1231,7 +1280,7 @@ describe("layout reducers", () => {
           ownPath: ["first"],
         });
       });
-      expect(result.current.state.layout).toEqual({
+      expect(result.current.state!.layout).toEqual({
         first: "Plot!a",
         second: "Audio!a",
         direction: "row",
@@ -1245,7 +1294,10 @@ describe("layout reducers", () => {
         direction: "row",
       } as MosaicParent<string>;
       act(() => {
-        result.current.actions.loadLayout({ layout: originalLayout });
+        result.current.actions.setSelectedLayout({
+          id: "X" as LayoutID,
+          data: { layout: originalLayout },
+        });
         result.current.actions.startDrag({ sourceTabId: undefined, path: ["first"] });
         result.current.actions.endDrag({
           originalLayout,
@@ -1258,7 +1310,7 @@ describe("layout reducers", () => {
           ownPath: ["first"],
         });
       });
-      expect(result.current.state.layout).toEqual({
+      expect(result.current.state!.layout).toEqual({
         first: "Audio!a",
         second: "Plot!a",
         direction: "row",

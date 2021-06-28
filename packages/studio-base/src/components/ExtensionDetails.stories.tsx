@@ -26,7 +26,7 @@ import ExtensionMarketplaceContext, {
 import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration";
 
 export default {
-  title: "components/ExtensionsSidebar",
+  title: "components/ExtensionDetails",
   component: ExtensionDetails,
 };
 

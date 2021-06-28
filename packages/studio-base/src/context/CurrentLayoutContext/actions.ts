@@ -24,12 +24,8 @@ import {
 } from "@foxglove/studio-base/types/panels";
 
 export type PanelsState = {
-  id: string;
-  name: string;
   layout?: MosaicNode<string>;
-  // We store config for each panel in a hash keyed by the panel id.
-  // This should at some point be renamed to `config` or `configById` or so,
-  // but it's inconvenient to have this diverge from `PANEL_PROPS_KEY`.
+  // We store config for each panel in an object keyed by the panel id.
   configById: SavedProps;
   /** @deprecated renamed to configById */
   savedProps?: SavedProps;
@@ -67,8 +63,6 @@ export type CreateTabPanelPayload = {
   singleTab: boolean;
 };
 
-export type LoadLayoutPayload = Partial<PanelsState>;
-
 export type UpdatePanelConfig<Config> = (
   panelType: string,
   perPanelFunc: PerPanelFunc<Config>,
@@ -93,7 +87,6 @@ export enum PANELS_ACTION_TYPES {
   DROP_PANEL = "DROP_PANEL",
   START_DRAG = "START_DRAG",
   END_DRAG = "END_DRAG",
-  LOAD_LAYOUT = "LOAD_LAYOUT",
 }
 
 export type SAVE_PANEL_CONFIGS = { type: "SAVE_PANEL_CONFIGS"; payload: SaveConfigsPayload };
@@ -106,7 +99,6 @@ export type CHANGE_PANEL_LAYOUT = {
   type: "CHANGE_PANEL_LAYOUT";
   payload: ChangePanelLayoutPayload;
 };
-export type LOAD_LAYOUT = { type: "LOAD_LAYOUT"; payload: LoadLayoutPayload };
 
 export type OVERWRITE_GLOBAL_DATA = {
   type: "OVERWRITE_GLOBAL_DATA";
@@ -167,7 +159,6 @@ export type AddPanelPayload = {
    * rather than automatically generated because the caller may want to use the new id for
    * something, such as selecting the newly added panel. */
   id: string;
-  layout?: MosaicNode<string>;
   tabId?: string;
   config?: PanelConfig;
   relatedConfigs?: SavedProps;
@@ -223,7 +214,6 @@ export type PanelsActions =
   | ADD_PANEL
   | DROP_PANEL
   | START_DRAG
-  | END_DRAG
-  | LOAD_LAYOUT;
+  | END_DRAG;
 
 export const panelEditingActions = new Set<string>(Object.values(PANELS_ACTION_TYPES));

@@ -65,23 +65,34 @@ export default class CacheOnlyLayoutStorage implements ILayoutStorage {
     path: string[];
     name: string;
     data: PanelsState;
-  }): Promise<void> {
+  }): Promise<LayoutMetadata> {
     const id = uuidv4() as LayoutID;
-    await this.storage.put({ id, name, path, state: data });
+    const newLayout: CachedLayout = { id, name, path, state: data };
+    await this.storage.put(newLayout);
+    return getMetadata(newLayout);
   }
 
   async updateLayout({
-    path,
     name,
+    path,
     data,
     targetID,
   }: {
-    path: string[];
-    name: string;
-    data: PanelsState;
     targetID: LayoutID;
+    name: string | undefined;
+    path: string[] | undefined;
+    data: PanelsState;
   }): Promise<void> {
-    await this.storage.put({ id: targetID, name, path, state: data });
+    const cachedLayout = await this.storage.get(targetID);
+    if (!cachedLayout || !cachedLayout.state) {
+      throw new Error("Attempted to update a layout that does not already exist");
+    }
+    await this.storage.put({
+      id: targetID,
+      name: name ?? cachedLayout.name,
+      path: path ?? cachedLayout.path,
+      state: data,
+    });
   }
 
   async shareLayout(_: unknown): Promise<void> {
@@ -106,7 +117,7 @@ export default class CacheOnlyLayoutStorage implements ILayoutStorage {
     path: string[];
   }): Promise<void> {
     const target = await this.storage.get(id);
-    if (!target) {
+    if (!target?.state) {
       throw new Error(`Layout id ${id} not found`);
     }
     await this.storage.put({ id, name, path, state: target.state });

@@ -13,6 +13,7 @@ import {
   ThemeProvider,
   UserProfileLocalStorageProvider,
   StudioToastProvider,
+  CacheOnlyLayoutStorageProvider,
 } from "@foxglove/studio-base";
 import { FirebaseAppProvider } from "@foxglove/studio-firebase";
 
@@ -60,6 +61,7 @@ export default function Root(): ReactElement {
     <StudioToastProvider />,
     <NativeStorageAppConfigurationProvider />,
     <NativeStorageLayoutCacheProvider />,
+    <CacheOnlyLayoutStorageProvider />,
     <NativeAppMenuProvider />,
     <UserProfileLocalStorageProvider />,
     <FirebaseAppProvider config={firebaseConfig} />,

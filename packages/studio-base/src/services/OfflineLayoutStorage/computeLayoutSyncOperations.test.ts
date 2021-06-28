@@ -28,8 +28,6 @@ function makeMetadata(
 
 describe("computeLayoutSyncOperations", () => {
   const state: PanelsState = {
-    id: "x",
-    name: "y",
     configById: {},
     globalVariables: {},
     linkedGlobalVariables: [],

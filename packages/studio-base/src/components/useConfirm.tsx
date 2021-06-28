@@ -50,7 +50,7 @@ export default function useConfirm(props: Props): {
 
   const buttons = [
     props.cancel !== false && (
-      <DefaultButton onClick={() => close(false)} text={props.cancel ?? "Cancel"} />
+      <DefaultButton key="cancel" onClick={() => close(false)} text={props.cancel ?? "Cancel"} />
     ),
     <DefaultButton
       key="confirm"

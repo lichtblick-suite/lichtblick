@@ -48,6 +48,7 @@ import { useAppConfiguration } from "@foxglove/studio-base/context/AppConfigurat
 import { useAssets } from "@foxglove/studio-base/context/AssetContext";
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
+import { useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
 import { PanelSettingsContext } from "@foxglove/studio-base/context/PanelSettingsContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
@@ -185,11 +186,17 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const isMounted = useMountedState();
 
-  const { loadLayout } = useCurrentLayoutActions();
+  const layoutStorage = useLayoutStorage();
+  const { setSelectedLayout } = useCurrentLayoutActions();
 
   const openWelcomeLayout = useCallback(async () => {
+    const newLayout = await layoutStorage.saveNewLayout({
+      path: [],
+      name: welcomeLayout.name,
+      data: welcomeLayout.data,
+    });
     if (isMounted()) {
-      loadLayout(welcomeLayout);
+      setSelectedLayout({ id: newLayout.id, data: welcomeLayout.data });
       if (isNonEmptyOrUndefined(props.demoBagUrl)) {
         selectSource(
           { name: "Demo Bag", type: "http" },
@@ -199,7 +206,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         );
       }
     }
-  }, [isMounted, loadLayout, selectSource, props.demoBagUrl]);
+  }, [layoutStorage, isMounted, setSelectedLayout, props.demoBagUrl, selectSource]);
 
   const handleInternalLink = useCallback((event: React.MouseEvent, href: string) => {
     if (href === "#help:message-path-syntax") {

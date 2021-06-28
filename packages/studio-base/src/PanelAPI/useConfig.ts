@@ -43,7 +43,9 @@ export function useConfigById<Config>(
 ): [Config, SaveConfig<Config>] {
   const { savePanelConfigs } = useCurrentLayoutActions();
   const config = useCurrentLayoutSelector((state) =>
-    panelId != undefined ? (state.configById[panelId] as Config | undefined) : undefined,
+    panelId != undefined
+      ? (state.selectedLayout?.data.configById[panelId] as Config | undefined)
+      : undefined,
   );
   if (panelId != undefined && !defaultConfig) {
     throw new Error(`Attempt to useConfig() but panel ${panelId} has no defaultConfig`);

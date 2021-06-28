@@ -64,7 +64,7 @@ const PlaybackTimeDisplayMethod = ({
   isPlaying: boolean;
 }): JSX.Element => {
   const timeDisplayMethod = useCurrentLayoutSelector(
-    (state) => state.playbackConfig.timeDisplayMethod ?? "ROS",
+    (state) => state.selectedLayout?.data.playbackConfig.timeDisplayMethod ?? "ROS",
   );
   const { setPlaybackConfig } = useCurrentLayoutActions();
   const setTimeDisplayMethod = useCallback(

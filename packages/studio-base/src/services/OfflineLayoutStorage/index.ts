@@ -138,28 +138,20 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
     path: string[];
     name: string;
     data: PanelsState;
-  }): Promise<void> {
-    await this.cacheStorage.runExclusive((cache) =>
-      cache.put({ id: uuidv4(), name, path, state: data }),
-    );
+  }): Promise<LayoutMetadata> {
+    return this.cacheStorage.runExclusive(async (cache) => {
+      const layout = { id: uuidv4(), name, path, state: data };
+      await cache.put(layout);
+      return getEffectiveMetadata(layout);
+    });
   }
 
-  async updateLayout({
-    path,
-    name,
-    data,
-    targetID,
-  }: {
-    path: string[];
-    name: string;
-    data: PanelsState;
-    targetID: LayoutID;
-  }): Promise<void> {
+  async updateLayout({ targetID, data }: { targetID: LayoutID; data: PanelsState }): Promise<void> {
     await this.updateCachedLayout(targetID, (layout) => {
       if (!layout) {
         throw new Error("Updating a layout not present in the cache");
       }
-      return { ...layout, path, name, state: data, locallyModified: true };
+      return { ...layout, state: data, locallyModified: true };
     });
   }
 

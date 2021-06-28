@@ -12,16 +12,16 @@ import { usePanelSettings } from "@foxglove/studio-base/context/PanelSettingsCon
 import { getPanelIdForType } from "@foxglove/studio-base/util/layout";
 
 export default function useAddPanel(): (selection: PanelSelection) => void {
-  const { addPanel, getCurrentLayout } = useCurrentLayoutActions();
+  const { addPanel } = useCurrentLayoutActions();
   const { openPanelSettings } = usePanelSettings();
   const { setSelectedPanelIds } = useSelectedPanels();
   return useCallback(
     ({ type, config, relatedConfigs }: PanelSelection) => {
       const id = getPanelIdForType(type);
-      addPanel({ id, layout: getCurrentLayout().layout, config, relatedConfigs });
+      addPanel({ id, config, relatedConfigs });
       setSelectedPanelIds([id]);
       openPanelSettings();
     },
-    [addPanel, setSelectedPanelIds, getCurrentLayout, openPanelSettings],
+    [addPanel, setSelectedPanelIds, openPanelSettings],
   );
 }

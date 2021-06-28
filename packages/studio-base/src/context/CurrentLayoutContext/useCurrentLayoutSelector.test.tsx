@@ -4,21 +4,26 @@
 import { act, renderHook } from "@testing-library/react-hooks";
 import { useLayoutEffect } from "react";
 
-import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import CurrentLayoutState, {
   DEFAULT_LAYOUT_FOR_TESTS,
 } from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
 
-import CurrentLayoutContext, { useCurrentLayoutSelector } from "./index";
+import CurrentLayoutContext, { LayoutState, useCurrentLayoutSelector } from "./index";
 
 describe("useCurrentLayoutSelector", () => {
   it("updates when layout changes", () => {
     const state = new CurrentLayoutState({
-      ...DEFAULT_LAYOUT_FOR_TESTS,
-      configById: { foo: { value: 42 } },
+      selectedLayout: {
+        ...DEFAULT_LAYOUT_FOR_TESTS.selectedLayout!,
+        data: {
+          ...DEFAULT_LAYOUT_FOR_TESTS.selectedLayout!.data,
+          configById: { foo: { value: 42 } },
+        },
+      },
     });
     const { result } = renderHook((selector) => useCurrentLayoutSelector(selector), {
-      initialProps: (panelsState: PanelsState) => panelsState.configById["foo"],
+      initialProps: (layoutState: LayoutState) =>
+        layoutState.selectedLayout?.data.configById["foo"],
       wrapper({ children }) {
         return (
           <CurrentLayoutContext.Provider value={state}>{children}</CurrentLayoutContext.Provider>
@@ -34,15 +39,21 @@ describe("useCurrentLayoutSelector", () => {
 
   it("updates when selector changes", () => {
     const state = new CurrentLayoutState({
-      ...DEFAULT_LAYOUT_FOR_TESTS,
-      configById: {
-        foo: { value: 42 },
-        bar: { otherValue: 0 },
+      selectedLayout: {
+        ...DEFAULT_LAYOUT_FOR_TESTS.selectedLayout!,
+        data: {
+          ...DEFAULT_LAYOUT_FOR_TESTS.selectedLayout!.data,
+          configById: {
+            foo: { value: 42 },
+            bar: { otherValue: 0 },
+          },
+        },
       },
     });
 
     const { result, rerender } = renderHook((selector) => useCurrentLayoutSelector(selector), {
-      initialProps: (panelsState: PanelsState) => panelsState.configById["foo"],
+      initialProps: (layoutState: LayoutState) =>
+        layoutState.selectedLayout?.data.configById["foo"],
       wrapper({ children }) {
         return (
           <CurrentLayoutContext.Provider value={state}>{children}</CurrentLayoutContext.Provider>
@@ -52,16 +63,21 @@ describe("useCurrentLayoutSelector", () => {
 
     expect(result.all).toEqual([{ value: 42 }]);
 
-    rerender((panelsState) => panelsState.configById["bar"]);
+    rerender((layoutState) => layoutState.selectedLayout?.data.configById["bar"]);
     expect(result.all).toEqual([{ value: 42 }, { otherValue: 0 }]);
   });
 
   it("updates when state changes before subscribe", () => {
     const state = new CurrentLayoutState({
-      ...DEFAULT_LAYOUT_FOR_TESTS,
-      configById: {
-        foo: { value: 42 },
-        bar: { otherValue: 0 },
+      selectedLayout: {
+        ...DEFAULT_LAYOUT_FOR_TESTS.selectedLayout!,
+        data: {
+          ...DEFAULT_LAYOUT_FOR_TESTS.selectedLayout!.data,
+          configById: {
+            foo: { value: 42 },
+            bar: { otherValue: 0 },
+          },
+        },
       },
     });
 
@@ -76,7 +92,8 @@ describe("useCurrentLayoutSelector", () => {
     }
 
     const { result } = renderHook((selector) => useCurrentLayoutSelector(selector), {
-      initialProps: (panelsState: PanelsState) => panelsState.configById["foo"],
+      initialProps: (layoutState: LayoutState) =>
+        layoutState.selectedLayout?.data.configById["foo"],
       wrapper({ children }) {
         return (
           <CurrentLayoutContext.Provider value={state}>

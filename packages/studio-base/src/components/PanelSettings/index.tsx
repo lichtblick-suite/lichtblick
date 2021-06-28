@@ -36,7 +36,7 @@ export default function PanelSettings(): JSX.Element {
 
   const theme = useTheme();
   const panelCatalog = usePanelCatalog();
-  const { getCurrentLayout, savePanelConfigs } = useCurrentLayoutActions();
+  const { getCurrentLayoutState: getCurrentLayout, savePanelConfigs } = useCurrentLayoutActions();
   const panelType = useMemo(
     () => (selectedPanelId != undefined ? getPanelTypeFromId(selectedPanelId) : undefined),
     [selectedPanelId],
@@ -48,10 +48,10 @@ export default function PanelSettings(): JSX.Element {
 
   const [showShareModal, setShowShareModal] = useState(false);
   const shareModal = useMemo(() => {
-    if (selectedPanelId == undefined || !showShareModal) {
+    const panelConfigById = getCurrentLayout().selectedLayout?.data.configById;
+    if (selectedPanelId == undefined || !showShareModal || !panelConfigById) {
       return ReactNull;
     }
-    const panelConfigById = getCurrentLayout().configById;
     return (
       <ShareJsonModal
         onRequestClose={() => setShowShareModal(false)}

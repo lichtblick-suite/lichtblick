@@ -36,7 +36,6 @@ import {
   MosaicWindowContext,
   getNodeAtPath,
   getOtherBranch,
-  isParent,
   updateTree,
   MosaicNode,
 } from "react-mosaic-component";
@@ -52,7 +51,6 @@ import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import {
   useCurrentLayoutActions,
-  useCurrentLayoutSelector,
   useSelectedPanels,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
@@ -138,12 +136,13 @@ export default function Panel<Config extends PanelConfig>(
       [isSelected, selectedPanelIds],
     );
 
-    const isOnlyPanel = useCurrentLayoutSelector((state) =>
-      tabId != undefined || state.layout == undefined ? false : !isParent(state.layout),
-    );
-
-    const { savePanelConfigs, updatePanelConfigs, createTabPanel, closePanel, getCurrentLayout } =
-      useCurrentLayoutActions();
+    const {
+      savePanelConfigs,
+      updatePanelConfigs,
+      createTabPanel,
+      closePanel,
+      getCurrentLayoutState: getCurrentLayout,
+    } = useCurrentLayoutActions();
 
     const [quickActionsKeyPressed, setQuickActionsKeyPressed] = useState(false);
     const [shiftKeyPressed, setShiftKeyPressed] = useState(false);
@@ -168,6 +167,10 @@ export default function Panel<Config extends PanelConfig>(
     // If such a panel already exists, we update it with the new props.
     const openSiblingPanel = useCallback(
       (panelType: string, siblingConfigCreator: (arg0: PanelConfig) => PanelConfig) => {
+        const panelsState = getCurrentLayout().selectedLayout?.data;
+        if (!panelsState) {
+          return;
+        }
         const siblingPanel = panelCatalog.getPanelByType(panelType);
         const siblingComponent = siblingPanel?.component;
         if (!siblingComponent) {
@@ -184,7 +187,7 @@ export default function Panel<Config extends PanelConfig>(
         if (typeof siblingId === "string" && getPanelTypeFromId(siblingId) === panelType) {
           const siblingConfig: PanelConfig = {
             ...siblingDefaultConfig,
-            ...getCurrentLayout().configById[siblingId],
+            ...panelsState.configById[siblingId],
           };
           savePanelConfigs({
             configs: [
@@ -254,7 +257,7 @@ export default function Panel<Config extends PanelConfig>(
     );
 
     const groupPanels = useCallback(() => {
-      const layout = getCurrentLayout().layout;
+      const layout = getCurrentLayout().selectedLayout?.data.layout;
       if (layout == undefined) {
         return;
       }
@@ -267,7 +270,7 @@ export default function Panel<Config extends PanelConfig>(
     }, [getCurrentLayout, getSelectedPanelIds, createTabPanel, childId]);
 
     const createTabs = useCallback(() => {
-      const layout = getCurrentLayout().layout;
+      const layout = getCurrentLayout().selectedLayout?.data.layout;
       if (layout == undefined) {
         return;
       }
@@ -288,7 +291,10 @@ export default function Panel<Config extends PanelConfig>(
     }, [closePanel, mosaicActions, mosaicWindowActions, tabId]);
 
     const splitPanel = useCallback(() => {
-      const savedProps = getCurrentLayout().configById;
+      const savedProps = getCurrentLayout().selectedLayout?.data.configById;
+      if (!savedProps) {
+        return;
+      }
       const tabSavedProps = tabId != undefined ? (savedProps[tabId] as TabPanelConfig) : undefined;
       if (tabId != undefined && tabSavedProps != undefined && childId != undefined) {
         const newId = getPanelIdForType(PanelComponent.panelType);
@@ -489,7 +495,7 @@ export default function Panel<Config extends PanelConfig>(
                     {shiftKeyPressed ? "Lock fullscreen" : "Fullscreen (Shift+click to lock)"}
                   </div>
                   <div>
-                    <Button onClick={removePanel} disabled={isOnlyPanel}>
+                    <Button onClick={removePanel}>
                       <TrashCanOutlineIcon />
                       Remove
                     </Button>
@@ -498,7 +504,6 @@ export default function Panel<Config extends PanelConfig>(
                       Split
                     </Button>
                   </div>
-                  {!isOnlyPanel && <p>Drag to move</p>}
                 </div>
               </div>
             )}

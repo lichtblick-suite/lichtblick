@@ -17,7 +17,7 @@ function assertLayout(value: unknown): asserts value is CachedLayout {
 }
 
 // Implement a LayoutStorage interface over OsContext
-export default class NativeStorageLayoutStorage implements ILayoutCache {
+export default class NativeStorageLayoutCache implements ILayoutCache {
   private static STORE_NAME = "layouts";
 
   private _ctx: Storage;
@@ -27,7 +27,7 @@ export default class NativeStorageLayoutStorage implements ILayoutCache {
   }
 
   async list(): Promise<readonly CachedLayout[]> {
-    const items = await this._ctx.all(NativeStorageLayoutStorage.STORE_NAME);
+    const items = await this._ctx.all(NativeStorageLayoutCache.STORE_NAME);
 
     const layouts: CachedLayout[] = [];
     for (const item of items) {
@@ -45,7 +45,7 @@ export default class NativeStorageLayoutStorage implements ILayoutCache {
   }
 
   async get(id: string): Promise<CachedLayout | undefined> {
-    const item = await this._ctx.get(NativeStorageLayoutStorage.STORE_NAME, id);
+    const item = await this._ctx.get(NativeStorageLayoutCache.STORE_NAME, id);
     if (item == undefined) {
       return undefined;
     }
@@ -62,10 +62,10 @@ export default class NativeStorageLayoutStorage implements ILayoutCache {
 
   async put(layout: CachedLayout): Promise<void> {
     const content = JSON.stringify(layout);
-    return this._ctx.put(NativeStorageLayoutStorage.STORE_NAME, layout.id, content);
+    return this._ctx.put(NativeStorageLayoutCache.STORE_NAME, layout.id, content);
   }
 
   async delete(id: string): Promise<void> {
-    return this._ctx.delete(NativeStorageLayoutStorage.STORE_NAME, id);
+    return this._ctx.delete(NativeStorageLayoutCache.STORE_NAME, id);
   }
 }

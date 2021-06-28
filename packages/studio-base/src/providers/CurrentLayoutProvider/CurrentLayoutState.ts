@@ -5,7 +5,7 @@ import { isEqual } from "lodash";
 import { getNodeAtPath } from "react-mosaic-component";
 import { v4 as uuidv4 } from "uuid";
 
-import { CurrentLayout } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { ICurrentLayout, LayoutState } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import {
   ADD_PANEL,
   CHANGE_PANEL_LAYOUT,
@@ -13,7 +13,6 @@ import {
   CREATE_TAB_PANEL,
   DROP_PANEL,
   END_DRAG,
-  LOAD_LAYOUT,
   MOVE_TAB,
   OVERWRITE_GLOBAL_DATA,
   PanelsActions,
@@ -31,51 +30,57 @@ import {
 import panelsReducer, {
   defaultPlaybackConfig,
 } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
+import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 import UndoRedo from "@foxglove/studio-base/util/UndoRedo";
 
-export const DEFAULT_LAYOUT_FOR_TESTS: PanelsState = {
-  id: "FOR_TESTS",
-  name: "FOR_TESTS",
-  configById: {},
-  globalVariables: {},
-  userNodes: {},
-  linkedGlobalVariables: [],
-  playbackConfig: defaultPlaybackConfig,
+export const DEFAULT_LAYOUT_FOR_TESTS: LayoutState = {
+  selectedLayout: {
+    id: "FOR_TESTS" as LayoutID,
+    data: {
+      configById: {},
+      globalVariables: {},
+      userNodes: {},
+      linkedGlobalVariables: [],
+      playbackConfig: defaultPlaybackConfig,
+    },
+  },
 };
 
 const LAYOUT_HISTORY_SIZE = 20;
 const LAYOUT_HISTORY_THROTTLE_MS = 1000;
 
-export default class CurrentLayoutState implements CurrentLayout {
-  private undoRedo: UndoRedo<PanelsState>;
-  private panelsState: PanelsState;
-  private panelsStateListeners = new Set<(_: PanelsState) => void>();
+export default class CurrentLayoutState implements ICurrentLayout {
+  private undoRedo: UndoRedo<LayoutState>;
+  private layoutState: LayoutState;
+  private layoutStateListeners = new Set<(_: LayoutState) => void>();
   private selectedPanelIds: readonly string[] = [];
   private selectedPanelIdsListeners = new Set<(_: readonly string[]) => void>();
 
   mosaicId = uuidv4();
 
-  constructor(initialState: PanelsState) {
-    this.panelsState = initialState;
-    // Run the reducer once to ensure any migrations happen (e.g. savedProps->configById)
-    this.dispatch({ type: "LOAD_LAYOUT", payload: initialState });
+  constructor(initialState: LayoutState) {
+    this.layoutState = { selectedLayout: undefined };
+    // Run the loadLayout action once to ensure any migrations happen (e.g. savedProps->configById)
+    if (initialState.selectedLayout) {
+      this.actions.setSelectedLayout(initialState.selectedLayout);
+    }
 
-    this.undoRedo = new UndoRedo<PanelsState>(this.panelsState, {
+    this.undoRedo = new UndoRedo(this.layoutState, {
       isEqual,
       historySize: LAYOUT_HISTORY_SIZE,
       throttleMs: LAYOUT_HISTORY_THROTTLE_MS,
     });
 
-    this.addPanelsStateListener((state) => {
+    this.addLayoutStateListener((state) => {
       this.undoRedo.updateState(state);
     });
   }
 
-  addPanelsStateListener = (listener: (_: PanelsState) => void): void => {
-    this.panelsStateListeners.add(listener);
+  addLayoutStateListener = (listener: (_: LayoutState) => void): void => {
+    this.layoutStateListeners.add(listener);
   };
-  removePanelsStateListener = (listener: (_: PanelsState) => void): void => {
-    this.panelsStateListeners.delete(listener);
+  removeLayoutStateListener = (listener: (_: LayoutState) => void): void => {
+    this.layoutStateListeners.delete(listener);
   };
   addSelectedPanelIdsListener = (listener: (_: readonly string[]) => void): void => {
     this.selectedPanelIdsListeners.add(listener);
@@ -85,7 +90,7 @@ export default class CurrentLayoutState implements CurrentLayout {
   };
 
   setSelectedPanelIds = (
-    value: readonly string[] | ((prevState: readonly string[]) => string[]),
+    value: readonly string[] | ((prevState: readonly string[]) => readonly string[]),
   ): void => {
     this.selectedPanelIds = typeof value === "function" ? value(this.selectedPanelIds) : value;
     for (const listener of [...this.selectedPanelIdsListeners]) {
@@ -97,9 +102,47 @@ export default class CurrentLayoutState implements CurrentLayout {
   };
 
   actions = {
-    getCurrentLayout: (): PanelsState => this.panelsState,
-    undoLayoutChange: (): void => this.undoRedo.undo(this.actions.loadLayout),
-    redoLayoutChange: (): void => this.undoRedo.redo(this.actions.loadLayout),
+    getCurrentLayoutState: (): LayoutState => this.layoutState,
+    undoLayoutChange: (): void =>
+      this.undoRedo.undo(({ selectedLayout }) => this.actions.setSelectedLayout(selectedLayout)),
+    redoLayoutChange: (): void =>
+      this.undoRedo.redo(({ selectedLayout }) => this.actions.setSelectedLayout(selectedLayout)),
+
+    setSelectedLayout: (
+      newLayout:
+        | {
+            id: LayoutID;
+            data: Partial<PanelsState> & {
+              // these used to be stored in PanelsState but are no longer; we remove them here.
+              id?: undefined;
+              name?: undefined;
+            };
+          }
+        | undefined,
+    ): void =>
+      this.updateState(() => {
+        if (!newLayout) {
+          return { selectedLayout: undefined };
+        }
+        const {
+          id,
+          data: { id: _id, name: _name, savedProps, ...panelsState },
+        } = newLayout;
+        return {
+          selectedLayout: {
+            id,
+            data: {
+              ...panelsState,
+              // configById was previously named savedProps; merge them for backward compatibility
+              configById: { ...panelsState.configById, ...savedProps },
+              globalVariables: panelsState.globalVariables ?? {},
+              userNodes: panelsState.userNodes ?? {},
+              linkedGlobalVariables: panelsState.linkedGlobalVariables ?? [],
+              playbackConfig: panelsState.playbackConfig ?? defaultPlaybackConfig,
+            },
+          },
+        };
+      }),
 
     savePanelConfigs: (payload: SAVE_PANEL_CONFIGS["payload"]): void =>
       this.dispatch({ type: "SAVE_PANEL_CONFIGS", payload }),
@@ -114,8 +157,6 @@ export default class CurrentLayoutState implements CurrentLayout {
     },
     changePanelLayout: (payload: CHANGE_PANEL_LAYOUT["payload"]): void =>
       this.dispatch({ type: "CHANGE_PANEL_LAYOUT", payload }),
-    loadLayout: (payload: LOAD_LAYOUT["payload"]): void =>
-      this.dispatch({ type: "LOAD_LAYOUT", payload }),
     overwriteGlobalVariables: (payload: OVERWRITE_GLOBAL_DATA["payload"]): void =>
       this.dispatch({ type: "OVERWRITE_GLOBAL_DATA", payload }),
     setGlobalVariables: (payload: SET_GLOBAL_DATA["payload"]): void =>
@@ -146,10 +187,24 @@ export default class CurrentLayoutState implements CurrentLayout {
     endDrag: (payload: END_DRAG["payload"]): void => this.dispatch({ type: "END_DRAG", payload }),
   };
 
-  private dispatch(action: PanelsActions) {
-    this.panelsState = panelsReducer(this.panelsState, action);
-    for (const listener of [...this.panelsStateListeners]) {
-      listener(this.panelsState);
+  private updateState(updater: (state: LayoutState) => LayoutState) {
+    this.layoutState = updater(this.layoutState);
+    for (const listener of [...this.layoutStateListeners]) {
+      listener(this.layoutState);
     }
+  }
+
+  private dispatch(action: PanelsActions) {
+    this.updateState((state) => {
+      if (!state.selectedLayout) {
+        return state;
+      }
+      return {
+        selectedLayout: {
+          id: state.selectedLayout.id,
+          data: panelsReducer(state.selectedLayout.data, action),
+        },
+      };
+    });
   }
 }

@@ -157,7 +157,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
 
 export default function PanelLayout(): JSX.Element {
   const { changePanelLayout } = useCurrentLayoutActions();
-  const layout = useCurrentLayoutSelector((state) => state.layout);
+  const layout = useCurrentLayoutSelector((state) => state.selectedLayout?.data.layout);
   const onChange = useCallback(
     (newLayout: MosaicNode<string>) => {
       changePanelLayout({ layout: newLayout });

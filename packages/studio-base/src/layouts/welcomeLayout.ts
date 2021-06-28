@@ -4,9 +4,7 @@
 
 import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 
-const state: PanelsState = {
-  id: "eb73965c-7fce-4dcc-9666-efc543c068ee",
-  name: "Welcome Layout",
+const data: PanelsState = {
   layout: {
     first: {
       first: {
@@ -169,4 +167,8 @@ const state: PanelsState = {
     timeDisplayMethod: "ROS",
   },
 };
-export default state;
+
+export default {
+  name: "Welcome to Foxglove Studio",
+  data,
+};

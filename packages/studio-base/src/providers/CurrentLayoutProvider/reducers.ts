@@ -23,7 +23,6 @@ import {
   MosaicParent,
   MosaicNode,
 } from "react-mosaic-component";
-import { v4 as uuidv4 } from "uuid";
 
 import {
   StartDragPayload,
@@ -308,24 +307,6 @@ const createTabPanelWithMultipleTabs = (
   return newPanelsState;
 };
 
-function loadLayout(
-  _state: PanelsState,
-  { savedProps, ...payload }: Partial<PanelsState>,
-): PanelsState {
-  return {
-    ...payload,
-    id: payload.id ?? uuidv4(),
-    name: payload.name ?? "unnamed",
-    layout: payload.layout,
-    // configById was previously named savedProps; merge them for backward compatibility
-    configById: { ...payload.configById, ...savedProps },
-    globalVariables: payload.globalVariables ?? {},
-    userNodes: payload.userNodes ?? {},
-    linkedGlobalVariables: payload.linkedGlobalVariables ?? [],
-    playbackConfig: payload.playbackConfig ?? defaultPlaybackConfig,
-  };
-}
-
 const moveTab = (panelsState: PanelsState, { source, target }: MoveTabPayload): PanelsState => {
   const saveConfigsPayload =
     source.panelId === target.panelId
@@ -336,16 +317,23 @@ const moveTab = (panelsState: PanelsState, { source, target }: MoveTabPayload): 
 
 const addPanel = (
   panelsState: PanelsState,
-  { tabId, layout, id, config, relatedConfigs }: AddPanelPayload,
+  { tabId, id, config, relatedConfigs }: AddPanelPayload,
 ) => {
   let newPanelsState = { ...panelsState };
   let saveConfigsPayload: { configs: ConfigsPayload[] } = { configs: [] };
   if (config) {
     saveConfigsPayload = getSaveConfigsPayloadForAddedPanel({ id, config, relatedConfigs });
   }
-  const fixedLayout = isEmpty(layout)
+  let layout: MosaicNode<string> | undefined;
+  if (tabId != undefined) {
+    const tabPanelConfig = panelsState.configById[tabId] as TabPanelConfig | undefined;
+    layout = tabPanelConfig?.tabs[tabPanelConfig.activeTabIdx]?.layout;
+  } else {
+    layout = panelsState.layout;
+  }
+  const fixedLayout: MosaicNode<string> = isEmpty(layout)
     ? id
-    : ({ direction: "row", first: id, second: layout } as MosaicParent<string>);
+    : { direction: "row", first: id, second: layout as MosaicNode<string> };
   const changeLayoutPayload = {
     layout: fixedLayout,
     trimConfigById: !relatedConfigs,
@@ -767,10 +755,6 @@ const panelsReducer = function (panelsState: PanelsState, action: PanelsActions)
       newPanelsState = action.payload.singleTab
         ? createTabPanelWithSingleTab(newPanelsState, action.payload)
         : createTabPanelWithMultipleTabs(newPanelsState, action.payload);
-      break;
-
-    case "LOAD_LAYOUT":
-      newPanelsState = loadLayout(newPanelsState, action.payload);
       break;
 
     case "OVERWRITE_GLOBAL_DATA":

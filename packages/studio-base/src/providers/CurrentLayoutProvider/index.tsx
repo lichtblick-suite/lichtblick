@@ -5,12 +5,13 @@ import { isEqual } from "lodash";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useToasts } from "react-toast-notifications";
 import { useAsync, useThrottle } from "react-use";
-import { v4 as uuidv4 } from "uuid";
 
 import Logger from "@foxglove/log";
-import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
+import CurrentLayoutContext, {
+  LayoutState,
+} from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { useLayoutCache } from "@foxglove/studio-base/context/LayoutCacheContext";
+import { useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
 import { useUserProfileStorage } from "@foxglove/studio-base/context/UserProfileStorageContext";
 import welcomeLayout from "@foxglove/studio-base/layouts/welcomeLayout";
 import CurrentLayoutState from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
@@ -18,7 +19,7 @@ import CurrentLayoutState from "@foxglove/studio-base/providers/CurrentLayoutPro
 const log = Logger.getLogger(__filename);
 
 function migrateLegacyLayoutFromLocalStorage() {
-  let result: PanelsState | undefined;
+  let result: (Omit<PanelsState, "name"> & { name?: string }) | undefined;
   for (const key of ["webvizGlobalState", "studioGlobalState"]) {
     const value = localStorage.getItem(key);
     if (value != undefined) {
@@ -41,58 +42,59 @@ function migrateLegacyLayoutFromLocalStorage() {
 function CurrentLayoutProviderWithInitialState({
   initialState,
   children,
-}: React.PropsWithChildren<{ initialState: PanelsState }>) {
+}: React.PropsWithChildren<{ initialState: LayoutState }>) {
   const { addToast } = useToasts();
 
   const { setUserProfile } = useUserProfileStorage();
-  const layoutStorage = useLayoutCache();
+  const layoutStorage = useLayoutStorage();
 
   const [stateInstance] = useState(() => new CurrentLayoutState(initialState));
-  const [panelsState, setPanelsState] = useState(() => stateInstance.actions.getCurrentLayout());
+  const [layoutState, setLayoutState] = useState(() =>
+    stateInstance.actions.getCurrentLayoutState(),
+  );
 
-  const lastCurrentLayoutId = useRef(initialState.id);
-  const previousSavedState = useRef<PanelsState | undefined>();
+  const lastCurrentLayoutId = useRef(initialState.selectedLayout?.id);
+  const previousSavedState = useRef<LayoutState | undefined>();
 
   useLayoutEffect(() => {
-    const currentState = stateInstance.actions.getCurrentLayout();
+    const currentState = stateInstance.actions.getCurrentLayoutState();
     // Skip initial save to LayoutStorage unless the layout changed since we initialized
     // CurrentLayoutState (e.g. for migrations)
     if (previousSavedState.current == undefined && isEqual(initialState, currentState)) {
       previousSavedState.current = currentState;
     }
-    const listener = (state: PanelsState) => {
+    const listener = (state: LayoutState) => {
       // When a new layout is selected, we don't need to save it back to storage
-      if (state.id !== previousSavedState.current?.id) {
+      if (state.selectedLayout?.id !== previousSavedState.current?.selectedLayout?.id) {
         previousSavedState.current = state;
       }
-      setPanelsState(state);
+      log.debug("state changed");
+      setLayoutState(state);
     };
-    stateInstance.addPanelsStateListener(listener);
-    return () => stateInstance.removePanelsStateListener(listener);
+    stateInstance.addLayoutStateListener(listener);
+    return () => stateInstance.removeLayoutStateListener(listener);
   }, [initialState, stateInstance]);
 
   // Save the layout to LayoutStorage.
   // Debounce the panel state to avoid persisting the layout constantly as the user is adjusting it
-  const throttledPanelsState = useThrottle(panelsState, 1000 /* 1 second */);
+  const throttledLayoutState = useThrottle(layoutState, 1000 /* 1 second */);
   useEffect(() => {
-    if (throttledPanelsState === previousSavedState.current) {
+    if (throttledLayoutState === previousSavedState.current) {
       // Don't save a layout that we just loaded
       return;
     }
-    previousSavedState.current = throttledPanelsState;
-    if (throttledPanelsState.id == undefined || throttledPanelsState.name == undefined) {
-      addToast(`The current layout could not be saved: missing id or name.`, {
-        appearance: "error",
-        id: "CurrentLayoutProvider.layoutStorage.put",
-      });
+    previousSavedState.current = throttledLayoutState;
+    const { selectedLayout } = throttledLayoutState;
+    if (selectedLayout == undefined) {
       return;
     }
+    log.debug("updateLayout");
     layoutStorage
-      .put({
-        id: throttledPanelsState.id,
+      .updateLayout({
+        targetID: selectedLayout.id,
+        data: selectedLayout.data,
         path: undefined,
-        name: throttledPanelsState.name,
-        state: throttledPanelsState,
+        name: undefined,
       })
       .catch((error) => {
         log.error(error);
@@ -101,22 +103,23 @@ function CurrentLayoutProviderWithInitialState({
           id: "CurrentLayoutProvider.layoutStorage.put",
         });
       });
-  }, [addToast, layoutStorage, throttledPanelsState]);
+  }, [addToast, layoutStorage, throttledLayoutState]);
 
   // Save the selected layout id to the UserProfile.
   useEffect(() => {
-    if (panelsState.id === lastCurrentLayoutId.current) {
+    if (layoutState.selectedLayout?.id === lastCurrentLayoutId.current) {
       return;
     }
-    lastCurrentLayoutId.current = panelsState.id;
-    setUserProfile({ currentLayoutId: panelsState.id }).catch((error) => {
+    lastCurrentLayoutId.current = layoutState.selectedLayout?.id;
+    log.debug("setUserProfile");
+    setUserProfile({ currentLayoutId: layoutState.selectedLayout?.id }).catch((error) => {
       console.error(error);
       addToast(`The current layout could not be saved. ${error.toString()}`, {
         appearance: "error",
         id: "CurrentLayoutProvider.setUserProfile",
       });
     });
-  }, [setUserProfile, panelsState.id, addToast]);
+  }, [setUserProfile, addToast, layoutState.selectedLayout?.id]);
 
   return (
     <CurrentLayoutContext.Provider value={stateInstance}>{children}</CurrentLayoutContext.Provider>
@@ -134,29 +137,40 @@ export default function CurrentLayoutProvider({
   const { addToast } = useToasts();
 
   const { getUserProfile } = useUserProfileStorage();
-  const layoutStorage = useLayoutCache();
+  const layoutStorage = useLayoutStorage();
 
-  const loadInitialState = useAsync(async (): Promise<PanelsState | undefined> => {
+  const loadInitialState = useAsync(async (): Promise<LayoutState> => {
     try {
       // If a legacy layout exists in localStorage, prefer that.
-      // The CurrentLayoutProviderWithInitialState will handle persisting this into LayoutStorage.
       const legacyLayout = migrateLegacyLayoutFromLocalStorage();
       if (legacyLayout != undefined) {
-        legacyLayout.id ??= uuidv4();
-        legacyLayout.name ??= "unnamed";
-        return legacyLayout;
+        const { name = "unnamed", ...data } = legacyLayout;
+        const newLayout = await layoutStorage.saveNewLayout({ path: [], name, data });
+        return { selectedLayout: { id: newLayout.id, data } };
       }
       // If the user's previously selected layout can be loaded, use it
       const { currentLayoutId } = await getUserProfile();
       if (currentLayoutId != undefined) {
-        const layout = await layoutStorage.get(currentLayoutId);
-        if (layout?.state) {
-          return layout.state;
+        const layout = await layoutStorage.getLayout(currentLayoutId);
+        if (layout != undefined) {
+          return { selectedLayout: { id: layout.id, data: layout.data } };
         }
       }
       // Otherwise try to choose any available layout
-      const allLayouts = await layoutStorage.list();
-      return allLayouts[0]?.state;
+      const allLayouts = await layoutStorage.getLayouts();
+      if (allLayouts[0]) {
+        const layout = await layoutStorage.getLayout(allLayouts[0].id);
+        if (layout) {
+          return { selectedLayout: { id: layout.id, data: layout.data } };
+        }
+      }
+      // If none were available, load the welcome layout.
+      const newLayout = await layoutStorage.saveNewLayout({
+        path: [],
+        name: welcomeLayout.name,
+        data: welcomeLayout.data,
+      });
+      return { selectedLayout: { id: newLayout.id, data: welcomeLayout.data } };
     } catch (error) {
       console.error(error);
       addToast(`The current layout could not be loaded. ${error.toString()}`, {
@@ -164,16 +178,17 @@ export default function CurrentLayoutProvider({
         id: "CurrentLayoutProvider.load",
       });
     }
-    return undefined;
+    return { selectedLayout: undefined };
   }, [addToast, getUserProfile, layoutStorage]);
 
   if (loadInitialState.loading) {
     return ReactNull;
   }
 
-  // If we were unable to determine an available layout to load, just load the welcome layout.
   return (
-    <CurrentLayoutProviderWithInitialState initialState={loadInitialState.value ?? welcomeLayout}>
+    <CurrentLayoutProviderWithInitialState
+      initialState={loadInitialState.value ?? { selectedLayout: undefined }}
+    >
       {children}
     </CurrentLayoutProviderWithInitialState>
   );

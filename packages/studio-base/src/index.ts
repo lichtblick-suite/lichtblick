@@ -18,8 +18,16 @@ export type {
   AppConfigurationValue,
   ChangeHandler,
 } from "./context/AppConfigurationContext";
-export { default as LayoutCacheContext } from "./context/LayoutCacheContext";
-export type { CachedLayout, ILayoutCache } from "@foxglove/studio-base/services/ILayoutCache";
+export { default as LayoutCacheContext, useLayoutCache } from "./context/LayoutCacheContext";
+export type { CachedLayout, ILayoutCache } from "./services/ILayoutCache";
+export type {
+  Layout,
+  LayoutMetadata,
+  LayoutID,
+  UserID,
+  ISO8601Timestamp,
+  ILayoutStorage,
+} from "./services/ILayoutStorage";
 export { default as NativeAppMenuContext } from "./context/NativeAppMenuContext";
 export type { NativeAppMenu, NativeAppMenuEvent } from "./context/NativeAppMenuContext";
 export type { PlayerSourceDefinition } from "./context/PlayerSelectionContext";
@@ -34,4 +42,14 @@ export type { ExtensionLoader, ExtensionInfo } from "./context/ExtensionLoaderCo
 export { default as AuthContext, useAuth } from "./context/AuthContext";
 export type { Auth, CurrentUser } from "./context/AuthContext";
 export { default as LayoutStorageContext } from "./context/LayoutStorageContext";
-export type { IRemoteLayoutStorage as RemoteLayoutStorage } from "@foxglove/studio-base/services/IRemoteLayoutStorage";
+export type {
+  RemoteLayout,
+  RemoteLayoutMetadata,
+  IRemoteLayoutStorage,
+} from "./services/IRemoteLayoutStorage";
+export { default as CacheOnlyLayoutStorage } from "./services/CacheOnlyLayoutStorage";
+export { default as CacheOnlyLayoutStorageProvider } from "./providers/CacheOnlyLayoutStorageProvider";
+export { AppSetting } from "./AppSetting";
+export { useAppConfigurationValue } from "./hooks/useAppConfigurationValue";
+export type { PanelsState } from "./context/CurrentLayoutContext/actions";
+export { default as OfflineLayoutStorage } from "@foxglove/studio-base/services/OfflineLayoutStorage";

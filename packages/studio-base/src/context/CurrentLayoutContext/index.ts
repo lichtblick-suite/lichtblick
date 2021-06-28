@@ -10,6 +10,7 @@ import { selectWithUnstableIdentityWarning } from "@foxglove/studio-base/hooks/s
 import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedContext";
 import { LinkedGlobalVariables } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import toggleSelectedPanel from "@foxglove/studio-base/providers/CurrentLayoutProvider/toggleSelectedPanel";
+import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 import { PanelConfig, PlaybackConfig, UserNodes } from "@foxglove/studio-base/types/panels";
 
 import {
@@ -20,7 +21,6 @@ import {
   CreateTabPanelPayload,
   DropPanelPayload,
   EndDragPayload,
-  LoadLayoutPayload,
   MoveTabPayload,
   SaveConfigsPayload,
   SplitPanelPayload,
@@ -28,13 +28,17 @@ import {
   SwapPanelPayload,
 } from "./actions";
 
+export type LayoutState = Readonly<{
+  selectedLayout: { id: LayoutID; data: PanelsState } | undefined;
+}>;
+
 /**
  * Encapsulates the mosaic layout, user nodes, and playback settings (everything considered to be
  * part of a saved "layout") used by the current workspace.
  */
-export interface CurrentLayout {
-  addPanelsStateListener: (listener: (_: PanelsState) => void) => void;
-  removePanelsStateListener: (listener: (_: PanelsState) => void) => void;
+export interface ICurrentLayout {
+  addLayoutStateListener: (listener: (_: LayoutState) => void) => void;
+  removeLayoutStateListener: (listener: (_: LayoutState) => void) => void;
   addSelectedPanelIdsListener: (listener: (_: readonly string[]) => void) => void;
   removeSelectedPanelIdsListener: (listener: (_: readonly string[]) => void) => void;
 
@@ -46,7 +50,7 @@ export interface CurrentLayout {
 
   getSelectedPanelIds: () => readonly string[];
   setSelectedPanelIds: (
-    _: readonly string[] | ((prevState: readonly string[]) => string[]),
+    _: readonly string[] | ((prevState: readonly string[]) => readonly string[]),
   ) => void;
 
   actions: {
@@ -54,7 +58,9 @@ export interface CurrentLayout {
      * Returns the current state - useful for click handlers and callbacks that read the state
      * asynchronously and don't want to update every time the state changes.
      */
-    getCurrentLayout: () => PanelsState;
+    getCurrentLayoutState: () => LayoutState;
+
+    setSelectedLayout: (payload: { id: LayoutID; data: Partial<PanelsState> } | undefined) => void;
 
     undoLayoutChange: () => void;
     redoLayoutChange: () => void;
@@ -63,7 +69,7 @@ export interface CurrentLayout {
     updatePanelConfigs: (panelType: string, updater: (config: PanelConfig) => PanelConfig) => void;
     createTabPanel: (payload: CreateTabPanelPayload) => void;
     changePanelLayout: (payload: ChangePanelLayoutPayload) => void;
-    loadLayout: (payload: LoadLayoutPayload) => void;
+
     overwriteGlobalVariables: (payload: { [key: string]: unknown }) => void;
     setGlobalVariables: (payload: { [key: string]: unknown }) => void;
     setUserNodes: (payload: Partial<UserNodes>) => void;
@@ -80,7 +86,7 @@ export interface CurrentLayout {
   };
 }
 
-export type CurrentLayoutActions = CurrentLayout["actions"];
+export type CurrentLayoutActions = ICurrentLayout["actions"];
 
 export type SelectedPanelActions = {
   getSelectedPanelIds: () => readonly string[];
@@ -92,7 +98,7 @@ export type SelectedPanelActions = {
   togglePanelSelected: (panelId: string, containingTabId: string | undefined) => void;
 };
 
-const CurrentLayoutContext = createContext<CurrentLayout | undefined>(undefined);
+const CurrentLayoutContext = createContext<ICurrentLayout | undefined>(undefined);
 
 export function usePanelMosaicId(): string {
   return useGuaranteedContext(CurrentLayoutContext).mosaicId;
@@ -100,20 +106,23 @@ export function usePanelMosaicId(): string {
 export function useCurrentLayoutActions(): CurrentLayoutActions {
   return useGuaranteedContext(CurrentLayoutContext).actions;
 }
-export function useCurrentLayoutSelector<T>(selector: (panelsState: PanelsState) => T): T {
+export function useCurrentLayoutSelector<T>(selector: (layoutState: LayoutState) => T): T {
   const currentLayout = useGuaranteedContext(CurrentLayoutContext);
   const [_, forceUpdate] = useReducer((x: number) => x + 1, 0);
 
   const state = useRef<{ value: T; selector: typeof selector } | undefined>(undefined);
   if (!state.current || selector !== state.current.selector) {
     state.current = {
-      value: selectWithUnstableIdentityWarning(currentLayout.actions.getCurrentLayout(), selector),
+      value: selectWithUnstableIdentityWarning(
+        currentLayout.actions.getCurrentLayoutState(),
+        selector,
+      ),
       selector,
     };
   }
   useLayoutEffect(() => {
-    const listener = (newState: PanelsState) => {
-      const newValue = selectWithUnstableIdentityWarning(newState, selector);
+    const listener = (layoutState: LayoutState) => {
+      const newValue = selectWithUnstableIdentityWarning(layoutState, selector);
       if (newValue !== state.current?.value) {
         forceUpdate();
       }
@@ -123,9 +132,9 @@ export function useCurrentLayoutSelector<T>(selector: (panelsState: PanelsState)
       };
     };
     // Update if necessary, i.e. if the state has changed between render and this effect
-    listener(currentLayout.actions.getCurrentLayout());
-    currentLayout.addPanelsStateListener(listener);
-    return () => currentLayout.removePanelsStateListener(listener);
+    listener(currentLayout.actions.getCurrentLayoutState());
+    currentLayout.addLayoutStateListener(listener);
+    return () => currentLayout.removeLayoutStateListener(listener);
   }, [currentLayout, selector]);
 
   return state.current.value;
@@ -143,19 +152,28 @@ export function useSelectedPanels(): SelectedPanelActions {
 
   const setSelectedPanelIds = useGuaranteedContext(CurrentLayoutContext).setSelectedPanelIds;
   const getSelectedPanelIds = useGuaranteedContext(CurrentLayoutContext).getSelectedPanelIds;
-  const { getCurrentLayout } = useCurrentLayoutActions();
+  const { getCurrentLayoutState: getCurrentLayout } = useCurrentLayoutActions();
 
   const selectAllPanels = useCallback(() => {
     // eslint-disable-next-line no-restricted-syntax
-    const panelIds = getLeaves(getCurrentLayout().layout ?? null);
+    const panelIds = getLeaves(getCurrentLayout().selectedLayout?.data.layout ?? null);
     setSelectedPanelIds(panelIds);
   }, [getCurrentLayout, setSelectedPanelIds]);
 
   const togglePanelSelected = useCallback(
     (panelId: string, containingTabId: string | undefined) => {
-      setSelectedPanelIds((selectedIds) =>
-        toggleSelectedPanel(panelId, containingTabId, getCurrentLayout().configById, selectedIds),
-      );
+      setSelectedPanelIds((selectedIds) => {
+        const { selectedLayout } = getCurrentLayout();
+        if (!selectedLayout) {
+          return selectedIds;
+        }
+        return toggleSelectedPanel(
+          panelId,
+          containingTabId,
+          selectedLayout.data.configById,
+          selectedIds,
+        );
+      });
     },
     [setSelectedPanelIds, getCurrentLayout],
   );

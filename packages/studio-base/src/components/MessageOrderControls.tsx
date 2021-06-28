@@ -26,7 +26,9 @@ const messageOrderLabel = {
 };
 
 export default function MessageOrderControls(): JSX.Element {
-  const messageOrder = useCurrentLayoutSelector((state) => state.playbackConfig.messageOrder);
+  const messageOrder = useCurrentLayoutSelector(
+    (state) => state.selectedLayout?.data.playbackConfig.messageOrder ?? "receiveTime",
+  );
   const { setPlaybackConfig } = useCurrentLayoutActions();
 
   const setMessageOrder = useCallback(

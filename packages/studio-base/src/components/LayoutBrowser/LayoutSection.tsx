@@ -3,10 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { makeStyles, Stack, Text } from "@fluentui/react";
-import { AsyncState } from "react-use/lib/useAsyncFn";
+
+import { LayoutMetadata } from "@foxglove/studio-base/services/ILayoutStorage";
 
 import LayoutRow from "./LayoutRow";
-import { LayoutItem } from "./types";
 
 const useStyles = makeStyles((theme) => ({
   sectionHeader: [
@@ -22,10 +22,17 @@ const useStyles = makeStyles((theme) => ({
       marginBottom: theme.spacing.s1,
     },
   ],
+
+  emptyText: {
+    display: "block",
+    paddingLeft: theme.spacing.m,
+    paddingRight: theme.spacing.m,
+  },
 }));
 
-export default function LayoutSection<T extends LayoutItem>({
+export default function LayoutSection({
   title,
+  emptyText,
   items,
   selectedId,
   onSelect,
@@ -34,14 +41,15 @@ export default function LayoutSection<T extends LayoutItem>({
   onDelete,
   onExport,
 }: {
-  title?: string;
-  items: AsyncState<readonly T[]>;
+  title: string | undefined;
+  emptyText: string | undefined;
+  items: readonly LayoutMetadata[] | undefined;
   selectedId?: string;
-  onSelect: (item: T) => void;
-  onRename: (item: T, newName: string) => void;
-  onDuplicate: (item: T) => void;
-  onDelete: (item: T) => void;
-  onExport: (item: T) => void;
+  onSelect: (item: LayoutMetadata) => void;
+  onRename: (item: LayoutMetadata, newName: string) => void;
+  onDuplicate: (item: LayoutMetadata) => void;
+  onDelete: (item: LayoutMetadata) => void;
+  onExport: (item: LayoutMetadata) => void;
 }): JSX.Element {
   const styles = useStyles();
   return (
@@ -52,8 +60,10 @@ export default function LayoutSection<T extends LayoutItem>({
         </Text>
       )}
       <Stack.Item>
-        {items.error ? `Error: ${items.error}` : undefined}
-        {items.value?.map((layout) => (
+        <Text className={styles.emptyText} style={{ lineHeight: "1.3" }}>
+          {items != undefined && items.length === 0 && emptyText}
+        </Text>
+        {items?.map((layout) => (
           <LayoutRow
             selected={layout.id === selectedId}
             key={layout.id}

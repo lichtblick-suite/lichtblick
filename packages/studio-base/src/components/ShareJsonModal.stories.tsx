@@ -23,6 +23,7 @@ import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/
 import CurrentLayoutState, {
   DEFAULT_LAYOUT_FOR_TESTS,
 } from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
+import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 
 storiesOf("components/ShareJsonModal", module)
   .addDecorator((Child: any) => {
@@ -56,7 +57,7 @@ storiesOf("components/ShareJsonModal", module)
         }, 10);
       }, 10);
     }, []);
-    const { loadLayout } = useCurrentLayoutActions();
+    const { setSelectedLayout } = useCurrentLayoutActions();
     return (
       <div data-modalcontainer="true">
         <ShareJsonModal
@@ -64,7 +65,9 @@ storiesOf("components/ShareJsonModal", module)
             // no-op
           }}
           value={""}
-          onChange={(value) => loadLayout(value as Partial<PanelsState>)}
+          onChange={(value) =>
+            setSelectedLayout({ id: "X" as LayoutID, data: value as Partial<PanelsState> })
+          }
           noun="layout"
         />
       </div>

@@ -33,7 +33,7 @@ import { useUserNodeState } from "@foxglove/studio-base/context/UserNodeStateCon
 import BottomBar from "@foxglove/studio-base/panels/NodePlayground/BottomBar";
 import Sidebar from "@foxglove/studio-base/panels/NodePlayground/Sidebar";
 import Playground from "@foxglove/studio-base/panels/NodePlayground/playground-icon.svg";
-import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
+import { PanelConfigSchema, UserNodes } from "@foxglove/studio-base/types/panels";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -122,13 +122,17 @@ const WelcomeScreen = ({
   );
 };
 
+const EMPTY_USER_NODES: UserNodes = Object.freeze({});
+
 function NodePlayground(props: Props) {
   const { config, saveConfig } = props;
   const { autoFormatOnSave = false, selectedNodeId, editorForStorybook } = config;
 
   const [explorer, updateExplorer] = React.useState<Explorer>(undefined);
 
-  const userNodes = useCurrentLayoutSelector((state) => state.userNodes);
+  const userNodes = useCurrentLayoutSelector(
+    (state) => state.selectedLayout?.data.userNodes ?? EMPTY_USER_NODES,
+  );
   const {
     state: { nodeStates: userNodeDiagnostics, rosLib },
   } = useUserNodeState();

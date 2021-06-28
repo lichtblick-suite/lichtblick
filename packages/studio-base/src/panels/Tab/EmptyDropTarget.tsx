@@ -75,7 +75,7 @@ export const EmptyDropTarget = ({ tabId }: Props): JSX.Element => {
   const onPanelSelect = useCallback(
     ({ type, config, relatedConfigs }: PanelSelection) => {
       const id = getPanelIdForType(type);
-      addPanel({ tabId, id, layout: undefined, config, relatedConfigs });
+      addPanel({ tabId, id, config, relatedConfigs });
     },
     [addPanel, tabId],
   );

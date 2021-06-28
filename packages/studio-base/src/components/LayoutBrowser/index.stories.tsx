@@ -6,18 +6,21 @@ import { Story, StoryContext } from "@storybook/react";
 import { useEffect, useMemo } from "react";
 import TestUtils from "react-dom/test-utils";
 import { useAsync } from "react-use";
+import { AsyncState } from "react-use/lib/useAsyncFn";
 
 import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
 import LayoutCacheContext, {
   useLayoutCache,
 } from "@foxglove/studio-base/context/LayoutCacheContext";
+import CacheOnlyLayoutStorageProvider from "@foxglove/studio-base/providers/CacheOnlyLayoutStorageProvider";
 import CurrentLayoutState, {
   DEFAULT_LAYOUT_FOR_TESTS,
 } from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
+import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 import MockLayoutCache from "@foxglove/studio-base/services/MockLayoutCache";
 import delay from "@foxglove/studio-base/util/delay";
-import signal from "@foxglove/studio-base/util/signal";
+import signal, { Signal } from "@foxglove/studio-base/util/signal";
 
 import LayoutBrowser from "./index";
 
@@ -25,41 +28,42 @@ function WithSetup(Child: Story, ctx: StoryContext): JSX.Element {
   const storage = useMemo(
     () =>
       new MockLayoutCache(
-        ctx.parameters?.useMockLayouts ?? true
-          ? [
-              {
-                id: "not-current",
-                name: "Another Layout",
-                path: undefined,
-                state: DEFAULT_LAYOUT_FOR_TESTS,
-              },
-              {
-                id: "test-id",
-                name: "Current Layout",
-                path: undefined,
-                state: DEFAULT_LAYOUT_FOR_TESTS,
-              },
-              {
-                id: "short-id",
-                name: "Short",
-                path: undefined,
-                state: DEFAULT_LAYOUT_FOR_TESTS,
-              },
-            ]
-          : [],
+        ctx.parameters?.mockLayouts ?? [
+          {
+            id: "not-current",
+            name: "Another Layout",
+            path: undefined,
+            state: { ...DEFAULT_LAYOUT_FOR_TESTS, id: "not-current", name: "Another Layout" },
+          },
+          {
+            id: "test-id",
+            name: "Current Layout",
+            path: undefined,
+            state: { ...DEFAULT_LAYOUT_FOR_TESTS, id: "test-id", name: "Current Layout" },
+          },
+          {
+            id: "short-id",
+            name: "Short",
+            path: undefined,
+            state: { ...DEFAULT_LAYOUT_FOR_TESTS, id: "short-id", name: "Short" },
+          },
+        ],
       ),
-    [ctx.parameters?.useMockLayouts],
+    [ctx.parameters?.mockLayouts],
   );
   const currentLayout = useMemo(
     () =>
       new CurrentLayoutState({
-        id: "test-id",
-        name: "Current Layout",
-        configById: {},
-        globalVariables: {},
-        userNodes: {},
-        linkedGlobalVariables: [],
-        playbackConfig: defaultPlaybackConfig,
+        selectedLayout: {
+          id: "test-id" as LayoutID,
+          data: {
+            configById: {},
+            globalVariables: {},
+            userNodes: {},
+            linkedGlobalVariables: [],
+            playbackConfig: defaultPlaybackConfig,
+          },
+        },
       }),
     [],
   );
@@ -67,11 +71,23 @@ function WithSetup(Child: Story, ctx: StoryContext): JSX.Element {
     <div style={{ display: "flex", height: 400 }}>
       <CurrentLayoutContext.Provider value={currentLayout}>
         <LayoutCacheContext.Provider value={storage}>
-          <Child />
+          <CacheOnlyLayoutStorageProvider>
+            <Child />
+          </CacheOnlyLayoutStorageProvider>
         </LayoutCacheContext.Provider>
       </CurrentLayoutContext.Provider>
     </div>
   );
+}
+
+/** Throw errors from the async function during render so they appear in the storybook */
+function useAsyncThrowing(fn: () => Promise<void>, deps: unknown[]): AsyncState<void> {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const result = useAsync(fn, deps);
+  if (result.error) {
+    throw result.error;
+  }
+  return result;
 }
 
 export default {
@@ -83,7 +99,7 @@ export default {
 export function Empty(): JSX.Element {
   return <LayoutBrowser />;
 }
-Empty.parameters = { useMockLayouts: false };
+Empty.parameters = { mockLayouts: [] };
 
 export function LayoutList(): JSX.Element {
   return <LayoutBrowser />;
@@ -91,7 +107,7 @@ export function LayoutList(): JSX.Element {
 
 AddLayout.parameters = { screenshot: { signal: signal() } };
 export function AddLayout(_args: unknown, ctx: StoryContext): JSX.Element {
-  useAsync(async () => {
+  useAsyncThrowing(async () => {
     await delay(100);
     document.querySelector<HTMLElement>(`[data-test="add-layout"]`)!.click();
     await delay(10);
@@ -106,7 +122,7 @@ export function AddLayout(_args: unknown, ctx: StoryContext): JSX.Element {
 
 MenuOpen.parameters = { screenshot: { signal: signal() } };
 export function MenuOpen(_args: unknown, ctx: StoryContext): JSX.Element {
-  useAsync(async () => {
+  useAsyncThrowing(async () => {
     await delay(100);
     document.querySelectorAll<HTMLElement>(`[data-test="layout-actions"]`)[1]!.click();
     await delay(10);
@@ -118,7 +134,7 @@ export function MenuOpen(_args: unknown, ctx: StoryContext): JSX.Element {
 
 EditingName.parameters = { screenshot: { signal: signal() } };
 export function EditingName(_args: unknown, ctx: StoryContext): JSX.Element {
-  useAsync(async () => {
+  useAsyncThrowing(async () => {
     await delay(100);
     document.querySelectorAll<HTMLElement>(`[data-test="layout-actions"]`)[1]!.click();
     await delay(10);
@@ -131,7 +147,7 @@ export function EditingName(_args: unknown, ctx: StoryContext): JSX.Element {
 
 CancelRenameWithEscape.parameters = { screenshot: { signal: signal() } };
 export function CancelRenameWithEscape(_args: unknown, ctx: StoryContext): JSX.Element {
-  useAsync(async () => {
+  useAsyncThrowing(async () => {
     await delay(100);
     document.querySelectorAll<HTMLElement>(`[data-test="layout-actions"]`)[1]!.click();
     await delay(10);
@@ -147,7 +163,7 @@ export function CancelRenameWithEscape(_args: unknown, ctx: StoryContext): JSX.E
 
 CancelRenameWithButton.parameters = { screenshot: { signal: signal() } };
 export function CancelRenameWithButton(_args: unknown, ctx: StoryContext): JSX.Element {
-  useAsync(async () => {
+  useAsyncThrowing(async () => {
     await delay(100);
     document.querySelectorAll<HTMLElement>(`[data-test="layout-actions"]`)[1]!.click();
     await delay(10);
@@ -163,7 +179,7 @@ export function CancelRenameWithButton(_args: unknown, ctx: StoryContext): JSX.E
 
 CommitRenameWithSubmit.parameters = { screenshot: { signal: signal() } };
 export function CommitRenameWithSubmit(_args: unknown, ctx: StoryContext): JSX.Element {
-  useAsync(async () => {
+  useAsyncThrowing(async () => {
     await delay(100);
     document.querySelectorAll<HTMLElement>(`[data-test="layout-actions"]`)[1]!.click();
     await delay(10);
@@ -188,7 +204,7 @@ export function CommitRenameWithSubmit(_args: unknown, ctx: StoryContext): JSX.E
 
 CommitRenameWithButton.parameters = { screenshot: { signal: signal() } };
 export function CommitRenameWithButton(_args: unknown, ctx: StoryContext): JSX.Element {
-  useAsync(async () => {
+  useAsyncThrowing(async () => {
     await delay(100);
     document.querySelectorAll<HTMLElement>(`[data-test="layout-actions"]`)[1]!.click();
     await delay(10);
@@ -214,7 +230,7 @@ export function CommitRenameWithButton(_args: unknown, ctx: StoryContext): JSX.E
 Duplicate.parameters = { screenshot: { signal: signal() } };
 export function Duplicate(_args: unknown, ctx: StoryContext): JSX.Element {
   const layoutCache = useLayoutCache();
-  const { error } = useAsync(async () => {
+  useAsyncThrowing(async () => {
     await delay(100);
     document.querySelectorAll<HTMLElement>(`[data-test="layout-actions"]`)[1]!.click();
     await delay(10);
@@ -227,11 +243,60 @@ export function Duplicate(_args: unknown, ctx: StoryContext): JSX.Element {
       throw new Error("Duplicate failed");
     }
   }, [ctx.parameters.screenshot.signal, layoutCache]);
-  if (error) {
-    throw error;
-  }
-
-  useEffect(() => {});
 
   return <LayoutBrowser />;
+}
+
+function DeleteStory({
+  index,
+  name,
+  signal: sig,
+}: {
+  index: number;
+  name: string;
+  signal: Signal<void>;
+}) {
+  const layoutCache = useLayoutCache();
+  useAsyncThrowing(async () => {
+    await delay(100);
+    document.querySelectorAll<HTMLElement>(`[data-test="layout-actions"]`)[index]!.click();
+    await delay(10);
+    document.querySelector<HTMLElement>(`[data-test="delete-layout"]`)!.click();
+    await delay(10);
+    document.querySelector<HTMLElement>(`button[type="submit"]`)!.click();
+    await delay(10);
+
+    if (!(await layoutCache.list()).some((layout) => layout.name === name)) {
+      sig.resolve();
+    } else {
+      throw new Error("Delete failed");
+    }
+  }, [sig, index, layoutCache, name]);
+
+  return <LayoutBrowser />;
+}
+
+DeleteLayout.parameters = { screenshot: { signal: signal() } };
+export function DeleteLayout(_args: unknown, ctx: StoryContext): JSX.Element {
+  return <DeleteStory index={0} name="Another Layout" signal={ctx.parameters.screenshot.signal} />;
+}
+
+DeleteSelectedLayout.parameters = { screenshot: { signal: signal() } };
+export function DeleteSelectedLayout(_args: unknown, ctx: StoryContext): JSX.Element {
+  return <DeleteStory index={1} name="Current Layout" signal={ctx.parameters.screenshot.signal} />;
+}
+
+DeleteLastLayout.parameters = {
+  screenshot: { signal: signal() },
+  mockLayouts: [
+    {
+      id: "test-id",
+      name: "Current Layout",
+      path: undefined,
+      state: DEFAULT_LAYOUT_FOR_TESTS,
+    },
+  ],
+};
+export function DeleteLastLayout(_args: unknown, ctx: StoryContext): JSX.Element {
+  return <DeleteStory index={0} name="Current Layout" signal={ctx.parameters.screenshot.signal} />;
 }

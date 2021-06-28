@@ -57,12 +57,17 @@ import {
   BuildPlayerOptions,
 } from "@foxglove/studio-base/players/buildPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
+import { UserNodes } from "@foxglove/studio-base/types/panels";
 import Storage from "@foxglove/studio-base/util/Storage";
 import { AppError } from "@foxglove/studio-base/util/errors";
 import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import { parseInputUrl } from "@foxglove/studio-base/util/url";
 
 const log = Logger.getLogger(__filename);
+
+const DEFAULT_MESSAGE_ORDER = "receiveTime";
+const EMPTY_USER_NODES: UserNodes = Object.freeze({});
+const EMPTY_GLOBAL_VARIABLES: GlobalVariables = Object.freeze({});
 
 type BuiltPlayer = {
   player: Player;
@@ -324,11 +329,15 @@ export default function PlayerManager({
     setUserNodeRosLib,
   });
 
-  const messageOrder = useCurrentLayoutSelector((state) => state.playbackConfig.messageOrder);
-  const userNodes = useCurrentLayoutSelector((state) => state.userNodes);
-  const globalVariables = useCurrentLayoutSelector((state) => state.globalVariables);
+  const messageOrder = useCurrentLayoutSelector(
+    (state) => state.selectedLayout?.data.playbackConfig.messageOrder,
+  );
+  const userNodes = useCurrentLayoutSelector((state) => state.selectedLayout?.data.userNodes);
+  const globalVariables = useCurrentLayoutSelector(
+    (state) => state.selectedLayout?.data.globalVariables,
+  );
 
-  const globalVariablesRef = useRef<GlobalVariables>(globalVariables);
+  const globalVariablesRef = useRef<GlobalVariables>(globalVariables ?? EMPTY_GLOBAL_VARIABLES);
   const [maybePlayer, setMaybePlayer] = useState<MaybePlayer<OrderedStampPlayer>>({});
   const [currentSourceName, setCurrentSourceName] = useState<string | undefined>(undefined);
   const isMounted = useMountedState();
@@ -365,8 +374,11 @@ export default function PlayerManager({
         setCurrentSourceName(builtPlayer.sources.join(","));
 
         const userNodePlayer = new UserNodePlayer(builtPlayer.player, userNodeActions);
-        const headerStampPlayer = new OrderedStampPlayer(userNodePlayer, initialMessageOrder);
-        headerStampPlayer.setGlobalVariables(globalVariablesRef.current);
+        const headerStampPlayer = new OrderedStampPlayer(
+          userNodePlayer,
+          initialMessageOrder ?? DEFAULT_MESSAGE_ORDER,
+        );
+        headerStampPlayer.setGlobalVariables(globalVariablesRef.current ?? EMPTY_GLOBAL_VARIABLES);
         setMaybePlayer({ player: headerStampPlayer });
       } catch (error) {
         setMaybePlayer({ error });
@@ -376,10 +388,10 @@ export default function PlayerManager({
   );
 
   useEffect(() => {
-    maybePlayer.player?.setMessageOrder(messageOrder);
+    maybePlayer.player?.setMessageOrder(messageOrder ?? DEFAULT_MESSAGE_ORDER);
   }, [messageOrder, maybePlayer]);
   useEffect(() => {
-    maybePlayer.player?.setUserNodes(userNodes);
+    maybePlayer.player?.setUserNodes(userNodes ?? EMPTY_USER_NODES);
   }, [userNodes, maybePlayer]);
 
   // Based on a source type, prompt the user for additional input and return a function to build the

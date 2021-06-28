@@ -18,12 +18,16 @@ import {
 
 export type GlobalVariables = { [key: string]: unknown };
 
+const EMPTY_GLOBAL_VARIABLES: GlobalVariables = Object.freeze({});
+
 export default function useGlobalVariables(): {
   globalVariables: GlobalVariables;
   setGlobalVariables: (arg0: GlobalVariables) => void;
   overwriteGlobalVariables: (arg0: GlobalVariables) => void;
 } {
   const { setGlobalVariables, overwriteGlobalVariables } = useCurrentLayoutActions();
-  const globalVariables = useCurrentLayoutSelector((state) => state.globalVariables);
+  const globalVariables = useCurrentLayoutSelector(
+    (state) => state.selectedLayout?.data.globalVariables ?? EMPTY_GLOBAL_VARIABLES,
+  );
   return { setGlobalVariables, overwriteGlobalVariables, globalVariables };
 }

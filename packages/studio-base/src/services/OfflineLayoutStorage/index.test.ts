@@ -23,8 +23,6 @@ import { PanelConfig } from "@foxglove/studio-base/types/panels";
 
 function makePanelsState(configById: Record<string, PanelConfig>): PanelsState {
   return {
-    id: "dummy id",
-    name: "dummy name",
     configById,
     globalVariables: {},
     linkedGlobalVariables: [],

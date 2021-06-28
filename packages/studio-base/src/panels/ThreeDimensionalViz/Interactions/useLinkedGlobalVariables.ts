@@ -24,7 +24,9 @@ export type LinkedGlobalVariable = {
   name: string;
 };
 
-export type LinkedGlobalVariables = LinkedGlobalVariable[];
+export type LinkedGlobalVariables = readonly LinkedGlobalVariable[];
+
+const EMPTY_VARIABLES = Object.freeze([]);
 
 export default function useLinkedGlobalVariables(): {
   linkedGlobalVariables: LinkedGlobalVariables;
@@ -32,7 +34,9 @@ export default function useLinkedGlobalVariables(): {
   linkedGlobalVariablesByName: { [name: string]: LinkedGlobalVariable[] };
 } {
   const { setLinkedGlobalVariables } = useCurrentLayoutActions();
-  const linkedGlobalVariables = useCurrentLayoutSelector((state) => state.linkedGlobalVariables);
+  const linkedGlobalVariables = useCurrentLayoutSelector(
+    (state) => state.selectedLayout?.data.linkedGlobalVariables ?? EMPTY_VARIABLES,
+  );
   const linkedGlobalVariablesByName = useMemo(() => {
     const linksByName: { [name: string]: LinkedGlobalVariable[] } = {};
     for (const link of linkedGlobalVariables) {

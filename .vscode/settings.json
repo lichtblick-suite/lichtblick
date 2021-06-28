@@ -21,6 +21,7 @@
   "eslint.options": {
     "reportUnusedDisableDirectives": true
   },
+  "jest.autoRun": { "watch": false, "onSave": "test-file" },
   // enable intellisense in custom snippets (see snippets.code-snippets)
   "editor.suggest.snippetsPreventQuickSuggestions": false
 }
