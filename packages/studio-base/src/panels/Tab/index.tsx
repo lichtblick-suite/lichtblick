@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { useCallback, useMemo, useState } from "react";
+import { MosaicNode } from "react-mosaic-component";
 import styled from "styled-components";
 
 import Flex from "@foxglove/studio-base/components/Flex";
@@ -85,7 +86,7 @@ function Tab({ config, saveConfig }: Props) {
     saveConfig({ ...config, activeTabIdx: tabs.length, tabs: tabs.concat([newTab]) });
   }, [config, saveConfig, tabs]);
   const onChangeLayout = useCallback(
-    (layout: string) => {
+    (layout: MosaicNode<string> | undefined) => {
       saveConfig(updateTabPanelLayout(layout, config));
     },
     [config, saveConfig],

@@ -50,6 +50,7 @@ export type TreeGroupNode = {
   // the node name being striked through in the UI.
   providerAvailable: boolean;
   children: TreeNode[];
+  description?: undefined;
 };
 export type TreeTopicNode = {
   type: "topic";
@@ -127,7 +128,7 @@ export type ToggleNamespaceChecked = (arg0: {
 }) => void;
 export type GetIsNamespaceCheckedByDefault = (topicName: string, columnIndex: number) => boolean;
 export type DerivedCustomSettings = {
-  overrideColorByColumn?: (string | undefined)[];
+  overrideColorByColumn?: (Color | undefined)[];
   isDefaultSettings?: boolean;
 };
 export type DerivedCustomSettingsByKey = {

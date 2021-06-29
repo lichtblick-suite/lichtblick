@@ -33,6 +33,7 @@ import {
   getNewCameraStateOnFollowChange,
   TargetPose,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
+import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 import clipboard from "@foxglove/studio-base/util/clipboard";
 import { point2DValidator, cameraStateValidator } from "@foxglove/studio-base/util/validators";
@@ -137,8 +138,8 @@ export default function CameraInfo({
         prevTargetPose: targetPose,
         prevFollowTf: followTf,
         prevFollowOrientation: followOrientation,
-        newFollowTf: config.followTf,
-        newFollowOrientation: config.followOrientation,
+        newFollowTf: (config as ThreeDimensionalVizConfig).followTf,
+        newFollowOrientation: (config as ThreeDimensionalVizConfig).followOrientation,
       });
       return { ...config, cameraState: newCameraState };
     });

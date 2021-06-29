@@ -47,14 +47,33 @@ declare module "regl-worldview" {
     onChange: any;
 
     constructor(polygons?: Polygon[]);
+
+    onMouseMove: MouseHandler;
+    onMouseUp: MouseHandler;
+    onDoubleClick: MouseHandler;
+    onMouseDown: MouseHandler;
   }
 
   interface CommonCommandProps {
     layerIndex?: any;
   }
 
+  export class Ray {
+    origin: Vec3;
+    dir: Vec3;
+    point: Vec3;
+    distanceToPoint(point: Vec3): number;
+    // eslint-disable-next-line no-restricted-syntax
+    planeIntersection(planeCoordinate: Vec3, planeNormal: Vec3): Vec3 | null;
+  }
+
+  type ClickedObject = {
+    object: unknown;
+    instanceIndex?: number;
+  };
   interface ReglClickInfo {
-    ray: any;
+    ray: Ray;
+    objects: ClickedObject[];
   }
 
   interface Arrow {
@@ -138,7 +157,7 @@ declare module "regl-worldview" {
     poses?: readonly Pose[];
   };
   type TriangleList = any;
-  type MouseHandler = any;
+  type MouseHandler = (event: React.MouseEvent, clickInfo: ReglClickInfo) => void;
 
   // vars
   const DEFAULT_CAMERA_STATE: CameraState;

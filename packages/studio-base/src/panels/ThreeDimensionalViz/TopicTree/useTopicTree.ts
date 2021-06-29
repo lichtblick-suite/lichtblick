@@ -443,7 +443,7 @@ export default function useTree({
           result[key]!.overrideColorByColumn = [undefined, undefined];
         }
         result[key]!.overrideColorByColumn![columnIndex] = settings.overrideColor as
-          | string
+          | Color
           | undefined;
       }
     }

@@ -14,7 +14,6 @@
 import AlertCircleIcon from "@mdi/svg/svg/alert-circle.svg";
 import LeadPencilIcon from "@mdi/svg/svg/lead-pencil.svg";
 import { useCallback, useContext, useMemo } from "react";
-import { Color } from "regl-worldview";
 import styled from "styled-components";
 
 import Icon from "@foxglove/studio-base/components/Icon";
@@ -298,9 +297,7 @@ export default function TreeNodeRow({
                   dataTest={`visibility-toggle~${key}~column${columnIdx}`}
                   key={columnIdx}
                   size={node.type === "topic" ? "SMALL" : "NORMAL"}
-                  overrideColor={
-                    derivedCustomSettings?.overrideColorByColumn?.[columnIdx] as Color | undefined
-                  }
+                  overrideColor={derivedCustomSettings?.overrideColorByColumn?.[columnIdx]}
                   checked={checked}
                   onToggle={() => {
                     toggleNodeChecked(key, columnIdx);

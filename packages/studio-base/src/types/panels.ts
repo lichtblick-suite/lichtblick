@@ -23,7 +23,7 @@ export type MosaicDropResult = {
 };
 
 export type PanelConfig = {
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 export type PlaybackConfig = {

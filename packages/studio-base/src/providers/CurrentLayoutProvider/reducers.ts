@@ -20,7 +20,6 @@ import {
   getNodeAtPath,
   MosaicPath,
   getLeaves,
-  MosaicParent,
   MosaicNode,
 } from "react-mosaic-component";
 
@@ -43,7 +42,6 @@ import {
 } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
 import {
-  PanelConfig,
   SavedProps,
   PlaybackConfig,
   MosaicDropTargetPosition,
@@ -167,21 +165,23 @@ const splitPanel = (
   let newPanelsState = { ...panelsState };
   const { configById: savedProps } = newPanelsState;
   if (tabId != undefined) {
-    const activeTabLayout = savedProps[tabId]?.tabs[savedProps[tabId]?.activeTabIdx].layout;
-    const newTabLayout = updateTree(activeTabLayout, [
-      {
-        path: getPathFromNode(id, activeTabLayout),
-        spec: { $set: { first: id, second: newId, direction } },
-      },
-    ]);
     const prevConfig = savedProps[tabId] as TabPanelConfig;
-    const newTabConfig = updateTabPanelLayout(newTabLayout, prevConfig);
-    newPanelsState = savePanelConfigs(newPanelsState, {
-      configs: [
-        { id: tabId, config: newTabConfig },
-        { id: newId, config },
-      ],
-    });
+    const activeTabLayout = prevConfig.tabs[prevConfig.activeTabIdx]?.layout;
+    if (activeTabLayout != undefined) {
+      const newTabLayout = updateTree(activeTabLayout, [
+        {
+          path: getPathFromNode(id, activeTabLayout),
+          spec: { $set: { first: id, second: newId, direction } },
+        },
+      ]);
+      const newTabConfig = updateTabPanelLayout(newTabLayout, prevConfig);
+      newPanelsState = savePanelConfigs(newPanelsState, {
+        configs: [
+          { id: tabId, config: newTabConfig },
+          { id: newId, config },
+        ],
+      });
+    }
   } else {
     newPanelsState = changePanelLayout(newPanelsState, {
       layout: updateTree(root, [{ path, spec: { $set: { first: id, second: newId, direction } } }]),
@@ -214,16 +214,17 @@ const swapPanel = (
   let newPanelsState = { ...panelsState };
   // For a panel inside a Tab panel, update the Tab panel's tab layouts via savedProps
   if (tabId != undefined && originalId != undefined) {
-    const tabSavedProps = newPanelsState.configById[tabId];
+    const tabSavedProps = newPanelsState.configById[tabId] as TabPanelConfig | undefined;
     if (tabSavedProps) {
-      const activeTabLayout = tabSavedProps.tabs[tabSavedProps.activeTabIdx]
-        .layout as MosaicParent<string>;
-      const newTabLayout = replaceAndRemovePanels({ originalId, newId }, activeTabLayout);
+      const activeTabLayout = tabSavedProps.tabs[tabSavedProps.activeTabIdx]?.layout;
+      if (activeTabLayout != undefined) {
+        const newTabLayout = replaceAndRemovePanels({ originalId, newId }, activeTabLayout);
 
-      const newTabConfig = updateTabPanelLayout(newTabLayout, tabSavedProps as TabPanelConfig);
-      newPanelsState = savePanelConfigs(newPanelsState, {
-        configs: [{ id: tabId, config: newTabConfig }],
-      });
+        const newTabConfig = updateTabPanelLayout(newTabLayout, tabSavedProps);
+        newPanelsState = savePanelConfigs(newPanelsState, {
+          configs: [{ id: tabId, config: newTabConfig }],
+        });
+      }
     }
   } else {
     newPanelsState = changePanelLayout(newPanelsState, {
@@ -477,11 +478,14 @@ const dragToMainFromTab = (
     position: MosaicDropTargetPosition;
     destinationPath: MosaicPath;
     ownPath: MosaicPath;
-    sourceTabConfig: PanelConfig;
+    sourceTabConfig: TabPanelConfig;
     sourceTabChildConfigs: ConfigsPayload[];
   },
 ): PanelsState => {
-  const currentTabLayout = sourceTabConfig.tabs[sourceTabConfig.activeTabIdx].layout;
+  const currentTabLayout = sourceTabConfig.tabs[sourceTabConfig.activeTabIdx]?.layout;
+  if (currentTabLayout == undefined) {
+    return panelsState;
+  }
   // Remove panel from tab layout
   const saveConfigsPayload = removePanelFromTabPanel(
     ownPath,
@@ -495,6 +499,9 @@ const dragToMainFromTab = (
 
   // Insert it into main layout
   const currentNode = getNodeAtPath(currentTabLayout, ownPath);
+  if (typeof currentNode !== "string") {
+    return panelsState;
+  }
   const newLayout = updateTree(
     originalLayout,
     createAddUpdates(originalLayout, currentNode, destinationPath, position),

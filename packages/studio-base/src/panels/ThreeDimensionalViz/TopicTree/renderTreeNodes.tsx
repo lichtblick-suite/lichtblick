@@ -12,15 +12,13 @@
 //   You may not use this file except in compliance with the License.
 
 import { uniq } from "lodash";
+import { Color } from "regl-worldview";
 import styled from "styled-components";
 
 import { LinkedGlobalVariable } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { canEditNamespaceOverrideColorDatatype } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/index";
 import { TOPIC_DISPLAY_MODES } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
-import {
-  isNonEmptyOrUndefined,
-  nonEmptyOrUndefined,
-} from "@foxglove/studio-base/util/emptyOrUndefined";
+import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import filterMap from "@foxglove/studio-base/util/filterMap";
 import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
@@ -126,8 +124,8 @@ export function getNamespaceNodes({
     const namespaceKey = generateNodeKey({ topicName, namespace });
     const featureKey = generateNodeKey({ topicName, namespace, isFeatureColumn: true });
     const topicNodeKey = node.key;
-    const overrideColorByColumn: any = [];
-    const hasNamespaceOverrideColorChangedByColumn: any = [];
+    const overrideColorByColumn: (Color | undefined)[] = [];
+    const hasNamespaceOverrideColorChangedByColumn: boolean[] = [];
 
     if (canEditNamespaceOverrideColor) {
       // Use namespace overrideColor by default, and fall back to topic overrideColor.
@@ -137,13 +135,10 @@ export function getNamespaceNodes({
         derivedCustomSettingsByKey[topicNodeKey]?.overrideColorByColumn ?? [];
       columns.forEach((columnIdx) => {
         overrideColorByColumn.push(
-          nonEmptyOrUndefined(namespaceOverrideColorByColumn[columnIdx]) ??
-            topicOverrideColorByColumn[columnIdx],
+          namespaceOverrideColorByColumn[columnIdx] ?? topicOverrideColorByColumn[columnIdx],
         );
         // The namespace color has changed if there is an override color.
-        hasNamespaceOverrideColorChangedByColumn.push(
-          isNonEmptyOrUndefined(namespaceOverrideColorByColumn[columnIdx]),
-        );
+        hasNamespaceOverrideColorChangedByColumn.push(!!namespaceOverrideColorByColumn[columnIdx]);
       });
     }
     const namespaceNode = {
@@ -270,9 +265,9 @@ export default function renderTreeNodes({
         </TooltipRow>,
       );
     }
-    if ((item as any).description) {
+    if (item.description != undefined) {
       tooltips.push(
-        <TooltipDescription key={tooltips.length}>{(item as any).description}</TooltipDescription>,
+        <TooltipDescription key={tooltips.length}>{item.description}</TooltipDescription>,
       );
     }
 
@@ -291,7 +286,7 @@ export default function renderTreeNodes({
         visibleByColumn={visibleByColumn}
         width={titleWidth}
         visibleTopicsCount={visibleTopicsCountByKey[item.key] ?? 0}
-        {...(tooltips.length > 0 ? ({ tooltips } as any) : undefined)}
+        {...(tooltips.length > 0 ? { tooltips } : undefined)}
         diffModeEnabled={diffModeEnabled}
       />
     );

@@ -17,6 +17,7 @@ import {
   MosaicWindow,
   MosaicDragType,
   MosaicNode,
+  MosaicPath,
 } from "react-mosaic-component";
 import "react-mosaic-component/react-mosaic-component.css";
 import styled from "styled-components";
@@ -32,14 +33,15 @@ import {
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { EmptyDropTarget } from "@foxglove/studio-base/panels/Tab/EmptyDropTarget";
-import { MosaicDropResult } from "@foxglove/studio-base/types/panels";
+import { MosaicDropResult, PanelConfig } from "@foxglove/studio-base/types/panels";
+import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import { getPanelIdForType, getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 import ErrorBoundary from "./ErrorBoundary";
 
 type Props = {
   layout?: MosaicNode<string>;
-  onChange: (panels: any) => void;
+  onChange: (panels: MosaicNode<string> | undefined) => void;
   tabId?: string;
 };
 
@@ -84,11 +86,11 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
   const mosaicId = usePanelMosaicId();
   const { layout, onChange, tabId } = props;
   const createTile = useCallback(
-    (config: any) => {
+    (config?: { type?: string; panelConfig?: PanelConfig }) => {
       const defaultPanelType = "RosOut";
-      const type = config ? config.type || defaultPanelType : defaultPanelType;
+      const type = config ? nonEmptyOrUndefined(config.type) ?? defaultPanelType : defaultPanelType;
       const id = getPanelIdForType(type);
-      if (config.panelConfig) {
+      if (config?.panelConfig) {
         savePanelConfigs({ configs: [{ id, config: config.panelConfig }] });
       }
       return id;
@@ -99,7 +101,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
   const panelCatalog = usePanelCatalog();
 
   const renderTile = useCallback(
-    (id: string | Record<string, never> | undefined, path: any) => {
+    (id: string | Record<string, never> | undefined, path: MosaicPath) => {
       // `id` is usually a string. But when `layout` is empty, `id` will be an empty object, in which case we don't need to render Tile
       if (id == undefined || typeof id !== "string") {
         return <></>;
@@ -120,10 +122,10 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
       const mosaicWindow = (
         <MosaicWindow
           title=""
-          key={path}
+          key={path.join("-")}
           path={path}
           createNode={createTile}
-          renderPreview={() => undefined as any}
+          renderPreview={() => undefined as unknown as JSX.Element}
         >
           {panel}
         </MosaicWindow>
@@ -143,7 +145,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
           className={"none"}
           resize={{ minimumPaneSizePercentage: 2 }}
           value={layout}
-          onChange={onChange}
+          onChange={(newLayout) => onChange(newLayout ?? undefined)}
           mosaicId={mosaicId}
         />
       ) : (
@@ -159,8 +161,10 @@ export default function PanelLayout(): JSX.Element {
   const { changePanelLayout } = useCurrentLayoutActions();
   const layout = useCurrentLayoutSelector((state) => state.selectedLayout?.data.layout);
   const onChange = useCallback(
-    (newLayout: MosaicNode<string>) => {
-      changePanelLayout({ layout: newLayout });
+    (newLayout: MosaicNode<string> | undefined) => {
+      if (newLayout != undefined) {
+        changePanelLayout({ layout: newLayout });
+      }
     },
     [changePanelLayout],
   );

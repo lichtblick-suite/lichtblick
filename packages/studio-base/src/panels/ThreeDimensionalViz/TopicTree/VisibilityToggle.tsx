@@ -35,7 +35,7 @@ export const TOGGLE_SIZE_CONFIG = {
   SMALL: { name: "SMALL", size: 10 },
 };
 
-const SToggle = styled.label<any>`
+const SToggle = styled.label`
   width: ${TOGGLE_WRAPPER_SIZE}px;
   height: ${TOGGLE_WRAPPER_SIZE}px;
   display: inline-flex;
@@ -68,8 +68,8 @@ type Props = {
   onAltToggle?: () => void;
   onShiftToggle?: () => void;
   onToggle: () => void;
-  onMouseEnter?: (arg0: MouseEvent) => void;
-  onMouseLeave?: (arg0: MouseEvent) => void;
+  onMouseEnter?: (arg0: React.MouseEvent) => void;
+  onMouseLeave?: (arg0: React.MouseEvent) => void;
   overrideColor?: Color;
   size?: Size;
   unavailableTooltip?: string;
@@ -78,7 +78,7 @@ type Props = {
   columnIndex: number;
 };
 
-function diffModeStyleOverrides(checked: boolean, columnIndex: number): any {
+function diffModeStyleOverrides(checked: boolean, columnIndex: number) {
   if (!checked) {
     return {
       border: `1px solid ${DISABLED_COLOR}`,
@@ -106,12 +106,16 @@ function getStyles({
   size?: Size;
   diffModeEnabled: boolean;
   columnIndex: number;
-}): any {
+}): React.CSSProperties {
   const sizeInNumber =
     size === TOGGLE_SIZE_CONFIG.SMALL.name
       ? TOGGLE_SIZE_CONFIG.SMALL.size
       : TOGGLE_SIZE_CONFIG.NORMAL.size;
-  let styles = { width: sizeInNumber, height: sizeInNumber, borderRadius: sizeInNumber / 2 };
+  let styles: React.CSSProperties = {
+    width: sizeInNumber,
+    height: sizeInNumber,
+    borderRadius: sizeInNumber / 2,
+  };
 
   if (diffModeEnabled) {
     return {
@@ -130,9 +134,9 @@ function getStyles({
 
   const color = visibleInScene ? enabledColor : disabledColor;
   if (checked) {
-    styles = { ...styles, background: color } as any;
+    styles = { ...styles, background: color };
   } else {
-    styles = { ...styles, border: `1px solid ${color}` } as any;
+    styles = { ...styles, border: `1px solid ${color}` };
   }
 
   return styles;
@@ -157,7 +161,7 @@ export default function VisibilityToggle({
 }: Props): JSX.Element {
   // Handle shift + click/enter, option + click/enter, and click/enter.
   const onChange = useCallback(
-    (e: MouseEvent | KeyboardEvent) => {
+    (e: React.MouseEvent | React.KeyboardEvent) => {
       if (onShiftToggle && e.shiftKey) {
         onShiftToggle();
       } else if (onAltToggle && e.altKey) {
@@ -172,7 +176,7 @@ export default function VisibilityToggle({
   if (!available) {
     return (
       <Icon
-        tooltipProps={{ placement: "top" } as any}
+        tooltipProps={{ placement: "top" }}
         tooltip={nonEmptyOrUndefined(unavailableTooltip) ?? "Unavailable"}
         fade
         small
@@ -197,7 +201,7 @@ export default function VisibilityToggle({
     <SToggle
       data-test={dataTest}
       tabIndex={0}
-      onKeyDown={(e: KeyboardEvent) => {
+      onKeyDown={(e: React.KeyboardEvent) => {
         if (e.key === "Enter") {
           onChange(e);
         }

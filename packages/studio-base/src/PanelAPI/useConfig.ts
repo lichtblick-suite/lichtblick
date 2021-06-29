@@ -37,7 +37,7 @@ export function useConfig<Config>(): [Config, (config: Partial<Config>) => void]
  * Like `useConfig`, but for a specific panel id. This generally shouldn't be used by panels
  * directly, but is for use in internal code that's running outside of regular context providers.
  */
-export function useConfigById<Config>(
+export function useConfigById<Config extends Record<string, unknown>>(
   panelId: string | undefined,
   defaultConfig: Config | undefined,
 ): [Config, SaveConfig<Config>] {

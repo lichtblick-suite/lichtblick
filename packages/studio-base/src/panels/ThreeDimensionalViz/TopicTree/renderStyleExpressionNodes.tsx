@@ -30,7 +30,6 @@ import { ColorOverride } from "@foxglove/studio-base/panels/ThreeDimensionalViz/
 import TooltipRow from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TooltipRow";
 import TooltipTable from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TooltipTable";
 import { TreeUINode } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/types";
-import { Color } from "@foxglove/studio-base/types/Messages";
 import filterMap from "@foxglove/studio-base/util/filterMap";
 import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import { joinTopics } from "@foxglove/studio-base/util/topicUtils";
@@ -70,21 +69,21 @@ export function renderStyleExpressionNodes({
     linkedGlobalVariablesByTopic[topicName] ?? [],
     ({ name }) => name,
   );
-  return Object.keys(linkedGlobalVariablesByVariableName).map((variableName, rowIndex) => {
-    const title = (
-      <StyleExpressionNode
-        {...{
-          linkedGlobalVariables: linkedGlobalVariablesByVariableName[variableName],
-          topic: topicName,
-          hasFeatureColumn,
-          rowWidth,
-          rowIndex,
-          variableName,
-        }}
-      />
-    );
-    return { key: `${topicName}~${variableName}`, title } as any;
-  });
+  return Object.entries(linkedGlobalVariablesByVariableName).map(
+    ([variableName, variables], rowIndex) => {
+      const title = (
+        <StyleExpressionNode
+          linkedGlobalVariables={variables}
+          topic={topicName}
+          hasFeatureColumn={hasFeatureColumn}
+          rowWidth={rowWidth}
+          rowIndex={rowIndex}
+          variableName={variableName}
+        />
+      );
+      return { key: `${topicName}~${variableName}`, title };
+    },
+  );
 }
 
 const SItemContent = styled.div`
@@ -93,7 +92,14 @@ const SItemContent = styled.div`
   justify-content: space-between;
 `;
 
-function StyleExpressionNode(props: any) {
+function StyleExpressionNode(props: {
+  linkedGlobalVariables: LinkedGlobalVariable[];
+  topic: string;
+  hasFeatureColumn: boolean;
+  rowWidth: number;
+  rowIndex: number;
+  variableName: string;
+}) {
   const { topic, rowWidth, rowIndex, hasFeatureColumn, linkedGlobalVariables } = props;
 
   const {
@@ -103,7 +109,7 @@ function StyleExpressionNode(props: any) {
   } = useContext(ThreeDimensionalVizContext);
 
   const { globalVariables } = useGlobalVariables();
-  const { markerKeyPath, name } = linkedGlobalVariables[0];
+  const { markerKeyPath, name } = linkedGlobalVariables[0]!;
 
   const value = globalVariables[name];
   const colorOverridesByColumnIdx: (ColorOverride | undefined)[] = defaults(
@@ -115,7 +121,7 @@ function StyleExpressionNode(props: any) {
 
   // Callbacks
   const updateSettingsForGlobalVariable = useCallback(
-    (globalVariableName, settings: { active: boolean; color: Color }, sourceIdx = 0) => {
+    (globalVariableName, settings: ColorOverride, sourceIdx = 0) => {
       const updatedSettings = new Array(2)
         .fill(0)
         .map((_, i) => colorOverrideBySourceIdxByVariable[globalVariableName]?.[i]);
@@ -195,18 +201,10 @@ function StyleExpressionNode(props: any) {
                   dataTest={`visibility-toggle T:${topic} ${name} ${sourceIdx}`}
                   key={sourceIdx}
                   onAltToggle={() =>
-                    updateSettingsForGlobalVariable(
-                      name,
-                      { active: !active, color } as any,
-                      sourceIdx,
-                    )
+                    updateSettingsForGlobalVariable(name, { active: !active, color }, sourceIdx)
                   }
                   onToggle={() =>
-                    updateSettingsForGlobalVariable(
-                      name,
-                      { active: !active, color } as any,
-                      sourceIdx,
-                    )
+                    updateSettingsForGlobalVariable(name, { active: !active, color }, sourceIdx)
                   }
                   overrideColor={color}
                   size="SMALL"
@@ -242,7 +240,7 @@ function StyleExpressionNode(props: any) {
                   color={colorOverridesByColumnIdx[0]?.color}
                   buttonShape={"circle"}
                   onChange={(color) => {
-                    const active = (colorOverridesByColumnIdx[0] as any).active;
+                    const active = colorOverridesByColumnIdx[0]?.active;
                     updateSettingsForGlobalVariable(name, { color, active }, 0);
                   }}
                 />
@@ -256,7 +254,7 @@ function StyleExpressionNode(props: any) {
                     color={colorOverridesByColumnIdx[1]?.color}
                     buttonShape={"circle"}
                     onChange={(color) => {
-                      const active = (colorOverridesByColumnIdx[1] as any).active;
+                      const active = colorOverridesByColumnIdx[1]?.active;
                       updateSettingsForGlobalVariable(name, { color, active }, 1);
                     }}
                   />

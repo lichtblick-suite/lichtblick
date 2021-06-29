@@ -13,6 +13,8 @@
 //   You may not use this file except in compliance with the License.
 import { getNodeAtPath, MosaicNode, MosaicParent, updateTree } from "react-mosaic-component";
 
+import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
+
 import {
   getPanelTypeFromId,
   getSaveConfigsPayloadForAddedPanel,
@@ -75,10 +77,12 @@ describe("layout", () => {
         relatedConfigs: {},
       };
       const { configs } = getSaveConfigsPayloadForAddedPanel(inputConfig);
-      expect(inputConfig.config.tabs.length).toEqual(configs[0]?.config.tabs.length);
+      expect(inputConfig.config.tabs.length).toEqual(
+        (configs[0]?.config as TabPanelConfig).tabs.length,
+      );
 
       const inputLayout = inputConfig.config.tabs[0]?.layout;
-      const outputLayout = configs[0]?.config.tabs[0].layout;
+      const outputLayout = (configs[0]?.config as TabPanelConfig).tabs[0]!.layout as string;
 
       expect(getPanelTypeFromId(inputLayout!)).toEqual(getPanelTypeFromId(outputLayout));
       expect(inputLayout).not.toEqual(outputLayout);
@@ -120,11 +124,13 @@ describe("layout", () => {
       expect(getPanelTypeFromId(newIdForFirstPlot!)).toEqual("Plot");
 
       expect(configsSaved[1]?.id).toEqual("Tab!abc");
-      const updatedTabConfig = configsSaved[1]?.config.tabs[0];
-      expect(updatedTabConfig.layout.first).toEqual(newIdForFirstPlot);
-      expect(updatedTabConfig.layout.second).not.toEqual("Plot!2");
-      expect(getPanelTypeFromId(updatedTabConfig.layout.second)).toEqual("Plot");
-      expect(updatedTabConfig.layout.direction).toEqual("row");
+      const updatedTabConfig = (configsSaved[1]?.config as TabPanelConfig).tabs[0]!;
+      expect((updatedTabConfig.layout as MosaicParent<string>).first).toEqual(newIdForFirstPlot);
+      expect((updatedTabConfig.layout as MosaicParent<string>).second).not.toEqual("Plot!2");
+      expect(
+        getPanelTypeFromId((updatedTabConfig.layout as MosaicParent<string>).second as string),
+      ).toEqual("Plot");
+      expect((updatedTabConfig.layout as MosaicParent<string>).direction).toEqual("row");
     });
   });
 

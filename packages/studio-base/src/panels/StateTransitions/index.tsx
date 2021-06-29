@@ -173,7 +173,9 @@ export function openSiblingStateTransitionsPanel(
     return {
       ...config,
       paths: uniq(
-        config.paths.concat([{ value: topicName, enabled: true, timestampMethod: "receiveTime" }]),
+        (config as StateTransitionConfig).paths.concat([
+          { value: topicName, timestampMethod: "receiveTime" },
+        ]),
       ),
     };
   });

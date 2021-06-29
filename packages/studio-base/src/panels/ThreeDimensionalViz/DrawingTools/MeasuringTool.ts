@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { isEqual } from "lodash";
-import { ReglClickInfo } from "regl-worldview";
+import { ReglClickInfo, Vec3 } from "regl-worldview";
 
 import { Point } from "@foxglove/studio-base/types/Messages";
 
@@ -29,9 +29,7 @@ type Props = MeasureInfo & {
 
 /* eslint-disable no-restricted-syntax */
 
-function arrayToPoint(
-  v?: [number, number, number],
-): { x: number; y: number; z: number } | undefined {
+function arrayToPoint(v?: Vec3 | null): { x: number; y: number; z: number } | undefined {
   if (!v) {
     return undefined;
   }

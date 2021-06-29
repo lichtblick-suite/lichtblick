@@ -176,7 +176,7 @@ export function inlineTabPanelLayouts(
     if (typeof id === "string" && isTabPanel(id) && !preserveTabPanelIds.includes(id)) {
       const panelProps = getValidTabPanelConfig(id, savedProps);
       const tabLayout = panelProps.tabs[panelProps.activeTabIdx]?.layout;
-      if (tabLayout) {
+      if (tabLayout != undefined) {
         return inlineTabPanelLayouts(tabLayout, savedProps, preserveTabPanelIds);
       }
     }
@@ -204,7 +204,7 @@ export const getParentTabPanelByPanelId = (
 
 const replaceMaybeTabLayoutWithNewPanelIds =
   (panelIdMap: PanelIdMap) =>
-  ({ id, config }: { id: string; config: PanelConfig }) => {
+  ({ id, config }: { id: string; config: Partial<TabPanelConfig> }) => {
     return config.tabs
       ? {
           id,
@@ -255,8 +255,9 @@ export function getPanelIdsInsideTabPanels(panelIds: string[], savedProps: Saved
   const tabPanelIds = panelIds.filter(isTabPanel);
   const tabLayouts: MosaicNode<string>[] = [];
   tabPanelIds.forEach((panelId) => {
-    if (savedProps[panelId]?.tabs) {
-      savedProps[panelId]?.tabs.forEach((tab: TabConfig) => {
+    const tabProps = savedProps[panelId] as Partial<TabPanelConfig> | undefined;
+    if (tabProps?.tabs) {
+      tabProps.tabs.forEach((tab: TabConfig) => {
         tabLayouts.push(
           tab.layout as MosaicNode<string>,
           ...getPanelIdsInsideTabPanels(getLeaves(tab.layout ?? ReactNull), savedProps),
@@ -278,7 +279,7 @@ export function getAllPanelIds(layout: MosaicNode<string>, savedProps: SavedProp
   return [...layoutPanelIds, ...tabPanelIds];
 }
 
-export const validateTabPanelConfig = (config?: PanelConfig): boolean => {
+export const validateTabPanelConfig = (config?: PanelConfig): config is TabPanelConfig => {
   if (!config) {
     return false;
   }
@@ -369,9 +370,7 @@ export const addPanelToTab = (
   tabConfig: PanelConfig | undefined,
   tabId: string,
 ): SaveConfigsPayload => {
-  const safeTabConfig = validateTabPanelConfig(tabConfig)
-    ? (tabConfig as TabPanelConfig)
-    : DEFAULT_TAB_PANEL_CONFIG;
+  const safeTabConfig = validateTabPanelConfig(tabConfig) ? tabConfig : DEFAULT_TAB_PANEL_CONFIG;
 
   const currentTabLayout = safeTabConfig.tabs[safeTabConfig.activeTabIdx]?.layout;
   const newTree =
@@ -393,7 +392,7 @@ export const addPanelToTab = (
   return saveConfigsPayload;
 };
 
-function getValidTabPanelConfig(panelId: string, savedProps: SavedProps): PanelConfig {
+function getValidTabPanelConfig(panelId: string, savedProps: SavedProps): TabPanelConfig {
   const config = savedProps[panelId];
   if (!config) {
     return DEFAULT_TAB_PANEL_CONFIG;
@@ -416,7 +415,7 @@ export const reorderTabWithinTabPanel = ({
   const targetIndex = target.tabIndex ?? tabs.length - 1; // target.tabIndex will only be set when dropping on a tab
 
   const nextSourceTabs = [...tabs.slice(0, sourceIndex), ...tabs.slice(sourceIndex + 1)];
-  nextSourceTabs.splice(targetIndex, 0, tabs[sourceIndex]);
+  nextSourceTabs.splice(targetIndex, 0, tabs[sourceIndex]!);
 
   // Update activeTabIdx so the active tab does not change when we move the tab
   const movedActiveTab = activeTabIdx === source.tabIndex;
@@ -451,15 +450,15 @@ export const moveTabBetweenTabPanels = ({
   const sourceConfig = getValidTabPanelConfig(source.panelId, savedProps);
   const targetConfig = getValidTabPanelConfig(target.panelId, savedProps);
 
-  const sourceIndex = source.tabIndex ?? (sourceConfig.tabs.length as number);
-  const targetIndex = target.tabIndex ?? (targetConfig.tabs.length as number);
+  const sourceIndex = source.tabIndex ?? sourceConfig.tabs.length;
+  const targetIndex = target.tabIndex ?? targetConfig.tabs.length;
   const nextTabsSource = [
     ...sourceConfig.tabs.slice(0, sourceIndex),
     ...sourceConfig.tabs.slice(sourceIndex + 1),
   ];
 
   const nextTabsTarget = targetConfig.tabs.slice();
-  nextTabsTarget.splice(targetIndex, 0, sourceConfig.tabs[sourceIndex]);
+  nextTabsTarget.splice(targetIndex, 0, sourceConfig.tabs[sourceIndex]!);
 
   // Update activeTabIdx so the active tab does not change as we move the tab
   const movedToBeforeActiveTabSource = sourceIndex <= sourceConfig.activeTabIdx;
@@ -469,7 +468,7 @@ export const moveTabBetweenTabPanels = ({
 
   const movedToBeforeActiveTabTarget = targetIndex <= targetConfig.activeTabIdx;
   const nextActiveTabIdxTarget = movedToBeforeActiveTabTarget
-    ? (targetConfig.activeTabIdx as number) + 1
+    ? targetConfig.activeTabIdx + 1
     : targetConfig.activeTabIdx;
 
   return {
@@ -532,7 +531,10 @@ export function getConfigsForNestedPanelsInsideTab(
   tabPanelIds.forEach((panelId) => {
     const { tabs, activeTabIdx } = getValidTabPanelConfig(panelId, savedProps);
     const tabLayout = tabs[activeTabIdx]?.layout;
-    if (tabLayout && getLeaves(tabLayout).some((id) => panelIdsToRemove.includes(id))) {
+    if (
+      tabLayout != undefined &&
+      getLeaves(tabLayout).some((id) => panelIdsToRemove.includes(id))
+    ) {
       const newTabLayout = replaceAndRemovePanels(
         { originalId: panelIdToReplace, newId: tabPanelId, idsToRemove: panelIdsToRemove },
         tabLayout,

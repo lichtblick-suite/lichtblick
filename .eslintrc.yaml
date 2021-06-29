@@ -146,16 +146,10 @@ overrides:
   - rules:
       "@typescript-eslint/no-explicit-any": warn
     files:
-      - "packages/studio-base/src/components/PanelLayout.tsx"
       - "packages/studio-base/src/context/PanelCatalogContext.ts"
       - "packages/studio-base/src/panels/NodePlayground/Editor.tsx"
       - "packages/studio-base/src/panels/ThreeDimensionalViz/SceneBuilder/index.ts"
       - "packages/studio-base/src/panels/ThreeDimensionalViz/SceneBuilder/types.ts"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/TopicTree/Layout.tsx"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector.tsx"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/TopicTree/VisibilityToggle.tsx"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/TopicTree/renderStyleExpressionNodes.tsx"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/TopicTree/renderTreeNodes.tsx"
       - "packages/studio-base/src/panels/ThreeDimensionalViz/WorldMarkers.tsx"
       - "packages/studio-base/src/panels/ThreeDimensionalViz/threeDimensionalVizUtils.ts"
       - "packages/studio-base/src/panels/ThreeDimensionalViz/utils/groupingUtils.ts"
