@@ -43,7 +43,7 @@ function WelcomePanel() {
 
   const [submitState, submit] = useAsyncFn(async () => {
     if (slackInviteChecked && process.env.SLACK_INVITE_URL != undefined) {
-      open(process.env.SLACK_INVITE_URL, "_blank");
+      open(process.env.SLACK_INVITE_URL);
     }
     if (subscribeChecked) {
       await subscribeToNewsletter(emailValue);

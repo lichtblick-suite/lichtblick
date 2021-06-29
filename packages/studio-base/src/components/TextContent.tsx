@@ -35,7 +35,6 @@ export default function TextContent(props: PropsWithChildren<Props>): React.Reac
       return (
         <a
           href={linkProps.href}
-          target="_blank"
           rel="noopener noreferrer"
           onClick={(event) => handleLink(event, linkProps.href ?? "")}
         >

@@ -81,7 +81,6 @@ export default function Metadata({
       {!diffMessage && datatype && (
         <a
           style={{ color: "inherit" }}
-          target="_blank"
           rel="noopener noreferrer"
           href={getMessageDocumentationLink(datatype)}
         >

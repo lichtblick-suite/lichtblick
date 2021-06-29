@@ -74,7 +74,7 @@ storiesOf("components/Modal", module)
     <Modal onRequestClose={() => action("close")()}>
       <div style={{ padding: 20 }}>
         <TextContent>
-          <a href="https://google.com" target="_blank" rel="noopener noreferrer">
+          <a href="https://google.com" rel="noopener noreferrer">
             link
           </a>
           <div>this is a floating, fixed position modal</div>

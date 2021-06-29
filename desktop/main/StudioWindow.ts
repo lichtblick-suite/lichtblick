@@ -100,6 +100,18 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
     shell.openExternal(url);
   });
 
+  browserWindow.webContents.on("will-navigate", (event, reqUrl) => {
+    // if the target url is not the same as our host then force open in a browser
+    // URL.host includes the port - so this works for localhost servers vs webpack dev server
+    const targetHost = new URL(reqUrl).host;
+    const currentHost = new URL(browserWindow.webContents.getURL()).host;
+    const isExternal = targetHost !== currentHost;
+    if (isExternal) {
+      event.preventDefault();
+      shell.openExternal(reqUrl);
+    }
+  });
+
   browserWindow.webContents.on("ipc-message", (_event: unknown, channel: string) => {
     if (channel === "window.toolbar-double-clicked") {
       const action: string =

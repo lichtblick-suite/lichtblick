@@ -106,9 +106,7 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
         <IconButton iconProps={{ iconName: "ChevronLeft" }} onClick={onClose} />,
       ]}
     >
-      <ExtensionId href={extension.homepage} target="_blank">
-        {extension.id}
-      </ExtensionId>
+      <ExtensionId href={extension.homepage}>{extension.id}</ExtensionId>
       <Version>{`v${extension.version}`}</Version>
       <License>{extension.license}</License>
       <Publisher>{extension.publisher}</Publisher>
