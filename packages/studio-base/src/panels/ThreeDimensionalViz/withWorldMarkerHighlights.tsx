@@ -42,8 +42,8 @@ const withHighlights = (
         ({ interactionData }) => interactionData?.highlighted,
       );
 
-      highlightedMarkersByType[type] = highlightedMarkers;
-      nonHighlightedMarkersByType[type] = nonHighlightedMarkers;
+      (highlightedMarkersByType as Record<string, unknown>)[type] = highlightedMarkers;
+      (nonHighlightedMarkersByType as Record<string, unknown>)[type] = nonHighlightedMarkers;
       hasHighlightedMarkers = hasHighlightedMarkers || highlightedMarkers.length > 0;
     });
 

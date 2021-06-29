@@ -14,12 +14,15 @@ import _, { flatten, groupBy, isEqual, keyBy, mapValues, some, xor } from "lodas
 import { Time } from "rosbag";
 import shallowequal from "shallowequal";
 
-import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
+import {
+  InteractionData,
+  Interactive,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions";
 import MessageCollector from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder/MessageCollector";
 import { MarkerMatcher } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
 import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
 import VelodyneCloudConverter from "@foxglove/studio-base/panels/ThreeDimensionalViz/VelodyneCloudConverter";
-import { Topic, Frame, MessageEvent } from "@foxglove/studio-base/players/types";
+import { Topic, Frame, MessageEvent, RosObject } from "@foxglove/studio-base/players/types";
 import {
   Color,
   Marker,
@@ -34,6 +37,14 @@ import {
   PoseStamped,
   VelodyneScan,
   GeometryMsgs$PolygonStamped,
+  Scale,
+  Point,
+  Header,
+  InstancedLineListMarker,
+  LaserScan,
+  OverlayIconMarker,
+  OccupancyGridMessage,
+  PointCloud2,
 } from "@foxglove/studio-base/types/Messages";
 import { MarkerProvider, MarkerCollector, Scene } from "@foxglove/studio-base/types/Scene";
 import Bounds from "@foxglove/studio-base/util/Bounds";
@@ -60,7 +71,7 @@ import { fromSec } from "@foxglove/studio-base/util/time";
 import { ThreeDimensionalVizHooks } from "./types";
 
 export type TopicSettingsCollection = {
-  [topicOrNamespaceKey: string]: any;
+  [topicOrNamespaceKey: string]: Record<string, unknown>;
 };
 
 // builds a syntehtic arrow marker from a geometry_msgs/PoseStamped
@@ -125,12 +136,9 @@ export function getSceneErrorsByTopic(
 ): {
   [topicName: string]: string[];
 } {
-  const res: any = {};
-  const addError = (topic: any, message: any) => {
-    if (!res[topic]) {
-      res[topic] = [];
-    }
-    res[topic].push(message);
+  const res: Record<string, string[]> = {};
+  const addError = (topic: string, message: string) => {
+    (res[topic] ??= []).push(message);
   };
   // generic errors
   for (const [topic, message] of sceneErrors.topicsWithError) {
@@ -157,8 +165,8 @@ export function filterOutSupersededMessages<T extends Pick<MessageEvent<unknown>
   if (MARKER_ARRAY_DATATYPES.includes(datatype)) {
     // Many marker arrays begin with a command to "delete all markers on this topic". If we see
     // this, we can ignore any earlier messages on the topic.
-    const earliestMessageToKeepIndex = reversedMessages.findIndex(({ message }: any) => {
-      const markers = message.markers ?? message.allMarkers;
+    const earliestMessageToKeepIndex = reversedMessages.findIndex(({ message }) => {
+      const markers = (message as { markers?: BaseMarker[] }).markers ?? [];
       return markers[0]?.action === 3;
     });
     if (earliestMessageToKeepIndex !== -1) {
@@ -169,7 +177,7 @@ export function filterOutSupersededMessages<T extends Pick<MessageEvent<unknown>
   const filteredMessages = [];
   let hasSeenNonLifetimeMessage = false;
   for (const message of reversedMessages) {
-    const hasLifetime = !!(message.message as any).lifetime;
+    const hasLifetime = !!(message.message as BaseMarker).lifetime;
     if (hasLifetime) {
       // Show all messages that have a lifetime.
       filteredMessages.unshift(message);
@@ -189,7 +197,6 @@ export default class SceneBuilder implements MarkerProvider {
   markers: Marker[] = [];
   transforms?: Transforms;
   rootTransformID?: string;
-  selectionState: any = {};
   frame?: Frame;
   // TODO(JP): Get rid of these two different variables `errors` and `errorsByTopic` which we
   // have to keep in sync.
@@ -343,17 +350,6 @@ export default class SceneBuilder implements MarkerProvider {
     );
   }
 
-  setGlobalVariables = ({ globalVariables }: { globalVariables: GlobalVariables }): void => {
-    const { getSelectionState, getTopicsToRender } = this._hooks;
-    const prevSelectionState = this.selectionState;
-    this.selectionState = getSelectionState(globalVariables);
-
-    // Because setSelectedNamespacesByTopic is called before setGlobalVariables,
-    // we need to add the topics here instead of overwriting them.
-    const updatedTopics = getTopicsToRender(prevSelectionState, this.selectionState);
-    updatedTopics.forEach((topicName) => this._markTopicToRender(topicName));
-  };
-
   setHighlightedMatchers(markerMatchers: Array<MarkerMatcher>): void {
     const markerMatchersByTopic = groupBy<MarkerMatcher>(markerMatchers, ({ topic }) => topic);
     this._addTopicsToRenderForMarkerMatchers(this._highlightMarkerMatchersByTopic, markerMatchers);
@@ -506,7 +502,10 @@ export default class SceneBuilder implements MarkerProvider {
     return pose;
   };
 
-  private _consumeMarkerArray = (topic: string, message: any): void => {
+  private _consumeMarkerArray = (
+    topic: string,
+    message: { markers: readonly BaseMarker[] },
+  ): void => {
     for (const marker of message.markers) {
       this._consumeMarker(topic, marker);
     }
@@ -556,7 +555,7 @@ export default class SceneBuilder implements MarkerProvider {
       return;
     }
 
-    const points = (message as any).points as MutablePoint[];
+    const points = (message as unknown as { points: MutablePoint[] }).points;
     const { position } = pose;
 
     let minZ = Number.MAX_SAFE_INTEGER;
@@ -589,11 +588,12 @@ export default class SceneBuilder implements MarkerProvider {
     // HACK(jacob): rather than hard-coding this, we should
     //  (a) produce this visualization dynamically from a non-marker topic
     //  (b) fix translucency so it looks correct (harder)
-    const color = this._hooks.getMarkerColor(topic, message.color as any);
+    const color = this._hooks.getMarkerColor(topic, message.color!);
 
     // Allow topic settings to override marker color (see MarkerSettingsEditor.js)
-    let { overrideColor } =
-      this._settingsByKey[`ns:${topic}:${namespace}`] || this._settingsByKey[`t:${topic}`] || {};
+    let { overrideColor } = (this._settingsByKey[`ns:${topic}:${namespace}`] ??
+      this._settingsByKey[`t:${topic}`] ??
+      {}) as { overrideColor?: Color };
 
     // Check for matching colorOverrideMarkerMatchers for this topic
     const colorOverrideMarkerMatchers = this._colorOverrideMarkerMatchersByTopic[topic] ?? [];
@@ -602,7 +602,7 @@ export default class SceneBuilder implements MarkerProvider {
         // Get the item at the key path
         // i.e. key path: ["foo", "bar"] would return "value" in an object like {foo: {bar: "value" }}
         const markerValue = markerKeyPath.reduce(
-          (item: any, key) => item?.[key],
+          (item, key) => item?.[key] as Record<string, unknown> | undefined,
           message as Record<string, unknown> | undefined,
         );
         return value === markerValue;
@@ -614,21 +614,38 @@ export default class SceneBuilder implements MarkerProvider {
 
     // Set later in renderMarkers so it be applied to markers generated in _consumeNonMarkerMessage
     const highlighted = false;
-    const interactionData = {
+    const interactionData: InteractionData = {
       topic,
       highlighted,
-      originalMessage: message,
+      originalMessage: message as unknown as RosObject,
     };
     const lifetime = message.lifetime;
 
     // This "marker-ish" thing is an unholy union of many drawable types...
-    const marker: any = {
-      type: (message as any).type,
+    const marker: {
+      type: number;
+      scale: Scale;
+      lifetime?: Time;
+      pose: Pose;
+      interactionData: InteractionData;
+      color?: Color;
+      colors?: readonly Color[];
+      points: Point[];
+      id: string | number;
+      ns: string;
+      header: Header;
+      action: 0 | 1 | 2 | 3;
+      text?: string;
+      poses?: readonly Pose[];
+      closed?: boolean;
+      metadataByIndex?: readonly Readonly<unknown[]>[];
+    } = {
+      type: (message as unknown as { type: number }).type,
       scale: message.scale,
-      lifetime: lifetime,
+      lifetime,
       pose,
       interactionData,
-      color: overrideColor || color,
+      color: overrideColor ?? color,
       colors: overrideColor ? [] : message.colors,
       points: parsedPoints,
       id: message.id,
@@ -642,9 +659,9 @@ export default class SceneBuilder implements MarkerProvider {
     }
     // InstancedLineList fields. Check some fields, some fixtures do not include them all.
     if ("metadataByIndex" in message) {
-      marker.poses = (message as any).poses;
-      marker.metadataByIndex = (message as any).metadataByIndex;
-      marker.closed = (message as any).closed;
+      marker.poses = (message as { poses?: readonly Pose[] }).poses;
+      marker.metadataByIndex = (message as InstancedLineListMarker).metadataByIndex;
+      marker.closed = (message as { closed?: boolean }).closed;
     }
     this.collectors[topic]!.addMarker(marker, name);
   }
@@ -718,7 +735,7 @@ export default class SceneBuilder implements MarkerProvider {
         },
       };
     }
-    (this.collectors[topic] as any).addNonMarker(topic, mappedMessage);
+    this.collectors[topic]!.addNonMarker(topic, mappedMessage as unknown as Interactive<unknown>);
   };
 
   _consumeColor = (msg: MessageEvent<Color>): void => {
@@ -737,14 +754,17 @@ export default class SceneBuilder implements MarkerProvider {
     topic: string,
     drawData: StampedMessage,
     type: number,
-    originalMessage?: any,
+    originalMessage?: unknown,
   ): void => {
+    if (this.rootTransformID === undefined) {
+      throw new Error("missing rootTransformId");
+    }
     const sourcePose = emptyPose();
     let pose = this.transforms?.apply(
       sourcePose,
       sourcePose,
       drawData.header.frame_id,
-      this.rootTransformID as any,
+      this.rootTransformID,
     );
     if (!pose) {
       // Don't error on frame_id="", interpret it as an identity transform
@@ -757,7 +777,10 @@ export default class SceneBuilder implements MarkerProvider {
     }
 
     // some callers of _consumeNonMarkerMessage provide LazyMessages and others provide regular objects
-    const obj = (("toJSON" in drawData) as any) ? (drawData as any).toJSON() : drawData;
+    const obj =
+      "toJSON" in drawData
+        ? (drawData as unknown as { toJSON: () => Record<string, unknown> }).toJSON()
+        : drawData;
     const mappedMessage = {
       ...obj,
       type,
@@ -768,9 +791,14 @@ export default class SceneBuilder implements MarkerProvider {
     // If a decay time is available, we assign a lifetime to this message
     // Do not automatically assign a 0 (zero) decay time since that translates
     // to an infinite lifetime. But do allow for 0 values based on user preferences.
-    const decayTimeInSec = this._settingsByKey[`t:${topic}`]?.decayTime;
-    const lifetime = decayTimeInSec ? fromSec(decayTimeInSec) : undefined;
-    (this.collectors[topic] as MessageCollector).addNonMarker(topic, mappedMessage, lifetime);
+    const decayTimeInSec = this._settingsByKey[`t:${topic}`]?.decayTime as number | undefined;
+    const lifetime =
+      decayTimeInSec != undefined && decayTimeInSec !== 0 ? fromSec(decayTimeInSec) : undefined;
+    (this.collectors[topic] as MessageCollector).addNonMarker(
+      topic,
+      mappedMessage as Interactive<unknown>,
+      lifetime,
+    );
   };
 
   setCurrentTime = (currentTime: { sec: number; nsec: number }): void => {
@@ -788,7 +816,7 @@ export default class SceneBuilder implements MarkerProvider {
   // extracts renderable markers from the ros frame
   render(): void {
     this.flattenedZHeightPose =
-      this._hooks.getFlattenedPose(this.frame as any) ?? this.flattenedZHeightPose;
+      this._hooks.getFlattenedPose(this.frame!) ?? this.flattenedZHeightPose;
 
     if (this.flattenedZHeightPose?.position) {
       this.bounds.update(this.flattenedZHeightPose.position);
@@ -811,15 +839,19 @@ export default class SceneBuilder implements MarkerProvider {
 
         break;
       case VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE:
-        this._consumeMarkerArray(topic, message);
+        this._consumeMarkerArray(topic, message as { markers: BaseMarker[] });
 
         break;
       case POSE_STAMPED_DATATYPE: {
         // make synthetic arrow marker from the stamped pose
         const pose = (msg.message as PoseStamped).pose;
-        (this.collectors[topic] as any).addNonMarker(
+        this.collectors[topic]!.addNonMarker(
           topic,
-          buildSyntheticArrowMarker(msg, pose, this._hooks.getSyntheticArrowMarkerColor),
+          buildSyntheticArrowMarker(
+            msg,
+            pose,
+            this._hooks.getSyntheticArrowMarkerColor,
+          ) as Interactive<unknown>,
         );
         break;
       }
@@ -838,7 +870,7 @@ export default class SceneBuilder implements MarkerProvider {
         const newMessage = {
           header: pathStamped.header,
           // Future: display orientation of the poses in the path
-          points: pathStamped.poses.map((pose: any) => pose.pose.position),
+          points: pathStamped.poses.map((pose) => pose.pose.position),
           closed: false,
           scale: { x: 0.2 },
           color: topicSettings?.overrideColor ?? { r: 0.5, g: 0.5, b: 1, a: 1 },
@@ -938,8 +970,8 @@ export default class SceneBuilder implements MarkerProvider {
       }
       const topicMarkers = collector.getMessages();
       for (const message of topicMarkers) {
-        const marker: any = message;
-        if (marker.ns) {
+        const marker = message as unknown as Interactive<BaseMarker & Marker>;
+        if (marker.ns != undefined && marker.ns !== "") {
           if (!this.namespaceIsEnabled(topic.name, marker.ns)) {
             continue;
           }
@@ -951,7 +983,7 @@ export default class SceneBuilder implements MarkerProvider {
         const markerMatches = (this._highlightMarkerMatchersByTopic[topic.name] ?? []).some(
           ({ checks = [] }) =>
             checks.every(({ markerKeyPath, value }) => {
-              const markerValue = _.get(message, markerKeyPath as any);
+              const markerValue = markerKeyPath ? _.get(message, markerKeyPath) : message;
               return value === markerValue;
             }),
         );
@@ -961,20 +993,26 @@ export default class SceneBuilder implements MarkerProvider {
         // flesh this out to be more marker type agnostic
         const settings = this._settingsByKey[`t:${topic.name}`];
         if (settings) {
-          marker.settings = settings;
+          (marker as { settings?: unknown }).settings = settings;
         }
         this._addMarkerToCollector(add, topic, marker);
       }
     }
   }
 
-  private _addMarkerToCollector(add: MarkerCollector, topic: Topic, originalMarker: any) {
-    let marker = originalMarker;
+  private _addMarkerToCollector(add: MarkerCollector, topic: Topic, originalMarker: Marker) {
+    let marker = originalMarker as
+      | Marker
+      | OccupancyGridMessage
+      | PointCloud2
+      | (PoseStamped & { type: 103 })
+      | (LaserScan & { type: 104 })
+      | (OverlayIconMarker & { type: 109 });
     switch (marker.type) {
       case 1:
       case 2:
       case 3:
-        marker = { ...marker, points: undefined };
+        marker = { ...marker, points: undefined } as unknown as typeof marker;
         break;
       case 4:
         marker = { ...marker, primitive: "line strip" };
@@ -982,10 +1020,12 @@ export default class SceneBuilder implements MarkerProvider {
       case 6:
         marker = { ...marker, primitive: "lines" };
         break;
+      default:
+        break;
     }
 
     // allow topic settings to override renderable marker command (see MarkerSettingsEditor.js)
-    const { overrideCommand } = this._settingsByKey[`t:${topic.name}`] || {};
+    const { overrideCommand } = this._settingsByKey[`t:${topic.name}`] ?? {};
 
     switch (marker.type) {
       case 0:
@@ -1036,9 +1076,10 @@ export default class SceneBuilder implements MarkerProvider {
       case 110:
         return add.color(marker);
       default: {
-        if (!this._hooks.addMarkerToCollector(add, marker)) {
-          this._setTopicError(topic.name, `Unsupported marker type: ${marker.type}`);
-        }
+        this._setTopicError(
+          topic.name,
+          `Unsupported marker type: ${(marker as { type: number }).type}`,
+        );
       }
     }
   }

@@ -92,16 +92,16 @@ export function syncBags(
   switch (syncOption) {
     case "bag1ToBag2":
       result.checkedKeys = { bag1: bag1CheckedKeys, bag2: bag1CheckedKeys.map(bag1KeyToBag2Key) };
-      bag1SettingKeys.forEach((bag1Key) => (newSettingsByKey[bag1Key] = settingsByKey[bag1Key]));
+      bag1SettingKeys.forEach((bag1Key) => (newSettingsByKey[bag1Key] = settingsByKey[bag1Key]!));
       bag1SettingKeys.forEach(
-        (bag1Key) => (newSettingsByKey[bag1KeyToBag2Key(bag1Key)] = settingsByKey[bag1Key]),
+        (bag1Key) => (newSettingsByKey[bag1KeyToBag2Key(bag1Key)] = settingsByKey[bag1Key]!),
       );
       break;
     case "bag2ToBag1":
       result.checkedKeys = { bag1: bag2CheckedKeys.map(bag2KeyToBag1Key), bag2: bag2CheckedKeys };
-      bag2SettingKeys.forEach((bag2Key) => (newSettingsByKey[bag2Key] = settingsByKey[bag2Key]));
+      bag2SettingKeys.forEach((bag2Key) => (newSettingsByKey[bag2Key] = settingsByKey[bag2Key]!));
       bag2SettingKeys.forEach(
-        (bag2Key) => (newSettingsByKey[bag2KeyToBag1Key(bag2Key)] = settingsByKey[bag2Key]),
+        (bag2Key) => (newSettingsByKey[bag2KeyToBag1Key(bag2Key)] = settingsByKey[bag2Key]!),
       );
       break;
     case "swapBag1AndBag2":
@@ -110,10 +110,10 @@ export function syncBags(
         bag2: bag1CheckedKeys.map(bag1KeyToBag2Key),
       };
       bag2SettingKeys.forEach(
-        (bag2Key) => (newSettingsByKey[bag2KeyToBag1Key(bag2Key)] = settingsByKey[bag2Key]),
+        (bag2Key) => (newSettingsByKey[bag2KeyToBag1Key(bag2Key)] = settingsByKey[bag2Key]!),
       );
       bag1SettingKeys.forEach(
-        (bag1Key) => (newSettingsByKey[bag1KeyToBag2Key(bag1Key)] = settingsByKey[bag1Key]),
+        (bag1Key) => (newSettingsByKey[bag1KeyToBag2Key(bag1Key)] = settingsByKey[bag1Key]!),
       );
       break;
     default:

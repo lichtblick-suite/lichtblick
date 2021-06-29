@@ -20,6 +20,7 @@ import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
 import Icon from "@foxglove/studio-base/components/Icon";
 import Menu from "@foxglove/studio-base/components/Menu";
 import Item from "@foxglove/studio-base/components/Menu/Item";
+import { DecodedMarker } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/decodeMarker";
 import {
   getClickedInfo,
   getAllPoints,
@@ -47,7 +48,10 @@ export default function PointCloudDetails({
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const { clickedPoint, clickedPointColor, additionalFieldValues } = useMemo(() => {
-    return getClickedInfo(object, instanceIndex) ?? ({} as Partial<ClickedInfo>);
+    return (
+      getClickedInfo(object as unknown as DecodedMarker, instanceIndex) ??
+      ({} as Partial<ClickedInfo>)
+    );
   }, [instanceIndex, object]);
 
   const additionalFieldNames = useMemo(
@@ -58,13 +62,18 @@ export default function PointCloudDetails({
   const hasAdditionalFieldNames = additionalFieldNames.length > 0;
   const onCopy = useCallback(() => {
     // GPU point clouds need to extract positions using getAllPoints()
-    const allPoints: number[] = object.points || getAllPoints(object);
+    const allPoints: number[] =
+      (object as { points?: number[] }).points ?? getAllPoints(object as unknown as DecodedMarker);
     const dataRows = [];
     const len = allPoints.length / 3;
     // get copy data
     for (let i = 0; i < len; i++) {
       const rowData = [allPoints[i * 3], allPoints[i * 3 + 1], allPoints[i * 3 + 2]];
-      rowData.push(...additionalFieldNames.map((fieldName) => object?.[fieldName]?.[i]));
+      rowData.push(
+        ...additionalFieldNames.map(
+          (fieldName) => (object as unknown as Record<string, number[]>)?.[fieldName]?.[i],
+        ),
+      );
       dataRows.push(rowData.join(","));
     }
 

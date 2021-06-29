@@ -75,7 +75,7 @@ export const SIconWrapper = styled.div`
   top: 0;
   left: 0;
 `;
-export type MarkerWithInteractionData = Interactive<any>;
+export type MarkerWithInteractionData = Interactive<BaseMarker>;
 
 export type InteractiveMarkersByType = {
   arrow: MarkerWithInteractionData[];
@@ -252,11 +252,11 @@ export default function WorldMarkers({
     <>
       <Cover color={backdropColor} />
       <OccupancyGrids layerIndex={(layerIndex as number) + LAYER_INDEX_OCCUPANCY_GRIDS}>
-        {grid as any}
+        {grid}
       </OccupancyGrids>
       {/* Render PointClouds first so other markers with the same zIndex can show on top of PointClouds. */}
       <PointClouds layerIndex={layerIndex} clearCachedMarkers={clearCachedMarkers}>
-        {pointcloud as any}
+        {pointcloud}
       </PointClouds>
       <Arrows layerIndex={layerIndex}>{arrow}</Arrows>
       <Points layerIndex={layerIndex} useWorldSpaceSize>
@@ -267,7 +267,7 @@ export default function WorldMarkers({
       <Cylinders layerIndex={layerIndex}>{cylinder}</Cylinders>
       <Cubes layerIndex={layerIndex}>{[...cube, ...cubeList]}</Cubes>
       <PoseMarkers layerIndex={layerIndex} markers={poseMarker} />
-      <LaserScans layerIndex={layerIndex}>{laserScan as any}</LaserScans>
+      <LaserScans layerIndex={layerIndex}>{laserScan}</LaserScans>
       {glTextAtlasInfo.status === "LOADED" && (
         <GLText
           layerIndex={(layerIndex as number) + LAYER_INDEX_TEXT}
@@ -284,18 +284,8 @@ export default function WorldMarkers({
         {[...instancedLineList, ...groupedLines]}
       </Lines>
       <LinedConvexHulls layerIndex={layerIndex}>{linedConvexHull}</LinedConvexHulls>
-      <Overlay
-        renderItem={({
-          item,
-          coordinates,
-          index,
-          dimension: { width, height },
-        }: {
-          item: any; // eslint-disable-line react/no-unused-prop-types
-          coordinates?: [number, number]; // eslint-disable-line react/no-unused-prop-types
-          index: any; // eslint-disable-line react/no-unused-prop-types
-          dimension: { width: number; height: number }; // eslint-disable-line react/no-unused-prop-types
-        }) => {
+      <Overlay<Interactive<OverlayIconMarker>>
+        renderItem={({ item, coordinates, index, dimension: { width, height } }) => {
           if (!coordinates) {
             return ReactNull;
           }
@@ -303,15 +293,15 @@ export default function WorldMarkers({
           if (left < -10 || top < -10 || left > width + 10 || top > height + 10) {
             return ReactNull; // Don't render anything that's too far outside of the canvas
           }
-          const originalMsg = item.interactionData?.originalMessage || {};
+          const originalMsg = item.interactionData?.originalMessage ?? {};
           const parsedMsg = originalMsg;
 
           const metadata = parsedMsg?.metadata;
-          if (!metadata) {
+          if (metadata == undefined) {
             return;
           }
           const { markerStyle = {}, iconOffset: { x = 0, y = 0 } = {} } = metadata as {
-            markerStyle?: any;
+            markerStyle?: React.CSSProperties;
             iconOffset?: { x: number; y: number };
           };
 

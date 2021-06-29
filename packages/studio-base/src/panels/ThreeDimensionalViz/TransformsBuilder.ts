@@ -149,7 +149,7 @@ const getAxisTextMarker = (id: string, transform: Transform, rootTransformID: st
     // @ts-expect-error should name exist on marker?
     name: `${id}-name`,
     pose: textPose,
-    type: MARKER_MSG_TYPES.TEXT_VIEW_FACING as Marker["type"],
+    type: MARKER_MSG_TYPES.TEXT_VIEW_FACING,
     text: id,
   };
 };

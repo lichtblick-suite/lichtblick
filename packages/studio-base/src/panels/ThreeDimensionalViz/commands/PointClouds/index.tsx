@@ -20,6 +20,7 @@ import {
   AssignNextColorsFn,
   MouseEventObject,
   vec4ToRGBA,
+  BaseShape,
 } from "regl-worldview";
 
 import {
@@ -337,7 +338,7 @@ const makePointCloudCommand = () => {
 };
 
 function instancedGetChildrenForHitmap<
-  T extends {
+  T extends BaseShape & {
     hitmapColors?: Uint8Array | number[];
     width?: number;
     height?: number;
@@ -378,7 +379,10 @@ function instancedGetChildrenForHitmap<
 }
 
 type Props = CommonCommandProps & {
-  children: PointCloudMarker[];
+  // TypeScript doesn't allow us to pass an array variable if `children` is set to an array type here
+  // https://github.com/microsoft/TypeScript/issues/30711#issuecomment-485013588
+  children: React.ReactNode;
+
   clearCachedMarkers?: boolean;
 };
 
@@ -389,10 +393,10 @@ export default function PointClouds({
 }: Props): React.ReactElement {
   const [command] = useState(() => makePointCloudCommand());
   const markerCache = useRef(new Map<Uint8Array, MemoizedMarker>());
-  markerCache.current = updateMarkerCache(markerCache.current, children);
+  markerCache.current = updateMarkerCache(markerCache.current, children as PointCloudMarker[]);
   const decodedMarkers = !(clearCachedMarkers ?? false)
     ? [...markerCache.current.values()].map((decoded) => decoded.marker)
-    : children.map((m) => decodeMarker(m));
+    : (children as PointCloudMarker[]).map((m) => decodeMarker(m));
   return (
     <Command getChildrenForHitmap={instancedGetChildrenForHitmap} {...rest} reglCommand={command}>
       {decodedMarkers}

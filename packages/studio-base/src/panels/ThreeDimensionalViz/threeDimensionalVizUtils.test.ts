@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { CameraState } from "regl-worldview";
+import { CameraState, MouseEventObject } from "regl-worldview";
 
 import {
   getNewCameraStateOnFollowChange,
@@ -83,7 +83,10 @@ describe("threeDimensionalVizUtils", () => {
         },
       };
       expect(
-        getUpdatedGlobalVariablesBySelectedObject(mouseEventObject, linkedGlobalVariables),
+        getUpdatedGlobalVariablesBySelectedObject(
+          mouseEventObject as unknown as MouseEventObject,
+          linkedGlobalVariables,
+        ),
       ).toEqual({
         linkedName: 123456,
       });
@@ -105,7 +108,10 @@ describe("threeDimensionalVizUtils", () => {
       };
 
       expect(
-        getUpdatedGlobalVariablesBySelectedObject(mouseEventObject, linkedGlobalVariables),
+        getUpdatedGlobalVariablesBySelectedObject(
+          mouseEventObject as unknown as MouseEventObject,
+          linkedGlobalVariables,
+        ),
       ).toEqual({
         linkedName: 654321,
       });

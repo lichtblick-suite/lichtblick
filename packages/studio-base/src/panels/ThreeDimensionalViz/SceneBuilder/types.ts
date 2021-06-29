@@ -15,11 +15,8 @@ import { Frame } from "@foxglove/studio-base/players/types";
 import { Color, Pose } from "@foxglove/studio-base/types/Messages";
 
 export type ThreeDimensionalVizHooks = Readonly<{
-  getSelectionState: (arg0: { [key: string]: any }) => any; // arg is globalVariables
-  getTopicsToRender: (arg0: any, arg1: any) => Set<string>; // args are selection states
   getMarkerColor: (arg0: string, arg1: Color) => Color;
   getOccupancyGridValues: (arg0: string) => [number, string]; // arg is topic, return value is [alpha, map].
   getFlattenedPose: (arg0: Frame) => Pose | undefined;
   getSyntheticArrowMarkerColor: (arg0: string) => Color; // arg is topic
-  addMarkerToCollector: (arg0: any, arg1: any) => boolean; // marker collector, marker
 }>;

@@ -148,9 +148,3 @@ overrides:
     files:
       - "packages/studio-base/src/context/PanelCatalogContext.ts"
       - "packages/studio-base/src/panels/NodePlayground/Editor.tsx"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/SceneBuilder/index.ts"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/SceneBuilder/types.ts"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/WorldMarkers.tsx"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/threeDimensionalVizUtils.ts"
-      - "packages/studio-base/src/panels/ThreeDimensionalViz/utils/groupingUtils.ts"
-      - "packages/studio-base/src/types/panels.ts"

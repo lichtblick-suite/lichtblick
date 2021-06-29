@@ -48,14 +48,16 @@ export function getDiffBySource(
     const elems = Array.isArray(value) ? value : [value];
     const [source1, source2] = partition(elems, (m) => {
       const { interactionData } = m;
-      return !interactionData || !interactionData.topic.startsWith(SECOND_SOURCE_PREFIX);
+      return (
+        interactionData == undefined || !interactionData.topic.startsWith(SECOND_SOURCE_PREFIX)
+      );
     });
 
     // Format markers. This results in three render passes:
     // 1. Render Source 1 markers in red
     // 2. Render Source 2 markers in gray, disabling depth checking.
     // 3. Render Source 2 markers in green, with depth checking enabled (written in step 1).
-    ret[0][key] = source1.map((m) => ({
+    (ret[0] as Record<string, unknown>)[key] = source1.map((m) => ({
       ...m,
       colors: [],
       color: SOURCE_1_COLOR_RGBA,
@@ -72,7 +74,7 @@ export function getDiffBySource(
         color: SOURCE_1_COLOR,
       },
     }));
-    ret[1][key] = source2.map((m) => ({
+    (ret[1] as Record<string, unknown>)[key] = source2.map((m) => ({
       ...m,
       colors: [],
       color: BASE_COLOR_RGBA,
@@ -88,7 +90,7 @@ export function getDiffBySource(
         color: BASE_COLOR,
       },
     }));
-    ret[2][key] = source2.map((m) => ({
+    (ret[2] as Record<string, unknown>)[key] = source2.map((m) => ({
       ...m,
       colors: [],
       color: SOURCE_2_COLOR_RGBA,

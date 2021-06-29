@@ -133,7 +133,9 @@ const laserScan = (regl: REGL.Regl) =>
   });
 
 type Props = CommonCommandProps & {
-  children: LaserScan[];
+  // TypeScript doesn't allow us to pass an array variable if `children` is set to an array type here
+  // https://github.com/microsoft/TypeScript/issues/30711#issuecomment-485013588
+  children: React.ReactNode;
 };
 
 export default function LaserScans(props: Props): JSX.Element {

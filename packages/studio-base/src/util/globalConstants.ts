@@ -80,7 +80,7 @@ export const MARKER_MSG_TYPES = {
   FILLED_POLYGON: 107,
   INSTANCED_LINE_LIST: 108,
   OVERLAY_ICON: 109,
-};
+} as const;
 
 export const POSE_MARKER_SCALE = { x: 2, y: 2, z: 0.1 };
 

@@ -151,7 +151,9 @@ const occupancyGrids = (regl: REGL.Regl) => {
 };
 
 type Props = CommonCommandProps & {
-  children: OccupancyGridMessage[];
+  // TypeScript doesn't allow us to pass an array variable if `children` is set to an array type here
+  // https://github.com/microsoft/TypeScript/issues/30711#issuecomment-485013588
+  children: React.ReactNode;
 };
 
 export default function OccupancyGrids(props: Props): JSX.Element {

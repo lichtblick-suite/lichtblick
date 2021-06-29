@@ -16,7 +16,7 @@ import { Marker } from "@foxglove/studio-base/types/Messages";
 
 export type InteractionData = {
   readonly topic: string;
-  readonly highlighted?: boolean;
+  highlighted?: boolean;
   readonly originalMessage: RosObject;
 };
 export type Interactive<T> = T & { interactionData: InteractionData };

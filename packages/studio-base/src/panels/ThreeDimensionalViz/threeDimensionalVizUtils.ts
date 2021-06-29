@@ -28,7 +28,7 @@ import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables"
 import { InteractionData } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import { LinkedGlobalVariables } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
-import { MutablePose } from "@foxglove/studio-base/types/Messages";
+import { InstancedLineListMarker, MutablePose } from "@foxglove/studio-base/types/Messages";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 
 export type TargetPose = { target: Vec3; targetOrientation: Vec4 };
@@ -109,18 +109,17 @@ export function useTransformedCameraState({
   return { transformedCameraState: mergedCameraState, targetPose: targetPose ?? lastTargetPose };
 }
 
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export const getInstanceObj = (marker: any, idx: number): any => {
+export const getInstanceObj = (marker: unknown, idx: number): unknown => {
   if (!marker) {
     return;
   }
-  return marker?.metadataByIndex?.[idx];
+  return (marker as InstancedLineListMarker).metadataByIndex?.[idx];
 };
 
-export const getObject = (selectedObject?: MouseEventObject): any => {
+export const getObject = (selectedObject?: MouseEventObject): unknown => {
   const object =
     (selectedObject?.instanceIndex !== undefined &&
-      selectedObject.object.metadataByIndex !== undefined &&
+      (selectedObject.object as InstancedLineListMarker).metadataByIndex !== undefined &&
       getInstanceObj(selectedObject.object, selectedObject.instanceIndex)) ||
     selectedObject?.object;
   return object;
@@ -129,7 +128,8 @@ export const getObject = (selectedObject?: MouseEventObject): any => {
 export const getInteractionData = (
   selectedObject?: MouseEventObject,
 ): InteractionData | undefined =>
-  selectedObject?.object.interactionData || getObject(selectedObject)?.interactionData;
+  (selectedObject?.object as { interactionData?: InteractionData }).interactionData ??
+  (getObject(selectedObject) as { interactionData?: InteractionData } | undefined)?.interactionData;
 
 export function getUpdatedGlobalVariablesBySelectedObject(
   selectedObject: MouseEventObject,
@@ -144,7 +144,7 @@ export function getUpdatedGlobalVariablesBySelectedObject(
   ) {
     return;
   }
-  const newGlobalVariables: { [key: string]: any } = {};
+  const newGlobalVariables: GlobalVariables = {};
   linkedGlobalVariables.forEach(({ topic, markerKeyPath, name }) => {
     if (interactionData.topic === topic) {
       const objectForPath = get(object, [...markerKeyPath].reverse());

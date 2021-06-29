@@ -87,7 +87,7 @@ function getMarkers(markerProviders: MarkerProvider[]): InteractiveMarkersByType
   // compatible with interactive markers. Ideally interactive markers would not require mutating
   // marker objects which would help avoid unsafe casting.
   const collector: MarkerCollector = {
-    arrow: (o) => markers.arrow.push(o as MarkerWithInteractionData),
+    arrow: (o) => markers.arrow.push(o as unknown as MarkerWithInteractionData),
     color: (o) => markers.color.push(o as Interactive<ColorMarker>),
     cube: (o) => markers.cube.push(o as Interactive<CubeMarker>),
     cubeList: (o) => markers.cubeList.push(o as Interactive<CubeListMarker>),
@@ -108,7 +108,7 @@ function getMarkers(markerProviders: MarkerProvider[]): InteractiveMarkersByType
     sphere: (o) => markers.sphere.push(o as Interactive<SphereMarker>),
     sphereList: (o) => markers.sphereList.push(o as Interactive<SphereListMarker>),
     text: (o) => markers.text.push(o as Interactive<TextMarker>),
-    triangleList: (o) => markers.triangleList.push(o as MarkerWithInteractionData),
+    triangleList: (o) => markers.triangleList.push(o as unknown as MarkerWithInteractionData),
   };
 
   for (const provider of markerProviders) {

@@ -12,11 +12,13 @@
 //   You may not use this file except in compliance with the License.
 
 import { groupBy, toPairs } from "lodash";
+import type REGL from "regl";
 
 import {
   LineListMarker,
   LineStripMarker,
   InstancedLineListMarker,
+  Pose,
 } from "@foxglove/studio-base/types/Messages";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 import { COLORS, MARKER_MSG_TYPES } from "@foxglove/studio-base/util/globalConstants";
@@ -44,7 +46,12 @@ export function groupLinesIntoInstancedLineLists(
   const INFINITE_METADATA = {};
 
   for (const [id, messageList] of toPairs(groups)) {
-    const baseMessage = messageList[0] as LineListMarker | LineStripMarker; // groupBy doesn't produce empty groups
+    const baseMessage =
+      // groupBy doesn't produce empty groups
+      messageList[0]! as (LineListMarker | LineStripMarker) & {
+        blend?: REGL.BlendingOptions;
+        depth?: REGL.DepthTestOptions;
+      };
     const isLineStrip = baseMessage.type === MARKER_MSG_TYPES.LINE_STRIP;
     const allColors = []; // accumulated colors
     const allPoints = []; // accumulated positions
@@ -52,9 +59,12 @@ export function groupLinesIntoInstancedLineLists(
     const poses = [];
 
     for (let messageIdx = 0; messageIdx < messageList.length; messageIdx++) {
-      const message: any = messageList[messageIdx];
-      const points: any = message.points || [];
-      const colors: any = message.colors || [];
+      const message: (LineListMarker | LineStripMarker) & {
+        poses?: readonly Pose[];
+        closed?: boolean;
+      } = messageList[messageIdx]!;
+      const points = message.points ?? [];
+      const colors = message.colors ?? [];
       if (points.length === 0) {
         // Ignore markers with no points
         continue;
@@ -87,7 +97,7 @@ export function groupLinesIntoInstancedLineLists(
 
         // In case no point colors are provided or there are not enough values, we use the provided
         // color for the marker (or a default value)
-        fillExtend(allColors, message.color || COLORS.WHITE, points.length - colors.length);
+        fillExtend(allColors, message.color ?? COLORS.WHITE, points.length - colors.length);
 
         // Accumulate poses for each points, if they're provided in the marker
         if (message.poses && message.poses.length > 0) {
@@ -98,12 +108,12 @@ export function groupLinesIntoInstancedLineLists(
         fillExtend(metadataByIndex, message, points.length);
         fillExtend(poses, message.pose, points.length - (message.poses ? message.poses.length : 0));
 
-        if (message.closed) {
+        if (message.closed ?? false) {
           // If this is a closed marker, we need to add an extra point to generate a new line
           // from the last element to the first one. We also need to add the metadata and a pose
           // that correspond to that point.
           allPoints.push(points[0]);
-          allColors.push(colors.length > 0 ? colors[0] : message.color || COLORS.WHITE);
+          allColors.push(colors.length > 0 ? colors[0] : message.color ?? COLORS.WHITE);
           metadataByIndex.push(message);
           poses.push(message.poses ? message.poses[0] : message.pose);
         }
@@ -124,7 +134,7 @@ export function groupLinesIntoInstancedLineLists(
         const lineListPoints = validateLineList(points);
 
         // Point colors, if present, need to be validated in the same way as positions
-        const lineListColors = colors ? validateLineList(colors) : [];
+        const lineListColors = validateLineList(colors);
 
         // Accumulate positions and colors
         extend(allPoints, lineListPoints);
@@ -134,7 +144,7 @@ export function groupLinesIntoInstancedLineLists(
         // color for the marker (or a default value)
         fillExtend(
           allColors,
-          message.color || COLORS.WHITE,
+          message.color ?? COLORS.WHITE,
           lineListPoints.length - lineListColors.length,
         );
 
@@ -155,7 +165,7 @@ export function groupLinesIntoInstancedLineLists(
     }
 
     // Extract common properties from base marker
-    const { header, action, ns, scale, blend, depth } = baseMessage as any;
+    const { header, action, ns, scale, blend, depth } = baseMessage;
     resultMarkers.push({
       header,
       action,
@@ -177,7 +187,7 @@ export function groupLinesIntoInstancedLineLists(
   return resultMarkers;
 }
 
-function extend<T>(arr1: T[], arr2: T[]) {
+function extend<T>(arr1: T[], arr2: readonly T[]) {
   arr2.forEach((v) => arr1.push(v));
 }
 
@@ -193,9 +203,9 @@ function fillExtend<T>(arr: T[], value: T, n: number): void {
 // For line lists, we need to check if the input array contains an
 // even number of elements. Otherwise, drop the last one since it
 // does not represent a valid line.
-function validateLineList<T>(points: T[]): T[] {
+function validateLineList<T>(points: readonly T[]): readonly T[] {
   if (points.length % 2 !== 0) {
-    points.pop();
+    return points.slice(0, -1);
   }
   return points;
 }

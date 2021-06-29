@@ -15,13 +15,17 @@ import { useCallback, useContext, useEffect } from "react";
 import { MouseEventObject } from "regl-worldview";
 import styled from "styled-components";
 
-import { SelectedObject } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
+import {
+  Interactive,
+  SelectedObject,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import { ThreeDimensionalVizContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
 import { ClickedPosition } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
 import {
   getInteractionData,
   getObject,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
+import { BaseMarker } from "@foxglove/studio-base/types/Messages";
 import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -109,11 +113,11 @@ function InteractionContextMenuItem({
   selectObject: (arg0?: SelectedObject) => void;
   interactiveObject?: MouseEventObject;
 }) {
-  const object = getObject(interactiveObject);
+  const object = getObject(interactiveObject) as Interactive<BaseMarker>;
   const topic = getInteractionData(interactiveObject)?.topic;
   const menuText = (
     <>
-      {object.id && <SId>{object.id}</SId>}
+      {object.id != undefined && object.id !== "" && <SId>{object.id}</SId>}
       {object.interactionData?.topic}
     </>
   );
@@ -123,7 +127,7 @@ function InteractionContextMenuItem({
     if (isNonEmptyOrUndefined(topic)) {
       const { id, ns } = object;
       const checks = [{ markerKeyPath: ["id"], value: id }];
-      if (ns) {
+      if (ns != undefined && ns !== "") {
         checks.push({ markerKeyPath: ["ns"], value: ns });
       }
       return setHoveredMarkerMatchers([{ topic, checks }]);
@@ -133,7 +137,7 @@ function InteractionContextMenuItem({
   useEffect(() => onMouseLeave, [onMouseLeave]);
 
   const selectItemObject = useCallback(
-    () => selectObject(interactiveObject),
+    () => selectObject(interactiveObject as SelectedObject),
     [interactiveObject, selectObject],
   );
 
@@ -143,7 +147,7 @@ function InteractionContextMenuItem({
       onMouseLeave={onMouseLeave}
       data-test="InteractionContextMenuItem"
     >
-      <STopic key={object.id || object.interactionData?.topic} onClick={selectItemObject}>
+      <STopic onClick={selectItemObject}>
         {menuText}
         <STooltip>{menuText}</STooltip>
       </STopic>

@@ -124,7 +124,7 @@ declare module "regl-worldview" {
   }
 
   type MouseEventObject = {
-    object: any;
+    object: BaseShape;
     instanceIndex?: number;
   };
   type Vec3 = readonly [number, number, number];
@@ -177,6 +177,19 @@ declare module "regl-worldview" {
       shiftKeys: boolean;
     }>
   >;
+
+  type Dimensions = { width: number; height: number; top: number; left: number };
+  class Overlay<T> extends React.Component<
+    {
+      renderItem: (_: {
+        item: T;
+        coordinates?: Vec3;
+        index: number;
+        dimension: Dimensions;
+      }) => React.ReactNode;
+    },
+    unknown
+  > {}
 
   export {
     DEFAULT_CAMERA_STATE,

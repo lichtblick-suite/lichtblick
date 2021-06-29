@@ -264,6 +264,7 @@ export type NavMsgs$Path = Readonly<{
 }>;
 
 export type OccupancyGridMessage = Readonly<{
+  header: Header;
   name: string;
   type: 101;
   map: "map" | "costmap";
@@ -290,7 +291,7 @@ export type InstancedLineListMarker = Readonly<
   BaseMarker &
     MultiPointMarker & {
       type: 108;
-      metadataByIndex?: readonly Readonly<Record<number, unknown>>[];
+      metadataByIndex?: readonly Readonly<unknown[]>[];
       scaleInvariant?: boolean;
     }
 >;
