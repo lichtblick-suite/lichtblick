@@ -22,7 +22,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@foxglove/just-fetch": "workspace:*",
+    "@foxglove/just-fetch": "1.0.0",
     "byte-base64": "1.1.0",
     "sax": "1.2.4",
     "web-encoding": "1.1.5",

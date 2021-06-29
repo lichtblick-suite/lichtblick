@@ -2573,15 +2573,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/just-fetch@workspace:*, @foxglove/just-fetch@workspace:packages/just-fetch":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/just-fetch@workspace:packages/just-fetch"
+"@foxglove/just-fetch@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@foxglove/just-fetch@npm:1.0.0"
   dependencies:
-    typescript: 4.3.4
-  peerDependencies:
-    node-fetch: ">=2.0.0"
-  languageName: unknown
-  linkType: soft
+    node-fetch: ^2
+  checksum: b6d2ea35a5ddd37186c0332644344ddd58ac6b3c2d6b5f6aff6670eefe0c97a17ab439a14b5199af1b50050ac86c3570d4f1d49bf186c6455bb0c930bac71766
+  languageName: node
+  linkType: hard
 
 "@foxglove/log@workspace:*, @foxglove/log@workspace:packages/log":
   version: 0.0.0-use.local
@@ -2854,7 +2853,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/xmlrpc@workspace:packages/xmlrpc"
   dependencies:
-    "@foxglove/just-fetch": "workspace:*"
+    "@foxglove/just-fetch": 1.0.0
     "@types/sax": ^1.2.1
     byte-base64: 1.1.0
     jest: 27.0.5
@@ -18951,7 +18950,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:2.6.1, node-fetch@npm:^2.3.0, node-fetch@npm:^2.6.0, node-fetch@npm:^2.6.1":
+"node-fetch@npm:2.6.1, node-fetch@npm:^2, node-fetch@npm:^2.3.0, node-fetch@npm:^2.6.0, node-fetch@npm:^2.6.1":
   version: 2.6.1
   resolution: "node-fetch@npm:2.6.1"
   checksum: 91075bedd57879117e310fbcc36983ad5d699e522edb1ebcdc4ee5294c982843982652925c3532729fdc86b2d64a8a827797a745f332040d91823c8752ee4d7c
