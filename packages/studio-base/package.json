@@ -179,7 +179,7 @@
     "sass-loader": "12.1.0",
     "storycap": "3.0.4",
     "string-replace-loader": "3.0.3",
-    "style-loader": "2.0.0",
+    "style-loader": "3.0.0",
     "three": "0.129.0",
     "ts-loader": "9.2.3",
     "typescript-plugin-styled-components": "1.6.0",
