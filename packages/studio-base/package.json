@@ -32,7 +32,7 @@
     "@foxglove/velodyne-cloud": "workspace:*",
     "@mdi/svg": "5.9.55",
     "@sentry/core": "6.8.0",
-    "@sentry/types": "6.7.1",
+    "@sentry/types": "6.8.0",
     "amplitude-js": "8.3.1",
     "async-mutex": "0.3.1",
     "chart.js": "3.4.0",

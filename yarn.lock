@@ -2226,7 +2226,7 @@ __metadata:
     "@foxglove/velodyne-cloud": "workspace:*"
     "@mdi/svg": 5.9.55
     "@sentry/core": 6.8.0
-    "@sentry/types": 6.7.1
+    "@sentry/types": 6.8.0
     "@storybook/addon-actions": 6.3.0
     "@storybook/addon-essentials": 6.3.0
     "@storybook/builder-webpack5": 6.3.0
