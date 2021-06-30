@@ -25,6 +25,7 @@
   "dependencies": {
     "@fluentui/react": "8.21.1",
     "@fluentui/react-icons-mdl2": "1.1.4",
+    "@foxglove/electron-socket": "1.0.0",
     "@foxglove/hooks": "workspace:*",
     "@foxglove/rosmsg-msgs-common": "workspace:*",
     "@foxglove/rosmsg-msgs-foxglove": "workspace:*",

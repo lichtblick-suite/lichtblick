@@ -2089,18 +2089,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/electron-socket@workspace:*, @foxglove/electron-socket@workspace:packages/electron-socket":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/electron-socket@workspace:packages/electron-socket"
+"@foxglove/electron-socket@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@foxglove/electron-socket@npm:1.0.0"
   dependencies:
-    "@types/dns-packet": 5.2.0
-    dns-packet: 5.2.4
-    eventemitter3: 4.0.7
-    typescript: 4.3.4
+    dns-packet: ^5.2.4
+    eventemitter3: ^4.0.7
   peerDependencies:
     electron: ">=12"
-  languageName: unknown
-  linkType: soft
+  checksum: 10eca917cce4cc915e061e52457040a43ee2c1509e21dfe03c4a52c0360d4d57d685143f6edbe242062a6207ee16baf686cf1408c7de0fc5f4f40db32d85b02d
+  languageName: node
+  linkType: hard
 
 "@foxglove/eslint-plugin@npm:0.9.0":
   version: 0.9.0
@@ -2219,6 +2218,7 @@ __metadata:
     "@fluentui/react": 8.21.1
     "@fluentui/react-icons-mdl2": 1.1.4
     "@foxglove/den": "workspace:*"
+    "@foxglove/electron-socket": 1.0.0
     "@foxglove/hooks": "workspace:*"
     "@foxglove/rosmsg-msgs-common": "workspace:*"
     "@foxglove/rosmsg-msgs-foxglove": "workspace:*"
@@ -5227,15 +5227,6 @@ __metadata:
   version: 4.1.5
   resolution: "@types/debug@npm:4.1.5"
   checksum: 36bdb74909be193aeeb8c9bb64ef45d691f35181dcf75285728ec1e07103cb91042be2e8294f0624fc5922d9b4f68482faf5ea3068288577ebdccee76cd7870c
-  languageName: node
-  linkType: hard
-
-"@types/dns-packet@npm:5.2.0":
-  version: 5.2.0
-  resolution: "@types/dns-packet@npm:5.2.0"
-  dependencies:
-    "@types/node": "*"
-  checksum: 8c6ddffa66698a93100cc9966c4318a35d24edcef5925ef1f7ea463130f8506e0436f58f823f829eb18941af57ce486d2805aa304cbb23fa36242e4e73d0813d
   languageName: node
   linkType: hard
 
@@ -10561,6 +10552,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "desktop@workspace:desktop"
   dependencies:
+    "@foxglove/electron-socket": 1.0.0
     "@foxglove/studio-base": "workspace:*"
     "@types/plist": ^3.0.2
     jszip: 3.6.0
@@ -10782,15 +10774,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dns-packet@npm:5.2.4":
-  version: 5.2.4
-  resolution: "dns-packet@npm:5.2.4"
-  dependencies:
-    ip: ^1.1.5
-  checksum: fd13c6fdea0712580cb6d635afb54a312e977f6035d414ab9db5da2626457244af701eaa88a4829d467d0fd39ebfad89c3c5ebbd7fa964b63774a5709c147fe9
-  languageName: node
-  linkType: hard
-
 "dns-packet@npm:^1.3.1":
   version: 1.3.1
   resolution: "dns-packet@npm:1.3.1"
@@ -10798,6 +10781,15 @@ __metadata:
     ip: ^1.1.0
     safe-buffer: ^5.0.1
   checksum: 6575edeea6e6e719823a1574cd1adcfebdc96f870cb1b367d6168490dc36c9826a97bf57ad009e6fdcd3dc5000cc43de7cb72a2102ba05b83178c8d0300c5a6e
+  languageName: node
+  linkType: hard
+
+"dns-packet@npm:^5.2.4":
+  version: 5.2.4
+  resolution: "dns-packet@npm:5.2.4"
+  dependencies:
+    ip: ^1.1.5
+  checksum: fd13c6fdea0712580cb6d635afb54a312e977f6035d414ab9db5da2626457244af701eaa88a4829d467d0fd39ebfad89c3c5ebbd7fa964b63774a5709c147fe9
   languageName: node
   linkType: hard
 
@@ -12123,7 +12115,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eventemitter3@npm:4.0.7, eventemitter3@npm:^4.0.0":
+"eventemitter3@npm:4.0.7, eventemitter3@npm:^4.0.0, eventemitter3@npm:^4.0.7":
   version: 4.0.7
   resolution: "eventemitter3@npm:4.0.7"
   checksum: 1875311c42fcfe9c707b2712c32664a245629b42bb0a5a84439762dd0fd637fc54d078155ea83c2af9e0323c9ac13687e03cfba79b03af9f40c89b4960099374
@@ -12990,7 +12982,6 @@ __metadata:
     "@babel/core": 7.14.6
     "@babel/preset-env": 7.14.7
     "@babel/preset-typescript": 7.14.5
-    "@foxglove/electron-socket": "workspace:*"
     "@foxglove/eslint-plugin": 0.9.0
     "@foxglove/tsconfig": 1.0.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.0-rc.0
