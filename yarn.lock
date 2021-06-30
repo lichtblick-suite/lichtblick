@@ -2360,11 +2360,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/tsconfig@workspace:*, @foxglove/tsconfig@workspace:packages/tsconfig":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/tsconfig@workspace:packages/tsconfig"
-  languageName: unknown
-  linkType: soft
+"@foxglove/tsconfig@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@foxglove/tsconfig@npm:1.0.0"
+  checksum: 2c216a1d936686dde87cd31aae9f67aee6b4384e11c80c23348cd6d10b4403ad86b94e887e8efdf73e1dfe9236330229d1e480da7d2b0ba09d91ddfd7f051414
+  languageName: node
+  linkType: hard
 
 "@foxglove/velodyne-cloud@workspace:*, @foxglove/velodyne-cloud@workspace:packages/velodyne-cloud":
   version: 0.0.0-use.local
@@ -12966,7 +12967,7 @@ __metadata:
     "@babel/preset-typescript": 7.14.5
     "@foxglove/electron-socket": "workspace:*"
     "@foxglove/eslint-plugin": 0.9.0
-    "@foxglove/tsconfig": "workspace:*"
+    "@foxglove/tsconfig": 1.0.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.0-rc.0
     "@sentry/electron": 2.5.0
     "@sentry/webpack-plugin": 1.15.1
