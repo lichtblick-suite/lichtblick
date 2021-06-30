@@ -2154,7 +2154,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/ros1@workspace:packages/ros1"
   dependencies:
-    "@foxglove/rosmsg": 0.1.1
+    "@foxglove/rosmsg": 0.1.2
     "@foxglove/rosmsg-serialization": "workspace:packages/rosmsg-serialization"
     "@foxglove/xmlrpc": "workspace:*"
     esbuild-runner: 2.2.0
@@ -2170,7 +2170,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/rosmsg-msgs-common@workspace:packages/rosmsg-msgs-common"
   dependencies:
-    "@foxglove/rosmsg": 0.1.1
+    "@foxglove/rosmsg": 0.1.2
     "@types/prettier": 2.3.0
     esbuild-runner: 2.2.0
     prettier: 2.3.1
@@ -2182,7 +2182,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/rosmsg-msgs-foxglove@workspace:packages/rosmsg-msgs-foxglove"
   dependencies:
-    "@foxglove/rosmsg": 0.1.1
+    "@foxglove/rosmsg": 0.1.2
     "@types/prettier": 2.3.0
     esbuild-runner: 2.2.0
     prettier: 2.3.1
@@ -2194,7 +2194,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/rosmsg-serialization@workspace:packages/rosmsg-serialization"
   dependencies:
-    "@foxglove/rosmsg": 0.1.1
+    "@foxglove/rosmsg": 0.1.2
     "@types/prettier": 2.3.0
     jest: 27.0.5
     prettier: 2.3.1
@@ -2202,13 +2202,13 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/rosmsg@npm:0.1.1":
-  version: 0.1.1
-  resolution: "@foxglove/rosmsg@npm:0.1.1"
+"@foxglove/rosmsg@npm:0.1.2":
+  version: 0.1.2
+  resolution: "@foxglove/rosmsg@npm:0.1.2"
   dependencies:
     moo: ^0.5.1
     nearley: ^2.20.1
-  checksum: 54309a60a8c590c7c35aa2dcf039831f5a0ba041bbc40288a92d6c769fbfafe1fae588332530ad966c7430f521717323bd7f6fc3b71c2b50cf6e4695653f0db4
+  checksum: 703ec8482ca012f00369bd2367d8f9632c0933203a89b06903df06568f4954888d664d706538b2fdc2b73c2454655f69e903101cfaebfdc4f434cba387974d08
   languageName: node
   linkType: hard
 
