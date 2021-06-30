@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@foxglove/rosmsg": "0.1.2",
-    "@foxglove/rosmsg-serialization": "workspace:packages/rosmsg-serialization",
+    "@foxglove/rosmsg-serialization": "workspace:*",
     "@foxglove/xmlrpc": "workspace:*",
     "eventemitter3": "4.0.7",
     "md5-typescript": "1.0.5",

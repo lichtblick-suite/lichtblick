@@ -16,7 +16,8 @@
 // etc). We should generally prevent users from making mistakes in the first place, but sometimes
 // its unavoidable to bail out with a generic error message (e.g. when dragging in a malformed
 // ROS bag).
-import { captureException, Severity } from "@sentry/electron";
+import { captureException } from "@sentry/core";
+import { Severity } from "@sentry/types";
 import { ReactNode } from "react";
 
 import { AppError } from "@foxglove/studio-base/util/errors";

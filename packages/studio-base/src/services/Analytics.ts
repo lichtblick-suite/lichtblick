@@ -2,11 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import {
-  addBreadcrumb as addSentryBreadcrumb,
-  setUser as setSentryUser,
-  Severity,
-} from "@sentry/electron";
+import { addBreadcrumb as addSentryBreadcrumb, setUser as setSentryUser } from "@sentry/core";
+import { Severity } from "@sentry/types";
 import amplitude from "amplitude-js";
 import { v4 as uuidv4 } from "uuid";
 
