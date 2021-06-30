@@ -18,7 +18,7 @@ import styled from "styled-components";
 
 import Log from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import AccountSettings from "@foxglove/studio-base/components/AccountSettings";
+import AccountSettings from "@foxglove/studio-base/components/AccountSettingsSidebar/AccountSettings";
 import ConnectionList from "@foxglove/studio-base/components/ConnectionList";
 import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
 import DropOverlay from "@foxglove/studio-base/components/DropOverlay";

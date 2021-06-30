@@ -14,3 +14,23 @@ index bb20b9649ddaef1015e027ef14ce9a557eabc1b3..9f9173a7d7308d9c573947305976d88c
 -declare const useThrottle: <T>(value: T, ms?: number) => T;
 +declare const useThrottle: <T>(value: T | (() => T), ms?: number) => T;
  export default useThrottle;
+diff --git a/esm/useLocalStorage.js b/esm/useLocalStorage.js
+index e9e192611c0c8407a0f8147304dcc366c0d074d9..434c1d5ddc5284d033a92ff487cabf2279bb2063 100644
+--- a/esm/useLocalStorage.js
++++ b/esm/useLocalStorage.js
+@@ -1,4 +1,5 @@
+-import { useCallback, useState, useRef, useLayoutEffect } from 'react';
++import { useCallback, useState, useRef } from 'react';
++import useUpdateEffect from './useUpdateEffect';
+ import { isBrowser, noop } from './misc/util';
+ var useLocalStorage = function (key, initialValue, options) {
+     if (!isBrowser) {
+@@ -35,7 +36,7 @@ var useLocalStorage = function (key, initialValue, options) {
+     // eslint-disable-next-line react-hooks/rules-of-hooks
+     var _a = useState(function () { return initializer.current(key); }), state = _a[0], setState = _a[1];
+     // eslint-disable-next-line react-hooks/rules-of-hooks
+-    useLayoutEffect(function () { return setState(initializer.current(key)); }, [key]);
++    useUpdateEffect(function () { return setState(initializer.current(key)); }, [key]);
+     // eslint-disable-next-line react-hooks/rules-of-hooks
+     var set = useCallback(function (valOrFunc) {
+         try {

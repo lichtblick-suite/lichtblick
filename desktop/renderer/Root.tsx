@@ -2,7 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { FirebaseOptions } from "@firebase/app";
 import { ReactElement, useCallback, useMemo } from "react";
 
 import {
@@ -15,14 +14,12 @@ import {
   StudioToastProvider,
   CacheOnlyLayoutStorageProvider,
 } from "@foxglove/studio-base";
-import { FirebaseAppProvider } from "@foxglove/studio-firebase";
 
 import { Desktop } from "../common/types";
 import NativeAppMenuProvider from "./components/NativeAppMenuProvider";
 import NativeStorageAppConfigurationProvider from "./components/NativeStorageAppConfigurationProvider";
 import NativeStorageLayoutCacheProvider from "./components/NativeStorageLayoutCacheProvider";
 import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
-import ExternalBrowserFirebaseAuthProvider from "./providers/ExternalBrowserFirebaseAuthProvider";
 
 const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo.bag";
 
@@ -48,14 +45,6 @@ export default function Root(): ReactElement {
     },
   ];
 
-  const firebaseConfig = useMemo(() => {
-    const config = process.env.FIREBASE_CONFIG;
-    if (config == undefined) {
-      throw new Error("Firebase is not configured");
-    }
-    return JSON.parse(config) as FirebaseOptions;
-  }, []);
-
   const providers = [
     /* eslint-disable react/jsx-key */
     <StudioToastProvider />,
@@ -64,8 +53,6 @@ export default function Root(): ReactElement {
     <CacheOnlyLayoutStorageProvider />,
     <NativeAppMenuProvider />,
     <UserProfileLocalStorageProvider />,
-    <FirebaseAppProvider config={firebaseConfig} />,
-    <ExternalBrowserFirebaseAuthProvider />,
     <ExtensionLoaderProvider />,
     /* eslint-enable react/jsx-key */
   ];

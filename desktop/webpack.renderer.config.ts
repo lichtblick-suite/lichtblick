@@ -81,14 +81,8 @@ export default (env: unknown, argv: WebpackArgv): Configuration => {
         AMPLITUDE_API_KEY: process.env.AMPLITUDE_API_KEY ?? null, // eslint-disable-line no-restricted-syntax
         SIGNUP_API_URL: "https://foxglove.dev/api/signup",
         SLACK_INVITE_URL: "https://foxglove.dev/join-slack",
-        FIREBASE_CONFIG: JSON.stringify({
-          apiKey: "AIzaSyCNoiuCap8m0BYUde0wiiuP8k1cXmTpKN0",
-          authDomain: "foxglove-studio-testing.firebaseapp.com",
-          projectId: "foxglove-studio-testing",
-          storageBucket: "foxglove-studio-testing.appspot.com",
-          messagingSenderId: "667544771216",
-          appId: "1:667544771216:web:f8e6d9705a3c28e73a5615",
-        }),
+        OAUTH_CLIENT_ID: process.env.OAUTH_CLIENT_ID ?? "YICNZfXZp7Sx9bV0UsKkfqBT4CRYwOsY",
+        FOXGLOVE_API_URL: process.env.FOXGLOVE_API_URL ?? "http://api.localhost:3000",
       }),
       new HtmlWebpackPlugin({
         templateContent: `

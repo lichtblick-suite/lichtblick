@@ -2,9 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import type { FirebaseOptions } from "@firebase/app";
-import { useMemo } from "react";
-
 import {
   App,
   ErrorBoundary,
@@ -15,12 +12,10 @@ import {
   StudioToastProvider,
   CacheOnlyLayoutStorageProvider,
 } from "@foxglove/studio-base";
-import { FirebaseAppProvider } from "@foxglove/studio-firebase";
 
 import AppConfigurationProvider from "./components/AppConfigurationProvider";
 import NoOpLayoutCacheProvider from "./components/NoOpLayoutCacheProvider";
 import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
-import FirebasePopupAuthProvider from "./providers/FirebasePopupAuthProvider";
 
 const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo.bag";
 
@@ -40,14 +35,6 @@ export default function Root(): JSX.Element {
     },
   ];
 
-  const firebaseConfig = useMemo(() => {
-    const config = process.env.FIREBASE_CONFIG;
-    if (config == undefined) {
-      throw new Error("Firebase is not configured");
-    }
-    return JSON.parse(config) as FirebaseOptions;
-  }, []);
-
   const providers = [
     /* eslint-disable react/jsx-key */
     <StudioToastProvider />,
@@ -55,8 +42,6 @@ export default function Root(): JSX.Element {
     <NoOpLayoutCacheProvider />,
     <CacheOnlyLayoutStorageProvider />,
     <UserProfileLocalStorageProvider />,
-    <FirebaseAppProvider config={firebaseConfig} />,
-    <FirebasePopupAuthProvider />,
     <ExtensionLoaderProvider />,
     /* eslint-enable react/jsx-key */
   ];

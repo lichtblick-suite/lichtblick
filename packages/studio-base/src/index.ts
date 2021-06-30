@@ -39,8 +39,6 @@ export { default as UserProfileLocalStorageProvider } from "./providers/UserProf
 export { default as StudioToastProvider } from "./components/StudioToastProvider";
 export { default as ExtensionLoaderContext } from "./context/ExtensionLoaderContext";
 export type { ExtensionLoader, ExtensionInfo } from "./context/ExtensionLoaderContext";
-export { default as AuthContext, useAuth } from "./context/AuthContext";
-export type { Auth, CurrentUser } from "./context/AuthContext";
 export { default as LayoutStorageContext } from "./context/LayoutStorageContext";
 export type {
   RemoteLayout,
