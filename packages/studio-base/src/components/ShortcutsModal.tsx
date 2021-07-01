@@ -30,7 +30,7 @@ type Props = {
 export default function ShortcutsModal({ onRequestClose }: Props): React.ReactElement {
   return (
     <RenderToBodyComponent>
-      <HelpModal rootStyle={{ maxWidth: 480, minWidth: 320 }} onRequestClose={onRequestClose}>
+      <HelpModal onRequestClose={onRequestClose}>
         <h2>Keyboard shortcuts</h2>
         <STitle>Global</STitle>
         <KeyboardShortcut description="Save layouts" keys={[COMMAND, "s"]} />
