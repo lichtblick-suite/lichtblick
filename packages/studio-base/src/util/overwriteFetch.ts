@@ -17,9 +17,7 @@ export default function overwriteFetch(): void {
   const originalFetch = global.fetch;
   global.fetch = (url: RequestInfo, init?: RequestInit) => {
     // Use this replacement error instead of the original one, because this one will have the correct stack trace.
-    const replacementError = new TypeError(
-      `Failed to fetch: url: ${url} This likely means there was a CORS issue, which can happen when the server is down.`,
-    );
+    const replacementError = new TypeError(`Failed to fetch: ${url}`);
     return originalFetch(url, init).catch((error) => {
       if (error.message === "Failed to fetch") {
         throw replacementError;

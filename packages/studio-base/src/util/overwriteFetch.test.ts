@@ -32,9 +32,7 @@ describe("overwriteFetch", () => {
     }
     // We should have replaced the original error with our new error.
     expect(error).not.toBe(originalError);
-    expect(error?.message).toEqual(
-      "Failed to fetch: url: url This likely means there was a CORS issue, which can happen when the server is down.",
-    );
+    expect(error?.message).toEqual("Failed to fetch: url");
   });
 
   it("does not touch unrelated errrors", async () => {
