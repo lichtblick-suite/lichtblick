@@ -51,7 +51,7 @@ jobs:
           fetch-depth: 0
           lfs: true
       - name: Configure Node.js
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@v2.2.0
         with:
           node-version: 14.x
       - name: Restore cache
@@ -85,7 +85,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.ref }}
           lfs: true
       - name: Configure Node.js
-        uses: actions/setup-node@v2.1.5
+        uses: actions/setup-node@v2.2.0
         with:
           node-version: 14.x
       - name: Restore cache
