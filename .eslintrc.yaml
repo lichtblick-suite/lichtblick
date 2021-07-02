@@ -142,9 +142,3 @@ overrides:
       - "**/*.stories.tsx"
       - "**/*.test.tsx"
       - "**/*.test.ts"
-
-  - rules:
-      "@typescript-eslint/no-explicit-any": warn
-    files:
-      - "packages/studio-base/src/context/PanelCatalogContext.ts"
-      - "packages/studio-base/src/panels/NodePlayground/Editor.tsx"

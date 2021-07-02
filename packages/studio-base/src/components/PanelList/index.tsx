@@ -180,7 +180,7 @@ type Props = {
 function verifyPanels(panels: readonly PanelInfo[]) {
   const panelTypes: Map<
     string,
-    { component: React.ComponentType<unknown>; presetSettings?: PresetSettings }
+    { component: React.ComponentType; presetSettings?: PresetSettings }
   > = new Map();
   for (const { component } of panels) {
     const { name, displayName, panelType } = component;

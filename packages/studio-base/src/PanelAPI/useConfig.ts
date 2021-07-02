@@ -17,7 +17,10 @@ import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
  * Load/Save panel configuration. This behaves in a manner similar to React.useState except the state
  * is persisted with the current layout.
  */
-export function useConfig<Config>(): [Config, (config: Partial<Config>) => void] {
+export function useConfig<Config extends Record<string, unknown>>(): [
+  Config,
+  (config: Partial<Config>) => void,
+] {
   const panelId = usePanelId();
   const panelCatalog = usePanelCatalog();
   const panelComponent = useMemo(
@@ -30,7 +33,7 @@ export function useConfig<Config>(): [Config, (config: Partial<Config>) => void]
   if (panelId != undefined && !panelComponent) {
     throw new Error(`Attempt to useConfig() with unknown panel id ${panelId}`);
   }
-  return useConfigById(panelId, panelComponent?.defaultConfig);
+  return useConfigById(panelId, panelComponent?.defaultConfig as Config);
 }
 
 /**

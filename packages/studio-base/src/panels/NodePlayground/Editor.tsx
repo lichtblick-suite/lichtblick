@@ -12,14 +12,14 @@
 //   You may not use this file except in compliance with the License.
 
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
-// @ts-expect-error why doesn't this import the base monaco?
+// @ts-expect-error StaticServices does not have type information in the monaco-editor package
 import { StaticServices } from "monaco-editor/esm/vs/editor/standalone/browser/standaloneServices";
 import { ReactElement, useRef } from "react";
 import MonacoEditor, { EditorDidMount, EditorWillMount } from "react-monaco-editor";
 import { useResizeDetector } from "react-resize-detector";
 
 import getPrettifiedCode from "@foxglove/studio-base/panels/NodePlayground/prettier";
-import { Script, EditorSelection } from "@foxglove/studio-base/panels/NodePlayground/script";
+import { Script } from "@foxglove/studio-base/panels/NodePlayground/script";
 import vsStudioTheme from "@foxglove/studio-base/panels/NodePlayground/theme/vs-studio.json";
 import { getNodeProjectConfig } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
@@ -42,7 +42,7 @@ type Props = {
 
 // Taken from:
 // https://github.com/microsoft/vscode/blob/master/src/vs/editor/standalone/browser/standaloneCodeServiceImpl.ts
-const gotoSelection = (editor: any, selection?: EditorSelection) => {
+const gotoSelection = (editor: monacoApi.editor.IEditor, selection?: monacoApi.IRange) => {
   if (selection) {
     if (selection.endLineNumber != undefined && selection.endColumn != undefined) {
       // These fields indicate a range was selected, set the range and reveal it.
@@ -97,7 +97,8 @@ const Editor = ({
   selection to move to the correct line.
   */
   codeEditorService.doOpenEditor = React.useCallback(
-    (editor: any, input: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (editor: monacoApi.editor.ICodeEditor, input: any) => {
       const requestedModel = monacoApi.editor.getModel(input.resource);
       if (!requestedModel) {
         return editor;
@@ -166,7 +167,7 @@ const Editor = ({
       monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
 
       monaco.languages.registerDocumentFormattingEditProvider("typescript", {
-        provideDocumentFormattingEdits: async (model: any) => {
+        provideDocumentFormattingEdits: async (model) => {
           try {
             return [
               {

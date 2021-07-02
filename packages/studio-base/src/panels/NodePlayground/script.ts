@@ -11,16 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-export type EditorSelection = {
-  startColumn: number;
-  endColumn?: number;
-  startLineNumber: number;
-  endLineNumber?: number;
-};
+import { IRange } from "monaco-editor/esm/vs/editor/editor.api";
 
 export type Script = {
   filePath: string;
   code: string;
   readOnly: boolean;
-  selection?: EditorSelection;
+  selection?: IRange;
 };
