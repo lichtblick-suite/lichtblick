@@ -67,7 +67,7 @@ export default class OrderedStampPlayer implements Player {
   }
 
   setListener(listener: (arg0: PlayerState) => Promise<void>): void {
-    this._player.setListener((state: PlayerState) => {
+    this._player.setListener(async (state: PlayerState) => {
       const { activeData } = state;
       if (!activeData) {
         // No new messages since last time.
@@ -184,7 +184,7 @@ export default class OrderedStampPlayer implements Player {
     // populate the panels regardless of requestBackfill() getting called.
     this.seekPlayback(this._currentTime);
   }
-  setUserNodes(nodes: UserNodes): Promise<void> {
+  async setUserNodes(nodes: UserNodes): Promise<void> {
     return this._player.setUserNodes(nodes);
   }
   setGlobalVariables(globalVariables: GlobalVariables): void {

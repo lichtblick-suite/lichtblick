@@ -33,7 +33,7 @@ export default class FakePlayer implements Player {
     this.listener = listener;
   }
 
-  emit({
+  async emit({
     activeData,
     presence,
   }: {

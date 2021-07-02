@@ -82,7 +82,10 @@ export class RosMaster {
 
   // <http://wiki.ros.org/ROS/Master_API> handlers
 
-  registerService = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  registerService = async (
+    _methodName: string,
+    args: XmlRpcValue[],
+  ): Promise<RosXmlRpcResponse> => {
     // [callerId, service, serviceApi, callerApi]
     const err = CheckArguments(args, ["string", "string", "string", "string"]);
     if (err) {
@@ -102,7 +105,10 @@ export class RosMaster {
     return Promise.resolve([1, "", 0]);
   };
 
-  unregisterService = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  unregisterService = async (
+    _methodName: string,
+    args: XmlRpcValue[],
+  ): Promise<RosXmlRpcResponse> => {
     // [callerId, service, serviceApi]
     const err = CheckArguments(args, ["string", "string", "string"]);
     if (err) {
@@ -123,7 +129,10 @@ export class RosMaster {
     return Promise.resolve([1, "", removed ? 1 : 0]);
   };
 
-  registerSubscriber = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  registerSubscriber = async (
+    _methodName: string,
+    args: XmlRpcValue[],
+  ): Promise<RosXmlRpcResponse> => {
     // [callerId, topic, topicType, callerApi]
     const err = CheckArguments(args, ["string", "string", "string", "string"]);
     if (err) {
@@ -156,7 +165,10 @@ export class RosMaster {
     return Promise.resolve([1, "", publisherApis]);
   };
 
-  unregisterSubscriber = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  unregisterSubscriber = async (
+    _methodName: string,
+    args: XmlRpcValue[],
+  ): Promise<RosXmlRpcResponse> => {
     // [callerId, topic, callerApi]
     const err = CheckArguments(args, ["string", "string", "string"]);
     if (err) {
@@ -178,7 +190,10 @@ export class RosMaster {
     return Promise.resolve([1, "", removed ? 1 : 0]);
   };
 
-  registerPublisher = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  registerPublisher = async (
+    _methodName: string,
+    args: XmlRpcValue[],
+  ): Promise<RosXmlRpcResponse> => {
     // [callerId, topic, topicType, callerApi]
     const err = CheckArguments(args, ["string", "string", "string", "string"]);
     if (err) {
@@ -224,7 +239,10 @@ export class RosMaster {
     return Promise.resolve([1, "", subscriberApis]);
   };
 
-  unregisterPublisher = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  unregisterPublisher = async (
+    _methodName: string,
+    args: XmlRpcValue[],
+  ): Promise<RosXmlRpcResponse> => {
     // [callerId, topic, callerApi]
     const err = CheckArguments(args, ["string", "string", "string"]);
     if (err) {
@@ -246,7 +264,7 @@ export class RosMaster {
     return Promise.resolve([1, "", removed ? 1 : 0]);
   };
 
-  lookupNode = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  lookupNode = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId, nodeName]
     const err = CheckArguments(args, ["string", "string"]);
     if (err) {
@@ -262,7 +280,10 @@ export class RosMaster {
     return Promise.resolve([1, "", nodeApi]);
   };
 
-  getPublishedTopics = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  getPublishedTopics = async (
+    _methodName: string,
+    args: XmlRpcValue[],
+  ): Promise<RosXmlRpcResponse> => {
     // [callerId, subgraph]
     const err = CheckArguments(args, ["string", "string"]);
     if (err) {
@@ -283,7 +304,7 @@ export class RosMaster {
     return Promise.resolve([1, "", entries]);
   };
 
-  getTopicTypes = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  getTopicTypes = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId]
     const err = CheckArguments(args, ["string"]);
     if (err) {
@@ -294,7 +315,7 @@ export class RosMaster {
     return Promise.resolve([1, "", entries]);
   };
 
-  getSystemState = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  getSystemState = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId]
     const err = CheckArguments(args, ["string"]);
     if (err) {
@@ -319,7 +340,7 @@ export class RosMaster {
     return Promise.resolve([1, "", [publishers, subscribers, services]]);
   };
 
-  getUri = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  getUri = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId]
     const err = CheckArguments(args, ["string"]);
     if (err) {
@@ -334,7 +355,7 @@ export class RosMaster {
     return Promise.resolve([1, "", url]);
   };
 
-  lookupService = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  lookupService = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId, service]
     const err = CheckArguments(args, ["string", "string"]);
     if (err) {
@@ -354,7 +375,7 @@ export class RosMaster {
 
   // <http://wiki.ros.org/ROS/Parameter%20Server%20API> handlers
 
-  deleteParam = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  deleteParam = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId, key]
     const err = CheckArguments(args, ["string", "string"]);
     if (err) {
@@ -368,7 +389,7 @@ export class RosMaster {
     return Promise.resolve([1, "", 0]);
   };
 
-  setParam = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  setParam = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId, key, value]
     const err = CheckArguments(args, ["string", "string", "*"]);
     if (err) {
@@ -397,7 +418,7 @@ export class RosMaster {
     return Promise.resolve([1, "", 0]);
   };
 
-  getParam = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  getParam = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId, key]
     const err = CheckArguments(args, ["string", "string"]);
     if (err) {
@@ -413,7 +434,7 @@ export class RosMaster {
     return Promise.resolve([status, "", value ?? {}]);
   };
 
-  searchParam = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  searchParam = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId, key]
     const err = CheckArguments(args, ["string", "string"]);
     if (err) {
@@ -429,7 +450,7 @@ export class RosMaster {
     return Promise.resolve([status, "", value ?? {}]);
   };
 
-  subscribeParam = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  subscribeParam = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId, callerApi, key]
     const err = CheckArguments(args, ["string", "string", "string"]);
     if (err) {
@@ -449,7 +470,10 @@ export class RosMaster {
     return Promise.resolve([1, "", value]);
   };
 
-  unsubscribeParam = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  unsubscribeParam = async (
+    _methodName: string,
+    args: XmlRpcValue[],
+  ): Promise<RosXmlRpcResponse> => {
     // [callerId, callerApi, key]
     const err = CheckArguments(args, ["string", "string", "string"]);
     if (err) {
@@ -467,7 +491,7 @@ export class RosMaster {
     return Promise.resolve([1, "", removed ? 1 : 0]);
   };
 
-  hasParam = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  hasParam = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId, key]
     const err = CheckArguments(args, ["string", "string"]);
     if (err) {
@@ -478,7 +502,7 @@ export class RosMaster {
     return Promise.resolve([1, "", this._parameters.has(key)]);
   };
 
-  getParamNames = (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  getParamNames = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId]
     const err = CheckArguments(args, ["string"]);
     if (err) {

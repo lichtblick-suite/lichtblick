@@ -248,9 +248,9 @@ export default class RandomAccessPlayer implements Player {
       });
   }
 
-  _emitState = debouncePromise(() => {
+  _emitState = debouncePromise(async () => {
     if (!this._listener) {
-      return Promise.resolve();
+      return;
     }
 
     if (this._hasError) {

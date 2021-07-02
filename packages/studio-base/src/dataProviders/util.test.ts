@@ -55,7 +55,7 @@ describe("debounceReduce", () => {
   it("combines calls that happen closely together", async () => {
     const totals: Array<number> = [];
     const time = 0;
-    const waitUntil = (t: number) => {
+    const waitUntil = async (t: number) => {
       if (time > t) {
         throw new Error(`It's past ${t} already`);
       }

@@ -80,7 +80,7 @@ describe("TcpConnection", () => {
     const port = (server.address() as AddressInfo).port;
 
     // Create the client socket
-    const tcpSocketCreate = (options: { host: string; port: number }): Promise<TcpSocket> => {
+    const tcpSocketCreate = async (options: { host: string; port: number }): Promise<TcpSocket> => {
       return Promise.resolve(new TcpSocketNode(options.host, options.port, new net.Socket()));
     };
     const socket = await tcpSocketCreate({ host: "localhost", port });

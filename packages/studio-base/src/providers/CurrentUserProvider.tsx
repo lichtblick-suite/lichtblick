@@ -21,7 +21,7 @@ export default function MeProvider(props: PropsWithChildren<unknown>): JSX.Eleme
     loading,
     value: me,
     error,
-  } = useAsync(() => {
+  } = useAsync(async () => {
     if (!isNonEmptyOrUndefined(bearerToken)) {
       return Promise.resolve(undefined);
     }

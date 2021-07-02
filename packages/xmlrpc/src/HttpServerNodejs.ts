@@ -11,7 +11,7 @@ export class HttpServerNodejs implements HttpServer {
   private _server: http.Server;
 
   constructor() {
-    this.handler = () => Promise.resolve({ statusCode: 404 });
+    this.handler = async () => ({ statusCode: 404 });
     this._server = new http.Server((req, res) => {
       // Read the full request body into a string
       const chunks: Uint8Array[] = [];
@@ -48,7 +48,7 @@ export class HttpServerNodejs implements HttpServer {
     return addr.port;
   }
 
-  listen(port?: number, hostname?: string, backlog?: number): Promise<void> {
+  async listen(port?: number, hostname?: string, backlog?: number): Promise<void> {
     return new Promise((resolve, reject) => {
       this._server.on("error", reject);
       this._server.listen(port, hostname, backlog, () => {

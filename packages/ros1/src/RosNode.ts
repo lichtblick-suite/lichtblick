@@ -431,7 +431,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
     };
   }
 
-  tcpServerAddress(): Promise<TcpAddress | undefined> {
+  async tcpServerAddress(): Promise<TcpAddress | undefined> {
     return this._tcpPublisher?.address() ?? Promise.resolve(undefined);
   }
 
@@ -664,7 +664,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
     // Register with each publisher. Any failures communicating with individual node XML-RPC servers
     // or TCP sockets will be caught and retried
     await Promise.allSettled(
-      publishers.map((pubUrl) => this._subscribeToPublisher(pubUrl, subscription)),
+      publishers.map(async (pubUrl) => this._subscribeToPublisher(pubUrl, subscription)),
     );
   }
 

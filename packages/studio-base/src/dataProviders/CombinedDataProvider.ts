@@ -303,7 +303,7 @@ export default class CombinedDataProvider implements DataProvider {
   }
 
   async close(): Promise<void> {
-    await Promise.all(this._providers.map((provider) => provider.close()));
+    await Promise.all(this._providers.map(async (provider) => provider.close()));
   }
 
   async getMessages(start: Time, end: Time, topics: GetMessagesTopics): Promise<GetMessagesResult> {

@@ -89,7 +89,7 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
   }
 
   async getLayouts(): Promise<readonly RemoteLayoutMetadata[]> {
-    return this.storage.runExclusive((storage) => this.getLayoutsUnlocked(storage));
+    return this.storage.runExclusive(async (storage) => this.getLayoutsUnlocked(storage));
   }
   private async getLayoutsUnlocked(storage: Storage): Promise<readonly RemoteLayoutMetadata[]> {
     const items = await storage.all(FakeRemoteLayoutStorage.STORE_NAME);
@@ -110,7 +110,7 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
   }
 
   async getLayout(id: LayoutID): Promise<RemoteLayout | undefined> {
-    return this.storage.runExclusive((storage) => this.getLayoutUnlocked(storage, id));
+    return this.storage.runExclusive(async (storage) => this.getLayoutUnlocked(storage, id));
   }
   private async getLayoutUnlocked(
     storage: Storage,
@@ -131,7 +131,7 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
     return parsed;
   }
 
-  saveNewLayout({
+  async saveNewLayout({
     path,
     name,
     data,

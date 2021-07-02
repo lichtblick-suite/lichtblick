@@ -374,7 +374,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
     });
   }
 
-  close(): Promise<void> {
+  async close(): Promise<void> {
     delete this._currentConnection; // Make sure that the current "connection" loop stops executing.
 
     return this._provider.close();

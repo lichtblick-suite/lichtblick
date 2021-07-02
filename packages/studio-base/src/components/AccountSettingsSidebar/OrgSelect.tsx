@@ -16,7 +16,7 @@ type OrgSelectProps = {
 export default function OrgSelect(props: OrgSelectProps): JSX.Element {
   const api = useConsoleApi();
 
-  const { value: orgs, error: orgsError } = useAsync(() => {
+  const { value: orgs, error: orgsError } = useAsync(async () => {
     api.setAuthHeader(`IdToken ${props.idToken}`);
     return api.orgs();
   }, [api, props.idToken]);

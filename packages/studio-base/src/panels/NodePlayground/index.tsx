@@ -40,7 +40,7 @@ import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import Config from "./Config";
 import { Script } from "./script";
 
-const Editor = React.lazy(() => import("@foxglove/studio-base/panels/NodePlayground/Editor"));
+const Editor = React.lazy(async () => import("@foxglove/studio-base/panels/NodePlayground/Editor"));
 
 const skeletonBody = `import { Input, Messages } from "ros";
 

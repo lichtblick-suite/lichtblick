@@ -465,10 +465,10 @@ describe("CombinedDataProvider", () => {
       });
       const initialize1 = jest
         .spyOn(p1, "initialize")
-        .mockImplementation(() => neverResolvedPromise);
+        .mockImplementation(async () => neverResolvedPromise);
       const initialize2 = jest
         .spyOn(p2, "initialize")
-        .mockImplementation(() => neverResolvedPromise);
+        .mockImplementation(async () => neverResolvedPromise);
 
       const combinedProvider = getCombinedDataProvider([
         { provider: p1 },

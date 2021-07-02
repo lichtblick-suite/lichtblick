@@ -73,7 +73,7 @@ export class RosFollower extends EventEmitter<RosFollowerEvents> {
     return this._url;
   }
 
-  getBusStats = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  getBusStats = async (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     const err = CheckArguments(args, ["string"]);
     if (err) {
       return Promise.reject(err);
@@ -89,7 +89,7 @@ export class RosFollower extends EventEmitter<RosFollowerEvents> {
     return Promise.resolve([1, "", [publishStats, subscribeStats, serviceStats]]);
   };
 
-  getBusInfo = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  getBusInfo = async (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     const err = CheckArguments(args, ["string"]);
     if (err) {
       return Promise.reject(err);
@@ -98,7 +98,7 @@ export class RosFollower extends EventEmitter<RosFollowerEvents> {
     return Promise.resolve([1, "", ""]);
   };
 
-  shutdown = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  shutdown = async (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     if (args.length !== 1 && args.length !== 2) {
       return Promise.reject(new Error(`Expected 1-2 arguments, got ${args.length}`));
     }
@@ -124,7 +124,7 @@ export class RosFollower extends EventEmitter<RosFollowerEvents> {
     return [1, "", this._rosNode.pid];
   };
 
-  getSubscriptions = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  getSubscriptions = async (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     const err = CheckArguments(args, ["string"]);
     if (err) {
       return Promise.reject(err);
@@ -135,7 +135,7 @@ export class RosFollower extends EventEmitter<RosFollowerEvents> {
     return Promise.resolve([1, "subscriptions", subs]);
   };
 
-  getPublications = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  getPublications = async (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     const err = CheckArguments(args, ["string"]);
     if (err) {
       return Promise.reject(err);
@@ -146,7 +146,7 @@ export class RosFollower extends EventEmitter<RosFollowerEvents> {
     return Promise.resolve([1, "publications", pubs]);
   };
 
-  paramUpdate = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  paramUpdate = async (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     const err = CheckArguments(args, ["string", "string", "*"]);
     if (err) {
       return Promise.reject(err);
@@ -162,7 +162,7 @@ export class RosFollower extends EventEmitter<RosFollowerEvents> {
     return Promise.resolve([1, "", 0]);
   };
 
-  publisherUpdate = (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
+  publisherUpdate = async (_: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     const err = CheckArguments(args, ["string", "string", "*"]);
     if (err) {
       return Promise.reject(err);

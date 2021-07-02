@@ -85,7 +85,7 @@ export default class ParseMessagesDataProvider implements DataProvider {
     };
   }
 
-  close(): Promise<void> {
+  async close(): Promise<void> {
     return this._provider.close();
   }
 }

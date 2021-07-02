@@ -40,7 +40,7 @@ export class Deserializer {
     this._parser.on("error", this._onError);
   }
 
-  deserializeMethodResponse(data: string | ArrayBuffer): Promise<XmlRpcValue> {
+  async deserializeMethodResponse(data: string | ArrayBuffer): Promise<XmlRpcValue> {
     return new Promise((resolve, reject) => {
       this._callback = (error, result) => {
         if (error) {
@@ -60,7 +60,7 @@ export class Deserializer {
     });
   }
 
-  deserializeMethodCall(data: string): Promise<[methodName: string, args: XmlRpcValue[]]> {
+  async deserializeMethodCall(data: string): Promise<[methodName: string, args: XmlRpcValue[]]> {
     return new Promise((resolve, reject) => {
       this._callback = (error, result) => {
         if (error) {

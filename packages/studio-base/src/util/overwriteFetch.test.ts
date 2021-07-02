@@ -16,12 +16,12 @@ import overwriteFetch from "./overwriteFetch";
 describe("overwriteFetch", () => {
   afterEach(() => {
     // reset the test
-    global.fetch = () => Promise.reject("not available");
+    global.fetch = async () => Promise.reject("not available");
   });
 
   it("overwrites the default fetch", async () => {
     const originalError = new TypeError("Failed to fetch");
-    global.fetch = () => Promise.reject(originalError);
+    global.fetch = async () => Promise.reject(originalError);
 
     overwriteFetch();
     let error;
@@ -37,7 +37,7 @@ describe("overwriteFetch", () => {
 
   it("does not touch unrelated errrors", async () => {
     const originalError = new TypeError("a different error");
-    global.fetch = () => Promise.reject(originalError);
+    global.fetch = async () => Promise.reject(originalError);
 
     overwriteFetch();
     let error;

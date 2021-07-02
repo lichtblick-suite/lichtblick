@@ -55,11 +55,11 @@ export class TcpPublisher extends EventEmitter<TcpPublisherEvents> implements Pu
     server.on("error", this._handleError);
   }
 
-  address(): Promise<TcpAddress | undefined> {
+  async address(): Promise<TcpAddress | undefined> {
     return this._server.address();
   }
 
-  publish(publication: Publication, message: unknown): Promise<void> {
+  async publish(publication: Publication, message: unknown): Promise<void> {
     const msgSize = publication.messageWriter.calculateByteSize(message);
     const dataSize = 4 + msgSize;
     const buffer = new ArrayBuffer(dataSize);

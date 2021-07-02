@@ -11,7 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-function promiseTimeout<T>(promise: Promise<T>, ms = 30000, reason = "unknown reason"): Promise<T> {
+async function promiseTimeout<T>(
+  promise: Promise<T>,
+  ms = 30000,
+  reason = "unknown reason",
+): Promise<T> {
   return Promise.race([
     promise,
     new Promise<T>((_resolve, reject) =>

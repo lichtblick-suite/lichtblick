@@ -43,7 +43,7 @@ export default class RpcDataProvider implements DataProvider {
     this._childDescriptor = child;
   }
 
-  initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
+  async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
     const { progressCallback, reportMetadataCallback } = extensionPoint;
 
     type ExtensionPointParams<K> = K extends keyof ExtensionPoint
@@ -90,7 +90,7 @@ export default class RpcDataProvider implements DataProvider {
     };
   }
 
-  close(): Promise<void> {
+  async close(): Promise<void> {
     return this._rpc.send("close");
   }
 }

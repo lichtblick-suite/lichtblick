@@ -205,7 +205,7 @@ export function MessagePipelineProvider({
       waitingForPromises: false,
     };
 
-    player.setListener((newPlayerState: PlayerState) => {
+    player.setListener(async (newPlayerState: PlayerState) => {
       warnOnOutOfSyncMessages(newPlayerState);
       if (currentPlayer.current !== player) {
         return Promise.resolve();

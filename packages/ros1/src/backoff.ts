@@ -17,7 +17,7 @@ export function backoffTime(
 
 // Wait for a period of time determined by the truncated exponential backoff
 // with jitter algorithm implemented in `backoffTime()`.
-export function backoff(
+export async function backoff(
   retries: number,
   maxMs: number = 10000,
   maxJitterMs: number = 1000,

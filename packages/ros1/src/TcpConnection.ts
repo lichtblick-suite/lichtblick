@@ -80,7 +80,7 @@ export class TcpConnection extends EventEmitter<TcpConnectionEvents> implements 
     return "TCPROS";
   }
 
-  remoteAddress(): Promise<TcpAddress | undefined> {
+  async remoteAddress(): Promise<TcpAddress | undefined> {
     return this._socket.remoteAddress();
   }
 

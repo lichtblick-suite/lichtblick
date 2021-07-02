@@ -27,7 +27,7 @@ export class XmlRpcClientMock {
     this.serverUrl = serverUrl;
   }
 
-  methodCall(method: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> {
+  async methodCall(method: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> {
     switch (method) {
       case "getPublishedTopics":
         return Promise.resolve([

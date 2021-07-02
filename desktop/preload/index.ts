@@ -92,7 +92,7 @@ const ctx: OsContext = {
     }
     return output;
   },
-  getMachineId: (): Promise<string> => {
+  getMachineId: async (): Promise<string> => {
     return machineIdPromise;
   },
   getAppVersion: (): string => {

@@ -16,7 +16,6 @@ import { useState } from "react";
 import { ExtensionDetails } from "@foxglove/studio-base/components/ExtensionDetails";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
 import ExtensionLoaderContext, {
-  ExtensionInfo,
   ExtensionLoader,
 } from "@foxglove/studio-base/context/ExtensionLoaderContext";
 import ExtensionMarketplaceContext, {
@@ -31,20 +30,20 @@ export default {
 };
 
 const MockExtensionLoader: ExtensionLoader = {
-  getExtensions: (): Promise<ExtensionInfo[]> => Promise.resolve([]),
-  loadExtension: (_id: string): Promise<string> => Promise.resolve(""),
-  downloadExtension: (_url: string): Promise<Uint8Array> => Promise.resolve(new Uint8Array()),
-  installExtension: (_foxeFileData: Uint8Array): Promise<ExtensionInfo> => {
+  getExtensions: async () => [],
+  loadExtension: async (_id: string) => "",
+  downloadExtension: async (_url: string) => new Uint8Array(),
+  installExtension: async (_foxeFileData: Uint8Array) => {
     throw new Error("MockExtensionLoader cannot install extensions");
   },
-  uninstallExtension: (_id: string): Promise<boolean> => Promise.resolve(false),
+  uninstallExtension: async (_id: string) => false,
 };
 
 const MockExtensionMarketplace: ExtensionMarketplace = {
-  getAvailableExtensions: (): Promise<ExtensionMarketplaceDetail[]> => Promise.resolve([]),
-  getMarkdown: (url: string): Promise<string> =>
-    Promise.resolve(`# Markdown
-Mock markdown rendering for URL [${url}](${url}).`),
+  getAvailableExtensions: async () => [],
+  getMarkdown: async (url: string) =>
+    `# Markdown
+Mock markdown rendering for URL [${url}](${url}).`,
 };
 
 const extension: ExtensionMarketplaceDetail = {

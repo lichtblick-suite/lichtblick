@@ -53,7 +53,7 @@ export default class WorkerDataProvider implements DataProvider {
     }
   }
 
-  initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
+  async initialize(extensionPoint: ExtensionPoint): Promise<InitializationResult> {
     if (preinitializedWorkers.length > 0) {
       this._worker = preinitializedWorkers.pop();
     } else {
@@ -68,7 +68,7 @@ export default class WorkerDataProvider implements DataProvider {
     return this._provider.initialize(extensionPoint);
   }
 
-  getMessages(start: Time, end: Time, topics: GetMessagesTopics): Promise<GetMessagesResult> {
+  async getMessages(start: Time, end: Time, topics: GetMessagesTopics): Promise<GetMessagesResult> {
     if (!this._provider) {
       throw new Error("WorkerDataProvieder not initialized");
     }

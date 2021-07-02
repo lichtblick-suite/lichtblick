@@ -245,7 +245,7 @@ describe("ApiCheckerDataProvider", () => {
         await provider.initialize(mockExtensionPoint().extensionPoint);
 
         let returnMessages: MessageEvent<unknown>[] = [];
-        jest.spyOn(memoryDataProvider, "getMessages").mockImplementation(() => {
+        jest.spyOn(memoryDataProvider, "getMessages").mockImplementation(async () => {
           return Promise.resolve({
             parsedMessages: returnMessages,
             rosBinaryMessages: undefined,

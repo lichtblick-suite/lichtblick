@@ -82,7 +82,7 @@ export default function PanelSetupWithBag({
       );
       player.setSubscriptions(formattedSubscriptions);
 
-      player.setListener(({ activeData }: PlayerState) => {
+      player.setListener(async ({ activeData }: PlayerState) => {
         if (!activeData) {
           return Promise.resolve();
         }

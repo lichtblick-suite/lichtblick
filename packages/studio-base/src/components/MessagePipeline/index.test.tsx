@@ -129,8 +129,8 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     rerender({ maybePlayer: { loading: true } });
     rerender({ maybePlayer: { error: new Error("failed to load player") } });
     rerender({ maybePlayer: { player } });
-    await act(() => player.emit());
-    await act(() => player.emit({ presence: PlayerPresence.RECONNECTING }));
+    await act(async () => player.emit());
+    await act(async () => player.emit({ presence: PlayerPresence.RECONNECTING }));
     expect(
       result.all.map((ctx) => {
         if (ctx instanceof Error) {
@@ -158,7 +158,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     act(() => {
       player.emit();
     });
-    expect(() => player.emit()).toThrow(
+    expect(async () => player.emit()).toThrow(
       "New playerState was emitted before last playerState was rendered.",
     );
   });
@@ -259,7 +259,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     });
 
     const lastContext = result.current;
-    await act(() => player.emit());
+    await act(async () => player.emit());
     for (const [key, value] of Object.entries(result.current)) {
       if (typeof value === "function") {
         expect((lastContext as Record<string, unknown>)[key]).toBe(value);
@@ -278,9 +278,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     expect(result.all.length).toBe(1);
     // Now wait for the player state emit cycle to complete.
     // This promise should resolve when the render loop finishes.
-    await act(() => player.emit());
+    await act(async () => player.emit());
     expect(result.all.length).toBe(2);
-    await act(() => player.emit());
+    await act(async () => player.emit());
     expect(result.all.length).toBe(3);
   });
 
@@ -335,7 +335,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         initialProps: { maybePlayer: { player } },
       }));
 
-      await act(() => player.emit());
+      await act(async () => player.emit());
       expect(result.all.length).toBe(2);
 
       player2 = new FakePlayer();
@@ -346,9 +346,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     });
 
     it("closes old player when new player is supplied and stops old player message flow", async () => {
-      await act(() => player2.emit());
+      await act(async () => player2.emit());
       expect(result.all.length).toBe(5);
-      await act(() => player.emit());
+      await act(async () => player.emit());
       expect(result.all.length).toBe(5);
       expect(
         result.all.map((ctx) => {
@@ -361,9 +361,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     });
 
     it("does not think the old player is the new player if it emits first", async () => {
-      await act(() => player.emit());
+      await act(async () => player.emit());
       expect(result.all.length).toBe(4);
-      await act(() => player2.emit());
+      await act(async () => player2.emit());
       expect(result.all.length).toBe(5);
       expect(
         result.all.map((ctx) => {
@@ -427,7 +427,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       parsedMessageDefinitionsByTopic: {},
       totalBytesReceived: 1234,
     };
-    await act(() => player.emit({ activeData }));
+    await act(async () => player.emit({ activeData }));
     expect(result.all.length).toBe(2);
 
     rerender({ maybePlayer: { player: undefined } });

@@ -15,6 +15,6 @@ export default class MutexLocked<T> {
   constructor(private value: T) {}
 
   async runExclusive<Result>(body: (value: T) => Promise<Result>): Promise<Result> {
-    return this.mutex.runExclusive(() => body(this.value));
+    return this.mutex.runExclusive(async () => body(this.value));
   }
 }

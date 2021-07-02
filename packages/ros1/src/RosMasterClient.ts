@@ -6,7 +6,7 @@ import { RosXmlRpcClient } from "./RosXmlRpcClient";
 import { RosXmlRpcResponse } from "./XmlRpcTypes";
 
 export class RosMasterClient extends RosXmlRpcClient {
-  registerService(
+  async registerService(
     callerId: string,
     service: string,
     serviceApi: string,
@@ -15,7 +15,7 @@ export class RosMasterClient extends RosXmlRpcClient {
     return this._methodCall("registerService", [callerId, service, serviceApi, callerApi]);
   }
 
-  unregisterService(
+  async unregisterService(
     callerId: string,
     service: string,
     serviceApi: string,
@@ -23,7 +23,7 @@ export class RosMasterClient extends RosXmlRpcClient {
     return this._methodCall("unregisterService", [callerId, service, serviceApi]);
   }
 
-  registerSubscriber(
+  async registerSubscriber(
     callerId: string,
     topic: string,
     topicType: string,
@@ -32,7 +32,7 @@ export class RosMasterClient extends RosXmlRpcClient {
     return this._methodCall("registerSubscriber", [callerId, topic, topicType, callerApi]);
   }
 
-  unregisterSubscriber(
+  async unregisterSubscriber(
     callerId: string,
     topic: string,
     callerApi: string,
@@ -40,7 +40,7 @@ export class RosMasterClient extends RosXmlRpcClient {
     return this._methodCall("unregisterSubscriber", [callerId, topic, callerApi]);
   }
 
-  registerPublisher(
+  async registerPublisher(
     callerId: string,
     topic: string,
     topicType: string,
@@ -49,7 +49,7 @@ export class RosMasterClient extends RosXmlRpcClient {
     return this._methodCall("registerPublisher", [callerId, topic, topicType, callerApi]);
   }
 
-  unregisterPublisher(
+  async unregisterPublisher(
     callerId: string,
     topic: string,
     callerApi: string,
@@ -57,27 +57,27 @@ export class RosMasterClient extends RosXmlRpcClient {
     return this._methodCall("unregisterPublisher", [callerId, topic, callerApi]);
   }
 
-  lookupNode(callerId: string, nodeName: string): Promise<RosXmlRpcResponse> {
+  async lookupNode(callerId: string, nodeName: string): Promise<RosXmlRpcResponse> {
     return this._methodCall("lookupNode", [callerId, nodeName]);
   }
 
-  getPublishedTopics(callerId: string, subgraph: string = ""): Promise<RosXmlRpcResponse> {
+  async getPublishedTopics(callerId: string, subgraph: string = ""): Promise<RosXmlRpcResponse> {
     return this._methodCall("getPublishedTopics", [callerId, subgraph]);
   }
 
-  getTopicTypes(callerId: string): Promise<RosXmlRpcResponse> {
+  async getTopicTypes(callerId: string): Promise<RosXmlRpcResponse> {
     return this._methodCall("getTopicTypes", [callerId]);
   }
 
-  getSystemState(callerId: string): Promise<RosXmlRpcResponse> {
+  async getSystemState(callerId: string): Promise<RosXmlRpcResponse> {
     return this._methodCall("getSystemState", [callerId]);
   }
 
-  getUri(callerId: string): Promise<RosXmlRpcResponse> {
+  async getUri(callerId: string): Promise<RosXmlRpcResponse> {
     return this._methodCall("getUri", [callerId]);
   }
 
-  lookupService(callerId: string, service: string): Promise<RosXmlRpcResponse> {
+  async lookupService(callerId: string, service: string): Promise<RosXmlRpcResponse> {
     return this._methodCall("lookupService", [callerId, service]);
   }
 }

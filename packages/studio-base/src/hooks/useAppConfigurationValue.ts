@@ -36,7 +36,7 @@ export function useAppConfigurationValue<T extends AppConfigurationValue>(
   }, [key, appConfiguration]);
 
   const wrappedSetter = useCallback(
-    (value?: T) => {
+    async (value?: T) => {
       setConfigurationValue(value);
       return appConfiguration.set(key, value);
     },

@@ -41,7 +41,7 @@ function CopyText({ copyText, tooltip, children }: Props): JSX.Element | ReactNu
     return ReactNull;
   }
   return (
-    <SCopyTextWrapper onClick={() => clipboard.copy(copyText)}>
+    <SCopyTextWrapper onClick={() => void clipboard.copy(copyText)}>
       {children != undefined ? children : copyText}
       <Icon fade style={{ margin: "0 8px", verticalAlign: "middle" }} tooltip={tooltip}>
         <ClipboardOutlineIcon />

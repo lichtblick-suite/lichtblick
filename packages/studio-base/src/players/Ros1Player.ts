@@ -113,7 +113,7 @@ export default class Ros1Player implements Player {
 
     const net = await Sockets.Create();
     const httpServer = await net.createHttpServer();
-    const tcpSocketCreate = (options: { host: string; port: number }): Promise<TcpSocket> => {
+    const tcpSocketCreate = async (options: { host: string; port: number }): Promise<TcpSocket> => {
       return net.createSocket(options.host, options.port);
     };
     const tcpServer = await net.createServer();
@@ -246,7 +246,7 @@ export default class Ros1Player implements Player {
     }
   };
 
-  private _emitState = debouncePromise(() => {
+  private _emitState = debouncePromise(async () => {
     if (!this._listener || this._closed) {
       return Promise.resolve();
     }

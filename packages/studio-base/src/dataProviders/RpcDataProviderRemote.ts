@@ -70,6 +70,6 @@ export default class RpcDataProviderRemote {
       },
     );
 
-    rpc.receive("close", () => provider.close());
+    rpc.receive("close", async () => provider.close());
   }
 }

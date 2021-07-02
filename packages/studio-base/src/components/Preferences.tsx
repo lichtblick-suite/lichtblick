@@ -170,7 +170,7 @@ function RosHostname(): React.ReactElement {
       label="ROS_HOSTNAME"
       placeholder={rosHostnamePlaceholder}
       value={rosHostname ?? ""}
-      onChange={(_event, newValue) => setRosHostname(nonEmptyOrUndefined(newValue))}
+      onChange={(_event, newValue) => void setRosHostname(nonEmptyOrUndefined(newValue))}
     />
   );
 }
@@ -227,12 +227,12 @@ export default function Preferences(): React.ReactElement {
             </Text>
             <Checkbox
               checked={telemetryEnabled ?? true}
-              onChange={(_event, checked) => setTelemetryEnabled(checked)}
+              onChange={(_event, checked) => void setTelemetryEnabled(checked)}
               label={`Send anonymized usage data to help us improve Foxglove Studio`}
             />
             <Checkbox
               checked={crashReportingEnabled ?? true}
-              onChange={(_event, checked) => setCrashReportingEnabled(checked)}
+              onChange={(_event, checked) => void setCrashReportingEnabled(checked)}
               label="Send anonymized crash reports"
             />
           </Stack>

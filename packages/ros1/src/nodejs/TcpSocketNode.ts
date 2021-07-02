@@ -32,7 +32,7 @@ export class TcpSocketNode extends EventEmitter<TcpSocketEvents> implements TcpS
     socket.on("error", (err) => this.emit("error", err));
   }
 
-  remoteAddress(): Promise<TcpAddress | undefined> {
+  async remoteAddress(): Promise<TcpAddress | undefined> {
     return Promise.resolve({
       port: this._port,
       family: this._socket.remoteFamily,
@@ -40,7 +40,7 @@ export class TcpSocketNode extends EventEmitter<TcpSocketEvents> implements TcpS
     });
   }
 
-  localAddress(): Promise<TcpAddress | undefined> {
+  async localAddress(): Promise<TcpAddress | undefined> {
     if (this._socket.destroyed) {
       return Promise.resolve(undefined);
     }
@@ -54,7 +54,7 @@ export class TcpSocketNode extends EventEmitter<TcpSocketEvents> implements TcpS
     );
   }
 
-  fd(): Promise<number | undefined> {
+  async fd(): Promise<number | undefined> {
     // There is no public node.js API for retrieving the file descriptor for a
     // socket. This is the only way of retrieving it from pure JS, on platforms
     // where sockets have file descriptors. See
@@ -63,11 +63,11 @@ export class TcpSocketNode extends EventEmitter<TcpSocketEvents> implements TcpS
     return Promise.resolve((this._socket as unknown as MaybeHasFd)._handle?.fd);
   }
 
-  connected(): Promise<boolean> {
+  async connected(): Promise<boolean> {
     return Promise.resolve(!this._socket.destroyed && this._socket.localAddress !== undefined);
   }
 
-  connect(): Promise<void> {
+  async connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       const KEEPALIVE_MS = 60 * 1000;
 
@@ -79,12 +79,12 @@ export class TcpSocketNode extends EventEmitter<TcpSocketEvents> implements TcpS
     });
   }
 
-  close(): Promise<void> {
+  async close(): Promise<void> {
     this._socket.destroy();
     return Promise.resolve();
   }
 
-  write(data: Uint8Array): Promise<void> {
+  async write(data: Uint8Array): Promise<void> {
     return new Promise((resolve, reject) => {
       this._socket.write(data, (err) => {
         if (err) {
@@ -96,12 +96,12 @@ export class TcpSocketNode extends EventEmitter<TcpSocketEvents> implements TcpS
     });
   }
 
-  setNoDelay(noDelay?: boolean): Promise<void> {
+  async setNoDelay(noDelay?: boolean): Promise<void> {
     this._socket.setNoDelay(noDelay);
     return Promise.resolve();
   }
 
-  static Create({ host, port }: { host: string; port: number }): Promise<TcpSocket> {
+  static async Create({ host, port }: { host: string; port: number }): Promise<TcpSocket> {
     return Promise.resolve(new TcpSocketNode(host, port, new net.Socket()));
   }
 }

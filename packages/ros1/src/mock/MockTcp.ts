@@ -13,7 +13,7 @@ export class MockTcpSocket extends EventEmitter<TcpSocketEvents> implements TcpS
     super();
   }
 
-  remoteAddress(): Promise<TcpAddress | undefined> {
+  async remoteAddress(): Promise<TcpAddress | undefined> {
     return Promise.resolve({
       address: "192.168.1.2",
       port: 40000,
@@ -21,34 +21,34 @@ export class MockTcpSocket extends EventEmitter<TcpSocketEvents> implements TcpS
     });
   }
 
-  localAddress(): Promise<TcpAddress | undefined> {
+  async localAddress(): Promise<TcpAddress | undefined> {
     return Promise.resolve(
       this._connected ? { address: "127.0.0.1", port: 30000, family: "IPv4" } : undefined,
     );
   }
 
-  fd(): Promise<number | undefined> {
+  async fd(): Promise<number | undefined> {
     return Promise.resolve(1);
   }
 
-  connected(): Promise<boolean> {
+  async connected(): Promise<boolean> {
     return Promise.resolve(this._connected);
   }
 
-  connect(): Promise<void> {
+  async connect(): Promise<void> {
     return Promise.resolve();
   }
 
-  close(): Promise<void> {
+  async close(): Promise<void> {
     this._connected = false;
     return Promise.resolve();
   }
 
-  write(_data: Uint8Array): Promise<void> {
+  async write(_data: Uint8Array): Promise<void> {
     return Promise.resolve();
   }
 
-  setNoDelay(_noDelay?: boolean): Promise<void> {
+  async setNoDelay(_noDelay?: boolean): Promise<void> {
     return Promise.resolve();
   }
 }
@@ -60,7 +60,7 @@ export class MockTcpServer extends EventEmitter<TcpServerEvents> implements TcpS
     super();
   }
 
-  address(): Promise<TcpAddress | undefined> {
+  async address(): Promise<TcpAddress | undefined> {
     return Promise.resolve(
       this.listening ? { address: "192.168.1.1", port: 20000, family: "IPv4" } : undefined,
     );
@@ -71,7 +71,7 @@ export class MockTcpServer extends EventEmitter<TcpServerEvents> implements TcpS
   }
 }
 
-export function TcpListen(_options: {
+export async function TcpListen(_options: {
   host?: string;
   port?: number;
   backlog?: number;
@@ -79,6 +79,9 @@ export function TcpListen(_options: {
   return Promise.resolve(new MockTcpServer());
 }
 
-export function TcpSocketConnect(_options: { host: string; port: number }): Promise<TcpSocket> {
+export async function TcpSocketConnect(_options: {
+  host: string;
+  port: number;
+}): Promise<TcpSocket> {
   return Promise.resolve(new MockTcpSocket());
 }

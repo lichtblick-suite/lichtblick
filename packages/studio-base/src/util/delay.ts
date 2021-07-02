@@ -12,6 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 /** Return a Promise resolved after @param ms milliseconds */
-export default function delay(ms: number): Promise<void> {
+export default async function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }

@@ -40,7 +40,11 @@ export class TcpServerNode extends EventEmitter<TcpServerEvents> implements TcpS
     this._server.close();
   }
 
-  static Listen(options: { host?: string; port?: number; backlog?: number }): Promise<TcpServer> {
+  static async Listen(options: {
+    host?: string;
+    port?: number;
+    backlog?: number;
+  }): Promise<TcpServer> {
     return new Promise((resolve, reject) => {
       const server = net.createServer();
       server.on("error", reject);

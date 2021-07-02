@@ -151,7 +151,7 @@ class PerformanceMeasuringClient {
     this.totalFrameMs = undefined;
   }
 
-  onError(e: Error): Promise<void> {
+  async onError(e: Error): Promise<void> {
     const event = new CustomEvent("playbackError", { detail: e.toString() });
     window.dispatchEvent(event);
     // Never bother to resolve this promise since we should stop perf playback whenever any error occurs.

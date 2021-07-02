@@ -18,7 +18,7 @@ export default function NativeStorageAppConfigurationProvider({
 }: PropsWithChildren<unknown>): React.ReactElement | ReactNull {
   const storage = useNativeStorage();
 
-  const { value, error } = useAsync(() => {
+  const { value, error } = useAsync(async () => {
     log.debug("Initializing app configuration");
     return NativeStorageAppConfiguration.Initialize(storage);
   }, [storage]);

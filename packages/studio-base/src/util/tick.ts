@@ -11,6 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-export default function tick(): Promise<void> {
+export default async function tick(): Promise<void> {
   return new Promise((resolve) => setImmediate(resolve));
 }

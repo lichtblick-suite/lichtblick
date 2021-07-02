@@ -186,7 +186,7 @@ export default class AutomatedRunPlayer implements Player {
     return { parsedMessages: filterMessages(parsedMessages) };
   }
 
-  _emitState(messages: readonly MessageEvent<unknown>[], currentTime: Time): Promise<void> {
+  async _emitState(messages: readonly MessageEvent<unknown>[], currentTime: Time): Promise<void> {
     return this._emitStateQueue.add(async () => {
       if (!this._listener) {
         return;

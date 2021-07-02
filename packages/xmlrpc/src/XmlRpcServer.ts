@@ -28,7 +28,7 @@ export class XmlRpcServer {
     return this.server.port();
   }
 
-  listen(port?: number, hostname?: string, backlog?: number): Promise<void> {
+  async listen(port?: number, hostname?: string, backlog?: number): Promise<void> {
     return this.server.listen(port, hostname, backlog);
   }
 
@@ -59,7 +59,7 @@ export class XmlRpcServer {
       } else {
         const calls = args[0] as { methodName: string; params: XmlRpcValue[] }[];
         const responses = await Promise.all(
-          calls.map((c) => this._methodCallHandler(c.methodName, c.params)),
+          calls.map(async (c) => this._methodCallHandler(c.methodName, c.params)),
         );
         const allResponses: XmlRpcValue[] = responses.map((res) => {
           if (res instanceof XmlRpcFault) {

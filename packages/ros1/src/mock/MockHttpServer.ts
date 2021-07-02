@@ -5,7 +5,7 @@
 import { HttpHandler, HttpServer } from "@foxglove/xmlrpc";
 
 export class MockHttpServer implements HttpServer {
-  handler: HttpHandler = (_req) => Promise.resolve({ statusCode: 404 });
+  handler: HttpHandler = async (_req) => Promise.resolve({ statusCode: 404 });
 
   private _port?: number;
   private _hostname?: string;
@@ -28,7 +28,7 @@ export class MockHttpServer implements HttpServer {
     return this._port;
   }
 
-  listen(port?: number, hostname?: string, _backlog?: number): Promise<void> {
+  async listen(port?: number, hostname?: string, _backlog?: number): Promise<void> {
     this._port = port ?? this._defaultPort;
     this._hostname = hostname ?? this._defaultHost;
     return Promise.resolve();

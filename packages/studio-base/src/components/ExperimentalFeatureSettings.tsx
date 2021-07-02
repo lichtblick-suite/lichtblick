@@ -68,7 +68,7 @@ function ExperimentalFeatureItem(props: { feature: Feature }) {
         </Stack>
         <Toggle
           checked={enabled}
-          onChange={(_, checked) => setEnabled(checked)}
+          onChange={(_, checked) => void setEnabled(checked)}
           onText="Enabled"
           offText="Disabled"
         />

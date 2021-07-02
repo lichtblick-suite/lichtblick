@@ -55,29 +55,29 @@ class ConsoleApi {
     this._authHeader = header;
   }
 
-  orgs(): Promise<Org[]> {
+  async orgs(): Promise<Org[]> {
     return this.get<Org[]>("/v1/orgs");
   }
 
-  me(): Promise<CurrentUser> {
+  async me(): Promise<CurrentUser> {
     return this.get<CurrentUser>("/v1/me");
   }
 
-  signin(args: SigninArgs): Promise<Session> {
+  async signin(args: SigninArgs): Promise<Session> {
     return this.post<Session>("/v1/signin", args);
   }
 
-  signout(): Promise<void> {
+  async signout(): Promise<void> {
     return this.post<void>("/v1/signout");
   }
 
-  deviceCode(args: DeviceCodeArgs): Promise<DeviceCodeResponse> {
+  async deviceCode(args: DeviceCodeArgs): Promise<DeviceCodeResponse> {
     return this.post<DeviceCodeResponse>("/v1/auth/device-code", {
       client_id: args.client_id,
     });
   }
 
-  token(args: TokenArgs): Promise<TokenResponse> {
+  async token(args: TokenArgs): Promise<TokenResponse> {
     return this.post<TokenResponse>("/v1/auth/token", {
       device_code: args.device_code,
       client_id: args.client_id,

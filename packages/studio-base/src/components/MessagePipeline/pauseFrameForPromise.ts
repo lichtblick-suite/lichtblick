@@ -23,7 +23,7 @@ export const MAX_PROMISE_TIMEOUT_TIME_MS = inAutomatedRunMode() ? 30000 : 5000;
 export async function pauseFrameForPromises(promises: FramePromise[]): Promise<void> {
   try {
     await promiseTimeout(
-      Promise.all(promises.map(({ promise }) => promise)),
+      Promise.all(promises.map(async ({ promise }) => promise)),
       MAX_PROMISE_TIMEOUT_TIME_MS,
     );
   } catch (error) {
