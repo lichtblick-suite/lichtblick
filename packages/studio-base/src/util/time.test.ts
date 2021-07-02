@@ -339,13 +339,3 @@ describe("time.getSeekTimeFromSpec", () => {
     expect(time.getSeekTimeFromSpec({ type: "fraction", fraction: 2 }, start, end)).toEqual(end);
   });
 });
-
-describe("time.getRosTimeFromString", () => {
-  it("takes a stringified number and returns time object", () => {
-    expect(time.getRosTimeFromString("")).toEqual(undefined);
-    expect(time.getRosTimeFromString("abc")).toEqual(undefined);
-    expect(time.getRosTimeFromString("123456.000000000")).toEqual({ sec: 123456, nsec: 0 });
-    expect(time.getRosTimeFromString("123456.100000000")).toEqual({ sec: 123456, nsec: 100000000 });
-    expect(time.getRosTimeFromString("123456.123456789")).toEqual({ sec: 123456, nsec: 123456789 });
-  });
-});

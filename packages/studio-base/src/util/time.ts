@@ -314,11 +314,3 @@ export function getTimestampForMessage(message: unknown): Time | undefined {
 
   return undefined;
 }
-
-export const getRosTimeFromString = (text: string): Time | undefined => {
-  if (text.length === 0 || isNaN(+text)) {
-    return undefined;
-  }
-  const textAsNum = Number(text);
-  return { sec: Math.floor(textAsNum), nsec: textAsNum * 1e9 - Math.floor(textAsNum) * 1e9 };
-};

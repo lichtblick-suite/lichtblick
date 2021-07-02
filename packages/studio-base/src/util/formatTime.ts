@@ -15,7 +15,8 @@ import momentDurationFormatSetup from "moment-duration-format";
 import moment from "moment-timezone";
 import { Time } from "rosbag";
 
-import { toDate, fromDate, getRosTimeFromString } from "./time";
+import parseFuzzyRosTime from "./parseFuzzyRosTime";
+import { toDate, fromDate } from "./time";
 
 // All time functions that require `moment` should live in this file.
 
@@ -88,9 +89,7 @@ export const getValidatedTimeAndMethodFromString = ({
   }
 
   return {
-    time: !isInvalidRosTime
-      ? getRosTimeFromString(text)
-      : parseTimeStr(`${date} ${text}`, timezone),
+    time: !isInvalidRosTime ? parseFuzzyRosTime(text) : parseTimeStr(`${date} ${text}`, timezone),
     method: isInvalidRosTime ? "TOD" : "ROS",
   };
 };
