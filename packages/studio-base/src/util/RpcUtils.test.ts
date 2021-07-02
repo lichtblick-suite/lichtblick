@@ -29,7 +29,7 @@ describe("RpcWorkerUtils and RpcMainThreadUtils", () => {
       const { local: mainChannel, remote: workerChannel } = createLinkedChannels();
       const main = new Rpc(mainChannel);
       let errorObject;
-      void main.receive("sendNotification", (err) => {
+      main.receive("sendNotification", (err) => {
         errorObject = err;
       });
 
