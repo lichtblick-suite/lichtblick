@@ -28,7 +28,7 @@ export function JSONInput(props: {
     setInternalValue(props.value);
   }
   const parsedValue = parseJson(internalValue);
-  const isValid = parsedValue !== undefined;
+  const isValid = parsedValue != undefined;
   return (
     <input
       style={{ color: isValid ? "white" : colors.RED }}
@@ -38,7 +38,7 @@ export function JSONInput(props: {
       onChange={(e) => {
         setInternalValue(e.target.value);
         const newParsedValue = parseJson(e.target.value);
-        if (newParsedValue !== undefined) {
+        if (newParsedValue != undefined) {
           props.onChange(newParsedValue);
         }
       }}

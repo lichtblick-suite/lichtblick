@@ -32,7 +32,7 @@ export default function CommonPointSettings({
   };
   onFieldChange: (name: string, value: unknown) => void;
 }): JSX.Element {
-  const pointSizeVal = settings.pointSize === undefined ? "" : settings.pointSize;
+  const pointSizeVal = settings.pointSize == undefined ? "" : settings.pointSize;
 
   const pointShape = settings.pointShape;
   const pointShapeVal = pointShape ?? defaultPointShape;

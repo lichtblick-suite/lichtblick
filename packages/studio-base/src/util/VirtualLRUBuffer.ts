@@ -150,7 +150,7 @@ export default class VirtualLRUBuffer {
       // copy to a new buffer in `VirtualLRUBuffer#slice` (less garbage collection), or if the current method
       // is better (faster slicing).
       const deleteIndex = this._lastAccessedBlockIndices.shift();
-      if (deleteIndex !== undefined) {
+      if (deleteIndex != undefined) {
         delete this._blocks[deleteIndex];
         // Remove the range that we evicted from `_rangesWithData`, since the range doesn't have data now.
         this._rangesWithData = simplify(

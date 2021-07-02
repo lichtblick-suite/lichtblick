@@ -742,13 +742,13 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
   ): string {
     // Prefer ROS_HOSTNAME, then ROS_IP env vars
     let hostname = getEnvVar("ROS_HOSTNAME") ?? getEnvVar("ROS_IP");
-    if (hostname !== undefined && hostname.length > 0) {
+    if (hostname != undefined && hostname.length > 0) {
       return hostname;
     }
 
     // Try to get the operating system hostname
     hostname = getHostname();
-    if (hostname !== undefined && hostname.length > 0) {
+    if (hostname != undefined && hostname.length > 0) {
       return hostname;
     }
 
@@ -764,7 +764,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
         continue;
       }
 
-      if (bestAddr === undefined) {
+      if (bestAddr == undefined) {
         // Use the first non-internal interface we find
         bestAddr = iface;
       } else if (RosNode.IsPrivateIP(bestAddr.address) && !RosNode.IsPrivateIP(iface.address)) {
@@ -775,7 +775,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
         bestAddr = iface;
       }
     }
-    if (bestAddr !== undefined) {
+    if (bestAddr != undefined) {
       return bestAddr.address;
     }
 

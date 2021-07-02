@@ -69,7 +69,7 @@ export const constantsByDatatype = createSelector(
       for (const field of value.fields) {
         if (
           field.isConstant === true &&
-          field.value !== undefined &&
+          field.value != undefined &&
           typeof field.value !== "boolean"
         ) {
           if (result[field.value] != undefined) {
@@ -116,7 +116,7 @@ export const enumValuesByDatatypeAndField = createSelector(
 
         if (
           field.isConstant === true &&
-          field.value !== undefined &&
+          field.value != undefined &&
           typeof field.value !== "boolean"
         ) {
           lastType = field.type;

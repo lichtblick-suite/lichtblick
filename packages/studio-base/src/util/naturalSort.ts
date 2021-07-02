@@ -22,7 +22,7 @@ type StringOrNumberFields<T> = T extends Record<string, unknown>
 function naturalSort(): typeof sortFn;
 function naturalSort<T, K extends StringOrNumberFields<T>>(key: K): (a: T, b: T) => number;
 function naturalSort<T, K extends StringOrNumberFields<T>>(key?: K): unknown {
-  return key === undefined
+  return key == undefined
     ? sortFn
     : (a: T, b: T) =>
         sortFn(a[key] as unknown as string | number, b[key] as unknown as string | number);

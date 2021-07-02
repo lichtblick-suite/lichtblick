@@ -84,7 +84,7 @@ function parseInput(value: string): { error?: string; parsedObject?: unknown } {
     const parsedAny: unknown = JSON.parse(value);
     if (Array.isArray(parsedAny)) {
       error = "Message content must be an object, not an array";
-    } else if (parsedAny === null /* eslint-disable-line no-restricted-syntax */) {
+    } else if (parsedAny == null /* eslint-disable-line no-restricted-syntax */) {
       error = "Message content must be an object, not null";
     } else if (typeof parsedAny !== "object") {
       error = `Message content must be an object, not ‘${typeof parsedAny}’`;

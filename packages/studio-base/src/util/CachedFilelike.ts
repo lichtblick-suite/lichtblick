@@ -102,7 +102,7 @@ export default class CachedFilelike implements Filelike {
   }
 
   async open(): Promise<void> {
-    if (this._fileSize !== undefined) {
+    if (this._fileSize != undefined) {
       return;
     }
     const { size } = await this._fileReader.open();
@@ -126,7 +126,7 @@ export default class CachedFilelike implements Filelike {
 
   // Get the file size. Requires a call to `open()` or `read()` first.
   size(): number {
-    if (this._fileSize === undefined) {
+    if (this._fileSize == undefined) {
       throw new Error("CachedFilelike has not been opened");
     }
     return this._fileSize;

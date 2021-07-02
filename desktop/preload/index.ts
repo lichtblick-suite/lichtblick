@@ -167,7 +167,7 @@ const menuBridge: NativeMenuBridge = {
   },
   async menuRemoveInputSource(name: string) {
     const listener = menuClickListeners.get(name);
-    if (listener === undefined) {
+    if (listener == undefined) {
       return;
     }
     menuClickListeners.delete(name);

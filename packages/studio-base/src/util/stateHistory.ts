@@ -32,7 +32,7 @@ export const pushState = <T>(
 
 export const undoChange = <T>(history: StateHistory<T>): StateHistory<T> => {
   const previousState = history.undoStates[history.undoStates.length - 1];
-  if (previousState === undefined) {
+  if (previousState == undefined) {
     // Return existing state if we have no history.
     // Do not ask users to call "canUndo", do not push dummy items onto the redo queue.
     return history;
@@ -47,7 +47,7 @@ export const undoChange = <T>(history: StateHistory<T>): StateHistory<T> => {
 
 export const redoChange = <T>(history: StateHistory<T>): StateHistory<T> => {
   const newState = history.redoStates[0];
-  if (newState === undefined) {
+  if (newState == undefined) {
     // Return existing state if we have no redo items.
     // Do not ask users to call "canRedo", do not push dummy items onto the undo queue.
     return history;

@@ -148,7 +148,7 @@ export default function getDiff(
   if (before === after) {
     return undefined;
   }
-  if (before === undefined) {
+  if (before == undefined) {
     const afterIsNotObj = Array.isArray(after) || typeof after !== "object";
     if (!isNonEmptyOrUndefined(idLabel) || afterIsNotObj) {
       return { [diffLabels.ADDED.labelText]: after };
@@ -160,7 +160,7 @@ export default function getDiff(
       [diffLabels.ADDED.labelText]: { ...idLabelObj, ...(after as DiffObject) },
     };
   }
-  if (after === undefined) {
+  if (after == undefined) {
     const beforeIsNotObj = Array.isArray(before) || typeof before !== "object";
     if (!isNonEmptyOrUndefined(idLabel) || beforeIsNotObj) {
       return { [diffLabels.DELETED.labelText]: before };

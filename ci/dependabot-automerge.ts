@@ -35,7 +35,7 @@ export default async function main(): Promise<void> {
   const subject = await execOutput("git", ["show", "-s", "--format=%s", "HEAD^"]);
 
   const merge = shouldAutomerge(subject);
-  if (merge === undefined) {
+  if (merge == undefined) {
     return log.info(`Not auto-merging (unexpected git commit): '${subject}'`);
   } else if (!merge) {
     return log.info("Not auto-merging (major version upgrade)");

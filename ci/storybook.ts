@@ -48,7 +48,7 @@ export default async function main(): Promise<void> {
     help: "Sub-commands to run",
     type: (arg: string): Command => {
       const command: Command | undefined = Command[arg as Command];
-      if (command !== undefined) {
+      if (command != undefined) {
         return command;
       }
       throw new ArgumentTypeError(`Unrecognized command ${arg}`);

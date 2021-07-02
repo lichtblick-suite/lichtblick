@@ -335,7 +335,7 @@ function RawMessages(props: Props) {
     const hideWrappingArray =
       baseItem.queriedData.length === 1 && typeof baseItem.queriedData[0]?.value === "object";
     const shouldDisplaySingleVal =
-      (data !== undefined && typeof data !== "object") ||
+      (data != undefined && typeof data !== "object") ||
       (isSingleElemArray(data) && data[0] != undefined && typeof data[0] !== "object");
     const singleVal = isSingleElemArray(data) ? data[0] : data;
 

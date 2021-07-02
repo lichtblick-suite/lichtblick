@@ -191,7 +191,7 @@ function UnconnectedPanelSetup(props: Props): JSX.Element | ReactNull {
     if (userNodes) {
       actions.setUserNodes(userNodes);
     }
-    if (layout !== undefined) {
+    if (layout != undefined) {
       actions.changePanelLayout({ layout });
     }
     if (linkedGlobalVariables) {

@@ -738,7 +738,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   const visibleDatasets = useMemo(() => {
     return filterMap(datasets, (dataset) => {
       const { label } = dataset;
-      if ((label === undefined || linesToHide[label]) ?? false) {
+      if ((label == undefined || linesToHide[label]) ?? false) {
         return;
       }
       return dataset;

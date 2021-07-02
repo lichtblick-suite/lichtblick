@@ -38,7 +38,7 @@ function lineStrip({
     ns: "bar",
     scale: { x: 1.0, y: 1.0, z: 1.0 },
     points,
-    ...(closed !== undefined ? { closed } : {}),
+    ...(closed != undefined ? { closed } : {}),
     header: { frame_id: "quux", stamp: { sec: 1, nsec: 2 }, seq: 0 },
     action: 0,
     pose: { position: { x: 0, y: 0, z: 0 }, orientation: { w: 1, x: 1, y: 1, z: 1 } },

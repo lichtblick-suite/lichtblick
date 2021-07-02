@@ -233,7 +233,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       saveState: saveConfig,
 
       setPreviewTime: (stamp: number | undefined) => {
-        if (stamp === undefined) {
+        if (stamp == undefined) {
           clearHoverValue("PanelExtensionAdatper");
         } else {
           const ctx = latestPipelineContextRef.current;

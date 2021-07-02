@@ -10,7 +10,7 @@ const LayoutCacheContext = createContext<ILayoutCache | undefined>(undefined);
 
 export function useLayoutCache(): ILayoutCache {
   const ctx = useContext(LayoutCacheContext);
-  if (ctx === undefined) {
+  if (ctx == undefined) {
     throw new Error("A LayoutCache provider is required to useLayoutCache");
   }
   return ctx;

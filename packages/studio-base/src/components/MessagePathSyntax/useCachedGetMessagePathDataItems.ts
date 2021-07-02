@@ -142,7 +142,7 @@ function filterMatches(filter: MessagePathFilter, value: any) {
 
   // Test equality using `==` so we can be forgiving for comparing booleans with integers,
   // comparing numbers with strings, and so on.
-  // eslint-disable-next-line no-restricted-syntax
+  // eslint-disable-next-line @foxglove/strict-equality
   return currentValue == filter.value;
 }
 
@@ -226,7 +226,7 @@ export function getMessagePathDataItems(
     path: string,
     structureItem: MessagePathStructureItem | undefined,
   ) {
-    if (value === undefined || structureItem === undefined) {
+    if (value == undefined || structureItem == undefined) {
       return;
     }
     const pathItem = filledInPath.messagePath[pathIndex];

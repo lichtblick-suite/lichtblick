@@ -69,7 +69,7 @@ function serializeValue(value: XmlRpcValue, xml: XMLBuilder) {
   while (stack.length > 0) {
     current = stack[stack.length - 1] as ValueInfo;
 
-    if (current.index !== undefined) {
+    if (current.index != undefined) {
       // Iterating a compound
       next = getNextItemsFrame(current);
       if (next) {

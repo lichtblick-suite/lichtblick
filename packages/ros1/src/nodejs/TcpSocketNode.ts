@@ -48,7 +48,7 @@ export class TcpSocketNode extends EventEmitter<TcpSocketEvents> implements TcpS
     const family = this._socket.remoteFamily; // There is no localFamily
     const address = this._socket.localAddress;
     return Promise.resolve(
-      port !== undefined && family !== undefined && address !== undefined
+      port != undefined && family != undefined && address != undefined
         ? { port, family, address }
         : undefined,
     );
@@ -64,7 +64,7 @@ export class TcpSocketNode extends EventEmitter<TcpSocketEvents> implements TcpS
   }
 
   async connected(): Promise<boolean> {
-    return Promise.resolve(!this._socket.destroyed && this._socket.localAddress !== undefined);
+    return Promise.resolve(!this._socket.destroyed && this._socket.localAddress != undefined);
   }
 
   async connect(): Promise<void> {

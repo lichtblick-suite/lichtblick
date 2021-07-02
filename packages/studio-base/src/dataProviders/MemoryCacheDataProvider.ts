@@ -124,7 +124,7 @@ export function getBlocksToKeep({
       // If we don't have size, there are no blocks to keep!
       const sizeInBytes = blockSizesInBytes[blockIndex];
 
-      if (sizeInBytes === undefined) {
+      if (sizeInBytes == undefined) {
         continue;
       }
 

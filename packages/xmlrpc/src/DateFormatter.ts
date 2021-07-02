@@ -47,7 +47,7 @@ export class DateFormatter {
     ].join("");
 
     date +=
-      dateParts[17] !== undefined
+      dateParts[17] != undefined
         ? dateParts[17] + (dateParts[19] != undefined && dateParts[20] == undefined ? "00" : "")
         : "Z";
 

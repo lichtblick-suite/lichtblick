@@ -655,7 +655,7 @@ const endDrag = (panelsState: PanelsState, dragPayload: EndDragPayload): PanelsS
   const targetTabConfig =
     targetTabId != undefined ? (originalSavedProps[targetTabId] as TabPanelConfig) : undefined;
   const panelIdsInsideTabPanels =
-    (sourceTabId !== undefined && getPanelIdsInsideTabPanels([sourceTabId], originalSavedProps)) ||
+    (sourceTabId != undefined && getPanelIdsInsideTabPanels([sourceTabId], originalSavedProps)) ||
     [];
 
   const sourceTabChildConfigs = filterMap(panelIdsInsideTabPanels, (id) => {
@@ -774,7 +774,7 @@ const panelsReducer = function (panelsState: PanelsState, action: PanelsActions)
         ...action.payload,
       };
       Object.keys(globalVariables).forEach((key) => {
-        if (globalVariables[key] === undefined) {
+        if (globalVariables[key] == undefined) {
           delete globalVariables[key];
         }
       });
@@ -785,7 +785,7 @@ const panelsReducer = function (panelsState: PanelsState, action: PanelsActions)
     case "SET_USER_NODES": {
       const userNodes = { ...newPanelsState.userNodes, ...action.payload };
       Object.keys(userNodes).forEach((key) => {
-        if (userNodes[key] === undefined) {
+        if (userNodes[key] == undefined) {
           delete userNodes[key];
         }
       });

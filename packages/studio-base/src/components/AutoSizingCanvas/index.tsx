@@ -38,7 +38,7 @@ const AutoSizingCanvas = ({
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas || width === undefined || height === undefined) {
+    if (!canvas || width == undefined || height == undefined) {
       return;
     }
     const ctx = canvas.getContext("2d");

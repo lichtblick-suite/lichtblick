@@ -37,7 +37,7 @@ export default function useContextSelector<T, U>(
   >();
   const contextValue = handle.currentValue();
   if (
-    state.current === undefined ||
+    state.current == undefined ||
     contextValue !== state.current.contextValue ||
     selector !== state.current.selector
   ) {

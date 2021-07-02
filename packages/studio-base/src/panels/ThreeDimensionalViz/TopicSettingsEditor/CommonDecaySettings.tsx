@@ -23,7 +23,7 @@ export default function CommonDecaySettings({
   onFieldChange: (name: string, value: unknown) => unknown;
 }): JSX.Element {
   const decayTime = settings.decayTime;
-  const decayTimeValue = decayTime === undefined ? "" : decayTime;
+  const decayTimeValue = decayTime == undefined ? "" : decayTime;
 
   return (
     <Flex col>

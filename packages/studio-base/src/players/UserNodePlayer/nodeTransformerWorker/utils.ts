@@ -35,7 +35,7 @@ const mapCategoryToDiagnosticSeverity = (
 // Function responsible for transforming diagnostic information into a format
 // the monaco-editor can use.
 export const transformDiagnosticToMarkerData = (diagnostic: ts.Diagnostic): Diagnostic => {
-  if (!diagnostic.file || diagnostic.start === undefined || diagnostic.length === undefined) {
+  if (!diagnostic.file || diagnostic.start == undefined || diagnostic.length == undefined) {
     throw new Error("Invariant: diagnostic is not initialized");
   }
 
@@ -67,7 +67,7 @@ function flattenDiagnosticMessageText(
 ): string {
   if (typeof diag === "string") {
     return diag;
-  } else if (diag === undefined) {
+  } else if (diag == undefined) {
     return "";
   }
   let result = "";

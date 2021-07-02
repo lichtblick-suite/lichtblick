@@ -10,7 +10,7 @@ const LayoutStorageContext = createContext<ILayoutStorage | undefined>(undefined
 
 export function useLayoutStorage(): ILayoutStorage {
   const ctx = useContext(LayoutStorageContext);
-  if (ctx === undefined) {
+  if (ctx == undefined) {
     throw new Error("A LayoutStorage provider is required to useLayoutStorage");
   }
   return ctx;

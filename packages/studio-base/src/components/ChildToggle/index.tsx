@@ -85,7 +85,7 @@ export default function ChildToggle(props: Props): ReactElement {
     style,
   } = props;
 
-  if (controlledIsOpen !== undefined && defaultIsOpen !== undefined) {
+  if (controlledIsOpen != undefined && defaultIsOpen != undefined) {
     throw new Error(
       "ChildToggle was provided both isOpen (controlled mode) and defaultIsOpen (uncontrolled). Pass only one.",
     );
@@ -106,7 +106,7 @@ export default function ChildToggle(props: Props): ReactElement {
   // Used by the internal click handler and escape key handler to change state.
   const setIsOpen = useCallback((value: boolean) => {
     // Only trigger a state update in uncontrolled mode. Otherwise, the client will do it from onToggle.
-    if (latestProps.current.controlledIsOpen === undefined) {
+    if (latestProps.current.controlledIsOpen == undefined) {
       uncontrolledSetIsOpen(value);
     }
     latestProps.current.onToggle?.(value);

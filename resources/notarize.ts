@@ -23,7 +23,7 @@ exports.default = async function (context: AfterPackContext) {
     return;
   }
 
-  if (appleApiIssuer === undefined || appleApiKeyId === undefined) {
+  if (appleApiIssuer == undefined || appleApiKeyId == undefined) {
     log.warn(
       {
         reason: "'APPLE_API_KEY_ID' or 'APPLE_API_KEY_ISSUER' environment variables not set",

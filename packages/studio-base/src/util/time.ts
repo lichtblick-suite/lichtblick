@@ -237,7 +237,7 @@ export function parseRosTimeStr(str: string): Time | undefined {
   }
 
   const [first, second] = partials;
-  if (first === undefined || second === undefined) {
+  if (first == undefined || second == undefined) {
     return undefined;
   }
 

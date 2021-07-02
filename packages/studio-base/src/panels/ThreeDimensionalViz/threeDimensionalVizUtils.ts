@@ -118,8 +118,8 @@ export const getInstanceObj = (marker: unknown, idx: number): unknown => {
 
 export const getObject = (selectedObject?: MouseEventObject): unknown => {
   const object =
-    (selectedObject?.instanceIndex !== undefined &&
-      (selectedObject.object as InstancedLineListMarker).metadataByIndex !== undefined &&
+    (selectedObject?.instanceIndex != undefined &&
+      (selectedObject.object as InstancedLineListMarker).metadataByIndex != undefined &&
       getInstanceObj(selectedObject.object, selectedObject.instanceIndex)) ||
     selectedObject?.object;
   return object;

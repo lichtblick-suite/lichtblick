@@ -470,7 +470,7 @@ export default class RosbridgePlayer implements Player {
 
   private _addInternalSubscriptions(subscriptions: SubscribePayload[]): void {
     // Always subscribe to /clock if available
-    if (subscriptions.find((sub) => sub.topic === "/clock") === undefined) {
+    if (subscriptions.find((sub) => sub.topic === "/clock") == undefined) {
       subscriptions.unshift({
         topic: "/clock",
         requester: { type: "other", name: "Ros1Player" },

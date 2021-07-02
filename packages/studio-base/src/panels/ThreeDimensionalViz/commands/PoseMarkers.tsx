@@ -121,7 +121,7 @@ function PoseMarkers({ markers, layerIndex }: PoseMarkerProps): ReactElement {
       }
       case "arrow":
       default: {
-        if (settings?.overrideColor !== undefined) {
+        if (settings?.overrideColor != undefined) {
           marker = { ...marker, color: settings.overrideColor };
         }
 

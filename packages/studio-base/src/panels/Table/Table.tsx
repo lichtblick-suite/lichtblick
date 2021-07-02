@@ -51,7 +51,7 @@ function getColumnsFromObject(
           }
 
           // eslint-disable-next-line no-restricted-syntax
-          if (typeof value === "object" && value !== null) {
+          if (typeof value === "object" && value != null) {
             return (
               <TableCell row={row} accessorPath={id}>
                 <Table value={value} accessorPath={accessorPath} />
@@ -131,10 +131,10 @@ export default function Table({
   const columns = React.useMemo(() => {
     if (
       // eslint-disable-next-line no-restricted-syntax
-      value === null ||
+      value == null ||
       typeof value !== "object" ||
       // eslint-disable-next-line no-restricted-syntax
-      (Array.isArray(value) && typeof value[0] !== "object" && value[0] !== null)
+      (Array.isArray(value) && typeof value[0] !== "object" && value[0] != null)
     ) {
       return [];
     }
@@ -161,7 +161,7 @@ export default function Table({
   if (
     typeof value !== "object" ||
     // eslint-disable-next-line no-restricted-syntax
-    value === null ||
+    value == null ||
     (!isNested && Array.isArray(value) && typeof value[0] !== "object")
   ) {
     return (

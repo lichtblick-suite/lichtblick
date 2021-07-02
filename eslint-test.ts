@@ -5,8 +5,6 @@
 // This file is not used in the app, but exists to test that our eslint config catches the code we want it to catch.
 // Because we run eslint with --report-unused-disable-directives, any unused comments will be errors.
 
-export {}; // for isolatedModules
-
 ({
   // eslint-disable-next-line no-restricted-syntax
   get x() {
@@ -16,12 +14,6 @@ export {}; // for isolatedModules
   // eslint-disable-next-line no-restricted-syntax
   set x(newX) {},
 });
-
-void (async () => {
-  await 1; // eslint-disable-line @typescript-eslint/await-thenable
-  await (function () {})(); // eslint-disable-line @typescript-eslint/await-thenable
-  await (async function () {})();
-})();
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (str: string, num: number, wut: any) => {
@@ -37,19 +29,22 @@ void (async () => {
   wut != null; // eslint-disable-line no-restricted-syntax
   null == wut; // eslint-disable-line no-restricted-syntax
   null != wut; // eslint-disable-line no-restricted-syntax
-  null === wut; // eslint-disable-line no-restricted-syntax
-  wut === null; // eslint-disable-line no-restricted-syntax
+  null === wut; // eslint-disable-line no-restricted-syntax, @foxglove/strict-equality
+  wut === null; // eslint-disable-line no-restricted-syntax, @foxglove/strict-equality
 
   wut == undefined;
   wut != undefined;
-  undefined == wut; // eslint-disable-line no-restricted-syntax
-  undefined != wut; // eslint-disable-line no-restricted-syntax
-  undefined === wut;
-  wut === undefined;
+  undefined == wut;
+  undefined != wut;
+  undefined === wut; // eslint-disable-line @foxglove/strict-equality
+  wut === undefined; // eslint-disable-line @foxglove/strict-equality
 
-  wut == str; // eslint-disable-line no-restricted-syntax
-  str == wut; // eslint-disable-line no-restricted-syntax
+  wut == str; // eslint-disable-line @foxglove/strict-equality
+  str == wut; // eslint-disable-line @foxglove/strict-equality
 };
 
 // @ts-expect-error unused function
 function useEffectOnce() {} // eslint-disable-line id-denylist, @typescript-eslint/no-unused-vars
+
+// keep isolatedModules happy
+export default {};

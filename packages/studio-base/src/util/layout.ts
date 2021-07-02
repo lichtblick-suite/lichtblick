@@ -236,7 +236,7 @@ export const getSaveConfigsPayloadForAddedPanel = ({
   const newConfigs = filterMap(templateIds, (templateId) => {
     const panelId = panelIdMap[templateId];
     const relatedConfig = relatedConfigs[templateId];
-    if (panelId === undefined || relatedConfig === undefined) {
+    if (panelId == undefined || relatedConfig == undefined) {
       return;
     }
 

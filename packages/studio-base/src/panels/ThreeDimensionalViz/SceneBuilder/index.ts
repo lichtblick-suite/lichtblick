@@ -682,7 +682,7 @@ export default class SceneBuilder implements MarkerProvider {
 
     let pose: MutablePose | undefined = emptyPose();
     if (this.transforms) {
-      if (this.rootTransformID === undefined) {
+      if (this.rootTransformID == undefined) {
         throw new Error("missing rootTransformId");
       }
       pose = this.transforms.apply(pose, pose, frame_id, this.rootTransformID);
@@ -756,7 +756,7 @@ export default class SceneBuilder implements MarkerProvider {
     type: number,
     originalMessage?: unknown,
   ): void => {
-    if (this.rootTransformID === undefined) {
+    if (this.rootTransformID == undefined) {
       throw new Error("missing rootTransformId");
     }
     const sourcePose = emptyPose();
@@ -949,7 +949,7 @@ export default class SceneBuilder implements MarkerProvider {
     // defined as an infinite lifetime
     const decayTime = this._settingsByKey[`t:${topic}`]?.decayTime;
     const filteredMessages =
-      decayTime === undefined ? filterOutSupersededMessages(messages, datatype) : messages;
+      decayTime == undefined ? filterOutSupersededMessages(messages, datatype) : messages;
     for (const message of filteredMessages) {
       this._consumeMessage(topic, datatype, message);
     }
