@@ -1,5 +1,6 @@
 {
   "//": "Note: we use babel-jest rather than ts-jest for performance reasons.",
+  "testMatch": ["<rootDir>/src/**/*.test.ts"],
   "transform": {
     "\\.tsx?$": "<rootDir>/src/test/transformers/typescriptTransformerWithRawImports.js",
     "\\.ne$": "<rootDir>/src/test/transformers/neTransformer.js",
