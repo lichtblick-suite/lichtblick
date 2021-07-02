@@ -177,7 +177,7 @@ type Props = {
 };
 
 // sanity checks to help panel authors debug issues
-function verifyPanels(panels: PanelInfo[]) {
+function verifyPanels(panels: readonly PanelInfo[]) {
   const panelTypes: Map<
     string,
     { component: React.ComponentType<unknown>; presetSettings?: PresetSettings }
@@ -225,48 +225,20 @@ function PanelList(props: Props): JSX.Element {
   );
 
   const handleSearchChange = React.useCallback((e: React.SyntheticEvent<HTMLInputElement>) => {
-    // TODO(Audrey): press enter to select the first item, allow using arrow key to go up and down
     setSearchQuery(e.currentTarget.value);
     setHighlightedPanelIdx(0);
   }, []);
 
   const panelCatalog = usePanelCatalog();
   const allPanels = useMemo(() => {
-    return panelCatalog.getPanels();
+    return [...panelCatalog.getPanels()].sort((a, b) =>
+      a.title.localeCompare(b.title, undefined, { ignorePunctuation: true, sensitivity: "base" }),
+    );
   }, [panelCatalog]);
-  /*
-  const panelsByCategory = useMemo(() => {
-    const allPanels = panelCatalog.getPanels();
-    const panelsByCat = new Map<string, PanelInfo[]>();
-
-    for (const panel of allPanels) {
-      const existing = panelsByCat.get(panel.category ?? "misc") ?? [];
-      existing.push(panel);
-      panelsByCat.set(panel.category ?? "misc", existing);
-    }
-    return panelsByCat;
-  }, [panelCatalog]);
-  */
-
-  //const panelCategories = useMemo(() => Array.from(panelsByCategory.keys()), [panelsByCategory]);
 
   useEffect(() => {
     verifyPanels(allPanels);
   }, [allPanels]);
-
-  /*
-  const filteredItemsByCategoryIdx = React.useMemo(
-    () => panelCategories.map((category) => getFilteredItemsForCategory(category)),
-    [getFilteredItemsForCategory, panelCategories],
-  );
-  */
-
-  /*
-  const noResults = React.useMemo(
-    () => filteredItemsByCategoryIdx.every((items) => !items || items.length === 0),
-    [filteredItemsByCategoryIdx],
-  );
-  */
 
   const filteredPanels = React.useMemo(() => {
     return searchQuery.length > 0
