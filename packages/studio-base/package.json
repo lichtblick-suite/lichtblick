@@ -180,7 +180,7 @@
     "storycap": "3.0.4",
     "string-replace-loader": "3.0.3",
     "style-loader": "3.0.0",
-    "three": "0.129.0",
+    "three": "0.130.0",
     "ts-loader": "9.2.3",
     "typescript-plugin-styled-components": "1.6.0",
     "urdf-loader": "0.10.2",

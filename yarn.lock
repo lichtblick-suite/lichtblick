@@ -2365,7 +2365,7 @@ __metadata:
     style-loader: 3.0.0
     styled-components: 5.3.0
     text-metrics: 2.0.9
-    three: 0.129.0
+    three: 0.130.0
     tinycolor2: 1.4.2
     ts-loader: 9.2.3
     typescript: 4.3.4
@@ -24337,10 +24337,10 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"three@npm:0.129.0":
-  version: 0.129.0
-  resolution: "three@npm:0.129.0"
-  checksum: 1fbe60ee56a3f1ff0d715f078364f3f521907e15d632e52a786ffd493e400fbcdab71e04150523bf15e69b310dd5267cd8dd3f97c5f3e2b3abfa5522b954fb5b
+"three@npm:0.130.0":
+  version: 0.130.0
+  resolution: "three@npm:0.130.0"
+  checksum: 117586d16f399c36712c6cfad7a9db5681f6c355a4570185e6191844e13dc7488746ef907de51ab2d1724db38713b778d201ccf36867c6fbb370ffc98db8a776
   languageName: node
   linkType: hard
 
