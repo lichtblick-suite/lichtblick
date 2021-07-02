@@ -3,13 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { CachedLayout } from "@foxglove/studio-base/services/ILayoutCache";
-import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
+import { ConflictType, LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 import { RemoteLayoutMetadata } from "@foxglove/studio-base/services/IRemoteLayoutStorage";
-
-export type ConflictType =
-  | "local-delete-remote-update"
-  | "local-update-remote-delete"
-  | "both-update";
 
 type CachedLayoutWithState = CachedLayout & { state: NonNullable<CachedLayout["state"]> };
 
@@ -40,8 +35,8 @@ export default function computeLayoutSyncOperations(
   for (const cachedLayout of cachedLayoutsById.values()) {
     // If the layout was created locally, upload it
     if (cachedLayout.serverMetadata == undefined) {
-      if (cachedLayout.state == undefined) {
-        // Nothing to upload, might as well delete.
+      // If it's already been deleted or there is nothing to upload, delete.
+      if (cachedLayout.locallyDeleted === true || cachedLayout.state == undefined) {
         ops.push({ type: "delete-local", cachedLayout });
       } else {
         ops.push({
@@ -57,10 +52,10 @@ export default function computeLayoutSyncOperations(
     // If we know the layout's server id, but it no longer exists on the server, delete it
     const remoteLayout = remoteLayoutsById.get(cachedLayout.serverMetadata.id);
     if (remoteLayout == undefined) {
-      if (cachedLayout.locallyModified === true) {
-        ops.push({ type: "conflict", cachedLayout, conflictType: "local-update-remote-delete" });
-      } else {
+      if (cachedLayout.locallyDeleted === true || cachedLayout.locallyModified !== true) {
         ops.push({ type: "delete-local", cachedLayout });
+      } else {
+        ops.push({ type: "conflict", cachedLayout, conflictType: "local-update-remote-delete" });
       }
       continue;
     }

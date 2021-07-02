@@ -276,6 +276,18 @@ describe("computeLayoutSyncOperations", () => {
     },
 
     {
+      name: "deletes locally when marked as deleted without server metadata",
+      local: [["local1", { ...local1, locallyDeleted: true }]],
+      remote: [],
+      expected: [
+        {
+          type: "delete-local",
+          cachedLayout: { ...local1, locallyDeleted: true },
+        },
+      ],
+    },
+
+    {
       name: "deletes locally when deleted both locally and remotely",
       local: [
         [
@@ -295,6 +307,33 @@ describe("computeLayoutSyncOperations", () => {
             ...local1,
             serverMetadata: makeMetadata("remote1", "1", { updatedAt: 5 }),
             locallyDeleted: true,
+          },
+        },
+      ],
+    },
+
+    {
+      name: "deletes locally when deleted and modified locally and deleted remotely",
+      local: [
+        [
+          "local1",
+          {
+            ...local1,
+            serverMetadata: makeMetadata("remote1", "1", { updatedAt: 5 }),
+            locallyDeleted: true,
+            locallyModified: true,
+          },
+        ],
+      ],
+      remote: [],
+      expected: [
+        {
+          type: "delete-local",
+          cachedLayout: {
+            ...local1,
+            serverMetadata: makeMetadata("remote1", "1", { updatedAt: 5 }),
+            locallyDeleted: true,
+            locallyModified: true,
           },
         },
       ],

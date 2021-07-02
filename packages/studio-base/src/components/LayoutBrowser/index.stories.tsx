@@ -32,7 +32,7 @@ function WithSetup(Child: Story, ctx: StoryContext): JSX.Element {
           {
             id: "not-current",
             name: "Another Layout",
-            path: undefined,
+            path: ["some", "path"],
             state: { ...DEFAULT_LAYOUT_FOR_TESTS, id: "not-current", name: "Another Layout" },
           },
           {

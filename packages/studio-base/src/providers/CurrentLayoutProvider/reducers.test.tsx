@@ -58,6 +58,14 @@ function renderProvider() {
 }
 
 describe("layout reducers", () => {
+  it("doesn't publish updates when new state is equal to old state", () => {
+    const { result } = renderProvider();
+
+    expect(result.all.length).toBe(1);
+    result.current.actions.setPlaybackConfig({ speed: 1 });
+    expect(result.all.length).toBe(1);
+  });
+
   describe("adds panel to a layout", () => {
     it("adds panel to main app layout", () => {
       const { result } = renderProvider();

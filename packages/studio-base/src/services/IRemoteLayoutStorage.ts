@@ -16,7 +16,9 @@ import {
  * enable permissions and consistency checks.
  */
 export type RemoteLayoutMetadata = {
-  [K in keyof Omit<LayoutMetadata, "data">]-?: NonNullable<LayoutMetadata[K]>;
+  [K in keyof Omit<LayoutMetadata, "data" | "hasUnsyncedChanges" | "conflict">]-?: NonNullable<
+    LayoutMetadata[K]
+  >;
 } & {
   data?: never;
 };
@@ -59,20 +61,6 @@ export interface IRemoteLayoutStorage {
     | { status: "success"; newMetadata: RemoteLayoutMetadata }
     | { status: "not-found" }
     | { status: "conflict" }
-  >;
-
-  updateSharedLayout: (params: {
-    sourceID: LayoutID;
-    path: string[];
-    name: string;
-    permission: "org_read" | "org_write";
-    targetID: LayoutID;
-    ifUnmodifiedSince: ISO8601Timestamp;
-  }) => Promise<
-    | { status: "success"; newMetadata: RemoteLayoutMetadata }
-    | { status: "not-found" }
-    | { status: "conflict" }
-    | { status: "precondition-failed" }
   >;
 
   deleteLayout: (params: {

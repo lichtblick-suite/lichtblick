@@ -38,6 +38,20 @@ const features: Feature[] = [
     name: "Extension Marketplace",
     description: <>Enable the extension marketplace for installing/uninstalling extensions</>,
   },
+  ...(process.env.NODE_ENV !== "production"
+    ? [
+        {
+          key: AppSetting.FAKE_REMOTE_LAYOUTS,
+          name: "Fake remote layout storage",
+          description: (
+            <>
+              Use a folder on disk as a “remote” layout server to experiment with shared layout
+              functionality.
+            </>
+          ),
+        },
+      ]
+    : []),
 ];
 
 function ExperimentalFeatureItem(props: { feature: Feature }) {

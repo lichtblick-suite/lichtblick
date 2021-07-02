@@ -14,11 +14,17 @@ import {
   ContextualMenu,
 } from "@fluentui/react";
 import cx from "classnames";
-import { useCallback, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 
+import conflictTypeToString from "@foxglove/studio-base/components/LayoutBrowser/conflictTypeToString";
+import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import useConfirm from "@foxglove/studio-base/components/useConfirm";
+import { useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
+import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutStorageDebuggingContext";
 import { LayoutMetadata } from "@foxglove/studio-base/services/ILayoutStorage";
 import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
+
+import { debugBorder } from "./styles";
 
 const useStyles = makeStyles((theme) => ({
   layoutRow: {
@@ -51,23 +57,35 @@ const useStyles = makeStyles((theme) => ({
     overflow: "hidden",
     lineHeight: theme.spacing.l2, // avoid descenders being cut off
   },
+
+  pathSegment: {
+    color: theme.palette.neutralSecondary,
+  },
+  pathSeparator: {
+    color: theme.palette.neutralTertiary,
+    padding: `0 ${theme.spacing.s2}`,
+  },
 }));
 
 export default function LayoutRow({
   layout,
   selected,
+  onSave,
   onSelect,
   onRename,
   onDuplicate,
   onDelete,
+  onShare,
   onExport,
 }: {
   layout: LayoutMetadata;
   selected: boolean;
+  onSave: (item: LayoutMetadata) => void;
   onSelect: (item: LayoutMetadata) => void;
   onRename: (item: LayoutMetadata, newName: string) => void;
   onDuplicate: (item: LayoutMetadata) => void;
   onDelete: (item: LayoutMetadata) => void;
+  onShare: (item: LayoutMetadata) => void;
   onExport: (item: LayoutMetadata) => void;
 }): JSX.Element {
   const styles = useStyles();
@@ -75,6 +93,12 @@ export default function LayoutRow({
 
   const [editingName, setEditingName] = useState(false);
   const [nameFieldValue, setNameFieldValue] = useState("");
+
+  const layoutStorage = useLayoutStorage();
+
+  const saveAction = useCallback(() => {
+    onSave(layout);
+  }, [layout, onSave]);
 
   const renameAction = useCallback(() => {
     setEditingName(true);
@@ -91,6 +115,7 @@ export default function LayoutRow({
 
   const duplicateAction = useCallback(() => onDuplicate(layout), [layout, onDuplicate]);
 
+  const shareAction = useCallback(() => onShare(layout), [layout, onShare]);
   const exportAction = useCallback(() => onExport(layout), [layout, onExport]);
 
   const onSubmit = useCallback(
@@ -128,7 +153,27 @@ export default function LayoutRow({
     confirmStyle: "danger",
   });
 
-  const menuItems: IContextualMenuItem[] = [
+  const tooltipContent = useMemo(() => {
+    const conflictString = conflictTypeToString(layout.conflict);
+    if (conflictString == undefined) {
+      return layout.hasUnsyncedChanges ? "Changes not synced" : undefined;
+    }
+    return conflictString;
+  }, [layout.conflict, layout.hasUnsyncedChanges]);
+
+  const changesOrConflictsTooltip = useTooltip({ contents: tooltipContent });
+
+  const layoutDebug = useContext(LayoutStorageDebuggingContext);
+
+  const menuItems: (boolean | IContextualMenuItem)[] = [
+    layoutStorage.supportsSyncing && {
+      key: "save",
+      text: layout.hasUnsyncedChanges ? "Save changes" : "No unsaved changes",
+      iconProps: { iconName: "Upload" },
+      onClick: saveAction,
+      ["data-test"]: "save-layout",
+      disabled: !layout.hasUnsyncedChanges,
+    },
     {
       key: "rename",
       text: "Rename",
@@ -143,10 +188,17 @@ export default function LayoutRow({
       onClick: duplicateAction,
       ["data-test"]: "duplicate-layout",
     },
+    layoutStorage.supportsSharing &&
+      layout.permission === "creator_write" && {
+        key: "share",
+        text: "Share",
+        iconProps: { iconName: "Share" },
+        onClick: shareAction,
+      },
     {
       key: "export",
       text: "Export",
-      iconProps: { iconName: "Share" },
+      iconProps: { iconName: "DownloadDocument" },
       onClick: exportAction,
     },
     { key: "divider_1", itemType: ContextualMenuItemType.Divider },
@@ -161,6 +213,59 @@ export default function LayoutRow({
       ["data-test"]: "delete-layout",
     },
   ];
+
+  if (layoutDebug?.useFakeRemoteLayoutStorage === true) {
+    menuItems.push(
+      { key: "debug_divider", itemType: ContextualMenuItemType.Divider },
+      {
+        key: "debug_id",
+        text: layout.id,
+        disabled: true,
+        itemProps: {
+          styles: {
+            root: { ...debugBorder, borderRight: "none", borderTop: "none", borderBottom: "none" },
+          },
+        },
+      },
+      {
+        key: "debug_edit",
+        text: "Inject edit",
+        iconProps: { iconName: "TestBeakerSolid" },
+        onClick: () => void layoutDebug.injectEdit(layout.id),
+        itemProps: {
+          styles: {
+            root: { ...debugBorder, borderRight: "none", borderTop: "none", borderBottom: "none" },
+          },
+        },
+      },
+      {
+        key: "debug_rename",
+        text: "Inject rename",
+        iconProps: { iconName: "TestBeakerSolid" },
+        onClick: () => void layoutDebug.injectRename(layout.id),
+        itemProps: {
+          styles: {
+            root: { ...debugBorder, borderRight: "none", borderTop: "none", borderBottom: "none" },
+          },
+        },
+      },
+      {
+        key: "debug_delete",
+        text: "Inject delete",
+        iconProps: { iconName: "TestBeakerSolid" },
+        onClick: () => void layoutDebug.injectDelete(layout.id),
+        itemProps: {
+          styles: {
+            root: { ...debugBorder, borderRight: "none", borderTop: "none", borderBottom: "none" },
+          },
+        },
+      },
+    );
+  }
+
+  const filteredItems = menuItems.filter(
+    (item): item is IContextualMenuItem => typeof item === "object",
+  );
 
   const [contextMenuEvent, setContextMenuEvent] = useState<MouseEvent | undefined>();
 
@@ -184,10 +289,11 @@ export default function LayoutRow({
       {contextMenuEvent && (
         <ContextualMenu
           target={contextMenuEvent}
-          items={menuItems}
+          items={filteredItems}
           onDismiss={() => setContextMenuEvent(undefined)}
         />
       )}
+      {changesOrConflictsTooltip.tooltip}
       {confirmDelete.modal}
       <Stack.Item grow className={styles.layoutName} title={layout.name}>
         {editingName ? (
@@ -198,7 +304,17 @@ export default function LayoutRow({
             onKeyDown={onTextFieldKeyDown}
           />
         ) : (
-          layout.name
+          <>
+            {layout.path.map((item) => {
+              return (
+                <>
+                  <span className={styles.pathSegment}>{item}</span>
+                  <span className={styles.pathSeparator}>›</span>
+                </>
+              );
+            })}
+            {layout.name}
+          </>
         )}
       </Stack.Item>
 
@@ -222,12 +338,19 @@ export default function LayoutRow({
           ariaLabel="Layout actions"
           data={{ text: "x" }}
           data-test="layout-actions"
+          elementRef={changesOrConflictsTooltip.ref}
           iconProps={{
-            iconName: "More",
-            styles: { root: { "& span": { verticalAlign: "baseline" } } },
+            iconName:
+              layout.conflict != undefined ? "Error" : layout.hasUnsyncedChanges ? "Info" : "More",
+            styles: {
+              root: {
+                "& span": { verticalAlign: "baseline" },
+                color: layout.conflict != undefined ? theme.semanticColors.errorIcon : undefined,
+              },
+            },
           }}
           onRenderMenuIcon={() => ReactNull}
-          menuProps={{ items: menuItems }}
+          menuProps={{ items: filteredItems }}
         />
       )}
     </Stack>

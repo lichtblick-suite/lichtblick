@@ -26,6 +26,7 @@ declare global {
     | "Copy"
     | "DataManagementSettings"
     | "Delete"
+    | "DownloadDocument"
     | "Edit"
     | "Error"
     | "ErrorBadge"
@@ -42,6 +43,7 @@ declare global {
     | "Share"
     | "SingleColumnEdit"
     | "TestBeakerSolid"
+    | "Upload"
     | "Variable2"
     | "Warning"
     | never; // never has no effect here other than keeping the semicolon on a separate line for easier conflict resolution

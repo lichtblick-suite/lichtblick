@@ -8,8 +8,10 @@ import path from "path";
 
 import { AppSetting } from "@foxglove/studio-base/src/AppSetting";
 
+import { DATASTORES_DIR_NAME } from "../common/storage";
+
 function getTelemetrySettings(): [crashReportingEnabled: boolean, telemetryEnabled: boolean] {
-  const datastoreDir = path.join(app.getPath("userData"), "studio-datastores", "settings");
+  const datastoreDir = path.join(app.getPath("userData"), DATASTORES_DIR_NAME, "settings");
   const settingsPath = path.join(datastoreDir, "settings.json");
   let crashReportingEnabled = true;
   let telemetryEnabled = true;

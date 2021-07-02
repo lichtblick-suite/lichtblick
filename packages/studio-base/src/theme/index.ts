@@ -78,6 +78,7 @@ export default createTheme({
       styles: {
         main: {
           "-webkit-app-region": "no-drag",
+          minHeight: "unset",
         },
       } as Partial<IModalStyles>,
     },

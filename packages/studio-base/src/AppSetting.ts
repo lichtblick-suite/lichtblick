@@ -11,4 +11,5 @@ export enum AppSetting {
   UNLIMITED_MEMORY_CACHE = "experimental.unlimited-memory-cache",
   SHOW_DEBUG_PANELS = "showDebugPanels",
   EXTENSION_MARKETPLACE = "extensionMarketplace",
+  FAKE_REMOTE_LAYOUTS = "debug.useFakeRemoteLayouts",
 }

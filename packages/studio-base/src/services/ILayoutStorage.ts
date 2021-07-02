@@ -16,6 +16,12 @@ export type UserMetadata = {
   email: string;
 };
 
+export type ConflictType =
+  | "local-delete-remote-update"
+  | "local-update-remote-delete"
+  | "both-update"
+  | "name-collision";
+
 /** Metadata that describes a panel layout. */
 export type LayoutMetadata = {
   id: LayoutID;
@@ -25,12 +31,21 @@ export type LayoutMetadata = {
   createdAt: ISO8601Timestamp | undefined;
   updatedAt: ISO8601Timestamp | undefined;
   permission: "creator_write" | "org_read" | "org_write";
+  /**
+   * Indicates whether changes have been made to the user's copy of this layout that have yet to be
+   * saved. Save the changes by calling ILayoutStorage.syncLayout().
+   */
+  hasUnsyncedChanges: boolean;
+  conflict: ConflictType | undefined;
   data?: never;
 };
 
 export type Layout = Omit<LayoutMetadata, "data"> & { data: PanelsState };
 
 export interface ILayoutStorage {
+  addLayoutsChangedListener(listener: () => void): void;
+  removeLayoutsChangedListener(listener: () => void): void;
+
   getLayouts(): Promise<LayoutMetadata[]>;
 
   getLayout(id: LayoutID): Promise<Layout | undefined>;
@@ -48,6 +63,10 @@ export interface ILayoutStorage {
     data: PanelsState;
   }): Promise<void>;
 
+  readonly supportsSyncing: boolean;
+
+  syncLayout(id: LayoutID): Promise<ConflictType | undefined>;
+
   readonly supportsSharing: boolean;
 
   shareLayout(params: {
@@ -55,14 +74,6 @@ export interface ILayoutStorage {
     path: string[];
     name: string;
     permission: "org_read" | "org_write";
-  }): Promise<void>;
-
-  updateSharedLayout(params: {
-    sourceID: LayoutID;
-    path: string[];
-    name: string;
-    permission: "org_read" | "org_write";
-    targetID: LayoutID;
   }): Promise<void>;
 
   deleteLayout(params: { id: LayoutID }): Promise<void>;

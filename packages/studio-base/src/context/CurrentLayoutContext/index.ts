@@ -69,7 +69,6 @@ export interface ICurrentLayout {
     updatePanelConfigs: (panelType: string, updater: (config: PanelConfig) => PanelConfig) => void;
     createTabPanel: (payload: CreateTabPanelPayload) => void;
     changePanelLayout: (payload: ChangePanelLayoutPayload) => void;
-
     overwriteGlobalVariables: (payload: { [key: string]: unknown }) => void;
     setGlobalVariables: (payload: { [key: string]: unknown }) => void;
     setUserNodes: (payload: Partial<UserNodes>) => void;

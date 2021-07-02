@@ -66,7 +66,7 @@ export default class CurrentLayoutState implements ICurrentLayout {
     }
 
     this.undoRedo = new UndoRedo(this.layoutState, {
-      isEqual,
+      isEqual: (a, b) => a === b, // we use isEqual to gate changes in updateState()
       historySize: LAYOUT_HISTORY_SIZE,
       throttleMs: LAYOUT_HISTORY_THROTTLE_MS,
     });
@@ -188,9 +188,12 @@ export default class CurrentLayoutState implements ICurrentLayout {
   };
 
   private updateState(updater: (state: LayoutState) => LayoutState) {
-    this.layoutState = updater(this.layoutState);
-    for (const listener of [...this.layoutStateListeners]) {
-      listener(this.layoutState);
+    const newState = updater(this.layoutState);
+    if (!isEqual(this.layoutState, newState)) {
+      this.layoutState = newState;
+      for (const listener of [...this.layoutStateListeners]) {
+        listener(this.layoutState);
+      }
     }
   }
 

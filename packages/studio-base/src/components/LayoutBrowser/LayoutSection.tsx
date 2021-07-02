@@ -35,20 +35,24 @@ export default function LayoutSection({
   emptyText,
   items,
   selectedId,
+  onSave,
   onSelect,
   onRename,
   onDuplicate,
   onDelete,
+  onShare,
   onExport,
 }: {
   title: string | undefined;
   emptyText: string | undefined;
   items: readonly LayoutMetadata[] | undefined;
   selectedId?: string;
+  onSave: (item: LayoutMetadata) => void;
   onSelect: (item: LayoutMetadata) => void;
   onRename: (item: LayoutMetadata, newName: string) => void;
   onDuplicate: (item: LayoutMetadata) => void;
   onDelete: (item: LayoutMetadata) => void;
+  onShare: (item: LayoutMetadata) => void;
   onExport: (item: LayoutMetadata) => void;
 }): JSX.Element {
   const styles = useStyles();
@@ -69,9 +73,11 @@ export default function LayoutSection({
             key={layout.id}
             layout={layout}
             onSelect={onSelect}
+            onSave={onSave}
             onRename={onRename}
             onDuplicate={onDuplicate}
             onDelete={onDelete}
+            onShare={onShare}
             onExport={onExport}
           />
         ))}

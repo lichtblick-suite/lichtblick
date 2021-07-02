@@ -47,12 +47,15 @@ function mockThrow(name: string) {
 function makeMockLayoutStorage() {
   return {
     supportsSharing: false,
+    supportsSyncing: false,
+    addLayoutsChangedListener: jest.fn(/*noop*/),
+    removeLayoutsChangedListener: jest.fn(/*noop*/),
     getLayouts: jest.fn().mockImplementation(mockThrow("getLayouts")),
     getLayout: jest.fn().mockImplementation(mockThrow("getLayout")),
     saveNewLayout: jest.fn().mockImplementation(mockThrow("saveNewLayout")),
     updateLayout: jest.fn().mockImplementation(mockThrow("updateLayout")),
+    syncLayout: jest.fn().mockImplementation(mockThrow("syncLayout")),
     shareLayout: jest.fn().mockImplementation(mockThrow("shareLayout")),
-    updateSharedLayout: jest.fn().mockImplementation(mockThrow("updateSharedLayout")),
     deleteLayout: jest.fn().mockImplementation(mockThrow("deleteLayout")),
     renameLayout: jest.fn().mockImplementation(mockThrow("renameLayout")),
   };
@@ -309,5 +312,39 @@ describe("CurrentLayoutProvider", () => {
       { selectedLayout: { id: "TEST_ID", data: TEST_LAYOUT } },
       { selectedLayout: { id: "TEST_ID", data: newState } },
     ]);
+  });
+
+  it("unsets current layout when the current layout is deleted", async () => {
+    const layoutStorageListCalled = signal();
+    const mockLayoutStorage = makeMockLayoutStorage();
+    mockLayoutStorage.getLayout.mockImplementation(async () => {
+      return { id: "TEST_ID", path: undefined, name: "Test layout", data: TEST_LAYOUT };
+    });
+    mockLayoutStorage.getLayouts.mockImplementation(async () => {
+      layoutStorageListCalled.resolve();
+      return [];
+    });
+
+    const mockUserProfile = makeMockUserProfile();
+    mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: "example" });
+    mockUserProfile.setUserProfile.mockResolvedValue(undefined);
+
+    const { currentLayoutStates, childMounted } = renderTest({
+      mockLayoutStorage,
+      mockUserProfile,
+    });
+    await act(() => childMounted);
+    expect(currentLayoutStates).toEqual([{ selectedLayout: { id: "TEST_ID", data: TEST_LAYOUT } }]);
+
+    expect(mockLayoutStorage.addLayoutsChangedListener).toHaveBeenCalledTimes(1);
+    mockLayoutStorage.addLayoutsChangedListener.mock.calls[0][0]();
+
+    await act(() => layoutStorageListCalled);
+
+    expect(currentLayoutStates).toEqual([
+      { selectedLayout: { id: "TEST_ID", data: TEST_LAYOUT } },
+      { selectedLayout: undefined },
+    ]);
+    expect(mockUserProfile.setUserProfile.mock.calls).toEqual([[{ currentLayoutId: undefined }]]);
   });
 });

@@ -4,7 +4,7 @@
 import { isEqual } from "lodash";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useToasts } from "react-toast-notifications";
-import { useAsync, useThrottle } from "react-use";
+import { useAsync, useMountedState, useThrottle } from "react-use";
 
 import Logger from "@foxglove/log";
 import CurrentLayoutContext, {
@@ -52,6 +52,20 @@ function CurrentLayoutProviderWithInitialState({
   const [layoutState, setLayoutState] = useState(() =>
     stateInstance.actions.getCurrentLayoutState(),
   );
+
+  const isMounted = useMountedState();
+
+  // If the current layout is deleted, deselect it
+  useEffect(() => {
+    const listener = async () => {
+      const selectedId = stateInstance.actions.getCurrentLayoutState().selectedLayout?.id;
+      if (!(await layoutStorage.getLayouts()).some(({ id }) => id === selectedId) && isMounted()) {
+        stateInstance.actions.setSelectedLayout(undefined);
+      }
+    };
+    layoutStorage.addLayoutsChangedListener(listener);
+    return () => layoutStorage.removeLayoutsChangedListener(listener);
+  }, [isMounted, layoutStorage, stateInstance.actions]);
 
   const lastCurrentLayoutId = useRef(initialState.selectedLayout?.id);
   const previousSavedState = useRef<LayoutState | undefined>();

@@ -70,7 +70,7 @@ export function SidebarContent({
           </Stack>
         )}
       </Stack>
-      <Stack.Item>{children}</Stack.Item>
+      <Stack.Item grow>{children}</Stack.Item>
     </Stack>
   );
 }
