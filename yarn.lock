@@ -2234,7 +2234,7 @@ __metadata:
     "@storybook/react": "patch:@storybook/react@6.3.0#../../patches/storybook-react.patch"
     "@testing-library/dom": 8.0.0
     "@testing-library/react": 12.0.0
-    "@testing-library/react-hooks": 7.0.0
+    "@testing-library/react-hooks": 7.0.1
     "@types/amplitude-js": 8.0.0
     "@types/argparse": 2.0.8
     "@types/circular-dependency-plugin": 5.0.2
@@ -4955,9 +4955,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@testing-library/react-hooks@npm:7.0.0":
-  version: 7.0.0
-  resolution: "@testing-library/react-hooks@npm:7.0.0"
+"@testing-library/react-hooks@npm:7.0.1":
+  version: 7.0.1
+  resolution: "@testing-library/react-hooks@npm:7.0.1"
   dependencies:
     "@babel/runtime": ^7.12.5
     "@types/react": ">=16.9.0"
@@ -4973,7 +4973,7 @@ __metadata:
       optional: true
     react-test-renderer:
       optional: true
-  checksum: 3c5e91459b2b939276bfa383cc73f40a2e5abec781d33b13db7dc1efd4796e7341ecbac638526623e8868ba23e4266b88bc537298931066797b11b3c0053e3d2
+  checksum: eecb59df11ae8e9d715e3b1e13a199995d363d879a9177497a5609d5ad41f1c112cb708d24b4f2a6c6ce7d81edefae34e8e8bbd5cde2a1d0abcc0f539df904de
   languageName: node
   linkType: hard
 
