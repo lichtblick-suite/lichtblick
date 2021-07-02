@@ -71,7 +71,7 @@ export class FixtureExample extends React.Component<FixtureExampleProps, Fixture
       this.updateState(data);
     }
     if (loadData) {
-      loadData.then((loadedData) => {
+      void loadData.then((loadedData) => {
         this.updateState(loadedData);
       });
     }

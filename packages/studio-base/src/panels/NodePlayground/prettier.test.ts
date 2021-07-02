@@ -35,6 +35,6 @@ describe("getPrettifiedCode", () => {
         return;
       }
     `;
-    expect(getPrettifiedCode(unformattedInvalidCode)).rejects.not.toBeFalsy();
+    await expect(getPrettifiedCode(unformattedInvalidCode)).rejects.not.toBeFalsy();
   });
 });

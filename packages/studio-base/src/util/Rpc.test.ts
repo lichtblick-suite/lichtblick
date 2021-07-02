@@ -163,16 +163,16 @@ describe("Rpc", () => {
     expect(result).toEqual([1, 2, 3]);
   });
 
-  it("throws when registering a receiver twice", async () => {
+  it("throws when registering a receiver twice", () => {
     const rpc = new Rpc(createLinkedChannels().local);
     rpc.receive("foo", () => {
       // no-op
     });
-    expect(async () =>
+    expect(() =>
       rpc.receive("foo", () => {
         // no-op
       }),
-    ).rejects.toThrow();
+    ).toThrow();
   });
 
   // Regression test for memory leak.

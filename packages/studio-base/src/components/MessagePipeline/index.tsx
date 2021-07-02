@@ -299,7 +299,7 @@ export function MessagePipelineProvider({
 
   React.useEffect(() => {
     let skipUpdate = false;
-    (async () => {
+    void (async () => {
       // Wait for the current frame to finish rendering if needed
       await pauseFrameForPromises(playerTickState.current.promisesToWaitFor ?? []);
 

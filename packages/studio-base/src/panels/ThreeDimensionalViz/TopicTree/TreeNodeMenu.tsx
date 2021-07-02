@@ -156,7 +156,7 @@ export default function TreeNodeMenu({
         {topicName.length > 0 && (
           <Item
             onClick={() => {
-              clipboard.copy(topicName);
+              void clipboard.copy(topicName);
               setIsOpen(false);
             }}
           >

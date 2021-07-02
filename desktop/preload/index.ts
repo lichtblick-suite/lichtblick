@@ -46,7 +46,9 @@ type IpcListener = (ev: unknown, ...args: unknown[]) => void;
 const menuClickListeners = new Map<string, IpcListener>();
 
 // Initialize the RPC channel for electron-socket asynchronously
-PreloaderSockets.Create();
+PreloaderSockets.Create().catch((err) => {
+  log.error("Failed to initialize preloader sockets", err);
+});
 
 window.addEventListener(
   "DOMContentLoaded",
@@ -60,7 +62,7 @@ window.addEventListener(
     document.body.appendChild(input);
 
     // let main know we are ready to accept open-file requests
-    ipcRenderer.invoke("load-pending-files");
+    void ipcRenderer.invoke("load-pending-files");
   },
   { once: true },
 );

@@ -83,37 +83,41 @@ export default class FetchReader extends Readable {
   }
 
   override _read(): void {
-    this._getReader().then((reader) => {
-      // if no reader is returned then we've encountered an error
-      if (!reader) {
-        return;
-      }
-      reader
-        .read()
-        .then(({ done, value }) => {
-          // no more to read, signal stream is finished
-          if (done) {
-            // Null has a special meaning for streams
-            // eslint-disable-next-line no-restricted-syntax
-            this.push(null);
-            return;
-          }
-          // TypeScript doesn't know that value is only undefined when value done is true
-          if (value != undefined) {
-            this.push(Buffer.from(value.buffer));
-          }
-        })
-        .catch((err) => {
-          // canceling the xhr request causes the promise to reject
-          if (this._aborted) {
-            // Null has a special meaning for streams
-            // eslint-disable-next-line no-restricted-syntax
-            this.push(null);
-            return;
-          }
-          this.emit("error", err);
-        });
-    });
+    this._getReader()
+      .then((reader) => {
+        // if no reader is returned then we've encountered an error
+        if (!reader) {
+          return;
+        }
+        reader
+          .read()
+          .then(({ done, value }) => {
+            // no more to read, signal stream is finished
+            if (done) {
+              // Null has a special meaning for streams
+              // eslint-disable-next-line no-restricted-syntax
+              this.push(null);
+              return;
+            }
+            // TypeScript doesn't know that value is only undefined when value done is true
+            if (value != undefined) {
+              this.push(Buffer.from(value.buffer));
+            }
+          })
+          .catch((err) => {
+            // canceling the xhr request causes the promise to reject
+            if (this._aborted) {
+              // Null has a special meaning for streams
+              // eslint-disable-next-line no-restricted-syntax
+              this.push(null);
+              return;
+            }
+            this.emit("error", err);
+          });
+      })
+      .catch((err) => {
+        this.emit("error", err);
+      });
   }
 
   // aborts the xhr request if user calls stream.destroy()

@@ -126,7 +126,7 @@ function SourceInfo() {
               <SCell
                 title={`Click to copy topic name ${topic.name} to clipboard.`}
                 onClick={() => {
-                  clipboard.copy(topic.name);
+                  void clipboard.copy(topic.name);
                 }}
               >
                 {topic.name}
@@ -134,7 +134,7 @@ function SourceInfo() {
               <SCell
                 title={`Click to copy topic type ${topic.datatype} to clipboard.`}
                 onClick={() => {
-                  clipboard.copy(topic.datatype);
+                  void clipboard.copy(topic.datatype);
                 }}
               >
                 {topic.datatype}

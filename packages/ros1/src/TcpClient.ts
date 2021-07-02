@@ -51,7 +51,7 @@ export class TcpClient extends EventEmitter<TcpClientEvents> implements Client {
     this._log = log;
     this._transformer = new RosTcpMessageStream();
     this._transportInfo = `TCPROS connection to [${address}:${port}]`;
-    this._getTransportInfo().then((info) => (this._transportInfo = info));
+    void this._getTransportInfo().then((info) => (this._transportInfo = info));
 
     socket.on("close", this._handleClose);
     socket.on("error", this._handleError);
@@ -158,7 +158,7 @@ export class TcpClient extends EventEmitter<TcpClientEvents> implements Client {
 
     this._receivedHeader = true;
 
-    this._socket.setNoDelay(tcpNoDelay);
+    void this._socket.setNoDelay(tcpNoDelay);
 
     if (topic == undefined || dataType == undefined || destinationCallerId == undefined) {
       this._log?.warn?.(
@@ -199,7 +199,7 @@ export class TcpClient extends EventEmitter<TcpClientEvents> implements Client {
     }
 
     // Write the response header
-    this._writeHeader(
+    void this._writeHeader(
       new Map<string, string>([
         ["callerid", this._nodeName],
         ["latching", pub.latching ? "1" : "0"],
@@ -213,7 +213,7 @@ export class TcpClient extends EventEmitter<TcpClientEvents> implements Client {
     // Immediately send the last published message if latching is enabled
     const latched = pub.latchedMessage(this.transportType());
     if (latched != undefined) {
-      this.write(latched);
+      void this.write(latched);
     }
 
     this.emit("subscribe", topic, destinationCallerId);

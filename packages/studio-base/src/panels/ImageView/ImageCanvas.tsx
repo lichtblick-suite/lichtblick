@@ -134,7 +134,7 @@ export default class ImageCanvas extends React.Component<Props, State> {
       if (this._canvasRenderer.type === "rpc") {
         const worker = this._getRpcWorker();
         const transferableCanvas = canvas.transferControlToOffscreen();
-        worker.send<void>("initialize", { id: this._id, canvas: transferableCanvas }, [
+        void worker.send<void>("initialize", { id: this._id, canvas: transferableCanvas }, [
           transferableCanvas,
         ]);
       }

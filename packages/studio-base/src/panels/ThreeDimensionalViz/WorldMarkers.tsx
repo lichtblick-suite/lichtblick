@@ -227,7 +227,7 @@ export default function WorldMarkers({
   });
   useEffect(() => {
     let mounted = true;
-    glTextAtlasPromise.then((atlas) => {
+    void glTextAtlasPromise.then((atlas) => {
       if (mounted) {
         setGlTextAtlasInfo({ status: "LOADED", glTextAtlas: atlas });
       }

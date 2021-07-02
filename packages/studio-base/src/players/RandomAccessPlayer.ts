@@ -160,7 +160,7 @@ export default class RandomAccessPlayer implements Player {
     });
     this._isPlaying = false;
     if (!this._initializing) {
-      this._provider.close();
+      void this._provider.close();
     }
     this._emitState();
   }
@@ -608,7 +608,7 @@ export default class RandomAccessPlayer implements Player {
     this._isPlaying = false;
     this._closed = true;
     if (!this._initializing && !this._hasError) {
-      this._provider.close();
+      void this._provider.close();
     }
     this._metricsCollector.close();
   }

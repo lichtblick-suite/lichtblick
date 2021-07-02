@@ -140,7 +140,7 @@ export function CanZoomAndUpdate(): JSX.Element {
     return () => {
       // first render of the chart triggers scrolling
       if (callCountRef.current === 0) {
-        doScroll();
+        void doScroll();
       }
 
       ++callCountRef.current;

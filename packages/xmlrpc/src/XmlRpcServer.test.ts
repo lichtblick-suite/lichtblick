@@ -20,7 +20,7 @@ describe("XmlRpcServer", () => {
       expect(args).toEqual(["Param A", "Param B"]);
       return Promise.resolve([1, "test", undefined]);
     });
-    server.listen().then(() => {
+    void server.listen().then(() => {
       const port = parseInt(new URL(server.server.url() as string).port);
       expect(port).not.toBeNaN();
 

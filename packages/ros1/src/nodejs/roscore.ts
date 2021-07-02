@@ -19,4 +19,4 @@ async function main() {
   console.log(`ROS_MASTER_URI=http://${hostname}:${port}/`);
 }
 
-main();
+void main();

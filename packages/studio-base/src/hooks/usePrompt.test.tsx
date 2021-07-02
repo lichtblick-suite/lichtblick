@@ -30,7 +30,7 @@ describe("usePrompt", () => {
     const { result, unmount } = renderHook(() => usePrompt(), { wrapper: ModalHost });
 
     act(() => {
-      result.current({
+      void result.current({
         title: "test-title",
         placeholder: "test-placeholder",
       });

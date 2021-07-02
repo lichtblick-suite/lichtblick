@@ -149,16 +149,20 @@ export default class CachedFilelike implements Filelike {
       throw new Error(`Requested more data than cache size: ${length} > ${this._cacheSizeInBytes}`);
     }
 
-    this.open().then(() => {
-      const size = this.size();
-      if (range.end > size) {
-        callback(new Error(`CachedFilelike#read past size`));
-        return;
-      }
+    this.open()
+      .then(() => {
+        const size = this.size();
+        if (range.end > size) {
+          callback(new Error(`CachedFilelike#read past size`));
+          return;
+        }
 
-      this._readRequests.push({ range, callback, requestTime: Date.now() });
-      this._updateState();
-    });
+        this._readRequests.push({ range, callback, requestTime: Date.now() });
+        this._updateState();
+      })
+      .catch((err) => {
+        callback(err);
+      });
   }
 
   // Gets called any time our connection or read requests change.

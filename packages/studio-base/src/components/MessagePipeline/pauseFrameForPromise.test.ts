@@ -31,7 +31,7 @@ describe("pauseFrameForPromise", () => {
   it("always reports an error in automated run mode", async () => {
     (inAutomatedRunMode as any).mockImplementation(() => true);
     const promise = signal();
-    pauseFrameForPromises([{ promise, name: "dummy" }]);
+    void pauseFrameForPromises([{ promise, name: "dummy" }]);
     await delay(MAX_PROMISE_TIMEOUT_TIME_MS + 20);
 
     expect(sendNotificationAny.mock.calls[0][3]).toEqual("error");

@@ -42,7 +42,7 @@ function Story({
 
   useEffect(() => {
     if (clickKey != undefined) {
-      (async () => {
+      void (async () => {
         // Give the ResizeGroup some time to show the overflow button, to avoid flaky screenshot tests
         for (let i = 0; i < 10; i++) {
           await new Promise((resolve) => setTimeout(resolve, 10));

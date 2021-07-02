@@ -112,7 +112,7 @@ function TimezoneSettings(): React.ReactElement {
       selectedKey={selectedItem.key}
       onChange={(_event, option) => {
         if (option) {
-          setTimezone(option.data);
+          void setTimezone(option.data);
         }
       }}
       onPendingValueChanged={onPendingValueChanged}
@@ -125,7 +125,7 @@ function TimezoneSettings(): React.ReactElement {
 }
 
 function MessageFramerate(): React.ReactElement {
-  const [messageRate, setMesageRate] = useAppConfigurationValue<number>(AppSetting.MESSAGE_RATE);
+  const [messageRate, setMessageRate] = useAppConfigurationValue<number>(AppSetting.MESSAGE_RATE);
   const entries = useMemo(
     () => MESSAGE_RATES.map((rate) => ({ key: rate, text: `${rate}`, data: rate })),
     [],
@@ -140,7 +140,7 @@ function MessageFramerate(): React.ReactElement {
       selectedKey={messageRate ?? 60}
       onChange={(_event, option) => {
         if (option) {
-          setMesageRate(option.data);
+          void setMessageRate(option.data);
         }
       }}
       calloutProps={{

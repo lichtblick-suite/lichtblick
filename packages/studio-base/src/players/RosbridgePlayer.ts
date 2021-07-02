@@ -118,7 +118,7 @@ export default class RosbridgePlayer implements Player {
       this._rosClient = rosClient;
 
       this._setupPublishers();
-      this._requestTopics();
+      void this._requestTopics();
     });
 
     rosClient.on("error", (err) => {

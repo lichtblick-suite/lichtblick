@@ -103,7 +103,7 @@ export class TcpConnection extends EventEmitter<TcpConnectionEvents> implements 
   private async _retryConnection(): Promise<void> {
     if (!this._shutdown) {
       await backoff(++this.retries);
-      this.connect();
+      void this.connect();
     }
   }
 
@@ -133,7 +133,7 @@ export class TcpConnection extends EventEmitter<TcpConnectionEvents> implements 
     this._shutdown = true;
     this._connected = false;
     this.removeAllListeners();
-    this._socket.close();
+    void this._socket.close();
   }
 
   async writeHeader(): Promise<void> {
@@ -144,7 +144,7 @@ export class TcpConnection extends EventEmitter<TcpConnectionEvents> implements 
     const lenBuffer = new ArrayBuffer(4);
     const view = new DataView(lenBuffer);
     view.setUint32(0, data.byteLength, true);
-    this._socket.write(new Uint8Array(lenBuffer));
+    void this._socket.write(new Uint8Array(lenBuffer));
 
     // Write the serialized header payload
     return this._socket.write(data);
@@ -182,14 +182,14 @@ export class TcpConnection extends EventEmitter<TcpConnectionEvents> implements 
     this._transportInfo = await this._getTransportInfo();
     // Write the initial request header. This prompts the publisher to respond
     // with its own header then start streaming messages
-    this.writeHeader();
+    void this.writeHeader();
   };
 
   private _handleClose = (): void => {
     this._connected = false;
     if (!this._shutdown) {
       this._log?.warn?.(`${this.toString()} closed unexpectedly. reconnecting`);
-      this._retryConnection();
+      void this._retryConnection();
     }
   };
 

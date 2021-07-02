@@ -155,11 +155,10 @@ export default class Rpc {
   // register a receiver for a given message on a topic
   // only one receiver can be registered per topic and currently
   // 'deregistering' a receiver is not supported since this is not common
-  async receive<T, TOut>(topic: string, handler: (arg0: T) => TOut): Promise<void> {
+  receive<T, TOut>(topic: string, handler: (arg0: T) => TOut): void {
     if (this._receivers.has(topic)) {
       throw new Error(`Receiver already registered for topic: ${topic}`);
     }
     this._receivers.set(topic, handler);
-    return Promise.resolve();
   }
 }

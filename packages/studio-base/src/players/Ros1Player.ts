@@ -97,7 +97,7 @@ export default class Ros1Player implements Player {
     this._hostname = hostname;
     this._start = fromMillis(Date.now());
     this._metricsCollector.playerConstructed();
-    this._open();
+    void this._open();
   }
 
   private _open = async (): Promise<void> => {
@@ -117,7 +117,7 @@ export default class Ros1Player implements Player {
       return net.createSocket(options.host, options.port);
     };
     const tcpServer = await net.createServer();
-    tcpServer.listen(undefined, hostname, 10);
+    void tcpServer.listen(undefined, hostname, 10);
 
     if (this._rosNode == undefined) {
       const rosNode = new RosNode({

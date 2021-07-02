@@ -97,7 +97,7 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
   // but using that causes the app to freeze when a new window is opened.
   browserWindow.webContents.on("new-window", (event, url) => {
     event.preventDefault();
-    shell.openExternal(url);
+    void shell.openExternal(url);
   });
 
   browserWindow.webContents.on("will-navigate", (event, reqUrl) => {
@@ -108,7 +108,7 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
     const isExternal = targetHost !== currentHost;
     if (isExternal) {
       event.preventDefault();
-      shell.openExternal(reqUrl);
+      void shell.openExternal(reqUrl);
     }
   });
 
@@ -263,7 +263,7 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
   });
 
   const showAboutDialog = () => {
-    dialog.showMessageBox(browserWindow, {
+    void dialog.showMessageBox(browserWindow, {
       type: "info",
       title: `About ${pkgInfo.productName}`,
       message: pkgInfo.productName,
@@ -363,9 +363,14 @@ class StudioWindow {
   load(): void {
     // load after setting windowsById so any ipc handlers with id lookup work
     log.info(`window.loadURL(${rendererPath})`);
-    this._window.loadURL(rendererPath).then(() => {
-      log.info("window URL loaded");
-    });
+    this._window
+      .loadURL(rendererPath)
+      .then(() => {
+        log.info("window URL loaded");
+      })
+      .catch((err) => {
+        log.error("loadURL error", err);
+      });
   }
 
   addInputSource(name: string): void {

@@ -50,10 +50,14 @@ export class Analytics {
 
     this._crashReporting = !(options.crashReportingOptOut ?? false);
     if (this._crashReporting) {
-      this.getDeviceId().then((deviceId) => {
-        const id = this.getUserId();
-        setSentryUser({ id, deviceId });
-      });
+      this.getDeviceId()
+        .then((deviceId) => {
+          const id = this.getUserId();
+          setSentryUser({ id, deviceId });
+        })
+        .catch((err) => {
+          log.error("getDeviceId error:", err);
+        });
     } else {
       log.info("Crash reporting is disabled");
     }
@@ -96,6 +100,7 @@ export class Analytics {
     return (await OsContextSingleton?.getMachineId()) ?? UUID_ZERO;
   }
 
+  logEvent(event: AppEvent, data?: { [key: string]: unknown }): void;
   async logEvent(event: AppEvent, data?: { [key: string]: unknown }): Promise<void> {
     const amp = await this._amplitude;
     if (amp != undefined) {

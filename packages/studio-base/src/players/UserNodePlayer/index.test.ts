@@ -231,13 +231,13 @@ describe("UserNodePlayer", () => {
         setUserNodeDiagnostics: mockSetNodeDiagnostics,
       });
 
-      userNodePlayer.setUserNodes({
+      void userNodePlayer.setUserNodes({
         nodeId: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
       });
 
       const [done] = setListenerHelper(userNodePlayer);
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: [],
@@ -263,7 +263,7 @@ describe("UserNodePlayer", () => {
         setUserNodeDiagnostics: mockSetNodeDiagnostics,
       });
 
-      userNodePlayer.setUserNodes({
+      void userNodePlayer.setUserNodes({
         nodeId: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
       });
 
@@ -278,7 +278,7 @@ describe("UserNodePlayer", () => {
         datatypes: { foo: { fields: [] } },
       };
 
-      fakePlayer.emit({ activeData });
+      void fakePlayer.emit({ activeData });
       const { topics: firstTopics, datatypes: firstDatatypes }: any = await done1;
       expect(firstTopics).toEqual([
         { name: "/np_input", datatype: "/np_input_datatype" },
@@ -296,13 +296,13 @@ describe("UserNodePlayer", () => {
       });
 
       // Seek should keep topics memoized.
-      fakePlayer.emit({ activeData: { ...activeData, lastSeekTime: 123 } });
+      void fakePlayer.emit({ activeData: { ...activeData, lastSeekTime: 123 } });
       const { topics: secondTopics, datatypes: secondDatatypes }: any = await done2;
       expect(secondTopics).toBe(firstTopics);
       expect(secondDatatypes).toBe(firstDatatypes);
 
       // Changing topics/datatypes should not memoize.
-      fakePlayer.emit({ activeData: { ...activeData, topics: [], datatypes: {} } });
+      void fakePlayer.emit({ activeData: { ...activeData, topics: [], datatypes: {} } });
       const { topics: thirdTopics, datatypes: thirdDatatypes }: any = await done3;
       expect(thirdTopics).not.toBe(firstTopics);
       expect(thirdDatatypes).not.toBe(firstDatatypes);
@@ -318,7 +318,7 @@ describe("UserNodePlayer", () => {
       });
 
       userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
-      userNodePlayer.setUserNodes({
+      void userNodePlayer.setUserNodes({
         nodeId: {
           name: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
           sourceCode: `${nodeUserCode}\nlog("LOG VALUE HERE");`,
@@ -329,7 +329,7 @@ describe("UserNodePlayer", () => {
 
       const [done, nextDone] = setListenerHelper(userNodePlayer, 2);
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: messagesArray,
@@ -342,7 +342,7 @@ describe("UserNodePlayer", () => {
 
       const { messages }: any = await done;
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: messagesArray,
@@ -365,7 +365,7 @@ describe("UserNodePlayer", () => {
 
       const [done] = setListenerHelper(userNodePlayer);
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: [],
@@ -377,7 +377,9 @@ describe("UserNodePlayer", () => {
       });
 
       const { topicNames }: any = await done;
-      userNodePlayer.setUserNodes({ nodeId: { name: "someNodeName", sourceCode: nodeUserCode } });
+      void userNodePlayer.setUserNodes({
+        nodeId: { name: "someNodeName", sourceCode: nodeUserCode },
+      });
       userNodePlayer.setSubscriptions(topicNames.map((topic: any) => ({ topic })));
       expect(fakePlayer.subscriptions).toEqual([{ topic: "/np_input" }]);
     });
@@ -388,11 +390,11 @@ describe("UserNodePlayer", () => {
 
       const [done] = setListenerHelper(userNodePlayer);
 
-      userNodePlayer.setUserNodes({
+      void userNodePlayer.setUserNodes({
         [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
       });
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: [upstreamFirst],
@@ -419,7 +421,7 @@ describe("UserNodePlayer", () => {
         [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
       });
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: [upstreamFirst],
@@ -458,7 +460,7 @@ describe("UserNodePlayer", () => {
         [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
       });
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: [upstreamFirst],
@@ -493,7 +495,7 @@ describe("UserNodePlayer", () => {
         },
       });
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: [upstreamFirst],
@@ -505,7 +507,7 @@ describe("UserNodePlayer", () => {
       });
       await done1;
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: [upstreamSecond],
@@ -547,7 +549,7 @@ describe("UserNodePlayer", () => {
         },
       });
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: [upstreamFirst],
@@ -594,7 +596,7 @@ describe("UserNodePlayer", () => {
         [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: unionTypeReturn },
       });
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: [upstreamFirst],
@@ -608,7 +610,7 @@ describe("UserNodePlayer", () => {
       const result: any = await done;
       expect(result.messages).toEqual([upstreamFirst]);
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: [upstreamSecond],
@@ -639,7 +641,7 @@ describe("UserNodePlayer", () => {
       });
       const [done] = setListenerHelper(userNodePlayer);
 
-      userNodePlayer.setUserNodes({
+      void userNodePlayer.setUserNodes({
         [`${DEFAULT_STUDIO_NODE_PREFIX}1`]: {
           name: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
           sourceCode: nodeUserCode,
@@ -651,7 +653,7 @@ describe("UserNodePlayer", () => {
       });
       userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: [upstreamFirst],
@@ -686,7 +688,7 @@ describe("UserNodePlayer", () => {
 
       const [done] = setListenerHelper(userNodePlayer);
 
-      userNodePlayer.setUserNodes({
+      void userNodePlayer.setUserNodes({
         [`${DEFAULT_STUDIO_NODE_PREFIX}1`]: {
           name: `${DEFAULT_STUDIO_NODE_PREFIX}1`,
           sourceCode: nodeUserCode,
@@ -697,7 +699,7 @@ describe("UserNodePlayer", () => {
         `${DEFAULT_STUDIO_NODE_PREFIX}1`,
         `${DEFAULT_STUDIO_NODE_PREFIX}2`,
       );
-      userNodePlayer.setUserNodes({
+      void userNodePlayer.setUserNodes({
         [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
         [`${nodeId}2`]: {
           name: `${DEFAULT_STUDIO_NODE_PREFIX}2`,
@@ -710,7 +712,7 @@ describe("UserNodePlayer", () => {
         { topic: `${DEFAULT_STUDIO_NODE_PREFIX}2` },
       ]);
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: [upstreamFirst],
@@ -752,7 +754,7 @@ describe("UserNodePlayer", () => {
       const fakePlayer = new FakePlayer();
       const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
 
-      userNodePlayer.setUserNodes({
+      void userNodePlayer.setUserNodes({
         [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode },
       });
 
@@ -760,7 +762,7 @@ describe("UserNodePlayer", () => {
 
       const [firstDone, secondDone] = setListenerHelper(userNodePlayer, 2);
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: [upstreamFirst],
@@ -773,7 +775,7 @@ describe("UserNodePlayer", () => {
 
       await firstDone;
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: [upstreamSecond],
@@ -880,13 +882,13 @@ describe("UserNodePlayer", () => {
       });
 
       userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
-      userNodePlayer.setUserNodes({
+      void userNodePlayer.setUserNodes({
         nodeId: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: code },
       });
 
       const [done] = setListenerHelper(userNodePlayer);
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: [upstreamFirst],
@@ -917,13 +919,13 @@ describe("UserNodePlayer", () => {
       const fakePlayer = new FakePlayer();
       const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
 
-      userNodePlayer.setUserNodes({
+      void userNodePlayer.setUserNodes({
         [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: nodeUserCode },
       });
 
       const [firstDone, secondDone] = setListenerHelper(userNodePlayer, 2);
 
-      fakePlayer.emit({
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: [upstreamFirst],
@@ -937,8 +939,8 @@ describe("UserNodePlayer", () => {
       const { topicNames: firstTopicNames }: any = await firstDone;
       expect(firstTopicNames).toEqual(["/np_input", `${DEFAULT_STUDIO_NODE_PREFIX}1`]);
 
-      userNodePlayer.setUserNodes({});
-      fakePlayer.emit({
+      void userNodePlayer.setUserNodes({});
+      void fakePlayer.emit({
         activeData: {
           ...basicPlayerState,
           messages: [upstreamFirst],
@@ -964,12 +966,12 @@ describe("UserNodePlayer", () => {
         setUserNodeDiagnostics: mockSetNodeDiagnostics,
       });
 
-      userNodePlayer.setUserNodes({
+      void userNodePlayer.setUserNodes({
         nodeId: { name: `${DEFAULT_STUDIO_NODE_PREFIX}1`, sourceCode: code },
       });
 
       const [done] = setListenerHelper(userNodePlayer);
-      fakePlayer.emit({ activeData: basicPlayerState });
+      void fakePlayer.emit({ activeData: basicPlayerState });
       await done;
       expect(mockSetNodeDiagnostics).toHaveBeenLastCalledWith(nodeId, [
         {
@@ -1029,11 +1031,11 @@ describe("UserNodePlayer", () => {
         const [done] = setListenerHelper(userNodePlayer);
 
         userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
-        userNodePlayer.setUserNodes({
+        void userNodePlayer.setUserNodes({
           [nodeId]: { name: `${DEFAULT_STUDIO_NODE_PREFIX}nodeName`, sourceCode: code },
         });
 
-        fakePlayer.emit({
+        void fakePlayer.emit({
           activeData: {
             ...basicPlayerState,
             messages: [upstreamFirst],
@@ -1077,7 +1079,7 @@ describe("UserNodePlayer", () => {
         });
         const [done] = setListenerHelper(userNodePlayer);
 
-        fakePlayer.emit({
+        void fakePlayer.emit({
           activeData: {
             ...basicPlayerState,
             messages: [upstreamFirst],
@@ -1089,7 +1091,7 @@ describe("UserNodePlayer", () => {
         });
 
         userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
-        userNodePlayer.setUserNodes({ nodeId: { name: "nodeName", sourceCode: code } });
+        void userNodePlayer.setUserNodes({ nodeId: { name: "nodeName", sourceCode: code } });
 
         const { topicNames }: any = await done;
         expect(mockAddNodeLogs.mock.calls).toEqual([]);
@@ -1113,7 +1115,7 @@ describe("UserNodePlayer", () => {
         const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
         const firstName = `${DEFAULT_STUDIO_NODE_PREFIX}innerState`;
 
-        userNodePlayer.setUserNodes({
+        void userNodePlayer.setUserNodes({
           [nodeId]: { name: firstName, sourceCode },
         });
         userNodePlayer.setSubscriptions([{ topic: firstName }]);
@@ -1122,7 +1124,7 @@ describe("UserNodePlayer", () => {
         const secondName = `${DEFAULT_STUDIO_NODE_PREFIX}state`;
         const secondSourceCode = sourceCode.replace(/innerState/g, "state");
 
-        userNodePlayer.setUserNodes({
+        void userNodePlayer.setUserNodes({
           [nodeId]: {
             name: secondName,
             sourceCode: secondSourceCode,
@@ -1132,7 +1134,7 @@ describe("UserNodePlayer", () => {
 
         const [done] = setListenerHelper(userNodePlayer);
 
-        fakePlayer.emit({
+        void fakePlayer.emit({
           activeData: {
             ...basicPlayerState,
             messages: [upstreamFirst],
@@ -1167,14 +1169,14 @@ describe("UserNodePlayer", () => {
         const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
         const firstName = `${DEFAULT_STUDIO_NODE_PREFIX}state`;
 
-        userNodePlayer.setUserNodes({
+        void userNodePlayer.setUserNodes({
           [nodeId]: { name: firstName, sourceCode },
         });
         userNodePlayer.setSubscriptions([{ topic: firstName }]);
 
         const [done] = setListenerHelper(userNodePlayer);
 
-        fakePlayer.emit({
+        void fakePlayer.emit({
           activeData: {
             ...basicPlayerState,
             messages: [upstreamFirst],
@@ -1216,7 +1218,7 @@ describe("UserNodePlayer", () => {
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
           datatypes: { foo: { fields: [] } },
         };
-        fakePlayer.emit({ activeData });
+        void fakePlayer.emit({ activeData });
 
         const { messages }: any = await done;
         expect(messages).toEqual([
@@ -1229,7 +1231,7 @@ describe("UserNodePlayer", () => {
         ]);
 
         userNodePlayer.setGlobalVariables({ globalValue: "bbb" });
-        fakePlayer.emit({ activeData });
+        void fakePlayer.emit({ activeData });
 
         const { messages: messages2 }: any = await done2;
         expect(messages2).toEqual([

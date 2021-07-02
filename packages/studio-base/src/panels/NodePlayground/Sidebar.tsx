@@ -191,22 +191,24 @@ const Sidebar = ({
       import(
         /* webpackChunkName: "monaco-api" */
         "monaco-editor/esm/vs/editor/editor.api"
-      ).then((monacoApi) => {
-        const monacoFilePath = monacoApi.Uri.parse(`file://${filePath}`);
-        const requestedModel = monacoApi.editor.getModel(monacoFilePath);
-        if (!requestedModel) {
-          return;
-        }
-        setScriptOverride(
-          {
-            filePath: requestedModel.uri.path,
-            code: requestedModel.getValue(),
-            readOnly: true,
-            selection: undefined,
-          },
-          2,
-        );
-      });
+      )
+        .then((monacoApi) => {
+          const monacoFilePath = monacoApi.Uri.parse(`file://${filePath}`);
+          const requestedModel = monacoApi.editor.getModel(monacoFilePath);
+          if (!requestedModel) {
+            return;
+          }
+          setScriptOverride(
+            {
+              filePath: requestedModel.uri.path,
+              code: requestedModel.getValue(),
+              readOnly: true,
+              selection: undefined,
+            },
+            2,
+          );
+        })
+        .catch(console.error);
     },
     [setScriptOverride],
   );

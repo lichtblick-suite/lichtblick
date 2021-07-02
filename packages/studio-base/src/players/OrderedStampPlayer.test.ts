@@ -303,7 +303,7 @@ describe("OrderedStampPlayer", () => {
     const upstreamMessages = [makeMessage(8.9, 9.5)];
     class ModifiedFakePlayer extends FakePlayer {
       override seekPlayback = () => {
-        this.emit({ activeData: { ...getState(), currentTime, messages: upstreamMessages } });
+        void this.emit({ activeData: { ...getState(), currentTime, messages: upstreamMessages } });
       };
     }
     const fakePlayer = new ModifiedFakePlayer();

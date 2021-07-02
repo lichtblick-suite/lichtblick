@@ -472,7 +472,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
     }
 
     // Then see if we need to set a new connection based on the new connection and read requests state.
-    this._maybeRunNewConnections();
+    void this._maybeRunNewConnections();
   }
 
   _getNewConnection(): Range | undefined {

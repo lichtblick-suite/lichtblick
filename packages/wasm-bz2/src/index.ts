@@ -21,7 +21,7 @@ function urlToPath(url: URL): string {
   return url.pathname.replace(/^\/([A-Z]):\//, "$1:/");
 }
 
-const isLoaded = new Promise<void>((resolve) => {
+const isLoaded = new Promise<void>((resolve, reject) => {
   ModuleFactory({
     locateFile: () => {
       // The ModuleFactory tries to be smart about how it loads the file path based environment and protocol.
@@ -35,7 +35,9 @@ const isLoaded = new Promise<void>((resolve) => {
       loaded = true;
       resolve();
     },
-  }).then((module) => (Module = module));
+  })
+    .then((module) => (Module = module))
+    .catch(reject);
 });
 
 export default {

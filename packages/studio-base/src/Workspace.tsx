@@ -272,7 +272,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   // Show welcome layout on first run
   useEffect(() => {
-    (async () => {
+    void (async () => {
       const welcomeLayoutShown = appConfiguration.get("onboarding.welcome-layout.shown");
       if (welcomeLayoutShown == undefined || welcomeLayoutShown === false) {
         // Set configuration *before* opening the layout to avoid infinite recursion when the player
@@ -344,7 +344,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   const filesToOpen = useElectronFilesToOpen();
   useEffect(() => {
     if (filesToOpen) {
-      openFiles(filesToOpen, { shiftPressed: false });
+      void openFiles(filesToOpen, { shiftPressed: false });
     }
   }, [filesToOpen, openFiles]);
 
@@ -383,7 +383,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const dropHandler = useCallback(
     ({ files, shiftPressed }: { files: FileList; shiftPressed: boolean }) => {
-      openFiles(files, { shiftPressed });
+      void openFiles(files, { shiftPressed });
     },
     [openFiles],
   );

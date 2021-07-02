@@ -105,7 +105,7 @@ export default function PointCloudDetails({
           <Menu>
             <Item
               onClick={() => {
-                clipboard.copy(clickedPoint.join(", ")).then(() => {
+                void clipboard.copy(clickedPoint.join(", ")).then(() => {
                   setIsOpen(false);
                 });
               }}

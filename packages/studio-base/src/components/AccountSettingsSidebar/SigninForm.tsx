@@ -31,7 +31,7 @@ export default function SigninForm(): JSX.Element {
     }, [api]);
 
   const handleOnSigninClick = useCallback(() => {
-    getDeviceCode();
+    void getDeviceCode();
   }, [getDeviceCode]);
 
   useEffect(() => {

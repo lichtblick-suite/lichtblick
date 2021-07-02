@@ -159,7 +159,7 @@ describe("BagDataProvider", () => {
       },
       [],
     );
-    provider.initialize(dummyExtensionPoint);
+    void provider.initialize(dummyExtensionPoint);
     await delay(100); // Call above returns promise that never resolves.
     expect((sendNotification as any).mock.calls).toEqual([
       [

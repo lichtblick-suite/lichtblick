@@ -44,7 +44,7 @@ export default class StoryPlayer implements Player {
     this._bags = bags;
   }
   setListener(listener: (arg0: PlayerState) => Promise<void>): void {
-    (async () => {
+    void (async () => {
       const bagDescriptors = await Promise.all(
         this._bags.map(async (file, i) => {
           const bagDescriptor = await getBagDescriptor(file);
@@ -63,7 +63,7 @@ export default class StoryPlayer implements Player {
           });
         });
       });
-      provider
+      void provider
         .initialize({
           progressCallback: () => {
             // no-op
@@ -81,7 +81,7 @@ export default class StoryPlayer implements Player {
             throw new Error("StoryPlayer requires parsed message definitions");
           }
 
-          listener({
+          void listener({
             capabilities: [],
             presence: PlayerPresence.PRESENT,
             playerId: "",

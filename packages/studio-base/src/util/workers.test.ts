@@ -34,17 +34,17 @@ describe("enforceFetchIsBlocked", () => {
     fetchMock.restore();
   });
 
-  it("throws when fetch works", () => {
+  it("throws when fetch works", async () => {
     fetchMock.get("test", 200);
     const wrappedFn = enforceFetchIsBlocked(() => "test");
     expect(wrappedFn).toBeInstanceOf(Function);
-    expect(wrappedFn()).rejects.toThrow("Content security policy too loose.");
+    await expect(wrappedFn()).rejects.toThrow("Content security policy too loose.");
   });
 
-  it("returns the output of the wrapped function when fetch fails", () => {
+  it("returns the output of the wrapped function when fetch fails", async () => {
     fetchMock.get("test", { throws: new Error("hi!") });
     const wrappedFn = enforceFetchIsBlocked((arg) => `test${arg}`);
     expect(wrappedFn).toBeInstanceOf(Function);
-    expect(wrappedFn(1)).resolves.toBe("test1");
+    await expect(wrappedFn(1)).resolves.toBe("test1");
   });
 });

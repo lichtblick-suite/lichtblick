@@ -137,7 +137,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
     this.rosFollower.close();
 
     if (this.parameters.size > 0) {
-      this.unsubscribeAllParams();
+      void this.unsubscribeAllParams();
     }
 
     for (const subTopic of Array.from(this.subscriptions.keys())) {
@@ -172,7 +172,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
 
     // Asynchronously register this subscription with rosmaster and connect to
     // each publisher
-    this._registerSubscriberAndConnect(subscription);
+    void this._registerSubscriberAndConnect(subscription);
 
     return subscription;
   }
@@ -250,7 +250,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
       return false;
     }
 
-    this._unregisterSubscriber(topic);
+    void this._unregisterSubscriber(topic);
 
     subscription.close();
     this.subscriptions.delete(topic);
@@ -263,7 +263,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
       return false;
     }
 
-    this._unregisterPublisher(topic);
+    void this._unregisterPublisher(topic);
 
     publication.close();
     this.publications.delete(topic);
@@ -519,7 +519,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
     // Add any new publishers that have appeared
     for (const addPub of added) {
       this._log?.info?.(`publisher ${addPub} for ${sub.name} came online, connecting`);
-      this._subscribeToPublisher(addPub, sub);
+      void this._subscribeToPublisher(addPub, sub);
     }
 
     this.emit("publisherUpdate", { topic, publishers, prevPublishers, callerId });
@@ -715,7 +715,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
       );
 
       if (!this.isSubscribedTo(topic)) {
-        socket.close();
+        void socket.close();
         return;
       }
 
@@ -732,7 +732,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
     }
 
     // Asynchronously initiate the socket connection. This will enter a retry loop on failure
-    connection.connect();
+    void connection.connect();
   }
 
   static GetRosHostname(

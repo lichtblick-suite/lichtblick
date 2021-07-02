@@ -192,7 +192,7 @@ export function CommitRenameWithSubmit(_args: unknown, ctx: StoryContext): JSX.E
 
   const layoutCache = useLayoutCache();
   useEffect(() => {
-    layoutCache.list().then((layouts) => {
+    void layoutCache.list().then((layouts) => {
       if (layouts.some((layout) => layout.name === "New name")) {
         ctx.parameters.screenshot.signal.resolve();
       }
@@ -217,7 +217,7 @@ export function CommitRenameWithButton(_args: unknown, ctx: StoryContext): JSX.E
 
   const layoutCache = useLayoutCache();
   useEffect(() => {
-    layoutCache.list().then((layouts) => {
+    void layoutCache.list().then((layouts) => {
       if (layouts.some((layout) => layout.name === "New name")) {
         ctx.parameters.screenshot.signal.resolve();
       }

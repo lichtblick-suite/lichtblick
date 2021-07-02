@@ -356,7 +356,7 @@ describe("MemoryCacheDataProvider", () => {
       },
     ]);
     await provider.initialize(mockExtensionPoint().extensionPoint);
-    provider.getMessages(
+    void provider.getMessages(
       { sec: 100, nsec: 0 },
       { sec: 102, nsec: 0 },
       { parsedMessages: ["/foo"] },

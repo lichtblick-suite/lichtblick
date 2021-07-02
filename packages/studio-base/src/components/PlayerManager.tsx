@@ -452,7 +452,7 @@ export default function PlayerManager({
           storage,
         });
         if (playerBuilder && isMounted()) {
-          setPlayer(playerBuilder);
+          void setPlayer(playerBuilder);
         }
       } catch (error) {
         setMaybePlayer({ error });
@@ -473,7 +473,7 @@ export default function PlayerManager({
   // restore the saved source on first mount
   useLayoutEffect(() => {
     if (savedSource) {
-      selectSource(savedSource, { restore: true });
+      void selectSource(savedSource, { restore: true });
     }
     // we only run the layout effect on first mount - never again even if the saved source changes
     // eslint-disable-next-line react-hooks/exhaustive-deps

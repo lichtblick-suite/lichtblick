@@ -99,4 +99,4 @@ ${entries}
 `;
 }
 
-main();
+void main();

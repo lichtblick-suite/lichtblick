@@ -88,7 +88,7 @@ export default class ShareJsonModal extends Component<Props, State> {
 
   onCopy = (): void => {
     const { value } = this.state;
-    clipboard.copy(value).then(() => {
+    void clipboard.copy(value).then(() => {
       this.setState({ copied: true });
       setTimeout(() => this.setState({ copied: false }), 1500);
     });

@@ -219,7 +219,7 @@ export default function NamespaceMenu({
         )}
         <Item
           onClick={() => {
-            clipboard.copy(namespace);
+            void clipboard.copy(namespace);
             setIsOpen(false);
           }}
         >

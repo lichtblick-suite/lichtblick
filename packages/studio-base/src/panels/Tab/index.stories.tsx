@@ -167,7 +167,7 @@ storiesOf("panels/Tab/index", module)
               '[data-test="panel-menu-item Some Panel"]',
             )[0];
             const panel = document.querySelectorAll('[data-test="empty-drop-target"]')[0];
-            dragAndDrop(imageItem, panel);
+            await dragAndDrop(imageItem, panel);
           }, DEFAULT_TIMEOUT);
         }}
       >
@@ -198,7 +198,7 @@ storiesOf("panels/Tab/index", module)
               '[data-test="panel-menu-item Some Panel"]',
             )[0];
             const panel = document.querySelectorAll('[data-test="empty-drop-target"]')[0];
-            dragAndDrop(imageItem, panel);
+            await dragAndDrop(imageItem, panel);
           }, DEFAULT_TIMEOUT);
         }}
       >
@@ -308,7 +308,7 @@ storiesOf("panels/Tab/index", module)
             const tabs = document.querySelectorAll("[draggable=true]");
 
             // Drag and drop the first tab onto the third tab
-            dragAndDrop(tabs[0], tabs[2]);
+            await dragAndDrop(tabs[0], tabs[2]);
           }, DEFAULT_TIMEOUT);
         }}
       >
@@ -335,7 +335,7 @@ storiesOf("panels/Tab/index", module)
             const toolbar = document.querySelectorAll('[data-test="toolbar-droppable"]')[0];
 
             // Drag and drop the first tab onto the toolbar
-            dragAndDrop(tabs[0], toolbar);
+            await dragAndDrop(tabs[0], toolbar);
           }, DEFAULT_TIMEOUT);
         }}
       >
@@ -369,7 +369,7 @@ storiesOf("panels/Tab/index", module)
             const toolbar = document.querySelectorAll('[data-test="toolbar-droppable"]')[1];
 
             // Drag and drop the first tab onto the toolbar of the second tab panel
-            dragAndDrop(tabs[1], toolbar);
+            await dragAndDrop(tabs[1], toolbar);
           }, DEFAULT_TIMEOUT);
         }}
       >
@@ -434,7 +434,7 @@ storiesOf("panels/Tab/index", module)
               document.querySelector(
                 '[data-test~="Tab!RightInner"] [data-test="mosaic-drag-handle"]',
               ) ?? undefined;
-            dragAndDrop(
+            await dragAndDrop(
               dragHandle,
               () =>
                 document.querySelector('[data-test~="Tab!Left"] [data-test="empty-drop-target"]') ??
@@ -466,7 +466,7 @@ storiesOf("panels/Tab/index", module)
             if (!dragHandle) {
               throw new Error("missing drag handle");
             }
-            dragAndDrop(dragHandle, () => {
+            await dragAndDrop(dragHandle, () => {
               const dropTarget = document
                 .querySelector('[data-test~="unknown!inner4"]')
                 ?.parentElement?.parentElement?.querySelector(".drop-target.left");

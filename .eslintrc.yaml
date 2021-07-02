@@ -109,6 +109,7 @@ overrides:
           allowAny: true
 
       "@typescript-eslint/promise-function-async": error
+      "@typescript-eslint/no-floating-promises": error
 
       "@typescript-eslint/no-inferrable-types": off # It's sometimes useful to explicitly name to guard against future changes
       "@typescript-eslint/no-empty-function": off
@@ -124,7 +125,6 @@ overrides:
 
       # These could theoretically be turned on (or merit investigation) but are currently noisy
       "@typescript-eslint/no-misused-promises": off # Often used with e.g. useCallback(async () => {})
-      "@typescript-eslint/no-floating-promises": off
       "@typescript-eslint/restrict-template-expressions": off
 
       "@typescript-eslint/prefer-regexp-exec": off

@@ -35,10 +35,10 @@ export default class RpcDataProviderRemote {
         provider = getDataProvider(childDescriptor);
         return provider.initialize({
           progressCallback: (data) => {
-            rpc.send("extensionPointCallback", { type: "progressCallback", data });
+            void rpc.send("extensionPointCallback", { type: "progressCallback", data });
           },
           reportMetadataCallback: (data: DataProviderMetadata) => {
-            rpc.send("extensionPointCallback", { type: "reportMetadataCallback", data });
+            void rpc.send("extensionPointCallback", { type: "reportMetadataCallback", data });
           },
         });
       },

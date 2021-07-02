@@ -246,7 +246,7 @@ export default class AutomatedRunPlayer implements Player {
     this._providerResult = await this._provider.initialize({
       progressCallback: (progress: Progress) => {
         this._progress = progress;
-        this._onUpdateProgress();
+        void this._onUpdateProgress();
       },
       reportMetadataCallback: (metadata: DataProviderMetadata) => {
         switch (metadata.type) {
@@ -293,20 +293,20 @@ export default class AutomatedRunPlayer implements Player {
     }
 
     this._startCalled = true;
-    this._maybeStartPlayback();
+    void this._maybeStartPlayback();
   }
 
   async _onUpdateProgress(): Promise<void> {
     if (this._client.shouldLoadDataBeforePlaying && this._providerResult != undefined) {
       // Update the view and do preloading calculations. Not necessary if we're already playing.
-      this._emitState([], this._providerResult.start);
+      void this._emitState([], this._providerResult.start);
     }
-    this._maybeStartPlayback();
+    void this._maybeStartPlayback();
   }
 
   async _maybeStartPlayback(): Promise<void> {
     if (this._readyToPlay()) {
-      this._run();
+      void this._run();
     }
   }
 

@@ -72,7 +72,7 @@ export default function Metadata({
         }
         return undefined;
       });
-      clipboard.copy(JSON.stringify(dataWithoutLargeArrays, undefined, 2) ?? "");
+      void clipboard.copy(JSON.stringify(dataWithoutLargeArrays, undefined, 2) ?? "");
     },
     [],
   );

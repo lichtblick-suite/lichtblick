@@ -475,7 +475,7 @@ describe("CombinedDataProvider", () => {
         { provider: p2, prefix: SECOND_SOURCE_PREFIX },
       ]);
 
-      combinedProvider.initialize(mockExtensionPoint().extensionPoint);
+      void combinedProvider.initialize(mockExtensionPoint().extensionPoint);
       await delay(1);
 
       expect(initialize1).toHaveBeenCalled();
@@ -679,7 +679,7 @@ describe("CombinedDataProvider", () => {
         let calls = mockProgressCallback.mock.calls;
         // Assume that p1 has no progress yet since it has not reported, so intersected range is empty
         expect(calls[calls.length - 1]).toEqual([{ fullyLoadedFractionRanges: [] }]);
-        combinedProvider.getMessages(
+        void combinedProvider.getMessages(
           { sec: 0, nsec: 0 },
           { sec: 0.1, nsec: 0 },
           { parsedMessages: ["/some_topic2"] },

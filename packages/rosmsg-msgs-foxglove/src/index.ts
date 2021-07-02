@@ -90,4 +90,4 @@ ${entries}
 `;
 }
 
-main();
+void main();

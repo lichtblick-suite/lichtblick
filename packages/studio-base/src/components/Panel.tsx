@@ -203,7 +203,7 @@ export default function Panel<Config extends PanelConfig>(
 
         // Otherwise, open new panel
         const newPanelPath = ownPath.concat("second");
-        mosaicWindowActions.split({ type: panelType }).then(() => {
+        void mosaicWindowActions.split({ type: panelType }).then(() => {
           const newPanelId = getNodeAtPath(mosaicActions.getRoot(), newPanelPath) as string;
           savePanelConfigs({
             configs: [
@@ -317,7 +317,7 @@ export default function Panel<Config extends PanelConfig>(
           ],
         });
       } else {
-        mosaicWindowActions.split({ type: PanelComponent.panelType });
+        void mosaicWindowActions.split({ type: PanelComponent.panelType });
       }
     }, [childId, config, getCurrentLayout, mosaicWindowActions, savePanelConfigs, tabId]);
 

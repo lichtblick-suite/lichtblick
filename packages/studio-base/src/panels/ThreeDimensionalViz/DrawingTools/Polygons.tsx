@@ -68,7 +68,7 @@ export default function Polygons({ onSetPolygons, polygonBuilder }: Props): JSX.
           small
           tooltip="Copy Polygons"
           onClick={() => {
-            clipboard.copy(getFormattedString(polygonPoints));
+            void clipboard.copy(getFormattedString(polygonPoints));
           }}
         >
           Copy

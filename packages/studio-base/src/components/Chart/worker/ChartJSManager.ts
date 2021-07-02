@@ -70,7 +70,7 @@ export default class ChartJSManager {
 
   constructor(initOpts: InitOpts) {
     log.info(`new ChartJSManager(id=${initOpts.id})`);
-    this.init(initOpts);
+    void this.init(initOpts);
   }
 
   async init({

@@ -40,7 +40,7 @@ describe("performanceMeasuringClient", () => {
     const perfClient = new PerformanceMeasuringClient();
     perfClient.start({ bagLengthMs: 1 });
     const error = new Error("playback_error");
-    perfClient.onError(error);
+    void perfClient.onError(error);
     expect(onPlaybackFinished).not.toHaveBeenCalled();
     expect(onPlaybackError).toHaveBeenCalledWith(error.toString());
   });

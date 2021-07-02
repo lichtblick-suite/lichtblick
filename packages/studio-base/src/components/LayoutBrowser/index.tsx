@@ -66,7 +66,7 @@ export default function LayoutBrowser({
 
   // Start loading on first mount
   useEffect(() => {
-    reloadLayouts();
+    void reloadLayouts();
   }, [reloadLayouts]);
 
   const onSelectLayout = useCallback(
@@ -155,7 +155,7 @@ export default function LayoutBrowser({
       path: [],
       data: state as PanelsState,
     });
-    onSelectLayout(newLayout);
+    void onSelectLayout(newLayout);
   }, [currentDateForStorybook, layoutStorage, onSelectLayout]);
 
   const onExportLayout = useCallback(
@@ -231,7 +231,7 @@ export default function LayoutBrowser({
 
     const data = parsedState as PanelsState;
     const newLayout = await layoutStorage.saveNewLayout({ path: [], name: layoutName, data });
-    onSelectLayout(newLayout);
+    void onSelectLayout(newLayout);
   }, [addToast, isMounted, layoutStorage, onSelectLayout]);
 
   const createLayoutTooltip = useTooltip({ contents: "Create new layout" });
@@ -333,7 +333,7 @@ export default function LayoutBrowser({
                     text="Sync now"
                     onClick={async () => {
                       await layoutDebug.syncNow();
-                      reloadLayouts();
+                      await reloadLayouts();
                     }}
                     styles={{
                       root: {

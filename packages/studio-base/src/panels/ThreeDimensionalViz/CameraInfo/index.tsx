@@ -164,7 +164,7 @@ export default function CameraInfo({
               tooltip="Copy cameraState"
               small
               onClick={() => {
-                clipboard.copy(JSON.stringify(cameraState, undefined, 2));
+                void clipboard.copy(JSON.stringify(cameraState, undefined, 2));
               }}
             >
               Copy
