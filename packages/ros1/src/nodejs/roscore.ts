@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { getEnvVar, getHostname, getNetworkInterfaces } from "@foxglove/ros1/src/nodejs";
-import { HttpServerNodejs } from "@foxglove/xmlrpc/src/HttpServerNodejs";
+import { HttpServerNodejs } from "@foxglove/xmlrpc/dist/HttpServerNodejs";
 
 import { RosMaster } from "../RosMaster";
 import { RosNode } from "../RosNode";

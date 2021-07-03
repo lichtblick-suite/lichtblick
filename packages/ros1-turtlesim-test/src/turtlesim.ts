@@ -11,7 +11,7 @@ import {
   TcpServerNode,
   TcpSocketNode,
 } from "@foxglove/ros1/src/nodejs";
-import { HttpServerNodejs } from "@foxglove/xmlrpc/src/HttpServerNodejs";
+import { HttpServerNodejs } from "@foxglove/xmlrpc/dist/HttpServerNodejs";
 
 const TURTLESIM_POSE_MSGDEF = `
 float32 x

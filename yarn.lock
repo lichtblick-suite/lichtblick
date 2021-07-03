@@ -2122,7 +2122,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/just-fetch@npm:1.2.0":
+"@foxglove/just-fetch@npm:^1.2.0":
   version: 1.2.0
   resolution: "@foxglove/just-fetch@npm:1.2.0"
   dependencies:
@@ -2155,7 +2155,7 @@ __metadata:
   dependencies:
     "@foxglove/rosmsg": 0.1.2
     "@foxglove/rosmsg-serialization": "workspace:*"
-    "@foxglove/xmlrpc": "workspace:*"
+    "@foxglove/xmlrpc": 1.0.0
     esbuild-runner: 2.2.0
     eventemitter3: 4.0.7
     jest: 27.0.6
@@ -2413,20 +2413,18 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/xmlrpc@workspace:*, @foxglove/xmlrpc@workspace:packages/xmlrpc":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/xmlrpc@workspace:packages/xmlrpc"
+"@foxglove/xmlrpc@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@foxglove/xmlrpc@npm:1.0.0"
   dependencies:
-    "@foxglove/just-fetch": 1.2.0
-    "@types/sax": ^1.2.1
-    byte-base64: 1.1.0
-    jest: 27.0.6
-    sax: 1.2.4
-    typescript: 4.3.5
-    web-encoding: 1.1.5
-    xmlbuilder2: 2.4.1
-  languageName: unknown
-  linkType: soft
+    "@foxglove/just-fetch": ^1.2.0
+    byte-base64: ^1.1.0
+    sax: ^1.2.4
+    web-encoding: ^1.1.5
+    xmlbuilder2: ^2.4.1
+  checksum: 68852b943ae462223bb2668916f1955f616f20351f89bcc7c6b41642791d4f2cb4a39233bd4dc2a885d8deedb4a6ae60ec55ceae68384f967c376b1ae7b29f31
+  languageName: node
+  linkType: hard
 
 "@google-cloud/common@npm:^3.6.0":
   version: 3.6.0
@@ -5638,15 +5636,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/sax@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "@types/sax@npm:1.2.1"
-  dependencies:
-    "@types/node": "*"
-  checksum: f4b5451fc15a7151fc626ba16a91cea7ec1ce8ae3357f4737523b1d336a004b242ce9508c061f012d8e4ef25345ca9e9e3ea459f51b97263b299d6f848787182
-  languageName: node
-  linkType: hard
-
 "@types/scheduler@npm:*":
   version: 0.16.1
   resolution: "@types/scheduler@npm:0.16.1"
@@ -8153,7 +8142,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"byte-base64@npm:1.1.0":
+"byte-base64@npm:^1.1.0":
   version: 1.1.0
   resolution: "byte-base64@npm:1.1.0"
   checksum: 95851fc758882ba6b28422d70c685f86257eb635be10eb37528765f39fc1c8766972f9bb39e0684539fafc7d9625145d26e5ab310a52c9eb9df3506952586e0c
@@ -22239,7 +22228,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"sax@npm:1.2.4, sax@npm:^1.2.4, sax@npm:~1.2.4":
+"sax@npm:^1.2.4, sax@npm:~1.2.4":
   version: 1.2.4
   resolution: "sax@npm:1.2.4"
   checksum: d3df7d32b897a2c2f28e941f732c71ba90e27c24f62ee918bd4d9a8cfb3553f2f81e5493c7f0be94a11c1911b643a9108f231dd6f60df3fa9586b5d2e3e9e1fe
@@ -25389,7 +25378,7 @@ typescript@4.3.5:
   languageName: node
   linkType: hard
 
-"web-encoding@npm:1.1.5":
+"web-encoding@npm:1.1.5, web-encoding@npm:^1.1.5":
   version: 1.1.5
   resolution: "web-encoding@npm:1.1.5"
   dependencies:
@@ -25987,7 +25976,7 @@ typescript@4.3.5:
   languageName: node
   linkType: hard
 
-"xmlbuilder2@npm:2.4.1":
+"xmlbuilder2@npm:^2.4.1":
   version: 2.4.1
   resolution: "xmlbuilder2@npm:2.4.1"
   dependencies:

@@ -6,5 +6,5 @@
     "rootDir": "./src",
     "outDir": "./dist"
   },
-  "references": [{ "path": "../ros1" }, { "path": "../xmlrpc" }]
+  "references": [{ "path": "../ros1" }]
 }
