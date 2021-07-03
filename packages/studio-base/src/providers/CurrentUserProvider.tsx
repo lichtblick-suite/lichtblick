@@ -12,16 +12,15 @@ import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefin
 
 const log = Logger.getLogger(__filename);
 
-/** MeProvider attempts to load the current user's profile if there is an authenticated session */
-export default function MeProvider(props: PropsWithChildren<unknown>): JSX.Element {
+/**
+ * CurrentUserProvider attempts to load the current user's profile if there is an authenticated
+ * session
+ */
+export default function CurrentUserProvider(props: PropsWithChildren<unknown>): JSX.Element {
   const api = useConsoleApi();
   const [bearerToken] = useLocalStorage<string>("fox.bearer-token");
 
-  const {
-    loading,
-    value: me,
-    error,
-  } = useAsync(async () => {
+  const { loading, value, error } = useAsync(async () => {
     if (!isNonEmptyOrUndefined(bearerToken)) {
       return Promise.resolve(undefined);
     }
@@ -30,12 +29,14 @@ export default function MeProvider(props: PropsWithChildren<unknown>): JSX.Eleme
   }, [api, bearerToken]);
 
   useEffect(() => {
-    log.error(error);
+    if (error) {
+      log.error(error);
+    }
   }, [error]);
 
   if (loading) {
     return <></>;
   }
 
-  return <CurrentUserContext.Provider value={me}>{props.children}</CurrentUserContext.Provider>;
+  return <CurrentUserContext.Provider value={value}>{props.children}</CurrentUserContext.Provider>;
 }
