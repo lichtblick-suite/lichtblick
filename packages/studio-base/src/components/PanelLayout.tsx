@@ -122,7 +122,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
       const mosaicWindow = (
         <MosaicWindow
           title=""
-          key={path.join("-")}
+          key={id}
           path={path}
           createNode={createTile}
           renderPreview={() => undefined as unknown as JSX.Element}
