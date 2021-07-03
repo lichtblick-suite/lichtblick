@@ -66,16 +66,16 @@ describe("useTopicTree", () => {
   }
 
   describe("getBaseKey", () => {
-    it("returns base key for bag2 group key ", () => {
+    it("returns base key for bag2 group key", () => {
       expect(getBaseKey("name_2:Foo")).toEqual("name:Foo");
     });
-    it("returns base key for bag2 topic key ", () => {
+    it("returns base key for bag2 topic key", () => {
       expect(getBaseKey("t:/studio_source_2/foo")).toEqual("t:/foo");
     });
-    it("returns base key for bag2 namespace key ", () => {
+    it("returns base key for bag2 namespace key", () => {
       expect(getBaseKey("ns:/studio_source_2/foo:ns1")).toEqual("ns:/foo:ns1");
     });
-    it("returns the original key if for non-bag2 keys ", () => {
+    it("returns the original key if for non-bag2 keys", () => {
       expect(getBaseKey("name:Bar")).toEqual("name:Bar");
       expect(getBaseKey("t:/foo")).toEqual("t:/foo");
       expect(getBaseKey("ns:/foo:ns1")).toEqual("ns:/foo:ns1");
@@ -344,7 +344,7 @@ describe("useTopicTree", () => {
       });
     });
 
-    it("selects all available namespaces if topic is checked and the namespaces haven't been modified ", () => {
+    it("selects all available namespaces if topic is checked and the namespaces haven't been modified", () => {
       const Test = createTest();
       mount(
         <Test
@@ -418,7 +418,7 @@ describe("useTopicTree", () => {
       });
     });
 
-    it("derives isDefaultSettings field from defaultTopicSettings input ", () => {
+    it("derives isDefaultSettings field from defaultTopicSettings input", () => {
       const Test = createTest();
       mount(
         <Test
@@ -475,7 +475,7 @@ describe("useTopicTree", () => {
   });
 
   describe("onNamespaceOverrideColorChange", () => {
-    it("saves the new color to panelConfig ", async () => {
+    it("saves the new color to panelConfig", async () => {
       const Test = createTest();
       const saveConfigMock = jest.fn();
       mount(
@@ -512,7 +512,7 @@ describe("useTopicTree", () => {
       });
     });
 
-    it("deletes the current overrideColor setting when the new color is undefined ", async () => {
+    it("deletes the current overrideColor setting when the new color is undefined", async () => {
       const Test = createTest();
       const saveConfigMock = jest.fn();
       mount(
@@ -1215,7 +1215,7 @@ describe("useTopicTree", () => {
       "/bar": ["namespace"],
     };
 
-    function validateVisibilityByNodeKey(
+    function expectVisibilityByNodeKey(
       visibiltyByNodeKey: any,
       _rootTreeNode: unknown,
       getIsTreeNodeVisibleInTree: any,
@@ -1249,7 +1249,7 @@ describe("useTopicTree", () => {
         "t:/bar": false,
         "ns:/bar:namespace": false,
       };
-      validateVisibilityByNodeKey(visibiltyByNodeKey, rootTreeNode, getIsTreeNodeVisibleInTree);
+      expectVisibilityByNodeKey(visibiltyByNodeKey, rootTreeNode, getIsTreeNodeVisibleInTree);
     });
 
     it("allows searching for a topic", () => {
@@ -1276,7 +1276,7 @@ describe("useTopicTree", () => {
         "t:/bar": false,
         "ns:/bar:namespace": false,
       };
-      validateVisibilityByNodeKey(visibiltyByNodeKey, rootTreeNode, getIsTreeNodeVisibleInTree);
+      expectVisibilityByNodeKey(visibiltyByNodeKey, rootTreeNode, getIsTreeNodeVisibleInTree);
     });
 
     it("allows searching for a group", () => {
@@ -1303,7 +1303,7 @@ describe("useTopicTree", () => {
         "t:/bar": false,
         "ns:/bar:namespace": false,
       };
-      validateVisibilityByNodeKey(visibiltyByNodeKey, rootTreeNode, getIsTreeNodeVisibleInTree);
+      expectVisibilityByNodeKey(visibiltyByNodeKey, rootTreeNode, getIsTreeNodeVisibleInTree);
     });
 
     it("does not allow searching for the root node", () => {
@@ -1330,7 +1330,7 @@ describe("useTopicTree", () => {
         "t:/bar": false,
         "ns:/bar:namespace": false,
       };
-      validateVisibilityByNodeKey(visibiltyByNodeKey, rootTreeNode, getIsTreeNodeVisibleInTree);
+      expectVisibilityByNodeKey(visibiltyByNodeKey, rootTreeNode, getIsTreeNodeVisibleInTree);
     });
 
     it("without a search text, returns shouldExpandAllKeys=false", () => {

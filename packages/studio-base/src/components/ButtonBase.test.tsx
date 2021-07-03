@@ -18,21 +18,25 @@ import Button from "./ButtonBase";
 
 describe("<Button />", () => {
   it("fires click callback", (done) => {
+    expect.assertions(0);
     const el = mount(<Button onClick={() => done()}>hello</Button>);
     el.simulate("click");
   });
 
   it("fires onMouseUp callback", (done) => {
+    expect.assertions(0);
     const el = mount(<Button onMouseUp={() => done()}>hello</Button>);
     el.simulate("mouseUp");
   });
 
   it("fires onMouseLeave callback", (done) => {
+    expect.assertions(0);
     const el = mount(<Button onMouseLeave={() => done()}>hello</Button>);
     el.simulate("mouseLeave");
   });
 
   it("fires onFocus callback", (done) => {
+    expect.assertions(0);
     const el = mount(<Button onFocus={() => done()}>hello</Button>);
     el.simulate("focus");
   });

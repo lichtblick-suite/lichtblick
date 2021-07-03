@@ -20,13 +20,13 @@ describe("RosMaster", () => {
       "testType",
       CALLER_API1,
     ]);
-    expect(Array.isArray(res));
+    expect(Array.isArray(res)).toBe(true);
     expect(res).toHaveLength(3);
 
     const [status, msg, subscribers] = res;
     expect(status).toEqual(1);
     expect(typeof msg).toBe("string");
-    expect(Array.isArray(subscribers));
+    expect(Array.isArray(subscribers)).toBe(true);
     expect(subscribers).toHaveLength(0);
 
     res = await rosMaster.registerSubscriber("registerSubscriber", [
@@ -35,13 +35,13 @@ describe("RosMaster", () => {
       "testType",
       CALLER_API2,
     ]);
-    expect(Array.isArray(res));
+    expect(Array.isArray(res)).toBe(true);
     expect(res).toHaveLength(3);
 
     const [status2, msg2, publishers] = res;
     expect(status2).toEqual(1);
     expect(typeof msg2).toBe("string");
-    expect(Array.isArray(publishers));
+    expect(Array.isArray(publishers)).toBe(true);
     expect(publishers).toEqual([CALLER_API1]);
 
     rosMaster.close();

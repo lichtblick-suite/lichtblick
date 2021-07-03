@@ -72,6 +72,7 @@ describe("MessagePipeline/warnOnOutOfSyncMessages", () => {
     });
 
     it("does not report an error when messages are in order", () => {
+      expect.assertions(0);
       warnOnOutOfSyncMessages(
         playerStateWithMessages([message(8, 9), message(7, 10)], "receiveTime"),
       );
@@ -99,6 +100,7 @@ describe("MessagePipeline/warnOnOutOfSyncMessages", () => {
     });
 
     it("does not report an error when messages are in order", () => {
+      expect.assertions(0);
       warnOnOutOfSyncMessages(
         playerStateWithMessages([message(7, 10), message(8, 9)], "headerStamp"),
       );

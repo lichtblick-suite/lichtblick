@@ -13,11 +13,11 @@ ignorePatterns:
 
 plugins:
   - file-progress
-  - jest
 
 extends:
   - plugin:@foxglove/base
   - plugin:@foxglove/react
+  - plugin:@foxglove/jest
 
 settings:
   import/internal-regex: "^@foxglove"
@@ -80,7 +80,10 @@ rules:
         `// eslint-disable-next-line no-restricted-syntax`. For rationale, see:
         https://github.com/sindresorhus/meta/discussions/7"
 
-  jest/no-disabled-tests: error
+  jest/no-done-callback: off # Can be a useful alternative to promises
+  jest/no-conditional-expect: warn
+  jest/expect-expect:
+    [error, { assertFunctionNames: [expect*, sendNotification.expectCalledDuringTest] }]
 
 overrides:
   - files: ["*.ts", "*.tsx"]

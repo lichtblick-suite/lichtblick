@@ -60,7 +60,7 @@ describe("RosNode", () => {
     expect((msg as { data: boolean }).data).toEqual(true);
     expect(data).toHaveLength(1);
     expect(pub.connection.connected()).toEqual(true);
-    expect(pub.connection.getTransportInfo().startsWith("TCPROS connection on port "));
+    expect(pub.connection.getTransportInfo().startsWith("TCPROS connection on port ")).toBe(true);
     expect(pub.connection.stats().bytesReceived).toEqual(143);
     expect(pub.connection.transportType()).toEqual("TCPROS");
     expect(pub.connectionId).toEqual(0);

@@ -54,14 +54,7 @@ describe("Rpc", () => {
       await delay(10);
       throw new Error("boom");
     });
-    return local
-      .send("foo", { foo: "baz" })
-      .then(() => {
-        throw new Error("Send should have rejected");
-      })
-      .catch((err) => {
-        expect(err.message).toEqual("boom");
-      });
+    await expect(local.send("foo", { foo: "baz" })).rejects.toThrow("boom");
   });
 
   it("rejects on send if receive rejects sync", async () => {
@@ -71,28 +64,14 @@ describe("Rpc", () => {
     worker.receive("foo", (_msg) => {
       throw new Error("boom");
     });
-    return local
-      .send("foo", { foo: "baz" })
-      .then(() => {
-        throw new Error("Send should have rejected");
-      })
-      .catch((err) => {
-        expect(err.message).toEqual("boom");
-      });
+    await expect(local.send("foo", { foo: "baz" })).rejects.toThrow("boom");
   });
 
   it("rejects on send if there is no receiver", async () => {
     const { local: mainChannel, remote: workerChannel } = createLinkedChannels();
     const local = new Rpc(mainChannel);
     new Rpc(workerChannel);
-    return local
-      .send("foo", { foo: "baz" })
-      .then(() => {
-        throw new Error("Send should have rejected");
-      })
-      .catch((err) => {
-        expect(err.message).toContain("no receiver");
-      });
+    await expect(local.send("foo", { foo: "baz" })).rejects.toThrow("no receiver");
   });
 
   it("can send and receive transferables", async () => {

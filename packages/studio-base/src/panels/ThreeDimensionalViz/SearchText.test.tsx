@@ -27,10 +27,10 @@ import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transfo
 import { TextMarker } from "@foxglove/studio-base/types/Messages";
 import { MARKER_MSG_TYPES } from "@foxglove/studio-base/util/globalConstants";
 
-export const ROOT_FRAME_ID = "root_frame";
-export const CHILD_FRAME_ID = "child_frame";
+const ROOT_FRAME_ID = "root_frame";
+const CHILD_FRAME_ID = "child_frame";
 
-export const header = {
+const header = {
   frame_id: ROOT_FRAME_ID,
   stamp: { sec: 0, nsec: 0 },
 };
@@ -84,8 +84,10 @@ const runUseGLTextTest = (
 
 describe("<SearchText />", () => {
   describe("getHighlightedIndices", () => {
-    expect(getHighlightedIndices("hello everyone", "e")).toEqual([1, 6, 8, 13]);
-    expect(getHighlightedIndices("hello everyone", "hello ")).toEqual([0, 1, 2, 3, 4, 5]);
+    it("highlights matches", () => {
+      expect(getHighlightedIndices("hello everyone", "e")).toEqual([1, 6, 8, 13]);
+      expect(getHighlightedIndices("hello everyone", "hello ")).toEqual([0, 1, 2, 3, 4, 5]);
+    });
     it("is case insensitive", () => {
       expect(getHighlightedIndices("Car", "car")).toEqual([0, 1, 2]);
       expect(getHighlightedIndices("car", "Car")).toEqual([0, 1, 2]);

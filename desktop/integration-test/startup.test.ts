@@ -13,6 +13,7 @@ const log = Logger.getLogger(__filename);
 
 describe("startup", () => {
   it("should start the application", async () => {
+    expect.assertions(0); // just needs to complete without error
     // In node.js the electron import gives us the path to the electron binary
     // Our type definitions don't realize this so cast the variable to a string
     const electronApp = await electron.launch({

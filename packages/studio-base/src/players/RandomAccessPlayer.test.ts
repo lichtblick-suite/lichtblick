@@ -12,6 +12,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+/* eslint-disable jest/no-conditional-expect */
+
 import { omit } from "lodash";
 import { TimeUtil, Time } from "rosbag";
 
@@ -1204,6 +1206,7 @@ describe("RandomAccessPlayer", () => {
   });
 
   it("reports when a provider is reconnecting", (done) => {
+    expect.assertions(0);
     const provider = new TestProvider();
     const source = new RandomAccessPlayer(
       { name: "TestProvider", args: { provider }, children: [] },

@@ -12,6 +12,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+/* eslint-disable jest/no-conditional-expect */
+
 import { renderHook, RenderResult } from "@testing-library/react-hooks/dom";
 import { last } from "lodash";
 import { PropsWithChildren, useCallback, useState } from "react";
@@ -330,13 +332,13 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       }));
 
       await act(async () => player.emit());
-      expect(result.all.length).toBe(2);
+      expect(result.all.length).toBe(2); // eslint-disable-line jest/no-standalone-expect
 
       player2 = new FakePlayer();
       player2.playerId = "fake player 2";
       rerender({ maybePlayer: { player: player2 } });
-      expect(player.close).toHaveBeenCalledTimes(1);
-      expect(result.all.length).toBe(4);
+      expect(player.close).toHaveBeenCalledTimes(1); // eslint-disable-line jest/no-standalone-expect
+      expect(result.all.length).toBe(4); // eslint-disable-line jest/no-standalone-expect
     });
 
     it("closes old player when new player is supplied and stops old player message flow", async () => {
@@ -371,12 +373,14 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
   });
 
   it("does not throw when interacting w/ context and player is missing", () => {
-    const { result } = renderHook(Hook, { wrapper: Wrapper });
-    result.current.startPlayback();
-    result.current.pausePlayback();
-    result.current.setPlaybackSpeed(1);
-    result.current.seekPlayback({ sec: 1, nsec: 0 });
-    result.current.publish({ topic: "/foo", msg: {} });
+    expect(() => {
+      const { result } = renderHook(Hook, { wrapper: Wrapper });
+      result.current.startPlayback();
+      result.current.pausePlayback();
+      result.current.setPlaybackSpeed(1);
+      result.current.seekPlayback({ sec: 1, nsec: 0 });
+      result.current.publish({ topic: "/foo", msg: {} });
+    }).not.toThrow();
   });
 
   it("transfers subscriptions and publishers between players", async () => {

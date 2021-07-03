@@ -85,10 +85,12 @@ describe("time.formatTimeRaw", () => {
 });
 
 describe("time.toSec", () => {
-  expect(time.toSec({ sec: 1, nsec: 0 })).toBe(1);
-  expect(time.toSec({ sec: 1, nsec: 1 })).toBe(1.000000001);
-  expect(time.toSec({ sec: 1, nsec: 999999999 })).toBe(1.999999999);
-  expect(time.toSec({ sec: 1, nsec: 1000000000 })).toBe(2);
+  it("converts to seconds", () => {
+    expect(time.toSec({ sec: 1, nsec: 0 })).toBe(1);
+    expect(time.toSec({ sec: 1, nsec: 1 })).toBe(1.000000001);
+    expect(time.toSec({ sec: 1, nsec: 999999999 })).toBe(1.999999999);
+    expect(time.toSec({ sec: 1, nsec: 1000000000 })).toBe(2);
+  });
 });
 
 describe("time.fromSec", () => {
@@ -140,26 +142,31 @@ describe("time.fromMicros", () => {
 });
 
 describe("time.subtractTimes", () => {
-  expect(time.subtractTimes({ sec: 1, nsec: 1 }, { sec: 1, nsec: 1 })).toEqual({ sec: 0, nsec: 0 });
-  expect(time.subtractTimes({ sec: 1, nsec: 2 }, { sec: 2, nsec: 1 })).toEqual({
-    sec: -1,
-    nsec: 1,
-  });
-  expect(time.subtractTimes({ sec: 5, nsec: 100 }, { sec: 2, nsec: 10 })).toEqual({
-    sec: 3,
-    nsec: 90,
-  });
-  expect(time.subtractTimes({ sec: 1, nsec: 1e8 }, { sec: 0, nsec: 5e8 })).toEqual({
-    sec: 0,
-    nsec: 600000000,
-  });
-  expect(time.subtractTimes({ sec: 1, nsec: 0 }, { sec: 0, nsec: 1e9 - 1 })).toEqual({
-    sec: 0,
-    nsec: 1,
-  });
-  expect(time.subtractTimes({ sec: 0, nsec: 0 }, { sec: 0, nsec: 1 })).toEqual({
-    sec: -1,
-    nsec: 1e9 - 1,
+  it("subtracts times", () => {
+    expect(time.subtractTimes({ sec: 1, nsec: 1 }, { sec: 1, nsec: 1 })).toEqual({
+      sec: 0,
+      nsec: 0,
+    });
+    expect(time.subtractTimes({ sec: 1, nsec: 2 }, { sec: 2, nsec: 1 })).toEqual({
+      sec: -1,
+      nsec: 1,
+    });
+    expect(time.subtractTimes({ sec: 5, nsec: 100 }, { sec: 2, nsec: 10 })).toEqual({
+      sec: 3,
+      nsec: 90,
+    });
+    expect(time.subtractTimes({ sec: 1, nsec: 1e8 }, { sec: 0, nsec: 5e8 })).toEqual({
+      sec: 0,
+      nsec: 600000000,
+    });
+    expect(time.subtractTimes({ sec: 1, nsec: 0 }, { sec: 0, nsec: 1e9 - 1 })).toEqual({
+      sec: 0,
+      nsec: 1,
+    });
+    expect(time.subtractTimes({ sec: 0, nsec: 0 }, { sec: 0, nsec: 1 })).toEqual({
+      sec: -1,
+      nsec: 1e9 - 1,
+    });
   });
 });
 

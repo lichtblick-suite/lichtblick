@@ -11,6 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+/* eslint-disable jest/no-conditional-expect */
+
 import exampleDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes.json";
 import {
   getOutputTopic,
@@ -35,7 +37,7 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 // Exported for use in other tests.
-export const baseNodeData: NodeData = {
+const baseNodeData: NodeData = {
   name: `${DEFAULT_STUDIO_NODE_PREFIX}main`,
   sourceCode: "",
   projectCode: new Map<string, string>(),
@@ -340,7 +342,7 @@ describe("pipeline", () => {
       import {norm} from "./pointClouds";
       const x = norm({x:1, y:2, z:3});
       `,
-    ])("produces transpiled code", (sourceCode) => {
+    ])("produces projectCode", (sourceCode) => {
       const { projectCode, diagnostics, transpiledCode } = compile({ ...baseNodeData, sourceCode });
       expect(projectCode?.size).toEqual(rawUserUtils.length);
       expect(typeof transpiledCode).toEqual("string");

@@ -83,13 +83,8 @@ describe("useMessageReducer", () => {
           <Test topics={["/foo"]} />
         </MockMessagePipelineProvider>,
       );
-      if (shouldThrow) {
-        expect(Test.result.mock.calls).toHaveLength(0);
-        expect(Test.error.mock.calls).toHaveLength(1);
-      } else {
-        expect(Test.error.mock.calls).toHaveLength(0);
-        expect(Test.result.mock.calls).toHaveLength(1);
-      }
+      expect(Test.result.mock.calls).toHaveLength(shouldThrow ? 0 : 1);
+      expect(Test.error.mock.calls).toHaveLength(shouldThrow ? 1 : 0);
     },
   );
 

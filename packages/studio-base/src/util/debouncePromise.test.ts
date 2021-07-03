@@ -116,6 +116,7 @@ describe("debouncePromise", () => {
     if (!promise) {
       throw new Error("currentPromise should be defined");
     }
+    // eslint-disable-next-line jest/valid-expect-in-promise
     promise = promise.then(() => {
       expect(calls).toBe(2);
     });
@@ -129,14 +130,11 @@ describe("debouncePromise", () => {
   });
 
   it("handles nested calls", async () => {
-    expect.assertions(3);
-
     let calls = 0;
     const debouncedFn = debouncePromise(async () => {
       ++calls;
       if (calls === 1) {
         debouncedFn();
-        expect(calls).toBe(1);
       }
     });
 

@@ -29,6 +29,7 @@ describe("<Icon />", () => {
   });
 
   it("stops click event with custom handler", (done) => {
+    expect.assertions(0);
     const Container = () => (
       <div onClick={() => done("should not bubble")}>
         <Icon onClick={() => done()}>
@@ -41,6 +42,7 @@ describe("<Icon />", () => {
   });
 
   it("does not prevent click by default", (done) => {
+    expect.assertions(0);
     const Container = () => (
       <div onClick={() => done()}>
         <Icon>

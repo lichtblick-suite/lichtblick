@@ -43,7 +43,10 @@ describe("permutations", () => {
   });
 });
 
-const check = (elements: { startTime: Time; endTime: Time }[], expectedSize: number) => {
+const expectChunkOverlaps = (
+  elements: { startTime: Time; endTime: Time }[],
+  expectedSize: number,
+) => {
   for (const permutation of getPermutations(elements)) {
     expect(getBagChunksOverlapCount(permutation)).toBe(expectedSize);
   }
@@ -65,7 +68,7 @@ describe("getBagChunksOverlapCount", () => {
       [6, 6],
       [6.5, 7],
     ]);
-    check(elements, 0);
+    expectChunkOverlaps(elements, 0);
   });
 
   it("returns one when two elements overlap", () => {
@@ -75,7 +78,7 @@ describe("getBagChunksOverlapCount", () => {
       [1.9, 2.1],
       [3, 4],
     ]);
-    check(elements, 1);
+    expectChunkOverlaps(elements, 1);
   });
 
   it("returns two when two separate pairs of elements overlap", () => {
@@ -86,7 +89,7 @@ describe("getBagChunksOverlapCount", () => {
       [6, 7],
       [6.5, 7.5],
     ]);
-    check(elements, 2);
+    expectChunkOverlaps(elements, 2);
   });
 
   it("returns the number of elements minus one when they all overlap", () => {
@@ -96,6 +99,6 @@ describe("getBagChunksOverlapCount", () => {
       [0.5, 1.5],
       [0.9, 1.9],
     ]);
-    check(elements, 3);
+    expectChunkOverlaps(elements, 3);
   });
 });
