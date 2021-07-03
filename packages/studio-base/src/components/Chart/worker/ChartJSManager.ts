@@ -50,7 +50,9 @@ function addEventListener(emitter: EventEmitter) {
 
 function removeEventListener(emitter: EventEmitter) {
   return (eventName: string, fn?: () => void) => {
-    fn && emitter.off(eventName, fn);
+    if (fn) {
+      emitter.off(eventName, fn);
+    }
   };
 }
 

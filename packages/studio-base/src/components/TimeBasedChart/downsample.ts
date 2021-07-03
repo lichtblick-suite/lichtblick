@@ -158,8 +158,12 @@ export default function downsample(dataset: DataSet, bounds: DownsampleBounds): 
     downsampled.push(reduced);
   }
 
-  minXDatum && downsampled.unshift(minXDatum);
-  maxXDatum && downsampled.push(maxXDatum);
+  if (minXDatum) {
+    downsampled.unshift(minXDatum);
+  }
+  if (maxXDatum) {
+    downsampled.push(maxXDatum);
+  }
 
   return { ...dataset, data: downsampled };
 }

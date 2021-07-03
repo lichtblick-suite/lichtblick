@@ -119,7 +119,11 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
       if (action === "Minimize") {
         browserWindow.minimize();
       } else if (action === "Maximize") {
-        browserWindow.isMaximized() ? browserWindow.unmaximize() : browserWindow.maximize();
+        if (browserWindow.isMaximized()) {
+          browserWindow.unmaximize();
+        } else {
+          browserWindow.maximize();
+        }
       } else {
         // "None"
       }

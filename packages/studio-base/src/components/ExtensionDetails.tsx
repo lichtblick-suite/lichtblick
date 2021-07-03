@@ -85,7 +85,9 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
       }
       const data = await extensionLoader.downloadExtension(url);
       await extensionLoader.installExtension(data);
-      isMounted() && setIsInstalled(true);
+      if (isMounted()) {
+        setIsInstalled(true);
+      }
     } catch (err) {
       addToast(`Failed to download extension ${extension.id}: ${err.message}`, {
         appearance: "error",
@@ -95,7 +97,9 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
 
   const uninstall = useCallback(async () => {
     await extensionLoader.uninstallExtension(extension.id);
-    isMounted() && setIsInstalled(false);
+    if (isMounted()) {
+      setIsInstalled(false);
+    }
   }, [extension.id, extensionLoader, isMounted]);
 
   return (

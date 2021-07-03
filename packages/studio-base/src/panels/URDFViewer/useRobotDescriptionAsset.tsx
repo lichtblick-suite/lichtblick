@@ -38,7 +38,9 @@ export default function useRobotDescriptionAsset(): {
 
   // When the error changes, show the message bar again if the user previously dismissed it.
   useLayoutEffect(() => {
-    robotDescriptionAssetError && setAssetErrorDismissed(false);
+    if (robotDescriptionAssetError) {
+      setAssetErrorDismissed(false);
+    }
   }, [robotDescriptionAssetError]);
 
   return { robotDescriptionAsset, messageBar };

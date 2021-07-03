@@ -751,7 +751,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
 
   // downsample datasets with the latest downsample function
   const downsampledDatasets = useMemo(() => {
-    invalidateDownsample;
+    void invalidateDownsample;
 
     return throttledDownsample(visibleDatasets);
   }, [invalidateDownsample, throttledDownsample, visibleDatasets]);

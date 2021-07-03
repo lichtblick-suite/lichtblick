@@ -5,6 +5,8 @@
 // This file is not used in the app, but exists to test that our eslint config catches the code we want it to catch.
 // Because we run eslint with --report-unused-disable-directives, any unused comments will be errors.
 
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+
 ({
   // eslint-disable-next-line no-restricted-syntax
   get x() {

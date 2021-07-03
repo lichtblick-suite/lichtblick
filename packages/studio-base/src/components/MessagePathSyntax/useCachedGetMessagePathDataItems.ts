@@ -177,7 +177,6 @@ export function fillInGlobalVariablesInPath(
         return { ...messagePathPart, value };
       }
 
-      messagePathPart.type;
       return messagePathPart;
     }),
   };

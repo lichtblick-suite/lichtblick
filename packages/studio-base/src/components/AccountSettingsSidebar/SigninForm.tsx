@@ -84,7 +84,6 @@ export default function SigninForm(): JSX.Element {
     if (!deviceResponse) {
       return;
     }
-    deviceResponse?.id_token;
   }, [deviceResponse]);
 
   const [{ value: session }, onOrgSelect] = useAsyncFn(

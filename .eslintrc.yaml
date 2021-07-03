@@ -50,6 +50,8 @@ rules:
     - terms: ["fixme", "xxx"]
       location: anywhere
 
+  no-unused-expressions: error
+
   prefer-arrow-callback:
     - error
     - allowNamedFunctions: true
@@ -107,6 +109,9 @@ overrides:
           allowNumber: false
           # Keeps the error count manageable while we enhance type information from the flow conversion
           allowAny: true
+
+      no-unused-expressions: off
+      "@typescript-eslint/no-unused-expressions": error
 
       "@foxglove/no-meaningless-void-operator": error
 
