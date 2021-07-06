@@ -2,14 +2,17 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Map as LeafMap, TileLayer, Control, LatLngBounds, Circle } from "leaflet";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Map as LeafMap, TileLayer, Control, LatLngBounds, CircleMarker } from "leaflet";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 import { PanelExtensionContext, MessageEvent } from "@foxglove/studio";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
-import FilteredPointLayer from "@foxglove/studio-base/panels/Map/FilteredPointMarkers";
+import FilteredPointLayer, {
+  POINT_MARKER_RADIUS,
+} from "@foxglove/studio-base/panels/Map/FilteredPointMarkers";
 import { Topic } from "@foxglove/studio-base/players/types";
+import { toSec } from "@foxglove/studio-base/util/time";
 
 import { NavSatFixMsg, Point } from "./types";
 
@@ -31,8 +34,8 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
   // Panel state management to update our set of messages
   // We use state to trigger a render on the panel
-  const [navMessages, setNavMessages] = useState<readonly MessageEvent<unknown>[]>([]);
-  const [allNavMessages, setAllNavMessages] = useState<readonly MessageEvent<unknown>[]>([]);
+  const [navMessages, setNavMessages] = useState<readonly MessageEvent<NavSatFixMsg>[]>([]);
+  const [allNavMessages, setAllNavMessages] = useState<readonly MessageEvent<NavSatFixMsg>[]>([]);
 
   // Panel state management to track the list of available topics
   const [topics, setTopics] = useState<readonly Topic[]>([]);
@@ -118,11 +121,11 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
       // if there is no current frame, we keep the last frame we've seen
       if (renderState.currentFrame && renderState.currentFrame.length > 0) {
-        setNavMessages(renderState.currentFrame);
+        setNavMessages(renderState.currentFrame as readonly MessageEvent<NavSatFixMsg>[]);
       }
 
       if (renderState.allFrames) {
-        setAllNavMessages(renderState.allFrames);
+        setAllNavMessages(renderState.allFrames as readonly MessageEvent<NavSatFixMsg>[]);
       }
     };
 
@@ -131,6 +134,22 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       context.onRender = undefined;
     };
   }, [context]);
+
+  const onHover = useCallback(
+    (messageEvent?: MessageEvent<NavSatFixMsg>) => {
+      context.setPreviewTime(
+        messageEvent == undefined ? undefined : toSec(messageEvent.receiveTime),
+      );
+    },
+    [context],
+  );
+
+  const onClick = useCallback(
+    (messageEvent: MessageEvent<NavSatFixMsg>) => {
+      context.seekPlayback?.(toSec(messageEvent.receiveTime));
+    },
+    [context],
+  );
 
   /// --- the remaining code is unrelated to the extension api ----- ///
 
@@ -146,8 +165,8 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       }
 
       for (const messageEvent of allNavMessages) {
-        const lat = (messageEvent.message as NavSatFixMsg).latitude;
-        const lon = (messageEvent.message as NavSatFixMsg).longitude;
+        const lat = messageEvent.message.latitude;
+        const lon = messageEvent.message.longitude;
         const point: Point = {
           lat,
           lon,
@@ -158,8 +177,8 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
       for (const messageEvent of navMessages) {
         const point: Point = {
-          lat: (messageEvent.message as NavSatFixMsg).latitude,
-          lon: (messageEvent.message as NavSatFixMsg).longitude,
+          lat: messageEvent.message.latitude,
+          lon: messageEvent.message.longitude,
         };
 
         return point;
@@ -180,13 +199,15 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       navSatMessageEvents: allNavMessages,
       bounds: filterBounds ?? currentMap.getBounds(),
       color: "#6771ef",
+      onHover,
+      onClick,
     });
 
     currentMap?.addLayer(pointLayer);
     return () => {
       currentMap?.removeLayer(pointLayer);
     };
-  }, [allNavMessages, currentMap, filterBounds]);
+  }, [allNavMessages, currentMap, filterBounds, onClick, onHover]);
 
   // create a filtered marker layer for the current nav messages
   // this effect is added after the allNavMessages so the layer appears above
@@ -218,13 +239,13 @@ function MapPanel(props: MapPanelProps): JSX.Element {
     let point: Point | undefined;
     let stampDelta = Number.MAX_VALUE;
     for (const msgEvent of allNavMessages) {
-      const stamp = msgEvent.receiveTime.sec + msgEvent.receiveTime.nsec / 1e9;
+      const stamp = toSec(msgEvent.receiveTime);
       const delta = previewTime - stamp;
       if (delta < stampDelta && delta >= 0) {
         stampDelta = delta;
         point = {
-          lat: (msgEvent.message as NavSatFixMsg).latitude,
-          lon: (msgEvent.message as NavSatFixMsg).longitude,
+          lat: msgEvent.message.latitude,
+          lon: msgEvent.message.longitude,
         };
       }
     }
@@ -232,9 +253,12 @@ function MapPanel(props: MapPanelProps): JSX.Element {
       return;
     }
 
-    const marker = new Circle([point.lat, point.lon], {
-      radius: 0.1,
+    const marker = new CircleMarker([point.lat, point.lon], {
+      radius: POINT_MARKER_RADIUS,
       color: "yellow",
+      stroke: false,
+      fillOpacity: 1,
+      interactive: false,
     });
 
     marker.addTo(currentMap);

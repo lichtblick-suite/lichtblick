@@ -49,7 +49,7 @@ declare module "@foxglove/studio" {
      * i.e. A plot panel may set the preview time when a user is hovering over the plot to signal
      * to other panels where the user is currently hovering and allow them to render accordingly.
      */
-    previewTime?: number;
+    previewTime?: number | undefined;
   }
 
   export type PanelExtensionContext = {
@@ -81,6 +81,11 @@ declare module "@foxglove/studio" {
      * Set the active preview time. Setting the preview time to undefined clears the preview time.
      */
     setPreviewTime: (time: number | undefined) => void;
+
+    /**
+     * Seek playback to the given time. Behaves as if the user had clicked the playback bar to seek.
+     */
+    seekPlayback?: (time: number) => void;
 
     /**
      * Process render events for the panel. Each render event receives a render state and a done callback.

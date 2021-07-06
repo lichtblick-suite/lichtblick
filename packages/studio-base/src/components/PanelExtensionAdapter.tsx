@@ -24,8 +24,9 @@ import {
   useHoverValue,
   useSetHoverValue,
 } from "@foxglove/studio-base/context/HoverValueContext";
-import { PlayerState } from "@foxglove/studio-base/players/types";
+import { PlayerCapabilities, PlayerState } from "@foxglove/studio-base/players/types";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
+import { fromSec, toSec } from "@foxglove/studio-base/util/time";
 
 const log = Logger.getLogger(__filename);
 
@@ -50,6 +51,14 @@ function selectRequestBackfill(ctx: MessagePipelineContext) {
   return ctx.requestBackfill;
 }
 
+function selectCapabilities(ctx: MessagePipelineContext) {
+  return ctx.playerState.capabilities;
+}
+
+function selectSeekPlayback(ctx: MessagePipelineContext) {
+  return ctx.seekPlayback;
+}
+
 /**
  * PanelExtensionAdapter renders a panel extension via initPanel
  *
@@ -63,6 +72,8 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
 
   const setSubscriptions = useMessagePipeline(selectSetSubscriptions);
   const requestBackfill = useMessagePipeline(selectRequestBackfill);
+  const capabilities = useMessagePipeline(selectCapabilities);
+  const seekPlayback = useMessagePipeline(selectSeekPlayback);
 
   const [subscriberId] = useState(() => uuid());
 
@@ -174,13 +185,15 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       const hoverVal = hoverValueRef.current?.value;
 
       if (startTime != undefined && hoverVal != undefined) {
-        const startStamp = startTime.sec + startTime.nsec / 1e9;
-        const stamp = startStamp + hoverVal;
+        const stamp = toSec(startTime) + hoverVal;
         if (stamp !== renderState.previewTime) {
           shouldRender = true;
         }
         renderState.previewTime = stamp;
       } else {
+        if (renderState.previewTime != undefined) {
+          shouldRender = true;
+        }
         renderState.previewTime = undefined;
       }
     }
@@ -232,6 +245,10 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
 
       saveState: saveConfig,
 
+      seekPlayback: capabilities.includes(PlayerCapabilities.playbackControl)
+        ? (stamp: number) => seekPlayback(fromSec(stamp))
+        : undefined,
+
       setPreviewTime: (stamp: number | undefined) => {
         if (stamp == undefined) {
           clearHoverValue("PanelExtensionAdatper");
@@ -243,7 +260,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
           if (!startTime) {
             return;
           }
-          const secondsFromStart = stamp - startTime.sec + startTime.nsec / 1e9;
+          const secondsFromStart = stamp - toSec(startTime);
           setHoverValue({
             type: "PLAYBACK_SECONDS",
             componentId: "PanelExtensionAdatper",
@@ -288,10 +305,12 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       },
     };
   }, [
+    capabilities,
     clearHoverValue,
     renderPanel,
     requestBackfill,
     saveConfig,
+    seekPlayback,
     setHoverValue,
     setSubscriptions,
     subscriberId,
