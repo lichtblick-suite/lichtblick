@@ -1,42 +1,47 @@
 # <img src="resources/icon/icon.png" width="40" height="40" align="top"> Foxglove Studio
 
-Foxglove Studio ([foxglove.dev](https://foxglove.dev)) is an integrated visualization and diagnosis tool for robotics. It began as a fork and evolution of[Webviz](https://github.com/cruise-automation/webviz), an open source project developed by [Cruise](https://getcruise.com/).
-
-To learn more about Foxglove, visit [foxglove.dev/about](https://foxglove.dev/about), read our [documentation](https://foxglove.dev/docs) and [release notes](https://github.com/foxglove/studio/releases), or check out [our blog](https://foxglove.dev/blog).
-
-You can also follow us on [Twitter](https://twitter.com/foxglovedev) to stay up-to-date on what our team is working on.
+Foxglove Studio ([foxglove.dev](https://foxglove.dev)) is an integrated visualization and diagnosis tool for robotics, available for [download](https://foxglove.dev/download) as a desktop app on Linux, Windows, and macOS.
 
 <p align="center">
   <a href="https://foxglove.dev"><img alt="Foxglove Studio screenshot" src="/resources/screenshot.jpg"></a>
 </p>
 
+To learn more, visit the following resources:
+
+- [About](https://foxglove.dev/about)
+- [Documentation](https://foxglove.dev/docs)
+- [Release notes](https://github.com/foxglove/studio/releases)
+- [ROS Wiki page](http://wiki.ros.org/FoxgloveStudio)
+- [Blog](https://foxglove.dev/blog)
+
+You can also join us on the following platforms to ask questions, share feedback, and stay up-to-date on what our team is working on:
+
+- [GitHub Discussions](https://github.com/foxglove/studio/discussions)
+- [Slack](https://foxglove.dev/join-slack)
+- [Newsletter](https://www.getrevue.co/profile/foxglove)
+- [Twitter](https://twitter.com/foxglovedev)
+- [LinkedIn](https://www.linkedin.com/company/foxglovedev)
+
 ## Installation
 
 Visit [foxglove.dev/download](https://foxglove.dev/download) or [GitHub Releases](https://github.com/foxglove/studio/releases) to download the latest version.
 
-## Support
-
-- [Documentation](https://foxglove.dev/docs)
-- [GitHub Discussions](https://github.com/foxglove/studio/discussions)
-- [Slack Community](https://foxglove.dev/join-slack)
-- [@foxglovedev on Twitter](https://twitter.com/foxglovedev)
-
 ## Contributing
 
-Contributions are welcome! Foxglove Studio is primarily written in TypeScript, the instructions below should help you get started:
+Foxglove Studio is primarily written in TypeScript – contributions are welcome!
 
 **Supported development environments:** Linux, Windows, macOS
 
-**Required dependencies:**
+**Dependencies:**
 
 - [Node.js](https://nodejs.org/en/) v14+
-- [Yarn](https://yarnpkg.com/getting-started/install) (`npm install -g yarn`)
+- [Yarn](https://yarnpkg.com/getting-started/install) – `npm install -g yarn`
 - [Git LFS](https://git-lfs.github.com/)
-- [Visual Studio Code](https://code.visualstudio.com/) (recommended)
+- [Visual Studio Code](https://code.visualstudio.com/) – Recommended
 
 **Getting started:**
 
-1. Clone git repo
+1. Clone repo
 1. Run `yarn install`
 1. Launch the development environment (run both scripts concurrently):
 
@@ -57,3 +62,7 @@ $ yarn lint         # lint all files
 $ yarn test         # run all tests
 $ yarn test:watch   # run tests on changed files
 ```
+
+### Credits
+
+Foxglove Studio began as a fork of [Webviz](https://github.com/cruise-automation/webviz), an open source project developed by [Cruise](https://getcruise.com/).
