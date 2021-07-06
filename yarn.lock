@@ -2273,7 +2273,7 @@ __metadata:
     "@types/string-hash": 1.1.1
     "@types/styled-components": 5.1.10
     "@types/text-metrics": "workspace:*"
-    "@types/three": ^0.129.1
+    "@types/three": ^0.130.0
     "@types/tinycolor2": 1.4.2
     "@types/url-search-params": 1.1.0
     "@types/uuid": 8.3.0
@@ -5719,10 +5719,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@types/three@npm:^0.129.1":
-  version: 0.129.1
-  resolution: "@types/three@npm:0.129.1"
-  checksum: f568361b9ae514432a77c4e2f1cf01d88903ce0341b83d0fff7732ff687f4fe285a2ea73d17fdf9565ec665b26c6b5e17e19217c3d871be66ea9c2bab8e87a4e
+"@types/three@npm:^0.130.0":
+  version: 0.130.0
+  resolution: "@types/three@npm:0.130.0"
+  checksum: 0dc7cbed7a98ea5de5939571b0a309411e81bd4b31fd36383f69e18e109a94686bbd24d37a89d5f7fe73099a0c49b64478a92d9bf8908c04ae1ec0ecf7b05c95
   languageName: node
   linkType: hard
 
