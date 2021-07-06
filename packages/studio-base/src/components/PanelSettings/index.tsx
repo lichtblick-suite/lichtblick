@@ -55,13 +55,14 @@ export default function PanelSettings(): JSX.Element {
     return (
       <ShareJsonModal
         onRequestClose={() => setShowShareModal(false)}
-        value={panelConfigById[selectedPanelId] ?? {}}
+        initialValue={panelConfigById[selectedPanelId] ?? {}}
         onChange={(config) =>
           savePanelConfigs({
             configs: [{ id: selectedPanelId, config: config as PanelConfig, override: true }],
           })
         }
-        noun="panel configuration"
+        title="Import/export settings"
+        noun="panel settings"
       />
     );
   }, [selectedPanelId, showShareModal, getCurrentLayout, savePanelConfigs]);

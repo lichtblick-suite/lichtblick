@@ -50,9 +50,18 @@ export default function HelpModal({
             rootHovered: {
               color: theme.palette.neutralSecondaryAlt,
             },
+            icon: {
+              verticalAlign: "top",
+              marginLeft: theme.spacing.s1,
+              marginRight: theme.spacing.s1,
+              height: theme.spacing.l2,
+              lineHeight: theme.spacing.l2,
+              textAlign: "center",
+              flexShrink: 0,
+            },
           }}
           ariaLabel="Close help modal"
-          iconProps={{ iconName: "Clear" }}
+          iconProps={{ iconName: "Cancel" }}
           onClick={onRequestClose}
         />
       </div>

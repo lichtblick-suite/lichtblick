@@ -12,34 +12,19 @@
 //   You may not use this file except in compliance with the License.
 
 import { storiesOf } from "@storybook/react";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import TestUtils from "react-dom/test-utils";
 
 import ShareJsonModal from "@foxglove/studio-base/components/ShareJsonModal";
-import CurrentLayoutContext, {
-  useCurrentLayoutActions,
-} from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import CurrentLayoutState, {
-  DEFAULT_LAYOUT_FOR_TESTS,
-} from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
-import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 
 storiesOf("components/ShareJsonModal", module)
-  .addDecorator((Child: any) => {
-    const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
-    return (
-      <CurrentLayoutContext.Provider value={currentLayout}>
-        <Child />
-      </CurrentLayoutContext.Provider>
-    );
-  })
   .add("standard", () => (
     <ShareJsonModal
+      title="Foo"
       onRequestClose={() => {
         // no-op
       }}
-      value=""
+      initialValue=""
       onChange={() => {
         // no-op
       }}
@@ -52,22 +37,17 @@ storiesOf("components/ShareJsonModal", module)
         const textarea: any = document.querySelector("textarea");
         textarea.value = "{";
         TestUtils.Simulate.change(textarea);
-        setTimeout(() => {
-          document.querySelector<HTMLElement>(".test-apply")?.click();
-        }, 10);
       }, 10);
     }, []);
-    const { setSelectedLayout } = useCurrentLayoutActions();
     return (
       <div data-modalcontainer="true">
         <ShareJsonModal
+          title="Foo"
           onRequestClose={() => {
             // no-op
           }}
-          value={""}
-          onChange={(value) =>
-            setSelectedLayout({ id: "X" as LayoutID, data: value as Partial<PanelsState> })
-          }
+          initialValue={""}
+          onChange={() => {}}
           noun="layout"
         />
       </div>
