@@ -76,7 +76,7 @@
     "react-outside-click-handler": "1.3.0",
     "react-resize-detector": "6.7.3",
     "react-table": "7.7.0",
-    "react-toast-notifications": "2.4.4",
+    "react-toast-notifications": "2.5.0",
     "react-transition-group": "4.4.2",
     "react-use": "patch:react-use@17.2.4#../../patches/react-use.patch",
     "react-virtualized": "9.22.3",

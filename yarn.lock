@@ -2340,7 +2340,7 @@ __metadata:
     react-resize-detector: 6.7.3
     react-svg-loader: 3.0.3
     react-table: 7.7.0
-    react-toast-notifications: 2.4.4
+    react-toast-notifications: 2.5.0
     react-transition-group: 4.4.2
     react-use: "patch:react-use@17.2.4#../../patches/react-use.patch"
     react-virtualized: 9.22.3
@@ -20957,16 +20957,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-toast-notifications@npm:2.4.4":
-  version: 2.4.4
-  resolution: "react-toast-notifications@npm:2.4.4"
+"react-toast-notifications@npm:2.5.0":
+  version: 2.5.0
+  resolution: "react-toast-notifications@npm:2.5.0"
   dependencies:
     "@emotion/core": ^10.0.14
     react-transition-group: ^4.4.1
   peerDependencies:
     react: ^16.8.0 || ^17.0.0
     react-dom: ^16.8.0 || ^17.0.0
-  checksum: 1c56a8a213982518e2a9a0a9e5b30668a161e700710f9be7bca685a05fb269e3ddfacaeaa16388316c9b27abe18e6e9ec71fccf50b7ca9008b7a6d3eaaa799c3
+  checksum: 96d7e635377a051bbfa48293871872bf7b4d4c8233f6c529e3ca4d8a937d2576e884b01b8e2c10204e4f23597aac278699c4ba8781fcfdea3f73e906049837b4
   languageName: node
   linkType: hard
 
