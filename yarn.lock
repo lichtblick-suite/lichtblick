@@ -2165,29 +2165,23 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/rosmsg-msgs-common@workspace:*, @foxglove/rosmsg-msgs-common@workspace:packages/rosmsg-msgs-common":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/rosmsg-msgs-common@workspace:packages/rosmsg-msgs-common"
+"@foxglove/rosmsg-msgs-common@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@foxglove/rosmsg-msgs-common@npm:1.0.0"
   dependencies:
-    "@foxglove/rosmsg": 0.1.2
-    "@types/prettier": 2.3.1
-    esbuild-runner: 2.2.0
-    prettier: 2.3.2
-    typescript: 4.3.5
-  languageName: unknown
-  linkType: soft
+    "@foxglove/rosmsg": ^0.1.2
+  checksum: 6599754228e4b9d9a680af222915b1789851412a2abd0d1fb97c6514de85c0d2ab6cd6df7da88b3286dd7f63cb3a1ef04c6afa1979f1be33fe6a571c428cdf51
+  languageName: node
+  linkType: hard
 
-"@foxglove/rosmsg-msgs-foxglove@workspace:*, @foxglove/rosmsg-msgs-foxglove@workspace:packages/rosmsg-msgs-foxglove":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/rosmsg-msgs-foxglove@workspace:packages/rosmsg-msgs-foxglove"
+"@foxglove/rosmsg-msgs-foxglove@npm:2.0.0":
+  version: 2.0.0
+  resolution: "@foxglove/rosmsg-msgs-foxglove@npm:2.0.0"
   dependencies:
-    "@foxglove/rosmsg": 0.1.2
-    "@types/prettier": 2.3.1
-    esbuild-runner: 2.2.0
-    prettier: 2.3.2
-    typescript: 4.3.5
-  languageName: unknown
-  linkType: soft
+    "@foxglove/rosmsg": ^0.1.2
+  checksum: 18048e6017c6d761f55964acc3771cf318c6a01340122166b8bff54decbf392b2f9571e31b163af899bb9c6232f64cfe9aeea54cfe7e81dc7db23a48b55425d1
+  languageName: node
+  linkType: hard
 
 "@foxglove/rosmsg-serialization@workspace:*, @foxglove/rosmsg-serialization@workspace:packages/rosmsg-serialization":
   version: 0.0.0-use.local
@@ -2201,7 +2195,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/rosmsg@npm:0.1.2":
+"@foxglove/rosmsg@npm:0.1.2, @foxglove/rosmsg@npm:^0.1.2":
   version: 0.1.2
   resolution: "@foxglove/rosmsg@npm:0.1.2"
   dependencies:
@@ -2220,8 +2214,8 @@ __metadata:
     "@foxglove/den": "workspace:*"
     "@foxglove/electron-socket": 1.0.0
     "@foxglove/hooks": "workspace:*"
-    "@foxglove/rosmsg-msgs-common": "workspace:*"
-    "@foxglove/rosmsg-msgs-foxglove": "workspace:*"
+    "@foxglove/rosmsg-msgs-common": 1.0.0
+    "@foxglove/rosmsg-msgs-foxglove": 2.0.0
     "@foxglove/studio": "workspace:*"
     "@foxglove/velodyne-cloud": "workspace:*"
     "@mdi/svg": 5.9.55
