@@ -59,3 +59,5 @@ $ yarn test:watch   # run tests on changed files
 Foxglove Studio began as a fork and evolution of [Webviz](https://github.com/cruise-automation/webviz), an open source project developed by [Cruise](https://getcruise.com/).
 
 To learn more about Foxglove, visit [foxglove.dev/about](https://foxglove.dev/about) or view our [documentation](https://foxglove.dev/docs) and [release notes](https://github.com/foxglove/studio/releases).
+
+You can also check out [our blog](https://foxglove.dev/blog) or follow us on [Twitter](https://twitter.com/foxglovedev) to stay up-to-date on what our team is working on.
