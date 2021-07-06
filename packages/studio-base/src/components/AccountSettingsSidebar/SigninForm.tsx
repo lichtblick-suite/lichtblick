@@ -80,12 +80,6 @@ export default function SigninForm(): JSX.Element {
     }
   }, [addToast, deviceResponseError]);
 
-  useEffect(() => {
-    if (!deviceResponse) {
-      return;
-    }
-  }, [deviceResponse]);
-
   const [{ value: session }, onOrgSelect] = useAsyncFn(
     async (org: Org) => {
       if (!deviceResponse) {
