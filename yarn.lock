@@ -2276,7 +2276,7 @@ __metadata:
     "@types/three": ^0.130.0
     "@types/tinycolor2": 1.4.2
     "@types/url-search-params": 1.1.0
-    "@types/uuid": 8.3.0
+    "@types/uuid": 8.3.1
     "@types/wicg-file-system-access": 2020.9.1
     "@types/ws": 7.4.5
     "@wojtekmaj/enzyme-adapter-react-17": 0.6.2
@@ -5765,10 +5765,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/uuid@npm:8.3.0":
-  version: 8.3.0
-  resolution: "@types/uuid@npm:8.3.0"
-  checksum: 0f46b15020b9c252473fb327a6491fd7d238c7b5bbaebd32195a0de178db040f6abb96902507ba25dd4a673cdd9cc28b8880512dba54561e8bc60d8f326c1e30
+"@types/uuid@npm:8.3.1":
+  version: 8.3.1
+  resolution: "@types/uuid@npm:8.3.1"
+  checksum: b41bdc5e86c6f0f1899306be10455636da0f2168c9489b869edd6837ddeb7c0e501b1ff7d857402462986bada2a379125743dd895fa801d03437cd632116a373
   languageName: node
   linkType: hard
 
