@@ -35,7 +35,7 @@
     "@sentry/types": "6.8.0",
     "amplitude-js": "8.3.1",
     "async-mutex": "0.3.1",
-    "chart.js": "3.4.0",
+    "chart.js": "3.4.1",
     "chartjs-plugin-annotation": "1.0.2",
     "chartjs-plugin-datalabels": "2.0.0",
     "chartjs-plugin-zoom": "github:foxglove/chartjs-plugin-zoom#656541279943f00dce600288435f83c436293146",
