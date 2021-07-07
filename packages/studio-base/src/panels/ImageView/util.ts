@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import clamp from "lodash/clamp";
-
 import { Topic, MessageEvent } from "@foxglove/studio-base/players/types";
 import { CameraInfo } from "@foxglove/studio-base/types/Messages";
 import {
@@ -22,11 +20,8 @@ import {
 
 import PinholeCameraModel from "./PinholeCameraModel";
 
-// The OffscreenCanvas type is not yet in Flow. It's similar to, but more restrictive than HTMLCanvasElement.
-// TODO: change this to the Flow definition once it's been added.
-export type OffscreenCanvas = HTMLCanvasElement;
-
 export type RenderOptions = {
+  imageSmoothing?: boolean;
   minValue?: number;
   maxValue?: number;
 };
@@ -40,19 +35,16 @@ export type MarkerOption = {
 
 export type RawMarkerData = {
   markers: MessageEvent<unknown>[];
-  scale: number;
   transformMarkers: boolean;
   cameraInfo?: CameraInfo;
 };
 
-export type MarkerData =
-  | {
-      markers: MessageEvent<unknown>[];
-      originalWidth?: number; // undefined means no scaling is needed (use the image's size)
-      originalHeight?: number; // undefined means no scaling is needed (use the image's size)
-      cameraModel?: PinholeCameraModel; // undefined means no transformation is needed
-    }
-  | undefined;
+export type MarkerData = {
+  markers: MessageEvent<unknown>[];
+  originalWidth?: number; // undefined means no scaling is needed (use the image's size)
+  originalHeight?: number; // undefined means no scaling is needed (use the image's size)
+  cameraModel?: PinholeCameraModel; // undefined means no transformation is needed
+};
 
 export function getMarkerOptions(
   imageTopic: string,
@@ -122,30 +114,8 @@ export function groupTopics(topics: Topic[]): Map<string, Topic[]> {
   return imageTopicsByNamespace;
 }
 
-// check if we pan out of bounds with the given top, left, right, bottom
-// x, y, scale is the state after we pan
-// if out of bound, return newX and newY satisfying the bounds
-// else, return the original x and y
-export function checkOutOfBounds(
-  x: number,
-  y: number,
-  outsideWidth: number,
-  outsideHeight: number,
-  insideWidth: number,
-  insideHeight: number,
-): [number, number] {
-  const leftX = 0;
-  const topY = 0;
-  const rightX = outsideWidth - insideWidth;
-  const bottomY = outsideHeight - insideHeight;
-  return [
-    clamp(x, Math.min(leftX, rightX), Math.max(leftX, rightX)),
-    clamp(y, Math.min(topY, bottomY), Math.max(topY, bottomY)),
-  ];
-}
-
 export function buildMarkerData(rawMarkerData: RawMarkerData): MarkerData | undefined {
-  const { markers, scale, transformMarkers, cameraInfo } = rawMarkerData;
+  const { markers, transformMarkers, cameraInfo } = rawMarkerData;
   if (markers.length === 0) {
     return {
       markers,
@@ -162,24 +132,10 @@ export function buildMarkerData(rawMarkerData: RawMarkerData): MarkerData | unde
     cameraModel = new PinholeCameraModel(cameraInfo);
   }
 
-  // Markers can only be rendered if we know the original size of the image.
-  // Prefer using CameraInfo to determine the image size.
-  let originalWidth: number | undefined = cameraInfo?.width ?? 0;
-  let originalHeight: number | undefined = cameraInfo?.height ?? 0;
-  if (originalWidth <= 0 || originalHeight <= 0) {
-    if (scale === 1) {
-      // Otherwise, if scale === 1, the image was not downsampled, so the size of the bitmap is accurate.
-      originalWidth = undefined;
-      originalHeight = undefined;
-    } else {
-      return undefined;
-    }
-  }
-
   return {
     markers,
     cameraModel,
-    originalWidth,
-    originalHeight,
+    originalWidth: cameraInfo?.width,
+    originalHeight: cameraInfo?.height,
   };
 }

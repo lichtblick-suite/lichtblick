@@ -25,7 +25,7 @@ type DistortionState = typeof DISTORTION_STATE[keyof typeof DISTORTION_STATE];
 // fromCameraInfo() and unrectifyPoint()
 // http://docs.ros.org/diamondback/api/image_geometry/html/c++/pinhole__camera__model_8cpp_source.html
 export default class PinholeCameraModel {
-  _distortionState: DistortionState = DISTORTION_STATE.NONE;
+  private _distortionState: DistortionState = DISTORTION_STATE.NONE;
   D: readonly number[] = [];
   K: readonly number[] = [];
   P: readonly number[] = [];

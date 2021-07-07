@@ -83,7 +83,7 @@ function AvailableTopicsStory({
         frame: {},
       }}
     >
-      <ImageView overrideConfig={{ ...ImageView.defaultConfig, cameraTopic, scale: 1 }} />
+      <ImageView overrideConfig={{ ...ImageView.defaultConfig, cameraTopic }} />
     </PanelSetup>
   );
 }

@@ -55,8 +55,7 @@ import { getSynchronizingReducers } from "@foxglove/studio-base/util/synchronize
 import { formatTimeRaw, getTimestampForMessage } from "@foxglove/studio-base/util/time";
 import toggle from "@foxglove/studio-base/util/toggle";
 
-import ImageCanvas, { DEFAULT_MAX_ZOOM } from "./ImageCanvas";
-import imageCanvasStyles from "./ImageCanvas.module.scss";
+import ImageCanvas from "./ImageCanvas";
 import helpContent from "./index.help.md";
 import style from "./index.module.scss";
 import {
@@ -73,7 +72,6 @@ type DefaultConfig = {
   cameraTopic: string;
   enabledMarkerTopics: string[];
   customMarkerTopicOptions?: string[];
-  scale: number;
   synchronize: boolean;
 };
 
@@ -81,9 +79,9 @@ export type Config = DefaultConfig & {
   transformMarkers: boolean;
   mode?: "fit" | "fill" | "other";
   smooth?: boolean;
+  zoom?: number;
+  pan?: { x: number; y: number };
   zoomPercentage?: number;
-  offset?: [number, number];
-  maxZoom?: number;
   minValue?: number;
   maxValue?: number;
   saveStoryConfig?: () => void;
@@ -123,8 +121,8 @@ const TopicTimestamp = ({
 
 const BottomBar = ({ children }: { children?: React.ReactNode }) => (
   <div
-    className={cx(imageCanvasStyles["bottom-bar"], {
-      [imageCanvasStyles.inScreenshotTests!]: inScreenshotTests(),
+    className={cx(style["bottom-bar"], {
+      [style.inScreenshotTests!]: inScreenshotTests(),
     })}
   >
     {children}
@@ -275,7 +273,6 @@ const NO_CUSTOM_OPTIONS: string[] = [];
 function ImageView(props: Props) {
   const { config, saveConfig } = props;
   const {
-    scale,
     cameraTopic,
     enabledMarkerTopics,
     transformMarkers,
@@ -435,10 +432,7 @@ function ImageView(props: Props) {
   });
 
   const shouldSynchronize = config.synchronize && enabledMarkerTopics.length > 0;
-  const imageAndMarkerTopics = useShallowMemo([
-    { topic: cameraTopic, imageScale: scale },
-    ...enabledMarkerTopics,
-  ]);
+  const imageAndMarkerTopics = useShallowMemo([{ topic: cameraTopic }, ...enabledMarkerTopics]);
   const { messagesByTopic, synchronizedMessages } = useOptionallySynchronizedMessages(
     shouldSynchronize,
     imageAndMarkerTopics,
@@ -489,7 +483,7 @@ function ImageView(props: Props) {
   );
 
   const markerDropdown = useMemo(() => {
-    const missingRequiredCameraInfo = scale !== 1 && !cameraInfo;
+    const missingRequiredCameraInfo = !cameraInfo;
 
     return (
       <Dropdown
@@ -551,7 +545,6 @@ function ImageView(props: Props) {
     onToggleMarkerName,
     renderedMarkerTimestamps,
     saveConfig,
-    scale,
   ]);
 
   const imageMessage = messagesByTopic[cameraTopic]?.[0];
@@ -574,12 +567,13 @@ function ImageView(props: Props) {
     return onFinishRenderImage;
   }, [pauseFrame]);
 
-  const rawMarkerData = {
-    markers: markersToRender,
-    scale,
-    transformMarkers,
-    cameraInfo: markersToRender.length > 0 ? cameraInfo : undefined,
-  };
+  const rawMarkerData = useMemo(() => {
+    return {
+      markers: markersToRender,
+      transformMarkers,
+      cameraInfo: markersToRender.length > 0 ? cameraInfo : undefined,
+    };
+  }, [cameraInfo, markersToRender, transformMarkers]);
 
   const toolbar = useMemo(() => {
     return (
@@ -655,13 +649,11 @@ const defaultConfig: Config = {
   cameraTopic: "",
   enabledMarkerTopics: [],
   customMarkerTopicOptions: [],
-  scale: 1,
   transformMarkers: false,
   synchronize: false,
   mode: "fit",
-  zoomPercentage: 100,
-  maxZoom: DEFAULT_MAX_ZOOM,
-  offset: [0, 0],
+  zoom: 1,
+  pan: { x: 0, y: 0 },
 };
 
 const configSchema: PanelConfigSchema<Config> = [
@@ -670,14 +662,6 @@ const configSchema: PanelConfigSchema<Config> = [
     key: "smooth",
     type: "toggle",
     title: "Bilinear smoothing",
-  },
-  {
-    key: "maxZoom",
-    type: "number",
-    title: "Maximum zoom %",
-    placeholder: `${DEFAULT_MAX_ZOOM}`,
-    allowEmpty: true,
-    validate: (value) => Math.max(100, value),
   },
   {
     key: "minValue",
@@ -693,16 +677,6 @@ const configSchema: PanelConfigSchema<Config> = [
     placeholder: "10000",
     allowEmpty: true,
   },
-  {
-    key: "scale",
-    type: "dropdown",
-    title: "Image resolution",
-    options: [
-      { value: 0.2, text: "20%" },
-      { value: 0.5, text: "50%" },
-      { value: 1, text: "100%" },
-    ],
-  },
 ];
 
 export default Panel(
@@ -710,6 +684,6 @@ export default Panel(
     panelType: "ImageViewPanel",
     defaultConfig,
     configSchema,
-    supportsStrictMode: false,
+    supportsStrictMode: true,
   }),
 );

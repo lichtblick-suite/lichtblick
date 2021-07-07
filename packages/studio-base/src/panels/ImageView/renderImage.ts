@@ -36,14 +36,7 @@ import {
   decodeMono8,
   decodeMono16,
 } from "./decodings";
-import {
-  buildMarkerData,
-  Dimensions,
-  RawMarkerData,
-  MarkerData,
-  OffscreenCanvas,
-  RenderOptions,
-} from "./util";
+import { buildMarkerData, Dimensions, RawMarkerData, MarkerData, RenderOptions } from "./util";
 
 const IMAGE_DATATYPES = ["sensor_msgs/CompressedImage", "sensor_msgs/Image"];
 
@@ -52,27 +45,30 @@ const IMAGE_DATATYPES = ["sensor_msgs/CompressedImage", "sensor_msgs/Image"];
 let hasLoggedCameraModelError: boolean = false;
 
 // Given a canvas, an image message, and marker info, render the image to the canvas.
-// Nothing in this module should have state.
 export async function renderImage({
   canvas,
+  zoomMode,
+  panZoom,
   imageMessage,
   imageMessageDatatype,
   rawMarkerData,
   options,
 }: {
-  canvas?: HTMLCanvasElement | OffscreenCanvas;
-  imageMessage?: MessageEvent<unknown>;
+  canvas: HTMLCanvasElement | OffscreenCanvas;
+  zoomMode: "fit" | "fill" | "other";
+  panZoom: { x: number; y: number; scale: number };
+  imageMessage?: Image | CompressedImage;
   imageMessageDatatype?: string;
   rawMarkerData: RawMarkerData;
   options?: RenderOptions;
 }): Promise<Dimensions | undefined> {
-  if (!canvas) {
-    return undefined;
-  }
   if (!imageMessage || imageMessageDatatype == undefined) {
     clearCanvas(canvas);
     return undefined;
   }
+
+  const { imageSmoothing = false } = options ?? {};
+
   let markerData = undefined;
   try {
     markerData = buildMarkerData(rawMarkerData);
@@ -85,7 +81,7 @@ export async function renderImage({
 
   try {
     const bitmap = await decodeMessageToBitmap(imageMessage, imageMessageDatatype, options);
-    const dimensions = paintBitmap(canvas, bitmap, markerData);
+    const dimensions = render(canvas, zoomMode, panZoom, bitmap, imageSmoothing, markerData);
     bitmap.close();
     return dimensions;
   } catch (error) {
@@ -112,12 +108,12 @@ function maybeUnrectifyPoint(
 }
 
 async function decodeMessageToBitmap(
-  msg: MessageEvent<unknown>,
+  imageMessage: Partial<Image> | Partial<CompressedImage>,
   datatype: string,
   options: RenderOptions = {},
 ): Promise<ImageBitmap> {
   let image: ImageData | HTMLImageElement | Blob;
-  const { data: rawData } = msg.message as Partial<Image>;
+  const { data: rawData } = imageMessage;
   if (!(rawData instanceof Uint8Array)) {
     throw new Error("Message must have data of type Uint8Array");
   }
@@ -129,9 +125,10 @@ async function decodeMessageToBitmap(
   // for properties consistent with either datatype, and render accordingly.
   if (
     datatype === "sensor_msgs/Image" &&
-    isNonEmptyOrUndefined((msg.message as Partial<Image>).encoding)
+    "encoding" in imageMessage &&
+    isNonEmptyOrUndefined(imageMessage.encoding)
   ) {
-    const { is_bigendian, width, height, encoding } = msg.message as Image;
+    const { is_bigendian, width, height, encoding } = imageMessage as Image;
     image = new ImageData(width, height);
     switch (encoding) {
       case "yuv422":
@@ -172,9 +169,9 @@ async function decodeMessageToBitmap(
     }
   } else if (
     IMAGE_DATATYPES.includes(datatype) ||
-    isNonEmptyOrUndefined((msg.message as Partial<CompressedImage>).format)
+    ("format" in imageMessage && isNonEmptyOrUndefined(imageMessage.format))
   ) {
-    const { format } = msg.message as CompressedImage;
+    const { format } = imageMessage as CompressedImage;
     image = new Blob([rawData], { type: `image/${format}` });
   } else {
     throw new Error(`Message type is not usable for rendering images.`);
@@ -183,45 +180,74 @@ async function decodeMessageToBitmap(
   return self.createImageBitmap(image);
 }
 
-function clearCanvas(canvas?: HTMLCanvasElement) {
+function clearCanvas(canvas?: HTMLCanvasElement | OffscreenCanvas) {
   if (canvas) {
     canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
   }
 }
 
-function paintBitmap(
-  canvas: HTMLCanvasElement,
+function render(
+  canvas: HTMLCanvasElement | OffscreenCanvas,
+  zoomMode: "fit" | "fill" | "other",
+  panZoom: { x: number; y: number; scale: number },
   bitmap: ImageBitmap,
-  markerData: MarkerData,
+  imageSmoothing: boolean,
+  markerData: MarkerData | undefined,
 ): Dimensions | undefined {
-  let bitmapDimensions = { width: bitmap.width, height: bitmap.height };
+  const bitmapDimensions = { width: bitmap.width, height: bitmap.height };
   const ctx = canvas.getContext("2d");
   if (!ctx) {
     return;
   }
-  if (!markerData) {
-    resizeCanvas(canvas, bitmap.width, bitmap.height);
-    ctx.transform(1, 0, 0, 1, 0, 0);
-    ctx.drawImage(bitmap, 0, 0);
-    return bitmapDimensions;
+
+  ctx.imageSmoothingEnabled = imageSmoothing;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const { markers = [], cameraModel } = markerData ?? {};
+
+  const viewportW = canvas.width;
+  const viewportH = canvas.height;
+
+  let imageViewportScale = viewportW / bitmap.width;
+
+  const calculatedHeight = bitmap.height * imageViewportScale;
+
+  // if we are trying to fit and the height exeeds viewport, we need to scale on height
+  if (zoomMode === "fit" && calculatedHeight > viewportH) {
+    imageViewportScale = viewportH / bitmap.height;
   }
 
-  const { markers, cameraModel } = markerData;
-  let { originalWidth, originalHeight } = markerData;
-  if (originalWidth == undefined) {
-    originalWidth = bitmap.width;
-  }
-  if (originalHeight == undefined) {
-    originalHeight = bitmap.height;
+  // if we are trying to fill and the height doesn't fill viewport, we need to scale on height
+  if (zoomMode === "fill" && calculatedHeight < viewportH) {
+    imageViewportScale = viewportH / bitmap.height;
   }
 
-  bitmapDimensions = { width: originalWidth, height: originalHeight };
-  resizeCanvas(canvas, originalWidth, originalHeight);
+  if (zoomMode === "other") {
+    imageViewportScale = 1;
+  }
+
   ctx.save();
-  ctx.scale(originalWidth / bitmap.width, originalHeight / bitmap.height);
+
+  // translate x/y from the center of the canvas
+  ctx.translate(viewportW / 2, viewportH / 2);
+  ctx.translate(panZoom.x, panZoom.y);
+
+  ctx.scale(panZoom.scale, panZoom.scale);
+  ctx.scale(imageViewportScale, imageViewportScale);
+
+  // center the image in the viewport
+  // also sets 0,0 as the upper left corner of the image since markers are drawn from 0,0 on the image
+  ctx.translate(-bitmap.width / 2, -bitmap.height / 2);
+
   ctx.drawImage(bitmap, 0, 0);
-  ctx.restore();
-  ctx.save();
+
+  // The bitmap images from the image message may be resized to conserve space
+  // while the markers are positioned relative to the original image size.
+  // Original width/height are the image dimensions for the marker positions
+  // These dimensions are used to scale the markers positions separately from the bitmap size
+  const { originalWidth = bitmap.width, originalHeight = bitmap.height } = markerData ?? {};
+  ctx.scale(bitmap.width / originalWidth, bitmap.height / originalHeight);
+
   try {
     paintMarkers(ctx, markers as MessageEvent<ImageMarker | ImageMarkerArray>[], cameraModel);
   } catch (err) {
@@ -233,7 +259,7 @@ function paintBitmap(
 }
 
 function paintMarkers(
-  ctx: CanvasRenderingContext2D,
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
   messages: MessageEvent<ImageMarker | ImageMarkerArray>[],
   cameraModel: PinholeCameraModel | undefined,
 ) {
@@ -249,13 +275,14 @@ function paintMarkers(
       }
     } catch (e) {
       console.error("Unable to paint marker to ImageView", e, message);
+    } finally {
+      ctx.restore();
     }
-    ctx.restore();
   }
 }
 
 function paintMarker(
-  ctx: CanvasRenderingContext2D,
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
   marker: ImageMarker,
   cameraModel: PinholeCameraModel | undefined,
 ) {
@@ -372,12 +399,5 @@ function paintMarker(
 
     default:
       console.warn("unrecognized image marker type", marker);
-  }
-}
-
-function resizeCanvas(canvas: HTMLCanvasElement | undefined, width: number, height: number) {
-  if (canvas && (canvas.width !== width || canvas.height !== height)) {
-    canvas.width = width;
-    canvas.height = height;
   }
 }

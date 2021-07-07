@@ -11,12 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { MessageEvent } from "@foxglove/studio-base/players/types";
+import { Image, CompressedImage } from "@foxglove/studio-base/types/Messages";
 import Rpc, { Channel } from "@foxglove/studio-base/util/Rpc";
 import { setupWorker } from "@foxglove/studio-base/util/RpcWorkerUtils";
 
 import { renderImage } from "./renderImage";
-import { Dimensions, RawMarkerData, OffscreenCanvas, RenderOptions } from "./util";
+import { Dimensions, RawMarkerData, RenderOptions } from "./util";
 
 class ImageCanvasWorker {
   _idToCanvas: {
@@ -34,21 +34,49 @@ class ImageCanvasWorker {
 
     rpc.receive(
       "renderImage",
-      async ({
-        id,
-        imageMessage,
-        imageMessageDatatype,
-        rawMarkerData,
-        options,
-      }: {
+      async (args: {
         id: string;
-        imageMessage?: MessageEvent<unknown>;
+        zoomMode: "fit" | "fill" | "other";
+        panZoom: { x: number; y: number; scale: number };
+        viewport: { width: number; height: number };
+        imageMessage?: Image | CompressedImage;
         imageMessageDatatype?: string;
         rawMarkerData: RawMarkerData;
         options: RenderOptions;
       }): Promise<Dimensions | undefined> => {
+        const {
+          id,
+          zoomMode,
+          panZoom,
+          viewport,
+          imageMessage,
+          imageMessageDatatype,
+          rawMarkerData,
+          options,
+        } = args;
+
         const canvas = this._idToCanvas[id];
-        return renderImage({ canvas, imageMessage, imageMessageDatatype, rawMarkerData, options });
+        if (!canvas) {
+          return;
+        }
+
+        if (canvas.width !== viewport.width) {
+          canvas.width = viewport.width;
+        }
+
+        if (canvas.height !== viewport.height) {
+          canvas.height = viewport.height;
+        }
+
+        return renderImage({
+          canvas,
+          zoomMode,
+          panZoom,
+          imageMessage,
+          imageMessageDatatype,
+          rawMarkerData,
+          options,
+        });
       },
     );
   }

@@ -13,39 +13,10 @@
 @import "@foxglove/studio-base/styles/colors.module.scss";
 
 .root {
+  overflow: hidden;
+  width: 100%;
   height: 100%;
   position: relative;
-}
-
-.canvas {
-  min-width: 0;
-  min-height: 0;
-  object-position: top left;
-}
-
-.bottom-bar {
-  transition: opacity 0.1s ease-in-out;
-  display: flex;
-  flex: 0 0 auto;
-  flex-direction: row;
-  background-color: transparent;
-  text-align: right;
-
-  position: absolute;
-  right: 4px;
-  padding-right: 5px;
-  bottom: 8px;
-  z-index: 100;
-  background-color: transparent;
-  opacity: 0;
-
-  &.inScreenshotTests {
-    opacity: 1;
-  }
-
-  :global(.mosaic-window):hover & {
-    opacity: 1;
-  }
 }
 
 .magnify {
@@ -56,9 +27,11 @@
   opacity: 1;
   background-color: $dark3;
   display: none;
+
   .root:hover & {
     display: block;
   }
+
   &:global(.hoverScreenshot) {
     display: block;
   }
@@ -75,7 +48,7 @@
   }
 }
 
-.zoomChart {
+.zoomContextMenu {
   position: absolute;
   bottom: 45px;
   left: 0;

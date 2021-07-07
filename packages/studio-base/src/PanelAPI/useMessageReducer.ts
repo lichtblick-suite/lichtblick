@@ -33,7 +33,7 @@ const log = Log.getLogger(__filename);
 
 type MessageReducer<T> = (arg0: T, message: MessageEvent<unknown>) => T;
 type MessagesReducer<T> = (arg0: T, messages: readonly MessageEvent<unknown>[]) => T;
-export type RequestedTopic = string | { topic: string; imageScale: number };
+export type RequestedTopic = string | { topic: string };
 
 // Compute the subscriptions to be requested from the player.
 function useSubscriptions({
@@ -61,7 +61,6 @@ function useSubscriptions({
           preloadingFallback,
           topic: request.topic,
           encoding: "image/compressed",
-          scale: request.imageScale,
         };
       }
       return { requester, preloadingFallback, topic: request };

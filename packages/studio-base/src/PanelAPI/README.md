@@ -45,7 +45,7 @@ Using this hook will cause the panel to re-render when any new messages come in 
 
 ```js
 PanelAPI.useMessageReducer<T>(props: {|
-  topics: (string | {| topic: string, imageScale: number |})[],
+  topics: (string | { topic: string })[],
   restore: (prevState: ?T) => T,
   addMessage: (prevState: T, message: Message) => T,
 |}): T;
@@ -53,7 +53,7 @@ PanelAPI.useMessageReducer<T>(props: {|
 
 ### Subscription parameters
 
-- `topics`: set of topics to subscribe to. Changing only the topics will not cause `restore` or `addMessage`/`addMessages` to be called. You can pass in an object if you want to set the `imageScale`: a number between 0 and 1 for subscriptions to image topics, requesting that the player downsample images. _(Unused in the open-source version of Webviz.)_
+- `topics`: set of topics to subscribe to. Changing only the topics will not cause `restore` or `addMessage`/`addMessages` to be called.
 
 ### Reducer functions
 

@@ -22,6 +22,31 @@
   }
 }
 
+.bottom-bar {
+  transition: opacity 0.1s ease-in-out;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: row;
+  background-color: transparent;
+  text-align: right;
+
+  position: absolute;
+  right: 4px;
+  padding-right: 5px;
+  bottom: 8px;
+  z-index: 100;
+  background-color: transparent;
+  opacity: 0;
+
+  &.inScreenshotTests {
+    opacity: 1;
+  }
+
+  :global(.mosaic-window):hover & {
+    opacity: 1;
+  }
+}
+
 .dropdownItem {
   position: relative;
 }

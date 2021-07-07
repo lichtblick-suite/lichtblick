@@ -13,14 +13,15 @@
 
 import { Story } from "@storybook/react";
 import { range, noop } from "lodash";
+import { useMemo } from "react";
 
 import ImageView, { Config } from "@foxglove/studio-base/panels/ImageView";
 import ImageCanvas from "@foxglove/studio-base/panels/ImageView/ImageCanvas";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
-import { ImageMarker } from "@foxglove/studio-base/types/Messages";
+import { CameraInfo, ImageMarker } from "@foxglove/studio-base/types/Messages";
 import signal from "@foxglove/studio-base/util/signal";
 
-const cameraInfo = {
+const cameraInfo: CameraInfo = {
   width: 400,
   height: 300,
   distortion_model: "plumb_bob",
@@ -40,8 +41,8 @@ const cameraInfo = {
 };
 
 const imageFormat = "image/png";
-// Image data has to be loaded asynchronously, so use this component to load it for stories.
-function LoadImageMessage({ children }: any) {
+
+function useImageMessage() {
   const [imageData, setImageData] = React.useState<Uint8Array | undefined>();
   React.useEffect(() => {
     const canvas = document.createElement("canvas");
@@ -65,16 +66,18 @@ function LoadImageMessage({ children }: any) {
       });
     }, imageFormat);
   }, []);
-  const imageMessage = {
-    topic: "/foo",
-    receiveTime: { sec: 0, nsec: 0 },
-    message: { format: imageFormat, data: imageData },
-  };
 
-  if (imageData) {
-    return children(imageMessage);
-  }
-  return ReactNull;
+  return useMemo(() => {
+    if (!imageData) {
+      return;
+    }
+
+    return {
+      topic: "/foo",
+      receiveTime: { sec: 0, nsec: 0 },
+      message: { format: imageFormat, data: imageData },
+    };
+  }, [imageData]);
 }
 
 function marker(
@@ -253,7 +256,7 @@ const topics = [
   { name: "/storybook_image", datatype: "sensor_msgs/Image" },
   { name: "/storybook_compressed_image", datatype: "sensor_msgs/CompressedImage" },
 ];
-const config: Config = { ...ImageView.defaultConfig, mode: "other" };
+const config: Config = { ...ImageView.defaultConfig, mode: "fit" };
 
 function RGBStory({ encoding }: { encoding: string }) {
   const width = 2560;
@@ -404,117 +407,139 @@ export default {
   },
 };
 
-export const Markers: Story = (_args, ctx) => (
-  <LoadImageMessage>
-    {(imageMessage: any) => (
-      <div>
-        <h2>original markers</h2>
-        <ImageCanvas
-          topic={topics[1]}
-          image={imageMessage}
-          rawMarkerData={{
-            markers,
-            cameraInfo: undefined,
-            scale: 1,
-            transformMarkers: false,
-          }}
-          config={config}
-          saveConfig={noop}
-          onStartRenderImage={() => () => ctx.parameters.screenshot.signal.resolve()}
-        />
-        <br />
-        <h2>transformed markers</h2>
-        <ImageCanvas
-          topic={topics[1]}
-          image={imageMessage}
-          rawMarkerData={{
-            markers,
-            cameraInfo: cameraInfo as any,
-            scale: 1,
-            transformMarkers: true,
-          }}
-          config={config}
-          saveConfig={noop}
-          onStartRenderImage={() => () => ctx.parameters.screenshot.signal.resolve()}
-        />
-        <h2>markers with different original image size</h2>
-        <ImageCanvas
-          topic={topics[1]}
-          image={imageMessage}
-          rawMarkerData={{
-            markers,
-            cameraInfo: { ...cameraInfo, width: 200, height: 150 } as any,
-            scale: 1,
-            transformMarkers: true,
-          }}
-          config={config}
-          saveConfig={noop}
-          onStartRenderImage={() => () => ctx.parameters.screenshot.signal.resolve()}
-        />
-      </div>
-    )}
-  </LoadImageMessage>
-);
-Markers.parameters = {
+export const MarkersOriginal: Story = (_args, ctx) => {
+  const imageMessage = useImageMessage();
+
+  return (
+    <div style={{ height: "400px" }}>
+      <ImageCanvas
+        topic={topics[1]}
+        image={imageMessage}
+        rawMarkerData={{
+          markers,
+          cameraInfo: undefined,
+          transformMarkers: false,
+        }}
+        config={config}
+        saveConfig={noop}
+        onStartRenderImage={() => () => ctx.parameters.screenshot.signal.resolve()}
+      />
+    </div>
+  );
+};
+
+MarkersOriginal.parameters = {
   screenshot: {
     signal: signal(),
   },
 };
 
-export const MarkersWithFallbackRenderingUsingMainThread = (): JSX.Element => (
-  <LoadImageMessage>
-    {(imageMessage: any) => (
-      <div>
-        <h2>original markers</h2>
-        <ImageCanvas
-          topic={topics[1]}
-          image={imageMessage}
-          rawMarkerData={{
-            markers,
-            cameraInfo: undefined,
-            scale: 1,
-            transformMarkers: false,
-          }}
-          config={config}
-          saveConfig={noop}
-          useMainThreadRenderingForTesting
-          onStartRenderImage={() => () => undefined}
-        />
-        <br />
-        <h2>transformed markers</h2>
-        <ImageCanvas
-          topic={topics[1]}
-          image={imageMessage}
-          rawMarkerData={{
-            markers,
-            cameraInfo: cameraInfo as any,
-            scale: 1,
-            transformMarkers: true,
-          }}
-          config={config}
-          saveConfig={noop}
-          useMainThreadRenderingForTesting
-          onStartRenderImage={() => () => undefined}
-        />
-        <h2>markers with different original image size</h2>
-        <ImageCanvas
-          topic={topics[1]}
-          image={imageMessage}
-          rawMarkerData={{
-            markers,
-            cameraInfo: { ...cameraInfo, width: 200, height: 150 } as any,
-            scale: 1,
-            transformMarkers: true,
-          }}
-          config={config}
-          saveConfig={noop}
-          useMainThreadRenderingForTesting
-          onStartRenderImage={() => () => undefined}
-        />
-      </div>
-    )}
-  </LoadImageMessage>
-);
+export const MarkersTransformed: Story = (_args, ctx) => {
+  const imageMessage = useImageMessage();
+
+  return (
+    <div style={{ height: "400px" }}>
+      <ImageCanvas
+        topic={topics[1]}
+        image={imageMessage}
+        rawMarkerData={{
+          markers,
+          cameraInfo,
+          transformMarkers: true,
+        }}
+        config={config}
+        saveConfig={noop}
+        onStartRenderImage={() => () => ctx.parameters.screenshot.signal.resolve()}
+      />
+    </div>
+  );
+};
+
+MarkersTransformed.parameters = {
+  screenshot: {
+    signal: signal(),
+  },
+};
+
+// markers with different original image size
+export const MarkersImageSize: Story = (_args, ctx) => {
+  const imageMessage = useImageMessage();
+
+  return (
+    <div style={{ height: "400px" }}>
+      <ImageCanvas
+        topic={topics[1]}
+        image={imageMessage}
+        rawMarkerData={{
+          markers,
+          cameraInfo: { ...cameraInfo, width: 200, height: 150 },
+          transformMarkers: true,
+        }}
+        config={config}
+        saveConfig={noop}
+        onStartRenderImage={() => () => ctx.parameters.screenshot.signal.resolve()}
+      />
+    </div>
+  );
+};
+
+MarkersImageSize.parameters = {
+  screenshot: {
+    signal: signal(),
+  },
+};
+
+export const MarkersWithFallbackRenderingUsingMainThread = (): JSX.Element => {
+  const imageMessage = useImageMessage();
+
+  return (
+    <div>
+      <h2>original markers</h2>
+      <ImageCanvas
+        topic={topics[1]}
+        image={imageMessage}
+        rawMarkerData={{
+          markers,
+          cameraInfo: undefined,
+          transformMarkers: false,
+        }}
+        config={config}
+        saveConfig={noop}
+        renderInMainThread
+        onStartRenderImage={() => () => undefined}
+      />
+      <br />
+      <h2>transformed markers</h2>
+      <ImageCanvas
+        topic={topics[1]}
+        image={imageMessage}
+        rawMarkerData={{
+          markers,
+          cameraInfo,
+          transformMarkers: true,
+        }}
+        config={config}
+        saveConfig={noop}
+        renderInMainThread
+        onStartRenderImage={() => () => undefined}
+      />
+      <h2>markers with different original image size</h2>
+      <ImageCanvas
+        topic={topics[1]}
+        image={imageMessage}
+        rawMarkerData={{
+          markers,
+          cameraInfo: { ...cameraInfo, width: 200, height: 150 },
+          transformMarkers: true,
+        }}
+        config={config}
+        saveConfig={noop}
+        renderInMainThread
+        onStartRenderImage={() => () => undefined}
+      />
+    </div>
+  );
+};
 
 export const ErrorState = (): JSX.Element => {
   return (
@@ -534,26 +559,23 @@ export const ErrorState = (): JSX.Element => {
 };
 
 export const CallsOnRenderFrameWhenRenderingSucceeds = (): JSX.Element => {
+  const imageMessage = useImageMessage();
+
   return (
     <ShouldCallOnRenderImage>
       {(onStartRenderImage) => (
-        <LoadImageMessage>
-          {(imageMessage: any) => (
-            <ImageCanvas
-              topic={topics[0]}
-              image={imageMessage}
-              rawMarkerData={{
-                markers,
-                cameraInfo: undefined,
-                scale: 1,
-                transformMarkers: false,
-              }}
-              config={config}
-              saveConfig={noop}
-              onStartRenderImage={onStartRenderImage}
-            />
-          )}
-        </LoadImageMessage>
+        <ImageCanvas
+          topic={topics[0]}
+          image={imageMessage}
+          rawMarkerData={{
+            markers,
+            cameraInfo: undefined,
+            transformMarkers: false,
+          }}
+          config={config}
+          saveConfig={noop}
+          onStartRenderImage={onStartRenderImage}
+        />
       )}
     </ShouldCallOnRenderImage>
   );

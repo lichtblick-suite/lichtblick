@@ -196,7 +196,6 @@ describe("ImageView", () => {
       expect(
         buildMarkerData({
           markers: [],
-          scale: 1,
           transformMarkers: true,
           cameraInfo: cameraInfo as any,
         }),
@@ -212,7 +211,6 @@ describe("ImageView", () => {
       expect(
         buildMarkerData({
           markers: [marker],
-          scale: 1,
           transformMarkers: false,
           cameraInfo: undefined,
         }),
@@ -226,32 +224,7 @@ describe("ImageView", () => {
       expect(
         buildMarkerData({
           markers: [marker],
-          scale: 1,
           transformMarkers: true,
-          cameraInfo: undefined,
-        }),
-      ).toEqual(undefined);
-    });
-
-    it("requires either cameraInfo or scale==1", () => {
-      expect(
-        buildMarkerData({
-          markers: [marker],
-          scale: 1,
-          transformMarkers: false,
-          cameraInfo: cameraInfo as any,
-        }),
-      ).toEqual({
-        markers: [marker],
-        cameraModel: undefined,
-        originalWidth: 10,
-        originalHeight: 5,
-      });
-      expect(
-        buildMarkerData({
-          markers: [marker],
-          scale: 0.5,
-          transformMarkers: false,
           cameraInfo: undefined,
         }),
       ).toEqual(undefined);
