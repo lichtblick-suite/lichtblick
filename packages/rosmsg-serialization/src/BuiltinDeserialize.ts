@@ -29,7 +29,8 @@ function MakeTypedArrayDeserialze<T extends Indexable>(
     | "getFloat64",
 ) {
   return (view: DataView, offset: number, len: number): T => {
-    const totalOffset = view.byteOffset + offset;
+    let currentOffset = offset;
+    const totalOffset = view.byteOffset + currentOffset;
     // new TypedArray(...) will throw if you try to make a typed array on unaligned boundary
     // but for aligned access we can use a typed array and avoid any extra memory alloc/copy
     if (totalOffset % TypedArrayConstructor.BYTES_PER_ELEMENT === 0) {
@@ -40,8 +41,8 @@ function MakeTypedArrayDeserialze<T extends Indexable>(
     if (len < 10) {
       const arr = new TypedArrayConstructor(len);
       for (let idx = 0; idx < len; ++idx) {
-        arr[idx] = view[getter](offset, true);
-        offset += TypedArrayConstructor.BYTES_PER_ELEMENT;
+        arr[idx] = view[getter](currentOffset, true);
+        currentOffset += TypedArrayConstructor.BYTES_PER_ELEMENT;
       }
       return arr;
     }
@@ -157,10 +158,11 @@ export const deserializers: BuiltinReaders & {
     return decoder.decode(codePoints);
   },
   boolArray: (view, offset, len) => {
+    let currentOffset = offset;
     const arr = new Array(len);
     for (let idx = 0; idx < len; ++idx) {
-      arr[idx] = deserializers.bool(view, offset);
-      offset += 1;
+      arr[idx] = deserializers.bool(view, currentOffset);
+      currentOffset += 1;
     }
     return arr;
   },
@@ -175,6 +177,7 @@ export const deserializers: BuiltinReaders & {
   float32Array: MakeTypedArrayDeserialze(Float32Array, "getFloat32"),
   float64Array: MakeTypedArrayDeserialze(Float64Array, "getFloat64"),
   timeArray: (view, offset, len) => {
+    let currentOffset = offset;
     // Time and Duration are actually arrays of int32
     // If the location of the TimeArray meets Int32Array aligned access requirements, we can use Int32Array
     // to speed up access to the int32 values.
@@ -182,7 +185,7 @@ export const deserializers: BuiltinReaders & {
 
     const timeArr = new Array<{ sec: number; nsec: number }>(len);
 
-    const totalOffset = view.byteOffset + offset;
+    const totalOffset = view.byteOffset + currentOffset;
     // aligned access provides for a fast path to typed array construction
     if (totalOffset % Int32Array.BYTES_PER_ELEMENT === 0) {
       const intArr = new Int32Array(view.buffer, totalOffset, len * 2);
@@ -195,10 +198,10 @@ export const deserializers: BuiltinReaders & {
     } else {
       for (let idx = 0; idx < len; ++idx) {
         timeArr[idx] = {
-          sec: view.getInt32(offset, true),
-          nsec: view.getInt32(offset + 4, true),
+          sec: view.getInt32(currentOffset, true),
+          nsec: view.getInt32(currentOffset + 4, true),
         };
-        offset += 8;
+        currentOffset += 8;
       }
     }
 
@@ -206,10 +209,11 @@ export const deserializers: BuiltinReaders & {
   },
   durationArray: (view, offset, len) => deserializers.timeArray(view, offset, len),
   fixedArray: (view, offset, len, elementDeser, elementSize) => {
+    let currentOffset = offset;
     const arr = new Array<unknown>(len);
     for (let idx = 0; idx < len; ++idx) {
-      arr[idx] = elementDeser(view, offset);
-      offset += elementSize(view, offset);
+      arr[idx] = elementDeser(view, currentOffset);
+      currentOffset += elementSize(view, currentOffset);
     }
     return arr;
   },

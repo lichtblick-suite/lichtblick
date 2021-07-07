@@ -289,7 +289,7 @@ export const constructDatatypes = (
   depth: number = 1,
   currentTypeParamMap: TypeMap = {},
 ): { outputDatatype: string; datatypes: RosDatatypes } => {
-  if (++depth > MAX_DEPTH) {
+  if (depth > MAX_DEPTH) {
     throw new Error(`Max AST traversal depth exceeded.`);
   }
 

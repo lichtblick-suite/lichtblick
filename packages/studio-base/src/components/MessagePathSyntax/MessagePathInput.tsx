@@ -180,9 +180,10 @@ class MessagePathInputUnconnected extends React.PureComponent<
     this.state = { focused: false };
   }
 
-  _onChange = (event: React.SyntheticEvent<HTMLInputElement>, value: string) => {
+  _onChange = (event: React.SyntheticEvent<HTMLInputElement>, rawValue: string) => {
     // When typing a "{" character, also  insert a "}", so you get an
     // autocomplete window immediately for selecting a filter name.
+    let value = rawValue;
     if ((event.nativeEvent as InputEvent).data === "{") {
       const target = event.target as HTMLInputElement;
       const newCursorPosition = target.selectionEnd ?? 0;
@@ -200,11 +201,12 @@ class MessagePathInputUnconnected extends React.PureComponent<
   };
 
   _onSelect = (
-    value: string,
+    rawValue: string,
     autocomplete: Autocomplete<string>,
     autocompleteType: ("topicName" | "messagePath" | "globalVariables") | undefined,
     autocompleteRange: { start: number; end: number },
   ) => {
+    let value = rawValue;
     // If we're dealing with a topic name, and we cannot validly end in a message type,
     // add a "." so the user can keep typing to autocomplete the message path.
     const keepGoingAfterTopicName =

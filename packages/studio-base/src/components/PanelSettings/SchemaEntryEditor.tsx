@@ -89,9 +89,9 @@ export default function SchemaEntryEditor({
                 return undefined; // onChange will not be called
               }}
               onChange={(_event, inputValue) => {
-                inputValue = nonEmptyOrUndefined(inputValue?.trim());
-                if ((inputValue != undefined && !isNaN(+inputValue)) || allowEmpty) {
-                  setValue(inputValue != undefined ? +inputValue : undefined);
+                const sanitizedInput = nonEmptyOrUndefined(inputValue?.trim());
+                if ((sanitizedInput != undefined && !isNaN(+sanitizedInput)) || allowEmpty) {
+                  setValue(sanitizedInput != undefined ? +sanitizedInput : undefined);
                 }
               }}
             />

@@ -54,8 +54,8 @@ export class Transform {
     return this._hasValidMatrix || this.id === rootId;
   }
 
-  isChildOfTransform(rootId: string): boolean {
-    rootId = stripLeadingSlash(rootId);
+  isChildOfTransform(unsanitizedRootId: string): boolean {
+    const rootId = stripLeadingSlash(unsanitizedRootId);
     if (!this.parent) {
       return this.id === rootId;
     }
@@ -69,8 +69,8 @@ export class Transform {
     return this.parent.rootTransform();
   }
 
-  apply(output: MutablePose, input: Pose, rootId: string): MutablePose | undefined {
-    rootId = stripLeadingSlash(rootId);
+  apply(output: MutablePose, input: Pose, unsanitizedRootId: string): MutablePose | undefined {
+    const rootId = stripLeadingSlash(unsanitizedRootId);
     if (!this.isValid(rootId)) {
       return undefined;
     }
@@ -138,8 +138,8 @@ export class Transform {
 class TfStore {
   private _storage = new Map<string, Transform>();
 
-  get(key: string): Transform {
-    key = stripLeadingSlash(key);
+  get(unsanitizedKey: string): Transform {
+    const key = stripLeadingSlash(unsanitizedKey);
     let result = this._storage.get(key);
     if (result) {
       return result;

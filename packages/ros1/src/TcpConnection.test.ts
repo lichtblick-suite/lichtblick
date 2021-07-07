@@ -62,8 +62,8 @@ describe("TcpConnection", () => {
   it("Connects and reads a parsed message", async () => {
     // Create the TCP listening socket
     const server = net.createServer((client) => {
-      client.on("data", (data) => {
-        data = data.subarray(4);
+      client.on("data", (fullData) => {
+        const data = fullData.subarray(4);
         expect(data.byteLength).toEqual(102);
         expect(TcpConnection.ParseHeader(data)).toEqual(CLIENT_HEADER);
 

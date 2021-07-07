@@ -198,9 +198,10 @@ export type StructureTraversalResult = {
 // does not) and does not hold onto objects as strongly (it uses WeakMap).
 export const traverseStructure = memoizeWeak(
   (
-    structureItem: MessagePathStructureItem | undefined,
+    initialStructureItem: MessagePathStructureItem | undefined,
     messagePath: MessagePathPart[],
   ): StructureTraversalResult => {
+    let structureItem = initialStructureItem;
     if (!structureItem) {
       return { valid: false, msgPathPart: undefined, structureItem: undefined };
     }

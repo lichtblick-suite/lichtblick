@@ -13,10 +13,11 @@ const builtinSizes = {
   },
   fixedArray: (
     view: DataView,
-    offset: number,
+    startOffset: number,
     len: number,
     typeSize: (view: DataView, offset: number) => number,
   ): number => {
+    let offset = startOffset;
     let size = 0;
     for (let idx = 0; idx < len; ++idx) {
       const elementSize = typeSize(view, offset);
@@ -27,9 +28,10 @@ const builtinSizes = {
   },
   array: (
     view: DataView,
-    offset: number,
+    startOffset: number,
     typeSize: (view: DataView, offset: number) => number,
   ): number => {
+    let offset = startOffset;
     const len = view.getUint32(offset, true);
 
     let size = 4;

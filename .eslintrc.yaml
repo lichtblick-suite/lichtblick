@@ -51,6 +51,7 @@ rules:
       location: anywhere
 
   no-unused-expressions: error
+  no-param-reassign: error
 
   no-useless-rename: error
   object-shorthand: error

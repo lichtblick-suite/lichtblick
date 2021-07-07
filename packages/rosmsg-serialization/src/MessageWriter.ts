@@ -173,17 +173,11 @@ class StandardTypeWriter {
   }
 
   int64(value: bigint | number): void {
-    if (typeof value !== "bigint") {
-      value = BigInt(value);
-    }
-    this.view.setBigInt64(this.offsetCalculator.int64(), value, true);
+    this.view.setBigInt64(this.offsetCalculator.int64(), BigInt(value), true);
   }
 
   uint64(value: bigint | number): void {
-    if (typeof value !== "bigint") {
-      value = BigInt(value);
-    }
-    this.view.setBigUint64(this.offsetCalculator.uint64(), value, true);
+    this.view.setBigUint64(this.offsetCalculator.uint64(), BigInt(value), true);
   }
 
   time(time: Time): void {
@@ -358,10 +352,6 @@ export class MessageWriter {
 
   // output is optional - if it is not provided, a Uint8Array will be generated.
   writeMessage(message: unknown, output?: Uint8Array): Uint8Array {
-    if (output == undefined) {
-      const dataSize = this.calculateByteSize(message);
-      output = new Uint8Array(dataSize);
-    }
-    return this.writer(message, output);
+    return this.writer(message, output ?? new Uint8Array(this.calculateByteSize(message)));
   }
 }

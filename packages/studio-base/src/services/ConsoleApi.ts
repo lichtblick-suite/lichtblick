@@ -85,14 +85,12 @@ class ConsoleApi {
   }
 
   protected async get<T>(apiPath: string, query?: Record<string, string>): Promise<T> {
-    if (query != undefined) {
-      apiPath += "?";
-      apiPath += new URLSearchParams(query).toString();
-    }
-
-    return this.request<T>(apiPath, {
-      method: "GET",
-    });
+    return this.request<T>(
+      query == undefined ? apiPath : `${apiPath}?${new URLSearchParams(query).toString()}`,
+      {
+        method: "GET",
+      },
+    );
   }
 
   protected async post<T>(apiPath: string, body?: unknown): Promise<T> {

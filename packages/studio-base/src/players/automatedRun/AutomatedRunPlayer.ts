@@ -149,9 +149,9 @@ export default class AutomatedRunPlayer implements Player {
     if (parsedTopics.length === 0) {
       return { parsedMessages: [] };
     }
-    start = clampTime(start, this._providerResult.start, this._providerResult.end);
-    end = clampTime(end, this._providerResult.start, this._providerResult.end);
-    const messages = await this._provider.getMessages(start, end, {
+    const clampedStart = clampTime(start, this._providerResult.start, this._providerResult.end);
+    const clampedEnd = clampTime(end, this._providerResult.start, this._providerResult.end);
+    const messages = await this._provider.getMessages(clampedStart, clampedEnd, {
       parsedMessages: parsedTopics,
     });
     const { parsedMessages, rosBinaryMessages } = messages;

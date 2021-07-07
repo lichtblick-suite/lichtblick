@@ -16,17 +16,17 @@ const THOUSAND_YEARS_IN_NANOSEC = 1000n * 365n * 24n * 60n * 60n * BigInt(1e9);
  * it is ms, µs, ns instead of seconds (or a smaller unit, in powers of 1000).
  */
 export default function parseFuzzyRosTime(stamp: string): Time | undefined {
-  stamp = stamp.trim();
-  if (DIGITS_WITHOUT_DECIMAL_POINT_RE.test(stamp)) {
+  const trimmedStamp = stamp.trim();
+  if (DIGITS_WITHOUT_DECIMAL_POINT_RE.test(trimmedStamp)) {
     // Start by assuming the input is in seconds, and convert to nanoseconds.
-    let nanos = BigInt(stamp) * BigInt(1e9);
+    let nanos = BigInt(trimmedStamp) * BigInt(1e9);
     while (nanos > THOUSAND_YEARS_IN_NANOSEC) {
       nanos /= 1000n;
     }
     return { sec: Number(nanos / BigInt(1e9)), nsec: Number(nanos % BigInt(1e9)) };
   }
 
-  const match = DIGITS_WITH_DECIMAL_POINT_RE.exec(stamp);
+  const match = DIGITS_WITH_DECIMAL_POINT_RE.exec(trimmedStamp);
   if (match?.[1] != undefined && match[2] != undefined) {
     // There can be at most 9 digits of nanoseconds. Truncate any others.
     return { sec: Number(match[1]), nsec: Number(match[2].substr(0, 9).padEnd(9, "0")) };

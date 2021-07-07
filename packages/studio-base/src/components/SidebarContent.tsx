@@ -25,8 +25,10 @@ export function SidebarContent({
 }>): JSX.Element {
   const theme = useTheme();
 
+  let trailingItemsWithHelp = trailingItems;
+
   if (helpContent != undefined) {
-    (trailingItems ??= []).push(
+    (trailingItemsWithHelp ??= []).push(
       <HelpButton iconStyle={{ width: "18px", height: "18px" }}>{helpContent}</HelpButton>,
     );
   }
@@ -62,9 +64,9 @@ export function SidebarContent({
             {title}
           </Text>
         </Stack.Item>
-        {trailingItems && (
+        {trailingItemsWithHelp && (
           <Stack horizontal verticalAlign="center">
-            {trailingItems.map((item, i) => (
+            {trailingItemsWithHelp.map((item, i) => (
               <Stack.Item key={i}>{item}</Stack.Item>
             ))}
           </Stack>

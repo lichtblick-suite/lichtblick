@@ -63,16 +63,17 @@ export function mergeNewRangeIntoUnsortedNonOverlappingList(
   newRange: Range,
   unsortedNonOverlappingRanges: readonly Range[],
 ): Range[] {
+  let firstRange = newRange;
   const newRanges = [];
   for (const range of unsortedNonOverlappingRanges) {
-    if (isOverlappingSimple(newRange, range) || isMeeting(newRange, range)) {
-      newRange = {
-        start: Math.min(range.start, newRange.start),
-        end: Math.max(range.end, newRange.end),
+    if (isOverlappingSimple(firstRange, range) || isMeeting(firstRange, range)) {
+      firstRange = {
+        start: Math.min(range.start, firstRange.start),
+        end: Math.max(range.end, firstRange.end),
       };
     } else {
       newRanges.push(range);
     }
   }
-  return [newRange, ...newRanges];
+  return [firstRange, ...newRanges];
 }

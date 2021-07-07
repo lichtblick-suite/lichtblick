@@ -25,9 +25,8 @@ export class Calibration {
   readonly cosRotTable: number[];
   readonly vls128LaserAzimuthCache: number[];
 
-  constructor(model: Model, calibrationData?: CalibrationData) {
+  constructor(model: Model, calibrationData: CalibrationData = loadCalibrationData(model)) {
     this.model = model;
-    calibrationData = calibrationData ?? loadCalibrationData(model);
     this.laserCorrections = calibrationData.lasers.map((v) => {
       return {
         laserId: v.laser_id,

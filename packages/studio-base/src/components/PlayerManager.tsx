@@ -440,14 +440,9 @@ export default function PlayerManager({
           throw new Error(`Could not create a player for ${selectedSource.name}`);
         }
 
-        if (!params) {
-          params = {};
-        }
-        params.rosHostname = rosHostname;
-
         const playerBuilder = await createPlayerBuilder({
           source: selectedSource,
-          sourceOptions: params,
+          sourceOptions: { ...params, rosHostname },
           prompt,
           storage,
         });

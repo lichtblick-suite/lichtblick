@@ -30,8 +30,7 @@ export function setupSendReportNotificationHandler(rpc: Rpc): void {
       severity: NotificationSeverity,
     ) => {
       if (!(details instanceof Error || typeof details === "string")) {
-        console.warn("Invalid Error type");
-        details = JSON.stringify(details) ?? "<<unknown error>>";
+        console.warn("Invalid Error type", details);
       }
       void rpc.send("sendNotification", {
         message,

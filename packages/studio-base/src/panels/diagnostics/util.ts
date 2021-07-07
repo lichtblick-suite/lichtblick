@@ -96,8 +96,9 @@ export function computeDiagnosticInfo(
   stamp: Time,
 ): DiagnosticInfo {
   const displayName = getDisplayName(status.hardware_id, status.name);
+  let validatedStatus = status;
   if (status.values?.some(({ value }) => value.length > MAX_STRING_LENGTH)) {
-    status = {
+    validatedStatus = {
       ...status,
       values: status.values?.map((kv) =>
         kv.value.length > MAX_STRING_LENGTH
@@ -107,7 +108,7 @@ export function computeDiagnosticInfo(
     };
   }
   return {
-    status,
+    status: validatedStatus,
     stamp,
     id: getDiagnosticId(status.hardware_id, status.name),
     displayName,

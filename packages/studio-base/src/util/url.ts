@@ -22,12 +22,8 @@ export function parseInputUrl(
     return undefined;
   }
 
-  if (!str.includes("://")) {
-    str = `${defaultProtocol}//${str}`;
-  }
-
   try {
-    let url = new URL(str);
+    let url = new URL(str.includes("://") ? str : `${defaultProtocol}//${str}`);
 
     // Check if the protocol exists in the passed in map of allowed protocols
     const proto = protocols[url.protocol];

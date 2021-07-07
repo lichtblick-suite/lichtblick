@@ -79,10 +79,9 @@ function flattenDiagnosticMessageText(
     }
   }
   result += diag.messageText;
-  indent++;
   if (diag.next) {
     for (const kid of diag.next) {
-      result += flattenDiagnosticMessageText(kid, newLine, indent);
+      result += flattenDiagnosticMessageText(kid, newLine, indent + 1);
     }
   }
   return result;

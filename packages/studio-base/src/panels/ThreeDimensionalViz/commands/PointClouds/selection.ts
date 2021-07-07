@@ -40,12 +40,11 @@ function getRange(min: number, max: number): number {
 
 // returns the linear interpolation between a and b based on unit-range variable t
 function lerp(t: number, a: number, b: number): number {
-  // Clamp t to (0, 1)
-  t = Math.min(Math.max(t, 0.0), 1.0);
   if (a === b) {
     return a;
   }
-  return a + t * (b - a);
+  // Clamp t to (0, 1)
+  return a + Math.min(Math.max(t, 0.0), 1.0) * (b - a);
 }
 
 export type ClickedInfo = {

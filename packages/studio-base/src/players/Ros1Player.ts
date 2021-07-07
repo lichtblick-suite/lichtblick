@@ -390,8 +390,8 @@ export default class Ros1Player implements Player {
       return;
     }
 
-    publishers = publishers.filter(({ topic }) => topic.length > 0 && topic !== "/");
-    const topics = new Set<string>(publishers.map(({ topic }) => topic));
+    const validPublishers = publishers.filter(({ topic }) => topic.length > 0 && topic !== "/");
+    const topics = new Set<string>(validPublishers.map(({ topic }) => topic));
 
     // Clear all problems related to publishing
     this._clearPublishProblems(true);
@@ -404,7 +404,7 @@ export default class Ros1Player implements Player {
     }
 
     // Unadvertise any topics where the dataType changed
-    for (const { topic, datatype } of publishers) {
+    for (const { topic, datatype } of validPublishers) {
       const existingPub = this._rosNode.publications.get(topic);
       if (existingPub != undefined && existingPub.dataType !== datatype) {
         this._rosNode.unadvertise(topic);
@@ -412,7 +412,7 @@ export default class Ros1Player implements Player {
     }
 
     // Advertise new topics
-    for (const { topic, datatype: dataType, datatypes } of publishers) {
+    for (const { topic, datatype: dataType, datatypes } of validPublishers) {
       if (this._rosNode.publications.has(topic)) {
         continue;
       }
