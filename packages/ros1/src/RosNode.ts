@@ -545,7 +545,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
 
   private async _registerSubscriber(subscription: Subscription): Promise<string[]> {
     if (!this._running) {
-      return Promise.resolve([]);
+      return [];
     }
 
     const callerApi = this._callerApi();
@@ -574,7 +574,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
 
   private async _registerPublisher(publication: Publication): Promise<string[]> {
     if (!this._running) {
-      return Promise.resolve([]);
+      return [];
     }
 
     const callerApi = this._callerApi();

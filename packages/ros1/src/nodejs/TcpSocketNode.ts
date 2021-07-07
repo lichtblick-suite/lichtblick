@@ -33,25 +33,23 @@ export class TcpSocketNode extends EventEmitter<TcpSocketEvents> implements TcpS
   }
 
   async remoteAddress(): Promise<TcpAddress | undefined> {
-    return Promise.resolve({
+    return {
       port: this._port,
       family: this._socket.remoteFamily,
       address: this._host,
-    });
+    };
   }
 
   async localAddress(): Promise<TcpAddress | undefined> {
     if (this._socket.destroyed) {
-      return Promise.resolve(undefined);
+      return undefined;
     }
     const port = this._socket.localPort;
     const family = this._socket.remoteFamily; // There is no localFamily
     const address = this._socket.localAddress;
-    return Promise.resolve(
-      port != undefined && family != undefined && address != undefined
-        ? { port, family, address }
-        : undefined,
-    );
+    return port != undefined && family != undefined && address != undefined
+      ? { port, family, address }
+      : undefined;
   }
 
   async fd(): Promise<number | undefined> {
@@ -60,11 +58,11 @@ export class TcpSocketNode extends EventEmitter<TcpSocketEvents> implements TcpS
     // where sockets have file descriptors. See
     // <https://github.com/nodejs/help/issues/1312>
     // eslint-disable-next-line no-underscore-dangle
-    return Promise.resolve((this._socket as unknown as MaybeHasFd)._handle?.fd);
+    return (this._socket as unknown as MaybeHasFd)._handle?.fd;
   }
 
   async connected(): Promise<boolean> {
-    return Promise.resolve(!this._socket.destroyed && this._socket.localAddress != undefined);
+    return !this._socket.destroyed && this._socket.localAddress != undefined;
   }
 
   async connect(): Promise<void> {
@@ -81,7 +79,6 @@ export class TcpSocketNode extends EventEmitter<TcpSocketEvents> implements TcpS
 
   async close(): Promise<void> {
     this._socket.destroy();
-    return Promise.resolve();
   }
 
   async write(data: Uint8Array): Promise<void> {
@@ -98,10 +95,9 @@ export class TcpSocketNode extends EventEmitter<TcpSocketEvents> implements TcpS
 
   async setNoDelay(noDelay?: boolean): Promise<void> {
     this._socket.setNoDelay(noDelay);
-    return Promise.resolve();
   }
 
   static async Create({ host, port }: { host: string; port: number }): Promise<TcpSocket> {
-    return Promise.resolve(new TcpSocketNode(host, port, new net.Socket()));
+    return new TcpSocketNode(host, port, new net.Socket());
   }
 }

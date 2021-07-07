@@ -2101,16 +2101,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/eslint-plugin@npm:0.12.1":
-  version: 0.12.1
-  resolution: "@foxglove/eslint-plugin@npm:0.12.1"
+"@foxglove/eslint-plugin@npm:0.12.2":
+  version: 0.12.2
+  resolution: "@foxglove/eslint-plugin@npm:0.12.2"
   peerDependencies:
     eslint: ^7
     eslint-config-prettier: ^8
     eslint-plugin-import: ^2
     eslint-plugin-prettier: ^3
     prettier: ^2
-  checksum: 849eacf77a76e6c2cb4a9d2e1e40b0f87a78d3d0ba302675d8d9aaaae51b807a2f098a289215d4e71f371f476f1b687127458da237c3f5638700cea70cb14f4a
+  checksum: fcb91db4e54381b3ea907989bc8d735cb427667e24ccfca17ae32fbbf59928602f0ecd93cec52464665677ad5a17894ff367dbf643dfaeabe4d1936985f7db4b
   languageName: node
   linkType: hard
 
@@ -12704,7 +12704,7 @@ __metadata:
     "@babel/core": 7.14.6
     "@babel/preset-env": 7.14.7
     "@babel/preset-typescript": 7.14.5
-    "@foxglove/eslint-plugin": 0.12.1
+    "@foxglove/eslint-plugin": 0.12.2
     "@foxglove/tsconfig": 1.0.0
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.0-rc.0
     "@sentry/electron": 2.5.0

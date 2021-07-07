@@ -93,13 +93,19 @@ export const LoadingSet = (): React.ReactElement => (
 
 export const SetFailed = (): React.ReactElement => (
   <Example
-    mockSetConfig={async () => Promise.reject("Example set error")}
+    mockSetConfig={async () => {
+      throw "Example set error";
+    }}
     mockSubscribe={action("subscribeToNewsletter")}
   />
 );
 
 export const SubscribeFailed = (): React.ReactElement => (
-  <Example mockSubscribe={async () => Promise.reject("Example subscribe error")} />
+  <Example
+    mockSubscribe={async () => {
+      throw "Example subscribe error";
+    }}
+  />
 );
 
 export const Success = (): React.ReactElement => <Example mockSubscribe={async () => undefined} />;

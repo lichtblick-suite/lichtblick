@@ -246,10 +246,10 @@ describe("ApiCheckerDataProvider", () => {
 
         let returnMessages: MessageEvent<unknown>[] = [];
         jest.spyOn(memoryDataProvider, "getMessages").mockImplementation(async () => {
-          return Promise.resolve({
+          return {
             parsedMessages: returnMessages,
             rosBinaryMessages: undefined,
-          });
+          };
         });
 
         // Return messages that are still within the global range, but outside of the requested range.

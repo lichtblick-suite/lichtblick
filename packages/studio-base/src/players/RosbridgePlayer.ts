@@ -256,7 +256,7 @@ export default class RosbridgePlayer implements Player {
 
   _emitState = debouncePromise(async () => {
     if (!this._listener || this._closed) {
-      return Promise.resolve();
+      return undefined;
     }
 
     const { _providerTopics, _providerDatatypes, _start } = this;

@@ -248,7 +248,7 @@ export default class Ros1Player implements Player {
 
   private _emitState = debouncePromise(async () => {
     if (!this._listener || this._closed) {
-      return Promise.resolve();
+      return undefined;
     }
 
     const providerTopics = this._providerTopics;

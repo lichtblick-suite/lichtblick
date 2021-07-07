@@ -89,7 +89,7 @@ export class RosMaster {
     // [callerId, service, serviceApi, callerApi]
     const err = CheckArguments(args, ["string", "string", "string", "string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     const [callerId, service, serviceApi, callerApi] = args as [string, string, string, string];
@@ -102,7 +102,7 @@ export class RosMaster {
     serviceProviders.set(callerId, serviceApi);
     this._nodes.set(callerId, callerApi);
 
-    return Promise.resolve([1, "", 0]);
+    return [1, "", 0];
   };
 
   unregisterService = async (
@@ -112,13 +112,13 @@ export class RosMaster {
     // [callerId, service, serviceApi]
     const err = CheckArguments(args, ["string", "string", "string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     const [callerId, service, _serviceApi] = args as [string, string, string];
     const serviceProviders = this._services.get(service);
     if (serviceProviders == undefined) {
-      return Promise.resolve([1, "", 0]);
+      return [1, "", 0];
     }
 
     const removed = serviceProviders.delete(callerId);
@@ -126,7 +126,7 @@ export class RosMaster {
       this._services.delete(service);
     }
 
-    return Promise.resolve([1, "", removed ? 1 : 0]);
+    return [1, "", removed ? 1 : 0];
   };
 
   registerSubscriber = async (
@@ -136,18 +136,14 @@ export class RosMaster {
     // [callerId, topic, topicType, callerApi]
     const err = CheckArguments(args, ["string", "string", "string", "string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     const [callerId, topic, topicType, callerApi] = args as [string, string, string, string];
 
     const dataType = this._topics.get(topic);
     if (dataType != undefined && dataType !== topicType) {
-      return Promise.resolve([
-        0,
-        `topic_type "${topicType}" for topic "${topic}" does not match "${dataType}"`,
-        [],
-      ]);
+      return [0, `topic_type "${topicType}" for topic "${topic}" does not match "${dataType}"`, []];
     }
 
     if (!this._subscriptions.has(topic)) {
@@ -162,7 +158,7 @@ export class RosMaster {
     const publisherApis = publishers
       .map((p) => this._nodes.get(p))
       .filter((a) => a != undefined) as string[];
-    return Promise.resolve([1, "", publisherApis]);
+    return [1, "", publisherApis];
   };
 
   unregisterSubscriber = async (
@@ -172,14 +168,14 @@ export class RosMaster {
     // [callerId, topic, callerApi]
     const err = CheckArguments(args, ["string", "string", "string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     const [callerId, topic, _callerApi] = args as [string, string, string];
 
     const subscribers = this._subscriptions.get(topic);
     if (subscribers == undefined) {
-      return Promise.resolve([1, "", 0]);
+      return [1, "", 0];
     }
 
     const removed = subscribers.delete(callerId);
@@ -187,7 +183,7 @@ export class RosMaster {
       this._subscriptions.delete(topic);
     }
 
-    return Promise.resolve([1, "", removed ? 1 : 0]);
+    return [1, "", removed ? 1 : 0];
   };
 
   registerPublisher = async (
@@ -197,18 +193,14 @@ export class RosMaster {
     // [callerId, topic, topicType, callerApi]
     const err = CheckArguments(args, ["string", "string", "string", "string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     const [callerId, topic, topicType, callerApi] = args as [string, string, string, string];
 
     const dataType = this._topics.get(topic);
     if (dataType != undefined && dataType !== topicType) {
-      return Promise.resolve([
-        0,
-        `topic_type "${topicType}" for topic "${topic}" does not match "${dataType}"`,
-        [],
-      ]);
+      return [0, `topic_type "${topicType}" for topic "${topic}" does not match "${dataType}"`, []];
     }
 
     if (!this._publications.has(topic)) {
@@ -236,7 +228,7 @@ export class RosMaster {
         .catch((apiErr) => this._log?.warn?.(`publisherUpdate call to ${api} failed: ${apiErr}`));
     }
 
-    return Promise.resolve([1, "", subscriberApis]);
+    return [1, "", subscriberApis];
   };
 
   unregisterPublisher = async (
@@ -246,14 +238,14 @@ export class RosMaster {
     // [callerId, topic, callerApi]
     const err = CheckArguments(args, ["string", "string", "string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     const [callerId, topic, _callerApi] = args as [string, string, string];
 
     const publishers = this._publications.get(topic);
     if (publishers == undefined) {
-      return Promise.resolve([1, "", 0]);
+      return [1, "", 0];
     }
 
     const removed = publishers.delete(callerId);
@@ -261,23 +253,23 @@ export class RosMaster {
       this._publications.delete(topic);
     }
 
-    return Promise.resolve([1, "", removed ? 1 : 0]);
+    return [1, "", removed ? 1 : 0];
   };
 
   lookupNode = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId, nodeName]
     const err = CheckArguments(args, ["string", "string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     const [_callerId, nodeName] = args as [string, string];
 
     const nodeApi = this._nodes.get(nodeName);
     if (nodeApi == undefined) {
-      return Promise.resolve([0, `node "${nodeName}" not found`, ""]);
+      return [0, `node "${nodeName}" not found`, ""];
     }
-    return Promise.resolve([1, "", nodeApi]);
+    return [1, "", nodeApi];
   };
 
   getPublishedTopics = async (
@@ -287,7 +279,7 @@ export class RosMaster {
     // [callerId, subgraph]
     const err = CheckArguments(args, ["string", "string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     // Subgraph filtering would need to be supported to become a fully compatible implementation
@@ -301,25 +293,25 @@ export class RosMaster {
       }
     }
 
-    return Promise.resolve([1, "", entries]);
+    return [1, "", entries];
   };
 
   getTopicTypes = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId]
     const err = CheckArguments(args, ["string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     const entries = Array.from(this._topics.entries());
-    return Promise.resolve([1, "", entries]);
+    return [1, "", entries];
   };
 
   getSystemState = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId]
     const err = CheckArguments(args, ["string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     const publishers: [string, string[]][] = Array.from(this._publications.entries()).map(
@@ -337,40 +329,40 @@ export class RosMaster {
       ],
     );
 
-    return Promise.resolve([1, "", [publishers, subscribers, services]]);
+    return [1, "", [publishers, subscribers, services]];
   };
 
   getUri = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId]
     const err = CheckArguments(args, ["string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     const url = this._url;
     if (url == undefined) {
-      return Promise.resolve([0, "", "not running"]);
+      return [0, "", "not running"];
     }
 
-    return Promise.resolve([1, "", url]);
+    return [1, "", url];
   };
 
   lookupService = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId, service]
     const err = CheckArguments(args, ["string", "string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     const [_callerId, service] = args as [string, string];
 
     const serviceProviders = this._services.get(service);
     if (serviceProviders == undefined || serviceProviders.size === 0) {
-      return Promise.resolve([0, `no providers for service "${service}"`, ""]);
+      return [0, `no providers for service "${service}"`, ""];
     }
 
     const serviceUrl = serviceProviders.values().next().value as string;
-    return Promise.resolve([1, "", serviceUrl]);
+    return [1, "", serviceUrl];
   };
 
   // <http://wiki.ros.org/ROS/Parameter%20Server%20API> handlers
@@ -379,21 +371,21 @@ export class RosMaster {
     // [callerId, key]
     const err = CheckArguments(args, ["string", "string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     const [_callerId, key] = args as [string, string];
 
     this._parameters.delete(key);
 
-    return Promise.resolve([1, "", 0]);
+    return [1, "", 0];
   };
 
   setParam = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId, key, value]
     const err = CheckArguments(args, ["string", "string", "*"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     const [callerId, key, value] = args as [string, string, XmlRpcValue];
@@ -415,14 +407,14 @@ export class RosMaster {
       }
     }
 
-    return Promise.resolve([1, "", 0]);
+    return [1, "", 0];
   };
 
   getParam = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId, key]
     const err = CheckArguments(args, ["string", "string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     // This endpoint needs to support namespace retrieval to fully match the rosparam server
@@ -431,14 +423,14 @@ export class RosMaster {
 
     const value = this._parameters.get(key);
     const status = value != undefined ? 1 : 0;
-    return Promise.resolve([status, "", value ?? {}]);
+    return [status, "", value ?? {}];
   };
 
   searchParam = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId, key]
     const err = CheckArguments(args, ["string", "string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     // This endpoint would have to take into account the callerId namespace, partial matching, and
@@ -447,14 +439,14 @@ export class RosMaster {
 
     const value = this._parameters.get(key);
     const status = value != undefined ? 1 : 0;
-    return Promise.resolve([status, "", value ?? {}]);
+    return [status, "", value ?? {}];
   };
 
   subscribeParam = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId, callerApi, key]
     const err = CheckArguments(args, ["string", "string", "string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     const [callerId, callerApi, key] = args as [string, string, string];
@@ -467,7 +459,7 @@ export class RosMaster {
     subscriptions.set(callerId, callerApi);
 
     const value = this._parameters.get(key) ?? {};
-    return Promise.resolve([1, "", value]);
+    return [1, "", value];
   };
 
   unsubscribeParam = async (
@@ -477,40 +469,40 @@ export class RosMaster {
     // [callerId, callerApi, key]
     const err = CheckArguments(args, ["string", "string", "string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     const [callerId, _callerApi, key] = args as [string, string, string];
 
     const subscriptions = this._paramSubscriptions.get(key);
     if (subscriptions == undefined) {
-      return Promise.resolve([1, "", 0]);
+      return [1, "", 0];
     }
 
     const removed = subscriptions.delete(callerId);
-    return Promise.resolve([1, "", removed ? 1 : 0]);
+    return [1, "", removed ? 1 : 0];
   };
 
   hasParam = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId, key]
     const err = CheckArguments(args, ["string", "string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     const [_callerId, key] = args as [string, string];
-    return Promise.resolve([1, "", this._parameters.has(key)]);
+    return [1, "", this._parameters.has(key)];
   };
 
   getParamNames = async (_methodName: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> => {
     // [callerId]
     const err = CheckArguments(args, ["string"]);
     if (err) {
-      return Promise.reject(err);
+      throw err;
     }
 
     const keys = Array.from(this._parameters.keys()).sort();
-    return Promise.resolve([1, "", keys]);
+    return [1, "", keys];
   };
 }
 

@@ -81,7 +81,7 @@ describe("TcpConnection", () => {
 
     // Create the client socket
     const tcpSocketCreate = async (options: { host: string; port: number }): Promise<TcpSocket> => {
-      return Promise.resolve(new TcpSocketNode(options.host, options.port, new net.Socket()));
+      return new TcpSocketNode(options.host, options.port, new net.Socket());
     };
     const socket = await tcpSocketCreate({ host: "localhost", port });
     const connection = new TcpConnection(socket, "localhost", port, CLIENT_HEADER);

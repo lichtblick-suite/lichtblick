@@ -208,7 +208,7 @@ export function MessagePipelineProvider({
     player.setListener(async (newPlayerState: PlayerState) => {
       warnOnOutOfSyncMessages(newPlayerState);
       if (currentPlayer.current !== player) {
-        return Promise.resolve();
+        return undefined;
       }
       if (playerTickState.current.resolveFn) {
         throw new Error("New playerState was emitted before last playerState was rendered.");

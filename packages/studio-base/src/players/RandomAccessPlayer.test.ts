@@ -284,7 +284,7 @@ describe("RandomAccessPlayer", () => {
           // initial getMessages from player initialization
           expect(start).toEqual({ sec: 10, nsec: 0 });
           expect(end).toEqual({ sec: 10, nsec: 0 });
-          return Promise.resolve(getMessagesResult);
+          return getMessagesResult;
 
         case 2: {
           expect(start).toEqual({ sec: 10, nsec: 0 });
@@ -297,12 +297,12 @@ describe("RandomAccessPlayer", () => {
               message: { payload: "foo bar" },
             },
           ];
-          return Promise.resolve({ ...getMessagesResult, parsedMessages });
+          return { ...getMessagesResult, parsedMessages };
         }
 
         case 3: {
           expect(start).toEqual({ sec: 10, nsec: 4000001 });
-          return Promise.resolve(getMessagesResult);
+          return getMessagesResult;
         }
 
         default:
@@ -446,7 +446,7 @@ describe("RandomAccessPlayer", () => {
           expect(start).toEqual({ sec: 10, nsec: 0 });
           expect(end).toEqual({ sec: 10, nsec: 0 });
           expect(topics).toEqual({ parsedMessages: ["/foo/bar"] });
-          return Promise.resolve(getMessagesResult);
+          return getMessagesResult;
 
         case 2: {
           expect(start).toEqual({ sec: 10, nsec: 0 });
@@ -459,12 +459,12 @@ describe("RandomAccessPlayer", () => {
               message: { payload: "foo bar" },
             },
           ];
-          return Promise.resolve({ ...getMessagesResult, parsedMessages });
+          return { ...getMessagesResult, parsedMessages };
         }
 
         case 3:
           source.pausePlayback();
-          return Promise.resolve({
+          return {
             ...getMessagesResult,
             parsedMessages: [
               {
@@ -473,7 +473,7 @@ describe("RandomAccessPlayer", () => {
                 message: "this message should not be emitted",
               },
             ],
-          } as any);
+          } as any;
 
         default:
           throw new Error("getMessages called too many times");
@@ -529,7 +529,7 @@ describe("RandomAccessPlayer", () => {
           // initial getMessages from player initialization
           expect(start).toEqual({ sec: 10, nsec: 0 });
           expect(end).toEqual({ sec: 10, nsec: 0 });
-          return Promise.resolve(getMessagesResult);
+          return getMessagesResult;
         case 2: {
           expect(start).toEqual({ sec: 10, nsec: 0 });
           expect(end).toEqual({ sec: 10, nsec: 4000000 });
@@ -543,12 +543,12 @@ describe("RandomAccessPlayer", () => {
           await delay(10);
           mockDateNow.mockReturnValue(Date.now() + 1);
           source.seekPlayback({ sec: 10, nsec: 0 });
-          return Promise.resolve({ ...getMessagesResult, parsedMessages });
+          return { ...getMessagesResult, parsedMessages };
         }
 
         case 3:
           source.pausePlayback();
-          return Promise.resolve({
+          return {
             ...getMessagesResult,
             parsedMessages: [
               {
@@ -557,7 +557,7 @@ describe("RandomAccessPlayer", () => {
                 message: "this message should not be emitted",
               },
             ],
-          } as any);
+          } as any;
 
         default:
           throw new Error("getMessages called too many times");
@@ -769,12 +769,12 @@ describe("RandomAccessPlayer", () => {
               message: { payload: "foo bar" },
             },
           ];
-          return Promise.resolve({ ...getMessagesResult, parsedMessages });
+          return { ...getMessagesResult, parsedMessages };
         }
         case 2:
           // make sure after we seek & read again we read exactly from the right nanosecond
           expect(start).toEqual({ sec: 20, nsec: 51 });
-          return Promise.resolve({
+          return {
             ...getMessagesResult,
             parsedMessages: [
               {
@@ -783,10 +783,10 @@ describe("RandomAccessPlayer", () => {
                 message: { payload: "baz" },
               },
             ],
-          });
+          };
         case 3:
           source.pausePlayback();
-          return Promise.resolve(getMessagesResult);
+          return getMessagesResult;
         default:
           throw new Error("getMessages called too many times");
       }
@@ -870,7 +870,7 @@ describe("RandomAccessPlayer", () => {
         case 2:
           // make sure after we seek & read again we read exactly from the right nanosecond
           expect(start).toEqual({ sec: 20, nsec: 50 });
-          return Promise.resolve({
+          return {
             ...getMessagesResult,
             parsedMessages: [
               {
@@ -879,10 +879,10 @@ describe("RandomAccessPlayer", () => {
                 message: { payload: "baz" },
               },
             ],
-          });
+          };
         case 3:
           source.pausePlayback();
-          return Promise.resolve(getMessagesResult);
+          return getMessagesResult;
         default:
           throw new Error("getMessages called too many times");
       }
@@ -1022,20 +1022,20 @@ describe("RandomAccessPlayer", () => {
         case 1:
           // initial getMessages from player initialization
           expect(topics).toEqual({ parsedMessages: ["/foo/bar"] });
-          return Promise.resolve(getMessagesResult);
+          return getMessagesResult;
 
         case 2:
           expect(topics).toEqual({ parsedMessages: ["/foo/bar", "/baz"] });
-          return Promise.resolve(getMessagesResult);
+          return getMessagesResult;
 
         case 3:
           // The `requestBackfill` without a `setSubscriptions` is identical to the one above.
           expect(topics).toEqual({ parsedMessages: ["/foo/bar", "/baz"] });
-          return Promise.resolve(getMessagesResult);
+          return getMessagesResult;
 
         case 4:
           expect(topics).toEqual({ parsedMessages: ["/baz"] });
-          return Promise.resolve(getMessagesResult);
+          return getMessagesResult;
 
         // Never called with empty topics!
 
@@ -1104,9 +1104,9 @@ describe("RandomAccessPlayer", () => {
       const next = items.shift();
       if (!next) {
         resolve();
-        return Promise.resolve(getMessagesResult);
+        return getMessagesResult;
       }
-      return Promise.resolve({ ...getMessagesResult, parsedMessages: [next] });
+      return { ...getMessagesResult, parsedMessages: [next] };
     };
 
     const source = new RandomAccessPlayer(
@@ -1122,7 +1122,6 @@ describe("RandomAccessPlayer", () => {
           }
         ).messages,
       );
-      return Promise.resolve();
     });
     source.setSubscriptions([{ topic: "/foo/bar" }, { topic: "/baz" }]);
     source.requestBackfill(); // We always get a `requestBackfill` after each `setSubscriptions`.
@@ -1258,7 +1257,7 @@ describe("RandomAccessPlayer", () => {
     getMessages.mockImplementation(async () => {
       firstGetMessagesCall.resolve();
       await firstGetMessagesReturn;
-      return Promise.resolve({ ...getMessagesResult, parsedMessages: messages1.splice(0, 1) });
+      return { ...getMessagesResult, parsedMessages: messages1.splice(0, 1) };
     });
 
     const store = new MessageStore(2);
@@ -1282,7 +1281,7 @@ describe("RandomAccessPlayer", () => {
     getMessages.mockImplementation(async () => {
       secondGetMessagesCall.resolve();
       await secondGetMessagesReturn;
-      return Promise.resolve({ ...getMessagesResult, parsedMessages: messages2.splice(0, 1) });
+      return { ...getMessagesResult, parsedMessages: messages2.splice(0, 1) };
     });
     store.reset(2);
 
@@ -1410,7 +1409,7 @@ describe("RandomAccessPlayer", () => {
 
     it("delegates to metricsCollector on actions", async () => {
       const provider = new TestProvider();
-      provider.getMessages = async () => Promise.resolve(getMessagesResult);
+      provider.getMessages = async () => getMessagesResult;
 
       const metricsCollector = new TestMetricsCollector();
       const source = new RandomAccessPlayer(
@@ -1499,9 +1498,7 @@ describe("RandomAccessPlayer", () => {
 
   it("seeks the player after starting", async () => {
     const provider = new TestProvider();
-    provider.getMessages = jest
-      .fn()
-      .mockImplementation(async () => Promise.resolve(getMessagesResult));
+    provider.getMessages = jest.fn().mockImplementation(async () => getMessagesResult);
     const player = new RandomAccessPlayer(
       { name: "TestProvider", args: { provider }, children: [] },
       playerOptions,
@@ -1524,9 +1521,7 @@ describe("RandomAccessPlayer", () => {
 
   it("does not seek until setListener is called to initialize the start and end time", async () => {
     const provider = new TestProvider();
-    provider.getMessages = jest
-      .fn()
-      .mockImplementation(async () => Promise.resolve(getMessagesResult));
+    provider.getMessages = jest.fn().mockImplementation(async () => getMessagesResult);
     const player = new RandomAccessPlayer(
       { name: "TestProvider", args: { provider }, children: [] },
       playerOptions,
@@ -1548,9 +1543,7 @@ describe("RandomAccessPlayer", () => {
 
   it("keeps currentTime reference equality if current time does not change", async () => {
     const provider = new TestProvider();
-    provider.getMessages = jest
-      .fn()
-      .mockImplementation(async () => Promise.resolve(getMessagesResult));
+    provider.getMessages = jest.fn().mockImplementation(async () => getMessagesResult);
     const player = new RandomAccessPlayer(
       { name: "TestProvider", args: { provider }, children: [] },
       playerOptions,
@@ -1590,7 +1583,7 @@ describe("RandomAccessPlayer", () => {
       expect(topics).toEqual({
         parsedMessages: ["/parsed_topic", "/parsed_and_binary_topic"],
       });
-      return Promise.resolve(getMessagesResult);
+      return getMessagesResult;
     };
 
     const store = new MessageStore(2);
@@ -1628,7 +1621,7 @@ describe("RandomAccessPlayer", () => {
       expect(topics).toEqual({
         parsedMessages: ["/streaming_parsed", "/streaming_and_fallback_parsed"],
       });
-      return Promise.resolve(getMessagesResult);
+      return getMessagesResult;
     };
 
     const store = new MessageStore(2);

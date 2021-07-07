@@ -30,7 +30,7 @@ export class XmlRpcClientMock {
   async methodCall(method: string, args: XmlRpcValue[]): Promise<RosXmlRpcResponse> {
     switch (method) {
       case "getPublishedTopics":
-        return Promise.resolve([
+        return [
           1,
           "current topics",
           [
@@ -39,9 +39,9 @@ export class XmlRpcClientMock {
             ["/turtle1/color_sensor", "turtlesim/Color"],
             ["/rosout_agg", "rosgraph_msgs/Log"],
           ],
-        ]);
+        ];
       case "getSystemState":
-        return Promise.resolve([
+        return [
           1,
           "current system state",
           [
@@ -69,9 +69,9 @@ export class XmlRpcClientMock {
               ["/rosout/set_logger_level", ["/rosout"]],
             ],
           ],
-        ]);
+        ];
       case "getTopicTypes":
-        return Promise.resolve([
+        return [
           1,
           "current system state", // Not a typo
           [
@@ -81,38 +81,34 @@ export class XmlRpcClientMock {
             ["/turtle1/color_sensor", "turtlesim/Color"],
             ["/rosout_agg", "rosgraph_msgs/Log"],
           ],
-        ]);
+        ];
       case "getUri":
-        return Promise.resolve([1, "", "http://localhost:11311/"]);
+        return [1, "", "http://localhost:11311/"];
       case "lookupNode": {
         const nodeName = args[1];
         if (nodeName === "/turtlesim") {
-          return Promise.resolve([1, "node api", "http://localhost:39211/"]);
+          return [1, "node api", "http://localhost:39211/"];
         }
-        return Promise.resolve([-1, `unknown node [${nodeName}]`, ""]);
+        return [-1, `unknown node [${nodeName}]`, ""];
       }
       case "lookupService": {
         const serviceName = args[1];
         if (TURTLESIM_SERVICES.has(serviceName as string)) {
-          return Promise.resolve([
-            1,
-            "rosrpc URI: [rosrpc://localhost:38017]",
-            "rosrpc://localhost:38017",
-          ]);
+          return [1, "rosrpc URI: [rosrpc://localhost:38017]", "rosrpc://localhost:38017"];
         }
-        return Promise.resolve([-1, "no provider", ""]);
+        return [-1, "no provider", ""];
       }
       case "registerPublisher":
       case "registerService":
-        return Promise.resolve([-1, "not implemented", ""]);
+        return [-1, "not implemented", ""];
       case "registerSubscriber":
-        return Promise.resolve([1, "", ["http://localhost:39211/"]]);
+        return [1, "", ["http://localhost:39211/"]];
       case "unregisterPublisher":
       case "unregisterService":
       case "unregisterSubscriber":
-        return Promise.resolve([-1, "not implemented", ""]);
+        return [-1, "not implemented", ""];
       default:
-        return Promise.resolve([-1, `unknown method [${method}]`, ""]);
+        return [-1, `unknown method [${method}]`, ""];
     }
   }
 }
