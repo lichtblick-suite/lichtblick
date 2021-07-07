@@ -14,6 +14,7 @@
 /* eslint-disable jest/no-conditional-expect */
 
 import exampleDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes.json";
+import generateRosLib from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateRosLib";
 import {
   getOutputTopic,
   validateOutputTopic,
@@ -23,8 +24,7 @@ import {
   extractGlobalVariables,
   compose,
   getInputTopics,
-} from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/transformer";
-import generateRosLib from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typegen";
+} from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/transform";
 import baseDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/baseDatatypes";
 import rawUserUtils from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/rawUserUtils";
 import {

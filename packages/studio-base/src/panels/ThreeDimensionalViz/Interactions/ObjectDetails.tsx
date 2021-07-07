@@ -52,7 +52,7 @@ type Props = CommonProps & { readonly objectToDisplay: unknown };
 
 // Used for switching between views of individual and combined objects.
 // TODO(steel): Only show the combined object when the individual objects are semantically related.
-function ObjectDetailsWrapper({
+export default function ObjectDetails({
   interactionData,
   selectedObject: { object, instanceIndex },
 }: WrapperProps): JSX.Element {
@@ -85,7 +85,7 @@ function ObjectDetailsWrapper({
           </DropdownItem>
         </Dropdown>
       )}
-      <ObjectDetails interactionData={interactionData} objectToDisplay={objectToDisplay} />
+      <ObjectDetailsInner interactionData={interactionData} objectToDisplay={objectToDisplay} />
     </div>
   );
 }
@@ -97,7 +97,7 @@ function maybePlainObject(rawVal: unknown) {
   return rawVal;
 }
 
-function ObjectDetails({ interactionData, objectToDisplay }: Props) {
+function ObjectDetailsInner({ interactionData, objectToDisplay }: Props) {
   const topic = interactionData?.topic ?? "";
 
   // object to display may not be a plain-ole-data
@@ -189,5 +189,3 @@ function ObjectDetails({ interactionData, objectToDisplay }: Props) {
     </SObjectDetails>
   );
 }
-
-export default ObjectDetailsWrapper;

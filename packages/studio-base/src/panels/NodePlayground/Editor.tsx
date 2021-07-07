@@ -18,7 +18,7 @@ import { ReactElement, useRef } from "react";
 import MonacoEditor, { EditorDidMount, EditorWillMount } from "react-monaco-editor";
 import { useResizeDetector } from "react-resize-detector";
 
-import getPrettifiedCode from "@foxglove/studio-base/panels/NodePlayground/prettier";
+import getPrettifiedCode from "@foxglove/studio-base/panels/NodePlayground/getPrettifiedCode";
 import { Script } from "@foxglove/studio-base/panels/NodePlayground/script";
 import vsStudioTheme from "@foxglove/studio-base/panels/NodePlayground/theme/vs-studio.json";
 import { getNodeProjectConfig } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";

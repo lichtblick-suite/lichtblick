@@ -8,10 +8,10 @@ export interface CurrentUser {
   email?: string;
 }
 
-const currentUserContext = createContext<CurrentUser | undefined>(undefined);
+const CurrentUserContext = createContext<CurrentUser | undefined>(undefined);
 
 export function useCurrentUser(): CurrentUser | undefined {
-  return useContext(currentUserContext);
+  return useContext(CurrentUserContext);
 }
 
-export default currentUserContext;
+export default CurrentUserContext;

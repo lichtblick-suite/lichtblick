@@ -174,7 +174,7 @@ export function getBaseKey(key: string): string {
   return key.replace(SECOND_SOURCE_PREFIX, "").replace("name_2:", "name:");
 }
 
-export default function useTree({
+export default function useTopicTree({
   availableNamespacesByTopic,
   checkedKeys,
   defaultTopicSettings,

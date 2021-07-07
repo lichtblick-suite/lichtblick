@@ -14,13 +14,13 @@
 
 import FakePlayer from "@foxglove/studio-base/components/MessagePipeline/FakePlayer";
 import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
+import MockUserNodePlayerWorker from "@foxglove/studio-base/players/UserNodePlayer/MockUserNodePlayerWorker";
 import exampleDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes.json";
 import {
   Sources,
   DiagnosticSeverity,
   ErrorCodes,
 } from "@foxglove/studio-base/players/UserNodePlayer/types";
-import MockUserNodePlayerWorker from "@foxglove/studio-base/players/UserNodePlayer/worker.mock";
 import { PlayerStateActiveData } from "@foxglove/studio-base/players/types";
 import Storage from "@foxglove/studio-base/util/Storage";
 import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";

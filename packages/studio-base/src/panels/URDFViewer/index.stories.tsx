@@ -6,7 +6,7 @@ import { useCallback, useState } from "react";
 import URDFLoader from "urdf-loader";
 import { v4 as uuidv4 } from "uuid";
 
-import AssetsContext from "@foxglove/studio-base/context/AssetContext";
+import AssetsContext from "@foxglove/studio-base/context/AssetsContext";
 import URDFViewer from "@foxglove/studio-base/panels/URDFViewer";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";

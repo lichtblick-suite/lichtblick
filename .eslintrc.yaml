@@ -13,6 +13,7 @@ ignorePatterns:
 
 plugins:
   - file-progress
+  - filenames
 
 extends:
   - plugin:@foxglove/base
@@ -24,6 +25,8 @@ settings:
 
 rules:
   "@foxglove/license-header": error
+
+  filenames/match-exported: error
 
   # show progress while linting
   file-progress/activate: warn

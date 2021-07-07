@@ -11,7 +11,7 @@ import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Flex from "@foxglove/studio-base/components/Flex";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import { useAssets } from "@foxglove/studio-base/context/AssetContext";
+import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
 import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { JointState } from "@foxglove/studio-base/types/Messages";

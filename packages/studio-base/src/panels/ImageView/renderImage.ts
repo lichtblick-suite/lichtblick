@@ -23,7 +23,7 @@ import {
 import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
-import CameraModel from "./CameraModel";
+import PinholeCameraModel from "./PinholeCameraModel";
 import {
   decodeYUV,
   decodeRGB8,
@@ -102,7 +102,7 @@ function toRGBA(color: Color) {
 
 // Note: Return type is inexact -- may contain z.
 function maybeUnrectifyPoint(
-  cameraModel: CameraModel | undefined,
+  cameraModel: PinholeCameraModel | undefined,
   point: Point,
 ): Readonly<{ x: number; y: number }> {
   if (cameraModel) {
@@ -235,7 +235,7 @@ function paintBitmap(
 function paintMarkers(
   ctx: CanvasRenderingContext2D,
   messages: MessageEvent<ImageMarker | ImageMarkerArray>[],
-  cameraModel: CameraModel | undefined,
+  cameraModel: PinholeCameraModel | undefined,
 ) {
   for (const { message } of messages) {
     ctx.save();
@@ -257,7 +257,7 @@ function paintMarkers(
 function paintMarker(
   ctx: CanvasRenderingContext2D,
   marker: ImageMarker,
-  cameraModel: CameraModel | undefined,
+  cameraModel: PinholeCameraModel | undefined,
 ) {
   switch (marker.type) {
     case 0: {

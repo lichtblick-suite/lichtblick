@@ -11,7 +11,7 @@ import { ExtensionInfo, ExtensionLoader, ExtensionLoaderContext } from "@foxglov
 const log = Logger.getLogger(__filename);
 
 // example provider showing how to load extensions from a separate js file
-export default function ExtensionRegistryProvider(props: PropsWithChildren<unknown>): JSX.Element {
+export default function ExtensionLoaderProvider(props: PropsWithChildren<unknown>): JSX.Element {
   const { value: registry, error } = useAsync(async () => {
     log.info("Fetching builtin extensions");
 

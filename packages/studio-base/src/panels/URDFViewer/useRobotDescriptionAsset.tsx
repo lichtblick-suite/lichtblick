@@ -7,7 +7,7 @@ import { useLayoutEffect, useState } from "react";
 import { useAsync } from "react-use";
 
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
-import { Asset } from "@foxglove/studio-base/context/AssetContext";
+import { Asset } from "@foxglove/studio-base/context/AssetsContext";
 import URDFAssetLoader from "@foxglove/studio-base/services/URDFAssetLoader";
 import { ROBOT_DESCRIPTION_PARAM } from "@foxglove/studio-base/util/globalConstants";
 

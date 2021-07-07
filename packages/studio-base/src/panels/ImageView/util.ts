@@ -20,7 +20,7 @@ import {
   nonEmptyOrUndefined,
 } from "@foxglove/studio-base/util/emptyOrUndefined";
 
-import CameraModel from "./CameraModel";
+import PinholeCameraModel from "./PinholeCameraModel";
 
 // The OffscreenCanvas type is not yet in Flow. It's similar to, but more restrictive than HTMLCanvasElement.
 // TODO: change this to the Flow definition once it's been added.
@@ -50,7 +50,7 @@ export type MarkerData =
       markers: MessageEvent<unknown>[];
       originalWidth?: number; // undefined means no scaling is needed (use the image's size)
       originalHeight?: number; // undefined means no scaling is needed (use the image's size)
-      cameraModel?: CameraModel; // undefined means no transformation is needed
+      cameraModel?: PinholeCameraModel; // undefined means no transformation is needed
     }
   | undefined;
 
@@ -159,7 +159,7 @@ export function buildMarkerData(rawMarkerData: RawMarkerData): MarkerData | unde
     if (!cameraInfo) {
       return undefined;
     }
-    cameraModel = new CameraModel(cameraInfo);
+    cameraModel = new PinholeCameraModel(cameraInfo);
   }
 
   // Markers can only be rendered if we know the original size of the image.

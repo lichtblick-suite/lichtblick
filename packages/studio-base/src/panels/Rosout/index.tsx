@@ -23,7 +23,7 @@ import { MessageEvent } from "@foxglove/studio-base/players/types";
 import FilterBar, { FilterBarProps } from "./FilterBar";
 import LogList from "./LogList";
 import LogMessage from "./LogMessage";
-import filterMessages from "./filter";
+import filterMessages from "./filterMessages";
 import helpContent from "./index.help.md";
 import { RosgraphMsgs$Log } from "./types";
 

@@ -743,7 +743,7 @@ const endDrag = (panelsState: PanelsState, dragPayload: EndDragPayload): PanelsS
   return changePanelLayout(panelsState, { layout: newLayout, trimConfigById: false });
 };
 
-const panelsReducer = function (panelsState: PanelsState, action: PanelsActions): PanelsState {
+export default function (panelsState: PanelsState, action: PanelsActions): PanelsState {
   let newPanelsState = { ...panelsState };
   switch (action.type) {
     case "CHANGE_PANEL_LAYOUT":
@@ -843,6 +843,4 @@ const panelsReducer = function (panelsState: PanelsState, action: PanelsActions)
   }
 
   return newPanelsState;
-};
-
-export default panelsReducer;
+}

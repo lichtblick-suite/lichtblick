@@ -25,7 +25,7 @@ import WorldMarkers, {
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/WorldMarkers";
 import { LAYER_INDEX_DEFAULT_BASE } from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
 import { withDiffMode } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/diffModeUtils";
-import withHighlights from "@foxglove/studio-base/panels/ThreeDimensionalViz/withWorldMarkerHighlights";
+import withHighlights from "@foxglove/studio-base/panels/ThreeDimensionalViz/withHighlights";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import {
   BaseMarker,

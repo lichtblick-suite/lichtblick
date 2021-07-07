@@ -7,7 +7,7 @@ import URDFLoader from "urdf-loader";
 import { XacroParser } from "xacro-parser";
 
 import Logger from "@foxglove/log";
-import { AssetLoader, Asset } from "@foxglove/studio-base/context/AssetContext";
+import { AssetLoader, Asset } from "@foxglove/studio-base/context/AssetsContext";
 
 const log = Logger.getLogger(__filename);
 

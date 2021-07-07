@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { RosMsgDefinition } from "@foxglove/rosmsg";
 
-import buildReader from "./LazyMessageReaderFactory";
+import buildReader from "./buildReader";
 
 function isBigEndian() {
   const array = new Uint8Array(4);

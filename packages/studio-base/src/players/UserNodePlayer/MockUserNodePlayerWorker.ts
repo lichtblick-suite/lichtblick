@@ -18,8 +18,8 @@ import {
   processMessage,
   registerNode,
 } from "@foxglove/studio-base/players/UserNodePlayer/nodeRuntimeWorker/registry";
-import transform from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/transformer";
-import generateRosLib from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typegen";
+import generateRosLib from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateRosLib";
+import transform from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/transform";
 import Rpc, { Channel, createLinkedChannels } from "@foxglove/studio-base/util/Rpc";
 
 const validateWorkerArgs = (arg: unknown) => {

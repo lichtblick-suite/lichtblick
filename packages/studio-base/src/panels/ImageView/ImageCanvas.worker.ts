@@ -18,7 +18,7 @@ import { setupWorker } from "@foxglove/studio-base/util/RpcWorkerUtils";
 import { renderImage } from "./renderImage";
 import { Dimensions, RawMarkerData, OffscreenCanvas, RenderOptions } from "./util";
 
-export default class ImageCanvasWorker {
+class ImageCanvasWorker {
   _idToCanvas: {
     [key: string]: OffscreenCanvas;
   } = {};

@@ -16,7 +16,7 @@
 
 import ts from "typescript/lib/typescript";
 
-import { formatInterfaceName } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typegen";
+import { formatInterfaceName } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateRosLib";
 import {
   constructDatatypes,
   findReturnType,

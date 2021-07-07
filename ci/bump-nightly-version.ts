@@ -13,7 +13,7 @@ import { execOutput } from "./exec";
 
 const PACKAGE_JSON_PATH = path.join(__dirname, "..", "package.json");
 
-export default async function main(): Promise<void> {
+async function main(): Promise<void> {
   // Parse package.json
   const pkg = JSON.parse(await fs.readFile(PACKAGE_JSON_PATH, "utf8"));
 

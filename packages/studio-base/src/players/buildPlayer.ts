@@ -7,7 +7,7 @@ import { rootGetDataProvider } from "@foxglove/studio-base/dataProviders/rootGet
 import { DataProviderDescriptor } from "@foxglove/studio-base/dataProviders/types";
 import RandomAccessPlayer from "@foxglove/studio-base/players/RandomAccessPlayer";
 import AutomatedRunPlayer from "@foxglove/studio-base/players/automatedRun/AutomatedRunPlayer";
-import PerformanceMeasuringClient from "@foxglove/studio-base/players/automatedRun/performanceMeasuringClient";
+import PerformanceMeasuringClient from "@foxglove/studio-base/players/automatedRun/PerformanceMeasuringClient";
 import videoRecordingClient from "@foxglove/studio-base/players/automatedRun/videoRecordingClient";
 import { Player, PlayerMetricsCollectorInterface } from "@foxglove/studio-base/players/types";
 import {

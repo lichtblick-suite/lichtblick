@@ -12,9 +12,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import PerformanceMeasuringClient from "./performanceMeasuringClient";
+import PerformanceMeasuringClient from "./PerformanceMeasuringClient";
 
-describe("performanceMeasuringClient", () => {
+describe("PerformanceMeasuringClient", () => {
   let onPlaybackFinished: any;
   let onPlaybackError: any;
   beforeEach(() => {

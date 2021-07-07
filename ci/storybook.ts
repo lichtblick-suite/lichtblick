@@ -18,7 +18,7 @@ enum Command {
   publish = "publish",
 }
 
-export default async function main(): Promise<void> {
+async function main(): Promise<void> {
   const parser = new ArgumentParser({
     formatter_class: RawDescriptionHelpFormatter,
     description: `
