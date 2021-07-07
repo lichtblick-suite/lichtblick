@@ -13,7 +13,6 @@ ignorePatterns:
 
 plugins:
   - file-progress
-  - filenames
 
 extends:
   - plugin:@foxglove/base
@@ -25,8 +24,6 @@ settings:
 
 rules:
   "@foxglove/license-header": error
-
-  filenames/match-exported: error
 
   # show progress while linting
   file-progress/activate: warn
@@ -53,15 +50,6 @@ rules:
     - terms: ["fixme", "xxx"]
       location: anywhere
 
-  no-unused-expressions: error
-  no-param-reassign: error
-
-  no-useless-rename: error
-  object-shorthand: error
-
-  prefer-arrow-callback:
-    - error
-    - allowNamedFunctions: true
   no-restricted-imports:
     - error
     - paths:
@@ -90,7 +78,6 @@ rules:
         https://github.com/sindresorhus/meta/discussions/7"
 
   jest/no-done-callback: off # Can be a useful alternative to promises
-  jest/no-conditional-expect: warn
   jest/expect-expect:
     [error, { assertFunctionNames: [expect*, sendNotification.expectCalledDuringTest] }]
 
@@ -116,15 +103,6 @@ overrides:
           allowNumber: false
           # Keeps the error count manageable while we enhance type information from the flow conversion
           allowAny: true
-
-      no-unused-expressions: off
-      "@typescript-eslint/no-unused-expressions": error
-
-      "@foxglove/no-meaningless-void-operator": error
-
-      "@typescript-eslint/promise-function-async": error
-      "@typescript-eslint/no-floating-promises": error
-      "@typescript-eslint/return-await": [error, always]
 
       "@typescript-eslint/no-inferrable-types": off # It's sometimes useful to explicitly name to guard against future changes
       "@typescript-eslint/no-empty-function": off
