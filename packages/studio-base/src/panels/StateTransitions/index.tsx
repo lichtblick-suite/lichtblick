@@ -336,7 +336,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
             pointStyle: "circle",
             showLine: true,
             datalabels: {
-              color: color,
+              color,
             },
           };
 

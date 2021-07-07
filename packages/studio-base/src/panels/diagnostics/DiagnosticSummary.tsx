@@ -115,7 +115,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
           ({
             selectedHardwareId: info.status.hardware_id,
             selectedName: info.status.name,
-            topicToRender: topicToRender,
+            topicToRender,
             collapsedSections: [],
           } as DiagnosticStatusConfig),
       );

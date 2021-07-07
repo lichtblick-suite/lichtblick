@@ -84,7 +84,7 @@ function changePanelLayout(
   const configById = trimConfigById
     ? pick(state.configById, [...panelIdsInsideTabPanels, ...panelIds])
     : state.configById;
-  return { ...state, configById: configById, layout };
+  return { ...state, configById, layout };
 }
 
 function savePanelConfigs(state: PanelsState, payload: SaveConfigsPayload): PanelsState {

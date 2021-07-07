@@ -147,7 +147,7 @@ export default function MockMessagePipelineProvider(props: {
   return (
     <ContextInternal.Provider
       value={{
-        playerState: playerState,
+        playerState,
         frame: groupBy(props.messages ?? [], "topic"),
         sortedTopics: (props.topics ?? []).sort(naturalSort("name")),
         datatypes: props.datatypes ?? NO_DATATYPES,

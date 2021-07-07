@@ -71,7 +71,7 @@ function renderTitle(option: IDropdownOption[] | undefined) {
 }
 
 export default function FilterBar(props: FilterBarProps): JSX.Element {
-  const nodeNameOptions = Array.from(props.nodeNames, (name) => ({ name: name, key: name }));
+  const nodeNameOptions = Array.from(props.nodeNames, (name) => ({ name, key: name }));
 
   const selectedItems = Array.from(props.searchTerms, (term) => ({
     name: term,

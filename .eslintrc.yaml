@@ -52,6 +52,9 @@ rules:
 
   no-unused-expressions: error
 
+  no-useless-rename: error
+  object-shorthand: error
+
   prefer-arrow-callback:
     - error
     - allowNamedFunctions: true

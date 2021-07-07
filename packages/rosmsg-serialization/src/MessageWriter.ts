@@ -327,7 +327,7 @@ function createWriterAndSizeCalculator(types: RosMsgDefinition[]): WriterAndSize
   }
 
   return {
-    writer: function (message: unknown, data: Uint8Array): Uint8Array {
+    writer(message: unknown, data: Uint8Array): Uint8Array {
       const writer = new StandardTypeWriter(data);
       return write(writer, message);
     },

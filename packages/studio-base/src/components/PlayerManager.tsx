@@ -356,8 +356,8 @@ export default function PlayerManager({
     AppSetting.UNLIMITED_MEMORY_CACHE,
   );
   const buildPlayerOptions: BuildPlayerOptions = useShallowMemo({
-    unlimitedMemoryCache: unlimitedMemoryCache,
-    metricsCollector: metricsCollector,
+    unlimitedMemoryCache,
+    metricsCollector,
   });
 
   // Load a new player using the given definition -- passed as a function so that the asynchronous

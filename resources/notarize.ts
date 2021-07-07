@@ -37,7 +37,7 @@ exports.default = async function (context: AfterPackContext) {
 
   return notarize({
     appBundleId: appId,
-    appPath: appPath,
+    appPath,
     appleApiKey: appleApiKeyId,
     appleApiIssuer,
   });

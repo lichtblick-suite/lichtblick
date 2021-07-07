@@ -548,7 +548,7 @@ export default function Layout({
     saveConfig,
     selectionState,
     topics,
-    autoSyncCameraState: autoSyncCameraState,
+    autoSyncCameraState,
     isDrawing,
   });
   callbackInputsRef.current = {
@@ -560,7 +560,7 @@ export default function Layout({
     saveConfig,
     selectionState,
     topics,
-    autoSyncCameraState: autoSyncCameraState,
+    autoSyncCameraState,
     isDrawing,
   };
 

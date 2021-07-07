@@ -98,7 +98,7 @@ function Chart(props: Props): JSX.Element {
       payload?: Record<string, unknown>,
       transferables?: Transferable[],
     ) => {
-      return rpc.send<T>(topic, { id: id, ...payload }, transferables);
+      return rpc.send<T>(topic, { id, ...payload }, transferables);
     },
     [id, rpc],
   );
@@ -370,7 +370,7 @@ function Chart(props: Props): JSX.Element {
       }
 
       props.onClick?.({
-        datalabel: datalabel,
+        datalabel,
         x: xVal,
         y: yVal,
       });

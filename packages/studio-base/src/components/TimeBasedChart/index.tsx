@@ -816,7 +816,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     options,
     data: downsampledData,
     onClick: props.onClick,
-    onScalesUpdate: onScalesUpdate,
+    onScalesUpdate,
     onChartUpdate,
     onHover,
   };
