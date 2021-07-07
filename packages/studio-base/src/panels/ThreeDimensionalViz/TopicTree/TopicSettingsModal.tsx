@@ -11,63 +11,18 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { DefaultButton, Dialog, DialogFooter } from "@fluentui/react";
 import { isEmpty, omit } from "lodash";
 import Tabs, { TabPane } from "rc-tabs";
 import React, { useCallback } from "react";
-import styled from "styled-components";
 
-import Button from "@foxglove/studio-base/components/Button";
 import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
-import Modal from "@foxglove/studio-base/components/Modal";
 import { RenderToBodyComponent } from "@foxglove/studio-base/components/RenderToBodyComponent";
 import { topicSettingsEditorForDatatype } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor";
 import { Topic } from "@foxglove/studio-base/players/types";
 import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { Save3DConfig } from "../index";
-
-const STopicSettingsEditor = styled.div`
-  background: ${colors.DARK2};
-  color: ${colors.TEXT};
-  padding: 16px;
-`;
-const STitle = styled.h3`
-  font-size: 20px;
-  font-size: 20px;
-  margin-right: 36px;
-  word-break: break-all;
-  line-height: 1.3;
-`;
-
-const SDatatype = styled.p`
-  padding-bottom: 12px;
-`;
-
-const SEditorWrapper = styled.div`
-  color: ${colors.TEXT};
-  width: 400px;
-`;
-
-const STabWrapper = styled.div`
-  .rc-tabs-nav-list {
-    display: flex;
-  }
-  .rc-tabs-tab {
-    margin-right: 16px;
-    padding-bottom: 6px;
-    margin-bottom: 8px;
-    color: ${colors.TEXT};
-    font-size: 14px;
-    cursor: pointer;
-  }
-  .rc-tabs-tab-active {
-    border-bottom: 2px solid ${colors.BLUEL1};
-  }
-  .rc-tabs-nav-operations {
-    display: none;
-  }
-`;
 
 function MainEditor({
   datatype,
@@ -75,6 +30,7 @@ function MainEditor({
   columnIndex: _columnIndex,
   onFieldChange,
   onSettingsChange,
+  setCurrentEditingTopic,
   settings,
   topicName: _topicName,
 }: {
@@ -87,6 +43,7 @@ function MainEditor({
       | Record<string, unknown>
       | ((prevSettings: Record<string, unknown>) => Record<string, unknown>),
   ) => void;
+  setCurrentEditingTopic: (arg0?: Topic) => void;
   settings: Record<string, unknown>;
   topicName: string;
 }) {
@@ -97,23 +54,20 @@ function MainEditor({
 
   return (
     <ErrorBoundary>
-      <SEditorWrapper>
+      <div>
         <Editor
           message={collectorMessage}
           onFieldChange={onFieldChange}
           settings={settings}
           onSettingsChange={onSettingsChange}
         />
-        <Button
-          className="test-reset-settings-btn"
-          style={{ marginTop: 8 }}
-          onClick={() => {
-            onSettingsChange({});
-          }}
-        >
-          Reset to defaults
-        </Button>
-      </SEditorWrapper>
+        <DialogFooter>
+          <DefaultButton onClick={() => onSettingsChange({})}>Reset to defaults</DefaultButton>
+          <DefaultButton primary onClick={() => setCurrentEditingTopic(undefined)}>
+            Done
+          </DefaultButton>
+        </DialogFooter>
+      </div>
     </ErrorBoundary>
   );
 }
@@ -186,48 +140,43 @@ function TopicSettingsModal({
       onSettingsChange={onSettingsChange}
       settings={settingsByKey[topicSettingsKey] ?? {}}
       topicName={nonPrefixedTopic}
+      setCurrentEditingTopic={setCurrentEditingTopic}
     />
   );
+
   return (
     <RenderToBodyComponent>
-      <Modal
-        onRequestClose={() => setCurrentEditingTopic(undefined)}
-        contentStyle={{
-          maxHeight: "calc(100vh - 200px)",
-          maxWidth: 480,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "auto",
+      <Dialog
+        isOpen
+        onDismiss={() => setCurrentEditingTopic(undefined)}
+        dialogContentProps={{
+          title: currentEditingTopic.name,
+          subText: currentEditingTopic.datatype,
         }}
+        modalProps={{ isBlocking: true }}
+        maxWidth={480}
+        minWidth={480}
       >
-        <STopicSettingsEditor>
-          <STitle>{currentEditingTopic.name}</STitle>
-          <SDatatype>{currentEditingTopic.datatype}</SDatatype>
-          {hasFeatureColumn ? (
-            <STabWrapper>
-              <Tabs
-                activeKey={`${columnIndex}`}
-                onChange={(newKey) => {
-                  const newEditingTopicName =
-                    newKey === "0"
-                      ? nonPrefixedTopic
-                      : `${SECOND_SOURCE_PREFIX}${nonPrefixedTopic}`;
-                  setCurrentEditingTopic({ datatype, name: newEditingTopicName });
-                }}
-              >
-                <TabPane tab={"base"} key={"0"}>
-                  {editorElem}
-                </TabPane>
-                <TabPane tab={SECOND_SOURCE_PREFIX} key={"1"}>
-                  {editorElem}
-                </TabPane>
-              </Tabs>
-            </STabWrapper>
-          ) : (
-            editorElem
-          )}
-        </STopicSettingsEditor>
-      </Modal>
+        {hasFeatureColumn ? (
+          <Tabs
+            activeKey={`${columnIndex}`}
+            onChange={(newKey) => {
+              const newEditingTopicName =
+                newKey === "0" ? nonPrefixedTopic : `${SECOND_SOURCE_PREFIX}${nonPrefixedTopic}`;
+              setCurrentEditingTopic({ datatype, name: newEditingTopicName });
+            }}
+          >
+            <TabPane tab={"base"} key={"0"}>
+              {editorElem}
+            </TabPane>
+            <TabPane tab={SECOND_SOURCE_PREFIX} key={"1"}>
+              {editorElem}
+            </TabPane>
+          </Tabs>
+        ) : (
+          editorElem
+        )}
+      </Dialog>
     </RenderToBodyComponent>
   );
 }
