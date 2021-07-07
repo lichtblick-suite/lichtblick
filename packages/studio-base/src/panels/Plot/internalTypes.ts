@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { TooltipItem } from "@foxglove/studio-base/components/TimeBasedChart";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 export type BasePlotPath = {
@@ -20,6 +21,29 @@ export type BasePlotPath = {
 
 export type PlotPath = BasePlotPath & {
   timestampMethod: TimestampMethod;
+};
+
+export type PlotChartPoint = {
+  x: number;
+  y: number;
+};
+
+export type DataSet = {
+  borderColor: string;
+  borderWidth: number;
+  data: Array<PlotChartPoint>;
+  fill: boolean;
+  key: string;
+  label: string;
+  pointBackgroundColor: string;
+  pointBorderColor: string;
+  pointHoverRadius: number;
+  pointRadius: number;
+  showLine: boolean;
+};
+
+export type PlotDataByPath = {
+  [path: string]: readonly (readonly TooltipItem[])[];
 };
 
 // A "reference line" plot path is a numeric value. It creates a horizontal line on the plot at the specified value.

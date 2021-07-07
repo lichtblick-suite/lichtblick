@@ -12,7 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { TimeBasedChartTooltipData } from "@foxglove/studio-base/components/TimeBasedChart";
-import { PlotChartPoint } from "@foxglove/studio-base/panels/Plot/PlotChart";
+
+import { PlotChartPoint } from "./internalTypes";
 
 export type MathFunction = (arg0: number) => number;
 

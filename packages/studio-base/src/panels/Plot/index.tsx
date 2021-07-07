@@ -40,15 +40,14 @@ import {
   getTooltipItemForMessageHistoryItem,
   TooltipItem,
 } from "@foxglove/studio-base/components/TimeBasedChart";
-import PlotChart, {
-  getDatasetsAndTooltips,
-  PlotDataByPath,
-} from "@foxglove/studio-base/panels/Plot/PlotChart";
-import PlotLegend from "@foxglove/studio-base/panels/Plot/PlotLegend";
 import { PanelConfig, PanelConfigSchema } from "@foxglove/studio-base/types/panels";
 import { fromSec, subtractTimes, toSec } from "@foxglove/studio-base/util/time";
 
+import PlotChart from "./PlotChart";
+import PlotLegend from "./PlotLegend";
+import { getDatasetsAndTooltips } from "./datasets";
 import helpContent from "./index.help.md";
+import { PlotDataByPath } from "./internalTypes";
 import { PlotConfig } from "./types";
 
 export { plotableRosTypes } from "./types";
@@ -231,7 +230,6 @@ function Plot(props: Props) {
   if (preloadingDisplayTime != undefined) {
     // display time == end time when streamking data..., and start time was 0
     // could use start time of 0 to indicate live stream?
-    //console.log(preloadingDisplayTime, preloadingStartTime, preloadingEndTime);
     if (followingViewWidth != undefined && +followingViewWidth > 0) {
       // Will be ignored in TimeBasedChart for non-preloading plots and non-timestamp plots.
       defaultView = { type: "following", width: +followingViewWidth };

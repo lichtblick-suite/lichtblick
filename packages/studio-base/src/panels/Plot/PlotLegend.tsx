@@ -21,17 +21,13 @@ import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
 import Icon from "@foxglove/studio-base/components/Icon";
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
-import {
-  PlotPath,
-  BasePlotPath,
-  isReferenceLinePlotPathType,
-} from "@foxglove/studio-base/panels/Plot/internalTypes";
 import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import { lineColors } from "@foxglove/studio-base/util/plotColors";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 import styles from "./PlotLegend.module.scss";
+import { PlotPath, BasePlotPath, isReferenceLinePlotPathType } from "./internalTypes";
 import { plotableRosTypes, PlotConfig, PlotXAxisVal } from "./types";
 
 type PlotLegendProps = {
