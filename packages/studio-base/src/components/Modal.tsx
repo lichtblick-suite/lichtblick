@@ -80,7 +80,12 @@ export default function Modal(props: PropsWithChildren<Props>): React.ReactEleme
             fade
             dataTest="modal-close-icon"
             xsmall
-            style={{ position: "absolute", right: 25, top: 25, cursor: "pointer" }}
+            style={{
+              position: "absolute",
+              right: 25,
+              top: 25,
+              cursor: "pointer",
+            }}
             onClick={props.onRequestClose}
           >
             <CloseIcon />

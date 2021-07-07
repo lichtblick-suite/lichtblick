@@ -39,7 +39,6 @@ import PlaybackControls from "@foxglove/studio-base/components/PlaybackControls"
 import { PlayerStatusIndicator } from "@foxglove/studio-base/components/PlayerStatusIndicator";
 import Preferences from "@foxglove/studio-base/components/Preferences";
 import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValueChange";
-import { RenderToBodyComponent } from "@foxglove/studio-base/components/RenderToBodyComponent";
 import ShortcutsModal from "@foxglove/studio-base/components/ShortcutsModal";
 import Sidebar, { SidebarItem } from "@foxglove/studio-base/components/Sidebar";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
@@ -430,11 +429,9 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           <ShortcutsModal onRequestClose={() => setShortcutsModalOpen(false)} />
         )}
         {messagePathSyntaxModalOpen && (
-          <RenderToBodyComponent>
-            <HelpModal onRequestClose={() => setMessagePathSyntaxModalOpen(false)}>
-              {messagePathHelp}
-            </HelpModal>
-          </RenderToBodyComponent>
+          <HelpModal onRequestClose={() => setMessagePathSyntaxModalOpen(false)}>
+            {messagePathHelp}
+          </HelpModal>
         )}
 
         <Toolbar onDoubleClick={props.onToolbarDoubleClick}>

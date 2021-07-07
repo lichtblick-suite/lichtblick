@@ -15,7 +15,6 @@ import styled from "styled-components";
 
 import HelpModal from "@foxglove/studio-base/components/HelpModal";
 import KeyboardShortcut from "@foxglove/studio-base/components/KeyboardShortcut";
-import { RenderToBodyComponent } from "@foxglove/studio-base/components/RenderToBodyComponent";
 
 const STitle = styled.h3`
   margin: 16px 0 8px 0;
@@ -29,27 +28,25 @@ type Props = {
 };
 export default function ShortcutsModal({ onRequestClose }: Props): React.ReactElement {
   return (
-    <RenderToBodyComponent>
-      <HelpModal onRequestClose={onRequestClose}>
-        <h2>Keyboard shortcuts</h2>
-        <STitle>Global</STitle>
-        <KeyboardShortcut description="Save layouts" keys={[COMMAND, "s"]} />
-        <KeyboardShortcut description="Import/export layouts" keys={[COMMAND, "e"]} />
-        <KeyboardShortcut description="Undo changes" keys={[COMMAND, "z"]} />
-        <KeyboardShortcut description="Redo changes" keys={[COMMAND, SHIFT, "z"]} />
-        <KeyboardShortcut description="Open a file" keys={[COMMAND, "o"]} />
-        <KeyboardShortcut description="Add a second bag" keys={[COMMAND, SHIFT, "o"]} />
-        <KeyboardShortcut description="Select all panels" keys={[COMMAND, "a"]} />
-        <KeyboardShortcut description="Show help and resources" keys={[SHIFT, "/"]} />
-        <KeyboardShortcut description="Show shortcuts" keys={[COMMAND, "/"]} />
-        <KeyboardShortcut description="Pause or play" keys={["Space"]} />
-        <KeyboardShortcut description="Seek forward 100ms" keys={["⇢"]} />
-        <KeyboardShortcut description="Seek backward 100ms" keys={["⇠"]} />
+    <HelpModal onRequestClose={onRequestClose}>
+      <h2>Keyboard shortcuts</h2>
+      <STitle>Global</STitle>
+      <KeyboardShortcut description="Save layouts" keys={[COMMAND, "s"]} />
+      <KeyboardShortcut description="Import/export layouts" keys={[COMMAND, "e"]} />
+      <KeyboardShortcut description="Undo changes" keys={[COMMAND, "z"]} />
+      <KeyboardShortcut description="Redo changes" keys={[COMMAND, SHIFT, "z"]} />
+      <KeyboardShortcut description="Open a file" keys={[COMMAND, "o"]} />
+      <KeyboardShortcut description="Add a second bag" keys={[COMMAND, SHIFT, "o"]} />
+      <KeyboardShortcut description="Select all panels" keys={[COMMAND, "a"]} />
+      <KeyboardShortcut description="Show help and resources" keys={[SHIFT, "/"]} />
+      <KeyboardShortcut description="Show shortcuts" keys={[COMMAND, "/"]} />
+      <KeyboardShortcut description="Pause or play" keys={["Space"]} />
+      <KeyboardShortcut description="Seek forward 100ms" keys={["⇢"]} />
+      <KeyboardShortcut description="Seek backward 100ms" keys={["⇠"]} />
 
-        <STitle>Panel</STitle>
-        <KeyboardShortcut description="Hovering over a panel to view panel shortcut" keys={["~"]} />
-        <KeyboardShortcut description="Hold to lock panel in full screen" keys={["~", SHIFT]} />
-      </HelpModal>
-    </RenderToBodyComponent>
+      <STitle>Panel</STitle>
+      <KeyboardShortcut description="Hovering over a panel to view panel shortcut" keys={["~"]} />
+      <KeyboardShortcut description="Hold to lock panel in full screen" keys={["~", SHIFT]} />
+    </HelpModal>
   );
 }

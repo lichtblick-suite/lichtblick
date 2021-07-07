@@ -23,8 +23,7 @@ import { v4 as uuidv4 } from "uuid";
 import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
 import Icon from "@foxglove/studio-base/components/Icon";
 import Menu from "@foxglove/studio-base/components/Menu";
-import Modal, { Title } from "@foxglove/studio-base/components/Modal";
-import { RenderToBodyComponent } from "@foxglove/studio-base/components/RenderToBodyComponent";
+import NotificationModal from "@foxglove/studio-base/components/NotificationModal";
 import {
   DetailsType,
   NotificationType,
@@ -167,47 +166,6 @@ export class NotificationList extends React.PureComponent<NotificationListProps>
       </Menu>
     );
   }
-}
-
-const ModalBody = styled.div`
-  padding: 32px;
-  max-width: 600px;
-  min-width: 300px;
-  max-height: 80vh;
-  overflow: auto;
-`;
-
-// Exporting for tests.
-export function NotificationModal({
-  notification,
-  onRequestClose,
-}: {
-  notification: NotificationMessage;
-  onRequestClose: () => void;
-}): React.ReactElement {
-  let details = notification.details;
-  if (details instanceof Error) {
-    details = details.stack;
-  }
-  return (
-    <RenderToBodyComponent>
-      <Modal onRequestClose={onRequestClose}>
-        <Title style={{ color: getColorForSeverity(notification.severity) }}>
-          {notification.message}
-        </Title>
-        <hr />
-        <ModalBody>
-          {typeof details === "string" ? (
-            <pre style={{ whiteSpace: "pre-wrap", lineHeight: 1.3 }}>{details}</pre>
-          ) : details != undefined && details !== "" ? (
-            details
-          ) : (
-            "No details provided"
-          )}
-        </ModalBody>
-      </Modal>
-    </RenderToBodyComponent>
-  );
 }
 
 export default function NotificationDisplay(): React.ReactElement {

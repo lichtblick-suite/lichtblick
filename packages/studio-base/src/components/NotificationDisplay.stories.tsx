@@ -17,14 +17,14 @@ import { useRef } from "react";
 
 import NotificationDisplay, {
   NotificationList,
-  NotificationModal,
   NotificationMessage,
 } from "@foxglove/studio-base/components/NotificationDisplay";
+import NotificationModal from "@foxglove/studio-base/components/NotificationModal";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 const randomNum = () => Math.floor(Math.random() * 1000);
 const addError = () =>
-  sendNotification(`Another error #${randomNum()}`, "some details", "app", "error");
+  sendNotification(`Another error #${randomNum()}`, new Error("some details"), "app", "error");
 const addWarning = () =>
   sendNotification(`Another warning #${randomNum()}`, "some details", "app", "warn");
 const addInfo = () =>
@@ -47,6 +47,23 @@ const AddMoreButtons = () => (
   </div>
 );
 
+const fakeError = () => {
+  const err = Error("This error is on purpose - it comes from the story");
+
+  err.stack = `at http://localhost:49891/main.iframe.bundle.js:13051:22
+    at finalStoryFn (http://localhost:49891/vendors-node_modules_fluentui_react-icons-mdl2_lib_components_AddIcon_js-node_modules_fluentu-9a6f77.iframe.bundle.js:56275:32)
+    at http://localhost:49891/vendors-node_modules_fluentui_react-icons-mdl2_lib_components_AddIcon_js-node_modules_fluentu-9a6f77.iframe.bundle.js:53001:21
+    at http://localhost:49891/vendors-node_modules_fluentui_react-icons-mdl2_lib_components_AddIcon_js-node_modules_fluentu-9a6f77.iframe.bundle.js:54920:16
+    at jsxDecorator (http://localhost:49891/vendors-node_modules_fluentui_react-icons-mdl2_lib_components_AddIcon_js-node_modules_fluentu-9a6f77.iframe.bundle.js:48482:15)
+    at http://localhost:49891/vendors-node_modules_fluentui_react-icons-mdl2_lib_components_AddIcon_js-node_modules_fluentu-9a6f77.iframe.bundle.js:53001:21
+    at http://localhost:49891/vendors-node_modules_fluentui_react-icons-mdl2_lib_components_AddIcon_js-node_modules_fluentu-9a6f77.iframe.bundle.js:54884:12
+    at http://localhost:49891/vendors-node_modules_fluentui_react-icons-mdl2_lib_components_AddIcon_js-node_modules_fluentu-9a6f77.iframe.bundle.js:54920:16
+    at withGrid (http://localhost:49891/vendors-node_modules_fluentui_react-icons-mdl2_lib_components_AddIcon_js-node_modules_fluentu-9a6f77.iframe.bundle.js:45137:10)
+    at http://localhost:49891/vendors-node_modules_fluentui_react-icons-mdl2_lib_components_AddIcon_js-node_modules_fluentu-9a6f77.iframe.bundle.js:53001:21`;
+
+  return err;
+};
+
 storiesOf("components/NotificationDisplay", module)
   .addParameters({
     chromatic: {
@@ -59,12 +76,7 @@ storiesOf("components/NotificationDisplay", module)
   .add("With one error", () => {
     class Wrapper extends React.Component<any> {
       override componentDidMount() {
-        sendNotification(
-          "Something bad happened",
-          "This error is on purpose - it comes from the story",
-          "app",
-          "error",
-        );
+        sendNotification("Something bad happened", fakeError(), "app", "error");
       }
 
       override render() {
@@ -110,30 +122,15 @@ storiesOf("components/NotificationDisplay", module)
   .add("expanded with 4 messages", () => {
     const el = useRef<HTMLDivElement>(ReactNull);
     React.useLayoutEffect(() => {
-      sendNotification(
-        "Something bad happened 1",
-        "This error is on purpose - it comes from the story",
-        "app",
-        "error",
-      );
-      sendNotification(
-        "Something bad happened 2",
-        "This error is on purpose - it comes from the story",
-        "app",
-        "error",
-      );
+      sendNotification("Something bad happened 1", fakeError(), "app", "error");
+      sendNotification("Something bad happened 2", fakeError(), "app", "error");
       sendNotification(
         "Just a warning",
         "This warning is on purpose - it comes from the story",
         "app",
         "warn",
       );
-      sendNotification(
-        "Something bad happened 3",
-        "This error is on purpose - it comes from the story",
-        "app",
-        "error",
-      );
+      sendNotification("Something bad happened 3", fakeError(), "app", "error");
 
       setImmediate(() => {
         el.current?.querySelector<HTMLElement>(".icon")?.click();
@@ -153,7 +150,7 @@ storiesOf("components/NotificationDisplay", module)
       {
         id: "1",
         message: "Error 1",
-        details: "Some error details",
+        details: fakeError(),
         read: true,
         created: moment(date).subtract(307, "minutes").toDate(),
         severity: "error",
@@ -161,7 +158,7 @@ storiesOf("components/NotificationDisplay", module)
       {
         id: "2",
         message: "Some very long error message that should be truncated",
-        details: "Some error details",
+        details: fakeError(),
         read: true,
         created: moment(date).subtract(31, "minutes").toDate(),
         severity: "error",
@@ -169,7 +166,7 @@ storiesOf("components/NotificationDisplay", module)
       {
         id: "5",
         message: "Foo foo baz",
-        details: "Some error details",
+        details: fakeError(),
         read: false,
         created: moment(date).subtract(17, "minutes").toDate(),
         severity: "error",
@@ -185,7 +182,7 @@ storiesOf("components/NotificationDisplay", module)
       {
         id: "3",
         message: "Some fake error",
-        details: "Foo bar baz this is a long-ish error details string",
+        details: fakeError(),
         read: false,
         created: moment(date).subtract(3, "seconds").toDate(),
         severity: "error",
@@ -209,7 +206,7 @@ storiesOf("components/NotificationDisplay", module)
         notification={{
           id: "1",
           message: "Error 1",
-          details: "Some error details",
+          details: fakeError(),
           read: false,
           created: new Date(),
           severity: "error",
