@@ -25,7 +25,7 @@ export default function SigninForm(): JSX.Element {
 
   const [{ value: deviceCode, error: deviceCodeError, loading }, getDeviceCode] =
     useAsyncFn(async () => {
-      return api.deviceCode({
+      return await api.deviceCode({
         client_id: process.env.OAUTH_CLIENT_ID!,
       });
     }, [api]);
@@ -87,7 +87,7 @@ export default function SigninForm(): JSX.Element {
       }
 
       // get a refresh token from the endpoint
-      return api.signin({
+      return await api.signin({
         id_token: deviceResponse.id_token,
         org_slug: org.slug,
       });

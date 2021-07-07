@@ -58,7 +58,7 @@ type RpcUpdateDataEvent = {
 async function loadDefaultFont(): Promise<FontFace> {
   const fontFace = new FontFace("Roboto Mono", `url(${RobotoMono}) format('woff2')`);
   (self as unknown as WorkerGlobalScope).fonts.add(fontFace);
-  return fontFace.load();
+  return await fontFace.load();
 }
 
 // Immediately start font loading in the Worker thread. Each ChartJSManager we instantiate will

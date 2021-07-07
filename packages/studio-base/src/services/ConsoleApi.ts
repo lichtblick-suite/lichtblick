@@ -56,36 +56,36 @@ class ConsoleApi {
   }
 
   async orgs(): Promise<Org[]> {
-    return this.get<Org[]>("/v1/orgs");
+    return await this.get<Org[]>("/v1/orgs");
   }
 
   async me(): Promise<CurrentUser> {
-    return this.get<CurrentUser>("/v1/me");
+    return await this.get<CurrentUser>("/v1/me");
   }
 
   async signin(args: SigninArgs): Promise<Session> {
-    return this.post<Session>("/v1/signin", args);
+    return await this.post<Session>("/v1/signin", args);
   }
 
   async signout(): Promise<void> {
-    return this.post<void>("/v1/signout");
+    return await this.post<void>("/v1/signout");
   }
 
   async deviceCode(args: DeviceCodeArgs): Promise<DeviceCodeResponse> {
-    return this.post<DeviceCodeResponse>("/v1/auth/device-code", {
+    return await this.post<DeviceCodeResponse>("/v1/auth/device-code", {
       client_id: args.client_id,
     });
   }
 
   async token(args: TokenArgs): Promise<TokenResponse> {
-    return this.post<TokenResponse>("/v1/auth/token", {
+    return await this.post<TokenResponse>("/v1/auth/token", {
       device_code: args.device_code,
       client_id: args.client_id,
     });
   }
 
   protected async get<T>(apiPath: string, query?: Record<string, string>): Promise<T> {
-    return this.request<T>(
+    return await this.request<T>(
       query == undefined ? apiPath : `${apiPath}?${new URLSearchParams(query).toString()}`,
       {
         method: "GET",
@@ -94,7 +94,7 @@ class ConsoleApi {
   }
 
   protected async post<T>(apiPath: string, body?: unknown): Promise<T> {
-    return this.request<T>(apiPath, {
+    return await this.request<T>(apiPath, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -123,7 +123,7 @@ class ConsoleApi {
     }
 
     try {
-      return res.json() as Promise<T>;
+      return (await res.json()) as T;
     } catch (err) {
       throw new Error("Request Failed.");
     }

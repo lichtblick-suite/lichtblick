@@ -59,7 +59,7 @@ describe("debounceReduce", () => {
       if (time > t) {
         throw new Error(`It's past ${t} already`);
       }
-      return delay(t - time);
+      return await delay(t - time);
     };
     const fn = debounceReduce({
       action: (n: number) => {

@@ -36,7 +36,7 @@ export default function ExtensionLoaderProvider(props: PropsWithChildren<unknown
       return extensions;
     },
     async loadExtension(id: string): Promise<string> {
-      return desktopBridge?.loadExtension(id) ?? "";
+      return (await desktopBridge?.loadExtension(id)) ?? "";
     },
     async downloadExtension(url: string): Promise<Uint8Array> {
       const res = await fetch(url);

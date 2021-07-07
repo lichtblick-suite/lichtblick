@@ -129,7 +129,7 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
 
   async getLayouts(): Promise<LayoutMetadata[]> {
     return filterMap(
-      await this.cacheStorage.runExclusive(async (cache) => cache.list()),
+      await this.cacheStorage.runExclusive(async (cache) => await cache.list()),
       (layout) =>
         layout.locallyDeleted === true && !this.latestConflictsByCacheId.has(layout.id)
           ? undefined
@@ -138,7 +138,7 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
   }
 
   async getLayout(id: LayoutID): Promise<Layout | undefined> {
-    const layout = await this.cacheStorage.runExclusive(async (cache) => cache.get(id));
+    const layout = await this.cacheStorage.runExclusive(async (cache) => await cache.get(id));
     if (layout?.locallyDeleted === true) {
       return undefined;
     }
@@ -154,16 +154,17 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
       return undefined;
     }
     const { data, ...metadata } = remoteLayout;
-    await this.cacheStorage.runExclusive(async (cache) =>
-      // In the unlikely event that local modifications (rename or delete) got into the cache since we
-      // last checked, the remote response will override them.
-      cache.put({
-        id: metadata.id,
-        name: metadata.name,
-        path: metadata.path,
-        state: data,
-        serverMetadata: metadata,
-      }),
+    await this.cacheStorage.runExclusive(
+      async (cache) =>
+        // In the unlikely event that local modifications (rename or delete) got into the cache since we
+        // last checked, the remote response will override them.
+        await cache.put({
+          id: metadata.id,
+          name: metadata.name,
+          path: metadata.path,
+          state: data,
+          serverMetadata: metadata,
+        }),
     );
     this.notifyChangeListeners();
     return {
@@ -250,7 +251,7 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
 
   /** Save a layout to the server following an explicit user action. */
   async syncLayout(id: LayoutID): Promise<ConflictType | undefined> {
-    const cachedLayout = await this.cacheStorage.runExclusive(async (cache) => cache.get(id));
+    const cachedLayout = await this.cacheStorage.runExclusive(async (cache) => await cache.get(id));
     let conflict: ConflictInfo | undefined;
     if (cachedLayout?.serverMetadata != undefined) {
       conflict = await this.performSyncOperation(
@@ -293,7 +294,7 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
   private async syncWithRemoteImpl(): Promise<ReadonlyMap<string, ConflictInfo>> {
     const [cachedLayoutsById, remoteLayoutsById] = await Promise.all([
       this.cacheStorage
-        .runExclusive(async (cache) => cache.list())
+        .runExclusive(async (cache) => await cache.list())
         .then(
           (layouts): ReadonlyMap<string, CachedLayout> =>
             new Map(layouts.map((layout) => [layout.id, layout])),
@@ -345,37 +346,39 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
 
       case "add-to-cache": {
         const { remoteLayout } = operation;
-        await this.cacheStorage.runExclusive(async (cache) =>
-          cache.put({
-            id: remoteLayout.id,
-            name: remoteLayout.name,
-            path: remoteLayout.path,
-            state: undefined,
-            serverMetadata: remoteLayout,
-          }),
+        await this.cacheStorage.runExclusive(
+          async (cache) =>
+            await cache.put({
+              id: remoteLayout.id,
+              name: remoteLayout.name,
+              path: remoteLayout.path,
+              state: undefined,
+              serverMetadata: remoteLayout,
+            }),
         );
         break;
       }
 
       case "update-cached-metadata": {
         const { cachedLayout, remoteLayout } = operation;
-        await this.cacheStorage.runExclusive(async (cache) =>
-          cache.put({
-            ...cachedLayout,
-            name: remoteLayout.name,
-            path: remoteLayout.path,
-            serverMetadata: remoteLayout,
-            state: undefined, // clear out the state so we know it needs to be fetched from the server
-            locallyDeleted: false,
-            locallyModified: false,
-          }),
+        await this.cacheStorage.runExclusive(
+          async (cache) =>
+            await cache.put({
+              ...cachedLayout,
+              name: remoteLayout.name,
+              path: remoteLayout.path,
+              serverMetadata: remoteLayout,
+              state: undefined, // clear out the state so we know it needs to be fetched from the server
+              locallyDeleted: false,
+              locallyModified: false,
+            }),
         );
         break;
       }
 
       case "delete-local": {
         const { cachedLayout } = operation;
-        await this.cacheStorage.runExclusive(async (cache) => cache.delete(cachedLayout.id));
+        await this.cacheStorage.runExclusive(async (cache) => await cache.delete(cachedLayout.id));
         break;
       }
 
@@ -387,7 +390,9 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
         });
         switch (response.status) {
           case "success":
-            await this.cacheStorage.runExclusive(async (cache) => cache.delete(cachedLayout.id));
+            await this.cacheStorage.runExclusive(
+              async (cache) => await cache.delete(cachedLayout.id),
+            );
             break;
           case "precondition-failed":
             return {
@@ -458,12 +463,13 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
         const response = await responsePromise;
         switch (response.status) {
           case "success":
-            await this.cacheStorage.runExclusive(async (cache) =>
-              cache.put({
-                ...cachedLayout,
-                locallyModified: false,
-                serverMetadata: response.newMetadata,
-              }),
+            await this.cacheStorage.runExclusive(
+              async (cache) =>
+                await cache.put({
+                  ...cachedLayout,
+                  locallyModified: false,
+                  serverMetadata: response.newMetadata,
+                }),
             );
             break;
           case "not-found":

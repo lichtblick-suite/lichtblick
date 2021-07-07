@@ -25,7 +25,7 @@ export default function CurrentUserProvider(props: PropsWithChildren<unknown>): 
       return undefined;
     }
     api.setAuthHeader(`Bearer ${bearerToken}`);
-    return api.me();
+    return await api.me();
   }, [api, bearerToken]);
 
   useEffect(() => {

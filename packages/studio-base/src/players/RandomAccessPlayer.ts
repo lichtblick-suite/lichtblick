@@ -248,9 +248,11 @@ export default class RandomAccessPlayer implements Player {
       });
   }
 
-  _emitState = debouncePromise(async () => {
+  // Potentially performance-sensitive; await can be expensive
+  // eslint-disable-next-line @typescript-eslint/promise-function-async
+  _emitState = debouncePromise(() => {
     if (!this._listener) {
-      return;
+      return Promise.resolve();
     }
 
     if (this._hasError) {

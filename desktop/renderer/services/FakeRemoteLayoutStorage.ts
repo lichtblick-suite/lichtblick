@@ -89,7 +89,9 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
   }
 
   async getLayouts(): Promise<readonly RemoteLayoutMetadata[]> {
-    return this.storage.runExclusive(async (storage) => this.getLayoutsUnlocked(storage));
+    return await this.storage.runExclusive(
+      async (storage) => await this.getLayoutsUnlocked(storage),
+    );
   }
   private async getLayoutsUnlocked(storage: Storage): Promise<readonly RemoteLayoutMetadata[]> {
     const items = await storage.all(FakeRemoteLayoutStorage.STORE_NAME);
@@ -110,7 +112,9 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
   }
 
   async getLayout(id: LayoutID): Promise<RemoteLayout | undefined> {
-    return this.storage.runExclusive(async (storage) => this.getLayoutUnlocked(storage, id));
+    return await this.storage.runExclusive(
+      async (storage) => await this.getLayoutUnlocked(storage, id),
+    );
   }
   private async getLayoutUnlocked(
     storage: Storage,
@@ -140,7 +144,7 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
     name: string;
     data: PanelsState;
   }): Promise<{ status: "success"; newMetadata: RemoteLayoutMetadata } | { status: "conflict" }> {
-    return this.storage.runExclusive(async (storage) => {
+    return await this.storage.runExclusive(async (storage) => {
       if (
         await this.hasNameConflictUnlocked(storage, {
           ignoringId: undefined,
@@ -190,7 +194,7 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
     | { status: "conflict" }
     | { status: "precondition-failed" }
   > {
-    return this.storage.runExclusive(async (storage) => {
+    return await this.storage.runExclusive(async (storage) => {
       const target = await this.getLayoutUnlocked(storage, targetID);
       if (!target) {
         return { status: "not-found" };
@@ -240,7 +244,7 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
     | { status: "not-found" }
     | { status: "conflict" }
   > {
-    return this.storage.runExclusive(async (storage) => {
+    return await this.storage.runExclusive(async (storage) => {
       const source = await this.getLayoutUnlocked(storage, sourceID);
       if (!source) {
         return { status: "not-found" };
@@ -287,7 +291,7 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
     targetID: LayoutID;
     ifUnmodifiedSince: ISO8601Timestamp;
   }): Promise<{ status: "success" | "precondition-failed" }> {
-    return this.storage.runExclusive(async (storage) => {
+    return await this.storage.runExclusive(async (storage) => {
       const target = await this.getLayoutUnlocked(storage, targetID);
       if (!target) {
         return { status: "success" };
@@ -316,7 +320,7 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
     | { status: "conflict" }
     | { status: "precondition-failed" }
   > {
-    return this.storage.runExclusive(async (storage) => {
+    return await this.storage.runExclusive(async (storage) => {
       const target = await this.getLayoutUnlocked(storage, targetID);
       if (!target) {
         return { status: "conflict" };

@@ -119,7 +119,7 @@ export function usePrompt(): (options: PromptOptions) => Promise<string | undefi
 
   const runPrompt = useCallback(
     async (options: PromptOptions) => {
-      return new Promise<string | undefined>((resolve) => {
+      return await new Promise<string | undefined>((resolve) => {
         const remove = modalHost.addModalElement(
           <ModalPrompt
             {...options}

@@ -45,7 +45,7 @@ export class TcpServerNode extends EventEmitter<TcpServerEvents> implements TcpS
     port?: number;
     backlog?: number;
   }): Promise<TcpServer> {
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       const server = net.createServer();
       server.on("error", reject);
       server.listen(options.port, options.host, options.backlog, () => {

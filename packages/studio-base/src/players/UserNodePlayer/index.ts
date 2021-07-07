@@ -123,7 +123,7 @@ export default class UserNodePlayer implements Player {
 
   constructor(player: Player, userNodeActions: UserNodeActions) {
     this._player = player;
-    this._player.setListener(async (state) => this._onPlayerState(state));
+    this._player.setListener(async (state) => await this._onPlayerState(state));
     const { setUserNodeDiagnostics, addUserNodeLogs, setUserNodeRosLib } = userNodeActions;
 
     // TODO(troy): can we make the below action flow better? Might be better to
@@ -233,7 +233,7 @@ export default class UserNodePlayer implements Player {
 
     // This code causes us to reset workers twice because the forceSeek resets the workers too
     // TODO: Only reset workers once
-    return this._resetWorkers().then(() => {
+    return await this._resetWorkers().then(() => {
       this.setSubscriptions(this._subscriptions);
       const { currentTime, isPlaying = false } = this._lastPlayerStateActiveData ?? {};
       if (currentTime && !isPlaying) {
@@ -511,8 +511,8 @@ export default class UserNodePlayer implements Player {
     }
 
     const allNodeRegistrations = await Promise.all(
-      Object.entries(this._userNodes).map(async ([nodeId, userNode]) =>
-        this._createNodeRegistration(nodeId, userNode),
+      Object.entries(this._userNodes).map(
+        async ([nodeId, userNode]) => await this._createNodeRegistration(nodeId, userNode),
       ),
     );
 

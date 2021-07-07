@@ -115,7 +115,7 @@ export default class RenameDataProvider implements DataProvider {
   }
 
   async close(): Promise<void> {
-    return this._provider.close();
+    return await this._provider.close();
   }
 
   _mapMessage = <T>(message: MessageEvent<T>): MessageEvent<T> => ({

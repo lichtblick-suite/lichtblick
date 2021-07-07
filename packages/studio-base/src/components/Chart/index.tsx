@@ -98,7 +98,7 @@ function Chart(props: Props): JSX.Element {
       payload?: Record<string, unknown>,
       transferables?: Transferable[],
     ) => {
-      return rpc.send<T>(topic, { id, ...payload }, transferables);
+      return await rpc.send<T>(topic, { id, ...payload }, transferables);
     },
     [id, rpc],
   );
@@ -308,7 +308,7 @@ function Chart(props: Props): JSX.Element {
 
   const onMouseUp = useCallback(
     async (event: React.MouseEvent<HTMLCanvasElement>) => {
-      return rpcSend("mouseup", {
+      return await rpcSend("mouseup", {
         event: rpcMouseEvent(event),
       });
     },

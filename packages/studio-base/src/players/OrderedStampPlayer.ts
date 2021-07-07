@@ -67,7 +67,9 @@ export default class OrderedStampPlayer implements Player {
   }
 
   setListener(listener: (arg0: PlayerState) => Promise<void>): void {
-    this._player.setListener(async (state: PlayerState) => {
+    // Potentially performance-sensitive; await can be expensive
+    // eslint-disable-next-line @typescript-eslint/promise-function-async
+    this._player.setListener((state: PlayerState) => {
       const { activeData } = state;
       if (!activeData) {
         // No new messages since last time.
@@ -185,7 +187,7 @@ export default class OrderedStampPlayer implements Player {
     this.seekPlayback(this._currentTime);
   }
   async setUserNodes(nodes: UserNodes): Promise<void> {
-    return this._player.setUserNodes(nodes);
+    return await this._player.setUserNodes(nodes);
   }
   setGlobalVariables(globalVariables: GlobalVariables): void {
     this._player.setGlobalVariables(globalVariables);

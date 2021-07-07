@@ -44,7 +44,7 @@ export default class FakePlayer implements Player {
       return undefined;
     }
 
-    return this.listener({
+    return await this.listener({
       playerId: this.playerId,
       presence: presence ?? PlayerPresence.PRESENT,
       capabilities: this._capabilities,

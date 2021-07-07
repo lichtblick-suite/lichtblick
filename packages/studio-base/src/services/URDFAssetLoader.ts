@@ -46,7 +46,7 @@ export default class URDFAssetLoader implements AssetLoader {
         url += `&basePath=${encodeURIComponent(basePath)}`;
       }
       url += `&relPath=${encodeURIComponent(relPath)}`;
-      return (await fetch(url)).text();
+      return await (await fetch(url)).text();
     };
 
     const urdf = await xacroParser.parse(text);

@@ -186,10 +186,13 @@ export default class AutomatedRunPlayer implements Player {
     return { parsedMessages: filterMessages(parsedMessages) };
   }
 
-  async _emitState(messages: readonly MessageEvent<unknown>[], currentTime: Time): Promise<void> {
-    return this._emitStateQueue.add(async () => {
+  // Potentially performance-sensitive; await can be expensive
+  // eslint-disable-next-line @typescript-eslint/promise-function-async
+  _emitState(messages: readonly MessageEvent<unknown>[], currentTime: Time): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/promise-function-async
+    return this._emitStateQueue.add(() => {
       if (!this._listener) {
-        return;
+        return Promise.resolve();
       }
       const initializationResult = this._providerResult;
       if (!initializationResult) {

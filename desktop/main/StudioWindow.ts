@@ -293,7 +293,7 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
       },
       {
         label: "Learn More",
-        click: async () => shell.openExternal("https://foxglove.dev"),
+        click: async () => await shell.openExternal("https://foxglove.dev"),
       },
       ...(isMac
         ? []

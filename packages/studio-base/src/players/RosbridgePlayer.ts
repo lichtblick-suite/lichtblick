@@ -254,9 +254,11 @@ export default class RosbridgePlayer implements Player {
     }
   };
 
-  _emitState = debouncePromise(async () => {
+  // Potentially performance-sensitive; await can be expensive
+  // eslint-disable-next-line @typescript-eslint/promise-function-async
+  _emitState = debouncePromise(() => {
     if (!this._listener || this._closed) {
-      return undefined;
+      return Promise.resolve();
     }
 
     const { _providerTopics, _providerDatatypes, _start } = this;

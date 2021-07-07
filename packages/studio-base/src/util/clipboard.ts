@@ -31,7 +31,7 @@ export default {
     // `execCommand` method.
     if (navigator?.clipboard?.writeText != undefined) {
       try {
-        return navigator.clipboard.writeText(text);
+        return await navigator.clipboard.writeText(text);
       } catch (error) {
         fallbackCopy(text);
       }

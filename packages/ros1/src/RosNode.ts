@@ -125,7 +125,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
   }
 
   async start(port?: number): Promise<void> {
-    return this.rosFollower
+    return await this.rosFollower
       .start(this.hostname, port)
       .then(() => this._log?.debug?.(`rosfollower listening at ${this.rosFollower.url()}`));
   }
@@ -233,7 +233,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
       throw new Error(`cannot publish to unadvertised topic "${topic}"`);
     }
 
-    return this._tcpPublisher.publish(publication, message);
+    return await this._tcpPublisher.publish(publication, message);
   }
 
   isSubscribedTo(topic: string): boolean {
@@ -432,7 +432,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
   }
 
   async tcpServerAddress(): Promise<TcpAddress | undefined> {
-    return this._tcpPublisher?.address() ?? Promise.resolve(undefined);
+    return await this._tcpPublisher?.address();
   }
 
   receivedBytes(): number {
@@ -664,7 +664,7 @@ export class RosNode extends EventEmitter<RosNodeEvents> {
     // Register with each publisher. Any failures communicating with individual node XML-RPC servers
     // or TCP sockets will be caught and retried
     await Promise.allSettled(
-      publishers.map(async (pubUrl) => this._subscribeToPublisher(pubUrl, subscription)),
+      publishers.map(async (pubUrl) => await this._subscribeToPublisher(pubUrl, subscription)),
     );
   }
 

@@ -96,7 +96,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       initialProps: { maybePlayer: { player } },
     });
 
-    await act(async () => player.emit());
+    await act(async () => await player.emit());
     expect(result.all).toEqual([
       expect.objectContaining({
         playerState: {
@@ -129,8 +129,8 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     rerender({ maybePlayer: { loading: true } });
     rerender({ maybePlayer: { error: new Error("failed to load player") } });
     rerender({ maybePlayer: { player } });
-    await act(async () => player.emit());
-    await act(async () => player.emit({ presence: PlayerPresence.RECONNECTING }));
+    await act(async () => await player.emit());
+    await act(async () => await player.emit({ presence: PlayerPresence.RECONNECTING }));
     expect(
       result.all.map((ctx) => {
         if (ctx instanceof Error) {
@@ -158,7 +158,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     act(() => {
       void player.emit();
     });
-    await expect(async () => player.emit()).rejects.toThrow(
+    await expect(async () => await player.emit()).rejects.toThrow(
       "New playerState was emitted before last playerState was rendered.",
     );
   });
@@ -209,7 +209,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     ]);
     const lastSubscriptions = result.current.subscriptions;
     // cause the player to emit a frame outside the render loop to trigger another render
-    await act(async () => player.emit());
+    await act(async () => await player.emit());
     // make sure subscriptions are reference equal when they don't change
     expect(result.current.subscriptions).toBe(lastSubscriptions);
   });
@@ -242,7 +242,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
 
     const lastPublishers = result.current.publishers;
     // cause the player to emit a frame outside the render loop to trigger another render
-    await act(async () => player.emit());
+    await act(async () => await player.emit());
     // make sure publishers are reference equal when they don't change
     expect(result.current.publishers).toBe(lastPublishers);
   });
@@ -255,7 +255,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     });
 
     const lastContext = result.current;
-    await act(async () => player.emit());
+    await act(async () => await player.emit());
     for (const [key, value] of Object.entries(result.current)) {
       if (typeof value === "function") {
         expect((lastContext as Record<string, unknown>)[key]).toBe(value);
@@ -274,9 +274,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     expect(result.all.length).toBe(1);
     // Now wait for the player state emit cycle to complete.
     // This promise should resolve when the render loop finishes.
-    await act(async () => player.emit());
+    await act(async () => await player.emit());
     expect(result.all.length).toBe(2);
-    await act(async () => player.emit());
+    await act(async () => await player.emit());
     expect(result.all.length).toBe(3);
   });
 
@@ -331,7 +331,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         initialProps: { maybePlayer: { player } },
       }));
 
-      await act(async () => player.emit());
+      await act(async () => await player.emit());
       expect(result.all.length).toBe(2); // eslint-disable-line jest/no-standalone-expect
 
       player2 = new FakePlayer();
@@ -342,9 +342,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     });
 
     it("closes old player when new player is supplied and stops old player message flow", async () => {
-      await act(async () => player2.emit());
+      await act(async () => await player2.emit());
       expect(result.all.length).toBe(5);
-      await act(async () => player.emit());
+      await act(async () => await player.emit());
       expect(result.all.length).toBe(5);
       expect(
         result.all.map((ctx) => {
@@ -357,9 +357,9 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     });
 
     it("does not think the old player is the new player if it emits first", async () => {
-      await act(async () => player.emit());
+      await act(async () => await player.emit());
       expect(result.all.length).toBe(4);
-      await act(async () => player2.emit());
+      await act(async () => await player2.emit());
       expect(result.all.length).toBe(5);
       expect(
         result.all.map((ctx) => {
@@ -425,7 +425,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       parsedMessageDefinitionsByTopic: {},
       totalBytesReceived: 1234,
     };
-    await act(async () => player.emit({ activeData }));
+    await act(async () => await player.emit({ activeData }));
     expect(result.all.length).toBe(2);
 
     rerender({ maybePlayer: { player: undefined } });
@@ -449,7 +449,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       });
 
       await act(async () => {
-        return player.emit().then(() => {
+        return await player.emit().then(() => {
           hasFinishedFrame = true;
         });
       });

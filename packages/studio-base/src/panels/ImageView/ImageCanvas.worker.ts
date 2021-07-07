@@ -34,7 +34,9 @@ class ImageCanvasWorker {
 
     rpc.receive(
       "renderImage",
-      async (args: {
+      // Potentially performance-sensitive; await can be expensive
+      // eslint-disable-next-line @typescript-eslint/promise-function-async
+      (args: {
         id: string;
         zoomMode: "fit" | "fill" | "other";
         panZoom: { x: number; y: number; scale: number };
@@ -57,7 +59,7 @@ class ImageCanvasWorker {
 
         const canvas = this._idToCanvas[id];
         if (!canvas) {
-          return;
+          return Promise.resolve(undefined);
         }
 
         if (canvas.width !== viewport.width) {

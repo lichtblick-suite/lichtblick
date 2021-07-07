@@ -13,5 +13,5 @@
 
 /** Return a Promise resolved after @param ms milliseconds */
 export default async function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return await new Promise((resolve) => setTimeout(resolve, ms));
 }

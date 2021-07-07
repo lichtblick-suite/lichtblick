@@ -155,7 +155,7 @@ class PerformanceMeasuringClient {
     const event = new CustomEvent("playbackError", { detail: e.toString() });
     window.dispatchEvent(event);
     // Never bother to resolve this promise since we should stop perf playback whenever any error occurs.
-    return new Promise<void>(() => {
+    return await new Promise<void>(() => {
       // no-op
     });
   }

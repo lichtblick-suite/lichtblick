@@ -429,8 +429,8 @@ storiesOf("panels/ThreeDimensionalViz/Interactions/Interaction", module)
     );
   });
 
-const selectObject = async () => simulateDragClick([468, 340]);
-const deselectObject = async () => simulateDragClick([515, 630]);
+const selectObject = async () => await simulateDragClick([468, 340]);
+const deselectObject = async () => await simulateDragClick([515, 630]);
 
 storiesOf("panels/ThreeDimensionalViz/interactions/open-close behavior", module)
   .addParameters({ chromatic: { delay: 2500 } })

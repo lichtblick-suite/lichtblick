@@ -66,7 +66,7 @@ export class TcpSocketNode extends EventEmitter<TcpSocketEvents> implements TcpS
   }
 
   async connect(): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       const KEEPALIVE_MS = 60 * 1000;
 
       this._socket.on("error", reject).connect(this._port, this._host, () => {
@@ -82,7 +82,7 @@ export class TcpSocketNode extends EventEmitter<TcpSocketEvents> implements TcpS
   }
 
   async write(data: Uint8Array): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return await new Promise((resolve, reject) => {
       this._socket.write(data, (err) => {
         if (err) {
           reject(err);

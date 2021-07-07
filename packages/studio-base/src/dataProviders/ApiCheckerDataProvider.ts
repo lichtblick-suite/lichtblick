@@ -236,7 +236,7 @@ export default class ApiCheckerDataProvider implements DataProvider {
       this._warn("close was called twice");
     }
     this._closed = true;
-    return this._provider?.close();
+    return await this._provider?.close();
   }
 
   _warn(message: string): void {

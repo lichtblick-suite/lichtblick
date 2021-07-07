@@ -246,7 +246,7 @@ export default class CombinedDataProvider implements DataProvider {
     this._extensionPoint = extensionPoint;
 
     const providerInitializePromises = this._providers.map(async (provider, idx) => {
-      return provider.initialize({
+      return await provider.initialize({
         ...extensionPoint,
         progressCallback: (progress: Progress) => {
           this._updateProgressForChild(idx, progress);
@@ -303,7 +303,7 @@ export default class CombinedDataProvider implements DataProvider {
   }
 
   async close(): Promise<void> {
-    await Promise.all(this._providers.map(async (provider) => provider.close()));
+    await Promise.all(this._providers.map(async (provider) => await provider.close()));
   }
 
   async getMessages(start: Time, end: Time, topics: GetMessagesTopics): Promise<GetMessagesResult> {

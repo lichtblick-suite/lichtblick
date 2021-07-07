@@ -95,7 +95,7 @@ const ctx: OsContext = {
     return output;
   },
   getMachineId: async (): Promise<string> => {
-    return machineIdPromise;
+    return await machineIdPromise;
   },
   getAppVersion: (): string => {
     return pkgInfo.version;
@@ -110,7 +110,7 @@ const desktopBridge: Desktop = {
     return window.process.argv.filter((arg) => arg.startsWith("foxglove://"));
   },
   async debug_openFakeRemoteLayoutStorageDirectory(): Promise<void> {
-    return ipcRenderer.invoke("debug_openFakeRemoteLayoutStorageDirectory");
+    return await ipcRenderer.invoke("debug_openFakeRemoteLayoutStorageDirectory");
   },
   async getExtensions() {
     const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
@@ -126,12 +126,12 @@ const desktopBridge: Desktop = {
   async installExtension(foxeFileData: Uint8Array) {
     const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
     const userExtensionRoot = pathJoin(homePath, ".foxglove-studio", "extensions");
-    return installExtension(foxeFileData, userExtensionRoot);
+    return await installExtension(foxeFileData, userExtensionRoot);
   },
   async uninstallExtension(id: string): Promise<boolean> {
     const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
     const userExtensionRoot = pathJoin(homePath, ".foxglove-studio", "extensions");
-    return uninstallExtension(id, userExtensionRoot);
+    return await uninstallExtension(id, userExtensionRoot);
   },
 };
 

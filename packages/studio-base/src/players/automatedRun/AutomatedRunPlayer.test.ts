@@ -179,7 +179,7 @@ describe("AutomatedRunPlayer", () => {
     const provider = new TestProvider({
       getMessages: async () => {
         getMessagesCallCount++;
-        return getMessagesSignal.signal;
+        return await getMessagesSignal.signal;
       },
     });
     function resolveNextGetMessages() {

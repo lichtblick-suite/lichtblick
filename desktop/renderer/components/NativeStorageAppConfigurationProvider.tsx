@@ -20,7 +20,7 @@ export default function NativeStorageAppConfigurationProvider({
 
   const { value, error } = useAsync(async () => {
     log.debug("Initializing app configuration");
-    return NativeStorageAppConfiguration.Initialize(storage);
+    return await NativeStorageAppConfiguration.Initialize(storage);
   }, [storage]);
 
   if (error) {

@@ -17,10 +17,10 @@ export default class LazilyInitialized<T> {
 
   async get(): Promise<T> {
     if (this.state.promise) {
-      return this.state.promise;
+      return await this.state.promise;
     }
     const promise = this.state.compute();
     this.state = { promise };
-    return promise;
+    return await promise;
   }
 }

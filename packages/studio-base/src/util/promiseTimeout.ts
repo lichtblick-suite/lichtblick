@@ -16,7 +16,7 @@ async function promiseTimeout<T>(
   ms = 30000,
   reason = "unknown reason",
 ): Promise<T> {
-  return Promise.race([
+  return await Promise.race([
     promise,
     new Promise<T>((_resolve, reject) =>
       setTimeout(() => reject(new Error(`Promise timed out after ${ms}ms: ${reason} `)), ms),

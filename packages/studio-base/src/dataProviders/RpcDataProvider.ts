@@ -91,6 +91,6 @@ export default class RpcDataProvider implements DataProvider {
   }
 
   async close(): Promise<void> {
-    return this._rpc.send("close");
+    return await this._rpc.send("close");
   }
 }

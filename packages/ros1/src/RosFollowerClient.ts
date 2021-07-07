@@ -11,27 +11,27 @@ export type ProtocolParams = [string, ...XmlRpcValue[]];
 
 export class RosFollowerClient extends RosXmlRpcClient {
   async getBusStats(callerId: string): Promise<RosXmlRpcResponse> {
-    return this._methodCall("getBusStats", [callerId]);
+    return await this._methodCall("getBusStats", [callerId]);
   }
 
   async getBusInfo(callerId: string): Promise<RosXmlRpcResponse> {
-    return this._methodCall("getBusInfo", [callerId]);
+    return await this._methodCall("getBusInfo", [callerId]);
   }
 
   async shutdown(callerId: string, msg = ""): Promise<RosXmlRpcResponse> {
-    return this._methodCall("shutdown", [callerId, msg]);
+    return await this._methodCall("shutdown", [callerId, msg]);
   }
 
   async getPid(callerId: string): Promise<RosXmlRpcResponse> {
-    return this._methodCall("getPid", [callerId]);
+    return await this._methodCall("getPid", [callerId]);
   }
 
   async getSubscriptions(callerId: string): Promise<RosXmlRpcResponse> {
-    return this._methodCall("getSubscriptions", [callerId]);
+    return await this._methodCall("getSubscriptions", [callerId]);
   }
 
   async getPublications(callerId: string): Promise<RosXmlRpcResponse> {
-    return this._methodCall("getPublications", [callerId]);
+    return await this._methodCall("getPublications", [callerId]);
   }
 
   async paramUpdate(
@@ -39,7 +39,7 @@ export class RosFollowerClient extends RosXmlRpcClient {
     parameterKey: string,
     parameterValue: XmlRpcValue,
   ): Promise<RosXmlRpcResponse> {
-    return this._methodCall("paramUpdate", [callerId, parameterKey, parameterValue]);
+    return await this._methodCall("paramUpdate", [callerId, parameterKey, parameterValue]);
   }
 
   async publisherUpdate(
@@ -47,7 +47,7 @@ export class RosFollowerClient extends RosXmlRpcClient {
     topic: string,
     publishers: string[],
   ): Promise<RosXmlRpcResponse> {
-    return this._methodCall("publisherUpdate", [callerId, topic, publishers]);
+    return await this._methodCall("publisherUpdate", [callerId, topic, publishers]);
   }
 
   async requestTopic(
@@ -55,6 +55,6 @@ export class RosFollowerClient extends RosXmlRpcClient {
     topic: string,
     protocols: ProtocolParams[],
   ): Promise<RosXmlRpcResponse> {
-    return this._methodCall("requestTopic", [callerId, topic, protocols]);
+    return await this._methodCall("requestTopic", [callerId, topic, protocols]);
   }
 }

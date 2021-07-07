@@ -65,10 +65,12 @@ export default class WorkerDataProvider implements DataProvider {
     }
 
     this._provider = new RpcDataProvider(new Rpc(this._worker), [this._child]);
-    return this._provider.initialize(extensionPoint);
+    return await this._provider.initialize(extensionPoint);
   }
 
-  async getMessages(start: Time, end: Time, topics: GetMessagesTopics): Promise<GetMessagesResult> {
+  // Potentially performance-sensitive; await can be expensive
+  // eslint-disable-next-line @typescript-eslint/promise-function-async
+  getMessages(start: Time, end: Time, topics: GetMessagesTopics): Promise<GetMessagesResult> {
     if (!this._provider) {
       throw new Error("WorkerDataProvieder not initialized");
     }

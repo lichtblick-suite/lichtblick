@@ -56,7 +56,7 @@ export class TcpPublisher extends EventEmitter<TcpPublisherEvents> implements Pu
   }
 
   async address(): Promise<TcpAddress | undefined> {
-    return this._server.address();
+    return await this._server.address();
   }
 
   async publish(publication: Publication, message: unknown): Promise<void> {
@@ -72,7 +72,7 @@ export class TcpPublisher extends EventEmitter<TcpPublisherEvents> implements Pu
     publication.messageWriter.writeMessage(message, msgData);
 
     const data = new Uint8Array(buffer, 0, dataSize);
-    return publication.write(this.transportType(), data);
+    return await publication.write(this.transportType(), data);
   }
 
   transportType(): string {

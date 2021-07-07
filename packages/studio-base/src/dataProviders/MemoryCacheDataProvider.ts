@@ -345,7 +345,9 @@ export default class MemoryCacheDataProvider implements DataProvider {
     return result;
   }
 
-  async getMessages(
+  // Potentially performance-sensitive; await can be expensive
+  // eslint-disable-next-line @typescript-eslint/promise-function-async
+  getMessages(
     startTime: Time,
     endTime: Time,
     subscriptions: GetMessagesTopics,
@@ -377,7 +379,7 @@ export default class MemoryCacheDataProvider implements DataProvider {
   async close(): Promise<void> {
     delete this._currentConnection; // Make sure that the current "connection" loop stops executing.
 
-    return this._provider.close();
+    return await this._provider.close();
   }
 
   // We're primarily interested in the topics for the first outstanding read request, and after that

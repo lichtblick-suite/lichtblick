@@ -9,19 +9,19 @@ import { RosXmlRpcResponse, RosXmlRpcResponseOrFault } from "./XmlRpcTypes";
 
 export class RosParamClient extends RosXmlRpcClient {
   async deleteParam(callerId: string, key: string): Promise<RosXmlRpcResponse> {
-    return this._methodCall("deleteParam", [callerId, key]);
+    return await this._methodCall("deleteParam", [callerId, key]);
   }
 
   async setParam(callerId: string, key: string, value: XmlRpcValue): Promise<RosXmlRpcResponse> {
-    return this._methodCall("setParam", [callerId, key, value]);
+    return await this._methodCall("setParam", [callerId, key, value]);
   }
 
   async getParam(callerId: string, key: string): Promise<RosXmlRpcResponse> {
-    return this._methodCall("getParam", [callerId, key]);
+    return await this._methodCall("getParam", [callerId, key]);
   }
 
   async searchParam(callerId: string, key: string): Promise<RosXmlRpcResponse> {
-    return this._methodCall("searchParam", [callerId, key]);
+    return await this._methodCall("searchParam", [callerId, key]);
   }
 
   async subscribeParam(
@@ -29,7 +29,7 @@ export class RosParamClient extends RosXmlRpcClient {
     callerApi: string,
     key: string,
   ): Promise<RosXmlRpcResponse> {
-    return this._methodCall("subscribeParam", [callerId, callerApi, key]);
+    return await this._methodCall("subscribeParam", [callerId, callerApi, key]);
   }
 
   async subscribeParams(
@@ -49,7 +49,7 @@ export class RosParamClient extends RosXmlRpcClient {
     callerApi: string,
     key: string,
   ): Promise<RosXmlRpcResponse> {
-    return this._methodCall("unsubscribeParam", [callerId, callerApi, key]);
+    return await this._methodCall("unsubscribeParam", [callerId, callerApi, key]);
   }
 
   async unsubscribeParams(
@@ -65,10 +65,10 @@ export class RosParamClient extends RosXmlRpcClient {
   }
 
   async hasParam(callerId: string, key: string): Promise<RosXmlRpcResponse> {
-    return this._methodCall("hasParam", [callerId, key]);
+    return await this._methodCall("hasParam", [callerId, key]);
   }
 
   async getParamNames(callerId: string): Promise<RosXmlRpcResponse> {
-    return this._methodCall("getParamNames", [callerId]);
+    return await this._methodCall("getParamNames", [callerId]);
   }
 }

@@ -173,7 +173,7 @@ describe("RandomAccessPlayer", () => {
     source.setListener(store.add);
     // make getMessages do nothing since we're going to start reading
     provider.getMessages = async () =>
-      new Promise(() => {
+      await new Promise(() => {
         // no-op
       });
     const messages = await store.done;
@@ -411,7 +411,7 @@ describe("RandomAccessPlayer", () => {
       }
     };
 
-    const store = new MessageStore(3);
+    const store = new MessageStore(4);
     source.setListener(store.add);
     await Promise.resolve();
     source.setSubscriptions([{ topic: "/foo/bar" }]);
@@ -423,7 +423,12 @@ describe("RandomAccessPlayer", () => {
     const messagePayloads = messages.map((msg) => {
       return { messages: msg.activeData?.messages ?? [] };
     });
-    expect(messagePayloads).toEqual([{ messages: [] }, { messages: [] }, { messages: [] }]);
+    expect(messagePayloads).toEqual([
+      { messages: [] },
+      { messages: [] },
+      { messages: [] },
+      { messages: [] },
+    ]);
   });
 
   it("pauses and does not emit messages after pause", async () => {
@@ -863,7 +868,7 @@ describe("RandomAccessPlayer", () => {
           expect(start).toEqual({ sec: 19, nsec: 1e9 + 50 - SEEK_BACK_NANOSECONDS });
           expect(end).toEqual({ sec: 20, nsec: 50 });
           expect(topics).toEqual({ parsedMessages: ["/foo/bar"] });
-          return new Promise((resolve) => {
+          return await new Promise((resolve) => {
             backfillPromiseCallback = resolve;
           });
         }
@@ -956,7 +961,7 @@ describe("RandomAccessPlayer", () => {
       end: Time,
       topics: GetMessagesTopics,
     ): Promise<GetMessagesResult> => {
-      return new Promise((resolve) => {
+      return await new Promise((resolve) => {
         lastGetMessagesCall = { start, end, topics, resolve };
       });
     };
@@ -1430,7 +1435,7 @@ describe("RandomAccessPlayer", () => {
       // player should initialize even if the listener promise hasn't resolved yet
       let resolveListener: any;
       listener.mockImplementationOnce(async () => {
-        return new Promise((resolve) => {
+        return await new Promise((resolve) => {
           resolveListener = resolve;
         });
       });

@@ -221,7 +221,8 @@ async function remoteBagFileSource(options: FactoryOptions) {
 
   const url = maybeUrl;
   options.storage.setItem(storageCacheKey, url);
-  return async (playerOptions: BuildPlayerOptions) => buildPlayerFromBagURLs([url], playerOptions);
+  return async (playerOptions: BuildPlayerOptions) =>
+    await buildPlayerFromBagURLs([url], playerOptions);
 }
 
 async function rosbridgeSource(options: FactoryOptions) {

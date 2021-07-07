@@ -19,5 +19,5 @@
 // appear in screenshot tests.
 
 export default async function waitForFonts(): Promise<unknown> {
-  return Promise.all([...document.fonts].map(async (font) => font.load()));
+  return await Promise.all([...document.fonts].map(async (font) => await font.load()));
 }

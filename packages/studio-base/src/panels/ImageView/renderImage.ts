@@ -107,7 +107,9 @@ function maybeUnrectifyPoint(
   return point;
 }
 
-async function decodeMessageToBitmap(
+// Potentially performance-sensitive; await can be expensive
+// eslint-disable-next-line @typescript-eslint/promise-function-async
+function decodeMessageToBitmap(
   imageMessage: Partial<Image> | Partial<CompressedImage>,
   datatype: string,
   options: RenderOptions = {},

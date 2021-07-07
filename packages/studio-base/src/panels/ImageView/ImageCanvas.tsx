@@ -117,7 +117,9 @@ export default function ImageCanvas(props: Props): JSX.Element {
     const id = uuidv4();
 
     if (renderInMainThread === true) {
-      const renderInMain = async (args: {
+      // Potentially performance-sensitive; await can be expensive
+      // eslint-disable-next-line @typescript-eslint/promise-function-async
+      const renderInMain = (args: {
         canvas: HTMLCanvasElement | OffscreenCanvas;
         zoomMode: "fit" | "fill" | "other";
         panZoom: { x: number; y: number; scale: number };
@@ -143,7 +145,9 @@ export default function ImageCanvas(props: Props): JSX.Element {
     } else {
       const worker = webWorkerManager.registerWorkerListener(id);
 
-      const workerRender = async (args: {
+      // Potentially performance-sensitive; await can be expensive
+      // eslint-disable-next-line @typescript-eslint/promise-function-async
+      const workerRender = (args: {
         canvas: HTMLCanvasElement | OffscreenCanvas;
         zoomMode: "fit" | "fill" | "other";
         panZoom: { x: number; y: number; scale: number };
@@ -164,7 +168,7 @@ export default function ImageCanvas(props: Props): JSX.Element {
         } = args;
 
         if (!imageMessage) {
-          return;
+          return Promise.resolve(undefined);
         }
 
         // Create a payload based on whether the image is a compressed image (format field present)

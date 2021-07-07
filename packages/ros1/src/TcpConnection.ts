@@ -81,7 +81,7 @@ export class TcpConnection extends EventEmitter<TcpConnectionEvents> implements 
   }
 
   async remoteAddress(): Promise<TcpAddress | undefined> {
-    return this._socket.remoteAddress();
+    return await this._socket.remoteAddress();
   }
 
   async connect(): Promise<void> {
@@ -147,7 +147,7 @@ export class TcpConnection extends EventEmitter<TcpConnectionEvents> implements 
     void this._socket.write(new Uint8Array(lenBuffer));
 
     // Write the serialized header payload
-    return this._socket.write(data);
+    return await this._socket.write(data);
   }
 
   // e.g. "TCPROS connection on port 59746 to [host:34318 on socket 11]"

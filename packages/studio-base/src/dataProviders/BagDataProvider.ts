@@ -97,7 +97,7 @@ class LogMetricsReader {
     this._extensionPoint = extensionPoint;
   }
   async open() {
-    return this._reader.open();
+    return await this._reader.open();
   }
   fetch(offset: number, length: number) {
     const stream = this._reader.fetch(offset, length);

@@ -62,10 +62,10 @@ export default class NativeStorageLayoutCache implements ILayoutCache {
 
   async put(layout: CachedLayout): Promise<void> {
     const content = JSON.stringify(layout);
-    return this._ctx.put(NativeStorageLayoutCache.STORE_NAME, layout.id, content);
+    return await this._ctx.put(NativeStorageLayoutCache.STORE_NAME, layout.id, content);
   }
 
   async delete(id: string): Promise<void> {
-    return this._ctx.delete(NativeStorageLayoutCache.STORE_NAME, id);
+    return await this._ctx.delete(NativeStorageLayoutCache.STORE_NAME, id);
   }
 }

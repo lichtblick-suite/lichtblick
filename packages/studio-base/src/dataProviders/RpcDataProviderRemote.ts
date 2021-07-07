@@ -33,7 +33,7 @@ export default class RpcDataProviderRemote {
       "initialize",
       async ({ childDescriptor }: { childDescriptor: DataProviderDescriptor }) => {
         provider = getDataProvider(childDescriptor);
-        return provider.initialize({
+        return await provider.initialize({
           progressCallback: (data) => {
             void rpc.send("extensionPointCallback", { type: "progressCallback", data });
           },
@@ -70,6 +70,6 @@ export default class RpcDataProviderRemote {
       },
     );
 
-    rpc.receive("close", async () => provider.close());
+    rpc.receive("close", async () => await provider.close());
   }
 }

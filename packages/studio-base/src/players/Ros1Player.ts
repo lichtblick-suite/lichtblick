@@ -114,7 +114,7 @@ export default class Ros1Player implements Player {
     const net = await Sockets.Create();
     const httpServer = await net.createHttpServer();
     const tcpSocketCreate = async (options: { host: string; port: number }): Promise<TcpSocket> => {
-      return net.createSocket(options.host, options.port);
+      return await net.createSocket(options.host, options.port);
     };
     const tcpServer = await net.createServer();
     void tcpServer.listen(undefined, hostname, 10);
@@ -246,9 +246,11 @@ export default class Ros1Player implements Player {
     }
   };
 
-  private _emitState = debouncePromise(async () => {
+  // Potentially performance-sensitive; await can be expensive
+  // eslint-disable-next-line @typescript-eslint/promise-function-async
+  private _emitState = debouncePromise(() => {
     if (!this._listener || this._closed) {
-      return undefined;
+      return Promise.resolve();
     }
 
     const providerTopics = this._providerTopics;
