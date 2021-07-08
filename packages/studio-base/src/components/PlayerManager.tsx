@@ -37,12 +37,6 @@ import PlayerSelectionContext, {
   PlayerSourceDefinition,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useUserNodeState } from "@foxglove/studio-base/context/UserNodeStateContext";
-import { CoreDataProviders } from "@foxglove/studio-base/dataProviders/constants";
-import { getRemoteBagGuid } from "@foxglove/studio-base/dataProviders/getRemoteBagGuid";
-import {
-  getLocalBagDescriptor,
-  getRemoteBagDescriptor,
-} from "@foxglove/studio-base/dataProviders/standardDataProviderDescriptors";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
@@ -57,6 +51,12 @@ import {
   BuildPlayerOptions,
 } from "@foxglove/studio-base/players/buildPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
+import { CoreDataProviders } from "@foxglove/studio-base/randomAccessDataProviders/constants";
+import { getRemoteBagGuid } from "@foxglove/studio-base/randomAccessDataProviders/getRemoteBagGuid";
+import {
+  getLocalBagDescriptor,
+  getRemoteBagDescriptor,
+} from "@foxglove/studio-base/randomAccessDataProviders/standardDataProviderDescriptors";
 import { UserNodes } from "@foxglove/studio-base/types/panels";
 import Storage from "@foxglove/studio-base/util/Storage";
 import { AppError } from "@foxglove/studio-base/util/errors";

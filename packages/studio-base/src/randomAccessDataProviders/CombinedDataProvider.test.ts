@@ -26,14 +26,14 @@
 //   You may not use this file except in compliance with the License.
 
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
-import BagDataProvider from "@foxglove/studio-base/dataProviders/BagDataProvider";
+import BagDataProvider from "@foxglove/studio-base/randomAccessDataProviders/BagDataProvider";
 import CombinedDataProvider, {
   mergedBlocks,
-} from "@foxglove/studio-base/dataProviders/CombinedDataProvider";
-import MemoryDataProvider from "@foxglove/studio-base/dataProviders/MemoryDataProvider";
-import RenameDataProvider from "@foxglove/studio-base/dataProviders/RenameDataProvider";
-import { mockExtensionPoint } from "@foxglove/studio-base/dataProviders/mockExtensionPoint";
-import { InitializationResult } from "@foxglove/studio-base/dataProviders/types";
+} from "@foxglove/studio-base/randomAccessDataProviders/CombinedDataProvider";
+import MemoryDataProvider from "@foxglove/studio-base/randomAccessDataProviders/MemoryDataProvider";
+import RenameDataProvider from "@foxglove/studio-base/randomAccessDataProviders/RenameDataProvider";
+import { mockExtensionPoint } from "@foxglove/studio-base/randomAccessDataProviders/mockExtensionPoint";
+import { InitializationResult } from "@foxglove/studio-base/randomAccessDataProviders/types";
 import delay from "@foxglove/studio-base/util/delay";
 import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";

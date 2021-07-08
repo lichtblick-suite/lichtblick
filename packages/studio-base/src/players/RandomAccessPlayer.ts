@@ -13,13 +13,6 @@
 import { TimeUtil, Time } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
-import { rootGetDataProvider } from "@foxglove/studio-base/dataProviders/rootGetDataProvider";
-import {
-  Connection,
-  DataProvider,
-  DataProviderDescriptor,
-  DataProviderMetadata,
-} from "@foxglove/studio-base/dataProviders/types";
 import NoopMetricsCollector from "@foxglove/studio-base/players/NoopMetricsCollector";
 import {
   AdvertisePayload,
@@ -37,6 +30,13 @@ import {
   ParameterValue,
   PlayerProblem,
 } from "@foxglove/studio-base/players/types";
+import { rootGetDataProvider } from "@foxglove/studio-base/randomAccessDataProviders/rootGetDataProvider";
+import {
+  Connection,
+  RandomAccessDataProvider,
+  RandomAccessDataProviderDescriptor,
+  RandomAccessDataProviderMetadata,
+} from "@foxglove/studio-base/randomAccessDataProviders/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
 import delay from "@foxglove/studio-base/util/delay";
@@ -87,9 +87,9 @@ export type RandomAccessPlayerOptions = {
   seekToTime: SeekToTimeSpec;
 };
 
-// A `Player` that wraps around a tree of `DataProviders`.
+// A `Player` that wraps around a tree of `RandomAccessDataProviders`.
 export default class RandomAccessPlayer implements Player {
-  _provider: DataProvider;
+  _provider: RandomAccessDataProvider;
   _isPlaying: boolean = false;
   _wasPlayingBeforeTabSwitch = false;
   _listener?: (arg0: PlayerState) => Promise<void>;
@@ -105,7 +105,7 @@ export default class RandomAccessPlayer implements Player {
   _lastSeekStartTime: number = Date.now();
   // This is the "lastSeekTime" emitted in the playerState. It is not the same as the _lastSeekStartTime because we can
   // start a seek and not end up emitting it, or emit something else while we are requesting messages for the seek. The
-  // DataProvider's `progressCallback` can cause an emit at any time, for example.
+  // RandomAccessDataProvider's `progressCallback` can cause an emit at any time, for example.
   // We only want to set the "lastSeekTime" exactly when we emit the messages coming from the seek.
   _lastSeekEmitTime: number = this._lastSeekStartTime;
   _cancelSeekBackfill: boolean = false;
@@ -138,7 +138,7 @@ export default class RandomAccessPlayer implements Player {
   _problems = new Map<string, PlayerProblem>();
 
   constructor(
-    providerDescriptor: DataProviderDescriptor,
+    providerDescriptor: RandomAccessDataProviderDescriptor,
     { metricsCollector, seekToTime }: RandomAccessPlayerOptions,
   ) {
     if (process.env.NODE_ENV === "test" && providerDescriptor.name === "TestProvider") {
@@ -179,7 +179,7 @@ export default class RandomAccessPlayer implements Player {
             this._emitState();
           }
         },
-        reportMetadataCallback: (metadata: DataProviderMetadata) => {
+        reportMetadataCallback: (metadata: RandomAccessDataProviderMetadata) => {
           switch (metadata.type) {
             case "updateReconnecting":
               this._reconnecting = metadata.reconnecting;

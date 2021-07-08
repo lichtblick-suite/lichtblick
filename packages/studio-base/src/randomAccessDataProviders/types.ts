@@ -22,7 +22,7 @@ import {
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
-// `DataProvider` describes a more specific kind of data ingesting than `Player`, namely ingesting
+// `RandomAccessDataProvider` describes a more specific kind of data ingesting than `Player`, namely ingesting
 // data that we have random access to. From Wikipedia:
 //
 //   "Random access is the ability to access an arbitrary element of a sequence in equal time or any
@@ -35,20 +35,20 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 // should get the exact same messages, and when you fetch one time range, you should get the exact
 // same messages as when splitting it into two fetch calls with shorter time ranges.
 //
-// A DataProvider initially returns basic information, such as the time range for which we have data,
+// A RandomAccessDataProvider initially returns basic information, such as the time range for which we have data,
 // and the topics and data types. It then allows for requesting messages for arbitrary time ranges
 // within, though it is the caller's responsibility to request small enough time ranges, since in
-// general DataProviders give no guarantees of how fast they return the data.
+// general RandomAccessDataProviders give no guarantees of how fast they return the data.
 //
 // The properties of immutability and idempotence make it very easy to compose different
-// DataProviders. For example, you can have a BagDataProvider which reads from a ROS bag, but which
+// RandomAccessDataProviders. For example, you can have a BagDataProvider which reads from a ROS bag, but which
 // takes a bit of time to decompress the ROS bag. So you might wrap it in a WorkerDataProvider,
 // which puts its children in a Web Worker, therefore allowing the decompression to happen in
 // parallel to the main thread. And you might wrap that in turn in a MemoryCacheDataProvider, which
 // does some in-memory read-ahead caching based on the most recent time range that was requested.
-// These trees of DataProviders are described by `DataProviderDescriptor`.
+// These trees of RandomAccessDataProviders are described by `RandomAccessDataProviderDescriptor`.
 //
-// DataProviders have a strict API which is enforced automatically in ApiCheckerDataProvider.
+// RandomAccessDataProviders have a strict API which is enforced automatically in ApiCheckerDataProvider.
 
 export type GetMessagesTopics = Readonly<{
   parsedMessages?: readonly string[];
@@ -82,7 +82,7 @@ export type MessageDefinitions =
     }>
   | ParsedMessageDefinitions;
 
-export interface DataProvider {
+export interface RandomAccessDataProvider {
   // Do any up-front initializing of the provider, and takes an optional extension point for
   // callbacks that only some implementations care about. May only be called once. If there's an
   // error during initialization, it must be reported using `sendNotification` (even in Web Workers).
@@ -105,18 +105,18 @@ export interface MessageReader {
   readMessage<T>(buffer: Readonly<Uint8Array>): T;
 }
 
-export interface DataProviderConstructor {
+export interface RandomAccessDataProviderConstructor {
   new (
-    // The arguments to this particular DataProvider; typically an object.
+    // The arguments to this particular RandomAccessDataProvider; typically an object.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     args: any,
-    // The children we should instantiate below. Many DataProviders cannot have any children (leaf
+    // The children we should instantiate below. Many RandomAccessDataProviders cannot have any children (leaf
     // nodes in the tree), many require exactly one child, and the `CombinedDataProvider` can take
     // an arbitrary number of children.
-    children: DataProviderDescriptor[],
+    children: RandomAccessDataProviderDescriptor[],
     // The function to instantiate the children (different in e.g. Web Workers).
     getDataProvider: GetDataProvider,
-  ): DataProvider;
+  ): RandomAccessDataProvider;
 }
 
 export type InitializationResult = {
@@ -140,7 +140,7 @@ export type ExtensionPoint = {
   // Report some sort of metadata to the `Player`, see below for different kinds of metadata.
   // TODO(JP): this is a bit of an odd one out. Maybe we should unify this with the
   // `progressCallback` and have one type of "status" object?
-  reportMetadataCallback: (metadata: DataProviderMetadata) => void;
+  reportMetadataCallback: (metadata: RandomAccessDataProviderMetadata) => void;
 };
 
 export type InitializationPerformanceMetadata = Readonly<{
@@ -168,7 +168,7 @@ export type ReceivedBytes = Readonly<{
   bytes: number;
 }>;
 
-export type DataProviderStall = Readonly<{
+export type RandomAccessDataProviderStall = Readonly<{
   type: "data_provider_stall";
   stallDuration: Time;
   requestTimeUntilStall: Time;
@@ -176,13 +176,13 @@ export type DataProviderStall = Readonly<{
   bytesReceivedBeforeStall: number;
 }>;
 
-export type DataProviderMetadata = // Report whether or not the DataProvider is reconnecting to some external server. Used to show a
+export type RandomAccessDataProviderMetadata = // Report whether or not the RandomAccessDataProvider is reconnecting to some external server. Used to show a
   // loading indicator in the UI.
   | Readonly<{ type: "updateReconnecting"; reconnecting: boolean }>
   | AverageThroughput
   | InitializationPerformanceMetadata
   | ReceivedBytes
-  | DataProviderStall;
+  | RandomAccessDataProviderStall;
 
 // A ROS bag "connection", used for parsing messages.
 export type Connection = {
@@ -193,14 +193,16 @@ export type Connection = {
   callerid: string;
 };
 
-// DataProviders can be instantiated using a DataProviderDescriptor and a GetDataProvider function.
+// RandomAccessDataProviders can be instantiated using a RandomAccessDataProviderDescriptor and a GetDataProvider function.
 // Because the descriptor is a plain JavaScript object, it can be sent over an Rpc Channel, which
 // means that you can describe a chain of data providers that includes a Worker or a WebSocket.
-export type DataProviderDescriptor = {
+export type RandomAccessDataProviderDescriptor = {
   name: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   args: any;
-  children: DataProviderDescriptor[];
+  children: RandomAccessDataProviderDescriptor[];
 };
 
-export type GetDataProvider = (arg0: DataProviderDescriptor) => DataProvider;
+export type GetDataProvider = (
+  arg0: RandomAccessDataProviderDescriptor,
+) => RandomAccessDataProvider;

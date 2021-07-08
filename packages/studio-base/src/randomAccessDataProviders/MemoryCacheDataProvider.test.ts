@@ -14,10 +14,10 @@
 import { first, flatten, last } from "lodash";
 import { TimeUtil } from "rosbag";
 
-import MemoryDataProvider from "@foxglove/studio-base/dataProviders/MemoryDataProvider";
-import { CoreDataProviders } from "@foxglove/studio-base/dataProviders/constants";
-import { mockExtensionPoint } from "@foxglove/studio-base/dataProviders/mockExtensionPoint";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
+import MemoryDataProvider from "@foxglove/studio-base/randomAccessDataProviders/MemoryDataProvider";
+import { CoreDataProviders } from "@foxglove/studio-base/randomAccessDataProviders/constants";
+import { mockExtensionPoint } from "@foxglove/studio-base/randomAccessDataProviders/mockExtensionPoint";
 import delay from "@foxglove/studio-base/util/delay";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";

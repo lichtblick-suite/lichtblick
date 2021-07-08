@@ -15,19 +15,19 @@ import { last } from "lodash";
 import { TimeUtil, Time } from "rosbag";
 
 import {
-  ExtensionPoint,
-  GetMessagesResult,
-  GetMessagesTopics,
-  InitializationResult,
-  DataProvider,
-  MessageDefinitions,
-} from "@foxglove/studio-base/dataProviders/types";
-import {
   Topic,
   MessageDefinitionsByTopic,
   ParsedMessageDefinitionsByTopic,
   MessageEvent,
 } from "@foxglove/studio-base/players/types";
+import {
+  ExtensionPoint,
+  GetMessagesResult,
+  GetMessagesTopics,
+  InitializationResult,
+  RandomAccessDataProvider,
+  MessageDefinitions,
+} from "@foxglove/studio-base/randomAccessDataProviders/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 function filterMessages<T>(
@@ -66,7 +66,7 @@ type MemoryDataProviderOptions = {
 };
 
 // in-memory data provider
-export default class MemoryDataProvider implements DataProvider {
+export default class MemoryDataProvider implements RandomAccessDataProvider {
   messages: GetMessagesResult;
   topics?: Topic[];
   datatypes?: RosDatatypes;

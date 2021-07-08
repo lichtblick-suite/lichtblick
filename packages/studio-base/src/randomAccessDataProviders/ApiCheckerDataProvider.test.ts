@@ -10,10 +10,10 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import ApiCheckerDataProvider from "@foxglove/studio-base/dataProviders/ApiCheckerDataProvider";
-import MemoryDataProvider from "@foxglove/studio-base/dataProviders/MemoryDataProvider";
-import { mockExtensionPoint } from "@foxglove/studio-base/dataProviders/mockExtensionPoint";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
+import ApiCheckerDataProvider from "@foxglove/studio-base/randomAccessDataProviders/ApiCheckerDataProvider";
+import MemoryDataProvider from "@foxglove/studio-base/randomAccessDataProviders/MemoryDataProvider";
+import { mockExtensionPoint } from "@foxglove/studio-base/randomAccessDataProviders/mockExtensionPoint";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 function getProvider(isRoot: boolean = false) {

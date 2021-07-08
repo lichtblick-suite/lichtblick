@@ -17,7 +17,7 @@ import { TimeUtil } from "rosbag";
 import BagDataProvider, {
   statsAreAdjacent,
   TimedDataThroughput,
-} from "@foxglove/studio-base/dataProviders/BagDataProvider";
+} from "@foxglove/studio-base/randomAccessDataProviders/BagDataProvider";
 import delay from "@foxglove/studio-base/util/delay";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 

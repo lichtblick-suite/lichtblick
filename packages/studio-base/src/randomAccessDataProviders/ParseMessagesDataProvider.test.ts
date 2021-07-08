@@ -12,10 +12,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import BagDataProvider from "@foxglove/studio-base/dataProviders/BagDataProvider";
-import ParseMessagesDataProvider from "@foxglove/studio-base/dataProviders/ParseMessagesDataProvider";
-import { CoreDataProviders } from "@foxglove/studio-base/dataProviders/constants";
-import createGetDataProvider from "@foxglove/studio-base/dataProviders/createGetDataProvider";
+import BagDataProvider from "@foxglove/studio-base/randomAccessDataProviders/BagDataProvider";
+import ParseMessagesDataProvider from "@foxglove/studio-base/randomAccessDataProviders/ParseMessagesDataProvider";
+import { CoreDataProviders } from "@foxglove/studio-base/randomAccessDataProviders/constants";
+import createGetDataProvider from "@foxglove/studio-base/randomAccessDataProviders/createGetDataProvider";
 
 function getProvider() {
   return new ParseMessagesDataProvider(

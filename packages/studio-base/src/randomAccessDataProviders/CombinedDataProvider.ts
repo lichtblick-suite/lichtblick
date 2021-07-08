@@ -15,22 +15,22 @@ import { assign, flatten, isEqual } from "lodash";
 import memoizeWeak from "memoize-weak";
 import { TimeUtil, Time } from "rosbag";
 
+import { Progress, MessageEvent } from "@foxglove/studio-base/players/types";
 import {
   BlockCache,
   MemoryCacheBlock,
-} from "@foxglove/studio-base/dataProviders/MemoryCacheDataProvider";
+} from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
 import {
-  DataProviderDescriptor,
+  RandomAccessDataProviderDescriptor,
   ExtensionPoint,
   GetDataProvider,
   GetMessagesResult,
   GetMessagesTopics,
   InitializationResult,
-  DataProvider,
+  RandomAccessDataProvider,
   MessageDefinitions,
   ParsedMessageDefinitions,
-} from "@foxglove/studio-base/dataProviders/types";
-import { Progress, MessageEvent } from "@foxglove/studio-base/players/types";
+} from "@foxglove/studio-base/randomAccessDataProviders/types";
 import { RosDatatype } from "@foxglove/studio-base/types/RosDatatypes";
 import filterMap from "@foxglove/studio-base/util/filterMap";
 import { deepIntersect } from "@foxglove/studio-base/util/ranges";
@@ -223,16 +223,20 @@ type ProcessedInitializationResult = Readonly<{
   topicSet: Set<string>;
 }>;
 
-// A DataProvider that combines multiple underlying DataProviders, optionally adding topic prefixes
+// A RandomAccessDataProvider that combines multiple underlying RandomAccessDataProviders, optionally adding topic prefixes
 // or removing certain topics.
-export default class CombinedDataProvider implements DataProvider {
-  _providers: DataProvider[];
+export default class CombinedDataProvider implements RandomAccessDataProvider {
+  _providers: RandomAccessDataProvider[];
   // Initialization result will be undefined for providers that don't successfully initialize.
   _initializationResultsPerProvider: (ProcessedInitializationResult | undefined)[] = [];
   _progressPerProvider: (Progress | undefined)[];
   _extensionPoint?: ExtensionPoint;
 
-  constructor(_: unknown, children: DataProviderDescriptor[], getDataProvider: GetDataProvider) {
+  constructor(
+    _: unknown,
+    children: RandomAccessDataProviderDescriptor[],
+    getDataProvider: GetDataProvider,
+  ) {
     this._providers = children.map((descriptor) =>
       process.env.NODE_ENV === "test" && descriptor.name === "TestProvider"
         ? descriptor.args.provider

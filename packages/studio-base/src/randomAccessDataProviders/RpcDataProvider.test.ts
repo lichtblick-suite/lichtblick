@@ -12,9 +12,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import MemoryDataProvider from "@foxglove/studio-base/dataProviders/MemoryDataProvider";
-import { mockExtensionPoint } from "@foxglove/studio-base/dataProviders/mockExtensionPoint";
-import { DataProviderMetadata } from "@foxglove/studio-base/dataProviders/types";
+import MemoryDataProvider from "@foxglove/studio-base/randomAccessDataProviders/MemoryDataProvider";
+import { mockExtensionPoint } from "@foxglove/studio-base/randomAccessDataProviders/mockExtensionPoint";
+import { RandomAccessDataProviderMetadata } from "@foxglove/studio-base/randomAccessDataProviders/types";
 import Rpc, { createLinkedChannels } from "@foxglove/studio-base/util/Rpc";
 
 import RpcDataProvider from "./RpcDataProvider";
@@ -85,7 +85,10 @@ describe("RpcDataProvider", () => {
     const provider = new RpcDataProvider(new Rpc(mainChannel), dummyChildren);
     const memoryDataProvider = new MemoryDataProvider(data);
     new RpcDataProviderRemote(new Rpc(workerChannel), () => memoryDataProvider);
-    const metadata: DataProviderMetadata = { type: "updateReconnecting", reconnecting: true };
+    const metadata: RandomAccessDataProviderMetadata = {
+      type: "updateReconnecting",
+      reconnecting: true,
+    };
 
     await provider.initialize(extensionPoint);
     if (!memoryDataProvider.extensionPoint) {

@@ -13,13 +13,13 @@
 
 import { Time } from "rosbag";
 
-import RpcDataProvider from "@foxglove/studio-base/dataProviders/RpcDataProvider";
+import RpcDataProvider from "@foxglove/studio-base/randomAccessDataProviders/RpcDataProvider";
 import Rpc from "@foxglove/studio-base/util/Rpc";
 
 import {
-  DataProvider,
+  RandomAccessDataProvider,
   InitializationResult,
-  DataProviderDescriptor,
+  RandomAccessDataProviderDescriptor,
   ExtensionPoint,
   GetMessagesResult,
   GetMessagesTopics,
@@ -36,14 +36,14 @@ if (process.env.NODE_ENV !== "test") {
   preinitializedWorkers = [WorkerDataProviderWorker(), WorkerDataProviderWorker()];
 }
 
-// Wraps the underlying DataProviderDescriptor tree in a Web Worker, therefore allowing
+// Wraps the underlying RandomAccessDataProviderDescriptor tree in a Web Worker, therefore allowing
 // `getMessages` calls to get resolved in parallel to the main thread.
-export default class WorkerDataProvider implements DataProvider {
+export default class WorkerDataProvider implements RandomAccessDataProvider {
   _worker?: Worker;
   _provider?: RpcDataProvider;
-  _child?: DataProviderDescriptor;
+  _child?: RandomAccessDataProviderDescriptor;
 
-  constructor(_args: unknown, children: DataProviderDescriptor[]) {
+  constructor(_args: unknown, children: RandomAccessDataProviderDescriptor[]) {
     if (children.length !== 1) {
       throw new Error(`Incorrect number of children to WorkerDataProvider: ${children.length}`);
     }

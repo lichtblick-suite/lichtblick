@@ -18,11 +18,6 @@ import { v4 as uuidv4 } from "uuid";
 
 import Logger from "@foxglove/log";
 import {
-  DataProvider,
-  DataProviderMetadata,
-  InitializationResult,
-} from "@foxglove/studio-base/dataProviders/types";
-import {
   AdvertisePayload,
   MessageEvent,
   ParameterValue,
@@ -34,6 +29,11 @@ import {
   SubscribePayload,
   Topic,
 } from "@foxglove/studio-base/players/types";
+import {
+  RandomAccessDataProvider,
+  RandomAccessDataProviderMetadata,
+  InitializationResult,
+} from "@foxglove/studio-base/randomAccessDataProviders/types";
 import { USER_ERROR_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import sendNotification, {
   NotificationType,
@@ -75,7 +75,7 @@ function formatSeconds(sec: number): string {
 export default class AutomatedRunPlayer implements Player {
   static className = "AutomatedRunPlayer";
   _isPlaying: boolean = false;
-  _provider: DataProvider;
+  _provider: RandomAccessDataProvider;
   _providerResult?: InitializationResult;
   _progress: Progress = {};
   _subscribedTopics: Set<string> = new Set();
@@ -94,7 +94,7 @@ export default class AutomatedRunPlayer implements Player {
   // deterministically so we put them in a FIFO queue.
   _emitStateQueue: Queue = new Queue(1);
 
-  constructor(provider: DataProvider, client: AutomatedRunClient) {
+  constructor(provider: RandomAccessDataProvider, client: AutomatedRunClient) {
     this._provider = provider;
     this._speed = client.speed;
     this._msPerFrame = client.msPerFrame;
@@ -251,7 +251,7 @@ export default class AutomatedRunPlayer implements Player {
         this._progress = progress;
         void this._onUpdateProgress();
       },
-      reportMetadataCallback: (metadata: DataProviderMetadata) => {
+      reportMetadataCallback: (metadata: RandomAccessDataProviderMetadata) => {
         switch (metadata.type) {
           case "updateReconnecting":
             sendNotification(

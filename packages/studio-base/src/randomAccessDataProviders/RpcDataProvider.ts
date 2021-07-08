@@ -14,26 +14,26 @@
 import { Time } from "rosbag";
 
 import {
-  DataProviderDescriptor,
+  RandomAccessDataProviderDescriptor,
   ExtensionPoint,
   GetMessagesResult,
   GetMessagesTopics,
   InitializationResult,
-  DataProvider,
-} from "@foxglove/studio-base/dataProviders/types";
+  RandomAccessDataProvider,
+} from "@foxglove/studio-base/randomAccessDataProviders/types";
 import Rpc from "@foxglove/studio-base/util/Rpc";
 import { setupMainThreadRpc } from "@foxglove/studio-base/util/RpcMainThreadUtils";
 
-// Looks a bit like a regular `DataProvider`, but is not intended to be used directly in a
-// DataProviderDescriptor tree, but rather in another DataProvider where we instantiate an Rpc, e.g.
+// Looks a bit like a regular `RandomAccessDataProvider`, but is not intended to be used directly in a
+// RandomAccessDataProviderDescriptor tree, but rather in another RandomAccessDataProvider where we instantiate an Rpc, e.g.
 // in a WorkerDataProvider, or even over a WebSocket. It proxies any calls to the
-// RpcDataProviderRemote, where we instantiate the rest of the DataProviderDescriptor tree.
+// RpcDataProviderRemote, where we instantiate the rest of the RandomAccessDataProviderDescriptor tree.
 // See WorkerDataProvider for an example.
-export default class RpcDataProvider implements DataProvider {
+export default class RpcDataProvider implements RandomAccessDataProvider {
   _rpc: Rpc;
-  _childDescriptor: DataProviderDescriptor;
+  _childDescriptor: RandomAccessDataProviderDescriptor;
 
-  constructor(rpc: Rpc, children: DataProviderDescriptor[]) {
+  constructor(rpc: Rpc, children: RandomAccessDataProviderDescriptor[]) {
     this._rpc = rpc;
     setupMainThreadRpc(this._rpc);
     const child = children[0];

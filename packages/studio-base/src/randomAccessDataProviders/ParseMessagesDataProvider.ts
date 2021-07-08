@@ -15,22 +15,22 @@ import { Time } from "rosbag";
 
 import rawMessageDefinitionsToParsed from "./rawMessageDefinitionsToParsed";
 import {
-  DataProvider,
+  RandomAccessDataProvider,
   InitializationResult,
   ExtensionPoint,
-  DataProviderDescriptor,
+  RandomAccessDataProviderDescriptor,
   GetDataProvider,
   GetMessagesResult,
   GetMessagesTopics,
 } from "./types";
 
 // Parses raw messages as returned by `BagDataProvider`. To make it fast to seek back and forth, we keep
-// a small cache here, which maps messages from the underlying DataProvider to parsed messages. This assumes
-// that usually the underlying DataProvider will give us the same message references, and fast, which should
+// a small cache here, which maps messages from the underlying RandomAccessDataProvider to parsed messages. This assumes
+// that usually the underlying RandomAccessDataProvider will give us the same message references, and fast, which should
 // be the case when using the MemoryCacheDataProvider.
-export default class ParseMessagesDataProvider implements DataProvider {
-  // Underlying DataProvider.
-  private _provider: DataProvider;
+export default class ParseMessagesDataProvider implements RandomAccessDataProvider {
+  // Underlying RandomAccessDataProvider.
+  private _provider: RandomAccessDataProvider;
 
   private _datatypeNamesByTopic: {
     [topic: string]: string;
@@ -38,7 +38,7 @@ export default class ParseMessagesDataProvider implements DataProvider {
 
   constructor(
     _args: unknown,
-    children: DataProviderDescriptor[],
+    children: RandomAccessDataProviderDescriptor[],
     getDataProvider: GetDataProvider,
   ) {
     const child = children[0];

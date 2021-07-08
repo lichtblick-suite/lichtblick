@@ -13,7 +13,7 @@
 
 import { debounce } from "lodash";
 
-import { ExtensionPoint } from "@foxglove/studio-base/dataProviders/types";
+import { ExtensionPoint } from "@foxglove/studio-base/randomAccessDataProviders/types";
 import { fromMillis } from "@foxglove/studio-base/util/time";
 
 const STALL_THRESHOLD_MS = 2000;

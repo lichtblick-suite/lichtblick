@@ -13,23 +13,26 @@
 
 import { TimeUtil, Time } from "rosbag";
 
-import { CoreDataProviders, MESSAGE_FORMATS } from "@foxglove/studio-base/dataProviders/constants";
 import {
-  DataProvider,
-  DataProviderDescriptor,
+  CoreDataProviders,
+  MESSAGE_FORMATS,
+} from "@foxglove/studio-base/randomAccessDataProviders/constants";
+import {
+  RandomAccessDataProvider,
+  RandomAccessDataProviderDescriptor,
   ExtensionPoint,
   GetDataProvider,
   GetMessagesResult,
   GetMessagesTopics,
   InitializationResult,
-} from "@foxglove/studio-base/dataProviders/types";
+} from "@foxglove/studio-base/randomAccessDataProviders/types";
 import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
-// We wrap every DataProvider in an ApiCheckerDataProvider to strictly enforce
-// the API guarantees. This makes it harder to make mistakes with DataProviders,
-// and allows you to rely on these guarantees when writing your own DataProviders
+// We wrap every RandomAccessDataProvider in an ApiCheckerDataProvider to strictly enforce
+// the API guarantees. This makes it harder to make mistakes with RandomAccessDataProviders,
+// and allows you to rely on these guarantees when writing your own RandomAccessDataProviders
 // or Players.
 //
 // Whenever possible we make these errors not prevent further playback, though
@@ -41,9 +44,9 @@ import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 // the guarantees that this gives us.
 
 export function instrumentTreeWithApiCheckerDataProvider(
-  treeRoot: DataProviderDescriptor,
+  treeRoot: RandomAccessDataProviderDescriptor,
   depth: number = 0,
-): DataProviderDescriptor {
+): RandomAccessDataProviderDescriptor {
   return {
     name: CoreDataProviders.ApiCheckerDataProvider,
     args: { name: `${treeRoot.name}@${depth}`, isRoot: depth === 0 },
@@ -58,9 +61,9 @@ export function instrumentTreeWithApiCheckerDataProvider(
   };
 }
 
-export default class ApiCheckerDataProvider implements DataProvider {
+export default class ApiCheckerDataProvider implements RandomAccessDataProvider {
   _name: string;
-  _provider?: DataProvider;
+  _provider?: RandomAccessDataProvider;
   _initializationResult?: InitializationResult;
   _topicNames: string[] = [];
   _closed: boolean = false;
@@ -68,7 +71,7 @@ export default class ApiCheckerDataProvider implements DataProvider {
 
   constructor(
     args: { name: string; isRoot: boolean },
-    children: DataProviderDescriptor[],
+    children: RandomAccessDataProviderDescriptor[],
     getDataProvider: GetDataProvider,
   ) {
     this._name = args.name;

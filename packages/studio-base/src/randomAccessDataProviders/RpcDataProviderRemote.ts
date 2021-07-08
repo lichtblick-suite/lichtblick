@@ -14,30 +14,33 @@
 import { Time } from "rosbag";
 
 import {
-  DataProvider,
-  DataProviderDescriptor,
-  DataProviderMetadata,
+  RandomAccessDataProvider,
+  RandomAccessDataProviderDescriptor,
+  RandomAccessDataProviderMetadata,
   GetMessagesTopics,
-} from "@foxglove/studio-base/dataProviders/types";
+} from "@foxglove/studio-base/randomAccessDataProviders/types";
 import Rpc from "@foxglove/studio-base/util/Rpc";
 import { setupWorker } from "@foxglove/studio-base/util/RpcWorkerUtils";
 
-// The "other side" of `RpcDataProvider`. Instantiates a `DataProviderDescriptor` tree underneath,
+// The "other side" of `RpcDataProvider`. Instantiates a `RandomAccessDataProviderDescriptor` tree underneath,
 // in the context of wherever this is instantiated (e.g. a Web Worker, or the server side of a
 // WebSocket).
 export default class RpcDataProviderRemote {
-  constructor(rpc: Rpc, getDataProvider: (arg0: DataProviderDescriptor) => DataProvider) {
+  constructor(
+    rpc: Rpc,
+    getDataProvider: (arg0: RandomAccessDataProviderDescriptor) => RandomAccessDataProvider,
+  ) {
     setupWorker(rpc);
-    let provider: DataProvider;
+    let provider: RandomAccessDataProvider;
     rpc.receive(
       "initialize",
-      async ({ childDescriptor }: { childDescriptor: DataProviderDescriptor }) => {
+      async ({ childDescriptor }: { childDescriptor: RandomAccessDataProviderDescriptor }) => {
         provider = getDataProvider(childDescriptor);
         return await provider.initialize({
           progressCallback: (data) => {
             void rpc.send("extensionPointCallback", { type: "progressCallback", data });
           },
-          reportMetadataCallback: (data: DataProviderMetadata) => {
+          reportMetadataCallback: (data: RandomAccessDataProviderMetadata) => {
             void rpc.send("extensionPointCallback", { type: "reportMetadataCallback", data });
           },
         });

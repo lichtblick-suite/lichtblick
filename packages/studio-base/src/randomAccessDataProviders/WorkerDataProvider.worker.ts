@@ -11,10 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import ApiCheckerDataProvider from "@foxglove/studio-base/dataProviders/ApiCheckerDataProvider";
-import BagDataProvider from "@foxglove/studio-base/dataProviders/BagDataProvider";
-import RpcDataProviderRemote from "@foxglove/studio-base/dataProviders/RpcDataProviderRemote";
-import createGetDataProvider from "@foxglove/studio-base/dataProviders/createGetDataProvider";
+import ApiCheckerDataProvider from "@foxglove/studio-base/randomAccessDataProviders/ApiCheckerDataProvider";
+import BagDataProvider from "@foxglove/studio-base/randomAccessDataProviders/BagDataProvider";
+import RpcDataProviderRemote from "@foxglove/studio-base/randomAccessDataProviders/RpcDataProviderRemote";
+import createGetDataProvider from "@foxglove/studio-base/randomAccessDataProviders/createGetDataProvider";
 import Rpc, { Channel } from "@foxglove/studio-base/util/Rpc";
 import { inWebWorker } from "@foxglove/studio-base/util/workers";
 

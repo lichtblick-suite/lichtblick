@@ -12,19 +12,21 @@
 //   You may not use this file except in compliance with the License.
 
 import {
-  DataProvider,
-  DataProviderConstructor,
-  DataProviderDescriptor,
+  RandomAccessDataProvider,
+  RandomAccessDataProviderConstructor,
+  RandomAccessDataProviderDescriptor,
   GetDataProvider,
-} from "@foxglove/studio-base/dataProviders/types";
+} from "@foxglove/studio-base/randomAccessDataProviders/types";
 
 export default function createGetDataProvider(descriptorMap: {
-  [name: string]: DataProviderConstructor;
+  [name: string]: RandomAccessDataProviderConstructor;
 }): GetDataProvider {
-  return function getDataProvider(descriptor: DataProviderDescriptor): DataProvider {
+  return function getDataProvider(
+    descriptor: RandomAccessDataProviderDescriptor,
+  ): RandomAccessDataProvider {
     const Provider = descriptorMap[descriptor.name];
     if (!Provider) {
-      throw new Error(`Unknown DataProviderDescriptor#name: ${descriptor.name}`);
+      throw new Error(`Unknown RandomAccessDataProviderDescriptor#name: ${descriptor.name}`);
     }
     return new Provider(descriptor.args, descriptor.children, getDataProvider);
   };

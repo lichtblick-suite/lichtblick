@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import BrowserHttpReader from "@foxglove/studio-base/dataProviders/BrowserHttpReader";
+import BrowserHttpReader from "@foxglove/studio-base/randomAccessDataProviders/BrowserHttpReader";
 import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 // Get a globally unique ID for caching purposes for a remote URL, or `undefined`

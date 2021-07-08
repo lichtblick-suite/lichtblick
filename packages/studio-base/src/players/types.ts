@@ -15,13 +15,13 @@ import { Time } from "rosbag";
 
 import { RosMsgDefinition } from "@foxglove/rosmsg";
 import type { MessageEvent } from "@foxglove/studio";
-import { BlockCache } from "@foxglove/studio-base/dataProviders/MemoryCacheDataProvider";
+import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
+import { BlockCache } from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
 import {
   AverageThroughput,
-  DataProviderStall,
+  RandomAccessDataProviderStall,
   InitializationPerformanceMetadata,
-} from "@foxglove/studio-base/dataProviders/types";
-import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
+} from "@foxglove/studio-base/randomAccessDataProviders/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { Range } from "@foxglove/studio-base/util/ranges";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
@@ -334,5 +334,5 @@ export interface PlayerMetricsCollectorInterface {
   recordUncachedRangeRequest(): void;
   recordTimeToFirstMsgs(): void;
   recordDataProviderInitializePerformance(metadata: InitializationPerformanceMetadata): void;
-  recordDataProviderStall(metadata: DataProviderStall): void;
+  recordDataProviderStall(metadata: RandomAccessDataProviderStall): void;
 }

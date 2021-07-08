@@ -17,19 +17,19 @@ import ReadResult from "rosbag/dist/ReadResult";
 import decompressLZ4 from "wasm-lz4";
 
 import Logger from "@foxglove/log";
-import BrowserHttpReader from "@foxglove/studio-base/dataProviders/BrowserHttpReader";
+import { MessageEvent } from "@foxglove/studio-base/players/types";
+import BrowserHttpReader from "@foxglove/studio-base/randomAccessDataProviders/BrowserHttpReader";
 import {
-  DataProvider,
-  DataProviderDescriptor,
+  RandomAccessDataProvider,
+  RandomAccessDataProviderDescriptor,
   Connection,
   ExtensionPoint,
   GetMessagesResult,
   GetMessagesTopics,
   InitializationResult,
   AverageThroughput,
-} from "@foxglove/studio-base/dataProviders/types";
-import { getReportMetadataForChunk } from "@foxglove/studio-base/dataProviders/util";
-import { MessageEvent } from "@foxglove/studio-base/players/types";
+} from "@foxglove/studio-base/randomAccessDataProviders/types";
+import { getReportMetadataForChunk } from "@foxglove/studio-base/randomAccessDataProviders/util";
 import CachedFilelike, { FileReader } from "@foxglove/studio-base/util/CachedFilelike";
 import { bagConnectionsToTopics } from "@foxglove/studio-base/util/bagConnectionsHelper";
 import { getBagChunksOverlapCount } from "@foxglove/studio-base/util/bags";
@@ -109,13 +109,13 @@ class LogMetricsReader {
 // Read from a ROS Bag. `bagPath` can either represent a local file, or a remote bag. See
 // `BrowserHttpReader` for how to set up a remote server to be able to directly stream from it.
 // Returns raw messages that still need to be parsed by `ParseMessagesDataProvider`.
-export default class BagDataProvider implements DataProvider {
+export default class BagDataProvider implements RandomAccessDataProvider {
   _options: Options;
   _bag?: Bag;
   _lastPerformanceStatsToLog?: TimedDataThroughput;
   _extensionPoint?: ExtensionPoint;
 
-  constructor(options: Options, children: DataProviderDescriptor[]) {
+  constructor(options: Options, children: RandomAccessDataProviderDescriptor[]) {
     if (children.length > 0) {
       throw new Error("BagDataProvider cannot have children");
     }

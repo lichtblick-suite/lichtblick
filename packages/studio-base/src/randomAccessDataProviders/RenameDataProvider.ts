@@ -14,32 +14,32 @@
 import memoizeWeak from "memoize-weak";
 import { Time } from "rosbag";
 
+import { Progress, Topic, MessageEvent } from "@foxglove/studio-base/players/types";
 import {
   BlockCache,
   MemoryCacheBlock,
-} from "@foxglove/studio-base/dataProviders/MemoryCacheDataProvider";
-import { MESSAGE_FORMATS } from "@foxglove/studio-base/dataProviders/constants";
+} from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
+import { MESSAGE_FORMATS } from "@foxglove/studio-base/randomAccessDataProviders/constants";
 import {
-  DataProviderDescriptor,
+  RandomAccessDataProviderDescriptor,
   ExtensionPoint,
   GetDataProvider,
   GetMessagesResult,
   GetMessagesTopics,
   InitializationResult,
-  DataProvider,
+  RandomAccessDataProvider,
   MessageDefinitions,
-} from "@foxglove/studio-base/dataProviders/types";
-import { Progress, Topic, MessageEvent } from "@foxglove/studio-base/players/types";
+} from "@foxglove/studio-base/randomAccessDataProviders/types";
 import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import filterMap from "@foxglove/studio-base/util/filterMap";
 
-export default class RenameDataProvider implements DataProvider {
-  _provider: DataProvider;
+export default class RenameDataProvider implements RandomAccessDataProvider {
+  _provider: RandomAccessDataProvider;
   _prefix: string;
 
   constructor(
     args: { prefix?: string },
-    children: DataProviderDescriptor[],
+    children: RandomAccessDataProviderDescriptor[],
     getDataProvider: GetDataProvider,
   ) {
     const child = children[0];
