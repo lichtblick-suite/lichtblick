@@ -2124,11 +2124,11 @@ __metadata:
   linkType: soft
 
 "@foxglove/just-fetch@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "@foxglove/just-fetch@npm:1.2.0"
+  version: 1.2.1
+  resolution: "@foxglove/just-fetch@npm:1.2.1"
   dependencies:
     node-fetch: ^3.0.0-beta.9
-  checksum: 0334ab426dddd68d25fced4dce8118cc982929d85b4a489dcf521232ffbef17deb175cfbe5bfcf28f258fe7d3c215bf641cb3db414b73981debb604b7f8d4a5b
+  checksum: 2f88bc819db3ac29b03cd6c2315625eaeb43d62c59158ac17cf0b0bc97cb3220033d8c03aeb3d5d1832e3032cd507234628d13d6bdfe2f926c180189dbc8d47e
   languageName: node
   linkType: hard
 
