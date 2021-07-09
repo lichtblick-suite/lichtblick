@@ -10,16 +10,12 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import ClipboardOutlineIcon from "@mdi/svg/svg/clipboard-outline.svg";
-import { cloneDeepWith } from "lodash";
-import React, { useCallback } from "react";
 import styled from "styled-components";
 
-import Icon from "@foxglove/studio-base/components/Icon";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
-import clipboard from "@foxglove/studio-base/util/clipboard";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
+import CopyMessageButton from "./CopyMessageButton";
 import { getMessageDocumentationLink } from "./utils";
 
 const SMetadata = styled.div`
@@ -37,23 +33,6 @@ type Props = {
   diffMessage?: MessageEvent<unknown>;
 };
 
-function CopyMessageButton({
-  text,
-  onClick,
-}: {
-  text: string;
-  onClick: (e: React.MouseEvent<HTMLElement>) => void;
-}) {
-  return (
-    <a onClick={onClick} href="#" style={{ textDecoration: "none" }}>
-      <Icon tooltip="Copy entire message to clipboard" style={{ position: "relative", top: -1 }}>
-        <ClipboardOutlineIcon style={{ verticalAlign: "middle" }} />
-      </Icon>{" "}
-      {text}
-    </a>
-  );
-}
-
 export default function Metadata({
   data,
   diffData,
@@ -62,20 +41,6 @@ export default function Metadata({
   message,
   diffMessage,
 }: Props): JSX.Element {
-  const onClickCopy = useCallback(
-    (dataToCopy: unknown) => (e: React.MouseEvent<HTMLElement>) => {
-      e.stopPropagation();
-      e.preventDefault();
-      const dataWithoutLargeArrays = cloneDeepWith(dataToCopy, (value) => {
-        if (typeof value === "object" && value.buffer) {
-          return "<buffer>";
-        }
-        return undefined;
-      });
-      void clipboard.copy(JSON.stringify(dataWithoutLargeArrays, undefined, 2) ?? "");
-    },
-    [],
-  );
   return (
     <SMetadata>
       {!diffMessage && datatype && (
@@ -88,14 +53,14 @@ export default function Metadata({
         </a>
       )}
       {diffMessage ? " base" : ""} @ {formatTimeRaw(message.receiveTime)} ROS{" "}
-      <CopyMessageButton onClick={onClickCopy(data)} text="Copy msg" />
+      <CopyMessageButton data={data} text="Copy msg" />
       {diffMessage?.receiveTime && (
         <>
           <div>
             {`diff @ ${formatTimeRaw(diffMessage.receiveTime)} ROS `}
-            <CopyMessageButton onClick={onClickCopy(diffData)} text="Copy msg" />
+            <CopyMessageButton data={diffData} text="Copy msg" />
           </div>
-          <CopyMessageButton onClick={onClickCopy(diff)} text="Copy diff of msgs" />
+          <CopyMessageButton data={diff} text="Copy diff of msgs" />
         </>
       )}
     </SMetadata>
