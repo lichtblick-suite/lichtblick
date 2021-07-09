@@ -13,8 +13,8 @@ import {
   CacheOnlyLayoutStorageProvider,
 } from "@foxglove/studio-base";
 
-import AppConfigurationProvider from "./components/AppConfigurationProvider";
-import NoOpLayoutCacheProvider from "./components/NoOpLayoutCacheProvider";
+import LocalStorageAppConfigurationProvider from "./components/LocalStorageAppConfigurationProvider";
+import LocalStorageLayoutCacheProvider from "./components/LocalStorageLayoutCacheProvider";
 import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
 
 const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo.bag";
@@ -38,8 +38,8 @@ export default function Root(): JSX.Element {
   const providers = [
     /* eslint-disable react/jsx-key */
     <StudioToastProvider />,
-    <AppConfigurationProvider />,
-    <NoOpLayoutCacheProvider />,
+    <LocalStorageAppConfigurationProvider />,
+    <LocalStorageLayoutCacheProvider />,
     <CacheOnlyLayoutStorageProvider />,
     <UserProfileLocalStorageProvider />,
     <ExtensionLoaderProvider />,
