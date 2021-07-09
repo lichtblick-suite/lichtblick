@@ -62,7 +62,7 @@ export default function GradientPicker({
   const rgbMaxColor = defaultedRGBStringFromColorObj(maxColor);
 
   const drawGradient = useCallback(
-    (ctx, width, height) => {
+    (ctx: CanvasRenderingContext2D, width: number, height: number) => {
       const gradient = ctx.createLinearGradient(0, 0, width, 0);
       gradient.addColorStop(0, rgbMinColor);
       gradient.addColorStop(1, rgbMaxColor);

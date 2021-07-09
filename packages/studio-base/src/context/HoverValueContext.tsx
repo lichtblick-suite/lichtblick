@@ -78,7 +78,7 @@ export function HoverValueProvider({ children }: React.PropsWithChildren<unknown
       rawSetHoverValue((oldValue) => (isEqual(newValue, oldValue) ? oldValue : newValue)),
     [],
   );
-  const clearHoverValue = useCallback((componentId) => {
+  const clearHoverValue = useCallback((componentId: string) => {
     rawSetHoverValue((currentValue) =>
       currentValue?.componentId === componentId ? undefined : currentValue,
     );

@@ -57,13 +57,13 @@ function Tab({ config, saveConfig }: Props) {
 
   // Create the actions used by the tab
   const selectTab = useCallback(
-    (idx) => {
+    (idx: number) => {
       saveConfig({ activeTabIdx: idx });
     },
     [saveConfig],
   );
   const setTabTitle = useCallback(
-    (idx, title) => {
+    (idx: number, title: string) => {
       const newTabs = tabs.slice();
       newTabs[idx] = { ...tabs[idx], title };
       saveConfig({ tabs: newTabs });

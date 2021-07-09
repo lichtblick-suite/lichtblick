@@ -60,8 +60,8 @@ function ControlledExample() {
   return (
     <Box
       title="clicked the 2nd option manually"
-      onMount={React.useCallback((el) => {
-        const secondOptionEl = el.querySelector("[data-test='second']");
+      onMount={React.useCallback((el: HTMLDivElement) => {
+        const secondOptionEl = el.querySelector<HTMLElement>("[data-test='second']");
         if (secondOptionEl) {
           secondOptionEl.click();
         }

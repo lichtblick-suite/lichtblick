@@ -95,7 +95,10 @@ export function ToolbarTab(props: Props): JSX.Element {
   const inputRef = useRef<HTMLInputElement>(ReactNull);
   const [title, setTitle] = useState<string>(tabTitle ?? "");
   const [editingTitle, setEditingTitle] = useState<boolean>(false);
-  const onChangeTitleInput = useCallback((ev) => setTitle(ev.target.value), []);
+  const onChangeTitleInput = useCallback(
+    (ev: React.ChangeEvent<HTMLInputElement>) => setTitle(ev.target.value),
+    [],
+  );
 
   const { selectTab, removeTab } = useMemo(
     () => ({

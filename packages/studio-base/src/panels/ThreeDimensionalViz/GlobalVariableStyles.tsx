@@ -114,10 +114,10 @@ export default function GlobalVariableStyles(props: Props): JSX.Element {
   const linkedGlobalVariablesByName = groupBy(linkedGlobalVariables, ({ name }) => name);
 
   const updateSettingsForGlobalVariable = useCallback(
-    (globalVariableName, settings: ColorOverride, sourceIdx = 0) => {
+    (globalVariableName: string, settings: ColorOverride, sourceIdx: number = 0) => {
       const updatedSettings = new Array(2)
         .fill(0)
-        .map((_, i) => colorOverrideBySourceIdxByVariable[globalVariableName]?.[i]);
+        .map((_, i) => colorOverrideBySourceIdxByVariable[globalVariableName]?.[i] ?? {});
       updatedSettings[sourceIdx] = settings;
       setColorOverrideBySourceIdxByVariable({
         ...colorOverrideBySourceIdxByVariable,

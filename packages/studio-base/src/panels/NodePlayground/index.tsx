@@ -196,8 +196,8 @@ function NodePlayground(props: Props) {
   );
 
   const saveNode = React.useCallback(
-    (script) => {
-      if (selectedNodeId == undefined || !script || !selectedNode) {
+    (script: string | undefined) => {
+      if (selectedNodeId == undefined || script == undefined || script === "" || !selectedNode) {
         return;
       }
       setUserNodes({ [selectedNodeId]: { ...selectedNode, sourceCode: script } });

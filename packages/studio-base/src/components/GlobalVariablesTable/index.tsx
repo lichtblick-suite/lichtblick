@@ -169,7 +169,7 @@ function LinkedGlobalVariableRow({ name }: { name: string }): ReactElement {
   );
 
   const unlink = useCallback(
-    (path) => {
+    (path: string) => {
       setLinkedGlobalVariables(
         linkedGlobalVariables.filter(
           ({ name: varName, topic, markerKeyPath }) =>

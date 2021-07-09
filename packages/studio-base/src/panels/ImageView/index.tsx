@@ -426,7 +426,7 @@ function ImageView(props: Props) {
     topics: cameraInfoTopic != undefined ? [cameraInfoTopic] : [],
     restore: useCallback((value) => value, []),
     addMessage: useCallback(
-      (_value, { message }: MessageEvent<unknown>) => message as CameraInfo,
+      (_value: CameraInfo | undefined, { message }: MessageEvent<unknown>) => message as CameraInfo,
       [],
     ),
   });

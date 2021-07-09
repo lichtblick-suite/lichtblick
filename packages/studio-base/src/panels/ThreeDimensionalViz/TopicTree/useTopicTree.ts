@@ -473,7 +473,7 @@ export default function useTopicTree({
 
   // A namespace is checked by default if none of the namespaces are in the checkedKeys and the selection is not modified.
   const getIsNamespaceCheckedByDefault = useCallback(
-    (topicName: string, columnIndex) =>
+    (topicName: string, columnIndex: number) =>
       !modifiedNamespaceTopics.includes(topicName) &&
       !checkedNamespacesByTopicName[
         columnIndex === 1 ? `${SECOND_SOURCE_PREFIX}${topicName}` : topicName

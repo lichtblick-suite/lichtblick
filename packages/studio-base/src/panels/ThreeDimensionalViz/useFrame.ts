@@ -16,6 +16,8 @@ import { useCallback, useRef } from "react";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import { Frame, MessageEvent } from "@foxglove/studio-base/players/types";
 
+type FrameState = { reset: boolean; frame: Frame };
+
 /**
  * useFrame returns the latest frame of messages.
  *
@@ -24,7 +26,7 @@ import { Frame, MessageEvent } from "@foxglove/studio-base/players/types";
  * @returns an object with a reset field and a frame field. The reset field indicates if
  * the frame marks a new series of frames rather than a continuation of previous frames
  */
-const useFrame = (topics: string[]): { reset: boolean; frame: Frame } => {
+const useFrame = (topics: string[]): FrameState => {
   // useMessageReducer may invoke restore and addMessages multiple times in a single pass
   // We use this flag to indicate if we've returned the result from a previous state update
   // and can start accumulating a new state
@@ -33,13 +35,13 @@ const useFrame = (topics: string[]): { reset: boolean; frame: Frame } => {
   // accumulate messages into a frame until we return the frame
   // once we've returned the frame we can accumulate messages into a new frame
   // reset indicates when the frame is the start of a new frame sequence
-  const response = PanelAPI.useMessageReducer<{ reset: boolean; frame: Frame }>({
+  const response = PanelAPI.useMessageReducer<FrameState>({
     topics,
     restore: useCallback(() => {
       returnedLastValueRef.current = false;
       return { reset: true, frame: {} };
     }, []),
-    addMessages: useCallback((prev, messages: readonly MessageEvent<unknown>[]) => {
+    addMessages: useCallback((prev: FrameState, messages: readonly MessageEvent<unknown>[]) => {
       if (returnedLastValueRef.current) {
         // after we've returned the value we can remove the reset flag and clear the frame
         prev.reset = false;

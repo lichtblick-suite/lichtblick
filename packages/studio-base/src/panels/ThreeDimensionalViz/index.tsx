@@ -13,6 +13,7 @@
 
 import { uniq, omit, debounce } from "lodash";
 import React, { useCallback, useMemo, useState, useRef, useEffect } from "react";
+import { CameraState } from "regl-worldview";
 
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import {
@@ -146,7 +147,7 @@ function BaseRenderer(props: Props): JSX.Element {
   );
 
   const saveCameraState = useCallback(
-    (newCameraStateObj) => saveConfig({ cameraState: newCameraStateObj }),
+    (newCameraStateObj: Partial<CameraState>) => saveConfig({ cameraState: newCameraStateObj }),
     [saveConfig],
   );
   const saveCameraStateDebounced = useMemo(
@@ -155,7 +156,7 @@ function BaseRenderer(props: Props): JSX.Element {
   );
 
   const onCameraStateChange = useCallback(
-    (newCameraState) => {
+    (newCameraState: CameraState) => {
       const newCurrentCameraState = omit(newCameraState, ["target", "targetOrientation"]);
       setConfigCameraState(newCurrentCameraState);
 

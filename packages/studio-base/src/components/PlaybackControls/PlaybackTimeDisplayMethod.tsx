@@ -68,7 +68,8 @@ const PlaybackTimeDisplayMethod = ({
   );
   const { setPlaybackConfig } = useCurrentLayoutActions();
   const setTimeDisplayMethod = useCallback(
-    (newTimeDisplayMethod) => setPlaybackConfig({ timeDisplayMethod: newTimeDisplayMethod }),
+    (newTimeDisplayMethod: "ROS" | "TOD" | undefined) =>
+      setPlaybackConfig({ timeDisplayMethod: newTimeDisplayMethod }),
     [setPlaybackConfig],
   );
 
@@ -87,7 +88,7 @@ const PlaybackTimeDisplayMethod = ({
   const [hasError, setHasError] = useState<boolean>(false);
 
   const onSubmit = useCallback(
-    (e) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
 
       if (inputText == undefined || inputText.length === 0) {

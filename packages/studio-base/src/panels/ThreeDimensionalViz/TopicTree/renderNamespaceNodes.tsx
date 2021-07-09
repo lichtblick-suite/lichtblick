@@ -109,7 +109,7 @@ function NamespaceNodeRow({
   );
 
   const updateHoveredMarkerMatchers = useCallback(
-    (columnIndex, visible) => {
+    (columnIndex: number, visible: boolean) => {
       if (visible) {
         const topic = [topicName, joinTopics(SECOND_SOURCE_PREFIX, topicName)][columnIndex];
         if (!isNonEmptyOrUndefined(topic)) {
@@ -132,7 +132,7 @@ function NamespaceNodeRow({
   }, [updateHoveredMarkerMatchers, onMouseLeave]);
 
   const onToggle = useCallback(
-    (columnIndex) => {
+    (columnIndex: number) => {
       toggleNamespaceChecked({ topicName, namespace, columnIndex });
       updateHoveredMarkerMatchers(columnIndex, !(visibleInSceneByColumn[columnIndex] ?? false));
     },
@@ -145,7 +145,7 @@ function NamespaceNodeRow({
     ],
   );
   const onAltToggle = useCallback(
-    (columnIndex) => {
+    (columnIndex: number) => {
       toggleCheckAllAncestors(nodeKey, columnIndex, topicName);
       updateHoveredMarkerMatchers(columnIndex, !(visibleInSceneByColumn[columnIndex] ?? false));
     },

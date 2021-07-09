@@ -15,7 +15,7 @@ import PinIcon from "@mdi/svg/svg/pin.svg";
 import cx from "classnames";
 import { compact } from "lodash";
 import { useCallback, useMemo } from "react";
-import { List, AutoSizer } from "react-virtualized";
+import { List, AutoSizer, ListRowProps } from "react-virtualized";
 
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
@@ -124,7 +124,8 @@ function DiagnosticSummary(props: Props): JSX.Element {
   );
 
   const renderRow = useCallback(
-    ({ item, style, key }) => {
+    // eslint-disable-next-line react/no-unused-prop-types
+    ({ item, style, key }: ListRowProps & { item: DiagnosticInfo }) => {
       return (
         <div key={key} style={style}>
           <NodeRow
@@ -203,7 +204,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
             height={height}
             style={{ outline: "none" }}
             rowHeight={25}
-            rowRenderer={(rowProps) => renderRow({ ...rowProps, item: nodes[rowProps.index] })}
+            rowRenderer={(rowProps) => renderRow({ ...rowProps, item: nodes[rowProps.index]! })}
             rowCount={nodes.length}
             overscanRowCount={10}
           />

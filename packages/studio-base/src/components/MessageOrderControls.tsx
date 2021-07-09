@@ -19,6 +19,7 @@ import {
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
+import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 const messageOrderLabel = {
   receiveTime: "Receive time",
@@ -32,7 +33,7 @@ export default function MessageOrderControls(): JSX.Element {
   const { setPlaybackConfig } = useCurrentLayoutActions();
 
   const setMessageOrder = useCallback(
-    (newMessageOrder) => {
+    (newMessageOrder: TimestampMethod) => {
       setPlaybackConfig({ messageOrder: newMessageOrder });
     },
     [setPlaybackConfig],

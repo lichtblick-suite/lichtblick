@@ -97,7 +97,7 @@ export default function TextField({
   }, [error, onError]);
 
   const validate = useCallback(
-    (val) => {
+    (val: string) => {
       const validationResult = validator(val);
       if (validationResult != undefined) {
         setError(validationResult);
@@ -110,7 +110,7 @@ export default function TextField({
   );
 
   const handleChange = useCallback(
-    ({ target }) => {
+    ({ target }: React.ChangeEvent<HTMLInputElement>) => {
       setInputStr(target.value);
       if (!validateOnBlur) {
         validate(target.value);

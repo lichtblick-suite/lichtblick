@@ -436,7 +436,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     [clearHoverValue, hoverComponentId],
   );
   const setGlobalHoverTime = useCallback(
-    (value) =>
+    (value: number) =>
       setHoverValue({
         componentId: hoverComponentId,
         value,
@@ -797,7 +797,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   );
 
   const onScalesUpdate = useCallback(
-    (scales: RpcScales, { userInteraction }) => {
+    (scales: RpcScales, { userInteraction }: { userInteraction: boolean }) => {
       if (userInteraction) {
         setHasUserPannedOrZoomed(true);
       }

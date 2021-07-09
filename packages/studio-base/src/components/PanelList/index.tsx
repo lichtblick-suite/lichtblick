@@ -26,7 +26,6 @@ import {
   usePanelMosaicId,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { PanelInfo, usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
-import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
 import {
   PanelConfig,
   MosaicDropTargetPosition,
@@ -72,10 +71,6 @@ const SEmptyState = styled.div`
   padding: 0px 16px 16px;
   opacity: 0.4;
 `;
-
-type PresetSettings =
-  | { config: TabPanelConfig; relatedConfigs: SavedProps }
-  | { config: PanelConfig; relatedConfigs: typeof undefined };
 
 type DropDescription = {
   type: string;
@@ -178,10 +173,7 @@ type Props = {
 
 // sanity checks to help panel authors debug issues
 function verifyPanels(panels: readonly PanelInfo[]) {
-  const panelTypes: Map<
-    string,
-    { component: React.ComponentType; presetSettings?: PresetSettings }
-  > = new Map();
+  const panelTypes: Map<string, React.ComponentType> = new Map();
   for (const { component } of panels) {
     const { name, displayName, panelType } = component;
     const dispName = displayName ?? name ?? "<unnamed>";
@@ -190,13 +182,12 @@ function verifyPanels(panels: readonly PanelInfo[]) {
     }
     const existingPanel = panelTypes.get(panelType);
     if (existingPanel) {
-      const otherDisplayName =
-        existingPanel.component.displayName ?? existingPanel.component.name ?? "<unnamed>";
+      const otherDisplayName = existingPanel.displayName ?? existingPanel.name ?? "<unnamed>";
       throw new Error(
         `Two components have the same panelType ('${panelType}'): ${otherDisplayName} and ${dispName}`,
       );
     }
-    panelTypes.set(panelType, { component });
+    panelTypes.set(panelType, component);
   }
 }
 
@@ -256,7 +247,7 @@ function PanelList(props: Props): JSX.Element {
   const noResults = filteredPanels.length === 0;
 
   const onKeyDown = React.useCallback(
-    (e) => {
+    (e: React.KeyboardEvent) => {
       if (e.key === "ArrowDown" && highlightedPanelIdx != undefined) {
         setHighlightedPanelIdx((highlightedPanelIdx + 1) % filteredPanels.length);
       } else if (e.key === "ArrowUp" && highlightedPanelIdx != undefined) {
@@ -273,7 +264,7 @@ function PanelList(props: Props): JSX.Element {
   );
 
   const displayPanelListItem = React.useCallback(
-    ({ presetSettings, title, component: { panelType } }) => {
+    ({ title, component: { panelType } }: PanelInfo) => {
       return (
         <DraggablePanelItem
           key={`${panelType}-${title}`}
@@ -281,17 +272,9 @@ function PanelList(props: Props): JSX.Element {
           panel={{
             type: panelType,
             title,
-            config: presetSettings?.config,
-            relatedConfigs: presetSettings?.relatedConfigs,
           }}
           onDrop={onPanelMenuItemDrop}
-          onClick={() =>
-            onPanelSelect({
-              type: panelType,
-              config: presetSettings?.config,
-              relatedConfigs: presetSettings?.relatedConfigs,
-            })
-          }
+          onClick={() => onPanelSelect({ type: panelType })}
           checked={title === selectedPanelTitle}
           highlighted={highlightedPanel?.title === title}
           searchQuery={searchQuery}

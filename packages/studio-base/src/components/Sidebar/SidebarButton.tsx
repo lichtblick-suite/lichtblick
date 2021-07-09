@@ -33,7 +33,10 @@ export default function SidebarButton({
 }): JSX.Element {
   const theme = useTheme();
   const { ref: tooltipRef, tooltip } = useTooltip({ contents: title, placement: "right" });
-  const renderStack = useCallback((props) => <div {...props} ref={tooltipRef} />, [tooltipRef]);
+  const renderStack = useCallback(
+    (props: React.HTMLAttributes<HTMLElement>) => <div {...props} ref={tooltipRef} />,
+    [tooltipRef],
+  );
 
   return (
     <Stack style={{ position: "relative", flexGrow: 1 }} as={renderStack}>

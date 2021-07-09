@@ -89,7 +89,7 @@ export default function MockMessagePipelineProvider(props: {
     [allSubscriptions],
   );
   const setSubscriptions = useCallback(
-    (id, subs) => setAllSubscriptions((s) => ({ ...s, [id]: subs })),
+    (id: string, subs: SubscribePayload[]) => setAllSubscriptions((s) => ({ ...s, [id]: subs })),
     [setAllSubscriptions],
   );
 

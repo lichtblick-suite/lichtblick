@@ -187,7 +187,7 @@ const Sidebar = ({
   const templatesSelected = explorer === "templates";
 
   const gotoUtils = React.useCallback(
-    (filePath) => {
+    (filePath: string) => {
       import(
         /* webpackChunkName: "monaco-api" */
         "monaco-editor/esm/vs/editor/editor.api"

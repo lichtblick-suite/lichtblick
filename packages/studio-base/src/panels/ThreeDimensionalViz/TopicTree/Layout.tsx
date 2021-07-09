@@ -565,9 +565,9 @@ export default function Layout({
   };
 
   const setColorOverrideBySourceIdxByVariable = useCallback(
-    (_colorOverrideBySourceIdxByVariable) => {
+    (newValue: ColorOverrideBySourceIdxByVariable) => {
       callbackInputsRef.current.saveConfig({
-        colorOverrideBySourceIdxByVariable: _colorOverrideBySourceIdxByVariable,
+        colorOverrideBySourceIdxByVariable: newValue,
       });
     },
     [],

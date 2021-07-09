@@ -21,7 +21,7 @@ function makeChartJSWorker() {
   return new Worker(new URL("./worker/main", import.meta.url));
 }
 
-type OnClickArg = {
+export type OnClickArg = {
   datalabel?: unknown;
   // x-value in scale
   x: number | undefined;

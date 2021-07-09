@@ -17,7 +17,7 @@ import TestUtils from "react-dom/test-utils";
 
 import signal from "@foxglove/studio-base/util/signal";
 
-import ChartComponent from ".";
+import ChartComponent, { OnClickArg } from ".";
 
 const dataPoint = {
   x: 0.000057603000000000004,
@@ -166,7 +166,7 @@ export const AllowsClickingOnDatalabels: Story = (_args, ctx) => {
     }
   }, [clickedDatalabel]);
 
-  const onClick = useCallback((ev) => {
+  const onClick = useCallback((ev: OnClickArg) => {
     setClickedDatalabel(ev.datalabel);
   }, []);
 

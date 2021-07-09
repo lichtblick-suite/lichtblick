@@ -194,7 +194,7 @@ export default function TreeNodeRow({
 
   const { setHoveredMarkerMatchers } = useContext(ThreeDimensionalVizContext);
   const updateHoveredMarkerMatchers = useCallback(
-    (columnIndex, visible) => {
+    (columnIndex: number, visible: boolean) => {
       if (visible) {
         const topic = [topicName, joinTopics(SECOND_SOURCE_PREFIX, topicName)][columnIndex];
         if (!isNonEmptyOrUndefined(topic)) {
