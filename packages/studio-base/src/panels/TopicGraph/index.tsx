@@ -125,7 +125,9 @@ function TopicGraph() {
 
   const [lrOrientation, setLROrientation] = useState<boolean>(false);
 
-  const [showTopics, setShowTopics] = useState<boolean>(true);
+  const [topicVisibility, setTopicVisibility] = useState<
+    "hide" | "show" | "show-only-with-subscribers"
+  >("show");
 
   const [showServices, setShowServices] = useState<boolean>(true);
 
@@ -142,6 +144,7 @@ function TopicGraph() {
     const output: cytoscape.ElementDefinition[] = [];
     const nodeIds = new Set<string>();
     const topicIds = new Set<string>();
+    const topicIdWithSubscriptions = new Set<string>();
     const serviceIds = new Set<string>();
     if (publishedTopics != undefined) {
       publishedTopics.forEach((curNodes, topic) => {
@@ -153,6 +156,7 @@ function TopicGraph() {
       subscribedTopics.forEach((curNodes, topic) => {
         unionInto(nodeIds, curNodes);
         topicIds.add(topic);
+        topicIdWithSubscriptions.add(topic);
       });
     }
     if (services != undefined) {
@@ -169,8 +173,14 @@ function TopicGraph() {
         data: { id: `n:${node}`, label: node, type: "node" },
       });
     }
-    if (showTopics) {
+    if (topicVisibility !== "hide") {
       for (const topic of topicIds) {
+        if (
+          topicVisibility === "show-only-with-subscribers" &&
+          !topicIdWithSubscriptions.has(topic)
+        ) {
+          continue;
+        }
         output.push({
           data: { id: `t:${topic}`, label: topic, type: "topic" },
         });
@@ -186,44 +196,52 @@ function TopicGraph() {
       }
     }
 
-    if (showTopics) {
-      if (publishedTopics != undefined) {
-        for (const [topic, publishers] of publishedTopics.entries()) {
-          for (const node of publishers) {
-            const source = `n:${node}`;
-            const target = `t:${topic}`;
-            output.push({ data: { id: `${source}-${target}`, source, target } });
-          }
-        }
-      }
-
-      if (subscribedTopics != undefined) {
-        for (const [topic, subscribers] of subscribedTopics.entries()) {
-          for (const node of subscribers) {
-            const source = `t:${topic}`;
-            const target = `n:${node}`;
-            output.push({ data: { id: `${source}-${target}`, source, target } });
-          }
-        }
-      }
-    } else {
-      if (publishedTopics != undefined && subscribedTopics != undefined) {
-        for (const [topic, publishers] of publishedTopics.entries()) {
-          for (const pubNode of publishers) {
-            const subscribers = subscribedTopics.get(topic);
-            if (subscribers != undefined) {
-              for (const subNode of subscribers) {
-                if (subNode === pubNode) {
-                  continue;
-                }
-                const source = `n:${pubNode}`;
-                const target = `n:${subNode}`;
-                output.push({ data: { id: `${source}-${target}`, source, target } });
-              }
+    switch (topicVisibility) {
+      case "show":
+      case "show-only-with-subscribers":
+        if (publishedTopics != undefined) {
+          for (const [topic, publishers] of publishedTopics.entries()) {
+            if (
+              topicVisibility === "show-only-with-subscribers" &&
+              !topicIdWithSubscriptions.has(topic)
+            ) {
+              continue;
+            }
+            for (const node of publishers) {
+              const source = `n:${node}`;
+              const target = `t:${topic}`;
+              output.push({ data: { id: `${source}-${target}`, source, target } });
             }
           }
         }
-      }
+
+        if (subscribedTopics != undefined) {
+          for (const [topic, subscribers] of subscribedTopics.entries()) {
+            for (const node of subscribers) {
+              const source = `t:${topic}`;
+              const target = `n:${node}`;
+              output.push({ data: { id: `${source}-${target}`, source, target } });
+            }
+          }
+        }
+        break;
+
+      case "hide":
+        if (publishedTopics == undefined || subscribedTopics == undefined) {
+          break;
+        }
+        for (const [topic, publishers] of publishedTopics.entries()) {
+          for (const pubNode of publishers) {
+            for (const subNode of subscribedTopics.get(topic) ?? []) {
+              if (subNode === pubNode) {
+                continue;
+              }
+              const source = `n:${pubNode}`;
+              const target = `n:${subNode}`;
+              output.push({ data: { id: `${source}-${target}`, source, target } });
+            }
+          }
+        }
     }
 
     if (showServices && services != undefined) {
@@ -235,7 +253,7 @@ function TopicGraph() {
     }
 
     return output;
-  }, [textMeasure, publishedTopics, subscribedTopics, services, showTopics, showServices]);
+  }, [textMeasure, publishedTopics, subscribedTopics, services, topicVisibility, showServices]);
 
   const graph = useRef<GraphMutation>();
 
@@ -250,8 +268,39 @@ function TopicGraph() {
 
   const toggleShowTopics = useCallback(() => {
     graph.current?.resetUserPanZoom();
-    setShowTopics(!showTopics);
-  }, [showTopics]);
+    setTopicVisibility((value) => {
+      switch (value) {
+        case "hide":
+          return "show-only-with-subscribers";
+        case "show-only-with-subscribers":
+          return "show";
+        case "show":
+          return "hide";
+      }
+    });
+  }, []);
+
+  const topicVisibilityTooltip = useMemo(() => {
+    switch (topicVisibility) {
+      case "hide":
+        return "Topics Hidden";
+      case "show-only-with-subscribers":
+        return "Showing Topics with Subscribers";
+      case "show":
+        return "Showing All Topics";
+    }
+  }, [topicVisibility]);
+
+  const topicButtonColor = useMemo(() => {
+    switch (topicVisibility) {
+      case "hide":
+        return "white";
+      case "show-only-with-subscribers":
+        return colors.green;
+      case "show":
+        return colors.accent;
+    }
+  }, [topicVisibility]);
 
   const toggleShowServices = useCallback(() => {
     graph.current?.resetUserPanZoom();
@@ -282,8 +331,8 @@ function TopicGraph() {
               {lrOrientation ? <ArrowRightIcon /> : <ArrowDownIcon />}
             </Icon>
           </Button>
-          <Button tooltip={showTopics ? "Hide Topics" : "Show Topics"} onClick={toggleShowTopics}>
-            <Icon style={{ color: showTopics ? colors.accent : "white" }} small>
+          <Button tooltip={topicVisibilityTooltip} onClick={toggleShowTopics}>
+            <Icon style={{ color: topicButtonColor }} small dataTest="toggle-topics">
               <TopicIcon />
             </Icon>
           </Button>
