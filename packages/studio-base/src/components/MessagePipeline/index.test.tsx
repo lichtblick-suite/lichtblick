@@ -47,7 +47,7 @@ function Hook(_props: WrapperProps) {
   return useMessagePipeline(useCallback((value) => value, []));
 }
 
-function Wrapper({ children, maybePlayer, globalVariables }: PropsWithChildren<WrapperProps>) {
+function Wrapper({ children, maybePlayer, globalVariables = {} }: PropsWithChildren<WrapperProps>) {
   const [config] = useState(() => makeConfiguration());
   return (
     <AppConfigurationContext.Provider value={config}>

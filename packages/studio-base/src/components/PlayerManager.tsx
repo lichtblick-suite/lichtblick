@@ -335,10 +335,10 @@ export default function PlayerManager({
   );
   const userNodes = useCurrentLayoutSelector((state) => state.selectedLayout?.data.userNodes);
   const globalVariables = useCurrentLayoutSelector(
-    (state) => state.selectedLayout?.data.globalVariables,
+    (state) => state.selectedLayout?.data.globalVariables ?? EMPTY_GLOBAL_VARIABLES,
   );
 
-  const globalVariablesRef = useRef<GlobalVariables>(globalVariables ?? EMPTY_GLOBAL_VARIABLES);
+  const globalVariablesRef = useRef<GlobalVariables>(globalVariables);
   const [maybePlayer, setMaybePlayer] = useState<MaybePlayer<OrderedStampPlayer>>({});
   const [currentSourceName, setCurrentSourceName] = useState<string | undefined>(undefined);
   const isMounted = useMountedState();
@@ -379,7 +379,7 @@ export default function PlayerManager({
           userNodePlayer,
           initialMessageOrder ?? DEFAULT_MESSAGE_ORDER,
         );
-        headerStampPlayer.setGlobalVariables(globalVariablesRef.current ?? EMPTY_GLOBAL_VARIABLES);
+        headerStampPlayer.setGlobalVariables(globalVariablesRef.current);
         setMaybePlayer({ player: headerStampPlayer });
       } catch (error) {
         setMaybePlayer({ error });

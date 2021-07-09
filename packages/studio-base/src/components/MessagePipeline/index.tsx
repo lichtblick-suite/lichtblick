@@ -95,12 +95,12 @@ type ProviderProps = {
   // information is passed in and merged with other player state.
   maybePlayer?: MaybePlayer;
 
-  globalVariables?: GlobalVariables;
+  globalVariables: GlobalVariables;
 };
 export function MessagePipelineProvider({
   children,
   maybePlayer = {},
-  globalVariables = {},
+  globalVariables,
 }: ProviderProps): React.ReactElement {
   const currentPlayer = useRef<Player | undefined>(undefined);
   const [rawPlayerState, setRawPlayerState] = useState<PlayerState>(defaultPlayerState);

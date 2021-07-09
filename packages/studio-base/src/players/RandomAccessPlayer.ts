@@ -588,10 +588,10 @@ export default class RandomAccessPlayer implements Player {
   }
 
   requestBackfill(): void {
-    if (this._isPlaying || this._initializing) {
+    if (this._isPlaying || this._initializing || !this._currentTime) {
       return;
     }
-    this.seekPlayback(this._nextReadStartTime);
+    this.seekPlayback(this._currentTime);
   }
 
   setPublishers(_publishers: AdvertisePayload[]): void {
