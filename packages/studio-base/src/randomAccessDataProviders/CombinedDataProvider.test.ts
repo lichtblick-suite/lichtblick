@@ -373,6 +373,7 @@ describe("CombinedDataProvider", () => {
           parsedMessageDefinitionsByTopic: {},
         },
         providesParsedMessages: true,
+        problems: [],
       });
     });
 
@@ -454,6 +455,7 @@ describe("CombinedDataProvider", () => {
           },
         },
         providesParsedMessages: true,
+        problems: [],
       });
     });
 

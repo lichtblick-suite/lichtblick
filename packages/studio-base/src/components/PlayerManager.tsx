@@ -50,11 +50,13 @@ import {
   buildPlayerFromDescriptor,
   BuildPlayerOptions,
 } from "@foxglove/studio-base/players/buildPlayer";
+import { buildRosbag2PlayerFromDescriptor } from "@foxglove/studio-base/players/buildRosbag2Player";
 import { Player } from "@foxglove/studio-base/players/types";
 import { CoreDataProviders } from "@foxglove/studio-base/randomAccessDataProviders/constants";
 import { getRemoteBagGuid } from "@foxglove/studio-base/randomAccessDataProviders/getRemoteBagGuid";
 import {
   getLocalBagDescriptor,
+  getLocalRosbag2Descriptor,
   getRemoteBagDescriptor,
 } from "@foxglove/studio-base/randomAccessDataProviders/standardDataProviderDescriptors";
 import { UserNodes } from "@foxglove/studio-base/types/panels";
@@ -140,6 +142,16 @@ async function buildPlayerFromBagURLs(
   throw new Error(`Unsupported number of urls: ${urls.length}`);
 }
 
+function buildRosbag2PlayerFromFolder(
+  folder: FileSystemDirectoryHandle,
+  options: BuildPlayerOptions,
+): BuiltPlayer {
+  return {
+    player: buildRosbag2PlayerFromDescriptor(getLocalRosbag2Descriptor(folder), options),
+    sources: [folder.name],
+  };
+}
+
 type FactoryOptions = {
   source: PlayerSourceDefinition;
   sourceOptions: Record<string, unknown>;
@@ -155,7 +167,7 @@ async function localBagFileSource(options: FactoryOptions) {
   // future enhancement would be to store the fileHandle in indexeddb and try to restore
   // fileHandles can be stored in indexeddb but not localstorage
   if (restore) {
-    return;
+    return undefined;
   }
 
   // maybe the caller has some files they want to open
@@ -179,6 +191,27 @@ async function localBagFileSource(options: FactoryOptions) {
   }
   return async (playerOptions: BuildPlayerOptions) => {
     return buildPlayerFromFiles([file], playerOptions);
+  };
+}
+
+async function localRosbag2FolderSource(options: FactoryOptions) {
+  let folder: FileSystemDirectoryHandle;
+
+  const restore = options.sourceOptions.restore ?? false;
+  if (restore) {
+    return undefined;
+  }
+
+  try {
+    folder = await showDirectoryPicker();
+  } catch (error) {
+    if (error.name === "AbortError") {
+      return undefined;
+    }
+    throw error;
+  }
+  return async (playerOptions: BuildPlayerOptions) => {
+    return buildRosbag2PlayerFromFolder(folder, playerOptions);
   };
 }
 
@@ -406,13 +439,15 @@ export default function PlayerManager({
   // changes to the GUID fetching in buildPlayerFromBagURLs.
   const lookupPlayerBuilderFactory = useCallback((definition: PlayerSourceDefinition) => {
     switch (definition.type) {
-      case "file":
+      case "ros1-local-bagfile":
         return localBagFileSource;
-      case "ros1-core":
+      case "ros2-folder":
+        return localRosbag2FolderSource;
+      case "ros1-socket":
         return roscoreSource;
-      case "ws":
+      case "ros-ws":
         return rosbridgeSource;
-      case "http":
+      case "ros1-remote-bagfile":
         return remoteBagFileSource;
       default:
         return;
@@ -438,7 +473,11 @@ export default function PlayerManager({
 
         const createPlayerBuilder = lookupPlayerBuilderFactory(selectedSource);
         if (!createPlayerBuilder) {
-          throw new Error(`Could not create a player for ${selectedSource.name}`);
+          // This can happen when upgrading from an older version of Studio that used different
+          // player names
+          log.error(`Could not create a player for ${selectedSource.name}`);
+          setMaybePlayer({ player: undefined });
+          return;
         }
 
         const playerBuilder = await createPlayerBuilder({

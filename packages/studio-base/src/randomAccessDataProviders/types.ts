@@ -50,6 +50,13 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 //
 // RandomAccessDataProviders have a strict API which is enforced automatically in ApiCheckerDataProvider.
 
+export type RandomAccessDataProviderProblem = {
+  severity: "error" | "warning";
+  message: string;
+  error?: Error;
+  tip?: string;
+};
+
 export type GetMessagesTopics = Readonly<{
   parsedMessages?: readonly string[];
   rosBinaryMessages?: readonly string[];
@@ -131,6 +138,10 @@ export type InitializationResult = {
   // update the ApiCheckerDataProvider to enforce it.
   providesParsedMessages: boolean;
   messageDefinitions: MessageDefinitions;
+
+  // Any errors or warnings that should be surfaced to the user as a result of initializing a data
+  // provider
+  problems: RandomAccessDataProviderProblem[];
 };
 
 export type ExtensionPoint = {

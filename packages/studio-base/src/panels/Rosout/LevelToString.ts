@@ -17,14 +17,19 @@ export const KNOWN_LOG_LEVELS: Array<number> = [1, 2, 4, 8, 16];
 export default function LevelToString(level: number): string {
   switch (level) {
     case 1:
+    case 10:
       return "DEBUG";
     case 2:
+    case 20:
       return "INFO";
     case 4:
+    case 30:
       return "WARN";
     case 8:
+    case 40:
       return "ERROR";
     case 16:
+    case 50:
       return "FATAL";
     default:
       return "?????";

@@ -44,6 +44,7 @@ const icons: {
   More: <Icons.MoreIcon />,
   MoreVertical: <Icons.MoreVerticalIcon />,
   OpenFile: <Icons.OpenFileIcon />,
+  OpenFolder: <Icons.OpenFolderHorizontalIcon />,
   RectangularClipping: <Icons.RectangularClippingIcon />,
   Rename: <Icons.RenameIcon />,
   Settings: <Icons.SettingsIcon />,

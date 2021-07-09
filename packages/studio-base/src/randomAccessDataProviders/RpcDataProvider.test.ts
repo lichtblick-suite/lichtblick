@@ -52,6 +52,7 @@ describe("RpcDataProvider", () => {
         messageDefinitionsByTopic: { some_datatype: "dummy" },
       },
       providesParsedMessages: false,
+      problems: [],
     });
   });
 

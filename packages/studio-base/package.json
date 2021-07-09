@@ -27,6 +27,7 @@
     "@fluentui/react-icons-mdl2": "1.1.4",
     "@foxglove/electron-socket": "1.0.0",
     "@foxglove/hooks": "workspace:*",
+    "@foxglove/rosbag2-web": "0.1.4",
     "@foxglove/rosmsg-msgs-common": "1.0.0",
     "@foxglove/rosmsg-msgs-foxglove": "2.0.0",
     "@foxglove/velodyne-cloud": "workspace:*",

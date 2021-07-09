@@ -74,6 +74,7 @@ describe("RenameDataProvider", () => {
       },
       numMessages: undefined,
       providesParsedMessages: true,
+      problems: [],
     });
   });
 
@@ -100,6 +101,7 @@ describe("RenameDataProvider", () => {
       },
       numMessages: undefined,
       providesParsedMessages: true,
+      problems: [],
     });
   });
 

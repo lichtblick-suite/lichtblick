@@ -85,6 +85,7 @@ export default class TestProvider implements RandomAccessDataProvider {
         messageDefinitionsByTopic: {},
         parsedMessageDefinitionsByTopic: {},
       },
+      problems: [],
     };
   }
 

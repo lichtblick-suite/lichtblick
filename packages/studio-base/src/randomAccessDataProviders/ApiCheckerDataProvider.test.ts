@@ -66,6 +66,7 @@ describe("ApiCheckerDataProvider", () => {
           { datatype: "some_datatype", name: "/some_other_topic" },
         ],
         providesParsedMessages: false,
+        problems: [],
       });
     });
 
@@ -91,6 +92,7 @@ describe("ApiCheckerDataProvider", () => {
           { datatype: "some_datatype", name: "/some_other_topic" },
         ],
         providesParsedMessages: false,
+        problems: [],
       });
     });
 

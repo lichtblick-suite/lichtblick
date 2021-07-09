@@ -39,6 +39,7 @@ declare global {
     | "More"
     | "MoreVertical"
     | "OpenFile"
+    | "OpenFolder"
     | "RectangularClipping"
     | "Rename"
     | "Settings"

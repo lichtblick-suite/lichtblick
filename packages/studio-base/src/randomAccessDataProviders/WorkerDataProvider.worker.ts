@@ -13,6 +13,7 @@
 
 import ApiCheckerDataProvider from "@foxglove/studio-base/randomAccessDataProviders/ApiCheckerDataProvider";
 import BagDataProvider from "@foxglove/studio-base/randomAccessDataProviders/BagDataProvider";
+import Rosbag2DataProvider from "@foxglove/studio-base/randomAccessDataProviders/Rosbag2DataProvider";
 import RpcDataProviderRemote from "@foxglove/studio-base/randomAccessDataProviders/RpcDataProviderRemote";
 import createGetDataProvider from "@foxglove/studio-base/randomAccessDataProviders/createGetDataProvider";
 import Rpc, { Channel } from "@foxglove/studio-base/util/Rpc";
@@ -21,6 +22,7 @@ import { inWebWorker } from "@foxglove/studio-base/util/workers";
 const getDataProvider = createGetDataProvider({
   ApiCheckerDataProvider,
   BagDataProvider,
+  Rosbag2DataProvider,
 });
 
 if (inWebWorker()) {

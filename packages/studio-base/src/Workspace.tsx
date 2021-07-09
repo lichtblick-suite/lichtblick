@@ -198,7 +198,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       setSelectedLayout({ id: newLayout.id, data: welcomeLayout.data });
       if (isNonEmptyOrUndefined(props.demoBagUrl)) {
         selectSource(
-          { name: "Demo Bag", type: "http" },
+          { name: "Demo Bag", type: "ros1-remote-bagfile" },
           {
             url: props.demoBagUrl,
           },
@@ -329,7 +329,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           previousFiles.current = otherFiles;
         }
         selectSource(
-          { name: "Local Files", type: "file" },
+          { name: "ROS 1 Bag File (local)", type: "ros1-local-bagfile" },
           {
             files: previousFiles.current,
           },
@@ -370,8 +370,8 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       }
       selectSource(
         {
-          name: "Remote Bag",
-          type: "http",
+          name: "ROS 1 Bag File (HTTP)",
+          type: "ros1-remote-bagfile",
         },
         { url: bagUrl },
       );
