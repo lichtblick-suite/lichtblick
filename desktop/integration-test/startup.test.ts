@@ -40,5 +40,5 @@ describe("startup", () => {
     });
 
     await electronApp.close();
-  });
+  }, 10_000);
 });
