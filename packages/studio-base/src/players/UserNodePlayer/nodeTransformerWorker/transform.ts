@@ -366,18 +366,28 @@ export const extractGlobalVariables = (nodeData: NodeData): NodeData => {
     throw new Error("'sourceFile' is absent'. There is a problem with the `compile` step.");
   }
 
-  // sourceFile is typed as ts.SourceFile which is missing fields that are available at runtime
-  // we have a locals map with various local variables
-  type WithLocals = { locals?: Map<string, ts.Symbol> };
-  const locals = (sourceFile as unknown as WithLocals).locals;
+  const globalVariablesMembers = sourceFile.forEachChild((node) => {
+    if (
+      ts.isTypeAliasDeclaration(node) &&
+      ts.isTypeLiteralNode(node.type) &&
+      node.name.text === "GlobalVariables"
+    ) {
+      return node.type.members;
+    } else if (ts.isInterfaceDeclaration(node) && node.name.text === "GlobalVariables") {
+      return node.members;
+    }
+    return undefined;
+  });
 
-  // If the GlobalVariables type isn't defined, that's ok.
-  const globalVariablesTypeSymbol = locals?.get("GlobalVariables");
-
-  const memberSymbolsByName =
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (globalVariablesTypeSymbol as any)?.declarations[0]?.type?.symbol?.members ?? new Map();
-  const globalVariables = [...memberSymbolsByName.keys()];
+  const globalVariables = filterMap(globalVariablesMembers ?? [], (member) => {
+    if (!member.name) {
+      return undefined;
+    }
+    if (ts.isIdentifier(member.name) || ts.isStringLiteral(member.name)) {
+      return member.name.text;
+    }
+    return undefined;
+  });
 
   return {
     ...nodeData,

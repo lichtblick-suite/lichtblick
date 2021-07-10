@@ -375,7 +375,7 @@ describe("pipeline", () => {
       expect(nodeData.globalVariables).toEqual(["foo", "bar"]);
     });
 
-    it("handles variables named GlobalVariables", () => {
+    it("ignores variables named GlobalVariables", () => {
       const nodeData = extract(
         {
           ...baseNodeData,
