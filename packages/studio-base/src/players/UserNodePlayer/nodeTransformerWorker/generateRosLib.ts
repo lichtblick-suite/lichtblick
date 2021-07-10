@@ -11,9 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-// @ts-nocheck
-/* eslint-disable @typescript-eslint/strict-boolean-expressions */
-
 import ts from "typescript/lib/typescript";
 
 import { Topic } from "@foxglove/studio-base/players/types";
@@ -25,46 +22,36 @@ export type InterfaceDeclarations = {
 };
 
 const modifiers = [
-  ts.createModifier(ts.SyntaxKind.ExportKeyword),
-  ts.createModifier(ts.SyntaxKind.DeclareKeyword),
+  ts.factory.createModifier(ts.SyntaxKind.ExportKeyword),
+  ts.factory.createModifier(ts.SyntaxKind.DeclareKeyword),
 ];
 
-const createProperty = (name: string, type: ts.TypeNode) =>
-  ts.createProperty(
-    undefined,
-    /* decorators */
-    undefined,
-    /* modifiers */
-    name,
-    /* name */
-    undefined,
-    /* questionOrExclamationToken */
-    type,
-    /* type */
+const createProperty = (name: string | ts.PropertyName, type: ts.TypeNode) => {
+  return ts.factory.createPropertySignature(
+    undefined /* modifiers */,
+    name /* name */,
+    undefined /* questionOrExclamationToken */,
+    type /* type */,
   );
+};
 
-const createTimeInterfaceDeclaration = (name: string) =>
-  ts.createInterfaceDeclaration(
-    undefined,
-    /* decorators */
-    modifiers,
-    /* modifiers */
-    name,
-    /* name */
-    undefined,
-    /* typeParameters */
-    undefined,
-    /* heritageClauses */
+const createTimeInterfaceDeclaration = (name: string) => {
+  return ts.factory.createInterfaceDeclaration(
+    undefined /* decorators */,
+    modifiers /* modifiers */,
+    name /* name */,
+    undefined /* typeParameters */,
+    undefined /* heritageClauses */,
     [
-      createProperty("sec", ts.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword)),
-      createProperty("nsec", ts.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword)),
-    ],
-    /* members */
+      createProperty("sec", ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword)),
+      createProperty("nsec", ts.factory.createKeywordTypeNode(ts.SyntaxKind.NumberKeyword)),
+    ] /* members */,
   );
+};
 
 // Since rosbagjs treats json as a primitive, we have to shim it in.
 // TODO: Update json declaration in a smarter way.
-const jsonInterfaceDeclaration = ts.createInterfaceDeclaration(
+const jsonInterfaceDeclaration = ts.factory.createInterfaceDeclaration(
   undefined,
   /* decorators */
   modifiers,
@@ -82,31 +69,33 @@ const jsonInterfaceDeclaration = ts.createInterfaceDeclaration(
 export const formatInterfaceName = (type: string): string => type.replace(/\//g, "__");
 
 // http://wiki.ros.org/msg
-const rosPrimitivesToTypeScriptMap = {
-  uint8: ts.SyntaxKind.NumberKeyword,
-  int8: ts.SyntaxKind.NumberKeyword,
-  uint16: ts.SyntaxKind.NumberKeyword,
-  int16: ts.SyntaxKind.NumberKeyword,
-  uint32: ts.SyntaxKind.NumberKeyword,
-  int32: ts.SyntaxKind.NumberKeyword,
-  float32: ts.SyntaxKind.NumberKeyword,
-  float64: ts.SyntaxKind.NumberKeyword,
-  int64: ts.SyntaxKind.NumberKeyword,
-  uint64: ts.SyntaxKind.NumberKeyword,
-  string: ts.SyntaxKind.StringKeyword,
-  bool: ts.SyntaxKind.BooleanKeyword,
-};
+const rosPrimitivesToTypeScriptMap = new Map<string, ts.KeywordTypeSyntaxKind>([
+  ["uint8", ts.SyntaxKind.NumberKeyword],
+  ["int8", ts.SyntaxKind.NumberKeyword],
+  ["uint16", ts.SyntaxKind.NumberKeyword],
+  ["int16", ts.SyntaxKind.NumberKeyword],
+  ["uint32", ts.SyntaxKind.NumberKeyword],
+  ["int32", ts.SyntaxKind.NumberKeyword],
+  ["float32", ts.SyntaxKind.NumberKeyword],
+  ["float64", ts.SyntaxKind.NumberKeyword],
+  ["int64", ts.SyntaxKind.NumberKeyword],
+  ["uint64", ts.SyntaxKind.NumberKeyword],
+  ["string", ts.SyntaxKind.StringKeyword],
+  ["bool", ts.SyntaxKind.BooleanKeyword],
+]);
 
 // NOTE: This list should stay in sync with rosbagjs. Exported for tests.
-export const typedArrayMap = {
-  uint8: "Uint8Array",
-  int8: "Int8Array",
-};
+export const typedArrayMap = new Map<string, string>([
+  ["uint8", "Uint8Array"],
+  ["int8", "Int8Array"],
+]);
 
-const rosSpecialTypesToTypescriptMap = {
-  time: createTimeInterfaceDeclaration("Time"),
-  duration: createTimeInterfaceDeclaration("Duration"),
-};
+const timeInterface = createTimeInterfaceDeclaration("Time");
+const durationInterface = createTimeInterfaceDeclaration("Duration");
+const rosSpecialTypesToTypescriptMap = new Map([
+  ["time", timeInterface],
+  ["duration", durationInterface],
+]);
 
 // Creates a 1-1 mapping of ROS datatypes to Typescript interface declarations.
 export const generateTypeDefs = (datatypes: RosDatatypes): InterfaceDeclarations => {
@@ -120,38 +109,35 @@ export const generateTypeDefs = (datatypes: RosDatatypes): InterfaceDeclarations
 
     const typeMembers = filterMap(definition.fields, ({ name, type, isArray, isConstant }) => {
       let node;
-      if (isConstant) {
+      const typedArray = typedArrayMap.get(type);
+      const rosPrimitive = rosPrimitivesToTypeScriptMap.get(type);
+      const rosSpecial = rosSpecialTypesToTypescriptMap.get(type);
+      if (isConstant === true) {
         // TODO: Support ROS constants at some point.
         return undefined;
-      } else if (isArray && typedArrayMap[type]) {
-        node = ts.createTypeReferenceNode(typedArrayMap[type]);
-      } else if (rosPrimitivesToTypeScriptMap[type]) {
-        node = ts.createKeywordTypeNode(rosPrimitivesToTypeScriptMap[type]);
-      } else if (rosSpecialTypesToTypescriptMap[type]) {
-        node = ts.createTypeReferenceNode(rosSpecialTypesToTypescriptMap[type].name);
+      } else if (isArray === true && typedArray != undefined) {
+        node = ts.factory.createTypeReferenceNode(typedArray);
+      } else if (rosPrimitive != undefined) {
+        node = ts.factory.createKeywordTypeNode(rosPrimitive);
+      } else if (rosSpecial) {
+        node = ts.factory.createTypeReferenceNode(rosSpecial.name);
       } else {
-        node = ts.createTypeReferenceNode(formatInterfaceName(type));
+        node = ts.factory.createTypeReferenceNode(formatInterfaceName(type));
       }
-      if (isArray && !typedArrayMap[type]) {
-        node = ts.createArrayTypeNode(node);
+      if (isArray === true && typedArray == undefined) {
+        node = ts.factory.createArrayTypeNode(node);
       }
 
       return createProperty(name, node);
     });
 
-    interfaceDeclarations[datatype] = ts.createInterfaceDeclaration(
-      undefined,
-      /* decorators */
-      [ts.createModifier(ts.SyntaxKind.ExportKeyword)],
-      /* modifiers */
-      formatInterfaceName(datatype),
-      /* name */
-      undefined,
-      /* typeParameters */
-      undefined,
-      /* heritageClauses */
-      typeMembers,
-      /* members */
+    interfaceDeclarations[datatype] = ts.factory.createInterfaceDeclaration(
+      undefined /* decorators */,
+      [ts.factory.createModifier(ts.SyntaxKind.ExportKeyword)] /* modifiers */,
+      formatInterfaceName(datatype) /* name */,
+      undefined /* typeParameters */,
+      undefined /* heritageClauses */,
+      typeMembers /* members */,
     );
   }
 
@@ -166,14 +152,16 @@ const generateRosLib = ({
   topics: Topic[];
   datatypes: RosDatatypes;
 }): string => {
-  let TopicsToMessageDefinition = ts.createInterfaceDeclaration(
+  let TopicsToMessageDefinition = ts.factory.createInterfaceDeclaration(
     undefined,
     modifiers,
-    /* modifiers */
     "TopicsToMessageDefinition",
+    undefined,
+    undefined,
+    [],
   );
 
-  const typedMessage = ts.createInterfaceDeclaration(
+  const typedMessage = ts.factory.createInterfaceDeclaration(
     undefined,
     /* decorators */
     modifiers,
@@ -181,18 +169,21 @@ const generateRosLib = ({
     "Input",
     /* name */
     [
-      ts.createTypeParameterDeclaration(
+      ts.factory.createTypeParameterDeclaration(
         "T",
-        ts.createTypeOperatorNode(ts.SyntaxKind.KeyOfKeyword, TopicsToMessageDefinition.name),
+        ts.factory.createTypeOperatorNode(
+          ts.SyntaxKind.KeyOfKeyword,
+          ts.factory.createTypeReferenceNode(TopicsToMessageDefinition.name),
+        ),
       ),
     ],
     /* typeParameters */
     undefined,
     /* heritageClauses */
     [
-      createProperty("topic", ts.createTypeReferenceNode("T")),
-      createProperty("receiveTime", ts.createTypeReferenceNode("Time")),
-      createProperty("message", ts.createTypeReferenceNode("TopicsToMessageDefinition[T]")),
+      createProperty("topic", ts.factory.createTypeReferenceNode("T")),
+      createProperty("receiveTime", ts.factory.createTypeReferenceNode("Time")),
+      createProperty("message", ts.factory.createTypeReferenceNode("TopicsToMessageDefinition[T]")),
     ],
     /* members */
   );
@@ -209,7 +200,7 @@ const generateRosLib = ({
       };
     }
 
-    TopicsToMessageDefinition = ts.updateInterfaceDeclaration(
+    TopicsToMessageDefinition = ts.factory.updateInterfaceDeclaration(
       TopicsToMessageDefinition,
       /* node */
       undefined,
@@ -224,21 +215,23 @@ const generateRosLib = ({
       [
         ...TopicsToMessageDefinition.members,
         createProperty(
-          ts.createStringLiteral(name),
-          ts.createTypeReferenceNode(`${DATATYPES_IDENTIFIER}.${formatInterfaceName(datatype)}`),
+          ts.factory.createStringLiteral(name),
+          ts.factory.createTypeReferenceNode(
+            `${DATATYPES_IDENTIFIER}.${formatInterfaceName(datatype)}`,
+          ),
         ),
       ],
       /* members */
     );
   });
 
-  const datatypesNamespace = ts.createModuleDeclaration(
+  const datatypesNamespace = ts.factory.createModuleDeclaration(
     undefined,
     /* decorators */
     modifiers,
     /* modifiers */
-    ts.createIdentifier(DATATYPES_IDENTIFIER),
-    ts.createModuleBlock(
+    ts.factory.createIdentifier(DATATYPES_IDENTIFIER),
+    ts.factory.createModuleBlock(
       Object.values(datatypeInterfaces).map((val) => {
         return val;
       }),
@@ -263,12 +256,8 @@ const generateRosLib = ({
   const result = `
     ${printer.printNode(ts.EmitHint.Unspecified, jsonInterfaceDeclaration, sourceFile)}
     ${printer.printNode(ts.EmitHint.Unspecified, TopicsToMessageDefinition, sourceFile)}
-    ${printer.printNode(
-      ts.EmitHint.Unspecified,
-      rosSpecialTypesToTypescriptMap.duration,
-      sourceFile,
-    )}
-    ${printer.printNode(ts.EmitHint.Unspecified, rosSpecialTypesToTypescriptMap.time, sourceFile)}
+    ${printer.printNode(ts.EmitHint.Unspecified, durationInterface, sourceFile)}
+    ${printer.printNode(ts.EmitHint.Unspecified, timeInterface, sourceFile)}
 
     /**
      * This type contains every message declaration in your bag, so that you can

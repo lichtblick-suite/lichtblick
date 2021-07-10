@@ -199,16 +199,15 @@ describe("typegen", () => {
         });
       });
       it("typed arrays", () => {
-        Object.entries(typedArrayMap).forEach(([rosType, jsType]) => {
+        for (const [rosType, jsType] of typedArrayMap) {
           const declarations = generateTypeDefs({
             "std_msgs/Data": {
               fields: [{ type: rosType, name: "x", isArray: true, isComplex: false }],
             },
           });
           const formattedTypes = formatTypeDef(declarations);
-          const type = jsType as any as string;
           expect(formattedTypes).toEqual({
-            "std_msgs/Data": `export interface std_msgs__Data { x: ${type}; }`,
+            "std_msgs/Data": `export interface std_msgs__Data { x: ${jsType}; }`,
           });
 
           const { diagnostics } = compile({
@@ -216,7 +215,7 @@ describe("typegen", () => {
             sourceCode: formattedTypes["std_msgs/Data"] ?? "",
           });
           expect(diagnostics).toEqual([]);
-        });
+        }
       });
       it("references", () => {
         const declarations = generateTypeDefs({

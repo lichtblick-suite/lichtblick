@@ -11,9 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-// @ts-nocheck
-/* eslint-disable @typescript-eslint/strict-boolean-expressions */
-
 import ts from "typescript/lib/typescript";
 
 import { formatInterfaceName } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateRosLib";
@@ -38,6 +35,7 @@ import {
 } from "@foxglove/studio-base/players/UserNodePlayer/types";
 import { Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+import filterMap from "@foxglove/studio-base/util/filterMap";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 export const hasTransformerErrors = (nodeData: NodeData): boolean =>
@@ -56,7 +54,8 @@ export const getInputTopics = (nodeData: NodeData): NodeData => {
     );
   }
 
-  if (!sourceFile.symbol) {
+  const symbol = typeChecker.getSymbolAtLocation(sourceFile);
+  if (!symbol) {
     const error: Diagnostic = {
       severity: DiagnosticSeverity.Error,
       message: "Must export an input topics array. E.g. 'export const inputs = ['/some_topics']'",
@@ -70,7 +69,7 @@ export const getInputTopics = (nodeData: NodeData): NodeData => {
   }
 
   const inputsExport = typeChecker
-    .getExportsOfModule(sourceFile.symbol)
+    .getExportsOfModule(symbol)
     .find((node) => node.escapedName === "inputs");
   if (!inputsExport) {
     const error: Diagnostic = {
@@ -85,11 +84,35 @@ export const getInputTopics = (nodeData: NodeData): NodeData => {
     };
   }
 
-  const inputTopicElements = inputsExport.declarations[0]?.initializer?.elements;
-  if (
-    !inputTopicElements ||
-    inputTopicElements.some(({ kind }) => kind !== ts.SyntaxKind.StringLiteral)
-  ) {
+  const decl = inputsExport?.declarations?.[0];
+  if (!decl || !ts.isVariableDeclaration(decl)) {
+    const error: Diagnostic = {
+      severity: DiagnosticSeverity.Error,
+      message: "inputs export must be an array variable.",
+      source: Sources.InputTopicsChecker,
+      code: ErrorCodes.InputTopicsChecker.BAD_INPUTS_TYPE,
+    };
+    return {
+      ...nodeData,
+      diagnostics: [...nodeData.diagnostics, error],
+    };
+  }
+
+  if (!decl.initializer || !ts.isArrayLiteralExpression(decl.initializer)) {
+    const error: Diagnostic = {
+      severity: DiagnosticSeverity.Error,
+      message: "inputs export must be an array variable.",
+      source: Sources.InputTopicsChecker,
+      code: ErrorCodes.InputTopicsChecker.BAD_INPUTS_TYPE,
+    };
+    return {
+      ...nodeData,
+      diagnostics: [...nodeData.diagnostics, error],
+    };
+  }
+
+  const inputTopicElements = decl.initializer?.elements;
+  if (inputTopicElements.some(({ kind }) => kind !== ts.SyntaxKind.StringLiteral)) {
     const error: Diagnostic = {
       severity: DiagnosticSeverity.Error,
       message:
@@ -103,8 +126,14 @@ export const getInputTopics = (nodeData: NodeData): NodeData => {
     };
   }
 
-  const inputTopics = inputTopicElements.map(({ text }) => text);
-  if (!inputTopics.length) {
+  const inputTopics = filterMap(inputTopicElements, (expression) => {
+    if (!ts.isStringLiteral(expression)) {
+      return undefined;
+    }
+    return expression.text;
+  });
+
+  if (inputTopics.length === 0) {
     const error: Diagnostic = {
       severity: DiagnosticSeverity.Error,
       message:
@@ -131,9 +160,9 @@ export const getOutputTopic = (nodeData: NodeData): NodeData => {
   );
   // Pick either the first matching group or the second, which corresponds
   // to single quotes or double quotes respectively.
-  const outputTopic = matches && (matches[2] || matches[3]);
+  const outputTopic = matches?.[2] ?? matches?.[3];
 
-  if (!outputTopic) {
+  if (outputTopic == undefined) {
     const error = {
       severity: DiagnosticSeverity.Error,
       message: `Must include an output, e.g. export const output = "${DEFAULT_STUDIO_NODE_PREFIX}your_output_topic";`,
@@ -157,7 +186,7 @@ export const validateInputTopics = (nodeData: NodeData, topics: Topic[]): NodeDa
   const badInputTopic = nodeData.inputTopics.find((topic) =>
     topic.startsWith(DEFAULT_STUDIO_NODE_PREFIX),
   );
-  if (badInputTopic) {
+  if (badInputTopic != undefined) {
     const error = {
       severity: DiagnosticSeverity.Error,
       message: `Input "${badInputTopic}" cannot equal another node's output.`,
@@ -337,10 +366,17 @@ export const extractGlobalVariables = (nodeData: NodeData): NodeData => {
     throw new Error("'sourceFile' is absent'. There is a problem with the `compile` step.");
   }
 
+  // sourceFile is typed as ts.SourceFile which is missing fields that are available at runtime
+  // we have a locals map with various local variables
+  type WithLocals = { locals?: Map<string, ts.Symbol> };
+  const locals = (sourceFile as unknown as WithLocals).locals;
+
   // If the GlobalVariables type isn't defined, that's ok.
-  const globalVariablesTypeSymbol = sourceFile.locals.get("GlobalVariables");
+  const globalVariablesTypeSymbol = locals?.get("GlobalVariables");
+
   const memberSymbolsByName =
-    globalVariablesTypeSymbol?.declarations[0]?.type?.symbol?.members ?? new Map();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (globalVariablesTypeSymbol as any)?.declarations[0]?.type?.symbol?.members ?? new Map();
   const globalVariables = [...memberSymbolsByName.keys()];
 
   return {
@@ -363,13 +399,17 @@ export const extractDatatypes = (nodeData: NodeData): NodeData => {
   }
 
   // Keys each message definition like { 'std_msg__ColorRGBA': 'std_msg/ColorRGBA' }
-  const messageDefinitionMap = {};
+  const messageDefinitionMap: Record<string, string> = {};
   Object.keys(sourceDatatypes).forEach((datatype) => {
     messageDefinitionMap[formatInterfaceName(datatype)] = datatype;
   });
 
   try {
     const exportNode = findDefaultExportFunction(sourceFile, typeChecker);
+    if (!exportNode) {
+      throw new Error("Your node must default export a function");
+    }
+
     const typeNode = findReturnType(typeChecker, 0, exportNode);
 
     const { outputDatatype, datatypes } = constructDatatypes(
@@ -384,7 +424,7 @@ export const extractDatatypes = (nodeData: NodeData): NodeData => {
       return { ...nodeData, diagnostics: [...nodeData.diagnostics, error.diagnostic] };
     }
 
-    throw err;
+    throw error;
   }
 };
 
@@ -427,7 +467,7 @@ const transform = ({
   topics: Topic[];
   rosLib: string;
   datatypes: RosDatatypes;
-}): NodeData & { sourceFile?: void; typeChecker?: void } => {
+}): NodeData => {
   const transformer = compose(
     getOutputTopic,
     validateOutputTopic,
@@ -456,8 +496,7 @@ const transform = ({
     },
     topics,
   );
-  // eslint-disable-next-line no-restricted-syntax
-  return { ...result, sourceFile: null, typeChecker: null };
+  return { ...result, sourceFile: undefined, typeChecker: undefined };
 };
 
 export default transform;

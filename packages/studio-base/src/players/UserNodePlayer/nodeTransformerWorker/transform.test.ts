@@ -132,7 +132,7 @@ describe("pipeline", () => {
         "const input = '/some_topic';\nexport const inputs = [ input ]",
         ErrorCodes.InputTopicsChecker.BAD_INPUTS_TYPE,
       ],
-    ])("returns errors for badly formatted inputs", (sourceCode, errorCategory) => {
+    ])("returns errors for badly formatted input: %s", (sourceCode, errorCategory) => {
       const { diagnostics } = compose(compile, getInputTopics)({ ...baseNodeData, sourceCode }, []);
       expect(diagnostics.length).toEqual(1);
       expect(diagnostics[0]?.severity).toEqual(DiagnosticSeverity.Error);
@@ -1488,6 +1488,43 @@ describe("pipeline", () => {
           };
           export default publisher;`,
         error: ErrorCodes.DatatypeExtraction.LIMITED_UNIONS,
+      },
+      {
+        description: "Return type member with no type",
+        sourceCode: `
+          // @ts-ignore
+          export default function(): {x} {
+            throw new Error();
+          };
+          `,
+        error: ErrorCodes.DatatypeExtraction.INVALID_PROPERTY,
+      },
+      {
+        description: "Return type member with no name",
+        sourceCode: `
+          export default function(): {(): number;} {
+            throw new Error();
+          };
+          `,
+        error: ErrorCodes.DatatypeExtraction.INVALID_PROPERTY,
+      },
+      {
+        description: "Indexed access type with non-literal index",
+        sourceCode: `
+          interface Pos { position: { pos: { x: number, y: number } }, lala: string  };
+          export default (msg: any): Pos[keyof Pos] => {
+            return { pos: { x: 1, y: 2 } };
+          };`,
+        error: ErrorCodes.DatatypeExtraction.INVALID_INDEXED_ACCESS,
+      },
+      {
+        description: "Indexed access type with non-string index",
+        sourceCode: `
+          interface Pos { [key: number]: number  };
+          export default (msg: any): Pos[3] => {
+            throw new Error();
+          };`,
+        error: ErrorCodes.DatatypeExtraction.INVALID_INDEXED_ACCESS,
       },
     ];
 

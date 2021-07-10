@@ -54,6 +54,8 @@ export const ErrorCodes = {
     LIMITED_UNIONS: 15,
     NO_NESTED_ANY: 16,
     NO_MAPPED_TYPES: 17,
+    INVALID_PROPERTY: 18,
+    INVALID_INDEXED_ACCESS: 19,
   },
   InputTopicsChecker: {
     NO_TOPIC_AVAIL: 1,
@@ -93,8 +95,6 @@ export type NodeData = {
   outputTopic: string;
   outputDatatype: string;
   datatypes: RosDatatypes;
-  // Should be ts.SourceFile and ts.TypeChecker. Not strongly typing here since we want to keep
-  // Typescript out of the main bundle.
   sourceFile?: SourceFile;
   typeChecker?: TypeChecker;
   rosLib: string;
