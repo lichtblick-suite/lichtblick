@@ -118,7 +118,6 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
           style={{ width: "auto", lineHeight: "normal", zIndex: 2 }}
         >
           <Dropdown
-            dataTest="plot-legend-x-axis-menu"
             value={xAxisVal}
             text={shortXAxisLabel(xAxisVal)}
             btnStyle={{ backgroundColor: "transparent", padding: 3 }}

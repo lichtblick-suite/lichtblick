@@ -816,31 +816,6 @@ ScatterPlotPlusLineGraphPlusReferenceLine.parameters = {
   },
 };
 
-OpenXAxisDropdownMenu.storyName = "open x-axis dropdown menu";
-export function OpenXAxisDropdownMenu(): JSX.Element {
-  const readySignal = useReadySignal();
-
-  const pauseFrame = useCallback(() => {
-    return () => {
-      const xAxisDropdown = document.querySelectorAll("[data-test=plot-legend-x-axis-menu]")[0];
-      (xAxisDropdown as any).click();
-
-      readySignal();
-    };
-  }, [readySignal]);
-
-  return (
-    <PanelSetup pauseFrame={pauseFrame} fixture={fixture}>
-      <Plot overrideConfig={exampleConfig} />
-    </PanelSetup>
-  );
-}
-OpenXAxisDropdownMenu.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
-};
-
 IndexBasedXAxisForArray.storyName = "index-based x-axis for array";
 export function IndexBasedXAxisForArray(): JSX.Element {
   const pauseFrame = useResumeCount(4);
