@@ -24,9 +24,18 @@
   // Use fixed width numbers (important for numbers that update during playback)
   font-feature-settings: "tnum";
 }
-
-// We currently avoid monospace system fonts due to DWriteFont::Create electron crash
-// when rendering offscreen canvas (see comments in ChartJsMux.ts and https://github.com/foxglove/studio/pull/933).
 @mixin ff-monospace {
-  font-family: "Roboto Mono";
+  font-family:
+    // Apple
+    ui-monospace,
+    // Windows
+    "Cascadia Mono",
+    "Segoe UI Mono",
+    // Ubuntu
+    "Ubuntu Mono",
+    // Chrome OS and Android
+    "Roboto Mono",
+    // Fallback
+    "Menlo",
+    "Monaco", "Consolas", monospace;
 }

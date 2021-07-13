@@ -31,7 +31,6 @@ export type InitOpts = {
   data: ChartData;
   options: ChartOptions;
   devicePixelRatio: number;
-  fontLoaded: Promise<FontFace>;
 };
 
 // allows us to override the chart.ctx instance field which zoom plugin uses for adding event listeners
@@ -75,17 +74,8 @@ export default class ChartJSManager {
     void this.init(initOpts);
   }
 
-  async init({
-    id,
-    node,
-    type,
-    data,
-    options,
-    devicePixelRatio,
-    fontLoaded,
-  }: InitOpts): Promise<void> {
-    const font = await fontLoaded;
-    log.debug(`ChartJSManager(${id}) init, default font "${font.family}" status=${font.status}`);
+  async init({ id, node, type, data, options, devicePixelRatio }: InitOpts): Promise<void> {
+    log.debug(`ChartJSManager(${id}) init`);
 
     const fakeNode = {
       addEventListener: addEventListener(this._fakeNodeEvents),
