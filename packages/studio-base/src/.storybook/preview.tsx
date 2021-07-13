@@ -2,12 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Story } from "@storybook/react";
+import { Story, StoryContext } from "@storybook/react";
+import { useMemo } from "react";
 import { ToastProvider } from "react-toast-notifications";
 
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import { HoverValueProvider } from "@foxglove/studio-base/context/HoverValueContext";
 import { UserNodeStateProvider } from "@foxglove/studio-base/context/UserNodeStateContext";
+import ReadySignalContext from "@foxglove/studio-base/stories/ReadySignalContext";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import waitForFonts from "@foxglove/studio-base/util/waitForFonts";
 
@@ -16,9 +18,15 @@ import "./styles.scss";
 
 let loaded = false;
 
-function withContextProviders(Child: Story): JSX.Element {
+function WithContextProviders(Child: Story, ctx: StoryContext): JSX.Element {
+  const sig = ctx.parameters?.screenshot?.signal;
+  const readySignal = useMemo(() => {
+    return sig ? () => sig.resolve() : undefined;
+  }, [sig]);
+
   const providers = [
     /* eslint-disable react/jsx-key */
+    <ReadySignalContext.Provider value={readySignal} />,
     <ThemeProvider />,
     <ToastProvider>{undefined}</ToastProvider>,
     <HoverValueProvider />,
@@ -43,7 +51,7 @@ export const loaders = [
   },
 ];
 
-export const decorators = [withContextProviders];
+export const decorators = [WithContextProviders];
 
 export const parameters = {
   // Disable default padding around the page body
