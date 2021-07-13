@@ -24,8 +24,7 @@ id -> [a-zA-Z0-9_]:+
 
 # Integer.
 integer
-   -> [0-9]:+      {% (d) => ({ value: parseInt(d[0].join("")), repr: d[0].join("") }) %}
-    | "-" [0-9]:+  {% (d) => ({ value: -parseInt(d[1].join("")), repr: `-${d[1].join("")}` }) %}
+   -> "-":? [0-9]:+  {% (d) => ({ value: BigInt((d[0] ?? "") + d[1].join("")), repr: (d[0] ?? "") + d[1].join("") }) %}
 
 # String of the form 'hi' or "hi". No escaping supported.
 string
@@ -68,7 +67,7 @@ name -> id
   {% (d) => ({ type: "name", name: d[0] }) %}
 
 # Slice part; can be a single array index `[0]` or multiple `[0:10]`, or even infinite `[:]`.
-sliceVal -> integer {% (d) => (d[0].value) %} | variable {% (d) => (d[0].value) %}
+sliceVal -> integer {% (d) => Number(d[0].value) %} | variable {% (d) => (d[0].value) %}
 slice -> "[" sliceVal "]"
             {% (d) => ({ type: "slice", start: d[1], end: d[1] }) %}
        | "[" sliceVal:? ":" sliceVal:? "]"

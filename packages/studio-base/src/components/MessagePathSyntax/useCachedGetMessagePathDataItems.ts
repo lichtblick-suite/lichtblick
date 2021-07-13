@@ -141,7 +141,7 @@ function filterMatches(filter: MessagePathFilter, value: any) {
   }
 
   // Test equality using `==` so we can be forgiving for comparing booleans with integers,
-  // comparing numbers with strings, and so on.
+  // comparing numbers with strings, bigints with numbers, and so on.
   // eslint-disable-next-line @foxglove/strict-equality
   return currentValue == filter.value;
 }

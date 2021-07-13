@@ -644,6 +644,61 @@ describe("useCachedGetMessagePathDataItems", () => {
         ],
       ]);
     });
+
+    it("filters correctly with bigints", () => {
+      const messages: MessageEvent<unknown>[] = [
+        {
+          topic: "/some/topic",
+          receiveTime: { sec: 0, nsec: 0 },
+          message: { str_field: "A", num_field: 18446744073709551616n },
+        },
+        {
+          topic: "/some/topic",
+          receiveTime: { sec: 0, nsec: 0 },
+          message: { str_field: "B", num_field: 18446744073709552020n },
+        },
+      ];
+      const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
+      const datatypes: RosDatatypes = {
+        some_datatype: {
+          fields: [{ name: "num_field", type: "uint64" }],
+        },
+      };
+
+      expect(
+        addValuesWithPathsToItems(
+          messages,
+          "/some/topic{num_field==18446744073709551616}.num_field",
+          topics,
+          datatypes,
+        ),
+      ).toEqual([
+        [
+          {
+            value: 18446744073709551616n,
+            path: "/some/topic{num_field==18446744073709551616}.num_field",
+          },
+        ],
+        [],
+      ]);
+
+      expect(
+        addValuesWithPathsToItems(
+          messages,
+          "/some/topic{num_field==18446744073709552020}.num_field",
+          topics,
+          datatypes,
+        ),
+      ).toEqual([
+        [],
+        [
+          {
+            value: 18446744073709552020n,
+            path: "/some/topic{num_field==18446744073709552020}.num_field",
+          },
+        ],
+      ]);
+    });
   });
 });
 

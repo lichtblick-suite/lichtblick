@@ -200,7 +200,7 @@ describe("parseRosPath", () => {
         {
           type: "filter",
           path: ["bar"],
-          value: 3,
+          value: 3n,
           nameLoc: "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{".length,
           valueLoc: "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{bar==".length,
           repr: "bar==3",
@@ -209,7 +209,7 @@ describe("parseRosPath", () => {
         {
           type: "filter",
           path: ["bar"],
-          value: -1,
+          value: -1n,
           nameLoc: "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{bar==3}.c{".length,
           valueLoc: "/topic.foo{bar=='baz'}.a{bar==\"baz\"}.b{bar==3}.c{bar==".length,
           repr: "bar==-1",
@@ -256,7 +256,7 @@ describe("parseRosPath", () => {
         {
           type: "filter",
           path: ["baz"],
-          value: 2,
+          value: 2n,
           nameLoc: "/topic{foo=='bar'}{".length,
           valueLoc: "/topic{foo=='bar'}{baz==".length,
           repr: "baz==2",
@@ -361,7 +361,7 @@ describe("parseRosPath", () => {
         {
           type: "filter",
           path: [],
-          value: 1,
+          value: 1n,
           nameLoc: "/topic.foo{".length,
           valueLoc: "/topic.foo{==".length,
           repr: "==1",
@@ -376,7 +376,7 @@ describe("parseRosPath", () => {
         {
           type: "filter",
           path: [],
-          value: -3,
+          value: -3n,
           nameLoc: "/topic.foo{".length,
           valueLoc: "/topic.foo{==".length,
           repr: "==-3",
