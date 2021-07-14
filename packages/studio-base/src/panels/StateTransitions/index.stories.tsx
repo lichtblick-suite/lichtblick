@@ -14,6 +14,8 @@
 import TestUtils from "react-dom/test-utils";
 
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import useResumeCount from "@foxglove/studio-base/stories/useResumeCount";
+import signal from "@foxglove/studio-base/util/signal";
 
 import StateTransitions from "./index";
 
@@ -94,9 +96,11 @@ export default {
   },
 };
 
-export const OnePath = (): JSX.Element => {
+OnePath.parameters = { screenshot: { signal: signal() } };
+export function OnePath(): JSX.Element {
+  const pauseFrame = useResumeCount(3);
   return (
-    <PanelSetup fixture={fixture}>
+    <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
       <StateTransitions
         overrideConfig={{
           paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
@@ -104,11 +108,13 @@ export const OnePath = (): JSX.Element => {
       />
     </PanelSetup>
   );
-};
+}
 
-export const MultiplePaths = (): JSX.Element => {
+MultiplePaths.parameters = { screenshot: { signal: signal() } };
+export function MultiplePaths(): JSX.Element {
+  const pauseFrame = useResumeCount(3);
   return (
-    <PanelSetup fixture={fixture}>
+    <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
       <StateTransitions
         overrideConfig={{
           paths: new Array(5).fill({
@@ -119,12 +125,15 @@ export const MultiplePaths = (): JSX.Element => {
       />
     </PanelSetup>
   );
-};
+}
 
-export const MultiplePathsWithHover = (): JSX.Element => {
+MultiplePathsWithHover.parameters = { screenshot: { signal: signal() } };
+export function MultiplePathsWithHover(): JSX.Element {
+  const pauseFrame = useResumeCount(3);
   return (
     <PanelSetup
       fixture={fixture}
+      pauseFrame={pauseFrame}
       onMount={() => {
         const mouseEnterContainer = document.querySelectorAll(
           "[data-test~=panel-mouseenter-container",
@@ -143,11 +152,13 @@ export const MultiplePathsWithHover = (): JSX.Element => {
       />
     </PanelSetup>
   );
-};
+}
 
-export const LongPath = (): JSX.Element => {
+LongPath.parameters = { screenshot: { signal: signal() } };
+export function LongPath(): JSX.Element {
+  const pauseFrame = useResumeCount(3);
   return (
-    <PanelSetup fixture={fixture} style={{ maxWidth: 100 }}>
+    <PanelSetup fixture={fixture} pauseFrame={pauseFrame} style={{ maxWidth: 100 }}>
       <StateTransitions
         overrideConfig={{
           paths: [{ value: "/some/topic/with/state.state", timestampMethod: "receiveTime" }],
@@ -155,11 +166,13 @@ export const LongPath = (): JSX.Element => {
       />
     </PanelSetup>
   );
-};
+}
 
-export const JsonPath = (): JSX.Element => {
+JsonPath.parameters = { screenshot: { signal: signal() } };
+export function JsonPath(): JSX.Element {
+  const pauseFrame = useResumeCount(3);
   return (
-    <PanelSetup fixture={fixture}>
+    <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
       <StateTransitions
         overrideConfig={{
           paths: [{ value: "/some/topic/with/state.data.value", timestampMethod: "receiveTime" }],
@@ -167,12 +180,18 @@ export const JsonPath = (): JSX.Element => {
       />
     </PanelSetup>
   );
-};
+}
 
-export const WithAHoveredTooltip = (): JSX.Element => {
+WithAHoveredTooltip.parameters = {
+  chromatic: { delay: 200 },
+  screenshot: { signal: signal() },
+};
+export function WithAHoveredTooltip(): JSX.Element {
+  const pauseFrame = useResumeCount(3);
   return (
     <PanelSetup
       fixture={fixture}
+      pauseFrame={pauseFrame}
       onMount={() => {
         setTimeout(() => {
           const [canvas] = document.getElementsByTagName("canvas");
@@ -195,10 +214,4 @@ export const WithAHoveredTooltip = (): JSX.Element => {
       />
     </PanelSetup>
   );
-};
-
-WithAHoveredTooltip.parameters = {
-  chromatic: {
-    delay: 200,
-  },
-};
+}

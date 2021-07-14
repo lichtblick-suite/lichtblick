@@ -19,6 +19,7 @@ import Plot, { PlotConfig } from "@foxglove/studio-base/panels/Plot";
 import { BlockCache } from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
 import PanelSetup, { triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
+import useResumeCount from "@foxglove/studio-base/stories/useResumeCount";
 import signal from "@foxglove/studio-base/util/signal";
 import { fromSec } from "@foxglove/studio-base/util/time";
 
@@ -327,22 +328,6 @@ export default {
     chromatic: { delay: 50 },
   },
 };
-
-function useResumeCount(count: number) {
-  const countRef = useRef(0);
-  const readySignal = useReadySignal();
-
-  const pauseFrame = useCallback(() => {
-    return () => {
-      countRef.current += 1;
-      if (countRef.current === count) {
-        readySignal();
-      }
-    };
-  }, [count, readySignal]);
-
-  return pauseFrame;
-}
 
 LineGraph.storyName = "line graph";
 export function LineGraph(): JSX.Element {
