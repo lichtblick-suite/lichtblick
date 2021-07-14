@@ -40,6 +40,7 @@ const icons: {
   FileASPX: <Icons.FileASPXIcon />,
   FiveTileGrid: <Icons.FiveTileGridIcon />,
   Flow: <Icons.FlowIcon />,
+  GenericScan: <Icons.GenericScanIcon />,
   Info: <Icons.InfoIcon />,
   More: <Icons.MoreIcon />,
   MoreVertical: <Icons.MoreVerticalIcon />,

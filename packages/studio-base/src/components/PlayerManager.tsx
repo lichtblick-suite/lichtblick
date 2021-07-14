@@ -46,6 +46,9 @@ import OrderedStampPlayer from "@foxglove/studio-base/players/OrderedStampPlayer
 import Ros1Player from "@foxglove/studio-base/players/Ros1Player";
 import RosbridgePlayer from "@foxglove/studio-base/players/RosbridgePlayer";
 import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
+import VelodynePlayer, {
+  DEFAULT_VELODYNE_PORT,
+} from "@foxglove/studio-base/players/VelodynePlayer";
 import {
   buildPlayerFromDescriptor,
   BuildPlayerOptions,
@@ -348,6 +351,48 @@ async function roscoreSource(options: FactoryOptions) {
   });
 }
 
+async function velodyneSource(options: FactoryOptions) {
+  const storageCacheKey = `studio.source.${options.source.name}`;
+
+  // undefined port indicates the user canceled the prompt
+  let maybePort;
+  const restore = options.sourceOptions.restore;
+
+  if (restore) {
+    maybePort = options.storage.getItem<string>(storageCacheKey);
+  } else {
+    const value = options.storage.getItem<string>(storageCacheKey);
+
+    maybePort = await options.prompt({
+      title: "Velodyne LIDAR UDP port",
+      placeholder: `${DEFAULT_VELODYNE_PORT}`,
+      value: value ?? `${DEFAULT_VELODYNE_PORT}`,
+      transformer: (str) => {
+        const parsed = parseInt(str);
+        if (isNaN(parsed) || parsed <= 0 || parsed > 65535) {
+          throw new AppError(
+            "Invalid port number. Please enter a valid UDP port number to listen for Velodyne packets",
+          );
+        }
+        return parsed.toString();
+      },
+    });
+  }
+
+  if (maybePort == undefined) {
+    return undefined;
+  }
+
+  const portStr = maybePort;
+  const port = parseInt(portStr);
+  options.storage.setItem(storageCacheKey, portStr);
+
+  return async (playerOptions: BuildPlayerOptions) => ({
+    player: new VelodynePlayer({ port, metricsCollector: playerOptions.metricsCollector }),
+    sources: [portStr],
+  });
+}
+
 export default function PlayerManager({
   children,
   playerSources,
@@ -449,6 +494,8 @@ export default function PlayerManager({
         return rosbridgeSource;
       case "ros1-remote-bagfile":
         return remoteBagFileSource;
+      case "velodyne-device":
+        return velodyneSource;
       default:
         return;
     }

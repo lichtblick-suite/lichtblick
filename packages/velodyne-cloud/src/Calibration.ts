@@ -16,6 +16,10 @@ export class Calibration {
   static VLP16_BLOCK_TDURATION = 110.592; // [µs]
   static VLP16_DSR_TOFFSET = 2.304; // [µs]
   static VLP16_FIRING_TOFFSET = 55.296; // [µs]
+  static HDL32E_DSR_TOFFSET = 1.152; // [µs]
+  static HDL32E_FIRING_TOFFSET = 46.08; // [µs]
+  static VLS128_DSR_TOFFSET = 2.665; // [µs]
+  static VLS128_FIRING_TOFFSET = 53.5; // [µs]
 
   readonly model: Model;
   readonly laserCorrections: LaserCorrection[];
@@ -88,10 +92,16 @@ export class Calibration {
         const single = Calibration.VLP16_DSR_TOFFSET;
         return Calibration.BuildTimings(12, 32, full, single, 0, block1, point2);
       }
-      case Model.HDL32E:
-        return Calibration.BuildTimings(12, 32, 46.08, 1.152, 0, block1, point2);
-      case Model.VLS128:
-        return Calibration.BuildTimings(3, 17, 53.3, 2.665, -8.7, block1, point1);
+      case Model.HDL32E: {
+        const full = Calibration.HDL32E_FIRING_TOFFSET;
+        const single = Calibration.HDL32E_DSR_TOFFSET;
+        return Calibration.BuildTimings(12, 32, full, single, 0, block1, point2);
+      }
+      case Model.VLS128: {
+        const full = Calibration.VLS128_FIRING_TOFFSET;
+        const single = Calibration.VLS128_DSR_TOFFSET;
+        return Calibration.BuildTimings(3, 17, full, single, -8.7, block1, point1);
+      }
       default:
         return [];
     }

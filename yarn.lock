@@ -2096,15 +2096,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/electron-socket@npm:1.0.0":
-  version: 1.0.0
-  resolution: "@foxglove/electron-socket@npm:1.0.0"
+"@foxglove/electron-socket@npm:1.1.0":
+  version: 1.1.0
+  resolution: "@foxglove/electron-socket@npm:1.1.0"
   dependencies:
     dns-packet: ^5.2.4
     eventemitter3: ^4.0.7
   peerDependencies:
     electron: ">=12"
-  checksum: 10eca917cce4cc915e061e52457040a43ee2c1509e21dfe03c4a52c0360d4d57d685143f6edbe242062a6207ee16baf686cf1408c7de0fc5f4f40db32d85b02d
+  checksum: afe0dc3465e34ac497f6c5c6555e2ae8dbed7b454c2d9dfa40ed41217d8066c17d6fc29fbc71a7ce454ace33ee09be7009d28167053ab127eb5bafe179fc0b09
   languageName: node
   linkType: hard
 
@@ -2270,7 +2270,7 @@ __metadata:
     "@fluentui/react": 8.23.2
     "@fluentui/react-icons-mdl2": 1.1.6
     "@foxglove/den": "workspace:*"
-    "@foxglove/electron-socket": 1.0.0
+    "@foxglove/electron-socket": 1.1.0
     "@foxglove/hooks": "workspace:*"
     "@foxglove/rosbag2-web": 0.1.4
     "@foxglove/rosmsg-msgs-common": 1.0.0
@@ -10278,7 +10278,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "desktop@workspace:desktop"
   dependencies:
-    "@foxglove/electron-socket": 1.0.0
+    "@foxglove/electron-socket": 1.1.0
     "@foxglove/studio-base": "workspace:*"
     "@types/plist": ^3.0.2
     jszip: 3.6.0

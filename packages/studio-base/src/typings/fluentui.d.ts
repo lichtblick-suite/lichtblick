@@ -35,6 +35,7 @@ declare global {
     | "FileASPX"
     | "FiveTileGrid"
     | "Flow"
+    | "GenericScan"
     | "Info"
     | "More"
     | "MoreVertical"

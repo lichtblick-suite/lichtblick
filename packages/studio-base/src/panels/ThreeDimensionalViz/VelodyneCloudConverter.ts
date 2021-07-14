@@ -38,6 +38,10 @@ export default class VelodyneCloudConverter {
 
     cloud.trim();
 
+    if (cloud.width === 0 || cloud.height === 0) {
+      return undefined;
+    }
+
     return {
       header: scan.header,
       packets: scan.packets,

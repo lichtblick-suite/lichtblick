@@ -39,6 +39,9 @@ export default function ConnectionList(): JSX.Element {
           case "ros1-remote-bagfile":
             iconName = "FileASPX";
             break;
+          case "velodyne-device":
+            iconName = "GenericScan";
+            break;
         }
         return (
           <div key={source.name}>

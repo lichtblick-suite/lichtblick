@@ -41,6 +41,10 @@ export default function Root(): JSX.Element {
       name: "ROS 2 Bag Folder (local)",
       type: "ros2-folder",
     },
+    {
+      name: "Velodyne LIDAR",
+      type: "velodyne-device",
+    },
   ];
 
   const providers = [

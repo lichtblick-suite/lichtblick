@@ -60,6 +60,9 @@ export default function TinyConnectionPicker({
             case "ros1-remote-bagfile":
               iconName = "FileASPX";
               break;
+            case "velodyne-device":
+              iconName = "GenericScan";
+              break;
           }
           return {
             key: source.name,

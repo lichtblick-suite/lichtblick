@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export * from "./Calibration";
+export * from "./packetRate";
 export * from "./PointCloud";
 export * from "./RawPacket";
 export * from "./Transformer";

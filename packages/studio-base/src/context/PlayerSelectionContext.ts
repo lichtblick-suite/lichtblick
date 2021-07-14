@@ -9,7 +9,8 @@ type SourceTypes =
   | "ros2-folder"
   | "ros1-socket"
   | "ros-ws"
-  | "ros1-remote-bagfile";
+  | "ros1-remote-bagfile"
+  | "velodyne-device";
 
 export type PlayerSourceDefinition = {
   name: string;
