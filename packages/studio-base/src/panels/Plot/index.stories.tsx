@@ -377,7 +377,7 @@ LineGraphWithLegendsHidden.parameters = {
 InALineGraphWithMultiplePlotsXAxesAreSynced.storyName =
   "in a line graph with multiple plots, x-axes are synced";
 export function InALineGraphWithMultiplePlotsXAxesAreSynced(): JSX.Element {
-  const pauseFrame = useResumeCount(8);
+  const pauseFrame = useResumeCount(6);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame} style={{ flexDirection: "column" }}>
