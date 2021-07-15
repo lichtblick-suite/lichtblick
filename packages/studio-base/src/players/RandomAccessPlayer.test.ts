@@ -15,8 +15,8 @@
 /* eslint-disable jest/no-conditional-expect */
 
 import { omit } from "lodash";
-import { TimeUtil, Time } from "rosbag";
 
+import { Time, add } from "@foxglove/rostime";
 import {
   MessageEvent,
   PlayerCapabilities,
@@ -157,7 +157,7 @@ describe("RandomAccessPlayer", () => {
     source.setListener(store.add);
     const messages: any = await store.done;
     expect(messages[1].activeData.currentTime).toEqual(
-      TimeUtil.add({ sec: 10, nsec: 0 }, fromNanoSec(SEEK_ON_START_NS)),
+      add({ sec: 10, nsec: 0 }, fromNanoSec(SEEK_ON_START_NS)),
     );
 
     source.close();
@@ -995,7 +995,7 @@ describe("RandomAccessPlayer", () => {
 
     // Test clamping to end time.
     lastGetMessagesCall.resolve(getMessagesResult);
-    source.seekPlayback(TimeUtil.add({ sec: 100, nsec: 0 }, { sec: 0, nsec: -100 }));
+    source.seekPlayback(add({ sec: 100, nsec: 0 }, { sec: 0, nsec: -100 }));
     lastGetMessagesCall.resolve(getMessagesResult);
     source.startPlayback();
     expect(lastGetMessagesCall).toEqual({

@@ -2130,12 +2130,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/just-fetch@npm:^1.2.0":
-  version: 1.2.1
-  resolution: "@foxglove/just-fetch@npm:1.2.1"
+"@foxglove/just-fetch@npm:^1.2.4":
+  version: 1.2.4
+  resolution: "@foxglove/just-fetch@npm:1.2.4"
   dependencies:
-    node-fetch: ^3.0.0-beta.9
-  checksum: 2f88bc819db3ac29b03cd6c2315625eaeb43d62c59158ac17cf0b0bc97cb3220033d8c03aeb3d5d1832e3032cd507234628d13d6bdfe2f926c180189dbc8d47e
+    "@foxglove/node-fetch": 3.1.0
+  checksum: 7bf36239b1e6db1d80adbed7e456045d40ce048a6a70a766028fc179f6968b3f45aff1636ba14cde14660883f2046e607ff1d9b4e5edefc5b4834b73cff7cbc0
   languageName: node
   linkType: hard
 
@@ -2146,6 +2146,16 @@ __metadata:
     typescript: 4.3.5
   languageName: unknown
   linkType: soft
+
+"@foxglove/node-fetch@npm:3.1.0":
+  version: 3.1.0
+  resolution: "@foxglove/node-fetch@npm:3.1.0"
+  dependencies:
+    data-uri-to-buffer: ^3.0.1
+    fetch-blob: ^2.1.1
+  checksum: 68d0c28d85622853752a221eeae78c5b0e750901a7eb603d05a0174556a690640a68b246751327a42f46e4447bd072784f81606cc7729bf49c6df8f0f5afa19d
+  languageName: node
+  linkType: hard
 
 "@foxglove/ros1-turtlesim-test@workspace:packages/ros1-turtlesim-test":
   version: 0.0.0-use.local
@@ -2163,13 +2173,12 @@ __metadata:
   dependencies:
     "@foxglove/rosmsg": 0.1.2
     "@foxglove/rosmsg-serialization": "workspace:*"
-    "@foxglove/xmlrpc": 1.0.0
+    "@foxglove/xmlrpc": 1.0.1
     esbuild-runner: 2.2.0
     eventemitter3: 4.0.7
     jest: 27.0.6
     md5-typescript: 1.0.5
     typescript: 4.3.5
-    web-encoding: 1.1.5
   languageName: unknown
   linkType: soft
 
@@ -2256,7 +2265,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rostime@npm:^1.1.0":
+"@foxglove/rostime@npm:1.1.0, @foxglove/rostime@npm:^1.1.0":
   version: 1.1.0
   resolution: "@foxglove/rostime@npm:1.1.0"
   checksum: 69af3b78da033dec7efbd73723444ec24504a63a9a86c2284b022c83fb71141842c8718c22de268b04916467022b349d2d193ad75064d515cbda158ca54f800e
@@ -2275,6 +2284,7 @@ __metadata:
     "@foxglove/rosbag2-web": 0.1.4
     "@foxglove/rosmsg-msgs-common": 1.0.0
     "@foxglove/rosmsg-msgs-foxglove": 2.0.0
+    "@foxglove/rostime": 1.1.0
     "@foxglove/studio": "workspace:*"
     "@foxglove/velodyne-cloud": "workspace:*"
     "@mdi/svg": 5.9.55
@@ -2449,7 +2459,6 @@ __metadata:
   dependencies:
     jest: 27.0.6
     kelonio: 0.6.0
-    rosbag: "github:foxglove/rosbag.js#6ce4e00c16b80973e270d53e9fb362a516e74e03"
     typescript: 4.3.5
   languageName: unknown
   linkType: soft
@@ -2461,16 +2470,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/xmlrpc@npm:1.0.0":
-  version: 1.0.0
-  resolution: "@foxglove/xmlrpc@npm:1.0.0"
+"@foxglove/xmlrpc@npm:1.0.1":
+  version: 1.0.1
+  resolution: "@foxglove/xmlrpc@npm:1.0.1"
   dependencies:
-    "@foxglove/just-fetch": ^1.2.0
+    "@foxglove/just-fetch": ^1.2.4
     byte-base64: ^1.1.0
     sax: ^1.2.4
-    web-encoding: ^1.1.5
     xmlbuilder2: ^2.4.1
-  checksum: 68852b943ae462223bb2668916f1955f616f20351f89bcc7c6b41642791d4f2cb4a39233bd4dc2a885d8deedb4a6ae60ec55ceae68384f967c376b1ae7b29f31
+  checksum: f120c6c9fa4ca2a0ca46d9af8dad3d075d68803dd9457fb398a0d684818662fdd566a6922075cf9be38cf8f956d9fc32daee9111c2baa6677df86f43aa06c84f
   languageName: node
   linkType: hard
 
@@ -18113,16 +18121,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^3.0.0-beta.9":
-  version: 3.0.0-beta.9
-  resolution: "node-fetch@npm:3.0.0-beta.9"
-  dependencies:
-    data-uri-to-buffer: ^3.0.1
-    fetch-blob: ^2.1.1
-  checksum: 586af0910649cb62f1c044ddac41e71c0b0f48133fba406ad5e0fab51baff18f22cd187ea65ef690ceed7386a71910e904348105dc8eae55f907fa94df7e76ca
-  languageName: node
-  linkType: hard
-
 "node-forge@npm:^0.10.0":
   version: 0.10.0
   resolution: "node-forge@npm:0.10.0"
@@ -25428,7 +25426,7 @@ typescript@4.3.5:
   languageName: node
   linkType: hard
 
-"web-encoding@npm:1.1.5, web-encoding@npm:^1.1.5":
+"web-encoding@npm:1.1.5":
   version: 1.1.5
   resolution: "web-encoding@npm:1.1.5"
   dependencies:

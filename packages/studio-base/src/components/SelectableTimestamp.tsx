@@ -12,9 +12,9 @@
 //   You may not use this file except in compliance with the License.
 import ChevronRightIcon from "@mdi/svg/svg/chevron-right.svg";
 import React, { useEffect } from "react";
-import { Time } from "rosbag";
 import styled from "styled-components";
 
+import { Time } from "@foxglove/rostime";
 import CopyText from "@foxglove/studio-base/components/CopyText";
 import Icon from "@foxglove/studio-base/components/Icon";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";

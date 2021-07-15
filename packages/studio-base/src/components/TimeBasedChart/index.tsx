@@ -24,12 +24,12 @@ import React, {
   MouseEvent,
 } from "react";
 import { useThrottle } from "react-use";
-import { Time } from "rosbag";
 import styled from "styled-components";
 import { useDebouncedCallback } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
 
 import Logger from "@foxglove/log";
+import { Time } from "@foxglove/rostime";
 import Button from "@foxglove/studio-base/components/Button";
 import ChartComponent from "@foxglove/studio-base/components/Chart/index";
 import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/types";

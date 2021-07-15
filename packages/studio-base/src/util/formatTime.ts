@@ -13,7 +13,8 @@
 
 import momentDurationFormatSetup from "moment-duration-format";
 import moment from "moment-timezone";
-import { Time } from "rosbag";
+
+import { Time } from "@foxglove/rostime";
 
 import parseFuzzyRosTime from "./parseFuzzyRosTime";
 import { toDate, fromDate } from "./time";

@@ -3,9 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import flatten from "lodash/flatten";
-import { Time } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
+import { Time } from "@foxglove/rostime";
 import {
   TimeBasedChartTooltipData,
   TooltipItem,

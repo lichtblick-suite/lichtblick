@@ -25,10 +25,9 @@
   "dependencies": {
     "@foxglove/rosmsg": "0.1.2",
     "@foxglove/rosmsg-serialization": "workspace:*",
-    "@foxglove/xmlrpc": "1.0.0",
+    "@foxglove/xmlrpc": "1.0.1",
     "eventemitter3": "4.0.7",
-    "md5-typescript": "1.0.5",
-    "web-encoding": "1.1.5"
+    "md5-typescript": "1.0.5"
   },
   "devDependencies": {
     "esbuild-runner": "2.2.0",

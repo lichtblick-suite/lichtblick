@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 import { partition } from "lodash";
 import memoizeWeak from "memoize-weak";
-import { Time, TimeUtil } from "rosbag";
 
+import { Time, add, compare, isLessThan } from "@foxglove/rostime";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
 import {
@@ -106,12 +106,12 @@ export default class OrderedStampPlayer implements Player {
         nsec: activeData.currentTime.nsec,
       };
       const [messages, newMessageBuffer] = partition(extendedMessageBuffer, (message) =>
-        TimeUtil.isLessThan(message.message.header.stamp, thresholdTime),
+        isLessThan(message.message.header.stamp, thresholdTime),
       );
 
       this._messageBuffer = newMessageBuffer;
 
-      messages.sort((a, b) => TimeUtil.compare(a.message.header.stamp, b.message.header.stamp));
+      messages.sort((a, b) => compare(a.message.header.stamp, b.message.header.stamp));
 
       const currentTime = clampTime(thresholdTime, activeData.startTime, activeData.endTime);
       this._currentTime = currentTime;
@@ -169,7 +169,7 @@ export default class OrderedStampPlayer implements Player {
     // Seek ahead of where we're interested in. If we want to seek to 10s, we want to backfill
     // messages with receive times between 10s and 11s.
     // Add backfilling for our translation buffer.
-    const seekLocation = TimeUtil.add(time, { sec: BUFFER_DURATION_SECS, nsec: 0 });
+    const seekLocation = add(time, { sec: BUFFER_DURATION_SECS, nsec: 0 });
     this._player.seekPlayback(seekLocation, { sec: BUFFER_DURATION_SECS, nsec: 0 });
   };
   requestBackfill(): void {

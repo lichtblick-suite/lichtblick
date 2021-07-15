@@ -14,7 +14,7 @@
 // All message types supported by Rviz
 // http://wiki.ros.org/rviz/DisplayTypes
 
-import { Time } from "rosbag";
+import { Time } from "@foxglove/rostime";
 
 export type Namespace = Readonly<{
   topic: string;

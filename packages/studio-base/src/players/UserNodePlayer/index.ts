@@ -12,10 +12,10 @@
 //   You may not use this file except in compliance with the License.
 import { isEqual, groupBy, partition } from "lodash";
 import memoizeWeak from "memoize-weak";
-import { TimeUtil, Time } from "rosbag";
 import shallowequal from "shallowequal";
 
 import Log from "@foxglove/log";
+import { Time, compare } from "@foxglove/rostime";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import {
   Diagnostic,
@@ -211,7 +211,7 @@ export default class UserNodePlayer implements Player {
     const result = {
       parsedMessages: parsedMessages
         .concat(nodeParsedMessages)
-        .sort((a, b) => TimeUtil.compare(a.receiveTime, b.receiveTime)),
+        .sort((a, b) => compare(a.receiveTime, b.receiveTime)),
     };
     this._lastGetMessagesInput = { parsedMessages, globalVariables, nodeRegistrations };
     this._lastGetMessagesResult = result;

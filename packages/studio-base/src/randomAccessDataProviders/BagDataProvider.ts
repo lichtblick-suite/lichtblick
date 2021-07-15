@@ -12,11 +12,12 @@
 //   You may not use this file except in compliance with the License.
 
 import { debounce, isEqual } from "lodash";
-import Bag, { open, Time, BagReader, TimeUtil } from "rosbag";
+import Bag, { open, BagReader } from "rosbag";
 import ReadResult from "rosbag/dist/ReadResult";
 import decompressLZ4 from "wasm-lz4";
 
 import Logger from "@foxglove/log";
+import { Time, add, compare } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import BrowserHttpReader from "@foxglove/studio-base/randomAccessDataProviders/BrowserHttpReader";
 import {
@@ -63,7 +64,7 @@ export type TimedDataThroughput = {
 export const statsAreAdjacent = (a: TimedDataThroughput, b: TimedDataThroughput): boolean => {
   return (
     isEqual(a.data.topics, b.data.topics) &&
-    isEqual(TimeUtil.add(a.endTime, { sec: 0, nsec: 1 }), b.startTime)
+    isEqual(add(a.endTime, { sec: 0, nsec: 1 }), b.startTime)
   );
 };
 
@@ -79,12 +80,9 @@ export const mergeStats = (
     type: a.data.type,
     totalSizeOfMessages: a.data.totalSizeOfMessages + b.data.totalSizeOfMessages,
     numberOfMessages: a.data.numberOfMessages + b.data.numberOfMessages,
-    receivedRangeDuration: TimeUtil.add(a.data.receivedRangeDuration, b.data.receivedRangeDuration),
-    requestedRangeDuration: TimeUtil.add(
-      a.data.requestedRangeDuration,
-      b.data.requestedRangeDuration,
-    ),
-    totalTransferTime: TimeUtil.add(a.data.totalTransferTime, b.data.totalTransferTime),
+    receivedRangeDuration: add(a.data.receivedRangeDuration, b.data.receivedRangeDuration),
+    requestedRangeDuration: add(a.data.requestedRangeDuration, b.data.requestedRangeDuration),
+    totalTransferTime: add(a.data.totalTransferTime, b.data.totalTransferTime),
   },
 });
 
@@ -346,9 +344,9 @@ export default class BagDataProvider implements RandomAccessDataProvider {
       reportMalformedError("bag parsing", error);
       throw error;
     }
-    messages.sort((a, b) => TimeUtil.compare(a.receiveTime, b.receiveTime));
+    messages.sort((a, b) => compare(a.receiveTime, b.receiveTime));
     // Range end is inclusive.
-    const duration = TimeUtil.add(subtractTimes(end, start), { sec: 0, nsec: 1 });
+    const duration = add(subtractTimes(end, start), { sec: 0, nsec: 1 });
     this._queueStats({
       startTime: start,
       endTime: end,

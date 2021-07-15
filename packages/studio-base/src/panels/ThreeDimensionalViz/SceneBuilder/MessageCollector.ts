@@ -10,9 +10,9 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { TimeUtil, Time } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
+import { Time, add, areEqual, isGreaterThan } from "@foxglove/rostime";
 import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import { BaseMarker } from "@foxglove/studio-base/types/Messages";
 
@@ -53,16 +53,16 @@ class MessageWithLifetime {
     }
     const lifetime: Time = this.lifetime;
 
-    if (TimeUtil.areSame(lifetime, ZERO_TIME)) {
+    if (areEqual(lifetime, ZERO_TIME)) {
       // Do not expire markers with infinite lifetime (lifetime == 0)
       return false;
     }
 
     // we use the receive time (clock) instead of the header stamp
     // to match the behavior of rviz
-    const expiresAt = TimeUtil.add(this.receiveTime, lifetime);
+    const expiresAt = add(this.receiveTime, lifetime);
 
-    return TimeUtil.isGreaterThan(currentTime, expiresAt);
+    return isGreaterThan(currentTime, expiresAt);
   }
 }
 
@@ -73,11 +73,11 @@ export default class MessageCollector {
   clock: Time = { sec: 0, nsec: 0 };
 
   setClock(clock: Time): void {
-    const clockMovedBackwards = TimeUtil.isGreaterThan(this.clock, clock);
+    const clockMovedBackwards = isGreaterThan(this.clock, clock);
 
     if (clockMovedBackwards) {
       this.markers.forEach((marker, key) => {
-        const markerReceivedAfterClock = TimeUtil.isGreaterThan(marker.receiveTime, clock);
+        const markerReceivedAfterClock = isGreaterThan(marker.receiveTime, clock);
         if (markerReceivedAfterClock) {
           this.markers.delete(key);
         }

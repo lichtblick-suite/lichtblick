@@ -10,21 +10,19 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { Time, TimeUtil } from "rosbag";
+import { Time, compare, isLessThan, isGreaterThan } from "@foxglove/rostime";
 
 export function getBagChunksOverlapCount(
   chunkInfos: readonly { startTime: Time; endTime: Time }[],
 ): number {
-  const sorted = chunkInfos
-    .slice()
-    .sort((left, right) => TimeUtil.compare(left.startTime, right.startTime));
+  const sorted = chunkInfos.slice().sort((left, right) => compare(left.startTime, right.startTime));
   let maxEndTime = { sec: -Infinity, nsec: 0 };
   let overlaps = 0;
   sorted.forEach(({ startTime, endTime }) => {
-    if (TimeUtil.isLessThan(startTime, maxEndTime)) {
+    if (isLessThan(startTime, maxEndTime)) {
       overlaps += 1;
     }
-    if (TimeUtil.isGreaterThan(endTime, maxEndTime)) {
+    if (isGreaterThan(endTime, maxEndTime)) {
       maxEndTime = endTime;
     }
   });

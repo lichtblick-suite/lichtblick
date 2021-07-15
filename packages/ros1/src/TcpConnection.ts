@@ -4,7 +4,6 @@
 
 import { EventEmitter } from "eventemitter3";
 import { MessageReader } from "rosbag";
-import { TextDecoder, TextEncoder } from "web-encoding";
 
 import { parse as parseMessageDefinition, RosMsgDefinition } from "@foxglove/rosmsg";
 

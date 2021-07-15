@@ -2,10 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Time, TimeUtil } from "rosbag";
 import styled from "styled-components";
 
 import Logger from "@foxglove/log";
+import { Time, toDate } from "@foxglove/rostime";
 
 import bagIcon from "../../resources/icon/BagIcon.png";
 import formatByteSize from "./formatByteSize";
@@ -162,14 +162,13 @@ export default function BagInfoDisplay({
           {bagInfo?.startTime && (
             <SummaryRow style={{ fontVariantNumeric: "tabular-nums" }}>
               <TimeLabel>Start:</TimeLabel>
-              {TimeUtil.toDate(bagInfo.startTime).toLocaleString()} (
-              {formatTimeRaw(bagInfo.startTime)})
+              {toDate(bagInfo.startTime).toLocaleString()} ({formatTimeRaw(bagInfo.startTime)})
             </SummaryRow>
           )}
           {bagInfo?.endTime && (
             <SummaryRow style={{ fontVariantNumeric: "tabular-nums" }}>
               <TimeLabel>End:</TimeLabel>
-              {TimeUtil.toDate(bagInfo.endTime).toLocaleString()} ({formatTimeRaw(bagInfo.endTime)})
+              {toDate(bagInfo.endTime).toLocaleString()} ({formatTimeRaw(bagInfo.endTime)})
             </SummaryRow>
           )}
         </div>

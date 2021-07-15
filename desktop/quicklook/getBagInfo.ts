@@ -2,7 +2,9 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import Bag, { Time } from "rosbag";
+import Bag from "rosbag";
+
+import { Time } from "@foxglove/rostime";
 
 export type TopicInfo = {
   topic: string;

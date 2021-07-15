@@ -11,9 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import { Time } from "rosbag";
 import styled from "styled-components";
 
+import { Time } from "@foxglove/rostime";
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
 import Flex from "@foxglove/studio-base/components/Flex";

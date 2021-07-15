@@ -31,6 +31,7 @@
     "@foxglove/rosbag2-web": "0.1.4",
     "@foxglove/rosmsg-msgs-common": "1.0.0",
     "@foxglove/rosmsg-msgs-foxglove": "2.0.0",
+    "@foxglove/rostime": "1.1.0",
     "@foxglove/studio": "workspace:*",
     "@foxglove/velodyne-cloud": "workspace:*",
     "@mdi/svg": "5.9.55",

@@ -18,10 +18,10 @@ import SkipNextOutlineIcon from "@mdi/svg/svg/skip-next-outline.svg";
 import SkipPreviousOutlineIcon from "@mdi/svg/svg/skip-previous-outline.svg";
 import classnames from "classnames";
 import React, { memo, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Time, TimeUtil } from "rosbag";
 import styled from "styled-components";
 import { v4 as uuidv4 } from "uuid";
 
+import { Time, compare } from "@foxglove/rostime";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import Button from "@foxglove/studio-base/components/Button";
 import Flex from "@foxglove/studio-base/components/Flex";
@@ -176,7 +176,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
     // repeat logic could also live in messagePipeline but since it is only triggered
     // from playback controls we've implemented it here for now - if there is demand
     // to toggle repeat from elsewhere this logic can move
-    if (currentTime && endTime && TimeUtil.compare(currentTime, endTime) >= 0) {
+    if (currentTime && endTime && compare(currentTime, endTime) >= 0) {
       // repeat
       if (startTime && repeat) {
         seek(startTime);
@@ -198,7 +198,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
         currentTime: current,
       } = playerState.current?.activeData ?? {};
       // if we are at the end, we need to go back to start
-      if (current && end && start && TimeUtil.compare(current, end) >= 0) {
+      if (current && end && start && compare(current, end) >= 0) {
         seek(start);
       }
       play();

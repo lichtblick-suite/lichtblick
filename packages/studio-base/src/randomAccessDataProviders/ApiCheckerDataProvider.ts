@@ -11,8 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { TimeUtil, Time } from "rosbag";
-
+import { Time, isLessThan } from "@foxglove/rostime";
 import {
   CoreDataProviders,
   MESSAGE_FORMATS,
@@ -148,21 +147,21 @@ export default class ApiCheckerDataProvider implements RandomAccessDataProvider 
       // Need to return, otherwise we can't refer to initRes later, and this is a really bad violation anyway.
       return { parsedMessages: undefined, rosBinaryMessages: undefined };
     }
-    if (TimeUtil.isLessThan(end, start)) {
+    if (isLessThan(end, start)) {
       this._warn(
         `getMessages end (${formatTimeRaw(end)}) is before getMessages start (${formatTimeRaw(
           start,
         )})`,
       );
     }
-    if (TimeUtil.isLessThan(start, initRes.start)) {
+    if (isLessThan(start, initRes.start)) {
       this._warn(
         `getMessages start (${formatTimeRaw(start)}) is before global start (${formatTimeRaw(
           initRes.start,
         )})`,
       );
     }
-    if (TimeUtil.isLessThan(initRes.end, end)) {
+    if (isLessThan(initRes.end, end)) {
       this._warn(
         `getMessages end (${formatTimeRaw(end)}) is after global end (${formatTimeRaw(
           initRes.end,
@@ -202,21 +201,21 @@ export default class ApiCheckerDataProvider implements RandomAccessDataProvider 
             `message.topic (${message.topic}) was never requested (${JSON.stringify(topics)})`,
           );
         }
-        if (TimeUtil.isLessThan(message.receiveTime, start)) {
+        if (isLessThan(message.receiveTime, start)) {
           this._warn(
             `message.receiveTime (${formatTimeRaw(
               message.receiveTime,
             )}) is before start (${formatTimeRaw(start)})`,
           );
         }
-        if (TimeUtil.isLessThan(end, message.receiveTime)) {
+        if (isLessThan(end, message.receiveTime)) {
           this._warn(
             `message.receiveTime (${formatTimeRaw(
               message.receiveTime,
             )}) is after end (${formatTimeRaw(end)})`,
           );
         }
-        if (lastTime && TimeUtil.isLessThan(message.receiveTime, lastTime)) {
+        if (lastTime && isLessThan(message.receiveTime, lastTime)) {
           this._warn(
             `message.receiveTime (${formatTimeRaw(
               message.receiveTime,

@@ -12,9 +12,9 @@
 //   You may not use this file except in compliance with the License.
 
 import { debounce, flatten, groupBy } from "lodash";
-import { Time } from "rosbag";
 
 import { useShallowMemo } from "@foxglove/hooks";
+import { Time } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";

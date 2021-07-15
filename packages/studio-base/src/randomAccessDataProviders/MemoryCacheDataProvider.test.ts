@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { first, flatten, last } from "lodash";
-import { TimeUtil } from "rosbag";
 
+import { compare } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import MemoryDataProvider from "@foxglove/studio-base/randomAccessDataProviders/MemoryDataProvider";
 import { CoreDataProviders } from "@foxglove/studio-base/randomAccessDataProviders/constants";
@@ -31,7 +31,7 @@ import MemoryCacheDataProvider, {
 
 function sortMessages<T>(messages: MessageEvent<T>[]) {
   return messages.sort((a, b) => {
-    const timeCompare = TimeUtil.compare(a.receiveTime, b.receiveTime);
+    const timeCompare = compare(a.receiveTime, b.receiveTime);
     if (timeCompare === 0) {
       return naturalSort()(a.topic, b.topic);
     }

@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { last } from "lodash";
-import { TimeUtil, Time } from "rosbag";
 
+import { Time, compare, isGreaterThan, isLessThan } from "@foxglove/rostime";
 import {
   Topic,
   MessageDefinitionsByTopic,
@@ -41,10 +41,10 @@ function filterMessages<T>(
   }
   const ret = [];
   for (const message of messages) {
-    if (TimeUtil.isGreaterThan(message.receiveTime, end)) {
+    if (isGreaterThan(message.receiveTime, end)) {
       break;
     }
-    if (TimeUtil.isLessThan(message.receiveTime, start)) {
+    if (isLessThan(message.receiveTime, start)) {
       continue;
     }
     if (!topics.includes(message.topic)) {
@@ -105,7 +105,7 @@ export default class MemoryDataProvider implements RandomAccessDataProvider {
     }
     const { parsedMessages, rosBinaryMessages } = this.messages;
     const sortedMessages = [...(parsedMessages ?? []), ...(rosBinaryMessages ?? [])].sort(
-      (m1, m2) => TimeUtil.compare(m1.receiveTime, m2.receiveTime),
+      (m1, m2) => compare(m1.receiveTime, m2.receiveTime),
     );
 
     let messageDefinitions: MessageDefinitions;

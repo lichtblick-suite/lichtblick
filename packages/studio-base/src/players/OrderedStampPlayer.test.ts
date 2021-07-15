@@ -11,8 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { TimeUtil } from "rosbag";
-
+import { add } from "@foxglove/rostime";
 import FakePlayer from "@foxglove/studio-base/components/MessagePipeline/FakePlayer";
 import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
 import {
@@ -182,7 +181,7 @@ describe("OrderedStampPlayer", () => {
     await fakePlayer.emit({
       activeData: {
         ...getState(),
-        currentTime: TimeUtil.add(getState().currentTime, fromSec(BUFFER_DURATION_SECS + 0.1)),
+        currentTime: add(getState().currentTime, fromSec(BUFFER_DURATION_SECS + 0.1)),
       },
     });
     // No additional setSpeed calls.

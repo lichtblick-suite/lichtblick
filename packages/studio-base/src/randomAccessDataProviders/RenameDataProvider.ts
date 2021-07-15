@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import memoizeWeak from "memoize-weak";
-import { Time } from "rosbag";
 
+import { Time } from "@foxglove/rostime";
 import { Progress, Topic, MessageEvent } from "@foxglove/studio-base/players/types";
 import {
   BlockCache,

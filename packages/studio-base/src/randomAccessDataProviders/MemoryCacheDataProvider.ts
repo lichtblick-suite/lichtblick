@@ -13,11 +13,11 @@
 
 import { simplify } from "intervals-fn";
 import { isEqual, sum, uniq } from "lodash";
-import { TimeUtil, Time } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
+import { Time, add, compare } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import {
   RandomAccessDataProvider,
@@ -452,7 +452,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
       }
 
       resolve({
-        parsedMessages: messages.sort((a, b) => TimeUtil.compare(a.receiveTime, b.receiveTime)),
+        parsedMessages: messages.sort((a, b) => compare(a.receiveTime, b.receiveTime)),
         rosBinaryMessages: undefined,
       });
       this._lastResolvedCallbackEnd = blockRange.end;
@@ -596,11 +596,11 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
           )
         : currentConnection.topics;
       // Get messages from the underlying provider.
-      const startTime = TimeUtil.add(
+      const startTime = add(
         this._startTime,
         fromNanoSec(currentBlockIndex * this._memCacheBlockSizeNs),
       );
-      const endTime = TimeUtil.add(
+      const endTime = add(
         this._startTime,
         fromNanoSec(
           Math.min(this._totalNs, (currentBlockIndex + 1) * this._memCacheBlockSizeNs) - 1,

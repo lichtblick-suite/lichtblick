@@ -10,9 +10,9 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { TimeUtil, Time } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
+import { Time, add, areEqual, compare } from "@foxglove/rostime";
 import NoopMetricsCollector from "@foxglove/studio-base/players/NoopMetricsCollector";
 import {
   AdvertisePayload,
@@ -238,7 +238,7 @@ export default class RandomAccessPlayer implements Player {
             return;
           }
           // Only do the initial seek if we haven't started playing already.
-          if (!this._isPlaying && TimeUtil.areSame(this._nextReadStartTime, initialTime)) {
+          if (!this._isPlaying && areEqual(this._nextReadStartTime, initialTime)) {
             this.seekPlayback(initialTime);
           }
         }, SEEK_START_DELAY_MS);
@@ -279,7 +279,7 @@ export default class RandomAccessPlayer implements Player {
     // It would be weird to provide a currentTime outside the bounds of what we read
     let lastEnd = this._nextReadStartTime;
     if (lastEnd.sec > 0 || lastEnd.nsec > 0) {
-      lastEnd = TimeUtil.add(lastEnd, { sec: 0, nsec: -1 });
+      lastEnd = add(lastEnd, { sec: 0, nsec: -1 });
     }
 
     const publishedTopics = new Map<string, Set<string>>();
@@ -297,7 +297,7 @@ export default class RandomAccessPlayer implements Player {
     // Here we check if lastEnd is the same as the currentTime we've already set and avoid assigning
     // a new reference value to current time if the underlying time value is unchanged
     const clampedLastEnd = clampTime(lastEnd, this._start, this._end);
-    if (!this._currentTime || TimeUtil.compare(this._currentTime, clampedLastEnd) !== 0) {
+    if (!this._currentTime || compare(this._currentTime, clampedLastEnd) !== 0) {
       this._currentTime = clampedLastEnd;
     }
 
@@ -357,14 +357,14 @@ export default class RandomAccessPlayer implements Player {
     this._lastRangeMillis = rangeMillis;
 
     // read is past end of bag, no more to read
-    if (TimeUtil.compare(this._nextReadStartTime, this._end) > 0) {
+    if (compare(this._nextReadStartTime, this._end) > 0) {
       return;
     }
 
     const seekTime = this._lastSeekStartTime;
     const start: Time = clampTime(this._nextReadStartTime, this._start, this._end);
     const end: Time = clampTime(
-      TimeUtil.add(this._nextReadStartTime, fromMillis(rangeMillis)),
+      add(this._nextReadStartTime, fromMillis(rangeMillis)),
       this._start,
       this._end,
     );
@@ -380,7 +380,7 @@ export default class RandomAccessPlayer implements Player {
 
     // our read finished and we didn't seed during the read, prepare for the next tick
     // we need to do this after checking for seek changes since seek time may have changed
-    this._nextReadStartTime = TimeUtil.add(end, { sec: 0, nsec: 1 });
+    this._nextReadStartTime = add(end, { sec: 0, nsec: 1 });
 
     // if we paused while reading then do not emit messages
     // and exit the read loop
@@ -533,7 +533,7 @@ export default class RandomAccessPlayer implements Player {
     // If we're playing, we'll give the panels some data soon anyway.
     const internalBackfillDuration = { sec: 0, nsec: this._isPlaying ? 0 : SEEK_BACK_NANOSECONDS };
     // Add on any extra time needed by the OrderedStampPlayer.
-    const totalBackfillDuration = TimeUtil.add(
+    const totalBackfillDuration = add(
       internalBackfillDuration,
       backfillDuration ?? { sec: 0, nsec: 0 },
     );
@@ -553,7 +553,7 @@ export default class RandomAccessPlayer implements Player {
       if (this._lastSeekStartTime === seekTime && !this._cancelSeekBackfill) {
         // similar to _tick(), we set the next start time past where we have read
         // this happens after reading and confirming that playback or other seeking hasn't happened
-        this._nextReadStartTime = TimeUtil.add(backfillEnd, { sec: 0, nsec: 1 });
+        this._nextReadStartTime = add(backfillEnd, { sec: 0, nsec: 1 });
 
         this._messages = messages;
         this._lastSeekEmitTime = seekTime;

@@ -13,9 +13,9 @@
 
 import { flatten, groupBy } from "lodash";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Time, TimeUtil } from "rosbag";
 
 import { useShallowMemo } from "@foxglove/hooks";
+import { Time, isLessThan } from "@foxglove/rostime";
 import {
   AdvertisePayload,
   MessageEvent,
@@ -69,13 +69,10 @@ export default function MockMessagePipelineProvider(props: {
   let currentTime = props.currentTime;
   if (!currentTime) {
     for (const message of props.messages ?? []) {
-      if (
-        startTime.current == undefined ||
-        TimeUtil.isLessThan(message.receiveTime, startTime.current)
-      ) {
+      if (startTime.current == undefined || isLessThan(message.receiveTime, startTime.current)) {
         startTime.current = message.receiveTime;
       }
-      if (!currentTime || TimeUtil.isLessThan(currentTime, message.receiveTime)) {
+      if (!currentTime || isLessThan(currentTime, message.receiveTime)) {
         currentTime = message.receiveTime;
       }
     }

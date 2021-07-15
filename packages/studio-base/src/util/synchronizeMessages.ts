@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { mapValues } from "lodash";
-import { TimeUtil, Time } from "rosbag";
 
+import { Time, areEqual, compare, isLessThan } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
@@ -39,7 +39,7 @@ function allMessageStampsNewestFirst(
       }
     }
   }
-  return stamps.sort((a, b) => -TimeUtil.compare(a, b));
+  return stamps.sort((a, b) => -compare(a, b));
 }
 
 // Get a subset of items matching a particular timestamp
@@ -54,7 +54,7 @@ function messagesMatchingStamp(
       const thisStamp = getHeaderStamp
         ? getHeaderStamp(message)
         : defaultGetHeaderStamp(message.message);
-      return thisStamp && TimeUtil.areSame(stamp, thisStamp);
+      return thisStamp && areEqual(stamp, thisStamp);
     });
     if (synchronizedMessage != undefined) {
       synchronizedMessagesByTopic[topic] = [synchronizedMessage];
@@ -95,7 +95,7 @@ function getSynchronizedMessages(
   for (const topic of topics) {
     const matchingMessage = messages[topic]?.find(({ message }) => {
       const thisStamp = getTimestampForMessage(message);
-      return thisStamp && TimeUtil.areSame(stamp, thisStamp);
+      return thisStamp && areEqual(stamp, thisStamp);
     });
     if (!matchingMessage) {
       return undefined;
@@ -125,7 +125,7 @@ function getSynchronizedState(
       newMessagesByTopic = mapValues(newMessagesByTopic, (msgsByTopic) =>
         msgsByTopic.filter(({ message }) => {
           const thisStamp = getTimestampForMessage(message);
-          return thisStamp != undefined && !TimeUtil.isLessThan(thisStamp, stamp);
+          return thisStamp != undefined && !isLessThan(thisStamp, stamp);
         }),
       );
       break;

@@ -11,9 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Time, TimeUtil } from "rosbag";
-
 import Logger from "@foxglove/log";
+import { Time, isLessThan } from "@foxglove/rostime";
 import { PlayerState, MessageEvent } from "@foxglove/studio-base/players/types";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 import {
@@ -95,7 +94,7 @@ export default function warnOnOutOfSyncMessages(playerState: PlayerState): void 
       if (
         lastMessageTime &&
         lastMessageTopic != undefined &&
-        TimeUtil.isLessThan(messageTime, lastMessageTime)
+        isLessThan(messageTime, lastMessageTime)
       ) {
         sendNotification(
           "Bag went back in time",

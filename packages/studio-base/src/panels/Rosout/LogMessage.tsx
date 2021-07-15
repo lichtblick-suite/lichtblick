@@ -13,8 +13,8 @@
 
 import { mergeStyleSets } from "@fluentui/react";
 import { padStart } from "lodash";
-import { Time } from "rosbag";
 
+import { Time } from "@foxglove/rostime";
 import mixins from "@foxglove/studio-base/styles/mixins.module.scss";
 
 import LevelToString from "./LevelToString";

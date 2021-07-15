@@ -11,9 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import _, { flatten, groupBy, isEqual, keyBy, mapValues, some, xor } from "lodash";
-import { Time } from "rosbag";
 import shallowequal from "shallowequal";
 
+import { Time } from "@foxglove/rostime";
 import {
   InteractionData,
   Interactive,

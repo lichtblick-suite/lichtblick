@@ -13,8 +13,8 @@
 
 import { assign, flatten, isEqual } from "lodash";
 import memoizeWeak from "memoize-weak";
-import { TimeUtil, Time } from "rosbag";
 
+import { Time, areEqual, compare, isGreaterThan, isLessThan } from "@foxglove/rostime";
 import { Progress, MessageEvent } from "@foxglove/studio-base/players/types";
 import {
   BlockCache,
@@ -39,7 +39,7 @@ import { clampTime } from "@foxglove/studio-base/util/time";
 
 import rawMessageDefinitionsToParsed from "./rawMessageDefinitionsToParsed";
 
-const sortTimes = (times: Time[]) => times.sort(TimeUtil.compare);
+const sortTimes = (times: Time[]) => times.sort(compare);
 const emptyGetMessagesResult = {
   rosBinaryMessages: undefined,
   parsedMessages: undefined,
@@ -65,7 +65,7 @@ export const mergedBlocks = (
   if (cache2 == undefined) {
     return cache1;
   }
-  if (!TimeUtil.areSame(cache1.startTime, cache2.startTime)) {
+  if (!areEqual(cache1.startTime, cache2.startTime)) {
     // TODO(JP): Actually support merging of blocks for different start times. Or not bother at all,
     // and move the CombinedDataProvider to above the MemoryCacheDataProvider, so we don't have to do
     // block merging at all.
@@ -95,7 +95,7 @@ const merge = <A, B>(
   while (index1 < messages1.length && index2 < messages2.length) {
     const m1 = messages1[index1] as MessageEvent<A>;
     const m2 = messages2[index2] as MessageEvent<B>;
-    if (TimeUtil.isGreaterThan(m1.receiveTime, m2.receiveTime)) {
+    if (isGreaterThan(m1.receiveTime, m2.receiveTime)) {
       messages[idx] = m2;
       ++index2;
     } else {
@@ -337,8 +337,8 @@ export default class CombinedDataProvider implements RandomAccessDataProvider {
           return emptyGetMessagesResult;
         }
         if (
-          TimeUtil.isLessThan(end, initializationResult.start) ||
-          TimeUtil.isLessThan(initializationResult.end, start)
+          isLessThan(end, initializationResult.start) ||
+          isLessThan(initializationResult.end, start)
         ) {
           // If we're totally out of bounds for this provider, we shouldn't call getMessages at all.
           return emptyGetMessagesResult;

@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import assert from "assert";
-import { TimeUtil } from "rosbag";
 
+import { compare } from "@foxglove/rostime";
 import BagDataProvider, {
   statsAreAdjacent,
   TimedDataThroughput,
@@ -143,7 +143,7 @@ describe("BagDataProvider", () => {
     assert(rosBinaryMessages);
     const timestamps = rosBinaryMessages.map(({ receiveTime }) => receiveTime);
     const sortedTimestamps = [...timestamps];
-    sortedTimestamps.sort(TimeUtil.compare);
+    sortedTimestamps.sort(compare);
     expect(timestamps).toEqual(sortedTimestamps);
     sendNotification.expectCalledDuringTest();
   });

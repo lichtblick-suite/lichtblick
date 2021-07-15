@@ -12,7 +12,6 @@
 //   You may not use this file except in compliance with the License.
 
 import { isEqual, sortBy } from "lodash";
-import { Time } from "rosbag";
 import roslib from "roslib";
 import { v4 as uuidv4 } from "uuid";
 
@@ -20,6 +19,7 @@ import Log from "@foxglove/log";
 import type { RosGraph } from "@foxglove/ros1";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
+import { Time } from "@foxglove/rostime";
 import {
   AdvertisePayload,
   MessageEvent,

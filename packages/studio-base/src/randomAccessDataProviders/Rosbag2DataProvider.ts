@@ -3,10 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { Md5 } from "md5-typescript";
-import { Time } from "rosbag";
 
 import { ROS2_TO_DEFINITIONS, Rosbag2, openFileSystemDirectoryHandle } from "@foxglove/rosbag2-web";
 import { stringify } from "@foxglove/rosmsg";
+import { Time } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio";
 import {
   MessageDefinitionsByTopic,
