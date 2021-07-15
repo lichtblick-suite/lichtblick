@@ -3,9 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { EventEmitter } from "eventemitter3";
-import { MessageReader } from "rosbag";
 
 import { parse as parseMessageDefinition, RosMsgDefinition } from "@foxglove/rosmsg";
+import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
 
 import { Connection, ConnectionStats } from "./Connection";
 import { LoggerService } from "./LoggerService";
@@ -17,7 +17,7 @@ export interface TcpConnectionEvents {
   header: (
     header: Map<string, string>,
     messageDefinition: RosMsgDefinition[],
-    messageReader: MessageReader,
+    messageReader: LazyMessageReader,
   ) => void;
   message: (msg: unknown, msgData: Uint8Array) => void;
   error: (err: Error) => void;
@@ -50,7 +50,7 @@ export class TcpConnection extends EventEmitter<TcpConnectionEvents> implements 
   };
   private _transformer = new RosTcpMessageStream();
   private _msgDefinition: RosMsgDefinition[] = [];
-  private _msgReader: MessageReader | undefined;
+  private _msgReader: LazyMessageReader | undefined;
   private _log?: LoggerService;
 
   constructor(
@@ -122,7 +122,7 @@ export class TcpConnection extends EventEmitter<TcpConnectionEvents> implements 
     return this._msgDefinition;
   }
 
-  messageReader(): MessageReader | undefined {
+  messageReader(): LazyMessageReader | undefined {
     return this._msgReader;
   }
 
@@ -212,7 +212,7 @@ export class TcpConnection extends EventEmitter<TcpConnectionEvents> implements 
 
       this._header = TcpConnection.ParseHeader(msgData);
       this._msgDefinition = parseMessageDefinition(this._header.get("message_definition") ?? "");
-      this._msgReader = new MessageReader(this._msgDefinition);
+      this._msgReader = new LazyMessageReader(this._msgDefinition);
       this.emit("header", this._header, this._msgDefinition, this._msgReader);
     } else {
       this._stats.messagesReceived++;

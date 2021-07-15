@@ -13,7 +13,7 @@
 
 import memoizeWeak from "memoize-weak";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { MessageReader } from "rosbag";
+import type { MessageReader } from "rosbag";
 import { v4 as uuidv4 } from "uuid";
 
 import { useShallowMemo } from "@foxglove/hooks";

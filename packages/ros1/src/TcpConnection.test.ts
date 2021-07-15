@@ -93,9 +93,9 @@ describe("TcpConnection", () => {
       connection.on("error", reject);
     });
     await socket.connect();
-    const msg = await p;
+    const msg = (await p) as { toJSON: () => unknown };
 
-    expect(msg).toEqual({ b: 255, g: 86, r: 69 });
+    expect(msg.toJSON()).toEqual({ b: 255, g: 86, r: 69 });
 
     connection.close();
     await new Promise<void>((resolve, reject) =>

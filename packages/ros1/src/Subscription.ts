@@ -3,9 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { EventEmitter } from "eventemitter3";
-import { MessageReader } from "rosbag";
 
 import { RosMsgDefinition } from "@foxglove/rosmsg";
+import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
 
 import { Connection } from "./Connection";
 import { PublisherLink } from "./PublisherLink";
@@ -41,7 +41,7 @@ export interface SubscriptionEvents {
   header: (
     header: Map<string, string>,
     msgDef: RosMsgDefinition[],
-    msgReader: MessageReader,
+    msgReader: LazyMessageReader,
   ) => void;
   message: (msg: unknown, data: Uint8Array, publisher: PublisherLink) => void;
 }

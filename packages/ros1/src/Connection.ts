@@ -2,9 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { MessageReader } from "rosbag";
-
 import { RosMsgDefinition } from "@foxglove/rosmsg";
+import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
 
 export interface ConnectionStats {
   bytesSent: number;
@@ -20,7 +19,7 @@ export interface Connection {
     listener: (
       header: Map<string, string>,
       msgDef: RosMsgDefinition[],
-      msgReader: MessageReader,
+      msgReader: LazyMessageReader,
     ) => void,
   ): this;
   on(eventName: "message", listener: (msg: unknown, data: Uint8Array) => void): this;
@@ -37,7 +36,7 @@ export interface Connection {
 
   messageDefinition(): RosMsgDefinition[];
 
-  messageReader(): MessageReader | undefined;
+  messageReader(): LazyMessageReader | undefined;
 
   close(): void;
 
