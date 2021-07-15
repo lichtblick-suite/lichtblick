@@ -23,7 +23,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@foxglove/rosmsg": "0.1.2",
+    "@foxglove/rosmsg": "0.2.1",
     "@foxglove/rosmsg-serialization": "workspace:*",
     "@foxglove/xmlrpc": "1.0.1",
     "eventemitter3": "4.0.7",
