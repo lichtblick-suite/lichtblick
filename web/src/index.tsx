@@ -5,8 +5,6 @@
 import { init as initSentry } from "@sentry/browser";
 import ReactDOM from "react-dom";
 
-import "@foxglove/studio-base/styles/global.scss";
-
 import Logger from "@foxglove/log";
 import { installDevtoolsFormatters, overwriteFetch, waitForFonts } from "@foxglove/studio-base";
 

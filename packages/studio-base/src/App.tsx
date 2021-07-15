@@ -25,6 +25,8 @@ import PanelCatalogProvider from "@foxglove/studio-base/providers/PanelCatalogPr
 import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 import URDFAssetLoader from "@foxglove/studio-base/services/URDFAssetLoader";
 
+import "@foxglove/studio-base/styles/global.scss";
+
 type AppProps = {
   availableSources: PlayerSourceDefinition[];
   demoBagUrl?: string;
