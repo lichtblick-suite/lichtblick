@@ -1,6 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+
 import { IconButton, IContextualMenuItem, useTheme } from "@fluentui/react";
 import { PropsWithChildren, useCallback, useContext, useMemo } from "react";
 
@@ -9,8 +10,8 @@ import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
+import NotificationModal from "@foxglove/studio-base/components/NotificationModal";
 import { PlayerPrecenceIcon } from "@foxglove/studio-base/components/PlayerStatusIndicator/PlayerPresenceIcon";
-import PlayerProblemModal from "@foxglove/studio-base/components/PlayerStatusIndicator/PlayerProblemModal";
 import ModalContext from "@foxglove/studio-base/context/ModalContext";
 import { PlayerPresence, PlayerProblem } from "@foxglove/studio-base/players/types";
 
@@ -65,7 +66,15 @@ export function PlayerStatusIndicator(): JSX.Element {
   const showProblemModal = useCallback(
     (problem: PlayerProblem) => {
       const remove = modalHost.addModalElement(
-        <PlayerProblemModal problem={problem} onRequestClose={() => remove()} />,
+        <NotificationModal
+          notification={{
+            message: problem.message,
+            subText: problem.tip,
+            details: problem.error,
+            severity: problem.severity,
+          }}
+          onRequestClose={() => remove()}
+        />,
       );
     },
     [modalHost],

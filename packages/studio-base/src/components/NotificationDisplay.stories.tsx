@@ -17,10 +17,9 @@ import { useRef } from "react";
 
 import NotificationDisplay, {
   NotificationList,
-  NotificationMessage,
 } from "@foxglove/studio-base/components/NotificationDisplay";
 import NotificationModal from "@foxglove/studio-base/components/NotificationModal";
-import sendNotification from "@foxglove/studio-base/util/sendNotification";
+import sendNotification, { NotificationMessage } from "@foxglove/studio-base/util/sendNotification";
 
 const randomNum = () => Math.floor(Math.random() * 1000);
 const addError = () =>

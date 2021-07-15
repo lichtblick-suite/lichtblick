@@ -23,6 +23,7 @@ import {
 } from "@foxglove/studio-base/randomAccessDataProviders/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { Range } from "@foxglove/studio-base/util/ranges";
+import { NotificationSeverity } from "@foxglove/studio-base/util/sendNotification";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 // re-exported until other import sites are updated from players/types to @foxglove/studio
@@ -101,7 +102,7 @@ export enum PlayerPresence {
 }
 
 export type PlayerProblem = {
-  severity: "error" | "warning";
+  severity: NotificationSeverity;
   message: string;
   error?: Error;
   tip?: string;

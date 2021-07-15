@@ -2,40 +2,18 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { IconButton, Modal, Text, TextField, makeStyles, useTheme } from "@fluentui/react";
+import { Dialog, Text, TextField, useTheme, IModalProps } from "@fluentui/react";
 
-import { DetailsType, NotificationSeverity } from "@foxglove/studio-base/util/sendNotification";
-
-export type NotificationMessage = {
-  readonly id: string;
-  readonly message: string;
-  readonly details: DetailsType;
-  readonly read: boolean;
-  readonly created: Date;
-  readonly severity: NotificationSeverity;
-};
-
-const useStyles = makeStyles((theme) => ({
-  content: {
-    padding: theme.spacing.l1,
-    borderTop: `1px solid ${theme.semanticColors.bodyDivider}`,
-  },
-  header: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: theme.spacing.l1,
-  },
-}));
+import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
+import { NotificationMessage } from "@foxglove/studio-base/util/sendNotification";
 
 export default function NotificationModal({
-  notification: { details, message, severity },
+  notification: { details, message, severity, subText },
   onRequestClose,
 }: {
   notification: NotificationMessage;
-  onRequestClose: () => void;
+  onRequestClose: IModalProps["onDismiss"];
 }): React.ReactElement {
-  const classes = useStyles();
   const theme = useTheme();
 
   const displayPropsBySeverity = {
@@ -45,68 +23,47 @@ export default function NotificationModal({
   };
 
   return (
-    <Modal isOpen onDismiss={onRequestClose}>
-      <header className={classes.header}>
-        <Text
-          variant="xLarge"
-          nowrap
-          style={{
+    <Dialog
+      isOpen
+      onDismiss={onRequestClose}
+      modalProps={{
+        isBlocking: true,
+      }}
+      dialogContentProps={{
+        title: message,
+        titleProps: {
+          style: {
             color: displayPropsBySeverity[severity],
-          }}
-        >
-          {message}
-        </Text>
-        <IconButton
+          },
+        },
+        subText,
+      }}
+      minWidth={700}
+    >
+      {details instanceof Error ? (
+        <TextField
           styles={{
-            root: {
-              color: theme.palette.neutralSecondary,
-              margin: 0, // TODO: remove this once global.scss is removed
-              marginLeft: theme.spacing.l1,
-            },
-            rootHovered: {
-              color: theme.palette.neutralSecondaryAlt,
-            },
-            icon: {
-              verticalAlign: "top",
-              marginLeft: theme.spacing.s1,
-              marginRight: theme.spacing.s1,
-              height: theme.spacing.l2,
-              lineHeight: theme.spacing.l2,
-              textAlign: "center",
-              flexShrink: 0,
+            field: {
+              color: theme.semanticColors.bodyText,
+              fontSize: `${theme.fonts.small}`,
+              fontFamily: `${MONOSPACE} !important`,
+              maxHeight: "50vh",
+              overflowY: "auto",
             },
           }}
-          ariaLabel="Close help modal"
-          iconProps={{ iconName: "Cancel" }}
-          onClick={onRequestClose}
+          readOnly
+          disabled
+          multiline
+          cols={90}
+          rows={12}
+          value={details.stack}
+          underlined={false}
         />
-      </header>
-      <div className={classes.content}>
-        {details instanceof Error ? (
-          <TextField
-            styles={{
-              field: {
-                color: theme.semanticColors.bodyText,
-                fontSize: "81.25%",
-                fontFamily: "'Ubuntu Mono', Menlo, Monaco, Courier, monospace !important",
-                maxHeight: "50vh",
-                overflowY: "auto",
-              },
-            }}
-            readOnly
-            disabled
-            multiline
-            cols={90}
-            rows={12}
-            value={details.stack}
-            underlined={false}
-          />
-        ) : details != undefined && details !== "" ? (
-          <Text>{details}</Text>
-        ) : (
-          "No details provided"
-        )}
-      </div>
-    </Modal>
+      ) : details != undefined && details !== "" ? (
+        <Text>{details}</Text>
+      ) : (
+        "No details provided"
+      )}
+    </Dialog>
   );
 }

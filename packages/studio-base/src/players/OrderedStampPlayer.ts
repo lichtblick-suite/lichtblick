@@ -121,7 +121,7 @@ export default class OrderedStampPlayer implements Player {
       if (topicsWithoutHeaders.size > 0) {
         problems = Array.from(topicsWithoutHeaders.values()).map<PlayerProblem>((topic) => {
           return {
-            severity: "warning",
+            severity: "warn",
             message: `Missing header stamp for message on topic: ${topic}.`,
             tip: `Ordering messages by header stamp is only supported for messages with a header.
  Ensure that all messages on requested topics have a header.`,

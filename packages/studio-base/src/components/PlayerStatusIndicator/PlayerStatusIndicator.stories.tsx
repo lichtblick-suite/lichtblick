@@ -25,7 +25,7 @@ export const SingleError = (): JSX.Element => {
             error: new Error("Original Error"),
           },
           {
-            severity: "warning",
+            severity: "warn",
             message: "Some longer warning message about sadness",
           },
         ]}

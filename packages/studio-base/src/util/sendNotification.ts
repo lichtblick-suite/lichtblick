@@ -32,6 +32,15 @@ export type NotificationHandler = (
   type: NotificationType,
   severity: NotificationSeverity,
 ) => void;
+export type NotificationMessage = {
+  readonly id?: string;
+  readonly message: string;
+  readonly details: DetailsType;
+  readonly subText?: string;
+  readonly read?: boolean;
+  readonly created?: Date;
+  readonly severity: NotificationSeverity;
+};
 
 const defaultNotificationHandler: NotificationHandler = (
   message: string,

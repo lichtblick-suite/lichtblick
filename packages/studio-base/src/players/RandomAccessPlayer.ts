@@ -445,7 +445,7 @@ export default class RandomAccessPlayer implements Player {
 
         if (!topics.includes(message.topic)) {
           this._problems.set(message.topic, {
-            severity: "warning",
+            severity: "warn",
             message: `Unexpected topic encountered: ${message.topic}. Skipping message`,
           });
           return undefined;
@@ -453,14 +453,14 @@ export default class RandomAccessPlayer implements Player {
         const topic = this._providerTopics.find((t) => t.name === message.topic);
         if (!topic) {
           this._problems.set(message.topic, {
-            severity: "warning",
+            severity: "warn",
             message: `Unexpected message on topic: ${message.topic}. Skipping message`,
           });
           return undefined;
         }
         if (topic.datatype === "") {
           this._problems.set(message.topic, {
-            severity: "warning",
+            severity: "warn",
             message: `Missing datatype for topic: ${message.topic}. Skipping message`,
           });
           return undefined;

@@ -124,7 +124,7 @@ export default class RosbridgePlayer implements Player {
     rosClient.on("error", (err) => {
       if (err) {
         this._problems.push({
-          severity: "warning",
+          severity: "warn",
           message: "Rosbridge issue",
           error: err,
         });
@@ -207,7 +207,7 @@ export default class RosbridgePlayer implements Player {
 
       if (topicsMissingDatatypes.length > 0) {
         this._problems.push({
-          severity: "warning",
+          severity: "warn",
           message: "Could not resolve all message types",
           tip: `Message types could not be found for these topics: ${topicsMissingDatatypes.join(
             ",",

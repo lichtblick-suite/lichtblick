@@ -26,21 +26,13 @@ import Menu from "@foxglove/studio-base/components/Menu";
 import NotificationModal from "@foxglove/studio-base/components/NotificationModal";
 import {
   DetailsType,
+  NotificationMessage,
   NotificationType,
   setNotificationHandler,
   unsetNotificationHandler,
   NotificationSeverity,
 } from "@foxglove/studio-base/util/sendNotification";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
-
-export type NotificationMessage = {
-  readonly id: string;
-  readonly message: string;
-  readonly details: DetailsType;
-  readonly read: boolean;
-  readonly created: Date;
-  readonly severity: NotificationSeverity;
-};
 
 const Container = styled.div<{ flash: boolean; unread: boolean; color: string }>`
   height: 100%;
@@ -143,7 +135,7 @@ function NotificationItem(props: NotificationItemProps) {
   return (
     <SItemContainer onClick={onClick} color={color}>
       <SText className="notification-message">{notification.message}</SText>
-      {!notification.read && <div style={{ paddingRight: 8 }}>•</div>}
+      {notification.read === false && <div style={{ paddingRight: 8 }}>•</div>}
       <STime>{timeString}</STime>
     </SItemContainer>
   );
@@ -213,7 +205,7 @@ export default function NotificationDisplay(): React.ReactElement {
     }
   }, []);
 
-  const unreadCount = notifications.reduce((acc, err) => acc + (err.read ? 0 : 1), 0);
+  const unreadCount = notifications.reduce((acc, err) => acc + (err.read === true ? 0 : 1), 0);
 
   const firstNotification = notifications[0];
   const { name, color, IconSvg } = displayPropsBySeverity[firstNotification?.severity ?? "error"];
