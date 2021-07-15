@@ -120,6 +120,8 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
       <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
       <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
       <title>Foxglove Studio</title>
+      
+      <script src="https://cdn.usefathom.com/script.js" data-site="NJCSCNBX" defer></script>
     </head>
     <script>
       global = globalThis;
