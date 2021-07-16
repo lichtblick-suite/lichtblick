@@ -7,7 +7,15 @@
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
+  // enable intellisense in custom snippets (see snippets.code-snippets)
+  "editor.suggest.snippetsPreventQuickSuggestions": false,
+  "eslint.options": {
+    "reportUnusedDisableDirectives": true
+  },
   "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
   "prettier.prettierPath": "./node_modules/prettier",
   "search.exclude": {
     "**/*.code-search": true,
@@ -18,10 +26,5 @@
   },
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.preferences.importModuleSpecifier": "non-relative",
-  "eslint.options": {
-    "reportUnusedDisableDirectives": true
-  },
-  "jest.autoRun": { "watch": false, "onSave": "test-file" },
-  // enable intellisense in custom snippets (see snippets.code-snippets)
-  "editor.suggest.snippetsPreventQuickSuggestions": false
+  "jest.autoRun": { "watch": false, "onSave": "test-file" }
 }

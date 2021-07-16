@@ -1,11 +1,2 @@
-arrowParens: always
 printWidth: 100
-trailingComma: "all"
-tabWidth: 2
-semi: true
-
-# For TS 4.3: https://github.com/prettier/prettier/issues/10642#issuecomment-849879761
-overrides:
-  - files: ["*.ts", "*.tsx"]
-    options:
-      parser: babel-ts
+trailingComma: all

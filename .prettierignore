@@ -1,1 +1,3 @@
 .github/**/*.md
+.yarn/plugins
+.yarn/releases
