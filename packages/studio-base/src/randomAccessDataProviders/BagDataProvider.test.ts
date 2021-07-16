@@ -18,7 +18,6 @@ import BagDataProvider, {
   statsAreAdjacent,
   TimedDataThroughput,
 } from "@foxglove/studio-base/randomAccessDataProviders/BagDataProvider";
-import delay from "@foxglove/studio-base/util/delay";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 const dummyExtensionPoint = {
@@ -145,31 +144,6 @@ describe("BagDataProvider", () => {
     const sortedTimestamps = [...timestamps];
     sortedTimestamps.sort(compare);
     expect(timestamps).toEqual(sortedTimestamps);
-    sendNotification.expectCalledDuringTest();
-  });
-
-  // Regression test for https://github.com/cruise-automation/studio/issues/373
-  it("treats an empty message definition as a non-existent connection (therefore thinking this bag is empty)", async () => {
-    const provider = new BagDataProvider(
-      {
-        bagPath: {
-          type: "file",
-          file: `${__dirname}/../test/fixtures/bag-with-empty-message-definition.bag`,
-        },
-      },
-      [],
-    );
-    void provider.initialize(dummyExtensionPoint);
-    await delay(100); // Call above returns promise that never resolves.
-    expect((sendNotification as any).mock.calls).toEqual([
-      [
-        "Empty connections found",
-        'This bag has some empty connections, which Studio does not currently support. We\'ll try to play the remaining topics. Details:\n\n[{"conn":0,"topic":"/led_array_status","type":"led_array_msgs/Status","md5sum":"53a14e6cadee4d14930b099922d25397","messageDefinition":"","callerid":"/led_array_node","latching":false,"offset":5254,"dataOffset":5310,"end":5475,"length":221}]',
-        "user",
-        "warn",
-      ],
-      ["Cannot play invalid bag", "Bag is empty or corrupt.", "user", "error"],
-    ]);
     sendNotification.expectCalledDuringTest();
   });
 });
