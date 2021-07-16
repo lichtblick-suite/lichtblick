@@ -13,14 +13,19 @@
     "email": "support@foxglove.dev"
   },
   "homepage": "https://foxglove.dev/",
-  "main": "src/index.ts",
+  "browser": "assets/index.js",
+  "main": "src/index",
   "files": [
-    "dist",
-    "src"
+    "assets",
+    "src/**/*.js",
+    "src/**/*.d.ts"
   ],
   "scripts": {
+    "prepack": "yarn build:webpack && yarn build:tsc",
     "chromatic": "chromatic --project-token $CHROMATIC_PROJECT_TOKEN --build-script-name storybook:build --exit-once-uploaded",
-    "storybook:build": "cross-env NODE_OPTIONS='--max-old-space-size=6144' TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' build-storybook --config-dir src/.storybook"
+    "storybook:build": "cross-env NODE_OPTIONS='--max-old-space-size=6144' TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' build-storybook --config-dir src/.storybook",
+    "build:tsc": "ttsc --module es2020 --project tsconfig.json",
+    "build:webpack": "cross-env TS_NODE_PROJECT=\"tsconfig.cli.json\" NODE_OPTIONS='--max-old-space-size=6144' webpack --mode production --progress"
   },
   "devDependencies": {
     "@fluentui/react": "8.23.2",
@@ -175,14 +180,18 @@
     "three": "0.130.1",
     "tinycolor2": "1.4.2",
     "ts-loader": "9.2.3",
+    "tsconfig-paths": "3.10.1",
+    "ttypescript": "1.5.12",
     "typescript": "4.3.5",
     "typescript-plugin-styled-components": "2.0.0",
+    "typescript-transform-paths": "3.1.0",
     "urdf-loader": "0.10.2",
     "url-search-params": "1.1.0",
     "use-debounce": "7.0.0",
     "use-pan-and-zoom": "0.6.2",
     "uuid": "8.3.2",
     "wasm-lz4": "2.0.0",
+    "webpack": "5.44.0",
     "xacro-parser": "0.3.1"
   }
 }
