@@ -23,9 +23,9 @@
   "scripts": {
     "prepack": "yarn build:webpack && yarn build:tsc",
     "chromatic": "chromatic --project-token $CHROMATIC_PROJECT_TOKEN --build-script-name storybook:build --exit-once-uploaded",
-    "storybook:build": "cross-env NODE_OPTIONS='--max-old-space-size=6144' TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' build-storybook --config-dir src/.storybook",
+    "storybook:build": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' build-storybook --config-dir src/.storybook",
     "build:tsc": "ttsc --module es2020 --project tsconfig.json",
-    "build:webpack": "cross-env TS_NODE_PROJECT=\"tsconfig.cli.json\" NODE_OPTIONS='--max-old-space-size=6144' webpack --mode production --progress"
+    "build:webpack": "cross-env TS_NODE_PROJECT=\"tsconfig.cli.json\" webpack --mode production --progress"
   },
   "devDependencies": {
     "@fluentui/react": "8.23.2",

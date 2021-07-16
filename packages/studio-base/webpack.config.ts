@@ -4,6 +4,8 @@
 
 /* eslint-disable filenames/match-exported */
 
+// This webpack config is for creating a package of studio-base for publishing to npm
+
 import { CleanWebpackPlugin } from "clean-webpack-plugin";
 import path from "path";
 import { Configuration } from "webpack";
@@ -21,8 +23,8 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
     ...appWebpackConfig,
 
     target: "web",
-    context: path.resolve(__dirname, "src"),
-    entry: "./index.ts",
+    context: path.resolve(__dirname),
+    entry: "./src/index.ts",
     devtool: isDev ? "eval-cheap-module-source-map" : "inline-source-map",
 
     // There should only be one version of react (and react-dom) in a component tree

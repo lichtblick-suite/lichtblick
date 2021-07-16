@@ -35,6 +35,8 @@ jobs:
             command: yarn run test --maxWorkers=100%
           - name: storybook
             command: yarn workspace @foxglove/studio-base run chromatic
+          - name: pack studio-base
+            command: yarn workspace @foxglove/studio-base pack
         include:
           - os: windows-2019
             config:
