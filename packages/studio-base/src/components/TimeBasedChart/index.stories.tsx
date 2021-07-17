@@ -10,7 +10,6 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { StoryContext } from "@storybook/react";
 import cloneDeep from "lodash/cloneDeep";
 import { useState, useCallback, useRef, useEffect } from "react";
 import TestUtils from "react-dom/test-utils";
@@ -18,7 +17,7 @@ import { useAsync } from "react-use";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import { triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
-import signal from "@foxglove/studio-base/util/signal";
+import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 
 import TimeBasedChart, { TimeBasedChartTooltipData } from "./index";
 import type { Props } from "./index";
@@ -162,11 +161,8 @@ CanZoomAndUpdate.parameters = {
   },
 };
 
-CleansUpTooltipOnUnmount.parameters = { screenshot: { signal: signal() } };
-export function CleansUpTooltipOnUnmount(
-  _args: unknown,
-  ctx: StoryContext,
-): JSX.Element | ReactNull {
+CleansUpTooltipOnUnmount.parameters = { useReadySignal: true };
+export function CleansUpTooltipOnUnmount(_args: unknown): JSX.Element | ReactNull {
   const [hasRenderedOnce, setHasRenderedOnce] = useState<boolean>(false);
   const { error } = useAsync(async () => {
     const [canvas] = document.getElementsByTagName("canvas");
@@ -183,15 +179,18 @@ export function CleansUpTooltipOnUnmount(
     }
     setHasRenderedOnce(true);
   }, []);
-  if (error) {
-    throw error;
-  }
+
+  const readySignal = useReadySignal();
 
   useEffect(() => {
     if (hasRenderedOnce) {
-      ctx.parameters.screenshot.signal.resolve();
+      readySignal();
     }
-  }, [hasRenderedOnce, ctx.parameters.screenshot.signal]);
+  }, [hasRenderedOnce, readySignal]);
+
+  if (error) {
+    throw error;
+  }
 
   if (hasRenderedOnce) {
     return <></>;

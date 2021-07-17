@@ -15,7 +15,6 @@ import TestUtils from "react-dom/test-utils";
 
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import useResumeCount from "@foxglove/studio-base/stories/useResumeCount";
-import signal from "@foxglove/studio-base/util/signal";
 
 import StateTransitions from "./index";
 
@@ -96,7 +95,7 @@ export default {
   },
 };
 
-OnePath.parameters = { screenshot: { signal: signal() } };
+OnePath.parameters = { useReadySignal: true };
 export function OnePath(): JSX.Element {
   const pauseFrame = useResumeCount(3);
   return (
@@ -110,7 +109,7 @@ export function OnePath(): JSX.Element {
   );
 }
 
-MultiplePaths.parameters = { screenshot: { signal: signal() } };
+MultiplePaths.parameters = { useReadySignal: true };
 export function MultiplePaths(): JSX.Element {
   const pauseFrame = useResumeCount(3);
   return (
@@ -127,7 +126,7 @@ export function MultiplePaths(): JSX.Element {
   );
 }
 
-MultiplePathsWithHover.parameters = { screenshot: { signal: signal() } };
+MultiplePathsWithHover.parameters = { useReadySignal: true };
 export function MultiplePathsWithHover(): JSX.Element {
   const pauseFrame = useResumeCount(3);
   return (
@@ -154,7 +153,7 @@ export function MultiplePathsWithHover(): JSX.Element {
   );
 }
 
-LongPath.parameters = { screenshot: { signal: signal() } };
+LongPath.parameters = { useReadySignal: true };
 export function LongPath(): JSX.Element {
   const pauseFrame = useResumeCount(3);
   return (
@@ -168,7 +167,7 @@ export function LongPath(): JSX.Element {
   );
 }
 
-JsonPath.parameters = { screenshot: { signal: signal() } };
+JsonPath.parameters = { useReadySignal: true };
 export function JsonPath(): JSX.Element {
   const pauseFrame = useResumeCount(3);
   return (
@@ -184,7 +183,7 @@ export function JsonPath(): JSX.Element {
 
 WithAHoveredTooltip.parameters = {
   chromatic: { delay: 200 },
-  screenshot: { signal: signal() },
+  useReadySignal: true,
 };
 export function WithAHoveredTooltip(): JSX.Element {
   const pauseFrame = useResumeCount(3);

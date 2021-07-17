@@ -18,8 +18,8 @@ import { useMemo } from "react";
 import ImageView, { Config } from "@foxglove/studio-base/panels/ImageView";
 import ImageCanvas from "@foxglove/studio-base/panels/ImageView/ImageCanvas";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
+import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 import { CameraInfo, ImageMarker } from "@foxglove/studio-base/types/Messages";
-import signal from "@foxglove/studio-base/util/signal";
 
 const cameraInfo: CameraInfo = {
   width: 400,
@@ -407,8 +407,9 @@ export default {
   },
 };
 
-export const MarkersOriginal: Story = (_args, ctx) => {
+export const MarkersOriginal: Story = (_args) => {
   const imageMessage = useImageMessage();
+  const readySignal = useReadySignal();
 
   return (
     <div style={{ height: "400px" }}>
@@ -422,20 +423,19 @@ export const MarkersOriginal: Story = (_args, ctx) => {
         }}
         config={config}
         saveConfig={noop}
-        onStartRenderImage={() => () => ctx.parameters.screenshot.signal.resolve()}
+        onStartRenderImage={() => readySignal}
       />
     </div>
   );
 };
 
 MarkersOriginal.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
-export const MarkersTransformed: Story = (_args, ctx) => {
+export const MarkersTransformed: Story = (_args) => {
   const imageMessage = useImageMessage();
+  const readySignal = useReadySignal();
 
   return (
     <div style={{ height: "400px" }}>
@@ -449,21 +449,20 @@ export const MarkersTransformed: Story = (_args, ctx) => {
         }}
         config={config}
         saveConfig={noop}
-        onStartRenderImage={() => () => ctx.parameters.screenshot.signal.resolve()}
+        onStartRenderImage={() => readySignal}
       />
     </div>
   );
 };
 
 MarkersTransformed.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 // markers with different original image size
-export const MarkersImageSize: Story = (_args, ctx) => {
+export const MarkersImageSize: Story = (_args) => {
   const imageMessage = useImageMessage();
+  const readySignal = useReadySignal();
 
   return (
     <div style={{ height: "400px" }}>
@@ -477,16 +476,14 @@ export const MarkersImageSize: Story = (_args, ctx) => {
         }}
         config={config}
         saveConfig={noop}
-        onStartRenderImage={() => () => ctx.parameters.screenshot.signal.resolve()}
+        onStartRenderImage={() => readySignal}
       />
     </div>
   );
 };
 
 MarkersImageSize.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 export const MarkersWithFallbackRenderingUsingMainThread = (): JSX.Element => {

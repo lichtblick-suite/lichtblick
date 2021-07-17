@@ -20,7 +20,6 @@ import { BlockCache } from "@foxglove/studio-base/randomAccessDataProviders/Memo
 import PanelSetup, { triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 import useResumeCount from "@foxglove/studio-base/stories/useResumeCount";
-import signal from "@foxglove/studio-base/util/signal";
 import { fromSec } from "@foxglove/studio-base/util/time";
 
 const float64StampedDefinition = `std_msgs/Header header
@@ -339,9 +338,7 @@ export function LineGraph(): JSX.Element {
   );
 }
 LineGraph.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 LineGraphWithLegendsHidden.storyName = "line graph with legends hidden";
@@ -354,9 +351,7 @@ export function LineGraphWithLegendsHidden(): JSX.Element {
   );
 }
 LineGraphWithLegendsHidden.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 InALineGraphWithMultiplePlotsXAxesAreSynced.storyName =
@@ -394,9 +389,7 @@ export function InALineGraphWithMultiplePlotsXAxesAreSynced(): JSX.Element {
   );
 }
 InALineGraphWithMultiplePlotsXAxesAreSynced.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 LineGraphAfterZoom.storyName = "line graph after zoom";
@@ -437,9 +430,7 @@ export function LineGraphAfterZoom(): JSX.Element {
   );
 }
 LineGraphAfterZoom.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 TimestampMethodHeaderStamp.storyName = "timestampMethod: headerStamp";
@@ -464,9 +455,7 @@ export function TimestampMethodHeaderStamp(): JSX.Element {
   );
 }
 TimestampMethodHeaderStamp.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 LongPath.storyName = "long path";
@@ -491,9 +480,7 @@ export function LongPath(): JSX.Element {
   );
 }
 LongPath.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 DisabledPath.storyName = "disabled path";
@@ -523,9 +510,7 @@ export function DisabledPath(): JSX.Element {
   );
 }
 DisabledPath.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 ReferenceLine.storyName = "reference line";
@@ -552,9 +537,7 @@ export function ReferenceLine(): JSX.Element {
   );
 }
 ReferenceLine.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 WithMinAndMaxYValues.storyName = "with min and max Y values";
@@ -582,9 +565,7 @@ export function WithMinAndMaxYValues(): JSX.Element {
   );
 }
 WithMinAndMaxYValues.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 WithJustMinYValueLessThanMinimumValue.storyName = "with just min Y value less than minimum value";
@@ -612,9 +593,7 @@ export function WithJustMinYValueLessThanMinimumValue(): JSX.Element {
   );
 }
 WithJustMinYValueLessThanMinimumValue.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 WithJustMinYValueMoreThanMinimumValue.storyName = "with just min Y value more than minimum value";
@@ -642,9 +621,7 @@ export function WithJustMinYValueMoreThanMinimumValue(): JSX.Element {
   );
 }
 WithJustMinYValueMoreThanMinimumValue.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 WithJustMinYValueMoreThanMaximumValue.storyName = "with just min Y value more than maximum value";
@@ -672,9 +649,7 @@ export function WithJustMinYValueMoreThanMaximumValue(): JSX.Element {
   );
 }
 WithJustMinYValueMoreThanMaximumValue.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 WithJustMaxYValueLessThanMaximumValue.storyName = "with just max Y value less than maximum value";
@@ -702,9 +677,7 @@ export function WithJustMaxYValueLessThanMaximumValue(): JSX.Element {
   );
 }
 WithJustMaxYValueLessThanMaximumValue.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 WithJustMaxYValueMoreThanMaximumValue.storyName = "with just max Y value more than maximum value";
@@ -732,9 +705,7 @@ export function WithJustMaxYValueMoreThanMaximumValue(): JSX.Element {
   );
 }
 WithJustMaxYValueMoreThanMaximumValue.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 WithJustMaxYValueLessThanMinimumValue.storyName = "with just max Y value less than minimum value";
@@ -762,9 +733,7 @@ export function WithJustMaxYValueLessThanMinimumValue(): JSX.Element {
   );
 }
 WithJustMaxYValueLessThanMinimumValue.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 ScatterPlotPlusLineGraphPlusReferenceLine.storyName =
@@ -796,9 +765,7 @@ export function ScatterPlotPlusLineGraphPlusReferenceLine(): JSX.Element {
   );
 }
 ScatterPlotPlusLineGraphPlusReferenceLine.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 IndexBasedXAxisForArray.storyName = "index-based x-axis for array";
@@ -825,9 +792,7 @@ export function IndexBasedXAxisForArray(): JSX.Element {
   );
 }
 IndexBasedXAxisForArray.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 CustomXAxisTopic.storyName = "custom x-axis topic";
@@ -854,9 +819,7 @@ export function CustomXAxisTopic(): JSX.Element {
   );
 }
 CustomXAxisTopic.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 CurrentCustomXAxisTopic.storyName = "current custom x-axis topic";
@@ -884,9 +847,7 @@ export function CurrentCustomXAxisTopic(): JSX.Element {
   );
 }
 CurrentCustomXAxisTopic.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 CustomXAxisTopicWithMismatchedDataLengths.storyName =
@@ -925,9 +886,7 @@ export function CustomXAxisTopicWithMismatchedDataLengths(): JSX.Element {
   );
 }
 CustomXAxisTopicWithMismatchedDataLengths.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 SuperCloseValues.storyName = "super close values";
@@ -974,9 +933,7 @@ export function SuperCloseValues(): JSX.Element {
   );
 }
 SuperCloseValues.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 TimeValues.storyName = "time values";
@@ -1003,9 +960,7 @@ export function TimeValues(): JSX.Element {
   );
 }
 TimeValues.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 PreloadedDataInBinaryBlocks.storyName = "preloaded data in binary blocks";
@@ -1027,9 +982,7 @@ export function PreloadedDataInBinaryBlocks(): JSX.Element {
   );
 }
 PreloadedDataInBinaryBlocks.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 MixedStreamedAndPreloadedData.storyName = "mixed streamed and preloaded data";
@@ -1055,9 +1008,7 @@ export function MixedStreamedAndPreloadedData(): JSX.Element {
   );
 }
 MixedStreamedAndPreloadedData.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 PreloadedDataAndItsDerivative.storyName = "preloaded data and its derivative";
@@ -1083,9 +1034,7 @@ export function PreloadedDataAndItsDerivative(): JSX.Element {
   );
 }
 PreloadedDataAndItsDerivative.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 PreloadedDataAndItsNegative.storyName = "preloaded data and its negative";
@@ -1111,9 +1060,7 @@ export function PreloadedDataAndItsNegative(): JSX.Element {
   );
 }
 PreloadedDataAndItsNegative.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 PreloadedDataAndItsAbsoluteValue.storyName = "preloaded data and its absolute value";
@@ -1139,9 +1086,7 @@ export function PreloadedDataAndItsAbsoluteValue(): JSX.Element {
   );
 }
 PreloadedDataAndItsAbsoluteValue.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
 export function Settings(): JSX.Element {

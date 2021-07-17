@@ -15,7 +15,7 @@ import cloneDeep from "lodash/cloneDeep";
 import { useState, useCallback, ComponentProps, useEffect } from "react";
 import TestUtils from "react-dom/test-utils";
 
-import signal from "@foxglove/studio-base/util/signal";
+import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 
 import ChartComponent, { OnClickArg } from ".";
 
@@ -121,43 +121,36 @@ export default {
   },
 };
 
-export const Basic: Story = (_args, ctx) => {
-  const storyRendered = () => {
-    ctx.parameters.screenshot.signal.resolve();
-  };
+export const Basic: Story = (_args) => {
+  const readySignal = useReadySignal();
 
   return (
     <div style={divStyle}>
-      <ChartComponent {...props} onChartUpdate={storyRendered} />
+      <ChartComponent {...props} onChartUpdate={readySignal} />
     </div>
   );
 };
 Basic.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
-export const WithDatalabels: Story = (_args, ctx) => {
-  const storyRendered = () => {
-    ctx.parameters.screenshot.signal.resolve();
-  };
+export const WithDatalabels: Story = (_args) => {
+  const readySignal = useReadySignal();
 
   return (
     <div style={divStyle}>
-      <ChartComponent {...propsWithDatalabels} onChartUpdate={storyRendered} />
+      <ChartComponent {...propsWithDatalabels} onChartUpdate={readySignal} />
     </div>
   );
 };
 
 WithDatalabels.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
 
-export const AllowsClickingOnDatalabels: Story = (_args, ctx) => {
+export const AllowsClickingOnDatalabels: Story = (_args) => {
   const [clickedDatalabel, setClickedDatalabel] = useState<any>(undefined);
+  const readySignal = useReadySignal();
 
   const doClick = useCallback(() => {
     if (!clickedDatalabel) {
@@ -172,9 +165,9 @@ export const AllowsClickingOnDatalabels: Story = (_args, ctx) => {
 
   useEffect(() => {
     if (clickedDatalabel) {
-      ctx.parameters.screenshot.signal.resolve();
+      readySignal();
     }
-  }, [ctx, clickedDatalabel]);
+  }, [clickedDatalabel, readySignal]);
 
   return (
     <div style={divStyle}>
@@ -189,7 +182,5 @@ export const AllowsClickingOnDatalabels: Story = (_args, ctx) => {
 };
 
 AllowsClickingOnDatalabels.parameters = {
-  screenshot: {
-    signal: signal(),
-  },
+  useReadySignal: true,
 };
