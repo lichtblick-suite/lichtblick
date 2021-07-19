@@ -47,6 +47,9 @@ const builtin: PanelInfo[] = [
     module: async () => await import("./NodePlayground"),
   },
   { title: "Tab", type: TAB_PANEL_TYPE, module: async () => await import("./Tab") },
+];
+
+const debug: PanelInfo[] = [
   {
     title: "Studio - Playback Performance",
     type: "PlaybackPerformance",
@@ -72,4 +75,4 @@ const hidden: PanelInfo[] = [
   },
 ];
 
-export default { builtin, hidden };
+export default { builtin, debug, hidden };
