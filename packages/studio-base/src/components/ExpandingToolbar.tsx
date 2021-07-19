@@ -55,6 +55,7 @@ type Props<T extends string> = {
   selectedTab?: T; // collapse the toolbar if selectedTab is undefined
   tooltip: string;
   style?: React.CSSProperties;
+  dataTest?: string;
 };
 
 export default function ExpandingToolbar<T extends string>({
@@ -65,10 +66,11 @@ export default function ExpandingToolbar<T extends string>({
   selectedTab,
   tooltip,
   style,
+  dataTest,
 }: Props<T>): JSX.Element {
   const expanded = selectedTab != undefined;
   if (!expanded) {
-    let selectedTabLocal = selectedTab;
+    let selectedTabLocal: T | undefined = selectedTab;
     // default to the first child's name if no tab is selected
     React.Children.forEach(children, (child) => {
       if (selectedTabLocal == undefined) {
@@ -76,7 +78,7 @@ export default function ExpandingToolbar<T extends string>({
       }
     });
     return (
-      <div className={className}>
+      <div data-test={dataTest} className={className}>
         <Button tooltip={tooltip} onClick={() => onSelectTab(selectedTabLocal)}>
           <Icon dataTest={`ExpandingToolbar-${tooltip}`}>{icon}</Icon>
         </Button>
@@ -90,7 +92,7 @@ export default function ExpandingToolbar<T extends string>({
     }
   });
   return (
-    <div className={cx(className, styles.expanded)}>
+    <div data-test={dataTest} className={cx(className, styles.expanded)}>
       <Flex row className={styles.tabBar}>
         {React.Children.map(children, (child) => {
           return (
