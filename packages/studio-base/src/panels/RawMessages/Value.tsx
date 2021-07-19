@@ -27,7 +27,7 @@ export default function Value({
   itemValue: unknown;
   valueAction: ValueAction | undefined;
   onTopicPathChange: (arg0: string) => void;
-  openSiblingPanel: (arg0: string, cb: (arg0: PanelConfig) => PanelConfig) => void;
+  openSiblingPanel: (type: string, cb: (config: PanelConfig) => PanelConfig) => void;
 }): JSX.Element {
   return (
     <span>

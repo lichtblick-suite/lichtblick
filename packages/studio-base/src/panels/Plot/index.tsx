@@ -54,7 +54,7 @@ export { plotableRosTypes } from "./types";
 export type { PlotConfig, PlotXAxisVal } from "./types";
 
 export function openSiblingPlotPanel(
-  openSiblingPanel: (arg0: string, cb: (arg0: PanelConfig) => PanelConfig) => void,
+  openSiblingPanel: (type: string, cb: (config: PanelConfig) => PanelConfig) => void,
   topicName: string,
 ): void {
   openSiblingPanel("Plot", (config: PanelConfig) => ({

@@ -28,6 +28,7 @@ import React, {
   ComponentType,
   Profiler,
   MouseEventHandler,
+  useLayoutEffect,
 } from "react";
 import DocumentEvents from "react-document-events";
 import {
@@ -39,6 +40,7 @@ import {
   updateTree,
   MosaicNode,
 } from "react-mosaic-component";
+import { useMountedState } from "react-use";
 import styled from "styled-components";
 
 import { useConfigById } from "@foxglove/studio-base/PanelAPI";
@@ -115,6 +117,9 @@ export default function Panel<Config extends PanelConfig>(
 ): ComponentType<Props<Config>> & PanelStatics<Config> {
   function ConnectedPanel(props: Props<Config>) {
     const { childId, overrideConfig, tabId } = props;
+
+    const isMounted = useMountedState();
+
     const { mosaicActions } = useContext(MosaicContext);
     const { mosaicWindowActions }: { mosaicWindowActions: MosaicWindowActions } =
       useContext(MosaicWindowContext);
@@ -157,29 +162,46 @@ export default function Panel<Config extends PanelConfig>(
       [panelCatalog, type],
     );
 
-    const [config, saveConfig] = useConfigById<Config>(childId, PanelComponent.defaultConfig);
+    const defaultConfig = PanelComponent.defaultConfig;
+    const [savedConfig, saveConfig] = useConfigById<Config>(childId);
+
+    // PanelSettings needs useConfigById to return a config
+    // If there is no saved config, we save the default config provided by the panel.
+    // This typically happens when a new panel is added and the layout does not yet have a config.
+    useLayoutEffect(() => {
+      if (savedConfig) {
+        return;
+      }
+      saveConfig(defaultConfig);
+    }, [defaultConfig, saveConfig, savedConfig]);
+
     const panelComponentConfig = useMemo(
-      () => ({ ...config, ...overrideConfig }),
-      [config, overrideConfig],
+      () => ({ ...defaultConfig, ...savedConfig, ...overrideConfig }),
+      [savedConfig, defaultConfig, overrideConfig],
     );
 
     // Open a panel next to the current panel, of the specified `panelType`.
     // If such a panel already exists, we update it with the new props.
     const openSiblingPanel = useCallback(
-      (panelType: string, siblingConfigCreator: (arg0: PanelConfig) => PanelConfig) => {
+      async (panelType: string, siblingConfigCreator: (config: PanelConfig) => PanelConfig) => {
         const panelsState = getCurrentLayout().selectedLayout?.data;
         if (!panelsState) {
           return;
         }
         const siblingPanel = panelCatalog.getPanelByType(panelType);
-        const siblingComponent = siblingPanel?.component;
-        if (!siblingComponent) {
+        if (!siblingPanel) {
           return;
         }
-        const siblingDefaultConfig = siblingComponent.defaultConfig;
+
+        const siblingModule = await siblingPanel.module();
+        if (!isMounted()) {
+          return;
+        }
+
+        const siblingDefaultConfig = siblingModule.default.defaultConfig;
         const ownPath = mosaicWindowActions.getPath();
 
-        // Try to find a sibling summary panel and update it with the `siblingConfig`
+        // Try to find a sibling panel and update it with the `siblingConfig`
         const lastNode = last(ownPath);
         const siblingPathEnd = lastNode != undefined ? getOtherBranch(lastNode) : "second";
         const siblingPath = ownPath.slice(0, -1).concat(siblingPathEnd);
@@ -216,7 +238,14 @@ export default function Panel<Config extends PanelConfig>(
           });
         });
       },
-      [getCurrentLayout, mosaicActions, mosaicWindowActions, panelCatalog, savePanelConfigs],
+      [
+        getCurrentLayout,
+        isMounted,
+        mosaicActions,
+        mosaicWindowActions,
+        panelCatalog,
+        savePanelConfigs,
+      ],
     );
 
     const { panelSettingsOpen } = usePanelSettings();
@@ -313,13 +342,20 @@ export default function Panel<Config extends PanelConfig>(
         savePanelConfigs({
           configs: [
             { id: tabId, config: newTabConfig },
-            { id: newId, config },
+            { id: newId, config: panelComponentConfig },
           ],
         });
       } else {
         void mosaicWindowActions.split({ type: PanelComponent.panelType });
       }
-    }, [childId, config, getCurrentLayout, mosaicWindowActions, savePanelConfigs, tabId]);
+    }, [
+      childId,
+      getCurrentLayout,
+      mosaicWindowActions,
+      panelComponentConfig,
+      savePanelConfigs,
+      tabId,
+    ]);
 
     const { onMouseMove, enterFullscreen, exitFullScreen } = useMemo(
       () => ({
@@ -429,7 +465,7 @@ export default function Panel<Config extends PanelConfig>(
                 type,
                 id: childId ?? "$unknown_id",
                 title,
-                config,
+                config: panelComponentConfig,
                 saveConfig: saveConfig as SaveConfig<PanelConfig>,
                 updatePanelConfigs,
                 openSiblingPanel,

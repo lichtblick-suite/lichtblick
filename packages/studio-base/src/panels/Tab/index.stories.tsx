@@ -24,6 +24,7 @@ import {
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { SExpectedResult } from "@foxglove/studio-base/stories/storyHelpers";
 import { dragAndDrop } from "@foxglove/studio-base/test/dragAndDropHelper";
+import { PanelConfigSchemaEntry } from "@foxglove/studio-base/types/panels";
 import tick from "@foxglove/studio-base/util/tick";
 
 import Tab from "./index";
@@ -43,18 +44,26 @@ SamplePanel2.defaultConfig = {};
 const MockPanel1 = Panel(SamplePanel1);
 const MockPanel2 = Panel(SamplePanel2);
 
-const allPanels = [
-  { title: "Some Panel", component: MockPanel1 },
-  { title: "Happy Panel", component: MockPanel2 },
-  { title: "Tab", component: Tab },
+const allPanels: PanelInfo[] = [
+  { title: "Some Panel", type: "Sample1", module: async () => ({ default: MockPanel1 }) },
+  { title: "Happy Panel", type: "Sample2", module: async () => ({ default: MockPanel2 }) },
+  { title: "Tab", type: "Tab", module: async () => ({ default: Tab }) },
 ];
 
 class MockPanelCatalog implements PanelCatalog {
+  async getConfigSchema(type: string): Promise<PanelConfigSchemaEntry<string>[] | undefined> {
+    const info = this.getPanelByType(type);
+    if (!info) {
+      return undefined;
+    }
+    const module = await info?.module();
+    return module.default.configSchema;
+  }
   getPanels(): PanelInfo[] {
     return allPanels;
   }
   getPanelByType(type: string): PanelInfo | undefined {
-    return allPanels.find((panel) => panel.component.panelType === type);
+    return allPanels.find((panel) => panel.type === type);
   }
 }
 

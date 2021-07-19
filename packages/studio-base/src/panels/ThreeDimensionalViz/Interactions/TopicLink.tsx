@@ -15,7 +15,6 @@ import styled from "styled-components";
 
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
-import RawMessages from "@foxglove/studio-base/panels/RawMessages/index";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
 
@@ -31,7 +30,7 @@ type Props = {
 export default function TopicLink({ topic }: Props): JSX.Element {
   const { openSiblingPanel } = usePanelContext();
   const openRawMessages = React.useCallback(() => {
-    openSiblingPanel(RawMessages.panelType, (config: PanelConfig) => ({
+    openSiblingPanel("RawMessages", (config: PanelConfig) => ({
       ...config,
       topicPath: topic,
     }));

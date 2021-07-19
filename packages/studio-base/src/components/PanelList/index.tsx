@@ -173,21 +173,16 @@ type Props = {
 
 // sanity checks to help panel authors debug issues
 function verifyPanels(panels: readonly PanelInfo[]) {
-  const panelTypes: Map<string, React.ComponentType> = new Map();
-  for (const { component } of panels) {
-    const { name, displayName, panelType } = component;
-    const dispName = displayName ?? name ?? "<unnamed>";
-    if (panelType.length === 0) {
-      throw new Error(`Panel component ${dispName} must declare a unique \`static panelType\``);
-    }
-    const existingPanel = panelTypes.get(panelType);
+  const panelTypes: Map<string, PanelInfo> = new Map();
+  for (const panel of panels) {
+    const { title, type } = panel;
+    const existingPanel = panelTypes.get(type);
     if (existingPanel) {
-      const otherDisplayName = existingPanel.displayName ?? existingPanel.name ?? "<unnamed>";
       throw new Error(
-        `Two components have the same panelType ('${panelType}'): ${otherDisplayName} and ${dispName}`,
+        `Two components have the same type ('${type}'): ${existingPanel.title} and ${title}`,
       );
     }
-    panelTypes.set(panelType, component);
+    panelTypes.set(type, panel);
   }
 }
 
@@ -254,9 +249,8 @@ function PanelList(props: Props): JSX.Element {
         const newIdx = (highlightedPanelIdx - 1) % (filteredPanels.length - 1);
         setHighlightedPanelIdx(newIdx >= 0 ? newIdx : filteredPanels.length + newIdx);
       } else if (e.key === "Enter" && highlightedPanel) {
-        const { component } = highlightedPanel;
         onPanelSelect({
-          type: component.panelType,
+          type: highlightedPanel.type,
         });
       }
     },
@@ -264,17 +258,17 @@ function PanelList(props: Props): JSX.Element {
   );
 
   const displayPanelListItem = React.useCallback(
-    ({ title, component: { panelType } }: PanelInfo) => {
+    ({ title, type }: PanelInfo) => {
       return (
         <DraggablePanelItem
-          key={`${panelType}-${title}`}
+          key={`${type}-${title}`}
           mosaicId={mosaicId}
           panel={{
-            type: panelType,
+            type,
             title,
           }}
           onDrop={onPanelMenuItemDrop}
-          onClick={() => onPanelSelect({ type: panelType })}
+          onClick={() => onPanelSelect({ type })}
           checked={title === selectedPanelTitle}
           highlighted={highlightedPanel?.title === title}
           searchQuery={searchQuery}

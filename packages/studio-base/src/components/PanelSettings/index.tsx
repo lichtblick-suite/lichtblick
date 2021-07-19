@@ -4,7 +4,7 @@
 
 import { DefaultButton, Stack, Text, useTheme } from "@fluentui/react";
 import { StrictMode, useMemo, useState } from "react";
-import { useUnmount } from "react-use";
+import { useAsync, useUnmount } from "react-use";
 
 import { useConfigById } from "@foxglove/studio-base/PanelAPI";
 import ShareJsonModal from "@foxglove/studio-base/components/ShareJsonModal";
@@ -67,10 +67,23 @@ export default function PanelSettings(): JSX.Element {
     );
   }, [selectedPanelId, showShareModal, getCurrentLayout, savePanelConfigs]);
 
-  const [config, saveConfig] = useConfigById<Record<string, unknown>>(
-    selectedPanelId,
-    panelInfo?.component.defaultConfig,
-  );
+  const [config, saveConfig] = useConfigById<Record<string, unknown>>(selectedPanelId);
+
+  const { value: schema, error } = useAsync(async () => {
+    if (panelInfo?.type == undefined) {
+      return undefined;
+    }
+
+    return await panelCatalog.getConfigSchema(panelInfo.type);
+  }, [panelCatalog, panelInfo?.type]);
+
+  if (error) {
+    return (
+      <SidebarContent title={`Panel Settings`}>
+        <Text styles={{ root: { color: theme.semanticColors.errorText } }}>{error.message}</Text>
+      </SidebarContent>
+    );
+  }
 
   if (selectedPanelId == undefined) {
     return (
@@ -87,19 +100,25 @@ export default function PanelSettings(): JSX.Element {
     );
   }
 
+  if (!config) {
+    return (
+      <SidebarContent title={`Panel Settings`}>
+        <Text styles={{ root: { color: theme.palette.neutralTertiary } }}>
+          loading panel settings...
+        </Text>
+      </SidebarContent>
+    );
+  }
+
   return (
     <SidebarContent title={`${panelInfo.title} Panel Settings`}>
       {shareModal}
       <Stack tokens={{ childrenGap: theme.spacing.m }}>
         <Stack.Item>
-          {panelInfo.component.configSchema ? (
+          {schema ? (
             <StrictMode>
               <PanelIdContext.Provider value={selectedPanelId}>
-                <SchemaEditor
-                  configSchema={panelInfo.component.configSchema}
-                  config={config}
-                  saveConfig={saveConfig}
-                />
+                <SchemaEditor configSchema={schema} config={config} saveConfig={saveConfig} />
               </PanelIdContext.Provider>
             </StrictMode>
           ) : (

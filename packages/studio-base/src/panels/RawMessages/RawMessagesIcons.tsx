@@ -31,7 +31,7 @@ type Props = {
   valueAction: ValueAction;
   basePath: string;
   onTopicPathChange: (arg0: string) => void;
-  openSiblingPanel: (arg0: string, cb: (arg0: PanelConfig) => PanelConfig) => void;
+  openSiblingPanel: (type: string, cb: (config: PanelConfig) => PanelConfig) => void;
 };
 
 export default function RawMessagesIcons({

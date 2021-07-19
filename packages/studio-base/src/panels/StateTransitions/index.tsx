@@ -166,7 +166,7 @@ export type StateTransitionPath = { value: string; timestampMethod: TimestampMet
 export type StateTransitionConfig = { paths: StateTransitionPath[] };
 
 export function openSiblingStateTransitionsPanel(
-  openSiblingPanel: (arg0: string, cb: (arg0: PanelConfig) => PanelConfig) => void,
+  openSiblingPanel: (type: string, cb: (config: PanelConfig) => PanelConfig) => void,
   topicName: string,
 ): void {
   openSiblingPanel("StateTransitions", (config: PanelConfig) => {

@@ -42,7 +42,7 @@ type Props = {
   splitFraction: number;
   onChangeSplitFraction: (arg0: number) => void;
   topicToRender: string;
-  openSiblingPanel: (arg0: string, cb: (arg0: PanelConfig) => PanelConfig) => void;
+  openSiblingPanel: (type: string, cb: (arg0: PanelConfig) => PanelConfig) => void;
   collapsedSections: { name: string; section: string }[];
   saveConfig: (arg0: Partial<Config>) => void;
 };

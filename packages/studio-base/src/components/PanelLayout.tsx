@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import React, { useCallback, useMemo, PropsWithChildren } from "react";
+import React, { useCallback, useMemo, PropsWithChildren, Suspense } from "react";
 import { useDrop } from "react-dnd";
 import {
   MosaicWithoutDragDropContext,
@@ -108,16 +108,16 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
       }
       const type = getPanelTypeFromId(id);
 
-      const PanelComponent = panelCatalog.getPanelByType(type)?.component;
-      const panel = PanelComponent ? (
-        <PanelComponent childId={id} tabId={tabId} />
-      ) : (
-        // If we haven't found a panel of the given type, render the panel selector
-        <Flex col center dataTest={id}>
-          <PanelToolbar floating isUnknownPanel />
-          Unknown panel type: {type}.
-        </Flex>
-      );
+      const panelInfo = panelCatalog.getPanelByType(type);
+      // If we haven't found a panel of the given type, render the panel selector
+      const PanelComponent = panelInfo
+        ? React.lazy(panelInfo.module)
+        : () => (
+            <Flex col center dataTest={id}>
+              <PanelToolbar floating isUnknownPanel />
+              Unknown panel type: {type}.
+            </Flex>
+          );
 
       const mosaicWindow = (
         <MosaicWindow
@@ -127,7 +127,9 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
           createNode={createTile}
           renderPreview={() => undefined as unknown as JSX.Element}
         >
-          {panel}
+          <Suspense fallback={<div>loading panel...</div>}>
+            <PanelComponent childId={id} tabId={tabId} />
+          </Suspense>
         </MosaicWindow>
       );
       if (type === "Tab") {

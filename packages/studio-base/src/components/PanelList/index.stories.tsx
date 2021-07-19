@@ -27,6 +27,7 @@ import PanelCatalogContext, {
 import CurrentLayoutState, {
   DEFAULT_LAYOUT_FOR_TESTS,
 } from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
+import { PanelConfigSchemaEntry } from "@foxglove/studio-base/types/panels";
 
 const SamplePanel1 = function () {
   return <div></div>;
@@ -43,17 +44,25 @@ SamplePanel2.defaultConfig = {};
 const MockPanel1 = Panel(SamplePanel1);
 const MockPanel2 = Panel(SamplePanel2);
 
-const allPanels = [
-  { title: "Some Panel", component: MockPanel1 },
-  { title: "Happy Panel", component: MockPanel2 },
+const allPanels: PanelInfo[] = [
+  { title: "Some Panel", type: "Sample1", module: async () => ({ default: MockPanel1 }) },
+  { title: "Happy Panel", type: "Sample2", module: async () => ({ default: MockPanel2 }) },
 ];
 
 class MockPanelCatalog implements PanelCatalog {
+  async getConfigSchema(type: string): Promise<PanelConfigSchemaEntry<string>[] | undefined> {
+    const info = this.getPanelByType(type);
+    if (!info) {
+      return undefined;
+    }
+    const module = await info?.module();
+    return module.default.configSchema;
+  }
   getPanels(): PanelInfo[] {
     return allPanels;
   }
   getPanelByType(type: string): PanelInfo | undefined {
-    return allPanels.find((panel) => panel.component.panelType === type);
+    return allPanels.find((panel) => panel.type === type);
   }
 }
 
