@@ -15,6 +15,7 @@ import ArrowLeftBoldIcon from "@mdi/svg/svg/arrow-left-bold.svg";
 import DeleteIcon from "@mdi/svg/svg/delete.svg";
 import FileMultipleIcon from "@mdi/svg/svg/file-multiple.svg";
 import HelpCircleIcon from "@mdi/svg/svg/help-circle.svg";
+import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 import styled from "styled-components";
 
 import Flex from "@foxglove/studio-base/components/Flex";
@@ -188,27 +189,20 @@ const Sidebar = ({
 
   const gotoUtils = React.useCallback(
     (filePath: string) => {
-      import(
-        /* webpackChunkName: "monaco-api" */
-        "monaco-editor/esm/vs/editor/editor.api"
-      )
-        .then((monacoApi) => {
-          const monacoFilePath = monacoApi.Uri.parse(`file://${filePath}`);
-          const requestedModel = monacoApi.editor.getModel(monacoFilePath);
-          if (!requestedModel) {
-            return;
-          }
-          setScriptOverride(
-            {
-              filePath: requestedModel.uri.path,
-              code: requestedModel.getValue(),
-              readOnly: true,
-              selection: undefined,
-            },
-            2,
-          );
-        })
-        .catch(console.error);
+      const monacoFilePath = monacoApi.Uri.parse(`file://${filePath}`);
+      const requestedModel = monacoApi.editor.getModel(monacoFilePath);
+      if (!requestedModel) {
+        return;
+      }
+      setScriptOverride(
+        {
+          filePath: requestedModel.uri.path,
+          code: requestedModel.getValue(),
+          readOnly: true,
+          selection: undefined,
+        },
+        2,
+      );
     },
     [setScriptOverride],
   );
