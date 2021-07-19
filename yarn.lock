@@ -2161,26 +2161,25 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/ros1-turtlesim-test@workspace:packages/ros1-turtlesim-test"
   dependencies:
-    "@foxglove/ros1": "workspace:*"
+    "@foxglove/ros1": 1.0.0
+    "@foxglove/xmlrpc": 1.1.4
     esbuild-runner: 2.2.0
     typescript: 4.3.5
   languageName: unknown
   linkType: soft
 
-"@foxglove/ros1@workspace:*, @foxglove/ros1@workspace:packages/ros1":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/ros1@workspace:packages/ros1"
+"@foxglove/ros1@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@foxglove/ros1@npm:1.0.0"
   dependencies:
-    "@foxglove/rosmsg": 0.2.1
-    "@foxglove/rosmsg-serialization": "workspace:*"
-    "@foxglove/xmlrpc": 1.0.1
-    esbuild-runner: 2.2.0
-    eventemitter3: 4.0.7
-    jest: 27.0.6
-    md5-typescript: 1.0.5
-    typescript: 4.3.5
-  languageName: unknown
-  linkType: soft
+    "@foxglove/rosmsg": ^0.2.1
+    "@foxglove/rosmsg-serialization": ^1.0.0
+    "@foxglove/xmlrpc": ^1.1.4
+    eventemitter3: ^4.0.7
+    md5-typescript: ^1.0.5
+  checksum: 00c9e09606ca3812c635121d3d7388e46ca5e0a169a11acbd8b8901a70355fcd56e3db2e0d7a3c3a52e6099ca939dfa48a62aae2b04ce5c1b2d2df4c15cdf28b
+  languageName: node
+  linkType: hard
 
 "@foxglove/rosbag2-web@npm:0.1.4":
   version: 0.1.4
@@ -2222,17 +2221,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg-serialization@workspace:*, @foxglove/rosmsg-serialization@workspace:packages/rosmsg-serialization":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/rosmsg-serialization@workspace:packages/rosmsg-serialization"
+"@foxglove/rosmsg-serialization@npm:1.0.0, @foxglove/rosmsg-serialization@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@foxglove/rosmsg-serialization@npm:1.0.0"
   dependencies:
-    "@foxglove/rosmsg": 0.2.1
-    "@types/prettier": 2.3.2
-    jest: 27.0.6
-    prettier: 2.3.2
-    typescript: 4.3.5
-  languageName: unknown
-  linkType: soft
+    "@foxglove/rosmsg": 0.1.2
+  checksum: ca374fe727939e59e5ea08e7546463c9f9a29bdac42c7d28f7969f8836d2adce4bae4d99e3c083a26ac4949d45cc7045d36ab71b2ac7309c82af485d037c2969
+  languageName: node
+  linkType: hard
 
 "@foxglove/rosmsg2-serialization@npm:^0.2.0":
   version: 0.2.0
@@ -2245,23 +2241,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg@npm:0.2.1, @foxglove/rosmsg@npm:^0.2.0":
-  version: 0.2.1
-  resolution: "@foxglove/rosmsg@npm:0.2.1"
-  dependencies:
-    moo: ^0.5.1
-    nearley: ^2.20.1
-  checksum: e0135669456b15c7e0f0b32915b748b246a8aba5bfdd5bf854e72fd8aa49843bf31157d5b634012797e6f86541e3055f235f95fe12b9fb12e7a3974e174888b4
-  languageName: node
-  linkType: hard
-
-"@foxglove/rosmsg@npm:^0.1.2":
+"@foxglove/rosmsg@npm:0.1.2, @foxglove/rosmsg@npm:^0.1.2":
   version: 0.1.2
   resolution: "@foxglove/rosmsg@npm:0.1.2"
   dependencies:
     moo: ^0.5.1
     nearley: ^2.20.1
   checksum: 703ec8482ca012f00369bd2367d8f9632c0933203a89b06903df06568f4954888d664d706538b2fdc2b73c2454655f69e903101cfaebfdc4f434cba387974d08
+  languageName: node
+  linkType: hard
+
+"@foxglove/rosmsg@npm:^0.2.0, @foxglove/rosmsg@npm:^0.2.1":
+  version: 0.2.1
+  resolution: "@foxglove/rosmsg@npm:0.2.1"
+  dependencies:
+    moo: ^0.5.1
+    nearley: ^2.20.1
+  checksum: e0135669456b15c7e0f0b32915b748b246a8aba5bfdd5bf854e72fd8aa49843bf31157d5b634012797e6f86541e3055f235f95fe12b9fb12e7a3974e174888b4
   languageName: node
   linkType: hard
 
@@ -2281,12 +2277,14 @@ __metadata:
     "@foxglove/den": "workspace:*"
     "@foxglove/electron-socket": 1.1.0
     "@foxglove/hooks": "workspace:*"
+    "@foxglove/ros1": 1.0.0
     "@foxglove/rosbag2-web": 0.1.4
     "@foxglove/rosmsg-msgs-common": 1.0.0
     "@foxglove/rosmsg-msgs-foxglove": 2.0.0
+    "@foxglove/rosmsg-serialization": 1.0.0
     "@foxglove/rostime": 1.1.0
     "@foxglove/studio": "workspace:*"
-    "@foxglove/velodyne-cloud": "workspace:*"
+    "@foxglove/velodyne-cloud": 1.0.0
     "@mdi/svg": 5.9.55
     "@sentry/core": 6.9.0
     "@sentry/types": 6.9.0
@@ -2457,15 +2455,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/velodyne-cloud@workspace:*, @foxglove/velodyne-cloud@workspace:packages/velodyne-cloud":
-  version: 0.0.0-use.local
-  resolution: "@foxglove/velodyne-cloud@workspace:packages/velodyne-cloud"
-  dependencies:
-    jest: 27.0.6
-    kelonio: 0.6.0
-    typescript: 4.3.5
-  languageName: unknown
-  linkType: soft
+"@foxglove/velodyne-cloud@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@foxglove/velodyne-cloud@npm:1.0.0"
+  checksum: ee2ae6b5c9a052767d71e0d3afeb5d4074902e26e382bff773ef088c3832618a0330c4e81cc5072daa22adbeef4545dbeacc8dfb133fd7580be1afbedcdf43cc
+  languageName: node
+  linkType: hard
 
 "@foxglove/wasm-bz2@npm:0.0.4":
   version: 0.0.4
@@ -2474,15 +2469,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/xmlrpc@npm:1.0.1":
-  version: 1.0.1
-  resolution: "@foxglove/xmlrpc@npm:1.0.1"
+"@foxglove/xmlrpc@npm:1.1.4, @foxglove/xmlrpc@npm:^1.1.4":
+  version: 1.1.4
+  resolution: "@foxglove/xmlrpc@npm:1.1.4"
   dependencies:
     "@foxglove/just-fetch": ^1.2.4
     byte-base64: ^1.1.0
     sax: ^1.2.4
     xmlbuilder2: ^2.4.1
-  checksum: f120c6c9fa4ca2a0ca46d9af8dad3d075d68803dd9457fb398a0d684818662fdd566a6922075cf9be38cf8f956d9fc32daee9111c2baa6677df86f43aa06c84f
+  checksum: 4c4cb990d097850f2893b9eb07dff17742f8183f0a8f792bc0fa8d7f80d5baa5ec28f9b2db0ba3725295f67f83f145110bcf4e9cffcdda1f9ccb75b0bd2f5f58
   languageName: node
   linkType: hard
 
@@ -9145,13 +9140,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"complex.js@npm:^2.0.11":
-  version: 2.0.12
-  resolution: "complex.js@npm:2.0.12"
-  checksum: 5e4a82d2651be879c46ded1638373a9177dcf5af6c74844d03ae8b0e1abf7fe0e246ada2d59c27f857c863c859af2deec6f08100fe138cf53558a93e89a2c49a
-  languageName: node
-  linkType: hard
-
 "component-emitter@npm:^1.2.1, component-emitter@npm:~1.3.0":
   version: 1.3.0
   resolution: "component-emitter@npm:1.3.0"
@@ -10054,7 +10042,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"decimal.js@npm:^10.2.0, decimal.js@npm:^10.2.1":
+"decimal.js@npm:^10.2.1":
   version: 10.2.1
   resolution: "decimal.js@npm:10.2.1"
   checksum: d2421adf209422d520c8f1a4d1fceffc2ccd0c041aa179f8d18a315ebda6a7be918f2634ac850df299dccccae6a3567c5761301a1c3693461fdef3d1de23b000
@@ -11454,13 +11442,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"escape-latex@npm:^1.2.0":
-  version: 1.2.0
-  resolution: "escape-latex@npm:1.2.0"
-  checksum: 73a787319f0965ecb8244bb38bf3a3cba872f0b9a5d3da8821140e9f39fe977045dc953a62b1a2bed4d12bfccbe75a7d8ec786412bf00739eaa2f627d0a8e0d6
-  languageName: node
-  linkType: hard
-
 "escape-string-regexp@npm:2.0.0, escape-string-regexp@npm:^2.0.0":
   version: 2.0.0
   resolution: "escape-string-regexp@npm:2.0.0"
@@ -11858,7 +11839,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eventemitter3@npm:4.0.7, eventemitter3@npm:^4.0.0, eventemitter3@npm:^4.0.7":
+"eventemitter3@npm:^4.0.0, eventemitter3@npm:^4.0.7":
   version: 4.0.7
   resolution: "eventemitter3@npm:4.0.7"
   checksum: 1875311c42fcfe9c707b2712c32664a245629b42bb0a5a84439762dd0fd637fc54d078155ea83c2af9e0323c9ac13687e03cfba79b03af9f40c89b4960099374
@@ -12799,13 +12780,6 @@ __metadata:
     xmldom: 0.6.0
   languageName: unknown
   linkType: soft
-
-"fraction.js@npm:^4.0.12":
-  version: 4.0.13
-  resolution: "fraction.js@npm:4.0.13"
-  checksum: 755f588c7ba8cedef6178369b940b39baac8549f463cad3f490c7e120d801fa55dd72956dfcae781b91992f551adbc7dfa1db8d042593794222ae9af22e008f0
-  languageName: node
-  linkType: hard
 
 "fragment-cache@npm:^0.2.1":
   version: 0.2.1
@@ -15454,13 +15428,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"javascript-natural-sort@npm:^0.7.1":
-  version: 0.7.1
-  resolution: "javascript-natural-sort@npm:0.7.1"
-  checksum: 161e2c512cc7884bc055a582c6645d9032cab88497a76123d73cb23bfb03d97a04cf7772ecdb8bd3366fc07192c2f996366f479f725c23ef073fffe03d6a586a
-  languageName: node
-  linkType: hard
-
 "jest-canvas-mock@npm:2.3.1":
   version: 2.3.1
   resolution: "jest-canvas-mock@npm:2.3.1"
@@ -16412,16 +16379,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"kelonio@npm:0.6.0":
-  version: 0.6.0
-  resolution: "kelonio@npm:0.6.0"
-  dependencies:
-    browser-process-hrtime: ^1.0.0
-    mathjs: ^6.2.3
-  checksum: b2ebfd5747642dc9ee2a063d9ab5114b0295391f3e561d12c2a99bd56dcfe96da4db4b4a43a4f0bf45a1cd7a90a258ea4e7aa5d9d50531c6e5366a60944c6c35
-  languageName: node
-  linkType: hard
-
 "keyv@npm:^3.0.0":
   version: 3.1.0
   resolution: "keyv@npm:3.1.0"
@@ -17203,24 +17160,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mathjs@npm:^6.2.3":
-  version: 6.6.5
-  resolution: "mathjs@npm:6.6.5"
-  dependencies:
-    complex.js: ^2.0.11
-    decimal.js: ^10.2.0
-    escape-latex: ^1.2.0
-    fraction.js: ^4.0.12
-    javascript-natural-sort: ^0.7.1
-    seed-random: ^2.2.0
-    tiny-emitter: ^2.1.0
-    typed-function: ^1.1.1
-  bin:
-    mathjs: bin/cli.js
-  checksum: a6756e3bde851f0dc29e55573288aecb4c36040b5c64228f4a72d5ab4953152df6165f7662986ae76603fd0cc96c41856ce6ebfe5c7ac693df1f80e41dc63b61
-  languageName: node
-  linkType: hard
-
 "md5-file@npm:4.0.0":
   version: 4.0.0
   resolution: "md5-file@npm:4.0.0"
@@ -17230,7 +17169,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"md5-typescript@npm:1.0.5":
+"md5-typescript@npm:^1.0.5":
   version: 1.0.5
   resolution: "md5-typescript@npm:1.0.5"
   checksum: 327cbe283be653a147ecb47d5fca8772c4cbcec7566bb06ce757bc0227f9183ec3511bc11ea72e3dacab408aa2a4291baa25eebed4629fe614b6479c26709ed0
@@ -22340,13 +22279,6 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"seed-random@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "seed-random@npm:2.2.0"
-  checksum: 74ddfb956021ce08726e127da5f30f2b3a133e0e8dab995a69893e5441bd17472856abd8242125a12d7b1773360dda7c80b6f54d39a2fc3de99734e079c646dc
-  languageName: node
-  linkType: hard
-
 "seedrandom@npm:3.0.5":
   version: 3.0.5
   resolution: "seedrandom@npm:3.0.5"
@@ -24089,7 +24021,7 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"tiny-emitter@npm:^2.0.0, tiny-emitter@npm:^2.1.0":
+"tiny-emitter@npm:^2.0.0":
   version: 2.1.0
   resolution: "tiny-emitter@npm:2.1.0"
   checksum: fbcfb5145751a0e3b109507a828eb6d6d4501352ab7bb33eccef46e22e9d9ad3953158870a6966a59e57ab7c3f9cfac7cab8521db4de6a5e757012f4677df2dd
@@ -24567,13 +24499,6 @@ resolve@^2.0.0-next.3:
     media-typer: 0.3.0
     mime-types: ~2.1.24
   checksum: 2c8e47675d55f8b4e404bcf529abdf5036c537a04c2b20177bcf78c9e3c1da69da3942b1346e6edb09e823228c0ee656ef0e033765ec39a70d496ef601a0c657
-  languageName: node
-  linkType: hard
-
-"typed-function@npm:^1.1.1":
-  version: 1.1.1
-  resolution: "typed-function@npm:1.1.1"
-  checksum: f431f6d0512fa51b5373b004fad0460e4b71827fc469c4bb915b3d4b4fcfd439fdd5aadc3e2f364e1d3c0deef29fd342b3e558f5239b5b842cfbf91af3ed1a57
   languageName: node
   linkType: hard
 

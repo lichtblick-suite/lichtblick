@@ -12,7 +12,7 @@ import {
   getPid,
   TcpSocketNode,
 } from "@foxglove/ros1/src/nodejs";
-import { HttpServerNodejs } from "@foxglove/xmlrpc/dist/HttpServerNodejs";
+import { HttpServerNodejs } from "@foxglove/xmlrpc/nodejs";
 
 async function main() {
   const name = "/testclient";
