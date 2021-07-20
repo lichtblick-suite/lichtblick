@@ -15,7 +15,7 @@ import { storiesOf } from "@storybook/react";
 import { useState } from "react";
 import styled from "styled-components";
 
-import Slider from "@foxglove/studio-base/components/Slider";
+import Slider from "@foxglove/studio-base/components/PlaybackControls/Slider";
 
 const StyledRange = styled.div<{ width?: number }>`
   position: absolute;

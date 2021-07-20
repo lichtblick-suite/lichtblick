@@ -33,12 +33,12 @@ import {
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import PlaybackTimeDisplayMethod from "@foxglove/studio-base/components/PlaybackControls/PlaybackTimeDisplayMethod";
+import Slider from "@foxglove/studio-base/components/PlaybackControls/Slider";
 import {
   jumpSeek,
   DIRECTION,
 } from "@foxglove/studio-base/components/PlaybackControls/sharedHelpers";
 import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpeedControls";
-import Slider from "@foxglove/studio-base/components/Slider";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import {
   useClearHoverValue,

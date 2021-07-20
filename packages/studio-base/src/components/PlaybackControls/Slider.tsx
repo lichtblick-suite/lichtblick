@@ -1,15 +1,6 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-//
-// This file incorporates work covered by the following copyright and
-// permission notice:
-//
-//   Copyright 2018-2021 Cruise LLC
-//
-//   This source code is licensed under the Apache License, Version 2.0,
-//   found at http://www.apache.org/licenses/LICENSE-2.0
-//   You may not use this file except in compliance with the License.
 
 import { clamp } from "lodash";
 import DocumentEvents from "react-document-events";
@@ -17,23 +8,11 @@ import styled from "styled-components";
 
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
-// A low level slider component.
-//
-// Props:
-// | Name          | Type                   | Description                                                                    |
-// | ------------- | ---------------------- | ------------------------------------------------------------------------------ |
-// | onChange      | (number) => void       | callback called whenever the value changes, either after click or during drag. |
-// | value         | number                 | the current value of the slider                                                |
-// | min           | number                 | the minimum value of the slider                                                |
-// | max           | number                 | the maximum value of the slider                                                |
-// | draggable?    | boolean                | set to true the slider will fire onChange callbacks during mouse dragging      |
-// | renderSlider? | (value:?number) => void | custom renderer to render the slider                                           |
-
 type Props = {
   value: number | undefined;
   min: number;
   max: number;
-  disabled: boolean; // Disable the mouse interactions.
+  disabled: boolean;
   step?: number;
   draggable: boolean;
   onChange: (arg0: number) => void;
@@ -126,11 +105,7 @@ export default class Slider extends React.Component<Props> {
 
   _onMouseMove = (e: React.MouseEvent<HTMLDivElement>): void => {
     const { draggable, onChange, disabled } = this.props;
-    if (disabled) {
-      return;
-    }
-    const { mouseDown } = this;
-    if (!draggable || !mouseDown) {
+    if (disabled || !draggable || !this.mouseDown) {
       return;
     }
     const value = this.getValueAtMouse(e);
@@ -139,10 +114,7 @@ export default class Slider extends React.Component<Props> {
 
   _onMouseDown = (e: React.MouseEvent<HTMLDivElement>): void => {
     const { draggable, onChange, disabled } = this.props;
-    if (disabled) {
-      return;
-    }
-    if (!draggable) {
+    if (disabled || !draggable) {
       return;
     }
     if (document.activeElement instanceof HTMLElement) {
