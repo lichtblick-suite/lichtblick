@@ -43,9 +43,9 @@ export default class Rosbag2DataProvider implements RandomAccessDataProvider {
   async initialize(_extensionPoint: ExtensionPoint): Promise<InitializationResult> {
     const folder = this.options_.bagFolderPath.folder;
     if (folder instanceof FileSystemDirectoryHandle) {
-      this.bag_ = await openFileSystemDirectoryHandle(folder, (_) =>
-        new URL("sql.js/dist/sql-wasm.wasm", import.meta.url).toString(),
-      );
+      const res = await fetch(new URL("sql.js/dist/sql-wasm.wasm", import.meta.url).toString());
+      const sqlWasm = await (await res.blob()).arrayBuffer();
+      this.bag_ = await openFileSystemDirectoryHandle(folder, sqlWasm);
     } else {
       throw new Error("Opening ROS2 bags via the native interface is not implemented yet");
     }

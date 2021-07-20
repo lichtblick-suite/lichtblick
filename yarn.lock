@@ -2181,13 +2181,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosbag2-web@npm:0.1.4":
-  version: 0.1.4
-  resolution: "@foxglove/rosbag2-web@npm:0.1.4"
+"@foxglove/rosbag2-web@npm:0.2.1":
+  version: 0.2.1
+  resolution: "@foxglove/rosbag2-web@npm:0.2.1"
   dependencies:
     "@foxglove/rosbag2": ^0.3.0
     sql.js: ^1.5.0
-  checksum: 84d004d6e08c0217912050870350cf8ed1cedf1f9bbf353d946fa13fb3ea50e0fdc5d82e06ca7daf543152f8887df2bffeb3cf9f5a83f8d2e30c3f01ace209dd
+  checksum: a6ff6ce5ddb640d5bb1d2777af10fc65d7053ed4ec9c063935a06fcf9938e5c0b102df0e433560c3894d2f9e2fdb743ab5917a62356e9ad5d8817dee540fa900
   languageName: node
   linkType: hard
 
@@ -2278,7 +2278,7 @@ __metadata:
     "@foxglove/electron-socket": 1.1.0
     "@foxglove/hooks": "workspace:*"
     "@foxglove/ros1": 1.0.0
-    "@foxglove/rosbag2-web": 0.1.4
+    "@foxglove/rosbag2-web": 0.2.1
     "@foxglove/rosmsg-msgs-common": 1.0.0
     "@foxglove/rosmsg-msgs-foxglove": 2.0.0
     "@foxglove/rosmsg-serialization": 1.0.0
