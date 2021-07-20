@@ -2410,7 +2410,7 @@ __metadata:
     regl-worldview: "github:foxglove/webviz#workspace=regl-worldview&commit=6eb0e8c45eff795f8718f33bf3e10478951e7249"
     rehype-raw: 5.1.0
     reselect: 4.0.0
-    rosbag: "github:foxglove/rosbag.js#6ce4e00c16b80973e270d53e9fb362a516e74e03"
+    rosbag: "github:foxglove/rosbag.js#1d776c9548ef6bdbd0209c7721941f8d4f25947f"
     roslib: "github:foxglove/roslibjs#1c29f898683cc07945d400ec97916520920041a2"
     sanitize-html: 2.4.0
     sass: 1.35.2
@@ -7270,11 +7270,9 @@ __metadata:
   linkType: hard
 
 "available-typed-arrays@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "available-typed-arrays@npm:1.0.2"
-  dependencies:
-    array-filter: ^1.0.0
-  checksum: 915a89f31bb9ba51f7396d5ae7d8eff99bc6d6ba9f337068a6916e9ba56fa47bfea7ea69f6f6ad131eac57f76582c721e5f0594e8fea7156894313fc41203fbd
+  version: 1.0.4
+  resolution: "available-typed-arrays@npm:1.0.4"
+  checksum: 28135bb29f2f8b4784a017ba0f652da9a1ffc88529ffc74f40e8fdc8f292375dbb6a8b0eb993ef9f1d0a5cb1bd8592c40eac715df79296630e9f83b7b3f4ae7f
   languageName: node
   linkType: hard
 
@@ -14882,9 +14880,9 @@ __metadata:
   linkType: hard
 
 "is-generator-function@npm:^1.0.7":
-  version: 1.0.8
-  resolution: "is-generator-function@npm:1.0.8"
-  checksum: ff6a510416885616fa57a2a1e043224a386ed37451c3686cc1ed38a63acd59b240f09b5d937aa86dedc3a7fb91ae6c0ce6477149d4b6f9be608a870e038b38bd
+  version: 1.0.9
+  resolution: "is-generator-function@npm:1.0.9"
+  checksum: 78e68709a0f145d2fd442c615db0ae40f542d49a3453f51bffb56409091bd0fa115767e1b61470dcdde45d085974517278c889632800b81a337226b87c397a1e
   languageName: node
   linkType: hard
 
@@ -21995,15 +21993,15 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"rosbag@github:foxglove/rosbag.js#6ce4e00c16b80973e270d53e9fb362a516e74e03":
+"rosbag@github:foxglove/rosbag.js#1d776c9548ef6bdbd0209c7721941f8d4f25947f":
   version: 3.0.0
-  resolution: "rosbag@https://github.com/foxglove/rosbag.js.git#commit=6ce4e00c16b80973e270d53e9fb362a516e74e03"
+  resolution: "rosbag@https://github.com/foxglove/rosbag.js.git#commit=1d776c9548ef6bdbd0209c7721941f8d4f25947f"
   dependencies:
     buffer: 6.0.3
     heap: 0.2.6
     int53: 1.0.0
     web-encoding: 1.1.5
-  checksum: 0fb27e42bb6e753762aa5396d45a2e1a196be1a4dbafea275f56d8a75c15d564ff57064017f13f2a47369ffc8194574eb0bacdc78c6c10b899d6d209ee7e767c
+  checksum: 980199c797b87c08b87eb3d9b817739621094e5cbf52c058e1932f02abc4f1219e950ae2fe6871cc7cd3c9196f39c11eb6a0bf83ec630e021f757cb7fae87f7a
   languageName: node
   linkType: hard
 
@@ -25127,8 +25125,8 @@ typescript@4.3.5:
   linkType: hard
 
 "util@npm:^0.12.3":
-  version: 0.12.3
-  resolution: "util@npm:0.12.3"
+  version: 0.12.4
+  resolution: "util@npm:0.12.4"
   dependencies:
     inherits: ^2.0.3
     is-arguments: ^1.0.4
@@ -25136,7 +25134,7 @@ typescript@4.3.5:
     is-typed-array: ^1.1.3
     safe-buffer: ^5.1.2
     which-typed-array: ^1.1.2
-  checksum: e64d4a901999017d3125ba20d66f3f97429240ed1f7cf60a705abba8a4901277b909250677f616e043cd49f7ce5e4f2f4df5aa3960e8fdf83941f828f3643e9a
+  checksum: 8eac7a6e6b341c0f1b3eb73bbe5dfcae31a7e9699c8fc3266789f3e95f7637946a7700dcf1904dbd3749a58a36760ebf7acf4bb5b717f7468532a8a79f44eff0
   languageName: node
   linkType: hard
 

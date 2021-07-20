@@ -166,7 +166,7 @@
     "regl-worldview": "github:foxglove/webviz#workspace=regl-worldview&commit=6eb0e8c45eff795f8718f33bf3e10478951e7249",
     "rehype-raw": "5.1.0",
     "reselect": "4.0.0",
-    "rosbag": "github:foxglove/rosbag.js#6ce4e00c16b80973e270d53e9fb362a516e74e03",
+    "rosbag": "github:foxglove/rosbag.js#1d776c9548ef6bdbd0209c7721941f8d4f25947f",
     "roslib": "github:foxglove/roslibjs#1c29f898683cc07945d400ec97916520920041a2",
     "sanitize-html": "2.4.0",
     "sass": "1.35.2",
