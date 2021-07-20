@@ -10,7 +10,16 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import React, { useCallback, useMemo, PropsWithChildren, Suspense } from "react";
+
+import { Spinner, SpinnerSize } from "@fluentui/react";
+import React, {
+  useCallback,
+  useMemo,
+  PropsWithChildren,
+  Suspense,
+  useRef,
+  LazyExoticComponent,
+} from "react";
 import { useDrop } from "react-dnd";
 import {
   MosaicWithoutDragDropContext,
@@ -22,8 +31,7 @@ import {
 import "react-mosaic-component/react-mosaic-component.css";
 import styled from "styled-components";
 
-import "./PanelLayout.scss";
-
+import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Flex from "@foxglove/studio-base/components/Flex";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import {
@@ -31,13 +39,15 @@ import {
   useCurrentLayoutSelector,
   usePanelMosaicId,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
+import { PanelComponent, usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { EmptyDropTarget } from "@foxglove/studio-base/panels/Tab/EmptyDropTarget";
 import { MosaicDropResult, PanelConfig } from "@foxglove/studio-base/types/panels";
 import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import { getPanelIdForType, getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 import ErrorBoundary from "./ErrorBoundary";
+
+import "./PanelLayout.scss";
 
 type Props = {
   layout?: MosaicNode<string>;
@@ -100,6 +110,9 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
 
   const panelCatalog = usePanelCatalog();
 
+  const panelCompoentCache = useRef(
+    new Map<string, LazyExoticComponent<PanelComponent> | (() => JSX.Element)>(),
+  );
   const renderTile = useCallback(
     (id: string | Record<string, never> | undefined, path: MosaicPath) => {
       // `id` is usually a string. But when `layout` is empty, `id` will be an empty object, in which case we don't need to render Tile
@@ -108,16 +121,22 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
       }
       const type = getPanelTypeFromId(id);
 
-      const panelInfo = panelCatalog.getPanelByType(type);
-      // If we haven't found a panel of the given type, render the panel selector
-      const PanelComponent = panelInfo
-        ? React.lazy(panelInfo.module)
-        : () => (
-            <Flex col center dataTest={id}>
-              <PanelToolbar floating isUnknownPanel />
-              Unknown panel type: {type}.
-            </Flex>
-          );
+      let Panel = panelCompoentCache.current.get(type);
+
+      // cache the lazy created panel component to avoid making the component again
+      if (!Panel) {
+        const panelInfo = panelCatalog.getPanelByType(type);
+        // If we haven't found a panel of the given type, render the panel selector
+        Panel = panelInfo
+          ? React.lazy(panelInfo.module)
+          : () => (
+              <Flex col center dataTest={id}>
+                <PanelToolbar floating isUnknownPanel />
+                Unknown panel type: {type}.
+              </Flex>
+            );
+        panelCompoentCache.current.set(type, Panel);
+      }
 
       const mosaicWindow = (
         <MosaicWindow
@@ -127,8 +146,14 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
           createNode={createTile}
           renderPreview={() => undefined as unknown as JSX.Element}
         >
-          <Suspense fallback={<div>loading panel...</div>}>
-            <PanelComponent childId={id} tabId={tabId} />
+          <Suspense
+            fallback={
+              <EmptyState>
+                <Spinner size={SpinnerSize.small} />
+              </EmptyState>
+            }
+          >
+            <Panel childId={id} tabId={tabId} />
           </Suspense>
         </MosaicWindow>
       );
