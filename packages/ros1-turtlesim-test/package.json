@@ -27,7 +27,7 @@
     "typescript": "4.3.5"
   },
   "dependencies": {
-    "@foxglove/ros1": "1.0.0",
+    "@foxglove/ros1": "1.0.1",
     "@foxglove/xmlrpc": "1.1.4"
   }
 }
