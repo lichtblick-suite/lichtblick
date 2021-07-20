@@ -19,7 +19,7 @@ import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
 
 const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo.bag";
 
-export default function Root(): JSX.Element {
+export function Root(): JSX.Element {
   const playerSources: PlayerSourceDefinition[] = [
     {
       name: "Rosbridge (WebSocket)",

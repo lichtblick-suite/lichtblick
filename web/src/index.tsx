@@ -6,12 +6,10 @@ import { init as initSentry } from "@sentry/browser";
 import ReactDOM from "react-dom";
 
 import Logger from "@foxglove/log";
-import { installDevtoolsFormatters, overwriteFetch, waitForFonts } from "@foxglove/studio-base";
 
-import Root from "./Root";
+import VersionBanner from "./VersionBanner";
 
 const log = Logger.getLogger(__filename);
-
 log.debug("initializing");
 
 if (typeof process.env.SENTRY_DSN === "string") {
@@ -30,22 +28,44 @@ if (typeof process.env.SENTRY_DSN === "string") {
   });
 }
 
-installDevtoolsFormatters();
-overwriteFetch();
-
 const rootEl = document.getElementById("root");
 if (!rootEl) {
   throw new Error("missing #root element");
 }
 
 async function main() {
+  const chromeMatch = navigator.userAgent.match(/Chrome\/(\d+)\./);
+  const chromeVersion = chromeMatch ? parseInt(chromeMatch[1] ?? "", 10) : 0;
+  const isChrome = chromeVersion !== 0;
+
+  const banner = <VersionBanner isChrome={isChrome} currentVersion={chromeVersion} />;
+  const renderCallback = () => {
+    // Integration tests look for this console log to indicate the app has rendered once
+    log.debug("App rendered");
+  };
+
+  if (!isChrome) {
+    ReactDOM.render(banner, rootEl, renderCallback);
+    return;
+  }
+
+  const { installDevtoolsFormatters, overwriteFetch, waitForFonts } = await import(
+    "@foxglove/studio-base"
+  );
+  installDevtoolsFormatters();
+  overwriteFetch();
   // consider moving waitForFonts into App to display an app loading screen
   await waitForFonts();
 
-  ReactDOM.render(<Root />, rootEl, () => {
-    // Integration tests look for this console log to indicate the app has rendered once
-    log.debug("App rendered");
-  });
+  const { Root } = await import("./Root");
+  ReactDOM.render(
+    <>
+      {banner}
+      <Root />
+    </>,
+    rootEl,
+    renderCallback,
+  );
 }
 
 void main();
