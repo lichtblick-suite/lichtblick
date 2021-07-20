@@ -46,7 +46,7 @@ const VersionBanner = function ({
         {isChrome ? undefined : (
           <p>
             Check out our browser support progress in{" "}
-            <a href="https://github.com/foxglove/studio/issues/1422">this GitHub issue</a>.
+            <a href="https://github.com/foxglove/studio/issues/1511">this GitHub issue</a>.
           </p>
         )}
       </div>
