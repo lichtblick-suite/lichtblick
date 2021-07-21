@@ -1,0 +1,32 @@
+name: Post Release
+
+# run only on releases (not pre-releases)
+on:
+  release:
+    types: [released]
+
+jobs:
+  merge:
+    name: Merge
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: main
+          lfs: true
+
+      - name: Configure git
+        run: |
+          git config user.name "Foxglove"
+          git config user.email "contact@foxglove.dev"
+
+      - name: Merge release
+        run: git merge --no-ff --no-edit "${{ github.event.release.tag_name }}"
+
+      - id: bump-version
+        uses: foxglove/action-bump-version@v1
+        with:
+          version: ${{ github.event.release.tag_name }}-dev
+          commit-message: Bump dev
+          push: true
