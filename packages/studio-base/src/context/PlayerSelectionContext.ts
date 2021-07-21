@@ -15,6 +15,7 @@ type SourceTypes =
 export type PlayerSourceDefinition = {
   name: string;
   type: SourceTypes;
+  disabledReason?: string | JSX.Element;
 };
 
 type FileSourceParams = {

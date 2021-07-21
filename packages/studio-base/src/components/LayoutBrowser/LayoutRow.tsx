@@ -14,13 +14,14 @@ import {
   ContextualMenu,
 } from "@fluentui/react";
 import cx from "classnames";
-import { useCallback, useContext, useMemo, useState } from "react";
+import { Fragment, useCallback, useContext, useMemo, useState } from "react";
+import { useMountedState } from "react-use";
 
 import conflictTypeToString from "@foxglove/studio-base/components/LayoutBrowser/conflictTypeToString";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
-import useConfirm from "@foxglove/studio-base/components/useConfirm";
 import { useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
 import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutStorageDebuggingContext";
+import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 import { LayoutMetadata } from "@foxglove/studio-base/services/ILayoutStorage";
 import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
@@ -90,6 +91,7 @@ export default function LayoutRow({
 }): JSX.Element {
   const styles = useStyles();
   const theme = useTheme();
+  const isMounted = useMountedState();
 
   const [editingName, setEditingName] = useState(false);
   const [nameFieldValue, setNameFieldValue] = useState("");
@@ -146,12 +148,7 @@ export default function LayoutRow({
     }, 0);
   }, []);
 
-  const confirmDelete = useConfirm({
-    title: `Delete “${layout.name}”?`,
-    action: (ok) => ok && onDelete(layout),
-    ok: "Delete",
-    confirmStyle: "danger",
-  });
+  const confirm = useConfirm();
 
   const tooltipContent = useMemo(() => {
     const conflictString = conflictTypeToString(layout.conflict);
@@ -164,6 +161,18 @@ export default function LayoutRow({
   const changesOrConflictsTooltip = useTooltip({ contents: tooltipContent });
 
   const layoutDebug = useContext(LayoutStorageDebuggingContext);
+
+  const confirmDelete = useCallback(() => {
+    void confirm({
+      title: `Delete “${layout.name}”?`,
+      ok: "Delete",
+      variant: "danger",
+    }).then((response) => {
+      if (response === "ok" && isMounted()) {
+        onDelete(layout);
+      }
+    });
+  }, [confirm, isMounted, layout, onDelete]);
 
   const menuItems: (boolean | IContextualMenuItem)[] = [
     layoutStorage.supportsSyncing && {
@@ -209,7 +218,7 @@ export default function LayoutRow({
         iconName: "Delete",
         styles: { root: { color: theme.semanticColors.errorText } },
       },
-      onClick: confirmDelete.open,
+      onClick: confirmDelete,
       ["data-test"]: "delete-layout",
     },
   ];
@@ -294,7 +303,6 @@ export default function LayoutRow({
         />
       )}
       {changesOrConflictsTooltip.tooltip}
-      {confirmDelete.modal}
       <Stack.Item grow className={styles.layoutName} title={layout.name}>
         {editingName ? (
           <TextField
@@ -307,10 +315,10 @@ export default function LayoutRow({
           <>
             {layout.path.map((item) => {
               return (
-                <>
+                <Fragment key={item}>
                   <span className={styles.pathSegment}>{item}</span>
                   <span className={styles.pathSeparator}>›</span>
-                </>
+                </Fragment>
               );
             })}
             {layout.name}

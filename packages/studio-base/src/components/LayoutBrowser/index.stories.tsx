@@ -12,6 +12,7 @@ import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutCon
 import LayoutCacheContext, {
   useLayoutCache,
 } from "@foxglove/studio-base/context/LayoutCacheContext";
+import ModalHost from "@foxglove/studio-base/context/ModalHost";
 import CacheOnlyLayoutStorageProvider from "@foxglove/studio-base/providers/CacheOnlyLayoutStorageProvider";
 import CurrentLayoutState, {
   DEFAULT_LAYOUT_FOR_TESTS,
@@ -69,13 +70,15 @@ function WithSetup(Child: Story, ctx: StoryContext): JSX.Element {
   );
   return (
     <div style={{ display: "flex", height: 400 }}>
-      <CurrentLayoutContext.Provider value={currentLayout}>
-        <LayoutCacheContext.Provider value={storage}>
-          <CacheOnlyLayoutStorageProvider>
-            <Child />
-          </CacheOnlyLayoutStorageProvider>
-        </LayoutCacheContext.Provider>
-      </CurrentLayoutContext.Provider>
+      <ModalHost>
+        <CurrentLayoutContext.Provider value={currentLayout}>
+          <LayoutCacheContext.Provider value={storage}>
+            <CacheOnlyLayoutStorageProvider>
+              <Child />
+            </CacheOnlyLayoutStorageProvider>
+          </LayoutCacheContext.Provider>
+        </CurrentLayoutContext.Provider>
+      </ModalHost>
     </div>
   );
 }
