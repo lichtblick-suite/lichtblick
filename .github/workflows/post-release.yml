@@ -1,9 +1,9 @@
 name: Post Release
 
-# run only on releases (not pre-releases)
+# run after releases are published
 on:
   release:
-    types: [released]
+    types: [published]
 
 jobs:
   merge:
