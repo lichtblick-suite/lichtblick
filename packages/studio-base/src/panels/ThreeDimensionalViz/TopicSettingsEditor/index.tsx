@@ -34,8 +34,6 @@ import PointCloudSettingsEditor from "./PointCloudSettingsEditor";
 import PoseSettingsEditor from "./PoseSettingsEditor";
 import styles from "./TopicSettingsEditor.module.scss";
 
-export const LINED_CONVEX_HULL_RENDERING_SETTING = "LinedConvexHull";
-
 export type { TopicSettingsEditorProps } from "./types";
 
 export function topicSettingsEditorForDatatype(datatype: string):

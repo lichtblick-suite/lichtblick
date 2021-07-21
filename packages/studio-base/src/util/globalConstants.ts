@@ -16,7 +16,6 @@ export const DEFAULT_STUDIO_NODE_PREFIX = "/studio_node/";
 
 export const TRANSFORM_TOPIC = "/tf";
 export const DIAGNOSTIC_TOPIC = "/diagnostics";
-export const SOCKET_KEY = "dataSource.websocket";
 export const SECOND_SOURCE_PREFIX = "/studio_source_2";
 
 export const COLOR_RGBA_DATATYPE = "std_msgs/ColorRGBA";
@@ -39,8 +38,6 @@ export const FOXGLOVE_GRID_DATATYPE = "foxglove/Grid";
 export const ROBOT_DESCRIPTION_PARAM = "/robot_description";
 
 export const MARKER_ARRAY_DATATYPES = [VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE];
-
-export const USER_ERROR_PREFIX = "[STUDIO USER ERROR]";
 
 export const COLORS = {
   RED: { r: 1.0, g: 0.2, b: 0.2, a: 1.0 },
@@ -77,12 +74,6 @@ export const MARKER_MSG_TYPES = {
   OVERLAY_ICON: 109,
 } as const;
 
-export const POSE_MARKER_SCALE = { x: 2, y: 2, z: 0.1 };
-
-// Planning
-export const MILES_PER_HOUR_TO_METERS_PER_SECOND = 0.44703;
-export const METERS_PER_SECOND_TO_MILES_PER_HOUR = 2.23694;
-
 export const jsonTreeTheme = {
   base00: "transparent", // bg
   base07: colors.BLUEL1, // text
@@ -94,5 +85,3 @@ export const jsonTreeTheme = {
 };
 
 export const TAB_PANEL_TYPE = "Tab";
-
-export const LINED_CONVEX_HULL_RENDERING_SETTING = "LinedConvexHull";

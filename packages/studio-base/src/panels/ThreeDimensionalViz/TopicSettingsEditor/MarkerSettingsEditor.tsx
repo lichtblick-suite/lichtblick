@@ -17,7 +17,6 @@ import Checkbox from "@foxglove/studio-base/components/Checkbox";
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Flex from "@foxglove/studio-base/components/Flex";
 import { Marker, MarkerArray } from "@foxglove/studio-base/types/Messages";
-import { LINED_CONVEX_HULL_RENDERING_SETTING } from "@foxglove/studio-base/util/globalConstants";
 
 import { TopicSettingsEditorProps } from ".";
 import { SLabel, SDescription } from "./common";
@@ -51,13 +50,10 @@ export default function MarkerSettingsEditor(
         `}
       </SDescription>
       <Checkbox
-        checked={settings.overrideCommand === LINED_CONVEX_HULL_RENDERING_SETTING}
+        checked={settings.overrideCommand === "LinedConvexHull"}
         label="Allow clicking inside line markers that form polygons"
         onChange={(checked) =>
-          onFieldChange(
-            "overrideCommand",
-            checked ? LINED_CONVEX_HULL_RENDERING_SETTING : undefined,
-          )
+          onFieldChange("overrideCommand", checked ? "LinedConvexHull" : undefined)
         }
         style={{ marginBottom: 12 }}
         labelStyle={{ lineHeight: 1.2 }}

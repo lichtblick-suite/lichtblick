@@ -50,8 +50,6 @@ import { MarkerProvider, MarkerCollector, Scene } from "@foxglove/studio-base/ty
 import Bounds from "@foxglove/studio-base/util/Bounds";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 import {
-  POSE_MARKER_SCALE,
-  LINED_CONVEX_HULL_RENDERING_SETTING,
   MARKER_ARRAY_DATATYPES,
   VISUALIZATION_MSGS_MARKER_DATATYPE,
   VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE,
@@ -83,7 +81,7 @@ const buildSyntheticArrowMarker = (
 ) => ({
   type: 103,
   pose,
-  scale: POSE_MARKER_SCALE,
+  scale: { x: 2, y: 2, z: 0.1 },
   color: getSyntheticArrowMarkerColor(topic),
   interactionData: { topic, originalMessage: message },
 });
@@ -1037,13 +1035,13 @@ export default class SceneBuilder implements MarkerProvider {
       case 3:
         return add.cylinder(marker);
       case 4:
-        if (overrideCommand === LINED_CONVEX_HULL_RENDERING_SETTING) {
+        if (overrideCommand === "LinedConvexHull") {
           return add.linedConvexHull(marker);
         }
 
         return add.lineStrip(marker);
       case 5:
-        if (overrideCommand === LINED_CONVEX_HULL_RENDERING_SETTING) {
+        if (overrideCommand === "LinedConvexHull") {
           return add.linedConvexHull(marker);
         }
 

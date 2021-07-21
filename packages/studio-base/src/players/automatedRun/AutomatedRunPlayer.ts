@@ -34,7 +34,6 @@ import {
   RandomAccessDataProviderMetadata,
   InitializationResult,
 } from "@foxglove/studio-base/randomAccessDataProviders/types";
-import { USER_ERROR_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import sendNotification, {
   NotificationType,
   NotificationSeverity,
@@ -113,7 +112,7 @@ export default class AutomatedRunPlayer implements Player {
         }
         let error;
         if (type === "user") {
-          error = new Error(`${USER_ERROR_PREFIX} ${message} // ${detailsToString(details)}`);
+          error = new Error(`[STUDIO USER ERROR] ${message} // ${detailsToString(details)}`);
         } else if (type === "app") {
           error = new Error(`[STUDIO APPLICATION ERROR] ${detailsToString(details)}`);
         } else {
