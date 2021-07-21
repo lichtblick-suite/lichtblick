@@ -34,6 +34,13 @@ if (!rootEl) {
 }
 
 async function main() {
+  const searchParams = new URLSearchParams(window.location.search);
+  const demoMode = searchParams.get("demo") != undefined;
+  if (demoMode) {
+    // Remove ?demo from the page URL so reloading the page doesn't save a new copy of the demo layout.
+    searchParams.delete("demo");
+    history.replaceState(undefined, "", `${window.location.pathname}?${searchParams.toString()}`);
+  }
   const chromeMatch = navigator.userAgent.match(/Chrome\/(\d+)\./);
   const chromeVersion = chromeMatch ? parseInt(chromeMatch[1] ?? "", 10) : 0;
   const isChrome = chromeVersion !== 0;
@@ -61,7 +68,7 @@ async function main() {
   ReactDOM.render(
     <>
       {banner}
-      <Root />
+      <Root loadWelcomeLayout={demoMode} />
     </>,
     rootEl,
     renderCallback,

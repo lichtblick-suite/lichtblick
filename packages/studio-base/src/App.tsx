@@ -28,6 +28,11 @@ import URDFAssetLoader from "@foxglove/studio-base/services/URDFAssetLoader";
 import "./styles/global.scss";
 
 type AppProps = {
+  /**
+   * Set to true to force loading the welcome layout for demo mode. Normally the demo is only shown
+   * on first launch and not subsequent launches.
+   */
+  loadWelcomeLayout?: boolean;
   availableSources: PlayerSourceDefinition[];
   demoBagUrl?: string;
   deepLinks?: string[];
@@ -64,6 +69,7 @@ export default function App(props: AppProps): JSX.Element {
         <Suspense fallback={<></>}>
           <PanelCatalogProvider>
             <Workspace
+              loadWelcomeLayout={props.loadWelcomeLayout}
               demoBagUrl={props.demoBagUrl}
               deepLinks={props.deepLinks}
               onToolbarDoubleClick={props.onFullscreenToggle}

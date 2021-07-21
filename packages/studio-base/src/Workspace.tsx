@@ -13,7 +13,7 @@
 import { Stack } from "@fluentui/react";
 import { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect } from "react";
 import { useToasts } from "react-toast-notifications";
-import { useMountedState } from "react-use";
+import { useMount, useMountedState } from "react-use";
 import styled from "styled-components";
 
 import Log from "@foxglove/log";
@@ -141,6 +141,7 @@ function Variables() {
 const allowedDropExtensions = [".bag", ".foxe", ".urdf"];
 
 type WorkspaceProps = {
+  loadWelcomeLayout?: boolean;
   demoBagUrl?: string;
   deepLinks?: string[];
   onToolbarDoubleClick?: () => void;
@@ -268,17 +269,15 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   const { addToast } = useToasts();
 
   // Show welcome layout on first run
-  useEffect(() => {
+  useMount(() => {
     void (async () => {
       const welcomeLayoutShown = appConfiguration.get("onboarding.welcome-layout.shown");
-      if (welcomeLayoutShown == undefined || welcomeLayoutShown === false) {
-        // Set configuration *before* opening the layout to avoid infinite recursion when the player
-        // loading state causes us to re-render.
+      if (welcomeLayoutShown !== true || props.loadWelcomeLayout === true) {
         await appConfiguration.set("onboarding.welcome-layout.shown", true);
         await openWelcomeLayout();
       }
     })();
-  }, [appConfiguration, openWelcomeLayout]);
+  });
 
   // previously loaded files are tracked so support the "add bag" feature which loads a second bag
   // file when the user presses shift during a drag/drop
