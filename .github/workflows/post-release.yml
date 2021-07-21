@@ -4,6 +4,10 @@ name: Post Release
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Git tag"
 
 jobs:
   merge:
@@ -22,11 +26,11 @@ jobs:
           git config user.email "contact@foxglove.dev"
 
       - name: Merge release
-        run: git merge --no-ff --no-edit "${{ github.event.release.tag_name }}"
+        run: git merge --no-ff --no-edit "${{ github.event.release.tag_name || github.event.inputs.tag }}"
 
       - id: bump-version
         uses: foxglove/action-bump-version@v1
         with:
-          version: ${{ github.event.release.tag_name }}-dev
+          version: ${{ github.event.release.tag_name || github.event.inputs.tag }}-dev
           commit-message: Bump dev
           push: true
