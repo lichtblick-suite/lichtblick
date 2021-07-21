@@ -57,14 +57,12 @@ export default function ExtensionLoaderProvider(props: PropsWithChildren<unknown
   );
 }
 
-async function downloadExtension(url: string): Promise<Uint8Array> {
-  const res = await fetch(url);
-  return new Uint8Array(await res.arrayBuffer());
+async function downloadExtension(_url: string): Promise<Uint8Array> {
+  throw new Error("Please download the desktop app to use extensions");
 }
 
 async function installExtension(_foxeFileData: Uint8Array): Promise<ExtensionInfo> {
-  // The web view can load extensions, but can't install them
-  throw new Error("Extensions cannot be installed from the web viewer");
+  throw new Error("Please download the desktop app to use extensions");
 }
 
 async function uninstallExtension(_id: string): Promise<boolean> {
