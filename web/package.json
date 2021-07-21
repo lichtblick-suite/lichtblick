@@ -1,11 +1,6 @@
 {
   "name": "web",
   "private": true,
-  "scripts": {
-    "serve": "webpack serve --mode development --progress",
-    "build:dev": "webpack --mode development --progress",
-    "build:prod": "webpack --mode production --progress"
-  },
   "dependencies": {
     "@foxglove/studio-base": "workspace:*"
   },
