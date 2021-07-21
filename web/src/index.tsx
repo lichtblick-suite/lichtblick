@@ -45,13 +45,20 @@ async function main() {
   const chromeVersion = chromeMatch ? parseInt(chromeMatch[1] ?? "", 10) : 0;
   const isChrome = chromeVersion !== 0;
 
-  const banner = <VersionBanner isChrome={isChrome} currentVersion={chromeVersion} />;
+  const canRenderApp = typeof BigInt64Array === "function" && typeof BigUint64Array === "function";
+  const banner = (
+    <VersionBanner
+      isChrome={isChrome}
+      currentVersion={chromeVersion}
+      isDismissable={canRenderApp}
+    />
+  );
   const renderCallback = () => {
     // Integration tests look for this console log to indicate the app has rendered once
     log.debug("App rendered");
   };
 
-  if (!isChrome) {
+  if (!canRenderApp) {
     ReactDOM.render(banner, rootEl, renderCallback);
     return;
   }
