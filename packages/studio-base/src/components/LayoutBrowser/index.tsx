@@ -308,7 +308,7 @@ export default function LayoutBrowser({
           )}
         </Stack.Item>
         <div style={{ flexGrow: 1 }} />
-        {process.env.NODE_ENV !== "production" && layoutDebug && (
+        {layoutDebug && (
           <Stack
             style={{
               position: "sticky",

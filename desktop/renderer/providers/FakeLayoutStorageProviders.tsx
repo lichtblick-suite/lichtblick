@@ -112,7 +112,9 @@ export default function FakeLayoutStorageProviders({
     return <>{children}</>;
   }
   return (
-    <LayoutStorageDebuggingContext.Provider value={debugging}>
+    <LayoutStorageDebuggingContext.Provider
+      value={process.env.NODE_ENV !== "production" ? debugging : undefined}
+    >
       <LayoutStorageContext.Provider value={offlineStorage}>
         {children}
       </LayoutStorageContext.Provider>
