@@ -18,7 +18,12 @@ interface WebpackConfiguration extends Configuration {
   devServer?: WebpackDevServerConfiguration;
 }
 
-// Use a single devServer configuration across all our multi-compiler configs
+const isRelease = process.env.RELEASE != undefined;
+
+// The appdata directory is derived from the product name. To have a separate directory
+// for our production and development builds we change the product name when using dev or serve.
+const productName = isRelease ? packageJson.productName : `${packageJson.productName} Dev`;
+
 const devServerConfig: WebpackConfiguration = {
   // Use empty entry to avoid webpack default fallback to /src
   entry: {},
@@ -54,7 +59,7 @@ const devServerConfig: WebpackConfiguration = {
       templateContent: JSON.stringify({
         main: "main/main.js",
         name: packageJson.name,
-        productName: packageJson.productName,
+        productName,
         version: packageJson.version,
         description: packageJson.description,
         productDescription: packageJson.productDescription,
