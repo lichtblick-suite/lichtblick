@@ -81,8 +81,8 @@ export default (env: unknown, argv: WebpackArgv): Configuration => {
         AMPLITUDE_API_KEY: process.env.AMPLITUDE_API_KEY ?? null, // eslint-disable-line no-restricted-syntax
         SIGNUP_API_URL: "https://foxglove.dev/api/signup",
         SLACK_INVITE_URL: "https://foxglove.dev/join-slack",
-        OAUTH_CLIENT_ID: process.env.OAUTH_CLIENT_ID ?? "YICNZfXZp7Sx9bV0UsKkfqBT4CRYwOsY",
-        FOXGLOVE_API_URL: process.env.FOXGLOVE_API_URL ?? "http://api.localhost:3000",
+        OAUTH_CLIENT_ID: process.env.OAUTH_CLIENT_ID ?? "oSJGEAQm16LNF09FSVTMYJO5aArQzq8o",
+        FOXGLOVE_API_URL: process.env.FOXGLOVE_API_URL ?? "http://api.foxglove.dev",
       }),
       new HtmlWebpackPlugin({
         templateContent: `

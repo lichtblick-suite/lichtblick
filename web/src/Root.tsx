@@ -10,7 +10,6 @@ import {
   ThemeProvider,
   UserProfileLocalStorageProvider,
   StudioToastProvider,
-  CacheOnlyLayoutStorageProvider,
 } from "@foxglove/studio-base";
 
 import LocalStorageAppConfigurationProvider from "./components/LocalStorageAppConfigurationProvider";
@@ -68,7 +67,6 @@ export function Root({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }): JSX
     <StudioToastProvider />,
     <LocalStorageAppConfigurationProvider />,
     <LocalStorageLayoutCacheProvider />,
-    <CacheOnlyLayoutStorageProvider />,
     <UserProfileLocalStorageProvider />,
     <ExtensionLoaderProvider />,
     /* eslint-enable react/jsx-key */

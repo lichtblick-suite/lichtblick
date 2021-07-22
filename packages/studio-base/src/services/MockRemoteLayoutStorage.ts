@@ -79,7 +79,7 @@ export default class MockRemoteLayoutStorage implements IRemoteLayoutStorage {
       name,
       path,
       permission: "creator_write",
-      creator: FAKE_USER,
+      creatorUserId: FAKE_USER.id,
       createdAt: now,
       updatedAt: now,
     };
@@ -157,7 +157,7 @@ export default class MockRemoteLayoutStorage implements IRemoteLayoutStorage {
       name,
       path,
       permission,
-      creator: FAKE_USER,
+      creatorUserId: FAKE_USER.id,
       createdAt: now,
       updatedAt: now,
     };

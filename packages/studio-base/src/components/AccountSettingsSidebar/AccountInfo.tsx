@@ -32,7 +32,7 @@ export default function AccountInfo(props: { me?: CurrentUser }): JSX.Element {
   return (
     <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
       <div>Signed in as: {props.me.email ?? "(no email address)"}</div>
-      <PrimaryButton onClick={onSignoutClick}>Signout</PrimaryButton>
+      <PrimaryButton onClick={onSignoutClick}>Sign out</PrimaryButton>
     </Stack>
   );
 }

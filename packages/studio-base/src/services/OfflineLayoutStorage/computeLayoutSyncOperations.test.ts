@@ -21,7 +21,7 @@ function makeMetadata(
     path: [],
     createdAt: new Date(1).toISOString() as ISO8601Timestamp,
     updatedAt: new Date(updatedAt).toISOString() as ISO8601Timestamp,
-    creator: { email: "foo@example.com", id: "user1" as UserID, name: "Test User" },
+    creatorUserId: "user1" as UserID,
     permission: "creator_write",
   };
 }

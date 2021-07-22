@@ -51,7 +51,7 @@ function getEffectiveMetadata(
 
         name: layout.name,
         path: layout.path ?? [],
-        creator: undefined,
+        creatorUserId: undefined,
         createdAt: undefined,
         updatedAt: undefined,
         permission: "creator_write",
@@ -250,23 +250,30 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
   }
 
   /** Save a layout to the server following an explicit user action. */
-  async syncLayout(id: LayoutID): Promise<ConflictType | undefined> {
+  async syncLayout(
+    id: LayoutID,
+  ): Promise<{ status: "success"; newId?: LayoutID } | { status: "conflict"; type: ConflictType }> {
     const cachedLayout = await this.cacheStorage.runExclusive(async (cache) => await cache.get(id));
-    let conflict: ConflictInfo | undefined;
-    if (cachedLayout?.serverMetadata != undefined) {
-      conflict = await this.performSyncOperation(
-        { type: "upload-updated", cachedLayout, remoteLayout: cachedLayout.serverMetadata },
-        { uploadChanges: true },
-      );
-    } else if (cachedLayout?.state != undefined) {
-      conflict = await this.performSyncOperation(
-        { type: "upload-new", cachedLayout: { ...cachedLayout, state: cachedLayout.state } },
-        { uploadChanges: true },
-      );
+    try {
+      if (cachedLayout?.serverMetadata != undefined) {
+        const { conflict } = await this.performSyncOperation(
+          { type: "upload-updated", cachedLayout, remoteLayout: cachedLayout.serverMetadata },
+          { uploadChanges: true },
+        );
+        return conflict ? { status: "conflict", type: conflict.type } : { status: "success" };
+      } else if (cachedLayout?.state != undefined) {
+        const { conflict, newId } = await this.performSyncOperation(
+          { type: "upload-new", cachedLayout: { ...cachedLayout, state: cachedLayout.state } },
+          { uploadChanges: true },
+        );
+        return conflict
+          ? { status: "conflict", type: conflict.type }
+          : { status: "success", newId };
+      }
+      return { status: "success" };
+    } finally {
+      this.notifyChangeListeners();
     }
-
-    this.notifyChangeListeners();
-    return conflict?.type;
   }
 
   private isSyncing = false;
@@ -322,7 +329,7 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
   ): Promise<ConflictInfo[]> {
     const conflicts: ConflictInfo[] = [];
     for (const operation of operations) {
-      const conflict = await this.performSyncOperation(operation, options);
+      const { conflict } = await this.performSyncOperation(operation, options);
       if (conflict) {
         conflicts.push(conflict);
       }
@@ -333,14 +340,16 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
   private async performSyncOperation(
     operation: SyncOperation,
     { uploadChanges }: { uploadChanges: boolean },
-  ): Promise<ConflictInfo | undefined> {
+  ): Promise<{ conflict?: ConflictInfo; newId?: LayoutID }> {
     switch (operation.type) {
       case "conflict": {
         const { cachedLayout, conflictType } = operation;
         return {
-          cacheId: cachedLayout.id,
-          remoteId: cachedLayout.serverMetadata?.id,
-          type: conflictType,
+          conflict: {
+            cacheId: cachedLayout.id,
+            remoteId: cachedLayout.serverMetadata?.id,
+            type: conflictType,
+          },
         };
       }
 
@@ -396,9 +405,11 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
             break;
           case "precondition-failed":
             return {
-              cacheId: cachedLayout.id,
-              remoteId: remoteLayout.id,
-              type: "local-delete-remote-update",
+              conflict: {
+                cacheId: cachedLayout.id,
+                remoteId: remoteLayout.id,
+                type: "local-delete-remote-update",
+              },
             };
         }
         break;
@@ -427,12 +438,14 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
               });
               await cache.delete(cachedLayout.id);
             });
-            break;
+            return { newId: response.newMetadata.id };
           case "conflict":
             return {
-              cacheId: cachedLayout.id,
-              remoteId: undefined,
-              type: "name-collision",
+              conflict: {
+                cacheId: cachedLayout.id,
+                remoteId: undefined,
+                type: "name-collision",
+              },
             };
         }
         break;
@@ -479,20 +492,24 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
             break;
           case "precondition-failed":
             return {
-              cacheId: cachedLayout.id,
-              remoteId: remoteLayout.id,
-              type: "both-update",
+              conflict: {
+                cacheId: cachedLayout.id,
+                remoteId: remoteLayout.id,
+                type: "both-update",
+              },
             };
           case "conflict":
             return {
-              cacheId: cachedLayout.id,
-              remoteId: remoteLayout.id,
-              type: "local-update-remote-delete",
+              conflict: {
+                cacheId: cachedLayout.id,
+                remoteId: remoteLayout.id,
+                type: "local-update-remote-delete",
+              },
             };
         }
-        break;
+        return { newId: remoteLayout.id };
       }
     }
-    return undefined;
+    return {};
   }
 }

@@ -11,7 +11,6 @@ import {
   useAppConfigurationValue,
   AppSetting,
   useLayoutCache,
-  CacheOnlyLayoutStorage,
   LayoutStorageContext,
   LayoutStorageDebuggingContext,
   LayoutID,
@@ -24,7 +23,7 @@ import FakeRemoteLayoutStorage from "../services/FakeRemoteLayoutStorage";
 const desktopBridge = (global as unknown as { desktopBridge: Desktop }).desktopBridge;
 const log = Logger.getLogger(__filename);
 
-export default function LayoutStorageProviders({
+export default function FakeLayoutStorageProviders({
   children,
 }: React.PropsWithChildren<unknown>): JSX.Element {
   const [useFakeRemoteLayoutStorage = false] = useAppConfigurationValue<boolean>(
@@ -41,8 +40,6 @@ export default function LayoutStorageProviders({
     () => new OfflineLayoutStorage({ cacheStorage: layoutCache, remoteStorage: fakeRemoteStorage }),
     [layoutCache, fakeRemoteStorage],
   );
-  const cacheOnlyStorage = useMemo(() => new CacheOnlyLayoutStorage(layoutCache), [layoutCache]);
-
   const openFakeStorageDirectory = useCallback(async () => {
     await desktopBridge.debug_openFakeRemoteLayoutStorageDirectory();
   }, []);
@@ -104,7 +101,6 @@ export default function LayoutStorageProviders({
   );
 
   const debugging = useShallowMemo({
-    useFakeRemoteLayoutStorage,
     openFakeStorageDirectory,
     syncNow,
     injectEdit,
@@ -112,11 +108,12 @@ export default function LayoutStorageProviders({
     injectDelete,
   });
 
+  if (!useFakeRemoteLayoutStorage) {
+    return <>{children}</>;
+  }
   return (
     <LayoutStorageDebuggingContext.Provider value={debugging}>
-      <LayoutStorageContext.Provider
-        value={useFakeRemoteLayoutStorage ? offlineStorage : cacheOnlyStorage}
-      >
+      <LayoutStorageContext.Provider value={offlineStorage}>
         {children}
       </LayoutStorageContext.Provider>
     </LayoutStorageDebuggingContext.Provider>

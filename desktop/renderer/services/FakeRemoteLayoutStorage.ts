@@ -28,11 +28,7 @@ function assertLayout(value: unknown): asserts value is RemoteLayout {
   }
 }
 
-const FAKE_USER = {
-  id: "fakeuser" as UserID,
-  email: "fakeuser@example.com",
-  name: "Fake User",
-};
+const FAKE_USER_ID = "fakeuser" as UserID;
 
 /**
  * An implementation of "remote" layout storage that stores layouts in native storage for debugging
@@ -160,7 +156,7 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
         id: uuidv4() as LayoutID,
         name,
         path,
-        creator: FAKE_USER,
+        creatorUserId: FAKE_USER_ID,
         createdAt: now,
         updatedAt: now,
         permission: "creator_write",
@@ -269,7 +265,7 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
         path,
         name,
         data: source.data,
-        creator: FAKE_USER,
+        creatorUserId: FAKE_USER_ID,
         createdAt: now,
         updatedAt: now,
         permission,

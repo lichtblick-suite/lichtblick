@@ -27,7 +27,7 @@ export type LayoutMetadata = {
   id: LayoutID;
   name: string;
   path: string[];
-  creator: UserMetadata | undefined;
+  creatorUserId: UserID | undefined;
   createdAt: ISO8601Timestamp | undefined;
   updatedAt: ISO8601Timestamp | undefined;
   permission: "creator_write" | "org_read" | "org_write";
@@ -65,7 +65,9 @@ export interface ILayoutStorage {
 
   readonly supportsSyncing: boolean;
 
-  syncLayout(id: LayoutID): Promise<ConflictType | undefined>;
+  syncLayout(
+    id: LayoutID,
+  ): Promise<{ status: "success"; newId?: LayoutID } | { status: "conflict"; type: ConflictType }>;
 
   readonly supportsSharing: boolean;
 

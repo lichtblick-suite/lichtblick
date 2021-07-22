@@ -7,12 +7,11 @@ import { createContext } from "react";
 import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 
 type ILayoutStorageDebugging = {
-  useFakeRemoteLayoutStorage: boolean;
-  openFakeStorageDirectory: () => Promise<void>;
+  openFakeStorageDirectory?: () => Promise<void>;
   syncNow: () => Promise<void>;
-  injectEdit: (id: LayoutID) => Promise<void>;
-  injectRename: (id: LayoutID) => Promise<void>;
-  injectDelete: (id: LayoutID) => Promise<void>;
+  injectEdit?: (id: LayoutID) => Promise<void>;
+  injectRename?: (id: LayoutID) => Promise<void>;
+  injectDelete?: (id: LayoutID) => Promise<void>;
 };
 
 export default createContext<ILayoutStorageDebugging | undefined>(undefined);

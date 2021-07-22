@@ -19,8 +19,6 @@ export type RemoteLayoutMetadata = {
   [K in keyof Omit<LayoutMetadata, "data" | "hasUnsyncedChanges" | "conflict">]-?: NonNullable<
     LayoutMetadata[K]
   >;
-} & {
-  data?: never;
 };
 
 /**

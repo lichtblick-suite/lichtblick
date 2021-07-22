@@ -45,7 +45,7 @@ describe("OfflineLayoutStorage", () => {
       id: "id1" as LayoutID,
       path: ["a"],
       name: "Foo",
-      creator: FAKE_USER,
+      creatorUserId: FAKE_USER.id,
       createdAt: new Date(1).toISOString() as ISO8601Timestamp,
       updatedAt: new Date(1).toISOString() as ISO8601Timestamp,
       permission: "creator_write",
@@ -66,7 +66,7 @@ describe("OfflineLayoutStorage", () => {
       name: "Foo",
       path: ["a"],
       data: remote1.data,
-      creator: undefined,
+      creatorUserId: undefined,
       createdAt: undefined,
       updatedAt: undefined,
       permission: "creator_write",
@@ -81,7 +81,7 @@ describe("OfflineLayoutStorage", () => {
       id: "id1" as LayoutID,
       path: ["a"],
       name: "Foo",
-      creator: FAKE_USER,
+      creatorUserId: FAKE_USER.id,
       createdAt: new Date(1).toISOString() as ISO8601Timestamp,
       updatedAt: new Date(1).toISOString() as ISO8601Timestamp,
       permission: "creator_write",
@@ -114,7 +114,7 @@ describe("OfflineLayoutStorage", () => {
         id: "id1" as LayoutID,
         path: ["a"],
         name: "Foo",
-        creator: FAKE_USER,
+        creatorUserId: FAKE_USER.id,
         createdAt: new Date(10).toISOString() as ISO8601Timestamp,
         updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
         permission: "creator_write",
@@ -152,7 +152,7 @@ describe("OfflineLayoutStorage", () => {
         id: "id1" as LayoutID,
         path: ["a"],
         name: "Foo",
-        creator: FAKE_USER,
+        creatorUserId: FAKE_USER.id,
         createdAt: new Date(10).toISOString() as ISO8601Timestamp,
         updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
         permission: "creator_write",
@@ -179,7 +179,7 @@ describe("OfflineLayoutStorage", () => {
         id: "id1" as LayoutID,
         path: ["a"],
         name: "Foo",
-        creator: FAKE_USER,
+        creatorUserId: FAKE_USER.id,
         createdAt: new Date(10).toISOString() as ISO8601Timestamp,
         updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
         permission: "creator_write",
@@ -188,7 +188,7 @@ describe("OfflineLayoutStorage", () => {
         ...remote1,
         path: ["b", "c"],
         name: "Foo2",
-        creator: FAKE_USER,
+        creatorUserId: FAKE_USER.id,
         createdAt: new Date(10).toISOString() as ISO8601Timestamp,
         updatedAt: new Date(20).toISOString() as ISO8601Timestamp,
         permission: "org_read",
@@ -225,7 +225,7 @@ describe("OfflineLayoutStorage", () => {
         id: "id1" as LayoutID,
         path: ["a"],
         name: "Foo",
-        creator: FAKE_USER,
+        creatorUserId: FAKE_USER.id,
         createdAt: new Date(10).toISOString() as ISO8601Timestamp,
         updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
         permission: "creator_write",
@@ -250,7 +250,7 @@ describe("OfflineLayoutStorage", () => {
         id: "id1" as LayoutID,
         path: ["a"],
         name: "Foo",
-        creator: FAKE_USER,
+        creatorUserId: FAKE_USER.id,
         createdAt: new Date(10).toISOString() as ISO8601Timestamp,
         updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
         permission: "creator_write",
@@ -278,7 +278,7 @@ describe("OfflineLayoutStorage", () => {
         id: "id1" as LayoutID,
         path: ["a"],
         name: "Foo",
-        creator: FAKE_USER,
+        creatorUserId: FAKE_USER.id,
         createdAt: new Date(10).toISOString() as ISO8601Timestamp,
         updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
         permission: "creator_write",
@@ -318,7 +318,7 @@ describe("OfflineLayoutStorage", () => {
         id: expect.any(String),
         path: ["a", "b"],
         name: "layout1",
-        creator: undefined,
+        creatorUserId: undefined,
         createdAt: undefined,
         updatedAt: undefined,
         permission: "creator_write",
@@ -354,7 +354,7 @@ describe("OfflineLayoutStorage", () => {
         id: expect.any(String),
         path: ["a", "b"],
         name: "layout1",
-        creator: FAKE_USER,
+        creatorUserId: FAKE_USER.id,
         createdAt: new Date(10).toISOString() as ISO8601Timestamp,
         updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
         permission: "creator_write",
@@ -382,7 +382,7 @@ describe("OfflineLayoutStorage", () => {
           id: expectedCached.id,
           path: ["a", "b"],
           name: "layout1",
-          creator: FAKE_USER,
+          creatorUserId: FAKE_USER.id,
           createdAt: new Date(10).toISOString() as ISO8601Timestamp,
           updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
           permission: "creator_write",
@@ -396,7 +396,7 @@ describe("OfflineLayoutStorage", () => {
         id: "id1" as LayoutID,
         path: ["a"],
         name: "Foo",
-        creator: FAKE_USER,
+        creatorUserId: FAKE_USER.id,
         createdAt: new Date(10).toISOString() as ISO8601Timestamp,
         updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
         permission: "creator_write",
@@ -418,8 +418,14 @@ describe("OfflineLayoutStorage", () => {
       });
 
       jest.setSystemTime(10);
-      await expect(storage.syncLayout(newId1)).resolves.toBe("name-collision");
-      await expect(storage.syncLayout(newId2)).resolves.toBeUndefined();
+      await expect(storage.syncLayout(newId1)).resolves.toEqual({
+        status: "conflict",
+        type: "name-collision",
+      });
+      await expect(storage.syncLayout(newId2)).resolves.toEqual({
+        status: "success",
+        newId: expect.any(String),
+      });
 
       const remoteLayouts = await remoteStorage.getLayouts();
       expect(remoteLayouts).toEqual([
@@ -428,7 +434,7 @@ describe("OfflineLayoutStorage", () => {
           id: expect.any(String),
           path: ["b", "c"],
           name: "Foo", // no conflict - not renamed
-          creator: FAKE_USER,
+          creatorUserId: FAKE_USER.id,
           createdAt: new Date(10).toISOString() as ISO8601Timestamp,
           updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
           permission: "creator_write",
@@ -441,7 +447,7 @@ describe("OfflineLayoutStorage", () => {
         id: "id1" as LayoutID,
         path: ["a"],
         name: "Foo",
-        creator: FAKE_USER,
+        creatorUserId: FAKE_USER.id,
         createdAt: new Date(10).toISOString() as ISO8601Timestamp,
         updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
         permission: "creator_write",
@@ -462,7 +468,7 @@ describe("OfflineLayoutStorage", () => {
       const storage = new OfflineLayoutStorage({ cacheStorage, remoteStorage });
 
       jest.setSystemTime(20);
-      await expect(storage.syncLayout(remote1.id)).resolves.toBeUndefined();
+      await expect(storage.syncLayout(remote1.id)).resolves.toEqual({ status: "success" });
       await expect(remoteStorage.getLayouts()).resolves.toEqual([
         {
           ...remote1,
@@ -485,7 +491,7 @@ describe("OfflineLayoutStorage", () => {
         id: "id1" as LayoutID,
         path: ["a"],
         name: "Foo",
-        creator: FAKE_USER,
+        creatorUserId: FAKE_USER.id,
         createdAt: new Date(10).toISOString() as ISO8601Timestamp,
         updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
         permission: "creator_write",
@@ -507,7 +513,7 @@ describe("OfflineLayoutStorage", () => {
 
       jest.setSystemTime(20);
       await expect(storage.syncWithRemote()).resolves.toEqual(new Map());
-      await expect(storage.syncLayout(remote1.id)).resolves.toBeUndefined();
+      await expect(storage.syncLayout(remote1.id)).resolves.toEqual({ status: "success" });
       await expect(remoteStorage.getLayouts()).resolves.toEqual([
         {
           ...remote1,

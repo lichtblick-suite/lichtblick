@@ -24,7 +24,7 @@ function getMetadata(layout: CachedLayout): LayoutMetadata {
     id: layout.id as LayoutID,
     name: layout.name,
     path: layout.path ?? [],
-    creator: undefined,
+    creatorUserId: undefined,
     createdAt: undefined,
     updatedAt: undefined,
     permission: "creator_write",
@@ -77,7 +77,7 @@ export default class CacheOnlyLayoutStorage implements ILayoutStorage {
     };
   }
 
-  async syncLayout(_id: LayoutID): Promise<undefined> {
+  async syncLayout(_id: LayoutID): Promise<never> {
     throw new Error("CacheOnlyLayoutStorage should never have unsynced changes");
   }
 

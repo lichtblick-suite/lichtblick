@@ -37,13 +37,18 @@ const features: Feature[] = [
     ? [
         {
           key: AppSetting.FAKE_REMOTE_LAYOUTS,
-          name: "Fake remote layout storage",
+          name: "Fake remote layout storage (desktop only)",
           description: (
             <>
               Use a folder on disk as a “remote” layout server to experiment with shared layout
               functionality.
             </>
           ),
+        },
+        {
+          key: AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
+          name: "Team shared layouts",
+          description: <>Enable team layout sharing when signed in to Studio.</>,
         },
       ]
     : []),
