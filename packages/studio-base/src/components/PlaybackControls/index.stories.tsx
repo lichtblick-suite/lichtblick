@@ -31,8 +31,7 @@ import CurrentLayoutState, {
   DEFAULT_LAYOUT_FOR_TESTS,
 } from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
 
-import { UnconnectedPlaybackControls } from ".";
-import styles from "./index.module.scss";
+import { UnconnectedPlaybackControls, useStyles } from ".";
 
 const START_TIME = 1531761690;
 
@@ -120,6 +119,7 @@ storiesOf("components/PlaybackControls", module)
     );
   })
   .add("tooltip", () => {
+    const classes = useStyles();
     const pause = action("pause");
     const play = action("play");
     const seek = action("seek");
@@ -132,7 +132,7 @@ storiesOf("components/PlaybackControls", module)
     }
 
     React.useEffect(() => {
-      const [element] = document.getElementsByClassName(styles.sliderContainer!);
+      const [element] = document.getElementsByClassName(classes.sliderContainer);
       if (element) {
         TestUtils.Simulate.mouseMove(element, { clientX: 450 });
       }

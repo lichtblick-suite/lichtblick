@@ -10,41 +10,29 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+
+import {
+  DefaultButton,
+  DirectionalHint,
+  ITextFieldStyles,
+  Stack,
+  TextField,
+  useTheme,
+} from "@fluentui/react";
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import styled from "styled-components";
 
 import { Time } from "@foxglove/rostime";
-import Dropdown from "@foxglove/studio-base/components/Dropdown";
-import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
-import Flex from "@foxglove/studio-base/components/Flex";
 import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
 import {
   formatDate,
   formatTime,
   getValidatedTimeAndMethodFromString,
 } from "@foxglove/studio-base/util/formatTime";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { formatTimeRaw, isTimeInRangeInclusive } from "@foxglove/studio-base/util/time";
-
-import styles from "./index.module.scss";
-
-const SInput = styled.input`
-  padding: 8px 4px;
-  width: calc(100% - 4px);
-`;
-const STimestamp = styled.span`
-  padding: 8px 4px;
-  cursor: pointer;
-  border-radius: 4px;
-
-  &:hover {
-    background-color: ${colors.DARK3};
-    opacity: 0.8;
-  }
-`;
 
 const PlaybackTimeDisplayMethod = ({
   currentTime,
@@ -63,19 +51,16 @@ const PlaybackTimeDisplayMethod = ({
   onPause: () => void;
   isPlaying: boolean;
 }): JSX.Element => {
+  const timestampInputRef = useRef<HTMLInputElement>(ReactNull);
   const timeDisplayMethod = useCurrentLayoutSelector(
     (state) => state.selectedLayout?.data.playbackConfig.timeDisplayMethod ?? "ROS",
   );
   const { setPlaybackConfig } = useCurrentLayoutActions();
   const setTimeDisplayMethod = useCallback(
-    (newTimeDisplayMethod: "ROS" | "TOD" | undefined) =>
+    (newTimeDisplayMethod: "ROS" | "TOD") =>
       setPlaybackConfig({ timeDisplayMethod: newTimeDisplayMethod }),
     [setPlaybackConfig],
   );
-
-  const timestampInputRef = useRef<HTMLInputElement>(ReactNull);
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-
   const currentTimeString = useMemo(() => {
     if (currentTime) {
       return timeDisplayMethod === "ROS"
@@ -84,11 +69,48 @@ const PlaybackTimeDisplayMethod = ({
     }
     return undefined;
   }, [currentTime, timeDisplayMethod, timezone]);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
   const [inputText, setInputText] = useState<string | undefined>(currentTimeString ?? undefined);
   const [hasError, setHasError] = useState<boolean>(false);
 
+  const theme = useTheme();
+  const textFieldStyles = useMemo(
+    () =>
+      ({
+        errorMessage: {
+          display: "none",
+        },
+        field: {
+          margin: 0,
+          whiteSpace: "nowrap",
+          fontFamily: MONOSPACE,
+
+          ":hover": {
+            borderRadius: 2,
+            backgroundColor: theme.semanticColors.buttonBackgroundHovered,
+          },
+        },
+        fieldGroup: {
+          border: "none",
+        },
+        icon: {
+          height: 20,
+          color: hasError ? theme.semanticColors.errorIcon : undefined,
+        },
+        root: {
+          marginLeft: theme.spacing.s1,
+
+          "&.is-disabled input[disabled]": {
+            background: "transparent",
+            cursor: "not-allowed",
+          },
+        },
+      } as Partial<ITextFieldStyles>),
+    [hasError, theme],
+  );
+
   const onSubmit = useCallback(
-    (e: React.SyntheticEvent) => {
+    (e: React.FormEvent) => {
       e.preventDefault();
 
       if (inputText == undefined || inputText.length === 0) {
@@ -111,7 +133,7 @@ const PlaybackTimeDisplayMethod = ({
 
       // If input is valid, clear error state, exit edit mode, and seek to input timestamp
       setHasError(false);
-      setIsEditing(false);
+
       if (
         validTimeAndMethod.time &&
         isTimeInRangeInclusive(validTimeAndMethod.time, startTime, endTime)
@@ -143,51 +165,81 @@ const PlaybackTimeDisplayMethod = ({
   }, [hasError, inputText, isPlaying]);
 
   return (
-    <Flex start style={{ flexGrow: 0, alignItems: "center", marginLeft: "8px" }}>
+    <Stack
+      horizontal
+      verticalAlign="center"
+      grow={0}
+      tokens={{
+        childrenGap: theme.spacing.s2,
+      }}
+    >
       {currentTime ? (
-        isEditing ? (
-          <form onSubmit={onSubmit} style={{ width: "100%" }}>
-            <SInput
-              ref={timestampInputRef}
-              data-test="PlaybackTime-text"
-              style={hasError ? { border: `1px solid ${colors.RED}` } : {}}
-              value={inputText}
-              autoFocus
-              onFocus={(e) => e.target.select()}
-              onBlur={onSubmit}
-              onChange={({ target: { value } }) => setInputText(value)}
-            />
-          </form>
-        ) : (
-          <STimestamp
+        <form onSubmit={onSubmit} style={{ width: "100%" }}>
+          <TextField
+            ariaLabel="Playback Time Method"
             data-test="PlaybackTime-text"
-            onClick={() => {
+            elementRef={timestampInputRef}
+            value={isEditing ? inputText : currentTimeString}
+            errorMessage={hasError ? "Invalid Time" : undefined}
+            onFocus={(e) => {
               onPause();
+              setHasError(false);
               setIsEditing(true);
               setInputText(currentTimeString);
+              e.target.select();
             }}
-          >
-            {currentTimeString}
-          </STimestamp>
-        )
+            onBlur={(e) => {
+              onSubmit(e);
+              setIsEditing(false);
+              setTimeout(() => setHasError(false), 600);
+            }}
+            iconProps={{ iconName: hasError ? "Warning" : undefined }}
+            size={21}
+            styles={textFieldStyles}
+            onChange={(_, newValue) => setInputText(newValue)}
+          />
+        </form>
       ) : (
-        <span data-test="PlaybackTime-text">–</span>
+        <TextField disabled size={13} styles={textFieldStyles} value="–" />
       )}
-      <Dropdown
-        position="above"
-        value={timeDisplayMethod}
-        text={timeDisplayMethod}
-        onChange={(val) => setTimeDisplayMethod(val)}
-        btnClassname={styles.timeDisplayMethodButton}
+      <DefaultButton
+        menuProps={{
+          directionalHint: DirectionalHint.topLeftEdge,
+          directionalHintFixed: true,
+          gapSpace: 3,
+          items: [
+            {
+              canCheck: true,
+              key: "TOD",
+              text: "Time of day (TOD)",
+              isChecked: timeDisplayMethod === "TOD",
+              onClick: () => setTimeDisplayMethod("TOD"),
+            },
+            {
+              canCheck: true,
+              key: "ROS",
+              text: "ROS time",
+              isChecked: timeDisplayMethod === "ROS",
+              onClick: () => setTimeDisplayMethod("ROS"),
+            },
+          ],
+        }}
+        styles={{
+          root: {
+            border: "none",
+            padding: theme.spacing.s1,
+            margin: 0, // Remove this once global.scss has gone away
+            minWidth: "50px",
+          },
+          label: theme.fonts.small,
+          menuIcon: {
+            fontSize: theme.fonts.tiny.fontSize,
+          },
+        }}
       >
-        <DropdownItem value="TOD">
-          <span key="day">Time of day (TOD)</span>
-        </DropdownItem>
-        <DropdownItem value="ROS">
-          <span key="ros">ROS time</span>
-        </DropdownItem>
-      </Dropdown>
-    </Flex>
+        {timeDisplayMethod}
+      </DefaultButton>
+    </Stack>
   );
 };
 

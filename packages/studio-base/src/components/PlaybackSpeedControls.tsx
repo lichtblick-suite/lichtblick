@@ -1,20 +1,17 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-//
-// This file incorporates work covered by the following copyright and
-// permission notice:
-//
-//   Copyright 2019-2021 Cruise LLC
-//
-//   This source code is licensed under the Apache License, Version 2.0,
-//   found at http://www.apache.org/licenses/LICENSE-2.0
-//   You may not use this file except in compliance with the License.
+
+import {
+  DefaultButton,
+  DirectionalHint,
+  IContextualMenuItem,
+  IMenuItemStyles,
+  useTheme,
+} from "@fluentui/react";
 import { useCallback, useEffect } from "react";
 
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
-import Dropdown from "@foxglove/studio-base/components/Dropdown";
-import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import {
   useCurrentLayoutActions,
@@ -22,9 +19,14 @@ import {
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 
-const SPEEDS = ["0.01", "0.02", "0.05", "0.1", "0.2", "0.5", "0.8", "1", "2", "3", "5"];
+const SPEED_OPTIONS = [0.01, 0.02, 0.05, 0.1, 0.2, 0.5, 0.8, 1, 2, 3, 5];
+
+function formatSpeed(val: number) {
+  return `${val < 0.1 ? val?.toFixed(2) : val}×`;
+}
 
 export default function PlaybackSpeedControls(): JSX.Element {
+  const theme = useTheme();
   const configSpeed = useCurrentLayoutSelector(
     (state) => state.selectedLayout?.data.playbackConfig.speed,
   );
@@ -33,9 +35,6 @@ export default function PlaybackSpeedControls(): JSX.Element {
   );
   const { capabilities } = useDataSourceInfo();
   const canSetSpeed = capabilities.includes(PlayerCapabilities.setSpeed);
-
-  // TODO(JP): Might be nice to move all this logic a bit deeper down. It's a bit weird to be doing
-  // all this in what's otherwise just a view component.
   const setPlaybackSpeed = useMessagePipeline(
     useCallback(({ setPlaybackSpeed: pipelineSetPlaybackSpeed }) => pipelineSetPlaybackSpeed, []),
   );
@@ -58,27 +57,55 @@ export default function PlaybackSpeedControls(): JSX.Element {
   }, [configSpeed, setSpeed]);
 
   const displayedSpeed = speed ?? configSpeed;
-  let speedText = `–`;
-
-  if (displayedSpeed != undefined) {
-    speedText = displayedSpeed < 0.1 ? `${displayedSpeed.toFixed(2)}x` : `${displayedSpeed}x`;
-  }
 
   return (
-    <Dropdown
-      position="above"
-      value={displayedSpeed}
-      text={speedText}
-      onChange={setSpeed}
-      menuStyle={{ width: "75px" }}
-      btnStyle={{ marginRight: "16px", height: "28px" }}
-      dataTest="PlaybackSpeedControls-Dropdown"
+    <DefaultButton
+      data-test="PlaybackSpeedControls-Dropdown"
+      menuProps={{
+        calloutProps: {
+          calloutMaxWidth: 80,
+        },
+        directionalHint: DirectionalHint.topLeftEdge,
+        directionalHintFixed: true,
+        gapSpace: 3,
+        items: SPEED_OPTIONS.map(
+          (option: number): IContextualMenuItem => ({
+            canCheck: true,
+            key: `${option}`,
+            text: formatSpeed(option),
+            isChecked: displayedSpeed === option,
+            onClick: () => setSpeed(option),
+          }),
+        ),
+        styles: {
+          subComponentStyles: {
+            menuItem: {
+              label: { fontSize: theme.fonts.small.fontSize },
+              // Reach into the component styles to remove the effects of global.scss
+              root: { margin: 0, borderRadius: 0 },
+              checkmarkIcon: { height: "20px" },
+            } as Partial<IMenuItemStyles>,
+          },
+        },
+      }}
+      styles={{
+        root: {
+          background: theme.semanticColors.buttonBackgroundHovered,
+          border: "none",
+          padding: theme.spacing.s1,
+          margin: 0, // Remove this once global.scss has gone away
+          minWidth: "60px",
+        },
+        rootHovered: {
+          background: theme.semanticColors.buttonBackgroundPressed,
+        },
+        label: theme.fonts.small,
+        menuIcon: {
+          fontSize: theme.fonts.tiny.fontSize,
+        },
+      }}
     >
-      {SPEEDS.map((eachSpeed: string) => (
-        <DropdownItem key={eachSpeed} value={parseFloat(eachSpeed)}>
-          <span>{eachSpeed}x</span>
-        </DropdownItem>
-      ))}
-    </Dropdown>
+      {displayedSpeed == undefined ? "–" : formatSpeed(displayedSpeed)}
+    </DefaultButton>
   );
 }

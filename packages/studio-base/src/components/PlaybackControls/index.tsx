@@ -11,21 +11,15 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import PauseIcon from "@mdi/svg/svg/pause.svg";
-import PlayIcon from "@mdi/svg/svg/play.svg";
-import RepeatIcon from "@mdi/svg/svg/repeat.svg";
-import SkipNextOutlineIcon from "@mdi/svg/svg/skip-next-outline.svg";
-import SkipPreviousOutlineIcon from "@mdi/svg/svg/skip-previous-outline.svg";
-import classnames from "classnames";
-import React, { memo, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import styled from "styled-components";
+import { Stack, IButtonStyles, makeStyles, useTheme } from "@fluentui/react";
+import cx from "classnames";
+import { merge } from "lodash";
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { Time, compare } from "@foxglove/rostime";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
-import Button from "@foxglove/studio-base/components/Button";
-import Flex from "@foxglove/studio-base/components/Flex";
-import Icon from "@foxglove/studio-base/components/Icon";
+import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import MessageOrderControls from "@foxglove/studio-base/components/MessageOrderControls";
 import {
@@ -45,37 +39,78 @@ import {
   useSetHoverValue,
 } from "@foxglove/studio-base/context/HoverValueContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
-import { PlayerState, PlayerStateActiveData } from "@foxglove/studio-base/players/types";
-import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import { PlayerState } from "@foxglove/studio-base/players/types";
+import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
 import { formatTime } from "@foxglove/studio-base/util/formatTime";
-import { colors as sharedColors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { subtractTimes, toSec, fromSec, formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";
 import { ProgressPlot } from "./ProgressPlot";
-import styles from "./index.module.scss";
 
-const cx = classnames.bind(styles);
+export const useStyles = makeStyles((theme) => ({
+  fullWidthBar: {
+    position: "absolute",
+    top: "12px",
+    left: "0",
+    right: "0",
+    height: "4px",
+    backgroundColor: theme.palette.neutralLighterAlt,
+  },
+  fullWidthBarActive: {
+    backgroundColor: theme.palette.neutralLight,
+  },
+  marker: {
+    backgroundColor: "white",
+    position: "absolute",
+    height: "36%",
+    border: `1px solid ${theme.semanticColors.bodyText}`,
+    width: "2px",
+    top: "32%",
+  },
+  sliderContainer: {
+    position: "absolute",
+    zIndex: "2",
+    flex: "1",
+    width: "100%",
+    height: "100%",
+  },
+  stateBar: {
+    position: "absolute",
+    zIndex: 1,
+    flex: 1,
+    width: "100%",
+    height: "100%",
 
-export const StyledFullWidthBar = styled.div<{ activeData?: PlayerStateActiveData }>`
-  position: absolute;
-  top: 12px;
-  left: 0;
-  right: 0;
-  background-color: ${(props) => (props.activeData ? sharedColors.DARK8 : sharedColors.DARK5)};
-  height: 4px;
-`;
+    "& canvas": {
+      minWidth: "100%",
+      minHeight: "100%",
+      flex: "1 0 100%",
+    },
+  },
+  tooltip: {
+    fontFamily: MONOSPACE,
+    whiteSpace: "nowrap",
 
-export const StyledMarker = styled.div.attrs<{ width: number }>(({ width }) => ({
-  style: { left: `calc(${width * 100}% - 2px)` },
-}))<{ width: number }>`
-  background-color: white;
-  position: absolute;
-  height: 36%;
-  border: 1px solid ${colors.divider};
-  width: 2px;
-  top: 32%;
-`;
+    "> div": {
+      paddingBottom: theme.spacing.s2,
+
+      "&:last-child": {
+        paddingBottom: 0,
+      },
+    },
+  },
+  tooltipTitle: {
+    color: theme.semanticColors.bodyBackground,
+    width: "70px",
+    textAlign: "right",
+    marginRight: theme.spacing.s2,
+    display: "inline-block",
+  },
+  tooltipValue: {
+    fontFamily: MONOSPACE,
+    opacity: 0.7,
+  },
+}));
 
 export type PlaybackControlProps = {
   player: PlayerState;
@@ -85,15 +120,10 @@ export type PlaybackControlProps = {
   seek: (arg0: Time) => void;
 };
 
-export const TooltipItem = ({ title, value }: { title: string; value: ReactNode }): JSX.Element => (
-  <div>
-    <span className={styles.tipTitle}>{title}:</span>
-    <span className={styles.tipValue}>{value}</span>
-  </div>
-);
-
 export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
   (props: PlaybackControlProps) => {
+    const classes = useStyles();
+    const theme = useTheme();
     const el = useRef<HTMLDivElement>(ReactNull);
     const slider = useRef<Slider>(ReactNull);
     const [repeat, setRepeat] = useState(false);
@@ -101,10 +131,13 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
       { x: number; y: number; tip: JSX.Element } | undefined
     >();
     const { tooltip } = useTooltip({
-      shown: tooltipState != undefined,
-      noPointerEvents: true,
-      targetPosition: { x: tooltipState?.x ?? 0, y: tooltipState?.y ?? 0 },
       contents: tooltipState?.tip,
+      noPointerEvents: true,
+      shown: tooltipState != undefined,
+      targetPosition: {
+        x: tooltipState?.x ?? 0,
+        y: tooltipState?.y ?? 0,
+      },
     });
     const { seek, pause, play, player } = props;
     const [timezone] = useAppConfigurationValue<string>(AppSetting.TIMEZONE);
@@ -139,11 +172,20 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
         const stamp = fromSec(value);
         const timeFromStart = subtractTimes(stamp, startTime);
 
+        const tooltipItems = [
+          { title: "ROS", value: formatTimeRaw(stamp) },
+          { title: "Time", value: formatTime(stamp) },
+          { title: "Elapsed", value: `${toSec(timeFromStart).toFixed(9)} sec` },
+        ];
+
         const tip = (
-          <div className={styles.tip}>
-            <TooltipItem title="ROS" value={formatTimeRaw(stamp)} />
-            <TooltipItem title="Time" value={formatTime(stamp)} />
-            <TooltipItem title="Elapsed" value={`${toSec(timeFromStart).toFixed(9)} sec`} />
+          <div className={classes.tooltip}>
+            {tooltipItems.map((item) => (
+              <div key={item.title}>
+                <span className={classes.tooltipTitle}>{item.title}:</span>
+                <span className={classes.tooltipValue}>{item.value}</span>
+              </div>
+            ))}
           </div>
         );
         setTooltipState({ x, y, tip });
@@ -153,7 +195,7 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
           value: toSec(timeFromStart),
         });
       },
-      [setHoverValue, hoverComponentId],
+      [classes, setHoverValue, hoverComponentId],
     );
 
     const onMouseLeave = useCallback(() => {
@@ -227,86 +269,181 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
       [seek, togglePlayPause],
     );
 
-    const seekControls = useMemo(
-      () => (
-        <>
-          <Button
-            onClick={() => jumpSeek(DIRECTION.BACKWARD, { seek, player: playerState.current })}
-            style={{ borderRadius: "4px 0px 0px 4px", marginLeft: "16px", marginRight: "1px" }}
-            className={cx([styles.seekBtn, { [styles.inactive!]: !activeData }])}
-            tooltip="Seek backward"
-          >
-            <Icon medium>
-              <SkipPreviousOutlineIcon />
-            </Icon>
-          </Button>
-          <Button
-            onClick={() => jumpSeek(DIRECTION.FORWARD, { seek, player: playerState.current })}
-            style={{ borderRadius: "0px 4px 4px 0px" }}
-            className={cx([styles.seekBtn, { [styles.inactive!]: !activeData }])}
-            tooltip="Seek forward"
-          >
-            <Icon medium>
-              <SkipNextOutlineIcon />
-            </Icon>
-          </Button>
-        </>
-      ),
-      [activeData, seek],
-    );
+    const iconButtonStyles: IButtonStyles = {
+      icon: { height: 20 },
+      root: {
+        margin: 0, // Remove this when global.scss goes away
+        color: theme.semanticColors.buttonText,
+      },
+      rootChecked: {
+        color: theme.palette.themePrimary,
+        backgroundColor: "transparent",
+      },
+      rootCheckedHovered: { color: theme.palette.themePrimary },
+      rootHovered: { color: theme.semanticColors.buttonTextHovered },
+      rootPressed: { color: theme.semanticColors.buttonTextPressed },
+    };
+
+    const seekIconButttonStyles = ({
+      left = false,
+      right = false,
+    }: {
+      left?: boolean | undefined;
+      right?: boolean | undefined;
+    }) =>
+      ({
+        root: {
+          background: theme.semanticColors.buttonBackgroundHovered,
+          ...(left && {
+            borderTopRightRadius: 0,
+            borderBottomRightRadius: 0,
+          }),
+          ...(right && {
+            borderTopLeftRadius: 0,
+            borderBottomLeftRadius: 0,
+          }),
+        },
+        rootHovered: {
+          background: theme.semanticColors.buttonBackgroundPressed,
+        },
+      } as IButtonStyles);
+
+    const loopTooltip = useTooltip({ contents: "Loop playback" });
+    const seekBackwardTooltip = useTooltip({ contents: "Seek backward" });
+    const seekForwardTooltip = useTooltip({ contents: "Seek forward" });
 
     return (
-      <Flex row className={styles.container}>
+      <div>
         {tooltip}
+        {loopTooltip.tooltip}
+        {seekBackwardTooltip.tooltip}
+        {seekForwardTooltip.tooltip}
         <KeyListener global keyDownHandlers={keyDownHandlers} />
-        <MessageOrderControls />
-        <PlaybackSpeedControls />
-        <div>
-          <Icon style={repeat ? {} : { opacity: 0.4 }} large onClick={toggleRepeat}>
-            <RepeatIcon />
-          </Icon>
-        </div>
-        <div className={styles.playIconWrapper} onClick={isPlaying === true ? pause : resumePlay}>
-          <Icon style={activeData ? {} : { opacity: 0.4 }} xlarge>
-            {isPlaying === true ? <PauseIcon /> : <PlayIcon />}
-          </Icon>
-        </div>
-        <div className={styles.bar}>
-          <StyledFullWidthBar activeData={activeData} />
-          <div className={styles.stateBar}>
-            <ProgressPlot progress={progress} />
-          </div>
-          <div
-            ref={el}
-            className={styles.sliderContainer}
-            onMouseMove={onMouseMove}
-            onMouseLeave={onMouseLeave}
+        <Stack
+          horizontal
+          verticalAlign="center"
+          tokens={{
+            childrenGap: theme.spacing.s1,
+            padding: theme.spacing.s1,
+          }}
+        >
+          <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.s1 }}>
+            <MessageOrderControls />
+            <PlaybackSpeedControls />
+          </Stack>
+          <Stack
+            horizontal
+            verticalAlign="center"
+            styles={{ root: { flex: 1 } }}
+            tokens={{
+              childrenGap: theme.spacing.s1,
+              padding: `0 ${theme.spacing.s2}`,
+            }}
           >
-            <Slider
-              ref={slider}
-              min={min ?? 0}
-              max={max ?? 100}
-              disabled={min == undefined || max == undefined}
-              step={step}
-              value={value}
-              draggable
-              onChange={onChange}
-              renderSlider={(val) => (val == undefined ? undefined : <StyledMarker width={val} />)}
+            <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.s2 }}>
+              <HoverableIconButton
+                elementRef={loopTooltip.ref}
+                checked={repeat}
+                disabled={!activeData}
+                onClick={toggleRepeat}
+                iconProps={{
+                  iconName: repeat ? "LoopFilled" : "Loop",
+                  iconNameActive: "LoopFilled",
+                }}
+                styles={iconButtonStyles}
+              />
+              <HoverableIconButton
+                disabled={!activeData}
+                onClick={isPlaying === true ? pause : resumePlay}
+                iconProps={{
+                  iconName: isPlaying === true ? "Pause" : "Play",
+                  iconNameActive: isPlaying === true ? "PauseFilled" : "PlayFilled",
+                }}
+                styles={iconButtonStyles}
+              />
+            </Stack>
+            <Stack
+              horizontal
+              grow={1}
+              verticalAlign="center"
+              styles={{ root: { height: "28px", position: "relative" } }}
+              tokens={{
+                padding: `0 ${theme.spacing.s1}`,
+              }}
+            >
+              <div
+                className={cx(classes.fullWidthBar, {
+                  [classes.fullWidthBarActive]: activeData,
+                })}
+              />
+              <Stack className={classes.stateBar}>
+                <ProgressPlot progress={progress} />
+              </Stack>
+              <div
+                ref={el}
+                className={classes.sliderContainer}
+                onMouseMove={onMouseMove}
+                onMouseLeave={onMouseLeave}
+              >
+                <Slider
+                  ref={slider}
+                  min={min ?? 0}
+                  max={max ?? 100}
+                  disabled={min == undefined || max == undefined}
+                  step={step}
+                  value={value}
+                  draggable
+                  onChange={onChange}
+                  renderSlider={(val) =>
+                    val == undefined ? undefined : (
+                      <div
+                        className={classes.marker}
+                        style={{ left: `calc(${val * 100}% - 2px)` }}
+                      />
+                    )
+                  }
+                />
+              </div>
+              <PlaybackBarHoverTicks componentId={hoverComponentId} />
+            </Stack>
+            <PlaybackTimeDisplayMethod
+              currentTime={currentTime}
+              startTime={startTime}
+              endTime={endTime}
+              onSeek={seek}
+              onPause={pause}
+              isPlaying={isPlaying ?? false}
+              timezone={timezone}
             />
-          </div>
-          <PlaybackBarHoverTicks componentId={hoverComponentId} />
-        </div>
-        <PlaybackTimeDisplayMethod
-          currentTime={currentTime}
-          startTime={startTime}
-          endTime={endTime}
-          onSeek={seek}
-          onPause={pause}
-          isPlaying={isPlaying ?? false}
-          timezone={timezone}
-        />
-        {seekControls}
-      </Flex>
+          </Stack>
+          <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 2 }}>
+            <HoverableIconButton
+              elementRef={seekBackwardTooltip.ref}
+              iconProps={{ iconName: "Previous", iconNameActive: "PreviousFilled" }}
+              disabled={!activeData}
+              onClick={() =>
+                jumpSeek(DIRECTION.BACKWARD, {
+                  seek,
+                  player: playerState.current,
+                })
+              }
+              styles={merge(seekIconButttonStyles({ left: true }), iconButtonStyles)}
+            />
+            <HoverableIconButton
+              elementRef={seekForwardTooltip.ref}
+              iconProps={{ iconName: "Next", iconNameActive: "NextFilled" }}
+              disabled={!activeData}
+              onClick={() =>
+                jumpSeek(DIRECTION.FORWARD, {
+                  seek,
+                  player: playerState.current,
+                })
+              }
+              styles={merge(seekIconButttonStyles({ right: true }), iconButtonStyles)}
+            />
+          </Stack>
+        </Stack>
+      </div>
     );
   },
 );

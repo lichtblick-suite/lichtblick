@@ -2,11 +2,22 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { ThemeProvider as FluentThemeProvider } from "@fluentui/react";
+import {
+  Next20Filled,
+  Next20Regular,
+  Pause20Filled,
+  Pause20Regular,
+  Play20Filled,
+  Play20Regular,
+  Previous20Filled,
+  Previous20Regular,
+} from "@fluentui/react-icons";
 import * as Icons from "@fluentui/react-icons-mdl2";
 import { registerIcons, unregisterIcons } from "@fluentui/style-utilities";
 import { useLayoutEffect, useState } from "react";
 import { ThemeProvider as StyledThemeProvider } from "styled-components";
 
+import LoopIcon from "@foxglove/studio-base/components/LoopIcon";
 import RosIcon from "@foxglove/studio-base/components/RosIcon";
 import theme from "@foxglove/studio-base/theme";
 
@@ -44,9 +55,19 @@ const icons: {
   Info: <Icons.InfoIcon />,
   More: <Icons.MoreIcon />,
   MoreVertical: <Icons.MoreVerticalIcon />,
+  Next: <Next20Regular />,
+  NextFilled: <Next20Filled />,
   OpenFile: <Icons.OpenFileIcon />,
   OpenFolder: <Icons.OpenFolderHorizontalIcon />,
+  Pause: <Pause20Regular />,
+  PauseFilled: <Pause20Filled />,
+  Play: <Play20Regular />,
+  PlayFilled: <Play20Filled />,
+  Previous: <Previous20Regular />,
+  PreviousFilled: <Previous20Filled />,
   RectangularClipping: <Icons.RectangularClippingIcon />,
+  Loop: <LoopIcon strokeWidth={1.375} />,
+  LoopFilled: <LoopIcon strokeWidth={1.875} />,
   Rename: <Icons.RenameIcon />,
   Settings: <Icons.SettingsIcon />,
   Share: <Icons.ShareIcon />,

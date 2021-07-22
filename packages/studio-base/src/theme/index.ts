@@ -211,7 +211,7 @@ function neutralColors(): Partial<IPalette> {
   const result: Partial<IPalette> = Object.fromEntries(
     keys.map((key, i) => {
       const ratio = i / (keys.length - 1);
-      return [key, "#" + getColorFromRGBA(hsl2rgb(THEME_HUE, 5, 10 + ratio * 85)).hex];
+      return [key, "#" + getColorFromRGBA(hsl2rgb(THEME_HUE, 5, 16 + ratio * 80)).hex];
     }),
   );
   return result;
