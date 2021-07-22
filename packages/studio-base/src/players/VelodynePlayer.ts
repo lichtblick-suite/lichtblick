@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from "uuid";
 import { Sockets, UdpRemoteInfo, UdpSocketRenderer } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
 import { Time } from "@foxglove/rostime";
-import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import {
   AdvertisePayload,
@@ -97,8 +96,7 @@ export default class VelodynePlayer implements Player {
   }
 
   private _open = async (): Promise<void> => {
-    const os = OsContextSingleton;
-    if (this._closed || os == undefined) {
+    if (this._closed) {
       return;
     }
     this._presence = PlayerPresence.INITIALIZING;
