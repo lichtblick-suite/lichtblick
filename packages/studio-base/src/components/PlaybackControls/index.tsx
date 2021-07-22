@@ -350,7 +350,9 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
                   iconName: repeat ? "LoopFilled" : "Loop",
                   iconNameActive: "LoopFilled",
                 }}
-                styles={iconButtonStyles}
+                styles={merge(iconButtonStyles, {
+                  rootDisabled: { background: "transparent" },
+                })}
               />
               <HoverableIconButton
                 disabled={!activeData}
@@ -359,7 +361,9 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
                   iconName: isPlaying === true ? "Pause" : "Play",
                   iconNameActive: isPlaying === true ? "PauseFilled" : "PlayFilled",
                 }}
-                styles={iconButtonStyles}
+                styles={merge(iconButtonStyles, {
+                  rootDisabled: { background: "transparent" },
+                })}
               />
             </Stack>
             <Stack
@@ -367,9 +371,6 @@ export const UnconnectedPlaybackControls = memo<PlaybackControlProps>(
               grow={1}
               verticalAlign="center"
               styles={{ root: { height: "28px", position: "relative" } }}
-              tokens={{
-                padding: `0 ${theme.spacing.s1}`,
-              }}
             >
               <div
                 className={cx(classes.fullWidthBar, {

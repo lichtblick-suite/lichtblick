@@ -83,7 +83,7 @@ export default function PlaybackSpeedControls(): JSX.Element {
               label: { fontSize: theme.fonts.small.fontSize },
               // Reach into the component styles to remove the effects of global.scss
               root: { margin: 0, borderRadius: 0 },
-              checkmarkIcon: { height: "20px" },
+              checkmarkIcon: { "& svg": { marginTop: "-2px" } },
             } as Partial<IMenuItemStyles>,
           },
         },
