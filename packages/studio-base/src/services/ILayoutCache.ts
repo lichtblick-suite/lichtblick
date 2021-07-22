@@ -8,7 +8,6 @@ import { RemoteLayoutMetadata } from "@foxglove/studio-base/services/IRemoteLayo
 export type CachedLayout = {
   id: string;
   name: string;
-  path: string[] | undefined;
   state: PanelsState | undefined;
 
   /** Last known metadata from the server for this layout */

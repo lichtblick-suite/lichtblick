@@ -26,7 +26,6 @@ export type ConflictType =
 export type LayoutMetadata = {
   id: LayoutID;
   name: string;
-  path: string[];
   creatorUserId: UserID | undefined;
   createdAt: ISO8601Timestamp | undefined;
   updatedAt: ISO8601Timestamp | undefined;
@@ -50,16 +49,11 @@ export interface ILayoutStorage {
 
   getLayout(id: LayoutID): Promise<Layout | undefined>;
 
-  saveNewLayout(params: {
-    path: string[];
-    name: string;
-    data: PanelsState;
-  }): Promise<LayoutMetadata>;
+  saveNewLayout(params: { name: string; data: PanelsState }): Promise<LayoutMetadata>;
 
   updateLayout(params: {
     targetID: LayoutID;
     name: string | undefined;
-    path: string[] | undefined;
     data: PanelsState;
   }): Promise<void>;
 
@@ -73,12 +67,11 @@ export interface ILayoutStorage {
 
   shareLayout(params: {
     sourceID: LayoutID;
-    path: string[];
     name: string;
     permission: "org_read" | "org_write";
   }): Promise<void>;
 
   deleteLayout(params: { id: LayoutID }): Promise<void>;
 
-  renameLayout(params: { id: LayoutID; name: string; path: string[] }): Promise<void>;
+  renameLayout(params: { id: LayoutID; name: string }): Promise<void>;
 }

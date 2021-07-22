@@ -14,7 +14,7 @@ import {
   ContextualMenu,
 } from "@fluentui/react";
 import cx from "classnames";
-import { Fragment, useCallback, useContext, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import { useMountedState } from "react-use";
 
 import conflictTypeToString from "@foxglove/studio-base/components/LayoutBrowser/conflictTypeToString";
@@ -57,14 +57,6 @@ const useStyles = makeStyles((theme) => ({
     whiteSpace: "nowrap",
     overflow: "hidden",
     lineHeight: theme.spacing.l2, // avoid descenders being cut off
-  },
-
-  pathSegment: {
-    color: theme.palette.neutralSecondary,
-  },
-  pathSeparator: {
-    color: theme.palette.neutralTertiary,
-    padding: `0 ${theme.spacing.s2}`,
   },
 }));
 
@@ -318,17 +310,7 @@ export default function LayoutRow({
             onKeyDown={onTextFieldKeyDown}
           />
         ) : (
-          <>
-            {layout.path.map((item) => {
-              return (
-                <Fragment key={item}>
-                  <span className={styles.pathSegment}>{item}</span>
-                  <span className={styles.pathSeparator}>›</span>
-                </Fragment>
-              );
-            })}
-            {layout.name}
-          </>
+          layout.name
         )}
       </Stack.Item>
 

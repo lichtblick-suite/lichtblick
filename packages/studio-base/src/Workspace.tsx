@@ -189,7 +189,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const openWelcomeLayout = useCallback(async () => {
     const newLayout = await layoutStorage.saveNewLayout({
-      path: [],
       name: welcomeLayout.name,
       data: welcomeLayout.data,
     });

@@ -18,7 +18,6 @@ function makeMetadata(
   return {
     id: id as LayoutID,
     name,
-    path: [],
     createdAt: new Date(1).toISOString() as ISO8601Timestamp,
     updatedAt: new Date(updatedAt).toISOString() as ISO8601Timestamp,
     creatorUserId: "user1" as UserID,
@@ -35,8 +34,8 @@ describe("computeLayoutSyncOperations", () => {
     userNodes: {},
     layout: undefined,
   };
-  const local1 = { id: "local1", name: "1", path: [], state, serverMetadata: undefined };
-  const local2 = { id: "local2", name: "2", path: [], state, serverMetadata: undefined };
+  const local1 = { id: "local1", name: "1", state, serverMetadata: undefined };
+  const local2 = { id: "local2", name: "2", state, serverMetadata: undefined };
 
   it.each<{
     name: string;

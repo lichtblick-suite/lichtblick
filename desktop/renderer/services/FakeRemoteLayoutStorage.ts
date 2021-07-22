@@ -2,7 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { isEqual } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
 import { MutexLocked } from "@foxglove/den/async";
@@ -51,12 +50,10 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
     storage: Storage,
     {
       ignoringId,
-      path,
       name,
       permission,
     }: {
       ignoringId: LayoutID | undefined;
-      path: string[];
       name: string;
       permission: "creator_write" | "org_read" | "org_write";
     },
@@ -75,8 +72,7 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
       if (
         (ignoringId == undefined || ignoringId !== parsed.id) &&
         (permission === "creator_write") === (parsed.permission === "creator_write") &&
-        parsed.name === name &&
-        isEqual(parsed.path, path)
+        parsed.name === name
       ) {
         return true;
       }
@@ -132,11 +128,9 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
   }
 
   async saveNewLayout({
-    path,
     name,
     data,
   }: {
-    path: string[];
     name: string;
     data: PanelsState;
   }): Promise<{ status: "success"; newMetadata: RemoteLayoutMetadata } | { status: "conflict" }> {
@@ -144,7 +138,6 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
       if (
         await this.hasNameConflictUnlocked(storage, {
           ignoringId: undefined,
-          path,
           name,
           permission: "creator_write",
         })
@@ -155,7 +148,6 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
       const newMetadata: RemoteLayoutMetadata = {
         id: uuidv4() as LayoutID,
         name,
-        path,
         creatorUserId: FAKE_USER_ID,
         createdAt: now,
         updatedAt: now,
@@ -174,13 +166,11 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
 
   async updateLayout({
     targetID,
-    path,
     name,
     data,
     ifUnmodifiedSince,
   }: {
     targetID: LayoutID;
-    path: string[];
     name: string;
     data: PanelsState;
     ifUnmodifiedSince: ISO8601Timestamp;
@@ -201,7 +191,6 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
       if (
         await this.hasNameConflictUnlocked(storage, {
           ignoringId: targetID,
-          path,
           name,
           permission: target.permission,
         })
@@ -210,7 +199,6 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
       }
       const newLayout: RemoteLayout = {
         ...target,
-        path,
         name,
         data,
         updatedAt: new Date().toISOString() as ISO8601Timestamp,
@@ -227,12 +215,10 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
 
   async shareLayout({
     sourceID,
-    path,
     name,
     permission,
   }: {
     sourceID: LayoutID;
-    path: string[];
     name: string;
     permission: "org_read" | "org_write";
   }): Promise<
@@ -251,7 +237,6 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
       if (
         await this.hasNameConflictUnlocked(storage, {
           ignoringId: undefined,
-          path,
           name,
           permission,
         })
@@ -262,7 +247,6 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
       const id = uuidv4() as LayoutID;
       const newLayout: RemoteLayout = {
         id,
-        path,
         name,
         data: source.data,
         creatorUserId: FAKE_USER_ID,
@@ -303,12 +287,10 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
   async renameLayout({
     targetID,
     name,
-    path,
     ifUnmodifiedSince,
   }: {
     targetID: LayoutID;
     name: string;
-    path: string[];
     ifUnmodifiedSince: ISO8601Timestamp;
   }): Promise<
     | { status: "success"; newMetadata: RemoteLayoutMetadata }
@@ -324,7 +306,6 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
       if (
         await this.hasNameConflictUnlocked(storage, {
           ignoringId: undefined,
-          path,
           name,
           permission: target.permission,
         })
@@ -337,7 +318,6 @@ export default class FakeRemoteLayoutStorage implements IRemoteLayoutStorage {
       const newLayout: RemoteLayout = {
         ...target,
         name,
-        path,
         updatedAt: new Date().toISOString() as ISO8601Timestamp,
       };
       await storage.put(

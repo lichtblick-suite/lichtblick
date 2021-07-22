@@ -56,7 +56,6 @@ export default function FakeLayoutStorageProviders({
       }
       await fakeRemoteStorage.updateLayout({
         targetID: layout.id,
-        path: layout.path,
         name: layout.name,
         data: {
           ...layout.data,
@@ -81,7 +80,6 @@ export default function FakeLayoutStorageProviders({
       }
       await fakeRemoteStorage.renameLayout({
         targetID: layout.id,
-        path: layout.path,
         name: `${layout.name} renamed`,
         ifUnmodifiedSince: layout.updatedAt,
       });

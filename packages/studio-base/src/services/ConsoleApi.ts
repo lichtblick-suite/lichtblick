@@ -50,7 +50,6 @@ export type ISO8601Timestamp = string & { __brand: "ISO8601Timestamp" };
 type Layout = {
   id: LayoutID;
   name: string;
-  path: string[];
   creatorUserId: UserID;
   createdAt: ISO8601Timestamp;
   updatedAt: ISO8601Timestamp;
@@ -167,14 +166,12 @@ class ConsoleApi {
     });
   }
 
-  async createLayout(
-    layout: Pick<Layout, "name" | "path" | "permission" | "data">,
-  ): Promise<Layout> {
+  async createLayout(layout: Pick<Layout, "name" | "permission" | "data">): Promise<Layout> {
     return await this.post<Layout>("/v1/layouts", layout);
   }
 
   async updateLayout(
-    layout: Pick<Layout, "id"> & Partial<Pick<Layout, "name" | "path" | "permission" | "data">>,
+    layout: Pick<Layout, "id"> & Partial<Pick<Layout, "name" | "permission" | "data">>,
   ): Promise<Layout> {
     return await this.put<Layout>(`/v1/layouts/${layout.id}`, layout);
   }

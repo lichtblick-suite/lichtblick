@@ -32,14 +32,12 @@ export interface IRemoteLayoutStorage {
   getLayout: (id: LayoutID) => Promise<RemoteLayout | undefined>;
 
   saveNewLayout: (params: {
-    path: string[];
     name: string;
     data: PanelsState;
   }) => Promise<{ status: "success"; newMetadata: RemoteLayoutMetadata } | { status: "conflict" }>;
 
   updateLayout: (params: {
     targetID: LayoutID;
-    path: string[];
     name: string;
     data: PanelsState;
     ifUnmodifiedSince: ISO8601Timestamp;
@@ -52,7 +50,6 @@ export interface IRemoteLayoutStorage {
 
   shareLayout: (params: {
     sourceID: LayoutID;
-    path: string[];
     name: string;
     permission: "org_read" | "org_write";
   }) => Promise<
@@ -69,7 +66,6 @@ export interface IRemoteLayoutStorage {
   renameLayout: (params: {
     targetID: LayoutID;
     name: string;
-    path: string[];
     ifUnmodifiedSince: ISO8601Timestamp;
   }) => Promise<
     | { status: "success"; newMetadata: RemoteLayoutMetadata }

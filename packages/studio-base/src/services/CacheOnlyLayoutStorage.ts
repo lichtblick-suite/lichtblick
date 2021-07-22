@@ -23,7 +23,6 @@ function getMetadata(layout: CachedLayout): LayoutMetadata {
   return {
     id: layout.id as LayoutID,
     name: layout.name,
-    path: layout.path ?? [],
     creatorUserId: undefined,
     createdAt: undefined,
     updatedAt: undefined,
@@ -82,16 +81,14 @@ export default class CacheOnlyLayoutStorage implements ILayoutStorage {
   }
 
   async saveNewLayout({
-    path,
     name,
     data,
   }: {
-    path: string[];
     name: string;
     data: PanelsState;
   }): Promise<LayoutMetadata> {
     const id = uuidv4() as LayoutID;
-    const newLayout: CachedLayout = { id, name, path, state: data };
+    const newLayout: CachedLayout = { id, name, state: data };
     await this.storage.put(newLayout);
     this.notifyChangeListeners();
     return getMetadata(newLayout);
@@ -99,13 +96,11 @@ export default class CacheOnlyLayoutStorage implements ILayoutStorage {
 
   async updateLayout({
     name,
-    path,
     data,
     targetID,
   }: {
     targetID: LayoutID;
     name: string | undefined;
-    path: string[] | undefined;
     data: PanelsState;
   }): Promise<void> {
     const cachedLayout = await this.storage.get(targetID);
@@ -115,7 +110,6 @@ export default class CacheOnlyLayoutStorage implements ILayoutStorage {
     await this.storage.put({
       id: targetID,
       name: name ?? cachedLayout.name,
-      path: path ?? cachedLayout.path,
       state: data,
     });
     this.notifyChangeListeners();
@@ -130,20 +124,12 @@ export default class CacheOnlyLayoutStorage implements ILayoutStorage {
     this.notifyChangeListeners();
   }
 
-  async renameLayout({
-    id,
-    name,
-    path,
-  }: {
-    id: LayoutID;
-    name: string;
-    path: string[];
-  }): Promise<void> {
+  async renameLayout({ id, name }: { id: LayoutID; name: string }): Promise<void> {
     const target = await this.storage.get(id);
     if (!target?.state) {
       throw new Error(`Layout id ${id} not found`);
     }
-    await this.storage.put({ id, name, path, state: target.state });
+    await this.storage.put({ id, name, state: target.state });
     this.notifyChangeListeners();
   }
 }

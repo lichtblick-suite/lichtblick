@@ -99,7 +99,7 @@ export default function LayoutBrowser({
 
   const onRenameLayout = useCallback(
     async (item: LayoutMetadata, newName: string) => {
-      await layoutStorage.renameLayout({ id: item.id, path: [], name: newName });
+      await layoutStorage.renameLayout({ id: item.id, name: newName });
       if (currentLayoutId === item.id) {
         await onSelectLayout(item);
       }
@@ -112,7 +112,6 @@ export default function LayoutBrowser({
       const source = await layoutStorage.getLayout(item.id);
       if (source) {
         const newLayout = await layoutStorage.saveNewLayout({
-          path: [],
           name: `${item.name} copy`,
           data: source.data,
         });
@@ -138,7 +137,6 @@ export default function LayoutBrowser({
       }
       // If no existing layout could be selected, use the welcome layout
       const newLayout = await layoutStorage.saveNewLayout({
-        path: [],
         name: welcomeLayout.name,
         data: welcomeLayout.data,
       });
@@ -160,7 +158,6 @@ export default function LayoutBrowser({
     };
     const newLayout = await layoutStorage.saveNewLayout({
       name,
-      path: [],
       data: state as PanelsState,
     });
     void onSelectLayout(newLayout);
@@ -184,11 +181,7 @@ export default function LayoutBrowser({
         title: `Share “${item.name}”`,
         value: item.name,
         transformer: (value: string) => {
-          if (
-            existingSharedLayouts.some(
-              (sharedLayout) => sharedLayout.path.length === 0 && sharedLayout.name === value,
-            )
-          ) {
+          if (existingSharedLayouts.some((sharedLayout) => sharedLayout.name === value)) {
             throw new Error("A shared layout with this name already exists.");
           }
           return value;
@@ -197,7 +190,6 @@ export default function LayoutBrowser({
       if (name != undefined) {
         await layoutStorage.shareLayout({
           sourceID: item.id,
-          path: [],
           name,
           permission: "org_write",
         });
@@ -238,7 +230,7 @@ export default function LayoutBrowser({
     }
 
     const data = parsedState as PanelsState;
-    const newLayout = await layoutStorage.saveNewLayout({ path: [], name: layoutName, data });
+    const newLayout = await layoutStorage.saveNewLayout({ name: layoutName, data });
     void onSelectLayout(newLayout);
   }, [addToast, isMounted, layoutStorage, onSelectLayout]);
 

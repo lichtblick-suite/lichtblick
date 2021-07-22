@@ -25,17 +25,14 @@ export default class ConsoleApiRemoteLayoutStorage implements IRemoteLayoutStora
   }
 
   async saveNewLayout({
-    path,
     name,
     data,
   }: {
-    path: string[];
     name: string;
     data: PanelsState;
   }): Promise<{ status: "success"; newMetadata: RemoteLayoutMetadata } | { status: "conflict" }> {
     try {
       const result = await this.api.createLayout({
-        path,
         name,
         data,
         permission: "creator_write",
@@ -49,13 +46,11 @@ export default class ConsoleApiRemoteLayoutStorage implements IRemoteLayoutStora
 
   async updateLayout({
     targetID,
-    path,
     name,
     data,
     ifUnmodifiedSince,
   }: {
     targetID: LayoutID;
-    path: string[];
     name: string;
     data?: PanelsState;
     ifUnmodifiedSince: ISO8601Timestamp;
@@ -75,7 +70,6 @@ export default class ConsoleApiRemoteLayoutStorage implements IRemoteLayoutStora
       }
       const result = await this.api.updateLayout({
         id: targetID,
-        path,
         name,
         data,
       });
@@ -88,12 +82,10 @@ export default class ConsoleApiRemoteLayoutStorage implements IRemoteLayoutStora
 
   async shareLayout({
     sourceID,
-    path,
     name,
     permission,
   }: {
     sourceID: LayoutID;
-    path: string[];
     name: string;
     permission: "org_read" | "org_write";
   }): Promise<
@@ -107,7 +99,6 @@ export default class ConsoleApiRemoteLayoutStorage implements IRemoteLayoutStora
         return { status: "not-found" };
       }
       const result = await this.api.createLayout({
-        path,
         name,
         data: existingLayout.data,
         permission,
@@ -132,7 +123,6 @@ export default class ConsoleApiRemoteLayoutStorage implements IRemoteLayoutStora
   async renameLayout(params: {
     targetID: LayoutID;
     name: string;
-    path: string[];
     ifUnmodifiedSince: ISO8601Timestamp;
   }): Promise<
     | { status: "success"; newMetadata: RemoteLayoutMetadata }

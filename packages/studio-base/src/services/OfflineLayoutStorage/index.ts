@@ -40,7 +40,6 @@ function getEffectiveMetadata(
     ? {
         ...layout.serverMetadata,
         name: layout.name,
-        path: layout.path ?? [],
         hasUnsyncedChanges: layout.locallyModified ?? false,
         conflict: conflictsByCacheId.get(layout.id)?.type,
       }
@@ -50,7 +49,6 @@ function getEffectiveMetadata(
         id: layout.id as LayoutID,
 
         name: layout.name,
-        path: layout.path ?? [],
         creatorUserId: undefined,
         createdAt: undefined,
         updatedAt: undefined,
@@ -161,7 +159,6 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
         await cache.put({
           id: metadata.id,
           name: metadata.name,
-          path: metadata.path,
           state: data,
           serverMetadata: metadata,
         }),
@@ -175,16 +172,14 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
   }
 
   async saveNewLayout({
-    path,
     name,
     data,
   }: {
-    path: string[];
     name: string;
     data: PanelsState;
   }): Promise<LayoutMetadata> {
     const newMetadata = await this.cacheStorage.runExclusive(async (cache) => {
-      const layout = { id: uuidv4(), name, path, state: data };
+      const layout = { id: uuidv4(), name, state: data };
       await cache.put(layout);
       return getEffectiveMetadata(layout, this.latestConflictsByCacheId);
     });
@@ -212,20 +207,12 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
     this.notifyChangeListeners();
   }
 
-  async renameLayout({
-    id,
-    name,
-    path,
-  }: {
-    id: LayoutID;
-    name: string;
-    path: string[];
-  }): Promise<void> {
+  async renameLayout({ id, name }: { id: LayoutID; name: string }): Promise<void> {
     await this.updateCachedLayout(id, (layout) => {
       if (!layout) {
         throw new Error("Renaming a layout not present in the cache");
       }
-      return { ...layout, name, path, locallyModified: true };
+      return { ...layout, name, locallyModified: true };
     });
     this.notifyChangeListeners();
   }
@@ -233,7 +220,6 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
   /** Only works when online */
   async shareLayout(params: {
     sourceID: LayoutID;
-    path: string[];
     name: string;
     permission: "org_read" | "org_write";
   }): Promise<void> {
@@ -360,7 +346,6 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
             await cache.put({
               id: remoteLayout.id,
               name: remoteLayout.name,
-              path: remoteLayout.path,
               state: undefined,
               serverMetadata: remoteLayout,
             }),
@@ -375,7 +360,6 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
             await cache.put({
               ...cachedLayout,
               name: remoteLayout.name,
-              path: remoteLayout.path,
               serverMetadata: remoteLayout,
               state: undefined, // clear out the state so we know it needs to be fetched from the server
               locallyDeleted: false,
@@ -421,7 +405,6 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
         }
         const { cachedLayout } = operation;
         const response = await this.remoteStorage.saveNewLayout({
-          path: cachedLayout.path ?? [],
           name: cachedLayout.name,
           data: cachedLayout.state,
         });
@@ -432,7 +415,6 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
               await cache.put({
                 id: response.newMetadata.id,
                 name: response.newMetadata.name,
-                path: response.newMetadata.path,
                 state: cachedLayout.state,
                 serverMetadata: response.newMetadata,
               });
@@ -461,14 +443,12 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
           responsePromise = this.remoteStorage.renameLayout({
             targetID: remoteLayout.id,
             name: cachedLayout.name,
-            path: cachedLayout.path ?? [],
             ifUnmodifiedSince: remoteLayout.updatedAt,
           });
         } else {
           responsePromise = this.remoteStorage.updateLayout({
             targetID: remoteLayout.id,
             name: cachedLayout.name,
-            path: cachedLayout.path ?? [],
             ifUnmodifiedSince: remoteLayout.updatedAt,
             data: cachedLayout.state,
           });
