@@ -55,9 +55,7 @@ function makeMockLayoutStorage() {
     saveNewLayout: jest.fn().mockImplementation(mockThrow("saveNewLayout")),
     updateLayout: jest.fn().mockImplementation(mockThrow("updateLayout")),
     syncLayout: jest.fn().mockImplementation(mockThrow("syncLayout")),
-    shareLayout: jest.fn().mockImplementation(mockThrow("shareLayout")),
     deleteLayout: jest.fn().mockImplementation(mockThrow("deleteLayout")),
-    renameLayout: jest.fn().mockImplementation(mockThrow("renameLayout")),
   };
 }
 function makeMockUserProfile() {
@@ -150,6 +148,7 @@ describe("CurrentLayoutProvider", () => {
           {
             name: "unnamed",
             data: persistedState.panels,
+            permission: "creator_write",
           },
         ],
       ]);

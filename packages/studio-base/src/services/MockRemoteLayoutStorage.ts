@@ -59,11 +59,13 @@ export default class MockRemoteLayoutStorage implements IRemoteLayoutStorage {
   async saveNewLayout({
     name,
     data,
+    permission,
   }: {
     name: string;
     data: PanelsState;
+    permission: "creator_write" | "org_read" | "org_write";
   }): Promise<{ status: "success"; newMetadata: RemoteLayoutMetadata } | { status: "conflict" }> {
-    if (this.hasNameConflict({ name, permission: "creator_write" })) {
+    if (this.hasNameConflict({ name, permission })) {
       return { status: "conflict" };
     }
     const id = uuidv4() as LayoutID;
@@ -71,7 +73,7 @@ export default class MockRemoteLayoutStorage implements IRemoteLayoutStorage {
     const newMetadata: RemoteLayoutMetadata = {
       id,
       name,
-      permission: "creator_write",
+      permission,
       creatorUserId: FAKE_USER.id,
       createdAt: now,
       updatedAt: now,
@@ -83,11 +85,13 @@ export default class MockRemoteLayoutStorage implements IRemoteLayoutStorage {
   async updateLayout({
     name,
     data,
+    permission,
     targetID,
     ifUnmodifiedSince,
   }: {
-    name: string | undefined;
-    data: PanelsState;
+    name?: string;
+    data?: PanelsState;
+    permission?: "creator_write" | "org_read" | "org_write";
     targetID: LayoutID;
     ifUnmodifiedSince: ISO8601Timestamp;
   }): Promise<
@@ -102,12 +106,12 @@ export default class MockRemoteLayoutStorage implements IRemoteLayoutStorage {
     if (
       this.hasNameConflict({
         name: name ?? target.name,
-        permission: target.permission,
+        permission: permission ?? target.permission,
       })
     ) {
       return { status: "conflict" };
     }
-    const { data: _, ...targetMetadata } = target;
+    const { data: targetData, ...targetMetadata } = target;
     if (Date.parse(targetMetadata.updatedAt) !== Date.parse(ifUnmodifiedSince)) {
       return { status: "precondition-failed" };
     }
@@ -115,39 +119,10 @@ export default class MockRemoteLayoutStorage implements IRemoteLayoutStorage {
     const newMetadata: RemoteLayoutMetadata = {
       ...targetMetadata,
       name: name ?? targetMetadata.name,
+      permission: permission ?? targetMetadata.permission,
       updatedAt: now,
     };
-    this.layoutsById.set(targetID, { ...newMetadata, data });
-    return { status: "success", newMetadata };
-  }
-
-  async shareLayout({
-    sourceID,
-    name,
-    permission,
-  }: {
-    sourceID: LayoutID;
-    name: string;
-    permission: "org_read" | "org_write";
-  }): Promise<{ status: "success"; newMetadata: RemoteLayoutMetadata } | { status: "conflict" }> {
-    const source = this.layoutsById.get(sourceID);
-    if (!source) {
-      return { status: "conflict" };
-    }
-    if (this.hasNameConflict({ name, permission: "creator_write" })) {
-      return { status: "conflict" };
-    }
-    const id = uuidv4() as LayoutID;
-    const now = new Date().toISOString() as ISO8601Timestamp;
-    const newMetadata: RemoteLayoutMetadata = {
-      id,
-      name,
-      permission,
-      creatorUserId: FAKE_USER.id,
-      createdAt: now,
-      updatedAt: now,
-    };
-    this.layoutsById.set(id, { ...newMetadata, data: source.data });
+    this.layoutsById.set(targetID, { ...newMetadata, data: data ?? targetData });
     return { status: "success", newMetadata };
   }
 
@@ -167,39 +142,5 @@ export default class MockRemoteLayoutStorage implements IRemoteLayoutStorage {
     }
     this.layoutsById.delete(targetID);
     return { status: "success" };
-  }
-
-  async renameLayout({
-    targetID,
-    name,
-    ifUnmodifiedSince,
-  }: {
-    targetID: LayoutID;
-    name: string;
-    ifUnmodifiedSince: ISO8601Timestamp;
-  }): Promise<
-    | { status: "success"; newMetadata: RemoteLayoutMetadata }
-    | { status: "conflict" }
-    | { status: "precondition-failed" }
-  > {
-    const target = this.layoutsById.get(targetID);
-    if (!target) {
-      return { status: "conflict" };
-    }
-    if (this.hasNameConflict({ name, permission: target.permission })) {
-      return { status: "conflict" };
-    }
-    const { data: _, ...targetMetadata } = target;
-    if (Date.parse(targetMetadata.updatedAt) !== Date.parse(ifUnmodifiedSince)) {
-      return { status: "precondition-failed" };
-    }
-    const now = new Date().toISOString() as ISO8601Timestamp;
-    const newMetadata: RemoteLayoutMetadata = {
-      ...targetMetadata,
-      name,
-      updatedAt: now,
-    };
-    this.layoutsById.set(targetID, { ...newMetadata, data: target.data });
-    return { status: "success", newMetadata };
   }
 }

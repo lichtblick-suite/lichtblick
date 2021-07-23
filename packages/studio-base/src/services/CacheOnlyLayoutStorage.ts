@@ -83,10 +83,15 @@ export default class CacheOnlyLayoutStorage implements ILayoutStorage {
   async saveNewLayout({
     name,
     data,
+    permission,
   }: {
     name: string;
     data: PanelsState;
+    permission: "creator_write" | "org_read" | "org_write";
   }): Promise<LayoutMetadata> {
+    if (permission !== "creator_write") {
+      throw new Error("Shared layouts are not supported in local-only storage");
+    }
     const id = uuidv4() as LayoutID;
     const newLayout: CachedLayout = { id, name, state: data };
     await this.storage.put(newLayout);
@@ -95,41 +100,33 @@ export default class CacheOnlyLayoutStorage implements ILayoutStorage {
   }
 
   async updateLayout({
+    targetID,
     name,
     data,
-    targetID,
+    permission,
   }: {
     targetID: LayoutID;
-    name: string | undefined;
-    data: PanelsState;
+    name?: string;
+    data?: PanelsState;
+    permission?: "creator_write" | "org_read" | "org_write";
   }): Promise<void> {
     const cachedLayout = await this.storage.get(targetID);
     if (!cachedLayout || !cachedLayout.state) {
       throw new Error("Attempted to update a layout that does not already exist");
     }
+    if (permission != undefined && permission !== "creator_write") {
+      throw new Error("Shared layouts are not supported in local-only storage");
+    }
     await this.storage.put({
       id: targetID,
       name: name ?? cachedLayout.name,
-      state: data,
+      state: data ?? cachedLayout.state,
     });
     this.notifyChangeListeners();
   }
 
-  async shareLayout(_: unknown): Promise<void> {
-    throw new Error("Sharing is not supported in local-only storage");
-  }
-
   async deleteLayout({ id }: { id: LayoutID }): Promise<void> {
     await this.storage.delete(id);
-    this.notifyChangeListeners();
-  }
-
-  async renameLayout({ id, name }: { id: LayoutID; name: string }): Promise<void> {
-    const target = await this.storage.get(id);
-    if (!target?.state) {
-      throw new Error(`Layout id ${id} not found`);
-    }
-    await this.storage.put({ id, name, state: target.state });
     this.notifyChangeListeners();
   }
 }

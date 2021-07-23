@@ -78,7 +78,7 @@ export default function FakeLayoutStorageProviders({
       if (!layout) {
         throw new Error("This layout doesn't exist on the server");
       }
-      await fakeRemoteStorage.renameLayout({
+      await fakeRemoteStorage.updateLayout({
         targetID: layout.id,
         name: `${layout.name} renamed`,
         ifUnmodifiedSince: layout.updatedAt,

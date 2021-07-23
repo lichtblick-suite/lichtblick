@@ -52,7 +52,7 @@ export default function ConsoleApiLayoutStorageProvider({
 
   return (
     <LayoutStorageDebuggingContext.Provider
-      value={process.env.NODE_ENV !== "production" ? debugging : undefined}
+      value={process.env.NODE_ENV !== "production" && currentUser ? debugging : undefined}
     >
       <LayoutStorageContext.Provider
         value={enableConsoleApiLayouts && currentUser ? offlineStorage : cacheOnlyStorage}

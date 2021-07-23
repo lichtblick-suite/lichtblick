@@ -99,7 +99,7 @@ export default function LayoutBrowser({
 
   const onRenameLayout = useCallback(
     async (item: LayoutMetadata, newName: string) => {
-      await layoutStorage.renameLayout({ id: item.id, name: newName });
+      await layoutStorage.updateLayout({ targetID: item.id, name: newName });
       if (currentLayoutId === item.id) {
         await onSelectLayout(item);
       }
@@ -114,6 +114,7 @@ export default function LayoutBrowser({
         const newLayout = await layoutStorage.saveNewLayout({
           name: `${item.name} copy`,
           data: source.data,
+          permission: "creator_write",
         });
         await onSelectLayout(newLayout);
       }
@@ -139,6 +140,7 @@ export default function LayoutBrowser({
       const newLayout = await layoutStorage.saveNewLayout({
         name: welcomeLayout.name,
         data: welcomeLayout.data,
+        permission: "creator_write",
       });
       await onSelectLayout(newLayout);
     },
@@ -159,6 +161,7 @@ export default function LayoutBrowser({
     const newLayout = await layoutStorage.saveNewLayout({
       name,
       data: state as PanelsState,
+      permission: "creator_write",
     });
     void onSelectLayout(newLayout);
   }, [currentDateForStorybook, layoutStorage, onSelectLayout]);
@@ -188,9 +191,13 @@ export default function LayoutBrowser({
         },
       });
       if (name != undefined) {
-        await layoutStorage.shareLayout({
-          sourceID: item.id,
+        const layout = await layoutStorage.getLayout(item.id);
+        if (!layout) {
+          throw new Error("The layout could not be found.");
+        }
+        await layoutStorage.saveNewLayout({
           name,
+          data: layout.data,
           permission: "org_write",
         });
       }
@@ -230,7 +237,11 @@ export default function LayoutBrowser({
     }
 
     const data = parsedState as PanelsState;
-    const newLayout = await layoutStorage.saveNewLayout({ name: layoutName, data });
+    const newLayout = await layoutStorage.saveNewLayout({
+      name: layoutName,
+      data,
+      permission: "creator_write",
+    });
     void onSelectLayout(newLayout);
   }, [addToast, isMounted, layoutStorage, onSelectLayout]);
 

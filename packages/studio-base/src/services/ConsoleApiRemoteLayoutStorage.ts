@@ -48,11 +48,13 @@ export default class ConsoleApiRemoteLayoutStorage implements IRemoteLayoutStora
     targetID,
     name,
     data,
+    permission,
     ifUnmodifiedSince,
   }: {
     targetID: LayoutID;
-    name: string;
+    name?: string;
     data?: PanelsState;
+    permission?: "creator_write" | "org_read" | "org_write";
     ifUnmodifiedSince: ISO8601Timestamp;
   }): Promise<
     | { status: "success"; newMetadata: RemoteLayoutMetadata }
@@ -72,35 +74,6 @@ export default class ConsoleApiRemoteLayoutStorage implements IRemoteLayoutStora
         id: targetID,
         name,
         data,
-      });
-      return { status: "success", newMetadata: result };
-    } catch (err) {
-      log.warn(err);
-      return { status: "conflict" };
-    }
-  }
-
-  async shareLayout({
-    sourceID,
-    name,
-    permission,
-  }: {
-    sourceID: LayoutID;
-    name: string;
-    permission: "org_read" | "org_write";
-  }): Promise<
-    | { status: "success"; newMetadata: RemoteLayoutMetadata }
-    | { status: "not-found" }
-    | { status: "conflict" }
-  > {
-    try {
-      const existingLayout = await this.api.getLayout(sourceID, { includeData: true });
-      if (!existingLayout || !existingLayout.data) {
-        return { status: "not-found" };
-      }
-      const result = await this.api.createLayout({
-        name,
-        data: existingLayout.data,
         permission,
       });
       return { status: "success", newMetadata: result };
@@ -118,18 +91,5 @@ export default class ConsoleApiRemoteLayoutStorage implements IRemoteLayoutStora
   }): Promise<{ status: "success" | "precondition-failed" }> {
     await this.api.deleteLayout(targetID);
     return { status: "success" };
-  }
-
-  async renameLayout(params: {
-    targetID: LayoutID;
-    name: string;
-    ifUnmodifiedSince: ISO8601Timestamp;
-  }): Promise<
-    | { status: "success"; newMetadata: RemoteLayoutMetadata }
-    | { status: "not-found" }
-    | { status: "conflict" }
-    | { status: "precondition-failed" }
-  > {
-    return await this.updateLayout(params);
   }
 }

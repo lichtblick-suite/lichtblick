@@ -291,6 +291,7 @@ describe("OfflineLayoutStorage", () => {
       await storage.saveNewLayout({
         name: "layout1",
         data: makePanelsState({}),
+        permission: "creator_write",
       });
 
       // The new layout is available from the cache immediately
@@ -384,10 +385,12 @@ describe("OfflineLayoutStorage", () => {
       const { id: newId1 } = await storage.saveNewLayout({
         name: "Foo",
         data: makePanelsState({ newLayoutPanel: { b: 2 } }),
+        permission: "creator_write",
       });
       const { id: newId2 } = await storage.saveNewLayout({
         name: "Bar",
         data: makePanelsState({ newLayoutPanel2: { c: 3 } }),
+        permission: "creator_write",
       });
 
       jest.setSystemTime(10);
