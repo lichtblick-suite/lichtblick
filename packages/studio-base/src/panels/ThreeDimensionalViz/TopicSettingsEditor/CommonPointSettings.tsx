@@ -13,8 +13,9 @@
 
 import { upperFirst } from "lodash";
 
+import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
+import Dropdown from "@foxglove/studio-base/components/Dropdown/index";
 import Flex from "@foxglove/studio-base/components/Flex";
-import { Select, Option } from "@foxglove/studio-base/components/Select";
 
 import { SLabel, SInput } from "./common";
 
@@ -37,9 +38,9 @@ export default function CommonPointSettings({
   const pointShape = settings.pointShape;
   const pointShapeVal = pointShape ?? defaultPointShape;
   const pointShapeOpts = ["circle", "square"].map((field) => (
-    <Option key={field} value={field}>
+    <DropdownItem key={field} value={field}>
       {upperFirst(field)}
-    </Option>
+    </DropdownItem>
   ));
 
   return (
@@ -60,13 +61,18 @@ export default function CommonPointSettings({
       />
 
       <SLabel>Point shape</SLabel>
-      <Select
+      <Dropdown
         text={upperFirst(pointShapeVal)}
         value={pointShapeVal}
         onChange={(value) => onFieldChange("pointShape", value)}
+        btnStyle={{
+          padding: "8px 12px",
+          display: "flex",
+          justifyContent: "space-between",
+        }}
       >
         {pointShapeOpts}
-      </Select>
+      </Dropdown>
     </Flex>
   );
 }

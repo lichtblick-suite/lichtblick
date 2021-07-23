@@ -16,11 +16,12 @@ import { Color } from "regl-worldview";
 import styled from "styled-components";
 
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
+import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
+import Dropdown from "@foxglove/studio-base/components/Dropdown/index";
 import Flex from "@foxglove/studio-base/components/Flex";
 import GradientPicker from "@foxglove/studio-base/components/GradientPicker";
 import Radio from "@foxglove/studio-base/components/Radio";
 import SegmentedControl from "@foxglove/studio-base/components/SegmentedControl";
-import { Select, Option } from "@foxglove/studio-base/components/Select";
 import CommonPointSettings from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/CommonPointSettings";
 import { TopicSettingsEditorProps } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/types";
 import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
@@ -168,7 +169,7 @@ export default function PointCloudSettingsEditor(
               onChange={(flatColor) => onColorModeChange({ mode: "flat", flatColor })}
             /> // Otherwise, choose a field from the point cloud to color by
           ) : (
-            <Select
+            <Dropdown
               text={colorMode.mode === "rgb" ? "rgb" : colorMode.colorField}
               value={colorMode.mode === "rgb" ? "rgb" : colorMode.colorField}
               onChange={(value) =>
@@ -185,15 +186,16 @@ export default function PointCloudSettingsEditor(
                   return { mode: "rainbow", colorField: value };
                 })
               }
+              btnStyle={{ padding: "8px 12px" }}
             >
               {!message
                 ? []
                 : message.fields.map(({ name }) => (
-                    <Option key={name} value={name}>
+                    <DropdownItem key={name} value={name}>
                       {name}
-                    </Option>
+                    </DropdownItem>
                   ))}
-            </Select>
+            </Dropdown>
           )}
         </Flex>
       </Flex>
