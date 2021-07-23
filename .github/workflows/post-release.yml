@@ -3,7 +3,13 @@ name: Post Release
 # run after releases are published
 on:
   release:
-    types: [published]
+    types: [released]
+  workflow_dispatch:
+    inputs:
+      target_commitish:
+        description: "Release branch"
+      tag_name:
+        description: "Tag name (with 'v' prefix)"
 
 jobs:
   bump:
@@ -13,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.release.target_commitish }}
+          ref: ${{ github.event.release.target_commitish || github.event.inputs.target_commitish }}
           lfs: true
 
       - name: Configure git
@@ -24,7 +30,7 @@ jobs:
       - id: bump-version
         uses: foxglove/action-bump-version@v1
         with:
-          version: ${{ github.event.release.tag_name }}-dev
+          version: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}-dev
           commit-message: Bump dev
           push: true
 
@@ -35,7 +41,7 @@ jobs:
           owner: foxglove
           repo: studio
           base: main
-          head: ${{ github.event.release.target_commitish }}
+          head: ${{ github.event.release.target_commitish || github.event.inputs.target_commitish }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -46,7 +52,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
           lfs: true
 
       - uses: actions/setup-node@v2
