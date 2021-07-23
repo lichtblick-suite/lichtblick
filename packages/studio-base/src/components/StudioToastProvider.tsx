@@ -28,6 +28,11 @@ const StudioToast = (props: ToastProps) => {
       isMultiline={false}
       onDismiss={() => props.onDismiss()}
       dismissButtonAriaLabel="Close"
+      styles={{
+        text: {
+          alignItems: "center",
+        },
+      }}
     >
       {props.children}
     </MessageBar>

@@ -11,6 +11,7 @@ import Workspace from "@foxglove/studio-base/Workspace";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import { NativeFileMenuPlayerSelection } from "@foxglove/studio-base/components/NativeFileMenuPlayerSelection";
 import PlayerManager from "@foxglove/studio-base/components/PlayerManager";
+import SendNotificationToastAdapter from "@foxglove/studio-base/components/SendNotificationToastAdapter";
 import AnalyticsProvider from "@foxglove/studio-base/context/AnalyticsProvider";
 import { AssetsProvider } from "@foxglove/studio-base/context/AssetsContext";
 import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
@@ -72,6 +73,7 @@ export default function App(props: AppProps): JSX.Element {
 
   return (
     <MultiProvider providers={providers}>
+      <SendNotificationToastAdapter />
       <NativeFileMenuPlayerSelection />
       <DndProvider backend={HTML5Backend}>
         <Suspense fallback={<></>}>
