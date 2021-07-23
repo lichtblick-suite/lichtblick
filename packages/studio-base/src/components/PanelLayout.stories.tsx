@@ -13,8 +13,11 @@
 
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { createGlobalStyle } from "styled-components";
 
+import { HideErrorSourceLocations } from "@foxglove/studio-base/components/ErrorBoundary";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
+import Panel from "@foxglove/studio-base/components/Panel";
 import { PanelCatalog, PanelInfo } from "@foxglove/studio-base/context/PanelCatalogContext";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { PanelConfigSchemaEntry } from "@foxglove/studio-base/types/panels";
@@ -23,6 +26,22 @@ import PanelLayout from "./PanelLayout";
 
 const allPanels: PanelInfo[] = [
   { title: "Some Panel", type: "Sample1", module: async () => await new Promise(() => {}) },
+  {
+    title: "Broken Panel",
+    type: "Sample2",
+    module: async () => {
+      return {
+        default: Panel(
+          Object.assign(
+            function BrokenPanel() {
+              throw new Error("I don't work!");
+            },
+            { panelType: "Sample2", defaultConfig: {} },
+          ),
+        ),
+      };
+    },
+  },
 ];
 
 class MockPanelCatalog implements PanelCatalog {
@@ -62,6 +81,29 @@ export const PanelNotFound = (): JSX.Element => {
       >
         <PanelLayout />
       </PanelSetup>
+    </DndProvider>
+  );
+};
+
+const PanelToolbarShown = createGlobalStyle`
+  .panelToolbarHovered {
+    display: flex !important;
+  }
+`;
+
+export const PanelWithError = (): JSX.Element => {
+  return (
+    <DndProvider backend={HTML5Backend}>
+      <HideErrorSourceLocations.Provider value={true}>
+        <PanelToolbarShown />
+        <PanelSetup
+          panelCatalog={new MockPanelCatalog()}
+          fixture={{ topics: [], datatypes: {}, frame: {}, layout: "Sample2!4co6n9d" }}
+          omitDragAndDrop
+        >
+          <PanelLayout />
+        </PanelSetup>
+      </HideErrorSourceLocations.Provider>
     </DndProvider>
   );
 };

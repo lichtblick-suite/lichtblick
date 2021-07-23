@@ -50,6 +50,7 @@ type Props = {
   additionalIcons?: React.ReactNode;
   hideToolbars?: boolean;
   isUnknownPanel?: boolean;
+  backgroundColor?: string;
 };
 
 // separated into a sub-component so it can always skip re-rendering
@@ -247,6 +248,7 @@ export default React.memo<Props>(function PanelToolbar({
   helpContent,
   hideToolbars = false,
   isUnknownPanel = false,
+  backgroundColor,
 }: Props) {
   const { supportsStrictMode = true } = useContext(PanelContext) ?? {};
   const [containsOpen, setContainsOpen] = useState(false);
@@ -298,7 +300,7 @@ export default React.memo<Props>(function PanelToolbar({
             [styles.floating!]: floating,
             [styles.hasChildren!]: Boolean(children),
           })}
-          style={showToolbar ? { display: "flex" } : {}}
+          style={showToolbar ? { display: "flex", backgroundColor } : { backgroundColor }}
         >
           {children}
           <PanelToolbarControls

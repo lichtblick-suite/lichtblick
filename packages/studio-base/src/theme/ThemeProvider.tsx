@@ -68,6 +68,7 @@ const icons: {
   RectangularClipping: <Icons.RectangularClippingIcon />,
   Loop: <LoopIcon strokeWidth={1.375} />,
   LoopFilled: <LoopIcon strokeWidth={1.875} />,
+  Refresh: <Icons.RefreshIcon />,
   Rename: <Icons.RenameIcon />,
   Settings: <Icons.SettingsIcon />,
   Share: <Icons.ShareIcon />,

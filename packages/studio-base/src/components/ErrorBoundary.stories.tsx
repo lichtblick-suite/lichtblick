@@ -15,17 +15,17 @@ import { storiesOf } from "@storybook/react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import ErrorBoundary from "./ErrorBoundary";
+import ErrorBoundary, { HideErrorSourceLocations } from "./ErrorBoundary";
 
 class Broken extends React.Component {
   override render() {
-    throw {
+    throw Object.assign(new Error("Hello!"), {
       stack: `
   an error occurred
   it's caught by this component
   now the user sees
       `,
-    };
+    });
     return ReactNull;
   }
 }
@@ -33,9 +33,11 @@ class Broken extends React.Component {
 storiesOf("components/ErrorBoundary", module).add("examples", () => {
   return (
     <DndProvider backend={HTML5Backend}>
-      <ErrorBoundary hideSourceLocations>
-        <Broken />
-      </ErrorBoundary>
+      <HideErrorSourceLocations.Provider value={true}>
+        <ErrorBoundary>
+          <Broken />
+        </ErrorBoundary>
+      </HideErrorSourceLocations.Provider>
     </DndProvider>
   );
 });

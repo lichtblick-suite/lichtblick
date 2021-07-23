@@ -52,6 +52,7 @@ declare global {
     | "Previous"
     | "PreviousFilled"
     | "RectangularClipping"
+    | "Refresh"
     | "Rename"
     | "Settings"
     | "Share"

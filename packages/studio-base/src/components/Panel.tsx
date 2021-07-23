@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { MessageBar, MessageBarType, Stack, useTheme } from "@fluentui/react";
 import BorderAllIcon from "@mdi/svg/svg/border-all.svg";
 import CloseIcon from "@mdi/svg/svg/close.svg";
 import ExpandAllOutlineIcon from "@mdi/svg/svg/expand-all-outline.svg";
@@ -45,12 +46,13 @@ import styled from "styled-components";
 
 import { useConfigById } from "@foxglove/studio-base/PanelAPI";
 import Button from "@foxglove/studio-base/components/Button";
-import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
+import ErrorBoundary, { ErrorRendererProps } from "@foxglove/studio-base/components/ErrorBoundary";
 import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
+import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import {
   useCurrentLayoutActions,
   useSelectedPanels,
@@ -101,6 +103,25 @@ type ComponentConstructorType<P> = { displayName?: string } & (
   | { new (props: P): React.Component<unknown, unknown> }
   | { (props: P): React.ReactElement<unknown> | ReactNull }
 );
+
+function ErrorToolbar(errorProps: ErrorRendererProps): JSX.Element {
+  const theme = useTheme();
+  return (
+    <Stack style={{ overflow: "hidden" }}>
+      <PanelToolbar backgroundColor={theme.semanticColors.errorBackground}>
+        <MessageBar
+          messageBarType={MessageBarType.error}
+          dismissIconProps={{ iconName: "Refresh" }}
+          dismissButtonAriaLabel="Reset"
+          onDismiss={errorProps.onDismiss}
+        >
+          {errorProps.error.toString()}
+        </MessageBar>
+      </PanelToolbar>
+      {errorProps.defaultRenderErrorDetails(errorProps)}
+    </Stack>
+  );
+}
 
 // HOC that wraps panel in an error boundary and flex box.
 // Gives panel a `config` and `saveConfig`.
@@ -554,7 +575,7 @@ export default function Panel<Config extends PanelConfig>(
                 <CloseIcon /> <span>Exit fullscreen</span>
               </button>
             )}
-            <ErrorBoundary>
+            <ErrorBoundary renderError={(errorProps) => <ErrorToolbar {...errorProps} />}>
               {PanelComponent.supportsStrictMode ?? true ? (
                 <React.StrictMode>{child}</React.StrictMode>
               ) : (
