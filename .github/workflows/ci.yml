@@ -46,25 +46,28 @@ jobs:
     name: ${{ matrix.config.name }} (${{ matrix.os }})
 
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2
         with:
           # Chromatic requires running build on the branch head, not PR merge commit
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
           lfs: true
-      - name: Configure Node.js
-        uses: actions/setup-node@v2.2.0
+
+      - uses: actions/setup-node@v2
         with:
           node-version: 14.x
+
       - name: Restore cache
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v2
         with:
           path: |
             .yarn/cache
             **/node_modules
           key: v5-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: v5-${{ runner.os }}-yarn-
+
       - run: yarn install --immutable
+
       - run: ${{ matrix.config.command }}
         env:
           CHROMATIC_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -82,16 +85,17 @@ jobs:
     name: integration (${{ matrix.os }})
 
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           lfs: true
-      - name: Configure Node.js
-        uses: actions/setup-node@v2.2.0
+
+      - uses: actions/setup-node@v2
         with:
           node-version: 14.x
+
       - name: Restore cache
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v2
         with:
           path: |
             .yarn/cache

@@ -4,21 +4,16 @@ name: Post Release
 on:
   release:
     types: [published]
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: "Git tag"
 
 jobs:
-  merge:
-    name: Merge
+  bump:
+    name: Bump dev
     runs-on: ubuntu-20.04
 
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: main
-          fetch-depth: 0
+          ref: ${{ github.event.release.target_commitish }}
           lfs: true
 
       - name: Configure git
@@ -26,12 +21,52 @@ jobs:
           git config user.name "Foxglove"
           git config user.email "contact@foxglove.dev"
 
-      - name: Merge release
-        run: git merge --no-ff --no-edit "${{ github.event.release.tag_name || github.event.inputs.tag }}"
-
       - id: bump-version
         uses: foxglove/action-bump-version@v1
         with:
-          version: ${{ github.event.release.tag_name || github.event.inputs.tag }}-dev
+          version: ${{ github.event.release.tag_name }}-dev
           commit-message: Bump dev
           push: true
+
+      - name: Merge release into main
+        uses: octokit/request-action@v2.x
+        with:
+          route: POST /repos/{owner}/{repo}/merges
+          owner: foxglove
+          repo: studio
+          base: main
+          head: ${{ github.event.release.target_commitish }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  npm:
+    name: NPM publish
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          lfs: true
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14.x
+          registry-url: https://registry.npmjs.org
+
+      - name: Restore cache
+        uses: actions/cache@v2
+        with:
+          path: .yarn/cache
+          key: v1-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: v1-${{ runner.os }}-yarn-
+
+      - run: yarn install --immutable
+
+      - run: npm publish ./packages/studio
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
+
+      - run: npm publish ./packages/studio-base
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
