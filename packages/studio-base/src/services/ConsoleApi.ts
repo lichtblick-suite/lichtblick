@@ -181,5 +181,5 @@ class ConsoleApi {
   }
 }
 
-export type { CurrentUser, Org };
+export type { CurrentUser, Org, DeviceCodeResponse, Session };
 export default ConsoleApi;

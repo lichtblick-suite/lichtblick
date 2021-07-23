@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PrimaryButton, Stack, useTheme } from "@fluentui/react";
+import { PrimaryButton, Stack, StackItem, useTheme } from "@fluentui/react";
 import { useCallback } from "react";
 import { useLocalStorage } from "react-use";
 
@@ -30,9 +30,13 @@ export default function AccountInfo(props: { me?: CurrentUser }): JSX.Element {
   }
 
   return (
-    <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
-      <div>Signed in as: {props.me.email ?? "(no email address)"}</div>
-      <PrimaryButton onClick={onSignoutClick}>Sign out</PrimaryButton>
+    <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
+      <StackItem>
+        <div>Signed in as: {props.me.email ?? "(no email address)"}</div>
+      </StackItem>
+      <StackItem>
+        <PrimaryButton onClick={onSignoutClick}>Sign out</PrimaryButton>
+      </StackItem>
     </Stack>
   );
 }
