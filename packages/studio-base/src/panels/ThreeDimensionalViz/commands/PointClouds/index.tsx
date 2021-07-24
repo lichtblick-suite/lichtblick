@@ -58,6 +58,159 @@ type Attributes = {
   color: number[] | MemoizedVertexBuffer;
 };
 
+const vertexShaderForSingleColor = `
+precision mediump float;
+
+// this comes from the camera
+uniform mat4 projection, view;
+
+#WITH_POSE
+
+attribute vec3 position;
+attribute float color; // color values in range [0-255]
+
+uniform float pointSize;
+uniform int colorMode;
+uniform vec4 flatColor;
+uniform vec4 minGradientColor;
+uniform vec4 maxGradientColor;
+uniform float minColorFieldValue;
+uniform float maxColorFieldValue;
+
+varying vec3 fragColor;
+
+float getFieldValue() {
+  return color;
+}
+
+float getFieldValue_UNORM() {
+  float value = getFieldValue();
+  float colorFieldRange = maxColorFieldValue - minColorFieldValue;
+  if (abs(colorFieldRange) < 0.00001) {
+    return 0.0;
+  }
+  return max(0.0, min((value - minColorFieldValue) / colorFieldRange, 1.0));
+}
+
+vec3 gradientColor() {
+  float pct = getFieldValue_UNORM();
+  return mix(minGradientColor, maxGradientColor, pct).rgb;
+}
+
+// taken from http://docs.ros.org/jade/api/rviz/html/c++/point__cloud__transformers_8cpp_source.html
+// line 47
+vec3 rainbowColor() {
+  float pct = getFieldValue_UNORM();
+  float h = (1.0 - pct) * 5.0 + 1.0;
+  float i = floor(h);
+  float f = fract(h);
+  // if i is even
+  if (mod(i, 2.0) < 1.0) {
+    f = 1.0 - f;
+  }
+  float n = 1.0 - f;
+  vec3 ret = vec3(0);
+  if (i <= 1.0) {
+    ret = vec3(n, 0.0, 1.0);
+  } else if (i == 2.0) {
+    ret = vec3(0.0, n, 1.0);
+  } else if (i == 3.0) {
+    ret = vec3(0.0, 1.0, n);
+  } else if (i == 4.0) {
+    ret = vec3(n, 1.0, 0.0);
+  } else {
+    ret = vec3(1.0, n, 0.0);
+  }
+  return 255.0 * ret;
+}
+
+void main () {
+  gl_PointSize = pointSize;
+  vec3 p = applyPose(position);
+  gl_Position = projection * view * vec4(p, 1);
+
+  if (colorMode == ${COLOR_MODE_GRADIENT}) {
+    fragColor = gradientColor();
+  } else if (colorMode == ${COLOR_MODE_RAINBOW}) {
+    fragColor = rainbowColor();
+  } else {
+    fragColor = flatColor.rgb;
+  }
+}
+`;
+
+const vertexShaderForRgbColor = `
+precision mediump float;
+
+// this comes from the camera
+uniform mat4 projection, view;
+
+#WITH_POSE
+
+attribute vec3 position;
+attribute vec3 color; // color values in range [0-255]
+
+uniform float pointSize;
+uniform int colorMode;
+
+varying vec3 fragColor;
+
+void main () {
+  gl_PointSize = pointSize;
+  vec3 p = applyPose(position);
+  gl_Position = projection * view * vec4(p, 1);
+
+  if (colorMode == ${COLOR_MODE_BGR}) {
+    fragColor = color.bgr;
+  } else if (colorMode == ${COLOR_MODE_RGB}) {
+    fragColor = color;
+  }
+}
+`;
+
+const fragmentShader = `
+precision mediump float;
+varying vec3 fragColor;
+uniform bool isCircle;
+void main () {
+  if (isCircle) {
+    // gl_PointCoord give us the coordinate of this pixel relative to the current point's position
+    // In order to render a circle, we normalize and compute the distance from the current point.
+    // Discard any fragments that are too far away from the center
+    vec3 normal;
+    normal.xy = gl_PointCoord * 2.0 - 1.0;
+    float r2 = dot(normal.xy, normal.xy);
+    if (r2 > 1.0) {
+      discard;
+    }
+  }
+  gl_FragColor = vec4(fragColor / 255.0, 1.0);
+}
+`;
+
+function getEffectiveColorMode(props: DecodedMarker) {
+  const { settings, is_bigendian, hitmapColors, blend } = props;
+  if (hitmapColors) {
+    // We're providing a colors array in RGB format
+    return COLOR_MODE_RGB;
+  }
+
+  if (blend?.color) {
+    // Force to `flat` mode if constant color is required for blending.
+    return COLOR_MODE_FLAT;
+  }
+
+  const { colorMode } = settings;
+  if (colorMode.mode === "flat") {
+    return COLOR_MODE_FLAT;
+  } else if (colorMode.mode === "gradient") {
+    return COLOR_MODE_GRADIENT;
+  } else if (colorMode.mode === "rainbow") {
+    return COLOR_MODE_RAINBOW;
+  }
+  return is_bigendian ? COLOR_MODE_RGB : COLOR_MODE_BGR;
+}
+
 // Implements a custom caching mechanism for vertex buffers.
 // Any memoized vertex buffer needs to be re-created whenever the Regl context
 // changes. That happens mostly when resizing the canvas or adding/removing new
@@ -111,109 +264,13 @@ const makePointCloudCommand = () => {
       REGL.DefaultContext
     >({
       primitive: "points",
-      vert: `
-      precision mediump float;
-
-      // this comes from the camera
-      uniform mat4 projection, view;
-
-      #WITH_POSE
-
-      attribute vec3 position;
-      attribute vec3 color; // color values in range [0-255]
-
-      uniform float pointSize;
-      uniform int colorMode;
-      uniform vec4 flatColor;
-      uniform vec4 minGradientColor;
-      uniform vec4 maxGradientColor;
-      uniform float minColorFieldValue;
-      uniform float maxColorFieldValue;
-
-      varying vec3 fragColor;
-
-      float getFieldValue() {
-        return color.x;
-      }
-
-      float getFieldValue_UNORM() {
-        float value = getFieldValue();
-        float colorFieldRange = maxColorFieldValue - minColorFieldValue;
-        if (abs(colorFieldRange) < 0.00001) {
-          return 0.0;
-        }
-        return max(0.0, min((value - minColorFieldValue) / colorFieldRange, 1.0));
-      }
-
-      vec3 gradientColor() {
-        float pct = getFieldValue_UNORM();
-        return mix(minGradientColor, maxGradientColor, pct).rgb;
-      }
-
-      // taken from http://docs.ros.org/jade/api/rviz/html/c++/point__cloud__transformers_8cpp_source.html
-      // line 47
-      vec3 rainbowColor() {
-        float pct = getFieldValue_UNORM();
-        float h = (1.0 - pct) * 5.0 + 1.0;
-        float i = floor(h);
-        float f = fract(h);
-        // if i is even
-        if (mod(i, 2.0) < 1.0) {
-          f = 1.0 - f;
-        }
-        float n = 1.0 - f;
-        vec3 ret = vec3(0);
-        if (i <= 1.0) {
-          ret = vec3(n, 0.0, 1.0);
-        } else if (i == 2.0) {
-          ret = vec3(0.0, n, 1.0);
-        } else if (i == 3.0) {
-          ret = vec3(0.0, 1.0, n);
-        } else if (i == 4.0) {
-          ret = vec3(n, 1.0, 0.0);
-        } else {
-          ret = vec3(1.0, n, 0.0);
-        }
-        return 255.0 * ret;
-      }
-
-      void main () {
-        gl_PointSize = pointSize;
-        vec3 p = applyPose(position);
-        gl_Position = projection * view * vec4(p, 1);
-
-        if (colorMode == ${COLOR_MODE_GRADIENT}) {
-          fragColor = gradientColor();
-        } else if (colorMode == ${COLOR_MODE_RAINBOW}) {
-          fragColor = rainbowColor();
-        } else if (colorMode == ${COLOR_MODE_BGR}) {
-          fragColor = vec3(color.b, color.g, color.r);
-        } else if (colorMode == ${COLOR_MODE_RGB}) {
-          fragColor = color;
-        } else {
-          fragColor = flatColor.rgb;
-        }
-      }
-    `,
-      frag: `
-      precision mediump float;
-      varying vec3 fragColor;
-      uniform bool isCircle;
-      void main () {
-        if (isCircle) {
-          // gl_PointCoord give us the coordinate of this pixel relative to the current point's position
-          // In order to render a circle, we normalize and compute the distance from the current point.
-          // Discard any fragments that are too far away from the center
-          vec3 normal;
-          normal.xy = gl_PointCoord * 2.0 - 1.0;
-          float r2 = dot(normal.xy, normal.xy);
-          if (r2 > 1.0) {
-            discard;
-          }
-        }
-        gl_FragColor = vec4(fragColor / 255.0, 1.0);
-      }
-    `,
+      vert: (_context, props) => {
+        const mode = getEffectiveColorMode(props);
+        return mode === COLOR_MODE_RGB || mode === COLOR_MODE_BGR
+          ? vertexShaderForRgbColor
+          : vertexShaderForSingleColor;
+      },
+      frag: fragmentShader,
       attributes: {
         position: (_context, props) => {
           return getCachedBuffer(positionBufferCache, props.positionBuffer);
@@ -257,28 +314,7 @@ const makePointCloudCommand = () => {
             ? props.settings?.pointShape === "circle"
             : true;
         },
-        colorMode: (_context, props) => {
-          const { settings, is_bigendian, hitmapColors, blend } = props;
-          if (hitmapColors) {
-            // We're providing a colors array in RGB format
-            return COLOR_MODE_RGB;
-          }
-
-          if (blend?.color) {
-            // Force to `flat` mode if constant color is required for blending.
-            return COLOR_MODE_FLAT;
-          }
-
-          const { colorMode } = settings;
-          if (colorMode.mode === "flat") {
-            return COLOR_MODE_FLAT;
-          } else if (colorMode.mode === "gradient") {
-            return COLOR_MODE_GRADIENT;
-          } else if (colorMode.mode === "rainbow") {
-            return COLOR_MODE_RAINBOW;
-          }
-          return is_bigendian ? COLOR_MODE_RGB : COLOR_MODE_BGR;
-        },
+        colorMode: (_context, props) => getEffectiveColorMode(props),
         flatColor: (_context, props) => {
           if (props.blend?.color) {
             // Use constant color for blending.

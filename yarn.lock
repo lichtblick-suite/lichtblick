@@ -2319,7 +2319,6 @@ __metadata:
     "@types/react-table": 7.7.2
     "@types/react-transition-group": ^4.4.2
     "@types/react-virtualized": 9.21.12
-    "@types/regl-worldview": "workspace:*"
     "@types/roslib": "workspace:*"
     "@types/sanitize-html": 2.3.2
     "@types/sass": ^1.16.1
@@ -2402,7 +2401,7 @@ __metadata:
     reg-publish-gcs-plugin: 0.10.16
     reg-simple-keygen-plugin: 0.10.16
     reg-suit: 0.10.16
-    regl-worldview: "github:foxglove/webviz#workspace=regl-worldview&commit=6eb0e8c45eff795f8718f33bf3e10478951e7249"
+    regl-worldview: "github:foxglove/webviz#workspace=regl-worldview&commit=b570564684c6382b2c1aef08ccd634f4e67ec989"
     rehype-raw: 5.1.0
     reselect: 4.0.0
     rosbag: "github:foxglove/rosbag.js#1d776c9548ef6bdbd0209c7721941f8d4f25947f"
@@ -5625,7 +5624,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/regl-worldview@workspace:*, @types/regl-worldview@workspace:packages/@types/regl-worldview":
+"@types/regl-worldview@workspace:packages/@types/regl-worldview":
   version: 0.0.0-use.local
   resolution: "@types/regl-worldview@workspace:packages/@types/regl-worldview"
   languageName: unknown
@@ -21519,9 +21518,9 @@ react-use@17.2.4:
   languageName: node
   linkType: hard
 
-"regl-worldview@github:foxglove/webviz#workspace=regl-worldview&commit=6eb0e8c45eff795f8718f33bf3e10478951e7249":
+"regl-worldview@github:foxglove/webviz#workspace=regl-worldview&commit=b570564684c6382b2c1aef08ccd634f4e67ec989":
   version: 0.16.1
-  resolution: "regl-worldview@https://github.com/foxglove/webviz.git#workspace=regl-worldview&commit=6eb0e8c45eff795f8718f33bf3e10478951e7249"
+  resolution: "regl-worldview@https://github.com/foxglove/webviz.git#workspace=regl-worldview&commit=b570564684c6382b2c1aef08ccd634f4e67ec989"
   dependencies:
     "@babel/runtime": ^7.3.1
     "@mapbox/tiny-sdf": ^1.1.1
@@ -21538,7 +21537,7 @@ react-use@17.2.4:
   peerDependencies:
     react: 16.x
     react-dom: 16.x
-  checksum: e104f13b4e3b230343101c504fc85df6333fd662bf489fafcb6900c714c6c18a373d6c10e757d728199970a553c22725d13fc72fcd640200295359f2e60c43fa
+  checksum: 361d24b3fdc0372932317472e1ed2da0de4346d06f14c69727c02c08957d47d75b9a25d2f1a340cff602db1d80aa0d002210ab6d00a0ba2cb76b2b4b5dcf9bff
   languageName: node
   linkType: hard
 
