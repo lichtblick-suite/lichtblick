@@ -11,8 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import Bag from "rosbag";
-
+import Bag from "@foxglove/rosbag";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { Topic } from "@foxglove/studio-base/players/types";
 import { Connection } from "@foxglove/studio-base/randomAccessDataProviders/types";

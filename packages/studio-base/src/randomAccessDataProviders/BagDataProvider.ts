@@ -12,11 +12,11 @@
 //   You may not use this file except in compliance with the License.
 
 import { debounce, isEqual } from "lodash";
-import Bag, { open, BagReader } from "rosbag";
-import ReadResult from "rosbag/dist/ReadResult";
 import decompressLZ4 from "wasm-lz4";
 
 import Logger from "@foxglove/log";
+import Bag, { open, BagReader } from "@foxglove/rosbag";
+import ReadResult from "@foxglove/rosbag/dist/ReadResult";
 import { Time, add, compare } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import BrowserHttpReader from "@foxglove/studio-base/randomAccessDataProviders/BrowserHttpReader";

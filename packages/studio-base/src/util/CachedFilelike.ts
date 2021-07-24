@@ -11,9 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { round } from "lodash";
-import { Callback, Filelike } from "rosbag";
 
 import Logger from "@foxglove/log";
+import { Callback, Filelike } from "@foxglove/rosbag";
 
 import VirtualLRUBuffer from "./VirtualLRUBuffer";
 import { getNewConnection } from "./getNewConnection";
