@@ -15,6 +15,7 @@ import LinkPlusIcon from "@mdi/svg/svg/link-plus.svg";
 import styled from "styled-components";
 
 import Icon from "@foxglove/studio-base/components/Icon";
+import { LegacyTable } from "@foxglove/studio-base/components/LegacyStyledComponents";
 
 import GlobalVariableLink from "./GlobalVariableLink/index";
 import GlobalVariableName from "./GlobalVariableName";
@@ -26,7 +27,7 @@ const SPath = styled.span`
   opacity: 0.8;
 `;
 
-const STable = styled.table`
+const STable = styled(LegacyTable)`
   td {
     padding: 0.3em;
     border: none;

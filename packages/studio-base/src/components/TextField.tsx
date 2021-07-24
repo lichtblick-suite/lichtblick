@@ -13,6 +13,7 @@
 
 import styled from "styled-components";
 
+import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const { useRef, useState, useLayoutEffect, useCallback } = React;
@@ -135,7 +136,7 @@ export default function TextField({
   return (
     <STextField style={style}>
       {label != undefined && <STextFieldLabel>{label}</STextFieldLabel>}
-      <input
+      <LegacyInput
         onBlur={handleBlur}
         ref={inputRef}
         placeholder={placeholder}

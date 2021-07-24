@@ -18,10 +18,16 @@ type Props = {
   color?: Color;
   onChange: (newColor: Color) => void;
   buttonShape?: "circle" | "default";
+  circleSize?: number;
 };
 
 // Returns a button that pops out an ColorPicker in a fluent callout.
-export default function ColorPicker({ color, onChange, buttonShape }: Props): JSX.Element {
+export default function ColorPicker({
+  color,
+  circleSize = 25,
+  onChange,
+  buttonShape,
+}: Props): JSX.Element {
   const fluentColor = colorObjToIColor(color);
   const colorButtonRef = useRef<HTMLElement>(ReactNull);
   const [colorPickerShown, setColorPickerShown] = useState(false);
@@ -35,9 +41,9 @@ export default function ColorPicker({ color, onChange, buttonShape }: Props): JS
           styles={{
             root: {
               backgroundColor: fluentColor.str,
-              width: "26px",
-              height: "26px",
-              borderRadius: "13px",
+              width: `${circleSize}px`,
+              height: `${circleSize}px`,
+              borderRadius: "50%",
             },
             rootHovered: { backgroundColor: fluentColor.str, opacity: 0.8 },
             rootPressed: { backgroundColor: fluentColor.str, opacity: 0.6 },

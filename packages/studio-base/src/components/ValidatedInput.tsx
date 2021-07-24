@@ -15,6 +15,7 @@ import { isEqual } from "lodash";
 import styled from "styled-components";
 
 import Flex from "@foxglove/studio-base/components/Flex";
+import { LegacyTextarea } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 import { validationErrorToString, ValidationResult } from "@foxglove/studio-base/util/validators";
 
@@ -26,7 +27,7 @@ const SEditBox = styled.div`
   min-height: 200px;
   max-height: 800px;
 `;
-const StyledTextarea = styled.textarea`
+const StyledTextarea = styled(LegacyTextarea)`
   flex: 1 1 auto;
   resize: none;
 `;

@@ -45,7 +45,7 @@ export default function NotificationModal({
           styles={{
             field: {
               color: theme.semanticColors.bodyText,
-              fontSize: `${theme.fonts.small}`,
+              fontSize: theme.fonts.small.fontSize,
               fontFamily: `${MONOSPACE} !important`,
               maxHeight: "50vh",
               overflowY: "auto",

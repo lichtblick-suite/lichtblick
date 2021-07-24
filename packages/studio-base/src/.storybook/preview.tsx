@@ -5,6 +5,7 @@
 import { Story, StoryContext } from "@storybook/react";
 import { ToastProvider } from "react-toast-notifications";
 
+import CssBaseline from "@foxglove/studio-base/components/CssBaseline";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import { HoverValueProvider } from "@foxglove/studio-base/context/HoverValueContext";
 import { UserNodeStateProvider } from "@foxglove/studio-base/context/UserNodeStateContext";
@@ -13,7 +14,6 @@ import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import signal from "@foxglove/studio-base/util/signal";
 import waitForFonts from "@foxglove/studio-base/util/waitForFonts";
 
-import "@foxglove/studio-base/styles/global.scss";
 import "./styles.scss";
 
 let loaded = false;
@@ -40,6 +40,7 @@ function WithContextProviders(Child: Story, ctx: StoryContext): JSX.Element {
   ];
   return (
     <MultiProvider providers={providers}>
+      <CssBaseline />
       <Child />
     </MultiProvider>
   );

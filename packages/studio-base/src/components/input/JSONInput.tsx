@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import { useRef, useState } from "react";
 
+import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const keyValMap: Record<string, number> = { ArrowDown: -1, ArrowUp: 1 };
@@ -30,7 +31,7 @@ export function JSONInput(props: {
   const parsedValue = parseJson(internalValue);
   const isValid = parsedValue != undefined;
   return (
-    <input
+    <LegacyInput
       style={{ color: isValid ? "white" : colors.RED }}
       data-test={props.dataTest ?? "json-input"}
       type="text"

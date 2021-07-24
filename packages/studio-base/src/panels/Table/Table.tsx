@@ -28,6 +28,11 @@ import styled from "styled-components";
 
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Icon from "@foxglove/studio-base/components/Icon";
+import {
+  LegacyButton,
+  LegacyTable,
+  LegacySelect,
+} from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { toolsColorScheme } from "@foxglove/studio-base/util/toolsColorScheme";
 
 import TableCell from "./TableCell";
@@ -82,11 +87,6 @@ function getColumnsFromObject(
   return columns;
 }
 
-const STable = styled.table`
-  border: none;
-  width: 100%;
-`;
-
 const STableRow = styled.tr`
   background-color: ${({ index }: { index: number }) =>
     index % 2 === 0 ? "inherit" : toolsColorScheme.base.dark};
@@ -103,19 +103,20 @@ type STableHeaderProps = {
 
 const STableHeader = styled.th<STableHeaderProps>`
   border-bottom: ${({ isSortedAsc }: STableHeaderProps) =>
-    isSortedAsc ? `solid 3px ${toolsColorScheme.blue.medium}` : "none"};
+    isSortedAsc ? `solid 3px ${toolsColorScheme.blue.medium}` : "none"} !important;
   border-top: ${({ isSortedDesc }: STableHeaderProps) =>
-    isSortedDesc ? `solid 3px ${toolsColorScheme.blue.medium}` : "none"};
-  border-left: none;
-  border-right: none;
-  font-weight: bold;
+    isSortedDesc ? `solid 3px ${toolsColorScheme.blue.medium}` : "none"} !important;
+  border-left: none !important;
+  border-right: none !important;
+  padding: 4px !important;
+  font-weight: bold !important;
   cursor: pointer;
   width: ${({ id }: STableHeaderProps) => (id === "expander" ? "25px" : "auto")};
   text-align: left;
 `;
 
 const STableData = styled.td`
-  padding: 4px;
+  padding: 4px !important;
   white-space: nowrap;
   text-overflow: ellipsis;
 `;
@@ -191,7 +192,7 @@ export default function Table({
 
   return (
     <>
-      <STable {...getTableProps()}>
+      <LegacyTable {...getTableProps()}>
         <thead>
           {headerGroups.map((headerGroup, i) => {
             return (
@@ -237,28 +238,28 @@ export default function Table({
             );
           })}
         </tbody>
-      </STable>
+      </LegacyTable>
       {!isNested && (
         <div style={{ margin: "4px auto 0" }}>
-          <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
+          <LegacyButton onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
             {"<<"}
-          </button>{" "}
-          <button onClick={() => previousPage()} disabled={!canPreviousPage}>
+          </LegacyButton>{" "}
+          <LegacyButton onClick={() => previousPage()} disabled={!canPreviousPage}>
             {"<"}
-          </button>{" "}
+          </LegacyButton>{" "}
           <span>
             Page{" "}
             <strong>
               {pageIndex + 1} of {pageOptions.length}
             </strong>{" "}
           </span>
-          <button onClick={() => nextPage()} disabled={!canNextPage}>
+          <LegacyButton onClick={() => nextPage()} disabled={!canNextPage}>
             {">"}
-          </button>{" "}
-          <button onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
+          </LegacyButton>{" "}
+          <LegacyButton onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage}>
             {">>"}
-          </button>{" "}
-          <select
+          </LegacyButton>{" "}
+          <LegacySelect
             value={pageSize}
             onChange={(e) => {
               setPageSize(Number(e.target.value));
@@ -269,7 +270,7 @@ export default function Table({
                 Show {size}
               </option>
             ))}
-          </select>
+          </LegacySelect>
         </div>
       )}
     </>

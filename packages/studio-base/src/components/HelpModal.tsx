@@ -45,7 +45,6 @@ export default function HelpModal({
           styles={{
             root: {
               color: theme.palette.neutralSecondary,
-              margin: 0, // TODO: remove this once global.scss is removed
               marginLeft: theme.spacing.l1,
             },
             rootHovered: {

@@ -15,6 +15,7 @@ import { ReactElement } from "react";
 import Tree from "react-json-tree";
 import styled from "styled-components";
 
+import { LegacyButton } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { UserNodeLog } from "@foxglove/studio-base/players/UserNodePlayer/types";
 import { jsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -57,7 +58,7 @@ const LogsSection = ({ nodeId, logs, clearLogs }: Props): ReactElement => {
   }
   return (
     <>
-      <button
+      <LegacyButton
         data-test="np-logs-clear"
         style={{ padding: "3px 5px", position: "absolute", right: 5, top: 5 }}
         onClick={() => {
@@ -67,7 +68,7 @@ const LogsSection = ({ nodeId, logs, clearLogs }: Props): ReactElement => {
         }}
       >
         clear logs
-      </button>
+      </LegacyButton>
       <ul>
         {logs.map(({ source, value }, idx) => {
           const renderTreeObj = value != undefined && typeof value === "object";

@@ -15,6 +15,8 @@ import { extname } from "path";
 import { useCallback, useLayoutEffect, useState } from "react";
 import { useToasts } from "react-toast-notifications";
 
+import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
+
 type Props = {
   children: React.ReactNode; // Shown when dragging in a file.
   allowedExtensions?: string[];
@@ -93,7 +95,7 @@ export default function DocumentDropListener(props: Props): JSX.Element {
 
   return (
     <>
-      <input // Expose a hidden input for Puppeteer to use to drop a file in.
+      <LegacyInput // Expose a hidden input for Puppeteer to use to drop a file in.
         type="file"
         style={{ display: "none" }}
         onChange={(event) => {

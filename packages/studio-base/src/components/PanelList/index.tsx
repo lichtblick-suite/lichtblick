@@ -19,6 +19,7 @@ import styled from "styled-components";
 
 import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
+import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { Item } from "@foxglove/studio-base/components/Menu";
 import TextHighlight from "@foxglove/studio-base/components/TextHighlight";
 import {
@@ -49,7 +50,7 @@ const SSearchInputContainer = styled(Flex)`
   border-radius: 4px;
 `;
 
-const SSearchInput = styled.input`
+const SSearchInput = styled(LegacyInput)`
   background-color: ${colors.DARK5};
   padding: 8px;
   width: 100%;

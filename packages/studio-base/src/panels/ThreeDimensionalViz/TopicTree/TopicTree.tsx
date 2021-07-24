@@ -29,6 +29,7 @@ import styled from "styled-components";
 
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import Icon from "@foxglove/studio-base/components/Icon";
+import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { Item } from "@foxglove/studio-base/components/Menu";
 import useChangeDetector from "@foxglove/studio-base/hooks/useChangeDetector";
 import useLinkedGlobalVariables from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
@@ -162,7 +163,7 @@ const SFilter = styled.div`
   flex: 1;
 `;
 
-const SInput = styled.input`
+const SInput = styled(LegacyInput)`
   height: 24px;
   background: transparent;
   flex: 1;

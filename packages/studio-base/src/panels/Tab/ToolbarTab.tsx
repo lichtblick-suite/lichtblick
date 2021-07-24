@@ -19,6 +19,7 @@ import styled from "styled-components";
 import textMetrics from "text-metrics";
 
 import Icon from "@foxglove/studio-base/components/Icon";
+import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import { TabActions } from "@foxglove/studio-base/panels/Tab/TabDndContext";
 import { SANS_SERIF } from "@foxglove/studio-base/styles/fonts";
@@ -61,7 +62,7 @@ const STab = styled.div<{
   maxWidth: `${MAX_TAB_WIDTH}px`,
 }));
 
-const SInput = styled.input<{ editable: boolean }>(({ editable }) => ({
+const SInput = styled(LegacyInput)<{ editable: boolean }>(({ editable }) => ({
   pointerEvents: editable ? "all" : "none",
   width: "100%",
 }));

@@ -21,6 +21,7 @@ import { v4 as uuidv4 } from "uuid";
 import Button from "@foxglove/studio-base/components/Button";
 import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
+import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import SpinningLoadingIcon from "@foxglove/studio-base/components/SpinningLoadingIcon";
@@ -287,7 +288,7 @@ function NodePlayground(props: Props) {
             )}
             {selectedNodeId != undefined && selectedNode && (
               <div style={{ position: "relative" }}>
-                <input
+                <LegacyInput
                   type="text"
                   placeholder="node name"
                   value={inputTitle}

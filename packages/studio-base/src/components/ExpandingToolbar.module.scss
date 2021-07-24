@@ -13,23 +13,38 @@
 
 @import "@foxglove/studio-base/styles/colors.module.scss";
 
-.tabBar {
-  .tab {
-    margin: 0;
-    padding-left: 8px;
-    padding-right: 8px;
-    border-radius: 0;
-    border-top: 2px solid transparent;
-    border-bottom: 2px solid transparent;
-    &.selected {
-      border-bottom: 2px solid $text-normal;
-    }
-  }
+.expandButton {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 8px 4px !important;
+}
 
-  .spaceSeparator {
-    flex-grow: 1;
-    min-width: 24px;
+.iconButton {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 8px 4px !important;
+  align-items: start !important;
+  margin-right: 4px !important;
+  margin-left: 4px !important;
+}
+
+.tab {
+  margin: 0;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  border-top: 2px solid transparent !important;
+  border-bottom: 2px solid transparent !important;
+
+  &.selected {
+    border-bottom: 2px solid $text-normal !important;
   }
+}
+
+.tabBar {
+  justify-content: space-between;
 }
 
 .tabBody {

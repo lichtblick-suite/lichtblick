@@ -340,17 +340,18 @@ function TopicGraph() {
       <PanelToolbar floating helpContent={helpContent} />
       <Toolbar>
         <div className={styles.buttons}>
-          <Button tooltip="Zoom Fit" onClick={onZoomFit}>
+          <Button className={styles.iconButton} tooltip="Zoom Fit" onClick={onZoomFit}>
             <Icon style={{ color: "white" }} small>
               <FitToPageIcon />
             </Icon>
           </Button>
-          <Button tooltip="Orientation" onClick={toggleOrientation}>
+          <Button className={styles.iconButton} tooltip="Orientation" onClick={toggleOrientation}>
             <Icon style={{ color: "white" }} small>
               {lrOrientation ? <ArrowLeftRightIcon /> : <ArrowUpDownIcon />}
             </Icon>
           </Button>
           <Button
+            className={styles.iconButton}
             tooltip={showServices ? "Showing services" : "Hiding services"}
             onClick={toggleShowServices}
           >

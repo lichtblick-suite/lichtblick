@@ -15,6 +15,7 @@ import ChevronDownIcon from "@mdi/svg/svg/chevron-down.svg";
 import cx from "classnames";
 import { ReactNode, CSSProperties, ReactElement } from "react";
 
+import { LegacyButton } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 
 import ChildToggle from "../ChildToggle";
@@ -104,7 +105,7 @@ export default class Dropdown<T> extends React.Component<Props<T>, State> {
     const { btnClassname, text, value, disabled, tooltip } = this.props;
     const { isOpen } = this.state;
     const button = (
-      <button
+      <LegacyButton
         className={cx(styles.button, btnClassname, { disabled })}
         style={{ opacity: isOpen ? 1 : undefined, ...this.props.btnStyle }}
         data-test={this.props.dataTest}
@@ -113,7 +114,7 @@ export default class Dropdown<T> extends React.Component<Props<T>, State> {
         <Icon style={{ marginLeft: 4 }}>
           <ChevronDownIcon style={{ width: 14, height: 14, opacity: 0.5 }} />
         </Icon>
-      </button>
+      </LegacyButton>
     );
     if (tooltip != undefined && tooltip.length > 0 && !isOpen) {
       // The tooltip often occludes the first item of the open menu.

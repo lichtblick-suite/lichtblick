@@ -32,6 +32,11 @@ $legend-item-height: 20px;
   }
 }
 
+.dropdown {
+  background-color: transparent !important;
+  padding: 3px !important;
+}
+
 .addLine {
   display: none;
   content: "+ add line";

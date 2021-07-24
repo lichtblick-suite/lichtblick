@@ -19,6 +19,7 @@ import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
 import Button from "@foxglove/studio-base/components/Button";
 import Flex from "@foxglove/studio-base/components/Flex";
+import { LegacyTextarea } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import PanelToolbarLabel from "@foxglove/studio-base/components/PanelToolbarLabel";
@@ -45,7 +46,7 @@ type Props = {
   saveConfig: (arg0: Partial<Config>) => void;
 };
 
-const STextArea = styled.textarea`
+const STextArea = styled(LegacyTextarea)`
   width: 100%;
   height: 100%;
   resize: none;

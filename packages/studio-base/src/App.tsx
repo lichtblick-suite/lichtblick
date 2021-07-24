@@ -29,8 +29,6 @@ import PanelCatalogProvider from "@foxglove/studio-base/providers/PanelCatalogPr
 import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 import URDFAssetLoader from "@foxglove/studio-base/services/URDFAssetLoader";
 
-import "./styles/global.scss";
-
 type AppProps = {
   /**
    * Set to true to force loading the welcome layout for demo mode. Normally the demo is only shown

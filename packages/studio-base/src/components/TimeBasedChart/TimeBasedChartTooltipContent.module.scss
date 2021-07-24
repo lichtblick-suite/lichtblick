@@ -21,16 +21,41 @@
   max-width: 350px;
   overflow-wrap: break-word;
 
+  table {
+    border: "none";
+    width: 100%;
+  }
+
   th,
   td {
     border: none;
+    padding: 0 0.3em;
+    line-height: 1.3em;
   }
 
   th {
     color: $dark2;
+    text-align: center;
 
     &:first-child {
       text-align: left;
+    }
+  }
+
+  tr {
+    &:first-child {
+      th,
+      td {
+        padding-top: 4px;
+        padding-bottom: 4px;
+      }
+    }
+
+    &:hover {
+      td {
+        color: $dark4;
+        cursor: pointer;
+      }
     }
   }
 }

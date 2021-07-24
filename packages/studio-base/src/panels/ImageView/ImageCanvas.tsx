@@ -30,6 +30,7 @@ import usePanZoom from "use-pan-and-zoom";
 import { v4 as uuidv4 } from "uuid";
 
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
+import { LegacyButton } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { Item } from "@foxglove/studio-base/components/Menu";
 import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
@@ -353,12 +354,12 @@ export default function ImageCanvas(props: Props): JSX.Element {
           Use mousewheel or buttons to zoom
         </div>
         <div className={cx(styles.menuItem, styles.borderBottom)}>
-          <button className={styles.round} onClick={zoomOut} data-panel-minus-zoom>
+          <LegacyButton className={styles.round} onClick={zoomOut} data-panel-minus-zoom>
             -
-          </button>
-          <button className={styles.round} onClick={zoomIn} data-panel-add-zoom>
+          </LegacyButton>
+          <LegacyButton className={styles.round} onClick={zoomIn} data-panel-add-zoom>
             +
-          </button>
+          </LegacyButton>
         </div>
         <Item className={styles.borderBottom} onClick={onZoom100} dataTest={"hundred-zoom"}>
           Zoom to 100%
@@ -452,13 +453,13 @@ export default function ImageCanvas(props: Props): JSX.Element {
         />
       )}
       {openZoomContext && zoomContextMenu}
-      <button
+      <LegacyButton
         className={styles.magnify}
         onClick={() => setOpenZoomContext((old) => !old)}
         data-magnify-icon
       >
         <MagnifyIcon />
-      </button>
+      </LegacyButton>
     </div>
   );
 }

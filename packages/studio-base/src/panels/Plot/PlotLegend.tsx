@@ -120,7 +120,7 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
           <Dropdown
             value={xAxisVal}
             text={shortXAxisLabel(xAxisVal)}
-            btnStyle={{ backgroundColor: "transparent", padding: 3 }}
+            btnClassname={styles.dropdown}
             onChange={(newXAxisVal) => saveConfig({ xAxisVal: newXAxisVal })}
             noPortal
           >

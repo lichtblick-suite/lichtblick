@@ -1,8 +1,21 @@
+/*
+  Make sure everything uses box-sizing: border-box.
+  Per https://www.paulirish.com/2012/box-sizing-border-box-ftw/
+  When changing this, be aware that Mosaic also adds this by default.
+*/
+html {
+  box-sizing: border-box;
+}
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
+
 /* http://meyerweb.com/eric/tools/css/reset/
    v2.0 | 20110126
    License: none (public domain)
 */
-
 html,
 body,
 div,
@@ -87,8 +100,6 @@ video {
   margin: 0;
   padding: 0;
   border: 0;
-  font-size: 100%;
-  font: inherit;
   vertical-align: baseline;
 }
 /* HTML5 display-role reset for older browsers */
@@ -126,4 +137,28 @@ q:after {
 table {
   border-collapse: collapse;
   border-spacing: 0;
+}
+td,
+th {
+  font: inherit;
+  text-align: left;
+}
+i,
+em {
+  font-style: italic;
+}
+b,
+strong {
+  font-weight: bold;
+  letter-spacing: -0.03125em;
+}
+p {
+  margin: 1em 0;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+code {
+  padding: 0 0.25em;
 }

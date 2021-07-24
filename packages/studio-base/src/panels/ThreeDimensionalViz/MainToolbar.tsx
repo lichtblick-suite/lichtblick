@@ -44,7 +44,7 @@ function MainToolbar({
   const measureActive = measureState === "place-start" || measureState === "place-finish";
   return (
     <div className={styles.buttons}>
-      <Button tooltip={cameraModeTip} onClick={onToggleCameraMode}>
+      <Button className={styles.iconButton} tooltip={cameraModeTip} onClick={onToggleCameraMode}>
         <Icon
           style={{ color: perspective ? colors.accent : "white" }}
           dataTest={`MainToolbar-toggleCameraMode`}
@@ -53,6 +53,7 @@ function MainToolbar({
         </Icon>
       </Button>
       <Button
+        className={styles.iconButton}
         disabled={perspective}
         tooltip={
           perspective
@@ -72,7 +73,7 @@ function MainToolbar({
         </Icon>
       </Button>
       {process.env.NODE_ENV === "development" && (
-        <Button tooltip="Debug" onClick={onToggleDebug}>
+        <Button className={styles.iconButton} tooltip="Debug" onClick={onToggleDebug}>
           <Icon style={{ color: debug ? colors.accent : "white" }}>
             <BugIcon />
           </Icon>

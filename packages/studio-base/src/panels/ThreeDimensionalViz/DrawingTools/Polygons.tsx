@@ -20,6 +20,7 @@ import {
   SValue,
   SLabel,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/styling";
+import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
 import {
   polygonsToPoints,
   getFormattedString,
@@ -65,6 +66,7 @@ export default function Polygons({ onSetPolygons, polygonBuilder }: Props): JSX.
         dataValidator={polygonPointsValidator}
       >
         <Button
+          className={styles.button}
           small
           tooltip="Copy Polygons"
           onClick={() => {

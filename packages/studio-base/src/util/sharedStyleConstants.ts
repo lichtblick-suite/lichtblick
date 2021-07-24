@@ -73,10 +73,8 @@ const robotStylesColors = {
 export const colors = {
   ...robotStylesColors,
   PRIMARY: robotStylesColors.PURPLE,
-  TEXT_MUTED: robotStylesColors.GRAY,
-  HIGHLIGHT: robotStylesColors.BLUE,
-  HIGHLIGHT_MUTED: tinyColor(robotStylesColors.BLUE).setAlpha(0.3).toRgbString(),
-  // TODO:(Audrey): !!! need design review. Don't use these colors until TopicGrouping feature is finished.
+  HIGHLIGHT: "#29bee7",
+  HIGHLIGHT_MUTED: "#29bee744",
   HOVER_BACKGROUND_COLOR: tinyColor(robotStylesColors.PURPLE).setAlpha(0.2).toRgbString(),
   DISABLED: robotStylesColors.DARK9,
   TEXTL1: robotStylesColors.LIGHT2,
@@ -89,6 +87,36 @@ export const colors = {
   DIFF_MODE_SOURCE_2: robotStylesColors.TEAL,
   DIFF_MODE_SOURCE_BOTH: robotStylesColors.DARK7,
   CYAN: "#00ffff",
+
+  BACKGROUND: "#121217",
+  BACKGROUND_CONTROL: "rgba(247, 247, 243, 0.1)",
+  BACKGROUND_CONTROL_SELECTED: "rgba(59, 46, 118, 0.6)",
+
+  TEXT_BRIGHT: "rgba(247, 247, 243, 0.88)",
+  TEXT_NORMAL: "rgba(247, 247, 243, 0.77)",
+  TEXT_DISABLED: "rgba(247, 247, 243, 0.15)",
+  TEXT_MUTED: "rgba(247, 247, 243, 0.3)",
+  TEXT_CONTROL: "rgba(247, 247, 243, 0.77)",
+  TEXT_CONTROL_HOVER: "rgba(247, 247, 243, 1)",
+
+  TEXT_INPUT: "rgba(0, 0, 0, 0.8)",
+  TEXT_INPUT_DISABLED: "rgba(0, 0, 0, 0.3)",
+
+  MENU_ITEM_SELECTED: "rgba(45, 45, 51, 1)",
+
+  DIVIDER: "rgba(247, 247, 243, 0.1)",
+
+  LIGHT_PURPLE: "#b79dca",
+  GREY: "#e7e9ef",
+  TOOLBAR_FIXED: "#1f1e27",
+  ACCENT: "#248eff",
+};
+
+export const spacing = {
+  PADDING: "8px",
+  CONTROL_PADDING: "8px 8px 8px 16px",
+  CONTROL_MARGIN: "0 0.2em",
+  TEXT_SIZE: "12px",
 };
 
 export const textSize = {

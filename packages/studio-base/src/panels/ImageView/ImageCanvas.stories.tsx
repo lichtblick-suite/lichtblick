@@ -491,7 +491,7 @@ export const MarkersWithFallbackRenderingUsingMainThread = (): JSX.Element => {
 
   return (
     <div>
-      <h2>original markers</h2>
+      <div>original markers</div>
       <ImageCanvas
         topic={topics[1]}
         image={imageMessage}
@@ -506,7 +506,7 @@ export const MarkersWithFallbackRenderingUsingMainThread = (): JSX.Element => {
         onStartRenderImage={() => () => undefined}
       />
       <br />
-      <h2>transformed markers</h2>
+      <div>transformed markers</div>
       <ImageCanvas
         topic={topics[1]}
         image={imageMessage}
@@ -520,7 +520,7 @@ export const MarkersWithFallbackRenderingUsingMainThread = (): JSX.Element => {
         renderInMainThread
         onStartRenderImage={() => () => undefined}
       />
-      <h2>markers with different original image size</h2>
+      <div>markers with different original image size</div>
       <ImageCanvas
         topic={topics[1]}
         image={imageMessage}

@@ -13,7 +13,9 @@
 
 import styled from "styled-components";
 
-export default styled.input`
+import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
+
+export default styled(LegacyInput)`
   width: 100%;
   margin: 0;
 `;

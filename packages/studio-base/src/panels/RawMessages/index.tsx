@@ -554,6 +554,7 @@ function RawMessages(props: Props) {
                     value={diffMethod}
                     onChange={(newDiffMethod) => saveConfig({ diffMethod: newDiffMethod })}
                     noPortal
+                    btnStyle={{ padding: "4px 10px" }}
                   >
                     <DropdownItem value={PREV_MSG_METHOD}>
                       <span>{PREV_MSG_METHOD}</span>

@@ -23,7 +23,7 @@ const ParametersTable = styled.div`
 
   th,
   td {
-    padding: 0px 16px;
+    padding: 3px 16px;
     line-height: 100%;
     border: none;
   }

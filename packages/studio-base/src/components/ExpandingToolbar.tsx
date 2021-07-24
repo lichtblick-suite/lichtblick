@@ -79,7 +79,11 @@ export default function ExpandingToolbar<T extends string>({
     });
     return (
       <div data-test={dataTest} className={className}>
-        <Button tooltip={tooltip} onClick={() => onSelectTab(selectedTabLocal)}>
+        <Button
+          className={styles.iconButton}
+          tooltip={tooltip}
+          onClick={() => onSelectTab(selectedTabLocal)}
+        >
           <Icon dataTest={`ExpandingToolbar-${tooltip}`}>{icon}</Icon>
         </Button>
       </div>
@@ -94,18 +98,19 @@ export default function ExpandingToolbar<T extends string>({
   return (
     <div data-test={dataTest} className={cx(className, styles.expanded)}>
       <Flex row className={styles.tabBar}>
-        {React.Children.map(children, (child) => {
-          return (
-            <Button
-              className={cx(styles.tab, { [styles.selected!]: child === selectedChild })}
-              onClick={() => onSelectTab(child.props.name as T)}
-            >
-              {child.props.name}
-            </Button>
-          );
-        })}
-        <div className={styles.spaceSeparator} />
-        <Button onClick={() => onSelectTab(undefined)}>
+        <Flex row>
+          {React.Children.map(children, (child) => {
+            return (
+              <Button
+                className={cx(styles.tab, { [styles.selected!]: child === selectedChild })}
+                onClick={() => onSelectTab(child.props.name as T)}
+              >
+                {child.props.name}
+              </Button>
+            );
+          })}
+        </Flex>
+        <Button className={styles.expandButton} onClick={() => onSelectTab(undefined)}>
           <Icon>
             <ArrowCollapseIcon />
           </Icon>

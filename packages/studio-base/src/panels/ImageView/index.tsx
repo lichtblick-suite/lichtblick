@@ -29,6 +29,7 @@ import dropDownStyles from "@foxglove/studio-base/components/Dropdown/index.modu
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
+import { LegacyButton } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { Item, SubMenu } from "@foxglove/studio-base/components/Menu";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
@@ -132,7 +133,7 @@ const ToggleComponent = ({
   dataTest?: string;
 }) => {
   return (
-    <button
+    <LegacyButton
       style={{ maxWidth: "100%", padding: "4px 8px" }}
       className={cx({ disabled })}
       data-test={dataTest}
@@ -141,7 +142,7 @@ const ToggleComponent = ({
       <Icon style={{ marginLeft: 4 }}>
         <MenuDownIcon style={{ width: 14, height: 14, opacity: 0.5 }} />
       </Icon>
-    </button>
+    </LegacyButton>
   );
 };
 
@@ -348,6 +349,7 @@ function ImageView(props: Props) {
     if (imageTopicsByNamespace.size === 0) {
       return (
         <Dropdown
+          btnClassname={style.dropdown}
           toggleComponent={
             <ToggleComponent
               dataTest={"topics-dropdown"}
@@ -491,6 +493,7 @@ function ImageView(props: Props) {
             ? "camera_info is required when image resolution is set to less than 100%.\nResolution can be changed in the panel settings."
             : undefined
         }
+        btnClassname={style.dropdown}
         disabled={availableAndEnabledMarkerTopics.length === 0 || missingRequiredCameraInfo}
       >
         {availableAndEnabledMarkerTopics.map((topic) => (

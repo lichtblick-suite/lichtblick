@@ -20,9 +20,11 @@ import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import { defaultedRGBStringFromColorObj } from "@foxglove/studio-base/util/colorUtils";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const GRADIENT_BAR_INSET = 15;
-const GRADIENT_BAR_HEIGHT = 10;
 const GRADIENT_LINE_HEIGHT = 6;
+const GRADIENT_LINE_WIDTH = 1;
+const GRADIENT_COLOR_PICKER_SIZE = 25;
+const GRADIENT_BAR_INSET = (GRADIENT_COLOR_PICKER_SIZE - GRADIENT_LINE_WIDTH) / 2;
+const GRADIENT_BAR_HEIGHT = 10;
 
 const SPickerWrapper = styled.div`
   flex: 1 1 auto;
@@ -40,7 +42,7 @@ const SBarWrapper = styled.div`
 `;
 const SLine = styled.div`
   flex: 0 0 auto;
-  width: 1px;
+  width: ${GRADIENT_LINE_WIDTH}px;
   height: ${GRADIENT_BAR_HEIGHT + GRADIENT_LINE_HEIGHT}px;
   background-color: ${colors.LIGHT2};
 `;
@@ -76,12 +78,14 @@ export default function GradientPicker({
     <>
       <SPickerWrapper>
         <ColorPicker
-          buttonShape={"circle"}
+          buttonShape="circle"
+          circleSize={GRADIENT_COLOR_PICKER_SIZE}
           color={minColor}
           onChange={(newColor) => onChange({ minColor: newColor, maxColor })}
         />
         <ColorPicker
-          buttonShape={"circle"}
+          buttonShape="circle"
+          circleSize={GRADIENT_COLOR_PICKER_SIZE}
           color={maxColor}
           onChange={(newColor) => onChange({ minColor, maxColor: newColor })}
         />

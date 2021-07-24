@@ -3,9 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import styled from "styled-components";
 
+import { LegacyTable } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-export default styled.table`
+export default styled(LegacyTable)`
   th,
   td {
     border: none;

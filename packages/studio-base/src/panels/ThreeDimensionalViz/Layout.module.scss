@@ -51,19 +51,30 @@ $spacing: 15px;
   pointer-events: none;
 }
 
+.iconButton {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 8px 4px !important;
+  align-items: start !important;
+  margin-right: 4px !important;
+  margin-left: 4px !important;
+}
+
+.button {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 4px !important;
+  align-items: start !important;
+  margin-right: 4px !important;
+  margin-left: 4px !important;
+}
+
 .buttons {
   @extend %floating-box;
   display: flex;
   flex-direction: column;
   padding: 0px;
   margin-bottom: 10px;
-
-  button {
-    background-color: transparent;
-    border: none;
-    padding-left: 4px;
-    padding-right: 4px;
-  }
 
   span:global(.icon) {
     width: 18px;

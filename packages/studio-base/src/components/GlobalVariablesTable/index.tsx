@@ -18,6 +18,7 @@ import styled, { css, FlattenSimpleInterpolation, keyframes } from "styled-compo
 
 import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
+import { LegacyTable } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Menu, { Item } from "@foxglove/studio-base/components/Menu";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import { JSONInput } from "@foxglove/studio-base/components/input/JSONInput";
@@ -67,6 +68,7 @@ const SGlobalVariablesTable = styled.div`
   th,
   td {
     line-height: 100%;
+    padding: 4px !important;
     border: none;
   }
 
@@ -292,7 +294,7 @@ function GlobalVariablesTable(): ReactElement {
 
   return (
     <SGlobalVariablesTable>
-      <table>
+      <LegacyTable>
         <thead>
           <tr>
             <th>Variable</th>
@@ -354,7 +356,7 @@ function GlobalVariablesTable(): ReactElement {
             </SAnimatedRow>
           ))}
         </tbody>
-      </table>
+      </LegacyTable>
       <Flex style={{ marginTop: 20 }}>
         <DefaultButton
           text="Add variable"

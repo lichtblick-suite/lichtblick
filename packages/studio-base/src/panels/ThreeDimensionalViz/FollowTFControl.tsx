@@ -23,6 +23,7 @@ import styled from "styled-components";
 import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
 import Button from "@foxglove/studio-base/components/Button";
 import Icon from "@foxglove/studio-base/components/Icon";
+import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
@@ -265,6 +266,7 @@ const FollowTFControl = memo<Props>((props: Props) => {
         </Icon>
       ) : undefined}
       <Button
+        className={styles.iconButton}
         tooltipProps={{ placement: "top" }}
         onClick={onClickFollowButton}
         tooltip={getFollowButtonTooltip()}
