@@ -427,9 +427,7 @@ export default function PlayerManager({
   const [initialMessageOrder] = useState(messageOrder);
 
   const analytics = useAnalytics();
-  const metricsCollector = useMemo(() => {
-    return new AnalyticsMetricsCollector(analytics);
-  }, [analytics]);
+  const metricsCollector = useMemo(() => new AnalyticsMetricsCollector(analytics), [analytics]);
 
   const [unlimitedMemoryCache = false] = useAppConfigurationValue<boolean>(
     AppSetting.UNLIMITED_MEMORY_CACHE,

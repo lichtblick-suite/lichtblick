@@ -13,6 +13,7 @@ import useAsyncFn from "react-use/lib/useAsyncFn";
 import conflictTypeToString from "@foxglove/studio-base/components/LayoutBrowser/conflictTypeToString";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
+import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
 import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
@@ -23,6 +24,7 @@ import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutS
 import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
 import welcomeLayout from "@foxglove/studio-base/layouts/welcomeLayout";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
+import AppEvent from "@foxglove/studio-base/services/AppEvent";
 import { LayoutMetadata } from "@foxglove/studio-base/services/ILayoutStorage";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
 
@@ -147,6 +149,8 @@ export default function LayoutBrowser({
     [currentLayoutId, layoutStorage, setSelectedLayout, onSelectLayout],
   );
 
+  const analytics = useAnalytics();
+
   const createNewLayout = useCallback(async () => {
     const name = `Unnamed layout ${moment(currentDateForStorybook).format("l")} at ${moment(
       currentDateForStorybook,
@@ -164,7 +168,9 @@ export default function LayoutBrowser({
       permission: "creator_write",
     });
     void onSelectLayout(newLayout);
-  }, [currentDateForStorybook, layoutStorage, onSelectLayout]);
+
+    analytics.logEvent(AppEvent.LAYOUT_CREATE);
+  }, [currentDateForStorybook, layoutStorage, analytics, onSelectLayout]);
 
   const onExportLayout = useCallback(
     async (item: LayoutMetadata) => {
@@ -172,9 +178,10 @@ export default function LayoutBrowser({
       if (layout) {
         const content = JSON.stringify(layout.data, undefined, 2);
         downloadTextFile(content, `${item.name}.json`);
+        analytics.logEvent(AppEvent.LAYOUT_EXPORT);
       }
     },
-    [layoutStorage],
+    [layoutStorage, analytics],
   );
 
   const onShareLayout = useCallback(
@@ -243,7 +250,9 @@ export default function LayoutBrowser({
       permission: "creator_write",
     });
     void onSelectLayout(newLayout);
-  }, [addToast, isMounted, layoutStorage, onSelectLayout]);
+
+    analytics.logEvent(AppEvent.LAYOUT_IMPORT);
+  }, [addToast, isMounted, layoutStorage, analytics, onSelectLayout]);
 
   const createLayoutTooltip = useTooltip({ contents: "Create new layout" });
   const importLayoutTooltip = useTooltip({ contents: "Import layout" });

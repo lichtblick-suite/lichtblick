@@ -5,12 +5,14 @@
 import { Story, StoryContext } from "@storybook/react";
 import { ToastProvider } from "react-toast-notifications";
 
+import { AppConfigurationContext } from "@foxglove/studio-base";
 import CssBaseline from "@foxglove/studio-base/components/CssBaseline";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import { HoverValueProvider } from "@foxglove/studio-base/context/HoverValueContext";
 import { UserNodeStateProvider } from "@foxglove/studio-base/context/UserNodeStateContext";
 import ReadySignalContext from "@foxglove/studio-base/stories/ReadySignalContext";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
+import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration";
 import signal from "@foxglove/studio-base/util/signal";
 import waitForFonts from "@foxglove/studio-base/util/waitForFonts";
 
@@ -29,8 +31,11 @@ function WithContextProviders(Child: Story, ctx: StoryContext): JSX.Element {
 
   const readySignal = ctx.parameters.readySignal;
 
+  const config = makeConfiguration();
+
   const providers = [
     /* eslint-disable react/jsx-key */
+    <AppConfigurationContext.Provider value={config} />,
     <ReadySignalContext.Provider value={readySignal} />,
     <ThemeProvider />,
     <ToastProvider>{undefined}</ToastProvider>,

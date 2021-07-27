@@ -8,6 +8,7 @@ import TestUtils from "react-dom/test-utils";
 import { useAsync } from "react-use";
 import { AsyncState } from "react-use/lib/useAsyncFn";
 
+import AnalyticsProvider from "@foxglove/studio-base/context/AnalyticsProvider";
 import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
 import LayoutCacheContext, {
   useLayoutCache,
@@ -71,13 +72,15 @@ function WithSetup(Child: Story, ctx: StoryContext): JSX.Element {
   return (
     <div style={{ display: "flex", height: 400 }}>
       <ModalHost>
-        <CurrentLayoutContext.Provider value={currentLayout}>
-          <LayoutCacheContext.Provider value={storage}>
-            <CacheOnlyLayoutStorageProvider>
-              <Child />
-            </CacheOnlyLayoutStorageProvider>
-          </LayoutCacheContext.Provider>
-        </CurrentLayoutContext.Provider>
+        <AnalyticsProvider>
+          <CurrentLayoutContext.Provider value={currentLayout}>
+            <LayoutCacheContext.Provider value={storage}>
+              <CacheOnlyLayoutStorageProvider>
+                <Child />
+              </CacheOnlyLayoutStorageProvider>
+            </LayoutCacheContext.Provider>
+          </CurrentLayoutContext.Provider>
+        </AnalyticsProvider>
       </ModalHost>
     </div>
   );

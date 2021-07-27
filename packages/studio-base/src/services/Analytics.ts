@@ -9,25 +9,13 @@ import { v4 as uuidv4 } from "uuid";
 
 import Logger from "@foxglove/log";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
+import AppEvent from "@foxglove/studio-base/services/AppEvent";
 import Storage from "@foxglove/studio-base/util/Storage";
 
 const UUID_ZERO = "00000000-0000-0000-0000-000000000000";
 const USER_ID_KEY = "analytics_user_id";
 
 const log = Logger.getLogger(__filename);
-
-export enum AppEvent {
-  APP_INIT = "APP_INIT",
-
-  // PlayerMetricsCollectorInterface events
-  PLAYER_CONSTRUCTED = "PLAYER_CONSTRUCTED",
-  PLAYER_INITIALIZED = "PLAYER_INITIALIZED",
-  PLAYER_PLAY = "PLAYER_PLAY",
-  PLAYER_SEEK = "PLAYER_SEEK",
-  PLAYER_SET_SPEED = "PLAYER_SET_SPEED",
-  PLAYER_PAUSE = "PLAYER_PAUSE",
-  PLAYER_CLOSE = "PLAYER_CLOSE",
-}
 
 export class Analytics {
   private _amplitude: Promise<amplitude.AmplitudeClient | undefined>;

@@ -9,7 +9,8 @@ import {
   PlayerMetricsCollectorInterface,
   SubscribePayload,
 } from "@foxglove/studio-base/players/types";
-import { Analytics, AppEvent } from "@foxglove/studio-base/services/Analytics";
+import { Analytics } from "@foxglove/studio-base/services/Analytics";
+import AppEvent from "@foxglove/studio-base/services/AppEvent";
 
 const log = Log.getLogger(__filename);
 

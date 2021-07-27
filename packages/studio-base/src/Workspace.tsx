@@ -134,6 +134,7 @@ function Connection() {
 
 function AddPanel() {
   const addPanel = useAddPanel();
+
   return (
     <SidebarContent noPadding title="Add panel">
       <PanelList onPanelSelect={addPanel} />

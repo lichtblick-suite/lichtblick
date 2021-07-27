@@ -30,8 +30,10 @@ import {
 import panelsReducer, {
   defaultPlaybackConfig,
 } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
+import AppEvent from "@foxglove/studio-base/services/AppEvent";
 import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 import UndoRedo from "@foxglove/studio-base/util/UndoRedo";
+import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 export const DEFAULT_LAYOUT_FOR_TESTS: LayoutState = {
   selectedLayout: {
@@ -51,6 +53,7 @@ const LAYOUT_HISTORY_THROTTLE_MS = 1000;
 
 export default class CurrentLayoutState implements ICurrentLayout {
   private undoRedo: UndoRedo<LayoutState>;
+  private analytics?: { logEvent: (event: AppEvent, data?: { [key: string]: unknown }) => void };
   private layoutState: LayoutState;
   private layoutStateListeners = new Set<(_: LayoutState) => void>();
   private selectedPanelIds: readonly string[] = [];
@@ -58,7 +61,11 @@ export default class CurrentLayoutState implements ICurrentLayout {
 
   mosaicId = uuidv4();
 
-  constructor(initialState: LayoutState) {
+  constructor(
+    initialState: LayoutState,
+    analytics?: { logEvent: (event: AppEvent, data?: { [key: string]: unknown }) => void },
+  ) {
+    this.analytics = analytics;
     this.layoutState = { selectedLayout: undefined };
     // Run the loadLayout action once to ensure any migrations happen (e.g. savedProps->configById)
     if (initialState.selectedLayout) {
@@ -154,6 +161,7 @@ export default class CurrentLayoutState implements ICurrentLayout {
     createTabPanel: (payload: CREATE_TAB_PANEL["payload"]): void => {
       this.dispatch({ type: "CREATE_TAB_PANEL", payload });
       this.setSelectedPanelIds([]);
+      this.analytics?.logEvent(AppEvent.LAYOUT_ADD_PANEL, { type: "Tab" });
     },
     changePanelLayout: (payload: CHANGE_PANEL_LAYOUT["payload"]): void =>
       this.dispatch({ type: "CHANGE_PANEL_LAYOUT", payload }),
@@ -172,16 +180,28 @@ export default class CurrentLayoutState implements ICurrentLayout {
       // Deselect the removed panel
       const closedId = getNodeAtPath(payload.root, payload.path);
       this.setSelectedPanelIds((ids) => ids.filter((id) => id !== closedId));
+      this.analytics?.logEvent(AppEvent.LAYOUT_REMOVE_PANEL, {
+        type: getPanelTypeFromId(closedId as string),
+      });
     },
     splitPanel: (payload: SPLIT_PANEL["payload"]): void =>
       this.dispatch({ type: "SPLIT_PANEL", payload }),
-    swapPanel: (payload: SWAP_PANEL["payload"]): void =>
-      this.dispatch({ type: "SWAP_PANEL", payload }),
+    swapPanel: (payload: SWAP_PANEL["payload"]): void => {
+      this.dispatch({ type: "SWAP_PANEL", payload });
+      this.analytics?.logEvent(AppEvent.LAYOUT_ADD_PANEL, { type: payload.type });
+      this.analytics?.logEvent(AppEvent.LAYOUT_REMOVE_PANEL, {
+        type: getPanelTypeFromId(payload.originalId),
+      });
+    },
     moveTab: (payload: MOVE_TAB["payload"]): void => this.dispatch({ type: "MOVE_TAB", payload }),
-    addPanel: (payload: ADD_PANEL["payload"]): void =>
-      this.dispatch({ type: "ADD_PANEL", payload }),
-    dropPanel: (payload: DROP_PANEL["payload"]): void =>
-      this.dispatch({ type: "DROP_PANEL", payload }),
+    addPanel: (payload: ADD_PANEL["payload"]): void => {
+      this.dispatch({ type: "ADD_PANEL", payload });
+      this.analytics?.logEvent(AppEvent.LAYOUT_ADD_PANEL, { type: getPanelTypeFromId(payload.id) });
+    },
+    dropPanel: (payload: DROP_PANEL["payload"]): void => {
+      this.dispatch({ type: "DROP_PANEL", payload });
+      this.analytics?.logEvent(AppEvent.LAYOUT_ADD_PANEL, { type: payload.newPanelType });
+    },
     startDrag: (payload: START_DRAG["payload"]): void =>
       this.dispatch({ type: "START_DRAG", payload }),
     endDrag: (payload: END_DRAG["payload"]): void => this.dispatch({ type: "END_DRAG", payload }),
