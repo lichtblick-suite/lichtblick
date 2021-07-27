@@ -118,6 +118,9 @@ function DraggablePanelItem({
       // dropping outside mosaic does nothing. If we have a tabId, but no
       // position or path, we're dragging into an empty tab.
       if ((position == undefined || path == undefined) && tabId == undefined) {
+        // when dragging a panel into an empty layout treat it link clicking the panel
+        // mosaic doesn't give us a position or path to invoke onDrop
+        onClick();
         return;
       }
       const { type, config, relatedConfigs } = panel;
