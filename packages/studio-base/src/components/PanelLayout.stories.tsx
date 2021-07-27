@@ -24,7 +24,7 @@ import { PanelConfigSchemaEntry } from "@foxglove/studio-base/types/panels";
 
 import PanelLayout from "./PanelLayout";
 
-const allPanels: PanelInfo[] = [
+const allPanels: readonly PanelInfo[] = [
   { title: "Some Panel", type: "Sample1", module: async () => await new Promise(() => {}) },
   {
     title: "Broken Panel",
@@ -53,11 +53,11 @@ class MockPanelCatalog implements PanelCatalog {
     const module = await info?.module();
     return module.default.configSchema;
   }
-  getPanels(): PanelInfo[] {
+  getPanels(): readonly PanelInfo[] {
     return allPanels;
   }
   getPanelByType(type: string): PanelInfo | undefined {
-    return allPanels.find((panel) => panel.type === type);
+    return allPanels.find((panel) => panel.preconfigured !== true && panel.type === type);
   }
 }
 

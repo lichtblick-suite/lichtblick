@@ -58,16 +58,14 @@ export default function PanelCatalogProvider(
   }, [extensionRegistry]);
 
   const allPanels = useMemo(() => {
-    return [...panels.builtin, ...panels.hidden, ...wrappedExtensionPanels];
+    return [...panels.builtin, ...panels.debug, ...panels.hidden, ...wrappedExtensionPanels];
   }, [wrappedExtensionPanels]);
 
   const visiblePanels = useMemo(() => {
     // debug panels are hidden by default, users can enable them within app settings
-    if (showDebugPanels) {
-      return [...panels.builtin, ...panels.debug, ...wrappedExtensionPanels];
-    }
-
-    return [...panels.builtin, ...wrappedExtensionPanels];
+    return showDebugPanels
+      ? [...panels.builtin, ...wrappedExtensionPanels]
+      : [...panels.builtin, ...panels.debug, ...wrappedExtensionPanels];
   }, [showDebugPanels, wrappedExtensionPanels]);
 
   const panelsByType = useMemo(() => {

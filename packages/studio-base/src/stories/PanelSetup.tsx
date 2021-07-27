@@ -143,7 +143,7 @@ class MockPanelCatalog implements PanelCatalog {
   async getConfigSchema(_type: string): Promise<PanelConfigSchemaEntry<string>[] | undefined> {
     return undefined;
   }
-  getPanels(): PanelInfo[] {
+  getPanels(): readonly PanelInfo[] {
     return [];
   }
   getPanelByType(_type: string): PanelInfo | undefined {

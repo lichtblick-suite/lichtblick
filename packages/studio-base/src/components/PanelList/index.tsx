@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import MagnifyIcon from "@mdi/svg/svg/magnify.svg";
 import fuzzySort from "fuzzysort";
+import { isEmpty } from "lodash";
 import { useEffect, useMemo } from "react";
 import { useDrag } from "react-dnd";
 import { MosaicDragType, MosaicPath } from "react-mosaic-component";
@@ -69,7 +70,7 @@ const SScrollContainer = styled.div`
 `;
 
 const SEmptyState = styled.div`
-  padding: 0px 16px 16px;
+  padding: 8px 16px;
   opacity: 0.4;
 `;
 
@@ -176,12 +177,20 @@ type Props = {
 function verifyPanels(panels: readonly PanelInfo[]) {
   const panelTypes: Map<string, PanelInfo> = new Map();
   for (const panel of panels) {
-    const { title, type } = panel;
+    const { title, type, config } = panel;
+    const dispName = title ?? type ?? "<unnamed>";
+    if (type.length === 0) {
+      throw new Error(`Panel component ${title} must declare a unique \`static panelType\``);
+    }
     const existingPanel = panelTypes.get(type);
     if (existingPanel) {
-      throw new Error(
-        `Two components have the same type ('${type}'): ${existingPanel.title} and ${title}`,
-      );
+      const bothHaveEmptyConfigs = isEmpty(existingPanel.config) && isEmpty(config);
+      if (bothHaveEmptyConfigs) {
+        const otherDisplayName = existingPanel.title ?? existingPanel.type ?? "<unnamed>";
+        throw new Error(
+          `Two components have the same panelType ('${type}') and no preset configs: ${otherDisplayName} and ${dispName}`,
+        );
+      }
     }
     panelTypes.set(type, panel);
   }
@@ -217,59 +226,80 @@ function PanelList(props: Props): JSX.Element {
   }, []);
 
   const panelCatalog = usePanelCatalog();
-  const allPanels = useMemo(() => {
-    return [...panelCatalog.getPanels()].sort((a, b) =>
-      a.title.localeCompare(b.title, undefined, { ignorePunctuation: true, sensitivity: "base" }),
-    );
+  const { allRegularPanels, allPreconfiguredPanels } = useMemo(() => {
+    const panels = panelCatalog.getPanels();
+    const regular = panels.filter((panel) => panel.preconfigured !== true);
+    const preconfigured = panels.filter((panel) => panel.preconfigured === true);
+    const sortByTitle = (a: PanelInfo, b: PanelInfo) =>
+      a.title.localeCompare(b.title, undefined, { ignorePunctuation: true, sensitivity: "base" });
+
+    return {
+      allRegularPanels: [...regular].sort(sortByTitle),
+      allPreconfiguredPanels: [...preconfigured].sort(sortByTitle),
+    };
   }, [panelCatalog]);
 
   useEffect(() => {
-    verifyPanels(allPanels);
-  }, [allPanels]);
+    verifyPanels([...allRegularPanels, ...allPreconfiguredPanels]);
+  }, [allRegularPanels, allPreconfiguredPanels]);
 
-  const filteredPanels = React.useMemo(() => {
-    return searchQuery.length > 0
-      ? fuzzySort
-          .go(searchQuery, allPanels, { key: "title" })
-          .map((searchResult) => searchResult.obj)
-      : allPanels;
-  }, [allPanels, searchQuery]);
-
-  const highlightedPanel = React.useMemo(
-    () => (highlightedPanelIdx != undefined ? filteredPanels[highlightedPanelIdx] : undefined),
-    [filteredPanels, highlightedPanelIdx],
+  const getFilteredPanels = React.useCallback(
+    (panels: PanelInfo[]) => {
+      return searchQuery.length > 0
+        ? fuzzySort
+            .go(searchQuery, panels, { key: "title" })
+            .map((searchResult) => searchResult.obj)
+        : panels;
+    },
+    [searchQuery],
   );
 
-  const noResults = filteredPanels.length === 0;
+  const { filteredRegularPanels, filteredPreconfiguredPanels } = React.useMemo(
+    () => ({
+      filteredRegularPanels: getFilteredPanels(allRegularPanels),
+      filteredPreconfiguredPanels: getFilteredPanels(allPreconfiguredPanels),
+    }),
+    [getFilteredPanels, allRegularPanels, allPreconfiguredPanels],
+  );
+
+  const allFilteredPanels = React.useMemo(
+    () => [...filteredPreconfiguredPanels, ...filteredRegularPanels],
+    [filteredPreconfiguredPanels, filteredRegularPanels],
+  );
+
+  const highlightedPanel = React.useMemo(() => {
+    return highlightedPanelIdx != undefined ? allFilteredPanels[highlightedPanelIdx] : undefined;
+  }, [allFilteredPanels, highlightedPanelIdx]);
+
+  const noResults = allFilteredPanels.length === 0;
 
   const onKeyDown = React.useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "ArrowDown" && highlightedPanelIdx != undefined) {
-        setHighlightedPanelIdx((highlightedPanelIdx + 1) % filteredPanels.length);
+        setHighlightedPanelIdx((highlightedPanelIdx + 1) % allFilteredPanels.length);
       } else if (e.key === "ArrowUp" && highlightedPanelIdx != undefined) {
-        const newIdx = (highlightedPanelIdx - 1) % (filteredPanels.length - 1);
-        setHighlightedPanelIdx(newIdx >= 0 ? newIdx : filteredPanels.length + newIdx);
+        const newIdx = (highlightedPanelIdx - 1) % (allFilteredPanels.length - 1);
+        setHighlightedPanelIdx(newIdx >= 0 ? newIdx : allFilteredPanels.length + newIdx);
       } else if (e.key === "Enter" && highlightedPanel) {
         onPanelSelect({
           type: highlightedPanel.type,
+          config: highlightedPanel.config,
+          relatedConfigs: highlightedPanel.relatedConfigs,
         });
       }
     },
-    [filteredPanels.length, highlightedPanel, highlightedPanelIdx, onPanelSelect],
+    [allFilteredPanels.length, highlightedPanel, highlightedPanelIdx, onPanelSelect],
   );
 
   const displayPanelListItem = React.useCallback(
-    ({ title, type }: PanelInfo) => {
+    ({ title, type, config, relatedConfigs }: PanelInfo) => {
       return (
         <DraggablePanelItem
           key={`${type}-${title}`}
           mosaicId={mosaicId}
-          panel={{
-            type,
-            title,
-          }}
+          panel={{ type, title, config, relatedConfigs }}
           onDrop={onPanelMenuItemDrop}
-          onClick={() => onPanelSelect({ type })}
+          onClick={() => onPanelSelect({ type, config, relatedConfigs })}
           checked={title === selectedPanelTitle}
           highlighted={highlightedPanel?.title === title}
           searchQuery={searchQuery}
@@ -308,7 +338,7 @@ function PanelList(props: Props): JSX.Element {
       </StickyDiv>
       <SScrollContainer>
         {noResults && <SEmptyState>No panels match search criteria.</SEmptyState>}
-        {filteredPanels.map(displayPanelListItem)}
+        {allFilteredPanels.map(displayPanelListItem)}
       </SScrollContainer>
     </div>
   );

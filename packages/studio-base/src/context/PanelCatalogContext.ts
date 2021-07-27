@@ -19,6 +19,9 @@ export type PanelInfo = {
    * This is to support our lazy built-in panels
    */
   module: () => Promise<{ default: PanelComponent }>;
+  config?: PanelConfig;
+  relatedConfigs?: { [panelId: string]: PanelConfig };
+  preconfigured?: boolean;
 };
 
 /** PanelCatalog describes the interface for getting available panels */
