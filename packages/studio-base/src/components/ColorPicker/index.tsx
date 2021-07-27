@@ -80,7 +80,7 @@ export default function ColorPicker({
         >
           <Picker
             color={colorObjToIColor(color)}
-            alphaType="none"
+            alphaType="alpha"
             onChange={(_event, newValue) => onChange(getColorFromIRGB(newValue))}
           />
         </Callout>
