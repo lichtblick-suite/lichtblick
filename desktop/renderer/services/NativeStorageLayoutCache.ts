@@ -2,9 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import Log from "@foxglove/log";
 import { CachedLayout, ILayoutCache } from "@foxglove/studio-base";
 
 import { Storage } from "../../common/types";
+
+const log = Log.getLogger(__filename);
 
 function assertLayout(value: unknown): asserts value is CachedLayout {
   if (typeof value !== "object" || value == undefined) {
@@ -35,10 +38,14 @@ export default class NativeStorageLayoutCache implements ILayoutCache {
         throw new Error("Invariant violation - layout item is not a buffer");
       }
 
-      const str = new TextDecoder().decode(item);
-      const parsed = JSON.parse(str);
-      assertLayout(parsed);
-      layouts.push(parsed);
+      try {
+        const str = new TextDecoder().decode(item);
+        const parsed = JSON.parse(str);
+        assertLayout(parsed);
+        layouts.push(parsed);
+      } catch (err) {
+        log.error(err);
+      }
     }
 
     return layouts;
@@ -56,7 +63,6 @@ export default class NativeStorageLayoutCache implements ILayoutCache {
     const str = new TextDecoder().decode(item);
     const parsed = JSON.parse(str);
     assertLayout(parsed);
-
     return parsed;
   }
 
