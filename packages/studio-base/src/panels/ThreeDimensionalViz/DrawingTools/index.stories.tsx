@@ -58,6 +58,7 @@ const DEFAULT_PROPS = {
   updatePanelConfig: () => {
     // no-op
   },
+  showForTests: true,
 };
 
 storiesOf("panels/ThreeDimensionalViz/DrawingTools", module).add("Polygon", () => {

@@ -13,6 +13,7 @@
 import PencilIcon from "@mdi/svg/svg/pencil.svg";
 import { PolygonBuilder, Polygon } from "regl-worldview";
 
+import { useAppConfigurationValue, AppSetting } from "@foxglove/studio-base";
 import ExpandingToolbar, { ToolGroup } from "@foxglove/studio-base/components/ExpandingToolbar";
 import Icon from "@foxglove/studio-base/components/Icon";
 import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
@@ -28,6 +29,7 @@ type Props = {
   polygonBuilder: PolygonBuilder;
   onSetDrawingTabType: (arg0?: DrawingTabType) => void;
   defaultSelectedTab?: DrawingTabType; // for UI testing
+  showForTests?: boolean;
 };
 
 // add more drawing shapes later, e.g. Grid, Axes, Crosshairs
@@ -36,12 +38,17 @@ function DrawingTools({
   onSetDrawingTabType,
   onSetPolygons,
   polygonBuilder,
+  showForTests,
 }: Props) {
   const [selectedTab, setSelectedTab] = React.useState<DrawingTabType | undefined>(
     defaultSelectedTab,
   );
 
-  return (
+  const [enableDrawingPolygons = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_DRAWING_POLYGONS,
+  );
+
+  return enableDrawingPolygons || showForTests === true ? (
     <ExpandingToolbar
       tooltip="Drawing tools"
       icon={
@@ -60,6 +67,8 @@ function DrawingTools({
         <Polygons onSetPolygons={onSetPolygons} polygonBuilder={polygonBuilder} />
       </ToolGroup>
     </ExpandingToolbar>
+  ) : (
+    ReactNull
   );
 }
 

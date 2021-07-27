@@ -33,6 +33,11 @@ const features: Feature[] = [
     name: "Studio Debug Panels",
     description: <>Show Studio debug panels in the add panel list.</>,
   },
+  {
+    key: AppSetting.ENABLE_DRAWING_POLYGONS,
+    name: "Drawing polygons in 3D panel",
+    description: <>Show sidebar control to draw polygons in the 3D panel.</>,
+  },
   ...(process.env.NODE_ENV !== "production"
     ? [
         {

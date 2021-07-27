@@ -12,4 +12,5 @@ export enum AppSetting {
   SHOW_DEBUG_PANELS = "showDebugPanels",
   FAKE_REMOTE_LAYOUTS = "debug.useFakeRemoteLayouts",
   ENABLE_CONSOLE_API_LAYOUTS = "enableConsoleApiLayouts",
+  ENABLE_DRAWING_POLYGONS = "enableDrawingPolygons",
 }
