@@ -14,7 +14,7 @@
 import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
 import cx from "classnames";
 import { flatten, flatMap, partition } from "lodash";
-import { CSSProperties } from "react";
+import { CSSProperties, useCallback, useMemo } from "react";
 
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
@@ -32,7 +32,6 @@ import { TimestampMethod } from "@foxglove/studio-base/util/time";
 import styles from "./MessagePathInput.module.scss";
 import { RosPath, RosPrimitive } from "./constants";
 import {
-  StructureTraversalResult,
   traverseStructure,
   messagePathStructures,
   messagePathsForDatatype,
@@ -162,142 +161,156 @@ type MessagePathInputBaseProps = {
   timestampMethod?: TimestampMethod;
   onTimestampMethodChange?: (arg0: TimestampMethod, index?: number) => void;
 };
-type MessagePathInputProps = MessagePathInputBaseProps & {
-  topics: readonly Topic[];
-  datatypes: RosDatatypes;
-  globalVariables: GlobalVariables;
-  setGlobalVariables: (arg0: GlobalVariables) => void;
-};
-type MessagePathInputState = { focused: boolean };
-class MessagePathInputUnconnected extends React.PureComponent<
-  MessagePathInputProps,
-  MessagePathInputState
-> {
-  _input?: HTMLInputElement;
 
-  constructor(props: MessagePathInputProps) {
-    super(props);
-    this.state = { focused: false };
-  }
+export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
+  props: MessagePathInputBaseProps,
+) {
+  const { globalVariables, setGlobalVariables } = useGlobalVariables();
+  const { datatypes, topics } = PanelAPI.useDataSourceInfo();
 
-  _onChange = (event: React.SyntheticEvent<HTMLInputElement>, rawValue: string) => {
-    // When typing a "{" character, also  insert a "}", so you get an
-    // autocomplete window immediately for selecting a filter name.
-    let value = rawValue;
-    if ((event.nativeEvent as InputEvent).data === "{") {
-      const target = event.target as HTMLInputElement;
-      const newCursorPosition = target.selectionEnd ?? 0;
-      value = `${value.slice(0, newCursorPosition)}}${value.slice(newCursorPosition)}`;
+  const {
+    supportsMathModifiers,
+    path,
+    prioritizedDatatype,
+    validTypes,
+    autoSize,
+    placeholder,
+    noMultiSlices,
+    timestampMethod,
+    inputStyle,
+    disableAutocomplete = false,
+  } = props;
 
-      setImmediate(() => target.setSelectionRange(newCursorPosition, newCursorPosition));
-    }
-    this.props.onChange(value, this.props.index);
-  };
+  const onChangeProp = props.onChange;
+  const onChange = useCallback(
+    (event: React.SyntheticEvent<HTMLInputElement>, rawValue: string) => {
+      // When typing a "{" character, also  insert a "}", so you get an
+      // autocomplete window immediately for selecting a filter name.
+      let value = rawValue;
+      if ((event.nativeEvent as InputEvent).data === "{") {
+        const target = event.target as HTMLInputElement;
+        const newCursorPosition = target.selectionEnd ?? 0;
+        value = `${value.slice(0, newCursorPosition)}}${value.slice(newCursorPosition)}`;
 
-  _onTimestampMethodChange = (value: TimestampMethod) => {
-    if (this.props.onTimestampMethodChange) {
-      this.props.onTimestampMethodChange(value, this.props.index);
-    }
-  };
-
-  _onSelect = (
-    rawValue: string,
-    autocomplete: Autocomplete<string>,
-    autocompleteType: ("topicName" | "messagePath" | "globalVariables") | undefined,
-    autocompleteRange: { start: number; end: number },
-  ) => {
-    let value = rawValue;
-    // If we're dealing with a topic name, and we cannot validly end in a message type,
-    // add a "." so the user can keep typing to autocomplete the message path.
-    const keepGoingAfterTopicName =
-      autocompleteType === "topicName" &&
-      this.props.validTypes != undefined &&
-      !this.props.validTypes.includes("message");
-    if (keepGoingAfterTopicName) {
-      value += ".";
-    }
-    this.props.onChange(
-      this.props.path.substr(0, autocompleteRange.start) +
-        value +
-        this.props.path.substr(autocompleteRange.end),
-      this.props.index,
-    );
-    // We want to continue typing if we're dealing with a topic name,
-    // or if we just autocompleted something with a filter (because we might want to
-    // edit that filter), or if the autocomplete already has a filter (because we might
-    // have just autocompleted a name inside that filter).
-    if (keepGoingAfterTopicName || value.includes("{") || this.props.path.includes("{")) {
-      const newCursorPosition = autocompleteRange.start + value.length;
-      setImmediate(() => autocomplete.setSelectionRange(newCursorPosition, newCursorPosition));
-    } else {
-      autocomplete.blur();
-    }
-  };
-
-  override render() {
-    const {
-      supportsMathModifiers,
-      path,
-      topics,
-      datatypes,
-      prioritizedDatatype,
-      validTypes,
-      autoSize,
-      placeholder,
-      noMultiSlices,
-      timestampMethod,
-      inputStyle,
-      disableAutocomplete = false,
-      globalVariables,
-      setGlobalVariables,
-    } = this.props;
-
-    const rosPath = parseRosPath(path);
-    let autocompleteType: ("topicName" | "messagePath" | "globalVariables") | undefined;
-    let topic: Topic | undefined;
-    let structureTraversalResult: StructureTraversalResult | undefined;
-    if (rosPath) {
-      const { topicName } = rosPath;
-      topic = topics.find(({ name }) => name === topicName);
-
-      if (topic) {
-        structureTraversalResult = traverseStructure(
-          messagePathStructures(datatypes)[topic.datatype],
-          rosPath.messagePath,
-        );
+        setImmediate(() => target.setSelectionRange(newCursorPosition, newCursorPosition));
       }
+      onChangeProp(value, props.index);
+    },
+    [onChangeProp, props.index],
+  );
 
-      if (!topic) {
-        autocompleteType = "topicName";
-      } else if (
-        !structureTraversalResult ||
-        !structureTraversalResult.valid ||
-        !validTerminatingStructureItem(structureTraversalResult.structureItem, validTypes)
-      ) {
-        autocompleteType = "messagePath";
+  const onSelect = useCallback(
+    (
+      rawValue: string,
+      autocomplete: Autocomplete<string>,
+      autocompleteType: ("topicName" | "messagePath" | "globalVariables") | undefined,
+      autocompleteRange: { start: number; end: number },
+    ) => {
+      let value = rawValue;
+      // If we're dealing with a topic name, and we cannot validly end in a message type,
+      // add a "." so the user can keep typing to autocomplete the message path.
+      const keepGoingAfterTopicName =
+        autocompleteType === "topicName" &&
+        validTypes != undefined &&
+        !validTypes.includes("message");
+      if (keepGoingAfterTopicName) {
+        value += ".";
       }
-    } else {
-      autocompleteType = "topicName";
+      onChangeProp(
+        path.substr(0, autocompleteRange.start) + value + path.substr(autocompleteRange.end),
+        props.index,
+      );
+      // We want to continue typing if we're dealing with a topic name,
+      // or if we just autocompleted something with a filter (because we might want to
+      // edit that filter), or if the autocomplete already has a filter (because we might
+      // have just autocompleted a name inside that filter).
+      if (keepGoingAfterTopicName || value.includes("{") || path.includes("{")) {
+        const newCursorPosition = autocompleteRange.start + value.length;
+        setImmediate(() => autocomplete.setSelectionRange(newCursorPosition, newCursorPosition));
+      } else {
+        autocomplete.blur();
+      }
+    },
+    [onChangeProp, path, props.index, validTypes],
+  );
+
+  const onTimestampMethodChangeProp = props.onTimestampMethodChange;
+  const onTimestampMethodChange = useCallback(
+    (value: TimestampMethod) => {
+      onTimestampMethodChangeProp?.(value, props.index);
+    },
+    [onTimestampMethodChangeProp, props.index],
+  );
+
+  const rosPath = useMemo(() => parseRosPath(path), [path]);
+
+  const topic = useMemo(() => {
+    if (!rosPath) {
+      return undefined;
     }
 
-    let autocompleteItems: string[] = [];
-    let autocompleteFilterText = "";
-    let autocompleteRange = { start: 0, end: Infinity };
+    const { topicName } = rosPath;
+    return topics.find(({ name }) => name === topicName);
+  }, [rosPath, topics]);
+
+  const structureTraversalResult = useMemo(() => {
+    if (!topic || !rosPath?.messagePath) {
+      return undefined;
+    }
+
+    return traverseStructure(messagePathStructures(datatypes)[topic.datatype], rosPath.messagePath);
+  }, [datatypes, rosPath?.messagePath, topic]);
+
+  const invalidGlobalVariablesVariable = useMemo(() => {
+    if (!rosPath) {
+      return undefined;
+    }
+    return getFirstInvalidVariableFromRosPath(rosPath, globalVariables, setGlobalVariables);
+  }, [globalVariables, rosPath, setGlobalVariables]);
+
+  const autocompleteType = useMemo(() => {
+    if (!rosPath) {
+      return "topicName";
+    } else if (!topic) {
+      return "topicName";
+    } else if (
+      !structureTraversalResult ||
+      !structureTraversalResult.valid ||
+      !validTerminatingStructureItem(structureTraversalResult.structureItem, validTypes)
+    ) {
+      return "messagePath";
+    }
+
+    if (invalidGlobalVariablesVariable) {
+      return "globalVariables";
+    }
+
+    return undefined;
+  }, [invalidGlobalVariablesVariable, structureTraversalResult, validTypes, rosPath, topic]);
+
+  const { autocompleteItems, autocompleteFilterText, autocompleteRange } = useMemo(() => {
     if (disableAutocomplete) {
-      autocompleteItems = [];
+      return {
+        autocompleteItems: [],
+        autocompleteFilterText: "",
+        autocompleteRange: { start: 0, end: Infinity },
+      };
     } else if (autocompleteType === "topicName") {
-      autocompleteItems = getTopicNames(topics);
-      autocompleteFilterText = path;
+      return {
+        autocompleteItems: getTopicNames(topics),
+        autocompleteFilterText: path,
+        autocompleteRange: { start: 0, end: Infinity },
+      };
     } else if (autocompleteType === "messagePath" && topic && rosPath) {
       if (
         structureTraversalResult &&
         !structureTraversalResult.valid &&
-        structureTraversalResult.msgPathPart &&
-        structureTraversalResult.msgPathPart.type === "filter" &&
-        structureTraversalResult.structureItem &&
-        structureTraversalResult.structureItem.structureType === "message"
+        structureTraversalResult.msgPathPart?.type === "filter" &&
+        structureTraversalResult.structureItem?.structureType === "message"
       ) {
         const { msgPathPart } = structureTraversalResult;
+
+        const items: string[] = [];
 
         // Provide filter suggestions for primitive values, since they're the only kinds of values
         // that can be filtered on.
@@ -305,193 +318,199 @@ class MessagePathInputUnconnected extends React.PureComponent<
         for (const name of Object.keys(structureTraversalResult.structureItem.nextByName)) {
           const item = structureTraversalResult.structureItem.nextByName[name];
           if (item?.structureType === "primitive") {
-            autocompleteItems.push(`${name}==${getExamplePrimitive(item.primitiveType)}`);
+            items.push(`${name}==${getExamplePrimitive(item.primitiveType)}`);
           }
         }
 
-        autocompleteFilterText = msgPathPart.path.join(".");
-        autocompleteRange = {
-          start: msgPathPart.nameLoc,
-          end: msgPathPart.nameLoc + autocompleteFilterText.length,
+        const filterText = msgPathPart.path.join(".");
+
+        return {
+          autocompleteItems: items,
+          autocompleteFilterText: filterText,
+          autocompleteRange: {
+            start: msgPathPart.nameLoc,
+            end: msgPathPart.nameLoc + filterText.length,
+          },
         };
       } else {
-        autocompleteItems = messagePathsForDatatype(
-          topic.datatype,
-          datatypes,
-          validTypes,
-          noMultiSlices,
-          rosPath.messagePath,
-        ).filter(
-          // .header.seq is pretty useless but shows up everryyywhere.
-          (msgPath) => msgPath !== "" && !msgPath.endsWith(".header.seq"),
-        );
-
         // Exclude any initial filters ("/topic{foo=='bar'}") from the range that will be replaced
         // when the user chooses a new message path.
-        let initialFilterLength = 0;
-        for (const item of rosPath.messagePath) {
+        const initialFilterLength = rosPath.messagePath.reduce((prev, item) => {
           if (item.type === "filter") {
-            initialFilterLength += item.repr.length + 2; // add { and }
-          } else {
-            break;
+            return prev + item.repr.length + 2; // add { and }
           }
-        }
+          return prev;
+        }, 0);
 
-        autocompleteRange = { start: topic.name.length + initialFilterLength, end: Infinity };
-        // Filter out filters (hah!) in a pretty crude way, so autocomplete still works
-        // when already having specified a filter and you want to see what other object
-        // names you can complete it with. Kind of an edge case, and this doesn't work
-        // ideally (because it will remove your existing filter if you actually select
-        // the autocomplete item), but it's easy to do for now, and nice to have.
-        autocompleteFilterText = path.substr(topic.name.length).replace(/\{[^}]*\}/g, "");
+        return {
+          autocompleteItems: messagePathsForDatatype(
+            topic.datatype,
+            datatypes,
+            validTypes,
+            noMultiSlices,
+            rosPath.messagePath,
+          ).filter(
+            // .header.seq is pretty useless but shows up everryyywhere.
+            (msgPath) => msgPath !== "" && !msgPath.endsWith(".header.seq"),
+          ),
+
+          autocompleteRange: { start: topic.name.length + initialFilterLength, end: Infinity },
+          // Filter out filters (hah!) in a pretty crude way, so autocomplete still works
+          // when already having specified a filter and you want to see what other object
+          // names you can complete it with. Kind of an edge case, and this doesn't work
+          // ideally (because it will remove your existing filter if you actually select
+          // the autocomplete item), but it's easy to do for now, and nice to have.
+          autocompleteFilterText: path.substr(topic.name.length).replace(/\{[^}]*\}/g, ""),
+        };
       }
-    } else if (rosPath) {
-      const invalidGlobalVariablesVariable = getFirstInvalidVariableFromRosPath(
-        rosPath,
-        globalVariables,
-        setGlobalVariables,
-      );
-
-      if (invalidGlobalVariablesVariable) {
-        autocompleteType = "globalVariables";
-        autocompleteItems = Object.keys(globalVariables).map((key) => `$${key}`);
-        autocompleteRange = {
+    } else if (invalidGlobalVariablesVariable) {
+      return {
+        autocompleteItems: Object.keys(globalVariables).map((key) => `$${key}`),
+        autocompleteRange: {
           start: invalidGlobalVariablesVariable.loc,
           end:
             invalidGlobalVariablesVariable.loc +
             invalidGlobalVariablesVariable.variableName.length +
             1,
-        };
-        autocompleteFilterText = invalidGlobalVariablesVariable.variableName;
-      }
+        },
+        autocompleteFilterText: invalidGlobalVariablesVariable.variableName,
+      };
     }
 
-    const noHeaderStamp = topic ? topicHasNoHeaderStamp(topic, datatypes) : false;
-    const orderedAutocompleteItems =
-      prioritizedDatatype != undefined
-        ? flatten(
-            partition(
-              autocompleteItems,
-              (item) => getTopicsByTopicName(topics)[item]?.datatype === prioritizedDatatype,
-            ),
-          )
-        : autocompleteItems;
+    return {
+      autocompleteItems: [],
+      autocompleteFilterText: "",
+      autocompleteRange: { start: 0, end: Infinity },
+    };
+  }, [
+    disableAutocomplete,
+    datatypes,
+    globalVariables,
+    path,
+    rosPath,
+    topic,
+    topics,
+    autocompleteType,
+    validTypes,
+    noMultiSlices,
+    invalidGlobalVariablesVariable,
+    structureTraversalResult,
+  ]);
 
-    const usesUnsupportedMathModifier =
-      (supportsMathModifiers == undefined || !supportsMathModifiers) && path.includes(".@");
+  const noHeaderStamp = useMemo(() => {
+    return topic ? topicHasNoHeaderStamp(topic, datatypes) : false;
+  }, [datatypes, topic]);
 
-    return (
-      <div
-        style={{ display: "flex", flex: "1 1 auto", minWidth: 0, justifyContent: "space-between" }}
-      >
-        <Autocomplete
-          items={orderedAutocompleteItems}
-          filterText={autocompleteFilterText}
-          value={path}
-          onChange={this._onChange}
-          onSelect={(value: string, _item: unknown, autocomplete: Autocomplete<string>) =>
-            this._onSelect(value, autocomplete, autocompleteType, autocompleteRange)
-          }
-          hasError={
-            usesUnsupportedMathModifier ||
-            (autocompleteType != undefined && !disableAutocomplete && path.length > 0)
-          }
-          autocompleteKey={autocompleteType}
-          placeholder={
-            placeholder != undefined && placeholder !== ""
-              ? placeholder
-              : "/some/topic.msgs[0].field"
-          }
-          autoSize={autoSize}
-          inputStyle={inputStyle} // Disable autoselect since people often construct complex queries, and it's very annoying
-          // to have the entire input selected whenever you want to make a change to a part it.
-          disableAutoSelect
-        />
+  const orderedAutocompleteItems = useMemo(() => {
+    if (prioritizedDatatype == undefined) {
+      return autocompleteItems;
+    }
 
-        {timestampMethod != undefined && (
-          <div className={styles.timestampMethodDropdownContainer}>
-            <Dropdown
-              onChange={this._onTimestampMethodChange}
-              value={timestampMethod}
-              toggleComponent={
-                <Tooltip contents="Timestamp used for x-axis" placement="top">
-                  <div
-                    className={cx({
-                      [styles.timestampMethodDropdown!]: true,
-                      [styles.timestampMethodDropdownError!]:
-                        timestampMethod === "headerStamp" && noHeaderStamp,
-                    })}
-                  >
-                    {timestampMethod === "receiveTime" ? "(receive time)" : "(header.stamp)"}
-                    <Icon style={{ position: "relative", top: 2, marginLeft: 2 }}>
-                      <MenuDownIcon />
-                    </Icon>
-                  </div>
-                </Tooltip>
-              }
-            >
-              <Tooltip
-                {
-                  ...{
-                    value: "receiveTime",
-                  }
-                  // weird spread syntax used to overcome error with "value" property.
-                  // "value" is needed for Dropdown but does not exist on Tooltip
-                }
-                placement="right"
-                contents="ROS-time at which the message was received and recorded"
-              >
-                <span>receive time</span>
-              </Tooltip>
-              <Tooltip
-                {
-                  ...{
-                    value: "headerStamp",
-                  }
-                  // weird spread syntax used to overcome error with "value" property.
-                  // "value" is needed for Dropdown but does not exist on Tooltip
-                }
-                placement="bottom"
-                contents={
-                  <div style={{ maxWidth: 200, lineHeight: "normal" }}>
-                    Value of the header.stamp field. Can mean different things for different topics.
-                    Be sure you know what this value means before using it.
-                    {noHeaderStamp && (
-                      <div className={styles.timestampItemError}>
-                        (header.stamp is not present in this topic)
-                      </div>
-                    )}
-                  </div>
-                }
-              >
-                <span
+    return flatten(
+      partition(
+        autocompleteItems,
+        (item) => getTopicsByTopicName(topics)[item]?.datatype === prioritizedDatatype,
+      ),
+    );
+  }, [autocompleteItems, prioritizedDatatype, topics]);
+
+  const usesUnsupportedMathModifier =
+    (supportsMathModifiers == undefined || !supportsMathModifiers) && path.includes(".@");
+
+  const hasError =
+    usesUnsupportedMathModifier ||
+    (autocompleteType != undefined && !disableAutocomplete && path.length > 0);
+
+  return (
+    <div
+      style={{ display: "flex", flex: "1 1 auto", minWidth: 0, justifyContent: "space-between" }}
+    >
+      <Autocomplete
+        items={orderedAutocompleteItems}
+        filterText={autocompleteFilterText}
+        value={path}
+        onChange={onChange}
+        onSelect={(value: string, _item: unknown, autocomplete: Autocomplete<string>) =>
+          onSelect(value, autocomplete, autocompleteType, autocompleteRange)
+        }
+        hasError={hasError}
+        autocompleteKey={autocompleteType}
+        placeholder={
+          placeholder != undefined && placeholder !== "" ? placeholder : "/some/topic.msgs[0].field"
+        }
+        autoSize={autoSize}
+        inputStyle={inputStyle} // Disable autoselect since people often construct complex queries, and it's very annoying
+        // to have the entire input selected whenever you want to make a change to a part it.
+        disableAutoSelect
+      />
+
+      {timestampMethod != undefined && (
+        <div className={styles.timestampMethodDropdownContainer}>
+          <Dropdown
+            onChange={onTimestampMethodChange}
+            value={timestampMethod}
+            toggleComponent={
+              <Tooltip contents="Timestamp used for x-axis" placement="top">
+                <div
                   className={cx({
-                    [styles.timestampItemError!]: noHeaderStamp,
+                    [styles.timestampMethodDropdown!]: true,
+                    [styles.timestampMethodDropdownError!]:
+                      timestampMethod === "headerStamp" && noHeaderStamp,
                   })}
                 >
-                  header.stamp
-                </span>
+                  {timestampMethod === "receiveTime" ? "(receive time)" : "(header.stamp)"}
+                  <Icon style={{ position: "relative", top: 2, marginLeft: 2 }}>
+                    <MenuDownIcon />
+                  </Icon>
+                </div>
               </Tooltip>
-            </Dropdown>
-          </div>
-        )}
-      </div>
-    );
-  }
-}
-
-export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
-  props: MessagePathInputBaseProps,
-) {
-  const { globalVariables, setGlobalVariables } = useGlobalVariables();
-  const { datatypes, topics } = PanelAPI.useDataSourceInfo();
-  return (
-    <MessagePathInputUnconnected
-      {...props}
-      topics={topics}
-      datatypes={datatypes}
-      globalVariables={globalVariables}
-      setGlobalVariables={setGlobalVariables}
-    />
+            }
+          >
+            <Tooltip
+              {
+                ...{
+                  value: "receiveTime",
+                }
+                // weird spread syntax used to overcome error with "value" property.
+                // "value" is needed for Dropdown but does not exist on Tooltip
+              }
+              placement="right"
+              contents="ROS-time at which the message was received and recorded"
+            >
+              <span>receive time</span>
+            </Tooltip>
+            <Tooltip
+              {
+                ...{
+                  value: "headerStamp",
+                }
+                // weird spread syntax used to overcome error with "value" property.
+                // "value" is needed for Dropdown but does not exist on Tooltip
+              }
+              placement="bottom"
+              contents={
+                <div style={{ maxWidth: 200, lineHeight: "normal" }}>
+                  Value of the header.stamp field. Can mean different things for different topics.
+                  Be sure you know what this value means before using it.
+                  {noHeaderStamp && (
+                    <div className={styles.timestampItemError}>
+                      (header.stamp is not present in this topic)
+                    </div>
+                  )}
+                </div>
+              }
+            >
+              <span
+                className={cx({
+                  [styles.timestampItemError!]: noHeaderStamp,
+                })}
+              >
+                header.stamp
+              </span>
+            </Tooltip>
+          </Dropdown>
+        </div>
+      )}
+    </div>
   );
 });
