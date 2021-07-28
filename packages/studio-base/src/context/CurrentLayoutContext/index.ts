@@ -128,13 +128,14 @@ export function useCurrentLayoutSelector<T>(selector: (layoutState: LayoutState)
         return;
       }
       const newValue = selectWithUnstableIdentityWarning(layoutState, selector);
-      if (newValue !== state.current?.value) {
-        forceUpdate();
+      if (newValue === state.current?.value) {
+        return;
       }
       state.current = {
         value: newValue,
         selector,
       };
+      forceUpdate();
     };
     // Update if necessary, i.e. if the state has changed between render and this effect
     listener(currentLayout.actions.getCurrentLayoutState());

@@ -5,6 +5,7 @@
 import { useCallback } from "react";
 
 import {
+  LayoutState,
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
@@ -32,13 +33,17 @@ export function useConfigById<Config extends Record<string, unknown>>(
 ): [Config | undefined, SaveConfig<Config>] {
   const { savePanelConfigs } = useCurrentLayoutActions();
 
-  // get the config from the current layout state
-  // if there is no config in the current layout state...then we would return undefined?
-  const config = useCurrentLayoutSelector((state) =>
-    panelId != undefined
-      ? (state.selectedLayout?.data.configById[panelId] as Config | undefined)
-      : undefined,
+  const configSelector = useCallback(
+    (state: LayoutState) => {
+      if (panelId == undefined) {
+        return undefined;
+      }
+      return state.selectedLayout?.data.configById?.[panelId] as Config | undefined;
+    },
+    [panelId],
   );
+
+  const config = useCurrentLayoutSelector(configSelector);
 
   const saveConfig: SaveConfig<Config> = useCallback(
     (newConfig) => {
