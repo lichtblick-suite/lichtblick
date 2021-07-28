@@ -200,7 +200,7 @@ const PlaybackTimeDisplayMethod = ({
           />
         </form>
       ) : (
-        <TextField disabled size={13} styles={textFieldStyles} value="–" />
+        <TextField disabled size={13} styles={textFieldStyles} defaultValue="–" />
       )}
       <DefaultButton
         menuProps={{
