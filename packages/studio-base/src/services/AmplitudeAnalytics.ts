@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import Logger from "@foxglove/log";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
-import AppEvent from "@foxglove/studio-base/services/AppEvent";
+import IAnalytics, { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 import Storage from "@foxglove/studio-base/util/Storage";
 
 const UUID_ZERO = "00000000-0000-0000-0000-000000000000";
@@ -17,7 +17,7 @@ const USER_ID_KEY = "analytics_user_id";
 
 const log = Logger.getLogger(__filename);
 
-export class Analytics {
+export class AmplitudeAnalytics implements IAnalytics {
   private _amplitude: Promise<amplitude.AmplitudeClient | undefined>;
   private _crashReporting: boolean;
   private _storage = new Storage();
@@ -50,7 +50,7 @@ export class Analytics {
       log.info("Crash reporting is disabled");
     }
 
-    this.logEvent(AppEvent.APP_INIT);
+    void this.logEvent(AppEvent.APP_INIT);
   }
 
   private async createAmplitude(apiKey: string): Promise<amplitude.AmplitudeClient> {
@@ -88,7 +88,6 @@ export class Analytics {
     return (await OsContextSingleton?.getMachineId()) ?? UUID_ZERO;
   }
 
-  logEvent(event: AppEvent, data?: { [key: string]: unknown }): void;
   async logEvent(event: AppEvent, data?: { [key: string]: unknown }): Promise<void> {
     const amp = await this._amplitude;
     if (amp != undefined) {

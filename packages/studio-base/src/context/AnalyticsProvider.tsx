@@ -7,7 +7,7 @@ import { PropsWithChildren, useMemo } from "react";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import AnalyticsContext from "@foxglove/studio-base/context/AnalyticsContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
-import { Analytics } from "@foxglove/studio-base/services/Analytics";
+import { AmplitudeAnalytics } from "@foxglove/studio-base/services/AmplitudeAnalytics";
 
 export default function AnalyticsProvider(
   props: PropsWithChildren<{ amplitudeApiKey?: string }>,
@@ -18,7 +18,7 @@ export default function AnalyticsProvider(
   );
 
   const analytics = useMemo(() => {
-    return new Analytics({
+    return new AmplitudeAnalytics({
       optOut: !enableTelemetry,
       crashReportingOptOut: !(enableCrashReporting && typeof process.env.SENTRY_DSN === "string"),
       amplitudeApiKey: props.amplitudeApiKey ?? process.env.AMPLITUDE_API_KEY,

@@ -24,7 +24,7 @@ import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutS
 import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
 import welcomeLayout from "@foxglove/studio-base/layouts/welcomeLayout";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
-import AppEvent from "@foxglove/studio-base/services/AppEvent";
+import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 import { LayoutMetadata } from "@foxglove/studio-base/services/ILayoutStorage";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
 
@@ -169,7 +169,7 @@ export default function LayoutBrowser({
     });
     void onSelectLayout(newLayout);
 
-    analytics.logEvent(AppEvent.LAYOUT_CREATE);
+    void analytics.logEvent(AppEvent.LAYOUT_CREATE);
   }, [currentDateForStorybook, layoutStorage, analytics, onSelectLayout]);
 
   const onExportLayout = useCallback(
@@ -178,7 +178,7 @@ export default function LayoutBrowser({
       if (layout) {
         const content = JSON.stringify(layout.data, undefined, 2);
         downloadTextFile(content, `${item.name}.json`);
-        analytics.logEvent(AppEvent.LAYOUT_EXPORT);
+        void analytics.logEvent(AppEvent.LAYOUT_EXPORT);
       }
     },
     [layoutStorage, analytics],
@@ -251,7 +251,7 @@ export default function LayoutBrowser({
     });
     void onSelectLayout(newLayout);
 
-    analytics.logEvent(AppEvent.LAYOUT_IMPORT);
+    void analytics.logEvent(AppEvent.LAYOUT_IMPORT);
   }, [addToast, isMounted, layoutStorage, analytics, onSelectLayout]);
 
   const createLayoutTooltip = useTooltip({ contents: "Create new layout" });

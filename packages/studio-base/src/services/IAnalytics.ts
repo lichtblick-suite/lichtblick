@@ -22,4 +22,9 @@ enum AppEvent {
   LAYOUT_REMOVE_PANEL = "LAYOUT_REMOVE_PANEL",
 }
 
-export default AppEvent;
+interface IAnalytics {
+  logEvent(event: AppEvent, data?: { [key: string]: unknown }): void | Promise<void>;
+}
+
+export { AppEvent };
+export default IAnalytics;
