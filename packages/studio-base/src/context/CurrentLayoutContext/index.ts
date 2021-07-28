@@ -120,7 +120,13 @@ export function useCurrentLayoutSelector<T>(selector: (layoutState: LayoutState)
     };
   }
   useLayoutEffect(() => {
+    let mounted = true;
     const listener = (layoutState: LayoutState) => {
+      // Note: Our removeLayoutStateListener is is too late if the layout state listeners are already
+      // being invoked. Our component might become unmounted during the state listener invocation
+      if (!mounted) {
+        return;
+      }
       const newValue = selectWithUnstableIdentityWarning(layoutState, selector);
       if (newValue !== state.current?.value) {
         forceUpdate();
@@ -133,7 +139,10 @@ export function useCurrentLayoutSelector<T>(selector: (layoutState: LayoutState)
     // Update if necessary, i.e. if the state has changed between render and this effect
     listener(currentLayout.actions.getCurrentLayoutState());
     currentLayout.addLayoutStateListener(listener);
-    return () => currentLayout.removeLayoutStateListener(listener);
+    return () => {
+      mounted = false;
+      currentLayout.removeLayoutStateListener(listener);
+    };
   }, [currentLayout, selector]);
 
   return state.current.value;
