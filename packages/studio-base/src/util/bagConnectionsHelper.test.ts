@@ -16,27 +16,30 @@ import { bagConnectionsToDatatypes, bagConnectionsToTopics } from "./bagConnecti
 describe("bagConnectionsToDatatypes", () => {
   it("extracts one big list from multiple connections", () => {
     expect(
-      bagConnectionsToDatatypes([
-        {
-          type: "something/points",
-          messageDefinition: `
+      bagConnectionsToDatatypes(
+        [
+          {
+            type: "something/points",
+            messageDefinition: `
             Point[] points
             ============
             MSG: geometry_msgs/Point
             float64 x
           `,
-        },
-        {
-          type: "something/two_points",
-          messageDefinition: `
+          },
+          {
+            type: "something/two_points",
+            messageDefinition: `
             Point point1
             Point point2
             ============
             MSG: geometry_msgs/Point
             float64 x
           `,
-        },
-      ]),
+          },
+        ],
+        { ros2: false },
+      ),
     ).toEqual({
       "something/points": {
         fields: [{ name: "points", type: "geometry_msgs/Point", isArray: true, isComplex: true }],

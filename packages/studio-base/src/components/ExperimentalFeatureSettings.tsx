@@ -38,6 +38,11 @@ const features: Feature[] = [
     name: "Drawing polygons in 3D panel",
     description: <>Show sidebar control to draw polygons in the 3D panel.</>,
   },
+  {
+    key: AppSetting.SHOW_ROS2_ROSBRIDGE,
+    name: "ROS 2 Rosbridge",
+    description: <>Enable ROS 2 Rosbridge as a possible data source connection.</>,
+  },
   ...(process.env.NODE_ENV !== "production"
     ? [
         {

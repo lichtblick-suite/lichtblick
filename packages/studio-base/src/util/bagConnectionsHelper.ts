@@ -25,10 +25,11 @@ type DatatypeDescription = {
 // Extract one big list of datatypes from the individual connections.
 export function bagConnectionsToDatatypes(
   connections: readonly DatatypeDescription[],
+  { ros2 }: { ros2: boolean },
 ): RosDatatypes {
   const datatypes: RosDatatypes = {};
   connections.forEach((connection) => {
-    const connectionTypes = parseMessageDefinition(connection.messageDefinition);
+    const connectionTypes = parseMessageDefinition(connection.messageDefinition, { ros2 });
     connectionTypes.forEach(({ name, definitions }, index) => {
       // The first definition usually doesn't have an explicit name,
       // so we get the name from the connection.

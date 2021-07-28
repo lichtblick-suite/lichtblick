@@ -134,7 +134,11 @@ describe("RosbridgePlayer", () => {
   let player: RosbridgePlayer;
 
   beforeEach(() => {
-    player = new RosbridgePlayer("ws://some-url", new NoopMetricsCollector());
+    player = new RosbridgePlayer({
+      url: "ws://some-url",
+      rosVersion: 1,
+      metricsCollector: new NoopMetricsCollector(),
+    });
   });
 
   afterEach(() => {
