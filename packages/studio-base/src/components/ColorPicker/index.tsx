@@ -19,6 +19,7 @@ type Props = {
   onChange: (newColor: Color) => void;
   buttonShape?: "circle" | "default";
   circleSize?: number;
+  alphaType?: "alpha" | "none";
 };
 
 // Returns a button that pops out an ColorPicker in a fluent callout.
@@ -27,6 +28,7 @@ export default function ColorPicker({
   circleSize = 25,
   onChange,
   buttonShape,
+  alphaType,
 }: Props): JSX.Element {
   const fluentColor = colorObjToIColor(color);
   const colorButtonRef = useRef<HTMLElement>(ReactNull);
@@ -80,7 +82,7 @@ export default function ColorPicker({
         >
           <Picker
             color={colorObjToIColor(color)}
-            alphaType="alpha"
+            alphaType={alphaType ?? "none"}
             onChange={(_event, newValue) => onChange(getColorFromIRGB(newValue))}
           />
         </Callout>

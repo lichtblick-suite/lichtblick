@@ -81,6 +81,7 @@ export default function PoseSettingsEditor(
             <ColorPicker
               color={settings.overrideColor}
               onChange={(newColor) => onFieldChange("overrideColor", newColor)}
+              alphaType="alpha"
             />
             <SLabel>Shaft width</SLabel>
             <SInput
