@@ -17,7 +17,8 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout ${{ github.event.release.target_commitish || github.event.inputs.target_commitish }}
+        uses: actions/checkout@v2
         with:
           ref: ${{ github.event.release.target_commitish || github.event.inputs.target_commitish }}
           lfs: true
@@ -50,7 +51,8 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
+        uses: actions/checkout@v2
         with:
           ref: ${{ github.event.release.tag_name || github.event.inputs.tag_name }}
           lfs: true
@@ -59,13 +61,7 @@ jobs:
         with:
           node-version: 14.x
           registry-url: https://registry.npmjs.org
-
-      - name: Restore cache
-        uses: actions/cache@v2
-        with:
-          path: .yarn/cache
-          key: v1-${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: v1-${{ runner.os }}-yarn-
+          cache: yarn
 
       - run: yarn install --immutable
 
