@@ -479,8 +479,6 @@ function ImageView(props: Props) {
   );
 
   const markerDropdown = useMemo(() => {
-    const missingRequiredCameraInfo = !cameraInfo;
-
     return (
       <Dropdown
         dataTest={"markers-dropdown"}
@@ -488,13 +486,7 @@ function ImageView(props: Props) {
         onChange={onToggleMarkerName}
         value={enabledMarkerTopics}
         text={availableAndEnabledMarkerTopics.length > 0 ? "markers" : "no markers"}
-        tooltip={
-          missingRequiredCameraInfo
-            ? "camera_info is required when image resolution is set to less than 100%.\nResolution can be changed in the panel settings."
-            : undefined
-        }
         btnClassname={style.dropdown}
-        disabled={availableAndEnabledMarkerTopics.length === 0 || missingRequiredCameraInfo}
       >
         {availableAndEnabledMarkerTopics.map((topic) => (
           <Item
@@ -536,7 +528,6 @@ function ImageView(props: Props) {
   }, [
     addTopicsMenu,
     availableAndEnabledMarkerTopics,
-    cameraInfo,
     customMarkerTopicOptions,
     enabledMarkerTopics,
     onToggleMarkerName,
