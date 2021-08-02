@@ -4,7 +4,14 @@
 
 import { makeStyles, MessageBar, MessageBarType, Stack, Text, useTheme } from "@fluentui/react";
 import { captureException } from "@sentry/core";
-import { createContext, ErrorInfo, useContext } from "react";
+import {
+  Component,
+  createContext,
+  ErrorInfo,
+  PropsWithChildren,
+  ReactNode,
+  useContext,
+} from "react";
 
 import { AppError } from "@foxglove/studio-base/util/errors";
 
@@ -116,8 +123,7 @@ export type ErrorRendererProps = {
 };
 
 type Props = {
-  children: React.ReactNode;
-  renderError: (_: ErrorRendererProps) => React.ReactNode;
+  renderError: (_: ErrorRendererProps) => ReactNode;
 };
 type State = {
   currentError: { error: Error; errorInfo: ErrorInfo } | undefined;
@@ -132,7 +138,7 @@ function defaultRenderErrorDetails(props: ErrorRendererProps): JSX.Element {
 
 export const HideErrorSourceLocations = createContext(false);
 
-export default class ErrorBoundary extends React.Component<Props, State> {
+export default class ErrorBoundary extends Component<PropsWithChildren<Props>, State> {
   override state: State = {
     currentError: undefined,
   };
@@ -146,7 +152,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
     this.setState({ currentError: { error, errorInfo } });
   }
 
-  override render(): React.ReactNode {
+  override render(): ReactNode {
     if (this.state.currentError) {
       return this.props.renderError({
         ...this.state.currentError,
