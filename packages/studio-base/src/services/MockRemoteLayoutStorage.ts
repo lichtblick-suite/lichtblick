@@ -33,14 +33,17 @@ export default class MockRemoteLayoutStorage implements IRemoteLayoutStorage {
   private hasNameConflict({
     name,
     permission,
+    ignoringID,
   }: {
     name: string;
     permission: "creator_write" | "org_read" | "org_write";
+    ignoringID?: LayoutID;
   }) {
     for (const layout of this.layoutsById.values()) {
       if (
         name === layout.name &&
-        (layout.permission === "creator_write") === (permission === "creator_write")
+        (layout.permission === "creator_write") === (permission === "creator_write") &&
+        layout.id !== ignoringID
       ) {
         return true;
       }
@@ -96,17 +99,19 @@ export default class MockRemoteLayoutStorage implements IRemoteLayoutStorage {
     ifUnmodifiedSince: ISO8601Timestamp;
   }): Promise<
     | { status: "success"; newMetadata: RemoteLayoutMetadata }
+    | { status: "not-found" }
     | { status: "conflict" }
     | { status: "precondition-failed" }
   > {
     const target = this.layoutsById.get(targetID);
     if (!target) {
-      return { status: "conflict" };
+      return { status: "not-found" };
     }
     if (
       this.hasNameConflict({
         name: name ?? target.name,
         permission: permission ?? target.permission,
+        ignoringID: targetID,
       })
     ) {
       return { status: "conflict" };

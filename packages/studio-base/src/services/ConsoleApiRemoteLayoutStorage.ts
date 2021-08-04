@@ -27,16 +27,14 @@ export default class ConsoleApiRemoteLayoutStorage implements IRemoteLayoutStora
   async saveNewLayout({
     name,
     data,
+    permission,
   }: {
     name: string;
     data: PanelsState;
+    permission: "creator_write" | "org_read" | "org_write";
   }): Promise<{ status: "success"; newMetadata: RemoteLayoutMetadata } | { status: "conflict" }> {
     try {
-      const result = await this.api.createLayout({
-        name,
-        data,
-        permission: "creator_write",
-      });
+      const result = await this.api.createLayout({ name, data, permission });
       return { status: "success", newMetadata: result };
     } catch (err) {
       log.warn(err);

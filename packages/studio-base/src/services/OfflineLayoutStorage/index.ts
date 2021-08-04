@@ -180,6 +180,7 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
     data: PanelsState;
     permission: "creator_write" | "org_read" | "org_write";
   }): Promise<LayoutMetadata> {
+    // For shared layouts, start by going directly to the server
     if (permission !== "creator_write") {
       const response = await this.remoteStorage.saveNewLayout({ name, data, permission });
       switch (response.status) {
@@ -192,6 +193,7 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
               serverMetadata: response.newMetadata,
             };
             await cache.put(layout);
+            this.notifyChangeListeners();
             return getEffectiveMetadata(layout, this.latestConflictsByCacheId);
           });
         case "conflict":
@@ -249,13 +251,13 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
       if (cachedLayout?.serverMetadata != undefined) {
         const { conflict } = await this.performSyncOperation(
           { type: "upload-updated", cachedLayout, remoteLayout: cachedLayout.serverMetadata },
-          { uploadChanges: true },
+          { uploadSharedLayoutChanges: true },
         );
         return conflict ? { status: "conflict", type: conflict.type } : { status: "success" };
       } else if (cachedLayout?.state != undefined) {
         const { conflict, newId } = await this.performSyncOperation(
           { type: "upload-new", cachedLayout: { ...cachedLayout, state: cachedLayout.state } },
-          { uploadChanges: true },
+          { uploadSharedLayoutChanges: true },
         );
         return conflict
           ? { status: "conflict", type: conflict.type }
@@ -267,7 +269,8 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
     }
   }
 
-  private isSyncing = false;
+  /** Ensures at most one sync operation is in progress at a time */
+  private currentSync?: Promise<ReadonlyMap<string, ConflictInfo>>;
 
   /**
    * Attempt to synchronize the local cache with remote storage. At minimum this incurs a fetch of
@@ -276,16 +279,16 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
    * @returns Any conflicts that arose during the sync.
    */
   async syncWithRemote(): Promise<ReadonlyMap<string, ConflictInfo>> {
-    if (this.isSyncing) {
-      throw new Error("Only one syncWithRemote operation may be in progress at a time.");
+    if (this.currentSync) {
+      return await this.currentSync;
     }
     try {
-      this.isSyncing = true;
-      this.latestConflictsByCacheId = await this.syncWithRemoteImpl();
+      this.currentSync = this.syncWithRemoteImpl();
+      this.latestConflictsByCacheId = await this.currentSync;
       this.notifyChangeListeners();
       return this.latestConflictsByCacheId;
     } finally {
-      this.isSyncing = false;
+      this.currentSync = undefined;
     }
   }
 
@@ -308,15 +311,17 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
     const operations = computeLayoutSyncOperations(cachedLayoutsById, remoteLayoutsById);
     log.info("Sync operations:", operations);
 
-    // By default we don't (currently) upload new layouts or changes made locally. The user
-    // triggers these uploads with an explicit save action.
-    const conflicts = await this.performSyncOperations(operations, { uploadChanges: false });
+    // By default we don't upload edits to shared layouts. The user triggers these uploads with an
+    // explicit save action.
+    const conflicts = await this.performSyncOperations(operations, {
+      uploadSharedLayoutChanges: false,
+    });
     return new Map(conflicts.map((info) => [info.cacheId, info]));
   }
 
   private async performSyncOperations(
     operations: SyncOperation[],
-    options: { uploadChanges: boolean },
+    options: { uploadSharedLayoutChanges: boolean },
   ): Promise<ConflictInfo[]> {
     const conflicts: ConflictInfo[] = [];
     for (const operation of operations) {
@@ -330,7 +335,7 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
 
   private async performSyncOperation(
     operation: SyncOperation,
-    { uploadChanges }: { uploadChanges: boolean },
+    { uploadSharedLayoutChanges }: { uploadSharedLayoutChanges: boolean },
   ): Promise<{ conflict?: ConflictInfo; newId?: LayoutID }> {
     switch (operation.type) {
       case "conflict": {
@@ -405,9 +410,6 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
       }
 
       case "upload-new": {
-        if (!uploadChanges) {
-          break;
-        }
         const { cachedLayout } = operation;
         const response = await this.remoteStorage.saveNewLayout({
           name: cachedLayout.name,
@@ -440,26 +442,16 @@ export default class OfflineLayoutStorage implements ILayoutStorage {
       }
 
       case "upload-updated": {
-        if (!uploadChanges) {
+        const { cachedLayout, remoteLayout } = operation;
+        if (!uploadSharedLayoutChanges && remoteLayout.permission !== "creator_write") {
           break;
         }
-        const { cachedLayout, remoteLayout } = operation;
-        let responsePromise: ReturnType<IRemoteLayoutStorage["updateLayout"]>;
-        if (!cachedLayout.state) {
-          responsePromise = this.remoteStorage.updateLayout({
-            targetID: remoteLayout.id,
-            name: cachedLayout.name,
-            ifUnmodifiedSince: remoteLayout.updatedAt,
-          });
-        } else {
-          responsePromise = this.remoteStorage.updateLayout({
-            targetID: remoteLayout.id,
-            name: cachedLayout.name,
-            ifUnmodifiedSince: remoteLayout.updatedAt,
-            data: cachedLayout.state,
-          });
-        }
-        const response = await responsePromise;
+        const response = await this.remoteStorage.updateLayout({
+          targetID: remoteLayout.id,
+          name: cachedLayout.name,
+          ifUnmodifiedSince: remoteLayout.updatedAt,
+          data: cachedLayout.state,
+        });
         switch (response.status) {
           case "success":
             await this.cacheStorage.runExclusive(

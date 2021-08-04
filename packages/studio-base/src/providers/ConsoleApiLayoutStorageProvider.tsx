@@ -4,8 +4,9 @@
 
 import { useCallback, useMemo } from "react";
 import { useToasts } from "react-toast-notifications";
+import { useInterval, useNetworkState } from "react-use";
 
-import { useShallowMemo } from "@foxglove/hooks";
+import { useShallowMemo, useVisibilityState } from "@foxglove/hooks";
 import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useConsoleApi } from "@foxglove/studio-base/context/ConsoleApiContext";
@@ -19,6 +20,8 @@ import ConsoleApiRemoteLayoutStorage from "@foxglove/studio-base/services/Consol
 import OfflineLayoutStorage from "@foxglove/studio-base/services/OfflineLayoutStorage";
 
 const log = Logger.getLogger(__filename);
+
+const SYNC_INTERVAL = 15_000;
 
 export default function ConsoleApiLayoutStorageProvider({
   children,
@@ -40,15 +43,30 @@ export default function ConsoleApiLayoutStorageProvider({
     [layoutCache, apiStorage],
   );
 
-  const syncNow = useCallback(async () => {
+  const sync = useCallback(async () => {
     try {
       const conflicts = await offlineStorage.syncWithRemote();
       log.info("synced, conflicts:", conflicts);
     } catch (error) {
-      addToast(`Sync failed: ${error.message}`, { appearance: "error" });
+      addToast(`Sync failed: ${error.message}`, {
+        id: "ConsoleApiLayoutStorageProvider.syncError",
+        appearance: "error",
+      });
     }
   }, [addToast, offlineStorage]);
-  const debugging = useShallowMemo({ syncNow });
+
+  const { online = false } = useNetworkState();
+  const visibilityState = useVisibilityState();
+
+  // Sync periodically when logged in, online, and the app is not hidden
+  useInterval(
+    sync,
+    currentUser && online && visibilityState === "visible"
+      ? SYNC_INTERVAL
+      : null /* eslint-disable-line no-restricted-syntax */,
+  );
+
+  const debugging = useShallowMemo({ syncNow: sync });
 
   return (
     <LayoutStorageDebuggingContext.Provider

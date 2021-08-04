@@ -321,13 +321,8 @@ describe("OfflineLayoutStorage", () => {
 
       await expect(remoteStorage.getLayouts()).resolves.toEqual([]);
 
-      // Regular sync action does not upload
-      jest.setSystemTime(5);
-      await expect(storage.syncWithRemote()).resolves.toEqual(new Map());
-      await expect(remoteStorage.getLayouts()).resolves.toEqual([]);
-
-      // After explicit syncing, the layout is written to the remote storage
       jest.setSystemTime(10);
+      await expect(storage.syncWithRemote()).resolves.toEqual(new Map());
       await storage.syncLayout(layouts[0]!.id);
       const expectedRemote: RemoteLayoutMetadata = {
         id: expect.any(String),
@@ -426,6 +421,14 @@ describe("OfflineLayoutStorage", () => {
         updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
         permission: "creator_write",
       };
+      const remote2: RemoteLayoutMetadata = {
+        id: "id2" as LayoutID,
+        name: "Foo2",
+        creatorUserId: FAKE_USER.id,
+        createdAt: new Date(11).toISOString() as ISO8601Timestamp,
+        updatedAt: new Date(11).toISOString() as ISO8601Timestamp,
+        permission: "org_read",
+      };
       const cacheStorage = new MockLayoutCache([
         {
           id: remote1.id,
@@ -434,26 +437,44 @@ describe("OfflineLayoutStorage", () => {
           serverMetadata: remote1,
           locallyModified: true,
         },
+        {
+          id: remote2.id,
+          name: "Bar2",
+          state: makePanelsState({ barPanel: { b: 2 } }),
+          serverMetadata: remote2,
+          locallyModified: true,
+        },
       ]);
       const remoteStorage = new MockRemoteLayoutStorage([
         { ...remote1, data: makePanelsState({}) },
+        { ...remote2, data: makePanelsState({}) },
       ]);
       const storage = new OfflineLayoutStorage({ cacheStorage, remoteStorage });
 
-      jest.setSystemTime(20);
-      await expect(storage.syncLayout(remote1.id)).resolves.toEqual({ status: "success" });
-      await expect(remoteStorage.getLayouts()).resolves.toEqual([
-        {
-          ...remote1,
-          name: "Bar",
-          updatedAt: new Date(20).toISOString() as ISO8601Timestamp,
-        },
-      ]);
+      // Regular sync action uploads changes for personal but not shared layouts
+      jest.setSystemTime(15);
+      await expect(storage.syncWithRemote()).resolves.toEqual(new Map());
       await expect(remoteStorage.getLayout(remote1.id)).resolves.toEqual({
         ...remote1,
         name: "Bar",
-        updatedAt: new Date(20).toISOString() as ISO8601Timestamp,
+        updatedAt: new Date(15).toISOString() as ISO8601Timestamp,
         data: makePanelsState({ fooPanel: { a: 1 } }),
+      });
+      await expect(remoteStorage.getLayout(remote2.id)).resolves.toEqual({
+        ...remote2,
+        name: "Foo2",
+        updatedAt: new Date(11).toISOString() as ISO8601Timestamp,
+        data: makePanelsState({}),
+      });
+
+      // Explicit single layout sync uploads changes for shared layouts
+      jest.setSystemTime(20);
+      await expect(storage.syncLayout(remote2.id)).resolves.toEqual({ status: "success" });
+      await expect(remoteStorage.getLayout(remote2.id)).resolves.toEqual({
+        ...remote2,
+        name: "Bar2",
+        updatedAt: new Date(20).toISOString() as ISO8601Timestamp,
+        data: makePanelsState({ barPanel: { b: 2 } }),
       });
     });
 
