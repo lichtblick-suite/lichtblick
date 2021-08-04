@@ -14,4 +14,5 @@ export enum AppSetting {
   SHOW_ROS2_ROSBRIDGE = "showRos2Rosbridge",
   ENABLE_CONSOLE_API_LAYOUTS = "enableConsoleApiLayouts",
   ENABLE_DRAWING_POLYGONS = "enableDrawingPolygons",
+  ENABLE_LEGACY_PLOT_PANEL = "enableLegacyPlotPanel",
 }

@@ -75,4 +75,12 @@ const hidden: PanelInfo[] = [
   },
 ];
 
-export default { builtin, debug, hidden };
+const legacyPlot: PanelInfo[] = [
+  {
+    title: "Legacy Plot",
+    type: "LegacyPlot",
+    module: async () => await import("./LegacyPlot"),
+  },
+];
+
+export default { builtin, debug, hidden, legacyPlot };

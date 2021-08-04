@@ -43,6 +43,11 @@ const features: Feature[] = [
     name: "ROS 2 Rosbridge",
     description: <>Enable ROS 2 Rosbridge as a possible data source connection.</>,
   },
+  {
+    key: AppSetting.ENABLE_LEGACY_PLOT_PANEL,
+    name: "Legacy Plot Panel",
+    description: <>Enable the legacy plot panel.</>,
+  },
   ...(process.env.NODE_ENV !== "production"
     ? [
         {

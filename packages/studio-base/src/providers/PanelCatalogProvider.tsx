@@ -26,6 +26,10 @@ export default function PanelCatalogProvider(
   props: PropsWithChildren<unknown>,
 ): React.ReactElement {
   const [showDebugPanels = false] = useAppConfigurationValue<boolean>(AppSetting.SHOW_DEBUG_PANELS);
+  const [enableLegacyPlotPanel = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_LEGACY_PLOT_PANEL,
+  );
+
   const extensionRegistry = useExtensionRegistry();
 
   const wrappedExtensionPanels = useMemo<PanelInfo[]>(() => {
@@ -58,15 +62,23 @@ export default function PanelCatalogProvider(
   }, [extensionRegistry]);
 
   const allPanels = useMemo(() => {
-    return [...panels.builtin, ...panels.debug, ...panels.hidden, ...wrappedExtensionPanels];
+    return [
+      ...panels.builtin,
+      ...panels.debug,
+      ...panels.hidden,
+      ...panels.legacyPlot,
+      ...wrappedExtensionPanels,
+    ];
   }, [wrappedExtensionPanels]);
 
   const visiblePanels = useMemo(() => {
+    const legacyPlotPanels = enableLegacyPlotPanel ? panels.legacyPlot : [];
+
     // debug panels are hidden by default, users can enable them within app settings
     return showDebugPanels
-      ? [...panels.builtin, ...wrappedExtensionPanels]
-      : [...panels.builtin, ...panels.debug, ...wrappedExtensionPanels];
-  }, [showDebugPanels, wrappedExtensionPanels]);
+      ? [...panels.builtin, ...legacyPlotPanels, ...wrappedExtensionPanels]
+      : [...panels.builtin, ...panels.debug, ...legacyPlotPanels, ...wrappedExtensionPanels];
+  }, [showDebugPanels, wrappedExtensionPanels, enableLegacyPlotPanel]);
 
   const panelsByType = useMemo(() => {
     const byType = new Map<string, PanelInfo>();
