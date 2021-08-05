@@ -24,6 +24,10 @@ export type RenderOptions = {
   imageSmoothing?: boolean;
   minValue?: number;
   maxValue?: number;
+
+  // resize the canvas element to fit the bitmap
+  // default is false
+  resizeCanvas?: boolean;
 };
 
 export type Dimensions = { width: number; height: number };

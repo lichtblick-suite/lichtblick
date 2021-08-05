@@ -391,24 +391,45 @@ export default function ImageCanvas(props: Props): JSX.Element {
       return;
     }
 
-    // context: https://stackoverflow.com/questions/37135417/download-canvas-as-png-in-fabric-js-giving-network-error
-    // read the canvas data as an image (png)
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        setError(
-          new Error(`Failed to create an image from ${canvas.width}x${canvas.height} canvas`),
-        );
+    const imageMessage = image.message as Image | CompressedImage | undefined;
+    if (!imageMessage) {
+      return;
+    }
+
+    // re-render the image onto a new canvas to download the original image
+    const tempCanvas = document.createElement("canvas");
+    void renderImage({
+      canvas: tempCanvas,
+      zoomMode: "other",
+      panZoom: { x: 0, y: 0, scale: 1 },
+      imageMessage,
+      imageMessageDatatype: topic.datatype,
+      rawMarkerData: { markers: [], transformMarkers: false },
+      options: { ...renderOptions, resizeCanvas: true },
+    }).then((dimensions) => {
+      if (!dimensions) {
         return;
       }
-      // name the image the same name as the topic
-      // note: the / characters in the file name will be replaced with _ by the browser
-      // remove the leading / so the image name doesn't start with _
-      const topicName = topic.name.slice(1);
-      const stamp = getTimestampForMessage(image.message) ?? { sec: 0, nsec: 0 };
-      const fileName = `${topicName}-${stamp.sec}-${stamp.nsec}`;
-      downloadFiles([{ blob, fileName }]);
+
+      // context: https://stackoverflow.com/questions/37135417/download-canvas-as-png-in-fabric-js-giving-network-error
+      // read the canvas data as an image (png)
+      tempCanvas.toBlob((blob) => {
+        if (!blob) {
+          setError(
+            new Error(`Failed to create an image from ${canvas.width}x${canvas.height} canvas`),
+          );
+          return;
+        }
+        // name the image the same name as the topic
+        // note: the / characters in the file name will be replaced with _ by the browser
+        // remove the leading / so the image name doesn't start with _
+        const topicName = topic.name.slice(1);
+        const stamp = getTimestampForMessage(image.message) ?? { sec: 0, nsec: 0 };
+        const fileName = `${topicName}-${stamp.sec}-${stamp.nsec}`;
+        downloadFiles([{ blob, fileName }]);
+      }, "image/png");
     });
-  }, [image, topic]);
+  }, [image, topic, renderOptions]);
 
   const keyDownHandlers = useMemo(() => {
     return {
@@ -434,13 +455,6 @@ export default function ImageCanvas(props: Props): JSX.Element {
       {renderError && <SErrorMessage>Error: {renderError.message}</SErrorMessage>}
       <canvas
         onContextMenu={onCanvasContextMenu}
-        /*
-        onMouseDown={onMouseDown}
-        onMouseUp={onMouseUp}
-        onMouseMove={onMouseMove}
-        onMouseOut={onMouseUp}
-        onWheel={onWheel}
-        */
         {...panZoomHandlers}
         style={style}
         ref={canvasRef}

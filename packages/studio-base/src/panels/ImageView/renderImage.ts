@@ -81,6 +81,12 @@ export async function renderImage({
 
   try {
     const bitmap = await decodeMessageToBitmap(imageMessage, imageMessageDatatype, options);
+
+    if (options?.resizeCanvas === true) {
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+    }
+
     const dimensions = render(canvas, zoomMode, panZoom, bitmap, imageSmoothing, markerData);
     bitmap.close();
     return dimensions;
