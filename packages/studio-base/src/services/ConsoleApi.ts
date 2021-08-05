@@ -47,12 +47,11 @@ export type UserID = string & { __brand: "UserID" };
 export type LayoutID = string & { __brand: "LayoutID" };
 export type ISO8601Timestamp = string & { __brand: "ISO8601Timestamp" };
 
-type Layout = {
+export type ConsoleApiLayout = {
   id: LayoutID;
   name: string;
-  creatorUserId: UserID;
-  createdAt: ISO8601Timestamp;
-  updatedAt: ISO8601Timestamp;
+  created_at: ISO8601Timestamp;
+  updated_at: ISO8601Timestamp;
   permission: "creator_write" | "org_read" | "org_write";
   data?: Record<string, unknown>;
 };
@@ -154,30 +153,36 @@ class ConsoleApi {
     }
   }
 
-  async getLayouts(options: { includeData: boolean }): Promise<readonly Layout[]> {
-    return await this.get<Layout[]>("/v1/layouts", {
+  async getLayouts(options: { includeData: boolean }): Promise<readonly ConsoleApiLayout[]> {
+    return await this.get<ConsoleApiLayout[]>("/v1/layouts", {
       include_data: options.includeData ? "true" : "false",
     });
   }
 
-  async getLayout(id: LayoutID, options: { includeData: boolean }): Promise<Layout | undefined> {
-    return await this.get<Layout>(`/v1/layouts/${id}`, {
+  async getLayout(
+    id: LayoutID,
+    options: { includeData: boolean },
+  ): Promise<ConsoleApiLayout | undefined> {
+    return await this.get<ConsoleApiLayout>(`/v1/layouts/${id}`, {
       include_data: options.includeData ? "true" : "false",
     });
   }
 
-  async createLayout(layout: Pick<Layout, "name" | "permission" | "data">): Promise<Layout> {
-    return await this.post<Layout>("/v1/layouts", layout);
+  async createLayout(
+    layout: Pick<ConsoleApiLayout, "name" | "permission" | "data">,
+  ): Promise<ConsoleApiLayout> {
+    return await this.post<ConsoleApiLayout>("/v1/layouts", layout);
   }
 
   async updateLayout(
-    layout: Pick<Layout, "id"> & Partial<Pick<Layout, "name" | "permission" | "data">>,
-  ): Promise<Layout> {
-    return await this.put<Layout>(`/v1/layouts/${layout.id}`, layout);
+    layout: Pick<ConsoleApiLayout, "id"> &
+      Partial<Pick<ConsoleApiLayout, "name" | "permission" | "data">>,
+  ): Promise<ConsoleApiLayout> {
+    return await this.put<ConsoleApiLayout>(`/v1/layouts/${layout.id}`, layout);
   }
 
   async deleteLayout(id: LayoutID): Promise<void> {
-    await this.delete<Layout>(`/v1/layouts/${id}`);
+    await this.delete<ConsoleApiLayout>(`/v1/layouts/${id}`);
   }
 }
 

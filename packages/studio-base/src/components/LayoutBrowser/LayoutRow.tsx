@@ -228,6 +228,16 @@ export default function LayoutRow({
           },
         },
       },
+      {
+        key: "debug_updated_at",
+        text: `Updated at: ${layout.updatedAt ?? "unknown"}`,
+        disabled: true,
+        itemProps: {
+          styles: {
+            root: { ...debugBorder, borderRight: "none", borderTop: "none", borderBottom: "none" },
+          },
+        },
+      },
     );
   }
   if (layoutDebug?.injectEdit) {

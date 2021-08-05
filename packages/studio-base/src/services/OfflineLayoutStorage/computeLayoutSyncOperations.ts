@@ -60,10 +60,7 @@ export default function computeLayoutSyncOperations(
       continue;
     }
 
-    const cachedUpdatedAt = Date.parse(cachedLayout.serverMetadata.updatedAt);
-    const serverUpdatedAt = Date.parse(remoteLayout.updatedAt);
-
-    if (serverUpdatedAt > cachedUpdatedAt) {
+    if (remoteLayout.updatedAt !== cachedLayout.serverMetadata.updatedAt) {
       if (cachedLayout.locallyModified === true || cachedLayout.locallyDeleted === true) {
         ops.push({
           type: "conflict",
