@@ -3,46 +3,30 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { mergeStyles, useTheme } from "@fluentui/react";
-
-import "@foxglove/studio-base/styles/reset.scss";
-import "@foxglove/studio-base/styles/assets/latin-roboto-mono.scss";
+import { PropsWithChildren } from "react";
 
 import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
 
-export default function CssBaseline(): ReactNull {
+import "@foxglove/studio-base/styles/assets/latin-roboto-mono.scss";
+
+export default function CssBaseline(props: PropsWithChildren<unknown>): JSX.Element {
   const theme = useTheme();
 
-  mergeStyles({
-    ":global(body, html, #root)": {
-      height: "100%",
-      width: "100%",
-      display: "flex",
-      flexDirection: "column",
-      position: "relative",
-      flex: "1 1 100%",
-      outline: "none",
-      overflow: "hidden",
-      background: theme.semanticColors.bodyBackground,
-      color: theme.semanticColors.bodyText,
-      font: "inherit",
-      ...theme.fonts.small,
+  // styles scoped to our container
+  const className = mergeStyles({
+    "*,*:before,*:after": {
+      boxSizing: "inherit",
     },
-    ":global(#root)": {
-      // ensure portals are able to stack on top of the main app
-      zIndex: 0,
-    },
-    ":global(::selection)": {
-      backgroundColor: theme.palette.blackTranslucent40,
-    },
-    ":global(code, pre, tt)": {
+    "code, pre, tt": {
       fontFamily: MONOSPACE,
       overflowWrap: "break-word",
     },
-    ":global(code)": {
+    code: {
+      padding: "0 0.25em",
       backgroundColor: theme.semanticColors.bodyBackgroundHovered,
       borderRadius: "0.2em",
     },
-    ":global(div)": {
+    div: {
       "::-webkit-scrollbar": {
         width: "4px",
         height: "4px",
@@ -55,22 +39,38 @@ export default function CssBaseline(): ReactNull {
         borderRadius: "2px",
       },
     },
-    ":global(a)": {
-      color: theme.semanticColors.link,
+    p: {
+      margin: "1em 0",
 
-      ":hover": {
-        color: theme.semanticColors.linkHovered,
+      ":last-child": {
+        marginBottom: 0,
       },
     },
-    ":global(hr)": {
-      border: "none",
-      display: "block",
-      height: "1px",
-      margin: "0",
-      padding: "0",
-      backgroundColor: theme.semanticColors.bodyDivider,
+    "b,strong": {
+      fontWeight: "bolder",
     },
+    table: {
+      borderCollapse: "collapse",
+      borderSpacing: 0,
+    },
+    "th, td": {
+      textAlign: "left",
+      verticalAlign: "top",
+    },
+
+    // container styling
+    height: "100%",
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+    position: "relative",
+    flex: "1 1 100%",
+    overflow: "hidden",
+    background: theme.semanticColors.bodyBackground,
+    color: theme.semanticColors.bodyText,
+    font: "inherit",
+    ...theme.fonts.small,
   });
 
-  return ReactNull;
+  return <div className={className}>{props.children}</div>;
 }

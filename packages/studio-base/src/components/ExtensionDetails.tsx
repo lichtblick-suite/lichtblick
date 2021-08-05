@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { IconButton, Pivot, PivotItem } from "@fluentui/react";
+import { IconButton, Link, Pivot, PivotItem } from "@fluentui/react";
 import { useCallback, useState } from "react";
 import { useToasts } from "react-toast-notifications";
 import { useAsync, useMountedState } from "react-use";
@@ -22,18 +22,6 @@ type Props = {
   extension: ExtensionMarketplaceDetail;
   onClose: () => void;
 };
-
-const ExtensionId = styled.a`
-  border-radius: 3px;
-  background-color: rgba(255, 255, 255, 0.2);
-  padding: 3px;
-  text-decoration: none;
-  white-space: nowrap;
-  display: inline-block;
-  text-overflow: ellipsis;
-  max-width: 100%;
-  overflow: hidden;
-`;
 
 const Publisher = styled.div`
   color: #e2dce9;
@@ -110,7 +98,7 @@ export function ExtensionDetails({ extension, onClose, installed }: Props): Reac
         <IconButton iconProps={{ iconName: "ChevronLeft" }} onClick={onClose} />,
       ]}
     >
-      <ExtensionId href={extension.homepage}>{extension.id}</ExtensionId>
+      <Link href={extension.homepage}>{extension.id}</Link>
       <Version>{`v${extension.version}`}</Version>
       <License>{extension.license}</License>
       <Publisher>{extension.publisher}</Publisher>

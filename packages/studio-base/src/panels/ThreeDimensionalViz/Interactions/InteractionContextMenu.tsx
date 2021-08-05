@@ -40,6 +40,7 @@ const SInteractionContextMenu = styled.div`
 const SMenu = styled.ul`
   margin: 0;
   padding: 0;
+  list-style: none;
 `;
 
 const STooltip = styled.div`

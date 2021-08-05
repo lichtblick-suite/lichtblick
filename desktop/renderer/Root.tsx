@@ -12,6 +12,8 @@ import {
   ThemeProvider,
   UserProfileLocalStorageProvider,
   StudioToastProvider,
+  CssBaseline,
+  GlobalCss,
 } from "@foxglove/studio-base";
 
 import { Desktop } from "../common/types";
@@ -75,16 +77,19 @@ export default function Root(): ReactElement {
 
   return (
     <ThemeProvider>
-      <ErrorBoundary>
-        <MultiProvider providers={providers}>
-          <App
-            demoBagUrl={DEMO_BAG_URL}
-            deepLinks={deepLinks}
-            onFullscreenToggle={handleToolbarDoubleClick}
-            availableSources={playerSources}
-          />
-        </MultiProvider>
-      </ErrorBoundary>
+      <GlobalCss />
+      <CssBaseline>
+        <ErrorBoundary>
+          <MultiProvider providers={providers}>
+            <App
+              demoBagUrl={DEMO_BAG_URL}
+              deepLinks={deepLinks}
+              onFullscreenToggle={handleToolbarDoubleClick}
+              availableSources={playerSources}
+            />
+          </MultiProvider>
+        </ErrorBoundary>
+      </CssBaseline>
     </ThemeProvider>
   );
 }

@@ -1,7 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import { DefaultButton, Stack, Text } from "@fluentui/react";
+import { DefaultButton, Stack, Text, Link } from "@fluentui/react";
 import CloseIcon from "@mdi/svg/svg/close.svg";
 import { useState, ReactElement } from "react";
 import styled from "styled-components";
@@ -75,7 +75,7 @@ const VersionBanner = function ({
         {isChrome ? undefined : (
           <Text styles={{ root: { color: "white", fontSize: "1.1em" } }}>
             Check out our cross-browser support progress in GitHub issue{" "}
-            <a href="https://github.com/foxglove/studio/issues/1511">#1511</a>.
+            <Link href="https://github.com/foxglove/studio/issues/1511">#1511</Link>.
           </Text>
         )}
 

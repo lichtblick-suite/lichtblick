@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack } from "@fluentui/react";
+import { Link, Stack } from "@fluentui/react";
 import ArrowLeftIcon from "@mdi/svg/svg/arrow-left.svg";
 import PlusIcon from "@mdi/svg/svg/plus.svg";
 import { Suspense } from "react";
@@ -104,7 +104,7 @@ const WelcomeScreen = ({
       <Playground />
       <TextContent>
         Welcome to Node Playground! Get started by reading the{" "}
-        <a
+        <Link
           href=""
           onClick={(e) => {
             e.preventDefault();
@@ -112,7 +112,7 @@ const WelcomeScreen = ({
           }}
         >
           docs
-        </a>
+        </Link>
         , or just create a new node.
       </TextContent>
       <Button style={{ marginTop: "8px" }} onClick={() => addNewNode()}>

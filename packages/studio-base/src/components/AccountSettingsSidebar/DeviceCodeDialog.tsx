@@ -12,6 +12,7 @@ import {
   PrimaryButton,
   useTheme,
   Spinner,
+  Link,
 } from "@fluentui/react";
 import { useEffect, useMemo } from "react";
 import { useAsync, useAsyncFn, useMountedState } from "react-use";
@@ -135,9 +136,9 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
             <StackItem>
               <Text>
                 Please ask your Org adminstrator to invite you or visit{" "}
-                <a href="https://console.foxglove.dev/signin" target="_blank" rel="noreferrer">
+                <Link href="https://console.foxglove.dev/signin" target="_blank" rel="noreferrer">
                   console.foxglove.dev/signin
-                </a>{" "}
+                </Link>{" "}
                 to sign up and create an org.
               </Text>
             </StackItem>
@@ -174,7 +175,7 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
         </StackItem>
         <StackItem className={classes.text}>
           <Text variant="large">
-            <a href={`${verificationUrl}?code=${userCode}`}>{verificationUrl}</a>
+            <Link href={`${verificationUrl}?code=${userCode}`}>{verificationUrl}</Link>
           </Text>
         </StackItem>
 
@@ -201,7 +202,7 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
   }
 
   return (
-    <Dialog hidden={false} maxWidth="33%" title={dialogTitle}>
+    <Dialog hidden={false} maxWidth="100%" title={dialogTitle}>
       {dialogContent}
       <DialogFooter>
         <PrimaryButton text="cancel" onClick={() => onClose?.()} />

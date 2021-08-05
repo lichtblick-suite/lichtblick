@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { Link } from "@fluentui/react";
 import { PropsWithChildren, useCallback, useContext } from "react";
 import Markdown, { PluggableList } from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -33,13 +34,13 @@ export default function TextContent(props: PropsWithChildren<Props>): React.Reac
   const linkRenderer = useCallback(
     (linkProps: { href?: string; children: React.ReactNode }) => {
       return (
-        <a
+        <Link
           href={linkProps.href}
           rel="noopener noreferrer"
           onClick={(event) => handleLink(event, linkProps.href ?? "")}
         >
           {linkProps.children}
-        </a>
+        </Link>
       );
     },
     [handleLink],

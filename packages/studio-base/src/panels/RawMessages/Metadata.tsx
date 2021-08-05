@@ -10,6 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import { Link } from "@fluentui/react";
 import styled from "styled-components";
 
 import { MessageEvent } from "@foxglove/studio-base/players/types";
@@ -44,13 +45,13 @@ export default function Metadata({
   return (
     <SMetadata>
       {!diffMessage && datatype && (
-        <a
+        <Link
           style={{ color: "inherit" }}
           rel="noopener noreferrer"
           href={getMessageDocumentationLink(datatype)}
         >
           {datatype}
-        </a>
+        </Link>
       )}
       {diffMessage ? " base" : ""} @ {formatTimeRaw(message.receiveTime)} ROS{" "}
       <CopyMessageButton data={data} text="Copy msg" />

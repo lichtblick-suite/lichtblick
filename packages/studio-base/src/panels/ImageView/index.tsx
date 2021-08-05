@@ -169,16 +169,16 @@ function renderEmptyState(
     <SEmptyStateWrapper>
       <EmptyState>
         Waiting for images {markerTopics.length > 0 && "and markers"} on:
-        <ul>
-          <li>
+        <div>
+          <div>
             <code>{cameraTopic}</code>
-          </li>
+          </div>
           {markerTopics.sort().map((m) => (
-            <li key={m}>
+            <div key={m}>
               <code>{m}</code>
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
         {shouldSynchronize && (
           <>
             <p>

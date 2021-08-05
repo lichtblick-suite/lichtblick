@@ -48,7 +48,6 @@ function Example({
       >
         <DropdownItem value="one" />
         <DropdownItem value="two" />
-        <hr />
         <DropdownItem value="three" />
       </Dropdown>
     </div>

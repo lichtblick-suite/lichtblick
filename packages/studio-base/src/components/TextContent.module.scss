@@ -15,8 +15,6 @@
 
 .root {
   background-color: transparent;
-  font-size: 1.1rem;
-  line-height: 1.65;
 
   h1,
   h2,
@@ -32,6 +30,10 @@
     font-size: 2em;
     margin-bottom: 0.5em;
     line-height: 1.2;
+  }
+
+  h1:first-of-type {
+    margin-top: 0;
   }
 
   h2 {
@@ -73,7 +75,6 @@
 
   td,
   th {
-    line-height: 1.65;
     padding: 0.5em;
     vertical-align: middle;
   }
