@@ -48,6 +48,11 @@ const features: Feature[] = [
     name: "Legacy Plot Panel",
     description: <>Enable the legacy plot panel.</>,
   },
+  {
+    key: AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
+    name: "Team Shared Layouts",
+    description: <>Enable team layout sharing when signed in to Studio.</>,
+  },
   ...(process.env.NODE_ENV !== "production"
     ? [
         {
@@ -59,11 +64,6 @@ const features: Feature[] = [
               functionality.
             </>
           ),
-        },
-        {
-          key: AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
-          name: "Team shared layouts",
-          description: <>Enable team layout sharing when signed in to Studio.</>,
         },
       ]
     : []),

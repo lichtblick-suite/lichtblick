@@ -16,6 +16,7 @@ import { useToasts } from "react-toast-notifications";
 import { useMount, useMountedState } from "react-use";
 
 import Log from "@foxglove/log";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import AccountSettings from "@foxglove/studio-base/components/AccountSettingsSidebar/AccountSettings";
 import ConnectionList from "@foxglove/studio-base/components/ConnectionList";
 import CssBaseline from "@foxglove/studio-base/components/CssBaseline";
@@ -50,6 +51,7 @@ import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext
 import { PanelSettingsContext } from "@foxglove/studio-base/context/PanelSettingsContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import useAddPanel from "@foxglove/studio-base/hooks/useAddPanel";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFilesToOpen";
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
 import welcomeLayout from "@foxglove/studio-base/layouts/welcomeLayout";
@@ -114,15 +116,7 @@ const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
   ["variables", { iconName: "Variable2", title: "Variables", component: Variables }],
   ["preferences", { iconName: "Settings", title: "Preferences", component: Preferences }],
   ["extensions", { iconName: "AddIn", title: "Extensions", component: ExtensionsSidebar }],
-  ...(process.env.NODE_ENV === "production"
-    ? []
-    : [
-        ["account", { iconName: "Contact", title: "Account", component: AccountSettings }] as const,
-      ]),
 ]);
-
-const SIDEBAR_BOTTOM_ITEMS: readonly SidebarItemKey[] =
-  process.env.NODE_ENV === "production" ? ["preferences"] : ["account", "preferences"];
 
 function Connection() {
   return (
@@ -409,6 +403,22 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     [selectedSidebarItem],
   );
 
+  const [enableSharedLayouts = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
+  );
+  const sidebarItems: typeof SIDEBAR_ITEMS = useMemo(() => {
+    return enableSharedLayouts
+      ? new Map([
+          ...SIDEBAR_ITEMS,
+          ["account", { iconName: "Contact", title: "Account", component: AccountSettings }],
+        ])
+      : SIDEBAR_ITEMS;
+  }, [enableSharedLayouts]);
+
+  const sidebarBottomItems: readonly SidebarItemKey[] = useMemo(() => {
+    return enableSharedLayouts ? ["account", "preferences"] : ["preferences"];
+  }, [enableSharedLayouts]);
+
   return (
     <MultiProvider
       providers={[
@@ -446,8 +456,8 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           <div style={{ flexGrow: 1 }} />
         </Toolbar>
         <Sidebar
-          items={SIDEBAR_ITEMS}
-          bottomItems={SIDEBAR_BOTTOM_ITEMS}
+          items={sidebarItems}
+          bottomItems={sidebarBottomItems}
           selectedKey={selectedSidebarItem}
           onSelectKey={setSelectedSidebarItem}
         >
