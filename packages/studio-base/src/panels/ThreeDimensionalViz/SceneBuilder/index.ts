@@ -13,6 +13,7 @@
 import _, { flatten, groupBy, isEqual, keyBy, mapValues, some, xor } from "lodash";
 import shallowequal from "shallowequal";
 
+import Log from "@foxglove/log";
 import { Time } from "@foxglove/rostime";
 import {
   InteractionData,
@@ -67,6 +68,8 @@ import sendNotification from "@foxglove/studio-base/util/sendNotification";
 import { fromSec } from "@foxglove/studio-base/util/time";
 
 import { ThreeDimensionalVizHooks } from "./types";
+
+const log = Log.getLogger(__filename);
 
 export type TopicSettingsCollection = {
   [topicOrNamespaceKey: string]: Record<string, unknown>;
@@ -823,6 +826,7 @@ export default class SceneBuilder implements MarkerProvider {
       try {
         this._consumeTopic(topic);
       } catch (error) {
+        log.error(error);
         this._setTopicError(topic, error.toString());
       }
     }
@@ -938,10 +942,14 @@ export default class SceneBuilder implements MarkerProvider {
     this.errors.topicsWithBadFrameIds.delete(topic);
     this.errors.topicsWithError.delete(topic);
     this.collectors[topic] ??= new MessageCollector();
-    (this.collectors[topic] as MessageCollector).setClock(this._clock ?? { sec: 0, nsec: 0 });
-    (this.collectors[topic] as MessageCollector).flush();
+    this.collectors[topic]?.setClock(this._clock ?? { sec: 0, nsec: 0 });
+    this.collectors[topic]?.flush();
 
-    const datatype = (this.topicsByName[topic] as Topic).datatype;
+    const datatype = this.topicsByName[topic]?.datatype;
+    if (datatype == undefined) {
+      return;
+    }
+
     // If topic has a decayTime set, markers with no lifetime will get one
     // later on, so we don't need to filter them. Note: A decayTime of zero is
     // defined as an infinite lifetime
