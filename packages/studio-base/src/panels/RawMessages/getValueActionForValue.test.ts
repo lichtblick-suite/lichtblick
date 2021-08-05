@@ -52,6 +52,30 @@ describe("getValueActionForValue", () => {
     });
   });
 
+  it("returns paths with bigints", () => {
+    const structureItem = {
+      structureType: "array",
+      next: {
+        structureType: "message",
+        nextByName: {
+          some_id: {
+            structureType: "primitive",
+            primitiveType: "uint64",
+            datatype: "",
+          },
+        },
+        datatype: "",
+      },
+      datatype: "",
+    };
+    expect(getAction([{ some_id: 18446744073709552000n }], structureItem, [0, "some_id"])).toEqual({
+      filterPath: "[:]{some_id==18446744073709552000}",
+      multiSlicePath: "[:].some_id",
+      primitiveType: "uint64",
+      singleSlicePath: "[:]{some_id==18446744073709552000}.some_id",
+    });
+  });
+
   it("returns slice paths when pointing at a number (even when it looks like an id)", () => {
     const structureItem = {
       structureType: "message",

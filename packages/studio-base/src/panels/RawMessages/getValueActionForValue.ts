@@ -98,8 +98,11 @@ export function getValueActionForValue(
         value != undefined &&
         typeof typicalFilterName === "string"
       ) {
+        const filterValue = (value as Record<string, unknown>)[typicalFilterName];
         singleSlicePath += `[:]{${typicalFilterName}==${
-          JSON.stringify((value as Record<string, unknown>)[typicalFilterName]) ?? ""
+          typeof filterValue === "bigint"
+            ? filterValue.toString()
+            : JSON.stringify(filterValue) ?? ""
         }}`;
       } else {
         singleSlicePath += `[${pathItem}]`;
