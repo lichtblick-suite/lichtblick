@@ -148,8 +148,6 @@ export type UserSelectionState = {
   selectedObject?: MouseEventObject;
 };
 
-export type EditTopicState = { tooltipPosX: number; topic: Topic };
-
 type GlobalVariableName = string;
 export type ColorOverride = {
   color?: Color;

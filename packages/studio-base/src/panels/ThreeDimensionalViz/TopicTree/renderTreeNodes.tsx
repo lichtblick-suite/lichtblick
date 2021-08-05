@@ -47,15 +47,6 @@ import { generateNodeKey } from "./useTopicTree";
 
 export const SWITCHER_WIDTH = 24;
 
-export const SToggles = styled.div`
-  display: flex;
-  align-items: center;
-`;
-export const SToggle = styled.div`
-  width: 24px;
-  height: 24px;
-`;
-
 const TooltipDescription = styled(TooltipRow)`
   line-height: 1.3;
   max-width: 300px;

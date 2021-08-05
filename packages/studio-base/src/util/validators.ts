@@ -67,35 +67,6 @@ export const isOrientation = (value: unknown): string | undefined => {
   return undefined;
 };
 
-export const isString = (value: unknown): string | undefined =>
-  typeof value !== "string" ? "must be string" : undefined;
-
-export const minLen =
-  (minLength = 0) =>
-  (value: unknown): string | undefined => {
-    if (Array.isArray(value)) {
-      return value.length < minLength
-        ? `must contain at least ${minLength} array ${minLength === 1 ? "item" : "items"}`
-        : undefined;
-    } else if (typeof value === "string") {
-      return value.length < minLength
-        ? `must contain at least ${minLength} ${minLength === 1 ? "character" : "characters"}`
-        : undefined;
-    }
-    return undefined;
-  };
-
-export const maxLen =
-  (maxLength = 0) =>
-  (value: unknown): string | undefined => {
-    if (Array.isArray(value)) {
-      return value.length > maxLength ? `must contain at most ${maxLength} array items` : undefined;
-    } else if (typeof value === "string") {
-      return value.length > maxLength ? `must contain at most ${maxLength} characters` : undefined;
-    }
-    return undefined;
-  };
-
 export const hasLen =
   (len = 0) =>
   (value: unknown): string | undefined => {

@@ -13,12 +13,10 @@
 
 import { intersection, keyBy } from "lodash";
 import memoizeWeak from "memoize-weak";
-import { createSelectorCreator, defaultMemoize, createSelector } from "reselect";
-import shallowequal from "shallowequal";
+import { createSelector } from "reselect";
 
 import { Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 export const getTopicNames = createSelector(
   (topics: readonly Topic[]) => topics,
@@ -33,13 +31,6 @@ export const getSanitizedTopics = memoizeWeak(
     );
   },
 );
-
-export function getTopicPrefixes(topics: string[]): string[] {
-  // only support one prefix now, can add more such as `/studio_bag_3` later
-  return topics.some((topic) => topic.startsWith(SECOND_SOURCE_PREFIX))
-    ? [SECOND_SOURCE_PREFIX]
-    : [];
-}
 
 export const getTopicsByTopicName = createSelector(
   (topics: readonly Topic[]) => topics,
@@ -159,6 +150,3 @@ export const enumValuesByDatatypeAndField = createSelector(
     return results;
   },
 );
-
-// @ts-expect-error createSelectorCreator does not vibe with shallowequal
-export const shallowEqualSelector = createSelectorCreator(defaultMemoize, shallowequal);

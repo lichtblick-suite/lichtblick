@@ -28,11 +28,6 @@ export type RenderOptions = {
 
 export type Dimensions = { width: number; height: number };
 
-export type MarkerOption = {
-  topic: string;
-  name: string;
-};
-
 export type RawMarkerData = {
   markers: MessageEvent<unknown>[];
   transformMarkers: boolean;

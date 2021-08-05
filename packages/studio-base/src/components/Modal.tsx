@@ -18,16 +18,7 @@ import styled from "styled-components";
 
 import Icon from "@foxglove/studio-base/components/Icon";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
-import colors from "@foxglove/studio-base/styles/colors.module.scss";
 import { colors as sharedColors } from "@foxglove/studio-base/util/sharedStyleConstants";
-
-export const Title = styled.h3`
-  padding: 18px 24px;
-  margin-right: 50px;
-  color: ${colors.textBright};
-  font-size: 22px;
-  line-height: 1.4;
-`;
 
 const Container = styled.div`
   position: absolute;

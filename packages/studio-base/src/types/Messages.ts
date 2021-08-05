@@ -27,7 +27,6 @@ export type MutablePoint = {
   z: number;
 };
 export type Point = Readonly<MutablePoint>;
-export type Vector3 = Point;
 type Points = readonly Point[];
 
 export type Header = Readonly<{
@@ -38,17 +37,6 @@ export type Header = Readonly<{
 
 export type StampedMessage = Readonly<{
   header: Header;
-}>;
-
-export type RosgraphMsgs$Log = Readonly<{
-  header: Header;
-  level: number;
-  name: string;
-  msg: string;
-  file: string;
-  function: string;
-  line: number;
-  topics: readonly string[];
 }>;
 
 export type GeometryMsgs$PolygonStamped = Readonly<{
@@ -89,12 +77,6 @@ export type MutablePose = {
   position: MutablePoint;
   orientation: MutableOrientation;
 };
-
-export type Pose2D = Readonly<{
-  x: number;
-  y: number;
-  theta: number;
-}>;
 
 export type Polygon = Readonly<{
   points: Points;
@@ -454,14 +436,6 @@ export type CameraInfo = Readonly<{
   K: readonly number[];
   P: readonly number[];
   R: readonly number[];
-}>;
-
-export type MapMetaData = Readonly<{
-  map_load_time: Time;
-  resolution: number;
-  width: number;
-  height: number;
-  origin: Pose;
 }>;
 
 export type JointState = Readonly<{

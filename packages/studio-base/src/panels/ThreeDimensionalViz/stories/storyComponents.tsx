@@ -11,19 +11,12 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { uniq } from "lodash";
-import { Worldview } from "regl-worldview";
-
 import Flex from "@foxglove/studio-base/components/Flex";
-import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
 import GlobalVariableSliderPanel from "@foxglove/studio-base/panels/GlobalVariableSlider";
 import ThreeDimensionalViz from "@foxglove/studio-base/panels/ThreeDimensionalViz";
 import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
 import { Frame, Topic } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
-import PanelSetupWithBag from "@foxglove/studio-base/stories/PanelSetupWithBag";
-import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
-import { ScreenshotSizedContainer } from "@foxglove/studio-base/stories/storyHelpers";
 import { getPanelIdForType } from "@foxglove/studio-base/util/layout";
 
 export type FixtureExampleData = {
@@ -48,14 +41,6 @@ type FixtureExampleState = {
   fixture?: Fixture;
   config: Partial<ThreeDimensionalVizConfig>;
   panelId: string;
-};
-
-export const WorldviewContainer = (props: { children: React.ReactNode }): JSX.Element => {
-  return (
-    <Worldview {...props} hideDebug={inScreenshotTests()}>
-      {props.children}
-    </Worldview>
-  );
 };
 
 export class FixtureExample extends React.Component<FixtureExampleProps, FixtureExampleState> {
@@ -138,59 +123,3 @@ export class FixtureExample extends React.Component<FixtureExampleProps, Fixture
     );
   }
 }
-
-export const ThreeDimPanelSetupWithBag = ({
-  threeDimensionalConfig,
-  globalVariables = {},
-  bag,
-}: {
-  threeDimensionalConfig: Partial<ThreeDimensionalVizConfig>;
-  globalVariables: Record<string, unknown>;
-  bag: string;
-}): JSX.Element => {
-  const topics = uniq(
-    threeDimensionalConfig.checkedKeys
-      ?.filter((key) => key.startsWith("t:"))
-      .map((topic) => topic.substring(2)),
-  );
-
-  return (
-    <ScreenshotSizedContainer>
-      <PanelSetupWithBag
-        frameHistoryCompatibility
-        bag={bag}
-        subscriptions={topics}
-        onMount={(_el, _layoutActions, selectedPanelActions) => {
-          // Wait for the panel to finish resizing
-          setTimeout(() => {
-            // Select the panel so we can control with the keyboard
-            selectedPanelActions.selectAllPanels();
-          }, 500);
-        }}
-        getMergedFixture={(bagFixture: Record<string, unknown>) => ({
-          ...bagFixture,
-          globalVariables: { ...globalVariables },
-          layout: {
-            first: "3D Panel!a",
-            second: "GlobalVariableSliderPanel!b",
-            direction: "column",
-            splitPercentage: 92.7860696517413,
-          },
-          savedProps: {
-            "3D Panel!a": threeDimensionalConfig,
-            "GlobalVariableSliderPanel!b": {
-              sliderProps: {
-                min: 0,
-                max: 12,
-                step: 0.5,
-              },
-              globalVariableName: "futureTime",
-            },
-          },
-        })}
-      >
-        <PanelLayout />
-      </PanelSetupWithBag>
-    </ScreenshotSizedContainer>
-  );
-};

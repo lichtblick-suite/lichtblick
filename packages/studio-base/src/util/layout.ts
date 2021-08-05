@@ -56,10 +56,6 @@ export function getPanelTypeFromId(id: string): string {
   return id.split("!")[0] ?? "";
 }
 
-export function getPanelIdWithNewType(id: string, newPanelType: string): string {
-  return id.replace(getPanelTypeFromId(id), newPanelType);
-}
-
 export function isTabPanel(panelId: string): boolean {
   return getPanelTypeFromId(panelId) === TAB_PANEL_TYPE;
 }

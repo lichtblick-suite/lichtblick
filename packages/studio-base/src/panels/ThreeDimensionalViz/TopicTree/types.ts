@@ -169,8 +169,3 @@ export type UseTreeOutput = {
   shouldExpandAllKeys: boolean;
   visibleTopicsCountByKey: VisibleTopicsCountByKey;
 };
-
-export type EditingTopic = {
-  name: string;
-  datatype: string;
-};

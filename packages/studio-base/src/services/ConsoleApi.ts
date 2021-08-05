@@ -43,7 +43,6 @@ type TokenResponse = {
   id_token: string;
 };
 
-export type UserID = string & { __brand: "UserID" };
 export type LayoutID = string & { __brand: "LayoutID" };
 export type ISO8601Timestamp = string & { __brand: "ISO8601Timestamp" };
 

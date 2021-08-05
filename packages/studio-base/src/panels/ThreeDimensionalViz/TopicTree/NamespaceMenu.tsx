@@ -35,7 +35,6 @@ const DISABLED_STYLE = { cursor: "not-allowed", color: colors.TEXT_MUTED };
 const ICON_SIZE = 18; // The width of the small icon.
 const COLOR_PICKER_ICON_SPACING = 4;
 const COLOR_PICKER_SIZE = 16;
-export const DOT_MENU_WIDTH = ICON_SIZE; // The width of the small icon.
 const COLOR_PICKER_AND_ICON_WIDTH = COLOR_PICKER_SIZE + ICON_SIZE + COLOR_PICKER_ICON_SPACING;
 
 const SItemContent = styled.div`

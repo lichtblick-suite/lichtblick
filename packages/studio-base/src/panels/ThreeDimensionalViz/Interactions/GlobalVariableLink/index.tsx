@@ -28,11 +28,6 @@ const SWrapper = styled.span`
   align-items: center;
 `;
 
-export const SP = styled.p`
-  line-height: 1.4;
-  margin-bottom: 12px;
-`;
-
 const SValue = styled.span`
   padding: 0;
 `;

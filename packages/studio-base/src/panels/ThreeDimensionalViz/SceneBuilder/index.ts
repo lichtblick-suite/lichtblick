@@ -17,7 +17,7 @@ import { Time } from "@foxglove/rostime";
 import {
   InteractionData,
   Interactive,
-} from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions";
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import MessageCollector from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder/MessageCollector";
 import { MarkerMatcher } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
 import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";

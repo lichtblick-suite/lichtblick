@@ -17,11 +17,6 @@ import { Time, add, compare, isLessThan } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { MarkerArray, StampedMessage } from "@foxglove/studio-base/types/Messages";
 
-type BatchTimestamp = {
-  seconds: number;
-  nanoseconds: number;
-};
-
 export type TimestampMethod = "receiveTime" | "headerStamp";
 
 export function isTime(obj?: unknown): obj is Time {
@@ -116,11 +111,6 @@ export function toNanoSec({ sec, nsec }: Time): number {
 }
 
 // WARNING! Imprecise float; see above.
-export function toMicroSec({ sec, nsec }: Time): number {
-  return (sec * 1e9 + nsec) / 1000;
-}
-
-// WARNING! Imprecise float; see above.
 export function toSec({ sec, nsec }: Time): number {
   return sec + nsec * 1e-9;
 }
@@ -197,10 +187,6 @@ export function findClosestTimestampIndex(
 
 export function formatFrame({ sec, nsec }: Time): string {
   return `${sec}.${String.prototype.padStart.call(nsec, 9, "0")}`;
-}
-
-export function transformBatchTimestamp({ seconds, nanoseconds }: BatchTimestamp): string {
-  return formatFrame({ sec: seconds, nsec: nanoseconds });
 }
 
 export function clampTime(time: Time, start: Time, end: Time): Time {

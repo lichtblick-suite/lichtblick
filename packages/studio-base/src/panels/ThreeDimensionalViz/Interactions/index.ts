@@ -15,7 +15,5 @@ import Interactions from "./Interactions";
 
 export * from "./Interactions";
 export { default as InteractionContextMenu } from "./InteractionContextMenu";
-export { default as GlobalVariableLink } from "./GlobalVariableLink";
-export * from "./types";
 
 export default Interactions;

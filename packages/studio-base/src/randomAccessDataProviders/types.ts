@@ -107,10 +107,6 @@ export interface RandomAccessDataProvider {
   close(): Promise<void>;
 }
 
-export interface MessageReader {
-  readMessage<T>(buffer: Readonly<Uint8Array>): T;
-}
-
 export interface RandomAccessDataProviderConstructor {
   new (
     // The arguments to this particular RandomAccessDataProvider; typically an object.

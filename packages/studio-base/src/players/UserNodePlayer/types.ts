@@ -121,13 +121,6 @@ export type UserNodeLog = {
   value: unknown; // TODO: This should ideally share the type def of `log()` in `lib.js`
 };
 
-export type UserNodeDiagnostics = {
-  [nodeId: string]: { diagnostics: readonly Diagnostic[] };
-};
-export type UserNodeLogs = {
-  [nodeId: string]: { logs: readonly UserNodeLog[] };
-};
-
 export type RegistrationOutput = {
   error?: string;
   userNodeLogs: UserNodeLog[];

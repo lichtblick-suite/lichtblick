@@ -13,26 +13,12 @@
 
 import tick from "@foxglove/studio-base/util/tick";
 
-export function findCanvas(): HTMLCanvasElement {
+function findCanvas(): HTMLCanvasElement {
   const canvas = document.querySelector("canvas");
   if (!canvas) {
     throw new Error("Could not find canvas element");
   }
   return canvas;
-}
-
-export async function simulateMouseMove(
-  point: number[] = [0, 0],
-  canvas: HTMLCanvasElement | undefined = findCanvas(),
-): Promise<void> {
-  const [clientX, clientY] = point;
-  canvas.dispatchEvent(
-    new MouseEvent("mousemove", {
-      bubbles: true,
-      clientX,
-      clientY,
-    }),
-  );
 }
 
 export async function simulateDragClick(

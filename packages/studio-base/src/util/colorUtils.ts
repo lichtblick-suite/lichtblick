@@ -39,18 +39,6 @@ export const hexToColorObj = (hex: string, alpha?: number): Color => {
   return { r, g, b, a: alpha ?? 1 };
 };
 
-export const interpolate = (a: number, b: number, t: number): number => (b - a) * t + a;
-export const interpolateColor = (colorA: ReglColor, colorB: ReglColor, t: number): ReglColor => {
-  const [rA, gA, bA, aA] = colorA;
-  const [rB, gB, bB, aB] = colorB;
-  return [
-    interpolate(rA, rB, t),
-    interpolate(gA, gB, t),
-    interpolate(bA, bB, t),
-    interpolate(aA, aB, t),
-  ];
-};
-
 // Converts a string like "rgb(r,g,b)" to a regl number array [r,g,b,a]
 // Any component that fails to convert is replaced with a 1
 export const rgbStrToReglRGB = (numberStr: string, alpha?: number): ReglColor => {

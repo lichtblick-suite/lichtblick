@@ -69,9 +69,6 @@ export type DiagnosticStatusArrayMsg = {
 };
 
 export type DiagnosticsById = Map<DiagnosticId, DiagnosticInfo>;
-export type DiagnosticsByLevel = {
-  [key: string]: DiagnosticsById;
-};
 
 // Remove leading slash from hardware_id if present.
 export function trimHardwareId(hardwareId: string): string {

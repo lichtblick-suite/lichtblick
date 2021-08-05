@@ -63,32 +63,6 @@ export type CreateTabPanelPayload = {
   singleTab: boolean;
 };
 
-export type UpdatePanelConfig<Config> = (
-  panelType: string,
-  perPanelFunc: PerPanelFunc<Config>,
-) => void;
-
-export enum PANELS_ACTION_TYPES {
-  CHANGE_PANEL_LAYOUT = "CHANGE_PANEL_LAYOUT",
-  IMPORT_PANEL_LAYOUT = "IMPORT_PANEL_LAYOUT",
-  SAVE_PANEL_CONFIGS = "SAVE_PANEL_CONFIGS",
-  SAVE_FULL_PANEL_CONFIG = "SAVE_FULL_PANEL_CONFIG",
-  CREATE_TAB_PANEL = "CREATE_TAB_PANEL",
-  OVERWRITE_GLOBAL_DATA = "OVERWRITE_GLOBAL_DATA",
-  SET_GLOBAL_DATA = "SET_GLOBAL_DATA",
-  SET_USER_NODES = "SET_USER_NODES",
-  SET_LINKED_GLOBAL_VARIABLES = "SET_LINKED_GLOBAL_VARIABLES",
-  SET_PLAYBACK_CONFIG = "SET_PLAYBACK_CONFIG",
-  CLOSE_PANEL = "CLOSE_PANEL",
-  SPLIT_PANEL = "SPLIT_PANEL",
-  SWAP_PANEL = "SWAP_PANEL",
-  MOVE_TAB = "MOVE_TAB",
-  ADD_PANEL = "ADD_PANEL",
-  DROP_PANEL = "DROP_PANEL",
-  START_DRAG = "START_DRAG",
-  END_DRAG = "END_DRAG",
-}
-
 export type SAVE_PANEL_CONFIGS = { type: "SAVE_PANEL_CONFIGS"; payload: SaveConfigsPayload };
 export type SAVE_FULL_PANEL_CONFIG = {
   type: "SAVE_FULL_PANEL_CONFIG";
@@ -192,10 +166,6 @@ export type EndDragPayload = {
   ownPath: MosaicPath;
 };
 export type END_DRAG = { type: "END_DRAG"; payload: EndDragPayload };
-export const endDrag = (payload: EndDragPayload): END_DRAG => ({
-  type: PANELS_ACTION_TYPES.END_DRAG,
-  payload,
-});
 
 export type PanelsActions =
   | CHANGE_PANEL_LAYOUT
@@ -215,5 +185,3 @@ export type PanelsActions =
   | DROP_PANEL
   | START_DRAG
   | END_DRAG;
-
-export const panelEditingActions = new Set<string>(Object.values(PANELS_ACTION_TYPES));
