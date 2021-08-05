@@ -2417,7 +2417,7 @@ __metadata:
     regl-worldview: "github:foxglove/webviz#workspace=regl-worldview&commit=b570564684c6382b2c1aef08ccd634f4e67ec989"
     rehype-raw: 5.1.0
     reselect: 4.0.0
-    roslib: "github:foxglove/roslibjs#1c29f898683cc07945d400ec97916520920041a2"
+    roslib: "github:foxglove/roslibjs#df3d7f87064c93b705e6e7e3354b2c6f63b682a6"
     sanitize-html: 2.4.0
     sass: 1.35.2
     sass-loader: 12.1.0
@@ -22017,9 +22017,9 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
-"roslib@github:foxglove/roslibjs#1c29f898683cc07945d400ec97916520920041a2":
+"roslib@github:foxglove/roslibjs#df3d7f87064c93b705e6e7e3354b2c6f63b682a6":
   version: 1.1.1
-  resolution: "roslib@https://github.com/foxglove/roslibjs.git#commit=1c29f898683cc07945d400ec97916520920041a2"
+  resolution: "roslib@https://github.com/foxglove/roslibjs.git#commit=df3d7f87064c93b705e6e7e3354b2c6f63b682a6"
   dependencies:
     cbor-js: ^0.1.0
     eventemitter2: ^6.4.0
@@ -22028,7 +22028,7 @@ resolve@^2.0.0-next.3:
     webworkify: ^1.5.0
     ws: ^7.2.1
     xmldom: ^0.6.0
-  checksum: 5f013c4d728cc5dc9cf04f8876c8a01b8aa9948c9df190e0ff93dde2503b339e0475c0a59005bb605fb65723b815d14d13843778849d1482b30d55a647c7b855
+  checksum: 2efef6e6ecaed7b92ced4e9b92ec09fd7ee056482fb30f9f533b94607b48a184e207c19f2e8de94c333026a24da43882d1aa88b748c5ceb560126155b7b21fed
   languageName: node
   linkType: hard
 
