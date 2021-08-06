@@ -2210,15 +2210,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosbag@github:foxglove/rosbag#18255370d91811d7d2152f630ed3ef2f9ceb1455":
-  version: 3.0.0
-  resolution: "@foxglove/rosbag@https://github.com/foxglove/rosbag.git#commit=18255370d91811d7d2152f630ed3ef2f9ceb1455"
+"@foxglove/rosbag@github:foxglove/rosbag#488cebb9ecf0ff406639b5f16651d75cb61c51c7":
+  version: 0.0.0
+  resolution: "@foxglove/rosbag@https://github.com/foxglove/rosbag.git#commit=488cebb9ecf0ff406639b5f16651d75cb61c51c7"
   dependencies:
-    buffer: 6.0.3
+    "@foxglove/rosmsg": ^1.0.1
+    "@foxglove/rosmsg-serialization": ^1.0.2
+    "@foxglove/rostime": ^1.1.0
     heap: 0.2.6
-    int53: 1.0.0
-    web-encoding: 1.1.5
-  checksum: 9053bc41fceea8aebe2f40b32dd4193259ccbd65d93838b8b3e5a5ceda161bb942237bf26caa293c0a3e2548f8c70a1c0b094c0dbd6bc1960f62a273089906f2
+  checksum: c24cd1e143cd826d08025cfdfa5e787315ea1c71d55f1d7fef4fd9315fb27b01b8f37af9cfcfccdf8bf38842b69413bd9406284fa473c1079878973617037556
   languageName: node
   linkType: hard
 
@@ -2240,12 +2240,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg-serialization@npm:1.0.2, @foxglove/rosmsg-serialization@npm:^1.0.0":
-  version: 1.0.2
-  resolution: "@foxglove/rosmsg-serialization@npm:1.0.2"
+"@foxglove/rosmsg-serialization@npm:1.0.3, @foxglove/rosmsg-serialization@npm:^1.0.0, @foxglove/rosmsg-serialization@npm:^1.0.2":
+  version: 1.0.3
+  resolution: "@foxglove/rosmsg-serialization@npm:1.0.3"
   dependencies:
     "@foxglove/rosmsg": ^1.0.1
-  checksum: 85a19755d85df9a1993bea2068720ccebdc7b0f775d4800cf97d382fb44b47344c4215e8c6b520cbb604e29c9acdd1eb384dc5b2ec90f06b3bfd3eb8f4f22922
+  checksum: 9fe4686116b383a3fd12357db64a65a10792ad6e6ef54b02ae95ce870c760bfcc3de1f0c7b8df8d910f44e11ff7c3a12cdf011bf9b0c0cafe67c05c8f33ba04c
   languageName: node
   linkType: hard
 
@@ -2285,11 +2285,11 @@ __metadata:
     "@foxglove/electron-socket": 1.1.0
     "@foxglove/hooks": "workspace:*"
     "@foxglove/ros1": 1.0.1
-    "@foxglove/rosbag": "github:foxglove/rosbag#18255370d91811d7d2152f630ed3ef2f9ceb1455"
+    "@foxglove/rosbag": "github:foxglove/rosbag#488cebb9ecf0ff406639b5f16651d75cb61c51c7"
     "@foxglove/rosbag2-web": 1.0.0
     "@foxglove/rosmsg-msgs-common": 1.0.1
     "@foxglove/rosmsg-msgs-foxglove": 2.0.1
-    "@foxglove/rosmsg-serialization": 1.0.2
+    "@foxglove/rosmsg-serialization": 1.0.3
     "@foxglove/rostime": 1.1.0
     "@foxglove/studio": "workspace:*"
     "@foxglove/velodyne-cloud": 1.0.0
@@ -6479,13 +6479,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zxing/text-encoding@npm:0.9.0":
-  version: 0.9.0
-  resolution: "@zxing/text-encoding@npm:0.9.0"
-  checksum: c23b12aee7639382e4949961304a1294776afaffa40f579e09ffecd0e5e68cf26ef3edd75009de46da8a536e571448755ca68b3e2ea707d53793c0edb2e2c34a
-  languageName: node
-  linkType: hard
-
 "abab@npm:^2.0.3, abab@npm:^2.0.5":
   version: 2.0.5
   resolution: "abab@npm:2.0.5"
@@ -7281,13 +7274,6 @@ __metadata:
   bin:
     autoprefixer: bin/autoprefixer
   checksum: 46987bc3de6612f0276c3643061901e33cc5721d07aaeb6f0daf237554448884a59c0b17087bf0f00a07d940abcb5a6eaf2203b962c24fe33d52f76aa845cb70
-  languageName: node
-  linkType: hard
-
-"available-typed-arrays@npm:^1.0.2":
-  version: 1.0.4
-  resolution: "available-typed-arrays@npm:1.0.4"
-  checksum: 28135bb29f2f8b4784a017ba0f652da9a1ffc88529ffc74f40e8fdc8f292375dbb6a8b0eb993ef9f1d0a5cb1bd8592c40eac715df79296630e9f83b7b3f4ae7f
   languageName: node
   linkType: hard
 
@@ -8112,16 +8098,6 @@ __metadata:
   version: 1.0.3
   resolution: "buffer-xor@npm:1.0.3"
   checksum: 10c520df29d62fa6e785e2800e586a20fc4f6dfad84bcdbd12e1e8a83856de1cb75c7ebd7abe6d036bbfab738a6cf18a3ae9c8e5a2e2eb3167ca7399ce65373a
-  languageName: node
-  linkType: hard
-
-"buffer@npm:6.0.3":
-  version: 6.0.3
-  resolution: "buffer@npm:6.0.3"
-  dependencies:
-    base64-js: ^1.3.1
-    ieee754: ^1.2.1
-  checksum: 5ad23293d9a731e4318e420025800b42bf0d264004c0286c8cc010af7a270c7a0f6522e84f54b9ad65cbd6db20b8badbfd8d2ebf4f80fa03dab093b89e68c3f9
   languageName: node
   linkType: hard
 
@@ -12641,13 +12617,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"foreach@npm:^2.0.5":
-  version: 2.0.5
-  resolution: "foreach@npm:2.0.5"
-  checksum: dab4fbfef0b40b69ee5eab81bcb9626b8fa8b3469c8cfa26480f3e5e1ee08c40eae07048c9a967c65aeda26e774511ccc70b3f10a604c01753c6ef24361f0fc8
-  languageName: node
-  linkType: hard
-
 "forever-agent@npm:~0.6.1":
   version: 0.6.1
   resolution: "forever-agent@npm:0.6.1"
@@ -14257,7 +14226,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ieee754@npm:^1.1.13, ieee754@npm:^1.1.4, ieee754@npm:^1.2.1":
+"ieee754@npm:^1.1.13, ieee754@npm:^1.1.4":
   version: 1.2.1
   resolution: "ieee754@npm:1.2.1"
   checksum: 5144c0c9815e54ada181d80a0b810221a253562422e7c6c3a60b1901154184f49326ec239d618c416c1c5945a2e197107aee8d986a3dd836b53dffefd99b5e7e
@@ -14514,13 +14483,6 @@ __metadata:
     strip-ansi: ^6.0.0
     through: ^2.3.6
   checksum: 4d387fc1eb6126acbd58cbdb9ad99d2887d181df86ab0c2b9abdf734e751093e2d5882c2b6dc7144d9ab16b7ab30a78a1d7f01fb6a2850a44aeb175d1e3f8778
-  languageName: node
-  linkType: hard
-
-"int53@npm:1.0.0":
-  version: 1.0.0
-  resolution: "int53@npm:1.0.0"
-  checksum: f85d00bd65b9c3f0e771f2a584149954957c98ad12dd177c8c1fab3a3172613c08d84491667f6ebedfda59b158418ceba8f684b076bb7faa9778f4bb983e3f8a
   languageName: node
   linkType: hard
 
@@ -14912,13 +14874,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-generator-function@npm:^1.0.7":
-  version: 1.0.9
-  resolution: "is-generator-function@npm:1.0.9"
-  checksum: 78e68709a0f145d2fd442c615db0ae40f542d49a3453f51bffb56409091bd0fa115767e1b61470dcdde45d085974517278c889632800b81a337226b87c397a1e
-  languageName: node
-  linkType: hard
-
 "is-glob@npm:^2.0.0, is-glob@npm:^2.0.1":
   version: 2.0.1
   resolution: "is-glob@npm:2.0.1"
@@ -15215,19 +15170,6 @@ __metadata:
   dependencies:
     has-symbols: ^1.0.1
   checksum: c6d54bd01218fa202da8ce91525ca41a907819be5f000df9ab9621467e087eb36f34b2dbfa51a2a699a282e860681ffa6a787d69e944ba99a46d3df553ff2798
-  languageName: node
-  linkType: hard
-
-"is-typed-array@npm:^1.1.3":
-  version: 1.1.5
-  resolution: "is-typed-array@npm:1.1.5"
-  dependencies:
-    available-typed-arrays: ^1.0.2
-    call-bind: ^1.0.2
-    es-abstract: ^1.18.0-next.2
-    foreach: ^2.0.5
-    has-symbols: ^1.0.1
-  checksum: ba435c83dc1dc0f205c0169f7e93a082816c6b261631a55e473f6f4e18fdf76c1997b326e2e63ae6139e0f75fb47d76252fc76ce75e6b2a74aa41c39743774cb
   languageName: node
   linkType: hard
 
@@ -25145,20 +25087,6 @@ typescript@4.3.5:
   languageName: node
   linkType: hard
 
-"util@npm:^0.12.3":
-  version: 0.12.4
-  resolution: "util@npm:0.12.4"
-  dependencies:
-    inherits: ^2.0.3
-    is-arguments: ^1.0.4
-    is-generator-function: ^1.0.7
-    is-typed-array: ^1.1.3
-    safe-buffer: ^5.1.2
-    which-typed-array: ^1.1.2
-  checksum: 8eac7a6e6b341c0f1b3eb73bbe5dfcae31a7e9699c8fc3266789f3e95f7637946a7700dcf1904dbd3749a58a36760ebf7acf4bb5b717f7468532a8a79f44eff0
-  languageName: node
-  linkType: hard
-
 "utila@npm:~0.4":
   version: 0.4.0
   resolution: "utila@npm:0.4.0"
@@ -25389,19 +25317,6 @@ typescript@4.3.5:
   dependencies:
     defaults: ^1.0.3
   checksum: 814e9d1ddcc9798f7377ffa448a5a3892232b9275ebb30a41b529607691c0491de47cba426e917a4d08ded3ee7e9ba2f3fe32e62ee3cd9c7d3bafb7754bd553c
-  languageName: node
-  linkType: hard
-
-"web-encoding@npm:1.1.5":
-  version: 1.1.5
-  resolution: "web-encoding@npm:1.1.5"
-  dependencies:
-    "@zxing/text-encoding": 0.9.0
-    util: ^0.12.3
-  dependenciesMeta:
-    "@zxing/text-encoding":
-      optional: true
-  checksum: 2234a2b122f41006ce07859b3c0bf2e18f46144fda2907d5db0b571b76aa5c26977c646100ad9c00d2f8a4f6f2b848bc02147845d8c447ab365ec4eff376338d
   languageName: node
   linkType: hard
 
@@ -25796,21 +25711,6 @@ typescript@4.3.5:
   version: 2.0.0
   resolution: "which-module@npm:2.0.0"
   checksum: 809f7fd3dfcb2cdbe0180b60d68100c88785084f8f9492b0998c051d7a8efe56784492609d3f09ac161635b78ea29219eb1418a98c15ce87d085bce905705c9c
-  languageName: node
-  linkType: hard
-
-"which-typed-array@npm:^1.1.2":
-  version: 1.1.4
-  resolution: "which-typed-array@npm:1.1.4"
-  dependencies:
-    available-typed-arrays: ^1.0.2
-    call-bind: ^1.0.0
-    es-abstract: ^1.18.0-next.1
-    foreach: ^2.0.5
-    function-bind: ^1.1.1
-    has-symbols: ^1.0.1
-    is-typed-array: ^1.1.3
-  checksum: 369597a623b0e446eb7b6ce9e2f515c2f6a0b3f5040b9c592d9ed07fb3357a90ab45311230f7e687cf0f0d410b47e98fba620dbb7eece9f556309a3448b4fa3e
   languageName: node
   linkType: hard
 

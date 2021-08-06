@@ -2,12 +2,14 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useEffect } from "react";
 import styled from "styled-components";
 
 import Logger from "@foxglove/log";
 import { Time, toDate } from "@foxglove/rostime";
 
 import bagIcon from "../../resources/icon/BagIcon.png";
+import ErrorInfo from "./ErrorInfo";
 import formatByteSize from "./formatByteSize";
 import { BagInfo, TopicInfo } from "./getBagInfo";
 
@@ -102,13 +104,6 @@ const Datatype = styled.div`
   opacity: 0.5;
 `;
 
-const ErrorInfo = styled.div`
-  padding: 12px;
-  background: #ffeaea;
-  border: 1px dashed #cc5f5f;
-  border-radius: 4px;
-`;
-
 function TopicRow({ info: { topic, datatype, numMessages, numConnections } }: { info: TopicInfo }) {
   return (
     <TopicRowWrapper>
@@ -133,6 +128,7 @@ export default function BagInfoDisplay({
   bagInfo?: BagInfo;
   error?: Error;
 }): JSX.Element {
+  useEffect(() => error && console.error(error), [error]);
   return (
     <div style={{ width: "100%" }}>
       <div

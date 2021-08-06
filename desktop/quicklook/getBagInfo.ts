@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import Bag from "@foxglove/rosbag";
+import { Bag, BagReader } from "@foxglove/rosbag";
+import { BlobReader } from "@foxglove/rosbag/web";
 import { Time } from "@foxglove/rostime";
 
 export type TopicInfo = {
@@ -21,7 +22,8 @@ export type BagInfo = {
 };
 
 export default async function getBagInfo(file: File): Promise<BagInfo> {
-  const bag = await Bag.open(file);
+  const bag = new Bag(new BagReader(new BlobReader(file)));
+  await bag.open();
   const numMessagesByConnectionIndex = Array.from(bag.connections.values(), () => 0);
   let totalMessages = 0;
   for (const chunk of bag.chunkInfos) {

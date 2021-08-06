@@ -1,3 +1,4 @@
+/** @jest-environment jsdom */
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -12,6 +13,7 @@
 //   You may not use this file except in compliance with the License.
 
 import assert from "assert";
+import fs from "fs";
 
 import { compare } from "@foxglove/rostime";
 import BagDataProvider, {
@@ -32,7 +34,12 @@ const dummyExtensionPoint = {
 describe("BagDataProvider", () => {
   it("initializes", async () => {
     const provider = new BagDataProvider(
-      { bagPath: { type: "file", file: `${__dirname}/../test/fixtures/example.bag` } },
+      {
+        bagPath: {
+          type: "file",
+          file: new Blob([fs.readFileSync(`${__dirname}/../test/fixtures/example.bag`)]),
+        },
+      },
       [],
     );
     const result = await provider.initialize(dummyExtensionPoint);
@@ -68,7 +75,12 @@ describe("BagDataProvider", () => {
 
   it("initializes with bz2 bag", async () => {
     const provider = new BagDataProvider(
-      { bagPath: { type: "file", file: `${__dirname}/../test/fixtures/example-bz2.bag` } },
+      {
+        bagPath: {
+          type: "file",
+          file: new Blob([fs.readFileSync(`${__dirname}/../test/fixtures/example-bz2.bag`)]),
+        },
+      },
       [],
     );
     const result = await provider.initialize(dummyExtensionPoint);
@@ -104,7 +116,12 @@ describe("BagDataProvider", () => {
 
   it("gets messages", async () => {
     const provider = new BagDataProvider(
-      { bagPath: { type: "file", file: `${__dirname}/../test/fixtures/example.bag` } },
+      {
+        bagPath: {
+          type: "file",
+          file: new Blob([fs.readFileSync(`${__dirname}/../test/fixtures/example.bag`)]),
+        },
+      },
       [],
     );
     await provider.initialize(dummyExtensionPoint);
@@ -128,7 +145,12 @@ describe("BagDataProvider", () => {
 
   it("sorts shuffled messages (and reports an error)", async () => {
     const provider = new BagDataProvider(
-      { bagPath: { type: "file", file: `${__dirname}/../test/fixtures/demo-shuffled.bag` } },
+      {
+        bagPath: {
+          type: "file",
+          file: new Blob([fs.readFileSync(`${__dirname}/../test/fixtures/demo-shuffled.bag`)]),
+        },
+      },
       [],
     );
     await provider.initialize(dummyExtensionPoint);

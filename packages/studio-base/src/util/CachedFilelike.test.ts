@@ -70,7 +70,7 @@ describe("CachedFilelike", () => {
   });
 
   describe("#read", () => {
-    it("returns data from the underlying FileReader", (done) => {
+    it("returns data from the underlying FileReader", async () => {
       const fileReader = new InMemoryFileReader(buffer.Buffer.from([0, 1, 2, 3]));
       const cachedFileReader = new CachedFilelike({
         fileReader,
@@ -78,16 +78,10 @@ describe("CachedFilelike", () => {
           // no-op
         },
       });
-      cachedFileReader.read(1, 2, (_error: unknown, data: any) => {
-        if (!data) {
-          throw new Error("Missing `data`");
-        }
-        expect([...data]).toEqual([1, 2]);
-        done();
-      });
+      await expect(cachedFileReader.read(1, 2)).resolves.toEqual(buffer.Buffer.from([1, 2]));
     });
 
-    it("returns an error in the callback if the FileReader keeps returning errors", (done) => {
+    it("returns an error in the callback if the FileReader keeps returning errors", async () => {
       const fileReader = new InMemoryFileReader(buffer.Buffer.from([0, 1, 2, 3]));
       let interval: any;
       let destroyed: any;
@@ -110,35 +104,26 @@ describe("CachedFilelike", () => {
           // no-op
         },
       });
-      cachedFileReader.read(1, 2, (error: any, _data: any) => {
-        expect(error).not.toEqual(undefined);
-        expect(destroyed).toEqual(true);
-        done();
-      });
+      await expect(cachedFileReader.read(1, 2)).rejects.toThrow("Dummy error");
+      expect(destroyed).toEqual(true);
     });
 
     it("keeps reconnecting when keepReconnectingCallback is set", async () => {
       const fileReader = new InMemoryFileReader(buffer.Buffer.from([0, 1, 2, 3]));
-      let interval: any;
-      let dataCallback: any;
+      let dataCallback: ((_: Buffer) => void) | undefined;
+      let errorCallback: ((_: Error) => void) | undefined;
       let destroyed: any;
-      let stopSendingErrors = false;
-      jest.spyOn(fileReader, "fetch").mockImplementation(() => {
+      const mockFetch = jest.spyOn(fileReader, "fetch").mockImplementation(() => {
         return {
           on: (type: "data" | "error", callback: ((_: Buffer) => void) & ((_: Error) => void)) => {
             if (type === "data") {
-              dataCallback = callback;
+              dataCallback = callback as (_: Buffer) => void;
             }
             if (type === "error") {
-              interval = setInterval(() => {
-                if (!stopSendingErrors) {
-                  return callback(new Error("Dummy error"));
-                }
-              }, 2);
+              errorCallback = callback as (_: Error) => void;
             }
           },
           destroy() {
-            clearInterval(interval);
             destroyed = true;
           },
         };
@@ -153,24 +138,17 @@ describe("CachedFilelike", () => {
         keepReconnectingCallback,
       });
 
-      const readerPromise = new Promise<Buffer>((resolve, reject) => {
-        // eslint-disable-next-line no-restricted-syntax
-        cachedFileReader.read(1, 2, (error: any, data?: Buffer | null) => {
-          if (data) {
-            resolve(data);
-          } else {
-            reject(error);
-          }
-        });
-      });
+      const readerPromise = cachedFileReader.read(1, 2);
 
+      await delay(10);
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+      if (!dataCallback || !errorCallback) {
+        throw new Error("dataCallback not set");
+      }
+      errorCallback(new Error("Dummy error"));
       await delay(10);
       expect(keepReconnectingCallback.mock.calls).toEqual([[true]]);
 
-      stopSendingErrors = true;
-      if (!dataCallback) {
-        throw new Error("dataCallback not set");
-      }
       dataCallback(buffer.Buffer.from([1, 2]));
       const data = await readerPromise;
       expect(keepReconnectingCallback.mock.calls).toEqual([[true], [false]]);
@@ -178,7 +156,7 @@ describe("CachedFilelike", () => {
       expect(destroyed).toBe(true);
     });
 
-    it("returns an empty buffer when requesting size 0 (does not throw an error)", (done) => {
+    it("returns an empty buffer when requesting size 0 (does not throw an error)", async () => {
       const fileReader = new InMemoryFileReader(buffer.Buffer.from([0, 1, 2, 3]));
       const cachedFileReader = new CachedFilelike({
         fileReader,
@@ -186,14 +164,7 @@ describe("CachedFilelike", () => {
           // no-op
         },
       });
-      // eslint-disable-next-line no-restricted-syntax
-      cachedFileReader.read(1, 0, (_error: unknown, data?: Buffer | null) => {
-        if (!data) {
-          throw new Error("Missing `data`");
-        }
-        expect([...data]).toEqual([]);
-        done();
-      });
+      await expect(cachedFileReader.read(1, 0)).resolves.toEqual(new Uint8Array([]));
     });
   });
 });

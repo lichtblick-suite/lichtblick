@@ -26,14 +26,17 @@
 //   You may not use this file except in compliance with the License.
 
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
-import BagDataProvider from "@foxglove/studio-base/randomAccessDataProviders/BagDataProvider";
 import CombinedDataProvider, {
   mergedBlocks,
 } from "@foxglove/studio-base/randomAccessDataProviders/CombinedDataProvider";
 import MemoryDataProvider from "@foxglove/studio-base/randomAccessDataProviders/MemoryDataProvider";
 import RenameDataProvider from "@foxglove/studio-base/randomAccessDataProviders/RenameDataProvider";
 import { mockExtensionPoint } from "@foxglove/studio-base/randomAccessDataProviders/mockExtensionPoint";
-import { InitializationResult } from "@foxglove/studio-base/randomAccessDataProviders/types";
+import {
+  GetMessagesResult,
+  InitializationResult,
+  RandomAccessDataProvider,
+} from "@foxglove/studio-base/randomAccessDataProviders/types";
 import delay from "@foxglove/studio-base/util/delay";
 import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
@@ -120,8 +123,16 @@ function provider4() {
   });
 }
 
-function brokenProvider() {
-  return new BagDataProvider({ bagPath: { type: "file", file: "not a real file" } }, []);
+class BrokenProvider implements RandomAccessDataProvider {
+  async initialize(): Promise<InitializationResult> {
+    throw new Error("Dummy error in initialize()");
+  }
+  async getMessages(): Promise<GetMessagesResult> {
+    throw new Error("Dummy error in getMessages()");
+  }
+  async close(): Promise<void> {
+    throw new Error("Dummy error in close()");
+  }
 }
 
 function getCombinedDataProvider(data: any[]) {
@@ -321,7 +332,7 @@ describe("CombinedDataProvider", () => {
         providesParsedMessages: true,
       });
 
-      const p2 = brokenProvider();
+      const p2 = new BrokenProvider();
       const combinedProvider = getCombinedDataProvider([{ provider: p1 }, { provider: p2 }]);
       const initResult = await combinedProvider.initialize(mockExtensionPoint().extensionPoint);
       expect(initResult).toEqual(

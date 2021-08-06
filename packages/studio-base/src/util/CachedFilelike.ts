@@ -13,7 +13,7 @@
 import { round } from "lodash";
 
 import Logger from "@foxglove/log";
-import { Callback, Filelike } from "@foxglove/rosbag";
+import { Filelike } from "@foxglove/rosbag";
 
 import VirtualLRUBuffer from "./VirtualLRUBuffer";
 import { getNewConnection } from "./getNewConnection";
@@ -80,7 +80,12 @@ export default class CachedFilelike implements Filelike {
   _currentConnection: { stream: FileStream; remainingRange: Range } | undefined;
 
   // A list of read requests and associated ranges for all read requests, in order.
-  _readRequests: { range: Range; callback: Callback<Buffer>; requestTime: number }[] = [];
+  _readRequests: {
+    range: Range;
+    resolve: (_: Uint8Array) => void;
+    reject: (_: Error) => void;
+    requestTime: number;
+  }[] = [];
 
   // The range.end of the last read request that we resolved. Useful for reading ahead a bit.
   _lastResolvedCallbackEnd?: number;
@@ -132,11 +137,11 @@ export default class CachedFilelike implements Filelike {
     return this._fileSize;
   }
 
-  // Read a certain byte range, and get back a `Buffer` in `callback`.
-  read(offset: number, length: number, callback: Callback<Buffer>): void {
+  // Potentially performance-sensitive; await can be expensive
+  // eslint-disable-next-line @typescript-eslint/promise-function-async
+  read(offset: number, length: number): Promise<Uint8Array> {
     if (length === 0) {
-      callback(undefined, Buffer.allocUnsafe(0));
-      return;
+      return Promise.resolve(new Uint8Array());
     }
 
     const range = { start: offset, end: offset + length };
@@ -149,20 +154,23 @@ export default class CachedFilelike implements Filelike {
       throw new Error(`Requested more data than cache size: ${length} > ${this._cacheSizeInBytes}`);
     }
 
-    this.open()
-      .then(() => {
-        const size = this.size();
-        if (range.end > size) {
-          callback(new Error(`CachedFilelike#read past size`));
-          return;
-        }
+    // Potentially performance-sensitive; await can be expensive
+    return new Promise((resolve, reject) => {
+      this.open()
+        .then(() => {
+          const size = this.size();
+          if (range.end > size) {
+            reject(new Error(`CachedFilelike#read past size`));
+            return;
+          }
 
-        this._readRequests.push({ range, callback, requestTime: Date.now() });
-        this._updateState();
-      })
-      .catch((err) => {
-        callback(err);
-      });
+          this._readRequests.push({ range, resolve, reject, requestTime: Date.now() });
+          this._updateState();
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
   }
 
   // Gets called any time our connection or read requests change.
@@ -172,7 +180,7 @@ export default class CachedFilelike implements Filelike {
     }
 
     // First, see if there are any read requests that we can resolve now.
-    this._readRequests = this._readRequests.filter(({ range, callback, requestTime }) => {
+    this._readRequests = this._readRequests.filter(({ range, resolve, requestTime }) => {
       if (!this._virtualBuffer.hasData(range.start, range.end)) {
         return true;
       }
@@ -193,7 +201,7 @@ export default class CachedFilelike implements Filelike {
           delay = 1000;
         }
       }
-      setTimeout(() => callback(undefined, buffer), delay);
+      setTimeout(() => resolve(buffer), delay);
 
       return false;
     });
@@ -259,7 +267,7 @@ export default class CachedFilelike implements Filelike {
 
           this._closed = true;
           for (const request of this._readRequests) {
-            request.callback(error);
+            request.reject(error);
           }
           return;
         }
