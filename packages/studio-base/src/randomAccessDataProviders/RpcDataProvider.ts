@@ -68,7 +68,7 @@ export default class RpcDataProvider implements RandomAccessDataProvider {
         return undefined;
       },
     );
-    return this._rpc.send("initialize", { childDescriptor: this._childDescriptor });
+    return await this._rpc.send("initialize", { childDescriptor: this._childDescriptor });
   }
 
   async getMessages(start: Time, end: Time, topics: GetMessagesTopics): Promise<GetMessagesResult> {

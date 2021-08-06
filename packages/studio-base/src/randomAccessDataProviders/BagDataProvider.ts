@@ -144,11 +144,11 @@ export default class BagDataProvider implements RandomAccessDataProvider {
           await remoteReader.open(); // Important that we call this first, because it might throw an error if the file can't be read.
         } catch (err) {
           sendNotification("Fetching remote bag failed", (err as Error).message, "user", "error");
-          return new Promise(() => {}); // Just never finish initializing.
+          return await new Promise(() => {}); // Just never finish initializing.
         }
         if (remoteReader.size() === 0) {
           sendNotification("Cannot play invalid bag", "Bag is 0 bytes in size.", "user", "error");
-          return new Promise(() => {}); // Just never finish initializing.
+          return await new Promise(() => {}); // Just never finish initializing.
         }
 
         this._bag = new Bag(new BagReader(remoteReader));
@@ -157,7 +157,7 @@ export default class BagDataProvider implements RandomAccessDataProvider {
           await this._bag.open();
         } catch (err) {
           sendNotification("Opening remote bag failed", (err as Error).message, "user", "error");
-          return new Promise(() => {}); // Just never finish initializing.
+          return await new Promise(() => {}); // Just never finish initializing.
         }
       } else {
         if (process.env.NODE_ENV === "test" && typeof bagPath.file !== "string") {
@@ -216,7 +216,7 @@ export default class BagDataProvider implements RandomAccessDataProvider {
     if (!startTime || !endTime || connections.length === 0) {
       // This will abort video generation:
       sendNotification("Cannot play invalid bag", "Bag is empty or corrupt.", "user", "error");
-      return new Promise(() => {
+      return await new Promise(() => {
         // no-op
       }); // Just never finish initializing.
     }

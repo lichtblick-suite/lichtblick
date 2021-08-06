@@ -149,7 +149,7 @@ export default class Rpc {
       };
     });
     this._channel.postMessage(message, transfer);
-    return result;
+    return await result;
   }
 
   // register a receiver for a given message on a topic

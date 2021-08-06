@@ -270,7 +270,7 @@ export default class CombinedDataProvider implements RandomAccessDataProvider {
       return undefined;
     });
     if (initializeOutcomes.every(({ status }) => status === "rejected")) {
-      return new Promise(() => {
+      return await new Promise(() => {
         // no-op
       }); // Just never finish initializing.
     }
@@ -284,7 +284,7 @@ export default class CombinedDataProvider implements RandomAccessDataProvider {
     const end = sortTimes(results.map((result) => result.end)).pop();
 
     if (!start || !end) {
-      return new Promise(() => {
+      return await new Promise(() => {
         // no-op
       }); // Just never finish initializing.
     }

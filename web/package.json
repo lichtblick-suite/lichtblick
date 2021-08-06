@@ -7,6 +7,6 @@
   "devDependencies": {
     "@types/copy-webpack-plugin": "8.0.1",
     "copy-webpack-plugin": "9.0.1",
-    "webpack": "5.44.0"
+    "webpack": "5.48.0"
   }
 }

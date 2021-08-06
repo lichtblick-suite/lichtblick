@@ -235,7 +235,7 @@ export function MessagePipelineProvider({
         return newPlayerState;
       });
 
-      return promise;
+      return await promise;
     });
     return () => {
       currentPlayer.current = playerTickState.current.resolveFn = undefined;

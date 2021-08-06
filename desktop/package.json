@@ -4,11 +4,11 @@
   "dependencies": {
     "@foxglove/electron-socket": "1.1.0",
     "@foxglove/studio-base": "workspace:*",
-    "jszip": "3.6.0"
+    "jszip": "3.7.1"
   },
   "devDependencies": {
     "@types/plist": "^3.0.2",
-    "plist": "3.0.2",
+    "plist": "3.0.3",
     "quicklookjs": "0.0.3"
   }
 }
