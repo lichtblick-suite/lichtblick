@@ -15,8 +15,6 @@ Here are some resources to get yourself ramped up:
 - [Basic Types](https://www.typescriptlang.org/docs/handbook/basic-types.html)
 - [Gitbook](https://basarat.gitbooks.io/typescript/content/docs/why-typescript.html)
 
-Post in #typescript for TypeScript questions.
-
 ### Writing Your First Node
 
 Every node must declare 3 exports that determine how it should execute:
