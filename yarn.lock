@@ -2210,15 +2210,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosbag@github:foxglove/rosbag#488cebb9ecf0ff406639b5f16651d75cb61c51c7":
-  version: 0.0.0
-  resolution: "@foxglove/rosbag@https://github.com/foxglove/rosbag.git#commit=488cebb9ecf0ff406639b5f16651d75cb61c51c7"
+"@foxglove/rosbag@npm:0.1.0":
+  version: 0.1.0
+  resolution: "@foxglove/rosbag@npm:0.1.0"
   dependencies:
     "@foxglove/rosmsg": ^1.0.1
     "@foxglove/rosmsg-serialization": ^1.0.2
     "@foxglove/rostime": ^1.1.0
     heap: 0.2.6
-  checksum: c24cd1e143cd826d08025cfdfa5e787315ea1c71d55f1d7fef4fd9315fb27b01b8f37af9cfcfccdf8bf38842b69413bd9406284fa473c1079878973617037556
+  checksum: c0ec4bb3db517d9f2667ee4caef13b92502bad0a797cfe619d1c89bc23afe5fe68e6a3ece022e4ac82354e4264b96fc7412fa2fe1611b6c5afd16bd981c130b7
   languageName: node
   linkType: hard
 
@@ -2285,7 +2285,7 @@ __metadata:
     "@foxglove/electron-socket": 1.1.0
     "@foxglove/hooks": "workspace:*"
     "@foxglove/ros1": 1.0.1
-    "@foxglove/rosbag": "github:foxglove/rosbag#488cebb9ecf0ff406639b5f16651d75cb61c51c7"
+    "@foxglove/rosbag": 0.1.0
     "@foxglove/rosbag2-web": 1.0.0
     "@foxglove/rosmsg-msgs-common": 1.0.1
     "@foxglove/rosmsg-msgs-foxglove": 2.0.1
@@ -2294,8 +2294,8 @@ __metadata:
     "@foxglove/studio": "workspace:*"
     "@foxglove/velodyne-cloud": 1.0.0
     "@mdi/svg": 5.9.55
-    "@sentry/core": 6.10.0
-    "@sentry/types": 6.10.0
+    "@sentry/core": 6.11.0
+    "@sentry/types": 6.11.0
     "@storybook/addon-actions": 6.3.6
     "@storybook/addon-essentials": 6.3.6
     "@storybook/builder-webpack5": 6.3.6
@@ -2321,7 +2321,7 @@ __metadata:
     "@types/nearley": 2.11.2
     "@types/prettier": 2.3.2
     "@types/promise-queue": 2.2.0
-    "@types/react": 17.0.15
+    "@types/react": 17.0.16
     "@types/react-autocomplete": 1.8.6
     "@types/react-document-events": "workspace:*"
     "@types/react-dom": 17.0.9
@@ -2443,8 +2443,8 @@ __metadata:
     use-pan-and-zoom: 0.6.2
     uuid: 8.3.2
     wasm-lz4: 2.0.0
-    webpack: 5.48.0
-    xacro-parser: 0.3.1
+    webpack: 5.49.0
+    xacro-parser: 0.3.3
   languageName: unknown
   linkType: soft
 
@@ -2454,10 +2454,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/tsconfig@npm:1.0.0":
-  version: 1.0.0
-  resolution: "@foxglove/tsconfig@npm:1.0.0"
-  checksum: 2c216a1d936686dde87cd31aae9f67aee6b4384e11c80c23348cd6d10b4403ad86b94e887e8efdf73e1dfe9236330229d1e480da7d2b0ba09d91ddfd7f051414
+"@foxglove/tsconfig@npm:1.1.0":
+  version: 1.1.0
+  resolution: "@foxglove/tsconfig@npm:1.1.0"
+  checksum: 18070d0f6a5bf540c04c5cab3c8ba223aee259d2ca628c78616d37c84e3d193069842901944019caf49fced1943b97cb6772aa7d9b6fe246842ce146386b85a6
   languageName: node
   linkType: hard
 
@@ -3305,16 +3305,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/core@npm:6.10.0":
-  version: 6.10.0
-  resolution: "@sentry/core@npm:6.10.0"
+"@sentry/core@npm:6.11.0":
+  version: 6.11.0
+  resolution: "@sentry/core@npm:6.11.0"
   dependencies:
-    "@sentry/hub": 6.10.0
-    "@sentry/minimal": 6.10.0
-    "@sentry/types": 6.10.0
-    "@sentry/utils": 6.10.0
+    "@sentry/hub": 6.11.0
+    "@sentry/minimal": 6.11.0
+    "@sentry/types": 6.11.0
+    "@sentry/utils": 6.11.0
     tslib: ^1.9.3
-  checksum: 62a2801dbc9f4c46e79e3f0cfd09a1a0335549f16c43672211387fbd330ce9674207c1e36d34d4164bb6e549e696acc685547b34150fe64fa6aeacef0e3b3fe7
+  checksum: 8c85cc7570186d7ff33fbc58a0e1151150ddaeb06f7407941642099d4798e511509a8566cf4dbc8a7ed73d7b3c93ba6640e5acea12fb86ffe5d79e8576fdaf2c
   languageName: node
   linkType: hard
 
@@ -3346,14 +3346,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/hub@npm:6.10.0":
-  version: 6.10.0
-  resolution: "@sentry/hub@npm:6.10.0"
+"@sentry/hub@npm:6.11.0":
+  version: 6.11.0
+  resolution: "@sentry/hub@npm:6.11.0"
   dependencies:
-    "@sentry/types": 6.10.0
-    "@sentry/utils": 6.10.0
+    "@sentry/types": 6.11.0
+    "@sentry/utils": 6.11.0
     tslib: ^1.9.3
-  checksum: c4b66ee17bfbbd10afa1c5fedf165437fb4f575c9385f820a457773917ec943ccaebb49569c449183eacbb06d74aebda14b68a54d0a65b1bb3ab481749a89ed7
+  checksum: ba602dee9e267bf6887ff9b98a763782f501367f782fe4a0e438ca73cfd66b58340989bd849d7a01f3afd78ad9dae4f679b4f42ad3bd5c8ccecd70ae6003d94f
   languageName: node
   linkType: hard
 
@@ -3368,14 +3368,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/minimal@npm:6.10.0":
-  version: 6.10.0
-  resolution: "@sentry/minimal@npm:6.10.0"
+"@sentry/minimal@npm:6.11.0":
+  version: 6.11.0
+  resolution: "@sentry/minimal@npm:6.11.0"
   dependencies:
-    "@sentry/hub": 6.10.0
-    "@sentry/types": 6.10.0
+    "@sentry/hub": 6.11.0
+    "@sentry/types": 6.11.0
     tslib: ^1.9.3
-  checksum: 5d2cc025295dbb2ccf5d79c3f630d9cfbd2305396f064ece906bb7abcc260937895d342aea4aa068c6eba8b9489b264f54ad1630241147cf41dd2cff68d658a4
+  checksum: b2a53e9d870ead288c2d7c9d36fb383be137f47e6046c038bde846fc2fcb09e94c3907c06ee5fd8dd3e0add29ac5ddb7524aa0cb39b6a5f3741f3c916a996a9f
   languageName: node
   linkType: hard
 
@@ -3420,10 +3420,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/types@npm:6.10.0":
-  version: 6.10.0
-  resolution: "@sentry/types@npm:6.10.0"
-  checksum: 17d5b91436503577c3b0852734f142f4872589ee0e2bc86ef886776efade19f8bc4e1d8fb67b3342e01220b4f7e8a7973cc81367f7ccf130964f227a0a100401
+"@sentry/types@npm:6.11.0":
+  version: 6.11.0
+  resolution: "@sentry/types@npm:6.11.0"
+  checksum: b3a8cb4a4d0150b2515bc7bcfb05c8f6f496490991152eae7fab815a81cb3295503c6124f44a09bda4c516d7adfdbe9610348927615edb537ece3d5add9924e6
   languageName: node
   linkType: hard
 
@@ -3434,13 +3434,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/utils@npm:6.10.0":
-  version: 6.10.0
-  resolution: "@sentry/utils@npm:6.10.0"
+"@sentry/utils@npm:6.11.0":
+  version: 6.11.0
+  resolution: "@sentry/utils@npm:6.11.0"
   dependencies:
-    "@sentry/types": 6.10.0
+    "@sentry/types": 6.11.0
     tslib: ^1.9.3
-  checksum: 1b6c68085d2e2e4ec16d039fd534e4e117194061b8f6720b71604143ed34212d54096f14302b9fc4e5d16b44605c86451d4fe6d924f22ff14f1d8406056a811c
+  checksum: 37d68df464399c4a3946f3e2b5b4ffb2fccaf60c3005c50911b0b97543ca30a55c6e9093363244b7b072706e3c34b6c718012da24961f3b954f9c552ec5fc734
   languageName: node
   linkType: hard
 
@@ -5625,14 +5625,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:17.0.15, @types/react@npm:>=16.9.0":
-  version: 17.0.15
-  resolution: "@types/react@npm:17.0.15"
+"@types/react@npm:*, @types/react@npm:17.0.16, @types/react@npm:>=16.9.0":
+  version: 17.0.16
+  resolution: "@types/react@npm:17.0.16"
   dependencies:
     "@types/prop-types": "*"
     "@types/scheduler": "*"
     csstype: ^3.0.2
-  checksum: 4ee41e0c8d0e938f501f80ac75a5ee70b5e8cd5968a1f764960bf7b2694fd0d8ca01345f00325617130643b4af6e072bb3ade023dbc2bd2db7e73504b355b8d9
+  checksum: cba60aeb284d4024feaca1364557fda72011e984b6b08f6e06a7cdc65e267eabc42d59c541ddbbb81720ab195b6df95a3535540abadd5c0e2cce26b16759dbaa
   languageName: node
   linkType: hard
 
@@ -12717,7 +12717,7 @@ __metadata:
     "@babel/preset-env": 7.15.0
     "@babel/preset-typescript": 7.15.0
     "@foxglove/eslint-plugin": 0.13.0
-    "@foxglove/tsconfig": 1.0.0
+    "@foxglove/tsconfig": 1.1.0
     "@foxglove/wasm-bz2": 0.0.4
     "@pmmmwh/react-refresh-webpack-plugin": 0.5.0-rc.2
     "@sentry/electron": 2.5.1
@@ -12773,7 +12773,7 @@ __metadata:
     typescript: 4.3.5
     typescript-plugin-css-modules: 3.4.0
     utif: 3.1.0
-    webpack: 5.48.0
+    webpack: 5.49.0
     webpack-cli: 4.7.2
     webpack-dev-server: 3.11.2
     webpack-hot-middleware: 2.25.0
@@ -24915,12 +24915,12 @@ typescript@4.3.5:
   linkType: hard
 
 "url-parse@npm:^1.4.3, url-parse@npm:^1.4.7":
-  version: 1.5.1
-  resolution: "url-parse@npm:1.5.1"
+  version: 1.5.3
+  resolution: "url-parse@npm:1.5.3"
   dependencies:
     querystringify: ^2.1.1
     requires-port: ^1.0.0
-  checksum: ce5c400db52d83b941944502000081e2338e46834cf16f2888961dc034ea5d49dbeb85ac8fdbe28c3fe738c09320a71a2f6d9286b748895cd464b1e208b6b991
+  checksum: c6b32fff835e43f3b1b4150239f459744f0ab1a908841dbfecbfc79bf67f4d6c8d9af1841d0c6d814d45bfa08525cc29312a0bef31db7aa894306b3db07e4ee0
   languageName: node
   linkType: hard
 
@@ -25334,7 +25334,7 @@ typescript@4.3.5:
     "@foxglove/studio-base": "workspace:*"
     "@types/copy-webpack-plugin": 8.0.1
     copy-webpack-plugin: 9.0.1
-    webpack: 5.48.0
+    webpack: 5.49.0
   languageName: unknown
   linkType: soft
 
@@ -25594,9 +25594,9 @@ typescript@4.3.5:
   languageName: node
   linkType: hard
 
-"webpack@npm:5.48.0, webpack@npm:^5.1.0, webpack@npm:^5.9.0":
-  version: 5.48.0
-  resolution: "webpack@npm:5.48.0"
+"webpack@npm:5.49.0, webpack@npm:^5.1.0, webpack@npm:^5.9.0":
+  version: 5.49.0
+  resolution: "webpack@npm:5.49.0"
   dependencies:
     "@types/eslint-scope": ^3.7.0
     "@types/estree": ^0.0.50
@@ -25627,7 +25627,7 @@ typescript@4.3.5:
       optional: true
   bin:
     webpack: bin/webpack.js
-  checksum: 34028413a0d6e9425c636f2c36e8cfaa3c0a545d3480d8f40fd64d25241ea7cb19590a1cc5eaaad6ea5ac6d0e59d2b5579702e9ea4506f448ad82656479823fe
+  checksum: 2b34df73bce8d3c02e45b0130393be6e2a2b5f79ceafe2eab12e85a8b552a3108a77d7dd63851944d72e033896b0bbdc76b53848d921b734978e53ffad48f517
   languageName: node
   linkType: hard
 
@@ -25868,12 +25868,12 @@ typescript@4.3.5:
   languageName: node
   linkType: hard
 
-"xacro-parser@npm:0.3.1":
-  version: 0.3.1
-  resolution: "xacro-parser@npm:0.3.1"
+"xacro-parser@npm:0.3.3":
+  version: 0.3.3
+  resolution: "xacro-parser@npm:0.3.3"
   dependencies:
     expr-eval: ^2.0.2
-  checksum: 6e710036e587492a268e417562386785e1c68d87f6b2295b2175af95c5157ad63cc5f13cb938621bc0fd1a34400f003a394e854f3cffaa560bab7d48802a071a
+  checksum: 555b19d371f219d7bec3931caa8f84c3b26ff34e27cd04cc9ad74bdd8c47072ffde9657f6c7a62e2a68ae06f119b896563347ef42a9aab04eac5c00c0ae35d32
   languageName: node
   linkType: hard
 

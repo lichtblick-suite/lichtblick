@@ -34,7 +34,7 @@
     "@foxglove/electron-socket": "1.1.0",
     "@foxglove/hooks": "workspace:*",
     "@foxglove/ros1": "1.0.1",
-    "@foxglove/rosbag": "github:foxglove/rosbag#488cebb9ecf0ff406639b5f16651d75cb61c51c7",
+    "@foxglove/rosbag": "0.1.0",
     "@foxglove/rosbag2-web": "1.0.0",
     "@foxglove/rosmsg-msgs-common": "1.0.1",
     "@foxglove/rosmsg-msgs-foxglove": "2.0.1",
@@ -43,8 +43,8 @@
     "@foxglove/studio": "workspace:*",
     "@foxglove/velodyne-cloud": "1.0.0",
     "@mdi/svg": "5.9.55",
-    "@sentry/core": "6.10.0",
-    "@sentry/types": "6.10.0",
+    "@sentry/core": "6.11.0",
+    "@sentry/types": "6.11.0",
     "@storybook/addon-actions": "6.3.6",
     "@storybook/addon-essentials": "6.3.6",
     "@storybook/builder-webpack5": "6.3.6",
@@ -70,7 +70,7 @@
     "@types/nearley": "2.11.2",
     "@types/prettier": "2.3.2",
     "@types/promise-queue": "2.2.0",
-    "@types/react": "17.0.15",
+    "@types/react": "17.0.16",
     "@types/react-autocomplete": "1.8.6",
     "@types/react-document-events": "workspace:*",
     "@types/react-dom": "17.0.9",
@@ -192,7 +192,7 @@
     "use-pan-and-zoom": "0.6.2",
     "uuid": "8.3.2",
     "wasm-lz4": "2.0.0",
-    "webpack": "5.48.0",
-    "xacro-parser": "0.3.1"
+    "webpack": "5.49.0",
+    "xacro-parser": "0.3.3"
   }
 }
