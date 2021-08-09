@@ -21,7 +21,7 @@
 (str: string, num: number, wut: any) => {
   str ? 0 : 1; // eslint-disable-line @typescript-eslint/strict-boolean-expressions
   num ? 0 : 1; // eslint-disable-line @typescript-eslint/strict-boolean-expressions
-  wut ? 0 : 1; // no error for now
+  wut ? 0 : 1; // eslint-disable-line @typescript-eslint/strict-boolean-expressions
 
   console.log = () => 0;
   console.log(str); // eslint-disable-line no-restricted-syntax

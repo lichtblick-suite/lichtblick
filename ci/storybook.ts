@@ -18,6 +18,13 @@ enum Command {
   publish = "publish",
 }
 
+type Args = {
+  command: Command[];
+  local: boolean;
+  headful: boolean;
+  verbose: boolean;
+};
+
 async function main(): Promise<void> {
   const parser = new ArgumentParser({
     formatter_class: RawDescriptionHelpFormatter,
@@ -62,7 +69,7 @@ async function main(): Promise<void> {
     argv.push("-h");
   }
 
-  const args = parser.parse_args(argv);
+  const args = parser.parse_args(argv) as Args;
 
   const storybookEnv = {
     env: {
@@ -125,7 +132,7 @@ async function main(): Promise<void> {
 
       "--puppeteerLaunchConfig",
       JSON.stringify({
-        headless: args.headless,
+        headless: !args.headful,
         args: [
           "--no-sandbox",
           "--disable-setuid-sandbox",

@@ -91,14 +91,16 @@ overrides:
       "@typescript-eslint/ban-ts-comment":
         - error
         - ts-expect-error: allow-with-description
+
       "@typescript-eslint/strict-boolean-expressions":
         - error
-          # Force explicit checks that strings are empty
-        - allowString: false
-          # Force explicit checks that numbers are != 0 or NaN
+        - allowString: false # Different from @foxglove/eslint-plugin
+          allowNullableString: false # Different from @foxglove/eslint-plugin
           allowNumber: false
-          # Keeps the error count manageable while we enhance type information from the flow conversion
-          allowAny: true
+          allowNullableNumber: false
+          allowNullableBoolean: false
+          allowNullableObject: true
+          allowAny: false
 
       "@typescript-eslint/no-inferrable-types": off # It's sometimes useful to explicitly name to guard against future changes
       "@typescript-eslint/no-empty-function": off
@@ -126,3 +128,57 @@ overrides:
       - "**/*.stories.tsx"
       - "**/*.test.tsx"
       - "**/*.test.ts"
+
+  - rules:
+      # Same config as above, but downgrade to warning until we fix 'allowAny' violations
+      "@typescript-eslint/strict-boolean-expressions":
+        - warn
+        - allowString: false
+          allowNullableString: false
+          allowNumber: false
+          allowNullableNumber: false
+          allowNullableBoolean: false
+          allowNullableObject: true
+          allowAny: false
+    files:
+      - "desktop/main/StudioWindow.ts"
+      - "desktop/main/index.ts"
+      - "packages/studio-base/src/.storybook/preview.tsx"
+      - "packages/studio-base/src/components/Autocomplete.stories.tsx"
+      - "packages/studio-base/src/components/Autocomplete.tsx"
+      - "packages/studio-base/src/components/Chart/index.stories.tsx"
+      - "packages/studio-base/src/components/MessagePathSyntax/MessagePathInput.stories.tsx"
+      - "packages/studio-base/src/components/MessagePipeline/pauseFrameForPromise.ts"
+      - "packages/studio-base/src/components/PanelSettings/SchemaEntryEditor.tsx"
+      - "packages/studio-base/src/components/PanelToolbar/index.stories.tsx"
+      - "packages/studio-base/src/components/PlayerManager.tsx"
+      - "packages/studio-base/src/components/ShareJsonModal.tsx"
+      - "packages/studio-base/src/components/TopicToRenderMenu.stories.tsx"
+      - "packages/studio-base/src/components/ValidatedInput.tsx"
+      - "packages/studio-base/src/panels/LegacyPlot/index.stories.tsx"
+      - "packages/studio-base/src/panels/NodePlayground/Editor.tsx"
+      - "packages/studio-base/src/panels/NodePlayground/index.stories.tsx"
+      - "packages/studio-base/src/panels/Publish/index.stories.tsx"
+      - "packages/studio-base/src/panels/Publish/index.tsx"
+      - "packages/studio-base/src/panels/RawMessages/getDiff.ts"
+      - "packages/studio-base/src/panels/RawMessages/index.tsx"
+      - "packages/studio-base/src/panels/ThreeDimensionalViz/CameraInfo/index.tsx"
+      - "packages/studio-base/src/panels/ThreeDimensionalViz/DebugStats.tsx"
+      - "packages/studio-base/src/panels/ThreeDimensionalViz/DrawingTools/Polygons.tsx"
+      - "packages/studio-base/src/panels/ThreeDimensionalViz/Interactions/ObjectDetails.tsx"
+      - "packages/studio-base/src/panels/ThreeDimensionalViz/TopicTree/Layout.tsx"
+      - "packages/studio-base/src/panels/ThreeDimensionalViz/TopicTree/useTopicTree.ts"
+      - "packages/studio-base/src/panels/ThreeDimensionalViz/commands/LinedConvexHulls.tsx"
+      - "packages/studio-base/src/panels/ThreeDimensionalViz/threeDimensionalVizUtils.ts"
+      - "packages/studio-base/src/panels/URDFViewer/Renderer.ts"
+      - "packages/studio-base/src/players/OrderedStampPlayer.test.ts"
+      - "packages/studio-base/src/players/RandomAccessPlayer.test.ts"
+      - "packages/studio-base/src/players/RosbridgePlayer.test.ts"
+      - "packages/studio-base/src/players/UserNodePlayer/index.ts"
+      - "packages/studio-base/src/players/UserNodePlayer/nodeRuntimeWorker/registry.ts"
+      - "packages/studio-base/src/randomAccessDataProviders/MemoryCacheDataProvider.ts"
+      - "packages/studio-base/src/stories/helpPages.stories.tsx"
+      - "packages/studio-base/src/util/Rpc.ts"
+      - "packages/studio-base/src/util/Storage.ts"
+      - "packages/studio-base/src/util/errors.ts"
+      - "packages/studio-base/src/util/validators.ts"
