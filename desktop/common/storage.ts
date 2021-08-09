@@ -3,4 +3,3 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 export const DATASTORES_DIR_NAME = "studio-datastores";
-export const FAKE_REMOTE_LAYOUT_STORE_NAME = "fake-remote-layouts";

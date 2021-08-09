@@ -16,7 +16,7 @@ function conflictTypeToString(conflictType: ConflictType | undefined): string | 
     case "local-delete-remote-update":
       return "You deleted this layout but it has been updated on the server.";
     case "local-update-remote-delete":
-      return "You deleted this layout but someone else updated it.";
+      return "You updated this layout but someone else deleted it.";
     case "name-collision":
       return "A layout with this name already exists.";
   }

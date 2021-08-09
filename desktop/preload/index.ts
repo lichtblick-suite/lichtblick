@@ -109,9 +109,6 @@ const desktopBridge: Desktop = {
   getDeepLinks(): string[] {
     return window.process.argv.filter((arg) => arg.startsWith("foxglove://"));
   },
-  async debug_openFakeRemoteLayoutStorageDirectory(): Promise<void> {
-    return await ipcRenderer.invoke("debug_openFakeRemoteLayoutStorageDirectory");
-  },
   async getExtensions() {
     const homePath = (await ipcRenderer.invoke("getHomePath")) as string;
     const userExtensionRoot = pathJoin(homePath, ".foxglove-studio", "extensions");

@@ -52,8 +52,6 @@ type DesktopExtension = {
 interface Desktop {
   handleToolbarDoubleClick: () => void;
 
-  debug_openFakeRemoteLayoutStorageDirectory: () => Promise<void>;
-
   // Get an array of deep links provided on app launch
   getDeepLinks: () => string[];
 
