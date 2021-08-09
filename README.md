@@ -14,7 +14,7 @@ To learn more, visit the following resources:
 - [ROS Wiki page](http://wiki.ros.org/FoxgloveStudio)
 - [Blog](https://foxglove.dev/blog)
 
-You can also join us on the following platforms to ask questions, share feedback, and stay up-to-date on what our team is working on:
+You can also join us on the following platforms to ask questions, share feedback, and stay up to date on what our team is working on:
 
 - [GitHub Discussions](https://github.com/foxglove/studio/discussions)
 - [Slack](https://foxglove.dev/join-slack)
