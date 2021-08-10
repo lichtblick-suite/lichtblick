@@ -55,6 +55,7 @@ function makeMockLayoutStorage() {
     saveNewLayout: jest.fn().mockImplementation(mockThrow("saveNewLayout")),
     updateLayout: jest.fn().mockImplementation(mockThrow("updateLayout")),
     syncLayout: jest.fn().mockImplementation(mockThrow("syncLayout")),
+    resolveConflict: jest.fn().mockImplementation(mockThrow("resolveConflict")),
     deleteLayout: jest.fn().mockImplementation(mockThrow("deleteLayout")),
   };
 }

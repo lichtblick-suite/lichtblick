@@ -25,7 +25,7 @@ import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
 import welcomeLayout from "@foxglove/studio-base/layouts/welcomeLayout";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
-import { LayoutMetadata } from "@foxglove/studio-base/services/ILayoutStorage";
+import { ConflictResolution, LayoutMetadata } from "@foxglove/studio-base/services/ILayoutStorage";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
 
 import LayoutSection from "./LayoutSection";
@@ -42,6 +42,7 @@ export default function LayoutBrowser({
   const { addToast } = useToasts();
   const layoutStorage = useLayoutStorage();
   const prompt = usePrompt();
+  const analytics = useAnalytics();
 
   const currentLayoutId = useCurrentLayoutSelector((state) => state.selectedLayout?.id);
   const { setSelectedLayout } = useCurrentLayoutActions();
@@ -149,8 +150,6 @@ export default function LayoutBrowser({
     [currentLayoutId, layoutStorage, setSelectedLayout, onSelectLayout],
   );
 
-  const analytics = useAnalytics();
-
   const createNewLayout = useCallback(async () => {
     const name = `Unnamed layout ${moment(currentDateForStorybook).format("l")} at ${moment(
       currentDateForStorybook,
@@ -210,6 +209,15 @@ export default function LayoutBrowser({
       }
     },
     [layoutStorage, layouts.value?.shared, prompt],
+  );
+
+  const onResolveConflict = useCallback(
+    async (item: LayoutMetadata, resolution: ConflictResolution) => {
+      const result = await layoutStorage.resolveConflict(item.id, resolution);
+      // Since the layout may have changed, re-select it in order to load the latest data
+      await onSelectLayout({ id: result.newId ?? item.id });
+    },
+    [layoutStorage, onSelectLayout],
   );
 
   const importLayout = useCallback(async () => {
@@ -300,6 +308,7 @@ export default function LayoutBrowser({
             onDelete={onDeleteLayout}
             onShare={onShareLayout}
             onExport={onExportLayout}
+            onResolveConflict={onResolveConflict}
           />
         </Stack.Item>
         <Stack.Item>
@@ -316,6 +325,7 @@ export default function LayoutBrowser({
               onDelete={onDeleteLayout}
               onShare={onShareLayout}
               onExport={onExportLayout}
+              onResolveConflict={onResolveConflict}
             />
           )}
         </Stack.Item>

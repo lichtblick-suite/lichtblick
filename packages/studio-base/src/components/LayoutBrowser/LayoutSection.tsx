@@ -4,7 +4,7 @@
 
 import { makeStyles, Stack, Text } from "@fluentui/react";
 
-import { LayoutMetadata } from "@foxglove/studio-base/services/ILayoutStorage";
+import { ConflictResolution, LayoutMetadata } from "@foxglove/studio-base/services/ILayoutStorage";
 
 import LayoutRow from "./LayoutRow";
 
@@ -42,6 +42,7 @@ export default function LayoutSection({
   onDelete,
   onShare,
   onExport,
+  onResolveConflict,
 }: {
   title: string | undefined;
   emptyText: string | undefined;
@@ -54,6 +55,7 @@ export default function LayoutSection({
   onDelete: (item: LayoutMetadata) => void;
   onShare: (item: LayoutMetadata) => void;
   onExport: (item: LayoutMetadata) => void;
+  onResolveConflict: (item: LayoutMetadata, resolution: ConflictResolution) => void;
 }): JSX.Element {
   const styles = useStyles();
   return (
@@ -79,6 +81,7 @@ export default function LayoutSection({
             onDelete={onDelete}
             onShare={onShare}
             onExport={onExport}
+            onResolveConflict={onResolveConflict}
           />
         ))}
       </Stack.Item>

@@ -22,6 +22,12 @@ export type ConflictType =
   | "both-update"
   | "name-collision";
 
+export type ConflictResolution =
+  | "revert-local"
+  | "delete-local"
+  | "delete-remote"
+  | "overwrite-remote";
+
 /** Metadata that describes a panel layout. */
 export type LayoutMetadata = {
   id: LayoutID;
@@ -67,6 +73,11 @@ export interface ILayoutStorage {
   syncLayout(
     id: LayoutID,
   ): Promise<{ status: "success"; newId?: LayoutID } | { status: "conflict"; type: ConflictType }>;
+
+  resolveConflict(
+    id: LayoutID,
+    resolution: ConflictResolution,
+  ): Promise<{ status: "success"; newId?: LayoutID }>;
 
   readonly supportsSharing: boolean;
 

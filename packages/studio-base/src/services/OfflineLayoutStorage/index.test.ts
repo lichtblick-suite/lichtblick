@@ -519,4 +519,220 @@ describe("OfflineLayoutStorage", () => {
       });
     });
   });
+
+  describe("resolveConflict", () => {
+    it("deletes cached layout", async () => {
+      const remote1: RemoteLayoutMetadata = {
+        id: "id1" as LayoutID,
+        name: "Foo",
+        creatorUserId: FAKE_USER.id,
+        createdAt: new Date(10).toISOString() as ISO8601Timestamp,
+        updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
+        permission: "creator_write",
+      };
+      const cacheStorage = new MockLayoutCache([
+        { id: remote1.id, name: "Foo", state: undefined, serverMetadata: remote1 },
+      ]);
+      const remoteStorage = new MockRemoteLayoutStorage([]);
+      const storage = new OfflineLayoutStorage({ cacheStorage, remoteStorage });
+      await expect(storage.resolveConflict(remote1.id, "delete-local")).resolves.toEqual({
+        status: "success",
+      });
+      await expect(cacheStorage.get(remote1.id)).resolves.toBeUndefined();
+      await expect(storage.getLayout(remote1.id)).resolves.toBeUndefined();
+    });
+
+    it("deletes remote layout", async () => {
+      const remote1: RemoteLayoutMetadata = {
+        id: "id1" as LayoutID,
+        name: "Foo",
+        creatorUserId: FAKE_USER.id,
+        createdAt: new Date(10).toISOString() as ISO8601Timestamp,
+        updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
+        permission: "creator_write",
+      };
+      const cacheStorage = new MockLayoutCache([
+        {
+          id: remote1.id,
+          name: "Foo",
+          state: undefined,
+          serverMetadata: remote1,
+          locallyDeleted: true,
+        },
+      ]);
+      const remoteStorage = new MockRemoteLayoutStorage([
+        { ...remote1, data: makePanelsState({ fooPanel: { a: 1 } }) },
+      ]);
+      const storage = new OfflineLayoutStorage({ cacheStorage, remoteStorage });
+      await expect(storage.resolveConflict(remote1.id, "delete-remote")).resolves.toEqual({
+        status: "success",
+      });
+      await expect(remoteStorage.getLayout(remote1.id)).resolves.toBeUndefined();
+      await expect(storage.getLayout(remote1.id)).resolves.toBeUndefined();
+    });
+
+    it("reverts local layout to server version", async () => {
+      const remote1: RemoteLayoutMetadata = {
+        id: "id1" as LayoutID,
+        name: "Foo",
+        creatorUserId: FAKE_USER.id,
+        createdAt: new Date(10).toISOString() as ISO8601Timestamp,
+        updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
+        permission: "creator_write",
+      };
+      const cacheStorage = new MockLayoutCache([
+        {
+          id: remote1.id,
+          name: "Foo",
+          state: makePanelsState({ fooPanel: { a: 1 } }),
+          serverMetadata: remote1,
+          locallyModified: true,
+        },
+      ]);
+      const remoteStorage = new MockRemoteLayoutStorage([
+        {
+          ...remote1,
+          data: makePanelsState({ barPanel: { b: 1 } }),
+          updatedAt: new Date(15).toISOString() as ISO8601Timestamp,
+        },
+      ]);
+      const storage = new OfflineLayoutStorage({ cacheStorage, remoteStorage });
+      await expect(storage.syncWithRemote()).resolves.toEqual(
+        new Map([[remote1.id, { cacheId: remote1.id, remoteId: remote1.id, type: "both-update" }]]),
+      );
+      await expect(storage.getLayout(remote1.id)).resolves.toEqual({
+        ...remote1,
+        conflict: "both-update",
+        hasUnsyncedChanges: true,
+        data: makePanelsState({ fooPanel: { a: 1 } }),
+      });
+      await expect(storage.resolveConflict(remote1.id, "revert-local")).resolves.toEqual({
+        status: "success",
+      });
+      await expect(remoteStorage.getLayout(remote1.id)).resolves.toEqual({
+        ...remote1,
+        data: makePanelsState({ barPanel: { b: 1 } }),
+        updatedAt: new Date(15).toISOString() as ISO8601Timestamp,
+      });
+      await expect(storage.getLayout(remote1.id)).resolves.toEqual({
+        ...remote1,
+        conflict: undefined,
+        hasUnsyncedChanges: false,
+        data: makePanelsState({ barPanel: { b: 1 } }),
+        updatedAt: new Date(15).toISOString() as ISO8601Timestamp,
+      });
+    });
+
+    it("overwrites remote layout with local version", async () => {
+      const remote1: RemoteLayoutMetadata = {
+        id: "id1" as LayoutID,
+        name: "Foo",
+        creatorUserId: FAKE_USER.id,
+        createdAt: new Date(10).toISOString() as ISO8601Timestamp,
+        updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
+        permission: "creator_write",
+      };
+      const cacheStorage = new MockLayoutCache([
+        {
+          id: remote1.id,
+          name: "Foo",
+          state: makePanelsState({ fooPanel: { a: 1 } }),
+          serverMetadata: remote1,
+          locallyModified: true,
+        },
+      ]);
+      const remoteStorage = new MockRemoteLayoutStorage([
+        {
+          ...remote1,
+          data: makePanelsState({ barPanel: { b: 1 } }),
+          updatedAt: new Date(15).toISOString() as ISO8601Timestamp,
+        },
+      ]);
+      const storage = new OfflineLayoutStorage({ cacheStorage, remoteStorage });
+      await expect(storage.syncWithRemote()).resolves.toEqual(
+        new Map([[remote1.id, { cacheId: remote1.id, remoteId: remote1.id, type: "both-update" }]]),
+      );
+      await expect(storage.getLayout(remote1.id)).resolves.toEqual({
+        ...remote1,
+        conflict: "both-update",
+        hasUnsyncedChanges: true,
+        data: makePanelsState({ fooPanel: { a: 1 } }),
+      });
+      jest.setSystemTime(20);
+      await expect(storage.resolveConflict(remote1.id, "overwrite-remote")).resolves.toEqual({
+        status: "success",
+      });
+      await expect(remoteStorage.getLayout(remote1.id)).resolves.toEqual({
+        ...remote1,
+        data: makePanelsState({ fooPanel: { a: 1 } }),
+        updatedAt: new Date(20).toISOString() as ISO8601Timestamp,
+      });
+      await expect(storage.getLayout(remote1.id)).resolves.toEqual({
+        ...remote1,
+        conflict: undefined,
+        hasUnsyncedChanges: false,
+        data: makePanelsState({ fooPanel: { a: 1 } }),
+        updatedAt: new Date(20).toISOString() as ISO8601Timestamp,
+      });
+    });
+
+    it("re-uploads local layout when remote was deleted", async () => {
+      const remote1: RemoteLayoutMetadata = {
+        id: "id1" as LayoutID,
+        name: "Foo",
+        creatorUserId: FAKE_USER.id,
+        createdAt: new Date(10).toISOString() as ISO8601Timestamp,
+        updatedAt: new Date(10).toISOString() as ISO8601Timestamp,
+        permission: "creator_write",
+      };
+      const cacheStorage = new MockLayoutCache([
+        {
+          id: remote1.id,
+          name: "Foo",
+          state: makePanelsState({ fooPanel: { a: 1 } }),
+          serverMetadata: remote1,
+          locallyModified: true,
+        },
+      ]);
+      const remoteStorage = new MockRemoteLayoutStorage([]);
+      const storage = new OfflineLayoutStorage({ cacheStorage, remoteStorage });
+      await expect(storage.syncWithRemote()).resolves.toEqual(
+        new Map([
+          [
+            remote1.id,
+            { cacheId: remote1.id, remoteId: remote1.id, type: "local-update-remote-delete" },
+          ],
+        ]),
+      );
+      await expect(storage.getLayout(remote1.id)).resolves.toEqual({
+        ...remote1,
+        conflict: "local-update-remote-delete",
+        hasUnsyncedChanges: true,
+        data: makePanelsState({ fooPanel: { a: 1 } }),
+      });
+      jest.setSystemTime(20);
+      const result = await storage.resolveConflict(remote1.id, "overwrite-remote");
+      expect(result).toEqual({
+        status: "success",
+        newId: expect.any(String),
+      });
+      await expect(remoteStorage.getLayout(result.newId!)).resolves.toEqual({
+        ...remote1,
+        id: result.newId,
+        data: makePanelsState({ fooPanel: { a: 1 } }),
+        createdAt: new Date(20).toISOString() as ISO8601Timestamp,
+        updatedAt: new Date(20).toISOString() as ISO8601Timestamp,
+      });
+      await expect(storage.getLayout(remote1.id)).resolves.toBeUndefined();
+      await expect(storage.getLayout(result.newId!)).resolves.toEqual({
+        ...remote1,
+        id: result.newId,
+        conflict: undefined,
+        hasUnsyncedChanges: false,
+        data: makePanelsState({ fooPanel: { a: 1 } }),
+        createdAt: new Date(20).toISOString() as ISO8601Timestamp,
+        updatedAt: new Date(20).toISOString() as ISO8601Timestamp,
+      });
+    });
+  });
 });

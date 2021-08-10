@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useToasts } from "react-toast-notifications";
 import { useInterval, useNetworkState } from "react-use";
 
@@ -60,11 +60,15 @@ export default function ConsoleApiLayoutStorageProvider({
   const visibilityState = useVisibilityState();
 
   // Sync periodically when logged in, online, and the app is not hidden
+  const enableSyncing = currentUser != undefined && online && visibilityState === "visible";
+  useEffect(() => {
+    if (enableSyncing) {
+      void sync();
+    }
+  }, [enableSyncing, sync]);
   useInterval(
     sync,
-    currentUser && online && visibilityState === "visible"
-      ? SYNC_INTERVAL
-      : null /* eslint-disable-line no-restricted-syntax */,
+    enableSyncing ? SYNC_INTERVAL : null /* eslint-disable-line no-restricted-syntax */,
   );
 
   const storage = enableConsoleApiLayouts && currentUser ? offlineStorage : cacheOnlyStorage;
