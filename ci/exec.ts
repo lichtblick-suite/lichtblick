@@ -15,17 +15,17 @@ export async function execOutput(
   program: string,
   args?: string[],
   options?: ExecOptions,
-): Promise<string> {
-  let output = "";
-  await execAction(program, args, {
+): Promise<{ status: number; stdout: string }> {
+  let stdout = "";
+  const status = await execAction(program, args, {
     ...options,
     silent: true,
     listeners: {
       stdout: (data) => {
-        output += data.toString();
+        stdout += data.toString();
       },
     },
   });
 
-  return output;
+  return { status, stdout };
 }

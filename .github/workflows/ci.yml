@@ -26,6 +26,7 @@ jobs:
               yarn dedupe --check
               yarn run tsc --noEmit # typecheck files that are not included by webpack or package builds
               yarn run lint:ci
+              yarn run lint:unused-exports
           - name: packages
             command: yarn run build:packages
           - name: web

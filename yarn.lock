@@ -4724,6 +4724,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ts-morph/common@npm:~0.10.1":
+  version: 0.10.1
+  resolution: "@ts-morph/common@npm:0.10.1"
+  dependencies:
+    fast-glob: ^3.2.5
+    minimatch: ^3.0.4
+    mkdirp: ^1.0.4
+    path-browserify: ^1.0.1
+  checksum: 24c8185a2c165d18d683dd822ee2e2070f325e328f87281ff3bc53e555aabf331bb5498ff89e3d1364e462f2b4be237442c38e2920d1ecb7438f4e2f30804e63
+  languageName: node
+  linkType: hard
+
 "@tsconfig/node10@npm:^1.0.7":
   version: 1.0.8
   resolution: "@tsconfig/node10@npm:1.0.8"
@@ -8952,6 +8964,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"code-block-writer@npm:^10.1.1":
+  version: 10.1.1
+  resolution: "code-block-writer@npm:10.1.1"
+  checksum: e048037acbcbda19fca62a3a63e4a64226ea6b5dc0fad7632d34a88c1165b29a357e5e19f0497811e9911472e824ab85f68176f40e439da87e051908956eb47c
+  languageName: node
+  linkType: hard
+
 "code-point-at@npm:^1.0.0":
   version: 1.1.0
   resolution: "code-point-at@npm:1.1.0"
@@ -12783,6 +12802,7 @@ __metadata:
     rimraf: 3.0.2
     semver: 7.3.5
     ts-node: 10.1.0
+    ts-prune: 0.9.2
     tslib: 2.3.0
     typescript: 4.3.5
     typescript-plugin-css-modules: 3.4.0
@@ -19003,7 +19023,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-browserify@npm:1.0.1":
+"path-browserify@npm:1.0.1, path-browserify@npm:^1.0.1":
   version: 1.0.1
   resolution: "path-browserify@npm:1.0.1"
   checksum: c6d7fa376423fe35b95b2d67990060c3ee304fc815ff0a2dc1c6c3cfaff2bd0d572ee67e18f19d0ea3bbe32e8add2a05021132ac40509416459fffee35200699
@@ -24209,6 +24229,13 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
+"true-myth@npm:^4.1.0":
+  version: 4.1.1
+  resolution: "true-myth@npm:4.1.1"
+  checksum: 0b937bb215b78d0ccff8637ac1c49be7f08c04f32a7b755c45a1566a1d522f50b0cadac93ad869b6bea9b843f60479160d3382c2c91d2381ef3559915564ff82
+  languageName: node
+  linkType: hard
+
 "truncate-utf8-bytes@npm:^1.0.0":
   version: 1.0.2
   resolution: "truncate-utf8-bytes@npm:1.0.2"
@@ -24261,6 +24288,16 @@ resolve@^2.0.0-next.3:
   languageName: node
   linkType: hard
 
+"ts-morph@npm:^11.0.0":
+  version: 11.0.3
+  resolution: "ts-morph@npm:11.0.3"
+  dependencies:
+    "@ts-morph/common": ~0.10.1
+    code-block-writer: ^10.1.1
+  checksum: a59c17c317d8b26fd41d1933667e0deb058d04ad2c48b16afc261817f372d18c0fefe994788c243eeaa91bca782e4f1d6baaaf833c29cb7eaa55e616c9ae77cd
+  languageName: node
+  linkType: hard
+
 "ts-node@npm:10.1.0":
   version: 10.1.0
   resolution: "ts-node@npm:10.1.0"
@@ -24302,6 +24339,22 @@ resolve@^2.0.0-next.3:
     typescript:
       optional: true
   checksum: c2a698b85d521298fe6f2435fbf2d3dc5834b423ea25abd321805ead3f399dbeedce7ca09492d7eb005b9d2c009c6b9587055bc3ab273dc6b9e40eefd7edb5b2
+  languageName: node
+  linkType: hard
+
+"ts-prune@npm:0.9.2":
+  version: 0.9.2
+  resolution: "ts-prune@npm:0.9.2"
+  dependencies:
+    commander: ^6.2.1
+    cosmiconfig: ^7.0.0
+    json5: ^2.1.3
+    lodash: ^4.17.21
+    true-myth: ^4.1.0
+    ts-morph: ^11.0.0
+  bin:
+    ts-prune: lib/index.js
+  checksum: bc8a001211cdfa17dd91253f26cd26da2299c1e1d7553b4dc53d7e8015cfe5edb9b82ff5a5b9cc982e4b9634b09ad320ab5e4e5bfc1217bfa2b53b1c3c53f8ab
   languageName: node
   linkType: hard
 
