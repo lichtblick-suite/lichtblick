@@ -51,7 +51,6 @@ import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import { LegacyButton } from "@foxglove/studio-base/components/LegacyStyledComponents";
-import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import {
@@ -59,7 +58,6 @@ import {
   useSelectedPanels,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
-import { PanelIdContext } from "@foxglove/studio-base/context/PanelIdContext";
 import { usePanelSettings } from "@foxglove/studio-base/context/PanelSettingsContext";
 import usePanelDrag from "@foxglove/studio-base/hooks/usePanelDrag";
 import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
@@ -481,28 +479,21 @@ export default function Panel<Config extends PanelConfig>(
           }
         }}
       >
-        <MultiProvider
-          providers={[
-            /* eslint-disable react/jsx-key */
-            <PanelContext.Provider
-              value={{
-                type,
-                id: childId ?? "$unknown_id",
-                title,
-                config: panelComponentConfig,
-                saveConfig: saveConfig as SaveConfig<PanelConfig>,
-                updatePanelConfigs,
-                openSiblingPanel,
-                enterFullscreen,
-                hasSettings: PanelComponent.configSchema != undefined,
-                tabId,
-                supportsStrictMode: PanelComponent.supportsStrictMode ?? true,
-                connectToolbarDragHandle,
-              }}
-            />,
-            <PanelIdContext.Provider value={childId} />,
-            /* eslint-enable react/jsx-key */
-          ]}
+        <PanelContext.Provider
+          value={{
+            type,
+            id: childId ?? "$unknown_id",
+            title,
+            config: panelComponentConfig,
+            saveConfig: saveConfig as SaveConfig<PanelConfig>,
+            updatePanelConfigs,
+            openSiblingPanel,
+            enterFullscreen,
+            hasSettings: PanelComponent.configSchema != undefined,
+            tabId,
+            supportsStrictMode: PanelComponent.supportsStrictMode ?? true,
+            connectToolbarDragHandle,
+          }}
         >
           {/* Ensure user exits full-screen mode when leaving window, even if key is still pressed down */}
           <DocumentEvents target={window} enabled onBlur={onBlurDocument} />
@@ -585,7 +576,7 @@ export default function Panel<Config extends PanelConfig>(
             </ErrorBoundary>
             {process.env.NODE_ENV !== "production" && <PerfInfo ref={perfInfo} />}
           </Flex>
-        </MultiProvider>
+        </PanelContext.Provider>
       </Profiler>
     );
   }

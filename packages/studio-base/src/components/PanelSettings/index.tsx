@@ -14,7 +14,6 @@ import {
   useSelectedPanels,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
-import { PanelIdContext } from "@foxglove/studio-base/context/PanelIdContext";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
@@ -117,9 +116,7 @@ export default function PanelSettings(): JSX.Element {
         <Stack.Item>
           {schema ? (
             <StrictMode>
-              <PanelIdContext.Provider value={selectedPanelId}>
-                <SchemaEditor configSchema={schema} config={config} saveConfig={saveConfig} />
-              </PanelIdContext.Provider>
+              <SchemaEditor configSchema={schema} config={config} saveConfig={saveConfig} />
             </StrictMode>
           ) : (
             <Text styles={{ root: { color: theme.palette.neutralTertiary } }}>
