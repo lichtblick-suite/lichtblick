@@ -96,7 +96,6 @@ import {
   VISUALIZATION_MSGS_MARKER_DATATYPE,
   TRANSFORM_STAMPED_DATATYPE,
 } from "@foxglove/studio-base/util/globalConstants";
-import { inVideoRecordingMode } from "@foxglove/studio-base/util/inAutomatedRunMode";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 import { joinTopics } from "@foxglove/studio-base/util/topicUtils";
 
@@ -753,13 +752,6 @@ export default function Layout({
 
   const cursorType = isDrawing ? "crosshair" : "";
 
-  const { videoRecordingStyle } = useMemo(
-    () => ({
-      videoRecordingStyle: { visibility: inVideoRecordingMode() ? "hidden" : "visible" },
-    }),
-    [],
-  );
-
   // Memoize the threeDimensionalVizContextValue to avoid returning a new object every time
   const threeDimensionalVizContextValue = useMemo(
     () => ({
@@ -795,14 +787,11 @@ export default function Layout({
           <PanelToolbar floating helpContent={helpContent} />
           <div style={{ position: "absolute", width: "100%", height: "100%" }}>
             <div
-              style={
-                {
-                  ...videoRecordingStyle,
-                  position: "relative",
-                  width: "100%",
-                  height: "100%",
-                } as React.CSSProperties
-              }
+              style={{
+                position: "relative",
+                width: "100%",
+                height: "100%",
+              }}
               ref={topicTreeSizeRef}
             >
               <TopicTree
@@ -870,7 +859,7 @@ export default function Layout({
             >
               {children}
               <DrawPolygons>{polygonBuilder.polygons}</DrawPolygons>
-              <div style={videoRecordingStyle as React.CSSProperties}>
+              <div>
                 <LayoutToolbar
                   cameraState={cameraState}
                   interactionsTabType={interactionsTabType}

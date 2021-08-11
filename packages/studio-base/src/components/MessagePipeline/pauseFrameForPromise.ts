@@ -11,14 +11,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import inAutomatedRunMode from "@foxglove/studio-base/util/inAutomatedRunMode";
 import promiseTimeout from "@foxglove/studio-base/util/promiseTimeout";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 export type FramePromise = { name: string; promise: Promise<void> };
 
 // Wait longer before erroring if there's no user waiting (in automated run)
-export const MAX_PROMISE_TIMEOUT_TIME_MS = inAutomatedRunMode() ? 30000 : 5000;
+export const MAX_PROMISE_TIMEOUT_TIME_MS = 5000;
 
 export async function pauseFrameForPromises(promises: FramePromise[]): Promise<void> {
   try {
@@ -29,7 +28,7 @@ export async function pauseFrameForPromises(promises: FramePromise[]): Promise<v
   } catch (error) {
     // An async render task failed to finish in time; some panels may display data from the wrong frame.
     const isTimeoutError = error.message.includes("Promise timed out");
-    if (!isTimeoutError || inAutomatedRunMode()) {
+    if (!isTimeoutError) {
       sendNotification("Player ", error, "app", "error");
       return;
     }
