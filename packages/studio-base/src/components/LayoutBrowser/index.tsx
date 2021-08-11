@@ -73,13 +73,16 @@ export default function LayoutBrowser({
   }, [reloadLayouts]);
 
   const onSelectLayout = useCallback(
-    async (item: Pick<LayoutMetadata, "id">) => {
+    async (item: Pick<LayoutMetadata, "id">, selectedViaClick?: boolean) => {
       const layout = await layoutStorage.getLayout(item.id);
       if (layout) {
         setSelectedLayout(layout);
+        if (selectedViaClick === true) {
+          void analytics.logEvent(AppEvent.LAYOUT_SELECT);
+        }
       }
     },
-    [layoutStorage, setSelectedLayout],
+    [analytics, layoutStorage, setSelectedLayout],
   );
 
   const onSaveLayout = useCallback(
@@ -93,11 +96,12 @@ export default function LayoutBrowser({
           break;
         case "conflict": {
           addToast(conflictTypeToString(result.type), { autoDismiss: true, appearance: "warning" });
+          void analytics.logEvent(AppEvent.LAYOUT_CONFLICT, { type: result.type });
           break;
         }
       }
     },
-    [addToast, layoutStorage, onSelectLayout],
+    [analytics, addToast, layoutStorage, onSelectLayout],
   );
 
   const onRenameLayout = useCallback(
@@ -105,9 +109,10 @@ export default function LayoutBrowser({
       await layoutStorage.updateLayout({ targetID: item.id, name: newName });
       if (currentLayoutId === item.id) {
         await onSelectLayout(item);
+        void analytics.logEvent(AppEvent.LAYOUT_RENAME);
       }
     },
-    [currentLayoutId, layoutStorage, onSelectLayout],
+    [analytics, currentLayoutId, layoutStorage, onSelectLayout],
   );
 
   const onDuplicateLayout = useCallback(
@@ -120,14 +125,17 @@ export default function LayoutBrowser({
           permission: "creator_write",
         });
         await onSelectLayout(newLayout);
+        void analytics.logEvent(AppEvent.LAYOUT_DUPLICATE);
       }
     },
-    [layoutStorage, onSelectLayout],
+    [analytics, layoutStorage, onSelectLayout],
   );
 
   const onDeleteLayout = useCallback(
     async (item: LayoutMetadata) => {
       await layoutStorage.deleteLayout({ id: item.id });
+      void analytics.logEvent(AppEvent.LAYOUT_DELETE);
+
       if (currentLayoutId !== item.id) {
         return;
       }
@@ -147,7 +155,7 @@ export default function LayoutBrowser({
       });
       await onSelectLayout(newLayout);
     },
-    [currentLayoutId, layoutStorage, setSelectedLayout, onSelectLayout],
+    [analytics, currentLayoutId, layoutStorage, setSelectedLayout, onSelectLayout],
   );
 
   const createNewLayout = useCallback(async () => {
@@ -206,9 +214,10 @@ export default function LayoutBrowser({
           data: layout.data,
           permission: "org_write",
         });
+        void analytics.logEvent(AppEvent.LAYOUT_SHARE);
       }
     },
-    [layoutStorage, layouts.value?.shared, prompt],
+    [analytics, layoutStorage, layouts.value?.shared, prompt],
   );
 
   const onResolveConflict = useCallback(
@@ -258,7 +267,6 @@ export default function LayoutBrowser({
       permission: "creator_write",
     });
     void onSelectLayout(newLayout);
-
     void analytics.logEvent(AppEvent.LAYOUT_IMPORT);
   }, [addToast, isMounted, layoutStorage, analytics, onSelectLayout]);
 

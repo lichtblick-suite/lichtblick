@@ -49,7 +49,7 @@ export default function LayoutSection({
   items: readonly LayoutMetadata[] | undefined;
   selectedId?: string;
   onSave: (item: LayoutMetadata) => void;
-  onSelect: (item: LayoutMetadata) => void;
+  onSelect: (item: LayoutMetadata, selectedViaClick?: boolean) => void;
   onRename: (item: LayoutMetadata, newName: string) => void;
   onDuplicate: (item: LayoutMetadata) => void;
   onDelete: (item: LayoutMetadata) => void;
