@@ -15,11 +15,18 @@ import { definitions as commonDefs } from "@foxglove/rosmsg-msgs-common";
 import { definitions as foxgloveDefs } from "@foxglove/rosmsg-msgs-foxglove";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
-export const basicDatatypes: RosDatatypes = {};
+/**
+ * basicDatatypes is a map containing definitions for ROS common datatypes and foxglove datatypes
+ * from the following packages:
+ *
+ * - @foxglove/rosmsgs-msg-common
+ * - @foxglove/rosmsg-msgs-foxglove
+ */
+export const basicDatatypes: RosDatatypes = new Map();
 
 for (const [name, def] of Object.entries(commonDefs)) {
-  basicDatatypes[name] = { fields: def.definitions };
+  basicDatatypes.set(name, def);
 }
 for (const [name, def] of Object.entries(foxgloveDefs)) {
-  basicDatatypes[name] = { fields: def.definitions };
+  basicDatatypes.set(name, def);
 }

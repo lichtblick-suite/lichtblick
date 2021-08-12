@@ -45,30 +45,32 @@ const systemStateMessages = [
 ];
 
 const fixture = {
-  datatypes: {
-    "msgs/SystemState": {
-      fields: [
-        { type: "std_msgs/Header", name: "header", isArray: false },
-        { type: "int8", name: "UNKNOWN", isConstant: true, value: -1 },
-        { type: "int8", name: "OFF", isConstant: true, value: 1 },
-        { type: "int8", name: "BOOTING", isConstant: true, value: 2 },
-        { type: "int8", name: "ACTIVE", isConstant: true, value: 3 },
-        { type: "int8", name: "state", isArray: false },
-        { type: "json", name: "data", isArray: false },
-      ],
-    },
-    "std_msgs/Header": {
-      fields: [
-        { name: "seq", type: "uint32", isArray: false },
-        {
-          name: "stamp",
-          type: "time",
-          isArray: false,
-        },
-        { name: "frame_id", type: "string", isArray: false },
-      ],
-    },
-  },
+  datatypes: new Map(
+    Object.entries({
+      "msgs/SystemState": {
+        definitions: [
+          { type: "std_msgs/Header", name: "header", isArray: false },
+          { type: "int8", name: "UNKNOWN", isConstant: true, value: -1 },
+          { type: "int8", name: "OFF", isConstant: true, value: 1 },
+          { type: "int8", name: "BOOTING", isConstant: true, value: 2 },
+          { type: "int8", name: "ACTIVE", isConstant: true, value: 3 },
+          { type: "int8", name: "state", isArray: false },
+          { type: "json", name: "data", isArray: false },
+        ],
+      },
+      "std_msgs/Header": {
+        definitions: [
+          { name: "seq", type: "uint32", isArray: false },
+          {
+            name: "stamp",
+            type: "time",
+            isArray: false,
+          },
+          { name: "frame_id", type: "string", isArray: false },
+        ],
+      },
+    }),
+  ),
   topics: [{ name: "/some/topic/with/state", datatype: "msgs/SystemState" }],
   activeData: {
     startTime: { sec: 1526191527, nsec: 202050 },

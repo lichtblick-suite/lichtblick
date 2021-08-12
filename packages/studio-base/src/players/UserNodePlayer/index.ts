@@ -154,8 +154,8 @@ export default class UserNodePlayer implements Player {
   _getDatatypes = memoizeWeak(
     (datatypes: RosDatatypes, nodeDatatypes: readonly RosDatatypes[]): RosDatatypes => {
       return nodeDatatypes.reduce(
-        (allDatatypes, userNodeDatatypes) => ({ ...allDatatypes, ...userNodeDatatypes }),
-        { ...datatypes, ...basicDatatypes },
+        (allDatatypes, userNodeDatatypes) => new Map([...allDatatypes, ...userNodeDatatypes]),
+        new Map([...datatypes, ...basicDatatypes]),
       );
     },
   );
@@ -259,8 +259,8 @@ export default class UserNodePlayer implements Player {
     }
     // Pass all the nodes a set of basic datatypes that we know how to render.
     // These could be overwritten later by bag datatypes, but these datatype definitions should be very stable.
-    const { topics = [], datatypes = {} } = this._lastPlayerStateActiveData ?? {};
-    const nodeDatatypes = { ...basicDatatypes, ...datatypes };
+    const { topics = [], datatypes = new Map() } = this._lastPlayerStateActiveData ?? {};
+    const nodeDatatypes: RosDatatypes = new Map([...basicDatatypes, ...datatypes]);
 
     const rosLib = await this._getRosLib();
     const { name, sourceCode } = userNode;

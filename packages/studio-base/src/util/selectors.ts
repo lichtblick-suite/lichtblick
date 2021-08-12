@@ -55,9 +55,9 @@ export const constantsByDatatype = createSelector(
   } => {
     type Result = Record<string | number, string>;
     const results: Record<string, Result> = {};
-    for (const [datatype, value] of Object.entries(datatypes)) {
+    for (const [datatype, value] of datatypes) {
       const result: Result = (results[datatype] = {});
-      for (const field of value.fields) {
+      for (const field of value.definitions) {
         if (
           field.isConstant === true &&
           field.value != undefined &&
@@ -92,13 +92,13 @@ export const enumValuesByDatatypeAndField = createSelector(
     datatypes: RosDatatypes,
   ): { [datatype: string]: { [field: string]: { [value: string]: string } } } => {
     const results: { [datatype: string]: { [field: string]: { [value: string]: string } } } = {};
-    for (const [datatype, value] of Object.entries(datatypes)) {
+    for (const [datatype, value] of datatypes) {
       const currentResult: { [field: string]: { [value: string]: string } } = {};
       // keep track of parsed constants
       let constants: { [key: string]: string } = {};
       // constants' types
       let lastType: string | undefined;
-      for (const field of value.fields) {
+      for (const field of value.definitions) {
         if (lastType != undefined && field.type !== lastType) {
           // encountering new type resets the accumulated constants
           constants = {};

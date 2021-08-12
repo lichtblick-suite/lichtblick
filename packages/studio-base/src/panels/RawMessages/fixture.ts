@@ -145,92 +145,96 @@ export const fixture = {
       },
     ],
   },
-  datatypes: {
-    "baz/num": { fields: [{ name: "value", type: "float64" }] },
-    "baz/bigint": { fields: [{ name: "value", type: "uint64" }] },
-    "baz/text": {
-      fields: [
-        { name: "value", type: "string" },
-        { name: "value_long", type: "string" },
-        { name: "value_with_newlines", type: "string" },
-      ],
-    },
-    "baz/array": { fields: [{ name: "value", type: "bool", isArray: true }] },
-    "baz/array/obj": {
-      fields: [{ name: "value", type: "baz/array/ace", isArray: true, isComplex: true }],
-    },
-    "baz/array/ace": {
-      fields: [
-        { name: "a", type: "string" },
-        { name: "c", type: "string" },
-        { name: "e", type: "string" },
-      ],
-    },
-    "geometry/types": {
-      fields: [
-        { name: "point2d", type: "geometry/types/Point2", isComplex: true },
-        { name: "point3d", type: "geometry/types/Point3", isComplex: true },
-      ],
-    },
-    "geometry/types/Point2": {
-      fields: [
-        { name: "x", type: "float64" },
-        { name: "y", type: "float64" },
-      ],
-    },
-    "geometry/types/Point3": {
-      fields: [
-        { name: "x", type: "float64" },
-        { name: "y", type: "float64" },
-        { name: "z", type: "float64" },
-      ],
-    },
-    "std_msgs/String": { fields: [{ name: "value", type: "string" }] },
-    "msgs/big_topic": {
-      fields: [
-        { name: "LotsOfStuff", type: "msgs/LotsOfStuff", isComplex: true },
-        { name: "timestamp_example_1", type: "time" },
-        { name: "timestamp_example_2", type: "time" },
-        { name: "timestamp_example_3", type: "time" },
-        { name: "some_id_example_1", type: "msgs/has_id_1", isComplex: true },
-        { name: "some_id_example_2", type: "msgs/has_id_2", isComplex: true },
-        { name: "some_short_data", type: "int8", isArray: true },
-        { name: "some_long_data", type: "uint8", isArray: true },
-        { name: "some_float_data", type: "float64", isArray: true },
-      ],
-    },
-    "msgs/LotsOfStuff": {
-      fields: [
-        { name: "SomeBoolean", type: "bool" },
-        { name: "SomeInteger", type: "float64" },
-        { name: "count", type: "int32" },
-        { name: "time", type: "time" },
-        { name: "valid", type: "bool" },
-      ],
-    },
-    "msgs/has_id_1": {
-      fields: [
-        { name: "someId", type: "int32" },
-        { name: "additional_data", type: "int32" },
-      ],
-    },
-    "msgs/has_id_2": { fields: [{ name: "some_id", type: "int32" }] },
-  },
+  datatypes: new Map(
+    Object.entries({
+      "baz/num": { definitions: [{ name: "value", type: "float64" }] },
+      "baz/bigint": { definitions: [{ name: "value", type: "uint64" }] },
+      "baz/text": {
+        definitions: [
+          { name: "value", type: "string" },
+          { name: "value_long", type: "string" },
+          { name: "value_with_newlines", type: "string" },
+        ],
+      },
+      "baz/array": { definitions: [{ name: "value", type: "bool", isArray: true }] },
+      "baz/array/obj": {
+        definitions: [{ name: "value", type: "baz/array/ace", isArray: true, isComplex: true }],
+      },
+      "baz/array/ace": {
+        definitions: [
+          { name: "a", type: "string" },
+          { name: "c", type: "string" },
+          { name: "e", type: "string" },
+        ],
+      },
+      "geometry/types": {
+        definitions: [
+          { name: "point2d", type: "geometry/types/Point2", isComplex: true },
+          { name: "point3d", type: "geometry/types/Point3", isComplex: true },
+        ],
+      },
+      "geometry/types/Point2": {
+        definitions: [
+          { name: "x", type: "float64" },
+          { name: "y", type: "float64" },
+        ],
+      },
+      "geometry/types/Point3": {
+        definitions: [
+          { name: "x", type: "float64" },
+          { name: "y", type: "float64" },
+          { name: "z", type: "float64" },
+        ],
+      },
+      "std_msgs/String": { definitions: [{ name: "value", type: "string" }] },
+      "msgs/big_topic": {
+        definitions: [
+          { name: "LotsOfStuff", type: "msgs/LotsOfStuff", isComplex: true },
+          { name: "timestamp_example_1", type: "time" },
+          { name: "timestamp_example_2", type: "time" },
+          { name: "timestamp_example_3", type: "time" },
+          { name: "some_id_example_1", type: "msgs/has_id_1", isComplex: true },
+          { name: "some_id_example_2", type: "msgs/has_id_2", isComplex: true },
+          { name: "some_short_data", type: "int8", isArray: true },
+          { name: "some_long_data", type: "uint8", isArray: true },
+          { name: "some_float_data", type: "float64", isArray: true },
+        ],
+      },
+      "msgs/LotsOfStuff": {
+        definitions: [
+          { name: "SomeBoolean", type: "bool" },
+          { name: "SomeInteger", type: "float64" },
+          { name: "count", type: "int32" },
+          { name: "time", type: "time" },
+          { name: "valid", type: "bool" },
+        ],
+      },
+      "msgs/has_id_1": {
+        definitions: [
+          { name: "someId", type: "int32" },
+          { name: "additional_data", type: "int32" },
+        ],
+      },
+      "msgs/has_id_2": { definitions: [{ name: "some_id", type: "int32" }] },
+    }),
+  ),
 };
 
 // separate fixture so that we only need to define datatypes for small subset of types
 export const enumFixture = {
-  datatypes: {
-    "baz/enum": {
-      fields: [
-        { type: "uint8", name: "ERROR", isConstant: true, value: 0 },
-        { type: "uint8", name: "OFF", isConstant: true, value: 1 },
-        { type: "uint8", name: "BOOTING", isConstant: true, value: 2 },
-        { type: "uint8", name: "ACTIVE", isConstant: true, value: 3 },
-        { type: "uint8", name: "value", isArray: false },
-      ],
-    },
-  },
+  datatypes: new Map(
+    Object.entries({
+      "baz/enum": {
+        definitions: [
+          { type: "uint8", name: "ERROR", isConstant: true, value: 0 },
+          { type: "uint8", name: "OFF", isConstant: true, value: 1 },
+          { type: "uint8", name: "BOOTING", isConstant: true, value: 2 },
+          { type: "uint8", name: "ACTIVE", isConstant: true, value: 3 },
+          { type: "uint8", name: "value", isArray: false },
+        ],
+      },
+    }),
+  ),
   topics: [{ name: "/baz/enum", datatype: "baz/enum" }],
   frame: {
     "/baz/enum": [
@@ -255,31 +259,33 @@ const exampleMessage = {
 };
 
 export const enumAdvancedFixture = {
-  datatypes: {
-    "baz/enum_advanced": {
-      fields: [
-        { type: "uint32", name: "OFF", isConstant: true, value: 0 },
-        { type: "uint32", name: "ON", isConstant: true, value: 1 },
-        { type: "uint32", name: "state", isArray: false },
-        { type: "uint32", name: "justField", isArray: false },
-        { type: "uint8", name: "RED", isConstant: true, value: 0 },
-        { type: "uint8", name: "YELLOW", isConstant: true, value: 1 },
-        { type: "uint8", name: "GREEN", isConstant: true, value: 2 },
-        { type: "uint8", name: "color", isArray: false },
-        { type: "baz/animals", name: "animal__foxglove_enum", isArray: false },
-        { type: "uint32", name: "animal", isArray: false },
-      ],
-    },
-    "baz/enum_advanced_array": {
-      fields: [{ type: "baz/enum_advanced", name: "value", isArray: true, isComplex: true }],
-    },
-    "baz/animals": {
-      fields: [
-        { type: "uint32", name: "CAT", isConstant: true, value: 10000 },
-        { type: "uint32", name: "DOG", isConstant: true, value: 10001 },
-      ],
-    },
-  },
+  datatypes: new Map(
+    Object.entries({
+      "baz/enum_advanced": {
+        definitions: [
+          { type: "uint32", name: "OFF", isConstant: true, value: 0 },
+          { type: "uint32", name: "ON", isConstant: true, value: 1 },
+          { type: "uint32", name: "state", isArray: false },
+          { type: "uint32", name: "justField", isArray: false },
+          { type: "uint8", name: "RED", isConstant: true, value: 0 },
+          { type: "uint8", name: "YELLOW", isConstant: true, value: 1 },
+          { type: "uint8", name: "GREEN", isConstant: true, value: 2 },
+          { type: "uint8", name: "color", isArray: false },
+          { type: "baz/animals", name: "animal__foxglove_enum", isArray: false },
+          { type: "uint32", name: "animal", isArray: false },
+        ],
+      },
+      "baz/enum_advanced_array": {
+        definitions: [{ type: "baz/enum_advanced", name: "value", isArray: true, isComplex: true }],
+      },
+      "baz/animals": {
+        definitions: [
+          { type: "uint32", name: "CAT", isConstant: true, value: 10000 },
+          { type: "uint32", name: "DOG", isConstant: true, value: 10001 },
+        ],
+      },
+    }),
+  ),
   topics: [{ name: "/baz/enum_advanced", datatype: "baz/enum_advanced" }],
   frame: {
     "/baz/enum_advanced": [
@@ -293,11 +299,13 @@ export const enumAdvancedFixture = {
 };
 
 export const withMissingData = {
-  datatypes: {
-    "baz/missing_data": {
-      fields: [{ type: "uint8", name: "value", isArray: false }],
-    },
-  },
+  datatypes: new Map(
+    Object.entries({
+      "baz/missing_data": {
+        definitions: [{ type: "uint8", name: "value", isArray: false }],
+      },
+    }),
+  ),
   topics: [{ name: "/baz/missing_data", datatype: "baz/missing_data" }],
   frame: {
     "/baz/missing_data": [
@@ -386,9 +394,13 @@ export const topicsWithIdsToDiffFixture = {
 };
 
 export const multipleNumberMessagesFixture = {
-  datatypes: {
-    multiple_number_messages: { fields: [{ type: "uint32", name: "value", isArray: false }] },
-  },
+  datatypes: new Map(
+    Object.entries({
+      multiple_number_messages: {
+        definitions: [{ type: "uint32", name: "value", isArray: false }],
+      },
+    }),
+  ),
   topics: [{ name: "/multiple_number_messages", datatype: "multiple_number_messages" }],
   frame: {
     "/baz/enum": [

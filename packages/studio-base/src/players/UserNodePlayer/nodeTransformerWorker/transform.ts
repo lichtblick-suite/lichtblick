@@ -410,9 +410,9 @@ export const extractDatatypes = (nodeData: NodeData): NodeData => {
 
   // Keys each message definition like { 'std_msg__ColorRGBA': 'std_msg/ColorRGBA' }
   const messageDefinitionMap: Record<string, string> = {};
-  Object.keys(sourceDatatypes).forEach((datatype) => {
+  for (const datatype of sourceDatatypes.keys()) {
     messageDefinitionMap[formatInterfaceName(datatype)] = datatype;
-  });
+  }
 
   try {
     const exportNode = findDefaultExportFunction(sourceFile, typeChecker);

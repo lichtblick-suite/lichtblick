@@ -112,7 +112,7 @@ export default class MemoryDataProvider implements RandomAccessDataProvider {
     if (this.datatypes || this.parsedMessageDefinitionsByTopic) {
       messageDefinitions = {
         type: "parsed",
-        datatypes: this.datatypes ?? {},
+        datatypes: this.datatypes ?? new Map(),
         parsedMessageDefinitionsByTopic: this.parsedMessageDefinitionsByTopic ?? {},
         messageDefinitionsByTopic: this.messageDefinitionsByTopic,
       };

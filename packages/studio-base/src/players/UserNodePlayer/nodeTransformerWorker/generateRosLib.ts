@@ -14,7 +14,7 @@
 import ts from "typescript/lib/typescript";
 
 import { Topic } from "@foxglove/studio-base/players/types";
-import { RosDatatypes, RosDatatype } from "@foxglove/studio-base/types/RosDatatypes";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import filterMap from "@foxglove/studio-base/util/filterMap";
 
 export type InterfaceDeclarations = {
@@ -100,14 +100,13 @@ const rosSpecialTypesToTypescriptMap = new Map([
 // Creates a 1-1 mapping of ROS datatypes to Typescript interface declarations.
 export const generateTypeDefs = (datatypes: RosDatatypes): InterfaceDeclarations => {
   const interfaceDeclarations: InterfaceDeclarations = {};
-  const datatypeEntries = Object.entries(datatypes) as unknown as Array<[string, RosDatatype]>;
 
-  for (const [datatype, definition] of datatypeEntries) {
+  for (const [datatype, definition] of datatypes) {
     if (interfaceDeclarations[datatype]) {
       continue;
     }
 
-    const typeMembers = filterMap(definition.fields, ({ name, type, isArray, isConstant }) => {
+    const typeMembers = filterMap(definition.definitions, ({ name, type, isArray, isConstant }) => {
       let node;
       const typedArray = typedArrayMap.get(type);
       const rosPrimitive = rosPrimitivesToTypeScriptMap.get(type);
@@ -196,7 +195,7 @@ const generateRosLib = ({
     if (!datatypeInterfaces[datatype]) {
       datatypeInterfaces = {
         ...datatypeInterfaces,
-        ...generateTypeDefs({ [datatype]: { fields: [] } }),
+        ...generateTypeDefs(new Map(Object.entries({ [datatype]: { definitions: [] } }))),
       };
     }
 

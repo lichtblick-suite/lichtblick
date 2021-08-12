@@ -112,7 +112,7 @@ export default class RandomAccessPlayer implements Player {
   _parsedSubscribedTopics: Set<string> = new Set();
   _providerTopics: Topic[] = [];
   _providerConnections: Connection[] = [];
-  _providerDatatypes: RosDatatypes = {};
+  _providerDatatypes: RosDatatypes = new Map();
   _metricsCollector: PlayerMetricsCollectorInterface;
   _initializing: boolean = true;
   _initialized: boolean = false;

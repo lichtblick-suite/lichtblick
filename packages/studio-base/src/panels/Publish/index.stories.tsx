@@ -20,9 +20,11 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 const getFixture = (allowPublish: any) => {
   return {
     topics: [],
-    datatypes: {
-      "std_msgs/String": { fields: [{ name: "data", type: "string" }] },
-    },
+    datatypes: new Map(
+      Object.entries({
+        "std_msgs/String": { definitions: [{ name: "data", type: "string" }] },
+      }),
+    ),
     frame: {},
     capabilities: allowPublish ? [PlayerCapabilities.advertise] : [],
     publish: action("publish"),
@@ -68,7 +70,7 @@ storiesOf("panels/Publish/index", module)
   })
   .add("Example with datatype that no longer exists", () => {
     return (
-      <PanelSetup fixture={{ topics: [], datatypes: {}, frame: {}, capabilities: [] }}>
+      <PanelSetup fixture={{ topics: [], datatypes: new Map(), frame: {}, capabilities: [] }}>
         <Publish overrideConfig={publishConfig(true, advancedJSON)} />
       </PanelSetup>
     );
@@ -76,9 +78,11 @@ storiesOf("panels/Publish/index", module)
   .add("example with valid preset JSON", () => {
     const fixture = {
       topics: [],
-      datatypes: {
-        "std_msgs/String": { fields: [{ name: "data", type: "string" }] },
-      },
+      datatypes: new Map(
+        Object.entries({
+          "std_msgs/String": { definitions: [{ name: "data", type: "string" }] },
+        }),
+      ),
       frame: {},
       capabilities: [PlayerCapabilities.advertise],
       setPublishers: action("setPublishers"),
@@ -96,9 +100,11 @@ storiesOf("panels/Publish/index", module)
   .add("example with invalid preset JSON", () => {
     const fixture = {
       topics: [],
-      datatypes: {
-        "std_msgs/String": { fields: [{ name: "data", type: "string" }] },
-      },
+      datatypes: new Map(
+        Object.entries({
+          "std_msgs/String": { definitions: [{ name: "data", type: "string" }] },
+        }),
+      ),
       frame: {},
       capabilities: [PlayerCapabilities.advertise],
       setPublishers: action("setPublishers"),

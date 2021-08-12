@@ -11,12 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { RosMsgField } from "@foxglove/rosmsg";
+import { RosMsgDefinition } from "@foxglove/rosmsg";
 
-export type RosDatatype = {
-  fields: RosMsgField[];
-};
-
-export type RosDatatypes = {
-  [key: string]: RosDatatype;
-};
+/** RosDatatypes is a map of datatype name to the datatype definition */
+export type RosDatatypes = Map<string, RosMsgDefinition>;

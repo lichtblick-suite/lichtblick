@@ -386,7 +386,7 @@ export const constructDatatypes = (
     };
   }
 
-  let datatypes: RosDatatypes = {};
+  let datatypes: RosDatatypes = new Map();
 
   const getRosMsgField = (
     name: string,
@@ -441,7 +441,7 @@ export const constructDatatypes = (
           depth + 1,
           typeParamMap,
         );
-        const childFields = nestedDatatypes[nestedType]?.fields ?? [];
+        const childFields = nestedDatatypes.get(nestedType)?.definitions ?? [];
         if (childFields.length === 2) {
           const secField = childFields.find((field) => field.name === "sec");
           const nsecField = childFields.find((field) => field.name === "nsec");
@@ -466,7 +466,7 @@ export const constructDatatypes = (
           }
         }
 
-        datatypes = { ...datatypes, ...nestedDatatypes };
+        datatypes = new Map([...datatypes, ...nestedDatatypes]);
         return {
           name,
           type: nestedType,
@@ -679,6 +679,9 @@ export const constructDatatypes = (
 
   return {
     outputDatatype: currentDatatype,
-    datatypes: { ...datatypes, [currentDatatype]: { fields: rosMsgFields } },
+    datatypes: new Map([
+      ...datatypes,
+      ...new Map([[currentDatatype, { definitions: rosMsgFields }]]),
+    ]),
   };
 };

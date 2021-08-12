@@ -24,24 +24,26 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 const defaultStart = { sec: 10, nsec: 0 };
 const defaultEnd = { sec: 100, nsec: 0 };
-const datatypes: RosDatatypes = {
-  fooBar: {
-    fields: [
-      {
-        name: "val",
-        type: "number",
-      },
-    ],
-  },
-  baz: {
-    fields: [
-      {
-        name: "val",
-        type: "number",
-      },
-    ],
-  },
-};
+const datatypes: RosDatatypes = new Map(
+  Object.entries({
+    fooBar: {
+      definitions: [
+        {
+          name: "val",
+          type: "number",
+        },
+      ],
+    },
+    baz: {
+      definitions: [
+        {
+          name: "val",
+          type: "number",
+        },
+      ],
+    },
+  }),
+);
 const defaultTopics: Topic[] = [
   { name: "/foo/bar", datatype: "fooBar" },
   { name: "/baz", datatype: "baz" },

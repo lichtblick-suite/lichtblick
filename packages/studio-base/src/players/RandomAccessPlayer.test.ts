@@ -117,10 +117,12 @@ describe("RandomAccessPlayer", () => {
       {
         activeData: {
           currentTime: { sec: 10, nsec: 0 },
-          datatypes: {
-            baz: { fields: [{ name: "val", type: "number" }] },
-            fooBar: { fields: [{ name: "val", type: "number" }] },
-          },
+          datatypes: new Map(
+            Object.entries({
+              baz: { definitions: [{ name: "val", type: "number" }] },
+              fooBar: { definitions: [{ name: "val", type: "number" }] },
+            }),
+          ),
           endTime: { sec: 100, nsec: 0 },
           isPlaying: false,
           lastSeekTime: 0,

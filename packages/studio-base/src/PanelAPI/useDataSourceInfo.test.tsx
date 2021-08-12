@@ -15,6 +15,7 @@
 import { mount } from "enzyme";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 import * as PanelAPI from ".";
 
@@ -32,9 +33,11 @@ describe("useDataSourceInfo", () => {
       message: {},
     },
   ];
-  const datatypes = {
-    Foo: { fields: [] },
-  };
+  const datatypes: RosDatatypes = new Map(
+    Object.entries({
+      Foo: { definitions: [] },
+    }),
+  );
 
   // Create a helper component that exposes the results of the hook in a Jest mock function
   function createTest() {
@@ -63,7 +66,7 @@ describe("useDataSourceInfo", () => {
       [
         {
           topics: [{ name: "/foo", datatype: "Foo" }],
-          datatypes: { Foo: { fields: [] } },
+          datatypes: new Map(Object.entries({ Foo: { definitions: [] } })),
           capabilities: ["hello"],
           startTime: { sec: 0, nsec: 1 },
           playerId: "1",
@@ -90,7 +93,7 @@ describe("useDataSourceInfo", () => {
       [
         {
           topics: [{ name: "/foo", datatype: "Foo" }],
-          datatypes: { Foo: { fields: [] } },
+          datatypes: new Map(Object.entries({ Foo: { definitions: [] } })),
           capabilities: ["hello"],
           startTime: { sec: 0, nsec: 1 },
           playerId: "1",
@@ -110,7 +113,7 @@ describe("useDataSourceInfo", () => {
             { name: "/bar", datatype: "Bar" },
             { name: "/foo", datatype: "Foo" },
           ],
-          datatypes: { Foo: { fields: [] } },
+          datatypes: new Map(Object.entries({ Foo: { definitions: [] } })),
           capabilities: ["hello"],
           startTime: { sec: 0, nsec: 1 },
           playerId: "1",

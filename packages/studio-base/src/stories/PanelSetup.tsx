@@ -233,9 +233,9 @@ function UnconnectedPanelSetup(props: Props): JSX.Element | ReactNull {
   } = props.fixture ?? {};
   let dTypes = datatypes;
   if (!dTypes) {
-    const dummyDatatypes: RosDatatypes = {};
+    const dummyDatatypes: RosDatatypes = new Map();
     for (const { datatype } of topics) {
-      dummyDatatypes[datatype] = { fields: [] };
+      dummyDatatypes.set(datatype, { definitions: [] });
     }
     dTypes = dummyDatatypes;
   }

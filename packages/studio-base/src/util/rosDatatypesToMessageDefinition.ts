@@ -30,7 +30,7 @@ export default function rosDatatypesToMessageDefinition(
     if (currentDatatypeName == undefined) {
       throw new Error(`Invariant violation - Array.pop() when length > 0`);
     }
-    const currentDatatype = datatypes[currentDatatypeName];
+    const currentDatatype = datatypes.get(currentDatatypeName);
     if (!currentDatatype) {
       throw new Error(
         `While searching datatypes for "${rootDatatypeName}", could not find datatype "${currentDatatypeName}"`,
@@ -39,10 +39,10 @@ export default function rosDatatypesToMessageDefinition(
     // The root datatype has no name field.
     const msgDefinition: RosMsgDefinition =
       currentDatatypeName === rootDatatypeName
-        ? { definitions: currentDatatype.fields }
-        : { name: currentDatatypeName, definitions: currentDatatype.fields };
+        ? { definitions: currentDatatype.definitions }
+        : { name: currentDatatypeName, definitions: currentDatatype.definitions };
     result.push(msgDefinition);
-    for (const field of currentDatatype.fields) {
+    for (const field of currentDatatype.definitions) {
       // Only search subfields if we haven't already seen it and it is "complex", IE it has its own fields and should
       // be contained in `datatypes`.
       if (field.isComplex === true && !seenDatatypeNames.has(field.type)) {

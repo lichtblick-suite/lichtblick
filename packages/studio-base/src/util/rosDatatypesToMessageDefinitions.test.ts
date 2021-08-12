@@ -13,6 +13,7 @@
 
 import { uniqBy } from "lodash";
 
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import {
   VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE,
   VISUALIZATION_MSGS_MARKER_DATATYPE,
@@ -40,25 +41,27 @@ describe("rosDatatypesToMessageDefinition", () => {
   });
 
   it("Errors if it can't find the definition", () => {
-    const datatypes = {
-      [VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE]: {
-        fields: [
-          {
-            isArray: true,
-            isComplex: true,
-            arrayLength: undefined,
-            name: "markers",
-            type: VISUALIZATION_MSGS_MARKER_DATATYPE,
-          },
-          {
-            isArray: false,
-            isComplex: true,
-            name: "header",
-            type: "std_msgs/CustomHeader",
-          },
-        ],
-      },
-    };
+    const datatypes: RosDatatypes = new Map(
+      Object.entries({
+        [VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE]: {
+          definitions: [
+            {
+              isArray: true,
+              isComplex: true,
+              arrayLength: undefined,
+              name: "markers",
+              type: VISUALIZATION_MSGS_MARKER_DATATYPE,
+            },
+            {
+              isArray: false,
+              isComplex: true,
+              name: "header",
+              type: "std_msgs/CustomHeader",
+            },
+          ],
+        },
+      }),
+    );
     expect(() =>
       rosDatatypesToMessageDefinition(datatypes, VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE),
     ).toThrow(

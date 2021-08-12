@@ -20,6 +20,7 @@ import { BlockCache } from "@foxglove/studio-base/randomAccessDataProviders/Memo
 import PanelSetup, { triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 import useResumeCount from "@foxglove/studio-base/stories/useResumeCount";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { fromSec } from "@foxglove/studio-base/util/time";
 
 const float64StampedDefinition = `std_msgs/Header header
@@ -165,55 +166,57 @@ const withEndTime = (testFixture: any, endTime: any) => ({
   activeData: { ...testFixture.activeData, endTime },
 });
 
-const datatypes = {
-  "msgs/PoseDebug": {
-    fields: [
-      { name: "header", type: "std_msgs/Header", isArray: false, isComplex: true },
-      { name: "pose", type: "msgs/Pose", isArray: false, isComplex: true },
-    ],
-  },
-  "msgs/Pose": {
-    fields: [
-      { name: "header", type: "std_msgs/Header", isArray: false, isComplex: true },
-      { name: "x", type: "float64", isArray: false },
-      { name: "y", type: "float64", isArray: false },
-      { name: "travel", type: "float64", isArray: false },
-      { name: "velocity", type: "float64", isArray: false },
-      { name: "acceleration", type: "float64", isArray: false },
-      { name: "heading", type: "float64", isArray: false },
-    ],
-  },
-  "msgs/State": {
-    fields: [
-      { name: "header", type: "std_msgs/Header", isArray: false, isComplex: true },
-      { name: "items", type: "msgs/OtherState", isArray: true, isComplex: true },
-    ],
-  },
-  "msgs/OtherState": {
-    fields: [
-      { name: "id", type: "int32", isArray: false },
-      { name: "speed", type: "float32", isArray: false },
-    ],
-  },
-  "std_msgs/Header": {
-    fields: [
-      { name: "seq", type: "uint32", isArray: false },
-      {
-        name: "stamp",
-        type: "time",
-        isArray: false,
-      },
-      { name: "frame_id", type: "string", isArray: false },
-    ],
-  },
-  "std_msgs/Bool": { fields: [{ name: "data", type: "bool", isArray: false }] },
-  "nonstd_msgs/Float64Stamped": {
-    fields: [
-      { name: "header", type: "std_msgs/Header", isArray: false, isComplex: true },
-      { name: "data", type: "float64", isArray: false },
-    ],
-  },
-};
+const datatypes: RosDatatypes = new Map(
+  Object.entries({
+    "msgs/PoseDebug": {
+      definitions: [
+        { name: "header", type: "std_msgs/Header", isArray: false, isComplex: true },
+        { name: "pose", type: "msgs/Pose", isArray: false, isComplex: true },
+      ],
+    },
+    "msgs/Pose": {
+      definitions: [
+        { name: "header", type: "std_msgs/Header", isArray: false, isComplex: true },
+        { name: "x", type: "float64", isArray: false },
+        { name: "y", type: "float64", isArray: false },
+        { name: "travel", type: "float64", isArray: false },
+        { name: "velocity", type: "float64", isArray: false },
+        { name: "acceleration", type: "float64", isArray: false },
+        { name: "heading", type: "float64", isArray: false },
+      ],
+    },
+    "msgs/State": {
+      definitions: [
+        { name: "header", type: "std_msgs/Header", isArray: false, isComplex: true },
+        { name: "items", type: "msgs/OtherState", isArray: true, isComplex: true },
+      ],
+    },
+    "msgs/OtherState": {
+      definitions: [
+        { name: "id", type: "int32", isArray: false },
+        { name: "speed", type: "float32", isArray: false },
+      ],
+    },
+    "std_msgs/Header": {
+      definitions: [
+        { name: "seq", type: "uint32", isArray: false },
+        {
+          name: "stamp",
+          type: "time",
+          isArray: false,
+        },
+        { name: "frame_id", type: "string", isArray: false },
+      ],
+    },
+    "std_msgs/Bool": { definitions: [{ name: "data", type: "bool", isArray: false }] },
+    "nonstd_msgs/Float64Stamped": {
+      definitions: [
+        { name: "header", type: "std_msgs/Header", isArray: false, isComplex: true },
+        { name: "data", type: "float64", isArray: false },
+      ],
+    },
+  }),
+);
 
 const getPreloadedMessage = (seconds: number) => ({
   topic: "/preloaded_topic",
@@ -897,9 +900,13 @@ export function SuperCloseValues(): JSX.Element {
     <PanelSetup
       pauseFrame={pauseFrame}
       fixture={{
-        datatypes: {
-          "std_msgs/Float32": { fields: [{ name: "data", type: "float32", isArray: false }] },
-        },
+        datatypes: new Map(
+          Object.entries({
+            "std_msgs/Float32": {
+              definitions: [{ name: "data", type: "float32", isArray: false }],
+            },
+          }),
+        ),
         topics: [{ name: "/some_number", datatype: "std_msgs/Float32" }],
         activeData: {
           startTime: { sec: 0, nsec: 0 },

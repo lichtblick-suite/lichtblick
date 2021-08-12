@@ -82,12 +82,14 @@ const example1 = {
 
 const fixture = {
   topics: [{ name: "/plot_a", datatype: "our_plot_type" }],
-  datatypes: {
-    our_plot_type: {
-      fields: [{ isArray: true, isComplex: true, name: "versions", type: "dummy" }],
-    },
-    dummy: { fields: [] },
-  },
+  datatypes: new Map(
+    Object.entries({
+      our_plot_type: {
+        definitions: [{ isArray: true, isComplex: true, name: "versions", type: "dummy" }],
+      },
+      dummy: { definitions: [] },
+    }),
+  ),
   frame: {
     "/plot_a": [
       {

@@ -14,7 +14,7 @@
 // Pulled from our open source demo bag: https://open-source-webviz-ui.s3.amazonaws.com/demo.bag
 import ts from "typescript/lib/typescript";
 
-import stressTestDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes.json";
+import stressTestDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes";
 import generateRosLib, {
   generateTypeDefs,
   typedArrayMap,
@@ -32,7 +32,7 @@ const baseNodeData: NodeData = {
   outputTopic: "",
   outputDatatype: "",
   globalVariables: [],
-  datatypes: {},
+  datatypes: new Map(),
   sourceFile: undefined,
   typeChecker: undefined,
   rosLib: "",
@@ -69,16 +69,20 @@ describe("typegen", () => {
   describe("generateTypeDefs", () => {
     describe("basic types", () => {
       it("multiple properties", () => {
-        const declarations = generateTypeDefs({
-          "std_msgs/ColorRGBA": {
-            fields: [
-              { type: "float32", name: "r", isArray: false, isComplex: false },
-              { type: "float32", name: "g", isArray: false, isComplex: false },
-              { type: "float32", name: "b", isArray: false, isComplex: false },
-              { type: "float32", name: "a", isArray: false, isComplex: false },
-            ],
-          },
-        });
+        const declarations = generateTypeDefs(
+          new Map(
+            Object.entries({
+              "std_msgs/ColorRGBA": {
+                definitions: [
+                  { type: "float32", name: "r", isArray: false, isComplex: false },
+                  { type: "float32", name: "g", isArray: false, isComplex: false },
+                  { type: "float32", name: "b", isArray: false, isComplex: false },
+                  { type: "float32", name: "a", isArray: false, isComplex: false },
+                ],
+              },
+            }),
+          ),
+        );
         expect(formatTypeDef(declarations)).toEqual({
           "std_msgs/ColorRGBA": `export interface std_msgs__ColorRGBA { r: number; g: number; b: number; a: number; }`,
         });
@@ -86,21 +90,29 @@ describe("typegen", () => {
     });
     describe("special ros types", () => {
       it("time", () => {
-        const declarations = generateTypeDefs({
-          "std_msgs/Time": {
-            fields: [{ type: "time", name: "t", isArray: false, isComplex: false }],
-          },
-        });
+        const declarations = generateTypeDefs(
+          new Map(
+            Object.entries({
+              "std_msgs/Time": {
+                definitions: [{ type: "time", name: "t", isArray: false, isComplex: false }],
+              },
+            }),
+          ),
+        );
         expect(formatTypeDef(declarations)).toEqual({
           "std_msgs/Time": `export interface std_msgs__Time { t: Time; }`,
         });
       });
       it("duration", () => {
-        const declarations = generateTypeDefs({
-          "std_msgs/Duration": {
-            fields: [{ type: "duration", name: "t", isArray: false, isComplex: false }],
-          },
-        });
+        const declarations = generateTypeDefs(
+          new Map(
+            Object.entries({
+              "std_msgs/Duration": {
+                definitions: [{ type: "duration", name: "t", isArray: false, isComplex: false }],
+              },
+            }),
+          ),
+        );
         expect(formatTypeDef(declarations)).toEqual({
           "std_msgs/Duration": `export interface std_msgs__Duration { t: Duration; }`,
         });
@@ -108,77 +120,104 @@ describe("typegen", () => {
     });
     describe("internal references", () => {
       it("allows ros datatypes that refer to each other", () => {
-        const declarations = generateTypeDefs({
-          "geometry_msgs/Pose": {
-            fields: [
-              { type: "geometry_msgs/Point", name: "position", isArray: false, isComplex: true },
-            ],
-          },
-          "geometry_msgs/Point": {
-            fields: [
-              { type: "float64", name: "x", isArray: false, isComplex: false },
-              { type: "float64", name: "y", isArray: false, isComplex: false },
-              { type: "float64", name: "z", isArray: false, isComplex: false },
-            ],
-          },
-        });
+        const declarations = generateTypeDefs(
+          new Map(
+            Object.entries({
+              "geometry_msgs/Pose": {
+                definitions: [
+                  {
+                    type: "geometry_msgs/Point",
+                    name: "position",
+                    isArray: false,
+                    isComplex: true,
+                  },
+                ],
+              },
+              "geometry_msgs/Point": {
+                definitions: [
+                  { type: "float64", name: "x", isArray: false, isComplex: false },
+                  { type: "float64", name: "y", isArray: false, isComplex: false },
+                  { type: "float64", name: "z", isArray: false, isComplex: false },
+                ],
+              },
+            }),
+          ),
+        );
         expect(formatTypeDef(declarations)).toEqual({
           "geometry_msgs/Pose": `export interface geometry_msgs__Pose { position: geometry_msgs__Point; }`,
           "geometry_msgs/Point": `export interface geometry_msgs__Point { x: number; y: number; z: number; }`,
         });
       });
       it("does not add duplicate declarations for interfaces already created", () => {
-        const declarations = generateTypeDefs({
-          "geometry_msgs/Pose": {
-            fields: [
-              { type: "geometry_msgs/Point", name: "position", isArray: false, isComplex: true },
-              {
-                type: "geometry_msgs/Point",
-                name: "last_position",
-                isArray: false,
-                isComplex: true,
+        const declarations = generateTypeDefs(
+          new Map(
+            Object.entries({
+              "geometry_msgs/Pose": {
+                definitions: [
+                  {
+                    type: "geometry_msgs/Point",
+                    name: "position",
+                    isArray: false,
+                    isComplex: true,
+                  },
+                  {
+                    type: "geometry_msgs/Point",
+                    name: "last_position",
+                    isArray: false,
+                    isComplex: true,
+                  },
+                ],
               },
-            ],
-          },
-          "geometry_msgs/Point": {
-            fields: [
-              { type: "float64", name: "x", isArray: false, isComplex: false },
-              { type: "float64", name: "y", isArray: false, isComplex: false },
-              { type: "float64", name: "z", isArray: false, isComplex: false },
-            ],
-          },
-        });
+              "geometry_msgs/Point": {
+                definitions: [
+                  { type: "float64", name: "x", isArray: false, isComplex: false },
+                  { type: "float64", name: "y", isArray: false, isComplex: false },
+                  { type: "float64", name: "z", isArray: false, isComplex: false },
+                ],
+              },
+            }),
+          ),
+        );
         expect(formatTypeDef(declarations)).toEqual({
           "geometry_msgs/Pose": `export interface geometry_msgs__Pose { position: geometry_msgs__Point; last_position: geometry_msgs__Point; }`,
           "geometry_msgs/Point": `export interface geometry_msgs__Point { x: number; y: number; z: number; }`,
         });
       });
       it("allows deep internal references", () => {
-        const declarations = generateTypeDefs({
-          "geometry_msgs/Pose": {
-            fields: [
-              {
-                type: "geometry_msgs/Directions",
-                name: "directions",
-                isArray: true,
-                isComplex: true,
+        const declarations = generateTypeDefs(
+          new Map(
+            Object.entries({
+              "geometry_msgs/Pose": {
+                definitions: [
+                  {
+                    type: "geometry_msgs/Directions",
+                    name: "directions",
+                    isArray: true,
+                    isComplex: true,
+                  },
+                ],
               },
-            ],
-          },
-          "geometry_msgs/Directions": {
-            fields: [
-              { type: "geometry_msgs/Point", name: "positions", isArray: true, isComplex: true },
-            ],
-          },
+              "geometry_msgs/Directions": {
+                definitions: [
+                  {
+                    type: "geometry_msgs/Point",
+                    name: "positions",
+                    isArray: true,
+                    isComplex: true,
+                  },
+                ],
+              },
 
-          "geometry_msgs/Point": {
-            fields: [
-              { type: "float64", name: "x", isArray: false, isComplex: false },
-              { type: "float64", name: "y", isArray: false, isComplex: false },
-              { type: "float64", name: "z", isArray: false, isComplex: false },
-            ],
-          },
-        });
+              "geometry_msgs/Point": {
+                definitions: [
+                  { type: "float64", name: "x", isArray: false, isComplex: false },
+                  { type: "float64", name: "y", isArray: false, isComplex: false },
+                  { type: "float64", name: "z", isArray: false, isComplex: false },
+                ],
+              },
+            }),
+          ),
+        );
         expect(formatTypeDef(declarations)).toEqual({
           "geometry_msgs/Pose": `export interface geometry_msgs__Pose { directions: geometry_msgs__Directions[]; }`,
           "geometry_msgs/Directions": `export interface geometry_msgs__Directions { positions: geometry_msgs__Point[]; }`,
@@ -189,22 +228,30 @@ describe("typegen", () => {
 
     describe("arrays", () => {
       it("defines primitive arrays", () => {
-        const declarations = generateTypeDefs({
-          "std_msgs/Points": {
-            fields: [{ type: "string", name: "x", isArray: true, isComplex: false }],
-          },
-        });
+        const declarations = generateTypeDefs(
+          new Map(
+            Object.entries({
+              "std_msgs/Points": {
+                definitions: [{ type: "string", name: "x", isArray: true, isComplex: false }],
+              },
+            }),
+          ),
+        );
         expect(formatTypeDef(declarations)).toEqual({
           "std_msgs/Points": `export interface std_msgs__Points { x: string[]; }`,
         });
       });
       it("typed arrays", () => {
         for (const [rosType, jsType] of typedArrayMap) {
-          const declarations = generateTypeDefs({
-            "std_msgs/Data": {
-              fields: [{ type: rosType, name: "x", isArray: true, isComplex: false }],
-            },
-          });
+          const declarations = generateTypeDefs(
+            new Map(
+              Object.entries({
+                "std_msgs/Data": {
+                  definitions: [{ type: rosType, name: "x", isArray: true, isComplex: false }],
+                },
+              }),
+            ),
+          );
           const formattedTypes = formatTypeDef(declarations);
           expect(formattedTypes).toEqual({
             "std_msgs/Data": `export interface std_msgs__Data { x: ${jsType}; }`,
@@ -218,20 +265,24 @@ describe("typegen", () => {
         }
       });
       it("references", () => {
-        const declarations = generateTypeDefs({
-          "geometry_msgs/Pose": {
-            fields: [
-              { type: "geometry_msgs/Point", name: "position", isArray: true, isComplex: true },
-            ],
-          },
-          "geometry_msgs/Point": {
-            fields: [
-              { type: "float64", name: "x", isArray: false, isComplex: false },
-              { type: "float64", name: "y", isArray: false, isComplex: false },
-              { type: "float64", name: "z", isArray: false, isComplex: false },
-            ],
-          },
-        });
+        const declarations = generateTypeDefs(
+          new Map(
+            Object.entries({
+              "geometry_msgs/Pose": {
+                definitions: [
+                  { type: "geometry_msgs/Point", name: "position", isArray: true, isComplex: true },
+                ],
+              },
+              "geometry_msgs/Point": {
+                definitions: [
+                  { type: "float64", name: "x", isArray: false, isComplex: false },
+                  { type: "float64", name: "y", isArray: false, isComplex: false },
+                  { type: "float64", name: "z", isArray: false, isComplex: false },
+                ],
+              },
+            }),
+          ),
+        );
         expect(formatTypeDef(declarations)).toEqual({
           "geometry_msgs/Pose": `export interface geometry_msgs__Pose { position: geometry_msgs__Point[]; }`,
           "geometry_msgs/Point": `export interface geometry_msgs__Point { x: number; y: number; z: number; }`,
@@ -240,11 +291,15 @@ describe("typegen", () => {
     });
     describe("ros constants", () => {
       it("does not return anything for ros constants", () => {
-        const declarations = generateTypeDefs({
-          "std_msgs/Constants": {
-            fields: [{ type: "uint8", name: "ARROW", isConstant: true, value: 0 }],
-          },
-        });
+        const declarations = generateTypeDefs(
+          new Map(
+            Object.entries({
+              "std_msgs/Constants": {
+                definitions: [{ type: "uint8", name: "ARROW", isConstant: true, value: 0 }],
+              },
+            }),
+          ),
+        );
         expect(formatTypeDef(declarations)).toEqual({
           "std_msgs/Constants": "export interface std_msgs__Constants { }",
         });
@@ -252,11 +307,15 @@ describe("typegen", () => {
     });
     describe("empty references", () => {
       it("contains an empty interface definition if the datatype does not have any properties", () => {
-        const declarations = generateTypeDefs({
-          "std_msgs/NoDef": {
-            fields: [],
-          },
-        });
+        const declarations = generateTypeDefs(
+          new Map(
+            Object.entries({
+              "std_msgs/NoDef": {
+                definitions: [],
+              },
+            }),
+          ),
+        );
         expect(formatTypeDef(declarations)).toEqual({
           "std_msgs/NoDef": "export interface std_msgs__NoDef { }",
         });
@@ -274,16 +333,18 @@ describe("typegen", () => {
           },
           { name: "/empty_topic", datatype: "std_msgs/NoDef" },
         ],
-        datatypes: {
-          "std_msgs/ColorRGBA": {
-            fields: [
-              { type: "float32", name: "r", isArray: false, isComplex: false },
-              { type: "float32", name: "g", isArray: false, isComplex: false },
-              { type: "float32", name: "b", isArray: false, isComplex: false },
-              { type: "float32", name: "a", isArray: false, isComplex: false },
-            ],
-          },
-        },
+        datatypes: new Map(
+          Object.entries({
+            "std_msgs/ColorRGBA": {
+              definitions: [
+                { type: "float32", name: "r", isArray: false, isComplex: false },
+                { type: "float32", name: "g", isArray: false, isComplex: false },
+                { type: "float32", name: "b", isArray: false, isComplex: false },
+                { type: "float32", name: "a", isArray: false, isComplex: false },
+              ],
+            },
+          }),
+        ),
       });
       const { diagnostics } = compile({ ...baseNodeData, sourceCode: rosLib });
       expect(diagnostics).toEqual([]);
@@ -291,7 +352,7 @@ describe("typegen", () => {
       expect(rosLib).toMatchSnapshot();
     });
     it("more complex snapshot", () => {
-      const randomTopics = Object.keys(stressTestDatatypes).map((datatype, i) => ({
+      const randomTopics = Array.from(stressTestDatatypes.keys()).map((datatype, i) => ({
         name: `/topic_${i}`,
         datatype,
       }));
@@ -302,7 +363,7 @@ describe("typegen", () => {
       expect(rosLib).toMatchSnapshot();
     });
     it("works with zero topics or datatypes", () => {
-      const rosLib = generateRosLib({ topics: [], datatypes: {} });
+      const rosLib = generateRosLib({ topics: [], datatypes: new Map() });
       expect(rosLib).toMatchSnapshot();
       const { diagnostics } = compile({ ...baseNodeData, sourceCode: rosLib });
       expect(diagnostics).toEqual([]);

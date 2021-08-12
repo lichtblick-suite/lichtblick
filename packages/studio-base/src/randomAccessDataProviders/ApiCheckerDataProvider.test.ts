@@ -29,7 +29,7 @@ function getProvider(isRoot: boolean = false) {
       { name: "/some_topic", datatype: "some_datatype" },
       { name: "/some_other_topic", datatype: "some_datatype" },
     ],
-    datatypes: { some_datatype: { fields: [] } },
+    datatypes: new Map(Object.entries({ some_datatype: { definitions: [] } })),
     messageDefinitionsByTopic: { "/some_other_topic": "dummy" },
     parsedMessageDefinitionsByTopic: { "/some_topic": [], "/some_other_topic": [] },
     providesParsedMessages: false, // to test missing messageDefinitionsByTopic
@@ -56,7 +56,7 @@ describe("ApiCheckerDataProvider", () => {
           // with parsed messageDefintions, the string messageDefintionsByTopic does not need to be complete.
           messageDefinitionsByTopic: { "/some_other_topic": "dummy" },
           parsedMessageDefinitionsByTopic: { "/some_topic": [], "/some_other_topic": [] },
-          datatypes: { some_datatype: { fields: [] } },
+          datatypes: new Map(Object.entries({ some_datatype: { definitions: [] } })),
         },
         connections: [],
         end: { nsec: 0, sec: 105 },
@@ -115,7 +115,9 @@ describe("ApiCheckerDataProvider", () => {
 
       it("throws when topic datatype is missing", async () => {
         const { provider, memoryDataProvider } = getProvider();
-        memoryDataProvider.datatypes = { some_other_datatype: { fields: [] } };
+        memoryDataProvider.datatypes = new Map(
+          Object.entries({ some_other_datatype: { definitions: [] } }),
+        );
         await expect(provider.initialize(mockExtensionPoint().extensionPoint)).rejects.toThrow();
       });
 

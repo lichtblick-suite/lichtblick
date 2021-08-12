@@ -27,7 +27,7 @@ const defaultActiveData: PlayerStateActiveData = {
   messageOrder: "receiveTime",
   lastSeekTime: 0,
   topics: [],
-  datatypes: {},
+  datatypes: new Map(),
   parsedMessageDefinitionsByTopic: {},
   totalBytesReceived: 0,
 };

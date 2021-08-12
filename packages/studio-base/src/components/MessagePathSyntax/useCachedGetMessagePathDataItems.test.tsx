@@ -54,9 +54,13 @@ function addValuesWithPathsToItems(
 
 describe("useCachedGetMessagePathDataItems", () => {
   const initialTopics = [{ name: "/topic", datatype: "datatype" }];
-  const initialDatatypes = {
-    datatype: { fields: [{ name: "an_array", type: "uint32", isArray: true, isComplex: false }] },
-  };
+  const initialDatatypes: RosDatatypes = new Map(
+    Object.entries({
+      datatype: {
+        definitions: [{ name: "an_array", type: "uint32", isArray: true, isComplex: false }],
+      },
+    }),
+  );
 
   function setup(initialPaths: string[], initialGlobalVariables?: GlobalVariables) {
     const initialProps = {
@@ -194,23 +198,25 @@ describe("useCachedGetMessagePathDataItems", () => {
         },
       ];
       const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
-      const datatypes: RosDatatypes = {
-        some_datatype: {
-          fields: [{ name: "some_array", type: "some_other_datatype", isArray: true }],
-        },
-        some_other_datatype: {
-          fields: [
-            { name: "some_id", type: "uint32" },
-            { name: "some_message", type: "yet_another_datatype" },
-          ],
-        },
-        yet_another_datatype: {
-          fields: [
-            { name: "x", type: "uint32" },
-            { name: "y", type: "uint32" },
-          ],
-        },
-      };
+      const datatypes: RosDatatypes = new Map(
+        Object.entries({
+          some_datatype: {
+            definitions: [{ name: "some_array", type: "some_other_datatype", isArray: true }],
+          },
+          some_other_datatype: {
+            definitions: [
+              { name: "some_id", type: "uint32" },
+              { name: "some_message", type: "yet_another_datatype" },
+            ],
+          },
+          yet_another_datatype: {
+            definitions: [
+              { name: "x", type: "uint32" },
+              { name: "y", type: "uint32" },
+            ],
+          },
+        }),
+      );
 
       expect(
         addValuesWithPathsToItems(
@@ -256,9 +262,11 @@ describe("useCachedGetMessagePathDataItems", () => {
           },
         ];
         const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
-        const datatypes: RosDatatypes = {
-          some_datatype: { fields: [{ name: "someJson", type: "json", isArray: false }] },
-        };
+        const datatypes: RosDatatypes = new Map(
+          Object.entries({
+            some_datatype: { definitions: [{ name: "someJson", type: "json", isArray: false }] },
+          }),
+        );
 
         expect(
           addValuesWithPathsToItems(messages, "/some/topic.someJson", topics, datatypes),
@@ -289,9 +297,11 @@ describe("useCachedGetMessagePathDataItems", () => {
           },
         ];
         const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
-        const datatypes: RosDatatypes = {
-          some_datatype: { fields: [{ name: "jsonArr", type: "json", isArray: false }] },
-        };
+        const datatypes: RosDatatypes = new Map(
+          Object.entries({
+            some_datatype: { definitions: [{ name: "jsonArr", type: "json", isArray: false }] },
+          }),
+        );
 
         expect(
           addValuesWithPathsToItems(messages, "/some/topic.jsonArr[0].foo.bar", topics, datatypes),
@@ -309,9 +319,11 @@ describe("useCachedGetMessagePathDataItems", () => {
           },
         ];
         const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
-        const datatypes: RosDatatypes = {
-          some_datatype: { fields: [{ name: "jsonArr", type: "json", isArray: false }] },
-        };
+        const datatypes: RosDatatypes = new Map(
+          Object.entries({
+            some_datatype: { definitions: [{ name: "jsonArr", type: "json", isArray: false }] },
+          }),
+        );
         const path = "/some/topic.jsonArr[:]{id==1}.val";
         expect(addValuesWithPathsToItems(messages, path, topics, datatypes)).toEqual([
           [{ value: 42, path, constantName: undefined }],
@@ -327,9 +339,11 @@ describe("useCachedGetMessagePathDataItems", () => {
           },
         ];
         const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
-        const datatypes: RosDatatypes = {
-          some_datatype: { fields: [{ name: "jsonArr", type: "json", isArray: true }] },
-        };
+        const datatypes: RosDatatypes = new Map(
+          Object.entries({
+            some_datatype: { definitions: [{ name: "jsonArr", type: "json", isArray: true }] },
+          }),
+        );
 
         expect(
           addValuesWithPathsToItems(messages, "/some/topic.jsonArr[0].foo", topics, datatypes),
@@ -345,9 +359,11 @@ describe("useCachedGetMessagePathDataItems", () => {
           },
         ];
         const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
-        const datatypes: RosDatatypes = {
-          some_datatype: { fields: [{ name: "someJson", type: "json", isArray: false }] },
-        };
+        const datatypes: RosDatatypes = new Map(
+          Object.entries({
+            some_datatype: { definitions: [{ name: "someJson", type: "json", isArray: false }] },
+          }),
+        );
 
         expect(
           addValuesWithPathsToItems(messages, "/some/topic.someJson.badPath", topics, datatypes),
@@ -380,9 +396,11 @@ describe("useCachedGetMessagePathDataItems", () => {
         },
       ];
       const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
-      const datatypes: RosDatatypes = {
-        some_datatype: { fields: [{ name: "some_array", type: "int32", isArray: true }] },
-      };
+      const datatypes: RosDatatypes = new Map(
+        Object.entries({
+          some_datatype: { definitions: [{ name: "some_array", type: "int32", isArray: true }] },
+        }),
+      );
 
       expect(
         addValuesWithPathsToItems(messages, "/some/topic.some_array[-2:-1]", topics, datatypes),
@@ -403,14 +421,18 @@ describe("useCachedGetMessagePathDataItems", () => {
         },
       ];
       // Topic not present
-      expect(addValuesWithPathsToItems(messages, "/some/topic", [], {})).toEqual([undefined]);
+      expect(addValuesWithPathsToItems(messages, "/some/topic", [], new Map())).toEqual([
+        undefined,
+      ]);
     });
 
     it("handles fields inside times", () => {
       const topics: Topic[] = [{ name: "/some/topic", datatype: "std_msgs/Header" }];
-      const datatypes: RosDatatypes = {
-        "std_msgs/Header": { fields: [{ name: "stamp", type: "time", isArray: false }] },
-      };
+      const datatypes: RosDatatypes = new Map(
+        Object.entries({
+          "std_msgs/Header": { definitions: [{ name: "stamp", type: "time", isArray: false }] },
+        }),
+      );
       const messages: MessageEvent<unknown>[] = [
         {
           topic: "/some/topic",
@@ -443,29 +465,31 @@ describe("useCachedGetMessagePathDataItems", () => {
         },
       ];
       const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
-      const datatypes: RosDatatypes = {
-        some_datatype: {
-          fields: [
-            {
-              name: "some_array",
-              type: "some_other_datatype",
-              isArray: true,
-            },
-          ],
-        },
-        some_other_datatype: {
-          fields: [
-            {
-              name: "some_filter_value",
-              type: "uint32",
-            },
-            {
-              name: "some_id",
-              type: "uint32",
-            },
-          ],
-        },
-      };
+      const datatypes: RosDatatypes = new Map(
+        Object.entries({
+          some_datatype: {
+            definitions: [
+              {
+                name: "some_array",
+                type: "some_other_datatype",
+                isArray: true,
+              },
+            ],
+          },
+          some_other_datatype: {
+            definitions: [
+              {
+                name: "some_filter_value",
+                type: "uint32",
+              },
+              {
+                name: "some_id",
+                type: "uint32",
+              },
+            ],
+          },
+        }),
+      );
 
       expect(
         addValuesWithPathsToItems(
@@ -513,20 +537,22 @@ describe("useCachedGetMessagePathDataItems", () => {
         },
       ];
       const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
-      const datatypes: RosDatatypes = {
-        some_datatype: {
-          fields: [
-            {
-              name: "str_field",
-              type: "string",
-            },
-            {
-              name: "num_field",
-              type: "uint32",
-            },
-          ],
-        },
-      };
+      const datatypes: RosDatatypes = new Map(
+        Object.entries({
+          some_datatype: {
+            definitions: [
+              {
+                name: "str_field",
+                type: "string",
+              },
+              {
+                name: "num_field",
+                type: "uint32",
+              },
+            ],
+          },
+        }),
+      );
 
       expect(
         addValuesWithPathsToItems(
@@ -604,28 +630,30 @@ describe("useCachedGetMessagePathDataItems", () => {
         },
       ];
       const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
-      const datatypes: RosDatatypes = {
-        some_datatype: {
-          fields: [
-            {
-              name: "OFF",
-              type: "uint32",
-              isConstant: true,
-              value: 0,
-            },
-            {
-              name: "ON",
-              type: "uint32",
-              isConstant: true,
-              value: 1,
-            },
-            {
-              name: "state",
-              type: "uint32",
-            },
-          ],
-        },
-      };
+      const datatypes: RosDatatypes = new Map(
+        Object.entries({
+          some_datatype: {
+            definitions: [
+              {
+                name: "OFF",
+                type: "uint32",
+                isConstant: true,
+                value: 0,
+              },
+              {
+                name: "ON",
+                type: "uint32",
+                isConstant: true,
+                value: 1,
+              },
+              {
+                name: "state",
+                type: "uint32",
+              },
+            ],
+          },
+        }),
+      );
 
       expect(addValuesWithPathsToItems(messages, "/some/topic.state", topics, datatypes)).toEqual([
         [
@@ -659,11 +687,13 @@ describe("useCachedGetMessagePathDataItems", () => {
         },
       ];
       const topics: Topic[] = [{ name: "/some/topic", datatype: "some_datatype" }];
-      const datatypes: RosDatatypes = {
-        some_datatype: {
-          fields: [{ name: "num_field", type: "uint64" }],
-        },
-      };
+      const datatypes: RosDatatypes = new Map(
+        Object.entries({
+          some_datatype: {
+            definitions: [{ name: "num_field", type: "uint64" }],
+          },
+        }),
+      );
 
       expect(
         addValuesWithPathsToItems(
@@ -789,9 +819,13 @@ describe("useDecodeMessagePathsForMessagesByTopic", () => {
       { name: "/topic2", datatype: "datatype" },
       { name: "/topic3", datatype: "datatype" },
     ];
-    const datatypes = {
-      datatype: { fields: [{ name: "value", type: "uint32", isArray: false, isComplex: false }] },
-    };
+    const datatypes: RosDatatypes = new Map(
+      Object.entries({
+        datatype: {
+          definitions: [{ name: "value", type: "uint32", isArray: false, isComplex: false }],
+        },
+      }),
+    );
     const currentLayout = new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS);
     const { result } = renderHook((paths) => useDecodeMessagePathsForMessagesByTopic(paths), {
       initialProps: ["/topic1.value", "/topic2.value", "/topic3.value", "/topic3..value"],

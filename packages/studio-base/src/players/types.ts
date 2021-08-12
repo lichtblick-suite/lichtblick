@@ -276,23 +276,19 @@ export type SubscribePayload = {
 };
 
 // Represents a single topic publisher, for use in `setPublishers`.
-// TODO(JP): Rename to `PublisherPayload`.
-// TODO(JP): Pull this into two types, one for the Player (which does not care about the
-// `advertiser`) and one for the Internals panel (which does).
 export type AdvertisePayload = {
-  // The topic name. Currently there is no hard requirement on whether or not this topic already
-  // exists.
+  // The topic name
   topic: string;
 
   // The datatype name
   datatype: string;
 
   // A map of datatype names to ROS message definitions. This must include
-  // message definitions for all types referenced by `datatype` and its children
+  // message definitions for all types referenced by `datatype` and its children.
   datatypes: RosDatatypes;
 
-  // Optionally, where the request came from. Used in the "Internals" panel to improve debugging.
-  advertiser?: { type: "panel"; name: string };
+  // Optionally indicate the name of the advertiser
+  advertiser?: string;
 };
 
 // The actual message to publish.

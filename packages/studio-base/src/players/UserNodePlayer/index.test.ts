@@ -15,13 +15,14 @@
 import FakePlayer from "@foxglove/studio-base/components/MessagePipeline/FakePlayer";
 import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
 import MockUserNodePlayerWorker from "@foxglove/studio-base/players/UserNodePlayer/MockUserNodePlayerWorker";
-import exampleDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes.json";
+import exampleDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes";
 import {
   Sources,
   DiagnosticSeverity,
   ErrorCodes,
 } from "@foxglove/studio-base/players/UserNodePlayer/types";
 import { PlayerStateActiveData } from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import Storage from "@foxglove/studio-base/util/Storage";
 import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
@@ -91,7 +92,7 @@ const basicPlayerState: PlayerStateActiveData = {
   messageOrder: "receiveTime",
   currentTime: { sec: 0, nsec: 0 },
   topics: [],
-  datatypes: {},
+  datatypes: new Map(),
 };
 
 const upstreamFirst = {
@@ -212,7 +213,7 @@ describe("UserNodePlayer", () => {
       const userNodePlayer = new UserNodePlayer(fakePlayer, defaultUserNodeActions);
       expect(fakePlayer.setPublishers).not.toHaveBeenCalled();
       expect(fakePlayer.publish).not.toHaveBeenCalled();
-      const publishers = [{ topic: "/foo", datatype: "foo", datatypes: {} }];
+      const publishers = [{ topic: "/foo", datatype: "foo", datatypes: new Map() }];
       userNodePlayer.setPublishers(publishers);
       expect(fakePlayer.setPublishers).toHaveBeenLastCalledWith(publishers);
       expect(fakePlayer.publish).not.toHaveBeenCalled();
@@ -244,7 +245,7 @@ describe("UserNodePlayer", () => {
           messageOrder: "receiveTime",
           currentTime: { sec: 0, nsec: 0 },
           topics: [{ name: "/np_input", datatype: `${DEFAULT_STUDIO_NODE_PREFIX}1` }],
-          datatypes: { foo: { fields: [] } },
+          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
         },
       });
 
@@ -275,7 +276,7 @@ describe("UserNodePlayer", () => {
         messageOrder: "receiveTime",
         currentTime: { sec: 0, nsec: 0 },
         topics: [{ name: "/np_input", datatype: "/np_input_datatype" }],
-        datatypes: { foo: { fields: [] } },
+        datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
       };
 
       void fakePlayer.emit({ activeData });
@@ -284,16 +285,21 @@ describe("UserNodePlayer", () => {
         { name: "/np_input", datatype: "/np_input_datatype" },
         { name: "/studio_node/1", datatype: `${DEFAULT_STUDIO_NODE_PREFIX}1` },
       ]);
-      expect(firstDatatypes).toEqual({
-        foo: { fields: [] },
-        [`${DEFAULT_STUDIO_NODE_PREFIX}1`]: {
-          fields: [
-            { name: "custom_np_field", type: "string", isArray: false, isComplex: false },
-            { name: "value", type: "string", isArray: false, isComplex: false },
+      expect(firstDatatypes).toEqual(
+        new Map([
+          ["foo", { definitions: [] }],
+          [
+            `${DEFAULT_STUDIO_NODE_PREFIX}1`,
+            {
+              definitions: [
+                { name: "custom_np_field", type: "string", isArray: false, isComplex: false },
+                { name: "value", type: "string", isArray: false, isComplex: false },
+              ],
+            },
           ],
-        },
-        ...basicDatatypes,
-      });
+          ...basicDatatypes,
+        ]),
+      );
 
       // Seek should keep topics memoized.
       void fakePlayer.emit({ activeData: { ...activeData, lastSeekTime: 123 } });
@@ -302,7 +308,7 @@ describe("UserNodePlayer", () => {
       expect(secondDatatypes).toBe(firstDatatypes);
 
       // Changing topics/datatypes should not memoize.
-      void fakePlayer.emit({ activeData: { ...activeData, topics: [], datatypes: {} } });
+      void fakePlayer.emit({ activeData: { ...activeData, topics: [], datatypes: new Map() } });
       const { topics: thirdTopics, datatypes: thirdDatatypes }: any = await done3;
       expect(thirdTopics).not.toBe(firstTopics);
       expect(thirdDatatypes).not.toBe(firstDatatypes);
@@ -336,7 +342,7 @@ describe("UserNodePlayer", () => {
           messageOrder: "receiveTime",
           currentTime: { sec: 0, nsec: 0 },
           topics: [{ name: "/np_input", datatype: `${DEFAULT_STUDIO_NODE_PREFIX}1` }],
-          datatypes: { foo: { fields: [] } },
+          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
         },
       });
 
@@ -349,7 +355,7 @@ describe("UserNodePlayer", () => {
           messageOrder: "receiveTime",
           currentTime: { sec: 0, nsec: 0 },
           topics: [{ name: "/np_input", datatype: `${DEFAULT_STUDIO_NODE_PREFIX}1` }],
-          datatypes: { foo: { fields: [] } },
+          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
         },
       });
 
@@ -372,7 +378,7 @@ describe("UserNodePlayer", () => {
           messageOrder: "receiveTime",
           currentTime: { sec: 0, nsec: 0 },
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] } },
+          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
         },
       });
 
@@ -401,7 +407,7 @@ describe("UserNodePlayer", () => {
           messageOrder: "receiveTime",
           currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] } },
+          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
         },
       });
 
@@ -428,7 +434,7 @@ describe("UserNodePlayer", () => {
           messageOrder: "receiveTime",
           currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] } },
+          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
         },
       });
 
@@ -467,7 +473,7 @@ describe("UserNodePlayer", () => {
           messageOrder: "receiveTime",
           currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] } },
+          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
         },
       });
 
@@ -484,7 +490,9 @@ describe("UserNodePlayer", () => {
         addUserNodeLogs,
         setUserNodeDiagnostics,
       });
-      const datatypes = { foo: { fields: [{ name: "payload", type: "string" }] } };
+      const datatypes: RosDatatypes = new Map(
+        Object.entries({ foo: { definitions: [{ name: "payload", type: "string" }] } }),
+      );
 
       const [done1, done2] = setListenerHelper(userNodePlayer, 2);
       userNodePlayer.setSubscriptions([{ topic: `${DEFAULT_STUDIO_NODE_PREFIX}1` }]);
@@ -556,7 +564,7 @@ describe("UserNodePlayer", () => {
           messageOrder: "receiveTime",
           currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] } },
+          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
         },
       });
 
@@ -603,7 +611,7 @@ describe("UserNodePlayer", () => {
           messageOrder: "receiveTime",
           currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] } },
+          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
         },
       });
 
@@ -617,7 +625,7 @@ describe("UserNodePlayer", () => {
           messageOrder: "receiveTime",
           currentTime: upstreamSecond.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] } },
+          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
         },
       });
 
@@ -660,7 +668,9 @@ describe("UserNodePlayer", () => {
           messageOrder: "receiveTime",
           currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+          datatypes: new Map(
+            Object.entries({ foo: { definitions: [] }, "std_msgs/Header": { definitions: [] } }),
+          ),
         },
       });
 
@@ -719,7 +729,9 @@ describe("UserNodePlayer", () => {
           messageOrder: "receiveTime",
           currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+          datatypes: new Map(
+            Object.entries({ foo: { definitions: [] }, "std_msgs/Header": { definitions: [] } }),
+          ),
         },
       });
 
@@ -769,7 +781,9 @@ describe("UserNodePlayer", () => {
           messageOrder: "receiveTime",
           currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+          datatypes: new Map(
+            Object.entries({ foo: { definitions: [] }, "std_msgs/Header": { definitions: [] } }),
+          ),
         },
       });
 
@@ -783,7 +797,9 @@ describe("UserNodePlayer", () => {
           currentTime: upstreamSecond.receiveTime,
           lastSeekTime: 1,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+          datatypes: new Map(
+            Object.entries({ foo: { definitions: [] }, "std_msgs/Header": { definitions: [] } }),
+          ),
         },
       });
 
@@ -895,7 +911,9 @@ describe("UserNodePlayer", () => {
           messageOrder: "receiveTime",
           currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+          datatypes: new Map(
+            Object.entries({ foo: { definitions: [] }, "std_msgs/Header": { definitions: [] } }),
+          ),
         },
       });
 
@@ -932,7 +950,9 @@ describe("UserNodePlayer", () => {
           messageOrder: "receiveTime",
           currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+          datatypes: new Map(
+            Object.entries({ foo: { definitions: [] }, "std_msgs/Header": { definitions: [] } }),
+          ),
         },
       });
 
@@ -947,7 +967,9 @@ describe("UserNodePlayer", () => {
           messageOrder: "receiveTime",
           currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+          datatypes: new Map(
+            Object.entries({ foo: { definitions: [] }, "std_msgs/Header": { definitions: [] } }),
+          ),
         },
       });
       const { topicNames: secondTopicNames }: any = await secondDone;
@@ -1042,7 +1064,9 @@ describe("UserNodePlayer", () => {
             messageOrder: "receiveTime",
             currentTime: upstreamFirst.receiveTime,
             topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-            datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+            datatypes: new Map(
+              Object.entries({ foo: { definitions: [] }, "std_msgs/Header": { definitions: [] } }),
+            ),
           },
         });
 
@@ -1086,7 +1110,9 @@ describe("UserNodePlayer", () => {
             messageOrder: "receiveTime",
             currentTime: upstreamFirst.receiveTime,
             topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-            datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+            datatypes: new Map(
+              Object.entries({ foo: { definitions: [] }, "std_msgs/Header": { definitions: [] } }),
+            ),
           },
         });
 
@@ -1141,7 +1167,9 @@ describe("UserNodePlayer", () => {
             messageOrder: "receiveTime",
             currentTime: upstreamFirst.receiveTime,
             topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-            datatypes: { foo: { fields: [] }, "std_msgs/Header": { fields: [] } },
+            datatypes: new Map(
+              Object.entries({ foo: { definitions: [] }, "std_msgs/Header": { definitions: [] } }),
+            ),
           },
         });
 
@@ -1216,7 +1244,7 @@ describe("UserNodePlayer", () => {
           messageOrder: "receiveTime",
           currentTime: upstreamFirst.receiveTime,
           topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-          datatypes: { foo: { fields: [] } },
+          datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
         };
         void fakePlayer.emit({ activeData });
 
@@ -1270,7 +1298,7 @@ describe("UserNodePlayer", () => {
             messageOrder: "receiveTime",
             currentTime: upstreamFirst.receiveTime,
             topics: [{ name: "/np_input", datatype: "std_msgs/Header" }],
-            datatypes: { foo: { fields: [] } },
+            datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
           },
         });
       };

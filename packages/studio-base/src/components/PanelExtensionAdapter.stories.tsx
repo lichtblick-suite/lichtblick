@@ -34,7 +34,7 @@ export const CatchRenderError = (): JSX.Element => {
             datatype: "test_msgs/Sample",
           },
         ],
-        datatypes: {},
+        datatypes: new Map(),
         frame: {},
         layout: "UnknownPanel!4co6n9d",
       }}

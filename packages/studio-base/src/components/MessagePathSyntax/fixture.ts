@@ -11,9 +11,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-export const datatypes = {
-  "some/datatype": { fields: [{ name: "index", type: "int32" }] },
-};
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+
+export const datatypes: RosDatatypes = new Map(
+  Object.entries({
+    "some/datatype": { definitions: [{ name: "index", type: "int32" }] },
+  }),
+);
 
 export const messages = Object.freeze([
   {

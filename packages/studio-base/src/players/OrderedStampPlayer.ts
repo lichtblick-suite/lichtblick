@@ -44,7 +44,7 @@ export const BUFFER_DURATION_SECS = 1.0;
 
 const getTopicsWithHeader = memoizeWeak((topics: Topic[], datatypes: RosDatatypes) => {
   return topics.filter(({ datatype }) => {
-    const fields = datatypes[datatype]?.fields;
+    const fields = datatypes.get(datatype)?.definitions;
     return fields?.find((field) => field.type === "std_msgs/Header");
   });
 });

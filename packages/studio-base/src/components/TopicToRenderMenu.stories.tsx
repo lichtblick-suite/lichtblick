@@ -47,7 +47,7 @@ storiesOf("components/TopicToRenderMenu", module)
   .add("example (have topicsGroups)", () => {
     return (
       <PanelSetup
-        fixture={{ topics: [], datatypes: {}, frame: {} }}
+        fixture={{ topics: [], datatypes: new Map(), frame: {} }}
         onMount={(el: any) => {
           const topicSet = el.querySelector("[data-test=topic-set]");
           if (topicSet) {
@@ -70,7 +70,7 @@ storiesOf("components/TopicToRenderMenu", module)
   .add("example (have singleTopicDatatype)", () => {
     return (
       <PanelSetup
-        fixture={{ topics: [], datatypes: {}, frame: {} }}
+        fixture={{ topics: [], datatypes: new Map(), frame: {} }}
         onMount={(el: any) => {
           const topicSet = el.querySelector("[data-test=topic-set]");
           if (topicSet) {
@@ -93,7 +93,7 @@ storiesOf("components/TopicToRenderMenu", module)
   .add("select another topic (have singleTopicDatatype)", () => {
     return (
       <PanelSetup
-        fixture={{ topics: [], datatypes: {}, frame: {} }}
+        fixture={{ topics: [], datatypes: new Map(), frame: {} }}
         onMount={(el: any) => {
           const topicSet = el.querySelector("[data-test=topic-set]");
           if (topicSet) {
@@ -116,7 +116,7 @@ storiesOf("components/TopicToRenderMenu", module)
   .add("no bag loaded, defaultTopicToRender === topicToRender (have topicsGroups)", () => {
     return (
       <PanelSetup
-        fixture={{ topics: [], datatypes: {}, frame: {} }}
+        fixture={{ topics: [], datatypes: new Map(), frame: {} }}
         onMount={(el: any) => {
           const topicSet = el.querySelector("[data-test=topic-set]");
           if (topicSet) {
@@ -139,7 +139,7 @@ storiesOf("components/TopicToRenderMenu", module)
   .add("no bag loaded, defaultTopicToRender !== topicToRender (have topicsGroups)", () => {
     return (
       <PanelSetup
-        fixture={{ topics: [], datatypes: {}, frame: {} }}
+        fixture={{ topics: [], datatypes: new Map(), frame: {} }}
         onMount={(el: any) => {
           const topicSet = el.querySelector("[data-test=topic-set]");
           if (topicSet) {
@@ -162,7 +162,7 @@ storiesOf("components/TopicToRenderMenu", module)
   .add("bag loaded but topicToRender is not available (have singleTopicDatatype)", () => {
     return (
       <PanelSetup
-        fixture={{ topics: [], datatypes: {}, frame: {} }}
+        fixture={{ topics: [], datatypes: new Map(), frame: {} }}
         onMount={(el: any) => {
           const topicSet = el.querySelector("[data-test=topic-set]");
           if (topicSet) {
@@ -185,7 +185,7 @@ storiesOf("components/TopicToRenderMenu", module)
   .add("bag loaded but defaultTopicToRender is not available (have singleTopicDatatype)", () => {
     return (
       <PanelSetup
-        fixture={{ topics: [], datatypes: {}, frame: {} }}
+        fixture={{ topics: [], datatypes: new Map(), frame: {} }}
         onMount={(el: any) => {
           const topicSet = el.querySelector("[data-test=topic-set]");
           if (topicSet) {

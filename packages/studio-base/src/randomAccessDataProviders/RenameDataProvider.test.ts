@@ -96,7 +96,7 @@ describe("RenameDataProvider", () => {
       messageDefinitions: {
         type: "parsed",
         messageDefinitionsByTopic: { [`${SECOND_SOURCE_PREFIX}/some_topic1`]: "int32 value" },
-        datatypes: {},
+        datatypes: new Map(),
         parsedMessageDefinitionsByTopic: { [`${SECOND_SOURCE_PREFIX}/some_topic1`]: [] },
       },
       numMessages: undefined,

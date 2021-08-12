@@ -17,9 +17,11 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 const fixture = {
   topics: [],
-  datatypes: {
-    Foo: { fields: [] },
-  },
+  datatypes: new Map(
+    Object.entries({
+      Foo: { definitions: [] },
+    }),
+  ),
   frame: {},
   capabilities: [],
   globalVariables: { globalVariable: 3.5 },

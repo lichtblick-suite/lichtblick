@@ -48,7 +48,7 @@ storiesOf(
     <PanelSetup
       fixture={{
         topics: [],
-        datatypes: {},
+        datatypes: new Map(),
         frame: {},
         linkedGlobalVariables,
         globalVariables: {

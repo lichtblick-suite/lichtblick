@@ -21,6 +21,7 @@ import {
   SubscribePayload,
   Topic,
 } from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
 import { VELODYNE_SCAN_DATATYPE } from "@foxglove/studio-base/util/globalConstants";
 import {
@@ -40,27 +41,32 @@ const RPM = 600;
 const PROBLEM_SOCKET_ERROR = "SOCKET_ERROR";
 const TOPIC = "/velodyne_points";
 const TOPICS: Topic[] = [{ name: TOPIC, datatype: VELODYNE_SCAN_DATATYPE }];
-const DATATYPES = {
-  "velodyne_msgs/VelodyneScan": {
-    fields: [
-      { type: "std_msgs/Header", name: "header", isArray: false, isComplex: true },
-      { type: "velodyne_msgs/VelodynePacket", name: "packets", isArray: true, isComplex: true },
-    ],
-  },
-  "velodyne_msgs/VelodynePacket": {
-    fields: [
-      { type: "time", name: "stamp", isArray: false, isComplex: false },
-      { type: "uint8", name: "data", isArray: true, arrayLength: 1206, isComplex: false },
-    ],
-  },
-  "std_msgs/Header": {
-    fields: [
-      { name: "seq", type: "uint32", isArray: false },
-      { name: "stamp", type: "time", isArray: false },
-      { name: "frame_id", type: "string", isArray: false },
-    ],
-  },
-};
+const DATATYPES: RosDatatypes = new Map(
+  Object.entries({
+    "velodyne_msgs/VelodyneScan": {
+      name: "velodyne_msgs/VelodyneScan",
+      definitions: [
+        { type: "std_msgs/Header", name: "header", isArray: false, isComplex: true },
+        { type: "velodyne_msgs/VelodynePacket", name: "packets", isArray: true, isComplex: true },
+      ],
+    },
+    "velodyne_msgs/VelodynePacket": {
+      name: "velodyne_msgs/VelodynePacket",
+      definitions: [
+        { type: "time", name: "stamp", isArray: false, isComplex: false },
+        { type: "uint8", name: "data", isArray: true, arrayLength: 1206, isComplex: false },
+      ],
+    },
+    "std_msgs/Header": {
+      name: "std_msgs/Header",
+      definitions: [
+        { name: "seq", type: "uint32", isArray: false },
+        { name: "stamp", type: "time", isArray: false },
+        { name: "frame_id", type: "string", isArray: false },
+      ],
+    },
+  }),
+);
 const CAPABILITIES: string[] = [];
 
 type VelodynePlayerOpts = {

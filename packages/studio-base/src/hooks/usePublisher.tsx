@@ -41,7 +41,7 @@ export default function usePublisher({
   const setPublishers = useMessagePipeline((context) => context.setPublishers);
   useEffect(() => {
     if (canPublish) {
-      setPublishers(id, [{ topic, datatype, datatypes, advertiser: { type: "panel", name } }]);
+      setPublishers(id, [{ topic, datatype, datatypes, advertiser: name }]);
       return () => setPublishers(id, []);
     } else {
       return undefined;

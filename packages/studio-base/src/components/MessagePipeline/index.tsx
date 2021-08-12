@@ -248,11 +248,13 @@ export function MessagePipelineProvider({
   }, [player]);
 
   const topics: Topic[] | undefined = useShallowMemo(playerState.activeData?.topics);
-  const unmemoizedDatatypes: RosDatatypes | undefined = playerState.activeData?.datatypes;
   const messages: readonly MessageEvent<unknown>[] | undefined = playerState.activeData?.messages;
   const frame = useMemo(() => groupBy(messages ?? [], "topic"), [messages]);
   const sortedTopics = useMemo(() => (topics ?? []).sort(), [topics]);
-  const datatypes: RosDatatypes = useMemo(() => unmemoizedDatatypes ?? {}, [unmemoizedDatatypes]);
+  const datatypes: RosDatatypes = useMemo(
+    () => playerState.activeData?.datatypes ?? new Map(),
+    [playerState.activeData?.datatypes],
+  );
   const setSubscriptions = useCallback(
     (id: string, subscriptionsForId: SubscribePayload[]) => {
       setAllSubscriptions((previousSubscriptions) => {

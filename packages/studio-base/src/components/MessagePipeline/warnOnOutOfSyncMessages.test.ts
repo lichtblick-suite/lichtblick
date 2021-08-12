@@ -32,7 +32,7 @@ const playerStateWithMessages = (messages: any, messageOrder: any): PlayerState 
       { name: "/foo", datatype: "visualization_msgs/Marker" },
       { name: "/bar", datatype: "visualization_msgs/Marker" },
     ],
-    datatypes: {},
+    datatypes: new Map(),
     parsedMessageDefinitionsByTopic: {},
     currentTime: {
       sec: 1,

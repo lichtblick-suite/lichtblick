@@ -29,7 +29,7 @@ function parsedMessageDefinitionsToDatatypes(
   const topicNameByDatatypeName: {
     [key: string]: string;
   } = fromPairs(topics.map(({ name, datatype }) => [datatype, name]));
-  const datatypes: RosDatatypes = {};
+  const datatypes: RosDatatypes = new Map();
   topLevelDatatypeNames.forEach((datatypeName) => {
     const topicName = topicNameByDatatypeName[datatypeName];
     if (topicName == undefined) {
@@ -43,9 +43,9 @@ function parsedMessageDefinitionsToDatatypes(
       // The first definition usually doesn't have an explicit name,
       // so we get the name from the datatype.
       if (index === 0) {
-        datatypes[datatypeName] = { fields: definitions };
+        datatypes.set(datatypeName, { name: datatypeName, definitions });
       } else if (name != undefined) {
-        datatypes[name] = { fields: definitions };
+        datatypes.set(name, { name, definitions });
       }
     });
   });

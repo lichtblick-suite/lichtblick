@@ -17,12 +17,15 @@ import { PropsWithChildren } from "react";
 
 import { MessageEvent } from "@foxglove/studio";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 import useFrame from "./useFrame";
 
-const datatypes = {
-  "some/datatype": { fields: [{ name: "index", type: "int32" }] },
-};
+const datatypes: RosDatatypes = new Map(
+  Object.entries({
+    "some/datatype": { definitions: [{ name: "index", type: "int32" }] },
+  }),
+);
 
 const messageEventFixtures = [
   {

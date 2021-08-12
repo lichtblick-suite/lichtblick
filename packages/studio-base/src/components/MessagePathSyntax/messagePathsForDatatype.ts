@@ -54,48 +54,48 @@ function isRosPrimitive(type: string): type is RosPrimitive {
 //   }
 // }
 let lastDatatypes: RosDatatypes | undefined;
-let lastStructures: Record<string, MessagePathStructureItemMessage>;
-export function messagePathStructures(datatypes: RosDatatypes): {
-  [key: string]: MessagePathStructureItemMessage;
-} {
-  if (lastDatatypes !== datatypes) {
-    lastDatatypes = undefined;
-    const structureFor = memoize((datatype: string): MessagePathStructureItemMessage => {
-      const nextByName: {
-        [key: string]: MessagePathStructureItem;
-      } = {};
-      const rosDatatype = datatype === "json" ? { fields: [] } : datatypes[datatype];
-      if (!rosDatatype) {
-        throw new Error(`datatype not found: "${datatype}"`);
-      }
-      rosDatatype.fields.forEach((msgField) => {
-        if (msgField.isConstant === true) {
-          return;
-        }
-
-        const next: MessagePathStructureItem = isRosPrimitive(msgField.type)
-          ? {
-              structureType: "primitive",
-              primitiveType: msgField.type,
-              datatype,
-            }
-          : structureFor(msgField.type);
-
-        if (msgField.isArray === true) {
-          nextByName[msgField.name] = { structureType: "array", next, datatype };
-        } else {
-          nextByName[msgField.name] = next;
-        }
-      });
-      return { structureType: "message", nextByName, datatype };
-    });
-
-    lastStructures = {};
-    Object.keys(datatypes).forEach((datatype) => {
-      lastStructures[datatype] = structureFor(datatype);
-    });
-    lastDatatypes = datatypes; // Set at the very end, in case there's an error earlier.
+let lastStructures: Record<string, MessagePathStructureItemMessage> | undefined;
+export function messagePathStructures(
+  datatypes: RosDatatypes,
+): Record<string, MessagePathStructureItemMessage> {
+  if (lastDatatypes === datatypes && lastStructures) {
+    return lastStructures;
   }
+
+  lastDatatypes = undefined;
+  const structureFor = memoize((datatype: string): MessagePathStructureItemMessage => {
+    const nextByName: Record<string, MessagePathStructureItem> = {};
+    const rosDatatype = datatypes.get(datatype);
+    if (!rosDatatype) {
+      throw new Error(`datatype not found: "${datatype}"`);
+    }
+    rosDatatype.definitions.forEach((msgField) => {
+      if (msgField.isConstant === true) {
+        return;
+      }
+
+      const next: MessagePathStructureItem = isRosPrimitive(msgField.type)
+        ? {
+            structureType: "primitive",
+            primitiveType: msgField.type,
+            datatype,
+          }
+        : structureFor(msgField.type);
+
+      if (msgField.isArray === true) {
+        nextByName[msgField.name] = { structureType: "array", next, datatype };
+      } else {
+        nextByName[msgField.name] = next;
+      }
+    });
+    return { structureType: "message", nextByName, datatype };
+  });
+
+  lastStructures = {};
+  for (const [datatype] of datatypes) {
+    lastStructures[datatype] = structureFor(datatype);
+  }
+  lastDatatypes = datatypes; // Set at the very end, in case there's an error earlier.
   return lastStructures;
 }
 

@@ -34,11 +34,13 @@ const makeArrayData = (length = 50, nestArray = true): unknown => {
 };
 
 const fixture = {
-  datatypes: {
-    my_arr: {
-      fields: [{ type: "json", name: "array", isConstant: false, isArray: true }],
-    },
-  },
+  datatypes: new Map(
+    Object.entries({
+      my_arr: {
+        definitions: [{ type: "json", name: "array", isConstant: false, isArray: true }],
+      },
+    }),
+  ),
   topics: [{ name: "/my_arr", datatype: "my_arr" }],
   frame: {
     "/my_arr": [

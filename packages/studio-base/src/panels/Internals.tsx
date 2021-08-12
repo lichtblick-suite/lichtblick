@@ -75,13 +75,7 @@ function getSubscriptionGroup({ requester }: SubscribePayload): string {
 }
 
 function getPublisherGroup({ advertiser }: AdvertisePayload): string {
-  if (!advertiser) {
-    return "<unknown>";
-  }
-  switch (advertiser.type) {
-    case "panel":
-      return `Panel “${advertiser.name}”`;
-  }
+  return advertiser == undefined ? "<unknown>" : advertiser;
 }
 
 type RecordedData = {

@@ -13,7 +13,7 @@
 
 /* eslint-disable jest/no-conditional-expect */
 
-import exampleDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes.json";
+import exampleDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes";
 import generateRosLib from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateRosLib";
 import {
   getOutputTopic,
@@ -47,7 +47,7 @@ const baseNodeData: NodeData = {
   globalVariables: [],
   outputTopic: "",
   outputDatatype: "",
-  datatypes: {},
+  datatypes: new Map(),
   sourceFile: undefined,
   typeChecker: undefined,
   rosLib: generateRosLib({
@@ -303,7 +303,9 @@ describe("pipeline", () => {
     describe("generated types", () => {
       it("can successfully use dynamically typed definitions as input", () => {
         const tickInfoDatatype = {
-          fields: [{ type: "uint64", name: "cpu_elapsed_ns", isArray: false, isComplex: false }],
+          definitions: [
+            { type: "uint64", name: "cpu_elapsed_ns", isArray: false, isComplex: false },
+          ],
         };
         const sourceCode = `
           import { Input, Messages } from "ros";
@@ -322,9 +324,11 @@ describe("pipeline", () => {
 
         const rosLib = generateRosLib({
           topics: [{ name: "/tick_information", datatype: "std_msgs/TickInfo" }],
-          datatypes: {
-            "std_msgs/TickInfo": tickInfoDatatype,
-          },
+          datatypes: new Map(
+            Object.entries({
+              "std_msgs/TickInfo": tickInfoDatatype,
+            }),
+          ),
         });
         const { diagnostics } = compile({ ...baseNodeData, sourceCode, rosLib: `${rosLib}` });
         expect(diagnostics).toEqual([]);
@@ -425,54 +429,58 @@ describe("pipeline", () => {
       rosLib?: string;
     };
 
-    const numDataType = {
-      [baseNodeData.name]: {
-        fields: [
-          {
-            name: "num",
-            isArray: false,
-            isComplex: false,
-            arrayLength: undefined,
-            type: "float64",
-          },
-        ],
-      },
-    };
+    const numDataType: RosDatatypes = new Map(
+      Object.entries({
+        [baseNodeData.name]: {
+          definitions: [
+            {
+              name: "num",
+              isArray: false,
+              isComplex: false,
+              arrayLength: undefined,
+              type: "float64",
+            },
+          ],
+        },
+      }),
+    );
 
-    const posDatatypes = {
-      [baseNodeData.name]: {
-        fields: [
-          {
-            name: "pos",
-            isArray: false,
-            isComplex: true,
-            arrayLength: undefined,
-            type: `${baseNodeData.name}/pos`,
-          },
-        ],
-      },
-      [`${baseNodeData.name}/pos`]: {
-        fields: [
-          {
-            name: "x",
-            isArray: false,
-            isComplex: false,
-            arrayLength: undefined,
-            type: "float64",
-          },
-          {
-            name: "y",
-            isArray: false,
-            isComplex: false,
-            arrayLength: undefined,
-            type: "float64",
-          },
-        ],
-      },
-    };
+    const posDatatypes: RosDatatypes = new Map(
+      Object.entries({
+        [baseNodeData.name]: {
+          definitions: [
+            {
+              name: "pos",
+              isArray: false,
+              isComplex: true,
+              arrayLength: undefined,
+              type: `${baseNodeData.name}/pos`,
+            },
+          ],
+        },
+        [`${baseNodeData.name}/pos`]: {
+          definitions: [
+            {
+              name: "x",
+              isArray: false,
+              isComplex: false,
+              arrayLength: undefined,
+              type: "float64",
+            },
+            {
+              name: "y",
+              isArray: false,
+              isComplex: false,
+              arrayLength: undefined,
+              type: "float64",
+            },
+          ],
+        },
+      }),
+    );
 
     const pointFields = {
-      fields: [
+      definitions: [
         {
           name: "x",
           isArray: false,
@@ -497,145 +505,166 @@ describe("pipeline", () => {
       ],
     };
 
-    const pointDataType = {
-      [baseNodeData.name]: pointFields,
-    };
+    const pointDataType: RosDatatypes = new Map(
+      Object.entries({
+        [baseNodeData.name]: pointFields,
+      }),
+    );
 
-    const nestedPointDataType = {
-      [baseNodeData.name]: {
-        fields: [
-          {
-            name: "point",
-            isArray: false,
-            isComplex: true,
-            arrayLength: undefined,
-            type: `${baseNodeData.name}/point`,
-          },
-        ],
-      },
-      [`${baseNodeData.name}/point`]: pointFields,
-    };
+    const nestedPointDataType: RosDatatypes = new Map(
+      Object.entries({
+        [baseNodeData.name]: {
+          definitions: [
+            {
+              name: "point",
+              isArray: false,
+              isComplex: true,
+              arrayLength: undefined,
+              type: `${baseNodeData.name}/point`,
+            },
+          ],
+        },
+        [`${baseNodeData.name}/point`]: pointFields,
+      }),
+    );
 
-    const poseDataType = {
-      [baseNodeData.name]: {
-        fields: [
-          {
-            name: "position",
-            isArray: false,
-            isComplex: true,
-            arrayLength: undefined,
-            type: `${baseNodeData.name}/position`,
-          },
-          {
-            name: "orientation",
-            isArray: false,
-            isComplex: true,
-            arrayLength: undefined,
-            type: `${baseNodeData.name}/orientation`,
-          },
-        ],
-      },
-      [`${baseNodeData.name}/position`]: pointFields,
-      [`${baseNodeData.name}/orientation`]: {
-        fields: [
-          ...pointFields.fields,
-          {
-            name: "w",
-            isArray: false,
-            isComplex: false,
-            arrayLength: undefined,
-            type: "float64",
-          },
-        ],
-      },
-    };
+    const poseDataType: RosDatatypes = new Map(
+      Object.entries({
+        [baseNodeData.name]: {
+          definitions: [
+            {
+              name: "position",
+              isArray: false,
+              isComplex: true,
+              arrayLength: undefined,
+              type: `${baseNodeData.name}/position`,
+            },
+            {
+              name: "orientation",
+              isArray: false,
+              isComplex: true,
+              arrayLength: undefined,
+              type: `${baseNodeData.name}/orientation`,
+            },
+          ],
+        },
+        [`${baseNodeData.name}/position`]: pointFields,
+        [`${baseNodeData.name}/orientation`]: {
+          definitions: [
+            ...pointFields.definitions,
+            {
+              name: "w",
+              isArray: false,
+              isComplex: false,
+              arrayLength: undefined,
+              type: "float64",
+            },
+          ],
+        },
+      }),
+    );
 
-    const timeDatatypes = {
-      [baseNodeData.name]: {
-        fields: [
-          { arrayLength: undefined, isArray: false, isComplex: false, name: "stamp", type: "time" },
-        ],
-      },
-    };
+    const timeDatatypes: RosDatatypes = new Map(
+      Object.entries({
+        [baseNodeData.name]: {
+          definitions: [
+            {
+              arrayLength: undefined,
+              isArray: false,
+              isComplex: false,
+              name: "stamp",
+              type: "time",
+            },
+          ],
+        },
+      }),
+    );
 
-    const baseDatatypesWithNestedColor = {
+    const baseDatatypesWithNestedColor: RosDatatypes = new Map([
       ...baseDatatypes,
-      [baseNodeData.name]: {
-        fields: [
-          {
-            arrayLength: undefined,
-            isArray: false,
-            isComplex: true,
-            name: "color",
-            type: "std_msgs/ColorRGBA",
-          },
-        ],
-      },
-    };
+      [
+        baseNodeData.name,
+        {
+          definitions: [
+            {
+              arrayLength: undefined,
+              isArray: false,
+              isComplex: true,
+              name: "color",
+              type: "std_msgs/ColorRGBA",
+            },
+          ],
+        },
+      ],
+    ]);
 
-    const posArrayDatatypes = {
-      [baseNodeData.name]: {
-        fields: [
-          {
-            name: "pos",
-            isArray: true,
-            isComplex: true,
-            arrayLength: undefined,
-            type: `${baseNodeData.name}/pos`,
-          },
-        ],
-      },
-      [`${baseNodeData.name}/pos`]: {
-        fields: [
-          {
-            name: "x",
-            isArray: false,
-            isComplex: false,
-            arrayLength: undefined,
-            type: "float64",
-          },
-          {
-            name: "y",
-            isArray: false,
-            isComplex: false,
-            arrayLength: undefined,
-            type: "float64",
-          },
-        ],
-      },
-    };
+    const posArrayDatatypes: RosDatatypes = new Map(
+      Object.entries({
+        [baseNodeData.name]: {
+          definitions: [
+            {
+              name: "pos",
+              isArray: true,
+              isComplex: true,
+              arrayLength: undefined,
+              type: `${baseNodeData.name}/pos`,
+            },
+          ],
+        },
+        [`${baseNodeData.name}/pos`]: {
+          definitions: [
+            {
+              name: "x",
+              isArray: false,
+              isComplex: false,
+              arrayLength: undefined,
+              type: "float64",
+            },
+            {
+              name: "y",
+              isArray: false,
+              isComplex: false,
+              arrayLength: undefined,
+              type: "float64",
+            },
+          ],
+        },
+      }),
+    );
 
-    const mixedDatatypes = {
-      [baseNodeData.name]: {
-        fields: [
-          {
-            name: "details",
-            isArray: false,
-            isComplex: true,
-            arrayLength: undefined,
-            type: `${baseNodeData.name}/details`,
-          },
-        ],
-      },
-      [`${baseNodeData.name}/details`]: {
-        fields: [
-          {
-            name: "name",
-            isArray: false,
-            isComplex: false,
-            arrayLength: undefined,
-            type: "string",
-          },
-          {
-            name: "count",
-            isArray: false,
-            isComplex: false,
-            arrayLength: undefined,
-            type: "float64",
-          },
-        ],
-      },
-    };
+    const mixedDatatypes: RosDatatypes = new Map(
+      Object.entries({
+        [baseNodeData.name]: {
+          definitions: [
+            {
+              name: "details",
+              isArray: false,
+              isComplex: true,
+              arrayLength: undefined,
+              type: `${baseNodeData.name}/details`,
+            },
+          ],
+        },
+        [`${baseNodeData.name}/details`]: {
+          definitions: [
+            {
+              name: "name",
+              isArray: false,
+              isComplex: false,
+              arrayLength: undefined,
+              type: "string",
+            },
+            {
+              name: "count",
+              isArray: false,
+              isComplex: false,
+              arrayLength: undefined,
+              type: "float64",
+            },
+          ],
+        },
+      }),
+    );
 
     const testCases: TestCase[] = [
       {
@@ -788,26 +817,28 @@ describe("pipeline", () => {
           export default (msg: any): { num: number, str: string } => {
             return { num: 1, str: 'hello' };
           };`,
-        datatypes: {
-          [baseNodeData.name]: {
-            fields: [
-              {
-                name: "num",
-                isArray: false,
-                isComplex: false,
-                arrayLength: undefined,
-                type: "float64",
-              },
-              {
-                name: "str",
-                isArray: false,
-                isComplex: false,
-                arrayLength: undefined,
-                type: "string",
-              },
-            ],
-          },
-        },
+        datatypes: new Map(
+          Object.entries({
+            [baseNodeData.name]: {
+              definitions: [
+                {
+                  name: "num",
+                  isArray: false,
+                  isComplex: false,
+                  arrayLength: undefined,
+                  type: "float64",
+                },
+                {
+                  name: "str",
+                  isArray: false,
+                  isComplex: false,
+                  arrayLength: undefined,
+                  type: "string",
+                },
+              ],
+            },
+          }),
+        ),
       },
       {
         description: "number type alias",
@@ -833,55 +864,57 @@ describe("pipeline", () => {
           export default (msg: any): { pos: { header: Header, x: number, y: number } } => {
             return { pos: { header: { time: 42 }, x: 1, y: 2 } };
           };`,
-        datatypes: {
-          [baseNodeData.name]: {
-            fields: [
-              {
-                name: "pos",
-                isArray: false,
-                isComplex: true,
-                arrayLength: undefined,
-                type: `${baseNodeData.name}/pos`,
-              },
-            ],
-          },
-          [`${baseNodeData.name}/pos`]: {
-            fields: [
-              {
-                name: "header",
-                isArray: false,
-                isComplex: true,
-                arrayLength: undefined,
-                type: `${baseNodeData.name}/pos/header`,
-              },
-              {
-                name: "x",
-                isArray: false,
-                isComplex: false,
-                arrayLength: undefined,
-                type: "float64",
-              },
-              {
-                name: "y",
-                isArray: false,
-                isComplex: false,
-                arrayLength: undefined,
-                type: "float64",
-              },
-            ],
-          },
-          [`${baseNodeData.name}/pos/header`]: {
-            fields: [
-              {
-                name: "time",
-                isArray: false,
-                isComplex: false,
-                arrayLength: undefined,
-                type: "float64",
-              },
-            ],
-          },
-        },
+        datatypes: new Map(
+          Object.entries({
+            [baseNodeData.name]: {
+              definitions: [
+                {
+                  name: "pos",
+                  isArray: false,
+                  isComplex: true,
+                  arrayLength: undefined,
+                  type: `${baseNodeData.name}/pos`,
+                },
+              ],
+            },
+            [`${baseNodeData.name}/pos`]: {
+              definitions: [
+                {
+                  name: "header",
+                  isArray: false,
+                  isComplex: true,
+                  arrayLength: undefined,
+                  type: `${baseNodeData.name}/pos/header`,
+                },
+                {
+                  name: "x",
+                  isArray: false,
+                  isComplex: false,
+                  arrayLength: undefined,
+                  type: "float64",
+                },
+                {
+                  name: "y",
+                  isArray: false,
+                  isComplex: false,
+                  arrayLength: undefined,
+                  type: "float64",
+                },
+              ],
+            },
+            [`${baseNodeData.name}/pos/header`]: {
+              definitions: [
+                {
+                  name: "time",
+                  isArray: false,
+                  isComplex: false,
+                  arrayLength: undefined,
+                  type: "float64",
+                },
+              ],
+            },
+          }),
+        ),
       },
       {
         description: "Nested properties with type reference",
@@ -917,19 +950,21 @@ describe("pipeline", () => {
           export default (msg: any): { pos: number[] } => {
             return { pos: [ 1, 2, 3 ] };
           };`,
-        datatypes: {
-          [baseNodeData.name]: {
-            fields: [
-              {
-                name: "pos",
-                isArray: true,
-                isComplex: true,
-                arrayLength: undefined,
-                type: "float64",
-              },
-            ],
-          },
-        },
+        datatypes: new Map(
+          Object.entries({
+            [baseNodeData.name]: {
+              definitions: [
+                {
+                  name: "pos",
+                  isArray: true,
+                  isComplex: true,
+                  arrayLength: undefined,
+                  type: "float64",
+                },
+              ],
+            },
+          }),
+        ),
       },
       {
         description: "Array literal type reference",
@@ -1009,19 +1044,21 @@ describe("pipeline", () => {
           export default (msg: any): { isTrue: boolean } => {
             return { isTrue: true };
           };`,
-        datatypes: {
-          [baseNodeData.name]: {
-            fields: [
-              {
-                name: "isTrue",
-                isArray: false,
-                isComplex: false,
-                arrayLength: undefined,
-                type: "bool",
-              },
-            ],
-          },
-        },
+        datatypes: new Map(
+          Object.entries({
+            [baseNodeData.name]: {
+              definitions: [
+                {
+                  name: "isTrue",
+                  isArray: false,
+                  isComplex: false,
+                  arrayLength: undefined,
+                  type: "bool",
+                },
+              ],
+            },
+          }),
+        ),
       },
       {
         description: "Indexed access type",
@@ -1147,46 +1184,6 @@ describe("pipeline", () => {
           export default publisher;`,
         datatypes: baseDatatypes,
         outputDatatype: "std_msgs/ColorRGBA",
-      },
-      {
-        description: "Should handle ros json type fields",
-        sourceCode: `
-          import { Messages, json } from "ros";
-
-          export const inputs = [];
-          export const output = "${DEFAULT_STUDIO_NODE_PREFIX}";
-
-          type Output = {
-            foo: string;
-            data: json;
-          };
-
-          const publisher = (message: any): Output => {
-            return { foo: 'test', data: { arr: [1, 2, 3], nested: { foo: 'bar' } } };
-          };
-          export default publisher;
-        `,
-        datatypes: {
-          "/studio_node/main": {
-            fields: [
-              {
-                arrayLength: undefined,
-                isArray: false,
-                isComplex: false,
-                name: "foo",
-                type: "string",
-              },
-              {
-                arrayLength: undefined,
-                isArray: false,
-                isComplex: false,
-                name: "data",
-                type: "json",
-              },
-            ],
-          },
-        },
-        outputDatatype: "/studio_node/main",
       },
       /*
       ERRORS
@@ -1538,7 +1535,7 @@ describe("pipeline", () => {
         typeof skip === "boolean" ? !skip : true,
       );
       filteredTestCases.forEach(
-        ({ description, sourceCode, datatypes = {}, error, outputDatatype, rosLib }) => {
+        ({ description, sourceCode, datatypes = new Map(), error, outputDatatype, rosLib }) => {
           it(`${error != undefined ? "Expected Error: " : ""}${description}`, () => {
             const inputNodeData = {
               ...baseNodeData,

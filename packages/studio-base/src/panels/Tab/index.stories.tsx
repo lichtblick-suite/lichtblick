@@ -67,7 +67,7 @@ class MockPanelCatalog implements PanelCatalog {
   }
 }
 
-const fixture = { topics: [], datatypes: {}, frame: {}, layout: "Tab!a" };
+const fixture = { topics: [], datatypes: new Map(), frame: {}, layout: "Tab!a" };
 const manyTabs = new Array(25)
   .fill(1)
   .map((_elem, idx) => ({ title: `Tab #${idx + 1}`, layout: undefined }));

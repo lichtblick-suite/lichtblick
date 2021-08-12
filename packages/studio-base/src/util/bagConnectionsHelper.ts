@@ -27,16 +27,16 @@ export function bagConnectionsToDatatypes(
   connections: readonly DatatypeDescription[],
   { ros2 }: { ros2: boolean },
 ): RosDatatypes {
-  const datatypes: RosDatatypes = {};
+  const datatypes: RosDatatypes = new Map();
   connections.forEach((connection) => {
-    const connectionTypes = parseMessageDefinition(connection.messageDefinition, { ros2 });
-    connectionTypes.forEach(({ name, definitions }, index) => {
+    const connectionDefinitions = parseMessageDefinition(connection.messageDefinition, { ros2 });
+    connectionDefinitions.forEach(({ name, definitions }, index) => {
       // The first definition usually doesn't have an explicit name,
-      // so we get the name from the connection.
+      // so we get the name from the datatype.
       if (index === 0) {
-        datatypes[connection.type] = { fields: definitions };
+        datatypes.set(connection.type, { name: connection.type, definitions });
       } else if (name != undefined) {
-        datatypes[name] = { fields: definitions };
+        datatypes.set(name, { name, definitions });
       }
     });
   });

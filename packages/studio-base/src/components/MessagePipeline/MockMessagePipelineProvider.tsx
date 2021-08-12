@@ -34,7 +34,7 @@ import naturalSort from "@foxglove/studio-base/util/naturalSort";
 
 import { ContextInternal } from "./index";
 
-const NO_DATATYPES = Object.freeze({});
+const NO_DATATYPES = new Map();
 
 function noop() {}
 

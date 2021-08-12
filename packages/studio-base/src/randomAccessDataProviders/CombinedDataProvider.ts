@@ -31,7 +31,7 @@ import {
   MessageDefinitions,
   ParsedMessageDefinitions,
 } from "@foxglove/studio-base/randomAccessDataProviders/types";
-import { RosDatatype } from "@foxglove/studio-base/types/RosDatatypes";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import filterMap from "@foxglove/studio-base/util/filterMap";
 import { deepIntersect } from "@foxglove/studio-base/util/ranges";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
@@ -132,8 +132,9 @@ const throwOnDuplicateTopics = (topics: string[]) => {
   });
 };
 
-const throwOnUnequalDatatypes = (datatypes: [string, RosDatatype][]) => {
-  datatypes
+const throwOnUnequalDatatypes = (datatypes: RosDatatypes[]) => {
+  const allEntries = flatten(datatypes.map((datatype) => Array.from(datatype.entries())));
+  allEntries
     .sort((a, b) => a[0].localeCompare(b[0]))
     .forEach(([datatype, definition], i, sortedDataTypes) => {
       const next = sortedDataTypes[i + 1];
@@ -151,9 +152,8 @@ function mergeMessageDefinitions(initResult: InitializationResult[]): MessageDef
   const parsedMessageDefinitionArr: ParsedMessageDefinitions[] = initResult.map((result) =>
     rawMessageDefinitionsToParsed(result.messageDefinitions, result.topics),
   );
-  throwOnUnequalDatatypes(
-    flatten(parsedMessageDefinitionArr.map(({ datatypes }) => Object.entries(datatypes))),
-  );
+
+  throwOnUnequalDatatypes(parsedMessageDefinitionArr.map(({ datatypes }) => datatypes));
   throwOnDuplicateTopics(
     flatten(
       parsedMessageDefinitionArr.map(({ messageDefinitionsByTopic }) =>
@@ -169,6 +169,8 @@ function mergeMessageDefinitions(initResult: InitializationResult[]): MessageDef
     ),
   );
 
+  const allDatatypes = flatten(parsedMessageDefinitionArr.map(({ datatypes }) => [...datatypes]));
+
   return {
     type: "parsed",
     messageDefinitionsByTopic: assign(
@@ -183,7 +185,7 @@ function mergeMessageDefinitions(initResult: InitializationResult[]): MessageDef
         ({ parsedMessageDefinitionsByTopic }) => parsedMessageDefinitionsByTopic,
       ),
     ),
-    datatypes: assign({}, ...parsedMessageDefinitionArr.map(({ datatypes }) => datatypes)),
+    datatypes: new Map(allDatatypes),
   };
 }
 

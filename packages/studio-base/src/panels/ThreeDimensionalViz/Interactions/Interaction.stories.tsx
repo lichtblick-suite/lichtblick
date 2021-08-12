@@ -130,7 +130,7 @@ function PanelSetupWithData({
       style={{ width: "auto", height: "auto", display: "inline-flex" }}
       fixture={{
         topics: [],
-        datatypes: {},
+        datatypes: new Map(),
         frame: {},
         linkedGlobalVariables: [
           {

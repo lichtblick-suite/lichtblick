@@ -70,7 +70,7 @@ export default class Ros1Player implements Player {
   private _listener?: (arg0: PlayerState) => Promise<void>; // Listener for _emitState().
   private _closed: boolean = false; // Whether the player has been completely closed using close().
   private _providerTopics?: Topic[]; // Topics as advertised by rosmaster.
-  private _providerDatatypes: RosDatatypes = {}; // All ROS message definitions received from subscriptions and set by publishers.
+  private _providerDatatypes: RosDatatypes = new Map(); // All ROS message definitions received from subscriptions and set by publishers.
   private _publishedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of publisher IDs publishing each topic.
   private _subscribedTopics = new Map<string, Set<string>>(); // A map of topic names to the set of subscriber IDs subscribed to each topic.
   private _services = new Map<string, Set<string>>(); // A map of service names to service provider IDs that provide each service.
@@ -346,12 +346,10 @@ export default class Ros1Player implements Player {
       const subscription = this._rosNode.subscribe({ topic: topicName, dataType: datatype });
 
       subscription.on("header", (_header, msgdef, _reader) => {
-        // We have to create a new object instead of just updating _providerDatatypes because it is
-        // later fed into a memoize() call
-        const typesByName: RosDatatypes = {};
-        Object.assign(typesByName, this._providerDatatypes);
-        Object.assign(typesByName, this._getRosDatatypes(datatype, msgdef));
-        this._providerDatatypes = typesByName;
+        // We have to create a new object instead of just updating _providerDatatypes to support
+        // shallow memo
+        const newDatatypes = this._getRosDatatypes(datatype, msgdef);
+        this._providerDatatypes = new Map([...this._providerDatatypes, ...newDatatypes]);
       });
       subscription.on("message", (message, _data, _pub) =>
         this._handleMessage(topicName, message, true),
@@ -502,16 +500,15 @@ export default class Ros1Player implements Player {
     datatype: string,
     messageDefinition: RosMsgDefinition[],
   ): RosDatatypes => {
-    const typesByName: RosDatatypes = {};
-    messageDefinition.forEach(({ name, definitions }, index) => {
-      // The first definition usually doesn't have an explicit name,
-      // so we get the name from the connection.
-      if (index === 0) {
-        typesByName[datatype] = { fields: definitions };
-      } else if (name != undefined) {
-        typesByName[name] = { fields: definitions };
+    const typesByName: RosDatatypes = new Map();
+    for (const def of messageDefinition) {
+      // The first definition usually doesn't have an explicit name so we use the datatype
+      if (def.name == undefined) {
+        typesByName.set(datatype, def);
+      } else {
+        typesByName.set(def.name, def);
       }
-    });
+    }
     return typesByName;
   };
 
@@ -562,7 +559,7 @@ export default class Ros1Player implements Player {
         {
           severity: "warn",
           message: "Unable to update connection graph",
-          tip: `The connection graph contains information about publishers and subscribers. A 
+          tip: `The connection graph contains information about publishers and subscribers. A
 stale graph may result in missing topics you expect. Ensure that roscore is reachable at ${this._url}.`,
           error,
         },

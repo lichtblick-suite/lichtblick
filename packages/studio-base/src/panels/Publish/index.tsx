@@ -107,7 +107,7 @@ function Publish(props: Props) {
 
   const publish = usePublisher({ name: "Publish", topic: topicName, datatype, datatypes });
 
-  const datatypeNames = useMemo(() => Object.keys(datatypes).sort(), [datatypes]);
+  const datatypeNames = useMemo(() => Array.from(datatypes.keys()).sort(), [datatypes]);
   const { error, parsedObject } = useMemo(() => parseInput(value), [value]);
 
   // when the selected datatype changes, replace the textarea contents with a sample message of the correct shape
@@ -119,7 +119,7 @@ function Publish(props: Props) {
       datatype.length > 0 &&
       prevDatatype.current != undefined &&
       datatype !== prevDatatype.current &&
-      datatypes[datatype] != undefined
+      datatypes.get(datatype) != undefined
     ) {
       const sampleMessage = buildSampleMessage(datatypes, datatype);
       if (sampleMessage) {

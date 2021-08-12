@@ -19,13 +19,18 @@ import { MessageEvent } from "@foxglove/studio-base/players/types";
 import CurrentLayoutState, {
   DEFAULT_LAYOUT_FOR_TESTS,
 } from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 import { useLatestMessageDataItem } from "./useLatestMessageDataItem";
 
 const topics = [{ name: "/topic", datatype: "datatype" }];
-const datatypes = {
-  datatype: { fields: [{ name: "value", type: "uint32", isArray: false, isComplex: false }] },
-};
+const datatypes: RosDatatypes = new Map(
+  Object.entries({
+    datatype: {
+      definitions: [{ name: "value", type: "uint32", isArray: false, isComplex: false }],
+    },
+  }),
+);
 const fixtureMessages: MessageEvent<unknown>[] = [
   {
     topic: "/topic",

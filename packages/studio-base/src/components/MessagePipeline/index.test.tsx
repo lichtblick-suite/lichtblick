@@ -74,7 +74,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         publishers: [],
         frame: {},
         sortedTopics: [],
-        datatypes: {},
+        datatypes: new Map(),
         setSubscriptions: expect.any(Function),
         setPublishers: expect.any(Function),
         publish: expect.any(Function),
@@ -223,21 +223,21 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
 
     act(() =>
       result.current.setPublishers("test", [
-        { topic: "/studio/test", datatype: "test", datatypes: {} },
+        { topic: "/studio/test", datatype: "test", datatypes: new Map() },
       ]),
     );
     expect(result.current.publishers).toEqual([
-      { topic: "/studio/test", datatype: "test", datatypes: {} },
+      { topic: "/studio/test", datatype: "test", datatypes: new Map() },
     ]);
 
     act(() =>
       result.current.setPublishers("bar", [
-        { topic: "/studio/test2", datatype: "test2", datatypes: {} },
+        { topic: "/studio/test2", datatype: "test2", datatypes: new Map() },
       ]),
     );
     expect(result.current.publishers).toEqual([
-      { topic: "/studio/test", datatype: "test", datatypes: {} },
-      { topic: "/studio/test2", datatype: "test2", datatypes: {} },
+      { topic: "/studio/test", datatype: "test", datatypes: new Map() },
+      { topic: "/studio/test2", datatype: "test2", datatypes: new Map() },
     ]);
 
     const lastPublishers = result.current.publishers;
@@ -393,7 +393,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     act(() => result.current.setSubscriptions("bar", [{ topic: "/studio/test2" }]));
     act(() =>
       result.current.setPublishers("test", [
-        { topic: "/studio/test", datatype: "test", datatypes: {} },
+        { topic: "/studio/test", datatype: "test", datatypes: new Map() },
       ]),
     );
 
@@ -401,7 +401,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     rerender({ maybePlayer: { player: player2 } });
     expect(player2.subscriptions).toEqual([{ topic: "/studio/test" }, { topic: "/studio/test2" }]);
     expect(player2.publishers).toEqual([
-      { topic: "/studio/test", datatype: "test", datatypes: {} },
+      { topic: "/studio/test", datatype: "test", datatypes: new Map() },
     ]);
   });
 
@@ -421,7 +421,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       speed: 0.2,
       lastSeekTime: 1234,
       topics: [{ name: "/input/foo", datatype: "foo" }],
-      datatypes: { foo: { fields: [] } },
+      datatypes: new Map(Object.entries({ foo: { definitions: [] } })),
       parsedMessageDefinitionsByTopic: {},
       totalBytesReceived: 1234,
     };

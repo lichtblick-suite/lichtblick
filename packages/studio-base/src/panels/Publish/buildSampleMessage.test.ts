@@ -11,21 +11,25 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
+
 import buildSampleMessage, { builtinSampleValues } from "./buildSampleMessage";
 
 describe("buildSampleMessage", () => {
-  const datatypes = {
-    A: { fields: [] },
-    B: { fields: [{ name: "data", type: "A" }] },
-    C: {
-      fields: [
-        { name: "foo", type: "B", isConstant: true },
-        { name: "bar", type: "B", isConstant: true, isArray: true },
-      ],
-    },
-    D: { fields: [{ name: "foo", type: "B", isArray: true }] },
-    E: { fields: [{ name: "foo", type: "B", isArray: true, arrayLength: 4 }] },
-  };
+  const datatypes: RosDatatypes = new Map(
+    Object.entries({
+      A: { definitions: [] },
+      B: { definitions: [{ name: "data", type: "A" }] },
+      C: {
+        definitions: [
+          { name: "foo", type: "B", isConstant: true },
+          { name: "bar", type: "B", isConstant: true, isArray: true },
+        ],
+      },
+      D: { definitions: [{ name: "foo", type: "B", isArray: true }] },
+      E: { definitions: [{ name: "foo", type: "B", isArray: true, arrayLength: 4 }] },
+    }),
+  );
 
   it("handles empty types", () => {
     expect(buildSampleMessage(datatypes, "A")).toEqual({});
@@ -47,8 +51,13 @@ describe("buildSampleMessage", () => {
 
   it("handles builtin types", () => {
     for (const type in builtinSampleValues) {
-      expect(buildSampleMessage({}, type)).toEqual(builtinSampleValues[type]);
-      expect(buildSampleMessage({ A: { fields: [{ name: "data", type }] } }, "A")).toEqual({
+      expect(buildSampleMessage(new Map(), type)).toEqual(builtinSampleValues[type]);
+      expect(
+        buildSampleMessage(
+          new Map(Object.entries({ A: { definitions: [{ name: "data", type }] } })),
+          "A",
+        ),
+      ).toEqual({
         data: builtinSampleValues[type],
       });
     }

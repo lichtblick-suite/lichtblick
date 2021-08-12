@@ -25,6 +25,7 @@ import useGlobalVariables, {
 import CurrentLayoutState, {
   DEFAULT_LAYOUT_FOR_TESTS,
 } from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 import * as fixture from "./fixture";
 
@@ -58,7 +59,7 @@ function makeMessagePipelineWrapper(initialGlobalVariables?: GlobalVariables) {
   const wrapper = ({
     children,
     topics = [],
-    datatypes = {},
+    datatypes = new Map(),
     messages = [],
     activeData,
   }: PropsWithChildren<TestProps>) => (
@@ -333,17 +334,19 @@ describe("useMessagesByPath", () => {
   });
 
   describe("global variables in paths", () => {
-    const exampleDatatypes = {
-      "dtype/Foo": {
-        fields: [{ name: "bars", type: "dtype/Bar", isArray: true, isComplex: true }],
-      },
-      "dtype/Bar": {
-        fields: [
-          { name: "index", type: "int32" },
-          { name: "baz", type: "int32" },
-        ],
-      },
-    };
+    const exampleDatatypes: RosDatatypes = new Map(
+      Object.entries({
+        "dtype/Foo": {
+          definitions: [{ name: "bars", type: "dtype/Bar", isArray: true, isComplex: true }],
+        },
+        "dtype/Bar": {
+          definitions: [
+            { name: "index", type: "int32" },
+            { name: "baz", type: "int32" },
+          ],
+        },
+      }),
+    );
 
     const message = {
       topic: "/some/topic",
@@ -411,7 +414,7 @@ describe("useMessagesByPath", () => {
       },
     });
 
-    rerender({ topics: [], datatypes: {}, messages: [], paths: ["/some/topic.index"] });
+    rerender({ topics: [], datatypes: new Map(), messages: [], paths: ["/some/topic.index"] });
 
     expect(
       result.all.map((item) => (item instanceof Error ? undefined : item.messagesByPath)),

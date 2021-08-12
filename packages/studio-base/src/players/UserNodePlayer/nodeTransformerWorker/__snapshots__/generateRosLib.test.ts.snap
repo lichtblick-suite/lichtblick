@@ -150,7 +150,7 @@ exports[`typegen generateRosLib more complex snapshot 1`] = `
         header: std_msgs__Header;
         height: number;
         width: number;
-        fields: sensor_msgs__PointField[];
+        definitions: sensor_msgs__PointField[];
         is_bigendian: boolean;
         point_step: number;
         row_step: number;

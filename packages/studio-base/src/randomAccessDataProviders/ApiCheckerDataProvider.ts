@@ -119,7 +119,7 @@ export default class ApiCheckerDataProvider implements RandomAccessDataProvider 
         ) {
           this._warn(`Topic "${topic.name}"" not present in parsedMessageDefinitionsByTopic`);
         }
-        if (!initializationResult.messageDefinitions.datatypes[topic.datatype]) {
+        if (!initializationResult.messageDefinitions.datatypes.get(topic.datatype)) {
           this._warn(`Topic "${topic.name}" datatype "${topic.datatype}" not present in datatypes`);
         }
       }

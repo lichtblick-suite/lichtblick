@@ -15,7 +15,7 @@ import { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 
 const nestedTabLayoutFixture: Fixture = {
   topics: [],
-  datatypes: {},
+  datatypes: new Map(),
   frame: {},
   layout: {
     direction: "column",
@@ -101,7 +101,7 @@ const nestedTabLayoutFixture: Fixture = {
 
 const nestedTabLayoutFixture2: Fixture = {
   topics: [],
-  datatypes: {},
+  datatypes: new Map(),
   frame: {},
   layout: {
     direction: "row",

@@ -57,7 +57,7 @@ export default class Rosbag2DataProvider implements RandomAccessDataProvider {
     const problems: RandomAccessDataProviderProblem[] = [];
     const topics: Topic[] = [];
     const connections: Connection[] = [];
-    const datatypes: RosDatatypes = {};
+    const datatypes: RosDatatypes = new Map();
     const messageDefinitionsByTopic: MessageDefinitionsByTopic = {};
     const parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic = {};
 
@@ -88,7 +88,7 @@ export default class Rosbag2DataProvider implements RandomAccessDataProvider {
         type: topicDef.type,
         callerid: topicDef.name,
       });
-      datatypes[topicDef.type] = { fields: parsedMsgdef.definitions };
+      datatypes.set(topicDef.type, { name: topicDef.type, definitions: parsedMsgdef.definitions });
       messageDefinitionsByTopic[topicDef.name] = messageDefinition;
       parsedMessageDefinitionsByTopic[topicDef.name] = fullParsedMessageDefinitions;
     }

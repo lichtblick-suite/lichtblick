@@ -19,6 +19,7 @@ import {
   PlayerState,
   PlayerStateActiveData,
 } from "@foxglove/studio-base/players/types";
+import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
 import signal from "@foxglove/studio-base/util/signal";
 import { fromSec, TimestampMethod } from "@foxglove/studio-base/util/time";
@@ -41,17 +42,19 @@ function makeMessage(
   };
 }
 
-const markerArrayDatatype = basicDatatypes["visualization_msgs/MarkerArray"];
-const dummyDatatypeWithHeader = {
-  dummyDatatypeWithHeader: {
-    fields: [
-      ...(markerArrayDatatype?.fields ?? []),
-      { type: "std_msgs/Header", name: "header", isArray: false, isComplex: true },
-    ],
-  },
-};
+const markerArrayDatatype = basicDatatypes.get("visualization_msgs/MarkerArray");
+const dummyDatatypeWithHeader: RosDatatypes = new Map(
+  Object.entries({
+    dummyDatatypeWithHeader: {
+      definitions: [
+        ...(markerArrayDatatype?.definitions ?? []),
+        { type: "std_msgs/Header", name: "header", isArray: false, isComplex: true },
+      ],
+    },
+  }),
+);
 
-function getState(hasHeaderStamp?: any): PlayerStateActiveData {
+function getState(hasHeaderStamp?: boolean): PlayerStateActiveData {
   return {
     messages: [],
     messageOrder: "receiveTime",
@@ -62,10 +65,10 @@ function getState(hasHeaderStamp?: any): PlayerStateActiveData {
     speed: 0.2,
     lastSeekTime: 0,
     topics: [],
-    datatypes: {
+    datatypes: new Map([
       ...basicDatatypes,
-      ...(hasHeaderStamp ? dummyDatatypeWithHeader : undefined),
-    },
+      ...(hasHeaderStamp === true ? dummyDatatypeWithHeader : []),
+    ]),
     parsedMessageDefinitionsByTopic: {},
     totalBytesReceived: 1234,
   };
