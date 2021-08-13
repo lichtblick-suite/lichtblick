@@ -13,6 +13,7 @@
 import CheckIcon from "@mdi/svg/svg/check.svg";
 import DatabaseIcon from "@mdi/svg/svg/database.svg";
 import { uniq } from "lodash";
+import { useMemo } from "react";
 import styled from "styled-components";
 
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
@@ -21,20 +22,11 @@ import styles from "@foxglove/studio-base/components/PanelToolbar/index.module.s
 import { Topic } from "@foxglove/studio-base/players/types";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-export type TopicGroup = {
-  suffix: string;
-  datatype: string;
-};
-
 type Props = {
   onChange: (topic: string) => void;
   topicToRender: string;
   topics: readonly Topic[];
-  // Use either one of these:
-  // singleTopicDatatype only supports a single datatype (search and select based on datatype)
-  // topicsGroups selects the "parent" path of a group of topics (if either of the group topics suffixes+datatypes match)
-  singleTopicDatatype?: string;
-  topicsGroups?: TopicGroup[];
+  allowedDatatypes: string[];
   defaultTopicToRender: string;
 };
 
@@ -64,29 +56,14 @@ export default function TopicToRenderMenu({
   onChange,
   topicToRender,
   topics,
-  topicsGroups,
-  singleTopicDatatype,
+  allowedDatatypes,
   defaultTopicToRender,
 }: Props): JSX.Element {
-  if (topicsGroups != undefined && singleTopicDatatype != undefined) {
-    throw new Error("Cannot set both topicsGroups and singleTopicDatatype");
-  }
-  if (topicsGroups == undefined && singleTopicDatatype == undefined) {
-    throw new Error("Must set either topicsGroups or singleTopicDatatype");
-  }
+  const allowedDatatypesSet = useMemo(() => new Set(allowedDatatypes), [allowedDatatypes]);
   const availableTopics: string[] = [];
   for (const topic of topics) {
-    if (topicsGroups) {
-      for (const topicGroup of topicsGroups) {
-        if (topic.name.endsWith(topicGroup.suffix) && topic.datatype === topicGroup.datatype) {
-          const parentTopic = topic.name.slice(0, topic.name.length - topicGroup.suffix.length);
-          availableTopics.push(parentTopic);
-        }
-      }
-    } else {
-      if (topic.datatype === singleTopicDatatype) {
-        availableTopics.push(topic.name);
-      }
+    if (allowedDatatypesSet.has(topic.datatype)) {
+      availableTopics.push(topic.name);
     }
   }
   // Keeps only the first occurrence of each topic.
@@ -107,13 +84,7 @@ export default function TopicToRenderMenu({
       toggleComponent={
         <Icon
           fade
-          tooltip={
-            topicsGroups
-              ? `Parent topics selected by topic suffixes:\n ${topicsGroups
-                  .map((group) => group.suffix)
-                  .join("\n")}`
-              : `Topics selected by datatype: ${singleTopicDatatype ?? ""}`
-          }
+          tooltip={`Supported datatypes: ${allowedDatatypes.join(", ")}`}
           tooltipProps={{ placement: "top" }}
           style={{ color: topicToRender === defaultTopicToRender ? colors.LIGHT1 : colors.ORANGE }}
           dataTest={"topic-set"}

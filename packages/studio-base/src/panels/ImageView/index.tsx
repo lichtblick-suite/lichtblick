@@ -35,6 +35,7 @@ import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipe
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
+import { IMAGE_DATATYPES } from "@foxglove/studio-base/panels/ImageView/renderImage";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
@@ -279,9 +280,7 @@ function ImageView(props: Props) {
 
   // Namespaces represent marker topics based on the camera topic prefix (e.g. "/camera_front_medium")
   const { allCameraNamespaces, imageTopicsByNamespace } = useMemo(() => {
-    const imageTopics = (topics ?? []).filter(({ datatype }) =>
-      ["sensor_msgs/Image", "sensor_msgs/CompressedImage"].includes(datatype),
-    );
+    const imageTopics = (topics ?? []).filter(({ datatype }) => IMAGE_DATATYPES.includes(datatype));
     const topicsByNamespace = groupTopics(imageTopics);
     return {
       imageTopicsByNamespace: topicsByNamespace,
@@ -293,10 +292,14 @@ function ImageView(props: Props) {
     () => [
       // Single marker
       "visualization_msgs/ImageMarker",
+      "visualization_msgs/msg/ImageMarker",
       // Marker arrays
       "foxglove_msgs/ImageMarkerArray",
+      "foxglove_msgs/msg/ImageMarkerArray",
       "studio_msgs/ImageMarkerArray",
+      "studio_msgs/msg/ImageMarkerArray",
       "visualization_msgs/ImageMarkerArray",
+      "visualization_msgs/msg/ImageMarkerArray",
       // backwards compat with webviz
       "webviz_msgs/ImageMarkerArray",
     ],

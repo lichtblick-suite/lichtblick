@@ -77,7 +77,7 @@ function DiagnosticStatusPanel(props: Props) {
       topicToRender={topicToRender}
       onChange={(newTopicToRender) => saveConfig({ topicToRender: newTopicToRender })}
       topics={topics}
-      singleTopicDatatype={"diagnostic_msgs/DiagnosticArray"}
+      allowedDatatypes={["diagnostic_msgs/DiagnosticArray", "diagnostic_msgs/msg/DiagnosticArray"]}
       defaultTopicToRender={DIAGNOSTIC_TOPIC}
     />
   );

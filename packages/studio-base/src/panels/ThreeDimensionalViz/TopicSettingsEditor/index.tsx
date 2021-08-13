@@ -15,16 +15,7 @@ import { ComponentType } from "react";
 
 import GridSettingsEditor from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/GridSettingsEditor";
 import { TopicSettingsEditorProps } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/types";
-import {
-  FOXGLOVE_GRID_DATATYPE,
-  NAV_MSGS_PATH_DATATYPE,
-  POINT_CLOUD_DATATYPE,
-  POSE_STAMPED_DATATYPE,
-  SENSOR_MSGS_LASER_SCAN_DATATYPE,
-  VELODYNE_SCAN_DATATYPE,
-  VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE,
-  VISUALIZATION_MSGS_MARKER_DATATYPE,
-} from "@foxglove/studio-base/util/globalConstants";
+import { FOXGLOVE_GRID_DATATYPE } from "@foxglove/studio-base/util/globalConstants";
 
 import LaserScanSettingsEditor from "./LaserScanSettingsEditor";
 import MarkerSettingsEditor from "./MarkerSettingsEditor";
@@ -40,13 +31,20 @@ export function topicSettingsEditorForDatatype(datatype: string):
   | undefined {
   const editors = new Map<string, unknown>([
     [FOXGLOVE_GRID_DATATYPE, GridSettingsEditor],
-    [POINT_CLOUD_DATATYPE, PointCloudSettingsEditor],
-    [VELODYNE_SCAN_DATATYPE, PointCloudSettingsEditor],
-    [POSE_STAMPED_DATATYPE, PoseSettingsEditor],
-    [SENSOR_MSGS_LASER_SCAN_DATATYPE, LaserScanSettingsEditor],
-    [VISUALIZATION_MSGS_MARKER_DATATYPE, MarkerSettingsEditor],
-    [VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE, MarkerSettingsEditor],
-    [NAV_MSGS_PATH_DATATYPE, MarkerSettingsEditor],
+    ["sensor_msgs/PointCloud2", PointCloudSettingsEditor],
+    ["sensor_msgs/msg/PointCloud2", PointCloudSettingsEditor],
+    ["velodyne_msgs/VelodyneScan", PointCloudSettingsEditor],
+    ["velodyne_msgs/msg/VelodyneScan", PointCloudSettingsEditor],
+    ["geometry_msgs/PoseStamped", PoseSettingsEditor],
+    ["geometry_msgs/msg/PoseStamped", PoseSettingsEditor],
+    ["sensor_msgs/LaserScan", LaserScanSettingsEditor],
+    ["sensor_msgs/msg/LaserScan", LaserScanSettingsEditor],
+    ["visualization_msgs/Marker", MarkerSettingsEditor],
+    ["visualization_msgs/msg/Marker", MarkerSettingsEditor],
+    ["visualization_msgs/MarkerArray", MarkerSettingsEditor],
+    ["visualization_msgs/msg/MarkerArray", MarkerSettingsEditor],
+    ["nav_msgs/Path", MarkerSettingsEditor],
+    ["nav_msgs/msg/Path", MarkerSettingsEditor],
   ]);
 
   return editors.get(datatype) as

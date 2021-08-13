@@ -18,7 +18,8 @@ import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedConte
 import { ThreeDimensionalVizContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
 import { TREE_SPACING } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/constants";
 import { TopicTreeContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
-import { SECOND_SOURCE_PREFIX, TRANSFORM_TOPIC } from "@foxglove/studio-base/util/globalConstants";
+import { TRANSFORM_TOPIC } from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
+import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import { joinTopics } from "@foxglove/studio-base/util/topicUtils";
 
 import NamespaceMenu from "./NamespaceMenu";

@@ -23,7 +23,6 @@ import {
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
-import { VELODYNE_SCAN_DATATYPE } from "@foxglove/studio-base/util/globalConstants";
 import {
   fromMillis,
   addTimes,
@@ -40,7 +39,7 @@ export const DEFAULT_VELODYNE_PORT = 2369;
 const RPM = 600;
 const PROBLEM_SOCKET_ERROR = "SOCKET_ERROR";
 const TOPIC = "/velodyne_points";
-const TOPICS: Topic[] = [{ name: TOPIC, datatype: VELODYNE_SCAN_DATATYPE }];
+const TOPICS: Topic[] = [{ name: TOPIC, datatype: "velodyne_msgs/VelodyneScan" }];
 const DATATYPES: RosDatatypes = new Map(
   Object.entries({
     "velodyne_msgs/VelodyneScan": {

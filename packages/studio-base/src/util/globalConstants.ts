@@ -14,30 +14,13 @@ import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export const DEFAULT_STUDIO_NODE_PREFIX = "/studio_node/";
 
-export const TRANSFORM_TOPIC = "/tf";
 export const DIAGNOSTIC_TOPIC = "/diagnostics";
 export const SECOND_SOURCE_PREFIX = "/studio_source_2";
-
-export const COLOR_RGBA_DATATYPE = "std_msgs/ColorRGBA";
-export const GEOMETRY_MSGS_POLYGON_STAMPED_DATATYPE = "geometry_msgs/PolygonStamped";
-export const NAV_MSGS_OCCUPANCY_GRID_DATATYPE = "nav_msgs/OccupancyGrid";
-export const NAV_MSGS_PATH_DATATYPE = "nav_msgs/Path";
-export const POINT_CLOUD_DATATYPE = "sensor_msgs/PointCloud2";
-export const POSE_STAMPED_DATATYPE = "geometry_msgs/PoseStamped";
-export const SENSOR_MSGS_LASER_SCAN_DATATYPE = "sensor_msgs/LaserScan";
-export const TRANSFORM_STAMPED_DATATYPE = "geometry_msgs/TransformStamped";
-export const TF_DATATYPE = "tf/tfMessage";
-export const TF2_DATATYPE = "tf2_msgs/TFMessage";
-export const VELODYNE_SCAN_DATATYPE = "velodyne_msgs/VelodyneScan";
-export const VISUALIZATION_MSGS_MARKER_DATATYPE = "visualization_msgs/Marker";
-export const VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE = "visualization_msgs/MarkerArray";
 
 export const FOXGLOVE_GRID_TOPIC = "/foxglove/grid";
 export const FOXGLOVE_GRID_DATATYPE = "foxglove/Grid";
 
 export const ROBOT_DESCRIPTION_PARAM = "/robot_description";
-
-export const MARKER_ARRAY_DATATYPES = [VISUALIZATION_MSGS_MARKER_ARRAY_DATATYPE];
 
 export const COLORS = {
   RED: { r: 1.0, g: 0.2, b: 0.2, a: 1.0 },

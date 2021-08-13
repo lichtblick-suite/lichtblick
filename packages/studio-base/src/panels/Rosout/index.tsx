@@ -71,7 +71,7 @@ const RosoutPanel = React.memo(({ config, saveConfig }: Props) => {
       topicToRender={config.topicToRender}
       onChange={(topicToRender) => saveConfig({ ...config, topicToRender })}
       topics={topics}
-      singleTopicDatatype="rosgraph_msgs/Log"
+      allowedDatatypes={["rosgraph_msgs/Log", "rcl_interfaces/msg/Log"]}
       defaultTopicToRender={"/rosout"}
     />
   );

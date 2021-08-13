@@ -37,7 +37,13 @@ import {
 } from "./decodings";
 import { buildMarkerData, Dimensions, RawMarkerData, MarkerData, RenderOptions } from "./util";
 
-const IMAGE_DATATYPES = ["sensor_msgs/CompressedImage", "sensor_msgs/Image"];
+const UNCOMPRESSED_IMAGE_DATATYPES = ["sensor_msgs/Image", "sensor_msgs/msg/Image"];
+export const IMAGE_DATATYPES = [
+  "sensor_msgs/Image",
+  "sensor_msgs/msg/Image",
+  "sensor_msgs/CompressedImage",
+  "sensor_msgs/msg/CompressedImage",
+];
 
 // Just globally keep track of if we've shown an error in rendering, since typically when you get
 // one error, you'd then get a whole bunch more, which is spammy.
@@ -130,7 +136,11 @@ function decodeMessageToBitmap(
   // compressed verisons of topics, in which case the message datatype can
   // differ from the one recorded during initialization. So here we just check
   // for properties consistent with either datatype, and render accordingly.
-  if (datatype === "sensor_msgs/Image" && "encoding" in imageMessage && imageMessage.encoding) {
+  if (
+    UNCOMPRESSED_IMAGE_DATATYPES.includes(datatype) &&
+    "encoding" in imageMessage &&
+    imageMessage.encoding
+  ) {
     const { is_bigendian, width, height, encoding } = imageMessage as Image;
     image = new ImageData(width, height);
     switch (encoding) {

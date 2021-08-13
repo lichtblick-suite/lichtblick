@@ -17,7 +17,7 @@ import { useMemo, useRef } from "react";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import useChangeDetector from "@foxglove/studio-base/hooks/useChangeDetector";
 import useDeepMemo from "@foxglove/studio-base/hooks/useDeepMemo";
-import { TRANSFORM_TOPIC } from "@foxglove/studio-base/util/globalConstants";
+import { TRANSFORM_TOPIC } from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
 
 import {
   UseSceneBuilderAndTransformsDataInput,

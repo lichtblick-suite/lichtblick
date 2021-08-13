@@ -53,7 +53,11 @@ function MapPanel(props: MapPanelProps): JSX.Element {
   useEffect(() => {
     // The map only supports sensor_msgs/NavSatFix
     const eligibleTopics = topics
-      .filter((topic) => topic.datatype === "sensor_msgs/NavSatFix")
+      .filter(
+        (topic) =>
+          topic.datatype === "sensor_msgs/NavSatFix" ||
+          topic.datatype === "sensor_msgs/msg/NavSatFix",
+      )
       .map((topic) => topic.name);
 
     context.subscribe(eligibleTopics);

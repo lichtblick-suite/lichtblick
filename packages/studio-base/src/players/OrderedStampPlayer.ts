@@ -45,7 +45,15 @@ export const BUFFER_DURATION_SECS = 1.0;
 const getTopicsWithHeader = memoizeWeak((topics: Topic[], datatypes: RosDatatypes) => {
   return topics.filter(({ datatype }) => {
     const fields = datatypes.get(datatype)?.definitions;
-    return fields?.find((field) => field.type === "std_msgs/Header");
+    return (
+      // An unqualified "Header" is resolved as std_msgs/Header, per http://wiki.ros.org/msg
+      (fields?.[0]?.name === "header" && fields[0].type === "Header") ||
+      fields?.find(
+        (field) =>
+          field.name === "header" &&
+          (field.type === "std_msgs/Header" || field.type === "std_msgs/msg/Header"),
+      )
+    );
   });
 });
 

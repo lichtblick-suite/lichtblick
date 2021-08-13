@@ -21,3 +21,10 @@ export const LAYER_INDEX_DEFAULT_BASE = 0;
 export const LAYER_INDEX_HIGHLIGHT_OVERLAY = 500;
 export const LAYER_INDEX_HIGHLIGHT_BASE = 1000;
 export const LAYER_INDEX_DIFF_MODE_BASE_PER_PASS = 100;
+
+export const TRANSFORM_TOPIC = "/tf";
+export const TRANSFORM_STAMPED_DATATYPES = [
+  "geometry_msgs/TransformStamped",
+  "geometry_msgs/msg/TransformStamped",
+];
+export const TF_DATATYPES = ["tf/tfMessage", "tf2_msgs/TFMessage", "tf2_msgs/msg/TFMessage"];

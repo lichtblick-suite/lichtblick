@@ -22,7 +22,7 @@ const topics = [
   },
   {
     name: "/studio_source_2/foo",
-    datatype: "abc_msgs/foo",
+    datatype: "abc_msgs/bar",
   },
   {
     name: "/studio_source_2/foo",
@@ -30,44 +30,8 @@ const topics = [
   },
 ];
 
-const topicsGroups = [
-  {
-    key: "foo",
-    suffix: "/foo",
-    datatype: "abc_msgs/foo",
-  },
-  {
-    key: "bar",
-    suffix: "/bar",
-    datatype: "abc_msgs/bar",
-  },
-];
-
 storiesOf("components/TopicToRenderMenu", module)
-  .add("example (have topicsGroups)", () => {
-    return (
-      <PanelSetup
-        fixture={{ topics: [], datatypes: new Map(), frame: {} }}
-        onMount={(el: any) => {
-          const topicSet = el.querySelector("[data-test=topic-set]");
-          if (topicSet) {
-            topicSet.click();
-          }
-        }}
-      >
-        <TopicToRenderMenu
-          onChange={() => {
-            // no-op
-          }}
-          topicToRender=""
-          topics={topics}
-          topicsGroups={topicsGroups}
-          defaultTopicToRender=""
-        />
-      </PanelSetup>
-    );
-  })
-  .add("example (have singleTopicDatatype)", () => {
+  .add("example", () => {
     return (
       <PanelSetup
         fixture={{ topics: [], datatypes: new Map(), frame: {} }}
@@ -84,7 +48,7 @@ storiesOf("components/TopicToRenderMenu", module)
           }}
           topicToRender="/foo"
           topics={topics}
-          singleTopicDatatype={"abc_msgs/foo"}
+          allowedDatatypes={["abc_msgs/foo", "abc_msgs/bar"]}
           defaultTopicToRender="/foo"
         />
       </PanelSetup>
@@ -107,59 +71,13 @@ storiesOf("components/TopicToRenderMenu", module)
           }}
           topicToRender="/studio_source_2/foo"
           topics={topics}
-          singleTopicDatatype={"abc_msgs/foo"}
+          allowedDatatypes={["abc_msgs/foo", "abc_msgs/bar"]}
           defaultTopicToRender="/foo"
         />
       </PanelSetup>
     );
   })
-  .add("no bag loaded, defaultTopicToRender === topicToRender (have topicsGroups)", () => {
-    return (
-      <PanelSetup
-        fixture={{ topics: [], datatypes: new Map(), frame: {} }}
-        onMount={(el: any) => {
-          const topicSet = el.querySelector("[data-test=topic-set]");
-          if (topicSet) {
-            topicSet.click();
-          }
-        }}
-      >
-        <TopicToRenderMenu
-          onChange={() => {
-            // no-op
-          }}
-          topicToRender=""
-          topics={[]}
-          topicsGroups={topicsGroups}
-          defaultTopicToRender=""
-        />
-      </PanelSetup>
-    );
-  })
-  .add("no bag loaded, defaultTopicToRender !== topicToRender (have topicsGroups)", () => {
-    return (
-      <PanelSetup
-        fixture={{ topics: [], datatypes: new Map(), frame: {} }}
-        onMount={(el: any) => {
-          const topicSet = el.querySelector("[data-test=topic-set]");
-          if (topicSet) {
-            topicSet.click();
-          }
-        }}
-      >
-        <TopicToRenderMenu
-          onChange={() => {
-            // no-op
-          }}
-          topicToRender="/studio_source_2"
-          topics={[]}
-          topicsGroups={topicsGroups}
-          defaultTopicToRender=""
-        />
-      </PanelSetup>
-    );
-  })
-  .add("bag loaded but topicToRender is not available (have singleTopicDatatype)", () => {
+  .add("bag loaded but topicToRender is not available", () => {
     return (
       <PanelSetup
         fixture={{ topics: [], datatypes: new Map(), frame: {} }}
@@ -176,13 +94,13 @@ storiesOf("components/TopicToRenderMenu", module)
           }}
           topicToRender="/abc"
           topics={topics}
-          singleTopicDatatype={"abc_msgs/foo"}
+          allowedDatatypes={["abc_msgs/foo", "abc_msgs/bar"]}
           defaultTopicToRender="/foo"
         />
       </PanelSetup>
     );
   })
-  .add("bag loaded but defaultTopicToRender is not available (have singleTopicDatatype)", () => {
+  .add("bag loaded but defaultTopicToRender is not available", () => {
     return (
       <PanelSetup
         fixture={{ topics: [], datatypes: new Map(), frame: {} }}
@@ -199,7 +117,7 @@ storiesOf("components/TopicToRenderMenu", module)
           }}
           topicToRender="/bar"
           topics={topics}
-          singleTopicDatatype={"abc_msgs/foo"}
+          allowedDatatypes={["abc_msgs/foo", "abc_msgs/bar"]}
           defaultTopicToRender="/bar"
         />
       </PanelSetup>
