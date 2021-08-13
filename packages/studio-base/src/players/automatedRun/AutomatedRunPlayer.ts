@@ -18,7 +18,7 @@ import { v4 as uuidv4 } from "uuid";
 import Logger from "@foxglove/log";
 import { Time, add, isLessThan } from "@foxglove/rostime";
 import {
-  AdvertisePayload,
+  AdvertiseOptions,
   MessageEvent,
   ParameterValue,
   Player,
@@ -409,7 +409,7 @@ export default class AutomatedRunPlayer implements Player {
     // no-op
   }
 
-  setPublishers(_publishers: AdvertisePayload[]): void {
+  setPublishers(_publishers: AdvertiseOptions[]): void {
     // no-op
   }
 

@@ -221,23 +221,13 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
       initialProps: { maybePlayer: { player } },
     });
 
-    act(() =>
-      result.current.setPublishers("test", [
-        { topic: "/studio/test", datatype: "test", datatypes: new Map() },
-      ]),
-    );
-    expect(result.current.publishers).toEqual([
-      { topic: "/studio/test", datatype: "test", datatypes: new Map() },
-    ]);
+    act(() => result.current.setPublishers("test", [{ topic: "/studio/test", datatype: "test" }]));
+    expect(result.current.publishers).toEqual([{ topic: "/studio/test", datatype: "test" }]);
 
-    act(() =>
-      result.current.setPublishers("bar", [
-        { topic: "/studio/test2", datatype: "test2", datatypes: new Map() },
-      ]),
-    );
+    act(() => result.current.setPublishers("bar", [{ topic: "/studio/test2", datatype: "test2" }]));
     expect(result.current.publishers).toEqual([
-      { topic: "/studio/test", datatype: "test", datatypes: new Map() },
-      { topic: "/studio/test2", datatype: "test2", datatypes: new Map() },
+      { topic: "/studio/test", datatype: "test" },
+      { topic: "/studio/test2", datatype: "test2" },
     ]);
 
     const lastPublishers = result.current.publishers;
@@ -391,18 +381,12 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
     });
     act(() => result.current.setSubscriptions("test", [{ topic: "/studio/test" }]));
     act(() => result.current.setSubscriptions("bar", [{ topic: "/studio/test2" }]));
-    act(() =>
-      result.current.setPublishers("test", [
-        { topic: "/studio/test", datatype: "test", datatypes: new Map() },
-      ]),
-    );
+    act(() => result.current.setPublishers("test", [{ topic: "/studio/test", datatype: "test" }]));
 
     const player2 = new FakePlayer();
     rerender({ maybePlayer: { player: player2 } });
     expect(player2.subscriptions).toEqual([{ topic: "/studio/test" }, { topic: "/studio/test2" }]);
-    expect(player2.publishers).toEqual([
-      { topic: "/studio/test", datatype: "test", datatypes: new Map() },
-    ]);
+    expect(player2.publishers).toEqual([{ topic: "/studio/test", datatype: "test" }]);
   });
 
   it("keeps activeData when closing a player", async () => {

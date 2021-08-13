@@ -17,7 +17,7 @@ import {
   PlayerState,
   Player,
   SubscribePayload,
-  AdvertisePayload,
+  AdvertiseOptions,
   PlayerPresence,
   ParameterValue,
 } from "@foxglove/studio-base/players/types";
@@ -26,7 +26,7 @@ export default class FakePlayer implements Player {
   listener?: (arg0: PlayerState) => Promise<void>;
   playerId: string = "test";
   subscriptions: SubscribePayload[] = [];
-  publishers: AdvertisePayload[] | undefined;
+  publishers: AdvertiseOptions[] | undefined;
   _capabilities: typeof PlayerCapabilities[keyof typeof PlayerCapabilities][] = [];
 
   setListener(listener: (arg0: PlayerState) => Promise<void>): void {
@@ -65,7 +65,7 @@ export default class FakePlayer implements Player {
   publish = (): void => {
     // no-op
   };
-  setPublishers = (pubs: AdvertisePayload[]): void => {
+  setPublishers = (pubs: AdvertiseOptions[]): void => {
     this.publishers = pubs;
   };
   setParameter(_key: string, _value: ParameterValue): void {

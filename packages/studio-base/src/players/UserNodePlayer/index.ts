@@ -30,7 +30,7 @@ import {
 } from "@foxglove/studio-base/players/UserNodePlayer/types";
 import { hasTransformerErrors } from "@foxglove/studio-base/players/UserNodePlayer/utils";
 import {
-  AdvertisePayload,
+  AdvertiseOptions,
   Player,
   PlayerState,
   PlayerStateActiveData,
@@ -720,7 +720,7 @@ export default class UserNodePlayer implements Player {
     }
   };
 
-  setPublishers = (publishers: AdvertisePayload[]): void => this._player.setPublishers(publishers);
+  setPublishers = (publishers: AdvertiseOptions[]): void => this._player.setPublishers(publishers);
   setParameter = (key: string, value: ParameterValue): void =>
     this._player.setParameter(key, value);
   publish = (request: PublishPayload): void => this._player.publish(request);

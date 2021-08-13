@@ -9,7 +9,7 @@ import Logger from "@foxglove/log";
 import { Time } from "@foxglove/rostime";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import {
-  AdvertisePayload,
+  AdvertiseOptions,
   MessageEvent,
   ParameterValue,
   Player,
@@ -259,7 +259,7 @@ export default class VelodynePlayer implements Player {
 
   setSubscriptions(_subscriptions: SubscribePayload[]): void {}
 
-  setPublishers(_publishers: AdvertisePayload[]): void {
+  setPublishers(_publishers: AdvertiseOptions[]): void {
     // no-op
   }
 

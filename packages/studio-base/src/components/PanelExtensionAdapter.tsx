@@ -24,7 +24,11 @@ import {
   useHoverValue,
   useSetHoverValue,
 } from "@foxglove/studio-base/context/HoverValueContext";
-import { PlayerCapabilities, PlayerState } from "@foxglove/studio-base/players/types";
+import {
+  AdvertiseOptions,
+  PlayerCapabilities,
+  PlayerState,
+} from "@foxglove/studio-base/players/types";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { fromSec, toSec } from "@foxglove/studio-base/util/time";
 
@@ -59,6 +63,8 @@ function selectSeekPlayback(ctx: MessagePipelineContext) {
   return ctx.seekPlayback;
 }
 
+type RenderFn = (renderState: Readonly<RenderState>, done: () => void) => void;
+
 /**
  * PanelExtensionAdapter renders a panel extension via initPanel
  *
@@ -75,17 +81,18 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   const capabilities = useMessagePipeline(selectCapabilities);
   const seekPlayback = useMessagePipeline(selectSeekPlayback);
 
-  const [subscriberId] = useState(() => uuid());
+  const [panelId] = useState(() => uuid());
 
   const [error, setError] = useState<Error | undefined>();
   const watchedFieldsRef = useRef(new Set<keyof RenderState>());
   const subscribedTopicsRef = useRef(new Set<string>());
   const previousPlayerStateRef = useRef<PlayerState | undefined>(undefined);
-  const panelContextRef = useRef<PanelExtensionContext | undefined>(undefined);
 
   // To avoid updating extended message stores once message pipeline blocks are no longer updating
   // we store a ref to the blocks and only update stores when the ref is different
   const prevBlocksRef = useRef<unknown>(undefined);
+
+  const [renderFn, setRenderFn] = useState<RenderFn | undefined>();
 
   const renderingRef = useRef<boolean>(false);
   const prevRenderState = useRef<RenderState>({});
@@ -105,6 +112,10 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   const setHoverValue = useSetHoverValue();
   const clearHoverValue = useClearHoverValue();
 
+  // track the advertisements requested by the panel context
+  // topic -> advertisement
+  const advertisementsRef = useRef(new Map<string, AdvertiseOptions>());
+
   // To avoid re-creating the renderPanel function when hover value changes we put it into a ref
   // It is sufficient for renderPanel to use the latest value when called.
   const hoverValueRef = useRef<typeof hoverValue>();
@@ -114,8 +125,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     rafRequestedRef.current = false;
 
     const ctx = latestPipelineContextRef.current;
-    const { current: panelContext } = panelContextRef;
-    if (!panelContext || !panelContext.onRender || !ctx) {
+    if (!renderFn || !ctx) {
       return;
     }
 
@@ -207,7 +217,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     try {
       setError(undefined);
       let doneCalled = false;
-      panelContext.onRender(renderState, () => {
+      renderFn(renderState, () => {
         // ignore any additional done calls from the panel
         if (doneCalled) {
           return;
@@ -218,28 +228,26 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     } catch (err) {
       setError(err);
     }
-  }, []);
+  }, [renderFn]);
 
-  useMessagePipeline((ctx) => {
-    latestPipelineContextRef.current = ctx;
+  const messagePipelineSelector = useCallback(
+    (ctx: MessagePipelineContext) => {
+      latestPipelineContextRef.current = ctx;
 
-    const { current: panelContext } = panelContextRef;
-    if (!panelContext || !panelContext.onRender) {
-      return;
-    }
+      if (!renderFn || rafRequestedRef.current) {
+        return;
+      }
 
-    if (rafRequestedRef.current) {
-      return;
-    }
-    rafRequestedRef.current = true;
-    requestAnimationFrame(renderPanel);
-  });
+      rafRequestedRef.current = true;
+      requestAnimationFrame(renderPanel);
+    },
+    [renderFn, renderPanel],
+  );
+
+  useMessagePipeline(messagePipelineSelector);
 
   type PartialPanelExtensionContext = Omit<PanelExtensionContext, "panelElement">;
   const partialExtensionContext = useMemo<PartialPanelExtensionContext>(() => {
-    type RenderFn = (renderState: Readonly<RenderState>, done: () => void) => void;
-    let renderFn: RenderFn | undefined = undefined;
-
     return {
       initialState: configRef.current,
 
@@ -279,7 +287,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
         }
 
         const subscribePayloads = topics.map((topic) => ({ topic }));
-        setSubscriptions(subscriberId, subscribePayloads);
+        setSubscriptions(panelId, subscribePayloads);
         for (const topic of topics) {
           subscribedTopicsRef.current.add(topic);
         }
@@ -287,55 +295,82 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
         requestBackfill();
       },
 
+      advertise: (topic: string, datatype: string, options) => {
+        const ctx = latestPipelineContextRef.current;
+        if (!ctx) {
+          throw new Error("Unable to advertise. There is no active connection.");
+        }
+
+        const payload: AdvertiseOptions = {
+          topic,
+          datatype,
+          options,
+        };
+        advertisementsRef.current.set(topic, payload);
+
+        ctx.setPublishers(panelId, Array.from(advertisementsRef.current.values()));
+      },
+
+      unadvertise: (topic: string) => {
+        const ctx = latestPipelineContextRef.current;
+        if (!ctx) {
+          throw new Error("Unable to advertise. There is no active connection.");
+        }
+
+        advertisementsRef.current.delete(topic);
+        ctx.setPublishers(panelId, Array.from(advertisementsRef.current.values()));
+      },
+
+      publish: (topic, message) => {
+        const ctx = latestPipelineContextRef.current;
+        if (!ctx) {
+          throw new Error("Unable to publish. There is no active connection.");
+        }
+        ctx.publish({
+          topic,
+          msg: message as Record<string, unknown>,
+        });
+      },
+
       unsubscribeAll: () => {
         subscribedTopicsRef.current.clear();
-        setSubscriptions(subscriberId, []);
-      },
-
-      // eslint-disable-next-line no-restricted-syntax
-      get onRender() {
-        return renderFn;
-      },
-
-      // When a panel sets the render function queue a render
-      // eslint-disable-next-line no-restricted-syntax
-      set onRender(renderFunction: RenderFn | undefined) {
-        renderFn = renderFunction;
-        requestAnimationFrame(renderPanel);
+        setSubscriptions(panelId, []);
       },
     };
   }, [
     capabilities,
     clearHoverValue,
-    renderPanel,
     requestBackfill,
     saveConfig,
     seekPlayback,
     setHoverValue,
     setSubscriptions,
-    subscriberId,
+    panelId,
   ]);
 
-  // invoked when the dom node changes
   const refCallback = useCallback<RefCallback<HTMLDivElement>>(
     (node) => {
-      // invoked when the dom node has gone away
+      // perform cleanup when the dom node goes away
       if (node === ReactNull) {
-        panelContextRef.current = undefined;
-
-        // clear the panel's subscriptions since it may be unmounting
-        setSubscriptions(subscriberId, []);
+        latestPipelineContextRef.current?.setSubscriptions(panelId, []);
+        latestPipelineContextRef.current?.setPublishers(panelId, []);
         return;
       }
 
-      log.info(`Init panel ${subscriberId}`);
-      panelContextRef.current = {
+      const panelContext: PanelExtensionContext = {
         panelElement: node,
         ...partialExtensionContext,
+
+        // eslint-disable-next-line no-restricted-syntax
+        set onRender(renderFunction: RenderFn | undefined) {
+          setRenderFn(() => renderFunction);
+        },
       };
-      initPanel(panelContextRef.current);
+
+      log.info(`Init panel ${panelId}`);
+      initPanel(panelContext);
     },
-    [initPanel, partialExtensionContext, setSubscriptions, subscriberId],
+    [initPanel, partialExtensionContext, panelId],
   );
 
   const style: CSSProperties = {};

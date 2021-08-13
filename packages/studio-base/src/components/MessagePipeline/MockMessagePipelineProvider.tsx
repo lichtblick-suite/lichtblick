@@ -17,7 +17,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useShallowMemo } from "@foxglove/hooks";
 import { Time, isLessThan } from "@foxglove/rostime";
 import {
-  AdvertisePayload,
+  AdvertiseOptions,
   MessageEvent,
   ParameterValue,
   PlayerPresence,
@@ -47,7 +47,7 @@ export default function MockMessagePipelineProvider(props: {
   messages?: MessageEvent<unknown>[];
   problems?: PlayerProblem[];
   publish?: (request: PublishPayload) => void;
-  setPublishers?: (arg0: string, arg1: AdvertisePayload[]) => void;
+  setPublishers?: (arg0: string, arg1: AdvertiseOptions[]) => void;
   setSubscriptions?: (arg0: string, arg1: SubscribePayload[]) => void;
   setParameter?: (key: string, value: ParameterValue) => void;
   noActiveData?: boolean;

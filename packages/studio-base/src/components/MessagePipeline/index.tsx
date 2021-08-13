@@ -21,7 +21,7 @@ import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConf
 import useContextSelector from "@foxglove/studio-base/hooks/useContextSelector";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import {
-  AdvertisePayload,
+  AdvertiseOptions,
   Frame,
   ParameterValue,
   Player,
@@ -50,9 +50,9 @@ export type MessagePipelineContext = {
   sortedTopics: Topic[];
   datatypes: RosDatatypes;
   subscriptions: SubscribePayload[];
-  publishers: AdvertisePayload[];
+  publishers: AdvertiseOptions[];
   setSubscriptions: (id: string, subscriptionsForId: SubscribePayload[]) => void;
-  setPublishers: (id: string, publishersForId: AdvertisePayload[]) => void;
+  setPublishers: (id: string, publishersForId: AdvertiseOptions[]) => void;
   setParameter: (key: string, value: ParameterValue) => void;
   publish: (request: PublishPayload) => void;
   startPlayback: () => void;
@@ -141,7 +141,7 @@ export function MessagePipelineProvider({
     () => flatten(Object.values(subscriptionsById)),
     [subscriptionsById],
   );
-  const publishers: AdvertisePayload[] = useMemo(
+  const publishers: AdvertiseOptions[] = useMemo(
     () => flatten(Object.values(publishersById)),
     [publishersById],
   );
@@ -264,7 +264,7 @@ export function MessagePipelineProvider({
     [setAllSubscriptions],
   );
   const setPublishers = useCallback(
-    (id: string, publishersForId: AdvertisePayload[]) => {
+    (id: string, publishersForId: AdvertiseOptions[]) => {
       setAllPublishers((p) => ({ ...p, [id]: publishersForId }));
     },
     [setAllPublishers],

@@ -43,7 +43,7 @@ import {
   PlayerStateActiveData,
   Progress,
   PublishPayload,
-  AdvertisePayload,
+  AdvertiseOptions,
 } from "@foxglove/studio-base/players/types";
 import CurrentLayoutState, {
   DEFAULT_LAYOUT_FOR_TESTS,
@@ -68,7 +68,7 @@ export type Fixture = {
   userNodeRosLib?: string;
   savedProps?: SavedProps;
   publish?: (request: PublishPayload) => void;
-  setPublishers?: (arg0: string, arg1: AdvertisePayload[]) => void;
+  setPublishers?: (publisherId: string, advertisements: AdvertiseOptions[]) => void;
 };
 
 type Props = {

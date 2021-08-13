@@ -17,7 +17,7 @@ import { Time, add, compare, isLessThan } from "@foxglove/rostime";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
 import {
-  AdvertisePayload,
+  AdvertiseOptions,
   PublishPayload,
   SubscribePayload,
   Player,
@@ -151,7 +151,7 @@ export default class OrderedStampPlayer implements Player {
   setSubscriptions = (subscriptions: SubscribePayload[]): void =>
     this._player.setSubscriptions(subscriptions);
   close = (): void => this._player.close();
-  setPublishers = (publishers: AdvertisePayload[]): void => this._player.setPublishers(publishers);
+  setPublishers = (publishers: AdvertiseOptions[]): void => this._player.setPublishers(publishers);
   setParameter = (key: string, value: ParameterValue): void =>
     this._player.setParameter(key, value);
   publish = (request: PublishPayload): void => this._player.publish(request);

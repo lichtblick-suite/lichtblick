@@ -65,7 +65,7 @@ export interface Player {
   // Set a new set of subscriptions/advertisers. This might trigger fetching
   // new data, which might in turn trigger a backfill of messages.
   setSubscriptions(subscriptions: SubscribePayload[]): void;
-  setPublishers(publishers: AdvertisePayload[]): void;
+  setPublishers(publishers: AdvertiseOptions[]): void;
   // Modify a remote parameter such as a rosparam.
   setParameter(key: string, value: ParameterValue): void;
   // If the Player supports publishing (i.e. PlayerState#capabilities contains
@@ -276,19 +276,15 @@ export type SubscribePayload = {
 };
 
 // Represents a single topic publisher, for use in `setPublishers`.
-export type AdvertisePayload = {
+export type AdvertiseOptions = {
   // The topic name
   topic: string;
 
   // The datatype name
   datatype: string;
 
-  // A map of datatype names to ROS message definitions. This must include
-  // message definitions for all types referenced by `datatype` and its children.
-  datatypes: RosDatatypes;
-
-  // Optionally indicate the name of the advertiser
-  advertiser?: string;
+  // Additional advertise options
+  options?: Record<string, unknown>;
 };
 
 // The actual message to publish.
