@@ -9,7 +9,6 @@ import { useState } from "react";
 import { useAsyncFn } from "react-use";
 import styled from "styled-components";
 
-import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import Button from "@foxglove/studio-base/components/Button";
 import Checkbox from "@foxglove/studio-base/components/Checkbox";
 import Flex from "@foxglove/studio-base/components/Flex";
@@ -60,9 +59,8 @@ function WelcomePanel() {
     emailError == undefined &&
     !loading;
 
-  // TODO: optional chaining is compiled out (for storybook) if used here; may be a webpack bug
-  const commandOrControl =
-    (OsContextSingleton && OsContextSingleton.platform === "darwin" && "⌘") ?? "^";
+  // show the command icon if we detect a Mac platform
+  const commandOrControl = navigator.userAgent.includes("Mac") ? "⌘" : "^";
 
   return (
     <Flex col scroll dataTest="welcome-content">
