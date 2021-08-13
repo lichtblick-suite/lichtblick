@@ -119,7 +119,7 @@ function zoomOut(keyObj: any) {
 }
 
 export default {
-  title: "panels/TwoDimensonalPlot",
+  title: "panels/LegacyPlot",
   parameters: {
     chromatic: {
       delay: 2500,
