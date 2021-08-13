@@ -40,7 +40,6 @@ import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 import { CameraInfo, StampedMessage } from "@foxglove/studio-base/types/Messages";
 import { PanelConfigSchema, SaveConfig } from "@foxglove/studio-base/types/panels";
-import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import filterMap from "@foxglove/studio-base/util/filterMap";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
@@ -353,7 +352,7 @@ function ImageView(props: Props) {
           toggleComponent={
             <ToggleComponent
               dataTest={"topics-dropdown"}
-              text={nonEmptyOrUndefined(cameraTopic) ?? "no image topics"}
+              text={cameraTopic ? cameraTopic : "no image topics"}
               disabled
             />
           }

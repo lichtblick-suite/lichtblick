@@ -92,16 +92,6 @@ overrides:
         - error
         - ts-expect-error: allow-with-description
 
-      "@typescript-eslint/strict-boolean-expressions":
-        - error
-        - allowString: false # Different from @foxglove/eslint-plugin
-          allowNullableString: false # Different from @foxglove/eslint-plugin
-          allowNumber: false
-          allowNullableNumber: false
-          allowNullableBoolean: false
-          allowNullableObject: true
-          allowAny: false
-
       "@typescript-eslint/no-inferrable-types": off # It's sometimes useful to explicitly name to guard against future changes
       "@typescript-eslint/no-empty-function": off
       "@typescript-eslint/no-implied-eval": off # We need to use `new Function()`
@@ -130,11 +120,11 @@ overrides:
       - "**/*.test.ts"
 
   - rules:
-      # Same config as above, but downgrade to warning until we fix 'allowAny' violations
+      # Same config as @foxglove/typescript, but downgrade to warning while we fix 'allowAny' violations
       "@typescript-eslint/strict-boolean-expressions":
         - warn
-        - allowString: false
-          allowNullableString: false
+        - allowString: true
+          allowNullableString: true
           allowNumber: false
           allowNullableNumber: false
           allowNullableBoolean: false

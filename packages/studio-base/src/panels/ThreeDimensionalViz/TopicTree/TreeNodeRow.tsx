@@ -26,10 +26,6 @@ import {
   TREE_SPACING,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/constants";
 import { TopicTreeContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
-import {
-  isNonEmptyOrUndefined,
-  nonEmptyOrUndefined,
-} from "@foxglove/studio-base/util/emptyOrUndefined";
 import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { joinTopics } from "@foxglove/studio-base/util/topicUtils";
@@ -153,8 +149,7 @@ export default function TreeNodeRow({
 
   const isDefaultSettings =
     !derivedCustomSettings || (derivedCustomSettings.isDefaultSettings ?? false);
-  const showTopicSettings =
-    topicName.length > 0 && isNonEmptyOrUndefined(datatype) && canEditDatatype(datatype);
+  const showTopicSettings = topicName.length > 0 && !!datatype && canEditDatatype(datatype);
   const showTopicSettingsChanged = showTopicSettings && !isDefaultSettings;
 
   const showTopicError =
@@ -197,7 +192,7 @@ export default function TreeNodeRow({
     (columnIndex: number, visible: boolean) => {
       if (visible) {
         const topic = [topicName, joinTopics(SECOND_SOURCE_PREFIX, topicName)][columnIndex];
-        if (!isNonEmptyOrUndefined(topic)) {
+        if (!topic) {
           return;
         }
         setHoveredMarkerMatchers([{ topic }]);
@@ -230,7 +225,7 @@ export default function TreeNodeRow({
         <NodeName
           isXSWidth={isXSWidth}
           maxWidth={maxNodeNameWidth}
-          displayName={nonEmptyOrUndefined(name) ?? topicName}
+          displayName={name ? name : topicName}
           tooltips={tooltips}
           topicName={topicName}
           searchText={filterText}

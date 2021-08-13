@@ -42,7 +42,6 @@ import {
 import { PanelComponent, usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
 import { EmptyDropTarget } from "@foxglove/studio-base/panels/Tab/EmptyDropTarget";
 import { MosaicDropResult, PanelConfig } from "@foxglove/studio-base/types/panels";
-import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import { getPanelIdForType, getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
 import ErrorBoundary from "./ErrorBoundary";
@@ -98,7 +97,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
   const createTile = useCallback(
     (config?: { type?: string; panelConfig?: PanelConfig }) => {
       const defaultPanelType = "RosOut";
-      const type = config ? nonEmptyOrUndefined(config.type) ?? defaultPanelType : defaultPanelType;
+      const type = config?.type ? config.type : defaultPanelType;
       const id = getPanelIdForType(type);
       if (config?.panelConfig) {
         savePanelConfigs({ configs: [{ id, config: config.panelConfig }] });

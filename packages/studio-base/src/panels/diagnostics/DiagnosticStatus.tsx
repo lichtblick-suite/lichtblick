@@ -31,7 +31,6 @@ import { openSiblingStateTransitionsPanel } from "@foxglove/studio-base/panels/S
 import { Config } from "@foxglove/studio-base/panels/diagnostics/DiagnosticStatusPanel";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
-import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 import style from "./DiagnosticStatus.module.scss";
 import { LEVEL_NAMES, DiagnosticInfo, KeyValue, DiagnosticStatusMessage } from "./util";
@@ -219,7 +218,7 @@ class DiagnosticStatus extends React.Component<Props, unknown> {
     }
     return (
       <td className={style.valueCell}>
-        {nonEmptyOrUndefined(str) ?? "\xa0"}
+        {str ? str : "\xa0"}
         {openPlotPanelIconElem}
       </td>
     );

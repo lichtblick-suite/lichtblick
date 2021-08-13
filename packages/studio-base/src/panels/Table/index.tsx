@@ -24,7 +24,6 @@ import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
-import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 import Table from "./Table";
 import helpContent from "./index.help.md";
@@ -56,8 +55,8 @@ function TablePanel({ config, saveConfig }: Props) {
   const msgs = useMessagesByTopic({ topics: [topicName], historySize: 1 })[topicName];
   const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems([topicPath]);
   const msg = msgs?.[0];
-  const cachedMessages = msg ? cachedGetMessagePathDataItems(topicPath, msg) : [];
-  const firstCachedMessage = cachedMessages?.[0];
+  const cachedMessages = msg ? cachedGetMessagePathDataItems(topicPath, msg) ?? [] : [];
+  const firstCachedMessage = cachedMessages[0];
 
   return (
     <Flex col clip style={{ position: "relative" }}>
@@ -72,7 +71,7 @@ function TablePanel({ config, saveConfig }: Props) {
         </div>
       </PanelToolbar>
       {topicPath.length === 0 && <EmptyState>No topic selected</EmptyState>}
-      {topicPath.length !== 0 && !isNonEmptyOrUndefined(cachedMessages) && (
+      {topicPath.length !== 0 && cachedMessages.length === 0 && (
         <EmptyState>Waiting for next message</EmptyState>
       )}
       {topicPath.length !== 0 && firstCachedMessage && (

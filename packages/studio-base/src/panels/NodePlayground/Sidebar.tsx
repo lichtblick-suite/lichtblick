@@ -30,7 +30,6 @@ import { getNodeProjectConfig } from "@foxglove/studio-base/players/UserNodePlay
 import templates from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/templates";
 import userUtilsReadMe from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/README.md";
 import { UserNodes } from "@foxglove/studio-base/types/panels";
-import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const MenuWrapper = styled.div`
@@ -157,7 +156,7 @@ const SidebarTitle = ({
 }) => (
   <Flex row style={{ alignItems: "center", color: colors.DARK9, padding: "5px" }}>
     <h3 style={{ textTransform: "uppercase" }}>{title}</h3>
-    {isNonEmptyOrUndefined(tooltip) && (
+    {tooltip && (
       <Icon style={{ cursor: "unset", marginLeft: "5px" }} medium tooltip={tooltip}>
         <HelpCircleIcon />
       </Icon>

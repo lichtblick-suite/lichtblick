@@ -27,7 +27,6 @@ import usePublisher from "@foxglove/studio-base/hooks/usePublisher";
 import { PlayerCapabilities, Topic } from "@foxglove/studio-base/players/types";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
-import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 import buildSampleMessage from "./buildSampleMessage";
 
@@ -216,7 +215,7 @@ function Publish(props: Props) {
         </STextAreaContainer>
       )}
       <Flex row style={buttonRowStyle}>
-        {isNonEmptyOrUndefined(error) && <SErrorText>{error}</SErrorText>}
+        {error && <SErrorText>{error}</SErrorText>}
         <Button
           style={{ backgroundColor: buttonColor }}
           tooltip={canPublish ? buttonTooltip : "Connect to ROS to publish data"}

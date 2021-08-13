@@ -18,31 +18,12 @@
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-(str: string, num: number, wut: any) => {
-  str ? 0 : 1; // eslint-disable-line @typescript-eslint/strict-boolean-expressions
-  num ? 0 : 1; // eslint-disable-line @typescript-eslint/strict-boolean-expressions
-  wut ? 0 : 1; // eslint-disable-line @typescript-eslint/strict-boolean-expressions
-
+(str: string, wut: any) => {
   console.log = () => 0;
   console.log(str); // eslint-disable-line no-restricted-syntax
 
   // All nulls are banned
   wut == null; // eslint-disable-line no-restricted-syntax
-  wut != null; // eslint-disable-line no-restricted-syntax
-  null == wut; // eslint-disable-line no-restricted-syntax
-  null != wut; // eslint-disable-line no-restricted-syntax
-  null === wut; // eslint-disable-line no-restricted-syntax, @foxglove/strict-equality
-  wut === null; // eslint-disable-line no-restricted-syntax, @foxglove/strict-equality
-
-  wut == undefined;
-  wut != undefined;
-  undefined == wut;
-  undefined != wut;
-  undefined === wut; // eslint-disable-line @foxglove/strict-equality
-  wut === undefined; // eslint-disable-line @foxglove/strict-equality
-
-  wut == str; // eslint-disable-line @foxglove/strict-equality
-  str == wut; // eslint-disable-line @foxglove/strict-equality
 };
 
 // @ts-expect-error unused function

@@ -23,7 +23,6 @@ import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedConte
 import { ROW_HEIGHT } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/constants";
 import { TopicTreeContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
 import clipboard from "@foxglove/studio-base/util/clipboard";
-import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { SetCurrentEditingTopic } from "./types";
@@ -163,7 +162,7 @@ export default function TreeNodeMenu({
             Copy topic name
           </Item>
         )}
-        {isNonEmptyOrUndefined(datatype) && (
+        {datatype && (
           <Item
             dataTest={`topic-row-menu-edit-settings-${topicName}`}
             onClick={() => {

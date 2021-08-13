@@ -25,7 +25,6 @@ import SegmentedControl from "@foxglove/studio-base/components/SegmentedControl"
 import CommonPointSettings from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/CommonPointSettings";
 import { TopicSettingsEditorProps } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/types";
 import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
-import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 import CommonDecaySettings from "./CommonDecaySettings";
 import { SLabel, SInput } from "./common";
@@ -151,7 +150,7 @@ export default function PointCloudSettingsEditor(
                 if (hasRGB) {
                   return { mode: "rgb" };
                 }
-                return isNonEmptyOrUndefined(defaultColorField)
+                return defaultColorField
                   ? { mode: "rainbow", colorField: defaultColorField }
                   : undefined;
               })

@@ -55,7 +55,6 @@ import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFiles
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
 import welcomeLayout from "@foxglove/studio-base/layouts/welcomeLayout";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
-import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 const log = Log.getLogger(__filename);
 
@@ -202,7 +201,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     });
     if (isMounted()) {
       setSelectedLayout({ id: newLayout.id, data: welcomeLayout.data });
-      if (isNonEmptyOrUndefined(props.demoBagUrl)) {
+      if (props.demoBagUrl) {
         selectSource(
           { name: "Demo Bag", type: "ros1-remote-bagfile" },
           {

@@ -13,7 +13,6 @@
 import { every, uniq, keyBy, isEmpty } from "lodash";
 
 import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
-import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import { jsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -150,7 +149,7 @@ export default function getDiff(
   }
   if (before == undefined) {
     const afterIsNotObj = Array.isArray(after) || typeof after !== "object";
-    if (!isNonEmptyOrUndefined(idLabel) || afterIsNotObj) {
+    if (!idLabel || afterIsNotObj) {
       return { [diffLabels.ADDED.labelText]: after };
     }
     const idLabelObj = {
@@ -162,7 +161,7 @@ export default function getDiff(
   }
   if (after == undefined) {
     const beforeIsNotObj = Array.isArray(before) || typeof before !== "object";
-    if (!isNonEmptyOrUndefined(idLabel) || beforeIsNotObj) {
+    if (!idLabel || beforeIsNotObj) {
       return { [diffLabels.DELETED.labelText]: before };
     }
     const idLabelObj = {

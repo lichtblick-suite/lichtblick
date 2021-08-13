@@ -12,7 +12,6 @@ import Logger from "@foxglove/log";
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import { PanelConfigSchemaEntry, SaveConfig } from "@foxglove/studio-base/types/panels";
 import { hexToColorObj, colorObjToIColor } from "@foxglove/studio-base/util/colorUtils";
-import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 const log = Logger.getLogger(__filename);
 
@@ -89,9 +88,9 @@ export default function SchemaEntryEditor({
                 return undefined; // onChange will not be called
               }}
               onChange={(_event, inputValue) => {
-                const sanitizedInput = nonEmptyOrUndefined(inputValue?.trim());
-                if ((sanitizedInput != undefined && !isNaN(+sanitizedInput)) || allowEmpty) {
-                  setValue(sanitizedInput != undefined ? +sanitizedInput : undefined);
+                const sanitizedInput = inputValue?.trim();
+                if ((sanitizedInput && !isNaN(+sanitizedInput)) || allowEmpty) {
+                  setValue(sanitizedInput ? +sanitizedInput : undefined);
                 }
               }}
             />

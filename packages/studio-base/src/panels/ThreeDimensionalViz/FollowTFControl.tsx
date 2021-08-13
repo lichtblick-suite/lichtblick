@@ -25,7 +25,6 @@ import Button from "@foxglove/studio-base/components/Button";
 import Icon from "@foxglove/studio-base/components/Icon";
 import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
-import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 import Transforms, { Transform } from "./Transforms";
 
@@ -113,7 +112,7 @@ const Container = styled.div`
 `;
 
 const arePropsEqual = (prevProps: Props, nextProps: Props) => {
-  if (!isNonEmptyOrUndefined(nextProps.tfToFollow)) {
+  if (!nextProps.tfToFollow) {
     const tfTree = buildTfTree(nextProps.transforms.values());
     const allNodes = Array.from(getDescendants(tfTree.roots));
     // As a result of various refactors this code does not make sense anymore and is in need of
@@ -148,8 +147,8 @@ const FollowTFControl = memo<Props>((props: Props) => {
   }, [nodesWithoutDefaultFollowTfFrame, newFollowTfFrame]);
 
   const getFollowButtonTooltip = useCallback(() => {
-    if (!isNonEmptyOrUndefined(tfToFollow)) {
-      if (isNonEmptyOrUndefined(lastSelectedFrame)) {
+    if (!tfToFollow) {
+      if (lastSelectedFrame) {
         return `Follow ${lastSelectedFrame}`;
       }
       return `Follow ${getDefaultFollowTransformFrame()}`;
@@ -160,8 +159,8 @@ const FollowTFControl = memo<Props>((props: Props) => {
   }, [tfToFollow, followOrientation, lastSelectedFrame, getDefaultFollowTransformFrame]);
 
   const onClickFollowButton = useCallback(() => {
-    if (!isNonEmptyOrUndefined(tfToFollow)) {
-      if (isNonEmptyOrUndefined(lastSelectedFrame)) {
+    if (!tfToFollow) {
+      if (lastSelectedFrame) {
         return onFollowChange(lastSelectedFrame);
       }
       return onFollowChange(getDefaultFollowTransformFrame());
@@ -211,12 +210,11 @@ const FollowTFControl = memo<Props>((props: Props) => {
     setHovering(true);
   }, [onMouseLeaveDebounced, setHovering]);
 
-  const followingCustomFrame =
-    isNonEmptyOrUndefined(tfToFollow) && tfToFollow !== getDefaultFollowTransformFrame();
+  const followingCustomFrame = !!tfToFollow && tfToFollow !== getDefaultFollowTransformFrame();
   const showFrameList =
     lastSelectedFrame != undefined || forceShowFrameList || followingCustomFrame;
   const selectedFrameId = tfToFollow ?? lastSelectedFrame;
-  const selectedItem: TfTreeNode | undefined = isNonEmptyOrUndefined(selectedFrameId)
+  const selectedItem: TfTreeNode | undefined = selectedFrameId
     ? { tf: new Transform(selectedFrameId), children: [], depth: 0 }
     : undefined;
 
@@ -224,7 +222,7 @@ const FollowTFControl = memo<Props>((props: Props) => {
     <Container
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeaveDebounced}
-      style={{ color: isNonEmptyOrUndefined(tfToFollow) ? undefined : colors.textMuted }}
+      style={{ color: tfToFollow ? undefined : colors.textMuted }}
     >
       {showFrameList && (
         <Autocomplete
@@ -271,7 +269,7 @@ const FollowTFControl = memo<Props>((props: Props) => {
         onClick={onClickFollowButton}
         tooltip={getFollowButtonTooltip()}
       >
-        <Icon style={{ color: isNonEmptyOrUndefined(tfToFollow) ? colors.accent : "white" }}>
+        <Icon style={{ color: tfToFollow ? colors.accent : "white" }}>
           {followOrientation ? <CompassOutlineIcon /> : <CrosshairsGpsIcon />}
         </Icon>
       </Button>

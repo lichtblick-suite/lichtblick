@@ -21,7 +21,6 @@ import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import { ExperimentalFeatureSettings } from "@foxglove/studio-base/components/ExperimentalFeatureSettings";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
-import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import filterMap from "@foxglove/studio-base/util/filterMap";
 import fuzzyFilter from "@foxglove/studio-base/util/fuzzyFilter";
 
@@ -170,7 +169,7 @@ function RosHostname(): React.ReactElement {
       label="ROS_HOSTNAME"
       placeholder={rosHostnamePlaceholder}
       value={rosHostname ?? ""}
-      onChange={(_event, newValue) => void setRosHostname(nonEmptyOrUndefined(newValue))}
+      onChange={(_event, newValue) => void setRosHostname(newValue ? newValue : undefined)}
     />
   );
 }

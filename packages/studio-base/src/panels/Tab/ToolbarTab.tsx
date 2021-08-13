@@ -23,7 +23,6 @@ import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledCompon
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import { TabActions } from "@foxglove/studio-base/panels/Tab/TabDndContext";
 import { SANS_SERIF } from "@foxglove/studio-base/styles/fonts";
-import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import styles from "./Tab.module.scss";
@@ -169,6 +168,8 @@ export function ToolbarTab(props: Props): JSX.Element {
     setTitle(tabTitle);
   }, [tabTitle]);
 
+  const tooltip = tabTitle ? tabTitle : "Enter tab name";
+
   return (
     <STab
       hidden={hidden}
@@ -181,10 +182,7 @@ export function ToolbarTab(props: Props): JSX.Element {
       ref={innerRef}
       className={cx(styles.tab, { [styles.active!]: isActive })}
     >
-      <Tooltip
-        contents={editingTitle ? "" : nonEmptyOrUndefined(tabTitle) ?? "Enter tab name"}
-        placement="top"
-      >
+      <Tooltip contents={editingTitle ? "" : tooltip} placement="top">
         {/* This div has to be here because the <ToolTip> overwrites the ref of its child*/}
         <div>
           <SInput

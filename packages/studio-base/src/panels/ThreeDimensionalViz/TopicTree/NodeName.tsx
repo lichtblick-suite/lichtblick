@@ -14,10 +14,6 @@
 import styled from "styled-components";
 
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
-import {
-  isNonEmptyOrUndefined,
-  nonEmptyOrUndefined,
-} from "@foxglove/studio-base/util/emptyOrUndefined";
 import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 import TextHighlight from "./TextHighlight";
@@ -76,9 +72,9 @@ export default function NodeName({
   style = {},
   tooltips,
 }: Props): JSX.Element {
-  let targetStr = nonEmptyOrUndefined(displayName) ?? topicName;
+  let targetStr = displayName ? displayName : topicName;
 
-  if (isNonEmptyOrUndefined(searchText)) {
+  if (searchText) {
     let topicNameToShow = topicName;
     const prefixedTopicName = `${SECOND_SOURCE_PREFIX}${topicName}`;
 
@@ -118,7 +114,7 @@ export default function NodeName({
   return (
     <STopicNameDisplay style={style}>
       <SDisplayName style={{ maxWidth }}>
-        {isNonEmptyOrUndefined(searchText) ? (
+        {searchText ? (
           <TextHighlight targetStr={targetStr} searchText={searchText} />
         ) : (
           <>

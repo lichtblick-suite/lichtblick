@@ -26,7 +26,6 @@ import {
   getObject,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
 import { BaseMarker } from "@foxglove/studio-base/types/Messages";
-import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const SInteractionContextMenu = styled.div`
@@ -125,7 +124,7 @@ function InteractionContextMenuItem({
 
   const { setHoveredMarkerMatchers } = useContext(ThreeDimensionalVizContext);
   const onMouseEnter = useCallback(() => {
-    if (isNonEmptyOrUndefined(topic)) {
+    if (topic) {
       const { id, ns } = object;
       const checks = [{ markerKeyPath: ["id"], value: id }];
       if (ns != undefined && ns !== "") {

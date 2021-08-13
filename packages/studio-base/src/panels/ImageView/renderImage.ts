@@ -20,7 +20,6 @@ import {
   CompressedImage,
   ImageMarkerArray,
 } from "@foxglove/studio-base/types/Messages";
-import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 import PinholeCameraModel from "./PinholeCameraModel";
@@ -131,11 +130,7 @@ function decodeMessageToBitmap(
   // compressed verisons of topics, in which case the message datatype can
   // differ from the one recorded during initialization. So here we just check
   // for properties consistent with either datatype, and render accordingly.
-  if (
-    datatype === "sensor_msgs/Image" &&
-    "encoding" in imageMessage &&
-    isNonEmptyOrUndefined(imageMessage.encoding)
-  ) {
+  if (datatype === "sensor_msgs/Image" && "encoding" in imageMessage && imageMessage.encoding) {
     const { is_bigendian, width, height, encoding } = imageMessage as Image;
     image = new ImageData(width, height);
     switch (encoding) {
@@ -177,7 +172,7 @@ function decodeMessageToBitmap(
     }
   } else if (
     IMAGE_DATATYPES.includes(datatype) ||
-    ("format" in imageMessage && isNonEmptyOrUndefined(imageMessage.format))
+    ("format" in imageMessage && imageMessage.format)
   ) {
     const { format } = imageMessage as CompressedImage;
     image = new Blob([rawData], { type: `image/${format}` });

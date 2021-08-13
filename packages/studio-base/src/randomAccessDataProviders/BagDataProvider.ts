@@ -34,7 +34,6 @@ import { getReportMetadataForChunk } from "@foxglove/studio-base/randomAccessDat
 import CachedFilelike, { FileReader } from "@foxglove/studio-base/util/CachedFilelike";
 import { bagConnectionsToTopics } from "@foxglove/studio-base/util/bagConnectionsHelper";
 import { getBagChunksOverlapCount } from "@foxglove/studio-base/util/bags";
-import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import { UserError } from "@foxglove/studio-base/util/errors";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 import { fromMillis, subtractTimes } from "@foxglove/studio-base/util/time";
@@ -179,11 +178,7 @@ export default class BagDataProvider implements RandomAccessDataProvider {
     }[] = [];
     for (const [connId, connection] of this._bag.connections) {
       const { messageDefinition, md5sum, topic, type, callerid } = connection;
-      if (
-        isNonEmptyOrUndefined(md5sum) &&
-        isNonEmptyOrUndefined(topic) &&
-        isNonEmptyOrUndefined(type)
-      ) {
+      if (md5sum && topic && type) {
         connections.push({
           messageDefinition,
           md5sum,

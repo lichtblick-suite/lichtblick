@@ -28,7 +28,6 @@ import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/In
 import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
 import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
 import { TextMarker, Color } from "@foxglove/studio-base/types/Messages";
-import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export const YELLOW = { r: 1, b: 0, g: 1, a: 1 };
@@ -176,12 +175,7 @@ export const useSearchMatches = ({
 }): void => {
   const hasCurrentMatchChanged = useDeepChangeDetector([currentMatch], true);
   React.useEffect(() => {
-    if (
-      !currentMatch ||
-      !searchTextOpen ||
-      !isNonEmptyOrUndefined(rootTf) ||
-      !hasCurrentMatchChanged
-    ) {
+    if (!currentMatch || !searchTextOpen || !rootTf || !hasCurrentMatchChanged) {
       return;
     }
 

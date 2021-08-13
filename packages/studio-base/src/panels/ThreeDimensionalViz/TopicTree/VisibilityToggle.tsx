@@ -19,7 +19,6 @@ import tinyColor from "tinycolor2";
 
 import Icon from "@foxglove/studio-base/components/Icon";
 import { defaultedRGBStringFromColorObj } from "@foxglove/studio-base/util/colorUtils";
-import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { ROW_HEIGHT } from "./constants";
@@ -177,7 +176,7 @@ export default function VisibilityToggle({
     return (
       <Icon
         tooltipProps={{ placement: "top" }}
-        tooltip={nonEmptyOrUndefined(unavailableTooltip) ?? "Unavailable"}
+        tooltip={unavailableTooltip ? unavailableTooltip : "Unavailable"}
         fade
         small
         clickable={false}

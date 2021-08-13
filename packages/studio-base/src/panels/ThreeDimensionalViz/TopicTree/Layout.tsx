@@ -76,7 +76,6 @@ import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDim
 import { Frame, Topic } from "@foxglove/studio-base/players/types";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import { Color, Marker } from "@foxglove/studio-base/types/Messages";
-import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import filterMap from "@foxglove/studio-base/util/filterMap";
 import {
   COLOR_RGBA_DATATYPE,
@@ -400,7 +399,7 @@ export default function Layout({
     if (selectedObject && interactionsTabType != undefined) {
       const marker = getObject(selectedObject) as Marker | undefined;
       const topic = getInteractionData(selectedObject)?.topic;
-      return marker && isNonEmptyOrUndefined(topic)
+      return marker && topic
         ? [
             {
               topic,
@@ -485,7 +484,7 @@ export default function Layout({
 
     sceneBuilder.setPlayerId(playerId);
 
-    if (isNonEmptyOrUndefined(rootTf)) {
+    if (rootTf) {
       sceneBuilder.setTransforms(transforms, rootTf);
     }
 
@@ -504,7 +503,7 @@ export default function Layout({
     sceneBuilder.render();
 
     // update the transforms and set the selected ones to render
-    if (isNonEmptyOrUndefined(rootTf)) {
+    if (rootTf) {
       transformsBuilder.setTransforms(transforms, rootTf);
     }
     transformsBuilder.setSelectedTransforms(selectedNamespacesByTopic[TRANSFORM_TOPIC] ?? []);

@@ -28,7 +28,6 @@ import React, { Component } from "react";
 import Icon from "@foxglove/studio-base/components/Icon";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
-import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 import { Node } from "./Node";
 import styles from "./index.module.scss";
@@ -190,22 +189,20 @@ export default class TreeNode extends Component<Props> {
     );
 
     // only enable visibility toggle for topics
-    const visibilityIcon = enableVisibilityToggle &&
-      node.topic &&
-      !isNonEmptyOrUndefined(node.namespace) && (
-        <Icon
-          style={{ padding: "0 4px" }}
-          fade
-          tooltip={visible ? "Hide topic temporarily" : "Show topic"}
-          onClick={this.onToggleVisibility}
-          dataTest={`node-${node.topic ?? node.name}`}
-        >
-          {visible ? <EyeOutlineIcon /> : <EyeOffOutlineIcon />}
-        </Icon>
-      );
+    const visibilityIcon = enableVisibilityToggle && node.topic && !node.namespace && (
+      <Icon
+        style={{ padding: "0 4px" }}
+        fade
+        tooltip={visible ? "Hide topic temporarily" : "Show topic"}
+        onClick={this.onToggleVisibility}
+        dataTest={`node-${node.topic ?? node.name}`}
+      >
+        {visible ? <EyeOutlineIcon /> : <EyeOffOutlineIcon />}
+      </Icon>
+    );
 
     // for simplicity, don't render remove UI for namespaces
-    const renderRemoveIcon = disableCheckbox && !isNonEmptyOrUndefined(namespace);
+    const renderRemoveIcon = disableCheckbox && !namespace;
     const removeIcon = renderRemoveIcon && (
       <Icon
         style={{ padding: "0 4px" }}

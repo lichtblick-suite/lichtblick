@@ -30,7 +30,6 @@ import {
   RandomAccessDataProvider,
   MessageDefinitions,
 } from "@foxglove/studio-base/randomAccessDataProviders/types";
-import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import filterMap from "@foxglove/studio-base/util/filterMap";
 
 export default class RenameDataProvider implements RandomAccessDataProvider {
@@ -46,7 +45,7 @@ export default class RenameDataProvider implements RandomAccessDataProvider {
     if (children.length !== 1 || !child) {
       throw new Error(`Incorrect number of children to RenameDataProvider: ${children.length}`);
     }
-    if (isNonEmptyOrUndefined(args.prefix) && !args.prefix.startsWith("/")) {
+    if (args.prefix && !args.prefix.startsWith("/")) {
       throw new Error(`Prefix must have a leading forward slash: ${JSON.stringify(args.prefix)}`);
     }
     this._provider = getDataProvider(child);

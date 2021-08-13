@@ -21,7 +21,6 @@ import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
 import Icon from "@foxglove/studio-base/components/Icon";
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
-import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import { lineColors } from "@foxglove/studio-base/util/plotColors";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
@@ -146,7 +145,7 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
         >
           {(xAxisVal === "custom" || xAxisVal === "currentCustom") && (
             <MessagePathInput
-              path={nonEmptyOrUndefined(xAxisPath?.value) ?? "/"}
+              path={xAxisPath?.value ? xAxisPath.value : "/"}
               onChange={(newXAxisPath) =>
                 saveConfig({
                   xAxisPath: { value: newXAxisPath, enabled: xAxisPath ? xAxisPath.enabled : true },

@@ -23,7 +23,6 @@ import { useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageCon
 import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutStorageDebuggingContext";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 import { ConflictResolution, LayoutMetadata } from "@foxglove/studio-base/services/ILayoutStorage";
-import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 import { debugBorder } from "./styles";
 
@@ -120,8 +119,8 @@ export default function LayoutRow({
       if (!editingName) {
         return;
       }
-      const newName = nonEmptyOrUndefined(nameFieldValue);
-      if (newName != undefined && newName !== layout.name) {
+      const newName = nameFieldValue;
+      if (newName && newName !== layout.name) {
         onRename(layout, newName);
       }
       setEditingName(false);

@@ -13,10 +13,6 @@
 
 import { Topic, MessageEvent } from "@foxglove/studio-base/players/types";
 import { CameraInfo } from "@foxglove/studio-base/types/Messages";
-import {
-  isNonEmptyOrUndefined,
-  nonEmptyOrUndefined,
-} from "@foxglove/studio-base/util/emptyOrUndefined";
 
 import PinholeCameraModel from "./PinholeCameraModel";
 
@@ -55,7 +51,7 @@ export function getMarkerOptions(
   const cameraNamespace = getCameraNamespace(imageTopic);
   for (const { name, datatype } of topics) {
     if (
-      isNonEmptyOrUndefined(cameraNamespace) &&
+      cameraNamespace &&
       (name.startsWith(cameraNamespace) || name.startsWith(`/old${cameraNamespace}`)) &&
       imageMarkerDatatypes.includes(datatype)
     ) {
@@ -81,7 +77,7 @@ export function getRelatedMarkerTopics(
 // get the sensor_msgs/CameraInfo topic associated with an image topic
 export function getCameraInfoTopic(imageTopic: string): string | undefined {
   const cameraNamespace = getCameraNamespace(imageTopic);
-  if (isNonEmptyOrUndefined(cameraNamespace)) {
+  if (cameraNamespace) {
     return `${cameraNamespace}/camera_info`;
   }
   return undefined;
@@ -102,7 +98,7 @@ export function getCameraNamespace(topicName: string): string | undefined {
 export function groupTopics(topics: Topic[]): Map<string, Topic[]> {
   const imageTopicsByNamespace: Map<string, Topic[]> = new Map();
   for (const topic of topics) {
-    const key = nonEmptyOrUndefined(getCameraNamespace(topic.name)) ?? topic.name;
+    const key = getCameraNamespace(topic.name) ?? topic.name;
     const vals = imageTopicsByNamespace.get(key);
     if (vals) {
       vals.push(topic);

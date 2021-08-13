@@ -10,7 +10,6 @@ import {
   TimeBasedChartTooltipData,
   TooltipItem,
 } from "@foxglove/studio-base/components/TimeBasedChart";
-import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import filterMap from "@foxglove/studio-base/util/filterMap";
 import { format } from "@foxglove/studio-base/util/formatTime";
 import { lightColor, lineColors } from "@foxglove/studio-base/util/plotColors";
@@ -232,7 +231,7 @@ function getDatasetAndTooltipsFromMessagePlotPath(
   const borderColor = lineColors[index % lineColors.length] ?? "#DDDDDD";
   const dataset: DataSet = {
     borderColor,
-    label: nonEmptyOrUndefined(path.value) ?? uuidv4(),
+    label: path.value ? path.value : uuidv4(),
     key: datasetKey,
     showLine,
     fill: false,

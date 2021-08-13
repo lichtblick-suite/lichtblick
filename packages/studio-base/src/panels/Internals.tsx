@@ -32,7 +32,6 @@ import {
   AdvertisePayload,
 } from "@foxglove/studio-base/players/types";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
-import { nonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 import filterMap from "@foxglove/studio-base/util/filterMap";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 
@@ -183,10 +182,8 @@ function Internals() {
   }
 
   function downloadJSON() {
-    downloadTextFile(
-      nonEmptyOrUndefined(JSON.stringify(recordedData.current)) ?? "{}",
-      "fixture.json",
-    );
+    const dataJson = JSON.stringify(recordedData.current);
+    downloadTextFile(dataJson ? dataJson : "{}", "fixture.json");
   }
 
   return (

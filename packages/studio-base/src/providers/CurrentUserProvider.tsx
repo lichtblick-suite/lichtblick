@@ -8,7 +8,6 @@ import { useAsync, useLocalStorage } from "react-use";
 import Logger from "@foxglove/log";
 import { useConsoleApi } from "@foxglove/studio-base/context/ConsoleApiContext";
 import CurrentUserContext from "@foxglove/studio-base/context/CurrentUserContext";
-import { isNonEmptyOrUndefined } from "@foxglove/studio-base/util/emptyOrUndefined";
 
 const log = Logger.getLogger(__filename);
 
@@ -21,7 +20,7 @@ export default function CurrentUserProvider(props: PropsWithChildren<unknown>): 
   const [bearerToken] = useLocalStorage<string>("fox.bearer-token");
 
   const { loading, value, error } = useAsync(async () => {
-    if (!isNonEmptyOrUndefined(bearerToken)) {
+    if (!bearerToken) {
       return undefined;
     }
     api.setAuthHeader(`Bearer ${bearerToken}`);
