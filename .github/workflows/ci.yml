@@ -48,8 +48,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          # Chromatic requires running build on the branch head, not PR merge commit
-          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
           lfs: true
 
@@ -70,8 +68,9 @@ jobs:
 
       - run: ${{ matrix.config.command }}
         env:
-          CHROMATIC_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          # Chromatic fails to run on PR merge ref unless head BRANCH and SHA are passed explicitly
           CHROMATIC_BRANCH: ${{ github.event.pull_request.head.ref || github.ref }}
+          CHROMATIC_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
 
   integration:
@@ -87,7 +86,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
           lfs: true
 
       - uses: actions/setup-node@v2
