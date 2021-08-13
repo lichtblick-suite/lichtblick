@@ -148,7 +148,9 @@ function TwoDimensionalPlot(props: Props) {
         return undefined;
       }
 
-      const dataset = { data, showLine: true, fill: false, ...picked };
+      // since message might be a lazy message, we need to read the individual x/y fields from each item
+      const dataPoints = data.map((item) => ({ x: item.x, y: item.y }));
+      const dataset = { data: dataPoints, showLine: true, fill: false, ...picked };
       if (pointRadiusOverride != undefined) {
         dataset.pointRadius = parseFloat(pointRadiusOverride);
       }
@@ -162,7 +164,9 @@ function TwoDimensionalPlot(props: Props) {
         return undefined;
       }
 
-      const dataset = { data, showLine: true, fill: false, ...picked };
+      // since message might be a lazy message, we need to read the individual x/y fields from each item
+      const dataPoints = data.map((item) => ({ x: item.x, y: item.y }));
+      const dataset = { data: dataPoints, showLine: true, fill: false, ...picked };
       if (pointRadiusOverride != undefined) {
         dataset.pointRadius = parseFloat(pointRadiusOverride);
       }
@@ -176,7 +180,10 @@ function TwoDimensionalPlot(props: Props) {
         return undefined;
       }
 
-      const closedData = data[0] != undefined ? data.concat([data[0]]) : data;
+      // since message might be a lazy message, we need to read the individual x/y fields from each item
+      const dataPoints = data.map((item) => ({ x: item.x, y: item.y }));
+      const closedData =
+        dataPoints[0] != undefined ? dataPoints.concat([dataPoints[0]]) : dataPoints;
       const dataset = {
         data: closedData,
         fill: true,
