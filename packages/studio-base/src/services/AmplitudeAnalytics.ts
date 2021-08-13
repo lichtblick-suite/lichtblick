@@ -17,6 +17,8 @@ const USER_ID_KEY = "analytics_user_id";
 
 const log = Logger.getLogger(__filename);
 
+const os = OsContextSingleton; // workaround for https://github.com/webpack/webpack/issues/12960
+
 export class AmplitudeAnalytics implements IAnalytics {
   private _amplitude: Promise<amplitude.AmplitudeClient | undefined>;
   private _crashReporting: boolean;
@@ -71,7 +73,7 @@ export class AmplitudeAnalytics implements IAnalytics {
   }
 
   getAppVersion(): string {
-    return OsContextSingleton?.getAppVersion() ?? "0.0.0";
+    return os?.getAppVersion() ?? "0.0.0";
   }
 
   getUserId(): string {
@@ -85,7 +87,7 @@ export class AmplitudeAnalytics implements IAnalytics {
 
   // OsContextSingleton.getMachineId() can take 500-2000ms on macOS
   async getDeviceId(): Promise<string> {
-    return (await OsContextSingleton?.getMachineId()) ?? UUID_ZERO;
+    return (await os?.getMachineId()) ?? UUID_ZERO;
   }
 
   async logEvent(event: AppEvent, data?: { [key: string]: unknown }): Promise<void> {
