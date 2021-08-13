@@ -21,6 +21,7 @@ import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
 import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
 import { Time } from "@foxglove/rostime";
+import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
 import {
   AdvertisePayload,
   MessageEvent,
@@ -34,7 +35,6 @@ import {
   PlayerPresence,
   PlayerMetricsCollectorInterface,
   ParameterValue,
-  PlayerProblem,
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { bagConnectionsToDatatypes } from "@foxglove/studio-base/util/bagConnectionsHelper";
@@ -90,7 +90,7 @@ export default class RosbridgePlayer implements Player {
   private _metricsCollector: PlayerMetricsCollectorInterface;
   private _hasReceivedMessage = false;
   private _presence: PlayerPresence = PlayerPresence.NOT_PRESENT;
-  private _problems: PlayerProblem[] = [];
+  private _problems = new PlayerProblemManager();
 
   constructor({
     url,
@@ -114,7 +114,7 @@ export default class RosbridgePlayer implements Player {
     if (this._closed) {
       return;
     }
-    this._problems = [];
+    this._problems.removeProblem("rosbridge:connection-failed");
     log.info(`Opening connection to ${this._url}`);
 
     // `workersocket` will open the actual WebSocket connection in a WebWorker.
@@ -125,7 +125,7 @@ export default class RosbridgePlayer implements Player {
         return;
       }
       this._presence = PlayerPresence.PRESENT;
-      this._problems = [];
+      this._problems.removeProblem("rosbridge:connection-failed");
       this._rosClient = rosClient;
 
       this._setupPublishers();
@@ -134,11 +134,12 @@ export default class RosbridgePlayer implements Player {
 
     rosClient.on("error", (err) => {
       if (err) {
-        this._problems.push({
+        this._problems.addProblem("rosbridge:error", {
           severity: "warn",
-          message: "Rosbridge issue",
+          message: "Rosbridge error",
           error: err,
         });
+        this._emitState();
       }
     });
 
@@ -155,7 +156,7 @@ export default class RosbridgePlayer implements Player {
       rosClient.close(); // ensure the underlying worker is cleaned up
       delete this._rosClient;
 
-      this._problems.push({
+      this._problems.addProblem("rosbridge:connection-failed", {
         severity: "error",
         message: "Connection failed",
         tip: `Check that the rosbridge WebSocket server at ${this._url} is reachable.`,
@@ -170,7 +171,7 @@ export default class RosbridgePlayer implements Player {
 
   _requestTopics = async (): Promise<void> => {
     // clear problems before each topics request so we don't have stale problems from previous failed requests
-    this._problems = [];
+    this._problems.removeProblems((id) => id.startsWith("requestTopics:"));
 
     if (this._requestTopicsTimeout) {
       clearTimeout(this._requestTopicsTimeout);
@@ -220,7 +221,7 @@ export default class RosbridgePlayer implements Player {
       }
 
       if (topicsMissingDatatypes.length > 0) {
-        this._problems.push({
+        this._problems.addProblem("requestTopics:missing-types", {
           severity: "warn",
           message: "Could not resolve all message types",
           tip: `Message types could not be found for these topics: ${topicsMissingDatatypes.join(
@@ -249,22 +250,24 @@ export default class RosbridgePlayer implements Player {
         this._subscribedTopics = graph.subscribers;
         this._services = graph.services;
       } catch (error) {
-        this._problems.push({
+        this._problems.addProblem("requestTopics:system-state", {
           severity: "error",
           message: "Failed to fetch node details from rosbridge",
+          error,
         });
         this._publishedTopics = new Map();
         this._subscribedTopics = new Map();
         this._services = new Map();
       }
-
-      this._emitState();
     } catch (error) {
-      this._problems.push({
+      this._problems.addProblem("requestTopics:error", {
         severity: "error",
         message: "Failed to fetch topics from rosbridge",
+        error,
       });
     } finally {
+      this._emitState();
+
       // Regardless of what happens, request topics again in a little bit.
       this._requestTopicsTimeout = setTimeout(this._requestTopics, 3000);
     }
@@ -285,7 +288,7 @@ export default class RosbridgePlayer implements Player {
         capabilities: CAPABILITIES,
         playerId: this._id,
         activeData: undefined,
-        problems: this._problems,
+        problems: this._problems.problems(),
       });
     }
 
@@ -303,7 +306,7 @@ export default class RosbridgePlayer implements Player {
       progress: {},
       capabilities: CAPABILITIES,
       playerId: this._id,
-      problems: this._problems,
+      problems: this._problems.problems(),
 
       activeData: {
         messages,
@@ -380,28 +383,37 @@ export default class RosbridgePlayer implements Player {
         continue;
       }
 
+      const problemId = `message:${topicName}`;
       topic.subscribe((message) => {
         if (!this._providerTopics) {
           return;
         }
+        try {
+          const bytes = (message as { bytes: ArrayBuffer }).bytes;
+          const receiveTime = fromMillis(Date.now());
+          const innerMessage = messageReader.readMessage(Buffer.from(bytes));
 
-        const bytes = (message as { bytes: ArrayBuffer }).bytes;
-        const receiveTime = fromMillis(Date.now());
-        const innerMessage = messageReader.readMessage(Buffer.from(bytes));
+          if (!this._hasReceivedMessage) {
+            this._hasReceivedMessage = true;
+            this._metricsCollector.recordTimeToFirstMsgs();
+          }
 
-        if (!this._hasReceivedMessage) {
-          this._hasReceivedMessage = true;
-          this._metricsCollector.recordTimeToFirstMsgs();
-        }
-
-        if (this._parsedTopics.has(topicName)) {
-          const msg: MessageEvent<unknown> = {
-            topic: topicName,
-            receiveTime,
-            message: innerMessage,
-          };
-          this._parsedMessages.push(msg);
-          this._handleInternalMessage(msg);
+          if (this._parsedTopics.has(topicName)) {
+            const msg: MessageEvent<unknown> = {
+              topic: topicName,
+              receiveTime,
+              message: innerMessage,
+            };
+            this._parsedMessages.push(msg);
+            this._handleInternalMessage(msg);
+          }
+          this._problems.removeProblem(problemId);
+        } catch (error) {
+          this._problems.addProblem(problemId, {
+            severity: "error",
+            message: `Failed to parse message on ${topicName}`,
+            error,
+          });
         }
 
         this._emitState();

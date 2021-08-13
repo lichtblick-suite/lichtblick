@@ -11,6 +11,7 @@ import { RosNode, TcpSocket } from "@foxglove/ros1";
 import { RosMsgDefinition } from "@foxglove/rosmsg";
 import { Time } from "@foxglove/rostime";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
+import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
 import {
   AdvertisePayload,
   MessageEvent,
@@ -85,10 +86,7 @@ export default class Ros1Player implements Player {
   private _hasReceivedMessage = false;
   private _metricsCollector: PlayerMetricsCollectorInterface;
   private _presence: PlayerPresence = PlayerPresence.CONSTRUCTING;
-
-  // track issues within the player
-  private _problems: PlayerProblem[] = [];
-  private _problemsById = new Map<string, PlayerProblem>();
+  private _problems = new PlayerProblemManager();
 
   constructor({ url, hostname, metricsCollector }: Ros1PlayerOpts) {
     log.info(`initializing Ros1Player (url=${url})`);
@@ -144,35 +142,30 @@ export default class Ros1Player implements Player {
   };
 
   private _addProblem(id: string, problem: PlayerProblem, skipEmit = false): void {
-    this._problemsById.set(id, problem);
-    this._problems = Array.from(this._problemsById.values());
+    this._problems.addProblem(id, problem);
     if (!skipEmit) {
       this._emitState();
     }
   }
 
   private _clearProblem(id: string, skipEmit = false): void {
-    if (!this._problemsById.delete(id)) {
-      return;
-    }
-    this._problems = Array.from(this._problemsById.values());
-    if (!skipEmit) {
-      this._emitState();
+    if (this._problems.removeProblem(id)) {
+      if (!skipEmit) {
+        this._emitState();
+      }
     }
   }
 
   private _clearPublishProblems(skipEmit = false) {
-    let modified = false;
-    for (const key of this._problemsById.keys()) {
-      if (key.startsWith("msgdef:") || key.startsWith("advertise:") || key.startsWith("publish:")) {
-        modified ||= this._problemsById.delete(key);
+    if (
+      this._problems.removeProblems(
+        (id) =>
+          id.startsWith("msgdef:") || id.startsWith("advertise:") || id.startsWith("publish:"),
+      )
+    ) {
+      if (!skipEmit) {
+        this._emitState();
       }
-    }
-    if (modified) {
-      this._problems = Array.from(this._problemsById.values());
-    }
-    if (!skipEmit) {
-      this._emitState();
     }
   }
 
@@ -261,7 +254,7 @@ export default class Ros1Player implements Player {
         progress: {},
         capabilities: CAPABILITIES,
         playerId: this._id,
-        problems: this._problems,
+        problems: this._problems.problems(),
         activeData: undefined,
       });
     }
@@ -280,7 +273,7 @@ export default class Ros1Player implements Player {
       progress: {},
       capabilities: CAPABILITIES,
       playerId: this._id,
-      problems: this._problems,
+      problems: this._problems.problems(),
 
       activeData: {
         messages,
