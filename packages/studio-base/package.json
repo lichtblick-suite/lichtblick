@@ -33,7 +33,7 @@
     "@foxglove/den": "workspace:*",
     "@foxglove/electron-socket": "1.1.0",
     "@foxglove/hooks": "workspace:*",
-    "@foxglove/ros1": "1.0.1",
+    "@foxglove/ros1": "1.2.0",
     "@foxglove/rosbag": "0.1.0",
     "@foxglove/rosbag2-web": "1.0.1",
     "@foxglove/rosmsg": "1.0.2",

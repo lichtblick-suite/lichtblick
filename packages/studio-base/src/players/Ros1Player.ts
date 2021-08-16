@@ -53,6 +53,7 @@ enum Problem {
   Parameters = "Parameters",
   Graph = "Graph",
   Publish = "Publish",
+  Node = "Node",
 }
 
 type Ros1PlayerOpts = {
@@ -133,6 +134,14 @@ export default class Ros1Player implements Player {
       rosNode.on("paramUpdate", ({ key, value, prevValue, callerId }) => {
         log.debug("paramUpdate", key, value, prevValue, callerId);
         this._parameters = new Map(rosNode.parameters);
+      });
+      rosNode.on("error", (error) => {
+        this._addProblem(Problem.Node, {
+          severity: "warn",
+          message: "ROS node error",
+          tip: `Connectivity will be automatically re-established`,
+          error,
+        });
       });
     }
 
@@ -347,6 +356,14 @@ export default class Ros1Player implements Player {
       subscription.on("message", (message, _data, _pub) =>
         this._handleMessage(topicName, message, true),
       );
+      subscription.on("error", (error) => {
+        this._addProblem(`subscribe:${topicName}`, {
+          severity: "warn",
+          message: `Topic subscription error for "${topicName}"`,
+          tip: `The subscription to "${topicName}" will be automatically re-established`,
+          error,
+        });
+      });
     }
 
     // Unsubscribe from topics that we are subscribed to but shouldn't be.

@@ -2169,23 +2169,23 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/ros1-turtlesim-test@workspace:packages/ros1-turtlesim-test"
   dependencies:
-    "@foxglove/ros1": 1.0.1
+    "@foxglove/ros1": 1.2.0
     "@foxglove/xmlrpc": 1.1.4
     esbuild-runner: 2.2.0
     typescript: 4.3.5
   languageName: unknown
   linkType: soft
 
-"@foxglove/ros1@npm:1.0.1":
-  version: 1.0.1
-  resolution: "@foxglove/ros1@npm:1.0.1"
+"@foxglove/ros1@npm:1.2.0":
+  version: 1.2.0
+  resolution: "@foxglove/ros1@npm:1.2.0"
   dependencies:
-    "@foxglove/rosmsg": ^1.0.0
-    "@foxglove/rosmsg-serialization": ^1.0.0
+    "@foxglove/rosmsg": ^1.0.2
+    "@foxglove/rosmsg-serialization": ^1.0.3
     "@foxglove/xmlrpc": ^1.1.4
     eventemitter3: ^4.0.7
     md5-typescript: ^1.0.5
-  checksum: 9e6a4713a0b670579e9836951ff2affa03f07a53da1900fe1532bd49d0bf2a5afe2196cc3f23656353d1c9037a1d4469b4928b3bf5cec4796d46758d3b863f59
+  checksum: f4c4b51570ffb361e23409e72b37ed08d5f006b00e40a9173e61e4f9694da93997a6bf7db6b25947d5a3e5b563875c3da87297c6d089395ac96b0205c31e98c6
   languageName: node
   linkType: hard
 
@@ -2241,7 +2241,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg-serialization@npm:1.0.3, @foxglove/rosmsg-serialization@npm:^1.0.0, @foxglove/rosmsg-serialization@npm:^1.0.2":
+"@foxglove/rosmsg-serialization@npm:1.0.3, @foxglove/rosmsg-serialization@npm:^1.0.2, @foxglove/rosmsg-serialization@npm:^1.0.3":
   version: 1.0.3
   resolution: "@foxglove/rosmsg-serialization@npm:1.0.3"
   dependencies:
@@ -2261,7 +2261,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg@npm:1.0.2, @foxglove/rosmsg@npm:^1.0.0, @foxglove/rosmsg@npm:^1.0.1":
+"@foxglove/rosmsg@npm:1.0.2, @foxglove/rosmsg@npm:^1.0.0, @foxglove/rosmsg@npm:^1.0.1, @foxglove/rosmsg@npm:^1.0.2":
   version: 1.0.2
   resolution: "@foxglove/rosmsg@npm:1.0.2"
   checksum: c008002e255279e54976d7565a1addd2869644c2f1d10b7711d51d60eb02303528e93ccba8568f1d56d8125e528cf66c6240b93dcf67f2797de7a5a2bc6eb3f9
@@ -2285,7 +2285,7 @@ __metadata:
     "@foxglove/den": "workspace:*"
     "@foxglove/electron-socket": 1.1.0
     "@foxglove/hooks": "workspace:*"
-    "@foxglove/ros1": 1.0.1
+    "@foxglove/ros1": 1.2.0
     "@foxglove/rosbag": 0.1.0
     "@foxglove/rosbag2-web": 1.0.1
     "@foxglove/rosmsg": 1.0.2
