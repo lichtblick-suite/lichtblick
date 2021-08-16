@@ -120,6 +120,10 @@ export function getReader(
   datatype: number,
   offset: number,
 ): FieldReader | undefined {
+  if (offset >= data.length) {
+    throw new Error(`Point cloud data offset ${offset} starts past ${data.length} byte buffer`);
+  }
+
   switch (datatype) {
     case DATATYPE.INT8:
       return new Int8Reader(data, offset);

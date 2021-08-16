@@ -30,6 +30,7 @@ import {
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
 import { toRgba } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/selection";
 import filterMap from "@foxglove/studio-base/util/filterMap";
+import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 import VertexBufferCache from "./VertexBufferCache";
 import { FLOAT_SIZE } from "./buffers";
@@ -429,10 +430,23 @@ export default function PointClouds({
 }: Props): React.ReactElement {
   const [command] = useState(() => makePointCloudCommand());
   const markerCache = useRef(new Map<Uint8Array, MemoizedMarker>());
-  markerCache.current = updateMarkerCache(markerCache.current, children as PointCloudMarker[]);
+  try {
+    markerCache.current = updateMarkerCache(markerCache.current, children as PointCloudMarker[]);
+  } catch (err) {
+    sendNotification("Point cloud decoding failed", err, "user", "error");
+  }
   const decodedMarkers = !(clearCachedMarkers ?? false)
     ? [...markerCache.current.values()].map((decoded) => decoded.marker)
-    : (children as PointCloudMarker[]).map((m) => decodeMarker(m));
+    : (children as PointCloudMarker[])
+        .map((m) => {
+          try {
+            return decodeMarker(m);
+          } catch (err) {
+            sendNotification("Point cloud decoding failed", err, "user", "error");
+            return undefined;
+          }
+        })
+        .filter((m) => m != undefined);
   return (
     <Command getChildrenForHitmap={instancedGetChildrenForHitmap} {...rest} reglCommand={command}>
       {decodedMarkers}
