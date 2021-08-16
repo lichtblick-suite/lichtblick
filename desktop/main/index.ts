@@ -108,7 +108,6 @@ function main() {
           return integration.name !== "Breadcrumbs";
         });
       },
-      maxBreadcrumbs: 10,
     });
   }
 

@@ -24,7 +24,7 @@ if (typeof process.env.SENTRY_DSN === "string") {
         return integration.name !== "Breadcrumbs";
       });
     },
-    maxBreadcrumbs: 10,
+    ignoreErrors: ["ResizeObserver loop limit exceeded"],
   });
 }
 
