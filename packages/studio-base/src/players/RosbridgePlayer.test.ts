@@ -136,7 +136,6 @@ describe("RosbridgePlayer", () => {
   beforeEach(() => {
     player = new RosbridgePlayer({
       url: "ws://some-url",
-      rosVersion: 1,
       metricsCollector: new NoopMetricsCollector(),
     });
   });
