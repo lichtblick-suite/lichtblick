@@ -39,11 +39,6 @@ const features: Feature[] = [
     description: <>Show sidebar control to draw polygons in the 3D panel.</>,
   },
   {
-    key: AppSetting.SHOW_ROS2_ROSBRIDGE,
-    name: "ROS 2 Rosbridge",
-    description: <>Enable ROS 2 Rosbridge as a possible data source connection.</>,
-  },
-  {
     key: AppSetting.ENABLE_LEGACY_PLOT_PANEL,
     name: "Legacy Plot Panel",
     description: <>Enable the legacy plot panel.</>,

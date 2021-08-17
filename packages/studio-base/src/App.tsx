@@ -6,7 +6,6 @@ import { Suspense, useMemo, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import Workspace from "@foxglove/studio-base/Workspace";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import { NativeFileMenuPlayerSelection } from "@foxglove/studio-base/components/NativeFileMenuPlayerSelection";
@@ -19,7 +18,6 @@ import { HoverValueProvider } from "@foxglove/studio-base/context/HoverValueCont
 import ModalHost from "@foxglove/studio-base/context/ModalHost";
 import { PlayerSourceDefinition } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { UserNodeStateProvider } from "@foxglove/studio-base/context/UserNodeStateContext";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import ConsoleApiLayoutStorageProvider from "@foxglove/studio-base/providers/ConsoleApiLayoutStorageProvider";
 import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
 import CurrentUserProvider from "@foxglove/studio-base/providers/CurrentUserProvider";
@@ -48,18 +46,6 @@ export default function App(props: AppProps): JSX.Element {
     return new ConsoleApi(process.env.FOXGLOVE_API_URL!);
   }, []);
 
-  const [showRos2Rosbridge = false] = useAppConfigurationValue<boolean>(
-    AppSetting.SHOW_ROS2_ROSBRIDGE,
-  );
-
-  const filteredDataSources = useMemo(
-    () =>
-      showRos2Rosbridge
-        ? props.availableSources
-        : props.availableSources.filter((source) => source.type !== "ros2-rosbridge-websocket"),
-    [props.availableSources, showRos2Rosbridge],
-  );
-
   const providers = [
     /* eslint-disable react/jsx-key */
     <AnalyticsProvider />,
@@ -73,7 +59,7 @@ export default function App(props: AppProps): JSX.Element {
     <CurrentLayoutProvider />,
     <ExtensionMarketplaceProvider />,
     <ExtensionRegistryProvider />,
-    <PlayerManager playerSources={filteredDataSources} />,
+    <PlayerManager playerSources={props.availableSources} />,
     /* eslint-enable react/jsx-key */
   ];
 

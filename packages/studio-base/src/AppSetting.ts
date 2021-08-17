@@ -10,7 +10,6 @@ export enum AppSetting {
   TIMEZONE = "timezone",
   UNLIMITED_MEMORY_CACHE = "experimental.unlimited-memory-cache",
   SHOW_DEBUG_PANELS = "showDebugPanels",
-  SHOW_ROS2_ROSBRIDGE = "showRos2Rosbridge",
   ENABLE_CONSOLE_API_LAYOUTS = "enableConsoleApiLayouts",
   ENABLE_DRAWING_POLYGONS = "enableDrawingPolygons",
   ENABLE_LEGACY_PLOT_PANEL = "enableLegacyPlotPanel",
