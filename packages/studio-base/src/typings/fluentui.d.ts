@@ -56,6 +56,7 @@ declare global {
     | "RemoveFromTrash"
     | "Rename"
     | "Settings"
+    | "SettingsFilled"
     | "Share"
     | "SingleColumnEdit"
     | "TestBeakerSolid"

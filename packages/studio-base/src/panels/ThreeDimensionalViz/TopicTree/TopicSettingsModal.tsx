@@ -152,8 +152,8 @@ function TopicSettingsModal({
         dialogContentProps={{
           title: currentEditingTopic.name,
           subText: currentEditingTopic.datatype,
+          showCloseButton: true,
         }}
-        modalProps={{ isBlocking: true }}
         maxWidth={480}
         minWidth={480}
       >

@@ -11,6 +11,8 @@ import {
   Play20Regular,
   Previous20Filled,
   Previous20Regular,
+  Settings20Filled,
+  Settings20Regular,
 } from "@fluentui/react-icons";
 import * as Icons from "@fluentui/react-icons-mdl2";
 import { registerIcons, unregisterIcons } from "@fluentui/style-utilities";
@@ -71,7 +73,8 @@ const icons: {
   RemoveFromTrash: <Icons.RemoveFromTrashIcon />,
   Refresh: <Icons.RefreshIcon />,
   Rename: <Icons.RenameIcon />,
-  Settings: <Icons.SettingsIcon />,
+  Settings: <Settings20Regular />,
+  SettingsFilled: <Settings20Filled />,
   Share: <Icons.ShareIcon />,
   SingleColumnEdit: <Icons.SingleColumnEditIcon />,
   TestBeakerSolid: <Icons.TestBeakerSolidIcon />,

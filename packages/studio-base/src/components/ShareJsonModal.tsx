@@ -63,10 +63,10 @@ export default function ShareJsonModal({
     <Dialog
       hidden={false}
       onDismiss={onRequestClose}
-      modalProps={{ isBlocking: true }}
       dialogContentProps={{
         title,
         subText: `Paste a new ${noun} to use it, or copy this one to share it:`,
+        showCloseButton: true,
       }}
       maxWidth={`calc(100vw - ${theme.spacing.l2})`}
     >

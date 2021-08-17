@@ -57,8 +57,8 @@ type AutocompleteProps<T = unknown> = {
   filterText?: string;
   value?: string;
   selectedItem?: T;
-  onChange?: (arg0: React.SyntheticEvent<HTMLInputElement>, arg1: string) => void;
-  onSelect: (arg0: string, arg1: T, arg2: Autocomplete<T>) => void;
+  onChange?: (event: React.SyntheticEvent<HTMLInputElement>, text: string) => void;
+  onSelect: (text: string, item: T, autocomplete: Autocomplete<T>) => void;
   onBlur?: () => void;
   hasError?: boolean;
   autocompleteKey?: string;

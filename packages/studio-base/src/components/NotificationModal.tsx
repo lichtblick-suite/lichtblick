@@ -26,9 +26,6 @@ export default function NotificationModal({
     <Dialog
       isOpen
       onDismiss={onRequestClose}
-      modalProps={{
-        isBlocking: true,
-      }}
       dialogContentProps={{
         title: message,
         titleProps: {
@@ -37,6 +34,7 @@ export default function NotificationModal({
           },
         },
         subText,
+        showCloseButton: true,
       }}
       minWidth={700}
     >
