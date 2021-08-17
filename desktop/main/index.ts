@@ -41,6 +41,17 @@ function isFileToOpen(arg: string) {
   return false;
 }
 
+function isNetworkError(err: Error) {
+  return (
+    err.message === "net::ERR_INTERNET_DISCONNECTED" ||
+    err.message === "net::ERR_PROXY_CONNECTION_FAILED" ||
+    err.message === "net::ERR_CONNECTION_RESET" ||
+    err.message === "net::ERR_CONNECTION_CLOSE" ||
+    err.message === "net::ERR_NAME_NOT_RESOLVED" ||
+    err.message === "net::ERR_CONNECTION_TIMED_OUT"
+  );
+}
+
 function main() {
   const start = Date.now();
   log.info(`${pkgInfo.productName} ${pkgInfo.version}`);
@@ -200,7 +211,11 @@ function main() {
       log.info("Automatic updates disabled (development version)");
     } else {
       autoUpdater.checkForUpdatesAndNotify().catch((err) => {
-        captureException(err);
+        if (isNetworkError(err)) {
+          log.warn(`Network error checking for updates: ${err}`);
+        } else {
+          captureException(err);
+        }
       });
     }
 
