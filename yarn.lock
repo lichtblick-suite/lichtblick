@@ -2169,23 +2169,23 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/ros1-turtlesim-test@workspace:packages/ros1-turtlesim-test"
   dependencies:
-    "@foxglove/ros1": 1.2.0
+    "@foxglove/ros1": 1.3.0
     "@foxglove/xmlrpc": 1.1.4
     esbuild-runner: 2.2.0
     typescript: 4.3.5
   languageName: unknown
   linkType: soft
 
-"@foxglove/ros1@npm:1.2.0":
-  version: 1.2.0
-  resolution: "@foxglove/ros1@npm:1.2.0"
+"@foxglove/ros1@npm:1.3.0":
+  version: 1.3.0
+  resolution: "@foxglove/ros1@npm:1.3.0"
   dependencies:
     "@foxglove/rosmsg": ^1.0.2
     "@foxglove/rosmsg-serialization": ^1.0.3
     "@foxglove/xmlrpc": ^1.1.4
     eventemitter3: ^4.0.7
     md5-typescript: ^1.0.5
-  checksum: f4c4b51570ffb361e23409e72b37ed08d5f006b00e40a9173e61e4f9694da93997a6bf7db6b25947d5a3e5b563875c3da87297c6d089395ac96b0205c31e98c6
+  checksum: a70b13537425fe2c9f4baad98a57f05c7219f2470a4e1542de7069f3ef102cabf5ae9564524e837248e6d6be79ec98308477531a3d88b277c12b480a346bcb0b
   languageName: node
   linkType: hard
 
@@ -2241,12 +2241,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg-serialization@npm:1.0.3, @foxglove/rosmsg-serialization@npm:^1.0.2, @foxglove/rosmsg-serialization@npm:^1.0.3":
-  version: 1.0.3
-  resolution: "@foxglove/rosmsg-serialization@npm:1.0.3"
+"@foxglove/rosmsg-serialization@npm:1.1.0, @foxglove/rosmsg-serialization@npm:^1.0.2, @foxglove/rosmsg-serialization@npm:^1.0.3":
+  version: 1.1.0
+  resolution: "@foxglove/rosmsg-serialization@npm:1.1.0"
   dependencies:
-    "@foxglove/rosmsg": ^1.0.1
-  checksum: 9fe4686116b383a3fd12357db64a65a10792ad6e6ef54b02ae95ce870c760bfcc3de1f0c7b8df8d910f44e11ff7c3a12cdf011bf9b0c0cafe67c05c8f33ba04c
+    "@foxglove/rosmsg": ^1.0.2
+  checksum: 4bdbc5a804f539bcafdd24303e54759bec9d0b367065c2e80ec9aefab216cfa8bcf908f56a1f3ee0874b0421f3c67209419b56f110cd956fddeb95b221a6f367
   languageName: node
   linkType: hard
 
@@ -2285,13 +2285,13 @@ __metadata:
     "@foxglove/den": "workspace:*"
     "@foxglove/electron-socket": 1.3.0
     "@foxglove/hooks": "workspace:*"
-    "@foxglove/ros1": 1.2.0
+    "@foxglove/ros1": 1.3.0
     "@foxglove/rosbag": 0.1.0
     "@foxglove/rosbag2-web": 1.0.1
     "@foxglove/rosmsg": 1.0.2
     "@foxglove/rosmsg-msgs-common": 1.0.1
     "@foxglove/rosmsg-msgs-foxglove": 2.0.1
-    "@foxglove/rosmsg-serialization": 1.0.3
+    "@foxglove/rosmsg-serialization": 1.1.0
     "@foxglove/rostime": 1.1.0
     "@foxglove/studio": "workspace:*"
     "@foxglove/velodyne-cloud": 1.0.0

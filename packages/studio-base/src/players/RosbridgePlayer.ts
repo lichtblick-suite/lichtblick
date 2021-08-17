@@ -389,9 +389,27 @@ export default class RosbridgePlayer implements Player {
           return;
         }
         try {
-          const bytes = (message as { bytes: ArrayBuffer }).bytes;
           const receiveTime = fromMillis(Date.now());
-          const innerMessage = messageReader.readMessage(Buffer.from(bytes));
+          const buffer = (message as { bytes: ArrayBuffer }).bytes;
+          const bytes = new Uint8Array(buffer);
+
+          // This conditional can be removed when the ROS2 deserializer supports size()
+          if (messageReader instanceof LazyMessageReader) {
+            const msgSize = messageReader.size(bytes);
+            if (msgSize > bytes.byteLength) {
+              this._problems.addProblem(problemId, {
+                severity: "error",
+                message: `Message buffer not large enough on ${topicName}`,
+                error: new Error(
+                  `Cannot read ${msgSize} byte message from ${bytes.byteLength} byte buffer`,
+                ),
+              });
+              this._emitState();
+              return;
+            }
+          }
+
+          const innerMessage = messageReader.readMessage(bytes);
 
           if (!this._hasReceivedMessage) {
             this._hasReceivedMessage = true;

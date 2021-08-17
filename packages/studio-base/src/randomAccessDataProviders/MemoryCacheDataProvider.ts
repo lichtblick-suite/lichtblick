@@ -647,7 +647,28 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
 
         sizeInBytes += rosBinaryMessage.message.byteLength;
 
-        const lazyMsg = lazyReader.readMessage(new Uint8Array(rosBinaryMessage.message));
+        const bytes = new Uint8Array(rosBinaryMessage.message);
+
+        try {
+          const msgSize = lazyReader.size(bytes);
+          if (msgSize > bytes.byteLength) {
+            sendNotification(
+              `Message buffer not large enough on ${rosBinaryMessage.topic}`,
+              `Cannot read ${msgSize} byte message from ${bytes.byteLength} byte buffer`,
+              "user",
+              "error",
+            );
+          }
+        } catch (error) {
+          sendNotification(
+            `Message size parsing failed on ${rosBinaryMessage.topic}`,
+            error,
+            "user",
+            "error",
+          );
+        }
+
+        const lazyMsg = lazyReader.readMessage(bytes);
         messagesByTopic[rosBinaryMessage.topic]?.push({
           topic: rosBinaryMessage.topic,
           receiveTime: rosBinaryMessage.receiveTime,
