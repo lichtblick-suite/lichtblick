@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { isEmpty, isEqual, dropRight, pick } from "lodash";
+import { isEmpty, isEqual, pick } from "lodash";
 import {
   updateTree,
   createDragToUpdates,
@@ -607,6 +607,7 @@ const startDrag = (
   panelsState: PanelsState,
   { path, sourceTabId }: StartDragPayload,
 ): PanelsState => {
+  // Collapse or remove the panel being dragged so it's temporarily hidden from the layout.
   if (path.length > 0) {
     if (sourceTabId != undefined) {
       const tabConfig = panelsState.configById[sourceTabId] as TabPanelConfig;
@@ -737,10 +738,9 @@ const endDrag = (panelsState: PanelsState, dragPayload: EndDragPayload): PanelsS
     return changePanelLayout(panelsState, { layout: newLayout, trimConfigById: false });
   }
 
-  const newLayout = updateTree(originalLayout, [
-    { path: dropRight(ownPath), spec: { splitPercentage: { $set: undefined } } },
-  ]);
-  return changePanelLayout(panelsState, { layout: newLayout, trimConfigById: false });
+  // The drag was canceled; restore the original layout to re-show/re-add the dragged panel.
+  // This undoes the effects of startDrag().
+  return { ...panelsState, layout: originalLayout, configById: originalSavedProps };
 };
 
 export default function (panelsState: PanelsState, action: PanelsActions): PanelsState {
