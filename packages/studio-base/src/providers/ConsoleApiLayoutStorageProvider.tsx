@@ -60,7 +60,8 @@ export default function ConsoleApiLayoutStorageProvider({
   const visibilityState = useVisibilityState();
 
   // Sync periodically when logged in, online, and the app is not hidden
-  const enableSyncing = currentUser != undefined && online && visibilityState === "visible";
+  const enableSyncing =
+    enableConsoleApiLayouts && currentUser != undefined && online && visibilityState === "visible";
   useEffect(() => {
     if (enableSyncing) {
       void sync();
