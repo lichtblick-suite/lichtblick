@@ -111,12 +111,12 @@ export enum DirectionalPadAction {
 }
 
 type DirectionalPadProps = {
-  onClick?: (action: DirectionalPadAction) => void;
+  onAction?: (action?: DirectionalPadAction) => void;
   disableStop?: boolean;
 };
 
 function DirectionalPad(props: DirectionalPadProps): JSX.Element {
-  const { onClick, disableStop = true } = props;
+  const { onAction, disableStop = true } = props;
 
   const [currentAction, setCurrentAction] = useState<DirectionalPadAction | undefined>();
 
@@ -127,15 +127,23 @@ function DirectionalPad(props: DirectionalPadProps): JSX.Element {
   const handleMouseDown = useCallback(
     (action: DirectionalPadAction) => {
       setCurrentAction(action);
-      onClick?.(action);
+      onAction?.(action);
     },
-    [onClick],
+    [onAction],
   );
+
+  const handleMouseUp = useCallback(() => {
+    if (currentAction == undefined) {
+      return;
+    }
+    setCurrentAction(undefined);
+    onAction?.();
+  }, [onAction, currentAction]);
 
   const makeMouseHandlers = (action: DirectionalPadAction) => ({
     onMouseDown: () => handleMouseDown(action),
-    onMouseUp: () => setCurrentAction(undefined),
-    onMouseLeave: () => setCurrentAction(undefined),
+    onMouseUp: () => handleMouseUp(),
+    onMouseLeave: () => handleMouseUp(),
   });
 
   return (

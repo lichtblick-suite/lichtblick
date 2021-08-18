@@ -2,7 +2,8 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { Story, StoryContext } from "@storybook/react";
+import { action } from "@storybook/addon-actions";
+import { Story } from "@storybook/react";
 
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
@@ -12,9 +13,9 @@ export default {
   title: "panels/Teleop/index",
   component: TeleopPanel,
   decorators: [
-    (StoryComponent: Story, { parameters }: StoryContext): JSX.Element => {
+    (StoryComponent: Story): JSX.Element => {
       return (
-        <PanelSetup fixture={parameters.panelSetup?.fixture}>
+        <PanelSetup fixture={{ publish: action("publish") }}>
           <StoryComponent />
         </PanelSetup>
       );

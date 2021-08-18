@@ -8,6 +8,7 @@ export type DeepPartial<T> = {
 
 export type Config = {
   topic?: string;
+  publishRate: number;
   upButton: {
     field: string;
     value: number;

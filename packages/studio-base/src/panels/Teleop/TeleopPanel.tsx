@@ -22,12 +22,15 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
   const { saveState } = context;
   const theme = useTheme();
 
+  const [currentAction, setCurrentAction] = useState<DirectionalPadAction | undefined>();
+
   // resolve an initial config which may have some missing fields into a full config
   const [config, setConfig] = useState<Config>(() => {
     const partialConfig = context.initialState as DeepPartial<Config>;
 
     const {
       topic,
+      publishRate = 1,
       upButton: { field: upField = "linear-x", value: upValue = 1 } = {},
       downButton: { field: downField = "linear-x", value: downValue = -1 } = {},
       leftButton: { field: leftField = "angular-z", value: leftValue = 1 } = {},
@@ -36,6 +39,7 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
 
     return {
       topic,
+      publishRate,
       upButton: { field: upField, value: upValue },
       downButton: { field: downField, value: downValue },
       leftButton: { field: leftField, value: leftValue },
@@ -93,68 +97,78 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
     return topics.map((topic) => topic.name);
   }, [topics]);
 
-  const onAction = useCallback(
-    (action: DirectionalPadAction) => {
-      if (!currentTopic) {
-        return;
+  useLayoutEffect(() => {
+    if (currentAction == undefined || !currentTopic) {
+      return;
+    }
+
+    const message = {
+      linear: {
+        x: 0,
+        y: 0,
+        z: 0,
+      },
+      angular: {
+        x: 0,
+        y: 0,
+        z: 0,
+      },
+    };
+
+    function setFieldValue(field: string, value: number) {
+      switch (field) {
+        case "linear-x":
+          message.linear.x = value;
+          break;
+        case "linear-y":
+          message.linear.y = value;
+          break;
+        case "linear-z":
+          message.linear.z = value;
+          break;
+        case "angular-x":
+          message.angular.x = value;
+          break;
+        case "angular-y":
+          message.angular.y = value;
+          break;
+        case "angular-z":
+          message.angular.z = value;
+          break;
       }
+    }
 
-      const message = {
-        linear: {
-          x: 0,
-          y: 0,
-          z: 0,
-        },
-        angular: {
-          x: 0,
-          y: 0,
-          z: 0,
-        },
-      };
+    switch (currentAction) {
+      case DirectionalPadAction.UP:
+        setFieldValue(config.upButton.field, config.upButton.value);
+        break;
+      case DirectionalPadAction.DOWN:
+        setFieldValue(config.downButton.field, config.downButton.value);
+        break;
+      case DirectionalPadAction.LEFT:
+        setFieldValue(config.leftButton.field, config.leftButton.value);
+        break;
+      case DirectionalPadAction.RIGHT:
+        setFieldValue(config.rightButton.field, config.rightButton.value);
+        break;
+      default:
+    }
 
-      function setFieldValue(field: string, value: number) {
-        switch (field) {
-          case "linear-x":
-            message.linear.x = value;
-            break;
-          case "linear-y":
-            message.linear.y = value;
-            break;
-          case "linear-z":
-            message.linear.z = value;
-            break;
-          case "angular-x":
-            message.angular.x = value;
-            break;
-          case "angular-y":
-            message.angular.y = value;
-            break;
-          case "angular-z":
-            message.angular.z = value;
-            break;
-        }
-      }
+    // don't publish if rate is 0 or negative - this is a config error on user's part
+    if (config.publishRate <= 0) {
+      return;
+    }
 
-      switch (action) {
-        case DirectionalPadAction.UP:
-          setFieldValue(config.upButton.field, config.upButton.value);
-          break;
-        case DirectionalPadAction.DOWN:
-          setFieldValue(config.downButton.field, config.downButton.value);
-          break;
-        case DirectionalPadAction.LEFT:
-          setFieldValue(config.leftButton.field, config.leftButton.value);
-          break;
-        case DirectionalPadAction.RIGHT:
-          setFieldValue(config.rightButton.field, config.rightButton.value);
-          break;
-        default:
-      }
-
+    const intervalMs = (1000 * 1) / config.publishRate;
+    context.publish(currentTopic, message);
+    const intervalHandle = setInterval(() => {
       context.publish(currentTopic, message);
-    },
-    [context, config, currentTopic],
-  );
+    }, intervalMs);
+
+    return () => {
+      clearInterval(intervalHandle);
+    };
+  }, [context, config, currentTopic, currentAction]);
 
   useLayoutEffect(() => {
     renderDone();
@@ -168,7 +182,7 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
         horizontalAlign="center"
         tokens={{ padding: `min(5%, ${theme.spacing.s1})` }}
       >
-        <DirectionalPad onClick={onAction} />
+        <DirectionalPad onAction={setCurrentAction} />
       </Stack>
       <Stack styles={{ root: { position: "absolute", top: 0, left: 0, margin: theme.spacing.s1 } }}>
         <HoverableIconButton

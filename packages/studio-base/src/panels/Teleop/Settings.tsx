@@ -94,6 +94,33 @@ export default function Settings(props: SettingsProps): JSX.Element {
           />
         </Stack>
       </StackItem>
+      <StackItem>
+        <TextField
+          type="number"
+          label="Publish Rate (Hz)"
+          defaultValue={String(config.publishRate)}
+          styles={{ root: { width: 80 } }}
+          onGetErrorMessage={(value) => {
+            const num = +value;
+            if (isNaN(num)) {
+              return "Not a valid number";
+            } else if (num < 0) {
+              return "Must be a positive number";
+            }
+
+            return;
+          }}
+          onChange={(_ev, value) => {
+            if (!value || isNaN(+value)) {
+              return;
+            }
+
+            saveConfig({
+              publishRate: +value,
+            });
+          }}
+        />
+      </StackItem>
       <StackItem grow>
         <Stack horizontal verticalAlign="end" tokens={{ childrenGap: theme.spacing.m }}>
           <StackItem grow>

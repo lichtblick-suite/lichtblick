@@ -12,5 +12,5 @@ export default {
 };
 
 export const Basic = (): JSX.Element => {
-  return <DirectionalPad onClick={action("click")} />;
+  return <DirectionalPad onAction={action("click")} />;
 };
