@@ -25,7 +25,7 @@
     "web:build:dev": "webpack --mode development --progress --config web/webpack.config.ts",
     "web:build:prod": "webpack --mode production --progress --config web/webpack.config.ts",
     "web:serve": "webpack serve --mode development --progress --config web/webpack.config.ts",
-    "license-check": "node -r esbuild-runner/register ci/license-check.ts",
+    "license-check": "ts-node ci/license-check.ts",
     "lint": "TIMING=1 eslint --report-unused-disable-directives --fix .",
     "lint:ci": "TIMING=1 eslint --report-unused-disable-directives --config .eslintrc.ci.yaml .",
     "lint:unused-exports": "ts-node ./ci/lint-unused-exports.ts",
@@ -53,7 +53,6 @@
   "resolutions": {
     "@types/node": "15.3.0",
     "esbuild-loader/esbuild": "0.12.18",
-    "esbuild-runner/esbuild": "0.12.18",
     "node-libs-browser/punycode": "2.1.1"
   },
   "devDependencies": {
