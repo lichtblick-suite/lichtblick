@@ -105,14 +105,10 @@ const SBar = styled.div<{ xAxisIsPlaybackTime: boolean }>`
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 9px;
-  margin-left: -4px;
+  width: 1px;
+  margin-left: -1px;
   display: block;
-  border-style: solid;
-  border-color: #f7be00 transparent;
-  background: ${(props) =>
-    props.xAxisIsPlaybackTime ? "#F7BE00 padding-box" : "#248EFF padding-box"};
-  border-width: ${(props) => (props.xAxisIsPlaybackTime ? "4px" : "0px 4px")};
+  background-color: ${(props) => (props.xAxisIsPlaybackTime ? "#F7BE00" : "#248EFF")};
 `;
 
 type ChartComponentProps = ComponentProps<typeof ChartComponent>;
