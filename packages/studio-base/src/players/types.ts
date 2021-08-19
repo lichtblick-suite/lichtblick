@@ -266,13 +266,6 @@ export type SubscribePayload = {
 
   // Optionally, where the request came from. Used in the "Internals" panel to improve debugging.
   requester?: { type: "panel" | "node" | "other"; name: string };
-
-  // If all subscriptions for this topic have this flag set, and the topic is available in
-  // PlayerState#Progress#blocks, the message won't be included in PlayerStateActiveData#messages.
-  // This is used by parsed-message subscribers to avoid parsing the messages at playback time when
-  // possible. Note: If there are other subscriptions without this flag set, the messages may still
-  // be delivered to the fallback subscriber.
-  preloadingFallback?: boolean;
 };
 
 // Represents a single topic publisher, for use in `setPublishers`.

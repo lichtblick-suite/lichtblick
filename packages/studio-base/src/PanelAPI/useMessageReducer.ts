@@ -39,11 +39,9 @@ export type RequestedTopic = string | { topic: string };
 function useSubscriptions({
   requestedTopics,
   panelType,
-  preloadingFallback,
 }: {
   requestedTopics: readonly RequestedTopic[];
   panelType?: string;
-  preloadingFallback: boolean;
 }): SubscribePayload[] {
   return useMemo(() => {
     const requester: SubscribePayload["requester"] =
@@ -58,14 +56,13 @@ function useSubscriptions({
         // deal with multiple subscriptions to the same topic but with different metadata.
         return {
           requester,
-          preloadingFallback,
           topic: request.topic,
           encoding: "image/compressed",
         };
       }
-      return { requester, preloadingFallback, topic: request };
+      return { requester, topic: request };
     });
-  }, [preloadingFallback, panelType, requestedTopics]);
+  }, [panelType, requestedTopics]);
 }
 
 type Params<T> = {
@@ -77,14 +74,6 @@ type Params<T> = {
   restore: (arg: T | undefined) => T;
   addMessage?: MessageReducer<T>;
   addMessages?: MessagesReducer<T>;
-
-  // If the messages are in blocks and _all_ subscribers set `preloadingFallback`, addMessage
-  // won't receive these messages. This is a useful optimization for "preloading fallback"
-  // subscribers.
-  // TODO(steel): Eventually we should deprecate these multiple ways of getting data, and we should
-  // always have blocks available. Then `useMessageReducer` should just become a wrapper around
-  // `useBlocksByTopic` for backwards compatibility.
-  preloadingFallback?: boolean;
 };
 
 function selectRequestBackfill(ctx: MessagePipelineContext) {
@@ -136,7 +125,6 @@ export function useMessageReducer<T>(props: Params<T>): T {
   const subscriptions = useSubscriptions({
     requestedTopics,
     panelType,
-    preloadingFallback: props.preloadingFallback ?? false,
   });
 
   const setSubscriptions = useMessagePipeline(selectSetSubscriptions);

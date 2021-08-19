@@ -576,14 +576,7 @@ export default class RandomAccessPlayer implements Player {
   }
 
   setSubscriptions(newSubscriptions: SubscribePayload[]): void {
-    // Anything we can get from the data providers will be in the blocks. Subscriptions for
-    // preloading-fallback codepaths are only needed for other data sources without blocks (like
-    // nodes and websocket.)
-    const parsedSubscriptions = newSubscriptions.filter(
-      ({ preloadingFallback }) => !(preloadingFallback ?? false),
-    );
-
-    this._parsedSubscribedTopics = new Set(parsedSubscriptions.map(({ topic }) => topic));
+    this._parsedSubscribedTopics = new Set(newSubscriptions.map(({ topic }) => topic));
     this._metricsCollector.setSubscriptions(newSubscriptions);
   }
 

@@ -33,9 +33,8 @@ type UnknownMessageEventsByTopic = Record<string, readonly MessageEvent<unknown>
 export function useMessagesByTopic(params: {
   topics: readonly string[];
   historySize: number;
-  preloadingFallback?: boolean;
 }): Record<string, readonly MessageEvent<unknown>[]> {
-  const { historySize, topics, preloadingFallback } = params;
+  const { historySize, topics } = params;
   const requestedTopics = useDeepMemo(topics);
 
   const addMessages = useCallback(
@@ -73,7 +72,6 @@ export function useMessagesByTopic(params: {
   return useMessageReducer({
     topics: requestedTopics,
     restore,
-    preloadingFallback,
     addMessages,
   });
 }

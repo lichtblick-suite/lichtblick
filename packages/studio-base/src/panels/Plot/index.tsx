@@ -168,10 +168,6 @@ function Plot(props: Props) {
   const messagesByTopic = useMessagesByTopic({
     topics: subscribeTopics,
     historySize,
-    // This subscription is used for two purposes:
-    //  1. A fallback for preloading when blocks are not available (nodes, websocket.)
-    //  2. Playback-synced plotting of index/custom data.
-    preloadingFallback: !showSingleCurrentMessage,
   });
 
   const decodeMessagePathsForMessagesByTopic =

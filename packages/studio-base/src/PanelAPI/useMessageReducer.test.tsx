@@ -263,14 +263,8 @@ describe("useMessageReducer", () => {
       root.unmount();
     });
     expect(setSubscriptions.mock.calls).toEqual([
-      [expect.any(String), [{ topic: "/foo", preloadingFallback: false }]],
-      [
-        expect.any(String),
-        [
-          { topic: "/foo", preloadingFallback: false },
-          { topic: "/bar", preloadingFallback: false },
-        ],
-      ],
+      [expect.any(String), [{ topic: "/foo" }]],
+      [expect.any(String), [{ topic: "/foo" }, { topic: "/bar" }]],
       [expect.any(String), []],
     ]);
   });
