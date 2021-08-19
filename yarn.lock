@@ -2119,15 +2119,15 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@foxglove/electron-socket@npm:1.3.0":
-  version: 1.3.0
-  resolution: "@foxglove/electron-socket@npm:1.3.0"
+"@foxglove/electron-socket@npm:1.3.1":
+  version: 1.3.1
+  resolution: "@foxglove/electron-socket@npm:1.3.1"
   dependencies:
     dns-packet: ^5.2.4
     eventemitter3: ^4.0.7
   peerDependencies:
     electron: ">=12"
-  checksum: 27bd02f001e208e325581cc09a09267499afa4a5a9aeedf26045753799c079c8103624d9f2070a01d93fedd6f97a19486073d72ae50ff978e1798a6e516b3a8b
+  checksum: ff25fcd0157797d4841f721657e201c3578c03cc0a6647d04f4bbeab84a83efb9e5cbb5f730603365c7a46ed9dd8c113d7d60b43781e07032d96304e5e3083ab
   languageName: node
   linkType: hard
 
@@ -2181,16 +2181,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/ros1@npm:1.3.0":
-  version: 1.3.0
-  resolution: "@foxglove/ros1@npm:1.3.0"
+"@foxglove/ros1@npm:1.3.1":
+  version: 1.3.1
+  resolution: "@foxglove/ros1@npm:1.3.1"
   dependencies:
     "@foxglove/rosmsg": ^1.0.2
-    "@foxglove/rosmsg-serialization": ^1.0.3
+    "@foxglove/rosmsg-serialization": ^1.1.1
     "@foxglove/xmlrpc": ^1.1.4
     eventemitter3: ^4.0.7
     md5-typescript: ^1.0.5
-  checksum: a70b13537425fe2c9f4baad98a57f05c7219f2470a4e1542de7069f3ef102cabf5ae9564524e837248e6d6be79ec98308477531a3d88b277c12b480a346bcb0b
+  checksum: a76481055d948adadceab50f19d965811b064ccc0de4fdae9bd8737b9d652e215fc28c7f1fdf9f8d95cb8bf570779f902f03a81eb26b940a1d02b08b85df9983
   languageName: node
   linkType: hard
 
@@ -2246,7 +2246,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg-serialization@npm:1.1.1, @foxglove/rosmsg-serialization@npm:^1.0.2, @foxglove/rosmsg-serialization@npm:^1.0.3":
+"@foxglove/rosmsg-serialization@npm:1.1.1, @foxglove/rosmsg-serialization@npm:^1.0.2, @foxglove/rosmsg-serialization@npm:^1.1.1":
   version: 1.1.1
   resolution: "@foxglove/rosmsg-serialization@npm:1.1.1"
   dependencies:
@@ -2288,9 +2288,9 @@ __metadata:
     "@fluentui/react-icons": 1.1.137
     "@fluentui/react-icons-mdl2": 1.1.8
     "@foxglove/den": "workspace:*"
-    "@foxglove/electron-socket": 1.3.0
+    "@foxglove/electron-socket": 1.3.1
     "@foxglove/hooks": "workspace:*"
-    "@foxglove/ros1": 1.3.0
+    "@foxglove/ros1": 1.3.1
     "@foxglove/rosbag": 0.1.0
     "@foxglove/rosbag2-web": 1.0.1
     "@foxglove/rosmsg": 1.0.2
@@ -10321,7 +10321,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "desktop@workspace:desktop"
   dependencies:
-    "@foxglove/electron-socket": 1.3.0
+    "@foxglove/electron-socket": 1.3.1
     "@foxglove/studio-base": "workspace:*"
     "@types/plist": ^3.0.2
     jszip: 3.7.1
