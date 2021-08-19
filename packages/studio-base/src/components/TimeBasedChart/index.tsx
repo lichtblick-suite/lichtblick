@@ -758,7 +758,9 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
 
   const downsampledData = useMemo(() => {
     if (resumeFrame.current) {
-      log.warn("force resumed paused frame");
+      if (process.env.NODE_ENV === "development") {
+        log.warn("force resumed paused frame");
+      }
       resumeFrame.current();
     }
     // during streaming the message pipeline should not give us any more data until we finish

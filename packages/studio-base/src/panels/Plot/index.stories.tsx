@@ -397,7 +397,7 @@ InALineGraphWithMultiplePlotsXAxesAreSynced.parameters = {
 
 LineGraphAfterZoom.storyName = "line graph after zoom";
 export function LineGraphAfterZoom(): JSX.Element {
-  const pauseState = useRef<"zoom" | "ready">("zoom");
+  const pauseState = useRef<"init" | "zoom" | "ready">("init");
   const readyState = useReadySignal();
 
   const doZoom = useCallback(() => {
@@ -416,6 +416,9 @@ export function LineGraphAfterZoom(): JSX.Element {
   const pauseFrame = useCallback(() => {
     return () => {
       switch (pauseState.current) {
+        case "init":
+          pauseState.current = "zoom";
+          break;
         case "zoom":
           doZoom();
           break;

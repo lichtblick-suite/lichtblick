@@ -226,17 +226,41 @@ function Plot(props: Props) {
   const preloadingDisplayTime = timeToXValueForPreloading(currentTime);
   const preloadingStartTime = timeToXValueForPreloading(startTime); // zero or undefined
   const preloadingEndTime = timeToXValueForPreloading(endTime);
-  let defaultView: ChartDefaultView | undefined;
-  if (preloadingDisplayTime != undefined) {
-    // display time == end time when streamking data..., and start time was 0
-    // could use start time of 0 to indicate live stream?
-    if (followingViewWidth != undefined && +followingViewWidth > 0) {
-      // Will be ignored in TimeBasedChart for non-preloading plots and non-timestamp plots.
-      defaultView = { type: "following", width: +followingViewWidth };
-    } else if (preloadingStartTime != undefined && preloadingEndTime != undefined) {
-      defaultView = { type: "fixed", minXValue: preloadingStartTime, maxXValue: preloadingEndTime };
+  const defaultView = useMemo<ChartDefaultView | undefined>(() => {
+    if (preloadingDisplayTime != undefined) {
+      // display time == end time when streamking data..., and start time was 0
+      // could use start time of 0 to indicate live stream?
+      if (followingViewWidth != undefined && +followingViewWidth > 0) {
+        // Will be ignored in TimeBasedChart for non-preloading plots and non-timestamp plots.
+        return { type: "following", width: +followingViewWidth };
+      } else if (preloadingStartTime != undefined && preloadingEndTime != undefined) {
+        return { type: "fixed", minXValue: preloadingStartTime, maxXValue: preloadingEndTime };
+      }
     }
-  }
+
+    return;
+  }, [followingViewWidth, preloadingDisplayTime, preloadingEndTime, preloadingStartTime]);
+
+  // filter the datasets down to only what is displayed for the default view
+  const filteredDatasets = useMemo(() => {
+    if (defaultView?.type === "following" && preloadingDisplayTime != undefined) {
+      const minX = preloadingDisplayTime - defaultView.width;
+      for (const dataset of datasets) {
+        // allow isNaN since chartjs treats these as breaks in the plot
+        dataset.data = dataset.data.filter((datum) => !datum || isNaN(datum.x) || datum?.x >= minX);
+      }
+    } else if (defaultView?.type === "fixed") {
+      const { minXValue, maxXValue } = defaultView;
+      for (const dataset of datasets) {
+        // allow isNaN since chartjs treats these as breaks in the plot
+        dataset.data.filter(
+          (datum) => !datum || isNaN(datum.x) || (datum.x >= minXValue && datum.x <= maxXValue),
+        );
+      }
+    }
+
+    return datasets;
+  }, [datasets, defaultView, preloadingDisplayTime]);
 
   const onClick = useCallback<NonNullable<ComponentProps<typeof PlotChart>["onClick"]>>(
     (params) => {
@@ -258,7 +282,7 @@ function Plot(props: Props) {
         paths={yAxisPaths}
         minYValue={parseFloat((minYValue ?? "")?.toString())}
         maxYValue={parseFloat((maxYValue ?? "")?.toString())}
-        datasets={datasets}
+        datasets={filteredDatasets}
         tooltips={tooltips}
         xAxisVal={xAxisVal}
         currentTime={preloadingDisplayTime}

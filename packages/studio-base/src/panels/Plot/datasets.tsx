@@ -232,7 +232,6 @@ function getDatasetAndTooltipsFromMessagePlotPath(
   const dataset: DataSet = {
     borderColor,
     label: path.value ? path.value : uuidv4(),
-    key: datasetKey,
     showLine,
     fill: false,
     borderWidth: 1,
