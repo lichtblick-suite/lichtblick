@@ -44,16 +44,12 @@ export function makeConfig(
       extensions: [".js", ".ts", ".jsx", ".tsx"],
       alias: {
         "@foxglove/studio-base": path.resolve(__dirname, "src"),
-        "react-dnd": require.resolve("react-dnd"),
-        "styled-components": require.resolve("styled-components"),
       },
       fallback: {
         path: require.resolve("path-browserify"),
         stream: require.resolve("readable-stream"),
         zlib: require.resolve("browserify-zlib"),
         crypto: require.resolve("crypto-browserify"),
-        fs: false,
-        pnpapi: false,
 
         // TypeScript tries to use this when running in node
         perf_hooks: false,
@@ -66,6 +62,14 @@ export function makeConfig(
         "@blueprintjs/core": false,
         "@blueprintjs/icons": false,
         domain: false,
+
+        // don't inject these things into our web build
+        fs: false,
+        pnpapi: false,
+
+        // punycode is a dependency for some older webpack v4 browser libs
+        // It adds unecessary bloat to the build so we make sure it isn't included
+        punycode: false,
       },
     },
     module: {

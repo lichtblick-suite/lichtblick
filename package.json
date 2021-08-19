@@ -52,8 +52,7 @@
   },
   "resolutions": {
     "@types/node": "15.3.0",
-    "esbuild-loader/esbuild": "0.12.18",
-    "node-libs-browser/punycode": "2.1.1"
+    "esbuild-loader/esbuild": "0.12.18"
   },
   "devDependencies": {
     "@actions/core": "1.4.0",
