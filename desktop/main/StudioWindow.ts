@@ -10,7 +10,6 @@ import {
   Menu,
   MenuItemConstructorOptions,
   shell,
-  systemPreferences,
   MenuItem,
 } from "electron";
 import path from "path";
@@ -105,24 +104,6 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
     if (isExternal) {
       event.preventDefault();
       void shell.openExternal(reqUrl);
-    }
-  });
-
-  browserWindow.webContents.on("ipc-message", (_event: unknown, channel: string) => {
-    if (channel === "window.toolbar-double-clicked") {
-      const action: string =
-        systemPreferences.getUserDefault?.("AppleActionOnDoubleClick", "string") ?? "Maximize";
-      if (action === "Minimize") {
-        browserWindow.minimize();
-      } else if (action === "Maximize") {
-        if (browserWindow.isMaximized()) {
-          browserWindow.unmaximize();
-        } else {
-          browserWindow.maximize();
-        }
-      } else {
-        // "None"
-      }
     }
   });
 
