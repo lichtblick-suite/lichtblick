@@ -2,12 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { toSec } from "@foxglove/rostime";
 import {
   VelodynePacket,
   VelodyneScan,
   VelodyneScanDecoded,
 } from "@foxglove/studio-base/types/Messages";
-import { toSec } from "@foxglove/studio-base/util/time";
 import { Calibration, Model, PointCloud, RawPacket, Transformer } from "@foxglove/velodyne-cloud";
 
 // Converts `velodyne_msgs/VelodyneScan` messages into `VelodyneScanDecoded`

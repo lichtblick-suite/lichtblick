@@ -16,7 +16,13 @@ import memoizeWeak from "memoize-weak";
 import { useEffect, useCallback, useMemo, ComponentProps } from "react";
 
 import { useShallowMemo } from "@foxglove/hooks";
-import { Time, add } from "@foxglove/rostime";
+import {
+  Time,
+  add as addTimes,
+  fromSec,
+  subtract as subtractTimes,
+  toSec,
+} from "@foxglove/rostime";
 import {
   useBlocksByTopic,
   useDataSourceInfo,
@@ -41,7 +47,6 @@ import {
   TooltipItem,
 } from "@foxglove/studio-base/components/TimeBasedChart";
 import { PanelConfig, PanelConfigSchema } from "@foxglove/studio-base/types/panels";
-import { fromSec, subtractTimes, toSec } from "@foxglove/studio-base/util/time";
 
 import PlotChart from "./PlotChart";
 import PlotLegend from "./PlotLegend";
@@ -265,7 +270,7 @@ function Plot(props: Props) {
         return;
       }
       // The player validates and clamps the time.
-      const seekTime = add(startTime, fromSec(seekSeconds));
+      const seekTime = addTimes(startTime, fromSec(seekSeconds));
       seek(seekTime);
     },
     [seek, startTime, xAxisVal],

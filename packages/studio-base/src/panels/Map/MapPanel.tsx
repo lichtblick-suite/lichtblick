@@ -6,13 +6,13 @@ import { Map as LeafMap, TileLayer, Control, LatLngBounds, CircleMarker } from "
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
+import { toSec } from "@foxglove/rostime";
 import { PanelExtensionContext, MessageEvent } from "@foxglove/studio";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import FilteredPointLayer, {
   POINT_MARKER_RADIUS,
 } from "@foxglove/studio-base/panels/Map/FilteredPointLayer";
 import { Topic } from "@foxglove/studio-base/players/types";
-import { toSec } from "@foxglove/studio-base/util/time";
 
 import { NavSatFixMsg, Point } from "./types";
 

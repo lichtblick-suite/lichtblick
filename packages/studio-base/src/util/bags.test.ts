@@ -11,8 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Time } from "@foxglove/rostime";
-import { fromSec } from "@foxglove/studio-base/util/time";
+import { Time, fromSec } from "@foxglove/rostime";
 
 import { getBagChunksOverlapCount } from "./bags";
 

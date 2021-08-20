@@ -14,10 +14,9 @@
 import momentDurationFormatSetup from "moment-duration-format";
 import moment from "moment-timezone";
 
-import { Time } from "@foxglove/rostime";
+import { Time, toDate, fromDate } from "@foxglove/rostime";
 
 import parseFuzzyRosTime from "./parseFuzzyRosTime";
-import { toDate, fromDate } from "./time";
 
 // All time functions that require `moment` should live in this file.
 

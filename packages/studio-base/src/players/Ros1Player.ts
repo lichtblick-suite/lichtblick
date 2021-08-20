@@ -9,7 +9,13 @@ import { Sockets } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
 import { RosNode, TcpSocket } from "@foxglove/ros1";
 import { RosMsgDefinition } from "@foxglove/rosmsg";
-import { Time } from "@foxglove/rostime";
+import {
+  Time,
+  add as addTimes,
+  fromMillis,
+  subtract as subtractTimes,
+  toSec,
+} from "@foxglove/rostime";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
 import {
@@ -30,13 +36,7 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
 import rosDatatypesToMessageDefinition from "@foxglove/studio-base/util/rosDatatypesToMessageDefinition";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
-import {
-  addTimes,
-  fromMillis,
-  subtractTimes,
-  TimestampMethod,
-  toSec,
-} from "@foxglove/studio-base/util/time";
+import { TimestampMethod } from "@foxglove/studio-base/util/time";
 import { HttpServer } from "@foxglove/xmlrpc";
 
 const log = Logger.getLogger(__filename);

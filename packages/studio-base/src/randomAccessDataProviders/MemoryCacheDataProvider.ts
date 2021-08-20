@@ -17,7 +17,14 @@ import { v4 as uuidv4 } from "uuid";
 
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
-import { Time, add, compare } from "@foxglove/rostime";
+import {
+  Time,
+  add as addTimes,
+  compare,
+  fromNanoSec,
+  subtract as subtractTimes,
+  toNanoSec,
+} from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import {
   RandomAccessDataProvider,
@@ -36,7 +43,6 @@ import {
   missingRanges,
 } from "@foxglove/studio-base/util/ranges";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
-import { fromNanoSec, subtractTimes, toNanoSec } from "@foxglove/studio-base/util/time";
 
 // I (JP) mostly just made these numbers up. It might be worth experimenting with different values
 // for these, but it seems to work reasonably well in my tests.
@@ -314,7 +320,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
       progressCallback: () => {},
     });
     this._startTime = result.start;
-    this._totalNs = toNanoSec(subtractTimes(result.end, result.start)) + 1; // +1 since times are inclusive.
+    this._totalNs = Number(toNanoSec(subtractTimes(result.end, result.start))) + 1; // +1 since times are inclusive.
 
     this._memCacheBlockSizeNs = Math.ceil(
       Math.max(MIN_MEM_CACHE_BLOCK_SIZE_NS, this._totalNs / MAX_BLOCKS),
@@ -357,8 +363,8 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
     this._preloadTopics = topics; // Push a new entry to `this._readRequests`, and call `this._updateState()`.
 
     const timeRange = {
-      start: toNanoSec(subtractTimes(startTime, this._startTime)),
-      end: toNanoSec(subtractTimes(endTime, this._startTime)) + 1, // `Range` defines `end` as exclusive.
+      start: Number(toNanoSec(subtractTimes(startTime, this._startTime))),
+      end: Number(toNanoSec(subtractTimes(endTime, this._startTime))) + 1, // `Range` defines `end` as exclusive.
     };
     const blockRange = {
       start: Math.floor(timeRange.start / this._memCacheBlockSizeNs),
@@ -542,7 +548,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
           `MemoryCacheDataProvider connection ${
             this._currentConnection ? this._currentConnection.id : ""
           }`,
-          err ? err.message : "<unknown error>",
+          err?.message ?? "<unknown error>",
           "app",
           "error",
         );
@@ -596,14 +602,14 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
           )
         : currentConnection.topics;
       // Get messages from the underlying provider.
-      const startTime = add(
+      const startTime = addTimes(
         this._startTime,
-        fromNanoSec(currentBlockIndex * this._memCacheBlockSizeNs),
+        fromNanoSec(BigInt(currentBlockIndex * this._memCacheBlockSizeNs)),
       );
-      const endTime = add(
+      const endTime = addTimes(
         this._startTime,
         fromNanoSec(
-          Math.min(this._totalNs, (currentBlockIndex + 1) * this._memCacheBlockSizeNs) - 1,
+          BigInt(Math.min(this._totalNs, (currentBlockIndex + 1) * this._memCacheBlockSizeNs) - 1),
         ), // endTime is inclusive.
       );
       const messages =

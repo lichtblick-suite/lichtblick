@@ -14,13 +14,13 @@
 import { last, sumBy } from "lodash";
 import { ReactElement } from "react";
 
+import { subtract as subtractTimes, toSec } from "@foxglove/rostime";
 import Flex from "@foxglove/studio-base/components/Flex";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { Sparkline, SparklinePoint } from "@foxglove/studio-base/components/Sparkline";
 import { PlayerStateActiveData } from "@foxglove/studio-base/players/types";
-import { subtractTimes, toSec } from "@foxglove/studio-base/util/time";
 
 import helpContent from "./index.help.md";
 

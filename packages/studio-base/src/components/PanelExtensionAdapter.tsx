@@ -6,6 +6,7 @@ import { CSSProperties, RefCallback, useCallback, useMemo, useRef, useState } fr
 import { v4 as uuid } from "uuid";
 
 import Logger from "@foxglove/log";
+import { fromSec, toSec } from "@foxglove/rostime";
 import {
   ExtensionPanelRegistration,
   MessageEvent,
@@ -30,7 +31,6 @@ import {
   PlayerState,
 } from "@foxglove/studio-base/players/types";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
-import { fromSec, toSec } from "@foxglove/studio-base/util/time";
 
 const log = Logger.getLogger(__filename);
 

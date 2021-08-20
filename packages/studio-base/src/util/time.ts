@@ -13,21 +13,19 @@
 
 // No time functions that require `moment` should live in this file.
 import log from "@foxglove/log";
-import { Time, add, compare, isLessThan } from "@foxglove/rostime";
+import {
+  Time,
+  add,
+  isLessThan,
+  toSec,
+  fromNanoSec,
+  clampTime,
+  interpolate,
+} from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { MarkerArray, StampedMessage } from "@foxglove/studio-base/types/Messages";
 
 export type TimestampMethod = "receiveTime" | "headerStamp";
-
-export function isTime(obj?: unknown): obj is Time {
-  return (
-    typeof obj === "object" &&
-    !!obj &&
-    "sec" in obj &&
-    "nsec" in obj &&
-    Object.getOwnPropertyNames(obj).length === 2
-  );
-}
 
 export function formatTimeRaw(stamp: Time): string {
   if (stamp.sec < 0 || stamp.nsec < 0) {
@@ -35,46 +33,6 @@ export function formatTimeRaw(stamp: Time): string {
     return "(invalid negative time)";
   }
   return `${stamp.sec}.${stamp.nsec.toFixed().padStart(9, "0")}`;
-}
-
-const isNum = /^\d+\.?\d*$/;
-
-// converts a string in Seconds to a time
-// we use a string because nano-second precision cannot be stored
-// in a JavaScript number for large nanoseconds (unix stamps)
-export function fromSecondStamp(stamp: string): Time {
-  if (!isNum.test(stamp)) {
-    throw new Error(`Could not parse time from ${stamp}`);
-  }
-  const [secondString = "0", nanoString = "0"] = stamp.split(".");
-  const nanosecond = nanoString.length <= 9 ? nanoString.padEnd(9, "0") : nanoString.slice(0, 9);
-
-  return { sec: parseInt(secondString), nsec: parseInt(nanosecond) };
-}
-
-// note: sub-millisecond precision is lost
-export function toDate(stamp: Time): Date {
-  const { sec, nsec } = stamp;
-  return new Date(sec * 1000 + nsec / 1e6);
-}
-
-export function fromDate(date: Date): Time {
-  const millis = date.getTime();
-  const remainder = millis % 1000;
-  return { sec: Math.floor(millis / 1000), nsec: remainder * 1e6 };
-}
-
-// returns the percentage of target in the range between start & end
-// e.g. start = { sec: 0 }, end = { sec: 10 }, target = { sec: 5 } = 50
-export function percentOf(start: Time, end: Time, target: Time): number {
-  const totalDuration = subtractTimes(end, start);
-  const targetDuration = subtractTimes(target, start);
-  return (toSec(targetDuration) / toSec(totalDuration)) * 100;
-}
-
-export function interpolateTimes(start: Time, end: Time, fraction: number): Time {
-  const duration = subtractTimes(end, start);
-  return add(start, fromNanoSec(fraction * toNanoSec(duration)));
 }
 
 function fixTime(t: Time): Time {
@@ -89,66 +47,6 @@ function fixTime(t: Time): Time {
     nsec += 1e9;
     sec -= 1;
   }
-  return { sec, nsec };
-}
-
-export function addTimes({ sec: sec1, nsec: nsec1 }: Time, { sec: sec2, nsec: nsec2 }: Time): Time {
-  return fixTime({ sec: sec1 + sec2, nsec: nsec1 + nsec2 });
-}
-
-export function subtractTimes(
-  { sec: sec1, nsec: nsec1 }: Time,
-  { sec: sec2, nsec: nsec2 }: Time,
-): Time {
-  return fixTime({ sec: sec1 - sec2, nsec: nsec1 - nsec2 });
-}
-
-// WARNING! This will not be a precise integer for large time values due to JS only supporting
-// 53-bit integers. Best to only use this when the time represents a relatively small duration
-// (at max a few weeks).
-export function toNanoSec({ sec, nsec }: Time): number {
-  return sec * 1e9 + nsec;
-}
-
-// WARNING! Imprecise float; see above.
-export function toSec({ sec, nsec }: Time): number {
-  return sec + nsec * 1e-9;
-}
-
-export function fromSec(value: number): Time {
-  // From https://github.com/ros/roscpp_core/blob/indigo-devel/rostime/include/ros/time.h#L153
-  let sec = Math.trunc(value);
-  let nsec = Math.round((value - sec) * 1e9);
-  sec += Math.trunc(nsec / 1e9);
-  nsec %= 1e9;
-  return { sec, nsec };
-}
-
-export function fromNanoSec(nsec: number): Time {
-  // From https://github.com/ros/roscpp_core/blob/86720717c0e1200234cc0a3545a255b60fb541ec/rostime/include/ros/impl/time.h#L63
-  // and https://github.com/ros/roscpp_core/blob/7583b7d38c6e1c2e8623f6d98559c483f7a64c83/rostime/src/time.cpp#L536
-  return { sec: Math.trunc(nsec / 1e9), nsec: nsec % 1e9 };
-}
-
-export function toMillis(time: Time, roundUp: boolean = true): number {
-  const secondsMillis = time.sec * 1e3;
-  const nsecMillis = time.nsec / 1e6;
-  return roundUp ? secondsMillis + Math.ceil(nsecMillis) : secondsMillis + Math.floor(nsecMillis);
-}
-
-export function fromMillis(value: number): Time {
-  let sec = Math.trunc(value / 1000);
-  let nsec = Math.round((value - sec * 1000) * 1e6);
-  sec += Math.trunc(nsec / 1e9);
-  nsec %= 1e9;
-  return { sec, nsec };
-}
-
-export function fromMicros(value: number): Time {
-  let sec = Math.trunc(value / 1e6);
-  let nsec = Math.round((value - sec * 1e6) * 1e3);
-  sec += Math.trunc(nsec / 1e9);
-  nsec %= 1e9;
   return { sec, nsec };
 }
 
@@ -188,23 +86,6 @@ export function findClosestTimestampIndex(
 export function formatFrame({ sec, nsec }: Time): string {
   return `${sec}.${String.prototype.padStart.call(nsec, 9, "0")}`;
 }
-
-export function clampTime(time: Time, start: Time, end: Time): Time {
-  if (compare(start, time) > 0) {
-    return start;
-  }
-  if (compare(end, time) < 0) {
-    return end;
-  }
-  return time;
-}
-
-export const isTimeInRangeInclusive = (time: Time, start: Time, end: Time): boolean => {
-  if (compare(start, time) > 0 || compare(end, time) < 0) {
-    return false;
-  }
-  return true;
-};
 
 export function parseRosTimeStr(str: string): Time | undefined {
   if (/^\d+\.?$/.test(str)) {
@@ -250,7 +131,7 @@ export type SeekToTimeSpec = AbsoluteSeekToTime | RelativeSeekToTime | SeekFract
 // something useful on the screen. Ideally this is less than BLOCK_SIZE_NS from
 // MemoryCacheDataProvider so we still stay within the first block when fetching
 // initial data.
-export const SEEK_ON_START_NS = 99 * 1e6; /* ms */
+export const SEEK_ON_START_NS = BigInt(99 * 1e6); /* ms */
 
 export function getSeekToTime(): SeekToTimeSpec {
   const defaultResult: SeekToTimeSpec = {
@@ -266,7 +147,7 @@ export function getSeekTimeFromSpec(spec: SeekToTimeSpec, start: Time, end: Time
       ? spec.time
       : spec.type === "relative"
       ? add(isLessThan(spec.startOffset, { sec: 0, nsec: 0 }) ? end : start, spec.startOffset)
-      : interpolateTimes(start, end, spec.fraction);
+      : interpolate(start, end, spec.fraction);
   return clampTime(rawSpecTime, start, end);
 }
 

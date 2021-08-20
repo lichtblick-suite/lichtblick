@@ -13,7 +13,7 @@
 import { partition } from "lodash";
 import memoizeWeak from "memoize-weak";
 
-import { Time, add, compare, isLessThan } from "@foxglove/rostime";
+import { Time, add, compare, isLessThan, clampTime, isTime } from "@foxglove/rostime";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
 import {
@@ -30,12 +30,7 @@ import {
 import { StampedMessage } from "@foxglove/studio-base/types/Messages";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { UserNodes } from "@foxglove/studio-base/types/panels";
-import {
-  clampTime,
-  getTimestampForMessage,
-  isTime,
-  TimestampMethod,
-} from "@foxglove/studio-base/util/time";
+import { getTimestampForMessage, TimestampMethod } from "@foxglove/studio-base/util/time";
 
 // As a compromise between playback buffering required and correctness (as well as our ability to
 // play near the ends of bags), we assume messages' headers are always between 0s and 1s earlier

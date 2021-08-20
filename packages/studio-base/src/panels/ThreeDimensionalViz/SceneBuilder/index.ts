@@ -14,7 +14,7 @@ import _, { flatten, groupBy, isEqual, keyBy, mapValues, some, xor } from "lodas
 import shallowequal from "shallowequal";
 
 import Log from "@foxglove/log";
-import { Time } from "@foxglove/rostime";
+import { Time, fromSec } from "@foxglove/rostime";
 import {
   InteractionData,
   Interactive,
@@ -52,7 +52,6 @@ import Bounds from "@foxglove/studio-base/util/Bounds";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
-import { fromSec } from "@foxglove/studio-base/util/time";
 
 import { ThreeDimensionalVizHooks } from "./types";
 

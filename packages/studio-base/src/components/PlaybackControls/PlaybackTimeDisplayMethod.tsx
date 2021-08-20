@@ -21,7 +21,7 @@ import {
 } from "@fluentui/react";
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 
-import { Time } from "@foxglove/rostime";
+import { Time, isTimeInRangeInclusive } from "@foxglove/rostime";
 import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
@@ -32,7 +32,7 @@ import {
   formatTime,
   getValidatedTimeAndMethodFromString,
 } from "@foxglove/studio-base/util/formatTime";
-import { formatTimeRaw, isTimeInRangeInclusive } from "@foxglove/studio-base/util/time";
+import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 const PlaybackTimeDisplayMethod = ({
   currentTime,

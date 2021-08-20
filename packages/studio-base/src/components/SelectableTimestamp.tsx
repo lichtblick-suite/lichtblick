@@ -14,14 +14,14 @@ import ChevronRightIcon from "@mdi/svg/svg/chevron-right.svg";
 import React, { useEffect } from "react";
 import styled from "styled-components";
 
-import { Time } from "@foxglove/rostime";
+import { Time, clampTime } from "@foxglove/rostime";
 import CopyText from "@foxglove/studio-base/components/CopyText";
 import Icon from "@foxglove/studio-base/components/Icon";
 import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 import mixins from "@foxglove/studio-base/styles/mixins.module.scss";
 import { formatDate, formatTime, parseTimeStr } from "@foxglove/studio-base/util/formatTime";
-import { parseRosTimeStr, clampTime, formatTimeRaw } from "@foxglove/studio-base/util/time";
+import { parseRosTimeStr, formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 const SRoot = styled.div`
   display: flex;
@@ -77,7 +77,12 @@ type Props = {
   timezone?: string;
 };
 
-function getValidTime(timeStr: string, start: Time, end: Time, isRosTime: boolean) {
+function getValidTime(
+  timeStr: string,
+  start: Time,
+  end: Time,
+  isRosTime: boolean,
+): Time | undefined {
   const validTime = isRosTime ? parseRosTimeStr(timeStr) : parseTimeStr(timeStr);
   return (validTime && clampTime(validTime, start, end)) || undefined;
 }

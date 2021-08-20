@@ -26,6 +26,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
+import { fromMillis } from "@foxglove/rostime";
 import CombinedDataProvider, {
   mergedBlocks,
 } from "@foxglove/studio-base/randomAccessDataProviders/CombinedDataProvider";
@@ -41,7 +42,6 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import delay from "@foxglove/studio-base/util/delay";
 import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
-import { fromMillis } from "@foxglove/studio-base/util/time";
 
 // reusable providers
 function provider1(initiallyLoaded = false) {

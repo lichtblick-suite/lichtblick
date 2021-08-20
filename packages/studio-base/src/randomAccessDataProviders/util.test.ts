@@ -11,9 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { toSec } from "@foxglove/rostime";
 import { RandomAccessDataProviderStall } from "@foxglove/studio-base/randomAccessDataProviders/types";
 import delay from "@foxglove/studio-base/util/delay";
-import { toSec } from "@foxglove/studio-base/util/time";
 
 import { mockExtensionPoint } from "./mockExtensionPoint";
 import { debounceReduce, getReportMetadataForChunk } from "./util";

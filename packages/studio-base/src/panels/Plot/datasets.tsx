@@ -5,7 +5,7 @@
 import flatten from "lodash/flatten";
 import { v4 as uuidv4 } from "uuid";
 
-import { Time } from "@foxglove/rostime";
+import { isTime, Time, toSec, subtract } from "@foxglove/rostime";
 import {
   TimeBasedChartTooltipData,
   TooltipItem,
@@ -13,13 +13,7 @@ import {
 import filterMap from "@foxglove/studio-base/util/filterMap";
 import { format } from "@foxglove/studio-base/util/formatTime";
 import { lightColor, lineColors } from "@foxglove/studio-base/util/plotColors";
-import {
-  isTime,
-  subtractTimes,
-  toSec,
-  formatTimeRaw,
-  TimestampMethod,
-} from "@foxglove/studio-base/util/time";
+import { formatTimeRaw, TimestampMethod } from "@foxglove/studio-base/util/time";
 
 import { PlotXAxisVal } from "./index";
 import {
@@ -80,7 +74,7 @@ function getPointsAndTooltipsForMessagePathItem(
   if (!timestamp) {
     return { points, tooltips, hasMismatchedData: false };
   }
-  const elapsedTime = toSec(subtractTimes(timestamp, startTime));
+  const elapsedTime = toSec(subtract(timestamp, startTime));
   for (const [
     innerIdx,
     { value, path: queriedPath, constantName },

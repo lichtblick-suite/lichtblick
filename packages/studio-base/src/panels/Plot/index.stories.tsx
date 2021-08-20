@@ -14,6 +14,7 @@
 import { useCallback, useRef } from "react";
 
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
+import { fromSec } from "@foxglove/rostime";
 import SchemaEditor from "@foxglove/studio-base/components/PanelSettings/SchemaEditor";
 import Plot, { PlotConfig } from "@foxglove/studio-base/panels/Plot";
 import { BlockCache } from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
@@ -21,7 +22,6 @@ import PanelSetup, { triggerWheel } from "@foxglove/studio-base/stories/PanelSet
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 import useResumeCount from "@foxglove/studio-base/stories/useResumeCount";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import { fromSec } from "@foxglove/studio-base/util/time";
 
 const float64StampedDefinition = `std_msgs/Header header
 float64 data

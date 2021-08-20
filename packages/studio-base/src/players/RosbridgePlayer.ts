@@ -20,7 +20,13 @@ import type { RosGraph } from "@foxglove/ros1";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
 import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
-import { Time } from "@foxglove/rostime";
+import {
+  Time,
+  add as addTimes,
+  fromMillis,
+  subtract as subtractTimes,
+  toSec,
+} from "@foxglove/rostime";
 import PlayerProblemManager from "@foxglove/studio-base/players/PlayerProblemManager";
 import {
   AdvertiseOptions,
@@ -40,13 +46,7 @@ import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { bagConnectionsToDatatypes } from "@foxglove/studio-base/util/bagConnectionsHelper";
 import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
-import {
-  addTimes,
-  fromMillis,
-  subtractTimes,
-  TimestampMethod,
-  toSec,
-} from "@foxglove/studio-base/util/time";
+import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 const log = Log.getLogger(__dirname);
 

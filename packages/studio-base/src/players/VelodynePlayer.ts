@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Sockets, UdpRemoteInfo, UdpSocketRenderer } from "@foxglove/electron-socket/renderer";
 import Logger from "@foxglove/log";
-import { Time } from "@foxglove/rostime";
+import { Time, fromMillis, add as addTimes, toDate, fromDate, fromMicros } from "@foxglove/rostime";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import {
   AdvertiseOptions,
@@ -23,13 +23,6 @@ import {
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
-import {
-  fromMillis,
-  addTimes,
-  toDate,
-  fromDate,
-  fromMicros,
-} from "@foxglove/studio-base/util/time";
 import { Model, RawPacket, packetRate } from "@foxglove/velodyne-cloud";
 
 const log = Logger.getLogger(__filename);

@@ -19,6 +19,7 @@ import stringHash from "string-hash";
 import styled, { css } from "styled-components";
 import tinycolor from "tinycolor2";
 
+import { subtract as subtractTimes, toSec } from "@foxglove/rostime";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import Button from "@foxglove/studio-base/components/Button";
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
@@ -33,7 +34,7 @@ import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
 import { darkColor, lineColors } from "@foxglove/studio-base/util/plotColors";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
-import { TimestampMethod, subtractTimes, toSec } from "@foxglove/studio-base/util/time";
+import { TimestampMethod } from "@foxglove/studio-base/util/time";
 import { grey } from "@foxglove/studio-base/util/toolsColorScheme";
 
 import helpContent from "./index.help.md";

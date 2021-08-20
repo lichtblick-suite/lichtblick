@@ -17,7 +17,7 @@ import { merge } from "lodash";
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
-import { Time, compare } from "@foxglove/rostime";
+import { Time, compare, subtract as subtractTimes, toSec, fromSec } from "@foxglove/rostime";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import HoverableIconButton from "@foxglove/studio-base/components/HoverableIconButton";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
@@ -42,7 +42,7 @@ import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConf
 import { PlayerState } from "@foxglove/studio-base/players/types";
 import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
 import { formatTime } from "@foxglove/studio-base/util/formatTime";
-import { subtractTimes, toSec, fromSec, formatTimeRaw } from "@foxglove/studio-base/util/time";
+import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";
 import { ProgressPlot } from "./ProgressPlot";

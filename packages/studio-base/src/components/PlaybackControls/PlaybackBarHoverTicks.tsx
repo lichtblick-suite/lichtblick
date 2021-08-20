@@ -14,13 +14,13 @@ import { useMemo } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import styled, { css } from "styled-components";
 
+import { toSec } from "@foxglove/rostime";
 import { RpcScales } from "@foxglove/studio-base/components/Chart/types";
 import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import HoverBar from "@foxglove/studio-base/components/TimeBasedChart/HoverBar";
-import { toSec } from "@foxglove/studio-base/util/time";
 
 const sharedTickStyles = css`
   position: absolute;

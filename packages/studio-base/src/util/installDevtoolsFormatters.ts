@@ -16,7 +16,7 @@
 
 import seedrandom from "seedrandom";
 
-import { isTime } from "./time";
+import { isTime } from "@foxglove/rostime";
 
 type HtmlTemplate = unknown;
 type DevtoolFormatterConfig = {

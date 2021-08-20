@@ -16,7 +16,7 @@
 
 import { omit } from "lodash";
 
-import { Time, add } from "@foxglove/rostime";
+import { Time, add, fromNanoSec } from "@foxglove/rostime";
 import {
   MessageEvent,
   PlayerCapabilities,
@@ -31,7 +31,7 @@ import {
 } from "@foxglove/studio-base/randomAccessDataProviders/types";
 import delay from "@foxglove/studio-base/util/delay";
 import signal from "@foxglove/studio-base/util/signal";
-import { fromNanoSec, getSeekToTime, SEEK_ON_START_NS } from "@foxglove/studio-base/util/time";
+import { getSeekToTime, SEEK_ON_START_NS } from "@foxglove/studio-base/util/time";
 
 import RandomAccessPlayer, {
   RandomAccessPlayerOptions,
