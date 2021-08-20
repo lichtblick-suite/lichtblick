@@ -3,8 +3,10 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import {
   CommandBarButton,
+  IButtonProps,
   IContextualMenuProps,
   IIconProps,
+  IRenderFunction,
   Stack,
   useTheme,
 } from "@fluentui/react";
@@ -12,30 +14,46 @@ import { useCallback } from "react";
 
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 
+import { Badge as StatusBadge } from "./Badge";
+import { Badge } from "./types";
+
 export const BUTTON_SIZE = 50;
 export const ICON_SIZE = 24;
 export const FADED_OPACITY = 0.7;
 
-export default function SidebarButton({
-  dataSidebarKey,
-  selected,
-  title,
-  iconProps,
-  onClick,
-  menuProps,
-}: {
+type SidebarButtonProps = {
   dataSidebarKey: string; // for storybook
   selected: boolean;
   title: string;
   iconProps?: IIconProps;
   onClick?: () => void;
   menuProps?: IContextualMenuProps;
-}): JSX.Element {
+  badge?: Badge;
+};
+
+export default function SidebarButton(props: SidebarButtonProps): JSX.Element {
+  const { dataSidebarKey, selected, title, iconProps, onClick, menuProps, badge } = props;
+
   const theme = useTheme();
   const { ref: tooltipRef, tooltip } = useTooltip({ contents: title, placement: "right" });
   const renderStack = useCallback(
-    (props: React.HTMLAttributes<HTMLElement>) => <div {...props} ref={tooltipRef} />,
+    (divProps: React.HTMLAttributes<HTMLElement>) => <div {...divProps} ref={tooltipRef} />,
     [tooltipRef],
+  );
+
+  const renderIcon = useCallback(
+    (buttonProps?: IButtonProps, defaultRender?: IRenderFunction<IButtonProps>) => {
+      if (!defaultRender) {
+        return <></>;
+      }
+
+      if (!badge) {
+        return defaultRender?.(buttonProps);
+      }
+
+      return <StatusBadge count={badge?.count}>{defaultRender?.(buttonProps)}</StatusBadge>;
+    },
+    [badge],
   );
 
   return (
@@ -57,6 +75,7 @@ export default function SidebarButton({
           ...iconProps,
         }}
         onClick={onClick}
+        onRenderIcon={renderIcon}
         menuProps={menuProps}
         onRenderMenuIcon={() => ReactNull}
       />

@@ -21,6 +21,7 @@ import ErrorBoundary from "@foxglove/studio-base/components/ErrorBoundary";
 import filterMap from "@foxglove/studio-base/util/filterMap";
 
 import SidebarButton, { BUTTON_SIZE } from "./SidebarButton";
+import { Badge } from "./types";
 
 function Noop(): ReactNull {
   return ReactNull;
@@ -38,6 +39,7 @@ const HideRootDropTargets = styled.div`
 export type SidebarItem = {
   iconName: IIconProps["iconName"];
   title: string;
+  badge?: Badge;
   component: React.ComponentType;
 };
 
@@ -113,6 +115,7 @@ export default function Sidebar<K extends string>({
           title={title}
           iconProps={{ iconName }}
           onClick={() => onItemClick(key)}
+          badge={item.badge}
         />
       );
     },

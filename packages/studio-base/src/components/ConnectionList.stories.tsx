@@ -3,16 +3,27 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import { PlayerStatusIndicator } from "@foxglove/studio-base/components/PlayerStatusIndicator/PlayerStatusIndicator";
 import ModalHost from "@foxglove/studio-base/context/ModalHost";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 
+import ConnectionList from "./ConnectionList";
+
 export default {
-  title: "components/PlayerStatusIndicator/PlayerStatusIndicator",
-  component: PlayerStatusIndicator,
+  title: "components/ConnectionList",
+  component: ConnectionList,
 };
 
-export const SingleError = (): JSX.Element => {
+export const NoDataSources = (): JSX.Element => {
+  return (
+    <ModalHost>
+      <MockMessagePipelineProvider>
+        <ConnectionList />
+      </MockMessagePipelineProvider>
+    </ModalHost>
+  );
+};
+
+export const WithPlayerProblems = (): JSX.Element => {
   return (
     <ModalHost>
       <MockMessagePipelineProvider
@@ -30,7 +41,7 @@ export const SingleError = (): JSX.Element => {
           },
         ]}
       >
-        <PlayerStatusIndicator />
+        <ConnectionList />
       </MockMessagePipelineProvider>
     </ModalHost>
   );

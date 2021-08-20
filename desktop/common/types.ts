@@ -50,8 +50,6 @@ type DesktopExtension = {
 };
 
 interface Desktop {
-  handleToolbarDoubleClick: () => void;
-
   // Get an array of deep links provided on app launch
   getDeepLinks: () => string[];
 

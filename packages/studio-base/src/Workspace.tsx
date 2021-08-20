@@ -28,19 +28,20 @@ import variablesHelp from "@foxglove/studio-base/components/GlobalVariablesTable
 import HelpModal from "@foxglove/studio-base/components/HelpModal";
 import LayoutBrowser from "@foxglove/studio-base/components/LayoutBrowser";
 import messagePathHelp from "@foxglove/studio-base/components/MessagePathSyntax/index.help.md";
-import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@foxglove/studio-base/components/MessagePipeline";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
 import PanelList from "@foxglove/studio-base/components/PanelList";
 import PanelSettings from "@foxglove/studio-base/components/PanelSettings";
 import PlaybackControls from "@foxglove/studio-base/components/PlaybackControls";
-import { PlayerStatusIndicator } from "@foxglove/studio-base/components/PlayerStatusIndicator";
 import Preferences from "@foxglove/studio-base/components/Preferences";
 import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValueChange";
 import ShortcutsModal from "@foxglove/studio-base/components/ShortcutsModal";
 import Sidebar, { SidebarItem } from "@foxglove/studio-base/components/Sidebar";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
-import Toolbar from "@foxglove/studio-base/components/Toolbar";
 import { useAppConfiguration } from "@foxglove/studio-base/context/AppConfigurationContext";
 import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
@@ -73,21 +74,6 @@ const useStyles = makeStyles({
     fontSize: "4em",
     marginBottom: "1em",
   },
-  toolbarItem: {
-    flex: "0 0 auto",
-    display: "flex",
-    alignItems: "center",
-    height: "100%",
-    minWidth: "40px",
-    // Allow interacting with buttons in the title bar without dragging the window
-    "-webkit-app-region": "no-drag",
-  },
-  truncate: {
-    whiteSpace: "nowrap",
-    textOverflow: "ellipsis",
-    overflow: "hidden",
-    lineHeight: "normal",
-  },
 });
 
 type SidebarItemKey =
@@ -99,22 +85,6 @@ type SidebarItemKey =
   | "account"
   | "layouts"
   | "preferences";
-
-const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
-  [
-    "connection",
-    { iconName: "DataManagementSettings", title: "Connection", component: Connection },
-  ],
-  ["layouts", { iconName: "FiveTileGrid", title: "Layouts", component: LayoutBrowser }],
-  ["add-panel", { iconName: "RectangularClipping", title: "Add Panel", component: AddPanel }],
-  [
-    "panel-settings",
-    { iconName: "SingleColumnEdit", title: "Panel Settings", component: PanelSettings },
-  ],
-  ["variables", { iconName: "Variable2", title: "Variables", component: Variables }],
-  ["preferences", { iconName: "Settings", title: "Preferences", component: Preferences }],
-  ["extensions", { iconName: "AddIn", title: "Extensions", component: ExtensionsSidebar }],
-]);
 
 function Connection() {
   return (
@@ -149,23 +119,25 @@ type WorkspaceProps = {
   loadWelcomeLayout?: boolean;
   demoBagUrl?: string;
   deepLinks?: string[];
-  onToolbarDoubleClick?: () => void;
 };
+
+const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
+const selectPlayerCapabilities = ({ playerState }: MessagePipelineContext) =>
+  playerState.capabilities;
+const selectRequestBackfill = ({ requestBackfill }: MessagePipelineContext) => requestBackfill;
+const selectPlayerProblems = ({ playerState }: MessagePipelineContext) => playerState.problems;
 
 export default function Workspace(props: WorkspaceProps): JSX.Element {
   const classes = useStyles();
   const containerRef = useRef<HTMLDivElement>(ReactNull);
   const { currentSourceName, selectSource } = usePlayerSelection();
-  const playerPresence = useMessagePipeline(
-    useCallback(({ playerState }) => playerState.presence, []),
-  );
-  const playerCapabilities = useMessagePipeline(
-    useCallback(({ playerState }) => playerState.capabilities, []),
-  );
+  const playerPresence = useMessagePipeline(selectPlayerPresence);
+  const playerCapabilities = useMessagePipeline(selectPlayerCapabilities);
+  const playerProblems = useMessagePipeline(selectPlayerProblems);
 
   // we use requestBackfill to signal when a player changes for RemountOnValueChange below
   // see comment below above the RemountOnValueChange component
-  const requestBackfill = useMessagePipeline(useCallback((ctx) => ctx.requestBackfill, []));
+  const requestBackfill = useMessagePipeline(selectRequestBackfill);
 
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<SidebarItemKey | undefined>(
     // Start with the sidebar open if no connection has been made
@@ -404,14 +376,40 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   const [enableSharedLayouts = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
   );
-  const sidebarItems: typeof SIDEBAR_ITEMS = useMemo(() => {
+
+  const sidebarItems = useMemo<Map<SidebarItemKey, SidebarItem>>(() => {
+    const connectionItem: SidebarItem = {
+      iconName: "DataManagementSettings",
+      title: "Connection",
+      component: Connection,
+    };
+
+    if (playerProblems && playerProblems.length > 0) {
+      connectionItem.badge = {
+        count: playerProblems.length,
+      };
+    }
+
+    const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
+      ["connection", connectionItem],
+      ["layouts", { iconName: "FiveTileGrid", title: "Layouts", component: LayoutBrowser }],
+      ["add-panel", { iconName: "RectangularClipping", title: "Add Panel", component: AddPanel }],
+      [
+        "panel-settings",
+        { iconName: "SingleColumnEdit", title: "Panel Settings", component: PanelSettings },
+      ],
+      ["variables", { iconName: "Variable2", title: "Variables", component: Variables }],
+      ["preferences", { iconName: "Settings", title: "Preferences", component: Preferences }],
+      ["extensions", { iconName: "AddIn", title: "Extensions", component: ExtensionsSidebar }],
+    ]);
+
     return enableSharedLayouts
       ? new Map([
           ...SIDEBAR_ITEMS,
           ["account", { iconName: "Contact", title: "Account", component: AccountSettings }],
         ])
       : SIDEBAR_ITEMS;
-  }, [enableSharedLayouts]);
+  }, [enableSharedLayouts, playerProblems]);
 
   const sidebarBottomItems: readonly SidebarItemKey[] = useMemo(() => {
     return enableSharedLayouts ? ["account", "preferences"] : ["preferences"];
@@ -441,17 +439,6 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
             {messagePathHelp}
           </HelpModal>
         )}
-
-        <Toolbar onDoubleClick={props.onToolbarDoubleClick}>
-          <div style={{ flexGrow: 1 }} />
-          <div className={classes.toolbarItem}>
-            <PlayerStatusIndicator />
-          </div>
-          <div className={classes.toolbarItem}>
-            <span className={classes.truncate}>{currentSourceName ?? "Foxglove Studio"}</span>{" "}
-          </div>
-          <div style={{ flexGrow: 1 }} />
-        </Toolbar>
         <Sidebar
           items={sidebarItems}
           bottomItems={sidebarBottomItems}

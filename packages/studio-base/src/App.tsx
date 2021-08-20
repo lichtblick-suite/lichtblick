@@ -7,6 +7,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 
 import Workspace from "@foxglove/studio-base/Workspace";
+import DocumentTitleAdapter from "@foxglove/studio-base/components/DocumentTitleAdapter";
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import { NativeFileMenuPlayerSelection } from "@foxglove/studio-base/components/NativeFileMenuPlayerSelection";
 import PlayerManager from "@foxglove/studio-base/components/PlayerManager";
@@ -36,7 +37,6 @@ type AppProps = {
   availableSources: PlayerSourceDefinition[];
   demoBagUrl?: string;
   deepLinks?: string[];
-  onFullscreenToggle?: () => void;
 };
 
 export default function App(props: AppProps): JSX.Element {
@@ -65,6 +65,7 @@ export default function App(props: AppProps): JSX.Element {
 
   return (
     <MultiProvider providers={providers}>
+      <DocumentTitleAdapter />
       <SendNotificationToastAdapter />
       <NativeFileMenuPlayerSelection />
       <DndProvider backend={HTML5Backend}>
@@ -74,7 +75,6 @@ export default function App(props: AppProps): JSX.Element {
               loadWelcomeLayout={props.loadWelcomeLayout}
               demoBagUrl={props.demoBagUrl}
               deepLinks={props.deepLinks}
-              onToolbarDoubleClick={props.onFullscreenToggle}
             />
           </PanelCatalogProvider>
         </Suspense>

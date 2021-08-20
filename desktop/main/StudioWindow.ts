@@ -46,7 +46,6 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
     minWidth: 350,
     minHeight: 250,
     autoHideMenuBar: true,
-    trafficLightPosition: { x: 12, y: 10 },
     title: pkgInfo.productName,
     webPreferences: {
       contextIsolation: true,
@@ -70,9 +69,6 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
     if (devIcon) {
       windowOptions.icon = devIcon;
     }
-  }
-  if (isMac) {
-    windowOptions.titleBarStyle = "hiddenInset";
   }
 
   const browserWindow = new BrowserWindow(windowOptions);
@@ -115,7 +111,7 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
   browserWindow.webContents.on("ipc-message", (_event: unknown, channel: string) => {
     if (channel === "window.toolbar-double-clicked") {
       const action: string =
-        systemPreferences.getUserDefault?.("AppleActionOnDoubleClick", "string") || "Maximize";
+        systemPreferences.getUserDefault?.("AppleActionOnDoubleClick", "string") ?? "Maximize";
       if (action === "Minimize") {
         browserWindow.minimize();
       } else if (action === "Maximize") {

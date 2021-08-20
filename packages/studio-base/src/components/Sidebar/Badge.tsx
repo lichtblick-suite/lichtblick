@@ -5,12 +5,12 @@
 import { makeStyles } from "@fluentui/react";
 import { PropsWithChildren } from "react";
 
-const radius = 4;
+const radius = 8;
 
 const useStyles = makeStyles((theme) => ({
   badge: {
     position: "absolute",
-    top: -radius,
+    bottom: -radius,
     right: -radius,
     width: radius * 2,
     height: radius * 2,
@@ -19,16 +19,19 @@ const useStyles = makeStyles((theme) => ({
     borderWidth: 1,
     borderStyle: "solid",
     borderColor: "rgba(1, 1, 1, 0.8)",
+    fontSize: "8px",
+    lineHeight: "14px",
   },
 }));
 
-export function Badge(props: PropsWithChildren<unknown>): JSX.Element {
+export function Badge(props: PropsWithChildren<{ count?: number }>): JSX.Element {
   const classes = useStyles();
+  const { count } = props;
 
   return (
     <span style={{ position: "relative" }}>
       {props.children}
-      <div className={classes.badge} />
+      <div className={classes.badge}>{count == undefined ? "" : count}</div>
     </span>
   );
 }

@@ -2,18 +2,33 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ActionButton, Text, useTheme } from "@fluentui/react";
-import { useCallback } from "react";
+import { ActionButton, Icon, Text, useTheme } from "@fluentui/react";
+import { useCallback, useContext } from "react";
 
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@foxglove/studio-base/components/MessagePipeline";
+import NotificationModal from "@foxglove/studio-base/components/NotificationModal";
+import ModalContext from "@foxglove/studio-base/context/ModalContext";
 import {
   PlayerSourceDefinition,
   usePlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
+import { PlayerProblem } from "@foxglove/studio-base/players/types";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
+
+const selectPlayerProblems = (ctx: MessagePipelineContext) => ctx.playerState.problems;
+
+const emptyArray: PlayerProblem[] = [];
 
 export default function ConnectionList(): JSX.Element {
   const { selectSource, availableSources } = usePlayerSelection();
   const confirm = useConfirm();
+  const modalHost = useContext(ModalContext);
+
+  const playerProblems = useMessagePipeline(selectPlayerProblems) ?? emptyArray;
 
   const theme = useTheme();
   const { currentSourceName } = usePlayerSelection();
@@ -33,6 +48,23 @@ export default function ConnectionList(): JSX.Element {
       selectSource(source);
     },
     [confirm, selectSource],
+  );
+
+  const showProblemModal = useCallback(
+    (problem: PlayerProblem) => {
+      const remove = modalHost.addModalElement(
+        <NotificationModal
+          notification={{
+            message: problem.message,
+            subText: problem.tip,
+            details: problem.error,
+            severity: problem.severity,
+          }}
+          onRequestClose={() => remove()}
+        />,
+      );
+    },
+    [modalHost],
   );
 
   return (
@@ -89,6 +121,28 @@ export default function ConnectionList(): JSX.Element {
             >
               {source.name}
             </ActionButton>
+          </div>
+        );
+      })}
+
+      {playerProblems.length > 0 && (
+        <hr style={{ width: "100%", height: "1px", border: 0, backgroundColor: colors.DIVIDER }} />
+      )}
+      {playerProblems.map((problem, idx) => {
+        const iconName = problem.severity === "error" ? "Error" : "Warning";
+        const color =
+          problem.severity === "error"
+            ? theme.semanticColors.errorBackground
+            : theme.semanticColors.warningBackground;
+        return (
+          <div
+            key={idx}
+            style={{ color, padding: theme.spacing.s1, cursor: "pointer" }}
+            onClick={() => showProblemModal(problem)}
+          >
+            <Icon iconName={iconName} />
+            &nbsp;
+            {problem.message}
           </div>
         );
       })}

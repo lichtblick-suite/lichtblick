@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ReactElement, useCallback, useMemo } from "react";
+import { ReactElement, useMemo } from "react";
 
 import {
   App,
@@ -67,20 +67,13 @@ export default function Root(): ReactElement {
 
   const deepLinks = useMemo(() => desktopBridge.getDeepLinks(), []);
 
-  const handleToolbarDoubleClick = useCallback(() => desktopBridge.handleToolbarDoubleClick(), []);
-
   return (
     <ThemeProvider>
       <GlobalCss />
       <CssBaseline>
         <ErrorBoundary>
           <MultiProvider providers={providers}>
-            <App
-              demoBagUrl={DEMO_BAG_URL}
-              deepLinks={deepLinks}
-              onFullscreenToggle={handleToolbarDoubleClick}
-              availableSources={playerSources}
-            />
+            <App demoBagUrl={DEMO_BAG_URL} deepLinks={deepLinks} availableSources={playerSources} />
           </MultiProvider>
         </ErrorBoundary>
       </CssBaseline>

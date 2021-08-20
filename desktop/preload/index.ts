@@ -102,9 +102,6 @@ const ctx: OsContext = {
 };
 
 const desktopBridge: Desktop = {
-  handleToolbarDoubleClick() {
-    ipcRenderer.send("window.toolbar-double-clicked");
-  },
   getDeepLinks(): string[] {
     return window.process.argv.filter((arg) => arg.startsWith("foxglove://"));
   },

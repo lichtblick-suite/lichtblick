@@ -24,7 +24,7 @@ const ITEMS = new Map<string, SidebarItem>([
   ["b", { title: "B", component: B, iconName: "ErrorBadge" }],
   ["c", { title: "C", component: C, iconName: "Cancel" }],
   ["d", { title: "D", component: D, iconName: "Delete" }],
-  ["e", { title: "E", component: E, iconName: "Edit" }],
+  ["e", { title: "E", component: E, badge: { count: 2 }, iconName: "Edit" }],
 ]);
 
 const BOTTOM_ITEMS = ["b"];
