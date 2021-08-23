@@ -226,6 +226,10 @@ export function makeConfig(
       new MonacoWebpackPlugin({
         // available options: https://github.com/Microsoft/monaco-editor-webpack-plugin#options
         languages: ["typescript", "javascript"],
+
+        // Output filenames should include content hashes in order to avoid caching issues with
+        // downstream users of the studio-base package.
+        filename: "[name].worker.[contenthash].js",
       }),
       new ForkTsCheckerWebpackPlugin({
         typescript: {
