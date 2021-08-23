@@ -17,7 +17,7 @@ export default function DocumentTitleAdapter(): JSX.Element {
       window.document.title = "Foxglove Studio";
       return;
     }
-    window.document.title = `Foxglove Studio - ${currentSourceName}`;
+    window.document.title = `${currentSourceName} - Foxglove Studio`;
   }, [currentSourceName]);
   return <></>;
 }
