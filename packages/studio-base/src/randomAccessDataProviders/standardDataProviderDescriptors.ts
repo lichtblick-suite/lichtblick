@@ -30,7 +30,6 @@ export function getLocalBagDescriptor(file: File): RandomAccessDataProviderDescr
 
 export function getRemoteBagDescriptor(
   url: string,
-  _guid: string | undefined,
   options: { unlimitedMemoryCache: boolean },
 ): RandomAccessDataProviderDescriptor {
   const bagDataProvider = {

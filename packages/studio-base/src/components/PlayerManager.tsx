@@ -54,7 +54,6 @@ import {
 import { buildRosbag2PlayerFromDescriptor } from "@foxglove/studio-base/players/buildRosbag2Player";
 import { Player } from "@foxglove/studio-base/players/types";
 import { CoreDataProviders } from "@foxglove/studio-base/randomAccessDataProviders/constants";
-import { getRemoteBagGuid } from "@foxglove/studio-base/randomAccessDataProviders/getRemoteBagGuid";
 import {
   getLocalBagDescriptor,
   getLocalRosbag2Descriptor,
@@ -106,16 +105,11 @@ function buildPlayerFromFiles(files: File[], options: BuildPlayerOptions): Built
   throw new Error(`Unsupported number of files: ${files.length}`);
 }
 
-async function buildPlayerFromBagURLs(
-  urls: string[],
-  options: BuildPlayerOptions,
-): Promise<BuiltPlayerMeta> {
-  const guids = await Promise.all(urls.map(getRemoteBagGuid));
-
+function buildPlayerFromBagURLs(urls: string[], options: BuildPlayerOptions): BuiltPlayerMeta {
   if (urls.length === 1) {
     return {
       player: buildPlayerFromDescriptor(
-        getRemoteBagDescriptor(urls[0] as string, guids[0], options),
+        getRemoteBagDescriptor(urls[0] as string, options),
         options,
       ),
       sources: urls.map((url) => url.toString()),
@@ -127,11 +121,11 @@ async function buildPlayerFromBagURLs(
           name: CoreDataProviders.CombinedDataProvider,
           args: {},
           children: [
-            getRemoteBagDescriptor(urls[0] as string, guids[0], options),
+            getRemoteBagDescriptor(urls[0] as string, options),
             {
               name: CoreDataProviders.RenameDataProvider,
               args: { prefix: SECOND_SOURCE_PREFIX },
-              children: [getRemoteBagDescriptor(urls[1] as string, guids[1], options)],
+              children: [getRemoteBagDescriptor(urls[1] as string, options)],
             },
           ],
         },
@@ -253,7 +247,7 @@ async function remoteBagFileSource(options: FactoryOptions): Promise<BuiltPlayer
 
   const url = maybeUrl;
   options.storage.setItem(storageCacheKey, url);
-  return await buildPlayerFromBagURLs([url], options.playerOptions);
+  return buildPlayerFromBagURLs([url], options.playerOptions);
 }
 
 async function rosbridgeSource(options: FactoryOptions): Promise<BuiltPlayerMeta | undefined> {
