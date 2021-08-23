@@ -35,7 +35,6 @@ import {
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import createSelectableContext from "@foxglove/studio-base/util/createSelectableContext";
 import { requestThrottledAnimationFrame } from "@foxglove/studio-base/util/requestThrottledAnimationFrame";
-import sendNotification from "@foxglove/studio-base/util/sendNotification";
 import signal from "@foxglove/studio-base/util/signal";
 
 import { pauseFrameForPromises, FramePromise } from "./pauseFrameForPromise";
@@ -81,11 +80,6 @@ function defaultPlayerState(): PlayerState {
   };
 }
 
-export type MaybePlayer<P extends Player = Player> =
-  | { loading: true; error?: undefined; player?: undefined }
-  | { loading?: false; error: Error; player?: undefined }
-  | { loading?: false; error?: undefined; player?: P };
-
 type ProviderProps = {
   children: React.ReactNode;
 
@@ -93,35 +87,18 @@ type ProviderProps = {
   // valid player. MessagePipelineProvider is not responsible for building players, but it is
   // responsible for providing player state information downstream in a context -- so this
   // information is passed in and merged with other player state.
-  maybePlayer?: MaybePlayer;
+  player?: Player;
 
   globalVariables: GlobalVariables;
 };
 export function MessagePipelineProvider({
   children,
-  maybePlayer = {},
+  player,
   globalVariables,
 }: ProviderProps): React.ReactElement {
   const currentPlayer = useRef<Player | undefined>(undefined);
   const [rawPlayerState, setRawPlayerState] = useState<PlayerState>(defaultPlayerState);
-  const playerState = useMemo(() => {
-    // Use the MaybePlayer's status if we do not yet have a player to report presence.
-    if (rawPlayerState.presence === PlayerPresence.NOT_PRESENT) {
-      return {
-        ...rawPlayerState,
-        presence:
-          maybePlayer.loading === true
-            ? PlayerPresence.CONSTRUCTING
-            : maybePlayer.error
-            ? PlayerPresence.ERROR
-            : maybePlayer.player
-            ? PlayerPresence.INITIALIZING
-            : PlayerPresence.NOT_PRESENT,
-      };
-    }
-    return rawPlayerState;
-  }, [maybePlayer, rawPlayerState]);
-  const lastActiveData = useRef<PlayerStateActiveData | undefined>(playerState.activeData);
+  const lastActiveData = useRef<PlayerStateActiveData | undefined>(rawPlayerState.activeData);
   const lastTimeWhenActiveDataBecameSet = useRef<number | undefined>();
   const [subscriptionsById, setAllSubscriptions] = useState<{
     [key: string]: SubscribePayload[];
@@ -145,16 +122,8 @@ export function MessagePipelineProvider({
     () => flatten(Object.values(publishersById)),
     [publishersById],
   );
-  const player = maybePlayer.player;
   useEffect(() => player?.setSubscriptions(subscriptions), [player, subscriptions]);
   useEffect(() => player?.setPublishers(publishers), [player, publishers]);
-
-  useEffect(() => {
-    const error = maybePlayer.error;
-    if (error) {
-      sendNotification("Connection error", error, "user", "error");
-    }
-  }, [maybePlayer.error]);
 
   // Slow down the message pipeline framerate to the given FPS if it is set to less than 60
   const [messageRate] = useAppConfigurationValue<number>(AppSetting.MESSAGE_RATE);
@@ -191,7 +160,7 @@ export function MessagePipelineProvider({
         }
       }
     }, skipFrames);
-  }, [playerState, skipFrames]);
+  }, [rawPlayerState, skipFrames]);
 
   useEffect(() => {
     currentPlayer.current = player;
@@ -247,13 +216,14 @@ export function MessagePipelineProvider({
     };
   }, [player]);
 
-  const topics: Topic[] | undefined = useShallowMemo(playerState.activeData?.topics);
-  const messages: readonly MessageEvent<unknown>[] | undefined = playerState.activeData?.messages;
+  const topics: Topic[] | undefined = useShallowMemo(rawPlayerState.activeData?.topics);
+  const messages: readonly MessageEvent<unknown>[] | undefined =
+    rawPlayerState.activeData?.messages;
   const frame = useMemo(() => groupBy(messages ?? [], "topic"), [messages]);
   const sortedTopics = useMemo(() => (topics ?? []).sort(), [topics]);
   const datatypes: RosDatatypes = useMemo(
-    () => playerState.activeData?.datatypes ?? new Map(),
-    [playerState.activeData?.datatypes],
+    () => rawPlayerState.activeData?.datatypes ?? new Map(),
+    [rawPlayerState.activeData?.datatypes],
   );
   const setSubscriptions = useCallback(
     (id: string, subscriptionsForId: SubscribePayload[]) => {
@@ -318,7 +288,7 @@ export function MessagePipelineProvider({
   return (
     <ContextInternal.Provider
       value={useShallowMemo({
-        playerState,
+        playerState: rawPlayerState,
         subscriptions,
         publishers,
         frame,
