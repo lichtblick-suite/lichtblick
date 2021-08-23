@@ -86,7 +86,7 @@ export default class Ros1Player implements Player {
   private _requestTopicsTimeout?: ReturnType<typeof setTimeout>; // setTimeout() handle for _requestTopics().
   private _hasReceivedMessage = false;
   private _metricsCollector: PlayerMetricsCollectorInterface;
-  private _presence: PlayerPresence = PlayerPresence.CONSTRUCTING;
+  private _presence: PlayerPresence = PlayerPresence.INITIALIZING;
   private _problems = new PlayerProblemManager();
 
   constructor({ url, hostname, metricsCollector }: Ros1PlayerOpts) {
@@ -259,6 +259,7 @@ export default class Ros1Player implements Player {
     const start = this._start;
     if (!providerTopics || !start) {
       return this._listener({
+        name: this._url,
         presence: this._presence,
         progress: {},
         capabilities: CAPABILITIES,
@@ -278,6 +279,7 @@ export default class Ros1Player implements Player {
     const messages = this._parsedMessages;
     this._parsedMessages = [];
     return this._listener({
+      name: this._url,
       presence: this._presence,
       progress: {},
       capabilities: CAPABILITIES,

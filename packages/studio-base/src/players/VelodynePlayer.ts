@@ -78,7 +78,7 @@ export default class VelodynePlayer implements Player {
   private _packets: RawPacket[] = []; // Queue of packets that will form the next parsed message
   private _parsedMessages: MessageEvent<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call
   private _metricsCollector: PlayerMetricsCollectorInterface;
-  private _presence: PlayerPresence = PlayerPresence.CONSTRUCTING;
+  private _presence: PlayerPresence = PlayerPresence.INITIALIZING;
 
   // track issues within the player
   private _problems: PlayerProblem[] = [];
@@ -202,6 +202,7 @@ export default class VelodynePlayer implements Player {
     const messages = this._parsedMessages;
     this._parsedMessages = [];
     return this._listener({
+      name: "Velodyne",
       presence: this._presence,
       progress: {},
       capabilities: CAPABILITIES,

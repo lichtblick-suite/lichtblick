@@ -98,7 +98,7 @@ export default class RosbridgePlayer implements Player {
     url: string;
     metricsCollector: PlayerMetricsCollectorInterface;
   }) {
-    this._presence = PlayerPresence.CONSTRUCTING;
+    this._presence = PlayerPresence.INITIALIZING;
     this._metricsCollector = metricsCollector;
     this._url = url;
     this._start = fromMillis(Date.now());
@@ -296,6 +296,7 @@ export default class RosbridgePlayer implements Player {
     const { _providerTopics, _providerDatatypes, _start } = this;
     if (!_providerTopics || !_providerDatatypes || !_start) {
       return this._listener({
+        name: this._url,
         presence: this._presence,
         progress: {},
         capabilities: CAPABILITIES,
@@ -315,6 +316,7 @@ export default class RosbridgePlayer implements Player {
     const messages = this._parsedMessages;
     this._parsedMessages = [];
     return this._listener({
+      name: this._url,
       presence: this._presence,
       progress: {},
       capabilities: CAPABILITIES,

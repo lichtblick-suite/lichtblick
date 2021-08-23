@@ -71,68 +71,60 @@ const DEFAULT_MESSAGE_ORDER = "receiveTime";
 const EMPTY_USER_NODES: UserNodes = Object.freeze({});
 const EMPTY_GLOBAL_VARIABLES: GlobalVariables = Object.freeze({});
 
-type BuiltPlayerMeta = {
-  player: Player;
-  sources: string[];
-};
-
-function buildPlayerFromFiles(files: File[], options: BuildPlayerOptions): BuiltPlayerMeta {
+function buildPlayerFromFiles(files: File[], options: BuildPlayerOptions): Player {
+  const name = files.map((file) => String(file.name)).join(", ");
   if (files.length === 1) {
-    return {
-      player: buildPlayerFromDescriptor(getLocalBagDescriptor(files[0] as File), options),
-      sources: files.map((file) => String(file.name)),
-    };
+    return buildPlayerFromDescriptor(name, getLocalBagDescriptor(files[0] as File), options);
   } else if (files.length === 2) {
-    return {
-      player: buildPlayerFromDescriptor(
-        {
-          name: CoreDataProviders.CombinedDataProvider,
-          args: {},
-          children: [
-            getLocalBagDescriptor(files[0] as File),
-            {
-              name: CoreDataProviders.RenameDataProvider,
-              args: { prefix: SECOND_SOURCE_PREFIX },
-              children: [getLocalBagDescriptor(files[1] as File)],
-            },
-          ],
-        },
-        options,
-      ),
-      sources: files.map((file) => String(file.name)),
-    };
+    return buildPlayerFromDescriptor(
+      name,
+      {
+        name: CoreDataProviders.CombinedDataProvider,
+        args: {},
+        children: [
+          getLocalBagDescriptor(files[0] as File),
+          {
+            name: CoreDataProviders.RenameDataProvider,
+            args: { prefix: SECOND_SOURCE_PREFIX },
+            children: [getLocalBagDescriptor(files[1] as File)],
+          },
+        ],
+      },
+      options,
+    );
   }
   throw new Error(`Unsupported number of files: ${files.length}`);
 }
 
-function buildPlayerFromBagURLs(urls: string[], options: BuildPlayerOptions): BuiltPlayerMeta {
+async function buildPlayerFromBagURLs(
+  urls: string[],
+  options: BuildPlayerOptions,
+): Promise<Player> {
+  const name = urls.map((url) => url.toString()).join(", ");
+
   if (urls.length === 1) {
-    return {
-      player: buildPlayerFromDescriptor(
-        getRemoteBagDescriptor(urls[0] as string, options),
-        options,
-      ),
-      sources: urls.map((url) => url.toString()),
-    };
+    return buildPlayerFromDescriptor(
+      name,
+      getRemoteBagDescriptor(urls[0] as string, options),
+      options,
+    );
   } else if (urls.length === 2) {
-    return {
-      player: buildPlayerFromDescriptor(
-        {
-          name: CoreDataProviders.CombinedDataProvider,
-          args: {},
-          children: [
-            getRemoteBagDescriptor(urls[0] as string, options),
-            {
-              name: CoreDataProviders.RenameDataProvider,
-              args: { prefix: SECOND_SOURCE_PREFIX },
-              children: [getRemoteBagDescriptor(urls[1] as string, options)],
-            },
-          ],
-        },
-        options,
-      ),
-      sources: urls.map((url) => url.toString()),
-    };
+    return buildPlayerFromDescriptor(
+      name,
+      {
+        name: CoreDataProviders.CombinedDataProvider,
+        args: {},
+        children: [
+          getRemoteBagDescriptor(urls[0] as string, options),
+          {
+            name: CoreDataProviders.RenameDataProvider,
+            args: { prefix: SECOND_SOURCE_PREFIX },
+            children: [getRemoteBagDescriptor(urls[1] as string, options)],
+          },
+        ],
+      },
+      options,
+    );
   }
   throw new Error(`Unsupported number of urls: ${urls.length}`);
 }
@@ -140,11 +132,8 @@ function buildPlayerFromBagURLs(urls: string[], options: BuildPlayerOptions): Bu
 function buildRosbag2PlayerFromFolder(
   folder: FileSystemDirectoryHandle,
   options: BuildPlayerOptions,
-): BuiltPlayerMeta {
-  return {
-    player: buildRosbag2PlayerFromDescriptor(getLocalRosbag2Descriptor(folder), options),
-    sources: [folder.name],
-  };
+): Player {
+  return buildRosbag2PlayerFromDescriptor(getLocalRosbag2Descriptor(folder), options);
 }
 
 type FactoryOptions = {
@@ -155,7 +144,7 @@ type FactoryOptions = {
   storage: Storage;
 };
 
-async function localBagFileSource(options: FactoryOptions): Promise<BuiltPlayerMeta | undefined> {
+async function localBagFileSource(options: FactoryOptions): Promise<Player | undefined> {
   let file: File;
 
   const restore = options.sourceOptions.restore ?? false;
@@ -187,9 +176,7 @@ async function localBagFileSource(options: FactoryOptions): Promise<BuiltPlayerM
   return buildPlayerFromFiles([file], options.playerOptions);
 }
 
-async function localRosbag2FolderSource(
-  options: FactoryOptions,
-): Promise<BuiltPlayerMeta | undefined> {
+async function localRosbag2FolderSource(options: FactoryOptions): Promise<Player | undefined> {
   let folder: FileSystemDirectoryHandle;
 
   const restore = options.sourceOptions.restore ?? false;
@@ -208,7 +195,7 @@ async function localRosbag2FolderSource(
   return buildRosbag2PlayerFromFolder(folder, options.playerOptions);
 }
 
-async function remoteBagFileSource(options: FactoryOptions): Promise<BuiltPlayerMeta | undefined> {
+async function remoteBagFileSource(options: FactoryOptions): Promise<Player | undefined> {
   const storageCacheKey = `studio.source.${options.source.name}`;
 
   // undefined url indicates the user canceled the prompt
@@ -247,10 +234,10 @@ async function remoteBagFileSource(options: FactoryOptions): Promise<BuiltPlayer
 
   const url = maybeUrl;
   options.storage.setItem(storageCacheKey, url);
-  return buildPlayerFromBagURLs([url], options.playerOptions);
+  return await buildPlayerFromBagURLs([url], options.playerOptions);
 }
 
-async function rosbridgeSource(options: FactoryOptions): Promise<BuiltPlayerMeta | undefined> {
+async function rosbridgeSource(options: FactoryOptions): Promise<Player | undefined> {
   const storageCacheKey = `studio.source.${options.source.name}`;
 
   // undefined url indicates the user canceled the prompt
@@ -287,16 +274,13 @@ async function rosbridgeSource(options: FactoryOptions): Promise<BuiltPlayerMeta
 
   const url = maybeUrl;
   options.storage.setItem(storageCacheKey, url);
-  return {
-    player: new RosbridgePlayer({
-      url,
-      metricsCollector: options.playerOptions.metricsCollector,
-    }),
-    sources: [url],
-  };
+  return new RosbridgePlayer({
+    url,
+    metricsCollector: options.playerOptions.metricsCollector,
+  });
 }
 
-async function roscoreSource(options: FactoryOptions): Promise<BuiltPlayerMeta | undefined> {
+async function roscoreSource(options: FactoryOptions): Promise<Player | undefined> {
   const storageCacheKey = `studio.source.${options.source.name}`;
 
   // undefined url indicates the user canceled the prompt
@@ -338,17 +322,14 @@ async function roscoreSource(options: FactoryOptions): Promise<BuiltPlayerMeta |
 
   const hostname = options.sourceOptions.rosHostname as string | undefined;
 
-  return {
-    player: new Ros1Player({
-      url,
-      hostname,
-      metricsCollector: options.playerOptions.metricsCollector,
-    }),
-    sources: [url],
-  };
+  return new Ros1Player({
+    url,
+    hostname,
+    metricsCollector: options.playerOptions.metricsCollector,
+  });
 }
 
-async function velodyneSource(options: FactoryOptions): Promise<BuiltPlayerMeta | undefined> {
+async function velodyneSource(options: FactoryOptions): Promise<Player | undefined> {
   const storageCacheKey = `studio.source.${options.source.name}`;
 
   // undefined port indicates the user canceled the prompt
@@ -384,10 +365,7 @@ async function velodyneSource(options: FactoryOptions): Promise<BuiltPlayerMeta 
   const port = parseInt(portStr);
   options.storage.setItem(storageCacheKey, portStr);
 
-  return {
-    player: new VelodynePlayer({ port, metricsCollector: options.playerOptions.metricsCollector }),
-    sources: [portStr],
-  };
+  return new VelodynePlayer({ port, metricsCollector: options.playerOptions.metricsCollector });
 }
 
 export default function PlayerManager({
@@ -415,7 +393,6 @@ export default function PlayerManager({
 
   const globalVariablesRef = useRef<GlobalVariables>(globalVariables);
   const [basePlayer, setBasePlayer] = useState<Player | undefined>();
-  const [currentSourceName, setCurrentSourceName] = useState<string | undefined>(undefined);
   const isMounted = useMountedState();
 
   // We don't want to recreate the player when the message order changes, but we do want to
@@ -490,7 +467,6 @@ export default function PlayerManager({
     async (selectedSource: PlayerSourceDefinition, params?: Record<string, unknown>) => {
       log.debug(`Select Source: ${selectedSource.name} ${selectedSource.type}`);
       setSavedSource(selectedSource);
-      setBasePlayer(undefined);
 
       try {
         metricsCollector.setProperty("player", selectedSource.type);
@@ -505,16 +481,15 @@ export default function PlayerManager({
           return;
         }
 
-        const builtPlayerMeta = await buildPlayer({
+        const newBasePlayer = await buildPlayer({
           source: selectedSource,
           sourceOptions: { ...params, rosHostname },
           playerOptions: buildPlayerOptions,
           prompt,
           storage,
         });
-        if (builtPlayerMeta && isMounted()) {
-          setCurrentSourceName(builtPlayerMeta.sources.join(","));
-          setBasePlayer(builtPlayerMeta.player);
+        if (newBasePlayer && isMounted()) {
+          setBasePlayer(newBasePlayer);
         }
       } catch (error) {
         setBasePlayer(undefined);
@@ -548,7 +523,6 @@ export default function PlayerManager({
   const value: PlayerSelection = {
     selectSource,
     availableSources: playerSources,
-    currentSourceName,
   };
 
   return (

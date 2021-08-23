@@ -203,6 +203,7 @@ export type Connection = {
 // Because the descriptor is a plain JavaScript object, it can be sent over an Rpc Channel, which
 // means that you can describe a chain of data providers that includes a Worker or a WebSocket.
 export type RandomAccessDataProviderDescriptor = {
+  label?: string;
   name: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   args: any;

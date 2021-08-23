@@ -16,7 +16,7 @@ export default {
 export const NoDataSources = (): JSX.Element => {
   return (
     <ModalHost>
-      <MockMessagePipelineProvider>
+      <MockMessagePipelineProvider presence={PlayerPresence.NOT_PRESENT}>
         <ConnectionList />
       </MockMessagePipelineProvider>
     </ModalHost>

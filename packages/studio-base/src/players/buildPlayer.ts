@@ -14,10 +14,12 @@ export type BuildPlayerOptions = {
 };
 
 export function buildPlayerFromDescriptor(
+  name: string,
   childDescriptor: RandomAccessDataProviderDescriptor,
   options: BuildPlayerOptions,
 ): Player {
   const rootDescriptor = {
+    label: name,
     name: CoreDataProviders.ParseMessagesDataProvider,
     args: {},
     children: [

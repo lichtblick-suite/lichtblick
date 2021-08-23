@@ -4,20 +4,25 @@
 
 import { useEffect } from "react";
 
-import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+} from "@foxglove/studio-base/components/MessagePipeline";
+
+const selectPlayerName = (ctx: MessagePipelineContext) => ctx.playerState.name;
 
 /**
  * DocumentTitleAdapter sets the document title based on the currently selected player
  */
 export default function DocumentTitleAdapter(): JSX.Element {
-  const { currentSourceName } = usePlayerSelection();
+  const playerName = useMessagePipeline(selectPlayerName);
 
   useEffect(() => {
-    if (!currentSourceName) {
+    if (!playerName) {
       window.document.title = "Foxglove Studio";
       return;
     }
-    window.document.title = `${currentSourceName} - Foxglove Studio`;
-  }, [currentSourceName]);
+    window.document.title = `${playerName} - Foxglove Studio`;
+  }, [playerName]);
   return <></>;
 }

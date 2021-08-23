@@ -48,6 +48,7 @@ export function getLocalRosbag2Descriptor(
   folder: FileSystemDirectoryHandle,
 ): RandomAccessDataProviderDescriptor {
   return {
+    label: folder.name,
     name: CoreDataProviders.Rosbag2DataProvider,
     args: { bagFolderPath: { type: "folder", folder } },
     children: [],

@@ -130,7 +130,7 @@ const selectPlayerProblems = ({ playerState }: MessagePipelineContext) => player
 export default function Workspace(props: WorkspaceProps): JSX.Element {
   const classes = useStyles();
   const containerRef = useRef<HTMLDivElement>(ReactNull);
-  const { currentSourceName, selectSource } = usePlayerSelection();
+  const { selectSource } = usePlayerSelection();
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerCapabilities = useMessagePipeline(selectPlayerCapabilities);
   const playerProblems = useMessagePipeline(selectPlayerProblems);
@@ -141,21 +141,29 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
 
   const [selectedSidebarItem, setSelectedSidebarItem] = useState<SidebarItemKey | undefined>(
     // Start with the sidebar open if no connection has been made
-    currentSourceName == undefined ? "connection" : undefined,
+    playerPresence === PlayerPresence.NOT_PRESENT ? "connection" : undefined,
   );
 
+  // When a player is present we hide the connection sidebar. To prevent hiding the connection sidebar
+  // when the user wants to select a new connection we track whether the sidebar item opened
+  const userSelectSidebarItem = useRef(false);
+
+  const selectSidebarItem = useCallback((item: SidebarItemKey | undefined) => {
+    userSelectSidebarItem.current = true;
+    setSelectedSidebarItem(item);
+  }, []);
+
   // Automatically close the connection sidebar when a connection is chosen
-  const prevSourceName = useRef(currentSourceName);
   useLayoutEffect(() => {
-    if (
-      selectedSidebarItem === "connection" &&
-      prevSourceName.current == undefined &&
-      currentSourceName != undefined
-    ) {
+    if (userSelectSidebarItem.current) {
+      userSelectSidebarItem.current = false;
+      return;
+    }
+
+    if (selectedSidebarItem === "connection" && playerPresence !== PlayerPresence.NOT_PRESENT) {
       setSelectedSidebarItem(undefined);
     }
-    prevSourceName.current = currentSourceName;
-  }, [selectedSidebarItem, currentSourceName]);
+  }, [selectedSidebarItem, playerPresence]);
 
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
   const [messagePathSyntaxModalOpen, setMessagePathSyntaxModalOpen] = useState(false);
@@ -443,7 +451,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           items={sidebarItems}
           bottomItems={sidebarBottomItems}
           selectedKey={selectedSidebarItem}
-          onSelectKey={setSelectedSidebarItem}
+          onSelectKey={selectSidebarItem}
         >
           {/* To ensure no stale player state remains, we unmount all panels when players change */}
           <RemountOnValueChange value={requestBackfill}>

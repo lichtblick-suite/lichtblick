@@ -16,10 +16,12 @@ import {
   usePlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
-import { PlayerProblem } from "@foxglove/studio-base/players/types";
+import { PlayerPresence, PlayerProblem } from "@foxglove/studio-base/players/types";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
+const selectPlayerPresence = ({ playerState }: MessagePipelineContext) => playerState.presence;
 const selectPlayerProblems = (ctx: MessagePipelineContext) => ctx.playerState.problems;
+const selectPlayerName = (ctx: MessagePipelineContext) => ctx.playerState.name;
 
 const emptyArray: PlayerProblem[] = [];
 
@@ -29,9 +31,10 @@ export default function ConnectionList(): JSX.Element {
   const modalHost = useContext(ModalContext);
 
   const playerProblems = useMessagePipeline(selectPlayerProblems) ?? emptyArray;
+  const playerPresence = useMessagePipeline(selectPlayerPresence);
+  const playerName = useMessagePipeline(selectPlayerName);
 
   const theme = useTheme();
-  const { currentSourceName } = usePlayerSelection();
 
   const onSourceClick = useCallback(
     (source: PlayerSourceDefinition) => {
@@ -73,9 +76,9 @@ export default function ConnectionList(): JSX.Element {
         block
         styles={{ root: { color: theme.palette.neutralTertiary, marginBottom: theme.spacing.l1 } }}
       >
-        {currentSourceName != undefined
-          ? currentSourceName
-          : "Not connected. Choose a data source below to get started."}
+        {playerPresence === PlayerPresence.NOT_PRESENT
+          ? "Not connected. Choose a data source below to get started."
+          : playerName}
       </Text>
       {availableSources.map((source) => {
         let iconName: RegisteredIconNames;

@@ -94,7 +94,6 @@ export interface Player {
 
 export enum PlayerPresence {
   NOT_PRESENT = "NOT_PRESENT",
-  CONSTRUCTING = "CONSTRUCTING",
   INITIALIZING = "INITIALIZING",
   RECONNECTING = "RECONNECTING",
   PRESENT = "PRESENT",
@@ -124,6 +123,10 @@ export type PlayerState = {
   // A unique id for this player (typically a UUID generated on construction). This is used to clear
   // out any data when switching to a new player.
   playerId: string;
+
+  // String name for the player
+  // The player could set this value to represent the current connection, name, ports, etc.
+  name?: string;
 
   // Surface issues during playback or player initialization
   problems?: PlayerProblem[];

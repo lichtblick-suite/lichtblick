@@ -45,7 +45,6 @@ interface SelectSourceFunction {
 export interface PlayerSelection {
   selectSource: SelectSourceFunction;
   availableSources: PlayerSourceDefinition[];
-  currentSourceName?: string;
 }
 
 const PlayerSelectionContext = createContext<PlayerSelection>({
