@@ -23,6 +23,10 @@ log.debug(`Start Preload`);
 log.info(`${pkgInfo.productName} ${pkgInfo.version}`);
 log.info(`initializing preloader, argv="${window.process.argv.join(" ")}"`);
 
+window.onerror = (ev) => {
+  console.error(ev);
+};
+
 // Load opt-out settings for crash reporting and telemetry
 const [allowCrashReporting] = getTelemetrySettings();
 if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
@@ -38,6 +42,7 @@ if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
         return integration.name !== "Breadcrumbs";
       });
     },
+    ignoreErrors: ["ResizeObserver loop limit exceeded"],
   });
 }
 
