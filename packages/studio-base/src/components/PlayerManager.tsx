@@ -41,28 +41,13 @@ import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
 import useWarnImmediateReRender from "@foxglove/studio-base/hooks/useWarnImmediateReRender";
 import AnalyticsMetricsCollector from "@foxglove/studio-base/players/AnalyticsMetricsCollector";
 import OrderedStampPlayer from "@foxglove/studio-base/players/OrderedStampPlayer";
-import Ros1Player from "@foxglove/studio-base/players/Ros1Player";
-import RosbridgePlayer from "@foxglove/studio-base/players/RosbridgePlayer";
 import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
-import VelodynePlayer, {
-  DEFAULT_VELODYNE_PORT,
-} from "@foxglove/studio-base/players/VelodynePlayer";
-import {
-  buildPlayerFromDescriptor,
-  BuildPlayerOptions,
-} from "@foxglove/studio-base/players/buildPlayer";
-import { buildRosbag2PlayerFromDescriptor } from "@foxglove/studio-base/players/buildRosbag2Player";
+import { BuildPlayerOptions } from "@foxglove/studio-base/players/buildPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
-import { CoreDataProviders } from "@foxglove/studio-base/randomAccessDataProviders/constants";
-import {
-  getLocalBagDescriptor,
-  getLocalRosbag2Descriptor,
-  getRemoteBagDescriptor,
-} from "@foxglove/studio-base/randomAccessDataProviders/standardDataProviderDescriptors";
+import { getLocalRosbag2Descriptor } from "@foxglove/studio-base/randomAccessDataProviders/standardDataProviderDescriptors";
 import { UserNodes } from "@foxglove/studio-base/types/panels";
 import Storage from "@foxglove/studio-base/util/Storage";
 import { AppError } from "@foxglove/studio-base/util/errors";
-import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import { parseInputUrl } from "@foxglove/studio-base/util/url";
 
 const log = Logger.getLogger(__filename);
@@ -70,71 +55,6 @@ const log = Logger.getLogger(__filename);
 const DEFAULT_MESSAGE_ORDER = "receiveTime";
 const EMPTY_USER_NODES: UserNodes = Object.freeze({});
 const EMPTY_GLOBAL_VARIABLES: GlobalVariables = Object.freeze({});
-
-function buildPlayerFromFiles(files: File[], options: BuildPlayerOptions): Player {
-  const name = files.map((file) => String(file.name)).join(", ");
-  if (files.length === 1) {
-    return buildPlayerFromDescriptor(name, getLocalBagDescriptor(files[0] as File), options);
-  } else if (files.length === 2) {
-    return buildPlayerFromDescriptor(
-      name,
-      {
-        name: CoreDataProviders.CombinedDataProvider,
-        args: {},
-        children: [
-          getLocalBagDescriptor(files[0] as File),
-          {
-            name: CoreDataProviders.RenameDataProvider,
-            args: { prefix: SECOND_SOURCE_PREFIX },
-            children: [getLocalBagDescriptor(files[1] as File)],
-          },
-        ],
-      },
-      options,
-    );
-  }
-  throw new Error(`Unsupported number of files: ${files.length}`);
-}
-
-async function buildPlayerFromBagURLs(
-  urls: string[],
-  options: BuildPlayerOptions,
-): Promise<Player> {
-  const name = urls.map((url) => url.toString()).join(", ");
-
-  if (urls.length === 1) {
-    return buildPlayerFromDescriptor(
-      name,
-      getRemoteBagDescriptor(urls[0] as string, options),
-      options,
-    );
-  } else if (urls.length === 2) {
-    return buildPlayerFromDescriptor(
-      name,
-      {
-        name: CoreDataProviders.CombinedDataProvider,
-        args: {},
-        children: [
-          getRemoteBagDescriptor(urls[0] as string, options),
-          {
-            name: CoreDataProviders.RenameDataProvider,
-            args: { prefix: SECOND_SOURCE_PREFIX },
-            children: [getRemoteBagDescriptor(urls[1] as string, options)],
-          },
-        ],
-      },
-      options,
-    );
-  }
-  throw new Error(`Unsupported number of urls: ${urls.length}`);
-}
-
-function buildRosbag2PlayerFromFolder(
-  folder: FileSystemDirectoryHandle,
-  options: BuildPlayerOptions,
-): Player {
-  return buildRosbag2PlayerFromDescriptor(getLocalRosbag2Descriptor(folder), options);
-}
 
 type FactoryOptions = {
   source: PlayerSourceDefinition;
@@ -154,6 +74,8 @@ async function localBagFileSource(options: FactoryOptions): Promise<Player | und
   if (restore) {
     return undefined;
   }
+
+  const { buildPlayerFromFiles } = await import("@foxglove/studio-base/players/buildPlayer");
 
   // maybe the caller has some files they want to open
   const files = options.sourceOptions.files;
@@ -192,7 +114,11 @@ async function localRosbag2FolderSource(options: FactoryOptions): Promise<Player
     }
     throw error;
   }
-  return buildRosbag2PlayerFromFolder(folder, options.playerOptions);
+
+  const { buildRosbag2PlayerFromDescriptor } = await import(
+    "@foxglove/studio-base/players/buildRosbag2Player"
+  );
+  return buildRosbag2PlayerFromDescriptor(getLocalRosbag2Descriptor(folder), options.playerOptions);
 }
 
 async function remoteBagFileSource(options: FactoryOptions): Promise<Player | undefined> {
@@ -234,11 +160,18 @@ async function remoteBagFileSource(options: FactoryOptions): Promise<Player | un
 
   const url = maybeUrl;
   options.storage.setItem(storageCacheKey, url);
-  return await buildPlayerFromBagURLs([url], options.playerOptions);
+
+  const { buildPlayerFromBagURLs } = await import("@foxglove/studio-base/players/buildPlayer");
+  return buildPlayerFromBagURLs([url], options.playerOptions);
 }
 
 async function rosbridgeSource(options: FactoryOptions): Promise<Player | undefined> {
   const storageCacheKey = `studio.source.${options.source.name}`;
+
+  // load the player on-demand
+  const { default: RosbridgePlayer } = await import(
+    "@foxglove/studio-base/players/RosbridgePlayer"
+  );
 
   // undefined url indicates the user canceled the prompt
   let maybeUrl;
@@ -282,6 +215,9 @@ async function rosbridgeSource(options: FactoryOptions): Promise<Player | undefi
 
 async function roscoreSource(options: FactoryOptions): Promise<Player | undefined> {
   const storageCacheKey = `studio.source.${options.source.name}`;
+
+  // load the player on-demand
+  const { default: Ros1Player } = await import("@foxglove/studio-base/players/Ros1Player");
 
   // undefined url indicates the user canceled the prompt
   let maybeUrl;
@@ -331,6 +267,11 @@ async function roscoreSource(options: FactoryOptions): Promise<Player | undefine
 
 async function velodyneSource(options: FactoryOptions): Promise<Player | undefined> {
   const storageCacheKey = `studio.source.${options.source.name}`;
+
+  // load the player on-demand
+  const { default: VelodynePlayer, DEFAULT_VELODYNE_PORT } = await import(
+    "@foxglove/studio-base/players/VelodynePlayer"
+  );
 
   // undefined port indicates the user canceled the prompt
   let maybePort;
