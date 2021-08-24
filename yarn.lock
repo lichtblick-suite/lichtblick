@@ -5821,13 +5821,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/xmldom@npm:^0.1.31":
-  version: 0.1.31
-  resolution: "@types/xmldom@npm:0.1.31"
-  checksum: 127a6e3c5b92663af29ff9ee66152286f0c381e35b0265161cc2583a7829b4d15c7e46f724337b8d2b89b06685baf0176c3d724cdb08881166a587f83ebd63e8
-  languageName: node
-  linkType: hard
-
 "@types/yargs-parser@npm:*":
   version: 20.2.0
   resolution: "@types/yargs-parser@npm:20.2.0"
@@ -6367,6 +6360,13 @@ __metadata:
   peerDependencies:
     react: ^17.0.0-0
   checksum: dc3dd0c2da0a0d0ab065f542fa5892f00026eec7eca34c0e673760ce0a35f19893fae64f648f3bb7121b9c47752d20a32fa0ca814d5e9300d3cdc14d899f535f
+  languageName: node
+  linkType: hard
+
+"@xmldom/xmldom@npm:0.7.2":
+  version: 0.7.2
+  resolution: "@xmldom/xmldom@npm:0.7.2"
+  checksum: bfaaa310bc71098f351d49f814b5f92af21d3d6640d80f9d574a7303d47fb34e2189d4bd076e570e8aca999af2108e460d5959c93d33463adc157f2bcb587059
   languageName: node
   linkType: hard
 
@@ -12247,9 +12247,9 @@ __metadata:
     "@types/semver": ^7.3.8
     "@types/utif": ^3.0.1
     "@types/webpack-dev-server": 3.11.5
-    "@types/xmldom": ^0.1.31
     "@typescript-eslint/eslint-plugin": 4.29.2
     "@typescript-eslint/parser": 4.29.2
+    "@xmldom/xmldom": 0.7.2
     babel-jest: 27.0.6
     babel-plugin-transform-import-meta: 2.0.0
     clean-webpack-plugin: 4.0.0-alpha.0
@@ -12294,7 +12294,6 @@ __metadata:
     webpack-cli: 4.8.0
     webpack-dev-server: 3.11.2
     webpack-hot-middleware: 2.25.0
-    xmldom: 0.6.0
   languageName: unknown
   linkType: soft
 
@@ -24681,7 +24680,7 @@ typescript@4.3.5:
   languageName: node
   linkType: hard
 
-"xmldom@npm:0.6.0, xmldom@npm:^0.6.0":
+"xmldom@npm:^0.6.0":
   version: 0.6.0
   resolution: "xmldom@npm:0.6.0"
   checksum: 710f64f5b2ba8ac1cbcf62c2e35b095a2f9ccbd596062efe037a5ca85d3ee077b691c4d74952ff476e4bab0dd82727604262899f25dddbb02f89ddeea4cca7f9
