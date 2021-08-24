@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Time } from "@foxglove/rostime";
-
 import * as formatTime from "./formatTime";
 
 describe("formatTime.format", () => {
@@ -84,32 +82,34 @@ describe("formatTime.formatTime", () => {
 });
 
 describe("formatTime.parseTimeStr", () => {
-  // create the time string input from current time zone so the test results are always consistent
-  // sample output: 2018-07-23 2:45:20.317 PM PDT
-  function getCombinedTimeStr(timestamp: Time) {
-    return `${formatTime.formatDate(timestamp)} ${formatTime.formatTime(timestamp)}`;
-  }
-
   it("returns undefined if the input string is formatted incorrectly", () => {
     expect(formatTime.parseTimeStr("")).toEqual(undefined);
     expect(formatTime.parseTimeStr("018-07")).toEqual(undefined);
     expect(formatTime.parseTimeStr("0")).toEqual(undefined);
   });
 
-  it("returns the correct time", () => {
+  it("returns the correct time with no time zone specified", () => {
     const originalTime = { sec: 1532382320, nsec: 317124567 };
-    const timeStr = getCombinedTimeStr(originalTime);
+    const timeStr = `${formatTime.formatDate(originalTime)} ${formatTime.formatTime(originalTime)}`;
     expect(formatTime.parseTimeStr(timeStr)).toEqual({
-      nsec: 317000000, // losing some accuracy when converting back
-      sec: originalTime.sec,
+      nsec: 317000000, // time string loses precision
+      sec: 1532382320,
     });
+  });
 
-    const timeObjInDifferentTimezone = formatTime.parseTimeStr(timeStr, "America/Detroit");
-    expect(timeObjInDifferentTimezone?.nsec).toEqual(317000000); // losing some accuracy when converting back
+  it("returns the correct time with time zone specified", () => {
+    const timeStr = "2018-07-23 2:45:20.317 PM PDT";
 
-    // Get numeric sec value that is not equal to originalTime's sec value
-    expect(timeObjInDifferentTimezone?.sec).not.toBeNaN();
-    expect(timeObjInDifferentTimezone?.sec).not.toEqual(originalTime.sec);
+    {
+      const time = formatTime.parseTimeStr(timeStr, "America/Los_Angeles");
+      expect(time).toEqual({ sec: 1532382320, nsec: 317000000 });
+    }
+
+    {
+      const time = formatTime.parseTimeStr(timeStr, "America/Detroit");
+      // 3 hours ahead results in seconds value 10800 less than America/Los_Angeles seconds value
+      expect(time).toEqual({ sec: 1532371520, nsec: 317000000 });
+    }
   });
 });
 
