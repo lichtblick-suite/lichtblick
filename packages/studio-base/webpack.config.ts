@@ -40,10 +40,11 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
 
     output: {
       publicPath: "",
+      filename: "index.js", // Referred to by package.json "browser" field
 
       // Output filenames should include content hashes in order to avoid caching issues with
       // downstream users of the studio-base package.
-      filename: "[name].[contenthash].js",
+      chunkFilename: "[name].[contenthash].js",
 
       path: path.resolve(__dirname, "assets"),
       library: {
