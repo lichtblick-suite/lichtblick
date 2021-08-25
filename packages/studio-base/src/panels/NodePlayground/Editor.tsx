@@ -14,7 +14,7 @@
 import * as monacoApi from "monaco-editor/esm/vs/editor/editor.api";
 // @ts-expect-error StaticServices does not have type information in the monaco-editor package
 import { StaticServices } from "monaco-editor/esm/vs/editor/standalone/browser/standaloneServices";
-import { ReactElement, useRef } from "react";
+import { ReactElement, useCallback, useRef } from "react";
 import MonacoEditor, { EditorDidMount, EditorWillMount } from "react-monaco-editor";
 import { useResizeDetector } from "react-resize-detector";
 
@@ -252,14 +252,21 @@ const Editor = ({
 
   const onChange = React.useCallback((srcCode: string) => setScriptCode(srcCode), [setScriptCode]);
 
+  const onResize = useCallback((width?: number, height?: number) => {
+    if (width != undefined && height != undefined) {
+      editorRef.current?.layout({ width, height });
+    }
+  }, []);
+
   // monaco editor builtin auto layout uses an interval to adjust size to the parent component
   // instead we use a resize observer and tell the editor to update the layout
+  // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
+  // and existing resize observation.
+  // https://github.com/maslianok/react-resize-detector/issues/45
   const { ref: sizeRef } = useResizeDetector({
-    onResize: (width, height) => {
-      if (width != undefined && height != undefined) {
-        editorRef.current?.layout({ width, height });
-      }
-    },
+    refreshRate: 0,
+    refreshMode: "debounce",
+    onResize,
   });
 
   if (!script) {

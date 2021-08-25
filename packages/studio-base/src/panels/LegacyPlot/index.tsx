@@ -323,7 +323,17 @@ function TwoDimensionalPlot(props: Props) {
     contents: tooltipElement,
   });
 
-  const { width = 0, height = 0, ref: resizeRef } = useResizeDetector<HTMLDivElement>();
+  // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
+  // and existing resize observation.
+  // https://github.com/maslianok/react-resize-detector/issues/45
+  const {
+    width = 0,
+    height = 0,
+    ref: resizeRef,
+  } = useResizeDetector<HTMLDivElement>({
+    refreshRate: 0,
+    refreshMode: "debounce",
+  });
 
   type CallbackType = NonNullable<ComponentProps<typeof ChartComponent>["onHover"]>;
   const onHover = useCallback<CallbackType>(

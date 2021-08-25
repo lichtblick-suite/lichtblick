@@ -100,7 +100,18 @@ export default function ImageCanvas(props: Props): JSX.Element {
   const [zoomMode, setZoomMode] = useState<Config["mode"]>(mode);
 
   const canvasRef = useRef<HTMLCanvasElement>(ReactNull);
-  const { width, height, ref: rootRef } = useResizeDetector();
+
+  // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
+  // and existing resize observation.
+  // https://github.com/maslianok/react-resize-detector/issues/45
+  const {
+    width,
+    height,
+    ref: rootRef,
+  } = useResizeDetector({
+    refreshRate: 0,
+    refreshMode: "debounce",
+  });
 
   // The render function dispatches rendering to the main thread or a worker
   const [doRenderImage, setDoRenderImage] = useState<RenderImage | undefined>(undefined);

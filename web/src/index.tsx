@@ -12,6 +12,10 @@ import VersionBanner from "./VersionBanner";
 const log = Logger.getLogger(__filename);
 log.debug("initializing");
 
+window.onerror = (...args) => {
+  console.error(...args);
+};
+
 if (typeof process.env.SENTRY_DSN === "string") {
   log.info("initializing Sentry");
   initSentry({

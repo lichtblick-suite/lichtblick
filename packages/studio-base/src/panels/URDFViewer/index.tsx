@@ -43,7 +43,18 @@ const DEFAULT_DISTANCE = 5;
 function URDFViewer({ config, saveConfig }: Props) {
   const { customJointValues, jointStatesTopic, opacity } = config;
   const [canvas, setCanvas] = useState<HTMLCanvasElement | ReactNull>(ReactNull);
-  const { ref: resizeRef, width, height } = useResizeDetector();
+
+  // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
+  // and existing resize observation.
+  // https://github.com/maslianok/react-resize-detector/issues/45
+  const {
+    ref: resizeRef,
+    width,
+    height,
+  } = useResizeDetector({
+    refreshRate: 0,
+    refreshMode: "debounce",
+  });
   const { assets } = useAssets();
   const [selectedAssetId, setSelectedAssetId] = useState<string | undefined>();
 
