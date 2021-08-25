@@ -21,7 +21,6 @@
   ],
   "scripts": {
     "prepack": "yarn build:webpack && yarn build:tsc",
-    "chromatic": "chromatic --build-script-name storybook:build --auto-accept-changes main --exit-once-uploaded",
     "storybook:build": "cross-env TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' build-storybook --config-dir src/.storybook",
     "build:tsc": "ttsc --module es2020 --project tsconfig.json",
     "build:webpack": "cross-env TS_NODE_PROJECT=\"tsconfig.cli.json\" webpack --mode production --progress"
