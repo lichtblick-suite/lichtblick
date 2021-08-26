@@ -30,7 +30,7 @@ import { simulateDragClick } from "@foxglove/studio-base/test/mouseEventsHelper"
 import delay from "@foxglove/studio-base/util/delay";
 import tick from "@foxglove/studio-base/util/tick";
 
-import Interactions, { OBJECT_TAB_TYPE, LINKED_VARIABLES_TAB_TYPE } from "./index";
+import Interactions, { OBJECT_TAB_TYPE, LINKED_VARIABLES_TAB_TYPE } from "./Interactions";
 import useLinkedGlobalVariables from "./useLinkedGlobalVariables";
 
 const SWrapper = styled.div`

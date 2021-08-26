@@ -54,6 +54,7 @@ type GetMessages = (
   topics: GetMessagesTopics,
 ) => Promise<GetMessagesResult>;
 
+// ts-prune-ignore-next
 export default class TestProvider implements RandomAccessDataProvider {
   _start: Time;
   _end: Time;

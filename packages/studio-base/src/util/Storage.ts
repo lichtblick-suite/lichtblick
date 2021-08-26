@@ -25,6 +25,7 @@ export type BustStorageFn = (backingStore: BackingStore, keys: string[]) => void
 const bustStorageFnsMap = new Map();
 
 // Exported for testing.
+// ts-prune-ignore-next
 export function clearBustStorageFnsMap(): void {
   bustStorageFnsMap.clear();
 }

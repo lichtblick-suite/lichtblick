@@ -35,14 +35,17 @@ export function bustAllMessageDefinitionCache(backingStore: BackingStore, keys: 
 // message definition cache can be busted.
 storage.registerBustStorageFn(bustAllMessageDefinitionCache);
 
+// ts-prune-ignore-next
 export const setStorageForTest = (quota?: number): void => {
   storage = new Storage(new MemoryStorage(quota));
   storage.registerBustStorageFn(bustAllMessageDefinitionCache);
 };
+// ts-prune-ignore-next
 export const restoreStorageForTest = (): void => {
   storage = new Storage();
 };
 
+// ts-prune-ignore-next
 export const getStorageForTest = (): Storage => storage;
 
 function maybeWriteLocalStorageCache(
@@ -142,6 +145,7 @@ class ParseMessageDefinitionCache {
   }
 }
 
+// ts-prune-ignore-next
 export const CacheForTesting = ParseMessageDefinitionCache;
 
 // We use this as a singleton - don't expose it in workers.

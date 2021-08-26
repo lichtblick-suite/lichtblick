@@ -15,11 +15,10 @@ import { storiesOf } from "@storybook/react";
 
 import Flex from "@foxglove/studio-base/components/Flex";
 import { triggerInputChange, triggerInputBlur } from "@foxglove/studio-base/stories/PanelSetup";
-import { createPrimitiveValidator, hasLen } from "@foxglove/studio-base/util/validators";
 
 import TextField from "./TextField";
 
-const validator = createPrimitiveValidator([hasLen(4)]);
+const validator = () => "Example error";
 
 function Box({ children, title }: any) {
   return (

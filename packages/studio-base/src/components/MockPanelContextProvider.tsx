@@ -55,4 +55,5 @@ function MockPanelContextProvider({
   );
 }
 
+// ts-prune-ignore-next
 export default MockPanelContextProvider;

@@ -67,35 +67,9 @@ export const isOrientation = (value: unknown): string | undefined => {
   return undefined;
 };
 
-export const hasLen =
-  (len = 0) =>
-  (value: unknown): string | undefined => {
-    if (Array.isArray(value)) {
-      return value.length !== len
-        ? `must contain exact ${len} array items (current item count: ${value.length})`
-        : undefined;
-    } else if (typeof value === "string") {
-      return value.length !== len
-        ? `must contain ${len} characters (current count: ${value.length})`
-        : undefined;
-    }
-    return undefined;
-  };
-
 // return the first error
 const join = (rules: Array<Rule>) => (value: unknown) =>
   rules.map((rule) => rule(value)).filter((error) => error != undefined)[0];
-
-export const getWebsocketUrlError = (websocketUrl: string): string => {
-  return `"${websocketUrl}" is an invalid WebSocket URL`;
-};
-export const isWebsocketUrl = (value: string): string | undefined => {
-  const pattern = new RegExp(`wss?://[a-z.-_\\d]+(:(d+))?`, "gi");
-  if (!pattern.test(value)) {
-    return getWebsocketUrlError(value);
-  }
-  return undefined;
-};
 
 export const createValidator = (rules: Rules) => {
   return (
@@ -113,18 +87,6 @@ export const createValidator = (rules: Rules) => {
       }
     });
     return errors;
-  };
-};
-
-export const createPrimitiveValidator = (rules: Rule[]) => {
-  return (data: unknown): string | undefined => {
-    for (const rule of rules) {
-      const error = rule(data);
-      if (error != undefined) {
-        return error;
-      }
-    }
-    return undefined;
   };
 };
 

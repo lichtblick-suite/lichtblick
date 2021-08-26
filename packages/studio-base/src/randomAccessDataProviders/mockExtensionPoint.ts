@@ -15,6 +15,7 @@ import {
   ExtensionPoint,
 } from "@foxglove/studio-base/randomAccessDataProviders/types";
 
+// ts-prune-ignore-next
 export function mockExtensionPoint(): {
   extensionPoint: ExtensionPoint;
   metadata: RandomAccessDataProviderMetadata[];

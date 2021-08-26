@@ -25,6 +25,7 @@ import { DiagnosticsBuffer } from "./useDiagnostics";
 // necessary. Exported for tests.
 export const MAX_STRING_LENGTH = 5000; // 5KB
 
+// ts-prune-ignore-next
 export const LEVELS: { OK: 0; WARN: 1; ERROR: 2; STALE: 3 } = {
   OK: 0,
   WARN: 1,

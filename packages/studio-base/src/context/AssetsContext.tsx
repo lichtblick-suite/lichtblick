@@ -65,4 +65,5 @@ export function AssetsProvider({
   return <AssetsContext.Provider value={value}>{children}</AssetsContext.Provider>;
 }
 
+// ts-prune-ignore-next
 export default AssetsContext;

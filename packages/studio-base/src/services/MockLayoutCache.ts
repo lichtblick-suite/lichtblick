@@ -4,6 +4,7 @@
 
 import { CachedLayout, ILayoutCache } from "@foxglove/studio-base/services/ILayoutCache";
 
+// ts-prune-ignore-next
 export default class MockLayoutCache implements ILayoutCache {
   private layoutsById: Map<string, CachedLayout>;
 

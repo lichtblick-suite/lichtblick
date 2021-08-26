@@ -23,6 +23,7 @@ export const FAKE_USER: UserMetadata = {
   name: "Fake User",
 };
 
+// ts-prune-ignore-next
 export default class MockRemoteLayoutStorage implements IRemoteLayoutStorage {
   private layoutsById = new Map<LayoutID, RemoteLayout>();
 

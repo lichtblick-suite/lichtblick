@@ -81,16 +81,6 @@ export function unsetNotificationHandler(): void {
   addNotification = defaultNotificationHandler;
 }
 
-export function detailsToString(details: DetailsType): string {
-  if (typeof details === "string") {
-    return details;
-  }
-  if (details instanceof Error) {
-    return details.toString();
-  }
-  return "unable to convert details to string type";
-}
-
 // Call this to add an notification to the application nav bar error component if mounted.
 // If the component is not mounted, use the console as a fallback.
 export default function sendNotification(

@@ -16,8 +16,6 @@ import {
   cameraStateValidator,
   polygonPointsValidator,
   point2DValidator,
-  isWebsocketUrl,
-  getWebsocketUrlError,
 } from "./validators";
 
 describe("isEmail", () => {
@@ -167,20 +165,5 @@ describe("point2DValidator", () => {
     expect(point2DValidator({ x: 1 })).toEqual({ y: "is required" });
     expect(point2DValidator({ x: "1" })).toEqual({ x: "must be a number", y: "is required" });
     expect(point2DValidator({ x: 1, y: "2" })).toEqual({ y: "must be a number" });
-  });
-});
-
-describe("isWebsocketUrl", () => {
-  it("validates if the input string is websocket url", () => {
-    let val = " ";
-    expect(isWebsocketUrl(val)).toEqual(getWebsocketUrlError(val));
-    val = "ws:";
-    expect(isWebsocketUrl(val)).toEqual(getWebsocketUrlError(val));
-    expect(isWebsocketUrl("ws://example.com")).toEqual(undefined);
-    expect(isWebsocketUrl("wss://example.me")).toEqual(undefined);
-    expect(isWebsocketUrl("ws://localhost:3000")).toEqual(undefined);
-    expect(isWebsocketUrl("ws://some-desktop:3000")).toEqual(undefined);
-    expect(isWebsocketUrl("ws://some_desktop:80")).toEqual(undefined);
-    expect(isWebsocketUrl("wss://localhost:3000")).toEqual(undefined);
   });
 });

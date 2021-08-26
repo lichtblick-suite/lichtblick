@@ -69,6 +69,7 @@ function messagesMatchingStamp(
 // header.stamps.
 // If multiple sets of synchronized messages are included, the one with the later header.stamp is
 // returned.
+// ts-prune-ignore-next
 export default function synchronizeMessages(
   messagesByTopic: Readonly<MessagesByTopic>,
   getHeaderStamp?: (itemMessage: MessageEvent<unknown>) => Time | undefined,

@@ -14,6 +14,7 @@
 import { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
+// ts-prune-ignore-next
 export const fixture = {
   topics: [
     { name: "/msgs/big_topic", datatype: "msgs/big_topic" },
@@ -221,6 +222,7 @@ export const fixture = {
 };
 
 // separate fixture so that we only need to define datatypes for small subset of types
+// ts-prune-ignore-next
 export const enumFixture = {
   datatypes: new Map(
     Object.entries({
@@ -258,6 +260,7 @@ const exampleMessage = {
   sentence: 'String with "quotes" and /slashes/.',
 };
 
+// ts-prune-ignore-next
 export const enumAdvancedFixture = {
   datatypes: new Map(
     Object.entries({
@@ -298,6 +301,7 @@ export const enumAdvancedFixture = {
   },
 };
 
+// ts-prune-ignore-next
 export const withMissingData = {
   datatypes: new Map(
     Object.entries({
@@ -320,6 +324,7 @@ export const withMissingData = {
   },
 };
 
+// ts-prune-ignore-next
 export const topicsToDiffFixture: Fixture = {
   datatypes: enumAdvancedFixture.datatypes,
   topics: [
@@ -354,6 +359,7 @@ export const topicsToDiffFixture: Fixture = {
   },
 };
 
+// ts-prune-ignore-next
 export const topicsWithIdsToDiffFixture = {
   datatypes: enumAdvancedFixture.datatypes,
   topics: [
@@ -393,6 +399,7 @@ export const topicsWithIdsToDiffFixture = {
   },
 };
 
+// ts-prune-ignore-next
 export const multipleNumberMessagesFixture = {
   datatypes: new Map(
     Object.entries({

@@ -13,12 +13,14 @@
 
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
+// ts-prune-ignore-next
 export const datatypes: RosDatatypes = new Map(
   Object.entries({
     "some/datatype": { definitions: [{ name: "index", type: "int32" }] },
   }),
 );
 
+// ts-prune-ignore-next
 export const messages = Object.freeze([
   {
     topic: "/some/topic",

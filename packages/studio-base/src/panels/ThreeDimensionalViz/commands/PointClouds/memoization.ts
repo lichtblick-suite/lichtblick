@@ -47,6 +47,7 @@ export function updateMarkerCache(
 
 // Get a memoized marker, if one exists in cache
 // This function is used for testing purposes
+// ts-prune-ignore-next
 export function memoizedMarker(
   cache: Map<Uint8Array, MemoizedMarker>,
   marker: PointCloudMarker,

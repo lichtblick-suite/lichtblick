@@ -65,7 +65,8 @@ type MemoryDataProviderOptions = {
   providesParsedMessages?: boolean;
 };
 
-// in-memory data provider
+// in-memory data provider for tests
+// ts-prune-ignore-next
 export default class MemoryDataProvider implements RandomAccessDataProvider {
   messages: GetMessagesResult;
   topics?: Topic[];

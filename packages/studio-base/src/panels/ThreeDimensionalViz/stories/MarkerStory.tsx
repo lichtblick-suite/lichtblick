@@ -50,6 +50,7 @@ Object.keys(markerProps).forEach((markerType, idx) => {
   fixtureData.frame["/viz_markers"]?.[0]?.message.markers.push(...markers);
 });
 
+// ts-prune-ignore-next
 export function MarkerStory(
   props: {
     data?: FixtureExampleData;

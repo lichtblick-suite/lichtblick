@@ -35,6 +35,7 @@ const validateWorkerArgs = (arg: unknown) => {
 };
 
 // One test class that implements both typescript compilation and message transformation.
+// ts-prune-ignore-next
 export default class MockUserNodePlayerWorker {
   port: Channel;
 

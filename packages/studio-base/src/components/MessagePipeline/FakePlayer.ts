@@ -22,6 +22,7 @@ import {
   ParameterValue,
 } from "@foxglove/studio-base/players/types";
 
+// ts-prune-ignore-next
 export default class FakePlayer implements Player {
   listener?: (arg0: PlayerState) => Promise<void>;
   playerId: string = "test";

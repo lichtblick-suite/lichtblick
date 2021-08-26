@@ -34,26 +34,6 @@ describe("time.formatTimeRaw", () => {
   });
 });
 
-describe("time.findClosestTimestampIndex", () => {
-  it("returns 0 for value before the first timestamp", () => {
-    expect(time.findClosestTimestampIndex({ sec: 1, nsec: 0 }, ["2", "3"])).toEqual(0);
-  });
-
-  it("returns last timestamp index for value after the last timestamp", () => {
-    expect(time.findClosestTimestampIndex({ sec: 11, nsec: 0 }, ["2", "3"])).toEqual(1);
-  });
-
-  it("returns -1 for empty timestamps", () => {
-    expect(time.findClosestTimestampIndex({ sec: 1, nsec: 0 })).toEqual(-1);
-  });
-
-  it("returns the correct timestamp index on the lower bound", () => {
-    expect(time.findClosestTimestampIndex({ sec: 1, nsec: 0 }, ["1", "2"])).toEqual(0);
-    expect(time.findClosestTimestampIndex({ sec: 1, nsec: 999999999 }, ["1", "2"])).toEqual(0);
-    expect(time.findClosestTimestampIndex({ sec: 2, nsec: 999999999 }, ["1", "2", "3"])).toEqual(1);
-  });
-});
-
 describe("time.parseRosTimeStr", () => {
   it("returns undefined if the input string is formatted incorrectly", () => {
     expect(time.parseRosTimeStr("")).toEqual(undefined);

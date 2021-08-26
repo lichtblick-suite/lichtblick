@@ -16,4 +16,5 @@ function useSubscribeContext(): SubscribeNewsletterFn {
 
 export type { SubscribeNewsletterFn };
 export { useSubscribeContext };
+// ts-prune-ignore-next
 export default SubscribeContext;

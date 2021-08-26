@@ -13,6 +13,7 @@
 
 import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
 
+// ts-prune-ignore-next
 export const POINT_CLOUD_MESSAGE: PointCloud2 = {
   fields: [
     {
@@ -160,6 +161,7 @@ export const POINT_CLOUD_MESSAGE: PointCloud2 = {
   ]),
 };
 
+// ts-prune-ignore-next
 export const POINT_CLOUD_WITH_ADDITIONAL_FIELDS: PointCloud2 = {
   fields: [
     {
