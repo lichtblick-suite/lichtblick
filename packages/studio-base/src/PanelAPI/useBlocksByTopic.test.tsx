@@ -40,7 +40,7 @@ describe("useBlocksByTopic", () => {
       </MockMessagePipelineProvider>,
     );
 
-    expect(Test.result.mock.calls).toEqual([[{ blocks: [], messageReadersByTopic: {} }]]);
+    expect(Test.result.mock.calls).toEqual([[[]]]);
 
     root.unmount();
   });
@@ -57,7 +57,7 @@ describe("useBlocksByTopic", () => {
     );
     // Consumers just need to check in one place to see whether they need a fallback for a topic:
     // in messageReadersByTopic. (They don't also need to check the presence of blocks.)
-    expect(Test.result.mock.calls).toEqual([[{ blocks: [], messageReadersByTopic: {} }]]);
+    expect(Test.result.mock.calls).toEqual([[[]]]);
     root.unmount();
   });
 
@@ -79,9 +79,7 @@ describe("useBlocksByTopic", () => {
     );
     // No message readers, even though we have a definition and we try to subscribe to the topic.
     // This means the data will never be provided.
-    expect(Test.result.mock.calls).toEqual([
-      [{ blocks: [undefined, undefined], messageReadersByTopic: {} }],
-    ]);
+    expect(Test.result.mock.calls).toEqual([[[undefined, undefined]]]);
     root.unmount();
   });
 
@@ -104,12 +102,7 @@ describe("useBlocksByTopic", () => {
     );
 
     // Make sure the calls are actual rerenders caused
-    const expectedCall = [
-      {
-        blocks: [{ "/topic": [] }],
-        messageReadersByTopic: {},
-      },
-    ];
+    const expectedCall = [[{ "/topic": [] }]];
     expect(Test.result.mock.calls).toEqual([expectedCall]);
 
     // Same identity on everything. useBlocksByTopic does not run again.
@@ -128,11 +121,11 @@ describe("useBlocksByTopic", () => {
 
     expect(Test.result.mock.calls).toEqual([expectedCall, expectedCall, expectedCall]);
     const [[c1], [c3], [c4]] = Test.result.mock.calls;
-    expect(c1.blocks).not.toBe(c3.blocks);
-    expect(c1.blocks[0]).toBe(c3.blocks[0]);
+    expect(c1).not.toBe(c3);
+    expect(c1[0]).toBe(c3[0]);
 
-    expect(c3.blocks).not.toBe(c4.blocks);
-    expect(c3.blocks[0]).not.toBe(c4.blocks[0]);
+    expect(c3).not.toBe(c4);
+    expect(c3[0]).not.toBe(c4[0]);
     root.unmount();
   });
 });

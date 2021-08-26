@@ -183,7 +183,7 @@ function Plot(props: Props) {
     [decodeMessagePathsForMessagesByTopic, messagesByTopic],
   );
 
-  const { blocks } = useBlocksByTopic(subscribeTopics);
+  const blocks = useBlocksByTopic(subscribeTopics);
   const blockItemsByPath = useMemo(
     () =>
       showSingleCurrentMessage

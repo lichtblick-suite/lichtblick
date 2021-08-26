@@ -16,7 +16,6 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { useShallowMemo } from "@foxglove/hooks";
-import type { MessageReader } from "@foxglove/rosmsg-serialization";
 import {
   useMessagePipeline,
   MessagePipelineContext,
@@ -28,18 +27,6 @@ import { MemoryCacheBlock } from "@foxglove/studio-base/randomAccessDataProvider
 
 export type MessageBlock = {
   readonly [topicName: string]: readonly MessageEvent<unknown>[];
-};
-
-export type BlocksForTopics = {
-  // TODO(jp/steel): Figure out whether it's better to return message definitions here. It's
-  // possible consumers will want to pass the readers through worker boundaries.
-  messageReadersByTopic: {
-    [topicName: string]: MessageReader;
-  };
-  // Semantics of blocks: Missing topics have not been cached. Adjacent elements are contiguous
-  // in time. Corresponding indexes in different BlocksForTopics cover the same time-range. Blocks
-  // are stored in increasing order of time.
-  blocks: readonly MessageBlock[];
 };
 
 // Memoization probably won't speed up the filtering appreciably, but preserves return identity.
@@ -92,7 +79,14 @@ const useSubscribeToTopicsForBlocks = (topics: readonly string[]) => {
 // so all consumers need a "regular playback" pipeline fallback for now.
 // Consumers can rely on the presence of topics in messageDefinitionsByTopic to signal whether
 // a fallback is needed for a given topic, because entries will not be populated in these cases.
-export function useBlocksByTopic(topics: readonly string[]): BlocksForTopics {
+//
+// Semantics of blocks:
+//   - Missing topics have not been cached.
+//   - Adjacent elements are contiguous
+//   - Each block represents the same duration of time
+//   - The number of blocks is consistent for the data source
+//   - Blocks are stored in increasing order of time
+export function useBlocksByTopic(topics: readonly string[]): readonly MessageBlock[] {
   const requestedTopics = useShallowMemo(topics);
 
   useSubscribeToTopicsForBlocks(requestedTopics);
@@ -108,5 +102,5 @@ export function useBlocksByTopic(topics: readonly string[]): BlocksForTopics {
     return allBlocks.map((block) => filterBlockByTopics(block, requestedTopics));
   }, [allBlocks, requestedTopics]);
 
-  return { messageReadersByTopic: {}, blocks };
+  return blocks;
 }
