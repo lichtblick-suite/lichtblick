@@ -617,22 +617,17 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     let maxY;
 
     if (!hasUserPannedOrZoomed) {
-      const yBounds = datasetBounds.y;
-
       // we prefer user specified bounds over dataset bounds
       minY = yAxes.min;
       maxY = yAxes.max;
 
-      // chartjs bug if the maximum value < dataset min results in array index to an undefined
-      // value and an object access on this undefined value
-      if (maxY != undefined && minY == undefined && maxY < Number(yBounds.min)) {
-        minY = maxY;
+      // chartjs doesn't like it when only one of min/max are specified for scales
+      // so if either is specified then we specify both
+      if (maxY == undefined && minY != undefined) {
+        maxY = datasetBounds.y.max;
       }
-
-      // chartjs bug if the minimum value > dataset max results in array index to an undefined
-      // value and an object access on this undefined value
-      if (minY != undefined && maxY == undefined && minY > Number(yBounds.max)) {
-        maxY = minY;
+      if (minY == undefined && maxY != undefined) {
+        minY = datasetBounds.y.min;
       }
     }
 
