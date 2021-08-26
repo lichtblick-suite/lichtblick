@@ -767,7 +767,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   const options = useMemo<ChartOptions>(() => {
     return {
       maintainAspectRatio: false,
-      animation: { duration: 0 },
+      animation: false,
       // Disable splines, they seem to cause weird rendering artifacts:
       elements: { line: { tension: 0 } },
       hover: {

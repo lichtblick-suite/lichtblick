@@ -40,14 +40,10 @@ type RpcEvent<EventType> = { id: string; event: EventType };
 
 type RpcUpdateEvent = {
   id: string;
-  options: ChartOptions;
-  width: number;
-  height: number;
-};
-
-type RpcUpdateDataEvent = {
-  id: string;
-  data: ChartData;
+  options?: ChartOptions;
+  width?: number;
+  height?: number;
+  data?: ChartData;
 };
 
 // Explicitly load the "Roboto Mono" font, since custom fonts from the main renderer are not
@@ -125,9 +121,6 @@ export default class ChartJsMux {
     );
 
     rpc.receive("update", (args: RpcUpdateEvent) => this._getChart(args.id).update(args));
-    rpc.receive("update-data", (args: RpcUpdateDataEvent) =>
-      this._getChart(args.id).updateData(args),
-    );
     rpc.receive("destroy", (args: RpcEvent<void>) => {
       const manager = this._managers.get(args.id);
       if (manager) {

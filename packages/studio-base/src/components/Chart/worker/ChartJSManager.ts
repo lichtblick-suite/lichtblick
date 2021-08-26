@@ -178,55 +178,56 @@ export default class ChartJSManager {
     return this.getScales();
   }
 
-  updateData({ data }: { data: ChartData }): RpcScales {
-    const instance = this._chartInstance;
-    if (instance == undefined) {
-      return {};
-    }
-
-    instance.data = data;
-    instance.update();
-
-    return this.getScales();
-  }
-
   update({
     options,
     width,
     height,
+    data,
   }: {
-    options: ChartOptions;
-    width: number;
-    height: number;
+    options?: ChartOptions;
+    width?: number;
+    height?: number;
+    data?: ChartData;
   }): RpcScales {
     const instance = this._chartInstance;
     if (instance == undefined) {
       return {};
     }
 
-    instance.options.plugins = this.addFunctionsToConfig(options).plugins;
+    if (options != undefined) {
+      instance.options.plugins = this.addFunctionsToConfig(options).plugins;
 
-    // scales are special because we can mutate them interally via the zoom plugin
-    instance.options.scales = merge(instance.options.scales, options.scales);
+      // scales are special because we can mutate them interally via the zoom plugin
+      instance.options.scales = merge(instance.options.scales, options.scales);
+    }
 
-    // Internally chartjs rounds width and height before updating the instance.
-    // If our update has decimal width and height that will cause a resize on every update.
-    // To avoid this we truncate the decimal from the width and height to present chartjs with whole
-    // numbers.
-    const wholeWidth = Math.floor(width);
-    const wholeHeight = Math.floor(height);
-    if (
-      Math.abs(instance.width - wholeWidth) > Number.EPSILON ||
-      Math.abs(instance.height - wholeHeight) > Number.EPSILON
-    ) {
-      instance.canvas.width = wholeWidth;
-      instance.canvas.height = wholeHeight;
-      instance.resize(wholeWidth, wholeHeight);
+    if (width != undefined && height != undefined) {
+      // Internally chartjs rounds width and height before updating the instance.
+      // If our update has decimal width and height that will cause a resize on every update.
+      // To avoid this we truncate the decimal from the width and height to present chartjs with whole
+      // numbers.
+      const wholeWidth = Math.floor(width);
+      const wholeHeight = Math.floor(height);
+      if (
+        Math.abs(instance.width - wholeWidth) > Number.EPSILON ||
+        Math.abs(instance.height - wholeHeight) > Number.EPSILON
+      ) {
+        instance.canvas.width = wholeWidth;
+        instance.canvas.height = wholeHeight;
+        instance.resize(wholeWidth, wholeHeight);
+      }
+    }
+
+    if (data != undefined) {
+      instance.data = data;
     }
 
     // While the chartjs API doesn't indicate update should be called after resize, in practice
     // we've found that performing a resize after an update sometimes results in a blank chart.
-    instance.update();
+    //
+    // NOTE: "none" disables animations - this is important for chart performance because we update
+    // the entire data set which does not preserve history for the chart animations
+    instance.update("none");
 
     return this.getScales();
   }

@@ -10,7 +10,7 @@
 
 import { ChartOptions, ChartData, ScatterDataPoint } from "chart.js";
 import Hammer from "hammerjs";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useAsync, useMountedState } from "react-use";
 import { v4 as uuidv4 } from "uuid";
 
@@ -85,7 +85,7 @@ function Chart(props: Props): JSX.Element {
   const zoomEnabled = props.options.plugins?.zoom?.zoom?.enabled ?? false;
   const panEnabled = props.options.plugins?.zoom?.pan?.enabled ?? false;
 
-  const { type, data, options, width, height } = props;
+  const { type, data, options, width, height, onChartUpdate } = props;
 
   const rpc = useMemo(() => {
     return webWorkerManager.registerWorkerListener(id);
@@ -136,6 +136,38 @@ function Chart(props: Props): JSX.Element {
     [isMounted],
   );
 
+  const previousUpdateMessage = useRef<Record<string, unknown>>({});
+
+  // getNewUpdateMessage returns an update message for the changed fields from the last
+  // call to get an update message
+  //
+  // The purpose of this mechanism is to avoid sending data/options/size to the worker
+  // if they are unchanged from a previous initialization or update.
+  const getNewUpdateMessage = useCallback(() => {
+    const prev = previousUpdateMessage.current;
+    const out: Record<string, unknown> = {};
+
+    if (prev.data !== data) {
+      prev.data = out.data = data;
+    }
+    if (prev.options !== options) {
+      prev.options = out.options = options;
+    }
+    if (prev.height !== height) {
+      prev.height = out.height = height;
+    }
+    if (prev.width !== width) {
+      prev.width = out.width = width;
+    }
+
+    // nothing to update
+    if (Object.keys(out).length === 0) {
+      return;
+    }
+
+    return out;
+  }, [data, height, options, width]);
+
   // first time initialization
   const { error: initError } = useAsync(async () => {
     // initialization happens once - even if the props for this effect change
@@ -154,33 +186,32 @@ function Chart(props: Props): JSX.Element {
 
     const offscreenCanvas = canvas.transferControlToOffscreen();
     initialized.current = true;
+
+    const newUpdateMessage = getNewUpdateMessage();
     const scales = await rpcSend<RpcScales>(
       "initialize",
       {
         node: offscreenCanvas,
         type,
-        data,
-        options,
+        data: newUpdateMessage?.data,
+        options: newUpdateMessage?.options,
         devicePixelRatio,
-        width,
-        height,
+        width: newUpdateMessage?.width,
+        height: newUpdateMessage?.height,
       },
       [offscreenCanvas],
     );
     maybeUpdateScales(scales);
-  }, [rpcSend, type, data, options, width, height, maybeUpdateScales]);
+    onChartUpdate?.();
+  }, [getNewUpdateMessage, rpcSend, type, maybeUpdateScales, onChartUpdate]);
 
-  if (initError) {
-    throw initError;
-  }
+  const { error: updateError } = useAsync(async () => {
+    const newUpdateMessage = getNewUpdateMessage();
+    if (!newUpdateMessage) {
+      return;
+    }
 
-  // call this when chart finishes rendering new data
-  const { onChartUpdate } = props;
-
-  const { error: updateDataError } = useAsync(async () => {
-    const scales = await rpcSend<RpcScales>("update-data", {
-      data,
-    });
+    const scales = await rpcSend<RpcScales>("update", newUpdateMessage);
 
     if (!isMounted()) {
       return;
@@ -188,27 +219,9 @@ function Chart(props: Props): JSX.Element {
 
     maybeUpdateScales(scales);
     onChartUpdate?.();
-  }, [data, isMounted, maybeUpdateScales, onChartUpdate, rpcSend]);
+  }, [getNewUpdateMessage, rpcSend, isMounted, maybeUpdateScales, onChartUpdate]);
 
-  if (updateDataError) {
-    throw updateDataError;
-  }
-
-  const { error: updateError } = useAsync(async () => {
-    const scales = await rpcSend<RpcScales>("update", {
-      options,
-      width,
-      height,
-    });
-
-    maybeUpdateScales(scales);
-  }, [height, maybeUpdateScales, options, rpcSend, width]);
-
-  if (updateError) {
-    throw updateError;
-  }
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !panEnabled) {
       return;
@@ -377,6 +390,14 @@ function Chart(props: Props): JSX.Element {
     },
     [isMounted, props, rpcSend],
   );
+
+  if (initError) {
+    throw initError;
+  }
+
+  if (updateError) {
+    throw updateError;
+  }
 
   return (
     <canvas
