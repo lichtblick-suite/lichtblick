@@ -18,6 +18,7 @@ import { ComponentProps, useCallback, useMemo, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import styled from "styled-components";
 
+import { filterMap } from "@foxglove/den/collection";
 import Button from "@foxglove/studio-base/components/Button";
 import ChartComponent from "@foxglove/studio-base/components/Chart";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
@@ -28,7 +29,6 @@ import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import useDeepChangeDetector from "@foxglove/studio-base/hooks/useDeepChangeDetector";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { TwoDimensionalTooltip } from "./Tooltip";

@@ -13,6 +13,7 @@
 
 import memoizeWeak from "memoize-weak";
 
+import { filterMap } from "@foxglove/den/collection";
 import { Time } from "@foxglove/rostime";
 import { Progress, Topic, MessageEvent } from "@foxglove/studio-base/players/types";
 import {
@@ -30,7 +31,6 @@ import {
   RandomAccessDataProvider,
   MessageDefinitions,
 } from "@foxglove/studio-base/randomAccessDataProviders/types";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 
 export default class RenameDataProvider implements RandomAccessDataProvider {
   _provider: RandomAccessDataProvider;

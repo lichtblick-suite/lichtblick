@@ -11,7 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-// More efficient version of [...values].map(mapFn).filter(Boolean)
+/**
+ * filterMap creates a new array populated with the results of calling a provided function on every
+ * element in the calling array. Results which resolve to a javascript "false" value are discarded
+ * from the array.
+ *
+ * This is a more efficient version of [...values].map(mapFn).filter(Boolean) that avoids two
+ * iterations of the array.
+ */
 export default function filterMap<T, U>(
   values: Iterable<T>,
   mapFn: (arg0: T, arg1: number) => U | undefined,

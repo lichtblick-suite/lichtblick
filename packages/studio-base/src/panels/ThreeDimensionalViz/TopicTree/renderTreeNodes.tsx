@@ -15,10 +15,10 @@ import { uniq } from "lodash";
 import { Color } from "regl-worldview";
 import styled from "styled-components";
 
+import { filterMap } from "@foxglove/den/collection";
 import { LinkedGlobalVariable } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { canEditNamespaceOverrideColorDatatype } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/index";
 import { TOPIC_DISPLAY_MODES } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 

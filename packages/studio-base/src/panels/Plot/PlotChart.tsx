@@ -16,12 +16,12 @@ import { AnnotationOptions } from "chartjs-plugin-annotation";
 import { ComponentProps, memo, useMemo } from "react";
 import { useResizeDetector } from "react-resize-detector";
 
+import { filterMap } from "@foxglove/den/collection";
 import TimeBasedChart, {
   Props as TimeBasedChartProps,
   ChartDefaultView,
   TimeBasedChartTooltipData,
 } from "@foxglove/studio-base/components/TimeBasedChart";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import { lineColors } from "@foxglove/studio-base/util/plotColors";
 
 import styles from "./PlotChart.module.scss";

@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import { v4 as uuidv4 } from "uuid";
 
+import { filterMap } from "@foxglove/den/collection";
 import {
   Time,
   add,
@@ -49,7 +50,6 @@ import {
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import debouncePromise from "@foxglove/studio-base/util/debouncePromise";
 import delay from "@foxglove/studio-base/util/delay";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import { isRangeCoveredByRanges } from "@foxglove/studio-base/util/ranges";
 import { getSanitizedTopics } from "@foxglove/studio-base/util/selectors";
 import {

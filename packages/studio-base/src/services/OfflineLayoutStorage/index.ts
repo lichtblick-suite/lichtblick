@@ -5,6 +5,7 @@
 import { v4 as uuidv4 } from "uuid";
 
 import { MutexLocked } from "@foxglove/den/async";
+import { filterMap } from "@foxglove/den/collection";
 import Logger from "@foxglove/log";
 import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { CachedLayout, ILayoutCache } from "@foxglove/studio-base/services/ILayoutCache";
@@ -21,7 +22,6 @@ import {
   IRemoteLayoutStorage,
 } from "@foxglove/studio-base/services/IRemoteLayoutStorage";
 import WriteThroughLayoutCache from "@foxglove/studio-base/services/WriteThroughLayoutCache";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 
 import computeLayoutSyncOperations, { SyncOperation } from "./computeLayoutSyncOperations";
 

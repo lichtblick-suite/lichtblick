@@ -15,6 +15,7 @@ import { groupBy, sortBy } from "lodash";
 import { Fragment } from "react";
 import styled from "styled-components";
 
+import { filterMap } from "@foxglove/den/collection";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import Button from "@foxglove/studio-base/components/Button";
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
@@ -32,7 +33,6 @@ import {
   AdvertiseOptions,
 } from "@foxglove/studio-base/players/types";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 
 const { useCallback } = React;

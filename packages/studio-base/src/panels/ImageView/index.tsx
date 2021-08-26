@@ -20,6 +20,7 @@ import cx from "classnames";
 import { last, uniq } from "lodash";
 import styled from "styled-components";
 
+import { filterMap } from "@foxglove/den/collection";
 import { useShallowMemo } from "@foxglove/hooks";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
@@ -41,7 +42,6 @@ import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 import { CameraInfo, StampedMessage } from "@foxglove/studio-base/types/Messages";
 import { PanelConfigSchema, SaveConfig } from "@foxglove/studio-base/types/panels";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 import { colors as sharedColors } from "@foxglove/studio-base/util/sharedStyleConstants";

@@ -16,9 +16,9 @@ import { useMemo, useCallback, useRef, createContext } from "react";
 import { Color } from "regl-worldview";
 import { useDebounce } from "use-debounce";
 
+import { filterMap } from "@foxglove/den/collection";
 import { useShallowMemo } from "@foxglove/hooks";
 import { TOPIC_DISPLAY_MODES } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import {
   FOXGLOVE_GRID_DATATYPE,
   FOXGLOVE_GRID_TOPIC,

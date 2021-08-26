@@ -15,6 +15,7 @@ import { simplify } from "intervals-fn";
 import { isEqual, sum, uniq } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 
+import { filterMap } from "@foxglove/den/collection";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
 import {
@@ -35,7 +36,6 @@ import {
   GetMessagesTopics,
   InitializationResult,
 } from "@foxglove/studio-base/randomAccessDataProviders/types";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import { getNewConnection } from "@foxglove/studio-base/util/getNewConnection";
 import {
   Range,

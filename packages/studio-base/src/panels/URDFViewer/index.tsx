@@ -6,6 +6,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { useResizeDetector } from "react-resize-detector";
 import { CameraStore, CameraListener, CameraState, DEFAULT_CAMERA_STATE } from "regl-worldview";
 
+import { filterMap } from "@foxglove/den/collection";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Flex from "@foxglove/studio-base/components/Flex";
@@ -16,7 +17,6 @@ import useCleanup from "@foxglove/studio-base/hooks/useCleanup";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import { JointState } from "@foxglove/studio-base/types/Messages";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import { ROBOT_DESCRIPTION_PARAM } from "@foxglove/studio-base/util/globalConstants";
 
 import { JointValueSliders } from "./JointValueSliders";

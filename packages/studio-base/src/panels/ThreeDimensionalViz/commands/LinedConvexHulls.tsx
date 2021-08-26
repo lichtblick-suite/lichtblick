@@ -30,7 +30,7 @@ import {
   Color,
 } from "regl-worldview";
 
-import filterMap from "@foxglove/studio-base/util/filterMap";
+import { filterMap } from "@foxglove/den/collection";
 
 type Props = CommonCommandProps & {
   children: readonly Readonly<Line>[];

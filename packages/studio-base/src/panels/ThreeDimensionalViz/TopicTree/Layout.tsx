@@ -25,6 +25,7 @@ import {
 } from "regl-worldview";
 import { useDebouncedCallback } from "use-debounce";
 
+import { filterMap } from "@foxglove/den/collection";
 import { useShallowMemo } from "@foxglove/hooks";
 import { Time } from "@foxglove/rostime";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
@@ -81,7 +82,6 @@ import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDim
 import { Frame, Topic } from "@foxglove/studio-base/players/types";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import { Color, Marker } from "@foxglove/studio-base/types/Messages";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import {
   FOXGLOVE_GRID_TOPIC,
   SECOND_SOURCE_PREFIX,

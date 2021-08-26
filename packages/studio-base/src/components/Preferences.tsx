@@ -15,13 +15,13 @@ import {
 import moment from "moment-timezone";
 import { useCallback, useMemo, useState } from "react";
 
+import { filterMap } from "@foxglove/den/collection";
 import { RosNode } from "@foxglove/ros1";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import { ExperimentalFeatureSettings } from "@foxglove/studio-base/components/ExperimentalFeatureSettings";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import fuzzyFilter from "@foxglove/studio-base/util/fuzzyFilter";
 
 const MESSAGE_RATES = [1, 3, 5, 10, 15, 20, 30, 60];

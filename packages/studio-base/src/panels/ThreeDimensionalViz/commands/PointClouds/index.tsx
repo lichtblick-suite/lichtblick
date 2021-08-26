@@ -23,13 +23,13 @@ import {
   BaseShape,
 } from "regl-worldview";
 
+import { filterMap } from "@foxglove/den/collection";
 import {
   DEFAULT_FLAT_COLOR,
   DEFAULT_MIN_COLOR,
   DEFAULT_MAX_COLOR,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PointCloudSettingsEditor";
 import { toRgba } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/selection";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 import VertexBufferCache from "./VertexBufferCache";

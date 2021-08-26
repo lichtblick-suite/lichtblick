@@ -14,6 +14,7 @@
 import { assign, flatten, isEqual } from "lodash";
 import memoizeWeak from "memoize-weak";
 
+import { filterMap } from "@foxglove/den/collection";
 import { Time, areEqual, compare, isGreaterThan, isLessThan, clampTime } from "@foxglove/rostime";
 import { Progress, MessageEvent } from "@foxglove/studio-base/players/types";
 import {
@@ -32,7 +33,6 @@ import {
   ParsedMessageDefinitions,
 } from "@foxglove/studio-base/randomAccessDataProviders/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import { deepIntersect } from "@foxglove/studio-base/util/ranges";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 

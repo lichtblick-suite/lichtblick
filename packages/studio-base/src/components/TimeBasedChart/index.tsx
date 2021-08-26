@@ -28,6 +28,7 @@ import styled from "styled-components";
 import { useDebouncedCallback } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
 
+import { filterMap } from "@foxglove/den/collection";
 import Logger from "@foxglove/log";
 import { Time } from "@foxglove/rostime";
 import Button from "@foxglove/studio-base/components/Button";
@@ -47,7 +48,6 @@ import {
   useSetHoverValue,
 } from "@foxglove/studio-base/context/HoverValueContext";
 import mixins from "@foxglove/studio-base/styles/mixins.module.scss";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
 import HoverBar from "./HoverBar";

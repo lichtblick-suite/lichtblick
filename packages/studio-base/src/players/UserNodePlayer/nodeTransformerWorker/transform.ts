@@ -13,6 +13,7 @@
 
 import ts from "typescript/lib/typescript";
 
+import { filterMap } from "@foxglove/den/collection";
 import { formatInterfaceName } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/generateRosLib";
 import {
   constructDatatypes,
@@ -35,7 +36,6 @@ import {
 } from "@foxglove/studio-base/players/UserNodePlayer/types";
 import { Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 export const hasTransformerErrors = (nodeData: NodeData): boolean =>

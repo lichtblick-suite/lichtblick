@@ -23,6 +23,7 @@ import {
   MosaicNode,
 } from "react-mosaic-component";
 
+import { filterMap } from "@foxglove/den/collection";
 import {
   StartDragPayload,
   EndDragPayload,
@@ -46,7 +47,6 @@ import {
   PlaybackConfig,
   MosaicDropTargetPosition,
 } from "@foxglove/studio-base/types/panels";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 import {
   updateTabPanelLayout,

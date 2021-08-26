@@ -5,12 +5,12 @@
 import flatten from "lodash/flatten";
 import { v4 as uuidv4 } from "uuid";
 
+import { filterMap } from "@foxglove/den/collection";
 import { isTime, Time, toSec, subtract } from "@foxglove/rostime";
 import {
   TimeBasedChartTooltipData,
   TooltipItem,
 } from "@foxglove/studio-base/components/TimeBasedChart";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import { format } from "@foxglove/studio-base/util/formatTime";
 import { lightColor, lineColors } from "@foxglove/studio-base/util/plotColors";
 import { formatTimeRaw, TimestampMethod } from "@foxglove/studio-base/util/time";

@@ -17,6 +17,7 @@ import { compact } from "lodash";
 import { useCallback, useMemo } from "react";
 import { List, AutoSizer, ListRowProps } from "react-virtualized";
 
+import { filterMap } from "@foxglove/den/collection";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Flex from "@foxglove/studio-base/components/Flex";
@@ -27,7 +28,6 @@ import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import TopicToRenderMenu from "@foxglove/studio-base/components/TopicToRenderMenu";
 import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import { DIAGNOSTIC_TOPIC } from "@foxglove/studio-base/util/globalConstants";
 import toggle from "@foxglove/studio-base/util/toggle";
 

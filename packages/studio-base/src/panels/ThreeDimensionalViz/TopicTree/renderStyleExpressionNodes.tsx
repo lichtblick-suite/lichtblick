@@ -17,6 +17,7 @@ import { groupBy, defaults } from "lodash";
 import { useCallback, useContext, useMemo } from "react";
 import styled from "styled-components";
 
+import { filterMap } from "@foxglove/den/collection";
 import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Icon from "@foxglove/studio-base/components/Icon";
@@ -30,7 +31,6 @@ import { ColorOverride } from "@foxglove/studio-base/panels/ThreeDimensionalViz/
 import TooltipRow from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TooltipRow";
 import TooltipTable from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TooltipTable";
 import { TreeUINode } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/types";
-import filterMap from "@foxglove/studio-base/util/filterMap";
 import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import { joinTopics } from "@foxglove/studio-base/util/topicUtils";
 
