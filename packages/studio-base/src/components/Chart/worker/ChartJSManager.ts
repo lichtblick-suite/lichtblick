@@ -201,19 +201,30 @@ export default class ChartJSManager {
       instance.options.scales = merge(instance.options.scales, options.scales);
     }
 
-    if (width != undefined && height != undefined) {
+    if (width != undefined || height != undefined) {
+      let shouldResize = false;
+      const wholeWidth = Math.floor(width ?? instance.width);
+      const wholeHeight = Math.floor(height ?? instance.height);
+
       // Internally chartjs rounds width and height before updating the instance.
       // If our update has decimal width and height that will cause a resize on every update.
       // To avoid this we truncate the decimal from the width and height to present chartjs with whole
       // numbers.
-      const wholeWidth = Math.floor(width);
-      const wholeHeight = Math.floor(height);
-      if (
-        Math.abs(instance.width - wholeWidth) > Number.EPSILON ||
-        Math.abs(instance.height - wholeHeight) > Number.EPSILON
-      ) {
-        instance.canvas.width = wholeWidth;
-        instance.canvas.height = wholeHeight;
+      if (width != undefined) {
+        if (Math.abs(instance.width - wholeWidth) > Number.EPSILON) {
+          instance.canvas.width = wholeWidth;
+          shouldResize = true;
+        }
+      }
+
+      if (height != undefined) {
+        if (Math.abs(instance.height - wholeHeight) > Number.EPSILON) {
+          instance.canvas.height = wholeHeight;
+          shouldResize = true;
+        }
+      }
+
+      if (shouldResize) {
         instance.resize(wholeWidth, wholeHeight);
       }
     }
