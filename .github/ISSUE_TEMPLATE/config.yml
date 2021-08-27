@@ -1,1 +1,8 @@
 blank_issues_enabled: false
+contact_links:
+  - name: Discussion
+    url: https://github.com/foxglove/studio/discussions
+    about: Ask a question
+  - name: Slack
+    url: https://foxglove.dev/slack
+    about: Get live help from the Foxglove Community
