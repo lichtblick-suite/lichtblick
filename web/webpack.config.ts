@@ -98,6 +98,10 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
 
     output: {
       publicPath: "/",
+
+      // Output filenames should include content hashes in order to cache bust when new versions are available
+      filename: "[name].[contenthash].js",
+
       path: path.resolve(__dirname, ".webpack"),
     },
 
