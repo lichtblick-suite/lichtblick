@@ -222,4 +222,41 @@ describe("CurrentLayoutProvider", () => {
       { loading: false, selectedLayout: { id: "TEST_ID", data: newState } },
     ]);
   });
+
+  it("keeps identity of action functions when modifying layout", async () => {
+    const layoutStoragePutCalled = signal();
+    const mockLayoutStorage = makeMockLayoutStorage();
+    mockLayoutStorage.getLayout.mockImplementation(async () => {
+      return {
+        id: "TEST_ID",
+        name: "Test layout",
+        baseline: { data: TEST_LAYOUT, updatedAt: new Date(10).toISOString() },
+      };
+    });
+    mockLayoutStorage.updateLayout.mockImplementation(async () => {
+      layoutStoragePutCalled.resolve();
+      return {
+        id: "TEST_ID",
+        name: "Test layout",
+        baseline: { data: TEST_LAYOUT, updatedAt: new Date(10).toISOString() },
+      };
+    });
+    const mockUserProfile = makeMockUserProfile();
+    mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: "example" });
+
+    const result = renderTest({
+      mockLayoutStorage,
+      mockUserProfile,
+    });
+    await act(() => result.current.childMounted);
+    const actions = result.current.actions;
+    expect(result.current.actions).toBe(actions);
+    act(() =>
+      result.current.actions.savePanelConfigs({
+        configs: [{ id: "ExamplePanel!1", config: { foo: "bar" } }],
+      }),
+    );
+    await act(() => layoutStoragePutCalled);
+    expect(result.current.actions.savePanelConfigs).toBe(actions.savePanelConfigs);
+  });
 });

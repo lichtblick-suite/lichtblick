@@ -237,7 +237,9 @@ export default function ImageCanvas(props: Props): JSX.Element {
   const {
     setPan,
     setZoom,
-    pan: panValue,
+    // panX/panY need to be split apart because the pan object's identity may change on each render,
+    // and we want to avoid unnecessary updates to useEffects/useMemos below
+    pan: { x: panX, y: panY },
     zoom: scaleValue,
     setContainer,
     panZoomHandlers,
@@ -277,8 +279,8 @@ export default function ImageCanvas(props: Props): JSX.Element {
     const targetHeight = height * devicePixelRatio;
 
     const computedViewbox = {
-      x: panValue.x * devicePixelRatio,
-      y: panValue.y * devicePixelRatio,
+      x: panX * devicePixelRatio,
+      y: panY * devicePixelRatio,
       scale: scaleValue,
     };
 
@@ -307,8 +309,8 @@ export default function ImageCanvas(props: Props): JSX.Element {
     width,
     height,
     devicePixelRatio,
-    panValue.x,
-    panValue.y,
+    panX,
+    panY,
     scaleValue,
     image?.message,
     onStartRenderImage,
@@ -353,10 +355,10 @@ export default function ImageCanvas(props: Props): JSX.Element {
 
   useLayoutEffect(() => {
     saveConfig({
-      pan: panValue,
+      pan: { x: panX, y: panY },
       zoom: scaleValue,
     });
-  }, [panValue, saveConfig, scaleValue]);
+  }, [panX, panY, saveConfig, scaleValue]);
 
   const zoomContextMenu = useMemo(() => {
     return (
