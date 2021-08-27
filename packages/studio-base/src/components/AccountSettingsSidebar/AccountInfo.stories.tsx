@@ -27,7 +27,7 @@ export const SignedIn = (): JSX.Element => {
 
   return (
     <ConsoleApiContext.Provider value={fakeConsoleApi}>
-      <AccountInfo me={me}></AccountInfo>
+      <AccountInfo me={me} />
     </ConsoleApiContext.Provider>
   );
 };

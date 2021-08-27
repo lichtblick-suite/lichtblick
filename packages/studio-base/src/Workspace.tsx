@@ -414,7 +414,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     return enableSharedLayouts
       ? new Map([
           ...SIDEBAR_ITEMS,
-          ["account", { iconName: "Contact", title: "Account", component: AccountSettings }],
+          ["account", { iconName: "Blockhead", title: "Account", component: AccountSettings }],
         ])
       : SIDEBAR_ITEMS;
   }, [enableSharedLayouts, playerProblems]);

@@ -8,7 +8,6 @@ type CurrentUser = {
 
 type SigninArgs = {
   id_token: string;
-  org_slug: string;
 };
 
 type Session = {

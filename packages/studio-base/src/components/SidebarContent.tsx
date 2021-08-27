@@ -36,12 +36,16 @@ export function SidebarContent({
   return (
     <Stack
       verticalFill
-      style={{
-        padding: noPadding ? undefined : theme.spacing.m,
-        maxHeight: "100%",
-        overflow: "auto",
+      styles={{
+        root: {
+          maxHeight: "100%",
+          overflow: "auto",
+        },
       }}
-      tokens={{ childrenGap: theme.spacing.s1 }}
+      tokens={{
+        childrenGap: theme.spacing.s1,
+        padding: noPadding ? undefined : theme.spacing.m,
+      }}
     >
       <Stack
         horizontal

@@ -8,7 +8,7 @@ import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
 import ModalHost from "@foxglove/studio-base/context/ModalHost";
 import ConsoleApi, { Org } from "@foxglove/studio-base/services/ConsoleApi";
 
-import DeviceCode from "./DeviceCodeDialog";
+import DeviceCodeDialog from "./DeviceCodeDialog";
 
 class FakeConsoleApi extends ConsoleApi {
   constructor() {
@@ -27,22 +27,9 @@ class FakeConsoleApi extends ConsoleApi {
   }
 }
 
-class NeverLoadOrgsConsoleApi extends FakeConsoleApi {
-  // never finish loading the orgs
-  override async orgs(): Promise<Org[]> {
-    return await new Promise(() => {});
-  }
-}
-
-class NoOrgsConsoleApi extends FakeConsoleApi {
-  override async orgs(): Promise<Org[]> {
-    return [];
-  }
-}
-
 export default {
-  title: "AccountSettingsSidebar/DeviceCode",
-  component: DeviceCode,
+  title: "AccountSettingsSidebar/DeviceCodeDialog",
+  component: DeviceCodeDialog,
   decorators: [
     (SingleStory: Story, ctx: StoryContext): JSX.Element => {
       const fakeConsoleApi = ctx.parameters.consoleApi ?? new FakeConsoleApi();
@@ -60,7 +47,7 @@ export default {
 
 export const ShowDeviceCode = (): JSX.Element => {
   return (
-    <DeviceCode
+    <DeviceCodeDialog
       deviceCode={{
         device_code: "foobar",
         expires_in: 100000,
@@ -74,7 +61,7 @@ export const ShowDeviceCode = (): JSX.Element => {
 
 export const CodeTimeout = (): JSX.Element => {
   return (
-    <DeviceCode
+    <DeviceCodeDialog
       deviceCode={{
         device_code: "foobar",
         expires_in: 0,
@@ -84,52 +71,4 @@ export const CodeTimeout = (): JSX.Element => {
       }}
     />
   );
-};
-
-export const LoadingOrgs = (): JSX.Element => {
-  return (
-    <DeviceCode
-      deviceCode={{
-        device_code: "foobar",
-        expires_in: 1,
-        interval: 0,
-        user_code: "AAAA-12BB",
-        verification_uri: "https://console.example.com/activate",
-      }}
-    />
-  );
-};
-LoadingOrgs.parameters = {
-  consoleApi: new NeverLoadOrgsConsoleApi(),
-};
-
-export const OrgSelect = (): JSX.Element => {
-  return (
-    <DeviceCode
-      deviceCode={{
-        device_code: "foobar",
-        expires_in: 1,
-        interval: 0,
-        user_code: "AAAA-12BB",
-        verification_uri: "https://console.example.com/activate",
-      }}
-    />
-  );
-};
-
-export const NoOrgs = (): JSX.Element => {
-  return (
-    <DeviceCode
-      deviceCode={{
-        device_code: "foobar",
-        expires_in: 1,
-        interval: 0,
-        user_code: "AAAA-12BB",
-        verification_uri: "https://console.example.com/activate",
-      }}
-    />
-  );
-};
-NoOrgs.parameters = {
-  consoleApi: new NoOrgsConsoleApi(),
 };

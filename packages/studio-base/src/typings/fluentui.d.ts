@@ -11,6 +11,8 @@ declare global {
     | CustomIconNames
     | "Add"
     | "AddIn"
+    | "Blockhead"
+    | "BlockheadFilled"
     | "Cancel"
     | "CheckMark"
     | "ChevronDown"

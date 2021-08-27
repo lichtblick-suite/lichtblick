@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PrimaryButton, Stack, StackItem, useTheme } from "@fluentui/react";
+import { PrimaryButton, Stack, Text, useTheme } from "@fluentui/react";
 import { ComponentProps, useCallback, useEffect, useMemo, useState } from "react";
 import { useToasts } from "react-toast-notifications";
 import { useAsyncFn, useLocalStorage } from "react-use";
@@ -10,6 +10,7 @@ import { useAsyncFn, useLocalStorage } from "react-use";
 import { useConsoleApi } from "@foxglove/studio-base/context/ConsoleApiContext";
 import { DeviceCodeResponse } from "@foxglove/studio-base/services/ConsoleApi";
 
+import AccountSyncGraphic from "./AccountSyncGraphic";
 import DeviceCodeDialog from "./DeviceCodeDialog";
 
 export default function SigninForm(): JSX.Element {
@@ -35,7 +36,7 @@ export default function SigninForm(): JSX.Element {
   }, [getDeviceCode]);
 
   useEffect(() => {
-    if (deviceCodeError) {
+    if (deviceCodeError != undefined) {
       addToast(deviceCodeError.message, {
         appearance: "error",
       });
@@ -46,7 +47,7 @@ export default function SigninForm(): JSX.Element {
   const onClose = useCallback<NonNullable<OnClose>>(
     (session) => {
       setDeviceCode(undefined);
-      if (session) {
+      if (session != undefined) {
         setBearerToken(session.bearer_token);
         window.location.reload();
       }
@@ -54,8 +55,21 @@ export default function SigninForm(): JSX.Element {
     [setBearerToken],
   );
 
+  // open new window with the device code to facilitate user signin flow
+  useEffect(() => {
+    if (deviceCode == undefined) {
+      return;
+    }
+
+    const url = new URL(deviceCode.verification_uri);
+    url.searchParams.append("user_code", deviceCode.user_code);
+    const href = url.toString();
+
+    window.open(href, "_blank");
+  }, [deviceCode]);
+
   const modal = useMemo(() => {
-    if (deviceCode) {
+    if (deviceCode != undefined) {
       return <DeviceCodeDialog deviceCode={deviceCode} onClose={onClose} />;
     }
 
@@ -63,14 +77,29 @@ export default function SigninForm(): JSX.Element {
   }, [deviceCode, onClose]);
 
   return (
-    <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
-      <StackItem>
-        <div>Sign in to access collaboration features like shared layouts.</div>
-      </StackItem>
-      <StackItem>
-        <PrimaryButton disabled={loading} text="Sign in" onClick={handleOnSigninClick} />
-      </StackItem>
+    <Stack tokens={{ childrenGap: theme.spacing.l1 }} styles={{ root: { lineHeight: "1.3" } }}>
+      <Stack horizontal horizontalAlign="center" styles={{ root: { color: theme.palette.accent } }}>
+        <AccountSyncGraphic width={192} />
+      </Stack>
+      <Text variant="mediumPlus">
+        Sign in to access collaboration features like shared layouts.
+      </Text>
       {modal}
+
+      <PrimaryButton
+        disabled={loading}
+        text="Sign in"
+        onClick={handleOnSigninClick}
+        styles={{
+          root: {
+            marginLeft: 0,
+            marginRight: 0,
+          },
+          rootDisabled: {
+            cursor: "wait !important",
+          },
+        }}
+      />
     </Stack>
   );
 }

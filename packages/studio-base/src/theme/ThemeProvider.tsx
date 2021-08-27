@@ -19,6 +19,8 @@ import { registerIcons, unregisterIcons } from "@fluentui/style-utilities";
 import { useLayoutEffect, useState } from "react";
 import { ThemeProvider as StyledThemeProvider } from "styled-components";
 
+import BlockheadFilledIcon from "@foxglove/studio-base/components/BlockheadFilledIcon";
+import BlockheadIcon from "@foxglove/studio-base/components/BlockheadIcon";
 import LoopIcon from "@foxglove/studio-base/components/LoopIcon";
 import RosIcon from "@foxglove/studio-base/components/RosIcon";
 import theme from "@foxglove/studio-base/theme";
@@ -29,6 +31,8 @@ const icons: {
 } = {
   Add: <Icons.AddIcon />,
   AddIn: <Icons.AddInIcon />,
+  Blockhead: <BlockheadIcon />,
+  BlockheadFilled: <BlockheadFilledIcon />,
   Cancel: <Icons.CancelIcon />,
   CheckMark: <Icons.CheckMarkIcon />,
   ChevronDown: <Icons.ChevronDownIcon />,
