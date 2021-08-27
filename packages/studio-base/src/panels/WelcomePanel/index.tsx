@@ -59,9 +59,6 @@ function WelcomePanel() {
     emailError == undefined &&
     !loading;
 
-  // show the command icon if we detect a Mac platform
-  const commandOrControl = navigator.userAgent.includes("Mac") ? "⌘" : "^";
-
   return (
     <Flex col scroll dataTest="welcome-content">
       <PanelToolbar floating />
@@ -83,9 +80,9 @@ function WelcomePanel() {
           <Icon clickable={false}>
             <PlusCircleOutlineIcon />
           </Icon>{" "}
-          icon above and try adding a new panel. Don’t worry if you make a mistake—you can press{" "}
-          <code>{commandOrControl}Z</code> to undo your changes. (This introduction is also a panel!
-          When you’re done reading, hover over it and click the{" "}
+          icon above and try adding a new panel. Don’t worry if you make a mistake—you can revert
+          your changes from the Layouts sidebar. (This introduction is also a panel! When you’re
+          done reading, hover over it and click the{" "}
           <Icon clickable={false}>
             <CogIcon />
           </Icon>{" "}

@@ -4,7 +4,7 @@
 
 import { makeStyles, Stack, Text } from "@fluentui/react";
 
-import { ConflictResolution, LayoutMetadata } from "@foxglove/studio-base/services/ILayoutStorage";
+import { Layout } from "@foxglove/studio-base/services/ILayoutStorage";
 
 import LayoutRow from "./LayoutRow";
 
@@ -35,27 +35,27 @@ export default function LayoutSection({
   emptyText,
   items,
   selectedId,
-  onSave,
   onSelect,
   onRename,
   onDuplicate,
   onDelete,
   onShare,
   onExport,
-  onResolveConflict,
+  onOverwrite,
+  onRevert,
 }: {
   title: string | undefined;
   emptyText: string | undefined;
-  items: readonly LayoutMetadata[] | undefined;
+  items: readonly Layout[] | undefined;
   selectedId?: string;
-  onSave: (item: LayoutMetadata) => void;
-  onSelect: (item: LayoutMetadata, selectedViaClick?: boolean) => void;
-  onRename: (item: LayoutMetadata, newName: string) => void;
-  onDuplicate: (item: LayoutMetadata) => void;
-  onDelete: (item: LayoutMetadata) => void;
-  onShare: (item: LayoutMetadata) => void;
-  onExport: (item: LayoutMetadata) => void;
-  onResolveConflict: (item: LayoutMetadata, resolution: ConflictResolution) => void;
+  onSelect: (item: Layout, selectedViaClick?: boolean) => void;
+  onRename: (item: Layout, newName: string) => void;
+  onDuplicate: (item: Layout) => void;
+  onDelete: (item: Layout) => void;
+  onShare: (item: Layout) => void;
+  onExport: (item: Layout) => void;
+  onOverwrite: (item: Layout) => void;
+  onRevert: (item: Layout) => void;
 }): JSX.Element {
   const styles = useStyles();
   return (
@@ -75,13 +75,13 @@ export default function LayoutSection({
             key={layout.id}
             layout={layout}
             onSelect={onSelect}
-            onSave={onSave}
             onRename={onRename}
             onDuplicate={onDuplicate}
             onDelete={onDelete}
             onShare={onShare}
             onExport={onExport}
-            onResolveConflict={onResolveConflict}
+            onOverwrite={onOverwrite}
+            onRevert={onRevert}
           />
         ))}
       </Stack.Item>

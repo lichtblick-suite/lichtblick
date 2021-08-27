@@ -8,9 +8,7 @@ export type NativeAppMenuEvent =
   | "open-preferences"
   | "open-keyboard-shortcuts"
   | "open-message-path-syntax-help"
-  | "open-welcome-layout"
-  | "undo"
-  | "redo";
+  | "open-welcome-layout";
 
 type Handler = () => void;
 

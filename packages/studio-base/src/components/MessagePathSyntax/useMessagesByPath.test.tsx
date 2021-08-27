@@ -1,4 +1,3 @@
-/** @jest-environment jsdom */
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -18,13 +17,10 @@ import React, { PropsWithChildren } from "react";
 import { MessageDataItemsByPath } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import useMessagesByPath from "@foxglove/studio-base/components/MessagePathSyntax/useMessagesByPath";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
 import useGlobalVariables, {
   GlobalVariables,
 } from "@foxglove/studio-base/hooks/useGlobalVariables";
-import CurrentLayoutState, {
-  DEFAULT_LAYOUT_FOR_TESTS,
-} from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
+import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 import * as fixture from "./fixture";
@@ -51,11 +47,6 @@ type TestProps = {
 function makeMessagePipelineWrapper(initialGlobalVariables?: GlobalVariables) {
   const setSubscriptions = jest.fn();
 
-  const currentLayout = new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS);
-  if (initialGlobalVariables != undefined) {
-    currentLayout.actions.setGlobalVariables(initialGlobalVariables);
-  }
-
   const wrapper = ({
     children,
     topics = [],
@@ -63,7 +54,7 @@ function makeMessagePipelineWrapper(initialGlobalVariables?: GlobalVariables) {
     messages = [],
     activeData,
   }: PropsWithChildren<TestProps>) => (
-    <CurrentLayoutContext.Provider value={currentLayout}>
+    <MockCurrentLayoutProvider initialState={{ globalVariables: initialGlobalVariables }}>
       <MockMessagePipelineProvider
         topics={topics}
         datatypes={datatypes}
@@ -73,7 +64,7 @@ function makeMessagePipelineWrapper(initialGlobalVariables?: GlobalVariables) {
       >
         {children}
       </MockMessagePipelineProvider>
-    </CurrentLayoutContext.Provider>
+    </MockCurrentLayoutProvider>
   );
   return { setSubscriptions, wrapper };
 }

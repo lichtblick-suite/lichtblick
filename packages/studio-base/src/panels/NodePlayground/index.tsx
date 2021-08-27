@@ -322,7 +322,6 @@ function NodePlayground(props: Props) {
               <WelcomeScreen addNewNode={addNewNode} updateExplorer={updateExplorer} />
             )}
             <div
-              data-nativeundoredo="true"
               style={{
                 flexGrow: 1,
                 width: "100%",

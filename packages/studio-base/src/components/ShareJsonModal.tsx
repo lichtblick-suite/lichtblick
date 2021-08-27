@@ -71,7 +71,6 @@ export default function ShareJsonModal({
       maxWidth={`calc(100vw - ${theme.spacing.l2})`}
     >
       <TextField
-        data-nativeundoredo="true"
         multiline
         rows={10}
         autoAdjustHeight

@@ -7,9 +7,7 @@ export type ForwardedMenuEvent =
   | "open-preferences"
   | "open-keyboard-shortcuts"
   | "open-message-path-syntax-help"
-  | "open-welcome-layout"
-  | "undo"
-  | "redo";
+  | "open-welcome-layout";
 
 interface NativeMenuBridge {
   // Events from the native window are available in the main process but not the renderer, so we forward them through the bridge.

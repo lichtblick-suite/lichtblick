@@ -13,16 +13,13 @@
 //   You may not use this file except in compliance with the License.
 import { act, renderHook } from "@testing-library/react-hooks";
 import { cloneDeep } from "lodash";
-import { useMemo } from "react";
 
 import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { Topic, MessageEvent } from "@foxglove/studio-base/players/types";
-import CurrentLayoutState, {
-  DEFAULT_LAYOUT_FOR_TESTS,
-} from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
+import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 import {
@@ -69,27 +66,20 @@ describe("useCachedGetMessagePathDataItems", () => {
       datatypes: initialDatatypes,
     };
 
-    let setGlobalVariables = (_: GlobalVariables) => {};
-
     const { result, rerender } = renderHook(
-      ({ paths }) => useCachedGetMessagePathDataItems(paths),
+      ({ paths }) => ({
+        setGlobalVariables: useCurrentLayoutActions().setGlobalVariables,
+        getItems: useCachedGetMessagePathDataItems(paths),
+      }),
       {
         initialProps,
         wrapper: function Wrapper({ topics, datatypes, children }) {
-          const currentLayout = useMemo(() => {
-            const state = new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS);
-            setGlobalVariables = state.actions.setGlobalVariables;
-            if (initialGlobalVariables != undefined) {
-              state.actions.setGlobalVariables(initialGlobalVariables);
-            }
-            return state;
-          }, []);
           return (
-            <CurrentLayoutContext.Provider value={currentLayout}>
+            <MockCurrentLayoutProvider initialState={{ globalVariables: initialGlobalVariables }}>
               <MockMessagePipelineProvider topics={topics} datatypes={datatypes}>
                 {children}
               </MockMessagePipelineProvider>
-            </CurrentLayoutContext.Provider>
+            </MockCurrentLayoutProvider>
           );
         },
       },
@@ -99,7 +89,6 @@ describe("useCachedGetMessagePathDataItems", () => {
       result,
       rerender,
       initialProps,
-      setGlobalVariables,
     };
   }
 
@@ -112,45 +101,49 @@ describe("useCachedGetMessagePathDataItems", () => {
 
     const { result, rerender, initialProps } = setup(["/topic.an_array[0]", "/topic.an_array[1]"]);
 
-    const data0 = result.current("/topic.an_array[0]", message);
-    const data1 = result.current("/topic.an_array[1]", message);
+    const data0 = result.current.getItems("/topic.an_array[0]", message);
+    const data1 = result.current.getItems("/topic.an_array[1]", message);
     expect(data0).toEqual([{ path: "/topic.an_array[0]", value: 5 }]);
     expect(data1).toEqual([{ path: "/topic.an_array[1]", value: 10 }]);
 
     // Calling again returns cached version.
-    expect(result.current("/topic.an_array[0]", message)).toBe(data0);
+    expect(result.current.getItems("/topic.an_array[0]", message)).toBe(data0);
 
     // Throws when asking for a path not in the list.
-    expect(() => result.current("/topic.an_array[2]", message)).toThrow(
+    expect(() => result.current.getItems("/topic.an_array[2]", message)).toThrow(
       "not in the list of cached paths",
     );
 
     // Using the exact same paths but with a new array instance will keep the returned function exactly the same.
-    const originalCachedGetMessage = result.current;
+    const originalCachedGetMessage = result.current.getItems;
     rerender({ ...initialProps, paths: ["/topic.an_array[0]", "/topic.an_array[1]"] });
-    expect(result.current).toBe(originalCachedGetMessage);
+    expect(result.current.getItems).toBe(originalCachedGetMessage);
 
     // Changing paths maintains cache for the remaining path.
     rerender({ ...initialProps, paths: ["/topic.an_array[0]"] });
-    expect(result.current("/topic.an_array[0]", message)).toBe(data0);
-    expect(() => result.current("/topic.an_array[1]", message)).toThrow(
+    expect(result.current.getItems("/topic.an_array[0]", message)).toBe(data0);
+    expect(() => result.current.getItems("/topic.an_array[1]", message)).toThrow(
       "not in the list of cached paths",
     );
     expect(result.current).not.toBe(originalCachedGetMessage); // Function should also be different.
     // Change it back to make sure that we indeed cleared the cache for the path that we removed.
     rerender({ ...initialProps, paths: ["/topic.an_array[0]", "/topic.an_array[1]"] });
-    expect(result.current("/topic.an_array[1]", message)).not.toBe(data1);
-    expect(result.current("/topic.an_array[0]", message)).toBe(data0); // Another sanity check.
+    expect(result.current.getItems("/topic.an_array[1]", message)).not.toBe(data1);
+    expect(result.current.getItems("/topic.an_array[0]", message)).toBe(data0); // Another sanity check.
 
     // Invalidate cache with topics.
-    const data0BeforeProviderTopicsChange = result.current("/topic.an_array[0]", message);
+    const data0BeforeProviderTopicsChange = result.current.getItems("/topic.an_array[0]", message);
     rerender({ ...initialProps, topics: cloneDeep(initialTopics) });
-    expect(result.current("/topic.an_array[0]", message)).not.toBe(data0BeforeProviderTopicsChange);
+    expect(result.current.getItems("/topic.an_array[0]", message)).not.toBe(
+      data0BeforeProviderTopicsChange,
+    );
 
     // Invalidate cache with datatypes.
-    const data0BeforeDatatypesChange = result.current("/topic.an_array[0]", message);
+    const data0BeforeDatatypesChange = result.current.getItems("/topic.an_array[0]", message);
     rerender({ ...initialProps, datatypes: cloneDeep(initialDatatypes) });
-    expect(result.current("/topic.an_array[0]", message)).not.toBe(data0BeforeDatatypesChange);
+    expect(result.current.getItems("/topic.an_array[0]", message)).not.toBe(
+      data0BeforeDatatypesChange,
+    );
   });
 
   it("clears the cache only when relevant global variables change", async () => {
@@ -159,21 +152,21 @@ describe("useCachedGetMessagePathDataItems", () => {
       receiveTime: { sec: 0, nsec: 0 },
       message: { an_array: [5, 10, 15, 20] },
     };
-    const { result, setGlobalVariables } = setup(["/topic.an_array[$foo]"], { foo: 0 });
+    const { result } = setup(["/topic.an_array[$foo]"], { foo: 0 });
 
-    const data0 = result.current("/topic.an_array[$foo]", message);
+    const data0 = result.current.getItems("/topic.an_array[$foo]", message);
     expect(data0).toEqual([{ path: "/topic.an_array[0]", value: 5 }]);
 
     // Sanity check.
-    expect(result.current("/topic.an_array[$foo]", message)).toBe(data0);
+    expect(result.current.getItems("/topic.an_array[$foo]", message)).toBe(data0);
 
     // Changing an unrelated global variable should not invalidate the cache.
-    act(() => setGlobalVariables({ bar: 0 }));
-    expect(result.current("/topic.an_array[$foo]", message)).toBe(data0);
+    act(() => result.current.setGlobalVariables({ bar: 0 }));
+    expect(result.current.getItems("/topic.an_array[$foo]", message)).toBe(data0);
 
     // Changing a relevant global variable.
-    act(() => setGlobalVariables({ foo: 1 }));
-    expect(result.current("/topic.an_array[$foo]", message)).toEqual([
+    act(() => result.current.setGlobalVariables({ foo: 1 }));
+    expect(result.current.getItems("/topic.an_array[$foo]", message)).toEqual([
       { path: "/topic.an_array[1]", value: 10 },
     ]);
   });
@@ -826,16 +819,15 @@ describe("useDecodeMessagePathsForMessagesByTopic", () => {
         },
       }),
     );
-    const currentLayout = new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS);
     const { result } = renderHook((paths) => useDecodeMessagePathsForMessagesByTopic(paths), {
       initialProps: ["/topic1.value", "/topic2.value", "/topic3.value", "/topic3..value"],
       wrapper({ children }) {
         return (
-          <CurrentLayoutContext.Provider value={currentLayout}>
+          <MockCurrentLayoutProvider>
             <MockMessagePipelineProvider topics={topics} datatypes={datatypes}>
               {children}
             </MockMessagePipelineProvider>
-          </CurrentLayoutContext.Provider>
+          </MockCurrentLayoutProvider>
         );
       },
     });

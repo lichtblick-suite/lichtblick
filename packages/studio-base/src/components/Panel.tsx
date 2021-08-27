@@ -166,7 +166,7 @@ export default function Panel<Config extends PanelConfig>(
       updatePanelConfigs,
       createTabPanel,
       closePanel,
-      getCurrentLayoutState: getCurrentLayout,
+      getCurrentLayoutState,
     } = useCurrentLayoutActions();
 
     const [quickActionsKeyPressed, setQuickActionsKeyPressed] = useState(false);
@@ -206,7 +206,7 @@ export default function Panel<Config extends PanelConfig>(
     // If such a panel already exists, we update it with the new props.
     const openSiblingPanel = useCallback(
       async (panelType: string, siblingConfigCreator: (config: PanelConfig) => PanelConfig) => {
-        const panelsState = getCurrentLayout().selectedLayout?.data;
+        const panelsState = getCurrentLayoutState().selectedLayout?.data;
         if (!panelsState) {
           return;
         }
@@ -261,7 +261,7 @@ export default function Panel<Config extends PanelConfig>(
         });
       },
       [
-        getCurrentLayout,
+        getCurrentLayoutState,
         isMounted,
         mosaicActions,
         mosaicWindowActions,
@@ -308,7 +308,7 @@ export default function Panel<Config extends PanelConfig>(
     );
 
     const groupPanels = useCallback(() => {
-      const layout = getCurrentLayout().selectedLayout?.data.layout;
+      const layout = getCurrentLayoutState().selectedLayout?.data.layout;
       if (layout == undefined) {
         return;
       }
@@ -318,10 +318,10 @@ export default function Panel<Config extends PanelConfig>(
         idsToRemove: getSelectedPanelIds(),
         singleTab: true,
       });
-    }, [getCurrentLayout, getSelectedPanelIds, createTabPanel, childId]);
+    }, [getCurrentLayoutState, getSelectedPanelIds, createTabPanel, childId]);
 
     const createTabs = useCallback(() => {
-      const layout = getCurrentLayout().selectedLayout?.data.layout;
+      const layout = getCurrentLayoutState().selectedLayout?.data.layout;
       if (layout == undefined) {
         return;
       }
@@ -331,7 +331,7 @@ export default function Panel<Config extends PanelConfig>(
         idsToRemove: getSelectedPanelIds(),
         singleTab: false,
       });
-    }, [getCurrentLayout, getSelectedPanelIds, createTabPanel, childId]);
+    }, [getCurrentLayoutState, getSelectedPanelIds, createTabPanel, childId]);
 
     const removePanel = useCallback(() => {
       closePanel({
@@ -342,7 +342,7 @@ export default function Panel<Config extends PanelConfig>(
     }, [closePanel, mosaicActions, mosaicWindowActions, tabId]);
 
     const splitPanel = useCallback(() => {
-      const savedProps = getCurrentLayout().selectedLayout?.data.configById;
+      const savedProps = getCurrentLayoutState().selectedLayout?.data.configById;
       if (!savedProps) {
         return;
       }
@@ -372,7 +372,7 @@ export default function Panel<Config extends PanelConfig>(
       }
     }, [
       childId,
-      getCurrentLayout,
+      getCurrentLayoutState,
       mosaicWindowActions,
       panelComponentConfig,
       savePanelConfigs,

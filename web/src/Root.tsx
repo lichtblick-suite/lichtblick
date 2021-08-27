@@ -17,7 +17,7 @@ import {
 } from "@foxglove/studio-base";
 
 import LocalStorageAppConfigurationProvider from "./components/LocalStorageAppConfigurationProvider";
-import LocalStorageLayoutCacheProvider from "./components/LocalStorageLayoutCacheProvider";
+import LocalStorageLayoutStorageProvider from "./components/LocalStorageLayoutStorageProvider";
 import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
 
 const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo.bag";
@@ -70,7 +70,7 @@ export function Root({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }): JSX
     /* eslint-disable react/jsx-key */
     <StudioToastProvider />,
     <LocalStorageAppConfigurationProvider />,
-    <LocalStorageLayoutCacheProvider />,
+    <LocalStorageLayoutStorageProvider />,
     <UserProfileLocalStorageProvider />,
     <ExtensionLoaderProvider />,
     /* eslint-enable react/jsx-key */

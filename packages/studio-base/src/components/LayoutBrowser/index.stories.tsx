@@ -9,77 +9,79 @@ import { useAsync } from "react-use";
 import { AsyncState } from "react-use/lib/useAsyncFn";
 
 import AnalyticsProvider from "@foxglove/studio-base/context/AnalyticsProvider";
-import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
-import LayoutCacheContext, {
-  useLayoutCache,
-} from "@foxglove/studio-base/context/LayoutCacheContext";
+import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
+import LayoutStorageContext, {
+  useLayoutStorage,
+} from "@foxglove/studio-base/context/LayoutStorageContext";
 import ModalHost from "@foxglove/studio-base/context/ModalHost";
-import CacheOnlyLayoutStorageProvider from "@foxglove/studio-base/providers/CacheOnlyLayoutStorageProvider";
-import CurrentLayoutState, {
-  DEFAULT_LAYOUT_FOR_TESTS,
-} from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
+import { UserProfileStorageContext } from "@foxglove/studio-base/context/UserProfileStorageContext";
+import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
+import LayoutManagerProvider from "@foxglove/studio-base/providers/LayoutManagerProvider";
 import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
-import MockLayoutCache from "@foxglove/studio-base/services/MockLayoutCache";
+import LayoutManager from "@foxglove/studio-base/services/LayoutManager";
+import MockLayoutStorage from "@foxglove/studio-base/services/MockLayoutStorage";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 import delay from "@foxglove/studio-base/util/delay";
 
 import LayoutBrowser from "./index";
 
+const DEFAULT_LAYOUT_FOR_TESTS: PanelsState = {
+  configById: {},
+  globalVariables: {},
+  userNodes: {},
+  linkedGlobalVariables: [],
+  playbackConfig: defaultPlaybackConfig,
+};
+
 function WithSetup(Child: Story, ctx: StoryContext): JSX.Element {
   const storage = useMemo(
     () =>
-      new MockLayoutCache(
+      new MockLayoutStorage(
+        LayoutManager.LOCAL_STORAGE_NAMESPACE,
         ctx.parameters?.mockLayouts ?? [
           {
             id: "not-current",
             name: "Another Layout",
             path: ["some", "path"],
-            state: { ...DEFAULT_LAYOUT_FOR_TESTS, id: "not-current", name: "Another Layout" },
+            baseline: { data: DEFAULT_LAYOUT_FOR_TESTS, updatedAt: new Date(10).toISOString() },
           },
           {
             id: "test-id",
             name: "Current Layout",
             path: undefined,
-            state: { ...DEFAULT_LAYOUT_FOR_TESTS, id: "test-id", name: "Current Layout" },
+            baseline: { data: DEFAULT_LAYOUT_FOR_TESTS, updatedAt: new Date(10).toISOString() },
           },
           {
             id: "short-id",
             name: "Short",
             path: undefined,
-            state: { ...DEFAULT_LAYOUT_FOR_TESTS, id: "short-id", name: "Short" },
+            baseline: { data: DEFAULT_LAYOUT_FOR_TESTS, updatedAt: new Date(10).toISOString() },
           },
         ],
       ),
     [ctx.parameters?.mockLayouts],
   );
-  const currentLayout = useMemo(
-    () =>
-      new CurrentLayoutState({
-        selectedLayout: {
-          id: "test-id" as LayoutID,
-          data: {
-            configById: {},
-            globalVariables: {},
-            userNodes: {},
-            linkedGlobalVariables: [],
-            playbackConfig: defaultPlaybackConfig,
-          },
-        },
-      }),
+  const userProfile = useMemo(
+    () => ({
+      getUserProfile: async () => ({ currentLayoutId: "test-id" as LayoutID }),
+      setUserProfile: async () => {},
+    }),
     [],
   );
   return (
     <div style={{ display: "flex", height: 400 }}>
       <ModalHost>
         <AnalyticsProvider>
-          <CurrentLayoutContext.Provider value={currentLayout}>
-            <LayoutCacheContext.Provider value={storage}>
-              <CacheOnlyLayoutStorageProvider>
-                <Child />
-              </CacheOnlyLayoutStorageProvider>
-            </LayoutCacheContext.Provider>
-          </CurrentLayoutContext.Provider>
+          <UserProfileStorageContext.Provider value={userProfile}>
+            <LayoutStorageContext.Provider value={storage}>
+              <LayoutManagerProvider>
+                <CurrentLayoutProvider>
+                  <Child />
+                </CurrentLayoutProvider>
+              </LayoutManagerProvider>
+            </LayoutStorageContext.Provider>
+          </UserProfileStorageContext.Provider>
         </AnalyticsProvider>
       </ModalHost>
     </div>
@@ -208,9 +210,9 @@ export function CommitRenameWithSubmit(_args: unknown): JSX.Element {
     TestUtils.Simulate.submit(document.activeElement!);
   }, []);
 
-  const layoutCache = useLayoutCache();
+  const layoutStorage = useLayoutStorage();
   useEffect(() => {
-    void layoutCache.list().then((layouts) => {
+    void layoutStorage.list(LayoutManager.LOCAL_STORAGE_NAMESPACE).then((layouts) => {
       if (layouts.some((layout) => layout.name === "New name")) {
         readySignal();
       }
@@ -233,11 +235,11 @@ export function CommitRenameWithButton(_args: unknown): JSX.Element {
     document.querySelector<HTMLElement>(`[data-test="commit-rename"]`)!.click();
   }, []);
 
-  const layoutCache = useLayoutCache();
+  const layoutStorage = useLayoutStorage();
   const readySignal = useReadySignal();
 
   useEffect(() => {
-    void layoutCache.list().then((layouts) => {
+    void layoutStorage.list(LayoutManager.LOCAL_STORAGE_NAMESPACE).then((layouts) => {
       if (layouts.some((layout) => layout.name === "New name")) {
         readySignal();
       }
@@ -249,7 +251,7 @@ export function CommitRenameWithButton(_args: unknown): JSX.Element {
 
 Duplicate.parameters = { useReadySignal: true };
 export function Duplicate(_args: unknown): JSX.Element {
-  const layoutCache = useLayoutCache();
+  const layoutStorage = useLayoutStorage();
   const readySignal = useReadySignal();
 
   useAsyncThrowing(async () => {
@@ -259,12 +261,16 @@ export function Duplicate(_args: unknown): JSX.Element {
     document.querySelector<HTMLElement>(`[data-test="duplicate-layout"]`)!.click();
     await delay(10);
 
-    if ((await layoutCache.list()).some((layout) => layout.name === "Current Layout copy")) {
+    if (
+      (await layoutStorage.list(LayoutManager.LOCAL_STORAGE_NAMESPACE)).some(
+        (layout) => layout.name === "Current Layout copy",
+      )
+    ) {
       readySignal();
     } else {
       throw new Error("Duplicate failed");
     }
-  }, [readySignal, layoutCache]);
+  }, [readySignal, layoutStorage]);
 
   return <LayoutBrowser />;
 }
@@ -278,7 +284,7 @@ function DeleteStory({
   name: string;
   signal: () => void;
 }) {
-  const layoutCache = useLayoutCache();
+  const layoutStorage = useLayoutStorage();
   useAsyncThrowing(async () => {
     await delay(100);
     document.querySelectorAll<HTMLElement>(`[data-test="layout-actions"]`)[index]!.click();
@@ -288,12 +294,16 @@ function DeleteStory({
     document.querySelector<HTMLElement>(`button[type="submit"]`)!.click();
     await delay(10);
 
-    if (!(await layoutCache.list()).some((layout) => layout.name === name)) {
+    if (
+      !(await layoutStorage.list(LayoutManager.LOCAL_STORAGE_NAMESPACE)).some(
+        (layout) => layout.name === name,
+      )
+    ) {
       sig();
     } else {
       throw new Error("Delete failed");
     }
-  }, [sig, index, layoutCache, name]);
+  }, [sig, index, layoutStorage, name]);
 
   return <LayoutBrowser />;
 }
@@ -322,7 +332,7 @@ DeleteLastLayout.parameters = {
       id: "test-id",
       name: "Current Layout",
       path: undefined,
-      state: DEFAULT_LAYOUT_FOR_TESTS,
+      baseline: { data: DEFAULT_LAYOUT_FOR_TESTS, updatedAt: new Date(10).toISOString() },
     },
   ],
 };

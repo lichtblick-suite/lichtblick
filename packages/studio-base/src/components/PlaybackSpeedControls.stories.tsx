@@ -11,14 +11,10 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { storiesOf } from "@storybook/react";
-import { useMemo } from "react";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpeedControls";
-import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
-import CurrentLayoutState, {
-  DEFAULT_LAYOUT_FOR_TESTS,
-} from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
+import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 
 const CAPABILITIES = ["setSpeed", "playbackControl"];
 
@@ -41,42 +37,38 @@ function ControlsStory() {
 
 storiesOf("components/PlaybackSpeedControls", module)
   .add("without speed capability", () => {
-    const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
     return (
-      <CurrentLayoutContext.Provider value={currentLayout}>
+      <MockCurrentLayoutProvider>
         <MockMessagePipelineProvider>
           <ControlsStory />
         </MockMessagePipelineProvider>
-      </CurrentLayoutContext.Provider>
+      </MockCurrentLayoutProvider>
     );
   })
   .add("without a speed from the player", () => {
-    const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
     return (
-      <CurrentLayoutContext.Provider value={currentLayout}>
+      <MockCurrentLayoutProvider>
         <MockMessagePipelineProvider capabilities={CAPABILITIES} activeData={{ speed: undefined }}>
           <ControlsStory />
         </MockMessagePipelineProvider>
-      </CurrentLayoutContext.Provider>
+      </MockCurrentLayoutProvider>
     );
   })
   .add("with a speed", () => {
-    const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
     return (
-      <CurrentLayoutContext.Provider value={currentLayout}>
+      <MockCurrentLayoutProvider>
         <MockMessagePipelineProvider capabilities={CAPABILITIES}>
           <ControlsStory />
         </MockMessagePipelineProvider>
-      </CurrentLayoutContext.Provider>
+      </MockCurrentLayoutProvider>
     );
   })
   .add("with a very small speed", () => {
-    const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
     return (
-      <CurrentLayoutContext.Provider value={currentLayout}>
+      <MockCurrentLayoutProvider>
         <MockMessagePipelineProvider capabilities={CAPABILITIES} activeData={{ speed: 0.01 }}>
           <ControlsStory />
         </MockMessagePipelineProvider>
-      </CurrentLayoutContext.Provider>
+      </MockCurrentLayoutProvider>
     );
   });

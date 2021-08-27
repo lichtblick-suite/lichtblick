@@ -19,7 +19,7 @@ import {
 import { Desktop } from "../common/types";
 import NativeAppMenuProvider from "./components/NativeAppMenuProvider";
 import NativeStorageAppConfigurationProvider from "./components/NativeStorageAppConfigurationProvider";
-import NativeStorageLayoutCacheProvider from "./components/NativeStorageLayoutCacheProvider";
+import NativeStorageLayoutStorageProvider from "./components/NativeStorageLayoutStorageProvider";
 import ExtensionLoaderProvider from "./providers/ExtensionLoaderProvider";
 
 const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo.bag";
@@ -58,7 +58,7 @@ export default function Root(): ReactElement {
     /* eslint-disable react/jsx-key */
     <StudioToastProvider />,
     <NativeStorageAppConfigurationProvider />,
-    <NativeStorageLayoutCacheProvider />,
+    <NativeStorageLayoutStorageProvider />,
     <NativeAppMenuProvider />,
     <UserProfileLocalStorageProvider />,
     <ExtensionLoaderProvider />,

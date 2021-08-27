@@ -33,8 +33,6 @@ export default function ShortcutsModal({ onRequestClose }: Props): React.ReactEl
       <STitle>Global</STitle>
       <KeyboardShortcut description="Save layouts" keys={[COMMAND, "s"]} />
       <KeyboardShortcut description="Import/export layouts" keys={[COMMAND, "e"]} />
-      <KeyboardShortcut description="Undo changes" keys={[COMMAND, "z"]} />
-      <KeyboardShortcut description="Redo changes" keys={[COMMAND, SHIFT, "z"]} />
       <KeyboardShortcut description="Open a file" keys={[COMMAND, "o"]} />
       <KeyboardShortcut description="Add a second bag" keys={[COMMAND, SHIFT, "o"]} />
       <KeyboardShortcut description="Select all panels" keys={[COMMAND, "a"]} />

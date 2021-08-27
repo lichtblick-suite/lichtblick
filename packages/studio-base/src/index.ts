@@ -18,16 +18,9 @@ export type {
   AppConfigurationValue,
   ChangeHandler,
 } from "./context/AppConfigurationContext";
-export { default as LayoutCacheContext, useLayoutCache } from "./context/LayoutCacheContext";
-export type { CachedLayout, ILayoutCache } from "./services/ILayoutCache";
-export type {
-  Layout,
-  LayoutMetadata,
-  LayoutID,
-  UserID,
-  ISO8601Timestamp,
-  ILayoutStorage,
-} from "./services/ILayoutStorage";
+export { default as LayoutStorageContext, useLayoutStorage } from "./context/LayoutStorageContext";
+export type { Layout, LayoutID, ISO8601Timestamp, ILayoutStorage } from "./services/ILayoutStorage";
+export { migrateLayout } from "./services/ILayoutStorage";
 export { default as NativeAppMenuContext } from "./context/NativeAppMenuContext";
 export type { NativeAppMenu, NativeAppMenuEvent } from "./context/NativeAppMenuContext";
 export type { PlayerSourceDefinition } from "./context/PlayerSelectionContext";
@@ -39,18 +32,10 @@ export { default as UserProfileLocalStorageProvider } from "./providers/UserProf
 export { default as StudioToastProvider } from "./components/StudioToastProvider";
 export { default as ExtensionLoaderContext } from "./context/ExtensionLoaderContext";
 export type { ExtensionLoader, ExtensionInfo } from "./context/ExtensionLoaderContext";
-export { default as LayoutStorageContext } from "./context/LayoutStorageContext";
-export type {
-  RemoteLayout,
-  RemoteLayoutMetadata,
-  IRemoteLayoutStorage,
-} from "./services/IRemoteLayoutStorage";
-export { default as CacheOnlyLayoutStorage } from "./services/CacheOnlyLayoutStorage";
-export { default as CacheOnlyLayoutStorageProvider } from "./providers/CacheOnlyLayoutStorageProvider";
+export { default as LayoutManagerContext } from "./context/LayoutManagerContext";
 export { AppSetting } from "./AppSetting";
 export { useAppConfigurationValue } from "./hooks/useAppConfigurationValue";
 export type { PanelsState } from "./context/CurrentLayoutContext/actions";
-export { default as OfflineLayoutStorage } from "./services/OfflineLayoutStorage";
 export { default as LayoutStorageDebuggingContext } from "./context/LayoutStorageDebuggingContext";
 export { default as CssBaseline } from "./components/CssBaseline";
 export { default as GlobalCss } from "./components/GlobalCss";

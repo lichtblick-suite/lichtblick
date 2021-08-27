@@ -1,4 +1,3 @@
-/** @jest-environment jsdom */
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
@@ -11,14 +10,11 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { renderHook } from "@testing-library/react-hooks/dom";
+import { renderHook } from "@testing-library/react-hooks";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
-import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
-import CurrentLayoutState, {
-  DEFAULT_LAYOUT_FOR_TESTS,
-} from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
+import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 import { useLatestMessageDataItem } from "./useLatestMessageDataItem";
@@ -51,16 +47,15 @@ const fixtureMessages: MessageEvent<unknown>[] = [
 
 describe("useLatestMessageDataItem", () => {
   it("returns undefined by default", async () => {
-    const currentLayout = new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS);
     const { result } = renderHook(({ path }) => useLatestMessageDataItem(path), {
       initialProps: { path: "/topic.value" },
       wrapper({ children }) {
         return (
-          <CurrentLayoutContext.Provider value={currentLayout}>
+          <MockCurrentLayoutProvider>
             <MockMessagePipelineProvider topics={topics} datatypes={datatypes}>
               {children}
             </MockMessagePipelineProvider>
-          </CurrentLayoutContext.Provider>
+          </MockCurrentLayoutProvider>
         );
       },
     });
@@ -68,16 +63,15 @@ describe("useLatestMessageDataItem", () => {
   });
 
   it("uses the latest message", async () => {
-    const currentLayout = new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS);
     const { result, rerender } = renderHook(({ path }) => useLatestMessageDataItem(path), {
       initialProps: { path: "/topic.value", messages: [fixtureMessages[0]!] },
       wrapper({ children, messages }) {
         return (
-          <CurrentLayoutContext.Provider value={currentLayout}>
+          <MockCurrentLayoutProvider>
             <MockMessagePipelineProvider messages={messages} topics={topics} datatypes={datatypes}>
               {children}
             </MockMessagePipelineProvider>
-          </CurrentLayoutContext.Provider>
+          </MockCurrentLayoutProvider>
         );
       },
     });
@@ -93,12 +87,11 @@ describe("useLatestMessageDataItem", () => {
   });
 
   it("only keeps messages that match the path", async () => {
-    const currentLayout = new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS);
     const { result } = renderHook(({ path }) => useLatestMessageDataItem(path), {
       initialProps: { path: "/topic{value==1}.value" },
       wrapper({ children }) {
         return (
-          <CurrentLayoutContext.Provider value={currentLayout}>
+          <MockCurrentLayoutProvider>
             <MockMessagePipelineProvider
               messages={fixtureMessages}
               topics={topics}
@@ -106,7 +99,7 @@ describe("useLatestMessageDataItem", () => {
             >
               {children}
             </MockMessagePipelineProvider>
-          </CurrentLayoutContext.Provider>
+          </MockCurrentLayoutProvider>
         );
       },
     });
@@ -116,12 +109,11 @@ describe("useLatestMessageDataItem", () => {
   });
 
   it("changing the path gives the new queriedData from the message", async () => {
-    const currentLayout = new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS);
     const { result, rerender } = renderHook(({ path }) => useLatestMessageDataItem(path), {
       initialProps: { path: "/topic{value==1}.value" },
       wrapper({ children }) {
         return (
-          <CurrentLayoutContext.Provider value={currentLayout}>
+          <MockCurrentLayoutProvider>
             <MockMessagePipelineProvider
               messages={fixtureMessages}
               topics={topics}
@@ -129,7 +121,7 @@ describe("useLatestMessageDataItem", () => {
             >
               {children}
             </MockMessagePipelineProvider>
-          </CurrentLayoutContext.Provider>
+          </MockCurrentLayoutProvider>
         );
       },
     });

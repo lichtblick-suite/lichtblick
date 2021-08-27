@@ -13,16 +13,12 @@
 
 import DatabaseIcon from "@mdi/svg/svg/database.svg";
 import { storiesOf } from "@storybook/react";
-import { useMemo } from "react";
 import { Mosaic, MosaicWindow } from "react-mosaic-component";
 
 import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
 import Icon from "@foxglove/studio-base/components/Icon";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
-import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
-import CurrentLayoutState, {
-  DEFAULT_LAYOUT_FOR_TESTS,
-} from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
+import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 
 import PanelToolbar from "./index";
 
@@ -48,7 +44,7 @@ class MosaicWrapper extends React.Component<{
             </div>
           </MosaicWindow>
         )}
-        value={this.props.layout || "dummy"}
+        value={this.props.layout ?? "dummy"}
         className="none"
       />
     );
@@ -98,12 +94,11 @@ function KeepToolbarVisibleHack() {
 
 storiesOf("components/PanelToolbar", module)
   .addDecorator((childrenRenderFcn) => {
-    const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
     // Provide all stories with PanelContext and current layout
     return (
-      <CurrentLayoutContext.Provider value={currentLayout}>
+      <MockCurrentLayoutProvider>
         <MockPanelContextProvider>{childrenRenderFcn()}</MockPanelContextProvider>
-      </CurrentLayoutContext.Provider>
+      </MockCurrentLayoutProvider>
     );
   })
   .add("non-floating (narrow)", () => {

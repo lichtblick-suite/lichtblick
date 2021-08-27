@@ -12,7 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { flatten } from "lodash";
-import { ComponentProps, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { ComponentProps, useLayoutEffect, useRef, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Mosaic, MosaicNode, MosaicWindow } from "react-mosaic-component";
@@ -20,7 +20,7 @@ import { Mosaic, MosaicNode, MosaicWindow } from "react-mosaic-component";
 import { useShallowMemo } from "@foxglove/hooks";
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import AppConfigurationContext from "@foxglove/studio-base/context/AppConfigurationContext";
-import CurrentLayoutContext, {
+import {
   CurrentLayoutActions,
   SelectedPanelActions,
   useCurrentLayoutActions,
@@ -45,9 +45,7 @@ import {
   PublishPayload,
   AdvertiseOptions,
 } from "@foxglove/studio-base/players/types";
-import CurrentLayoutState, {
-  DEFAULT_LAYOUT_FOR_TESTS,
-} from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
+import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { PanelConfigSchemaEntry, SavedProps, UserNodes } from "@foxglove/studio-base/types/panels";
 
@@ -284,12 +282,11 @@ function UnconnectedPanelSetup(props: Props): JSX.Element | ReactNull {
 }
 
 export default function PanelSetup(props: Props): JSX.Element {
-  const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
   return (
     <UserNodeStateProvider>
-      <CurrentLayoutContext.Provider value={currentLayout}>
+      <MockCurrentLayoutProvider>
         <UnconnectedPanelSetup {...props} />
-      </CurrentLayoutContext.Provider>
+      </MockCurrentLayoutProvider>
     </UserNodeStateProvider>
   );
 }

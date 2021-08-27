@@ -185,7 +185,8 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
 
 export default function PanelLayout(): JSX.Element {
   const { changePanelLayout } = useCurrentLayoutActions();
-  const layout = useCurrentLayoutSelector((state) => state.selectedLayout?.data.layout);
+  const layoutLoading = useCurrentLayoutSelector((state) => state.loading);
+  const selectedLayout = useCurrentLayoutSelector((state) => state.selectedLayout);
   const onChange = useCallback(
     (newLayout: MosaicNode<string> | undefined) => {
       if (newLayout != undefined) {
@@ -194,5 +195,15 @@ export default function PanelLayout(): JSX.Element {
     },
     [changePanelLayout],
   );
-  return <UnconnectedPanelLayout layout={layout} onChange={onChange} />;
+  if (selectedLayout) {
+    return <UnconnectedPanelLayout layout={selectedLayout.data.layout} onChange={onChange} />;
+  } else if (layoutLoading === true) {
+    return (
+      <EmptyState>
+        <Spinner size={SpinnerSize.large} />
+      </EmptyState>
+    );
+  } else {
+    return <EmptyState>Select a layout in the sidebar to get started!</EmptyState>;
+  }
 }

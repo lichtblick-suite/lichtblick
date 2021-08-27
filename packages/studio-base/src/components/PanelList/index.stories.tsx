@@ -12,21 +12,17 @@
 //   You may not use this file except in compliance with the License.
 
 import { storiesOf } from "@storybook/react";
-import { useMemo } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import TestUtils from "react-dom/test-utils";
 
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelList from "@foxglove/studio-base/components/PanelList";
-import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
 import PanelCatalogContext, {
   PanelCatalog,
   PanelInfo,
 } from "@foxglove/studio-base/context/PanelCatalogContext";
-import CurrentLayoutState, {
-  DEFAULT_LAYOUT_FOR_TESTS,
-} from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
+import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 import { PanelConfigSchemaEntry } from "@foxglove/studio-base/types/panels";
 
 const SamplePanel1 = function () {
@@ -127,13 +123,10 @@ storiesOf("components/PanelList", module)
     },
   })
   .addDecorator((childrenRenderFcn) => {
-    const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
     return (
       <DndProvider backend={HTML5Backend}>
         <PanelCatalogContext.Provider value={new MockPanelCatalog()}>
-          <CurrentLayoutContext.Provider value={currentLayout}>
-            {childrenRenderFcn()}
-          </CurrentLayoutContext.Provider>
+          <MockCurrentLayoutProvider>{childrenRenderFcn()}</MockCurrentLayoutProvider>
         </PanelCatalogContext.Provider>
       </DndProvider>
     );

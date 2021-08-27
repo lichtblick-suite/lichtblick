@@ -167,16 +167,8 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
     role: "editMenu",
     label: "Edit",
     submenu: [
-      {
-        label: "Undo",
-        accelerator: "CommandOrControl+Z",
-        click: () => browserWindow.webContents.send("undo"),
-      },
-      {
-        label: "Redo",
-        accelerator: "CommandOrControl+Shift+Z",
-        click: () => browserWindow.webContents.send("redo"),
-      },
+      { role: "undo" },
+      { role: "redo" },
       { type: "separator" },
       { role: "cut" },
       { role: "copy" },

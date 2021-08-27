@@ -13,23 +13,19 @@
 
 import { action } from "@storybook/addon-actions";
 import { storiesOf } from "@storybook/react";
-import { useMemo } from "react";
 import TestUtils from "react-dom/test-utils";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import AppConfigurationContext, {
   AppConfiguration,
 } from "@foxglove/studio-base/context/AppConfigurationContext";
-import CurrentLayoutContext from "@foxglove/studio-base/context/CurrentLayoutContext";
 import {
   PlayerCapabilities,
   PlayerPresence,
   PlayerState,
   PlayerStateActiveData,
 } from "@foxglove/studio-base/players/types";
-import CurrentLayoutState, {
-  DEFAULT_LAYOUT_FOR_TESTS,
-} from "@foxglove/studio-base/providers/CurrentLayoutProvider/CurrentLayoutState";
+import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 
 import { UnconnectedPlaybackControls, useStyles } from ".";
 
@@ -73,17 +69,16 @@ function Wrapper({
   activeData?: PlayerStateActiveData;
   children: React.ReactNode;
 }) {
-  const currentLayout = useMemo(() => new CurrentLayoutState(DEFAULT_LAYOUT_FOR_TESTS), []);
   return (
     <AppConfigurationContext.Provider value={mockAppConfiguration}>
-      <CurrentLayoutContext.Provider value={currentLayout}>
+      <MockCurrentLayoutProvider>
         <MockMessagePipelineProvider
           capabilities={["setSpeed", "playbackControl"]}
           activeData={activeData}
         >
           <div style={{ padding: 20, margin: 100 }}>{children}</div>
         </MockMessagePipelineProvider>
-      </CurrentLayoutContext.Provider>
+      </MockCurrentLayoutProvider>
     </AppConfigurationContext.Provider>
   );
 }
