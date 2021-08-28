@@ -33,7 +33,7 @@ export type PlotChartPoint = {
 export type DataSet = ComponentProps<typeof TimeBasedChart>["data"]["datasets"][0];
 
 export type PlotDataByPath = {
-  [path: string]: readonly (readonly TooltipItem[])[];
+  [path: string]: TooltipItem[][];
 };
 
 // A "reference line" plot path is a numeric value. It creates a horizontal line on the plot at the specified value.

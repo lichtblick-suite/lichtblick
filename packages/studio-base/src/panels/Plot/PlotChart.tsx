@@ -13,7 +13,7 @@
 
 import { ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
-import { ComponentProps, memo, useMemo } from "react";
+import { ComponentProps, useMemo } from "react";
 import { useResizeDetector } from "react-resize-detector";
 
 import { filterMap } from "@foxglove/den/collection";
@@ -24,7 +24,6 @@ import TimeBasedChart, {
 } from "@foxglove/studio-base/components/TimeBasedChart";
 import { lineColors } from "@foxglove/studio-base/util/plotColors";
 
-import styles from "./PlotChart.module.scss";
 import { PlotXAxisVal } from "./index";
 import { PlotPath, isReferenceLinePlotPathType } from "./internalTypes";
 
@@ -66,7 +65,7 @@ type PlotChartProps = {
   defaultView?: ChartDefaultView;
   onClick?: TimeBasedChartProps["onClick"];
 };
-export default memo<PlotChartProps>(function PlotChart(props: PlotChartProps) {
+export default function PlotChart(props: PlotChartProps): JSX.Element {
   const {
     paths,
     currentTime,
@@ -113,7 +112,7 @@ export default memo<PlotChartProps>(function PlotChart(props: PlotChartProps) {
   }, [datasets]);
 
   return (
-    <div className={styles.root} ref={sizeRef}>
+    <div style={{ width: "100%", flexGrow: 1, overflow: "hidden" }} ref={sizeRef}>
       <TimeBasedChart
         key={xAxisVal}
         isSynced
@@ -132,4 +131,4 @@ export default memo<PlotChartProps>(function PlotChart(props: PlotChartProps) {
       />
     </div>
   );
-});
+}

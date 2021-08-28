@@ -15,7 +15,7 @@ import { compact, uniq } from "lodash";
 import memoizeWeak from "memoize-weak";
 import { useEffect, useCallback, useMemo, ComponentProps } from "react";
 
-import { useShallowMemo } from "@foxglove/hooks";
+import { filterMap } from "@foxglove/den/collection";
 import {
   Time,
   add as addTimes,
@@ -23,16 +23,16 @@ import {
   subtract as subtractTimes,
   toSec,
 } from "@foxglove/rostime";
-import {
-  useBlocksByTopic,
-  useDataSourceInfo,
-  useMessagesByTopic,
-} from "@foxglove/studio-base/PanelAPI";
+import { MessageEvent } from "@foxglove/studio";
+import { useBlocksByTopic, useMessageReducer } from "@foxglove/studio-base/PanelAPI";
 import { MessageBlock } from "@foxglove/studio-base/PanelAPI/useBlocksByTopic";
 import Flex from "@foxglove/studio-base/components/Flex";
-import { getTopicsFromPaths } from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
+import parseRosPath, {
+  getTopicsFromPaths,
+} from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import {
   MessageDataItemsByPath,
+  useCachedGetMessagePathDataItems,
   useDecodeMessagePathsForMessagesByTopic,
 } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import {
@@ -135,6 +135,10 @@ function getBlockItemsByPath(
   return ret;
 }
 
+function selectStartTime(ctx: MessagePipelineContext) {
+  return ctx.playerState.activeData?.startTime;
+}
+
 function selectCurrentTime(ctx: MessagePipelineContext) {
   return ctx.playerState.activeData?.currentTime;
 }
@@ -158,59 +162,16 @@ function Plot(props: Props) {
     xAxisVal,
     xAxisPath,
   } = config;
+
   useEffect(() => {
     if (yAxisPaths.length === 0) {
       saveConfig({ paths: [{ value: "", enabled: true, timestampMethod: "receiveTime" }] });
     }
-  });
+  }, [saveConfig, yAxisPaths.length]);
 
   const showSingleCurrentMessage = xAxisVal === "currentCustom" || xAxisVal === "index";
-  const historySize = showSingleCurrentMessage ? 1 : Infinity;
 
-  const allPaths = yAxisPaths.map(({ value }) => value).concat(compact([xAxisPath?.value]));
-  const memoizedPaths: string[] = useShallowMemo<string[]>(allPaths);
-  const subscribeTopics = useMemo(() => getTopicsFromPaths(memoizedPaths), [memoizedPaths]);
-  const messagesByTopic = useMessagesByTopic({
-    topics: subscribeTopics,
-    historySize,
-  });
-
-  const decodeMessagePathsForMessagesByTopic =
-    useDecodeMessagePathsForMessagesByTopic(memoizedPaths);
-
-  const streamedItemsByPath = useMemo(
-    () => getPlotDataByPath(decodeMessagePathsForMessagesByTopic(messagesByTopic)),
-    [decodeMessagePathsForMessagesByTopic, messagesByTopic],
-  );
-
-  const blocks = useBlocksByTopic(subscribeTopics);
-  const blockItemsByPath = useMemo(
-    () =>
-      showSingleCurrentMessage
-        ? {}
-        : getBlockItemsByPath(decodeMessagePathsForMessagesByTopic, blocks),
-    [showSingleCurrentMessage, decodeMessagePathsForMessagesByTopic, blocks],
-  );
-  const { startTime } = useDataSourceInfo();
-
-  // If every streaming key is in the blocks, just use the blocks object for a stable identity.
-  const mergedItems = useMemo(() => {
-    return Object.keys(streamedItemsByPath).every((path) => blockItemsByPath[path] != undefined)
-      ? blockItemsByPath
-      : { ...streamedItemsByPath, ...blockItemsByPath };
-  }, [blockItemsByPath, streamedItemsByPath]);
-
-  // Don't filter out disabled paths when passing into getDatasetsAndTooltips, because we still want
-  // easy access to the history when turning the disabled paths back on.
-  const { datasets, tooltips, pathsWithMismatchedDataLengths } = useMemo(
-    // TODO(steel): This memoization isn't quite ideal: getDatasetsAndTooltips is a bit expensive
-    // with lots of preloaded data, and when we preload a new block we re-generate the datasets for
-    // the whole timeline. We should try to use block memoization here.
-    () =>
-      getDatasetsAndTooltips(yAxisPaths, mergedItems, startTime ?? ZERO_TIME, xAxisVal, xAxisPath),
-    [yAxisPaths, mergedItems, startTime, xAxisVal, xAxisPath],
-  );
-
+  const startTime = useMessagePipeline(selectStartTime);
   const currentTime = useMessagePipeline(selectCurrentTime);
   const endTime = useMessagePipeline(selectEndTime);
   const seek = useMessagePipeline(selectSeek);
@@ -218,50 +179,165 @@ function Plot(props: Props) {
   // Min/max x-values and playback position indicator are only used for preloaded plots. In non-
   // preloaded plots min x-value is always the last seek time, and the max x-value is the current
   // playback time.
-  const timeToXValueForPreloading = (t?: Time): number | undefined => {
-    if (xAxisVal === "timestamp" && t && startTime) {
-      return toSec(subtractTimes(t, startTime));
+  const timeSincePreloadedStart = (time?: Time): number | undefined => {
+    if (xAxisVal === "timestamp" && time && startTime) {
+      return toSec(subtractTimes(time, startTime));
     }
     return undefined;
   };
-  const preloadingDisplayTime = timeToXValueForPreloading(currentTime);
-  const preloadingStartTime = timeToXValueForPreloading(startTime); // zero or undefined
-  const preloadingEndTime = timeToXValueForPreloading(endTime);
+
+  const currentTimeSinceStart = timeSincePreloadedStart(currentTime);
+
+  const followingView = useMemo<ChartDefaultView | undefined>(() => {
+    if (followingViewWidth != undefined && +followingViewWidth > 0) {
+      return { type: "following", width: +followingViewWidth };
+    }
+    return undefined;
+  }, [followingViewWidth]);
+
+  const endTimeSinceStart = timeSincePreloadedStart(endTime);
+  const fixedView = useMemo<ChartDefaultView | undefined>(() => {
+    if (xAxisVal === "timestamp" && startTime && endTimeSinceStart != undefined) {
+      return { type: "fixed", minXValue: 0, maxXValue: endTimeSinceStart };
+    }
+    return undefined;
+  }, [endTimeSinceStart, startTime, xAxisVal]);
+
+  // following view and fixed view are split to keep defaultView identity stable when possible
   const defaultView = useMemo<ChartDefaultView | undefined>(() => {
-    if (preloadingDisplayTime != undefined) {
-      // display time == end time when streamking data..., and start time was 0
-      // could use start time of 0 to indicate live stream?
-      if (followingViewWidth != undefined && +followingViewWidth > 0) {
-        // Will be ignored in TimeBasedChart for non-preloading plots and non-timestamp plots.
-        return { type: "following", width: +followingViewWidth };
-      } else if (preloadingStartTime != undefined && preloadingEndTime != undefined) {
-        return { type: "fixed", minXValue: preloadingStartTime, maxXValue: preloadingEndTime };
+    if (followingView) {
+      return followingView;
+    } else if (fixedView) {
+      return fixedView;
+    }
+    return undefined;
+  }, [fixedView, followingView]);
+
+  const allPaths = useMemo(() => {
+    return yAxisPaths.map(({ value }) => value).concat(compact([xAxisPath?.value]));
+  }, [xAxisPath?.value, yAxisPaths]);
+
+  const subscribeTopics = useMemo(() => getTopicsFromPaths(allPaths), [allPaths]);
+
+  const cachedGetMessagePathDataItems = useCachedGetMessagePathDataItems(allPaths);
+  const decodeMessagePathsForMessagesByTopic = useDecodeMessagePathsForMessagesByTopic(allPaths);
+
+  // When iterating message events, we need a reverse lookup from topic to the paths that requested
+  // the topic.
+  const topicToPaths = useMemo<Map<string, string[]>>(() => {
+    const out = new Map<string, string[]>();
+    for (const path of allPaths) {
+      const rosPath = parseRosPath(path);
+      if (!rosPath) {
+        continue;
       }
+      const existing = out.get(rosPath.topicName) ?? [];
+      existing.push(path);
+      out.set(rosPath.topicName, existing);
+    }
+    return out;
+  }, [allPaths]);
+
+  const restore = useCallback((): PlotDataByPath => {
+    return {};
+  }, []);
+
+  const addMessages = useCallback(
+    (accumulated: PlotDataByPath, msgEvents: readonly MessageEvent<unknown>[]) => {
+      for (const msgEvent of msgEvents) {
+        const paths = topicToPaths.get(msgEvent.topic);
+        if (!paths) {
+          continue;
+        }
+
+        for (const path of paths) {
+          const dataItem = cachedGetMessagePathDataItems(path, msgEvent);
+          if (!dataItem) {
+            continue;
+          }
+
+          const tooltipItem = getTooltipItemForMessageHistoryItem({
+            message: msgEvent,
+            queriedData: dataItem,
+          });
+
+          if (showSingleCurrentMessage) {
+            accumulated[path] = [[tooltipItem]];
+          } else {
+            const plotDataPath = (accumulated[path] ??= [[]]);
+            // PlotDataPaths have 2d arrays of tooltip items to accomodate blocks which may have gaps
+            // so each continuous set of blocks forms one set of tooltip items.
+            // For streaming messages we treat this as one continuous set of items and always add
+            // to the first "range"
+            plotDataPath[0]!.push(tooltipItem);
+          }
+        }
+      }
+
+      return { ...accumulated };
+    },
+    [cachedGetMessagePathDataItems, showSingleCurrentMessage, topicToPaths],
+  );
+
+  const plotDataByPath = useMessageReducer<PlotDataByPath>({
+    topics: subscribeTopics,
+    restore,
+    addMessages,
+  });
+
+  // filter down the message history to the follow window
+  const filteredPlotData = useMemo(() => {
+    if (followingView?.type !== "following" || currentTime == undefined) {
+      return plotDataByPath;
     }
 
-    return;
-  }, [followingViewWidth, preloadingDisplayTime, preloadingEndTime, preloadingStartTime]);
+    const filteredByPath: typeof plotDataByPath = {};
 
-  // filter the datasets down to only what is displayed for the default view
-  const filteredDatasets = useMemo(() => {
-    if (defaultView?.type === "following" && preloadingDisplayTime != undefined) {
-      const minX = preloadingDisplayTime - defaultView.width;
-      for (const dataset of datasets) {
-        // allow isNaN since chartjs treats these as breaks in the plot
-        dataset.data = dataset.data.filter((datum) => !datum || isNaN(datum.x) || datum?.x >= minX);
+    const minStamp = toSec(currentTime) - followingView.width;
+    for (const [path, plotDataItems] of Object.entries(plotDataByPath)) {
+      const newArr = [];
+      for (const tooltipArr of plotDataItems) {
+        const filtered = filterMap(tooltipArr, (tooltip) => {
+          if (toSec(tooltip.receiveTime) < minStamp) {
+            return undefined;
+          }
+          return tooltip;
+        });
+        if (filtered.length > 0) {
+          newArr.push(filtered);
+        }
       }
-    } else if (defaultView?.type === "fixed") {
-      const { minXValue, maxXValue } = defaultView;
-      for (const dataset of datasets) {
-        // allow isNaN since chartjs treats these as breaks in the plot
-        dataset.data.filter(
-          (datum) => !datum || isNaN(datum.x) || (datum.x >= minXValue && datum.x <= maxXValue),
-        );
-      }
+
+      filteredByPath[path] = newArr;
     }
+    return filteredByPath;
+  }, [currentTime, followingView, plotDataByPath]);
 
-    return datasets;
-  }, [datasets, defaultView, preloadingDisplayTime]);
+  const blocks = useBlocksByTopic(subscribeTopics);
+
+  // This memoization isn't quite ideal: getDatasetsAndTooltips is a bit expensive
+  // with lots of preloaded data, and when we preload a new block we re-generate the datasets for
+  // the whole timeline. We could try to use block memoization here.
+  const plotDataForBlocks = useMemo(() => {
+    if (showSingleCurrentMessage) {
+      return {};
+    }
+    return getBlockItemsByPath(decodeMessagePathsForMessagesByTopic, blocks);
+  }, [blocks, decodeMessagePathsForMessagesByTopic, showSingleCurrentMessage]);
+
+  // Keep disabled paths when passing into getDatasetsAndTooltips, because we still want
+  // easy access to the history when turning the disabled paths back on.
+  const { datasets, tooltips, pathsWithMismatchedDataLengths } = useMemo(() => {
+    const allPlotData = { ...filteredPlotData, ...plotDataForBlocks };
+
+    return getDatasetsAndTooltips(
+      yAxisPaths,
+      allPlotData,
+      startTime ?? ZERO_TIME,
+      xAxisVal,
+      xAxisPath,
+    );
+  }, [filteredPlotData, plotDataForBlocks, yAxisPaths, startTime, xAxisVal, xAxisPath]);
 
   const onClick = useCallback<NonNullable<ComponentProps<typeof PlotChart>["onClick"]>>(
     (params) => {
@@ -283,10 +359,10 @@ function Plot(props: Props) {
         paths={yAxisPaths}
         minYValue={parseFloat((minYValue ?? "")?.toString())}
         maxYValue={parseFloat((maxYValue ?? "")?.toString())}
-        datasets={filteredDatasets}
+        datasets={datasets}
         tooltips={tooltips}
         xAxisVal={xAxisVal}
-        currentTime={preloadingDisplayTime}
+        currentTime={currentTimeSinceStart}
         onClick={onClick}
         defaultView={defaultView}
       />
