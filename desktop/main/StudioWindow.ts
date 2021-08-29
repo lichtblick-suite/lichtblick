@@ -299,7 +299,7 @@ class StudioWindow {
 
     const id = browserWindow.webContents.id;
 
-    log.info(`New studio window ${id}`);
+    log.info(`New Foxglove Studio window ${id}`);
     StudioWindow.windowsByContentId.set(id, this);
 
     // when a window closes and it is the current application menu, clear the input sources

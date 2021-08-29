@@ -31,7 +31,7 @@ const features: Feature[] = [
   {
     key: AppSetting.SHOW_DEBUG_PANELS,
     name: "Studio Debug Panels",
-    description: <>Show Studio debug panels in the add panel list.</>,
+    description: <>Show Foxglove Studio debug panels in the add panel list.</>,
   },
   {
     key: AppSetting.ENABLE_DRAWING_POLYGONS,
@@ -46,7 +46,7 @@ const features: Feature[] = [
   {
     key: AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
     name: "Team Shared Layouts",
-    description: <>Enable team layout sharing when signed in to Studio.</>,
+    description: <>Enable team layout sharing when signed in to Foxglove Studio.</>,
   },
 ];
 

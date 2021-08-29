@@ -1,6 +1,6 @@
 # `@fluentui/react` quick start guide
 
-[Fluent UI](https://developer.microsoft.com/en-us/fluentui) is a React component library for building UIs. This guide is meant to provide some useful tips to help you be productive with Fluent UI while working on Studio.
+[Fluent UI](https://developer.microsoft.com/en-us/fluentui) is a React component library for building UIs. This guide is meant to provide some useful tips to help you be productive with Fluent UI while working on Foxglove Studio.
 
 Fluent UI is developed as a [monorepo](https://github.com/microsoft/fluentui) containing many sub-packages, but most functions and components are re-exported from the base `@fluentui/react` package.
 

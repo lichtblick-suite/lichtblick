@@ -34,8 +34,8 @@ const style: CSSProperties = {
 };
 
 // Looks at the regl stats and throws errors if it seems we're going over acceptable (arbitrary) max ranges.
-// The maxes are arbitrarily set to be an order of magnitude higher than the 'steady state' of a pretty loaded Studio scene to
-// allow for plenty of headroom.
+// The maxes are arbitrarily set to be an order of magnitude higher than the 'steady state' of a pretty loaded
+// Foxglove Studio scene to allow for plenty of headroom.
 function validate(stats: Stats) {
   if (stats.bufferCount > 500) {
     throw new Error(`Possible gl buffer leak detected. Buffer count: ${stats.bufferCount}`);

@@ -192,7 +192,7 @@ export default class BagDataProvider implements RandomAccessDataProvider {
     if (emptyConnections.length > 0) {
       sendNotification(
         "Empty connections found",
-        `This bag has some empty connections, which Studio does not currently support. We'll try to play the remaining topics. Details:\n\n${JSON.stringify(
+        `This bag has some empty connections, which Foxglove Studio does not currently support. We'll try to play the remaining topics. Details:\n\n${JSON.stringify(
           emptyConnections,
         )}`,
         "user",

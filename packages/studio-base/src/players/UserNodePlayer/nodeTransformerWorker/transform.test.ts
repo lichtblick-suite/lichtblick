@@ -198,7 +198,7 @@ describe("pipeline", () => {
       );
       expect(diagnostics[0]?.code).toEqual(ErrorCodes.Other.FILENAME);
     });
-    it.each(["const x: string = 'hello Studio'", "const num: number = 1222"])(
+    it.each(["const x: string = 'hello foxglove'", "const num: number = 1222"])(
       "can compile",
       (sourceCode) => {
         const { diagnostics } = compile({ ...baseNodeData, sourceCode });
@@ -264,7 +264,7 @@ describe("pipeline", () => {
 
     it.each([
       { sourceCode: "const x: string = 42;", errorCode: 2322 },
-      { sourceCode: "export const x: number = 'hello Studio';", errorCode: 2322 },
+      { sourceCode: "export const x: number = 'hello foxglove';", errorCode: 2322 },
       { sourceCode: "import { x } from './y'", errorCode: 2307 },
       { sourceCode: "const x: string = [];", errorCode: 2322 },
       {
@@ -335,13 +335,13 @@ describe("pipeline", () => {
       });
     });
 
-    it.each(["const x: string = 'hello Studio'"])("produces transpiled code", (sourceCode) => {
+    it.each(["const x: string = 'hello foxglove'"])("produces transpiled code", (sourceCode) => {
       const { transpiledCode, diagnostics } = compile({ ...baseNodeData, sourceCode });
       expect(typeof transpiledCode).toEqual("string");
       expect(diagnostics.length).toEqual(0);
     });
     it.each([
-      "const x: string = 'hello Studio'",
+      "const x: string = 'hello foxglove'",
       `
       import {norm} from "./pointClouds";
       const x = norm({x:1, y:2, z:3});
@@ -1312,7 +1312,7 @@ describe("pipeline", () => {
       {
         description: "Export a string as default export.",
         sourceCode: `
-          export default 'hello Studio';`,
+          export default 'hello foxglove';`,
         error: ErrorCodes.DatatypeExtraction.NON_FUNC_DEFAULT_EXPORT,
       },
       {

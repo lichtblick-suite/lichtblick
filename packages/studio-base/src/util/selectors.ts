@@ -75,7 +75,7 @@ export const constantsByDatatype = createSelector(
   },
 );
 
-// Studio enum annotations are of the form: "Foo__foxglove_enum" (notice double underscore)
+// Foxglove Studio enum annotations are of the form: "Foo__foxglove_enum" (notice double underscore)
 // This method returns type name from "Foo" or undefined name doesn't match this format
 export function extractTypeFromStudioEnumAnnotation(name: string): string | undefined {
   const match = /(.*)__(foxglove|webviz)_enum$/.exec(name);

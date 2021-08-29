@@ -51,7 +51,8 @@ const LogsSection = ({ nodeId, logs, clearLogs }: Props): ReactElement => {
       <>
         <p>No logs to display.</p>
         <p>
-          Invoke <code>log(someValue)</code> in your Studio node code to see data printed here.
+          Invoke <code>log(someValue)</code> in your Foxglove Studio node code to see data printed
+          here.
         </p>
       </>
     );

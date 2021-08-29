@@ -445,7 +445,7 @@ export default class SceneBuilder implements MarkerProvider {
       this.reportedErrorTopics.topicsWithBadFrameIds.add(topic);
       sendNotification(
         `Topic ${topic} has bad frame`,
-        "Non-root transforms may be out of sync, since Studio uses the latest transform message instead of the one matching header.stamp",
+        "Non-root transforms may be out of sync, since Foxglove Studio uses the latest transform message instead of the one matching header.stamp",
         "user",
         "warn",
       );

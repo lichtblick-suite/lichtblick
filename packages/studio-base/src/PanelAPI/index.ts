@@ -11,7 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-// This file contains hooks and components comprising the public API for Studio panel development.
+// This file contains hooks and components comprising the public API for
+// Foxglove Studio panel development.
 // Recommended use: import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 
 export { useDataSourceInfo } from "./useDataSourceInfo";

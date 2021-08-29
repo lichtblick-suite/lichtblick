@@ -599,8 +599,8 @@ function ImageView(props: Props) {
           onClick={() => saveConfig({ transformMarkers: !transformMarkers })}
           tooltip={
             transformMarkers
-              ? "Markers are being transformed by Studio based on the camera model. Click to turn it off."
-              : `Markers can be transformed by Studio based on the camera model. Click to turn it on.`
+              ? "Markers are being transformed by Foxglove Studio based on the camera model. Click to turn it off."
+              : `Markers can be transformed by Foxglove Studio based on the camera model. Click to turn it on.`
           }
           fade
           medium

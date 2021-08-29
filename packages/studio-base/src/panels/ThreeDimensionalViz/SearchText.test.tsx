@@ -129,7 +129,7 @@ describe("<SearchText />", () => {
     it("sets a custom highlight color to the correct index", async () => {
       const setSearchTextMatches = jest.fn();
       const markers = [
-        createMarker("hello Studio"),
+        createMarker("hello foxglove"),
         createMarker("hello past"),
         createMarker("hello future"),
       ];
