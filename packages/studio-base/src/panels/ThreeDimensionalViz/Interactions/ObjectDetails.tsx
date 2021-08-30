@@ -147,7 +147,7 @@ function ObjectDetailsInner({ interactionData, objectToDisplay }: Props) {
         labelRenderer={(markerKeyPath, _p1, _p2, hasChildren) => {
           const label = first(markerKeyPath);
           if (!hasChildren) {
-            return <span style={{ padding: "0 4px" }}>{label}</span>;
+            return <span style={{ padding: "0 4px 0 0" }}>{label}</span>;
           }
 
           let objectForPath: Record<string, unknown> | undefined = sortedDataObject;
