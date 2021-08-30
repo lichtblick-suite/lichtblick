@@ -61,7 +61,7 @@ export interface ICurrentLayout {
      */
     getCurrentLayoutState: () => LayoutState;
 
-    setSelectedLayoutId: (id: LayoutID) => void;
+    setSelectedLayoutId: (id: LayoutID | undefined) => void;
 
     savePanelConfigs: (payload: SaveConfigsPayload) => void;
     updatePanelConfigs: (panelType: string, updater: (config: PanelConfig) => PanelConfig) => void;

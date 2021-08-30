@@ -21,7 +21,6 @@ import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutStorageDebuggingContext";
 import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
-import welcomeLayout from "@foxglove/studio-base/layouts/welcomeLayout";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
 import { Layout } from "@foxglove/studio-base/services/ILayoutStorage";
@@ -121,18 +120,10 @@ export default function LayoutBrowser({
         setSelectedLayoutId(layout.id);
         return;
       }
-      // If no other layouts exist, use the welcome layout
-      // This call should probably be removed and consolidated with other calls to add the welcome layout:
-      // - https://github.com/foxglove/studio/issues/1545
-      // - https://github.com/foxglove/studio/pull/1575
-      const newLayout = await layoutStorage.saveNewLayout({
-        name: welcomeLayout.name,
-        data: welcomeLayout.data,
-        permission: "creator_write",
-      });
-      await onSelectLayout(newLayout);
+      // If no other layouts exist, just deselect the layout
+      setSelectedLayoutId(undefined);
     },
-    [analytics, currentLayoutId, layoutStorage, setSelectedLayoutId, onSelectLayout],
+    [analytics, currentLayoutId, layoutStorage, setSelectedLayoutId],
   );
 
   const createNewLayout = useCallback(async () => {
