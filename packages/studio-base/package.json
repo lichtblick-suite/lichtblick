@@ -34,7 +34,7 @@
     "@foxglove/hooks": "workspace:*",
     "@foxglove/ros1": "1.3.2",
     "@foxglove/rosbag": "0.1.1",
-    "@foxglove/rosbag2-web": "1.0.2",
+    "@foxglove/rosbag2-web": "1.0.3",
     "@foxglove/rosmsg": "2.0.0",
     "@foxglove/rosmsg-msgs-common": "1.0.2",
     "@foxglove/rosmsg-msgs-foxglove": "2.0.2",
