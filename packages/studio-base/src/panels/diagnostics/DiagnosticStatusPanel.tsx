@@ -155,10 +155,12 @@ function DiagnosticStatusPanel(props: Props) {
   );
 }
 
+const defaultConfig: Config = { topicToRender: DIAGNOSTIC_TOPIC, collapsedSections: [] };
+
 export default Panel(
   Object.assign(DiagnosticStatusPanel, {
     panelType: "DiagnosticStatusPanel",
-    defaultConfig: { topicToRender: DIAGNOSTIC_TOPIC, collapsedSections: [] },
+    defaultConfig,
     supportsStrictMode: false,
   }),
 );

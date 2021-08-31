@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import PanelSetup, { triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
+import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 
 import TwoDimensionalPlot from "./index";
 
@@ -127,15 +128,22 @@ export default {
   },
 };
 
-export const basic = (): JSX.Element => {
+Basic.parameters = { useReadySignal: true };
+export function Basic(): JSX.Element {
+  const readySignal = useReadySignal({ count: 1 });
   return (
     <PanelSetup fixture={fixture}>
-      <TwoDimensionalPlot overrideConfig={{ path: { value: "/plot_a.versions[0]" } }} />
+      <TwoDimensionalPlot
+        overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
+        onChartUpdate={readySignal}
+      />
     </PanelSetup>
   );
-};
+}
 
-export const customMinMaxWindow = (): JSX.Element => {
+CustomMinMaxWindow.parameters = { useReadySignal: true };
+export function CustomMinMaxWindow(): JSX.Element {
+  const readySignal = useReadySignal({ count: 1 });
   return (
     <PanelSetup fixture={fixture}>
       <TwoDimensionalPlot
@@ -146,30 +154,36 @@ export const customMinMaxWindow = (): JSX.Element => {
           minYVal: "0.5",
           maxYVal: "4.5",
         }}
+        onChartUpdate={readySignal}
       />
     </PanelSetup>
   );
-};
+}
 
-export const customMinMaxVal = (): JSX.Element => {
+CustomMinMaxVal.parameters = { useReadySignal: true };
+export function CustomMinMaxVal(): JSX.Element {
+  const readySignal = useReadySignal({ count: 1 });
   return (
     <PanelSetup fixture={fixture}>
       <TwoDimensionalPlot
         overrideConfig={{ path: { value: "/plot_a.versions[0]" }, maxYVal: "10" }}
+        onChartUpdate={readySignal}
       />
     </PanelSetup>
   );
-};
+}
 
-export const emptyTopic = (): JSX.Element => {
+export function EmptyTopic(): JSX.Element {
   return (
     <PanelSetup fixture={fixture}>
       <TwoDimensionalPlot overrideConfig={{ path: { value: "/plot_b" } }} />
     </PanelSetup>
   );
-};
+}
 
-export const withTooltip = (): JSX.Element => {
+WithTooltip.parameters = { useReadySignal: true };
+export function WithTooltip(): JSX.Element {
+  const readySignal = useReadySignal({ count: 1 });
   return (
     <div
       style={{ width: 300, height: 300 }}
@@ -185,13 +199,18 @@ export const withTooltip = (): JSX.Element => {
       }}
     >
       <PanelSetup fixture={fixture}>
-        <TwoDimensionalPlot overrideConfig={{ path: { value: "/plot_a.versions[0]" } }} />
+        <TwoDimensionalPlot
+          overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
+          onChartUpdate={readySignal}
+        />
       </PanelSetup>
     </div>
   );
-};
+}
 
-export const showResetAfterHorizontalZoom = (): JSX.Element => {
+ShowResetAfterHorizontalZoom.parameters = { useReadySignal: true };
+export function ShowResetAfterHorizontalZoom(): JSX.Element {
+  const readySignal = useReadySignal({ count: 1 });
   return (
     <PanelSetup
       fixture={fixture}
@@ -199,11 +218,16 @@ export const showResetAfterHorizontalZoom = (): JSX.Element => {
         setTimeout(zoomOut, 200);
       }}
     >
-      <TwoDimensionalPlot overrideConfig={{ path: { value: "/plot_a.versions[0]" } }} />
+      <TwoDimensionalPlot
+        overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
+        onChartUpdate={readySignal}
+      />
     </PanelSetup>
   );
-};
-export const showResetAfterVerticalZoom = (): JSX.Element => {
+}
+ShowResetAfterVerticalZoom.parameters = { useReadySignal: true };
+export function ShowResetAfterVerticalZoom(): JSX.Element {
+  const readySignal = useReadySignal({ count: 3 });
   return (
     <PanelSetup
       fixture={fixture}
@@ -214,11 +238,16 @@ export const showResetAfterVerticalZoom = (): JSX.Element => {
         );
       }}
     >
-      <TwoDimensionalPlot overrideConfig={{ path: { value: "/plot_a.versions[0]" } }} />
+      <TwoDimensionalPlot
+        overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
+        onChartUpdate={readySignal}
+      />
     </PanelSetup>
   );
-};
-export const showResetZoom = (): JSX.Element => {
+}
+ShowResetZoom.parameters = { useReadySignal: true };
+export function ShowResetZoom(): JSX.Element {
+  const readySignal = useReadySignal({ count: 3 });
   return (
     <PanelSetup
       fixture={fixture}
@@ -229,12 +258,17 @@ export const showResetZoom = (): JSX.Element => {
         );
       }}
     >
-      <TwoDimensionalPlot overrideConfig={{ path: { value: "/plot_a.versions[0]" } }} />
+      <TwoDimensionalPlot
+        overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
+        onChartUpdate={readySignal}
+      />
     </PanelSetup>
   );
-};
+}
 
-export const resetZoom = (): JSX.Element => {
+ResetZoom.parameters = { useReadySignal: true };
+export function ResetZoom(): JSX.Element {
+  const readySignal = useReadySignal({ count: 3 });
   return (
     <PanelSetup
       fixture={fixture}
@@ -248,7 +282,10 @@ export const resetZoom = (): JSX.Element => {
         }, 400);
       }}
     >
-      <TwoDimensionalPlot overrideConfig={{ path: { value: "/plot_a.versions[0]" } }} />
+      <TwoDimensionalPlot
+        overrideConfig={{ path: { value: "/plot_a.versions[0]" } }}
+        onChartUpdate={readySignal}
+      />
     </PanelSetup>
   );
-};
+}

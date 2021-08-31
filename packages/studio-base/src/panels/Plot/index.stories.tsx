@@ -20,7 +20,6 @@ import Plot, { PlotConfig } from "@foxglove/studio-base/panels/Plot";
 import { BlockCache } from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
 import PanelSetup, { triggerWheel } from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
-import useResumeCount from "@foxglove/studio-base/stories/useResumeCount";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
 const float64StampedDefinition = `std_msgs/Header header
@@ -333,7 +332,8 @@ export default {
 
 LineGraph.storyName = "line graph";
 export function LineGraph(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
       <Plot overrideConfig={exampleConfig} />
@@ -346,7 +346,8 @@ LineGraph.parameters = {
 
 LineGraphWithLegendsHidden.storyName = "line graph with legends hidden";
 export function LineGraphWithLegendsHidden(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
       <Plot overrideConfig={{ ...exampleConfig, showLegend: false }} />
@@ -360,7 +361,8 @@ LineGraphWithLegendsHidden.parameters = {
 InALineGraphWithMultiplePlotsXAxesAreSynced.storyName =
   "in a line graph with multiple plots, x-axes are synced";
 export function InALineGraphWithMultiplePlotsXAxesAreSynced(): JSX.Element {
-  const pauseFrame = useResumeCount(6);
+  const readySignal = useReadySignal({ count: 6 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame} style={{ flexDirection: "column" }}>
@@ -441,7 +443,8 @@ LineGraphAfterZoom.parameters = {
 
 TimestampMethodHeaderStamp.storyName = "timestampMethod: headerStamp";
 export function TimestampMethodHeaderStamp(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
       <Plot
@@ -466,7 +469,8 @@ TimestampMethodHeaderStamp.parameters = {
 
 LongPath.storyName = "long path";
 export function LongPath(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame} style={{ maxWidth: 250 }}>
@@ -491,7 +495,8 @@ LongPath.parameters = {
 
 DisabledPath.storyName = "disabled path";
 export function DisabledPath(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
@@ -521,7 +526,8 @@ DisabledPath.parameters = {
 
 ReferenceLine.storyName = "reference line";
 export function ReferenceLine(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
@@ -548,7 +554,8 @@ ReferenceLine.parameters = {
 
 WithMinAndMaxYValues.storyName = "with min and max Y values";
 export function WithMinAndMaxYValues(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
@@ -576,7 +583,8 @@ WithMinAndMaxYValues.parameters = {
 
 WithJustMinYValueLessThanMinimumValue.storyName = "with just min Y value less than minimum value";
 export function WithJustMinYValueLessThanMinimumValue(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
@@ -604,7 +612,8 @@ WithJustMinYValueLessThanMinimumValue.parameters = {
 
 WithJustMinYValueMoreThanMinimumValue.storyName = "with just min Y value more than minimum value";
 export function WithJustMinYValueMoreThanMinimumValue(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
@@ -632,7 +641,8 @@ WithJustMinYValueMoreThanMinimumValue.parameters = {
 
 WithJustMinYValueMoreThanMaximumValue.storyName = "with just min Y value more than maximum value";
 export function WithJustMinYValueMoreThanMaximumValue(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
@@ -660,7 +670,8 @@ WithJustMinYValueMoreThanMaximumValue.parameters = {
 
 WithJustMaxYValueLessThanMaximumValue.storyName = "with just max Y value less than maximum value";
 export function WithJustMaxYValueLessThanMaximumValue(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
@@ -688,7 +699,8 @@ WithJustMaxYValueLessThanMaximumValue.parameters = {
 
 WithJustMaxYValueMoreThanMaximumValue.storyName = "with just max Y value more than maximum value";
 export function WithJustMaxYValueMoreThanMaximumValue(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
@@ -716,7 +728,8 @@ WithJustMaxYValueMoreThanMaximumValue.parameters = {
 
 WithJustMaxYValueLessThanMinimumValue.storyName = "with just max Y value less than minimum value";
 export function WithJustMaxYValueLessThanMinimumValue(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
@@ -745,7 +758,8 @@ WithJustMaxYValueLessThanMinimumValue.parameters = {
 ScatterPlotPlusLineGraphPlusReferenceLine.storyName =
   "scatter plot plus line graph plus reference line";
 export function ScatterPlotPlusLineGraphPlusReferenceLine(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
@@ -776,7 +790,8 @@ ScatterPlotPlusLineGraphPlusReferenceLine.parameters = {
 
 IndexBasedXAxisForArray.storyName = "index-based x-axis for array";
 export function IndexBasedXAxisForArray(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
@@ -803,7 +818,8 @@ IndexBasedXAxisForArray.parameters = {
 
 CustomXAxisTopic.storyName = "custom x-axis topic";
 export function CustomXAxisTopic(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
@@ -830,7 +846,8 @@ CustomXAxisTopic.parameters = {
 
 CurrentCustomXAxisTopic.storyName = "current custom x-axis topic";
 export function CurrentCustomXAxisTopic(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   // As above, but just shows a single point instead of the whole line.
   return (
@@ -859,7 +876,8 @@ CurrentCustomXAxisTopic.parameters = {
 CustomXAxisTopicWithMismatchedDataLengths.storyName =
   "custom x-axis topic with mismatched data lengths";
 export function CustomXAxisTopicWithMismatchedDataLengths(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
@@ -897,7 +915,8 @@ CustomXAxisTopicWithMismatchedDataLengths.parameters = {
 
 SuperCloseValues.storyName = "super close values";
 export function SuperCloseValues(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup
@@ -948,7 +967,8 @@ SuperCloseValues.parameters = {
 
 TimeValues.storyName = "time values";
 export function TimeValues(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
@@ -975,7 +995,8 @@ TimeValues.parameters = {
 
 PreloadedDataInBinaryBlocks.storyName = "preloaded data in binary blocks";
 export function PreloadedDataInBinaryBlocks(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup pauseFrame={pauseFrame} fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
@@ -997,7 +1018,8 @@ PreloadedDataInBinaryBlocks.parameters = {
 
 MixedStreamedAndPreloadedData.storyName = "mixed streamed and preloaded data";
 export function MixedStreamedAndPreloadedData(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup pauseFrame={pauseFrame} fixture={withEndTime(fixture, { sec: 3, nsec: 0 })}>
@@ -1023,7 +1045,8 @@ MixedStreamedAndPreloadedData.parameters = {
 
 PreloadedDataAndItsDerivative.storyName = "preloaded data and its derivative";
 export function PreloadedDataAndItsDerivative(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup pauseFrame={pauseFrame} fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
@@ -1049,7 +1072,8 @@ PreloadedDataAndItsDerivative.parameters = {
 
 PreloadedDataAndItsNegative.storyName = "preloaded data and its negative";
 export function PreloadedDataAndItsNegative(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup pauseFrame={pauseFrame} fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>
@@ -1075,7 +1099,8 @@ PreloadedDataAndItsNegative.parameters = {
 
 PreloadedDataAndItsAbsoluteValue.storyName = "preloaded data and its absolute value";
 export function PreloadedDataAndItsAbsoluteValue(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
 
   return (
     <PanelSetup pauseFrame={pauseFrame} fixture={withEndTime(fixture, { sec: 2, nsec: 0 })}>

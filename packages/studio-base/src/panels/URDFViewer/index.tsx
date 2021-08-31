@@ -40,6 +40,11 @@ export type Props = {
 
 const DEFAULT_DISTANCE = 5;
 
+const defaultConfig: Config = {
+  jointStatesTopic: "/joint_states",
+  opacity: 0.75,
+};
+
 function URDFViewer({ config, saveConfig }: Props) {
   const { customJointValues, jointStatesTopic, opacity } = config;
   const [canvas, setCanvas] = useState<HTMLCanvasElement | ReactNull>(ReactNull);
@@ -198,8 +203,7 @@ function URDFViewer({ config, saveConfig }: Props) {
             checked={!useCustomJointValues}
             onChange={(_event, checked) =>
               saveConfig({
-                jointStatesTopic:
-                  checked ?? false ? URDFViewer.defaultConfig.jointStatesTopic : undefined,
+                jointStatesTopic: checked ?? false ? defaultConfig.jointStatesTopic : undefined,
               })
             }
           />
@@ -265,9 +269,9 @@ function URDFViewer({ config, saveConfig }: Props) {
   );
 }
 
-URDFViewer.panelType = "URDFViewer";
-URDFViewer.defaultConfig = {
-  jointStatesTopic: "/joint_states",
-  opacity: 0.75,
-};
-export default Panel(URDFViewer);
+export default Panel(
+  Object.assign(URDFViewer, {
+    panelType: "URDFViewer",
+    defaultConfig,
+  }),
+);

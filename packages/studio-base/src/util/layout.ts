@@ -264,7 +264,7 @@ export function getPanelIdsInsideTabPanels(panelIds: string[], savedProps: Saved
   return flatMap(tabLayouts, getLeaves);
 }
 
-export const DEFAULT_TAB_PANEL_CONFIG = {
+export const DEFAULT_TAB_PANEL_CONFIG: TabPanelConfig = {
   activeTabIdx: 0,
   tabs: [{ title: "1", layout: undefined }],
 };

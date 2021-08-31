@@ -83,7 +83,11 @@ type Config = {
   maxYVal?: string;
   pointRadiusOverride?: string;
 };
-type Props = { config: Config; saveConfig: (arg0: Partial<Config>) => void };
+type Props = {
+  config: Config;
+  saveConfig: (arg0: Partial<Config>) => void;
+  onChartUpdate?: () => void;
+};
 export type Line = {
   order?: number;
   label: string;
@@ -123,7 +127,7 @@ export type PlotMessage = {
 };
 
 function TwoDimensionalPlot(props: Props) {
-  const { config, saveConfig } = props;
+  const { config, saveConfig, onChartUpdate } = props;
   const { path, minXVal, maxXVal, minYVal, maxYVal, pointRadiusOverride } = config;
   const [hasUserPannedOrZoomed, setHasUserPannedOrZoomed] = React.useState<boolean>(false);
   const [hasVerticalExclusiveZoom, setHasVerticalExclusiveZoom] = React.useState<boolean>(false);
@@ -425,6 +429,7 @@ function TwoDimensionalPlot(props: Props) {
             onScalesUpdate={onScaleBoundsUpdate}
             onHover={onHover}
             data={{ datasets }}
+            onChartUpdate={onChartUpdate}
           />
           {hasUserPannedOrZoomed && (
             <SResetZoom>
@@ -440,7 +445,11 @@ function TwoDimensionalPlot(props: Props) {
   );
 }
 
-TwoDimensionalPlot.panelType = "TwoDimensionalPlot";
-TwoDimensionalPlot.defaultConfig = { path: { value: "" } };
+const defaultConfig: Config = { path: { value: "" } };
 
-export default Panel<Config>(TwoDimensionalPlot);
+export default Panel(
+  Object.assign(TwoDimensionalPlot, {
+    panelType: "TwoDimensionalPlot",
+    defaultConfig,
+  }),
+);

@@ -391,16 +391,18 @@ const configSchema: PanelConfigSchema<PlotConfig> = [
   },
 ];
 
+const defaultConfig: PlotConfig = {
+  paths: [{ value: "", enabled: true, timestampMethod: "receiveTime" }],
+  minYValue: "",
+  maxYValue: "",
+  showLegend: true,
+  xAxisVal: "timestamp",
+};
+
 export default Panel(
   Object.assign(Plot, {
     panelType: "Plot",
-    defaultConfig: {
-      paths: [{ value: "", enabled: true, timestampMethod: "receiveTime" as const }],
-      minYValue: "",
-      maxYValue: "",
-      showLegend: true,
-      xAxisVal: "timestamp" as const,
-    },
+    defaultConfig,
     supportsStrictMode: false,
     configSchema,
   }),

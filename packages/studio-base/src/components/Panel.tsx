@@ -44,6 +44,7 @@ import {
 import { useMountedState } from "react-use";
 import styled from "styled-components";
 
+import { useShallowMemo } from "@foxglove/hooks";
 import { useConfigById } from "@foxglove/studio-base/PanelAPI";
 import Button from "@foxglove/studio-base/components/Button";
 import ErrorBoundary, { ErrorRendererProps } from "@foxglove/studio-base/components/ErrorBoundary";
@@ -128,15 +129,14 @@ function ErrorToolbar(errorProps: ErrorRendererProps): JSX.Element {
 //
 // `config` comes from the current layout, but in stories / tests you can pass in your own:
 //   `<MyPanel config={…} />`
-export default function Panel<Config extends PanelConfig>(
-  PanelComponent: ComponentConstructorType<{
-    config: Config;
-    saveConfig: SaveConfig<Config>;
-  }> &
-    PanelStatics<Config>,
-): ComponentType<Props<Config>> & PanelStatics<Config> {
+export default function Panel<
+  Config extends PanelConfig,
+  PanelProps extends { config: Config; saveConfig: SaveConfig<Config> },
+>(
+  PanelComponent: ComponentConstructorType<PanelProps> & PanelStatics<Config>,
+): ComponentType<Props<Config> & Omit<PanelProps, "config" | "saveConfig">> & PanelStatics<Config> {
   function ConnectedPanel(props: Props<Config>) {
-    const { childId, overrideConfig, tabId } = props;
+    const { childId, overrideConfig, tabId, ...otherProps } = props;
 
     const isMounted = useMountedState();
 
@@ -437,10 +437,15 @@ export default function Panel<Config extends PanelConfig>(
       onReleaseQuickActionsKey();
     }, [exitFullScreen, onReleaseQuickActionsKey]);
 
-    const child = useMemo(
-      () => <PanelComponent config={panelComponentConfig} saveConfig={saveConfig} />,
-      [panelComponentConfig, saveConfig],
+    const otherPanelProps = useShallowMemo(otherProps);
+    const childProps = useMemo(
+      // We have to lie to TypeScript with "as PanelProps" because the "PanelProps extends {...}"
+      // constraint technically allows the panel to require the types of config/saveConfig be more
+      // specific types that aren't satisfied by the functions we pass in
+      () => ({ config: panelComponentConfig, saveConfig, ...otherPanelProps } as PanelProps),
+      [otherPanelProps, panelComponentConfig, saveConfig],
     );
+    const child = useMemo(() => <PanelComponent {...childProps} />, [childProps]);
 
     const renderCount = useRef(0);
 

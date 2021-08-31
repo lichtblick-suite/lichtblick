@@ -11,10 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useCallback } from "react";
 import TestUtils from "react-dom/test-utils";
 
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
-import useResumeCount from "@foxglove/studio-base/stories/useResumeCount";
+import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 
 import StateTransitions from "./index";
 
@@ -99,7 +100,8 @@ export default {
 
 OnePath.parameters = { useReadySignal: true };
 export function OnePath(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
       <StateTransitions
@@ -113,7 +115,8 @@ export function OnePath(): JSX.Element {
 
 MultiplePaths.parameters = { useReadySignal: true };
 export function MultiplePaths(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
       <StateTransitions
@@ -130,7 +133,8 @@ export function MultiplePaths(): JSX.Element {
 
 MultiplePathsWithHover.parameters = { useReadySignal: true };
 export function MultiplePathsWithHover(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
     <PanelSetup
       fixture={fixture}
@@ -157,7 +161,8 @@ export function MultiplePathsWithHover(): JSX.Element {
 
 LongPath.parameters = { useReadySignal: true };
 export function LongPath(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame} style={{ maxWidth: 100 }}>
       <StateTransitions
@@ -171,7 +176,8 @@ export function LongPath(): JSX.Element {
 
 JsonPath.parameters = { useReadySignal: true };
 export function JsonPath(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
     <PanelSetup fixture={fixture} pauseFrame={pauseFrame}>
       <StateTransitions
@@ -188,7 +194,8 @@ WithAHoveredTooltip.parameters = {
   useReadySignal: true,
 };
 export function WithAHoveredTooltip(): JSX.Element {
-  const pauseFrame = useResumeCount(3);
+  const readySignal = useReadySignal({ count: 3 });
+  const pauseFrame = useCallback(() => readySignal, [readySignal]);
   return (
     <PanelSetup
       fixture={fixture}

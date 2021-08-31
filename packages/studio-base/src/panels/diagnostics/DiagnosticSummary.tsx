@@ -228,15 +228,16 @@ const configSchema: PanelConfigSchema<Config> = [
   { key: "sortByLevel", type: "toggle", title: "Sort by level" },
 ];
 
+const defaultConfig: Config = {
+  pinnedIds: [],
+  hardwareIdFilter: "",
+  topicToRender: DIAGNOSTIC_TOPIC,
+  sortByLevel: true,
+};
 export default Panel(
   Object.assign(DiagnosticSummary, {
     panelType: "DiagnosticSummary",
-    defaultConfig: {
-      pinnedIds: [],
-      hardwareIdFilter: "",
-      topicToRender: DIAGNOSTIC_TOPIC,
-      sortByLevel: true,
-    },
+    defaultConfig,
     supportsStrictMode: false,
     configSchema,
   }),

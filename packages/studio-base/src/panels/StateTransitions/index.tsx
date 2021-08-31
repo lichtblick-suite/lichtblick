@@ -453,10 +453,11 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   );
 });
 
+const defaultConfig: PanelConfig = { paths: [] };
 export default Panel(
   Object.assign(StateTransitions, {
     panelType: "StateTransitions",
-    defaultConfig: { paths: [] },
+    defaultConfig,
     supportsStrictMode: false,
   }),
 );

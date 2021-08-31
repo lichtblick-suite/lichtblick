@@ -586,14 +586,18 @@ function RawMessages(props: Props) {
   );
 }
 
-RawMessages.defaultConfig = {
+const defaultConfig: RawMessagesConfig = {
   topicPath: "",
   diffTopicPath: "",
-  diffMethod: CUSTOM_METHOD as typeof CUSTOM_METHOD,
+  diffMethod: CUSTOM_METHOD,
   diffEnabled: false,
   showFullMessageForDiff: false,
 };
-RawMessages.panelType = "RawMessages";
-RawMessages.supportsStrictMode = false;
 
-export default Panel(RawMessages);
+export default Panel(
+  Object.assign(RawMessages, {
+    panelType: "RawMessages",
+    defaultConfig,
+    supportsStrictMode: false,
+  }),
+);
