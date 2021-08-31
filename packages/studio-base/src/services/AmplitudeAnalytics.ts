@@ -9,7 +9,11 @@ import { v4 as uuidv4 } from "uuid";
 
 import Logger from "@foxglove/log";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
-import IAnalytics, { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
+import IAnalytics, {
+  AppEvent,
+  getEventBreadcrumbType,
+  getEventCategory,
+} from "@foxglove/studio-base/services/IAnalytics";
 import Storage from "@foxglove/studio-base/util/Storage";
 
 const UUID_ZERO = "00000000-0000-0000-0000-000000000000";
@@ -101,8 +105,9 @@ export class AmplitudeAnalytics implements IAnalytics {
     // important that this happens after await amplitude (after setSentryUser() call)
     if (this._crashReporting) {
       addSentryBreadcrumb({
-        type: "user",
-        category: event,
+        type: getEventBreadcrumbType(event),
+        category: `studio.${getEventCategory(event).toLowerCase()}`,
+        message: event,
         level: Severity.Info,
         data,
         timestamp: Date.now() / 1000,

@@ -192,16 +192,18 @@ export default function LayoutBrowser({
     async (item: Layout) => {
       // CurrentLayoutProvider automatically updates in its layout change listener
       await layoutStorage.overwriteLayout({ id: item.id });
+      void analytics.logEvent(AppEvent.LAYOUT_OVERWRITE);
     },
-    [layoutStorage],
+    [analytics, layoutStorage],
   );
 
   const onRevertLayout = useCallback(
     async (item: Layout) => {
       // CurrentLayoutProvider automatically updates in its layout change listener
       await layoutStorage.revertLayout({ id: item.id });
+      void analytics.logEvent(AppEvent.LAYOUT_REVERT);
     },
-    [layoutStorage],
+    [analytics, layoutStorage],
   );
 
   const importLayout = useCallback(async () => {
