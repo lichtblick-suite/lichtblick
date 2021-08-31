@@ -2,16 +2,17 @@ diff --git a/dist/esm/client/preview/render.js b/dist/esm/client/preview/render.
 index 5883ed6c7e9db640cd8f209a3b840efb1d54c6a7..03c377000bdc7eb620c2f9107a2635e820d69247 100644
 --- a/dist/esm/client/preview/render.js
 +++ b/dist/esm/client/preview/render.js
-@@ -44,9 +44,12 @@ var document = global.document,
+@@ -44,9 +44,13 @@ var document = global.document,
      FRAMEWORK_OPTIONS = global.FRAMEWORK_OPTIONS;
  var rootEl = document ? document.getElementById('root') : null;
 
 -var render = function render(node, el) {
 +var render = function render(node, el, storyContext) {
-+  var maybeSignal = storyContext.parameters?.storyReady;
    return new Promise(function (resolve) {
 -    ReactDOM.render(node, el, resolve);
 +    ReactDOM.render(node, el, () => {
++      // access the parameters in the render callback to allow decorators to set storyReady
++      var maybeSignal = storyContext.parameters?.storyReady;
 +      maybeSignal ? maybeSignal.then(resolve) : resolve();
 +    });
    });
