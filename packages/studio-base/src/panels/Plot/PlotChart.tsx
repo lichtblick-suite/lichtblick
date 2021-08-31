@@ -55,6 +55,7 @@ function getAnnotations(paths: PlotPath[]) {
 }
 
 type PlotChartProps = {
+  isSynced: boolean;
   paths: PlotPath[];
   minYValue: number;
   maxYValue: number;
@@ -74,6 +75,7 @@ export default function PlotChart(props: PlotChartProps): JSX.Element {
     maxYValue,
     datasets,
     onClick,
+    isSynced,
     tooltips,
     xAxisVal,
   } = props;
@@ -115,7 +117,7 @@ export default function PlotChart(props: PlotChartProps): JSX.Element {
     <div style={{ width: "100%", flexGrow: 1, overflow: "hidden" }} ref={sizeRef}>
       <TimeBasedChart
         key={xAxisVal}
-        isSynced
+        isSynced={isSynced}
         zoom
         width={width ?? 0}
         height={height ?? 0}

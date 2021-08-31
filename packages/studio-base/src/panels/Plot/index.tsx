@@ -356,6 +356,7 @@ function Plot(props: Props) {
     <Flex col clip center style={{ position: "relative" }}>
       <PanelToolbar helpContent={helpContent} floating />
       <PlotChart
+        isSynced={xAxisVal === "timestamp"}
         paths={yAxisPaths}
         minYValue={parseFloat((minYValue ?? "")?.toString())}
         maxYValue={parseFloat((maxYValue ?? "")?.toString())}
