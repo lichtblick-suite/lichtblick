@@ -1,6 +1,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
+import { isEqual } from "lodash";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getNodeAtPath } from "react-mosaic-component";
 import { useToasts } from "react-toast-notifications";
@@ -155,6 +156,14 @@ export default function CurrentLayoutProvider({
       ) {
         return;
       }
+      const oldData = layoutStateRef.current.selectedLayout.data;
+      const newData = panelsReducer(layoutStateRef.current.selectedLayout.data, action);
+
+      // the panel state did not change, so no need to perform layout state updates or layout manager updates
+      if (isEqual(oldData, newData)) {
+        return;
+      }
+
       const newLayout = {
         id: layoutStateRef.current.selectedLayout.id,
         data: panelsReducer(layoutStateRef.current.selectedLayout.data, action),

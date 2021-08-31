@@ -89,28 +89,35 @@ function changePanelLayout(
 
 function savePanelConfigs(state: PanelsState, payload: SaveConfigsPayload): PanelsState {
   const { configs } = payload;
-  // imutable update of key/value pairs
-  const newSavedProps = configs.reduce(
+  const prevConfigById = state.configById;
+
+  // create a configById object with new configs merged on top of previous configs
+  //
+  // Note: If no configs are changed, the return value of newConfigById is the same as the state input
+  //       This keeps the state object unchagned if the configs values did not change.
+  const newConfigById = configs.reduce(
     (currentSavedProps, { id, config, defaultConfig = {}, override = false }) => {
-      return override
-        ? { ...currentSavedProps, [id]: config }
-        : {
-            ...currentSavedProps,
-            [id]: {
-              // merge new config with old one
-              // similar to how this.setState merges props
-              // When updating the panel state, we merge the new config (which may be just a part of config) with the old config and the default config every time.
-              // Previously this was done inside the component, but since the lifecycle is Action => Reducer => new state => Component,
-              // dispatching an update to the panel state is not instant and can take some time to propagate back to the component.
-              // If the existing panel config is the complete config1, and two actions were fired in quick succession the component with partial config2 and config3,
-              // the correct behavior is to merge config2 with config1 and dispatch that, and then merge config 3 with the combined config2 and config1.
-              // Instead we had stale state so we would merge config3 with config1 and overwrite any keys that exist in config2 but do not exist in config3.
-              // The solution is to do this merge inside the reducer itself, since the state inside the reducer is never stale (unlike the state inside the component).
-              ...defaultConfig,
-              ...currentSavedProps[id],
-              ...config,
-            },
-          };
+      if (override) {
+        return { ...currentSavedProps, [id]: config };
+      }
+
+      const oldConfig = currentSavedProps[id];
+      const newConfig = {
+        // merge the partial new config with the default config and the old config
+        // any entries in the new config can override default config and previous config entries
+        ...defaultConfig,
+        ...currentSavedProps[id],
+        ...config,
+      };
+
+      // if the new config is unchanged, return currentSavedProps to keep same object
+      // keeping the same object around is useful for upstream consumers of state which look at changes
+      // in object reference to mean the object changed
+      if (isEqual(oldConfig, newConfig)) {
+        return currentSavedProps;
+      }
+
+      return { ...currentSavedProps, [id]: newConfig };
     },
     state.configById,
   );
@@ -118,12 +125,17 @@ function savePanelConfigs(state: PanelsState, payload: SaveConfigsPayload): Pane
   if (tabPanelConfigSaved) {
     // eslint-disable-next-line no-restricted-syntax
     const panelIds = getLeaves(state.layout ?? null);
-    const panelIdsInsideTabPanels = getPanelIdsInsideTabPanels(panelIds, newSavedProps);
+    const panelIdsInsideTabPanels = getPanelIdsInsideTabPanels(panelIds, newConfigById);
     // Filter savedProps in case a panel was removed from a Tab layout
     // We don't want its savedProps hanging around forever
-    return { ...state, configById: pick(newSavedProps, [...panelIdsInsideTabPanels, ...panelIds]) };
+    return { ...state, configById: pick(newConfigById, [...panelIdsInsideTabPanels, ...panelIds]) };
   }
-  return { ...state, configById: newSavedProps };
+
+  // if none of the configs changed, then we keep the same state object
+  if (prevConfigById === newConfigById) {
+    return state;
+  }
+  return { ...state, configById: newConfigById };
 }
 
 function saveFullPanelConfig(state: PanelsState, payload: SaveFullConfigPayload): PanelsState {
@@ -743,34 +755,33 @@ const endDrag = (panelsState: PanelsState, dragPayload: EndDragPayload): PanelsS
   return { ...panelsState, layout: originalLayout, configById: originalSavedProps };
 };
 
-export default function (panelsState: PanelsState, action: PanelsActions): PanelsState {
-  let newPanelsState = { ...panelsState };
+export default function (panelsState: Readonly<PanelsState>, action: PanelsActions): PanelsState {
+  // start the newPanelsState as the current panels state so if there are no changes the identity
+  // of the panels state object remains the same
   switch (action.type) {
     case "CHANGE_PANEL_LAYOUT":
-      newPanelsState = changePanelLayout(newPanelsState, action.payload);
-      break;
+      return changePanelLayout(panelsState, action.payload);
 
     case "SAVE_PANEL_CONFIGS":
-      newPanelsState = savePanelConfigs(newPanelsState, action.payload);
-      break;
+      return savePanelConfigs(panelsState, action.payload);
 
     case "SAVE_FULL_PANEL_CONFIG":
-      newPanelsState = saveFullPanelConfig(newPanelsState, action.payload);
-      break;
+      return saveFullPanelConfig(panelsState, action.payload);
 
     case "CREATE_TAB_PANEL":
-      newPanelsState = action.payload.singleTab
-        ? createTabPanelWithSingleTab(newPanelsState, action.payload)
-        : createTabPanelWithMultipleTabs(newPanelsState, action.payload);
-      break;
+      return action.payload.singleTab
+        ? createTabPanelWithSingleTab(panelsState, action.payload)
+        : createTabPanelWithMultipleTabs(panelsState, action.payload);
 
     case "OVERWRITE_GLOBAL_DATA":
-      newPanelsState.globalVariables = action.payload;
-      break;
+      return {
+        ...panelsState,
+        globalVariables: action.payload,
+      };
 
     case "SET_GLOBAL_DATA": {
       const globalVariables = {
-        ...newPanelsState.globalVariables,
+        ...panelsState.globalVariables,
         ...action.payload,
       };
       Object.keys(globalVariables).forEach((key) => {
@@ -778,69 +789,67 @@ export default function (panelsState: PanelsState, action: PanelsActions): Panel
           delete globalVariables[key];
         }
       });
-      newPanelsState.globalVariables = globalVariables;
-      break;
+      return {
+        ...panelsState,
+        globalVariables,
+      };
     }
 
     case "SET_USER_NODES": {
-      const userNodes = { ...newPanelsState.userNodes, ...action.payload };
-      Object.keys(userNodes).forEach((key) => {
-        if (userNodes[key] == undefined) {
+      const userNodes = { ...panelsState.userNodes };
+      for (const [key, value] of Object.entries(action.payload)) {
+        if (value == undefined) {
           delete userNodes[key];
+        } else {
+          userNodes[key] = value;
         }
-      });
-      newPanelsState.userNodes = userNodes as {
-        [K in keyof typeof userNodes]-?: NonNullable<typeof userNodes[K]>;
+      }
+      return {
+        ...panelsState,
+        userNodes,
       };
-      break;
     }
 
     case "SET_LINKED_GLOBAL_VARIABLES":
-      newPanelsState.linkedGlobalVariables = action.payload;
-      break;
-
-    case "SET_PLAYBACK_CONFIG":
-      newPanelsState.playbackConfig = {
-        ...newPanelsState.playbackConfig,
-        ...action.payload,
+      return {
+        ...panelsState,
+        linkedGlobalVariables: action.payload,
       };
-      break;
-
+    case "SET_PLAYBACK_CONFIG":
+      return {
+        ...panelsState,
+        playbackConfig: {
+          ...panelsState.playbackConfig,
+          ...action.payload,
+        },
+      };
     case "CLOSE_PANEL":
-      newPanelsState = closePanel(newPanelsState, action.payload);
-      break;
+      return closePanel(panelsState, action.payload);
 
     case "SPLIT_PANEL":
-      newPanelsState = splitPanel(newPanelsState, action.payload);
-      break;
+      return splitPanel(panelsState, action.payload);
 
     case "SWAP_PANEL":
-      newPanelsState = swapPanel(newPanelsState, action.payload);
-      break;
+      return swapPanel(panelsState, action.payload);
 
     case "MOVE_TAB":
-      newPanelsState = moveTab(newPanelsState, action.payload);
-      break;
+      return moveTab(panelsState, action.payload);
 
     case "ADD_PANEL":
-      newPanelsState = addPanel(newPanelsState, action.payload);
-      break;
+      return addPanel(panelsState, action.payload);
 
     case "DROP_PANEL":
-      newPanelsState = dropPanel(newPanelsState, action.payload);
-      break;
+      return dropPanel(panelsState, action.payload);
 
     case "START_DRAG":
-      newPanelsState = startDrag(newPanelsState, action.payload);
-      break;
+      return startDrag(panelsState, action.payload);
 
     case "END_DRAG":
-      newPanelsState = endDrag(newPanelsState, action.payload);
-      break;
+      return endDrag(panelsState, action.payload);
 
     default:
       throw new Error("This reducer should only be used for panel actions");
   }
 
-  return newPanelsState;
+  return panelsState;
 }

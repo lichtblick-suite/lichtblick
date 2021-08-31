@@ -707,6 +707,40 @@ describe("layout reducers", () => {
       configById: {},
     } as PanelsState;
 
+    it("keeps panel state identity stable when config is unchanged", () => {
+      const orig: PanelsState = {
+        ...emptyLayout,
+        layout: panelState.layout,
+      };
+
+      const panelConfig = {
+        id: "SecondPanel!2wydzut",
+        config: { foo: "bar" },
+        defaultConfig: { foo: "" },
+      };
+      const panels = panelsReducer(orig, {
+        type: "SAVE_PANEL_CONFIGS",
+        payload: {
+          configs: [
+            panelConfig,
+            { id: "FirstPanel!34otwwt", config: { baz: true }, defaultConfig: { baz: false } },
+          ],
+        },
+      });
+
+      const panelsTwo = panelsReducer(panels, {
+        type: "SAVE_PANEL_CONFIGS",
+        payload: {
+          configs: [
+            panelConfig,
+            { id: "FirstPanel!34otwwt", config: { baz: true }, defaultConfig: { baz: false } },
+          ],
+        },
+      });
+
+      expect(panelsTwo).toEqual(panels);
+    });
+
     it("removes a panel's configById when it is removed from the layout", () => {
       let panels: PanelsState = {
         ...emptyLayout,

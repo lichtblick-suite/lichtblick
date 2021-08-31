@@ -52,9 +52,9 @@ export default function PlaybackSpeedControls(): JSX.Element {
   // Set the speed to the speed that we got from the config whenever we get a new Player.
   useEffect(() => {
     if (configSpeed != undefined) {
-      setSpeed(configSpeed);
+      setPlaybackSpeed(configSpeed);
     }
-  }, [configSpeed, setSpeed]);
+  }, [configSpeed, setPlaybackSpeed]);
 
   const displayedSpeed = speed ?? configSpeed;
 

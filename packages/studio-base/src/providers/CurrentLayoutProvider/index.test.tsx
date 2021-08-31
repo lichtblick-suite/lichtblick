@@ -189,8 +189,8 @@ describe("CurrentLayoutProvider", () => {
         baseline: { data: TEST_LAYOUT, updatedAt: new Date(10).toISOString() },
       };
     });
-    mockLayoutStorage.updateLayout.mockImplementation(async () => layoutStoragePutCalled.resolve());
 
+    mockLayoutStorage.updateLayout.mockImplementation(async () => layoutStoragePutCalled.resolve());
     const mockUserProfile = makeMockUserProfile();
     mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: "example" });
 
@@ -198,6 +198,7 @@ describe("CurrentLayoutProvider", () => {
       mockLayoutStorage,
       mockUserProfile,
     });
+
     await act(() => result.current.childMounted);
     act(() => result.current.actions.setPlaybackConfig({ timeDisplayMethod: "TOD" }));
     await act(() => layoutStoragePutCalled);
