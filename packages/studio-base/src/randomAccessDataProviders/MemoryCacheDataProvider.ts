@@ -53,8 +53,12 @@ export const MIN_MEM_CACHE_BLOCK_SIZE_NS = 0.1e9; // Messages are laid out in bl
 // less flexible, so we may want to move away from a single-level block structure in the future.
 export const MAX_BLOCKS = 400;
 const READ_AHEAD_NS = 3e9; // Number of nanoseconds to read ahead from the last `getMessages` call.
-const DEFAULT_CACHE_SIZE_BYTES = 2.5e9; // Number of bytes that we aim to keep in the cache.
 export const MAX_BLOCK_SIZE_BYTES = 50e6; // Number of bytes in a block before we show an error.
+
+// Number of bytes that we aim to keep in the cache.
+// Setting this to higher than 1.5GB caused the renderer process to crash on linux on certain bags.
+// See: https://github.com/foxglove/studio/pull/1733
+const DEFAULT_CACHE_SIZE_BYTES = 1.0e9;
 
 // For each memory block we store the actual messages (grouped by topic), and a total byte size of
 // the underlying ArrayBuffers.
