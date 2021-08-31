@@ -227,7 +227,7 @@ export function ShowResetAfterHorizontalZoom(): JSX.Element {
 }
 ShowResetAfterVerticalZoom.parameters = { useReadySignal: true };
 export function ShowResetAfterVerticalZoom(): JSX.Element {
-  const readySignal = useReadySignal({ count: 3 });
+  const readySignal = useReadySignal({ count: 2 });
   return (
     <PanelSetup
       fixture={fixture}
@@ -247,7 +247,7 @@ export function ShowResetAfterVerticalZoom(): JSX.Element {
 }
 ShowResetZoom.parameters = { useReadySignal: true };
 export function ShowResetZoom(): JSX.Element {
-  const readySignal = useReadySignal({ count: 3 });
+  const readySignal = useReadySignal({ count: 2 });
   return (
     <PanelSetup
       fixture={fixture}
@@ -268,7 +268,7 @@ export function ShowResetZoom(): JSX.Element {
 
 ResetZoom.parameters = { useReadySignal: true };
 export function ResetZoom(): JSX.Element {
-  const readySignal = useReadySignal({ count: 3 });
+  const readySignal = useReadySignal({ count: 2 });
   return (
     <PanelSetup
       fixture={fixture}
