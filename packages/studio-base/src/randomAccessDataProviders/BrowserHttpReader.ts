@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import FetchReader from "@foxglove/studio-base/randomAccessDataProviders/FetchReader";
 import { FileReader, FileStream } from "@foxglove/studio-base/util/CachedFilelike";
+import FetchReader from "@foxglove/studio-base/util/FetchReader";
 
 // A file reader that reads from a remote HTTP URL, for usage in the browser (not for node.js).
 export default class BrowserHttpReader implements FileReader {
