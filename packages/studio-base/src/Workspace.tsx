@@ -112,7 +112,7 @@ function Variables() {
 }
 
 // file types we support for drag/drop
-const allowedDropExtensions = [".bag", ".foxe", ".urdf"];
+const allowedDropExtensions = [".bag", ".foxe", ".urdf", ".xacro"];
 
 type WorkspaceProps = {
   loadWelcomeLayout?: boolean;
