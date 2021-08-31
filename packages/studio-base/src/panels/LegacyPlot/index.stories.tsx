@@ -268,7 +268,7 @@ export function ShowResetZoom(): JSX.Element {
 
 ResetZoom.parameters = { useReadySignal: true };
 export function ResetZoom(): JSX.Element {
-  const readySignal = useReadySignal({ count: 2 });
+  const readySignal = useReadySignal({ count: 3 });
   return (
     <PanelSetup
       fixture={fixture}
