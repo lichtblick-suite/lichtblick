@@ -147,6 +147,16 @@ function Chart(props: Props): JSX.Element {
     const prev = previousUpdateMessage.current;
     const out: Record<string, unknown> = {};
 
+    // NOTE(Roman): I don't know why this happens but when I initialize a chart using some data
+    // and width/height of 0. Even when I later send an update for correct width/height the chart
+    // does not render.
+    //
+    // The workaround here is to avoid sending any initialization or update messages until we have
+    // a width and height that are non-zero
+    if (width === 0 || height === 0) {
+      return undefined;
+    }
+
     if (prev.data !== data) {
       prev.data = out.data = data;
     }
@@ -168,58 +178,62 @@ function Chart(props: Props): JSX.Element {
     return out;
   }, [data, height, options, width]);
 
-  // first time initialization
-  const { error: initError } = useAsync(async () => {
-    // initialization happens once - even if the props for this effect change
-    if (initialized.current) {
-      return;
-    }
-
-    const canvas = canvasRef.current;
-    if (!canvas) {
-      return;
-    }
-
-    if (!("transferControlToOffscreen" in canvas)) {
-      throw new Error("Chart requires browsers with offscreen canvas support");
-    }
-
-    const offscreenCanvas = canvas.transferControlToOffscreen();
-    initialized.current = true;
-
-    const newUpdateMessage = getNewUpdateMessage();
-    const scales = await rpcSend<RpcScales>(
-      "initialize",
-      {
-        node: offscreenCanvas,
-        type,
-        data: newUpdateMessage?.data,
-        options: newUpdateMessage?.options,
-        devicePixelRatio,
-        width: newUpdateMessage?.width,
-        height: newUpdateMessage?.height,
-      },
-      [offscreenCanvas],
-    );
-    maybeUpdateScales(scales);
-    onChartUpdate?.();
-  }, [getNewUpdateMessage, rpcSend, type, maybeUpdateScales, onChartUpdate]);
-
   const { error: updateError } = useAsync(async () => {
+    // first time initialization
+    if (!initialized.current) {
+      const canvas = canvasRef.current;
+      if (!canvas) {
+        return;
+      }
+
+      if (!("transferControlToOffscreen" in canvas)) {
+        throw new Error("Chart requires browsers with offscreen canvas support");
+      }
+
+      const newUpdateMessage = getNewUpdateMessage();
+      if (!newUpdateMessage) {
+        return;
+      }
+
+      initialized.current = true;
+
+      const offscreenCanvas = canvas.transferControlToOffscreen();
+      const scales = await rpcSend<RpcScales>(
+        "initialize",
+        {
+          node: offscreenCanvas,
+          type,
+          data: newUpdateMessage?.data,
+          options: newUpdateMessage?.options,
+          devicePixelRatio,
+          width: newUpdateMessage?.width,
+          height: newUpdateMessage?.height,
+        },
+        [offscreenCanvas],
+      );
+
+      if (!isMounted()) {
+        return;
+      }
+
+      maybeUpdateScales(scales);
+      onChartUpdate?.();
+      return;
+    }
+
     const newUpdateMessage = getNewUpdateMessage();
     if (!newUpdateMessage) {
       return;
     }
 
     const scales = await rpcSend<RpcScales>("update", newUpdateMessage);
-
     if (!isMounted()) {
       return;
     }
 
     maybeUpdateScales(scales);
     onChartUpdate?.();
-  }, [getNewUpdateMessage, rpcSend, isMounted, maybeUpdateScales, onChartUpdate]);
+  }, [getNewUpdateMessage, rpcSend, isMounted, maybeUpdateScales, onChartUpdate, type]);
 
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
@@ -390,10 +404,6 @@ function Chart(props: Props): JSX.Element {
     },
     [isMounted, props, rpcSend],
   );
-
-  if (initError) {
-    throw initError;
-  }
 
   if (updateError) {
     throw updateError;

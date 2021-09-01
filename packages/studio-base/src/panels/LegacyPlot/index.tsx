@@ -399,7 +399,20 @@ function TwoDimensionalPlot(props: Props) {
     throw new Error("2D Plot datasets do not have unique labels");
   }
 
+  const data = useMemo(() => {
+    return { datasets };
+  }, [datasets]);
+
   const emptyMessage = datasets.length === 0;
+  const emptyStateElement = useMemo(() => {
+    if (!message) {
+      return <EmptyState>Waiting for next message</EmptyState>;
+    } else if (emptyMessage) {
+      <EmptyState>No 2D Plot data (lines, points, polygons) to visualize</EmptyState>;
+    }
+
+    return undefined;
+  }, [emptyMessage, message]);
 
   return (
     <SContainer>
@@ -413,34 +426,33 @@ function TwoDimensionalPlot(props: Props) {
           autoSize
         />
       </PanelToolbar>
-      {!message ? (
-        <EmptyState>Waiting for next message</EmptyState>
-      ) : emptyMessage ? (
-        <EmptyState>No 2D Plot data (lines, points, polygons) to visualize</EmptyState>
-      ) : (
-        <SRoot onDoubleClick={onResetZoom} ref={resizeRef}>
-          {tooltip}
-          <ChartComponent
-            type="scatter"
-            width={width}
-            height={height}
-            key={`${width}x${height}`}
-            options={options}
-            onScalesUpdate={onScaleBoundsUpdate}
-            onHover={onHover}
-            data={{ datasets }}
-            onChartUpdate={onChartUpdate}
-          />
-          {hasUserPannedOrZoomed && (
-            <SResetZoom>
-              <Button tooltip="(shortcut: double-click)" onClick={onResetZoom}>
-                reset view
-              </Button>
-            </SResetZoom>
-          )}
-          <KeyListener global keyDownHandlers={keyDownHandlers} keyUpHandlers={keyUphandlers} />
-        </SRoot>
-      )}
+      <SRoot onDoubleClick={onResetZoom} ref={resizeRef}>
+        {emptyStateElement ? (
+          emptyStateElement
+        ) : (
+          <>
+            {tooltip}
+            <ChartComponent
+              type="scatter"
+              width={width}
+              height={height}
+              options={options}
+              onScalesUpdate={onScaleBoundsUpdate}
+              onHover={onHover}
+              data={data}
+              onChartUpdate={onChartUpdate}
+            />
+            {hasUserPannedOrZoomed && (
+              <SResetZoom>
+                <Button tooltip="(shortcut: double-click)" onClick={onResetZoom}>
+                  reset view
+                </Button>
+              </SResetZoom>
+            )}
+            <KeyListener global keyDownHandlers={keyDownHandlers} keyUpHandlers={keyUphandlers} />
+          </>
+        )}
+      </SRoot>
     </SContainer>
   );
 }
