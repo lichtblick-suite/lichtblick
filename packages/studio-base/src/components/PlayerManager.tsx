@@ -41,6 +41,7 @@ import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
 import useWarnImmediateReRender from "@foxglove/studio-base/hooks/useWarnImmediateReRender";
 import AnalyticsMetricsCollector from "@foxglove/studio-base/players/AnalyticsMetricsCollector";
 import OrderedStampPlayer from "@foxglove/studio-base/players/OrderedStampPlayer";
+import Ros2Player from "@foxglove/studio-base/players/Ros2Player";
 import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
 import { BuildPlayerOptions } from "@foxglove/studio-base/players/buildPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
@@ -213,7 +214,7 @@ async function rosbridgeSource(options: FactoryOptions): Promise<Player | undefi
   });
 }
 
-async function roscoreSource(options: FactoryOptions): Promise<Player | undefined> {
+async function ros1Source(options: FactoryOptions): Promise<Player | undefined> {
   const storageCacheKey = `studio.source.${options.source.name}`;
 
   // load the player on-demand
@@ -265,6 +266,43 @@ async function roscoreSource(options: FactoryOptions): Promise<Player | undefine
   });
 }
 
+async function ros2Source(options: FactoryOptions): Promise<Player | undefined> {
+  const storageCacheKey = `studio.source.${options.source.name}`;
+
+  // undefined url indicates the user canceled the prompt
+  let maybeDomainId: string | undefined;
+  const restore = options.sourceOptions.restore;
+
+  if (restore) {
+    maybeDomainId = options.storage.getItem<string>(storageCacheKey);
+  } else {
+    const value = options.storage.getItem<string>(storageCacheKey);
+
+    maybeDomainId = await options.prompt({
+      title: "ROS 2 DomainId",
+      placeholder: "0",
+      value: value ?? "0",
+      transformer: (str) => {
+        const result = parseInt(str);
+        if (isNaN(result) || result < 0) {
+          throw new AppError("Invalid ROS 2 DomainId. Please use a non-negative integer");
+        }
+        return String(result);
+      },
+    });
+  }
+
+  if (maybeDomainId == undefined) {
+    return undefined;
+  }
+
+  const domainIdStr = maybeDomainId;
+  const domainId = parseInt(domainIdStr);
+  options.storage.setItem(storageCacheKey, maybeDomainId);
+
+  return new Ros2Player({ domainId, metricsCollector: options.playerOptions.metricsCollector });
+}
+
 async function velodyneSource(options: FactoryOptions): Promise<Player | undefined> {
   const storageCacheKey = `studio.source.${options.source.name}`;
 
@@ -277,7 +315,7 @@ async function velodyneSource(options: FactoryOptions): Promise<Player | undefin
   let maybePort;
   const restore = options.sourceOptions.restore;
 
-  if (restore) {
+  if (restore != undefined) {
     maybePort = options.storage.getItem<string>(storageCacheKey);
   } else {
     const value = options.storage.getItem<string>(storageCacheKey);
@@ -382,7 +420,9 @@ export default function PlayerManager({
       case "ros2-local-bagfile":
         return localRosbag2FolderSource;
       case "ros1-socket":
-        return roscoreSource;
+        return ros1Source;
+      case "ros2-socket":
+        return ros2Source;
       case "rosbridge-websocket":
         return rosbridgeSource;
       case "ros1-remote-bagfile":

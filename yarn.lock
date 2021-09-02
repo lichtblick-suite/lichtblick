@@ -2193,6 +2193,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@foxglove/ros2@npm:1.0.1":
+  version: 1.0.1
+  resolution: "@foxglove/ros2@npm:1.0.1"
+  dependencies:
+    "@foxglove/rosmsg": ^2.0.0
+    "@foxglove/rosmsg2-serialization": ^1.0.2
+    "@foxglove/rtps": ^1.2.0
+    eventemitter3: ^4.0.7
+  checksum: d068b43ab06108aab324e0db768c60ddcba233d4e10cb90bb229c575dd1a2cb275723c15bef55b0def346d4da9e641a63b9bfd0e60679266adde634895c4f988
+  languageName: node
+  linkType: hard
+
 "@foxglove/rosbag2-web@npm:1.0.3":
   version: 1.0.3
   resolution: "@foxglove/rosbag2-web@npm:1.0.3"
@@ -2281,6 +2293,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@foxglove/rtps@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "@foxglove/rtps@npm:1.2.0"
+  dependencies:
+    "@foxglove/cdr": ^1.1.1
+    "@foxglove/rostime": ^1.1.0
+    avl: ^1.5.2
+    eventemitter3: ^4.0.7
+  checksum: 9eb02799f76f2e92407b5aa8b0e3521ed5b3d004acc8f1ecbde7f72c778b2fd960b13697c80e4ea479a7f7ebbc8c448d871050c52383e1da3c2b6d513b25c53f
+  languageName: node
+  linkType: hard
+
 "@foxglove/studio-base@workspace:*, @foxglove/studio-base@workspace:packages/studio-base":
   version: 0.0.0-use.local
   resolution: "@foxglove/studio-base@workspace:packages/studio-base"
@@ -2292,6 +2316,7 @@ __metadata:
     "@foxglove/electron-socket": 1.3.1
     "@foxglove/hooks": "workspace:*"
     "@foxglove/ros1": 1.3.2
+    "@foxglove/ros2": 1.0.1
     "@foxglove/rosbag": 0.1.1
     "@foxglove/rosbag2-web": 1.0.3
     "@foxglove/rosmsg": 2.0.0
@@ -7158,6 +7183,13 @@ __metadata:
   bin:
     autoprefixer: bin/autoprefixer
   checksum: 46987bc3de6612f0276c3643061901e33cc5721d07aaeb6f0daf237554448884a59c0b17087bf0f00a07d940abcb5a6eaf2203b962c24fe33d52f76aa845cb70
+  languageName: node
+  linkType: hard
+
+"avl@npm:^1.5.2":
+  version: 1.5.3
+  resolution: "avl@npm:1.5.3"
+  checksum: 19ab9bff1eec3de86188313342fc8843e695db174aa355217ca2c0e2ec925a415f2c65d83c6772238c8d646cf6310cae5d92cc0ef5d76fc0348eef9c1eac06aa
   languageName: node
   linkType: hard
 

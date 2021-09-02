@@ -33,6 +33,10 @@ export default function Root(): ReactElement {
       type: "ros1-socket",
     },
     {
+      name: "ROS 2 [BETA]",
+      type: "ros2-socket",
+    },
+    {
       name: "Rosbridge (WebSocket)",
       type: "rosbridge-websocket",
     },
