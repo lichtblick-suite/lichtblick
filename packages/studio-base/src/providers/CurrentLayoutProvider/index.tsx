@@ -144,10 +144,12 @@ export default function CurrentLayoutProvider({
     [addToast, isMounted, layoutManager, setLayoutState, setUserProfile],
   );
 
+  type UpdateLayoutParams = { id: LayoutID; data: PanelsState };
+  const unsavedLayoutsRef = useRef(new Map<LayoutID, UpdateLayoutParams>());
+
   // When the user performs an action, we immediately setLayoutState to update the UI. Saving back
   // to the LayoutManager is debounced.
   const debouncedSaveTimeout = useRef<ReturnType<typeof setTimeout>>();
-  const debouncedSaveParams = useRef<{ id: LayoutID; data: PanelsState }>();
   const performAction = useCallback(
     (action: PanelsActions) => {
       if (
@@ -169,24 +171,25 @@ export default function CurrentLayoutProvider({
         data: newData,
       };
 
-      debouncedSaveParams.current = newLayout;
-      debouncedSaveTimeout.current ??= setTimeout(() => {
-        const params = debouncedSaveParams.current;
+      // store the layout for saving
+      unsavedLayoutsRef.current.set(newLayout.id, newLayout);
 
-        debouncedSaveParams.current = undefined;
+      debouncedSaveTimeout.current ??= setTimeout(() => {
+        const layoutsToSave = [...unsavedLayoutsRef.current.values()];
+        unsavedLayoutsRef.current.clear();
+
         debouncedSaveTimeout.current = undefined;
-        if (!params) {
-          return;
+        for (const params of layoutsToSave) {
+          layoutManager.updateLayout(params).catch((error) => {
+            log.error(error);
+            if (isMounted()) {
+              addToast(`Your changes could not be saved. ${error.toString()}`, {
+                appearance: "error",
+                id: "CurrentLayoutProvider.throttledSave",
+              });
+            }
+          });
         }
-        layoutManager.updateLayout(params).catch((error) => {
-          log.error(error);
-          if (isMounted()) {
-            addToast(`Your changes could not be saved. ${error.toString()}`, {
-              appearance: "error",
-              id: "CurrentLayoutProvider.throttledSave",
-            });
-          }
-        });
       }, SAVE_INTERVAL_MS);
 
       // Some actions like CHANGE_PANEL_LAYOUT will cause further downstream effects to update panel
