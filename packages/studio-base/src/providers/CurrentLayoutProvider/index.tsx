@@ -166,13 +166,13 @@ export default function CurrentLayoutProvider({
 
       const newLayout = {
         id: layoutStateRef.current.selectedLayout.id,
-        data: panelsReducer(layoutStateRef.current.selectedLayout.data, action),
+        data: newData,
       };
-      setLayoutState({ loading: false, selectedLayout: newLayout });
 
       debouncedSaveParams.current = newLayout;
       debouncedSaveTimeout.current ??= setTimeout(() => {
         const params = debouncedSaveParams.current;
+
         debouncedSaveParams.current = undefined;
         debouncedSaveTimeout.current = undefined;
         if (!params) {
@@ -188,6 +188,11 @@ export default function CurrentLayoutProvider({
           }
         });
       }, SAVE_INTERVAL_MS);
+
+      // Some actions like CHANGE_PANEL_LAYOUT will cause further downstream effects to update panel
+      // configs (i.e. set default configs). These result in calls to performAction. To ensure the
+      // debounced params are set in the proper order, we invoke setLayoutState at the end.
+      setLayoutState({ loading: false, selectedLayout: newLayout });
     },
     [addToast, isMounted, layoutManager, setLayoutState],
   );
