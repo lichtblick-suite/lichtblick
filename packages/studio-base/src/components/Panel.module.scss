@@ -41,21 +41,10 @@
   position: fixed;
   z-index: 100;
   border: 4px solid rgba(110, 81, 238, 0.3);
-  top: $topBarHeight;
-  left: 0;
-  right: 0;
-  bottom: $playbackControlHeight;
-}
-
-.notClickable {
-  position: fixed;
-  z-index: 100;
   top: 0;
   left: 0;
   right: 0;
-  height: $topBarHeight;
-  opacity: 0;
-  cursor: not-allowed;
+  bottom: $playbackControlHeight;
 }
 
 .tabActionsOverlay,
@@ -135,7 +124,7 @@
   justify-content: space-between;
 }
 
-.exitFullScreen {
+button.exitFullScreen {
   position: fixed;
   top: 75px;
   right: 8px;

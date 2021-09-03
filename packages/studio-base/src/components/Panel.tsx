@@ -519,7 +519,6 @@ export default function Panel<
               connectToolbarDragPreview(el);
             }}
           >
-            {fullScreen && <div className={styles.notClickable} />}
             {isSelected && !fullScreen && numSelectedPanelsIfSelected > 1 && (
               <div data-tab-options className={styles.tabActionsOverlay}>
                 <Button style={{ backgroundColor: colors.BLUE }} onClick={groupPanels}>
