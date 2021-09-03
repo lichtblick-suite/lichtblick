@@ -6,6 +6,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "experimentalDecorators": true,
+    "useUnknownInCatchVariables": false,
     "lib": ["dom", "dom.iterable", "es2020", "webworker"]
   }
 }

@@ -15,7 +15,7 @@
 // instances of web-workers and shared-workers respectively, as well as avaiable on
 // 'global' within them.
 export interface Channel {
-  postMessage(data: unknown, transfer?: Transferable[]): void;
+  postMessage(data: unknown, transfer?: (Transferable | OffscreenCanvas)[]): void;
   onmessage?: ((ev: MessageEvent) => unknown) | null; // eslint-disable-line no-restricted-syntax
   terminate: () => void;
 }
@@ -133,7 +133,11 @@ export default class Rpc {
   // send a message across the rpc boundary to a receiver on the other side
   // this returns a promise for the receiver's response.  If there is no registered
   // receiver for the given topic, this method throws
-  async send<TResult>(topic: string, data?: unknown, transfer?: Transferable[]): Promise<TResult> {
+  async send<TResult>(
+    topic: string,
+    data?: unknown,
+    transfer?: (Transferable | OffscreenCanvas)[],
+  ): Promise<TResult> {
     const id = this._messageId++;
     const message = { topic, id, data };
     const result = new Promise<TResult>((resolve, reject) => {

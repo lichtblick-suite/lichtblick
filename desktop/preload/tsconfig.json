@@ -4,6 +4,7 @@
   "compilerOptions": {
     "rootDir": "../../",
     "noEmit": true,
-    "lib": ["dom", "es2020"]
+    "lib": ["dom", "es2020"],
+    "useUnknownInCatchVariables": false
   }
 }

@@ -96,7 +96,7 @@ function Chart(props: Props): JSX.Element {
     async <T extends unknown>(
       topic: string,
       payload?: Record<string, unknown>,
-      transferables?: Transferable[],
+      transferables?: (Transferable | OffscreenCanvas)[],
     ) => {
       return await rpc.send<T>(topic, { id, ...payload }, transferables);
     },
