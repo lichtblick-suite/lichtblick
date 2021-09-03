@@ -27,52 +27,8 @@ export function formatTimeRaw(stamp: Time): string {
   return `${stamp.sec}.${stamp.nsec.toFixed().padStart(9, "0")}`;
 }
 
-function fixTime(t: Time): Time {
-  // Equivalent to fromNanoSec(toNanoSec(t)), but no chance of precision loss.
-  // nsec should be non-negative, and less than 1e9.
-  let { sec, nsec } = t;
-  while (nsec >= 1e9) {
-    nsec -= 1e9;
-    sec += 1;
-  }
-  while (nsec < 0) {
-    nsec += 1e9;
-    sec -= 1;
-  }
-  return { sec, nsec };
-}
-
 export function formatFrame({ sec, nsec }: Time): string {
   return `${sec}.${String.prototype.padStart.call(nsec, 9, "0")}`;
-}
-
-export function parseRosTimeStr(str: string): Time | undefined {
-  if (/^\d+\.?$/.test(str)) {
-    // Whole number with optional "." at the end.
-    const sec = parseInt(str, 10);
-    return { sec: isNaN(sec) ? 0 : sec, nsec: 0 };
-  }
-  if (!/^\d+\.\d+$/.test(str)) {
-    // Not digits.digits -- invalid.
-    return undefined;
-  }
-  const partials = str.split(".");
-  if (partials.length === 0) {
-    return undefined;
-  }
-
-  const [first, second] = partials;
-  if (first == undefined || second == undefined) {
-    return undefined;
-  }
-
-  // There can be 9 digits of nanoseconds. If the fractional part is "1", we need to add eight
-  // zeros. Also, make sure we round to an integer if we need to _remove_ digits.
-  const digitsShort = 9 - second.length;
-  const nsec = Math.round(parseInt(second, 10) * 10 ** digitsShort);
-  // It's possible we rounded to { sec: 1, nsec: 1e9 }, which is invalid, so fixTime.
-  const sec = parseInt(first, 10);
-  return fixTime({ sec: isNaN(sec) ? 0 : sec, nsec });
 }
 
 // Functions and types for specifying and applying player initial seek time intentions.

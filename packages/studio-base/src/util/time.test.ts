@@ -34,29 +34,6 @@ describe("time.formatTimeRaw", () => {
   });
 });
 
-describe("time.parseRosTimeStr", () => {
-  it("returns undefined if the input string is formatted incorrectly", () => {
-    expect(time.parseRosTimeStr("")).toEqual(undefined);
-    expect(time.parseRosTimeStr(".12121")).toEqual(undefined);
-    expect(time.parseRosTimeStr(".")).toEqual(undefined);
-  });
-
-  it("returns the correct time", () => {
-    expect(time.parseRosTimeStr("12121.")).toEqual({ sec: 12121, nsec: 0 });
-    expect(time.parseRosTimeStr("1")).toEqual({ sec: 1, nsec: 0 });
-    expect(time.parseRosTimeStr("1.")).toEqual({ sec: 1, nsec: 0 });
-    expect(time.parseRosTimeStr("1.12")).toEqual({ sec: 1, nsec: 0.12e9 });
-    expect(time.parseRosTimeStr("100.100")).toEqual({ sec: 100, nsec: 0.1e9 });
-    expect(time.parseRosTimeStr("100")).toEqual({ sec: 100, nsec: 0 });
-    // Full nanosecond timestamp
-    expect(time.parseRosTimeStr("1.123456789")).toEqual({ sec: 1, nsec: 0.123456789e9 });
-    // Too much precision
-    expect(time.parseRosTimeStr("1.0123456789")).toEqual({ sec: 1, nsec: 0.012345679e9 });
-    // Too much precision, round seconds up.
-    expect(time.parseRosTimeStr("1.999999999999")).toEqual({ sec: 2, nsec: 0 });
-  });
-});
-
 describe("time.getTimestampForMessageEvent", () => {
   it("uses headerStamp when available", () => {
     const messageBase = {

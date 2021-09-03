@@ -19,9 +19,10 @@ import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import SelectableTimestamp from "@foxglove/studio-base/components/SelectableTimestamp";
 import clipboard from "@foxglove/studio-base/util/clipboard";
 import { formatDuration } from "@foxglove/studio-base/util/formatTime";
+
+import Timestamp from "./Timestamp";
 
 const STableContainer = styled.div`
   overflow-y: auto;
@@ -90,31 +91,11 @@ function SourceInfo() {
         <SHeader>
           <SHeaderItem>
             <STitle>Start time:</STitle>
-            <SelectableTimestamp
-              startTime={startTime}
-              endTime={endTime}
-              currentTime={startTime}
-              pausePlayback={() => {
-                // no-op
-              }}
-              seekPlayback={() => {
-                // no-op
-              }}
-            />
+            <Timestamp time={startTime} />
           </SHeaderItem>
           <SHeaderItem>
             <STitle>End Time:</STitle>
-            <SelectableTimestamp
-              startTime={startTime}
-              endTime={endTime}
-              currentTime={endTime}
-              pausePlayback={() => {
-                // no-op
-              }}
-              seekPlayback={() => {
-                // no-op
-              }}
-            />
+            <Timestamp time={endTime} />
           </SHeaderItem>
           <SHeaderItem>
             <STitle>Duration: {formatDuration(duration)}</STitle>
@@ -156,6 +137,6 @@ function SourceInfo() {
 
 SourceInfo.panelType = "SourceInfo";
 SourceInfo.defaultConfig = {};
-SourceInfo.supportsStrictMode = false;
+SourceInfo.supportsStrictMode = true;
 
 export default Panel(SourceInfo);
