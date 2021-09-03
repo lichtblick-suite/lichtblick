@@ -40,12 +40,13 @@ function mockThrow(name: string) {
   };
 }
 
-function makeMockLayoutStorage() {
+function makeMockLayoutManager() {
   return {
     supportsSharing: false,
     supportsSyncing: false,
-    addLayoutsChangedListener: jest.fn(/*noop*/),
-    removeLayoutsChangedListener: jest.fn(/*noop*/),
+    isBusy: false,
+    on: jest.fn(/*noop*/),
+    off: jest.fn(/*noop*/),
     getLayouts: jest.fn().mockImplementation(mockThrow("getLayouts")),
     getLayout: jest.fn().mockImplementation(mockThrow("getLayout")),
     saveNewLayout: jest.fn().mockImplementation(mockThrow("saveNewLayout")),
@@ -53,6 +54,7 @@ function makeMockLayoutStorage() {
     deleteLayout: jest.fn().mockImplementation(mockThrow("deleteLayout")),
     overwriteLayout: jest.fn().mockImplementation(mockThrow("overwriteLayout")),
     revertLayout: jest.fn().mockImplementation(mockThrow("revertLayout")),
+    makePersonalCopy: jest.fn().mockImplementation(mockThrow("makePersonalCopy")),
   };
 }
 function makeMockUserProfile() {
@@ -63,10 +65,10 @@ function makeMockUserProfile() {
 }
 
 function renderTest({
-  mockLayoutStorage,
+  mockLayoutManager,
   mockUserProfile,
 }: {
-  mockLayoutStorage: ILayoutManager;
+  mockLayoutManager: ILayoutManager;
   mockUserProfile: UserProfileStorage;
 }) {
   const childMounted = signal();
@@ -81,7 +83,7 @@ function renderTest({
         useEffect(() => childMounted.resolve(), []);
         return (
           <ToastProvider>
-            <LayoutManagerContext.Provider value={mockLayoutStorage}>
+            <LayoutManagerContext.Provider value={mockLayoutManager}>
               <UserProfileStorageContext.Provider value={mockUserProfile}>
                 <CurrentLayoutProvider>{children}</CurrentLayoutProvider>
               </UserProfileStorageContext.Provider>
@@ -105,8 +107,8 @@ describe("CurrentLayoutProvider", () => {
       playbackConfig: { speed: 0.1, messageOrder: "headerStamp", timeDisplayMethod: "TOD" },
     };
     const layoutStorageGetCalled = signal();
-    const mockLayoutStorage = makeMockLayoutStorage();
-    mockLayoutStorage.getLayout.mockImplementation(async () => {
+    const mockLayoutManager = makeMockLayoutManager();
+    mockLayoutManager.getLayout.mockImplementation(async () => {
       layoutStorageGetCalled.resolve();
       return {
         id: "example",
@@ -118,10 +120,10 @@ describe("CurrentLayoutProvider", () => {
     const mockUserProfile = makeMockUserProfile();
     mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: "example" });
 
-    const result = renderTest({ mockLayoutStorage, mockUserProfile });
+    const result = renderTest({ mockLayoutManager, mockUserProfile });
     await act(() => layoutStorageGetCalled);
 
-    expect(mockLayoutStorage.getLayout.mock.calls).toEqual([["example"]]);
+    expect(mockLayoutManager.getLayout.mock.calls).toEqual([["example"]]);
     expect(
       result.all.map((item) => (item instanceof Error ? undefined : item.layoutState)),
     ).toEqual([
@@ -132,12 +134,12 @@ describe("CurrentLayoutProvider", () => {
   });
 
   it("saves new layout selection into UserProfile", async () => {
-    const mockLayoutStorage = makeMockLayoutStorage();
+    const mockLayoutManager = makeMockLayoutManager();
     const newLayout: Partial<PanelsState> = {
       ...TEST_LAYOUT,
       layout: "ExamplePanel!2",
     };
-    mockLayoutStorage.getLayout.mockImplementation(async (id: string) => {
+    mockLayoutManager.getLayout.mockImplementation(async (id: string) => {
       return id === "example"
         ? {
             id: "example",
@@ -159,7 +161,7 @@ describe("CurrentLayoutProvider", () => {
     });
 
     const result = renderTest({
-      mockLayoutStorage,
+      mockLayoutManager,
       mockUserProfile,
     });
 
@@ -181,8 +183,8 @@ describe("CurrentLayoutProvider", () => {
 
   it("saves layout updates into LayoutStorage", async () => {
     const layoutStoragePutCalled = signal();
-    const mockLayoutStorage = makeMockLayoutStorage();
-    mockLayoutStorage.getLayout.mockImplementation(async () => {
+    const mockLayoutManager = makeMockLayoutManager();
+    mockLayoutManager.getLayout.mockImplementation(async () => {
       return {
         id: "TEST_ID",
         name: "Test layout",
@@ -190,12 +192,12 @@ describe("CurrentLayoutProvider", () => {
       };
     });
 
-    mockLayoutStorage.updateLayout.mockImplementation(async () => layoutStoragePutCalled.resolve());
+    mockLayoutManager.updateLayout.mockImplementation(async () => layoutStoragePutCalled.resolve());
     const mockUserProfile = makeMockUserProfile();
     mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: "example" });
 
     const result = renderTest({
-      mockLayoutStorage,
+      mockLayoutManager,
       mockUserProfile,
     });
 
@@ -211,7 +213,7 @@ describe("CurrentLayoutProvider", () => {
       },
     };
 
-    expect(mockLayoutStorage.updateLayout.mock.calls).toEqual([
+    expect(mockLayoutManager.updateLayout.mock.calls).toEqual([
       [{ id: "TEST_ID", data: newState }],
     ]);
     expect(
@@ -226,15 +228,15 @@ describe("CurrentLayoutProvider", () => {
 
   it("keeps identity of action functions when modifying layout", async () => {
     const layoutStoragePutCalled = signal();
-    const mockLayoutStorage = makeMockLayoutStorage();
-    mockLayoutStorage.getLayout.mockImplementation(async () => {
+    const mockLayoutManager = makeMockLayoutManager();
+    mockLayoutManager.getLayout.mockImplementation(async () => {
       return {
         id: "TEST_ID",
         name: "Test layout",
         baseline: { data: TEST_LAYOUT, updatedAt: new Date(10).toISOString() },
       };
     });
-    mockLayoutStorage.updateLayout.mockImplementation(async () => {
+    mockLayoutManager.updateLayout.mockImplementation(async () => {
       layoutStoragePutCalled.resolve();
       return {
         id: "TEST_ID",
@@ -246,7 +248,7 @@ describe("CurrentLayoutProvider", () => {
     mockUserProfile.getUserProfile.mockResolvedValue({ currentLayoutId: "example" });
 
     const result = renderTest({
-      mockLayoutStorage,
+      mockLayoutManager,
       mockUserProfile,
     });
     await act(() => result.current.childMounted);

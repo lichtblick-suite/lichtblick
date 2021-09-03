@@ -49,6 +49,7 @@ const icons: {
   Copy: <Icons.CopyIcon />,
   DataManagementSettings: <Icons.DataManagementSettingsIcon />,
   Delete: <Icons.DeleteIcon />,
+  DependencyAdd: <Icons.DependencyAddIcon />,
   Download: <Icons.DownloadIcon />,
   DownloadDocument: <Icons.DownloadDocumentIcon />,
   Edit: <Icons.EditIcon />,

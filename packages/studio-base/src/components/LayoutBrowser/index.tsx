@@ -5,7 +5,7 @@ import { DefaultButton, IconButton, Spinner, Stack, useTheme } from "@fluentui/r
 import { partition } from "lodash";
 import moment from "moment";
 import path from "path";
-import { useCallback, useContext, useEffect } from "react";
+import { useCallback, useContext, useEffect, useLayoutEffect, useState } from "react";
 import { useToasts } from "react-toast-notifications";
 import { useMountedState } from "react-use";
 import useAsyncFn from "react-use/lib/useAsyncFn";
@@ -20,10 +20,12 @@ import {
 import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutStorageDebuggingContext";
+import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
+import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
-import { Layout } from "@foxglove/studio-base/services/ILayoutStorage";
+import { Layout, layoutIsShared } from "@foxglove/studio-base/services/ILayoutStorage";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
 
 import LayoutSection from "./LayoutSection";
@@ -38,95 +40,130 @@ export default function LayoutBrowser({
   const theme = useTheme();
   const isMounted = useMountedState();
   const { addToast } = useToasts();
-  const layoutStorage = useLayoutManager();
+  const layoutManager = useLayoutManager();
   const prompt = usePrompt();
   const analytics = useAnalytics();
+  const confirm = useConfirm();
 
   const currentLayoutId = useCurrentLayoutSelector((state) => state.selectedLayout?.id);
   const { setSelectedLayoutId } = useCurrentLayoutActions();
 
+  const [isBusy, setIsBusy] = useState(layoutManager.isBusy);
+  useLayoutEffect(() => {
+    const listener = () => setIsBusy(layoutManager.isBusy);
+    listener();
+    layoutManager.on("busychange", listener);
+    return () => layoutManager.off("busychange", listener);
+  }, [layoutManager]);
+
   const [layouts, reloadLayouts] = useAsyncFn(
     async () => {
-      const [personal, shared] = partition(
-        await layoutStorage.getLayouts(),
-        layoutStorage.supportsSharing
-          ? (layout) => layout.permission === "creator_write"
-          : () => true,
+      const [shared, personal] = partition(
+        await layoutManager.getLayouts(),
+        layoutManager.supportsSharing ? layoutIsShared : () => false,
       );
       return {
         personal: personal.sort((a, b) => a.name.localeCompare(b.name)),
         shared: shared.sort((a, b) => a.name.localeCompare(b.name)),
       };
     },
-    [layoutStorage],
+    [layoutManager],
     { loading: true },
   );
 
   useEffect(() => {
     const listener = () => void reloadLayouts();
-    layoutStorage.addLayoutsChangedListener(listener);
-    return () => layoutStorage.removeLayoutsChangedListener(listener);
-  }, [layoutStorage, reloadLayouts]);
+    layoutManager.on("change", listener);
+    return () => layoutManager.off("change", listener);
+  }, [layoutManager, reloadLayouts]);
 
   // Start loading on first mount
   useEffect(() => {
     void reloadLayouts();
   }, [reloadLayouts]);
 
-  const onSelectLayout = useCallback(
-    async (item: Pick<Layout, "id">, selectedViaClick?: boolean) => {
-      setSelectedLayoutId(item.id);
+  const promptForUnsavedChanges = useCallback(async () => {
+    // Don't allow the user to switch away from a personal layout if they have unsaved changes. This
+    // currently has a race condition because of the throttled save in CurrentLayoutProvider -- it's
+    // possible to make changes and switch layouts before they're sent to the layout manager.
+    const currentLayout =
+      currentLayoutId != undefined ? await layoutManager.getLayout(currentLayoutId) : undefined;
+    if (
+      currentLayout != undefined &&
+      layoutIsShared(currentLayout) &&
+      currentLayout.working != undefined
+    ) {
+      await confirm({
+        title: `“${currentLayout.name}” has changes`,
+        prompt: "Before switching layouts, you must either save or discard your current changes.",
+        ok: "Fine",
+        cancel: "Do Not Sell My Personal Information",
+      });
+      return false;
+    }
+    return true;
+  }, [confirm, currentLayoutId, layoutManager]);
+
+  const onSelectLayout = useCallbackWithToast(
+    async (item: Layout, selectedViaClick?: boolean) => {
       if (selectedViaClick === true) {
-        void analytics.logEvent(AppEvent.LAYOUT_SELECT);
+        if (!(await promptForUnsavedChanges())) {
+          return;
+        }
+        void analytics.logEvent(AppEvent.LAYOUT_SELECT, { permission: item.permission });
       }
+      setSelectedLayoutId(item.id);
     },
-    [analytics, setSelectedLayoutId],
+    [analytics, promptForUnsavedChanges, setSelectedLayoutId],
   );
 
-  const onRenameLayout = useCallback(
+  const onRenameLayout = useCallbackWithToast(
     async (item: Layout, newName: string) => {
-      await layoutStorage.updateLayout({ id: item.id, name: newName });
-      void analytics.logEvent(AppEvent.LAYOUT_RENAME);
+      await layoutManager.updateLayout({ id: item.id, name: newName });
+      void analytics.logEvent(AppEvent.LAYOUT_RENAME, { permission: item.permission });
     },
-    [analytics, layoutStorage],
+    [analytics, layoutManager],
   );
 
-  const onDuplicateLayout = useCallback(
+  const onDuplicateLayout = useCallbackWithToast(
     async (item: Layout) => {
-      const source = await layoutStorage.getLayout(item.id);
-      if (source) {
-        const newLayout = await layoutStorage.saveNewLayout({
-          name: `${item.name} copy`,
-          data: source.working?.data ?? source.baseline.data,
-          permission: "creator_write",
-        });
-        await onSelectLayout(newLayout);
-        void analytics.logEvent(AppEvent.LAYOUT_DUPLICATE);
+      if (!(await promptForUnsavedChanges())) {
+        return;
       }
+      const newLayout = await layoutManager.saveNewLayout({
+        name: `${item.name} copy`,
+        data: item.working?.data ?? item.baseline.data,
+        permission: "creator_write",
+      });
+      await onSelectLayout(newLayout);
+      void analytics.logEvent(AppEvent.LAYOUT_DUPLICATE, { permission: item.permission });
     },
-    [analytics, layoutStorage, onSelectLayout],
+    [analytics, layoutManager, onSelectLayout, promptForUnsavedChanges],
   );
 
-  const onDeleteLayout = useCallback(
+  const onDeleteLayout = useCallbackWithToast(
     async (item: Layout) => {
-      await layoutStorage.deleteLayout({ id: item.id });
-      void analytics.logEvent(AppEvent.LAYOUT_DELETE);
+      await layoutManager.deleteLayout({ id: item.id });
+      void analytics.logEvent(AppEvent.LAYOUT_DELETE, { permission: item.permission });
 
       if (currentLayoutId !== item.id) {
         return;
       }
       // If the layout was selected, select a different available layout
-      for (const layout of await layoutStorage.getLayouts()) {
+      for (const layout of await layoutManager.getLayouts()) {
         setSelectedLayoutId(layout.id);
         return;
       }
       // If no other layouts exist, just deselect the layout
       setSelectedLayoutId(undefined);
     },
-    [analytics, currentLayoutId, layoutStorage, setSelectedLayoutId],
+    [analytics, currentLayoutId, layoutManager, setSelectedLayoutId],
   );
 
-  const createNewLayout = useCallback(async () => {
+  const createNewLayout = useCallbackWithToast(async () => {
+    if (!(await promptForUnsavedChanges())) {
+      return;
+    }
     const name = `Unnamed layout ${moment(currentDateForStorybook).format("l")} at ${moment(
       currentDateForStorybook,
     ).format("LT")}`;
@@ -137,7 +174,7 @@ export default function LayoutBrowser({
       linkedGlobalVariables: [],
       playbackConfig: defaultPlaybackConfig,
     };
-    const newLayout = await layoutStorage.saveNewLayout({
+    const newLayout = await layoutManager.saveNewLayout({
       name,
       data: state as PanelsState,
       permission: "creator_write",
@@ -145,21 +182,18 @@ export default function LayoutBrowser({
     void onSelectLayout(newLayout);
 
     void analytics.logEvent(AppEvent.LAYOUT_CREATE);
-  }, [currentDateForStorybook, layoutStorage, analytics, onSelectLayout]);
+  }, [promptForUnsavedChanges, currentDateForStorybook, layoutManager, onSelectLayout, analytics]);
 
-  const onExportLayout = useCallback(
+  const onExportLayout = useCallbackWithToast(
     async (item: Layout) => {
-      const layout = await layoutStorage.getLayout(item.id);
-      if (layout) {
-        const content = JSON.stringify(layout.working?.data ?? layout.baseline.data, undefined, 2);
-        downloadTextFile(content, `${item.name}.json`);
-        void analytics.logEvent(AppEvent.LAYOUT_EXPORT);
-      }
+      const content = JSON.stringify(item.working?.data ?? item.baseline.data, undefined, 2);
+      downloadTextFile(content, `${item.name}.json`);
+      void analytics.logEvent(AppEvent.LAYOUT_EXPORT, { permission: item.permission });
     },
-    [layoutStorage, analytics],
+    [analytics],
   );
 
-  const onShareLayout = useCallback(
+  const onShareLayout = useCallbackWithToast(
     async (item: Layout) => {
       const existingSharedLayouts = layouts.value?.shared ?? [];
       const name = await prompt({
@@ -173,40 +207,54 @@ export default function LayoutBrowser({
         },
       });
       if (name != undefined) {
-        const layout = await layoutStorage.getLayout(item.id);
-        if (!layout) {
-          throw new Error("The layout could not be found.");
-        }
-        await layoutStorage.saveNewLayout({
+        await layoutManager.saveNewLayout({
           name,
-          data: layout.working?.data ?? layout.baseline.data,
+          data: item.working?.data ?? item.baseline.data,
           permission: "org_write",
         });
-        void analytics.logEvent(AppEvent.LAYOUT_SHARE);
+        void analytics.logEvent(AppEvent.LAYOUT_SHARE, { permission: item.permission });
       }
     },
-    [analytics, layoutStorage, layouts.value?.shared, prompt],
+    [analytics, layoutManager, layouts.value?.shared, prompt],
   );
 
-  const onOverwriteLayout = useCallback(
+  const onOverwriteLayout = useCallbackWithToast(
     async (item: Layout) => {
       // CurrentLayoutProvider automatically updates in its layout change listener
-      await layoutStorage.overwriteLayout({ id: item.id });
-      void analytics.logEvent(AppEvent.LAYOUT_OVERWRITE);
+      await layoutManager.overwriteLayout({ id: item.id });
+      void analytics.logEvent(AppEvent.LAYOUT_OVERWRITE, { permission: item.permission });
     },
-    [analytics, layoutStorage],
+    [analytics, layoutManager],
   );
 
-  const onRevertLayout = useCallback(
+  const onRevertLayout = useCallbackWithToast(
     async (item: Layout) => {
       // CurrentLayoutProvider automatically updates in its layout change listener
-      await layoutStorage.revertLayout({ id: item.id });
-      void analytics.logEvent(AppEvent.LAYOUT_REVERT);
+      await layoutManager.revertLayout({ id: item.id });
+      void analytics.logEvent(AppEvent.LAYOUT_REVERT, { permission: item.permission });
     },
-    [analytics, layoutStorage],
+    [analytics, layoutManager],
   );
 
-  const importLayout = useCallback(async () => {
+  const onMakePersonalCopy = useCallbackWithToast(
+    async (item: Layout) => {
+      const newLayout = await layoutManager.makePersonalCopy({
+        id: item.id,
+        name: `${item.name} copy`,
+      });
+      await onSelectLayout(newLayout);
+      void analytics.logEvent(AppEvent.LAYOUT_MAKE_PERSONAL_COPY, {
+        permission: item.permission,
+        syncStatus: item.syncInfo?.status,
+      });
+    },
+    [analytics, layoutManager, onSelectLayout],
+  );
+
+  const importLayout = useCallbackWithToast(async () => {
+    if (!(await promptForUnsavedChanges())) {
+      return;
+    }
     const [fileHandle] = await showOpenFilePicker({
       multiple: false,
       excludeAcceptAllOption: false,
@@ -238,14 +286,14 @@ export default function LayoutBrowser({
     }
 
     const data = parsedState as PanelsState;
-    const newLayout = await layoutStorage.saveNewLayout({
+    const newLayout = await layoutManager.saveNewLayout({
       name: layoutName,
       data,
       permission: "creator_write",
     });
     void onSelectLayout(newLayout);
     void analytics.logEvent(AppEvent.LAYOUT_IMPORT);
-  }, [addToast, isMounted, layoutStorage, analytics, onSelectLayout]);
+  }, [promptForUnsavedChanges, isMounted, layoutManager, onSelectLayout, analytics, addToast]);
 
   const createLayoutTooltip = useTooltip({ contents: "Create new layout" });
   const importLayoutTooltip = useTooltip({ contents: "Import layout" });
@@ -257,7 +305,7 @@ export default function LayoutBrowser({
       title="Layouts"
       noPadding
       trailingItems={[
-        layouts.loading && <Spinner key="spinner" />,
+        (layouts.loading || isBusy) && <Spinner key="spinner" />,
         <IconButton
           key="add-layout"
           elementRef={createLayoutTooltip.ref}
@@ -298,7 +346,7 @@ export default function LayoutBrowser({
       <Stack verticalFill>
         <Stack.Item>
           <LayoutSection
-            title={layoutStorage.supportsSharing ? "Personal" : undefined}
+            title={layoutManager.supportsSharing ? "Personal" : undefined}
             emptyText="Add a new layout to get started with Foxglove Studio!"
             items={layouts.value?.personal}
             selectedId={currentLayoutId}
@@ -310,10 +358,11 @@ export default function LayoutBrowser({
             onExport={onExportLayout}
             onOverwrite={onOverwriteLayout}
             onRevert={onRevertLayout}
+            onMakePersonalCopy={onMakePersonalCopy}
           />
         </Stack.Item>
         <Stack.Item>
-          {layoutStorage.supportsSharing && (
+          {layoutManager.supportsSharing && (
             <LayoutSection
               title="Shared"
               emptyText="Your organization doesn’t have any shared layouts yet. Share a personal layout to collaborate with other team members."
@@ -327,11 +376,12 @@ export default function LayoutBrowser({
               onExport={onExportLayout}
               onOverwrite={onOverwriteLayout}
               onRevert={onRevertLayout}
+              onMakePersonalCopy={onMakePersonalCopy}
             />
           )}
         </Stack.Item>
         <div style={{ flexGrow: 1 }} />
-        {layoutDebug && (
+        {layoutDebug?.syncNow && (
           <Stack
             styles={{
               root: {
@@ -348,26 +398,11 @@ export default function LayoutBrowser({
           >
             <Stack.Item grow align="stretch">
               <Stack disableShrink horizontal tokens={{ childrenGap: theme.spacing.s1 }}>
-                {layoutDebug.openFakeStorageDirectory && (
-                  <Stack.Item grow>
-                    <DefaultButton
-                      text="Open dir"
-                      onClick={() => void layoutDebug.openFakeStorageDirectory?.()}
-                      styles={{
-                        root: {
-                          display: "block",
-                          width: "100%",
-                          margin: 0,
-                        },
-                      }}
-                    />
-                  </Stack.Item>
-                )}
                 <Stack.Item grow>
                   <DefaultButton
                     text="Sync now"
                     onClick={async () => {
-                      await layoutDebug.syncNow();
+                      await layoutDebug.syncNow?.();
                       await reloadLayouts();
                     }}
                     styles={{

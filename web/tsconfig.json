@@ -3,6 +3,7 @@
   "include": ["*.ts"],
   "compilerOptions": {
     "module": "commonjs",
-    "noEmit": true
+    "noEmit": true,
+    "experimentalDecorators": true
   }
 }

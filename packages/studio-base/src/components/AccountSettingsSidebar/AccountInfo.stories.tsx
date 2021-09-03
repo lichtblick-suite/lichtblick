@@ -20,6 +20,8 @@ export default {
 
 export const SignedIn = (): JSX.Element => {
   const me = {
+    id: "fake-userid",
+    orgId: "fake-orgid",
     email: "foo@example.com",
   };
 

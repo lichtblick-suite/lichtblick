@@ -36,7 +36,7 @@ import { LinkedGlobalVariables } from "@foxglove/studio-base/panels/ThreeDimensi
 import panelsReducer from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import { LayoutID } from "@foxglove/studio-base/services/ConsoleApi";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
-import { LayoutChangeListener } from "@foxglove/studio-base/services/ILayoutManager";
+import { LayoutManagerEventTypes } from "@foxglove/studio-base/services/ILayoutManager";
 import { PanelConfig, UserNodes, PlaybackConfig } from "@foxglove/studio-base/types/panels";
 import { getPanelTypeFromId } from "@foxglove/studio-base/util/layout";
 
@@ -203,7 +203,7 @@ export default function CurrentLayoutProvider({
   // Changes to the layout storage from external user actions (such as resetting a layout to a
   // previous saved state) need to trigger setLayoutState.
   useEffect(() => {
-    const listener: LayoutChangeListener = ({ updatedLayout }) => {
+    const listener: LayoutManagerEventTypes["change"] = ({ updatedLayout }) => {
       if (
         updatedLayout &&
         layoutStateRef.current.selectedLayout &&
@@ -218,8 +218,8 @@ export default function CurrentLayoutProvider({
         });
       }
     };
-    layoutManager.addLayoutsChangedListener(listener);
-    return () => layoutManager.removeLayoutsChangedListener(listener);
+    layoutManager.on("change", listener);
+    return () => layoutManager.off("change", listener);
   }, [layoutManager, setLayoutState]);
 
   // Load initial state by re-selecting the last selected layout from the UserProfile

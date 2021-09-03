@@ -32,6 +32,7 @@ enum AppEvent {
   LAYOUT_SHARE = "LAYOUT_SHARE",
   LAYOUT_OVERWRITE = "LAYOUT_OVERWRITE",
   LAYOUT_REVERT = "LAYOUT_REVERT",
+  LAYOUT_MAKE_PERSONAL_COPY = "LAYOUT_MAKE_PERSONAL_COPY",
 
   // Panel events
   PANEL_ADD = "PANEL_ADD",
@@ -76,6 +77,7 @@ export function getEventCategory(event: AppEvent): AppEventCategory {
     case AppEvent.LAYOUT_SHARE:
     case AppEvent.LAYOUT_OVERWRITE:
     case AppEvent.LAYOUT_REVERT:
+    case AppEvent.LAYOUT_MAKE_PERSONAL_COPY:
       return AppEventCategory.LAYOUTS;
 
     case AppEvent.PANEL_ADD:
@@ -112,6 +114,7 @@ export function getEventBreadcrumbType(event: AppEvent): SentryBreadcrumbType {
     case AppEvent.LAYOUT_SHARE:
     case AppEvent.LAYOUT_OVERWRITE:
     case AppEvent.LAYOUT_REVERT:
+    case AppEvent.LAYOUT_MAKE_PERSONAL_COPY:
     case AppEvent.PANEL_ADD:
     case AppEvent.PANEL_DELETE:
       return SentryBreadcrumbType.USER;

@@ -2,11 +2,21 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { EventNames, EventListener } from "eventemitter3";
+
 import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
-import { Layout, LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
+import { Layout, LayoutID, LayoutPermission } from "@foxglove/studio-base/services/ILayoutStorage";
 
-export type LayoutChangeListener = (event: { updatedLayout: Layout | undefined }) => void;
+export type LayoutManagerEventTypes = {
+  /**
+   * Called when a change has occurred to the layouts and the user interface should be updated.
+   * If a particular layout was updated, its data will be passed in the event.
+   */
+  change: (event: { updatedLayout: Layout | undefined }) => void;
 
+  /** Called when the layout manager starts or stops asynchronous activity.  */
+  busychange: () => void;
+};
 /**
  * The Layout Manager is a high-level interface on top of raw layout storage which maps more closely
  * to actions the user can take in the application.
@@ -16,12 +26,16 @@ export interface ILayoutManager {
   /** Indicates whether permissions other than "creator_write" are supported. */
   readonly supportsSharing: boolean;
 
-  /**
-   * Called when a change has occurred to the layouts and the user interface should be updated.
-   * If a particular layout was updated, its data will be passed in the event.
-   */
-  addLayoutsChangedListener(listener: LayoutChangeListener): void;
-  removeLayoutsChangedListener(listener: LayoutChangeListener): void;
+  readonly isBusy: boolean;
+
+  on<E extends EventNames<LayoutManagerEventTypes>>(
+    name: E,
+    listener: EventListener<LayoutManagerEventTypes, E>,
+  ): void;
+  off<E extends EventNames<LayoutManagerEventTypes>>(
+    name: E,
+    listener: EventListener<LayoutManagerEventTypes, E>,
+  ): void;
 
   getLayouts(): Promise<readonly Layout[]>;
 
@@ -30,7 +44,7 @@ export interface ILayoutManager {
   saveNewLayout(params: {
     name: string;
     data: PanelsState;
-    permission: "creator_write" | "org_read" | "org_write";
+    permission: LayoutPermission;
   }): Promise<Layout>;
 
   /**
@@ -39,12 +53,7 @@ export interface ILayoutManager {
    * @note If the layout has not been edited before, the returned layout's id may be different from
    * the input id.
    */
-  updateLayout(params: {
-    id: LayoutID;
-    name?: string;
-    data?: PanelsState;
-    permission?: "creator_write" | "org_read" | "org_write";
-  }): Promise<Layout>;
+  updateLayout(params: { id: LayoutID; name?: string; data?: PanelsState }): Promise<Layout>;
 
   deleteLayout(params: { id: LayoutID }): Promise<void>;
 
@@ -53,4 +62,7 @@ export interface ILayoutManager {
 
   /** Revert this layout to the baseline. */
   revertLayout(params: { id: LayoutID }): Promise<Layout>;
+
+  /** Transfer a shared layout's working changes into a new personal layout. */
+  makePersonalCopy(params: { id: LayoutID; name: string }): Promise<Layout>;
 }

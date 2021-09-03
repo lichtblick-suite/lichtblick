@@ -8,6 +8,10 @@
 // See typings/index.d.ts for additional included references
 /// <reference types="./typings" />
 
+export { default as ConsoleApi } from "@foxglove/studio-base/services/ConsoleApi";
+export { default as ConsoleApiContext } from "@foxglove/studio-base/context/ConsoleApiContext";
+export { default as ConsoleApiRemoteLayoutStorageProvider } from "@foxglove/studio-base/providers/ConsoleApiRemoteLayoutStorageProvider";
+export { default as CurrentUserProvider } from "@foxglove/studio-base/providers/CurrentUserProvider";
 export { default as App } from "./App";
 export type { NetworkInterface, OsContext } from "./OsContext";
 export { default as ErrorBoundary } from "./components/ErrorBoundary";

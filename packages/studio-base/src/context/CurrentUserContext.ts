@@ -5,7 +5,9 @@
 import { createContext, useContext } from "react";
 
 export interface CurrentUser {
-  email?: string;
+  id: string;
+  orgId: string;
+  email: string;
 }
 
 const CurrentUserContext = createContext<CurrentUser | undefined>(undefined);

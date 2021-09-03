@@ -5,6 +5,7 @@
     "rootDir": "../../",
     "noEmit": true,
     "jsx": "react-jsx",
+    "experimentalDecorators": true,
     "lib": ["dom", "dom.iterable", "es2020", "webworker"]
   }
 }

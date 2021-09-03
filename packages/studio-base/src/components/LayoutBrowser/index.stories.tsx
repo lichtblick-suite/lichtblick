@@ -18,7 +18,7 @@ import { UserProfileStorageContext } from "@foxglove/studio-base/context/UserPro
 import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import LayoutManagerProvider from "@foxglove/studio-base/providers/LayoutManagerProvider";
-import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
+import { ISO8601Timestamp, Layout, LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 import LayoutManager from "@foxglove/studio-base/services/LayoutManager";
 import MockLayoutStorage from "@foxglove/studio-base/services/MockLayoutStorage";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
@@ -34,29 +34,45 @@ const DEFAULT_LAYOUT_FOR_TESTS: PanelsState = {
   playbackConfig: defaultPlaybackConfig,
 };
 
+const exampleCurrentLayout: Layout = {
+  id: "test-id" as LayoutID,
+  name: "Current Layout",
+  baseline: {
+    data: DEFAULT_LAYOUT_FOR_TESTS,
+    savedAt: new Date(10).toISOString() as ISO8601Timestamp,
+  },
+  permission: "creator_write",
+  working: undefined,
+  syncInfo: undefined,
+};
 function WithSetup(Child: Story, ctx: StoryContext): JSX.Element {
   const storage = useMemo(
     () =>
       new MockLayoutStorage(
         LayoutManager.LOCAL_STORAGE_NAMESPACE,
-        ctx.parameters?.mockLayouts ?? [
+        (ctx.parameters?.mockLayouts as Layout[] | undefined) ?? [
           {
-            id: "not-current",
+            id: "not-current" as LayoutID,
             name: "Another Layout",
-            path: ["some", "path"],
-            baseline: { data: DEFAULT_LAYOUT_FOR_TESTS, updatedAt: new Date(10).toISOString() },
+            baseline: {
+              data: DEFAULT_LAYOUT_FOR_TESTS,
+              savedAt: new Date(10).toISOString() as ISO8601Timestamp,
+            },
+            permission: "creator_write",
+            working: undefined,
+            syncInfo: undefined,
           },
+          exampleCurrentLayout,
           {
-            id: "test-id",
-            name: "Current Layout",
-            path: undefined,
-            baseline: { data: DEFAULT_LAYOUT_FOR_TESTS, updatedAt: new Date(10).toISOString() },
-          },
-          {
-            id: "short-id",
+            id: "short-id" as LayoutID,
             name: "Short",
-            path: undefined,
-            baseline: { data: DEFAULT_LAYOUT_FOR_TESTS, updatedAt: new Date(10).toISOString() },
+            baseline: {
+              data: DEFAULT_LAYOUT_FOR_TESTS,
+              savedAt: new Date(10).toISOString() as ISO8601Timestamp,
+            },
+            permission: "creator_write",
+            working: undefined,
+            syncInfo: undefined,
           },
         ],
       ),
@@ -310,12 +326,5 @@ export function DeleteLastLayout(_args: unknown): JSX.Element {
 }
 DeleteLastLayout.parameters = {
   useReadySignal: true,
-  mockLayouts: [
-    {
-      id: "test-id",
-      name: "Current Layout",
-      path: undefined,
-      baseline: { data: DEFAULT_LAYOUT_FOR_TESTS, updatedAt: new Date(10).toISOString() },
-    },
-  ],
+  mockLayouts: [exampleCurrentLayout],
 };

@@ -14,6 +14,10 @@ import {
   StudioToastProvider,
   CssBaseline,
   GlobalCss,
+  ConsoleApi,
+  ConsoleApiContext,
+  CurrentUserProvider,
+  ConsoleApiRemoteLayoutStorageProvider,
 } from "@foxglove/studio-base";
 
 import { Desktop } from "../common/types";
@@ -58,10 +62,15 @@ export default function Root(): ReactElement {
     },
   ];
 
+  const api = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL!), []);
+
   const providers = [
     /* eslint-disable react/jsx-key */
-    <StudioToastProvider />,
     <NativeStorageAppConfigurationProvider />,
+    <ConsoleApiContext.Provider value={api} />,
+    <CurrentUserProvider />,
+    <ConsoleApiRemoteLayoutStorageProvider />,
+    <StudioToastProvider />,
     <NativeStorageLayoutStorageProvider />,
     <NativeAppMenuProvider />,
     <UserProfileLocalStorageProvider />,
