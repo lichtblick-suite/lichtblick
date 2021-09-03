@@ -42,6 +42,10 @@ export function Root({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }): JSX
       ),
     },
     {
+      name: "ROS 1 Rosbridge (WebSocket)",
+      type: "rosbridge-websocket",
+    },
+    {
       name: "ROS 2",
       type: "ros2-socket",
       badgeText: "beta",
@@ -55,7 +59,7 @@ export function Root({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }): JSX
       ),
     },
     {
-      name: "Rosbridge (WebSocket)",
+      name: "ROS 2 Rosbridge (WebSocket)",
       type: "rosbridge-websocket",
     },
     {
