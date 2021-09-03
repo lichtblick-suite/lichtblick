@@ -90,6 +90,7 @@ export default class RosbridgePlayer implements Player {
   private _hasReceivedMessage = false;
   private _presence: PlayerPresence = PlayerPresence.NOT_PRESENT;
   private _problems = new PlayerProblemManager();
+  private _emitTimer?: ReturnType<typeof setTimeout>;
 
   constructor({
     url,
@@ -109,6 +110,9 @@ export default class RosbridgePlayer implements Player {
   _open = (): void => {
     if (this._closed) {
       return;
+    }
+    if (this._rosClient != undefined) {
+      throw new Error(`Attempted to open a second Rosbridge connection`);
     }
     this._problems.removeProblem("rosbridge:connection-failed");
     log.info(`Opening connection to ${this._url}`);
@@ -309,7 +313,10 @@ export default class RosbridgePlayer implements Player {
     // When connected
     // Time is always moving forward even if we don't get messages from the server.
     if (this._presence === PlayerPresence.PRESENT) {
-      setTimeout(this._emitState, 100);
+      if (this._emitTimer != undefined) {
+        clearTimeout(this._emitTimer);
+      }
+      this._emitTimer = setTimeout(this._emitState, 100);
     }
 
     const currentTime = this._getCurrentTime();
@@ -354,6 +361,10 @@ export default class RosbridgePlayer implements Player {
     this._closed = true;
     if (this._rosClient) {
       this._rosClient.close();
+    }
+    if (this._emitTimer != undefined) {
+      clearTimeout(this._emitTimer);
+      this._emitTimer = undefined;
     }
     this._metricsCollector.close();
     this._hasReceivedMessage = false;

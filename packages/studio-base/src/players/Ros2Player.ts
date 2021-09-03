@@ -73,6 +73,7 @@ export default class Ros2Player implements Player {
   private _metricsCollector: PlayerMetricsCollectorInterface;
   private _presence: PlayerPresence = PlayerPresence.INITIALIZING;
   private _problems = new PlayerProblemManager();
+  private _emitTimer?: ReturnType<typeof setTimeout>;
 
   constructor({ domainId, metricsCollector }: Ros2PlayerOpts) {
     log.info(`initializing Ros2Player (domainId=${domainId})`);
@@ -250,7 +251,10 @@ export default class Ros2Player implements Player {
     // Time is always moving forward even if we don't get messages from the server.
     // If we are not connected, don't emit updates since we are not longer getting new data
     if (this._presence === PlayerPresence.PRESENT) {
-      setTimeout(this._emitState, 100);
+      if (this._emitTimer != undefined) {
+        clearTimeout(this._emitTimer);
+      }
+      this._emitTimer = setTimeout(this._emitState, 100);
     }
 
     const currentTime = this._getCurrentTime();
@@ -295,6 +299,10 @@ export default class Ros2Player implements Player {
     this._closed = true;
     if (this._rosNode) {
       void this._rosNode.shutdown();
+    }
+    if (this._emitTimer != undefined) {
+      clearTimeout(this._emitTimer);
+      this._emitTimer = undefined;
     }
     this._metricsCollector.close();
     this._hasReceivedMessage = false;

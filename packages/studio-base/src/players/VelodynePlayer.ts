@@ -79,6 +79,7 @@ export default class VelodynePlayer implements Player {
   private _parsedMessages: MessageEvent<unknown>[] = []; // Queue of messages that we'll send in next _emitState() call
   private _metricsCollector: PlayerMetricsCollectorInterface;
   private _presence: PlayerPresence = PlayerPresence.INITIALIZING;
+  private _emitTimer?: ReturnType<typeof setTimeout>;
 
   // track issues within the player
   private _problems: PlayerProblem[] = [];
@@ -195,7 +196,10 @@ export default class VelodynePlayer implements Player {
     // Time is always moving forward even if we don't get messages from the device.
     // If we are not connected, don't emit updates since we are not longer getting new data
     if (this._presence === PlayerPresence.PRESENT) {
-      setTimeout(this._emitState, 100);
+      if (this._emitTimer != undefined) {
+        clearTimeout(this._emitTimer);
+      }
+      this._emitTimer = setTimeout(this._emitState, 100);
     }
 
     const currentTime = fromMillis(Date.now());
@@ -242,6 +246,10 @@ export default class VelodynePlayer implements Player {
     if (this._socket) {
       void this._socket.dispose();
       this._socket = undefined;
+    }
+    if (this._emitTimer != undefined) {
+      clearTimeout(this._emitTimer);
+      this._emitTimer = undefined;
     }
     this._metricsCollector.close();
     this._totalBytesReceived = 0;
