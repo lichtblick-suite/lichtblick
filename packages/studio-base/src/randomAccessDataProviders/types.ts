@@ -204,6 +204,7 @@ export type Connection = {
 // means that you can describe a chain of data providers that includes a Worker or a WebSocket.
 export type RandomAccessDataProviderDescriptor = {
   label?: string;
+  filePath?: string;
   name: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   args: any;

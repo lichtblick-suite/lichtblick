@@ -27,6 +27,8 @@ export type { Layout, LayoutID, ISO8601Timestamp, ILayoutStorage } from "./servi
 export { migrateLayout } from "./services/ILayoutStorage";
 export { default as NativeAppMenuContext } from "./context/NativeAppMenuContext";
 export type { NativeAppMenu, NativeAppMenuEvent } from "./context/NativeAppMenuContext";
+export { default as NativeWindowContext } from "./context/NativeWindowContext";
+export type { NativeWindow } from "./context/NativeWindowContext";
 export type { PlayerSourceDefinition } from "./context/PlayerSelectionContext";
 export { default as ThemeProvider } from "./theme/ThemeProvider";
 export { default as installDevtoolsFormatters } from "./util/installDevtoolsFormatters";

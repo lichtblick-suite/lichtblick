@@ -17,12 +17,19 @@ import { RandomAccessDataProviderDescriptor } from "@foxglove/studio-base/random
 function wrapInWorker(
   descriptor: RandomAccessDataProviderDescriptor,
 ): RandomAccessDataProviderDescriptor {
-  return { name: CoreDataProviders.WorkerDataProvider, args: {}, children: [descriptor] };
+  return {
+    label: descriptor.label,
+    filePath: descriptor.filePath,
+    name: CoreDataProviders.WorkerDataProvider,
+    args: {},
+    children: [descriptor],
+  };
 }
 
 export function getLocalBagDescriptor(file: File): RandomAccessDataProviderDescriptor {
   return wrapInWorker({
     name: CoreDataProviders.BagDataProvider,
+    filePath: (file as { path?: string }).path, // File.path is added by Electron
     args: { bagPath: { type: "file", file } },
     children: [],
   });

@@ -107,6 +107,9 @@ const ctx: OsContext = {
 };
 
 const desktopBridge: Desktop = {
+  async setRepresentedFilename(path: string | undefined) {
+    await ipcRenderer.invoke("setRepresentedFilename", path);
+  },
   getDeepLinks(): string[] {
     return window.process.argv.filter((arg) => arg.startsWith("foxglove://"));
   },

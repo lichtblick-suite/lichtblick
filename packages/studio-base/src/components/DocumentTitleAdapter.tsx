@@ -8,21 +8,32 @@ import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
+import { useNativeWindow } from "@foxglove/studio-base/context/NativeWindowContext";
 
 const selectPlayerName = (ctx: MessagePipelineContext) => ctx.playerState.name;
+const selectPlayerFilePath = (ctx: MessagePipelineContext) => ctx.playerState.filePath;
 
 /**
  * DocumentTitleAdapter sets the document title based on the currently selected player
  */
 export default function DocumentTitleAdapter(): JSX.Element {
+  const nativeWindow = useNativeWindow();
   const playerName = useMessagePipeline(selectPlayerName);
+  const filePath = useMessagePipeline(selectPlayerFilePath);
 
   useEffect(() => {
     if (!playerName) {
       window.document.title = "Foxglove Studio";
       return;
     }
-    window.document.title = `${playerName} - Foxglove Studio`;
+    window.document.title = navigator.userAgent.includes("Mac")
+      ? playerName
+      : `${playerName} – Foxglove Studio`;
   }, [playerName]);
+
+  useEffect(() => {
+    nativeWindow?.setRepresentedFilename(filePath);
+  }, [filePath, nativeWindow]);
+
   return <></>;
 }

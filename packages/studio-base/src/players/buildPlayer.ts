@@ -23,8 +23,9 @@ export function buildPlayerFromDescriptor(
   childDescriptor: RandomAccessDataProviderDescriptor,
   options: BuildPlayerOptions,
 ): Player {
-  const rootDescriptor = {
+  const rootDescriptor: RandomAccessDataProviderDescriptor = {
     label: name,
+    filePath: childDescriptor.filePath,
     name: CoreDataProviders.ParseMessagesDataProvider,
     args: {},
     children: [
