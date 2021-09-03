@@ -27,7 +27,7 @@ export default function useGlobalVariables(): {
 } {
   const { setGlobalVariables, overwriteGlobalVariables } = useCurrentLayoutActions();
   const globalVariables = useCurrentLayoutSelector(
-    (state) => state.selectedLayout?.data.globalVariables ?? EMPTY_GLOBAL_VARIABLES,
+    (state) => state.selectedLayout?.data?.globalVariables ?? EMPTY_GLOBAL_VARIABLES,
   );
   return { setGlobalVariables, overwriteGlobalVariables, globalVariables };
 }

@@ -17,7 +17,7 @@ describe("useCurrentLayoutSelector", () => {
       }),
       {
         initialProps: (layoutState: LayoutState) =>
-          layoutState.selectedLayout?.data.configById["foo"],
+          layoutState.selectedLayout?.data?.configById["foo"],
         wrapper({ children }) {
           return (
             <MockCurrentLayoutProvider initialState={{ configById: { foo: { value: 42 } } }}>
@@ -49,7 +49,7 @@ describe("useCurrentLayoutSelector", () => {
       }),
       {
         initialProps: (layoutState: LayoutState) =>
-          layoutState.selectedLayout?.data.configById["foo"],
+          layoutState.selectedLayout?.data?.configById["foo"],
         wrapper({ children }) {
           return (
             <MockCurrentLayoutProvider
@@ -71,7 +71,7 @@ describe("useCurrentLayoutSelector", () => {
       { value: 42 },
     ]);
 
-    rerender((layoutState) => layoutState.selectedLayout?.data.configById["bar"]);
+    rerender((layoutState) => layoutState.selectedLayout?.data?.configById["bar"]);
     expect(result.all.map((item) => (item instanceof Error ? undefined : item.value))).toEqual([
       { value: 42 },
       { otherValue: 0 },
@@ -101,7 +101,7 @@ describe("useCurrentLayoutSelector", () => {
       }),
       {
         initialProps: (layoutState: LayoutState) =>
-          layoutState.selectedLayout?.data.configById["foo"],
+          layoutState.selectedLayout?.data?.configById["foo"],
         wrapper({ children }) {
           return (
             <MockCurrentLayoutProvider

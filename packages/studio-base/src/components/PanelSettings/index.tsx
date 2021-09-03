@@ -47,7 +47,7 @@ export default function PanelSettings(): JSX.Element {
 
   const [showShareModal, setShowShareModal] = useState(false);
   const shareModal = useMemo(() => {
-    const panelConfigById = getCurrentLayout().selectedLayout?.data.configById;
+    const panelConfigById = getCurrentLayout().selectedLayout?.data?.configById;
     if (selectedPanelId == undefined || !showShareModal || !panelConfigById) {
       return ReactNull;
     }

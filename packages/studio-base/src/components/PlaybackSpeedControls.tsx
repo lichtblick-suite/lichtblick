@@ -28,7 +28,7 @@ function formatSpeed(val: number) {
 export default function PlaybackSpeedControls(): JSX.Element {
   const theme = useTheme();
   const configSpeed = useCurrentLayoutSelector(
-    (state) => state.selectedLayout?.data.playbackConfig.speed,
+    (state) => state.selectedLayout?.data?.playbackConfig.speed,
   );
   const speed = useMessagePipeline(
     useCallback(({ playerState }) => playerState.activeData?.speed, []),

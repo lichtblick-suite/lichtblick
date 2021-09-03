@@ -363,11 +363,11 @@ export default function PlayerManager({
   });
 
   const messageOrder = useCurrentLayoutSelector(
-    (state) => state.selectedLayout?.data.playbackConfig.messageOrder,
+    (state) => state.selectedLayout?.data?.playbackConfig.messageOrder,
   );
-  const userNodes = useCurrentLayoutSelector((state) => state.selectedLayout?.data.userNodes);
+  const userNodes = useCurrentLayoutSelector((state) => state.selectedLayout?.data?.userNodes);
   const globalVariables = useCurrentLayoutSelector(
-    (state) => state.selectedLayout?.data.globalVariables ?? EMPTY_GLOBAL_VARIABLES,
+    (state) => state.selectedLayout?.data?.globalVariables ?? EMPTY_GLOBAL_VARIABLES,
   );
 
   const globalVariablesRef = useRef<GlobalVariables>(globalVariables);

@@ -308,7 +308,7 @@ export default function Panel<
     );
 
     const groupPanels = useCallback(() => {
-      const layout = getCurrentLayoutState().selectedLayout?.data.layout;
+      const layout = getCurrentLayoutState().selectedLayout?.data?.layout;
       if (layout == undefined) {
         return;
       }
@@ -321,7 +321,7 @@ export default function Panel<
     }, [getCurrentLayoutState, getSelectedPanelIds, createTabPanel, childId]);
 
     const createTabs = useCallback(() => {
-      const layout = getCurrentLayoutState().selectedLayout?.data.layout;
+      const layout = getCurrentLayoutState().selectedLayout?.data?.layout;
       if (layout == undefined) {
         return;
       }
@@ -342,7 +342,7 @@ export default function Panel<
     }, [closePanel, mosaicActions, mosaicWindowActions, tabId]);
 
     const splitPanel = useCallback(() => {
-      const savedProps = getCurrentLayoutState().selectedLayout?.data.configById;
+      const savedProps = getCurrentLayoutState().selectedLayout?.data?.configById;
       if (!savedProps) {
         return;
       }

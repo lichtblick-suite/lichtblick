@@ -68,7 +68,6 @@ export default function CurrentLayoutProvider({
   }, []);
 
   const [layoutState, setLayoutStateInternal] = useState<LayoutState>({
-    loading: true,
     selectedLayout: undefined,
   });
   const layoutStateRef = useRef(layoutState);
@@ -110,21 +109,24 @@ export default function CurrentLayoutProvider({
       { saveToProfile = true }: { saveToProfile?: boolean } = {},
     ) => {
       if (id == undefined) {
-        setLayoutState({ loading: false, selectedLayout: undefined });
+        setLayoutState({ selectedLayout: undefined });
         return;
       }
       try {
-        setLayoutState({ loading: true, selectedLayout: undefined });
+        setLayoutState({ selectedLayout: { id, loading: true, data: undefined } });
         const layout = await layoutManager.getLayout(id);
         if (!isMounted()) {
           return;
         }
         if (layout == undefined) {
-          setLayoutState({ loading: false, selectedLayout: undefined });
+          setLayoutState({ selectedLayout: undefined });
         } else {
           setLayoutState({
-            loading: false,
-            selectedLayout: { id: layout.id, data: layout.working?.data ?? layout.baseline.data },
+            selectedLayout: {
+              loading: false,
+              id: layout.id,
+              data: layout.working?.data ?? layout.baseline.data,
+            },
           });
           if (saveToProfile) {
             setUserProfile({ currentLayoutId: id }).catch((error) => {
@@ -138,7 +140,7 @@ export default function CurrentLayoutProvider({
       } catch (error) {
         console.error(error);
         addToast(`The layout could not be loaded. ${error.toString()}`, { appearance: "error" });
-        setLayoutState({ loading: false, selectedLayout: undefined });
+        setLayoutState({ selectedLayout: undefined });
       }
     },
     [addToast, isMounted, layoutManager, setLayoutState, setUserProfile],
@@ -153,13 +155,13 @@ export default function CurrentLayoutProvider({
   const performAction = useCallback(
     (action: PanelsActions) => {
       if (
-        layoutStateRef.current.loading === true ||
-        layoutStateRef.current.selectedLayout == undefined
+        layoutStateRef.current.selectedLayout?.data == undefined ||
+        layoutStateRef.current.selectedLayout.loading === true
       ) {
         return;
       }
       const oldData = layoutStateRef.current.selectedLayout.data;
-      const newData = panelsReducer(layoutStateRef.current.selectedLayout.data, action);
+      const newData = panelsReducer(oldData, action);
 
       // the panel state did not change, so no need to perform layout state updates or layout manager updates
       if (isEqual(oldData, newData)) {
@@ -195,7 +197,7 @@ export default function CurrentLayoutProvider({
       // Some actions like CHANGE_PANEL_LAYOUT will cause further downstream effects to update panel
       // configs (i.e. set default configs). These result in calls to performAction. To ensure the
       // debounced params are set in the proper order, we invoke setLayoutState at the end.
-      setLayoutState({ loading: false, selectedLayout: newLayout });
+      setLayoutState({ selectedLayout: { ...newLayout, loading: false } });
     },
     [addToast, isMounted, layoutManager, setLayoutState],
   );
@@ -210,8 +212,8 @@ export default function CurrentLayoutProvider({
         updatedLayout.id === layoutStateRef.current.selectedLayout.id
       ) {
         setLayoutState({
-          loading: false,
           selectedLayout: {
+            loading: false,
             id: updatedLayout.id,
             data: updatedLayout.working?.data ?? updatedLayout.baseline.data,
           },

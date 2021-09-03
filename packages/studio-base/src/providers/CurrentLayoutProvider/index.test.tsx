@@ -127,9 +127,9 @@ describe("CurrentLayoutProvider", () => {
     expect(
       result.all.map((item) => (item instanceof Error ? undefined : item.layoutState)),
     ).toEqual([
-      { loading: true, selectedLayout: undefined },
-      { loading: true, selectedLayout: undefined },
-      { loading: false, selectedLayout: { id: "example", data: expectedState } },
+      { selectedLayout: undefined },
+      { selectedLayout: { loading: true, id: "example", data: undefined } },
+      { selectedLayout: { loading: false, id: "example", data: expectedState } },
     ]);
   });
 
@@ -173,11 +173,11 @@ describe("CurrentLayoutProvider", () => {
     expect(
       result.all.map((item) => (item instanceof Error ? undefined : item.layoutState)),
     ).toEqual([
-      { loading: true, selectedLayout: undefined },
-      { loading: true, selectedLayout: undefined },
-      { loading: false, selectedLayout: { id: "example", data: TEST_LAYOUT } },
-      { loading: true, selectedLayout: undefined },
-      { loading: false, selectedLayout: { id: "example2", data: newLayout } },
+      { selectedLayout: undefined },
+      { selectedLayout: { loading: true, id: "example", data: undefined } },
+      { selectedLayout: { loading: false, id: "example", data: TEST_LAYOUT } },
+      { selectedLayout: { loading: true, id: "example2", data: undefined } },
+      { selectedLayout: { loading: false, id: "example2", data: newLayout } },
     ]);
   });
 
@@ -186,7 +186,7 @@ describe("CurrentLayoutProvider", () => {
     const mockLayoutManager = makeMockLayoutManager();
     mockLayoutManager.getLayout.mockImplementation(async () => {
       return {
-        id: "TEST_ID",
+        id: "example",
         name: "Test layout",
         baseline: { data: TEST_LAYOUT, updatedAt: new Date(10).toISOString() },
       };
@@ -214,15 +214,15 @@ describe("CurrentLayoutProvider", () => {
     };
 
     expect(mockLayoutManager.updateLayout.mock.calls).toEqual([
-      [{ id: "TEST_ID", data: newState }],
+      [{ id: "example", data: newState }],
     ]);
     expect(
       result.all.map((item) => (item instanceof Error ? undefined : item.layoutState)),
     ).toEqual([
-      { loading: true, selectedLayout: undefined },
-      { loading: true, selectedLayout: undefined },
-      { loading: false, selectedLayout: { id: "TEST_ID", data: TEST_LAYOUT } },
-      { loading: false, selectedLayout: { id: "TEST_ID", data: newState } },
+      { selectedLayout: undefined },
+      { selectedLayout: { loading: true, id: "example", data: undefined } },
+      { selectedLayout: { loading: false, id: "example", data: TEST_LAYOUT } },
+      { selectedLayout: { loading: false, id: "example", data: newState } },
     ]);
   });
 

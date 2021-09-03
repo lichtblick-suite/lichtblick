@@ -86,7 +86,7 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
         throw new Error("Trying to split unknown panel!");
       }
 
-      const config = getCurrentLayout().selectedLayout?.data.configById[id] ?? {};
+      const config = getCurrentLayout().selectedLayout?.data?.configById[id] ?? {};
       splitPanel({
         id,
         tabId,

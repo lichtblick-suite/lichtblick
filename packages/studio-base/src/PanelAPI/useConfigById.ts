@@ -25,7 +25,7 @@ export default function useConfigById<Config extends Record<string, unknown>>(
       if (panelId == undefined) {
         return undefined;
       }
-      return state.selectedLayout?.data.configById?.[panelId] as Config | undefined;
+      return state.selectedLayout?.data?.configById?.[panelId] as Config | undefined;
     },
     [panelId],
   );

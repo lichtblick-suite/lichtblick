@@ -29,8 +29,13 @@ import {
 } from "./actions";
 
 export type LayoutState = Readonly<{
-  loading?: boolean;
-  selectedLayout: { id: LayoutID; data: PanelsState } | undefined;
+  selectedLayout:
+    | {
+        id: LayoutID;
+        loading?: boolean;
+        data: PanelsState | undefined;
+      }
+    | undefined;
 }>;
 
 /**
@@ -163,7 +168,7 @@ export function useSelectedPanels(): SelectedPanelActions {
 
   const selectAllPanels = useCallback(() => {
     // eslint-disable-next-line no-restricted-syntax
-    const panelIds = getLeaves(getCurrentLayout().selectedLayout?.data.layout ?? null);
+    const panelIds = getLeaves(getCurrentLayout().selectedLayout?.data?.layout ?? null);
     setSelectedPanelIds(panelIds);
   }, [getCurrentLayout, setSelectedPanelIds]);
 
@@ -171,7 +176,7 @@ export function useSelectedPanels(): SelectedPanelActions {
     (panelId: string, containingTabId: string | undefined) => {
       setSelectedPanelIds((selectedIds) => {
         const { selectedLayout } = getCurrentLayout();
-        if (!selectedLayout) {
+        if (!selectedLayout?.data) {
           return selectedIds;
         }
         return toggleSelectedPanel(

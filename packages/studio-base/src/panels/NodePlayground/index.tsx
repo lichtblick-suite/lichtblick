@@ -134,7 +134,7 @@ function NodePlayground(props: Props) {
   const [explorer, updateExplorer] = React.useState<Explorer>(undefined);
 
   const userNodes = useCurrentLayoutSelector(
-    (state) => state.selectedLayout?.data.userNodes ?? EMPTY_USER_NODES,
+    (state) => state.selectedLayout?.data?.userNodes ?? EMPTY_USER_NODES,
   );
   const {
     state: { nodeStates: userNodeDiagnostics, rosLib },

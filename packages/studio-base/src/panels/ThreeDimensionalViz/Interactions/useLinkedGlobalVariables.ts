@@ -35,7 +35,7 @@ export default function useLinkedGlobalVariables(): {
 } {
   const { setLinkedGlobalVariables } = useCurrentLayoutActions();
   const linkedGlobalVariables = useCurrentLayoutSelector(
-    (state) => state.selectedLayout?.data.linkedGlobalVariables ?? EMPTY_VARIABLES,
+    (state) => state.selectedLayout?.data?.linkedGlobalVariables ?? EMPTY_VARIABLES,
   );
   const linkedGlobalVariablesByName = useMemo(() => {
     const linksByName: { [name: string]: LinkedGlobalVariable[] } = {};

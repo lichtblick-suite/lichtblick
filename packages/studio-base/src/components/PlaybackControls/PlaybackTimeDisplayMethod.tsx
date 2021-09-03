@@ -53,7 +53,7 @@ const PlaybackTimeDisplayMethod = ({
 }): JSX.Element => {
   const timestampInputRef = useRef<HTMLInputElement>(ReactNull);
   const timeDisplayMethod = useCurrentLayoutSelector(
-    (state) => state.selectedLayout?.data.playbackConfig.timeDisplayMethod ?? "ROS",
+    (state) => state.selectedLayout?.data?.playbackConfig.timeDisplayMethod ?? "ROS",
   );
   const { setPlaybackConfig } = useCurrentLayoutActions();
   const setTimeDisplayMethod = useCallback(
