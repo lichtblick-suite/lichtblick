@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { ActionButton, Icon, Text, useTheme } from "@fluentui/react";
+import { ActionButton, Icon, makeStyles, Text, useTheme } from "@fluentui/react";
 import { useCallback, useContext } from "react";
 
 import {
@@ -25,10 +25,24 @@ const selectPlayerName = (ctx: MessagePipelineContext) => ctx.playerState.name;
 
 const emptyArray: PlayerProblem[] = [];
 
+const useStyles = makeStyles((theme) => ({
+  badge: {
+    textTransform: "uppercase",
+    fontSize: theme.fonts.small.fontSize,
+    fontWeight: 600,
+    backgroundColor: theme.palette.themePrimary,
+    color: theme.palette.neutralLighterAlt,
+    padding: `1px 8px`,
+    marginLeft: theme.spacing.m,
+    borderRadius: 100,
+  },
+}));
+
 export default function ConnectionList(): JSX.Element {
   const { selectSource, availableSources } = usePlayerSelection();
   const confirm = useConfirm();
   const modalHost = useContext(ModalContext);
+  const styles = useStyles();
 
   const playerProblems = useMessagePipeline(selectPlayerProblems) ?? emptyArray;
   const playerPresence = useMessagePipeline(selectPlayerPresence);
@@ -124,6 +138,7 @@ export default function ConnectionList(): JSX.Element {
               onClick={() => onSourceClick(source)}
             >
               {source.name}
+              {source.badgeText && <span className={styles.badge}>{source.badgeText}</span>}
             </ActionButton>
           </div>
         );

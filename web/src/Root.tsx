@@ -42,8 +42,9 @@ export function Root({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }): JSX
       ),
     },
     {
-      name: "ROS 2 [BETA]",
+      name: "ROS 2",
       type: "ros2-socket",
+      badgeText: "beta",
       disabledReason: (
         <>
           ROS 2 Native connections are only available in our desktop app.&nbsp;

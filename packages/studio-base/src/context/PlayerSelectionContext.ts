@@ -17,6 +17,7 @@ export type PlayerSourceDefinition = {
   name: string;
   type: SourceTypes;
   disabledReason?: string | JSX.Element;
+  badgeText?: string;
 };
 
 type FileSourceParams = {
