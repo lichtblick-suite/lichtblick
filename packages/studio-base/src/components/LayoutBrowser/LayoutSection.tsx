@@ -66,7 +66,7 @@ export default function LayoutSection({
         </Text>
       )}
       <Stack.Item>
-        <Text className={styles.emptyText} style={{ lineHeight: "1.3" }}>
+        <Text className={styles.emptyText} styles={{ root: { lineHeight: "1.3" } }}>
           {items != undefined && items.length === 0 && emptyText}
         </Text>
         {items?.map((layout) => (

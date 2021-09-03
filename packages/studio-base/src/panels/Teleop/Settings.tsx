@@ -7,7 +7,6 @@ import {
   IDropdownOption,
   Label,
   Stack,
-  StackItem,
   Text,
   TextField,
   useTheme,
@@ -69,7 +68,7 @@ export default function Settings(props: SettingsProps): JSX.Element {
 
   return (
     <Stack verticalFill tokens={{ childrenGap: theme.spacing.m }}>
-      <StackItem>
+      <Stack.Item>
         <Text>Publish Topic</Text>
         <Stack
           tokens={{
@@ -93,8 +92,8 @@ export default function Settings(props: SettingsProps): JSX.Element {
             }}
           />
         </Stack>
-      </StackItem>
-      <StackItem>
+      </Stack.Item>
+      <Stack.Item>
         <TextField
           type="number"
           label="Publish Rate (Hz)"
@@ -120,12 +119,12 @@ export default function Settings(props: SettingsProps): JSX.Element {
             });
           }}
         />
-      </StackItem>
-      <StackItem grow>
+      </Stack.Item>
+      <Stack.Item grow>
         <Stack horizontal verticalAlign="end" tokens={{ childrenGap: theme.spacing.m }}>
-          <StackItem grow>
+          <Stack.Item grow>
             <Label>Up Button:</Label>
-          </StackItem>
+          </Stack.Item>
           <Dropdown
             label="Field"
             selectedKey={config.upButton.field}
@@ -157,12 +156,12 @@ export default function Settings(props: SettingsProps): JSX.Element {
             }}
           />
         </Stack>
-      </StackItem>
-      <StackItem>
+      </Stack.Item>
+      <Stack.Item>
         <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.m }}>
-          <StackItem grow>
+          <Stack.Item grow>
             <Label>Down Button:</Label>
-          </StackItem>
+          </Stack.Item>
           <Dropdown
             selectedKey={config.downButton.field}
             options={dropDownOptions}
@@ -192,12 +191,12 @@ export default function Settings(props: SettingsProps): JSX.Element {
             }}
           />
         </Stack>
-      </StackItem>
-      <StackItem>
+      </Stack.Item>
+      <Stack.Item>
         <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.m }}>
-          <StackItem grow>
+          <Stack.Item grow>
             <Label>Left Button:</Label>
-          </StackItem>
+          </Stack.Item>
           <Dropdown
             selectedKey={config.leftButton.field}
             options={dropDownOptions}
@@ -227,12 +226,12 @@ export default function Settings(props: SettingsProps): JSX.Element {
             }}
           />
         </Stack>
-      </StackItem>
-      <StackItem>
+      </Stack.Item>
+      <Stack.Item>
         <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.m }}>
-          <StackItem grow>
+          <Stack.Item grow>
             <Label>Right Button:</Label>
-          </StackItem>
+          </Stack.Item>
           <Dropdown
             selectedKey={config.rightButton.field}
             options={dropDownOptions}
@@ -262,7 +261,7 @@ export default function Settings(props: SettingsProps): JSX.Element {
             }}
           />
         </Stack>
-      </StackItem>
+      </Stack.Item>
     </Stack>
   );
 }
