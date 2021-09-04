@@ -91,7 +91,7 @@ export default (env: unknown, argv: WebpackArgv): Configuration => {
       new HtmlWebpackPlugin({
         templateContent: `
   <!doctype html>
-  <html>
+  <html style="background-color: #121217;">
     <head><meta charset="utf-8"></head>
     <script>
       global = globalThis;
