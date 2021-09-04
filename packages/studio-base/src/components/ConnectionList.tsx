@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.themePrimary,
     color: theme.palette.neutralLighterAlt,
     padding: `1px 8px`,
-    marginLeft: theme.spacing.m,
+    marginLeft: "10px",
     borderRadius: 100,
   },
 }));

@@ -28,6 +28,7 @@ import useGlobalVariables, {
 } from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { usePreviousValue } from "@foxglove/studio-base/hooks/usePreviousValue";
 import useLinkedGlobalVariables from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
+import { SANS_SERIF } from "@foxglove/studio-base/styles/fonts";
 import { colors as sharedColors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 // The minimum amount of time to wait between showing the global variable update animation again
@@ -68,7 +69,7 @@ const SGlobalVariablesTable = styled.div`
   th,
   td {
     line-height: 100%;
-    padding: 4px !important;
+    padding: 8px 4px !important;
     border: none;
   }
 
@@ -83,9 +84,15 @@ const SGlobalVariablesTable = styled.div`
       background: none !important;
       color: inherit;
       width: 100%;
-      padding-left: 0;
-      padding-right: 0;
-      min-width: 0;
+      min-width: 5em;
+      padding: 0;
+      border: 0;
+      font: inherit;
+      font-family: ${SANS_SERIF};
+      font-size: 100%;
+    }
+    input:focus {
+      outline: none;
     }
     &:last-child {
       color: rgba(255, 255, 255, 0.6);

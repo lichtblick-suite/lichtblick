@@ -38,16 +38,7 @@ export default function Root(): ReactElement {
       type: "ros1-socket",
     },
     {
-      name: "ROS 1 Rosbridge (WebSocket)",
-      type: "rosbridge-websocket",
-    },
-    {
-      name: "ROS 2",
-      type: "ros2-socket",
-      badgeText: "beta",
-    },
-    {
-      name: "ROS 2 Rosbridge (WebSocket)",
+      name: "ROS 1 Rosbridge",
       type: "rosbridge-websocket",
     },
     {
@@ -55,8 +46,17 @@ export default function Root(): ReactElement {
       type: "ros1-local-bagfile",
     },
     {
-      name: "ROS 1 Bag (HTTP)",
+      name: "ROS 1 Bag (remote)",
       type: "ros1-remote-bagfile",
+    },
+    {
+      name: "ROS 2",
+      type: "ros2-socket",
+      badgeText: "beta",
+    },
+    {
+      name: "ROS 2 Rosbridge",
+      type: "rosbridge-websocket",
     },
     {
       name: "ROS 2 Bag (local)",

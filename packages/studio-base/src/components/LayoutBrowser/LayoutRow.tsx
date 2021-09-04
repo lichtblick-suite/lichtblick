@@ -73,7 +73,6 @@ const useStyles = makeStyles((theme) => ({
     userSelect: "none",
   },
   layoutNameSelected: {
-    fontWeight: 600,
     color: theme.palette.themePrimary,
   },
 
@@ -121,11 +120,7 @@ export default function LayoutRow({
 
   const [editingName, setEditingName] = useState(false);
   const [nameFieldValue, setNameFieldValue] = useState("");
-  const [hovered, setHovered] = useState<boolean>(false);
   const [menuOpen, setMenuOpen] = useState<boolean>(false);
-
-  const onMouseEnter = useCallback(() => setHovered(true), []);
-  const onMouseLeave = useCallback(() => setHovered(false), []);
 
   const onMenuOpened = useCallback(() => setMenuOpen(true), []);
   const onMenuDismissed = useCallback(() => setMenuOpen(false), []);
@@ -155,12 +150,10 @@ export default function LayoutRow({
   }, [layout]);
 
   const onClick = useCallback(() => {
-    if (selected) {
-      renameAction();
-    } else {
+    if (!selected) {
       onSelect(layout, true);
     }
-  }, [layout, onSelect, renameAction, selected]);
+  }, [layout, onSelect, selected]);
 
   const duplicateAction = useCallback(() => onDuplicate(layout), [layout, onDuplicate]);
 
@@ -383,8 +376,6 @@ export default function LayoutRow({
       })}
       onClick={editingName ? undefined : onClick}
       onSubmit={onSubmit}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
       onContextMenu={(event) => {
         event.preventDefault();
         setContextMenuEvent(event.nativeEvent);
@@ -429,18 +420,9 @@ export default function LayoutRow({
           className={cx(styles.menuButton, {
             [styles.menuButtonModified]: hasModifications,
           })}
-          onFocus={() => setHovered(true)}
-          onBlur={() => setHovered(false)}
           data-test="layout-actions"
           iconProps={{
-            iconName:
-              menuOpen || hovered
-                ? "More"
-                : deletedOnServer
-                ? "Error"
-                : hasModifications
-                ? "LocationDot"
-                : "More",
+            iconName: deletedOnServer ? "Error" : hasModifications ? "LocationDot" : "More",
             styles: {
               root: {
                 color: deletedOnServer ? theme.semanticColors.errorIcon : undefined,

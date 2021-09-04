@@ -42,8 +42,16 @@ export function Root({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }): JSX
       ),
     },
     {
-      name: "ROS 1 Rosbridge (WebSocket)",
+      name: "ROS 1 Rosbridge",
       type: "rosbridge-websocket",
+    },
+    {
+      name: "ROS 1 Bag (local)",
+      type: "ros1-local-bagfile",
+    },
+    {
+      name: "ROS 1 Bag (remote)",
+      type: "ros1-remote-bagfile",
     },
     {
       name: "ROS 2",
@@ -59,16 +67,8 @@ export function Root({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }): JSX
       ),
     },
     {
-      name: "ROS 2 Rosbridge (WebSocket)",
+      name: "ROS 2 Rosbridge",
       type: "rosbridge-websocket",
-    },
-    {
-      name: "ROS 1 Bag (local)",
-      type: "ros1-local-bagfile",
-    },
-    {
-      name: "ROS 1 Bag (HTTP)",
-      type: "ros1-remote-bagfile",
     },
     {
       name: "ROS 2 Bag (local)",
