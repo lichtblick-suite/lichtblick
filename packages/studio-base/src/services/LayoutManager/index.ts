@@ -256,7 +256,10 @@ export default class LayoutManager implements ILayoutManager {
 
             // If the name is being changed, we will need to upload to the server
             syncInfo:
-              this.remote && name != undefined
+              this.remote &&
+              name != undefined &&
+              localLayout.syncInfo &&
+              localLayout.syncInfo?.status !== "new"
                 ? { status: "updated", lastRemoteSavedAt: localLayout.syncInfo?.lastRemoteSavedAt }
                 : localLayout.syncInfo,
           }),
