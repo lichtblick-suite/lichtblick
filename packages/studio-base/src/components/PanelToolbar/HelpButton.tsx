@@ -11,17 +11,23 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mergeStyleSets } from "@fluentui/react";
 import HelpCircleOutlineIcon from "@mdi/svg/svg/help-circle-outline.svg";
 import { CSSProperties, PropsWithChildren, useState } from "react";
 
 import HelpModal from "@foxglove/studio-base/components/HelpModal";
 import Icon from "@foxglove/studio-base/components/Icon";
 
-import styles from "./index.module.scss";
-
 type Props = {
   iconStyle?: CSSProperties;
 };
+
+const styles = mergeStyleSets({
+  icon: {
+    fontSize: 14,
+    margin: "0 0.2em",
+  },
+});
 
 export default function HelpButton(props: PropsWithChildren<Props>): JSX.Element {
   const [showHelp, setShowHelp] = useState<boolean>(false);

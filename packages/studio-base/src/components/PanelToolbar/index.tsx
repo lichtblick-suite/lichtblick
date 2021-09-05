@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mergeStyleSets } from "@fluentui/react";
 import { SingleColumnEditIcon } from "@fluentui/react-icons-mdl2";
 import AlertIcon from "@mdi/svg/svg/alert.svg";
 import ArrowSplitHorizontalIcon from "@mdi/svg/svg/arrow-split-horizontal.svg";
@@ -41,8 +42,6 @@ import {
 import { usePanelSettings } from "@foxglove/studio-base/context/PanelSettingsContext";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-import styles from "./index.module.scss";
-
 type Props = {
   children?: React.ReactNode;
   floating?: boolean;
@@ -52,6 +51,75 @@ type Props = {
   isUnknownPanel?: boolean;
   backgroundColor?: string;
 };
+
+export const PANEL_TOOLBAR_HEIGHT = 26;
+export const PANEL_TOOLBAR_SPACING = 4;
+
+const styles = mergeStyleSets({
+  iconContainer: {
+    paddingTop: PANEL_TOOLBAR_SPACING,
+    display: "flex",
+    flex: "0 0 auto",
+    alignItems: "center",
+    marginLeft: PANEL_TOOLBAR_SPACING,
+    flexDirection: "row",
+    minHeight: PANEL_TOOLBAR_HEIGHT - PANEL_TOOLBAR_SPACING,
+    padding: "2px 2px 2px 6px",
+
+    svg: {
+      fontSize: 14,
+    },
+  },
+  panelName: {
+    fontSize: 10,
+    opacity: 0.5,
+    marginRight: 4,
+  },
+  panelToolbarContainer: {
+    transition: "transform 80ms ease-in-out, opacity 80ms ease-in-out",
+    display: "flex",
+    flex: "0 0 auto",
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    backgroundColor: colors.TOOLBAR_FIXED,
+    padding: PANEL_TOOLBAR_SPACING,
+
+    "&.floating": {
+      position: "absolute",
+      right: 0,
+      // leave some room for possible scrollbar
+      paddingRight: 8,
+      top: 0,
+      width: "100%",
+      zIndex: 5000,
+      backgroundColor: "transparent",
+      pointerEvents: "none",
+
+      "*": {
+        pointerEvents: "auto",
+      },
+      "&.hasChildren": {
+        left: 0,
+        backgroundColor: colors.TOOLBAR_FIXED,
+      },
+      "&:not(.hasChildren) > *": {
+        backgroundColor: colors.DARK3,
+        borderRadius: 4,
+        boxShadow: "0 6px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.2)",
+      },
+    },
+    "&:not(.floating)": {
+      minHeight: PANEL_TOOLBAR_HEIGHT + PANEL_TOOLBAR_SPACING,
+    },
+  },
+  icon: {
+    fontSize: 14,
+    margin: "0 0.2em",
+  },
+  dragIcon: {
+    cursor: "move",
+  },
+});
 
 // separated into a sub-component so it can always skip re-rendering
 // it never changes after it initially mounts
@@ -230,7 +298,7 @@ const PanelToolbarControls = React.memo(function PanelToolbarControls({
       {!isUnknownPanel && (
         <span ref={panelContext?.connectToolbarDragHandle} data-test="mosaic-drag-handle">
           <Icon fade tooltip="Move panel (shortcut: ` or ~)">
-            <DragIcon className={styles.dragIcon} />
+            <DragIcon className={cx(styles.icon, styles.dragIcon)} />
           </Icon>
         </span>
       )}
@@ -302,8 +370,8 @@ export default React.memo<Props>(function PanelToolbar({
         <div
           className={cx(styles.panelToolbarContainer, {
             panelToolbarHovered: floating,
-            [styles.floating!]: floating,
-            [styles.hasChildren!]: Boolean(children),
+            floating,
+            hasChildren: Boolean(children),
           })}
           style={showToolbar ? { display: "flex", backgroundColor } : { backgroundColor }}
         >

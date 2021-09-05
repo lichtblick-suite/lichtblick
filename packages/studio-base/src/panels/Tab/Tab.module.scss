@@ -11,7 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-@import "@foxglove/studio-base/components/PanelToolbar/index.module.scss";
+$panelToolbarHeight: 26px;
+$panelToolbarSpacing: 4px;
 
 .tab {
   position: relative;
