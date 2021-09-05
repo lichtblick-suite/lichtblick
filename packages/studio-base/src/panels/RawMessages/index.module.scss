@@ -11,8 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-@import "@foxglove/studio-base/styles/mixins.module.scss";
-
 .topicInputs {
   width: 100%;
   line-height: 20px;
@@ -21,7 +19,19 @@
 .container {
   // match the padding with the default padding used in react-json-tree
   padding-left: 0.5em;
-  @include ff-sans-serif;
+  font-family:
+    // Apple
+    -apple-system, BlinkMacSystemFont,
+    // Windows
+    "Segoe UI",
+    // Ubuntu
+    "Ubuntu",
+    // Chrome OS and Android
+    "Roboto",
+    // Fallback
+    sans-serif;
+  // Use fixed width numbers (important for numbers that update during playback)
+  font-feature-settings: "tnum";
 }
 
 .iconWrapper {

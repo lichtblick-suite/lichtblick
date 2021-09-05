@@ -30,10 +30,9 @@ import TimeBasedChart, {
   getTooltipItemForMessageHistoryItem,
   TimeBasedChartTooltipData,
 } from "@foxglove/studio-base/components/TimeBasedChart";
-import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
 import { darkColor, lineColors } from "@foxglove/studio-base/util/plotColors";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { colors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 import { grey } from "@foxglove/studio-base/util/toolsColorScheme";
 
@@ -54,7 +53,7 @@ export const transitionableRosTypes = [
   "json",
 ];
 
-const fontFamily = MONOSPACE;
+const fontFamily = fonts.MONOSPACE;
 const fontSize = 10;
 const fontWeight = "bold";
 

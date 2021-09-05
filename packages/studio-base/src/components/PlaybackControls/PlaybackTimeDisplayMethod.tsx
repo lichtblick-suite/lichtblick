@@ -26,12 +26,12 @@ import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
 import {
   formatDate,
   formatTime,
   getValidatedTimeAndMethodFromString,
 } from "@foxglove/studio-base/util/formatTime";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 const PlaybackTimeDisplayMethod = ({
@@ -83,7 +83,7 @@ const PlaybackTimeDisplayMethod = ({
         field: {
           margin: 0,
           whiteSpace: "nowrap",
-          fontFamily: MONOSPACE,
+          fontFamily: fonts.MONOSPACE,
 
           ":hover": {
             borderRadius: 2,

@@ -25,9 +25,9 @@ import {
 import { MarkerStory } from "@foxglove/studio-base/panels/ThreeDimensionalViz/stories/MarkerStory";
 import PanelSetup, { triggerInputChange } from "@foxglove/studio-base/stories/PanelSetup";
 import { ScreenshotSizedContainer } from "@foxglove/studio-base/stories/storyHelpers";
-import colors from "@foxglove/studio-base/styles/colors.module.scss";
 import { simulateDragClick } from "@foxglove/studio-base/test/mouseEventsHelper";
 import delay from "@foxglove/studio-base/util/delay";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import tick from "@foxglove/studio-base/util/tick";
 
 import Interactions, { OBJECT_TAB_TYPE, LINKED_VARIABLES_TAB_TYPE } from "./Interactions";
@@ -40,7 +40,7 @@ const SWrapper = styled.div`
   flex-wrap: wrap;
 `;
 const SP = styled.p`
-  color: ${colors.textMuted};
+  color: ${colors.TEXT_MUTED};
 `;
 
 const markerObject = {

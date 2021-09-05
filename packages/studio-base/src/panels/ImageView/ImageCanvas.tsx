@@ -33,10 +33,10 @@ import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import { LegacyButton } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import { Item } from "@foxglove/studio-base/components/Menu";
 import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
-import colors from "@foxglove/studio-base/styles/colors.module.scss";
 import { CompressedImage, Image } from "@foxglove/studio-base/types/Messages";
 import WebWorkerManager from "@foxglove/studio-base/util/WebWorkerManager";
 import { downloadFiles } from "@foxglove/studio-base/util/download";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
 import styles from "./ImageCanvas.module.scss";
@@ -64,7 +64,7 @@ const SErrorMessage = styled.div`
   position: absolute;
   align-items: center;
   justify-content: center;
-  color: ${colors.red};
+  color: ${colors.RED2};
 `;
 
 const webWorkerManager = new WebWorkerManager(() => {

@@ -13,8 +13,7 @@
 
 import styled from "styled-components";
 
-import { SANS_SERIF } from "@foxglove/studio-base/styles/fonts";
-import { colors, textSize, rounded } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { colors, textSize, rounded, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const SKeyboardShortcut = styled.div`
   padding: 4px 0;
@@ -46,7 +45,9 @@ const SKey = styled.kbd`
   padding: 0 3px;
   font-size: 12px;
   line-height: 1.5;
-  font-family: ${SANS_SERIF};
+  font-family: ${fonts.SANS_SERIF};
+  font-feature-settings: "tnum";
+
   :not(:last-child) {
     border-right: 1px solid ${colors.DARK9};
   }

@@ -17,7 +17,7 @@ import { useAppConfigurationValue, AppSetting } from "@foxglove/studio-base";
 import ExpandingToolbar, { ToolGroup } from "@foxglove/studio-base/components/ExpandingToolbar";
 import Icon from "@foxglove/studio-base/components/Icon";
 import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/sharedStyles";
-import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import Polygons from "./Polygons";
 
@@ -52,7 +52,7 @@ function DrawingTools({
     <ExpandingToolbar
       tooltip="Drawing tools"
       icon={
-        <Icon style={{ color: selectedTab != undefined ? colors.accent : "white" }}>
+        <Icon style={{ color: selectedTab != undefined ? colors.ACCENT : "white" }}>
           <PencilIcon />
         </Icon>
       }

@@ -29,8 +29,8 @@ import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import { openSiblingPlotPanel } from "@foxglove/studio-base/panels/Plot";
 import { openSiblingStateTransitionsPanel } from "@foxglove/studio-base/panels/StateTransitions";
 import { Config } from "@foxglove/studio-base/panels/diagnostics/DiagnosticStatusPanel";
-import colors from "@foxglove/studio-base/styles/colors.module.scss";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import style from "./DiagnosticStatus.module.scss";
 import { LEVEL_NAMES, DiagnosticInfo, KeyValue, DiagnosticStatusMessage } from "./util";
@@ -68,7 +68,7 @@ const ResizeHandle = styled.div.attrs<{ splitFraction: number }>(({ splitFractio
       left: 6px;
       margin-left: -2px;
       width: 4px;
-      background-color: ${colors.divider};
+      background-color: ${colors.DIVIDER};
     }
   }
 `;

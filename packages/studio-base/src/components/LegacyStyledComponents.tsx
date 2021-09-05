@@ -4,8 +4,11 @@
 
 import styled from "styled-components";
 
-import { MONOSPACE, SANS_SERIF } from "@foxglove/studio-base/styles/fonts";
-import { colors as sharedColors, spacing } from "@foxglove/studio-base/util/sharedStyleConstants";
+import {
+  fonts,
+  colors as sharedColors,
+  spacing,
+} from "@foxglove/studio-base/util/sharedStyleConstants";
 
 /**
  * @deprecated The LegacyButton should not be used for new features. use fluentui/react instead
@@ -17,7 +20,8 @@ export const LegacyButton = styled.button`
   color: ${sharedColors.TEXT_CONTROL};
   font: inherit;
   line-height: 100%;
-  font-family: ${SANS_SERIF};
+  font-family: ${fonts.SANS_SERIF};
+  font-feature-settings: "tnum";
   font-size: 100%;
   margin: ${spacing.CONTROL_MARGIN};
   padding: 8px 12px;
@@ -64,7 +68,8 @@ export const LegacyInput = styled.input`
   border: none;
   color: ${sharedColors.TEXT_CONTROL};
   font: inherit;
-  font-family: ${SANS_SERIF};
+  font-family: ${fonts.SANS_SERIF};
+  font-feature-settings: "tnum";
   font-size: 100%;
   margin: ${spacing.CONTROL_MARGIN};
   padding: 8px 12px;
@@ -90,7 +95,7 @@ export const LegacyTextarea = styled.textarea`
   color: ${sharedColors.TEXT_NORMAL};
   font: inherit;
   line-height: 1.4;
-  font-family: ${MONOSPACE};
+  font-family: ${fonts.MONOSPACE};
   font-size: 100%;
   margin: ${spacing.CONTROL_MARGIN};
   padding: 8px 12px;
@@ -115,7 +120,8 @@ export const LegacySelect = styled.select`
   border: none;
   color: ${sharedColors.TEXT_CONTROL};
   font: inherit;
-  font-family: ${SANS_SERIF};
+  font-family: ${fonts.SANS_SERIF};
+  font-feature-settings: "tnum";
   font-size: 100%;
   margin: ${spacing.CONTROL_MARGIN};
   padding: 8px 12px;

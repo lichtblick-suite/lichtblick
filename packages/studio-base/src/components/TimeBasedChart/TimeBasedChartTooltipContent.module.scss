@@ -12,10 +12,9 @@
 //   You may not use this file except in compliance with the License.
 
 @import "@foxglove/studio-base/styles/colors.module.scss";
-@import "@foxglove/studio-base/styles/mixins.module.scss";
 
 .root {
-  @include ff-monospace;
+  font-family: "Roboto Mono";
   font-size: 11px;
   line-height: 1.4;
   max-width: 350px;

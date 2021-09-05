@@ -40,8 +40,8 @@ import {
 } from "@foxglove/studio-base/context/HoverValueContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { PlayerState } from "@foxglove/studio-base/players/types";
-import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
 import { formatTime } from "@foxglove/studio-base/util/formatTime";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import PlaybackBarHoverTicks from "./PlaybackBarHoverTicks";
@@ -88,7 +88,7 @@ export const useStyles = makeStyles((theme) => ({
     },
   },
   tooltip: {
-    fontFamily: MONOSPACE,
+    fontFamily: fonts.MONOSPACE,
     whiteSpace: "nowrap",
 
     "> div": {
@@ -107,7 +107,7 @@ export const useStyles = makeStyles((theme) => ({
     display: "inline-block",
   },
   tooltipValue: {
-    fontFamily: MONOSPACE,
+    fontFamily: fonts.MONOSPACE,
     opacity: 0.7,
   },
 }));

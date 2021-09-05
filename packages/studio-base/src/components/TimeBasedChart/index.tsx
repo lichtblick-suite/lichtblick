@@ -47,7 +47,7 @@ import {
   useClearHoverValue,
   useSetHoverValue,
 } from "@foxglove/studio-base/context/HoverValueContext";
-import mixins from "@foxglove/studio-base/styles/mixins.module.scss";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
 import HoverBar from "./HoverBar";
@@ -582,7 +582,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   const xScale = useMemo<ScaleOptions>(() => {
     const defaultXTicksSettings: ScaleOptions["ticks"] = {
       font: {
-        family: mixins.monospaceFont,
+        family: fonts.MONOSPACE,
         size: 10,
       },
       color: "#eee",
@@ -606,7 +606,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   const yScale = useMemo<ScaleOptions>(() => {
     const defaultYTicksSettings: ScaleOptions["ticks"] = {
       font: {
-        family: mixins.monospaceFont,
+        family: fonts.MONOSPACE,
         size: 10,
       },
       color: "#eee",

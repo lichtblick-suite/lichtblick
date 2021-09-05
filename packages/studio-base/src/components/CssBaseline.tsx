@@ -5,9 +5,8 @@
 import { mergeStyles, useTheme } from "@fluentui/react";
 import { PropsWithChildren } from "react";
 
-import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
-
 import "@foxglove/studio-base/styles/assets/latin-roboto-mono.scss";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export default function CssBaseline(props: PropsWithChildren<unknown>): JSX.Element {
   const theme = useTheme();
@@ -18,7 +17,7 @@ export default function CssBaseline(props: PropsWithChildren<unknown>): JSX.Elem
       boxSizing: "inherit",
     },
     "code, pre, tt": {
-      fontFamily: MONOSPACE,
+      fontFamily: fonts.MONOSPACE,
       overflowWrap: "break-word",
     },
     code: {

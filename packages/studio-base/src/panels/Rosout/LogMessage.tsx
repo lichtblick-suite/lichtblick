@@ -15,7 +15,7 @@ import { mergeStyleSets } from "@fluentui/react";
 import { padStart } from "lodash";
 
 import { Time } from "@foxglove/rostime";
-import mixins from "@foxglove/studio-base/styles/mixins.module.scss";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import LevelToString from "./LevelToString";
 import logLevelColorsStyle from "./LogLevelColors.module.scss";
@@ -41,7 +41,7 @@ const classes = mergeStyleSets({
     paddingLeft: "20px",
     whiteSpace: "pre-wrap",
     lineHeight: "1.2",
-    fontFamily: mixins.monospaceFont,
+    fontFamily: fonts.MONOSPACE,
   },
 });
 

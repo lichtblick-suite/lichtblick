@@ -22,8 +22,7 @@ import Icon from "@foxglove/studio-base/components/Icon";
 import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import { TabActions } from "@foxglove/studio-base/panels/Tab/TabDndContext";
-import { SANS_SERIF } from "@foxglove/studio-base/styles/fonts";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { colors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import styles from "./Tab.module.scss";
 
@@ -31,7 +30,7 @@ const MAX_TAB_WIDTH = 100;
 const MIN_ACTIVE_TAB_WIDTH = 40;
 const MIN_OTHER_TAB_WIDTH = 14;
 
-const fontFamily = SANS_SERIF;
+const fontFamily = fonts.SANS_SERIF;
 const fontSize = "12px";
 let textMeasure: textMetrics.TextMeasure;
 function measureText(text: string): number {

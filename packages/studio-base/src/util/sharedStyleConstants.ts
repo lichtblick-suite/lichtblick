@@ -31,6 +31,7 @@ const robotStylesColors = {
 
   GRAY: "#9f9fa2",
   GRAY2: "#2d2c33",
+  GRAY3: "#586e75",
 
   MAGENTAL1: "#e05ffa",
   MAGENTA: "#c83deb",
@@ -51,6 +52,7 @@ const robotStylesColors = {
   GREENL1: "#1abd89",
   GREEN: "#00a375",
   GREEN1: "#008768",
+  GREEN2: "#05d27d",
 
   LIMEL1: "#6bd66f",
   LIME: "#4ac252",
@@ -63,6 +65,7 @@ const robotStylesColors = {
   ORANGEL1: "#fc8942",
   ORANGE: "#f76c1b",
   ORANGE1: "#e5540b",
+  ORANGE2: "#ccb862",
 
   REDL1: "#ff6b82",
   RED: "#f54966",
@@ -117,6 +120,9 @@ export const spacing = {
   CONTROL_PADDING: "8px 8px 8px 16px",
   CONTROL_MARGIN: "0 0.2em",
   TEXT_SIZE: "12px",
+  TOP_BAR_HEIGHT: "36px",
+  PANEL_TOOLBAR_HEIGHT: "26px",
+  PANEL_TOOLBAR_SPACING: "4px",
 };
 
 export const textSize = {
@@ -136,4 +142,9 @@ export const rounded = {
   LARGE: "8px",
   PILL: "999px",
   CIRCLE: "50%",
+};
+
+export const fonts = {
+  SANS_SERIF: `-apple-system, BlinkMacSystemFont, "Segoe UI", "Ubuntu", "Roboto", sans-serif`,
+  MONOSPACE: `"Roboto Mono"`,
 };

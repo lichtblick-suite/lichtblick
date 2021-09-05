@@ -35,8 +35,8 @@ import {
   TargetPose,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
 import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
-import colors from "@foxglove/studio-base/styles/colors.module.scss";
 import clipboard from "@foxglove/studio-base/util/clipboard";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { point2DValidator, cameraStateValidator } from "@foxglove/studio-base/util/validators";
 
 export const CAMERA_TAB_TYPE = "Camera";
@@ -151,7 +151,7 @@ export default function CameraInfo({
     <ExpandingToolbar
       tooltip="Camera"
       icon={
-        <Icon style={{ color: autoSyncCameraState ? colors.accent : "white" }}>
+        <Icon style={{ color: autoSyncCameraState ? colors.ACCENT : "white" }}>
           <CameraControlIcon />
         </Icon>
       }
@@ -224,7 +224,7 @@ export default function CameraInfo({
                   </SValue>
                 </SRow>
                 <SRow style={{ marginBottom: 8 }}>
-                  <SLabel style={cameraState.perspective ? { color: colors.textMuted } : {}}>
+                  <SLabel style={cameraState.perspective ? { color: colors.TEXT_MUTED } : {}}>
                     Show crosshair:
                   </SLabel>
                   <SValue>

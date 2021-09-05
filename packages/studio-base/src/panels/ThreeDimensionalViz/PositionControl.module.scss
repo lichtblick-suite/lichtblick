@@ -1,7 +1,7 @@
-@import "@foxglove/studio-base/styles/mixins.module.scss";
+@import "@foxglove/studio-base/styles/colors.module.scss";
 
 .inputField {
-  @include ff-monospace;
+  font-family: "Roboto Mono";
   padding: 8px 12px;
   border-radius: 4px;
   outline: none;

@@ -22,8 +22,8 @@ import parseRosPath from "@foxglove/studio-base/components/MessagePathSyntax/par
 import { useCachedGetMessagePathDataItems } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import Table from "./Table";
 import helpContent from "./index.help.md";
@@ -32,7 +32,7 @@ const TableContainer = styled.div`
   overflow: auto;
   display: flex;
   flex-direction: column;
-  font-family: ${MONOSPACE};
+  font-family: ${fonts.MONOSPACE};
 `;
 
 type Config = { topicPath: string };

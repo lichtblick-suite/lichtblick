@@ -1,4 +1,3 @@
-@import "@foxglove/studio-base/styles/mixins.module.scss";
 @import "@foxglove/studio-base/styles/colors.module.scss";
 
 .dropdown {
@@ -8,10 +7,24 @@
 }
 
 .container {
-  @include ff-sans-serif;
+  font-family:
+    // Apple
+    -apple-system, BlinkMacSystemFont,
+    // Windows
+    "Segoe UI",
+    // Ubuntu
+    "Ubuntu",
+    // Chrome OS and Android
+    "Roboto",
+    // Fallback
+    sans-serif;
+  // Use fixed width numbers (important for numbers that update during playback)
+  font-feature-settings: "tnum";
 
   .topicName {
-    @extend %modal-subtitle;
+    color: $text-bright;
+    font-size: 16px;
+    line-height: 16px * 1.25;
     word-wrap: break-word;
   }
 

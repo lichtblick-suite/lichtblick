@@ -12,10 +12,15 @@
 //   You may not use this file except in compliance with the License.
 
 @import "@foxglove/studio-base/styles/colors.module.scss";
-@import "@foxglove/studio-base/styles/mixins.module.scss";
 
 .container {
-  @extend %floating-box;
+  background-color: $dark3;
+  border-radius: 4px;
+  padding: 0;
+  box-shadow: 0 0px 32px rgba(8, 8, 10, 0.6);
+  overflow: hidden;
+  pointer-events: auto;
+  flex-shrink: 0;
   min-width: 50px;
   flex: 0 0 auto;
   overflow-y: auto;
@@ -32,10 +37,21 @@
 }
 
 .item {
-  @extend %menu-item;
+  text-decoration: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  color: $text-control;
+  user-select: none;
+  display: flex;
+  align-items: center;
 
+  &:hover {
+    color: rgba(255, 255, 255, 1);
+    background-color: $dark5;
+  }
   &.active {
-    @extend %menu-item-active;
+    color: rgba(255, 255, 255, 1);
+    background-color: $dark5;
   }
 
   &.disabled {
@@ -62,7 +78,8 @@
   }
 
   &.hoverForScreenshot {
-    @extend %menu-item-hover;
+    color: rgba(255, 255, 255, 1);
+    background-color: $dark5;
   }
 }
 

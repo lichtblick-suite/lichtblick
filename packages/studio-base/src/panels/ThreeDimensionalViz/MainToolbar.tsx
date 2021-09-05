@@ -21,7 +21,7 @@ import MeasuringTool, {
   MeasureInfo,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/DrawingTools/MeasuringTool";
 import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/sharedStyles";
-import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 type Props = {
   measuringTool?: MeasuringTool;
@@ -46,7 +46,7 @@ function MainToolbar({
     <div className={styles.buttons}>
       <Button className={styles.iconButton} tooltip={cameraModeTip} onClick={onToggleCameraMode}>
         <Icon
-          style={{ color: perspective ? colors.accent : "white" }}
+          style={{ color: perspective ? colors.ACCENT : "white" }}
           dataTest={`MainToolbar-toggleCameraMode`}
         >
           <Video3dIcon />
@@ -66,7 +66,7 @@ function MainToolbar({
       >
         <Icon
           style={{
-            color: measureActive ? colors.accent : perspective ? undefined : "white",
+            color: measureActive ? colors.ACCENT : perspective ? undefined : "white",
           }}
         >
           <RulerIcon />
@@ -74,7 +74,7 @@ function MainToolbar({
       </Button>
       {process.env.NODE_ENV === "development" && (
         <Button className={styles.iconButton} tooltip="Debug" onClick={onToggleDebug}>
-          <Icon style={{ color: debug ? colors.accent : "white" }}>
+          <Icon style={{ color: debug ? colors.ACCENT : "white" }}>
             <BugIcon />
           </Icon>
         </Button>

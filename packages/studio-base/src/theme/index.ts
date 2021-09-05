@@ -19,15 +19,14 @@ import {
 } from "@fluentui/react";
 import { createTheme } from "@fluentui/theme";
 
-import { SANS_SERIF } from "@foxglove/studio-base/styles/fonts";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { colors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const THEME_HUE = 247;
 
 // https://aka.ms/themedesigner
 export default createTheme({
   defaultFontStyle: {
-    fontFamily: SANS_SERIF,
+    fontFamily: fonts.SANS_SERIF,
   },
   semanticColors: {
     menuBackground: "#242429",

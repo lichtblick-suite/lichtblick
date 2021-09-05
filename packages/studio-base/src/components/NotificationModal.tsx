@@ -4,8 +4,8 @@
 
 import { Dialog, Text, TextField, useTheme, IModalProps } from "@fluentui/react";
 
-import { MONOSPACE } from "@foxglove/studio-base/styles/fonts";
 import { NotificationMessage } from "@foxglove/studio-base/util/sendNotification";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export default function NotificationModal({
   notification: { details, message, severity, subText },
@@ -44,7 +44,7 @@ export default function NotificationModal({
             field: {
               color: theme.semanticColors.bodyText,
               fontSize: theme.fonts.small.fontSize,
-              fontFamily: `${MONOSPACE} !important`,
+              fontFamily: `${fonts.MONOSPACE} !important`,
               maxHeight: "50vh",
               overflowY: "auto",
             },
