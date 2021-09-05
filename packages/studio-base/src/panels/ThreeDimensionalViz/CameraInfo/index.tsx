@@ -29,7 +29,7 @@ import {
   SValue,
   SLabel,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/styling";
-import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
+import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/sharedStyles";
 import {
   getNewCameraStateOnFollowChange,
   TargetPose,

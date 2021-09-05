@@ -20,7 +20,7 @@ import styled from "styled-components";
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
 import useGetItemStringWithTimezone from "@foxglove/studio-base/components/JsonTree/useGetItemStringWithTimezone";
-import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
+import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/sharedStyles";
 import { getInstanceObj } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
 import { jsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
 

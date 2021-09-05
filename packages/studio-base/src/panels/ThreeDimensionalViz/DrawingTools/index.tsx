@@ -16,7 +16,7 @@ import { PolygonBuilder, Polygon } from "regl-worldview";
 import { useAppConfigurationValue, AppSetting } from "@foxglove/studio-base";
 import ExpandingToolbar, { ToolGroup } from "@foxglove/studio-base/components/ExpandingToolbar";
 import Icon from "@foxglove/studio-base/components/Icon";
-import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
+import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/sharedStyles";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 
 import Polygons from "./Polygons";

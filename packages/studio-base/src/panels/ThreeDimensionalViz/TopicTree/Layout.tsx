@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mergeStyleSets } from "@fluentui/react";
 import { groupBy } from "lodash";
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
@@ -48,7 +49,6 @@ import {
   TabType,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions";
 import useLinkedGlobalVariables from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
-import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
 import LayoutToolbar from "@foxglove/studio-base/panels/ThreeDimensionalViz/LayoutToolbar";
 import SceneBuilder from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
 import sceneBuilderHooks from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder/defaultHooks";
@@ -143,6 +143,23 @@ export type ColorOverride = {
   active?: boolean;
 };
 export type ColorOverrideBySourceIdxByVariable = Record<GlobalVariableName, ColorOverride[]>;
+
+const styles = mergeStyleSets({
+  container: {
+    display: "flex",
+    flex: "1 1 auto",
+    position: "relative",
+    width: "100%",
+    height: "100%",
+  },
+  world: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    bottom: 0,
+    right: 0,
+  },
+});
 
 // generally supported datatypes
 const SUPPORTED_MARKER_DATATYPES_SET = new Set([

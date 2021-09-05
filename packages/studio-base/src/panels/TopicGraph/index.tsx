@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mergeStyleSets } from "@fluentui/react";
 import ArrowLeftRightIcon from "@mdi/svg/svg/arrow-left-right.svg";
 import ArrowUpDownIcon from "@mdi/svg/svg/arrow-up-down.svg";
 import FitToPageIcon from "@mdi/svg/svg/fit-to-page-outline.svg";
@@ -28,12 +29,42 @@ import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipe
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import Radio from "@foxglove/studio-base/components/Radio";
-import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
-import colors from "@foxglove/studio-base/styles/colors.module.scss";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import Graph, { GraphMutation } from "./Graph";
 import Toolbar from "./Toolbar";
 import helpContent from "./index.help.md";
+
+const styles = mergeStyleSets({
+  iconButton: {
+    backgroundColor: "transparent !important",
+    border: "none !important",
+    padding: "8px 4px !important",
+    alignItems: "start !important",
+    marginRight: "4px !important",
+    marginLeft: "4px !important",
+  },
+  buttons: {
+    backgroundColor: `${colors.DARK3}`,
+    borderRadius: "4px",
+    boxShadow: "0 0px 32px rgba(8, 8, 10, 0.6)",
+    overflow: "hidden",
+    pointerEvents: "auto",
+    flexShrink: "0",
+
+    display: "flex",
+    flexDirection: "column",
+    padding: 0,
+    marginBottom: 10,
+
+    "& span.icon": {
+      width: 18,
+      height: 18,
+      fontSize: 18,
+      display: "inline-block",
+    },
+  },
+});
 
 const LABEL_MAX_WIDTH = 200;
 const STYLESHEET: Cytoscape.Stylesheet[] = [
@@ -318,7 +349,7 @@ function TopicGraph() {
   }, [topicVisibility]);
 
   const topicButtonColor = useMemo(() => {
-    return topicVisibility === "none" ? "white" : colors.lightPurple;
+    return topicVisibility === "none" ? "white" : colors.LIGHT_PURPLE;
   }, [topicVisibility]);
 
   const toggleShowServices = useCallback(() => {
@@ -355,7 +386,7 @@ function TopicGraph() {
             tooltip={showServices ? "Showing services" : "Hiding services"}
             onClick={toggleShowServices}
           >
-            <Icon style={{ color: showServices ? colors.red : "white" }} small>
+            <Icon style={{ color: showServices ? colors.RED2 : "white" }} small>
               <ServiceIcon />
             </Icon>
           </Button>

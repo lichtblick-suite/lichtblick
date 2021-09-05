@@ -23,7 +23,7 @@ import styled from "styled-components";
 import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
 import Button from "@foxglove/studio-base/components/Button";
 import Icon from "@foxglove/studio-base/components/Icon";
-import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
+import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/sharedStyles";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 
 import Transforms, { Transform } from "./Transforms";

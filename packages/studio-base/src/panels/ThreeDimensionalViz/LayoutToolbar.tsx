@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import cx from "classnames";
+import { makeStyles } from "@fluentui/react";
 import { PolygonBuilder, MouseEventObject, Polygon } from "regl-worldview";
 
 import CameraInfo from "@foxglove/studio-base/panels/ThreeDimensionalViz/CameraInfo";
@@ -25,13 +25,13 @@ import MeasuringTool, {
 import FollowTFControl from "@foxglove/studio-base/panels/ThreeDimensionalViz/FollowTFControl";
 import Interactions from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions";
 import { TabType } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/Interactions";
-import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
 import MainToolbar from "@foxglove/studio-base/panels/ThreeDimensionalViz/MainToolbar";
 import MeasureMarker from "@foxglove/studio-base/panels/ThreeDimensionalViz/MeasureMarker";
 import SearchText, {
   SearchTextProps,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SearchText";
 import { LayoutToolbarSharedProps } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
+import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/sharedStyles";
 
 type Props = LayoutToolbarSharedProps &
   SearchTextProps & {
@@ -51,6 +51,22 @@ type Props = LayoutToolbarSharedProps &
     setMeasureInfo: (arg0: MeasureInfo) => void;
     showCrosshair?: boolean;
   };
+
+const useStyles = makeStyles({
+  root: {
+    position: "absolute",
+    top: 15 + 20,
+    right: 15,
+    padding: 0,
+    zIndex: 101,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+
+    // allow mouse events to pass through the empty space in this container element
+    pointerEvents: "none",
+  },
+});
 
 function LayoutToolbar({
   autoSyncCameraState,
@@ -87,6 +103,7 @@ function LayoutToolbar({
   toggleSearchTextOpen,
   transforms,
 }: Props) {
+  const classes = useStyles();
   return (
     <>
       <MeasuringTool
@@ -95,7 +112,7 @@ function LayoutToolbar({
         measurePoints={measureInfo.measurePoints}
         onMeasureInfoChange={setMeasureInfo}
       />
-      <div className={cx(styles.toolbar, styles.right)}>
+      <div className={classes.root}>
         <div className={styles.buttons}>
           <SearchText
             searchTextOpen={searchTextOpen}

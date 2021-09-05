@@ -20,7 +20,7 @@ import Icon from "@foxglove/studio-base/components/Icon";
 import MeasuringTool, {
   MeasureInfo,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/DrawingTools/MeasuringTool";
-import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/Layout.module.scss";
+import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/sharedStyles";
 import colors from "@foxglove/studio-base/styles/colors.module.scss";
 
 type Props = {
