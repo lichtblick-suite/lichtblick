@@ -6,17 +6,13 @@ import { Story, StoryContext } from "@storybook/react";
 
 import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
 import ModalHost from "@foxglove/studio-base/context/ModalHost";
-import ConsoleApi, { Org } from "@foxglove/studio-base/services/ConsoleApi";
+import ConsoleApi, { DeviceCodeResponse } from "@foxglove/studio-base/services/ConsoleApi";
 
 import DeviceCodeDialog from "./DeviceCodeDialog";
 
 class FakeConsoleApi extends ConsoleApi {
-  constructor() {
+  constructor(private _deviceCode: DeviceCodeResponse | Promise<DeviceCodeResponse>) {
     super("");
-  }
-
-  override async orgs(): Promise<Org[]> {
-    return [{ id: "1234", slug: "OrgSlug", display_name: "My Org" }];
   }
 
   override async token(): ReturnType<ConsoleApi["token"]> {
@@ -25,6 +21,10 @@ class FakeConsoleApi extends ConsoleApi {
       id_token: "bar",
     };
   }
+
+  override async deviceCode(): Promise<DeviceCodeResponse> {
+    return await this._deviceCode;
+  }
 }
 
 export default {
@@ -32,7 +32,8 @@ export default {
   component: DeviceCodeDialog,
   decorators: [
     (SingleStory: Story, ctx: StoryContext): JSX.Element => {
-      const fakeConsoleApi = ctx.parameters.consoleApi ?? new FakeConsoleApi();
+      const fakeConsoleApi =
+        ctx.parameters.consoleApi ?? new FakeConsoleApi(ctx.parameters.deviceCode);
 
       return (
         <ModalHost>
@@ -45,30 +46,35 @@ export default {
   ],
 };
 
-export const ShowDeviceCode = (): JSX.Element => {
-  return (
-    <DeviceCodeDialog
-      deviceCode={{
-        device_code: "foobar",
-        expires_in: 100000,
-        interval: 100,
-        user_code: "AAAA-12BB",
-        verification_uri: "https://console.example.com/activate",
-      }}
-    />
-  );
+export function WaitForCode(): JSX.Element {
+  return <DeviceCodeDialog />;
+}
+WaitForCode.parameters = {
+  deviceCode: new Promise(() => {}),
 };
 
-export const CodeTimeout = (): JSX.Element => {
-  return (
-    <DeviceCodeDialog
-      deviceCode={{
-        device_code: "foobar",
-        expires_in: 0,
-        interval: 0,
-        user_code: "AAAA-12BB",
-        verification_uri: "https://console.example.com/activate",
-      }}
-    />
-  );
+export function ShowDeviceCode(): JSX.Element {
+  return <DeviceCodeDialog />;
+}
+ShowDeviceCode.parameters = {
+  deviceCode: {
+    device_code: "foobar",
+    expires_in: 100000,
+    interval: 100,
+    user_code: "AAAA-12BB",
+    verification_uri: "https://console.example.com/activate",
+  },
+};
+
+export function CodeTimeout(): JSX.Element {
+  return <DeviceCodeDialog />;
+}
+CodeTimeout.parameters = {
+  deviceCode: {
+    device_code: "foobar",
+    expires_in: 0,
+    interval: 0,
+    user_code: "AAAA-12BB",
+    verification_uri: "https://console.example.com/activate",
+  },
 };

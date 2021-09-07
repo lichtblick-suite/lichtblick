@@ -12,31 +12,63 @@ import {
   PrimaryButton,
   useTheme,
   Link,
+  Spinner,
+  SpinnerSize,
 } from "@fluentui/react";
 import { useEffect, useMemo } from "react";
+import { useToasts } from "react-toast-notifications";
 import { useAsync, useMountedState } from "react-use";
 
 import Logger from "@foxglove/log";
 import { useConsoleApi } from "@foxglove/studio-base/context/ConsoleApiContext";
-import { DeviceCodeResponse, Session } from "@foxglove/studio-base/services/ConsoleApi";
+import { Session } from "@foxglove/studio-base/services/ConsoleApi";
 
 const log = Logger.getLogger(__filename);
 
 type DeviceCodePanelProps = {
-  deviceCode: DeviceCodeResponse;
   onClose?: (session?: Session) => void;
 };
 
 // Show instructions on opening the browser and entering the device code
 export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Element {
   const theme = useTheme();
+  const { addToast } = useToasts();
   const isMounted = useMountedState();
   const api = useConsoleApi();
+  const { onClose } = props;
 
-  const { deviceCode, onClose } = props;
-  const { user_code: userCode, verification_uri: verificationUrl } = deviceCode;
+  const { value: deviceCode, error: deviceCodeError } = useAsync(async () => {
+    return await api.deviceCode({
+      client_id: process.env.OAUTH_CLIENT_ID!,
+    });
+  }, [api]);
+
+  useEffect(() => {
+    if (deviceCodeError != undefined) {
+      addToast(deviceCodeError.message, {
+        appearance: "error",
+      });
+      onClose?.();
+    }
+  }, [addToast, deviceCodeError, onClose]);
+
+  // open new window with the device code to facilitate user signin flow
+  useEffect(() => {
+    if (deviceCode == undefined) {
+      return;
+    }
+
+    const url = new URL(deviceCode.verification_uri);
+    url.searchParams.append("user_code", deviceCode.user_code);
+    const href = url.toString();
+
+    window.open(href, "_blank");
+  }, [deviceCode]);
 
   const { value: deviceResponse, error: deviceResponseError } = useAsync(async () => {
+    if (!deviceCode) {
+      return;
+    }
     const endTimeMs = Date.now() + deviceCode.expires_in * 1000;
 
     // continue polling for the token until we receive the token or we timeout
@@ -72,7 +104,30 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
     });
   }, [api, deviceResponse]);
 
+  useEffect(() => {
+    if (session != undefined) {
+      onClose?.(session);
+    }
+  }, [onClose, session]);
+
   const dialogContent = useMemo(() => {
+    if (!deviceCode) {
+      return (
+        <Spinner
+          size={SpinnerSize.small}
+          label="Initiating sign in…"
+          labelPosition="right"
+          styles={{
+            root: { justifyContent: "flex-start" },
+            label: {
+              fontSize: theme.fonts.medium.fontSize,
+              color: theme.semanticColors.bodyText,
+            },
+          }}
+        />
+      );
+    }
+    const { user_code: userCode, verification_uri: verificationUrl } = deviceCode;
     return (
       <Stack tokens={{ childrenGap: theme.spacing.l1 }}>
         <Stack tokens={{ childrenGap: theme.spacing.s1 }} styles={{ root: { lineHeight: "1.3" } }}>
@@ -104,15 +159,21 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
             },
           }}
         />
+
+        <Spinner
+          size={SpinnerSize.small}
+          label="Awaiting authentiation…"
+          labelPosition="right"
+          styles={{
+            label: {
+              fontSize: theme.fonts.medium.fontSize,
+              color: theme.semanticColors.bodyText,
+            },
+          }}
+        />
       </Stack>
     );
-  }, [userCode, verificationUrl, theme]);
-
-  useEffect(() => {
-    if (session != undefined) {
-      onClose?.(session);
-    }
-  }, [onClose, session]);
+  }, [deviceCode, theme]);
 
   if (deviceResponseError != undefined || signinError != undefined) {
     return (
@@ -126,7 +187,7 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
   }
 
   return (
-    <Dialog hidden={false} minWidth={440} title="Complete Sign in">
+    <Dialog hidden={false} minWidth={440} title="Sign in to Foxglove">
       {dialogContent}
       <DialogFooter>
         <DefaultButton text="Cancel" onClick={() => onClose?.()} />
