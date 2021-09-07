@@ -20,6 +20,7 @@ import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import useContextSelector from "@foxglove/studio-base/hooks/useContextSelector";
 import { GlobalVariables } from "@foxglove/studio-base/hooks/useGlobalVariables";
+import useSelectableContextGetter from "@foxglove/studio-base/hooks/useSelectableContextGetter";
 import {
   AdvertiseOptions,
   Frame,
@@ -65,6 +66,17 @@ export type MessagePipelineContext = {
 
 // exported only for MockMessagePipelineProvider
 export const ContextInternal = createSelectableContext<MessagePipelineContext>();
+
+/**
+ * useMessagePipelineGetter returns a function to access the current message pipeline context.
+ * Commonly used in places where you want to access a value from the latest pipeline in a useCallback hook
+ * but don't want the callback dependencies invalidated on ever change.
+ *
+ * @returns a function to return the current MessagePipelineContext
+ */
+export function useMessagePipelineGetter(): () => MessagePipelineContext {
+  return useSelectableContextGetter(ContextInternal);
+}
 
 export function useMessagePipeline<T>(selector: (arg0: MessagePipelineContext) => T): T {
   return useContextSelector(ContextInternal, selector);

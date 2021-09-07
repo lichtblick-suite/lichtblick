@@ -58,7 +58,7 @@ type Props = {
   componentId: string;
 };
 
-export default React.memo<Props>(function PlaybackBarHoverTicks({ componentId }: Props) {
+export default function PlaybackBarHoverTicks({ componentId }: Props): JSX.Element {
   const startTime = useMessagePipeline(getStartTime);
   const endTime = useMessagePipeline(getEndTime);
 
@@ -95,4 +95,4 @@ export default React.memo<Props>(function PlaybackBarHoverTicks({ componentId }:
       )}
     </div>
   );
-});
+}

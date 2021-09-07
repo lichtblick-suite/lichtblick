@@ -12,11 +12,10 @@
 //   You may not use this file except in compliance with the License.
 
 import { Time, toMillis, fromMillis } from "@foxglove/rostime";
-import { PlayerState } from "@foxglove/studio-base/players/types";
 
-export const ARROW_SEEK_BIG_MS = 500;
-export const ARROW_SEEK_DEFAULT_MS = 100;
-export const ARROW_SEEK_SMALL_MS = 10;
+const ARROW_SEEK_BIG_MS = 500;
+const ARROW_SEEK_DEFAULT_MS = 100;
+const ARROW_SEEK_SMALL_MS = 10;
 export const DIRECTION = {
   FORWARD: 1,
   BACKWARD: -1,
@@ -24,21 +23,15 @@ export const DIRECTION = {
 
 export const jumpSeek = (
   directionSign: typeof DIRECTION[keyof typeof DIRECTION],
-  playerProps: { seek: (arg0: Time) => void; player: PlayerState },
+  currentTime: Time,
   modifierKeys?: { altKey: boolean; shiftKey: boolean },
-): void => {
-  const { player, seek } = playerProps;
-  if (!player.activeData) {
-    return;
-  }
-
-  const timeMs = toMillis(player.activeData.currentTime);
+): Time => {
+  const timeMs = toMillis(currentTime);
   const deltaMs =
     modifierKeys?.altKey === true
       ? ARROW_SEEK_BIG_MS
       : modifierKeys?.shiftKey === true
       ? ARROW_SEEK_SMALL_MS
       : ARROW_SEEK_DEFAULT_MS;
-  const nextTime = fromMillis(timeMs + deltaMs * directionSign);
-  seek(nextTime);
+  return fromMillis(timeMs + deltaMs * directionSign);
 };

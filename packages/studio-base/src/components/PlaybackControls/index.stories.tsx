@@ -12,8 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { action } from "@storybook/addon-actions";
-import { storiesOf } from "@storybook/react";
-import TestUtils from "react-dom/test-utils";
+import { Story } from "@storybook/react";
 
 import MockMessagePipelineProvider from "@foxglove/studio-base/components/MessagePipeline/MockMessagePipelineProvider";
 import AppConfigurationContext, {
@@ -27,7 +26,7 @@ import {
 } from "@foxglove/studio-base/players/types";
 import MockCurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider/MockCurrentLayoutProvider";
 
-import { UnconnectedPlaybackControls, useStyles } from ".";
+import PlaybackControls from "./index";
 
 const START_TIME = 1531761690;
 
@@ -63,18 +62,27 @@ const mockAppConfiguration: AppConfiguration = {
 };
 
 function Wrapper({
+  isPlaying = false,
   activeData,
   children,
+  progress,
 }: {
+  isPlaying?: boolean;
   activeData?: PlayerStateActiveData;
   children: React.ReactNode;
+  progress?: PlayerState["progress"];
 }) {
   return (
     <AppConfigurationContext.Provider value={mockAppConfiguration}>
       <MockCurrentLayoutProvider>
         <MockMessagePipelineProvider
+          isPlaying={isPlaying}
           capabilities={["setSpeed", "playbackControl"]}
           activeData={activeData}
+          pausePlayback={action("pause")}
+          seekPlayback={action("seek")}
+          startPlayback={action("play")}
+          progress={progress}
         >
           <div style={{ padding: 20, margin: 100 }}>{children}</div>
         </MockMessagePipelineProvider>
@@ -83,76 +91,38 @@ function Wrapper({
   );
 }
 
-storiesOf("components/PlaybackControls", module)
-  .add("playing", () => {
-    const pause = action("pause");
-    const play = action("play");
-    const seek = action("seek");
-    const player = getPlayerState();
-    return (
-      <Wrapper>
-        <UnconnectedPlaybackControls player={player} pause={pause} play={play} seek={seek} />
-      </Wrapper>
-    );
-  })
-  .add("paused", () => {
-    const pause = action("pause");
-    const play = action("play");
-    const seek = action("seek");
-    const player = getPlayerState();
+export default {
+  title: "components/PlaybackControls",
+};
 
-    // satisify flow
-    if (player.activeData) {
-      player.activeData.isPlaying = false;
-      player.activeData.startTime.sec += 1;
-      player.activeData.endTime.sec += 1;
-    }
-    return (
-      <Wrapper>
-        <UnconnectedPlaybackControls player={player} pause={pause} play={play} seek={seek} />
-      </Wrapper>
-    );
-  })
-  .add("tooltip", () => {
-    const classes = useStyles();
-    const pause = action("pause");
-    const play = action("play");
-    const seek = action("seek");
-    const player = getPlayerState();
+export const Playing: Story = () => {
+  return (
+    <Wrapper isPlaying>
+      <PlaybackControls />
+    </Wrapper>
+  );
+};
 
-    if (player.activeData) {
-      player.activeData.isPlaying = false;
-      player.activeData.startTime.sec += 1;
-      player.activeData.endTime.sec += 1;
-    }
+export const Paused: Story = () => {
+  return (
+    <Wrapper>
+      <PlaybackControls />
+    </Wrapper>
+  );
+};
 
-    React.useEffect(() => {
-      const [element] = document.getElementsByClassName(classes.sliderContainer);
-      if (element) {
-        TestUtils.Simulate.mouseMove(element, { clientX: 450 });
-      }
-    });
-    return (
-      <Wrapper>
-        <UnconnectedPlaybackControls player={player} pause={pause} play={play} seek={seek} />
-      </Wrapper>
-    );
-  })
-  .add("download progress by ranges", () => {
-    const player = getPlayerState();
-    const pause = action("pause");
-    const play = action("play");
-    const seek = action("seek");
-    player.progress = {
-      ...player.progress,
-      fullyLoadedFractionRanges: [
-        { start: 0.23, end: 0.6 },
-        { start: 0.7, end: 1 },
-      ],
-    };
-    return (
-      <Wrapper>
-        <UnconnectedPlaybackControls player={player} pause={pause} play={play} seek={seek} />
-      </Wrapper>
-    );
-  });
+export const DownloadProgressByRanges: Story = () => {
+  const player = getPlayerState();
+  player.progress = {
+    ...player.progress,
+    fullyLoadedFractionRanges: [
+      { start: 0.23, end: 0.6 },
+      { start: 0.7, end: 1 },
+    ],
+  };
+  return (
+    <Wrapper progress={player.progress}>
+      <PlaybackControls />
+    </Wrapper>
+  );
+};
