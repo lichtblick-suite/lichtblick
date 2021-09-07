@@ -11,11 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mergeStyleSets } from "@fluentui/react";
 import CheckIcon from "@mdi/svg/svg/check.svg";
 import CloseIcon from "@mdi/svg/svg/close.svg";
 import cx from "classnames";
 import React, { Ref as ReactRef, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import styled from "styled-components";
 import textMetrics from "text-metrics";
 
 import Icon from "@foxglove/studio-base/components/Icon";
@@ -24,11 +24,63 @@ import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import { TabActions } from "@foxglove/studio-base/panels/Tab/TabDndContext";
 import { colors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-import styles from "./Tab.module.scss";
-
 const MAX_TAB_WIDTH = 100;
 const MIN_ACTIVE_TAB_WIDTH = 40;
 const MIN_OTHER_TAB_WIDTH = 14;
+
+const styles = mergeStyleSets({
+  root: {
+    position: "relative",
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
+    height: 26,
+    padding: "0 6px",
+    userSelect: "none",
+    border: "1px solid transparent",
+    backgroundColor: "transparent",
+    maxWidth: MAX_TAB_WIDTH,
+    top: 4, // Shift the tab down so it's flush with the bottom of the PanelToolbar
+    marginTop: -4,
+
+    "&.isActive": {
+      backgroundColor: colors.DARK4,
+      userSelect: "all",
+    },
+    "&.isDragging": {
+      backgroundColor: colors.DARK2,
+      borderColor: colors.DARK6,
+      boxShadow: `0px 2px 6px rgba(0, 0, 0, 0.2)`,
+    },
+    "&.highlight": {
+      borderColor: colors.DARK6,
+    },
+    "&.hidden": {
+      opacity: 0,
+    },
+    "&:not(.isActive) + &:not(.isActive):before": {
+      borderLeft: "1px solid rgb(45, 45, 51)",
+      content: '""',
+      height: 16,
+      left: 0,
+      position: "absolute", // within .draggableTab
+      top: 4,
+      zIndex: 1,
+    },
+  },
+  input: {
+    backgroundColor: "transparent !important",
+    padding: "0px !important",
+    pointerEvents: "none",
+    width: "100%",
+
+    "&.isEditable": {
+      pointerEvents: "all",
+    },
+  },
+});
 
 const fontFamily = fonts.SANS_SERIF;
 const fontSize = "12px";
@@ -39,32 +91,6 @@ function measureText(text: string): number {
   }
   return textMeasure.width(text) + 3;
 }
-
-const STab = styled.div<{
-  isDragging: boolean;
-  isActive: boolean;
-  tabCount: number;
-  highlight: boolean;
-  value: string;
-  hidden: boolean;
-}>(({ isActive, value, tabCount, isDragging, hidden, highlight }) => ({
-  opacity: hidden ? 0 : 1,
-  borderColor: isDragging || highlight ? colors.DARK6 : "transparent",
-  boxShadow: isDragging ? `0px 2px 6px rgba(0, 0, 0, 0.2)` : "none",
-  backgroundColor: isActive ? colors.DARK4 : isDragging ? colors.DARK2 : "transparent",
-  minWidth: isActive
-    ? `calc(max(${MIN_ACTIVE_TAB_WIDTH}px,  min(${Math.ceil(
-        measureText(value) + 30,
-      )}px, ${MAX_TAB_WIDTH}px, 100% - ${MIN_OTHER_TAB_WIDTH * (tabCount - 1)}px)))`
-    : undefined,
-  maxWidth: `${MAX_TAB_WIDTH}px`,
-}));
-
-const SInput = styled(LegacyInput)<{ editable: boolean }>(({ editable }) => ({
-  pointerEvents: editable ? "all" : "none",
-  width: "100%",
-}));
-const clearBgStyle = { backgroundColor: "transparent", padding: 0 };
 
 type Props = {
   hidden: boolean;
@@ -170,25 +196,25 @@ export function ToolbarTab(props: Props): JSX.Element {
   const tooltip = tabTitle ? tabTitle : "Enter tab name";
 
   return (
-    <STab
-      hidden={hidden}
-      isDragging={isDragging}
-      isActive={isActive}
-      highlight={highlight}
-      tabCount={tabCount}
-      value={tabTitle}
+    <div
       onClick={onClickTab}
       ref={innerRef}
-      className={cx(styles.tab, { [styles.active!]: isActive })}
+      className={cx(styles.root, { isActive, isDragging, highlight, hidden })}
+      style={{
+        minWidth: isActive
+          ? `calc(max(${MIN_ACTIVE_TAB_WIDTH}px,  min(${Math.ceil(
+              measureText(tabTitle) + 30,
+            )}px, ${MAX_TAB_WIDTH}px, 100% - ${MIN_OTHER_TAB_WIDTH * (tabCount - 1)}px)))`
+          : undefined,
+      }}
     >
       <Tooltip contents={editingTitle ? "" : tooltip} placement="top">
         {/* This div has to be here because the <ToolTip> overwrites the ref of its child*/}
         <div>
-          <SInput
+          <LegacyInput
+            className={cx(styles.input, { isEditable: editingTitle })}
             readOnly={!editingTitle}
-            editable={editingTitle}
             placeholder="Enter tab name"
-            style={clearBgStyle}
             value={title}
             onChange={onChangeTitleInput}
             onBlur={setTabTitle}
@@ -213,6 +239,6 @@ export function ToolbarTab(props: Props): JSX.Element {
           )}
         </Icon>
       ) : undefined}
-    </STab>
+    </div>
   );
 }
