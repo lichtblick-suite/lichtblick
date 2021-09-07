@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mergeStyleSets } from "@fluentui/react";
 import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import PlusMinusIcon from "@mdi/svg/svg/plus-minus.svg";
@@ -55,6 +56,7 @@ import getDiff, {
 import { Topic } from "@foxglove/studio-base/players/types";
 import { jsonTreeTheme, SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import { enumValuesByDatatypeAndField } from "@foxglove/studio-base/util/selectors";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import DiffSpan from "./DiffSpan";
 import MaybeCollapsedValue from "./MaybeCollapsedValue";
@@ -66,7 +68,6 @@ import {
   getStructureItemForPath,
 } from "./getValueActionForValue";
 import helpContent from "./index.help.md";
-import styles from "./index.module.scss";
 import { DATA_ARRAY_PREVIEW_LIMIT, getItemStringForDiff } from "./utils";
 
 export const CUSTOM_METHOD = "custom";
@@ -103,6 +104,28 @@ function maybeDeepParse(val: unknown) {
   }
   return val;
 }
+
+const classes = mergeStyleSets({
+  container: {
+    paddingLeft: "0.5em",
+    fontFamily: fonts.SANS_SERIF,
+    fontFeatureSettings: "tnum", // Use fixed width numbers (important for numbers that update during playback)
+  },
+  iconWrapper: {
+    display: "inline",
+    paddingRight: 40, // To make it so the icons appear when you move the mouse somewhat close.
+  },
+  singleVal: {
+    fontSize: "2.5em",
+    wordWrap: "break-word",
+    fontWeight: "bold",
+    whiteSpace: "pre-line",
+  },
+  topicInputs: {
+    width: "100%",
+    lineHeight: "20px",
+  },
+});
 
 function RawMessages(props: Props) {
   const { config, saveConfig } = props;
@@ -258,7 +281,7 @@ function RawMessages(props: Props) {
       itemValue: unknown,
       ...keyPath: (number | string)[]
     ) => (
-      <ReactHoverObserver className={styles.iconWrapper ?? ""}>
+      <ReactHoverObserver className={classes.iconWrapper}>
         {({ isHovering }: { isHovering: boolean }) => {
           const lastKeyPath = last(keyPath) as number;
           let valueAction: ValueAction | undefined;
@@ -354,7 +377,7 @@ function RawMessages(props: Props) {
       : CheckboxBlankOutlineIcon;
 
     return (
-      <Flex col clip scroll className={styles.container ?? ""}>
+      <Flex col clip scroll className={classes.container}>
         <Metadata
           data={data}
           diffData={diffData}
@@ -364,7 +387,7 @@ function RawMessages(props: Props) {
           {...(diffItem ? { diffMessage: diffItem.message } : undefined)}
         />
         {shouldDisplaySingleVal ? (
-          <div className={styles.singleVal ?? ""}>
+          <div className={classes.singleVal}>
             <MaybeCollapsedValue itemLabel={String(singleVal)} />
           </div>
         ) : diffEnabled && isEqual({}, diff) ? (
@@ -539,7 +562,7 @@ function RawMessages(props: Props) {
         >
           {expandAll ?? false ? <LessIcon /> : <MoreIcon />}
         </Icon>
-        <div className={styles.topicInputs ?? ""}>
+        <div className={classes.topicInputs}>
           <MessagePathInput
             index={0}
             path={topicPath}
