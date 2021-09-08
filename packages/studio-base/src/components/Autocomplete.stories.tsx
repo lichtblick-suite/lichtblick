@@ -17,7 +17,7 @@ import TestUtils from "react-dom/test-utils";
 
 import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
 
-function focusInput(el: any) {
+function focusInput(el: HTMLDivElement | ReactNull) {
   if (el) {
     const input = el.querySelector("input");
     if (input) {

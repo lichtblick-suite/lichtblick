@@ -57,7 +57,7 @@ export const isOrientation = (value: unknown): string | undefined => {
   if (isNumberArrayErr != undefined) {
     return isNumberArrayErr;
   }
-  if (value) {
+  if (value != undefined) {
     const quaternionSum = (value as Array<number>).reduce((memo, item) => memo + item * item, 0);
     // Very rough validation to make sure the quaternion numbers are not too far off
     if (Math.abs(quaternionSum - 1) > 0.1) {
@@ -123,7 +123,7 @@ export const cameraStateValidator = (jsonData: unknown): ValidationResult | unde
 const isXYPointArray = (value: unknown): string | undefined => {
   if (Array.isArray(value)) {
     for (const item of value) {
-      if (!item || item.x == undefined || item.y == undefined) {
+      if (item == undefined || item.x == undefined || item.y == undefined) {
         return `must contain x and y points`;
       }
       if (typeof item.x !== "number" || typeof item.y !== "number") {
@@ -152,7 +152,7 @@ const isPolygons = (value: unknown): string | undefined => {
 
 // validate the polygons must be a nested array of xy points
 export const polygonPointsValidator = (jsonData?: unknown): ValidationResult | undefined => {
-  if (!jsonData || isEqual(jsonData, []) || isEqual(jsonData, {})) {
+  if (jsonData == undefined || jsonData === "" || isEqual(jsonData, []) || isEqual(jsonData, {})) {
     return undefined;
   }
   const rules = { polygons: [isPolygons] };

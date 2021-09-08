@@ -115,7 +115,7 @@ const Editor = ({
         filePath: requestedModel.uri.path,
         code: requestedModel.getValue(),
         readOnly: true,
-        selection: input.options ? input.options.selection : undefined,
+        selection: input.options?.selection,
       });
       return editor;
     },

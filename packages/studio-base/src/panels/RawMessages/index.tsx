@@ -99,7 +99,7 @@ const dataWithoutWrappingArray = (data: unknown) => {
 // lazy messages don't have own properties so we need to invoke "toJSON" to get the message
 // as a regular object
 function maybeDeepParse(val: unknown) {
-  if (val && typeof val === "object" && "toJSON" in val) {
+  if (typeof val === "object" && val != undefined && "toJSON" in val) {
     return (val as { toJSON: () => unknown }).toJSON();
   }
   return val;

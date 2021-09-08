@@ -702,8 +702,8 @@ export default function Layout({
   // When the TopicTree is hidden, focus the <World> again so keyboard controls continue to work
   const worldRef = useRef<typeof Worldview | undefined>(ReactNull);
   useEffect(() => {
-    if (!showTopicTree && worldRef.current) {
-      worldRef.current.focus();
+    if (!showTopicTree) {
+      worldRef.current?.focus();
     }
   }, [showTopicTree]);
 

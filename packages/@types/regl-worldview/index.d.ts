@@ -103,7 +103,7 @@ declare module "regl-worldview" {
     assignNextColors: AssignNextColorsFn,
     excludedObjects: MouseEventObject[],
   ): T extends unknown[] ? T : T | undefined;
-  function shouldConvert(arg: any): any;
+  function shouldConvert(arg: any): boolean;
 
   // jsx elements
   const FilledPolygons: any;

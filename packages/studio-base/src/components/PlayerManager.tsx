@@ -68,7 +68,7 @@ type FactoryOptions = {
 async function localBagFileSource(options: FactoryOptions): Promise<Player | undefined> {
   let file: File;
 
-  const restore = options.sourceOptions.restore ?? false;
+  const restore = Boolean(options.sourceOptions.restore ?? false);
 
   // future enhancement would be to store the fileHandle in indexeddb and try to restore
   // fileHandles can be stored in indexeddb but not localstorage
@@ -80,7 +80,7 @@ async function localBagFileSource(options: FactoryOptions): Promise<Player | und
 
   // maybe the caller has some files they want to open
   const files = options.sourceOptions.files;
-  if (files && files instanceof Array) {
+  if (files instanceof Array) {
     return buildPlayerFromFiles(files, options.playerOptions);
   }
 
@@ -102,7 +102,7 @@ async function localBagFileSource(options: FactoryOptions): Promise<Player | und
 async function localRosbag2FolderSource(options: FactoryOptions): Promise<Player | undefined> {
   let folder: FileSystemDirectoryHandle;
 
-  const restore = options.sourceOptions.restore ?? false;
+  const restore = Boolean(options.sourceOptions.restore ?? false);
   if (restore) {
     return undefined;
   }
@@ -128,12 +128,12 @@ async function remoteBagFileSource(options: FactoryOptions): Promise<Player | un
   // undefined url indicates the user canceled the prompt
   let maybeUrl;
 
-  const restore = options.sourceOptions.restore;
+  const restore = Boolean(options.sourceOptions.restore ?? false);
   const urlOption = options.sourceOptions.url;
 
   if (restore) {
     maybeUrl = options.storage.getItem<string>(storageCacheKey);
-  } else if (urlOption && typeof urlOption === "string") {
+  } else if (typeof urlOption === "string") {
     maybeUrl = urlOption;
   } else {
     maybeUrl = await options.prompt({
@@ -176,7 +176,7 @@ async function rosbridgeSource(options: FactoryOptions): Promise<Player | undefi
 
   // undefined url indicates the user canceled the prompt
   let maybeUrl;
-  const restore = options.sourceOptions.restore;
+  const restore = Boolean(options.sourceOptions.restore);
 
   if (restore) {
     maybeUrl = options.storage.getItem<string>(storageCacheKey);
@@ -222,7 +222,7 @@ async function ros1Source(options: FactoryOptions): Promise<Player | undefined> 
 
   // undefined url indicates the user canceled the prompt
   let maybeUrl;
-  const restore = options.sourceOptions.restore;
+  const restore = Boolean(options.sourceOptions.restore);
 
   if (restore) {
     maybeUrl = options.storage.getItem<string>(storageCacheKey);
@@ -271,7 +271,7 @@ async function ros2Source(options: FactoryOptions): Promise<Player | undefined> 
 
   // undefined url indicates the user canceled the prompt
   let maybeDomainId: string | undefined;
-  const restore = options.sourceOptions.restore;
+  const restore = Boolean(options.sourceOptions.restore);
 
   if (restore) {
     maybeDomainId = options.storage.getItem<string>(storageCacheKey);

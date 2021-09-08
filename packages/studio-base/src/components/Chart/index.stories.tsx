@@ -149,11 +149,11 @@ WithDatalabels.parameters = {
 };
 
 export const AllowsClickingOnDatalabels: Story = (_args) => {
-  const [clickedDatalabel, setClickedDatalabel] = useState<any>(undefined);
+  const [clickedDatalabel, setClickedDatalabel] = useState<unknown>(undefined);
   const readySignal = useReadySignal();
 
   const doClick = useCallback(() => {
-    if (!clickedDatalabel) {
+    if (clickedDatalabel == undefined) {
       const [canvas] = document.getElementsByTagName("canvas");
       TestUtils.Simulate.click(canvas!, { clientX: 245, clientY: 419 });
     }
@@ -164,7 +164,7 @@ export const AllowsClickingOnDatalabels: Story = (_args) => {
   }, []);
 
   useEffect(() => {
-    if (clickedDatalabel) {
+    if (clickedDatalabel != undefined) {
       readySignal();
     }
   }, [clickedDatalabel, readySignal]);
@@ -172,8 +172,10 @@ export const AllowsClickingOnDatalabels: Story = (_args) => {
   return (
     <div style={divStyle}>
       <div style={{ padding: 6, fontSize: 16 }}>
-        {clickedDatalabel
-          ? `Clicked datalabel with selection id: ${String(clickedDatalabel.selectionObj)}`
+        {clickedDatalabel != undefined
+          ? `Clicked datalabel with selection id: ${String(
+              (clickedDatalabel as Record<string, unknown>).selectionObj,
+            )}`
           : "Have not clicked datalabel"}
       </div>
       <ChartComponent {...propsWithDatalabels} onChartUpdate={doClick} onClick={onClick} />

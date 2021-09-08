@@ -22,7 +22,7 @@ import "./styles.scss";
 let loaded = false;
 
 function WithContextProviders(Child: Story, ctx: StoryContext): JSX.Element {
-  if (ctx.parameters?.useReadySignal) {
+  if (ctx.parameters?.useReadySignal === true) {
     const sig = signal();
     ctx.parameters.storyReady = sig;
     ctx.parameters.readySignal = () => {

@@ -123,9 +123,9 @@ export const registerNode = ({
       userNodeDiagnostics,
     };
   } catch (e) {
-    const error = e.toString();
+    const error: string = e.toString();
     return {
-      error: error.length ? error : `Unknown error encountered registering this node.`,
+      error: error.length > 0 ? error : `Unknown error encountered registering this node.`,
       userNodeLogs,
       userNodeDiagnostics,
     };
@@ -158,10 +158,10 @@ export const processMessage = ({
     return { message: newMessage, error: undefined, userNodeLogs, userNodeDiagnostics };
   } catch (e) {
     // TODO: Be able to map line numbers from errors.
-    const error = e.toString();
+    const error: string = e.toString();
     return {
       message: undefined,
-      error: error.length ? error : "Unknown error encountered running this node.",
+      error: error.length > 0 ? error : "Unknown error encountered running this node.",
       userNodeLogs,
       userNodeDiagnostics,
     };

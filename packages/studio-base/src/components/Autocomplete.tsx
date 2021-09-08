@@ -83,7 +83,7 @@ function defaultGetText(name: string) {
     if (typeof item === "string") {
       return item;
     } else if (
-      item &&
+      item != undefined &&
       typeof item === "object" &&
       typeof (item as { value?: string }).value === "string"
     ) {

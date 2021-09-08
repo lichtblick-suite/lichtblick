@@ -68,10 +68,10 @@ export default function ObjectDetails({
     setShowInstance(shouldShowInstance);
   }, []);
 
-  const objectToDisplay = instanceObject && showInstance ? instanceObject : object;
+  const objectToDisplay = instanceObject != undefined && showInstance ? instanceObject : object;
   return (
     <div>
-      {instanceObject && (
+      {instanceObject != undefined && (
         <Dropdown
           btnClassname={styles.button}
           position="below"
@@ -93,7 +93,7 @@ export default function ObjectDetails({
 }
 
 function maybePlainObject(rawVal: unknown) {
-  if (rawVal && typeof rawVal === "object" && "toJSON" in rawVal) {
+  if (typeof rawVal === "object" && rawVal && "toJSON" in rawVal) {
     return (rawVal as { toJSON: () => unknown }).toJSON();
   }
   return rawVal;

@@ -231,9 +231,9 @@ storiesOf("panels/NodePlayground", module)
         userNodeDiagnostics: { nodeId1: [] },
         userNodeLogs: { nodeId1: [] },
       }}
-      onMount={(el: any) => {
+      onMount={(el) => {
         setTimeout(() => {
-          el.querySelectorAll("[data-test=go-back]")[0].click();
+          el.querySelectorAll<HTMLElement>("[data-test=go-back]")[0]!.click();
         }, 500);
       }}
     >
@@ -255,9 +255,9 @@ storiesOf("panels/NodePlayground", module)
     return (
       <PanelSetup
         fixture={{ ...fixture, userNodes }}
-        onMount={(el: any) => {
+        onMount={(el) => {
           setTimeout(() => {
-            el.querySelectorAll("[data-test=node-explorer]")[0].click();
+            el.querySelectorAll<HTMLElement>("[data-test=node-explorer]")[0]!.click();
           }, SIDEBAR_OPEN_CLICK_TIMEOUT);
         }}
       >
@@ -269,9 +269,9 @@ storiesOf("panels/NodePlayground", module)
     return (
       <PanelSetup
         fixture={{ ...fixture, userNodes }}
-        onMount={(el: any) => {
+        onMount={(el) => {
           setTimeout(() => {
-            el.querySelectorAll("[data-test=node-explorer]")[0].click();
+            el.querySelectorAll<HTMLElement>("[data-test=node-explorer]")[0]!.click();
           }, SIDEBAR_OPEN_CLICK_TIMEOUT);
         }}
       >
@@ -283,9 +283,9 @@ storiesOf("panels/NodePlayground", module)
     return (
       <PanelSetup
         fixture={{ ...fixture, userNodes }}
-        onMount={(el: any) => {
+        onMount={(el) => {
           setTimeout(() => {
-            el.querySelectorAll("[data-test=docs-explorer]")[0].click();
+            el.querySelectorAll<HTMLElement>("[data-test=docs-explorer]")[0]!.click();
           }, SIDEBAR_OPEN_CLICK_TIMEOUT);
         }}
       >
@@ -297,9 +297,9 @@ storiesOf("panels/NodePlayground", module)
     return (
       <PanelSetup
         fixture={{ ...fixture, userNodes }}
-        onMount={(el: any) => {
+        onMount={(el) => {
           setTimeout(() => {
-            el.querySelectorAll("[data-test=utils-explorer]")[0].click();
+            el.querySelectorAll<HTMLElement>("[data-test=utils-explorer]")[0]!.click();
           }, SIDEBAR_OPEN_CLICK_TIMEOUT);
         }}
       >
@@ -311,9 +311,9 @@ storiesOf("panels/NodePlayground", module)
     return (
       <PanelSetup
         fixture={{ ...fixture, userNodes }}
-        onMount={(el: any) => {
+        onMount={(el) => {
           setTimeout(() => {
-            el.querySelectorAll("[data-test=templates-explorer]")[0].click();
+            el.querySelectorAll<HTMLElement>("[data-test=templates-explorer]")[0]!.click();
           }, SIDEBAR_OPEN_CLICK_TIMEOUT);
         }}
       >
@@ -382,9 +382,9 @@ storiesOf("panels/NodePlayground", module)
         userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
         userNodeDiagnostics: { nodeId1: [] },
       }}
-      onMount={(el: any) => {
+      onMount={(el) => {
         setTimeout(() => {
-          const diagnosticsErrorsLabel = el.querySelector("[data-test=np-errors]");
+          const diagnosticsErrorsLabel = el.querySelector<HTMLElement>("[data-test=np-errors]");
           if (diagnosticsErrorsLabel) {
             diagnosticsErrorsLabel.click();
           }
@@ -401,9 +401,9 @@ storiesOf("panels/NodePlayground", module)
         userNodes: { nodeId1: { name: "/studio_node/node", sourceCode: "" } },
         userNodeDiagnostics: { nodeId1: [] },
       }}
-      onMount={(el: any) => {
+      onMount={(el) => {
         setTimeout(() => {
-          const logsLabel = el.querySelector("[data-test=np-logs]");
+          const logsLabel = el.querySelector<HTMLElement>("[data-test=np-logs]");
           if (logsLabel) {
             logsLabel.click();
           }
@@ -497,9 +497,9 @@ storiesOf("panels/NodePlayground", module)
           ],
         },
       }}
-      onMount={(el: any) => {
+      onMount={(el) => {
         setTimeout(() => {
-          const diagnosticsErrorsLabel = el.querySelector("[data-test=np-errors]");
+          const diagnosticsErrorsLabel = el.querySelector<HTMLElement>("[data-test=np-errors]");
           if (diagnosticsErrorsLabel) {
             diagnosticsErrorsLabel.click();
           }
@@ -539,9 +539,9 @@ storiesOf("panels/NodePlayground", module)
         userNodeDiagnostics: { nodeId1: [] },
         userNodeLogs: { nodeId1: logs },
       }}
-      onMount={(el: any) => {
+      onMount={(el) => {
         setTimeout(() => {
-          const logsLabel = el.querySelector("[data-test=np-logs]");
+          const logsLabel = el.querySelector<HTMLElement>("[data-test=np-logs]");
           if (logsLabel) {
             logsLabel.click();
           }
@@ -559,12 +559,12 @@ storiesOf("panels/NodePlayground", module)
         userNodeDiagnostics: { nodeId1: [] },
         userNodeLogs: { nodeId1: logs },
       }}
-      onFirstMount={(el: any) => {
+      onFirstMount={(el) => {
         setTimeout(() => {
-          const logsLabel = el.querySelector("[data-test=np-logs]");
+          const logsLabel = el.querySelector<HTMLElement>("[data-test=np-logs]");
           if (logsLabel) {
             logsLabel.click();
-            const clearBtn = el.querySelector("button[data-test=np-logs-clear]");
+            const clearBtn = el.querySelector<HTMLElement>("button[data-test=np-logs-clear]");
             if (clearBtn) {
               clearBtn.click();
             }

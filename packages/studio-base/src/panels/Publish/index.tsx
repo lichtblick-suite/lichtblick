@@ -121,7 +121,7 @@ function Publish(props: Props) {
       datatypes.get(datatype) != undefined
     ) {
       const sampleMessage = buildSampleMessage(datatypes, datatype);
-      if (sampleMessage) {
+      if (sampleMessage != undefined) {
         const stringifiedSampleMessage = JSON.stringify(sampleMessage, undefined, 2);
         saveConfig({ value: stringifiedSampleMessage });
       }
@@ -155,7 +155,7 @@ function Publish(props: Props) {
 
   const onPublishClicked = useRethrow(
     useCallback(() => {
-      if (topicName.length !== 0 && parsedObject) {
+      if (topicName.length !== 0 && parsedObject != undefined) {
         publish(parsedObject as Record<string, unknown>);
       } else {
         throw new Error(`called _publish() when input was invalid`);
@@ -219,8 +219,8 @@ function Publish(props: Props) {
         <Button
           style={{ backgroundColor: buttonColor }}
           tooltip={canPublish ? buttonTooltip : "Connect to ROS to publish data"}
-          disabled={!canPublish || !parsedObject}
-          primary={canPublish && !!parsedObject}
+          disabled={!canPublish || parsedObject == undefined}
+          primary={canPublish && parsedObject != undefined}
           onClick={onPublishClicked}
         >
           {buttonText}

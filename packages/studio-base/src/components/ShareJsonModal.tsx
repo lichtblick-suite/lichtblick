@@ -39,7 +39,7 @@ export default function ShareJsonModal({
     try {
       return { decodedValue: JSON.parse(value === "" ? "{}" : value) as unknown, error: undefined };
     } catch (err) {
-      return { decodedValue: undefined, error: err };
+      return { decodedValue: undefined, error: err as Error };
     }
   }, [value]);
 

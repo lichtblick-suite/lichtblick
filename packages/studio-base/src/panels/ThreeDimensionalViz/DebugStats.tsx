@@ -59,7 +59,7 @@ export default function DebugStats(): JSX.Element | ReactNull {
   const context = useContext<WorldviewContextType>(WorldviewReactContext);
   const renderCount = useRef(0);
   renderCount.current = renderCount.current + 1;
-  if (context.initializedData.regl) {
+  if (context.initializedData.regl != undefined) {
     const { stats } = context.initializedData.regl as { stats: Stats };
     validate(stats);
     const textureSize = (stats.getTotalTextureSize() / (1024 * 1024)).toFixed(1);

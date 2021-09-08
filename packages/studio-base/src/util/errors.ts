@@ -31,10 +31,10 @@ export class AppError extends Error {
       this.message = details;
     }
 
-    if (extraInfo) {
+    if (extraInfo != undefined) {
       // If `extraInfo` was passed via a componentDidCatch:
       // https://reactjs.org/docs/react-component.html#componentdidcatch
-      if ((extraInfo as { componentStack: unknown }).componentStack) {
+      if ((extraInfo as { componentStack: unknown }).componentStack != undefined) {
         this.message += `\n\n${(extraInfo as { componentStack: unknown }).componentStack}`;
       } else {
         try {

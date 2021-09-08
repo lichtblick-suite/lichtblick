@@ -92,7 +92,7 @@ export function ValidatedInputBase({
         }
       }
 
-      if (newError) {
+      if (newError != undefined) {
         setError(newError);
         return;
       }

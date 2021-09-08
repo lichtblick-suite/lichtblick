@@ -320,7 +320,7 @@ describe("OrderedStampPlayer", () => {
     );
     jest.spyOn(fakePlayer, "seekPlayback");
 
-    let emitted: any;
+    let emitted = false;
     let state: PlayerState | undefined;
     player.setListener(async (playerState) => {
       state = playerState;

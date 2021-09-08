@@ -858,7 +858,7 @@ describe("RandomAccessPlayer", () => {
       playerOptions,
     );
     let callCount = 0;
-    let backfillPromiseCallback: any;
+    let backfillPromiseCallback: ((_: GetMessagesResult) => void) | undefined;
     provider.getMessages = async (
       start: Time,
       end: Time,
@@ -957,7 +957,14 @@ describe("RandomAccessPlayer", () => {
     source.setSubscriptions([{ topic: "/foo/bar" }]);
     source.requestBackfill(); // We always get a `requestBackfill` after each `setSubscriptions`.
 
-    let lastGetMessagesCall: any;
+    let lastGetMessagesCall:
+      | {
+          start: Time;
+          end: Time;
+          topics: GetMessagesTopics;
+          resolve: (_: GetMessagesResult) => void;
+        }
+      | undefined;
     const getMessages = async (
       start: Time,
       end: Time,
@@ -984,9 +991,6 @@ describe("RandomAccessPlayer", () => {
     source.seekPlayback({ sec: 0, nsec: 250 });
 
     await delay(1);
-    if (!lastGetMessagesCall) {
-      throw new Error("lastGetMessagesCall not set");
-    }
     lastGetMessagesCall.resolve(getMessagesResult);
     expect(lastGetMessagesCall).toEqual({
       start: { sec: 10, nsec: 0 }, // Clamped to start
@@ -1442,10 +1446,6 @@ describe("RandomAccessPlayer", () => {
         });
       });
       source.setListener(listener);
-      // appease Flow
-      if (!resolveListener) {
-        throw new Error("listener wasn't called");
-      }
       await Promise.resolve();
       expect(metricsCollector.stats()).toEqual({
         initialized: 1,

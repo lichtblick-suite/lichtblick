@@ -27,7 +27,7 @@ export async function pauseFrameForPromises(promises: FramePromise[]): Promise<v
     );
   } catch (error) {
     // An async render task failed to finish in time; some panels may display data from the wrong frame.
-    const isTimeoutError = error.message.includes("Promise timed out");
+    const isTimeoutError = (error as Error).message.includes("Promise timed out");
     if (!isTimeoutError) {
       sendNotification("Player ", error, "app", "error");
       return;

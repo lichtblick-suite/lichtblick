@@ -80,7 +80,7 @@ function CameraStateInfo({ cameraState, onAlignXYAxis }: CameraStateInfoProps) {
         .map((key) => {
           let val: unknown = cameraState[key];
           if (key === "perspective") {
-            val = val ? "true" : "false";
+            val = cameraState[key] ?? false ? "true" : "false";
           } else if (Array.isArray(val)) {
             val = val.map((x) => x.toFixed(1)).join(", ");
           } else if (typeof val === "number") {

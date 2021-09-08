@@ -106,7 +106,7 @@ export default function SchemaEntryEditor({
       return (
         <Toggle
           label={title}
-          checked={!!currentValue}
+          checked={Boolean(currentValue)}
           onChange={(_event, checked) => setValue(checked)}
         />
       );

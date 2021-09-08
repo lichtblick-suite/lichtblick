@@ -17,7 +17,7 @@ import Publish from "@foxglove/studio-base/panels/Publish";
 import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
-const getFixture = (allowPublish: any) => {
+const getFixture = (allowPublish: boolean) => {
   return {
     topics: [],
     datatypes: new Map(

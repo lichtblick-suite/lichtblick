@@ -49,7 +49,7 @@ class MockRosClient {
   _topics: string[] = [];
   _types: string[] = [];
   _typedefs_full_text: string[] = [];
-  _connectCallback?: any;
+  _connectCallback?: () => void;
   _messages: any[] = [];
 
   setup({
@@ -68,12 +68,10 @@ class MockRosClient {
     this._typedefs_full_text = typedefs;
     this._messages = messages;
 
-    if (this._connectCallback) {
-      this._connectCallback();
-    }
+    this._connectCallback?.();
   }
 
-  on(op: string, callback: any) {
+  on(op: string, callback: () => void) {
     if (op === "connection") {
       this._connectCallback = callback;
     }

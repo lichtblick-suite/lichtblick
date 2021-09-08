@@ -142,7 +142,7 @@ export default class Rpc {
     const message = { topic, id, data };
     const result = new Promise<TResult>((resolve, reject) => {
       this._pendingCallbacks[id] = (info) => {
-        if (info.data?.[ERROR]) {
+        if (info.data?.[ERROR] != undefined) {
           const error = new Error(info.data.message);
           error.name = info.data.name;
           error.stack = info.data.stack;

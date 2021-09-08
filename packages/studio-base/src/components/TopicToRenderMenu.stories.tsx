@@ -35,8 +35,8 @@ storiesOf("components/TopicToRenderMenu", module)
     return (
       <PanelSetup
         fixture={{ topics: [], datatypes: new Map(), frame: {} }}
-        onMount={(el: any) => {
-          const topicSet = el.querySelector("[data-test=topic-set]");
+        onMount={(el) => {
+          const topicSet = el.querySelector<HTMLElement>("[data-test=topic-set]");
           if (topicSet) {
             topicSet.click();
           }
@@ -58,8 +58,8 @@ storiesOf("components/TopicToRenderMenu", module)
     return (
       <PanelSetup
         fixture={{ topics: [], datatypes: new Map(), frame: {} }}
-        onMount={(el: any) => {
-          const topicSet = el.querySelector("[data-test=topic-set]");
+        onMount={(el) => {
+          const topicSet = el.querySelector<HTMLElement>("[data-test=topic-set]");
           if (topicSet) {
             topicSet.click();
           }
@@ -81,8 +81,8 @@ storiesOf("components/TopicToRenderMenu", module)
     return (
       <PanelSetup
         fixture={{ topics: [], datatypes: new Map(), frame: {} }}
-        onMount={(el: any) => {
-          const topicSet = el.querySelector("[data-test=topic-set]");
+        onMount={(el) => {
+          const topicSet = el.querySelector<HTMLElement>("[data-test=topic-set]");
           if (topicSet) {
             topicSet.click();
           }
@@ -104,8 +104,8 @@ storiesOf("components/TopicToRenderMenu", module)
     return (
       <PanelSetup
         fixture={{ topics: [], datatypes: new Map(), frame: {} }}
-        onMount={(el: any) => {
-          const topicSet = el.querySelector("[data-test=topic-set]");
+        onMount={(el) => {
+          const topicSet = el.querySelector<HTMLElement>("[data-test=topic-set]");
           if (topicSet) {
             topicSet.click();
           }

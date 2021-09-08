@@ -106,7 +106,7 @@ const fixture = {
   },
 };
 
-function zoomOut(keyObj?: any) {
+function zoomOut(keyObj?: KeyboardEventInit) {
   const canvasEl = document.querySelector("canvas");
 
   // Zoom is a continuous event, so we need to simulate wheel multiple times

@@ -46,7 +46,7 @@ export default function getDiff(
   if (Array.isArray(before) && Array.isArray(after)) {
     let idToCompareWith: string | undefined;
     const allItems = before.concat(after);
-    if (allItems[0] && typeof allItems[0] === "object") {
+    if (typeof allItems[0] === "object" && allItems[0] != undefined) {
       let candidateIdsToCompareWith: Record<string, { before: unknown[]; after: unknown[] }> = {};
       if (allItems[0].id != undefined) {
         candidateIdsToCompareWith.id = { before: [], after: [] };
@@ -56,7 +56,7 @@ export default function getDiff(
           candidateIdsToCompareWith[key] = { before: [], after: [] };
         }
       }
-      if (!every(allItems, (item) => item && typeof item === "object")) {
+      if (!every(allItems, (item) => typeof item === "object" && item)) {
         candidateIdsToCompareWith = {};
       }
       for (const [idKey, candidates] of Object.entries(candidateIdsToCompareWith)) {
@@ -90,7 +90,7 @@ export default function getDiff(
       const unmatchedAfterById = keyBy(after, idToCompareWith);
       const diff = [];
       for (const beforeItem of before) {
-        if (!beforeItem || typeof beforeItem !== "object") {
+        if (beforeItem == undefined || typeof beforeItem !== "object") {
           throw new Error("beforeItem is invalid; should have checked this earlier");
         }
         const id = beforeItem[idToCompareWith];
@@ -125,7 +125,7 @@ export default function getDiff(
     }
   }
 
-  if (before && after && typeof before === "object" && typeof after === "object") {
+  if (typeof before === "object" && typeof after === "object" && before && after) {
     const diff: DiffObject = {};
     const allKeys = Object.keys(before).concat(Object.keys(after));
     for (const key of uniq(allKeys)) {

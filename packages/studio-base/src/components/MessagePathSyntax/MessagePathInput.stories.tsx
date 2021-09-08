@@ -87,7 +87,7 @@ const fixture = {
   globalVariables: { global_var_1: 42, global_var_2: 10 },
 };
 
-const clickInput = (el: any) => {
+const clickInput = (el: HTMLDivElement) => {
   const firstInput = el.querySelector("input");
   if (firstInput) {
     firstInput.focus();

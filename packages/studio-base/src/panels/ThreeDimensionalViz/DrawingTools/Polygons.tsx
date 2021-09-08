@@ -58,7 +58,7 @@ export default function Polygons({ onSetPolygons, polygonBuilder }: Props): JSX.
       <ValidatedInput
         value={polygonPoints}
         onChange={(newPolygonPoints) => {
-          if (newPolygonPoints) {
+          if (newPolygonPoints != undefined) {
             setPolygonPoints(newPolygonPoints as Point2D[][]);
             onSetPolygons(pointsToPolygons(newPolygonPoints as Point2D[][]));
           }

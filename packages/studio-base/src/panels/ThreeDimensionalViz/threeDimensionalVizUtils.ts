@@ -110,7 +110,7 @@ export function useTransformedCameraState({
 }
 
 export const getInstanceObj = (marker: unknown, idx: number): unknown => {
-  if (!marker) {
+  if (marker == undefined) {
     return;
   }
   return (marker as InstancedLineListMarker).metadataByIndex?.[idx];

@@ -23,7 +23,7 @@ export function makeHelpPageStories(req: ReturnType<typeof require.context>): vo
   helpData.forEach(({ name, data }: any) => {
     stories.add(name, () => (
       <HelpModal onRequestClose={() => {}}>
-        {data.default ? React.createElement(data.default) : data}
+        {data.default != undefined ? React.createElement(data.default) : data}
       </HelpModal>
     ));
   });

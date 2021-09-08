@@ -189,7 +189,7 @@ export default function useTopicTree({
     () =>
       Array.from(flattenNode(topicTreeConfig))
         .map((node) =>
-          node.topicName && !(node as { namespace?: unknown }).namespace
+          node.topicName && (node as { namespace?: unknown }).namespace == undefined
             ? node.topicName
             : undefined,
         )
@@ -432,7 +432,7 @@ export default function useTopicTree({
         continue;
       }
 
-      if (settings.overrideColor) {
+      if (settings.overrideColor != undefined) {
         if (!result[key]!.overrideColorByColumn) {
           result[key]!.overrideColorByColumn = [undefined, undefined];
         }

@@ -22,7 +22,7 @@ export interface BackingStore {
 export type BustStorageFn = (backingStore: BackingStore, keys: string[]) => void;
 
 // Having a global map so that different storage instances can add bust storage function to the same map.
-const bustStorageFnsMap = new Map();
+const bustStorageFnsMap = new Map<BackingStore, BustStorageFn[]>();
 
 // Exported for testing.
 // ts-prune-ignore-next
@@ -40,7 +40,7 @@ export default class Storage {
 
   // The registered bustStorageFn will be called when the storage quota is reached.
   registerBustStorageFn(bustStorageFn: BustStorageFn): void {
-    const bustStorageFns = bustStorageFnsMap.get(this._backingStore) || [];
+    const bustStorageFns = bustStorageFnsMap.get(this._backingStore) ?? [];
     bustStorageFnsMap.set(this._backingStore, [...bustStorageFns, bustStorageFn]);
   }
 
@@ -70,7 +70,7 @@ export default class Storage {
   }
 
   _bustStorage(): void {
-    const bustStorageFns = bustStorageFnsMap.get(this._backingStore) || [];
+    const bustStorageFns = bustStorageFnsMap.get(this._backingStore) ?? [];
     for (const bustStorageFn of bustStorageFns) {
       bustStorageFn(this._backingStore, this.keys());
     }
@@ -102,7 +102,7 @@ export default class Storage {
             err = e1;
           }
         }
-        if (err) {
+        if (err != undefined) {
           throw err;
         }
       }

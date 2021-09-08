@@ -65,7 +65,7 @@ type UserNodeActions = {
 };
 
 function maybePlainObject(rawVal: unknown) {
-  if (rawVal && typeof rawVal === "object" && "toJSON" in rawVal) {
+  if (typeof rawVal === "object" && rawVal && "toJSON" in rawVal) {
     return (rawVal as { toJSON: () => unknown }).toJSON();
   }
   return rawVal;
