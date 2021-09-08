@@ -105,7 +105,6 @@ export default function Scrubber(props: Props): JSX.Element {
 
   const [hoverComponentId] = useState<string>(() => uuidv4());
   const el = useRef<HTMLDivElement>(ReactNull);
-  const slider = useRef<Slider>(ReactNull);
 
   const startTime = useMessagePipeline(selectStartTime);
   const currentTime = useMessagePipeline(selectCurrentTime);
@@ -119,18 +118,16 @@ export default function Scrubber(props: Props): JSX.Element {
   const onChange = useCallback((value: number) => onSeek(fromSec(value)), [onSeek]);
 
   const latestStartTime = useLatest(startTime);
-  const onMouseMove = useCallback(
-    (e: React.MouseEvent<HTMLDivElement>) => {
-      if (!latestStartTime.current || el.current == undefined || slider.current == undefined) {
+  const onHoverOver = useCallback(
+    (ev: React.MouseEvent<HTMLDivElement>, value: number) => {
+      if (!latestStartTime.current || el.current == undefined) {
         return;
       }
       const currentEl = el.current;
-      const currentSlider = slider.current;
-      const x = e.clientX;
+      const x = ev.clientX;
       // fix the y position of the tooltip to float on top of the playback bar
       const y = currentEl.getBoundingClientRect().top;
 
-      const value = currentSlider.getValueAtMouse(e);
       const stamp = fromSec(value);
       const timeFromStart = subtractTimes(stamp, latestStartTime.current);
 
@@ -162,13 +159,13 @@ export default function Scrubber(props: Props): JSX.Element {
 
   const clearHoverValue = useClearHoverValue();
 
-  const onMouseLeave = useCallback(() => {
+  const onHoverOut = useCallback(() => {
     setTooltipState(undefined);
     clearHoverValue(hoverComponentId);
   }, [clearHoverValue, hoverComponentId]);
 
   // Clean up the hover value when we are unmounted -- important for storybook.
-  useEffect(() => onMouseLeave, [onMouseLeave]);
+  useEffect(() => onHoverOut, [onHoverOut]);
 
   const renderSlider = useCallback(
     (val?: number) => {
@@ -209,20 +206,16 @@ export default function Scrubber(props: Props): JSX.Element {
       <Stack className={classes.stateBar}>
         <ProgressPlot progress={progress} />
       </Stack>
-      <div
-        ref={el}
-        className={classes.sliderContainer}
-        onMouseMove={onMouseMove}
-        onMouseLeave={onMouseLeave}
-      >
+      <div ref={el} className={classes.sliderContainer}>
         <Slider
-          ref={slider}
           min={min ?? 0}
           max={max ?? 100}
           disabled={min == undefined || max == undefined}
           step={step}
           value={value}
           draggable
+          onHoverOver={onHoverOver}
+          onHoverOut={onHoverOut}
           onChange={onChange}
           renderSlider={renderSlider}
         />
