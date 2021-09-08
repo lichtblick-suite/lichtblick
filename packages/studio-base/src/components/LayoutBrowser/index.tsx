@@ -225,15 +225,16 @@ export default function LayoutBrowser({
         label: "Layout name",
       });
       if (name != undefined) {
-        await layoutManager.saveNewLayout({
+        const newLayout = await layoutManager.saveNewLayout({
           name,
           data: item.working?.data ?? item.baseline.data,
           permission: "org_write",
         });
         void analytics.logEvent(AppEvent.LAYOUT_SHARE, { permission: item.permission });
+        await onSelectLayout(newLayout);
       }
     },
-    [analytics, layoutManager, prompt],
+    [analytics, layoutManager, onSelectLayout, prompt],
   );
 
   const onOverwriteLayout = useCallbackWithToast(
