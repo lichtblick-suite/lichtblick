@@ -13,33 +13,43 @@
 
 import { toSec } from "@foxglove/rostime";
 import { RandomAccessDataProviderStall } from "@foxglove/studio-base/randomAccessDataProviders/types";
-import delay from "@foxglove/studio-base/util/delay";
 
 import { mockExtensionPoint } from "./mockExtensionPoint";
 import { debounceReduce, getReportMetadataForChunk } from "./util";
 
+jest.useFakeTimers();
+
 describe("getReportMetadataForChunk", () => {
+  let mockDateNow: jest.MockedFunction<() => number>;
+  beforeEach(() => {
+    mockDateNow = jest.spyOn(Date, "now").mockReturnValue(0) as jest.MockedFunction<() => number>;
+  });
+  afterEach(() => {
+    mockDateNow.mockRestore();
+  });
+
   it("logs a stall", async () => {
     const { metadata, extensionPoint } = mockExtensionPoint();
     let time = 0;
-    const waitUntil = async (t: any) => {
+    const waitUntil = (t: any) => {
       const delayDuration = t - time;
       if (delayDuration < 0) {
         throw new Error(`It's past ${t} already`);
       }
-      await delay(delayDuration);
+      mockDateNow.mockReturnValue(mockDateNow() + delayDuration);
+      jest.advanceTimersByTime(delayDuration);
       time = t;
     };
     const reportMetadataForChunk = getReportMetadataForChunk(extensionPoint, 100);
     // Should not result in a stall
-    await waitUntil(200);
+    waitUntil(200);
 
     reportMetadataForChunk(Buffer.allocUnsafe(100));
-    await waitUntil(250);
+    waitUntil(250);
     reportMetadataForChunk(Buffer.allocUnsafe(100));
-    await waitUntil(300);
+    waitUntil(300);
     reportMetadataForChunk(Buffer.allocUnsafe(100));
-    await waitUntil(500);
+    waitUntil(500);
     reportMetadataForChunk(Buffer.allocUnsafe(100));
     const stalls = metadata.filter(({ type }) => type === "data_provider_stall");
     expect(stalls).toHaveLength(1);
@@ -52,14 +62,23 @@ describe("getReportMetadataForChunk", () => {
 });
 
 describe("debounceReduce", () => {
+  let mockDateNow: jest.MockedFunction<() => number>;
+  beforeEach(() => {
+    mockDateNow = jest.spyOn(Date, "now").mockReturnValue(0) as jest.MockedFunction<() => number>;
+  });
+  afterEach(() => {
+    mockDateNow.mockRestore();
+  });
+
   it("combines calls that happen closely together", async () => {
     const totals: Array<number> = [];
     const time = 0;
-    const waitUntil = async (t: number) => {
+    const waitUntil = (t: number) => {
       if (time > t) {
         throw new Error(`It's past ${t} already`);
       }
-      return await delay(t - time);
+      mockDateNow.mockReturnValue(mockDateNow() + t - time);
+      jest.advanceTimersByTime(t - time);
     };
     const fn = debounceReduce({
       action: (n: number) => {
@@ -71,17 +90,17 @@ describe("debounceReduce", () => {
     });
 
     fn(new ArrayBuffer(1));
-    await waitUntil(1);
+    waitUntil(1);
     expect(totals).toEqual([1]);
 
     fn(new ArrayBuffer(2));
-    await waitUntil(90);
+    waitUntil(90);
     expect(totals).toEqual([1]); // not yet
     fn(new ArrayBuffer(3));
-    await waitUntil(110);
+    waitUntil(110);
     expect(totals).toEqual([1, 5]); // combines writes
 
-    await waitUntil(300);
+    waitUntil(300);
     expect(totals).toEqual([1, 5]); // no extra writes
   });
 });
