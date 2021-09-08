@@ -85,10 +85,14 @@ export default function computeLayoutSyncOperations(
           ops.push({ local: false, type: "upload-new", localLayout });
           break;
         case "updated":
-          ops.push({ local: true, type: "mark-deleted", localLayout });
+          if (!layoutIsShared(localLayout)) {
+            ops.push({ local: true, type: "delete-local", localLayout });
+          } else {
+            ops.push({ local: true, type: "mark-deleted", localLayout });
+          }
           break;
         case "tracked":
-          if (localLayout.working == undefined) {
+          if (localLayout.working == undefined || !layoutIsShared(localLayout)) {
             ops.push({ local: true, type: "delete-local", localLayout });
           } else {
             ops.push({ local: true, type: "mark-deleted", localLayout });
