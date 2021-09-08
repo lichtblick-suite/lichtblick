@@ -51,7 +51,6 @@ import { MarkerProvider, MarkerCollector, Scene } from "@foxglove/studio-base/ty
 import Bounds from "@foxglove/studio-base/util/Bounds";
 import { emptyPose } from "@foxglove/studio-base/util/Pose";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
-import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 import { ThreeDimensionalVizHooks } from "./types";
 
@@ -443,12 +442,6 @@ export default class SceneBuilder implements MarkerProvider {
   _reportBadFrameId(topic: string): void {
     if (!this.reportedErrorTopics.topicsWithBadFrameIds.has(topic)) {
       this.reportedErrorTopics.topicsWithBadFrameIds.add(topic);
-      sendNotification(
-        `Topic ${topic} has bad frame`,
-        "Non-root transforms may be out of sync, since Foxglove Studio uses the latest transform message instead of the one matching header.stamp",
-        "user",
-        "warn",
-      );
     }
   }
 
