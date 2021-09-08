@@ -34,17 +34,31 @@ const log = Logger.getLogger(__filename);
  * A wrapper around ILayoutStorage for a particular namespace.
  */
 class NamespacedLayoutStorage {
-  private migration?: Promise<void>;
+  private migration: Promise<void>;
   constructor(
     private storage: ILayoutStorage,
     private namespace: string,
-    { migrateLocalLayouts }: { migrateLocalLayouts: boolean },
+    {
+      migrateUnnamespacedLayouts,
+      importFromNamespace,
+    }: { migrateUnnamespacedLayouts: boolean; importFromNamespace: string | undefined },
   ) {
-    if (migrateLocalLayouts) {
-      this.migration = storage.migrateLocalLayouts?.(namespace).catch((error) => {
-        log.error("Migration failed:", error);
-      });
-    }
+    this.migration = (async function () {
+      if (migrateUnnamespacedLayouts) {
+        await storage
+          .migrateUnnamespacedLayouts?.(namespace)
+          .catch((error) => log.error("Migration failed:", error));
+      }
+
+      if (importFromNamespace != undefined) {
+        await storage
+          .importLayouts({
+            fromNamespace: importFromNamespace,
+            toNamespace: namespace,
+          })
+          .catch((error) => log.error("Import failed:", error));
+      }
+    })();
   }
 
   async list(): Promise<readonly Layout[]> {
@@ -123,7 +137,12 @@ export default class LayoutManager implements ILayoutManager {
         remote
           ? LayoutManager.REMOTE_STORAGE_NAMESPACE_PREFIX + remote.namespace
           : LayoutManager.LOCAL_STORAGE_NAMESPACE,
-        { migrateLocalLayouts: true },
+        {
+          migrateUnnamespacedLayouts: true,
+
+          // Convert existing local layouts into cloud personal layouts
+          importFromNamespace: remote ? LayoutManager.LOCAL_STORAGE_NAMESPACE : undefined,
+        },
       ),
     );
     this.remote = remote;

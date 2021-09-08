@@ -9,6 +9,16 @@ import { Storage } from "../../common/types";
 
 const log = Log.getLogger(__filename);
 
+function parseAndMigrateLayout(item: string | Uint8Array): Layout {
+  if (!(item instanceof Uint8Array)) {
+    throw new Error("Invariant violation - layout item is not a buffer");
+  }
+
+  const str = new TextDecoder().decode(item);
+  const parsed = JSON.parse(str);
+  return migrateLayout(parsed);
+}
+
 // Implement a LayoutStorage interface over OsContext
 export default class NativeStorageLayoutStorage implements ILayoutStorage {
   private static STORE_PREFIX = "layouts-";
@@ -25,14 +35,8 @@ export default class NativeStorageLayoutStorage implements ILayoutStorage {
 
     const layouts: Layout[] = [];
     for (const item of items) {
-      if (!(item instanceof Uint8Array)) {
-        throw new Error("Invariant violation - layout item is not a buffer");
-      }
-
       try {
-        const str = new TextDecoder().decode(item);
-        const parsed = JSON.parse(str);
-        layouts.push(migrateLayout(parsed));
+        layouts.push(parseAndMigrateLayout(item));
       } catch (err) {
         log.error(err);
       }
@@ -46,13 +50,7 @@ export default class NativeStorageLayoutStorage implements ILayoutStorage {
     if (item == undefined) {
       return undefined;
     }
-    if (!(item instanceof Uint8Array)) {
-      throw new Error("Invariant violation - layout item is not a buffer");
-    }
-
-    const str = new TextDecoder().decode(item);
-    const parsed = JSON.parse(str);
-    return migrateLayout(parsed);
+    return parseAndMigrateLayout(item);
   }
 
   async put(namespace: string, layout: Layout): Promise<Layout> {
@@ -65,7 +63,33 @@ export default class NativeStorageLayoutStorage implements ILayoutStorage {
     return await this._ctx.delete(NativeStorageLayoutStorage.STORE_PREFIX + namespace, id);
   }
 
-  async migrateLocalLayouts(namespace: string): Promise<void> {
+  async importLayouts({
+    fromNamespace,
+    toNamespace,
+  }: {
+    fromNamespace: string;
+    toNamespace: string;
+  }): Promise<void> {
+    const keys = await this._ctx.list(NativeStorageLayoutStorage.STORE_PREFIX + fromNamespace);
+    for (const key of keys) {
+      try {
+        const item = await this._ctx.get(
+          NativeStorageLayoutStorage.STORE_PREFIX + fromNamespace,
+          key,
+        );
+        if (item == undefined) {
+          continue;
+        }
+        const layout = parseAndMigrateLayout(item);
+        await this.put(toNamespace, layout);
+        await this._ctx.delete(NativeStorageLayoutStorage.STORE_PREFIX + fromNamespace, key);
+      } catch (error) {
+        log.error(error);
+      }
+    }
+  }
+
+  async migrateUnnamespacedLayouts(namespace: string): Promise<void> {
     // Layouts were previously stored in a single un-namespaced store named "layouts".
     const items = await this._ctx.all(NativeStorageLayoutStorage.LEGACY_STORE_NAME);
     for (const item of items) {

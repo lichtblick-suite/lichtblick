@@ -35,4 +35,6 @@ export default class MockLayoutStorage implements ILayoutStorage {
   async delete(namespace: string, id: string): Promise<void> {
     this.layoutsByIdByNamespace.get(namespace)?.delete(id);
   }
+
+  async importLayouts(): Promise<void> {}
 }

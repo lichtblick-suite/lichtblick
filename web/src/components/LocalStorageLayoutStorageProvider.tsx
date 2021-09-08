@@ -55,7 +55,36 @@ export default function LocalStorageLayoutStorageProvider(
         localStorage.removeItem(`${KEY_PREFIX}.${namespace}.${id}`);
       },
 
-      async migrateLocalLayouts(namespace: string) {
+      async importLayouts({
+        fromNamespace,
+        toNamespace,
+      }: {
+        fromNamespace: string;
+        toNamespace: string;
+      }): Promise<void> {
+        const keysToMigrate: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key?.startsWith(`${KEY_PREFIX}.${fromNamespace}.`) === true) {
+            keysToMigrate.push(key);
+          }
+        }
+        for (const key of keysToMigrate) {
+          const layout = localStorage.getItem(key);
+          if (layout == undefined) {
+            continue;
+          }
+          try {
+            const { id } = migrateLayout(JSON.parse(layout));
+            localStorage.setItem(`${KEY_PREFIX}.${toNamespace}.${id}`, layout);
+            localStorage.removeItem(key);
+          } catch (err) {
+            log.error(err);
+          }
+        }
+      },
+
+      async migrateUnnamespacedLayouts(namespace: string) {
         // Layouts were previously stored with the un-namespaced prefix "studio.layout-cache".
         const legacyKeys = filterMap(new Array(localStorage.length), (_, i) => {
           const key = localStorage.key(i) ?? undefined;
