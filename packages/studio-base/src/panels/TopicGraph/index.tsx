@@ -305,6 +305,10 @@ function TopicGraph() {
 
         if (subscribedTopics != undefined) {
           for (const [topic, subscribers] of subscribedTopics.entries()) {
+            if (!topicPassesConditions({ topicIdWithSubscriptions, topic })) {
+              continue;
+            }
+
             for (const node of subscribers) {
               const source = `t:${topic}`;
               const target = `n:${node}`;
