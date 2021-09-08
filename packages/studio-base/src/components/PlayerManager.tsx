@@ -185,7 +185,7 @@ async function rosbridgeSource(options: FactoryOptions): Promise<Player | undefi
     maybeUrl = await options.prompt({
       title: "WebSocket connection",
       placeholder: "ws://localhost:9090",
-      value,
+      initialValue: value,
       transformer: (str) => {
         const result = parseInputUrl(str, "http:", {
           "http:": { protocol: "ws:", port: 9090 },
@@ -233,7 +233,7 @@ async function ros1Source(options: FactoryOptions): Promise<Player | undefined> 
     maybeUrl = await options.prompt({
       title: "ROS 1 TCP connection",
       placeholder: "localhost:11311",
-      value: value ?? os?.getEnvVar("ROS_MASTER_URI") ?? "localhost:11311",
+      initialValue: value ?? os?.getEnvVar("ROS_MASTER_URI") ?? "localhost:11311",
       transformer: (str) => {
         const result = parseInputUrl(str, "ros:", {
           "http:": { port: 80 },
@@ -281,7 +281,7 @@ async function ros2Source(options: FactoryOptions): Promise<Player | undefined> 
     maybeDomainId = await options.prompt({
       title: "ROS 2 DomainId",
       placeholder: "0",
-      value: value ?? "0",
+      initialValue: value ?? "0",
       transformer: (str) => {
         const result = parseInt(str);
         if (isNaN(result) || result < 0) {
@@ -323,7 +323,7 @@ async function velodyneSource(options: FactoryOptions): Promise<Player | undefin
     maybePort = await options.prompt({
       title: "Velodyne LIDAR UDP port",
       placeholder: `${DEFAULT_VELODYNE_PORT}`,
-      value: value ?? `${DEFAULT_VELODYNE_PORT}`,
+      initialValue: value ?? `${DEFAULT_VELODYNE_PORT}`,
       transformer: (str) => {
         const parsed = parseInt(str);
         if (isNaN(parsed) || parsed <= 0 || parsed > 65535) {

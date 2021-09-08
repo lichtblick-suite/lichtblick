@@ -24,8 +24,10 @@ import ModalContext from "@foxglove/studio-base/context/ModalContext";
 
 type PromptOptions = {
   title: string;
+  subText?: string;
   placeholder?: string;
-  value?: string;
+  initialValue?: string;
+  label?: string;
 
   // Map the user-provided value to another value before returning it from prompt(). This function
   // may throw an error; if it does, it will present as a validation error and the user will not be
@@ -42,8 +44,10 @@ type ModalPromptProps = PromptOptions & {
 function ModalPrompt({
   onComplete: originalOnComplete,
   title,
+  subText,
   placeholder,
-  value: initialValue,
+  initialValue,
+  label,
   transformer,
 }: ModalPromptProps) {
   const [value, setValue] = useState(initialValue ?? "");
@@ -81,7 +85,11 @@ function ModalPrompt({
   }, [textField]);
 
   return (
-    <Dialog hidden={false} onDismiss={() => onComplete(undefined)} dialogContentProps={{ title }}>
+    <Dialog
+      hidden={false}
+      onDismiss={() => onComplete(undefined)}
+      dialogContentProps={{ title, subText }}
+    >
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -93,6 +101,7 @@ function ModalPrompt({
         }}
       >
         <TextField
+          label={label}
           componentRef={setTextField}
           placeholder={placeholder}
           value={value}
@@ -100,12 +109,12 @@ function ModalPrompt({
           onChange={(_, newValue) => setValue(newValue ?? "")}
         />
         <DialogFooter>
+          <DefaultButton onClick={() => onComplete(undefined)} text="Cancel" />
           <PrimaryButton
             type="submit"
             disabled={value === "" || errorMessage != undefined}
             text="OK"
           />
-          <DefaultButton onClick={() => onComplete(undefined)} text="Cancel" />
         </DialogFooter>
       </form>
     </Dialog>

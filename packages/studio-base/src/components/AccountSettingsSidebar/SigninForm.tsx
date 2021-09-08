@@ -41,7 +41,8 @@ export default function SigninForm(): JSX.Element {
           <AccountSyncGraphic width={192} />
         </Stack>
         <Text variant="medium">
-          Sign in to Foxglove to access collaboration features like shared layouts.
+          Create a Foxglove account to sync your layouts across multiple devices, and share them
+          with your team.
         </Text>
 
         <PrimaryButton

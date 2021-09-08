@@ -4,7 +4,6 @@
 
 import {
   Stack,
-  TextField,
   Text,
   Dialog,
   DialogFooter,
@@ -22,6 +21,7 @@ import { useAsync, useMountedState } from "react-use";
 import Logger from "@foxglove/log";
 import { useConsoleApi } from "@foxglove/studio-base/context/ConsoleApiContext";
 import { Session } from "@foxglove/studio-base/services/ConsoleApi";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const log = Logger.getLogger(__filename);
 
@@ -62,7 +62,9 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
     url.searchParams.append("user_code", deviceCode.user_code);
     const href = url.toString();
 
-    window.open(href, "_blank");
+    setTimeout(() => {
+      window.open(href, "_blank");
+    }, 700);
   }, [deviceCode]);
 
   const { value: deviceResponse, error: deviceResponseError } = useAsync(async () => {
@@ -112,65 +114,31 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
 
   const dialogContent = useMemo(() => {
     if (!deviceCode) {
-      return (
-        <Spinner
-          size={SpinnerSize.small}
-          label="Initiating sign in…"
-          labelPosition="right"
-          styles={{
-            root: { justifyContent: "flex-start" },
-            label: {
-              fontSize: theme.fonts.medium.fontSize,
-              color: theme.semanticColors.bodyText,
-            },
-          }}
-        />
-      );
+      return ReactNull;
     }
     const { user_code: userCode, verification_uri: verificationUrl } = deviceCode;
     return (
       <Stack tokens={{ childrenGap: theme.spacing.l1 }}>
         <Stack tokens={{ childrenGap: theme.spacing.s1 }} styles={{ root: { lineHeight: "1.3" } }}>
           <Text variant="medium" block>
-            To connect your Foxglove account, follow the instructions in your browser.
+            To complete sign in, follow the instructions in your browser with the code below.
+          </Text>
+          <Text
+            styles={{
+              root: {
+                fontSize: theme.fonts.superLarge.fontSize,
+                color: theme.semanticColors.disabledBodyText,
+                fontFamily: fonts.MONOSPACE,
+              },
+            }}
+          >
+            {userCode}
           </Text>
           <Text variant="medium" block>
             If your browser didn’t open automatically, please{" "}
             <Link href={`${verificationUrl}?user_code=${userCode}`}>click here</Link> to continue.
           </Text>
         </Stack>
-
-        <TextField
-          label="Your device confirmation code is:"
-          value={userCode}
-          autoFocus
-          readOnly
-          styles={{
-            root: {
-              textAlign: "center",
-            },
-            field: {
-              fontSize: theme.fonts.xxLarge.fontSize,
-              textAlign: "center",
-            },
-            fieldGroup: {
-              marginTop: theme.spacing.s2,
-              height: 48,
-            },
-          }}
-        />
-
-        <Spinner
-          size={SpinnerSize.small}
-          label="Awaiting authentiation…"
-          labelPosition="right"
-          styles={{
-            label: {
-              fontSize: theme.fonts.medium.fontSize,
-              color: theme.semanticColors.bodyText,
-            },
-          }}
-        />
       </Stack>
     );
   }, [deviceCode, theme]);
@@ -187,10 +155,23 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
   }
 
   return (
-    <Dialog hidden={false} minWidth={440} title="Sign in to Foxglove">
+    <Dialog hidden={false} minWidth={440} title="Sign in">
       {dialogContent}
-      <DialogFooter>
-        <DefaultButton text="Cancel" onClick={() => onClose?.()} />
+      <DialogFooter styles={{ action: { display: "block" } }}>
+        <Stack horizontal grow horizontalAlign="space-between">
+          <Spinner
+            size={SpinnerSize.small}
+            label={deviceCode ? "Awaiting authentication…" : "Connecting…"}
+            labelPosition="right"
+            styles={{
+              label: {
+                fontSize: theme.fonts.medium.fontSize,
+                color: theme.semanticColors.bodyText,
+              },
+            }}
+          />
+          <DefaultButton text="Cancel" onClick={() => onClose?.()} />
+        </Stack>
       </DialogFooter>
     </Dialog>
   );

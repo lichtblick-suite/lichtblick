@@ -94,8 +94,8 @@ export default function LayoutBrowser({
       currentLayout.working != undefined
     ) {
       await confirm({
-        title: `“${currentLayout.name}” has changes`,
-        prompt: "Before switching layouts, you must either save or discard your current changes.",
+        title: `“${currentLayout.name}” has been modified`,
+        prompt: "Save or discard your changes before switching layouts.",
         ok: "Fine",
         cancel: "Do Not Sell My Personal Information",
       });
@@ -195,16 +195,11 @@ export default function LayoutBrowser({
 
   const onShareLayout = useCallbackWithToast(
     async (item: Layout) => {
-      const existingSharedLayouts = layouts.value?.shared ?? [];
       const name = await prompt({
-        title: `Share “${item.name}”`,
-        value: item.name,
-        transformer: (value: string) => {
-          if (existingSharedLayouts.some((sharedLayout) => sharedLayout.name === value)) {
-            throw new Error("A shared layout with this name already exists.");
-          }
-          return value;
-        },
+        title: "Share a copy with your team",
+        subText: "Team layouts can be used and changed by members of your team.",
+        initialValue: item.name,
+        label: "Layout name",
       });
       if (name != undefined) {
         await layoutManager.saveNewLayout({
@@ -215,7 +210,7 @@ export default function LayoutBrowser({
         void analytics.logEvent(AppEvent.LAYOUT_SHARE, { permission: item.permission });
       }
     },
-    [analytics, layoutManager, layouts.value?.shared, prompt],
+    [analytics, layoutManager, prompt],
   );
 
   const onOverwriteLayout = useCallbackWithToast(
@@ -364,7 +359,7 @@ export default function LayoutBrowser({
         <Stack.Item>
           {layoutManager.supportsSharing && (
             <LayoutSection
-              title="Shared"
+              title="Team"
               emptyText="Your organization doesn’t have any shared layouts yet. Share a personal layout to collaborate with other team members."
               items={layouts.value?.shared}
               selectedId={currentLayoutId}

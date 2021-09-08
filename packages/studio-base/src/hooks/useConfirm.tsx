@@ -100,7 +100,8 @@ function ConfirmModal(props: ConfirmModalProps) {
       hidden={false}
       onDismiss={() => onComplete("cancel")}
       dialogContentProps={{ title: props.title }}
-      styles={{ main: { maxWidth: "unset !important" } }}
+      minWidth={320}
+      maxWidth={480}
     >
       <form
         onSubmit={(event) => {

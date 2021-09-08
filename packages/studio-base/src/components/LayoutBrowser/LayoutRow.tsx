@@ -198,6 +198,9 @@ export default function LayoutRow({
   const confirmDelete = useCallback(() => {
     void confirm({
       title: `Delete “${layout.name}”?`,
+      prompt: `${
+        layoutIsShared(layout) ? "Team members will no longer be able to access this layout." : ""
+      } This action cannot be undone.`,
       ok: "Delete",
       variant: "danger",
     }).then((response) => {
@@ -217,7 +220,10 @@ export default function LayoutRow({
     },
     {
       key: "duplicate",
-      text: "Duplicate",
+      text:
+        layoutStorage.supportsSharing && layoutIsShared(layout)
+          ? "Make a personal copy"
+          : "Make a copy",
       iconProps: { iconName: "Copy" },
       onClick: duplicateAction,
       ["data-test"]: "duplicate-layout",
@@ -227,13 +233,13 @@ export default function LayoutRow({
     layoutStorage.supportsSharing &&
       !layoutIsShared(layout) && {
         key: "share",
-        text: "Share",
+        text: "Share with team",
         iconProps: { iconName: "Share" },
         onClick: shareAction,
       },
     {
       key: "export",
-      text: "Export",
+      text: "Export as JSON",
       iconProps: { iconName: "DownloadDocument" },
       onClick: exportAction,
     },

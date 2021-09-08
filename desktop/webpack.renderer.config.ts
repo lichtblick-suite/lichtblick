@@ -87,6 +87,8 @@ export default (env: unknown, argv: WebpackArgv): Configuration => {
         SLACK_INVITE_URL: "https://foxglove.dev/join-slack",
         OAUTH_CLIENT_ID: process.env.OAUTH_CLIENT_ID ?? "oSJGEAQm16LNF09FSVTMYJO5aArQzq8o",
         FOXGLOVE_API_URL: process.env.FOXGLOVE_API_URL ?? "https://api.foxglove.dev",
+        FOXGLOVE_ACCOUNT_DASHBOARD_URL:
+          process.env.FOXGLOVE_ACCOUNT_DASHBOARD_URL ?? "https://console.foxglove.dev/dashboard",
       }),
       new HtmlWebpackPlugin({
         templateContent: `

@@ -69,7 +69,7 @@ describe("usePrompt", () => {
     act(() => {
       valPromise = result.current({
         title: "test-title",
-        value: "initial-value",
+        initialValue: "initial-value",
         placeholder: "some-placeholder",
       });
     });
