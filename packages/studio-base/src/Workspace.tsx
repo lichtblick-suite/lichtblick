@@ -395,7 +395,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
             "account",
             {
               iconName: currentUser != undefined ? "BlockheadFilled" : "Blockhead",
-              title: currentUser != undefined ? `Logged in as ${currentUser.email}` : "Account",
+              title: currentUser != undefined ? `Signed in as ${currentUser.email}` : "Account",
               component: AccountSettings,
             },
           ],

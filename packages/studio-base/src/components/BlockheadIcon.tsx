@@ -9,7 +9,7 @@ const useStyles = makeStyles({
   // trying to match the wrapper provided by @fluentui here
   root: {
     display: "inline-block",
-    verticalAlign: "middle",
+    verticalAlign: "top",
     speak: "none",
     width: "1em",
     height: "1em",

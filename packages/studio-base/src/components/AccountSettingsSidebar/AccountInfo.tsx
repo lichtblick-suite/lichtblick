@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { DefaultButton, PrimaryButton, Stack, Text, useTheme } from "@fluentui/react";
+import { DefaultButton, Icon, PrimaryButton, Stack, Text, useTheme } from "@fluentui/react";
 import { useCallback } from "react";
 import { useLocalStorage } from "react-use";
 
@@ -30,12 +30,36 @@ export default function AccountInfo(props: { me?: CurrentUser }): JSX.Element {
   }
 
   return (
-    <Stack tokens={{ childrenGap: theme.spacing.s2 }}>
-      <Text>Signed in as: {props.me.email ?? "(no email address)"}</Text>
-      <PrimaryButton href={process.env.FOXGLOVE_ACCOUNT_DASHBOARD_URL}>
-        Account settings
-      </PrimaryButton>
-      <DefaultButton onClick={onSignoutClick}>Sign out</DefaultButton>
+    <Stack verticalFill verticalAlign="space-between">
+      <Stack tokens={{ childrenGap: theme.spacing.m }}>
+        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.s1 }}>
+          <Icon
+            iconName="BlockheadFilled"
+            styles={{
+              root: {
+                color: theme.palette.themePrimary,
+                fontSize: theme.fonts.superLarge.fontSize,
+                height: theme.fonts.superLarge.fontSize,
+              },
+            }}
+          />
+          <Stack verticalAlign="center" tokens={{ childrenGap: theme.spacing.s2 }}>
+            <Text
+              variant="smallPlus"
+              styles={{ root: { color: theme.semanticColors.bodySubtext } }}
+            >
+              Signed in as
+            </Text>
+            <Text variant="medium">{props.me.email ?? "(no email address)"}</Text>
+          </Stack>
+        </Stack>
+        <PrimaryButton href={process.env.FOXGLOVE_ACCOUNT_DASHBOARD_URL}>
+          Account settings
+        </PrimaryButton>
+      </Stack>
+      <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
+        <DefaultButton onClick={onSignoutClick}>Sign out</DefaultButton>
+      </Stack>
     </Stack>
   );
 }
