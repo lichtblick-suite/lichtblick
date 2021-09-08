@@ -347,7 +347,7 @@ function TopicTree({
           <Icon
             dataTest="expand-all-icon"
             tooltip={topLevelNodesCollapsed ? "Expand all" : "Collapse all"}
-            small
+            size="small"
             fade
             onClick={() => {
               saveConfig({ expandedKeys: topLevelNodesCollapsed ? allKeys : [] });
@@ -360,7 +360,7 @@ function TopicTree({
         {filterText.length > 0 && (
           <Icon
             dataTest="clear-filter-icon"
-            small
+            size="small"
             fade
             style={headerRightIconStyle}
             onClick={() => setFilterText("")}
@@ -370,7 +370,7 @@ function TopicTree({
         )}
         <Dropdown
           toggleComponent={
-            <Icon small fade style={headerRightIconStyle} tooltip="Sync settings">
+            <Icon size="small" fade style={headerRightIconStyle} tooltip="Sync settings">
               <SyncIcon />
             </Icon>
           }

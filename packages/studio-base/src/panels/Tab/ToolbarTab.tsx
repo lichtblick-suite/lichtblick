@@ -225,7 +225,7 @@ export function ToolbarTab(props: Props): JSX.Element {
       </Tooltip>
       {isActive ? (
         <Icon
-          small
+          size="small"
           fade
           dataTest="tab-icon"
           tooltip={editingTitle ? "Set new name" : "Remove tab"}

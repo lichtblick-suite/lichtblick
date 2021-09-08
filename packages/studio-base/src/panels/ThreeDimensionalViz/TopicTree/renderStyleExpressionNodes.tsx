@@ -220,7 +220,7 @@ function StyleExpressionNode(props: {
         )}
         <ChildToggle position="below" dataTest={`topic-row-menu-${topic}`}>
           <Icon
-            small
+            size="small"
             fade
             style={{
               padding: "4px 0px",

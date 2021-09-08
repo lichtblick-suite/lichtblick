@@ -72,7 +72,7 @@ function getColumnsFromObject(
   ];
 
   const Cell: ColumnWithLooseAccessor["Cell"] = ({ row }) => (
-    <Icon medium {...row.getToggleRowExpandedProps()} dataTest={`expand-row-${row.index}`}>
+    <Icon size="medium" {...row.getToggleRowExpandedProps()} dataTest={`expand-row-${row.index}`}>
       {row.isExpanded ? <MinusIcon /> : <PlusIcon />}
     </Icon>
   );

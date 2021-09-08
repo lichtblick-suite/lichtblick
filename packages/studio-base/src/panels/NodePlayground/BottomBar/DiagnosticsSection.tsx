@@ -53,7 +53,12 @@ const DiagnosticsSection = ({ diagnostics }: Props): ReactElement => {
             : undefined;
         return (
           <li key={`${message}_${i}`}>
-            <Icon tooltip="Severity" small style={{ color: severityColors[severityLabel] }} active>
+            <Icon
+              tooltip="Severity"
+              size="small"
+              style={{ color: severityColors[severityLabel] }}
+              active
+            >
               {severityIcons[severityLabel]}
             </Icon>
             <span style={{ padding: "5px" }}>{message}</span>

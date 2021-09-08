@@ -87,7 +87,7 @@ export default function Checkbox({
   return (
     <SCheckbox disabled={disabled} labelDirection={labelDirection} style={style}>
       {labelDirection === "left" && styledLabel}
-      <Icon small tooltip={tooltip} onClick={onClick} dataTest={dataTest}>
+      <Icon size="small" tooltip={tooltip} onClick={onClick} dataTest={dataTest}>
         <Component />
       </Icon>
       {labelDirection === "right" && styledLabel}

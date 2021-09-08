@@ -522,13 +522,13 @@ export default function Panel<
             {isSelected && !fullScreen && numSelectedPanelsIfSelected > 1 && (
               <div data-tab-options className={styles.tabActionsOverlay}>
                 <Button style={{ backgroundColor: colors.BLUE }} onClick={groupPanels}>
-                  <Icon small style={{ marginBottom: 5 }}>
+                  <Icon size="small" style={{ marginBottom: 5 }}>
                     <BorderAllIcon />
                   </Icon>
                   Group in tab
                 </Button>
                 <Button style={{ backgroundColor: colors.BLUE }} onClick={createTabs}>
-                  <Icon small style={{ marginBottom: 5 }}>
+                  <Icon size="small" style={{ marginBottom: 5 }}>
                     <ExpandAllOutlineIcon />
                   </Icon>
                   Create {numSelectedPanelsIfSelected} tabs

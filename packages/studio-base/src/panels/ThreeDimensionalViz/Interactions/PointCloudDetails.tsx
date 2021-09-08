@@ -95,7 +95,7 @@ export default function PointCloudDetails({
       <div style={{ display: "flex", justifyContent: "flex-end" }}>
         <ChildToggle position="below" onToggle={setIsOpen} isOpen={isOpen}>
           <Icon
-            small
+            size="small"
             fade
             active={isOpen}
             tooltip={hasAdditionalFieldNames ? "Export points and fields" : "Export points"}

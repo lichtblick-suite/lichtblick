@@ -84,7 +84,7 @@ export default function TopicTreeSwitcher({
           dataTest="open-topic-picker"
           active={renderTopicTree}
           fade
-          medium
+          size="medium"
           onClick={onClick}
         >
           <LayersIcon />
@@ -100,7 +100,7 @@ export default function TopicTreeSwitcher({
       >
         <Icon
           tooltipProps={{ placement: "top", contents: "Pin topic picker" }}
-          small
+          size="small"
           fade
           active={pinTopics}
           onClick={() => {

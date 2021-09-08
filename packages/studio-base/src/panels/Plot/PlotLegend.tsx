@@ -212,7 +212,7 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
                   <Icon
                     style={{ color: colors.RED }}
                     clickable={false}
-                    small
+                    size="small"
                     tooltipProps={{ placement: "top" }}
                     tooltip="Mismatch in the number of elements in x-axis and y-axis messages"
                   >

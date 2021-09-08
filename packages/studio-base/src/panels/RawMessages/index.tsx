@@ -550,12 +550,12 @@ function RawMessages(props: Props) {
   return (
     <Flex col clip style={{ position: "relative" }}>
       <PanelToolbar helpContent={helpContent}>
-        <Icon tooltip="Toggle diff" medium fade onClick={onToggleDiff} active={diffEnabled}>
+        <Icon tooltip="Toggle diff" size="medium" fade onClick={onToggleDiff} active={diffEnabled}>
           <PlusMinusIcon />
         </Icon>
         <Icon
           tooltip={expandAll ?? false ? "Collapse all" : "Expand all"}
-          medium
+          size="medium"
           fade
           onClick={onToggleExpandAll}
           style={{ position: "relative", top: 1 }}

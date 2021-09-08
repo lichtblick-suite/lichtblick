@@ -376,12 +376,12 @@ function TopicGraph() {
       <Toolbar>
         <div className={styles.buttons}>
           <Button className={styles.iconButton} tooltip="Zoom Fit" onClick={onZoomFit}>
-            <Icon style={{ color: "white" }} small>
+            <Icon style={{ color: "white" }} size="small">
               <FitToPageIcon />
             </Icon>
           </Button>
           <Button className={styles.iconButton} tooltip="Orientation" onClick={toggleOrientation}>
-            <Icon style={{ color: "white" }} small>
+            <Icon style={{ color: "white" }} size="small">
               {lrOrientation ? <ArrowLeftRightIcon /> : <ArrowUpDownIcon />}
             </Icon>
           </Button>
@@ -390,7 +390,7 @@ function TopicGraph() {
             tooltip={showServices ? "Showing services" : "Hiding services"}
             onClick={toggleShowServices}
           >
-            <Icon style={{ color: showServices ? colors.RED2 : "white" }} small>
+            <Icon style={{ color: showServices ? colors.RED2 : "white" }} size="small">
               <ServiceIcon />
             </Icon>
           </Button>

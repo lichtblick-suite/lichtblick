@@ -11,41 +11,95 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mergeStyleSets } from "@fluentui/react";
 import cx from "classnames";
-import { CSSProperties } from "react";
+import { ComponentProps, CSSProperties, ReactNode, MouseEvent } from "react";
 
 import Tooltip, { useTooltip } from "@foxglove/studio-base/components/Tooltip";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-import styles from "./icon.module.scss";
+type IconSizeKey = "xlarge" | "large" | "medium" | "small" | "xsmall" | "xxsmall";
+
+function makeIconStyle(size: number) {
+  return {
+    width: size,
+    height: size,
+    fontSize: size,
+    verticalAlign: "middle",
+
+    img: {
+      width: size,
+      height: size,
+      fontSize: size,
+      verticalAlign: "middle",
+    },
+  };
+}
+
+const classes = mergeStyleSets({
+  icon: {
+    "> svg": {
+      fill: "currentColor",
+      width: "1em",
+      height: "1em",
+      verticalAlign: "text-top",
+    },
+  },
+  clickable: {
+    cursor: "pointer",
+
+    ".disabled &": {
+      cursor: "unset",
+    },
+    "[disabled] &": {
+      cursor: "unset",
+    },
+  },
+  fade: {
+    opacity: 0.6,
+    transition: "opacity 0.2s ease-in-out",
+
+    "&:hover": {
+      opacity: 0.8,
+    },
+    "&.active": {
+      opacity: 1,
+    },
+  },
+  wrappedIcon: {
+    "&:hover": {
+      backgroundColor: colors.DARK3,
+    },
+    "&.active": {
+      backgroundColor: colors.DARK4,
+    },
+  },
+  xlarge: makeIconStyle(32),
+  large: makeIconStyle(24),
+  medium: makeIconStyle(20),
+  small: makeIconStyle(18),
+  xsmall: makeIconStyle(16),
+  xxsmall: makeIconStyle(11),
+});
 
 type Props = {
-  children: React.ReactNode;
-  xlarge?: boolean;
-  large?: boolean;
-  medium?: boolean;
-  small?: boolean;
-  xsmall?: boolean;
-  xxsmall?: boolean;
+  children: ReactNode;
   active?: boolean;
   fade?: boolean;
-  onClick?: (e: React.MouseEvent<HTMLElement>) => void;
+  size?: IconSizeKey;
+  onClick?: (e: MouseEvent<HTMLElement>) => void;
   clickable?: boolean;
   className?: string;
   style?: CSSProperties;
-  tooltip?: React.ReactNode;
-  tooltipProps?: Partial<React.ComponentProps<typeof Tooltip> & { alwaysShown?: false }>;
+  tooltip?: ReactNode;
+  tooltipProps?: Partial<ComponentProps<typeof Tooltip> & { alwaysShown?: false }>;
   dataTest?: string;
 };
 
 const Icon = (props: Props): JSX.Element => {
   const {
     children,
-    xlarge,
-    large,
-    medium,
-    small,
-    xsmall,
-    xxsmall,
+    size,
     onClick,
     clickable,
     active,
@@ -56,22 +110,22 @@ const Icon = (props: Props): JSX.Element => {
     tooltipProps,
     dataTest,
   } = props;
-  const classNames = cx("icon", styles.icon, className, {
-    [styles.fade!]: fade,
-    [styles.clickable!]: !!onClick || clickable == undefined || clickable,
-    [styles.active!]: active,
-    [styles.xlarge!]: xlarge,
-    [styles.large!]: large,
-    [styles.medium!]: medium,
-    [styles.small!]: small,
-    [styles.xsmall!]: xsmall,
-    [styles.xxsmall!]: xxsmall,
+  const classNames = cx("icon", classes.icon, className, {
+    active,
+    [classes.fade]: fade,
+    [classes.clickable]: !!onClick || clickable == undefined || clickable,
+    [classes.xlarge]: size === "xlarge",
+    [classes.large]: size === "large",
+    [classes.medium]: size === "medium",
+    [classes.small]: size === "small",
+    [classes.xsmall]: size === "xsmall",
+    [classes.xxsmall]: size === "xxsmall",
   });
 
   // if we have a click handler
   // cancel the bubbling on the event and process it
   // in our click handler callback; otherwise, let it bubble
-  const clickHandler = (e: React.MouseEvent<HTMLElement>) => {
+  const clickHandler = (e: MouseEvent<HTMLElement>) => {
     if (onClick) {
       e.preventDefault();
       e.stopPropagation();
@@ -111,7 +165,7 @@ export const WrappedIcon = (props: Props): JSX.Element => {
         minWidth: "40px",
         ...props.style,
       }}
-      className={cx(styles.wrappedIcon, props.className)}
+      className={cx(classes.wrappedIcon, props.className)}
     />
   );
 };

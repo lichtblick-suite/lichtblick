@@ -602,7 +602,7 @@ function ImageView(props: Props) {
               : `Markers can be transformed by Foxglove Studio based on the camera model. Click to turn it on.`
           }
           fade
-          medium
+          size="medium"
         >
           <WavesIcon style={{ color: transformMarkers ? colors.ORANGE2 : colors.TEXT_BRIGHT }} />
         </Icon>

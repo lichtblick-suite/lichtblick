@@ -116,7 +116,7 @@ const WelcomeScreen = ({
         , or just create a new node.
       </TextContent>
       <Button style={{ marginTop: "8px" }} onClick={() => addNewNode()}>
-        <Icon medium>
+        <Icon size="medium">
           <PlusIcon />
         </Icon>{" "}
         New node
@@ -277,7 +277,7 @@ function NodePlayground(props: Props) {
           >
             {scriptBackStack.length > 1 && (
               <Icon
-                large
+                size="large"
                 tooltip="Go back"
                 dataTest="go-back"
                 style={{ color: colors.DARK9 }}
@@ -307,7 +307,7 @@ function NodePlayground(props: Props) {
               </div>
             )}
             <Icon
-              large
+              size="large"
               tooltip="new node"
               dataTest="new-node"
               style={{ color: colors.DARK9, padding: "0 5px" }}
@@ -333,7 +333,7 @@ function NodePlayground(props: Props) {
               <Suspense
                 fallback={
                   <Flex center style={{ width: "100%", height: "100%" }}>
-                    <Icon large>
+                    <Icon size="large">
                       <SpinningLoadingIcon />
                     </Icon>
                   </Flex>

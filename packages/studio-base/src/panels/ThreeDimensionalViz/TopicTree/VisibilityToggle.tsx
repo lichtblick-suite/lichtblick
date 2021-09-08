@@ -178,7 +178,7 @@ export default function VisibilityToggle({
         tooltipProps={{ placement: "top" }}
         tooltip={unavailableTooltip ? unavailableTooltip : "Unavailable"}
         fade
-        small
+        size="small"
         clickable={false}
         style={{
           fontSize: 10,

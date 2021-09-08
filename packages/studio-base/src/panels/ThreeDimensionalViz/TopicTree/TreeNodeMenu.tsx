@@ -77,7 +77,7 @@ export default function TreeNodeMenu({
       dataTest={`topic-row-menu-${topicName}`}
     >
       <Icon
-        small
+        size="small"
         fade
         style={{
           padding: "4px 0px",

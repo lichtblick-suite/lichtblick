@@ -56,7 +56,9 @@ export default function ExpandableMenu({
       }}
     >
       <STitleWrapper>{title}</STitleWrapper>
-      {!disableOpenClose && <Icon small>{isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}</Icon>}
+      {!disableOpenClose && (
+        <Icon size="small">{isOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}</Icon>
+      )}
     </Item>
   );
 

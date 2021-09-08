@@ -108,7 +108,7 @@ export function TabbedToolbar(props: Props): JSX.Element {
             />
           ))}
           <Icon
-            small
+            size="small"
             fade
             dataTest="add-tab"
             tooltip="Add tab"

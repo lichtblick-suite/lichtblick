@@ -270,7 +270,7 @@ export default function TreeNodeRow({
                 display: "inline-flex",
                 alignItems: "center",
               }}
-              small
+              size="small"
               tooltipProps={{ placement: "top" }}
               tooltip={errorTooltip}
               onClick={(e) => e.stopPropagation()}

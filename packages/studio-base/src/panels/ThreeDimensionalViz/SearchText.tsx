@@ -280,7 +280,7 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
       }}
     >
       <div style={{ backgroundColor: "#1A191F", padding: "0px 4px 0px 8px", borderRadius: "4px" }}>
-        <Icon medium>
+        <Icon size="medium">
           <SearchIcon />
         </Icon>
         <LegacyInput
@@ -308,13 +308,13 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
           {searchTextMatches.length}
         </span>
       </div>
-      <Icon medium onClick={() => iterateCurrentIndex(-1)}>
+      <Icon size="medium" onClick={() => iterateCurrentIndex(-1)}>
         <ArrowUpIcon />
       </Icon>
-      <Icon medium onClick={() => iterateCurrentIndex(1)}>
+      <Icon size="medium" onClick={() => iterateCurrentIndex(1)}>
         <ArrowDownIcon />
       </Icon>
-      <Icon onClick={() => toggleSearchTextOpen(false)} tooltip="[esc]" medium>
+      <Icon onClick={() => toggleSearchTextOpen(false)} tooltip="[esc]" size="medium">
         <CloseIcon />
       </Icon>
     </div>

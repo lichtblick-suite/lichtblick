@@ -354,7 +354,7 @@ function GlobalVariablesTable(): ReactElement {
                 <Flex center style={{ justifyContent: "space-between" }}>
                   --
                   <SIconWrapper onClick={() => setGlobalVariables({ [name]: undefined })}>
-                    <Icon small>
+                    <Icon size="small">
                       <CloseIcon />
                     </Icon>
                   </SIconWrapper>

@@ -120,7 +120,7 @@ const NodesList = ({ nodes, selectNode, deleteNode, collapse, selectedNodeId }: 
             onClick={() => selectNode(nodeId)}
           >
             {nodes[nodeId]?.name}
-            <Icon onClick={() => deleteNode(nodeId)} medium>
+            <Icon onClick={() => deleteNode(nodeId)} size="medium">
               <DeleteIcon />
             </Icon>
           </ListItem>
@@ -157,12 +157,12 @@ const SidebarTitle = ({
   <Flex row style={{ alignItems: "center", color: colors.DARK9, padding: "5px" }}>
     <h3 style={{ textTransform: "uppercase" }}>{title}</h3>
     {tooltip && (
-      <Icon style={{ cursor: "unset", marginLeft: "5px" }} medium tooltip={tooltip}>
+      <Icon style={{ cursor: "unset", marginLeft: "5px" }} size="medium" tooltip={tooltip}>
         <HelpCircleIcon />
       </Icon>
     )}
     <div style={{ display: "flex", justifyContent: "flex-end", flexGrow: 1 }}>
-      <Icon onClick={collapse} medium tooltip={"collapse"}>
+      <Icon onClick={collapse} size="medium" tooltip={"collapse"}>
         <ArrowLeftBoldIcon />
       </Icon>
     </div>
@@ -282,7 +282,7 @@ const Sidebar = ({
         <Icon
           dataTest="node-explorer"
           onClick={() => updateExplorer(nodesSelected ? undefined : "nodes")}
-          large
+          size="large"
           tooltip={"nodes"}
           style={{ color: nodesSelected ? "inherit" : colors.DARK9, position: "relative" }}
         >
@@ -291,7 +291,7 @@ const Sidebar = ({
         <Icon
           dataTest="utils-explorer"
           onClick={() => updateExplorer(utilsSelected ? undefined : "utils")}
-          large
+          size="large"
           tooltip={"utilities"}
           style={{ color: utilsSelected ? "inherit" : colors.DARK9 }}
         >
@@ -300,7 +300,7 @@ const Sidebar = ({
         <Icon
           dataTest="templates-explorer"
           onClick={() => updateExplorer(templatesSelected ? undefined : "templates")}
-          large
+          size="large"
           tooltip={"templates"}
           style={{ color: templatesSelected ? "inherit" : colors.DARK9 }}
         >
@@ -309,7 +309,7 @@ const Sidebar = ({
         <Icon
           dataTest="docs-explorer"
           onClick={() => updateExplorer(docsSelected ? undefined : "docs")}
-          large
+          size="large"
           tooltip={"docs"}
           style={{ color: docsSelected ? "inherit" : colors.DARK9 }}
         >

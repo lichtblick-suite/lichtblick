@@ -73,7 +73,7 @@ export default function Timestamp({ time, timezone }: Props): JSX.Element {
   return (
     <SRoot>
       <DateWrapper>{date}</DateWrapper>
-      <Icon style={{ margin: "0 4px", opacity: "0.5" }} medium clickable={false}>
+      <Icon style={{ margin: "0 4px", opacity: "0.5" }} size="medium" clickable={false}>
         <ChevronRightIcon />
       </Icon>
       <TimestampWrapper>

@@ -391,7 +391,7 @@ class DiagnosticStatus extends React.Component<Props, unknown> {
                       onClick={this._toggleSections}
                     >
                       <Icon
-                        medium
+                        size="medium"
                         fade
                         style={{ padding: 4 }}
                         tooltip={

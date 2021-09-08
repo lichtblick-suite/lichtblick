@@ -68,7 +68,7 @@ export default function Radio(props: RadioProps): ReactElement {
     <>
       {options.map(({ id, label }: RadioOption) => (
         <SOption tabIndex={0} key={id} data-test={id} onClick={() => onChange(id)} {...restProps}>
-          <Icon small>
+          <Icon size="small">
             {id === selectedId ? <RadioButtonCheckedIcon /> : <RadioButtonUncheckedIcon />}
           </Icon>
           <SLabel>{label}</SLabel>
