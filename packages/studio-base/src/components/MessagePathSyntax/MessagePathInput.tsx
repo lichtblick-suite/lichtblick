@@ -335,12 +335,8 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
       } else {
         // Exclude any initial filters ("/topic{foo=='bar'}") from the range that will be replaced
         // when the user chooses a new message path.
-        const initialFilterLength = rosPath.messagePath.reduce((prev, item) => {
-          if (item.type === "filter") {
-            return prev + item.repr.length + 2; // add { and }
-          }
-          return prev;
-        }, 0);
+        const initialFilterLength =
+          rosPath.messagePath[0]?.type === "filter" ? rosPath.messagePath[0].repr.length + 2 : 0;
 
         return {
           autocompleteItems: messagePathsForDatatype(
