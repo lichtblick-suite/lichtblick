@@ -10,6 +10,7 @@ import LayoutManagerContext from "@foxglove/studio-base/context/LayoutManagerCon
 import { useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
 import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutStorageDebuggingContext";
 import { useRemoteLayoutStorage } from "@foxglove/studio-base/context/RemoteLayoutStorageContext";
+import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
 import { ISO8601Timestamp, LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 import LayoutManager from "@foxglove/studio-base/services/LayoutManager";
 
@@ -26,7 +27,7 @@ export default function LayoutManagerProvider({
     [layoutStorage, remoteLayoutStorage],
   );
 
-  const sync = useCallback(async () => {
+  const sync = useCallbackWithToast(async () => {
     await layoutManager.syncWithRemote();
   }, [layoutManager]);
 

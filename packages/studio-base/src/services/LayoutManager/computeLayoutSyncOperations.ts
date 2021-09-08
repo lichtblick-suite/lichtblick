@@ -50,10 +50,12 @@ export default function computeLayoutSyncOperations(
           ops.push({ local: false, type: "upload-updated", localLayout });
           break;
         case "tracked":
-          if (
-            localLayout.syncInfo.lastRemoteSavedAt !== remoteLayout.savedAt ||
-            !remoteLayout.savedAt
-          ) {
+          // if the server doesn't provide a savedAt we consider the layout old and ignore it
+          if (!remoteLayout.savedAt) {
+            break;
+          }
+
+          if (localLayout.syncInfo.lastRemoteSavedAt !== remoteLayout.savedAt) {
             ops.push({
               local: true,
               type: "update-baseline",
