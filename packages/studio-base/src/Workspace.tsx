@@ -44,6 +44,7 @@ import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent"
 import { useAppConfiguration } from "@foxglove/studio-base/context/AppConfigurationContext";
 import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
@@ -359,6 +360,8 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
   );
 
+  const currentUser = useCurrentUser();
+
   const sidebarItems = useMemo<Map<SidebarItemKey, SidebarItem>>(() => {
     const connectionItem: SidebarItem = {
       iconName: "DataManagementSettings",
@@ -388,10 +391,17 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     return enableSharedLayouts
       ? new Map([
           ...SIDEBAR_ITEMS,
-          ["account", { iconName: "Blockhead", title: "Account", component: AccountSettings }],
+          [
+            "account",
+            {
+              iconName: currentUser != undefined ? "BlockheadFilled" : "Blockhead",
+              title: currentUser != undefined ? `Logged in as ${currentUser.email}` : "Account",
+              component: AccountSettings,
+            },
+          ],
         ])
       : SIDEBAR_ITEMS;
-  }, [enableSharedLayouts, playerProblems]);
+  }, [enableSharedLayouts, playerProblems, currentUser]);
 
   const sidebarBottomItems: readonly SidebarItemKey[] = useMemo(() => {
     return enableSharedLayouts ? ["account", "preferences"] : ["preferences"];
