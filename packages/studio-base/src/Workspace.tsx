@@ -47,8 +47,8 @@ import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLa
 import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
-import { PanelSettingsContext } from "@foxglove/studio-base/context/PanelSettingsContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import { WorkspaceContext } from "@foxglove/studio-base/context/WorkspaceContext";
 import useAddPanel from "@foxglove/studio-base/hooks/useAddPanel";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFilesToOpen";
@@ -346,10 +346,11 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   const showPlaybackControls =
     playerPresence === PlayerPresence.NOT_PRESENT || playerCapabilities.includes("playbackControl");
 
-  const panelSettings = useMemo(
+  const workspaceActions = useMemo(
     () => ({
       panelSettingsOpen: selectedSidebarItem === "panel-settings",
       openPanelSettings: () => setSelectedSidebarItem("panel-settings"),
+      openAccountSettings: () => setSelectedSidebarItem("account"),
     }),
     [selectedSidebarItem],
   );
@@ -401,7 +402,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       providers={[
         /* eslint-disable react/jsx-key */
         <LinkHandlerContext.Provider value={handleInternalLink} />,
-        <PanelSettingsContext.Provider value={panelSettings} />,
+        <WorkspaceContext.Provider value={workspaceActions} />,
         /* eslint-enable react/jsx-key */
       ]}
     >

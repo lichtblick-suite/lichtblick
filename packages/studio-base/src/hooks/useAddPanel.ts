@@ -8,12 +8,12 @@ import {
   useCurrentLayoutActions,
   useSelectedPanels,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { usePanelSettings } from "@foxglove/studio-base/context/PanelSettingsContext";
+import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import { getPanelIdForType } from "@foxglove/studio-base/util/layout";
 
 export default function useAddPanel(): (selection: PanelSelection) => void {
   const { addPanel } = useCurrentLayoutActions();
-  const { openPanelSettings } = usePanelSettings();
+  const { openPanelSettings } = useWorkspace();
   const { setSelectedPanelIds } = useSelectedPanels();
   return useCallback(
     ({ type, config, relatedConfigs }: PanelSelection) => {

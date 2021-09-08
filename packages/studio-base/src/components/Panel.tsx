@@ -59,7 +59,7 @@ import {
   useSelectedPanels,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogContext";
-import { usePanelSettings } from "@foxglove/studio-base/context/PanelSettingsContext";
+import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import usePanelDrag from "@foxglove/studio-base/hooks/usePanelDrag";
 import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
 import { PanelConfig, SaveConfig, PanelConfigSchema } from "@foxglove/studio-base/types/panels";
@@ -270,7 +270,7 @@ export default function Panel<
       ],
     );
 
-    const { panelSettingsOpen } = usePanelSettings();
+    const { panelSettingsOpen } = useWorkspace();
 
     const onOverlayClick: MouseEventHandler<HTMLDivElement> = useCallback(
       (e) => {

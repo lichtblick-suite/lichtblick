@@ -39,7 +39,7 @@ import {
   useCurrentLayoutActions,
   useSelectedPanels,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
-import { usePanelSettings } from "@foxglove/studio-base/context/PanelSettingsContext";
+import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 type Props = {
@@ -185,7 +185,7 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
 
   const panelContext = useContext(PanelContext);
 
-  const { openPanelSettings } = usePanelSettings();
+  const { openPanelSettings } = useWorkspace();
   const openSettings = useCallback(() => {
     if (panelContext?.id != undefined) {
       setSelectedPanelIds([panelContext.id]);

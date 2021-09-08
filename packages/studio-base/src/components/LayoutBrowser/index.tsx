@@ -1,7 +1,15 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import { DefaultButton, IconButton, Spinner, Stack, useTheme } from "@fluentui/react";
+import {
+  DefaultButton,
+  IconButton,
+  Link,
+  makeStyles,
+  Spinner,
+  Stack,
+  useTheme,
+} from "@fluentui/react";
 import { partition } from "lodash";
 import moment from "moment";
 import path from "path";
@@ -10,6 +18,7 @@ import { useToasts } from "react-toast-notifications";
 import { useMountedState } from "react-use";
 import useAsyncFn from "react-use/lib/useAsyncFn";
 
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
@@ -20,6 +29,8 @@ import {
 import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutStorageDebuggingContext";
+import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
@@ -31,6 +42,16 @@ import { downloadTextFile } from "@foxglove/studio-base/util/download";
 import LayoutSection from "./LayoutSection";
 import showOpenFilePicker from "./showOpenFilePicker";
 import { debugBorder } from "./styles";
+
+const useStyles = makeStyles((theme) => ({
+  signInPrompt: {
+    fontSize: theme.fonts.smallPlus.fontSize,
+    padding: theme.spacing.s1,
+    backgroundColor: theme.palette.themeLighterAlt,
+    position: "sticky",
+    bottom: 0,
+  },
+}));
 
 export default function LayoutBrowser({
   currentDateForStorybook,
@@ -44,6 +65,8 @@ export default function LayoutBrowser({
   const prompt = usePrompt();
   const analytics = useAnalytics();
   const confirm = useConfirm();
+  const { openAccountSettings } = useWorkspace();
+  const styles = useStyles();
 
   const currentLayoutId = useCurrentLayoutSelector((state) => state.selectedLayout?.id);
   const { setSelectedLayoutId } = useCurrentLayoutActions();
@@ -295,6 +318,11 @@ export default function LayoutBrowser({
 
   const layoutDebug = useContext(LayoutStorageDebuggingContext);
 
+  const [enableSharedLayouts = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
+  );
+  const showSignInPrompt = enableSharedLayouts && !layoutManager.supportsSharing;
+
   return (
     <SidebarContent
       title="Layouts"
@@ -376,6 +404,12 @@ export default function LayoutBrowser({
           )}
         </Stack.Item>
         <div style={{ flexGrow: 1 }} />
+        {showSignInPrompt && (
+          <Stack.Item className={styles.signInPrompt}>
+            <Link onClick={openAccountSettings}>Sign in</Link> to sync layouts across multiple
+            devices, and share them with team members.
+          </Stack.Item>
+        )}
         {layoutDebug?.syncNow && (
           <Stack
             styles={{
