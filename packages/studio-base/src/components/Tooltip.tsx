@@ -9,7 +9,7 @@ import {
   useTheme,
   ICalloutContentStyles,
 } from "@fluentui/react";
-import { Fragment, useCallback, useRef, useState } from "react";
+import { useCallback, Fragment, useRef, useState } from "react";
 
 type Contents = React.ReactNode | (() => React.ReactNode);
 
@@ -150,6 +150,7 @@ export default function Tooltip(
   const { ref, tooltip } = useTooltip(props);
   const child = React.Children.only(children);
   const host = React.cloneElement(child, { ref });
+
   return (
     // When studio-base is packaged for npm, we saw strange issues where React would warn about
     // missing keys on these children, so we add explicit keys.

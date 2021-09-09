@@ -3,31 +3,53 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { IconButton, IButtonProps, IIconProps } from "@fluentui/react";
-import { useState } from "react";
+import { forwardRef, useCallback, useEffect, useState } from "react";
 
 type Props = {
   iconProps: {
     iconNameActive?: RegisteredIconNames | undefined;
   } & IIconProps;
-} & IButtonProps;
+} & Omit<IButtonProps, "allowDisabledFocus">;
 
-export default function HoverableIconButton({
-  iconProps: { iconName, iconNameActive, ...rest },
-  ...props
-}: Props): JSX.Element {
+const HoverableIconButton = forwardRef<HTMLElement, Props>((props, ref) => {
+  const {
+    iconProps: { iconName, iconNameActive, ...restIcon },
+    ...restProps
+  } = props;
+
   const [hovered, setHovered] = useState(false);
+
+  const onMouseOver = useCallback(() => {
+    if (props.disabled === true) {
+      return;
+    }
+    setHovered(true);
+  }, [props.disabled]);
+
+  const onMouseLeave = useCallback(() => {
+    setHovered(false);
+  }, []);
+
+  useEffect(() => {
+    if (props.disabled === true) {
+      setHovered(false);
+    }
+  }, [props.disabled]);
 
   return (
     <IconButton
-      {...props}
+      elementRef={ref}
+      {...restProps}
       iconProps={{
+        ...restIcon,
         iconName: iconNameActive != undefined ? (hovered ? iconNameActive : iconName) : iconName,
-        ...rest,
       }}
-      {...(props.disabled !== true && {
-        onMouseOver: () => setHovered(true),
-        onMouseLeave: () => setHovered(false),
-      })}
+      allowDisabledFocus={true /* required to support mouse leave events for disabled buttons */}
+      onMouseEnter={onMouseOver}
+      onMouseLeave={onMouseLeave}
     />
   );
-}
+});
+HoverableIconButton.displayName = "HoverableIconButton";
+
+export default HoverableIconButton;

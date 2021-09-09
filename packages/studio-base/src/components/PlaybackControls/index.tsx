@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack, IButtonStyles, useTheme } from "@fluentui/react";
+import { Stack, IButtonStyles, useTheme, StackItem } from "@fluentui/react";
 import { merge } from "lodash";
 import { useCallback, useMemo, useState } from "react";
 
@@ -29,7 +29,7 @@ import {
   DIRECTION,
 } from "@foxglove/studio-base/components/PlaybackControls/sharedHelpers";
 import PlaybackSpeedControls from "@foxglove/studio-base/components/PlaybackSpeedControls";
-import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
 
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
 import RepeatAdapter from "./RepeatAdapter";
@@ -101,10 +101,6 @@ export default function PlaybackControls(): JSX.Element {
     [msgPipeline, seek, togglePlayPause],
   );
 
-  const loopTooltip = useTooltip({ contents: "Loop playback" });
-  const seekBackwardTooltip = useTooltip({ contents: "Seek backward" });
-  const seekForwardTooltip = useTooltip({ contents: "Seek forward" });
-
   const iconButtonStyles: IButtonStyles = {
     icon: { height: 20 },
     root: {
@@ -146,9 +142,6 @@ export default function PlaybackControls(): JSX.Element {
 
   return (
     <div>
-      {loopTooltip.tooltip}
-      {seekBackwardTooltip.tooltip}
-      {seekForwardTooltip.tooltip}
       <RepeatAdapter
         play={play}
         pause={pause}
@@ -179,30 +172,35 @@ export default function PlaybackControls(): JSX.Element {
           }}
         >
           <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.s2 }}>
-            <HoverableIconButton
-              elementRef={loopTooltip.ref}
-              checked={repeat}
-              disabled={!isActive}
-              onClick={toggleRepeat}
-              iconProps={{
-                iconName: repeat ? "LoopFilled" : "Loop",
-                iconNameActive: "LoopFilled",
-              }}
-              styles={merge(iconButtonStyles, {
-                rootDisabled: { background: "transparent" },
-              })}
-            />
-            <HoverableIconButton
-              disabled={!isActive}
-              onClick={isPlaying ? pause : resumePlay}
-              iconProps={{
-                iconName: isPlaying ? "Pause" : "Play",
-                iconNameActive: isPlaying ? "PauseFilled" : "PlayFilled",
-              }}
-              styles={merge(iconButtonStyles, {
-                rootDisabled: { background: "transparent" },
-              })}
-            />
+            <StackItem>
+              <Tooltip contents="Loop playback">
+                <HoverableIconButton
+                  checked={repeat}
+                  disabled={!isActive}
+                  onClick={toggleRepeat}
+                  iconProps={{
+                    iconName: repeat ? "LoopFilled" : "Loop",
+                    iconNameActive: "LoopFilled",
+                  }}
+                  styles={merge(iconButtonStyles, {
+                    rootDisabled: { background: "transparent" },
+                  })}
+                />
+              </Tooltip>
+            </StackItem>
+            <StackItem>
+              <HoverableIconButton
+                disabled={!isActive}
+                onClick={isPlaying ? pause : resumePlay}
+                iconProps={{
+                  iconName: isPlaying ? "Pause" : "Play",
+                  iconNameActive: isPlaying ? "PauseFilled" : "PlayFilled",
+                }}
+                styles={merge(iconButtonStyles, {
+                  rootDisabled: { background: "transparent" },
+                })}
+              />
+            </StackItem>
           </Stack>
           <Stack
             horizontal
@@ -215,32 +213,38 @@ export default function PlaybackControls(): JSX.Element {
           <PlaybackTimeDisplay onSeek={seek} onPause={pause} />
         </Stack>
         <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 2 }}>
-          <HoverableIconButton
-            elementRef={seekBackwardTooltip.ref}
-            iconProps={{ iconName: "Previous", iconNameActive: "PreviousFilled" }}
-            disabled={!isActive}
-            onClick={() => {
-              const currentTime = msgPipeline().playerState.activeData?.currentTime;
-              if (!currentTime) {
-                return;
-              }
-              seek(jumpSeek(DIRECTION.BACKWARD, currentTime));
-            }}
-            styles={merge(seekIconButttonStyles({ left: true }), iconButtonStyles)}
-          />
-          <HoverableIconButton
-            elementRef={seekForwardTooltip.ref}
-            iconProps={{ iconName: "Next", iconNameActive: "NextFilled" }}
-            disabled={!isActive}
-            onClick={() => {
-              const currentTime = msgPipeline().playerState.activeData?.currentTime;
-              if (!currentTime) {
-                return;
-              }
-              seek(jumpSeek(DIRECTION.FORWARD, currentTime));
-            }}
-            styles={merge(seekIconButttonStyles({ right: true }), iconButtonStyles)}
-          />
+          <StackItem>
+            <Tooltip contents="Seek backward">
+              <HoverableIconButton
+                iconProps={{ iconName: "Previous", iconNameActive: "PreviousFilled" }}
+                disabled={!isActive}
+                onClick={() => {
+                  const currentTime = msgPipeline().playerState.activeData?.currentTime;
+                  if (!currentTime) {
+                    return;
+                  }
+                  seek(jumpSeek(DIRECTION.BACKWARD, currentTime));
+                }}
+                styles={merge(seekIconButttonStyles({ left: true }), iconButtonStyles)}
+              />
+            </Tooltip>
+          </StackItem>
+          <StackItem>
+            <Tooltip contents="Seek forward">
+              <HoverableIconButton
+                iconProps={{ iconName: "Next", iconNameActive: "NextFilled" }}
+                disabled={!isActive}
+                onClick={() => {
+                  const currentTime = msgPipeline().playerState.activeData?.currentTime;
+                  if (!currentTime) {
+                    return;
+                  }
+                  seek(jumpSeek(DIRECTION.FORWARD, currentTime));
+                }}
+                styles={merge(seekIconButttonStyles({ right: true }), iconButtonStyles)}
+              />
+            </Tooltip>
+          </StackItem>
         </Stack>
       </Stack>
     </div>
