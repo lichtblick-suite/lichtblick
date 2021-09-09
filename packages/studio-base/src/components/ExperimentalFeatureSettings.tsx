@@ -51,25 +51,50 @@ const features: Feature[] = [
 ];
 
 function ExperimentalFeatureItem(props: { feature: Feature }) {
+  const theme = useTheme();
   const { feature } = props;
 
   const [enabled, setEnabled] = useAppConfigurationValue<boolean>(feature.key);
   return (
-    <Stack>
-      <Stack horizontal>
-        <Stack grow>
-          <Text as="h2" variant="medium">
-            {feature.name}
-          </Text>
-        </Stack>
-        <Toggle
-          checked={enabled}
-          onChange={(_, checked) => void setEnabled(checked)}
-          onText="Enabled"
-          offText="Disabled"
-        />
+    <Stack
+      horizontal
+      verticalAlign="start"
+      tokens={{ childrenGap: theme.spacing.m }}
+      styles={{
+        root: {
+          ":not(:first-child)": {
+            paddingTop: theme.spacing.m,
+            borderTop: `1px solid ${theme.semanticColors.bodyDivider}`,
+          },
+        },
+      }}
+    >
+      <Stack grow tokens={{ childrenGap: theme.spacing.s2 }}>
+        <Text variant="medium" styles={{ root: { fontWeight: 600 } }}>
+          {feature.name}
+        </Text>
+        <Text
+          variant="smallPlus"
+          styles={{
+            root: {
+              color: theme.semanticColors.bodySubtext,
+            },
+          }}
+        >
+          {feature.description}
+        </Text>
       </Stack>
-      <div>{feature.description}</div>
+      <Toggle
+        checked={enabled}
+        onChange={(_, checked) => void setEnabled(checked)}
+        onText="Enabled "
+        offText="Disabled"
+        styles={{
+          text: {
+            minWidth: 60,
+          },
+        }}
+      />
     </Stack>
   );
 }
