@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mergeStyleSets } from "@fluentui/react";
 import ArrowLeftIcon from "@mdi/svg/svg/arrow-left.svg";
 import ArrowRightIcon from "@mdi/svg/svg/arrow-right.svg";
 import ChevronDownIcon from "@mdi/svg/svg/chevron-down.svg";
@@ -20,12 +21,12 @@ import SwapHorizontalIcon from "@mdi/svg/svg/swap-horizontal.svg";
 import SyncIcon from "@mdi/svg/svg/sync.svg";
 import LessIcon from "@mdi/svg/svg/unfold-less-horizontal.svg";
 import MoreIcon from "@mdi/svg/svg/unfold-more-horizontal.svg";
+import cx from "classnames";
 import { clamp, groupBy } from "lodash";
 import Tree from "rc-tree";
 import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import { CSSTransition } from "react-transition-group";
-import styled from "styled-components";
 
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import Icon from "@foxglove/studio-base/components/Icon";
@@ -44,7 +45,6 @@ import TopicViewModeSelector from "./TopicViewModeSelector";
 import { ROW_HEIGHT, TREE_SPACING } from "./constants";
 import NoMatchesSvg from "./noMatches.svg";
 import renderTreeNodes, { SWITCHER_WIDTH } from "./renderTreeNodes";
-import topicTreeTransition from "./topicTreeTransition.module.scss";
 import {
   DerivedCustomSettingsByKey,
   GetIsNamespaceCheckedByDefault,
@@ -67,144 +67,154 @@ const SEARCH_BAR_HEIGHT = 40;
 const SWITCHER_ICON_SIZE = 20;
 const MAX_CONTAINER_WIDTH_RATIO = 0.9;
 
-const STopicTreeWrapper = styled.div`
-  position: absolute;
-  top: ${CONTAINER_SPACING}px;
-  left: ${CONTAINER_SPACING}px;
-  z-index: 102;
-  max-width: ${MAX_CONTAINER_WIDTH_RATIO * 100}%;
-
-  // Allow clicks right above the TopicTree to close it
-  pointer-events: none;
-`;
-
-const STopicTree = styled.div`
-  position: relative;
-  color: ${colors.TEXT};
-  border-radius: 6px;
-  background-color: ${colors.DARK2};
-  padding-bottom: 6px;
-  max-width: 100%;
-  overflow: auto;
-  pointer-events: auto;
-  transition: opacity 0.15s linear, transform 0.15s linear;
-`;
-
-const STopicTreeInner = styled.div<{ isXSWidth: boolean }>`
-  .rc-tree {
-    li {
-      ul {
-        padding: 0 0 0 ${SWITCHER_WIDTH}px;
-      }
-    }
-    .rc-tree-node-content-wrapper {
-      cursor: unset;
-    }
+const classes = mergeStyleSets({
+  wrapper: {
+    position: "absolute",
+    top: CONTAINER_SPACING,
+    left: CONTAINER_SPACING,
+    zIndex: 102,
+    maxEidth: `${MAX_CONTAINER_WIDTH_RATIO * 100}%`,
+    pointerEvents: "none", // Allow clicks right above the TopicTree to close it
+  },
+  tree: {
+    position: "relative",
+    color: colors.TEXT,
+    borderRadius: "6px",
+    backgroundColor: colors.DARK2,
+    paddingBottom: "6px",
+    maxWidth: "100%",
+    overflow: "auto",
+    pointerEvents: "auto",
+    transition: "opacity 0.15s linear, transform 0.15s linear",
+  },
+  inner: {
+    "rc-tree li ul": {
+      padding: 0,
+      paddingLeft: SWITCHER_WIDTH,
+    },
+    ".rc-tree-node-content-wrapper": {
+      cursor: "unset",
+    },
     /* Make the chevron icon transition nicely between pointing down and right. */
-    .rc-tree-switcher {
-      height: ${ROW_HEIGHT}px;
-      transition: transform 80ms ease-in-out;
-    }
-    .rc-tree-switcher_close {
-      transform: rotate(-90deg);
-    }
-    .rc-tree-switcher_open {
-      transform: rotate(0deg);
-    }
+    ".rc-tree-switcher": {
+      height: ROW_HEIGHT,
+      transition: "transform 80ms ease-in-out",
+    },
+    ".rc-tree-switcher_close": {
+      transform: "rotate(-90deg)",
+    },
+    ".rc-tree-switcher_open": {
+      transform: "rotate(0deg)",
+    },
     /* Hide the chevron switcher icon when it's not usable. */
-    .rc-tree-switcher-noop {
-      visibility: hidden;
-    }
-    .rc-tree-treenode {
-      display: flex;
-      padding: 0 ${({ isXSWidth }) => (isXSWidth ? 0 : TREE_SPACING)}px;
-      &:hover {
-        background: ${colors.DARK4};
-      }
-      &.rc-tree-treenode-disabled {
-        color: ${colors.TEXT_MUTED};
-        cursor: unset;
-        .rc-tree-node-content-wrapper {
-          cursor: unset;
-        }
-      }
-    }
-    .rc-tree-indent {
-      width: 100%;
-    }
-    .rc-tree-indent-unit {
-      width: 24px;
-    }
-    .rc-tree-treenode-switcher-close,
-    .rc-tree-treenode-switcher-open {
-      .rc-tree-node-content-wrapper {
-        padding: 0;
-      }
-    }
-  }
-`;
+    ".rc-tree-switcher-noop": {
+      visibility: "hidden",
+    },
+    ".rc-tree-treenode": {
+      display: "flex",
+      padding: 0,
 
-const STopicTreeHeader = styled.div`
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  display: flex;
-  padding-left: 8px;
-  align-items: center;
-  background-color: ${colors.DARK5};
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
-`;
+      "&:hover": {
+        background: colors.DARK4,
+      },
+      "&.rc-tree-treenode-disabled": {
+        color: colors.TEXT_MUTED,
+        cursor: "unset",
 
-const SFilter = styled.div`
-  display: flex;
-  padding: 8px 4px;
-  align-items: center;
-  flex: 1;
-`;
+        ".rc-tree-node-content-wrapper": {
+          cursor: "unset",
+        },
+      },
+      ".isXSWidth &": {
+        padding: `0 ${TREE_SPACING}px`,
+      },
+    },
+    ".rc-tree-indent": {
+      width: "100%",
+    },
+    ".rc-tree-indent-unit": {
+      width: 24,
+    },
+    ".rc-tree-treenode-switcher-close, .rc-tree-treenode-switcher-open": {
+      ".rc-tree-node-content-wrapper": {
+        padding: 0,
+      },
+    },
+  },
+  header: {
+    position: "sticky",
+    top: 0,
+    zIndex: 1,
+    display: "flex",
+    paddingLeft: 8,
+    alignItems: "center",
+    backgroundColor: colors.DARK5,
+    borderTopLeftRadius: 6,
+    borderTopRightRadius: 6,
+  },
+  filter: {
+    display: "flex",
+    padding: "8px 4px",
+    alignItems: "center",
+    flex: 1,
+  },
+  input: {
+    height: 24,
+    background: "transparent",
+    flex: 1,
+    overflow: "auto",
+    fontSize: 12,
+    marginLeft: 4,
+    padding: "4px 8px",
+    minWidth: 80,
+    border: "none",
 
-const SInput = styled(LegacyInput)`
-  height: 24px;
-  background: transparent;
-  flex: 1;
-  overflow: auto;
-  font-size: 12px;
-  margin-left: 4px;
-  padding: 4px 8px;
-  min-width: 80px;
-  border: none;
-  :focus,
-  :hover {
-    outline: none;
-    background: transparent;
-  }
-`;
+    ":focus, :hover": {
+      outline: "none",
+      background: "transparent",
+    },
+  },
+  icon: {
+    width: SWITCHER_WIDTH,
+    height: ROW_HEIGHT,
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  noMatches: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 57,
+    marginBottom: 74,
+  },
+  noMatchesText: {
+    marginTop: 25,
+    fontSize: 16,
+    width: 205,
+    textAlign: "center",
+    lineHeight: "130%",
+  },
+});
 
-const SSwitcherIcon = styled.div`
-  width: ${SWITCHER_WIDTH}px;
-  height: ${ROW_HEIGHT}px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-const SNoMatches = styled.div`
-  margin-top: 57px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 74px;
-`;
-
-const SNoMatchesText = styled.div`
-  margin-top: 25px;
-  font-size: 16px;
-  width: 205px;
-  text-align: center;
-  line-height: 130%;
-`;
+const transitionClasses = mergeStyleSets({
+  enter: {
+    opacity: 0,
+    transform: "translateX(-20px)",
+    pointerEvents: "none",
+  },
+  exitActive: {
+    opacity: 0,
+    transform: "translateX(-20px)",
+    pointerEvents: "none",
+  },
+  enterActive: {
+    opacity: 1,
+    transform: "none",
+  },
+});
 
 type SharedProps = {
   allKeys: string[];
@@ -320,13 +330,14 @@ function TopicTree({
   );
 
   return (
-    <STopicTreeInner style={{ width: treeWidth }} isXSWidth={isXSWidth}>
-      <STopicTreeHeader>
-        <SFilter>
+    <div className={cx(classes.inner, { isXSWidth })} style={{ width: treeWidth }}>
+      <header className={classes.header}>
+        <div className={classes.filter}>
           <Icon style={{ color: "rgba(255,255,255, 0.3)" }}>
             <MagnifyIcon style={{ width: 16, height: 16 }} />
           </Icon>
-          <SInput
+          <LegacyInput
+            className={classes.input}
             size={3}
             data-test="topic-tree-filter-input"
             value={filterText}
@@ -335,7 +346,7 @@ function TopicTree({
             onKeyDown={onKeyDown}
             ref={filterTextFieldRef}
           />
-        </SFilter>
+        </div>
         {rootTreeNode.providerAvailable && (
           <TopicViewModeSelector
             isXSWidth={isXSWidth}
@@ -403,14 +414,16 @@ function TopicTree({
             Swap bags 1 and 2
           </Item>
         </Dropdown>
-      </STopicTreeHeader>
+      </header>
       {hasFeatureColumn && <DiffModeSettings enabled={diffModeEnabled} saveConfig={saveConfig} />}
       <div ref={scrollContainerRef} style={{ overflow: "auto", width: treeWidth }}>
         {showNoMatchesState ? (
-          <SNoMatches>
+          <div className={classes.noMatches}>
             <NoMatchesSvg />
-            <SNoMatchesText>No results found. Try searching a different term.</SNoMatchesText>
-          </SNoMatches>
+            <div className={classes.noMatchesText}>
+              No results found. Try searching a different term.
+            </div>
+          </div>
         ) : (
           <Tree
             treeData={renderTreeNodes({
@@ -451,17 +464,20 @@ function TopicTree({
               /* Set autoExpandParent to true when filtering */
             }
             switcherIcon={
-              <SSwitcherIcon style={filterText.length > 0 ? { visibility: "hidden" } : {}}>
+              <div
+                className={classes.icon}
+                style={filterText.length > 0 ? { visibility: "hidden" } : {}}
+              >
                 <ChevronDownIcon
                   fill="currentColor"
                   style={{ width: SWITCHER_ICON_SIZE, height: SWITCHER_ICON_SIZE }}
                 />
-              </SSwitcherIcon>
+              </div>
             }
           />
         )}
       </div>
-    </STopicTreeInner>
+    </div>
   );
 }
 
@@ -489,9 +505,9 @@ function TopicTreeWrapper({
   });
 
   return (
-    <STopicTreeWrapper
+    <div
       style={{ height: containerHeight - CONTAINER_SPACING * 3 }}
-      className="ant-component"
+      className={cx("ant-component", classes.wrapper)}
     >
       <div
         ref={sizeRef}
@@ -514,11 +530,11 @@ function TopicTreeWrapper({
         <CSSTransition
           timeout={150}
           in={renderTopicTree}
-          classNames={{ ...topicTreeTransition }}
+          classNames={transitionClasses}
           mountOnEnter
           unmountOnExit
         >
-          <STopicTree onClick={(e) => e.stopPropagation()}>
+          <div className={classes.tree} onClick={(e) => e.stopPropagation()}>
             <TopicTree
               {...rest}
               sceneErrorsByKey={sceneErrorsByKey}
@@ -531,10 +547,10 @@ function TopicTreeWrapper({
                 containerHeight - SEARCH_BAR_HEIGHT - SWITCHER_HEIGHT - CONTAINER_SPACING * 2
               }
             />
-          </STopicTree>
+          </div>
         </CSSTransition>
       </div>
-    </STopicTreeWrapper>
+    </div>
   );
 }
 
