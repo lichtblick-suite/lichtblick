@@ -23,12 +23,38 @@ import {
   LayoutPermission,
   layoutPermissionIsShared,
 } from "@foxglove/studio-base/services/ILayoutStorage";
-import { IRemoteLayoutStorage } from "@foxglove/studio-base/services/IRemoteLayoutStorage";
+import {
+  IRemoteLayoutStorage,
+  RemoteLayout,
+} from "@foxglove/studio-base/services/IRemoteLayoutStorage";
 import computeLayoutSyncOperations, {
   SyncOperation,
 } from "@foxglove/studio-base/services/LayoutManager/computeLayoutSyncOperations";
 
 const log = Logger.getLogger(__filename);
+
+/**
+ * Try to perform the given updateLayout operation on remote storage. If a conflict is returned,
+ * fetch the most recent version of the layout and return that instead.
+ */
+async function updateOrFetchLayout(
+  remote: IRemoteLayoutStorage,
+  params: Parameters<IRemoteLayoutStorage["updateLayout"]>[0],
+): Promise<RemoteLayout> {
+  const response = await remote.updateLayout(params);
+  switch (response.status) {
+    case "success":
+      return response.newLayout;
+    case "conflict": {
+      const remoteLayout = await remote.getLayout(params.id);
+      if (!remoteLayout) {
+        throw new Error(`Update rejected but layout is not present on server: ${params.id}`);
+      }
+      log.info(`Layout update rejected, using server version: ${params.id}`);
+      return remoteLayout;
+    }
+  }
+}
 
 /**
  * A wrapper around ILayoutStorage for a particular namespace.
@@ -252,7 +278,7 @@ export default class LayoutManager implements ILayoutManager {
       if (!this.remote) {
         throw new Error("Shared layouts are not supported without remote layout storage");
       }
-      const updatedBaseline = await this.remote.updateLayout({ id, name, savedAt: now });
+      const updatedBaseline = await updateOrFetchLayout(this.remote, { id, name, savedAt: now });
       const result = await this.local.runExclusive(
         async (local) =>
           await local.put({
@@ -334,7 +360,7 @@ export default class LayoutManager implements ILayoutManager {
       if (!this.remote) {
         throw new Error("Shared layouts are not supported without remote layout storage");
       }
-      const updatedBaseline = await this.remote.updateLayout({
+      const updatedBaseline = await updateOrFetchLayout(this.remote, {
         id,
         data: localLayout.working?.data ?? localLayout.baseline.data,
         savedAt: now,
@@ -557,7 +583,7 @@ export default class LayoutManager implements ILayoutManager {
           case "upload-updated": {
             const { localLayout } = operation;
             log.debug(`Uploading updated layout ${localLayout.id}`);
-            const newBaseline = await remote.updateLayout({
+            const newBaseline = await updateOrFetchLayout(remote, {
               id: localLayout.id,
               name: localLayout.name,
               data: localLayout.baseline.data,
@@ -567,6 +593,7 @@ export default class LayoutManager implements ILayoutManager {
             return async (local) =>
               await local.put({
                 ...localLayout,
+                name: newBaseline.name,
                 baseline: { ...localLayout.baseline, savedAt: newBaseline.savedAt },
                 syncInfo: { status: "tracked", lastRemoteSavedAt: newBaseline.savedAt },
               });
