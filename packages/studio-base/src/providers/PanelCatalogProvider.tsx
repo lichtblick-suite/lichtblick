@@ -76,8 +76,8 @@ export default function PanelCatalogProvider(
 
     // debug panels are hidden by default, users can enable them within app settings
     return showDebugPanels
-      ? [...panels.builtin, ...legacyPlotPanels, ...wrappedExtensionPanels]
-      : [...panels.builtin, ...panels.debug, ...legacyPlotPanels, ...wrappedExtensionPanels];
+      ? [...panels.builtin, ...panels.debug, ...legacyPlotPanels, ...wrappedExtensionPanels]
+      : [...panels.builtin, ...legacyPlotPanels, ...wrappedExtensionPanels];
   }, [showDebugPanels, wrappedExtensionPanels, enableLegacyPlotPanel]);
 
   const panelsByType = useMemo(() => {
