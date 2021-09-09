@@ -2357,7 +2357,6 @@ __metadata:
     "@types/promise-queue": 2.2.0
     "@types/react": 17.0.18
     "@types/react-autocomplete": 1.8.6
-    "@types/react-document-events": "workspace:*"
     "@types/react-dom": 17.0.9
     "@types/react-highlight-words": 0.16.3
     "@types/react-hover-observer": "workspace:*"
@@ -2426,7 +2425,6 @@ __metadata:
     rc-tree: 5.0.2
     react: 17.0.2
     react-autocomplete: "janpaul123/react-autocomplete#bc8737070b5744069719c8fcd4e0a197192b0d48"
-    react-document-events: 1.5.1
     react-dom: 17.0.2
     react-highlight-words: 0.17.0
     react-hover-observer: 2.1.1
@@ -5477,12 +5475,6 @@ __metadata:
   checksum: 8ffce3570f8d3387bc47f12b6032b1d86c1b93abf7fa3585ce2e293052b76d8eacb19287d1b5b810e7bb0c56ea22433b9b11e301aaf3703bc9fd46980e723aa7
   languageName: node
   linkType: hard
-
-"@types/react-document-events@workspace:*, @types/react-document-events@workspace:packages/@types/react-document-events":
-  version: 0.0.0-use.local
-  resolution: "@types/react-document-events@workspace:packages/@types/react-document-events"
-  languageName: unknown
-  linkType: soft
 
 "@types/react-dom@npm:17.0.9, @types/react-dom@npm:>=16.9.0":
   version: 17.0.9
@@ -19547,16 +19539,6 @@ fsevents@^1.2.7:
   bin:
     react-docgen: bin/react-docgen.js
   checksum: c56e63385948aabd7dbf76531c28031221832f50baa96839394b0dd9d305d9bd27dfc9c4ef432c6f6cfd73948c4705af156fbfccfd82a6823a5acb2bd247fdcf
-  languageName: node
-  linkType: hard
-
-"react-document-events@npm:1.5.1":
-  version: 1.5.1
-  resolution: "react-document-events@npm:1.5.1"
-  peerDependencies:
-    react: ">0.14"
-    react-dom: ">0.14"
-  checksum: 783bf5552649c5c67edc13aa94a13501028d5bbf8dd3eb1fb36bffb56f8975e953bb73c5a2df090de4e3df8d805d4f9539e79f69f9f75c6a175ed5ec7d11eff1
   languageName: node
   linkType: hard
 

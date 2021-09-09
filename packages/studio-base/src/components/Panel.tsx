@@ -30,8 +30,8 @@ import React, {
   Profiler,
   MouseEventHandler,
   useLayoutEffect,
+  useEffect,
 } from "react";
-import DocumentEvents from "react-document-events";
 import {
   MosaicContext,
   MosaicWindowActions,
@@ -430,11 +430,16 @@ export default function Panel<
       [selectAllPanels, cmdKeyPressed, exitFullScreen, onReleaseQuickActionsKey],
     );
 
-    const onBlurDocument = useCallback(() => {
-      exitFullScreen();
-      setCmdKeyPressed(false);
-      setShiftKeyPressed(false);
-      onReleaseQuickActionsKey();
+    /* Ensure user exits full-screen mode when leaving window, even if key is still pressed down */
+    useEffect(() => {
+      const listener = () => {
+        exitFullScreen();
+        setCmdKeyPressed(false);
+        setShiftKeyPressed(false);
+        onReleaseQuickActionsKey();
+      };
+      window.addEventListener("blur", listener);
+      return () => window.removeEventListener("blur", listener);
     }, [exitFullScreen, onReleaseQuickActionsKey]);
 
     const otherPanelProps = useShallowMemo(otherProps);
@@ -500,8 +505,6 @@ export default function Panel<
             connectToolbarDragHandle,
           }}
         >
-          {/* Ensure user exits full-screen mode when leaving window, even if key is still pressed down */}
-          <DocumentEvents target={window} enabled onBlur={onBlurDocument} />
           <KeyListener global keyUpHandlers={keyUpHandlers} keyDownHandlers={keyDownHandlers} />
           <Flex
             onClick={onOverlayClick}
