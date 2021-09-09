@@ -360,7 +360,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
   );
 
-  const currentUser = useCurrentUser();
+  const { currentUser } = useCurrentUser();
 
   const sidebarItems = useMemo<Map<SidebarItemKey, SidebarItem>>(() => {
     const connectionItem: SidebarItem = {

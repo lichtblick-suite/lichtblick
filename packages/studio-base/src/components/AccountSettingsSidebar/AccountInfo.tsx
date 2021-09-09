@@ -2,30 +2,39 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { DefaultButton, Icon, PrimaryButton, Stack, Text, useTheme } from "@fluentui/react";
-import { useCallback } from "react";
-import { useLocalStorage } from "react-use";
+import {
+  DefaultButton,
+  Icon,
+  PrimaryButton,
+  Spinner,
+  SpinnerSize,
+  Stack,
+  Text,
+  useTheme,
+} from "@fluentui/react";
+import { useToasts } from "react-toast-notifications";
+import { useAsyncFn } from "react-use";
 
 import Logger from "@foxglove/log";
-import { useConsoleApi } from "@foxglove/studio-base/context/ConsoleApiContext";
-import { CurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
+import { useCurrentUser, User } from "@foxglove/studio-base/context/CurrentUserContext";
 
 const log = Logger.getLogger(__filename);
 
-export default function AccountInfo(props: { me?: CurrentUser }): JSX.Element {
+export default function AccountInfo(props: { currentUser?: User }): JSX.Element {
   const theme = useTheme();
-  const api = useConsoleApi();
-  const [_, _set, removeBearerToken] = useLocalStorage<string>("fox.bearer-token");
+  const { signOut } = useCurrentUser();
+  const { addToast } = useToasts();
 
-  const onSignoutClick = useCallback(async () => {
-    api.signout().catch((err) => {
-      log.error(err);
-    });
-    removeBearerToken();
-    window.location.reload();
-  }, [api, removeBearerToken]);
+  const [{ loading }, onSignoutClick] = useAsyncFn(async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      log.error(error);
+      addToast(error.toString(), { appearance: "error" });
+    }
+  }, [addToast, signOut]);
 
-  if (!props.me) {
+  if (!props.currentUser) {
     return <></>;
   }
 
@@ -50,7 +59,7 @@ export default function AccountInfo(props: { me?: CurrentUser }): JSX.Element {
             >
               Signed in as
             </Text>
-            <Text variant="medium">{props.me.email ?? "(no email address)"}</Text>
+            <Text variant="medium">{props.currentUser.email ?? "(no email address)"}</Text>
           </Stack>
         </Stack>
         <PrimaryButton href={process.env.FOXGLOVE_ACCOUNT_DASHBOARD_URL}>
@@ -58,7 +67,9 @@ export default function AccountInfo(props: { me?: CurrentUser }): JSX.Element {
         </PrimaryButton>
       </Stack>
       <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
-        <DefaultButton onClick={onSignoutClick}>Sign out</DefaultButton>
+        <DefaultButton onClick={onSignoutClick}>
+          Sign out&nbsp;{loading && <Spinner size={SpinnerSize.small} />}
+        </DefaultButton>
       </Stack>
     </Stack>
   );

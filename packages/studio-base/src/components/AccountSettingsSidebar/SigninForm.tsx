@@ -4,8 +4,8 @@
 
 import { PrimaryButton, Stack, Text, useTheme } from "@fluentui/react";
 import { useCallback, useState } from "react";
-import { useLocalStorage } from "react-use";
 
+import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { Session } from "@foxglove/studio-base/services/ConsoleApi";
 
 import AccountSyncGraphic from "./AccountSyncGraphic";
@@ -13,7 +13,7 @@ import DeviceCodeDialog from "./DeviceCodeDialog";
 
 export default function SigninForm(): JSX.Element {
   const theme = useTheme();
-  const [_, setBearerToken] = useLocalStorage<string>("fox.bearer-token");
+  const { setBearerToken } = useCurrentUser();
   const [modalOpen, setModalOpen] = useState(false);
 
   const handleOnSigninClick = useCallback(() => setModalOpen(true), []);
@@ -23,7 +23,6 @@ export default function SigninForm(): JSX.Element {
       setModalOpen(false);
       if (session != undefined) {
         setBearerToken(session.bearer_token);
-        window.location.reload();
       }
     },
     [setBearerToken],

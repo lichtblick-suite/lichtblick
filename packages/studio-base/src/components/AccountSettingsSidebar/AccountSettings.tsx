@@ -11,15 +11,15 @@ import AccountInfo from "./AccountInfo";
 import SigninForm from "./SigninForm";
 
 export default function AccountSettings(): JSX.Element {
-  const me = useCurrentUser();
+  const { currentUser } = useCurrentUser();
 
   const content = useMemo(() => {
-    if (!me) {
+    if (!currentUser) {
       return <SigninForm />;
     }
 
-    return <AccountInfo me={me} />;
-  }, [me]);
+    return <AccountInfo currentUser={currentUser} />;
+  }, [currentUser]);
 
   return <SidebarContent title="Account">{content}</SidebarContent>;
 }

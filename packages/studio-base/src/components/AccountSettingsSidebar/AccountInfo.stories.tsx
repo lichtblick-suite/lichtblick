@@ -29,7 +29,7 @@ export const SignedIn = (): JSX.Element => {
 
   return (
     <ConsoleApiContext.Provider value={fakeConsoleApi}>
-      <AccountInfo me={me} />
+      <AccountInfo currentUser={me} />
     </ConsoleApiContext.Provider>
   );
 };

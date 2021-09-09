@@ -18,7 +18,7 @@ export default function ConsoleApiRemoteLayoutStorageProvider({
     AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
   );
   const api = useConsoleApi();
-  const currentUser = useCurrentUser();
+  const { currentUser } = useCurrentUser();
 
   const apiStorage = useMemo(
     () =>
