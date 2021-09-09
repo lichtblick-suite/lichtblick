@@ -13,23 +13,25 @@
 
 import { ChartOptions, ScaleOptions } from "chart.js";
 import { uniq } from "lodash";
-import { ComponentProps, useMemo, useState } from "react";
+import { ComponentProps, useCallback, useMemo, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
 import stringHash from "string-hash";
 import styled, { css } from "styled-components";
 import tinycolor from "tinycolor2";
 
-import { subtract as subtractTimes, toSec } from "@foxglove/rostime";
+import { add as addTimes, subtract as subtractTimes, toSec, fromSec } from "@foxglove/rostime";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import Button from "@foxglove/studio-base/components/Button";
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
 import useMessagesByPath from "@foxglove/studio-base/components/MessagePathSyntax/useMessagesByPath";
+import { useMessagePipelineGetter } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import TimeBasedChart, {
   getTooltipItemForMessageHistoryItem,
   TimeBasedChartTooltipData,
 } from "@foxglove/studio-base/components/TimeBasedChart";
+import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
 import { darkColor, lineColors } from "@foxglove/studio-base/util/plotColors";
 import { colors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -389,6 +391,20 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
     refreshMode: "debounce",
   });
 
+  const messagePipeline = useMessagePipelineGetter();
+  const onClick = useCallback(
+    ({ x: seekSeconds }: OnChartClickArgs) => {
+      const { startTime: start } = messagePipeline().playerState.activeData ?? {};
+      const { seekPlayback } = messagePipeline();
+      if (seekSeconds == undefined || start == undefined) {
+        return;
+      }
+      const seekTime = addTimes(start, fromSec(seekSeconds));
+      seekPlayback(seekTime);
+    },
+    [messagePipeline],
+  );
+
   return (
     <SRoot>
       <PanelToolbar floating helpContent={helpContent} />
@@ -417,6 +433,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
             yAxes={yScale}
             plugins={plugins}
             tooltips={tooltips}
+            onClick={onClick}
           />
 
           {paths.map(({ value: path, timestampMethod }, index) => (

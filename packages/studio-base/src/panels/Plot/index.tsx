@@ -38,6 +38,7 @@ import {
 import {
   MessagePipelineContext,
   useMessagePipeline,
+  useMessagePipelineGetter,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
@@ -46,6 +47,7 @@ import {
   getTooltipItemForMessageHistoryItem,
   TooltipItem,
 } from "@foxglove/studio-base/components/TimeBasedChart";
+import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
 import { PanelConfig, PanelConfigSchema } from "@foxglove/studio-base/types/panels";
 
 import PlotChart from "./PlotChart";
@@ -147,10 +149,6 @@ function selectEndTime(ctx: MessagePipelineContext) {
   return ctx.playerState.activeData?.endTime;
 }
 
-function selectSeek(ctx: MessagePipelineContext) {
-  return ctx.seekPlayback;
-}
-
 function Plot(props: Props) {
   const { saveConfig, config } = props;
   const {
@@ -174,7 +172,6 @@ function Plot(props: Props) {
   const startTime = useMessagePipeline(selectStartTime);
   const currentTime = useMessagePipeline(selectCurrentTime);
   const endTime = useMessagePipeline(selectEndTime);
-  const seek = useMessagePipeline(selectSeek);
 
   // Min/max x-values and playback position indicator are only used for preloaded plots. In non-
   // preloaded plots min x-value is always the last seek time, and the max x-value is the current
@@ -339,17 +336,20 @@ function Plot(props: Props) {
     );
   }, [filteredPlotData, plotDataForBlocks, yAxisPaths, startTime, xAxisVal, xAxisPath]);
 
+  const messagePipeline = useMessagePipelineGetter();
   const onClick = useCallback<NonNullable<ComponentProps<typeof PlotChart>["onClick"]>>(
-    (params) => {
+    (params: OnChartClickArgs) => {
       const seekSeconds = params.x;
-      if (!startTime || seekSeconds == undefined || xAxisVal !== "timestamp") {
+      const { startTime: start } = messagePipeline().playerState.activeData ?? {};
+      const { seekPlayback } = messagePipeline();
+      if (!start || seekSeconds == undefined || xAxisVal !== "timestamp") {
         return;
       }
       // The player validates and clamps the time.
-      const seekTime = addTimes(startTime, fromSec(seekSeconds));
-      seek(seekTime);
+      const seekTime = addTimes(start, fromSec(seekSeconds));
+      seekPlayback(seekTime);
     },
-    [seek, startTime, xAxisVal],
+    [messagePipeline, xAxisVal],
   );
 
   return (
