@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Toggle, Stack, Text, useTheme } from "@fluentui/react";
+import { Stack, Text, useTheme, Checkbox } from "@fluentui/react";
 
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
@@ -25,12 +25,17 @@ type Feature = {
 const features: Feature[] = [
   {
     key: AppSetting.UNLIMITED_MEMORY_CACHE,
-    name: "Unlimited in-memory cache (requires restart)",
-    description: <>Fully buffer a bag into memory. This may use up a lot of system memory.</>,
+    name: "Unlimited in-memory cache",
+    description: (
+      <>
+        Fully buffer a bag into memory. This may use up a lot of system memory. Changing this
+        setting requires a restart.
+      </>
+    ),
   },
   {
     key: AppSetting.SHOW_DEBUG_PANELS,
-    name: "Studio Debug Panels",
+    name: "Studio debug panels",
     description: <>Show Foxglove Studio debug panels in the add panel list.</>,
   },
   {
@@ -40,12 +45,12 @@ const features: Feature[] = [
   },
   {
     key: AppSetting.ENABLE_LEGACY_PLOT_PANEL,
-    name: "Legacy Plot Panel",
-    description: <>Enable the legacy plot panel.</>,
+    name: "Legacy Plot panel",
+    description: <>Enable the Legacy Plot panel.</>,
   },
   {
     key: AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
-    name: "Team Shared Layouts",
+    name: "Team shared layouts",
     description: <>Enable team layout sharing when signed in to Foxglove Studio.</>,
   },
 ];
@@ -56,43 +61,37 @@ function ExperimentalFeatureItem(props: { feature: Feature }) {
 
   const [enabled, setEnabled] = useAppConfigurationValue<boolean>(feature.key);
   return (
-    <Stack
-      horizontal
-      verticalAlign="start"
-      tokens={{ childrenGap: theme.spacing.m }}
-      styles={{
-        root: {
-          ":not(:first-child)": {
-            paddingTop: theme.spacing.m,
-            borderTop: `1px solid ${theme.semanticColors.bodyDivider}`,
-          },
-        },
-      }}
-    >
-      <Stack grow tokens={{ childrenGap: theme.spacing.s2 }}>
-        <Text variant="medium" styles={{ root: { fontWeight: 600 } }}>
-          {feature.name}
-        </Text>
-        <Text
-          variant="smallPlus"
-          styles={{
-            root: {
-              color: theme.semanticColors.bodySubtext,
-            },
-          }}
-        >
-          {feature.description}
-        </Text>
-      </Stack>
-      <Toggle
+    <Stack grow tokens={{ childrenGap: theme.spacing.s2 }}>
+      <Checkbox
+        onRenderLabel={() => {
+          return (
+            <Stack
+              tokens={{ childrenGap: theme.spacing.s2 }}
+              styles={{ root: { paddingLeft: theme.spacing.s2 } }}
+            >
+              <Text variant="medium" styles={{ root: { fontWeight: 600 } }}>
+                {feature.name}
+              </Text>
+              <Text
+                variant="smallPlus"
+                styles={{
+                  root: {
+                    color: theme.semanticColors.bodySubtext,
+                  },
+                }}
+              >
+                {feature.description}
+              </Text>
+            </Stack>
+          );
+        }}
         checked={enabled}
         onChange={(_, checked) => void setEnabled(checked)}
-        onText="Enabled "
-        offText="Disabled"
         styles={{
           text: {
             minWidth: 60,
           },
+          label: { alignItems: "baseline" },
         }}
       />
     </Stack>

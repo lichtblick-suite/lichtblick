@@ -238,7 +238,12 @@ export default function Preferences(): React.ReactElement {
         </Stack.Item>
         <Stack.Item>
           <SectionHeader>Experimental Features</SectionHeader>
-          <ExperimentalFeatureSettings />
+          <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
+            <Text style={{ color: theme.palette.neutralSecondary }}>
+              These features are unstable and not recommended for daily use.
+            </Text>
+            <ExperimentalFeatureSettings />
+          </Stack>
         </Stack.Item>
       </Stack>
     </SidebarContent>
