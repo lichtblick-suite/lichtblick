@@ -40,7 +40,8 @@ export default function downsample(dataset: DataSet, bounds: DownsampleBounds): 
   const threshold = 2;
 
   let prevPoint: { x: number; y: number } | undefined = undefined;
-  const downsampled = filterMap(dataset.data, (datum) => {
+  const endIndex = dataset.data.length - 1;
+  const downsampled = filterMap(dataset.data, (datum, index) => {
     if (!datum) {
       return datum;
     }
@@ -48,6 +49,11 @@ export default function downsample(dataset: DataSet, bounds: DownsampleBounds): 
     const point = { x: datum.x * pixelPerXValue, y: datum.y * pixelPerYValue };
     if (!prevPoint) {
       prevPoint = point;
+      return datum;
+    }
+
+    // Always keep the last data point
+    if (index === endIndex) {
       return datum;
     }
 
