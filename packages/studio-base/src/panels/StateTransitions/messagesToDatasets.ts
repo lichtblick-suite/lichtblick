@@ -4,14 +4,13 @@
 
 import stringHash from "string-hash";
 
-import { Time, toSec } from "@foxglove/rostime";
+import { Time, toSec, subtract as subtractTimes } from "@foxglove/rostime";
 import { ChartData } from "@foxglove/studio-base/components/Chart";
 import { MessageAndData } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import {
   getTooltipItemForMessageHistoryItem,
   TimeBasedChartTooltipData,
 } from "@foxglove/studio-base/components/TimeBasedChart";
-import { subtractTimes } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/time";
 import { darkColor, lineColors } from "@foxglove/studio-base/util/plotColors";
 import { grey } from "@foxglove/studio-base/util/toolsColorScheme";
 

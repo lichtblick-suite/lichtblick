@@ -19,7 +19,7 @@ import styled, { css } from "styled-components";
 import tinycolor from "tinycolor2";
 
 import { useShallowMemo } from "@foxglove/hooks";
-import { add as addTimes, fromSec } from "@foxglove/rostime";
+import { add as addTimes, fromSec, subtract as subtractTimes, toSec } from "@foxglove/rostime";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import { useBlocksByTopic } from "@foxglove/studio-base/PanelAPI";
 import Button from "@foxglove/studio-base/components/Button";
@@ -27,7 +27,11 @@ import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax
 import { getTopicsFromPaths } from "@foxglove/studio-base/components/MessagePathSyntax/parseRosPath";
 import { useDecodeMessagePathsForMessagesByTopic } from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import useMessagesByPath from "@foxglove/studio-base/components/MessagePathSyntax/useMessagesByPath";
-import { useMessagePipelineGetter } from "@foxglove/studio-base/components/MessagePipeline";
+import {
+  MessagePipelineContext,
+  useMessagePipeline,
+  useMessagePipelineGetter,
+} from "@foxglove/studio-base/components/MessagePipeline";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import TimeBasedChart, {
@@ -186,6 +190,10 @@ export function openSiblingStateTransitionsPanel(
   });
 }
 
+function selectCurrentTime(ctx: MessagePipelineContext) {
+  return ctx.playerState.activeData?.currentTime;
+}
+
 type Props = {
   config: StateTransitionConfig;
   saveConfig: (arg0: Partial<StateTransitionConfig>) => void;
@@ -223,6 +231,11 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
   const subscribeTopics = useMemo(() => getTopicsFromPaths(pathStrings), [pathStrings]);
 
   const { startTime } = PanelAPI.useDataSourceInfo();
+  const currentTime = useMessagePipeline(selectCurrentTime);
+  const currentTimeSinceStart = useMemo(
+    () => (!currentTime || !startTime ? undefined : toSec(subtractTimes(currentTime, startTime))),
+    [currentTime, startTime],
+  );
   const itemsByPath = useMessagesByPath(pathStrings);
 
   const decodeMessagePathsForMessagesByTopic = useDecodeMessagePathsForMessagesByTopic(pathStrings);
@@ -381,6 +394,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
             plugins={plugins}
             tooltips={tooltips}
             onClick={onClick}
+            currentTime={currentTimeSinceStart}
           />
 
           {paths.map(({ value: path, timestampMethod }, index) => (
