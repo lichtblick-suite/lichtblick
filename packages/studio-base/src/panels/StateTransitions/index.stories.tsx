@@ -14,6 +14,7 @@
 import { useCallback } from "react";
 import TestUtils from "react-dom/test-utils";
 
+import { BlockCache } from "@foxglove/studio-base/randomAccessDataProviders/MemoryCacheDataProvider";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { useReadySignal } from "@foxglove/studio-base/stories/ReadySignalContext";
 
@@ -72,7 +73,10 @@ const fixture = {
       },
     }),
   ),
-  topics: [{ name: "/some/topic/with/state", datatype: "msgs/SystemState" }],
+  topics: [
+    { name: "/some/topic/with/state", datatype: "msgs/SystemState" },
+    { name: "/blocks", datatype: "msgs/SystemState" },
+  ],
   activeData: {
     startTime: { sec: 1526191527, nsec: 202050 },
     endTime: { sec: 1526191551, nsec: 999997069 },
@@ -189,35 +193,61 @@ export function JsonPath(): JSX.Element {
   );
 }
 
-WithAHoveredTooltip.parameters = {
-  chromatic: { delay: 200 },
-  useReadySignal: true,
+const messageCache: BlockCache = {
+  blocks: [
+    {
+      sizeInBytes: 0,
+      messagesByTopic: {
+        "/blocks": systemStateMessages.slice(0, 5).map((message, idx) => ({
+          topic: "/blocks",
+          receiveTime: message.header.stamp,
+          message: { ...message, data: { value: idx } },
+        })),
+      },
+    },
+    {
+      sizeInBytes: 0,
+      messagesByTopic: {
+        "/blocks": systemStateMessages.slice(7, 12).map((message, idx) => ({
+          topic: "/blocks",
+          receiveTime: message.header.stamp,
+          message: { ...message, data: { value: idx } },
+        })),
+      },
+    },
+    {
+      sizeInBytes: 0,
+      messagesByTopic: {},
+    },
+    {
+      sizeInBytes: 0,
+      messagesByTopic: {
+        "/blocks": systemStateMessages.slice(15, 19).map((message, idx) => ({
+          topic: "/blocks",
+          receiveTime: message.header.stamp,
+          message: { ...message, data: { value: idx } },
+        })),
+      },
+    },
+  ],
+  startTime: systemStateMessages[0]!.header.stamp,
 };
-export function WithAHoveredTooltip(): JSX.Element {
+
+Blocks.parameters = { useReadySignal: true };
+export function Blocks(): JSX.Element {
   const readySignal = useReadySignal({ count: 3 });
   const pauseFrame = useCallback(() => readySignal, [readySignal]);
+
+  const blockFixture = { ...fixture, progress: { messageCache } };
+
   return (
-    <PanelSetup
-      fixture={fixture}
-      pauseFrame={pauseFrame}
-      onMount={() => {
-        setTimeout(() => {
-          const [canvas] = document.getElementsByTagName("canvas");
-          const x = 163;
-          const y = 266;
-          canvas?.dispatchEvent(
-            new MouseEvent("mousemove", { screenX: x, clientX: x, screenY: y, clientY: y }),
-          );
-        }, 100);
-      }}
-      style={{ width: 370 }}
-    >
+    <PanelSetup fixture={blockFixture} pauseFrame={pauseFrame}>
       <StateTransitions
         overrideConfig={{
-          paths: new Array(5).fill({
-            value: "/some/topic/with/state.state",
-            timestampMethod: "receiveTime",
-          }),
+          paths: [
+            { value: "/some/topic/with/state.state", timestampMethod: "receiveTime" },
+            { value: "/blocks.state", timestampMethod: "receiveTime" },
+          ],
         }}
       />
     </PanelSetup>

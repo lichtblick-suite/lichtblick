@@ -8,7 +8,7 @@
 /// <reference types="chartjs-plugin-datalabels" />
 /// <reference types="chartjs-plugin-zoom" />
 
-import { ChartOptions, ChartData, ScatterDataPoint } from "chart.js";
+import { ChartOptions, ChartData as ChartJsChartData, ScatterDataPoint } from "chart.js";
 import Hammer from "hammerjs";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useAsync, useMountedState } from "react-use";
@@ -32,10 +32,10 @@ export type OnClickArg = {
 // Chartjs typings use _null_ to indicate _gaps_ in the dataset
 // eslint-disable-next-line no-restricted-syntax
 const ChartNull = null;
-type Data = ChartData<"scatter", (ScatterDataPoint | typeof ChartNull)[]>;
+export type ChartData = ChartJsChartData<"scatter", (ScatterDataPoint | typeof ChartNull)[]>;
 
 type Props = {
-  data: Data;
+  data: ChartData;
   options: ChartOptions;
   type: string;
   height: number;
