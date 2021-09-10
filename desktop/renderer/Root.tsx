@@ -16,7 +16,7 @@ import {
   GlobalCss,
   ConsoleApi,
   ConsoleApiContext,
-  CurrentUserProvider,
+  ConsoleApiCurrentUserProvider,
   ConsoleApiRemoteLayoutStorageProvider,
 } from "@foxglove/studio-base";
 
@@ -74,7 +74,7 @@ export default function Root(): ReactElement {
     /* eslint-disable react/jsx-key */
     <NativeStorageAppConfigurationProvider />,
     <ConsoleApiContext.Provider value={api} />,
-    <CurrentUserProvider />,
+    <ConsoleApiCurrentUserProvider />,
     <ConsoleApiRemoteLayoutStorageProvider />,
     <StudioToastProvider />,
     <NativeStorageLayoutStorageProvider />,

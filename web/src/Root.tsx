@@ -18,7 +18,7 @@ import {
   ConsoleApi,
   ConsoleApiContext,
   ConsoleApiRemoteLayoutStorageProvider,
-  CurrentUserProvider,
+  ConsoleApiCurrentUserProvider,
 } from "@foxglove/studio-base";
 
 import LocalStorageAppConfigurationProvider from "./components/LocalStorageAppConfigurationProvider";
@@ -94,7 +94,7 @@ export function Root({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }): JSX
     /* eslint-disable react/jsx-key */
     <LocalStorageAppConfigurationProvider />,
     <ConsoleApiContext.Provider value={api} />,
-    <CurrentUserProvider />,
+    <ConsoleApiCurrentUserProvider />,
     <ConsoleApiRemoteLayoutStorageProvider />,
     <StudioToastProvider />,
     <LocalStorageLayoutStorageProvider />,

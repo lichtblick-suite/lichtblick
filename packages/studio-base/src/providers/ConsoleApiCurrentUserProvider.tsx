@@ -16,7 +16,9 @@ const log = Logger.getLogger(__filename);
  * CurrentUserProvider attempts to load the current user's profile if there is an authenticated
  * session
  */
-export default function CurrentUserProvider(props: PropsWithChildren<unknown>): JSX.Element {
+export default function ConsoleApiCurrentUserProvider(
+  props: PropsWithChildren<unknown>,
+): JSX.Element {
   const api = useConsoleApi();
   const [bearerToken, setBearerToken, removeBearerToken] =
     useLocalStorage<string>("fox.bearer-token");

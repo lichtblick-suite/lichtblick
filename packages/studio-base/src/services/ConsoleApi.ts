@@ -2,10 +2,13 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-type CurrentUser = {
+type User = {
   id: string;
-  orgId: string;
   email: string;
+  orgId: string;
+  orgDisplayName: string | null; // eslint-disable-line no-restricted-syntax
+  orgSlug: string;
+  orgPaid: boolean | null; // eslint-disable-line no-restricted-syntax
 };
 
 type SigninArgs = {
@@ -75,8 +78,8 @@ class ConsoleApi {
     return await this.get<Org[]>("/v1/orgs");
   }
 
-  async me(): Promise<CurrentUser> {
-    return await this.get<CurrentUser>("/v1/me");
+  async me(): Promise<User> {
+    return await this.get<User>("/v1/me");
   }
 
   async signin(args: SigninArgs): Promise<Session> {
@@ -225,5 +228,5 @@ class ConsoleApi {
   }
 }
 
-export type { CurrentUser, Org, DeviceCodeResponse, Session };
+export type { Org, DeviceCodeResponse, Session };
 export default ConsoleApi;

@@ -53,13 +53,13 @@ export default function AccountInfo(props: { currentUser?: User }): JSX.Element 
             }}
           />
           <Stack verticalAlign="center" tokens={{ childrenGap: theme.spacing.s2 }}>
+            <Text variant="medium">{props.currentUser.email ?? "(no email address)"}</Text>
             <Text
               variant="smallPlus"
               styles={{ root: { color: theme.semanticColors.bodySubtext } }}
             >
-              Signed in as
+              {props.currentUser.orgDisplayName ?? props.currentUser.orgSlug}
             </Text>
-            <Text variant="medium">{props.currentUser.email ?? "(no email address)"}</Text>
           </Stack>
         </Stack>
         <PrimaryButton href={process.env.FOXGLOVE_ACCOUNT_DASHBOARD_URL}>

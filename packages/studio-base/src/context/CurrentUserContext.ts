@@ -6,8 +6,11 @@ import { createContext, useContext } from "react";
 
 export interface User {
   id: string;
-  orgId: string;
   email: string;
+  orgId: string;
+  orgDisplayName: string | null; // eslint-disable-line no-restricted-syntax
+  orgSlug: string;
+  orgPaid: boolean | null; // eslint-disable-line no-restricted-syntax
 }
 
 export interface CurrentUser {
