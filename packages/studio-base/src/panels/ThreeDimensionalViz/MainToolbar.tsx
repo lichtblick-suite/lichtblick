@@ -57,7 +57,7 @@ function MainToolbar({
         disabled={perspective}
         tooltip={
           perspective
-            ? "Switch to 2D Camera to Measure Distance"
+            ? "Switch to 2D camera to measure distance"
             : measureActive
             ? "Cancel Measuring"
             : "Measure Distance"

@@ -73,7 +73,7 @@ const InteractionsBaseComponent = React.memo<PropsWithConfig>(function Interacti
 
   return (
     <ExpandingToolbar
-      tooltip="Inspect Objects"
+      tooltip="Inspect objects"
       icon={
         <Icon style={{ color: "white" }}>
           <CursorDefault />

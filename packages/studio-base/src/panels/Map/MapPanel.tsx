@@ -331,7 +331,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
 
   return (
     <div style={{ width: "100%", height: "100%" }}>
-      {!center && <EmptyState>Waiting for first gps point...</EmptyState>}
+      {!center && <EmptyState>Waiting for first GPS point...</EmptyState>}
       <div
         ref={mapContainerRef}
         style={{ width: "100%", height: "100%", visibility: center ? "visible" : "hidden" }}

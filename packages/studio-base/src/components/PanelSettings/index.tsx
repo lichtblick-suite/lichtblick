@@ -78,7 +78,7 @@ export default function PanelSettings(): JSX.Element {
 
   if (error) {
     return (
-      <SidebarContent title={`Panel Settings`}>
+      <SidebarContent title="Panel settings">
         <Text styles={{ root: { color: theme.semanticColors.errorText } }}>{error.message}</Text>
       </SidebarContent>
     );
@@ -86,7 +86,7 @@ export default function PanelSettings(): JSX.Element {
 
   if (selectedPanelId == undefined) {
     return (
-      <SidebarContent title={`Panel Settings`}>
+      <SidebarContent title="Panel settings">
         <Text styles={{ root: { color: theme.palette.neutralTertiary } }}>
           Select a panel to edit its settings.
         </Text>
@@ -101,7 +101,7 @@ export default function PanelSettings(): JSX.Element {
 
   if (!config) {
     return (
-      <SidebarContent title={`Panel Settings`}>
+      <SidebarContent title="Panel settings">
         <Text styles={{ root: { color: theme.palette.neutralTertiary } }}>
           loading panel settings...
         </Text>
@@ -110,7 +110,7 @@ export default function PanelSettings(): JSX.Element {
   }
 
   return (
-    <SidebarContent title={`${panelInfo.title} Panel Settings`}>
+    <SidebarContent title={`${panelInfo.title} panel settings`}>
       {shareModal}
       <Stack tokens={{ childrenGap: theme.spacing.m }}>
         <Stack.Item>

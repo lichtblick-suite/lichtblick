@@ -110,7 +110,7 @@ type NodesListProps = {
 const NodesList = ({ nodes, selectNode, deleteNode, collapse, selectedNodeId }: NodesListProps) => {
   return (
     <Flex col>
-      <SidebarTitle title={"nodes"} collapse={collapse} />
+      <SidebarTitle title="Nodes" collapse={collapse} />
       {Object.keys(nodes).map((nodeId) => {
         return (
           <ListItem
@@ -154,9 +154,9 @@ const SidebarTitle = ({
   collapse: () => void;
 }) => (
   <Flex row style={{ alignItems: "center", color: colors.DARK9, padding: "5px" }}>
-    <h3 style={{ textTransform: "uppercase" }}>{title}</h3>
+    <h3>{title}</h3>
     {tooltip && (
-      <Icon style={{ cursor: "unset", marginLeft: "5px" }} size="medium" tooltip={tooltip}>
+      <Icon style={{ cursor: "unset", marginLeft: "5px" }} size="xsmall" tooltip={tooltip}>
         <HelpCircleIcon />
       </Icon>
     )}
@@ -218,7 +218,7 @@ const Sidebar = ({
       ),
       docs: (
         <SFlex>
-          <SidebarTitle title={"docs"} collapse={() => updateExplorer(undefined)} />
+          <SidebarTitle title="Docs" collapse={() => updateExplorer(undefined)} />
           <TextContent style={{ backgroundColor: "transparent" }}>
             {otherMarkdownDocsForTest ?? nodePlaygroundDocs}
           </TextContent>
@@ -228,7 +228,7 @@ const Sidebar = ({
         <Flex col style={{ position: "relative" }}>
           <SidebarTitle
             collapse={() => updateExplorer(undefined)}
-            title={"utilities"}
+            title="Utilities"
             tooltip={`You can import any of these modules into your node using the following syntax: 'import { .. } from "./pointClouds.ts".\n\nWant to contribute? Scroll to the bottom of the docs for details!`}
           />
           {utilityFiles.map(({ fileName, filePath }) => (
@@ -246,7 +246,7 @@ const Sidebar = ({
       templates: (
         <Flex col>
           <SidebarTitle
-            title={"templates"}
+            title="Templates"
             tooltip={"Create nodes from these templates"}
             collapse={() => updateExplorer(undefined)}
           />
@@ -279,7 +279,7 @@ const Sidebar = ({
           dataTest="node-explorer"
           onClick={() => updateExplorer(nodesSelected ? undefined : "nodes")}
           size="large"
-          tooltip={"nodes"}
+          tooltip="Nodes"
           style={{ color: nodesSelected ? "inherit" : colors.DARK9, position: "relative" }}
         >
           <FileMultipleIcon />
@@ -288,7 +288,7 @@ const Sidebar = ({
           dataTest="utils-explorer"
           onClick={() => updateExplorer(utilsSelected ? undefined : "utils")}
           size="large"
-          tooltip={"utilities"}
+          tooltip="Utilities"
           style={{ color: utilsSelected ? "inherit" : colors.DARK9 }}
         >
           <HammerWrenchIcon />
@@ -297,7 +297,7 @@ const Sidebar = ({
           dataTest="templates-explorer"
           onClick={() => updateExplorer(templatesSelected ? undefined : "templates")}
           size="large"
-          tooltip={"templates"}
+          tooltip="Templates"
           style={{ color: templatesSelected ? "inherit" : colors.DARK9 }}
         >
           <TemplateIcon />
@@ -306,7 +306,7 @@ const Sidebar = ({
           dataTest="docs-explorer"
           onClick={() => updateExplorer(docsSelected ? undefined : "docs")}
           size="large"
-          tooltip={"docs"}
+          tooltip="Docs"
           style={{ color: docsSelected ? "inherit" : colors.DARK9 }}
         >
           <HelpCircleIcon />

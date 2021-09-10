@@ -98,7 +98,7 @@ export default function FilterBar(props: FilterBarProps): JSX.Element {
       <Stack grow>
         <TagPicker
           inputProps={{
-            placeholder: "node name or message text",
+            placeholder: "Node name or message text",
           }}
           styles={{
             text: { minWidth: 0 },

@@ -69,7 +69,7 @@ export default function Settings(props: SettingsProps): JSX.Element {
   return (
     <Stack verticalFill tokens={{ childrenGap: theme.spacing.m }}>
       <Stack.Item>
-        <Text>Publish Topic</Text>
+        <Text>Publish topic</Text>
         <Stack
           tokens={{
             padding: `${theme.spacing.s1} 0`,
@@ -96,7 +96,7 @@ export default function Settings(props: SettingsProps): JSX.Element {
       <Stack.Item>
         <TextField
           type="number"
-          label="Publish Rate (Hz)"
+          label="Publish rate (Hz)"
           defaultValue={String(config.publishRate)}
           styles={{ root: { width: 80 } }}
           onGetErrorMessage={(value) => {
@@ -123,7 +123,7 @@ export default function Settings(props: SettingsProps): JSX.Element {
       <Stack.Item grow>
         <Stack horizontal verticalAlign="end" tokens={{ childrenGap: theme.spacing.m }}>
           <Stack.Item grow>
-            <Label>Up Button:</Label>
+            <Label>Up button:</Label>
           </Stack.Item>
           <Dropdown
             label="Field"
@@ -160,7 +160,7 @@ export default function Settings(props: SettingsProps): JSX.Element {
       <Stack.Item>
         <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.m }}>
           <Stack.Item grow>
-            <Label>Down Button:</Label>
+            <Label>Down button:</Label>
           </Stack.Item>
           <Dropdown
             selectedKey={config.downButton.field}
@@ -195,7 +195,7 @@ export default function Settings(props: SettingsProps): JSX.Element {
       <Stack.Item>
         <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.m }}>
           <Stack.Item grow>
-            <Label>Left Button:</Label>
+            <Label>Left button:</Label>
           </Stack.Item>
           <Dropdown
             selectedKey={config.leftButton.field}
@@ -230,7 +230,7 @@ export default function Settings(props: SettingsProps): JSX.Element {
       <Stack.Item>
         <Stack horizontal verticalAlign="center" tokens={{ childrenGap: theme.spacing.m }}>
           <Stack.Item grow>
-            <Label>Right Button:</Label>
+            <Label>Right button:</Label>
           </Stack.Item>
           <Dropdown
             selectedKey={config.rightButton.field}

@@ -375,7 +375,7 @@ function TopicGraph() {
       <PanelToolbar floating helpContent={helpContent} />
       <Toolbar>
         <div className={styles.buttons}>
-          <Button className={styles.iconButton} tooltip="Zoom Fit" onClick={onZoomFit}>
+          <Button className={styles.iconButton} tooltip="Zoom fit" onClick={onZoomFit}>
             <Icon style={{ color: "white" }} size="small">
               <FitToPageIcon />
             </Icon>

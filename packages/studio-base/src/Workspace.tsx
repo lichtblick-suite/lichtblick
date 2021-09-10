@@ -378,10 +378,10 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     const SIDEBAR_ITEMS = new Map<SidebarItemKey, SidebarItem>([
       ["connection", connectionItem],
       ["layouts", { iconName: "FiveTileGrid", title: "Layouts", component: LayoutBrowser }],
-      ["add-panel", { iconName: "RectangularClipping", title: "Add Panel", component: AddPanel }],
+      ["add-panel", { iconName: "RectangularClipping", title: "Add panel", component: AddPanel }],
       [
         "panel-settings",
-        { iconName: "SingleColumnEdit", title: "Panel Settings", component: PanelSettings },
+        { iconName: "SingleColumnEdit", title: "Panel settings", component: PanelSettings },
       ],
       ["variables", { iconName: "Variable2", title: "Variables", component: Variables }],
       ["preferences", { iconName: "Settings", title: "Preferences", component: Preferences }],

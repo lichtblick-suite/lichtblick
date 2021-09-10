@@ -199,11 +199,11 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
             icon: { height: 20 },
           }}
         >
-          Panel Settings
+          Panel settings
         </HoverableIconButton>
       </Stack>
       <Dialog
-        dialogContentProps={{ title: "Teleop Panel Settings", showCloseButton: true }}
+        dialogContentProps={{ title: "Teleop panel settings", showCloseButton: true }}
         hidden={!showSettings}
         onDismiss={() => setShowSettings(false)}
         maxWidth={480}

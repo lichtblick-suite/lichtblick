@@ -364,7 +364,7 @@ export default function ImageCanvas(props: Props): JSX.Element {
     return (
       <div className={styles.zoomContextMenu} data-zoom-menu>
         <div className={cx(styles.menuItem, styles.notInteractive)}>
-          Use mousewheel or buttons to zoom
+          Scroll or use the buttons below to zoom
         </div>
         <div className={cx(styles.menuItem, styles.borderBottom)}>
           <LegacyButton className={styles.round} onClick={zoomOut} data-panel-minus-zoom>

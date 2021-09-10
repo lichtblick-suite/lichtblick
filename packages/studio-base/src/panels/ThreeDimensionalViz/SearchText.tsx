@@ -261,7 +261,7 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
   if (!searchTextOpen) {
     return (
       <Button className={styles.iconButton} onClick={() => toggleSearchTextOpen(!searchTextOpen)}>
-        <Icon tooltip="search text markers">
+        <Icon tooltip="Search text markers">
           <SearchIcon />
         </Icon>
       </Button>
