@@ -259,8 +259,8 @@ export default class ChartJSManager {
     const elements =
       this._chartInstance?.getElementsAtEventForMode(
         ev as unknown as Event,
-        this._chartInstance.options.hover?.mode ?? "intersect",
-        this._chartInstance.options.hover ?? {},
+        this._chartInstance.options.interaction?.mode ?? "intersect",
+        this._chartInstance.options.interaction ?? {},
         false,
       ) ?? [];
 
@@ -281,6 +281,18 @@ export default class ChartJSManager {
         data,
       });
     }
+
+    // sort elemtents by proximity to the cursor
+    out.sort((itemA, itemB) => {
+      const dxA = event.clientX - itemA.view.x;
+      const dyA = event.clientY - itemA.view.y;
+      const dxB = event.clientX - itemB.view.x;
+      const dyB = event.clientY - itemB.view.y;
+      const distSquaredA = dxA * dxA + dyA * dyA;
+      const distSquaredB = dxB * dxB + dyB * dyB;
+
+      return distSquaredA - distSquaredB;
+    });
 
     return out;
   }

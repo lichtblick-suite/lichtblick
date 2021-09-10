@@ -501,8 +501,6 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
         display: false,
       },
       tooltip: {
-        intersect: false,
-        mode: "x",
         enabled: false, // Disable native tooltips since we use custom ones.
       },
       zoom: {
@@ -770,7 +768,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
       animation: false,
       // Disable splines, they seem to cause weird rendering artifacts:
       elements: { line: { tension: 0 } },
-      hover: {
+      interaction: {
         intersect: false,
         mode: "x",
       },
