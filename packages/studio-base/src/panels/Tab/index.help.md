@@ -1,16 +1,12 @@
 # Tab
 
-Allows users to group multiple panels in a mini layout, each nested under a tab.
+Group related panels into tabs to organize your layout and save space.
 
-## Selecting Panels to Group
+`Cmd` + click ti select panels to group. Hovering over a selected panel will display two options: grouping all selected panels into a single tab, or creating a separate tab for each.
 
-Select the first panel with a click, and select subsequent panels via `Cmd` + click. To deselect a panel, use `Cmd` + click.
+## Shortcuts
 
-To quickly select all panels in a layout, use `Cmd` + `a`, or click on the "Select all panels" option in the app's "Config" menu in the top-right.
+- `Cmd` + click – Select panels to group
+- `Cmd` + `a` – Select all panels in the current layout
 
-Users can group the selected panels in one of 2 ways:
-
-- Combine selected panels under a single tab in a new Tab panel
-- Create a separate tab for each selected panel in a new Tab panel
-
-Hovering over any selected panel will allow you to make your choice.
+[Learn more](https://foxglove.dev/docs/panels/tab).

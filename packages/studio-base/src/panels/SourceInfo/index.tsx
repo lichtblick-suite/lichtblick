@@ -23,6 +23,7 @@ import clipboard from "@foxglove/studio-base/util/clipboard";
 import { formatDuration } from "@foxglove/studio-base/util/formatTime";
 
 import Timestamp from "./Timestamp";
+import helpContent from "./index.help.md";
 
 const STableContainer = styled.div`
   overflow-y: auto;
@@ -77,7 +78,7 @@ function SourceInfo() {
   if (!startTime || !endTime) {
     return (
       <>
-        <PanelToolbar floating />
+        <PanelToolbar helpContent={helpContent} floating />
         <EmptyState>Waiting for data...</EmptyState>
       </>
     );
@@ -86,7 +87,7 @@ function SourceInfo() {
   const duration = subtractTimes(endTime, startTime);
   return (
     <>
-      <PanelToolbar floating />
+      <PanelToolbar helpContent={helpContent} floating />
       <STableContainer>
         <SHeader>
           <SHeaderItem>

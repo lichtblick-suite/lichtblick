@@ -28,7 +28,6 @@ import nodePlaygroundDocs from "@foxglove/studio-base/panels/NodePlayground/inde
 import { Script } from "@foxglove/studio-base/panels/NodePlayground/script";
 import { getNodeProjectConfig } from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/projectConfig";
 import templates from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/templates";
-import userUtilsReadMe from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/typescript/userUtils/README.md";
 import { UserNodes } from "@foxglove/studio-base/types/panels";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -223,9 +222,6 @@ const Sidebar = ({
           <TextContent style={{ backgroundColor: "transparent" }}>
             {otherMarkdownDocsForTest ?? nodePlaygroundDocs}
           </TextContent>
-          <br />
-          <br />
-          <TextContent style={{ backgroundColor: "transparent" }}>{userUtilsReadMe}</TextContent>
         </SFlex>
       ),
       utils: (

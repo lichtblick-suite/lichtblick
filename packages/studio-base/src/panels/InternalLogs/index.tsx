@@ -10,6 +10,8 @@ import Flex from "@foxglove/studio-base/components/Flex";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 
+import helpContent from "./index.help.md";
+
 type Config = {
   // we store disabled channels so any new channels are default enabled
   disabledChannels: string[];
@@ -42,7 +44,7 @@ function InternalLogs(props: Props) {
 
   return (
     <Flex col>
-      <PanelToolbar />
+      <PanelToolbar helpContent={helpContent} />
       <Flex col>
         {channels.map((logger) => {
           const label = logger.name().length === 0 ? "default" : logger.name();

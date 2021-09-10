@@ -18,6 +18,8 @@ import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
 import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
 
+import helpContent from "./index.help.md";
+
 type SliderProps = {
   min: number;
   max: number;
@@ -47,7 +49,7 @@ function GlobalVariableSliderPanel(props: Props): React.ReactElement {
 
   return (
     <div style={{ padding: "25px 4px 4px" }}>
-      <PanelToolbar floating />
+      <PanelToolbar helpContent={helpContent} floating />
       <Slider
         min={sliderProps.min}
         max={sliderProps.max}

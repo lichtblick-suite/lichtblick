@@ -1,13 +1,11 @@
-# Image View
+# Image
 
-The Image View panel displays images from `sensor_msgs/Image` or `sensor_msgs/CompressedImage` topics.
+Display images from topics with a [`sensor_msgs/Image`](https://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/Image.html),[`sensor_msgs/msg/Image`](https://github.com/ros2/common_interfaces/blob/master/sensor_msgs/msg/Image.msg), [`sensor_msgs/CompressedImage`](https://docs.ros.org/en/api/sensor_msgs/html/msg/CompressedImage.html), or [`sensor_msgs/msg/CompressedImage`](https://github.com/ros2/common_interfaces/blob/master/sensor_msgs/msg/CompressedImage.msg) datatype.
 
-16-bit images (`16UC1`) are currently displayed assuming the values fall into the 0–10000 range, consistent with the defaults of the ROS `image_view` tool.
+You can also superimpose markers on the images, from topics with a [`foxglove_msgs/ImageMarkerArray`](https://github.com/foxglove/ros_foxglove_msgs/blob/main/msg/ImageMarkerArray.msg) or `foxglove_msgs/msg/ImageMarkerArray` datatype.
 
-The **markers** dropdown can be used to toggle on and off topics with type `visualization_msgs/ImageMarker`, which will be overlayed on top of the selected image topic. Note that markers are only available if the `CameraInfo` for the selected camera is being published. If the image is unrectified, the markers will be transformed based on `CameraInfo`.
+## Shortcuts
 
-Shortcuts:
+- `Scroll` – Zoom
 
-- =: Zoom in
-- -: Zoom out
-- 0: Zoom 100%
+[Learn more](https://foxglove.dev/docs/panels/image).

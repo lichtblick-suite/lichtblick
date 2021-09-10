@@ -1,5 +1,7 @@
 # Table
 
-Displays data similar to `RawMessages` but in a tabular format. You can use the typical message-path syntax to do things like drilling down to a particular value, or filtering.
+Display topic data in a tabular format.
 
-To sort rows in the table, click in the headers. To multi-sort once you've already sorted on a particular value, hold `shift` and click a header.
+Use [message path syntax](/docs/app-concepts/message-path-syntax) to determine the data to display. Click a column's header to sort by that column; hold `Shift` to click multiple columns.
+
+[Learn more](https://foxglove.dev/docs/panels/table).

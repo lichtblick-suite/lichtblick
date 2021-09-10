@@ -35,6 +35,8 @@ import {
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 
+import helpContent from "./index.help.md";
+
 const { useCallback } = React;
 
 const RECORD_ALL = "RECORD_ALL";
@@ -192,7 +194,7 @@ function Internals() {
 
   return (
     <Container>
-      <PanelToolbar floating />
+      <PanelToolbar floating helpContent={helpContent} />
       <h1>Recording</h1>
       <TextContent>
         Press to start recording topic data for debug purposes. The latest messages on each topic

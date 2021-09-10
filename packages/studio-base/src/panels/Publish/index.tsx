@@ -29,6 +29,7 @@ import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import buildSampleMessage from "./buildSampleMessage";
+import helpContent from "./index.help.md";
 
 type Config = {
   topicName: string;
@@ -177,7 +178,7 @@ function Publish(props: Props) {
 
   return (
     <Flex col style={{ height: "100%", padding: "12px" }}>
-      <PanelToolbar floating />
+      <PanelToolbar helpContent={helpContent} floating />
       {advancedView && (
         <SRow>
           <SSpan>Topic:</SSpan>

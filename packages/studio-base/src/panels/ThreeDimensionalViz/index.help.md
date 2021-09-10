@@ -1,35 +1,40 @@
 # 3D
 
-Plots visualization messages in a 3D scene. You can select topics using the left-hand topic list; you can toggle the ability to follow orientation and manually select the frame you follow in the right-hand controls. Selected topics will have their messages visualized within the 3D scene. Topic selection is part of the configuration and will be saved between reloads and can be shared with `Import / Export Layout`. This panel can be expanded / collapsed by clicking on the caret icon to the left of it.
+Display visualization markers with any of the following datatypes in a 2D or 3D scene:
 
-By default the scene will follow the center of a frame. When you move the camera, the camera will be offset from the center of that frame, but stay relative to that center.
+Can display the following datatypes:
 
-You can toggle between a 3D perspective camera and a top-down, 2D orthographic camera of the scene by clicking on the _toggle 2D / 3D_ button in the top left of the 3D view panel.
+- Transform – [`tf/tfMessage`](http://docs.ros.org/en/noetic/api/tf/html/msg/tfMessage.html), [`tf2_msgs/TFMessage`](http://docs.ros.org/en/noetic/api/tf2_msgs/html/msg/TFMessage.html), [`tf2_msgs/msg/TFMessage`](https://github.com/ros2/geometry2/blob/ros2/tf2_msgs/msg/TFMessage.msg), [`geometry_msgs/TransformStamped`](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/TransformStamped.html), [`geometry_msgs/msg/TransformStamped`](https://github.com/ros2/common_interfaces/blob/master/geometry_msgs/msg/TransformStamped.msg)
+- Laser scan – [`sensor_msgs/LaserScan`](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/LaserScan.html), [`sensor_msgs/msg/LaserScan`](https://github.com/ros2/common_interfaces/blob/master/sensor_msgs/msg/LaserScan.msg)
+- Occupancy grid – [`nav_msgs/OccupancyGrid`](http://docs.ros.org/en/noetic/api/nav_msgs/html/msg/OccupancyGrid.html), [`nav_msgs/msg/OccupancyGrid`](https://github.com/ros2/common_interfaces/blob/master/nav_msgs/msg/OccupancyGrid.msg)
+- [Marker](http://wiki.ros.org/rviz/DisplayTypes/Marker) – [`visualization_msgs/Marker`](http://docs.ros.org/en/noetic/api/visualization_msgs/html/msg/Marker.html), [`visualization_msgs/msg/Marker`](https://github.com/ros2/common_interfaces/blob/master/visualization_msgs/msg/Marker.msg), [`visualization_msgs/MarkerArray`](http://docs.ros.org/en/noetic/api/visualization_msgs/html/msg/MarkerArray.html), [`visualization_msgs/msg/MarkerArray`](https://github.com/ros2/common_interfaces/blob/master/visualization_msgs/msg/MarkerArray.msg)
+- Path – [`nav_msgs/Path`](http://docs.ros.org/en/noetic/api/nav_msgs/html/msg/Path.html), [`nav_msgs/msg/Path`](https://github.com/ros2/common_interfaces/blob/master/nav_msgs/msg/Path.msg)
+- Point cloud – [`sensor_msgs/PointCloud2`](http://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/PointCloud2.html), [`sensor_msgs/msg/PointCloud2`](https://github.com/ros2/common_interfaces/blob/master/sensor_msgs/msg/PointCloud2.msg)
+- Polygon – [`geometry_msgs/PolygonStamped`](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PolygonStamped.html), [`geometry_msgs/msg/PolygonStamped`](https://github.com/ros2/common_interfaces/blob/master/geometry_msgs/msg/PolygonStamped.msg)
+- Pose – [`geometry_msgs/PoseStamped`](http://docs.ros.org/en/noetic/api/geometry_msgs/html/msg/PoseStamped.html), [`geometry_msgs/msg/PoseStamped`](https://github.com/ros2/common_interfaces/blob/master/geometry_msgs/msg/PoseStamped.msg)
+- Velodyne scan – [`velodyne_msgs/VelodyneScan`](http://docs.ros.org/en/noetic/api/velodyne_msgs/html/msg/VelodyneScan.html), [`velodyne_msgs/msg/VelodyneScan`](https://github.com/ros-drivers/velodyne/blob/ros2/velodyne_msgs/msg/VelodyneScan.msg)
+- Color – [`std_msgs/ColorRGBA`](http://docs.ros.org/en/noetic/api/std_msgs/html/msg/ColorRGBA.html), [`std_msgs/msg/ColorRGBA`](https://github.com/ros2/common_interfaces/blob/master/std_msgs/msg/ColorRGBA.msg), any datatype suffixed with `/Color` or `/ColorRGBA` and containing `r`, `g`, `b` fields
 
-`Left-click + drag` on the scene to move the camera position parallel to the ground. If 'follow' mode is on this will disengage it.
+Click any given marker in the scene to display its relevant details in a dialog box.
 
-`Right-click + drag` on the scene to pan and rotate the camera. Dragging left/right will rotate the camera around the Z axis, and in 3D camera mode dragging top/bottom will pan the camera around the world's x/y axis.
+## Shortcuts
 
-`Mouse-wheel` controls the 'zoom' of the camera. Wheeling "up" will zoom the camera closer in while wheeling "down" will zoom the camera farther away.
+To move the camera:
 
-Holding down `shift` in while performing any interaction with the camera will adjust values by 1/10th of their normal adjustments. This allows precision movements and adjustments to the camera.
+- `w` – Forward
+- `a` – Left
+- `s` – Backward
+- `d` – Right
+- `z`, or `Scroll` up – Zoom in
+- `x`, or `Scroll` down – Zoom out
+- Drag – Parallel to the ground. Will disengage “follow” mode, if enabled.
+- Right-click + drag – Pan and rotate. Dragging horizontally rotates around the world's z-axis; dragging vertically pans around the x and y axes
+- `Shift` + other action – Adjusts all values to be 1/10 of baseline values; allows for more precise movements and adjustments
 
-_tip: If you get 'lost' in the scene and end up looking into infinite blank space and can't find your way back try clicking on 'follow' to snap the camera back to the default position._
+Other:
 
-## Keyboard shortcuts
+- `t` – Open topic picker
+- `Esc` – Close topic picker
+- `Cmd` + `f` – Search for marker text
 
-In 3D camera mode, you can also use "shooter controls" (like those found in most popular desktop first-person shooter games) of `w` `a` `s` `d` to move the camera forward / left / backwards / right respective to the camera's position, and use `z` `x` to zoom in and out. It's easy to get lost when using these controls as there is nothing anchoring the camera to the scene.
-
-You can use `t` to open the Topic Tree and `Esc` to close it again.
-
-## Interacting with markers
-
-Markers can be selected to see details about them. Open the "Interactions" panel from the right-side controls and click a marker to see information such as the topic name and marker contents.
-
-Clicking on a point in a point cloud offers additional information, such as the color and coordinates of the point clicked. Selecting a point cloud also allows exporting all points from the point cloud message as a CSV.
-
-### Linking selected markers to global variables
-
-It's possible to link fields from a selected marker to global variables. In the "Selected object" tab of the "Interactions" panel, hover over a key in the JSON view of the marker. A button should appear that, when clicked, opens a dialog box that allows linking the field to a global variable.
-
-When a global variable is linked, selecting another marker that contains the same key will update the global variable. For example, with the tracked object "id" field linked to the global variable "$trackedObjectId", clicking another tracked object will update the "$trackedObjectId" field. This makes it easy to use the information about selected markers in other panels.
+[Learn more](https://foxglove.dev/docs/panels/3d).

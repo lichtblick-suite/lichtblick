@@ -1,5 +1,7 @@
 # Diagnostics - Detail
 
-Displays diagnostics data for a given diagnostic name/hardware_id.  Select a diagnostic from the dropdown and the values will be displayed and updated in the panel below.
+Display diagnostics data for a given `diagnostic_name/hardware_id`.
 
-Diagnostic keys and values support rich formatting with some basic HTML tags, such as `<b>`, `<i>`, `<u>`, `<tt>`, `<table>`, and more.
+Select a diagnostic to see its details. Clicking any entry in the `Diagnostics – Summary` panel will also open this panel with the relevant data.
+
+[Learn more](https://foxglove.dev/docs/panels/diagnostics).

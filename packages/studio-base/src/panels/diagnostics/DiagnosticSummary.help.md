@@ -1,15 +1,7 @@
 # Diagnostics - Summary
 
-Displays the status of all the nodes it has seen in groups from:
+Display the status of your nodes from topics with a [`diagnostic_msgs/DiagnosticArray`](https://docs.ros.org/en/noetic/api/diagnostic_msgs/html/msg/DiagnosticArray.html) or [`diagnostic_msgs/msg/DiagnosticArray`](https://github.com/ros2/common_interfaces/blob/master/diagnostic_msgs/msg/DiagnosticArray.msg) datatype.
 
-- Pinned nodes
-- Stale
-- Error
-- Warn
-- Ok
+You can pin a node to the top of your feed, filter entries by `hardware_id` and node, or sort nodes by level. You can also click any entry to see its details in the `Diagnostics – Detail` panel.
 
-You can pin a specific node you are interested in by clicking the pin icon next to it (appears on hover).
-
-You can also click a key to see it show up in the Runtime Monitor Details Panel.
-
-Entries can be filtered by a fuzzy (subsequence) match against hardware\_id and name. When a filter string is used, entries are ordered by the how early the filter characters appear in the matched label.
+[Learn more](https://foxglove.dev/docs/panels/diagnostics).

@@ -23,7 +23,7 @@ import {
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
 
-import Internals from "./Internals";
+import Internals from "./index";
 
 const mockDownloadTextFile: any = downloadTextFile;
 jest.mock("@foxglove/studio-base/util/download");
