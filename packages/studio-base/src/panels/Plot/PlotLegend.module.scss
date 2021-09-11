@@ -22,7 +22,7 @@ $legend-item-height: 20px;
   $legend-root-left: 65px;
   position: absolute;
   left: $legend-root-left;
-  top: 25px;
+  top: 6px;
   background: $legend-highlight-color;
   color: #eee;
   max-width: calc(100% - #{$legend-root-left} - 25px); // Leave some space at the end for the "X".

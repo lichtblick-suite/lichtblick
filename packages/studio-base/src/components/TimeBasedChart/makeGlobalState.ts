@@ -4,6 +4,7 @@
 
 import { EventEmitter } from "eventemitter3";
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from "react";
+import { useLatest } from "react-use";
 
 // Create a "global" state hook
 // Calling _makeGlobalState_ will return a hook function that behaves similar to useState
@@ -38,24 +39,41 @@ function makeGlobalState<T>(): (options: {
       enabled ? existingValue : undefined,
     );
 
-    const setValue = useCallback((val: SetStateAction<T | undefined>) => {
-      const newValue = val instanceof Function ? val(existingValue) : val;
-      if (existingValue !== newValue) {
-        existingValue = newValue;
-        emitter.emit("change", existingValue);
-      }
-    }, []);
+    // Avoid re-creating the setValue callback when enabled changes.
+    // Instead use the latest value of enabled to deterimine if the setter should do anything
+    const enabledRef = useLatest(enabled);
+    const setValue = useCallback(
+      (val: SetStateAction<T | undefined>) => {
+        if (!enabledRef.current) {
+          return;
+        }
+
+        const newValue = val instanceof Function ? val(existingValue) : val;
+        if (existingValue !== newValue) {
+          existingValue = newValue;
+          emitter.emit("change", existingValue);
+        }
+      },
+      [enabledRef],
+    );
 
     useEffect(() => {
+      return () => {
+        // when unmounting, clear the global value to prevent stale entries
+        // without this, the previous global value is retained which may no longer be relevant
+        setValue(undefined);
+      };
+    }, [setValue]);
+
+    useEffect(() => {
+      // when disabled the local value gets set to undefined
       if (!enabled) {
+        setLocalValue(undefined);
         return;
       }
 
       emitter.on("change", setLocalValue);
       return () => {
-        // when unmounting, clear the global value to prevent stale entries
-        // without this, the previous global value is retained which may no longer be relevant
-        setValue(undefined);
         emitter.off("change", setLocalValue);
       };
     }, [enabled, setValue]);

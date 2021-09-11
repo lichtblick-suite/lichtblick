@@ -114,7 +114,7 @@ export default function PlotChart(props: PlotChartProps): JSX.Element {
   }, [datasets]);
 
   return (
-    <div style={{ width: "100%", flexGrow: 1, overflow: "hidden" }} ref={sizeRef}>
+    <div style={{ width: "100%", flexGrow: 1, overflow: "hidden", padding: "2px" }} ref={sizeRef}>
       <TimeBasedChart
         key={xAxisVal}
         isSynced={isSynced}

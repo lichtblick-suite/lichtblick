@@ -144,10 +144,15 @@ export function useTooltip({
 }
 
 export default function Tooltip(
-  props: Props & { children: React.ReactElement },
+  props: Props & { children?: React.ReactElement },
 ): React.ReactElement | ReactNull {
   const { children } = props;
   const { ref, tooltip } = useTooltip(props);
+
+  if (!children) {
+    return tooltip;
+  }
+
   const child = React.Children.only(children);
   const host = React.cloneElement(child, { ref });
 

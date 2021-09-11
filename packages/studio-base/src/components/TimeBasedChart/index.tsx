@@ -14,7 +14,6 @@ import { ChartOptions, ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
 import { ZoomOptions } from "chartjs-plugin-zoom/types/options";
 import React, {
-  memo,
   useEffect,
   useCallback,
   useState,
@@ -23,7 +22,7 @@ import React, {
   useMemo,
   MouseEvent,
 } from "react";
-import { useThrottle } from "react-use";
+import { useMountedState, useThrottle } from "react-use";
 import styled from "styled-components";
 import { useDebouncedCallback } from "use-debounce";
 import { v4 as uuidv4 } from "uuid";
@@ -42,7 +41,7 @@ import {
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import TimeBasedChartLegend from "@foxglove/studio-base/components/TimeBasedChart/TimeBasedChartLegend";
 import makeGlobalState from "@foxglove/studio-base/components/TimeBasedChart/makeGlobalState";
-import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
+import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import {
   useClearHoverValue,
   useSetHoverValue,
@@ -118,7 +117,7 @@ type ChartComponentProps = ComponentProps<typeof ChartComponent>;
 const ChartNull = null;
 
 // only sync the x axis and allow y-axis scales to auto-calculate
-type SyncBounds = { min: number; max: number; userInteraction: boolean };
+type SyncBounds = { min: number; max: number; sourceId: string; userInteraction: boolean };
 const useGlobalXBounds = makeGlobalState<SyncBounds>();
 
 // Calculation mode for the "reset view" view.
@@ -157,7 +156,7 @@ export type Props = {
 // start of the bag, and which is kept in sync with other instances of this
 // component. Uses chart.js internally, with a zoom/pan plugin, and with our
 // standard tooltips.
-export default memo<Props>(function TimeBasedChart(props: Props) {
+export default function TimeBasedChart(props: Props): JSX.Element {
   const {
     datasetId,
     type,
@@ -178,7 +177,8 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
 
   const { labels, datasets } = data;
 
-  const hasUnmounted = useRef<boolean>(false);
+  const componentId = useMemo(() => uuidv4(), []);
+  const isMounted = useMountedState();
   const canvasContainer = useRef<HTMLDivElement>(ReactNull);
 
   const [hasUserPannedOrZoomed, setHasUserPannedOrZoomed] = useState<boolean>(false);
@@ -261,89 +261,9 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     { leading: false, maxWait: 100 },
   );
 
-  const updateScales = useCallback(
-    (scales: RpcScales) => {
-      currentScalesRef.current = scales;
-
-      queueDownsampleInvalidate();
-
-      // chart indicated we got a scales update, we may need to update global bounds
-      if (!isSynced || !scales?.x) {
-        return;
-      }
-
-      // the change is a result of user interaction on our chart
-      // we definitely set the sync scale value so other charts follow our zoom/pan behavior
-      if (hasUserPannedOrZoomed) {
-        setGlobalBounds({
-          min: scales.x.min,
-          max: scales.x.max,
-          userInteraction: true,
-        });
-        return;
-      }
-
-      // the scales changed due to new data or another non-user initiated event
-      // the sync value is conditionally set depending on the state of the existing sync value
-      setGlobalBounds((old) => {
-        // no scale from our plot, always use old value
-        const xScale = scales?.x;
-        if (!xScale) {
-          return old;
-        }
-
-        // no old value for sync, initialize with our value
-        if (!old) {
-          return {
-            min: xScale.min,
-            max: xScale.max,
-            userInteraction: false,
-          };
-        }
-
-        // give preference to an old value set via user interaction
-        // note that updates due to _our_ user interaction are set earlier
-        if (old.userInteraction) {
-          return old;
-        }
-
-        // calculate min/max based on old value and our new scale
-        const newMin = Math.min(xScale.min, old.min);
-        const newMax = Math.max(xScale.max, old.max);
-
-        // avoid making a new sync object if the existing one matches our range
-        // avoids infinite set states
-        if (old.max === newMax && old.min === newMin) {
-          return old;
-        }
-
-        // existing value does not match our new range, update the global sync value
-        return {
-          min: newMin,
-          max: newMax,
-          userInteraction: false,
-        };
-      });
-    },
-    [hasUserPannedOrZoomed, isSynced, queueDownsampleInvalidate, setGlobalBounds],
-  );
-
   const onResetZoom = () => {
     setHasUserPannedOrZoomed(false);
-
-    // clearing the global bounds will make all panels reset to their data sets
-    // which will cause all to re-sync to the min/max ranges for any panels without user interaction
-    if (isSynced) {
-      if (defaultView?.type === "fixed") {
-        setGlobalBounds({
-          min: defaultView.minXValue,
-          max: defaultView.maxXValue,
-          userInteraction: false,
-        });
-      } else {
-        setGlobalBounds(undefined);
-      }
-    }
+    setGlobalBounds(undefined);
   };
 
   const [hasVerticalExclusiveZoom, setHasVerticalExclusiveZoom] = useState<boolean>(false);
@@ -373,14 +293,6 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     [setHasVerticalExclusiveZoom, setHasBothAxesZoom],
   );
 
-  // Always clean up tooltips when unmounting.
-  useEffect(() => {
-    return () => {
-      hasUnmounted.current = true;
-      setActiveTooltip(undefined);
-    };
-  }, []);
-
   // We use a custom tooltip so we can style it more nicely, and so that it can break
   // out of the bounds of the canvas, in case the panel is small.
   const [activeTooltip, setActiveTooltip] = useState<{
@@ -388,17 +300,9 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     y: number;
     data: TimeBasedChartTooltipData;
   }>();
-  const { tooltip } = useTooltip({
-    shown: true,
-    noPointerEvents: true,
-    targetPosition: { x: activeTooltip?.x ?? 0, y: activeTooltip?.y ?? 0 },
-    contents: activeTooltip && <TimeBasedChartTooltipContent tooltip={activeTooltip.data} />,
-  });
   const updateTooltip = useCallback(
     (element?: RpcElement) => {
-      // This is an async callback, so it can fire after this component is unmounted. Make sure that we remove the
-      // tooltip if this fires after unmount.
-      if (!element || hasUnmounted.current) {
+      if (!element) {
         return setActiveTooltip(undefined);
       }
 
@@ -424,21 +328,11 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     [tooltips],
   );
 
-  const hoverComponentId = useMemo(() => uuidv4(), []);
   const setHoverValue = useSetHoverValue();
   const clearHoverValue = useClearHoverValue();
   const clearGlobalHoverTime = useCallback(
-    () => clearHoverValue(hoverComponentId),
-    [clearHoverValue, hoverComponentId],
-  );
-  const setGlobalHoverTime = useCallback(
-    (value: number) =>
-      setHoverValue({
-        componentId: hoverComponentId,
-        value,
-        type: xAxisIsPlaybackTime ? "PLAYBACK_SECONDS" : "OTHER",
-      }),
-    [setHoverValue, hoverComponentId, xAxisIsPlaybackTime],
+    () => clearHoverValue(componentId),
+    [clearHoverValue, componentId],
   );
 
   const onMouseOut = useCallback(() => {
@@ -470,9 +364,13 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
         return;
       }
 
-      setGlobalHoverTime(xVal);
+      setHoverValue({
+        componentId,
+        value: xVal,
+        type: xAxisIsPlaybackTime ? "PLAYBACK_SECONDS" : "OTHER",
+      });
     },
-    [setGlobalHoverTime, clearGlobalHoverTime],
+    [setHoverValue, componentId, xAxisIsPlaybackTime, clearGlobalHoverTime],
   );
 
   const plugins = useMemo<ChartOptions["plugins"]>(() => {
@@ -525,9 +423,14 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
   // To avoid making a new xScale identity on all updates that might change the min/max
   // we memo the min/max X values so only when the values change is the scales object re-made
   const { min: minX, max: maxX } = useMemo(() => {
-    // if the user has manual override of the display, we remove the min/max settings and allow the chart
-    // to handle the bounds
-    if (hasUserPannedOrZoomed) {
+    // when unlocking sync keep the last manually panned/zoomed chart state
+    if (!globalBounds && hasUserPannedOrZoomed) {
+      return { min: undefined, max: undefined };
+    }
+
+    // if the aren't syncing bounds or if the bounds are from our own component, then we
+    // unset the min/max and allow the chart to control the bounds
+    if (globalBounds?.sourceId === componentId) {
       return { min: undefined, max: undefined };
     }
 
@@ -549,7 +452,7 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     // if we are syncing and have global bounds there are two possibilities
     // 1. the global bounds are from user interaction, we use that unconditionally
     // 2. the global bounds are min/max with our dataset bounds
-    if (isSynced && globalBounds) {
+    if (globalBounds) {
       if (globalBounds.userInteraction) {
         min = globalBounds.min;
         max = globalBounds.max;
@@ -573,8 +476,8 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     datasetBounds.x.min,
     defaultView,
     globalBounds,
+    componentId,
     hasUserPannedOrZoomed,
-    isSynced,
   ]);
 
   const xScale = useMemo<ScaleOptions>(() => {
@@ -782,24 +685,107 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
 
   const onHover = useCallback(
     (elements: RpcElement[]) => {
-      updateTooltip(elements[0]);
+      // onHover could fire after component unmounts so we need to guard with mounted checks
+      if (isMounted()) {
+        updateTooltip(elements[0]);
+      }
     },
-    [updateTooltip],
+    [isMounted, updateTooltip],
   );
 
   const onScalesUpdate = useCallback(
     (scales: RpcScales, { userInteraction }: { userInteraction: boolean }) => {
-      if (userInteraction) {
-        setHasUserPannedOrZoomed(true);
+      if (!isMounted()) {
+        return;
       }
 
-      updateScales(scales);
+      currentScalesRef.current = scales;
+
+      queueDownsampleInvalidate();
+
+      // chart indicated we got a scales update, we may need to update global bounds
+      if (!isSynced || !scales?.x) {
+        return;
+      }
+
+      // the change is a result of user interaction on our chart
+      // we definitely set the sync scale value so other charts follow our zoom/pan behavior
+      if (userInteraction) {
+        setGlobalBounds({
+          min: scales.x.min,
+          max: scales.x.max,
+          sourceId: componentId,
+          userInteraction: true,
+        });
+        return;
+      }
+
+      // the scales changed due to new data or another non-user initiated event
+      // the sync value is conditionally set depending on the state of the existing sync value
+      setGlobalBounds((old) => {
+        // no scale from our plot, always use old value
+        const scalesX = scales?.x;
+        if (!scalesX) {
+          return old;
+        }
+
+        // no old value for sync, initialize with our value
+        if (!old) {
+          return {
+            min: scalesX.min,
+            max: scalesX.max,
+            sourceId: componentId,
+            userInteraction: false,
+          };
+        }
+
+        // give preference to an old value set via user interaction
+        // note that updates due to _our_ user interaction are set earlier
+        if (old.userInteraction) {
+          return old;
+        }
+
+        // calculate min/max based on old value and our new scale
+        const newMin = Math.min(scalesX.min, old.min);
+        const newMax = Math.max(scalesX.max, old.max);
+
+        // avoid making a new sync object if the existing one matches our range
+        // avoids infinite set states
+        if (old.max === newMax && old.min === newMin) {
+          return old;
+        }
+
+        // existing value does not match our new range, update the global sync value
+        return {
+          min: newMin,
+          max: newMax,
+          sourceId: componentId,
+          userInteraction: false,
+        };
+      });
     },
-    [updateScales],
+    [componentId, isMounted, isSynced, queueDownsampleInvalidate, setGlobalBounds],
   );
 
-  // we don't memo this because either options or data is likely to change with each render
-  // maybe one day someone perfs this and decides to memo?
+  useEffect(() => log.debug(`<TimeBasedChart> (datasetId=${datasetId})`), [datasetId]);
+
+  const tooltipContent = useMemo(() => {
+    return activeTooltip ? (
+      <TimeBasedChartTooltipContent tooltip={activeTooltip.data} />
+    ) : undefined;
+  }, [activeTooltip]);
+
+  // reset is shown if we have sync lock and there has been user interaction, or if we don't
+  // have sync lock and the user has manually interacted with the plot
+  //
+  // The reason we check for pan lock is to remove reset display from all sync'd plots once
+  // the range has been reset.
+  const showReset = useMemo(() => {
+    return isSynced ? globalBounds?.userInteraction === true : hasUserPannedOrZoomed;
+  }, [globalBounds?.userInteraction, hasUserPannedOrZoomed, isSynced]);
+
+  // We don't memo this since each option itself is memo'd and this is just convenience to pass to
+  // the component.
   const chartProps: ChartComponentProps = {
     type,
     width,
@@ -812,21 +798,24 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
     onHover,
   };
 
-  useEffect(() => log.debug(`<TimeBasedChart> (datasetId=${datasetId})`), [datasetId]);
-
   // avoid rendering if width/height are 0 - usually on initial mount
   // so we don't trigger onChartUpdate if we know we will immediately resize
   if (width === 0 || height === 0) {
-    return ReactNull;
+    return <></>;
   }
 
   return (
     <div style={{ display: "flex", width: "100%" }}>
-      {tooltip}
+      <Tooltip
+        shown
+        noPointerEvents={true}
+        targetPosition={{ x: activeTooltip?.x ?? 0, y: activeTooltip?.y ?? 0 }}
+        contents={tooltipContent}
+      />
       <div style={{ display: "flex", width }}>
         <SRoot onDoubleClick={onResetZoom}>
           <HoverBar
-            componentId={hoverComponentId}
+            componentId={componentId}
             isTimestampScale={xAxisIsPlaybackTime}
             scales={currentScalesRef.current}
           >
@@ -837,13 +826,13 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
             <ChartComponent {...chartProps} />
           </div>
 
-          {hasUserPannedOrZoomed && (
-            <SResetZoom>
+          <SResetZoom>
+            {showReset && (
               <Button tooltip="(shortcut: double-click)" onClick={onResetZoom}>
                 reset view
               </Button>
-            </SResetZoom>
-          )}
+            )}
+          </SResetZoom>
           <KeyListener global keyDownHandlers={keyDownHandlers} keyUpHandlers={keyUphandlers} />
         </SRoot>
       </div>
@@ -860,4 +849,4 @@ export default memo<Props>(function TimeBasedChart(props: Props) {
       )}
     </div>
   );
-});
+}
