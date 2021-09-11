@@ -152,6 +152,7 @@ function selectEndTime(ctx: MessagePipelineContext) {
 function Plot(props: Props) {
   const { saveConfig, config } = props;
   const {
+    title,
     followingViewWidth,
     paths: yAxisPaths,
     minYValue,
@@ -355,6 +356,7 @@ function Plot(props: Props) {
   return (
     <Flex col clip center style={{ position: "relative" }}>
       <PanelToolbar helpContent={helpContent} floating />
+      <div>{title ?? "Untitled"}</div>
       <PlotChart
         isSynced={xAxisVal === "timestamp"}
         paths={yAxisPaths}
@@ -380,6 +382,7 @@ function Plot(props: Props) {
 }
 
 const configSchema: PanelConfigSchema<PlotConfig> = [
+  { key: "title", type: "text", title: "Title", placeholder: "Untitled" },
   { key: "maxYValue", type: "number", title: "Y max", placeholder: "auto", allowEmpty: true },
   { key: "minYValue", type: "number", title: "Y min", placeholder: "auto", allowEmpty: true },
   {
@@ -393,6 +396,7 @@ const configSchema: PanelConfigSchema<PlotConfig> = [
 ];
 
 const defaultConfig: PlotConfig = {
+  title: undefined,
   paths: [{ value: "", enabled: true, timestampMethod: "receiveTime" }],
   minYValue: "",
   maxYValue: "",

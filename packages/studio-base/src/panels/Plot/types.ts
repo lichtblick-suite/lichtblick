@@ -12,6 +12,7 @@ export type PlotXAxisVal =
   | "currentCustom"; // Message path data. One "current" message at playback time.
 
 export type PlotConfig = {
+  title?: string;
   paths: PlotPath[];
   minYValue?: string | number;
   maxYValue?: string | number;
