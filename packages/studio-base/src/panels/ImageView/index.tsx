@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mergeStyleSets } from "@fluentui/merge-styles";
 import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import CloseIcon from "@mdi/svg/svg/close.svg";
@@ -18,7 +19,6 @@ import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
 import WavesIcon from "@mdi/svg/svg/waves.svg";
 import cx from "classnames";
 import { last, uniq } from "lodash";
-import styled from "styled-components";
 
 import { filterMap } from "@foxglove/den/collection";
 import { useShallowMemo } from "@foxglove/hooks";
@@ -26,7 +26,6 @@ import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
-import dropDownStyles from "@foxglove/studio-base/components/Dropdown/index.module.scss";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
@@ -50,7 +49,6 @@ import toggle from "@foxglove/studio-base/util/toggle";
 
 import ImageCanvas from "./ImageCanvas";
 import helpContent from "./index.help.md";
-import style from "./index.module.scss";
 import {
   getCameraInfoTopic,
   getCameraNamespace,
@@ -87,20 +85,71 @@ type Props = {
   saveConfig: SaveImagePanelConfig;
 };
 
-const TopicTimestampSpan = styled.span`
-  padding: 0px 15px 0px 0px;
-  font-size: 10px;
-  font-style: italic;
-`;
+const classes = mergeStyleSets({
+  controls: {
+    display: "flex",
+    flexWrap: "wrap",
+    flex: "1 1 auto",
+    alignItems: "center",
+    overflow: "hidden",
 
-const SEmptyStateWrapper = styled.div`
-  width: 100%;
-  height: 100%;
-  background: ${colors.DARK2};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
+    button: {
+      margin: "1px 4px 1px 0",
+    },
+  },
+  bottomBar: {
+    transition: "opacity 0.1s ease-in-out",
+    display: "flex",
+    flex: "0 0 auto",
+    flexDirection: "row",
+    backgroundColor: "transparent",
+    textAlign: "right",
+    position: "absolute",
+    right: 4,
+    paddingRight: 5,
+    bottom: 8,
+    zIndex: 100,
+    opacity: "0",
+
+    "&.inScreenshotTests": {
+      opacity: 1,
+    },
+    ".mosaic-window:hover &": {
+      opacity: "1",
+    },
+  },
+  dropdown: {
+    padding: "4px 8px !important",
+  },
+  dropdownTitle: {
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+    flexDhrink: 1,
+    display: "flex",
+    alignItems: "center",
+  },
+  dropdownItem: {
+    position: "relative",
+  },
+  emptyStateWrapper: {
+    width: "100%",
+    height: "100%",
+    background: colors.DARK2,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  toggleButton: {
+    display: "flex",
+    alignItems: "center",
+  },
+  topicTimestamp: {
+    padding: "0px 15px 0px 0px",
+    fontSize: 10,
+    fontStyle: "italic",
+  },
+});
 
 const TopicTimestamp = ({
   text,
@@ -110,12 +159,19 @@ const TopicTimestamp = ({
   style?: {
     [key: string]: string;
   };
-}) => (text === "" ? ReactNull : <TopicTimestampSpan style={styleObj}>{text}</TopicTimestampSpan>);
+}) =>
+  text === "" ? (
+    ReactNull
+  ) : (
+    <span className={classes.topicTimestamp} style={styleObj}>
+      {text}
+    </span>
+  );
 
 const BottomBar = ({ children }: { children?: React.ReactNode }) => (
   <div
-    className={cx(style["bottom-bar"], {
-      [style.inScreenshotTests!]: inScreenshotTests(),
+    className={cx(classes.bottomBar, {
+      inScreenshotTests: inScreenshotTests(),
     })}
   >
     {children}
@@ -134,10 +190,10 @@ const ToggleComponent = ({
   return (
     <LegacyButton
       style={{ maxWidth: "100%", padding: "4px 8px" }}
-      className={cx({ disabled })}
+      className={cx(classes.toggleButton, { disabled })}
       data-test={dataTest}
     >
-      <span className={dropDownStyles.title}>{text}</span>
+      <span className={classes.dropdownTitle}>{text}</span>
       <Icon style={{ marginLeft: 4 }}>
         <MenuDownIcon style={{ width: 14, height: 14, opacity: 0.5 }} />
       </Icon>
@@ -159,13 +215,13 @@ function renderEmptyState(
 ) {
   if (cameraTopic === "") {
     return (
-      <SEmptyStateWrapper>
+      <div className={classes.emptyStateWrapper}>
         <EmptyState>Select a topic to view images</EmptyState>
-      </SEmptyStateWrapper>
+      </div>
     );
   }
   return (
-    <SEmptyStateWrapper>
+    <div className={classes.emptyStateWrapper}>
       <EmptyState>
         Waiting for images {markerTopics.length > 0 && "and markers"} on:
         <div>
@@ -206,7 +262,7 @@ function renderEmptyState(
           </>
         )}
       </EmptyState>
-    </SEmptyStateWrapper>
+    </div>
   );
 }
 
@@ -350,7 +406,7 @@ function ImageView(props: Props) {
     if (imageTopicsByNamespace.size === 0) {
       return (
         <Dropdown
-          btnClassname={style.dropdown}
+          btnClassname={classes.dropdown}
           toggleComponent={
             <ToggleComponent
               dataTest={"topics-dropdown"}
@@ -487,7 +543,7 @@ function ImageView(props: Props) {
         onChange={onToggleMarkerName}
         value={enabledMarkerTopics}
         text={availableAndEnabledMarkerTopics.length > 0 ? "Markers" : "No markers"}
-        btnClassname={style.dropdown}
+        btnClassname={classes.dropdown}
       >
         {availableAndEnabledMarkerTopics.map((topic) => (
           <Item
@@ -500,7 +556,7 @@ function ImageView(props: Props) {
               )
             }
             key={topic}
-            className={style.dropdownItem}
+            className={classes.dropdownItem}
           >
             <span style={{ display: "inline-block", marginRight: "15px" }}>{topic}</span>
             <TopicTimestamp text={renderedMarkerTimestamps[topic] ?? ""} />
@@ -567,7 +623,7 @@ function ImageView(props: Props) {
   const toolbar = useMemo(() => {
     return (
       <PanelToolbar floating={cameraTopic !== ""} helpContent={helpContent}>
-        <div className={style.controls}>
+        <div className={classes.controls}>
           {imageTopicDropdown}
           {markerDropdown}
         </div>

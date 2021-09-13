@@ -11,17 +11,18 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mergeStyleSets } from "@fluentui/merge-styles";
 import ChevronDownIcon from "@mdi/svg/svg/chevron-down.svg";
 import cx from "classnames";
 import { ReactNode, CSSProperties, ReactElement } from "react";
 
 import { LegacyButton } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import ChildToggle from "../ChildToggle";
 import Icon from "../Icon";
 import Menu, { Item } from "../Menu";
-import styles from "./index.module.scss";
 
 type Props<T> = {
   children?: ReactNode;
@@ -44,6 +45,34 @@ type Props<T> = {
 type State = {
   isOpen: boolean;
 };
+
+const classes = mergeStyleSets({
+  button: {
+    display: "flex",
+    maxWidth: "100%",
+    padding: "4px 10px",
+    backgroundColor: colors.DARK4,
+    alignItems: "center",
+
+    "&:hover": {
+      backgroundColor: colors.DARK5,
+    },
+  },
+  title: {
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+    flexDhrink: 1,
+    display: "flex",
+    alignItems: "center",
+  },
+  option: {
+    ":disabled": {
+      color: colors.DISABLED,
+      cursor: "not-allowed",
+    },
+  },
+});
 
 export default class Dropdown<T> extends React.Component<Props<T>, State> {
   override state = { isOpen: false };
@@ -106,11 +135,11 @@ export default class Dropdown<T> extends React.Component<Props<T>, State> {
     const { isOpen } = this.state;
     const button = (
       <LegacyButton
-        className={cx(styles.button, btnClassname, { disabled })}
+        className={cx(classes.button, btnClassname, { disabled })}
         style={{ opacity: isOpen ? 1 : undefined, ...this.props.btnStyle }}
         data-test={this.props.dataTest}
       >
-        <span className={styles.title}>{text ?? value}</span>
+        <span className={classes.title}>{text ?? value}</span>
         <Icon style={{ marginLeft: 4 }}>
           <ChevronDownIcon style={{ width: 14, height: 14, opacity: 0.5 }} />
         </Icon>
