@@ -446,7 +446,7 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         wrapper: Wrapper,
         initialProps: { player },
       });
-      async function runSingleFrame(shouldPause: boolean) {
+      async function runSingleFrame({ shouldPause }: { shouldPause: boolean }) {
         let resumeFn;
         if (shouldPause) {
           resumeFn = result.current.pauseFrame("");
@@ -470,11 +470,11 @@ describe("MessagePipelineProvider/useMessagePipeline", () => {
         }
       }
 
-      await runSingleFrame(true);
-      await runSingleFrame(true);
-      await runSingleFrame(false);
-      await runSingleFrame(false);
-      await runSingleFrame(true);
+      await runSingleFrame({ shouldPause: true });
+      await runSingleFrame({ shouldPause: true });
+      await runSingleFrame({ shouldPause: false });
+      await runSingleFrame({ shouldPause: false });
+      await runSingleFrame({ shouldPause: true });
     });
 
     it("Adding a promise that is previously resolved just plays through", async () => {

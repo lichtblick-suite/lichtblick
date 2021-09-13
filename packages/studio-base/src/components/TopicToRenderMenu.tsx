@@ -82,7 +82,7 @@ export default function TopicToRenderMenu({
   }
   // Keeps only the first occurrence of each topic.
   const renderTopics: string[] = uniq([defaultTopicToRender, ...availableTopics, topicToRender]);
-  const parentTopicSpan = (topic: string, available: boolean) => {
+  const parentTopicSpan = ({ topic, available }: { topic: string; available: boolean }) => {
     return (
       <>
         {topic.length > 0 ? topic : <em>Default</em>}
@@ -119,7 +119,7 @@ export default function TopicToRenderMenu({
           }}
         >
           <span className={styles.topicLabel}>
-            {parentTopicSpan(topic, availableTopics.includes(topic))}
+            {parentTopicSpan({ topic, available: availableTopics.includes(topic) })}
           </span>
           {topicToRender === topic && (
             <span className={styles.checkIcon}>

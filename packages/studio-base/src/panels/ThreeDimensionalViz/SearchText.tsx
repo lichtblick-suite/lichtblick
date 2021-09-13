@@ -47,6 +47,7 @@ export type WorldSearchTextProps = {
 };
 
 export type SearchTextProps = WorldSearchTextProps & {
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
   toggleSearchTextOpen: (bool: boolean) => void;
   setSearchText: (searchText: string) => void;
   setSelectedMatchIndex: (index: number) => void;
@@ -173,7 +174,7 @@ export const useSearchMatches = ({
   searchTextOpen: boolean;
   transforms: Transforms;
 }): void => {
-  const hasCurrentMatchChanged = useDeepChangeDetector([currentMatch], true);
+  const hasCurrentMatchChanged = useDeepChangeDetector([currentMatch], { initiallyTrue: true });
   React.useEffect(() => {
     if (!currentMatch || !searchTextOpen || !rootTf || !hasCurrentMatchChanged) {
       return;

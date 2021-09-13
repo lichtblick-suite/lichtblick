@@ -313,6 +313,7 @@ export default class SceneBuilder implements MarkerProvider {
     Object.assign(this.lastSeenMessages, frame);
   }
 
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
   setFlattenMarkers(_flatten: boolean): void {
     this.flatten = _flatten;
   }

@@ -71,7 +71,7 @@ export function useLatestMessageDataItem(path: string): MessageAndData | undefin
   const requestBackfill = useMessagePipeline(
     useCallback(({ requestBackfill: pipelineRequestBackfill }) => pipelineRequestBackfill, []),
   );
-  if (useChangeDetector([cachedGetMessagePathDataItems, path], false)) {
+  if (useChangeDetector([cachedGetMessagePathDataItems, path], { initiallyTrue: false })) {
     requestBackfill();
   }
 

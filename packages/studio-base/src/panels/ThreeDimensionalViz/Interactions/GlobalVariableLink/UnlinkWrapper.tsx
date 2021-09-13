@@ -52,6 +52,7 @@ const SIconWrapper = styled.span`
 type Props = {
   linkedGlobalVariable: LinkedGlobalVariable;
   children: (arg0: {
+    // eslint-disable-next-line @foxglove/no-boolean-parameters
     setIsOpen: (arg0: boolean) => void;
     linkedGlobalVariable: LinkedGlobalVariable;
   }) => ReactNode;

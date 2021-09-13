@@ -272,7 +272,12 @@ export default class Autocomplete<T = unknown> extends PureComponent<
       menuStyle = {},
       inputStyle = {},
     } = this.props;
-    const autocompleteItems = fuzzyFilter(items, filterText, getItemText, sortWhenFiltering);
+    const autocompleteItems = fuzzyFilter({
+      options: items,
+      filter: filterText,
+      getText: getItemText,
+      sort: sortWhenFiltering,
+    });
 
     const { hasError = autocompleteItems.length === 0 && value?.length } = this.props;
 

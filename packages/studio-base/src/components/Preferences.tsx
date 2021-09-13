@@ -88,7 +88,11 @@ function TimezoneSettings(): React.ReactElement {
 
   const [filterText, setFilterText] = useState<string>("");
   const filteredItems = useMemo(() => {
-    const matchingItems = fuzzyFilter(timezoneItems, filterText, (item) => item.text);
+    const matchingItems = fuzzyFilter({
+      options: timezoneItems,
+      filter: filterText,
+      getText: (item) => item.text,
+    });
     return [...fixedItems, ...matchingItems];
   }, [fixedItems, timezoneItems, filterText]);
 

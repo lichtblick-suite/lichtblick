@@ -130,7 +130,11 @@ export default class Ros2Player implements Player {
     this._presence = PlayerPresence.PRESENT;
   };
 
-  private _addProblem(id: string, problem: PlayerProblem, skipEmit = false): void {
+  private _addProblem(
+    id: string,
+    problem: PlayerProblem,
+    { skipEmit = false }: { skipEmit?: boolean } = {},
+  ): void {
     this._problems.addProblem(id, problem);
     if (!skipEmit) {
       this._emitState();
@@ -145,7 +149,7 @@ export default class Ros2Player implements Player {
   //   }
   // }
 
-  private _clearPublishProblems(skipEmit = false) {
+  private _clearPublishProblems({ skipEmit = false }: { skipEmit?: boolean } = {}) {
     if (
       this._problems.removeProblems(
         (id) =>
@@ -220,7 +224,7 @@ export default class Ros2Player implements Player {
           tip: `Ensure a ROS 2 DDS system is running on the local network and UDP multicast is supported`,
           error,
         },
-        false,
+        { skipEmit: false },
       );
     } finally {
       // Regardless of what happens, request topics again in a little bit.
@@ -366,6 +370,8 @@ export default class Ros2Player implements Player {
     topic: string,
     timestamp: Time,
     message: unknown,
+    // This is a hot path so we avoid extra object allocation from a parameters struct
+    // eslint-disable-next-line @foxglove/no-boolean-parameters
     external: boolean,
   ): void => {
     if (this._providerTopics == undefined) {
@@ -396,7 +402,7 @@ export default class Ros2Player implements Player {
     // const topics = new Set<string>(validPublishers.map(({ topic }) => topic));
 
     // Clear all problems related to publishing
-    this._clearPublishProblems(true);
+    this._clearPublishProblems({ skipEmit: false });
 
     // Unadvertise any topics that were previously published and no longer appear in the list
     // for (const topic of this._rosNode.publications.keys()) {

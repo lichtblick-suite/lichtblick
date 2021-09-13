@@ -74,7 +74,10 @@ function generateMessagesForLongInput(): MessageEvent<ArrayBuffer>[] {
   ]);
 }
 
-function getProvider(messages: MessageEvent<ArrayBuffer>[], unlimitedCache: boolean = false) {
+function getProvider(
+  messages: MessageEvent<ArrayBuffer>[],
+  { unlimitedCache = false }: { unlimitedCache?: boolean } = {},
+) {
   const memoryDataProvider = new MemoryDataProvider({
     messages: { parsedMessages: undefined, rosBinaryMessages: messages },
     providesParsedMessages: false,
@@ -243,7 +246,7 @@ describe("MemoryCacheDataProvider", () => {
   });
 
   it("does not stop prefetching with unlimitedCache", async () => {
-    const { provider } = getProvider(generateLargeMessages(), true);
+    const { provider } = getProvider(generateLargeMessages(), { unlimitedCache: true });
     const { extensionPoint } = mockExtensionPoint();
     const mockProgressCallback = jest.spyOn(extensionPoint, "progressCallback");
 

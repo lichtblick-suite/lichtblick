@@ -320,7 +320,7 @@ export interface PlayerMetricsCollectorInterface {
   close(): void;
   setSubscriptions(subscriptions: SubscribePayload[]): void;
   recordBytesReceived(bytes: number): void;
-  recordPlaybackTime(time: Time, stillLoadingData: boolean): void;
+  recordPlaybackTime(time: Time, params: { stillLoadingData: boolean }): void;
   recordDataProviderPerformance(metadata: AverageThroughput): void;
   recordUncachedRangeRequest(): void;
   recordTimeToFirstMsgs(): void;

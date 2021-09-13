@@ -29,6 +29,7 @@ type Props = {
   title: ReactNode;
   icon?: ReactNode;
   isOpen: boolean;
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
   setIsOpen: (arg0: boolean) => void;
   children: ReactNode[];
   disableOpenClose?: boolean;

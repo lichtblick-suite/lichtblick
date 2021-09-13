@@ -73,6 +73,7 @@ export default class CachedFilelike implements Filelike {
   _virtualBuffer: VirtualLRUBuffer;
   _logFn: (arg0: string) => void = (msg) => log.info(msg);
   _closed: boolean = false;
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
   _keepReconnectingCallback?: (reconnecting: boolean) => void;
 
   // The current active connection, if there is one. `remainingRange.start` gets updated whenever
@@ -97,6 +98,7 @@ export default class CachedFilelike implements Filelike {
     fileReader: FileReader;
     cacheSizeInBytes?: number;
     logFn?: (arg0: string) => void;
+    // eslint-disable-next-line @foxglove/no-boolean-parameters
     keepReconnectingCallback?: (reconnecting: boolean) => void;
   }) {
     this._fileReader = options.fileReader;

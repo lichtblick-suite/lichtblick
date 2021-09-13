@@ -15,7 +15,10 @@ import { isEqual } from "lodash";
 import { useRef } from "react";
 
 // Similar to useChangeDetector, but using deep equality check
-export default function useDeepChangeDetector(deps: unknown[], initiallyTrue: boolean): boolean {
+export default function useDeepChangeDetector(
+  deps: unknown[],
+  { initiallyTrue }: { initiallyTrue: boolean },
+): boolean {
   const ref = useRef(initiallyTrue ? undefined : deps);
   const changed = !isEqual(ref.current, deps);
   ref.current = deps;

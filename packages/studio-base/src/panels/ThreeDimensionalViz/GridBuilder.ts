@@ -37,6 +37,7 @@ export default class GridBuilder implements MarkerProvider {
     }
   };
 
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
   setVisible(isVisible: boolean): void {
     this._visible = isVisible;
   }

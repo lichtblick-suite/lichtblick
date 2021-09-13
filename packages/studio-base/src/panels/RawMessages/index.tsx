@@ -368,7 +368,12 @@ function RawMessages(props: Props) {
     // json parse/stringify round trip is used to deep parse data and diff data which may be lazy messages
     // lazy messages have non-enumerable getters but do have a toJSON method to turn themselves into an object
     const diff = diffEnabled
-      ? getDiff(maybeDeepParse(data), maybeDeepParse(diffData), undefined, showFullMessageForDiff)
+      ? getDiff({
+          before: maybeDeepParse(data),
+          after: maybeDeepParse(diffData),
+          idLabel: undefined,
+          showFullMessageForDiff,
+        })
       : {};
     const diffLabelTexts = Object.values(diffLabels).map(({ labelText }) => labelText);
 

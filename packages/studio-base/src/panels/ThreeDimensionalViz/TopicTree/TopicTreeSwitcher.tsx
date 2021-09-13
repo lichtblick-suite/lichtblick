@@ -58,6 +58,7 @@ type Props = {
   pinTopics: boolean;
   renderTopicTree: boolean;
   saveConfig: Save3DConfig;
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
   setShowTopicTree: (arg0: boolean | ((arg0: boolean) => boolean)) => void;
   showErrorBadge: boolean;
 };

@@ -18,9 +18,12 @@ import useDeepChangeDetector from "@foxglove/studio-base/hooks/useDeepChangeDete
 describe("useDeepChangeDetector", () => {
   it("returns true only when value changes", () => {
     for (const initialValue of [true, false]) {
-      const { result, rerender } = renderHook((deps) => useDeepChangeDetector(deps, initialValue), {
-        initialProps: [1, 1],
-      });
+      const { result, rerender } = renderHook(
+        (deps) => useDeepChangeDetector(deps, { initiallyTrue: initialValue }),
+        {
+          initialProps: [1, 1],
+        },
+      );
       expect(result.current).toBe(initialValue);
       rerender([1, 1]);
       expect(result.current).toBe(false);
@@ -38,9 +41,12 @@ describe("useDeepChangeDetector", () => {
   it("uses deep comparison (lodash isEqual) for equality check", () => {
     const obj = { name: "foo" };
     const objInArr = { name: "bar" };
-    const { result, rerender } = renderHook((deps) => useDeepChangeDetector(deps, false), {
-      initialProps: [[1, objInArr], "a", obj],
-    });
+    const { result, rerender } = renderHook(
+      (deps) => useDeepChangeDetector(deps, { initiallyTrue: false }),
+      {
+        initialProps: [[1, objInArr], "a", obj],
+      },
+    );
     expect(result.current).toBe(false);
     rerender([[1, objInArr], "a", obj]);
     expect(result.current).toBe(false);

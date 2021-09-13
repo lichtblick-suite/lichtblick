@@ -22,7 +22,10 @@ import * as PanelAPI from ".";
 
 describe("useMessageReducer", () => {
   // Create a helper component that exposes restore, addMessage, and the results of the hook for mocking
-  function createTest(useAddMessage: boolean = true, useAddMessages: boolean = false) {
+  function createTest({
+    useAddMessage = true,
+    useAddMessages = false,
+  }: { useAddMessage?: boolean; useAddMessages?: boolean } = {}) {
     function Test({
       topics,
       addMessagesOverride,
@@ -77,7 +80,7 @@ describe("useMessageReducer", () => {
   ])(
     "requires exactly one 'add' callback (%p)",
     async ({ useAddMessage, useAddMessages, shouldThrow }) => {
-      const Test = createTest(useAddMessage, useAddMessages);
+      const Test = createTest({ useAddMessage, useAddMessages });
       mount(
         <MockMessagePipelineProvider>
           <Test topics={["/foo"]} />
@@ -115,7 +118,7 @@ describe("useMessageReducer", () => {
   });
 
   it("calls restore to initialize and addMessages for initial messages", async () => {
-    const Test = createTest(false, true);
+    const Test = createTest({ useAddMessage: false, useAddMessages: true });
 
     Test.restore.mockReturnValue(1);
     Test.addMessages.mockImplementation((_, msgs) => msgs[msgs.length - 1].message.value);
@@ -189,7 +192,7 @@ describe("useMessageReducer", () => {
   });
 
   it("calls addMessages for messages added later", async () => {
-    const Test = createTest(false, true);
+    const Test = createTest({ useAddMessage: false, useAddMessages: true });
 
     Test.restore.mockReturnValue(1);
     Test.addMessages.mockImplementation((_prevValue, msgs) => msgs[msgs.length - 1].message.value);
@@ -475,7 +478,7 @@ describe("useMessageReducer", () => {
   });
 
   it("restore called when addMessages changes", async () => {
-    const Test = createTest(false, true);
+    const Test = createTest({ useAddMessage: false, useAddMessages: true });
 
     Test.restore.mockReturnValue(1);
     Test.addMessages.mockImplementation((_, msgs) => msgs[msgs.length - 1].message.value);

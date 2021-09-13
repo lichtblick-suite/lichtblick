@@ -64,6 +64,7 @@ export default function ObjectDetails({
     full: "Show full object",
   };
 
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
   const updateShowInstance = useCallback((shouldShowInstance: boolean) => {
     setShowInstance(shouldShowInstance);
   }, []);

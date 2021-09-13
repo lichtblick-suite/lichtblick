@@ -30,10 +30,12 @@ import KeyListener from "@foxglove/studio-base/components/KeyListener";
 import styles from "./index.module.scss";
 
 type ContainsOpenProps = {
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
   onChange: (containsOpen: boolean) => void;
   children: React.ReactNode;
 };
 
+// eslint-disable-next-line @foxglove/no-boolean-parameters
 const Context = React.createContext((_opening: boolean) => {});
 
 // Component for detecting if any child component is opened or not. Handy for
@@ -42,6 +44,7 @@ const Context = React.createContext((_opening: boolean) => {});
 function ChildToggleContainsOpen({ onChange, children }: ContainsOpenProps): ReactElement {
   const openNumber = useRef(0);
   const tellAncestorAboutToggledChild = useCallback(
+    // eslint-disable-next-line @foxglove/no-boolean-parameters
     (opening: boolean) => {
       const newValue = openNumber.current + (opening ? 1 : -1);
       console.assert(newValue >= 0);
@@ -59,6 +62,7 @@ type Props = {
   isOpen?: boolean;
   defaultIsOpen?: boolean;
   // fired when the trigger component is clicked
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
   onToggle?: (isOpen: boolean) => void;
   // requires exactly 2 components: a toggle trigger & a content component
   children: [ReactNode, ReactNode];
@@ -104,6 +108,7 @@ export default function ChildToggle(props: Props): ReactElement {
   });
 
   // Used by the internal click handler and escape key handler to change state.
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
   const setIsOpen = useCallback((value: boolean) => {
     // Only trigger a state update in uncontrolled mode. Otherwise, the client will do it from onToggle.
     if (latestProps.current.controlledIsOpen == undefined) {

@@ -236,6 +236,7 @@ type SharedProps = {
   sceneErrorsByKey: SceneErrorsByKey;
   setCurrentEditingTopic: SetCurrentEditingTopic;
   setFilterText: (arg0: string) => void;
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
   setShowTopicTree: (arg0: boolean | ((arg0: boolean) => boolean)) => void;
   shouldExpandAllKeys: boolean;
   showTopicTree: boolean;
@@ -292,7 +293,7 @@ function TopicTree({
   // to ensure newly added nodes such as `uncategorized` are properly expanded:
   // https://github.com/ant-design/ant-design/issues/18012
   const expandedKeysRef = useRef(expandedKeys);
-  const hasRootNodeChanged = useChangeDetector([rootTreeNode], false);
+  const hasRootNodeChanged = useChangeDetector([rootTreeNode], { initiallyTrue: false });
   expandedKeysRef.current = hasRootNodeChanged ? [...expandedKeys] : expandedKeys;
 
   useEffect(() => {

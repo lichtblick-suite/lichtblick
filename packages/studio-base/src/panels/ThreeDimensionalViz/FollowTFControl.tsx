@@ -90,6 +90,7 @@ type Props = {
   transforms: Transforms;
   tfToFollow?: string;
   followOrientation: boolean;
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
   onFollowChange: (tfId?: string | false, followOrientation?: boolean) => void;
 };
 

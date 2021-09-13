@@ -45,7 +45,7 @@ export type Props = {
   };
   labelDirection?: "top" | "left" | "right";
   tooltip?: string;
-  onChange: (newChecked: boolean) => void;
+  onChange: (newChecked: boolean) => void; // eslint-disable-line @foxglove/no-boolean-parameters
   style?: {
     [key: string]: string | number;
   };

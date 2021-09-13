@@ -16,7 +16,10 @@ import { storiesOf } from "@storybook/react";
 import Table from "@foxglove/studio-base/panels/Table";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
-const makeArrayData = (length = 50, nestArray = true): unknown => {
+const makeArrayData = ({
+  length = 50,
+  nestArray = true,
+}: { length?: number; nestArray?: boolean } = {}): unknown => {
   return new Array(length).fill(0).map((_, i) => {
     return {
       val: i,
@@ -27,7 +30,7 @@ const makeArrayData = (length = 50, nestArray = true): unknown => {
       obj: {
         date: new Date(`2020-01-${i}`),
       },
-      arr: nestArray ? makeArrayData(5, false) : [],
+      arr: nestArray ? makeArrayData({ length: 5, nestArray: false }) : [],
       primitiveArray: [1, 2, 3, 4, 5],
     };
   });

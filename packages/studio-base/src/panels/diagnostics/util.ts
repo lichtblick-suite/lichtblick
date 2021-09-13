@@ -138,5 +138,9 @@ export const filterAndSortDiagnostics = (
     return sortBy(unpinnedNodes, (info) => info.displayName.replace(/^\//, ""));
   }
   // fuzzyFilter sorts by match accuracy.
-  return fuzzyFilter(unpinnedNodes, hardwareIdFilter, ({ displayName }) => displayName);
+  return fuzzyFilter({
+    options: unpinnedNodes,
+    filter: hardwareIdFilter,
+    getText: ({ displayName }) => displayName,
+  });
 };

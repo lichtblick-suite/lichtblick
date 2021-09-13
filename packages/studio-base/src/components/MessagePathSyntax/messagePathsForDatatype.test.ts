@@ -217,21 +217,17 @@ describe("messagePathsForDatatype", () => {
   });
 
   it("returns an array of possible message paths for the given `validTypes`", () => {
-    expect(messagePathsForDatatype("pose_msgs/PoseDebug", datatypes, ["float64"])).toEqual([
-      ".some_pose.dummy_array[:]",
-      ".some_pose.x",
-    ]);
+    expect(
+      messagePathsForDatatype("pose_msgs/PoseDebug", datatypes, { validTypes: ["float64"] }),
+    ).toEqual([".some_pose.dummy_array[:]", ".some_pose.x"]);
   });
 
   it("does not suggest hashes with multiple values when setting `noMultiSlices`", () => {
     expect(
-      messagePathsForDatatype(
-        "pose_msgs/PoseDebug",
-        datatypes,
-        ["float64"],
-        /* noMultiSlices*/
-        true,
-      ),
+      messagePathsForDatatype("pose_msgs/PoseDebug", datatypes, {
+        validTypes: ["float64"],
+        noMultiSlices: true,
+      }),
     ).toEqual([".some_pose.dummy_array[0]", ".some_pose.x"]);
   });
 });

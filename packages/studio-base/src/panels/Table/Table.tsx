@@ -50,7 +50,7 @@ function getColumnsFromObject(
         Header: accessor,
         accessor,
         id,
-        Cell: ({ value, row }) => {
+        Cell({ value, row }) {
           if (Array.isArray(value) && typeof value[0] !== "object") {
             return JSON.stringify(value);
           }

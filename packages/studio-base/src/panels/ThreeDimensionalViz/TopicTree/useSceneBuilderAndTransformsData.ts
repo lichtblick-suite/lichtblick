@@ -32,7 +32,7 @@ export default function useSceneBuilderAndTransformsData({
   staticallyAvailableNamespacesByTopic,
 }: UseSceneBuilderAndTransformsDataInput): UseSceneBuilderAndTransformsDataOutput {
   const { playerId } = useDataSourceInfo();
-  const hasChangedPlayerId = useChangeDetector([playerId], false);
+  const hasChangedPlayerId = useChangeDetector([playerId], { initiallyTrue: false });
 
   const newAvailableTfs = transforms
     .values()

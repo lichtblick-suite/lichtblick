@@ -205,14 +205,19 @@ const canTransformMarkersByTopic = (topic: string) => !topic.includes("rect");
 
 // Group image topics by the first component of their name
 
-function renderEmptyState(
-  cameraTopic: string,
-  markerTopics: string[],
-  shouldSynchronize: boolean,
+function renderEmptyState({
+  cameraTopic,
+  markerTopics,
+  shouldSynchronize,
+  messagesByTopic,
+}: {
+  cameraTopic: string;
+  markerTopics: string[];
+  shouldSynchronize: boolean;
   messagesByTopic: {
     [topic: string]: readonly MessageEvent<unknown>[];
-  },
-) {
+  };
+}) {
   if (cameraTopic === "") {
     return (
       <div className={classes.emptyStateWrapper}>
@@ -267,6 +272,7 @@ function renderEmptyState(
 }
 
 function useOptionallySynchronizedMessages(
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
   shouldSynchronize: boolean,
   topics: readonly PanelAPI.RequestedTopic[],
 ) {
@@ -673,7 +679,12 @@ function ImageView(props: Props) {
       {toolbar}
       {/* If rendered, EmptyState will hide the always-present ImageCanvas */}
       {showEmptyState &&
-        renderEmptyState(cameraTopic, enabledMarkerTopics, shouldSynchronize, messagesByTopic)}
+        renderEmptyState({
+          cameraTopic,
+          markerTopics: enabledMarkerTopics,
+          shouldSynchronize,
+          messagesByTopic,
+        })}
       {/* Always render the ImageCanvas because it's expensive to unmount and start up. */}
       {imageMessageToRender && (
         <ImageCanvas

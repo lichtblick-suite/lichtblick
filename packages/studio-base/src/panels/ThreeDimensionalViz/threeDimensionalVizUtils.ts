@@ -159,6 +159,7 @@ export function getUpdatedGlobalVariablesBySelectedObject(
 function getEquivalentOffsetsWithoutTarget(
   offsets: { readonly targetOffset: Vec3; readonly thetaOffset: number },
   targetPose: { readonly target: Vec3; readonly targetOrientation: Vec4 },
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
   followOrientation: boolean = false,
 ): { targetOffset: Vec3; thetaOffset: number } {
   const heading = followOrientation

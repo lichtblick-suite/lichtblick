@@ -527,7 +527,9 @@ export default class RandomAccessPlayer implements Player {
   }
 
   _setNextReadStartTime(time: Time): void {
-    this._metricsCollector.recordPlaybackTime(time, !this.hasCachedRange(this._start, this._end));
+    this._metricsCollector.recordPlaybackTime(time, {
+      stillLoadingData: !this.hasCachedRange(this._start, this._end),
+    });
     this._nextReadStartTime = clampTime(time, this._start, this._end);
   }
 

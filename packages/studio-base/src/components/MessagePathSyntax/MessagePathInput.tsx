@@ -339,13 +339,11 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
           rosPath.messagePath[0]?.type === "filter" ? rosPath.messagePath[0].repr.length + 2 : 0;
 
         return {
-          autocompleteItems: messagePathsForDatatype(
-            topic.datatype,
-            datatypes,
+          autocompleteItems: messagePathsForDatatype(topic.datatype, datatypes, {
             validTypes,
             noMultiSlices,
-            rosPath.messagePath,
-          ).filter(
+            messagePath: rosPath.messagePath,
+          }).filter(
             // .header.seq is pretty useless but shows up everryyywhere.
             (msgPath) => msgPath !== "" && !msgPath.endsWith(".header.seq"),
           ),

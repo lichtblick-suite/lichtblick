@@ -103,7 +103,7 @@ export default function LayoutRow({
 }: {
   layout: Layout;
   selected: boolean;
-  onSelect: (item: Layout, selectedViaClick?: boolean) => void;
+  onSelect: (item: Layout, params?: { selectedViaClick?: boolean }) => void;
   onRename: (item: Layout, newName: string) => void;
   onDuplicate: (item: Layout) => void;
   onDelete: (item: Layout) => void;
@@ -151,7 +151,7 @@ export default function LayoutRow({
 
   const onClick = useCallback(() => {
     if (!selected) {
-      onSelect(layout, true);
+      onSelect(layout, { selectedViaClick: true });
     }
   }, [layout, onSelect, selected]);
 

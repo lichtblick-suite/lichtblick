@@ -117,9 +117,15 @@ export function validTerminatingStructureItem(
 export function messagePathsForDatatype(
   datatype: string,
   datatypes: RosDatatypes,
-  validTypes?: string[],
-  noMultiSlices?: boolean,
-  messagePath: MessagePathPart[] = [],
+  {
+    validTypes,
+    noMultiSlices,
+    messagePath = [],
+  }: {
+    validTypes?: string[];
+    noMultiSlices?: boolean;
+    messagePath?: MessagePathPart[];
+  } = {},
 ): string[] {
   let clonedMessagePath = [...messagePath];
   const messagePaths: string[] = [];

@@ -65,7 +65,7 @@ export default class AnalyticsMetricsCollector implements PlayerMetricsCollector
 
   recordBytesReceived(_bytes: number): void {}
 
-  recordPlaybackTime(_time: Time, _stillLoadingData: boolean): void {}
+  recordPlaybackTime(_time: Time, _params: { stillLoadingData: boolean }): void {}
 
   recordDataProviderPerformance(
     _metadata: Readonly<{

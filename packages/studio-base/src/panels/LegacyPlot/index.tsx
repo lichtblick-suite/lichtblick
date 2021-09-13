@@ -366,7 +366,9 @@ function TwoDimensionalPlot(props: Props) {
   }, [setHasUserPannedOrZoomed]);
 
   if (
-    useDeepChangeDetector([pick(props.config, ["minXVal", "maxXVal", "minYVal", "maxYVal"])], false)
+    useDeepChangeDetector([pick(props.config, ["minXVal", "maxXVal", "minYVal", "maxYVal"])], {
+      initiallyTrue: false,
+    })
   ) {
     // Reset the view to the default when the default changes.
     if (hasUserPannedOrZoomed) {

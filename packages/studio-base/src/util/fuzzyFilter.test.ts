@@ -15,23 +15,41 @@ import fuzzyFilter from "./fuzzyFilter";
 
 describe("fuzzyFilter", () => {
   it("filters correctly", () => {
-    expect(fuzzyFilter(["abc", "def"], "a", (x) => x)).toEqual(["abc"]);
-    expect(fuzzyFilter(["abc", "def"], "e", (x) => x)).toEqual(["def"]);
-    expect(fuzzyFilter(["abc", "def"], "aa", (x) => x)).toEqual([]);
-    expect(fuzzyFilter(["abc", "def"], "z", (x) => x)).toEqual([]);
+    expect(fuzzyFilter({ options: ["abc", "def"], filter: "a", getText: (x) => x })).toEqual([
+      "abc",
+    ]);
+    expect(fuzzyFilter({ options: ["abc", "def"], filter: "e", getText: (x) => x })).toEqual([
+      "def",
+    ]);
+    expect(fuzzyFilter({ options: ["abc", "def"], filter: "aa", getText: (x) => x })).toEqual([]);
+    expect(fuzzyFilter({ options: ["abc", "def"], filter: "z", getText: (x) => x })).toEqual([]);
   });
   it("sorts better matches first", () => {
-    expect(fuzzyFilter(["abbc", "abc"], "abc", (x) => x)).toEqual(["abc", "abbc"]);
-    expect(fuzzyFilter(["abb", "ab"], "ab", (x) => x)).toEqual(["ab", "abb"]);
+    expect(fuzzyFilter({ options: ["abbc", "abc"], filter: "abc", getText: (x) => x })).toEqual([
+      "abc",
+      "abbc",
+    ]);
+    expect(fuzzyFilter({ options: ["abb", "ab"], filter: "ab", getText: (x) => x })).toEqual([
+      "ab",
+      "abb",
+    ]);
   });
   it("allows disabling sorting", () => {
-    expect(fuzzyFilter(["abbc", "abc"], "abc", (x) => x, false)).toEqual(["abbc", "abc"]);
-    expect(fuzzyFilter(["abb", "ab"], "ab", (x) => x, false)).toEqual(["abb", "ab"]);
+    expect(
+      fuzzyFilter({ options: ["abbc", "abc"], filter: "abc", getText: (x) => x, sort: false }),
+    ).toEqual(["abbc", "abc"]);
+    expect(
+      fuzzyFilter({ options: ["abb", "ab"], filter: "ab", getText: (x) => x, sort: false }),
+    ).toEqual(["abb", "ab"]);
   });
   it("ignores punctuation and capitalization", () => {
-    expect(fuzzyFilter(["ab/cDE"], "a-b_Cde", (x) => x)).toEqual(["ab/cDE"]);
+    expect(fuzzyFilter({ options: ["ab/cDE"], filter: "a-b_Cde", getText: (x) => x })).toEqual([
+      "ab/cDE",
+    ]);
   });
   it("supports custom objects", () => {
-    expect(fuzzyFilter([{ x: "abc" }, { x: "def" }], "a", ({ x }) => x)).toEqual([{ x: "abc" }]);
+    expect(
+      fuzzyFilter({ options: [{ x: "abc" }, { x: "def" }], filter: "a", getText: ({ x }) => x }),
+    ).toEqual([{ x: "abc" }]);
   });
 });

@@ -46,6 +46,7 @@ function consumeSingleTfs(tfs: MessageEvent<TF>[], transforms: Transforms): void
  *
  * If the frame is undefined, transform accumulation is reset and all existing transforms are discarded.
  */
+// eslint-disable-next-line @foxglove/no-boolean-parameters
 function useTransforms(topics: readonly Topic[], frame: Frame, reset: boolean): Transforms {
   const topicsToDatatypes = useMemo(() => {
     return new Map<string, string>(topics.map((topic) => [topic.name, topic.datatype]));

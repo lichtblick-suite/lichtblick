@@ -52,6 +52,7 @@ export default function LinkToGlobalVariable({
   const [name, setName] = React.useState(() => getInitialName(markerKeyPath));
 
   const setIsOpen = React.useCallback(
+    // eslint-disable-next-line @foxglove/no-boolean-parameters
     (newValue: boolean) => {
       _setIsOpen(newValue);
       if (newValue) {

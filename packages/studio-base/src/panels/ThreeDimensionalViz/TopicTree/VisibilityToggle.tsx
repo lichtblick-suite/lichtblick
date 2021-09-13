@@ -77,6 +77,7 @@ type Props = {
   columnIndex: number;
 };
 
+// eslint-disable-next-line @foxglove/no-boolean-parameters
 function diffModeStyleOverrides(checked: boolean, columnIndex: number) {
   if (!checked) {
     return {

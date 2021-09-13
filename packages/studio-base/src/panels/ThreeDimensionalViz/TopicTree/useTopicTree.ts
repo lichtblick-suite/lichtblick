@@ -241,6 +241,7 @@ export default function useTopicTree({
     const isSelectedMemo: { [key: string]: boolean } = {};
 
     // Check if a node is selected and fill in the isSelectedMemo cache for future access.
+    // eslint-disable-next-line @foxglove/no-boolean-parameters
     function isSelected(baseKey: string | undefined, isFeatureColumn: boolean): boolean {
       // Only topic node or top level group node may not have parentKey, and if we reached this level,
       // the descendants nodes should already been selected. Specifically, if a node key is included in the checkedKeys
@@ -724,6 +725,7 @@ export default function useTopicTree({
     }
 
     // Calculates whether a node is visible. This is a recursive function intended to be run on the root node.
+    // eslint-disable-next-line @foxglove/no-boolean-parameters
     function calculateIsVisible(node: TreeNode, isAncestorVisible: boolean): boolean {
       // When the user is viewing available/visible nodes, we can skip setting the visibility for the children of
       // unavailable/invisible nodes since they are not going to be rendered.

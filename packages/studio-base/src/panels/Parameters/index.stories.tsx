@@ -9,7 +9,13 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import Parameters from "./index";
 
-const getFixture = (getParameters: boolean, setParameters: boolean) => {
+const getFixture = ({
+  getParameters,
+  setParameters,
+}: {
+  getParameters: boolean;
+  setParameters: boolean;
+}) => {
   const capabilities: string[] = [];
   if (getParameters) {
     capabilities.push(PlayerCapabilities.getParameters);
@@ -42,14 +48,14 @@ const getFixture = (getParameters: boolean, setParameters: boolean) => {
 storiesOf("panels/Parameters/index", module)
   .add("default", () => {
     return (
-      <PanelSetup fixture={getFixture(false, false)}>
+      <PanelSetup fixture={getFixture({ getParameters: false, setParameters: false })}>
         <Parameters />
       </PanelSetup>
     );
   })
   .add("with parameters", () => {
     return (
-      <PanelSetup fixture={getFixture(true, false)}>
+      <PanelSetup fixture={getFixture({ getParameters: true, setParameters: false })}>
         <Parameters />
       </PanelSetup>
     );

@@ -100,6 +100,7 @@ export type LayoutToolbarSharedProps = {
   followTf?: string | false;
   onAlignXYAxis: () => void;
   onCameraStateChange: (arg0: CameraState) => void;
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
   onFollowChange: (followTf?: string | false, followOrientation?: boolean) => void;
   saveConfig: Save3DConfig;
   targetPose?: TargetPose;

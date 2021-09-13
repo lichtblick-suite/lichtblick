@@ -37,12 +37,17 @@ export const diffLabels = {
 export const diffLabelsByLabelText = keyBy(Object.values(diffLabels), "labelText");
 
 export type DiffObject = Record<string, unknown>;
-export default function getDiff(
-  before: unknown,
-  after: unknown,
-  idLabel?: string,
-  showFullMessageForDiff: boolean = false,
-): undefined | DiffObject | DiffObject[] {
+export default function getDiff({
+  before,
+  after,
+  idLabel,
+  showFullMessageForDiff = false,
+}: {
+  before: unknown;
+  after: unknown;
+  idLabel?: string;
+  showFullMessageForDiff?: boolean;
+}): undefined | DiffObject | DiffObject[] {
   if (Array.isArray(before) && Array.isArray(after)) {
     let idToCompareWith: string | undefined;
     const allItems = before.concat(after);
@@ -94,12 +99,12 @@ export default function getDiff(
           throw new Error("beforeItem is invalid; should have checked this earlier");
         }
         const id = beforeItem[idToCompareWith];
-        const innerDiff = getDiff(
-          beforeItem,
-          unmatchedAfterById[id],
-          idToCompareWith,
+        const innerDiff = getDiff({
+          before: beforeItem,
+          after: unmatchedAfterById[id],
+          idLabel: idToCompareWith,
           showFullMessageForDiff,
-        );
+        });
         delete unmatchedAfterById[id];
         if (!isEmpty(innerDiff)) {
           const isDeleted =
@@ -116,7 +121,12 @@ export default function getDiff(
         }
       }
       for (const afterItem of Object.values(unmatchedAfterById)) {
-        const innerDiff = getDiff(undefined, afterItem, idToCompareWith, showFullMessageForDiff);
+        const innerDiff = getDiff({
+          before: undefined,
+          after: afterItem,
+          idLabel: idToCompareWith,
+          showFullMessageForDiff,
+        });
         if (!isEmpty(innerDiff)) {
           diff.push(innerDiff as DiffObject);
         }
@@ -129,12 +139,12 @@ export default function getDiff(
     const diff: DiffObject = {};
     const allKeys = Object.keys(before).concat(Object.keys(after));
     for (const key of uniq(allKeys)) {
-      const innerDiff = getDiff(
-        (before as DiffObject)[key],
-        (after as DiffObject)[key],
-        undefined,
+      const innerDiff = getDiff({
+        before: (before as DiffObject)[key],
+        after: (after as DiffObject)[key],
+        idLabel: undefined,
         showFullMessageForDiff,
-      );
+      });
       if (!isEmpty(innerDiff)) {
         diff[key] = innerDiff;
       } else if (showFullMessageForDiff) {

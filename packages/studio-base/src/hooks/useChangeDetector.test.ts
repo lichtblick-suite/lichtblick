@@ -18,9 +18,12 @@ import useChangeDetector from "@foxglove/studio-base/hooks/useChangeDetector";
 describe("useChangeDetector", () => {
   it("returns true only when value changes", () => {
     for (const initialValue of [true, false]) {
-      const { result, rerender } = renderHook((deps) => useChangeDetector(deps, initialValue), {
-        initialProps: [1, 1],
-      });
+      const { result, rerender } = renderHook(
+        (deps) => useChangeDetector(deps, { initiallyTrue: initialValue }),
+        {
+          initialProps: [1, 1],
+        },
+      );
       expect(result.current).toBe(initialValue);
       rerender([1, 1]);
       expect(result.current).toBe(false);
@@ -37,9 +40,12 @@ describe("useChangeDetector", () => {
 
   it("uses reference equality", () => {
     const obj = {};
-    const { result, rerender } = renderHook((deps) => useChangeDetector(deps, false), {
-      initialProps: [1, "a", obj],
-    });
+    const { result, rerender } = renderHook(
+      (deps) => useChangeDetector(deps, { initiallyTrue: false }),
+      {
+        initialProps: [1, "a", obj],
+      },
+    );
     expect(result.current).toBe(false);
     rerender([1, "a", obj]);
     expect(result.current).toBe(false);

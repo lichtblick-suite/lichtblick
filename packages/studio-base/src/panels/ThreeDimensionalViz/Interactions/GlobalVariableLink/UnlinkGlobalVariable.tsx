@@ -27,6 +27,7 @@ const SPath = styled.span`
 
 type Props = {
   linkedGlobalVariable: LinkedGlobalVariable;
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
   setIsOpen: (arg0: boolean) => void;
 };
 

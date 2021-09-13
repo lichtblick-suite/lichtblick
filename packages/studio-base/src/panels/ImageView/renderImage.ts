@@ -92,7 +92,7 @@ export async function renderImage({
       canvas.height = bitmap.height;
     }
 
-    const dimensions = render(canvas, zoomMode, panZoom, bitmap, imageSmoothing, markerData);
+    const dimensions = render({ canvas, zoomMode, panZoom, bitmap, imageSmoothing, markerData });
     bitmap.close();
     return dimensions;
   } catch (error) {
@@ -199,14 +199,21 @@ function clearCanvas(canvas?: HTMLCanvasElement | OffscreenCanvas) {
   }
 }
 
-function render(
-  canvas: HTMLCanvasElement | OffscreenCanvas,
-  zoomMode: "fit" | "fill" | "other",
-  panZoom: { x: number; y: number; scale: number },
-  bitmap: ImageBitmap,
-  imageSmoothing: boolean,
-  markerData: MarkerData | undefined,
-): Dimensions | undefined {
+function render({
+  canvas,
+  zoomMode,
+  panZoom,
+  bitmap,
+  imageSmoothing,
+  markerData,
+}: {
+  canvas: HTMLCanvasElement | OffscreenCanvas;
+  zoomMode: "fit" | "fill" | "other";
+  panZoom: { x: number; y: number; scale: number };
+  bitmap: ImageBitmap;
+  imageSmoothing: boolean;
+  markerData: MarkerData | undefined;
+}): Dimensions | undefined {
   const bitmapDimensions = { width: bitmap.width, height: bitmap.height };
   const ctx = canvas.getContext("2d");
   if (!ctx) {

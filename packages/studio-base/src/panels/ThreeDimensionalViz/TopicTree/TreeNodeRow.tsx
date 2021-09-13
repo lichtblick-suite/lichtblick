@@ -189,6 +189,7 @@ export default function TreeNodeRow({
 
   const { setHoveredMarkerMatchers } = useContext(ThreeDimensionalVizContext);
   const updateHoveredMarkerMatchers = useCallback(
+    // eslint-disable-next-line @foxglove/no-boolean-parameters
     (columnIndex: number, visible: boolean) => {
       if (visible) {
         const topic = [topicName, joinTopics(SECOND_SOURCE_PREFIX, topicName)][columnIndex];

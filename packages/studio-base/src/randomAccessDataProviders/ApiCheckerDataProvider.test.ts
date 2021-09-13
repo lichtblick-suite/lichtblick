@@ -16,7 +16,7 @@ import MemoryDataProvider from "@foxglove/studio-base/randomAccessDataProviders/
 import { mockExtensionPoint } from "@foxglove/studio-base/randomAccessDataProviders/mockExtensionPoint";
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
-function getProvider(isRoot: boolean = false) {
+function getProvider({ isRoot = false }: { isRoot?: boolean } = {}) {
   const memoryDataProvider = new MemoryDataProvider({
     messages: {
       parsedMessages: [
@@ -48,7 +48,7 @@ function getProvider(isRoot: boolean = false) {
 describe("ApiCheckerDataProvider", () => {
   describe("#initialize", () => {
     it("works in the normal case", async () => {
-      const { provider } = getProvider(true);
+      const { provider } = getProvider({ isRoot: true });
       const initializationResult = await provider.initialize(mockExtensionPoint().extensionPoint);
       expect(initializationResult).toEqual({
         messageDefinitions: {
@@ -130,14 +130,14 @@ describe("ApiCheckerDataProvider", () => {
       });
 
       it("throws when topic is missing from messageDefinitionsByTopic (raw messageDefinitions)", async () => {
-        const { provider, memoryDataProvider } = getProvider(true);
+        const { provider, memoryDataProvider } = getProvider({ isRoot: true });
         memoryDataProvider.parsedMessageDefinitionsByTopic = undefined;
         memoryDataProvider.datatypes = undefined;
         await expect(provider.initialize(mockExtensionPoint().extensionPoint)).rejects.toThrow();
       });
 
       it("throws when root message definitions are not parsed", async () => {
-        const { provider, memoryDataProvider } = getProvider(true);
+        const { provider, memoryDataProvider } = getProvider({ isRoot: true });
         memoryDataProvider.messageDefinitionsByTopic = {
           "/some_topic": "dummy",
           "/some_other_topic": "dummy",

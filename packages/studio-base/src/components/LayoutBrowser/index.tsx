@@ -128,8 +128,8 @@ export default function LayoutBrowser({
   }, [confirm, currentLayoutId, layoutManager]);
 
   const onSelectLayout = useCallbackWithToast(
-    async (item: Layout, selectedViaClick?: boolean) => {
-      if (selectedViaClick === true) {
+    async (item: Layout, { selectedViaClick = false }: { selectedViaClick?: boolean } = {}) => {
+      if (selectedViaClick) {
         if (!(await promptForUnsavedChanges())) {
           return;
         }

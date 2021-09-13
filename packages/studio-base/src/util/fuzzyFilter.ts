@@ -13,12 +13,17 @@
 
 // Fuzzy matching: allow filter "fzmg" to match "fuzzy/matching".
 // Score by how early in the string matches appear.
-export default function fuzzyFilter<T>(
-  options: T[],
-  filter: string | undefined,
-  getText: (option: T) => string,
-  sort: boolean = true,
-): T[] {
+export default function fuzzyFilter<T>({
+  options,
+  filter,
+  getText,
+  sort = true,
+}: {
+  options: T[];
+  filter: string | undefined;
+  getText: (option: T) => string;
+  sort?: boolean;
+}): T[] {
   if (filter == undefined || filter === "") {
     return options;
   }

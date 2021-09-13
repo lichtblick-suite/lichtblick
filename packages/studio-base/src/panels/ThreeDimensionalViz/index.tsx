@@ -107,6 +107,7 @@ function BaseRenderer(props: Props): JSX.Element {
     configFollowTf: config.followTf,
   };
   const onFollowChange = useCallback(
+    // eslint-disable-next-line @foxglove/no-boolean-parameters
     (newFollowTf?: string | false, newFollowOrientation?: boolean) => {
       const {
         configCameraState: prevCameraState,

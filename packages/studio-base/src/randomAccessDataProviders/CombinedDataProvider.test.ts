@@ -44,7 +44,7 @@ import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants
 import sendNotification from "@foxglove/studio-base/util/sendNotification";
 
 // reusable providers
-function provider1(initiallyLoaded = false) {
+function provider1({ initiallyLoaded = false }: { initiallyLoaded?: boolean } = {}) {
   return new MemoryDataProvider({
     messages: {
       parsedMessages: [
@@ -676,7 +676,7 @@ describe("CombinedDataProvider", () => {
       });
 
       it("assumes providers that don't report progress in initialize are fully loaded", async () => {
-        const p1 = provider1(true);
+        const p1 = provider1({ initiallyLoaded: true });
         const p2 = provider2();
         const combinedProvider = getCombinedDataProvider([
           { provider: p1, prefix: "/generic_topic" },

@@ -133,6 +133,7 @@ export default class BagDataProvider implements RandomAccessDataProvider {
           logFn: (message) => {
             log.info(`CachedFilelike: ${message}`);
           },
+          // eslint-disable-next-line @foxglove/no-boolean-parameters
           keepReconnectingCallback: (reconnecting: boolean) => {
             extensionPoint.reportMetadataCallback({
               type: "updateReconnecting",
