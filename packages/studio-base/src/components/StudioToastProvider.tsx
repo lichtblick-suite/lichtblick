@@ -3,12 +3,18 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { MessageBar, MessageBarType } from "@fluentui/react";
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useCallback, useEffect, useRef, useState } from "react";
 import { ToastProps, ToastProvider } from "react-toast-notifications";
 
-const StudioToast = (props: ToastProps) => {
+const StudioToast = ({
+  appearance,
+  onDismiss,
+  children,
+  transitionDuration,
+  transitionState,
+}: ToastProps) => {
   const barType = (() => {
-    switch (props.appearance) {
+    switch (appearance) {
       case "info":
         return MessageBarType.info;
       case "success":
@@ -21,21 +27,39 @@ const StudioToast = (props: ToastProps) => {
         return MessageBarType.info;
     }
   })();
+  const onDismissBar = useCallback(() => onDismiss(), [onDismiss]);
+
+  // Adapted from react-toast-notifications ToastElement
+  const [height, setHeight] = useState<string | number>("auto");
+  const elementRef = useRef<HTMLDivElement>(ReactNull);
+  useEffect(() => {
+    if (transitionState === "entered") {
+      setHeight(elementRef.current?.offsetHeight ?? "auto");
+    }
+    if (transitionState === "exiting") {
+      setHeight(0);
+    }
+  }, [transitionState]);
 
   return (
-    <MessageBar
-      messageBarType={barType}
-      isMultiline={false}
-      onDismiss={() => props.onDismiss()}
-      dismissButtonAriaLabel="Close"
-      styles={{
-        text: {
-          alignItems: "center",
-        },
-      }}
-    >
-      {props.children}
-    </MessageBar>
+    <div ref={elementRef} style={{ height, transition: `height ${transitionDuration}ms` }}>
+      <MessageBar
+        messageBarType={barType}
+        isMultiline={false}
+        onDismiss={onDismissBar}
+        dismissButtonAriaLabel="Close"
+        styles={{
+          text: { alignItems: "center" },
+          root: {
+            transition: `transform ${transitionDuration}ms, opacity ${transitionDuration}ms`,
+            transform: transitionState === "entered" ? "" : "scale(0.66)",
+            opacity: transitionState === "entered" ? 1 : 0,
+          },
+        }}
+      >
+        {children}
+      </MessageBar>
+    </div>
   );
 };
 
