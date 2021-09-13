@@ -150,6 +150,13 @@ export default class LayoutManager implements ILayoutManager {
     return this.busyCount > 0;
   }
 
+  isOnline = false;
+
+  setOnline(online: boolean): void {
+    this.isOnline = online;
+    this.emitter.emit("onlinechange");
+  }
+
   constructor({
     local,
     remote,
@@ -220,6 +227,9 @@ export default class LayoutManager implements ILayoutManager {
       if (!this.remote) {
         throw new Error("Shared layouts are not supported without remote layout storage");
       }
+      if (!this.isOnline) {
+        throw new Error("Cannot share a layout while offline");
+      }
       const newLayout = await this.remote.saveNewLayout({
         id: uuidv4() as LayoutID,
         name,
@@ -278,6 +288,9 @@ export default class LayoutManager implements ILayoutManager {
       if (!this.remote) {
         throw new Error("Shared layouts are not supported without remote layout storage");
       }
+      if (!this.isOnline) {
+        throw new Error("Cannot update a shared layout while offline");
+      }
       const updatedBaseline = await updateOrFetchLayout(this.remote, { id, name, savedAt: now });
       const result = await this.local.runExclusive(
         async (local) =>
@@ -325,6 +338,9 @@ export default class LayoutManager implements ILayoutManager {
         throw new Error("Shared layouts are not supported without remote layout storage");
       }
       if (localLayout.syncInfo?.status !== "remotely-deleted") {
+        if (!this.isOnline) {
+          throw new Error("Cannot delete a shared layout while offline");
+        }
         await this.remote.deleteLayout(id);
       }
     }
@@ -359,6 +375,9 @@ export default class LayoutManager implements ILayoutManager {
     if (layoutIsShared(localLayout)) {
       if (!this.remote) {
         throw new Error("Shared layouts are not supported without remote layout storage");
+      }
+      if (!this.isOnline) {
+        throw new Error("Cannot save a shared layout while offline");
       }
       const updatedBaseline = await updateOrFetchLayout(this.remote, {
         id,
@@ -462,7 +481,7 @@ export default class LayoutManager implements ILayoutManager {
   }
 
   private async syncWithRemoteImpl(): Promise<void> {
-    if (!this.remote) {
+    if (!this.remote || !this.isOnline) {
       return;
     }
 

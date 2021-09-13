@@ -16,6 +16,9 @@ export type LayoutManagerEventTypes = {
 
   /** Called when the layout manager starts or stops asynchronous activity.  */
   busychange: () => void;
+
+  /** Called when the layout manager goes online or offline.  */
+  onlinechange: () => void;
 };
 /**
  * The Layout Manager is a high-level interface on top of raw layout storage which maps more closely
@@ -26,7 +29,16 @@ export interface ILayoutManager {
   /** Indicates whether permissions other than "creator_write" are supported. */
   readonly supportsSharing: boolean;
 
+  /** Indicates whether the layout manager is currently performing an async operation. */
   readonly isBusy: boolean;
+
+  /** Indicates whether the layout manager is currently performing an async operation. */
+  readonly isOnline: boolean;
+
+  /**
+   * Inform the layout manager whether it is online or offline (and remote requests may be expected to fail).
+   */
+  setOnline(online: boolean): void;
 
   on<E extends EventNames<LayoutManagerEventTypes>>(
     name: E,

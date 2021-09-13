@@ -33,6 +33,9 @@ export default function LayoutManagerProvider({
 
   const { online = false } = useNetworkState();
   const visibilityState = useVisibilityState();
+  useEffect(() => {
+    layoutManager.setOnline(online);
+  }, [layoutManager, online]);
 
   // Sync periodically when logged in, online, and the app is not hidden
   const enableSyncing = remoteLayoutStorage != undefined && online && visibilityState === "visible";
@@ -92,7 +95,18 @@ export default function LayoutManagerProvider({
     [remoteLayoutStorage],
   );
 
-  const debugging = useShallowMemo({ syncNow: sync, injectEdit, injectRename, injectDelete });
+  const setOnline = useCallback(
+    (newValue: boolean) => layoutManager.setOnline(newValue),
+    [layoutManager],
+  );
+
+  const debugging = useShallowMemo({
+    syncNow: sync,
+    setOnline,
+    injectEdit,
+    injectRename,
+    injectDelete,
+  });
 
   return (
     <LayoutStorageDebuggingContext.Provider

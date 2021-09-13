@@ -8,8 +8,10 @@ import {
   makeStyles,
   Spinner,
   Stack,
+  Toggle,
   useTheme,
 } from "@fluentui/react";
+import { CloudOffline24Filled } from "@fluentui/react-icons";
 import { partition } from "lodash";
 import moment from "moment";
 import path from "path";
@@ -72,11 +74,18 @@ export default function LayoutBrowser({
   const { setSelectedLayoutId } = useCurrentLayoutActions();
 
   const [isBusy, setIsBusy] = useState(layoutManager.isBusy);
+  const [isOnline, setIsOnline] = useState(layoutManager.isOnline);
   useLayoutEffect(() => {
-    const listener = () => setIsBusy(layoutManager.isBusy);
-    listener();
-    layoutManager.on("busychange", listener);
-    return () => layoutManager.off("busychange", listener);
+    const busyListener = () => setIsBusy(layoutManager.isBusy);
+    const onlineListener = () => setIsOnline(layoutManager.isOnline);
+    busyListener();
+    onlineListener();
+    layoutManager.on("busychange", busyListener);
+    layoutManager.on("onlinechange", onlineListener);
+    return () => {
+      layoutManager.off("busychange", busyListener);
+      layoutManager.off("onlinechange", onlineListener);
+    };
   }, [layoutManager]);
 
   const [layouts, reloadLayouts] = useAsyncFn(
@@ -330,6 +339,7 @@ export default function LayoutBrowser({
       noPadding
       trailingItems={[
         (layouts.loading || isBusy) && <Spinner key="spinner" />,
+        !isOnline && <CloudOffline24Filled primaryFill={theme.palette.themeLighterAlt} />,
         <IconButton
           key="add-layout"
           elementRef={createLayoutTooltip.ref}
@@ -430,7 +440,7 @@ export default function LayoutBrowser({
               <Stack disableShrink horizontal tokens={{ childrenGap: theme.spacing.s1 }}>
                 <Stack.Item grow>
                   <DefaultButton
-                    text="Sync now"
+                    text="Sync"
                     onClick={async () => {
                       await layoutDebug.syncNow?.();
                       await reloadLayouts();
@@ -444,6 +454,12 @@ export default function LayoutBrowser({
                     }}
                   />
                 </Stack.Item>
+                <Toggle
+                  checked={layoutManager.isOnline}
+                  onText="Online"
+                  offText="Offline"
+                  onChange={(_, checked) => checked != undefined && layoutDebug.setOnline(checked)}
+                />
               </Stack>
             </Stack.Item>
           </Stack>

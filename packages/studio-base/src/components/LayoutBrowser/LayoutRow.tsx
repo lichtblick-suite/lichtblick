@@ -14,7 +14,7 @@ import {
   ContextualMenu,
 } from "@fluentui/react";
 import cx from "classnames";
-import { useCallback, useContext, useState } from "react";
+import { useCallback, useContext, useLayoutEffect, useState } from "react";
 import { useMountedState } from "react-use";
 
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
@@ -126,13 +126,19 @@ export default function LayoutRow({
   const onMenuDismissed = useCallback(() => setMenuOpen(false), []);
 
   const layoutDebug = useContext(LayoutStorageDebuggingContext);
-  const layoutStorage = useLayoutManager();
+  const layoutManager = useLayoutManager();
   const deletedOnServer = layout.syncInfo?.status === "remotely-deleted";
   const hasModifications = layout.working != undefined;
 
-  // const saveAction = useCallback(() => {
-  //   onSave(layout);
-  // }, [layout, onSave]);
+  const [isOnline, setIsOnline] = useState(layoutManager.isOnline);
+  useLayoutEffect(() => {
+    const onlineListener = () => setIsOnline(layoutManager.isOnline);
+    onlineListener();
+    layoutManager.on("onlinechange", onlineListener);
+    return () => {
+      layoutManager.off("onlinechange", onlineListener);
+    };
+  }, [layoutManager]);
 
   const overwriteAction = useCallback(() => {
     onOverwrite(layout);
@@ -217,11 +223,13 @@ export default function LayoutRow({
       iconProps: { iconName: "Rename" },
       onClick: renameAction,
       ["data-test"]: "rename-layout",
+      disabled: layoutIsShared(layout) && !isOnline,
+      secondaryText: layoutIsShared(layout) && !isOnline ? "Offline" : undefined,
     },
     {
       key: "duplicate",
       text:
-        layoutStorage.supportsSharing && layoutIsShared(layout)
+        layoutManager.supportsSharing && layoutIsShared(layout)
           ? "Make a personal copy"
           : "Make a copy",
       iconProps: { iconName: "Copy" },
@@ -230,12 +238,14 @@ export default function LayoutRow({
       // Duplicate first requires saving or discarding changes
       disabled: hasModifications && layoutIsShared(layout),
     },
-    layoutStorage.supportsSharing &&
+    layoutManager.supportsSharing &&
       !layoutIsShared(layout) && {
         key: "share",
         text: "Share with team",
         iconProps: { iconName: "Share" },
         onClick: shareAction,
+        disabled: !isOnline,
+        secondaryText: !isOnline ? "Offline" : undefined,
       },
     {
       key: "export",
@@ -263,7 +273,8 @@ export default function LayoutRow({
         text: "Save changes",
         iconProps: { iconName: "Upload" },
         onClick: overwriteAction,
-        disabled: deletedOnServer,
+        disabled: deletedOnServer || (layoutIsShared(layout) && !isOnline),
+        secondaryText: layoutIsShared(layout) && !isOnline ? "Offline" : undefined,
       },
       {
         key: "revert",

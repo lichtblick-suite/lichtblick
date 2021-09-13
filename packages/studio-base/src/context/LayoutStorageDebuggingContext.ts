@@ -8,6 +8,7 @@ import { LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 
 type ILayoutStorageDebugging = {
   syncNow: () => Promise<void>;
+  setOnline: (online: boolean) => void;
   injectEdit: (id: LayoutID) => Promise<void>;
   injectRename: (id: LayoutID) => Promise<void>;
   injectDelete: (id: LayoutID) => Promise<void>;
