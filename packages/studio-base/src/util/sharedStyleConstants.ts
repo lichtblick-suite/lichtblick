@@ -94,6 +94,8 @@ export const colors = {
   BACKGROUND: "#121217",
   BACKGROUND_CONTROL: "rgba(247, 247, 243, 0.1)",
   BACKGROUND_CONTROL_SELECTED: "rgba(59, 46, 118, 0.6)",
+  BACKGROUND_DISABLED: "rgba(255, 255, 255, 0.3)",
+  BACKGROUND_FOCUSED: "rgba(255, 255, 255, 0.075)",
 
   TEXT_BRIGHT: "rgba(247, 247, 243, 0.88)",
   TEXT_NORMAL: "rgba(247, 247, 243, 0.77)",

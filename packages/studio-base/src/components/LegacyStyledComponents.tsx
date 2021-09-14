@@ -4,20 +4,16 @@
 
 import styled from "styled-components";
 
-import {
-  fonts,
-  colors as sharedColors,
-  spacing,
-} from "@foxglove/studio-base/util/sharedStyleConstants";
+import { fonts, colors, spacing } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 /**
  * @deprecated The LegacyButton should not be used for new features. use fluentui/react instead
  */
 export const LegacyButton = styled.button`
-  background-color: ${sharedColors.BACKGROUND_CONTROL};
+  background-color: ${colors.BACKGROUND_CONTROL};
   border-radius: 4px;
   border: none;
-  color: ${sharedColors.TEXT_CONTROL};
+  color: ${colors.TEXT_CONTROL};
   font: inherit;
   line-height: 100%;
   font-family: ${fonts.SANS_SERIF};
@@ -32,22 +28,22 @@ export const LegacyButton = styled.button`
     outline: none;
   }
   &.is-danger {
-    background-color: ${sharedColors.RED};
+    background-color: ${colors.RED};
   }
   &.is-warning {
-    background-color: ${sharedColors.BACKGROUND_CONTROL};
+    background-color: ${colors.BACKGROUND_CONTROL};
   }
   &:not(.disabled):not(:disabled):not(.ms-Button):hover {
     cursor: pointer;
-    color: ${sharedColors.TEXT_CONTROL_HOVER};
+    color: ${colors.TEXT_CONTROL_HOVER};
   }
   &.is-primary {
-    background-color: ${sharedColors.GREEN};
-    color: ${sharedColors.BACKGROUND};
+    background-color: ${colors.GREEN};
+    color: ${colors.BACKGROUND};
   }
   &.selected {
-    background-color: ${sharedColors.DARK5};
-    color: ${sharedColors.TEXT_NORMAL};
+    background-color: ${colors.DARK5};
+    color: ${colors.TEXT_NORMAL};
   }
   &.disabled,
   &:disabled {
@@ -66,7 +62,7 @@ export const LegacyInput = styled.input`
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: 4px;
   border: none;
-  color: ${sharedColors.TEXT_CONTROL};
+  color: ${colors.TEXT_CONTROL};
   font: inherit;
   font-family: ${fonts.SANS_SERIF};
   font-feature-settings: "tnum";
@@ -76,8 +72,8 @@ export const LegacyInput = styled.input`
   text-align: left;
 
   &.disabled {
-    color: ${sharedColors.TEXT_INPUT_DISABLED};
-    background-color: rgba(255, 255, 255, 0.3);
+    color: ${colors.TEXT_INPUT_DISABLED};
+    background-color: ${colors.BACKGROUND_DISABLED};
   }
   &:focus {
     background-color: rgba(255, 255, 255, 0.075);
@@ -89,10 +85,10 @@ export const LegacyInput = styled.input`
  * @deprecated The LegacyTextarea should not be used for new features. use fluentui/react instead
  */
 export const LegacyTextarea = styled.textarea`
-  background-color: ${sharedColors.DARK};
+  background-color: ${colors.DARK};
   border-radius: 4px;
-  border: 2px solid ${sharedColors.TEXT_NORMAL};
-  color: ${sharedColors.TEXT_NORMAL};
+  border: 2px solid ${colors.TEXT_NORMAL};
+  color: ${colors.TEXT_NORMAL};
   font: inherit;
   line-height: 1.4;
   font-family: ${fonts.MONOSPACE};
@@ -106,8 +102,8 @@ export const LegacyTextarea = styled.textarea`
     outline: none;
   }
   &.disabled {
-    background-color: rgba(255, 255, 255, 0.3);
-    color: ${sharedColors.TEXT_INPUT_DISABLED};
+    background-color: ${colors.BACKGROUND_DISABLED};
+    color: ${colors.TEXT_INPUT_DISABLED};
   }
 `;
 
@@ -118,7 +114,7 @@ export const LegacySelect = styled.select`
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: 4px;
   border: none;
-  color: ${sharedColors.TEXT_CONTROL};
+  color: ${colors.TEXT_CONTROL};
   font: inherit;
   font-family: ${fonts.SANS_SERIF};
   font-feature-settings: "tnum";
@@ -132,8 +128,8 @@ export const LegacySelect = styled.select`
     background-color: rgba(255, 255, 255, 0.075);
   }
   &.disabled {
-    color: ${sharedColors.TEXT_INPUT_DISABLED};
-    background-color: rgba(255, 255, 255, 0.3);
+    color: ${colors.TEXT_INPUT_DISABLED};
+    background-color: ${colors.BACKGROUND_DISABLED};
   }
 `;
 
@@ -145,7 +141,7 @@ export const LegacyTable = styled.table`
   width: 100%;
 
   th {
-    color: ${sharedColors.TEXT_NORMAL};
+    color: ${colors.TEXT_NORMAL};
 
     tr:first-child & {
       padding-top: 4px;
@@ -154,7 +150,7 @@ export const LegacyTable = styled.table`
   }
   th,
   td {
-    border: 1px solid ${sharedColors.DIVIDER};
+    border: 1px solid ${colors.DIVIDER};
     padding: 0 0.3em;
     line-height: 1.3em;
   }
@@ -166,7 +162,7 @@ export const LegacyTable = styled.table`
 
   tr:hover {
     td {
-      background-color: ${sharedColors.DARK4};
+      background-color: ${colors.DARK4};
       cursor: pointer;
     }
 
