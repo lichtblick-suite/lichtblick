@@ -96,6 +96,7 @@ export default function LayoutManagerProvider({
   );
 
   const setOnline = useCallback(
+    // eslint-disable-next-line @foxglove/no-boolean-parameters
     (newValue: boolean) => layoutManager.setOnline(newValue),
     [layoutManager],
   );

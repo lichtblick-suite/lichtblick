@@ -152,6 +152,7 @@ export default class LayoutManager implements ILayoutManager {
 
   isOnline = false;
 
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
   setOnline(online: boolean): void {
     this.isOnline = online;
     this.emitter.emit("onlinechange");

@@ -13,7 +13,7 @@
 
 import { Link } from "@fluentui/react";
 import { PropsWithChildren, useCallback, useContext } from "react";
-import Markdown, { PluggableList } from "react-markdown";
+import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { CSSProperties } from "styled-components";
 
@@ -46,15 +46,13 @@ export default function TextContent(props: PropsWithChildren<Props>): React.Reac
     [handleLink],
   );
 
-  const rehypePlugins: PluggableList = [];
-  if (allowMarkdownHtml === true) {
-    rehypePlugins.push(rehypeRaw);
-  }
-
   return (
     <div className={styles.root} style={style}>
       {typeof children === "string" ? (
-        <Markdown rehypePlugins={rehypePlugins} components={{ a: linkRenderer }}>
+        <Markdown
+          rehypePlugins={allowMarkdownHtml === true ? [rehypeRaw] : []}
+          components={{ a: linkRenderer }}
+        >
           {children}
         </Markdown>
       ) : (
