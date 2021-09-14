@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mergeStyleSets } from "@fluentui/merge-styles";
 import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
 import cx from "classnames";
 import { flatten, flatMap, partition } from "lodash";
@@ -27,9 +28,9 @@ import useGlobalVariables, {
 import { Topic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 import { getTopicNames, getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
-import styles from "./MessagePathInput.module.scss";
 import { RosPath, RosPrimitive } from "./constants";
 import {
   traverseStructure,
@@ -38,6 +39,44 @@ import {
   validTerminatingStructureItem,
 } from "./messagePathsForDatatype";
 import parseRosPath from "./parseRosPath";
+
+const classes = mergeStyleSets({
+  root: {
+    display: "flex",
+    flex: "1 1 auto",
+    minWidth: 0,
+    justifyContent: "space-between",
+  },
+  container: {
+    flexShrink: 100,
+    minWidth: 20,
+    whiteSpace: "nowrap",
+  },
+  icon: {
+    position: "relative",
+    top: 2,
+    marginLeft: 2,
+  },
+  dropdown: {
+    cursor: "pointer",
+    paddingLeft: 2,
+    color: colors.TEXT_MUTED,
+
+    "&:hover": {
+      color: colors.TEXT_NORMAL,
+    },
+  },
+  dropdownError: {
+    color: colors.RED2,
+  },
+  error: {
+    color: colors.RED2,
+  },
+  tooltip: {
+    maxWidth: 200,
+    lineHeight: "normal",
+  },
+});
 
 // To show an input field with an autocomplete so the user can enter message paths, use:
 //
@@ -416,9 +455,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     (autocompleteType != undefined && !disableAutocomplete && path.length > 0);
 
   return (
-    <div
-      style={{ display: "flex", flex: "1 1 auto", minWidth: 0, justifyContent: "space-between" }}
-    >
+    <div className={classes.root}>
       <Autocomplete
         items={orderedAutocompleteItems}
         filterText={autocompleteFilterText}
@@ -439,7 +476,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
       />
 
       {timestampMethod != undefined && (
-        <div className={styles.timestampMethodDropdownContainer}>
+        <div className={classes.container}>
           <Dropdown
             onChange={onTimestampMethodChange}
             value={timestampMethod}
@@ -447,13 +484,12 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
               <Tooltip contents="Timestamp used for x-axis" placement="top">
                 <div
                   className={cx({
-                    [styles.timestampMethodDropdown!]: true,
-                    [styles.timestampMethodDropdownError!]:
-                      timestampMethod === "headerStamp" && noHeaderStamp,
+                    [classes.dropdown]: true,
+                    [classes.dropdownError]: timestampMethod === "headerStamp" && noHeaderStamp,
                   })}
                 >
                   {timestampMethod === "receiveTime" ? "(receive time)" : "(header.stamp)"}
-                  <Icon style={{ position: "relative", top: 2, marginLeft: 2 }}>
+                  <Icon className={classes.icon}>
                     <MenuDownIcon />
                   </Icon>
                 </div>
@@ -483,24 +519,16 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
               }
               placement="bottom"
               contents={
-                <div style={{ maxWidth: 200, lineHeight: "normal" }}>
+                <div className={classes.tooltip}>
                   Value of the header.stamp field. Can mean different things for different topics.
                   Be sure you know what this value means before using it.
                   {noHeaderStamp && (
-                    <div className={styles.timestampItemError}>
-                      (header.stamp is not present in this topic)
-                    </div>
+                    <div className={classes.error}>(header.stamp is not present in this topic)</div>
                   )}
                 </div>
               }
             >
-              <span
-                className={cx({
-                  [styles.timestampItemError!]: noHeaderStamp,
-                })}
-              >
-                header.stamp
-              </span>
+              <span className={cx({ [classes.error]: noHeaderStamp })}>header.stamp</span>
             </Tooltip>
           </Dropdown>
         </div>
