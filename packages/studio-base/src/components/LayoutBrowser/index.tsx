@@ -35,6 +35,7 @@ import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutS
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
+import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
 import { defaultPlaybackConfig } from "@foxglove/studio-base/providers/CurrentLayoutProvider/reducers";
 import { AppEvent } from "@foxglove/studio-base/services/IAnalytics";
@@ -68,6 +69,7 @@ export default function LayoutBrowser({
   const analytics = useAnalytics();
   const { openAccountSettings } = useWorkspace();
   const styles = useStyles();
+  const confirm = useConfirm();
   const openUnsavedChangesPrompt = useUnsavedChangesPrompt();
 
   const currentLayoutId = useCurrentLayoutSelector((state) => state.selectedLayout?.id);
@@ -114,24 +116,6 @@ export default function LayoutBrowser({
     void reloadLayouts();
   }, [reloadLayouts]);
 
-  const onOverwriteLayout = useCallbackWithToast(
-    async (item: Layout) => {
-      // CurrentLayoutProvider automatically updates in its layout change listener
-      await layoutManager.overwriteLayout({ id: item.id });
-      void analytics.logEvent(AppEvent.LAYOUT_OVERWRITE, { permission: item.permission });
-    },
-    [analytics, layoutManager],
-  );
-
-  const onRevertLayout = useCallbackWithToast(
-    async (item: Layout) => {
-      // CurrentLayoutProvider automatically updates in its layout change listener
-      await layoutManager.revertLayout({ id: item.id });
-      void analytics.logEvent(AppEvent.LAYOUT_REVERT, { permission: item.permission });
-    },
-    [analytics, layoutManager],
-  );
-
   /**
    * Don't allow the user to switch away from a personal layout if they have unsaved changes. This
    * currently has a race condition because of the throttled save in CurrentLayoutProvider -- it's
@@ -151,10 +135,18 @@ export default function LayoutBrowser({
         case "cancel":
           return false;
         case "discard":
-          await onRevertLayout(currentLayout);
+          await layoutManager.revertLayout({ id: currentLayout.id });
+          void analytics.logEvent(AppEvent.LAYOUT_REVERT, {
+            permission: currentLayout.permission,
+            context: "UnsavedChangesPrompt",
+          });
           return true;
         case "overwrite":
-          await onOverwriteLayout(currentLayout);
+          await layoutManager.overwriteLayout({ id: currentLayout.id });
+          void analytics.logEvent(AppEvent.LAYOUT_OVERWRITE, {
+            permission: currentLayout.permission,
+            context: "UnsavedChangesPrompt",
+          });
           return true;
         case "makePersonal":
           // We don't use onMakePersonalCopy() here because it might need to prompt for unsaved changes, and we don't want to select the newly created layout
@@ -165,20 +157,14 @@ export default function LayoutBrowser({
           void analytics.logEvent(AppEvent.LAYOUT_MAKE_PERSONAL_COPY, {
             permission: currentLayout.permission,
             syncStatus: currentLayout.syncInfo?.status,
+            context: "UnsavedChangesPrompt",
           });
           return true;
       }
       return false;
     }
     return true;
-  }, [
-    analytics,
-    currentLayoutId,
-    layoutManager,
-    onOverwriteLayout,
-    onRevertLayout,
-    openUnsavedChangesPrompt,
-  ]);
+  }, [analytics, currentLayoutId, layoutManager, openUnsavedChangesPrompt]);
 
   const onSelectLayout = useCallbackWithToast(
     async (item: Layout, { selectedViaClick = false }: { selectedViaClick?: boolean } = {}) => {
@@ -288,6 +274,44 @@ export default function LayoutBrowser({
       }
     },
     [analytics, layoutManager, onSelectLayout, prompt],
+  );
+
+  const onOverwriteLayout = useCallbackWithToast(
+    async (item: Layout) => {
+      if (layoutIsShared(item)) {
+        const response = await confirm({
+          title: `Update “${item.name}”?`,
+          prompt:
+            "Your changes will overwrite this layout for all team members. This cannot be undone.",
+          ok: "Save",
+        });
+        if (response !== "ok") {
+          return;
+        }
+      }
+      await layoutManager.overwriteLayout({ id: item.id });
+      void analytics.logEvent(AppEvent.LAYOUT_OVERWRITE, { permission: item.permission });
+    },
+    [analytics, confirm, layoutManager],
+  );
+
+  const onRevertLayout = useCallbackWithToast(
+    async (item: Layout) => {
+      if (layoutIsShared(item)) {
+        const response = await confirm({
+          title: `Revert “${item.name}”?`,
+          prompt: "Your changes will be permantly deleted. This cannot be undone.",
+          ok: "Discard changes",
+          variant: "danger",
+        });
+        if (response !== "ok") {
+          return;
+        }
+      }
+      await layoutManager.revertLayout({ id: item.id });
+      void analytics.logEvent(AppEvent.LAYOUT_REVERT, { permission: item.permission });
+    },
+    [analytics, confirm, layoutManager],
   );
 
   const onMakePersonalCopy = useCallbackWithToast(
