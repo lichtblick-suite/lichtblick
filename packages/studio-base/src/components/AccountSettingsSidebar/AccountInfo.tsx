@@ -12,11 +12,13 @@ import {
   Text,
   useTheme,
 } from "@fluentui/react";
+import { useCallback } from "react";
 import { useToasts } from "react-toast-notifications";
 import { useAsyncFn } from "react-use";
 
 import Logger from "@foxglove/log";
 import { useCurrentUser, User } from "@foxglove/studio-base/context/CurrentUserContext";
+import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 
 const log = Logger.getLogger(__filename);
 
@@ -24,8 +26,9 @@ export default function AccountInfo(props: { currentUser?: User }): JSX.Element 
   const theme = useTheme();
   const { signOut } = useCurrentUser();
   const { addToast } = useToasts();
+  const confirm = useConfirm();
 
-  const [{ loading }, onSignoutClick] = useAsyncFn(async () => {
+  const [{ loading }, beginSignOut] = useAsyncFn(async () => {
     try {
       await signOut();
     } catch (error) {
@@ -33,6 +36,17 @@ export default function AccountInfo(props: { currentUser?: User }): JSX.Element 
       addToast(error.toString(), { appearance: "error" });
     }
   }, [addToast, signOut]);
+
+  const onSignoutClick = useCallback(() => {
+    void confirm({
+      title: "Are you sure you want to sign out?",
+      ok: "Sign out",
+    }).then((response) => {
+      if (response === "ok") {
+        void beginSignOut();
+      }
+    });
+  }, [beginSignOut, confirm]);
 
   if (!props.currentUser) {
     return <></>;
