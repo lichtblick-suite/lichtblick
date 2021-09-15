@@ -54,6 +54,13 @@ const features: Feature[] = [
     description: <>Enable team layout sharing when signed in to Foxglove Studio.</>,
   },
 ];
+if (process.env.NODE_ENV === "development") {
+  features.push({
+    key: AppSetting.ENABLE_LAYOUT_DEBUGGING,
+    name: "Layout debugging",
+    description: <>Show extra controls for developing and debugging layout storage.</>,
+  });
+}
 
 function ExperimentalFeatureItem(props: { feature: Feature }) {
   const theme = useTheme();

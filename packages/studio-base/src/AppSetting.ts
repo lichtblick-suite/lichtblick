@@ -11,6 +11,7 @@ export enum AppSetting {
   UNLIMITED_MEMORY_CACHE = "experimental.unlimited-memory-cache",
   SHOW_DEBUG_PANELS = "showDebugPanels",
   ENABLE_CONSOLE_API_LAYOUTS = "enableConsoleApiLayouts",
+  ENABLE_LAYOUT_DEBUGGING = "enableLayoutDebugging",
   ENABLE_DRAWING_POLYGONS = "enableDrawingPolygons",
   ENABLE_LEGACY_PLOT_PANEL = "enableLegacyPlotPanel",
 }

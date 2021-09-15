@@ -6,10 +6,12 @@ import { useCallback, useEffect, useMemo } from "react";
 import { useInterval, useNetworkState } from "react-use";
 
 import { useShallowMemo, useVisibilityState } from "@foxglove/hooks";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import LayoutManagerContext from "@foxglove/studio-base/context/LayoutManagerContext";
 import { useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
 import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutStorageDebuggingContext";
 import { useRemoteLayoutStorage } from "@foxglove/studio-base/context/RemoteLayoutStorageContext";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
 import { ISO8601Timestamp, LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 import LayoutManager from "@foxglove/studio-base/services/LayoutManager";
@@ -21,6 +23,9 @@ export default function LayoutManagerProvider({
 }: React.PropsWithChildren<unknown>): JSX.Element {
   const layoutStorage = useLayoutStorage();
   const remoteLayoutStorage = useRemoteLayoutStorage();
+  const [enableLayoutDebugging = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_LAYOUT_DEBUGGING,
+  );
 
   const layoutManager = useMemo(
     () => new LayoutManager({ local: layoutStorage, remote: remoteLayoutStorage }),
@@ -111,7 +116,11 @@ export default function LayoutManagerProvider({
 
   return (
     <LayoutStorageDebuggingContext.Provider
-      value={process.env.NODE_ENV !== "production" && remoteLayoutStorage ? debugging : undefined}
+      value={
+        process.env.NODE_ENV !== "production" && enableLayoutDebugging && remoteLayoutStorage
+          ? debugging
+          : undefined
+      }
     >
       <LayoutManagerContext.Provider value={layoutManager}>
         {children}
