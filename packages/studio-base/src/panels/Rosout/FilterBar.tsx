@@ -20,13 +20,14 @@ import {
   useTheme,
 } from "@fluentui/react";
 import ClipboardOutlineIcon from "@mdi/svg/svg/clipboard-outline.svg";
+import cx from "classnames";
 
 import Icon from "@foxglove/studio-base/components/Icon";
+import logStyles from "@foxglove/studio-base/panels/Rosout/logStyles";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import clipboard from "@foxglove/studio-base/util/clipboard";
 
 import LevelToString, { KNOWN_LOG_LEVELS } from "./LevelToString";
-import logStyle from "./LogLevelColors.module.scss";
 import { RosgraphMsgs$Log } from "./types";
 
 // Create the log level options nodes once since they don't change per render.
@@ -54,9 +55,19 @@ function renderOption(option: ISelectableOption | undefined) {
   if (!option) {
     return ReactNull;
   }
-  const className = logStyle[LevelToString(option.key as number).toLowerCase()];
+  const strLevel = LevelToString(option.key as number);
+
   return (
-    <div key={option.key} className={className}>
+    <div
+      key={option.key}
+      className={cx({
+        [logStyles.fatal]: strLevel === "FATAL",
+        [logStyles.error]: strLevel === "ERROR",
+        [logStyles.warn]: strLevel === "WARN",
+        [logStyles.info]: strLevel === "INFO",
+        [logStyles.debug]: strLevel === "DEBUG",
+      })}
+    >
       {option.text}
     </div>
   );
