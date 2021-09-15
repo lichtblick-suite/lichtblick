@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mergeStyleSets } from "@fluentui/merge-styles";
 import PinIcon from "@mdi/svg/svg/pin.svg";
 import cx from "classnames";
 import { compact } from "lodash";
@@ -27,14 +28,14 @@ import Panel from "@foxglove/studio-base/components/Panel";
 import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import TopicToRenderMenu from "@foxglove/studio-base/components/TopicToRenderMenu";
+import { Config as DiagnosticStatusConfig } from "@foxglove/studio-base/panels/diagnostics/DiagnosticStatusPanel";
+import helpContent from "@foxglove/studio-base/panels/diagnostics/DiagnosticSummary.help.md";
+import useDiagnostics from "@foxglove/studio-base/panels/diagnostics/useDiagnostics";
 import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
 import { DIAGNOSTIC_TOPIC } from "@foxglove/studio-base/util/globalConstants";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import toggle from "@foxglove/studio-base/util/toggle";
 
-import { Config as DiagnosticStatusConfig } from "./DiagnosticStatusPanel";
-import helpContent from "./DiagnosticSummary.help.md";
-import styles from "./DiagnosticSummary.module.scss";
-import useDiagnostics from "./useDiagnostics";
 import {
   DiagnosticId,
   DiagnosticInfo,
@@ -49,6 +50,62 @@ type NodeRowProps = {
   onClick: (info: DiagnosticInfo) => void;
   onClickPin: (info: DiagnosticInfo) => void;
 };
+
+const classes = mergeStyleSets({
+  panel: {
+    backgroundColor: colors.DARK,
+  },
+  ok: {
+    color: colors.GREEN2,
+  },
+  warn: {
+    color: colors.ORANGE2,
+  },
+  error: {
+    color: colors.RED2,
+  },
+  stale: {
+    color: colors.TEXT_MUTED,
+  },
+  pinIcon: {
+    marginRight: 4,
+    marginLeft: 4,
+    verticalAlign: "middle",
+    visibility: "hidden",
+
+    svg: {
+      fontSize: 16,
+      position: "relative",
+      top: -1,
+    },
+  },
+  pinIconActive: {
+    visibility: "visible",
+  },
+  nodeRow: {
+    textDecoration: "none",
+    cursor: "pointer",
+    color: colors.TEXT_CONTROL,
+    userSelect: "none",
+    display: "flex",
+    alignItems: "center",
+    padding: 0,
+    lineHeight: "24px",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+
+    "&:hover": {
+      color: "white",
+      backgroundColor: colors.DARK5,
+
+      "> .icon": {
+        visibility: "visible",
+      },
+    },
+  },
+});
+
 class NodeRow extends React.PureComponent<NodeRowProps> {
   onClick = () => {
     const { info, onClick } = this.props;
@@ -64,21 +121,28 @@ class NodeRow extends React.PureComponent<NodeRowProps> {
     const levelName = LEVEL_NAMES[info.status.level];
 
     return (
-      <div
-        className={cx(levelName != undefined ? styles[levelName] : undefined, styles.nodeRow)}
-        onClick={this.onClick}
-        data-test-diagnostic-row
-      >
+      <div className={classes.nodeRow} onClick={this.onClick} data-test-diagnostic-row>
         <Icon
           fade={!isPinned}
           onClick={this.onClickPin}
-          className={cx(styles.pinIcon, { [styles.pinned!]: isPinned })}
+          className={cx(classes.pinIcon, {
+            [classes.pinIconActive]: isPinned,
+          })}
         >
           <PinIcon />
         </Icon>
-        <span>{info.displayName}</span>
-        {" – "}
-        <span className={styles.message}>{info.status.message}</span>
+        <div>{info.displayName}</div>
+        &nbsp;–&nbsp;
+        <div
+          className={cx({
+            [classes.ok]: levelName === "ok",
+            [classes.warn]: levelName === "warn",
+            [classes.error]: levelName === "error",
+            [classes.stale]: levelName === "stale",
+          })}
+        >
+          {info.status.message}
+        </div>
       </div>
     );
   }
@@ -215,7 +279,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
   }, [diagnostics, hardwareIdFilter, pinnedIds, renderRow, sortByLevel, topicToRender]);
 
   return (
-    <Flex col className={styles.panel}>
+    <Flex col className={classes.panel}>
       <PanelToolbar helpContent={helpContent} additionalIcons={topicToRenderMenu}>
         {hardwareFilter}
       </PanelToolbar>

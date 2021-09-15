@@ -137,7 +137,7 @@ export const LegacySelect = styled.select`
  * @deprecated The LegacyTable should not be used for new features. use fluentui/react instead
  */
 export const LegacyTable = styled.table`
-  border: "none";
+  border: none;
   width: 100%;
 
   th {

@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mergeStyleSets } from "@fluentui/merge-styles";
 import ChartLineVariantIcon from "@mdi/svg/svg/chart-line-variant.svg";
 import DotsHorizontalIcon from "@mdi/svg/svg/dots-horizontal.svg";
 import ChevronDownIcon from "@mdi/svg/svg/unfold-less-horizontal.svg";
@@ -20,11 +21,9 @@ import { clamp } from "lodash";
 import { ReactElement } from "react";
 import { createSelector } from "reselect";
 import sanitizeHtml from "sanitize-html";
-import styled from "styled-components";
 
 import Flex from "@foxglove/studio-base/components/Flex";
 import Icon from "@foxglove/studio-base/components/Icon";
-import { LegacyTable } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import { openSiblingPlotPanel } from "@foxglove/studio-base/panels/Plot";
 import { openSiblingStateTransitionsPanel } from "@foxglove/studio-base/panels/StateTransitions";
@@ -32,7 +31,6 @@ import { Config } from "@foxglove/studio-base/panels/diagnostics/DiagnosticStatu
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-import style from "./DiagnosticStatus.module.scss";
 import { LEVEL_NAMES, DiagnosticInfo, KeyValue, DiagnosticStatusMessage } from "./util";
 
 const MIN_SPLIT_FRACTION = 0.1;
@@ -47,53 +45,94 @@ type Props = {
   saveConfig: (arg0: Partial<Config>) => void;
 };
 
-const ResizeHandle = styled.div.attrs<{ splitFraction: number }>(({ splitFraction }) => ({
-  style: { left: `${100 * splitFraction}%` },
-}))<{ splitFraction: number }>`
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 12px;
-  margin-left: -6px;
-  cursor: col-resize;
-  :hover,
-  :active,
-  :focus {
-    outline: none;
-    ::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 6px;
-      margin-left: -2px;
-      width: 4px;
-      background-color: ${colors.DIVIDER};
-    }
-  }
-`;
+const classes = mergeStyleSets({
+  table: {
+    tableLayout: "fixed",
+    width: "100%",
+    lineHeight: "1.3em",
+    whiteSpace: "pre-line",
+    overflowWrap: "break-word",
+    textAlign: "left",
+    border: "none",
 
-const KeyValueTable = styled(LegacyTable)`
-  table-layout: fixed;
-  width: 100%;
-  line-height: 1.3em;
-  white-space: pre-line;
-  overflow-wrap: break-word;
-  text-align: left;
-  tr:nth-child(odd) {
-    background-color: #222;
-  }
-  td {
-    border: none;
-    padding: 1px 3px;
-  }
-  /* nested table styles */
-  table {
-    th {
-      font-weight: bold;
-    }
-  }
-`;
+    td: {
+      border: "none",
+      padding: "1px 3px",
+    },
+    "td, th": {
+      lineHeight: "1.3em",
+    },
+  },
+  name: {
+    fontWeight: "bold",
+  },
+  sectionHeader: {
+    color: colors.HIGHLIGHT,
+    textAlign: "center !important",
+    fontSize: "1.2em",
+    padding: 4,
+    cursor: "pointer",
+    border: "none",
+  },
+
+  // Status classes
+  ok: { color: `${colors.GREEN2} !important` },
+  warn: { color: `${colors.ORANGE2} !important` },
+  error: { color: `${colors.RED2} !important` },
+  stale: { color: `${colors.GRAY2} !important` },
+  unknown: { color: `${colors.RED2} !important` },
+
+  collapsedSection: {
+    textAlign: "center",
+    color: colors.RED2,
+  },
+  interactiveRow: {
+    cursor: "pointer",
+
+    ":nth-child(odd)": {
+      backgroundColor: colors.DARK3,
+    },
+    ":hover": {
+      backgroundColor: colors.DARK4,
+
+      ".icon": {
+        visibility: "visible",
+      },
+    },
+  },
+  icon: {
+    color: "white",
+    marginLeft: 4,
+    visibility: "hidden",
+
+    "> svg": {
+      verticalAlign: -2,
+    },
+  },
+  resizeHandle: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    width: 12,
+    marginLeft: -6,
+    cursor: "col-resize",
+
+    ":hover, :active, :focus": {
+      outline: "none",
+
+      "::after": {
+        content: '""',
+        position: "absolute",
+        top: 0,
+        bottom: 0,
+        left: 6,
+        marginLeft: -2,
+        width: 4,
+        backgroundColor: colors.DIVIDER,
+      },
+    },
+  },
+});
 
 type FormattedKeyValue = {
   key: string;
@@ -208,16 +247,15 @@ class DiagnosticStatus extends React.Component<Props, unknown> {
   }
 
   _renderKeyValueCell(
-    _cls: string,
     html: { __html: string } | undefined,
     str: string,
     openPlotPanelIconElem?: React.ReactNode,
   ): ReactElement {
     if (html) {
-      return <td className={style.valueCell} dangerouslySetInnerHTML={html} />;
+      return <td dangerouslySetInnerHTML={html} />;
     }
     return (
-      <td className={style.valueCell}>
+      <td>
         {str ? str : "\xa0"}
         {openPlotPanelIconElem}
       </td>
@@ -239,8 +277,8 @@ class DiagnosticStatus extends React.Component<Props, unknown> {
         );
         ellipsisShown = false;
         return (
-          <tr key={idx} className={style.section} onClick={() => this._onClickSection(sectionObj)}>
-            <th colSpan={2}>
+          <tr key={idx} onClick={() => this._onClickSection(sectionObj)}>
+            <th className={classes.sectionHeader} colSpan={2}>
               {key}
               {value}
             </th>
@@ -253,7 +291,7 @@ class DiagnosticStatus extends React.Component<Props, unknown> {
         ellipsisShown = true;
         return (
           <tr key={idx}>
-            <td colSpan={2} className={style.collapsedSection}>
+            <td colSpan={2} className={classes.collapsedSection}>
               &hellip;
             </td>
           </tr>
@@ -268,7 +306,7 @@ class DiagnosticStatus extends React.Component<Props, unknown> {
           <Icon
             fade
             dataTest="open-plot-icon"
-            className={style.plotIcon}
+            className={classes.icon}
             onClick={() => openSiblingPlotPanel(openSiblingPanel, valuePath)}
             tooltip="Line chart"
           >
@@ -277,7 +315,7 @@ class DiagnosticStatus extends React.Component<Props, unknown> {
         ) : (
           <Icon
             fade
-            className={style.stateTransitionsIcon}
+            className={classes.icon}
             onClick={() => openSiblingStateTransitionsPanel(openSiblingPanel, valuePath)}
             tooltip="State Transitions"
           >
@@ -286,14 +324,9 @@ class DiagnosticStatus extends React.Component<Props, unknown> {
         );
       }
       return (
-        <tr key={idx} className={style.row}>
-          {this._renderKeyValueCell(style.keyCell as string, keyHtml, key)}
-          {this._renderKeyValueCell(
-            style.valueCell as string,
-            valueHtml,
-            value,
-            openPlotPanelIconElem,
-          )}
+        <tr className={classes.interactiveRow} key={idx}>
+          {this._renderKeyValueCell(keyHtml, key)}
+          {this._renderKeyValueCell(valueHtml, value, openPlotPanelIconElem)}
         </tr>
       );
     });
@@ -334,24 +367,35 @@ class DiagnosticStatus extends React.Component<Props, unknown> {
       openSiblingPanel,
       topicToRender,
     } = this.props;
-    const statusClass = style[`status-${LEVEL_NAMES[status.level] ?? "unknown"}`];
+    const statusClass = cx({
+      [classes.ok]: LEVEL_NAMES[status.level] === "ok",
+      [classes.error]: LEVEL_NAMES[status.level] === "error",
+      [classes.warn]: LEVEL_NAMES[status.level] === "warn",
+      [classes.stale]: LEVEL_NAMES[status.level] === "stale",
+      [classes.unknown]: LEVEL_NAMES[status.level] === "unknown",
+    });
 
     return (
       <div>
-        <ResizeHandle
-          data-test-resizehandle
-          splitFraction={splitFraction}
+        <div
+          className={classes.resizeHandle}
+          style={{ left: `${100 * splitFraction}%` }}
           onMouseDown={this._resizeMouseDown}
+          data-test-resizehandle
         />
-        <KeyValueTable ref={this._tableRef}>
+        <table className={classes.table} ref={this._tableRef}>
           <tbody>
             {/* Use a dummy row to fix the column widths */}
             <tr style={{ height: 0 }}>
               <td style={{ padding: 0, width: `${100 * splitFraction}%`, borderRight: "none" }} />
               <td style={{ padding: 0, borderLeft: "none" }} />
             </tr>
-            <tr className={cx(style.section, statusClass)}>
-              <th data-test="DiagnosticStatus-display-name" colSpan={2}>
+            <tr>
+              <th
+                className={cx(classes.sectionHeader, statusClass)}
+                data-test="DiagnosticStatus-display-name"
+                colSpan={2}
+              >
                 <Tooltip
                   placement="bottom"
                   contents={
@@ -366,14 +410,14 @@ class DiagnosticStatus extends React.Component<Props, unknown> {
                 </Tooltip>
               </th>
             </tr>
-            <tr className={cx(style.row, statusClass)}>
+            <tr className={cx(classes.interactiveRow, statusClass)}>
               <td colSpan={2}>
                 <Flex style={{ justifyContent: "space-between" }}>
                   <div>
                     {status.message}{" "}
                     <Icon
                       fade
-                      className={style.stateTransitionsIcon}
+                      className={classes.icon}
                       onClick={() =>
                         openSiblingStateTransitionsPanel(
                           openSiblingPanel,
@@ -413,7 +457,7 @@ class DiagnosticStatus extends React.Component<Props, unknown> {
             </tr>
             {this._renderKeyValueSections()}
           </tbody>
-        </KeyValueTable>
+        </table>
       </div>
     );
   }
