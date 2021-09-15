@@ -247,6 +247,7 @@ export function Blocks(): JSX.Element {
           paths: [
             { value: "/some/topic/with/state.state", timestampMethod: "receiveTime" },
             { value: "/blocks.state", timestampMethod: "receiveTime" },
+            { value: "/blocks.state", timestampMethod: "receiveTime" },
           ],
         }}
       />

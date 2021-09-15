@@ -270,8 +270,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
       };
     }
 
-    let pathIndex = 0;
-    for (const path of paths) {
+    paths.forEach((path, pathIndex) => {
       // y axis values are set based on the path we are rendering
       // negative makes each path render below the previous
       const y = (pathIndex + 1) * 6 * -1;
@@ -296,7 +295,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
       // display the messages from blocks.
       const haveBlocksForPath = blocksForPath.some((item) => item != undefined);
       if (haveBlocksForPath) {
-        continue;
+        return;
       }
 
       const items = itemsByPath[path.value];
@@ -311,9 +310,7 @@ const StateTransitions = React.memo(function StateTransitions(props: Props) {
         outDatasets.push(...newDataSets);
         outTooltips.push(...newTooltips);
       }
-
-      ++pathIndex;
-    }
+    });
 
     return {
       datasets: outDatasets,
