@@ -120,12 +120,20 @@ export function migrateLayout(value: unknown): Layout {
     }
   }
 
+  function migrateData(data: PanelsState): PanelsState {
+    const result = { ...data, configById: data.configById ?? data.savedProps ?? {} };
+    delete result.savedProps;
+    return result;
+  }
+
   return {
     id: layout.id,
     name: layout.name ?? `Unnamed (${now})`,
     permission: layout.permission ?? "creator_write",
-    working: layout.working,
-    baseline,
+    working: layout.working
+      ? { ...layout.working, data: migrateData(layout.working.data) }
+      : undefined,
+    baseline: { ...baseline, data: migrateData(baseline.data) },
     syncInfo: layout.syncInfo,
   };
 }
