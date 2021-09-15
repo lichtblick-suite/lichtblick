@@ -342,22 +342,37 @@ function Chart(props: Props): JSX.Element {
     [rpcSend],
   );
 
+  // Since hover events are handled via rpc, we might get a response back when we've
+  // already hovered away from the chart. We gate calling onHover by whether the mouse is still
+  // present on the component
+  const mousePresentRef = useRef(false);
+
   const { onHover } = props;
   const onMouseMove = useCallback(
     async (event: React.MouseEvent<HTMLCanvasElement>) => {
-      if (onHover) {
+      if (onHover && mousePresentRef.current) {
         const elements = await rpcSend<RpcElement[]>("getElementsAtEvent", {
           event: rpcMouseEvent(event),
         });
 
-        if (!isMounted()) {
+        if (!isMounted() || !mousePresentRef.current) {
           return;
         }
+
         onHover(elements);
       }
     },
     [onHover, rpcSend, isMounted],
   );
+
+  const onMouseEnter = useCallback(() => {
+    mousePresentRef.current = true;
+  }, []);
+
+  const onMouseLeave = useCallback(() => {
+    mousePresentRef.current = false;
+    onHover?.([]);
+  }, [onHover]);
 
   const onClick = useCallback(
     async (event: React.MouseEvent<HTMLCanvasElement>): Promise<void> => {
@@ -418,6 +433,8 @@ function Chart(props: Props): JSX.Element {
       onClick={onClick}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      onMouseEnter={onMouseEnter}
       onMouseUp={onMouseUp}
       style={{ width, height }}
     />

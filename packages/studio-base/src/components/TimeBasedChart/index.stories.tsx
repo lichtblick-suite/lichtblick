@@ -169,6 +169,8 @@ export function CleansUpTooltipOnUnmount(_args: unknown): JSX.Element | ReactNul
     const { top, left } = canvas!.getBoundingClientRect();
     // wait for chart to render before triggering tooltip
     let tooltip: Element | undefined;
+
+    TestUtils.Simulate.mouseEnter(canvas!);
     for (let i = 0; !tooltip && i < 20; i++) {
       TestUtils.Simulate.mouseMove(canvas!, { clientX: 333 + left, clientY: 650 + top });
       await new Promise((resolve) => setTimeout(resolve, 100));
