@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { PropsWithChildren, useCallback, useMemo } from "react";
+import { PropsWithChildren, useCallback, useMemo, useState } from "react";
 import { useAsync, useLocalStorage } from "react-use";
 
 import { useShallowMemo } from "@foxglove/hooks";
@@ -39,6 +39,11 @@ export default function ConsoleApiCurrentUserProvider(
     },
   );
 
+  // If we don't have a cached user, the first loading pass prevents rendering the provider and
+  // children. Future loading effects don't prevent rendering the provider to avoid flashing the
+  // screen.
+  const [completedFirstLoad, setCompletedFirstLoad] = useState(cachedCurrentUser != undefined);
+
   // When we have a valid token, we need to set the api auth header so child components can make
   // authenticated requests
   useMemo(() => {
@@ -48,7 +53,7 @@ export default function ConsoleApiCurrentUserProvider(
     api.setAuthHeader(`Bearer ${bearerToken}`);
   }, [api, bearerToken]);
 
-  const { loading } = useAsync(async () => {
+  useAsync(async () => {
     try {
       if (!bearerToken) {
         return undefined;
@@ -59,6 +64,8 @@ export default function ConsoleApiCurrentUserProvider(
     } catch (error) {
       log.error(error);
       return undefined;
+    } finally {
+      setCompletedFirstLoad(true);
     }
   }, [api, bearerToken, setCachedCurrentUser]);
 
@@ -70,8 +77,7 @@ export default function ConsoleApiCurrentUserProvider(
 
   const value = useShallowMemo({ currentUser: cachedCurrentUser, setBearerToken, signOut });
 
-  // Wait for first time loading to complete
-  if (!cachedCurrentUser && loading) {
+  if (!completedFirstLoad) {
     return <></>;
   }
 
