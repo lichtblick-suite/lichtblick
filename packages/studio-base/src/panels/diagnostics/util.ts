@@ -40,6 +40,8 @@ export const LEVEL_NAMES: { [key: number]: string } = {
   3: "stale",
 };
 
+export const KNOWN_LEVELS = [0, 1, 2, 3];
+
 interface ToString {
   toString(): string;
 }
