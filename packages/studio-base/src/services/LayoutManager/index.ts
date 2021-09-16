@@ -443,7 +443,7 @@ export default class LayoutManager implements ILayoutManager {
       const newLayout = await local.put({
         id: uuidv4() as LayoutID,
         name,
-        permission: "creator_write",
+        permission: "CREATOR_WRITE",
         baseline: { data: layout.working?.data ?? layout.baseline.data, savedAt: now },
         working: undefined,
         syncInfo: { status: "new", lastRemoteSavedAt: now },

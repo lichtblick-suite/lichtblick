@@ -177,7 +177,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     const newLayout = await layoutStorage.saveNewLayout({
       name: welcomeLayout.name,
       data: welcomeLayout.data,
-      permission: "creator_write",
+      permission: "CREATOR_WRITE",
     });
     if (isMounted()) {
       setSelectedLayoutId(newLayout.id);

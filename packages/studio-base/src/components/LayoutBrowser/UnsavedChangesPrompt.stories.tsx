@@ -16,7 +16,7 @@ export default {
 const dummyLayout: Layout = {
   id: "dummy-id" as LayoutID,
   name: "Example layout",
-  permission: "org_write",
+  permission: "ORG_WRITE",
   baseline: {
     savedAt: new Date(10).toISOString() as ISO8601Timestamp,
     data: {

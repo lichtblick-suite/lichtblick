@@ -22,7 +22,7 @@ export default function SigninForm(): JSX.Element {
     (session?: Session) => {
       setModalOpen(false);
       if (session != undefined) {
-        setBearerToken(session.bearer_token);
+        setBearerToken(session.bearerToken);
       }
     },
     [setBearerToken],

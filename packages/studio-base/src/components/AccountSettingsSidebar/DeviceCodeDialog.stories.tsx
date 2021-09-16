@@ -17,8 +17,8 @@ class FakeConsoleApi extends ConsoleApi {
 
   override async token(): ReturnType<ConsoleApi["token"]> {
     return {
-      access_token: "foo",
-      id_token: "bar",
+      accessToken: "foo",
+      idToken: "bar",
     };
   }
 
@@ -58,11 +58,11 @@ export function ShowDeviceCode(): JSX.Element {
 }
 ShowDeviceCode.parameters = {
   deviceCode: {
-    device_code: "foobar",
-    expires_in: 100000,
+    deviceCode: "foobar",
+    expiresIn: 100000,
     interval: 100,
-    user_code: "AAAA-12BB",
-    verification_uri: "https://console.example.com/activate",
+    userCode: "AAAA-12BB",
+    verificationUri: "https://console.example.com/activate",
   },
 };
 
@@ -71,10 +71,10 @@ export function CodeTimeout(): JSX.Element {
 }
 CodeTimeout.parameters = {
   deviceCode: {
-    device_code: "foobar",
-    expires_in: 0,
+    deviceCode: "foobar",
+    expiresIn: 0,
     interval: 0,
-    user_code: "AAAA-12BB",
-    verification_uri: "https://console.example.com/activate",
+    userCode: "AAAA-12BB",
+    verificationUri: "https://console.example.com/activate",
   },
 };

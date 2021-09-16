@@ -195,7 +195,7 @@ export default function LayoutBrowser({
       const newLayout = await layoutManager.saveNewLayout({
         name: `${item.name} copy`,
         data: item.working?.data ?? item.baseline.data,
-        permission: "creator_write",
+        permission: "CREATOR_WRITE",
       });
       await onSelectLayout(newLayout);
       void analytics.logEvent(AppEvent.LAYOUT_DUPLICATE, { permission: item.permission });
@@ -239,7 +239,7 @@ export default function LayoutBrowser({
     const newLayout = await layoutManager.saveNewLayout({
       name,
       data: state as PanelsState,
-      permission: "creator_write",
+      permission: "CREATOR_WRITE",
     });
     void onSelectLayout(newLayout);
 
@@ -267,7 +267,7 @@ export default function LayoutBrowser({
         const newLayout = await layoutManager.saveNewLayout({
           name,
           data: item.working?.data ?? item.baseline.data,
-          permission: "org_write",
+          permission: "ORG_WRITE",
         });
         void analytics.logEvent(AppEvent.LAYOUT_SHARE, { permission: item.permission });
         await onSelectLayout(newLayout);
@@ -367,7 +367,7 @@ export default function LayoutBrowser({
     const newLayout = await layoutManager.saveNewLayout({
       name: layoutName,
       data,
-      permission: "creator_write",
+      permission: "CREATOR_WRITE",
     });
     void onSelectLayout(newLayout);
     void analytics.logEvent(AppEvent.LAYOUT_IMPORT);

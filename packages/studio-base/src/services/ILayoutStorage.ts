@@ -9,7 +9,7 @@ import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/
 export type LayoutID = string & { __brand: "LayoutID" };
 export type ISO8601Timestamp = string & { __brand: "ISO8601Timestamp" };
 
-export type LayoutPermission = "creator_write" | "org_read" | "org_write";
+export type LayoutPermission = "CREATOR_WRITE" | "ORG_READ" | "ORG_WRITE";
 
 export type LayoutSyncStatus =
   | "new"
@@ -73,13 +73,13 @@ export interface ILayoutStorage {
 
 export function layoutPermissionIsShared(
   permission: LayoutPermission,
-): permission is Exclude<LayoutPermission, "creator_write"> {
-  return permission !== "creator_write";
+): permission is Exclude<LayoutPermission, "CREATOR_WRITE"> {
+  return permission !== "CREATOR_WRITE";
 }
 
 export function layoutIsShared(
   layout: Layout,
-): layout is Layout & { permission: Exclude<LayoutPermission, "creator_write"> } {
+): layout is Layout & { permission: Exclude<LayoutPermission, "CREATOR_WRITE"> } {
   return layoutPermissionIsShared(layout.permission);
 }
 
@@ -129,7 +129,7 @@ export function migrateLayout(value: unknown): Layout {
   return {
     id: layout.id,
     name: layout.name ?? `Unnamed (${now})`,
-    permission: layout.permission ?? "creator_write",
+    permission: layout.permission ?? "CREATOR_WRITE",
     working: layout.working
       ? { ...layout.working, data: migrateData(layout.working.data) }
       : undefined,

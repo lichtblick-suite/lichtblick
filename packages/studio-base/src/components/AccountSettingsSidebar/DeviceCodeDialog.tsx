@@ -39,7 +39,7 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
 
   const { value: deviceCode, error: deviceCodeError } = useAsync(async () => {
     return await api.deviceCode({
-      client_id: process.env.OAUTH_CLIENT_ID!,
+      clientId: process.env.OAUTH_CLIENT_ID!,
     });
   }, [api]);
 
@@ -58,8 +58,8 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
       return;
     }
 
-    const url = new URL(deviceCode.verification_uri);
-    url.searchParams.append("user_code", deviceCode.user_code);
+    const url = new URL(deviceCode.verificationUri);
+    url.searchParams.append("user_code", deviceCode.userCode);
     const href = url.toString();
 
     setTimeout(() => {
@@ -71,7 +71,7 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
     if (!deviceCode) {
       return;
     }
-    const endTimeMs = Date.now() + deviceCode.expires_in * 1000;
+    const endTimeMs = Date.now() + deviceCode.expiresIn * 1000;
 
     // continue polling for the token until we receive the token or we timeout
     while (Date.now() < endTimeMs) {
@@ -83,8 +83,8 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
 
       try {
         const tempAccess = await api.token({
-          device_code: deviceCode.device_code,
-          client_id: process.env.OAUTH_CLIENT_ID!,
+          deviceCode: deviceCode.deviceCode,
+          clientId: process.env.OAUTH_CLIENT_ID!,
         });
         return tempAccess;
       } catch (err) {
@@ -102,7 +102,7 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
     }
 
     return await api.signin({
-      id_token: deviceResponse.id_token,
+      idToken: deviceResponse.idToken,
     });
   }, [api, deviceResponse]);
 
@@ -116,7 +116,7 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
     if (!deviceCode) {
       return ReactNull;
     }
-    const { user_code: userCode, verification_uri: verificationUrl } = deviceCode;
+    const { userCode, verificationUri } = deviceCode;
     return (
       <Stack tokens={{ childrenGap: theme.spacing.l1 }}>
         <Stack tokens={{ childrenGap: theme.spacing.s1 }} styles={{ root: { lineHeight: "1.3" } }}>
@@ -136,7 +136,7 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
           </Text>
           <Text variant="medium" block>
             If your browser didn’t open automatically, please{" "}
-            <Link href={`${verificationUrl}?user_code=${userCode}`}>click here</Link> to continue.
+            <Link href={`${verificationUri}?user_code=${userCode}`}>click here</Link> to continue.
           </Text>
         </Stack>
       </Stack>

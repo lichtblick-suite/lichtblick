@@ -26,7 +26,7 @@ export type LayoutManagerEventTypes = {
  * @see LayoutManager concrete implementation
  */
 export interface ILayoutManager {
-  /** Indicates whether permissions other than "creator_write" are supported. */
+  /** Indicates whether permissions other than "CREATOR_WRITE" are supported. */
   readonly supportsSharing: boolean;
 
   /** Indicates whether the layout manager is currently performing an async operation. */
