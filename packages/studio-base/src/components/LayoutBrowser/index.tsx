@@ -43,6 +43,7 @@ import { Layout, layoutIsShared } from "@foxglove/studio-base/services/ILayoutSt
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
 
 import LayoutSection from "./LayoutSection";
+import helpContent from "./index.help.md";
 import showOpenFilePicker from "./showOpenFilePicker";
 import { debugBorder } from "./styles";
 
@@ -386,6 +387,7 @@ export default function LayoutBrowser({
   return (
     <SidebarContent
       title="Layouts"
+      helpContent={helpContent}
       noPadding
       trailingItems={[
         (layouts.loading || isBusy) && <Spinner key="spinner" />,
@@ -414,14 +416,7 @@ export default function LayoutBrowser({
           iconProps={{ iconName: "OpenFile" }}
           onClick={importLayout}
           ariaLabel="Import layout"
-          styles={{
-            root: {
-              marginRight: `-${theme.spacing.s1}`,
-            },
-            icon: {
-              height: 20,
-            },
-          }}
+          styles={{ icon: { height: 20 } }}
         >
           {importLayoutTooltip.tooltip}
         </IconButton>,

@@ -8,6 +8,7 @@ import { useAsync } from "react-use";
 import styled from "styled-components";
 
 import Button from "@foxglove/studio-base/components/Button";
+import { ExtensionDetails } from "@foxglove/studio-base/components/ExtensionDetails";
 import { SectionHeader } from "@foxglove/studio-base/components/Menu";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
@@ -16,7 +17,7 @@ import {
   useExtensionMarketplace,
 } from "@foxglove/studio-base/context/ExtensionMarketplaceContext";
 
-import { ExtensionDetails } from "./ExtensionDetails";
+import helpContent from "./index.help.md";
 
 const ListItemStyles = mergeStyles({
   marginLeft: "-16px",
@@ -152,7 +153,7 @@ export default function ExtensionsSidebar(): React.ReactElement {
   }
 
   return (
-    <SidebarContent title="Extensions">
+    <SidebarContent title="Extensions" helpContent={helpContent}>
       <Stack tokens={{ childrenGap: 30 }}>
         <Stack.Item>
           <SectionHeader>Installed</SectionHeader>

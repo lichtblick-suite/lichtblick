@@ -1,11 +1,7 @@
 # Variables
 
-Allows you to read and set variables for any panel that uses the [message path syntax](#help:message-path-syntax) (e.g. Plot, State Transitions, Raw Messages, etc.).
+Variables are values that can be set globally for a given layout. They’re prefixed with a `$` for easy reference, and can be set to any valid string, number, or boolean value.
 
-For example, instead of having to change a particular object ID that you want to see visualizations for across panels, you can:
+You can use variables in any panel that supports message path syntax to help you switch quickly between subsets of your data. Certain panels like the 3D and Variable Slider panels can update variable values with user interactions.
 
-- Set a `$my_object_ID` variable in the Variables panel
-- Type `/my_objects.objects[:]{id==$my_object_ID}.some_field` in your Plot Panel to plot a particular field in your specified object
-- Type `/my_objects.objects[:]{id==$my_object_ID}` in your Raw Messages Panel to see all the info for your specified object
-
-For numeric variable values, use the up and down arrow keys to increment and decrement the values, respectively.
+[Learn more](https://foxglove.dev/docs/app-concepts/variables).

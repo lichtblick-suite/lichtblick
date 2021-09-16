@@ -6,7 +6,7 @@ import MockMessagePipelineProvider from "@foxglove/studio-base/components/Messag
 import ModalHost from "@foxglove/studio-base/context/ModalHost";
 import { PlayerPresence } from "@foxglove/studio-base/players/types";
 
-import ConnectionList from "./ConnectionList";
+import ConnectionList from "./index";
 
 export default {
   title: "components/ConnectionList",

@@ -19,6 +19,7 @@ import Log from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import AccountSettings from "@foxglove/studio-base/components/AccountSettingsSidebar/AccountSettings";
 import ConnectionList from "@foxglove/studio-base/components/ConnectionList";
+import connectionHelpContent from "@foxglove/studio-base/components/ConnectionList/index.help.md";
 import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
 import DropOverlay from "@foxglove/studio-base/components/DropOverlay";
 import ExtensionsSidebar from "@foxglove/studio-base/components/ExtensionsSidebar";
@@ -88,7 +89,7 @@ type SidebarItemKey =
 
 function Connection() {
   return (
-    <SidebarContent title="Connection">
+    <SidebarContent title="Connection" helpContent={connectionHelpContent}>
       <ConnectionList />
     </SidebarContent>
   );
