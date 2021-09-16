@@ -252,16 +252,16 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
         click: () => browserWindow.webContents.send("open-welcome-layout"),
       },
       {
-        label: "Message Path Syntax",
+        label: "Message path syntax",
         click: () => browserWindow.webContents.send("open-message-path-syntax-help"),
       },
       {
-        label: "Keyboard Shortcuts",
+        label: "Keyboard shortcuts",
         accelerator: "CommandOrControl+/",
         click: () => browserWindow.webContents.send("open-keyboard-shortcuts"),
       },
       {
-        label: "Learn More",
+        label: "Learn more",
         click: async () => await shell.openExternal("https://foxglove.dev"),
       },
       ...(isMac

@@ -24,7 +24,7 @@ import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropL
 import DropOverlay from "@foxglove/studio-base/components/DropOverlay";
 import ExtensionsSidebar from "@foxglove/studio-base/components/ExtensionsSidebar";
 import GlobalVariablesTable from "@foxglove/studio-base/components/GlobalVariablesTable";
-import variablesHelp from "@foxglove/studio-base/components/GlobalVariablesTable/index.help.md";
+import variablesHelpContent from "@foxglove/studio-base/components/GlobalVariablesTable/index.help.md";
 import HelpModal from "@foxglove/studio-base/components/HelpModal";
 import LayoutBrowser from "@foxglove/studio-base/components/LayoutBrowser";
 import messagePathHelp from "@foxglove/studio-base/components/MessagePathSyntax/index.help.md";
@@ -35,6 +35,7 @@ import {
 import MultiProvider from "@foxglove/studio-base/components/MultiProvider";
 import PanelLayout from "@foxglove/studio-base/components/PanelLayout";
 import PanelList from "@foxglove/studio-base/components/PanelList";
+import panelsHelpContent from "@foxglove/studio-base/components/PanelList/index.help.md";
 import PanelSettings from "@foxglove/studio-base/components/PanelSettings";
 import PlaybackControls from "@foxglove/studio-base/components/PlaybackControls";
 import Preferences from "@foxglove/studio-base/components/Preferences";
@@ -99,7 +100,7 @@ function AddPanel() {
   const addPanel = useAddPanel();
 
   return (
-    <SidebarContent noPadding title="Add panel">
+    <SidebarContent noPadding title="Add panel" helpContent={panelsHelpContent}>
       <PanelList onPanelSelect={addPanel} />
     </SidebarContent>
   );
@@ -107,7 +108,7 @@ function AddPanel() {
 
 function Variables() {
   return (
-    <SidebarContent title="Variables" helpContent={variablesHelp}>
+    <SidebarContent title="Variables" helpContent={variablesHelpContent}>
       <GlobalVariablesTable />
     </SidebarContent>
   );
