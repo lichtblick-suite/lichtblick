@@ -71,7 +71,7 @@ export default function LayoutBrowser({
   const { openAccountSettings } = useWorkspace();
   const styles = useStyles();
   const confirm = useConfirm();
-  const openUnsavedChangesPrompt = useUnsavedChangesPrompt();
+  const { unsavedChangesPrompt, openUnsavedChangesPrompt } = useUnsavedChangesPrompt();
 
   const currentLayoutId = useCurrentLayoutSelector((state) => state.selectedLayout?.id);
   const { setSelectedLayoutId } = useCurrentLayoutActions();
@@ -422,6 +422,7 @@ export default function LayoutBrowser({
         </IconButton>,
       ]}
     >
+      {unsavedChangesPrompt}
       <Stack verticalFill>
         <Stack.Item>
           <LayoutSection

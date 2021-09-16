@@ -14,10 +14,10 @@ import {
   DefaultButton,
   PrimaryButton,
 } from "@fluentui/react";
-import { useCallback, useContext, useMemo, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLatest, useUnmount } from "react-use";
 
-import ModalContext from "@foxglove/studio-base/context/ModalContext";
+import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import { Layout } from "@foxglove/studio-base/services/ILayoutStorage";
 
 type UnsavedChangesResolution =
@@ -28,11 +28,13 @@ type UnsavedChangesResolution =
 
 export function UnsavedChangesPrompt({
   layout,
+  isOnline,
   onComplete,
   defaultSelectedKey = "discard",
   defaultPersonalCopyName,
 }: {
   layout: Layout;
+  isOnline: boolean;
   onComplete: (_: UnsavedChangesResolution) => void;
   defaultSelectedKey?: Exclude<UnsavedChangesResolution["type"], "cancel">;
   defaultPersonalCopyName?: string;
@@ -46,11 +48,14 @@ export function UnsavedChangesPrompt({
       { key: "discard", text: "Discard changes" },
       {
         key: "overwrite",
-        text: `Update team layout “${layout.name}”`,
+        text: `Update team layout “${layout.name}”${
+          !isOnline ? " (unavailable while offline)" : ""
+        }`,
+        disabled: !isOnline,
       },
       { key: "makePersonal", text: "Save a personal copy" },
     ],
-    [layout.name],
+    [isOnline, layout.name],
   );
   const [selectedKey, setSelectedKey] = useState(defaultSelectedKey);
 
@@ -160,33 +165,50 @@ export function UnsavedChangesPrompt({
   );
 }
 
-export function useUnsavedChangesPrompt(): (item: Layout) => Promise<UnsavedChangesResolution> {
-  const modalHost = useContext(ModalContext);
+export function useUnsavedChangesPrompt(): {
+  unsavedChangesPrompt?: JSX.Element;
+  openUnsavedChangesPrompt: (item: Layout) => Promise<UnsavedChangesResolution>;
+} {
+  const [layout, setLayout] = useState<Layout | undefined>();
+  const resolveRef = useRef<(res: UnsavedChangesResolution) => void>();
 
-  const onCompleteRef = useRef<((_: UnsavedChangesResolution) => void) | undefined>();
-  const openPrompt = useCallback(
-    async (layout: Layout) => {
-      return await new Promise<UnsavedChangesResolution>((resolve) => {
-        const remove = modalHost.addModalElement(
-          <UnsavedChangesPrompt
-            layout={layout}
-            onComplete={
-              (onCompleteRef.current = (value) => {
-                resolve(value);
-                remove();
-                onCompleteRef.current = undefined;
-              })
-            }
-          />,
-        );
-      });
-    },
-    [modalHost],
-  );
+  const layoutManager = useLayoutManager();
+  const [isOnline, setIsOnline] = useState(layoutManager.isOnline);
+  useLayoutEffect(() => {
+    const onlineListener = () => setIsOnline(layoutManager.isOnline);
+    onlineListener();
+    layoutManager.on("onlinechange", onlineListener);
+    return () => layoutManager.off("onlinechange", onlineListener);
+  }, [layoutManager]);
+
+  const unsavedChangesPrompt = useMemo(() => {
+    if (!layout) {
+      return undefined;
+    }
+    return (
+      <UnsavedChangesPrompt
+        layout={layout}
+        isOnline={isOnline}
+        onComplete={(value) => {
+          resolveRef.current?.(value);
+          resolveRef.current = undefined;
+          setLayout(undefined);
+        }}
+      />
+    );
+  }, [isOnline, layout]);
+
+  const openUnsavedChangesPrompt = useCallback(async (item: Layout) => {
+    setLayout(item);
+    return await new Promise<UnsavedChangesResolution>((resolve) => {
+      resolveRef.current?.({ type: "cancel" });
+      resolveRef.current = resolve;
+    });
+  }, []);
 
   // Close automatically when unmounted
   useUnmount(() => {
-    onCompleteRef.current?.({ type: "cancel" });
+    resolveRef.current?.({ type: "cancel" });
   });
-  return openPrompt;
+  return { unsavedChangesPrompt, openUnsavedChangesPrompt };
 }
