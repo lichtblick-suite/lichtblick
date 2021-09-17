@@ -51,7 +51,7 @@ import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
 import HoverBar from "./HoverBar";
 import TimeBasedChartTooltipContent from "./TimeBasedChartTooltipContent";
-import downsample from "./downsample";
+import { downsampleTimeseries, downsampleScatter } from "./downsample";
 
 const log = Logger.getLogger(__filename);
 
@@ -609,7 +609,10 @@ export default function TimeBasedChart(props: Props): JSX.Element {
           return dataset;
         }
 
-        const downsampled = downsample(dataset, bounds);
+        const downsampled =
+          dataset.showLine !== true
+            ? downsampleScatter(dataset, bounds)
+            : downsampleTimeseries(dataset, bounds);
         // NaN item values are now allowed, instead we convert these to undefined entries
         // which will create _gaps_ in the line
         const nanToNulldata = downsampled.data.map((item) => {
