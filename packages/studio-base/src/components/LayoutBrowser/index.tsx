@@ -260,7 +260,7 @@ export default function LayoutBrowser({
     async (item: Layout) => {
       const name = await prompt({
         title: "Share a copy with your team",
-        subText: "Team layouts can be used and changed by members of your team.",
+        subText: "Team layouts can be used and changed by other members of your team.",
         initialValue: item.name,
         label: "Layout name",
       });

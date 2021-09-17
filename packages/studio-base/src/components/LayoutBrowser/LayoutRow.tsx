@@ -226,22 +226,21 @@ export default function LayoutRow({
       disabled: layoutIsShared(layout) && !isOnline,
       secondaryText: layoutIsShared(layout) && !isOnline ? "Offline" : undefined,
     },
-    {
+    // For shared layouts, duplicate first requires saving or discarding changes
+    !(layoutIsShared(layout) && hasModifications) && {
       key: "duplicate",
       text:
         layoutManager.supportsSharing && layoutIsShared(layout)
           ? "Make a personal copy"
-          : "Make a copy",
+          : "Duplicate",
       iconProps: { iconName: "Copy" },
       onClick: duplicateAction,
       ["data-test"]: "duplicate-layout",
-      // Duplicate first requires saving or discarding changes
-      disabled: hasModifications && layoutIsShared(layout),
     },
     layoutManager.supportsSharing &&
       !layoutIsShared(layout) && {
         key: "share",
-        text: "Share with team",
+        text: "Share with team…",
         iconProps: { iconName: "Share" },
         onClick: shareAction,
         disabled: !isOnline,
@@ -249,14 +248,14 @@ export default function LayoutRow({
       },
     {
       key: "export",
-      text: "Export as JSON",
+      text: "Export…",
       iconProps: { iconName: "DownloadDocument" },
       onClick: exportAction,
     },
     { key: "divider_1", itemType: ContextualMenuItemType.Divider },
     {
       key: "delete",
-      text: "Delete…",
+      text: "Delete",
       iconProps: {
         iconName: "Delete",
         styles: { root: { color: theme.semanticColors.errorText } },
@@ -270,7 +269,7 @@ export default function LayoutRow({
     const sectionItems: IContextualMenuItem[] = [
       {
         key: "overwrite",
-        text: "Save changes",
+        text: "Save",
         iconProps: { iconName: "Upload" },
         onClick: overwriteAction,
         disabled: deletedOnServer || (layoutIsShared(layout) && !isOnline),
@@ -278,16 +277,16 @@ export default function LayoutRow({
       },
       {
         key: "revert",
-        text: "Revert to last saved version",
+        text: "Revert",
         iconProps: { iconName: "Undo" },
         onClick: revertAction,
         disabled: deletedOnServer,
       },
     ];
     if (layoutIsShared(layout)) {
-      sectionItems.unshift({
+      sectionItems.push({
         key: "copy_to_personal",
-        text: "Save as a personal copy",
+        text: "Make a personal copy",
         iconProps: { iconName: "DependencyAdd" },
         onClick: makePersonalCopyAction,
       });
