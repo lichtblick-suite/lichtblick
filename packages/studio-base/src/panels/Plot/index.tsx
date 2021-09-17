@@ -356,7 +356,7 @@ function Plot(props: Props) {
   return (
     <Flex col clip center style={{ position: "relative" }}>
       <PanelToolbar helpContent={helpContent} floating />
-      <div>{title ?? "Untitled"}</div>
+      {title && <div>{title}</div>}
       <PlotChart
         isSynced={xAxisVal === "timestamp"}
         paths={yAxisPaths}
