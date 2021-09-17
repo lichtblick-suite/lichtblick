@@ -1,6 +1,6 @@
 # Plot
 
-Plot arbitrary values from topics using [message path syntax](#help:message-path-syntax).
+Plot arbitrary values from topic paths, specified using [message path syntax](#help:message-path-syntax).
 
 ## Shortcuts
 

@@ -1,8 +1,6 @@
 # State Transitions
 
-Track when the discrete values of incoming topics change.
-
-Specify the data you want to track using [message path syntax](#help:message-path-syntax).
+Track when the discrete values of topic paths, specified using [message path syntax](#help:message-path-syntax), change.
 
 ## Shortcuts
 

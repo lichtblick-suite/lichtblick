@@ -36,7 +36,7 @@ const features: Feature[] = [
   {
     key: AppSetting.SHOW_DEBUG_PANELS,
     name: "Studio debug panels",
-    description: <>Show Foxglove Studio debug panels in the add panel list.</>,
+    description: <>Show Foxglove Studio debug panels in the &ldquo;Add panel&rdquo; list.</>,
   },
   {
     key: AppSetting.ENABLE_DRAWING_POLYGONS,
