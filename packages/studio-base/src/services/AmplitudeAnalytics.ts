@@ -23,7 +23,13 @@ export class AmplitudeAnalytics implements IAnalytics {
     this._amp = amplitude.getInstance();
 
     if (options.amplitudeApiKey) {
-      this._amp.init(options.amplitudeApiKey);
+      // Capitalize platform name
+      let platform = os?.platform ?? "web";
+      platform = platform.charAt(0).toUpperCase() + platform.slice(1);
+
+      this._amp.init(options.amplitudeApiKey, undefined, {
+        platform,
+      });
     }
 
     this._amp.setOptOut(!options.enableTelemetry);
