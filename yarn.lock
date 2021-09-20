@@ -2259,12 +2259,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg-serialization@npm:1.1.3, @foxglove/rosmsg-serialization@npm:^1.1.2":
-  version: 1.1.3
-  resolution: "@foxglove/rosmsg-serialization@npm:1.1.3"
+"@foxglove/rosmsg-serialization@npm:1.2.0, @foxglove/rosmsg-serialization@npm:^1.1.2":
+  version: 1.2.0
+  resolution: "@foxglove/rosmsg-serialization@npm:1.2.0"
   dependencies:
     "@foxglove/rosmsg": ^2.0.0
-  checksum: cb64edbc5b1d53ac964027808c8d7b88d8804405427dc0e3ccf4dadb8a475da001c6b000ee4f5c8ee259cff06757e1891fbadb5d1708dad8eae0393fa78880c7
+  checksum: c806644d96a4bb71aff904e2e0dfac622a39136db26415123e43262371943527cea142ef25bebf804b513994b1a99bf6594aabd100f68bb70bd9abfaaa611fdc
   languageName: node
   linkType: hard
 
@@ -2324,7 +2324,7 @@ __metadata:
     "@foxglove/rosmsg": 2.0.0
     "@foxglove/rosmsg-msgs-common": 1.0.3
     "@foxglove/rosmsg-msgs-foxglove": 2.0.2
-    "@foxglove/rosmsg-serialization": 1.1.3
+    "@foxglove/rosmsg-serialization": 1.2.0
     "@foxglove/rostime": 1.1.0
     "@foxglove/studio": "workspace:*"
     "@foxglove/velodyne-cloud": 1.0.0
