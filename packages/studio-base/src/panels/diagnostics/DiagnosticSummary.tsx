@@ -213,12 +213,13 @@ function DiagnosticSummary(props: Props): JSX.Element {
       style={{
         width: "100%",
         padding: "0",
-        background: "transparent",
+        backgroundColor: "transparent",
         opacity: "0.5",
         marginLeft: "10px",
+        fontSize: "14px",
       }}
       value={hardwareIdFilter}
-      placeholder={"Filter hardware id"}
+      placeholder="Filter hardware id"
       onChange={(e) => saveConfig({ hardwareIdFilter: e.target.value })}
     />
   );
@@ -309,7 +310,10 @@ function DiagnosticSummary(props: Props): JSX.Element {
     <Flex col className={classes.panel}>
       <PanelToolbar helpContent={helpContent} additionalIcons={topicToRenderMenu}>
         <Dropdown
-          styles={{ root: { minWidth: "100px" } }}
+          styles={{
+            root: { minWidth: "100px" },
+            title: { backgroundColor: "transparent" },
+          }}
           onRenderOption={renderOption}
           onRenderTitle={(option: IDropdownOption[] | undefined) =>
             option ? <>{option.map(renderOption)}</> : ReactNull

@@ -92,6 +92,7 @@ export default function FilterBar(props: FilterBarProps): JSX.Element {
   return (
     <Stack grow horizontal tokens={{ childrenGap: theme.spacing.s1 }}>
       <Dropdown
+        styles={{ title: { background: "transparent" } }}
         onRenderOption={renderOption}
         onRenderTitle={renderTitle}
         onChange={(_ev, option) => {
