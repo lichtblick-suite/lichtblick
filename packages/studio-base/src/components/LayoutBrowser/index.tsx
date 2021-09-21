@@ -400,12 +400,8 @@ export default function LayoutBrowser({
           ariaLabel="Create new layout"
           data-test="add-layout"
           styles={{
-            icon: {
-              height: 20,
-            },
-            root: {
-              margin: `0 ${theme.spacing.s2}`,
-            },
+            icon: { height: 20 },
+            root: { margin: `0 ${theme.spacing.s2}` },
           }}
         >
           {createLayoutTooltip.tooltip}
@@ -416,7 +412,10 @@ export default function LayoutBrowser({
           iconProps={{ iconName: "OpenFile" }}
           onClick={importLayout}
           ariaLabel="Import layout"
-          styles={{ icon: { height: 20 } }}
+          styles={{
+            icon: { height: 20 },
+            root: { marginRight: theme.spacing.s1 },
+          }}
         >
           {importLayoutTooltip.tooltip}
         </IconButton>,
