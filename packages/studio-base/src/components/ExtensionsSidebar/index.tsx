@@ -2,14 +2,12 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { mergeStyles, MessageBar, MessageBarType, Stack, useTheme } from "@fluentui/react";
+import { MessageBar, MessageBarType, Stack, useTheme, makeStyles } from "@fluentui/react";
 import { useMemo, useState } from "react";
 import { useAsync } from "react-use";
-import styled from "styled-components";
 
 import Button from "@foxglove/studio-base/components/Button";
 import { ExtensionDetails } from "@foxglove/studio-base/components/ExtensionDetails";
-import { SectionHeader } from "@foxglove/studio-base/components/Menu";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
 import {
@@ -19,59 +17,41 @@ import {
 
 import helpContent from "./index.help.md";
 
-const ListItemStyles = mergeStyles({
-  marginLeft: "-16px",
-  marginRight: "-16px",
-  paddingLeft: "16px",
-  paddingRight: "16px",
-  selectors: {
-    ":hover": {
-      backgroundColor: "rgba(255, 255, 255, 0.05)",
-      cursor: "pointer",
-    },
+const useStyles = makeStyles((theme) => ({
+  name: {
+    fontWeight: "bold",
   },
-});
-
-const Name = styled.span`
-  color: #8b888f;
-  font-weight: bold;
-`;
-
-const NameLine = styled.div`
-  margin-top: 6px;
-`;
-
-const Version = styled.span`
-  color: #7a777d;
-  font-size: 80%;
-  margin-left: 8px;
-`;
-
-const Description = styled.span`
-  color: #8b888f;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  width: 100%;
-  display: inline-block;
-  overflow: hidden;
-`;
-
-const DescriptionLine = styled.div`
-  margin-top: 6px;
-`;
-
-const Publisher = styled.span`
-  color: #e2dce9;
-`;
-
-const PublisherLine = styled.div`
-  margin-top: 4px;
-  margin-bottom: 10px;
-`;
+  version: {
+    color: theme.palette.neutralSecondaryAlt,
+    fontSize: "80%",
+    marginLeft: 8,
+  },
+  description: {
+    color: theme.palette.neutralSecondaryAlt,
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    width: "100%",
+    display: "inline-block",
+    overflow: "hidden",
+  },
+  publisher: {
+    color: theme.semanticColors.bodyText,
+  },
+  sectionHeader: {
+    ...theme.fonts.medium,
+    display: "block",
+    fontVariant: "small-caps",
+    textTransform: "lowercase",
+    color: theme.palette.neutralSecondaryAlt,
+    letterSpacing: "0.5px",
+    marginTop: theme.spacing.m,
+    marginBottom: theme.spacing.s1,
+  },
+}));
 
 export default function ExtensionsSidebar(): React.ReactElement {
   const theme = useTheme();
-
+  const classes = useStyles();
   const [shouldFetch, setShouldFetch] = useState<boolean>(true);
   const [marketplaceEntries, setMarketplaceEntries] = useState<ExtensionMarketplaceDetail[]>([]);
   const [focusedExtension, setFocusedExtension] = useState<
@@ -156,7 +136,7 @@ export default function ExtensionsSidebar(): React.ReactElement {
     <SidebarContent title="Extensions" helpContent={helpContent}>
       <Stack tokens={{ childrenGap: 30 }}>
         <Stack.Item>
-          <SectionHeader>Installed</SectionHeader>
+          <h2 className={classes.sectionHeader}>Installed</h2>
           <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
             {installedEntries.length > 0
               ? installedEntries.map((entry) => (
@@ -175,7 +155,7 @@ export default function ExtensionsSidebar(): React.ReactElement {
           </Stack>
         </Stack.Item>
         <Stack.Item>
-          <SectionHeader>Available</SectionHeader>
+          <h2 className={classes.sectionHeader}>Available</h2>
           <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
             {filteredMarketplaceEntries.map((entry) => (
               <ExtensionListEntry
@@ -201,19 +181,41 @@ function ExtensionListEntry(props: {
   onClick: () => void;
 }): JSX.Element {
   const { entry } = props;
+  const theme = useTheme();
+  const classes = useStyles();
   return (
-    <Stack.Item key={entry.id} className={ListItemStyles} onClick={props.onClick}>
-      <NameLine>
-        <Name>{entry.name}</Name>
-        <Version>{entry.version}</Version>
-      </NameLine>
-      <DescriptionLine>
-        <Description>{entry.description}</Description>
-      </DescriptionLine>
-      <PublisherLine>
-        <Publisher>{entry.publisher}</Publisher>
-      </PublisherLine>
-    </Stack.Item>
+    <Stack
+      key={entry.id}
+      onClick={props.onClick}
+      styles={{
+        root: {
+          margin: `0 -${theme.spacing.m}`,
+          borderBottom: `1px solid ${theme.semanticColors.bodyBackground}`,
+          borderTop: `1px solid ${theme.semanticColors.bodyBackground}`,
+
+          ":hover": {
+            backgroundColor: theme.semanticColors.menuItemBackgroundHovered,
+            color: theme.semanticColors.accentButtonBackground,
+            cursor: "pointer",
+          },
+        },
+      }}
+      tokens={{
+        childrenGap: 6,
+        padding: `${theme.spacing.s1} ${theme.spacing.m}`,
+      }}
+    >
+      <Stack.Item>
+        <span className={classes.name}>{entry.name}</span>
+        <span className={classes.version}>{entry.version}</span>
+      </Stack.Item>
+      <Stack.Item>
+        <span className={classes.description}>{entry.description}</span>
+      </Stack.Item>
+      <Stack.Item>
+        <span className={classes.publisher}>{entry.publisher}</span>
+      </Stack.Item>
+    </Stack>
   );
 }
 

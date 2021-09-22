@@ -18,7 +18,7 @@ import { ComponentProps, CSSProperties, ReactNode, MouseEvent } from "react";
 import Tooltip, { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-type IconSizeKey = "xlarge" | "large" | "medium" | "small" | "xsmall" | "xxsmall";
+export type IconSize = "xlarge" | "large" | "medium" | "small" | "xsmall" | "xxsmall";
 
 function makeIconStyle(size: number) {
   return {
@@ -86,7 +86,7 @@ type Props = {
   children: ReactNode;
   active?: boolean;
   fade?: boolean;
-  size?: IconSizeKey;
+  size?: IconSize;
   onClick?: (e: MouseEvent<HTMLElement>) => void;
   clickable?: boolean;
   className?: string;

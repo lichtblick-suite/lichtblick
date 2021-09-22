@@ -11,26 +11,86 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mergeStyleSets } from "@fluentui/merge-styles";
 import CheckCircleIcon from "@mdi/svg/svg/check-circle.svg";
 import CheckIcon from "@mdi/svg/svg/check.svg";
 import ChevronLeftIcon from "@mdi/svg/svg/chevron-left.svg";
 import ChevronRightIcon from "@mdi/svg/svg/chevron-right.svg";
 import cx from "classnames";
 import { noop } from "lodash";
-import styled from "styled-components";
 
-import Icon from "@foxglove/studio-base/components/Icon";
+import Icon, { IconSize } from "@foxglove/studio-base/components/Icon";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-import styles from "./index.module.scss";
+const classes = mergeStyleSets({
+  contentWrapper: {
+    flex: "1 1 auto",
+    display: "flex",
+    alignItems: "center",
+    minWidth: 0,
+  },
+  item: {
+    textDecoration: "none",
+    padding: "8px 16px",
+    cursor: "pointer",
+    color: colors.TEXT_CONTROL,
+    userSelect: "none",
+    display: "flex",
+    alignItems: "center",
 
-const SContentWrapper = styled.div`
-  flex: 1 1 auto;
-  display: flex;
-  align-items: center;
-  // need this for text truncation https://css-tricks.com/flexbox-truncated-text/
-  min-width: 0px;
-`;
+    ":hover": {
+      color: colors.TEXT_BRIGHT,
+      backgroundColor: colors.DARK5,
+    },
+    "&.hoverForScreenshots": {
+      color: colors.TEXT_BRIGHT,
+      backgroundColor: colors.DARK5,
+    },
+  },
+  itemActive: {
+    color: colors.TEXT_BRIGHT,
+    backgroundColor: colors.DARK5,
+  },
+  itemDisabled: {
+    color: colors.TEXT_DISABLED,
+    cursor: "not-allowed",
+
+    ":hover": {
+      backgroundColor: "transparent",
+      color: colors.TEXT_DISABLED,
+    },
+  },
+  itemHeader: {
+    textTransform: "uppercase",
+    opacity: 0.6,
+    fontSize: 11,
+    letterSpacing: 1,
+    paddingTop: 16,
+
+    "&:hover": {
+      cursor: "default",
+      backgroundColor: "inherit",
+      opacity: 0.5,
+    },
+  },
+  submenuIcon: {
+    width: 16,
+    height: 16,
+    flex: "none",
+    fill: "currentColor",
+    opacity: 0.6,
+    position: "relative",
+  },
+  submenuIconLeft: {
+    right: 6,
+  },
+  icon: {
+    marginRight: 12,
+    fontSize: 14,
+    verticalAlign: "middle",
+  },
+});
 
 type ItemProps = {
   className?: string;
@@ -40,7 +100,7 @@ type ItemProps = {
   tooltip?: React.ReactNode;
   children: React.ReactNode;
   icon?: React.ReactNode;
-  iconSize?: "xxsmall" | "xsmall" | "small" | "medium" | "large" | "xlarge";
+  iconSize?: IconSize;
   isDropdown?: boolean;
   disabled?: boolean;
   onClick?: () => void;
@@ -72,35 +132,40 @@ const Item = (props: ItemProps): JSX.Element => {
     style,
     hoverForScreenshots,
   } = props;
-  const classes = cx(styles.item, className, {
-    [styles.active!]: highlighted && !disabled,
-    [styles.disabled!]: disabled,
+  const itemClasses = cx(classes.item, className, {
     disabled,
-    [styles.header!]: isHeader,
-    [styles.hoverForScreenshot!]: hoverForScreenshots,
+    hoverForScreenshots,
+    [classes.itemActive]: highlighted && !disabled,
+    [classes.itemDisabled]: disabled,
+    [classes.itemHeader]: isHeader,
   });
 
   const item = (
-    <div className={classes} onClick={disabled ? noop : onClick} data-test={dataTest} style={style}>
-      {hasSubMenu && direction === "left" && <ChevronLeftIcon className={styles.submenuIconLeft} />}
+    <div
+      className={itemClasses}
+      onClick={disabled ? noop : onClick}
+      data-test={dataTest}
+      style={style}
+    >
+      {hasSubMenu && direction === "left" && (
+        <ChevronLeftIcon className={cx(classes.submenuIcon, classes.submenuIconLeft)} />
+      )}
       {icon != undefined && (
-        <span className={styles.icon}>
-          <Icon {...{ [iconSize]: true }}>{icon}</Icon>
+        <span className={classes.icon}>
+          <Icon size={iconSize}>{icon}</Icon>
         </span>
       )}
-      <SContentWrapper>
+      <div className={classes.contentWrapper}>
         {children}
         {checked && !isDropdown && (
-          <Icon {...{ [iconSize]: true }} style={{ marginLeft: "5px" }}>
+          <Icon size={iconSize} style={{ marginLeft: 5 }}>
             <CheckCircleIcon />
           </Icon>
         )}
-      </SContentWrapper>
-      {hasSubMenu && direction === "right" && (
-        <ChevronRightIcon className={styles.submenuIconRight} />
-      )}
+      </div>
+      {hasSubMenu && direction === "right" && <ChevronRightIcon className={classes.submenuIcon} />}
       {checked && isDropdown && (
-        <Icon {...{ [iconSize]: true }}>
+        <Icon size={iconSize}>
           <CheckIcon />
         </Icon>
       )}

@@ -14,10 +14,8 @@
 import ExpandableMenu from "./ExpandableMenu";
 import Item from "./Item";
 import Menu from "./Menu";
-import MenuHeader from "./MenuHeader";
-import SectionHeader from "./SectionHeader";
 import SubMenu from "./SubMenu";
 
-export { Item, SubMenu, MenuHeader, SectionHeader, ExpandableMenu };
+export { Item, SubMenu, ExpandableMenu };
 
 export default Menu;

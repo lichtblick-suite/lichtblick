@@ -11,14 +11,39 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mergeStyleSets } from "@fluentui/merge-styles";
 import cx from "classnames";
 
-import styles from "./index.module.scss";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 type Props = React.PropsWithChildren<{
   className?: string;
   style?: React.CSSProperties;
 }>;
+
+const classes = mergeStyleSets({
+  container: {
+    backgroundColor: colors.DARK3,
+    borderRadius: 4,
+    padding: 0,
+    boxShadow: "0 0px 32px rgba(8, 8, 10, 0.6)",
+    overflow: "hidden",
+    pointerEvents: "auto",
+    flexShrink: 0,
+    minWidth: 50,
+    flex: "0 0 auto",
+    overflowY: "auto",
+    maxHeight: "100%",
+
+    hr: {
+      padding: 0,
+      backgroundColor: colors.DIVIDER,
+    },
+    a: {
+      textDecoration: "none",
+    },
+  },
+});
 
 // a small component which wraps its children in menu styles
 // and provides a helper { Item } component which can be used
@@ -26,9 +51,8 @@ type Props = React.PropsWithChildren<{
 export default class Menu extends React.PureComponent<Props> {
   override render(): JSX.Element {
     const { children, className, style } = this.props;
-    const classes = cx(styles.container, className);
     return (
-      <div className={classes} style={style}>
+      <div className={cx(classes.container, className)} style={style}>
         {children}
       </div>
     );
