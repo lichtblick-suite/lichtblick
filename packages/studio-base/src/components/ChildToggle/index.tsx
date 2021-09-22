@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Layer } from "@fluentui/react";
+import { Layer, mergeStyleSets } from "@fluentui/react";
 import cx from "classnames";
 import {
   ReactElement,
@@ -27,7 +27,12 @@ import {
 import Flex from "@foxglove/studio-base/components/Flex";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
 
-import styles from "./index.module.scss";
+const classes = mergeStyleSets({
+  childContainer: {
+    position: "fixed",
+    pointerEvents: "none",
+  },
+});
 
 type ContainsOpenProps = {
   // eslint-disable-next-line @foxglove/no-boolean-parameters
@@ -217,7 +222,7 @@ export default function ChildToggle(props: Props): ReactElement {
           reverse={position === "left" || position === "bottom-left"}
           start={position !== "above"}
           end={position === "above"}
-          className={styles.childContainer}
+          className={classes.childContainer}
           style={styleObj}
         >
           {/* shrinkable spacer allows child to have a default position but slide over when it would go offscreen */}
@@ -239,7 +244,7 @@ export default function ChildToggle(props: Props): ReactElement {
   return (
     <div
       ref={el}
-      className={cx({ ["open"]: isOpen })}
+      className={cx({ open: isOpen })}
       style={style}
       onClick={(event) => event.stopPropagation()}
     >
