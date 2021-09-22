@@ -264,6 +264,15 @@ function buildMenu(browserWindow: BrowserWindow): Menu {
         label: "Learn more",
         click: async () => await shell.openExternal("https://foxglove.dev"),
       },
+      { type: "separator" } as const,
+      {
+        label: "License",
+        click: async () => await shell.openExternal("https://foxglove.dev/legal/studio-license"),
+      },
+      {
+        label: "Privacy",
+        click: async () => await shell.openExternal("https://foxglove.dev/legal/privacy"),
+      },
       ...(isMac
         ? []
         : [
