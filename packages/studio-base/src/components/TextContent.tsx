@@ -11,15 +11,69 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Link } from "@fluentui/react";
+import { Link, mergeStyleSets } from "@fluentui/react";
 import { PropsWithChildren, useCallback, useContext } from "react";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
 import { CSSProperties } from "styled-components";
 
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-import styles from "./TextContent.module.scss";
+const classes = mergeStyleSets({
+  root: {
+    backgroundColor: "transparent",
+
+    "h1, h2, h3, h4, h5, h6": {
+      fontWeight: "normal",
+      lineHeight: "1.4",
+    },
+    h1: {
+      fontSize: "2em",
+      marginBottom: "0.5em",
+      lineHeight: "1.2",
+
+      ":first-of-type": {
+        marginTop: 0,
+      },
+    },
+    h2: {
+      fontSize: "1.3em",
+      marginBottom: "0.25em",
+    },
+    h3: {
+      fontSize: "1.1em",
+      marginBottom: "0.25em",
+      color: colors.TEXT_MUTED,
+    },
+    "h4, h5, h6": {
+      marginBottom: "0.25em",
+      color: colors.TEXT_MUTED,
+      fontStyle: "italic",
+    },
+    ul: {
+      listStylePosition: "outside",
+      listStyleType: "disc",
+      marginLeft: "1.5em",
+      marginBottom: "1em",
+    },
+    "p, ul": {
+      ":last-child": {
+        marginBottom: "0",
+      },
+    },
+    "td, th": {
+      padding: "0.5em",
+      verticalAlign: "middle",
+    },
+    img: {
+      maxWidth: "100%",
+    },
+    pre: {
+      whiteSpace: "pre-wrap",
+    },
+  },
+});
 
 type Props = {
   style?: CSSProperties;
@@ -47,7 +101,7 @@ export default function TextContent(props: PropsWithChildren<Props>): React.Reac
   );
 
   return (
-    <div className={styles.root} style={style}>
+    <div className={classes.root} style={style}>
       {typeof children === "string" ? (
         <Markdown
           rehypePlugins={allowMarkdownHtml === true ? [rehypeRaw] : []}

@@ -15,7 +15,6 @@ import {
 import path from "path";
 
 import Logger from "@foxglove/log";
-import colors from "@foxglove/studio-base/src/styles/colors.module.scss";
 
 import pkgInfo from "../../package.json";
 import getDevModeIcon from "./getDevModeIcon";
@@ -61,7 +60,7 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
       // Access-Control-Allow-Origin check
       webSecurity: isProduction,
     },
-    backgroundColor: colors.background,
+    backgroundColor: "#121217",
   };
   if (!isProduction) {
     const devIcon = getDevModeIcon();
