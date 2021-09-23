@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Link, Stack } from "@fluentui/react";
+import { Link, Spinner, SpinnerSize, Stack } from "@fluentui/react";
 import ArrowLeftIcon from "@mdi/svg/svg/arrow-left.svg";
 import PlusIcon from "@mdi/svg/svg/plus.svg";
 import { Suspense } from "react";
@@ -24,7 +24,6 @@ import Icon from "@foxglove/studio-base/components/Icon";
 import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
-import SpinningLoadingIcon from "@foxglove/studio-base/components/SpinningLoadingIcon";
 import TextContent from "@foxglove/studio-base/components/TextContent";
 import {
   useCurrentLayoutActions,
@@ -333,9 +332,7 @@ function NodePlayground(props: Props) {
               <Suspense
                 fallback={
                   <Flex center style={{ width: "100%", height: "100%" }}>
-                    <Icon size="large">
-                      <SpinningLoadingIcon />
-                    </Icon>
+                    <Spinner size={SpinnerSize.large} />
                   </Flex>
                 }
               >

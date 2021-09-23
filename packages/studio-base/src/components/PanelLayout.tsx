@@ -148,7 +148,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
           <Suspense
             fallback={
               <EmptyState>
-                <Spinner size={SpinnerSize.small} />
+                <Spinner size={SpinnerSize.large} />
               </EmptyState>
             }
           >
