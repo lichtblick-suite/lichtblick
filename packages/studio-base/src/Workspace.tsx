@@ -11,7 +11,15 @@
 //   You may not use this file except in compliance with the License.
 
 import { makeStyles, Stack } from "@fluentui/react";
-import { useState, useEffect, useRef, useCallback, useMemo, useLayoutEffect } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+  useLayoutEffect,
+  useContext,
+} from "react";
 import { useToasts } from "react-toast-notifications";
 import { useMount, useMountedState } from "react-use";
 
@@ -45,6 +53,7 @@ import Sidebar, { SidebarItem } from "@foxglove/studio-base/components/Sidebar";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import { useAppConfiguration } from "@foxglove/studio-base/context/AppConfigurationContext";
 import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
+import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
 import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
@@ -136,6 +145,11 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerCapabilities = useMessagePipeline(selectPlayerCapabilities);
   const playerProblems = useMessagePipeline(selectPlayerProblems);
+
+  const [enableSharedLayouts = false] = useAppConfigurationValue<boolean>(
+    AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
+  );
+  const supportsAccountSettings = useContext(ConsoleApiContext) != undefined && enableSharedLayouts;
 
   // we use requestBackfill to signal when a player changes for RemountOnValueChange below
   // see comment below above the RemountOnValueChange component
@@ -353,13 +367,9 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     () => ({
       panelSettingsOpen: selectedSidebarItem === "panel-settings",
       openPanelSettings: () => setSelectedSidebarItem("panel-settings"),
-      openAccountSettings: () => setSelectedSidebarItem("account"),
+      openAccountSettings: () => supportsAccountSettings && setSelectedSidebarItem("account"),
     }),
-    [selectedSidebarItem],
-  );
-
-  const [enableSharedLayouts = false] = useAppConfigurationValue<boolean>(
-    AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
+    [selectedSidebarItem, supportsAccountSettings],
   );
 
   const { currentUser } = useCurrentUser();
@@ -390,7 +400,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       ["extensions", { iconName: "AddIn", title: "Extensions", component: ExtensionsSidebar }],
     ]);
 
-    return enableSharedLayouts
+    return supportsAccountSettings
       ? new Map([
           ...SIDEBAR_ITEMS,
           [
@@ -403,11 +413,11 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
           ],
         ])
       : SIDEBAR_ITEMS;
-  }, [enableSharedLayouts, playerProblems, currentUser]);
+  }, [supportsAccountSettings, playerProblems, currentUser]);
 
   const sidebarBottomItems: readonly SidebarItemKey[] = useMemo(() => {
-    return enableSharedLayouts ? ["account", "preferences"] : ["preferences"];
-  }, [enableSharedLayouts]);
+    return supportsAccountSettings ? ["account", "preferences"] : ["preferences"];
+  }, [supportsAccountSettings]);
 
   return (
     <MultiProvider

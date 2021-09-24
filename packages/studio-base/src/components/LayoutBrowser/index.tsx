@@ -25,6 +25,7 @@ import { useUnsavedChangesPrompt } from "@foxglove/studio-base/components/Layout
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
+import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
 import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
@@ -380,7 +381,8 @@ export default function LayoutBrowser({
   const [enableSharedLayouts = false] = useAppConfigurationValue<boolean>(
     AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
   );
-  const showSignInPrompt = enableSharedLayouts && !layoutManager.supportsSharing;
+  const supportsSignIn = useContext(ConsoleApiContext) != undefined && enableSharedLayouts;
+  const showSignInPrompt = supportsSignIn && !layoutManager.supportsSharing;
 
   return (
     <SidebarContent
