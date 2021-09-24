@@ -298,16 +298,14 @@ export default function LayoutBrowser({
 
   const onRevertLayout = useCallbackWithToast(
     async (item: Layout) => {
-      if (layoutIsShared(item)) {
-        const response = await confirm({
-          title: `Revert “${item.name}”?`,
-          prompt: "Your changes will be permantly deleted. This cannot be undone.",
-          ok: "Discard changes",
-          variant: "danger",
-        });
-        if (response !== "ok") {
-          return;
-        }
+      const response = await confirm({
+        title: `Revert “${item.name}”?`,
+        prompt: "Your changes will be permantly deleted. This cannot be undone.",
+        ok: "Discard changes",
+        variant: "danger",
+      });
+      if (response !== "ok") {
+        return;
       }
       await layoutManager.revertLayout({ id: item.id });
       void analytics.logEvent(AppEvent.LAYOUT_REVERT, { permission: item.permission });
