@@ -21,12 +21,27 @@ type McapReaderOptions = {
    * compression will be called to decompress the chunk data.
    */
   decompressHandlers?: {
-    [compression: string]: (buffer: DataView, decompressedSize: bigint) => DataView;
+    [compression: string]: (buffer: Uint8Array, decompressedSize: bigint) => Uint8Array;
   };
 };
 
 /**
  * A streaming reader for Message Capture files.
+ *
+ * Usage example:
+ * ```
+ * const reader = new McapReader();
+ * stream.on("data", (data) => {
+ *   try {
+ *     reader.append(data);
+ *     for (let record; (record = reader.nextRecord()); ) {
+ *       // process available records
+ *     }
+ *   } catch (e) {
+ *     // handle errors
+ *   }
+ * });
+ * ```
  */
 export default class McapReader {
   private buffer = new StreamBuffer(MCAP_MAGIC.length * 2);
@@ -40,14 +55,20 @@ export default class McapReader {
     this.decompressHandlers = decompressHandlers;
   }
 
+  /** @returns True if a valid, complete mcap file has been parsed. */
   done(): boolean {
     return this.doneReading;
   }
 
+  /** @returns The number of bytes that have been received by `append()` but not yet parsed. */
   bytesRemaining(): number {
     return this.buffer.bytesRemaining();
   }
 
+  /**
+   * Provide the reader with newly received bytes for it to process. After calling this function,
+   * call `nextRecord()` again to parse any records that are now available.
+   */
   append(data: Uint8Array): void {
     if (this.doneReading) {
       throw new Error("Already done reading");
@@ -55,6 +76,13 @@ export default class McapReader {
     this.buffer.append(data);
   }
 
+  /**
+   * Read the next record from the stream if possible. If not enough data is available to parse a
+   * complete record, or if the reading has terminated with a valid footer, returns undefined.
+   *
+   * This function may throw any errors encountered during parsing. If an error is thrown, the
+   * reader is in an unspecified state and should no longer be used.
+   */
   nextRecord(): McapRecord | undefined {
     if (this.doneReading) {
       return undefined;
@@ -96,7 +124,7 @@ export default class McapReader {
           if (this.includeChunks) {
             yield record;
           }
-          let buffer = new DataView(record.data);
+          let buffer = new Uint8Array(record.data);
           if (record.compression !== "") {
             const decompress = this.decompressHandlers[record.compression];
             if (!decompress) {
@@ -110,10 +138,11 @@ export default class McapReader {
           if (chunkCrc !== record.decompressedCrc) {
             throw new Error(`Incorrect chunk CRC ${chunkCrc} (expected ${record.decompressedCrc})`);
           }
+          const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
           let chunkOffset = 0;
           for (
             let chunkResult;
-            (chunkResult = parseRecord(buffer, chunkOffset)), chunkResult.record;
+            (chunkResult = parseRecord(view, chunkOffset)), chunkResult.record;
             chunkOffset += chunkResult.usedBytes
           ) {
             switch (chunkResult.record.type) {

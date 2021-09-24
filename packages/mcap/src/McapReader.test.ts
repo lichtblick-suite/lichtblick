@@ -260,9 +260,7 @@ describe("McapReader", () => {
       ...uint32LE(0), // empty schema
       ...[1, 2, 3], // channel data
     ]);
-    const decompressHandlers = {
-      xyz: () => new DataView(channelInfo.buffer, channelInfo.byteOffset, channelInfo.byteLength),
-    };
+    const decompressHandlers = { xyz: () => channelInfo };
     const reader = new McapReader(compressed ? { decompressHandlers } : undefined);
     reader.append(
       new Uint8Array([

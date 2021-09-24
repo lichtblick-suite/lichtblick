@@ -118,13 +118,7 @@ async function validate(
   const reader = new McapReader({
     includeChunks: true,
     decompressHandlers: {
-      lz4: (buffer, decompressedSize) => {
-        const result = decompressLZ4(
-          new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength),
-          Number(decompressedSize),
-        );
-        return new DataView(result.buffer, result.byteOffset, result.byteLength);
-      },
+      lz4: (buffer, decompressedSize) => decompressLZ4(buffer, Number(decompressedSize)),
     },
   });
 
