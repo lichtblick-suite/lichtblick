@@ -1,0 +1,9 @@
+{
+  "extends": "@foxglove/tsconfig/base",
+  "include": ["./**/*"],
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "./dist",
+    "lib": ["es2020", "dom"]
+  }
+}

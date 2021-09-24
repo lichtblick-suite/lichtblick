@@ -1,0 +1,38 @@
+{
+  "name": "@foxglove/mcap",
+  "description": "Message Capture file reading support in TypeScript",
+  "license": "MPL-2.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/foxglove/studio.git"
+  },
+  "author": {
+    "name": "Foxglove Technologies",
+    "email": "support@foxglove.dev"
+  },
+  "homepage": "https://foxglove.dev/",
+  "main": "./src/index.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "prepack": "tsc -b",
+    "validate": "ts-node --project tsconfig.cjs.json scripts/validate.ts"
+  },
+  "devDependencies": {
+    "@foxglove/crc": "0.0.1",
+    "@foxglove/rosmsg": "2.0.0",
+    "@foxglove/rosmsg-serialization": "1.2.0",
+    "@foxglove/rosmsg2-serialization": "1.0.2",
+    "@types/lodash": "^4",
+    "commander": "8.2.0",
+    "lodash": "4.17.21",
+    "ts-node": "10.2.1",
+    "typescript": "4.4.3"
+  },
+  "dependencies": {
+    "eventemitter3": "4.0.7"
+  }
+}

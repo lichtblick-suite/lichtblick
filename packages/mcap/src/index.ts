@@ -2,11 +2,6 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-declare module "wasm-lz4" {
-  function decompress(buffer: Uint8Array, size: number): Buffer;
-  namespace decompress {
-    const isLoaded: Promise<boolean>;
-  }
-
-  export default decompress;
-}
+export { default as McapReader } from "./McapReader";
+export * from "./parse";
+export * from "./types";

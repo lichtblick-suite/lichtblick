@@ -2112,6 +2112,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@foxglove/crc@npm:0.0.1":
+  version: 0.0.1
+  resolution: "@foxglove/crc@npm:0.0.1"
+  checksum: afaad77fa138257b2807c6ca5a22f6fd769bbe4eae88eb37313a71d8f83e5673f563cc656f467b00ab39def1e0705c4e92c048242e386b272d2a6199a75ef486
+  languageName: node
+  linkType: hard
+
 "@foxglove/den@workspace:*, @foxglove/den@workspace:packages/den":
   version: 0.0.0-use.local
   resolution: "@foxglove/den@workspace:packages/den"
@@ -2169,6 +2176,23 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/log@workspace:packages/log"
   dependencies:
+    typescript: 4.4.3
+  languageName: unknown
+  linkType: soft
+
+"@foxglove/mcap@workspace:packages/mcap":
+  version: 0.0.0-use.local
+  resolution: "@foxglove/mcap@workspace:packages/mcap"
+  dependencies:
+    "@foxglove/crc": 0.0.1
+    "@foxglove/rosmsg": 2.0.0
+    "@foxglove/rosmsg-serialization": 1.2.0
+    "@foxglove/rosmsg2-serialization": 1.0.2
+    "@types/lodash": ^4
+    commander: 8.2.0
+    eventemitter3: 4.0.7
+    lodash: 4.17.21
+    ts-node: 10.2.1
     typescript: 4.4.3
   languageName: unknown
   linkType: soft
@@ -2268,7 +2292,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg2-serialization@npm:^1.0.2":
+"@foxglove/rosmsg2-serialization@npm:1.0.2, @foxglove/rosmsg2-serialization@npm:^1.0.2":
   version: 1.0.2
   resolution: "@foxglove/rosmsg2-serialization@npm:1.0.2"
   dependencies:
@@ -5257,10 +5281,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:*":
-  version: 4.14.172
-  resolution: "@types/lodash@npm:4.14.172"
-  checksum: 5fc51ea40d7e455bd1c760bcc60c9e81f82d85988666d4d4969bd8311367c63bbf1fe2be48755ba87836710e45fff94014ec164ebe6ccaa72815014981152434
+"@types/lodash@npm:*, @types/lodash@npm:^4":
+  version: 4.14.173
+  resolution: "@types/lodash@npm:4.14.173"
+  checksum: 9e97ef5816299e5470db1cb32a93e981af60f74f18a35d045ed4caf224a065df96bfae6e444ec96aa392fc01258592b965d840ae042eef77ef719a578c7daef8
   languageName: node
   linkType: hard
 
@@ -8976,6 +9000,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"commander@npm:8.2.0":
+  version: 8.2.0
+  resolution: "commander@npm:8.2.0"
+  checksum: e868805bc266777f7a9c8a740e15b9e02b8148d8251f577ea9b9ef373ac0bdeb77b9b60cfc033592c9e1affea89993be08c13c623f0c619f9bf152c0e4d12cb0
+  languageName: node
+  linkType: hard
+
 "commander@npm:^2.19.0, commander@npm:^2.20.0":
   version: 2.20.3
   resolution: "commander@npm:2.20.3"
@@ -11595,7 +11626,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eventemitter3@npm:^4.0.0, eventemitter3@npm:^4.0.7":
+"eventemitter3@npm:4.0.7, eventemitter3@npm:^4.0.0, eventemitter3@npm:^4.0.7":
   version: 4.0.7
   resolution: "eventemitter3@npm:4.0.7"
   checksum: 1875311c42fcfe9c707b2712c32664a245629b42bb0a5a84439762dd0fd637fc54d078155ea83c2af9e0323c9ac13687e03cfba79b03af9f40c89b4960099374
