@@ -63,21 +63,16 @@ async function validate(
         }
         let parsedDefinitions;
         let messageDeserializer;
-        if (record.schemaFormat === "ros1") {
-          parsedDefinitions = parseMessageDefinition(
-            new TextDecoder().decode(record.schemaDefinition),
-          );
+        if (record.encoding === "ros1") {
+          parsedDefinitions = parseMessageDefinition(new TextDecoder().decode(record.schema));
           messageDeserializer = new ROS1LazyMessageReader(parsedDefinitions);
-        } else if (record.schemaFormat === "ros2") {
-          parsedDefinitions = parseMessageDefinition(
-            new TextDecoder().decode(record.schemaDefinition),
-            {
-              ros2: true,
-            },
-          );
+        } else if (record.encoding === "ros2") {
+          parsedDefinitions = parseMessageDefinition(new TextDecoder().decode(record.schema), {
+            ros2: true,
+          });
           messageDeserializer = new ROS2MessageReader(parsedDefinitions);
         } else {
-          throw new Error(`unsupported schema format ${record.schemaFormat}`);
+          throw new Error(`unsupported encoding ${record.encoding}`);
         }
         channelInfoById.set(record.id, { info: record, messageDeserializer, parsedDefinitions });
         break;

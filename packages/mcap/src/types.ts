@@ -12,9 +12,8 @@ export type ChannelInfo = {
   topic: string;
   encoding: string;
   schemaName: string;
-  schemaFormat: string;
-  schemaDefinition: ArrayBuffer;
-  userData: ArrayBuffer;
+  schema: ArrayBuffer;
+  data: ArrayBuffer;
 };
 export type Message = {
   type: "Message";

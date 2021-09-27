@@ -242,9 +242,8 @@ describe("McapReader", () => {
       topic: "mytopic",
       encoding: "utf12",
       schemaName: "some data",
-      schemaFormat: "none",
-      schemaDefinition: new ArrayBuffer(0),
-      userData: new Uint8Array([1, 2, 3]).buffer,
+      schema: new ArrayBuffer(0),
+      data: new Uint8Array([1, 2, 3]).buffer,
     });
     expect(reader.nextRecord()).toEqual({ type: "Footer", indexPos: 0n, indexCrc: 0 });
     expect(reader.done()).toBe(true);
@@ -288,9 +287,8 @@ describe("McapReader", () => {
       topic: "mytopic",
       encoding: "utf12",
       schemaName: "some data",
-      schemaFormat: "none",
-      schemaDefinition: new ArrayBuffer(0),
-      userData: new Uint8Array([1, 2, 3]).buffer,
+      schema: new ArrayBuffer(0),
+      data: new Uint8Array([1, 2, 3]).buffer,
     });
     expect(reader.nextRecord()).toEqual({ type: "Footer", indexPos: 0n, indexCrc: 0 });
     expect(reader.done()).toBe(true);
