@@ -2112,10 +2112,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/crc@npm:0.0.1":
-  version: 0.0.1
-  resolution: "@foxglove/crc@npm:0.0.1"
-  checksum: afaad77fa138257b2807c6ca5a22f6fd769bbe4eae88eb37313a71d8f83e5673f563cc656f467b00ab39def1e0705c4e92c048242e386b272d2a6199a75ef486
+"@foxglove/crc@npm:0.0.3":
+  version: 0.0.3
+  resolution: "@foxglove/crc@npm:0.0.3"
+  checksum: 2eee0e45780e3289c4a190fa909e5977643667e19a21b945a109977b89427b877d8e12ebf91821653d69bdb0390e58540e1c9bb906aefcc7dd818c64f131f071
   languageName: node
   linkType: hard
 
@@ -2184,7 +2184,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@foxglove/mcap@workspace:packages/mcap"
   dependencies:
-    "@foxglove/crc": 0.0.1
+    "@foxglove/crc": 0.0.3
     "@foxglove/rosmsg": 2.0.0
     "@foxglove/rosmsg-serialization": 1.2.0
     "@foxglove/rosmsg2-serialization": 1.0.2

@@ -132,9 +132,7 @@ export default class McapReader {
             }
             buffer = decompress(buffer, record.decompressedSize);
           }
-          const chunkCrc = crc32(
-            new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength),
-          );
+          const chunkCrc = crc32(buffer);
           if (chunkCrc !== record.decompressedCrc) {
             throw new Error(`Incorrect chunk CRC ${chunkCrc} (expected ${record.decompressedCrc})`);
           }
