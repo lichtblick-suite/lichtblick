@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { mergeStyleSets } from "@fluentui/merge-styles";
 import AlertCircleIcon from "@mdi/svg/svg/alert-circle.svg";
 import MenuIcon from "@mdi/svg/svg/menu.svg";
 import cx from "classnames";
@@ -25,9 +26,127 @@ import { lineColors } from "@foxglove/studio-base/util/plotColors";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
-import styles from "./PlotLegend.module.scss";
 import { PlotPath, BasePlotPath, isReferenceLinePlotPathType } from "./internalTypes";
 import { plotableRosTypes, PlotConfig, PlotXAxisVal } from "./types";
+
+const classes = mergeStyleSets({
+  root: {
+    position: "absolute",
+    left: 65,
+    top: 6,
+    background: colors.LEGEND_HIGHLIGHT_COLOR,
+    color: colors.LIGHT1,
+    maxWidth: "calc(100% - 65px - 25px)",
+
+    ":hover": {
+      background: colors.LEGEND_HIGHLIGHT_COLOR,
+    },
+  },
+  dropdown: {
+    backgroundColor: "transparent !important",
+    padding: "3px !important",
+  },
+  addLine: {
+    display: "none",
+    content: "+ add line",
+    position: "absolute",
+    background: colors.LEGEND_HIGHLIGHT_COLOR,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    transform: "translateY(100%)",
+    padding: 6,
+    cursor: "pointer",
+    textAlign: "center",
+
+    ":hover": {
+      background: colors.LEGEND_HIGHLIGHT_COLOR_BRIGHT,
+    },
+    ".mosaic-window:hover &": {
+      display: "block",
+    },
+  },
+  item: {
+    display: "flex",
+    padding: "0 5px",
+    height: 20,
+    lineHeight: 20,
+    position: "relative",
+
+    ":hover": {
+      background: colors.LEGEND_HIGHLIGHT_COLOR_BRIGHT,
+
+      "[data-item-remove]": {
+        visibility: "initial",
+      },
+    },
+  },
+  itemIconContainer: {
+    display: "inline-block",
+    width: 22,
+    height: 20,
+    lineHeight: 0,
+    cursor: "pointer",
+    flexShrink: 0,
+
+    ":hover": {
+      background: colors.LEGEND_HIGHLIGHT_COLOR_BRIGHTER,
+    },
+  },
+  itemIcon: {
+    display: "inline-block",
+    width: 15,
+    borderBottom: "2px solid currentColor",
+    height: 0,
+    verticalAlign: "middle",
+    position: "relative",
+    top: "calc(50% - 1px)",
+  },
+  legendToggle: {
+    visibility: "hidden",
+    padding: 6,
+    cursor: "pointer",
+    position: "absolute",
+    top: 0,
+    left: -30,
+    height: 25,
+    borderRadius: 5,
+    userSelect: "none",
+    background: colors.LEGEND_HIGHLIGHT_COLOR_BRIGHT,
+
+    ":hover": {
+      background: colors.LEGEND_HIGHLIGHT_COLOR_BRIGHT,
+    },
+    ".mosaic-window:hover &": {
+      visibility: "initial",
+    },
+  },
+  itemRemove: {
+    visibility: "hidden",
+    padding: "0 6px",
+    cursor: "pointer",
+    position: "absolute",
+    right: -21,
+    background: "transparent",
+    height: 20,
+    lineHeight: 20,
+    userSelect: "none",
+
+    ":hover": {
+      background: colors.LEGEND_HIGHLIGHT_COLOR_BRIGHT,
+    },
+  },
+  itemInput: {
+    overflow: "hidden",
+    width: "100%",
+    display: "flex",
+  },
+  itemInputDisabled: {
+    input: {
+      textDecoration: "line-through",
+    },
+  },
+});
 
 type PlotLegendProps = {
   paths: PlotPath[];
@@ -97,8 +216,8 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
 
   if (!showLegend) {
     return (
-      <div className={styles.root}>
-        <Icon className={styles.legendToggle} onClick={toggleToShowLegend}>
+      <div className={classes.root}>
+        <Icon className={classes.legendToggle} onClick={toggleToShowLegend}>
           <MenuIcon />
         </Icon>
       </div>
@@ -106,20 +225,20 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
   }
 
   return (
-    <div className={styles.root}>
-      <Icon className={styles.legendToggle} onClick={toggleToHideLegend}>
+    <div className={classes.root}>
+      <Icon className={classes.legendToggle} onClick={toggleToHideLegend}>
         <MenuIcon />
       </Icon>
-      <div className={styles.item}>
+      <div className={classes.item}>
         x:
         <div
-          className={styles.itemIconContainer}
+          className={classes.itemIconContainer}
           style={{ width: "auto", lineHeight: "normal", zIndex: 2 }}
         >
           <Dropdown
             value={xAxisVal}
             text={shortXAxisLabel(xAxisVal)}
-            btnClassname={styles.dropdown}
+            btnClassname={classes.dropdown}
             onChange={(newXAxisVal) => saveConfig({ xAxisVal: newXAxisVal })}
             noPortal
           >
@@ -138,9 +257,8 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
           </Dropdown>
         </div>
         <div
-          className={cx({
-            [styles.itemInput!]: true,
-            [styles.itemInputDisabled!]: xAxisPath?.enabled !== true,
+          className={cx(classes.itemInput, {
+            [classes.itemInputDisabled]: xAxisPath?.enabled !== true,
           })}
         >
           {(xAxisVal === "custom" || xAxisVal === "currentCustom") && (
@@ -171,10 +289,10 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
 
         return (
           <Fragment key={index}>
-            <div className={styles.item}>
+            <div className={classes.item}>
               y:
               <div
-                className={styles.itemIconContainer}
+                className={classes.itemIconContainer}
                 style={{ zIndex: 1 }}
                 onClick={() => {
                   const newPaths = paths.slice();
@@ -186,14 +304,13 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
                 }}
               >
                 <div
-                  className={styles.itemIcon}
+                  className={classes.itemIcon}
                   style={{ color: path.enabled ? lineColors[index % lineColors.length] : "#777" }}
                 />
               </div>
               <div
-                className={cx({
-                  [styles.itemInput!]: true,
-                  [styles.itemInputDisabled!]: !path.enabled,
+                className={cx(classes.itemInput, {
+                  [classes.itemInputDisabled]: !path.enabled,
                 })}
               >
                 <MessagePathInput
@@ -221,7 +338,8 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
                 )}
               </div>
               <div
-                className={styles.itemRemove}
+                data-item-remove
+                className={classes.itemRemove}
                 onClick={() => {
                   const newPaths = paths.slice();
                   newPaths.splice(index, 1);
@@ -235,7 +353,7 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
         );
       })}
       <div
-        className={styles.addLine}
+        className={classes.addLine}
         onClick={() =>
           saveConfig({
             paths: [

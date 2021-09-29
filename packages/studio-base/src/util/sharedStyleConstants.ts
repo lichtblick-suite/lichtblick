@@ -89,6 +89,9 @@ export const colors = {
   DIFF_MODE_SOURCE_1: robotStylesColors.MAGENTA,
   DIFF_MODE_SOURCE_2: robotStylesColors.TEAL,
   DIFF_MODE_SOURCE_BOTH: robotStylesColors.DARK7,
+  LEGEND_HIGHLIGHT_COLOR: "rgba(36, 36, 41, 0.7)",
+  LEGEND_HIGHLIGHT_COLOR_BRIGHT: "#37373f",
+  LEGEND_HIGHLIGHT_COLOR_BRIGHTER: "#4d4d57",
   CYAN: "#00ffff",
 
   BACKGROUND: "#121217",
