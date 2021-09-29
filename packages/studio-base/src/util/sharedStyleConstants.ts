@@ -128,6 +128,7 @@ export const spacing = {
   TOP_BAR_HEIGHT: "36px",
   PANEL_TOOLBAR_HEIGHT: "26px",
   PANEL_TOOLBAR_SPACING: "4px",
+  PLAYBACK_CONTROL_HEIGHT: "50px",
 };
 
 export const textSize = {
