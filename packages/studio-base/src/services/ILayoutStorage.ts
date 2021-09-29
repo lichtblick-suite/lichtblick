@@ -129,7 +129,8 @@ export function migrateLayout(value: unknown): Layout {
   return {
     id: layout.id,
     name: layout.name ?? `Unnamed (${now})`,
-    permission: layout.permission ?? "CREATOR_WRITE",
+    permission:
+      (layout.permission?.toUpperCase() as LayoutPermission | undefined) ?? "CREATOR_WRITE",
     working: layout.working
       ? { ...layout.working, data: migrateData(layout.working.data) }
       : undefined,
