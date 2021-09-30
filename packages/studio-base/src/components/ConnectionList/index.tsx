@@ -110,6 +110,7 @@ export default function ConnectionList(): JSX.Element {
           case "rosbridge-websocket":
             iconName = "Flow";
             break;
+          case "foxglove-data-platform":
           case "ros1-remote-bagfile":
             iconName = "FileASPX";
             break;

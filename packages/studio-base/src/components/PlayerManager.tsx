@@ -14,6 +14,7 @@
 import {
   PropsWithChildren,
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -29,6 +30,7 @@ import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import OsContextSingleton from "@foxglove/studio-base/OsContextSingleton";
 import { MessagePipelineProvider } from "@foxglove/studio-base/components/MessagePipeline";
 import { useAnalytics } from "@foxglove/studio-base/context/AnalyticsContext";
+import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
 import { useCurrentLayoutSelector } from "@foxglove/studio-base/context/CurrentLayoutContext";
 import PlayerSelectionContext, {
   PlayerSelection,
@@ -46,6 +48,7 @@ import UserNodePlayer from "@foxglove/studio-base/players/UserNodePlayer";
 import { BuildPlayerOptions } from "@foxglove/studio-base/players/buildPlayer";
 import { Player } from "@foxglove/studio-base/players/types";
 import { getLocalRosbag2Descriptor } from "@foxglove/studio-base/randomAccessDataProviders/standardDataProviderDescriptors";
+import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 import { UserNodes } from "@foxglove/studio-base/types/panels";
 import Storage from "@foxglove/studio-base/util/Storage";
 import { AppError } from "@foxglove/studio-base/util/errors";
@@ -62,7 +65,15 @@ type FactoryOptions = {
   sourceOptions: Record<string, unknown>;
   playerOptions: BuildPlayerOptions;
   prompt: ReturnType<typeof usePrompt>;
+  consoleApi?: ConsoleApi;
   storage: Storage;
+};
+
+type FoxgloveDataPlatformOptions = {
+  start: string;
+  end: string;
+  seek?: string;
+  deviceId: string;
 };
 
 async function localBagFileSource(options: FactoryOptions): Promise<Player | undefined> {
@@ -164,6 +175,45 @@ async function remoteBagFileSource(options: FactoryOptions): Promise<Player | un
 
   const { buildPlayerFromBagURLs } = await import("@foxglove/studio-base/players/buildPlayer");
   return buildPlayerFromBagURLs([url], options.playerOptions);
+}
+
+async function foxgloveDataPlatformSource(options: FactoryOptions): Promise<Player | undefined> {
+  const storageCacheKey = `studio.source.${options.source.name}`;
+
+  // load the player on-demand
+  const { default: FoxgloveDataPlatformPlayer } = await import(
+    "@foxglove/studio-base/players/FoxgloveDataPlatformPlayer"
+  );
+
+  let params: FoxgloveDataPlatformOptions | undefined;
+
+  const restore = Boolean(options.sourceOptions.restore ?? false);
+  if (restore) {
+    params = options.storage.getItem<FoxgloveDataPlatformOptions>(storageCacheKey);
+  } else if (typeof options.sourceOptions.start === "string") {
+    params = options.sourceOptions as FoxgloveDataPlatformOptions;
+    if (!params.start || !params.end || !params.deviceId) {
+      throw new Error(
+        `Missing required FoxgloveDataPlatform parameters in ${JSON.stringify(
+          options.sourceOptions,
+        )}`,
+      );
+    }
+  }
+
+  if (!params) {
+    return undefined;
+  }
+  if (!options.consoleApi) {
+    throw new Error(`${options.source.name} data source is not available without ConsoleApi`);
+  }
+
+  options.storage.setItem(storageCacheKey, params);
+  return new FoxgloveDataPlatformPlayer({
+    params,
+    consoleApi: options.consoleApi,
+    metricsCollector: options.playerOptions.metricsCollector,
+  });
 }
 
 async function rosbridgeSource(options: FactoryOptions): Promise<Player | undefined> {
@@ -354,6 +404,7 @@ export default function PlayerManager({
   playerSources: PlayerSourceDefinition[];
 }>): JSX.Element {
   useWarnImmediateReRender();
+  const consoleApi = useContext(ConsoleApiContext);
 
   const { setUserNodeDiagnostics, addUserNodeLogs, setUserNodeRosLib } = useUserNodeState();
   const userNodeActions = useShallowMemo({
@@ -415,6 +466,8 @@ export default function PlayerManager({
   // requested player.
   const lookupPlayerBuilderFactory = useCallback((definition: PlayerSourceDefinition) => {
     switch (definition.type) {
+      case "foxglove-data-platform":
+        return foxgloveDataPlatformSource;
       case "ros1-local-bagfile":
         return localBagFileSource;
       case "ros2-local-bagfile":
@@ -467,6 +520,7 @@ export default function PlayerManager({
           sourceOptions: { ...params, rosHostname },
           playerOptions: buildPlayerOptions,
           prompt,
+          consoleApi,
           storage,
         });
         if (newBasePlayer && isMounted()) {
@@ -482,6 +536,7 @@ export default function PlayerManager({
     [
       addToast,
       buildPlayerOptions,
+      consoleApi,
       isMounted,
       lookupPlayerBuilderFactory,
       metricsCollector,

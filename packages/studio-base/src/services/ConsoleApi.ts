@@ -47,6 +47,14 @@ type TokenResponse = {
   idToken: string;
 };
 
+type TopicResponse = {
+  topic: string;
+  encoding: string;
+  schemaName: string;
+  schema?: string;
+  version: string;
+};
+
 export type LayoutID = string & { __brand: "LayoutID" };
 export type ISO8601Timestamp = string & { __brand: "ISO8601Timestamp" };
 
@@ -225,6 +233,32 @@ class ConsoleApi {
 
   async deleteLayout(id: LayoutID): Promise<boolean> {
     return (await this.delete(`/v1/layouts/${id}`)).status === 200;
+  }
+
+  async topics(params: {
+    deviceId: string;
+    start: string;
+    end: string;
+    includeSchemas?: boolean;
+  }): Promise<readonly TopicResponse[]> {
+    return (
+      await this.get<TopicResponse[]>("/v1/data/topics", {
+        ...params,
+        includeSchemas: params.includeSchemas ?? false ? "true" : "false",
+      })
+    ).map((topic) => ({
+      ...topic,
+      schema: topic.schema != undefined ? atob(topic.schema) : undefined,
+    }));
+  }
+
+  async stream(params: {
+    deviceId: string;
+    start: string;
+    end: string;
+    topics: readonly string[];
+  }): Promise<{ link: string }> {
+    return await this.post<{ link: string }>("/v1/data/stream", params);
   }
 }
 

@@ -24,7 +24,7 @@ export default function NotificationModal({
 
   return (
     <Dialog
-      isOpen
+      hidden={false}
       onDismiss={onRequestClose}
       dialogContentProps={{
         title: message,

@@ -263,13 +263,6 @@ export type SubscribePayload = {
   // The topic name to subscribe to.
   topic: string;
 
-  // A particular requested encoding.
-  // TODO(JP): Remove and derive from `scale` (= "image/compressed").
-  encoding?: string;
-
-  // Currently only used for images. Used for compressing the image.
-  scale?: number;
-
   // Optionally, where the request came from. Used in the "Internals" panel to improve debugging.
   requester?: { type: "panel" | "node" | "other"; name: string };
 };

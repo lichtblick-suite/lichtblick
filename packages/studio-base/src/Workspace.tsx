@@ -24,6 +24,7 @@ import { useToasts } from "react-toast-notifications";
 import { useMount, useMountedState } from "react-use";
 
 import Log from "@foxglove/log";
+import { fromRFC3339String } from "@foxglove/rostime";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import AccountSettings from "@foxglove/studio-base/components/AccountSettingsSidebar/AccountSettings";
 import ConnectionList from "@foxglove/studio-base/components/ConnectionList";
@@ -335,19 +336,47 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
         return;
       }
 
-      // only support rosbag urls
       const type = url.searchParams.get("type");
-      const bagUrl = url.searchParams.get("url");
-      if (type !== "rosbag" || bagUrl == undefined) {
-        return;
+      if (type === "rosbag") {
+        const bagUrl = url.searchParams.get("url");
+        if (!bagUrl) {
+          log.warn(`Missing rosbag url param in ${url}`);
+          return;
+        }
+        selectSource(
+          {
+            name: "ROS 1 Bag File (HTTP)",
+            type: "ros1-remote-bagfile",
+          },
+          { url: bagUrl },
+        );
+      } else if (type === "foxglove-data-platform") {
+        const start = url.searchParams.get("start") ?? "";
+        const end = url.searchParams.get("end") ?? "";
+        const seekTo = url.searchParams.get("seekTo") ?? undefined;
+        const deviceId = url.searchParams.get("deviceId");
+        if (!deviceId) {
+          log.warn(`Missing deviceId param in ${url}`);
+          return;
+        }
+        if (
+          !fromRFC3339String(start) ||
+          !fromRFC3339String(end) ||
+          (seekTo && !fromRFC3339String(seekTo))
+        ) {
+          log.warn(`Missing or invalid timestamp(s) in ${url}`);
+          return;
+        }
+        selectSource(
+          {
+            name: "Foxglove Data Platform",
+            type: "foxglove-data-platform",
+          },
+          { start, end, seekTo, deviceId },
+        );
+      } else {
+        log.warn(`Unknown deep link type ${url}`);
       }
-      selectSource(
-        {
-          name: "ROS 1 Bag File (HTTP)",
-          type: "ros1-remote-bagfile",
-        },
-        { url: bagUrl },
-      );
     } catch (err) {
       log.error(err);
     }

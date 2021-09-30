@@ -12,40 +12,15 @@
 //   You may not use this file except in compliance with the License.
 
 import { Time, fromSec } from "@foxglove/rostime";
+import permutations from "@foxglove/studio-base/test/permutations";
 
 import { getBagChunksOverlapCount } from "./bags";
-
-function* getPermutations<T>(values: T[]): Iterable<T[]> {
-  if (values.length < 2) {
-    yield values;
-    return;
-  }
-  for (let i = 0; i < values.length; ++i) {
-    const element = values[i]!;
-    const rest = [...values.slice(0, i), ...values.slice(i + 1)];
-    for (const restPermutation of getPermutations(rest)) {
-      yield [element, ...restPermutation];
-    }
-  }
-}
-
-// Just to make sure that it works
-describe("permutations", () => {
-  it("returns every order of the input elements", () => {
-    const permutations = [...getPermutations<number>([1, 2, 3])].map((numbers: number[]) =>
-      numbers.join(","),
-    );
-    expect(new Set(permutations)).toEqual(
-      new Set(["1,2,3", "1,3,2", "2,1,3", "2,3,1", "3,1,2", "3,2,1"]),
-    );
-  });
-});
 
 const expectChunkOverlaps = (
   elements: { startTime: Time; endTime: Time }[],
   expectedSize: number,
 ) => {
-  for (const permutation of getPermutations(elements)) {
+  for (const permutation of permutations(elements)) {
     expect(getBagChunksOverlapCount(permutation)).toBe(expectedSize);
   }
 };
