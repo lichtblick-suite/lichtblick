@@ -122,7 +122,7 @@ export const MosaicWrapper = ({ children }: { children: React.ReactNode }): JSX.
   return (
     <DndProvider backend={HTML5Backend}>
       <Mosaic
-        className="none"
+        className="mosaic-foxglove-theme" // prevent the default mosaic theme from being applied
         initialValue="mock"
         renderTile={(_id, path) => {
           return (

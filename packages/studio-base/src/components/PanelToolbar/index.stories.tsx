@@ -45,7 +45,7 @@ class MosaicWrapper extends React.Component<{
           </MosaicWindow>
         )}
         value={this.props.layout ?? "dummy"}
-        className="none"
+        className="mosaic-foxglove-theme" // prevent the default mosaic theme from being applied
       />
     );
   }

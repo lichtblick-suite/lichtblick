@@ -46,8 +46,6 @@ import { getPanelIdForType, getPanelTypeFromId } from "@foxglove/studio-base/uti
 
 import ErrorBoundary from "./ErrorBoundary";
 
-import "./PanelLayout.scss";
-
 type Props = {
   layout?: MosaicNode<string>;
   onChange: (panels: MosaicNode<string> | undefined) => void;
@@ -168,7 +166,7 @@ export function UnconnectedPanelLayout(props: Props): React.ReactElement {
       layout != undefined || layout === "" ? (
         <MosaicWithoutDragDropContext
           renderTile={renderTile}
-          className={"none"}
+          className="mosaic-foxglove-theme" // prevent the default mosaic theme from being applied
           resize={{ minimumPaneSizePercentage: 2 }}
           value={layout}
           onChange={(newLayout) => onChange(newLayout ?? undefined)}
