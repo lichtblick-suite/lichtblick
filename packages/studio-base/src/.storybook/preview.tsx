@@ -17,7 +17,7 @@ import { makeConfiguration } from "@foxglove/studio-base/util/makeConfiguration"
 import signal from "@foxglove/studio-base/util/signal";
 import waitForFonts from "@foxglove/studio-base/util/waitForFonts";
 
-import "./styles.scss";
+import "./styles.css";
 
 let loaded = false;
 

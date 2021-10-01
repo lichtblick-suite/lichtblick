@@ -228,7 +228,6 @@ const PlaybackTimeDisplayMethod = ({
           root: {
             border: "none",
             padding: theme.spacing.s1,
-            margin: 0, // Remove this once global.scss has gone away
             minWidth: "50px",
           },
           label: theme.fonts.small,

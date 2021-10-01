@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 // Bring in global modules and overrides required by studio source files
-// This adds type declarations for scss, bag, etc imports
+// This adds type declarations for bag, etc imports
 // This adds type declarations for global react
 // See typings/index.d.ts for additional included references
 /// <reference types="./typings" />

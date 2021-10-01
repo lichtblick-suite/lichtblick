@@ -2394,7 +2394,6 @@ __metadata:
     "@types/react-virtualized": 9.21.13
     "@types/roslib": "workspace:*"
     "@types/sanitize-html": 2.3.2
-    "@types/sass": ^1.16.1
     "@types/seedrandom": 3.0.1
     "@types/shallowequal": 1.1.1
     "@types/string-hash": 1.1.1
@@ -2474,8 +2473,6 @@ __metadata:
     reselect: 4.0.0
     roslib: "github:foxglove/roslibjs#df3d7f87064c93b705e6e7e3354b2c6f63b682a6"
     sanitize-html: 2.5.0
-    sass: 1.39.2
-    sass-loader: 12.1.0
     seedrandom: 3.0.5
     shallowequal: 1.1.0
     storycap: 3.1.0
@@ -5671,15 +5668,6 @@ __metadata:
   dependencies:
     htmlparser2: ^6.0.0
   checksum: 7f5b7e8a354d247a8fc6edc7c6fee8a7537bfda9002f5b15e127e3329896d5c2ad52ec9db8ba8503db0f6cdce724b68ea6533256aeb5ec367682ee536bae5b65
-  languageName: node
-  linkType: hard
-
-"@types/sass@npm:^1.16.1":
-  version: 1.16.1
-  resolution: "@types/sass@npm:1.16.1"
-  dependencies:
-    "@types/node": "*"
-  checksum: 3f86d2eaf4988a2775fc0fc164d35e73ce82d71228191da7b11d97ad5e8ac129f1c5f798307e31482f8cfebab758bd3b24e731860bed81afe5a1bbe13fa2b2df
   languageName: node
   linkType: hard
 
@@ -21195,39 +21183,6 @@ resolve@^2.0.0-next.3:
     parse-srcset: ^1.0.2
     postcss: ^8.0.2
   checksum: cae6b1b04762bc40029340b35fd92ae538e31245c4c799376c5dbc96ae3ce145a6c501b8d043549dfa9f04d406f6e9554a34b2e3a98ff7b343337477ceec0f7a
-  languageName: node
-  linkType: hard
-
-"sass-loader@npm:12.1.0":
-  version: 12.1.0
-  resolution: "sass-loader@npm:12.1.0"
-  dependencies:
-    klona: ^2.0.4
-    neo-async: ^2.6.2
-  peerDependencies:
-    fibers: ">= 3.1.0"
-    node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0
-    sass: ^1.3.0
-    webpack: ^5.0.0
-  peerDependenciesMeta:
-    fibers:
-      optional: true
-    node-sass:
-      optional: true
-    sass:
-      optional: true
-  checksum: 69c66ea3482922064f1e907fc204283e5e9cc02eb20b7ab1761d478922f77b3e2c47c8e3c585f771d75ce57bb088b226ae2eb4c736849b29c8727e921a6e0d41
-  languageName: node
-  linkType: hard
-
-"sass@npm:1.39.2":
-  version: 1.39.2
-  resolution: "sass@npm:1.39.2"
-  dependencies:
-    chokidar: ">=3.0.0 <4.0.0"
-  bin:
-    sass: sass.js
-  checksum: 7b3d96e5db3c579f4d48064bf3ec6582999255aab7fa3226d5db4711434b7aa54cc8f656ca4763c4e65c92520d6820651aecd38148b560997b445ba86b3e3c77
   languageName: node
   linkType: hard
 

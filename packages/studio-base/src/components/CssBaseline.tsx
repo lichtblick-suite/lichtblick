@@ -5,7 +5,7 @@
 import { mergeStyles, useTheme } from "@fluentui/react";
 import { PropsWithChildren } from "react";
 
-import "@foxglove/studio-base/styles/assets/latin-roboto-mono.scss";
+import "@foxglove/studio-base/styles/assets/latin-roboto-mono.css";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export default function CssBaseline(props: PropsWithChildren<unknown>): JSX.Element {

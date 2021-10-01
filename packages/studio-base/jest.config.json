@@ -20,7 +20,6 @@
     "\\.svg$": "<rootDir>/src/test/mocks/MockSvg.tsx",
     "react-monaco-editor": "<rootDir>/src/test/stubs/MonacoEditor.tsx",
     "\\.(glb|md|png)$": "<rootDir>/src/test/mocks/fileMock.ts",
-    "\\.(css|scss)$": "<rootDir>/src/test/mocks/styleMock.ts",
     "@foxglove/studio-base/(.*)": "<rootDir>/src/$1"
   },
   "//": "Native find is slow because it does not exclude files: https://github.com/facebook/jest/pull/11264#issuecomment-825377579",

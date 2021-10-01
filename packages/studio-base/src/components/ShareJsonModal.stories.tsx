@@ -31,6 +31,19 @@ storiesOf("components/ShareJsonModal", module)
       noun="layout"
     />
   ))
+  .add("JSON", () => (
+    <ShareJsonModal
+      title="Foo"
+      onRequestClose={() => {
+        // no-op
+      }}
+      initialValue={{ foo: "bar", baz: "qux" }}
+      onChange={() => {
+        // no-op
+      }}
+      noun="layout"
+    />
+  ))
   .add("submitting invalid layout", () => {
     useEffect(() => {
       setTimeout(() => {

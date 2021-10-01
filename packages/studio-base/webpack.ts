@@ -135,32 +135,20 @@ export function makeConfig(
           },
         },
         {
-          test: /\.s?css$/,
+          test: /\.css$/,
           loader: "style-loader",
           sideEffects: true,
         },
         {
-          test: /\.s?css$/,
-          oneOf: [
-            {
-              test: /\.module\./,
-              loader: "css-loader",
-              options: {
-                modules: {
-                  localIdentName: "[path][name]-[contenthash:base64:5]--[local]",
-                },
-                sourceMap: true,
-              },
-            },
-            { loader: "css-loader", options: { sourceMap: true } },
-          ],
+          test: /\.css$/,
+          loader: "css-loader",
+          options: { sourceMap: true },
         },
         {
-          test: /\.s?css$/,
+          test: /\.css$/,
           loader: "esbuild-loader",
           options: { loader: "css", minify: !isDev },
         },
-        { test: /\.scss$/, loader: "sass-loader", options: { sourceMap: true } },
         { test: /\.woff2?$/, type: "asset/inline" },
         { test: /\.(glb|bag|ttf|bin)$/, type: "asset/resource" },
         {

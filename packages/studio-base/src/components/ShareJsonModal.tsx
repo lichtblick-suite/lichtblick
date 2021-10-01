@@ -15,6 +15,7 @@ import { useCallback, useMemo, useState } from "react";
 
 import clipboard from "@foxglove/studio-base/util/clipboard";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 type Props = {
   onRequestClose: () => void;
@@ -80,7 +81,11 @@ export default function ShareJsonModal({
         errorMessage={error && "The JSON provided is invalid."}
         spellCheck={false}
         styles={{
-          field: { fontFamily: "monospace !important", maxHeight: "60vh", overflowY: "auto" },
+          field: {
+            fontFamily: `${fonts.MONOSPACE} !important`,
+            maxHeight: "60vh",
+            overflowY: "auto",
+          },
         }}
       />
       <DialogFooter

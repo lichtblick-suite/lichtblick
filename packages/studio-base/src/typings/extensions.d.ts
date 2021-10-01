@@ -36,11 +36,6 @@ declare module "*.png" {
   export default Path;
 }
 
-declare module "*.module.scss" {
-  const classes: { [key: string]: string };
-  export default classes;
-}
-
 declare module "*.glb" {
   const content: string;
   export default content;
