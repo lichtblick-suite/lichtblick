@@ -98,7 +98,7 @@ export default async function* streamMessages(
           messages.push({
             topic: channelInfo.info.topic,
             receiveTime,
-            message: channelInfo.messageDeserializer.readMessage(new Uint8Array(record.data)),
+            message: channelInfo.messageDeserializer.readMessage(new DataView(record.data)),
           });
         }
         break;

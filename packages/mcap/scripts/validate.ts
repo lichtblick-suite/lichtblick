@@ -86,17 +86,17 @@ async function validate(
         if (deserialize) {
           let message: unknown;
           if (channelInfo.messageDeserializer instanceof ROS1LazyMessageReader) {
-            const size = channelInfo.messageDeserializer.size(new Uint8Array(record.data));
+            const size = channelInfo.messageDeserializer.size(new DataView(record.data));
             if (size !== record.data.byteLength) {
               throw new Error(
                 `Message size ${size} should match buffer length ${record.data.byteLength}`,
               );
             }
             message = channelInfo.messageDeserializer
-              .readMessage(new Uint8Array(record.data))
+              .readMessage(new DataView(record.data))
               .toJSON();
           } else {
-            message = channelInfo.messageDeserializer.readMessage(new Uint8Array(record.data));
+            message = channelInfo.messageDeserializer.readMessage(new DataView(record.data));
           }
           if (dump) {
             log(message);
