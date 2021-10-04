@@ -96,53 +96,52 @@ export type RandomAccessPlayerOptions = {
 export default class RandomAccessPlayer implements Player {
   private _label?: string;
   private _filePath?: string;
-  _provider: RandomAccessDataProvider;
-  _isPlaying: boolean = false;
-  _wasPlayingBeforeTabSwitch = false;
-  _listener?: (arg0: PlayerState) => Promise<void>;
-  _speed: number = 0.2;
-  _start: Time = { sec: 0, nsec: 0 };
-  _end: Time = { sec: 0, nsec: 0 };
+  private _provider: RandomAccessDataProvider;
+  private _isPlaying: boolean = false;
+  private _listener?: (arg0: PlayerState) => Promise<void>;
+  private _speed: number = 0.2;
+  private _start: Time = { sec: 0, nsec: 0 };
+  private _end: Time = { sec: 0, nsec: 0 };
   // next read start time indicates where to start reading for the next tick
   // after a tick read, it is set to 1nsec past the end of the read operation (preparing for the next tick)
-  _nextReadStartTime: Time = { sec: 0, nsec: 0 };
-  _lastTickMillis?: number;
+  private _nextReadStartTime: Time = { sec: 0, nsec: 0 };
+  private _lastTickMillis?: number;
   // The last time a "seek" was started. This is used to cancel async operations, such as seeks or ticks, when a seek
   // happens while they are ocurring.
-  _lastSeekStartTime: number = Date.now();
+  private _lastSeekStartTime: number = Date.now();
   // This is the "lastSeekTime" emitted in the playerState. It is not the same as the _lastSeekStartTime because we can
   // start a seek and not end up emitting it, or emit something else while we are requesting messages for the seek. The
   // RandomAccessDataProvider's `progressCallback` can cause an emit at any time, for example.
   // We only want to set the "lastSeekTime" exactly when we emit the messages coming from the seek.
-  _lastSeekEmitTime: number = this._lastSeekStartTime;
-  _cancelSeekBackfill: boolean = false;
-  _parsedSubscribedTopics: Set<string> = new Set();
-  _providerTopics: Topic[] = [];
-  _providerConnections: Connection[] = [];
-  _providerDatatypes: RosDatatypes = new Map();
-  _metricsCollector: PlayerMetricsCollectorInterface;
-  _initializing: boolean = true;
-  _initialized: boolean = false;
-  _reconnecting: boolean = false;
-  _progress: Progress = Object.freeze({});
-  _id: string = uuidv4();
-  _messages: MessageEvent<unknown>[] = [];
-  _receivedBytes: number = 0;
-  _messageOrder: TimestampMethod = "receiveTime";
-  _hasError = false;
-  _closed = false;
-  _seekToTime: SeekToTimeSpec;
-  _lastRangeMillis?: number;
-  _parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic = {};
+  private _lastSeekEmitTime: number = this._lastSeekStartTime;
+  private _cancelSeekBackfill: boolean = false;
+  private _parsedSubscribedTopics: Set<string> = new Set();
+  private _providerTopics: Topic[] = [];
+  private _providerConnections: Connection[] = [];
+  private _providerDatatypes: RosDatatypes = new Map();
+  private _metricsCollector: PlayerMetricsCollectorInterface;
+  private _initializing: boolean = true;
+  private _initialized: boolean = false;
+  private _reconnecting: boolean = false;
+  private _progress: Progress = Object.freeze({});
+  private _id: string = uuidv4();
+  private _messages: MessageEvent<unknown>[] = [];
+  private _receivedBytes: number = 0;
+  private _messageOrder: TimestampMethod = "receiveTime";
+  private _hasError = false;
+  private _closed = false;
+  private _seekToTime: SeekToTimeSpec;
+  private _lastRangeMillis?: number;
+  private _parsedMessageDefinitionsByTopic: ParsedMessageDefinitionsByTopic = {};
 
   // To keep reference equality for downstream user memoization cache the currentTime provided in the last activeData update
   // See additional comments below where _currentTime is set
-  _currentTime?: Time;
+  private _currentTime?: Time;
 
   // The problem store holds problems based on keys (which may be hard-coded problem types or topics)
   // The overall player may be healthy, but individual topics may have warnings or errors.
   // These are set/cleared in the store to track the current set of problems
-  _problems = new Map<string, PlayerProblem>();
+  private _problems = new Map<string, PlayerProblem>();
 
   constructor(
     providerDescriptor: RandomAccessDataProviderDescriptor,
@@ -259,7 +258,7 @@ export default class RandomAccessPlayer implements Player {
 
   // Potentially performance-sensitive; await can be expensive
   // eslint-disable-next-line @typescript-eslint/promise-function-async
-  _emitState = debouncePromise(() => {
+  private _emitState = debouncePromise(() => {
     if (!this._listener) {
       return Promise.resolve();
     }
@@ -346,7 +345,7 @@ export default class RandomAccessPlayer implements Player {
     return this._listener(data);
   });
 
-  async _tick(): Promise<void> {
+  private async _tick(): Promise<void> {
     if (this._initializing || !this._isPlaying || this._hasError) {
       return;
     }
@@ -405,7 +404,7 @@ export default class RandomAccessPlayer implements Player {
     this._emitState();
   }
 
-  _read = debouncePromise(async () => {
+  private _read = debouncePromise(async () => {
     try {
       while (this._isPlaying && !this._hasError) {
         const start = Date.now();
@@ -422,7 +421,10 @@ export default class RandomAccessPlayer implements Player {
     }
   });
 
-  async _getMessages(start: Time, end: Time): Promise<{ parsedMessages: MessageEvent<unknown>[] }> {
+  private async _getMessages(
+    start: Time,
+    end: Time,
+  ): Promise<{ parsedMessages: MessageEvent<unknown>[] }> {
     const parsedTopics = getSanitizedTopics(this._parsedSubscribedTopics, this._providerTopics);
     if (parsedTopics.length === 0) {
       return { parsedMessages: [] };
@@ -518,7 +520,7 @@ export default class RandomAccessPlayer implements Player {
     this._emitState();
   }
 
-  _reportInitialized(): void {
+  private _reportInitialized(): void {
     if (this._initializing || this._initialized) {
       return;
     }
@@ -526,14 +528,14 @@ export default class RandomAccessPlayer implements Player {
     this._initialized = true;
   }
 
-  _setNextReadStartTime(time: Time): void {
+  private _setNextReadStartTime(time: Time): void {
     this._metricsCollector.recordPlaybackTime(time, {
       stillLoadingData: !this.hasCachedRange(this._start, this._end),
     });
     this._nextReadStartTime = clampTime(time, this._start, this._end);
   }
 
-  _seekPlaybackInternal = debouncePromise(async (backfillDuration?: Time) => {
+  private _seekPlaybackInternal = debouncePromise(async (backfillDuration?: Time) => {
     const seekTime = Date.now();
     this._lastSeekStartTime = seekTime;
     this._cancelSeekBackfill = false;

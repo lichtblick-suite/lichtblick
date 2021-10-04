@@ -29,8 +29,8 @@ import { setupMainThreadRpc } from "@foxglove/studio-base/util/RpcMainThreadUtil
 // RpcDataProviderRemote, where we instantiate the rest of the RandomAccessDataProviderDescriptor tree.
 // See WorkerDataProvider for an example.
 export default class RpcDataProvider implements RandomAccessDataProvider {
-  _rpc: Rpc;
-  _childDescriptor: RandomAccessDataProviderDescriptor;
+  private _rpc: Rpc;
+  private _childDescriptor: RandomAccessDataProviderDescriptor;
 
   constructor(rpc: Rpc, children: RandomAccessDataProviderDescriptor[]) {
     this._rpc = rpc;

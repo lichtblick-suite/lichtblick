@@ -38,8 +38,8 @@ const getBagDescriptor = async (url?: string) => {
 const NOOP_PROVIDER = [{ name: "noop", args: {}, children: [] }];
 
 export default class StoryPlayer implements Player {
-  _parsedSubscribedTopics: string[] = [];
-  _bags: string[] = [];
+  private _parsedSubscribedTopics: string[] = [];
+  private _bags: string[] = [];
   constructor(bags: string[]) {
     this._bags = bags;
   }

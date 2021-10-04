@@ -17,8 +17,8 @@ const DEFAULT_LOCAL_STORAGE__QUOTA = 5000000;
 
 export default class MemoryStorage {
   // Use `__` to mark the fields as internal so we can filter them out in Storage when getting keys using Object.keys(storage).
-  _internal_items: Record<string, string> = {};
-  _internal_quota: number;
+  private _internal_items: Record<string, string> = {};
+  private _internal_quota: number;
   [key: string]: unknown;
 
   constructor(quota?: number) {
@@ -33,7 +33,7 @@ export default class MemoryStorage {
     return this._internal_items[key];
   }
 
-  _getUsedSize(): number {
+  private _getUsedSize(): number {
     return Object.keys(this._internal_items).reduce((memo, key) => {
       return memo + new Blob([this.getItem(key)!]).size;
     }, 0);

@@ -23,16 +23,20 @@ import { setupMainThreadRpc } from "@foxglove/studio-base/util/RpcMainThreadUtil
 type WorkerListenerState<W> = { rpc: Rpc; worker: W; listenerIds: string[] };
 
 export default class WebWorkerManager<W extends Channel> {
-  _createWorker: () => W;
-  _maxWorkerCount: number;
-  _workerStates: (WorkerListenerState<W> | undefined)[];
-  _allListeners: Set<string>;
+  private _createWorker: () => W;
+  private _maxWorkerCount: number;
+  private _workerStates: (WorkerListenerState<W> | undefined)[];
+  private _allListeners: Set<string>;
 
   constructor(createWorker: () => W, maxWorkerCount: number) {
     this._createWorker = createWorker;
     this._maxWorkerCount = maxWorkerCount;
     this._workerStates = new Array(maxWorkerCount);
     this._allListeners = new Set();
+  }
+
+  testing_workerCount(): number {
+    return this._workerStates.filter(Boolean).length;
   }
 
   testing_getWorkerState(id: string): WorkerListenerState<W> | undefined {

@@ -146,12 +146,11 @@ export default class UserNodePlayer implements Player {
     };
   }
 
-  _getTopics = memoizeWeak((topics: readonly Topic[], nodeTopics: readonly Topic[]): Topic[] => [
-    ...topics,
-    ...nodeTopics,
-  ]);
+  private _getTopics = memoizeWeak(
+    (topics: readonly Topic[], nodeTopics: readonly Topic[]): Topic[] => [...topics, ...nodeTopics],
+  );
 
-  _getDatatypes = memoizeWeak(
+  private _getDatatypes = memoizeWeak(
     (datatypes: RosDatatypes, nodeDatatypes: readonly RosDatatypes[]): RosDatatypes => {
       return nodeDatatypes.reduce(
         (allDatatypes, userNodeDatatypes) => new Map([...allDatatypes, ...userNodeDatatypes]),
@@ -172,7 +171,7 @@ export default class UserNodePlayer implements Player {
 
   // When updating nodes while paused, we seek to the current time
   // (i.e. invoke _getMessages with an empty array) to refresh messages
-  _getMessages = async (
+  private _getMessages = async (
     parsedMessages: readonly MessageEvent<unknown>[],
     globalVariables: GlobalVariables,
     nodeRegistrations: readonly NodeRegistration[],
@@ -484,7 +483,7 @@ export default class UserNodePlayer implements Player {
   //
   // For the time being, resetWorkers is a catchall for these circumstances. As
   // performance bottlenecks are identified, it will be subject to change.
-  async _resetWorkers(): Promise<void> {
+  private async _resetWorkers(): Promise<void> {
     if (!this._lastPlayerStateActiveData) {
       return;
     }
@@ -561,7 +560,7 @@ export default class UserNodePlayer implements Player {
     pending.resolve();
   }
 
-  async _getRosLib(): Promise<string> {
+  private async _getRosLib(): Promise<string> {
     if (!this._lastPlayerStateActiveData) {
       throw new Error("_getRosLib was called before `_lastPlayerStateActiveData` set");
     }

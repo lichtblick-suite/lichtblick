@@ -16,7 +16,7 @@ import FetchReader from "@foxglove/studio-base/util/FetchReader";
 
 // A file reader that reads from a remote HTTP URL, for usage in the browser (not for node.js).
 export default class BrowserHttpReader implements FileReader {
-  _url: string;
+  private _url: string;
 
   constructor(url: string) {
     this._url = url;

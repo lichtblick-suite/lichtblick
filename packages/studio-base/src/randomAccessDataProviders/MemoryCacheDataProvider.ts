@@ -237,34 +237,33 @@ export function getPrefetchStartPoint(uncachedRanges: Range[], cursorPosition: n
 // unparsed ROS messages. The messages are evicted from this in-memory cache based on some constants
 // defined at the top of this file.
 export default class MemoryCacheDataProvider implements RandomAccessDataProvider {
-  _id: string;
-  _provider: RandomAccessDataProvider;
-  _extensionPoint?: ExtensionPoint;
+  private _provider: RandomAccessDataProvider;
+  private _extensionPoint?: ExtensionPoint;
 
   // The actual blocks that contain the messages. Blocks have a set "width" in terms of nanoseconds
   // since the start time of the bag. If a block has some messages for a topic, then by definition
   // it has *all* messages for that topic and timespan.
-  _blocks: (MemoryCacheBlock | undefined)[] = [];
+  private _blocks: (MemoryCacheBlock | undefined)[] = [];
 
   // The start time of the bag. Used for computing from and to nanoseconds since the start.
-  _startTime: Time = { sec: 0, nsec: 0 };
+  private _startTime: Time = { sec: 0, nsec: 0 };
 
   // The topics that we were most recently asked to load.
   // This is always set by the last `getMessages` call.
-  _preloadTopics: string[] = [];
+  private _preloadTopics: string[] = [];
 
   // Total length of the data in nanoseconds. Used to compute progress with.
-  _totalNs: number = 0;
+  private _totalNs: number = 0;
 
   // The current "connection", which represents the range that we're downloading.
-  _currentConnection?: {
+  private _currentConnection?: {
     id: string;
     topics: string[];
     remainingBlockRange: Range;
   };
 
   // The read requests we've received via `getMessages`.
-  _readRequests: {
+  private _readRequests: {
     // Actual range of messages, in nanoseconds since `this._startTime`.
     timeRange: Range;
     // The range of blocks.
@@ -276,36 +275,29 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
   // Recently requested ranges of blocks, sorted by most recent to least recent. There should never
   // be any overlapping ranges. Ranges *are* allowed to cover blocks that haven't been downloaded
   // (yet).
-  _recentBlockRanges: Range[] = [];
+  private _recentBlockRanges: Range[] = [];
 
   // The end time of the last callback that we've resolved. This is useful for preloading new data
   // around this time.
-  _lastResolvedCallbackEnd?: number;
+  private _lastResolvedCallbackEnd?: number;
 
   // When we log a "block too large" error, we only want to do that once, to prevent
   // spamming errors.
-  _loggedTooLargeError: boolean = false;
+  private _loggedTooLargeError: boolean = false;
 
   // If we're configured to use an unlimited cache, we try to just load as much as possible and
   // never evict anything.
-  _cacheSizeBytes: number;
-  _readAheadBlocks: number = 0;
-  _memCacheBlockSizeNs: number = 0;
+  private _cacheSizeBytes: number;
+  private _readAheadBlocks: number = 0;
+  private _memCacheBlockSizeNs: number = 0;
 
-  _lazyMessageReadersByTopic = new Map<string, LazyMessageReader>();
+  private _lazyMessageReadersByTopic = new Map<string, LazyMessageReader>();
 
   constructor(
-    {
-      id,
-      unlimitedCache = false,
-    }: {
-      id: string;
-      unlimitedCache?: boolean;
-    },
+    { unlimitedCache = false }: { unlimitedCache?: boolean },
     children: RandomAccessDataProviderDescriptor[],
     getDataProvider: GetDataProvider,
   ) {
-    this._id = id;
     this._cacheSizeBytes = unlimitedCache ? Infinity : DEFAULT_CACHE_SIZE_BYTES;
     const child = children[0];
     if (children.length !== 1 || !child) {
@@ -394,7 +386,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
 
   // We're primarily interested in the topics for the first outstanding read request, and after that
   // we're interested in preloading topics (based on the *last* read request).
-  _getCurrentTopics(): string[] {
+  private _getCurrentTopics(): string[] {
     if (this._readRequests[0]) {
       return this._readRequests[0].topics;
     }
@@ -402,7 +394,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
     return this._preloadTopics;
   }
 
-  _resolveFinishedReadRequests(): void {
+  private _resolveFinishedReadRequests(): void {
     this._readRequests = this._readRequests.filter(({ timeRange, blockRange, topics, resolve }) => {
       if (topics.length === 0) {
         resolve({
@@ -471,7 +463,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
   }
 
   // Gets called any time our "connection", read requests, or topics change.
-  _updateState(): void {
+  private _updateState(): void {
     // First, see if there are any read requests that we can resolve now.
     this._resolveFinishedReadRequests();
 
@@ -487,7 +479,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
     void this._maybeRunNewConnections();
   }
 
-  _getNewConnection(): Range | undefined {
+  private _getNewConnection(): Range | undefined {
     const connectionForReadRange = getNewConnection({
       currentRemainingRange: this._currentConnection
         ? this._currentConnection.remainingBlockRange
@@ -516,7 +508,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
     return undefined;
   }
 
-  _getPrefetchRange(): Range | undefined {
+  private _getPrefetchRange(): Range | undefined {
     const bounds = {
       start: 0,
       end: this._blocks.length,
@@ -537,7 +529,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
     };
   }
 
-  async _maybeRunNewConnections(): Promise<void> {
+  private async _maybeRunNewConnections(): Promise<void> {
     for (;;) {
       const newConnection = this._getNewConnection();
 
@@ -568,7 +560,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
 
   // Replace the current connection with a new one, spanning a certain range of blocks. Return whether we
   // completed successfully, or whether we were interrupted by another connection.
-  async _setConnection(blockRange: Range): Promise<boolean> {
+  private async _setConnection(blockRange: Range): Promise<boolean> {
     if (this._getCurrentTopics().length === 0) {
       delete this._currentConnection;
       return true;
@@ -743,7 +735,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
   }
 
   // For the relevant downloaded ranges, we look at `this._blocks` and the most relevant topics.
-  _getDownloadedBlockRanges(): Range[] {
+  private _getDownloadedBlockRanges(): Range[] {
     const topics: string[] = this._getCurrentTopics();
 
     return simplify(
@@ -766,7 +758,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
     );
   }
 
-  _purgeOldBlocks(): void {
+  private _purgeOldBlocks(): void {
     if (this._cacheSizeBytes === Infinity) {
       return;
     }
@@ -805,7 +797,7 @@ export default class MemoryCacheDataProvider implements RandomAccessDataProvider
     this._blocks = newBlocks;
   }
 
-  _updateProgress(): void {
+  private _updateProgress(): void {
     this._extensionPoint?.progressCallback({
       fullyLoadedFractionRanges: this._getDownloadedBlockRanges().map((range) => ({
         // Convert block ranges into fractions.

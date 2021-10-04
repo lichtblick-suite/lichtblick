@@ -154,9 +154,9 @@ export default class Autocomplete<T = unknown> extends PureComponent<
   AutocompleteProps<T>,
   AutocompleteState
 > {
-  _autocomplete: RefObject<ReactAutocomplete>;
-  _ignoreFocus: boolean = false;
-  _ignoreBlur: boolean = false;
+  private _autocomplete: RefObject<ReactAutocomplete>;
+  private _ignoreFocus: boolean = false;
+  private _ignoreBlur: boolean = false;
 
   static defaultProps = {
     getItemText: defaultGetText("getItemText"),
@@ -212,7 +212,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
     }
   }
 
-  _onFocus = (): void => {
+  private _onFocus = (): void => {
     if (this._ignoreFocus) {
       return;
     }
@@ -231,7 +231,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
   // Wait for a mouseup event, and check in the mouseup event if anything was actually selected, or
   // if it just was a click without a drag. In the latter case, select everything. This is very
   // similar to how, say, the browser bar in Chrome behaves.
-  _onMouseDown = (_event: React.MouseEvent<HTMLInputElement>): void => {
+  private _onMouseDown = (_event: React.MouseEvent<HTMLInputElement>): void => {
     if (this.props.disableAutoSelect ?? false) {
       return;
     }
@@ -260,7 +260,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
     document.addEventListener("mouseup", onMouseUp, true);
   };
 
-  _onBlur = (): void => {
+  private _onBlur = (): void => {
     if (this._ignoreBlur) {
       return;
     }
@@ -277,7 +277,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
     }
   };
 
-  _onChange = (event: React.SyntheticEvent<HTMLInputElement>): void => {
+  private _onChange = (event: React.SyntheticEvent<HTMLInputElement>): void => {
     if (this.props.onChange) {
       this.props.onChange(event, (event.target as HTMLInputElement).value);
     } else {
@@ -288,7 +288,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
   // Make sure the input field gets focused again after selecting, in case we're doing multiple
   // autocompletes. We pass in `this` to `onSelect` in case the user of this component wants to call
   // `blur()`.
-  _onSelect = (value: string, item: T): void => {
+  private _onSelect = (value: string, item: T): void => {
     if (this._autocomplete.current?.refs.input) {
       (this._autocomplete.current.refs.input as HTMLInputElement).focus();
       this.setState({ focused: true, value: undefined }, () => {
@@ -299,7 +299,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
 
   // When scrolling down by even a little bit, just show all items. In most cases people won't
   // do this and instead will type more text to narrow down their autocomplete.
-  _onScroll = (event: React.MouseEvent<HTMLDivElement>): void => {
+  private _onScroll = (event: React.MouseEvent<HTMLDivElement>): void => {
     if (event.currentTarget.scrollTop > 0) {
       // Never set `showAllItems` to false here, as `<ReactAutocomplete>` may have a reference to
       // the highlighted element. We only set it back to false in `componentDidUpdate`.
@@ -307,7 +307,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
     }
   };
 
-  _onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>): void => {
+  private _onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>): void => {
     if (event.key === "Escape" || (event.key === "Enter" && this.props.items.length === 0)) {
       this.blur();
     }

@@ -53,16 +53,15 @@ const getTopicsWithHeader = memoizeWeak((topics: Topic[], datatypes: RosDatatype
 });
 
 export default class OrderedStampPlayer implements Player {
-  _player: UserNodePlayer;
-  _messageOrder: TimestampMethod;
+  private _player: UserNodePlayer;
+  private _messageOrder: TimestampMethod;
   // When messageOrder is "headerStamp", contains buffered, unsorted messages with receiveTime "in
   // the near future". Only messages with headers are stored.
-  _messageBuffer: MessageEvent<StampedMessage>[] = [];
+  private _messageBuffer: MessageEvent<StampedMessage>[] = [];
   // Used to invalidate the cache. (Also signals subscription changes etc).
-  _lastSeekId?: number = undefined;
+  private _lastSeekId?: number = undefined;
   // Our best guess of "now" in case we need to force a backfill.
-  _currentTime?: Time = undefined;
-  _topicsWithoutHeadersSinceSeek = new Set<string>();
+  private _currentTime?: Time = undefined;
 
   constructor(player: UserNodePlayer, messageOrder: TimestampMethod) {
     this._player = player;
@@ -87,7 +86,6 @@ export default class OrderedStampPlayer implements Player {
       if (activeData.lastSeekTime !== this._lastSeekId) {
         this._messageBuffer = [];
         this._lastSeekId = activeData.lastSeekTime;
-        this._topicsWithoutHeadersSinceSeek = new Set<string>();
       }
 
       // Only store messages with a header stamp.

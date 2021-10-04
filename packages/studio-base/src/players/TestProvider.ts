@@ -56,10 +56,10 @@ type GetMessages = (
 
 // ts-prune-ignore-next
 export default class TestProvider implements RandomAccessDataProvider {
-  _start: Time;
-  _end: Time;
-  _topics: Topic[];
-  _datatypes: RosDatatypes;
+  private _start: Time;
+  private _end: Time;
+  private _topics: Topic[];
+  private _datatypes: RosDatatypes;
   extensionPoint?: ExtensionPoint;
   closed: boolean = false;
 

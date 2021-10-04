@@ -26,7 +26,7 @@ type ErrorsByTopic = {
   [topicName: string]: string[];
 };
 class MockTransform {
-  _values: { id: string }[];
+  private _values: { id: string }[];
   constructor({ tfs }: { tfs: { id: string }[] }) {
     this._values = tfs;
   }

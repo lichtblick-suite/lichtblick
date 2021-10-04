@@ -35,7 +35,7 @@ export class Transform {
   id: string;
   matrix: mat4 = mat4.create();
   parent?: Transform;
-  _hasValidMatrix: boolean = false;
+  private _hasValidMatrix: boolean = false;
 
   constructor(id: string) {
     this.id = stripLeadingSlash(id);

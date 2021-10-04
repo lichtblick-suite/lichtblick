@@ -60,12 +60,12 @@ export function instrumentTreeWithApiCheckerDataProvider(
 }
 
 export default class ApiCheckerDataProvider implements RandomAccessDataProvider {
-  _name: string;
-  _provider?: RandomAccessDataProvider;
-  _initializationResult?: InitializationResult;
-  _topicNames: string[] = [];
-  _closed: boolean = false;
-  _isRoot: boolean;
+  private _name: string;
+  private _provider?: RandomAccessDataProvider;
+  private _initializationResult?: InitializationResult;
+  private _topicNames: string[] = [];
+  private _closed: boolean = false;
+  private _isRoot: boolean;
 
   constructor(
     args: { name: string; isRoot: boolean },
@@ -240,7 +240,7 @@ export default class ApiCheckerDataProvider implements RandomAccessDataProvider 
     return await this._provider?.close();
   }
 
-  _warn(message: string): void {
+  private _warn(message: string): void {
     const prefixedMessage = `ApiCheckerDataProvider(${this._name}): ${message}`;
     sendNotification("Internal data provider assertion failed", prefixedMessage, "app", "warn");
 

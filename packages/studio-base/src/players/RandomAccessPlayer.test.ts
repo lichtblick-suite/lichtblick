@@ -49,10 +49,10 @@ const playerOptions: RandomAccessPlayerOptions = {
 type PlayerStateWithoutPlayerId = Omit<PlayerState, "playerId">;
 
 class MessageStore {
-  _messages: PlayerStateWithoutPlayerId[] = [];
+  private _messages: PlayerStateWithoutPlayerId[] = [];
   done: Promise<PlayerStateWithoutPlayerId[]>;
-  _expected: number;
-  _resolve: (arg0: PlayerStateWithoutPlayerId[]) => void = () => {
+  private _expected: number;
+  private _resolve: (arg0: PlayerStateWithoutPlayerId[]) => void = () => {
     // no-op
   };
   constructor(expected: number) {
@@ -1353,11 +1353,11 @@ describe("RandomAccessPlayer", () => {
 
   describe("metrics collecting", () => {
     class TestMetricsCollector implements PlayerMetricsCollectorInterface {
-      _initialized: number = 0;
-      _played: number = 0;
-      _paused: number = 0;
-      _seeked: number = 0;
-      _speed: number[] = [];
+      private _initialized: number = 0;
+      private _played: number = 0;
+      private _paused: number = 0;
+      private _seeked: number = 0;
+      private _speed: number[] = [];
 
       setProperty(_key: string, _value: string | number | boolean): void {
         // no-op

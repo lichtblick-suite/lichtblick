@@ -31,7 +31,7 @@ type Props = {
 };
 
 export default class SubMenu extends React.Component<Props, State> {
-  _unmounted: boolean = false;
+  private _unmounted: boolean = false;
 
   override state = {
     open: false,

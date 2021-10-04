@@ -67,21 +67,21 @@ const CLOSE_ENOUGH_BYTES_TO_NOT_START_NEW_CONNECTION = 1024 * 1024 * 5;
 const log = Logger.getLogger(__filename);
 
 export default class CachedFilelike implements Filelike {
-  _fileReader: FileReader;
-  _cacheSizeInBytes: number = Infinity;
-  _fileSize?: number;
-  _virtualBuffer: VirtualLRUBuffer;
-  _logFn: (arg0: string) => void = (msg) => log.info(msg);
-  _closed: boolean = false;
+  private _fileReader: FileReader;
+  private _cacheSizeInBytes: number = Infinity;
+  private _fileSize?: number;
+  private _virtualBuffer: VirtualLRUBuffer;
+  private _logFn: (arg0: string) => void = (msg) => log.info(msg);
+  private _closed: boolean = false;
   // eslint-disable-next-line @foxglove/no-boolean-parameters
-  _keepReconnectingCallback?: (reconnecting: boolean) => void;
+  private _keepReconnectingCallback?: (reconnecting: boolean) => void;
 
   // The current active connection, if there is one. `remainingRange.start` gets updated whenever
   // we receive new data, so it truly is the remaining range that it is going to download.
-  _currentConnection: { stream: FileStream; remainingRange: Range } | undefined;
+  private _currentConnection: { stream: FileStream; remainingRange: Range } | undefined;
 
   // A list of read requests and associated ranges for all read requests, in order.
-  _readRequests: {
+  private _readRequests: {
     range: Range;
     resolve: (_: Uint8Array) => void;
     reject: (_: Error) => void;
@@ -89,10 +89,10 @@ export default class CachedFilelike implements Filelike {
   }[] = [];
 
   // The range.end of the last read request that we resolved. Useful for reading ahead a bit.
-  _lastResolvedCallbackEnd?: number;
+  private _lastResolvedCallbackEnd?: number;
 
   // The last time we've encountered an error;
-  _lastErrorTime?: number;
+  private _lastErrorTime?: number;
 
   constructor(options: {
     fileReader: FileReader;
@@ -176,7 +176,7 @@ export default class CachedFilelike implements Filelike {
   }
 
   // Gets called any time our connection or read requests change.
-  _updateState(): void {
+  private _updateState(): void {
     if (this._closed) {
       return;
     }
@@ -228,7 +228,7 @@ export default class CachedFilelike implements Filelike {
   }
 
   // Replace the current connection with a new one, spanning a certain range.
-  _setConnection(range: Range): void {
+  private _setConnection(range: Range): void {
     this._logFn(`Setting new connection @ ${rangeToString(range)}`);
 
     if (this._currentConnection) {

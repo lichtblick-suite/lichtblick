@@ -88,7 +88,7 @@ function getProvider(
   });
   return {
     provider: new MemoryCacheDataProvider(
-      { id: "some-id", unlimitedCache },
+      { unlimitedCache },
       [{ name: CoreDataProviders.MemoryCacheDataProvider, args: {}, children: [] }],
       () => memoryDataProvider,
     ),

@@ -190,13 +190,13 @@ const getFormattedKeyValues = createSelector(
 
 // component to display a single diagnostic status
 class DiagnosticStatus extends React.Component<Props, unknown> {
-  _tableRef = React.createRef<HTMLTableElement>();
+  private _tableRef = React.createRef<HTMLTableElement>();
 
   static defaultProps = {
     splitFraction: 0.5,
   };
 
-  _onClickSection(sectionObj: { name: string; section: string }): void {
+  private _onClickSection(sectionObj: { name: string; section: string }): void {
     const { collapsedSections, saveConfig } = this.props;
     const clickedSelectionIsCollapsed = collapsedSections.find(
       ({ name, section }) => name === sectionObj.name && section === sectionObj.section,
@@ -212,17 +212,17 @@ class DiagnosticStatus extends React.Component<Props, unknown> {
     }
   }
 
-  _resizeMouseDown = (event: React.MouseEvent<Element>): void => {
+  private _resizeMouseDown = (event: React.MouseEvent<Element>): void => {
     event.preventDefault();
     window.addEventListener("mousemove", this._resizeMouseMove);
     window.addEventListener("mouseup", this._resizeMouseUp);
   };
 
-  _resizeMouseUp = (): void => {
+  private _resizeMouseUp = (): void => {
     window.removeEventListener("mousemove", this._resizeMouseMove);
   };
 
-  _resizeMouseMove = (event: MouseEvent): void => {
+  private _resizeMouseMove = (event: MouseEvent): void => {
     const {
       _tableRef,
       props: { onChangeSplitFraction },
@@ -246,7 +246,7 @@ class DiagnosticStatus extends React.Component<Props, unknown> {
     window.removeEventListener("mouseup", this._resizeMouseUp);
   }
 
-  _renderKeyValueCell(
+  private _renderKeyValueCell(
     html: { __html: string } | undefined,
     str: string,
     openPlotPanelIconElem?: React.ReactNode,
@@ -262,7 +262,7 @@ class DiagnosticStatus extends React.Component<Props, unknown> {
     );
   }
 
-  _renderKeyValueSections = (): React.ReactNode => {
+  private _renderKeyValueSections = (): React.ReactNode => {
     const { info, topicToRender, openSiblingPanel, collapsedSections } = this.props;
     const formattedKeyVals: FormattedKeyValue[] = getFormattedKeyValues(info.status);
     let inCollapsedSection = false;
@@ -332,12 +332,12 @@ class DiagnosticStatus extends React.Component<Props, unknown> {
     });
   };
 
-  _getSectionsCollapsedForCurrentName = (): { name: string; section: string }[] => {
+  private _getSectionsCollapsedForCurrentName = (): { name: string; section: string }[] => {
     const { collapsedSections, info } = this.props;
     return collapsedSections.filter(({ name }) => name === info.status.name);
   };
 
-  _getSectionsThatCanBeCollapsed = (): FormattedKeyValue[] => {
+  private _getSectionsThatCanBeCollapsed = (): FormattedKeyValue[] => {
     const { info } = this.props;
     const formattedKeyVals = getFormattedKeyValues(info.status);
     return formattedKeyVals.filter(({ key, value }) => {
@@ -347,7 +347,7 @@ class DiagnosticStatus extends React.Component<Props, unknown> {
     });
   };
 
-  _toggleSections = (): void => {
+  private _toggleSections = (): void => {
     const { saveConfig, collapsedSections, info } = this.props;
     const newSectionsForCurrentName =
       this._getSectionsCollapsedForCurrentName().length > 0

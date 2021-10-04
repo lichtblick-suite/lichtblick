@@ -198,23 +198,23 @@ export default class SceneBuilder implements MarkerProvider {
   collectors: {
     [key: string]: MessageCollector;
   } = {};
-  _clock?: Time;
-  _playerId?: string;
-  _settingsByKey: TopicSettingsCollection = {};
-  _onForceUpdate?: () => void;
+  private _clock?: Time;
+  private _playerId?: string;
+  private _settingsByKey: TopicSettingsCollection = {};
+  private _onForceUpdate?: () => void;
 
   // When not-empty, fade any markers that don't match
-  _highlightMarkerMatchersByTopic: MarkerMatchersByTopic = {};
+  private _highlightMarkerMatchersByTopic: MarkerMatchersByTopic = {};
 
   // When not-empty, override the color of matching markers
-  _colorOverrideMarkerMatchersByTopic: MarkerMatchersByTopic = {};
+  private _colorOverrideMarkerMatchersByTopic: MarkerMatchersByTopic = {};
 
-  _hooks: ThreeDimensionalVizHooks;
+  private _hooks: ThreeDimensionalVizHooks;
 
   // Decodes `velodyne_msgs/VelodyneScan` ROS messages into
   // `VelodyneScanDecoded` objects that mimic `PointCloud2` and can be rendered
   // as point clouds
-  _velodyneCloudConverter = new VelodyneCloudConverter();
+  private _velodyneCloudConverter = new VelodyneCloudConverter();
 
   allNamespaces: Namespace[] = [];
   // TODO(Audrey): remove enabledNamespaces once we release topic groups
@@ -344,7 +344,7 @@ export default class SceneBuilder implements MarkerProvider {
     this._colorOverrideMarkerMatchersByTopic = markerMatchersByTopic;
   }
 
-  _addTopicsToRenderForMarkerMatchers(
+  private _addTopicsToRenderForMarkerMatchers(
     previousMarkerMatchersByTopic: MarkerMatchersByTopic,
     newMarkerMatchers: Array<MarkerMatcher>,
   ): void {
@@ -357,7 +357,7 @@ export default class SceneBuilder implements MarkerProvider {
     }
   }
 
-  _markTopicToRender(topicName: string): void {
+  private _markTopicToRender(topicName: string): void {
     if (this.topicsByName[topicName]) {
       this.topicsToRender.add(topicName);
     }
@@ -382,7 +382,7 @@ export default class SceneBuilder implements MarkerProvider {
     this._onForceUpdate = callback;
   }
 
-  _addError(map: Map<string, ErrorDetails>, topic: string): ErrorDetails {
+  private _addError(map: Map<string, ErrorDetails>, topic: string): ErrorDetails {
     let values = map.get(topic);
     if (!values) {
       values = { namespaces: new Set(), frameIds: new Set() };
@@ -392,13 +392,13 @@ export default class SceneBuilder implements MarkerProvider {
     return values;
   }
 
-  _setTopicError = (topic: string, message: string): void => {
+  private _setTopicError = (topic: string, message: string): void => {
     this.errors.topicsWithError.set(topic, message);
     this._updateErrorsByTopic();
   };
 
   // Update the field anytime the errors change in order to generate a new object to trigger TopicTree to rerender.
-  _updateErrorsByTopic(): void {
+  private _updateErrorsByTopic(): void {
     if (!this.transforms) {
       return;
     }
@@ -413,7 +413,7 @@ export default class SceneBuilder implements MarkerProvider {
   }
 
   // keep a unique set of all seen namespaces
-  _consumeNamespace(topic: string, name: string): void {
+  private _consumeNamespace(topic: string, name: string): void {
     if (some(this.allNamespaces, (ns) => ns.topic === topic && ns.name === name)) {
       return;
     }
@@ -432,7 +432,7 @@ export default class SceneBuilder implements MarkerProvider {
     return some(this.enabledNamespaces, (ns) => ns.topic === topic && ns.name === name);
   }
 
-  _transformMarkerPose = (topic: string, marker: BaseMarker): MutablePose | undefined => {
+  private _transformMarkerPose = (topic: string, marker: BaseMarker): MutablePose | undefined => {
     const frame_id = marker.header.frame_id;
 
     if (frame_id.length === 0) {
@@ -477,7 +477,7 @@ export default class SceneBuilder implements MarkerProvider {
     }
   };
 
-  _consumeMarker(topic: string, message: BaseMarker): void {
+  private _consumeMarker(topic: string, message: BaseMarker): void {
     const namespace = message.ns;
     if (namespace.length > 0) {
       // Consume namespaces even if the message is later discarded
@@ -632,7 +632,7 @@ export default class SceneBuilder implements MarkerProvider {
     this.collectors[topic]!.addMarker(marker, name);
   }
 
-  _consumeOccupancyGrid = (topic: string, message: NavMsgs$OccupancyGrid): void => {
+  private _consumeOccupancyGrid = (topic: string, message: NavMsgs$OccupancyGrid): void => {
     const { frame_id } = message.header;
 
     if (frame_id.length === 0) {
@@ -703,7 +703,7 @@ export default class SceneBuilder implements MarkerProvider {
     this.collectors[topic]!.addNonMarker(topic, mappedMessage as unknown as Interactive<unknown>);
   };
 
-  _consumeColor = (msg: MessageEvent<Color>): void => {
+  private _consumeColor = (msg: MessageEvent<Color>): void => {
     const color = msg.message;
     if (color.r == undefined || color.g == undefined || color.b == undefined) {
       return;
@@ -797,7 +797,7 @@ export default class SceneBuilder implements MarkerProvider {
     this.topicsToRender.clear();
   }
 
-  _consumeMessage = (topic: string, datatype: string, msg: MessageEvent<unknown>): void => {
+  private _consumeMessage = (topic: string, datatype: string, msg: MessageEvent<unknown>): void => {
     const { message } = msg;
     switch (datatype) {
       case "visualization_msgs/Marker":

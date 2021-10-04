@@ -18,7 +18,7 @@ import delay from "@foxglove/studio-base/util/delay";
 import CachedFilelike, { FileReader, FileStream } from "./CachedFilelike";
 
 class InMemoryFileReader implements FileReader {
-  _buffer: Buffer;
+  private _buffer: Buffer;
 
   constructor(bufferObj: Buffer) {
     this._buffer = bufferObj;

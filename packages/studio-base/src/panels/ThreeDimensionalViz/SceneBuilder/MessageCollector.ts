@@ -96,7 +96,7 @@ export default class MessageCollector {
     });
   }
 
-  _addItem(key: string, item: ObjectWithInteractionData, lifetime?: Time): void {
+  private _addItem(key: string, item: ObjectWithInteractionData, lifetime?: Time): void {
     const existing = this.markers.get(key);
     if (existing) {
       existing.update(item, this.clock, lifetime);

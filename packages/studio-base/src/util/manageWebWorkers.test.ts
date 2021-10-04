@@ -64,9 +64,13 @@ describe("WebWorkerManager", () => {
 
   it("can add and remove multiple listeners to the same worker", () => {
     const webWorkerManager = new WebWorkerManager(() => new FakeWorker(), 2);
+    expect(webWorkerManager.testing_workerCount()).toEqual(0);
     webWorkerManager.registerWorkerListener("1");
+    expect(webWorkerManager.testing_workerCount()).toEqual(1);
     webWorkerManager.registerWorkerListener("2");
+    expect(webWorkerManager.testing_workerCount()).toEqual(2);
     webWorkerManager.registerWorkerListener("3");
+    expect(webWorkerManager.testing_workerCount()).toEqual(2);
     expect(webWorkerManager.testing_getWorkerState("1")).toEqual(
       webWorkerManager.testing_getWorkerState("3"),
     );
@@ -77,8 +81,7 @@ describe("WebWorkerManager", () => {
     expect(webWorkerManager.testing_getWorkerState("3")?.listenerIds).toEqual(["3"]);
     webWorkerManager.unregisterWorkerListener("2");
     webWorkerManager.unregisterWorkerListener("3");
-    // eslint-disable-next-line no-underscore-dangle
-    expect(webWorkerManager._workerStates).toEqual([undefined, undefined]);
+    expect(webWorkerManager.testing_workerCount()).toEqual(0);
   });
 
   it("throws when registering an ID twice", () => {

@@ -133,7 +133,7 @@ export default class VelodynePlayer implements Player {
     }
   };
 
-  _handleMessage = (data: Uint8Array, rinfo: UdpRemoteInfo): void => {
+  private _handleMessage = (data: Uint8Array, rinfo: UdpRemoteInfo): void => {
     const receiveTime = fromMillis(Date.now());
     const date = toDate(receiveTime);
     date.setMinutes(0, 0, 0);

@@ -48,7 +48,7 @@ type State = {
 };
 
 class Example extends Component<Props, State> {
-  _intervalId?: ReturnType<typeof setInterval>;
+  private _intervalId?: ReturnType<typeof setInterval>;
   override state = { items: generateData(MSG_BATCH_SIZE), paused: true };
 
   override componentDidMount() {
@@ -63,7 +63,7 @@ class Example extends Component<Props, State> {
     }
   }
 
-  _startTimer = () => {
+  private _startTimer = () => {
     this._intervalId = setInterval(() => {
       const newData = generateData(MSG_BATCH_SIZE);
       const items = [...this.state.items, ...newData];

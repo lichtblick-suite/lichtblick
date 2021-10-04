@@ -67,17 +67,17 @@ function maybeWriteLocalStorageCache(
 
 class ParseMessageDefinitionCache {
   // Used because we may load extraneous definitions that we need to clear.
-  _usedMd5Sums = new Set<string>();
-  _stringDefinitionsToParsedDefinitions: {
+  private _usedMd5Sums = new Set<string>();
+  private _stringDefinitionsToParsedDefinitions: {
     [key: string]: RosMsgDefinition[];
   } = {};
-  _md5SumsToParsedDefinitions: {
+  private _md5SumsToParsedDefinitions: {
     [key: string]: RosMsgDefinition[];
   } = {};
-  _hashesToParsedDefinitions: {
+  private _hashesToParsedDefinitions: {
     [key: string]: RosMsgDefinition[];
   } = {};
-  _localStorageCacheDisabled = false;
+  private _localStorageCacheDisabled = false;
 
   constructor() {
     const hashesToParsedDefinitionsEntries = storage

@@ -46,11 +46,11 @@ class MockRosClient {
     workerInstance = this;
   }
 
-  _topics: string[] = [];
-  _types: string[] = [];
-  _typedefs_full_text: string[] = [];
-  _connectCallback?: () => void;
-  _messages: any[] = [];
+  private _topics: string[] = [];
+  private _types: string[] = [];
+  private _typedefs_full_text: string[] = [];
+  private _connectCallback?: () => void;
+  private _messages: any[] = [];
 
   setup({
     topics = [],

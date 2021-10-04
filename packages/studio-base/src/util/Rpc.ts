@@ -67,14 +67,14 @@ export function createLinkedChannels(): { local: Channel; remote: Channel } {
 // Check out the tests for more examples.
 export default class Rpc {
   static transferables = "$$TRANSFERABLES";
-  _channel: Omit<Channel, "terminate">;
-  _messageId: number = 0;
-  _pendingCallbacks: {
+  private _channel: Omit<Channel, "terminate">;
+  private _messageId: number = 0;
+  private _pendingCallbacks: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [key: number]: (arg0: any) => void;
   } = {};
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  _receivers: Map<string, (arg0: any) => any> = new Map();
+  private _receivers: Map<string, (arg0: any) => any> = new Map();
 
   constructor(channel: Omit<Channel, "terminate">) {
     this._channel = channel;
@@ -86,7 +86,7 @@ export default class Rpc {
     this._channel.onmessage = this._onChannelMessage;
   }
 
-  _onChannelMessage = (ev: MessageEvent): void => {
+  private _onChannelMessage = (ev: MessageEvent): void => {
     const { id, topic, data } = ev.data;
     if (topic === RESPONSE) {
       this._pendingCallbacks[id]?.(ev.data);

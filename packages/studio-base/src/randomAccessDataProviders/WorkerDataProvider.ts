@@ -38,9 +38,9 @@ if (process.env.NODE_ENV !== "test") {
 // Wraps the underlying RandomAccessDataProviderDescriptor tree in a Web Worker, therefore allowing
 // `getMessages` calls to get resolved in parallel to the main thread.
 export default class WorkerDataProvider implements RandomAccessDataProvider {
-  _worker?: Worker;
-  _provider?: RpcDataProvider;
-  _child?: RandomAccessDataProviderDescriptor;
+  private _worker?: Worker;
+  private _provider?: RpcDataProvider;
+  private _child?: RandomAccessDataProviderDescriptor;
 
   constructor(_args: unknown, children: RandomAccessDataProviderDescriptor[]) {
     if (children.length !== 1) {

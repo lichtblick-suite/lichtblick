@@ -17,8 +17,8 @@ import { MemoizedVertexBuffer, VertexBuffer } from "./types";
 // We keep track of both the current and the previous frames to tell
 // which vertex buffer are not used anymore and need to be deleted.
 export default class VertexBufferCache {
-  _current = new Map<Float32Array, MemoizedVertexBuffer>();
-  _previous = new Map<Float32Array, MemoizedVertexBuffer>();
+  private _current = new Map<Float32Array, MemoizedVertexBuffer>();
+  private _previous = new Map<Float32Array, MemoizedVertexBuffer>();
 
   // Call this method before rendering to initialize
   // the cache for the current frame.
@@ -72,7 +72,7 @@ export default class VertexBufferCache {
     this._previous.clear();
   }
 
-  _deleteBuffer = (cached: MemoizedVertexBuffer): void => {
+  private _deleteBuffer = (cached: MemoizedVertexBuffer): void => {
     const { buffer } = cached;
     // Destroy GPU buffer
     buffer?.destroy();

@@ -32,7 +32,7 @@ export function clearBustStorageFnsMap(): void {
 
 // Small wrapper around localStorage for convenience.
 export default class Storage {
-  _backingStore: BackingStore;
+  private _backingStore: BackingStore;
 
   constructor(backingStore: BackingStore = window.localStorage) {
     this._backingStore = backingStore;
@@ -69,7 +69,7 @@ export default class Storage {
     }
   }
 
-  _bustStorage(): void {
+  private _bustStorage(): void {
     const bustStorageFns = bustStorageFnsMap.get(this._backingStore) ?? [];
     for (const bustStorageFn of bustStorageFns) {
       bustStorageFn(this._backingStore, this.keys());

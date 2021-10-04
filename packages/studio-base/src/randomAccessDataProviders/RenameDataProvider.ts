@@ -33,8 +33,8 @@ import {
 } from "@foxglove/studio-base/randomAccessDataProviders/types";
 
 export default class RenameDataProvider implements RandomAccessDataProvider {
-  _provider: RandomAccessDataProvider;
-  _prefix: string;
+  private _provider: RandomAccessDataProvider;
+  private _prefix: string;
 
   constructor(
     args: { prefix?: string },
@@ -117,7 +117,7 @@ export default class RenameDataProvider implements RandomAccessDataProvider {
     return await this._provider.close();
   }
 
-  _mapMessage = <T>(message: MessageEvent<T>): MessageEvent<T> => ({
+  private _mapMessage = <T>(message: MessageEvent<T>): MessageEvent<T> => ({
     // Only map fields that we know are correctly mapped. Don't just splat in `...message` here
     // because we might miss an important mapping!
     topic: `${this._prefix}${message.topic}`,
@@ -149,7 +149,7 @@ export default class RenameDataProvider implements RandomAccessDataProvider {
     };
   }
 
-  _mapMessageCache = memoizeWeak(
+  private _mapMessageCache = memoizeWeak(
     (messageCache: BlockCache): BlockCache => ({
       // Note: don't just map(this._mapBlock) because map also passes the array and defeats the
       // memoization.
@@ -158,7 +158,7 @@ export default class RenameDataProvider implements RandomAccessDataProvider {
     }),
   );
 
-  _mapBlock = memoizeWeak((block?: MemoryCacheBlock): MemoryCacheBlock | undefined => {
+  private _mapBlock = memoizeWeak((block?: MemoryCacheBlock): MemoryCacheBlock | undefined => {
     if (!block) {
       return;
     }

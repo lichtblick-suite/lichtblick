@@ -15,11 +15,11 @@ import { Readable } from "stream";
 // A node.js-style readable stream wrapper for the Streams API:
 // https://developer.mozilla.org/en-US/docs/Web/API/Streams_API
 export default class FetchReader extends Readable {
-  _response: Promise<Response>;
-  _reader?: ReadableStreamReader<Uint8Array>;
-  _controller: AbortController;
-  _aborted: boolean = false;
-  _url: string;
+  private _response: Promise<Response>;
+  private _reader?: ReadableStreamReader<Uint8Array>;
+  private _controller: AbortController;
+  private _aborted: boolean = false;
+  private _url: string;
 
   constructor(url: string, options?: RequestInit) {
     super();
@@ -30,7 +30,7 @@ export default class FetchReader extends Readable {
 
   // you can only call getReader once on a response body
   // so keep a local copy of the reader and return it after the first call to get a reader
-  async _getReader(): Promise<ReadableStreamReader<Uint8Array> | undefined> {
+  private async _getReader(): Promise<ReadableStreamReader<Uint8Array> | undefined> {
     if (this._reader) {
       return this._reader;
     }

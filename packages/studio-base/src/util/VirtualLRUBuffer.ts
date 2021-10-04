@@ -44,13 +44,13 @@ import { isRangeCoveredByRanges, Range } from "./ranges";
 
 export default class VirtualLRUBuffer {
   byteLength: number; // How many bytes does this buffer represent.
-  _blocks: Buffer[] = []; // Actual `Buffer` for each block.
+  private _blocks: Buffer[] = []; // Actual `Buffer` for each block.
   // How many bytes is each block. This used to work up to 2GiB minus a byte, and now seems to crash
   // past 2GiB minus 4KiB. Default to 1GiB so we don't get caught out next time the limit drops.
-  _blockSize: number = Math.trunc(buffer.kMaxLength / 2);
-  _numberOfBlocks: number = Infinity; // How many blocks are we allowed to have at any time.
-  _lastAccessedBlockIndices: number[] = []; // Indexes of blocks, from least to most recently accessed.
-  _rangesWithData: Range[] = []; // Ranges for which we have data copied in (and have not been evicted).
+  private _blockSize: number = Math.trunc(buffer.kMaxLength / 2);
+  private _numberOfBlocks: number = Infinity; // How many blocks are we allowed to have at any time.
+  private _lastAccessedBlockIndices: number[] = []; // Indexes of blocks, from least to most recently accessed.
+  private _rangesWithData: Range[] = []; // Ranges for which we have data copied in (and have not been evicted).
 
   constructor(options: { size: number; blockSize?: number; numberOfBlocks?: number }) {
     this.byteLength = options.size;
@@ -126,7 +126,7 @@ export default class VirtualLRUBuffer {
   }
 
   // Get a reference to a block, and mark it as most recently used. Might evict older blocks.
-  _getBlock(index: number): Buffer {
+  private _getBlock(index: number): Buffer {
     if (!this._blocks[index]) {
       // If a block is not allocated yet, do so.
       let size = this._blockSize;

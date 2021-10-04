@@ -227,11 +227,11 @@ type ProcessedInitializationResult = Readonly<{
 // A RandomAccessDataProvider that combines multiple underlying RandomAccessDataProviders, optionally adding topic prefixes
 // or removing certain topics.
 export default class CombinedDataProvider implements RandomAccessDataProvider {
-  _providers: RandomAccessDataProvider[];
+  private _providers: RandomAccessDataProvider[];
   // Initialization result will be undefined for providers that don't successfully initialize.
-  _initializationResultsPerProvider: (ProcessedInitializationResult | undefined)[] = [];
-  _progressPerProvider: (Progress | undefined)[];
-  _extensionPoint?: ExtensionPoint;
+  private _initializationResultsPerProvider: (ProcessedInitializationResult | undefined)[] = [];
+  private _progressPerProvider: (Progress | undefined)[];
+  private _extensionPoint?: ExtensionPoint;
 
   constructor(
     _: unknown,
@@ -372,7 +372,7 @@ export default class CombinedDataProvider implements RandomAccessDataProvider {
     return mergedMessages;
   }
 
-  _updateProgressForChild(providerIdx: number, progress: Progress): void {
+  private _updateProgressForChild(providerIdx: number, progress: Progress): void {
     this._progressPerProvider[providerIdx] = progress;
     // Assume empty for unreported progress
     const cleanProgresses = this._progressPerProvider.map((p) => p ?? emptyProgress());
