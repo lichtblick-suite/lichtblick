@@ -11,8 +11,14 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets } from "@fluentui/merge-styles";
-import { Dropdown, IDropdownOption, ISelectableOption } from "@fluentui/react";
+import {
+  Dropdown,
+  IDropdownOption,
+  IDropdownStyles,
+  ISelectableOption,
+  mergeStyleSets,
+  useTheme,
+} from "@fluentui/react";
 import PinIcon from "@mdi/svg/svg/pin.svg";
 import cx from "classnames";
 import { compact } from "lodash";
@@ -163,6 +169,37 @@ type Props = {
 };
 
 function DiagnosticSummary(props: Props): JSX.Element {
+  const theme = useTheme();
+
+  const dropdownStyles = {
+    root: {
+      minWidth: "100px",
+    },
+    caretDownWrapper: {
+      top: 0,
+      lineHeight: 24,
+      height: 24,
+    },
+    title: {
+      backgroundColor: "transparent",
+      fontSize: theme.fonts.small.fontSize,
+      borderColor: theme.semanticColors.bodyDivider,
+      lineHeight: 24,
+      height: 24,
+    },
+    dropdownItemSelected: {
+      fontSize: theme.fonts.small.fontSize,
+      lineHeight: 24,
+      height: 24,
+      minHeight: 24,
+    },
+    dropdownItem: {
+      lineHeight: 24,
+      height: 24,
+      minHeight: 24,
+      fontSize: theme.fonts.small.fontSize,
+    },
+  } as Partial<IDropdownStyles>;
   const { config, saveConfig } = props;
   const { topics } = useDataSourceInfo();
   const { minLevel, topicToRender, pinnedIds, hardwareIdFilter, sortByLevel = true } = config;
@@ -216,7 +253,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
         backgroundColor: "transparent",
         opacity: "0.5",
         marginLeft: "10px",
-        fontSize: "14px",
+        fontSize: "12px",
       }}
       value={hardwareIdFilter}
       placeholder="Filter hardware id"
@@ -310,10 +347,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
     <Flex col className={classes.panel}>
       <PanelToolbar helpContent={helpContent} additionalIcons={topicToRenderMenu}>
         <Dropdown
-          styles={{
-            root: { minWidth: "100px" },
-            title: { backgroundColor: "transparent" },
-          }}
+          styles={dropdownStyles}
           onRenderOption={renderOption}
           onRenderTitle={(option: IDropdownOption[] | undefined) =>
             option ? <>{option.map(renderOption)}</> : ReactNull
