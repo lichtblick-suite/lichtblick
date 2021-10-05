@@ -223,8 +223,7 @@ describe("McapReader", () => {
           ...string("mytopic"), // topic
           ...string("utf12"), // encoding
           ...string("some data"), // schema name
-          ...string("none"), // schema format
-          ...uint32LE(0), // empty schema
+          ...string("stuff"), // schema
           ...[1, 2, 3], // channel data
         ]),
 
@@ -242,7 +241,7 @@ describe("McapReader", () => {
       topic: "mytopic",
       encoding: "utf12",
       schemaName: "some data",
-      schema: new ArrayBuffer(0),
+      schema: "stuff",
       data: new Uint8Array([1, 2, 3]).buffer,
     });
     expect(reader.nextRecord()).toEqual({ type: "Footer", indexPos: 0n, indexCrc: 0 });
@@ -255,8 +254,7 @@ describe("McapReader", () => {
       ...string("mytopic"), // topic
       ...string("utf12"), // encoding
       ...string("some data"), // schema name
-      ...string("none"), // schema format
-      ...uint32LE(0), // empty schema
+      ...string("stuff"), // schema
       ...[1, 2, 3], // channel data
     ]);
     const decompressHandlers = { xyz: () => channelInfo };
@@ -287,7 +285,7 @@ describe("McapReader", () => {
       topic: "mytopic",
       encoding: "utf12",
       schemaName: "some data",
-      schema: new ArrayBuffer(0),
+      schema: "stuff",
       data: new Uint8Array([1, 2, 3]).buffer,
     });
     expect(reader.nextRecord()).toEqual({ type: "Footer", indexPos: 0n, indexCrc: 0 });

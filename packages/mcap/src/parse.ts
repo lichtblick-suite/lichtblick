@@ -98,9 +98,8 @@ export function parseRecord(
       offset += schemaNameLen;
       const schemaLen = view.getUint32(offset, true);
       offset += 4;
-      const schema = view.buffer.slice(
-        view.byteOffset + offset,
-        view.byteOffset + offset + schemaLen,
+      const schema = new TextDecoder().decode(
+        new DataView(view.buffer, view.byteOffset + offset, schemaLen),
       );
       offset += schemaLen;
       const data = view.buffer.slice(view.byteOffset + offset, view.byteOffset + recordEndOffset);

@@ -55,6 +55,12 @@ type TopicResponse = {
   version: string;
 };
 
+type CoverageResponse = {
+  deviceId: string;
+  start: string;
+  end: string;
+};
+
 export type LayoutID = string & { __brand: "LayoutID" };
 export type ISO8601Timestamp = string & { __brand: "ISO8601Timestamp" };
 
@@ -233,6 +239,14 @@ class ConsoleApi {
 
   async deleteLayout(id: LayoutID): Promise<boolean> {
     return (await this.delete(`/v1/layouts/${id}`)).status === 200;
+  }
+
+  async coverage(params: {
+    deviceId: string;
+    start: string;
+    end: string;
+  }): Promise<CoverageResponse[]> {
+    return await this.get<CoverageResponse[]>("/v1/data/coverage", params);
   }
 
   async topics(params: {

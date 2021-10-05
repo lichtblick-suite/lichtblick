@@ -75,7 +75,7 @@ export default async function* streamMessages({
   function processRecord(record: McapRecord) {
     switch (record.type) {
       default:
-        break;
+        return;
 
       case "ChannelInfo": {
         const existingInfo = channelInfoById.get(record.id);
@@ -83,14 +83,13 @@ export default async function* streamMessages({
           if (!isEqual(existingInfo.info, record)) {
             throw new Error(`differing channel infos for for ${record.id}`);
           }
-          break;
+          return;
         }
-        const schema = new TextDecoder().decode(record.schema);
         const readers = messageReadersByTopic.get(record.topic) ?? [];
         for (const reader of readers) {
-          if (reader.encoding === record.encoding && reader.schema === schema) {
+          if (reader.encoding === record.encoding && reader.schema === record.schema) {
             channelInfoById.set(record.id, { info: record, messageDeserializer: reader.reader });
-            break;
+            return;
           }
         }
         log.error("No pre-initialized reader for", record, "available readers are:", readers);
@@ -113,7 +112,7 @@ export default async function* streamMessages({
             message: channelInfo.messageDeserializer.readMessage(new DataView(record.data)),
           });
         }
-        break;
+        return;
       }
     }
   }

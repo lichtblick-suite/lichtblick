@@ -64,10 +64,10 @@ async function validate(
         let parsedDefinitions;
         let messageDeserializer;
         if (record.encoding === "ros1") {
-          parsedDefinitions = parseMessageDefinition(new TextDecoder().decode(record.schema));
+          parsedDefinitions = parseMessageDefinition(record.schema);
           messageDeserializer = new ROS1LazyMessageReader(parsedDefinitions);
         } else if (record.encoding === "ros2") {
-          parsedDefinitions = parseMessageDefinition(new TextDecoder().decode(record.schema), {
+          parsedDefinitions = parseMessageDefinition(record.schema, {
             ros2: true,
           });
           messageDeserializer = new ROS2MessageReader(parsedDefinitions);
