@@ -23,12 +23,10 @@ import {
 } from "@foxglove/studio-base/players/UserNodePlayer/types";
 import { PlayerStateActiveData } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import Storage from "@foxglove/studio-base/util/Storage";
 import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
 import { DEFAULT_STUDIO_NODE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import signal from "@foxglove/studio-base/util/signal";
 
-const storage = new Storage();
 const nodeId = "nodeId";
 
 const nodeUserCode = `
@@ -143,10 +141,6 @@ UserNodePlayer.CreateNodeTransformWorker = () => {
 };
 
 describe("UserNodePlayer", () => {
-  afterAll(() => {
-    storage.clear();
-  });
-
   describe("default player behavior", () => {
     it("subscribes to underlying topics when node topics are subscribed", () => {
       const fakePlayer = new FakePlayer();

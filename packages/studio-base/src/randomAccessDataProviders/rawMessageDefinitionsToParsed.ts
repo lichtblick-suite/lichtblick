@@ -13,9 +13,9 @@
 
 import { fromPairs, uniq } from "lodash";
 
+import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
 import { Topic, ParsedMessageDefinitionsByTopic } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
-import parseMessageDefinitionsCache from "@foxglove/studio-base/util/parseMessageDefinitionsCache";
 
 import { MessageDefinitions, ParsedMessageDefinitions } from "./types";
 
@@ -64,11 +64,7 @@ export default function rawMessageDefinitionsToParsed(
     messageDefinitions.messageDefinitionsByTopic,
   )) {
     const messageDefinition = topicDefinitions;
-    const md5 = messageDefinitions.messageDefinitionMd5SumByTopic?.[topic];
-    parsedMessageDefinitionsByTopic[topic] = parseMessageDefinitionsCache.parseMessageDefinition(
-      messageDefinition,
-      md5,
-    );
+    parsedMessageDefinitionsByTopic[topic] = parseMessageDefinition(messageDefinition);
   }
   return {
     type: "parsed",

@@ -93,9 +93,6 @@ export default class RenameDataProvider implements RandomAccessDataProvider {
         messageDefinitionsByTopic: convertTopicNameKey(
           messageDefinitions.messageDefinitionsByTopic,
         ),
-        messageDefinitionMd5SumByTopic: messageDefinitions.messageDefinitionMd5SumByTopic
-          ? convertTopicNameKey(messageDefinitions.messageDefinitionMd5SumByTopic)
-          : undefined,
       };
     }
 

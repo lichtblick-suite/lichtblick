@@ -222,10 +222,8 @@ export default class BagDataProvider implements RandomAccessDataProvider {
     }
 
     const messageDefinitionsByTopic: Record<string, string> = {};
-    const messageDefinitionMd5SumByTopic: Record<string, string> = {};
     for (const connection of connections) {
       messageDefinitionsByTopic[connection.topic] = connection.messageDefinition;
-      messageDefinitionMd5SumByTopic[connection.topic] = connection.md5sum;
     }
 
     return {
@@ -236,7 +234,6 @@ export default class BagDataProvider implements RandomAccessDataProvider {
       messageDefinitions: {
         type: "raw",
         messageDefinitionsByTopic,
-        messageDefinitionMd5SumByTopic,
       },
       providesParsedMessages: false,
       problems: [],

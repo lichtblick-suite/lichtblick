@@ -19,29 +19,12 @@ export interface BackingStore {
   removeItem(key: string): void;
 }
 
-export type BustStorageFn = (backingStore: BackingStore, keys: string[]) => void;
-
-// Having a global map so that different storage instances can add bust storage function to the same map.
-const bustStorageFnsMap = new Map<BackingStore, BustStorageFn[]>();
-
-// Exported for testing.
-// ts-prune-ignore-next
-export function clearBustStorageFnsMap(): void {
-  bustStorageFnsMap.clear();
-}
-
 // Small wrapper around localStorage for convenience.
 export default class Storage {
   private _backingStore: BackingStore;
 
   constructor(backingStore: BackingStore = window.localStorage) {
     this._backingStore = backingStore;
-  }
-
-  // The registered bustStorageFn will be called when the storage quota is reached.
-  registerBustStorageFn(bustStorageFn: BustStorageFn): void {
-    const bustStorageFns = bustStorageFnsMap.get(this._backingStore) ?? [];
-    bustStorageFnsMap.set(this._backingStore, [...bustStorageFns, bustStorageFn]);
   }
 
   clear(): void {
@@ -69,44 +52,9 @@ export default class Storage {
     }
   }
 
-  private _bustStorage(): void {
-    const bustStorageFns = bustStorageFnsMap.get(this._backingStore) ?? [];
-    for (const bustStorageFn of bustStorageFns) {
-      bustStorageFn(this._backingStore, this.keys());
-    }
-  }
-
-  setItem(key: string, value: unknown, bustStorageFn?: BustStorageFn): void {
+  setItem(key: string, value: unknown): void {
     const strValue = JSON.stringify(value);
-    try {
-      this._backingStore.setItem(key, strValue);
-    } catch {
-      // If there is a bustStorageFn when setItem, we should call it first to bust the lower priority caches.
-      if (bustStorageFn) {
-        bustStorageFn(this._backingStore, this.keys());
-      } else {
-        this._bustStorage();
-      }
-      let err;
-      try {
-        this._backingStore.setItem(key, strValue);
-      } catch (e) {
-        err = e;
-        if (bustStorageFn) {
-          // Call the globally cache busting functions to bust more cache if setItem still fails.
-          this._bustStorage();
-          try {
-            // Try writing again.
-            this._backingStore.setItem(key, strValue);
-          } catch (e1) {
-            err = e1;
-          }
-        }
-        if (err != undefined) {
-          throw err;
-        }
-      }
-    }
+    this._backingStore.setItem(key, strValue);
   }
 
   removeItem(key: string): void {

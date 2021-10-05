@@ -81,10 +81,6 @@ export type MessageDefinitions =
       // available through the data provider in binary format, either directly through getMessages calls
       // or indirectly through the player progress mechanism.
       messageDefinitionsByTopic: MessageDefinitionsByTopic;
-      // Optional, the md5 sum of the message definition by topic.
-      messageDefinitionMd5SumByTopic?: {
-        [key: string]: string;
-      };
     }>
   | ParsedMessageDefinitions;
 
