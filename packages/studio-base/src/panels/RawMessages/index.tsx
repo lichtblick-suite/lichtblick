@@ -375,7 +375,6 @@ function RawMessages(props: Props) {
           showFullMessageForDiff,
         })
       : {};
-    const diffLabelTexts = Object.values(diffLabels).map(({ labelText }) => labelText);
 
     const CheckboxComponent = showFullMessageForDiff
       ? CheckboxMarkedIcon
@@ -445,18 +444,27 @@ function RawMessages(props: Props) {
                 );
               }}
               postprocessValue={(rawVal: unknown) => {
-                const val = maybeDeepParse(rawVal);
-                if (
-                  typeof val === "object" &&
-                  val != undefined &&
-                  Object.keys(val).length === 1 &&
-                  (diffLabelTexts as string[]).includes(Object.keys(val)[0] as string)
-                ) {
-                  if (Object.keys(val)[0] !== diffLabels.ID.labelText) {
-                    return Object.values(val)[0];
-                  }
+                if (rawVal == undefined) {
+                  return rawVal;
                 }
-                return val;
+                const idValue = (rawVal as Record<string, unknown>)[diffLabels.ID.labelText];
+                const addedValue = (rawVal as Record<string, unknown>)[diffLabels.ADDED.labelText];
+                const changedValue = (rawVal as Record<string, unknown>)[
+                  diffLabels.CHANGED.labelText
+                ];
+                const deletedValue = (rawVal as Record<string, unknown>)[
+                  diffLabels.DELETED.labelText
+                ];
+                if (
+                  (addedValue != undefined ? 1 : 0) +
+                    (changedValue != undefined ? 1 : 0) +
+                    (deletedValue != undefined ? 1 : 0) ===
+                    1 &&
+                  idValue == undefined
+                ) {
+                  return addedValue ?? changedValue ?? deletedValue;
+                }
+                return maybeDeepParse(rawVal);
               }}
               theme={{
                 ...jsonTreeTheme,
