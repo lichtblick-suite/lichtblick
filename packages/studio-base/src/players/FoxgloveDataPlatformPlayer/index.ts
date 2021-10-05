@@ -373,22 +373,21 @@ export default class FoxgloveDataPlatformPlayer implements Player {
       return;
     }
     const preloadedMessages = this._initialized.preloadedMessages;
-    const preloadedExtent = preloadedMessages.fullyLoadedExtent(this._currentTime);
+    const nextRangeToLoad = preloadedMessages.nextRangeToLoad(this._currentTime);
     const shouldPreload =
       this._requestedTopics.length > 0 &&
-      (!preloadedExtent ||
-        toSec(subtract(preloadedExtent.end, this._currentTime)) < this._preloadThresholdSecs);
+      nextRangeToLoad != undefined &&
+      toSec(subtract(nextRangeToLoad.start, this._currentTime)) < this._preloadThresholdSecs;
     if (!shouldPreload) {
       return;
     }
 
-    const startTime = clampTime(preloadedExtent?.end ?? this._currentTime, this._start, this._end);
-    const proposedEndTime = clampTime(
+    const startTime = nextRangeToLoad.start;
+    const endTime = clampTime(
       add(startTime, fromSec(this._preloadDurationSecs)),
       this._start,
-      this._end,
+      nextRangeToLoad.end,
     );
-    const endTime = preloadedMessages.fullyLoadedExtent(proposedEndTime)?.start ?? proposedEndTime;
     if (areEqual(startTime, endTime)) {
       return;
     }

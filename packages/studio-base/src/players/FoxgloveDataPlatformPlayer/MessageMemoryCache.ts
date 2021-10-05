@@ -84,9 +84,13 @@ export default class MessageMemoryCache {
   }
 
   /**
-   * @returns The maximal fully loaded range that contains `targetTime`.
+   * Returns the unloaded range or "gap" starting from the target time to the beginning of the next
+   * loaded range, or if the target time falls inside an already-loaded range, return the next gap
+   * after the target time.
+   *
+   * Returns undefined if the target time and all times after it have been loaded.
    */
-  fullyLoadedExtent(targetTime: Time): TimeRange | undefined {
+  nextRangeToLoad(targetTime: Time): TimeRange | undefined {
     let lo = 0;
     let hi = this.loadedRanges.length;
     while (lo < hi) {
@@ -97,10 +101,27 @@ export default class MessageMemoryCache {
       } else if (!isGreaterThan(midRange.range.end, targetTime)) {
         lo = mid + 1;
       } else {
-        return midRange.range;
+        // The target time is already loaded; return the next gap.
+        if (mid + 1 < this.loadedRanges.length) {
+          return {
+            start: midRange.range.end,
+            end: this.loadedRanges[mid + 1]!.range.start,
+          };
+        } else if (areEqual(midRange.range.end, this.maxTime)) {
+          return undefined;
+        } else {
+          return { start: midRange.range.end, end: this.maxTime };
+        }
       }
     }
-    return undefined;
+    // The target time does not fall within a loaded range.
+    if (lo < this.loadedRanges.length) {
+      return { start: targetTime, end: this.loadedRanges[lo]!.range.start };
+    } else if (areEqual(targetTime, this.maxTime)) {
+      return undefined;
+    } else {
+      return { start: targetTime, end: this.maxTime };
+    }
   }
 
   /**
