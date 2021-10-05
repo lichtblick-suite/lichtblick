@@ -7,20 +7,39 @@ import decompressLZ4 from "wasm-lz4";
 
 import Logger from "@foxglove/log";
 import { ChannelInfo, McapReader, McapRecord } from "@foxglove/mcap";
-import { parse as parseMessageDefinition, RosMsgDefinition } from "@foxglove/rosmsg";
-import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
-import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
 import { fromNanoSec, isTimeInRangeInclusive, Time, toRFC3339String } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 
 const log = Logger.getLogger(__filename);
 
-export default async function* streamMessages(
-  api: ConsoleApi,
-  signal: AbortSignal,
-  params: { deviceId: string; start: Time; end: Time; topics: readonly string[] },
-): AsyncIterable<MessageEvent<unknown>[]> {
+interface MessageReader {
+  readMessage(data: ArrayBufferView): MessageEvent<unknown>;
+}
+
+export default async function* streamMessages({
+  api,
+  signal,
+  messageReadersByTopic,
+  params,
+}: {
+  api: ConsoleApi;
+
+  /**
+   * An AbortSignal allowing the stream request to be canceled. When the signal is aborted, the
+   * function may return successfully (possibly after yielding any remaining messages), or it may
+   * raise an AbortError.
+   */
+  signal: AbortSignal;
+
+  /** Parameters indicating the time range to stream. */
+  params: { deviceId: string; start: Time; end: Time; topics: readonly string[] };
+
+  /**
+   * Message readers are initialized out of band so we can parse message definitions only once.
+   */
+  messageReadersByTopic: Map<string, { encoding: string; schema: string; reader: MessageReader }[]>;
+}): AsyncIterable<MessageEvent<unknown>[]> {
   await decompressLZ4.isLoaded;
 
   log.debug("streamMessages", params);
@@ -47,11 +66,7 @@ export default async function* streamMessages(
 
   const channelInfoById = new Map<
     number,
-    {
-      info: ChannelInfo;
-      messageDeserializer: ROS2MessageReader | LazyMessageReader;
-      parsedDefinitions: RosMsgDefinition[];
-    }
+    { info: ChannelInfo; messageDeserializer: MessageReader }
   >();
 
   let totalMessages = 0;
@@ -70,21 +85,18 @@ export default async function* streamMessages(
           }
           break;
         }
-        let parsedDefinitions;
-        let messageDeserializer;
-        if (record.encoding === "ros1") {
-          parsedDefinitions = parseMessageDefinition(new TextDecoder().decode(record.schema));
-          messageDeserializer = new LazyMessageReader(parsedDefinitions);
-        } else if (record.encoding === "ros2") {
-          parsedDefinitions = parseMessageDefinition(new TextDecoder().decode(record.schema), {
-            ros2: true,
-          });
-          messageDeserializer = new ROS2MessageReader(parsedDefinitions);
-        } else {
-          throw new Error(`unsupported encoding ${record.encoding}`);
+        const schema = new TextDecoder().decode(record.schema);
+        const readers = messageReadersByTopic.get(record.topic) ?? [];
+        for (const reader of readers) {
+          if (reader.encoding === record.encoding && reader.schema === schema) {
+            channelInfoById.set(record.id, { info: record, messageDeserializer: reader.reader });
+            break;
+          }
         }
-        channelInfoById.set(record.id, { info: record, messageDeserializer, parsedDefinitions });
-        break;
+        log.error("No pre-initialized reader for", record, "available readers are:", readers);
+        throw new Error(
+          `No pre-initialized reader for ${record.topic} (${record.encoding}, ${record.schemaName})`,
+        );
       }
 
       case "Message": {

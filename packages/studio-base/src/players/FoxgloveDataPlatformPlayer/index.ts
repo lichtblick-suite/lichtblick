@@ -6,6 +6,8 @@ import { v4 as uuidv4 } from "uuid";
 
 import Logger from "@foxglove/log";
 import { parse as parseMessageDefinition } from "@foxglove/rosmsg";
+import { LazyMessageReader } from "@foxglove/rosmsg-serialization";
+import { MessageReader as ROS2MessageReader } from "@foxglove/rosmsg2-serialization";
 import {
   add,
   clampTime,
@@ -87,6 +89,10 @@ export default class FoxgloveDataPlatformPlayer implements Player {
   private _progress: Progress = {};
   private _loadedMoreMessages?: Signal<void>;
   private _nextFrame: MessageEvent<unknown>[] = [];
+  private _messageReadersByTopic = new Map<
+    string,
+    { encoding: string; schema: string; reader: ROS2MessageReader | LazyMessageReader }[]
+  >();
 
   // track issues within the player
   private _problems: PlayerProblem[] = [];
@@ -128,30 +134,25 @@ export default class FoxgloveDataPlatformPlayer implements Player {
       includeSchemas: true,
     });
     if (rawTopics.length === 0) {
-      this._presence = PlayerPresence.ERROR;
-      this._addProblem("no-data", {
-        message: `No data available for ${this._deviceId} between ${formatTimeRaw(
+      throw new Error(
+        `No data available for ${this._deviceId} between ${formatTimeRaw(
           this._start,
         )} and ${formatTimeRaw(this._end)}.`,
-        severity: "error",
-      });
-      return;
+      );
     }
 
     const topics: Topic[] = [];
     const datatypes: RosDatatypes = new Map();
     for (const { topic, encoding, schema, schemaName } of rawTopics) {
-      if (encoding !== "ros1" && encoding !== "ros2") {
-        this._addProblem("bad-encoding", {
-          message: `Unsupported encoding for ${topic}: ${encoding}`,
-          severity: "error",
-        });
-        return;
-      }
       if (schema == undefined) {
         throw new Error(`missing requested schema for ${topic}`);
       }
+      if (encoding !== "ros1" && encoding !== "ros2") {
+        throw new Error(`Unsupported encoding for ${topic}: ${encoding}`);
+      }
+
       topics.push({ name: topic, datatype: schemaName });
+
       const parsedDefinitions = parseMessageDefinition(schema, { ros2: encoding === "ros2" });
       parsedDefinitions.forEach(({ name, definitions }, index) => {
         // The first definition usually doesn't have an explicit name,
@@ -162,6 +163,25 @@ export default class FoxgloveDataPlatformPlayer implements Player {
           datatypes.set(name, { name, definitions });
         }
       });
+
+      let readers = this._messageReadersByTopic.get(topic);
+      if (!readers) {
+        readers = [];
+        this._messageReadersByTopic.set(topic, readers);
+      }
+      for (const reader of readers) {
+        if (reader.encoding === encoding && reader.schema === schema) {
+          continue;
+        }
+      }
+      switch (encoding) {
+        case "ros1":
+          readers.push({ encoding, schema, reader: new LazyMessageReader(parsedDefinitions) });
+          break;
+        case "ros2":
+          readers.push({ encoding, schema, reader: new ROS2MessageReader(parsedDefinitions) });
+          break;
+      }
     }
     this._topics = topics;
     this._datatypes = datatypes;
@@ -330,11 +350,16 @@ export default class FoxgloveDataPlatformPlayer implements Player {
     this._currentPreloadTask = thisTask;
     log.debug("Starting preload task", startTime, endTime);
     (async () => {
-      const stream = streamMessages(this._consoleApi, thisTask.signal, {
-        deviceId: this._deviceId,
-        start: startTime,
-        end: endTime,
-        topics: this._requestedTopics,
+      const stream = streamMessages({
+        api: this._consoleApi,
+        signal: thisTask.signal,
+        messageReadersByTopic: this._messageReadersByTopic,
+        params: {
+          deviceId: this._deviceId,
+          start: startTime,
+          end: endTime,
+          topics: this._requestedTopics,
+        },
       });
 
       for await (const { messages, range } of collateMessageStream(stream, {
