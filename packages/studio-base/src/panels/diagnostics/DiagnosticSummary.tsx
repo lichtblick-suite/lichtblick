@@ -170,36 +170,39 @@ type Props = {
 
 function DiagnosticSummary(props: Props): JSX.Element {
   const theme = useTheme();
-
-  const dropdownStyles = {
-    root: {
-      minWidth: "100px",
-    },
-    caretDownWrapper: {
-      top: 0,
-      lineHeight: 24,
-      height: 24,
-    },
-    title: {
-      backgroundColor: "transparent",
-      fontSize: theme.fonts.small.fontSize,
-      borderColor: theme.semanticColors.bodyDivider,
-      lineHeight: 24,
-      height: 24,
-    },
-    dropdownItemSelected: {
-      fontSize: theme.fonts.small.fontSize,
-      lineHeight: 24,
-      height: 24,
-      minHeight: 24,
-    },
-    dropdownItem: {
-      lineHeight: 24,
-      height: 24,
-      minHeight: 24,
-      fontSize: theme.fonts.small.fontSize,
-    },
-  } as Partial<IDropdownStyles>;
+  const dropdownStyles = useMemo(
+    () =>
+      ({
+        root: {
+          minWidth: "100px",
+        },
+        caretDownWrapper: {
+          top: 0,
+          lineHeight: 24,
+          height: 24,
+        },
+        title: {
+          backgroundColor: "transparent",
+          fontSize: theme.fonts.small.fontSize,
+          borderColor: theme.semanticColors.bodyDivider,
+          lineHeight: 24,
+          height: 24,
+        },
+        dropdownItemSelected: {
+          fontSize: theme.fonts.small.fontSize,
+          lineHeight: 24,
+          height: 24,
+          minHeight: 24,
+        },
+        dropdownItem: {
+          lineHeight: 24,
+          height: 24,
+          minHeight: 24,
+          fontSize: theme.fonts.small.fontSize,
+        },
+      } as Partial<IDropdownStyles>),
+    [theme],
+  );
   const { config, saveConfig } = props;
   const { topics } = useDataSourceInfo();
   const { minLevel, topicToRender, pinnedIds, hardwareIdFilter, sortByLevel = true } = config;
