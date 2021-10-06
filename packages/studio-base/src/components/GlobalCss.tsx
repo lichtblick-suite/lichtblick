@@ -14,6 +14,11 @@ const mosaicStyles = () =>
         left: 0,
         bottom: 0,
         right: 0,
+
+        ".drop-target-container .drop-target": {
+          backgroundColor: colors.TEXT_DISABLED,
+          border: `2px solid ${colors.TEXT_MUTED}`,
+        },
       },
       ".mosaic-tile": {
         margin: 1,
@@ -113,10 +118,6 @@ const mosaicStyles = () =>
             color: colors.TEXT_CONTROL_HOVER,
           },
         },
-      },
-      ".drop-target-container .drop-target": {
-        backgroundColor: colors.TEXT_DISABLED,
-        border: `2px solid ${colors.TEXT_MUTED}`,
       },
     },
   });
