@@ -45,7 +45,7 @@ export default function ConsoleApiCookieCurrentUserProvider(
   // On signIn, direct the user to console to perform the account signin flow. This will set the correct
   // cookies and return the user back to studio
   const signIn = useCallback(() => {
-    const currentLocation = window.location.href;
+    const currentLocation = encodeURIComponent(window.location.href);
     window.location.href = `https://console.foxglove.dev/signin?returnTo=${currentLocation}`;
   }, []);
 

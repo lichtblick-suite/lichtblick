@@ -175,7 +175,11 @@ class ConsoleApi {
     if (this._authHeader != undefined) {
       headers["Authorization"] = this._authHeader;
     }
-    const fullConfig = { ...config, headers: { ...headers, ...config?.headers } };
+    const fullConfig: RequestInit = {
+      ...config,
+      credentials: "include",
+      headers: { ...headers, ...config?.headers },
+    };
 
     const res = await fetch(fullUrl, fullConfig);
     if (res.status !== 200 && !allowedStatuses.includes(res.status)) {
