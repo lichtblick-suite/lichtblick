@@ -15,7 +15,6 @@ import {
   SpinnerSize,
 } from "@fluentui/react";
 import { useEffect, useMemo } from "react";
-import { useToasts } from "react-toast-notifications";
 import { useAsync, useMountedState } from "react-use";
 
 import Logger from "@foxglove/log";
@@ -32,7 +31,6 @@ type DeviceCodePanelProps = {
 // Show instructions on opening the browser and entering the device code
 export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Element {
   const theme = useTheme();
-  const { addToast } = useToasts();
   const isMounted = useMountedState();
   const api = useConsoleApi();
   const { onClose } = props;
@@ -42,15 +40,6 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
       clientId: process.env.OAUTH_CLIENT_ID!,
     });
   }, [api]);
-
-  useEffect(() => {
-    if (deviceCodeError != undefined) {
-      addToast(deviceCodeError.message, {
-        appearance: "error",
-      });
-      onClose?.();
-    }
-  }, [addToast, deviceCodeError, onClose]);
 
   // open new window with the device code to facilitate user signin flow
   useEffect(() => {
@@ -143,10 +132,14 @@ export default function DeviceCodeDialog(props: DeviceCodePanelProps): JSX.Eleme
     );
   }, [deviceCode, theme]);
 
-  if (deviceResponseError != undefined || signinError != undefined) {
+  if (
+    deviceCodeError != undefined ||
+    deviceResponseError != undefined ||
+    signinError != undefined
+  ) {
     return (
       <Dialog hidden={false} title="Error">
-        {deviceResponseError?.message ?? signinError?.message}
+        {deviceCodeError?.message ?? deviceResponseError?.message ?? signinError?.message}
         <DialogFooter>
           <PrimaryButton text="Done" onClick={() => onClose?.()} />
         </DialogFooter>

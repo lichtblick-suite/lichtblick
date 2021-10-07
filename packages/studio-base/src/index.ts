@@ -9,9 +9,12 @@
 /// <reference types="./typings" />
 
 export { default as ConsoleApi } from "@foxglove/studio-base/services/ConsoleApi";
-export { default as ConsoleApiContext } from "@foxglove/studio-base/context/ConsoleApiContext";
+export type { Session } from "@foxglove/studio-base/services/ConsoleApi";
+export {
+  default as ConsoleApiContext,
+  useConsoleApi,
+} from "@foxglove/studio-base/context/ConsoleApiContext";
 export { default as ConsoleApiRemoteLayoutStorageProvider } from "@foxglove/studio-base/providers/ConsoleApiRemoteLayoutStorageProvider";
-export { default as ConsoleApiCurrentUserProvider } from "@foxglove/studio-base/providers/ConsoleApiCurrentUserProvider";
 export { default as App } from "./App";
 export type { NetworkInterface, OsContext } from "./OsContext";
 export { default as ErrorBoundary } from "./components/ErrorBoundary";
@@ -45,3 +48,6 @@ export type { PanelsState } from "./context/CurrentLayoutContext/actions";
 export { default as LayoutStorageDebuggingContext } from "./context/LayoutStorageDebuggingContext";
 export { default as CssBaseline } from "./components/CssBaseline";
 export { default as GlobalCss } from "./components/GlobalCss";
+export { default as CurrentUserContext } from "./context/CurrentUserContext";
+export type { User } from "./context/CurrentUserContext";
+export { default as DeviceCodeDialog } from "./components/DeviceCodeDialog";

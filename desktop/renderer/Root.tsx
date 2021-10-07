@@ -16,11 +16,11 @@ import {
   GlobalCss,
   ConsoleApi,
   ConsoleApiContext,
-  ConsoleApiCurrentUserProvider,
   ConsoleApiRemoteLayoutStorageProvider,
 } from "@foxglove/studio-base";
 
 import { Desktop } from "../common/types";
+import ConsoleApiCurrentUserProvider from "./components/ConsoleApiCurrentUserProvider";
 import NativeAppMenuProvider from "./components/NativeAppMenuProvider";
 import NativeStorageAppConfigurationProvider from "./components/NativeStorageAppConfigurationProvider";
 import NativeStorageLayoutStorageProvider from "./components/NativeStorageLayoutStorageProvider";
