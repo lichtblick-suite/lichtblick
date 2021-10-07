@@ -7,7 +7,7 @@ import { crc32 } from "@foxglove/crc";
 import StreamBuffer from "./StreamBuffer";
 import { MCAP_MAGIC } from "./constants";
 import { parseMagic, parseRecord } from "./parse";
-import { McapRecord } from "./types";
+import { ChannelInfo, McapRecord } from "./types";
 
 type McapReaderOptions = {
   /**
@@ -95,6 +95,8 @@ export default class McapReader {
   }
 
   private *read(): Generator<McapRecord | undefined, McapRecord | undefined, void> {
+    const channelInfosById = new Map<number, ChannelInfo>();
+    const channelInfosSeenInThisChunk = new Set<number>();
     {
       let magic, usedBytes;
       while ((({ magic, usedBytes } = parseMagic(this.buffer.view, 0)), !magic)) {
@@ -107,7 +109,15 @@ export default class McapReader {
       let record;
       {
         let usedBytes;
-        while ((({ record, usedBytes } = parseRecord(this.buffer.view, 0)), !record)) {
+        while (
+          (({ record, usedBytes } = parseRecord(
+            this.buffer.view,
+            0,
+            channelInfosById,
+            channelInfosSeenInThisChunk,
+          )),
+          !record)
+        ) {
           yield;
         }
         this.buffer.consume(usedBytes);
@@ -140,7 +150,13 @@ export default class McapReader {
           let chunkOffset = 0;
           for (
             let chunkResult;
-            (chunkResult = parseRecord(view, chunkOffset)), chunkResult.record;
+            (chunkResult = parseRecord(
+              view,
+              chunkOffset,
+              channelInfosById,
+              channelInfosSeenInThisChunk,
+            )),
+              chunkResult.record;
             chunkOffset += chunkResult.usedBytes
           ) {
             switch (chunkResult.record.type) {

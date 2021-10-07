@@ -2,11 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { isEqual } from "lodash";
 import decompressLZ4 from "wasm-lz4";
 
 import Logger from "@foxglove/log";
-import { ChannelInfo, McapReader, McapRecord } from "@foxglove/mcap";
+import { McapReader, McapRecord } from "@foxglove/mcap";
 import { fromNanoSec, isTimeInRangeInclusive, Time, toRFC3339String } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
@@ -57,17 +56,15 @@ export default async function* streamMessages({
   if (response.status === 404) {
     return;
   } else if (response.status !== 200) {
-    throw new Error(`Unexpected response status ${response.status} for ${mcapUrl}`);
+    log.error(`${response.status} response for`, mcapUrl, response);
+    throw new Error(`Unexpected response status ${response.status}`);
   }
   if (!response.body) {
     throw new Error("Unable to stream response body");
   }
   const streamReader = response.body?.getReader();
 
-  const channelInfoById = new Map<
-    number,
-    { info: ChannelInfo; messageDeserializer: MessageReader }
-  >();
+  const messageReadersByChannelId = new Map<number, MessageReader>();
 
   let totalMessages = 0;
   let messages: MessageEvent<unknown>[] = [];
@@ -78,17 +75,13 @@ export default async function* streamMessages({
         return;
 
       case "ChannelInfo": {
-        const existingInfo = channelInfoById.get(record.id);
-        if (existingInfo) {
-          if (!isEqual(existingInfo.info, record)) {
-            throw new Error(`differing channel infos for for ${record.id}`);
-          }
+        if (messageReadersByChannelId.has(record.id)) {
           return;
         }
         const readers = messageReadersByTopic.get(record.topic) ?? [];
         for (const reader of readers) {
           if (reader.encoding === record.encoding && reader.schema === record.schema) {
-            channelInfoById.set(record.id, { info: record, messageDeserializer: reader.reader });
+            messageReadersByChannelId.set(record.id, reader.reader);
             return;
           }
         }
@@ -99,17 +92,19 @@ export default async function* streamMessages({
       }
 
       case "Message": {
-        const channelInfo = channelInfoById.get(record.channelId);
-        if (!channelInfo) {
-          throw new Error(`message for channel ${record.channelId} with no prior channel info`);
+        const reader = messageReadersByChannelId.get(record.channelInfo.id);
+        if (!reader) {
+          throw new Error(
+            `message for channel ${record.channelInfo.id} with no prior channel info`,
+          );
         }
         const receiveTime = fromNanoSec(record.timestamp);
         if (isTimeInRangeInclusive(receiveTime, params.start, params.end)) {
           totalMessages++;
           messages.push({
-            topic: channelInfo.info.topic,
+            topic: record.channelInfo.topic,
             receiveTime,
-            message: channelInfo.messageDeserializer.readMessage(new DataView(record.data)),
+            message: reader.readMessage(new DataView(record.data)),
           });
         }
         return;

@@ -57,7 +57,7 @@ async function validate(
         const existingInfo = channelInfoById.get(record.id);
         if (existingInfo) {
           if (!isEqual(existingInfo.info, record)) {
-            throw new Error(`differing channel infos for for ${record.id}`);
+            throw new Error(`differing channel infos for ${record.id}`);
           }
           break;
         }
@@ -79,9 +79,11 @@ async function validate(
       }
 
       case "Message": {
-        const channelInfo = channelInfoById.get(record.channelId);
+        const channelInfo = channelInfoById.get(record.channelInfo.id);
         if (!channelInfo) {
-          throw new Error(`message for channel ${record.channelId} with no prior channel info`);
+          throw new Error(
+            `message for channel ${record.channelInfo.id} with no prior channel info`,
+          );
         }
         if (deserialize) {
           let message: unknown;
@@ -155,10 +157,12 @@ async function validate(
 }
 
 program
-  .argument("<file>", "path to mcap file")
+  .argument("<file...>", "path to mcap file(s)")
   .option("--deserialize", "deserialize message contents", false)
   .option("--dump", "dump message contents to stdout", false)
-  .action((file: string, options: { deserialize: boolean; dump: boolean }) => {
-    validate(file, options).catch(console.error);
+  .action(async (files: string[], options: { deserialize: boolean; dump: boolean }) => {
+    for (const file of files) {
+      await validate(file, options).catch(console.error);
+    }
   })
   .parse();

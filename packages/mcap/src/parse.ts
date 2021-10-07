@@ -2,8 +2,10 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { isEqual } from "lodash";
+
 import { MCAP_MAGIC, RecordType } from "./constants";
-import { McapMagic, McapRecord } from "./types";
+import { McapMagic, McapRecord, ChannelInfo } from "./types";
 
 /**
  * Parse a MCAP magic string and format version at `startOffset` in `view`.
@@ -36,10 +38,17 @@ export function parseMagic(
 
 /**
  * Parse a MCAP record beginning at `startOffset` in `view`.
+ *
+ * @param channelInfosById Used to track ChannelInfo objects across calls to `parseRecord` and
+ * associate them with newly parsed Message records.
+ * @param channelInfosSeenInThisChunk Used to validate that messages are preceded by a corresponding
+ * ChannelInfo within the same chunk.
  */
 export function parseRecord(
   view: DataView,
   startOffset: number,
+  channelInfosById: Map<number, ChannelInfo>,
+  channelInfosSeenInThisChunk: Set<number>,
 ): { record: McapRecord; usedBytes: number } | { record?: undefined; usedBytes: 0 } {
   if (startOffset + 5 >= view.byteLength) {
     return { usedBytes: 0 };
@@ -113,17 +122,36 @@ export function parseRecord(
         schema,
         data,
       };
-      return { record, usedBytes: recordEndOffset - startOffset };
+      channelInfosSeenInThisChunk.add(id);
+      const existingInfo = channelInfosById.get(id);
+      if (existingInfo) {
+        if (!isEqual(existingInfo, record)) {
+          throw new Error(`differing channel infos for ${record.id}`);
+        }
+        return { record: existingInfo, usedBytes: recordEndOffset - startOffset };
+      } else {
+        channelInfosById.set(id, record);
+        return { record, usedBytes: recordEndOffset - startOffset };
+      }
     }
 
     case RecordType.MESSAGE: {
       const channelId = view.getUint32(offset, true);
       offset += 4;
+      const channelInfo = channelInfosById.get(channelId);
+      if (!channelInfo) {
+        throw new Error(`Encountered message on channel ${channelId} without prior channel info`);
+      }
+      if (!channelInfosSeenInThisChunk.has(channelId)) {
+        throw new Error(
+          `Encountered message on channel ${channelId} without prior channel info in this chunk; channel info must be repeated within each chunk where the channel is used`,
+        );
+      }
       const timestamp = view.getBigUint64(offset, true);
       offset += 8;
       const data = view.buffer.slice(view.byteOffset + offset, view.byteOffset + recordEndOffset);
 
-      const record: McapRecord = { type: "Message", channelId, timestamp, data };
+      const record: McapRecord = { type: "Message", channelInfo, timestamp, data };
       return { record, usedBytes: recordEndOffset - startOffset };
     }
 
@@ -147,6 +175,7 @@ export function parseRecord(
         decompressedCrc,
         data,
       };
+      channelInfosSeenInThisChunk.clear();
       return { record, usedBytes: recordEndOffset - startOffset };
     }
 

@@ -17,7 +17,7 @@ export type ChannelInfo = {
 };
 export type Message = {
   type: "Message";
-  channelId: number;
+  channelInfo: ChannelInfo;
   timestamp: bigint;
   data: ArrayBuffer;
 };
