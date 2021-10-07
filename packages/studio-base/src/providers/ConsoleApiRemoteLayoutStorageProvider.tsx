@@ -4,28 +4,20 @@
 
 import { useMemo } from "react";
 
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useConsoleApi } from "@foxglove/studio-base/context/ConsoleApiContext";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import RemoteLayoutStorageContext from "@foxglove/studio-base/context/RemoteLayoutStorageContext";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import ConsoleApiRemoteLayoutStorage from "@foxglove/studio-base/services/ConsoleApiRemoteLayoutStorage";
 
 export default function ConsoleApiRemoteLayoutStorageProvider({
   children,
 }: React.PropsWithChildren<unknown>): JSX.Element {
-  const [enableConsoleApiLayouts = false] = useAppConfigurationValue<boolean>(
-    AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
-  );
   const api = useConsoleApi();
   const { currentUser } = useCurrentUser();
 
   const apiStorage = useMemo(
-    () =>
-      enableConsoleApiLayouts && currentUser
-        ? new ConsoleApiRemoteLayoutStorage(currentUser.id, api)
-        : undefined,
-    [api, currentUser, enableConsoleApiLayouts],
+    () => (currentUser ? new ConsoleApiRemoteLayoutStorage(currentUser.id, api) : undefined),
+    [api, currentUser],
   );
 
   return (

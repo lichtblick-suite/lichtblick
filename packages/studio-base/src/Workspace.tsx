@@ -25,7 +25,6 @@ import { useMount, useMountedState } from "react-use";
 
 import Log from "@foxglove/log";
 import { fromRFC3339String } from "@foxglove/rostime";
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import AccountSettings from "@foxglove/studio-base/components/AccountSettingsSidebar/AccountSettings";
 import ConnectionList from "@foxglove/studio-base/components/ConnectionList";
 import connectionHelpContent from "@foxglove/studio-base/components/ConnectionList/index.help.md";
@@ -63,7 +62,6 @@ import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { WorkspaceContext } from "@foxglove/studio-base/context/WorkspaceContext";
 import useAddPanel from "@foxglove/studio-base/hooks/useAddPanel";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFilesToOpen";
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
 import welcomeLayout from "@foxglove/studio-base/layouts/welcomeLayout";
@@ -147,10 +145,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   const playerCapabilities = useMessagePipeline(selectPlayerCapabilities);
   const playerProblems = useMessagePipeline(selectPlayerProblems);
 
-  const [enableSharedLayouts = false] = useAppConfigurationValue<boolean>(
-    AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
-  );
-  const supportsAccountSettings = useContext(ConsoleApiContext) != undefined && enableSharedLayouts;
+  const supportsAccountSettings = useContext(ConsoleApiContext) != undefined;
 
   // we use requestBackfill to signal when a player changes for RemountOnValueChange below
   // see comment below above the RemountOnValueChange component

@@ -20,7 +20,6 @@ import { useToasts } from "react-toast-notifications";
 import { useMountedState } from "react-use";
 import useAsyncFn from "react-use/lib/useAsyncFn";
 
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { useUnsavedChangesPrompt } from "@foxglove/studio-base/components/LayoutBrowser/UnsavedChangesPrompt";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
@@ -34,7 +33,6 @@ import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutStorageDebuggingContext";
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
@@ -378,10 +376,7 @@ export default function LayoutBrowser({
 
   const layoutDebug = useContext(LayoutStorageDebuggingContext);
 
-  const [enableSharedLayouts = false] = useAppConfigurationValue<boolean>(
-    AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
-  );
-  const supportsSignIn = useContext(ConsoleApiContext) != undefined && enableSharedLayouts;
+  const supportsSignIn = useContext(ConsoleApiContext) != undefined;
   const showSignInPrompt = supportsSignIn && !layoutManager.supportsSharing;
 
   return (

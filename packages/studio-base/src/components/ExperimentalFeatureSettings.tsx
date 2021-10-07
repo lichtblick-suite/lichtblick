@@ -48,11 +48,6 @@ const features: Feature[] = [
     name: "Legacy Plot panel",
     description: <>Enable the Legacy Plot panel.</>,
   },
-  {
-    key: AppSetting.ENABLE_CONSOLE_API_LAYOUTS,
-    name: "Team shared layouts",
-    description: <>Enable team layout sharing when signed in to Foxglove Studio.</>,
-  },
 ];
 if (process.env.NODE_ENV === "development") {
   features.push({
