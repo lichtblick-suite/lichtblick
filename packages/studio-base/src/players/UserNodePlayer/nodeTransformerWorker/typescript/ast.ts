@@ -635,7 +635,7 @@ export const constructDatatypes = (
         throw new DatatypeExtractionError(noNestedAny);
 
       default:
-        throw new Error("Unhandled node kind.");
+        throw new Error(`Unhandled node kind (${tsNode.kind}) for field (${name})`);
     }
   };
 
