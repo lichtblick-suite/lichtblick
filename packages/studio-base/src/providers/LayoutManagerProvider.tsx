@@ -3,9 +3,11 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useCallback, useEffect, useMemo } from "react";
-import { useInterval, useNetworkState } from "react-use";
+import { useToasts } from "react-toast-notifications";
+import { useNetworkState } from "react-use";
 
 import { useShallowMemo, useVisibilityState } from "@foxglove/hooks";
+import Logger from "@foxglove/log";
 import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import LayoutManagerContext from "@foxglove/studio-base/context/LayoutManagerContext";
 import { useLayoutStorage } from "@foxglove/studio-base/context/LayoutStorageContext";
@@ -15,12 +17,17 @@ import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConf
 import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
 import { ISO8601Timestamp, LayoutID } from "@foxglove/studio-base/services/ILayoutStorage";
 import LayoutManager from "@foxglove/studio-base/services/LayoutManager";
+import delay from "@foxglove/studio-base/util/delay";
 
-const SYNC_INTERVAL = 15_000;
+const log = Logger.getLogger(__filename);
+
+const SYNC_INTERVAL_BASE_MS = 30_000;
+const SYNC_INTERVAL_MAX_MS = 3 * 60_000;
 
 export default function LayoutManagerProvider({
   children,
 }: React.PropsWithChildren<unknown>): JSX.Element {
+  const { addToast } = useToasts();
   const layoutStorage = useLayoutStorage();
   const remoteLayoutStorage = useRemoteLayoutStorage();
   const [enableLayoutDebugging = false] = useAppConfigurationValue<boolean>(
@@ -32,10 +39,6 @@ export default function LayoutManagerProvider({
     [layoutStorage, remoteLayoutStorage],
   );
 
-  const sync = useCallbackWithToast(async () => {
-    await layoutManager.syncWithRemote();
-  }, [layoutManager]);
-
   const { online = false } = useNetworkState();
   const visibilityState = useVisibilityState();
   useEffect(() => {
@@ -45,14 +48,37 @@ export default function LayoutManagerProvider({
   // Sync periodically when logged in, online, and the app is not hidden
   const enableSyncing = remoteLayoutStorage != undefined && online && visibilityState === "visible";
   useEffect(() => {
-    if (enableSyncing) {
-      void sync();
+    if (!enableSyncing) {
+      return;
     }
-  }, [enableSyncing, sync]);
-  useInterval(
-    sync,
-    enableSyncing ? SYNC_INTERVAL : null /* eslint-disable-line no-restricted-syntax */,
-  );
+    let stopped = false;
+    void (async () => {
+      let failures = 0;
+      while (!stopped) {
+        try {
+          await layoutManager.syncWithRemote();
+          failures = 0;
+        } catch (error) {
+          log.error("Sync failed:", error);
+          addToast(error.toString(), { appearance: "error", autoDismiss: true });
+          failures++;
+        }
+        // Exponential backoff with jitter:
+        // https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+        const duration =
+          Math.random() * Math.min(SYNC_INTERVAL_MAX_MS, SYNC_INTERVAL_BASE_MS * 2 ** failures);
+        log.debug("Waiting", (duration / 1000).toFixed(2), "sec for next sync", { failures });
+        await delay(duration);
+      }
+    })();
+    return () => {
+      stopped = true;
+    };
+  }, [addToast, enableSyncing, layoutManager]);
+
+  const syncNow = useCallbackWithToast(async () => {
+    await layoutManager.syncWithRemote();
+  }, [layoutManager]);
 
   const injectEdit = useCallback(
     async (id: LayoutID) => {
@@ -107,7 +133,7 @@ export default function LayoutManagerProvider({
   );
 
   const debugging = useShallowMemo({
-    syncNow: sync,
+    syncNow,
     setOnline,
     injectEdit,
     injectRename,
