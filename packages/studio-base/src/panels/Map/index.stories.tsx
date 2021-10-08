@@ -52,3 +52,43 @@ SinglePoint.parameters = {
     },
   },
 };
+
+export const MultipleTopics = (): JSX.Element => {
+  return <MapPanel />;
+};
+
+MultipleTopics.parameters = {
+  chromatic: {
+    delay: 1000,
+  },
+  panelSetup: {
+    fixture: {
+      topics: [
+        { name: "/gps", datatype: "sensor_msgs/NavSatFix" },
+        { name: "/another-gps-topic", datatype: "sensor_msgs/NavSatFix" },
+      ],
+      frame: {
+        "/gps": [
+          {
+            topic: "/gps",
+            receiveTime: { sec: 123, nsec: 456 },
+            message: {
+              latitude: 0,
+              longitude: 0,
+            },
+          },
+        ],
+        "/another-gps-topic": [
+          {
+            topic: "/another-gps-topic",
+            receiveTime: { sec: 123, nsec: 456 },
+            message: {
+              latitude: 0.1,
+              longitude: 0.1,
+            },
+          },
+        ],
+      },
+    },
+  },
+};
