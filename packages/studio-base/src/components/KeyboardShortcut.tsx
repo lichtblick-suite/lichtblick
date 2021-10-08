@@ -46,7 +46,6 @@ const SKey = styled.kbd`
   font-size: 12px;
   line-height: 1.5;
   font-family: ${fonts.SANS_SERIF};
-  font-feature-settings: "tnum";
 
   :not(:last-child) {
     border-right: 1px solid ${colors.DARK9};

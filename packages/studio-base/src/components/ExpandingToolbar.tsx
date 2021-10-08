@@ -31,6 +31,7 @@ const classes = mergeStyleSets({
     padding: "8px 4px !important",
   },
   iconButton: {
+    fontFamily: "sans-serif !important",
     backgroundColor: "transparent !important",
     border: "none !important",
     padding: "8px 4px !important",

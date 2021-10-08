@@ -88,7 +88,7 @@ const SGlobalVariablesTable = styled.div`
       border: 0;
       font: inherit;
       font-family: ${fonts.SANS_SERIF};
-      font-feature-settings: "tnum";
+      font-feature-settings: ${fonts.SANS_SERIF_FEATURE_SETTINGS};
       font-size: 100%;
     }
     input:focus {

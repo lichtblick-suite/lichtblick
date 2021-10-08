@@ -14,6 +14,8 @@
 import { CSSProperties, useContext, useRef } from "react";
 import { WorldviewReactContext, WorldviewContextType } from "regl-worldview";
 
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+
 type Stats = {
   bufferCount: number;
   elementsCount: number;
@@ -30,7 +32,7 @@ const style: CSSProperties = {
   right: 5,
   backgroundColor: "rgba(1, 1, 1, 0.2)",
   padding: 5,
-  fontFamily: "monospace",
+  fontFamily: fonts.MONOSPACE,
 };
 
 // Looks at the regl stats and throws errors if it seems we're going over acceptable (arbitrary) max ranges.

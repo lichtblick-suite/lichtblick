@@ -109,7 +109,7 @@ const classes = mergeStyleSets({
   container: {
     paddingLeft: "0.5em",
     fontFamily: fonts.SANS_SERIF,
-    fontFeatureSettings: "tnum", // Use fixed width numbers (important for numbers that update during playback)
+    fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, "zero"`,
   },
   iconWrapper: {
     display: "inline",

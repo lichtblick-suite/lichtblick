@@ -8,6 +8,7 @@ import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const sharedStyles = mergeStyleSets({
   iconButton: {
+    fontFamily: "sans-serif !important",
     backgroundColor: "transparent !important",
     border: "none !important",
     padding: "8px 4px !important",

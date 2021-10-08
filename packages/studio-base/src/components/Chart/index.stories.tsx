@@ -73,7 +73,7 @@ const props: ComponentProps<typeof ChartComponent> = {
       y: {
         ticks: {
           font: {
-            family: `"Roboto Mono"`,
+            family: `"IBM Plex Mono"`,
             size: 10,
           },
           color: "#eee",
@@ -88,7 +88,7 @@ const props: ComponentProps<typeof ChartComponent> = {
       x: {
         ticks: {
           font: {
-            family: `"Roboto Mono"`,
+            family: `"IBM Plex Mono"`,
             size: 10,
           },
           color: "#eee",

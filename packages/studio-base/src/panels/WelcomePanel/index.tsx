@@ -1,18 +1,11 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import CogIcon from "@mdi/svg/svg/cog.svg";
-import DatabaseIcon from "@mdi/svg/svg/database.svg";
-import DragIcon from "@mdi/svg/svg/drag.svg";
-import PlusCircleOutlineIcon from "@mdi/svg/svg/plus-circle-outline.svg";
+import { Button, Icon, IIconStyles, Stack, Text, useTheme } from "@fluentui/react";
 import { useState } from "react";
 import { useAsyncFn } from "react-use";
-import styled from "styled-components";
 
-import Button from "@foxglove/studio-base/components/Button";
 import Checkbox from "@foxglove/studio-base/components/Checkbox";
-import Flex from "@foxglove/studio-base/components/Flex";
-import Icon from "@foxglove/studio-base/components/Icon";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import TextContent from "@foxglove/studio-base/components/TextContent";
@@ -22,16 +15,24 @@ import { useSubscribeContext } from "@foxglove/studio-base/panels/WelcomePanel/S
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { isEmail } from "@foxglove/studio-base/util/validators";
 
-const Term = styled.span`
-  font-weight: bold;
-  font-style: italic;
-`;
-
 function validateEmail(str: string | undefined): string | undefined {
   return isEmail(str) ? undefined : "Enter a valid e-mail address";
 }
 
+const iconStyles: IIconStyles = {
+  root: {
+    svg: {
+      fill: "currentColor",
+      width: "1em",
+      height: "1em",
+      marginBottom: "-0.2em",
+    },
+  },
+};
+
 function WelcomePanel() {
+  const theme = useTheme();
+
   const [subscribed = false, setSubscribed] =
     useAppConfigurationValue<boolean>("onboarding.subscribed");
   const [subscribeChecked, setSubscribeChecked] = useState(true);
@@ -60,10 +61,14 @@ function WelcomePanel() {
     !loading;
 
   return (
-    <Flex col scroll dataTest="welcome-content">
+    <Stack
+      data-test="welcome-content"
+      styles={{ root: { overflowY: "auto" } }}
+      tokens={{ padding: theme.spacing.l1 }}
+    >
       <PanelToolbar floating />
-      <TextContent style={{ padding: 12 }}>
-        <h2 style={{ fontSize: "1.5em", marginBottom: "0.8em" }}>Welcome</h2>
+      <TextContent>
+        <h1>Welcome</h1>
         <p>
           Foxglove Studio is an integrated visualization and debugging tool for robotics. It allows
           you to quickly and easily understand what’s happening in real-time, and provides a unique
@@ -71,35 +76,42 @@ function WelcomePanel() {
         </p>
         <p>
           The configuration of views and graphs you’re looking at now is called the{" "}
-          <Term>layout</Term>. Each view is a <Term>panel</Term>. You can rearrange panels to your
-          liking: hover over them and drag the{" "}
-          <Icon clickable={false}>
-            <DragIcon />
-          </Icon>{" "}
-          icon. Click the{" "}
-          <Icon clickable={false}>
-            <PlusCircleOutlineIcon />
-          </Icon>{" "}
-          icon above and try adding a new panel. Don’t worry if you make a mistake—you can revert
-          your changes from the Layouts sidebar. (This introduction is also a panel! When you’re
-          done reading, hover over it and click the{" "}
-          <Icon clickable={false}>
-            <CogIcon />
-          </Icon>{" "}
-          icon to remove it.)
+          <b>
+            <em>layout</em>
+          </b>
+          . Each view is a{" "}
+          <b>
+            <em>panel</em>
+          </b>
+          . You can rearrange panels to your liking: hover over them and drag the{" "}
+          <Icon iconName="Drag" styles={iconStyles} /> icon. Click the{" "}
+          <Icon iconName="PlusCircleOutline" styles={iconStyles} /> icon above and try adding a new
+          panel. Don’t worry if you make a mistake—you can revert your changes from the Layouts
+          sidebar. (This introduction is also a panel! When you’re done reading, hover over it and
+          click the <Icon iconName="Cog" styles={iconStyles} /> icon to remove it.)
         </p>
         <p>
           Want to view data from your own ROS bag file? Double-click a bag file to open it with
           Foxglove Studio, or just drag &amp; drop it into the app. Click{" "}
-          <Icon clickable={false}>
-            <DatabaseIcon />
-          </Icon>{" "}
-          in the upper left to select another data source.
+          <Icon iconName="Database" styles={iconStyles} /> in the upper left to select another data
+          source.
         </p>
-        <p style={{ marginTop: "3em" }}>
-          To get in touch with us and learn more tips &amp; tricks, join our Slack community and
-          subscribe to our mailing list:
-        </p>
+        <Text
+          variant="smallPlus"
+          styles={{
+            root: {
+              display: "block",
+              margin: `${theme.spacing.l1} 0 ${theme.spacing.s1}`,
+              color: theme.semanticColors.bodyText,
+            },
+          }}
+        >
+          <b>
+            To get in touch with us and learn more tips &amp; tricks, join our Slack community and
+            subscribe to our mailing list:
+          </b>
+        </Text>
+
         <TextField
           placeholder="me@example.com"
           value={emailValue}
@@ -118,8 +130,8 @@ function WelcomePanel() {
           checked={slackInviteChecked}
           onChange={setSlackInviteChecked}
         />
-        <div style={{ marginTop: "0.5em" }}>
-          <Button isPrimary={!subscribed} disabled={!submitEnabled} onClick={submit}>
+        <Stack horizontalAlign="start" tokens={{ padding: `${theme.spacing.l1} 0 0` }}>
+          <Button primary={!subscribed} disabled={!submitEnabled} onClick={submit}>
             {loading ? "Signing Up..." : "Sign Up"}
           </Button>
           &nbsp;
@@ -128,9 +140,9 @@ function WelcomePanel() {
           ) : subscribed && !submitState.loading ? (
             <span style={{ color: colors.GREEN2 }}>Thanks for signing up!</span>
           ) : undefined}
-        </div>
+        </Stack>
       </TextContent>
-    </Flex>
+    </Stack>
   );
 }
 

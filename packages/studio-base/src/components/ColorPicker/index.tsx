@@ -13,6 +13,7 @@ import { useRef, useState } from "react";
 import { Color } from "regl-worldview";
 
 import { colorObjToIColor, getColorFromIRGB } from "@foxglove/studio-base/util/colorUtils";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 type Props = {
   color?: Color;
@@ -83,6 +84,14 @@ export default function ColorPicker({
           <Picker
             color={colorObjToIColor(color)}
             alphaType={alphaType ?? "none"}
+            styles={{
+              tableHexCell: { width: "35%" },
+              input: {
+                input: {
+                  fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero'`,
+                },
+              },
+            }}
             onChange={(_event, newValue) => onChange(getColorFromIRGB(newValue))}
           />
         </Callout>

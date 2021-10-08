@@ -52,6 +52,7 @@ const SIconWrapper = styled.div`
   position: absolute;
   top: 0;
   left: 0;
+  font-family: sans-serif;
 `;
 
 type Props = {

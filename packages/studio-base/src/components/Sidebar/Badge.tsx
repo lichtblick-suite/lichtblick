@@ -19,8 +19,12 @@ const useStyles = makeStyles((theme) => ({
     borderWidth: 1,
     borderStyle: "solid",
     borderColor: "rgba(1, 1, 1, 0.8)",
-    fontSize: "8px",
-    lineHeight: "14px",
+    fontSize: 7,
+    fontWeight: 700,
+    fontFeatureSettings: "normal",
+    letterSpacing: "-0.025em",
+    lineHeight: (radius - 1) * 2,
+    textAlign: "center",
   },
 }));
 

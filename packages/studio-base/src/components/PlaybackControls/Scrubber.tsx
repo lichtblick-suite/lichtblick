@@ -67,7 +67,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   tooltip: {
-    fontFamily: fonts.MONOSPACE,
+    fontFamily: fonts.SANS_SERIF,
     whiteSpace: "nowrap",
 
     "> div": {
@@ -86,7 +86,7 @@ const useStyles = makeStyles((theme) => ({
     display: "inline-block",
   },
   tooltipValue: {
-    fontFamily: fonts.MONOSPACE,
+    fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, "zero"`,
     opacity: 0.7,
   },
 }));

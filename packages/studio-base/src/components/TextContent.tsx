@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Link, mergeStyleSets } from "@fluentui/react";
+import { Link, makeStyles } from "@fluentui/react";
 import { PropsWithChildren, useCallback, useContext } from "react";
 import Markdown from "react-markdown";
 import rehypeRaw from "rehype-raw";
@@ -20,50 +20,58 @@ import { CSSProperties } from "styled-components";
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const classes = mergeStyleSets({
+const useStyles = makeStyles((theme) => ({
   root: {
+    ...theme.fonts.smallPlus,
+    lineHeight: "1.4",
     backgroundColor: "transparent",
+    color: theme.semanticColors.bodySubtext,
 
     "h1, h2, h3, h4, h5, h6": {
-      fontWeight: "normal",
-      lineHeight: "1.4",
-    },
-    h1: {
-      fontSize: "2em",
-      marginBottom: "0.5em",
-      lineHeight: "1.2",
+      color: theme.semanticColors.bodyText,
 
-      ":first-of-type": {
+      ":first-child": {
         marginTop: 0,
       },
     },
+    h1: {
+      ...theme.fonts.xxLarge,
+      marginBottom: theme.spacing.s1,
+      fontWeight: 500,
+    },
     h2: {
-      fontSize: "1.3em",
-      marginBottom: "0.25em",
+      ...theme.fonts.xLarge,
+      marginBottom: theme.spacing.s1,
+      fontWeight: 500,
     },
     h3: {
-      fontSize: "1.1em",
-      marginBottom: "0.25em",
+      ...theme.fonts.large,
+      marginBottom: theme.spacing.s1,
       color: colors.TEXT_MUTED,
+      fontWeight: 500,
     },
     "h4, h5, h6": {
-      marginBottom: "0.25em",
+      ...theme.fonts.mediumPlus,
+      marginBottom: theme.spacing.s2,
       color: colors.TEXT_MUTED,
+      fontWeight: 500,
       fontStyle: "italic",
     },
     ul: {
+      lineHeight: "1.5",
       listStylePosition: "outside",
       listStyleType: "disc",
-      marginLeft: "1.5em",
-      marginBottom: "1em",
+      marginLeft: theme.spacing.s1,
+      marginBottom: theme.spacing.m,
+    },
+    "b, strong": {
+      fontWeight: "700 !important",
     },
     "p, ul": {
-      ":last-child": {
-        marginBottom: "0",
-      },
+      margin: `${theme.spacing.s1} 0`,
     },
     "td, th": {
-      padding: "0.5em",
+      padding: theme.spacing.s2,
       verticalAlign: "middle",
     },
     img: {
@@ -73,7 +81,7 @@ const classes = mergeStyleSets({
       whiteSpace: "pre-wrap",
     },
   },
-});
+}));
 
 type Props = {
   style?: CSSProperties;
@@ -82,7 +90,7 @@ type Props = {
 
 export default function TextContent(props: PropsWithChildren<Props>): React.ReactElement {
   const { children, style, allowMarkdownHtml } = props;
-
+  const classes = useStyles();
   const handleLink = useContext(LinkHandlerContext);
 
   const linkRenderer = useCallback(

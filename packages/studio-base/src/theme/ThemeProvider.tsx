@@ -16,6 +16,10 @@ import {
 } from "@fluentui/react-icons";
 import * as Icons from "@fluentui/react-icons-mdl2";
 import { registerIcons, unregisterIcons } from "@fluentui/style-utilities";
+import CogIcon from "@mdi/svg/svg/cog.svg";
+import DatabaseIcon from "@mdi/svg/svg/database.svg";
+import DragIcon from "@mdi/svg/svg/drag.svg";
+import PlusCircleOutlineIcon from "@mdi/svg/svg/plus-circle-outline.svg";
 import { useLayoutEffect, useState } from "react";
 import { ThemeProvider as StyledThemeProvider } from "styled-components";
 
@@ -45,13 +49,16 @@ const icons: {
   ClearSelection: <Icons.ClearSelectionIcon />,
   ClipboardList: <Icons.ClipboardListIcon />,
   CodeEdit: <Icons.CodeEditIcon />,
+  Cog: <CogIcon />,
   Contact: <Icons.ContactIcon />,
   Copy: <Icons.CopyIcon />,
+  Database: <DatabaseIcon />,
   DataManagementSettings: <Icons.DataManagementSettingsIcon />,
   Delete: <Icons.DeleteIcon />,
   DependencyAdd: <Icons.DependencyAddIcon />,
   Download: <Icons.DownloadIcon />,
   DownloadDocument: <Icons.DownloadDocumentIcon />,
+  Drag: <DragIcon />,
   Edit: <Icons.EditIcon />,
   Error: <Icons.ErrorIcon />,
   ErrorBadge: <Icons.ErrorBadgeIcon />,
@@ -73,6 +80,7 @@ const icons: {
   PauseFilled: <Pause20Filled />,
   Play: <Play20Regular />,
   PlayFilled: <Play20Filled />,
+  PlusCircleOutline: <PlusCircleOutlineIcon />,
   Previous: <Previous20Regular />,
   PreviousFilled: <Previous20Filled />,
   RectangularClipping: <Icons.RectangularClippingIcon />,

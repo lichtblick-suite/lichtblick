@@ -151,6 +151,9 @@ export const rounded = {
 };
 
 export const fonts = {
-  SANS_SERIF: `-apple-system, BlinkMacSystemFont, "Segoe UI", "Ubuntu", "Roboto", sans-serif`,
-  MONOSPACE: `"Roboto Mono"`,
+  MONOSPACE: "'IBM Plex Mono', monospace",
+  SANS_SERIF: "'Inter', sans-serif",
+  SANS_SERIF_FEATURE_SETTINGS:
+    // enable font features https://rsms.me/inter/lab
+    "'cv08', 'cv10', 'tnum'",
 };

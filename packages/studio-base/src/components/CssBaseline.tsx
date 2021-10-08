@@ -5,7 +5,9 @@
 import { mergeStyles, useTheme } from "@fluentui/react";
 import { PropsWithChildren } from "react";
 
-import "@foxglove/studio-base/styles/assets/latin-roboto-mono.css";
+import "@foxglove/studio-base/styles/assets/inter.css";
+import "@foxglove/studio-base/styles/assets/plex-mono.css";
+
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export default function CssBaseline(props: PropsWithChildren<unknown>): JSX.Element {
@@ -69,6 +71,7 @@ export default function CssBaseline(props: PropsWithChildren<unknown>): JSX.Elem
     color: theme.semanticColors.bodyText,
     font: "inherit",
     ...theme.fonts.small,
+    fontFeatureSettings: fonts.SANS_SERIF_FEATURE_SETTINGS,
   });
 
   return <div className={className}>{props.children}</div>;
