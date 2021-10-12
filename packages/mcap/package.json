@@ -24,7 +24,7 @@
   "devDependencies": {
     "@foxglove/crc": "0.0.3",
     "@foxglove/rosmsg": "^2.0.0",
-    "@foxglove/rosmsg-serialization": "^1.2.1",
+    "@foxglove/rosmsg-serialization": "^1.2.2",
     "@foxglove/rosmsg2-serialization": "^1.0.3",
     "@types/lodash": "^4",
     "commander": "8.2.0",

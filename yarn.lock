@@ -2186,7 +2186,7 @@ __metadata:
   dependencies:
     "@foxglove/crc": 0.0.3
     "@foxglove/rosmsg": ^2.0.0
-    "@foxglove/rosmsg-serialization": ^1.2.1
+    "@foxglove/rosmsg-serialization": ^1.2.2
     "@foxglove/rosmsg2-serialization": ^1.0.3
     "@types/lodash": ^4
     commander: 8.2.0
@@ -2283,12 +2283,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@foxglove/rosmsg-serialization@npm:1.2.1, @foxglove/rosmsg-serialization@npm:^1.1.2, @foxglove/rosmsg-serialization@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "@foxglove/rosmsg-serialization@npm:1.2.1"
+"@foxglove/rosmsg-serialization@npm:1.2.2, @foxglove/rosmsg-serialization@npm:^1.1.2, @foxglove/rosmsg-serialization@npm:^1.2.2":
+  version: 1.2.2
+  resolution: "@foxglove/rosmsg-serialization@npm:1.2.2"
   dependencies:
     "@foxglove/rosmsg": ^2.0.0
-  checksum: 319ed2fdf53103738aabcacbbd24b2c1ec0f915457a3e12a5432d7dd00daca0ff63788304354164caafa8b8421d6919da0b914ada2bdfcf568d38a0a9deb4011
+  checksum: 4a62607ce42d9b6905e10527ec481d4d834274ca7349dac252ec38016465bbcff2b1fda5443b4433b3d9112e59d8dfb1eb7bd2ce591ff53aead2b06c07e896da
   languageName: node
   linkType: hard
 
@@ -2349,7 +2349,7 @@ __metadata:
     "@foxglove/rosmsg": 2.0.0
     "@foxglove/rosmsg-msgs-common": 1.0.3
     "@foxglove/rosmsg-msgs-foxglove": 2.0.2
-    "@foxglove/rosmsg-serialization": 1.2.1
+    "@foxglove/rosmsg-serialization": 1.2.2
     "@foxglove/rosmsg2-serialization": 1.0.3
     "@foxglove/rostime": 1.1.1
     "@foxglove/studio": "workspace:*"
