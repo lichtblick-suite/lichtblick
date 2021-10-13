@@ -702,6 +702,10 @@ export default function TimeBasedChart(props: Props): JSX.Element {
         return;
       }
 
+      if (userInteraction) {
+        setHasUserPannedOrZoomed(true);
+      }
+
       currentScalesRef.current = scales;
 
       queueDownsampleInvalidate();
@@ -712,8 +716,8 @@ export default function TimeBasedChart(props: Props): JSX.Element {
       }
 
       // the change is a result of user interaction on our chart
-      // we definitely set the sync scale value so other charts follow our zoom/pan behavior
-      if (userInteraction) {
+      // we set the sync scale value so other synced charts follow our zoom/pan behavior
+      if (userInteraction && isSynced) {
         setGlobalBounds({
           min: scales.x.min,
           max: scales.x.max,

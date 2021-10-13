@@ -17,6 +17,7 @@ export type PlotConfig = {
   minYValue?: string | number;
   maxYValue?: string | number;
   showLegend: boolean;
+  isSynced: boolean;
   xAxisVal: PlotXAxisVal;
   xAxisPath?: BasePlotPath;
   followingViewWidth?: number;

@@ -158,6 +158,7 @@ function Plot(props: Props) {
     minYValue,
     maxYValue,
     showLegend,
+    isSynced,
     xAxisVal,
     xAxisPath,
   } = config;
@@ -358,7 +359,7 @@ function Plot(props: Props) {
       <PanelToolbar helpContent={helpContent} floating />
       {title && <div>{title}</div>}
       <PlotChart
-        isSynced={xAxisVal === "timestamp"}
+        isSynced={xAxisVal === "timestamp" && isSynced}
         paths={yAxisPaths}
         minYValue={parseFloat((minYValue ?? "")?.toString())}
         maxYValue={parseFloat((maxYValue ?? "")?.toString())}
@@ -383,6 +384,11 @@ function Plot(props: Props) {
 
 const configSchema: PanelConfigSchema<PlotConfig> = [
   { key: "title", type: "text", title: "Title", placeholder: "Untitled" },
+  {
+    key: "isSynced",
+    type: "toggle",
+    title: "Sync to other Plot panels with a timestamp-based x-axis",
+  },
   { key: "maxYValue", type: "number", title: "Y max", placeholder: "auto", allowEmpty: true },
   { key: "minYValue", type: "number", title: "Y min", placeholder: "auto", allowEmpty: true },
   {
@@ -401,6 +407,7 @@ const defaultConfig: PlotConfig = {
   minYValue: "",
   maxYValue: "",
   showLegend: true,
+  isSynced: true,
   xAxisVal: "timestamp",
 };
 
