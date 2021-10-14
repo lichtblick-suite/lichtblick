@@ -140,11 +140,6 @@ const mainConfig = (env: unknown, argv: WebpackArgv): Configuration => {
     </head>
     <script>
       global = globalThis;
-      window.FabricConfig = ${
-        // don't load @fabricui fonts from Microsoft servers
-        // https://github.com/microsoft/fluentui/issues/10363
-        JSON.stringify({ fontBaseUrl: "" })
-      };
     </script>
     <body>
       <div id="root"></div>
