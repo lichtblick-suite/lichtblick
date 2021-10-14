@@ -58,7 +58,7 @@ async function configureQuickLookExtension(context: AfterPackContext) {
     NSExtension: {
       ...(originalInfo.NSExtension as PlistObject),
       NSExtensionAttributes: {
-        QLSupportedContentTypes: ["org.ros.bag"],
+        QLSupportedContentTypes: ["org.ros.bag", "dev.foxglove.mcap"],
         QLSupportsSearchableItems: false,
       },
     },

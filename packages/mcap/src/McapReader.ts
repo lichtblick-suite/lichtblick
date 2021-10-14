@@ -23,6 +23,11 @@ type McapReaderOptions = {
   decompressHandlers?: {
     [compression: string]: (buffer: Uint8Array, decompressedSize: bigint) => Uint8Array;
   };
+
+  /**
+   * When set to true (the default), chunk CRCs will be validated. Set to false to improve performance.
+   */
+  validateChunkCrcs?: boolean;
 };
 
 /**
@@ -47,12 +52,18 @@ export default class McapReader {
   private buffer = new StreamBuffer(MCAP_MAGIC.length * 2);
   private decompressHandlers;
   private includeChunks;
+  private validateChunkCrcs;
   private doneReading = false;
   private generator = this.read();
 
-  constructor({ includeChunks = false, decompressHandlers = {} }: McapReaderOptions = {}) {
+  constructor({
+    includeChunks = false,
+    decompressHandlers = {},
+    validateChunkCrcs = true,
+  }: McapReaderOptions = {}) {
     this.includeChunks = includeChunks;
     this.decompressHandlers = decompressHandlers;
+    this.validateChunkCrcs = validateChunkCrcs;
   }
 
   /** @returns True if a valid, complete mcap file has been parsed. */
@@ -142,9 +153,13 @@ export default class McapReader {
             }
             buffer = decompress(buffer, record.decompressedSize);
           }
-          const chunkCrc = crc32(buffer);
-          if (chunkCrc !== record.decompressedCrc) {
-            throw new Error(`Incorrect chunk CRC ${chunkCrc} (expected ${record.decompressedCrc})`);
+          if (this.validateChunkCrcs) {
+            const chunkCrc = crc32(buffer);
+            if (chunkCrc !== record.decompressedCrc) {
+              throw new Error(
+                `Incorrect chunk CRC ${chunkCrc} (expected ${record.decompressedCrc})`,
+              );
+            }
           }
           const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
           let chunkOffset = 0;

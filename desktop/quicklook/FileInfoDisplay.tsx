@@ -9,13 +9,14 @@ import Logger from "@foxglove/log";
 import { Time, toDate } from "@foxglove/rostime";
 
 import bagIcon from "../../resources/icon/BagIcon.png";
+import mcapIcon from "../../resources/icon/McapIcon.png";
 import ErrorInfo from "./ErrorInfo";
 import formatByteSize from "./formatByteSize";
-import { BagInfo, TopicInfo } from "./getBagInfo";
+import { FileInfo, TopicInfo } from "./getInfo";
 
 const log = Logger.getLogger(__filename);
 
-type FileInfo = {
+type FileStats = {
   name: string;
   size: number;
 };
@@ -119,13 +120,13 @@ function TopicRow({ info: { topic, datatype, numMessages, numConnections } }: { 
   );
 }
 
-export default function BagInfoDisplay({
+export default function FileInfoDisplay({
+  fileStats,
   fileInfo,
-  bagInfo,
   error,
 }: {
-  fileInfo: FileInfo;
-  bagInfo?: BagInfo;
+  fileStats: FileStats;
+  fileInfo?: FileInfo;
   error?: Error;
 }): JSX.Element {
   useEffect(() => error && console.error(error), [error]);
@@ -140,40 +141,43 @@ export default function BagInfoDisplay({
           marginBottom: 16,
         }}
       >
-        <img src={bagIcon} style={{ width: 128 }} />
+        <img src={fileStats.name.endsWith(".mcap") ? mcapIcon : bagIcon} style={{ width: 128 }} />
         <div style={{ display: "flex", flexDirection: "column", minWidth: 300, flex: "1 1 0" }}>
-          <FileName>{fileInfo.name}</FileName>
+          <FileName>{fileStats.name}</FileName>
           <SummaryRow>
-            {bagInfo && (
+            {fileInfo && (
               <>
-                {bagInfo.topics.length.toLocaleString()}{" "}
-                {bagInfo.topics.length === 1 ? "topic" : "topics"},{" "}
-                {bagInfo.numChunks.toLocaleString()} {bagInfo.numChunks === 1 ? "chunk" : "chunks"},{" "}
-                {bagInfo.totalMessages.toLocaleString()}{" "}
-                {bagInfo.totalMessages === 1 ? "message" : "messages"},{" "}
+                {fileInfo.topics.length.toLocaleString()}{" "}
+                {fileInfo.topics.length === 1 ? "topic" : "topics"},{" "}
+                {fileInfo.numChunks.toLocaleString()}{" "}
+                {fileInfo.numChunks === 1 ? "chunk" : "chunks"},{" "}
+                {fileInfo.totalMessages.toLocaleString()}{" "}
+                {fileInfo.totalMessages === 1 ? "message" : "messages"},{" "}
               </>
             )}
-            {formatByteSize(fileInfo.size)}
+            {formatByteSize(fileStats.size)}
           </SummaryRow>
-          {bagInfo?.startTime && (
+          {fileInfo?.startTime && (
             <SummaryRow style={{ fontVariantNumeric: "tabular-nums" }}>
               <TimeLabel>Start:</TimeLabel>
-              {toDate(bagInfo.startTime).toLocaleString()} ({formatTimeRaw(bagInfo.startTime)})
+              {toDate(fileInfo.startTime).toLocaleString()} ({formatTimeRaw(fileInfo.startTime)})
             </SummaryRow>
           )}
-          {bagInfo?.endTime && (
+          {fileInfo?.endTime && (
             <SummaryRow style={{ fontVariantNumeric: "tabular-nums" }}>
               <TimeLabel>End:</TimeLabel>
-              {toDate(bagInfo.endTime).toLocaleString()} ({formatTimeRaw(bagInfo.endTime)})
+              {toDate(fileInfo.endTime).toLocaleString()} ({formatTimeRaw(fileInfo.endTime)})
             </SummaryRow>
           )}
         </div>
       </div>
       {error && <ErrorInfo>{error.toString()}</ErrorInfo>}
       <TopicList>
-        {bagInfo?.topics.map((topicInfo, i) => (
-          <TopicRow key={i} info={topicInfo} />
-        ))}
+        <tbody>
+          {fileInfo?.topics.map((topicInfo, i) => (
+            <TopicRow key={i} info={topicInfo} />
+          ))}
+        </tbody>
       </TopicList>
     </div>
   );

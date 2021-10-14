@@ -11,9 +11,9 @@ import { createGlobalStyle } from "styled-components";
 
 import Logger from "@foxglove/log";
 
-import BagInfoDisplay from "./BagInfoDisplay";
 import ErrorInfo from "./ErrorInfo";
-import getBagInfo from "./getBagInfo";
+import FileInfoDisplay from "./FileInfoDisplay";
+import { getBagInfo, getMcapInfo } from "./getInfo";
 
 const log = Logger.getLogger(__filename);
 
@@ -75,11 +75,12 @@ function Root(): JSX.Element {
       if (!file) {
         return;
       }
-      const fileInfo = { name: file.name, size: file.size };
-      const { bagInfo, error } = await getBagInfo(file)
-        .then((info) => ({ bagInfo: info, error: undefined }))
-        .catch((err) => ({ bagInfo: undefined, error: err }));
-      return { fileInfo, bagInfo, error };
+      const fileStats = { name: file.name, size: file.size };
+      const infoPromise = file.name.endsWith(".mcap") ? getMcapInfo(file) : getBagInfo(file);
+      const { fileInfo, error } = await infoPromise
+        .then((info) => ({ fileInfo: info, error: undefined }))
+        .catch((err) => ({ fileInfo: undefined, error: err }));
+      return { fileStats, fileInfo, error };
     } finally {
       if (typeof quicklook !== "undefined") {
         await quicklook.finishedLoading();
@@ -92,7 +93,7 @@ function Root(): JSX.Element {
     <div>
       {state.loading && "Loading…"}
       {state.error && <ErrorInfo>{state.error.toString()}</ErrorInfo>}
-      {state.value && <BagInfoDisplay {...state.value} />}
+      {state.value && <FileInfoDisplay {...state.value} />}
     </div>
   );
 }

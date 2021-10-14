@@ -8,7 +8,7 @@ import ForkTsCheckerWebpackPlugin from "fork-ts-checker-webpack-plugin";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import path from "path";
 import ReactRefreshTypescript from "react-refresh-typescript";
-import { Configuration } from "webpack";
+import { Configuration, ProvidePlugin } from "webpack";
 
 import type { WebpackArgv } from "@foxglove/studio-base/WebpackArgv";
 
@@ -34,6 +34,7 @@ export default (_env: unknown, argv: WebpackArgv): Configuration => {
     module: {
       rules: [
         { test: /\.png$/, type: "asset/inline" },
+        { test: /\.wasm$/, type: "asset/inline" },
         {
           test: /\.tsx?$/,
           exclude: /node_modules/,
@@ -87,11 +88,19 @@ export default (_env: unknown, argv: WebpackArgv): Configuration => {
 </html>
 `,
       }),
+      new ProvidePlugin({
+        // the buffer module exposes the Buffer class as a property
+        Buffer: ["buffer", "Buffer"],
+      }),
       ...(isServe ? [new ReactRefreshPlugin()] : []),
     ],
 
     resolve: {
       extensions: [".js", ".ts", ".tsx", ".json"],
+      fallback: {
+        path: require.resolve("path-browserify"),
+        fs: false,
+      },
     },
   };
 };

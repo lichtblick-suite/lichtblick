@@ -7,6 +7,25 @@ import { isEqual } from "lodash";
 import { MCAP_MAGIC, RecordType } from "./constants";
 import { McapMagic, McapRecord, ChannelInfo } from "./types";
 
+// DataView.getBigUint64 was added to relatively recent versions of Safari. It's pretty easy to
+// maintain this fallback code.
+//
+// eslint-disable-next-line @foxglove/no-boolean-parameters
+const getBigUint64: (this: DataView, offset: number, littleEndian?: boolean) => bigint =
+  typeof DataView.prototype.getBigUint64 === "function"
+    ? DataView.prototype.getBigUint64 // eslint-disable-line @typescript-eslint/unbound-method
+    : function (this: DataView, offset, littleEndian): bigint {
+        const lo =
+          littleEndian === true
+            ? this.getUint32(offset, littleEndian)
+            : this.getUint32(offset + 4, littleEndian);
+        const hi =
+          littleEndian === true
+            ? this.getUint32(offset + 4, littleEndian)
+            : this.getUint32(offset, littleEndian);
+        return (BigInt(hi) << 32n) | BigInt(lo);
+      };
+
 /**
  * Parse a MCAP magic string and format version at `startOffset` in `view`.
  */
@@ -67,7 +86,7 @@ export function parseRecord(
     if (offset + 12 > view.byteLength) {
       return { usedBytes: 0 };
     }
-    const indexPos = view.getBigUint64(offset, true);
+    const indexPos = getBigUint64.call(view, offset, true);
     offset += 8;
     const indexCrc = view.getUint32(offset, true);
     offset += 4;
@@ -147,7 +166,7 @@ export function parseRecord(
           `Encountered message on channel ${channelId} without prior channel info in this chunk; channel info must be repeated within each chunk where the channel is used`,
         );
       }
-      const timestamp = view.getBigUint64(offset, true);
+      const timestamp = getBigUint64.call(view, offset, true);
       offset += 8;
       const data = view.buffer.slice(view.byteOffset + offset, view.byteOffset + recordEndOffset);
 
@@ -156,7 +175,7 @@ export function parseRecord(
     }
 
     case RecordType.CHUNK: {
-      const decompressedSize = view.getBigUint64(offset, true);
+      const decompressedSize = getBigUint64.call(view, offset, true);
       offset += 8;
       const decompressedCrc = view.getUint32(offset, true);
       offset += 4;

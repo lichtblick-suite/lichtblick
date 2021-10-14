@@ -148,6 +148,13 @@
           "UTTypeTagSpecification": { "public.filename-extension": "bag" }
         },
         {
+          "UTTypeConformsTo": ["public.data"],
+          "UTTypeDescription": "Message Capture File",
+          "UTTypeIcons": { "UTTypeIconText": "mcap" },
+          "UTTypeIdentifier": "dev.foxglove.mcap",
+          "UTTypeTagSpecification": { "public.filename-extension": "mcap" }
+        },
+        {
           "UTTypeConformsTo": ["public.data", "public.archive", "public.zip-archive"],
           "UTTypeDescription": "Foxglove Studio Extension File",
           "UTTypeIcons": { "UTTypeIconText": "foxe" },
