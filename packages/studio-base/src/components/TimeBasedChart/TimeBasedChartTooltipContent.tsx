@@ -75,7 +75,12 @@ export default function TimeBasedChartTooltipContent(
   props: PropsWithChildren<Props>,
 ): React.ReactElement {
   const { tooltip } = props;
-  const value = typeof tooltip.value === "string" ? tooltip.value : JSON.stringify(tooltip.value);
+  const value =
+    typeof tooltip.value === "string"
+      ? tooltip.value
+      : typeof tooltip.value === "bigint"
+      ? tooltip.value.toString()
+      : JSON.stringify(tooltip.value);
   const { receiveTime, headerStamp } = tooltip.item;
 
   return (

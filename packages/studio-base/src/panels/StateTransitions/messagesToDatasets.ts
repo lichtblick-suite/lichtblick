@@ -40,7 +40,7 @@ export default function messagesToDatasets(args: Args): DatasetInfo {
     tooltips: [],
   };
 
-  let prevQueryValue: string | number | boolean | undefined;
+  let prevQueryValue: string | number | bigint | boolean | undefined;
   let previousTimestamp: Time | undefined;
   let currentData: ChartData["datasets"][0]["data"] = [];
 
@@ -82,7 +82,12 @@ export default function messagesToDatasets(args: Args): DatasetInfo {
         continue;
       }
 
-      if (typeof value !== "number" && typeof value !== "boolean" && typeof value !== "string") {
+      if (
+        typeof value !== "number" &&
+        typeof value !== "bigint" &&
+        typeof value !== "boolean" &&
+        typeof value !== "string"
+      ) {
         continue;
       }
 

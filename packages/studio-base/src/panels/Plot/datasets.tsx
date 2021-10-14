@@ -42,7 +42,7 @@ function getXForPoint(
   xAxisRanges: readonly (readonly TooltipItem[])[] | undefined,
   xItem: TooltipItem | undefined,
   xAxisPath: BasePlotPath | undefined,
-): number {
+): number | bigint {
   if (isCustomScale(xAxisVal) && xAxisPath) {
     if (isReferenceLinePlotPathType(xAxisPath)) {
       return Number.parseFloat(xAxisPath.value);
@@ -52,7 +52,7 @@ function getXForPoint(
         return NaN;
       }
       const value = xItem.queriedData[innerIdx]?.value;
-      return isTime(value) ? toSec(value) : Number(value);
+      return isTime(value) ? toSec(value) : typeof value === "bigint" ? value : Number(value);
     }
   }
   return xAxisVal === "timestamp" ? timestamp : innerIdx;
@@ -79,9 +79,14 @@ function getPointsAndTooltipsForMessagePathItem(
     innerIdx,
     { value, path: queriedPath, constantName },
   ] of yItem.queriedData.entries()) {
-    if (typeof value === "number" || typeof value === "boolean" || typeof value === "string") {
-      const valueNum = Number(value);
-      if (!isNaN(valueNum)) {
+    if (
+      typeof value === "number" ||
+      typeof value === "boolean" ||
+      typeof value === "string" ||
+      typeof value === "bigint"
+    ) {
+      const valueNum = typeof value === "bigint" ? value : Number(value);
+      if (typeof valueNum === "bigint" || !isNaN(valueNum)) {
         const x = getXForPoint(xAxisVal, elapsedTime, innerIdx, xAxisRanges, xItem, xAxisPath);
         const y = valueNum;
         const tooltip = {
@@ -94,7 +99,7 @@ function getPointsAndTooltipsForMessagePathItem(
           constantName,
           startTime,
         };
-        points.push({ x, y });
+        points.push({ x: Number(x), y: Number(y) });
         tooltips.push(tooltip);
       }
     } else if (isTime(value)) {
@@ -110,7 +115,7 @@ function getPointsAndTooltipsForMessagePathItem(
         constantName,
         startTime,
       };
-      points.push({ x, y });
+      points.push({ x: Number(x), y });
       tooltips.push(tooltip);
     }
   }

@@ -73,12 +73,12 @@ export const mathFunctions: { [fn: string]: MathFunction } = {
 };
 
 // Apply a function to the y-value of the data or tooltips passed in.
-export function applyToDataOrTooltips<T extends { y: number | string }>(
+export function applyToDataOrTooltips<T extends { y: number | string | bigint }>(
   dataOrTooltips: T[],
   func: (arg0: number) => number,
 ): T[] {
   return dataOrTooltips.map((item) => {
-    let y = (item as { y: number | string }).y;
+    let { y } = item;
     const numericYValue: number = Number(y);
     // Only apply the function if the Y value is a valid number.
     if (!isNaN(numericYValue)) {
