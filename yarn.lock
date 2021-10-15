@@ -2470,7 +2470,7 @@ __metadata:
     react-use: "patch:react-use@17.3.1#../../patches/react-use.patch"
     react-virtualized: 9.22.3
     readable-stream: 3.6.0
-    regl-worldview: "github:foxglove/webviz#workspace=regl-worldview&commit=b570564684c6382b2c1aef08ccd634f4e67ec989"
+    regl-worldview: "github:foxglove/regl-worldview#de23cc70b52ffdc245cc6b73537f1289473ac6d8"
     rehype-raw: 5.1.0
     reselect: 4.0.0
     roslib: "github:foxglove/roslibjs#df3d7f87064c93b705e6e7e3354b2c6f63b682a6"
@@ -10595,6 +10595,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"draco3d@npm:^1.4.1":
+  version: 1.4.3
+  resolution: "draco3d@npm:1.4.3"
+  checksum: 46f3dad8a441ad3f123be45465307f5ee09a76d6bb3228cc37cd02883427a341efaf1612c1a4592a7ef2450f39feb870e040b04bb00d5e9788db6b75d1f5de33
+  languageName: node
+  linkType: hard
+
 "duplexer3@npm:^0.1.4":
   version: 0.1.4
   resolution: "duplexer3@npm:0.1.4"
@@ -12783,10 +12790,17 @@ fsevents@^1.2.7:
   languageName: node
   linkType: hard
 
-"gl-matrix@npm:*, gl-matrix@npm:3.3.0, gl-matrix@npm:>=2.6.1":
+"gl-matrix@npm:*, gl-matrix@npm:3.3.0":
   version: 3.3.0
   resolution: "gl-matrix@npm:3.3.0"
   checksum: 4a1b475d2f726ccb6ad1727e8553d391fba613cfc9eded2fc9d2c2d9dc44e457b4f04a0a640ca18d949927c4444df67ff8498997d25f7cf542a84125cfc9c87a
+  languageName: node
+  linkType: hard
+
+"gl-matrix@npm:^2.8.1":
+  version: 2.8.1
+  resolution: "gl-matrix@npm:2.8.1"
+  checksum: 20d13fd428ea3021d625781e025132ff8ec264f4c05310bda9ad859535ab32fb505323486d2d5c51b5f715c2a9d059da588b66e8e2afdafdf1acc4f45629b7ff
   languageName: node
   linkType: hard
 
@@ -20596,15 +20610,16 @@ react-use@17.3.1:
   languageName: node
   linkType: hard
 
-"regl-worldview@github:foxglove/webviz#workspace=regl-worldview&commit=b570564684c6382b2c1aef08ccd634f4e67ec989":
-  version: 0.16.1
-  resolution: "regl-worldview@https://github.com/foxglove/webviz.git#workspace=regl-worldview&commit=b570564684c6382b2c1aef08ccd634f4e67ec989"
+"regl-worldview@github:foxglove/regl-worldview#de23cc70b52ffdc245cc6b73537f1289473ac6d8":
+  version: 0.17.0
+  resolution: "regl-worldview@https://github.com/foxglove/regl-worldview.git#commit=de23cc70b52ffdc245cc6b73537f1289473ac6d8"
   dependencies:
     "@babel/runtime": ^7.3.1
     "@mapbox/tiny-sdf": ^1.1.1
     distance-to-line-segment: 0.2.0
+    draco3d: ^1.4.1
     earcut: ^2.1.3
-    gl-matrix: ">=2.6.1"
+    gl-matrix: ^2.8.1
     lodash: ^4.17.11
     memoize-one: ^5.1.1
     memoize-weak: ^1.0.2
@@ -20615,7 +20630,7 @@ react-use@17.3.1:
   peerDependencies:
     react: 16.x
     react-dom: 16.x
-  checksum: 361d24b3fdc0372932317472e1ed2da0de4346d06f14c69727c02c08957d47d75b9a25d2f1a340cff602db1d80aa0d002210ab6d00a0ba2cb76b2b4b5dcf9bff
+  checksum: 1b597116a022f534043ff963df2c31c8128f74ddd56dbc3e8cf5ccfd01d5914482df58f69124d45a12530bbe0c7fcd6715515b0ee2079ae045ff9d1a1fe0a755
   languageName: node
   linkType: hard
 
