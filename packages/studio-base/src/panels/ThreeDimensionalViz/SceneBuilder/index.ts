@@ -604,6 +604,8 @@ export default class SceneBuilder implements MarkerProvider {
       text?: string;
       poses?: readonly Pose[];
       closed?: boolean;
+      mesh_resource?: string;
+      mesh_use_embedded_materials?: boolean;
       metadataByIndex?: readonly Readonly<unknown[]>[];
     } = {
       type: (message as unknown as { type: number }).type,
@@ -618,6 +620,8 @@ export default class SceneBuilder implements MarkerProvider {
       ns: message.ns,
       header: message.header,
       action: message.action,
+      mesh_resource: message.mesh_resource,
+      mesh_use_embedded_materials: message.mesh_use_embedded_materials,
     };
     // Marker fields
     if ("text" in message) {
@@ -1036,7 +1040,8 @@ export default class SceneBuilder implements MarkerProvider {
         return add.points(marker);
       case 9:
         return add.text(marker);
-      // mesh resource not supported
+      case 10:
+        return add.mesh(marker);
       case 11:
         return add.triangleList(marker);
       case 101:

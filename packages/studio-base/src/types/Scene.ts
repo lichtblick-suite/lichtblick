@@ -31,6 +31,7 @@ import {
   OverlayIconMarker,
   ColorMarker,
   PoseStamped,
+  MeshMarker,
 } from "@foxglove/studio-base/types/Messages";
 import Bounds from "@foxglove/studio-base/util/Bounds";
 
@@ -52,6 +53,7 @@ export interface MarkerCollector {
   lineList(arg0: LineListMarker): void;
   points(arg0: PointsMarker): void;
   text(arg0: TextMarker): void;
+  mesh(arg0: MeshMarker): void;
   triangleList(arg0: TriangleListMarker): void;
   grid(arg0: OccupancyGridMessage): void;
   pointcloud(arg0: PointCloud): void;

@@ -29,6 +29,7 @@ import {
   LaserScan,
   LineListMarker,
   LineStripMarker,
+  MeshMarker,
   OccupancyGridMessage,
   OverlayIconMarker,
   PointCloud,
@@ -69,6 +70,7 @@ class MockMarkerCollector implements MarkerCollector {
   lineList(_arg0: LineListMarker): void {}
   points(_arg0: PointsMarker): void {}
   text(_arg0: TextMarker): void {}
+  mesh(_arg0: MeshMarker): void {}
   triangleList(_arg0: TriangleListMarker): void {}
   grid(_arg0: OccupancyGridMessage): void {}
   pointcloud(_arg0: PointCloud): void {}

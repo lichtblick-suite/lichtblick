@@ -117,6 +117,7 @@ export type BaseMarker = Readonly<
     frame_locked?: boolean; // TODO: required
     text?: string;
     mesh_resource?: string; // TODO: required
+    mesh_use_embedded_materials?: boolean;
     primitive?: string;
     metadata?: Readonly<Record<string, unknown>>;
   }
@@ -220,10 +221,11 @@ export type TextMarker = Readonly<
 >;
 
 export type MeshMarker = Readonly<
-  BaseMarker &
-    MultiPointMarker & {
-      type: 11;
-    }
+  BaseMarker & {
+    type: 10;
+    mesh_resource: string;
+    mesh_use_embedded_materials: boolean;
+  }
 >;
 
 type NavMsgs$MapMetaData = Readonly<{
@@ -296,6 +298,7 @@ export type Marker =
   | CubeListMarker
   | PointsMarker
   | TextMarker
+  | MeshMarker
   | TriangleListMarker
   | MeshMarker
   | FilledPolygonMarker

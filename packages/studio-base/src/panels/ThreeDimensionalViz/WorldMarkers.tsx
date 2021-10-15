@@ -39,6 +39,7 @@ import {
   PoseMarkers,
   LinedConvexHulls,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands";
+import MeshMarkers from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/MeshMarkers";
 import {
   LAYER_INDEX_TEXT,
   LAYER_INDEX_OCCUPANCY_GRIDS,
@@ -56,6 +57,7 @@ import {
   TextMarker,
   OverlayIconMarker,
   ColorMarker,
+  MeshMarker,
 } from "@foxglove/studio-base/types/Messages";
 import { ReglColor } from "@foxglove/studio-base/util/colorUtils";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -91,6 +93,7 @@ export type InteractiveMarkersByType = {
   linedConvexHull: Interactive<LineListMarker | LineStripMarker>[];
   lineList: Interactive<LineListMarker>[];
   lineStrip: Interactive<LineStripMarker>[];
+  mesh: Interactive<MeshMarker>[];
   overlayIcon: Interactive<OverlayIconMarker>[];
   pointcloud: Interactive<SphereMarker>[];
   points: Interactive<PointsMarker>[];
@@ -210,6 +213,7 @@ export default function WorldMarkers({
     linedConvexHull,
     lineList,
     lineStrip,
+    mesh,
     overlayIcon,
     pointcloud,
     points,
@@ -284,6 +288,7 @@ export default function WorldMarkers({
         {[...instancedLineList, ...groupedLines]}
       </Lines>
       <LinedConvexHulls layerIndex={layerIndex}>{linedConvexHull}</LinedConvexHulls>
+      <MeshMarkers layerIndex={layerIndex} markers={mesh}></MeshMarkers>
       <Overlay<Interactive<OverlayIconMarker>>
         renderItem={({ item, coordinates, index, dimension: { width, height } }) => {
           if (!coordinates) {
