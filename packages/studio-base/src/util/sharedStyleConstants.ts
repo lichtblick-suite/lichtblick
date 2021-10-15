@@ -75,7 +75,7 @@ const robotStylesColors = {
 
 export const colors = {
   ...robotStylesColors,
-  PRIMARY: robotStylesColors.PURPLE,
+  PRIMARY: "#a197ea",
   HIGHLIGHT: "#29bee7",
   HIGHLIGHT_MUTED: "#29bee744",
   HOVER_BACKGROUND_COLOR: tinyColor(robotStylesColors.PURPLE).setAlpha(0.2).toRgbString(),

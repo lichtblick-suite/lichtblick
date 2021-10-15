@@ -13,13 +13,13 @@
 
 import { mergeStyleSets } from "@fluentui/merge-styles";
 import cx from "classnames";
+import { Fzf, FzfResultItem } from "fzf";
 import { maxBy } from "lodash";
 import React, { CSSProperties, PureComponent, RefObject } from "react";
 import ReactAutocomplete from "react-autocomplete";
 import { createPortal } from "react-dom";
 import textMetrics from "text-metrics";
 
-import fuzzyFilter from "@foxglove/studio-base/util/fuzzyFilter";
 import { colors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const fontFamily = fonts.SANS_SERIF;
@@ -33,6 +33,7 @@ function measureText(text: string): number {
 }
 
 const ROW_HEIGHT = 24;
+const MAX_ITEMS = 200;
 
 const classes = mergeStyleSets({
   root: {
@@ -148,6 +149,36 @@ function defaultGetText(name: string) {
     throw new Error(`you need to provide an implementation of ${name}`);
   };
 }
+
+const EMPTY_SET = new Set<number>();
+
+function itemToFzfResult<T>(item: T, getItemText: (item: T) => string): FzfResultItem<string> {
+  return {
+    item: getItemText(item),
+    score: 0,
+    positions: EMPTY_SET,
+    start: 0,
+    end: 0,
+  };
+}
+
+const HighlightChars = (props: { str: string; indices: Set<number> }) => {
+  const chars = props.str.split("");
+
+  const nodes = chars.map((char, i) => {
+    if (props.indices.has(i)) {
+      return (
+        <b key={i} style={{ color: colors.HIGHLIGHT }}>
+          {char}
+        </b>
+      );
+    } else {
+      return char;
+    }
+  });
+
+  return <>{nodes}</>;
+};
 
 export default class Autocomplete<T = unknown> extends PureComponent<
   AutocompleteProps<T>,
@@ -328,12 +359,13 @@ export default class Autocomplete<T = unknown> extends PureComponent<
       menuStyle = {},
       inputStyle = {},
     } = this.props;
-    const autocompleteItems = fuzzyFilter({
-      options: items,
-      filter: filterText,
-      getText: getItemText,
-      sort: sortWhenFiltering,
-    });
+    const autocompleteItems: FzfResultItem<string>[] = filterText
+      ? new Fzf(items.map(getItemText), {
+          fuzzy: filterText.length > 2 ? "v2" : false,
+          sort: sortWhenFiltering,
+          limit: MAX_ITEMS,
+        }).find(filterText)
+      : items.map((item) => itemToFzfResult(item, getItemText));
 
     const { hasError = autocompleteItems.length === 0 && value?.length } = this.props;
 
@@ -347,9 +379,9 @@ export default class Autocomplete<T = unknown> extends PureComponent<
       <ReactAutocomplete
         open={open}
         items={autocompleteItems}
-        getItemValue={getItemValue}
-        renderItem={(item, isHighlighted) => {
-          const itemValue = getItemValue(item);
+        getItemValue={(item: FzfResultItem<string>) => item.item}
+        renderItem={(item: FzfResultItem<string>, isHighlighted) => {
+          const itemValue = item.item;
           return (
             <div
               key={itemValue}
@@ -361,7 +393,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
                   selectedItemValue != undefined && itemValue === selectedItemValue,
               })}
             >
-              {getItemText(item)}
+              <HighlightChars str={item.item} indices={item.positions} />
             </div>
           );
         }}
@@ -405,8 +437,8 @@ export default class Autocomplete<T = unknown> extends PureComponent<
 
           // The longest string might not be the widest (e.g. "|||" vs "www"), but this is
           // quite a bit faster, so we throw in a nice padding and call it good enough! :-)
-          const longestItem = maxBy(autocompleteItems, (item) => getItemText(item).length);
-          const width = 50 + (longestItem != undefined ? measureText(getItemText(longestItem)) : 0);
+          const longestItem = maxBy(autocompleteItems, (item) => item.item.length);
+          const width = 50 + (longestItem != undefined ? measureText(longestItem.item) : 0);
           const maxHeight = `calc(100vh - 10px - ${style.top}px)`;
 
           return (

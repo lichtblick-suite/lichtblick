@@ -3,6 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { ThemeProvider as FluentThemeProvider } from "@fluentui/react";
 import {
+  Braces20Regular,
+  Braces20Filled,
   Next20Filled,
   Next20Regular,
   Pause20Filled,
@@ -19,6 +21,8 @@ import { registerIcons, unregisterIcons } from "@fluentui/style-utilities";
 import CogIcon from "@mdi/svg/svg/cog.svg";
 import DatabaseIcon from "@mdi/svg/svg/database.svg";
 import DragIcon from "@mdi/svg/svg/drag.svg";
+import HelpCircleIcon from "@mdi/svg/svg/help-circle-outline.svg";
+import MenuDownIcon from "@mdi/svg/svg/menu-down.svg";
 import PlusCircleOutlineIcon from "@mdi/svg/svg/plus-circle-outline.svg";
 import { useLayoutEffect, useState } from "react";
 import { ThemeProvider as StyledThemeProvider } from "styled-components";
@@ -35,6 +39,8 @@ const icons: {
 } = {
   Add: <Icons.AddIcon />,
   AddIn: <Icons.AddInIcon />,
+  Braces: <Braces20Regular />,
+  BracesFilled: <Braces20Filled />,
   Blockhead: <BlockheadIcon />,
   BlockheadFilled: <BlockheadFilledIcon />,
   Cancel: <Icons.CancelIcon />,
@@ -66,10 +72,12 @@ const icons: {
   FiveTileGrid: <Icons.FiveTileGridIcon />,
   Flow: <Icons.FlowIcon />,
   GenericScan: <Icons.GenericScanIcon />,
+  HelpCircle: <HelpCircleIcon />,
   Info: <Icons.InfoIcon />,
   LocationDot: <Icons.LocationDotIcon />,
   Loop: <LoopIcon strokeWidth={1.375} />,
   LoopFilled: <LoopIcon strokeWidth={1.875} />,
+  MenuDown: <MenuDownIcon />,
   More: <Icons.MoreIcon />,
   MoreVertical: <Icons.MoreVerticalIcon />,
   Next: <Next20Regular />,

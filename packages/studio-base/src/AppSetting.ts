@@ -10,6 +10,7 @@ export enum AppSetting {
   TIMEZONE = "timezone",
   UNLIMITED_MEMORY_CACHE = "experimental.unlimited-memory-cache",
   SHOW_DEBUG_PANELS = "showDebugPanels",
+  ENABLE_FIELD_MATCHING = "enableFieldMatching",
   ENABLE_LAYOUT_DEBUGGING = "enableLayoutDebugging",
   ENABLE_DRAWING_POLYGONS = "enableDrawingPolygons",
   ENABLE_LEGACY_PLOT_PANEL = "enableLegacyPlotPanel",

@@ -15,11 +15,14 @@ import { storiesOf } from "@storybook/react";
 
 import Flex from "@foxglove/studio-base/components/Flex";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
-import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import { Topic } from "@foxglove/studio-base/players/types";
+import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
+import { basicDatatypes } from "@foxglove/studio-base/util/datatypes";
+import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 import MessagePathInput from "./MessagePathInput";
 
-const fixture = {
+const fixture: Fixture = {
   datatypes: new Map(
     Object.entries({
       "msgs/PoseDebug": {
@@ -87,6 +90,22 @@ const fixture = {
   globalVariables: { global_var_1: 42, global_var_2: 10 },
 };
 
+let manyTopics: Topic[] = [];
+for (let i = 0; i < 10; i++) {
+  manyTopics = manyTopics.concat(
+    Array.from(basicDatatypes.keys()).map(
+      (datatype): Topic => ({ name: `/${datatype.toLowerCase()}/${i}`, datatype }),
+    ),
+  );
+}
+
+const heavyFixture: Fixture = {
+  datatypes: basicDatatypes,
+  topics: manyTopics,
+  frame: {},
+  globalVariables: { global_var_1: 42, global_var_2: 10 },
+};
+
 const clickInput = (el: HTMLDivElement) => {
   const firstInput = el.querySelector("input");
   if (firstInput) {
@@ -96,17 +115,41 @@ const clickInput = (el: HTMLDivElement) => {
 
 function MessagePathInputStory(props: { path: string; prioritizedDatatype?: string }) {
   const [path, setPath] = React.useState(props.path);
+  const [timestampMethod, setTimestampMethod] = React.useState<TimestampMethod>("receiveTime");
 
   return (
     <MockPanelContextProvider>
       <PanelSetup fixture={fixture} onMount={clickInput}>
         <Flex style={{ margin: "10px" }}>
           <MessagePathInput
-            autoSize
+            autoSize={false}
             path={path}
             prioritizedDatatype={props.prioritizedDatatype}
             onChange={(newPath) => setPath(newPath)}
-            timestampMethod="receiveTime"
+            onTimestampMethodChange={setTimestampMethod}
+            timestampMethod={timestampMethod}
+          />
+        </Flex>
+      </PanelSetup>
+    </MockPanelContextProvider>
+  );
+}
+
+function MessagePathPerformanceStory(props: { path: string; prioritizedDatatype?: string }) {
+  const [path, setPath] = React.useState(props.path);
+  const [timestampMethod, setTimestampMethod] = React.useState<TimestampMethod>("receiveTime");
+
+  return (
+    <MockPanelContextProvider>
+      <PanelSetup fixture={heavyFixture} onMount={clickInput}>
+        <Flex style={{ margin: "10px" }}>
+          <MessagePathInput
+            autoSize={false}
+            path={path}
+            prioritizedDatatype={props.prioritizedDatatype}
+            onChange={(newPath) => setPath(newPath)}
+            onTimestampMethodChange={setTimestampMethod}
+            timestampMethod={timestampMethod}
           />
         </Flex>
       </PanelSetup>
@@ -171,4 +214,7 @@ storiesOf("components/MessagePathInput", module)
   })
   .add("path for multiple levels of nested fields inside json object", () => {
     return <MessagePathInputStory path="/some_logs_topic.myJson.a.b.c" />;
+  })
+  .add("performance testing", () => {
+    return <MessagePathPerformanceStory path="." />;
   });
