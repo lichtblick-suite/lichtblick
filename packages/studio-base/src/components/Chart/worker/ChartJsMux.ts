@@ -46,11 +46,11 @@ type RpcUpdateEvent = {
   data?: ChartData;
 };
 
-// Explicitly load the "Plex Mono" font, since custom fonts from the main renderer are not
-// inherited by web workers. This is required to draw "Plex Mono" on an OffscreenCanvas, and it
-// also appears to fix a crash a large portion of Windows users were seeing where the rendering
-// thread would crash in skia code related to DirectWrite font loading when the system display
-// scaling is set >100%.
+// Explicitly load the "Plex Mono" font, since custom fonts from the main renderer are not inherited
+// by web workers. This is required to draw "Plex Mono" on an OffscreenCanvas, and it also appears
+// to fix a crash a large portion of Windows users were seeing where the rendering thread would
+// crash in skia code related to DirectWrite font loading when the system display scaling is set
+// >100%. For more info on this crash, see util/waitForFonts.ts.
 async function loadDefaultFont(): Promise<FontFace> {
   const fontFace = new FontFace("IBM Plex Mono", `url(${PlexMono}) format('woff2')`);
   (self as unknown as WorkerGlobalScope).fonts.add(fontFace);
