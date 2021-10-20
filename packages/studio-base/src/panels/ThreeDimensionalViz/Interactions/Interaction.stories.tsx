@@ -34,10 +34,10 @@ import Interactions, { OBJECT_TAB_TYPE, LINKED_VARIABLES_TAB_TYPE } from "./Inte
 import useLinkedGlobalVariables from "./useLinkedGlobalVariables";
 
 const SWrapper = styled.div`
-  background: #2d2c33;
+  background: ${colors.DARK};
   display: flex;
-  flex-direction: row;
   flex-wrap: wrap;
+  height: 100%;
 `;
 const SP = styled.p`
   color: ${colors.TEXT_MUTED};

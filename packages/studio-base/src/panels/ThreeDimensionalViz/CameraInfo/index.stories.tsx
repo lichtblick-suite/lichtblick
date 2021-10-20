@@ -12,16 +12,22 @@
 //   You may not use this file except in compliance with the License.
 
 import { storiesOf } from "@storybook/react";
+import { CSSProperties } from "react";
 import { DEFAULT_CAMERA_STATE } from "regl-worldview";
 
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import CameraInfo, {
   CAMERA_TAB_TYPE,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/CameraInfo";
+import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const containerStyle = {
-  margin: 8,
-  display: "inline-block",
+const containerStyle: CSSProperties = {
+  padding: 8,
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-end",
+  backgroundColor: colors.DARK,
+  height: "100%",
 };
 
 const DEFAULT_PROPS = {

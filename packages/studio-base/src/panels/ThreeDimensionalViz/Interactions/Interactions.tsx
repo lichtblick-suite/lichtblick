@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import CursorDefault from "@mdi/svg/svg/cursor-default.svg";
 import { MouseEventObject } from "regl-worldview";
 
 import Checkbox from "@foxglove/studio-base/components/Checkbox";
@@ -19,13 +18,11 @@ import ExpandingToolbar, {
   ToolGroup,
   ToolGroupFixedSizePane,
 } from "@foxglove/studio-base/components/ExpandingToolbar";
-import Icon from "@foxglove/studio-base/components/Icon";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import ObjectDetails from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/ObjectDetails";
 import TopicLink from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/TopicLink";
 import { SelectedObject } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import { decodeAdditionalFields } from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/PointClouds/selection";
-import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/sharedStyles";
 import { getInteractionData } from "@foxglove/studio-base/panels/ThreeDimensionalViz/threeDimensionalVizUtils";
 import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz/types";
 import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
@@ -74,12 +71,7 @@ const InteractionsBaseComponent = React.memo<PropsWithConfig>(function Interacti
   return (
     <ExpandingToolbar
       tooltip="Inspect objects"
-      icon={
-        <Icon style={{ color: "white" }}>
-          <CursorDefault />
-        </Icon>
-      }
-      className={styles.buttons}
+      iconName="CursorDefault"
       selectedTab={interactionsTabType}
       onSelectTab={(newSelectedTab) => setInteractionsTabType(newSelectedTab)}
     >

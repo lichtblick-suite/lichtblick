@@ -11,10 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { CSSProperties, useContext, useRef } from "react";
+import { makeStyles } from "@fluentui/react";
+import { useContext, useRef } from "react";
 import { WorldviewReactContext, WorldviewContextType } from "regl-worldview";
 
-import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { colors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 type Stats = {
   bufferCount: number;
@@ -26,14 +27,29 @@ type Stats = {
   getTotalBufferSize(): number;
 };
 
-const style: CSSProperties = {
-  position: "absolute",
-  bottom: 5,
-  right: 5,
-  backgroundColor: "rgba(1, 1, 1, 0.2)",
-  padding: 5,
-  fontFamily: fonts.MONOSPACE,
-};
+const useStyles = makeStyles((theme) => ({
+  root: {
+    position: "absolute",
+    bottom: theme.spacing.m,
+    right: theme.spacing.m,
+    backgroundColor: colors.LEGEND_HIGHLIGHT_COLOR,
+    borderRadius: theme.effects.roundedCorner2,
+    fontFamily: fonts.MONOSPACE,
+    fontSize: theme.fonts.tiny.fontSize,
+    padding: theme.spacing.s2,
+    pointerEvents: "none",
+
+    td: {
+      padding: 2,
+      textAlign: "right",
+    },
+    th: {
+      padding: "2px 6px",
+      color: colors.BRIGHT_YELLOW,
+      textTransform: "uppercase",
+    },
+  },
+}));
 
 // Looks at the regl stats and throws errors if it seems we're going over acceptable (arbitrary) max ranges.
 // The maxes are arbitrarily set to be an order of magnitude higher than the 'steady state' of a pretty loaded
@@ -58,25 +74,44 @@ function validate(stats: Stats) {
 // Shows debug regl stats in the 3d panel.  Crashes the panel if regl stats drift outside of acceptable ranges.
 // TODO(bmc): move to regl-worldview at some point
 export default function DebugStats(): JSX.Element | ReactNull {
+  const classes = useStyles();
   const context = useContext<WorldviewContextType>(WorldviewReactContext);
   const renderCount = useRef(0);
   renderCount.current = renderCount.current + 1;
   if (context.initializedData.regl != undefined) {
     const { stats } = context.initializedData.regl as { stats: Stats };
+
     validate(stats);
+
     const textureSize = (stats.getTotalTextureSize() / (1024 * 1024)).toFixed(1);
     const bufferSize = (stats.getTotalBufferSize() / (1024 * 1024)).toFixed(1);
+
     return (
-      <div style={style}>
-        <div>renders: {renderCount.current}</div>
-        <div>
-          buffers: {stats.bufferCount} ({bufferSize}) Mb
-        </div>
-        <div>
-          textures: {stats.textureCount} ({textureSize}) Mb
-        </div>
-        <div>elements: {stats.elementsCount}</div>
-        <div>shaders: {stats.shaderCount}</div>
+      <div className={classes.root}>
+        <table>
+          <tbody>
+            <tr>
+              <th>renders:</th>
+              <td>{renderCount.current}</td>
+            </tr>
+            <tr>
+              <th>buffers:</th>
+              <td>{`${stats.bufferCount} (${bufferSize}) Mb`}</td>
+            </tr>
+            <tr>
+              <th>textures:</th>
+              <td>{`${stats.textureCount} (${textureSize}) Mb`}</td>
+            </tr>
+            <tr>
+              <th>elements:</th>
+              <td> {stats.elementsCount}</td>
+            </tr>
+            <tr>
+              <th>shaders:</th>
+              <td> {stats.shaderCount}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     );
   }

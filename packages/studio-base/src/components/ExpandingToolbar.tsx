@@ -1,71 +1,31 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-//
-// This file incorporates work covered by the following copyright and
-// permission notice:
-//
-//   Copyright 2018-2021 Cruise LLC
-//
-//   This source code is licensed under the Apache License, Version 2.0,
-//   found at http://www.apache.org/licenses/LICENSE-2.0
-//   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets } from "@fluentui/merge-styles";
-import ArrowCollapseIcon from "@mdi/svg/svg/arrow-collapse.svg";
-import cx from "classnames";
+import {
+  Pivot,
+  PivotItem,
+  Stack,
+  IconButton,
+  makeStyles,
+  useTheme,
+  IButtonStyles,
+} from "@fluentui/react";
 import { ReactElement } from "react";
 
-import Button from "@foxglove/studio-base/components/Button";
-import Flex from "@foxglove/studio-base/components/Flex";
-import Icon from "@foxglove/studio-base/components/Icon";
+import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const PANE_WIDTH = 268;
 const PANE_HEIGHT = 240;
 
-const classes = mergeStyleSets({
-  expandButton: {
-    backgroundColor: "transparent !important",
-    border: "none !important",
-    padding: "8px 4px !important",
+const useStyles = makeStyles((theme) => ({
+  toolGroupFixedSizePanel: {
+    overflowX: "hidden",
+    overflowY: "auto",
+    padding: theme.spacing.s1,
+    maxHeight: PANE_HEIGHT,
   },
-  iconButton: {
-    fontFamily: "sans-serif !important",
-    backgroundColor: "transparent !important",
-    border: "none !important",
-    padding: "8px 4px !important",
-    alignItems: "start !important",
-    marginRight: "4px !important",
-    marginLeft: "4px !important",
-  },
-  tab: {
-    margin: "0",
-    paddingLeft: "8px !important",
-    paddingRight: "8px !important",
-    backgroundColor: "transparent !important",
-    border: "none !important",
-    borderRadius: "0 !important",
-    borderTop: "2px solid transparent !important",
-    borderBottom: "2px solid transparent !important",
-  },
-  tabSelected: {
-    borderBottom: `2px solid ${colors.TEXT_NORMAL} !important`,
-  },
-  fixedSizePane: {
-    height: PANE_HEIGHT,
-    width: PANE_WIDTH - 28,
-    overflow: "hidden auto",
-    padding: "8px 0",
-  },
-  tabBar: {
-    justifyContent: "space-between",
-  },
-  tabBody: {
-    backgroundColor: colors.DARK,
-    padding: "4px 12px 12px 12px",
-  },
-});
+}));
 
 export function ToolGroup<T>({ children }: { name: T; children: React.ReactElement }): JSX.Element {
   return children;
@@ -76,31 +36,49 @@ export function ToolGroupFixedSizePane({
 }: {
   children: React.ReactElement | React.ReactElement[];
 }): JSX.Element {
-  return <div className={classes.fixedSizePane}>{children}</div>;
+  const classes = useStyles();
+  return <div className={classes.toolGroupFixedSizePanel}>{children}</div>;
 }
 
 type Props<T extends string> = {
+  checked?: boolean;
   children: React.ReactElement<typeof ToolGroup>[] | React.ReactElement<typeof ToolGroup>;
-  className?: string;
-  icon: React.ReactNode;
+  iconName: RegisteredIconNames;
   onSelectTab: (name: T | undefined) => void;
   selectedTab?: T; // collapse the toolbar if selectedTab is undefined
   tooltip: string;
-  style?: React.CSSProperties;
   dataTest?: string;
 };
 
+const iconStyles = {
+  iconChecked: { color: colors.ACCENT },
+  icon: {
+    color: "white",
+
+    svg: {
+      fill: "currentColor",
+      height: "1em",
+      width: "1em",
+    },
+  },
+} as Partial<IButtonStyles>;
+
 export default function ExpandingToolbar<T extends string>({
   children,
-  className,
-  icon,
+  checked,
+  iconName,
   onSelectTab,
   selectedTab,
   tooltip,
-  style,
   dataTest,
 }: Props<T>): JSX.Element {
+  const theme = useTheme();
   const expanded = selectedTab != undefined;
+
+  const expandingToolbarButton = useTooltip({
+    contents: tooltip,
+  });
+
   if (!expanded) {
     let selectedTabLocal: T | undefined = selectedTab;
     // default to the first child's name if no tab is selected
@@ -109,50 +87,86 @@ export default function ExpandingToolbar<T extends string>({
         selectedTabLocal = child.props.name as T;
       }
     });
+
     return (
-      <div data-test={dataTest} className={className}>
-        <Button
-          className={classes.iconButton}
-          tooltip={tooltip}
+      <div>
+        {expandingToolbarButton.tooltip}
+        <IconButton
+          checked={checked}
+          elementRef={expandingToolbarButton.ref}
           onClick={() => onSelectTab(selectedTabLocal)}
-        >
-          <Icon dataTest={`ExpandingToolbar-${tooltip}`}>{icon}</Icon>
-        </Button>
+          iconProps={{ iconName }}
+          data-test={`ExpandingToolbar-${tooltip}`}
+          styles={{
+            root: { backgroundColor: colors.DARK3, pointerEvents: "auto" },
+            rootHovered: { backgroundColor: colors.DARK3 },
+            rootPressed: { backgroundColor: colors.DARK3 },
+            rootDisabled: { backgroundColor: colors.DARK3 },
+            rootChecked: { backgroundColor: colors.DARK3 },
+            rootCheckedHovered: { backgroundColor: colors.DARK3 },
+            rootCheckedPressed: { backgroundColor: colors.DARK3 },
+            ...iconStyles,
+          }}
+        />
       </div>
     );
   }
   let selectedChild: ReactElement | undefined;
+
   React.Children.forEach(children, (child) => {
     if (!selectedChild || child.props.name === selectedTab) {
       selectedChild = child;
     }
   });
+
   return (
-    <div data-test={dataTest} className={className}>
-      <Flex row className={classes.tabBar}>
-        <Flex row>
-          {React.Children.map(children, (child) => {
-            return (
-              <Button
-                className={cx(classes.tab, {
-                  [classes.tabSelected]: child === selectedChild,
-                })}
-                onClick={() => onSelectTab(child.props.name as T)}
-              >
-                {child.props.name}
-              </Button>
-            );
-          })}
-        </Flex>
-        <Button className={classes.expandButton} onClick={() => onSelectTab(undefined)}>
-          <Icon>
-            <ArrowCollapseIcon />
-          </Icon>
-        </Button>
-      </Flex>
-      <div className={classes.tabBody} style={style}>
-        {selectedChild}
-      </div>
-    </div>
+    <Stack
+      data-test={dataTest}
+      styles={{
+        root: {
+          position: "relative",
+          pointerEvents: "auto",
+          backgroundColor: theme.semanticColors.buttonBackgroundHovered,
+          borderRadius: theme.effects.roundedCorner2,
+          width: 280,
+        },
+      }}
+    >
+      <Pivot
+        styles={{
+          root: {
+            paddingRight: theme.spacing.l2,
+          },
+          link: {
+            fontSize: theme.fonts.small.fontSize,
+            marginRight: 0,
+            height: 32,
+          },
+          itemContainer: {
+            backgroundColor: theme.semanticColors.bodyBackground,
+          },
+        }}
+      >
+        {React.Children.map(children, (child) => {
+          return <PivotItem headerText={child.props.name}>{child}</PivotItem>;
+        })}
+      </Pivot>
+      <IconButton
+        onClick={() => onSelectTab(undefined)}
+        iconProps={{ iconName: "ArrowCollapse" }}
+        styles={{
+          root: {
+            backgroundColor: "transparent",
+            position: "absolute",
+            right: 0,
+            top: 0,
+          },
+          rootHovered: { backgroundColor: "transparent" },
+          rootPressed: { backgroundColor: "transparent" },
+          rootDisabled: { backgroundColor: "transparent" },
+          ...iconStyles,
+        }}
+      />
+    </Stack>
   );
 }

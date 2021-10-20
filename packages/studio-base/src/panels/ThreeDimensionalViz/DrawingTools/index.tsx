@@ -10,14 +10,10 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import PencilIcon from "@mdi/svg/svg/pencil.svg";
 import { PolygonBuilder, Polygon } from "regl-worldview";
 
 import { useAppConfigurationValue, AppSetting } from "@foxglove/studio-base";
 import ExpandingToolbar, { ToolGroup } from "@foxglove/studio-base/components/ExpandingToolbar";
-import Icon from "@foxglove/studio-base/components/Icon";
-import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/sharedStyles";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import Polygons from "./Polygons";
 
@@ -50,13 +46,9 @@ function DrawingTools({
 
   return enableDrawingPolygons || showForTests === true ? (
     <ExpandingToolbar
+      checked={selectedTab != undefined}
       tooltip="Drawing tools"
-      icon={
-        <Icon style={{ color: selectedTab != undefined ? colors.ACCENT : "white" }}>
-          <PencilIcon />
-        </Icon>
-      }
-      className={styles.buttons}
+      iconName="Pencil"
       selectedTab={selectedTab}
       onSelectTab={(newSelectedTab) => {
         onSetDrawingTabType(newSelectedTab);

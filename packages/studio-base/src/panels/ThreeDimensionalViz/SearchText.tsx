@@ -11,22 +11,16 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import ArrowDownIcon from "@mdi/svg/svg/chevron-down.svg";
-import ArrowUpIcon from "@mdi/svg/svg/chevron-up.svg";
-import CloseIcon from "@mdi/svg/svg/close.svg";
-import SearchIcon from "@mdi/svg/svg/magnify.svg";
+import { IButtonStyles, IconButton, Stack, TextField, useTheme } from "@fluentui/react";
 import { vec3 } from "gl-matrix";
 import { range, throttle } from "lodash";
-import React, { useState, useRef, useEffect, useCallback, KeyboardEvent } from "react";
+import { useState, useRef, useEffect, useCallback, KeyboardEvent } from "react";
 import { CameraState, cameraStateSelectors } from "regl-worldview";
 
-import Button from "@foxglove/studio-base/components/Button";
-import Icon from "@foxglove/studio-base/components/Icon";
-import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
+import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import useDeepChangeDetector from "@foxglove/studio-base/hooks/useDeepChangeDetector";
 import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
-import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/sharedStyles";
 import { TextMarker, Color } from "@foxglove/studio-base/types/Messages";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -175,7 +169,8 @@ export const useSearchMatches = ({
   transforms: Transforms;
 }): void => {
   const hasCurrentMatchChanged = useDeepChangeDetector([currentMatch], { initiallyTrue: true });
-  React.useEffect(() => {
+
+  useEffect(() => {
     if (!currentMatch || !searchTextOpen || !rootTf || !hasCurrentMatchChanged) {
       return;
     }
@@ -215,6 +210,26 @@ export const useSearchMatches = ({
   ]);
 };
 
+const iconStyle = {
+  icon: {
+    color: "white",
+
+    svg: {
+      fill: "currentColor",
+      height: "1em",
+      width: "1em",
+    },
+  },
+} as Partial<IButtonStyles>;
+
+const arrowButtonStyles = {
+  icon: { height: 18, fontSize: 10 },
+  root: { backgroundColor: "transparent", width: 18 },
+  rootHovered: { backgroundColor: "transparent" },
+  rootPressed: { backgroundColor: "transparent" },
+  rootDisabled: { backgroundColor: "transparent" },
+} as Partial<IButtonStyles>;
+
 const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
   searchTextOpen,
   toggleSearchTextOpen,
@@ -229,6 +244,7 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
   transforms,
   rootTf,
 }: SearchTextComponentProps) {
+  const theme = useTheme();
   const currentMatch = searchTextMatches[selectedMatchIndex];
   const iterateCurrentIndex = useCallback(
     (iterator: number) => {
@@ -244,7 +260,7 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
     [searchTextMatches, selectedMatchIndex, setSelectedMatchIndex],
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (searchTextMatches.length === 0) {
       setSelectedMatchIndex(0);
     }
@@ -258,67 +274,117 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
     searchTextOpen,
     transforms,
   });
+  const hasMatches: boolean = searchTextMatches.length > 0;
+  const searchButton = useTooltip({ contents: "Search text markers", placement: "left" });
 
   if (!searchTextOpen) {
     return (
-      <Button className={styles.iconButton} onClick={() => toggleSearchTextOpen(!searchTextOpen)}>
-        <Icon tooltip="Search text markers">
-          <SearchIcon />
-        </Icon>
-      </Button>
+      <div>
+        {searchButton.tooltip}
+        <IconButton
+          elementRef={searchButton.ref}
+          iconProps={{ iconName: "Search" }}
+          onClick={() => toggleSearchTextOpen(!searchTextOpen)}
+          styles={{
+            root: { backgroundColor: colors.DARK3, pointerEvents: "auto" },
+            rootHovered: { backgroundColor: colors.DARK3 },
+            rootPressed: { backgroundColor: colors.DARK3 },
+            rootDisabled: { backgroundColor: colors.DARK3 },
+            ...iconStyle,
+          }}
+        />
+      </div>
     );
   }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        flexDirection: "row",
-        padding: "0 4px",
-        height: "36px",
-        /* Hack to match the heights of the other toolbar components */
+    <Stack
+      horizontal
+      verticalAlign="center"
+      styles={{
+        root: {
+          pointerEvents: "auto",
+          backgroundColor: colors.DARK3,
+          borderRadius: theme.effects.roundedCorner2,
+          position: "relative",
+        },
       }}
     >
-      <div style={{ backgroundColor: "#1A191F", padding: "0px 4px 0px 8px", borderRadius: "4px" }}>
-        <Icon size="medium">
-          <SearchIcon />
-        </Icon>
-        <LegacyInput
-          autoFocus
-          ref={searchInputRef}
-          type="text"
-          placeholder="Find in scene"
-          spellCheck={false}
-          value={searchText}
-          style={{ backgroundColor: "transparent" }}
-          onChange={(e) => setSearchText(e.target.value)}
-          onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
-            if (e.key !== "Enter") {
-              return;
-            }
-            if (e.shiftKey) {
-              iterateCurrentIndex(-1);
-              return;
-            }
-            iterateCurrentIndex(1);
-          }}
+      <TextField
+        autoFocus
+        iconProps={{ iconName: "Search" }}
+        elementRef={searchInputRef}
+        type="text"
+        placeholder="Find in scene"
+        spellCheck={false}
+        suffix={`${hasMatches ? selectedMatchIndex + 1 : "0"} of ${searchTextMatches.length}`}
+        value={searchText}
+        styles={{
+          icon: {
+            color: theme.semanticColors.inputText,
+            lineHeight: 0,
+            left: theme.spacing.s1,
+            right: "auto",
+            fontSize: 18,
+            ...iconStyle,
+
+            svg: {
+              fill: "currentColor",
+              height: "1em",
+              width: "1em",
+            },
+          },
+          field: {
+            padding: `0 ${theme.spacing.s1} 0 ${theme.spacing.l2}`,
+
+            "::placeholder": { opacity: 0.6 },
+          },
+          suffix: { backgroundColor: "transparent" },
+        }}
+        onChange={(_, newValue) => setSearchText(newValue ?? "")}
+        onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
+          if (e.key !== "Enter") {
+            return;
+          }
+          if (e.shiftKey) {
+            iterateCurrentIndex(-1);
+            return;
+          }
+          iterateCurrentIndex(1);
+        }}
+      />
+      <Stack
+        horizontal
+        verticalAlign="center"
+        tokens={{
+          childrenGap: theme.spacing.s2,
+          padding: `0 0 0 ${theme.spacing.s2}`,
+        }}
+      >
+        <IconButton
+          iconProps={{ iconName: "ChevronUpSmall" }}
+          onClick={() => iterateCurrentIndex(-1)}
+          disabled={!hasMatches || searchTextMatches.length === selectedMatchIndex + 1}
+          styles={arrowButtonStyles}
         />
-        <span style={{ color: colors.TEXT_MUTED, width: "50px", display: "inline-block" }}>
-          {searchTextMatches.length > 0 ? selectedMatchIndex + 1 : "0"} of{" "}
-          {searchTextMatches.length}
-        </span>
-      </div>
-      <Icon size="medium" onClick={() => iterateCurrentIndex(-1)}>
-        <ArrowUpIcon />
-      </Icon>
-      <Icon size="medium" onClick={() => iterateCurrentIndex(1)}>
-        <ArrowDownIcon />
-      </Icon>
-      <Icon onClick={() => toggleSearchTextOpen(false)} tooltip="[esc]" size="medium">
-        <CloseIcon />
-      </Icon>
-    </div>
+        <IconButton
+          iconProps={{ iconName: "ChevronDownSmall" }}
+          onClick={() => iterateCurrentIndex(1)}
+          disabled={!hasMatches || selectedMatchIndex === 0}
+          styles={arrowButtonStyles}
+        />
+      </Stack>
+      <IconButton
+        onClick={() => toggleSearchTextOpen(false)}
+        iconProps={{ iconName: "Close" }}
+        styles={{
+          rootHovered: { backgroundColor: "transparent" },
+          rootPressed: { backgroundColor: "transparent" },
+          rootDisabled: { backgroundColor: "transparent" },
+          ...iconStyle,
+        }}
+      />
+    </Stack>
   );
 });
 

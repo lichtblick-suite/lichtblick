@@ -42,11 +42,11 @@ const SExistingLinks = styled.div`
   margin-bottom: 8px;
 `;
 
-const SList = styled.ul`
+const SList = styled.div`
   margin: 12px 6px;
 `;
 
-const SListItem = styled.li`
+const SListItem = styled.div`
   display: flex;
   align-items: center;
   margin: 6px;

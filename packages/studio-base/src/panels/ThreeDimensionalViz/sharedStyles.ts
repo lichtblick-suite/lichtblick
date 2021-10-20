@@ -34,7 +34,6 @@ const sharedStyles = mergeStyleSets({
     display: "flex",
     flexDirection: "column",
     padding: 0,
-    marginBottom: 10,
 
     "& span.icon": {
       width: 18,

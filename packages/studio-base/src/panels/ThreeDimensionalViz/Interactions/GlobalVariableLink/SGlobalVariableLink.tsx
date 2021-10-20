@@ -21,8 +21,13 @@ export default styled.span`
   display: inline-flex;
   align-items: center;
   word-break: normal;
-  .icon {
+
+  span.icon {
     color: ${colors.BLUE};
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    display: inline-block;
   }
   .link-icon {
     opacity: 0.2;

@@ -54,7 +54,7 @@ export default function Polygons({ onSetPolygons, polygonBuilder }: Props): JSX.
   polygonBuilder.onChange = polygonBuilderOnChange;
 
   return (
-    <>
+    <div style={{ padding: 8 }}>
       <ValidatedInput
         value={polygonPoints}
         onChange={(newPolygonPoints) => {
@@ -85,6 +85,6 @@ export default function Polygons({ onSetPolygons, polygonBuilder }: Props): JSX.
           Start drawing by holding <b>ctrl</b> and clicking on the 3D panel.
         </em>
       </p>
-    </>
+    </div>
   );
 }

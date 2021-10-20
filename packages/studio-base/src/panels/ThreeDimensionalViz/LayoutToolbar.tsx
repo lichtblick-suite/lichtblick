@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { makeStyles } from "@fluentui/react";
+import { Stack, Text, useTheme } from "@fluentui/react";
 import { PolygonBuilder, MouseEventObject, Polygon } from "regl-worldview";
 
 import CameraInfo from "@foxglove/studio-base/panels/ThreeDimensionalViz/CameraInfo";
@@ -31,7 +31,7 @@ import SearchText, {
   SearchTextProps,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SearchText";
 import { LayoutToolbarSharedProps } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
-import styles from "@foxglove/studio-base/panels/ThreeDimensionalViz/sharedStyles";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 type Props = LayoutToolbarSharedProps &
   SearchTextProps & {
@@ -51,22 +51,6 @@ type Props = LayoutToolbarSharedProps &
     setMeasureInfo: (arg0: MeasureInfo) => void;
     showCrosshair?: boolean;
   };
-
-const useStyles = makeStyles({
-  root: {
-    position: "absolute",
-    top: 15 + 20,
-    right: 15,
-    padding: 0,
-    zIndex: 101,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-end",
-
-    // allow mouse events to pass through the empty space in this container element
-    pointerEvents: "none",
-  },
-});
 
 function LayoutToolbar({
   autoSyncCameraState,
@@ -103,7 +87,7 @@ function LayoutToolbar({
   toggleSearchTextOpen,
   transforms,
 }: Props) {
-  const classes = useStyles();
+  const theme = useTheme();
   return (
     <>
       <MeasuringTool
@@ -112,41 +96,63 @@ function LayoutToolbar({
         measurePoints={measureInfo.measurePoints}
         onMeasureInfoChange={setMeasureInfo}
       />
-      <div className={classes.root}>
-        <div className={styles.buttons}>
-          <SearchText
-            searchTextOpen={searchTextOpen}
-            toggleSearchTextOpen={toggleSearchTextOpen}
-            searchText={searchText}
-            setSearchText={setSearchText}
-            setSearchTextMatches={setSearchTextMatches}
-            searchTextMatches={searchTextMatches}
-            searchInputRef={searchInputRef}
-            setSelectedMatchIndex={setSelectedMatchIndex}
-            selectedMatchIndex={selectedMatchIndex}
-            onCameraStateChange={onCameraStateChange}
-            cameraState={cameraState}
-            transforms={transforms}
-            rootTf={rootTf}
-          />
-        </div>
-        <div className={styles.buttons}>
-          <FollowTFControl
-            transforms={transforms}
-            tfToFollow={typeof followTf === "string" && followTf.length > 0 ? followTf : undefined}
-            followOrientation={followOrientation}
-            onFollowChange={onFollowChange}
-          />
-        </div>
-        <MainToolbar
-          measureInfo={measureInfo}
-          measuringTool={measuringElRef.current ?? undefined}
-          perspective={cameraState.perspective}
-          debug={debug}
-          onToggleCameraMode={onToggleCameraMode}
-          onToggleDebug={onToggleDebug}
+      <Stack
+        styles={{
+          root: {
+            position: "absolute",
+            top: `calc(${theme.spacing.l2} + ${theme.spacing.s1})`,
+            right: theme.spacing.m,
+            zIndex: 101,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end",
+            // allow mouse events to pass through the empty space in this container element
+            pointerEvents: "none",
+          },
+        }}
+        tokens={{ childrenGap: theme.spacing.s1 }}
+      >
+        <SearchText
+          searchTextOpen={searchTextOpen}
+          toggleSearchTextOpen={toggleSearchTextOpen}
+          searchText={searchText}
+          setSearchText={setSearchText}
+          setSearchTextMatches={setSearchTextMatches}
+          searchTextMatches={searchTextMatches}
+          searchInputRef={searchInputRef}
+          setSelectedMatchIndex={setSelectedMatchIndex}
+          selectedMatchIndex={selectedMatchIndex}
+          onCameraStateChange={onCameraStateChange}
+          cameraState={cameraState}
+          transforms={transforms}
+          rootTf={rootTf}
         />
-        {measuringElRef.current?.measureDistance}
+        <FollowTFControl
+          transforms={transforms}
+          tfToFollow={typeof followTf === "string" && followTf.length > 0 ? followTf : undefined}
+          followOrientation={followOrientation}
+          onFollowChange={onFollowChange}
+        />
+        <Stack
+          horizontal
+          verticalAlign="center"
+          styles={{ root: { position: "relative" } }}
+          tokens={{ childrenGap: theme.spacing.s1 }}
+        >
+          {measuringElRef.current && (
+            <Text variant="small" styles={{ root: { fontFamily: fonts.MONOSPACE } }}>
+              {measuringElRef.current?.measureDistance}
+            </Text>
+          )}
+          <MainToolbar
+            measureInfo={measureInfo}
+            measuringTool={measuringElRef.current ?? undefined}
+            perspective={cameraState.perspective}
+            debug={debug}
+            onToggleCameraMode={onToggleCameraMode}
+            onToggleDebug={onToggleDebug}
+          />
+        </Stack>
         <Interactions
           selectedObject={selectedObject}
           interactionsTabType={interactionsTabType}
@@ -168,7 +174,7 @@ function LayoutToolbar({
           showCrosshair={showCrosshair}
           autoSyncCameraState={autoSyncCameraState}
         />
-      </div>
+      </Stack>
       {!cameraState.perspective && showCrosshair && <Crosshair cameraState={cameraState} />}
       <MeasureMarker measurePoints={measureInfo.measurePoints} />
     </>
