@@ -24,14 +24,12 @@ import {
   CubeListMarker,
   CubeMarker,
   CylinderMarker,
-  FilledPolygonMarker,
   InstancedLineListMarker,
   LaserScan,
   LineListMarker,
   LineStripMarker,
   MeshMarker,
   OccupancyGridMessage,
-  OverlayIconMarker,
   PointCloud,
   PointsMarker,
   SphereListMarker,
@@ -76,11 +74,9 @@ class MockMarkerCollector implements MarkerCollector {
   pointcloud(_arg0: PointCloud): void {}
   laserScan(_arg0: LaserScan): void {}
   linedConvexHull(_arg0: LineListMarker | LineStripMarker): void {}
-  filledPolygon(_arg0: FilledPolygonMarker): void {}
   instancedLineList(arg0: InstancedLineListMarker): void {
     this.data.instancedLineList.push(arg0);
   }
-  overlayIcon(_arg0: OverlayIconMarker): void {}
 }
 
 storiesOf("panels/ThreeDimensionalViz/GridBuilder", module)

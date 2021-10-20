@@ -142,15 +142,11 @@ export declare type TextMarker = BaseMarker & {
   text: string
 };
 
-export declare type TriangleListMarker = MultiPointMarker & {
-  type: 11
-};
-
 export declare type MeshMarker = MultiPointMarker & {
   type: 10
 };
 
-export declare type FilledPolygonMarker = MultiPointMarker & {
-  type: 107
+export declare type TriangleListMarker = MultiPointMarker & {
+  type: 11
 };
 `;

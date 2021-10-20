@@ -130,5 +130,4 @@ export enum MarkerTypes {
   TEXT = 9,
   MESH = 10,
   TRIANGLE_LIST = 11,
-  FILLED_POLYGON = 107,
 }

@@ -106,7 +106,6 @@ declare module "regl-worldview" {
   function shouldConvert(arg: any): boolean;
 
   // jsx elements
-  const FilledPolygons: any;
   const Arrows: any;
   const Worldview: any;
   const Command: any;
@@ -202,7 +201,6 @@ declare module "regl-worldview" {
     CommonCommandProps,
     Arrow,
     Arrows,
-    FilledPolygons,
     pointToVec3,
     vec3ToPoint,
     orientationToVec4,

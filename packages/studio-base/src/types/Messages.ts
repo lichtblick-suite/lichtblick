@@ -145,20 +145,6 @@ export type ArrowMarker = Readonly<
   }
 >;
 
-type IconMetadata = {
-  markerStyle: {
-    [att: string]: string | number;
-  };
-  name: string;
-  iconOffset: { x: number; y: number };
-};
-export type OverlayIconMarker = Readonly<
-  BaseMarker & {
-    type: 109;
-    metadata: IconMetadata;
-  }
->;
-
 export type CubeMarker = Readonly<
   BaseMarker & {
     type: 1;
@@ -264,13 +250,6 @@ export type TriangleListMarker = Readonly<
     }
 >;
 
-export type FilledPolygonMarker = Readonly<
-  BaseMarker &
-    MultiPointMarker & {
-      type: 107;
-    }
->;
-
 export type InstancedLineListMarker = Readonly<
   BaseMarker &
     MultiPointMarker & {
@@ -301,7 +280,6 @@ export type Marker =
   | MeshMarker
   | TriangleListMarker
   | MeshMarker
-  | FilledPolygonMarker
   | InstancedLineListMarker
   | ColorMarker;
 

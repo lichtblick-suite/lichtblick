@@ -11,10 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
-import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
-import { ComponentProps } from "react";
-
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Flex from "@foxglove/studio-base/components/Flex";
 import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
@@ -32,8 +28,7 @@ export type PoseSettings = {
     headWidth?: number;
     shaftWidth?: number;
   };
-  modelType?: "car-model" | "arrow" | "car-outline";
-  addCarOutlineBuffer?: boolean;
+  modelType?: "car-model" | "arrow";
 };
 
 export default function PoseSettingsEditor(
@@ -57,17 +52,6 @@ export default function PoseSettingsEditor(
               onChange={(e) => onSettingsChange({ ...settings, alpha: parseFloat(e.target.value) })}
             />
           </Flex>
-        );
-      }
-      case "car-outline": {
-        return (
-          <>
-            <SLabel>Color of outline</SLabel>
-            <ColorPicker
-              color={settings.overrideColor}
-              onChange={(newColor) => onFieldChange("overrideColor", newColor)}
-            />
-          </>
         );
       }
       case "arrow":
@@ -126,7 +110,7 @@ export default function PoseSettingsEditor(
   }, [onFieldChange, onSettingsChange, settings]);
 
   const badModelTypeSetting = React.useMemo(
-    () => !["car-model", "car-outline", "arrow"].includes(settings.modelType!),
+    () => !["car-model", "arrow"].includes(settings.modelType!),
     [settings],
   );
 
@@ -137,19 +121,6 @@ export default function PoseSettingsEditor(
       </div>
     );
   }
-
-  const CheckboxComponent =
-    settings.addCarOutlineBuffer ?? false ? CheckboxMarkedIcon : CheckboxBlankOutlineIcon;
-
-  const iconProps: ComponentProps<typeof CheckboxComponent> = {
-    width: 16,
-    height: 16,
-    style: {
-      fill: "currentColor",
-      position: "relative",
-      top: "5px",
-    },
-  };
 
   return (
     <Flex col>
@@ -166,7 +137,6 @@ export default function PoseSettingsEditor(
       >
         {[
           { value: "car-model", title: "Car Model" },
-          { value: "car-outline", title: "Car Outline" },
           { value: "arrow", title: "Arrow" },
         ].map(({ value, title }) => (
           <div key={value} style={{ marginBottom: "4px", display: "flex" }}>
@@ -180,18 +150,6 @@ export default function PoseSettingsEditor(
         ))}
       </div>
 
-      <Flex style={{ marginBottom: "5px", cursor: "pointer" }}>
-        <CheckboxComponent
-          {...iconProps}
-          onClick={() =>
-            onSettingsChange({
-              ...settings,
-              addCarOutlineBuffer: !(settings.addCarOutlineBuffer ?? false),
-            })
-          }
-        />
-        <SLabel>Show error buffer</SLabel>
-      </Flex>
       {settingsByCarType}
     </Flex>
   );

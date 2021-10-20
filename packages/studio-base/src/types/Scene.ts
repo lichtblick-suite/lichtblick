@@ -23,12 +23,10 @@ import {
   PointsMarker,
   TextMarker,
   TriangleListMarker,
-  FilledPolygonMarker, // non-default types
   OccupancyGridMessage,
   PointCloud,
   LaserScan,
   InstancedLineListMarker,
-  OverlayIconMarker,
   ColorMarker,
   PoseStamped,
   MeshMarker,
@@ -59,9 +57,7 @@ export interface MarkerCollector {
   pointcloud(arg0: PointCloud): void;
   laserScan(arg0: LaserScan): void;
   linedConvexHull(arg0: LineListMarker | LineStripMarker): void;
-  filledPolygon(arg0: FilledPolygonMarker): void;
   instancedLineList(arg0: InstancedLineListMarker): void;
-  overlayIcon(arg0: OverlayIconMarker): void;
 }
 
 export interface MarkerProvider {

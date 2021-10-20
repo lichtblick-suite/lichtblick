@@ -41,7 +41,6 @@ const markers = {
   cube: [],
   cubeList: [],
   cylinder: [],
-  filledPolygon: [],
   glText: [],
   grid: [],
   instancedLineList: [],
@@ -57,7 +56,6 @@ const markers = {
   sphereList: [],
   text: [],
   triangleList: [],
-  overlayIcon: [],
 };
 
 const sharedExpected = {
@@ -66,7 +64,6 @@ const sharedExpected = {
   cube: [],
   cubeList: [],
   cylinder: [],
-  filledPolygon: [],
   glText: [],
   grid: [],
   instancedLineList: [],
@@ -82,7 +79,6 @@ const sharedExpected = {
   sphereList: [],
   text: [],
   triangleList: [],
-  overlayIcon: [],
 };
 
 describe("getDiffBySource", () => {

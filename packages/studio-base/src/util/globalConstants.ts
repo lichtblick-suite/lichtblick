@@ -52,9 +52,7 @@ export const MARKER_MSG_TYPES = {
   TEXT_VIEW_FACING: 9,
   MESH_RESOURCE: 10,
   TRIANGLE_LIST: 11,
-  FILLED_POLYGON: 107,
   INSTANCED_LINE_LIST: 108,
-  OVERLAY_ICON: 109,
 } as const;
 
 export const jsonTreeTheme = {

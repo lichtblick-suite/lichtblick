@@ -43,7 +43,6 @@ import {
   Header,
   InstancedLineListMarker,
   LaserScan,
-  OverlayIconMarker,
   OccupancyGridMessage,
   PointCloud2,
 } from "@foxglove/studio-base/types/Messages";
@@ -990,8 +989,7 @@ export default class SceneBuilder implements MarkerProvider {
       | OccupancyGridMessage
       | PointCloud2
       | (PoseStamped & { type: 103 })
-      | (LaserScan & { type: 104 })
-      | (OverlayIconMarker & { type: 109 });
+      | (LaserScan & { type: 104 });
     switch (marker.type) {
       case 1:
       case 2:
@@ -1052,12 +1050,8 @@ export default class SceneBuilder implements MarkerProvider {
         return add.poseMarker(marker);
       case 104:
         return add.laserScan(marker);
-      case 107:
-        return add.filledPolygon(marker);
       case 108:
         return add.instancedLineList(marker);
-      case 109:
-        return add.overlayIcon(marker);
       case 110:
         return add.color(marker);
       default: {
