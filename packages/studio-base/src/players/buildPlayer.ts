@@ -47,7 +47,9 @@ export function buildPlayerFromFiles(files: File[], options: BuildPlayerOptions)
   const name = files.map((file) => String(file.name)).join(", ");
   if (files.length === 1) {
     return buildPlayerFromDescriptor(name, getLocalBagDescriptor(files[0] as File), options);
-  } else if (files.length === 2) {
+  }
+  /* Disable loading the second bag data source preparing to remove this feature
+  else if (files.length === 2) {
     return buildPlayerFromDescriptor(
       name,
       {
@@ -65,6 +67,7 @@ export function buildPlayerFromFiles(files: File[], options: BuildPlayerOptions)
       options,
     );
   }
+  */
   throw new Error(`Unsupported number of files: ${files.length}`);
 }
 
