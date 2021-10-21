@@ -13,7 +13,8 @@
 
 import { storiesOf } from "@storybook/react";
 import { useState, useCallback, useRef } from "react";
-import { Color } from "regl-worldview";
+
+import { Color } from "@foxglove/regl-worldview";
 
 import VisibilityToggle, { Size, TOGGLE_SIZE_CONFIG } from "./VisibilityToggle";
 

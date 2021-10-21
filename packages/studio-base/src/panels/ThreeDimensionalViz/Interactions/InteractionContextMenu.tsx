@@ -12,9 +12,9 @@
 //   You may not use this file except in compliance with the License.
 
 import { useCallback, useContext, useEffect } from "react";
-import { MouseEventObject } from "regl-worldview";
 import styled from "styled-components";
 
+import { MouseEventObject } from "@foxglove/regl-worldview";
 import {
   Interactive,
   SelectedObject,

@@ -15,8 +15,8 @@ import { IButtonStyles, IconButton, Stack, TextField, useTheme } from "@fluentui
 import { vec3 } from "gl-matrix";
 import { range, throttle } from "lodash";
 import { useState, useRef, useEffect, useCallback, KeyboardEvent } from "react";
-import { CameraState, cameraStateSelectors } from "regl-worldview";
 
+import { CameraState, cameraStateSelectors } from "@foxglove/regl-worldview";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import useDeepChangeDetector from "@foxglove/studio-base/hooks/useDeepChangeDetector";
 import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";

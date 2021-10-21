@@ -13,9 +13,9 @@
 
 import { vec3 } from "gl-matrix";
 import { isEqual } from "lodash";
-import { CameraState, cameraStateSelectors, Vec3 } from "regl-worldview";
 import styled from "styled-components";
 
+import { CameraState, cameraStateSelectors, Vec3 } from "@foxglove/regl-worldview";
 import Button from "@foxglove/studio-base/components/Button";
 import ExpandingToolbar, { ToolGroup } from "@foxglove/studio-base/components/ExpandingToolbar";
 import Flex from "@foxglove/studio-base/components/Flex";

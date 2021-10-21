@@ -12,8 +12,13 @@
 //   You may not use this file except in compliance with the License.
 
 import { forwardRef } from "react";
-import { Worldview, CameraState, MouseHandler, DEFAULT_CAMERA_STATE } from "regl-worldview";
 
+import {
+  Worldview,
+  CameraState,
+  MouseHandler,
+  DEFAULT_CAMERA_STATE,
+} from "@foxglove/regl-worldview";
 import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import {
   WorldSearchTextProps,

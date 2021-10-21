@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 import memoize from "lodash/memoize";
 import type REGL from "regl";
-import { Command } from "regl-worldview";
 
+import { Command } from "@foxglove/regl-worldview";
 import { ReglColor } from "@foxglove/studio-base/util/colorUtils";
 
 type Uniforms = {

@@ -13,9 +13,9 @@
 
 import { storiesOf } from "@storybook/react";
 import { noop } from "lodash";
-import { DEFAULT_CAMERA_STATE, Lines, Worldview } from "regl-worldview";
 import styled from "styled-components";
 
+import { DEFAULT_CAMERA_STATE, Lines, Worldview } from "@foxglove/regl-worldview";
 import { TopicSettingsCollection } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
 import { GridSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/GridSettingsEditor";
 import {

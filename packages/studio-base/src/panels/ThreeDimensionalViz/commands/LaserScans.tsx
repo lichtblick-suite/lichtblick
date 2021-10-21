@@ -13,14 +13,14 @@
 
 import { range } from "lodash";
 import type REGL from "regl";
+
 import {
   Command,
   withPose,
   toRGBA,
   CommonCommandProps,
   nonInstancedGetChildrenForHitmap,
-} from "regl-worldview";
-
+} from "@foxglove/regl-worldview";
 import { LaserScanSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/LaserScanSettingsEditor";
 import { LaserScan } from "@foxglove/studio-base/types/Messages";
 import { ReglColor } from "@foxglove/studio-base/util/colorUtils";

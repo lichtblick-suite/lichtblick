@@ -11,8 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Polygon, PolygonPoint } from "regl-worldview";
-
+import { Polygon, PolygonPoint } from "@foxglove/regl-worldview";
 import { Point2D } from "@foxglove/studio-base/panels/ThreeDimensionalViz/DrawingTools";
 
 export function polygonsToPoints(polygons: Polygon[]): Point2D[][] {

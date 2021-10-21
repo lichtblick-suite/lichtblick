@@ -13,11 +13,11 @@
 
 import { difference, keyBy, uniq, mapValues, xor, isEqual, flatten, omit } from "lodash";
 import { useMemo, useCallback, useRef, createContext } from "react";
-import { Color } from "regl-worldview";
 import { useDebounce } from "use-debounce";
 
 import { filterMap } from "@foxglove/den/collection";
 import { useShallowMemo } from "@foxglove/hooks";
+import { Color } from "@foxglove/regl-worldview";
 import { TOPIC_DISPLAY_MODES } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
 import {
   FOXGLOVE_GRID_DATATYPE,

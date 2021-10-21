@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { isEqual } from "lodash";
-import { ReglClickInfo, Vec3 } from "regl-worldview";
 
+import { ReglClickInfo, Vec3 } from "@foxglove/regl-worldview";
 import { Point } from "@foxglove/studio-base/types/Messages";
 
 export type MeasureState = "idle" | "place-start" | "place-finish";

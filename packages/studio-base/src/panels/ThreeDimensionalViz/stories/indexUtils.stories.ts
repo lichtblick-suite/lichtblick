@@ -11,8 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Color } from "regl-worldview";
-
+import { Color } from "@foxglove/regl-worldview";
 import { MARKER_MSG_TYPES } from "@foxglove/studio-base/util/globalConstants";
 
 const GAP = 11;

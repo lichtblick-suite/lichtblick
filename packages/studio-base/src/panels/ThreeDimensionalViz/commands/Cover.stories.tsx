@@ -13,8 +13,9 @@
 
 import { storiesOf } from "@storybook/react";
 import { noop } from "lodash";
-import { Worldview } from "regl-worldview";
 import styled from "styled-components";
+
+import { Worldview } from "@foxglove/regl-worldview";
 
 import Cover from "./Cover";
 

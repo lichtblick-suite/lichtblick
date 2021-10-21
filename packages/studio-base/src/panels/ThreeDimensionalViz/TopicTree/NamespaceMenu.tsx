@@ -14,9 +14,9 @@
 import DotsVerticalIcon from "@mdi/svg/svg/dots-vertical.svg";
 import UndoVariantIcon from "@mdi/svg/svg/undo-variant.svg";
 import { useState } from "react";
-import { Color } from "regl-worldview";
 import styled from "styled-components";
 
+import { Color } from "@foxglove/regl-worldview";
 import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Icon from "@foxglove/studio-base/components/Icon";

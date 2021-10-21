@@ -11,8 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Color } from "regl-worldview";
-
+import { Color } from "@foxglove/regl-worldview";
 import Checkbox from "@foxglove/studio-base/components/Checkbox";
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Flex from "@foxglove/studio-base/components/Flex";

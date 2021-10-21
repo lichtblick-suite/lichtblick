@@ -13,8 +13,8 @@
 
 import { storiesOf } from "@storybook/react";
 import { CSSProperties } from "react";
-import { PolygonBuilder } from "regl-worldview";
 
+import { PolygonBuilder } from "@foxglove/regl-worldview";
 import { pointsToPolygons } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/drawToolUtils";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 

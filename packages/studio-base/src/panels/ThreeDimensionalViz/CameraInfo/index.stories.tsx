@@ -13,8 +13,8 @@
 
 import { storiesOf } from "@storybook/react";
 import { CSSProperties } from "react";
-import { DEFAULT_CAMERA_STATE } from "regl-worldview";
 
+import { DEFAULT_CAMERA_STATE } from "@foxglove/regl-worldview";
 import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import CameraInfo, {
   CAMERA_TAB_TYPE,

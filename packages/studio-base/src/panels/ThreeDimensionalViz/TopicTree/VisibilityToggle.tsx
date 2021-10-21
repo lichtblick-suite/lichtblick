@@ -13,10 +13,10 @@
 
 import BlockHelperIcon from "@mdi/svg/svg/block-helper.svg";
 import { useCallback } from "react";
-import { Color } from "regl-worldview";
 import styled from "styled-components";
 import tinyColor from "tinycolor2";
 
+import { Color } from "@foxglove/regl-worldview";
 import Icon from "@foxglove/studio-base/components/Icon";
 import { defaultedRGBStringFromColorObj } from "@foxglove/studio-base/util/colorUtils";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";

@@ -13,8 +13,8 @@
 //   You may not use this file except in compliance with the License.
 import { renderHook, act } from "@testing-library/react-hooks";
 import { mount } from "enzyme";
-import { CameraState, DEFAULT_CAMERA_STATE } from "regl-worldview";
 
+import { CameraState, DEFAULT_CAMERA_STATE } from "@foxglove/regl-worldview";
 import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import {
   GLTextMarker,

@@ -13,9 +13,9 @@
 
 import ExportVariantIcon from "@mdi/svg/svg/export-variant.svg";
 import { useMemo, useState, useCallback } from "react";
-import { MouseEventObject } from "regl-worldview";
 import styled from "styled-components";
 
+import { MouseEventObject } from "@foxglove/regl-worldview";
 import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
 import Icon from "@foxglove/studio-base/components/Icon";
 import Menu from "@foxglove/studio-base/components/Menu";

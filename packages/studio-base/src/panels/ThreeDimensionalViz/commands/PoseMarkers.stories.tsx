@@ -13,7 +13,8 @@
 
 import { storiesOf } from "@storybook/react";
 import { ComponentProps } from "react";
-import { Worldview, DEFAULT_CAMERA_STATE, Color } from "regl-worldview";
+
+import { Worldview, DEFAULT_CAMERA_STATE, Color } from "@foxglove/regl-worldview";
 
 import PoseMarkers from "./PoseMarkers";
 

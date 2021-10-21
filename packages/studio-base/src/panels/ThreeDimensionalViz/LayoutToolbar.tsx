@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { Stack, Text, useTheme } from "@fluentui/react";
-import { PolygonBuilder, MouseEventObject, Polygon } from "regl-worldview";
 
+import { PolygonBuilder, MouseEventObject, Polygon } from "@foxglove/regl-worldview";
 import CameraInfo from "@foxglove/studio-base/panels/ThreeDimensionalViz/CameraInfo";
 import Crosshair from "@foxglove/studio-base/panels/ThreeDimensionalViz/Crosshair";
 import DrawingTools, {

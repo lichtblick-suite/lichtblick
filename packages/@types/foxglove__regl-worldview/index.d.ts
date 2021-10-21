@@ -29,7 +29,7 @@ declare module "regl" {
   }
 }
 
-declare module "regl-worldview" {
+declare module "@foxglove/regl-worldview" {
   export interface Color {
     r: number;
     g: number;

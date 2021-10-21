@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { CameraState, MouseEventObject } from "regl-worldview";
+import { CameraState, MouseEventObject } from "@foxglove/regl-worldview";
 
 import {
   getNewCameraStateOnFollowChange,

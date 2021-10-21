@@ -13,8 +13,8 @@
 
 import { partition } from "lodash";
 import { ComponentType } from "react";
-import { vec4ToRGBA } from "regl-worldview";
 
+import { vec4ToRGBA } from "@foxglove/regl-worldview";
 import {
   InteractiveMarkersByType,
   WorldMarkerProps,

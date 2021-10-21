@@ -12,8 +12,14 @@
 //   You may not use this file except in compliance with the License.
 
 import type REGL from "regl";
-import { Command, withPose, pointToVec3, defaultBlend, CommonCommandProps } from "regl-worldview";
 
+import {
+  Command,
+  withPose,
+  pointToVec3,
+  defaultBlend,
+  CommonCommandProps,
+} from "@foxglove/regl-worldview";
 import {
   defaultMapPalette,
   TextureCache,

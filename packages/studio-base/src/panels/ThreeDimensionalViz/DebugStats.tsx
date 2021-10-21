@@ -13,8 +13,8 @@
 
 import { makeStyles } from "@fluentui/react";
 import { useContext, useRef } from "react";
-import { WorldviewReactContext, WorldviewContextType } from "regl-worldview";
 
+import { WorldviewReactContext, WorldviewContextType } from "@foxglove/regl-worldview";
 import { colors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 type Stats = {

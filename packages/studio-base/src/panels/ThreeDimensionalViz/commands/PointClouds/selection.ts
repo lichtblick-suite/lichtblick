@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { omit, difference, isEmpty, isNil } from "lodash";
-import { toRGBA, Color } from "regl-worldview";
 
+import { toRGBA, Color } from "@foxglove/regl-worldview";
 import {
   DEFAULT_FLAT_COLOR,
   DEFAULT_MIN_COLOR,

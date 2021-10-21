@@ -12,9 +12,9 @@
 //   You may not use this file except in compliance with the License.
 
 import { useCallback } from "react";
-import { Color } from "regl-worldview";
 import styled from "styled-components";
 
+import { Color } from "@foxglove/regl-worldview";
 import AutoSizingCanvas from "@foxglove/studio-base/components/AutoSizingCanvas";
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import { defaultedRGBStringFromColorObj } from "@foxglove/studio-base/util/colorUtils";

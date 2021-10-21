@@ -13,6 +13,8 @@
 
 import { useRef, useState } from "react";
 import type REGL from "regl";
+
+import { filterMap } from "@foxglove/den/collection";
 import {
   Command,
   withPose,
@@ -21,9 +23,7 @@ import {
   MouseEventObject,
   vec4ToRGBA,
   BaseShape,
-} from "regl-worldview";
-
-import { filterMap } from "@foxglove/den/collection";
+} from "@foxglove/regl-worldview";
 import {
   DEFAULT_FLAT_COLOR,
   DEFAULT_MIN_COLOR,

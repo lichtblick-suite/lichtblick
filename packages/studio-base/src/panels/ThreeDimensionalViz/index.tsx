@@ -13,8 +13,8 @@
 
 import { uniq, omit, debounce } from "lodash";
 import React, { useCallback, useMemo, useState, useRef, useEffect } from "react";
-import { CameraState } from "regl-worldview";
 
+import { CameraState } from "@foxglove/regl-worldview";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import {
   MessagePipelineContext,

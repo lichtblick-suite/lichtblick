@@ -12,7 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { vec3, quat } from "gl-matrix";
-import { cameraStateSelectors, Lines, CameraState } from "regl-worldview";
+
+import { cameraStateSelectors, Lines, CameraState } from "@foxglove/regl-worldview";
 
 type Props = {
   cameraState: CameraState;

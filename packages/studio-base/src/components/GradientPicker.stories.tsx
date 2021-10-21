@@ -14,7 +14,8 @@
 import { storiesOf } from "@storybook/react";
 import { useRef, useLayoutEffect, useState } from "react";
 import TestUtils from "react-dom/test-utils";
-import { Color } from "regl-worldview";
+
+import { Color } from "@foxglove/regl-worldview";
 
 import GradientPicker from "./GradientPicker";
 

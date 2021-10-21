@@ -14,6 +14,8 @@
 import flatMap from "lodash/flatMap";
 import uniqBy from "lodash/uniqBy";
 import qh from "quickhull3d";
+
+import { filterMap } from "@foxglove/den/collection";
 import {
   Triangles,
   Lines,
@@ -28,9 +30,7 @@ import {
   AssignNextColorsFn,
   MouseEventObject,
   Color,
-} from "regl-worldview";
-
-import { filterMap } from "@foxglove/den/collection";
+} from "@foxglove/regl-worldview";
 
 type Props = CommonCommandProps & {
   children: readonly Readonly<Line>[];

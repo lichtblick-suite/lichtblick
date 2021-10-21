@@ -4,9 +4,14 @@
 import { ComboBox, IDropdownOption, Stack, Toggle } from "@fluentui/react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
-import { CameraStore, CameraListener, CameraState, DEFAULT_CAMERA_STATE } from "regl-worldview";
 
 import { filterMap } from "@foxglove/den/collection";
+import {
+  CameraStore,
+  CameraListener,
+  CameraState,
+  DEFAULT_CAMERA_STATE,
+} from "@foxglove/regl-worldview";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Flex from "@foxglove/studio-base/components/Flex";

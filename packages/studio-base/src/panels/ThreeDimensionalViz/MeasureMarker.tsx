@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Lines, Spheres, Point } from "regl-worldview";
+import { Lines, Spheres, Point } from "@foxglove/regl-worldview";
 
 type Props = {
   measurePoints: { start?: Point; end?: Point };

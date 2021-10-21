@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { cloneDeep } from "lodash";
-import { Color } from "regl-worldview";
 
+import { Color } from "@foxglove/regl-worldview";
 import {
   markerProps,
   generateMarkers,

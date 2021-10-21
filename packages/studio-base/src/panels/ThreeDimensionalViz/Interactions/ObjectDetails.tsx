@@ -14,9 +14,9 @@
 import { first, omit, sortBy } from "lodash";
 import { useCallback } from "react";
 import Tree from "react-json-tree";
-import { MouseEventObject } from "regl-worldview";
 import styled from "styled-components";
 
+import { MouseEventObject } from "@foxglove/regl-worldview";
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
 import useGetItemStringWithTimezone from "@foxglove/studio-base/components/JsonTree/useGetItemStringWithTimezone";

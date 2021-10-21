@@ -10,8 +10,8 @@ import {
   ColorPicker as Picker,
 } from "@fluentui/react";
 import { useRef, useState } from "react";
-import { Color } from "regl-worldview";
 
+import { Color } from "@foxglove/regl-worldview";
 import { colorObjToIColor, getColorFromIRGB } from "@foxglove/studio-base/util/colorUtils";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 

@@ -2207,6 +2207,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@foxglove/regl-worldview@npm:1.0.0":
+  version: 1.0.0
+  resolution: "@foxglove/regl-worldview@npm:1.0.0"
+  dependencies:
+    "@babel/runtime": ^7.3.1
+    "@mapbox/tiny-sdf": ^1.1.1
+    distance-to-line-segment: 0.2.0
+    draco3d: ^1.4.1
+    earcut: ^2.1.3
+    gl-matrix: ^2.8.1
+    lodash: ^4.17.11
+    memoize-one: ^5.1.1
+    memoize-weak: ^1.0.2
+    normalize-wheel: 1.0.1
+    regl: ^1.3.1
+    reselect: ^3.0.1
+    shallowequal: 1.1.0
+  peerDependencies:
+    react: 16.x
+    react-dom: 16.x
+  checksum: 980a41e146eb7b5a3069eee15ccdadfba2ad5b45709781791c5b642419352b8109a35e0ffb3cf823904eebffbd01324973ad73a11414765c23c1ba60d1a9c97c
+  languageName: node
+  linkType: hard
+
 "@foxglove/ros1@npm:1.3.2":
   version: 1.3.2
   resolution: "@foxglove/ros1@npm:1.3.2"
@@ -2342,6 +2366,7 @@ __metadata:
     "@foxglove/electron-socket": 1.3.1
     "@foxglove/hooks": "workspace:*"
     "@foxglove/mcap": "workspace:*"
+    "@foxglove/regl-worldview": 1.0.0
     "@foxglove/ros1": 1.3.2
     "@foxglove/ros2": 1.0.4
     "@foxglove/rosbag": 0.1.1
@@ -2470,7 +2495,6 @@ __metadata:
     react-use: "patch:react-use@17.3.1#../../patches/react-use.patch"
     react-virtualized: 9.22.3
     readable-stream: 3.6.0
-    regl-worldview: "github:foxglove/regl-worldview#de23cc70b52ffdc245cc6b73537f1289473ac6d8"
     rehype-raw: 5.1.0
     reselect: 4.0.0
     roslib: "github:foxglove/roslibjs#df3d7f87064c93b705e6e7e3354b2c6f63b682a6"
@@ -5082,6 +5106,12 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/foxglove__regl-worldview@workspace:packages/@types/foxglove__regl-worldview":
+  version: 0.0.0-use.local
+  resolution: "@types/foxglove__regl-worldview@workspace:packages/@types/foxglove__regl-worldview"
+  languageName: unknown
+  linkType: soft
+
 "@types/fs-extra@npm:^9.0.11":
   version: 9.0.12
   resolution: "@types/fs-extra@npm:9.0.12"
@@ -5625,12 +5655,6 @@ __metadata:
   checksum: e342bfaa4fe052fc3a445ea49f746f3fd82cfc9c8028eae139a3e0763ead1871f353bd40da2a472f23d2b52544d2781d40e3159c0703e7e2ff08c13f067a3b9c
   languageName: node
   linkType: hard
-
-"@types/regl-worldview@workspace:packages/@types/regl-worldview":
-  version: 0.0.0-use.local
-  resolution: "@types/regl-worldview@workspace:packages/@types/regl-worldview"
-  languageName: unknown
-  linkType: soft
 
 "@types/resize-observer-browser@npm:^0.1.6":
   version: 0.1.6
@@ -20607,30 +20631,6 @@ react-use@17.3.1:
   bin:
     regjsparser: bin/parser
   checksum: 1c439ec46a0be7834ec82fbb109396e088b6b73f0e9562cd67c37e3bdf85cc7cffe0192b3324da4491c7f709ce2b06fb2d59e12f0f9836b2e0cf26d5e54263aa
-  languageName: node
-  linkType: hard
-
-"regl-worldview@github:foxglove/regl-worldview#de23cc70b52ffdc245cc6b73537f1289473ac6d8":
-  version: 0.17.0
-  resolution: "regl-worldview@https://github.com/foxglove/regl-worldview.git#commit=de23cc70b52ffdc245cc6b73537f1289473ac6d8"
-  dependencies:
-    "@babel/runtime": ^7.3.1
-    "@mapbox/tiny-sdf": ^1.1.1
-    distance-to-line-segment: 0.2.0
-    draco3d: ^1.4.1
-    earcut: ^2.1.3
-    gl-matrix: ^2.8.1
-    lodash: ^4.17.11
-    memoize-one: ^5.1.1
-    memoize-weak: ^1.0.2
-    normalize-wheel: 1.0.1
-    regl: ^1.3.1
-    reselect: ^3.0.1
-    shallowequal: 1.1.0
-  peerDependencies:
-    react: 16.x
-    react-dom: 16.x
-  checksum: 1b597116a022f534043ff963df2c31c8128f74ddd56dbc3e8cf5ccfd01d5914482df58f69124d45a12530bbe0c7fcd6715515b0ee2079ae045ff9d1a1fe0a755
   languageName: node
   linkType: hard
 

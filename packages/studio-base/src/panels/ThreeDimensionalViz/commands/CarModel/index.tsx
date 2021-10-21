@@ -11,8 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 import { vec3 } from "gl-matrix";
-import { GLTFScene, parseGLB, Pose, Scale, CommonCommandProps } from "regl-worldview";
 
+import { GLTFScene, parseGLB, Pose, Scale, CommonCommandProps } from "@foxglove/regl-worldview";
 import { InteractionData } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import carModelURL from "@foxglove/studio-base/panels/ThreeDimensionalViz/commands/CarModel/carModel.glb";
 

@@ -12,9 +12,9 @@
 //   You may not use this file except in compliance with the License.
 
 import React, { useCallback } from "react";
-import { Color } from "regl-worldview";
 import styled from "styled-components";
 
+import { Color } from "@foxglove/regl-worldview";
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
 import Dropdown from "@foxglove/studio-base/components/Dropdown/index";

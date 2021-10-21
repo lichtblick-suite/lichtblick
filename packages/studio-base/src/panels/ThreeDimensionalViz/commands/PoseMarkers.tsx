@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 import { vec3 } from "gl-matrix";
 import { memo, ReactElement } from "react";
+
 import {
   Arrows,
   pointToVec3,
@@ -19,8 +20,7 @@ import {
   orientationToVec4,
   CommonCommandProps,
   Pose,
-} from "regl-worldview";
-
+} from "@foxglove/regl-worldview";
 import { InteractionData } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import { PoseSettings } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/PoseSettingsEditor";
 import { Color, Header, Scale } from "@foxglove/studio-base/types/Messages";

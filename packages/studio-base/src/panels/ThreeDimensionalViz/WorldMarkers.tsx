@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { useMemo, useState, useEffect } from "react";
+
 import {
   Arrows,
   Cubes,
@@ -22,8 +23,7 @@ import {
   Triangles,
   Lines,
   createInstancedGetChildrenForHitmap,
-} from "regl-worldview";
-
+} from "@foxglove/regl-worldview";
 import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import { GLTextMarker } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SearchText";
 import {

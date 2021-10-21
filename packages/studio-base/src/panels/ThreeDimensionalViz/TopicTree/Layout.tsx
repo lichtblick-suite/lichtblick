@@ -15,6 +15,10 @@ import { mergeStyleSets } from "@fluentui/react";
 import { groupBy } from "lodash";
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useResizeDetector } from "react-resize-detector";
+import { useDebouncedCallback } from "use-debounce";
+
+import { filterMap } from "@foxglove/den/collection";
+import { useShallowMemo } from "@foxglove/hooks";
 import {
   Worldview,
   PolygonBuilder,
@@ -23,11 +27,7 @@ import {
   ReglClickInfo,
   MouseEventObject,
   Polygon,
-} from "regl-worldview";
-import { useDebouncedCallback } from "use-debounce";
-
-import { filterMap } from "@foxglove/den/collection";
-import { useShallowMemo } from "@foxglove/hooks";
+} from "@foxglove/regl-worldview";
 import { Time } from "@foxglove/rostime";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";

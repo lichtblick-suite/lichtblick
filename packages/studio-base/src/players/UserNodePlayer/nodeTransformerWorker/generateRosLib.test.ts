@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-// Pulled from our open source demo bag: https://open-source-webviz-ui.s3.amazonaws.com/demo.bag
 import ts from "typescript/lib/typescript";
 
 import stressTestDatatypes from "@foxglove/studio-base/players/UserNodePlayer/nodeTransformerWorker/fixtures/example-datatypes";

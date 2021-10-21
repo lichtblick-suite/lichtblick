@@ -12,8 +12,8 @@
 //   You may not use this file except in compliance with the License.
 
 import { storiesOf } from "@storybook/react";
-import { DEFAULT_CAMERA_STATE } from "regl-worldview";
 
+import { DEFAULT_CAMERA_STATE } from "@foxglove/regl-worldview";
 import Flex from "@foxglove/studio-base/components/Flex";
 import { triggerInputChange, triggerInputBlur } from "@foxglove/studio-base/stories/PanelSetup";
 import { createValidator, isNumber, ValidationResult } from "@foxglove/studio-base/util/validators";
