@@ -13,10 +13,12 @@
 import { ReactElement, useMemo } from "react";
 
 import { CommonCommandProps, GLTFScene, parseGLB } from "@foxglove/regl-worldview";
+import { rewritePackageUrl } from "@foxglove/studio-base/context/AssetsContext";
 import { MeshMarker } from "@foxglove/studio-base/types/Messages";
 
 type MeshMarkerProps = CommonCommandProps & {
   markers: MeshMarker[];
+  basePath?: string;
 };
 
 async function loadModel(url: string): Promise<unknown> {
@@ -40,24 +42,25 @@ class ModelCache {
   }
 }
 
-function MeshMarkers({ markers, layerIndex }: MeshMarkerProps): ReactElement {
+function MeshMarkers({ markers, layerIndex, basePath }: MeshMarkerProps): ReactElement {
   const models: React.ReactNode[] = [];
 
   const modelCache = useMemo(() => new ModelCache(), []);
 
-  markers.forEach((marker, idx) => {
+  for (let i = 0; i < markers.length; i++) {
+    const marker = markers[i]!;
     const { pose, mesh_resource, scale } = marker;
+    if (mesh_resource == undefined || mesh_resource.length === 0) {
+      continue;
+    }
+    const url = rewritePackageUrl(mesh_resource, basePath);
 
     models.push(
-      <GLTFScene
-        key={idx}
-        layerIndex={layerIndex}
-        model={async () => await modelCache.load(mesh_resource)}
-      >
+      <GLTFScene key={i} layerIndex={layerIndex} model={async () => await modelCache.load(url)}>
         {{ pose, scale, interactionData: undefined }}
       </GLTFScene>,
     );
-  });
+  }
 
   return <>{...models}</>;
 }

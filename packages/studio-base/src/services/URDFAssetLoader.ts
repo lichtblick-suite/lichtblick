@@ -7,7 +7,12 @@ import URDFLoader from "urdf-loader";
 import { XacroParser } from "xacro-parser";
 
 import Logger from "@foxglove/log";
-import { AssetLoader, Asset } from "@foxglove/studio-base/context/AssetsContext";
+import {
+  AssetLoader,
+  Asset,
+  parsePackageUrl,
+  rewritePackageUrl,
+} from "@foxglove/studio-base/context/AssetsContext";
 
 const log = Logger.getLogger(__filename);
 
@@ -35,17 +40,10 @@ export default class URDFAssetLoader implements AssetLoader {
     };
     xacroParser.getFileContents = async (path: string) => {
       // Given a fully formed package:// URL, translate it to something we can actually fetch.
-      const match = path.match(/^package:\/\/([^/]+)\/(.+)$/);
-      if (!match) {
+      if (!parsePackageUrl(path)) {
         throw new Error(`Unable to get file contents for ${path}`);
       }
-      const targetPkg = match[1] as string;
-      const relPath = match[2] as string;
-      let url = `x-foxglove-ros-package:?targetPkg=${targetPkg}`;
-      if (basePath != undefined) {
-        url += `&basePath=${encodeURIComponent(basePath)}`;
-      }
-      url += `&relPath=${encodeURIComponent(relPath)}`;
+      const url = rewritePackageUrl(path, basePath);
       return await (await fetch(url)).text();
     };
 

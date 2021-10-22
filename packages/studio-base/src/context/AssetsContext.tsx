@@ -31,6 +31,28 @@ export interface AssetLoader {
   load(file: File, options: { basePath: string | undefined }): Promise<Asset | undefined>;
 }
 
+/**
+ * Rewrite ROS `package://` URLs as `x-foxglove-ros-package:` URLs. All other
+ * URLs are returned unmodified.
+ */
+export function rewritePackageUrl(url: string, basePath: string | undefined): string {
+  const pkgMatch = parsePackageUrl(url);
+  return pkgMatch
+    ? `x-foxglove-ros-package:?targetPkg=${pkgMatch.targetPkg}${
+        basePath ? `&basePath=${encodeURIComponent(basePath)}` : ""
+      }&relPath=${encodeURIComponent(pkgMatch.relPath)}`
+    : url;
+}
+
+/**
+ * Parse a ROS `package://` URL (ex: "package://camera_drivers/resource/calibration/001.yaml")
+ * into targetPkg ("camera_drivers)") and relPath ("/resource/calibration/001.yaml") components.
+ */
+export function parsePackageUrl(url: string): { targetPkg: string; relPath: string } | undefined {
+  const match = url.match(/^package:\/\/([^/]+)\/(.+)$/);
+  return match ? { targetPkg: match[1]!, relPath: match[2]! } : undefined;
+}
+
 export function useAssets(): Assets {
   return useContext(AssetsContext);
 }
