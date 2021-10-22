@@ -24,7 +24,11 @@ import FilteredPointLayer, {
 } from "@foxglove/studio-base/panels/Map/FilteredPointLayer";
 import { Topic } from "@foxglove/studio-base/players/types";
 
-import { NavSatFixMsg, Point } from "./types";
+import { NavSatFixMsg, NavSatFixStatus, Point } from "./types";
+
+const COLOR_HISTORY = "#6771ef";
+const COLOR_ACTIVE_FIX = "#ec1515";
+const COLOR_ACTIVE_NO_FIX = "#5f0909";
 
 // Persisted panel state
 type Config = {
@@ -315,7 +319,7 @@ function MapPanel(props: MapPanelProps): JSX.Element {
         map: currentMap,
         navSatMessageEvents: events,
         bounds: filterBounds ?? currentMap.getBounds(),
-        color: "#6771ef",
+        color: COLOR_HISTORY,
         onHover,
         onClick,
       });
@@ -348,16 +352,30 @@ function MapPanel(props: MapPanelProps): JSX.Element {
         continue;
       }
 
-      const pointLayer = FilteredPointLayer({
+      const hasFix = (ev: MessageEvent<NavSatFixMsg>) =>
+        ev.message.status.status !== NavSatFixStatus.STATUS_NO_FIX;
+      const noFixEvents = events.filter((ev) => !hasFix(ev));
+      const fixEvents = events.filter(hasFix);
+
+      const pointLayerNoFix = FilteredPointLayer({
         map: currentMap,
-        navSatMessageEvents: events,
+        navSatMessageEvents: noFixEvents,
         bounds: filterBounds ?? currentMap.getBounds(),
-        color: "#ec1515",
+        color: COLOR_ACTIVE_NO_FIX,
+        showAccuracy: true,
+      });
+      const pointLayerFix = FilteredPointLayer({
+        map: currentMap,
+        navSatMessageEvents: fixEvents,
+        bounds: filterBounds ?? currentMap.getBounds(),
+        color: COLOR_ACTIVE_FIX,
+        showAccuracy: true,
       });
 
       // clear any previous layers to only display the current frame
       topicLayer.currentFrame.clearLayers();
-      topicLayer.currentFrame.addLayer(pointLayer);
+      topicLayer.currentFrame.addLayer(pointLayerNoFix);
+      topicLayer.currentFrame.addLayer(pointLayerFix);
     }
   }, [currentMap, filterBounds, navMessages, topicLayers]);
 
