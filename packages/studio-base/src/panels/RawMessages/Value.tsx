@@ -3,13 +3,15 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { mergeStyleSets } from "@fluentui/react";
-import ConsoleLineIcon from "@mdi/svg/svg/console-line.svg";
+import ClipboardOutlineIcon from "@mdi/svg/svg/clipboard-outline.svg";
 
 import Icon from "@foxglove/studio-base/components/Icon";
 import { PanelConfig } from "@foxglove/studio-base/types/panels";
+import clipboard from "@foxglove/studio-base/util/clipboard";
 
 import HighlightedValue from "./HighlightedValue";
 import RawMessagesIcons from "./RawMessagesIcons";
+import { copyMessageReplacer } from "./copyMessageReplacer";
 import { ValueAction } from "./getValueActionForValue";
 
 const classes = mergeStyleSets({
@@ -54,11 +56,12 @@ export default function Value({
           <Icon
             fade
             className={classes.icon}
-            // eslint-disable-next-line no-restricted-syntax
-            onClick={() => console.log(itemValue)}
-            tooltip="Log data to browser console"
+            onClick={() => {
+              void clipboard.copy(JSON.stringify(itemValue, copyMessageReplacer, 2) ?? "");
+            }}
+            tooltip="Copy"
           >
-            <ConsoleLineIcon />
+            <ClipboardOutlineIcon />
           </Icon>
         </>
       )}
