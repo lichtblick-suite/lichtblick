@@ -146,7 +146,7 @@ export default class McapReader {
             yield record;
           }
           let buffer = new Uint8Array(record.data);
-          if (record.compression !== "") {
+          if (record.compression !== "" && record.data.byteLength > 0) {
             const decompress = this.decompressHandlers[record.compression];
             if (!decompress) {
               throw new Error(`Unsupported compression ${record.compression}`);

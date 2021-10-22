@@ -91,6 +91,34 @@ describe("McapReader", () => {
     expect(reader.done()).toBe(true);
   });
 
+  it("accepts empty chunks", () => {
+    const reader = new McapReader();
+    reader.append(
+      new Uint8Array([
+        ...MCAP_MAGIC,
+        formatVersion,
+        ...record(RecordType.CHUNK, [
+          ...uint64LE(0n), // decompressed size
+          ...uint32LE(0), // decompressed crc32
+          ...string("lz4"), // compression
+          // no chunk data
+        ]),
+        ...record(RecordType.FOOTER, [
+          ...uint64LE(0n), // index pos
+          ...uint32LE(0), // index crc
+        ]),
+        ...MCAP_MAGIC,
+        formatVersion,
+      ]),
+    );
+    expect(reader.nextRecord()).toEqual({
+      type: "Footer",
+      indexPos: 0n,
+      indexCrc: 0,
+    });
+    expect(reader.done()).toBe(true);
+  });
+
   it("waits patiently to parse one byte at a time, and rejects new data after read completed", () => {
     const reader = new McapReader();
     const data = new Uint8Array([
@@ -456,7 +484,7 @@ describe("McapReader", () => {
           ...uint64LE(0n), // decompressed size
           ...uint32LE(crc32(channelInfo)), // decompressed crc32
           ...string(compressed ? "xyz" : ""), // compression
-          ...(compressed ? [] : channelInfo),
+          ...(compressed ? new TextEncoder().encode("compressed bytes") : channelInfo),
         ]),
 
         ...record(RecordType.FOOTER, [
