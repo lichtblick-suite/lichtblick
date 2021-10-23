@@ -14,6 +14,8 @@ import { ReactElement, useMemo } from "react";
 
 import { CommonCommandProps, GLTFScene, parseGLB } from "@foxglove/regl-worldview";
 import { rewritePackageUrl } from "@foxglove/studio-base/context/AssetsContext";
+import { GlbModel } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/GlbModel";
+import { parseStlToGlb } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/parseStlToGlb";
 import { MeshMarker } from "@foxglove/studio-base/types/Messages";
 
 type MeshMarkerProps = CommonCommandProps & {
@@ -21,17 +23,34 @@ type MeshMarkerProps = CommonCommandProps & {
   basePath?: string;
 };
 
-async function loadModel(url: string): Promise<unknown> {
+async function loadModel(url: string): Promise<GlbModel | undefined> {
+  const GLB_MAGIC = 0x676c5446; // "glTF"
+
   const response = await fetch(url);
   const buffer = await response.arrayBuffer();
-  const model = await parseGLB(buffer);
-  return model;
+  if (buffer.byteLength < 4) {
+    return undefined;
+  }
+  const view = new DataView(buffer);
+
+  // Check if this is a glTF .glb file
+  if (GLB_MAGIC === view.getUint32(0, false)) {
+    return (await parseGLB(buffer)) as GlbModel;
+  }
+
+  // STL binary files don't have a header, so we have to rely on the file extension
+  if (url.endsWith(".stl")) {
+    return parseStlToGlb(buffer);
+  }
+
+  // No Collada .dae support yet
+  return undefined;
 }
 
 class ModelCache {
-  private models = new Map<string, Promise<unknown>>();
+  private models = new Map<string, Promise<GlbModel | undefined>>();
 
-  async load(url: string): Promise<unknown> {
+  async load(url: string): Promise<GlbModel | undefined> {
     let promise = this.models.get(url);
     if (promise) {
       return await promise;

@@ -178,6 +178,24 @@ function RosHostname(): React.ReactElement {
   );
 }
 
+function RosPackagePath(): React.ReactElement {
+  const [rosPackagePath, setRosPackagePath] = useAppConfigurationValue<string>(
+    AppSetting.ROS_PACKAGE_PATH,
+  );
+
+  const os = OsContextSingleton;
+  const rosPackagePathPlaceholder = useMemo(() => os?.getEnvVar("ROS_PACKAGE_PATH"), [os]);
+
+  return (
+    <TextField
+      label="ROS_PACKAGE_PATH"
+      placeholder={rosPackagePathPlaceholder}
+      value={rosPackagePath ?? ""}
+      onChange={(_event, newValue) => void setRosPackagePath(newValue ? newValue : undefined)}
+    />
+  );
+}
+
 function SectionHeader({ children }: React.PropsWithChildren<unknown>) {
   const theme = useTheme();
   return (
@@ -217,8 +235,16 @@ export default function Preferences(): React.ReactElement {
             <Stack.Item>
               <MessageFramerate />
             </Stack.Item>
+          </Stack>
+        </Stack.Item>
+        <Stack.Item>
+          <SectionHeader>ROS</SectionHeader>
+          <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
             <Stack.Item>
               <RosHostname />
+            </Stack.Item>
+            <Stack.Item>
+              <RosPackagePath />
             </Stack.Item>
           </Stack>
         </Stack.Item>

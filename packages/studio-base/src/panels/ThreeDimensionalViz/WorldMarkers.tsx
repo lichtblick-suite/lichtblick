@@ -24,6 +24,8 @@ import {
   Lines,
   createInstancedGetChildrenForHitmap,
 } from "@foxglove/regl-worldview";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import { GLTextMarker } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SearchText";
 import {
@@ -187,6 +189,8 @@ export default function WorldMarkers({
 
   const backdropColor = useMemo((): ReglColor => averageMarkerColor(color), [color]);
 
+  const [basePath] = useAppConfigurationValue<string>(AppSetting.ROS_PACKAGE_PATH);
+
   return (
     <>
       <Cover color={backdropColor} />
@@ -222,7 +226,7 @@ export default function WorldMarkers({
         {[...instancedLineList, ...groupedLines]}
       </Lines>
       <LinedConvexHulls layerIndex={layerIndex}>{linedConvexHull}</LinedConvexHulls>
-      <MeshMarkers layerIndex={layerIndex} markers={mesh}></MeshMarkers>
+      <MeshMarkers layerIndex={layerIndex} markers={mesh} basePath={basePath}></MeshMarkers>
     </>
   );
 }

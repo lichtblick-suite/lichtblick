@@ -39,40 +39,53 @@ async function rosPackageNameAtPath(packagePath: string): Promise<string | undef
 }
 
 /**
- * Search for the ROS package named `pkg`, by searching relative to `searchPath`, and/or in
- * `env.ROS_PACKAGE_PATH` if it is set.
+ * Return a map of ROS package names to their absolute paths.
+ */
+async function listRosPackages(rootPath: string): Promise<Map<string, string>> {
+  const packagePaths = await fs.readdir(rootPath, { withFileTypes: true });
+  const packagesArray: { name: string | undefined; absolutePath: string }[] = await Promise.all(
+    packagePaths.map(async (packagePath) => {
+      const absolutePath = path.join(rootPath, packagePath.name);
+      try {
+        const name = packagePath.isDirectory()
+          ? await rosPackageNameAtPath(absolutePath)
+          : undefined;
+        return { name, absolutePath };
+      } catch (err) {
+        return { name: undefined, absolutePath };
+      }
+    }),
+  );
+
+  const packages = new Map<string, string>();
+  for (const { name, absolutePath } of packagesArray) {
+    if (name != undefined) {
+      packages.set(name, absolutePath);
+    }
+  }
+  return packages;
+}
+
+/**
+ * Search for the ROS package named `pkg` relative to `searchPath` and/or `env.ROS_PACKAGE_PATH`
+ * if it is set.
  */
 async function findRosPackageRoot(pkg: string, searchPath?: string): Promise<string | undefined> {
-  // Search relative to the given path
-  if (searchPath != undefined) {
-    let currentPath = searchPath;
-    for (;;) {
-      if ((await rosPackageNameAtPath(currentPath)) === pkg) {
-        log.info(`Found ROS package ${pkg} at ${currentPath} (searched relative to ${searchPath})`);
-        return currentPath;
-      }
-      if (path.dirname(currentPath) === currentPath) {
-        break;
-      }
-      currentPath = path.dirname(currentPath);
-    }
-  }
-
+  log.debug(`findRosPackageRoot(${pkg}, ${searchPath})`);
   // Search relative to ROS_PACKAGE_PATH
-  const { ROS_PACKAGE_PATH } = process.env;
+  const ROS_PACKAGE_PATH = searchPath ?? process.env.ROS_PACKAGE_PATH ?? "";
   if (ROS_PACKAGE_PATH != undefined && ROS_PACKAGE_PATH !== "") {
-    const packages = await fs.readdir(ROS_PACKAGE_PATH);
-    if (packages.includes(pkg)) {
+    const packages = await listRosPackages(ROS_PACKAGE_PATH);
+    const packagePath = packages.get(pkg);
+    if (packagePath) {
       log.info(
-        `Found ROS package ${pkg} at ${path.join(ROS_PACKAGE_PATH, pkg)} (in ROS_PACKAGE_PATH)`,
+        `Found ROS package "${pkg}" at "${packagePath}" (in ROS_PACKAGE_PATH "${ROS_PACKAGE_PATH}")`,
       );
-      return path.join(ROS_PACKAGE_PATH, pkg);
+      return packagePath;
     }
   }
 
-  log.warn(
-    `Could not find ROS package ${pkg} relative to ${searchPath}, nor in ROS_PACKAGE_PATH (${ROS_PACKAGE_PATH})`,
-  );
+  log.warn(`Could not find ROS package "${pkg}" (in ROS_PACKAGE_PATH "${ROS_PACKAGE_PATH}")`);
   return undefined;
 }
 
@@ -91,10 +104,7 @@ async function findRosPackageResource(urlString: string): Promise<string> {
   }
 
   const resourcePathParts = relPath.split("/");
-  const pkgRoot = await findRosPackageRoot(
-    targetPkg,
-    basePath == undefined ? undefined : path.dirname(basePath),
-  );
+  const pkgRoot = await findRosPackageRoot(targetPkg, basePath ?? undefined);
   if (pkgRoot == undefined) {
     throw new Error(
       `ROS package ${targetPkg} not found${
