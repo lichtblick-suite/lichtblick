@@ -37,11 +37,14 @@ export interface AssetLoader {
  */
 export function rewritePackageUrl(url: string, basePath: string | undefined): string {
   const pkgMatch = parsePackageUrl(url);
-  return pkgMatch
+  const newUrl = pkgMatch
     ? `x-foxglove-ros-package:?targetPkg=${pkgMatch.targetPkg}${
         basePath ? `&basePath=${encodeURIComponent(basePath)}` : ""
       }&relPath=${encodeURIComponent(pkgMatch.relPath)}`
     : url;
+  return /^x-foxglove-ros-package:.+\.tiff?$/i.test(newUrl)
+    ? newUrl.replace(/^x-foxglove-ros-package:/, "x-foxglove-ros-package-converted-tiff:")
+    : newUrl;
 }
 
 /**
