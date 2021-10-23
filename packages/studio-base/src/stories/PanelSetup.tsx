@@ -26,6 +26,7 @@ import {
   useCurrentLayoutActions,
   useSelectedPanels,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { HoverValueProvider } from "@foxglove/studio-base/context/HoverValueContext";
 import PanelCatalogContext, {
   PanelCatalog,
   PanelInfo,
@@ -284,9 +285,11 @@ function UnconnectedPanelSetup(props: Props): JSX.Element | ReactNull {
 export default function PanelSetup(props: Props): JSX.Element {
   return (
     <UserNodeStateProvider>
-      <MockCurrentLayoutProvider>
-        <UnconnectedPanelSetup {...props} />
-      </MockCurrentLayoutProvider>
+      <HoverValueProvider>
+        <MockCurrentLayoutProvider>
+          <UnconnectedPanelSetup {...props} />
+        </MockCurrentLayoutProvider>
+      </HoverValueProvider>
     </UserNodeStateProvider>
   );
 }

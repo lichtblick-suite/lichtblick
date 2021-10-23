@@ -352,8 +352,8 @@ function DiagnosticSummary(props: Props): JSX.Element {
         <Dropdown
           styles={dropdownStyles}
           onRenderOption={renderOption}
-          onRenderTitle={(option: IDropdownOption[] | undefined) =>
-            option ? <>{option.map(renderOption)}</> : ReactNull
+          onRenderTitle={(options: IDropdownOption[] | undefined) =>
+            options?.[0] ? renderOption(options[0]) : ReactNull
           }
           onChange={(_ev, option) => {
             if (option) {

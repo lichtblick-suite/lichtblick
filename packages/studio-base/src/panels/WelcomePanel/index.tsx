@@ -1,15 +1,22 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
-import { Button, Icon, IIconStyles, Stack, Text, useTheme } from "@fluentui/react";
-import { useState } from "react";
+import {
+  Checkbox,
+  DefaultButton,
+  Icon,
+  IIconStyles,
+  Stack,
+  Text,
+  TextField,
+  useTheme,
+} from "@fluentui/react";
+import { useMemo, useState } from "react";
 import { useAsyncFn } from "react-use";
 
-import Checkbox from "@foxglove/studio-base/components/Checkbox";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import TextContent from "@foxglove/studio-base/components/TextContent";
-import TextField from "@foxglove/studio-base/components/TextField";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { useSubscribeContext } from "@foxglove/studio-base/panels/WelcomePanel/SubscribeContext";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -38,7 +45,10 @@ function WelcomePanel() {
   const [subscribeChecked, setSubscribeChecked] = useState(true);
   const [slackInviteChecked, setSlackInviteChecked] = useState(true);
   const [emailValue, setEmailValue] = useState("");
-  const [emailError, setEmailError] = useState<string | undefined>();
+  const emailError = useMemo(
+    () => (emailValue.length === 0 ? undefined : validateEmail(emailValue)),
+    [emailValue],
+  );
   const subscribeToNewsletter = useSubscribeContext();
 
   const [submitState, submit] = useAsyncFn(async () => {
@@ -112,34 +122,36 @@ function WelcomePanel() {
           </b>
         </Text>
 
-        <TextField
-          placeholder="me@example.com"
-          value={emailValue}
-          onChange={setEmailValue}
-          onError={setEmailError}
-          validator={validateEmail}
-        />
-        <Checkbox
-          label={`Send me updates about Foxglove Studio`}
-          checked={subscribeChecked}
-          onChange={setSubscribeChecked}
-        />
-        <Checkbox
-          dataTest="slack-invite"
-          label={`Invite me to the Slack community`}
-          checked={slackInviteChecked}
-          onChange={setSlackInviteChecked}
-        />
-        <Stack horizontalAlign="start" tokens={{ padding: `${theme.spacing.l1} 0 0` }}>
-          <Button primary={!subscribed} disabled={!submitEnabled} onClick={submit}>
-            {loading ? "Signing Up..." : "Sign Up"}
-          </Button>
-          &nbsp;
-          {error ? (
-            <span style={{ color: colors.RED2 }}>{error.toString()}</span>
-          ) : subscribed && !submitState.loading ? (
-            <span style={{ color: colors.GREEN2 }}>Thanks for signing up!</span>
-          ) : undefined}
+        <Stack tokens={{ childrenGap: theme.spacing.m }}>
+          <TextField
+            placeholder="me@example.com"
+            value={emailValue}
+            onChange={(_event, newValue) => newValue != undefined && setEmailValue(newValue)}
+            errorMessage={emailError}
+          />
+          <Checkbox
+            label="Send me updates about Foxglove Studio"
+            checked={subscribeChecked}
+            onChange={(_event, newValue) => newValue != undefined && setSubscribeChecked(newValue)}
+          />
+          <Checkbox
+            label="Invite me to the Slack community"
+            checked={slackInviteChecked}
+            onChange={(_event, newValue) =>
+              newValue != undefined && setSlackInviteChecked(newValue)
+            }
+          />
+          <Stack horizontalAlign="start">
+            <DefaultButton primary={!subscribed} disabled={!submitEnabled} onClick={submit}>
+              {loading ? "Signing Up..." : "Sign Up"}
+            </DefaultButton>
+            &nbsp;
+            {error ? (
+              <span style={{ color: colors.RED2 }}>{error.toString()}</span>
+            ) : subscribed && !submitState.loading ? (
+              <span style={{ color: colors.GREEN2 }}>Thanks for signing up!</span>
+            ) : undefined}
+          </Stack>
         </Stack>
       </TextContent>
     </Stack>

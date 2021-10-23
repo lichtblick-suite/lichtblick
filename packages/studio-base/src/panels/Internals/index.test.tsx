@@ -21,6 +21,7 @@ import {
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
+import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { downloadTextFile } from "@foxglove/studio-base/util/download";
 
 import Internals from "./index";
@@ -41,15 +42,17 @@ describe("<Internals>", () => {
     }
     const contextFn = jest.fn().mockReturnValue(ReactNull);
     const wrapper = mount(
-      <PanelSetup
-        fixture={{
-          topics: [{ name: "/foo", datatype: "foo_msgs/Foo" }],
-          frame: {},
-        }}
-      >
-        <Internals />
-        <Consumer fn={contextFn} />
-      </PanelSetup>,
+      <ThemeProvider>
+        <PanelSetup
+          fixture={{
+            topics: [{ name: "/foo", datatype: "foo_msgs/Foo" }],
+            frame: {},
+          }}
+        >
+          <Internals />
+          <Consumer fn={contextFn} />
+        </PanelSetup>
+      </ThemeProvider>,
     );
     expect(wrapper.find("[data-test='internals-subscriptions']").text()).not.toContain("/foo");
     expect(contextFn.mock.calls).toEqual([[expect.objectContaining({ subscriptions: [] })]]);
@@ -57,16 +60,18 @@ describe("<Internals>", () => {
 
     const anotherContextFn = jest.fn().mockReturnValue(ReactNull);
     const wrapperWithSubscriber = mount(
-      <PanelSetup
-        fixture={{
-          topics: [{ name: "/foo", datatype: "foo_msgs/Foo" }],
-          frame: {},
-        }}
-      >
-        <Internals />
-        <Consumer fn={anotherContextFn} />
-        <Subscriber topic="/foo" />
-      </PanelSetup>,
+      <ThemeProvider>
+        <PanelSetup
+          fixture={{
+            topics: [{ name: "/foo", datatype: "foo_msgs/Foo" }],
+            frame: {},
+          }}
+        >
+          <Internals />
+          <Consumer fn={anotherContextFn} />
+          <Subscriber topic="/foo" />
+        </PanelSetup>
+      </ThemeProvider>,
     );
     expect(anotherContextFn.mock.calls).toEqual([
       [expect.objectContaining({ subscriptions: [] })],
@@ -86,11 +91,14 @@ describe("<Internals>", () => {
           topics: [{ name: "/foo", datatype: "foo_msgs/Foo" }],
         }}
       >
-        <Internals />
-        <Subscriber topic="/foo" />
+        <ThemeProvider>
+          <Internals />
+          <Subscriber topic="/foo" />
+        </ThemeProvider>
       </PanelSetup>,
     );
 
+    await Promise.resolve();
     const recordButton = wrapper.find("[data-test='internals-record-button']").find("button");
 
     expect(wrapper.find("[data-test='internals-subscriptions']").text()).toContain("/foo");

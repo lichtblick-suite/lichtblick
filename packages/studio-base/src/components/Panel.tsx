@@ -220,7 +220,7 @@ const classes = mergeStyleSets({
     },
   },
   exitFullScreen: {
-    position: "fixed",
+    position: "fixed !important", // ensure this overrides LegacyButton styles
     top: 75,
     right: 8,
     zIndex: 102,

@@ -8,8 +8,8 @@ import { mount } from "enzyme";
 
 import { PanelExtensionContext } from "@foxglove/studio";
 import PanelExtensionAdapter from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import { HoverValueProvider } from "@foxglove/studio-base/context/HoverValueContext";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
+import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 
 describe("PanelExtensionAdapter", () => {
   it("should call initPanel", (done) => {
@@ -25,11 +25,11 @@ describe("PanelExtensionAdapter", () => {
 
     const Wrapper = () => {
       return (
-        <HoverValueProvider>
+        <ThemeProvider>
           <PanelSetup>
             <PanelExtensionAdapter config={config} saveConfig={saveConfig} initPanel={initPanel} />
           </PanelSetup>
-        </HoverValueProvider>
+        </ThemeProvider>
       );
     };
 
@@ -45,7 +45,7 @@ describe("PanelExtensionAdapter", () => {
     };
 
     mount(
-      <HoverValueProvider>
+      <ThemeProvider>
         <PanelSetup
           fixture={{
             topics: [],
@@ -69,7 +69,7 @@ describe("PanelExtensionAdapter", () => {
         >
           <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
         </PanelSetup>
-      </HoverValueProvider>,
+      </ThemeProvider>,
     );
   });
 
@@ -82,7 +82,7 @@ describe("PanelExtensionAdapter", () => {
     };
 
     mount(
-      <HoverValueProvider>
+      <ThemeProvider>
         <PanelSetup
           fixture={{
             topics: [],
@@ -127,7 +127,7 @@ describe("PanelExtensionAdapter", () => {
         >
           <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
         </PanelSetup>
-      </HoverValueProvider>,
+      </ThemeProvider>,
     );
   });
 
@@ -142,7 +142,7 @@ describe("PanelExtensionAdapter", () => {
     };
 
     mount(
-      <HoverValueProvider>
+      <ThemeProvider>
         <PanelSetup
           fixture={{
             topics: [],
@@ -169,7 +169,7 @@ describe("PanelExtensionAdapter", () => {
         >
           <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
         </PanelSetup>
-      </HoverValueProvider>,
+      </ThemeProvider>,
     );
   });
 
@@ -183,7 +183,7 @@ describe("PanelExtensionAdapter", () => {
     };
 
     mount(
-      <HoverValueProvider>
+      <ThemeProvider>
         <PanelSetup
           fixture={{
             topics: [],
@@ -240,7 +240,7 @@ describe("PanelExtensionAdapter", () => {
         >
           <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
         </PanelSetup>
-      </HoverValueProvider>,
+      </ThemeProvider>,
     );
   });
 
@@ -286,7 +286,7 @@ describe("PanelExtensionAdapter", () => {
 
     const Wrapper = ({ mounted = true }: { mounted?: boolean }) => {
       return (
-        <HoverValueProvider>
+        <ThemeProvider>
           <PanelSetup fixture={fixture}>
             {mounted && (
               <PanelExtensionAdapter
@@ -296,7 +296,7 @@ describe("PanelExtensionAdapter", () => {
               />
             )}
           </PanelSetup>
-        </HoverValueProvider>
+        </ThemeProvider>
       );
     };
 

@@ -11,27 +11,18 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets } from "@fluentui/react";
-import { SingleColumnEditIcon } from "@fluentui/react-icons-mdl2";
+import { ContextualMenu, IContextualMenuItem, mergeStyleSets } from "@fluentui/react";
 import AlertIcon from "@mdi/svg/svg/alert.svg";
-import ArrowSplitHorizontalIcon from "@mdi/svg/svg/arrow-split-horizontal.svg";
-import ArrowSplitVerticalIcon from "@mdi/svg/svg/arrow-split-vertical.svg";
-import CheckboxMultipleBlankOutlineIcon from "@mdi/svg/svg/checkbox-multiple-blank-outline.svg";
 import CogIcon from "@mdi/svg/svg/cog.svg";
 import DragIcon from "@mdi/svg/svg/drag.svg";
-import FullscreenIcon from "@mdi/svg/svg/fullscreen.svg";
 import HelpCircleOutlineIcon from "@mdi/svg/svg/help-circle-outline.svg";
-import TrashCanOutlineIcon from "@mdi/svg/svg/trash-can-outline.svg";
 import cx from "classnames";
-import { useContext, useState, useCallback, useMemo } from "react";
+import { useContext, useState, useCallback, useMemo, useRef } from "react";
 import { MosaicContext, MosaicNode, MosaicWindowContext } from "react-mosaic-component";
 import { useResizeDetector } from "react-resize-detector";
 
-import { ChildToggleContainsOpen } from "@foxglove/studio-base/components/ChildToggle";
-import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import HelpModal from "@foxglove/studio-base/components/HelpModal";
 import Icon from "@foxglove/studio-base/components/Icon";
-import { Item, SubMenu } from "@foxglove/studio-base/components/Menu";
 import PanelContext from "@foxglove/studio-base/components/PanelContext";
 import PanelList, { PanelSelection } from "@foxglove/studio-base/components/PanelList";
 import { getPanelTypeFromMosaic } from "@foxglove/studio-base/components/PanelToolbar/utils";
@@ -121,9 +112,18 @@ const styles = mergeStyleSets({
   },
 });
 
-// separated into a sub-component so it can always skip re-rendering
-// it never changes after it initially mounts
-function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknownPanel: boolean }) {
+function PanelActionsDropdown({
+  isOpen,
+  setIsOpen,
+  isUnknownPanel,
+}: {
+  isOpen: boolean;
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  setIsOpen: (_: boolean) => void;
+  isUnknownPanel: boolean;
+}) {
+  const panelContext = useContext(PanelContext);
+  const tabId = panelContext?.tabId;
   const { mosaicActions } = useContext(MosaicContext);
   const { mosaicWindowActions } = useContext(MosaicWindowContext);
   const {
@@ -183,8 +183,6 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
     [mosaicActions, mosaicWindowActions, swapPanel, tabId],
   );
 
-  const panelContext = useContext(PanelContext);
-
   const { openPanelSettings } = useWorkspace();
   const openSettings = useCallback(() => {
     if (panelContext?.id != undefined) {
@@ -193,71 +191,116 @@ function StandardMenuItems({ tabId, isUnknownPanel }: { tabId?: string; isUnknow
     }
   }, [setSelectedPanelIds, openPanelSettings, panelContext?.id]);
 
+  const menuItems: IContextualMenuItem[] = useMemo(() => {
+    const items: IContextualMenuItem[] = [
+      {
+        key: "settings",
+        text: "Panel settings",
+        onClick: openSettings,
+        iconProps: { iconName: "SingleColumnEdit" },
+        disabled: !(panelContext?.hasSettings ?? false),
+      },
+      {
+        key: "change-panel",
+        text: "Change panel",
+        onClick: openSettings,
+        iconProps: {
+          iconName: "ShapeSubtract",
+          styles: { root: { height: 24, marginLeft: 2, marginRight: 6 } },
+        },
+        subMenuProps: {
+          items: [{ key: "dummy" }],
+          onRenderMenuList: () => (
+            <PanelList
+              selectedPanelTitle={panelContext?.title}
+              onPanelSelect={swap(panelContext?.id)}
+            />
+          ),
+        },
+      },
+    ];
+    if (!isUnknownPanel) {
+      items.push(
+        {
+          key: "fullscreen",
+          text: "Fullscreen",
+          onClick: panelContext?.enterFullscreen,
+          iconProps: {
+            iconName: "FullScreenMaximize",
+            styles: { root: { height: 24, marginLeft: 2, marginRight: 6 } },
+          },
+        },
+        {
+          key: "hsplit",
+          text: "Split horizontal",
+          onClick: () => split(panelContext?.id, "column"),
+          iconProps: {
+            iconName: "SplitHorizontal",
+            styles: { root: { height: 24, marginLeft: 2, marginRight: 6 } },
+          },
+        },
+        {
+          key: "vsplit",
+          text: "Split vertical",
+          onClick: () => split(panelContext?.id, "row"),
+          iconProps: {
+            iconName: "SplitVertical",
+            styles: { root: { height: 24, marginLeft: 2, marginRight: 6 } },
+          },
+        },
+      );
+    }
+    items.push({
+      key: "remove",
+      text: "Remove panel",
+      onClick: close,
+      iconProps: { iconName: "Delete" },
+      "data-test": "panel-settings-remove",
+    });
+    return items;
+  }, [
+    close,
+    isUnknownPanel,
+    openSettings,
+    panelContext?.enterFullscreen,
+    panelContext?.hasSettings,
+    panelContext?.id,
+    panelContext?.title,
+    split,
+    swap,
+  ]);
+
+  const buttonRef = useRef<HTMLDivElement>(ReactNull);
+
   const type = getPanelType();
   if (type == undefined) {
     return ReactNull;
   }
 
   return (
-    <>
-      <Item
-        icon={<SingleColumnEditIcon />}
-        onClick={openSettings}
-        disabled={!(panelContext?.hasSettings ?? false)}
+    <div ref={buttonRef}>
+      <ContextualMenu
+        hidden={!isOpen}
+        items={menuItems}
+        target={buttonRef}
+        onDismiss={() => setIsOpen(false)}
+      />
+      <Icon
+        fade
+        tooltip="Panel settings"
+        dataTest="panel-settings"
+        onClick={() => setIsOpen(!isOpen)}
       >
-        Panel settings
-      </Item>
-      <SubMenu
-        text="Change panel"
-        icon={<CheckboxMultipleBlankOutlineIcon />}
-        dataTest="panel-settings-change"
-      >
-        <PanelList
-          selectedPanelTitle={panelContext?.title}
-          onPanelSelect={swap(panelContext?.id)}
-        />
-      </SubMenu>
-      {!isUnknownPanel && (
-        <>
-          <Item
-            icon={<FullscreenIcon />}
-            onClick={panelContext?.enterFullscreen}
-            dataTest="panel-settings-fullscreen"
-            tooltip="(shortcut: ` or ~)"
-          >
-            Fullscreen
-          </Item>
-          <Item
-            icon={<ArrowSplitHorizontalIcon />}
-            onClick={() => split(panelContext?.id, "column")}
-            dataTest="panel-settings-hsplit"
-            tooltip="(shortcut: ` or ~)"
-          >
-            Split horizontal
-          </Item>
-          <Item
-            icon={<ArrowSplitVerticalIcon />}
-            onClick={() => split(panelContext?.id, "row")}
-            dataTest="panel-settings-vsplit"
-            tooltip="(shortcut: ` or ~)"
-          >
-            Split vertical
-          </Item>
-        </>
-      )}
-      <Item
-        icon={<TrashCanOutlineIcon />}
-        onClick={close}
-        dataTest="panel-settings-remove"
-        tooltip="(shortcut: ` or ~)"
-      >
-        Remove panel
-      </Item>
-    </>
+        <CogIcon className={styles.icon} />
+      </Icon>
+    </div>
   );
 }
 
 type PanelToolbarControlsProps = Pick<Props, "additionalIcons" | "floating"> & {
+  menuOpen: boolean;
+  // eslint-disable-next-line @foxglove/no-boolean-parameters
+  setMenuOpen: (_: boolean) => void;
   showControls?: boolean;
   showPanelName?: boolean;
   isUnknownPanel: boolean;
@@ -266,6 +309,8 @@ type PanelToolbarControlsProps = Pick<Props, "additionalIcons" | "floating"> & {
 // Keep controls, which don't change often, in a pure component in order to avoid re-rendering the
 // whole PanelToolbar when only children change.
 const PanelToolbarControls = React.memo(function PanelToolbarControls({
+  menuOpen,
+  setMenuOpen,
   additionalIcons,
   showControls = false,
   floating = false,
@@ -285,16 +330,11 @@ const PanelToolbarControls = React.memo(function PanelToolbarControls({
         <div className={styles.panelName}>{panelContext.title}</div>
       )}
       {additionalIcons}
-      <Dropdown
-        flatEdges={!floating}
-        toggleComponent={
-          <Icon fade tooltip="Panel settings" dataTest="panel-settings">
-            <CogIcon className={styles.icon} />
-          </Icon>
-        }
-      >
-        <StandardMenuItems tabId={panelContext?.tabId} isUnknownPanel={isUnknownPanel} />
-      </Dropdown>
+      <PanelActionsDropdown
+        isOpen={menuOpen}
+        setIsOpen={setMenuOpen}
+        isUnknownPanel={isUnknownPanel}
+      />
       {!isUnknownPanel && (
         <span ref={panelContext?.connectToolbarDragHandle} data-test="mosaic-drag-handle">
           <Icon fade tooltip="Move panel (shortcut: ` or ~)">
@@ -319,7 +359,7 @@ export default React.memo<Props>(function PanelToolbar({
   backgroundColor,
 }: Props) {
   const { supportsStrictMode = true } = useContext(PanelContext) ?? {};
-  const [containsOpen, setContainsOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
 
   // Help-shown state must be hoisted outside the controls container so the modal can remain visible
@@ -361,30 +401,30 @@ export default React.memo<Props>(function PanelToolbar({
 
   // floating toolbars only show when hovered - but hovering over a context menu would hide the toolbar
   // showToolbar is used to force-show elements even if not hovered
-  const showToolbar = containsOpen || !!isUnknownPanel;
+  const showToolbar = menuOpen || !!isUnknownPanel;
 
   return (
     <div ref={sizeRef}>
-      <ChildToggleContainsOpen onChange={setContainsOpen}>
-        {showHelp && <HelpModal onRequestClose={() => setShowHelp(false)}>{helpContent}</HelpModal>}
-        <div
-          className={cx(styles.panelToolbarContainer, {
-            panelToolbarHovered: floating,
-            floating,
-            hasChildren: Boolean(children),
-          })}
-          style={showToolbar ? { display: "flex", backgroundColor } : { backgroundColor }}
-        >
-          {children}
-          <PanelToolbarControls
-            showControls={showToolbar}
-            floating={floating}
-            showPanelName={(width ?? 0) > 360}
-            additionalIcons={additionalIconsWithHelp}
-            isUnknownPanel={!!isUnknownPanel}
-          />
-        </div>
-      </ChildToggleContainsOpen>
+      {showHelp && <HelpModal onRequestClose={() => setShowHelp(false)}>{helpContent}</HelpModal>}
+      <div
+        className={cx(styles.panelToolbarContainer, {
+          panelToolbarHovered: floating,
+          floating,
+          hasChildren: Boolean(children),
+        })}
+        style={showToolbar ? { display: "flex", backgroundColor } : { backgroundColor }}
+      >
+        {children}
+        <PanelToolbarControls
+          showControls={showToolbar}
+          floating={floating}
+          showPanelName={(width ?? 0) > 360}
+          additionalIcons={additionalIconsWithHelp}
+          isUnknownPanel={!!isUnknownPanel}
+          menuOpen={menuOpen}
+          setMenuOpen={setMenuOpen}
+        />
+      </div>
     </div>
   );
 });

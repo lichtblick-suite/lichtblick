@@ -14,6 +14,7 @@
 import { storiesOf } from "@storybook/react";
 
 import { PlayerStateActiveData } from "@foxglove/studio-base/players/types";
+import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import { UnconnectedPlaybackPerformance, UnconnectedPlaybackPerformanceProps } from ".";
 
@@ -57,5 +58,9 @@ storiesOf("panels/PlaybackPerformance/index", module).add("simple example", () =
       },
     },
   ];
-  return <Example states={states} />;
+  return (
+    <PanelSetup>
+      <Example states={states} />
+    </PanelSetup>
+  );
 });

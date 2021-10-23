@@ -15,6 +15,10 @@ import {
   Previous20Regular,
   Settings20Filled,
   Settings20Regular,
+  ShapeSubtract20Regular,
+  SplitHorizontal20Regular,
+  SplitVertical20Regular,
+  FullScreenMaximize20Regular,
 } from "@fluentui/react-icons";
 import * as Icons from "@fluentui/react-icons-mdl2";
 import { registerIcons, unregisterIcons } from "@fluentui/style-utilities";
@@ -104,6 +108,7 @@ const icons: {
   FitToPage: <FitToPageIcon />,
   FiveTileGrid: <Icons.FiveTileGridIcon />,
   Flow: <Icons.FlowIcon />,
+  FullScreenMaximize: <FullScreenMaximize20Regular />,
   GenericScan: <Icons.GenericScanIcon />,
   HelpCircle: <HelpCircleIcon />,
   Info: <Icons.InfoIcon />,
@@ -138,7 +143,10 @@ const icons: {
   Settings: <Settings20Regular />,
   SettingsFilled: <Settings20Filled />,
   Share: <Icons.ShareIcon />,
+  ShapeSubtract: <ShapeSubtract20Regular />,
   SingleColumnEdit: <Icons.SingleColumnEditIcon />,
+  SplitHorizontal: <SplitHorizontal20Regular />,
+  SplitVertical: <SplitVertical20Regular />,
   StatusCircleInner: <Icons.StatusCircleInnerIcon />,
   TestBeakerSolid: <Icons.TestBeakerSolidIcon />,
   Topic: <TopicIcon />,
