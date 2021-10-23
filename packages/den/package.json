@@ -21,7 +21,7 @@
     "prepack": "tsc -b"
   },
   "devDependencies": {
-    "typescript": "4.4.3"
+    "typescript": "4.4.4"
   },
   "dependencies": {
     "async-mutex": "0.3.2"

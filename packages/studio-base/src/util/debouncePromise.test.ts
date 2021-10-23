@@ -116,7 +116,6 @@ describe("debouncePromise", () => {
     if (!promise) {
       throw new Error("currentPromise should be defined");
     }
-    // eslint-disable-next-line jest/valid-expect-in-promise
     promise = promise.then(() => {
       expect(calls).toBe(2);
     });

@@ -11,7 +11,7 @@ import {
   Toggle,
   useTheme,
 } from "@fluentui/react";
-import { CloudOffline24Filled } from "@fluentui/react-icons";
+import { CloudOff24Filled } from "@fluentui/react-icons";
 import { partition } from "lodash";
 import moment from "moment";
 import path from "path";
@@ -386,7 +386,7 @@ export default function LayoutBrowser({
       noPadding
       trailingItems={[
         (layouts.loading || isBusy) && <Spinner key="spinner" />,
-        !isOnline && <CloudOffline24Filled primaryFill={theme.palette.themeLighterAlt} />,
+        !isOnline && <CloudOff24Filled primaryFill={theme.palette.themeLighterAlt} />,
         <IconButton
           key="add-layout"
           elementRef={createLayoutTooltip.ref}
