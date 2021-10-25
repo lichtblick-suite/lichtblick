@@ -12,6 +12,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { mergeStyleSets } from "@fluentui/merge-styles";
+import { IconButton } from "@fluentui/react";
 import AlertCircleIcon from "@mdi/svg/svg/alert-circle.svg";
 import MenuIcon from "@mdi/svg/svg/menu.svg";
 import cx from "classnames";
@@ -22,12 +23,33 @@ import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
 import Icon from "@foxglove/studio-base/components/Icon";
 import MessagePathInput from "@foxglove/studio-base/components/MessagePathSyntax/MessagePathInput";
+import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import { lineColors } from "@foxglove/studio-base/util/plotColors";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 import { PlotPath, BasePlotPath, isReferenceLinePlotPathType } from "./internalTypes";
 import { plotableRosTypes, PlotConfig, PlotXAxisVal } from "./types";
+
+const stylesForButtonsDisplayedOnHover = {
+  visibility: "hidden",
+  padding: 6,
+  cursor: "pointer",
+  position: "absolute",
+  top: 0,
+  height: 25,
+  width: 25,
+  borderRadius: 5,
+  userSelect: "none",
+  background: colors.LEGEND_HIGHLIGHT_COLOR_BRIGHT,
+
+  ":hover": {
+    background: colors.LEGEND_HIGHLIGHT_COLOR_BRIGHT,
+  },
+  ".mosaic-window:hover &": {
+    visibility: "initial",
+  },
+};
 
 const classes = mergeStyleSets({
   root: {
@@ -102,25 +124,8 @@ const classes = mergeStyleSets({
     position: "relative",
     top: "calc(50% - 1px)",
   },
-  legendToggle: {
-    visibility: "hidden",
-    padding: 6,
-    cursor: "pointer",
-    position: "absolute",
-    top: 0,
-    left: -30,
-    height: 25,
-    borderRadius: 5,
-    userSelect: "none",
-    background: colors.LEGEND_HIGHLIGHT_COLOR_BRIGHT,
-
-    ":hover": {
-      background: colors.LEGEND_HIGHLIGHT_COLOR_BRIGHT,
-    },
-    ".mosaic-window:hover &": {
-      visibility: "initial",
-    },
-  },
+  download: { ...stylesForButtonsDisplayedOnHover, left: -60 },
+  legendToggle: { ...stylesForButtonsDisplayedOnHover, left: -30 },
   itemRemove: {
     visibility: "hidden",
     padding: "0 6px",
@@ -155,6 +160,7 @@ type PlotLegendProps = {
   xAxisVal: PlotXAxisVal;
   xAxisPath?: BasePlotPath;
   pathsWithMismatchedDataLengths: string[];
+  onDownload: () => void;
 };
 
 const shortXAxisLabel = (path: PlotXAxisVal): string => {
@@ -172,8 +178,15 @@ const shortXAxisLabel = (path: PlotXAxisVal): string => {
 };
 
 export default function PlotLegend(props: PlotLegendProps): JSX.Element {
-  const { paths, saveConfig, showLegend, xAxisVal, xAxisPath, pathsWithMismatchedDataLengths } =
-    props;
+  const {
+    paths,
+    saveConfig,
+    showLegend,
+    xAxisVal,
+    xAxisPath,
+    pathsWithMismatchedDataLengths,
+    onDownload,
+  } = props;
   const lastPath = last(paths);
 
   const onInputChange = useCallback(
@@ -214,6 +227,8 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
     [saveConfig],
   );
 
+  const downloadCSVTooltip = useTooltip({ contents: "Download plot data as CSV" });
+
   if (!showLegend) {
     return (
       <div className={classes.root}>
@@ -226,6 +241,16 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
 
   return (
     <div className={classes.root}>
+      <IconButton
+        className={classes.download}
+        elementRef={downloadCSVTooltip.ref}
+        iconProps={{ iconName: "Download" }}
+        onClick={onDownload}
+        ariaLabel="Download plot data as CSV"
+        styles={{ icon: { height: 20 } }}
+      >
+        {downloadCSVTooltip.tooltip}
+      </IconButton>
       <Icon className={classes.legendToggle} onClick={toggleToHideLegend}>
         <MenuIcon />
       </Icon>
