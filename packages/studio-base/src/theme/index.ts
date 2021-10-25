@@ -2,20 +2,20 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import {
-  IContextualMenuStyles,
-  IContextualMenuItemStyles,
-  ILayerStyles,
-  IOverlayStyles,
-  IModalStyles,
-  IComboBoxStyles,
-  ITooltipStyles,
-  ITooltipStyleProps,
-  IColorPickerStyles,
-  IToggleStyles,
-  ISpinnerStyles,
-  IPalette,
-  hsl2rgb,
   getColorFromRGBA,
+  hsl2rgb,
+  IColorPickerStyles,
+  IComboBoxStyles,
+  IContextualMenuItemStyles,
+  IContextualMenuStyles,
+  ILayerStyles,
+  IModalStyles,
+  IOverlayStyles,
+  IPalette,
+  ISpinnerStyles,
+  IToggleStyles,
+  ITooltipStyleProps,
+  ITooltipStyles,
 } from "@fluentui/react";
 import { createTheme } from "@fluentui/theme";
 

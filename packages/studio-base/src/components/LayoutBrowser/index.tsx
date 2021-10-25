@@ -3,15 +3,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import {
   DefaultButton,
+  IconBase,
   IconButton,
-  Link,
-  makeStyles,
   Spinner,
   Stack,
   Toggle,
   useTheme,
 } from "@fluentui/react";
-import { CloudOff24Filled } from "@fluentui/react-icons";
 import { partition } from "lodash";
 import moment from "moment";
 import path from "path";
@@ -20,6 +18,8 @@ import { useToasts } from "react-toast-notifications";
 import { useMountedState } from "react-use";
 import useAsyncFn from "react-use/lib/useAsyncFn";
 
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
+import SignInPrompt from "@foxglove/studio-base/components/LayoutBrowser/SignInPrompt";
 import { useUnsavedChangesPrompt } from "@foxglove/studio-base/components/LayoutBrowser/UnsavedChangesPrompt";
 import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
@@ -32,7 +32,7 @@ import {
 import { PanelsState } from "@foxglove/studio-base/context/CurrentLayoutContext/actions";
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import LayoutStorageDebuggingContext from "@foxglove/studio-base/context/LayoutStorageDebuggingContext";
-import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import useCallbackWithToast from "@foxglove/studio-base/hooks/useCallbackWithToast";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
 import { usePrompt } from "@foxglove/studio-base/hooks/usePrompt";
@@ -46,16 +46,6 @@ import helpContent from "./index.help.md";
 import showOpenFilePicker from "./showOpenFilePicker";
 import { debugBorder } from "./styles";
 
-const useStyles = makeStyles((theme) => ({
-  signInPrompt: {
-    fontSize: theme.fonts.smallPlus.fontSize,
-    padding: theme.spacing.s1,
-    backgroundColor: theme.palette.themeLighterAlt,
-    position: "sticky",
-    bottom: 0,
-  },
-}));
-
 export default function LayoutBrowser({
   currentDateForStorybook,
 }: React.PropsWithChildren<{
@@ -67,8 +57,6 @@ export default function LayoutBrowser({
   const layoutManager = useLayoutManager();
   const prompt = usePrompt();
   const analytics = useAnalytics();
-  const { openAccountSettings } = useWorkspace();
-  const styles = useStyles();
   const confirm = useConfirm();
   const { unsavedChangesPrompt, openUnsavedChangesPrompt } = useUnsavedChangesPrompt();
 
@@ -375,9 +363,13 @@ export default function LayoutBrowser({
   const importLayoutTooltip = useTooltip({ contents: "Import layout" });
 
   const layoutDebug = useContext(LayoutStorageDebuggingContext);
-
   const supportsSignIn = useContext(ConsoleApiContext) != undefined;
-  const showSignInPrompt = supportsSignIn && !layoutManager.supportsSharing;
+
+  const [hideSignInPrompt = false, setHideSignInPrompt] = useAppConfigurationValue<boolean>(
+    AppSetting.HIDE_SIGN_IN_PROMPT,
+  );
+
+  const showSignInPrompt = supportsSignIn && !layoutManager.supportsSharing && !hideSignInPrompt;
 
   return (
     <SidebarContent
@@ -386,7 +378,12 @@ export default function LayoutBrowser({
       noPadding
       trailingItems={[
         (layouts.loading || isBusy) && <Spinner key="spinner" />,
-        !isOnline && <CloudOff24Filled primaryFill={theme.palette.themeLighterAlt} />,
+        !isOnline && (
+          <IconBase
+            iconName="CloudOffFilled"
+            styles={{ root: { color: theme.palette.themeLighterAlt } }}
+          />
+        ),
         <IconButton
           key="add-layout"
           elementRef={createLayoutTooltip.ref}
@@ -455,12 +452,7 @@ export default function LayoutBrowser({
           )}
         </Stack.Item>
         <div style={{ flexGrow: 1 }} />
-        {showSignInPrompt && (
-          <Stack.Item className={styles.signInPrompt}>
-            <Link onClick={openAccountSettings}>Sign in</Link> to sync layouts across multiple
-            devices, and share them with team members.
-          </Stack.Item>
-        )}
+        {showSignInPrompt && <SignInPrompt onDismiss={() => void setHideSignInPrompt(true)} />}
         {layoutDebug?.syncNow && (
           <Stack
             styles={{

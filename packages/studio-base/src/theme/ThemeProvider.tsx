@@ -5,6 +5,7 @@ import { ThemeProvider as FluentThemeProvider } from "@fluentui/react";
 import {
   Braces20Regular,
   Braces20Filled,
+  CloudOff24Filled,
   Next20Filled,
   Next20Regular,
   Pause20Filled,
@@ -87,6 +88,7 @@ const icons: {
   ClearSelection: <Icons.ClearSelectionIcon />,
   ClipboardList: <Icons.ClipboardListIcon />,
   Close: <CloseIcon />,
+  CloudOffFilled: <CloudOff24Filled />,
   CodeEdit: <Icons.CodeEditIcon />,
   Cog: <CogIcon />,
   CompassOutline: <CompassOutlineIcon />,

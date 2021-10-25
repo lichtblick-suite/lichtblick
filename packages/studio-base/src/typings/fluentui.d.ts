@@ -34,6 +34,7 @@ declare global {
     | "ClearSelection"
     | "ClipboardList"
     | "Close"
+    | "CloudOffFilled"
     | "CodeEdit"
     | "Cog"
     | "CompassOutline"
