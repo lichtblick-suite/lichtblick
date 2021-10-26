@@ -90,6 +90,8 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
 
   // To avoid updating extended message stores once message pipeline blocks are no longer updating
   // we store a ref to the blocks and only update stores when the ref is different
+  // Note: when subscribing to new topics this ref is unset to re-calculate the allFrames value with
+  // newly subscribed topics.
   const prevBlocksRef = useRef<unknown>(undefined);
 
   const [renderFn, setRenderFn] = useState<RenderFn | undefined>();
@@ -285,6 +287,12 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
         if (topics.length === 0) {
           return;
         }
+
+        // If the player has loaded all the blocks, the blocks reference won't change so our message
+        // pipeline handler for allFrames won't create a new set of all frames for the newly
+        // subscribed topic. To ensure a new set of allFrames with the newly subscribed topic is
+        // created, we unset the blocks ref which will force re-creating allFrames.
+        prevBlocksRef.current = undefined;
 
         const subscribePayloads = topics.map((topic) => ({ topic }));
         setSubscriptions(panelId, subscribePayloads);
