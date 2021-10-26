@@ -10,7 +10,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { makeStyles, Stack } from "@fluentui/react";
+import { Link, makeStyles, Stack, Text, useTheme } from "@fluentui/react";
 import {
   useState,
   useEffect,
@@ -54,13 +54,16 @@ import { SidebarContent } from "@foxglove/studio-base/components/SidebarContent"
 import { useAppConfiguration } from "@foxglove/studio-base/context/AppConfigurationContext";
 import { useAssets } from "@foxglove/studio-base/context/AssetsContext";
 import ConsoleApiContext from "@foxglove/studio-base/context/ConsoleApiContext";
-import { useCurrentLayoutActions } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import {
+  useCurrentLayoutActions,
+  useCurrentLayoutSelector,
+} from "@foxglove/studio-base/context/CurrentLayoutContext";
 import { useCurrentUser } from "@foxglove/studio-base/context/CurrentUserContext";
 import { useExtensionLoader } from "@foxglove/studio-base/context/ExtensionLoaderContext";
 import { useLayoutManager } from "@foxglove/studio-base/context/LayoutManagerContext";
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
-import { WorkspaceContext } from "@foxglove/studio-base/context/WorkspaceContext";
+import { useWorkspace, WorkspaceContext } from "@foxglove/studio-base/context/WorkspaceContext";
 import useAddPanel from "@foxglove/studio-base/hooks/useAddPanel";
 import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFilesToOpen";
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
@@ -106,10 +109,23 @@ function Connection() {
 
 function AddPanel() {
   const addPanel = useAddPanel();
+  const { openLayoutBrowser } = useWorkspace();
+  const theme = useTheme();
+  const selectedLayoutId = useCurrentLayoutSelector((state) => state.selectedLayout?.id);
 
   return (
-    <SidebarContent noPadding title="Add panel" helpContent={panelsHelpContent}>
-      <PanelList onPanelSelect={addPanel} />
+    <SidebarContent
+      noPadding={selectedLayoutId != undefined}
+      title="Add panel"
+      helpContent={panelsHelpContent}
+    >
+      {selectedLayoutId == undefined ? (
+        <Text styles={{ root: { color: theme.palette.neutralTertiary } }}>
+          <Link onClick={openLayoutBrowser}>Select a layout</Link> to get started!
+        </Text>
+      ) : (
+        <PanelList onPanelSelect={addPanel} />
+      )}
     </SidebarContent>
   );
 }
@@ -392,6 +408,7 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       panelSettingsOpen: selectedSidebarItem === "panel-settings",
       openPanelSettings: () => setSelectedSidebarItem("panel-settings"),
       openAccountSettings: () => supportsAccountSettings && setSelectedSidebarItem("account"),
+      openLayoutBrowser: () => setSelectedSidebarItem("layouts"),
     }),
     [selectedSidebarItem, supportsAccountSettings],
   );

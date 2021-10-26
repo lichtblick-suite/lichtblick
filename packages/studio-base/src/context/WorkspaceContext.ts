@@ -12,12 +12,16 @@ export const WorkspaceContext = createContext({
   openAccountSettings: (): void => {
     throw new Error("Must be in a WorkspaceContext.Provider to open account settings");
   },
+  openLayoutBrowser: (): void => {
+    throw new Error("Must be in a WorkspaceContext.Provider to open layout browser");
+  },
 });
 
 export function useWorkspace(): {
   panelSettingsOpen: boolean;
   openPanelSettings: () => void;
   openAccountSettings: () => void;
+  openLayoutBrowser: () => void;
 } {
   return useContext(WorkspaceContext);
 }
