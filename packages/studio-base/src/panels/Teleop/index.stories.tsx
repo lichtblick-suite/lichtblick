@@ -5,6 +5,7 @@
 import { action } from "@storybook/addon-actions";
 import { Story } from "@storybook/react";
 
+import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 import TeleopPanel from "./index";
@@ -15,7 +16,9 @@ export default {
   decorators: [
     (StoryComponent: Story): JSX.Element => {
       return (
-        <PanelSetup fixture={{ publish: action("publish") }}>
+        <PanelSetup
+          fixture={{ capabilities: [PlayerCapabilities.advertise], publish: action("publish") }}
+        >
           <StoryComponent />
         </PanelSetup>
       );
@@ -23,6 +26,9 @@ export default {
   ],
 };
 
-export const EmptyState = (): JSX.Element => {
+export const Unconfigured = (): JSX.Element => {
   return <TeleopPanel />;
+};
+export const WithTopic = (): JSX.Element => {
+  return <TeleopPanel overrideConfig={{ topic: "/abc" }} />;
 };

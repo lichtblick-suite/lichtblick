@@ -8,6 +8,7 @@ import { mount } from "enzyme";
 
 import { PanelExtensionContext } from "@foxglove/studio";
 import PanelExtensionAdapter from "@foxglove/studio-base/components/PanelExtensionAdapter";
+import { PlayerCapabilities } from "@foxglove/studio-base/players/types";
 import PanelSetup, { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
 import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 
@@ -41,13 +42,14 @@ describe("PanelExtensionAdapter", () => {
 
   it("should support advertising on a topic", (done) => {
     const initPanel = (context: PanelExtensionContext) => {
-      context.advertise("/some/topic", "some_datatype");
+      context.advertise?.("/some/topic", "some_datatype");
     };
 
     mount(
       <ThemeProvider>
         <PanelSetup
           fixture={{
+            capabilities: [PlayerCapabilities.advertise],
             topics: [],
             datatypes: new Map(),
             frame: {},
@@ -77,14 +79,15 @@ describe("PanelExtensionAdapter", () => {
     let count = 0;
 
     const initPanel = (context: PanelExtensionContext) => {
-      context.advertise("/some/topic", "some_datatype");
-      context.advertise("/another/topic", "another_datatype");
+      context.advertise?.("/some/topic", "some_datatype");
+      context.advertise?.("/another/topic", "another_datatype");
     };
 
     mount(
       <ThemeProvider>
         <PanelSetup
           fixture={{
+            capabilities: [PlayerCapabilities.advertise],
             topics: [],
             datatypes: new Map(),
             frame: {},
@@ -135,8 +138,8 @@ describe("PanelExtensionAdapter", () => {
     expect.assertions(3);
 
     const initPanel = (context: PanelExtensionContext) => {
-      context.advertise("/some/topic", "some_datatype");
-      context.publish("/some/topic", {
+      context.advertise?.("/some/topic", "some_datatype");
+      context.publish?.("/some/topic", {
         foo: "bar",
       });
     };
@@ -145,6 +148,7 @@ describe("PanelExtensionAdapter", () => {
       <ThemeProvider>
         <PanelSetup
           fixture={{
+            capabilities: [PlayerCapabilities.advertise],
             topics: [],
             datatypes: new Map(),
             frame: {},
@@ -177,15 +181,16 @@ describe("PanelExtensionAdapter", () => {
     let count = 0;
 
     const initPanel = (context: PanelExtensionContext) => {
-      context.advertise("/some/topic", "some_datatype");
-      context.advertise("/another/topic", "another_datatype");
-      context.unadvertise("/some/topic");
+      context.advertise?.("/some/topic", "some_datatype");
+      context.advertise?.("/another/topic", "another_datatype");
+      context.unadvertise?.("/some/topic");
     };
 
     mount(
       <ThemeProvider>
         <PanelSetup
           fixture={{
+            capabilities: [PlayerCapabilities.advertise],
             topics: [],
             datatypes: new Map(),
             frame: {},
@@ -250,10 +255,11 @@ describe("PanelExtensionAdapter", () => {
 
     const initPanel = (context: PanelExtensionContext) => {
       expect(context).toBeDefined();
-      context.advertise("/some/topic", "some_datatype");
+      context.advertise?.("/some/topic", "some_datatype");
     };
 
     const fixture: Fixture = {
+      capabilities: [PlayerCapabilities.advertise],
       topics: [],
       datatypes: new Map(),
       frame: {},

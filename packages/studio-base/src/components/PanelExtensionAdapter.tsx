@@ -295,42 +295,48 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
         requestBackfill();
       },
 
-      advertise: (topic: string, datatype: string, options) => {
-        const ctx = latestPipelineContextRef.current;
-        if (!ctx) {
-          throw new Error("Unable to advertise. There is no active connection.");
-        }
+      advertise: capabilities.includes(PlayerCapabilities.advertise)
+        ? (topic: string, datatype: string, options) => {
+            const ctx = latestPipelineContextRef.current;
+            if (!ctx) {
+              throw new Error("Unable to advertise. There is no active connection.");
+            }
 
-        const payload: AdvertiseOptions = {
-          topic,
-          datatype,
-          options,
-        };
-        advertisementsRef.current.set(topic, payload);
+            const payload: AdvertiseOptions = {
+              topic,
+              datatype,
+              options,
+            };
+            advertisementsRef.current.set(topic, payload);
 
-        ctx.setPublishers(panelId, Array.from(advertisementsRef.current.values()));
-      },
+            ctx.setPublishers(panelId, Array.from(advertisementsRef.current.values()));
+          }
+        : undefined,
 
-      unadvertise: (topic: string) => {
-        const ctx = latestPipelineContextRef.current;
-        if (!ctx) {
-          throw new Error("Unable to advertise. There is no active connection.");
-        }
+      unadvertise: capabilities.includes(PlayerCapabilities.advertise)
+        ? (topic: string) => {
+            const ctx = latestPipelineContextRef.current;
+            if (!ctx) {
+              throw new Error("Unable to advertise. There is no active connection.");
+            }
 
-        advertisementsRef.current.delete(topic);
-        ctx.setPublishers(panelId, Array.from(advertisementsRef.current.values()));
-      },
+            advertisementsRef.current.delete(topic);
+            ctx.setPublishers(panelId, Array.from(advertisementsRef.current.values()));
+          }
+        : undefined,
 
-      publish: (topic, message) => {
-        const ctx = latestPipelineContextRef.current;
-        if (!ctx) {
-          throw new Error("Unable to publish. There is no active connection.");
-        }
-        ctx.publish({
-          topic,
-          msg: message as Record<string, unknown>,
-        });
-      },
+      publish: capabilities.includes(PlayerCapabilities.advertise)
+        ? (topic, message) => {
+            const ctx = latestPipelineContextRef.current;
+            if (!ctx) {
+              throw new Error("Unable to publish. There is no active connection.");
+            }
+            ctx.publish({
+              topic,
+              msg: message as Record<string, unknown>,
+            });
+          }
+        : undefined,
 
       unsubscribeAll: () => {
         subscribedTopicsRef.current.clear();

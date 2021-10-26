@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { makeStyles } from "@fluentui/react";
-import clsx from "clsx";
+import cx from "classnames";
 import { useCallback, useState } from "react";
 
 const useStyles = makeStyles({
@@ -38,11 +38,12 @@ const useButtonStyles = makeStyles(({ semanticColors }) => ({
     },
   },
   backgroundDisabled: {
-    cursor: "auto",
+    cursor: "not-allowed",
     strokeWidth: 0,
 
+    fill: semanticColors.buttonBackgroundDisabled,
     ":hover": {
-      fill: semanticColors.bodyBackgroundHovered,
+      fill: semanticColors.buttonBackgroundDisabled,
 
       "+ path": {
         fill: semanticColors.bodyBackground,
@@ -111,12 +112,13 @@ export enum DirectionalPadAction {
 }
 
 type DirectionalPadProps = {
+  disabled?: boolean;
   onAction?: (action?: DirectionalPadAction) => void;
   disableStop?: boolean;
 };
 
 function DirectionalPad(props: DirectionalPadProps): JSX.Element {
-  const { onAction, disableStop = true } = props;
+  const { onAction, disableStop = true, disabled = false } = props;
 
   const [currentAction, setCurrentAction] = useState<DirectionalPadAction | undefined>();
 
@@ -140,11 +142,14 @@ function DirectionalPad(props: DirectionalPadProps): JSX.Element {
     onAction?.();
   }, [onAction, currentAction]);
 
-  const makeMouseHandlers = (action: DirectionalPadAction) => ({
-    onMouseDown: () => handleMouseDown(action),
-    onMouseUp: () => handleMouseUp(),
-    onMouseLeave: () => handleMouseUp(),
-  });
+  const makeMouseHandlers = (action: DirectionalPadAction) =>
+    disabled
+      ? undefined
+      : {
+          onMouseDown: () => handleMouseDown(action),
+          onMouseUp: () => handleMouseUp(),
+          onMouseLeave: () => handleMouseUp(),
+        };
 
   return (
     <div className={classes.root}>
@@ -153,23 +158,31 @@ function DirectionalPad(props: DirectionalPadProps): JSX.Element {
           {/* UP button */}
           <g {...makeMouseHandlers(DirectionalPadAction.UP)} role="button">
             <path
-              className={clsx(buttonClasses.background, {
+              className={cx(buttonClasses.background, {
+                [buttonClasses.backgroundDisabled]: disabled,
                 [buttonClasses.backgroundPressed]: currentAction === DirectionalPadAction.UP,
               })}
               d="M162.707,78.945c-20.74,-14.771 -48.795,-14.771 -69.535,-0l-42.723,-42.723c44.594,-37.791 110.372,-37.794 154.981,-0l-42.723,42.723Z"
             />
-            <path className={buttonClasses.icon} d="M128,30.364l20,20l-40,-0l20,-20Z" />
+            <path
+              className={cx(buttonClasses.icon, { [buttonClasses.iconDisabled]: disabled })}
+              d="M128,30.364l20,20l-40,-0l20,-20Z"
+            />
           </g>
 
           {/* DOWN button */}
           <g {...makeMouseHandlers(DirectionalPadAction.DOWN)} role="button">
             <path
-              className={clsx(buttonClasses.background, {
+              className={cx(buttonClasses.background, {
+                [buttonClasses.backgroundDisabled]: disabled,
                 [buttonClasses.backgroundPressed]: currentAction === DirectionalPadAction.DOWN,
               })}
               d="M93.172,176.764c20.74,14.771 48.795,14.771 69.535,0l42.723,42.723c-44.594,37.791 -110.372,37.794 -154.981,0l42.723,-42.723Z"
             />
-            <path className={buttonClasses.icon} d="M128,225.345l-20,-20l40,0l-20,20Z" />
+            <path
+              className={cx(buttonClasses.icon, { [buttonClasses.iconDisabled]: disabled })}
+              d="M128,225.345l-20,-20l40,0l-20,20Z"
+            />
           </g>
         </g>
 
@@ -177,23 +190,31 @@ function DirectionalPad(props: DirectionalPadProps): JSX.Element {
           {/* LEFT button */}
           <g {...makeMouseHandlers(DirectionalPadAction.LEFT)} role="button">
             <path
-              className={clsx(buttonClasses.background, {
+              className={cx(buttonClasses.background, {
+                [buttonClasses.backgroundDisabled]: disabled,
                 [buttonClasses.backgroundPressed]: currentAction === DirectionalPadAction.LEFT,
               })}
               d="M36.307,205.345c-37.793,-44.609 -37.791,-110.387 -0,-154.981l42.723,42.723c-14.771,20.74 -14.771,48.795 -0,69.535l-42.723,42.723Z"
             />
-            <path className={buttonClasses.icon} d="M30.449,127.854l20,-20l0,40l-20,-20Z" />
+            <path
+              className={cx(buttonClasses.icon, { [buttonClasses.iconDisabled]: disabled })}
+              d="M30.449,127.854l20,-20l0,40l-20,-20Z"
+            />
           </g>
 
           {/* RIGHT button */}
           <g {...makeMouseHandlers(DirectionalPadAction.RIGHT)} role="button">
             <path
-              className={clsx(buttonClasses.background, {
+              className={cx(buttonClasses.background, {
+                [buttonClasses.backgroundDisabled]: disabled,
                 [buttonClasses.backgroundPressed]: currentAction === DirectionalPadAction.RIGHT,
               })}
               d="M219.572,50.364c37.794,44.609 37.791,110.387 0.001,154.981l-42.724,-42.723c14.771,-20.74 14.771,-48.795 0,-69.535l42.723,-42.723Z"
             />
-            <path className={buttonClasses.icon} d="M225.43,127.854l-20,20l0,-40l20,20Z" />
+            <path
+              className={cx(buttonClasses.icon, { [buttonClasses.iconDisabled]: disabled })}
+              d="M225.43,127.854l-20,20l0,-40l20,20Z"
+            />
           </g>
         </g>
 
@@ -201,7 +222,7 @@ function DirectionalPad(props: DirectionalPadProps): JSX.Element {
         {!disableStop && (
           <g {...makeMouseHandlers(DirectionalPadAction.STOP)} role="button">
             <circle
-              className={clsx(stopButtonClasses.background, {
+              className={cx(stopButtonClasses.background, {
                 [stopButtonClasses.backgroundDisabled]: false,
               })}
               cx="128"
@@ -213,7 +234,7 @@ function DirectionalPad(props: DirectionalPadProps): JSX.Element {
               dy={12}
               y={128}
               textAnchor="middle"
-              className={clsx(stopButtonClasses.text, {
+              className={cx(stopButtonClasses.text, {
                 [stopButtonClasses.textDisabled]: false,
               })}
             >

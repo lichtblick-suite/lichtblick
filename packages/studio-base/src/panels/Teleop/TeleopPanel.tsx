@@ -77,7 +77,7 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
       return;
     }
 
-    context.advertise(currentTopic, "geometry_msgs/Twist", {
+    context.advertise?.(currentTopic, "geometry_msgs/Twist", {
       datatypes: new Map([
         ["geometry_msgs/Vector3", commonDefs["geometry_msgs/Vector3"]],
         ["geometry_msgs/Twist", commonDefs["geometry_msgs/Twist"]],
@@ -85,7 +85,7 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
     });
 
     return () => {
-      context.unadvertise(currentTopic);
+      context.unadvertise?.(currentTopic);
     };
   }, [context, currentTopic]);
 
@@ -160,9 +160,9 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
     }
 
     const intervalMs = (1000 * 1) / config.publishRate;
-    context.publish(currentTopic, message);
+    context.publish?.(currentTopic, message);
     const intervalHandle = setInterval(() => {
-      context.publish(currentTopic, message);
+      context.publish?.(currentTopic, message);
     }, intervalMs);
 
     return () => {
@@ -174,6 +174,8 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
     renderDone();
   }, [renderDone]);
 
+  const enabled = Boolean(context.publish && config.publishRate > 0 && currentTopic);
+
   return (
     <>
       <Stack
@@ -182,7 +184,7 @@ function TeleopPanel(props: TeleopPanelProps): JSX.Element {
         horizontalAlign="center"
         tokens={{ padding: `min(5%, ${theme.spacing.s1})` }}
       >
-        <DirectionalPad onAction={setCurrentAction} />
+        <DirectionalPad onAction={setCurrentAction} disabled={!enabled} />
       </Stack>
       <Stack styles={{ root: { position: "absolute", top: 0, left: 0, margin: theme.spacing.s1 } }}>
         <HoverableIconButton

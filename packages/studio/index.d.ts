@@ -102,12 +102,12 @@ declare module "@foxglove/studio" {
      *
      * The options object is passed to the current data source for additional configuration.
      */
-    advertise(topic: string, datatype: string, options?: Record<string, unknown>): void;
+    advertise?(topic: string, datatype: string, options?: Record<string, unknown>): void;
 
     /**
      * Indicate that you no longer want to advertise on this topic.
      */
-    unadvertise(topic: string): void;
+    unadvertise?(topic: string): void;
 
     /**
      * Publish a message on a given topic. You must first advertise on the topic before publishing.
@@ -115,7 +115,7 @@ declare module "@foxglove/studio" {
      * @param topic The name of the topic to publish the message on
      * @param message The message to publish
      */
-    publish(topic: string, message: unknown): void;
+    publish?(topic: string, message: unknown): void;
 
     /**
      * Process render events for the panel. Each render event receives a render state and a done callback.
