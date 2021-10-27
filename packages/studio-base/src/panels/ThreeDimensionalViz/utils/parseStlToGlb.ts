@@ -20,8 +20,6 @@ type StlData = {
 };
 
 const UNITS_REGEX = /UNITS=(mm|cm| m|ft|in)/;
-const UNSIGNED_SHORT = 5123; // glTF componentType for 16-bit unsigned integer
-const FLOAT = 5126; // glTF componentType for 32-bit floating point
 const DEFAULT_COLOR = [36 / 255, 142 / 255, 255 / 255, 1];
 
 const textDecoder = new TextDecoder();
@@ -36,7 +34,7 @@ export function parseStlToGlb(buffer: ArrayBuffer): GlbModel | undefined {
     accessors: [
       {
         bufferView: 0,
-        componentType: FLOAT,
+        componentType: WebGLRenderingContext.FLOAT,
         count: stlData.position.length / 3,
         type: "VEC3",
         min: stlData.minPosition,
@@ -44,7 +42,7 @@ export function parseStlToGlb(buffer: ArrayBuffer): GlbModel | undefined {
       },
       {
         bufferView: 1,
-        componentType: FLOAT,
+        componentType: WebGLRenderingContext.FLOAT,
         count: stlData.normal.length / 3,
         type: "VEC3",
         min: stlData.minNormal,
@@ -52,7 +50,7 @@ export function parseStlToGlb(buffer: ArrayBuffer): GlbModel | undefined {
       },
       {
         bufferView: 2,
-        componentType: UNSIGNED_SHORT,
+        componentType: WebGLRenderingContext.UNSIGNED_SHORT,
         count: stlData.indices.length,
         type: "SCALAR",
         min: [0],
@@ -80,7 +78,7 @@ export function parseStlToGlb(buffer: ArrayBuffer): GlbModel | undefined {
       },
     ],
     meshes: [{ primitives: [{ attributes: { POSITION: 0, NORMAL: 1 }, indices: 2, material: 0 }] }],
-    nodes: [{ mesh: 0, rotation: [-0.7071, 0, 0, 0.7071] }], // Z-up to Y-up
+    nodes: [{ mesh: 0, rotation: [-Math.SQRT1_2, 0, 0, Math.SQRT1_2] }], // Z-up to Y-up
     scene: 0,
     scenes: [{ nodes: [0] }],
   };

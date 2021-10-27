@@ -70,10 +70,29 @@ async function listRosPackages(rootPath: string): Promise<Map<string, string>> {
  * Search for the ROS package named `pkg` relative to `searchPath` and/or `env.ROS_PACKAGE_PATH`
  * if it is set.
  */
-async function findRosPackageRoot(pkg: string, searchPath?: string): Promise<string | undefined> {
+async function findRosPackageRoot(
+  pkg: string,
+  { rosPackagePath, searchPath }: { rosPackagePath?: string; searchPath?: string },
+): Promise<string | undefined> {
   log.debug(`findRosPackageRoot(${pkg}, ${searchPath})`);
+
+  // Search relative to the given path
+  if (searchPath != undefined) {
+    let currentPath = searchPath;
+    for (;;) {
+      if ((await rosPackageNameAtPath(currentPath)) === pkg) {
+        log.info(`Found ROS package ${pkg} at ${currentPath} (searched relative to ${searchPath})`);
+        return currentPath;
+      }
+      if (path.dirname(currentPath) === currentPath) {
+        break;
+      }
+      currentPath = path.dirname(currentPath);
+    }
+  }
+
   // Search relative to ROS_PACKAGE_PATH
-  const ROS_PACKAGE_PATH = searchPath ?? process.env.ROS_PACKAGE_PATH ?? "";
+  const ROS_PACKAGE_PATH = rosPackagePath ?? process.env.ROS_PACKAGE_PATH ?? "";
   if (ROS_PACKAGE_PATH != undefined && ROS_PACKAGE_PATH !== "") {
     const packages = await listRosPackages(ROS_PACKAGE_PATH);
     const packagePath = packages.get(pkg);
@@ -95,6 +114,7 @@ async function findRosPackageResource(urlString: string): Promise<string> {
   const params = new URLSearchParams(url.search);
   const targetPkg = params.get("targetPkg");
   const basePath = params.get("basePath");
+  const rosPackagePath = params.get("rosPackagePath");
   const relPath = params.get("relPath");
   if (targetPkg == undefined) {
     throw new Error("ROS package URL missing targetPkg");
@@ -104,7 +124,10 @@ async function findRosPackageResource(urlString: string): Promise<string> {
   }
 
   const resourcePathParts = relPath.split("/");
-  const pkgRoot = await findRosPackageRoot(targetPkg, basePath ?? undefined);
+  const pkgRoot = await findRosPackageRoot(targetPkg, {
+    rosPackagePath: rosPackagePath ?? undefined,
+    searchPath: basePath ? path.dirname(basePath) : undefined,
+  });
   if (pkgRoot == undefined) {
     throw new Error(
       `ROS package ${targetPkg} not found${

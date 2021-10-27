@@ -43,7 +43,7 @@ export default class URDFAssetLoader implements AssetLoader {
       if (!parsePackageUrl(path)) {
         throw new Error(`Unable to get file contents for ${path}`);
       }
-      const url = rewritePackageUrl(path, basePath);
+      const url = rewritePackageUrl(path, { basePath });
       return await (await fetch(url)).text();
     };
 

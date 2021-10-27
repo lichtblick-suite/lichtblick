@@ -35,12 +35,19 @@ export interface AssetLoader {
  * Rewrite ROS `package://` URLs as `x-foxglove-ros-package:` URLs. All other
  * URLs are returned unmodified.
  */
-export function rewritePackageUrl(url: string, basePath: string | undefined): string {
+export function rewritePackageUrl(
+  url: string,
+  { basePath, rosPackagePath }: { basePath?: string; rosPackagePath?: string },
+): string {
   const pkgMatch = parsePackageUrl(url);
+  const basePathStr = basePath ? `&basePath=${encodeURIComponent(basePath)}` : "";
+  const rosPackagePathStr = rosPackagePath
+    ? `&rosPackagePath=${encodeURIComponent(rosPackagePath)}`
+    : "";
+  const relPathStr = pkgMatch?.relPath ? encodeURIComponent(pkgMatch.relPath) : "";
+
   const newUrl = pkgMatch
-    ? `x-foxglove-ros-package:?targetPkg=${pkgMatch.targetPkg}${
-        basePath ? `&basePath=${encodeURIComponent(basePath)}` : ""
-      }&relPath=${encodeURIComponent(pkgMatch.relPath)}`
+    ? `x-foxglove-ros-package:?targetPkg=${pkgMatch.targetPkg}${basePathStr}&rosPackagePath=${rosPackagePathStr}&relPath=${relPathStr}`
     : url;
   return /^x-foxglove-ros-package:.+\.tiff?$/i.test(newUrl)
     ? newUrl.replace(/^x-foxglove-ros-package:/, "x-foxglove-ros-package-converted-tiff:")

@@ -13,14 +13,15 @@
 import { ReactElement, useMemo } from "react";
 
 import { CommonCommandProps, GLTFScene, parseGLB } from "@foxglove/regl-worldview";
+import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { rewritePackageUrl } from "@foxglove/studio-base/context/AssetsContext";
+import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { GlbModel } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/GlbModel";
 import { parseStlToGlb } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/parseStlToGlb";
 import { MeshMarker } from "@foxglove/studio-base/types/Messages";
 
 type MeshMarkerProps = CommonCommandProps & {
   markers: MeshMarker[];
-  basePath?: string;
 };
 
 async function loadModel(url: string): Promise<GlbModel | undefined> {
@@ -61,10 +62,11 @@ class ModelCache {
   }
 }
 
-function MeshMarkers({ markers, layerIndex, basePath }: MeshMarkerProps): ReactElement {
+function MeshMarkers({ markers, layerIndex }: MeshMarkerProps): ReactElement {
   const models: React.ReactNode[] = [];
 
   const modelCache = useMemo(() => new ModelCache(), []);
+  const [rosPackagePath] = useAppConfigurationValue<string>(AppSetting.ROS_PACKAGE_PATH);
 
   for (let i = 0; i < markers.length; i++) {
     const marker = markers[i]!;
@@ -72,7 +74,7 @@ function MeshMarkers({ markers, layerIndex, basePath }: MeshMarkerProps): ReactE
     if (mesh_resource == undefined || mesh_resource.length === 0) {
       continue;
     }
-    const url = rewritePackageUrl(mesh_resource, basePath);
+    const url = rewritePackageUrl(mesh_resource, { rosPackagePath });
 
     models.push(
       <GLTFScene key={i} layerIndex={layerIndex} model={async () => await modelCache.load(url)}>
