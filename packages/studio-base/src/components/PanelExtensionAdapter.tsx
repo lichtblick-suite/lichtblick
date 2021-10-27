@@ -18,6 +18,7 @@ import {
   MessagePipelineContext,
   useMessagePipeline,
 } from "@foxglove/studio-base/components/MessagePipeline";
+import { usePanelContext } from "@foxglove/studio-base/components/PanelContext";
 import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import RemountOnValueChange from "@foxglove/studio-base/components/RemountOnValueChange";
 import {
@@ -30,7 +31,8 @@ import {
   PlayerCapabilities,
   PlayerState,
 } from "@foxglove/studio-base/players/types";
-import { SaveConfig } from "@foxglove/studio-base/types/panels";
+import { PanelConfig, SaveConfig } from "@foxglove/studio-base/types/panels";
+import { assertNever } from "@foxglove/studio-base/util/assertNever";
 
 const log = Logger.getLogger(__filename);
 
@@ -80,6 +82,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   const requestBackfill = useMessagePipeline(selectRequestBackfill);
   const capabilities = useMessagePipeline(selectCapabilities);
   const seekPlayback = useMessagePipeline(selectSeekPlayback);
+  const { openSiblingPanel } = usePanelContext();
 
   const [panelId] = useState(() => uuid());
 
@@ -250,10 +253,26 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
 
   type PartialPanelExtensionContext = Omit<PanelExtensionContext, "panelElement">;
   const partialExtensionContext = useMemo<PartialPanelExtensionContext>(() => {
+    const layout: PanelExtensionContext["layout"] = {
+      addPanel({ position, type, updateIfExists, getState }) {
+        if (position === "sibling") {
+          openSiblingPanel({
+            panelType: type,
+            updateIfExists,
+            siblingConfigCreator: (existingConfig) => getState(existingConfig) as PanelConfig,
+          });
+          return;
+        }
+        assertNever(position, `Unsupported position for addPanel: ${position}`);
+      },
+    };
+
     return {
       initialState: configRef.current,
 
       saveState: saveConfig,
+
+      layout,
 
       seekPlayback: capabilities.includes(PlayerCapabilities.playbackControl)
         ? (stamp: number) => seekPlayback(fromSec(stamp))
@@ -352,14 +371,15 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       },
     };
   }, [
-    capabilities,
-    clearHoverValue,
-    requestBackfill,
     saveConfig,
+    capabilities,
+    openSiblingPanel,
     seekPlayback,
+    clearHoverValue,
     setHoverValue,
     setSubscriptions,
     panelId,
+    requestBackfill,
   ]);
 
   const refCallback = useCallback<RefCallback<HTMLDivElement>>(

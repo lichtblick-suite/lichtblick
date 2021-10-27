@@ -43,7 +43,11 @@ export type SavedProps = {
   [panelId: string]: PanelConfig;
 };
 
-export type OpenSiblingPanel = (type: string, cb: (config: PanelConfig) => PanelConfig) => void;
+export type OpenSiblingPanel = (params: {
+  panelType: string;
+  siblingConfigCreator: (config: PanelConfig) => PanelConfig;
+  updateIfExists: boolean;
+}) => void;
 
 type KeyPathsOfImpl<T, Prefix extends string> =
   // return never when given any/unknown

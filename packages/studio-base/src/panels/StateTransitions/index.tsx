@@ -41,7 +41,7 @@ import {
   ChartData,
   OnClickArg as OnChartClickArgs,
 } from "@foxglove/studio-base/src/components/Chart";
-import { PanelConfig } from "@foxglove/studio-base/types/panels";
+import { OpenSiblingPanel, PanelConfig } from "@foxglove/studio-base/types/panels";
 import { colors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
@@ -175,18 +175,22 @@ const plugins: ChartOptions["plugins"] = {
 export type StateTransitionConfig = { paths: StateTransitionPath[] };
 
 export function openSiblingStateTransitionsPanel(
-  openSiblingPanel: (type: string, cb: (config: PanelConfig) => PanelConfig) => void,
+  openSiblingPanel: OpenSiblingPanel,
   topicName: string,
 ): void {
-  openSiblingPanel("StateTransitions", (config: PanelConfig) => {
-    return {
-      ...config,
-      paths: uniq(
-        (config as StateTransitionConfig).paths.concat([
-          { value: topicName, timestampMethod: "receiveTime" },
-        ]),
-      ),
-    };
+  openSiblingPanel({
+    panelType: "StateTransitions",
+    updateIfExists: true,
+    siblingConfigCreator: (config: PanelConfig) => {
+      return {
+        ...config,
+        paths: uniq(
+          (config as StateTransitionConfig).paths.concat([
+            { value: topicName, timestampMethod: "receiveTime" },
+          ]),
+        ),
+      };
+    },
   });
 }
 

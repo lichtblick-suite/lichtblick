@@ -25,6 +25,38 @@ declare module "@foxglove/studio" {
     message: T;
   }>;
 
+  export interface LayoutActions {
+    /** Open a new panel or update an existing panel in the layout.  */
+    addPanel(params: {
+      /**
+       * Where to position the panel. Currently, only "sibling" is supported which indicates the
+       * new panel will be adjacent to the calling panel.
+       */
+      position: "sibling";
+
+      /**
+       * The type of panel to open. For internal panels, this corresponds to the `static panelType`.
+       * For extension panels, this `"extensionName.panelName"` where extensionName is the `name`
+       * field from the extension's package.json, and panelName is the name provided to
+       * `registerPanel()`.
+       */
+      type: string;
+
+      /**
+       * Whether to update an existing sibling panel of the same type, if it already exists. If
+       * false, a new panel will always be added.
+       */
+      updateIfExists: boolean;
+
+      /**
+       * A function that returns the state for the new panel. If updating an existing panel, the
+       * existing state will be passed in.
+       * @see `updateIfExists`
+       */
+      getState(existingState?: unknown): unknown;
+    }): void;
+  }
+
   export interface RenderState {
     /**
      * The latest messages for the current render frame. These are new messages since the last render frame.
@@ -62,6 +94,9 @@ declare module "@foxglove/studio" {
      * Initial panel state
      */
     readonly initialState: unknown;
+
+    /** Actions the panel may perform related to the user's current layout. */
+    readonly layout: LayoutActions;
 
     /**
      * Subscribe to updates on this field within the render state. Render will only be invoked when

@@ -23,7 +23,7 @@ import {
   openSiblingStateTransitionsPanel,
   transitionableRosTypes,
 } from "@foxglove/studio-base/panels/StateTransitions";
-import { PanelConfig } from "@foxglove/studio-base/types/panels";
+import { OpenSiblingPanel } from "@foxglove/studio-base/types/panels";
 
 import { ValueAction } from "./getValueActionForValue";
 
@@ -31,7 +31,7 @@ type Props = {
   valueAction: ValueAction;
   basePath: string;
   onTopicPathChange: (arg0: string) => void;
-  openSiblingPanel: (type: string, cb: (config: PanelConfig) => PanelConfig) => void;
+  openSiblingPanel: OpenSiblingPanel;
 };
 
 const iconClassName = mergeStyles({

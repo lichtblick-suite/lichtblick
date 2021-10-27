@@ -49,7 +49,11 @@ import {
   TooltipItem,
 } from "@foxglove/studio-base/components/TimeBasedChart";
 import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
-import { PanelConfig, PanelConfigSchema } from "@foxglove/studio-base/types/panels";
+import {
+  OpenSiblingPanel,
+  PanelConfig,
+  PanelConfigSchema,
+} from "@foxglove/studio-base/types/panels";
 import { downloadFiles } from "@foxglove/studio-base/util/download";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
@@ -63,18 +67,19 @@ import { PlotConfig, PlotXAxisVal } from "./types";
 export { plotableRosTypes } from "./types";
 export type { PlotConfig, PlotXAxisVal } from "./types";
 
-export function openSiblingPlotPanel(
-  openSiblingPanel: (type: string, cb: (config: PanelConfig) => PanelConfig) => void,
-  topicName: string,
-): void {
-  openSiblingPanel("Plot", (config: PanelConfig) => ({
-    ...config,
-    paths: uniq(
-      (config as PlotConfig).paths
-        .concat([{ value: topicName, enabled: true, timestampMethod: "receiveTime" }])
-        .filter(({ value }) => value),
-    ),
-  }));
+export function openSiblingPlotPanel(openSiblingPanel: OpenSiblingPanel, topicName: string): void {
+  openSiblingPanel({
+    panelType: "Plot",
+    updateIfExists: true,
+    siblingConfigCreator: (config: PanelConfig) => ({
+      ...config,
+      paths: uniq(
+        (config as PlotConfig).paths
+          .concat([{ value: topicName, enabled: true, timestampMethod: "receiveTime" }])
+          .filter(({ value }) => value),
+      ),
+    }),
+  });
 }
 
 function getCSVRow(

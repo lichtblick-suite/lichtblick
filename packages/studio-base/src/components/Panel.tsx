@@ -60,7 +60,12 @@ import { usePanelCatalog } from "@foxglove/studio-base/context/PanelCatalogConte
 import { useWorkspace } from "@foxglove/studio-base/context/WorkspaceContext";
 import usePanelDrag from "@foxglove/studio-base/hooks/usePanelDrag";
 import { TabPanelConfig } from "@foxglove/studio-base/types/layouts";
-import { PanelConfig, SaveConfig, PanelConfigSchema } from "@foxglove/studio-base/types/panels";
+import {
+  PanelConfig,
+  SaveConfig,
+  PanelConfigSchema,
+  OpenSiblingPanel,
+} from "@foxglove/studio-base/types/panels";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 import {
   getPanelIdForType,
@@ -366,8 +371,8 @@ export default function Panel<
 
     // Open a panel next to the current panel, of the specified `panelType`.
     // If such a panel already exists, we update it with the new props.
-    const openSiblingPanel = useCallback(
-      async (panelType: string, siblingConfigCreator: (config: PanelConfig) => PanelConfig) => {
+    const openSiblingPanel = useCallback<OpenSiblingPanel>(
+      async ({ panelType, siblingConfigCreator, updateIfExists }) => {
         const panelsState = getCurrentLayoutState().selectedLayout?.data;
         if (!panelsState) {
           return;
@@ -386,25 +391,27 @@ export default function Panel<
         const ownPath = mosaicWindowActions.getPath();
 
         // Try to find a sibling panel and update it with the `siblingConfig`
-        const lastNode = last(ownPath);
-        const siblingPathEnd = lastNode != undefined ? getOtherBranch(lastNode) : "second";
-        const siblingPath = ownPath.slice(0, -1).concat(siblingPathEnd);
-        const siblingId = getNodeAtPath(mosaicActions.getRoot(), siblingPath);
-        if (typeof siblingId === "string" && getPanelTypeFromId(siblingId) === panelType) {
-          const siblingConfig: PanelConfig = {
-            ...siblingDefaultConfig,
-            ...panelsState.configById[siblingId],
-          };
-          savePanelConfigs({
-            configs: [
-              {
-                id: siblingId,
-                config: siblingConfigCreator(siblingConfig),
-                defaultConfig: siblingDefaultConfig,
-              },
-            ],
-          });
-          return;
+        if (updateIfExists) {
+          const lastNode = last(ownPath);
+          const siblingPathEnd = lastNode != undefined ? getOtherBranch(lastNode) : "second";
+          const siblingPath = ownPath.slice(0, -1).concat(siblingPathEnd);
+          const siblingId = getNodeAtPath(mosaicActions.getRoot(), siblingPath);
+          if (typeof siblingId === "string" && getPanelTypeFromId(siblingId) === panelType) {
+            const siblingConfig: PanelConfig = {
+              ...siblingDefaultConfig,
+              ...panelsState.configById[siblingId],
+            };
+            savePanelConfigs({
+              configs: [
+                {
+                  id: siblingId,
+                  config: siblingConfigCreator(siblingConfig),
+                  defaultConfig: siblingDefaultConfig,
+                },
+              ],
+            });
+            return;
+          }
         }
 
         // Otherwise, open new panel

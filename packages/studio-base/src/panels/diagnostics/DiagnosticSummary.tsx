@@ -217,16 +217,17 @@ function DiagnosticSummary(props: Props): JSX.Element {
 
   const showDetails = useCallback(
     (info: DiagnosticInfo) => {
-      openSiblingPanel(
-        "DiagnosticStatusPanel",
-        () =>
+      openSiblingPanel({
+        panelType: "DiagnosticStatusPanel",
+        siblingConfigCreator: () =>
           ({
             selectedHardwareId: info.status.hardware_id,
             selectedName: info.status.name,
             topicToRender,
             collapsedSections: [],
           } as DiagnosticStatusConfig),
-      );
+        updateIfExists: true,
+      });
     },
     [topicToRender, openSiblingPanel],
   );

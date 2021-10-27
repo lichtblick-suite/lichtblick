@@ -30,10 +30,14 @@ type Props = {
 export default function TopicLink({ topic }: Props): JSX.Element {
   const { openSiblingPanel } = usePanelContext();
   const openRawMessages = React.useCallback(() => {
-    openSiblingPanel("RawMessages", (config: PanelConfig) => ({
-      ...config,
-      topicPath: topic,
-    }));
+    openSiblingPanel({
+      panelType: "RawMessages",
+      updateIfExists: true,
+      siblingConfigCreator: (config: PanelConfig) => ({
+        ...config,
+        topicPath: topic,
+      }),
+    });
   }, [openSiblingPanel, topic]);
 
   return (

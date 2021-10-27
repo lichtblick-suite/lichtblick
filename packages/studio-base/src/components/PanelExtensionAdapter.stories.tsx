@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { PanelExtensionContext } from "@foxglove/studio";
+import MockPanelContextProvider from "@foxglove/studio-base/components/MockPanelContextProvider";
 import PanelExtensionAdapter from "@foxglove/studio-base/components/PanelExtensionAdapter";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
@@ -39,7 +40,9 @@ export const CatchRenderError = (): JSX.Element => {
         layout: "UnknownPanel!4co6n9d",
       }}
     >
-      <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+      <MockPanelContextProvider>
+        <PanelExtensionAdapter config={{}} saveConfig={() => {}} initPanel={initPanel} />
+      </MockPanelContextProvider>
     </PanelSetup>
   );
 };

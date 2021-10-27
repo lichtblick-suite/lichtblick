@@ -6,7 +6,7 @@ import { mergeStyleSets } from "@fluentui/react";
 import ClipboardOutlineIcon from "@mdi/svg/svg/clipboard-outline.svg";
 
 import Icon from "@foxglove/studio-base/components/Icon";
-import { PanelConfig } from "@foxglove/studio-base/types/panels";
+import { OpenSiblingPanel } from "@foxglove/studio-base/types/panels";
 import clipboard from "@foxglove/studio-base/util/clipboard";
 
 import HighlightedValue from "./HighlightedValue";
@@ -45,7 +45,7 @@ export default function Value({
   itemValue: unknown;
   valueAction: ValueAction | undefined;
   onTopicPathChange: (arg0: string) => void;
-  openSiblingPanel: (type: string, cb: (config: PanelConfig) => PanelConfig) => void;
+  openSiblingPanel: OpenSiblingPanel;
 }): JSX.Element {
   return (
     <span>

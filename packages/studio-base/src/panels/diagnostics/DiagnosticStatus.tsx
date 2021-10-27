@@ -28,7 +28,7 @@ import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import { openSiblingPlotPanel } from "@foxglove/studio-base/panels/Plot";
 import { openSiblingStateTransitionsPanel } from "@foxglove/studio-base/panels/StateTransitions";
 import { Config } from "@foxglove/studio-base/panels/diagnostics/DiagnosticStatusPanel";
-import { PanelConfig } from "@foxglove/studio-base/types/panels";
+import { OpenSiblingPanel } from "@foxglove/studio-base/types/panels";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { LEVEL_NAMES, DiagnosticInfo, KeyValue, DiagnosticStatusMessage } from "./util";
@@ -40,7 +40,7 @@ type Props = {
   splitFraction: number;
   onChangeSplitFraction: (arg0: number) => void;
   topicToRender: string;
-  openSiblingPanel: (type: string, cb: (arg0: PanelConfig) => PanelConfig) => void;
+  openSiblingPanel: OpenSiblingPanel;
   collapsedSections: { name: string; section: string }[];
   saveConfig: (arg0: Partial<Config>) => void;
 };
