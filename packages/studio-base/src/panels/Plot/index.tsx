@@ -448,7 +448,7 @@ const configSchema: PanelConfigSchema<PlotConfig> = [
   {
     key: "isSynced",
     type: "toggle",
-    title: "Sync to other Plot panels with a timestamp-based x-axis",
+    title: "Sync with other timestamp-based plots",
   },
   { key: "maxYValue", type: "number", title: "Y max", placeholder: "auto", allowEmpty: true },
   { key: "minYValue", type: "number", title: "Y min", placeholder: "auto", allowEmpty: true },
