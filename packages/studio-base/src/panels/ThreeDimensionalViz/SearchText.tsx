@@ -326,7 +326,6 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
             left: theme.spacing.s1,
             right: "auto",
             fontSize: 18,
-            ...iconStyle,
 
             svg: {
               fill: "currentColor",

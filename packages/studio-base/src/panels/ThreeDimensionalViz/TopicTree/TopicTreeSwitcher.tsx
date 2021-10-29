@@ -8,9 +8,8 @@ import { useCallback } from "react";
 
 import KeyboardShortcut from "@foxglove/studio-base/components/KeyboardShortcut";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
+import { Save3DConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
-
-import { Save3DConfig } from "../index";
 
 export const SWITCHER_HEIGHT = 30;
 

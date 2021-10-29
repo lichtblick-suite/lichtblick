@@ -43,7 +43,7 @@ const VISIBLE_COUNT_MARGIN = 4;
 
 export const STreeNodeRow = styled.div`
   color: ${(props: { visibleInScene: boolean }) =>
-    props.visibleInScene ? "unset" : colors.TEXT_MUTED};
+    props.visibleInScene ? "inherit" : colors.TEXT_MUTED};
   display: flex;
   align-items: center;
   justify-content: space-between;

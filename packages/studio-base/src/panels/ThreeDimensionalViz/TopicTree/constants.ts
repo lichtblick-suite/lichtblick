@@ -14,3 +14,18 @@
 export const TREE_SPACING = 8;
 
 export const ROW_HEIGHT = 24;
+
+export const TOPIC_DISPLAY_MODES = {
+  SHOW_ALL: {
+    value: "SHOW_ALL",
+    label: "All",
+  },
+  SHOW_AVAILABLE: {
+    value: "SHOW_AVAILABLE",
+    label: "Available",
+  },
+  SHOW_SELECTED: {
+    value: "SHOW_SELECTED",
+    label: "Visible",
+  },
+} as const;

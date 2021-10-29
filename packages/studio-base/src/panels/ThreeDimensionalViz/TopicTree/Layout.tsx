@@ -59,9 +59,11 @@ import {
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
 import TopicSettingsModal from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TopicSettingsModal";
 import TopicTree from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TopicTree";
-import { TOPIC_DISPLAY_MODES } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TopicViewModeSelector";
-import { TopicDisplayMode } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/types";
+import { TOPIC_DISPLAY_MODES } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/constants";
 import useSceneBuilderAndTransformsData from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/useSceneBuilderAndTransformsData";
+import useTopicTree, {
+  TopicTreeContext,
+} from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
 import Transforms, {
   DEFAULT_ROOT_FRAME_IDS,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
@@ -88,8 +90,6 @@ import {
 } from "@foxglove/studio-base/util/globalConstants";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
 import { joinTopics } from "@foxglove/studio-base/util/topicUtils";
-
-import useTopicTree, { TopicTreeContext } from "./useTopicTree";
 
 type EventName = "onDoubleClick" | "onMouseMove" | "onMouseDown" | "onMouseUp";
 export type ClickedPosition = { clientX: number; clientY: number };
@@ -224,7 +224,7 @@ export default function Layout({
     diffModeEnabled,
     showCrosshair,
     autoSyncCameraState = false,
-    topicDisplayMode = TOPIC_DISPLAY_MODES.SHOW_ALL.value as TopicDisplayMode,
+    topicDisplayMode = TOPIC_DISPLAY_MODES.SHOW_ALL.value,
     settingsByKey,
     colorOverrideBySourceIdxByVariable,
     disableAutoOpenClickedObject = false,

@@ -127,7 +127,7 @@ export default function ExpandingToolbar<T extends string>({
           position: "relative",
           pointerEvents: "auto",
           backgroundColor: theme.semanticColors.buttonBackgroundHovered,
-          borderRadius: theme.effects.roundedCorner2,
+          borderRadius: theme.effects.roundedCorner4,
           width: 280,
         },
       }}

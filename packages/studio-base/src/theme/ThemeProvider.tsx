@@ -3,6 +3,8 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import { ThemeProvider as FluentThemeProvider } from "@fluentui/react";
 import {
+  ArrowStepInLeft16Regular,
+  ArrowStepInRight16Regular,
   Braces20Regular,
   Braces20Filled,
   CloudOff24Filled,
@@ -25,6 +27,8 @@ import * as Icons from "@fluentui/react-icons-mdl2";
 import { registerIcons, unregisterIcons } from "@fluentui/style-utilities";
 import ArrowCollapseIcon from "@mdi/svg/svg/arrow-collapse.svg";
 import ArrowLeftRightIcon from "@mdi/svg/svg/arrow-left-right.svg";
+import ArrowLeftIcon from "@mdi/svg/svg/arrow-left.svg";
+import ArrowRightIcon from "@mdi/svg/svg/arrow-right.svg";
 import ArrowUpDownIcon from "@mdi/svg/svg/arrow-up-down.svg";
 import BugIcon from "@mdi/svg/svg/bug.svg";
 import CameraControlIcon from "@mdi/svg/svg/camera-control.svg";
@@ -49,6 +53,10 @@ import PlusCircleOutlineIcon from "@mdi/svg/svg/plus-circle-outline.svg";
 import ServiceIcon from "@mdi/svg/svg/rectangle-outline.svg";
 import TopicIcon from "@mdi/svg/svg/rhombus.svg";
 import RulerIcon from "@mdi/svg/svg/ruler.svg";
+import SwapHorizontalIcon from "@mdi/svg/svg/swap-horizontal.svg";
+import SyncIcon from "@mdi/svg/svg/sync.svg";
+import UnfoldLessIcon from "@mdi/svg/svg/unfold-less-horizontal.svg";
+import UnfoldMoreIcon from "@mdi/svg/svg/unfold-more-horizontal.svg";
 import Video3dIcon from "@mdi/svg/svg/video-3d.svg";
 import { useLayoutEffect, useState } from "react";
 import { ThemeProvider as StyledThemeProvider } from "styled-components";
@@ -67,7 +75,11 @@ const icons: {
   AddIn: <Icons.AddInIcon />,
   ArrowCollapse: <ArrowCollapseIcon />,
   ArrowDown: <ArrowDownIcon />,
+  ArrowLeft: <ArrowLeftIcon />,
   ArrowLeftRight: <ArrowLeftRightIcon />,
+  ArrowRight: <ArrowRightIcon />,
+  ArrowStepLeft: <ArrowStepInLeft16Regular />,
+  ArrowStepRight: <ArrowStepInRight16Regular />,
   ArrowUp: <ArrowUpIcon />,
   ArrowUpDown: <ArrowUpDownIcon />,
   Blockhead: <BlockheadIcon />,
@@ -77,6 +89,7 @@ const icons: {
   Bug: <BugIcon />,
   CameraControl: <CameraControlIcon />,
   Cancel: <Icons.CancelIcon />,
+  CaretSolidDown: <Icons.CaretSolidDownIcon />,
   CheckMark: <Icons.CheckMarkIcon />,
   ChevronDown: <Icons.ChevronDownIcon />,
   ChevronDownSmall: <Icons.ChevronDownSmallIcon />,
@@ -150,9 +163,13 @@ const icons: {
   SplitHorizontal: <SplitHorizontal20Regular />,
   SplitVertical: <SplitVertical20Regular />,
   StatusCircleInner: <Icons.StatusCircleInnerIcon />,
+  SwapHorizontal: <SwapHorizontalIcon />,
+  Sync: <SyncIcon />,
   TestBeakerSolid: <Icons.TestBeakerSolidIcon />,
   Topic: <TopicIcon />,
   Undo: <Icons.UndoIcon />,
+  UnfoldLess: <UnfoldLessIcon />,
+  UnfoldMore: <UnfoldMoreIcon />,
   Upload: <Icons.UploadIcon />,
   Variable2: <Icons.Variable2Icon />,
   Video3d: <Video3dIcon />,
