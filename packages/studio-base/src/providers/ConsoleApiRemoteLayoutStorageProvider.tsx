@@ -16,8 +16,8 @@ export default function ConsoleApiRemoteLayoutStorageProvider({
   const { currentUser } = useCurrentUser();
 
   const apiStorage = useMemo(
-    () => (currentUser ? new ConsoleApiRemoteLayoutStorage(currentUser.id, api) : undefined),
-    [api, currentUser],
+    () => (currentUser?.id ? new ConsoleApiRemoteLayoutStorage(currentUser.id, api) : undefined),
+    [api, currentUser?.id],
   );
 
   return (
