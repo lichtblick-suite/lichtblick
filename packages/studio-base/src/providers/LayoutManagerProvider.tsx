@@ -51,12 +51,12 @@ export default function LayoutManagerProvider({
     if (!enableSyncing) {
       return;
     }
-    let stopped = false;
+    const controller = new AbortController();
     void (async () => {
       let failures = 0;
-      while (!stopped) {
+      while (!controller.signal.aborted) {
         try {
-          await layoutManager.syncWithRemote();
+          await layoutManager.syncWithRemote(controller.signal);
           failures = 0;
         } catch (error) {
           log.error("Sync failed:", error);
@@ -72,12 +72,13 @@ export default function LayoutManagerProvider({
       }
     })();
     return () => {
-      stopped = true;
+      log.debug("Canceling layout sync due to effect cleanup callback");
+      controller.abort();
     };
   }, [addToast, enableSyncing, layoutManager]);
 
   const syncNow = useCallbackWithToast(async () => {
-    await layoutManager.syncWithRemote();
+    await layoutManager.syncWithRemote(new AbortController().signal);
   }, [layoutManager]);
 
   const injectEdit = useCallback(

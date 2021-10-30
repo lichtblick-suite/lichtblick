@@ -464,7 +464,7 @@ export default class LayoutManager implements ILayoutManager {
    * storage, or both.
    */
   @LayoutManager.withBusyStatus
-  async syncWithRemote(): Promise<void> {
+  async syncWithRemote(abortSignal: AbortSignal): Promise<void> {
     if (this.currentSync) {
       log.debug("Layout sync is already in progress");
       return await this.currentSync;
@@ -472,7 +472,7 @@ export default class LayoutManager implements ILayoutManager {
     const start = performance.now();
     try {
       log.debug("Starting layout sync");
-      this.currentSync = this.syncWithRemoteImpl();
+      this.currentSync = this.syncWithRemoteImpl(abortSignal);
       await this.currentSync;
       this.notifyChangeListeners({ updatedLayout: undefined });
     } finally {
@@ -481,7 +481,7 @@ export default class LayoutManager implements ILayoutManager {
     }
   }
 
-  private async syncWithRemoteImpl(): Promise<void> {
+  private async syncWithRemoteImpl(abortSignal: AbortSignal): Promise<void> {
     if (!this.remote || !this.isOnline) {
       return;
     }
@@ -490,6 +490,9 @@ export default class LayoutManager implements ILayoutManager {
       this.local.runExclusive(async (local) => await local.list()),
       this.remote.getLayouts(),
     ]);
+    if (abortSignal.aborted) {
+      return;
+    }
 
     const syncOperations = computeLayoutSyncOperations(localLayouts, remoteLayouts);
     const [localOps, remoteOps] = partition(
@@ -497,16 +500,20 @@ export default class LayoutManager implements ILayoutManager {
       (op): op is typeof op & { local: true } => op.local,
     );
     await Promise.all([
-      this.performLocalSyncOperations(localOps),
-      this.performRemoteSyncOperations(remoteOps),
+      this.performLocalSyncOperations(localOps, abortSignal),
+      this.performRemoteSyncOperations(remoteOps, abortSignal),
     ]);
   }
 
   private async performLocalSyncOperations(
     operations: readonly (SyncOperation & { local: true })[],
+    abortSignal: AbortSignal,
   ): Promise<void> {
     await this.local.runExclusive(async (local) => {
       for (const operation of operations) {
+        if (abortSignal.aborted) {
+          return;
+        }
         switch (operation.type) {
           case "mark-deleted": {
             const { localLayout } = operation;
@@ -559,6 +566,7 @@ export default class LayoutManager implements ILayoutManager {
 
   private async performRemoteSyncOperations(
     operations: readonly (SyncOperation & { local: false })[],
+    abortSignal: AbortSignal,
   ): Promise<void> {
     const { remote } = this;
     if (!remote) {
@@ -567,7 +575,7 @@ export default class LayoutManager implements ILayoutManager {
 
     // Any necessary local cleanups are performed all at once after the server operations, so the
     // server ops can be done without blocking other local sync operations.
-    type CleanupFunction = (local: NamespacedLayoutStorage) => void;
+    type CleanupFunction = (local: NamespacedLayoutStorage) => Promise<void>;
 
     const cleanups = await Promise.all(
       operations.map(async (operation): Promise<CleanupFunction> => {
@@ -578,7 +586,12 @@ export default class LayoutManager implements ILayoutManager {
             if (!(await remote.deleteLayout(localLayout.id))) {
               log.warn(`Deleting layout ${localLayout.id} which was not present in remote storage`);
             }
-            return async (local) => await local.delete(localLayout.id);
+            return async (local) => {
+              if (abortSignal.aborted) {
+                return;
+              }
+              await local.delete(localLayout.id);
+            };
           }
 
           case "upload-new": {
@@ -592,12 +605,14 @@ export default class LayoutManager implements ILayoutManager {
               savedAt:
                 localLayout.baseline.savedAt ?? (new Date().toISOString() as ISO8601Timestamp),
             });
-            return async (local) =>
+            return async (local) => {
+              // Don't check abortSignal; we need the cache to be updated to show the layout is tracked
               await local.put({
                 ...localLayout,
                 baseline: { ...localLayout.baseline, savedAt: newBaseline.savedAt },
                 syncInfo: { status: "tracked", lastRemoteSavedAt: newBaseline.savedAt },
               });
+            };
           }
 
           case "upload-updated": {
@@ -610,22 +625,22 @@ export default class LayoutManager implements ILayoutManager {
               savedAt:
                 localLayout.baseline.savedAt ?? (new Date().toISOString() as ISO8601Timestamp),
             });
-            return async (local) =>
+            return async (local) => {
+              // Don't check abortSignal; we need the cache to be updated to show the layout is tracked
               await local.put({
                 ...localLayout,
                 name: newBaseline.name,
                 baseline: { ...localLayout.baseline, savedAt: newBaseline.savedAt },
                 syncInfo: { status: "tracked", lastRemoteSavedAt: newBaseline.savedAt },
               });
+            };
           }
         }
       }),
     );
 
     await this.local.runExclusive(async (local) => {
-      for (const cleanup of cleanups) {
-        cleanup(local);
-      }
+      await Promise.all(cleanups.map(async (cleanup) => await cleanup(local)));
     });
   }
 }
