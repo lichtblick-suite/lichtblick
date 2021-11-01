@@ -4,61 +4,51 @@
 
 import { createContext, useContext } from "react";
 
-type SourceTypes =
-  | "foxglove-data-platform"
-  | "ros1-local-bagfile"
-  | "ros2-local-bagfile"
-  | "ros1-socket"
-  | "ros2-socket"
-  | "rosbridge-websocket"
-  | "ros1-remote-bagfile"
-  | "velodyne-device";
+import { PromptOptions } from "@foxglove/studio-base/hooks/usePrompt";
+import { Player, PlayerMetricsCollectorInterface } from "@foxglove/studio-base/players/types";
+import ConsoleApi from "@foxglove/studio-base/services/ConsoleApi";
 
-export type PlayerSourceDefinition = {
-  name: string;
-  type: SourceTypes;
+export type DataSourceFactoryInitializeArgs = {
+  metricsCollector: PlayerMetricsCollectorInterface;
+  unlimitedMemoryCache: boolean;
+  rosHostname?: string;
+  folder?: FileSystemDirectoryHandle;
+  file?: File;
+  url?: string;
+  consoleApi?: ConsoleApi;
+} & Record<string, unknown>;
+
+export interface IDataSourceFactory {
+  id: string;
+  displayName: string;
+  iconName?: RegisteredIconNames;
   disabledReason?: string | JSX.Element;
   badgeText?: string;
-};
+  hidden?: boolean;
 
-type FileSourceParams = {
-  files?: File[];
-};
+  // If data source initialization supports "Open File" workflow, this property lists the supported
+  // file types
+  supportedFileTypes?: string[];
 
-type FolderSourceParams = {
-  folder?: string;
-};
+  supportsOpenDirectory?: boolean;
 
-type HttpSourceParams = {
-  url?: string;
-};
+  promptOptions?: (previousValue?: string) => PromptOptions;
 
-type FoxgloveDataPlatformSourceParams = {
-  start?: string;
-  end?: string;
-  seekTo?: string;
-  deviceId?: string;
-};
-
-type SpecializedPlayerSource<T extends SourceTypes> = Omit<PlayerSourceDefinition, "type"> & {
-  type: T;
-};
-
-interface SelectSourceFunction {
-  (definition: SpecializedPlayerSource<"ros1-local-bagfile">, params?: FileSourceParams): void;
-  (definition: SpecializedPlayerSource<"ros2-local-bagfile">, params?: FolderSourceParams): void;
-  (definition: SpecializedPlayerSource<"ros1-remote-bagfile">, params?: HttpSourceParams): void;
-  (
-    definition: SpecializedPlayerSource<"foxglove-data-platform">,
-    params?: FoxgloveDataPlatformSourceParams,
-  ): void;
-  (definition: PlayerSourceDefinition, params?: never): void;
+  // Initialize a player.
+  initialize: (args: DataSourceFactoryInitializeArgs) => Player | undefined;
 }
 
-// PlayerSelection provides the user with a select function and the items to select
+/**
+ * PlayerSelectionContext exposes the available data sources and a function to set the current data source
+ */
 export interface PlayerSelection {
-  selectSource: SelectSourceFunction;
-  availableSources: PlayerSourceDefinition[];
+  selectSource: (sourceId: string, args?: Record<string, unknown>) => void;
+
+  /** Currently selected data source */
+  selectedSource?: IDataSourceFactory;
+
+  /** List of available data sources */
+  availableSources: IDataSourceFactory[];
 }
 
 const PlayerSelectionContext = createContext<PlayerSelection>({

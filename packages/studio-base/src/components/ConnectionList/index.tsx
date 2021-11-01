@@ -12,7 +12,7 @@ import {
 import NotificationModal from "@foxglove/studio-base/components/NotificationModal";
 import ModalContext from "@foxglove/studio-base/context/ModalContext";
 import {
-  PlayerSourceDefinition,
+  IDataSourceFactory,
   usePlayerSelection,
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useConfirm } from "@foxglove/studio-base/hooks/useConfirm";
@@ -51,7 +51,7 @@ export default function ConnectionList(): JSX.Element {
   const theme = useTheme();
 
   const onSourceClick = useCallback(
-    (source: PlayerSourceDefinition) => {
+    (source: IDataSourceFactory) => {
       if (source.disabledReason != undefined) {
         void confirm({
           title: "Unsupported Connection",
@@ -62,7 +62,7 @@ export default function ConnectionList(): JSX.Element {
         return;
       }
 
-      selectSource(source);
+      selectSource(source.id);
     },
     [confirm, selectSource],
   );
@@ -95,31 +95,13 @@ export default function ConnectionList(): JSX.Element {
           : playerName}
       </Text>
       {availableSources.map((source) => {
-        let iconName: RegisteredIconNames;
-        switch (source.type) {
-          case "ros1-local-bagfile":
-            iconName = "OpenFile";
-            break;
-          case "ros2-local-bagfile":
-            iconName = "OpenFolder";
-            break;
-          case "ros1-socket":
-          case "ros2-socket":
-            iconName = "studio.ROS";
-            break;
-          case "rosbridge-websocket":
-            iconName = "Flow";
-            break;
-          case "foxglove-data-platform":
-          case "ros1-remote-bagfile":
-            iconName = "FileASPX";
-            break;
-          case "velodyne-device":
-            iconName = "GenericScan";
-            break;
+        if (source.hidden === true) {
+          return ReactNull;
         }
+
+        const iconName: RegisteredIconNames = source.iconName as RegisteredIconNames;
         return (
-          <div key={source.name}>
+          <div key={source.id}>
             <ActionButton
               styles={{
                 root: {
@@ -138,7 +120,7 @@ export default function ConnectionList(): JSX.Element {
               }}
               onClick={() => onSourceClick(source)}
             >
-              {source.name}
+              {source.displayName}
               {source.badgeText && <span className={styles.badge}>{source.badgeText}</span>}
             </ActionButton>
           </div>

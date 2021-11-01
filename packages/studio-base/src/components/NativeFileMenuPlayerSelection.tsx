@@ -19,14 +19,14 @@ export function NativeFileMenuPlayerSelection(): ReactElement {
     }
 
     for (const item of availableSources) {
-      nativeAppMenu.addFileEntry(item.name, () => {
-        selectSource(item);
+      nativeAppMenu.addFileEntry(item.displayName, () => {
+        selectSource(item.id);
       });
     }
 
     return () => {
       for (const item of availableSources) {
-        nativeAppMenu.removeFileEntry(item.name);
+        nativeAppMenu.removeFileEntry(item.displayName);
       }
     };
   }, [availableSources, nativeAppMenu, selectSource]);

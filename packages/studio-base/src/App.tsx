@@ -16,7 +16,7 @@ import AnalyticsProvider from "@foxglove/studio-base/context/AnalyticsProvider";
 import { AssetsProvider } from "@foxglove/studio-base/context/AssetsContext";
 import { HoverValueProvider } from "@foxglove/studio-base/context/HoverValueContext";
 import ModalHost from "@foxglove/studio-base/context/ModalHost";
-import { PlayerSourceDefinition } from "@foxglove/studio-base/context/PlayerSelectionContext";
+import { IDataSourceFactory } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { UserNodeStateProvider } from "@foxglove/studio-base/context/UserNodeStateContext";
 import CurrentLayoutProvider from "@foxglove/studio-base/providers/CurrentLayoutProvider";
 import ExtensionMarketplaceProvider from "@foxglove/studio-base/providers/ExtensionMarketplaceProvider";
@@ -31,7 +31,7 @@ type AppProps = {
    * on first launch and not subsequent launches.
    */
   loadWelcomeLayout?: boolean;
-  availableSources: PlayerSourceDefinition[];
+  availableSources: IDataSourceFactory[];
   demoBagUrl?: string;
   deepLinks?: string[];
 };

@@ -10,7 +10,6 @@ import {
   getRemoteBagDescriptor,
 } from "@foxglove/studio-base/randomAccessDataProviders/standardDataProviderDescriptors";
 import { RandomAccessDataProviderDescriptor } from "@foxglove/studio-base/randomAccessDataProviders/types";
-import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import { getSeekToTime } from "@foxglove/studio-base/util/time";
 
 export type BuildPlayerOptions = {
@@ -80,23 +79,7 @@ export function buildPlayerFromBagURLs(urls: string[], options: BuildPlayerOptio
       getRemoteBagDescriptor(urls[0] as string, options),
       options,
     );
-  } else if (urls.length === 2) {
-    return buildPlayerFromDescriptor(
-      name,
-      {
-        name: CoreDataProviders.CombinedDataProvider,
-        args: {},
-        children: [
-          getRemoteBagDescriptor(urls[0] as string, options),
-          {
-            name: CoreDataProviders.RenameDataProvider,
-            args: { prefix: SECOND_SOURCE_PREFIX },
-            children: [getRemoteBagDescriptor(urls[1] as string, options)],
-          },
-        ],
-      },
-      options,
-    );
   }
+
   throw new Error(`Unsupported number of urls: ${urls.length}`);
 }

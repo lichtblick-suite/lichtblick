@@ -8,7 +8,7 @@ import {
   App,
   ErrorBoundary,
   MultiProvider,
-  PlayerSourceDefinition,
+  IDataSourceFactory,
   ThemeProvider,
   UserProfileLocalStorageProvider,
   StudioToastProvider,
@@ -17,6 +17,14 @@ import {
   ConsoleApi,
   ConsoleApiContext,
   ConsoleApiRemoteLayoutStorageProvider,
+  Ros1LocalBagDataSourceFactory,
+  Ros2LocalBagDataSourceFactory,
+  RosbridgeDataSourceFactory,
+  VelodyneDataSourceFactory,
+  Ros1RemoteBagDataSourceFactory,
+  Ros1SocketDataSourceFactory,
+  Ros2SocketDataSourceFactory,
+  FoxgloveDataPlatformDataSourceFactory,
 } from "@foxglove/studio-base";
 
 import { Desktop } from "../common/types";
@@ -31,43 +39,18 @@ const DEMO_BAG_URL = "https://storage.googleapis.com/foxglove-public-assets/demo
 
 const desktopBridge = (global as unknown as { desktopBridge: Desktop }).desktopBridge;
 
-export default function Root(): ReactElement {
-  const playerSources: PlayerSourceDefinition[] = [
-    {
-      name: "ROS 1",
-      type: "ros1-socket",
-    },
-    {
-      name: "ROS 1 Rosbridge",
-      type: "rosbridge-websocket",
-    },
-    {
-      name: "ROS 1 Bag (local)",
-      type: "ros1-local-bagfile",
-    },
-    {
-      name: "ROS 1 Bag (remote)",
-      type: "ros1-remote-bagfile",
-    },
-    {
-      name: "ROS 2",
-      type: "ros2-socket",
-      badgeText: "beta",
-    },
-    {
-      name: "ROS 2 Rosbridge",
-      type: "rosbridge-websocket",
-    },
-    {
-      name: "ROS 2 Bag (local)",
-      type: "ros2-local-bagfile",
-    },
-    {
-      name: "Velodyne LIDAR",
-      type: "velodyne-device",
-    },
-  ];
+const dataSources: IDataSourceFactory[] = [
+  new Ros1SocketDataSourceFactory(),
+  new Ros1LocalBagDataSourceFactory(),
+  new Ros1RemoteBagDataSourceFactory(),
+  new Ros2SocketDataSourceFactory(),
+  new Ros2LocalBagDataSourceFactory(),
+  new RosbridgeDataSourceFactory(),
+  new VelodyneDataSourceFactory(),
+  new FoxgloveDataPlatformDataSourceFactory(),
+];
 
+export default function Root(): ReactElement {
   const api = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL!), []);
 
   const providers = [
@@ -93,7 +76,7 @@ export default function Root(): ReactElement {
       <CssBaseline>
         <ErrorBoundary>
           <MultiProvider providers={providers}>
-            <App demoBagUrl={DEMO_BAG_URL} deepLinks={deepLinks} availableSources={playerSources} />
+            <App demoBagUrl={DEMO_BAG_URL} deepLinks={deepLinks} availableSources={dataSources} />
           </MultiProvider>
         </ErrorBoundary>
       </CssBaseline>

@@ -145,3 +145,5 @@ export function usePrompt(): (options: PromptOptions) => Promise<string | undefi
 
   return runPrompt;
 }
+
+export type { PromptOptions };
