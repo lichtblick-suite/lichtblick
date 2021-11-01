@@ -63,10 +63,10 @@ export const constantsByDatatype = createSelector(
           field.value != undefined &&
           typeof field.value !== "boolean"
         ) {
-          if (result[field.value] != undefined) {
-            result[field.value] = "<multiple constants match>";
+          if (result[field.value.toString()] != undefined) {
+            result[field.value.toString()] = "<multiple constants match>";
           } else {
-            result[field.value] = field.name;
+            result[field.value.toString()] = field.name;
           }
         }
       }
@@ -111,10 +111,10 @@ export const enumValuesByDatatypeAndField = createSelector(
           typeof field.value !== "boolean"
         ) {
           lastType = field.type;
-          if (constants[field.value] != undefined) {
-            constants[field.value] = "<multiple constants match>";
+          if (constants[field.value.toString()] != undefined) {
+            constants[field.value.toString()] = "<multiple constants match>";
           } else {
-            constants[field.value] = field.name;
+            constants[field.value.toString()] = field.name;
           }
           continue;
         }

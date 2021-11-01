@@ -15,7 +15,7 @@ import { debounce, isEqual } from "lodash";
 import decompressLZ4 from "wasm-lz4";
 
 import Logger from "@foxglove/log";
-import { Bag, BagReader } from "@foxglove/rosbag";
+import { Bag } from "@foxglove/rosbag";
 import { BlobReader } from "@foxglove/rosbag/web";
 import { Time, add, compare, fromMillis, subtract as subtractTimes } from "@foxglove/rostime";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
@@ -152,7 +152,7 @@ export default class BagDataProvider implements RandomAccessDataProvider {
           return await new Promise(() => {}); // Just never finish initializing.
         }
 
-        this._bag = new Bag(new BagReader(remoteReader));
+        this._bag = new Bag(remoteReader);
 
         try {
           await this._bag.open();
@@ -161,7 +161,7 @@ export default class BagDataProvider implements RandomAccessDataProvider {
           return await new Promise(() => {}); // Just never finish initializing.
         }
       } else {
-        this._bag = new Bag(new BagReader(new BlobReader(bagPath.file)));
+        this._bag = new Bag(new BlobReader(bagPath.file));
         await this._bag.open();
       }
     } catch (err) {

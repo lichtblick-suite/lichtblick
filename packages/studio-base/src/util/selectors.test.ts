@@ -56,12 +56,13 @@ describe("selectors", () => {
                 definitions: [
                   { type: "uint32", name: "OFF", isConstant: true, value: 0 },
                   { type: "uint32", name: "ON", isConstant: true, value: 1 },
+                  { type: "uint64", name: "TWO", isConstant: true, value: 18446744073709551615n },
                 ],
               },
             }),
           ),
         ),
-      ).toEqual({ "some/datatype": { "0": "OFF", "1": "ON" } });
+      ).toEqual({ "some/datatype": { "0": "OFF", "1": "ON", "18446744073709551615": "TWO" } });
     });
 
     it("marks duplicate constant names", () => {
@@ -97,6 +98,9 @@ describe("selectors", () => {
                   { type: "uint8", name: "YELLOW", isConstant: true, value: 1 },
                   { type: "uint8", name: "GREEN", isConstant: true, value: 2 },
                   { type: "uint8", name: "color", isArray: false, isComplex: false },
+                  { type: "uint64", name: "ONE", isConstant: true, value: 1n },
+                  { type: "uint64", name: "TWO", isConstant: true, value: 2n },
+                  { type: "uint64", name: "large_number", isArray: false, isComplex: false },
                 ],
               },
             }),
@@ -106,6 +110,7 @@ describe("selectors", () => {
         "some/datatype": {
           state: { "0": "OFF", "1": "ON" },
           color: { "0": "RED", "1": "YELLOW", "2": "GREEN" },
+          large_number: { "1": "ONE", "2": "TWO" },
         },
       });
     });

@@ -5,7 +5,7 @@
 import decompressLZ4 from "wasm-lz4";
 
 import { McapReader, McapRecord } from "@foxglove/mcap";
-import { Bag, BagReader } from "@foxglove/rosbag";
+import { Bag } from "@foxglove/rosbag";
 import { BlobReader } from "@foxglove/rosbag/web";
 import { Time, fromNanoSec, isLessThan, isGreaterThan } from "@foxglove/rostime";
 
@@ -25,7 +25,7 @@ export type FileInfo = {
 };
 
 export async function getBagInfo(file: File): Promise<FileInfo> {
-  const bag = new Bag(new BagReader(new BlobReader(file)));
+  const bag = new Bag(new BlobReader(file));
   await bag.open();
   const numMessagesByConnectionIndex = Array.from(bag.connections.values(), () => 0);
   let totalMessages = 0;
