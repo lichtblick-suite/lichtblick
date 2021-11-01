@@ -50,6 +50,12 @@ const RosTimeWrapper = styled.div`
   margin: 0 8px;
 `;
 
+const RelativeTimeWrapper = styled.div`
+  display: inline-block;
+  color: ${colors.GREY};
+  margin: 0 8px;
+`;
+
 const TimeWrapper = styled.div`
   display: inline-block;
   margin: 0 8px;
@@ -65,10 +71,23 @@ type Props = {
 };
 
 export default function Timestamp({ time, timezone }: Props): JSX.Element {
+  const rawTime = formatTimeRaw(time);
+
+  if (!isAbsoluteTime(time)) {
+    return (
+      <SRoot>
+        <TimestampWrapper>
+          <RelativeTimeWrapper>{rawTime}</RelativeTimeWrapper>
+          <CopyText copyText={rawTime} tooltip="Copy time to clipboard">
+            sec
+          </CopyText>
+        </TimestampWrapper>
+      </SRoot>
+    );
+  }
+
   const currentTimeStr = formatTime(time, timezone);
   const date = formatDate(time, timezone);
-
-  const rawTime = formatTimeRaw(time);
 
   return (
     <SRoot>
@@ -89,4 +108,11 @@ export default function Timestamp({ time, timezone }: Props): JSX.Element {
       </TimestampWrapper>
     </SRoot>
   );
+}
+
+const DURATION_20_YEARS_SEC = 20 * 365 * 24 * 60 * 60;
+
+// Values "too small" to be absolute epoch-based times are probably relative durations.
+function isAbsoluteTime(time: Time): boolean {
+  return time.sec > DURATION_20_YEARS_SEC;
 }

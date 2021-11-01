@@ -20,6 +20,7 @@ import MemoryCacheDataProvider from "@foxglove/studio-base/randomAccessDataProvi
 import ParseMessagesDataProvider from "@foxglove/studio-base/randomAccessDataProviders/ParseMessagesDataProvider";
 import RenameDataProvider from "@foxglove/studio-base/randomAccessDataProviders/RenameDataProvider";
 import Rosbag2DataProvider from "@foxglove/studio-base/randomAccessDataProviders/Rosbag2DataProvider";
+import UlogDataProvider from "@foxglove/studio-base/randomAccessDataProviders/UlogDataProvider";
 import WorkerDataProvider from "@foxglove/studio-base/randomAccessDataProviders/WorkerDataProvider";
 import createGetDataProvider from "@foxglove/studio-base/randomAccessDataProviders/createGetDataProvider";
 import {
@@ -35,6 +36,7 @@ const getDataProviderBase = createGetDataProvider({
   ParseMessagesDataProvider,
   RenameDataProvider,
   Rosbag2DataProvider,
+  UlogDataProvider,
   WorkerDataProvider,
 });
 

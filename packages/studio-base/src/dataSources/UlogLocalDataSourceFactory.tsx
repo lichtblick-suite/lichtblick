@@ -8,26 +8,25 @@ import {
 } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { buildNonRos1PlayerFromDescriptor } from "@foxglove/studio-base/players/buildNonRos1Player";
 import { Player } from "@foxglove/studio-base/players/types";
-import { getLocalRosbag2Descriptor } from "@foxglove/studio-base/randomAccessDataProviders/standardDataProviderDescriptors";
+import { getLocalUlogDescriptor } from "@foxglove/studio-base/randomAccessDataProviders/standardDataProviderDescriptors";
 
-class Ros2LocalBagDataSourceFactory implements IDataSourceFactory {
-  id = "ros2-local-bagfile";
-  displayName = "ROS 2 Bag (local)";
-  iconName: IDataSourceFactory["iconName"] = "OpenFolder";
-
-  supportsOpenDirectory = true;
+class UlogLocalDataSourceFactory implements IDataSourceFactory {
+  id = "ulog-local-file";
+  displayName = "PX4 ULog (local)";
+  iconName: IDataSourceFactory["iconName"] = "OpenFile";
+  supportedFileTypes = [".ulg", ".ulog"];
 
   initialize(args: DataSourceFactoryInitializeArgs): Player | undefined {
-    const folder = args.folder;
-    if (!folder) {
+    const file = args.file;
+    if (!file) {
       return;
     }
 
-    return buildNonRos1PlayerFromDescriptor(getLocalRosbag2Descriptor(folder), {
+    return buildNonRos1PlayerFromDescriptor(getLocalUlogDescriptor(file), {
       metricsCollector: args.metricsCollector,
       unlimitedMemoryCache: args.unlimitedMemoryCache,
     });
   }
 }
 
-export default Ros2LocalBagDataSourceFactory;
+export default UlogLocalDataSourceFactory;

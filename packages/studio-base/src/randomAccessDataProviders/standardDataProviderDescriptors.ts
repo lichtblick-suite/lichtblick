@@ -61,3 +61,13 @@ export function getLocalRosbag2Descriptor(
     children: [],
   };
 }
+
+export function getLocalUlogDescriptor(file: File): RandomAccessDataProviderDescriptor {
+  return {
+    label: file.name,
+    name: CoreDataProviders.UlogDataProvider,
+    filePath: (file as { path?: string }).path, // File.path is added by Electron
+    args: { filePath: { type: "file", file } },
+    children: [],
+  };
+}

@@ -25,6 +25,7 @@ import {
   Ros1SocketDataSourceFactory,
   Ros2SocketDataSourceFactory,
   FoxgloveDataPlatformDataSourceFactory,
+  UlogLocalDataSourceFactory,
 } from "@foxglove/studio-base";
 
 import { Desktop } from "../common/types";
@@ -46,6 +47,7 @@ const dataSources: IDataSourceFactory[] = [
   new Ros2SocketDataSourceFactory(),
   new Ros2LocalBagDataSourceFactory(),
   new RosbridgeDataSourceFactory(),
+  new UlogLocalDataSourceFactory(),
   new VelodyneDataSourceFactory(),
   new FoxgloveDataPlatformDataSourceFactory(),
 ];

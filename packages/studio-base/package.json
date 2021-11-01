@@ -45,6 +45,7 @@
     "@foxglove/rosmsg2-serialization": "1.0.4",
     "@foxglove/rostime": "1.1.1",
     "@foxglove/studio": "workspace:*",
+    "@foxglove/ulog": "2.1.1",
     "@foxglove/velodyne-cloud": "1.0.0",
     "@mdi/svg": "6.3.95",
     "@sentry/core": "6.13.3",

@@ -18,6 +18,7 @@ import {
   MessageDefinitionsByTopic,
   ParsedMessageDefinitionsByTopic,
   MessageEvent,
+  ParameterValue,
 } from "@foxglove/studio-base/players/types";
 import { RosDatatypes } from "@foxglove/studio-base/types/RosDatatypes";
 
@@ -122,6 +123,7 @@ export type InitializationResult = {
   end: Time; // Inclusive (time of last message).
   topics: Topic[];
   connections: Connection[];
+  parameters?: Map<string, ParameterValue>;
 
   // Signals whether the messages returned from calls to getMessages are parsed into Javascript
   // objects or are returned in ROS binary format.

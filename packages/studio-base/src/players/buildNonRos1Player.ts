@@ -9,8 +9,8 @@ import { RandomAccessDataProviderDescriptor } from "@foxglove/studio-base/random
 import { getSeekToTime } from "@foxglove/studio-base/util/time";
 
 // This is separate from buildPlayerFromDescriptor because we can't use ParseMessages and
-// MemoryCache with Rosbag2DataProvider currently (they only support ROS1 binary messages)
-export function buildRosbag2PlayerFromDescriptor(
+// MemoryCache with non-ROS1 DataProviders currently (they only support ROS1 binary messages)
+export function buildNonRos1PlayerFromDescriptor(
   rootDescriptor: RandomAccessDataProviderDescriptor,
   options: BuildPlayerOptions,
 ): Player {
