@@ -11,6 +11,7 @@
 //   You may not use this file except in compliance with the License.
 
 import { Link, makeStyles, Stack, Text, useTheme } from "@fluentui/react";
+import { extname } from "path";
 import {
   useState,
   useEffect,
@@ -138,9 +139,6 @@ function Variables() {
   );
 }
 
-// file types we support for drag/drop
-const allowedDropExtensions = [".bag", ".foxe", ".urdf", ".xacro"];
-
 type WorkspaceProps = {
   loadWelcomeLayout?: boolean;
   demoBagUrl?: string;
@@ -156,10 +154,21 @@ const selectPlayerProblems = ({ playerState }: MessagePipelineContext) => player
 export default function Workspace(props: WorkspaceProps): JSX.Element {
   const classes = useStyles();
   const containerRef = useRef<HTMLDivElement>(ReactNull);
-  const { selectSource } = usePlayerSelection();
+  const { availableSources, selectSource } = usePlayerSelection();
   const playerPresence = useMessagePipeline(selectPlayerPresence);
   const playerCapabilities = useMessagePipeline(selectPlayerCapabilities);
   const playerProblems = useMessagePipeline(selectPlayerProblems);
+
+  // file types we support for drag/drop
+  const allowedDropExtensions = useMemo(() => {
+    const extensions = [".foxe", ".urdf", ".xacro"];
+    for (const source of availableSources) {
+      if (source.supportedFileTypes) {
+        extensions.push(...source.supportedFileTypes);
+      }
+    }
+    return extensions;
+  }, [availableSources]);
 
   const supportsAccountSettings = useContext(ConsoleApiContext) != undefined;
 
@@ -264,16 +273,12 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
     })();
   });
 
-  // previously loaded files are tracked so support the "add bag" feature which loads a second bag
-  // file when the user presses shift during a drag/drop
-  const previousFiles = useRef<File[]>([]);
-
   const { loadFromFile } = useAssets();
 
   const extensionLoader = useExtensionLoader();
 
   const openFiles = useCallback(
-    async (files: FileList, { shiftPressed }: { shiftPressed: boolean }) => {
+    async (files: FileList) => {
       const otherFiles: File[] = [];
       for (const file of files) {
         // electron extends File with a `path` field which is not available in browsers
@@ -305,24 +310,31 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       }
 
       if (otherFiles.length > 0) {
-        if (shiftPressed) {
-          previousFiles.current = previousFiles.current.concat(otherFiles);
-        } else {
-          previousFiles.current = otherFiles;
+        // Look for a source that supports the dragged file extensions
+        for (const source of availableSources) {
+          const filteredFiles = otherFiles.filter((file) => {
+            const ext = extname(file.name);
+            return source.supportedFileTypes?.includes(ext);
+          });
+
+          // select the first source that has files that match the supported extensions
+          if (filteredFiles.length > 0) {
+            selectSource(source.id, {
+              files: otherFiles,
+            });
+            break;
+          }
         }
-        selectSource("ros1-local-bagfile", {
-          files: previousFiles.current,
-        });
       }
     },
-    [addToast, extensionLoader, loadFromFile, selectSource],
+    [addToast, availableSources, extensionLoader, loadFromFile, selectSource],
   );
 
   // files the main thread told us to open
   const filesToOpen = useElectronFilesToOpen();
   useEffect(() => {
     if (filesToOpen) {
-      void openFiles(filesToOpen, { shiftPressed: false });
+      void openFiles(filesToOpen);
     }
   }, [filesToOpen, openFiles]);
 
@@ -380,8 +392,8 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
   }, [props.deepLinks, selectSource]);
 
   const dropHandler = useCallback(
-    ({ files, shiftPressed }: { files: FileList; shiftPressed: boolean }) => {
-      void openFiles(files, { shiftPressed });
+    ({ files }: { files: FileList }) => {
+      void openFiles(files);
     },
     [openFiles],
   );

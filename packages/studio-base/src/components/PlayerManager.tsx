@@ -219,15 +219,19 @@ export default function PlayerManager(props: PropsWithChildren<PlayerManagerProp
       const supportedFileTypes = foundSource.supportedFileTypes;
       if (supportedFileTypes != undefined) {
         try {
-          const [fileHandle] = await showOpenFilePicker({
-            types: [
-              {
-                description: foundSource.displayName,
-                accept: { "application/octet-stream": supportedFileTypes },
-              },
-            ],
-          });
-          const file = await fileHandle.getFile();
+          let file = (args?.files as File[] | undefined)?.[0];
+
+          if (!file) {
+            const [fileHandle] = await showOpenFilePicker({
+              types: [
+                {
+                  description: foundSource.displayName,
+                  accept: { "application/octet-stream": supportedFileTypes },
+                },
+              ],
+            });
+            file = await fileHandle.getFile();
+          }
 
           const newPlayer = foundSource.initialize({
             file,
