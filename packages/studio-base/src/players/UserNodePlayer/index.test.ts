@@ -826,7 +826,7 @@ describe("UserNodePlayer", () => {
             }
             return { num: 42 };
           };`,
-        error: "TypeError: Cannot read property 'message' of undefined",
+        error: expect.stringMatching(/^TypeError:/),
       },
       {
         code: `
@@ -837,7 +837,7 @@ describe("UserNodePlayer", () => {
           export default (messages: any): { num: number } => {
             return { num: 42 };
           };`,
-        error: "TypeError: Cannot read property 'bad' of undefined",
+        error: expect.stringMatching(/^TypeError:/),
       },
       {
         code: `
