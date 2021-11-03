@@ -24,7 +24,6 @@ import {
   useMessagePipeline,
   useMessagePipelineGetter,
 } from "@foxglove/studio-base/components/MessagePipeline";
-import HelpButton from "@foxglove/studio-base/components/PanelToolbar/HelpButton";
 import {
   jumpSeek,
   DIRECTION,
@@ -35,7 +34,6 @@ import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import PlaybackTimeDisplay from "./PlaybackTimeDisplay";
 import RepeatAdapter from "./RepeatAdapter";
 import Scrubber from "./Scrubber";
-import helpContent from "./index.help.md";
 
 const selectPause = (ctx: MessagePipelineContext) => ctx.pausePlayback;
 const selectPlay = (ctx: MessagePipelineContext) => ctx.startPlayback;
@@ -255,7 +253,6 @@ export default function PlaybackControls(): JSX.Element {
               />
             </Tooltip>
           </StackItem>
-          <HelpButton iconStyle={{ width: "18px", height: "18px" }}>{helpContent}</HelpButton>
         </Stack>
       </Stack>
     </div>

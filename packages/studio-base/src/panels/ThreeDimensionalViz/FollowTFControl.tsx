@@ -13,7 +13,7 @@
 
 import { IButtonStyles, IconButton, Stack, useTheme } from "@fluentui/react";
 import { sortBy, debounce } from "lodash";
-import { memo, createRef, useCallback, useState } from "react";
+import { memo, createRef, useCallback, useState, useMemo } from "react";
 import shallowequal from "shallowequal";
 
 import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Autocomplete";
@@ -34,25 +34,6 @@ type TfTree = {
     [key: string]: TfTreeNode;
   };
 };
-
-const iconButtonStyles = {
-  rootHovered: { backgroundColor: "transparent" },
-  rootPressed: { backgroundColor: "transparent" },
-  rootDisabled: { backgroundColor: "transparent" },
-  rootChecked: { backgroundColor: "transparent" },
-  rootCheckedHovered: { backgroundColor: "transparent" },
-  rootCheckedPressed: { backgroundColor: "transparent" },
-  iconChecked: { color: colors.HIGHLIGHT },
-  icon: {
-    color: "white",
-
-    svg: {
-      fill: "currentColor",
-      height: "1em",
-      width: "1em",
-    },
-  },
-} as Partial<IButtonStyles>;
 
 const treeNodeToTfId = (node: TfTreeNode) => node.tf.id;
 
@@ -138,6 +119,29 @@ const FollowTFControl = memo<Props>((props: Props) => {
   const [forceShowFrameList, setForceShowFrameList] = useState(false);
   const [hovering, setHovering] = useState(false);
   const [lastSelectedFrame, setLastSelectedFrame] = useState<string | undefined>(undefined);
+  const theme = useTheme();
+
+  const iconButtonStyles = useMemo(
+    (): Partial<IButtonStyles> => ({
+      rootHovered: { backgroundColor: "transparent" },
+      rootPressed: { backgroundColor: "transparent" },
+      rootDisabled: { backgroundColor: "transparent" },
+      rootChecked: { backgroundColor: "transparent" },
+      rootCheckedHovered: { backgroundColor: "transparent" },
+      rootCheckedPressed: { backgroundColor: "transparent" },
+      iconChecked: { color: colors.HIGHLIGHT },
+      icon: {
+        color: theme.semanticColors.bodyText,
+
+        svg: {
+          fill: "currentColor",
+          height: "1em",
+          width: "1em",
+        },
+      },
+    }),
+    [theme],
+  );
 
   const tfTree = buildTfTree(transforms.values());
   const allNodes = Array.from(getDescendants(tfTree.roots));
@@ -223,7 +227,6 @@ const FollowTFControl = memo<Props>((props: Props) => {
 
   const followButton = useTooltip({ contents: getFollowButtonTooltip() });
   const frameListButton = useTooltip({ contents: "Select a frame to follow…" });
-  const theme = useTheme();
 
   return (
     <Stack
@@ -234,10 +237,11 @@ const FollowTFControl = memo<Props>((props: Props) => {
       verticalAlign="center"
       styles={{
         root: {
-          backgroundColor: colors.DARK3,
+          // see also ExpandingToolbar styles
+          backgroundColor: theme.semanticColors.buttonBackgroundHovered,
           borderRadius: theme.effects.roundedCorner2,
           pointerEvents: "auto",
-          color: tfToFollow ? undefined : colors.TEXT_MUTED,
+          color: tfToFollow ? undefined : theme.semanticColors.disabledText,
           position: "relative",
         },
       }}

@@ -84,14 +84,19 @@ const PlaybackTimeDisplayMethod = ({
           margin: 0,
           whiteSpace: "nowrap",
           fontFeatureSettings: `${fonts.SANS_SERIF_FEATURE_SETTINGS}, 'zero'`,
+          backgroundColor: "transparent",
 
           ":hover": {
             borderRadius: 2,
-            backgroundColor: theme.semanticColors.buttonBackgroundHovered,
+            backgroundColor: theme.semanticColors.inputBackground,
+          },
+          ":focus": {
+            backgroundColor: theme.semanticColors.inputBackground,
           },
         },
         fieldGroup: {
           border: "none",
+          backgroundColor: "transparent",
         },
         icon: {
           height: 20,
@@ -227,8 +232,12 @@ const PlaybackTimeDisplayMethod = ({
         styles={{
           root: {
             border: "none",
+            background: theme.semanticColors.buttonBackgroundHovered,
             padding: theme.spacing.s1,
             minWidth: "50px",
+          },
+          rootHovered: {
+            background: theme.semanticColors.buttonBackgroundPressed,
           },
           label: theme.fonts.small,
           menuIcon: {

@@ -22,7 +22,6 @@ import useDeepChangeDetector from "@foxglove/studio-base/hooks/useDeepChangeDete
 import { Interactive } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/types";
 import Transforms from "@foxglove/studio-base/panels/ThreeDimensionalViz/Transforms";
 import { TextMarker, Color } from "@foxglove/studio-base/types/Messages";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export const YELLOW = { r: 1, b: 0, g: 1, a: 1 };
 export const ORANGE = { r: 0.97, g: 0.58, b: 0.02, a: 1 };
@@ -210,18 +209,6 @@ export const useSearchMatches = ({
   ]);
 };
 
-const iconStyle = {
-  icon: {
-    color: "white",
-
-    svg: {
-      fill: "currentColor",
-      height: "1em",
-      width: "1em",
-    },
-  },
-} as Partial<IButtonStyles>;
-
 const arrowButtonStyles = {
   icon: { height: 18, fontSize: 10 },
   root: { backgroundColor: "transparent", width: 18 },
@@ -277,6 +264,18 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
   const hasMatches: boolean = searchTextMatches.length > 0;
   const searchButton = useTooltip({ contents: "Search text markers", placement: "left" });
 
+  const iconStyle: Partial<IButtonStyles> = {
+    icon: {
+      color: theme.semanticColors.bodyText,
+
+      svg: {
+        fill: "currentColor",
+        height: "1em",
+        width: "1em",
+      },
+    },
+  };
+
   if (!searchTextOpen) {
     return (
       <div>
@@ -286,10 +285,14 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
           iconProps={{ iconName: "Search" }}
           onClick={() => toggleSearchTextOpen(!searchTextOpen)}
           styles={{
-            root: { backgroundColor: colors.DARK3, pointerEvents: "auto" },
-            rootHovered: { backgroundColor: colors.DARK3 },
-            rootPressed: { backgroundColor: colors.DARK3 },
-            rootDisabled: { backgroundColor: colors.DARK3 },
+            // see also ExpandingToolbar styles
+            root: {
+              backgroundColor: theme.semanticColors.buttonBackgroundHovered,
+              pointerEvents: "auto",
+            },
+            rootHovered: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
+            rootPressed: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
+            rootDisabled: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
             ...iconStyle,
           }}
         />
@@ -304,7 +307,7 @@ const SearchText = React.memo<SearchTextComponentProps>(function SearchText({
       styles={{
         root: {
           pointerEvents: "auto",
-          backgroundColor: colors.DARK3,
+          backgroundColor: theme.semanticColors.buttonBackgroundHovered,
           borderRadius: theme.effects.roundedCorner2,
           position: "relative",
         },

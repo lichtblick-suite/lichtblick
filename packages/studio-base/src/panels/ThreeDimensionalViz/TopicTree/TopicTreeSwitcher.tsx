@@ -2,7 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { IconButton, makeStyles } from "@fluentui/react";
+import { IconButton, makeStyles, useTheme } from "@fluentui/react";
 import cx from "classnames";
 import { useCallback } from "react";
 
@@ -53,6 +53,7 @@ export default function TopicTreeSwitcher({
   setShowTopicTree,
   showErrorBadge,
 }: Props): JSX.Element {
+  const theme = useTheme();
   const classes = useStyles();
   const onClick = useCallback(() => setShowTopicTree((shown) => !shown), [setShowTopicTree]);
 
@@ -114,17 +115,17 @@ export default function TopicTreeSwitcher({
           root: {
             position: "relative",
             transform: "translateX(-100%)",
-            backgroundColor: colors.DARK3,
+            backgroundColor: theme.semanticColors.buttonBackgroundHovered,
             opacity: renderTopicTree ? 0 : 1,
             transition: `opacity 0.15s ease-out ${renderTopicTree ? 0 : 0.2}s`,
             pointerEvents: renderTopicTree ? "none" : "auto",
           },
-          rootHovered: { backgroundColor: colors.DARK3 },
-          rootPressed: { backgroundColor: colors.DARK3 },
-          rootDisabled: { backgroundColor: colors.DARK3 },
+          rootHovered: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
+          rootPressed: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
+          rootDisabled: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
           iconChecked: { color: colors.ACCENT },
           icon: {
-            color: "white",
+            color: theme.semanticColors.bodyText,
 
             svg: {
               fill: "currentColor",

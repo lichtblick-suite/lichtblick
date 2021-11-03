@@ -19,27 +19,6 @@ type Props = {
   onToggleDebug: () => void;
 };
 
-const iconButtonStyles = {
-  rootHovered: { backgroundColor: "transparent" },
-  rootPressed: { backgroundColor: "transparent" },
-  rootDisabled: { backgroundColor: "transparent" },
-
-  rootChecked: { backgroundColor: "transparent" },
-  rootCheckedHovered: { backgroundColor: "transparent" },
-  rootCheckedPressed: { backgroundColor: "transparent" },
-
-  iconChecked: { color: colors.HIGHLIGHT },
-  icon: {
-    color: "white",
-
-    svg: {
-      fill: "currentColor",
-      height: "1em",
-      width: "1em",
-    },
-  },
-} as Partial<IButtonStyles>;
-
 function MainToolbar({
   measuringTool,
   measureInfo: { measureState },
@@ -65,12 +44,33 @@ function MainToolbar({
     contents: debug ? "Disable Debug" : "Enable Debug",
   });
 
+  const iconButtonStyles: Partial<IButtonStyles> = {
+    rootHovered: { backgroundColor: "transparent" },
+    rootPressed: { backgroundColor: "transparent" },
+    rootDisabled: { backgroundColor: "transparent" },
+
+    rootChecked: { backgroundColor: "transparent" },
+    rootCheckedHovered: { backgroundColor: "transparent" },
+    rootCheckedPressed: { backgroundColor: "transparent" },
+
+    iconChecked: { color: colors.HIGHLIGHT },
+    icon: {
+      color: theme.semanticColors.bodyText,
+
+      svg: {
+        fill: "currentColor",
+        height: "1em",
+        width: "1em",
+      },
+    },
+  };
+
   return (
     <Stack
       grow={0}
       styles={{
         root: {
-          backgroundColor: colors.DARK3,
+          backgroundColor: theme.semanticColors.buttonBackgroundHovered,
           borderRadius: theme.effects.roundedCorner2,
           flexShrink: 0,
           pointerEvents: "auto",

@@ -41,7 +41,7 @@ function formatTimezone(name: string) {
 }
 
 function ColorSchemeSettings(): JSX.Element {
-  const [colorScheme = "system", setColorScheme] = useAppConfigurationValue<string>(
+  const [colorScheme = "dark", setColorScheme] = useAppConfigurationValue<string>(
     AppSetting.COLOR_SCHEME,
   );
   const options: IChoiceGroupOption[] = useMemo(

@@ -55,7 +55,7 @@ function isNetworkError(err: Error) {
 }
 
 function updateNativeColorScheme() {
-  const colorScheme = getAppSetting<string>(AppSetting.COLOR_SCHEME);
+  const colorScheme = getAppSetting<string>(AppSetting.COLOR_SCHEME) ?? "dark";
   nativeTheme.themeSource =
     colorScheme === "dark" ? "dark" : colorScheme === "light" ? "light" : "system";
 }
