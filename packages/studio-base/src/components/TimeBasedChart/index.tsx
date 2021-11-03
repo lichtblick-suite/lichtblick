@@ -10,6 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import { useTheme } from "@fluentui/react";
 import { ChartOptions, ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
 import { ZoomOptions } from "chartjs-plugin-zoom/types/options";
@@ -177,6 +178,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
 
   const { labels, datasets } = data;
 
+  const theme = useTheme();
   const componentId = useMemo(() => uuidv4(), []);
   const isMounted = useMountedState();
   const canvasContainer = useRef<HTMLDivElement>(ReactNull);
@@ -486,12 +488,12 @@ export default function TimeBasedChart(props: Props): JSX.Element {
         family: fonts.MONOSPACE,
         size: 10,
       },
-      color: "#eee",
+      color: theme.palette.neutralSecondary,
       maxRotation: 0,
     };
 
     const scale = {
-      grid: { color: "rgba(255, 255, 255, 0.2)" },
+      grid: { color: theme.palette.neutralLighter },
       ...xAxes,
       min: minX,
       max: maxX,
@@ -502,7 +504,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
     };
 
     return scale;
-  }, [maxX, minX, xAxes]);
+  }, [theme.palette.neutralSecondary, theme.palette.neutralLighter, xAxes, minX, maxX]);
 
   const yScale = useMemo<ScaleOptions>(() => {
     const defaultYTicksSettings: ScaleOptions["ticks"] = {
@@ -510,7 +512,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
         family: fonts.MONOSPACE,
         size: 10,
       },
-      color: "#eee",
+      color: theme.palette.neutralSecondary,
       padding: 0,
     };
 
@@ -542,7 +544,7 @@ export default function TimeBasedChart(props: Props): JSX.Element {
         ...yAxes.ticks,
       },
     } as ScaleOptions;
-  }, [datasetBounds.y, yAxes, hasUserPannedOrZoomed]);
+  }, [datasetBounds.y, yAxes, hasUserPannedOrZoomed, theme.palette.neutralSecondary]);
 
   const datasetBoundsRef = useRef(datasetBounds);
   datasetBoundsRef.current = datasetBounds;

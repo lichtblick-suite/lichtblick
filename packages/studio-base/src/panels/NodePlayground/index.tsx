@@ -165,6 +165,7 @@ function NodePlayground(props: Props) {
     borderRadius: 0,
     margin: 0,
     backgroundColor: colors.DARK2,
+    color: colors.LIGHT2,
     padding: "4px 20px",
     width: `${inputTitle.length + 4}ch`, // Width based on character count of title + padding
   };

@@ -61,7 +61,7 @@ export default function SidebarButton(props: SidebarButtonProps): JSX.Element {
       {tooltip}
       <CommandBarButton
         data-sidebar-key={dataSidebarKey}
-        style={{ height: BUTTON_SIZE, margin: 0 }}
+        styles={{ root: { height: BUTTON_SIZE, margin: 0, backgroundColor: "transparent" } }}
         iconProps={{
           styles: {
             root: {

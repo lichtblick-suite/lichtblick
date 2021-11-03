@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { ITheme, useTheme } from "@fluentui/react";
 import BlockHelperIcon from "@mdi/svg/svg/block-helper.svg";
 import { useCallback } from "react";
 import styled from "styled-components";
@@ -25,7 +26,6 @@ import { ROW_HEIGHT } from "./constants";
 
 export const TOPIC_ROW_PADDING = 3;
 
-const DEFAULT_COLOR = colors.LIGHT1;
 export const DISABLED_COLOR = colors.TEXT_MUTED;
 export const TOGGLE_WRAPPER_SIZE = 24;
 
@@ -43,6 +43,9 @@ const SToggle = styled.label`
   position: relative;
   cursor: pointer;
   outline: 0;
+  span {
+    border: 1px solid ${({ theme }) => theme.palette.neutralLight} !important;
+  }
   :hover {
     background-color: rgba(255, 255, 255, 0.1);
   }
@@ -93,6 +96,7 @@ function diffModeStyleOverrides(checked: boolean, columnIndex: number) {
 }
 
 function getStyles({
+  theme,
   checked,
   visibleInScene,
   overrideColor,
@@ -100,6 +104,7 @@ function getStyles({
   diffModeEnabled,
   columnIndex,
 }: {
+  theme: ITheme;
   checked: boolean;
   visibleInScene: boolean;
   overrideColor?: Color;
@@ -130,7 +135,7 @@ function getStyles({
         enabledColor: overrideRGB,
         disabledColor: tinyColor(overrideRGB).setAlpha(0.5).toRgbString(),
       }
-    : { enabledColor: DEFAULT_COLOR, disabledColor: DISABLED_COLOR };
+    : { enabledColor: theme.palette.neutralLight, disabledColor: "transparent" };
 
   const color = visibleInScene ? enabledColor : disabledColor;
   if (checked) {
@@ -159,6 +164,7 @@ export default function VisibilityToggle({
   diffModeEnabled,
   columnIndex,
 }: Props): JSX.Element {
+  const theme = useTheme();
   // Handle shift + click/enter, option + click/enter, and click/enter.
   const onChange = useCallback(
     (e: React.MouseEvent | React.KeyboardEvent) => {
@@ -212,6 +218,7 @@ export default function VisibilityToggle({
     >
       <SSpan
         style={getStyles({
+          theme,
           checked,
           visibleInScene,
           size,

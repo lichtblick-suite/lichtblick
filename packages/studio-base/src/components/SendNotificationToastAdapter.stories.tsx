@@ -42,6 +42,7 @@ export default {
     chromatic: {
       delay: 100,
     },
+    colorScheme: "dark",
   },
   decorators: [
     (StoryFn: Story): JSX.Element => {
@@ -93,15 +94,18 @@ export const OneInfo = (): JSX.Element => {
 export const MultipleMessages = (): JSX.Element => {
   useEffect(() => {
     sendNotification("Something bad happened 1", fakeError(), "app", "error");
-    sendNotification("Something bad happened 2", fakeError(), "app", "error");
+    sendNotification("Here's a helpful tip", fakeError(), "user", "info");
     sendNotification(
       "Just a warning",
       "This warning is on purpose - it comes from the story",
       "app",
       "warn",
     );
-    sendNotification("Something bad happened 3", fakeError(), "app", "error");
+    sendNotification("Something bad happened 2", fakeError(), "app", "error");
   }, []);
 
   return <SendNotificationToastAdapter />;
 };
+
+export const MultipleMessagesLightTheme = MultipleMessages.bind(undefined);
+(MultipleMessagesLightTheme as any).parameters = { colorScheme: "light" };

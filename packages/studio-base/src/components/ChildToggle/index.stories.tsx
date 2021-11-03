@@ -108,6 +108,7 @@ function UncontrolledChildToggleStory({ defaultIsOpen }: { defaultIsOpen?: boole
   );
 }
 storiesOf("components/ChildToggle", module)
+  .addParameters({ colorScheme: "dark" })
   .add("controlled", () => <ChildToggleStory />)
   .add("uncontrolled", () => <UncontrolledChildToggleStory />)
   .add("uncontrolled with defaultIsOpen", () => (

@@ -40,6 +40,9 @@ export const ErrorModal = (): JSX.Element => {
     />
   );
 };
+ErrorModal.parameters = { colorScheme: "light" };
+export const ErrorModalDark = ErrorModal.bind(undefined);
+ErrorModalDark.parameters = { colorScheme: "dark" };
 
 export const Warning = (): JSX.Element => {
   return (
@@ -56,6 +59,7 @@ export const Warning = (): JSX.Element => {
     />
   );
 };
+Warning.parameters = { colorScheme: "dark" };
 
 export const ErrorWithoutDetails = (): JSX.Element => {
   return (
@@ -72,6 +76,7 @@ export const ErrorWithoutDetails = (): JSX.Element => {
     />
   );
 };
+ErrorWithoutDetails.parameters = { colorScheme: "dark" };
 
 export const ErrorWithJsxElementDetails = (): JSX.Element => {
   return (
@@ -92,3 +97,6 @@ export const ErrorWithJsxElementDetails = (): JSX.Element => {
     />
   );
 };
+ErrorWithJsxElementDetails.parameters = { colorScheme: "light" };
+export const ErrorWithJsxElementDetailsDark = ErrorWithJsxElementDetails.bind(undefined);
+ErrorWithJsxElementDetailsDark.parameters = { colorScheme: "dark" };

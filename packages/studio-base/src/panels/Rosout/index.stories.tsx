@@ -125,6 +125,7 @@ export const TopicToRender = (): JSX.Element => {
     </PanelSetup>
   );
 };
+TopicToRender.parameters = { colorScheme: "dark" };
 
 export const FilteredTerms = (): JSX.Element => {
   return (

@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets } from "@fluentui/react";
+import { mergeStyleSets, useTheme } from "@fluentui/react";
 import CheckboxBlankOutlineIcon from "@mdi/svg/svg/checkbox-blank-outline.svg";
 import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import PlusMinusIcon from "@mdi/svg/svg/plus-minus.svg";
@@ -52,6 +52,7 @@ import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import getDiff, {
   diffLabels,
   diffLabelsByLabelText,
+  DiffObject,
 } from "@foxglove/studio-base/panels/RawMessages/getDiff";
 import { Topic } from "@foxglove/studio-base/players/types";
 import { jsonTreeTheme, SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
@@ -128,12 +129,21 @@ const classes = mergeStyleSets({
 });
 
 function RawMessages(props: Props) {
+  const theme = useTheme();
   const { config, saveConfig } = props;
   const { openSiblingPanel } = usePanelContext();
   const { topicPath, diffMethod, diffTopicPath, diffEnabled, showFullMessageForDiff } = config;
   const { topics, datatypes } = useDataSourceInfo();
 
-  const getItemString = useGetItemStringWithTimezone();
+  const defaultGetItemString = useGetItemStringWithTimezone();
+  const getItemString = useMemo(
+    () =>
+      diffEnabled
+        ? (type: string, data: DiffObject, itemType: React.ReactNode) =>
+            getItemStringForDiff({ type, data, itemType, isInverted: theme.isInverted })
+        : defaultGetItemString,
+    [defaultGetItemString, diffEnabled, theme.isInverted],
+  );
 
   const topicRosPath: RosPath | undefined = useMemo(() => parseRosPath(topicPath), [topicPath]);
   const topic: Topic | undefined = useMemo(
@@ -416,7 +426,7 @@ function RawMessages(props: Props) {
               shouldExpandNode={shouldExpandNode}
               hideRoot
               invertTheme={false}
-              getItemString={diffEnabled ? getItemStringForDiff : getItemString}
+              getItemString={getItemString}
               valueRenderer={(valueAsString, value, ...keyPath) => {
                 if (diffEnabled) {
                   return renderDiffLabel(valueAsString, value);
@@ -482,16 +492,22 @@ function RawMessages(props: Props) {
                   let backgroundColor;
                   let textDecoration;
                   if (diffLabelsByLabelText[keyPath[0]]) {
-                    // @ts-expect-error backgroundColor is not a property?
-                    backgroundColor = diffLabelsByLabelText[keyPath[0]].backgroundColor;
+                    backgroundColor = theme.isInverted
+                      ? // @ts-expect-error backgroundColor is not a property?
+                        diffLabelsByLabelText[keyPath[0]].invertedBackgroundColor
+                      : // @ts-expect-error backgroundColor is not a property?
+                        diffLabelsByLabelText[keyPath[0]].backgroundColor;
                     textDecoration =
                       keyPath[0] === diffLabels.DELETED.labelText ? "line-through" : "none";
                   }
                   const nestedObj = get(diff, keyPath.slice().reverse(), {});
                   const nestedObjKey = Object.keys(nestedObj)[0];
                   if (nestedObjKey != undefined && diffLabelsByLabelText[nestedObjKey]) {
-                    // @ts-expect-error backgroundColor is not a property?
-                    backgroundColor = diffLabelsByLabelText[nestedObjKey].backgroundColor;
+                    backgroundColor = theme.isInverted
+                      ? // @ts-expect-error backgroundColor is not a property?
+                        diffLabelsByLabelText[nestedObjKey].invertedBackgroundColor
+                      : // @ts-expect-error backgroundColor is not a property?
+                        diffLabelsByLabelText[nestedObjKey].backgroundColor;
                     textDecoration =
                       nestedObjKey === diffLabels.DELETED.labelText ? "line-through" : "none";
                   }
@@ -519,8 +535,11 @@ function RawMessages(props: Props) {
                   const nestedObj = get(diff, keyPath.slice().reverse(), {});
                   const nestedObjKey = Object.keys(nestedObj)[0];
                   if (nestedObjKey != undefined && diffLabelsByLabelText[nestedObjKey]) {
-                    // @ts-expect-error backgroundColor is not a property?
-                    backgroundColor = diffLabelsByLabelText[nestedObjKey].backgroundColor;
+                    backgroundColor = theme.isInverted
+                      ? // @ts-expect-error backgroundColor is not a property?
+                        diffLabelsByLabelText[nestedObjKey].invertedBackgroundColor
+                      : // @ts-expect-error backgroundColor is not a property?
+                        diffLabelsByLabelText[nestedObjKey].backgroundColor;
                     textDecoration =
                       nestedObjKey === diffLabels.DELETED.labelText ? "line-through" : "none";
                   }
@@ -541,23 +560,24 @@ function RawMessages(props: Props) {
       </Flex>
     );
   }, [
-    baseItem,
-    diffEnabled,
-    diffItem,
-    diffMethod,
-    diffTopicPath,
     expandAll,
-    expandedFields,
-    onLabelClick,
-    otherSourceTopic,
-    rootStructureItem,
-    saveConfig,
+    topicPath,
+    diffEnabled,
+    diffMethod,
+    baseItem,
+    diffItem,
     showFullMessageForDiff,
     topic,
-    topicPath,
-    valueRenderer,
-    renderDiffLabel,
     getItemString,
+    expandedFields,
+    diffTopicPath,
+    otherSourceTopic,
+    saveConfig,
+    onLabelClick,
+    valueRenderer,
+    rootStructureItem,
+    renderDiffLabel,
+    theme.isInverted,
   ]);
 
   return (

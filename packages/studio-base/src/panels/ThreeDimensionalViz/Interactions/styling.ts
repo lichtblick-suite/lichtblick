@@ -22,7 +22,7 @@ export const SValue = styled.div`
   word-break: break-word;
 `;
 export const SEmptyState = styled.div`
-  color: ${colors.TEXT_MUTED};
+  color: ${({ theme }) => theme.semanticColors.disabledText};
   line-height: 1.4;
   margin-bottom: 8px;
 `;

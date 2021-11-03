@@ -10,10 +10,10 @@ import { fonts, colors, spacing } from "@foxglove/studio-base/util/sharedStyleCo
  * @deprecated The LegacyButton should not be used for new features. use fluentui/react instead
  */
 export const LegacyButton = styled.button`
-  background-color: ${colors.BACKGROUND_CONTROL};
+  background-color: ${({ theme }) => theme.palette.neutralLighter};
   border-radius: 4px;
   border: none;
-  color: ${colors.TEXT_CONTROL};
+  color: ${({ theme }) => theme.semanticColors.buttonText};
   font: inherit;
   line-height: 100%;
   font-family: ${fonts.SANS_SERIF};
@@ -24,6 +24,9 @@ export const LegacyButton = styled.button`
   position: relative;
   text-align: center;
 
+  &:not(.disabled):not(:disabled):hover {
+    background-color: ${({ theme }) => theme.semanticColors.buttonBackgroundHovered};
+  }
   &:focus {
     outline: none;
   }
@@ -31,19 +34,19 @@ export const LegacyButton = styled.button`
     background-color: ${colors.RED};
   }
   &.is-warning {
-    background-color: ${colors.BACKGROUND_CONTROL};
+    background-color: ${colors.ORANGE};
   }
   &:not(.disabled):not(:disabled):not(.ms-Button):hover {
     cursor: pointer;
-    color: ${colors.TEXT_CONTROL_HOVER};
+    color: ${({ theme }) => theme.semanticColors.buttonTextHovered};
   }
   &.is-primary {
-    background-color: ${colors.GREEN};
-    color: ${colors.BACKGROUND};
+    background-color: ${({ theme }) => theme.semanticColors.primaryButtonBackground};
+    color: ${({ theme }) => theme.semanticColors.primaryButtonText};
   }
   &.selected {
-    background-color: ${colors.DARK5};
-    color: ${colors.TEXT_NORMAL};
+    background-color: ${({ theme }) => theme.semanticColors.buttonBackgroundChecked};
+    color: ${({ theme }) => theme.semanticColors.primaryButtonText};
   }
   &.disabled,
   &:disabled {
@@ -59,10 +62,10 @@ export const LegacyButton = styled.button`
  * @deprecated The LegacyInput should not be used for new features. use fluentui/react instead
  */
 export const LegacyInput = styled.input`
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: ${({ theme }) => theme.palette.neutralLighter};
   border-radius: 4px;
   border: none;
-  color: ${colors.TEXT_CONTROL};
+  color: ${({ theme }) => theme.semanticColors.inputText};
   font: inherit;
   font-family: ${fonts.SANS_SERIF};
   font-feature-settings: ${fonts.SANS_SERIF_FEATURE_SETTINGS};
@@ -72,11 +75,11 @@ export const LegacyInput = styled.input`
   text-align: left;
 
   &.disabled {
-    color: ${colors.TEXT_INPUT_DISABLED};
-    background-color: ${colors.BACKGROUND_DISABLED};
+    color: ${({ theme }) => theme.semanticColors.disabledText};
+    background-color: ${({ theme }) => theme.semanticColors.buttonBackgroundDisabled};
   }
   &:focus {
-    background-color: rgba(255, 255, 255, 0.075);
+    background-color: ${({ theme }) => theme.palette.neutralLighterAlt};
     outline: none;
   }
 `;
@@ -85,10 +88,10 @@ export const LegacyInput = styled.input`
  * @deprecated The LegacyTextarea should not be used for new features. use fluentui/react instead
  */
 export const LegacyTextarea = styled.textarea`
-  background-color: ${colors.DARK};
+  background-color: ${({ theme }) => theme.semanticColors.inputBackground};
   border-radius: 4px;
-  border: 2px solid ${colors.TEXT_NORMAL};
-  color: ${colors.TEXT_NORMAL};
+  border: 2px solid ${({ theme }) => theme.semanticColors.inputBorder};
+  color: ${({ theme }) => theme.semanticColors.inputText};
   font: inherit;
   line-height: 1.4;
   font-family: ${fonts.MONOSPACE};
@@ -98,12 +101,11 @@ export const LegacyTextarea = styled.textarea`
   text-align: left;
 
   &:focus {
-    background-color: black;
+    border-color: ${({ theme }) => theme.semanticColors.inputFocusBorderAlt};
     outline: none;
   }
   &.disabled {
-    background-color: ${colors.BACKGROUND_DISABLED};
-    color: ${colors.TEXT_INPUT_DISABLED};
+    color: ${({ theme }) => theme.semanticColors.disabledText};
   }
 `;
 
@@ -114,7 +116,7 @@ export const LegacySelect = styled.select`
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: 4px;
   border: none;
-  color: ${colors.TEXT_CONTROL};
+  color: ${({ theme }) => theme.semanticColors.inputText};
   font: inherit;
   font-family: ${fonts.SANS_SERIF};
   font-feature-settings: ${fonts.SANS_SERIF_FEATURE_SETTINGS};
@@ -128,8 +130,8 @@ export const LegacySelect = styled.select`
     background-color: rgba(255, 255, 255, 0.075);
   }
   &.disabled {
-    color: ${colors.TEXT_INPUT_DISABLED};
-    background-color: ${colors.BACKGROUND_DISABLED};
+    color: ${({ theme }) => theme.semanticColors.disabledText};
+    background-color: ${({ theme }) => theme.semanticColors.buttonBackgroundDisabled};
   }
 `;
 
@@ -141,7 +143,7 @@ export const LegacyTable = styled.table`
   width: 100%;
 
   th {
-    color: ${colors.TEXT_NORMAL};
+    color: ${({ theme }) => theme.semanticColors.bodyText};
 
     tr:first-child & {
       padding-top: 4px;
@@ -150,7 +152,7 @@ export const LegacyTable = styled.table`
   }
   th,
   td {
-    border: 1px solid ${colors.DIVIDER};
+    border: 1px solid ${({ theme }) => theme.semanticColors.bodyDivider};
     padding: 0 0.3em;
     line-height: 1.3em;
   }
@@ -162,7 +164,7 @@ export const LegacyTable = styled.table`
 
   tr:hover {
     td {
-      background-color: ${colors.DARK4};
+      background-color: ${({ theme }) => theme.semanticColors.menuItemBackgroundHovered};
       cursor: pointer;
     }
 

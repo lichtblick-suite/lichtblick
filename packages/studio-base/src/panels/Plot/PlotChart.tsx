@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useTheme } from "@fluentui/react";
 import { ScaleOptions } from "chart.js";
 import { AnnotationOptions } from "chartjs-plugin-annotation";
 import { ComponentProps, useMemo } from "react";
@@ -67,6 +68,7 @@ type PlotChartProps = {
   onClick?: TimeBasedChartProps["onClick"];
 };
 export default function PlotChart(props: PlotChartProps): JSX.Element {
+  const theme = useTheme();
   const {
     paths,
     currentTime,
@@ -92,10 +94,10 @@ export default function PlotChart(props: PlotChartProps): JSX.Element {
         precision: 3,
       },
       grid: {
-        color: "rgba(255, 255, 255, 0.2)",
+        color: theme.palette.neutralLighter,
       },
     };
-  }, [maxYValue, minYValue]);
+  }, [maxYValue, minYValue, theme.palette.neutralLighter]);
 
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
   // and existing resize observation.

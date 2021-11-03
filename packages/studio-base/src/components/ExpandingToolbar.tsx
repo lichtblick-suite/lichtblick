@@ -11,7 +11,7 @@ import {
   useTheme,
   IButtonStyles,
 } from "@fluentui/react";
-import { ReactElement } from "react";
+import { ReactElement, useMemo } from "react";
 
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
@@ -50,19 +50,6 @@ type Props<T extends string> = {
   dataTest?: string;
 };
 
-const iconStyles = {
-  iconChecked: { color: colors.ACCENT },
-  icon: {
-    color: "white",
-
-    svg: {
-      fill: "currentColor",
-      height: "1em",
-      width: "1em",
-    },
-  },
-} as Partial<IButtonStyles>;
-
 export default function ExpandingToolbar<T extends string>({
   children,
   checked,
@@ -78,6 +65,22 @@ export default function ExpandingToolbar<T extends string>({
   const expandingToolbarButton = useTooltip({
     contents: tooltip,
   });
+
+  const iconStyles = useMemo<Partial<IButtonStyles>>(
+    () => ({
+      iconChecked: { color: colors.ACCENT },
+      icon: {
+        color: theme.semanticColors.buttonText,
+
+        svg: {
+          fill: "currentColor",
+          height: "1em",
+          width: "1em",
+        },
+      },
+    }),
+    [theme.semanticColors.buttonText],
+  );
 
   if (!expanded) {
     let selectedTabLocal: T | undefined = selectedTab;
@@ -98,13 +101,16 @@ export default function ExpandingToolbar<T extends string>({
           iconProps={{ iconName }}
           data-test={`ExpandingToolbar-${tooltip}`}
           styles={{
-            root: { backgroundColor: colors.DARK3, pointerEvents: "auto" },
-            rootHovered: { backgroundColor: colors.DARK3 },
-            rootPressed: { backgroundColor: colors.DARK3 },
-            rootDisabled: { backgroundColor: colors.DARK3 },
-            rootChecked: { backgroundColor: colors.DARK3 },
-            rootCheckedHovered: { backgroundColor: colors.DARK3 },
-            rootCheckedPressed: { backgroundColor: colors.DARK3 },
+            root: {
+              backgroundColor: theme.semanticColors.buttonBackgroundHovered,
+              pointerEvents: "auto",
+            },
+            rootHovered: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
+            rootPressed: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
+            rootDisabled: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
+            rootChecked: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
+            rootCheckedHovered: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
+            rootCheckedPressed: { backgroundColor: theme.semanticColors.buttonBackgroundHovered },
             ...iconStyles,
           }}
         />

@@ -11,13 +11,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets } from "@fluentui/merge-styles";
-import { IconButton } from "@fluentui/react";
+import { IconButton, ITheme, makeStyles } from "@fluentui/react";
 import AlertCircleIcon from "@mdi/svg/svg/alert-circle.svg";
 import MenuIcon from "@mdi/svg/svg/menu.svg";
 import cx from "classnames";
 import { last } from "lodash";
 import { Fragment, useCallback, useMemo } from "react";
+import tinycolor from "tinycolor2";
 
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import DropdownItem from "@foxglove/studio-base/components/Dropdown/DropdownItem";
@@ -31,37 +31,38 @@ import { TimestampMethod } from "@foxglove/studio-base/util/time";
 import { PlotPath, BasePlotPath, isReferenceLinePlotPathType } from "./internalTypes";
 import { plotableRosTypes, PlotConfig, PlotXAxisVal } from "./types";
 
-const stylesForButtonsDisplayedOnHover = {
-  visibility: "hidden",
-  padding: 6,
-  cursor: "pointer",
-  position: "absolute",
-  top: 0,
-  height: 25,
-  width: 25,
-  borderRadius: 5,
-  userSelect: "none",
-  background: colors.LEGEND_HIGHLIGHT_COLOR_BRIGHT,
+const stylesForButtonsDisplayedOnHover = (theme: ITheme) =>
+  ({
+    visibility: "hidden",
+    padding: 6,
+    cursor: "pointer",
+    position: "absolute",
+    top: 0,
+    height: 25,
+    width: 25,
+    borderRadius: 5,
+    userSelect: "none",
+    background: tinycolor(theme.palette.neutralLight).setAlpha(0.75).toRgbString(),
 
-  ":hover": {
-    background: colors.LEGEND_HIGHLIGHT_COLOR_BRIGHT,
-  },
-  ".mosaic-window:hover &": {
-    visibility: "initial",
-  },
-};
+    ":hover": {
+      background: tinycolor(theme.palette.neutralLight).setAlpha(0.75).toRgbString(),
+    },
+    ".mosaic-window:hover &": {
+      visibility: "initial",
+    },
+  } as const);
 
-const classes = mergeStyleSets({
+const useStyles = makeStyles((theme) => ({
   root: {
     position: "absolute",
     left: 65,
     top: 6,
-    background: colors.LEGEND_HIGHLIGHT_COLOR,
-    color: colors.LIGHT1,
+    background: tinycolor(theme.palette.neutralLight).setAlpha(0.25).toRgbString(),
+    color: theme.semanticColors.bodySubtext,
     maxWidth: "calc(100% - 65px - 25px)",
 
     ":hover": {
-      background: colors.LEGEND_HIGHLIGHT_COLOR,
+      background: tinycolor(theme.palette.neutralLight).setAlpha(0.5).toRgbString(),
     },
   },
   dropdown: {
@@ -72,7 +73,7 @@ const classes = mergeStyleSets({
     display: "none",
     content: "+ add line",
     position: "absolute",
-    background: colors.LEGEND_HIGHLIGHT_COLOR,
+    background: tinycolor(theme.palette.neutralLight).setAlpha(0.5).toRgbString(),
     left: 0,
     right: 0,
     bottom: 0,
@@ -82,7 +83,7 @@ const classes = mergeStyleSets({
     textAlign: "center",
 
     ":hover": {
-      background: colors.LEGEND_HIGHLIGHT_COLOR_BRIGHT,
+      background: tinycolor(theme.palette.neutralLight).setAlpha(0.75).toRgbString(),
     },
     ".mosaic-window:hover &": {
       display: "block",
@@ -96,7 +97,7 @@ const classes = mergeStyleSets({
     position: "relative",
 
     ":hover": {
-      background: colors.LEGEND_HIGHLIGHT_COLOR_BRIGHT,
+      background: tinycolor(theme.palette.neutralLight).setAlpha(0.75).toRgbString(),
 
       "[data-item-remove]": {
         visibility: "initial",
@@ -112,7 +113,7 @@ const classes = mergeStyleSets({
     flexShrink: 0,
 
     ":hover": {
-      background: colors.LEGEND_HIGHLIGHT_COLOR_BRIGHTER,
+      background: theme.palette.neutralLight,
     },
   },
   itemIcon: {
@@ -124,8 +125,8 @@ const classes = mergeStyleSets({
     position: "relative",
     top: "calc(50% - 1px)",
   },
-  download: { ...stylesForButtonsDisplayedOnHover, left: -60 },
-  legendToggle: { ...stylesForButtonsDisplayedOnHover, left: -30 },
+  download: { ...stylesForButtonsDisplayedOnHover(theme), left: -60 },
+  legendToggle: { ...stylesForButtonsDisplayedOnHover(theme), left: -30 },
   itemRemove: {
     visibility: "hidden",
     padding: "0 6px",
@@ -138,7 +139,7 @@ const classes = mergeStyleSets({
     userSelect: "none",
 
     ":hover": {
-      background: colors.LEGEND_HIGHLIGHT_COLOR_BRIGHT,
+      background: tinycolor(theme.palette.neutralLight).setAlpha(0.75).toRgbString(),
     },
   },
   itemInput: {
@@ -151,7 +152,7 @@ const classes = mergeStyleSets({
       textDecoration: "line-through",
     },
   },
-});
+}));
 
 type PlotLegendProps = {
   paths: PlotPath[];
@@ -188,6 +189,7 @@ export default function PlotLegend(props: PlotLegendProps): JSX.Element {
     onDownload,
   } = props;
   const lastPath = last(paths);
+  const classes = useStyles();
 
   const onInputChange = useCallback(
     (value: string, index?: number) => {

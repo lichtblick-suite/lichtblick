@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
 import { useMemo } from "react";
+import { useMedia } from "react-use";
 
 import {
   App,
@@ -17,6 +18,8 @@ import {
   ConsoleApi,
   ConsoleApiContext,
   ConsoleApiRemoteLayoutStorageProvider,
+  AppSetting,
+  useAppConfigurationValue,
   Ros1LocalBagDataSourceFactory,
   Ros2LocalBagDataSourceFactory,
   RosbridgeDataSourceFactory,
@@ -47,12 +50,18 @@ const dataSources: IDataSourceFactory[] = [
   new FoxgloveDataPlatformDataSourceFactory(),
 ];
 
+function ColorSchemeThemeProvider({ children }: React.PropsWithChildren<unknown>): JSX.Element {
+  const [colorScheme = "system"] = useAppConfigurationValue<string>(AppSetting.COLOR_SCHEME);
+  const systemSetting = useMedia("(prefers-color-scheme: dark)");
+  const isDark = colorScheme === "dark" || (colorScheme === "system" && systemSetting);
+  return <ThemeProvider isDark={isDark}>{children}</ThemeProvider>;
+}
+
 export function Root({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }): JSX.Element {
   const api = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL!), []);
 
   const providers = [
     /* eslint-disable react/jsx-key */
-    <LocalStorageAppConfigurationProvider />,
     <ConsoleApiContext.Provider value={api} />,
     <ConsoleApiCookieUserProvider />,
     <ConsoleApiRemoteLayoutStorageProvider />,
@@ -64,19 +73,21 @@ export function Root({ loadWelcomeLayout }: { loadWelcomeLayout: boolean }): JSX
   ];
 
   return (
-    <ThemeProvider>
-      <GlobalCss />
-      <CssBaseline>
-        <ErrorBoundary>
-          <MultiProvider providers={providers}>
-            <App
-              loadWelcomeLayout={loadWelcomeLayout}
-              demoBagUrl={DEMO_BAG_URL}
-              availableSources={dataSources}
-            />
-          </MultiProvider>
-        </ErrorBoundary>
-      </CssBaseline>
-    </ThemeProvider>
+    <LocalStorageAppConfigurationProvider>
+      <ColorSchemeThemeProvider>
+        <GlobalCss />
+        <CssBaseline>
+          <ErrorBoundary>
+            <MultiProvider providers={providers}>
+              <App
+                loadWelcomeLayout={loadWelcomeLayout}
+                demoBagUrl={DEMO_BAG_URL}
+                availableSources={dataSources}
+              />
+            </MultiProvider>
+          </ErrorBoundary>
+        </CssBaseline>
+      </ColorSchemeThemeProvider>
+    </LocalStorageAppConfigurationProvider>
   );
 }

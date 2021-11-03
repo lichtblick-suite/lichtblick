@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useTheme } from "@fluentui/react";
 import ArrowLeftBoldIcon from "@mdi/svg/svg/arrow-left-bold.svg";
 import DeleteIcon from "@mdi/svg/svg/delete.svg";
 import FileMultipleIcon from "@mdi/svg/svg/file-multiple.svg";
@@ -42,9 +43,10 @@ const MenuWrapper = styled.div`
   }
 `;
 
-const ExplorerWrapper = styled.div`
+const ExplorerWrapper = styled.div<{ useThemeColors: boolean; show: boolean }>`
   display: ${({ show }: { show: boolean }) => (show ? "initial" : "none")};
-  background-color: ${colors.GRAY2};
+  background-color: ${({ useThemeColors, theme }) =>
+    useThemeColors ? theme.palette.neutralLighterAlt : colors.GRAY2};
   max-width: 325px;
   min-width: 275px;
   overflow: auto;
@@ -58,6 +60,7 @@ const ListItem = styled.li`
   justify-content: space-between;
   word-break: break-all;
   align-items: center;
+  color: ${colors.LIGHT1};
   background-color: ${({ selected }: { selected: boolean }) =>
     selected ? colors.DARK9 : "transparent"};
   > span {
@@ -84,6 +87,7 @@ const TemplateItem = styled.li`
     display: block;
     margin: 3px 0;
   }
+  color: ${colors.LIGHT1};
   &:hover {
     background-color: ${colors.DARK9};
   }
@@ -205,6 +209,8 @@ const Sidebar = ({
     [setScriptOverride],
   );
 
+  const theme = useTheme();
+
   const explorers = React.useMemo(
     () => ({
       nodes: (
@@ -219,7 +225,7 @@ const Sidebar = ({
       docs: (
         <SFlex>
           <SidebarTitle title="Docs" collapse={() => updateExplorer(undefined)} />
-          <TextContent style={{ backgroundColor: "transparent" }}>
+          <TextContent style={{ backgroundColor: theme.palette.neutralLighterAlt }}>
             {otherMarkdownDocsForTest ?? nodePlaygroundDocs}
           </TextContent>
         </SFlex>
@@ -267,6 +273,7 @@ const Sidebar = ({
       script,
       selectNode,
       selectedNodeId,
+      theme,
       updateExplorer,
       userNodes,
     ],
@@ -280,7 +287,7 @@ const Sidebar = ({
           onClick={() => updateExplorer(nodesSelected ? undefined : "nodes")}
           size="large"
           tooltip="Nodes"
-          style={{ color: nodesSelected ? "inherit" : colors.DARK9, position: "relative" }}
+          style={{ color: nodesSelected ? colors.LIGHT1 : colors.DARK9, position: "relative" }}
         >
           <FileMultipleIcon />
         </Icon>
@@ -289,7 +296,7 @@ const Sidebar = ({
           onClick={() => updateExplorer(utilsSelected ? undefined : "utils")}
           size="large"
           tooltip="Utilities"
-          style={{ color: utilsSelected ? "inherit" : colors.DARK9 }}
+          style={{ color: utilsSelected ? colors.LIGHT1 : colors.DARK9 }}
         >
           <HammerWrenchIcon />
         </Icon>
@@ -298,7 +305,7 @@ const Sidebar = ({
           onClick={() => updateExplorer(templatesSelected ? undefined : "templates")}
           size="large"
           tooltip="Templates"
-          style={{ color: templatesSelected ? "inherit" : colors.DARK9 }}
+          style={{ color: templatesSelected ? colors.LIGHT1 : colors.DARK9 }}
         >
           <TemplateIcon />
         </Icon>
@@ -307,12 +314,12 @@ const Sidebar = ({
           onClick={() => updateExplorer(docsSelected ? undefined : "docs")}
           size="large"
           tooltip="Docs"
-          style={{ color: docsSelected ? "inherit" : colors.DARK9 }}
+          style={{ color: docsSelected ? colors.LIGHT1 : colors.DARK9 }}
         >
           <HelpCircleIcon />
         </Icon>
       </MenuWrapper>
-      <ExplorerWrapper show={explorer != undefined}>
+      <ExplorerWrapper useThemeColors={docsSelected} show={explorer != undefined}>
         {explorer != undefined && explorers[explorer]}
       </ExplorerWrapper>
     </>

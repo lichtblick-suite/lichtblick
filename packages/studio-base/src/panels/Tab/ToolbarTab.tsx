@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets } from "@fluentui/react";
+import { makeStyles } from "@fluentui/react";
 import CheckIcon from "@mdi/svg/svg/check.svg";
 import CloseIcon from "@mdi/svg/svg/close.svg";
 import cx from "classnames";
@@ -22,13 +22,13 @@ import Icon from "@foxglove/studio-base/components/Icon";
 import { LegacyInput } from "@foxglove/studio-base/components/LegacyStyledComponents";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import { TabActions } from "@foxglove/studio-base/panels/Tab/TabDndContext";
-import { colors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const MAX_TAB_WIDTH = 100;
 const MIN_ACTIVE_TAB_WIDTH = 40;
 const MIN_OTHER_TAB_WIDTH = 14;
 
-const styles = mergeStyleSets({
+const useStyles = makeStyles((theme) => ({
   root: {
     position: "relative",
     borderTopLeftRadius: 4,
@@ -46,22 +46,21 @@ const styles = mergeStyleSets({
     marginTop: -4,
 
     "&.isActive": {
-      backgroundColor: colors.DARK4,
+      backgroundColor: theme.semanticColors.listItemBackgroundChecked,
       userSelect: "all",
     },
     "&.isDragging": {
-      backgroundColor: colors.DARK2,
-      borderColor: colors.DARK6,
-      boxShadow: `0px 2px 6px rgba(0, 0, 0, 0.2)`,
+      backgroundColor: theme.semanticColors.listItemBackgroundHovered,
+      borderColor: theme.semanticColors.listItemBackgroundChecked,
     },
     "&.highlight": {
-      borderColor: colors.DARK6,
+      borderColor: theme.semanticColors.listItemBackgroundCheckedHovered,
     },
     "&.hidden": {
       opacity: 0,
     },
     "&:not(.isActive) + &:not(.isActive):before": {
-      borderLeft: "1px solid rgb(45, 45, 51)",
+      borderLeft: `1px solid ${theme.semanticColors.bodyDivider}`,
       content: '""',
       height: 16,
       left: 0,
@@ -80,7 +79,7 @@ const styles = mergeStyleSets({
       pointerEvents: "all",
     },
   },
-});
+}));
 
 const fontFamily = fonts.SANS_SERIF;
 const fontSize = "12px";
@@ -116,6 +115,7 @@ export function ToolbarTab(props: Props): JSX.Element {
     highlight,
     hidden,
   } = props;
+  const styles = useStyles();
 
   const inputRef = useRef<HTMLInputElement>(ReactNull);
   const [title, setTitle] = useState<string>(tabTitle ?? "");

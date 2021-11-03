@@ -42,7 +42,7 @@ import {
   OnClickArg as OnChartClickArgs,
 } from "@foxglove/studio-base/src/components/Chart";
 import { OpenSiblingPanel, PanelConfig } from "@foxglove/studio-base/types/panels";
-import { colors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { TimestampMethod } from "@foxglove/studio-base/util/time";
 
 import helpContent from "./index.help.md";
@@ -95,8 +95,6 @@ const SChartContainerInner = styled.div`
   margin-top: 10px;
 `;
 
-const inputColor = tinycolor(colors.DARK3).setAlpha(0.7).toHexString();
-const inputColorBright = tinycolor(colors.DARK3).lighten(8).toHexString();
 const inputLeft = 20;
 const SInputContainer = styled.div<{ shrink: boolean }>`
   display: flex;
@@ -111,7 +109,7 @@ const SInputContainer = styled.div<{ shrink: boolean }>`
   line-height: 20px;
 
   &:hover {
-    background: ${inputColor};
+    background: ${({ theme }) => tinycolor(theme.palette.neutralLight).setAlpha(0.5).toRgbString()};
   }
 
   // Move over the first input on hover for the toolbar.
@@ -131,11 +129,12 @@ const SInputDelete = styled.div`
   height: 20px;
   line-height: 20px;
   padding: 0 6px;
-  background: ${inputColor};
+  background: ${({ theme }) => tinycolor(theme.palette.neutralLight).setAlpha(0.5).toRgbString()};
   cursor: pointer;
 
   &:hover {
-    background: ${inputColorBright};
+    background: ${({ theme }) =>
+      tinycolor(theme.palette.neutralLight).setAlpha(0.75).toRgbString()};
   }
 
   ${SInputContainer}:hover & {

@@ -16,7 +16,7 @@ import styled from "styled-components";
 
 import { useRethrow } from "@foxglove/hooks";
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
-import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
+import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Autocomplete";
 import Button from "@foxglove/studio-base/components/Button";
 import Flex from "@foxglove/studio-base/components/Flex";
 import { LegacyTextarea } from "@foxglove/studio-base/components/LegacyStyledComponents";
@@ -147,7 +147,7 @@ function Publish(props: Props) {
 
   // when a known topic is selected, also fill in its datatype
   const onSelectTopic = useCallback(
-    (name: string, topic: Topic, autocomplete: Autocomplete<Topic>) => {
+    (name: string, topic: Topic, autocomplete: IAutocomplete) => {
       saveConfig({ topicName: name, datatype: topic.datatype });
       autocomplete.blur();
     },
@@ -155,7 +155,7 @@ function Publish(props: Props) {
   );
 
   const onSelectDatatype = useCallback(
-    (newDatatype: string, _value: unknown, autocomplete: Autocomplete<string>) => {
+    (newDatatype: string, _value: unknown, autocomplete: IAutocomplete) => {
       saveConfig({ datatype: newDatatype });
       autocomplete.blur();
     },

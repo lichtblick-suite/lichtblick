@@ -158,12 +158,20 @@ function MessagePathPerformanceStory(props: { path: string; prioritizedDatatype?
 }
 
 storiesOf("components/MessagePathInput", module)
+  .addParameters({ colorScheme: "dark" })
   .add("autocomplete topics", () => {
     return <MessagePathInputStory path="/" />;
   })
   .add("autocomplete messagePath", () => {
     return <MessagePathInputStory path="/some_topic/location.po" />;
   })
+  .add(
+    "autocomplete messagePath light",
+    () => {
+      return <MessagePathInputStory path="/some_topic/location.po" />;
+    },
+    { colorScheme: "light" },
+  )
   .add("autocomplete filter", () => {
     return <MessagePathInputStory path="/some_topic/state.items[:]{}" />;
   })

@@ -12,6 +12,7 @@ import OccupancyGrids from "./OccupancyGrids";
 export default {
   title: "panels/ThreeDimensionalViz/commands/OccupancyGrids",
   component: OccupancyGrids,
+  parameters: { colorScheme: "dark" },
 };
 
 function makeGrid([px, py, pz]: vec3, [ox, oy, oz, ow]: quat) {

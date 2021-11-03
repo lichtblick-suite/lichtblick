@@ -17,6 +17,7 @@ import { act } from "react-dom/test-utils";
 import { ToastProvider } from "react-toast-notifications";
 
 import DocumentDropListener from "@foxglove/studio-base/components/DocumentDropListener";
+import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 
 describe("<DocumentDropListener>", () => {
   let wrapper: HTMLDivElement;
@@ -32,9 +33,11 @@ describe("<DocumentDropListener>", () => {
     ReactDOM.render(
       <div>
         <ToastProvider>
-          <DocumentDropListener allowedExtensions={[]}>
-            <div />
-          </DocumentDropListener>
+          <ThemeProvider isDark={false}>
+            <DocumentDropListener allowedExtensions={[]}>
+              <div />
+            </DocumentDropListener>
+          </ThemeProvider>
         </ToastProvider>
       </div>,
       wrapper,

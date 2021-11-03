@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ContextualMenu, mergeStyleSets } from "@fluentui/react";
+import { ContextualMenu, makeStyles } from "@fluentui/react";
 import MagnifyIcon from "@mdi/svg/svg/magnify.svg";
 import cx from "classnames";
 import { useCallback, useLayoutEffect, useRef, MouseEvent, useState, useMemo } from "react";
@@ -45,7 +45,7 @@ type Props = {
   renderInMainThread?: boolean;
 };
 
-const classes = mergeStyleSets({
+const useStyles = makeStyles((theme) => ({
   root: {
     overflow: "hidden",
     width: "100%",
@@ -60,12 +60,12 @@ const classes = mergeStyleSets({
     },
   },
   magnify: {
-    position: "absolute !important",
+    position: "absolute !important" as unknown as "absolute",
     bottom: 5,
     left: 0,
     zIndex: 102,
     opacity: 1,
-    backgroundColor: `${colors.DARK3} !important`,
+    backgroundColor: `${theme.palette.neutralLight} !important`,
     display: "none",
 
     ".hoverScreenshot &": {
@@ -74,7 +74,7 @@ const classes = mergeStyleSets({
     svg: {
       width: 16,
       height: 16,
-      fill: "white",
+      fill: theme.semanticColors.bodyText,
       float: "left",
     },
     span: {
@@ -89,10 +89,11 @@ const classes = mergeStyleSets({
     left: 0,
     zIndex: 102,
     opacity: 1,
-    backgroundColor: colors.DARK3,
+    backgroundColor: theme.semanticColors.menuBackground,
     width: 145,
     borderRadius: "4%",
     display: "none",
+    boxShadow: theme.effects.elevation64,
 
     ".hoverScreenshot &": {
       display: "block",
@@ -104,7 +105,7 @@ const classes = mergeStyleSets({
     borderRadius: "100%",
   },
   borderBottom: {
-    borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+    borderBottom: `1px solid ${theme.palette.neutralLighter}`,
   },
   menuItem: {
     display: "flex",
@@ -137,7 +138,7 @@ const classes = mergeStyleSets({
   canvasImageRenderingSmooth: {
     imageRendering: "auto",
   },
-});
+}));
 
 const webWorkerManager = new WebWorkerManager(() => {
   return new Worker(new URL("ImageCanvas.worker", import.meta.url));
@@ -165,6 +166,7 @@ export default function ImageCanvas(props: Props): JSX.Element {
     onStartRenderImage,
   } = props;
   const { mode } = config;
+  const classes = useStyles();
 
   // generic errors within the panel
   const [error, setError] = useState<Error | undefined>();
@@ -457,7 +459,18 @@ export default function ImageCanvas(props: Props): JSX.Element {
         </Item>
       </div>
     );
-  }, [onZoom100, onZoomFill, onZoomFit, zoomIn, zoomOut]);
+  }, [
+    classes.borderBottom,
+    classes.menuItem,
+    classes.notInteractive,
+    classes.round,
+    classes.zoomContextMenu,
+    onZoom100,
+    onZoomFill,
+    onZoomFit,
+    zoomIn,
+    zoomOut,
+  ]);
 
   const [contextMenuEvent, setContextMenuEvent] = useState<
     MouseEvent<HTMLCanvasElement>["nativeEvent"] | undefined

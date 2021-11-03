@@ -404,6 +404,7 @@ export default {
     chromatic: {
       delay: 2500,
     },
+    colorScheme: "dark",
   },
 };
 

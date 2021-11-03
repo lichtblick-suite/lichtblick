@@ -14,55 +14,81 @@
 
 import { mount } from "enzyme";
 
+import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
+
 import Button from "./ButtonBase";
 
 describe("<Button />", () => {
   it("fires click callback", (done) => {
     expect.assertions(0);
-    const el = mount(<Button onClick={() => done()}>hello</Button>);
+    const el = mount(
+      <ThemeProvider isDark={false}>
+        <Button onClick={() => done()}>hello</Button>
+      </ThemeProvider>,
+    );
     el.simulate("click");
   });
 
   it("fires onMouseUp callback", (done) => {
     expect.assertions(0);
-    const el = mount(<Button onMouseUp={() => done()}>hello</Button>);
+    const el = mount(
+      <ThemeProvider isDark={false}>
+        <Button onMouseUp={() => done()}>hello</Button>
+      </ThemeProvider>,
+    );
     el.simulate("mouseUp");
   });
 
   it("fires onMouseLeave callback", (done) => {
     expect.assertions(0);
-    const el = mount(<Button onMouseLeave={() => done()}>hello</Button>);
+    const el = mount(
+      <ThemeProvider isDark={false}>
+        <Button onMouseLeave={() => done()}>hello</Button>
+      </ThemeProvider>,
+    );
     el.simulate("mouseLeave");
   });
 
   it("fires onFocus callback", (done) => {
     expect.assertions(0);
-    const el = mount(<Button onFocus={() => done()}>hello</Button>);
+    const el = mount(
+      <ThemeProvider isDark={false}>
+        <Button onFocus={() => done()}>hello</Button>
+      </ThemeProvider>,
+    );
     el.simulate("focus");
   });
 
   it("accepts custom class name", (done) => {
     const el = mount(
-      <Button className="foo" onClick={done}>
-        hello
-      </Button>,
+      <ThemeProvider isDark={false}>
+        <Button className="foo" onClick={done}>
+          hello
+        </Button>
+      </ThemeProvider>,
     );
-    expect(el.hasClass("foo")).toBe(true);
+    expect(el.getDOMNode().classList).toContain("foo");
     done();
     el.unmount();
   });
 
   it("accepts custom id", () => {
-    const el = mount(<Button id="button-1">hello</Button>);
+    const el = mount(
+      <ThemeProvider isDark={false}>
+        <Button id="button-1">hello</Button>
+      </ThemeProvider>,
+    );
     expect(el.find("#button-1").exists()).toBe(true);
     el.unmount();
   });
 
   it("applies bulma-style classes", () => {
     const el = mount(
-      <Button small primary warning danger>
-        hello
-      </Button>,
+      <ThemeProvider isDark={false}>
+        <Button small primary warning danger>
+          hello
+        </Button>
+      </ThemeProvider>,
     );
     const classes = el.getDOMNode().classList;
     expect(classes).toContain("is-small");

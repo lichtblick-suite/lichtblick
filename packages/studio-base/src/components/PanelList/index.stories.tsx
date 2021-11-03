@@ -121,6 +121,7 @@ storiesOf("components/PanelList", module)
       // Wait for simulated key events
       delay: 100,
     },
+    colorScheme: "dark",
   })
   .addDecorator((childrenRenderFcn) => {
     return (
@@ -133,14 +134,13 @@ storiesOf("components/PanelList", module)
   })
   .add("panel list", () => (
     <div style={{ margin: 50, height: 480 }}>
-      <PanelList
-        onPanelSelect={() => {
-          // no-op
-        }}
-      />
+      <PanelList onPanelSelect={() => {}} />
     </div>
   ))
   .add("filtered panel list", () => <PanelListWithInteractions inputValue="AAA" />)
+  .add("filtered panel list light", () => <PanelListWithInteractions inputValue="AAA" />, {
+    colorScheme: "light",
+  })
   .add("navigating panel list with arrow keys", () => (
     <PanelListWithInteractions events={[arrowDown, arrowDown, arrowUp]} />
   ))

@@ -87,11 +87,11 @@ function getColumnsFromObject(
   return columns;
 }
 
-const STableRow = styled.tr`
-  background-color: ${({ index }: { index: number }) =>
-    index % 2 === 0 ? "inherit" : toolsColorScheme.base.dark};
+const STableRow = styled.tr<{ index: number }>`
+  background-color: ${({ index, theme }) =>
+    index % 2 === 0 ? "inherit" : theme.palette.neutralLighterAlt};
   &:hover {
-    background-color: ${toolsColorScheme.base.light};
+    background-color: ${({ theme }) => theme.palette.neutralLighterAlt};
   }
 `;
 

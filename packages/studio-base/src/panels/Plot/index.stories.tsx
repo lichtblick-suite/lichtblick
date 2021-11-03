@@ -440,6 +440,7 @@ export function LineGraphAfterZoom(): JSX.Element {
 }
 LineGraphAfterZoom.parameters = {
   useReadySignal: true,
+  colorScheme: "dark",
 };
 
 TimestampMethodHeaderStamp.storyName = "timestampMethod: headerStamp";

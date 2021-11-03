@@ -11,22 +11,20 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets } from "@fluentui/merge-styles";
+import { makeStyles } from "@fluentui/react";
 import cx from "classnames";
-
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 type Props = React.PropsWithChildren<{
   className?: string;
   style?: React.CSSProperties;
 }>;
 
-const classes = mergeStyleSets({
+const useStyles = makeStyles((theme) => ({
   container: {
-    backgroundColor: colors.DARK3,
+    backgroundColor: theme.semanticColors.menuBackground,
     borderRadius: 4,
     padding: 0,
-    boxShadow: "0 0px 32px rgba(8, 8, 10, 0.6)",
+    boxShadow: theme.effects.elevation64,
     overflow: "hidden",
     pointerEvents: "auto",
     flexShrink: 0,
@@ -37,24 +35,26 @@ const classes = mergeStyleSets({
 
     hr: {
       padding: 0,
-      backgroundColor: colors.DIVIDER,
+      backgroundColor: theme.semanticColors.bodyDivider,
     },
     a: {
       textDecoration: "none",
     },
   },
-});
+}));
 
 // a small component which wraps its children in menu styles
 // and provides a helper { Item } component which can be used
 // to render typical menu items with text & an icon
-export default class Menu extends React.PureComponent<Props> {
-  override render(): JSX.Element {
-    const { children, className, style } = this.props;
-    return (
-      <div className={cx(classes.container, className)} style={style}>
-        {children}
-      </div>
-    );
-  }
+export default function Menu({
+  className,
+  style,
+  children,
+}: React.PropsWithChildren<Props>): JSX.Element {
+  const styles = useStyles();
+  return (
+    <div className={cx(styles.container, className)} style={style}>
+      {children}
+    </div>
+  );
 }

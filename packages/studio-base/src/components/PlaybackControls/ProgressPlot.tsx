@@ -10,12 +10,12 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import { useTheme } from "@fluentui/react";
 import { complement } from "intervals-fn";
 import { useCallback } from "react";
 
 import AutoSizingCanvas from "@foxglove/studio-base/components/AutoSizingCanvas";
 import { Progress } from "@foxglove/studio-base/players/types";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const BAR_HEIGHT = 28;
 const LINE_START = 12;
@@ -27,11 +27,12 @@ type ProgressProps = {
 
 export function ProgressPlot(props: ProgressProps): JSX.Element {
   const { fullyLoadedFractionRanges } = props.progress;
+  const theme = useTheme();
   const draw = useCallback(
     (context: CanvasRenderingContext2D, width: number, height: number) => {
       context.clearRect(0, 0, width, height);
       if (fullyLoadedFractionRanges) {
-        context.fillStyle = colors.DARK5;
+        context.fillStyle = theme.palette.neutralLight;
         const invertedRanges = complement({ start: 0, end: 1 }, fullyLoadedFractionRanges);
         for (const range of invertedRanges) {
           const start = width * range.start;
@@ -40,7 +41,7 @@ export function ProgressPlot(props: ProgressProps): JSX.Element {
         }
       }
     },
-    [fullyLoadedFractionRanges],
+    [fullyLoadedFractionRanges, theme.palette.neutralLight],
   );
 
   return (

@@ -11,11 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets } from "@fluentui/react";
+import { makeStyles } from "@fluentui/react";
 import cx from "classnames";
 import { CSSProperties, MouseEventHandler } from "react";
 
-const classes = mergeStyleSets({
+const useStyles = makeStyles((theme) => ({
   flex: {
     display: "flex",
     flexDirection: "row",
@@ -29,19 +29,18 @@ const classes = mergeStyleSets({
       background: "transparent",
     },
     "&::-webkit-scrollbar-thumb": {
-      background: "rgba(255, 255, 255, 0.1)",
+      background: theme.palette.blackTranslucent40,
       borderRadius: 2,
     },
   },
   reverse: {
     flexDirection: "row-reverse",
   },
-  col: {
-    flexDirection: "column",
-  },
-  colReverse: {
-    flexDirection: "column-reverse",
-  },
+  // when the theme changes dynamically, the main flex rule above moves later in the
+  // generated style tag (order is not preserved), so we need the specificity to be higher
+  // https://github.com/microsoft/fluentui/issues/20452
+  col: { flexDirection: "column !important" },
+  colReverse: { flexDirection: "column-reverse !important" },
   clip: {
     overflow: "hidden",
   },
@@ -64,7 +63,7 @@ const classes = mergeStyleSets({
   scrollX: {
     overflowX: "auto",
   },
-});
+}));
 
 type Props = {
   // set to true to flex along column instead of row
@@ -96,6 +95,7 @@ type Props = {
 };
 
 const Flex = React.forwardRef((props: Props, ref: React.ForwardedRef<HTMLDivElement>) => {
+  const classes = useStyles();
   const {
     col,
     row,

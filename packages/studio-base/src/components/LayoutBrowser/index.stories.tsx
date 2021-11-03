@@ -155,7 +155,7 @@ export function TruncatedLayoutNameSelected(): JSX.Element {
   return <LayoutBrowser />;
 }
 
-AddLayout.parameters = { useReadySignal: true };
+AddLayout.parameters = { useReadySignal: true, colorScheme: "dark" };
 export function AddLayout(_args: unknown): JSX.Element {
   const readySignal = useReadySignal();
 
@@ -172,7 +172,7 @@ export function AddLayout(_args: unknown): JSX.Element {
   );
 }
 
-MenuOpen.parameters = { useReadySignal: true };
+MenuOpen.parameters = { useReadySignal: true, colorScheme: "dark" };
 export function MenuOpen(_args: unknown): JSX.Element {
   const readySignal = useReadySignal();
 
@@ -185,8 +185,10 @@ export function MenuOpen(_args: unknown): JSX.Element {
 
   return <LayoutBrowser />;
 }
+export const MenuOpenLight = MenuOpen.bind(undefined);
+MenuOpenLight.parameters = { useReadySignal: true, colorScheme: "light" };
 
-EditingName.parameters = { useReadySignal: true };
+EditingName.parameters = { useReadySignal: true, colorScheme: "dark" };
 export function EditingName(_args: unknown): JSX.Element {
   const readySignal = useReadySignal();
 
@@ -201,7 +203,7 @@ export function EditingName(_args: unknown): JSX.Element {
   return <LayoutBrowser />;
 }
 
-CancelRenameWithEscape.parameters = { useReadySignal: true };
+CancelRenameWithEscape.parameters = { useReadySignal: true, colorScheme: "dark" };
 export function CancelRenameWithEscape(_args: unknown): JSX.Element {
   const readySignal = useReadySignal();
 
@@ -219,7 +221,7 @@ export function CancelRenameWithEscape(_args: unknown): JSX.Element {
   return <LayoutBrowser />;
 }
 
-CommitRenameWithTab.parameters = { useReadySignal: true };
+CommitRenameWithTab.parameters = { useReadySignal: true, colorScheme: "dark" };
 export function CommitRenameWithTab(_args: unknown): JSX.Element {
   const readySignal = useReadySignal();
 
@@ -248,7 +250,7 @@ export function CommitRenameWithTab(_args: unknown): JSX.Element {
   return <LayoutBrowser />;
 }
 
-Duplicate.parameters = { useReadySignal: true };
+Duplicate.parameters = { useReadySignal: true, colorScheme: "dark" };
 export function Duplicate(_args: unknown): JSX.Element {
   const layoutStorage = useLayoutStorage();
   const readySignal = useReadySignal();
@@ -311,13 +313,13 @@ export function DeleteLayout(_args: unknown): JSX.Element {
   const readySignal = useReadySignal();
   return <DeleteStory index={0} name="Another Layout" signal={readySignal} />;
 }
-DeleteLayout.parameters = { useReadySignal: true };
+DeleteLayout.parameters = { useReadySignal: true, colorScheme: "dark" };
 
 export function DeleteSelectedLayout(_args: unknown): JSX.Element {
   const readySignal = useReadySignal();
   return <DeleteStory index={1} name="Current Layout" signal={readySignal} />;
 }
-DeleteSelectedLayout.parameters = { useReadySignal: true };
+DeleteSelectedLayout.parameters = { useReadySignal: true, colorScheme: "dark" };
 
 export function DeleteLastLayout(_args: unknown): JSX.Element {
   const readySignal = useReadySignal();
@@ -327,4 +329,5 @@ export function DeleteLastLayout(_args: unknown): JSX.Element {
 DeleteLastLayout.parameters = {
   useReadySignal: true,
   mockLayouts: [exampleCurrentLayout],
+  colorScheme: "dark",
 };

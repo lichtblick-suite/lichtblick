@@ -3,7 +3,9 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 import {
   Checkbox,
+  ChoiceGroup,
   DirectionalHint,
+  IChoiceGroupOption,
   IComboBoxOption,
   SelectableOptionMenuItemType,
   Stack,
@@ -36,6 +38,32 @@ function formatTimezone(name: string) {
     return `${zoneAbbr} (${offsetStr})`;
   }
   return `${name} (${zoneAbbr}, ${offsetStr})`;
+}
+
+function ColorSchemeSettings(): JSX.Element {
+  const [colorScheme = "system", setColorScheme] = useAppConfigurationValue<string>(
+    AppSetting.COLOR_SCHEME,
+  );
+  const options: IChoiceGroupOption[] = useMemo(
+    () => [
+      { key: "light", text: "Light", iconProps: { iconName: "WeatherSunny" } },
+      { key: "dark", text: "Dark", iconProps: { iconName: "WeatherMoon" } },
+      { key: "system", text: "Follow system", iconProps: { iconName: "CircleHalfFill" } },
+    ],
+    [],
+  );
+  return (
+    <ChoiceGroup
+      label="Color scheme"
+      options={options}
+      selectedKey={colorScheme}
+      onChange={(_event, option) => {
+        if (option != undefined) {
+          void setColorScheme(option.key);
+        }
+      }}
+    />
+  );
 }
 
 function TimezoneSettings(): React.ReactElement {
@@ -229,6 +257,9 @@ export default function Preferences(): React.ReactElement {
         <Stack.Item>
           <SectionHeader>General</SectionHeader>
           <Stack tokens={{ childrenGap: theme.spacing.s1 }}>
+            <Stack.Item>
+              <ColorSchemeSettings />
+            </Stack.Item>
             <Stack.Item>
               <TimezoneSettings />
             </Stack.Item>

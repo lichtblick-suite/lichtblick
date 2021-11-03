@@ -18,51 +18,66 @@ import TestUtils from "react-dom/test-utils";
 import ShareJsonModal from "@foxglove/studio-base/components/ShareJsonModal";
 
 storiesOf("components/ShareJsonModal", module)
-  .add("standard", () => (
-    <ShareJsonModal
-      title="Foo"
-      onRequestClose={() => {
-        // no-op
-      }}
-      initialValue=""
-      onChange={() => {
-        // no-op
-      }}
-      noun="layout"
-    />
-  ))
-  .add("JSON", () => (
-    <ShareJsonModal
-      title="Foo"
-      onRequestClose={() => {
-        // no-op
-      }}
-      initialValue={{ foo: "bar", baz: "qux" }}
-      onChange={() => {
-        // no-op
-      }}
-      noun="layout"
-    />
-  ))
-  .add("submitting invalid layout", () => {
-    useEffect(() => {
-      setTimeout(() => {
-        const textarea: any = document.querySelector("textarea");
-        textarea.value = "{";
-        TestUtils.Simulate.change(textarea);
-      }, 10);
-    }, []);
-    return (
-      <div data-modalcontainer="true">
-        <ShareJsonModal
-          title="Foo"
-          onRequestClose={() => {
-            // no-op
-          }}
-          initialValue={""}
-          onChange={() => {}}
-          noun="layout"
-        />
-      </div>
-    );
-  });
+  .add(
+    "standard",
+    () => (
+      <ShareJsonModal
+        title="Foo"
+        onRequestClose={() => {}}
+        initialValue=""
+        onChange={() => {}}
+        noun="layout"
+      />
+    ),
+    { colorScheme: "dark" },
+  )
+  .add(
+    "standard light",
+    () => (
+      <ShareJsonModal
+        title="Foo"
+        onRequestClose={() => {}}
+        initialValue=""
+        onChange={() => {}}
+        noun="layout"
+      />
+    ),
+    { colorScheme: "light" },
+  )
+  .add(
+    "JSON",
+    () => (
+      <ShareJsonModal
+        title="Foo"
+        onRequestClose={() => {}}
+        initialValue={{ foo: "bar", baz: "qux" }}
+        onChange={() => {}}
+        noun="layout"
+      />
+    ),
+    { colorScheme: "dark" },
+  )
+  .add(
+    "submitting invalid layout",
+    () => {
+      useEffect(() => {
+        setTimeout(() => {
+          const textarea: any = document.querySelector("textarea");
+          textarea.value = "{";
+          TestUtils.Simulate.change(textarea);
+        }, 10);
+      }, []);
+      return (
+        <div data-modalcontainer="true">
+          <ShareJsonModal
+            title="Foo"
+            onRequestClose={() => {}}
+            initialValue={""}
+            onChange={() => {}}
+            noun="layout"
+          />
+        </div>
+      );
+    },
+    { colorScheme: "dark" },
+  );

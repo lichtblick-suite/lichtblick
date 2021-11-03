@@ -32,8 +32,9 @@ const SDropTarget = styled.div<{ isOver: boolean }>`
   flex-direction: column;
   width: 100%;
   height: 100%;
-  background-color: ${({ isOver }) => (isOver ? colors.TEXT_DISABLED : "transparent")};
-  border: ${({ isOver }) => (isOver ? `1px solid ${colors.TEXT_MUTED}` : "none")};
+  background-color: ${({ isOver, theme }) =>
+    isOver ? theme.palette.neutralLighterAlt : "transparent"};
+  border: ${({ isOver, theme }) => (isOver ? `1px solid ${theme.palette.neutralLight}` : "none")};
 `;
 
 const SEmptyStateText = styled.div`
@@ -41,7 +42,7 @@ const SEmptyStateText = styled.div`
   margin: 16px 72px;
   text-align: center;
   line-height: 1.5;
-  color: rgba(247, 247, 243, 0.3);
+  color: ${({ theme }) => theme.semanticColors.disabledText};
 `;
 
 const SPickAPanelText = styled.div`

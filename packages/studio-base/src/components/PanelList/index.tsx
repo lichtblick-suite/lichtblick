@@ -10,7 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
-import { mergeStyleSets } from "@fluentui/merge-styles";
+import { makeStyles, useTheme } from "@fluentui/react";
 import MagnifyIcon from "@mdi/svg/svg/magnify.svg";
 import fuzzySort from "fuzzysort";
 import { isEmpty } from "lodash";
@@ -36,10 +36,9 @@ import {
 } from "@foxglove/studio-base/types/panels";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const classes = mergeStyleSets({
+const useStyles = makeStyles((theme) => ({
   root: {
     height: "100%",
-    overflow: "hidden",
   },
   container: {
     padding: 16,
@@ -55,18 +54,19 @@ const classes = mergeStyleSets({
   },
   searchInputContainer: {
     paddingLeft: 8,
-    backgroundColor: colors.DARK5,
+    backgroundColor: theme.semanticColors.inputBackground,
     borderRadius: 4,
+    border: `1px solid ${theme.semanticColors.inputBorder}`,
   },
   searchInput: {
-    backgroundColor: `${colors.DARK5} !important`,
+    backgroundColor: `${theme.semanticColors.inputBackground} !important`,
     padding: "8px !important",
     margin: "0 !important",
     width: "100%",
     minWidth: 0,
 
     ":hover, :focus": {
-      backgroundColor: colors.DARK5,
+      backgroundColor: theme.semanticColors.inputBackground,
     },
   },
   scrollContainer: {
@@ -77,7 +77,7 @@ const classes = mergeStyleSets({
     padding: "8px 16px",
     opacity: 0.4,
   },
-});
+}));
 
 type DropDescription = {
   type: string;
@@ -112,6 +112,7 @@ function DraggablePanelItem({
   highlighted,
   mosaicId,
 }: PanelItemProps) {
+  const classes = useStyles();
   const scrollRef = React.useRef<HTMLDivElement>(ReactNull);
   const [, drag] = useDrag<unknown, MosaicDropResult, never>({
     type: MosaicDragType.WINDOW,
@@ -206,6 +207,8 @@ function verifyPanels(panels: readonly PanelInfo[]) {
 }
 
 function PanelList(props: Props): JSX.Element {
+  const theme = useTheme();
+  const classes = useStyles();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [highlightedPanelIdx, setHighlightedPanelIdx] = React.useState<number | undefined>();
   const { onPanelSelect, selectedPanelTitle } = props;
@@ -330,7 +333,7 @@ function PanelList(props: Props): JSX.Element {
       <div className={classes.sticky}>
         <div className={classes.container}>
           <Flex center className={classes.searchInputContainer}>
-            <Icon style={{ color: colors.LIGHT, opacity: 0.3 }}>
+            <Icon style={{ color: theme.semanticColors.inputIcon }}>
               <MagnifyIcon />
             </Icon>
             <LegacyInput

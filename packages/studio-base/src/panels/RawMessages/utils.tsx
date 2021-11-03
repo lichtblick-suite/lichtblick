@@ -51,11 +51,16 @@ function getChangeCounts(
   return startingCounts;
 }
 
-export const getItemStringForDiff = (
-  _type: string,
-  data: DiffObject,
-  itemType: ReactNode,
-): ReactNode => {
+export const getItemStringForDiff = ({
+  data,
+  itemType,
+  isInverted,
+}: {
+  type: string;
+  data: DiffObject;
+  itemType: ReactNode;
+  isInverted: boolean;
+}): ReactNode => {
   const { ADDED, DELETED, CHANGED, ID } = diffLabels;
   const id = data[ID.labelText] as DiffObject | undefined;
   const idLabel = id
@@ -80,7 +85,7 @@ export const getItemStringForDiff = (
               fontSize: "0.8em",
               padding: 2,
               borderRadius: 3,
-              backgroundColor: ADDED.color,
+              backgroundColor: isInverted ? colors.DARK6 : colors.LIGHT1,
               marginRight: 5,
             }}
           >

@@ -34,6 +34,7 @@ declare global {
     | "ChevronLeft"
     | "ChevronRight"
     | "ChevronUpSmall"
+    | "CircleHalfFill"
     | "CirclePlus"
     | "Clear"
     | "ClearSelection"
@@ -112,6 +113,8 @@ declare global {
     | "Variable2"
     | "Video3d"
     | "Warning"
+    | "WeatherSunny"
+    | "WeatherMoon"
     | never; // never has no effect here other than keeping the semicolon on a separate line for easier conflict resolution
 }
 

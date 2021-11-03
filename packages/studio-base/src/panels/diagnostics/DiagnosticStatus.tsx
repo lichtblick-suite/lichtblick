@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets } from "@fluentui/merge-styles";
+import { makeStyles } from "@fluentui/react";
 import ChartLineVariantIcon from "@mdi/svg/svg/chart-line-variant.svg";
 import DotsHorizontalIcon from "@mdi/svg/svg/dots-horizontal.svg";
 import ChevronDownIcon from "@mdi/svg/svg/unfold-less-horizontal.svg";
@@ -45,7 +45,7 @@ type Props = {
   saveConfig: (arg0: Partial<Config>) => void;
 };
 
-const classes = mergeStyleSets({
+const useStyles = makeStyles((theme) => ({
   table: {
     tableLayout: "fixed",
     width: "100%",
@@ -90,10 +90,10 @@ const classes = mergeStyleSets({
     cursor: "pointer",
 
     ":nth-child(odd)": {
-      backgroundColor: colors.DARK3,
+      backgroundColor: theme.palette.neutralLighterAlt,
     },
     ":hover": {
-      backgroundColor: colors.DARK4,
+      backgroundColor: theme.palette.neutralLighter,
 
       ".icon": {
         visibility: "visible",
@@ -132,7 +132,7 @@ const classes = mergeStyleSets({
       },
     },
   },
-});
+}));
 
 type FormattedKeyValue = {
   key: string;
@@ -200,6 +200,7 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
     splitFraction = 0.5,
   } = props;
   const tableRef = useRef<HTMLTableElement>(ReactNull);
+  const classes = useStyles();
 
   const onClickSection = useCallback(
     (sectionObj: { name: string; section: string }): void => {
@@ -344,6 +345,7 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
       );
     });
   }, [
+    classes,
     collapsedSections,
     info.status,
     onClickSection,

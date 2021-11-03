@@ -27,7 +27,7 @@ describe("PanelExtensionAdapter", () => {
 
     const Wrapper = () => {
       return (
-        <ThemeProvider>
+        <ThemeProvider isDark>
           <MockPanelContextProvider>
             <PanelSetup>
               <PanelExtensionAdapter
@@ -53,7 +53,7 @@ describe("PanelExtensionAdapter", () => {
     };
 
     mount(
-      <ThemeProvider>
+      <ThemeProvider isDark>
         <MockPanelContextProvider>
           <PanelSetup
             fixture={{
@@ -93,7 +93,7 @@ describe("PanelExtensionAdapter", () => {
     };
 
     mount(
-      <ThemeProvider>
+      <ThemeProvider isDark>
         <MockPanelContextProvider>
           <PanelSetup
             fixture={{
@@ -156,7 +156,7 @@ describe("PanelExtensionAdapter", () => {
     };
 
     mount(
-      <ThemeProvider>
+      <ThemeProvider isDark>
         <MockPanelContextProvider>
           <PanelSetup
             fixture={{
@@ -200,7 +200,7 @@ describe("PanelExtensionAdapter", () => {
     };
 
     mount(
-      <ThemeProvider>
+      <ThemeProvider isDark>
         <MockPanelContextProvider>
           <PanelSetup
             fixture={{
@@ -307,7 +307,7 @@ describe("PanelExtensionAdapter", () => {
 
     const Wrapper = ({ mounted = true }: { mounted?: boolean }) => {
       return (
-        <ThemeProvider>
+        <ThemeProvider isDark>
           <MockPanelContextProvider>
             <PanelSetup fixture={fixture}>
               {mounted && (
@@ -360,7 +360,7 @@ describe("PanelExtensionAdapter", () => {
 
     const Wrapper = () => {
       return (
-        <ThemeProvider>
+        <ThemeProvider isDark>
           <MockPanelContextProvider openSiblingPanel={openSiblingPanel}>
             <PanelSetup>
               <PanelExtensionAdapter

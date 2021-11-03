@@ -38,7 +38,7 @@ const STable = styled.div`
 
 const SRow = styled.div`
   &:nth-child(even) {
-    background: #333;
+    background: ${({ theme }) => theme.palette.neutralLighterAlt};
   }
 `;
 
@@ -56,7 +56,7 @@ const SCell = styled.div`
 
 const SHeader = styled.div`
   font-size: 14px;
-  border-bottom: #333 solid 2px;
+  border-bottom: ${({ theme }) => theme.semanticColors.bodyDivider} solid 2px;
 `;
 
 const STitle = styled.div`

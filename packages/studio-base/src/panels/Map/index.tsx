@@ -7,6 +7,7 @@ import ReactDOM from "react-dom";
 import { PanelExtensionContext } from "@foxglove/studio";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelExtensionAdapter from "@foxglove/studio-base/components/PanelExtensionAdapter";
+import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import MapPanel from "./MapPanel";
@@ -15,7 +16,12 @@ import helpContent from "./index.help.md";
 import "leaflet/dist/leaflet.css";
 
 function initPanel(context: PanelExtensionContext) {
-  ReactDOM.render(<MapPanel context={context} />, context.panelElement);
+  ReactDOM.render(
+    <ThemeProvider isDark>
+      <MapPanel context={context} />
+    </ThemeProvider>,
+    context.panelElement,
+  );
 }
 
 type Props = {

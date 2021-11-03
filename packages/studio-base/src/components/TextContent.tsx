@@ -18,7 +18,6 @@ import rehypeRaw from "rehype-raw";
 import { CSSProperties } from "styled-components";
 
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -47,13 +46,13 @@ const useStyles = makeStyles((theme) => ({
     h3: {
       ...theme.fonts.large,
       marginBottom: theme.spacing.s1,
-      color: colors.TEXT_MUTED,
+      color: theme.palette.neutralLight,
       fontWeight: 500,
     },
     "h4, h5, h6": {
       ...theme.fonts.mediumPlus,
       marginBottom: theme.spacing.s2,
-      color: colors.TEXT_MUTED,
+      color: theme.palette.neutralLight,
       fontWeight: 500,
       fontStyle: "italic",
     },

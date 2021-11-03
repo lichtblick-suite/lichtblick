@@ -7,19 +7,13 @@ import ReactDOM from "react-dom";
 import { PanelExtensionContext } from "@foxglove/studio";
 import Panel from "@foxglove/studio-base/components/Panel";
 import PanelExtensionAdapter from "@foxglove/studio-base/components/PanelExtensionAdapter";
-import ThemeProvider from "@foxglove/studio-base/theme/ThemeProvider";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 
 import TeleopPanel from "./TeleopPanel";
 import helpContent from "./index.help.md";
 
 function initPanel(context: PanelExtensionContext) {
-  ReactDOM.render(
-    <ThemeProvider>
-      <TeleopPanel context={context} />
-    </ThemeProvider>,
-    context.panelElement,
-  );
+  ReactDOM.render(<TeleopPanel context={context} />, context.panelElement);
 }
 
 type Props = {

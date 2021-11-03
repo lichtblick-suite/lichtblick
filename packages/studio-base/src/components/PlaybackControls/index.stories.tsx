@@ -84,7 +84,7 @@ function Wrapper({
           startPlayback={action("play")}
           progress={progress}
         >
-          <div style={{ padding: 20, margin: 100 }}>{children}</div>
+          <div style={{ padding: 20, margin: 20 }}>{children}</div>
         </MockMessagePipelineProvider>
       </MockCurrentLayoutProvider>
     </AppConfigurationContext.Provider>
@@ -102,6 +102,7 @@ export const Playing: Story = () => {
     </Wrapper>
   );
 };
+Playing.parameters = { colorScheme: "both-column" };
 
 export const Paused: Story = () => {
   return (
@@ -110,6 +111,7 @@ export const Paused: Story = () => {
     </Wrapper>
   );
 };
+Paused.parameters = { colorScheme: "both-column" };
 
 export const DownloadProgressByRanges: Story = () => {
   const player = getPlayerState();
@@ -126,3 +128,4 @@ export const DownloadProgressByRanges: Story = () => {
     </Wrapper>
   );
 };
+DownloadProgressByRanges.parameters = { colorScheme: "both-column" };

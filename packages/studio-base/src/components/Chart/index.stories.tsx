@@ -118,6 +118,7 @@ export default {
       // additional delay for any final clicks or renders
       delay: 100,
     },
+    colorScheme: "dark",
   },
 };
 
@@ -155,7 +156,7 @@ export const AllowsClickingOnDatalabels: Story = (_args) => {
   const doClick = useCallback(() => {
     if (clickedDatalabel == undefined) {
       const [canvas] = document.getElementsByTagName("canvas");
-      TestUtils.Simulate.click(canvas!, { clientX: 245, clientY: 419 });
+      TestUtils.Simulate.click(canvas!, { clientX: 245, clientY: 429 });
     }
   }, [clickedDatalabel]);
 

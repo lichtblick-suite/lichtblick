@@ -31,15 +31,16 @@ type Props = {
   defaultTopicToRender: string;
 };
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   topic: {
     display: "flex",
     cursor: "pointer",
     padding: 8,
     height: 32,
-  },
-  topicSelected: {
-    backgroundColor: colors.BACKGROUND_CONTROL_SELECTED,
+    color: theme.semanticColors.menuItemText,
+    ":hover": {
+      backgroundColor: theme.semanticColors.menuItemBackgroundHovered,
+    },
   },
   topicLabel: {
     flex: "flex-start",
@@ -50,7 +51,7 @@ const useStyles = makeStyles({
     flex: "flex-end",
 
     svg: {
-      fill: "white",
+      fill: theme.semanticColors.menuIcon,
       width: 15,
       height: 15,
     },
@@ -61,9 +62,9 @@ const useStyles = makeStyles({
     color: colors.ORANGE,
   },
   iconActive: {
-    color: colors.LIGHT1,
+    color: theme.palette.neutralPrimary,
   },
-});
+}));
 
 export default function TopicToRenderMenu({
   onChange,
@@ -110,9 +111,7 @@ export default function TopicToRenderMenu({
     >
       {renderTopics.map((topic) => (
         <div
-          className={cx(styles.topic, {
-            [styles.topicSelected]: topicToRender === topic,
-          })}
+          className={styles.topic}
           key={topic}
           onClick={() => {
             onChange(topic);

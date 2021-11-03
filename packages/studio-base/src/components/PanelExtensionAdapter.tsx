@@ -2,6 +2,7 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
+import { useTheme } from "@fluentui/react";
 import { CSSProperties, RefCallback, useCallback, useMemo, useRef, useState } from "react";
 import { v4 as uuid } from "uuid";
 
@@ -126,6 +127,8 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
   const hoverValueRef = useRef<typeof hoverValue>();
   hoverValueRef.current = hoverValue;
 
+  const colorScheme = useTheme().isInverted ? "dark" : "light";
+
   const renderPanel = useCallback(() => {
     rafRequestedRef.current = false;
 
@@ -213,6 +216,13 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
       }
     }
 
+    if (watchedFieldsRef.current.has("colorScheme")) {
+      if (colorScheme !== renderState.colorScheme) {
+        shouldRender = true;
+        renderState.colorScheme = colorScheme;
+      }
+    }
+
     if (!shouldRender) {
       return;
     }
@@ -233,7 +243,7 @@ function PanelExtensionAdapter(props: PanelExtensionAdapterProps): JSX.Element {
     } catch (err) {
       setError(err);
     }
-  }, [renderFn]);
+  }, [colorScheme, renderFn]);
 
   const messagePipelineSelector = useCallback(
     (ctx: MessagePipelineContext) => {

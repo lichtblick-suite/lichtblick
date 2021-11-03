@@ -16,7 +16,6 @@ import CheckboxMarkedIcon from "@mdi/svg/svg/checkbox-marked.svg";
 import styled from "styled-components";
 
 import Icon from "@foxglove/studio-base/components/Icon";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export const SCheckbox = styled.div<{
   labelDirection: "top" | "left" | "right";
@@ -26,14 +25,17 @@ export const SCheckbox = styled.div<{
   align-items: center;
   flex-direction: ${(props) => (props.labelDirection === "top" ? "column" : "row")};
   align-items: ${(props) => (props.labelDirection === "top" ? "flex-start" : "center")};
-  color: ${(props) => (props.disabled ? colors.GRAY : colors.LIGHT1)};
+  color: ${({ disabled, theme }) =>
+    disabled ? theme.semanticColors.disabledText : theme.semanticColors.bodyText};
   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
 `;
 
 export const SLabel = styled.label<{ labelDirection: "top" | "left" | "right"; disabled: boolean }>`
   margin: ${(props) => (props.labelDirection === "top" ? "6px 6px 6px 0" : "6px")};
-  color: ${(props) =>
-    props.disabled || props.labelDirection === "top" ? colors.GRAY : colors.LIGHT1};
+  color: ${({ disabled, labelDirection, theme }) =>
+    disabled || labelDirection === "top"
+      ? theme.semanticColors.disabledText
+      : theme.semanticColors.bodyText};
 `;
 
 export type Props = {

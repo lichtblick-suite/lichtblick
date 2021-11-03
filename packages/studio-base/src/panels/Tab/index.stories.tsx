@@ -77,12 +77,17 @@ storiesOf("panels/Tab/index", module)
     chromatic: {
       delay: 1000,
     },
+    colorScheme: "dark",
   })
-  .add("default", () => (
-    <PanelSetup fixture={fixture}>
-      <Tab />
-    </PanelSetup>
-  ))
+  .add(
+    "default",
+    () => (
+      <PanelSetup fixture={fixture}>
+        <Tab />
+      </PanelSetup>
+    ),
+    { colorScheme: "both-row" },
+  )
   .add("showing panel list", () => (
     <PanelSetup
       fixture={fixture}
@@ -97,6 +102,24 @@ storiesOf("panels/Tab/index", module)
       <Tab />
     </PanelSetup>
   ))
+  .add(
+    "showing panel list light",
+    () => (
+      <PanelSetup
+        fixture={fixture}
+        panelCatalog={new MockPanelCatalog()}
+        onMount={() => {
+          setTimeout(async () => {
+            await tick();
+            (document.querySelectorAll('[data-test="pick-a-panel"]')[0] as any).click();
+          }, DEFAULT_TIMEOUT);
+        }}
+      >
+        <Tab />
+      </PanelSetup>
+    ),
+    { colorScheme: "light" },
+  )
   .add("picking a panel from the panel list creates a new tab if there are none", () => {
     return (
       <PanelSetup
@@ -215,43 +238,47 @@ storiesOf("panels/Tab/index", module)
       </PanelSetup>
     );
   })
-  .add("with chosen active tab", () => (
-    <PanelSetup panelCatalog={new MockPanelCatalog()} fixture={fixture}>
-      <Tab
-        overrideConfig={{
-          activeTabIdx: 1,
-          tabs: [
-            {
-              title: "Tab A",
-              layout: undefined,
-            },
-            {
-              title: "Tab B",
-              layout: {
-                direction: "row",
-                first: {
-                  direction: "column",
-                  first: "Sample1!2xqjjqw",
-                  second: "Sample2!81fx2n",
-                  splitPercentage: 60,
-                },
-                second: {
-                  direction: "column",
-                  first: "Sample2!3dor2gy",
-                  second: "Sample1!3wrafzj",
-                  splitPercentage: 40,
+  .add(
+    "with chosen active tab",
+    () => (
+      <PanelSetup panelCatalog={new MockPanelCatalog()} fixture={fixture}>
+        <Tab
+          overrideConfig={{
+            activeTabIdx: 1,
+            tabs: [
+              {
+                title: "Tab A",
+                layout: undefined,
+              },
+              {
+                title: "Tab B",
+                layout: {
+                  direction: "row",
+                  first: {
+                    direction: "column",
+                    first: "Sample1!2xqjjqw",
+                    second: "Sample2!81fx2n",
+                    splitPercentage: 60,
+                  },
+                  second: {
+                    direction: "column",
+                    first: "Sample2!3dor2gy",
+                    second: "Sample1!3wrafzj",
+                    splitPercentage: 40,
+                  },
                 },
               },
-            },
-            {
-              title: "Tab C",
-              layout: undefined,
-            },
-          ],
-        }}
-      />
-    </PanelSetup>
-  ))
+              {
+                title: "Tab C",
+                layout: undefined,
+              },
+            ],
+          }}
+        />
+      </PanelSetup>
+    ),
+    { colorScheme: "both-row" },
+  )
   .add("add tab", () => {
     return (
       <PanelSetup

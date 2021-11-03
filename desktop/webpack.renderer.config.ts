@@ -93,11 +93,21 @@ export default (env: unknown, argv: WebpackArgv): Configuration => {
       new HtmlWebpackPlugin({
         templateContent: `
   <!doctype html>
-  <html style="background-color: #121217;">
+  <html>
     <head><meta charset="utf-8"></head>
     <script>
       global = globalThis;
     </script>
+    <style>
+      html, body {
+        background-color: #fdfdfd;
+      }
+      @media (prefers-color-scheme: dark) {
+        html, body {
+          background-color: #121217;
+        }
+      }
+    </style>
     <body>
       <div id="root"></div>
     </body>

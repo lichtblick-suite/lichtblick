@@ -11,11 +11,11 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets } from "@fluentui/merge-styles";
+import { makeStyles } from "@fluentui/react";
 import cx from "classnames";
 import { Fzf, FzfResultItem } from "fzf";
 import { maxBy } from "lodash";
-import React, { CSSProperties, PureComponent, RefObject } from "react";
+import React, { CSSProperties, PureComponent, RefObject, useCallback } from "react";
 import ReactAutocomplete from "react-autocomplete";
 import { createPortal } from "react-dom";
 import textMetrics from "text-metrics";
@@ -35,14 +35,14 @@ function measureText(text: string): number {
 const ROW_HEIGHT = 24;
 const MAX_ITEMS = 200;
 
-const classes = mergeStyleSets({
+const useStyles = makeStyles((theme) => ({
   root: {
     borderRadius: 3,
     borderTopLeftRadius: 0,
-    boxShadow: "0 2px 12px rgba(0, 0, 0, 0.1)",
+    boxShadow: theme.effects.elevation16,
     position: "fixed",
     overflow: "auto",
-    background: colors.DARK3,
+    background: theme.semanticColors.menuBackground,
     zIndex: 1,
     marginLeft: -6,
   },
@@ -50,7 +50,7 @@ const classes = mergeStyleSets({
     background: "transparent !important",
     borderRadius: 0,
     border: "none",
-    color: "inherit",
+    color: theme.semanticColors.inputText,
     flexGrow: 1,
     fontSize: "1rem",
     margin: 0,
@@ -59,22 +59,21 @@ const classes = mergeStyleSets({
     fontFamily: fonts.SANS_SERIF,
 
     "&.disabled, &[disabled]": {
-      color: colors.TEXT_INPUT_DISABLED,
-      backgroundColor: colors.BACKGROUND_DISABLED,
+      color: theme.semanticColors.disabledText,
+      backgroundColor: theme.semanticColors.disabledBackground,
     },
     "&:focus": {
-      backgroundColor: colors.BACKGROUND_FOCUSED,
       outline: "none",
     },
     "&::placeholder": {
-      color: colors.TEXT_MUTED,
+      color: theme.semanticColors.inputPlaceholderText,
     },
   },
   inputError: {
-    color: colors.RED2,
+    color: `${colors.RED2} !important`,
   },
   inputPlaceholder: {
-    color: colors.TEXT_MUTED,
+    color: theme.semanticColors.inputPlaceholderText,
   },
   item: {
     padding: 6,
@@ -82,16 +81,16 @@ const classes = mergeStyleSets({
     minHeight: ROW_HEIGHT,
     lineHeight: ROW_HEIGHT - 10,
     overflowWrap: "break-word",
-    color: colors.TEXT_NORMAL,
+    color: theme.semanticColors.menuItemText,
     whiteSpace: "pre",
   },
   itemSelected: {
-    backgroundColor: colors.DARK5,
+    backgroundColor: theme.semanticColors.menuItemBackgroundHovered,
   },
   itemHighlighted: {
-    backgroundColor: colors.DARK4,
+    backgroundColor: theme.semanticColors.menuItemBackgroundHovered,
   },
-});
+}));
 
 // <Autocomplete> is a Studio-specific autocomplete with support for things like multiple
 // autocompletes that seamlessly transition into each other, e.g. when building more complex
@@ -109,6 +108,7 @@ const classes = mergeStyleSets({
 // of a "false" focus event. (In our case we just don't bother with ignoring the `focus` event since
 // it doesn't cause any problems.)
 type AutocompleteProps<T = unknown> = {
+  classes: ReturnType<typeof useStyles>;
   items: T[];
   getItemValue: (arg0: T) => string;
   getItemText: (arg0: T) => string;
@@ -116,7 +116,7 @@ type AutocompleteProps<T = unknown> = {
   value?: string;
   selectedItem?: T;
   onChange?: (event: React.SyntheticEvent<HTMLInputElement>, text: string) => void;
-  onSelect: (text: string, item: T, autocomplete: Autocomplete<T>) => void;
+  onSelect: (text: string, item: T, autocomplete: AutocompleteImpl<T>) => void;
   onBlur?: () => void;
   hasError?: boolean;
   autocompleteKey?: string;
@@ -181,10 +181,16 @@ const HighlightChars = (props: { str: string; indices: Set<number> }) => {
   return <>{nodes}</>;
 };
 
-export default class Autocomplete<T = unknown> extends PureComponent<
-  AutocompleteProps<T>,
-  AutocompleteState
-> {
+export interface IAutocomplete {
+  setSelectionRange(selectionStart: number, selectionEnd: number): void;
+  focus(): void;
+  blur(): void;
+}
+
+class AutocompleteImpl<T = unknown>
+  extends PureComponent<AutocompleteProps<T>, AutocompleteState>
+  implements IAutocomplete
+{
   private _autocomplete: RefObject<ReactAutocomplete>;
   private _ignoreFocus: boolean = false;
   private _ignoreBlur: boolean = false;
@@ -346,6 +352,7 @@ export default class Autocomplete<T = unknown> extends PureComponent<
 
   override render(): JSX.Element {
     const {
+      classes,
       autocompleteKey,
       autoSize = false,
       getItemValue,
@@ -486,3 +493,24 @@ export default class Autocomplete<T = unknown> extends PureComponent<
     );
   }
 }
+
+export default React.forwardRef((props, ref) => {
+  const classes = useStyles();
+  const mapRef = useCallback(
+    (autocomplete: IAutocomplete | ReactNull) => {
+      if (typeof ref === "function") {
+        ref(autocomplete);
+      } else if (ref != undefined) {
+        ref.current = autocomplete;
+      }
+    },
+    [ref],
+  );
+  return <AutocompleteImpl {...props} ref={mapRef} classes={classes} />;
+}) as <T>(
+  props: JSX.LibraryManagedAttributes<
+    typeof AutocompleteImpl,
+    Omit<AutocompleteProps<T>, "classes">
+  > &
+    React.RefAttributes<IAutocomplete>,
+) => React.ReactElement;

@@ -16,7 +16,7 @@ import {
   IDropdownOption,
   IDropdownStyles,
   ISelectableOption,
-  mergeStyleSets,
+  makeStyles,
   useTheme,
 } from "@fluentui/react";
 import PinIcon from "@mdi/svg/svg/pin.svg";
@@ -59,10 +59,7 @@ type NodeRowProps = {
   onClickPin: (info: DiagnosticInfo) => void;
 };
 
-const classes = mergeStyleSets({
-  panel: {
-    backgroundColor: colors.DARK,
-  },
+const useStyles = makeStyles((theme) => ({
   ok: {
     color: colors.GREEN2,
   },
@@ -73,7 +70,7 @@ const classes = mergeStyleSets({
     color: colors.RED2,
   },
   stale: {
-    color: colors.TEXT_MUTED,
+    color: theme.semanticColors.disabledText,
   },
   pinIcon: {
     marginRight: 4,
@@ -93,7 +90,6 @@ const classes = mergeStyleSets({
   nodeRow: {
     textDecoration: "none",
     cursor: "pointer",
-    color: colors.TEXT_CONTROL,
     userSelect: "none",
     display: "flex",
     alignItems: "center",
@@ -104,57 +100,56 @@ const classes = mergeStyleSets({
     textOverflow: "ellipsis",
 
     "&:hover": {
-      color: "white",
-      backgroundColor: colors.DARK5,
+      backgroundColor: theme.semanticColors.listItemBackgroundHovered,
 
       "> .icon": {
         visibility: "visible",
       },
     },
   },
-});
+}));
 
-class NodeRow extends React.PureComponent<NodeRowProps> {
-  onClick = () => {
-    const { info, onClick } = this.props;
+const NodeRow = React.memo(function NodeRow(props: NodeRowProps) {
+  const handleClick = useCallback(() => {
+    const info = props.info;
+    const onClick = props.onClick;
     onClick(info);
-  };
-  onClickPin = () => {
-    const { info, onClickPin } = this.props;
+  }, [props.onClick, props.info]);
+  const handleClickPin = useCallback(() => {
+    const info = props.info;
+    const onClickPin = props.onClickPin;
     onClickPin(info);
-  };
+  }, [props.onClickPin, props.info]);
 
-  override render() {
-    const { info, isPinned } = this.props;
-    const levelName = LEVEL_NAMES[info.status.level];
-
-    return (
-      <div className={classes.nodeRow} onClick={this.onClick} data-test-diagnostic-row>
-        <Icon
-          fade={!isPinned}
-          onClick={this.onClickPin}
-          className={cx(classes.pinIcon, {
-            [classes.pinIconActive]: isPinned,
-          })}
-        >
-          <PinIcon />
-        </Icon>
-        <div>{info.displayName}</div>
-        &nbsp;–&nbsp;
-        <div
-          className={cx({
-            [classes.ok]: levelName === "ok",
-            [classes.warn]: levelName === "warn",
-            [classes.error]: levelName === "error",
-            [classes.stale]: levelName === "stale",
-          })}
-        >
-          {info.status.message}
-        </div>
+  const { info, isPinned } = props;
+  const levelName = LEVEL_NAMES[info.status.level];
+  const classes = useStyles();
+  return (
+    <div className={classes.nodeRow} onClick={handleClick} data-test-diagnostic-row>
+      <Icon
+        fade={!isPinned}
+        onClick={handleClickPin}
+        className={cx(classes.pinIcon, {
+          [classes.pinIconActive]: isPinned,
+        })}
+      >
+        <PinIcon />
+      </Icon>
+      <div>{info.displayName}</div>
+      &nbsp;–&nbsp;
+      <div
+        className={cx({
+          [classes.ok]: levelName === "ok",
+          [classes.warn]: levelName === "warn",
+          [classes.error]: levelName === "error",
+          [classes.stale]: levelName === "stale",
+        })}
+      >
+        {info.status.message}
       </div>
-    );
-  }
-}
+    </div>
+  );
+});
 
 type Config = {
   minLevel: number;
@@ -170,6 +165,7 @@ type Props = {
 
 function DiagnosticSummary(props: Props): JSX.Element {
   const theme = useTheme();
+  const classes = useStyles();
   const dropdownStyles = useMemo(
     () =>
       ({
@@ -348,7 +344,7 @@ function DiagnosticSummary(props: Props): JSX.Element {
     );
 
   return (
-    <Flex col className={classes.panel}>
+    <Flex col>
       <PanelToolbar helpContent={helpContent} additionalIcons={topicToRenderMenu}>
         <Dropdown
           styles={dropdownStyles}

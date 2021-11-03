@@ -41,9 +41,9 @@ const MAX_GROUP_ERROR_WIDTH = 64;
 const VISIBLE_COUNT_WIDTH = 18;
 const VISIBLE_COUNT_MARGIN = 4;
 
-export const STreeNodeRow = styled.div`
-  color: ${(props: { visibleInScene: boolean }) =>
-    props.visibleInScene ? "inherit" : colors.TEXT_MUTED};
+export const STreeNodeRow = styled.div<{ visibleInScene: boolean }>`
+  color: ${({ theme, visibleInScene }) =>
+    visibleInScene ? "inherit" : theme.semanticColors.disabledText};
   display: flex;
   align-items: center;
   justify-content: space-between;

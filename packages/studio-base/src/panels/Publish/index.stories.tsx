@@ -33,14 +33,15 @@ const getFixture = ({ allowPublish }: { allowPublish: boolean }) => {
 };
 
 const advancedJSON = `{\n  "data": ""\n}`;
-const publishConfig = ({ advancedView, json }: { advancedView: boolean; json: string }) => ({
+const publishConfig = (config: Partial<typeof Publish["defaultConfig"]>) => ({
   topicName: "/sample_topic",
   datatype: "std_msgs/String",
   buttonText: "Publish",
   buttonTooltip: "",
   buttonColor: "",
-  advancedView,
-  value: json,
+  advancedView: true,
+  value: "",
+  ...config,
 });
 
 storiesOf("panels/Publish/index", module)
@@ -48,7 +49,21 @@ storiesOf("panels/Publish/index", module)
     const allowPublish = true;
     return (
       <PanelSetup fixture={getFixture({ allowPublish })}>
-        <Publish overrideConfig={publishConfig({ advancedView: true, json: advancedJSON })} />
+        <Publish overrideConfig={publishConfig({ advancedView: true, value: advancedJSON })} />
+      </PanelSetup>
+    );
+  })
+  .add("custom button color", () => {
+    const allowPublish = true;
+    return (
+      <PanelSetup fixture={getFixture({ allowPublish })}>
+        <Publish
+          overrideConfig={publishConfig({
+            advancedView: true,
+            value: advancedJSON,
+            buttonColor: "#ffbf49",
+          })}
+        />
       </PanelSetup>
     );
   })
@@ -56,7 +71,7 @@ storiesOf("panels/Publish/index", module)
     const allowPublish = false;
     return (
       <PanelSetup fixture={getFixture({ allowPublish })}>
-        <Publish overrideConfig={publishConfig({ advancedView: true, json: advancedJSON })} />
+        <Publish overrideConfig={publishConfig({ advancedView: true, value: advancedJSON })} />
       </PanelSetup>
     );
   })
@@ -64,14 +79,14 @@ storiesOf("panels/Publish/index", module)
     const allowPublish = false;
     return (
       <PanelSetup fixture={getFixture({ allowPublish })}>
-        <Publish overrideConfig={publishConfig({ advancedView: false, json: advancedJSON })} />
+        <Publish overrideConfig={publishConfig({ advancedView: false, value: advancedJSON })} />
       </PanelSetup>
     );
   })
   .add("Example with datatype that no longer exists", () => {
     return (
       <PanelSetup fixture={{ topics: [], datatypes: new Map(), frame: {}, capabilities: [] }}>
-        <Publish overrideConfig={publishConfig({ advancedView: true, json: advancedJSON })} />
+        <Publish overrideConfig={publishConfig({ advancedView: true, value: advancedJSON })} />
       </PanelSetup>
     );
   })
@@ -93,7 +108,7 @@ storiesOf("panels/Publish/index", module)
 
     return (
       <PanelSetup fixture={fixture}>
-        <Publish overrideConfig={publishConfig({ advancedView: true, json: validJSON })} />
+        <Publish overrideConfig={publishConfig({ advancedView: true, value: validJSON })} />
       </PanelSetup>
     );
   })
@@ -115,7 +130,7 @@ storiesOf("panels/Publish/index", module)
 
     return (
       <PanelSetup fixture={fixture}>
-        <Publish overrideConfig={publishConfig({ advancedView: true, json: invalid })} />
+        <Publish overrideConfig={publishConfig({ advancedView: true, value: invalid })} />
       </PanelSetup>
     );
   });

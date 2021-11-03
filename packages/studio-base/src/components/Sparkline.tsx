@@ -11,6 +11,9 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useTheme } from "@fluentui/react";
+import { useCallback } from "react";
+
 import AutoSizingCanvas from "@foxglove/studio-base/components/AutoSizingCanvas";
 
 export type SparklinePoint = { value: number; timestamp: number };
@@ -32,11 +35,12 @@ function draw(
   context: CanvasRenderingContext2D,
   width: number,
   height: number,
+  color: string,
 ) {
   const maxValue = Math.max(maximum, ...points.map(({ value }) => value));
   context.clearRect(0, 0, width, height);
   context.beginPath();
-  context.strokeStyle = "white";
+  context.strokeStyle = color;
   let first = true;
   for (const { value, timestamp } of points) {
     const x = ((timeRange + timestamp - nowStamp) / timeRange) * width;
@@ -52,29 +56,33 @@ function draw(
 }
 
 export function Sparkline(props: SparklineProps): JSX.Element {
+  const theme = useTheme();
+  const drawCallback = useCallback(
+    (context: CanvasRenderingContext2D, width: number, height: number) => {
+      draw(
+        props.points,
+        props.maximum ?? 0,
+        props.timeRange,
+        props.nowStamp ?? Date.now(),
+        context,
+        width,
+        height,
+        theme.palette.neutralDark,
+      );
+    },
+    [props.maximum, props.nowStamp, props.points, props.timeRange, theme.palette.neutralDark],
+  );
   return (
     <div
       style={{
         display: "inline-block",
         verticalAlign: "-10px",
-        backgroundColor: "#333",
+        backgroundColor: theme.palette.neutralLight,
         width: props.width,
         height: props.height,
       }}
     >
-      <AutoSizingCanvas
-        draw={(context: CanvasRenderingContext2D, width: number, height: number) => {
-          draw(
-            props.points,
-            props.maximum ?? 0,
-            props.timeRange,
-            props.nowStamp ?? Date.now(),
-            context,
-            width,
-            height,
-          );
-        }}
-      />
+      <AutoSizingCanvas draw={drawCallback} />
     </div>
   );
 }

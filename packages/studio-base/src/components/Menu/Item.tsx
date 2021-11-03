@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets } from "@fluentui/merge-styles";
+import { makeStyles } from "@fluentui/react";
 import CheckCircleIcon from "@mdi/svg/svg/check-circle.svg";
 import CheckIcon from "@mdi/svg/svg/check.svg";
 import ChevronLeftIcon from "@mdi/svg/svg/chevron-left.svg";
@@ -21,9 +21,8 @@ import { noop } from "lodash";
 
 import Icon, { IconSize } from "@foxglove/studio-base/components/Icon";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const classes = mergeStyleSets({
+const useStyles = makeStyles((theme) => ({
   contentWrapper: {
     flex: "1 1 auto",
     display: "flex",
@@ -34,38 +33,38 @@ const classes = mergeStyleSets({
     textDecoration: "none",
     padding: "8px 16px",
     cursor: "pointer",
-    color: colors.TEXT_CONTROL,
+    color: theme.semanticColors.menuItemText,
     userSelect: "none",
     display: "flex",
     alignItems: "center",
 
     ":hover": {
-      color: colors.TEXT_BRIGHT,
-      backgroundColor: colors.DARK5,
+      color: theme.semanticColors.menuItemTextHovered,
+      backgroundColor: theme.semanticColors.menuItemBackgroundHovered,
     },
     "&.hoverForScreenshots": {
-      color: colors.TEXT_BRIGHT,
-      backgroundColor: colors.DARK5,
+      color: theme.semanticColors.menuItemTextHovered,
+      backgroundColor: theme.semanticColors.menuItemBackgroundHovered,
     },
   },
   itemActive: {
-    color: colors.TEXT_BRIGHT,
-    backgroundColor: colors.DARK5,
+    color: theme.semanticColors.menuItemText,
+    backgroundColor: theme.semanticColors.menuItemBackgroundPressed,
   },
   itemDisabled: {
-    color: colors.TEXT_DISABLED,
+    color: theme.semanticColors.disabledText,
     cursor: "not-allowed",
 
     ":hover": {
       backgroundColor: "transparent",
-      color: colors.TEXT_DISABLED,
+      color: theme.semanticColors.disabledText,
     },
   },
   itemHeader: {
     textTransform: "uppercase",
     opacity: 0.6,
     fontSize: 11,
-    letterSpacing: 1,
+    letterSpacing: "1px",
     paddingTop: 16,
 
     "&:hover": {
@@ -90,7 +89,7 @@ const classes = mergeStyleSets({
     fontSize: 14,
     verticalAlign: "middle",
   },
-});
+}));
 
 type ItemProps = {
   className?: string;
@@ -114,6 +113,7 @@ type ItemProps = {
 };
 
 const Item = (props: ItemProps): JSX.Element => {
+  const classes = useStyles();
   const {
     className = "",
     isHeader = false,

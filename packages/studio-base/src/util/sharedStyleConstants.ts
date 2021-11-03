@@ -89,28 +89,9 @@ export const colors = {
   DIFF_MODE_SOURCE_1: robotStylesColors.MAGENTA,
   DIFF_MODE_SOURCE_2: robotStylesColors.TEAL,
   DIFF_MODE_SOURCE_BOTH: robotStylesColors.DARK7,
-  LEGEND_HIGHLIGHT_COLOR: "rgba(36, 36, 41, 0.7)",
-  LEGEND_HIGHLIGHT_COLOR_BRIGHT: "#37373f",
-  LEGEND_HIGHLIGHT_COLOR_BRIGHTER: "#4d4d57",
   CYAN: "#00ffff",
 
-  BACKGROUND: "#121217",
-  BACKGROUND_CONTROL: "rgba(247, 247, 243, 0.1)",
-  BACKGROUND_CONTROL_SELECTED: "rgba(59, 46, 118, 0.6)",
-  BACKGROUND_DISABLED: "rgba(255, 255, 255, 0.3)",
-  BACKGROUND_FOCUSED: "rgba(255, 255, 255, 0.075)",
-
-  TEXT_BRIGHT: "rgba(247, 247, 243, 0.88)",
-  TEXT_NORMAL: "rgba(247, 247, 243, 0.77)",
-  TEXT_DISABLED: "rgba(247, 247, 243, 0.15)",
   TEXT_MUTED: "rgba(247, 247, 243, 0.3)",
-  TEXT_CONTROL: "rgba(247, 247, 243, 0.77)",
-  TEXT_CONTROL_HOVER: "rgba(247, 247, 243, 1)",
-
-  TEXT_INPUT: "rgba(0, 0, 0, 0.8)",
-  TEXT_INPUT_DISABLED: "rgba(0, 0, 0, 0.3)",
-
-  MENU_ITEM_SELECTED: "rgba(45, 45, 51, 1)",
 
   DIVIDER: "rgba(247, 247, 243, 0.1)",
 

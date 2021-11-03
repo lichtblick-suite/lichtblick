@@ -124,27 +124,6 @@ function unionInto<T>(dest: Set<T>, ...iterables: Set<T>[]): void {
   }
 }
 
-const iconButtonStyles = {
-  rootHovered: { backgroundColor: "transparent" },
-  rootPressed: { backgroundColor: "transparent" },
-  rootDisabled: { backgroundColor: "transparent" },
-
-  rootChecked: { backgroundColor: "transparent" },
-  rootCheckedHovered: { backgroundColor: "transparent" },
-  rootCheckedPressed: { backgroundColor: "transparent" },
-
-  iconChecked: { color: colors.RED2 },
-  icon: {
-    color: "white",
-
-    svg: {
-      fill: "currentColor",
-      height: "1em",
-      width: "1em",
-    },
-  },
-} as Partial<IButtonStyles>;
-
 function TopicGraph() {
   const theme = useTheme();
   const [selectedTab, setSelectedTab] = useState<"Topics" | undefined>(undefined);
@@ -172,6 +151,30 @@ function TopicGraph() {
         fontSize: "16px",
       }),
     [],
+  );
+
+  const iconButtonStyles = useMemo<Partial<IButtonStyles>>(
+    () => ({
+      rootHovered: { backgroundColor: "transparent" },
+      rootPressed: { backgroundColor: "transparent" },
+      rootDisabled: { backgroundColor: "transparent" },
+
+      rootChecked: { backgroundColor: "transparent" },
+      rootCheckedHovered: { backgroundColor: "transparent" },
+      rootCheckedPressed: { backgroundColor: "transparent" },
+
+      iconChecked: { color: colors.RED2 },
+      icon: {
+        color: theme.semanticColors.buttonText,
+
+        svg: {
+          fill: "currentColor",
+          height: "1em",
+          width: "1em",
+        },
+      },
+    }),
+    [theme.semanticColors.buttonText],
   );
 
   const topicPassesConditions = useCallback(
@@ -383,7 +386,7 @@ function TopicGraph() {
           grow={0}
           styles={{
             root: {
-              backgroundColor: colors.DARK3,
+              backgroundColor: theme.semanticColors.buttonBackgroundHovered,
               borderRadius: theme.effects.roundedCorner2,
               flexShrink: 0,
               pointerEvents: "auto",

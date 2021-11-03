@@ -183,7 +183,7 @@ export function EmptyTopic(): JSX.Element {
   );
 }
 
-WithTooltip.parameters = { useReadySignal: true };
+WithTooltip.parameters = { useReadySignal: true, colorScheme: "dark" };
 export function WithTooltip(): JSX.Element {
   const readySignal = useReadySignal();
   return (
@@ -223,7 +223,7 @@ function useStepSequence(...steps: StepFn[]): () => void {
   }, []);
 }
 
-ShowResetAfterHorizontalZoom.parameters = { useReadySignal: true };
+ShowResetAfterHorizontalZoom.parameters = { useReadySignal: true, colorScheme: "dark" };
 export function ShowResetAfterHorizontalZoom(): JSX.Element {
   const readySignal = useReadySignal();
 
@@ -237,7 +237,7 @@ export function ShowResetAfterHorizontalZoom(): JSX.Element {
     </PanelSetup>
   );
 }
-ShowResetAfterVerticalZoom.parameters = { useReadySignal: true };
+ShowResetAfterVerticalZoom.parameters = { useReadySignal: true, colorScheme: "dark" };
 export function ShowResetAfterVerticalZoom(): JSX.Element {
   const readySignal = useReadySignal({ count: 2 });
   const step = useStepSequence(
@@ -257,7 +257,7 @@ export function ShowResetAfterVerticalZoom(): JSX.Element {
     </PanelSetup>
   );
 }
-ShowResetZoom.parameters = { useReadySignal: true };
+ShowResetZoom.parameters = { useReadySignal: true, colorScheme: "dark" };
 export function ShowResetZoom(): JSX.Element {
   const readySignal = useReadySignal({ count: 2 });
   const step = useStepSequence(
@@ -278,7 +278,7 @@ export function ShowResetZoom(): JSX.Element {
   );
 }
 
-ResetZoom.parameters = { useReadySignal: true };
+ResetZoom.parameters = { useReadySignal: true, colorScheme: "dark" };
 export function ResetZoom(): JSX.Element {
   const readySignal = useReadySignal();
 

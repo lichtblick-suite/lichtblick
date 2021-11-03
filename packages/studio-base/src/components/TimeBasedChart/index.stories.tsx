@@ -79,11 +79,11 @@ const commonProps: Props = {
   type: "scatter",
   xAxes: {
     ticks: { precision: 3 },
-    grid: { color: "rgba(255, 255, 255, 0.2)" },
+    grid: { color: "rgba(187, 187, 187, 0.2)" },
   },
   yAxes: {
     ticks: { precision: 3 },
-    grid: { color: "rgba(255, 255, 255, 0.2)" },
+    grid: { color: "rgba(187, 187, 187, 0.2)" },
   },
   xAxisIsPlaybackTime: true,
 };
@@ -95,18 +95,22 @@ export default {
     chromatic: {
       delay: 50,
     },
+    colorScheme: "dark",
   },
 };
 
 export function Simple(): JSX.Element {
   return (
-    <div style={{ width: "100%", height: "100%", background: "black" }}>
+    <div style={{ width: "100%", height: "100%" }}>
       <MockMessagePipelineProvider>
         <TimeBasedChart {...commonProps} />
       </MockMessagePipelineProvider>
     </div>
   );
 }
+export const SimpleLight = Object.assign(Simple.bind(undefined), {
+  parameters: { colorScheme: "light" },
+});
 
 // zoom and update without resetting zoom
 export function CanZoomAndUpdate(): JSX.Element {

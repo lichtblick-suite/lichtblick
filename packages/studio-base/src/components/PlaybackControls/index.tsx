@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { Stack, IButtonStyles, useTheme, StackItem } from "@fluentui/react";
+import { Stack, IButtonStyles, useTheme, StackItem, makeStyles } from "@fluentui/react";
 import { merge } from "lodash";
 import { useCallback, useMemo, useState } from "react";
 
@@ -45,8 +45,15 @@ const selectIsPlaying = (ctx: MessagePipelineContext) =>
   ctx.playerState.activeData?.isPlaying === true;
 const selectIsActive = (ctx: MessagePipelineContext) => !!ctx.playerState.activeData;
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    backgroundColor: theme.palette.neutralLighterAlt,
+  },
+}));
+
 export default function PlaybackControls(): JSX.Element {
   const theme = useTheme();
+  const styles = useStyles();
   const [repeat, setRepeat] = useState(false);
 
   const pause = useMessagePipeline(selectPause);
@@ -155,6 +162,7 @@ export default function PlaybackControls(): JSX.Element {
       <Stack
         horizontal
         verticalAlign="center"
+        className={styles.root}
         tokens={{
           childrenGap: theme.spacing.s1,
           padding: theme.spacing.s1,

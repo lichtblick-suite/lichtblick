@@ -82,6 +82,9 @@ declare module "@foxglove/studio" {
      * to other panels where the user is currently hovering and allow them to render accordingly.
      */
     previewTime?: number | undefined;
+
+    /** The color scheme currently in use throughout the app. */
+    colorScheme?: "dark" | "light";
   }
 
   export type PanelExtensionContext = {

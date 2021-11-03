@@ -54,7 +54,8 @@ function Example({
   );
 }
 storiesOf("components/Dropdown", module)
-  .add("position_below", () => <Example position="below" />)
-  .add("position_left", () => <Example position="left" />)
-  .add("position_right", () => <Example position="right" />)
-  .add("with custom button", () => <Example showCustomBtn />);
+  .add("position_below", () => <Example position="below" />, { colorScheme: "dark" })
+  .add("position_below light", () => <Example position="below" />, { colorScheme: "light" })
+  .add("position_left", () => <Example position="left" />, { colorScheme: "dark" })
+  .add("position_right", () => <Example position="right" />, { colorScheme: "dark" })
+  .add("with custom button", () => <Example showCustomBtn />, { colorScheme: "dark" });

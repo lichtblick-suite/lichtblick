@@ -4,7 +4,6 @@
 import styled from "styled-components";
 
 import { LegacyTable } from "@foxglove/studio-base/components/LegacyStyledComponents";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export default styled(LegacyTable)`
   th,
@@ -17,7 +16,7 @@ export default styled(LegacyTable)`
   }
   max-width: 100%;
   th {
-    color: ${colors.TEXT_MUTED};
+    color: ${({ theme }) => theme.semanticColors.disabledText};
     padding-right: 4px;
   }
 `;

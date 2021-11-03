@@ -16,7 +16,7 @@ import { sortBy, debounce } from "lodash";
 import { memo, createRef, useCallback, useState } from "react";
 import shallowequal from "shallowequal";
 
-import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
+import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Autocomplete";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -147,7 +147,7 @@ const FollowTFControl = memo<Props>((props: Props) => {
   const nodesWithoutDefaultFollowTfFrame = allNodes?.length;
   const newFollowTfFrame = allNodes?.[0]?.tf?.id;
 
-  const autocomplete = createRef<Autocomplete<TfTreeNode>>();
+  const autocomplete = createRef<IAutocomplete>();
 
   const getDefaultFollowTransformFrame = useCallback(() => {
     return nodesWithoutDefaultFollowTfFrame !== 0 ? newFollowTfFrame : undefined;
@@ -184,7 +184,7 @@ const FollowTFControl = memo<Props>((props: Props) => {
   ]);
 
   const onSelectFrame = useCallback(
-    (id: string, _item: unknown, autocompleteNode: Autocomplete<TfTreeNode>) => {
+    (id: string, _item: unknown, autocompleteNode: IAutocomplete) => {
       setLastSelectedFrame(id === getDefaultFollowTransformFrame() ? undefined : id);
       onFollowChange(id, followOrientation);
       autocompleteNode.blur();

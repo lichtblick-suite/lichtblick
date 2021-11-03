@@ -16,6 +16,12 @@ import ShortcutsModal from "./ShortcutsModal";
 export default {
   title: "components/ShortcutsModal",
 };
-export function Standard(): React.ReactElement {
+export function Dark(): React.ReactElement {
   return <ShortcutsModal onRequestClose={() => {}} />;
 }
+Dark.parameters = { colorScheme: "dark" };
+
+export function Light(): React.ReactElement {
+  return <ShortcutsModal onRequestClose={() => {}} />;
+}
+Light.parameters = { colorScheme: "light" };

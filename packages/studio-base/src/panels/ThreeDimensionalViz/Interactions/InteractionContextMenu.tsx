@@ -31,6 +31,7 @@ import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 const SInteractionContextMenu = styled.div`
   position: fixed;
   width: 240px;
+  color: ${colors.LIGHT1};
   background: ${colors.DARK4};
   opacity: 0.9;
   z-index: 101; /* above the Text marker */

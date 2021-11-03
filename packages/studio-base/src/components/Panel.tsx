@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { MessageBar, MessageBarType, Stack, useTheme, mergeStyleSets } from "@fluentui/react";
+import { MessageBar, MessageBarType, Stack, useTheme, makeStyles } from "@fluentui/react";
 import BorderAllIcon from "@mdi/svg/svg/border-all.svg";
 import CloseIcon from "@mdi/svg/svg/close.svg";
 import ExpandAllOutlineIcon from "@mdi/svg/svg/expand-all-outline.svg";
@@ -75,10 +75,10 @@ import {
 } from "@foxglove/studio-base/util/layout";
 import { colors, spacing } from "@foxglove/studio-base/util/sharedStyleConstants";
 
-const classes = mergeStyleSets({
+const useStyles = makeStyles((theme) => ({
   root: {
     zIndex: 1,
-    backgroundColor: colors.DARK,
+    backgroundColor: theme.isInverted ? colors.DARK : colors.LIGHT,
     position: "relative",
 
     // // To use css to hide/show toolbars on hover we use a global panelToolbar class
@@ -150,7 +150,7 @@ const classes = mergeStyleSets({
     paddingTop: "24px",
 
     ".mosaic-window:hover &": {
-      backgroundColor: "rgba(45, 45, 51, 1)",
+      backgroundColor: theme.palette.neutralLight,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -158,7 +158,7 @@ const classes = mergeStyleSets({
     },
     // for screenshot tests
     ".hoverForScreenshot": {
-      backgroundColor: "rgba(45, 45, 51, 1)",
+      backgroundColor: theme.palette.neutralLight,
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
@@ -195,14 +195,16 @@ const classes = mergeStyleSets({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    background: "rgba(110, 81, 238, 0.5)",
+    background: `${theme.semanticColors.primaryButtonBackground} !important`,
+    color: `${theme.semanticColors.primaryButtonText} !important`,
 
     svg: {
       margin: "0 0 6px",
+      fill: theme.semanticColors.primaryButtonText,
     },
 
     ":not(.disabled):hover": {
-      background: "rgba(110, 81, 238, 0.8)",
+      background: `${theme.semanticColors.primaryButtonBackgroundHovered} !important`,
     },
   },
   tabActionsOverlayButton: {
@@ -210,7 +212,8 @@ const classes = mergeStyleSets({
     flex: "none",
     fontSize: "14px",
     alignItems: "center",
-    background: "rgba(110, 81, 238, 0.5)",
+    background: `${theme.semanticColors.primaryButtonBackground} !important`,
+    color: `${theme.semanticColors.primaryButtonText} !important`,
     width: 145,
     height: 40,
     display: "flex",
@@ -219,13 +222,14 @@ const classes = mergeStyleSets({
 
     svg: {
       margin: "0 0 6px",
+      fill: theme.semanticColors.primaryButtonText,
     },
     ":not(.disabled):hover": {
-      background: "rgba(110, 81, 238, 0.8)",
+      background: `${theme.semanticColors.primaryButtonBackgroundHovered} !important`,
     },
   },
   exitFullScreen: {
-    position: "fixed !important", // ensure this overrides LegacyButton styles
+    position: "fixed !important" as unknown as "fixed", // ensure this overrides LegacyButton styles
     top: 75,
     right: 8,
     zIndex: 102,
@@ -250,7 +254,7 @@ const classes = mergeStyleSets({
       paddingLeft: "3",
     },
   },
-});
+}));
 
 type Props<Config> = {
   childId?: string;
@@ -305,6 +309,8 @@ export default function Panel<
   function ConnectedPanel(props: Props<Config>) {
     const { childId, overrideConfig, tabId, ...otherProps } = props;
 
+    const classes = useStyles();
+    const theme = useTheme();
     const isMounted = useMountedState();
 
     const { mosaicActions } = useContext(MosaicContext);
@@ -721,7 +727,7 @@ export default function Panel<
               >
                 <div>
                   <div>
-                    <FullscreenIcon />
+                    <FullscreenIcon style={{ fill: theme.semanticColors.bodyText }} />
                     {shiftKeyPressed ? "Lock fullscreen" : "Fullscreen (Shift+click to lock)"}
                   </div>
                   <div>

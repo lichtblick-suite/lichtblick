@@ -13,14 +13,12 @@
 
 import styled from "styled-components";
 
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
-
 export default styled.form`
-  background-color: ${colors.DARK3};
+  background-color: ${({ theme }) => theme.semanticColors.menuBackground};
   margin-left: -16px;
   padding: 12px;
   width: 240px;
-  box-shadow: 0 6px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.25);
+  box-shadow: ${({ theme }) => theme.effects.elevation64};
   pointer-events: auto;
   flex: 0 0 auto;
   border-radius: 8px;

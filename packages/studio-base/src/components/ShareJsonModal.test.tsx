@@ -16,7 +16,7 @@ describe("<ShareJsonModal />", () => {
       done();
     };
     const wrapper = mount(
-      <ThemeProvider>
+      <ThemeProvider isDark>
         <div data-modalcontainer="true">
           <ShareJsonModal
             title="Foo"
@@ -44,7 +44,7 @@ describe("<ShareJsonModal />", () => {
       done("Change callback was fired unexpectedly");
     };
     const wrapper = mount(
-      <ThemeProvider>
+      <ThemeProvider isDark>
         <div data-modalcontainer="true">
           <ShareJsonModal
             title="Foo"
@@ -74,7 +74,7 @@ describe("<ShareJsonModal />", () => {
       done();
     };
     const wrapper = mount(
-      <ThemeProvider>
+      <ThemeProvider isDark>
         <div data-modalcontainer="true">
           <ShareJsonModal
             title="Foo"

@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useTheme } from "@fluentui/react";
 import { ChartOptions, ScaleOptions } from "chart.js";
 import { ZoomOptions } from "chartjs-plugin-zoom/types/options";
 import { flatten, pick, uniq } from "lodash";
@@ -127,6 +128,7 @@ export type PlotMessage = {
 };
 
 function TwoDimensionalPlot(props: Props) {
+  const theme = useTheme();
   const { config, saveConfig, onChartUpdate } = props;
   const { path, minXVal, maxXVal, minYVal, maxYVal, pointRadiusOverride } = config;
   const [hasUserPannedOrZoomed, setHasUserPannedOrZoomed] = React.useState<boolean>(false);
@@ -137,7 +139,12 @@ function TwoDimensionalPlot(props: Props) {
     | PlotMessage
     | undefined;
 
-  const { title, yAxisLabel, xAxisLabel, gridColor } = message ?? {};
+  const {
+    title,
+    yAxisLabel,
+    xAxisLabel,
+    gridColor = theme.palette.neutralLighterAlt,
+  } = message ?? {};
 
   const datasets = useMemo<Data["datasets"]>(() => {
     if (!message) {
@@ -275,7 +282,7 @@ function TwoDimensionalPlot(props: Props) {
       color: colors.GRAY,
       animation: { duration: 0 },
       plugins: {
-        title: { display: title != undefined, text: title, color: "white" },
+        title: { display: title != undefined, text: title, color: theme.palette.black },
         tooltip: {
           intersect: false,
           mode: "nearest",
@@ -301,7 +308,7 @@ function TwoDimensionalPlot(props: Props) {
         },
       },
     }),
-    [title, xScale, yScale, zoomMode],
+    [theme, title, xScale, yScale, zoomMode],
   );
 
   const onScaleBoundsUpdate = useCallback((_: unknown, opt: { userInteraction: boolean }) => {

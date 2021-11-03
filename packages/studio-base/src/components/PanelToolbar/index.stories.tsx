@@ -142,51 +142,83 @@ storiesOf("components/PanelToolbar", module)
       </MosaicWrapper>
     );
   })
-  .add("menu (only panel)", () => {
-    class Story extends React.Component {
-      override render() {
-        return (
-          <MosaicWrapper>
-            <PanelToolbarWithOpenMenu />
-          </MosaicWrapper>
-        );
+  .add(
+    "menu (only panel)",
+    () => {
+      class Story extends React.Component {
+        override render() {
+          return (
+            <MosaicWrapper>
+              <PanelToolbarWithOpenMenu />
+            </MosaicWrapper>
+          );
+        }
       }
-    }
-    return <Story />;
-  })
-  .add("menu (with sibling panel)", () => {
-    class Story extends React.Component {
-      override render() {
-        return (
-          <MosaicWrapper layout={{ direction: "row", first: "dummy", second: "Sibling" }}>
-            <PanelToolbarWithOpenMenu />
-          </MosaicWrapper>
-        );
+      return <Story />;
+    },
+    { colorScheme: "dark" },
+  )
+  .add(
+    "menu light",
+    () => {
+      class Story extends React.Component {
+        override render() {
+          return (
+            <MosaicWrapper>
+              <PanelToolbarWithOpenMenu />
+            </MosaicWrapper>
+          );
+        }
       }
-    }
-    return <Story />;
-  })
-  .add("menu for Tab panel", () => {
-    class Story extends React.Component {
-      override render() {
-        return (
-          <MosaicWrapper layout={{ direction: "row", first: "Tab", second: "Sibling" }}>
-            <PanelToolbarWithOpenMenu />
-          </MosaicWrapper>
-        );
+      return <Story />;
+    },
+    { colorScheme: "light" },
+  )
+  .add(
+    "menu (with sibling panel)",
+    () => {
+      class Story extends React.Component {
+        override render() {
+          return (
+            <MosaicWrapper layout={{ direction: "row", first: "dummy", second: "Sibling" }}>
+              <PanelToolbarWithOpenMenu />
+            </MosaicWrapper>
+          );
+        }
       }
-    }
-    return <Story />;
-  })
-  .add("no toolbars", () => {
-    class Story extends React.Component {
-      override render() {
-        return (
-          <MosaicWrapper layout={{ direction: "row", first: "dummy", second: "Sibling" }}>
-            <PanelToolbarWithOpenMenu hideToolbars />
-          </MosaicWrapper>
-        );
+      return <Story />;
+    },
+    { colorScheme: "dark" },
+  )
+  .add(
+    "menu for Tab panel",
+    () => {
+      class Story extends React.Component {
+        override render() {
+          return (
+            <MosaicWrapper layout={{ direction: "row", first: "Tab", second: "Sibling" }}>
+              <PanelToolbarWithOpenMenu />
+            </MosaicWrapper>
+          );
+        }
       }
-    }
-    return <Story />;
-  });
+      return <Story />;
+    },
+    { colorScheme: "dark" },
+  )
+  .add(
+    "no toolbars",
+    () => {
+      class Story extends React.Component {
+        override render() {
+          return (
+            <MosaicWrapper layout={{ direction: "row", first: "dummy", second: "Sibling" }}>
+              <PanelToolbarWithOpenMenu hideToolbars />
+            </MosaicWrapper>
+          );
+        }
+      }
+      return <Story />;
+    },
+    { colorScheme: "dark" },
+  );

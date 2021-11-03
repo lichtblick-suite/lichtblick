@@ -28,7 +28,6 @@ import { TabPanelConfig as Config } from "@foxglove/studio-base/types/layouts";
 import { SaveConfig } from "@foxglove/studio-base/types/panels";
 import { TAB_PANEL_TYPE } from "@foxglove/studio-base/util/globalConstants";
 import { DEFAULT_TAB_PANEL_CONFIG, updateTabPanelLayout } from "@foxglove/studio-base/util/layout";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const SPanelCover = styled.div`
   top: 0;
@@ -36,7 +35,7 @@ const SPanelCover = styled.div`
   width: 100%;
   height: 100%;
   z-index: 1;
-  background: ${colors.DARK};
+  background: ${({ theme }) => theme.semanticColors.bodyBackground};
   position: absolute;
 `;
 

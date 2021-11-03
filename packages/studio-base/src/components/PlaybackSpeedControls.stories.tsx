@@ -36,39 +36,58 @@ function ControlsStory() {
 }
 
 storiesOf("components/PlaybackSpeedControls", module)
-  .add("without speed capability", () => {
-    return (
-      <MockCurrentLayoutProvider>
-        <MockMessagePipelineProvider>
-          <ControlsStory />
-        </MockMessagePipelineProvider>
-      </MockCurrentLayoutProvider>
-    );
-  })
-  .add("without a speed from the player", () => {
-    return (
-      <MockCurrentLayoutProvider>
-        <MockMessagePipelineProvider capabilities={CAPABILITIES} activeData={{ speed: undefined }}>
-          <ControlsStory />
-        </MockMessagePipelineProvider>
-      </MockCurrentLayoutProvider>
-    );
-  })
-  .add("with a speed", () => {
-    return (
-      <MockCurrentLayoutProvider>
-        <MockMessagePipelineProvider capabilities={CAPABILITIES}>
-          <ControlsStory />
-        </MockMessagePipelineProvider>
-      </MockCurrentLayoutProvider>
-    );
-  })
-  .add("with a very small speed", () => {
-    return (
-      <MockCurrentLayoutProvider>
-        <MockMessagePipelineProvider capabilities={CAPABILITIES} activeData={{ speed: 0.01 }}>
-          <ControlsStory />
-        </MockMessagePipelineProvider>
-      </MockCurrentLayoutProvider>
-    );
-  });
+  .add(
+    "without speed capability",
+    () => {
+      return (
+        <MockCurrentLayoutProvider>
+          <MockMessagePipelineProvider>
+            <ControlsStory />
+          </MockMessagePipelineProvider>
+        </MockCurrentLayoutProvider>
+      );
+    },
+    { colorScheme: "dark" },
+  )
+  .add(
+    "without a speed from the player",
+    () => {
+      return (
+        <MockCurrentLayoutProvider>
+          <MockMessagePipelineProvider
+            capabilities={CAPABILITIES}
+            activeData={{ speed: undefined }}
+          >
+            <ControlsStory />
+          </MockMessagePipelineProvider>
+        </MockCurrentLayoutProvider>
+      );
+    },
+    { colorScheme: "dark" },
+  )
+  .add(
+    "with a speed",
+    () => {
+      return (
+        <MockCurrentLayoutProvider>
+          <MockMessagePipelineProvider capabilities={CAPABILITIES}>
+            <ControlsStory />
+          </MockMessagePipelineProvider>
+        </MockCurrentLayoutProvider>
+      );
+    },
+    { colorScheme: "dark" },
+  )
+  .add(
+    "with a very small speed",
+    () => {
+      return (
+        <MockCurrentLayoutProvider>
+          <MockMessagePipelineProvider capabilities={CAPABILITIES} activeData={{ speed: 0.01 }}>
+            <ControlsStory />
+          </MockMessagePipelineProvider>
+        </MockCurrentLayoutProvider>
+      );
+    },
+    { colorScheme: "dark" },
+  );

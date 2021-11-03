@@ -84,6 +84,10 @@ export const PanelNotFound = (): JSX.Element => {
     </DndProvider>
   );
 };
+PanelNotFound.parameters = { colorScheme: "dark" };
+export const PanelNotFoundLight = Object.assign(PanelNotFound.bind(undefined), {
+  parameters: { colorScheme: "light" },
+});
 
 const PanelToolbarShown = createGlobalStyle`
   .panelToolbarHovered {

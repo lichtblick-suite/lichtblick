@@ -60,7 +60,6 @@ function newStudioWindow(deepLinks: string[] = []): BrowserWindow {
       // Access-Control-Allow-Origin check
       webSecurity: isProduction,
     },
-    backgroundColor: "#121217",
   };
   if (!isProduction) {
     const devIcon = getDevModeIcon();

@@ -51,12 +51,7 @@ const classes = mergeStyleSets({
     display: "flex",
     maxWidth: "100%",
     padding: "4px 10px",
-    backgroundColor: colors.DARK4,
     alignItems: "center",
-
-    "&:hover": {
-      backgroundColor: colors.DARK5,
-    },
   },
   title: {
     overflow: "hidden",

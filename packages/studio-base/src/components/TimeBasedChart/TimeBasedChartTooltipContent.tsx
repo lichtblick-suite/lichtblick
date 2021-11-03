@@ -11,13 +11,13 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets } from "@fluentui/react";
+import { makeStyles } from "@fluentui/react";
 import cx from "classnames";
 import { PropsWithChildren } from "react";
 
 import { subtract as subtractTimes, toSec } from "@foxglove/rostime";
 import { formatTime } from "@foxglove/studio-base/util/formatTime";
-import { colors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 import { TimeBasedChartTooltipData } from "./index";
@@ -26,7 +26,7 @@ type Props = {
   tooltip: TimeBasedChartTooltipData;
 };
 
-const classes = mergeStyleSets({
+const useStyles = makeStyles((theme) => ({
   root: {
     fontFamily: fonts.MONOSPACE,
     fontSize: 11,
@@ -44,7 +44,7 @@ const classes = mergeStyleSets({
     lineHeight: "1.3em",
   },
   tableCellHeader: {
-    color: colors.DARK2,
+    color: theme.palette.neutralTertiary,
     textAlign: "center",
 
     ":first-child": {
@@ -58,23 +58,17 @@ const classes = mergeStyleSets({
         paddingTop: 4,
       },
     },
-
-    ":hover": {
-      td: {
-        color: colors.DARK4,
-        cursor: "pointer",
-      },
-    },
   },
   title: {
-    color: colors.DARK2,
+    color: theme.palette.neutralTertiary,
   },
-});
+}));
 
 export default function TimeBasedChartTooltipContent(
   props: PropsWithChildren<Props>,
 ): React.ReactElement {
   const { tooltip } = props;
+  const classes = useStyles();
   const value =
     typeof tooltip.value === "string"
       ? tooltip.value

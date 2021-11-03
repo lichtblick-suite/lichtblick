@@ -141,7 +141,7 @@ export default function FilterBar(props: FilterBarProps): JSX.Element {
           style={{
             whiteSpace: "nowrap",
             padding: "0px 8px",
-            color: "rgba(255, 255, 255, 0.5)",
+            color: theme.palette.neutralTertiary,
           }}
         >
           {props.messages.length} {props.messages.length === 1 ? "item" : "items"}

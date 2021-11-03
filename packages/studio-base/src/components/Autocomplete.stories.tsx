@@ -27,6 +27,7 @@ function focusInput(el: HTMLDivElement | ReactNull) {
 }
 
 storiesOf("components/Autocomplete", module)
+  .addParameters({ colorScheme: "dark" })
   .add("filtering to 'o'", () => {
     class Example extends Component {
       override render() {
@@ -36,9 +37,7 @@ storiesOf("components/Autocomplete", module)
               items={["one", "two", "three"]}
               filterText={"o"}
               value={"o"}
-              onSelect={() => {
-                // no-op
-              }}
+              onSelect={() => {}}
               hasError
             />
           </div>
@@ -47,6 +46,28 @@ storiesOf("components/Autocomplete", module)
     }
     return <Example />;
   })
+  .add(
+    "filtering to 'o' light",
+    () => {
+      class Example extends Component {
+        override render() {
+          return (
+            <div style={{ padding: 20 }} ref={focusInput}>
+              <Autocomplete
+                items={["one", "two", "three"]}
+                filterText={"o"}
+                value={"o"}
+                onSelect={() => {}}
+                hasError
+              />
+            </div>
+          );
+        }
+      }
+      return <Example />;
+    },
+    { colorScheme: "light" },
+  )
   .add("with non-string items and leading whitespace", () => {
     return (
       <div style={{ padding: 20 }} ref={focusInput}>
@@ -59,9 +80,7 @@ storiesOf("components/Autocomplete", module)
           getItemText={({ text }: any) => text}
           filterText={"o"}
           value={"o"}
-          onSelect={() => {
-            // no-op
-          }}
+          onSelect={() => {}}
         />
       </div>
     );
@@ -84,9 +103,7 @@ storiesOf("components/Autocomplete", module)
         <Autocomplete
           items={[{ value: "one" }, { value: "two" }, { value: "three" }]}
           getItemText={({ value }: any) => `item: ${value.toUpperCase()}`}
-          onSelect={() => {
-            // no-op
-          }}
+          onSelect={() => {}}
         />
       </div>
     );
@@ -98,9 +115,7 @@ storiesOf("components/Autocomplete", module)
           items={[{ value: "one" }, { value: "two" }, { value: "three" }]}
           getItemText={({ value }: any) => `item: ${value.toUpperCase()}`}
           selectedItem={{ value: "two" }}
-          onSelect={() => {
-            // no-op
-          }}
+          onSelect={() => {}}
         />
       </div>
     );
@@ -112,9 +127,7 @@ storiesOf("components/Autocomplete", module)
           items={[{ value: "one" }, { value: "two" }, { value: "three" }]}
           getItemText={({ value }: any) => `item: ${value.toUpperCase()}`}
           selectedItem={{ value: "two" }}
-          onSelect={() => {
-            // no-op
-          }}
+          onSelect={() => {}}
           clearOnFocus
         />
       </div>
@@ -127,9 +140,7 @@ storiesOf("components/Autocomplete", module)
           items={[{ value: "bab" }, { value: "bb" }, { value: "a2" }, { value: "a1" }]}
           getItemText={({ value }: any) => `item: ${value.toUpperCase()}`}
           value={"b"}
-          onSelect={() => {
-            // no-op
-          }}
+          onSelect={() => {}}
           sortWhenFiltering={false}
         />
       </div>
@@ -140,13 +151,7 @@ storiesOf("components/Autocomplete", module)
       override render() {
         return (
           <div style={{ position: "absolute", right: 0, padding: 20 }} ref={focusInput}>
-            <Autocomplete
-              items={["loooooooooooooong item"]}
-              value="looo"
-              onSelect={() => {
-                // no-op
-              }}
-            />
+            <Autocomplete items={["loooooooooooooong item"]} value="looo" onSelect={() => {}} />
           </div>
         );
       }
@@ -161,9 +166,7 @@ storiesOf("components/Autocomplete", module)
             <Autocomplete
               items={[]}
               value="/abcdefghi_jklmnop.abcdefghi_jklmnop[:]{some_id==1297193}.isSomething"
-              onSelect={() => {
-                // no-op
-              }}
+              onSelect={() => {}}
               autoSize
             />
           </div>

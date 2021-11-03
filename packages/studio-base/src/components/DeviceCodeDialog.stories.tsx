@@ -30,6 +30,7 @@ class FakeConsoleApi extends ConsoleApi {
 export default {
   title: "AccountSettingsSidebar/DeviceCodeDialog",
   component: DeviceCodeDialog,
+  parameters: { colorScheme: "dark" },
   decorators: [
     (SingleStory: Story, ctx: StoryContext): JSX.Element => {
       const fakeConsoleApi =
@@ -46,35 +47,41 @@ export default {
   ],
 };
 
-export function WaitForCode(): JSX.Element {
-  return <DeviceCodeDialog />;
-}
-WaitForCode.parameters = {
-  deviceCode: new Promise(() => {}),
-};
-
-export function ShowDeviceCode(): JSX.Element {
-  return <DeviceCodeDialog />;
-}
-ShowDeviceCode.parameters = {
-  deviceCode: {
-    deviceCode: "foobar",
-    expiresIn: 100000,
-    interval: 100,
-    userCode: "AAAA-12BB",
-    verificationUri: "https://console.example.com/activate",
+export const WaitForCode = Object.assign(() => <DeviceCodeDialog />, {
+  parameters: {
+    deviceCode: new Promise(() => {}),
   },
-};
+});
+export const WaitForCodeLight = Object.assign(() => <DeviceCodeDialog />, {
+  parameters: { ...WaitForCode.parameters, colorScheme: "light" },
+});
 
-export function CodeTimeout(): JSX.Element {
-  return <DeviceCodeDialog />;
-}
-CodeTimeout.parameters = {
-  deviceCode: {
-    deviceCode: "foobar",
-    expiresIn: 0,
-    interval: 0,
-    userCode: "AAAA-12BB",
-    verificationUri: "https://console.example.com/activate",
+export const ShowDeviceCode = Object.assign(() => <DeviceCodeDialog />, {
+  parameters: {
+    deviceCode: {
+      deviceCode: "foobar",
+      expiresIn: 100000,
+      interval: 100,
+      userCode: "AAAA-12BB",
+      verificationUri: "https://console.example.com/activate",
+    },
   },
-};
+});
+export const ShowDeviceCodeLight = Object.assign(() => <DeviceCodeDialog />, {
+  parameters: { ...ShowDeviceCode.parameters, colorScheme: "light" },
+});
+
+export const CodeTimeout = Object.assign(() => <DeviceCodeDialog />, {
+  parameters: {
+    deviceCode: {
+      deviceCode: "foobar",
+      expiresIn: 0,
+      interval: 0,
+      userCode: "AAAA-12BB",
+      verificationUri: "https://console.example.com/activate",
+    },
+  },
+});
+export const CodeTimeoutLight = Object.assign(() => <DeviceCodeDialog />, {
+  parameters: { ...CodeTimeout.parameters, colorScheme: "light" },
+});

@@ -100,6 +100,7 @@ storiesOf("panels/ThreeDimensionalViz/commands/PoseMarkers", module)
       // we delay screenshot until some time with the hope it has loaded
       delay: 3000,
     },
+    colorScheme: "dark",
   })
   .add("alpha_0.3", () => <Example alpha={0.3} />)
   .add("alpha_0.5, color_50,200,50,0.8", () => (

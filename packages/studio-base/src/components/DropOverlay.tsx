@@ -19,7 +19,7 @@ const Outer = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.75);
+  background: ${({ theme }) => theme.palette.blackTranslucent40};
   z-index: 100000;
   pointer-events: none;
 `;
@@ -31,7 +31,7 @@ const Inner = styled.div`
   right: 40px;
   bottom: 40px;
   border-radius: 28px;
-  border: 2px dashed rgba(255, 255, 255, 0.5);
+  border: 2px dashed ${({ theme }) => theme.palette.black};
   display: flex;
   flex-direction: column;
   text-align: center;

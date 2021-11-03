@@ -17,7 +17,7 @@ import { Time } from "@foxglove/rostime";
 import CopyText from "@foxglove/studio-base/components/CopyText";
 import Icon from "@foxglove/studio-base/components/Icon";
 import { formatDate, formatTime } from "@foxglove/studio-base/util/formatTime";
-import { colors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { formatTimeRaw } from "@foxglove/studio-base/util/time";
 
 const SRoot = styled.div`
@@ -30,7 +30,7 @@ const DateWrapper = styled.div`
   font-family: ${fonts.MONOSPACE};
   font-size: 14px;
   font-weight: normal;
-  color: ${colors.GREY};
+  color: ${({ theme }) => theme.palette.neutralSecondary};
   margin-left: 8px;
 `;
 
@@ -39,20 +39,20 @@ const TimestampWrapper = styled.div`
   font-family: ${fonts.MONOSPACE};
   font-size: 14px;
   font-weight: normal;
-  color: ${colors.GREY};
+  color: ${({ theme }) => theme.palette.neutralSecondary};
   align-items: center;
   flex: 0 0 auto;
 `;
 
 const RosTimeWrapper = styled.div`
   display: inline-block;
-  color: rgba(255, 255, 255, 0.5);
+  color: ${({ theme }) => theme.palette.neutralTertiary};
   margin: 0 8px;
 `;
 
 const RelativeTimeWrapper = styled.div`
   display: inline-block;
-  color: ${colors.GREY};
+  color: ${({ theme }) => theme.palette.neutralSecondary};
   margin: 0 8px;
 `;
 
@@ -62,7 +62,7 @@ const TimeWrapper = styled.div`
 `;
 
 const ROSText = styled.div`
-  color: rgba(255, 255, 255, 0.5);
+  color: ${({ theme }) => theme.palette.neutralTertiary};
 `;
 
 type Props = {

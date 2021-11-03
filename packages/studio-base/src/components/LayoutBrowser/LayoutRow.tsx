@@ -29,8 +29,8 @@ const useStyles = makeStyles((theme) => ({
     cursor: "pointer",
     paddingLeft: theme.spacing.m,
     paddingRight: theme.spacing.s1,
-    borderBottom: `1px solid ${theme.semanticColors.bodyBackground}`,
-    borderTop: `1px solid ${theme.semanticColors.bodyBackground}`,
+    marginBottom: 1,
+    marginTop: 1,
 
     ":hover": {
       background: theme.semanticColors.menuItemBackgroundHovered,

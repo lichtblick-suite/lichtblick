@@ -56,12 +56,11 @@ export function useTooltip({
     beakWidth: 8,
     styles: {
       root: {
-        color: theme.palette.black,
         selectors: { code: { backgroundColor: "transparent", padding: 0 } },
       },
-      beak: { background: theme.palette.neutralDark },
-      beakCurtain: { background: theme.palette.neutralDark },
-      calloutMain: { background: theme.palette.neutralDark },
+      beak: { background: theme.palette.neutralLighter },
+      beakCurtain: { background: theme.palette.neutralLighter },
+      calloutMain: { background: theme.palette.neutralLighter },
     },
   };
 

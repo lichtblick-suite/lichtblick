@@ -15,7 +15,7 @@ import { makeStyles } from "@fluentui/react";
 import { useContext, useRef } from "react";
 
 import { WorldviewReactContext, WorldviewContextType } from "@foxglove/regl-worldview";
-import { colors, fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 type Stats = {
   bufferCount: number;
@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     bottom: theme.spacing.m,
     right: theme.spacing.m,
-    backgroundColor: colors.LEGEND_HIGHLIGHT_COLOR,
+    backgroundColor: theme.palette.neutralLight,
     borderRadius: theme.effects.roundedCorner2,
     fontFamily: fonts.MONOSPACE,
     fontSize: theme.fonts.tiny.fontSize,
@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme) => ({
     },
     th: {
       padding: "2px 6px",
-      color: colors.BRIGHT_YELLOW,
+      color: theme.semanticColors.menuHeader,
       textTransform: "uppercase",
     },
   },
@@ -96,11 +96,11 @@ export default function DebugStats(): JSX.Element | ReactNull {
             </tr>
             <tr>
               <th>buffers:</th>
-              <td>{`${stats.bufferCount} (${bufferSize}) Mb`}</td>
+              <td>{`${stats.bufferCount} (${bufferSize}) MB`}</td>
             </tr>
             <tr>
               <th>textures:</th>
-              <td>{`${stats.textureCount} (${textureSize}) Mb`}</td>
+              <td>{`${stats.textureCount} (${textureSize}) MB`}</td>
             </tr>
             <tr>
               <th>elements:</th>

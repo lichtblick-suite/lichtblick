@@ -27,6 +27,7 @@ export default {
       </ModalHost>
     ),
   ],
+  parameters: { colorScheme: "dark" },
 };
 
 export const Defaults = (): unknown => {
@@ -56,6 +57,8 @@ export const Primary = (): unknown => {
 
   return <></>;
 };
+export const PrimaryLight = Primary.bind(undefined);
+(PrimaryLight as any).parameters = { colorScheme: "light" };
 
 export const Danger = (): unknown => {
   const confirm = useConfirm();
@@ -71,3 +74,5 @@ export const Danger = (): unknown => {
 
   return <></>;
 };
+export const DangerLight = Danger.bind(undefined);
+(DangerLight as any).parameters = { colorScheme: "light" };

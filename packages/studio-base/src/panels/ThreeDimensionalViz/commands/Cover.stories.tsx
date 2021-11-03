@@ -28,24 +28,26 @@ const SExpectedResult = styled.div`
   z-index: 1000;
 `;
 
-storiesOf("panels/ThreeDimensionalViz/Commands/Cover", module).add("renders with blending", () => {
-  const transparentRed = [1, 0, 0, 0.5];
-  const transparentBlue = [0, 0, 1, 0.5];
-  return (
-    <div style={{ width: 1001, height: 745 }}>
-      <Worldview
-        onClick={noop}
-        onCameraStateChange={noop}
-        cameraState={{ target: [-627, -608, -17], perspective: true }}
-        onDoubleClick={noop}
-        onMouseDown={noop}
-        onMouseMove={noop}
-        onMouseUp={noop}
-      >
-        <Cover color={transparentRed as any} layerIndex={0} />
-        <Cover color={transparentBlue as any} layerIndex={1} />
-      </Worldview>
-      <SExpectedResult>The whole viewport should be purple</SExpectedResult>
-    </div>
-  );
-});
+storiesOf("panels/ThreeDimensionalViz/Commands/Cover", module)
+  .addParameters({ colorScheme: "dark" })
+  .add("renders with blending", () => {
+    const transparentRed = [1, 0, 0, 0.5];
+    const transparentBlue = [0, 0, 1, 0.5];
+    return (
+      <div style={{ width: 1001, height: 745 }}>
+        <Worldview
+          onClick={noop}
+          onCameraStateChange={noop}
+          cameraState={{ target: [-627, -608, -17], perspective: true }}
+          onDoubleClick={noop}
+          onMouseDown={noop}
+          onMouseMove={noop}
+          onMouseUp={noop}
+        >
+          <Cover color={transparentRed as any} layerIndex={0} />
+          <Cover color={transparentBlue as any} layerIndex={1} />
+        </Worldview>
+        <SExpectedResult>The whole viewport should be purple</SExpectedResult>
+      </div>
+    );
+  });

@@ -242,7 +242,6 @@ const useComponentStyles = (theme: ITheme) =>
         rootDisabled: { backgroundColor: "transparent" },
         menuIcon: {
           fontSize: 8,
-          color: "white",
 
           svg: {
             fill: "currentColor",
@@ -266,10 +265,7 @@ const useComponentStyles = (theme: ITheme) =>
         rootHovered: { backgroundColor: "transparent" },
         rootPressed: { backgroundColor: "transparent" },
         rootDisabled: { backgroundColor: "transparent" },
-        rootFocused: { color: "white" },
         icon: {
-          color: "white",
-
           svg: {
             fill: "currentColor",
             height: "1em",

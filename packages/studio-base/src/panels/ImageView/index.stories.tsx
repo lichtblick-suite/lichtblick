@@ -52,6 +52,11 @@ export function TopicButNoDataSourceHovered(): React.ReactElement {
     </PanelSetup>
   );
 }
+TopicButNoDataSourceHovered.parameters = { colorScheme: "dark" };
+export const TopicButNoDataSourceHoveredLight = Object.assign(
+  TopicButNoDataSourceHovered.bind(undefined),
+  { parameters: { colorScheme: "light" } },
+);
 
 function AvailableTopicsStory({
   cameraTopic,
@@ -91,16 +96,37 @@ function AvailableTopicsStory({
 export const AvailableTopicsNoneSelected = (): React.ReactElement => (
   <AvailableTopicsStory cameraTopic="" />
 );
+AvailableTopicsNoneSelected.parameters = { colorScheme: "dark" };
+export const AvailableTopicsNoneSelectedLight = Object.assign(
+  AvailableTopicsNoneSelected.bind(undefined),
+  { parameters: { colorScheme: "light" } },
+);
+
 export const AvailableTopicsChildSelected = (): React.ReactElement => (
   <AvailableTopicsStory cameraTopic="/foo_image" />
 );
+AvailableTopicsChildSelected.parameters = { colorScheme: "dark" };
+export const AvailableTopicsChildSelectedLight = Object.assign(
+  AvailableTopicsChildSelected.bind(undefined),
+  { parameters: { colorScheme: "light" } },
+);
+
 export const AvailableTopicsDescendentSelected = (): React.ReactElement => (
   <AvailableTopicsStory cameraTopic="/baz_image/compressed" />
+);
+AvailableTopicsDescendentSelected.parameters = { colorScheme: "dark" };
+export const AvailableTopicsDescendentSelectedLight = Object.assign(
+  AvailableTopicsDescendentSelected.bind(undefined),
+  { parameters: { colorScheme: "light" } },
 );
 
 export const AvailableTopicsMarkers = (): React.ReactElement => (
   <AvailableTopicsStory openMarkersMenu cameraTopic="/baz_image/compressed" />
 );
+AvailableTopicsMarkers.parameters = { colorScheme: "dark" };
+export const AvailableTopicsMarkersLight = Object.assign(AvailableTopicsMarkers.bind(undefined), {
+  parameters: { colorScheme: "light" },
+});
 
 export function Settings(): JSX.Element {
   return (

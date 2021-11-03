@@ -15,7 +15,7 @@ import { sortBy } from "lodash";
 import { useCallback, useMemo } from "react";
 
 import { useDataSourceInfo } from "@foxglove/studio-base/PanelAPI";
-import Autocomplete from "@foxglove/studio-base/components/Autocomplete";
+import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Autocomplete";
 import EmptyState from "@foxglove/studio-base/components/EmptyState";
 import Flex from "@foxglove/studio-base/components/Flex";
 import Panel from "@foxglove/studio-base/components/Panel";
@@ -55,11 +55,7 @@ function DiagnosticStatusPanel(props: Props) {
   } = config;
 
   const onSelect = useCallback(
-    (
-      _value: string,
-      entry: DiagnosticAutocompleteEntry,
-      autocomplete: Autocomplete<DiagnosticAutocompleteEntry>,
-    ) => {
+    (_value: string, entry: DiagnosticAutocompleteEntry, autocomplete: IAutocomplete) => {
       const hasNewHardwareId = config.selectedHardwareId !== entry.hardware_id;
       const hasNewName = config.selectedName !== entry.name;
       saveConfig({

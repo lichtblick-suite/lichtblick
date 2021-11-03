@@ -25,7 +25,7 @@ export default {
 
 export function Table(): JSX.Element {
   return (
-    <div style={{ margin: 30, paddingLeft: 300, height: 400 }}>
+    <div style={{ margin: 30, height: 400 }}>
       <DndProvider backend={HTML5Backend}>
         <MockCurrentLayoutProvider>
           <GlobalVariablesTable />

@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { ContextualMenu, IContextualMenuItem, mergeStyleSets } from "@fluentui/react";
+import { ContextualMenu, IContextualMenuItem, makeStyles } from "@fluentui/react";
 import AlertIcon from "@mdi/svg/svg/alert.svg";
 import CogIcon from "@mdi/svg/svg/cog.svg";
 import DragIcon from "@mdi/svg/svg/drag.svg";
@@ -46,7 +46,7 @@ type Props = {
 export const PANEL_TOOLBAR_HEIGHT = 26;
 export const PANEL_TOOLBAR_SPACING = 4;
 
-const styles = mergeStyleSets({
+const useStyles = makeStyles((theme) => ({
   iconContainer: {
     paddingTop: PANEL_TOOLBAR_SPACING,
     display: "flex",
@@ -72,7 +72,7 @@ const styles = mergeStyleSets({
     flex: "0 0 auto",
     flexDirection: "row",
     justifyContent: "flex-end",
-    backgroundColor: colors.TOOLBAR_FIXED,
+    backgroundColor: theme.palette.neutralLighterAlt,
     padding: PANEL_TOOLBAR_SPACING,
 
     "&.floating": {
@@ -91,12 +91,12 @@ const styles = mergeStyleSets({
       },
       "&.hasChildren": {
         left: 0,
-        backgroundColor: colors.TOOLBAR_FIXED,
+        backgroundColor: theme.palette.neutralLighterAlt,
       },
       "&:not(.hasChildren) > *": {
-        backgroundColor: colors.DARK3,
+        backgroundColor: theme.palette.neutralLighterAlt,
         borderRadius: 4,
-        boxShadow: "0 6px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.2)",
+        boxShadow: theme.effects.elevation16,
       },
     },
     "&:not(.floating)": {
@@ -110,7 +110,7 @@ const styles = mergeStyleSets({
   dragIcon: {
     cursor: "move",
   },
-});
+}));
 
 function PanelActionsDropdown({
   isOpen,
@@ -122,6 +122,7 @@ function PanelActionsDropdown({
   setIsOpen: (_: boolean) => void;
   isUnknownPanel: boolean;
 }) {
+  const styles = useStyles();
   const panelContext = useContext(PanelContext);
   const tabId = panelContext?.tabId;
   const { mosaicActions } = useContext(MosaicContext);
@@ -318,6 +319,7 @@ const PanelToolbarControls = React.memo(function PanelToolbarControls({
   showPanelName = false,
 }: PanelToolbarControlsProps) {
   const panelContext = useContext(PanelContext);
+  const styles = useStyles();
 
   return (
     <div
@@ -358,6 +360,7 @@ export default React.memo<Props>(function PanelToolbar({
   isUnknownPanel = false,
   backgroundColor,
 }: Props) {
+  const styles = useStyles();
   const { supportsStrictMode = true } = useContext(PanelContext) ?? {};
   const [menuOpen, setMenuOpen] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -384,7 +387,7 @@ export default React.memo<Props>(function PanelToolbar({
         )}
       </>
     );
-  }, [additionalIcons, helpContent, supportsStrictMode]);
+  }, [additionalIcons, helpContent, styles.icon, supportsStrictMode]);
 
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
   // and existing resize observation.

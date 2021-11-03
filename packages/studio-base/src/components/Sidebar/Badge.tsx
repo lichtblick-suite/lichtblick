@@ -5,7 +5,7 @@
 import { makeStyles } from "@fluentui/react";
 import { PropsWithChildren } from "react";
 
-const radius = 8;
+const radius = 7;
 
 const useStyles = makeStyles((theme) => ({
   badge: {
@@ -16,14 +16,12 @@ const useStyles = makeStyles((theme) => ({
     height: radius * 2,
     borderRadius: radius,
     backgroundColor: theme.semanticColors.errorBackground ?? "red",
-    borderWidth: 1,
-    borderStyle: "solid",
-    borderColor: "rgba(1, 1, 1, 0.8)",
-    fontSize: 7,
+    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 8,
     fontWeight: 700,
     fontFeatureSettings: "normal",
     letterSpacing: "-0.025em",
-    lineHeight: (radius - 1) * 2,
+    lineHeight: radius * 2,
     textAlign: "center",
   },
 }));

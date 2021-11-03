@@ -4,13 +4,11 @@
 
 import styled from "styled-components";
 
-import { colors as sharedColors } from "@foxglove/studio-base/util/sharedStyleConstants";
-
 const ParametersTable = styled.div`
   display: flex;
   flex-direction: column;
   white-space: nowrap;
-  color: ${sharedColors.LIGHT};
+  color: ${({ theme }) => theme.palette.neutralPrimary};
 
   table {
     width: calc(100% + 1px);
@@ -18,7 +16,7 @@ const ParametersTable = styled.div`
 
   thead {
     user-select: none;
-    border-bottom: 1px solid ${sharedColors.BORDER_LIGHT};
+    border-bottom: 1px solid ${({ theme }) => theme.semanticColors.bodyDivider};
   }
 
   th,
@@ -32,7 +30,7 @@ const ParametersTable = styled.div`
     padding: 8px 16px;
     border: none;
     text-align: left;
-    color: rgba(255, 255, 255, 0.6);
+    color: ${({ theme }) => theme.palette.neutralSecondary};
     min-width: 120px;
   }
 

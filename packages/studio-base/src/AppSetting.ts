@@ -16,4 +16,5 @@ export enum AppSetting {
   ENABLE_LAYOUT_DEBUGGING = "enableLayoutDebugging",
   ENABLE_DRAWING_POLYGONS = "enableDrawingPolygons",
   ENABLE_LEGACY_PLOT_PANEL = "enableLegacyPlotPanel",
+  COLOR_SCHEME = "colorScheme",
 }

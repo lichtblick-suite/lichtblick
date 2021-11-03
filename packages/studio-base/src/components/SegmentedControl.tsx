@@ -28,12 +28,12 @@ const SSegmentedControl = styled.div`
   display: inline-flex;
   padding: 4px;
   border-radius: 6px;
-  background-color: ${colorToAlpha(colors.LIGHT, 0.15)};
+  background-color: ${({ theme }) => colorToAlpha(theme.palette.neutralPrimary, 0.15)};
   outline: 0;
   &:focus-within,
   &:focus,
   &:active {
-    box-shadow: inset 0 0 0 2px ${colorToAlpha(colors.LIGHT, 0.1)};
+    box-shadow: inset 0 0 0 2px ${({ theme }) => colorToAlpha(theme.palette.neutralPrimary, 0.1)};
   }
 `;
 
@@ -43,7 +43,8 @@ const SOption = styled.div<{ isSelected: boolean }>`
   transition: all 80ms ease-in-out;
   border-radius: 4px;
   background-color: ${(props) => (props.isSelected ? colors.PRIMARY : "transparent")};
-  color: ${(props) => (props.isSelected ? colors.LIGHT : colors.LIGHT)};
+  color: ${({ isSelected, theme }) =>
+    isSelected ? theme.palette.white : theme.palette.neutralDark};
   padding: 8px 16px;
   &:hover {
     opacity: 0.8;

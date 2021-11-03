@@ -40,5 +40,9 @@ export function Default(): React.ReactElement {
     targetPosition: { x: 200, y: 100 },
     contents: <TimeBasedChartTooltipContent tooltip={data} />,
   });
-  return <div style={{ width: "100%", height: "100%", background: "white" }}>{tooltip}</div>;
+  return <div style={{ width: "100%", height: "100%" }}>{tooltip}</div>;
 }
+Default.parameters = { colorScheme: "dark" };
+export const DefaultLight = Object.assign(Default.bind(undefined), {
+  parameters: { colorScheme: "light" },
+});
