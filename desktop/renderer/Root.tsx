@@ -27,13 +27,12 @@ import {
   Ros2SocketDataSourceFactory,
   FoxgloveDataPlatformDataSourceFactory,
   UlogLocalDataSourceFactory,
-  useAppConfigurationValue,
-  AppSetting,
 } from "@foxglove/studio-base";
 
 import { Desktop } from "../common/types";
 import ConsoleApiCurrentUserProvider from "./components/ConsoleApiCurrentUserProvider";
 import NativeAppMenuProvider from "./components/NativeAppMenuProvider";
+import NativeColorSchemeAdapter from "./components/NativeColorSchemeAdapter";
 import NativeStorageAppConfigurationProvider from "./components/NativeStorageAppConfigurationProvider";
 import NativeStorageLayoutStorageProvider from "./components/NativeStorageLayoutStorageProvider";
 import NativeWindowProvider from "./components/NativeWindowProvider";
@@ -55,18 +54,12 @@ const dataSources: IDataSourceFactory[] = [
   new FoxgloveDataPlatformDataSourceFactory(),
 ];
 
-function ColorSchemeThemeProvider({ children }: React.PropsWithChildren<unknown>): JSX.Element {
-  const [colorScheme = "system"] = useAppConfigurationValue<string>(AppSetting.COLOR_SCHEME);
-  const systemSetting = useMedia("(prefers-color-scheme: dark)");
-  const isDark = colorScheme === "dark" || (colorScheme === "system" && systemSetting);
-  return <ThemeProvider isDark={isDark}>{children}</ThemeProvider>;
-}
-
 export default function Root(): ReactElement {
   const api = useMemo(() => new ConsoleApi(process.env.FOXGLOVE_API_URL!), []);
 
   const providers = [
     /* eslint-disable react/jsx-key */
+    <NativeStorageAppConfigurationProvider />,
     <ConsoleApiContext.Provider value={api} />,
     <ConsoleApiCurrentUserProvider />,
     <ConsoleApiRemoteLayoutStorageProvider />,
@@ -81,18 +74,21 @@ export default function Root(): ReactElement {
 
   const deepLinks = useMemo(() => desktopBridge.getDeepLinks(), []);
 
+  // In Electron, the app theme setting is used to set `nativeTheme.themeSource`, which Chromium
+  // uses to inform the prefers-color-scheme query, so we don't need to read the app setting here.
+  const isDark = useMedia("(prefers-color-scheme: dark)");
+
   return (
-    <NativeStorageAppConfigurationProvider>
-      <ColorSchemeThemeProvider>
-        <GlobalCss />
-        <CssBaseline>
-          <ErrorBoundary>
-            <MultiProvider providers={providers}>
-              <App demoBagUrl={DEMO_BAG_URL} deepLinks={deepLinks} availableSources={dataSources} />
-            </MultiProvider>
-          </ErrorBoundary>
-        </CssBaseline>
-      </ColorSchemeThemeProvider>
-    </NativeStorageAppConfigurationProvider>
+    <ThemeProvider isDark={isDark}>
+      <GlobalCss />
+      <CssBaseline>
+        <ErrorBoundary>
+          <MultiProvider providers={providers}>
+            <NativeColorSchemeAdapter />
+            <App demoBagUrl={DEMO_BAG_URL} deepLinks={deepLinks} availableSources={dataSources} />
+          </MultiProvider>
+        </ErrorBoundary>
+      </CssBaseline>
+    </ThemeProvider>
   );
 }

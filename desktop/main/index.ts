@@ -11,6 +11,7 @@ import { autoUpdater } from "electron-updater";
 import fs from "fs";
 
 import Logger from "@foxglove/log";
+import { AppSetting } from "@foxglove/studio-base/src/AppSetting";
 
 import pkgInfo from "../../package.json";
 import StudioWindow from "./StudioWindow";
@@ -22,6 +23,7 @@ import {
   registerRosPackageProtocolHandlers,
   registerRosPackageProtocolSchemes,
 } from "./rosPackageResources";
+import { getAppSetting } from "./settings";
 import { getTelemetrySettings } from "./telemetry";
 
 const log = Logger.getLogger(__filename);
@@ -50,6 +52,12 @@ function isNetworkError(err: Error) {
     err.message === "net::ERR_NAME_NOT_RESOLVED" ||
     err.message === "net::ERR_CONNECTION_TIMED_OUT"
   );
+}
+
+function updateNativeColorScheme() {
+  const colorScheme = getAppSetting<string>(AppSetting.COLOR_SCHEME);
+  nativeTheme.themeSource =
+    colorScheme === "dark" ? "dark" : colorScheme === "light" ? "light" : "system";
 }
 
 function main() {
@@ -106,8 +114,8 @@ function main() {
   });
 
   // Load opt-out settings for crash reporting and telemetry
-  const [allowCrashReporting] = getTelemetrySettings();
-  if (allowCrashReporting && typeof process.env.SENTRY_DSN === "string") {
+  const { crashReportingEnabled } = getTelemetrySettings();
+  if (crashReportingEnabled && typeof process.env.SENTRY_DSN === "string") {
     log.info("initializing Sentry in main");
     initSentry({
       dsn: process.env.SENTRY_DSN,
@@ -197,12 +205,15 @@ function main() {
   // Must be called before app.ready event
   registerRosPackageProtocolSchemes();
 
+  ipcMain.handle("updateNativeColorScheme", () => {
+    updateNativeColorScheme();
+  });
+
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
   app.on("ready", async () => {
-    nativeTheme.themeSource = "dark";
-
+    updateNativeColorScheme();
     const argv = process.argv;
     const deepLinks = argv.filter((arg) => arg.startsWith("foxglove://"));
 
