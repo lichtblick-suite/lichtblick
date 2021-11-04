@@ -13,8 +13,6 @@
 import { useRef, useState } from "react";
 import ReactInputAutosize from "react-input-autosize";
 
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
-
 export function ValidatedResizingInput(props: {
   value: string;
   onChange: (arg0: string) => void;
@@ -29,7 +27,6 @@ export function ValidatedResizingInput(props: {
   }
   return (
     <ReactInputAutosize
-      style={{ color: !props.invalidInputs.includes(internalValue) ? "white" : colors.RED }}
       value={`$${internalValue}`}
       data-test={props.dataTest}
       onChange={(event) => {

@@ -26,7 +26,6 @@ import PanelToolbarLabel from "@foxglove/studio-base/components/PanelToolbarLabe
 import usePublisher from "@foxglove/studio-base/hooks/usePublisher";
 import { PlayerCapabilities, Topic } from "@foxglove/studio-base/players/types";
 import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import buildSampleMessage from "./buildSampleMessage";
 import helpContent from "./index.help.md";
@@ -62,7 +61,7 @@ const SErrorText = styled.div`
   display: flex;
   align-items: center;
   padding: 4px;
-  color: ${colors.RED2};
+  color: ${({ theme }) => theme.semanticColors.errorBackground};
 `;
 
 const SSpan = styled.span`

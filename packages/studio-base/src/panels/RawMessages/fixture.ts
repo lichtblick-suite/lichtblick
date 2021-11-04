@@ -39,6 +39,8 @@ export const fixture = {
             count: 0,
             time: { nsec: 627658424, sec: 1526191529 },
             valid: true,
+            str: "a string",
+            nothing: undefined,
           },
           timestamp_example_1: { sec: 0, nsec: 0 },
           timestamp_example_2: { sec: 1, nsec: 1 },

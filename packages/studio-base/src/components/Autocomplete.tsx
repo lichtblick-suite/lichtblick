@@ -70,7 +70,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   inputError: {
-    color: `${colors.RED2} !important`,
+    color: `${theme.semanticColors.errorIcon} !important`,
   },
   inputPlaceholder: {
     color: theme.semanticColors.inputPlaceholderText,
@@ -325,11 +325,11 @@ class AutocompleteImpl<T = unknown>
   // Make sure the input field gets focused again after selecting, in case we're doing multiple
   // autocompletes. We pass in `this` to `onSelect` in case the user of this component wants to call
   // `blur()`.
-  private _onSelect = (value: string, item: T): void => {
+  private _onSelect = (value: string, item: FzfResultItem<T>): void => {
     if (this._autocomplete.current?.refs.input) {
       (this._autocomplete.current.refs.input as HTMLInputElement).focus();
       this.setState({ focused: true, value: undefined }, () => {
-        this.props.onSelect(value, item, this);
+        this.props.onSelect(value, item.item, this);
       });
     }
   };

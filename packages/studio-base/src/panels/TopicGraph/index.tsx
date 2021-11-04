@@ -163,7 +163,7 @@ function TopicGraph() {
       rootCheckedHovered: { backgroundColor: "transparent" },
       rootCheckedPressed: { backgroundColor: "transparent" },
 
-      iconChecked: { color: colors.RED2 },
+      iconChecked: { color: colors.ACCENT },
       icon: {
         color: theme.semanticColors.buttonText,
 

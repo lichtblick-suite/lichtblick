@@ -21,7 +21,6 @@ import { useMemo } from "react";
 import Dropdown from "@foxglove/studio-base/components/Dropdown";
 import Icon from "@foxglove/studio-base/components/Icon";
 import { Topic } from "@foxglove/studio-base/players/types";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 type Props = {
   onChange: (topic: string) => void;
@@ -59,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
   icon: {
     fontSize: 14,
     margin: "0 0.2em",
-    color: colors.ORANGE,
+    color: theme.semanticColors.warningBackground,
   },
   iconActive: {
     color: theme.palette.neutralPrimary,

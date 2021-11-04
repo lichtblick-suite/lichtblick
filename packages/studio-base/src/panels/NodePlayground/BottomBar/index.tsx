@@ -10,6 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import { useTheme } from "@fluentui/react";
 import { useState, useRef, useEffect, ReactElement } from "react";
 import styled from "styled-components";
 
@@ -41,17 +42,20 @@ type HeaderItemProps = {
   numItems: number;
 };
 
-const HeaderItem = ({ isOpen, numItems, text }: HeaderItemProps) => (
-  <SHeaderItem
-    style={{
-      color: numItems > 0 ? colors.RED : "inherit",
-      borderBottom: isOpen ? `1px solid ${colors.DARK6}` : "none",
-      paddingBottom: isOpen ? 2 : 0,
-    }}
-  >
-    {text} {numItems > 0 ? numItems : ""}
-  </SHeaderItem>
-);
+function HeaderItem({ isOpen, numItems, text }: HeaderItemProps) {
+  const theme = useTheme();
+  return (
+    <SHeaderItem
+      style={{
+        color: numItems > 0 ? theme.semanticColors.errorBackground : "inherit",
+        borderBottom: isOpen ? `1px solid ${colors.DARK6}` : "none",
+        paddingBottom: isOpen ? 2 : 0,
+      }}
+    >
+      {text} {numItems > 0 ? numItems : ""}
+    </SHeaderItem>
+  );
+}
 
 const BottomBar = ({ nodeId, isSaved, save, diagnostics, logs }: Props): ReactElement => {
   const [bottomBarDisplay, setBottomBarDisplay] = useState("closed");

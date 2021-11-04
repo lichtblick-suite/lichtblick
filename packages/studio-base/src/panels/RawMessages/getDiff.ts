@@ -13,7 +13,6 @@
 import { every, uniq, keyBy, isEmpty } from "lodash";
 
 import { isTypicalFilterName } from "@foxglove/studio-base/components/MessagePathSyntax/isTypicalFilterName";
-import { jsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 export const diffArrow = "->";
@@ -32,7 +31,7 @@ export const diffLabels = {
     invertedBackgroundColor: "#3d2327",
     indicator: "-",
   },
-  CHANGED: { labelText: "STUDIO_DIFF___CHANGED", color: jsonTreeTheme.base0B },
+  CHANGED: { labelText: "STUDIO_DIFF___CHANGED", color: colors.YELLOW1 },
   ID: { labelText: "STUDIO_DIFF___ID" },
 } as const;
 

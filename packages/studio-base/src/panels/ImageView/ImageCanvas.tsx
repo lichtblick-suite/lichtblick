@@ -27,7 +27,6 @@ import { MessageEvent, Topic } from "@foxglove/studio-base/players/types";
 import { CompressedImage, Image } from "@foxglove/studio-base/types/Messages";
 import WebWorkerManager from "@foxglove/studio-base/util/WebWorkerManager";
 import { downloadFiles } from "@foxglove/studio-base/util/download";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
 import { Config, SaveImagePanelConfig } from "./index";
@@ -125,7 +124,7 @@ const useStyles = makeStyles((theme) => ({
     position: "absolute",
     alignItems: "center",
     justifyContent: "center",
-    color: colors.RED2,
+    color: theme.semanticColors.errorText,
   },
   canvas: {
     position: "absolute",

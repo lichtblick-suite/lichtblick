@@ -55,7 +55,7 @@ import getDiff, {
   DiffObject,
 } from "@foxglove/studio-base/panels/RawMessages/getDiff";
 import { Topic } from "@foxglove/studio-base/players/types";
-import { jsonTreeTheme, SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
+import { useJsonTreeTheme, SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import { enumValuesByDatatypeAndField } from "@foxglove/studio-base/util/selectors";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -130,6 +130,7 @@ const classes = mergeStyleSets({
 
 function RawMessages(props: Props) {
   const theme = useTheme();
+  const jsonTreeTheme = useJsonTreeTheme();
   const { config, saveConfig } = props;
   const { openSiblingPanel } = usePanelContext();
   const { topicPath, diffMethod, diffTopicPath, diffEnabled, showFullMessageForDiff } = config;
@@ -569,6 +570,7 @@ function RawMessages(props: Props) {
     showFullMessageForDiff,
     topic,
     getItemString,
+    jsonTreeTheme,
     expandedFields,
     diffTopicPath,
     otherSourceTopic,

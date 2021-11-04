@@ -16,7 +16,6 @@ import styled from "styled-components";
 
 import Flex from "@foxglove/studio-base/components/Flex";
 import { LegacyTextarea } from "@foxglove/studio-base/components/LegacyStyledComponents";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { validationErrorToString, ValidationResult } from "@foxglove/studio-base/util/validators";
 
 const { useState, useCallback, useRef, useLayoutEffect, useEffect } = React;
@@ -32,7 +31,7 @@ const StyledTextarea = styled(LegacyTextarea)`
   resize: none;
 `;
 const SError = styled.div`
-  color: ${colors.RED2};
+  color: ${({ theme }) => theme.semanticColors.errorText};
   padding: 8px 4px;
 `;
 

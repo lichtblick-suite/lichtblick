@@ -10,6 +10,7 @@
 //   This source code is licensed under the Apache License, Version 2.0,
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
+import { useTheme } from "@fluentui/react";
 import AlertCircleIcon from "@mdi/svg/svg/alert-circle.svg";
 import AlertIcon from "@mdi/svg/svg/alert.svg";
 import HelpCircleIcon from "@mdi/svg/svg/help-circle.svg";
@@ -19,14 +20,6 @@ import { ReactElement } from "react";
 
 import Icon from "@foxglove/studio-base/components/Icon";
 import { Diagnostic, DiagnosticSeverity } from "@foxglove/studio-base/players/UserNodePlayer/types";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
-
-const severityColors = {
-  Hint: colors.YELLOWL1,
-  Info: colors.BLUEL1,
-  Warning: colors.ORANGEL1,
-  Error: colors.REDL1,
-};
 
 const severityIcons = {
   Hint: <HelpCircleIcon />,
@@ -40,6 +33,14 @@ type Props = {
 };
 
 const DiagnosticsSection = ({ diagnostics }: Props): ReactElement => {
+  const theme = useTheme();
+  const severityColors = {
+    Hint: theme.palette.yellowLight,
+    Info: theme.palette.blueLight,
+    Warning: theme.semanticColors.warningBackground,
+    Error: theme.semanticColors.errorBackground,
+  };
+
   return diagnostics.length > 0 ? (
     <ul>
       {diagnostics.map(({ severity, message, source, startColumn, startLineNumber }, i) => {
@@ -62,7 +63,7 @@ const DiagnosticsSection = ({ diagnostics }: Props): ReactElement => {
               {severityIcons[severityLabel]}
             </Icon>
             <span style={{ padding: "5px" }}>{message}</span>
-            <span style={{ color: colors.GRAY }}>
+            <span style={{ color: theme.palette.neutralLight }}>
               {source} {errorLoc}
             </span>
           </li>

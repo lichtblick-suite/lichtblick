@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useTheme } from "@fluentui/react";
 import AlertCircleIcon from "@mdi/svg/svg/alert-circle.svg";
 import LeadPencilIcon from "@mdi/svg/svg/lead-pencil.svg";
 import { useCallback, useContext, useMemo } from "react";
@@ -58,7 +59,7 @@ export const SLeft = styled.div`
 `;
 
 const SErrorCount = styled.small`
-  color: ${colors.RED};
+  color: ${({ theme }) => theme.semanticColors.errorText};
   width: ${MAX_GROUP_ERROR_WIDTH}px;
 `;
 
@@ -144,6 +145,7 @@ export default function TreeNodeRow({
   width,
   diffModeEnabled,
 }: Props): JSX.Element {
+  const theme = useTheme();
   const topicName = node.type === "topic" ? node.topicName : "";
   const datatype = node.type === "topic" ? node.datatype : undefined;
 
@@ -266,7 +268,7 @@ export default function TreeNodeRow({
           <SIconWrapper>
             <Icon
               style={{
-                color: colors.RED,
+                color: theme.semanticColors.errorText,
                 fontSize: 14,
                 display: "inline-flex",
                 alignItems: "center",

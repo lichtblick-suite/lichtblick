@@ -16,7 +16,7 @@ import cx from "classnames";
 import { padStart } from "lodash";
 
 import { Time } from "@foxglove/rostime";
-import logStyles from "@foxglove/studio-base/panels/Rosout/logStyles";
+import useLogStyles from "@foxglove/studio-base/panels/Rosout/useLogStyles";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import LevelToString from "./LevelToString";
@@ -54,6 +54,7 @@ export default React.memo(function LogMessage({ msg }: { msg: RosgraphMsgs$Log }
   // the first message line is rendered with the info/stamp/name
   // following newlines are rendered on their own line
   const lines = msg.msg.split("\n");
+  const logStyles = useLogStyles();
 
   return (
     <div

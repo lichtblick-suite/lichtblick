@@ -19,7 +19,6 @@ import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import TextContent from "@foxglove/studio-base/components/TextContent";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { useSubscribeContext } from "@foxglove/studio-base/panels/WelcomePanel/SubscribeContext";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { isEmail } from "@foxglove/studio-base/util/validators";
 
 function validateEmail(str: string | undefined): string | undefined {
@@ -147,9 +146,11 @@ function WelcomePanel() {
             </DefaultButton>
             &nbsp;
             {error ? (
-              <span style={{ color: colors.RED2 }}>{error.toString()}</span>
+              <span style={{ color: theme.semanticColors.errorText }}>{error.toString()}</span>
             ) : subscribed && !submitState.loading ? (
-              <span style={{ color: colors.GREEN2 }}>Thanks for signing up!</span>
+              <span style={{ color: theme.semanticColors.successIcon }}>
+                Thanks for signing up!
+              </span>
             ) : undefined}
           </Stack>
         </Stack>

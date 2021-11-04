@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { makeStyles } from "@fluentui/react";
+import { makeStyles, useTheme } from "@fluentui/react";
 import ChartLineVariantIcon from "@mdi/svg/svg/chart-line-variant.svg";
 import DotsHorizontalIcon from "@mdi/svg/svg/dots-horizontal.svg";
 import ChevronDownIcon from "@mdi/svg/svg/unfold-less-horizontal.svg";
@@ -76,15 +76,15 @@ const useStyles = makeStyles((theme) => ({
   },
 
   // Status classes
-  ok: { color: `${colors.GREEN2} !important` },
-  warn: { color: `${colors.ORANGE2} !important` },
-  error: { color: `${colors.RED2} !important` },
-  stale: { color: `${colors.GRAY2} !important` },
-  unknown: { color: `${colors.RED2} !important` },
+  ok: { color: `${theme.semanticColors.successIcon} !important` },
+  warn: { color: `${theme.semanticColors.warningBackground} !important` },
+  error: { color: `${theme.semanticColors.errorBackground} !important` },
+  stale: { color: `${theme.semanticColors.infoIcon} !important` },
+  unknown: { color: `${theme.semanticColors.errorBackground} !important` },
 
   collapsedSection: {
     textAlign: "center",
-    color: colors.RED2,
+    color: theme.semanticColors.errorBackground,
   },
   interactiveRow: {
     cursor: "pointer",
@@ -101,7 +101,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   icon: {
-    color: "white",
+    color: theme.palette.themePrimary,
     marginLeft: 4,
     visibility: "hidden",
 
@@ -128,7 +128,7 @@ const useStyles = makeStyles((theme) => ({
         left: 6,
         marginLeft: -2,
         width: 4,
-        backgroundColor: colors.DIVIDER,
+        backgroundColor: "rgba(127, 127, 127, 0.4)",
       },
     },
   },
@@ -201,6 +201,7 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
   } = props;
   const tableRef = useRef<HTMLTableElement>(ReactNull);
   const classes = useStyles();
+  const theme = useTheme();
 
   const onClickSection = useCallback(
     (sectionObj: { name: string; section: string }): void => {
@@ -451,7 +452,10 @@ export default function DiagnosticStatus(props: Props): JSX.Element {
                   </Icon>
                 </div>
                 {getSectionsThatCanBeCollapsed().length > 0 && (
-                  <div style={{ color: "white", cursor: "pointer" }} onClick={toggleSections}>
+                  <div
+                    style={{ color: theme.semanticColors.bodyText, cursor: "pointer" }}
+                    onClick={toggleSections}
+                  >
                     <Icon
                       size="medium"
                       fade

@@ -42,7 +42,6 @@ import { CameraInfo, StampedMessage } from "@foxglove/studio-base/types/Messages
 import { PanelConfigSchema, SaveConfig } from "@foxglove/studio-base/types/panels";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import { getSynchronizingReducers } from "@foxglove/studio-base/util/synchronizeMessages";
 import { formatTimeRaw, getTimestampForMessage } from "@foxglove/studio-base/util/time";
 import toggle from "@foxglove/studio-base/util/toggle";
@@ -678,7 +677,11 @@ function ImageView(props: Props) {
           size="medium"
         >
           <WavesIcon
-            style={{ color: transformMarkers ? colors.ORANGE2 : theme.semanticColors.disabledText }}
+            style={{
+              color: transformMarkers
+                ? theme.semanticColors.warningBackground
+                : theme.semanticColors.disabledText,
+            }}
           />
         </Icon>
       </BottomBar>

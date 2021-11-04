@@ -23,7 +23,7 @@ import ClipboardOutlineIcon from "@mdi/svg/svg/clipboard-outline.svg";
 import cx from "classnames";
 
 import Icon from "@foxglove/studio-base/components/Icon";
-import logStyles from "@foxglove/studio-base/panels/Rosout/logStyles";
+import useLogStyles from "@foxglove/studio-base/panels/Rosout/useLogStyles";
 import { MessageEvent } from "@foxglove/studio-base/players/types";
 import clipboard from "@foxglove/studio-base/util/clipboard";
 
@@ -51,7 +51,10 @@ export type FilterBarProps = {
 };
 
 // custom renderer for item in dropdown list to color text
-function renderOption(option: ISelectableOption | undefined) {
+function renderOption(
+  option: ISelectableOption | undefined,
+  logStyles: ReturnType<typeof useLogStyles>,
+) {
   if (!option) {
     return ReactNull;
   }
@@ -74,11 +77,14 @@ function renderOption(option: ISelectableOption | undefined) {
 }
 
 // custom renderer for selected dropdown item to color the text
-function renderTitle(option: IDropdownOption[] | undefined) {
-  if (!option) {
+function renderTitle(
+  options: IDropdownOption[] | undefined,
+  logStyles: ReturnType<typeof useLogStyles>,
+) {
+  if (!options) {
     return ReactNull;
   }
-  return <>{option.map(renderOption)}</>;
+  return <>{options.map((option) => renderOption(option, logStyles))}</>;
 }
 
 export default function FilterBar(props: FilterBarProps): JSX.Element {
@@ -89,12 +95,13 @@ export default function FilterBar(props: FilterBarProps): JSX.Element {
     key: term,
   }));
   const theme = useTheme();
+  const logStyles = useLogStyles();
   return (
     <Stack grow horizontal tokens={{ childrenGap: theme.spacing.s1 }}>
       <Dropdown
         styles={{ title: { background: "transparent" } }}
-        onRenderOption={renderOption}
-        onRenderTitle={renderTitle}
+        onRenderOption={(option) => renderOption(option, logStyles)}
+        onRenderTitle={(options) => renderTitle(options, logStyles)}
         onChange={(_ev, option) => {
           if (option) {
             props.onFilterChange({

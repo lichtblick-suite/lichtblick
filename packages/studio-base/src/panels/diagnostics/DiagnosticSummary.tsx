@@ -40,7 +40,6 @@ import helpContent from "@foxglove/studio-base/panels/diagnostics/DiagnosticSumm
 import useDiagnostics from "@foxglove/studio-base/panels/diagnostics/useDiagnostics";
 import { PanelConfigSchema } from "@foxglove/studio-base/types/panels";
 import { DIAGNOSTIC_TOPIC } from "@foxglove/studio-base/util/globalConstants";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 import toggle from "@foxglove/studio-base/util/toggle";
 
 import {
@@ -60,18 +59,10 @@ type NodeRowProps = {
 };
 
 const useStyles = makeStyles((theme) => ({
-  ok: {
-    color: colors.GREEN2,
-  },
-  warn: {
-    color: colors.ORANGE2,
-  },
-  error: {
-    color: colors.RED2,
-  },
-  stale: {
-    color: theme.semanticColors.disabledText,
-  },
+  ok: { color: theme.semanticColors.successIcon },
+  warn: { color: theme.semanticColors.warningBackground },
+  error: { color: theme.semanticColors.errorBackground },
+  stale: { color: theme.semanticColors.infoIcon },
   pinIcon: {
     marginRight: 4,
     marginLeft: 4,
