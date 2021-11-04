@@ -5,7 +5,7 @@
 const path = require("path");
 const fs = require("fs");
 
-const REAL_YARN = path.join(__dirname, "releases", "yarn-3.0.0-rc.2.cjs");
+const REAL_YARN = path.join(__dirname, "releases", "yarn-3.1.0.cjs");
 
 // Increases the v8 old memory space (effectively increasing v8 heap space beyond the 2GB default)
 process.env.NODE_OPTIONS = "--max-old-space-size=6144";
