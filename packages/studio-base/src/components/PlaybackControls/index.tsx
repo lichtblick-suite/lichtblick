@@ -46,6 +46,7 @@ const selectIsActive = (ctx: MessagePipelineContext) => !!ctx.playerState.active
 const useStyles = makeStyles((theme) => ({
   root: {
     backgroundColor: theme.palette.neutralLighterAlt,
+    borderTop: `1px solid ${theme.palette.neutralLighter}`,
   },
 }));
 
@@ -148,7 +149,7 @@ export default function PlaybackControls(): JSX.Element {
     } as IButtonStyles);
 
   return (
-    <div>
+    <>
       <RepeatAdapter
         play={play}
         pause={pause}
@@ -255,6 +256,6 @@ export default function PlaybackControls(): JSX.Element {
           </StackItem>
         </Stack>
       </Stack>
-    </div>
+    </>
   );
 }

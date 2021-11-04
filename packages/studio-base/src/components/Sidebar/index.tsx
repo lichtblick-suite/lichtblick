@@ -226,7 +226,14 @@ export default function Sidebar<K extends string>({
               {id === "children" ? (
                 (children as JSX.Element)
               ) : (
-                <div style={{ backgroundColor: theme.palette.neutralLighterAlt }}>
+                <div
+                  style={{
+                    backgroundColor: theme.palette.neutralLighterAlt,
+                    // This box-shadow ensures the background color extends all the way to the
+                    // divider despite the default 1px margin around .mosaic-tile.
+                    boxShadow: `0 0 0 1px ${theme.palette.neutralLighterAlt}`,
+                  }}
+                >
                   <SelectedComponent />
                 </div>
               )}
