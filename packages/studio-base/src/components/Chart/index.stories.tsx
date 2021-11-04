@@ -111,7 +111,7 @@ if (propsWithDatalabels.data.datasets[0]?.datalabels) {
 const divStyle = { width: 600, height: 800, background: "black" };
 
 export default {
-  title: "components/Chart/index",
+  title: "components/Chart",
   component: ChartComponent,
   parameters: {
     chromatic: {

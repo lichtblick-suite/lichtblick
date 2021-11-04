@@ -92,7 +92,7 @@ const fixture = {
 };
 
 export default {
-  title: "panels/Rosout/index",
+  title: "panels/Rosout",
   component: Rosout,
 };
 

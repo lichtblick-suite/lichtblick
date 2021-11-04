@@ -14,7 +14,7 @@ import SubscribeContext, { SubscribeNewsletterFn } from "./SubscribeContext";
 import WelcomePanel from "./index";
 
 export default {
-  title: "panels/WelcomePanel/index",
+  title: "panels/WelcomePanel",
   component: WelcomePanel,
 };
 

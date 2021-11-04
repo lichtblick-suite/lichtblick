@@ -89,7 +89,7 @@ const commonProps: Props = {
 };
 
 export default {
-  title: "components/TimeBasedChart/index",
+  title: "components/TimeBasedChart",
   component: TimeBasedChart,
   parameters: {
     chromatic: {

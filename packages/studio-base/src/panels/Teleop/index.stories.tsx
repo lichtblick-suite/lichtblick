@@ -11,7 +11,7 @@ import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 import TeleopPanel from "./index";
 
 export default {
-  title: "panels/Teleop/index",
+  title: "panels/Teleop",
   component: TeleopPanel,
   decorators: [
     (StoryComponent: Story): JSX.Element => {

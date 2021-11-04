@@ -324,7 +324,7 @@ const exampleConfig: PlotConfig = {
 };
 
 export default {
-  title: "panels/Plot/index",
+  title: "panels/Plot",
   component: Plot,
   parameters: {
     chromatic: { delay: 50 },

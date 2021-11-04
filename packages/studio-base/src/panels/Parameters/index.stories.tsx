@@ -45,7 +45,7 @@ const getFixture = ({
   };
 };
 
-storiesOf("panels/Parameters/index", module)
+storiesOf("panels/Parameters", module)
   .add("default", () => {
     return (
       <PanelSetup fixture={getFixture({ getParameters: false, setParameters: false })}>

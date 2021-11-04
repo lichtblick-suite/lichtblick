@@ -11,7 +11,7 @@ import delay from "@foxglove/studio-base/util/delay";
 import TopicGraph, { TopicVisibility } from "./index";
 
 export default {
-  title: "panels/TopicGraph/index",
+  title: "panels/TopicGraph",
   component: TopicGraph,
 };
 

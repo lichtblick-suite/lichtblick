@@ -43,7 +43,7 @@ function Example({ states }: { states: UnconnectedPlaybackPerformanceProps[] }) 
   return <UnconnectedPlaybackPerformance {...state[0]!} />;
 }
 
-storiesOf("panels/PlaybackPerformance/index", module).add("simple example", () => {
+storiesOf("panels/PlaybackPerformance", module).add("simple example", () => {
   const states = [
     {
       timestamp: 1000,

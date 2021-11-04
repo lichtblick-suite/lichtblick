@@ -35,7 +35,7 @@ function PanelWithData() {
   );
 }
 
-storiesOf("panels/SourceInfo/index", module)
+storiesOf("panels/SourceInfo", module)
   .addParameters({
     chromatic: {
       delay: 1750,

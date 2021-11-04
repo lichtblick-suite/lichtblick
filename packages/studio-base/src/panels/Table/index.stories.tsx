@@ -56,7 +56,7 @@ const fixture = {
   },
 };
 
-storiesOf("panels/Table/index", module)
+storiesOf("panels/Table", module)
   .add("no topic path", () => {
     return (
       <PanelSetup fixture={{ frame: {}, topics: [] }}>

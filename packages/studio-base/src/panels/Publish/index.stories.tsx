@@ -44,7 +44,7 @@ const publishConfig = (config: Partial<typeof Publish["defaultConfig"]>) => ({
   ...config,
 });
 
-storiesOf("panels/Publish/index", module)
+storiesOf("panels/Publish", module)
   .add("example can publish, advanced", () => {
     const allowPublish = true;
     return (
