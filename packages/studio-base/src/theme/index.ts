@@ -160,32 +160,30 @@ export const lightTheme = createTheme(getPartialTheme({ inverted: false }));
 export const darkTheme = createTheme(getPartialTheme({ inverted: true }));
 
 function themeColors({ inverted }: { inverted: boolean }): Partial<IPalette> {
-  const keys: (keyof IPalette)[] = [
-    "themeDarker",
-    "themeDark",
-    "themeDarkAlt",
-    "themePrimary",
-    "themeSecondary",
-    "themeTertiary",
-    "themeLight",
-    "themeLighter",
-    "themeLighterAlt",
-  ];
-  if (inverted) {
-    keys.reverse();
-  }
-
-  const result: Partial<IPalette> = Object.fromEntries(
-    keys.map((key, i) => {
-      const ratio = i / (keys.length - 1);
-      return [
-        key,
-        "#" +
-          getColorFromRGBA(hsl2rgb(THEME_HUE, Math.min(20 + ratio * 75, 75), 40 + ratio * 57)).hex,
-      ];
-    }),
-  );
-  return result;
+  // Generated from https://aka.ms/themedesigner
+  return inverted
+    ? {
+        themePrimary: "#9480ed",
+        themeLighterAlt: "#060509",
+        themeLighter: "#181426",
+        themeLight: "#2c2647",
+        themeTertiary: "#594d8e",
+        themeSecondary: "#8271d1",
+        themeDarkAlt: "#9e8cef",
+        themeDark: "#ad9df1",
+        themeDarker: "#c1b6f5",
+      }
+    : {
+        themePrimary: "#744ce0",
+        themeLighterAlt: "#f9f7fe",
+        themeLighter: "#e7e0fa",
+        themeLight: "#d2c5f6",
+        themeTertiary: "#a88fed",
+        themeSecondary: "#8360e4",
+        themeDarkAlt: "#6845ca",
+        themeDark: "#583aab",
+        themeDarker: "#412b7e",
+      };
 }
 
 function neutralColors({ inverted }: { inverted: boolean }): Partial<IPalette> {
