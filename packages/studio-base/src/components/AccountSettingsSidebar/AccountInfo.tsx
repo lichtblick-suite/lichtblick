@@ -76,7 +76,7 @@ export default function AccountInfo(props: { currentUser?: User }): JSX.Element 
             </Text>
           </Stack>
         </Stack>
-        <PrimaryButton href={process.env.FOXGLOVE_ACCOUNT_DASHBOARD_URL}>
+        <PrimaryButton href={process.env.FOXGLOVE_ACCOUNT_DASHBOARD_URL} target="_blank">
           Account settings
         </PrimaryButton>
       </Stack>
