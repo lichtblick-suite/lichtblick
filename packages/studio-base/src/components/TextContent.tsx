@@ -18,11 +18,12 @@ import rehypeRaw from "rehype-raw";
 import { CSSProperties } from "styled-components";
 
 import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext";
+import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 const useStyles = makeStyles((theme) => ({
   root: {
     ...theme.fonts.smallPlus,
-    lineHeight: "1.4",
+    lineHeight: "1.6",
     backgroundColor: "transparent",
     color: theme.semanticColors.bodySubtext,
 
@@ -46,38 +47,102 @@ const useStyles = makeStyles((theme) => ({
     h3: {
       ...theme.fonts.large,
       marginBottom: theme.spacing.s1,
-      color: theme.palette.neutralLight,
+      color: theme.semanticColors.bodySubtext,
       fontWeight: 500,
     },
-    "h4, h5, h6": {
+    h4: {
       ...theme.fonts.mediumPlus,
       marginBottom: theme.spacing.s2,
-      color: theme.palette.neutralLight,
+      color: theme.semanticColors.bodySubtext,
       fontWeight: 500,
-      fontStyle: "italic",
     },
-    ul: {
-      lineHeight: "1.5",
-      listStylePosition: "outside",
-      listStyleType: "disc",
-      marginLeft: theme.spacing.s1,
+    h5: {
+      ...theme.fonts.medium,
+      marginBottom: theme.spacing.s2,
+      color: theme.semanticColors.bodySubtext,
+      fontWeight: 500,
+    },
+    h6: {
+      ...theme.fonts.smallPlus,
+      marginBottom: theme.spacing.s2,
+      color: theme.semanticColors.bodySubtext,
+      fontWeight: 500,
+    },
+    "ol, ul": {
+      paddingLeft: theme.spacing.l1,
       marginBottom: theme.spacing.m,
+    },
+    li: {
+      margin: `${theme.spacing.s2} 0`,
     },
     "b, strong": {
       fontWeight: "700 !important",
     },
     "p, ul": {
       margin: `${theme.spacing.s1} 0`,
-    },
-    "td, th": {
-      padding: theme.spacing.s2,
-      verticalAlign: "middle",
+
+      ":only-child": {
+        margin: `${theme.spacing.s2} 0`,
+      },
     },
     img: {
       maxWidth: "100%",
     },
     pre: {
       whiteSpace: "pre-wrap",
+      fontFamily: fonts.MONOSPACE,
+      backgroundColor: theme.semanticColors.bodyBackgroundHovered,
+      padding: `0 ${theme.spacing.s2}`,
+      borderRadius: theme.effects.roundedCorner2,
+
+      code: {
+        backgroundColor: "transparent",
+        padding: 0,
+      },
+    },
+    code: {
+      fontFamily: fonts.MONOSPACE,
+      backgroundColor: theme.semanticColors.bodyBackgroundHovered,
+      borderRadius: "0.2em",
+      padding: `0 ${theme.spacing.s2}`,
+    },
+    kbd: {
+      display: "inline-flex",
+      flex: "none",
+      fontFamily: fonts.MONOSPACE,
+      color: theme.semanticColors.bodySubtext,
+      backgroundColor: theme.semanticColors.bodyStandoutBackground,
+      boxShadow: `inset 0 1px 0 ${theme.semanticColors.bodyBackgroundHovered}`,
+      borderRadius: theme.effects.roundedCorner2,
+      fontSize: theme.fonts.small.fontSize,
+      padding: `0 ${theme.spacing.s2}`,
+      fontWeight: 500,
+      minWidth: 20,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    table: {
+      borderCollapse: "collapse",
+      borderSpacing: 0,
+      margin: `${theme.spacing.s1} -${theme.spacing.s2}`,
+      border: `1px solid ${theme.semanticColors.bodyFrameDivider}`,
+    },
+    "td, th": {
+      padding: theme.spacing.s2,
+      borderBottom: `1px solid ${theme.semanticColors.bodyFrameDivider}`,
+      borderRight: `1px solid ${theme.semanticColors.bodyFrameDivider}`,
+
+      ":last-child": {
+        borderRight: "none",
+      },
+    },
+    th: {
+      whiteSpace: "nowrap",
+    },
+    tr: {
+      ":last-child": {
+        "td, th": { borderBottom: "none" },
+      },
     },
   },
 }));

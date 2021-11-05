@@ -4,9 +4,12 @@ Plot arbitrary values from topic paths, specified using [message path syntax](#h
 
 ## Shortcuts
 
-- `Scroll` – Zoom horizontally
-- `v` + `Scroll` – Zoom vertically
-- `b` + `Scroll` – Zoom both horizontally and vertically
-- `Double-click` – Reset view
+<kbd>Scroll</kbd> – Zoom horizontally
+
+<kbd>v</kbd> + <kbd>Scroll</kbd> – Zoom vertically
+
+<kbd>b</kbd> + <kbd>Scroll</kbd> – Zoom both horizontally and vertically
+
+<kbd>Double-click</kbd> – Reset view
 
 [Learn more](https://foxglove.dev/docs/panels/plot).

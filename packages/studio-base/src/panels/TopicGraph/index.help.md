@@ -6,6 +6,6 @@ To use this panel, you must be connected to a live ROS system via a native or Ro
 
 ## Shortcuts
 
-- `Scroll` – Zoom
+<kbd>Scroll</kbd> – Zoom
 
 [Learn more](https://foxglove.dev/docs/panels/topic-graph).

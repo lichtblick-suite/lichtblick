@@ -19,11 +19,6 @@ const useStyles = makeStyles((theme) => ({
       fontFamily: fonts.MONOSPACE,
       overflowWrap: "break-word",
     },
-    code: {
-      padding: "0 0.25em",
-      backgroundColor: theme.semanticColors.bodyBackgroundHovered,
-      borderRadius: "0.2em",
-    },
     div: {
       "::-webkit-scrollbar": {
         width: "4px",
@@ -44,8 +39,8 @@ const useStyles = makeStyles((theme) => ({
         marginBottom: 0,
       },
     },
-    "b,strong": {
-      fontWeight: "bolder",
+    "b, strong": {
+      fontWeight: 700,
     },
     table: {
       borderCollapse: "collapse",

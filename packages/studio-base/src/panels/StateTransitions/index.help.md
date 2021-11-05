@@ -4,7 +4,8 @@ Track when the discrete values of topic paths, specified using [message path syn
 
 ## Shortcuts
 
-- `Scroll` - Zoom
-- `Double-click` – Reset view
+<kbd>Scroll</kbd> - Zoom
+
+<kbd>Double-click</kbd> – Reset view
 
 [Learn more](https://foxglove.dev/docs/panels/state-transitions).
