@@ -17,7 +17,6 @@ import {
   isDuring,
   isMeeting,
   isOverlappingSimple,
-  simplify,
 } from "intervals-fn";
 
 export type Range = {
@@ -39,14 +38,6 @@ export function isRangeCoveredByRanges(
     }
   }
   return false;
-}
-
-export function deepIntersect(arraysOfRanges: Range[][]): Range[] {
-  let result = arraysOfRanges[0] ?? [];
-  for (const arrayOfRanges of arraysOfRanges.slice(1)) {
-    result = intersect(result, arrayOfRanges);
-  }
-  return simplify(result);
 }
 
 // Get the ranges in `bounds` that are NOT covered by `ranges`.

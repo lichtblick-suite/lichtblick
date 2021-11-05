@@ -13,10 +13,8 @@
 export const CoreDataProviders = {
   ApiCheckerDataProvider: "ApiCheckerDataProvider",
   BagDataProvider: "BagDataProvider",
-  CombinedDataProvider: "CombinedDataProvider",
   MemoryCacheDataProvider: "MemoryCacheDataProvider",
   ParseMessagesDataProvider: "ParseMessagesDataProvider",
-  RenameDataProvider: "RenameDataProvider",
   Rosbag2DataProvider: "Rosbag2DataProvider",
   RpcDataProvider: "RpcDataProvider",
   UlogDataProvider: "UlogDataProvider",

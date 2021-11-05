@@ -47,26 +47,6 @@ export function buildPlayerFromFiles(files: File[], options: BuildPlayerOptions)
   if (files.length === 1) {
     return buildPlayerFromDescriptor(name, getLocalBagDescriptor(files[0] as File), options);
   }
-  /* Disable loading the second bag data source preparing to remove this feature
-  else if (files.length === 2) {
-    return buildPlayerFromDescriptor(
-      name,
-      {
-        name: CoreDataProviders.CombinedDataProvider,
-        args: {},
-        children: [
-          getLocalBagDescriptor(files[0] as File),
-          {
-            name: CoreDataProviders.RenameDataProvider,
-            args: { prefix: SECOND_SOURCE_PREFIX },
-            children: [getLocalBagDescriptor(files[1] as File)],
-          },
-        ],
-      },
-      options,
-    );
-  }
-  */
   throw new Error(`Unsupported number of files: ${files.length}`);
 }
 

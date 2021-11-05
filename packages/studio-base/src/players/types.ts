@@ -220,9 +220,6 @@ export type Topic = {
   name: string;
   // Name of the datatype (see `type PlayerStateActiveData` for details).
   datatype: string;
-  // The original topic name, if the topic name was at some point renamed, e.g. in
-  // RenameDataProvider.
-  originalTopic?: string;
   // The number of messages present on the topic. Valid only for sources with a fixed number of
   // messages, such as bags.
   numMessages?: number;

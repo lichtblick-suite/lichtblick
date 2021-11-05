@@ -26,7 +26,6 @@ const defaultGetMergedFixture = (bagFixture: Fixture) => bagFixture;
 
 type Props = {
   bag: string;
-  bag2?: string;
   children: React.ReactNode;
   subscriptions?: string[];
   // merge the bag data with existing fixture data
@@ -46,7 +45,6 @@ type Props = {
 // merge them together using getMergedFixture
 export default function PanelSetupWithBag({
   bag,
-  bag2,
   children,
   getMergedFixture = defaultGetMergedFixture,
   // TODO(troy): Ideally we wouldn't even need subscriptions here, relying on
@@ -76,7 +74,7 @@ export default function PanelSetupWithBag({
 
   useEffect(() => {
     void (async () => {
-      const player = new StoryPlayer([bag, bag2].filter(Boolean) as string[]);
+      const player = new StoryPlayer(bag);
       const formattedSubscriptions: SubscribePayload[] = flatten(
         (subscriptions ?? []).map((topic) => [{ topic }]),
       );
@@ -97,7 +95,7 @@ export default function PanelSetupWithBag({
         );
       });
     })();
-  }, [bag, bag2, getMergedFixture, subscriptions]);
+  }, [bag, getMergedFixture, subscriptions]);
 
   return fixture ? (
     <PanelSetup fixture={fixture} onMount={onMount} onFirstMount={onFirstMount}>

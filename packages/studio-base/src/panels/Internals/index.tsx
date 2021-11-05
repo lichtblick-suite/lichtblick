@@ -136,18 +136,14 @@ function Internals() {
             <ul>
               {sortBy(groupedSubscriptions[key], (sub) => sub.topic).map((sub, i) => (
                 <li key={i}>
-                  <code>
-                    {sub.topic}
-                    {topicsByName[sub.topic]?.originalTopic != undefined &&
-                      ` (original topic: ${topicsByName[sub.topic]?.originalTopic})`}
-                  </code>
+                  <code>{sub.topic}</code>
                 </li>
               ))}
             </ul>
           </Fragment>
         );
       });
-  }, [groupedSubscriptions, subscriptions.length, topicsByName]);
+  }, [groupedSubscriptions, subscriptions.length]);
 
   const renderedPublishers = React.useMemo(() => {
     if (publishers.length === 0) {

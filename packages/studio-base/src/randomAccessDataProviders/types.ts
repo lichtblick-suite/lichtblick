@@ -109,9 +109,7 @@ export interface RandomAccessDataProviderConstructor {
     // The arguments to this particular RandomAccessDataProvider; typically an object.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     args: any,
-    // The children we should instantiate below. Many RandomAccessDataProviders cannot have any children (leaf
-    // nodes in the tree), many require exactly one child, and the `CombinedDataProvider` can take
-    // an arbitrary number of children.
+    // The children we should instantiate within the provider
     children: RandomAccessDataProviderDescriptor[],
     // The function to instantiate the children (different in e.g. Web Workers).
     getDataProvider: GetDataProvider,

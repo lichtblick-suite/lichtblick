@@ -13,7 +13,6 @@
 
 import {
   isRangeCoveredByRanges,
-  deepIntersect,
   missingRanges,
   mergeNewRangeIntoUnsortedNonOverlappingList,
   Range,
@@ -40,35 +39,6 @@ describe("ranges", () => {
           { start: 7, end: 10 },
         ]),
       ).toEqual(false);
-    });
-  });
-
-  describe("deepIntersect", () => {
-    it("returns an empty array when given an empty array", () => {
-      expect(deepIntersect([])).toEqual([]);
-    });
-
-    it("returns the original array of ranges when only given that", () => {
-      const ranges = [
-        { start: 0, end: 10 },
-        { start: 20, end: 30 },
-      ];
-      expect(deepIntersect([ranges])).toEqual(ranges);
-    });
-
-    it("intersects multiple arrays of ranges", () => {
-      const ranges1 = [
-        { start: 0, end: 10 },
-        { start: 20, end: 30 },
-      ];
-      const ranges2 = [
-        { start: 5, end: 15 },
-        { start: 18, end: 28 },
-      ];
-      expect(deepIntersect([ranges1, ranges2])).toEqual([
-        { start: 5, end: 10 },
-        { start: 20, end: 28 },
-      ]);
     });
   });
 

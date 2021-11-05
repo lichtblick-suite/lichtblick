@@ -18,50 +18,30 @@ import {
   PlayerPresence,
 } from "@foxglove/studio-base/players/types";
 import BagDataProvider from "@foxglove/studio-base/randomAccessDataProviders/BagDataProvider";
-import CombinedDataProvider from "@foxglove/studio-base/randomAccessDataProviders/CombinedDataProvider";
 import ParseMessagesDataProvider from "@foxglove/studio-base/randomAccessDataProviders/ParseMessagesDataProvider";
-import RenameDataProvider from "@foxglove/studio-base/randomAccessDataProviders/RenameDataProvider";
-
-import { SECOND_SOURCE_PREFIX } from "../util/globalConstants";
 
 const noop = (): void => {};
-
-const getBagDescriptor = async (url?: string) => {
-  if (url == undefined) {
-    throw new Error("No bag url provided.");
-  }
-  const response = await fetch(url);
-  const blobs = await response.blob();
-  return { type: "file", file: new File([blobs], "test.bag") };
-};
 
 const NOOP_PROVIDER = [{ name: "noop", args: {}, children: [] }];
 
 export default class StoryPlayer implements Player {
   private _parsedSubscribedTopics: string[] = [];
-  private _bags: string[] = [];
-  constructor(bags: string[]) {
-    this._bags = bags;
+  private _bag: string;
+  constructor(bag: string) {
+    this._bag = bag;
   }
   setListener(listener: (arg0: PlayerState) => Promise<void>): void {
     void (async () => {
-      const bagDescriptors = await Promise.all(
-        this._bags.map(async (file, i) => {
-          const bagDescriptor = await getBagDescriptor(file);
-          return {
-            name: "",
-            args: { bagDescriptor, prefix: i === 1 ? SECOND_SOURCE_PREFIX : "" },
-            children: [],
-          };
-        }),
-      );
-      const provider = new CombinedDataProvider({}, bagDescriptors, ({ args }) => {
-        const { bagDescriptor, prefix } = args;
-        return new RenameDataProvider({ prefix }, NOOP_PROVIDER, () => {
-          return new ParseMessagesDataProvider({}, NOOP_PROVIDER, () => {
-            return new BagDataProvider({ bagPath: bagDescriptor, cacheSizeInBytes: Infinity }, []);
-          });
-        });
+      const response = await fetch(this._bag);
+      const blobs = await response.blob();
+      const provider = new ParseMessagesDataProvider({}, NOOP_PROVIDER, () => {
+        return new BagDataProvider(
+          {
+            bagPath: { type: "file", file: new File([blobs], "test.bag") },
+            cacheSizeInBytes: Infinity,
+          },
+          [],
+        );
       });
       void provider
         .initialize({
