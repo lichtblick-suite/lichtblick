@@ -17,6 +17,7 @@ import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import { rewritePackageUrl } from "@foxglove/studio-base/context/AssetsContext";
 import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import { GlbModel } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/GlbModel";
+import { parseDaeToGlb } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/parseDaeToGlb";
 import { parseStlToGlb } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/parseStlToGlb";
 import { MeshMarker } from "@foxglove/studio-base/types/Messages";
 
@@ -44,7 +45,10 @@ async function loadModel(url: string): Promise<GlbModel | undefined> {
     return parseStlToGlb(buffer);
   }
 
-  // No Collada .dae support yet
+  if (url.endsWith(".dae")) {
+    return await parseDaeToGlb(buffer);
+  }
+
   return undefined;
 }
 

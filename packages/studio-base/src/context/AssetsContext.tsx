@@ -47,7 +47,7 @@ export function rewritePackageUrl(
   const relPathStr = pkgMatch?.relPath ? encodeURIComponent(pkgMatch.relPath) : "";
 
   const newUrl = pkgMatch
-    ? `x-foxglove-ros-package:?targetPkg=${pkgMatch.targetPkg}${basePathStr}&rosPackagePath=${rosPackagePathStr}&relPath=${relPathStr}`
+    ? `x-foxglove-ros-package:?targetPkg=${pkgMatch.targetPkg}${basePathStr}${rosPackagePathStr}&relPath=${relPathStr}`
     : url;
   return /^x-foxglove-ros-package:.+\.tiff?$/i.test(newUrl)
     ? newUrl.replace(/^x-foxglove-ros-package:/, "x-foxglove-ros-package-converted-tiff:")
