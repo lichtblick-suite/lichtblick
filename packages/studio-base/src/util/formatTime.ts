@@ -15,6 +15,7 @@ import momentDurationFormatSetup from "moment-duration-format";
 import moment from "moment-timezone";
 
 import { Time, toDate, fromDate } from "@foxglove/rostime";
+import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
 
 import parseFuzzyRosTime from "./parseFuzzyRosTime";
 
@@ -77,19 +78,19 @@ export const getValidatedTimeAndMethodFromString = ({
   text?: string;
   date: string;
   timezone?: string;
-}): { time?: Time; method: "ROS" | "TOD" } | undefined => {
+}): { time?: Time; method: TimeDisplayMethod } | undefined => {
   if (text == undefined || text === "") {
     return;
   }
-  const isInvalidRosTime = isNaN(+text);
+  const isInvalidRawTime = isNaN(+text);
   const isInvalidTodTime = !(todTimeRegex.test(text) && parseTimeStr(`${date} ${text}`, timezone));
 
-  if (isInvalidRosTime && isInvalidTodTime) {
+  if (isInvalidRawTime && isInvalidTodTime) {
     return;
   }
 
   return {
-    time: !isInvalidRosTime ? parseFuzzyRosTime(text) : parseTimeStr(`${date} ${text}`, timezone),
-    method: isInvalidRosTime ? "TOD" : "ROS",
+    time: !isInvalidRawTime ? parseFuzzyRosTime(text) : parseTimeStr(`${date} ${text}`, timezone),
+    method: isInvalidRawTime ? "TOD" : "SEC",
   };
 };

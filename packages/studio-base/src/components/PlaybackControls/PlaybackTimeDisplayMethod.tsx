@@ -26,6 +26,7 @@ import {
   useCurrentLayoutActions,
   useCurrentLayoutSelector,
 } from "@foxglove/studio-base/context/CurrentLayoutContext";
+import { TimeDisplayMethod } from "@foxglove/studio-base/types/panels";
 import {
   formatDate,
   formatTime,
@@ -52,18 +53,19 @@ const PlaybackTimeDisplayMethod = ({
   isPlaying: boolean;
 }): JSX.Element => {
   const timestampInputRef = useRef<HTMLInputElement>(ReactNull);
-  const timeDisplayMethod = useCurrentLayoutSelector(
-    (state) => state.selectedLayout?.data?.playbackConfig.timeDisplayMethod ?? "ROS",
-  );
+  const timeDisplayMethod: TimeDisplayMethod = useCurrentLayoutSelector((state) => {
+    const method = state.selectedLayout?.data?.playbackConfig.timeDisplayMethod ?? "TOD";
+    return method === "TOD" ? "TOD" : "SEC";
+  });
   const { setPlaybackConfig } = useCurrentLayoutActions();
   const setTimeDisplayMethod = useCallback(
-    (newTimeDisplayMethod: "ROS" | "TOD") =>
+    (newTimeDisplayMethod: TimeDisplayMethod) =>
       setPlaybackConfig({ timeDisplayMethod: newTimeDisplayMethod }),
     [setPlaybackConfig],
   );
   const currentTimeString = useMemo(() => {
     if (currentTime) {
-      return timeDisplayMethod === "ROS"
+      return timeDisplayMethod === "SEC"
         ? formatTimeRaw(currentTime)
         : formatTime(currentTime, timezone);
     }
@@ -222,10 +224,10 @@ const PlaybackTimeDisplayMethod = ({
             },
             {
               canCheck: true,
-              key: "ROS",
-              text: "ROS time",
-              isChecked: timeDisplayMethod === "ROS",
-              onClick: () => setTimeDisplayMethod("ROS"),
+              key: "SEC",
+              text: "Seconds",
+              isChecked: timeDisplayMethod === "SEC",
+              onClick: () => setTimeDisplayMethod("SEC"),
             },
           ],
         }}

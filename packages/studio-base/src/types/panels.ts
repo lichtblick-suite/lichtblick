@@ -26,10 +26,12 @@ export type PanelConfig = {
   [key: string]: unknown;
 };
 
+export type TimeDisplayMethod = "SEC" | "TOD";
+
 export type PlaybackConfig = {
   speed: number;
   messageOrder: TimestampMethod;
-  timeDisplayMethod: "ROS" | "TOD";
+  timeDisplayMethod: TimeDisplayMethod;
 };
 
 export type UserNode = { name: string; sourceCode: string };

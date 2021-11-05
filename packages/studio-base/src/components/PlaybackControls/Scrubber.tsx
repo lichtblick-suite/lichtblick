@@ -131,7 +131,7 @@ export default function Scrubber(props: Props): JSX.Element {
       const timeFromStart = subtractTimes(stamp, latestStartTime.current);
 
       const tooltipItems = [
-        { title: "ROS", value: formatTimeRaw(stamp) },
+        { title: "SEC", value: formatTimeRaw(stamp) },
         { title: "Time", value: formatTime(stamp) },
         { title: "Elapsed", value: `${toSec(timeFromStart).toFixed(9)} sec` },
       ];

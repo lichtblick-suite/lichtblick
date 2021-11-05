@@ -132,7 +132,7 @@ describe("formatTime.getValidatedTimeAndMethodFromString", () => {
       }),
     ).toEqual({
       time: { nsec: 0, sec: 1598635994 },
-      method: "ROS",
+      method: "SEC",
     });
     expect(
       formatTime.getValidatedTimeAndMethodFromString({ ...commonArgs, text: "1:30:10.000 PM PST" }),

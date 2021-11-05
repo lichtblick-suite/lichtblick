@@ -30,7 +30,7 @@ const TEST_LAYOUT: PanelsState = {
   playbackConfig: {
     speed: 0.2,
     messageOrder: "receiveTime",
-    timeDisplayMethod: "ROS",
+    timeDisplayMethod: "SEC",
   },
 };
 

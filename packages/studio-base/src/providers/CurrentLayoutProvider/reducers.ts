@@ -70,7 +70,7 @@ import {
 export const defaultPlaybackConfig: PlaybackConfig = {
   speed: 1.0,
   messageOrder: "receiveTime",
-  timeDisplayMethod: "ROS",
+  timeDisplayMethod: "TOD",
 };
 
 function changePanelLayout(
