@@ -13,12 +13,8 @@
 
 import { storiesOf } from "@storybook/react";
 
-import RawMessages, {
-  PREV_MSG_METHOD,
-  OTHER_SOURCE_METHOD,
-} from "@foxglove/studio-base/panels/RawMessages";
+import RawMessages, { PREV_MSG_METHOD } from "@foxglove/studio-base/panels/RawMessages";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
-import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 import {
   fixture,
@@ -261,51 +257,6 @@ storiesOf("panels/RawMessages", module)
             diffMethod: PREV_MSG_METHOD,
             diffTopicPath: "/another/baz/enum_advanced",
             diffEnabled: false,
-            showFullMessageForDiff: true,
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("diff messages from different sources", () => {
-    return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }} onMount={expandAll}>
-        <RawMessages
-          overrideConfig={{
-            topicPath: "/foo",
-            diffMethod: OTHER_SOURCE_METHOD,
-            diffTopicPath: "",
-            diffEnabled: true,
-            showFullMessageForDiff: true,
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("diff messages from different sources when base topic is from second source", () => {
-    return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }} onMount={expandAll}>
-        <RawMessages
-          overrideConfig={{
-            topicPath: `${SECOND_SOURCE_PREFIX}/foo`,
-            diffMethod: OTHER_SOURCE_METHOD,
-            diffTopicPath: "",
-            diffEnabled: true,
-            showFullMessageForDiff: true,
-          }}
-        />
-      </PanelSetup>
-    );
-  })
-  .add("display empty state if second source is not available", () => {
-    return (
-      <PanelSetup fixture={fixture} style={{ width: 380 }} onMount={expandAll}>
-        <RawMessages
-          overrideConfig={{
-            topicPath: "/baz/text",
-            diffMethod: OTHER_SOURCE_METHOD,
-            diffTopicPath: "/foo",
-            diffEnabled: true,
             showFullMessageForDiff: true,
           }}
         />

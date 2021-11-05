@@ -12,14 +12,12 @@
 //   You may not use this file except in compliance with the License.
 
 import { Fixture } from "@foxglove/studio-base/stories/PanelSetup";
-import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 // ts-prune-ignore-next
 export const fixture = {
   topics: [
     { name: "/msgs/big_topic", datatype: "msgs/big_topic" },
     { name: "/foo", datatype: "std_msgs/String" },
-    { name: `${SECOND_SOURCE_PREFIX}/foo`, datatype: "std_msgs/String" },
     { name: "/baz/num", datatype: "baz/num" },
     { name: "/baz/bigint", datatype: "baz/bigint" },
     { name: "/baz/text", datatype: "baz/text" },
@@ -69,17 +67,6 @@ export const fixture = {
         message: {
           some_array: ["a", "b", "c", "d", "e", "f"],
           some_id_example_2: { some_id: 123 },
-        },
-      },
-    ],
-    [`${SECOND_SOURCE_PREFIX}/foo`]: [
-      {
-        topic: `${SECOND_SOURCE_PREFIX}/foo`,
-        receiveTime: { sec: 123, nsec: 456789011 },
-        message: {
-          some_array: ["a", "f", "n", "o", "p"],
-          some_deleted_key: "BYE",
-          some_id_example_2: { some_id: 567 },
         },
       },
     ],

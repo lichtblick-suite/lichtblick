@@ -55,7 +55,7 @@ import getDiff, {
   DiffObject,
 } from "@foxglove/studio-base/panels/RawMessages/getDiff";
 import { Topic } from "@foxglove/studio-base/players/types";
-import { useJsonTreeTheme, SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
+import { useJsonTreeTheme } from "@foxglove/studio-base/util/globalConstants";
 import { enumValuesByDatatypeAndField } from "@foxglove/studio-base/util/selectors";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
@@ -73,10 +73,9 @@ import { DATA_ARRAY_PREVIEW_LIMIT, getItemStringForDiff } from "./utils";
 
 export const CUSTOM_METHOD = "custom";
 export const PREV_MSG_METHOD = "previous message";
-export const OTHER_SOURCE_METHOD = "other source";
 export type RawMessagesConfig = {
   topicPath: string;
-  diffMethod: "custom" | "previous message" | "other source";
+  diffMethod: "custom" | "previous message";
   diffTopicPath: string;
   diffEnabled: boolean;
   showFullMessageForDiff: boolean;
@@ -180,13 +179,7 @@ function RawMessages(props: Props) {
     useLatestMessageDataItem(topicPath),
   ];
 
-  const otherSourceTopic = topicName.startsWith(SECOND_SOURCE_PREFIX)
-    ? topicName.replace(SECOND_SOURCE_PREFIX, "")
-    : `${SECOND_SOURCE_PREFIX}${topicName}`;
-  const inOtherSourceDiffMode = diffEnabled && diffMethod === OTHER_SOURCE_METHOD;
-  const diffTopicObj = useLatestMessageDataItem(
-    diffEnabled ? (inOtherSourceDiffMode ? otherSourceTopic : diffTopicPath) : "",
-  );
+  const diffTopicObj = useLatestMessageDataItem(diffEnabled ? diffTopicPath : "");
 
   const inTimetickDiffMode = diffEnabled && diffMethod === PREV_MSG_METHOD;
   const baseItem = inTimetickDiffMode ? prevTickObj : currTickObj;
@@ -354,11 +347,6 @@ function RawMessages(props: Props) {
     if (diffEnabled && diffMethod === CUSTOM_METHOD && (!baseItem || !diffItem)) {
       return (
         <EmptyState>{`Waiting to diff next messages from "${topicPath}" and "${diffTopicPath}"`}</EmptyState>
-      );
-    }
-    if (diffEnabled && diffMethod === OTHER_SOURCE_METHOD && (!baseItem || !diffItem)) {
-      return (
-        <EmptyState>{`Waiting to diff next messages from "${topicPath}" and "${otherSourceTopic}"`}</EmptyState>
       );
     }
     if (!baseItem) {
@@ -573,7 +561,6 @@ function RawMessages(props: Props) {
     jsonTreeTheme,
     expandedFields,
     diffTopicPath,
-    otherSourceTopic,
     saveConfig,
     onLabelClick,
     valueRenderer,
@@ -616,9 +603,6 @@ function RawMessages(props: Props) {
                   >
                     <DropdownItem value={PREV_MSG_METHOD}>
                       <span>{PREV_MSG_METHOD}</span>
-                    </DropdownItem>
-                    <DropdownItem value={OTHER_SOURCE_METHOD}>
-                      <span>{OTHER_SOURCE_METHOD}</span>
                     </DropdownItem>
                     <DropdownItem value={CUSTOM_METHOD}>
                       <span>custom</span>
