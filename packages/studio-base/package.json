@@ -34,7 +34,7 @@
     "@foxglove/hooks": "workspace:*",
     "@foxglove/mcap": "workspace:*",
     "@foxglove/regl-worldview": "1.0.0",
-    "@foxglove/ros1": "1.3.3",
+    "@foxglove/ros1": "1.3.4",
     "@foxglove/ros2": "1.0.5",
     "@foxglove/rosbag": "0.1.2",
     "@foxglove/rosbag2-web": "1.0.3",
