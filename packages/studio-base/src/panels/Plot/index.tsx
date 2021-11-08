@@ -11,6 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
+import { useTheme } from "@fluentui/react";
 import { compact, uniq } from "lodash";
 import memoizeWeak from "memoize-weak";
 import { useEffect, useCallback, useMemo, ComponentProps } from "react";
@@ -222,6 +223,7 @@ function Plot(props: Props) {
     xAxisVal,
     xAxisPath,
   } = config;
+  const theme = useTheme();
 
   useEffect(() => {
     if (yAxisPaths.length === 0) {
@@ -389,14 +391,23 @@ function Plot(props: Props) {
   const { datasets, tooltips, pathsWithMismatchedDataLengths } = useMemo(() => {
     const allPlotData = { ...filteredPlotData, ...plotDataForBlocks };
 
-    return getDatasetsAndTooltips(
-      yAxisPaths,
-      allPlotData,
-      startTime ?? ZERO_TIME,
+    return getDatasetsAndTooltips({
+      paths: yAxisPaths,
+      itemsByPath: allPlotData,
+      startTime: startTime ?? ZERO_TIME,
       xAxisVal,
       xAxisPath,
-    );
-  }, [filteredPlotData, plotDataForBlocks, yAxisPaths, startTime, xAxisVal, xAxisPath]);
+      invertedTheme: theme.isInverted,
+    });
+  }, [
+    filteredPlotData,
+    plotDataForBlocks,
+    yAxisPaths,
+    startTime,
+    xAxisVal,
+    xAxisPath,
+    theme.isInverted,
+  ]);
 
   const messagePipeline = useMessagePipelineGetter();
   const onClick = useCallback<NonNullable<ComponentProps<typeof PlotChart>["onClick"]>>(

@@ -12,7 +12,7 @@ import {
   TooltipItem,
 } from "@foxglove/studio-base/components/TimeBasedChart";
 import { format } from "@foxglove/studio-base/util/formatTime";
-import { lightColor, lineColors } from "@foxglove/studio-base/util/plotColors";
+import { darkColor, lightColor, lineColors } from "@foxglove/studio-base/util/plotColors";
 import { formatTimeRaw, TimestampMethod } from "@foxglove/studio-base/util/time";
 
 import { PlotXAxisVal } from "./index";
@@ -124,15 +124,25 @@ function getPointsAndTooltipsForMessagePathItem(
   return { points, tooltips, hasMismatchedData };
 }
 
-function getDatasetAndTooltipsFromMessagePlotPath(
-  path: PlotPath,
-  yAxisRanges: readonly (readonly TooltipItem[])[],
-  index: number,
-  startTime: Time,
-  xAxisVal: PlotXAxisVal,
-  xAxisRanges: readonly (readonly TooltipItem[])[] | undefined,
-  xAxisPath?: BasePlotPath,
-): {
+function getDatasetAndTooltipsFromMessagePlotPath({
+  path,
+  yAxisRanges,
+  index,
+  startTime,
+  xAxisVal,
+  xAxisRanges,
+  xAxisPath,
+  invertedTheme = false,
+}: {
+  path: PlotPath;
+  yAxisRanges: readonly (readonly TooltipItem[])[];
+  index: number;
+  startTime: Time;
+  xAxisVal: PlotXAxisVal;
+  xAxisRanges: readonly (readonly TooltipItem[])[] | undefined;
+  xAxisPath?: BasePlotPath;
+  invertedTheme?: boolean;
+}): {
   dataset: DataSet;
   tooltips: TimeBasedChartTooltipData[];
   hasMismatchedData: boolean;
@@ -236,7 +246,7 @@ function getDatasetAndTooltipsFromMessagePlotPath(
     borderWidth: 1,
     pointRadius: 1,
     pointHoverRadius: 3,
-    pointBackgroundColor: lightColor(borderColor),
+    pointBackgroundColor: invertedTheme ? lightColor(borderColor) : darkColor(borderColor),
     pointBorderColor: "transparent",
     data: flatten(rangesOfPoints),
   };
@@ -248,13 +258,21 @@ function getDatasetAndTooltipsFromMessagePlotPath(
   };
 }
 
-export function getDatasetsAndTooltips(
-  paths: PlotPath[],
-  itemsByPath: PlotDataByPath,
-  startTime: Time,
-  xAxisVal: PlotXAxisVal,
-  xAxisPath?: BasePlotPath,
-): {
+export function getDatasetsAndTooltips({
+  paths,
+  itemsByPath,
+  startTime,
+  xAxisVal,
+  xAxisPath,
+  invertedTheme,
+}: {
+  paths: PlotPath[];
+  itemsByPath: PlotDataByPath;
+  startTime: Time;
+  xAxisVal: PlotXAxisVal;
+  xAxisPath?: BasePlotPath;
+  invertedTheme?: boolean;
+}): {
   datasets: DataSet[];
   tooltips: TimeBasedChartTooltipData[];
   pathsWithMismatchedDataLengths: string[];
@@ -265,15 +283,16 @@ export function getDatasetsAndTooltips(
     if (!path.enabled) {
       return undefined;
     } else if (!isReferenceLinePlotPathType(path)) {
-      return getDatasetAndTooltipsFromMessagePlotPath(
+      return getDatasetAndTooltipsFromMessagePlotPath({
         path,
-        yRanges,
+        yAxisRanges: yRanges,
         index,
         startTime,
         xAxisVal,
-        xRanges,
+        xAxisRanges: xRanges,
         xAxisPath,
-      );
+        invertedTheme,
+      });
     }
     return undefined;
   });
