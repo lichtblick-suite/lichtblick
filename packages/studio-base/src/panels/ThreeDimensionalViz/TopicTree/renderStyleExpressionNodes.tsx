@@ -13,26 +13,24 @@
 
 import DotsVerticalIcon from "@mdi/svg/svg/dots-vertical.svg";
 import EarthIcon from "@mdi/svg/svg/earth.svg";
-import { groupBy, defaults } from "lodash";
-import { useCallback, useContext, useMemo } from "react";
+import { groupBy } from "lodash";
+import { useCallback, useContext } from "react";
 import styled from "styled-components";
 
-import { filterMap } from "@foxglove/den/collection";
 import ChildToggle from "@foxglove/studio-base/components/ChildToggle";
 import ColorPicker from "@foxglove/studio-base/components/ColorPicker";
 import Icon from "@foxglove/studio-base/components/Icon";
 import Menu, { Item } from "@foxglove/studio-base/components/Menu";
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
 import useGlobalVariables from "@foxglove/studio-base/hooks/useGlobalVariables";
-import { getDefaultColorOverrideBySourceIdx } from "@foxglove/studio-base/panels/ThreeDimensionalViz/GlobalVariableStyles";
 import { LinkedGlobalVariable } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { ThreeDimensionalVizContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/ThreeDimensionalVizContext";
 import { ColorOverride } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
 import TooltipRow from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TooltipRow";
 import TooltipTable from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TooltipTable";
 import { TreeUINode } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/types";
-import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
-import { joinTopics } from "@foxglove/studio-base/util/topicUtils";
+import { hexToColorObj } from "@foxglove/studio-base/util/colorUtils";
+import { lineColors } from "@foxglove/studio-base/util/plotColors";
 
 import { SLeft, SRightActions, SToggles, STreeNodeRow } from "./TreeNodeRow";
 import VisibilityToggle from "./VisibilityToggle";
@@ -55,13 +53,11 @@ export function renderStyleExpressionNodes({
   width,
   isXSWidth,
   topicName,
-  hasFeatureColumn,
   linkedGlobalVariablesByTopic,
 }: {
   width: number;
   isXSWidth: boolean;
   topicName: string;
-  hasFeatureColumn: boolean;
   linkedGlobalVariablesByTopic: Record<string, LinkedGlobalVariable[]>;
 }): TreeUINode[] {
   const rowWidth = width - (isXSWidth ? 0 : TREE_SPACING * 2) - OUTER_LEFT_MARGIN;
@@ -75,10 +71,8 @@ export function renderStyleExpressionNodes({
         <StyleExpressionNode
           linkedGlobalVariables={variables}
           topic={topicName}
-          hasFeatureColumn={hasFeatureColumn}
           rowWidth={rowWidth}
           rowIndex={rowIndex}
-          variableName={variableName}
         />
       );
       return { key: `${topicName}~${variableName}`, title };
@@ -95,55 +89,35 @@ const SItemContent = styled.div`
 function StyleExpressionNode(props: {
   linkedGlobalVariables: LinkedGlobalVariable[];
   topic: string;
-  hasFeatureColumn: boolean;
   rowWidth: number;
   rowIndex: number;
-  variableName: string;
 }) {
-  const { topic, rowWidth, rowIndex, hasFeatureColumn, linkedGlobalVariables } = props;
+  const { topic, rowWidth, rowIndex, linkedGlobalVariables } = props;
 
-  const {
-    colorOverrideBySourceIdxByVariable,
-    setColorOverrideBySourceIdxByVariable,
-    setHoveredMarkerMatchers,
-  } = useContext(ThreeDimensionalVizContext);
+  const { colorOverrideByVariable, setColorOverrideByVariable, setHoveredMarkerMatchers } =
+    useContext(ThreeDimensionalVizContext);
 
   const { globalVariables } = useGlobalVariables();
   const { markerKeyPath, name } = linkedGlobalVariables[0]!;
 
   const value = globalVariables[name];
-  const colorOverridesByColumnIdx: (ColorOverride | undefined)[] = defaults(
-    [],
-    colorOverrideBySourceIdxByVariable[name],
-    getDefaultColorOverrideBySourceIdx(rowIndex),
-  );
-  const activeRowActive = colorOverridesByColumnIdx.some((colorOverride) => colorOverride?.active);
+  const colorOverride: ColorOverride = colorOverrideByVariable[name] ?? {
+    active: false,
+    color: hexToColorObj(lineColors[rowIndex % lineColors.length]!, 1),
+  };
 
-  // Callbacks
+  const active = colorOverride.active ?? false;
+  const color = colorOverride.color;
+
   const updateSettingsForGlobalVariable = useCallback(
-    (globalVariableName: string, settings: ColorOverride, sourceIdx: number = 0) => {
-      const updatedSettings = new Array(2)
-        .fill(0)
-        .map((_, i) => colorOverrideBySourceIdxByVariable[globalVariableName]?.[i] ?? {});
-      updatedSettings[sourceIdx] = settings;
-      setColorOverrideBySourceIdxByVariable({
-        ...colorOverrideBySourceIdxByVariable,
-        [globalVariableName]: updatedSettings,
+    (globalVariableName: string, settings: ColorOverride) => {
+      setColorOverrideByVariable({
+        ...colorOverrideByVariable,
+        [globalVariableName]: settings,
       });
     },
-    [colorOverrideBySourceIdxByVariable, setColorOverrideBySourceIdxByVariable],
+    [colorOverrideByVariable, setColorOverrideByVariable],
   );
-
-  // Mouse-hover handlers
-  const onMouseLeave = useCallback(() => setHoveredMarkerMatchers([]), [setHoveredMarkerMatchers]);
-  const mouseEventHandlersByColumnIdx = useMemo(() => {
-    const topicNameByColumnIdx = [topic, joinTopics(SECOND_SOURCE_PREFIX, topic)];
-    return topicNameByColumnIdx.map((_topic) => ({
-      onMouseEnter: () =>
-        setHoveredMarkerMatchers([{ topic: _topic, checks: [{ markerKeyPath, value }] }]),
-      onMouseLeave,
-    }));
-  }, [markerKeyPath, onMouseLeave, setHoveredMarkerMatchers, topic, value]);
 
   const tooltipContent = (
     <TooltipRow>
@@ -170,7 +144,7 @@ function StyleExpressionNode(props: {
 
   return (
     <STreeNodeRow
-      visibleInScene={activeRowActive}
+      visibleInScene={active}
       style={{
         width: rowWidth,
         marginLeft: `-${OUTER_LEFT_MARGIN}px`,
@@ -187,37 +161,23 @@ function StyleExpressionNode(props: {
         </Tooltip>
       </SLeft>
       <SRightActions>
-        {colorOverridesByColumnIdx != undefined && (
-          <SToggles>
-            {filterMap(colorOverridesByColumnIdx, (override, sourceIdx) => {
-              if (!hasFeatureColumn && sourceIdx === 1) {
-                return ReactNull;
-              }
-              const { active = false, color } = override ?? {};
-              return (
-                <VisibilityToggle
-                  available={true}
-                  checked={active}
-                  dataTest={`visibility-toggle T:${topic} ${name} ${sourceIdx}`}
-                  key={sourceIdx}
-                  onAltToggle={() =>
-                    updateSettingsForGlobalVariable(name, { active: !active, color }, sourceIdx)
-                  }
-                  onToggle={() =>
-                    updateSettingsForGlobalVariable(name, { active: !active, color }, sourceIdx)
-                  }
-                  overrideColor={color}
-                  size="SMALL"
-                  unavailableTooltip={""}
-                  visibleInScene={active}
-                  diffModeEnabled={false}
-                  columnIndex={sourceIdx}
-                  {...mouseEventHandlersByColumnIdx[sourceIdx]}
-                />
-              );
-            })}
-          </SToggles>
-        )}
+        <SToggles>
+          <VisibilityToggle
+            available={true}
+            checked={active}
+            dataTest={`visibility-toggle T:${topic} ${name}`}
+            onAltToggle={() => updateSettingsForGlobalVariable(name, { active: !active, color })}
+            onToggle={() => updateSettingsForGlobalVariable(name, { active: !active, color })}
+            overrideColor={color}
+            size="SMALL"
+            unavailableTooltip={""}
+            visibleInScene={active}
+            onMouseEnter={() =>
+              setHoveredMarkerMatchers([{ topic, checks: [{ markerKeyPath, value }] }])
+            }
+            onMouseLeave={() => setHoveredMarkerMatchers([])}
+          />
+        </SToggles>
         <ChildToggle position="below" dataTest={`topic-row-menu-${topic}`}>
           <Icon
             size="small"
@@ -237,30 +197,17 @@ function StyleExpressionNode(props: {
               <SItemContent>
                 <span style={{ paddingRight: 8 }}>Marker color</span>
                 <ColorPicker
-                  color={colorOverridesByColumnIdx[0]?.color}
+                  color={colorOverride?.color}
                   buttonShape={"circle"}
-                  onChange={(color) => {
-                    const active = colorOverridesByColumnIdx[0]?.active;
-                    updateSettingsForGlobalVariable(name, { color, active }, 0);
+                  onChange={(newColor) => {
+                    updateSettingsForGlobalVariable(name, {
+                      color: newColor,
+                      active: colorOverride?.active,
+                    });
                   }}
                 />
               </SItemContent>
             </Item>
-            {hasFeatureColumn && (
-              <Item style={{ padding: "0 12px", height: 28 }}>
-                <SItemContent>
-                  <span style={{ paddingRight: 8 }}>Feature marker color</span>
-                  <ColorPicker
-                    color={colorOverridesByColumnIdx[1]?.color}
-                    buttonShape={"circle"}
-                    onChange={(color) => {
-                      const active = colorOverridesByColumnIdx[1]?.active;
-                      updateSettingsForGlobalVariable(name, { color, active }, 1);
-                    }}
-                  />
-                </SItemContent>
-              </Item>
-            )}
           </Menu>
         </ChildToggle>
       </SRightActions>

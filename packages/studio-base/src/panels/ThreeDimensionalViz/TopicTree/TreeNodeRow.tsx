@@ -14,7 +14,7 @@
 import { useTheme } from "@fluentui/react";
 import AlertCircleIcon from "@mdi/svg/svg/alert-circle.svg";
 import LeadPencilIcon from "@mdi/svg/svg/lead-pencil.svg";
-import { useCallback, useContext, useMemo } from "react";
+import { useContext } from "react";
 import styled from "styled-components";
 
 import Icon from "@foxglove/studio-base/components/Icon";
@@ -27,9 +27,7 @@ import {
   TREE_SPACING,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/constants";
 import { TopicTreeContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
-import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
-import { joinTopics } from "@foxglove/studio-base/util/topicUtils";
 
 import NodeName from "./NodeName";
 import TreeNodeMenu, { DOT_MENU_WIDTH } from "./TreeNodeMenu";
@@ -112,11 +110,10 @@ const SVisibleCount = styled.span`
 type Props = {
   checkedKeysSet: Set<string>;
   hasChildren: boolean;
-  hasFeatureColumn: boolean;
   isXSWidth: boolean;
   node: TreeNode;
   nodeVisibleInScene: boolean;
-  visibleByColumn: (boolean | undefined)[];
+  visible: boolean;
   sceneErrors: string[] | undefined;
   setCurrentEditingTopic: SetCurrentEditingTopic;
   derivedCustomSettings?: DerivedCustomSettings;
@@ -124,7 +121,6 @@ type Props = {
   filterText: string;
   tooltips?: React.ReactNode[];
   visibleTopicsCount: number;
-  diffModeEnabled: boolean;
 };
 
 export default function TreeNodeRow({
@@ -132,18 +128,16 @@ export default function TreeNodeRow({
   derivedCustomSettings,
   filterText,
   hasChildren,
-  hasFeatureColumn,
   isXSWidth,
   node,
-  node: { availableByColumn, providerAvailable, name, key, featureKey },
+  node: { available, providerAvailable, name, key },
   nodeVisibleInScene,
   sceneErrors,
   setCurrentEditingTopic,
   tooltips,
-  visibleByColumn,
+  visible,
   visibleTopicsCount,
   width,
-  diffModeEnabled,
 }: Props): JSX.Element {
   const theme = useTheme();
   const topicName = node.type === "topic" ? node.topicName : "";
@@ -161,7 +155,7 @@ export default function TreeNodeRow({
 
   const rowWidth = width - (isXSWidth ? 0 : TREE_SPACING * 2);
 
-  const togglesWidth = hasFeatureColumn ? TOGGLE_WRAPPER_SIZE * 2 : TOGGLE_WRAPPER_SIZE;
+  const togglesWidth = TOGGLE_WRAPPER_SIZE;
   const rightActionWidth = providerAvailable ? togglesWidth + DOT_MENU_WIDTH : DOT_MENU_WIDTH;
   // -8px to add some spacing between the name and right action area.
   let maxNodeNameWidth = rowWidth - rightActionWidth - 8;
@@ -190,33 +184,14 @@ export default function TreeNodeRow({
   maxNodeNameWidth -= showVisibleTopicsCount ? VISIBLE_COUNT_WIDTH + VISIBLE_COUNT_MARGIN * 2 : 0;
 
   const { setHoveredMarkerMatchers } = useContext(ThreeDimensionalVizContext);
-  const updateHoveredMarkerMatchers = useCallback(
-    // eslint-disable-next-line @foxglove/no-boolean-parameters
-    (columnIndex: number, visible: boolean) => {
-      if (visible) {
-        const topic = [topicName, joinTopics(SECOND_SOURCE_PREFIX, topicName)][columnIndex];
-        if (!topic) {
-          return;
-        }
-        setHoveredMarkerMatchers([{ topic }]);
-      }
-    },
-    [setHoveredMarkerMatchers, topicName],
-  );
-
-  const onMouseLeave = useCallback(() => setHoveredMarkerMatchers([]), [setHoveredMarkerMatchers]);
-  const mouseEventHandlersByColumnIdx = useMemo(() => {
-    return new Array(2).fill(0).map((_, columnIndex) => ({
-      onMouseEnter: () => updateHoveredMarkerMatchers(columnIndex, true),
-      onMouseLeave,
-    }));
-  }, [onMouseLeave, updateHoveredMarkerMatchers]);
   const {
     toggleCheckAllAncestors,
     toggleNodeChecked,
     toggleNodeExpanded,
     toggleCheckAllDescendants,
   } = useGuaranteedContext(TopicTreeContext, "TopicTreeContext");
+
+  const checked = checkedKeysSet.has(key);
 
   return (
     <STreeNodeRow visibleInScene={nodeVisibleInScene} style={{ width: rowWidth }}>
@@ -287,47 +262,43 @@ export default function TreeNodeRow({
       <SRightActions>
         {providerAvailable && (
           <SToggles>
-            {availableByColumn.map((available, columnIdx) => {
-              const checked = checkedKeysSet.has(columnIdx === 1 ? featureKey : key);
-              return (
-                <VisibilityToggle
-                  available={available}
-                  dataTest={`visibility-toggle~${key}~column${columnIdx}`}
-                  key={columnIdx}
-                  size={node.type === "topic" ? "SMALL" : "NORMAL"}
-                  overrideColor={derivedCustomSettings?.overrideColorByColumn?.[columnIdx]}
-                  checked={checked}
-                  onToggle={() => {
-                    toggleNodeChecked(key, columnIdx);
-                    updateHoveredMarkerMatchers(columnIdx, !checked);
-                  }}
-                  onShiftToggle={() => {
-                    toggleCheckAllDescendants(key, columnIdx);
-                    updateHoveredMarkerMatchers(columnIdx, !checked);
-                  }}
-                  onAltToggle={() => {
-                    toggleCheckAllAncestors(key, columnIdx);
-                    updateHoveredMarkerMatchers(columnIdx, !checked);
-                  }}
-                  unavailableTooltip={
-                    node.type === "group"
-                      ? "None of the topics in this group are currently available"
-                      : "Unavailable"
-                  }
-                  visibleInScene={visibleByColumn[columnIdx] ?? false}
-                  {...mouseEventHandlersByColumnIdx[columnIdx]}
-                  diffModeEnabled={diffModeEnabled}
-                  columnIndex={columnIdx}
-                />
-              );
-            })}
+            <VisibilityToggle
+              available={available}
+              dataTest={`visibility-toggle~${key}`}
+              size={node.type === "topic" ? "SMALL" : "NORMAL"}
+              overrideColor={derivedCustomSettings?.overrideColor}
+              checked={checked}
+              onToggle={() => {
+                toggleNodeChecked(key);
+                if (!checked) {
+                  setHoveredMarkerMatchers([{ topic: topicName }]);
+                }
+              }}
+              onShiftToggle={() => {
+                toggleCheckAllDescendants(key);
+                if (!checked) {
+                  setHoveredMarkerMatchers([{ topic: topicName }]);
+                }
+              }}
+              onAltToggle={() => {
+                toggleCheckAllAncestors(key);
+                if (!checked) {
+                  setHoveredMarkerMatchers([{ topic: topicName }]);
+                }
+              }}
+              unavailableTooltip={
+                node.type === "group"
+                  ? "None of the topics in this group are currently available"
+                  : "Unavailable"
+              }
+              visibleInScene={visible ?? false}
+              onMouseEnter={() => setHoveredMarkerMatchers([{ topic: topicName }])}
+              onMouseLeave={() => setHoveredMarkerMatchers([])}
+            />
           </SToggles>
         )}
         <TreeNodeMenu
           datatype={showTopicSettings ? datatype : undefined}
-          disableBaseColumn={diffModeEnabled || !(availableByColumn[0] ?? false)}
-          disableFeatureColumn={diffModeEnabled || !(availableByColumn[1] ?? false)}
-          hasFeatureColumn={hasFeatureColumn && (availableByColumn[1] ?? false)}
           nodeKey={key}
           providerAvailable={providerAvailable}
           setCurrentEditingTopic={setCurrentEditingTopic}

@@ -27,8 +27,6 @@ function Example({
   visibleInScene = false,
   showFocused = false,
   showToggled = false,
-  diffModeEnabled = false,
-  columnIndex = 0,
 }: {
   available: boolean;
   checked?: boolean;
@@ -38,8 +36,6 @@ function Example({
   visibleInScene?: boolean;
   showFocused?: boolean;
   showToggled?: boolean;
-  diffModeEnabled?: boolean;
-  columnIndex?: number;
 }) {
   const [checked, setChecked] = useState(defaultChecked);
   const onToggle = useCallback(() => {
@@ -73,8 +69,6 @@ function Example({
         size={size}
         overrideColor={overrideColor}
         dataTest="myToggle"
-        diffModeEnabled={diffModeEnabled}
-        columnIndex={columnIndex}
       />
     </div>
   );
@@ -193,40 +187,4 @@ storiesOf("panels/ThreeDimensionalViz/TopicTree/VisibilityToggle", module)
       );
     },
     { colorScheme: "light" },
-  )
-  .add("diff mode", () => {
-    return (
-      <div>
-        <Example
-          available
-          checked
-          visibleInScene
-          diffModeEnabled={true}
-          columnIndex={0}
-          title="diffModeEnabled: true, checked: true, columnIndex: 0"
-        />
-        <Example
-          available
-          checked
-          visibleInScene
-          diffModeEnabled={true}
-          columnIndex={1}
-          title="diffModeEnabled: true, checked: true, columnIndex: 1"
-        />
-        <Example
-          available
-          visibleInScene
-          diffModeEnabled={true}
-          columnIndex={0}
-          title="diffModeEnabled: true, checked: false, columnIndex: 0"
-        />
-        <Example
-          available
-          visibleInScene
-          diffModeEnabled={true}
-          columnIndex={1}
-          title="diffModeEnabled: true, checked: false, columnIndex: 1"
-        />
-      </div>
-    );
-  });
+  );

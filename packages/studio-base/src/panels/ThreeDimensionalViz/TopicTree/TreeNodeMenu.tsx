@@ -23,11 +23,8 @@ import useGuaranteedContext from "@foxglove/studio-base/hooks/useGuaranteedConte
 import { ROW_HEIGHT } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/constants";
 import { TopicTreeContext } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/useTopicTree";
 import clipboard from "@foxglove/studio-base/util/clipboard";
-import { colors } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import { SetCurrentEditingTopic } from "./types";
-
-const DISABLED_STYLE = { cursor: "not-allowed", color: colors.TEXT_MUTED };
 
 const SItemContent = styled.div`
   display: flex;
@@ -37,9 +34,6 @@ const SItemContent = styled.div`
 
 type Props = {
   datatype?: string;
-  disableBaseColumn: boolean;
-  disableFeatureColumn: boolean;
-  hasFeatureColumn: boolean;
   nodeKey: string;
   providerAvailable: boolean;
   setCurrentEditingTopic: SetCurrentEditingTopic;
@@ -50,9 +44,6 @@ export const DOT_MENU_WIDTH = 18; // The width of the small icon.
 
 export default function TreeNodeMenu({
   datatype,
-  disableBaseColumn,
-  disableFeatureColumn,
-  hasFeatureColumn,
   nodeKey,
   providerAvailable,
   setCurrentEditingTopic,
@@ -93,12 +84,9 @@ export default function TreeNodeMenu({
         {providerAvailable && (
           <>
             <Item
-              style={{ padding: "0 12px", ...(disableBaseColumn ? DISABLED_STYLE : undefined) }}
+              style={{ padding: "0 12px" }}
               onClick={() => {
-                if (disableBaseColumn) {
-                  return;
-                }
-                toggleCheckAllAncestors(nodeKey, 0);
+                toggleCheckAllAncestors(nodeKey);
                 setIsOpen(false);
               }}
             >
@@ -108,12 +96,9 @@ export default function TreeNodeMenu({
               </SItemContent>
             </Item>
             <Item
-              style={{ padding: "0 12px", ...(disableBaseColumn ? DISABLED_STYLE : undefined) }}
+              style={{ padding: "0 12px" }}
               onClick={() => {
-                if (disableBaseColumn) {
-                  return;
-                }
-                toggleCheckAllDescendants(nodeKey, 0);
+                toggleCheckAllDescendants(nodeKey);
                 setIsOpen(false);
               }}
             >
@@ -122,34 +107,6 @@ export default function TreeNodeMenu({
                 <KeyboardShortcut keys={["Shift", "Enter"]} />
               </SItemContent>
             </Item>
-            {hasFeatureColumn && (
-              <>
-                <Item
-                  style={disableFeatureColumn ? DISABLED_STYLE : {}}
-                  onClick={() => {
-                    if (disableFeatureColumn) {
-                      return;
-                    }
-                    toggleCheckAllAncestors(nodeKey, 1);
-                    setIsOpen(false);
-                  }}
-                >
-                  Toggle feature ancestors
-                </Item>
-                <Item
-                  style={disableFeatureColumn ? DISABLED_STYLE : {}}
-                  onClick={() => {
-                    if (disableFeatureColumn) {
-                      return;
-                    }
-                    toggleCheckAllDescendants(nodeKey, 1);
-                    setIsOpen(false);
-                  }}
-                >
-                  Toggle feature descendants
-                </Item>
-              </>
-            )}
           </>
         )}
         {topicName.length > 0 && (

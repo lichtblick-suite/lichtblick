@@ -17,21 +17,17 @@ const TOPIC_NAME = "/foo";
 const UNAVAILABLE_TOPIC_NAME = "/foo_unavailable";
 const AVAILABLE_TOPIC_NAME = "/foo_base_feature_available";
 const BASE_AVAILABLE_TOPIC_NAME = "/foo_base_available";
-const FEATURE_AVAILABLE_TOPIC_NAME = "/foo_feature_available";
 const CHECKED_BY_DEFAULT_TOPIC_NAME = "/foo_checked_by_default";
 const CHECKED_BY_CHECKED_KEYS_TOPIC_NAME = "/foo_checked_by_checked_keys";
 const INVISIBLE_NAMESPACE = "ns_invisible";
 
 const getIsNamespaceCheckedByDefaultMock = (topicName: string) => {
-  return (_topic: string, columnIndex: number) => {
+  return (_topic: string) => {
     if (topicName === UNAVAILABLE_TOPIC_NAME) {
       return false;
     }
     if (topicName === BASE_AVAILABLE_TOPIC_NAME) {
-      return columnIndex === 0;
-    }
-    if (topicName === FEATURE_AVAILABLE_TOPIC_NAME) {
-      return columnIndex === 1;
+      return true;
     }
     if (topicName === CHECKED_BY_DEFAULT_TOPIC_NAME) {
       return true;
@@ -44,15 +40,12 @@ const getIsNamespaceCheckedByDefaultMock = (topicName: string) => {
 };
 
 const getIsTreeNodeVisibleInSceneMock = (topicName: string) => {
-  return (_node: TreeNode, columnIndex: number, namespace?: string) => {
+  return (_node: TreeNode, namespace?: string) => {
     if (topicName === UNAVAILABLE_TOPIC_NAME) {
       return false;
     }
     if (topicName === BASE_AVAILABLE_TOPIC_NAME) {
-      return columnIndex === 0;
-    }
-    if (topicName === FEATURE_AVAILABLE_TOPIC_NAME) {
-      return columnIndex === 1;
+      return true;
     }
     if (topicName === CHECKED_BY_DEFAULT_TOPIC_NAME) {
       return true;
@@ -92,31 +85,28 @@ describe("getNamespaceNodes", () => {
           type: "topic",
           topicName,
           key: `t:/${topicName}`,
-          featureKey: `t:/studio_source_2/${topicName}`,
           providerAvailable: false,
-          availableByColumn: [true],
+          available: true,
         },
       } as any),
     ).toEqual([
       {
-        availableByColumn: [true],
-        checkedByColumn: [false],
-        featureKey: "ns:/studio_source_2/foo_unavailable:ns1",
-        hasNamespaceOverrideColorChangedByColumn: [],
+        available: true,
+        checked: false,
+        hasNamespaceOverrideColorChanged: false,
         key: "ns:/foo_unavailable:ns1",
         namespace: "ns1",
-        overrideColorByColumn: [],
-        visibleInSceneByColumn: [false],
+        overrideColor: undefined,
+        visibleInScene: false,
       },
       {
-        availableByColumn: [true],
-        checkedByColumn: [false],
-        featureKey: "ns:/studio_source_2/foo_unavailable:ns2",
-        hasNamespaceOverrideColorChangedByColumn: [],
+        available: true,
+        checked: false,
+        hasNamespaceOverrideColorChanged: false,
         key: "ns:/foo_unavailable:ns2",
         namespace: "ns2",
-        overrideColorByColumn: [],
-        visibleInSceneByColumn: [false],
+        overrideColor: undefined,
+        visibleInScene: false,
       },
     ]);
   });
@@ -130,37 +120,33 @@ describe("getNamespaceNodes", () => {
         derivedCustomSettingsByKey: {},
         getIsNamespaceCheckedByDefault: getIsNamespaceCheckedByDefaultMock(topicName),
         getIsTreeNodeVisibleInScene: getIsTreeNodeVisibleInSceneMock(topicName),
-        hasFeatureColumn: false,
         node: {
           type: "topic",
           topicName,
           key: `t:${topicName}`,
-          featureKey: `t:/studio_source_2${topicName}`,
           providerAvailable: false,
-          availableByColumn: [true],
+          available: true,
         },
         showVisible: false,
       }),
     ).toEqual([
       {
-        availableByColumn: [true],
-        checkedByColumn: [true],
-        featureKey: "ns:/studio_source_2/foo_base_available:ns1",
-        hasNamespaceOverrideColorChangedByColumn: [],
+        available: true,
+        checked: true,
+        hasNamespaceOverrideColorChanged: false,
         key: "ns:/foo_base_available:ns1",
         namespace: "ns1",
-        overrideColorByColumn: [],
-        visibleInSceneByColumn: [true],
+        overrideColor: undefined,
+        visibleInScene: true,
       },
       {
-        availableByColumn: [true],
-        checkedByColumn: [true],
-        featureKey: "ns:/studio_source_2/foo_base_available:ns2",
-        hasNamespaceOverrideColorChangedByColumn: [],
+        available: true,
+        checked: true,
+        hasNamespaceOverrideColorChanged: false,
         key: "ns:/foo_base_available:ns2",
         namespace: "ns2",
-        overrideColorByColumn: [],
-        visibleInSceneByColumn: [true],
+        overrideColor: undefined,
+        visibleInScene: true,
       },
     ]);
   });
@@ -174,104 +160,54 @@ describe("getNamespaceNodes", () => {
         checkedKeysSet: new Set([`t:${topicName}`]),
         getIsNamespaceCheckedByDefault: getIsNamespaceCheckedByDefaultMock(topicName),
         getIsTreeNodeVisibleInScene: getIsTreeNodeVisibleInSceneMock(topicName),
-        hasFeatureColumn: true,
         node: {
           type: "topic",
           topicName,
           key: `t:${topicName}`,
-          featureKey: `t:/studio_source_2${topicName}`,
           providerAvailable: true,
-          availableByColumn: [true, false],
+          available: true,
         },
       }),
     ).toEqual([
       {
-        availableByColumn: [true, false],
-        checkedByColumn: [true, false],
-        featureKey: "ns:/studio_source_2/foo_base_available:ns1",
-        hasNamespaceOverrideColorChangedByColumn: [],
+        available: true,
+        checked: true,
+        hasNamespaceOverrideColorChanged: false,
         key: "ns:/foo_base_available:ns1",
         namespace: "ns1",
-        overrideColorByColumn: [],
-        visibleInSceneByColumn: [true, false],
+        overrideColor: undefined,
+        visibleInScene: true,
       },
       {
-        availableByColumn: [true, false],
-        checkedByColumn: [true, false],
-        featureKey: "ns:/studio_source_2/foo_base_available:ns2",
-        hasNamespaceOverrideColorChangedByColumn: [],
+        available: true,
+        checked: true,
+        hasNamespaceOverrideColorChanged: false,
         key: "ns:/foo_base_available:ns2",
         namespace: "ns2",
-        overrideColorByColumn: [],
-        visibleInSceneByColumn: [true, false],
+        overrideColor: undefined,
+        visibleInScene: true,
       },
     ]);
   });
-  it("returns namespace nodes when base and feature topics are available (only feature selected)", () => {
-    const topicName = FEATURE_AVAILABLE_TOPIC_NAME;
-    expect(
-      getNamespaceNodes({
-        ...sharedProps,
-        availableNamespacesByTopic: { [`/studio_source_2${topicName}`]: ["ns1", "ns2"] },
-        checkedKeysSet: new Set([`t:/studio_source_/2${topicName}`]),
-        getIsNamespaceCheckedByDefault: getIsNamespaceCheckedByDefaultMock(topicName),
-        getIsTreeNodeVisibleInScene: getIsTreeNodeVisibleInSceneMock(topicName),
-        hasFeatureColumn: true,
-        node: {
-          type: "topic",
-          topicName,
-          key: `t:${topicName}`,
-          featureKey: `t:/studio_source_2${topicName}`,
-          providerAvailable: true,
-          availableByColumn: [false, true],
-        },
-      }),
-    ).toEqual([
-      {
-        availableByColumn: [false, true],
-        checkedByColumn: [false, true],
-        featureKey: "ns:/studio_source_2/foo_feature_available:ns1",
-        hasNamespaceOverrideColorChangedByColumn: [],
-        key: "ns:/foo_feature_available:ns1",
-        namespace: "ns1",
-        overrideColorByColumn: [],
-        visibleInSceneByColumn: [false, true],
-      },
-      {
-        availableByColumn: [false, true],
-        checkedByColumn: [false, true],
-        featureKey: "ns:/studio_source_2/foo_feature_available:ns2",
-        hasNamespaceOverrideColorChangedByColumn: [],
-        key: "ns:/foo_feature_available:ns2",
-        namespace: "ns2",
-        overrideColorByColumn: [],
-        visibleInSceneByColumn: [false, true],
-      },
-    ]);
-  });
-
   it("does not have duplicates namespace names", () => {
     const topicName = AVAILABLE_TOPIC_NAME;
     const nsNodes = getNamespaceNodes({
       ...sharedProps,
       availableNamespacesByTopic: {
         [topicName]: ["ns1", "ns3"],
-        [`/studio_source_2${topicName}`]: ["ns1", "ns2"],
       },
-      checkedKeysSet: new Set([`t:${topicName}`, `t:/studio_source_2${topicName}`]),
+      checkedKeysSet: new Set([`t:${topicName}`]),
       getIsNamespaceCheckedByDefault: getIsNamespaceCheckedByDefaultMock(topicName),
       getIsTreeNodeVisibleInScene: getIsTreeNodeVisibleInSceneMock(topicName),
-      hasFeatureColumn: true,
       node: {
         type: "topic",
         topicName,
         key: `t:${topicName}`,
-        featureKey: `t:/studio_source_2${topicName}`,
         providerAvailable: true,
-        availableByColumn: [true, true],
+        available: true,
       },
     });
-    expect(nsNodes.map((node) => node.namespace)).toEqual(["ns1", "ns3", "ns2"]);
+    expect(nsNodes.map((node) => node.namespace)).toEqual(["ns1", "ns3"]);
   });
 
   it("handles namespaces checked by default", () => {
@@ -280,27 +216,21 @@ describe("getNamespaceNodes", () => {
       ...sharedProps,
       availableNamespacesByTopic: {
         [topicName]: ["ns1", "ns3"],
-        [`/studio_source_2${topicName}`]: ["ns1", "ns2"],
       },
-      checkedKeysSet: new Set([`t:${topicName}`, `t:/studio_source_2${topicName}`]),
+      checkedKeysSet: new Set([`t:${topicName}`]),
       getIsNamespaceCheckedByDefault: getIsNamespaceCheckedByDefaultMock(topicName),
       getIsTreeNodeVisibleInScene: getIsTreeNodeVisibleInSceneMock(topicName),
-      hasFeatureColumn: true,
       node: {
         type: "topic",
         topicName,
         key: `t:${topicName}`,
-        featureKey: `t:/studio_source_2${topicName}`,
         providerAvailable: true,
-        availableByColumn: [true, true],
+        available: true,
       },
     });
-    expect(
-      nsNodes.map(({ checkedByColumn, namespace }) => ({ checkedByColumn, namespace })),
-    ).toEqual([
-      { checkedByColumn: [true, true], namespace: "ns1" },
-      { checkedByColumn: [true, true], namespace: "ns3" },
-      { checkedByColumn: [true, true], namespace: "ns2" },
+    expect(nsNodes.map(({ checked, namespace }) => ({ checked, namespace }))).toEqual([
+      { checked: true, namespace: "ns1" },
+      { checked: true, namespace: "ns3" },
     ]);
   });
 
@@ -310,33 +240,22 @@ describe("getNamespaceNodes", () => {
       ...sharedProps,
       availableNamespacesByTopic: {
         [topicName]: ["ns1", "ns3"],
-        [`/studio_source_2${topicName}`]: ["ns1", "ns2"],
       },
-      checkedKeysSet: new Set([
-        `t:${topicName}`,
-        `ns:${topicName}:ns1`,
-        `t:/studio_source_2${topicName}`,
-        `ns:/studio_source_2${topicName}:ns2`,
-      ]),
+      checkedKeysSet: new Set([`t:${topicName}`, `ns:${topicName}:ns1`]),
       getIsNamespaceCheckedByDefault: getIsNamespaceCheckedByDefaultMock(topicName),
       getIsTreeNodeVisibleInScene: getIsTreeNodeVisibleInSceneMock(topicName),
-      hasFeatureColumn: true,
       node: {
         type: "topic",
         topicName,
         key: `t:${topicName}`,
-        featureKey: `t:/studio_source_2${topicName}`,
         providerAvailable: true,
-        availableByColumn: [true, true],
+        available: true,
       },
     });
 
-    expect(
-      nsNodes.map(({ checkedByColumn, namespace }) => ({ checkedByColumn, namespace })),
-    ).toEqual([
-      { checkedByColumn: [true, false], namespace: "ns1" },
-      { checkedByColumn: [false, false], namespace: "ns3" },
-      { checkedByColumn: [false, true], namespace: "ns2" },
+    expect(nsNodes.map(({ checked, namespace }) => ({ checked, namespace }))).toEqual([
+      { checked: true, namespace: "ns1" },
+      { checked: false, namespace: "ns3" },
     ]);
   });
 
@@ -346,28 +265,20 @@ describe("getNamespaceNodes", () => {
       ...sharedProps,
       availableNamespacesByTopic: {
         [topicName]: ["ns1", INVISIBLE_NAMESPACE],
-        [`/studio_source_2${topicName}`]: ["ns1", "ns2"],
       },
-      checkedKeysSet: new Set([
-        `t:${topicName}`,
-        `ns:${topicName}:ns1`,
-        `t:/studio_source_2${topicName}`,
-        `ns:/studio_source_2${topicName}:ns2`,
-      ]),
+      checkedKeysSet: new Set([`t:${topicName}`, `ns:${topicName}:ns1`]),
       getIsNamespaceCheckedByDefault: getIsNamespaceCheckedByDefaultMock(topicName),
       getIsTreeNodeVisibleInScene: getIsTreeNodeVisibleInSceneMock(topicName),
-      hasFeatureColumn: true,
       node: {
         type: "topic",
         topicName,
         key: `t:${topicName}`,
-        featureKey: `t:/studio_source_2${topicName}`,
         providerAvailable: true,
-        availableByColumn: [true, true],
+        available: true,
       },
       showVisible: true,
     });
-    expect(nsNodes.map((node) => node.namespace)).toEqual(["ns1", "ns2"]);
+    expect(nsNodes.map((node) => node.namespace)).toEqual(["ns1"]);
   });
 
   it("returns override colors from namespaces and topics", () => {
@@ -377,22 +288,16 @@ describe("getNamespaceNodes", () => {
       derivedCustomSettingsByKey: {
         [`t:${topicName}`]: {
           isDefaultSettings: false,
-          overrideColorByColumn: [
-            { r: 0.1, g: 0.1, b: 0.1, a: 0.1 },
-            { r: 0.2, g: 0.2, b: 0.2, a: 0.2 },
-          ],
+          overrideColor: { r: 0.1, g: 0.1, b: 0.1, a: 0.1 },
         },
         [`ns:${topicName}:ns1`]: {
-          overrideColorByColumn: [
-            { r: 0.3, g: 0.3, b: 0.3, a: 0.3 },
-            { r: 0.4, g: 0.4, b: 0.4, a: 0.4 },
-          ],
+          overrideColor: { r: 0.3, g: 0.3, b: 0.3, a: 0.3 },
         },
         [`ns:${topicName}:ns2`]: {
-          overrideColorByColumn: [undefined, { r: 0.5, g: 0.5, b: 0.5, a: 0.5 }],
+          overrideColor: undefined,
         },
         [`ns:${topicName}:ns3`]: {
-          overrideColorByColumn: [{ r: 0.6, g: 0.6, b: 0.6, a: 0.6 }, undefined],
+          overrideColor: { r: 0.6, g: 0.6, b: 0.6, a: 0.6 },
         },
       } as any,
       canEditNamespaceOverrideColor: true,
@@ -406,35 +311,23 @@ describe("getNamespaceNodes", () => {
         type: "topic",
         topicName,
         key: `t:${topicName}`,
-        featureKey: `t:/studio_source_2${topicName}`,
         providerAvailable: true,
-        availableByColumn: [true, true],
+        available: true,
       },
       showVisible: true,
     } as any);
-    expect(
-      nsNodes.map(({ namespace, overrideColorByColumn }) => ({ namespace, overrideColorByColumn })),
-    ).toEqual([
+    expect(nsNodes.map(({ namespace, overrideColor }) => ({ namespace, overrideColor }))).toEqual([
       {
         namespace: "ns1",
-        overrideColorByColumn: [
-          { r: 0.3, g: 0.3, b: 0.3, a: 0.3 },
-          { r: 0.4, g: 0.4, b: 0.4, a: 0.4 },
-        ],
+        overrideColor: { r: 0.3, g: 0.3, b: 0.3, a: 0.3 },
       },
       {
         namespace: "ns2",
-        overrideColorByColumn: [
-          { r: 0.1, g: 0.1, b: 0.1, a: 0.1 },
-          { r: 0.5, g: 0.5, b: 0.5, a: 0.5 },
-        ],
+        overrideColor: { r: 0.1, g: 0.1, b: 0.1, a: 0.1 },
       },
       {
         namespace: "ns3",
-        overrideColorByColumn: [
-          { r: 0.6, g: 0.6, b: 0.6, a: 0.6 },
-          { r: 0.2, g: 0.2, b: 0.2, a: 0.2 },
-        ],
+        overrideColor: { r: 0.6, g: 0.6, b: 0.6, a: 0.6 },
       },
     ]);
   });

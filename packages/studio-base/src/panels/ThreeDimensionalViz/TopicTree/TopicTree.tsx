@@ -18,7 +18,6 @@ import {
   Stack,
   Text,
   TextField,
-  Toggle,
   ITheme,
   IStackStyles,
   ITextFieldStyles,
@@ -36,8 +35,6 @@ import { CSSTransition } from "react-transition-group";
 import useChangeDetector from "@foxglove/studio-base/hooks/useChangeDetector";
 import { Save3DConfig } from "@foxglove/studio-base/panels/ThreeDimensionalViz";
 import useLinkedGlobalVariables from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
-import { TopicSettingsCollection } from "@foxglove/studio-base/panels/ThreeDimensionalViz/SceneBuilder";
-import DiffModeIcon from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/DiffModeIcon";
 import TopicTreeSwitcher, {
   SWITCHER_HEIGHT,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/TopicTreeSwitcher";
@@ -51,7 +48,6 @@ import renderTreeNodes, {
   SWITCHER_WIDTH,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/renderTreeNodes";
 import { TopicDisplayMode } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/types";
-import { syncBags, SYNC_OPTIONS } from "@foxglove/studio-base/panels/ThreeDimensionalViz/syncBags";
 
 import {
   DerivedCustomSettingsByKey,
@@ -380,16 +376,13 @@ type SharedProps = {
   allKeys: string[];
   availableNamespacesByTopic: NamespacesByTopic;
   checkedKeys: string[];
-  settingsByKey: TopicSettingsCollection;
   derivedCustomSettingsByKey: DerivedCustomSettingsByKey;
   expandedKeys: string[];
   filterText: string;
   getIsNamespaceCheckedByDefault: GetIsNamespaceCheckedByDefault;
   getIsTreeNodeVisibleInScene: GetIsTreeNodeVisibleInScene;
   getIsTreeNodeVisibleInTree: GetIsTreeNodeVisibleInTree;
-  hasFeatureColumn: boolean;
   onNamespaceOverrideColorChange: OnNamespaceOverrideColorChange;
-  diffModeEnabled: boolean;
   rootTreeNode: TreeNode;
   saveConfig: Save3DConfig;
   sceneErrorsByKey: SceneErrorsByKey;
@@ -424,16 +417,13 @@ function TopicTree({
   allKeys,
   availableNamespacesByTopic,
   checkedKeys,
-  settingsByKey,
   derivedCustomSettingsByKey,
   expandedKeys,
   filterText,
   getIsNamespaceCheckedByDefault,
   getIsTreeNodeVisibleInScene,
   getIsTreeNodeVisibleInTree,
-  hasFeatureColumn,
   onNamespaceOverrideColorChange,
-  diffModeEnabled,
   rootTreeNode,
   saveConfig,
   sceneErrorsByKey,
@@ -540,69 +530,7 @@ function TopicTree({
           styles={styles.expandIcon}
           title={topLevelNodesCollapsed ? "Expand all" : "Collapse all"}
         />
-        {hasFeatureColumn && (
-          <IconButton
-            iconProps={{ iconName: "Sync" }}
-            menuIconProps={{ iconName: "CaretSolidDown" }}
-            menuProps={{
-              items: [
-                {
-                  key: "bag1ToBag2",
-                  text: "Sync bag 1 to bag 2",
-                  secondaryText: "Set bag 2's topic settings and selected topics to bag 1's",
-                  iconProps: { iconName: "ArrowStepLeft" },
-                  onClick: () =>
-                    saveConfig(syncBags({ checkedKeys, settingsByKey }, SYNC_OPTIONS.bag1ToBag2)),
-                },
-                {
-                  key: "bag2ToBag1",
-                  text: "Sync bag 2 to bag 1",
-                  secondaryText: "Set bag 1's topic settings and selected topics to bag 2's",
-                  iconProps: { iconName: "ArrowStepRight" },
-                  onClick: () =>
-                    saveConfig(syncBags({ checkedKeys, settingsByKey }, SYNC_OPTIONS.bag2ToBag1)),
-                },
-                {
-                  key: "swapBag1AndBag2",
-                  text: "Swap bags 1 and 2",
-                  secondaryText: "Swap topic settings and selected topics between bag 1 and bag 2",
-                  iconProps: { iconName: "SwapHorizontal" },
-                  onClick: () =>
-                    saveConfig(
-                      syncBags({ checkedKeys, settingsByKey }, SYNC_OPTIONS.swapBag1AndBag2),
-                    ),
-                },
-              ],
-              styles: {
-                subComponentStyles: {
-                  menuItem: styles.syncMenuItem,
-                },
-              },
-            }}
-            styles={styles.syncIcon}
-          />
-        )}
       </Stack>
-      {hasFeatureColumn && (
-        <Stack
-          horizontal
-          horizontalAlign="space-between"
-          verticalAlign="center"
-          tokens={{ padding: `${theme.spacing.s2} ${theme.spacing.s1}` }}
-        >
-          <Toggle
-            onChange={() => saveConfig({ diffModeEnabled: !diffModeEnabled })}
-            checked={diffModeEnabled}
-            label="Show diff"
-            inlineLabel
-            styles={{
-              label: { marginLeft: theme.spacing.s1 },
-              root: { marginBottom: 0 },
-            }}
-          />
-          {diffModeEnabled && <DiffModeIcon />}
-        </Stack>
-      )}
       <div ref={scrollContainerRef} style={{ overflow: "auto", width: treeWidth }}>
         {showNoMatchesState ? (
           <Stack
@@ -629,7 +557,6 @@ function TopicTree({
               getIsTreeNodeVisibleInScene,
               getIsTreeNodeVisibleInTree,
               getIsNamespaceCheckedByDefault,
-              hasFeatureColumn,
               isXSWidth,
               onNamespaceOverrideColorChange,
               sceneErrorsByKey,
@@ -640,7 +567,6 @@ function TopicTree({
               width: treeWidth,
               filterText,
               linkedGlobalVariablesByTopic,
-              diffModeEnabled: hasFeatureColumn && diffModeEnabled,
             })}
             height={treeHeight}
             itemHeight={ROW_HEIGHT}

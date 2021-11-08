@@ -141,7 +141,6 @@
     "prettier": "2.4.1",
     "promise-queue": "2.2.5",
     "quickhull3d": "2.0.5",
-    "rc-tabs": "11.10.2",
     "rc-tree": "5.2.1",
     "react": "17.0.2",
     "react-autocomplete": "janpaul123/react-autocomplete#bc8737070b5744069719c8fcd4e0a197192b0d48",

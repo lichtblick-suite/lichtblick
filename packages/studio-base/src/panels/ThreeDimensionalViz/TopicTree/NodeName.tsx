@@ -14,7 +14,6 @@
 import styled from "styled-components";
 
 import Tooltip from "@foxglove/studio-base/components/Tooltip";
-import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 
 import TextHighlight from "./TextHighlight";
 import TextMiddleTruncate from "./TextMiddleTruncate";
@@ -75,21 +74,8 @@ export default function NodeName({
   let targetStr = displayName ? displayName : topicName;
 
   if (searchText) {
-    let topicNameToShow = topicName;
-    const prefixedTopicName = `${SECOND_SOURCE_PREFIX}${topicName}`;
-
-    // Show feature topic if base topicName does not include searchText and it's still a match.
-    if (
-      topicName.length > 0 &&
-      !topicName.includes(searchText) &&
-      prefixedTopicName.includes(searchText)
-    ) {
-      topicNameToShow = prefixedTopicName;
-      targetStr = topicNameToShow;
-    }
-
     if (displayName.length > 0 && topicName.length > 0 && displayName !== topicName) {
-      targetStr = `${displayName} (${topicNameToShow})`;
+      targetStr = `${displayName} (${topicName})`;
     }
   }
   const xsWidthElem =

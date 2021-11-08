@@ -50,13 +50,11 @@ const SColorPickerWrapper = styled.span`
 
 type Props = {
   disableBaseColumn: boolean;
-  disableFeatureColumn: boolean;
-  hasFeatureColumn: boolean;
-  hasNamespaceOverrideColorChangedByColumn: boolean[];
+  hasNamespaceOverrideColorChanged: boolean;
   namespace: string;
   nodeKey: string;
   onNamespaceOverrideColorChange: OnNamespaceOverrideColorChange;
-  overrideColorByColumn?: (Color | undefined)[];
+  overrideColor?: Color;
   providerAvailable: boolean;
   topicName: string;
 };
@@ -72,22 +70,18 @@ const overrideColorChangedIconStyle = {
 
 export default function NamespaceMenu({
   disableBaseColumn,
-  disableFeatureColumn,
-  hasFeatureColumn,
-  hasNamespaceOverrideColorChangedByColumn,
+  hasNamespaceOverrideColorChanged,
   namespace,
   nodeKey,
   onNamespaceOverrideColorChange,
-  overrideColorByColumn,
+  overrideColor,
   providerAvailable,
   topicName,
 }: Props): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
 
   // Render with extra space for the reset icon if any column has the override color.
-  const showResetOverrideColor =
-    (hasNamespaceOverrideColorChangedByColumn[0] ?? false) ||
-    (hasNamespaceOverrideColorChangedByColumn[1] ?? false);
+  const showResetOverrideColor = hasNamespaceOverrideColorChanged ?? false;
   const colorPickerWrapperStyle = showResetOverrideColor
     ? { width: COLOR_PICKER_AND_ICON_WIDTH }
     : {};
@@ -127,7 +121,7 @@ export default function NamespaceMenu({
                 if (disableBaseColumn) {
                   return;
                 }
-                toggleCheckAllAncestors(nodeKey, 0, topicName);
+                toggleCheckAllAncestors(nodeKey, topicName);
                 setIsOpen(false);
               }}
             >
@@ -136,21 +130,7 @@ export default function NamespaceMenu({
                 <KeyboardShortcut keys={["Alt", "Enter"]} />
               </SItemContent>
             </Item>
-            {hasFeatureColumn && (
-              <Item
-                style={disableFeatureColumn ? DISABLED_STYLE : {}}
-                onClick={() => {
-                  if (disableFeatureColumn) {
-                    return;
-                  }
-                  toggleCheckAllAncestors(nodeKey, 1, topicName);
-                  setIsOpen(false);
-                }}
-              >
-                Toggle feature ancestors
-              </Item>
-            )}
-            {overrideColorByColumn && (
+            {overrideColor && (
               <>
                 <Item
                   style={{
@@ -163,11 +143,11 @@ export default function NamespaceMenu({
                     <span style={{ paddingRight: 8 }}>Marker color</span>
                     <SColorPickerWrapper style={colorPickerWrapperStyle}>
                       <ColorPicker
-                        color={overrideColorByColumn[0]}
+                        color={overrideColor}
                         buttonShape={"circle"}
                         onChange={(newColor) => onNamespaceOverrideColorChange(newColor, nodeKey)}
                       />
-                      {(hasNamespaceOverrideColorChangedByColumn[0] ?? false) && (
+                      {(hasNamespaceOverrideColorChanged ?? false) && (
                         <Icon
                           dataTest="reset-override-color-icon"
                           size="small"
@@ -182,36 +162,6 @@ export default function NamespaceMenu({
                     </SColorPickerWrapper>
                   </SItemContent>
                 </Item>
-                {hasFeatureColumn && (
-                  <Item
-                    style={{
-                      padding: "0 12px",
-                      height: 28,
-                      ...(disableBaseColumn ? DISABLED_STYLE : undefined),
-                    }}
-                  >
-                    <SItemContent>
-                      <span style={{ paddingRight: 8 }}>Feature marker color</span>
-                      <SColorPickerWrapper style={colorPickerWrapperStyle}>
-                        <Icon
-                          dataTest="reset-override-color-icon"
-                          size="small"
-                          fade
-                          tooltipProps={{ placement: "top", contents: "Reset to default" }}
-                          onClick={() => onNamespaceOverrideColorChange(undefined, nodeKey)}
-                          style={overrideColorChangedIconStyle}
-                        >
-                          <UndoVariantIcon />
-                        </Icon>
-                        <ColorPicker
-                          color={overrideColorByColumn[1]}
-                          buttonShape={"circle"}
-                          onChange={(newColor) => onNamespaceOverrideColorChange(newColor, nodeKey)}
-                        />
-                      </SColorPickerWrapper>
-                    </SItemContent>
-                  </Item>
-                )}
               </>
             )}
           </>

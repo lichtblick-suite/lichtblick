@@ -29,7 +29,6 @@ import WorldMarkers, {
   MarkerWithInteractionData,
 } from "@foxglove/studio-base/panels/ThreeDimensionalViz/WorldMarkers";
 import { LAYER_INDEX_DEFAULT_BASE } from "@foxglove/studio-base/panels/ThreeDimensionalViz/constants";
-import { withDiffMode } from "@foxglove/studio-base/panels/ThreeDimensionalViz/utils/diffModeUtils";
 import withHighlights from "@foxglove/studio-base/panels/ThreeDimensionalViz/withHighlights";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import {
@@ -60,7 +59,6 @@ type Props = WorldSearchTextProps & {
   onMouseDown?: MouseHandler;
   onMouseMove?: MouseHandler;
   onMouseUp?: MouseHandler;
-  diffModeEnabled: boolean;
 };
 
 function getMarkers(markerProviders: MarkerProvider[]): InteractiveMarkersByType {
@@ -122,7 +120,7 @@ function getMarkers(markerProviders: MarkerProvider[]): InteractiveMarkersByType
 }
 
 // Wrap the WorldMarkers in HoC(s)
-const WrappedWorldMarkers = withHighlights(withDiffMode(WorldMarkers));
+const WrappedWorldMarkers = withHighlights(WorldMarkers);
 
 function World(
   {
@@ -130,7 +128,6 @@ function World(
     autoTextBackgroundColor,
     children,
     onCameraStateChange,
-    diffModeEnabled,
     cameraState,
     isPlaying,
     markerProviders,
@@ -187,7 +184,6 @@ function World(
           layerIndex: LAYER_INDEX_DEFAULT_BASE,
           clearCachedMarkers: false,
           cameraDistance: cameraState.distance ?? DEFAULT_CAMERA_STATE.distance,
-          diffModeEnabled,
         }}
       />
     </Worldview>

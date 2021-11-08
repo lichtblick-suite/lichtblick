@@ -11,7 +11,6 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { uniq } from "lodash";
 import styled from "styled-components";
 
 import { filterMap } from "@foxglove/den/collection";
@@ -19,7 +18,6 @@ import { Color } from "@foxglove/regl-worldview";
 import { LinkedGlobalVariable } from "@foxglove/studio-base/panels/ThreeDimensionalViz/Interactions/useLinkedGlobalVariables";
 import { canEditNamespaceOverrideColorDatatype } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicSettingsEditor/index";
 import { TOPIC_DISPLAY_MODES } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/constants";
-import { SECOND_SOURCE_PREFIX } from "@foxglove/studio-base/util/globalConstants";
 import naturalSort from "@foxglove/studio-base/util/naturalSort";
 
 import TooltipRow from "./TooltipRow";
@@ -60,7 +58,6 @@ type Props = {
   getIsNamespaceCheckedByDefault: GetIsNamespaceCheckedByDefault;
   getIsTreeNodeVisibleInScene: GetIsTreeNodeVisibleInScene;
   getIsTreeNodeVisibleInTree: GetIsTreeNodeVisibleInTree;
-  hasFeatureColumn: boolean;
   isXSWidth: boolean;
   onNamespaceOverrideColorChange: OnNamespaceOverrideColorChange;
   sceneErrorsByKey: SceneErrorsByKey;
@@ -71,7 +68,6 @@ type Props = {
   linkedGlobalVariablesByTopic: {
     [key: string]: LinkedGlobalVariable[];
   };
-  diffModeEnabled: boolean;
 };
 
 export function getNamespaceNodes({
@@ -81,7 +77,6 @@ export function getNamespaceNodes({
   derivedCustomSettingsByKey,
   getIsNamespaceCheckedByDefault,
   getIsTreeNodeVisibleInScene,
-  hasFeatureColumn,
   node,
   showVisible,
 }: {
@@ -91,7 +86,6 @@ export function getNamespaceNodes({
   derivedCustomSettingsByKey: DerivedCustomSettingsByKey;
   getIsNamespaceCheckedByDefault: GetIsNamespaceCheckedByDefault;
   getIsTreeNodeVisibleInScene: GetIsTreeNodeVisibleInScene;
-  hasFeatureColumn: boolean;
   node: TreeTopicNode;
   showVisible: boolean;
 }): NamespaceNode[] {
@@ -99,60 +93,31 @@ export function getNamespaceNodes({
   const baseNamespacesSet = new Set(
     (topicName.length !== 0 && availableNamespacesByTopic[topicName]) || [],
   );
-  const featureNamespacesSet = new Set(
-    (topicName.length !== 0 &&
-      hasFeatureColumn &&
-      availableNamespacesByTopic[`${SECOND_SOURCE_PREFIX}${topicName}`]) ||
-      [],
-  );
-  const uniqueNamespaces = uniq([
-    ...Array.from(baseNamespacesSet),
-    ...Array.from(featureNamespacesSet),
-  ]);
-  const columns = hasFeatureColumn ? [0, 1] : [0];
-  return filterMap(uniqueNamespaces, (namespace) => {
+  return filterMap(Array.from(baseNamespacesSet), (namespace) => {
     const namespaceKey = generateNodeKey({ topicName, namespace });
-    const featureKey = generateNodeKey({ topicName, namespace, isFeatureColumn: true });
     const topicNodeKey = node.key;
-    const overrideColorByColumn: (Color | undefined)[] = [];
-    const hasNamespaceOverrideColorChangedByColumn: boolean[] = [];
+    let overrideColor: Color | undefined = undefined;
+    let hasNamespaceOverrideColorChanged: boolean = false;
 
     if (canEditNamespaceOverrideColor) {
       // Use namespace overrideColor by default, and fall back to topic overrideColor.
-      const namespaceOverrideColorByColumn =
-        derivedCustomSettingsByKey[namespaceKey]?.overrideColorByColumn ?? [];
-      const topicOverrideColorByColumn =
-        derivedCustomSettingsByKey[topicNodeKey]?.overrideColorByColumn ?? [];
-      columns.forEach((columnIdx) => {
-        overrideColorByColumn.push(
-          namespaceOverrideColorByColumn[columnIdx] ?? topicOverrideColorByColumn[columnIdx],
-        );
-        // The namespace color has changed if there is an override color.
-        hasNamespaceOverrideColorChangedByColumn.push(!!namespaceOverrideColorByColumn[columnIdx]);
-      });
+      const namespaceOverrideColor = derivedCustomSettingsByKey[namespaceKey]?.overrideColor;
+      const topicOverrideColor = derivedCustomSettingsByKey[topicNodeKey]?.overrideColor;
+      overrideColor = namespaceOverrideColor ?? topicOverrideColor;
+      // The namespace color has changed if there is an override color.
+      hasNamespaceOverrideColorChanged = !!namespaceOverrideColor;
     }
     const namespaceNode = {
       key: namespaceKey,
-      featureKey,
       namespace,
-      overrideColorByColumn,
-      hasNamespaceOverrideColorChangedByColumn,
-      availableByColumn: columns.map((columnIdx) =>
-        columnIdx === 1 ? featureNamespacesSet.has(namespace) : baseNamespacesSet.has(namespace),
-      ),
-      checkedByColumn: columns.map(
-        (columnIdx) =>
-          checkedKeysSet.has(columnIdx === 1 ? featureKey : namespaceKey) ||
-          getIsNamespaceCheckedByDefault(topicName, columnIdx),
-      ),
-      visibleInSceneByColumn: columns.map((columnIdx) =>
-        getIsTreeNodeVisibleInScene(node, columnIdx, namespace),
-      ),
+      overrideColor,
+      hasNamespaceOverrideColorChanged,
+      available: baseNamespacesSet.has(namespace),
+      checked: checkedKeysSet.has(namespaceKey) || getIsNamespaceCheckedByDefault(topicName),
+      visibleInScene: getIsTreeNodeVisibleInScene(node, namespace),
     };
 
-    const visible =
-      (namespaceNode.visibleInSceneByColumn[0] ?? false) ||
-      (namespaceNode.visibleInSceneByColumn[1] ?? false);
+    const visible = namespaceNode.visibleInScene ?? false;
     // Don't render namespaces that are not visible when the user selected to view Visible only.
     if (node.providerAvailable && showVisible && !visible) {
       return undefined;
@@ -172,7 +137,6 @@ export default function renderTreeNodes({
   getIsNamespaceCheckedByDefault,
   getIsTreeNodeVisibleInScene,
   getIsTreeNodeVisibleInTree,
-  hasFeatureColumn,
   isXSWidth,
   onNamespaceOverrideColorChange,
   sceneErrorsByKey,
@@ -181,7 +145,6 @@ export default function renderTreeNodes({
   visibleTopicsCountByKey,
   width,
   linkedGlobalVariablesByTopic,
-  diffModeEnabled,
 }: Props): TreeUINode[] {
   const titleWidth = width - SWITCHER_WIDTH;
 
@@ -190,13 +153,10 @@ export default function renderTreeNodes({
     if (!getIsTreeNodeVisibleInTree(key)) {
       return undefined;
     }
-    const visibleByColumn = hasFeatureColumn
-      ? [getIsTreeNodeVisibleInScene(item, 0), getIsTreeNodeVisibleInScene(item, 1)]
-      : [getIsTreeNodeVisibleInScene(item, 0)];
+    const visible = getIsTreeNodeVisibleInScene(item) ?? false;
 
-    const nodeVisibleInScene = (visibleByColumn[0] ?? false) || (visibleByColumn[1] ?? false);
-    const nodeAvailable =
-      (item.availableByColumn[0] ?? false) || (item.availableByColumn[1] ?? false);
+    const nodeVisibleInScene = visible;
+    const nodeAvailable = item.available ?? false;
 
     const showVisible = topicDisplayMode === TOPIC_DISPLAY_MODES.SHOW_SELECTED.value;
     const showAvailable = topicDisplayMode === TOPIC_DISPLAY_MODES.SHOW_AVAILABLE.value;
@@ -224,7 +184,6 @@ export default function renderTreeNodes({
             derivedCustomSettingsByKey,
             getIsNamespaceCheckedByDefault,
             getIsTreeNodeVisibleInScene,
-            hasFeatureColumn,
             node: item,
             showVisible,
           })
@@ -267,17 +226,15 @@ export default function renderTreeNodes({
         derivedCustomSettings={derivedCustomSettingsByKey[key]}
         filterText={filterText}
         hasChildren={itemChildren.length > 0 || namespaceNodes.length > 0}
-        hasFeatureColumn={hasFeatureColumn}
         isXSWidth={isXSWidth}
         node={item}
         nodeVisibleInScene={nodeVisibleInScene}
         sceneErrors={sceneErrorsByKey[item.key]}
         setCurrentEditingTopic={setCurrentEditingTopic}
-        visibleByColumn={visibleByColumn}
+        visible={visible}
         width={titleWidth}
         visibleTopicsCount={visibleTopicsCountByKey[item.key] ?? 0}
         {...(tooltips.length > 0 ? { tooltips } : undefined)}
-        diffModeEnabled={diffModeEnabled}
       />
     );
 
@@ -287,7 +244,6 @@ export default function renderTreeNodes({
         ...renderStyleExpressionNodes({
           isXSWidth,
           topicName,
-          hasFeatureColumn,
           linkedGlobalVariablesByTopic,
           width: titleWidth,
         }),
@@ -297,13 +253,11 @@ export default function renderTreeNodes({
         ...renderNamespaceNodes({
           children: namespaceNodes.sort(naturalSort("namespace")),
           getIsTreeNodeVisibleInTree,
-          hasFeatureColumn,
           isXSWidth,
           onNamespaceOverrideColorChange,
           topicNode: item,
           width: titleWidth,
           filterText,
-          diffModeEnabled,
         }),
       );
     }
@@ -315,7 +269,6 @@ export default function renderTreeNodes({
         getIsTreeNodeVisibleInScene,
         getIsTreeNodeVisibleInTree,
         getIsNamespaceCheckedByDefault,
-        hasFeatureColumn,
         isXSWidth,
         onNamespaceOverrideColorChange,
         topicDisplayMode,
@@ -326,7 +279,6 @@ export default function renderTreeNodes({
         width: titleWidth,
         filterText,
         linkedGlobalVariablesByTopic,
-        diffModeEnabled,
       }),
     );
     return {

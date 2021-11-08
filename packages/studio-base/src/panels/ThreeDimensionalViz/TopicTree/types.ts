@@ -43,26 +43,25 @@ export type TreeGroupNode = {
   type: "group";
   name: string;
   key: string;
-  featureKey: string;
   parentKey?: string;
-  availableByColumn: boolean[];
+  available: boolean;
   // Whether the data providers are available. If it is and the current node is not available, we'll show
   // the node name being striked through in the UI.
   providerAvailable: boolean;
   children: TreeNode[];
   description?: undefined;
 };
+
 export type TreeTopicNode = {
   type: "topic";
   topicName: string;
   key: string;
-  featureKey: string;
   parentKey?: string;
   name?: string;
   datatype?: string;
   description?: string;
   providerAvailable: boolean;
-  availableByColumn: boolean[];
+  available: boolean;
   children?: undefined;
 };
 
@@ -108,27 +107,14 @@ export type UseTreeInput = {
   uncategorizedGroupName: string;
 };
 
-export type GetIsTreeNodeVisibleInScene = (
-  topicNode: TreeNode,
-  columnIndex: number,
-  namespaceKey?: string,
-) => boolean;
+export type GetIsTreeNodeVisibleInScene = (topicNode: TreeNode, namespaceKey?: string) => boolean;
 export type GetIsTreeNodeVisibleInTree = (key: string) => boolean;
 export type SetCurrentEditingTopic = (arg0?: Topic) => void;
 export type ToggleNode = (nodeKey: string, namespaceParentTopicName?: string) => void;
-export type ToggleNodeByColumn = (
-  nodeKey: string,
-  columnIndex: number,
-  namespaceParentTopicName?: string,
-) => void;
-export type ToggleNamespaceChecked = (arg0: {
-  topicName: string;
-  namespace: string;
-  columnIndex: number;
-}) => void;
-export type GetIsNamespaceCheckedByDefault = (topicName: string, columnIndex: number) => boolean;
+export type ToggleNamespaceChecked = (arg0: { topicName: string; namespace: string }) => void;
+export type GetIsNamespaceCheckedByDefault = (topicName: string) => boolean;
 export type DerivedCustomSettings = {
-  overrideColorByColumn?: (Color | undefined)[];
+  overrideColor?: Color;
   isDefaultSettings?: boolean;
 };
 export type DerivedCustomSettingsByKey = {
@@ -147,16 +133,15 @@ export type UseTreeOutput = {
   getIsTreeNodeVisibleInScene: GetIsTreeNodeVisibleInScene;
   getIsTreeNodeVisibleInTree: GetIsTreeNodeVisibleInTree;
   getIsNamespaceCheckedByDefault: GetIsNamespaceCheckedByDefault;
-  hasFeatureColumn: boolean;
   // For testing.
   nodesByKey: {
     [key: string]: TreeNode;
   };
   onNamespaceOverrideColorChange: OnNamespaceOverrideColorChange;
-  toggleCheckAllAncestors: ToggleNodeByColumn;
-  toggleCheckAllDescendants: ToggleNodeByColumn;
+  toggleCheckAllAncestors: ToggleNode;
+  toggleCheckAllDescendants: ToggleNode;
   toggleNamespaceChecked: ToggleNamespaceChecked;
-  toggleNodeChecked: ToggleNodeByColumn;
+  toggleNodeChecked: ToggleNode;
   toggleNodeExpanded: ToggleNode;
   rootTreeNode: TreeNode;
   selectedNamespacesByTopic: {

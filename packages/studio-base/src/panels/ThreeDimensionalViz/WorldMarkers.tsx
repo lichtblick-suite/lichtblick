@@ -105,7 +105,6 @@ export type WorldMarkerProps = {
   markersByType: InteractiveMarkersByType;
   clearCachedMarkers: boolean;
   cameraDistance: number;
-  diffModeEnabled: boolean;
 };
 
 // Average a list of color markers into a single output color value. The returned value is the

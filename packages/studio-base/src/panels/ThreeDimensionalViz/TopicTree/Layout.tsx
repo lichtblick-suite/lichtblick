@@ -84,12 +84,8 @@ import { ThreeDimensionalVizConfig } from "@foxglove/studio-base/panels/ThreeDim
 import { Frame, Topic } from "@foxglove/studio-base/players/types";
 import inScreenshotTests from "@foxglove/studio-base/stories/inScreenshotTests";
 import { Color, Marker } from "@foxglove/studio-base/types/Messages";
-import {
-  FOXGLOVE_GRID_TOPIC,
-  SECOND_SOURCE_PREFIX,
-} from "@foxglove/studio-base/util/globalConstants";
+import { FOXGLOVE_GRID_TOPIC } from "@foxglove/studio-base/util/globalConstants";
 import { getTopicsByTopicName } from "@foxglove/studio-base/util/selectors";
-import { joinTopics } from "@foxglove/studio-base/util/topicUtils";
 
 type EventName = "onDoubleClick" | "onMouseMove" | "onMouseDown" | "onMouseUp";
 export type ClickedPosition = { clientX: number; clientY: number };
@@ -143,7 +139,7 @@ export type ColorOverride = {
   color?: Color;
   active?: boolean;
 };
-export type ColorOverrideBySourceIdxByVariable = Record<GlobalVariableName, ColorOverride[]>;
+export type ColorOverrideByVariable = Record<GlobalVariableName, ColorOverride>;
 
 const styles = mergeStyleSets({
   container: {
@@ -221,12 +217,11 @@ export default function Layout({
     flattenMarkers = false,
     modifiedNamespaceTopics,
     pinTopics,
-    diffModeEnabled,
     showCrosshair,
     autoSyncCameraState = false,
     topicDisplayMode = TOPIC_DISPLAY_MODES.SHOW_ALL.value,
     settingsByKey,
-    colorOverrideBySourceIdxByVariable,
+    colorOverrideByVariable,
     disableAutoOpenClickedObject = false,
   },
 }: Props): React.ReactElement {
@@ -361,7 +356,6 @@ export default function Layout({
     getIsNamespaceCheckedByDefault,
     getIsTreeNodeVisibleInScene,
     getIsTreeNodeVisibleInTree,
-    hasFeatureColumn,
     onNamespaceOverrideColorChange,
     rootTreeNode,
     sceneErrorsByKey,
@@ -426,32 +420,29 @@ export default function Layout({
   const colorOverrideMarkerMatchers = useMemo(() => {
     // Transform linkedGlobalVariables and overridesByGlobalVariable into markerMatchers for SceneBuilder
     const linkedGlobalVariablesByName = groupBy(linkedGlobalVariables, ({ name }) => name);
-    return Object.keys(
-      colorOverrideBySourceIdxByVariable ?? ({} as ColorOverrideBySourceIdxByVariable),
-    ).reduce((activeColorOverrideMatchers, name) => {
-      return (colorOverrideBySourceIdxByVariable?.[name] ?? ([] as ColorOverride[])).flatMap(
-        (override, i) =>
-          override?.active ?? false
-            ? [
-                ...activeColorOverrideMatchers,
-                ...(linkedGlobalVariablesByName[name] ?? []).map(({ topic, markerKeyPath }) => {
-                  const baseTopic = topic.replace(SECOND_SOURCE_PREFIX, "");
-                  return {
-                    topic: i === 0 ? baseTopic : joinTopics(SECOND_SOURCE_PREFIX, baseTopic),
-                    checks: [
-                      {
-                        markerKeyPath,
-                        value: globalVariables[name],
-                      },
-                    ],
-                    color: override.color,
-                  };
-                }),
-              ]
-            : activeColorOverrideMatchers,
-      );
+
+    const variables = Object.entries(colorOverrideByVariable ?? {});
+    return variables.reduce((activeColorOverrideMatchers, [variable, override]) => {
+      return override?.active ?? false
+        ? [
+            ...activeColorOverrideMatchers,
+            ...(linkedGlobalVariablesByName[variable] ?? []).map(({ topic, markerKeyPath }) => {
+              const baseTopic = topic;
+              return {
+                topic: baseTopic,
+                checks: [
+                  {
+                    markerKeyPath,
+                    value: globalVariables[variable],
+                  },
+                ],
+                color: override.color,
+              };
+            }),
+          ]
+        : activeColorOverrideMatchers;
     }, [] as MarkerMatcher[]);
-  }, [colorOverrideBySourceIdxByVariable, globalVariables, linkedGlobalVariables]);
+  }, [colorOverrideByVariable, globalVariables, linkedGlobalVariables]);
 
   const rootTf = useMemo(() => {
     // If the user specified a followTf we will only return the root frame from their followTf
@@ -563,14 +554,11 @@ export default function Layout({
     isDrawing,
   };
 
-  const setColorOverrideBySourceIdxByVariable = useCallback(
-    (newValue: ColorOverrideBySourceIdxByVariable) => {
-      callbackInputsRef.current.saveConfig({
-        colorOverrideBySourceIdxByVariable: newValue,
-      });
-    },
-    [],
-  );
+  const setColorOverrideByVariable = useCallback((newValue: ColorOverrideByVariable) => {
+    callbackInputsRef.current.saveConfig({
+      colorOverrideByVariable: newValue,
+    });
+  }, []);
 
   const handleEvent = useCallback(
     (eventName: EventName, ev: React.MouseEvent, args?: ReglClickInfo) => {
@@ -757,15 +745,11 @@ export default function Layout({
   // Memoize the threeDimensionalVizContextValue to avoid returning a new object every time
   const threeDimensionalVizContextValue = useMemo(
     () => ({
-      setColorOverrideBySourceIdxByVariable,
+      setColorOverrideByVariable,
       setHoveredMarkerMatchers: setHoveredMarkerMatchersDebounced,
-      colorOverrideBySourceIdxByVariable: colorOverrideBySourceIdxByVariable ?? {},
+      colorOverrideByVariable: colorOverrideByVariable ?? {},
     }),
-    [
-      colorOverrideBySourceIdxByVariable,
-      setColorOverrideBySourceIdxByVariable,
-      setHoveredMarkerMatchersDebounced,
-    ],
+    [colorOverrideByVariable, setColorOverrideByVariable, setHoveredMarkerMatchersDebounced],
   );
 
   // Use a debounce and 0 refresh rate to avoid triggering a resize observation while handling
@@ -808,18 +792,15 @@ export default function Layout({
                 checkedKeys={checkedKeys}
                 containerHeight={containerHeight ?? 0}
                 containerWidth={containerWidth ?? 0}
-                settingsByKey={settingsByKey}
                 derivedCustomSettingsByKey={derivedCustomSettingsByKey}
                 expandedKeys={expandedKeys}
                 filterText={filterText}
                 getIsNamespaceCheckedByDefault={getIsNamespaceCheckedByDefault}
                 getIsTreeNodeVisibleInScene={getIsTreeNodeVisibleInScene}
                 getIsTreeNodeVisibleInTree={getIsTreeNodeVisibleInTree}
-                hasFeatureColumn={hasFeatureColumn}
                 onExitTopicTreeFocus={onExitTopicTreeFocus}
                 onNamespaceOverrideColorChange={onNamespaceOverrideColorChange}
                 pinTopics={pinTopics}
-                diffModeEnabled={diffModeEnabled}
                 rootTreeNode={rootTreeNode}
                 saveConfig={saveConfig}
                 sceneErrorsByKey={sceneErrorsByKey}
@@ -834,7 +815,6 @@ export default function Layout({
               {currentEditingTopic && (
                 <TopicSettingsModal
                   currentEditingTopic={currentEditingTopic}
-                  hasFeatureColumn={hasFeatureColumn}
                   setCurrentEditingTopic={setCurrentEditingTopic}
                   sceneBuilderMessage={
                     sceneBuilder.collectors[currentEditingTopic.name]?.getMessages()[0]
@@ -853,7 +833,6 @@ export default function Layout({
               isPlaying={isPlaying}
               markerProviders={markerProviders}
               onCameraStateChange={onCameraStateChange}
-              diffModeEnabled={hasFeatureColumn && diffModeEnabled}
               onClick={onClick}
               onDoubleClick={onDoubleClick}
               onMouseDown={onMouseDown}

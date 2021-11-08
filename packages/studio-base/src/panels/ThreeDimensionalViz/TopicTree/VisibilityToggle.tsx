@@ -26,7 +26,6 @@ import { ROW_HEIGHT } from "./constants";
 
 export const TOPIC_ROW_PADDING = 3;
 
-export const DISABLED_COLOR = colors.TEXT_MUTED;
 export const TOGGLE_WRAPPER_SIZE = 24;
 
 export const TOGGLE_SIZE_CONFIG = {
@@ -76,24 +75,7 @@ type Props = {
   size?: Size;
   unavailableTooltip?: string;
   visibleInScene: boolean;
-  diffModeEnabled: boolean;
-  columnIndex: number;
 };
-
-// eslint-disable-next-line @foxglove/no-boolean-parameters
-function diffModeStyleOverrides(checked: boolean, columnIndex: number) {
-  if (!checked) {
-    return {
-      border: `1px solid ${DISABLED_COLOR}`,
-    };
-  }
-
-  const firstColor = columnIndex === 0 ? colors.DIFF_MODE_SOURCE_1 : colors.DIFF_MODE_SOURCE_BOTH;
-  const secondColor = columnIndex === 0 ? colors.DIFF_MODE_SOURCE_BOTH : colors.DIFF_MODE_SOURCE_2;
-  return {
-    background: `linear-gradient(90deg, ${firstColor} 0%, ${firstColor} 50%, ${secondColor} 51%, ${secondColor} 100%)`,
-  };
-}
 
 function getStyles({
   theme,
@@ -101,33 +83,22 @@ function getStyles({
   visibleInScene,
   overrideColor,
   size,
-  diffModeEnabled,
-  columnIndex,
 }: {
   theme: ITheme;
   checked: boolean;
   visibleInScene: boolean;
   overrideColor?: Color;
   size?: Size;
-  diffModeEnabled: boolean;
-  columnIndex: number;
 }): React.CSSProperties {
   const sizeInNumber =
     size === TOGGLE_SIZE_CONFIG.SMALL.name
       ? TOGGLE_SIZE_CONFIG.SMALL.size
       : TOGGLE_SIZE_CONFIG.NORMAL.size;
-  let styles: React.CSSProperties = {
+  const styles: React.CSSProperties = {
     width: sizeInNumber,
     height: sizeInNumber,
     borderRadius: sizeInNumber / 2,
   };
-
-  if (diffModeEnabled) {
-    return {
-      ...styles,
-      ...diffModeStyleOverrides(checked, columnIndex),
-    };
-  }
 
   const overrideRGB = defaultedRGBStringFromColorObj(overrideColor);
   const { enabledColor, disabledColor } = overrideColor
@@ -139,12 +110,9 @@ function getStyles({
 
   const color = visibleInScene ? enabledColor : disabledColor;
   if (checked) {
-    styles = { ...styles, background: color };
-  } else {
-    styles = { ...styles, border: `1px solid ${color}` };
+    return { ...styles, background: color };
   }
-
-  return styles;
+  return { ...styles, border: `1px solid ${color}` };
 }
 
 // A toggle component that supports using tab key to focus and using space key to check/uncheck.
@@ -161,8 +129,6 @@ export default function VisibilityToggle({
   visibleInScene,
   onMouseEnter,
   onMouseLeave,
-  diffModeEnabled,
-  columnIndex,
 }: Props): JSX.Element {
   const theme = useTheme();
   // Handle shift + click/enter, option + click/enter, and click/enter.
@@ -223,8 +189,6 @@ export default function VisibilityToggle({
           visibleInScene,
           size,
           overrideColor,
-          diffModeEnabled,
-          columnIndex,
         })}
       />
     </SToggle>

@@ -13,7 +13,7 @@
 
 import { noop } from "lodash";
 
-import { ColorOverrideBySourceIdxByVariable } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
+import { ColorOverrideByVariable } from "@foxglove/studio-base/panels/ThreeDimensionalViz/TopicTree/Layout";
 import { Color } from "@foxglove/studio-base/types/Messages";
 
 // Used to check if a Marker's path matches a value
@@ -37,10 +37,10 @@ export type MarkerMatcher = {
 export const ThreeDimensionalVizContext = React.createContext<{
   setHoveredMarkerMatchers: (markerMatchers: MarkerMatcher[]) => void;
 
-  colorOverrideBySourceIdxByVariable: ColorOverrideBySourceIdxByVariable;
-  setColorOverrideBySourceIdxByVariable: (arg0: ColorOverrideBySourceIdxByVariable) => void;
+  colorOverrideByVariable: ColorOverrideByVariable;
+  setColorOverrideByVariable: (arg0: ColorOverrideByVariable) => void;
 }>({
   setHoveredMarkerMatchers: noop,
-  colorOverrideBySourceIdxByVariable: {},
-  setColorOverrideBySourceIdxByVariable: noop,
+  colorOverrideByVariable: {},
+  setColorOverrideByVariable: noop,
 });

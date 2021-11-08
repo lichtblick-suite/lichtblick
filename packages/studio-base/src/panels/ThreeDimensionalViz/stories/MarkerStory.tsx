@@ -74,9 +74,9 @@ export function MarkerStory(
           thetaOffset: -0.5,
           perspective: true,
         },
-        colorOverrideBySourceIdxByVariable: {
-          qux_idx: [{ active: true, color: { r: 1, g: 0.3, b: 0.1, a: 1 } }],
-          foo: [{ active: true, color: { r: 0.2, g: 0.4, b: 1, a: 1 } }],
+        colorOverrideByVariable: {
+          qux_idx: { active: true, color: { r: 1, g: 0.3, b: 0.1, a: 1 } },
+          foo: { active: true, color: { r: 0.2, g: 0.4, b: 1, a: 1 } },
         },
         ...initialConfigOverride,
       }}
