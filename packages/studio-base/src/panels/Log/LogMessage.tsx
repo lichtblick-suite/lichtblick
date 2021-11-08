@@ -16,7 +16,7 @@ import cx from "classnames";
 import { padStart } from "lodash";
 
 import { Time } from "@foxglove/rostime";
-import useLogStyles from "@foxglove/studio-base/panels/Rosout/useLogStyles";
+import useLogStyles from "@foxglove/studio-base/panels/Log/useLogStyles";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
 
 import LevelToString from "./LevelToString";

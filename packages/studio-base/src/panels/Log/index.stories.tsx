@@ -13,7 +13,7 @@
 
 import TestUtils from "react-dom/test-utils";
 
-import Rosout from "@foxglove/studio-base/panels/Rosout";
+import Log from "@foxglove/studio-base/panels/Log";
 import PanelSetup from "@foxglove/studio-base/stories/PanelSetup";
 
 const fixture = {
@@ -92,14 +92,14 @@ const fixture = {
 };
 
 export default {
-  title: "panels/Rosout",
-  component: Rosout,
+  title: "panels/Log",
+  component: Log,
 };
 
 export const Simple = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture}>
-      <Rosout />
+      <Log />
     </PanelSetup>
   );
 };
@@ -135,7 +135,7 @@ export const TopicToRender = (): JSX.Element => {
         });
       }}
     >
-      <Rosout overrideConfig={{ searchTerms: [], minLogLevel: 1, topicToRender: "/foo/rosout" }} />
+      <Log overrideConfig={{ searchTerms: [], minLogLevel: 1, topicToRender: "/foo/rosout" }} />
     </PanelSetup>
   );
 };
@@ -144,7 +144,7 @@ TopicToRender.parameters = { colorScheme: "dark" };
 export const FilteredTerms = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture}>
-      <Rosout
+      <Log
         overrideConfig={{
           searchTerms: ["multiple", "/some_topic"],
           minLogLevel: 1,
@@ -160,7 +160,7 @@ FilteredTerms.title = `filtered terms: "multiple", "/some_topic"`;
 export const CaseInsitiveFilter = (): JSX.Element => {
   return (
     <PanelSetup fixture={fixture}>
-      <Rosout
+      <Log
         overrideConfig={{
           searchTerms: ["could", "Ipsum"],
           minLogLevel: 1,

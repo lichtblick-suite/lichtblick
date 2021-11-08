@@ -30,7 +30,7 @@ import { RosgraphMsgs$Log } from "./types";
 type Config = {
   searchTerms: string[];
   minLogLevel: number;
-  topicToRender: string;
+  topicToRender?: string;
 };
 
 type Props = {
@@ -38,7 +38,10 @@ type Props = {
   saveConfig: (arg0: Config) => void;
 };
 
-const RosoutPanel = React.memo(({ config, saveConfig }: Props) => {
+const ROS1_LOG = "rosgraph_msgs/Log";
+const ROS2_LOG = "rcl_interfaces/msg/Log";
+
+const LogPanel = React.memo(({ config, saveConfig }: Props) => {
   const { topics } = PanelAPI.useDataSourceInfo();
   const { minLogLevel, searchTerms } = config;
 
@@ -49,8 +52,17 @@ const RosoutPanel = React.memo(({ config, saveConfig }: Props) => {
     [config, saveConfig],
   );
 
-  const { [config.topicToRender]: messages = [] } = PanelAPI.useMessagesByTopic({
-    topics: [config.topicToRender],
+  const defaultTopicToRender = useMemo(
+    () =>
+      topics.find((topic) => topic.datatype === ROS1_LOG || topic.datatype === ROS2_LOG)?.name ??
+      "/rosout",
+    [topics],
+  );
+
+  const topicToRender = config.topicToRender ?? defaultTopicToRender;
+
+  const { [topicToRender]: messages = [] } = PanelAPI.useMessagesByTopic({
+    topics: [topicToRender],
     historySize: 100000,
   }) as { [key: string]: MessageEvent<RosgraphMsgs$Log>[] };
 
@@ -68,11 +80,11 @@ const RosoutPanel = React.memo(({ config, saveConfig }: Props) => {
 
   const topicToRenderMenu = (
     <TopicToRenderMenu
-      topicToRender={config.topicToRender}
-      onChange={(topicToRender) => saveConfig({ ...config, topicToRender })}
+      topicToRender={topicToRender}
+      onChange={(newTopicToRender) => saveConfig({ ...config, topicToRender: newTopicToRender })}
       topics={topics}
-      allowedDatatypes={["rosgraph_msgs/Log", "rcl_interfaces/msg/Log"]}
-      defaultTopicToRender={"/rosout"}
+      allowedDatatypes={[ROS1_LOG, ROS2_LOG]}
+      defaultTopicToRender={defaultTopicToRender}
     />
   );
 
@@ -101,11 +113,11 @@ const RosoutPanel = React.memo(({ config, saveConfig }: Props) => {
   );
 });
 
-RosoutPanel.displayName = "Rosout";
+LogPanel.displayName = "Log";
 
 export default Panel(
-  Object.assign(RosoutPanel, {
-    defaultConfig: { searchTerms: [], minLogLevel: 1, topicToRender: "/rosout" } as Config,
-    panelType: "RosOut",
+  Object.assign(LogPanel, {
+    defaultConfig: { searchTerms: [], minLogLevel: 1 } as Config,
+    panelType: "RosOut", // The legacy RosOut name is used for backwards compatibility
   }),
 );
