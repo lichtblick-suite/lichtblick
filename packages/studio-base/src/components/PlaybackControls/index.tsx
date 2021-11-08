@@ -112,7 +112,6 @@ export default function PlaybackControls(): JSX.Element {
   const iconButtonStyles: IButtonStyles = {
     icon: { height: 20 },
     root: {
-      margin: 0, // Remove this when global.scss goes away
       color: theme.semanticColors.buttonText,
     },
     rootChecked: {
