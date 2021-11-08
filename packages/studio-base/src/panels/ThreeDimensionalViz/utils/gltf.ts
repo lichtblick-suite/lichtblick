@@ -4,8 +4,8 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-/* Generated from official JSON schema using `npm run generate-interface`
- * on 2018-02-24
+/* Generated from official JSON schema using `npx gltf-typescript-generator ./gltf.ts https://raw.githubusercontent.com/KhronosGroup/glTF/main/specification/2.0/schema/glTF.schema.json`
+ * on 2021-11-08
  */
 
 // tslint:disable:quotemark
@@ -13,15 +13,15 @@
 
 export type GlTfId = number;
 /**
- * Indices of those attributes that deviate from their initialization value.
+ * An object pointing to a buffer view containing the indices of deviating accessor values. The number of indices is equal to `accessor.sparse.count`. Indices **MUST** strictly increase.
  */
 export interface AccessorSparseIndices {
   /**
-   * The index of the bufferView with sparse indices. Referenced bufferView can't have ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER target.
+   * The index of the buffer view with sparse indices. The referenced buffer view **MUST NOT** have its `target` or `byteStride` properties defined. The buffer view and the optional `byteOffset` **MUST** be aligned to the `componentType` byte length.
    */
   bufferView: GlTfId;
   /**
-   * The offset relative to the start of the bufferView in bytes. Must be aligned.
+   * The offset relative to the start of the buffer view in bytes.
    */
   byteOffset?: number;
   /**
@@ -33,15 +33,15 @@ export interface AccessorSparseIndices {
   [k: string]: any;
 }
 /**
- * Array of size `accessor.sparse.count` times number of components storing the displaced accessor attributes pointed by `accessor.sparse.indices`.
+ * An object pointing to a buffer view containing the deviating accessor values. The number of elements is equal to `accessor.sparse.count` times number of components. The elements have the same component type as the base accessor. The elements are tightly packed. Data **MUST** be aligned following the same rules as the base accessor.
  */
 export interface AccessorSparseValues {
   /**
-   * The index of the bufferView with sparse values. Referenced bufferView can't have ARRAY_BUFFER or ELEMENT_ARRAY_BUFFER target.
+   * The index of the bufferView with sparse values. The referenced buffer view **MUST NOT** have its `target` or `byteStride` properties defined.
    */
   bufferView: GlTfId;
   /**
-   * The offset relative to the start of the bufferView in bytes. Must be aligned.
+   * The offset relative to the start of the bufferView in bytes.
    */
   byteOffset?: number;
   extensions?: any;
@@ -49,19 +49,19 @@ export interface AccessorSparseValues {
   [k: string]: any;
 }
 /**
- * Sparse storage of attributes that deviate from their initialization value.
+ * Sparse storage of accessor values that deviate from their initialization value.
  */
 export interface AccessorSparse {
   /**
-   * Number of entries stored in the sparse array.
+   * Number of deviating accessor values stored in the sparse array.
    */
   count: number;
   /**
-   * Index array of size `count` that points to those accessor attributes that deviate from their initialization value. Indices must strictly increase.
+   * An object pointing to a buffer view containing the indices of deviating accessor values. The number of indices is equal to `count`. Indices **MUST** strictly increase.
    */
   indices: AccessorSparseIndices;
   /**
-   * Array of size `count` times number of components, storing the displaced accessor attributes pointed by `indices`. Substituted values must have the same `componentType` and number of components as the base accessor.
+   * An object pointing to a buffer view containing the deviating accessor values.
    */
   values: AccessorSparseValues;
   extensions?: any;
@@ -69,7 +69,7 @@ export interface AccessorSparse {
   [k: string]: any;
 }
 /**
- * A typed view into a bufferView.  A bufferView contains raw binary data.  An accessor provides a typed view into a bufferView or a subset of a bufferView similar to how WebGL's `vertexAttribPointer()` defines an attribute in a buffer.
+ * A typed view into a buffer view that contains raw binary data.
  */
 export interface Accessor {
   /**
@@ -77,35 +77,35 @@ export interface Accessor {
    */
   bufferView?: GlTfId;
   /**
-   * The offset relative to the start of the bufferView in bytes.
+   * The offset relative to the start of the buffer view in bytes.
    */
   byteOffset?: number;
   /**
-   * The datatype of components in the attribute.
+   * The datatype of the accessor's components.
    */
   componentType: 5120 | 5121 | 5122 | 5123 | 5125 | 5126 | number;
   /**
-   * Specifies whether integer data values should be normalized.
+   * Specifies whether integer data values are normalized before usage.
    */
   normalized?: boolean;
   /**
-   * The number of attributes referenced by this accessor.
+   * The number of elements referenced by this accessor.
    */
   count: number;
   /**
-   * Specifies if the attribute is a scalar, vector, or matrix.
+   * Specifies if the accessor's elements are scalars, vectors, or matrices.
    */
   type: "SCALAR" | "VEC2" | "VEC3" | "VEC4" | "MAT2" | "MAT3" | "MAT4" | string;
   /**
-   * Maximum value of each component in this attribute.
+   * Maximum value of each component in this accessor.
    */
   max?: number[];
   /**
-   * Minimum value of each component in this attribute.
+   * Minimum value of each component in this accessor.
    */
   min?: number[];
   /**
-   * Sparse storage of attributes that deviate from their initialization value.
+   * Sparse storage of elements that deviate from their initialization value.
    */
   sparse?: AccessorSparse;
   name?: any;
@@ -114,15 +114,15 @@ export interface Accessor {
   [k: string]: any;
 }
 /**
- * The index of the node and TRS property that an animation channel targets.
+ * The descriptor of the animated property.
  */
 export interface AnimationChannelTarget {
   /**
-   * The index of the node to target.
+   * The index of the node to animate. When undefined, the animated object **MAY** be defined by an extension.
    */
   node?: GlTfId;
   /**
-   * The name of the node's TRS property to modify, or the "weights" of the Morph Targets it instantiates. For the "translation" property, the values that are provided by the sampler are the translation along the x, y, and z axes. For the "rotation" property, the values are a quaternion in the order (x, y, z, w), where w is the scalar. For the "scale" property, the values are the scaling factors along the x, y, and z axes.
+   * The name of the node's TRS property to animate, or the `"weights"` of the Morph Targets it instantiates. For the `"translation"` property, the values that are provided by the sampler are the translation along the X, Y, and Z axes. For the `"rotation"` property, the values are a quaternion in the order (x, y, z, w), where w is the scalar. For the `"scale"` property, the values are the scaling factors along the X, Y, and Z axes.
    */
   path: "translation" | "rotation" | "scale" | "weights" | string;
   extensions?: any;
@@ -130,7 +130,7 @@ export interface AnimationChannelTarget {
   [k: string]: any;
 }
 /**
- * Targets an animation's sampler at a node's property.
+ * An animation channel combines an animation sampler with a target property being animated.
  */
 export interface AnimationChannel {
   /**
@@ -138,7 +138,7 @@ export interface AnimationChannel {
    */
   sampler: GlTfId;
   /**
-   * The index of the node and TRS property to target.
+   * The descriptor of the animated property.
    */
   target: AnimationChannelTarget;
   extensions?: any;
@@ -146,11 +146,11 @@ export interface AnimationChannel {
   [k: string]: any;
 }
 /**
- * Combines input and output accessors with an interpolation algorithm to define a keyframe graph (but not its target).
+ * An animation sampler combines timestamps with a sequence of output values and defines an interpolation algorithm.
  */
 export interface AnimationSampler {
   /**
-   * The index of an accessor containing keyframe input values, e.g., time.
+   * The index of an accessor containing keyframe timestamps.
    */
   input: GlTfId;
   /**
@@ -170,11 +170,11 @@ export interface AnimationSampler {
  */
 export interface Animation {
   /**
-   * An array of channels, each of which targets an animation's sampler at a node's property. Different channels of the same animation can't have equal targets.
+   * An array of animation channels. An animation channel combines an animation sampler with a target property being animated. Different channels of the same animation **MUST NOT** have the same targets.
    */
   channels: AnimationChannel[];
   /**
-   * An array of samplers that combines input and output accessors with an interpolation algorithm to define a keyframe graph (but not its target).
+   * An array of animation samplers. An animation sampler combines timestamps with a sequence of output values and defines an interpolation algorithm.
    */
   samplers: AnimationSampler[];
   name?: any;
@@ -195,11 +195,11 @@ export interface Asset {
    */
   generator?: string;
   /**
-   * The glTF version that this asset targets.
+   * The glTF version in the form of `<major>.<minor>` that this asset targets.
    */
   version: string;
   /**
-   * The minimum glTF version that this asset targets.
+   * The minimum glTF version in the form of `<major>.<minor>` that this asset targets. This property **MUST NOT** be greater than the asset version.
    */
   minVersion?: string;
   extensions?: any;
@@ -211,7 +211,7 @@ export interface Asset {
  */
 export interface Buffer {
   /**
-   * The uri of the buffer.
+   * The URI (or IRI) of the buffer.
    */
   uri?: string;
   /**
@@ -244,7 +244,7 @@ export interface BufferView {
    */
   byteStride?: number;
   /**
-   * The target that the GPU buffer should be bound to.
+   * The hint representing the intended GPU buffer type to use with this buffer view.
    */
   target?: 34962 | 34963 | number;
   name?: any;
@@ -257,15 +257,15 @@ export interface BufferView {
  */
 export interface CameraOrthographic {
   /**
-   * The floating-point horizontal magnification of the view. Must not be zero.
+   * The floating-point horizontal magnification of the view. This value **MUST NOT** be equal to zero. This value **SHOULD NOT** be negative.
    */
   xmag: number;
   /**
-   * The floating-point vertical magnification of the view. Must not be zero.
+   * The floating-point vertical magnification of the view. This value **MUST NOT** be equal to zero. This value **SHOULD NOT** be negative.
    */
   ymag: number;
   /**
-   * The floating-point distance to the far clipping plane. `zfar` must be greater than `znear`.
+   * The floating-point distance to the far clipping plane. This value **MUST NOT** be equal to zero. `zfar` **MUST** be greater than `znear`.
    */
   zfar: number;
   /**
@@ -285,7 +285,7 @@ export interface CameraPerspective {
    */
   aspectRatio?: number;
   /**
-   * The floating-point vertical field of view in radians.
+   * The floating-point vertical field of view in radians. This value **SHOULD** be less than π.
    */
   yfov: number;
   /**
@@ -301,15 +301,15 @@ export interface CameraPerspective {
   [k: string]: any;
 }
 /**
- * A camera's projection.  A node can reference a camera to apply a transform to place the camera in the scene.
+ * A camera's projection.  A node **MAY** reference a camera to apply a transform to place the camera in the scene.
  */
 export interface Camera {
   /**
-   * An orthographic camera containing properties to create an orthographic projection matrix.
+   * An orthographic camera containing properties to create an orthographic projection matrix. This property **MUST NOT** be defined when `perspective` is defined.
    */
   orthographic?: CameraOrthographic;
   /**
-   * A perspective camera containing properties to create a perspective projection matrix.
+   * A perspective camera containing properties to create a perspective projection matrix. This property **MUST NOT** be defined when `orthographic` is defined.
    */
   perspective?: CameraPerspective;
   /**
@@ -322,19 +322,19 @@ export interface Camera {
   [k: string]: any;
 }
 /**
- * Image data used to create a texture. Image can be referenced by URI or `bufferView` index. `mimeType` is required in the latter case.
+ * Image data used to create a texture. Image **MAY** be referenced by an URI (or IRI) or a buffer view index.
  */
 export interface Image {
   /**
-   * The uri of the image.
+   * The URI (or IRI) of the image.
    */
   uri?: string;
   /**
-   * The image's MIME type.
+   * The image's media type. This field **MUST** be defined when `bufferView` is defined.
    */
   mimeType?: "image/jpeg" | "image/png" | string;
   /**
-   * The index of the bufferView that contains the image. Use this instead of the image's uri property.
+   * The index of the bufferView that contains the image. This field **MUST NOT** be defined when `uri` is defined.
    */
   bufferView?: GlTfId;
   name?: any;
@@ -363,7 +363,7 @@ export interface TextureInfo {
  */
 export interface MaterialPbrMetallicRoughness {
   /**
-   * The material's base color factor.
+   * The factors for the base color of the material.
    */
   baseColorFactor?: number[];
   /**
@@ -371,11 +371,11 @@ export interface MaterialPbrMetallicRoughness {
    */
   baseColorTexture?: TextureInfo;
   /**
-   * The metalness of the material.
+   * The factor for the metalness of the material.
    */
   metallicFactor?: number;
   /**
-   * The roughness of the material.
+   * The factor for the roughness of the material.
    */
   roughnessFactor?: number;
   /**
@@ -390,7 +390,7 @@ export interface MaterialNormalTextureInfo {
   index?: any;
   texCoord?: any;
   /**
-   * The scalar multiplier applied to each normal vector of the normal texture.
+   * The scalar parameter applied to each normal vector of the normal texture.
    */
   scale?: number;
   extensions?: any;
@@ -416,23 +416,23 @@ export interface Material {
   extensions?: any;
   extras?: any;
   /**
-   * A set of parameter values that are used to define the metallic-roughness material model from Physically-Based Rendering (PBR) methodology. When not specified, all the default values of `pbrMetallicRoughness` apply.
+   * A set of parameter values that are used to define the metallic-roughness material model from Physically Based Rendering (PBR) methodology. When undefined, all the default values of `pbrMetallicRoughness` **MUST** apply.
    */
   pbrMetallicRoughness?: MaterialPbrMetallicRoughness;
   /**
-   * The normal map texture.
+   * The tangent space normal texture.
    */
   normalTexture?: MaterialNormalTextureInfo;
   /**
-   * The occlusion map texture.
+   * The occlusion texture.
    */
   occlusionTexture?: MaterialOcclusionTextureInfo;
   /**
-   * The emissive map texture.
+   * The emissive texture.
    */
   emissiveTexture?: TextureInfo;
   /**
-   * The emissive color of the material.
+   * The factors for the emissive color of the material.
    */
   emissiveFactor?: number[];
   /**
@@ -454,13 +454,13 @@ export interface Material {
  */
 export interface MeshPrimitive {
   /**
-   * A dictionary object, where each key corresponds to mesh attribute semantic and each value is the index of the accessor containing attribute's data.
+   * A plain JSON object, where each key corresponds to a mesh attribute semantic and each value is the index of the accessor containing attribute's data.
    */
   attributes: {
     [k: string]: GlTfId;
   };
   /**
-   * The index of the accessor that contains the indices.
+   * The index of the accessor that contains the vertex indices.
    */
   indices?: GlTfId;
   /**
@@ -468,11 +468,11 @@ export interface MeshPrimitive {
    */
   material?: GlTfId;
   /**
-   * The type of primitives to render.
+   * The topology type of primitives to render.
    */
   mode?: 0 | 1 | 2 | 3 | 4 | 5 | 6 | number;
   /**
-   * An array of Morph Targets, each  Morph Target is a dictionary mapping attributes (only `POSITION`, `NORMAL`, and `TANGENT` supported) to their deviations in the Morph Target.
+   * An array of morph targets.
    */
   targets?: {
     [k: string]: GlTfId;
@@ -482,15 +482,15 @@ export interface MeshPrimitive {
   [k: string]: any;
 }
 /**
- * A set of primitives to be rendered.  A node can contain one mesh.  A node's transform places the mesh in the scene.
+ * A set of primitives to be rendered.  Its global transform is defined by a node that references it.
  */
 export interface Mesh {
   /**
-   * An array of primitives, each defining geometry to be rendered with a material.
+   * An array of primitives, each defining geometry to be rendered.
    */
   primitives: MeshPrimitive[];
   /**
-   * Array of weights to be applied to the Morph Targets.
+   * Array of weights to be applied to the morph targets. The number of array elements **MUST** match the number of morph targets.
    */
   weights?: number[];
   name?: any;
@@ -499,7 +499,7 @@ export interface Mesh {
   [k: string]: any;
 }
 /**
- * A node in the node hierarchy.  When the node contains `skin`, all `mesh.primitives` must contain `JOINTS_0` and `WEIGHTS_0` attributes.  A node can have either a `matrix` or any combination of `translation`/`rotation`/`scale` (TRS) properties. TRS properties are converted to matrices and postmultiplied in the `T * R * S` order to compose the transformation matrix; first the scale is applied to the vertices, then the rotation, and then the translation. If none are provided, the transform is the identity. When a node is targeted for animation (referenced by an animation.channel.target), only TRS properties may be present; `matrix` will not be present.
+ * A node in the node hierarchy.  When the node contains `skin`, all `mesh.primitives` **MUST** contain `JOINTS_0` and `WEIGHTS_0` attributes.  A node **MAY** have either a `matrix` or any combination of `translation`/`rotation`/`scale` (TRS) properties. TRS properties are converted to matrices and postmultiplied in the `T * R * S` order to compose the transformation matrix; first the scale is applied to the vertices, then the rotation, and then the translation. If none are provided, the transform is the identity. When a node is targeted for animation (referenced by an animation.channel.target), `matrix` **MUST NOT** be present.
  */
 export interface Node {
   /**
@@ -535,7 +535,7 @@ export interface Node {
    */
   translation?: number[];
   /**
-   * The weights of the instantiated Morph Target. Number of elements must match number of Morph Targets of used mesh.
+   * The weights of the instantiated morph target. The number of array elements **MUST** match the number of morph targets of the referenced mesh. When defined, `mesh` **MUST** also be defined.
    */
   weights?: number[];
   name?: any;
@@ -556,11 +556,11 @@ export interface Sampler {
    */
   minFilter?: 9728 | 9729 | 9984 | 9985 | 9986 | 9987 | number;
   /**
-   * s wrapping mode.
+   * S (U) wrapping mode.
    */
   wrapS?: 33071 | 33648 | 10497 | number;
   /**
-   * t wrapping mode.
+   * T (V) wrapping mode.
    */
   wrapT?: 33071 | 33648 | 10497 | number;
   name?: any;
@@ -586,11 +586,11 @@ export interface Scene {
  */
 export interface Skin {
   /**
-   * The index of the accessor containing the floating-point 4x4 inverse-bind matrices.  The default is that each matrix is a 4x4 identity matrix, which implies that inverse-bind matrices were pre-applied.
+   * The index of the accessor containing the floating-point 4x4 inverse-bind matrices.
    */
   inverseBindMatrices?: GlTfId;
   /**
-   * The index of the node used as a skeleton root. When undefined, joints transforms resolve to scene root.
+   * The index of the node used as a skeleton root.
    */
   skeleton?: GlTfId;
   /**
@@ -607,11 +607,11 @@ export interface Skin {
  */
 export interface Texture {
   /**
-   * The index of the sampler used by this texture. When undefined, a sampler with repeat wrapping and auto filtering should be used.
+   * The index of the sampler used by this texture. When undefined, a sampler with repeat wrapping and auto filtering **SHOULD** be used.
    */
   sampler?: GlTfId;
   /**
-   * The index of the image used by this texture.
+   * The index of the image used by this texture. When undefined, an extension or other mechanism **SHOULD** supply an alternate texture source, otherwise behavior is undefined.
    */
   source?: GlTfId;
   name?: any;
@@ -624,7 +624,7 @@ export interface Texture {
  */
 export interface GlTf {
   /**
-   * Names of glTF extensions used somewhere in this asset.
+   * Names of glTF extensions used in this asset.
    */
   extensionsUsed?: string[];
   /**
