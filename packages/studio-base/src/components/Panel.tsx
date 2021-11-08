@@ -130,8 +130,9 @@ const useStyles = makeStyles((theme) => ({
   },
   rootSelected: {
     ":after": {
-      opacity: 1,
-      transition: "opacity 0.05s ease-out",
+      // https://github.com/microsoft/fluentui/issues/20452
+      opacity: "1 !important",
+      transition: "opacity 0.05s ease-out !important",
     },
   },
   actionsOverlay: {
