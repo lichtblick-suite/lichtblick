@@ -584,7 +584,7 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
           filterText={autocompleteFilterText}
           value={path}
           onChange={onChange}
-          onSelect={(value: string, _item: unknown, autocomplete: IAutocomplete) =>
+          onSelect={(value, _item, autocomplete) =>
             onSelect(value, autocomplete, autocompleteType, autocompleteRange)
           }
           hasError={hasError}

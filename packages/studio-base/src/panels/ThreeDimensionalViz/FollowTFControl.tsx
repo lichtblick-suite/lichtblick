@@ -13,7 +13,7 @@
 
 import { IButtonStyles, IconButton, Stack, useTheme } from "@fluentui/react";
 import { sortBy, debounce } from "lodash";
-import { memo, createRef, useCallback, useState, useMemo } from "react";
+import { memo, useCallback, useState, useMemo, useRef } from "react";
 import shallowequal from "shallowequal";
 
 import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Autocomplete";
@@ -151,7 +151,7 @@ const FollowTFControl = memo<Props>((props: Props) => {
   const nodesWithoutDefaultFollowTfFrame = allNodes?.length;
   const newFollowTfFrame = allNodes?.[0]?.tf?.id;
 
-  const autocomplete = createRef<IAutocomplete>();
+  const autocomplete = useRef<IAutocomplete>(ReactNull);
 
   const getDefaultFollowTransformFrame = useCallback(() => {
     return nodesWithoutDefaultFollowTfFrame !== 0 ? newFollowTfFrame : undefined;
@@ -188,19 +188,23 @@ const FollowTFControl = memo<Props>((props: Props) => {
   ]);
 
   const onSelectFrame = useCallback(
-    (id: string, _item: unknown, autocompleteNode: IAutocomplete) => {
+    (id: string, _item: unknown) => {
       setLastSelectedFrame(id === getDefaultFollowTransformFrame() ? undefined : id);
       onFollowChange(id, followOrientation);
-      autocompleteNode.blur();
+      autocomplete.current?.blur();
     },
-    [setLastSelectedFrame, getDefaultFollowTransformFrame, onFollowChange, followOrientation],
+    [
+      setLastSelectedFrame,
+      getDefaultFollowTransformFrame,
+      onFollowChange,
+      followOrientation,
+      autocomplete,
+    ],
   );
 
   const openFrameList = useCallback(() => {
     setForceShowFrameList(true);
-    if (autocomplete.current) {
-      autocomplete.current.focus();
-    }
+    autocomplete.current?.focus();
   }, [setForceShowFrameList, autocomplete]);
 
   // slight delay to prevent the arrow from disappearing when you're trying to click it

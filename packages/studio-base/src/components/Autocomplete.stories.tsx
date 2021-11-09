@@ -108,6 +108,33 @@ storiesOf("components/Autocomplete", module)
       </div>
     );
   })
+  .add(
+    "uncontrolled value light",
+    () => {
+      return (
+        <div
+          style={{ padding: 20 }}
+          ref={(el) => {
+            if (el) {
+              const input: HTMLInputElement | undefined = el.querySelector("input") as any;
+              if (input) {
+                input.focus();
+                input.value = "h";
+                TestUtils.Simulate.change(input);
+              }
+            }
+          }}
+        >
+          <Autocomplete
+            items={[{ value: "one" }, { value: "two" }, { value: "three" }]}
+            getItemText={({ value }: any) => `item: ${value.toUpperCase()}`}
+            onSelect={() => {}}
+          />
+        </div>
+      );
+    },
+    { colorScheme: "light" },
+  )
   .add("uncontrolled value with selected item", () => {
     return (
       <div style={{ padding: 20 }} ref={focusInput}>
