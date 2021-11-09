@@ -7,10 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { filterMap } from "@foxglove/den/collection";
 import { isTime, Time, toSec, subtract } from "@foxglove/rostime";
-import {
-  TimeBasedChartTooltipData,
-  TooltipItem,
-} from "@foxglove/studio-base/components/TimeBasedChart";
+import { TimeBasedChartTooltipData } from "@foxglove/studio-base/components/TimeBasedChart";
 import { format } from "@foxglove/studio-base/util/formatTime";
 import { darkColor, lightColor, lineColors } from "@foxglove/studio-base/util/plotColors";
 import { formatTimeRaw, TimestampMethod } from "@foxglove/studio-base/util/time";
@@ -22,6 +19,7 @@ import {
   isReferenceLinePlotPathType,
   PlotChartPoint,
   PlotDataByPath,
+  PlotDataItem,
   PlotPath,
 } from "./internalTypes";
 import { derivative, applyToDataOrTooltips, mathFunctions } from "./transformPlotRange";
@@ -39,8 +37,8 @@ function getXForPoint(
   xAxisVal: PlotXAxisVal,
   timestamp: number,
   innerIdx: number,
-  xAxisRanges: readonly (readonly TooltipItem[])[] | undefined,
-  xItem: TooltipItem | undefined,
+  xAxisRanges: readonly (readonly PlotDataItem[])[] | undefined,
+  xItem: PlotDataItem | undefined,
   xAxisPath: BasePlotPath | undefined,
 ): number | bigint {
   if (isCustomScale(xAxisVal) && xAxisPath) {
@@ -59,13 +57,13 @@ function getXForPoint(
 }
 
 function getPointsAndTooltipsForMessagePathItem(
-  yItem: TooltipItem,
-  xItem: TooltipItem | undefined,
+  yItem: PlotDataItem,
+  xItem: PlotDataItem | undefined,
   startTime: Time,
   timestampMethod: TimestampMethod,
   xAxisVal: PlotXAxisVal,
   xAxisPath?: BasePlotPath,
-  xAxisRanges?: readonly (readonly TooltipItem[])[],
+  xAxisRanges?: readonly (readonly PlotDataItem[])[],
   datasetKey?: string,
 ): PointsAndTooltips {
   const points: PlotChartPoint[] = [];
@@ -135,11 +133,11 @@ function getDatasetAndTooltipsFromMessagePlotPath({
   invertedTheme = false,
 }: {
   path: PlotPath;
-  yAxisRanges: readonly (readonly TooltipItem[])[];
+  yAxisRanges: readonly (readonly PlotDataItem[])[];
   index: number;
   startTime: Time;
   xAxisVal: PlotXAxisVal;
-  xAxisRanges: readonly (readonly TooltipItem[])[] | undefined;
+  xAxisRanges: readonly (readonly PlotDataItem[])[] | undefined;
   xAxisPath?: BasePlotPath;
   invertedTheme?: boolean;
 }): {
@@ -159,11 +157,11 @@ function getDatasetAndTooltipsFromMessagePlotPath({
   let rangesOfTooltips: TimeBasedChartTooltipData[][] = [];
   let rangesOfPoints: PlotChartPoint[][] = [];
   for (const [rangeIdx, range] of yAxisRanges.entries()) {
-    const xRange: readonly TooltipItem[] | undefined = xAxisRanges?.[rangeIdx];
+    const xRange: readonly PlotDataItem[] | undefined = xAxisRanges?.[rangeIdx];
     const rangeTooltips = [];
     const rangePoints = [];
     for (const [outerIdx, item] of range.entries()) {
-      const xItem: TooltipItem | undefined = xRange?.[outerIdx];
+      const xItem: PlotDataItem | undefined = xRange?.[outerIdx];
       const {
         points: itemPoints,
         tooltips: itemTooltips,

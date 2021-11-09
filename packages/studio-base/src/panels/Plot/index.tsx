@@ -47,7 +47,6 @@ import {
   ChartDefaultView,
   TimeBasedChartTooltipData,
   getTooltipItemForMessageHistoryItem,
-  TooltipItem,
 } from "@foxglove/studio-base/components/TimeBasedChart";
 import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
 import {
@@ -62,7 +61,7 @@ import PlotChart from "./PlotChart";
 import PlotLegend from "./PlotLegend";
 import { getDatasetsAndTooltips } from "./datasets";
 import helpContent from "./index.help.md";
-import { DataSet, PlotDataByPath } from "./internalTypes";
+import { DataSet, PlotDataByPath, PlotDataItem } from "./internalTypes";
 import { PlotConfig, PlotXAxisVal } from "./types";
 
 export { plotableRosTypes } from "./types";
@@ -165,7 +164,7 @@ function getBlockItemsByPath(
   decodeMessagePathsForMessagesByTopic: (_: MessageBlock) => MessageDataItemsByPath,
   blocks: readonly MessageBlock[],
 ) {
-  const ret: Record<string, TooltipItem[][]> = {};
+  const ret: Record<string, PlotDataItem[][]> = {};
   const lastBlockIndexForPath: Record<string, number> = {};
   blocks.forEach((block, i: number) => {
     const messagePathItemsForBlock: PlotDataByPath = getMessagePathItemsForBlock(
