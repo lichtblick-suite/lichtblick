@@ -22,11 +22,9 @@ import {
 import { flatten, flatMap, partition } from "lodash";
 import { CSSProperties, useCallback, useMemo } from "react";
 
-import { AppSetting } from "@foxglove/studio-base/AppSetting";
 import * as PanelAPI from "@foxglove/studio-base/PanelAPI";
 import Autocomplete, { IAutocomplete } from "@foxglove/studio-base/components/Autocomplete";
 import { useTooltip } from "@foxglove/studio-base/components/Tooltip";
-import { useAppConfigurationValue } from "@foxglove/studio-base/hooks/useAppConfigurationValue";
 import useGlobalVariables, {
   GlobalVariables,
 } from "@foxglove/studio-base/hooks/useGlobalVariables";
@@ -395,10 +393,6 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     [topicNamesAutocompleteItems, topics, datatypes],
   );
 
-  const [enableFieldMatching = false] = useAppConfigurationValue<boolean>(
-    AppSetting.ENABLE_FIELD_MATCHING,
-  );
-
   const autocompleteType = useMemo(() => {
     if (!rosPath) {
       return "topicName";
@@ -430,10 +424,9 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
       // If the path is empty, return topic names only to show the full list of topics. Otherwise,
       // use the full set of topic names and field paths to autocomplete
       return {
-        autocompleteItems:
-          enableFieldMatching && path
-            ? topicNamesAndFieldsAutocompleteItems
-            : topicNamesAutocompleteItems,
+        autocompleteItems: path
+          ? topicNamesAndFieldsAutocompleteItems
+          : topicNamesAutocompleteItems,
         autocompleteFilterText: path,
         autocompleteRange: { start: 0, end: Infinity },
       };
@@ -518,7 +511,6 @@ export default React.memo<MessagePathInputBaseProps>(function MessagePathInput(
     topic,
     rosPath,
     invalidGlobalVariablesVariable,
-    enableFieldMatching,
     path,
     topicNamesAutocompleteItems,
     topicNamesAndFieldsAutocompleteItems,
