@@ -28,6 +28,7 @@ import { PointCloud2 } from "@foxglove/studio-base/types/Messages";
 
 import CommonDecaySettings from "./CommonDecaySettings";
 import { SLabel, SInput } from "./common";
+import { turboColorString } from "./turboColor";
 
 export type ColorMode =
   | {
@@ -65,6 +66,15 @@ export type ColorMode =
       maxValue?: number;
       minColor?: never;
       maxColor?: never;
+    }
+  | {
+      mode: "turbo";
+      flatColor?: never;
+      colorField: string;
+      minValue?: number;
+      maxValue?: number;
+      minColor?: never;
+      maxColor?: never;
     };
 
 export const DEFAULT_FLAT_COLOR = { r: 1, g: 1, b: 1, a: 1 };
@@ -77,6 +87,8 @@ export type PointCloudSettings = {
   decayTime?: number;
   colorMode?: ColorMode;
 };
+
+const DEFAULT_COLOR_FIELDS = ["intensity", "i"];
 
 const SValueRangeInput = styled(SInput).attrs({ type: "number", placeholder: "auto" })`
   width: 0px;
@@ -103,6 +115,18 @@ const RainbowText = React.memo(function RainbowText({ children }: { children: st
   );
 });
 
+const TurboText = React.memo(function TurboText({ children }: { children: string }) {
+  return (
+    <>
+      {Array.from(children, (child, idx) => (
+        <span key={idx} style={{ color: turboColorString((idx + 1) / (children.length + 1)) }}>
+          {child}
+        </span>
+      ))}
+    </>
+  );
+});
+
 export default function PointCloudSettingsEditor(
   props: TopicSettingsEditorProps<PointCloud2, PointCloudSettings>,
 ): React.ReactElement {
@@ -121,10 +145,16 @@ export default function PointCloudSettingsEditor(
   );
 
   const hasRGB = message?.fields?.some(({ name }) => name === "rgb") ?? false;
-  const defaultColorField = message?.fields?.find(({ name }) => name !== "rgb")?.name;
+  const defaultColorField =
+    message?.fields?.find(({ name }) => DEFAULT_COLOR_FIELDS.includes(name))?.name ??
+    message?.fields?.find(({ name }) => name !== "rgb")?.name;
   const colorMode: ColorMode =
     settings.colorMode ??
-    (hasRGB ? { mode: "rgb" } : { mode: "flat", flatColor: DEFAULT_FLAT_COLOR });
+    (hasRGB
+      ? { mode: "rgb" }
+      : defaultColorField
+      ? { mode: "turbo", colorField: defaultColorField }
+      : { mode: "flat", flatColor: DEFAULT_FLAT_COLOR });
 
   return (
     <Flex col>
@@ -151,7 +181,7 @@ export default function PointCloudSettingsEditor(
                   return { mode: "rgb" };
                 }
                 return defaultColorField
-                  ? { mode: "rainbow", colorField: defaultColorField }
+                  ? { mode: "turbo", colorField: defaultColorField }
                   : undefined;
               })
             }
@@ -182,7 +212,10 @@ export default function PointCloudSettingsEditor(
                   if (prevColorMode?.mode === "rainbow") {
                     return { ...prevColorMode, colorField: value };
                   }
-                  return { mode: "rainbow", colorField: value };
+                  if (prevColorMode?.mode === "turbo") {
+                    return { ...prevColorMode, colorField: value };
+                  }
+                  return { mode: "turbo", colorField: value };
                 })
               }
               btnStyle={{ padding: "8px 12px" }}
@@ -199,7 +232,9 @@ export default function PointCloudSettingsEditor(
         </Flex>
       </Flex>
 
-      {(colorMode.mode === "gradient" || colorMode.mode === "rainbow") && (
+      {(colorMode.mode === "gradient" ||
+        colorMode.mode === "rainbow" ||
+        colorMode.mode === "turbo") && (
         <Flex col style={{ marginBottom: "8px" }}>
           <SLabel>Value range</SLabel>
           <Flex row style={{ marginLeft: "8px" }}>
@@ -209,7 +244,9 @@ export default function PointCloudSettingsEditor(
                 value={colorMode.minValue ?? ""}
                 onChange={({ target: { value } }) =>
                   onColorModeChange((prevColorMode) =>
-                    prevColorMode?.mode === "gradient" || prevColorMode?.mode === "rainbow"
+                    prevColorMode?.mode === "gradient" ||
+                    prevColorMode?.mode === "rainbow" ||
+                    prevColorMode?.mode === "turbo"
                       ? { ...prevColorMode, minValue: value === "" ? undefined : +value }
                       : prevColorMode,
                   )
@@ -222,7 +259,9 @@ export default function PointCloudSettingsEditor(
                 value={colorMode.maxValue ?? ""}
                 onChange={({ target: { value } }) =>
                   onColorModeChange((prevColorMode) =>
-                    prevColorMode?.mode === "gradient" || prevColorMode?.mode === "rainbow"
+                    prevColorMode?.mode === "gradient" ||
+                    prevColorMode?.mode === "rainbow" ||
+                    prevColorMode?.mode === "turbo"
                       ? { ...prevColorMode, maxValue: value === "" ? undefined : +value }
                       : prevColorMode,
                   )
@@ -234,10 +273,16 @@ export default function PointCloudSettingsEditor(
             selectedId={colorMode.mode}
             onChange={(id) =>
               onColorModeChange((prevColorMode) => {
-                if (prevColorMode?.mode === "rainbow" || prevColorMode?.mode === "gradient") {
+                if (
+                  prevColorMode?.mode === "gradient" ||
+                  prevColorMode?.mode === "rainbow" ||
+                  prevColorMode?.mode === "turbo"
+                ) {
                   const { colorField, minValue, maxValue } = prevColorMode;
                   return id === "rainbow"
                     ? { mode: "rainbow", colorField, minValue, maxValue }
+                    : id === "turbo"
+                    ? { mode: "turbo", colorField, minValue, maxValue }
                     : {
                         mode: "gradient",
                         colorField,
@@ -251,6 +296,10 @@ export default function PointCloudSettingsEditor(
               })
             }
             options={[
+              {
+                id: "turbo",
+                label: colorMode.mode === "turbo" ? <TurboText>Turbo</TurboText> : "Turbo",
+              },
               {
                 id: "rainbow",
                 label:

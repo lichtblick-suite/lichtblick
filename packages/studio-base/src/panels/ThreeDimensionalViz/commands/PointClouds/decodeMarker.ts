@@ -95,7 +95,11 @@ export function decodeMarker(marker: PointCloudMarker): DecodedMarker {
   // Unfortunately, we cannot do this in GPU and we need to traverse the color array to
   // fetch the required values.
   // These calculations can be ignored if we're rendering to the hitmap
-  if (colorBuffer && !isHitmap && (colorMode.mode === "gradient" || colorMode.mode === "rainbow")) {
+  if (
+    colorBuffer &&
+    !isHitmap &&
+    (colorMode.mode === "gradient" || colorMode.mode === "rainbow" || colorMode.mode === "turbo")
+  ) {
     let hasMinValue = false;
     if (colorMode.minValue != undefined) {
       hasMinValue = true;
