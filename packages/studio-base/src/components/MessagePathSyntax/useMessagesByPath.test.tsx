@@ -29,7 +29,7 @@ const singleTopic = [{ name: "/some/topic", datatype: "some/datatype" }];
 
 function queriedMessage(index: 0 | 1 | 2) {
   return {
-    message: fixture.messages[index],
+    messageEvent: fixture.messages[index],
     queriedData: [{ value: fixture.messages[index].message, path: "/some/topic" }],
   };
 }
@@ -143,8 +143,8 @@ describe("useMessagesByPath", () => {
       { "/some/topic": [] },
       {
         "/some/topic": [
-          { message: fixture.messages[1], queriedData: [] },
-          { message: fixture.messages[2], queriedData: [] },
+          { messageEvent: fixture.messages[1], queriedData: [] },
+          { messageEvent: fixture.messages[2], queriedData: [] },
         ],
       },
     ]);
@@ -239,11 +239,11 @@ describe("useMessagesByPath", () => {
       {
         "/some/topic.index": [
           {
-            message: fixture.messages[0],
+            messageEvent: fixture.messages[0],
             queriedData: [{ path: "/some/topic.index", value: 0 }],
           },
           {
-            message: fixture.messages[1],
+            messageEvent: fixture.messages[1],
             queriedData: [{ path: "/some/topic.index", value: 1 }],
           },
         ],
@@ -304,7 +304,7 @@ describe("useMessagesByPath", () => {
       {
         "/some/topic.index": [
           {
-            message: fixture.messages[0],
+            messageEvent: fixture.messages[0],
             queriedData: [{ path: "/some/topic.index", value: 0 }],
           },
         ],
@@ -363,7 +363,7 @@ describe("useMessagesByPath", () => {
         {
           "/some/topic.bars[:]{index==$foo}.baz": [
             {
-              message,
+              messageEvent: message,
               queriedData: [{ path: "/some/topic.bars[:]{index==$foo}.baz", value: 10 }],
             },
           ],
@@ -371,7 +371,7 @@ describe("useMessagesByPath", () => {
         {
           "/some/topic.bars[:]{index==$foo}.baz": [
             {
-              message,
+              messageEvent: message,
               queriedData: [{ path: "/some/topic.bars[:]{index==$foo}.baz", value: 11 }],
             },
           ],

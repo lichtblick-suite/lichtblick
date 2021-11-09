@@ -173,7 +173,7 @@ function RawMessages(props: Props) {
   const prevTickMsg = consecutiveMsgs?.[consecutiveMsgs.length - 2];
   const [prevTickObj, currTickObj] = [
     prevTickMsg && {
-      message: prevTickMsg,
+      messageEvent: prevTickMsg,
       queriedData: cachedGetMessagePathDataItems(topicPath, prevTickMsg) ?? [],
     },
     useLatestMessageDataItem(topicPath),
@@ -385,9 +385,9 @@ function RawMessages(props: Props) {
           data={data}
           diffData={diffData}
           diff={diff}
-          message={baseItem.message}
+          message={baseItem.messageEvent}
           {...(topic ? { datatype: topic.datatype } : undefined)}
-          {...(diffItem ? { diffMessage: diffItem.message } : undefined)}
+          {...(diffItem ? { diffMessage: diffItem.messageEvent } : undefined)}
         />
         {shouldDisplaySingleVal ? (
           <div className={classes.singleVal}>

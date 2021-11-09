@@ -51,9 +51,9 @@ export default function messagesToDatasets(args: Args): DatasetInfo {
     }
 
     for (const itemByPath of messages) {
-      const headerStamp = getTimestampForMessage(itemByPath.message.message);
+      const headerStamp = getTimestampForMessage(itemByPath.messageEvent.message);
       const timestamp =
-        path.timestampMethod === "headerStamp" ? headerStamp : itemByPath.message.receiveTime;
+        path.timestampMethod === "headerStamp" ? headerStamp : itemByPath.messageEvent.receiveTime;
       if (!timestamp) {
         continue;
       }
@@ -102,7 +102,7 @@ export default function messagesToDatasets(args: Args): DatasetInfo {
         x,
         y,
         item: {
-          receiveTime: itemByPath.message.receiveTime,
+          receiveTime: itemByPath.messageEvent.receiveTime,
           headerStamp,
         },
         path: path.value,

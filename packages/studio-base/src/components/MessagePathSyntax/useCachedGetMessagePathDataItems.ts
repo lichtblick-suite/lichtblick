@@ -346,7 +346,10 @@ export function getMessagePathDataItems(
   return queriedData;
 }
 
-export type MessageAndData = { message: MessageEvent<unknown>; queriedData: MessagePathDataItem[] };
+export type MessageAndData = {
+  messageEvent: MessageEvent<unknown>;
+  queriedData: MessagePathDataItem[];
+};
 
 export type MessageDataItemsByPath = {
   readonly [key: string]: readonly MessageAndData[];
@@ -387,7 +390,7 @@ export function useDecodeMessagePathsForMessagesByTopic(
           // Add the item (if it exists) to the array.
           const queriedData = cachedGetMessagePathDataItems(path, message);
           if (queriedData) {
-            messagesForThisPath.push({ message, queriedData });
+            messagesForThisPath.push({ messageEvent: message, queriedData });
           }
         }
       }

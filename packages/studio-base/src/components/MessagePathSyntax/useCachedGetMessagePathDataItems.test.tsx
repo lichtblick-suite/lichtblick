@@ -865,7 +865,9 @@ describe("useDecodeMessagePathsForMessagesByTopic", () => {
     };
     expect(result.current(messagesByTopic)).toEqual({
       // Value for /topic1.value
-      "/topic1.value": [{ message, queriedData: [{ path: "/topic1.value", value: 1 }] }],
+      "/topic1.value": [
+        { messageEvent: message, queriedData: [{ path: "/topic1.value", value: 1 }] },
+      ],
       // Empty array for /topic2.value
       "/topic2.value": [],
       // No array for /topic3.value because the path is valid but the data is missing.

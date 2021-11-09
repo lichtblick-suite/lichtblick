@@ -45,7 +45,7 @@ export function useLatestMessageDataItem(path: string): MessageAndData | undefin
           return;
         }
         if (queriedData.length > 0) {
-          return { message, queriedData };
+          return { messageEvent: message, queriedData };
         }
       }
       return prevMessageAndData;
@@ -56,9 +56,9 @@ export function useLatestMessageDataItem(path: string): MessageAndData | undefin
   const restore = useCallback(
     (prevMessageAndData?: MessageAndData): MessageAndData | undefined => {
       if (prevMessageAndData) {
-        const queriedData = cachedGetMessagePathDataItems(path, prevMessageAndData.message);
+        const queriedData = cachedGetMessagePathDataItems(path, prevMessageAndData.messageEvent);
         if (queriedData && queriedData.length > 0) {
-          return { message: prevMessageAndData.message, queriedData };
+          return { messageEvent: prevMessageAndData.messageEvent, queriedData };
         }
       }
       return undefined;

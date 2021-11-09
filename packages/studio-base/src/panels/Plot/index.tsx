@@ -145,10 +145,10 @@ const getPlotDataByPath = (itemsByPath: MessageDataItemsByPath): PlotDataByPath 
   Object.entries(itemsByPath).forEach(([path, items]) => {
     ret[path] = [
       items.map((messageAndData) => {
-        const headerStamp = getTimestampForMessage(messageAndData.message.message);
+        const headerStamp = getTimestampForMessage(messageAndData.messageEvent.message);
         return {
           queriedData: messageAndData.queriedData,
-          receiveTime: messageAndData.message.receiveTime,
+          receiveTime: messageAndData.messageEvent.receiveTime,
           headerStamp,
         };
       }),
