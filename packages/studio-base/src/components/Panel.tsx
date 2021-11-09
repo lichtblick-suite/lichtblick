@@ -384,17 +384,20 @@ export default function Panel<
         if (!panelsState) {
           return;
         }
-        const siblingPanel = panelCatalog.getPanelByType(panelType);
-        if (!siblingPanel) {
-          return;
+
+        let siblingDefaultConfig: PanelConfig = {};
+
+        // If we can lookup the sibling panel type, try to load the default config from the panel module
+        const siblingPanelInfo = panelCatalog.getPanelByType(panelType);
+        if (siblingPanelInfo) {
+          const siblingModule = await siblingPanelInfo.module();
+          if (!isMounted()) {
+            return;
+          }
+
+          siblingDefaultConfig = siblingModule.default.defaultConfig;
         }
 
-        const siblingModule = await siblingPanel.module();
-        if (!isMounted()) {
-          return;
-        }
-
-        const siblingDefaultConfig = siblingModule.default.defaultConfig;
         const ownPath = mosaicWindowActions.getPath();
 
         // Try to find a sibling panel and update it with the `siblingConfig`
