@@ -11,7 +11,7 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { mergeStyleSets } from "@fluentui/merge-styles";
+import { mergeStyleSets } from "@fluentui/react";
 import ChevronDownIcon from "@mdi/svg/svg/chevron-down.svg";
 import ChevronUpIcon from "@mdi/svg/svg/chevron-up.svg";
 import { ReactNode } from "react";

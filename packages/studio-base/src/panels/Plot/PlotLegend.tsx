@@ -40,7 +40,7 @@ const stylesForButtonsDisplayedOnHover = (theme: ITheme) =>
     top: 0,
     height: 25,
     width: 25,
-    borderRadius: 5,
+    borderRadius: theme.effects.roundedCorner2,
     userSelect: "none",
     background: tinycolor(theme.palette.neutralLight).setAlpha(0.75).toRgbString(),
 

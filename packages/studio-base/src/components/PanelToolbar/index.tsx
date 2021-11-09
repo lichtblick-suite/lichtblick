@@ -95,7 +95,7 @@ const useStyles = makeStyles((theme) => ({
       },
       "&:not(.hasChildren) > *": {
         backgroundColor: theme.palette.neutralLighterAlt,
-        borderRadius: 4,
+        borderRadius: theme.effects.roundedCorner2,
         boxShadow: theme.effects.elevation16,
       },
     },

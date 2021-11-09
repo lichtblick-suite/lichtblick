@@ -11,7 +11,7 @@ import { fonts, spacing } from "@foxglove/studio-base/util/sharedStyleConstants"
  */
 export const LegacyButton = styled.button`
   background-color: ${({ theme }) => theme.palette.neutralLighter};
-  border-radius: 4px;
+  border-radius: ${({ theme }) => theme.effects.roundedCorner2};
   border: none;
   color: ${({ theme }) => theme.semanticColors.buttonText};
   font: inherit;
@@ -63,7 +63,7 @@ export const LegacyButton = styled.button`
  */
 export const LegacyInput = styled.input`
   background-color: ${({ theme }) => theme.palette.neutralLighter};
-  border-radius: 4px;
+  border-radius: ${({ theme }) => theme.effects.roundedCorner2};
   border: none;
   color: ${({ theme }) => theme.semanticColors.inputText};
   font: inherit;
@@ -89,7 +89,7 @@ export const LegacyInput = styled.input`
  */
 export const LegacyTextarea = styled.textarea`
   background-color: ${({ theme }) => theme.semanticColors.inputBackground};
-  border-radius: 4px;
+  border-radius: ${({ theme }) => theme.effects.roundedCorner2};
   border: 2px solid ${({ theme }) => theme.semanticColors.inputBorder};
   color: ${({ theme }) => theme.semanticColors.inputText};
   font: inherit;
@@ -114,7 +114,7 @@ export const LegacyTextarea = styled.textarea`
  */
 export const LegacySelect = styled.select`
   background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+  border-radius: ${({ theme }) => theme.effects.roundedCorner2};
   border: none;
   color: ${({ theme }) => theme.semanticColors.inputText};
   font: inherit;
