@@ -29,7 +29,6 @@ export function Default(): React.ReactElement {
     value: 3,
     constantName: "ACTIVE",
     item: {
-      queriedData: [],
       receiveTime: { sec: 123, nsec: 456 },
       headerStamp: { sec: 100, nsec: 30 },
     },

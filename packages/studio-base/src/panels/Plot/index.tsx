@@ -46,7 +46,6 @@ import PanelToolbar from "@foxglove/studio-base/components/PanelToolbar";
 import {
   ChartDefaultView,
   TimeBasedChartTooltipData,
-  getTooltipItemForMessageHistoryItem,
 } from "@foxglove/studio-base/components/TimeBasedChart";
 import { OnClickArg as OnChartClickArgs } from "@foxglove/studio-base/src/components/Chart";
 import {
@@ -55,7 +54,7 @@ import {
   PanelConfigSchema,
 } from "@foxglove/studio-base/types/panels";
 import { downloadFiles } from "@foxglove/studio-base/util/download";
-import { formatTimeRaw } from "@foxglove/studio-base/util/time";
+import { formatTimeRaw, getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
 import PlotChart from "./PlotChart";
 import PlotLegend from "./PlotLegend";
@@ -144,7 +143,16 @@ type Props = {
 const getPlotDataByPath = (itemsByPath: MessageDataItemsByPath): PlotDataByPath => {
   const ret: PlotDataByPath = {};
   Object.entries(itemsByPath).forEach(([path, items]) => {
-    ret[path] = [items.map(getTooltipItemForMessageHistoryItem)];
+    ret[path] = [
+      items.map((messageAndData) => {
+        const headerStamp = getTimestampForMessage(messageAndData.message.message);
+        return {
+          queriedData: messageAndData.queriedData,
+          receiveTime: messageAndData.message.receiveTime,
+          headerStamp,
+        };
+      }),
+    ];
   });
   return ret;
 };
@@ -316,20 +324,21 @@ function Plot(props: Props) {
             continue;
           }
 
-          const tooltipItem = getTooltipItemForMessageHistoryItem({
-            message: msgEvent,
+          const headerStamp = getTimestampForMessage(msgEvent.message);
+          const plotDataItem = {
             queriedData: dataItem,
-          });
+            receiveTime: msgEvent.receiveTime,
+            headerStamp,
+          };
 
           if (showSingleCurrentMessage) {
-            accumulated[path] = [[tooltipItem]];
+            accumulated[path] = [[plotDataItem]];
           } else {
             const plotDataPath = (accumulated[path] ??= [[]]);
-            // PlotDataPaths have 2d arrays of tooltip items to accomodate blocks which may have gaps
-            // so each continuous set of blocks forms one set of tooltip items.
-            // For streaming messages we treat this as one continuous set of items and always add
-            // to the first "range"
-            plotDataPath[0]!.push(tooltipItem);
+            // PlotDataPaths have 2d arrays of items to accomodate blocks which may have gaps so
+            // each continuous set of blocks forms one continuous line. For streaming messages we
+            // treat this as one continuous set of items and always add to the first "range"
+            plotDataPath[0]!.push(plotDataItem);
           }
         }
       }

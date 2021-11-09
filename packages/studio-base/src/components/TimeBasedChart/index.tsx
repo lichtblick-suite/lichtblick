@@ -35,10 +35,6 @@ import Button from "@foxglove/studio-base/components/Button";
 import ChartComponent from "@foxglove/studio-base/components/Chart/index";
 import { RpcElement, RpcScales } from "@foxglove/studio-base/components/Chart/types";
 import KeyListener from "@foxglove/studio-base/components/KeyListener";
-import {
-  MessageAndData,
-  MessagePathDataItem,
-} from "@foxglove/studio-base/components/MessagePathSyntax/useCachedGetMessagePathDataItems";
 import { useMessagePipeline } from "@foxglove/studio-base/components/MessagePipeline";
 import TimeBasedChartLegend from "@foxglove/studio-base/components/TimeBasedChart/TimeBasedChartLegend";
 import makeGlobalState from "@foxglove/studio-base/components/TimeBasedChart/makeGlobalState";
@@ -48,7 +44,6 @@ import {
   useSetHoverValue,
 } from "@foxglove/studio-base/context/HoverValueContext";
 import { fonts } from "@foxglove/studio-base/util/sharedStyleConstants";
-import { getTimestampForMessage } from "@foxglove/studio-base/util/time";
 
 import HoverBar from "./HoverBar";
 import TimeBasedChartTooltipContent from "./TimeBasedChartTooltipContent";
@@ -57,15 +52,8 @@ import { downsampleTimeseries, downsampleScatter } from "./downsample";
 const log = Logger.getLogger(__filename);
 
 export type TooltipItem = {
-  queriedData: MessagePathDataItem[];
   receiveTime: Time;
   headerStamp?: Time;
-};
-
-export const getTooltipItemForMessageHistoryItem = (item: MessageAndData): TooltipItem => {
-  const { message } = item.message;
-  const headerStamp = getTimestampForMessage(message);
-  return { queriedData: item.queriedData, receiveTime: item.message.receiveTime, headerStamp };
 };
 
 export type TimeBasedChartTooltipData = {
@@ -77,7 +65,6 @@ export type TimeBasedChartTooltipData = {
   value: number | bigint | boolean | string;
   constantName?: string;
   startTime: Time;
-  source?: number;
 };
 
 const SRoot = styled.div`

@@ -87,12 +87,6 @@ export default function TimeBasedChartTooltipContent(
         <span className={classes.title}>Path:&nbsp;</span>
         {tooltip.path}
       </div>
-      {tooltip.source != undefined && (
-        <div>
-          <span className={classes.title}>Source:&nbsp;</span>
-          {tooltip.source}
-        </div>
-      )}
       <table className={classes.table}>
         <tbody>
           <tr className={classes.tableRow}>
