@@ -30,6 +30,8 @@ type PreviousThreeDimensionalVizConfig = {
 };
 
 export type ThreeDimensionalVizConfig = {
+  useThemeBackgroundColor: boolean;
+  customBackgroundColor: string;
   enableShortDisplayNames?: boolean;
   autoTextBackgroundColor?: boolean;
   cameraState: Partial<CameraState>;

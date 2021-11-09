@@ -237,6 +237,12 @@ const configSchema: PanelConfigSchema<ThreeDimensionalVizConfig> = [
     type: "toggle",
     title: "Automatically apply dark/light background color to text",
   },
+  {
+    key: "useThemeBackgroundColor",
+    type: "toggle",
+    title: "Automatically determine background color based on the color scheme",
+  },
+  { key: "customBackgroundColor", type: "color", title: "Background color" },
 ];
 
 BaseRenderer.displayName = "ThreeDimensionalViz";
@@ -253,6 +259,8 @@ BaseRenderer.defaultConfig = {
   autoSyncCameraState: false,
   autoTextBackgroundColor: true,
   diffModeEnabled: true,
+  useThemeBackgroundColor: true,
+  customBackgroundColor: "#000000",
 } as ThreeDimensionalVizConfig;
 BaseRenderer.supportsStrictMode = false;
 BaseRenderer.configSchema = configSchema;

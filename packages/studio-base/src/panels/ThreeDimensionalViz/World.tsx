@@ -11,7 +11,8 @@
 //   found at http://www.apache.org/licenses/LICENSE-2.0
 //   You may not use this file except in compliance with the License.
 
-import { forwardRef } from "react";
+import { getColorFromString } from "@fluentui/react";
+import { forwardRef, useMemo } from "react";
 
 import {
   Worldview,
@@ -49,6 +50,7 @@ import { MarkerCollector, MarkerProvider } from "@foxglove/studio-base/types/Sce
 
 type Props = WorldSearchTextProps & {
   autoTextBackgroundColor: boolean;
+  canvasBackgroundColor: string;
   cameraState: CameraState;
   children?: React.ReactNode;
   isPlaying: boolean;
@@ -126,6 +128,7 @@ function World(
   {
     onClick,
     autoTextBackgroundColor,
+    canvasBackgroundColor,
     children,
     onCameraStateChange,
     cameraState,
@@ -158,8 +161,14 @@ function World(
     }),
   };
 
+  const backgroundColor = useMemo(() => {
+    const { r, g, b, a } = getColorFromString(canvasBackgroundColor) ?? { r: 0, g: 0, b: 0, a: 1 };
+    return [r / 255, g / 255, b / 255, (a ?? 100) / 100];
+  }, [canvasBackgroundColor]);
+
   return (
     <Worldview
+      backgroundColor={backgroundColor}
       cameraState={cameraState}
       enableStackedObjectEvents={!isPlaying}
       hideDebug={inScreenshotTests()}
