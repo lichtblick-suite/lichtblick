@@ -66,6 +66,7 @@ import LinkHandlerContext from "@foxglove/studio-base/context/LinkHandlerContext
 import { usePlayerSelection } from "@foxglove/studio-base/context/PlayerSelectionContext";
 import { useWorkspace, WorkspaceContext } from "@foxglove/studio-base/context/WorkspaceContext";
 import useAddPanel from "@foxglove/studio-base/hooks/useAddPanel";
+import { useCalloutDismissalBlocker } from "@foxglove/studio-base/hooks/useCalloutDismissalBlocker";
 import useElectronFilesToOpen from "@foxglove/studio-base/hooks/useElectronFilesToOpen";
 import useNativeAppMenuEvent from "@foxglove/studio-base/hooks/useNativeAppMenuEvent";
 import welcomeLayout from "@foxglove/studio-base/layouts/welcomeLayout";
@@ -239,6 +240,8 @@ export default function Workspace(props: WorkspaceProps): JSX.Element {
       containerRef.current.focus();
     }
   }, []);
+
+  useCalloutDismissalBlocker();
 
   useNativeAppMenuEvent(
     "open-preferences",
